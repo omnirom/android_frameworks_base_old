@@ -334,6 +334,8 @@ class DisplayContent extends WindowContainer<DisplayContent.DisplayChildWindowCo
 
     private final int mSfHwRotation;
 
+    private final int mSfHwRotation;
+
     private final Consumer<WindowState> mUpdateWindowsForAnimator = w -> {
         WindowStateAnimator winAnimator = w.mWinAnimator;
         if (winAnimator.hasSurface()) {
@@ -763,6 +765,9 @@ class DisplayContent extends WindowContainer<DisplayContent.DisplayChildWindowCo
 
         // Add itself as a child to the root container.
         mService.mRoot.addChild(this, null);
+
+        // Load hardware rotation from prop
+        mSfHwRotation = android.os.SystemProperties.getInt("ro.sf.hwrotation", 0) / 90;
 
         // Load hardware rotation from prop
         mSfHwRotation = android.os.SystemProperties.getInt("ro.sf.hwrotation", 0) / 90;
