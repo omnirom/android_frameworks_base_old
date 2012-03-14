@@ -620,6 +620,15 @@ bool BootAnimation::movie()
     for (size_t i=0 ; i<pcount ; i++) {
         const Animation::Part& part(animation.parts[i]);
         const size_t fcount = part.frames.size();
+
+#ifdef BOARD_USES_TEXTURE_CACHE
+        const int useTextureCache = 0;
+#ifndef NO_TEXTURE_CACHE
+        useTextureCache = ((animation.width * animation.height * fcount) >
+                                 48 * 1024 * 1024) ? 1 : 0;
+#endif
+#endif
+
         glBindTexture(GL_TEXTURE_2D, 0);
 
         for (int r=0 ; !part.count || r<part.count ; r++) {
@@ -641,8 +650,11 @@ bool BootAnimation::movie()
             for (size_t j=0 ; j<fcount && (!exitPending() || part.playUntilComplete) ; j++) {
                 const Animation::Frame& frame(part.frames[j]);
                 nsecs_t lastFrame = systemTime();
-
+#ifdef BOARD_USES_TEXTURE_CACHE
+                if (r > 0 && !useTextureCache) {
+#else
                 if (r > 0) {
+#endif
                     glBindTexture(GL_TEXTURE_2D, frame.tid);
                 } else {
                     if (part.count != 1) {
@@ -685,6 +697,10 @@ bool BootAnimation::movie()
                 }
 
                 checkExit();
+#ifdef BOARD_USES_TEXTURE_CACHE
+                if (useTextureCache)
+                    glDeleteTextures(1, &frame.tid);
+#endif
             }
 
             usleep(part.pause * ns2us(frameDuration));
