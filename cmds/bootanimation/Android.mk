@@ -23,6 +23,10 @@ LOCAL_SHARED_LIBRARIES := \
     libgui \
     libtinyalsa
 
+ifeq ($(TARGET_BOOTANIMATION_PRELOAD),true)
+    LOCAL_CFLAGS += -DPRELOAD_BOOTANIMATION
+endif
+
 LOCAL_MODULE:= bootanimation
 
 ifdef TARGET_32_BIT_SURFACEFLINGER
