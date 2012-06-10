@@ -289,17 +289,46 @@ status_t BootAnimation::readyToRun() {
     bool encryptedAnimation = atoi(decrypt) != 0 || !strcmp("trigger_restart_min_framework", decrypt);
 
     ZipFileRO* zipFile = NULL;
-    if ((encryptedAnimation &&
+    char zipFilename[ANIM_ENTRY_NAME_MAX];
+
+    if (encryptedAnimation &&
             (access(SYSTEM_ENCRYPTED_BOOTANIMATION_FILE, R_OK) == 0) &&
-            ((zipFile = ZipFileRO::open(SYSTEM_ENCRYPTED_BOOTANIMATION_FILE)) != NULL)) ||
-
-            ((access(OEM_BOOTANIMATION_FILE, R_OK) == 0) &&
-            ((zipFile = ZipFileRO::open(OEM_BOOTANIMATION_FILE)) != NULL)) ||
-
-            ((access(SYSTEM_BOOTANIMATION_FILE, R_OK) == 0) &&
-            ((zipFile = ZipFileRO::open(SYSTEM_BOOTANIMATION_FILE)) != NULL))) {
-        mZip = zipFile;
+            ((zipFile = ZipFileRO::open(SYSTEM_ENCRYPTED_BOOTANIMATION_FILE)) != NULL)) {
+        strcpy(zipFilename, SYSTEM_ENCRYPTED_BOOTANIMATION_FILE);
+    } else if ((access(OEM_BOOTANIMATION_FILE, R_OK) == 0) &&
+            ((zipFile = ZipFileRO::open(OEM_BOOTANIMATION_FILE)) != NULL)) {
+        strcpy(zipFilename, OEM_BOOTANIMATION_FILE);
+    } else if ((access(SYSTEM_BOOTANIMATION_FILE, R_OK) == 0) &&
+            ((zipFile = ZipFileRO::open(SYSTEM_BOOTANIMATION_FILE)) != NULL)) {
+        strcpy(zipFilename, SYSTEM_BOOTANIMATION_FILE);
     }
+    mZip = zipFile;
+
+#ifdef PRELOAD_BOOTANIMATION
+    // Preload the bootanimation zip on memory, so we don't stutter
+    // when showing the animation
+    ALOGW("Preload: zip filename - %s", zipFilename);
+    FILE* fd;
+    fd = fopen(zipFilename, "r");
+    if (fd != NULL) {
+        // We could use readahead..
+        // ... if bionic supported it :(
+        //readahead(fd, 0, INT_MAX);
+        void *crappyBuffer = malloc(2*1024*1024);
+        if (crappyBuffer != NULL) {
+            // Read all the zip
+            while (!feof(fd))
+                fread(crappyBuffer, 1024, 2*1024, fd);
+
+            free(crappyBuffer);
+        } else {
+            ALOGW("Preload: unable to allocate memory");
+        }
+        fclose(fd);
+    } else {
+        ALOGW("Preload: file not found %s", zipFilename);
+    }
+#endif
 
     return NO_ERROR;
 }
