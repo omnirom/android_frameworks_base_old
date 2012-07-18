@@ -26,8 +26,6 @@ LOCAL_PATH := $(call my-dir)
 # TODO: find a more appropriate way to do this.
 framework_res_source_path := APPS/framework-res_intermediates/src
 
-# the library
-# ============================================================
 include $(CLEAR_VARS)
 
 # FRAMEWORKS_BASE_SUBDIRS comes from build/core/pathmap.mk
@@ -237,7 +235,21 @@ LOCAL_SRC_FILES += \
 	telephony/java/com/android/internal/telephony/ITelephonyRegistry.aidl \
 	telephony/java/com/android/internal/telephony/IWapPushManager.aidl \
 	wifi/java/android/net/wifi/IWifiManager.aidl \
-	wifi/java/android/net/wifi/p2p/IWifiP2pManager.aidl
+	wifi/java/android/net/wifi/p2p/IWifiP2pManager.aidl \
+	fmradio/java/com/stericsson/hardware/fm/IFmReceiver.aidl \
+	fmradio/java/com/stericsson/hardware/fm/IFmTransmitter.aidl \
+	fmradio/java/com/stericsson/hardware/fm/IOnStateChangedListener.aidl \
+	fmradio/java/com/stericsson/hardware/fm/IOnStartedListener.aidl \
+	fmradio/java/com/stericsson/hardware/fm/IOnErrorListener.aidl \
+	fmradio/java/com/stericsson/hardware/fm/IOnScanListener.aidl \
+	fmradio/java/com/stericsson/hardware/fm/IOnForcedPauseListener.aidl \
+	fmradio/java/com/stericsson/hardware/fm/IOnForcedResetListener.aidl \
+	fmradio/java/com/stericsson/hardware/fm/IOnBlockScanListener.aidl \
+	fmradio/java/com/stericsson/hardware/fm/IOnRDSDataFoundListener.aidl \
+	fmradio/java/com/stericsson/hardware/fm/IOnSignalStrengthListener.aidl \
+	fmradio/java/com/stericsson/hardware/fm/IOnStereoListener.aidl \
+	fmradio/java/com/stericsson/hardware/fm/IOnExtraCommandListener.aidl \
+	fmradio/java/com/stericsson/hardware/fm/IOnAutomaticSwitchListener.aidl
 #
 
 
@@ -584,7 +596,7 @@ include $(CLEAR_VARS)
 
 LOCAL_SRC_FILES:=$(framework_docs_LOCAL_API_CHECK_SRC_FILES)
 LOCAL_INTERMEDIATE_SOURCES:=$(framework_docs_LOCAL_INTERMEDIATE_SOURCES)
-LOCAL_JAVA_LIBRARIES:=$(framework_docs_LOCAL_API_CHECK_JAVA_LIBRARIES)
+LOCAL_JAVA_LIBRARIES:=$(framework_docs_LOCAL_API_CHECK_JAVA_LIBRARIES) framework
 LOCAL_MODULE_CLASS:=$(framework_docs_LOCAL_MODULE_CLASS)
 LOCAL_DROIDDOC_SOURCE_PATH:=$(framework_docs_LOCAL_DROIDDOC_SOURCE_PATH)
 LOCAL_DROIDDOC_HTML_DIR:=$(framework_docs_LOCAL_DROIDDOC_HTML_DIR)
@@ -788,7 +800,6 @@ LOCAL_MODULE := ext
 LOCAL_DX_FLAGS := --core-library
 
 include $(BUILD_JAVA_LIBRARY)
-
 
 # Include subdirectory makefiles
 # ============================================================
