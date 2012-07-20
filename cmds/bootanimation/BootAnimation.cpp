@@ -170,7 +170,11 @@ status_t BootAnimation::initTexture(const Animation::Frame& frame)
     if (codec) {
         codec->setDitherImage(false);
         codec->decode(&stream, &bitmap,
+                #ifdef USE_565
+                kRGB_565_SkColorType,
+                #else
                 kN32_SkColorType,
+                #endif
                 SkImageDecoder::kDecodePixels_Mode);
         delete codec;
     }
