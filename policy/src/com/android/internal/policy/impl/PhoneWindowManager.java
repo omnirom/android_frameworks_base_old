@@ -662,7 +662,6 @@ public class PhoneWindowManager implements WindowManagerPolicy {
             resolver.registerContentObserver(Settings.System.getUriFor(
                     Settings.System.VIRTUAL_KEYS_HAPTIC_FEEDBACK), false, this,
                     UserHandle.USER_ALL);
-
             updateSettings();
         }
 
@@ -1344,19 +1343,19 @@ public class PhoneWindowManager implements WindowManagerPolicy {
         mStatusBarHeight =
                 res.getDimensionPixelSize(com.android.internal.R.dimen.status_bar_height);
 
-        // Height of the navigation bar when presented horizontally at bottom
-        mNavigationBarHeightForRotation[mPortraitRotation] =
-        mNavigationBarHeightForRotation[mUpsideDownRotation] =
-                res.getDimensionPixelSize(com.android.internal.R.dimen.navigation_bar_height);
-        mNavigationBarHeightForRotation[mLandscapeRotation] =
-        mNavigationBarHeightForRotation[mSeascapeRotation] = res.getDimensionPixelSize(
-                com.android.internal.R.dimen.navigation_bar_height_landscape);
-
-        // Width of the navigation bar when presented vertically along one side
-        mNavigationBarWidthForRotation[mPortraitRotation] =
-        mNavigationBarWidthForRotation[mUpsideDownRotation] =
-        mNavigationBarWidthForRotation[mLandscapeRotation] =
-        mNavigationBarWidthForRotation[mSeascapeRotation] =
+        // Height of the navigation bar when presented horizontally at bottom 		
+        mNavigationBarHeightForRotation[mPortraitRotation] =		
+        mNavigationBarHeightForRotation[mUpsideDownRotation] =		
+                res.getDimensionPixelSize(com.android.internal.R.dimen.navigation_bar_height);		
+        mNavigationBarHeightForRotation[mLandscapeRotation] =		
+        mNavigationBarHeightForRotation[mSeascapeRotation] = res.getDimensionPixelSize(		
+                com.android.internal.R.dimen.navigation_bar_height_landscape);		
+		
+        // Width of the navigation bar when presented vertically along one side 		
+        mNavigationBarWidthForRotation[mPortraitRotation] =		
+        mNavigationBarWidthForRotation[mUpsideDownRotation] =		
+        mNavigationBarWidthForRotation[mLandscapeRotation] =		
+        mNavigationBarWidthForRotation[mSeascapeRotation] =		
                 res.getDimensionPixelSize(com.android.internal.R.dimen.navigation_bar_width);
 
         // SystemUI (status bar) layout policy
