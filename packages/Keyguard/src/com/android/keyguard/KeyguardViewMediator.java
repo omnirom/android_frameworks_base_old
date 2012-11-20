@@ -332,7 +332,6 @@ public class KeyguardViewMediator {
                 // if the current user has gone to the backup.
                 KeyguardUpdateMonitor.getInstance(mContext).setAlternateUnlockEnabled(true);
             }
-            mKeyguardViewManager.onUserSwitching(userId);
         }
 
         @Override
