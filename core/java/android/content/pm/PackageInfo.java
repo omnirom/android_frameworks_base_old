@@ -1,5 +1,6 @@
 /*
  * Copyright (C) 2007 The Android Open Source Project
+ * This code has been modified.  Portions copyright (C) 2010, T-Mobile USA, Inc.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -15,6 +16,11 @@
  */
 
 package android.content.pm;
+
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.Map;
+import java.util.Set;
 
 import android.os.Parcel;
 import android.os.Parcelable;
@@ -218,6 +224,67 @@ public class PackageInfo implements Parcelable {
      */
     public int installLocation = INSTALL_LOCATION_INTERNAL_ONLY;
 
+    // Is Theme Apk
+    /**
+     * {@hide}
+     */
+    public boolean isThemeApk = false;
+
+    /**
+     * {@hide}
+     */
+    public boolean hasIconPack = false;
+
+    /**
+     * {@hide}
+     */
+    public ArrayList<String> mOverlayTargets;
+
+    // Is Legacy Theme Apk
+    /**
+     * {@hide}
+     */
+    public boolean isLegacyThemeApk = false;
+
+    // Is Legacy Icon Apk
+    /**
+     * {@hide}
+     */
+    public boolean isLegacyIconPackApk = false;
+
+    // ThemeInfo
+    /**
+     * {@hide}
+     */
+    public ThemeInfo [] themeInfos;
+
+    // ThemeInfo
+    /**
+     * {@hide}
+     */
+    public LegacyThemeInfo [] legacyThemeInfos;
+
+    /**
+     * Contains a mapping of packages and their redirected resources found in
+     * legacy themes.
+     *
+     * i.e
+     * com.android.systemui
+     *      |--- color/status_bar_clock_color -> color/com_android_systemui_status_bar_clock_color
+     *      |--- drawable/ic_notifications -> drawable/com_android_systemui_ic_notifications
+     *      |--- ...
+     *      |--- ...
+     * com.android.settings
+     *      |--- dimen/normal_height -> dimen/com_android_settings_normal_height
+     *      |--- drawable/ic_location -> drawable/com_android_settings_ic_location
+     *      |--- drawable/ic_menu_trash_holo_dark -> drawable/com_android_settings_ic_menu_trash
+     *      |--- ...
+     *      |--- ...
+     *
+     *  {@hide}
+     */
+    public Map<String, Map<String, String>> packageRedirections;
+
     /** @hide */
     public boolean requiredForAllUsers;
 
@@ -226,6 +293,14 @@ public class PackageInfo implements Parcelable {
 
     /** @hide */
     public String requiredAccountType;
+
+    /**
+     * What package, if any, this package will overlay.
+     *
+     * Package name of target package, or null.
+     * @hide
+     */
+    public String overlayTarget;
 
     public PackageInfo() {
     }
@@ -270,6 +345,17 @@ public class PackageInfo implements Parcelable {
         dest.writeInt(requiredForAllUsers ? 1 : 0);
         dest.writeString(restrictedAccountType);
         dest.writeString(requiredAccountType);
+
+        /* Theme-specific. */
+        dest.writeInt((isThemeApk)? 1 : 0);
+        dest.writeStringList(mOverlayTargets);
+        dest.writeTypedArray(themeInfos, parcelableFlags);
+        dest.writeInt(hasIconPack ? 1 : 0);
+        /* Legacy Theme-specific. */
+        dest.writeInt((isLegacyThemeApk) ? 1 : 0);
+        dest.writeInt((isLegacyIconPackApk) ? 1 : 0);
+        writeRedirectionsMap(dest);
+        dest.writeTypedArray(legacyThemeInfos, parcelableFlags);
     }
 
     public static final Parcelable.Creator<PackageInfo> CREATOR
@@ -311,5 +397,58 @@ public class PackageInfo implements Parcelable {
         requiredForAllUsers = source.readInt() != 0;
         restrictedAccountType = source.readString();
         requiredAccountType = source.readString();
+
+        /* Theme-specific. */
+        isThemeApk = (source.readInt() != 0);
+        mOverlayTargets = source.createStringArrayList();
+        themeInfos = source.createTypedArray(ThemeInfo.CREATOR);
+        hasIconPack = source.readInt() == 1;
+        /* Legacy Theme-specific. */
+        isLegacyThemeApk = (source.readInt() != 0);
+        isLegacyIconPackApk = (source.readInt() != 0);
+        readRedirectionsMap(source);
+        legacyThemeInfos = source.createTypedArray(LegacyThemeInfo.CREATOR);
+    }
+
+    /**
+     * Writes the packageRedirections map to the given parcel
+     * @param dest
+     */
+    private void writeRedirectionsMap(Parcel dest) {
+        if (packageRedirections == null) {
+            dest.writeInt(0);
+            return;
+        }
+        final int numPackages = packageRedirections.size();
+        dest.writeInt(numPackages);
+        Set<String> pkgs = packageRedirections.keySet();
+        for (String pkg : pkgs) {
+            dest.writeString(pkg);
+            Map<String, String> redirectionsMap = packageRedirections.get(pkg);
+            final int numRedirections = redirectionsMap.size();
+            dest.writeInt(numRedirections);
+            Set<String> redirectKeys = redirectionsMap.keySet();
+            for (String redirectKey : redirectKeys) {
+                dest.writeString(redirectKey);
+                dest.writeString(redirectionsMap.get(redirectKey));
+            }
+        }
+    }
+
+    /**
+     * Reads back packageRedirections map from the given parcel
+     * @param source
+     */
+    private void readRedirectionsMap(Parcel source) {
+        final int numPackages = source.readInt();
+        for (int i = 0; i < numPackages; i++) {
+            String pkg = source.readString();
+            final int numRedirections = source.readInt();
+            Map<String, String> redirectrionsMap = new HashMap<String, String>();
+            for (int j = 0; j < numRedirections; j++) {
+                redirectrionsMap.put(source.readString(), source.readString());
+            }
+            packageRedirections.put(pkg, redirectrionsMap);
+        }
     }
 }

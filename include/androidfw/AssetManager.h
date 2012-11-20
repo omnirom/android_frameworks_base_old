@@ -69,6 +69,14 @@ struct ResTable_config;
  */
 class AssetManager : public AAssetManager {
 public:
+    static const char* RESOURCES_FILENAME;
+    static const char* IDMAP_BIN;
+    static const char* OVERLAY_DIR;
+    static const char* TARGET_PACKAGE_NAME;
+    static const char* TARGET_APK_PATH;
+    static const char* IDMAP_DIR;
+    static const char* RESOURCES_EXTENSION;
+
     typedef enum CacheMode {
         CACHE_UNKNOWN = 0,
         CACHE_OFF,          // don't try to cache file locations
@@ -93,8 +101,15 @@ public:
      * newly-added asset source.
      */
     bool addAssetPath(const String8& path, void** cookie);
+    bool addOverlayPath(const String8& path, void** cookie, const String8& resArscPath,
+                 const String8& resApkPath, const String8& targetPkgPath, const String8& prefixPath);
+    bool addIconPath(const String8& path, void** cookie, const String8& resArscPath,
+                 const String8& resApkPath, const String8& prefixPath, uint32_t pkgIdOverride);
+    bool addCommonOverlayPath(const String8& path, void** cookie, const String8& resArscPath,
+                 const String8& resApkPath, const String8& prefixPath);
+    bool removeOverlayPath(const String8& path, void* cookie);
 
-    /*                                                                       
+    /*
      * Convenience for adding the standard system assets.  Uses the
      * ANDROID_ROOT environment variable to find them.
      */
@@ -218,14 +233,32 @@ public:
      */
     void getLocales(Vector<String8>* locales) const;
 
+    /**
+     * Generate idmap data to translate resources IDs between a package and a
+     * corresponding overlay package.
+     */
+    bool createIdmap(const char* targetApkPath, const char* overlayApkPath,
+        uint32_t targetCrc, uint32_t overlayCrc,
+        time_t targetMtime, time_t overlayMtime,
+        Vector<String8>& targets, Vector<String8>& overlays,
+        uint32_t** outData, size_t* outSize);
+
+    String8 getBasePackageName(int index);
+
 private:
     struct asset_path
     {
         String8 path;
         FileType type;
         String8 idmap;
+        String8 prefixPath;
+        String8 resfilePath;
+        String8 resApkPath;
+        uint32_t pkgIdOverride;
+        asset_path() : pkgIdOverride(0) {}
     };
 
+    bool updateResTableFromAssetPath(ResTable* rt, const asset_path& ap, void* cookie) const;
     Asset* openInPathLocked(const char* fileName, AccessMode mode,
         const asset_path& path);
     Asset* openNonAssetInPathLocked(const char* fileName, AccessMode mode,
@@ -238,7 +271,7 @@ private:
     String8 createZipSourceNameLocked(const String8& zipFileName,
         const String8& dirName, const String8& fileName);
 
-    ZipFileRO* getZipFileLocked(const asset_path& path);
+    ZipFileRO* getZipFileLocked(const String8& path);
     Asset* openAssetFromFileLocked(const String8& fileName, AccessMode mode);
     Asset* openAssetFromZipLocked(const ZipFileRO* pZipFile,
         const ZipEntryRO entry, AccessMode mode, const String8& entryName);
@@ -264,19 +297,18 @@ private:
     void setLocaleLocked(const char* locale);
     void updateResourceParamsLocked() const;
 
-    bool createIdmapFileLocked(const String8& originalPath, const String8& overlayPath,
-                               const String8& idmapPath);
-
-    bool isIdmapStaleLocked(const String8& originalPath, const String8& overlayPath,
-                            const String8& idmapPath);
-
     Asset* openIdmapLocked(const struct asset_path& ap) const;
 
-    bool getZipEntryCrcLocked(const String8& zipPath, const char* entryFilename, uint32_t* pCrc);
+    void addSystemOverlays(const char* pathOverlaysList, const String8& targetPackagePath,
+            ResTable* sharedRes, size_t offset) const;
+
+    String8 getPkgName(const char *apkPath);
+
+    String8 getOverlayResPath(const char* targetApkPath, const char* overlayApkPath);
 
     class SharedZip : public RefBase {
     public:
-        static sp<SharedZip> get(const String8& path);
+        static sp<SharedZip> get(const String8& path, bool createIfNotPresent = true);
 
         ZipFileRO* getZip();
 
@@ -287,6 +319,9 @@ private:
         ResTable* setResourceTable(ResTable* res);
         
         bool isUpToDate();
+
+        void addOverlay(const asset_path& ap);
+        bool getOverlay(size_t idx, asset_path* out) const;
         
     protected:
         ~SharedZip();
@@ -301,6 +336,8 @@ private:
 
         Asset* mResourceTableAsset;
         ResTable* mResourceTable;
+
+        Vector<asset_path> mOverlays;
 
         static Mutex gLock;
         static DefaultKeyedVector<String8, wp<SharedZip> > gOpen;
@@ -334,6 +371,9 @@ private:
         static String8 getPathName(const char* path);
 
         bool isUpToDate();
+
+        void addOverlay(const String8& path, const asset_path& overlay);
+        bool getOverlay(const String8& path, size_t idx, asset_path* out) const;
         
     private:
         void closeZip(int idx);
@@ -354,6 +394,9 @@ private:
 
     mutable ResTable* mResources;
     ResTable_config* mConfig;
+
+    String8 mBasePackageName;
+    int32_t mBasePackageIndex;
 
     /*
      * Cached data for "loose" files.  This lets us avoid poking at the
