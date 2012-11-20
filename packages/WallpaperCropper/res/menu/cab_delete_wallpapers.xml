@@ -2,7 +2,7 @@
 <!--
 /*
 **
-** Copyright 2014, ParanoidAndroid Project
+** Copyright 2013, The Android Open Source Project
 **
 ** Licensed under the Apache License, Version 2.0 (the "License");
 ** you may not use this file except in compliance with the License.
@@ -18,15 +18,10 @@
 */
 -->
 
-<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
-    android:id="@+id/blur_dialog"
-    android:layout_width="match_parent"
-    android:layout_height="match_parent">
-    <SeekBar
-        android:id="@+id/blur_seekbar"
-        android:layout_width="fill_parent"
-        android:layout_height="wrap_content"
-        android:layout_marginTop="14dp"
-        android:progress="16"
-        android:max="25" />
-</LinearLayout>
+<menu xmlns:android="http://schemas.android.com/apk/res/android" >
+  <item
+     android:id="@+id/menu_delete"
+     android:title="@string/wallpaper_delete"
+     android:showAsAction="always"
+     android:icon="@android:drawable/ic_menu_delete" />
+</menu>
