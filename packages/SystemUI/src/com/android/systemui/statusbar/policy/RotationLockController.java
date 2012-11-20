@@ -53,6 +53,10 @@ public final class RotationLockController {
         mCallbacks.add(callback);
     }
 
+    public void removeRotationLockControllerCallback(RotationLockControllerCallback callback) {
+        mCallbacks.remove(callback);
+    }
+
     public boolean isRotationLocked() {
         if (RotationPolicy.isRotationLockToggleSupported(mContext)) {
             return RotationPolicy.isRotationLocked(mContext);

@@ -1,5 +1,6 @@
 /*
  * Copyright (C) 2008 The Android Open Source Project
+ * This code has been modified.  Portions copyright (C) 2010, T-Mobile USA, Inc.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -21,6 +22,9 @@ import android.os.Parcel;
 import android.os.Parcelable;
 import android.text.TextUtils;
 import android.view.View;
+import android.util.Log;
+import android.os.SystemProperties;
+import android.text.TextUtils;
 
 import java.util.Locale;
 
@@ -71,6 +75,11 @@ public final class Configuration implements Parcelable, Comparable<Configuration
      * resource qualifier.
      */
     public Locale locale;
+
+    /**
+     * @hide
+     */
+    public CustomTheme customTheme;
 
     /**
      * Locale should persist on setting.  This is hidden because it is really
@@ -403,7 +412,33 @@ public final class Configuration implements Parcelable, Comparable<Configuration
     public static final int ORIENTATION_LANDSCAPE = 2;
     /** @deprecated Not currently supported or used. */
     @Deprecated public static final int ORIENTATION_SQUARE = 3;
-    
+
+
+    /**
+     * @hide
+     */
+    public static final int THEME_UNDEFINED = 0;
+
+    /**
+     * @hide
+     */
+    public static final String THEME_PACKAGE_NAME_PERSISTENCE_PROPERTY = "persist.sys.themePackageName";
+
+    /**
+     * @hide
+     */
+    public static final String THEME_SYSTEMUI_PACKAGE_NAME_PERSISTENCE_PROPERTY = "persist.sys.themeSysUiPkgName";
+
+    /**
+     * @hide
+     */
+    public static final String THEME_ICONPACK_PACKAGE_NAME_PERSISTENCE_PROPERTY = "themeIconPackPkgName";
+
+    /**
+     * @hide
+     */
+    public static final String THEME_FONT_PACKAGE_NAME_PERSISTENCE_PROPERTY = "themeFontPackPkgName";
+
     /**
      * Overall orientation of the screen.  May be one of
      * {@link #ORIENTATION_LANDSCAPE}, {@link #ORIENTATION_PORTRAIT}.
@@ -618,8 +653,11 @@ public final class Configuration implements Parcelable, Comparable<Configuration
         compatScreenHeightDp = o.compatScreenHeightDp;
         compatSmallestScreenWidthDp = o.compatSmallestScreenWidthDp;
         seq = o.seq;
+        if (o.customTheme != null) {
+            customTheme = (CustomTheme) o.customTheme.clone();
+        }
     }
-    
+
     public String toString() {
         StringBuilder sb = new StringBuilder(128);
         sb.append("{");
@@ -753,6 +791,8 @@ public final class Configuration implements Parcelable, Comparable<Configuration
             sb.append(" s.");
             sb.append(seq);
         }
+        sb.append(" themeResource=");
+        sb.append(customTheme);
         sb.append('}');
         return sb.toString();
     }
@@ -779,6 +819,7 @@ public final class Configuration implements Parcelable, Comparable<Configuration
         smallestScreenWidthDp = compatSmallestScreenWidthDp = SMALLEST_SCREEN_WIDTH_DP_UNDEFINED;
         densityDpi = DENSITY_DPI_UNDEFINED;
         seq = 0;
+        customTheme = null;
     }
 
     /** {@hide} */
@@ -921,7 +962,13 @@ public final class Configuration implements Parcelable, Comparable<Configuration
         if (delta.seq != 0) {
             seq = delta.seq;
         }
-        
+
+        if (delta.customTheme != null
+                && (customTheme == null || !customTheme.equals(delta.customTheme))) {
+            changed |= ActivityInfo.CONFIG_THEME_RESOURCE;
+            customTheme = (CustomTheme)delta.customTheme.clone();
+        }
+
         return changed;
     }
 
@@ -1031,7 +1078,10 @@ public final class Configuration implements Parcelable, Comparable<Configuration
                 && densityDpi != delta.densityDpi) {
             changed |= ActivityInfo.CONFIG_DENSITY;
         }
-
+        if (delta.customTheme != null &&
+                (customTheme == null || !customTheme.equals(delta.customTheme))) {
+            changed |= ActivityInfo.CONFIG_THEME_RESOURCE;
+        }
         return changed;
     }
 
@@ -1047,7 +1097,9 @@ public final class Configuration implements Parcelable, Comparable<Configuration
      * @return Return true if the resource needs to be loaded, else false.
      */
     public static boolean needNewResources(int configChanges, int interestingChanges) {
-        return (configChanges & (interestingChanges|ActivityInfo.CONFIG_FONT_SCALE)) != 0;
+        return (configChanges & (interestingChanges |
+                ActivityInfo.CONFIG_FONT_SCALE |
+                ActivityInfo.CONFIG_THEME_RESOURCE)) != 0;
     }
 
     /**
@@ -1120,6 +1172,7 @@ public final class Configuration implements Parcelable, Comparable<Configuration
         dest.writeInt(compatScreenHeightDp);
         dest.writeInt(compatSmallestScreenWidthDp);
         dest.writeInt(seq);
+        dest.writeParcelable(customTheme, flags);
     }
 
     public void readFromParcel(Parcel source) {
@@ -1148,6 +1201,7 @@ public final class Configuration implements Parcelable, Comparable<Configuration
         compatScreenHeightDp = source.readInt();
         compatSmallestScreenWidthDp = source.readInt();
         seq = source.readInt();
+        customTheme = source.readParcelable(CustomTheme.class.getClassLoader());
     }
     
     public static final Parcelable.Creator<Configuration> CREATOR
@@ -1215,7 +1269,12 @@ public final class Configuration implements Parcelable, Comparable<Configuration
         n = this.smallestScreenWidthDp - that.smallestScreenWidthDp;
         if (n != 0) return n;
         n = this.densityDpi - that.densityDpi;
-        //if (n != 0) return n;
+        if (n != 0) return n;
+        if (this.customTheme == null) {
+            if (that.customTheme != null) return 1;
+        } else {
+            n = this.customTheme.compareTo(that.customTheme);
+        }
         return n;
     }
 
@@ -1252,6 +1311,8 @@ public final class Configuration implements Parcelable, Comparable<Configuration
         result = 31 * result + screenHeightDp;
         result = 31 * result + smallestScreenWidthDp;
         result = 31 * result + densityDpi;
+        result = 31 * result + (this.customTheme != null ?
+                                  this.customTheme.hashCode() : 0);
         return result;
     }
 
