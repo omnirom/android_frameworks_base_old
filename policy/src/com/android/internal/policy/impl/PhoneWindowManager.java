@@ -2022,6 +2022,7 @@ public class PhoneWindowManager implements WindowManagerPolicy {
             if (DEBUG_STARTING_WINDOW) Slog.d(TAG, "addStartingWindow " + packageName
                     + ": nonLocalizedLabel=" + nonLocalizedLabel + " theme="
                     + Integer.toHexString(theme));
+
             if (theme != context.getThemeResId() || labelRes != 0) {
                 try {
                     context = context.createPackageContext(packageName, 0);
