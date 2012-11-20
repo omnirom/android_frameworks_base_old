@@ -1,13 +1,12 @@
 <manifest xmlns:android="http://schemas.android.com/apk/res/android"
         package="com.android.wallpapercropper" >
-        <uses-permission android:name="android.permission.INTERACT_ACROSS_USERS_FULL" />
-        <uses-permission android:name="android.permission.READ_EXTERNAL_STORAGE" />
-        <uses-permission android:name="android.permission.SET_WALLPAPER" />
-        <uses-permission android:name="android.permission.SET_WALLPAPER_HINTS" />
-        <uses-permission android:name="android.permission.WRITE_EXTERNAL_STORAGE" />
-        <uses-permission android:name="android.permission.WRITE_SETTINGS" />
 
-        <application android:requiredForAllUsers="true">
+    <uses-permission android:name="android.permission.SET_WALLPAPER" />
+    <uses-permission android:name="android.permission.SET_WALLPAPER_HINTS" />
+    <uses-permission android:name="android.permission.READ_EXTERNAL_STORAGE" />
+    <uses-permission android:name="android.permission.SET_KEYGUARD_WALLPAPER" />
+
+    <application android:requiredForAllUsers="true">
         <activity
             android:name="WallpaperCropActivity"
             android:theme="@style/Theme.WallpaperCropper"
@@ -22,12 +21,25 @@
         <activity
             android:name="LockscreenWallpaper"
             android:theme="@style/Theme.WallpaperCropper"
-            android:label="@string/pick_lockscreen"
+            android:label="@string/pick_wallpaper"
+            android:icon="@mipmap/ic_launcher_wallpaper"
+            android:finishOnCloseSystemDialogs="true">
+            <intent-filter>
+                <action android:name="android.intent.action.SET_KEYGUARD_WALLPAPER" />
+                <category android:name="android.intent.category.DEFAULT" />
+            </intent-filter>
+        </activity>
+
+        <activity
+            android:name="WallpaperPickerActivity"
+            android:theme="@style/Theme.WallpaperCropper"
+            android:label="@string/pick_wallpaper"
+            android:icon="@mipmap/ic_launcher_wallpaper"
             android:finishOnCloseSystemDialogs="true">
             <intent-filter>
                 <action android:name="android.intent.action.SET_WALLPAPER" />
-                <data android:mimeType="image/*" />
+                <category android:name="android.intent.category.DEFAULT" />
             </intent-filter>
         </activity>
-        </application>
+    </application>
 </manifest>

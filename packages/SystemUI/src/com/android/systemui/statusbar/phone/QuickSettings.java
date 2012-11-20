@@ -144,6 +144,8 @@ class QuickSettings {
     private BluetoothController mBluetoothController;
     private RotationLockController mRotationLockController;
     private LocationController mLocationController;
+    private NetworkController mNetworkController;
+    private BatteryController mBatteryController;
 
     private AsyncTask<Void, Void, Pair<String, Drawable>> mUserInfoTask;
     private AsyncTask<Void, Void, Pair<Boolean, Boolean>> mQueryCertTask;
@@ -212,6 +214,8 @@ class QuickSettings {
         mBluetoothController = bluetoothController;
         mRotationLockController = rotationLockController;
         mLocationController = locationController;
+        mNetworkController = networkController;
+        mBatteryController = batteryController;
 
         setupQuickSettings();
         updateResources();
@@ -1353,6 +1357,26 @@ class QuickSettings {
             array.add(tile.toString());
         }
         return array;
+    }
+
+    public void shutdown() {
+        if (mReceiver != null) {
+            mContext.unregisterReceiver(mReceiver);
+        }
+        if (mProfileReceiver != null) {
+            mContext.unregisterReceiver(mProfileReceiver);
+        }
+        if (mModel != null) {
+            mNetworkController.removeNetworkSignalChangedCallback(mModel);
+            mBluetoothController.removeStateChangedCallback(mModel);
+            mBatteryController.removeStateChangedCallback(mModel);
+            mLocationController.removeSettingsChangedCallback(mModel);
+            mRotationLockController.removeRotationLockControllerCallback(mModel);
+            mModel = null;
+        }
+        if (mContainerView != null) {
+            mContainerView.removeAllViews();
+        }
     }
 
     public void updateTiles() {
