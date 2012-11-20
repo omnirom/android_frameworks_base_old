@@ -1313,6 +1313,21 @@ class QuickSettings {
         return array;
     }
 
+    public void shutdown() {
+        if (mReceiver != null) {
+            mContext.unregisterReceiver(mReceiver);
+        }
+        if (mProfileReceiver != null) {
+            mContext.unregisterReceiver(mProfileReceiver);
+        }
+        if (mModel != null) {
+            mModel = null;
+        }
+        if (mContainerView != null) {
+            mContainerView.removeAllViews();
+        }
+    }
+
     public void updateTiles() {
         addTiles(mContainerView, false, true);
         addTemporaryTiles(mContainerView);
