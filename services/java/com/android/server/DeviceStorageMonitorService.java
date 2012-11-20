@@ -19,12 +19,14 @@ package com.android.server;
 import android.app.Notification;
 import android.app.NotificationManager;
 import android.app.PendingIntent;
+import android.content.BroadcastReceiver;
 import android.content.ContentResolver;
 import android.content.Context;
 import android.content.Intent;
 import android.content.pm.IPackageDataObserver;
 import android.content.pm.IPackageManager;
 import android.content.pm.PackageManager;
+import android.content.pm.ThemeUtils;
 import android.os.Binder;
 import android.os.Environment;
 import android.os.FileObserver;
@@ -88,6 +90,7 @@ public class DeviceStorageMonitorService extends Binder {
     private boolean mMemFullFlag=false;
     private Context mContext;
     private ContentResolver mResolver;
+    private Context mUiContext;
     private long mTotalMemory;  // on /data
     private StatFs mDataFileStats;
     private StatFs mSystemFileStats;
@@ -316,6 +319,14 @@ public class DeviceStorageMonitorService extends Binder {
         mLastReportedFreeMemTime = 0;
         mContext = context;
         mResolver = mContext.getContentResolver();
+
+        ThemeUtils.registerThemeChangeReceiver(mContext, new BroadcastReceiver() {
+            @Override
+            public void onReceive(Context context, Intent intent) {
+                mUiContext = null;
+            }
+        });
+
         //create StatFs object
         mDataFileStats = new StatFs(DATA_PATH.getAbsolutePath());
         mSystemFileStats = new StatFs(SYSTEM_PATH.getAbsolutePath());
@@ -375,7 +386,7 @@ public class DeviceStorageMonitorService extends Binder {
         notification.icon = com.android.internal.R.drawable.stat_notify_disk_full;
         notification.tickerText = title;
         notification.flags |= Notification.FLAG_NO_CLEAR;
-        notification.setLatestEventInfo(mContext, title, details, intent);
+        notification.setLatestEventInfo(getUiContext(), title, details, intent);
         mNotificationMgr.notifyAsUser(null, LOW_MEMORY_NOTIFICATION_ID, notification,
                 UserHandle.ALL);
         mContext.sendStickyBroadcastAsUser(mStorageLowIntent, UserHandle.ALL);
@@ -487,5 +498,13 @@ public class DeviceStorageMonitorService extends Binder {
                 pw.print(Formatter.formatFileSize(mContext, mMemCacheStartTrimThreshold));
                 pw.print(" mMemCacheTrimToThreshold=");
                 pw.println(Formatter.formatFileSize(mContext, mMemCacheTrimToThreshold));
+    }
+
+    private Context getUiContext() {
+        if (mUiContext == null) {
+            mUiContext = ThemeUtils.createUiContext(mContext);
+        }
+
+        return mUiContext != null ? mUiContext : mContext;
     }
 }
