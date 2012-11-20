@@ -174,6 +174,16 @@ public class RingtoneManager {
      */
     public static final String EXTRA_RINGTONE_PICKED_URI =
             "android.intent.extra.ringtone.PICKED_URI";
+
+    /**
+     * Set the resource id theme to use for the dialog picker activity.<br/>
+     * The default theme is <code>com.android.internal.R.Theme_Holo_Dialog_Alert</code>.
+     *
+     * @see #ACTION_RINGTONE_PICKER
+     * @hide
+     */
+    public static final String EXTRA_RINGTONE_DIALOG_THEME =
+            "android.intent.extra.ringtone.DIALOG_THEME";
     
     // Make sure the column ordering and then ..._COLUMN_INDEX are in sync
     
@@ -364,7 +374,7 @@ public class RingtoneManager {
         
         final Cursor internalCursor = getInternalRingtones();
         final Cursor mediaCursor = getMediaRingtones();
-             
+
         return mCursor = new SortCursor(new Cursor[] { internalCursor, mediaCursor },
                 MediaStore.Audio.Media.DEFAULT_SORT_ORDER);
     }
@@ -431,14 +441,14 @@ public class RingtoneManager {
             if (currentUri == null || !uriString.equals(previousUriString)) {
                 currentUri = Uri.parse(uriString);
             }
-            
+
             if (ringtoneUri.equals(ContentUris.withAppendedId(currentUri, cursor
                     .getLong(ID_COLUMN_INDEX)))) {
                 return i;
             }
             
             cursor.move(1);
-            
+
             previousUriString = uriString;
         }
         
@@ -460,7 +470,7 @@ public class RingtoneManager {
         if (uri == null) {
             uri = getValidRingtoneUriFromCursorAndClose(context, rm.getMediaRingtones());
         }
-        
+
         return uri;
     }
     
@@ -498,7 +508,7 @@ public class RingtoneManager {
                     MediaStore.Audio.Media.DEFAULT_SORT_ORDER)
                 : null;
     }
-    
+
     private void setFilterColumnsList(int type) {
         List<String> columns = mFilterColumns;
         columns.clear();
