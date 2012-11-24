@@ -420,6 +420,7 @@ public interface WindowManagerPolicy {
 
         public void shutdown(boolean confirm);
         public void rebootSafeMode(boolean confirm);
+        public void reboot();
     }
 
     /** Window has been added to the screen. */
