@@ -2724,6 +2724,15 @@ void TouchInputMapper::configure(nsecs_t when,
 
     mConfig = *config;
 
+    bool disableTouchpad = false;
+
+    // Find out if the touchpad is disabled.
+    if (mParameters.deviceType == Parameters::DEVICE_TYPE_POINTER) {
+        if (mConfig.touchpadStatus == 0) {
+            disableTouchpad = true;
+        }
+    }
+
     if (!changes) { // first time only
         // Configure basic parameters.
         configureParameters();
@@ -2757,10 +2766,58 @@ void TouchInputMapper::configure(nsecs_t when,
         configureSurface(when, &resetNeeded);
     }
 
+    if (!changes || (changes & InputReaderConfiguration::CHANGE_TOUCHPAD_MODE)) {
+        // Change touchpad mode
+        if (mConfig.touchpadMode == 1) {
+            mParameters.gestureMode = Parameters::GESTURE_MODE_POINTER;
+        } else if (mConfig.touchpadMode == 0) {
+            mParameters.gestureMode = Parameters::GESTURE_MODE_SPOTS;
+        } else {
+            ALOGW("Invalid value for touchpadMode: '%d'", mConfig.touchpadMode);
+        }
+        // Configure device sources, surface dimensions, orientation and
+        // scaling factors.
+        configureSurface(when, &resetNeeded);
+    }
+
+    if (mParameters.deviceType == Parameters::DEVICE_TYPE_POINTER) {
+        if (!changes || (changes & InputReaderConfiguration::CHANGE_TOUCHPAD_MODE)) {
+            // Change touchpad gesture
+            if (mConfig.touchpadMode == 0) {
+                mParameters.gestureMode = Parameters::GESTURE_MODE_SPOTS;
+            } else if (mConfig.touchpadMode == 1) {
+                mParameters.gestureMode = Parameters::GESTURE_MODE_POINTER;
+            } else {
+                ALOGW("Invalid value for touchpadMode: '%d'", mConfig.touchpadMode);
+            }
+            // Configure device sources, surface dimensions, orientation and
+            // scaling factors.
+            configureSurface(when, &resetNeeded);
+        }
+
+        if (!changes || (changes & InputReaderConfiguration::CHANGE_TOUCHPAD_STATUS)) {
+            // Change touchpad status.
+            if (mConfig.touchpadStatus == 0) {
+                disableTouchpad = true;
+            } else if (mConfig.touchpadStatus == 1) {
+                disableTouchpad = false;
+                // Configure device sources, surface dimensions, orientation and
+                // scaling factors.  This also conveniently re-enables the touchpad.
+                configureSurface(when, &resetNeeded);
+            } else {
+                ALOGW("Invalid value for touchpadStatus: '%d'", mConfig.touchpadStatus);
+            }
+        }
+    }
+
     if (changes && resetNeeded) {
         // Send reset, unless this is the first time the device has been configured,
         // in which case the reader will call reset itself after all mappers are ready.
         getDevice()->notifyReset(when);
+    }
+    // disable the touchpad if required
+    if (disableTouchpad) {
+        mDeviceMode = DEVICE_MODE_DISABLED;
     }
 }
 

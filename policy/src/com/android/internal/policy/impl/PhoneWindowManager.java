@@ -27,6 +27,7 @@ import android.app.ProgressDialog;
 import android.app.SearchManager;
 import android.app.StatusBarManager;
 import android.app.UiModeManager;
+import android.bluetooth.BluetoothAdapter;
 import android.content.ActivityNotFoundException;
 import android.content.BroadcastReceiver;
 import android.content.ComponentName;
@@ -50,10 +51,13 @@ import android.media.AudioSystem;
 import android.media.IAudioService;
 import android.media.Ringtone;
 import android.media.RingtoneManager;
+import android.net.wifi.WifiManager;
+import android.os.BatteryManager;
 import android.os.Bundle;
 import android.os.FactoryTest;
 import android.os.Handler;
 import android.os.IBinder;
+import android.os.IPowerManager;
 import android.os.IRemoteCallback;
 import android.os.Looper;
 import android.os.Message;
@@ -68,6 +72,7 @@ import android.os.UEventObserver;
 import android.os.UserHandle;
 import android.os.Vibrator;
 import android.provider.Settings;
+import android.provider.Settings.SettingNotFoundException;
 import android.service.dreams.DreamService;
 import android.service.dreams.IDreamManager;
 import android.util.DisplayMetrics;
@@ -4506,6 +4511,11 @@ public class PhoneWindowManager implements WindowManagerPolicy {
                         cancelPendingScreenshotChordAction();
                         cancelPendingScreenrecordChordAction();
                     }
+                } else if (keyCode == KeyEvent.KEYCODE_VOLUME_MUTE) {
+                    if (down) {
+                        muteVolume(keyguardActive);
+                    }
+                    break;
                 }
                 if (down) {
                     ITelephony telephonyService = getTelephonyService();
@@ -4611,6 +4621,7 @@ public class PhoneWindowManager implements WindowManagerPolicy {
                 break;
             }
 
+            case KeyEvent.KEYCODE_SLEEP:
             case KeyEvent.KEYCODE_POWER: {
                 result &= ~ACTION_PASS_TO_USER;
                 if (down) {
@@ -4719,6 +4730,44 @@ public class PhoneWindowManager implements WindowManagerPolicy {
                 }
                 break;
             }
+
+            case KeyEvent.KEYCODE_WIRELESS:
+            case KeyEvent.KEYCODE_BLUETOOTH:
+            case KeyEvent.KEYCODE_TOUCHPAD:
+            case KeyEvent.KEYCODE_CAPTURE:
+            case KeyEvent.KEYCODE_SETTINGS:{
+                if (down) {
+                    mHandler.post(new Runnable() {
+                        public void run() {
+                            if (keyCode == KeyEvent.KEYCODE_WIRELESS) {
+                                wifiToggle();
+                            } else if (keyCode == KeyEvent.KEYCODE_BLUETOOTH) {
+                                bluetoothToggle();
+                            } else if (keyCode == KeyEvent.KEYCODE_TOUCHPAD) {
+                                touchpadToggle();
+                            } else if (keyCode == KeyEvent.KEYCODE_CAPTURE) {
+                                takeScreenshot();
+                            } else if (keyCode == KeyEvent.KEYCODE_SETTINGS) {
+                                launchSettings();
+                            }
+                        }
+                    });
+                }
+                break;
+            }
+
+            case KeyEvent.KEYCODE_BRIGHTNESS_DOWN:
+            case KeyEvent.KEYCODE_BRIGHTNESS_UP:
+            case KeyEvent.KEYCODE_BRIGHTNESS_AUTO: {
+                if (down) {
+                    mHandler.post(new Runnable() {
+                        public void run() {
+                            brightnessControl(keyCode);
+                        }
+                    });
+                }
+                break;
+            }
         }
 
         if (!isScreenOn && mOffscreenGestureSupport) {
@@ -4767,6 +4816,157 @@ public class PhoneWindowManager implements WindowManagerPolicy {
         return true;
     }
 
+    private void muteVolume(boolean keyguardActive) {
+        AudioManager audioManager = (AudioManager) mContext
+                .getSystemService(Context.AUDIO_SERVICE);
+        int ringerMode = audioManager.getRingerMode();
+        if (ringerMode == AudioManager.RINGER_MODE_NORMAL) {
+            if (!keyguardActive) {
+                audioManager.adjustVolume(AudioManager.ADJUST_SAME, AudioManager.FLAG_SHOW_UI);
+            }
+            int vibrateMode = AudioManager.RINGER_MODE_VIBRATE;
+            // Check if vibrate in silent mode (default) should be overridden.
+            if (android.provider.Settings.System.getInt(
+                    mContext.getContentResolver(),
+                    Settings.System.VIBRATE_IN_SILENT, vibrateMode) == AudioManager.RINGER_MODE_VIBRATE) {
+                vibrateMode = AudioManager.RINGER_MODE_VIBRATE;
+                Vibrator vibrator = (Vibrator) mContext
+                        .getSystemService(Context.VIBRATOR_SERVICE);
+                vibrator.vibrate(300);
+            } else {
+                vibrateMode = AudioManager.RINGER_MODE_SILENT;
+            }
+            audioManager.setRingerMode(vibrateMode);
+        } else {
+            audioManager.setRingerMode(AudioManager.RINGER_MODE_NORMAL);
+            if (!keyguardActive) {
+                audioManager.adjustVolume(AudioManager.ADJUST_SAME, AudioManager.FLAG_SHOW_UI);
+            }
+        }
+    }
+
+    private void wifiToggle() {
+        WifiManager wifiManager = (WifiManager) mContext
+                .getSystemService("wifi");
+        boolean wifiState = wifiManager.isWifiEnabled();
+        if (wifiState) {
+            wifiManager.setWifiEnabled(false);
+            //Toast.makeText(mContext, "Wifi Disabled", Toast.LENGTH_SHORT).show();
+        } else {
+            wifiManager.setWifiEnabled(true);
+            //Toast.makeText(mContext, "Wifi Enabled", Toast.LENGTH_SHORT).show();
+        }
+    }
+
+    private void bluetoothToggle() {
+        BluetoothAdapter btAdapter = BluetoothAdapter.getDefaultAdapter();
+        boolean btState = btAdapter.isEnabled();
+        if (btState) {
+            btAdapter.disable();
+            //Toast.makeText(mContext, "Bluetooth Disabled", Toast.LENGTH_SHORT).show();
+        } else {
+            btAdapter.enable();
+            //Toast.makeText(mContext, "Bluetooth Enabled", Toast.LENGTH_SHORT).show();
+        }
+    }
+
+    private void brightnessControl(int keyCode) {
+        int level = 255;
+        int incrementBacklight = 15;
+        if (keyCode == KeyEvent.KEYCODE_BRIGHTNESS_UP) {
+            setBrightnessMode(Settings.System.SCREEN_BRIGHTNESS_MODE_MANUAL);
+         // Prevent the new brightness value from exceeding 255
+            if ((getBrightness() + (2 * incrementBacklight)) <= level) {
+                level = getBrightness() + incrementBacklight;
+            }
+            setBrightness(level);
+        } else if (keyCode == KeyEvent.KEYCODE_BRIGHTNESS_DOWN) {
+            setBrightnessMode(Settings.System.SCREEN_BRIGHTNESS_MODE_MANUAL);
+            level = 4;
+            // Prevent the new brightness value from falling below 4
+            if (getBrightness() - 2 * incrementBacklight >= level) {
+                level = getBrightness() - incrementBacklight;
+            }
+            setBrightness(level);
+        } else {
+            if (getBrightnessMode() == Settings.System.SCREEN_BRIGHTNESS_MODE_MANUAL) {
+                setBrightnessMode(Settings.System.SCREEN_BRIGHTNESS_MODE_AUTOMATIC);
+            } else {
+                setBrightnessMode(Settings.System.SCREEN_BRIGHTNESS_MODE_MANUAL);
+                setBrightness(getBrightness());
+            }
+        }
+    }
+
+    private int getBrightness() {
+        try {
+            int level = android.provider.Settings.System.getInt(
+                    mContext.getContentResolver(),
+                    Settings.System.SCREEN_BRIGHTNESS);
+            return level;
+        } catch (SettingNotFoundException e) {
+            Log.e(TAG, "Couldn't get brightness setting. ", e);
+            return 255;
+        }
+    }
+
+    private int getBrightnessMode() {
+        try {
+            int mode = android.provider.Settings.System.getInt(
+                    mContext.getContentResolver(),
+                    Settings.System.SCREEN_BRIGHTNESS_MODE);
+            return mode;
+        } catch (SettingNotFoundException e) {
+            Log.e(TAG, "Couldn't get brightness mode. ", e);
+            return 0;
+        }
+
+    }
+    private void setBrightness(int level)
+    {
+//FIXME
+/*        try {
+            android.provider.Settings.System.putInt(mContext.getContentResolver(),
+                    Settings.System.SCREEN_BRIGHTNESS, level);
+            IPowerManager ipowermanager =
+                    IPowerManager.Stub.asInterface(ServiceManager.getService("power"));
+            if(ipowermanager != null) {
+                ipowermanager.setBacklightBrightness(level);
+            }
+        } catch (RemoteException e) {;
+        Log.e(TAG, "Couldn't set brightness level. ", e);
+        }
+        return;
+*/
+    }
+
+    private void setBrightnessMode(int mode)
+    {
+        if(getBrightnessMode() != mode)
+            android.provider.Settings.System.putInt(mContext.getContentResolver(),
+                    Settings.System.SCREEN_BRIGHTNESS_MODE, mode);
+    }
+
+    private void launchSettings() {
+        Intent intent = new Intent("android.settings.SETTINGS");
+        intent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
+        mContext.startActivity(intent);
+    }
+
+    private void touchpadToggle() {
+        int touchpadStatus = EOSConstants.DEVICE_SETTINGS_TOUCHPAD_ENABLED;
+        // Check whether touchpad input is currently enabled (default).
+        if (android.provider.Settings.System.getInt(
+                mContext.getContentResolver(),
+                EOSConstants.DEVICE_SETTINGS_TOUCHPAD_STATUS, touchpadStatus) == EOSConstants.DEVICE_SETTINGS_TOUCHPAD_ENABLED) {
+            // ...and if so prepare to disable it.
+            touchpadStatus = EOSConstants.DEVICE_SETTINGS_TOUCHPAD_DISABLED;
+        }
+        android.provider.Settings.System.putInt(mContext.getContentResolver(),
+                EOSConstants.DEVICE_SETTINGS_TOUCHPAD_STATUS, touchpadStatus);
+        String status = (touchpadStatus == EOSConstants.DEVICE_SETTINGS_TOUCHPAD_ENABLED) ? "Enabled" : "Disabled";
+        //Toast.makeText(mContext, "Touchpad " + status, Toast.LENGTH_SHORT).show();
+    }
 
     /** {@inheritDoc} */
     @Override

@@ -140,6 +140,12 @@ struct InputReaderConfiguration {
         // Stylus icon option changed.
         CHANGE_STYLUS_ICON_ENABLED = 1 << 6,
 
+        // The touchpad gesture mode has changed.
+        CHANGE_TOUCHPAD_MODE = 1 << 6,
+
+        // The touchpad status has changed.
+        CHANGE_TOUCHPAD_STATUS = 1 << 7,
+
         // All devices must be reopened.
         CHANGE_MUST_REOPEN = 1 << 31,
     };
@@ -233,6 +239,12 @@ struct InputReaderConfiguration {
     // Ignore finger touches this long after the stylus has been used (including hover)
     nsecs_t stylusPalmRejectionTime;
 
+    // The touchpad gesture mode.
+    int32_t touchpadMode;
+
+    // Touchpad status.
+    int32_t touchpadStatus;
+
     InputReaderConfiguration() :
             virtualKeyQuietTime(0),
             pointerVelocityControlParameters(1.0f, 500.0f, 3000.0f, 3.0f),
@@ -250,6 +262,8 @@ struct InputReaderConfiguration {
             pointerGestureMovementSpeedRatio(0.8f),
             pointerGestureZoomSpeedRatio(0.3f),
             showTouches(false),
+            touchpadMode(0),
+            touchpadStatus(1)
             stylusIconEnabled(false),
             stylusPalmRejectionTime(50 * 10000000LL) // 50 ms
     { }

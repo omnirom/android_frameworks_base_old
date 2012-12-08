@@ -623,17 +623,24 @@ public class KeyEvent extends InputEvent implements Parcelable {
     /** Key code constant: Assist key.
      * Launches the global assist activity.  Not delivered to applications. */
     public static final int KEYCODE_ASSIST          = 219;
-    /** Key code constant: Brightness Down key.
-     * Adjusts the screen brightness down. */
-    public static final int KEYCODE_BRIGHTNESS_DOWN = 220;
-    /** Key code constant: Brightness Up key.
-     * Adjusts the screen brightness up. */
-    public static final int KEYCODE_BRIGHTNESS_UP   = 221;
     /** Key code constant: Audio Track key
      * Switches the audio tracks. */
     public static final int KEYCODE_MEDIA_AUDIO_TRACK = 222;
 
     private static final int LAST_KEYCODE           = KEYCODE_MEDIA_AUDIO_TRACK;
+
+    public static final int KEYCODE_WIRELESS        = 220;
+    public static final int KEYCODE_BLUETOOTH       = 221;
+    public static final int KEYCODE_TOUCHPAD        = 222;
+    public static final int KEYCODE_BRIGHTNESS_UP   = 223;
+    public static final int KEYCODE_BRIGHTNESS_DOWN = 224;
+    public static final int KEYCODE_BRIGHTNESS_AUTO = 225;
+    public static final int KEYCODE_CAPTURE         = 226;
+    public static final int KEYCODE_EUROPE_1        = 227;
+    public static final int KEYCODE_EUROPE_2        = 228;
+    public static final int KEYCODE_SLEEP           = 229;
+
+    private static final int LAST_KEYCODE           = KEYCODE_SLEEP;
 
     // NOTE: If you add a new keycode here you must also add it to:
     //  isSystem()
@@ -875,9 +882,17 @@ public class KeyEvent extends InputEvent implements Parcelable {
         names.append(KEYCODE_RO, "KEYCODE_RO");
         names.append(KEYCODE_KANA, "KEYCODE_KANA");
         names.append(KEYCODE_ASSIST, "KEYCODE_ASSIST");
-        names.append(KEYCODE_BRIGHTNESS_DOWN, "KEYCODE_BRIGHTNESS_DOWN");
-        names.append(KEYCODE_BRIGHTNESS_UP, "KEYCODE_BRIGHTNESS_UP");
         names.append(KEYCODE_MEDIA_AUDIO_TRACK, "KEYCODE_MEDIA_AUDIO_TRACK");
+        names.append(KEYCODE_WIRELESS, "KEYCODE_WIRELESS");
+        names.append(KEYCODE_BLUETOOTH, "KEYCODE_BLUETOOTH");
+        names.append(KEYCODE_TOUCHPAD, "KEYCODE_TOUCHPAD");
+        names.append(KEYCODE_BRIGHTNESS_UP, "KEYCODE_BRIGHTNESS_UP");
+        names.append(KEYCODE_BRIGHTNESS_DOWN, "KEYCODE_BRIGHTNESS_DOWN");
+        names.append(KEYCODE_BRIGHTNESS_AUTO, "KEYCODE_BRIGHTNESS_AUTO");
+        names.append(KEYCODE_CAPTURE, "KEYCODE_CAPTURE");
+        names.append(KEYCODE_EUROPE_1, "KEYCODE_EUROPE_1");
+        names.append(KEYCODE_EUROPE_2, "KEYCODE_EUROPE_2");
+        names.append(KEYCODE_SLEEP, "KEYCODE_SLEEP");
     };
 
     // Symbolic names of all metakeys in bit order from least significant to most significant.

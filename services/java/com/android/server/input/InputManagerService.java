@@ -22,6 +22,7 @@ import com.android.server.Watchdog;
 import com.android.server.display.DisplayManagerService;
 import com.android.server.display.DisplayViewport;
 
+import org.teameos.jellybean.settings.EOSConstants;
 import org.xmlpull.v1.XmlPullParser;
 
 import android.Manifest;
@@ -141,6 +142,8 @@ public class InputManagerService extends IInputManager.Stub
             new HashMap<IBinder, VibratorToken>();
     private int mNextVibratorTokenValue;
 
+    private boolean mHasTouchpad = false;
+
     // State for the currently installed input filter.
     final Object mInputFilterLock = new Object();
     IInputFilter mInputFilter; // guarded by mInputFilterLock
@@ -187,6 +190,9 @@ public class InputManagerService extends IInputManager.Stub
     private static native void nativeReloadDeviceAliases(int ptr);
     private static native String nativeDump(int ptr);
     private static native void nativeMonitor(int ptr);
+    private static native void nativeSetTouchpadMode(int ptr, int mode);
+    private static native void nativeSetTouchpadStatus(int ptr, int status);
+
 
     // Input event injection constants defined in InputDispatcher.h.
     private static final int INPUT_EVENT_INJECTION_SUCCEEDED = 0;
@@ -265,24 +271,41 @@ public class InputManagerService extends IInputManager.Stub
         Slog.i(TAG, "Starting input manager");
         nativeStart(mPtr);
 
+        mHasTouchpad = mContext.getResources().getBoolean(
+                com.android.internal.R.bool.config_hasTouchpad);
+
         // Add ourself to the Watchdog monitors.
         Watchdog.getInstance().addMonitor(this);
 
         registerPointerSpeedSettingObserver();
         registerShowTouchesSettingObserver();
         registerStylusIconEnabledSettingObserver();
+        if (mHasTouchpad) {
+            registerTouchpadModeSettingObserver();
+            registerTouchpadStatusSettingObserver();
+
+        }
 
         mContext.registerReceiver(new BroadcastReceiver() {
             @Override
             public void onReceive(Context context, Intent intent) {
                 updatePointerSpeedFromSettings();
                 updateShowTouchesFromSettings();
+                if (mHasTouchpad) {
+                    updateTouchpadModeFromSettings();
+                    updateTouchpadStatusFromSettings();
+                }
+
             }
         }, new IntentFilter(Intent.ACTION_USER_SWITCHED), null, mHandler);
 
         updatePointerSpeedFromSettings();
         updateShowTouchesFromSettings();
         updateStylusIconEnabledFromSettings();
+        if (mHasTouchpad) {
+            updateTouchpadModeFromSettings();
+            updateTouchpadStatusFromSettings();
+        }
     }
 
     // TODO(BT) Pass in paramter for bluetooth system
@@ -1158,6 +1181,18 @@ public class InputManagerService extends IInputManager.Stub
         nativeSetShowTouches(mPtr, setting != 0);
     }
 
+    public void updateTouchpadModeFromSettings()
+    {
+        int mode = getTouchpadModeSetting(0);
+        nativeSetTouchpadMode(mPtr, mode);
+    }
+
+    public void updateTouchpadStatusFromSettings()
+    {
+        int status = getTouchpadStatusSetting(1);
+        nativeSetTouchpadStatus(mPtr, status);
+    }
+
     private void registerShowTouchesSettingObserver() {
         mContext.getContentResolver().registerContentObserver(
                 Settings.System.getUriFor(Settings.System.SHOW_TOUCHES), true,
@@ -1169,6 +1204,28 @@ public class InputManagerService extends IInputManager.Stub
                 }, UserHandle.USER_ALL);
     }
 
+    private void registerTouchpadModeSettingObserver() {
+        mContext.getContentResolver().registerContentObserver(
+                Settings.System.getUriFor(EOSConstants.DEVICE_SETTINGS_TOUCHPAD_MODE), true,
+                new ContentObserver(mHandler) {
+                    @Override
+                    public void onChange(boolean selfChange) {
+                        updateTouchpadModeFromSettings();
+                    }
+                });
+    }
+
+    private void registerTouchpadStatusSettingObserver() {
+        mContext.getContentResolver().registerContentObserver(
+                Settings.System.getUriFor(EOSConstants.DEVICE_SETTINGS_TOUCHPAD_STATUS), true,
+                new ContentObserver(mHandler) {
+                    @Override
+                    public void onChange(boolean selfChange) {
+                        updateTouchpadStatusFromSettings();
+                    }
+                });
+    }
+
     private int getShowTouchesSetting(int defaultValue) {
         int result = defaultValue;
         try {
@@ -1178,6 +1235,17 @@ public class InputManagerService extends IInputManager.Stub
         }
         return result;
     }
+
+    private int getTouchpadModeSetting(int defaultValue) {
+        int result = defaultValue;
+        try {
+            result = Settings.System.getInt(mContext.getContentResolver(),
+                    EOSConstants.DEVICE_SETTINGS_TOUCHPAD_MODE);
+        } catch (SettingNotFoundException snfe) {
+        }
+        return result;
+    }
+
 
     // Binder call
     @Override
@@ -1205,6 +1273,16 @@ public class InputManagerService extends IInputManager.Stub
             v.mVibrating = true;
             nativeVibrate(mPtr, deviceId, pattern, repeat, v.mTokenValue);
         }
+    }
+
+    private int getTouchpadStatusSetting(int defaultValue) {
+        int result = defaultValue;
+        try {
+            result = Settings.System.getInt(mContext.getContentResolver(),
+                    EOSConstants.DEVICE_SETTINGS_TOUCHPAD_STATUS);
+        } catch (SettingNotFoundException snfe) {
+        }
+        return result;
     }
 
     // Binder call

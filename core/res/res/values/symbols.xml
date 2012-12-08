@@ -25,6 +25,7 @@
        frameworks/base/core/res/MakeJavaSymbols.sed for how to easily generate
        this.
   -->
+  <java-symbol type="bool" name="config_hasTouchpad" />
   <java-symbol type="id" name="account_name" />
   <java-symbol type="id" name="account_row_icon" />
   <java-symbol type="id" name="account_row_text" />
