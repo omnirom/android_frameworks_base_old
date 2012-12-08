@@ -1158,6 +1158,18 @@ public class InputManagerService extends IInputManager.Stub
         nativeSetShowTouches(mPtr, setting != 0);
     }
 
+    public void updateTouchpadModeFromSettings()
+    {
+        int mode = getTouchpadModeSetting(0);
+        nativeSetTouchpadMode(mPtr, mode);
+    }
+
+    public void updateTouchpadStatusFromSettings()
+    {
+        int status = getTouchpadStatusSetting(1);
+        nativeSetTouchpadStatus(mPtr, status);
+    }
+
     private void registerShowTouchesSettingObserver() {
         mContext.getContentResolver().registerContentObserver(
                 Settings.System.getUriFor(Settings.System.SHOW_TOUCHES), true,

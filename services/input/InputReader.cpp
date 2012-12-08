@@ -2762,7 +2762,6 @@ void TouchInputMapper::configure(nsecs_t when,
         // in which case the reader will call reset itself after all mappers are ready.
         getDevice()->notifyReset(when);
     }
-}
 
 void TouchInputMapper::configureParameters() {
     // Use the pointer presentation mode for devices that do not support distinct
