@@ -48,7 +48,7 @@ public class SettingsPanelView extends PanelView {
     Drawable mHandleBar;
     int mHandleBarHeight;
     View mHandleView;
-
+    
     public SettingsPanelView(Context context, AttributeSet attrs) {
         super(context, attrs);
     }
