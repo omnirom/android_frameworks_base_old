@@ -31,6 +31,8 @@ import android.graphics.Rect;
 import android.os.Handler;
 import android.os.Message;
 import android.os.RemoteException;
+import android.os.UserHandle;
+import android.provider.Settings;
 import android.util.AttributeSet;
 import android.util.Log;
 import android.util.SparseArray;
@@ -56,12 +58,14 @@ import com.android.systemui.plugins.statusbar.phone.NavGesture.GestureHelper;
 import com.android.systemui.stackdivider.Divider;
 import com.android.systemui.statusbar.policy.DeadZone;
 import com.android.systemui.statusbar.policy.KeyButtonDrawable;
+import com.android.systemui.tuner.TunerService;
 
 import java.io.FileDescriptor;
 import java.io.PrintWriter;
 import java.util.function.Consumer;
 
-public class NavigationBarView extends FrameLayout implements PluginListener<NavGesture> {
+public class NavigationBarView extends FrameLayout implements PluginListener<NavGesture>,
+        TunerService.Tunable {
     final static boolean DEBUG = false;
     final static String TAG = "StatusBar/NavBarView";
 
@@ -300,6 +304,10 @@ public class NavigationBarView extends FrameLayout implements PluginListener<Nav
         return mButtonDispatchers;
     }
 
+    public ViewGroup getDpadView() {
+        return (ViewGroup) getCurrentView().findViewById(R.id.dpad_group);
+    }
+
     private void updateCarModeIcons(Context ctx) {
         mBackCarModeIcon = getDrawable(ctx,
                 R.drawable.ic_sysbar_back_carmode, R.drawable.ic_sysbar_back_carmode);
@@ -418,8 +426,8 @@ public class NavigationBarView extends FrameLayout implements PluginListener<Nav
 
         // The Accessibility button always overrides the appearance of the IME switcher
         final boolean showImeButton =
-                !mShowAccessibilityButton && ((hints & StatusBarManager.NAVIGATION_HINT_IME_SHOWN)
-                        != 0);
+                !mShowAccessibilityButton && !showDpadArrowKeys() &&
+                ((hints & StatusBarManager.NAVIGATION_HINT_IME_SHOWN) != 0);
         getImeSwitchButton().setVisibility(showImeButton ? View.VISIBLE : View.INVISIBLE);
         getImeSwitchButton().setImageDrawable(mImeIcon);
 
@@ -433,6 +441,8 @@ public class NavigationBarView extends FrameLayout implements PluginListener<Nav
         setDisabledFlags(mDisabledFlags, true);
 
         mBarTransitions.reapplyDarkIntensity();
+
+        updateDpadKeys();
     }
 
     public void setDisabledFlags(int disabledFlags) {
@@ -758,6 +768,7 @@ public class NavigationBarView extends FrameLayout implements PluginListener<Nav
     protected void onDetachedFromWindow() {
         super.onDetachedFromWindow();
         Dependency.get(PluginManager.class).removePluginListener(this);
+        Dependency.get(TunerService.class).removeTunable(this);
         if (mGestureHelper != null) {
             mGestureHelper.destroy();
         }
@@ -778,6 +789,11 @@ public class NavigationBarView extends FrameLayout implements PluginListener<Nav
         }
         mGestureHelper = defaultHelper;
         updateTaskSwitchHelper();
+    }
+
+    @Override
+    public void onTuningChanged(String key, String newValue) {
+        setNavigationIconHints(mNavigationIconHints, true);
     }
 
     public void dump(FileDescriptor fd, PrintWriter pw, String[] args) {
@@ -831,8 +847,22 @@ public class NavigationBarView extends FrameLayout implements PluginListener<Nav
         void onVerticalChanged(boolean isVertical);
     }
 
+    public void updateDpadKeys() {
+        if (showDpadArrowKeys()) { // overrides IME button
+            final boolean showingIme = ((mNavigationIconHints
+                    & StatusBarManager.NAVIGATION_HINT_BACK_ALT) != 0);
+
+            getDpadView().setVisibility(showingIme ? View.VISIBLE : View.INVISIBLE);
+        }
+    }
+
     private final Consumer<Boolean> mDockedListener = exists -> mHandler.post(() -> {
         mDockedStackExists = exists;
         updateRecentsIcon();
     });
+
+    private boolean showDpadArrowKeys() {
+        return Settings.System.getIntForUser(getContext().getContentResolver(),
+                Settings.System.NAVIGATION_BAR_MENU_ARROW_KEYS, 0, UserHandle.USER_CURRENT) != 0;
+    }
 }
