@@ -4737,6 +4737,15 @@ public final class Settings {
         public static final String OMNI_DOZE_ON_CHARGE_NOW = "doze_on_charge_now";
 
         /**
+         * Whether to show arrow keys in navigation bar
+         * @hide
+         */
+        public static final String OMNI_NAVIGATION_BAR_ARROW_KEYS = "navigation_bar_menu_arrow_keys";
+
+        private static final Validator OMNI_NAVIGATION_BAR_ARROW_KEYS_VALIDATOR =
+                BOOLEAN_VALIDATOR;
+
+        /**
          * IMPORTANT: If you add a new public settings you also have to add it to
          * PUBLIC_SETTINGS below. If the new setting is hidden you have to add
          * it to PRIVATE_SETTINGS below. Also add a validator that can validate
@@ -4867,7 +4876,8 @@ public final class Settings {
             OMNI_VIBRATE_ON_CONNECT,
             OMNI_VIBRATE_ON_CALLWAITING,
             OMNI_VIBRATE_ON_DISCONNECT,
-            OMNI_DOZE_ON_CHARGE
+            OMNI_DOZE_ON_CHARGE,
+            OMNI_NAVIGATION_BAR_ARROW_KEYS
         };
 
         /**
@@ -5047,6 +5057,7 @@ public final class Settings {
             PRIVATE_SETTINGS.add(OMNI_VIBRATE_ON_CALLWAITING);
             PRIVATE_SETTINGS.add(OMNI_VIBRATE_ON_DISCONNECT);
             PRIVATE_SETTINGS.add(OMNI_DOZE_ON_CHARGE);
+            PRIVATE_SETTINGS.add(OMNI_NAVIGATION_BAR_ARROW_KEYS);
         }
 
         /**
@@ -5247,6 +5258,8 @@ public final class Settings {
                     OMNI_VIBRATE_ON_DISCONNECT_VALIDATOR);
             VALIDATORS.put(OMNI_DOZE_ON_CHARGE,
                     OMNI_DOZE_ON_CHARGE_VALIDATOR);
+            VALIDATORS.put(OMNI_NAVIGATION_BAR_ARROW_KEYS,
+                    OMNI_NAVIGATION_BAR_ARROW_KEYS_VALIDATOR);
         }
 
         /**
