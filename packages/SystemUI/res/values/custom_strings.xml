@@ -138,4 +138,8 @@
         <item>default</item>
         <item>space;left,back,home,recent,right;space</item>
     </string-array>
+
+    <!-- Navigation bar dpad -->
+    <string name="accessibility_dpad_left">Cursor left</string>
+    <string name="accessibility_dpad_right">Cursor right</string>
 </resources>
