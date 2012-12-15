@@ -91,9 +91,29 @@ public class CamcorderProfile
     public static final int QUALITY_QVGA = 7;
 
     /**
+     * {@hide}
+     */
+    public static final int QUALITY_FWVGA = 8;
+    /**
+     * {@hide}
+     */
+    public static final int QUALITY_WVGA = 9;
+
+    /**
+     * {@hide}
+     */
+    public static final int QUALITY_VGA = 10;
+
+    /**
+     * {@hide}
+     */
+    public static final int QUALITY_WQVGA = 11;
+
+    /**
+     * {@hide}
      * Quality level corresponding to the 2160p (3840x2160) resolution.
      */
-    public static final int QUALITY_2160P = 8;
+    public static final int QUALITY_2160P = 12;
 
     // Start and end of quality list
     private static final int QUALITY_LIST_START = QUALITY_LOW;
@@ -139,10 +159,30 @@ public class CamcorderProfile
      */
     public static final int QUALITY_TIME_LAPSE_QVGA = 1007;
 
+    /** @hide
+     * Time lapse quality level corresponding to the FWVGA (864 x 480) resolution.
+     */
+    public static final int QUALITY_TIME_LAPSE_FWVGA = 1008;
+
+    /** @hide
+     * Time lapse quality level corresponding to the WVGA (800 x 480) resolution.
+     */
+    public static final int QUALITY_TIME_LAPSE_WVGA = 1009;
+
+    /** @hide
+     * Time lapse quality level corresponding to the VGA (640 x 480) resolution.
+     */
+    public static final int QUALITY_TIME_LAPSE_VGA = 1010;
+
+    /** @hide
+     * Time lapse quality level corresponding to the WQVGA (432 x 240) resolution.
+     */
+    public static final int QUALITY_TIME_LAPSE_WQVGA = 1011;
+
     /**
      * Time lapse quality level corresponding to the 2160p (3840 x 2160) resolution.
      */
-    public static final int QUALITY_TIME_LAPSE_2160P = 1008;
+    public static final int QUALITY_TIME_LAPSE_2160P = 1012;
 
     // Start and end of timelapse quality list
     private static final int QUALITY_TIME_LAPSE_LIST_START = QUALITY_TIME_LAPSE_LOW;
