@@ -58,6 +58,17 @@
             android:padding="2dp"
             android:visibility="gone" />
 
+        <com.android.systemui.statusbar.policy.ClockLeft
+            android:id="@+id/left_clock"
+            android:textAppearance="@style/TextAppearance.StatusBar.Clock"
+            android:layout_width="wrap_content"
+            android:layout_height="fill_parent"
+            android:singleLine="true"
+            android:paddingStart="2dp"
+            android:paddingEnd="2dp"
+            android:gravity="center"
+            android:visibility="gone" />
+
         <!-- The alpha of this area is controlled from both PhoneStatusBarTransitions and
              PhoneStatusBar (DISABLE_NOTIFICATION_ICONS). -->
         <com.android.systemui.statusbar.AlphaOptimizedFrameLayout
