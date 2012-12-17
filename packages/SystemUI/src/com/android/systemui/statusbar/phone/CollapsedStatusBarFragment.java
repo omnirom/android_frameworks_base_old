@@ -44,6 +44,7 @@ import com.android.systemui.statusbar.CommandQueue;
 import com.android.systemui.statusbar.SignalClusterView;
 import com.android.systemui.statusbar.phone.StatusBarIconController.DarkIconManager;
 import com.android.systemui.statusbar.policy.DarkIconDispatcher;
+import com.android.systemui.statusbar.policy.Clock;
 import com.android.systemui.statusbar.policy.EncryptionHelper;
 import com.android.systemui.statusbar.policy.KeyguardMonitor;
 import com.android.systemui.statusbar.policy.NetworkController;
@@ -74,6 +75,8 @@ public class CollapsedStatusBarFragment extends Fragment implements CommandQueue
     private boolean mShowNetworkTraffic;
     private final Handler mHandler = new Handler();
     private NetworkTraffic mNetworkTraffic;
+    private View mClock;
+    private View mLeftClock;
 
     private class OmniSettingsObserver extends ContentObserver {
         OmniSettingsObserver(Handler handler) {
@@ -97,12 +100,35 @@ public class CollapsedStatusBarFragment extends Fragment implements CommandQueue
             resolver.registerContentObserver(Settings.System
                     .getUriFor(Settings.System.NETWORK_TRAFFIC_AUTOHIDE_THRESHOLD), false,
                     this, UserHandle.USER_ALL);
+            resolver.registerContentObserver(Settings.System
+                    .getUriFor(Settings.System.STATUS_BAR_CLOCK), false,
+                    this, UserHandle.USER_ALL);
+            resolver.registerContentObserver(Settings.System
+                    .getUriFor(Settings.System.STATUSBAR_CLOCK_STYLE), false,
+                    this, UserHandle.USER_ALL);
+            resolver.registerContentObserver(Settings.System
+                    .getUriFor(Settings.System.STATUS_BAR_CLOCK_SECONDS), false,
+                    this, UserHandle.USER_ALL);
+            resolver.registerContentObserver(Settings.System
+                    .getUriFor(Settings.System.STATUSBAR_CLOCK_AM_PM_STYLE), false,
+                    this, UserHandle.USER_ALL);
+            resolver.registerContentObserver(Settings.System
+                    .getUriFor(Settings.System.STATUSBAR_CLOCK_DATE_DISPLAY), false,
+                    this, UserHandle.USER_ALL);
+            resolver.registerContentObserver(Settings.System
+                    .getUriFor(Settings.System.STATUSBAR_CLOCK_DATE_STYLE), false,
+                    this, UserHandle.USER_ALL);
+            resolver.registerContentObserver(Settings.System
+                    .getUriFor(Settings.System.STATUSBAR_CLOCK_DATE_FORMAT), false,
+                    this, UserHandle.USER_ALL);
         }
 
         @Override
         public void onChange(boolean selfChange, Uri uri) {
             if (uri.equals(Settings.System.getUriFor(Settings.System.STATUS_BAR_LOGO))) {
                 updateSettings(true);
+               ((Clock)mClock).updateSettings();
+               ((Clock)mLeftClock).updateSettings();
             } else if (mNetworkTraffic != null) {
                 mNetworkTraffic.updateSettings();
             }
@@ -144,6 +170,8 @@ public class CollapsedStatusBarFragment extends Fragment implements CommandQueue
         Dependency.get(StatusBarIconController.class).addIconGroup(mDarkIconManager);
         mSystemIconArea = mStatusBar.findViewById(R.id.system_icon_area);
         mSignalClusterView = mStatusBar.findViewById(R.id.signal_cluster);
+        mClock = mStatusBar.findViewById(R.id.clock);
+        mLeftClock = mStatusBar.findViewById(R.id.left_clock);
         Dependency.get(DarkIconDispatcher.class).addDarkReceiver(mSignalClusterView);
         mOmniLogo = mStatusBar.findViewById(R.id.status_bar_logo);
         mNetworkTraffic = (NetworkTraffic) mStatusBar.findViewById(R.id.networkTraffic);
@@ -260,6 +288,11 @@ public class CollapsedStatusBarFragment extends Fragment implements CommandQueue
             animateHide(mOmniLogo, animate, true);
         }
 
+
+        if (((Clock)mLeftClock).isEnabled()) {
+            animateHide(mLeftClock, animate, true);
+        }
+
         if (mShowNetworkTraffic) {
             animateHide(mNetworkTraffic, animate, true);
         }
@@ -269,6 +302,9 @@ public class CollapsedStatusBarFragment extends Fragment implements CommandQueue
         animateShow(mNotificationIconAreaInner, animate);
         if (mShowLogo) {
             animateShow(mOmniLogo, animate);
+        }
+        if (((Clock)mLeftClock).isEnabled()) {
+            animateShow(mLeftClock, animate);
         }
     }
 
