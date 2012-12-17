@@ -35,7 +35,7 @@ public final class PhoneStatusBarTransitions extends BarTransitions {
     private final PhoneStatusBarView mView;
     private final float mIconAlphaWhenOpaque;
 
-    private View mLeftSide, mStatusIcons, mSignalCluster, mBattery, mClock, mLogoIcon, mNetworkTraffic, mBatteryContainer;
+    private View mLeftSide, mStatusIcons, mSignalCluster, mBattery, mClock, mLogoIcon, mNetworkTraffic, mBatteryContainer, mLeftClock;
     private Animator mCurrentAnimation;
 
     public PhoneStatusBarTransitions(PhoneStatusBarView view) {
@@ -51,6 +51,7 @@ public final class PhoneStatusBarTransitions extends BarTransitions {
         mSignalCluster = mView.findViewById(R.id.signal_cluster);
         mBattery = mView.findViewById(R.id.battery);
         mClock = mView.findViewById(R.id.clock);
+        mLeftClock = mView.findViewById(R.id.left_clock);
         mLogoIcon = mView.findViewById(R.id.status_bar_logo);
         mNetworkTraffic = mView.findViewById(R.id.networkTraffic);
         mBatteryContainer = mView.findViewById(R.id.battery_container);
@@ -100,6 +101,7 @@ public final class PhoneStatusBarTransitions extends BarTransitions {
                 animCollection.add(animateTransitionTo(mBattery, newAlphaBC));
             }
             animCollection.add(animateTransitionTo(mClock, newAlphaBC));
+            animCollection.add(animateTransitionTo(mLeftClock, newAlphaBC));
             animCollection.add(animateTransitionTo(mLogoIcon, newAlpha));
             animCollection.add(animateTransitionTo(mNetworkTraffic, newAlpha));
             if (mBatteryContainer != null) {
@@ -120,6 +122,7 @@ public final class PhoneStatusBarTransitions extends BarTransitions {
                 mBattery.setAlpha(newAlphaBC);
             }
             mClock.setAlpha(newAlphaBC);
+            mLeftClock.setAlpha(newAlphaBC);
             mLogoIcon.setAlpha(newAlpha);
             mNetworkTraffic.setAlpha(newAlpha);
             if (mBatteryContainer != null) {
