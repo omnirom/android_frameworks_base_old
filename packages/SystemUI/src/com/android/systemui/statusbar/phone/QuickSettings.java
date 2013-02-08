@@ -548,9 +548,12 @@ class QuickSettings {
 
                     if (rssiState.dataTypeIconId > 0) {
                         iov.setImageResource(rssiState.dataTypeIconId);
-                    } else {
+                    } else if (rssiState.dataTypeIconId == 0 && cm.getMobileDataEnabled()) {
                         iov.setImageDrawable(null);
+                    } else {
+                        iov.setImageResource(R.drawable.ic_qs_signal_data_off);
                     }
+
                     setActivity(view, rssiState);
 
                     tv.setText(state.label);
