@@ -966,4 +966,18 @@ public class WifiNative {
         // Note: optional feature on the driver. It is ok for this to fail.
         doBooleanCommand("DRIVER MIRACAST " + mode);
     }
+
+    public boolean getModeCapability(String mode) {
+        String ret = doStringCommand("GET_CAPABILITY modes");
+        if (!TextUtils.isEmpty(ret)) {
+            String[] tokens = ret.split(" ");
+            for (String t : tokens) {
+                if (t.compareTo(mode) == 0)
+                    return true;
+            }
+        }
+        return false;
+    }
+
+    public native static boolean setMode(int mode);
 }
