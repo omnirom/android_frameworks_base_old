@@ -540,6 +540,7 @@ public class AudioService extends IAudioService.Stub {
         intentFilter.addAction(Intent.ACTION_SCREEN_ON);
         intentFilter.addAction(Intent.ACTION_SCREEN_OFF);
         intentFilter.addAction(Intent.ACTION_USER_SWITCHED);
+        intentFilter.addAction(Intent.ACTION_HEADSET_PLUG);
 
         intentFilter.addAction(Intent.ACTION_CONFIGURATION_CHANGED);
         // TODO merge orientation and rotation
@@ -4094,6 +4095,16 @@ public class AudioService extends IAudioService.Stub {
                         }
                     }
                 }
+            } else if (action.equals(Intent.ACTION_HEADSET_PLUG)) {
+                state = intent.getIntExtra("state", 0);
+                if (state == 1) {
+                    // Headset plugged in
+                    adjustCurrentStreamVolume();
+                    // TODO: Cap volume at safe levels
+                } else {
+                    // Headset disconnected
+                    adjustCurrentStreamVolume();
+                }
             } else if (action.equals(Intent.ACTION_USB_AUDIO_ACCESSORY_PLUG) ||
                            action.equals(Intent.ACTION_USB_AUDIO_DEVICE_PLUG)) {
                 state = intent.getIntExtra("state", 0);
@@ -4184,6 +4195,23 @@ public class AudioService extends IAudioService.Stub {
                         0,
                         null,
                         SAFE_VOLUME_CONFIGURE_TIMEOUT_MS);
+
+                adjustCurrentStreamVolume();
+            } else if (action.equals(Intent.ACTION_PACKAGE_REMOVED)
+                    || action.equals(Intent.ACTION_PACKAGE_DATA_CLEARED)) {
+                if (!intent.getBooleanExtra(Intent.EXTRA_REPLACING, false)) {
+                    // a package is being removed, not replaced
+                    String packageName = intent.getData().getSchemeSpecificPart();
+                    if (packageName != null) {
+                        cleanupMediaButtonReceiverForPackage(packageName, true);
+                    }
+                }
+            } else if (action.equals(Intent.ACTION_PACKAGE_ADDED)
+                    || action.equals(Intent.ACTION_PACKAGE_CHANGED)) {
+                String packageName = intent.getData().getSchemeSpecificPart();
+                if (packageName != null) {
+                    cleanupMediaButtonReceiverForPackage(packageName, false);
+                }
             } else if (action.equals(Intent.ACTION_SCREEN_ON)) {
                 AudioSystem.setParameters("screen_state=on");
             } else if (action.equals(Intent.ACTION_SCREEN_OFF)) {
@@ -4211,6 +4239,20 @@ public class AudioService extends IAudioService.Stub {
                         0,
                         0,
                         mStreamStates[AudioSystem.STREAM_MUSIC], 0);
+            }
+        }
+
+        private void adjustCurrentStreamVolume() {
+            VolumeStreamState streamState;
+            int device;
+
+            for (int stream = 0; stream < AudioSystem.getNumStreamTypes(); stream++) {
+                if (stream == mStreamVolumeAlias[stream]) {
+                    streamState = mStreamStates[mStreamVolumeAlias[stream]];
+                    device = getDeviceForStream(stream);
+                    // apply stored value for device
+                    streamState.applyDeviceVolume(device);
+                }
             }
         }
     }
