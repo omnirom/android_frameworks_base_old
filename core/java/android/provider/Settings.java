@@ -3807,6 +3807,11 @@ public final class Settings {
         public static final String SWAP_VOLUME_BUTTONS = "swap_volume_buttons";
 
         /**
+         * @hide
+         */
+        public static final String VOLUME_BUTTON_FORCE_MEDIA = "volume_button_force_media";
+
+        /**
          * Enable/disable brightness control in statusbar
          * @hide
          */

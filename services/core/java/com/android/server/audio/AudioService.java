@@ -558,6 +558,7 @@ public class AudioService extends IAudioService.Stub {
     private AudioManagerInternal.RingerModeDelegate mRingerModeDelegate;
     private VolumePolicy mVolumePolicy = VolumePolicy.DEFAULT;
     private long mLoweredFromNormalToVibrateTime;
+    private boolean mVolumeKeyForceMediaStream;
 
     // Intent "extra" data keys.
     public static final String CONNECT_INTENT_KEY_PORT_NAME = "portName";
@@ -663,6 +664,8 @@ public class AudioService extends IAudioService.Stub {
 
         mLinkNotificationWithVolume = Settings.System.getIntForUser(mContentResolver,
                 Settings.System.VOLUME_LINK_NOTIFICATION, 1, UserHandle.USER_CURRENT) == 1;
+        mVolumeKeyForceMediaStream = Settings.System.getIntForUser(mContentResolver,
+                Settings.System.VOLUME_BUTTON_FORCE_MEDIA, 0, UserHandle.USER_CURRENT) == 1;
 
         // must be called before readPersistedSettings() which needs a valid mStreamVolumeAlias[]
         // array initialized by updateStreamVolumeAlias()
@@ -3614,10 +3617,16 @@ public class AudioService extends IAudioService.Stub {
                     if (DEBUG_VOL)
                         Log.v(TAG, "getActiveStreamType: Forcing STREAM_MUSIC stream active");
                     return AudioSystem.STREAM_MUSIC;
-                    } else {
+                } else {
+                    if (!mVolumeKeyForceMediaStream) {
                         if (DEBUG_VOL)
                             Log.v(TAG, "getActiveStreamType: Forcing STREAM_RING b/c default");
                         return AudioSystem.STREAM_RING;
+                    } else {
+                        if (DEBUG_VOL)
+                            Log.v(TAG, "getActiveStreamType: Forcing STREAM_MUSIC b/c default");
+                        return AudioSystem.STREAM_MUSIC;
+                    }
                 }
             } else if (isAfMusicActiveRecently(0)) {
                 if (DEBUG_VOL)
@@ -3652,9 +3661,16 @@ public class AudioService extends IAudioService.Stub {
                     if (DEBUG_VOL) Log.v(TAG, "getActiveStreamType: forcing STREAM_MUSIC");
                     return AudioSystem.STREAM_MUSIC;
                 } else {
-                    if (DEBUG_VOL) Log.v(TAG,
-                            "getActiveStreamType: using STREAM_NOTIFICATION as default");
-                    return AudioSystem.STREAM_NOTIFICATION;
+                    if (!mVolumeKeyForceMediaStream) {
+                        if (DEBUG_VOL)
+                            Log.v(TAG,
+                                    "getActiveStreamType: using STREAM_NOTIFICATION as default");
+                        return AudioSystem.STREAM_NOTIFICATION;
+                    } else {
+                        if (DEBUG_VOL)
+                            Log.v(TAG, "getActiveStreamType: Forcing STREAM_MUSIC b/c default");
+                        return AudioSystem.STREAM_MUSIC;
+                    }
                 }
             }
             break;
@@ -4725,9 +4741,10 @@ public class AudioService extends IAudioService.Stub {
                     Settings.Global.ENCODED_SURROUND_OUTPUT_AUTO);
             mContentResolver.registerContentObserver(Settings.Global.getUriFor(
                     Settings.Global.ENCODED_SURROUND_OUTPUT), false, this);
-
             mContentResolver.registerContentObserver(Settings.System.getUriFor(
                     Settings.System.VOLUME_LINK_NOTIFICATION), false, this);
+            mContentResolver.registerContentObserver(Settings.System.getUriFor(
+                    Settings.System.VOLUME_BUTTON_FORCE_MEDIA), false, this);
         }
 
         @Override
@@ -4756,6 +4773,8 @@ public class AudioService extends IAudioService.Stub {
                 } else {
                     mStreamVolumeAlias[AudioSystem.STREAM_NOTIFICATION] = AudioSystem.STREAM_NOTIFICATION;
                 }
+                mVolumeKeyForceMediaStream = System.getIntForUser(mContentResolver,
+                        Settings.System.VOLUME_BUTTON_FORCE_MEDIA, 0, UserHandle.USER_CURRENT) == 1;
             }
         }
 
