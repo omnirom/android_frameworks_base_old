@@ -456,6 +456,8 @@ public class AudioService extends IAudioService.Stub {
     // If absolute volume is supported in AVRCP device
     private boolean mAvrcpAbsVolSupported = false;
 
+    private int mVolumeKeysControlRingStream;
+
     ///////////////////////////////////////////////////////////////////////////
     // Construction
     ///////////////////////////////////////////////////////////////////////////
@@ -722,6 +724,9 @@ public class AudioService extends IAudioService.Stub {
 
             updateRingerModeAffectedStreams();
             readDockAudioSettings(cr);
+
+            mVolumeKeysControlRingStream = Settings.System.getIntForUser(cr,
+                    Settings.System.VOLUME_KEYS_CONTROL_RING_STREAM, 1, UserHandle.USER_CURRENT);
         }
 
         mLinkNotificationWithVolume = Settings.System.getIntForUser(cr,
@@ -811,6 +816,10 @@ public class AudioService extends IAudioService.Stub {
             streamType = mVolumeControlStream;
         } else {
             streamType = getActiveStreamType(suggestedStreamType);
+        }
+
+        if (streamType == AudioSystem.STREAM_DEFAULT) {
+            return;
         }
 
         // Play sounds on STREAM_RING only and if lock screen is not on.
@@ -1672,6 +1681,11 @@ public class AudioService extends IAudioService.Stub {
                 }
             }
             int streamType = getActiveStreamType(AudioManager.USE_DEFAULT_STREAM_TYPE);
+
+            if (streamType == AudioSystem.STREAM_DEFAULT) {
+                return 0;
+            }
+
             if (streamType == STREAM_REMOTE_MUSIC) {
                 // here handle remote media playback the same way as local playback
                 streamType = AudioManager.STREAM_MUSIC;
@@ -2677,9 +2691,19 @@ public class AudioService extends IAudioService.Stub {
                             Log.v(TAG, "getActiveStreamType: Forcing STREAM_REMOTE_MUSIC");
                         return STREAM_REMOTE_MUSIC;
                     } else {
-                        if (DEBUG_VOL)
-                            Log.v(TAG, "getActiveStreamType: Forcing STREAM_RING b/c default");
-                        return AudioSystem.STREAM_RING;
+                        if (mVolumeKeysControlRingStream == 1) {
+                            if (DEBUG_VOL)
+                                Log.v(TAG, "getActiveStreamType: Forcing STREAM_RING b/c default");
+                            return AudioSystem.STREAM_RING;
+                        } else if (mVolumeKeysControlRingStream == -1) {
+                            if (DEBUG_VOL)
+                                Log.v(TAG, "getActiveStreamType: Forcing STREAM_DEFAULT b/c default setting");
+                            return AudioSystem.STREAM_DEFAULT;
+                        } else {
+                            if (DEBUG_VOL)
+                                Log.v(TAG, "getActiveStreamType: Forcing STREAM_MUSIC b/c default setting");
+                            return AudioSystem.STREAM_MUSIC;
+                        }
                 }
             } else if (isAfMusicActiveRecently(0)) {
                 if (DEBUG_VOL)
@@ -3714,6 +3738,8 @@ public class AudioService extends IAudioService.Stub {
                 Settings.Global.DOCK_AUDIO_MEDIA_ENABLED), false, this);
             mContentResolver.registerContentObserver(Settings.System.getUriFor(
                 Settings.System.VOLUME_LINK_NOTIFICATION), false, this);
+            mContentResolver.registerContentObserver(Settings.System.getUriFor(
+                Settings.System.VOLUME_KEYS_CONTROL_RING_STREAM), false, this);
         }
 
         @Override
