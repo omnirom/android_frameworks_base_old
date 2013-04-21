@@ -3983,6 +3983,11 @@ public final class Settings {
         public static final String VOLUME_LINK_NOTIFICATION = "volume_link_notification";
 
         /**
+         * @hide
+         */
+        public static final String VOLUME_BUTTON_FORCE_MEDIA = "volume_button_force_media";
+
+        /**
          * Settings to backup. This is here so that it's in the same place as the settings
          * keys and easy to update.
          *
@@ -4152,6 +4157,7 @@ public final class Settings {
             PRIVATE_SETTINGS.add(ACCELEROMETER_ROTATION_ANGLES);
             PRIVATE_SETTINGS.add(LOCKSCREEN_ROTATION);
             PRIVATE_SETTINGS.add(VOLUME_LINK_NOTIFICATION);
+            PRIVATE_SETTINGS.add(VOLUME_BUTTON_FORCE_MEDIA);
         }
 
         /**
