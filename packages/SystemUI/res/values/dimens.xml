@@ -99,26 +99,26 @@
 
     <!-- Notification drawer tuning parameters (phone UI) -->
     <!-- Initial velocity of the shade when expanding on its own -->
-    <dimen name="self_expand_velocity">2000dp</dimen>
+    <dimen name="self_expand_velocity">4000dp</dimen>
     <!-- Initial velocity of the shade when collapsing on its own -->
-    <dimen name="self_collapse_velocity">2000dp</dimen>
+    <dimen name="self_collapse_velocity">4000dp</dimen>
     <!-- Minimum final velocity of gestures interpreted as expand requests -->
-    <dimen name="fling_expand_min_velocity">100dp</dimen>
+    <dimen name="fling_expand_min_velocity">200dp</dimen>
     <!-- Minimum final velocity of gestures interpreted as collapse requests -->
-    <dimen name="fling_collapse_min_velocity">100dp</dimen>
+    <dimen name="fling_collapse_min_velocity">200dp</dimen>
     <!-- Cap on contribution of x dimension of gesture to overall velocity -->
-    <dimen name="fling_gesture_max_x_velocity">200dp</dimen>
+    <dimen name="fling_gesture_max_x_velocity">400dp</dimen>
     <!-- Cap on overall resulting fling speed (s^-1) -->
-    <dimen name="fling_gesture_max_output_velocity">3000dp</dimen>
+    <dimen name="fling_gesture_max_output_velocity">6000dp</dimen>
 
     <!-- Minimum distance a fling must travel (anti-jitter) -->
-    <dimen name="fling_gesture_min_dist">20dp</dimen>
+    <dimen name="fling_gesture_min_dist">40dp</dimen>
 
     <!-- Minimum fraction of the display a gesture must travel, at any velocity, to qualify as a
          collapse request -->
-    <item type="dimen" name="collapse_min_display_fraction">10%</item>
+    <item type="dimen" name="collapse_min_display_fraction">20%</item>
     <!-- Minimum fraction of the display a gesture must travel to qualify as an expand request -->
-    <item type="dimen" name="expand_min_display_fraction">50%</item>
+    <item type="dimen" name="expand_min_display_fraction">100%</item>
 
     <!-- Initial acceleration of an expand animation after fling -->
     <dimen name="expand_accel">2000dp</dimen>
