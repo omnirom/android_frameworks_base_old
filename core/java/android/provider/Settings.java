@@ -2795,6 +2795,14 @@ public final class Settings {
         public static final String ACTIVE_DISPLAY_BYPASS = "active_display_bypass";
 
         /**
+         * Screen-On Notification Light
+         * 0 - disable, default
+         * 1 - enable
+         * @hide
+         */
+        public static final String SCREEN_ON_NOTIFICATION_LED = "screen_on_notification_led";
+
+        /**
          * @deprecated Use {@link android.provider.Settings.Global#LOW_BATTERY_SOUND}
          * instead
          * @hide
