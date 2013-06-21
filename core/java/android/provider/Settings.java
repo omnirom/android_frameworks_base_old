@@ -2662,6 +2662,11 @@ public final class Settings {
         public static final String BATTERY_AROUND_LOCKSCREEN_RING = "battery_around_lockscreen_ring";
 
         /**
+         * Whether national data Roming should be used.
+         */
+        public static final String MVNO_ROAMING = "mvno_roaming";
+
+        /**
          * Settings to backup. This is here so that it's in the same place as the settings
          * keys and easy to update.
          *
@@ -3494,6 +3499,13 @@ public final class Settings {
          * by network, gps, or other location providers.
          */
         public static final String ALLOW_MOCK_LOCATION = "mock_location";
+
+        /**
+         * Setting to allow the use of com.android.internal.telephony.SMSDispatcher#MockSmsReceiver
+         * to simulate the reception of SMS for testing purposes during application development.
+         * @hide
+         */
+         public static final String ALLOW_MOCK_SMS = "mock_sms";
 
         /**
          * A 64-bit number (as a hex string) that is randomly
@@ -4457,6 +4469,7 @@ public final class Settings {
         public static final String[] SETTINGS_TO_BACKUP = {
             BUGREPORT_IN_POWER_MENU,                            // moved to global
             ALLOW_MOCK_LOCATION,
+            ALLOW_MOCK_SMS,
             PARENTAL_CONTROL_ENABLED,
             PARENTAL_CONTROL_REDIRECT_URL,
             USB_MASS_STORAGE_ENABLED,                           // moved to global
@@ -6286,7 +6299,7 @@ public final class Settings {
          * @param context A context.
          * @param cursor A cursor pointing to the row whose title should be
          *        returned. The cursor must contain at least the {@link #TITLE}
-         *        and {@link #INTENT} columns.
+         *        and {@link #INTENT} columns.         * Settings to backup. This is here so that it's in the same place as the settings
          * @return A title that is localized and can be displayed to the user,
          *         or the empty string if one could not be found.
          */
