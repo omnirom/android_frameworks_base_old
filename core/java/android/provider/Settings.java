@@ -2662,6 +2662,11 @@ public final class Settings {
         public static final String BATTERY_AROUND_LOCKSCREEN_RING = "battery_around_lockscreen_ring";
 
         /**
+         * Whether national data Roming should be used.
+         */
+        public static final String MVNO_ROAMING = "mvno_roaming";
+
+        /**
          * Settings to backup. This is here so that it's in the same place as the settings
          * keys and easy to update.
          *
@@ -6286,7 +6291,7 @@ public final class Settings {
          * @param context A context.
          * @param cursor A cursor pointing to the row whose title should be
          *        returned. The cursor must contain at least the {@link #TITLE}
-         *        and {@link #INTENT} columns.
+         *        and {@link #INTENT} columns.         * Settings to backup. This is here so that it's in the same place as the settings
          * @return A title that is localized and can be displayed to the user,
          *         or the empty string if one could not be found.
          */
