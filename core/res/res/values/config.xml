@@ -1317,4 +1317,8 @@
     <integer name="config_deviceHardwareKeys">0</integer>
 
     <integer name="config_backKillTimeout">2000</integer>
+
+    <!-- True if the Irda service should be started at system start -->
+    <bool name="config_enableIrdaManagerService">false</bool>
+
 </resources>

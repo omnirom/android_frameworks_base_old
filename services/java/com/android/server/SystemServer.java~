@@ -832,7 +832,6 @@ class ServerThread {
             } catch (Throwable e) {
                 reportWtf("starting Print Service", e);
             }
-	  }
         }
 
         Settings.Secure.putInt(mContentResolver, Settings.Secure.ADB_PORT,
