@@ -795,7 +795,19 @@ class ServerThread {
                 }
             }
 
-            if (!disableNonCoreServices) {
+            if (!disableNonCoreServices) { 
+            if (context.getResources().getBoolean(
+                    com.android.internal.R.bool.config_enableIrdaManagerService)) {
+                try {
+                    Slog.i(TAG, "IrdaManager Service");
+                    ServiceManager.addService("irda", new IrdaManagerService(context));
+                } catch (Throwable e) {
+                    Slog.e(TAG, "Failure starting Irda Service", e);
+                }
+            }
+
+
+             if (!disableNonCoreServices) {
                 try {
                     Slog.i(TAG, "Assets Atlas Service");
                     atlas = new AssetAtlasService(context);
@@ -803,7 +815,8 @@ class ServerThread {
                 } catch (Throwable e) {
                     reportWtf("starting AssetAtlasService", e);
                 }
-            }
+             }
+            
 
             try {
                 Slog.i(TAG, "IdleMaintenanceService");
@@ -819,6 +832,7 @@ class ServerThread {
             } catch (Throwable e) {
                 reportWtf("starting Print Service", e);
             }
+	  }
         }
 
         Settings.Secure.putInt(mContentResolver, Settings.Secure.ADB_PORT,
