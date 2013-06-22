@@ -1795,4 +1795,7 @@
   <!-- Wifi -->
   <java-symbol type="bool" name="config_wifiApStartInterface" />
 
+  <!-- Irda Service -->
+  <java-symbol type="bool" name="config_enableIrdaManagerService" />
+
 </resources>
