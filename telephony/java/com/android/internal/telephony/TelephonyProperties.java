@@ -187,4 +187,10 @@ public interface TelephonyProperties
      * Ignore RIL_UNSOL_NITZ_TIME_RECEIVED completely, used for debugging/testing.
      */
     static final String PROPERTY_IGNORE_NITZ = "telephony.test.ignore.nitz";
+
+    /**
+     * Set to true to indicates support for simultaneous voice and EvDo.
+     */
+    static final String PROPERTY_SVDO = "ro.ril.svdo";
+
 }
