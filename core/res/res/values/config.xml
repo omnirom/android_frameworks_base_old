@@ -1141,5 +1141,8 @@
     <string-array name="config_disabledUntilUsedPreinstalledImes" translatable="false">
         <item>com.android.inputmethod.latin</item>
     </string-array>
+    
+    <!-- Disable the home key unlock setting -->
+    <bool name="config_disableHomeUnlockSetting">true</bool>
 
 </resources>
