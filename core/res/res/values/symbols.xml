@@ -1839,5 +1839,8 @@
   <!-- From Chromium-WebView -->
   <java-symbol type="attr" name="actionModeWebSearchDrawable" />
   <java-symbol type="string" name="websearch" />
+  
+  <!-- Lockscreen -->
+  <java-symbol type="bool" name="config_disableHomeUnlockSetting" />
 
 </resources>
