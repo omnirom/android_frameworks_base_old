@@ -636,8 +636,7 @@ public class LockPatternUtils {
             KeyStore keyStore = KeyStore.getInstance();
             if (password != null) {
                 if (userHandle == UserHandle.USER_OWNER) {
-                    // Update the encryption password.
-                    updateEncryptionPassword(password);
+                    // Encryption password is not updated here, allowing different passwords
 
                     // Update the keystore password
                     keyStore.password(password);
@@ -721,6 +720,28 @@ public class LockPatternUtils {
         } catch (RemoteException re) {
             // Cant do much
             Log.e(TAG, "Unable to save lock password " + re);
+        }
+    }
+
+    /**
+     * Saves a device encryption password.  Does not do any checking on complexity.
+     * @param password The password to save
+     */
+    public void saveEncryptionPassword(String password) {
+        saveEncryptionPassword(password, getCurrentOrCallingUserId());
+    }
+
+    /**
+     * Saves a device encryption password.  Does not do any checking on complexity.
+     * @param password The password to save
+     * @param userHandle The userId of the user to change the password for (must be owner!)
+     */
+    public void saveEncryptionPassword(String password, int userHandle) {
+        if (password != null) {
+            if (userHandle == UserHandle.USER_OWNER) {
+                // Update the encryption password.
+                updateEncryptionPassword(password);
+            }
         }
     }
 
