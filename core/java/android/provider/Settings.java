@@ -2493,7 +2493,7 @@ public final class Settings {
          */
         public static final String HEADSET_CONNECT_PLAYER = "headset_connect_player";
 
-        /*
+        /**
          * Whether the power menu reboot menu is enabled
          * @hide
          */
@@ -6049,6 +6049,12 @@ public final class Settings {
         public static final String LOW_BATTERY_SOUND_TIMEOUT = "low_battery_sound_timeout";
 
         /**
+         * Whether to include options in power menu for rebooting into recovery or bootloader
+         * @hide
+         */
+        public static final String ADVANCED_REBOOT = "advanced_reboot";
+
+        /**
          * Settings to backup. This is here so that it's in the same place as the settings
          * keys and easy to update.
          *
@@ -6079,7 +6085,8 @@ public final class Settings {
             WIFI_NUM_OPEN_NETWORKS_KEPT,
             EMERGENCY_TONE,
             CALL_AUTO_RETRY,
-            DOCK_AUDIO_MEDIA_ENABLED
+            DOCK_AUDIO_MEDIA_ENABLED,
+            ADVANCED_REBOOT
         };
 
         // Populated lazily, guarded by class object:
