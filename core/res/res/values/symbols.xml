@@ -1845,5 +1845,5 @@
 
   <java-symbol type="drawable" name="ic_lock_reboot" />
   <java-symbol type="string" name="global_action_reboot" />
-
+  <java-symbol type="array" name="shutdown_reboot_options" />
 </resources>
