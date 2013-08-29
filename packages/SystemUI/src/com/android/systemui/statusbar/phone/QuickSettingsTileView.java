@@ -16,6 +16,8 @@
 
 package com.android.systemui.statusbar.phone;
 
+import com.android.systemui.R;
+
 import android.content.Context;
 import android.util.AttributeSet;
 import android.view.LayoutInflater;
@@ -47,6 +49,11 @@ class QuickSettingsTileView extends FrameLayout {
 
     void setContent(int layoutId, LayoutInflater inflater) {
         inflater.inflate(layoutId, this);
+    }
+
+    void setLoading(boolean loading) {
+        findViewById(R.id.loading).setVisibility(loading ? View.VISIBLE : View.GONE);
+        findViewById(R.id.image).setVisibility(loading ? View.GONE : View.VISIBLE);
     }
 
     @Override
