@@ -29,6 +29,8 @@ import android.database.ContentObserver;
 import android.graphics.drawable.Drawable;
 import android.hardware.display.WifiDisplayStatus;
 import android.net.ConnectivityManager;
+import android.net.wifi.WifiManager;
+import android.net.wifi.WifiInfo;
 import android.os.Handler;
 import android.os.UserHandle;
 import android.provider.Settings;
@@ -216,8 +218,11 @@ class QuickSettingsModel implements BluetoothStateChangeCallback,
     private State mAirplaneModeState = new State();
 
     private QuickSettingsTileView mWifiTile;
+    private QuickSettingsTileView mWifiBackTile;
     private RefreshCallback mWifiCallback;
+    private RefreshCallback mWifiBackCallback;
     private WifiState mWifiState = new WifiState();
+    private WifiState mWifiBackState = new WifiState();
 
     private QuickSettingsTileView mWifiDisplayTile;
     private RefreshCallback mWifiDisplayCallback;
@@ -399,6 +404,11 @@ class QuickSettingsModel implements BluetoothStateChangeCallback,
         mWifiCallback = cb;
         mWifiCallback.refreshView(mWifiTile, mWifiState);
     }
+    void addWifiBackTile(QuickSettingsTileView view, RefreshCallback cb) {
+        mWifiBackTile = view;
+        mWifiBackCallback = cb;
+        mWifiCallback.refreshView(mWifiBackTile, mWifiBackState);
+    }
     // Remove the double quotes that the SSID may contain
     public static String removeDoubleQuotes(String string) {
         if (string == null) return null;
@@ -432,16 +442,44 @@ class QuickSettingsModel implements BluetoothStateChangeCallback,
             mWifiState.iconId = wifiSignalIconId;
             mWifiState.label = removeDoubleQuotes(enabledDesc);
             mWifiState.signalContentDescription = wifiSignalContentDescription;
+
+            mWifiBackState.iconId = wifiSignalIconId;
+            mWifiBackState.label = getWifiIpAddr();
+            mWifiBackState.signalContentDescription = wifiSignalContentDescription;
         } else if (wifiNotConnected) {
             mWifiState.iconId = R.drawable.ic_qs_wifi_0;
             mWifiState.label = r.getString(R.string.quick_settings_wifi_label);
             mWifiState.signalContentDescription = r.getString(R.string.accessibility_no_wifi);
+
+            mWifiBackState.iconId = wifiSignalIconId;
+            mWifiBackState.label = r.getString(R.string.quick_settings_wifi_label);
+            mWifiBackState.signalContentDescription = r.getString(R.string.accessibility_no_wifi);
         } else {
             mWifiState.iconId = R.drawable.ic_qs_wifi_no_network;
             mWifiState.label = r.getString(R.string.quick_settings_wifi_off_label);
             mWifiState.signalContentDescription = r.getString(R.string.accessibility_wifi_off);
+
+            mWifiBackState.iconId = mWifiState.iconId;
+            mWifiBackState.label = mWifiState.label;
+            mWifiBackState.signalContentDescription = mWifiState.signalContentDescription;
         }
         mWifiCallback.refreshView(mWifiTile, mWifiState);
+        mWifiBackCallback.refreshView(mWifiTile, mWifiBackState);
+    }
+
+    String getWifiIpAddr() {
+        WifiManager wifiManager = (WifiManager) mContext.getSystemService(Context.WIFI_SERVICE);
+        WifiInfo wifiInfo = wifiManager.getConnectionInfo();
+        int ip = wifiInfo.getIpAddress();
+
+        String ipString = String.format(
+            "%d.%d.%d.%d",
+            (ip & 0xff),
+            (ip >> 8 & 0xff),
+            (ip >> 16 & 0xff),
+            (ip >> 24 & 0xff));
+
+        return ipString;
     }
 
     boolean deviceHasMobileData() {
