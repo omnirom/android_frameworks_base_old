@@ -22,13 +22,17 @@ import android.content.Context;
 import android.graphics.drawable.Drawable;
 import android.util.AttributeSet;
 import android.view.LayoutInflater;
+import android.view.View;
 import android.widget.FrameLayout;
 import android.widget.ImageView;
+import android.widget.ProgressBar;
 import android.widget.TextView;
+
 
 class QuickSettingsBasicTile extends QuickSettingsTileView {
     private final TextView mTextView;
     private final ImageView mImageView;
+    private final ProgressBar mLoadingView;
 
     public QuickSettingsBasicTile(Context context) {
         this(context, null);
@@ -49,6 +53,7 @@ class QuickSettingsBasicTile extends QuickSettingsTileView {
                         FrameLayout.LayoutParams.MATCH_PARENT));
         mTextView = (TextView) findViewById(R.id.text);
         mImageView = (ImageView) findViewById(R.id.image);
+        mLoadingView = (ProgressBar) findViewById(R.id.loading);
     }
 
     @Override
@@ -78,5 +83,10 @@ class QuickSettingsBasicTile extends QuickSettingsTileView {
 
     public void setTextResource(int resId) {
         mTextView.setText(resId);
+    }
+
+    public void setLoading(boolean loading) {
+        mLoadingView.setVisibility(loading ? View.VISIBLE : View.GONE);
+        mImageView.setVisibility(loading ? View.GONE : View.VISIBLE);
     }
 }

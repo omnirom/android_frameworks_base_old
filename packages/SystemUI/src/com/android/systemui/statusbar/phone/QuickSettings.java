@@ -407,10 +407,17 @@ class QuickSettings {
 
     private void addSystemTiles(ViewGroup parent, LayoutInflater inflater) {
         // Wi-fi
-        final QuickSettingsBasicTile wifiTile
+        final QuickSettingsBasicTile wifiTileFront
                 = new QuickSettingsBasicTile(mContext);
+
+        final QuickSettingsBasicTile wifiTileBack
+                = new QuickSettingsBasicTile(mContext);
+
+        final QuickSettingsFlipTile wifiTile
+                = new QuickSettingsFlipTile(mContext, wifiTileFront, wifiTileBack);
+
         if (LONG_PRESS_TOGGLES) {
-            wifiTile.setOnLongClickListener(new View.OnLongClickListener() {
+            wifiTileFront.setOnLongClickListener(new View.OnLongClickListener() {
                 @Override
                 public boolean onLongClick(View v) {
                     startSettingsActivity(android.provider.Settings.ACTION_WIFI_SETTINGS);
@@ -419,7 +426,7 @@ class QuickSettings {
             });
         }
     
-        wifiTile.setOnClickListener(new View.OnClickListener() {
+        wifiTileFront.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
                 final boolean enable =
@@ -438,24 +445,45 @@ class QuickSettings {
                         return null;
                     }
                 }.execute();
-                wifiTile.setLoading(true);
-                wifiTile.setPressed(false);
+                wifiTileFront.setLoading(true);
+                wifiTileFront.setPressed(false);
             }} );
-        mModel.addWifiTile(wifiTile, new QuickSettingsModel.RefreshCallback() {
+
+        mModel.addWifiTile(wifiTileFront, new QuickSettingsModel.RefreshCallback() {
             private String mPreviousLabel = "";
 
             @Override
             public void refreshView(QuickSettingsTileView unused, State state) {
                 WifiState wifiState = (WifiState) state;
-                wifiTile.setImageResource(wifiState.iconId);
-                wifiTile.setText(wifiState.label);
-                wifiTile.setContentDescription(mContext.getString(
+                wifiTileFront.setImageResource(wifiState.iconId);
+                wifiTileFront.setText(wifiState.label);
+                wifiTileFront.setContentDescription(mContext.getString(
                         R.string.accessibility_quick_settings_wifi,
                         wifiState.signalContentDescription,
                         (wifiState.connected) ? wifiState.label : ""));
 
                 if (wifiState.label != null && !mPreviousLabel.equals(wifiState.label)) {
-                    wifiTile.setLoading(false);
+                    wifiTileFront.setLoading(false);
+                    mPreviousLabel = wifiState.label;
+                }
+            }
+        });
+
+        mModel.addWifiBackTile(wifiTileBack, new QuickSettingsModel.RefreshCallback() {
+            private String mPreviousLabel = "";
+
+            @Override
+            public void refreshView(QuickSettingsTileView unused, State state) {
+                WifiState wifiState = (WifiState) state;
+                wifiTileBack.setImageResource(wifiState.iconId);
+                wifiTileBack.setText(wifiState.label);
+                wifiTileBack.setContentDescription(mContext.getString(
+                        R.string.accessibility_quick_settings_wifi,
+                        wifiState.signalContentDescription,
+                        (wifiState.connected) ? wifiState.label : ""));
+
+                if (wifiState.label != null && !mPreviousLabel.equals(wifiState.label)) {
+                    wifiTileBack.setLoading(false);
                     mPreviousLabel = wifiState.label;
                 }
             }
