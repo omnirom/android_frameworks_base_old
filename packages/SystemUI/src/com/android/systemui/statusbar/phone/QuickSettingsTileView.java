@@ -51,11 +51,6 @@ class QuickSettingsTileView extends FrameLayout {
         inflater.inflate(layoutId, this);
     }
 
-    void setLoading(boolean loading) {
-        findViewById(R.id.loading).setVisibility(loading ? View.VISIBLE : View.GONE);
-        findViewById(R.id.image).setVisibility(loading ? View.GONE : View.VISIBLE);
-    }
-
     @Override
     public void setVisibility(int vis) {
         if (QuickSettings.DEBUG_GONE_TILES) {
