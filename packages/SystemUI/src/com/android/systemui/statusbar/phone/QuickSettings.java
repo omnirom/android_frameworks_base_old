@@ -40,6 +40,7 @@ import android.graphics.drawable.Drawable;
 import android.graphics.drawable.LevelListDrawable;
 import android.hardware.display.DisplayManager;
 import android.hardware.display.WifiDisplayStatus;
+import android.net.ConnectivityManager;
 import android.net.wifi.WifiManager;
 import android.os.AsyncTask;
 import android.os.Handler;
@@ -405,10 +406,18 @@ class QuickSettings {
 
     private void addSystemTiles(ViewGroup parent, LayoutInflater inflater) {
         // Wi-fi
-        final QuickSettingsBasicTile wifiTile
+        final QuickSettingsBasicTile wifiTileFront
                 = new QuickSettingsBasicTile(mContext);
+
+        final QuickSettingsBasicBackTile wifiTileBack
+                = new QuickSettingsBasicBackTile(mContext);
+
+        final QuickSettingsFlipTile wifiTile
+                = new QuickSettingsFlipTile(mContext, wifiTileFront, wifiTileBack);
+
+
         if (LONG_PRESS_TOGGLES) {
-            wifiTile.setOnLongClickListener(new View.OnLongClickListener() {
+            wifiTileFront.setOnLongClickListener(new View.OnLongClickListener() {
                 @Override
                 public boolean onLongClick(View v) {
                     startSettingsActivity(android.provider.Settings.ACTION_WIFI_SETTINGS);
@@ -417,7 +426,7 @@ class QuickSettings {
             });
         }
 
-        wifiTile.setOnClickListener(new View.OnClickListener() {
+        wifiTileFront.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
                 final boolean enable =
@@ -436,28 +445,55 @@ class QuickSettings {
                         return null;
                     }
                 }.execute();
-                wifiTile.setLoading(true);
-                wifiTile.setPressed(false);
+                wifiTileFront.setLoading(true);
+                wifiTileFront.setPressed(false);
             }} );
+
         mModel.addWifiTile(wifiTile, new NetworkActivityCallback() {
             private String mPreviousLabel = "";
 
             @Override
             public void refreshView(QuickSettingsTileView view, State state) {
                 WifiState wifiState = (WifiState) state;
-                ImageView iv = (ImageView) view.findViewById(R.id.image);
-                iv.setImageResource(wifiState.iconId);
-                setActivity(view, wifiState);
-                TextView tv = (TextView) view.findViewById(R.id.text);
-                tv.setText(wifiState.label);
-                wifiTile.setContentDescription(mContext.getString(
+                wifiTileFront.setImageResource(wifiState.iconId);
+                wifiTileFront.setText(wifiState.label);
+                wifiTileFront.setContentDescription(mContext.getString(
                         R.string.accessibility_quick_settings_wifi,
                         wifiState.signalContentDescription,
                         (wifiState.connected) ? wifiState.label : ""));
 
                 if (wifiState.label != null && !mPreviousLabel.equals(wifiState.label)) {
-                    wifiTile.setLoading(false);
+                    wifiTileFront.setLoading(false);
                     mPreviousLabel = wifiState.label;
+                }
+            }
+        });
+
+        final ConnectivityManager cm =
+                (ConnectivityManager) mContext.getSystemService(Context.CONNECTIVITY_SERVICE);
+        wifiTileBack.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                if (cm.getTetherableWifiRegexs().length != 0) {
+                    Intent intent = new Intent();
+                        intent.setComponent(new ComponentName(
+                                "com.android.settings",
+                                "com.android.settings.Settings$TetherSettingsActivity"));
+                        startSettingsActivity(intent);
+                }
+            }} );
+
+        mModel.addWifiBackTile(wifiTileBack, new QuickSettingsModel.RefreshCallback() {
+            @Override
+            public void refreshView(QuickSettingsTileView unused, State state) {
+                WifiState wifiState = (WifiState) state;
+                wifiTileBack.setImageResource(wifiState.iconId);
+                wifiTileBack.setLabel(wifiState.label);
+                if (cm.getTetherableWifiRegexs().length != 0) {
+                    wifiTileBack.setFunction(
+                        mContext.getString(R.string.quick_settings_wifi_tethering_label));
+                } else {
+                    wifiTileBack.setFunction("");
                 }
             }
         });
@@ -592,10 +628,17 @@ class QuickSettings {
         // Bluetooth
         if (mModel.deviceSupportsBluetooth()
                 || DEBUG_GONE_TILES) {
-            final QuickSettingsBasicTile bluetoothTile
+            final QuickSettingsBasicTile bluetoothTileFront
                     = new QuickSettingsBasicTile(mContext);
+
+            final QuickSettingsBasicBackTile bluetoothTileBack
+                    = new QuickSettingsBasicBackTile(mContext);
+
+            final QuickSettingsFlipTile bluetoothTile
+                    = new QuickSettingsFlipTile(mContext, bluetoothTileFront, bluetoothTileBack);
+
             if (LONG_PRESS_TOGGLES) {
-                bluetoothTile.setOnLongClickListener(new View.OnLongClickListener() {
+                bluetoothTileFront.setOnLongClickListener(new View.OnLongClickListener() {
                     @Override
                     public boolean onLongClick(View v) {
                         startSettingsActivity(android.provider.Settings.ACTION_BLUETOOTH_SETTINGS);
@@ -603,7 +646,7 @@ class QuickSettings {
                     }
                 });
             }
-            bluetoothTile.setOnClickListener(new View.OnClickListener() {
+            bluetoothTileFront.setOnClickListener(new View.OnClickListener() {
                 @Override
                 public void onClick(View v) {
                     if (mBluetoothAdapter.isEnabled()) {
@@ -611,38 +654,66 @@ class QuickSettings {
                     } else {
                         mBluetoothAdapter.enable();
                     }
-                    bluetoothTile.setPressed(false);
-                    bluetoothTile.setLoading(true);
+                    bluetoothTileFront.setPressed(false);
+                    bluetoothTileFront.setLoading(true);
                 }});
-            mModel.addBluetoothTile(bluetoothTile, new QuickSettingsModel.RefreshCallback() {
+            bluetoothTileBack.setOnClickListener(new View.OnClickListener() {
+                @Override
+                public void onClick(View v) {
+                    if (!mBluetoothAdapter.isEnabled()) {
+                        return;
+                    }
+
+                    if (mBluetoothAdapter.getScanMode() 
+                        != BluetoothAdapter.SCAN_MODE_CONNECTABLE_DISCOVERABLE) {
+                        mBluetoothAdapter.setScanMode(
+                            BluetoothAdapter.SCAN_MODE_CONNECTABLE_DISCOVERABLE, 300);
+                        bluetoothTileBack.setFunction(
+                                mContext.getString(R.string.quick_settings_bluetooth_discoverable_label));
+                    } else {
+                        mBluetoothAdapter.setScanMode(
+                            BluetoothAdapter.SCAN_MODE_CONNECTABLE, 300);
+                        bluetoothTileBack.setFunction(
+                                mContext.getString(R.string.quick_settings_bluetooth_not_discoverable_label));
+                    }
+                }
+            });
+            mModel.addBluetoothTile(bluetoothTileFront, new QuickSettingsModel.RefreshCallback() {
                 private boolean mPreviousState = false;
 
                 @Override
                 public void refreshView(QuickSettingsTileView unused, State state) {
                     BluetoothState bluetoothState = (BluetoothState) state;
-                    bluetoothTile.setImageResource(state.iconId);
+                    bluetoothTileFront.setImageResource(state.iconId);
 
-                    /*
-                    Resources r = mContext.getResources();
-                    //TODO: Show connected bluetooth device label
-                    Set<BluetoothDevice> btDevices =
-                            mBluetoothController.getBondedBluetoothDevices();
-                    if (btDevices.size() == 1) {
-                        // Show the name of the bluetooth device you are connected to
-                        label = btDevices.iterator().next().getName();
-                    } else if (btDevices.size() > 1) {
-                        // Show a generic label about the number of bluetooth devices
-                        label = r.getString(R.string.quick_settings_bluetooth_multiple_devices_label,
-                                btDevices.size());
-                    }
-                    */
-                    bluetoothTile.setContentDescription(mContext.getString(
+                    bluetoothTileFront.setContentDescription(mContext.getString(
                             R.string.accessibility_quick_settings_bluetooth,
                             bluetoothState.stateContentDescription));
-                    bluetoothTile.setText(state.label);
+                    bluetoothTileFront.setText(state.label);
                     if (mPreviousState != state.enabled) {
-                        bluetoothTile.setLoading(false);
+                        bluetoothTileFront.setLoading(false);
                         mPreviousState = state.enabled;
+                    }
+                }
+            });
+            mModel.addBluetoothBackTile(bluetoothTileBack, new QuickSettingsModel.RefreshCallback() {
+                @Override
+                public void refreshView(QuickSettingsTileView unused, State state) {
+                    BluetoothState bluetoothState = (BluetoothState) state;
+                    bluetoothTileBack.setImageResource(state.iconId);
+
+                    bluetoothTileBack.setContentDescription(mContext.getString(
+                            R.string.accessibility_quick_settings_bluetooth,
+                            bluetoothState.stateContentDescription));
+                    bluetoothTileBack.setLabel(state.label);
+
+                    if (mBluetoothAdapter.getScanMode() 
+                        == BluetoothAdapter.SCAN_MODE_CONNECTABLE_DISCOVERABLE) {
+                        bluetoothTileBack.setFunction(
+                            mContext.getString(R.string.quick_settings_bluetooth_discoverable_label));
+                    } else {
+                        bluetoothTileBack.setFunction(
+                            mContext.getString(R.string.quick_settings_bluetooth_not_discoverable_label));
                     }
                 }
             });
