@@ -46,6 +46,7 @@ import com.android.server.power.ShutdownThread;
 
 import android.Manifest;
 import android.app.ActivityManager.StackBoxInfo;
+import android.app.ActivityManager;
 import android.app.ActivityManagerNative;
 import android.app.IActivityManager;
 import android.app.StatusBarManager;
@@ -151,6 +152,7 @@ import java.util.Date;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Iterator;
+import java.util.Map;
 import java.util.List;
 
 /** {@hide} */
@@ -796,6 +798,8 @@ public class WindowManagerService extends IWindowManager.Stub
 
         // Add ourself to the Watchdog monitors.
         Watchdog.getInstance().addMonitor(this);
+
+        setupSplitView();
 
         SurfaceControl.openTransaction();
         try {
@@ -9889,7 +9893,31 @@ public class WindowManagerService extends IWindowManager.Stub
 
             if (DEBUG_FOCUS_LIGHT) Slog.v(TAG, "findFocusedWindow: Found new focus @ " + i +
                         " = " + win);
-            return win;
+
+            // Dispatch to this window if it is wants key events.
+            if (win.canReceiveKeys()) {
+                if (mFocusedApp != null) {
+                    SplitViewTaskInfo splitTaskInfo = getSplitInfo(mFocusedApp.token);
+
+                    if (splitTaskInfo != null && splitTaskInfo.taskType > SPLIT_TASK_FULLSCREEN) {
+                        if ((mTaskTouched != null && mTaskTouched.equals(mFocusedApp.token))
+                            || mTaskTouched == null) {
+                            if (DEBUG_FOCUS) Slog.v(
+                                TAG, "Found focus @ " + i + " = " + win);
+                            return win;
+                        } else {
+                            if (DEBUG_FOCUS || localLOGV) Slog.v(
+                                TAG, "Task " + win + " is split, but not last touched");
+                        }
+                    } else {
+                        if (DEBUG_FOCUS) Slog.v(TAG, "Task " + win + " has no split token");
+                        return win;
+                    }
+                } else {
+                    if (DEBUG_FOCUS) Slog.v(TAG, "Null thisApp");
+                    return win;
+                }
+            }
         }
 
         if (DEBUG_FOCUS_LIGHT) Slog.v(TAG, "findFocusedWindow: No focusable windows.");
@@ -10886,4 +10914,528 @@ public class WindowManagerService extends IWindowManager.Stub
     public void addSystemUIVisibilityFlag(int flag) {
         mLastStatusBarVisibility |= flag;
     }
+
+    /** SPLIT VIEW **/
+
+    // Full-screen app
+    private final static int SPLIT_TASK_FULLSCREEN = -1;
+    // Main front app
+    private final static int SPLIT_TASK_MAIN = 0;
+    // Side front app
+    private final static int SPLIT_TASK_SIDE = 1;
+
+    // Folded card width in pixels
+    private final static int FOLDED_CARD_WIDTH = 30;
+    // Unfolded card width in pixels
+    private final static int UNFOLDED_CARD_WIDTH = 120;
+    // Unfold drift (overlap) in pixels
+    private final static int UNFOLDED_CARD_DRIFT = 40;
+
+    private int mSplitViewTasks[];
+    private SplitViewTaskInfo mMainTask;
+    private List<SplitViewTaskInfo> mSplitTaskStack;
+    private List<Integer> mSplitTaskRenderOrder;
+    private IBinder mTaskTouched;
+    private Rect mSplitViewRect = new Rect();
+
+    // true = cards are folded, false = cards are unfolded
+    private boolean mIsStackFolded;
+
+    public class SplitViewTaskInfo {
+        // The tokens of the windows of this split view task
+        public List<IBinder> tokens = new ArrayList<IBinder>();
+
+        // The task id of this split view task
+        public int taskId;
+
+        // One of SPLIT_TASK_...
+        public int taskType;
+    }
+
+    private void setupSplitView() {
+        mSplitViewTasks = new int[2];
+        mSplitTaskStack = new ArrayList<SplitViewTaskInfo>();
+        mSplitTaskRenderOrder = new ArrayList<Integer>();
+        mIsStackFolded = true;
+    }
+
+    public List<Integer> getSplitTaskRenderOrder() {
+        return mSplitTaskRenderOrder;
+    }
+
+    /**
+     * Returns a SplitViewTaskInfo for the provided token, or null if
+     * the token isn't in split view mode.
+     */
+    public SplitViewTaskInfo getSplitInfo(IBinder token) {
+        for (SplitViewTaskInfo taskInfo : mSplitTaskStack) {
+            if (taskInfo.tokens.contains(token)) {
+                return taskInfo;
+            }
+        }
+
+        return null;
+    }
+
+    /**
+     * Returns a SplitViewTaskInfo for the provided task id, or null if
+     * the task isn't in split view mode.
+     */
+    public SplitViewTaskInfo getSplitInfo(int taskId) {
+        for (SplitViewTaskInfo taskInfo : mSplitTaskStack) {
+            if (taskInfo.taskId == taskId) {
+                return taskInfo;
+            }
+        }
+
+        return null;
+    }
+
+    /**
+     * Prunes fullscreen activities from the split task stack,
+     * and make sure the main app and the front side app are at
+     * the top of the stack.
+     */
+    public void reorganizeSplitTaskStack() {
+        int index = 0;
+        for (SplitViewTaskInfo taskInfo : mSplitTaskStack) {
+            Log.e(TAG, "XPLOD/ Checking task id " + taskInfo.taskId);
+
+            if (taskInfo.taskType == SPLIT_TASK_FULLSCREEN) {
+                Log.e(TAG, "XPLOD/ ==> Task is FULLSCREEN, pruning!");
+                mSplitTaskStack.remove(index);
+                // Restart reorganization
+                reorganizeSplitTaskStack();
+                return;
+            }
+            else if (taskInfo.taskType == SPLIT_TASK_MAIN && index != 0) {
+                Log.e(TAG, "XPLOD/ ==> Task is TASK_MAIN and not at index 0!");
+                mSplitTaskStack.remove(index);
+                mSplitTaskStack.add(0, taskInfo);
+                // Restart reorganization
+                reorganizeSplitTaskStack();
+                return;
+            }
+
+            ++index;
+        }
+    }
+
+    public void wakeUpAndUpdateSplitTasks() {
+        Log.e(TAG, "XPLOD_TRACE/ Wake Up And Update Split Tasks (folded=" + mIsStackFolded + ")");
+
+        final long origId = Binder.clearCallingIdentity();
+
+        // Two rules here:
+        // - If we are in folded status, the main activity (task index 0 in our
+        //   stack) should be above everything, and the side stack rendered/awaken
+        //   from bottom to top.
+        // - When unfolded, apps on the side stack might (and will) overlap the main
+        //   activity, so it must be rendered first.
+        int lastIndexFor = 0;
+
+        mSplitTaskRenderOrder.clear();
+
+        if (!mIsStackFolded) {
+            lastIndexFor = 1;
+            //moveTaskAndActivityToFront(mSplitTaskStack.get(0).taskId);
+            mSplitTaskRenderOrder.add(mSplitTaskStack.get(0).taskId);
+
+            try {
+                IBinder token = mActivityManager.getActivityForTask(mSplitTaskStack.get(0).taskId, false);
+
+                WindowToken winToken = mTokenMap.get(token);
+
+                Log.e("XPLOD_TRACE", "There are " + winToken.windows.size() + " windows!");
+
+                for (WindowState state : winToken.windows) {
+                    WindowManager.LayoutParams lp = state.getAttrs();
+                    lp.x = 300;
+                    state.showLw(true, true);
+                }
+            } catch (RemoteException e) {
+                Log.e(TAG, "Cannot retrieve activity token for task " + mSplitTaskStack.get(0).taskId, e);
+            }
+        }
+
+        for (int i = mSplitTaskStack.size()-1; i >= lastIndexFor; i--) {
+            //moveTaskAndActivityToFront(mSplitTaskStack.get(i).taskId);
+            mSplitTaskRenderOrder.add(mSplitTaskStack.get(i).taskId);
+
+            try {
+                IBinder token = mActivityManager.getActivityForTask(mSplitTaskStack.get(i).taskId, false);
+
+                WindowToken winToken = mTokenMap.get(token);
+
+                Log.e("XPLOD_TRACE", "There are " + winToken.windows.size() + " windows!");
+
+                for (WindowState state : winToken.windows) {
+                    WindowManager.LayoutParams lp = state.getAttrs();
+                    lp.x = 300;
+                    state.showLw(true, true);
+                    state.mDisplayContent.layoutNeeded = true;
+                    updateFocusedWindowLocked(UPDATE_FOCUS_WILL_PLACE_SURFACES,
+                        false /*updateInputWindows*/);
+                    performLayoutAndPlaceSurfacesLocked();
+                    if (state.mAppToken != null) {
+                        state.mAppToken.updateReportedVisibilityLocked();
+                    }
+                }
+            } catch (RemoteException e) {
+                Log.e(TAG, "Cannot retrieve activity token for task " + mSplitTaskStack.get(i).taskId, e);
+            }
+        }
+
+        notifyWindowsChanged();
+        //performLayoutAndPlaceSurfacesLocked();
+
+        /*try {
+            mActivityManager.notifySplitViewLayoutChanged();
+        } catch (RemoteException e) {
+            Log.e(TAG, "Unable to notify split view layout changed", e);
+        }*/
+        
+        Binder.restoreCallingIdentity(origId);
+    }
+
+    // see wakeUpAndUpdateSplitTasks
+    private void moveTaskAndActivityToFront(int taskId) {
+        try {
+            moveTaskToTop(taskId);
+            mActivityManager.moveTaskToFront(taskId, 0, null);
+            Log.e("XPLOD", "Moving activity " + taskId + " to front");
+        } catch (RemoteException e) {
+            Log.e(TAG, "Cannot move the activity to front", e);
+        }
+    }
+
+    /**
+     * Returns whether or not the provided taskId is the front
+     * task of the main or side stack
+     */
+    private boolean isSplitTaskFront(int taskId) {
+        // Check top task (if any)
+        if (mSplitTaskStack.size() == 0) return false;
+        SplitViewTaskInfo taskInfo = mSplitTaskStack.get(0);
+        if (taskInfo.taskId == taskId) return true;
+
+        // Check second task
+        if (mSplitTaskStack.size() == 1) return false;
+        taskInfo = mSplitTaskStack.get(1);
+        if (taskInfo.taskId == taskId) return true;
+
+        // The mSplitTaskStack variable is ordered:
+        // [Main Task] [Front Side Task] [Other Side Task]..
+        // so if the task isn't the first or second element of the list,
+        // then it's not a front task on the main or side stack.
+        return false;
+    }
+
+    /**
+     * Returns whether or not the provided token is the front
+     * task of the main or side stack
+     */
+    private boolean isSplitTaskFront(IBinder token) {
+        SplitViewTaskInfo taskInfo = getSplitInfo(token);
+        return isSplitTaskFront(taskInfo.taskId);
+    }
+
+    public void moveSideTaskToFront(IBinder token) {
+        int index = 0;
+        for (SplitViewTaskInfo taskInfo : mSplitTaskStack) {
+            if (taskInfo.tokens.contains(token)) {
+                mSplitTaskStack.remove(index);
+                mSplitTaskStack.add(1, taskInfo);
+                break;
+            }
+
+            ++index;
+        }
+    }
+
+    /**
+     * Returns whether or not the provided taskId is in split view mode
+     * or not. Remember that the taskId is shared between all activities
+     * of an app, thus children activities from the root one shares the
+     * same taskId.
+     *
+     * @param taskId The task id of the activity
+     * @return True if the task is in split view mode
+     */
+    public boolean isTaskSplitView(int taskId) {
+        SplitViewTaskInfo taskInfo = getSplitInfo(taskId);
+        return ((taskInfo != null) && (taskInfo.taskType > SPLIT_TASK_FULLSCREEN));
+    }
+
+    /**
+     * Sets whether or not a task should be in split view or not. The
+     * update only occurs when activities performs a resume or restart
+     * operation.
+     *
+     * @param taskId The task id of the activity
+     * @param split True to enable split mode, false otherwise
+     */
+    public void setTaskSplitView(int taskId, boolean split) {
+        SplitViewTaskInfo taskInfo = getSplitInfo(taskId);
+        if (taskInfo == null) {
+            taskInfo = new SplitViewTaskInfo();
+            taskInfo.taskId = taskId;
+            mSplitTaskStack.add(taskInfo);
+            mSplitTaskRenderOrder.add(taskId);
+            Log.e("XPLOD", "Task added: " + taskId + " in slot " + (mSplitTaskStack.size()-1));
+        }
+
+        if (split) {
+            if (mMainTask == null) {
+                // We have no main task yet, set this app as the main
+                mMainTask = taskInfo;
+                taskInfo.taskType = SPLIT_TASK_MAIN;
+            } else {
+                taskInfo.taskType = SPLIT_TASK_SIDE;
+            }
+        } else {
+            if (taskInfo.taskType == SPLIT_TASK_MAIN) {
+                mMainTask = null;
+            }
+            taskInfo.taskType = SPLIT_TASK_FULLSCREEN;
+        }
+
+        try {
+            IBinder token = mActivityManager.getActivityForTask(taskId, false);
+            if (!taskInfo.tokens.contains(token)) {
+                taskInfo.tokens.add(token);
+            }
+        } catch (RemoteException e) {
+            Log.e(TAG, "Cannot retrieve activity token for task " + taskId, e);
+        }
+
+        wakeUpAndUpdateSplitTasks();
+    }
+
+    /**
+     * Notifies the WindowManager that the provided token is split
+     * or not. This is useful because children activities don't share
+     * the same token, so Activity can notify the window token is split
+     * as well based on the taskId it reads during performRestart.
+     *
+     * @param token The activity token
+     * @param split True if the token should be split
+     */
+    public void setTaskChildSplit(int taskId, IBinder token, boolean split) {
+        SplitViewTaskInfo taskInfo = getSplitInfo(taskId);
+
+        if (taskInfo != null) {
+            if (!taskInfo.tokens.contains(token)) {
+                taskInfo.tokens.add(token);
+            }
+
+            if (!split) {
+                taskInfo.taskType = SPLIT_TASK_FULLSCREEN;
+            } else if (taskInfo == mMainTask) {
+                taskInfo.taskType = SPLIT_TASK_MAIN;
+            } else {
+                taskInfo.taskType = SPLIT_TASK_SIDE;
+            }
+        } else {
+            Log.e(TAG, "XPLOD_EARLY/ Cannot find taskInfo for task " + taskId + " that reported a new activity token");
+        }
+    }
+
+    /**
+     * Notifies that the provided activity token has been touched, and
+     * sets the focus to that activity, and move it to the front so it
+     * gets updated properly.
+     *
+     * @param token The activity token
+     * @param force Set this to true to force the focus update even if the
+     *              application was already focused
+     */
+    public void notifyActivityTouched(IBinder token, boolean force) {
+        if (!isSplitTaskFront(token)) {
+            Log.e(TAG, "XPLOD_TRACE/ notifyActivityTouched: Touched a non-front split task");
+            if (mIsStackFolded) {
+                // Side stack was folded, unfold it as we touched a back activity
+                Log.e(TAG, "XPLOD_TRACE/ notifyActivityTouched: Set folding status to FALSE");
+                mIsStackFolded = false;
+                // Update views/windows
+                wakeUpAndUpdateSplitTasks();
+            } else {
+                // Side stack was unfolded and we touched a non-front activity, put it to front
+                // and fold it back
+                Log.e(TAG, "XPLOD_TRACE/ notifyActivityTouched: Set folding status to TRUE and moving touched window to front!");
+                moveSideTaskToFront(token);
+                mIsStackFolded = true;
+                // Update views/windows
+                wakeUpAndUpdateSplitTasks();
+            }
+        } else {
+            mTaskTouched = token;
+            synchronized(mWindowMap) {
+                boolean changed = false;
+                if (token != null) {
+                    AppWindowToken newFocus = findAppWindowToken(token);
+                    if (newFocus == null) {
+                        Slog.w(TAG, "Attempted to set focus to non-existing app token: " + token);
+                        return;
+                    }
+                    changed = mFocusedApp != newFocus;
+                    mFocusedApp = newFocus;
+                    if (changed || force) {
+                        if (DEBUG_FOCUS) Slog.v(TAG, "Changed app focus to " + token);
+                        mInputMonitor.setFocusedAppLw(newFocus);
+                    }
+                }
+
+                if (changed || force) {
+                    final long origId = Binder.clearCallingIdentity();
+                    updateFocusedWindowLocked(UPDATE_FOCUS_NORMAL, true);
+                    mH.removeMessages(H.REPORT_FOCUS_CHANGE);
+                    mH.sendEmptyMessage(H.REPORT_FOCUS_CHANGE);
+                    Binder.restoreCallingIdentity(origId);
+                }
+            }
+
+            // We only move the activity to front if it's not already the focused app.
+            // Not doing so causes a huge lag when opening an app in split view, because
+            // it is moved to front while starting.
+            if (!force) {
+                final long origId = Binder.clearCallingIdentity();
+                try {
+                    mActivityManager.moveTaskToFront(mActivityManager.getTaskForActivity(token, false), 0, null);
+                    //Log.e("XPLOD", "Moved activity to front because TOUCH!");
+                } catch (RemoteException e) {
+                    Log.e(TAG, "Cannot move the activity to front", e);
+                }
+                Binder.restoreCallingIdentity(origId);
+            }
+        }
+    }
+
+    public void setSplitViewRect(int l, int t, int r, int b) {
+        Log.e("XPLOD", "Set split view rect ("+l+","+t+","+r+","+b+")");
+        mSplitViewRect.left = l;
+        mSplitViewRect.top = t;
+        mSplitViewRect.right = r;
+        mSplitViewRect.bottom = b;
+    }
+
+    /**
+     * Computes and return the final window metrics for the provided
+     * taskId.
+     * If the task isn't split, the full screen size is returned.
+     *
+     * @param taskId The id of the task
+     * @return A rect of the final window metrics
+     */
+    public Rect getSplitViewRect(int taskId) {
+        Log.e("XPLOD", "Debug Activity " + taskId + " asked for split view rect");
+
+        // TODO: Move me only when it matters
+        reorganizeSplitTaskStack();
+
+        // TODO(multidisplay): For now, apply Configuration to main screen only.
+        final DisplayContent displayContent = getDefaultDisplayContentLocked();
+
+        // Use the effective "visual" dimensions based on current rotation
+        final boolean rotated = (mRotation == Surface.ROTATION_90
+                || mRotation == Surface.ROTATION_270);
+        final int realdw = rotated ?
+                displayContent.mBaseDisplayHeight : displayContent.mBaseDisplayWidth;
+        final int realdh = rotated ?
+                displayContent.mBaseDisplayWidth : displayContent.mBaseDisplayHeight;
+        final boolean nativeLandscape =
+                (displayContent.mBaseDisplayHeight < displayContent.mBaseDisplayWidth);
+
+        int dw = realdw;
+        int dh = realdh;
+
+        // Get application display metrics.
+        int appWidth = mPolicy.getNonDecorDisplayWidth(dw, dh, mRotation);
+        int appHeight = mPolicy.getNonDecorDisplayHeight(dw, dh, mRotation);
+
+        SplitViewTaskInfo taskInfo = getSplitInfo(taskId);
+
+        if (taskInfo == null) {
+            Log.e(TAG, "XPLOD_EARLY/ Getting split view rect for task " + taskId + " but I have no idea what this app is! Returning fullscreen");
+            return new Rect(0, 0, appWidth, appHeight);
+        }
+
+
+        /** XPLOD TODO:
+         **  - Leave some room for folded/unfolded activities
+         **  - Detect tap on folded part of the screen
+         **  - Unfold on tap (animations + move ALL activities(!))
+         **/
+
+        // Current positionning policy: main task has 50% of the screen,
+        // side apps have 50% minus the space needed for folded apps.
+        // In case apps are unfolded, apps back in the side stack might
+        // overlap/drift above the main (left) app.
+        // Please note that all calculations are done with a LANDSCAPE
+        // viewport, so we have apps on left and right (not top and bottom).
+        // Rotation is done afterwards when returning the Rect
+        if (taskInfo.taskType == SPLIT_TASK_MAIN) {
+            if (nativeLandscape ^ rotated) {
+                return new Rect(0, 0, appWidth/2, appHeight);
+            } else {
+                return new Rect(0, 0, appWidth, appHeight/2);
+            }
+        } else if (taskInfo.taskType == SPLIT_TASK_SIDE) {
+            int driftRight = 0, driftLeft = 0;
+
+            // Drift cards
+            // TODO: Simplify this logic
+            if (mIsStackFolded) {
+                if (isSplitTaskFront(taskInfo.taskId)) {
+                    // We compute the total size of the back stack depth (minus this
+                    // front activity) so that, according to the positionning policy,
+                    // we shift the right stack and leave 50% to the main app at all time
+
+                    // From here, we are on the side, so we assume we have at least 2 tasks in
+                    // the stack.
+                    if (mSplitTaskStack.size() < 2) {
+                        throw new RuntimeException("We're positionning the side app, but we have less than 2 apps in the stack!");
+                    }
+                    int totalBackDepth = mSplitTaskStack.size() - 2;
+                    driftLeft = FOLDED_CARD_WIDTH * totalBackDepth;
+
+                    Log.e(TAG, "XPLOD_LAYOUT/ Layouting front side task " + taskInfo.taskId + " with " + driftLeft + "/" + driftRight + " drift");
+                } else {
+                    int cardDepth = mSplitTaskStack.indexOf(taskInfo) - 1;
+                    driftRight = -FOLDED_CARD_WIDTH * cardDepth;
+
+                    Log.e(TAG, "XPLOD_LAYOUT/ Layouting back side task " + taskInfo.taskId + " with " + driftLeft + "/" + driftRight + " drift");
+                }
+            } else {
+                // When cards are unfolded, we overlap on the main (left) app/card
+                if (isSplitTaskFront(taskInfo.taskId)) {
+                    if (mSplitTaskStack.size() < 2) {
+                        throw new RuntimeException("We're positionning the side app, but we have less than 2 apps in the stack!");
+                    }
+                    int totalBackDepth = mSplitTaskStack.size() - 2;
+                    driftLeft = FOLDED_CARD_WIDTH * totalBackDepth;
+
+                    Log.e(TAG, "XPLOD_LAYOUT/ Layouting front side task " + taskInfo.taskId + " with " + driftLeft + "/" + driftRight + " drift");
+                } else {
+                    int cardDepth = mSplitTaskStack.indexOf(taskInfo) - 1;
+                    driftRight = -UNFOLDED_CARD_WIDTH/2 * cardDepth;
+                    driftLeft = -UNFOLDED_CARD_WIDTH/2 * cardDepth;
+
+                    Log.e(TAG, "XPLOD_LAYOUT/ Layouting back side task " + taskInfo.taskId + " with " + driftLeft + "/" + driftRight + " drift");
+                }
+            }
+
+            if (nativeLandscape ^ rotated) {
+                return new Rect(appWidth/2 + driftLeft, 0, appWidth + driftRight, appHeight);
+            } else {
+                return new Rect(0, appHeight/2 + driftLeft, appWidth, appHeight + driftRight);
+            }
+        } else {
+            Log.e(TAG, "XPLOD_EARLY/ Getting split view rect for task " + taskId + " but it's not split main or side! (" + taskInfo.taskType + ") Returning fullscreen");
+            return new Rect(0, 0, appWidth, appHeight);
+        }
+
+    }
+
+    /** END SPLIT VIEW **/
 }
