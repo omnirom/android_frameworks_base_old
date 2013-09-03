@@ -6246,6 +6246,29 @@ public final class ActivityManagerService  extends ActivityManagerNative
         return -1;
     }
 
+    public IBinder getActivityForTask(int task, boolean onlyRoot) {
+        synchronized(this) {
+            return getActivityForTaskLocked(task, onlyRoot);
+        }
+    }
+
+    IBinder getActivityForTaskLocked(int task, boolean onlyRoot) {
+        final int N = mMainStack.mHistory.size();
+        TaskRecord lastTask = null;
+        for (int i=0; i<N; i++) {
+            ActivityRecord r = (ActivityRecord)mMainStack.mHistory.get(i);
+            if (r.task.taskId == task) {
+                if (!onlyRoot || lastTask != r.task) {
+                    return r.appToken;
+                }
+                return null;
+            }
+            lastTask = r.task;
+        }
+
+        return null;
+    }
+
     // =========================================================
     // THUMBNAILS
     // =========================================================
