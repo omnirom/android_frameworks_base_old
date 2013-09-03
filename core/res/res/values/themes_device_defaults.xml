@@ -555,4 +555,16 @@ easier.
     <style name="Theme.DeviceDefault.Dialog.NoFrame" parent="Theme.Holo.Dialog.NoFrame">
     </style>
 
+    <style name="Theme.DeviceDefault.SplitView">
+        <item name="android:windowIsFloating">false</item>
+        <item name="android:windowIsTranslucent">true</item>
+        <item name="android:windowFrame">@null</item>
+        <item name="android:windowContentOverlay">@null</item>
+        <item name="android:windowAnimationStyle">@android:style/Animation.Dialog</item>
+        <item name="android:windowActionModeOverlay">true</item>
+        <item name="android:windowCloseOnTouchOutside">true</item>
+        <item name="android:windowFullscreen">false</item>
+        <item name="android:windowSoftInputMode">stateAlwaysHidden|adjustPan</item>
+    </style>
+
 </resources>

@@ -37,6 +37,7 @@ import android.content.res.TypedArray;
 import android.database.Cursor;
 import android.graphics.Bitmap;
 import android.graphics.Canvas;
+import android.graphics.Rect;
 import android.graphics.drawable.Drawable;
 import android.media.AudioManager;
 import android.net.Uri;
@@ -55,6 +56,7 @@ import android.text.TextUtils;
 import android.text.method.TextKeyListener;
 import android.util.AttributeSet;
 import android.util.EventLog;
+import android.util.DisplayMetrics;
 import android.util.Log;
 import android.util.Slog;
 import android.util.SparseArray;
@@ -62,6 +64,9 @@ import android.view.ActionMode;
 import android.view.ContextMenu;
 import android.view.ContextMenu.ContextMenuInfo;
 import android.view.ContextThemeWrapper;
+import android.view.Display;
+import android.view.Gravity;
+import android.view.IWindowManager;
 import android.view.KeyEvent;
 import android.view.LayoutInflater;
 import android.view.Menu;
@@ -757,6 +762,8 @@ public class Activity extends ContextThemeWrapper
 
     private Thread mUiThread;
     final Handler mHandler = new Handler();
+
+    private Rect mOriginalBounds;
 
     /** Return the intent that started this activity. */
     public Intent getIntent() {
@@ -5088,8 +5095,48 @@ public class Activity extends ContextThemeWrapper
         attachBaseContext(context);
 
         mFragments.attachActivity(this, mContainer, null);
+        mToken = token;
+
+        // Notify the SplitViewManager that our activity is being attached
+        /*mWindowManager = (WindowManager) context.getSystemService(Context.WINDOW_SERVICE);
+        IWindowManager wm = (IWindowManager) WindowManagerGlobal.getWindowManagerService();
         
-        mWindow = PolicyManager.makeNewWindow(this);
+        try {
+            // Check for split view settings
+            Log.e(TAG, "XPLOD/ Checking for SPLIT_VIEW flag");
+            if (intent != null && 
+                ((intent.getFlags() & Intent.FLAG_ACTIVITY_SPLIT_VIEW) == Intent.FLAG_ACTIVITY_SPLIT_VIEW)) {
+                // This activity has been started with SPLIT_VIEW flag, do what is needed
+                Log.e(TAG, "XPLOD/ SPLIT_VIEW ACTIVITY");
+
+                // We apply our split view style to make window translucent to see other
+                // apps beneath it
+                context.getTheme().applyStyle(com.android.internal.R.style.Theme_DeviceDefault_SplitView, true);
+
+                // Then, we make our window and apply it the position and size
+                mWindow = PolicyManager.makeNewWindow(this);
+                mWindow.setGravity(Gravity.LEFT | Gravity.TOP);
+
+                Rect windowBounds = wm.getSplitViewRect(getTaskId());
+                mWindow.setLayout(windowBounds.right - windowBounds.left, windowBounds.bottom - windowBounds.top);
+
+                WindowManager.LayoutParams params = mWindow.getAttributes();
+                params.x = windowBounds.left;
+                params.y = windowBounds.top;
+                mWindow.setAttributes(params);
+
+                // Finally, we make the window non-modal to allow the second app to get input
+                mWindow.addFlags(WindowManager.LayoutParams.FLAG_NOT_TOUCH_MODAL);
+            } else {
+                mWindow = PolicyManager.makeNewWindow(this);
+            }
+        } catch (RemoteException e) {
+            Log.e(TAG, "Could not get perform split view actions", e);
+*/
+            // Create a default window
+            mWindow = PolicyManager.makeNewWindow(this);
+  //      }
+        
         mWindow.setCallback(this);
         mWindow.getLayoutInflater().setPrivateFactory(this);
         if (info.softInputMode != WindowManager.LayoutParams.SOFT_INPUT_STATE_UNSPECIFIED) {
@@ -5102,7 +5149,6 @@ public class Activity extends ContextThemeWrapper
         
         mMainThread = aThread;
         mInstrumentation = instr;
-        mToken = token;
         mIdent = ident;
         mApplication = application;
         mIntent = intent;
@@ -5122,6 +5168,7 @@ public class Activity extends ContextThemeWrapper
         }
         mWindowManager = mWindow.getWindowManager();
         mCurrentConfig = config;
+
     }
 
     /** @hide */
@@ -5162,6 +5209,58 @@ public class Activity extends ContextThemeWrapper
     
     final void performRestart() {
         mFragments.noteStateNotSaved();
+
+        IWindowManager wm = (IWindowManager) WindowManagerGlobal.getWindowManagerService();
+
+        try {        
+            // Check for split view settings
+            Log.e(TAG, "XPLOD/ Checking for SPLIT_VIEW flag on RESTART (taskId=" + getTaskId() + ")");
+            if (wm.isTaskSplitView(getTaskId())) {
+                // This activity has been started with SPLIT_VIEW flag, do what is needed
+                Log.e(TAG, "XPLOD/ SPLIT_VIEW ACTIVITY on RESTART (taskId=" + getTaskId() + ")");
+
+                // We apply our split view style to make window translucent to see other
+                // apps beneath it
+                getTheme().applyStyle(com.android.internal.R.style.Theme_DeviceDefault_SplitView, true);
+
+                // Then, we apply it the position and size
+                mWindow.setGravity(Gravity.LEFT | Gravity.TOP);
+
+                WindowManager.LayoutParams params = mWindow.getAttributes();
+
+                if (mOriginalBounds == null) {
+                    mOriginalBounds = new Rect();
+                    mOriginalBounds.left = params.x;
+                    mOriginalBounds.top = params.y;
+                    mOriginalBounds.right = params.x + params.width;
+                    mOriginalBounds.bottom = params.y + params.height;
+                }
+
+                Rect windowBounds = wm.getSplitViewRect(getTaskId());
+                mWindow.setLayout(windowBounds.right - windowBounds.left,
+                    windowBounds.bottom - windowBounds.top);
+
+                params.x = windowBounds.left;
+                params.y = windowBounds.top;
+                mWindow.setAttributes(params);
+
+                // Finally, we make the window non-modal to allow the second app to get input
+                mWindow.addFlags(WindowManager.LayoutParams.FLAG_NOT_TOUCH_MODAL);
+            } else if (mOriginalBounds != null) {
+                // Restore normal window bounds
+                Log.e(TAG, "XPLOD/ Restore BOUNDS (TaskId=" + getTaskId() + ")");
+                WindowManager.LayoutParams params = mWindow.getAttributes();
+                params.x = mOriginalBounds.left;
+                params.y = mOriginalBounds.top;
+
+                mWindow.setLayout(mOriginalBounds.right - mOriginalBounds.left,
+                    mOriginalBounds.bottom - mOriginalBounds.top);
+
+            }
+        } catch (RemoteException e) {
+            Log.e(TAG, "Could not perform split view actions on restart", e);
+        }
+
 
         if (mStopped) {
             mStopped = false;

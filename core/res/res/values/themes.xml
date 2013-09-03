@@ -1025,6 +1025,7 @@ please see themes_device_defaults.xml.
         <item name="android:windowSoftInputMode">stateUnspecified|adjustUnspecified</item>
         <item name="windowActionBar">true</item>
         <item name="windowActionModeOverlay">false</item>
+        <item name="android:windowIsTranslucent">true</item>
 
         <!-- Dialog attributes -->
         <item name="dialogTheme">@android:style/Theme.Holo.Dialog</item>
