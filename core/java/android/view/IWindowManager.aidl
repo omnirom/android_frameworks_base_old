@@ -285,4 +285,13 @@ interface IWindowManager
      * @return The magnification spec if such or null.
      */
     MagnificationSpec getCompatibleMagnificationSpecForWindow(in IBinder windowToken);
+
+
+    /** SPLIT VIEW **/
+    boolean isTaskSplitView(int taskId);
+    void setTaskSplitView(int taskId, boolean split);
+    Rect getSplitViewRect(int taskId);
+    void notifyActivityTouched(int taskId);
+
+    /** SPLIT VIEW END **/
 }

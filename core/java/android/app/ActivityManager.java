@@ -891,6 +891,12 @@ public class ActivityManager {
     public static final int MOVE_TASK_NO_USER_ACTION = 0x00000002;
 
     /**
+     * Flag for {@link #moveTaskToFront(int, int)}: the app is requested
+     * to start in a rescaled mode to fit multi-window mode (split view).
+     */
+    public static final int MOVE_TASK_SPLIT_VIEW = 0x0000000F;
+
+    /**
      * Equivalent to calling {@link #moveTaskToFront(int, int, Bundle)}
      * with a null options argument.
      *

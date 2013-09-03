@@ -62,6 +62,7 @@ import com.android.server.power.PowerManagerService;
 import com.android.server.power.ShutdownThread;
 
 import android.Manifest;
+import android.app.ActivityManager;
 import android.app.ActivityManagerNative;
 import android.app.IActivityManager;
 import android.app.StatusBarManager;
@@ -165,6 +166,7 @@ import java.util.Date;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Iterator;
+import java.util.Map;
 import java.util.List;
 import java.util.NoSuchElementException;
 
@@ -821,6 +823,13 @@ public class WindowManagerService extends IWindowManager.Stub
 
         // Add ourself to the Watchdog monitors.
         Watchdog.getInstance().addMonitor(this);
+
+        mSplitViewTasks = new int[2];
+        mNextSplitViewLocation = 0;
+        mIsTaskSplitted = new HashMap<Integer, Boolean>();
+        mTaskLocation = new HashMap<Integer, Integer>();
+        mIsTokenSplitted = new HashMap<IBinder, Boolean>();
+        Log.e(TAG, "XPLOD/ NEW WINDOW MANAGER SERVICE");
 
         SurfaceControl.openTransaction();
         try {
@@ -9484,12 +9493,45 @@ public class WindowManagerService extends IWindowManager.Stub
             WindowState win = findFocusedWindowLocked(displayContent);
             if (win != null) {
                 return win;
+            } else {
+                Log.e(TAG, "XPLOD/ Win was null from focusedWindowLocked, calling again with next display batch");
             }
         }
         return null;
     }
 
     private WindowState findFocusedWindowLocked(DisplayContent displayContent) {
+        Log.e(TAG, "XPLOD/ Called findFocusedWindowLocked");
+        /*if (mTaskTouched != null) {
+            final WindowList windows = displayContent.getWindowList();
+            for (int i = windows.size() - 1; i >= 0; i--) {
+                final WindowState win = windows.get(i);
+                AppWindowToken thisApp = win.mAppToken;
+                if (thisApp != null) {
+                    IBinder appToken = thisApp.token;
+
+                    if (mIsTokenSplitted.containsKey(appToken)) {
+                        Log.e(TAG, "XPLOD/ TokenSplitted contains key");
+                        if (mIsTokenSplitted.get(appToken)) {
+                            Log.e(TAG, "XPLOD/ Token IS splitted");
+                            if (mTaskTouched.equals(appToken)) {
+                                Log.e(TAG, "XPLOD/ App has been touched, move it to front");
+                                return win;
+                            } else {
+                                Log.e(TAG, "XPLOD/ App not touched");
+                            }
+                        } else {
+                            Log.e(TAG, "XPLOD/ Token IS NOT splitted");
+                        }
+                    } else {
+                        Log.e(TAG, "XPLOD/ TokenSplitted NOT HAZ key");
+                    }
+                }
+            }
+            Log.e(TAG, "XPLOD/ findFocusedWindowLocked FALLBACK");
+            //return null;
+        }*/
+
         int nextAppIndex = mAppTokens.size()-1;
         WindowToken nextApp = nextAppIndex >= 0 ? mAppTokens.get(nextAppIndex) : null;
 
@@ -9497,7 +9539,7 @@ public class WindowManagerService extends IWindowManager.Stub
         for (int i = windows.size() - 1; i >= 0; i--) {
             final WindowState win = windows.get(i);
 
-            if (localLOGV || DEBUG_FOCUS) Slog.v(
+            if (localLOGV || DEBUG_FOCUS || true) Slog.v(
                 TAG, "Looking for focus: " + i
                 + " = " + win
                 + ", flags=" + win.mAttrs.flags
@@ -9522,14 +9564,39 @@ public class WindowManagerService extends IWindowManager.Stub
                     if (nextApp == mFocusedApp) {
                         // Whoops, we are below the focused app...  no focus
                         // for you!
-                        if (localLOGV || DEBUG_FOCUS) Slog.v(
-                            TAG, "Reached focused app: " + mFocusedApp);
-                        return null;
+                        if (localLOGV || DEBUG_FOCUS || true) Slog.v(
+                            TAG, "Focus Set Reached focused app: " + mFocusedApp);
+                        //return null;
                     }
                     nextAppIndex--;
                     nextApp = mAppTokens.get(nextAppIndex);
                     if (nextApp == thisApp) {
-                        break;
+                        /*// If it's a split view app, allow focus to go to the window below
+                        // -- it may be the last touched app, who knows.
+                        if (mTaskTouched != null) {
+                            IBinder appToken = thisApp.token;
+
+                            if (mIsTokenSplitted.containsKey(appToken)) {
+                                Log.e(TAG, "XPLOD/ TokenSplitted contains key");
+                                if (mIsTokenSplitted.get(appToken)) {
+                                    Log.e(TAG, "XPLOD/ Token IS splitted");
+                                    if (mTaskTouched.equals(appToken)) {
+                                        Log.e(TAG, "XPLOD/ App has been touched, move it to front");
+                                        break;
+                                    } else {
+                                        Log.e(TAG, "XPLOD/ App not touched");
+                                    }
+                                } else {
+                                    Log.e(TAG, "XPLOD/ Token IS NOT splitted");
+                                    break;
+                                }
+                            } else {
+                                break;
+                            }
+                        } else */{
+                            Log.e(TAG, "XPLOD/ Focus set to: " + thisApp.token);
+                            break;
+                        }
                     }
                 }
                 if (thisApp != nextApp) {
@@ -9538,14 +9605,33 @@ public class WindowManagerService extends IWindowManager.Stub
                     // so restart at the original app.
                     nextAppIndex = origAppIndex;
                     nextApp = mAppTokens.get(nextAppIndex);
+                    Log.e(TAG, "XPLOD/ Uh oh! WTF");
                 }
+            } else {
+                Log.e(TAG, "XPLOD/ CONDITION NOT TRUE! >< "+thisApp+" != null && "+nextApp+" != null && thisApp != nextApp");
             }
 
             // Dispatch to this window if it is wants key events.
             if (win.canReceiveKeys()) {
-                if (DEBUG_FOCUS) Slog.v(
-                        TAG, "Found focus @ " + i + " = " + win);
-                return win;
+                if (thisApp != null) {
+                    if (mIsTokenSplitted.containsKey(thisApp.token) && mIsTokenSplitted.get(thisApp.token)) {
+                        if ((mTaskTouched != null && mTaskTouched.equals(thisApp.token)) || mTaskTouched == null) {
+                            if (DEBUG_FOCUS) Slog.v(
+                                TAG, "Found focus @ " + i + " = " + win);
+                            Log.e(TAG, "XPLOD/ Task is split, and last touched");
+                            return win;
+                        } else {
+                            Log.e(TAG, "XPLOD/ Task is split, but not last touched");
+                        }
+                    } else {
+                        return win;
+                    }
+                } else {
+                    Log.e(TAG, "XPLOD/ Null thisapp");
+                    return win;
+                }
+            } else {
+                Log.e(TAG, "XPLOD/ Cannot receive keys");
             }
         }
         return null;
@@ -10578,4 +10664,128 @@ public class WindowManagerService extends IWindowManager.Stub
             displayContent.updateDisplayInfo();
         }
     }
+
+    /** SPLIT VIEW **/
+
+    private int mSplitViewTasks[];
+    private int mNextSplitViewLocation;
+    private Map<Integer, Boolean> mIsTaskSplitted;
+    private Map<IBinder, Boolean> mIsTokenSplitted;
+    private Map<Integer, Integer> mTaskLocation;
+    private IBinder mTaskTouched;
+
+    public boolean isTaskSplitView(int taskId) {
+
+        if (mIsTaskSplitted.containsKey(taskId)) {
+            Log.e(TAG, "XPLOD/ Is Task Split View ? " + taskId + " = " + mIsTaskSplitted.get(taskId));
+            return mIsTaskSplitted.get(taskId);
+        } else {
+            Log.e(TAG, "XPLOD/ Is Task Split View ? " + taskId + " unknown, so no");
+            return false;
+        }
+    }
+
+    public void setTaskSplitView(int taskId, boolean split) {
+        mIsTaskSplitted.put(taskId, split);
+        try {
+            mIsTokenSplitted.put(mActivityManager.getActivityForTask(taskId, false), split);
+        } catch (RemoteException e) {
+            Log.e(TAG, "Cannot retrieve activity token for task " + taskId, e);
+        }
+        Log.e(TAG, "XPLOD/ Set Task Split View " + taskId + " ? " + split);
+    }
+
+    public void notifyActivityTouched(int taskId) {
+        try {
+            mTaskTouched = mActivityManager.getActivityForTask(taskId, false);
+            synchronized(mWindowMap) {
+                boolean changed = false;
+                if (mTaskTouched != null) {
+                    AppWindowToken newFocus = findAppWindowToken(mTaskTouched);
+                    if (newFocus == null) {
+                        Slog.w(TAG, "Attempted to set focus to non-existing app token: " + mTaskTouched);
+                        return;
+                    }
+                    changed = mFocusedApp != newFocus;
+                    mFocusedApp = newFocus;
+                    if (changed) {
+                        Log.e(TAG, "XPLOD/ Changed app focus to " + mTaskTouched);
+                        mInputMonitor.setFocusedAppLw(newFocus);
+                    }
+                }
+
+                if (changed) {
+                    final long origId = Binder.clearCallingIdentity();
+                    updateFocusedWindowLocked(UPDATE_FOCUS_NORMAL, true);
+                    mH.removeMessages(H.REPORT_FOCUS_CHANGE);
+                    mH.sendEmptyMessage(H.REPORT_FOCUS_CHANGE);
+                    Binder.restoreCallingIdentity(origId);
+                }
+            }
+        } catch (RemoteException e) {
+            Log.e(TAG, "XPLOD/ Cannot get activity token for task " + taskId, e);
+        }
+        Log.e(TAG, "XPLOD/ Activity " + taskId + " notified it touched");
+    }
+
+    public Rect getSplitViewRect(int taskId) {
+        Log.e(TAG, "XPLOD/ App requesting split view rect ; taskId =" + taskId);
+        mSplitViewTasks[mNextSplitViewLocation] = taskId;
+        mIsTaskSplitted.put(taskId, true);
+
+        // TODO(multidisplay): For now, apply Configuration to main screen only.
+        final DisplayContent displayContent = getDefaultDisplayContentLocked();
+
+        // Use the effective "visual" dimensions based on current rotation
+        final boolean rotated = (mRotation == Surface.ROTATION_90
+                || mRotation == Surface.ROTATION_270);
+        final int realdw = rotated ?
+                displayContent.mBaseDisplayHeight : displayContent.mBaseDisplayWidth;
+        final int realdh = rotated ?
+                displayContent.mBaseDisplayWidth : displayContent.mBaseDisplayHeight;
+        int dw = realdw;
+        int dh = realdh;
+
+        if (mAltOrientation) {
+            if (realdw > realdh) {
+                // Turn landscape into portrait.
+                int maxw = (int)(realdh/1.3f);
+                if (maxw < realdw) {
+                    dw = maxw;
+                }
+            } else {
+                // Turn portrait into landscape.
+                int maxh = (int)(realdw/1.3f);
+                if (maxh < realdh) {
+                    dh = maxh;
+                }
+            }
+        }
+
+        // Get application display metrics.
+        final int appWidth = mPolicy.getNonDecorDisplayWidth(dw, dh, mRotation);
+        final int appHeight = mPolicy.getNonDecorDisplayHeight(dw, dh, mRotation);
+
+        int location = mNextSplitViewLocation;
+        if (mTaskLocation.containsKey(taskId)) {
+            location = mTaskLocation.get(taskId);
+        } else {
+            if (mNextSplitViewLocation == 0) {
+                mNextSplitViewLocation = 1;
+            } else {
+                mNextSplitViewLocation = 0;
+            }
+        }
+
+        mTaskLocation.put(taskId, location);
+
+        if (location == 0) {
+            return new Rect(0, 0, appWidth, appHeight/2);
+        } else {
+            return new Rect(0, appHeight/2, appWidth, appHeight);
+        }
+
+    }
+
+    /** END SPLIT VIEW **/
 }

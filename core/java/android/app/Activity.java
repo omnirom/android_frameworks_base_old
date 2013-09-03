@@ -37,6 +37,7 @@ import android.content.res.TypedArray;
 import android.database.Cursor;
 import android.graphics.Bitmap;
 import android.graphics.Canvas;
+import android.graphics.Rect;
 import android.graphics.drawable.Drawable;
 import android.media.AudioManager;
 import android.net.Uri;
@@ -55,6 +56,7 @@ import android.text.TextUtils;
 import android.text.method.TextKeyListener;
 import android.util.AttributeSet;
 import android.util.EventLog;
+import android.util.DisplayMetrics;
 import android.util.Log;
 import android.util.Slog;
 import android.util.SparseArray;
@@ -62,6 +64,9 @@ import android.view.ActionMode;
 import android.view.ContextMenu;
 import android.view.ContextMenu.ContextMenuInfo;
 import android.view.ContextThemeWrapper;
+import android.view.Display;
+import android.view.Gravity;
+import android.view.IWindowManager;
 import android.view.KeyEvent;
 import android.view.LayoutInflater;
 import android.view.Menu;
@@ -757,6 +762,9 @@ public class Activity extends ContextThemeWrapper
 
     private Thread mUiThread;
     final Handler mHandler = new Handler();
+
+    private Rect mOriginalBounds;
+    private boolean mIsSplitView;
 
     /** Return the intent that started this activity. */
     public Intent getIntent() {
@@ -2420,6 +2428,14 @@ public class Activity extends ContextThemeWrapper
     public boolean dispatchTouchEvent(MotionEvent ev) {
         if (ev.getAction() == MotionEvent.ACTION_DOWN) {
             onUserInteraction();
+        }
+        if (mIsSplitView) {
+            IWindowManager wm = (IWindowManager) WindowManagerGlobal.getWindowManagerService();
+            try {
+                wm.notifyActivityTouched(getTaskId());
+            } catch (RemoteException e) {
+                Log.e(TAG, "XPLOD/ Cannot notify activity touched", e);
+            }
         }
         if (getWindow().superDispatchTouchEvent(ev)) {
             return true;
@@ -5088,7 +5104,8 @@ public class Activity extends ContextThemeWrapper
         attachBaseContext(context);
 
         mFragments.attachActivity(this, mContainer, null);
-        
+        mToken = token;
+
         mWindow = PolicyManager.makeNewWindow(this);
         mWindow.setCallback(this);
         mWindow.getLayoutInflater().setPrivateFactory(this);
@@ -5102,7 +5119,6 @@ public class Activity extends ContextThemeWrapper
         
         mMainThread = aThread;
         mInstrumentation = instr;
-        mToken = token;
         mIdent = ident;
         mApplication = application;
         mIntent = intent;
@@ -5122,6 +5138,7 @@ public class Activity extends ContextThemeWrapper
         }
         mWindowManager = mWindow.getWindowManager();
         mCurrentConfig = config;
+
     }
 
     /** @hide */
@@ -5162,6 +5179,58 @@ public class Activity extends ContextThemeWrapper
     
     final void performRestart() {
         mFragments.noteStateNotSaved();
+
+        IWindowManager wm = (IWindowManager) WindowManagerGlobal.getWindowManagerService();
+
+        try {
+            mIsSplitView = false;
+            // Check for split view settings
+            Log.e(TAG, "XPLOD/ Checking for SPLIT_VIEW flag on RESTART (taskId=" + getTaskId() + ")");
+            if (wm.isTaskSplitView(getTaskId())) {
+                // This activity has been started with SPLIT_VIEW flag, do what is needed
+                Log.e(TAG, "XPLOD/ SPLIT_VIEW ACTIVITY on RESTART (taskId=" + getTaskId() + ")");
+                mIsSplitView = true;
+
+                // Then, we apply it the position and size
+                mWindow.setGravity(Gravity.LEFT | Gravity.TOP);
+
+                WindowManager.LayoutParams params = mWindow.getAttributes();
+
+                if (mOriginalBounds == null) {
+                    mOriginalBounds = new Rect();
+                    mOriginalBounds.left = params.x;
+                    mOriginalBounds.top = params.y;
+                    mOriginalBounds.right = params.x + params.width;
+                    mOriginalBounds.bottom = params.y + params.height;
+                }
+
+                Rect windowBounds = wm.getSplitViewRect(getTaskId());
+                mWindow.setLayout(windowBounds.right - windowBounds.left,
+                    windowBounds.bottom - windowBounds.top);
+
+                params.x = windowBounds.left;
+                params.y = windowBounds.top;
+                mWindow.setAttributes(params);
+
+                // Finally, we make the window non-modal to allow the second app to get input
+                mWindow.addFlags(WindowManager.LayoutParams.FLAG_NOT_TOUCH_MODAL);
+                mWindow.addFlags(WindowManager.LayoutParams.FLAG_WATCH_OUTSIDE_TOUCH);
+                mWindow.addFlags(WindowManager.LayoutParams.FLAG_SPLIT_TOUCH);
+            } else if (mOriginalBounds != null) {
+                // Restore normal window bounds
+                Log.e(TAG, "XPLOD/ Restore BOUNDS (TaskId=" + getTaskId() + ")");
+                WindowManager.LayoutParams params = mWindow.getAttributes();
+                params.x = mOriginalBounds.left;
+                params.y = mOriginalBounds.top;
+
+                mWindow.setLayout(mOriginalBounds.right - mOriginalBounds.left,
+                    mOriginalBounds.bottom - mOriginalBounds.top);
+
+            }
+        } catch (RemoteException e) {
+            Log.e(TAG, "Could not perform split view actions on restart", e);
+        }
+
 
         if (mStopped) {
             mStopped = false;
