@@ -41,6 +41,10 @@
     <!-- Title shown in recents popup for inspecting an application's properties -->
     <string name="status_bar_recent_inspect_item_title">App info</string>
 
+    <!-- !!!!!!!!!!!!! FIXME: MOVE ME INTO CUSTOM_STRINGS ONCE QS PATCH IS MERGED !!!!!!!!!!!!!!!!!!!!!
+        Title shown in recents popup for adding an application to the split view -->
+    <string name="status_bar_recent_add_to_split_view">Add to Split View</string>
+
     <!-- Message shown in the middle of the screen after clicking on the recent apps button
          when there are no recent apps to show. Also used for accessibility. [CHAR LIMIT=45]-->
     <string name="status_bar_no_recent_apps">No recent apps</string>
