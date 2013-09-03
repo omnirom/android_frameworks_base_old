@@ -165,6 +165,7 @@ import java.util.Date;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Iterator;
+import java.util.Map;
 import java.util.List;
 import java.util.NoSuchElementException;
 
@@ -10578,4 +10579,83 @@ public class WindowManagerService extends IWindowManager.Stub
             displayContent.updateDisplayInfo();
         }
     }
+
+    /** SPLIT VIEW **/
+
+    private int mSplitViewTasks[] = new int[2];
+    private int mNextSplitViewLocation = 0;
+    private Map<Integer, Boolean> mIsTaskSplitted = new HashMap<Integer, Boolean>();
+    private Map<Integer, Integer> mTaskLocation = new HashMap<Integer, Integer>();
+
+    public boolean isTaskSplitView(int taskId) {
+        if (mIsTaskSplitted.containsKey(taskId)) {
+            return mIsTaskSplitted.get(taskId);
+        } else {
+            return false;
+        }
+    }
+
+    public void setTaskSplitView(int taskId, boolean split) {
+        mIsTaskSplitted.put(taskId, split);
+    }
+
+    public Rect getSplitViewRect(int taskId) {
+        mSplitViewTasks[mNextSplitViewLocation] = taskId;
+        mIsTaskSplitted.put(taskId, true);
+
+        // TODO(multidisplay): For now, apply Configuration to main screen only.
+        final DisplayContent displayContent = getDefaultDisplayContentLocked();
+
+        // Use the effective "visual" dimensions based on current rotation
+        final boolean rotated = (mRotation == Surface.ROTATION_90
+                || mRotation == Surface.ROTATION_270);
+        final int realdw = rotated ?
+                displayContent.mBaseDisplayHeight : displayContent.mBaseDisplayWidth;
+        final int realdh = rotated ?
+                displayContent.mBaseDisplayWidth : displayContent.mBaseDisplayHeight;
+        int dw = realdw;
+        int dh = realdh;
+
+        if (mAltOrientation) {
+            if (realdw > realdh) {
+                // Turn landscape into portrait.
+                int maxw = (int)(realdh/1.3f);
+                if (maxw < realdw) {
+                    dw = maxw;
+                }
+            } else {
+                // Turn portrait into landscape.
+                int maxh = (int)(realdw/1.3f);
+                if (maxh < realdh) {
+                    dh = maxh;
+                }
+            }
+        }
+
+        // Get application display metrics.
+        final int appWidth = mPolicy.getNonDecorDisplayWidth(dw, dh, mRotation);
+        final int appHeight = mPolicy.getNonDecorDisplayHeight(dw, dh, mRotation);
+
+        int location = mNextSplitViewLocation;
+        if (mTaskLocation.containsKey(taskId)) {
+            location = mTaskLocation.get(taskId);
+        } else {
+            if (mNextSplitViewLocation == 0) {
+                mNextSplitViewLocation = 1;
+            } else {
+                mNextSplitViewLocation = 0;
+            }
+        }
+
+        mTaskLocation.put(taskId, location);
+
+        if (location == 0) {
+            return new Rect(0, 0, appWidth, appHeight/2);
+        } else {
+            return new Rect(0, appHeight/2, appWidth, appHeight);
+        }
+
+    }
+
+    /** END SPLIT VIEW **/
 }
