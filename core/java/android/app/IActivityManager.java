@@ -113,6 +113,7 @@ public interface IActivityManager extends IInterface {
     public boolean moveActivityTaskToBack(IBinder token, boolean nonRoot) throws RemoteException;
     public void moveTaskBackwards(int task) throws RemoteException;
     public int getTaskForActivity(IBinder token, boolean onlyRoot) throws RemoteException;
+    public IBinder getActivityForTask(int task, boolean onlyRoot) throws RemoteException;
     /* oneway */
     public void reportThumbnail(IBinder token,
             Bitmap thumbnail, CharSequence description) throws RemoteException;
@@ -641,4 +642,7 @@ public interface IActivityManager extends IInterface {
     int KILL_UID_TRANSACTION = IBinder.FIRST_CALL_TRANSACTION+164;
     int SET_USER_IS_MONKEY_TRANSACTION = IBinder.FIRST_CALL_TRANSACTION+165;
     int HANG_TRANSACTION = IBinder.FIRST_CALL_TRANSACTION+166;
+
+    /* SPLIT VIEW */
+    int GET_ACTIVITY_FOR_TASK_TRANSACTION = IBinder.FIRST_CALL_TRANSACTION+200;
 }
