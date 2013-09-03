@@ -55,4 +55,6 @@
     <!-- QuickSettings: Immersive mode (Off) [CHAR LIMIT=NONE] -->
     <string name="quick_settings_immersive_mode_off_label">Immersive Off</string>
 
+    <!-- Title shown in recents popup for adding an application to the split view -->
+    <string name="status_bar_recent_add_to_split_view">Add to Split View</string>
 </resources>
