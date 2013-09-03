@@ -17,7 +17,7 @@
 #define LOG_TAG "InputDispatcher"
 #define ATRACE_TAG ATRACE_TAG_INPUT
 
-//#define LOG_NDEBUG 0
+#define LOG_NDEBUG 0
 
 // Log detailed debug messages about each inbound event notification to the dispatcher.
 #define DEBUG_INBOUND_EVENT_DETAILS 0
@@ -35,7 +35,7 @@
 #define DEBUG_INJECTION 0
 
 // Log debug messages about input focus tracking.
-#define DEBUG_FOCUS 0
+#define DEBUG_FOCUS 1
 
 // Log debug messages about the app switch latency optimization.
 #define DEBUG_APP_SWITCH 0
@@ -1488,7 +1488,18 @@ int32_t InputDispatcher::findTouchedWindowTargetsLocked(nsecs_t currentTime,
         const TouchedWindow& touchedWindow = mTempTouchState.windows.itemAt(i);
         addWindowTargetLocked(touchedWindow.windowHandle, touchedWindow.targetFlags,
                 touchedWindow.pointerIds, inputTargets);
+        const InputWindowInfo* info = touchedWindow.windowHandle->getInfo();
+        if (info->canReceiveKeys) {
+            mFocusedWindowHandle = touchedWindow.windowHandle; // XPLOD
+            ALOGE("XPLOD: FOCUSED WINDOW HANDLE: Yes for %s", info->name.string());
+        } else {
+            ALOGE("XPLOD: FOCUSED WINDOW HANDLE: No for %s", info->name.string());
+        }
+        
     }
+
+    // Wake up poll loop since it may need to make new input dispatching choices.
+    mLooper->wake();
 
     // Drop the outside or hover touch windows since we will not care about them
     // in the next iteration.

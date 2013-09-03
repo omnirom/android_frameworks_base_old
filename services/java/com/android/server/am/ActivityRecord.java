@@ -21,6 +21,7 @@ import com.android.server.AttributeCache;
 import com.android.server.am.ActivityStack.ActivityState;
 
 import android.app.Activity;
+import android.app.ActivityManagerNative;
 import android.app.ActivityOptions;
 import android.content.ComponentName;
 import android.content.Intent;
@@ -43,7 +44,9 @@ import android.util.Log;
 import android.util.Slog;
 import android.util.TimeUtils;
 import android.view.IApplicationToken;
+import android.view.IWindowManager;
 import android.view.WindowManager;
+import android.view.WindowManagerGlobal;
 
 import java.io.PrintWriter;
 import java.lang.ref.WeakReference;

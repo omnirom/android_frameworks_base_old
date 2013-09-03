@@ -46,7 +46,7 @@ public final class WindowManagerImpl implements WindowManager {
     private final WindowManagerGlobal mGlobal = WindowManagerGlobal.getInstance();
     private final Display mDisplay;
     private final Window mParentWindow;
-
+    
     public WindowManagerImpl(Display display) {
         this(display, null);
     }
