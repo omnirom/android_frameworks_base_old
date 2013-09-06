@@ -31,6 +31,7 @@ import java.util.Map;
 
 import android.app.AppOpsManager;
 import android.content.Context;
+import android.content.pm.PackageInfo;
 import android.content.pm.PackageManager;
 import android.content.pm.PackageManager.NameNotFoundException;
 import android.os.AsyncTask;
@@ -1078,6 +1079,137 @@ public class AppOpsService extends IAppOpsService.Stub {
                     }
                 }
             }
+        }
+    }
+
+    @Override
+    public List<Integer> getPrivacyGuardOpsForPackage(String packageName) {
+        PackageInfo pkgInfo;
+        List<Integer> ops = new ArrayList<Integer>();
+        try {
+            pkgInfo = mContext.getPackageManager()
+                .getPackageInfo(packageName, PackageManager.GET_PERMISSIONS);
+        } catch (NameNotFoundException e) {
+            return ops;
+        }
+        // we need to get all relevant permissions of the package.
+        // Only calling getOpsForPackage does not return ops
+        // with AppOpsManager.MODE_ALLOWED which never got
+        // granted and do not show up in Ops statistics
+        final String[] requestedPermissions = pkgInfo.requestedPermissions;
+        if (requestedPermissions != null) {
+            for (String requested : requestedPermissions) {
+                int curOp = AppOpsManager.getPrivacyGuardOp(requested);
+                boolean duplicate = false;
+                // check for duplicates
+                for (int op : ops) {
+                    if (op == curOp) {
+                        duplicate = true;
+                    }
+                }
+                if (curOp != AppOpsManager.OP_NONE && !duplicate) {
+                    ops.add(curOp);
+                }
+            }
+        }
+        return ops;
+    }
+
+    @Override
+    public int getPrivacyGuardSettingForPackage(int uid, String packageName) {
+        int privacyGuardState;
+        boolean pgDetect;
+        boolean isCustomOpPresent = false;
+
+        List<AppOpsManager.PackageOps> packageOps =
+            getOpsForPackage(uid, packageName, null);
+        List<Integer> privacyGuardOps = getPrivacyGuardOpsForPackage(packageName);
+        List<Integer> privacyGuardOpsHelper = new ArrayList<Integer>(privacyGuardOps);
+
+        // get disabled Ops and check for custom Op changes
+        if (packageOps != null) {
+            for (AppOpsManager.OpEntry op : packageOps.get(0).getOps()) {
+                pgDetect = false;
+                if (checkOperation(op.getOp(), uid, packageName)
+                    == AppOpsManager.MODE_IGNORED) {
+                    for (int pgOp : privacyGuardOps) {
+                        if (AppOpsManager.opToSwitch(op.getOp()) == pgOp) {
+                            privacyGuardOpsHelper.remove((Integer) pgOp);
+                            pgDetect = true;
+                            break;
+                        }
+                    }
+                    if (!pgDetect) {
+                        isCustomOpPresent = true;
+                    }
+                }
+            }
+        }
+
+        // get privacy guard state
+        if (!privacyGuardOps.isEmpty()
+            && privacyGuardOps.size() != privacyGuardOpsHelper.size()) {
+            if (privacyGuardOpsHelper.isEmpty()) {
+                privacyGuardState = AppOpsManager.PRIVACY_GUARD_ENABLED;
+            } else {
+                privacyGuardState = AppOpsManager.PRIVACY_GUARD_CUSTOM;
+            }
+        } else {
+            privacyGuardState = AppOpsManager.PRIVACY_GUARD_DISABLED;
+        }
+
+        // return current mode
+        switch (privacyGuardState) {
+            case AppOpsManager.PRIVACY_GUARD_ENABLED:
+                if (isCustomOpPresent) {
+                    return AppOpsManager.PRIVACY_GUARD_ENABLED_PLUS;
+                } else {
+                    return AppOpsManager.PRIVACY_GUARD_ENABLED;
+                }
+            case AppOpsManager.PRIVACY_GUARD_CUSTOM:
+                if (isCustomOpPresent) {
+                    return AppOpsManager.PRIVACY_GUARD_CUSTOM_PLUS;
+                } else {
+                    return AppOpsManager.PRIVACY_GUARD_CUSTOM;
+                }
+            case AppOpsManager.PRIVACY_GUARD_DISABLED:
+                if (isCustomOpPresent) {
+                    return AppOpsManager.PRIVACY_GUARD_DISABLED_PLUS;
+                } else {
+                    return AppOpsManager.PRIVACY_GUARD_DISABLED;
+                }
+        }
+        return AppOpsManager.PRIVACY_GUARD_DISABLED;
+    }
+
+    @Override
+    public void setPrivacyGuardSettingForPackage(int uid, String packageName,
+            boolean state, boolean forceAll) {
+        List<Integer> switchOps;
+        if (!forceAll) {
+            // retrieve specific privacy guard permissions
+            switchOps = getPrivacyGuardOpsForPackage(packageName);
+        } else {
+            // if user want to enable all permissions on the package
+            // we need to retrieve the disabled ops.
+            // All ops are retrieved via getOpsForPackage
+            // which are flagged with AppOpsManager.MODE_IGNORED
+            switchOps = new ArrayList<Integer>();
+            List<AppOpsManager.PackageOps> packageOps =
+                getOpsForPackage(uid, packageName, null);
+            if (packageOps != null) {
+                for (AppOpsManager.OpEntry op : packageOps.get(0).getOps()) {
+                    if (checkOperation(op.getOp(), uid, packageName)
+                        == AppOpsManager.MODE_IGNORED) {
+                        switchOps.add(AppOpsManager.opToSwitch(op.getOp()));
+                    }
+                }
+            }
+        }
+
+        for (int op : switchOps) {
+            setMode(op, uid, packageName, state
+                    ? AppOpsManager.MODE_IGNORED : AppOpsManager.MODE_ALLOWED);
         }
     }
 }
