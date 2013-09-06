@@ -1826,6 +1826,12 @@
   <java-symbol type="drawable" name="ic_navigation_ring_vibrate" />
   <java-symbol type="drawable" name="ic_navigation_ring_lastapp" />
 
+  <!-- Privacy Guard -->
+  <java-symbol type="string" name="privacy_guard_notification" />
+  <java-symbol type="string" name="privacy_guard_notification_detail" />
+  <java-symbol type="drawable" name="stat_notify_privacy_guard" />
+
+
   <java-symbol type="bool" name="config_offscreenGestureSupport" />
   <java-symbol type="bool" name="config_hasRotationLockSwitch" />
   <java-symbol type="string" name="toast_rotation_unlocked" />
