@@ -16,21 +16,22 @@
 
 package android.app;
 
+import android.content.Context;
+import android.Manifest;
 import android.os.Binder;
 import android.os.IBinder;
+import android.os.Parcel;
+import android.os.Parcelable;
+import android.os.Process;
+import android.os.RemoteException;
 import android.util.ArrayMap;
+
 import com.android.internal.app.IAppOpsService;
 import com.android.internal.app.IAppOpsCallback;
 
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
-
-import android.content.Context;
-import android.os.Parcel;
-import android.os.Parcelable;
-import android.os.Process;
-import android.os.RemoteException;
 
 /**
  * API for interacting with "application operation" tracking.
@@ -92,7 +93,7 @@ public class AppOpsManager {
 
     // when adding one of these:
     //  - increment _NUM_OP
-    //  - add rows to sOpToSwitch, sOpToString, sOpNames, sOpPerms, sOpDefaultMode
+    //  - add rows to sOpToSwitch, sOpToString, sOpNames, sOpPerms, sPrivacyGuardOp, sOpDefaultMode
     //  - add descriptive strings to Settings/res/values/arrays.xml
     //  - add the op to the appropriate template in AppOpsState.OpsTemplate (settings app)
 
@@ -405,6 +406,66 @@ public class AppOpsManager {
     };
 
     /**
+     * Privacy Guard Ops and states need to
+     * match general Ops map. Unused Ops are flagged as OP_NONE
+     */
+    private static final int[] sPrivacyGuardOp = new int[] {
+            OP_COARSE_LOCATION,
+            OP_COARSE_LOCATION,
+            OP_COARSE_LOCATION,
+            OP_NONE,
+            OP_READ_CONTACTS,
+            OP_WRITE_CONTACTS,
+            OP_READ_CALL_LOG,
+            OP_WRITE_CALL_LOG,
+            OP_READ_CALENDAR,
+            OP_WRITE_CALENDAR,
+            OP_COARSE_LOCATION,
+            OP_NONE,
+            OP_COARSE_LOCATION,
+            OP_NONE,
+            OP_READ_SMS,
+            OP_WRITE_SMS,
+            OP_RECEIVE_SMS,
+            OP_RECEIVE_SMS,
+            OP_RECEIVE_SMS,
+            OP_RECEIVE_SMS,
+            OP_SEND_SMS,
+            OP_READ_SMS,
+            OP_WRITE_SMS,
+            OP_NONE,
+            OP_NONE,
+            OP_NONE,
+            OP_NONE,
+            OP_NONE,
+            OP_NONE,
+            OP_NONE,
+            OP_NONE,
+            OP_NONE,
+            OP_NONE,
+            OP_NONE,
+            OP_NONE,
+            OP_NONE,
+            OP_NONE,
+            OP_NONE,
+            OP_NONE,
+            OP_NONE,
+            OP_NONE,
+            OP_COARSE_LOCATION,
+            OP_COARSE_LOCATION,
+    };
+
+    /**
+     * Privacy Guard states
+     */
+    public static final int PRIVACY_GUARD_DISABLED      = 0;
+    public static final int PRIVACY_GUARD_DISABLED_PLUS = 1;
+    public static final int PRIVACY_GUARD_ENABLED       = 2;
+    public static final int PRIVACY_GUARD_ENABLED_PLUS  = 3;
+    public static final int PRIVACY_GUARD_CUSTOM        = 4;
+    public static final int PRIVACY_GUARD_CUSTOM_PLUS   = 5;
+
+    /**
      * This specifies the default mode for each operation.
      */
     private static int[] sOpDefaultMode = new int[] {
@@ -563,6 +624,19 @@ public class AppOpsManager {
      */
     public static String opToPermission(int op) {
         return sOpPerms[op];
+    }
+
+    /**
+     * Retrieve the permission associated privacy guard operation,
+     * or OP_NONE if there is not one.
+     */
+    public static int getPrivacyGuardOp(String permission) {
+        for (int i=0; i<sOpPerms.length; i++) {
+            if (sOpPerms[i] != null && sOpPerms[i].equals(permission)) {
+                return sPrivacyGuardOp[i];
+            }
+        }
+        return OP_NONE;
     }
 
     /**
@@ -1132,5 +1206,50 @@ public class AppOpsManager {
     /** @hide */
     public void finishOp(int op) {
         finishOp(op, Process.myUid(), mContext.getOpPackageName());
+    }
+
+    public List<Integer> getPrivacyGuardOpsForPackage(String packageName) {
+        try {
+            return mService.getPrivacyGuardOpsForPackage(packageName);
+        } catch (RemoteException e) {
+        }
+        return null;
+    }
+
+    public int getPrivacyGuardSettingForPackage(int uid, String packageName) {
+        try {
+            return mService.getPrivacyGuardSettingForPackage(uid, packageName);
+        } catch (RemoteException e) {
+        }
+        return PRIVACY_GUARD_DISABLED;
+    }
+
+    public void setPrivacyGuardSettingForPackage(int uid, String packageName,
+            boolean state, boolean forceAll) {
+        try {
+            mService.setPrivacyGuardSettingForPackage(uid, packageName, state, forceAll);
+        } catch (RemoteException e) {
+        }
+    }
+
+    /**
+     * Retrieve the privacy guard state associated icons for notification and settings
+     */
+    public static int getPrivacyGuardIconResId(int pgState) {
+        switch (pgState) {
+            case PRIVACY_GUARD_DISABLED:
+                return com.android.internal.R.drawable.stat_notify_privacy_guard_off;
+            case PRIVACY_GUARD_ENABLED:
+                return com.android.internal.R.drawable.stat_notify_privacy_guard;
+            case PRIVACY_GUARD_CUSTOM:
+                return com.android.internal.R.drawable.stat_notify_privacy_guard_custom;
+            case PRIVACY_GUARD_DISABLED_PLUS:
+                return com.android.internal.R.drawable.stat_notify_privacy_guard_off_plus;
+            case PRIVACY_GUARD_ENABLED_PLUS:
+                return com.android.internal.R.drawable.stat_notify_privacy_guard_plus;
+            case PRIVACY_GUARD_CUSTOM_PLUS:
+                return com.android.internal.R.drawable.stat_notify_privacy_guard_custom_plus;
+        }
+        return com.android.internal.R.drawable.stat_notify_privacy_guard_off;
     }
 }
