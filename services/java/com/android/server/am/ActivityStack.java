@@ -48,6 +48,7 @@ import android.app.Activity;
 import android.app.ActivityManager;
 import android.app.ActivityOptions;
 import android.app.AppGlobals;
+import android.app.AppOpsManager;
 import android.app.IActivityController;
 import android.app.IThumbnailReceiver;
 import android.app.ResultInfo;
@@ -215,6 +216,11 @@ final class ActivityStack {
 
     long mLaunchStartTime = 0;
     long mFullyDrawnStartTime = 0;
+
+    /**
+     * Is the privacy guard currently enabled?
+     */
+    String mPrivacyGuardPackageName = null;
 
     /**
      * Save the most recent screenshot for reuse. This keeps Recents from taking two identical
@@ -980,6 +986,7 @@ final class ActivityStack {
         } else {
             next.cpuTimeAtResume = 0; // Couldn't get the cpu time of process
         }
+        updatePrivacyGuardNotificationLocked(next);
     }
 
     /**
@@ -1677,6 +1684,32 @@ final class ActivityStack {
             ++stackNdx;
         }
         mTaskHistory.add(stackNdx, task);
+    }
+
+    private final void updatePrivacyGuardNotificationLocked(ActivityRecord next) {
+        if (android.provider.Settings.Secure.getIntForUser(mContext.getContentResolver(),
+            android.provider.Settings.Secure.PRIVACY_GUARD_NOTIFICATION,
+            1, UserHandle.USER_CURRENT) == 0) {
+            return;
+        }
+        if (mPrivacyGuardPackageName != null && mPrivacyGuardPackageName.equals(next.packageName)) {
+            return;
+        }
+
+        int privacy = mService.mAppOpsService.getPrivacyGuardSettingForPackage(
+                next.app.uid, next.packageName);
+
+        if (mPrivacyGuardPackageName != null && privacy == AppOpsManager.PRIVACY_GUARD_DISABLED) {
+            Message msg = mService.mHandler.obtainMessage(
+                    ActivityManagerService.CANCEL_PRIVACY_NOTIFICATION_MSG, next.userId);
+            msg.sendToTarget();
+            mPrivacyGuardPackageName = null;
+        } else if (privacy > AppOpsManager.PRIVACY_GUARD_DISABLED) {
+            Message msg = mService.mHandler.obtainMessage(
+                    ActivityManagerService.POST_PRIVACY_NOTIFICATION_MSG, privacy, 0, next);
+            msg.sendToTarget();
+            mPrivacyGuardPackageName = next.packageName;
+        }
     }
 
     final void startActivityLocked(ActivityRecord r, boolean newTask,
