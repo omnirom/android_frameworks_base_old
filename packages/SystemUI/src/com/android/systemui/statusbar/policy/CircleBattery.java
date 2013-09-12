@@ -81,6 +81,7 @@ public class CircleBattery extends ImageView {
     private Paint   mPaintGray;
     private Paint   mPaintSystem;
     private Paint   mPaintRed;
+    private Paint   mPaintGreen;
 
     // runnable to invalidate view via mHandler.postDelayed() call
     private final Runnable mInvalidate = new Runnable() {
@@ -207,6 +208,7 @@ public class CircleBattery extends ImageView {
         mPaintGray = new Paint(mPaintFont);
         mPaintSystem = new Paint(mPaintFont);
         mPaintRed = new Paint(mPaintFont);
+        mPaintGreen = new Paint(mPaintFont);
 
         mPaintFont.setColor(res.getColor(R.color.holo_blue_dark));
         mPaintSystem.setColor(res.getColor(R.color.holo_blue_dark));
@@ -214,6 +216,7 @@ public class CircleBattery extends ImageView {
         // do not want to use static 0x404040 color value. would break theming.
         mPaintGray.setColor(res.getColor(R.color.darker_gray));
         mPaintRed.setColor(res.getColor(R.color.holo_red_light));
+        mPaintGreen.setColor(res.getColor(R.color.holo_green_light));
 
         // font needs some extra settings
         mPaintFont.setTextAlign(Align.CENTER);
@@ -266,6 +269,9 @@ public class CircleBattery extends ImageView {
         int padLevel = level;
         if (padLevel >= 97) {
             padLevel = 100;
+            if (mIsCharging) {
+                usePaint = mPaintGreen;
+            }
         }
 
         // draw thin gray ring first
@@ -338,6 +344,7 @@ public class CircleBattery extends ImageView {
 
         float strokeWidth = mCircleSize / 6.5f;
         mPaintRed.setStrokeWidth(strokeWidth);
+        mPaintGreen.setStrokeWidth(strokeWidth);
         mPaintSystem.setStrokeWidth(strokeWidth);
         mPaintGray.setStrokeWidth(strokeWidth / 3.5f);
 
