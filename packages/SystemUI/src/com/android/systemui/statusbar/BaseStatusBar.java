@@ -32,6 +32,7 @@ import com.android.systemui.recent.TaskDescription;
 import com.android.systemui.statusbar.policy.NotificationRowLayout;
 import com.android.systemui.statusbar.tablet.StatusBarPanel;
 
+import android.app.Activity;
 import android.app.ActivityManager;
 import android.app.ActivityManagerNative;
 import android.app.ActivityOptions;
@@ -45,6 +46,7 @@ import android.content.Intent;
 import android.content.IntentFilter;
 import android.content.pm.ApplicationInfo;
 import android.content.pm.PackageManager.NameNotFoundException;
+import android.content.pm.ResolveInfo;
 import android.content.res.Resources;
 import android.database.ContentObserver;
 import android.graphics.Bitmap;
@@ -80,6 +82,7 @@ import android.widget.RemoteViews;
 import android.widget.TextView;
 
 import java.util.ArrayList;
+import java.util.List;
 import java.util.Locale;
 
 public abstract class BaseStatusBar extends SystemUI implements
@@ -96,6 +99,7 @@ public abstract class BaseStatusBar extends SystemUI implements
     protected static final int MSG_CLOSE_SEARCH_PANEL = 1025;
     protected static final int MSG_SHOW_INTRUDER = 1026;
     protected static final int MSG_HIDE_INTRUDER = 1027;
+    protected static final int MSG_TOGGLE_LAST_APP = 1028;
 
     protected static final boolean ENABLE_INTRUDERS = false;
 
@@ -413,6 +417,12 @@ public abstract class BaseStatusBar extends SystemUI implements
         mHandler.sendEmptyMessage(msg);
     }
 
+    public void toggleLastApp() {
+        int msg = MSG_TOGGLE_LAST_APP;
+        mHandler.removeMessages(msg);
+        mHandler.sendEmptyMessage(msg);
+    }
+
     @Override
     public void preloadRecentApps() {
         int msg = MSG_PRELOAD_RECENT_APPS;
@@ -486,6 +496,34 @@ public abstract class BaseStatusBar extends SystemUI implements
     }
 
     protected abstract View getStatusBarView();
+
+    protected void toggleLastAppImpl() {
+        int lastAppId = 0;
+        int looper = 1;
+        String packageName;
+        final Intent intent = new Intent(Intent.ACTION_MAIN);
+        final ActivityManager am = (ActivityManager) mContext
+                .getSystemService(Activity.ACTIVITY_SERVICE);
+        String defaultHomePackage = "com.android.launcher";
+        intent.addCategory(Intent.CATEGORY_HOME);
+        final ResolveInfo res = mContext.getPackageManager().resolveActivity(intent, 0);
+        if (res.activityInfo != null && !res.activityInfo.packageName.equals("android")) {
+            defaultHomePackage = res.activityInfo.packageName;
+        }
+        List <ActivityManager.RunningTaskInfo> tasks = am.getRunningTasks(5);
+        // lets get enough tasks to find something to switch to
+        // Note, we'll only get as many as the system currently has - up to 5
+        while ((lastAppId == 0) && (looper < tasks.size())) {
+            packageName = tasks.get(looper).topActivity.getPackageName();
+            if (!packageName.equals(defaultHomePackage) && !packageName.equals("com.android.systemui")) {
+                lastAppId = tasks.get(looper).id;
+            }
+            looper++;
+        }
+        if (lastAppId != 0) {
+            am.moveTaskToFront(lastAppId, am.MOVE_TASK_NO_USER_ACTION);
+        }
+    }
 
     protected void toggleRecentsActivity() {
         try {
@@ -682,6 +720,10 @@ public abstract class BaseStatusBar extends SystemUI implements
              case MSG_CANCEL_PRELOAD_RECENT_APPS:
                   cancelPreloadingRecentTasksList();
                   break;
+             case MSG_TOGGLE_LAST_APP:
+                 if (DEBUG) Slog.d(TAG, "toggle last app");
+                 toggleLastAppImpl();
+                 break;
              case MSG_OPEN_SEARCH_PANEL:
                  if (DEBUG) Slog.d(TAG, "opening search panel");
                  if (mSearchPanelView != null && mSearchPanelView.isAssistantAvailable()) {

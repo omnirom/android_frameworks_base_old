@@ -717,6 +717,14 @@ public class PhoneStatusBar extends BaseStatusBar {
         }
     };
 
+    private View.OnLongClickListener mRecentsLongClickListener = new View.OnLongClickListener() {
+        public boolean onLongClick(View v) {
+            awakenDreams();
+            toggleLastApp();
+            return true;
+        }
+    };
+
     private int mShowSearchHoldoff = 0;
     private Runnable mShowSearchPanel = new Runnable() {
         public void run() {
