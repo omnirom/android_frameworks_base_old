@@ -234,6 +234,7 @@ public class PhoneWindowManager implements WindowManagerPolicy {
     boolean mNavigationBarOnBottom = true; // is the navigation bar on the bottom *right now*?
     int[] mNavigationBarHeightForRotation = new int[4];
     int[] mNavigationBarWidthForRotation = new int[4];
+    boolean mBarsAreTranslucent = true;
 
     WindowState mKeyguard = null;
     KeyguardViewMediator mKeyguardMediator;
@@ -2756,8 +2757,10 @@ public class PhoneWindowManager implements WindowManagerPolicy {
         systemRect.top = mSystemTop;
         systemRect.right = mSystemRight;
         systemRect.bottom = mSystemBottom;
-        if (mStatusBar != null) return mStatusBar.getSurfaceLayer();
-        if (mNavigationBar != null) return mNavigationBar.getSurfaceLayer();
+        if (!mBarsAreTranslucent) {
+            if (mStatusBar != null) return mStatusBar.getSurfaceLayer();
+            if (mNavigationBar != null) return mNavigationBar.getSurfaceLayer();
+        }
         return 0;
     }
 
@@ -5133,4 +5136,14 @@ public class PhoneWindowManager implements WindowManagerPolicy {
                 pw.print(" mDemoHdmiRotationLock="); pw.println(mDemoHdmiRotationLock);
         pw.print(prefix); pw.print("mUndockedHdmiRotation="); pw.println(mUndockedHdmiRotation);
     }
+
+    /** Translucent bars */
+    public boolean isBarTranslucent() {
+        return mBarsAreTranslucent && true; // TODO: s/true/read from preferences
+    }
+
+    public void setBarTranslucentAllowed(boolean allowed) {
+        mBarsAreTranslucent = allowed;
+    }
 }
+

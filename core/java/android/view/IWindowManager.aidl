@@ -230,6 +230,12 @@ interface IWindowManager
     boolean hasNavigationBar();
 
     /**
+     * Device bars are translucent
+     */
+    boolean isBarTranslucent();
+    void setBarTranslucentAllowed(boolean allowed);
+
+    /**
      * Lock the device immediately with the specified options (can be null).
      */
     void lockNow(in Bundle options);

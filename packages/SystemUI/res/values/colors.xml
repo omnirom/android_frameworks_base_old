@@ -19,7 +19,7 @@
 <resources>
     <drawable name="notification_number_text_color">#ff000000</drawable>
     <drawable name="ticker_background_color">#ff1d1d1d</drawable>
-    <drawable name="status_bar_background">#ff000000</drawable>
+    <drawable name="status_bar_background">#80000000</drawable>
     <color name="notification_panel_solid_background">#ff000000</color>
     <drawable name="status_bar_recents_app_thumbnail_background">#88000000</drawable>
     <color name="status_bar_recents_app_label_color">#ffffffff</color>
@@ -31,7 +31,7 @@
     <drawable name="notification_header_bg">#FF000000</drawable>
 
     <!-- ==================== system bar only ==================== -->
-    <drawable name="system_bar_background">#ff000000</drawable>
+    <drawable name="system_bar_background">#88000000</drawable>
     <!-- the darkening filter applied to notifications -->
     <drawable name="notification_icon_area_smoke">#aa000000</drawable>
     <color name="notification_panel_scrim_color">#B0000000</color>
