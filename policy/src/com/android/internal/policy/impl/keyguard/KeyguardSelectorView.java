@@ -15,15 +15,25 @@
  */
 package com.android.internal.policy.impl.keyguard;
 
+import java.io.File;
+import java.net.URISyntaxException;
+import java.util.ArrayList;
+
 import android.animation.ObjectAnimator;
 import android.app.SearchManager;
 import android.app.admin.DevicePolicyManager;
 import android.content.ComponentName;
 import android.content.Context;
 import android.content.Intent;
+import android.content.pm.PackageManager;
+import android.content.res.Configuration;
+import android.content.res.Resources;
+import android.graphics.Bitmap;
 import android.graphics.drawable.Drawable;
+import android.graphics.drawable.InsetDrawable;
 import android.os.UserHandle;
 import android.provider.Settings;
+import android.text.TextUtils;
 import android.util.AttributeSet;
 import android.util.Log;
 import android.util.Slog;
@@ -31,10 +41,12 @@ import android.view.View;
 import android.widget.LinearLayout;
 
 import com.android.internal.telephony.IccCardConstants.State;
+import com.android.internal.util.custom.LockscreenTargetUtils;
 import com.android.internal.widget.LockPatternUtils;
 import com.android.internal.widget.multiwaveview.GlowPadView;
 import com.android.internal.widget.multiwaveview.GlowPadView.OnTriggerListener;
 import com.android.internal.R;
+import com.android.internal.widget.multiwaveview.TargetDrawable;
 
 public class KeyguardSelectorView extends LinearLayout implements KeyguardSecurityView {
     private static final boolean DEBUG = KeyguardHostView.DEBUG;
@@ -52,12 +64,16 @@ public class KeyguardSelectorView extends LinearLayout implements KeyguardSecuri
     private LockPatternUtils mLockPatternUtils;
     private SecurityMessageDisplay mSecurityMessageDisplay;
     private Drawable mBouncerFrame;
+    private String[] mStoredTargets;
+    private int mTargetOffset;
+    private boolean mIsScreenLarge;
 
     OnTriggerListener mOnTriggerListener = new OnTriggerListener() {
 
         public void onTrigger(View v, int target) {
-            final int resId = mGlowPadView.getResourceIdForTarget(target);
-            switch (resId) {
+            if (mStoredTargets == null) {
+                final int resId = mGlowPadView.getResourceIdForTarget(target);
+                switch (resId) {
                 case com.android.internal.R.drawable.ic_action_assist_generic:
                     Intent assistIntent =
                             ((SearchManager) mContext.getSystemService(Context.SEARCH_SERVICE))
@@ -79,7 +95,27 @@ public class KeyguardSelectorView extends LinearLayout implements KeyguardSecuri
                 case com.android.internal.R.drawable.ic_lockscreen_unlock:
                     mCallback.userActivity(0);
                     mCallback.dismiss(false);
-                break;
+                    break;
+                }
+            } else {
+                if (target == mTargetOffset) {
+                    mCallback.dismiss(false);
+                } else {
+                    int realTarget = target - mTargetOffset - 1;
+                    String targetUri = realTarget < mStoredTargets.length
+                            ? mStoredTargets[realTarget] : null;
+
+                    if (GlowPadView.EMPTY_TARGET.equals(targetUri)) {
+                        mCallback.dismiss(false);
+                    } else {
+                        try {
+                            Intent intent = Intent.parseUri(targetUri, 0);
+                            mActivityLauncher.launchActivity(intent, false, true, null, null);
+                        } catch (URISyntaxException e) {
+                            Log.w(TAG, "Invalid lockscreen target " + targetUri);
+                        }
+                    }
+                }
             }
         }
 
@@ -130,9 +166,15 @@ public class KeyguardSelectorView extends LinearLayout implements KeyguardSecuri
         }
 
         @Override
+        protected void dismissKeyguardOnNextActivity() {
+            getCallback().dismiss(false);
+        }
+
+        @Override
         Context getContext() {
             return mContext;
-        }};
+        }
+    };
 
     public KeyguardSelectorView(Context context) {
         this(context, null);
@@ -141,6 +183,7 @@ public class KeyguardSelectorView extends LinearLayout implements KeyguardSecuri
     public KeyguardSelectorView(Context context, AttributeSet attrs) {
         super(context, attrs);
         mLockPatternUtils = new LockPatternUtils(getContext());
+        mTargetOffset = LockscreenTargetUtils.getTargetOffset(context);
     }
 
     @Override
@@ -178,10 +221,10 @@ public class KeyguardSelectorView extends LinearLayout implements KeyguardSecuri
                 || secureCameraDisabled;
         final KeyguardUpdateMonitor monitor = KeyguardUpdateMonitor.getInstance(getContext());
         boolean disabledBySimState = monitor.isSimLocked();
-        boolean cameraTargetPresent =
-            isTargetPresent(com.android.internal.R.drawable.ic_lockscreen_camera);
+        boolean cameraPresent =
+                mContext.getPackageManager().hasSystemFeature(PackageManager.FEATURE_CAMERA);
         boolean searchTargetPresent =
-            isTargetPresent(com.android.internal.R.drawable.ic_action_assist_generic);
+                isTargetPresent(com.android.internal.R.drawable.ic_action_assist_generic);
 
         if (cameraDisabledByAdmin) {
             Log.v(TAG, "Camera disabled by Device Policy");
@@ -196,7 +239,7 @@ public class KeyguardSelectorView extends LinearLayout implements KeyguardSecuri
         boolean searchActionAvailable =
                 ((SearchManager) mContext.getSystemService(Context.SEARCH_SERVICE))
                 .getAssistIntent(mContext, false, UserHandle.USER_CURRENT) != null;
-        mCameraDisabled = cameraDisabledByAdmin || disabledBySimState || !cameraTargetPresent
+        mCameraDisabled = cameraDisabledByAdmin || disabledBySimState || !cameraPresent
                 || !currentUserSetup;
         mSearchDisabled = disabledBySimState || !searchActionAvailable || !searchTargetPresent
                 || !currentUserSetup;
@@ -204,31 +247,129 @@ public class KeyguardSelectorView extends LinearLayout implements KeyguardSecuri
     }
 
     public void updateResources() {
-        // Update the search icon with drawable from the search .apk
-        if (!mSearchDisabled) {
-            Intent intent = ((SearchManager) mContext.getSystemService(Context.SEARCH_SERVICE))
-                    .getAssistIntent(mContext, false, UserHandle.USER_CURRENT);
-            if (intent != null) {
-                // XXX Hack. We need to substitute the icon here but haven't formalized
-                // the public API. The "_google" metadata will be going away, so
-                // DON'T USE IT!
-                ComponentName component = intent.getComponent();
-                boolean replaced = mGlowPadView.replaceTargetDrawablesIfPresent(component,
-                        ASSIST_ICON_METADATA_NAME + "_google",
-                        com.android.internal.R.drawable.ic_action_assist_generic);
+        String storedTargets = Settings.System.getStringForUser(mContext.getContentResolver(),
+                Settings.System.LOCKSCREEN_TARGETS, UserHandle.USER_CURRENT);
+        if (storedTargets == null) {
+            // Update the search icon with drawable from the search .apk
+            if (!mSearchDisabled) {
+                Intent intent = ((SearchManager) mContext.getSystemService(Context.SEARCH_SERVICE))
+                        .getAssistIntent(mContext, false, UserHandle.USER_CURRENT);
+                if (intent != null) {
+                    // XXX Hack. We need to substitute the icon here but haven't formalized
+                    // the public API. The "_google" metadata will be going away, so
+                    // DON'T USE IT!
+                    ComponentName component = intent.getComponent();
+                    boolean replaced = mGlowPadView.replaceTargetDrawablesIfPresent(component,
+                            ASSIST_ICON_METADATA_NAME + "_google",
+                            com.android.internal.R.drawable.ic_action_assist_generic);
 
-                if (!replaced && !mGlowPadView.replaceTargetDrawablesIfPresent(component,
-                            ASSIST_ICON_METADATA_NAME,
-                            com.android.internal.R.drawable.ic_action_assist_generic)) {
-                        Slog.w(TAG, "Couldn't grab icon from package " + component);
+                    if (!replaced && !mGlowPadView.replaceTargetDrawablesIfPresent(component,
+                                ASSIST_ICON_METADATA_NAME,
+                                com.android.internal.R.drawable.ic_action_assist_generic)) {
+                            Slog.w(TAG, "Couldn't grab icon from package " + component);
+                    }
                 }
             }
-        }
 
-        mGlowPadView.setEnableTarget(com.android.internal.R.drawable
-                .ic_lockscreen_camera, !mCameraDisabled);
-        mGlowPadView.setEnableTarget(com.android.internal.R.drawable
-                .ic_action_assist_generic, !mSearchDisabled);
+            mGlowPadView.setEnableTarget(com.android.internal.R.drawable
+                    .ic_lockscreen_camera, !mCameraDisabled);
+            mGlowPadView.setEnableTarget(com.android.internal.R.drawable
+                    .ic_action_assist_generic, !mSearchDisabled);
+
+            // Enable magnetic targets
+            mGlowPadView.setMagneticTargets(true);
+        } else {
+            mStoredTargets = storedTargets.split("\\|");
+            ArrayList<TargetDrawable> storedDrawables = new ArrayList<TargetDrawable>();
+
+            final Resources res = getResources();
+            final Drawable blankActiveDrawable = res.getDrawable(
+                    R.drawable.ic_lockscreen_target_activated);
+            final InsetDrawable activeBack = new InsetDrawable(blankActiveDrawable, 0, 0, 0, 0);
+
+            // Disable magnetic target
+            mGlowPadView.setMagneticTargets(false);
+
+            // Magnetic target replacement
+            final Drawable blankInActiveDrawable = res.getDrawable(
+                    com.android.internal.R.drawable.ic_lockscreen_lock_pressed);
+            final Drawable unlockActiveDrawable = res.getDrawable(
+                    com.android.internal.R.drawable.ic_lockscreen_unlock_activated);
+
+            // Shift targets for landscape lockscreen on phones
+            for (int i = 0; i < mTargetOffset; i++) {
+                storedDrawables.add(new TargetDrawable(res, null));
+            }
+
+            // Add unlock target
+            storedDrawables.add(new TargetDrawable(res,
+                    res.getDrawable(R.drawable.ic_lockscreen_unlock)));
+
+            for (int i = 0; i < 8 - mTargetOffset - 1; i++) {
+                if (i >= mStoredTargets.length) {
+                    storedDrawables.add(new TargetDrawable(res, 0));
+                    continue;
+                }
+
+                String uri = mStoredTargets[i];
+                if (uri.equals(GlowPadView.EMPTY_TARGET)) {
+                    Drawable d = LockscreenTargetUtils.getLayeredDrawable(
+                            mContext, unlockActiveDrawable, blankInActiveDrawable,
+                            LockscreenTargetUtils.getInsetForIconType(mContext, null), true);
+                    storedDrawables.add(new TargetDrawable(res, d));
+                    continue;
+                }
+
+                try {
+                    Intent intent = Intent.parseUri(uri, 0);
+                    Drawable front = null;
+                    Drawable back = activeBack;
+                    boolean frontBlank = false;
+                    String type = null;
+
+                    if (intent.hasExtra(GlowPadView.ICON_FILE)) {
+                        type = GlowPadView.ICON_FILE;
+                        front = LockscreenTargetUtils.getDrawableFromFile(mContext,
+                                intent.getStringExtra(GlowPadView.ICON_FILE));
+                    } else if (intent.hasExtra(GlowPadView.ICON_RESOURCE)) {
+                        String source = intent.getStringExtra(GlowPadView.ICON_RESOURCE);
+                        String packageName = intent.getStringExtra(GlowPadView.ICON_PACKAGE);
+
+                        if (source != null) {
+                            front = LockscreenTargetUtils.getDrawableFromResources(mContext,
+                                    packageName, source, false);
+                            back = LockscreenTargetUtils.getDrawableFromResources(mContext,
+                                    packageName, source, true);
+                            type = GlowPadView.ICON_RESOURCE;
+                            frontBlank = true;
+                        }
+                    }
+                    if (front == null || back == null) {
+                        front = LockscreenTargetUtils.getDrawableFromIntent(mContext, intent);
+                    }
+
+                    int inset = LockscreenTargetUtils.getInsetForIconType(mContext, type);
+                    Drawable drawable = LockscreenTargetUtils.getLayeredDrawable(mContext,
+                            back,front, inset, frontBlank);
+                    TargetDrawable targetDrawable = new TargetDrawable(res, drawable);
+
+                    ComponentName compName = intent.getComponent();
+                    String className = compName == null ? null : compName.getClassName();
+                    if (TextUtils.equals(className, "com.android.camera.CameraLauncher")) {
+                        targetDrawable.setEnabled(!mCameraDisabled);
+                    } else if (TextUtils.equals(className, "SearchActivity")) {
+                        targetDrawable.setEnabled(!mSearchDisabled);
+                    }
+
+                    storedDrawables.add(targetDrawable);
+                } catch (URISyntaxException e) {
+                    Log.w(TAG, "Invalid target uri " + uri);
+                    storedDrawables.add(new TargetDrawable(res, 0));
+                }
+            }
+
+            mGlowPadView.setTargetResources(storedDrawables);
+        }
     }
 
     void doTransition(View view, float to) {
