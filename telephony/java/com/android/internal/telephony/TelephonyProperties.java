@@ -189,7 +189,7 @@ public interface TelephonyProperties
     static final String PROPERTY_IGNORE_NITZ = "telephony.test.ignore.nitz";
 
     /**
-     * Set to true to indicates support for simultaneous voice and data.
+     * Set to true to indicates support for simultaneous voice and EvDo.
      */
-    static final String PROPERTY_SVDATA = "ro.config.svlte1x";
+    static final String PROPERTY_SVDO = "ro.ril.svdo";
 }
