@@ -1856,6 +1856,7 @@
 
   <!-- CM -->
   <java-symbol type="bool" name="config_smsSamsungCdmaAlternateMessageIDEncoding" />
+  <java-symbol type="bool" name="config_samsung_stk" />
 
   <java-symbol type="drawable" name="ic_lock_reboot" />
   <java-symbol type="string" name="global_action_reboot" />
