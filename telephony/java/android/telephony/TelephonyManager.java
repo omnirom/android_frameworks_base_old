@@ -611,6 +611,8 @@ public class TelephonyManager {
     public static final int NETWORK_TYPE_EHRPD = 14;
     /** Current network is HSPA+ */
     public static final int NETWORK_TYPE_HSPAP = 15;
+    /** Current network is DC-HSPAP */
+    public static final int NETWORK_TYPE_DCHSPAP = 30;
 
     /**
      * @return the NETWORK_TYPE_xxxx for current data connection.
@@ -640,6 +642,7 @@ public class TelephonyManager {
      * @see #NETWORK_TYPE_LTE
      * @see #NETWORK_TYPE_EHRPD
      * @see #NETWORK_TYPE_HSPAP
+     * @see #NETWORK_TYPE_DCHSPAP
      *
      * @hide
      */
@@ -716,6 +719,7 @@ public class TelephonyManager {
             case NETWORK_TYPE_EVDO_B:
             case NETWORK_TYPE_EHRPD:
             case NETWORK_TYPE_HSPAP:
+            case NETWORK_TYPE_DCHSPAP:
                 return NETWORK_CLASS_3_G;
             case NETWORK_TYPE_LTE:
                 return NETWORK_CLASS_4_G;
@@ -768,6 +772,8 @@ public class TelephonyManager {
                 return "iDEN";
             case NETWORK_TYPE_HSPAP:
                 return "HSPA+";
+            case NETWORK_TYPE_DCHSPAP:
+                return "DCHSPAP";
             default:
                 return "UNKNOWN";
         }

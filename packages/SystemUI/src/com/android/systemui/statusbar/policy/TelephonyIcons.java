@@ -153,6 +153,23 @@ class TelephonyIcons {
                 R.drawable.ic_qs_signal_full_h
     };
 
+    // DC-HSPAP
+    static final int[][] DATA_DC = {
+            { R.drawable.stat_sys_data_connected_dc,
+              R.drawable.stat_sys_data_connected_dc,
+              R.drawable.stat_sys_data_connected_dc,
+              R.drawable.stat_sys_data_connected_dc },
+            { R.drawable.stat_sys_data_fully_connected_dc,
+              R.drawable.stat_sys_data_fully_connected_dc,
+              R.drawable.stat_sys_data_fully_connected_dc,
+              R.drawable.stat_sys_data_fully_connected_dc }
+    };
+
+    static final int[] QS_DATA_DC = {
+                R.drawable.ic_qs_signal_h,
+                R.drawable.ic_qs_signal_full_h
+    };
+
     //CDMA
     // Use 3G icons for EVDO data and 1x icons for 1XRTT data
     static final int[][] DATA_1X = {
