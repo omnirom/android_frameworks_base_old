@@ -28325,6 +28325,7 @@ package android.webkit {
     method public synchronized int getTextZoom();
     method public synchronized boolean getUseWideViewPort();
     method public synchronized java.lang.String getUserAgentString();
+    method public synchronized boolean getWebSocketsEnabled();
     method public void setAllowContentAccess(boolean);
     method public void setAllowFileAccess(boolean);
     method public abstract void setAllowFileAccessFromFileURLs(boolean);
@@ -28373,6 +28374,7 @@ package android.webkit {
     method public synchronized void setTextZoom(int);
     method public synchronized void setUseWideViewPort(boolean);
     method public synchronized void setUserAgentString(java.lang.String);
+    method public synchronized void setWebSocketsEnabled(boolean);
     method public synchronized boolean supportMultipleWindows();
     method public boolean supportZoom();
     field public static final int LOAD_CACHE_ELSE_NETWORK = 1; // 0x1
