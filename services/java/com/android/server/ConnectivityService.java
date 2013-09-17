@@ -175,7 +175,6 @@ public class ConnectivityService extends IConnectivityManager.Stub {
     private static final int MAX_HOSTROUTE_CYCLE_COUNT = 10;
 
     private Tethering mTethering;
-    private boolean mTetheringConfigValid = false;
 
     private KeyStore mKeyStore;
 
@@ -589,10 +588,6 @@ public class ConnectivityService extends IConnectivityManager.Stub {
         }
 
         mTethering = new Tethering(mContext, mNetd, statsService, this, mHandler.getLooper());
-        mTetheringConfigValid = ((mTethering.getTetherableUsbRegexs().length != 0 ||
-                                  mTethering.getTetherableWifiRegexs().length != 0 ||
-                                  mTethering.getTetherableBluetoothRegexs().length != 0) &&
-                                 mTethering.getUpstreamIfaceTypes().length != 0);
 
         mVpn = new Vpn(mContext, mVpnCallback, mNetd, this);
         mVpn.startMonitoring(mContext, mTrackerHandler);
@@ -2174,13 +2169,24 @@ public class ConnectivityService extends IConnectivityManager.Stub {
             }
         }
 
+        if (DBG) log("handleCaptivePortalTrackerCheck: call captivePortalCheckComplete ni=" + info);
         thisNet.captivePortalCheckComplete();
     }
 
     /** @hide */
+    @Override
     public void captivePortalCheckComplete(NetworkInfo info) {
         enforceConnectivityInternalPermission();
+        if (DBG) log("captivePortalCheckComplete: ni=" + info);
         mNetTrackers[info.getType()].captivePortalCheckComplete();
+    }
+
+    /** @hide */
+    @Override
+    public void captivePortalCheckCompleted(NetworkInfo info, boolean isCaptivePortal) {
+        enforceConnectivityInternalPermission();
+        if (DBG) log("captivePortalCheckCompleted: ni=" + info + " captive=" + isCaptivePortal);
+        mNetTrackers[info.getType()].captivePortalCheckCompleted(isCaptivePortal);
     }
 
     /**
@@ -3002,7 +3008,10 @@ public class ConnectivityService extends IConnectivityManager.Stub {
         int defaultVal = (SystemProperties.get("ro.tether.denied").equals("true") ? 0 : 1);
         boolean tetherEnabledInSettings = (Settings.Global.getInt(mContext.getContentResolver(),
                 Settings.Global.TETHER_SUPPORTED, defaultVal) != 0);
-        return tetherEnabledInSettings && mTetheringConfigValid;
+        return tetherEnabledInSettings && ((mTethering.getTetherableUsbRegexs().length != 0 ||
+                mTethering.getTetherableWifiRegexs().length != 0 ||
+                mTethering.getTetherableBluetoothRegexs().length != 0) &&
+                mTethering.getUpstreamIfaceTypes().length != 0);
     }
 
     // An API NetworkStateTrackers can call when they lose their network.
@@ -3734,11 +3743,26 @@ public class ConnectivityService extends IConnectivityManager.Stub {
                 // hipri connection so the default connection stays active.
                 log("isMobileOk: start hipri url=" + params.mUrl);
                 mCs.setEnableFailFastMobileData(DctConstants.ENABLED);
-                mCs.startUsingNetworkFeature(ConnectivityManager.TYPE_MOBILE,
-                        Phone.FEATURE_ENABLE_HIPRI, new Binder());
 
                 // Continue trying to connect until time has run out
                 long endTime = SystemClock.elapsedRealtime() + params.mTimeOutMs;
+
+                // First wait until we can start using hipri
+                Binder binder = new Binder();
+                while(SystemClock.elapsedRealtime() < endTime) {
+                    int ret = mCs.startUsingNetworkFeature(ConnectivityManager.TYPE_MOBILE,
+                            Phone.FEATURE_ENABLE_HIPRI, binder);
+                    if ((ret == PhoneConstants.APN_ALREADY_ACTIVE)
+                        || (ret == PhoneConstants.APN_REQUEST_STARTED)) {
+                            log("isMobileOk: hipri started");
+                            break;
+                    }
+                    if (VDBG) log("isMobileOk: hipri not started yet");
+                    result = ConnectivityManager.CMP_RESULT_CODE_NO_CONNECTION;
+                    sleep(1);
+                }
+
+                // Continue trying to connect until time has run out
                 while(SystemClock.elapsedRealtime() < endTime) {
                     try {
                         // Wait for hipri to connect.
@@ -3747,8 +3771,10 @@ public class ConnectivityService extends IConnectivityManager.Stub {
                         NetworkInfo.State state = mCs
                                 .getNetworkInfo(ConnectivityManager.TYPE_MOBILE_HIPRI).getState();
                         if (state != NetworkInfo.State.CONNECTED) {
-                            log("isMobileOk: not connected ni=" +
+                            if (VDBG) {
+                                log("isMobileOk: not connected ni=" +
                                     mCs.getNetworkInfo(ConnectivityManager.TYPE_MOBILE_HIPRI));
+                            }
                             sleep(1);
                             result = ConnectivityManager.CMP_RESULT_CODE_NO_CONNECTION;
                             continue;
@@ -4088,7 +4114,9 @@ public class ConnectivityService extends IConnectivityManager.Stub {
         return null;
     }
 
-    private String getMobileRedirectedProvisioningUrl() {
+    @Override
+    public String getMobileRedirectedProvisioningUrl() {
+        enforceConnectivityInternalPermission();
         String url = getProvisioningUrlBaseFromFile(REDIRECTED_PROVISIONING);
         if (TextUtils.isEmpty(url)) {
             url = mContext.getResources().getString(R.string.mobile_redirected_provisioning_url);
@@ -4096,14 +4124,15 @@ public class ConnectivityService extends IConnectivityManager.Stub {
         return url;
     }
 
+    @Override
     public String getMobileProvisioningUrl() {
         enforceConnectivityInternalPermission();
         String url = getProvisioningUrlBaseFromFile(PROVISIONING);
         if (TextUtils.isEmpty(url)) {
             url = mContext.getResources().getString(R.string.mobile_provisioning_url);
-            log("getProvisioningUrl: mobile_provisioining_url from resource =" + url);
+            log("getMobileProvisioningUrl: mobile_provisioining_url from resource =" + url);
         } else {
-            log("getProvisioningUrl: mobile_provisioning_url from File =" + url);
+            log("getMobileProvisioningUrl: mobile_provisioning_url from File =" + url);
         }
         // populate the iccid, imei and phone number in the provisioning url.
         if (!TextUtils.isEmpty(url)) {
