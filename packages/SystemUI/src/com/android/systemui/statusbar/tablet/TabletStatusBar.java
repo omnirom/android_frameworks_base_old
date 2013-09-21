@@ -570,6 +570,8 @@ public class TabletStatusBar extends BaseStatusBar implements
                 }
             });
 
+        addActiveDisplayView();
+
         // tuning parameters
         final int LIGHTS_GOING_OUT_SYSBAR_DURATION = 750;
         final int LIGHTS_GOING_OUT_SHADOW_DURATION = 750;
