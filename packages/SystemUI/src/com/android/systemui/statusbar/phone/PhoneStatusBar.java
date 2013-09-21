@@ -471,6 +471,8 @@ public class PhoneStatusBar extends BaseStatusBar {
             // no window manager? good luck with that
         }
 
+        addActiveDisplayView();
+
         // figure out which pixel-format to use for the status bar.
         updateTranslucentStatus();
 
