@@ -242,7 +242,7 @@ public class ActiveDisplayView extends FrameLayout {
     };
 
     /**
-     * Class used to listen for changes to P.O.R.N. related settings
+     * Class used to listen for changes to active display related settings
      */
     class SettingsObserver extends ContentObserver {
         SettingsObserver(Handler handler) {
@@ -295,6 +295,8 @@ public class ActiveDisplayView extends FrameLayout {
                     resolver, Settings.System.ACTIVE_DISPLAY_REDISPLAY, 0L);
             mInitialBrightness = Settings.System.getInt(
                     resolver, Settings.System.ACTIVE_DISPLAY_BRIGHTNESS, 100) / 100f;
+
+            if (DEBUG) Log.e(TAG, "Enable status: " + mDisplayNotifications);
 
             int brightnessMode = Settings.System.getInt(
                     resolver, Settings.System.SCREEN_BRIGHTNESS_MODE, -1);
