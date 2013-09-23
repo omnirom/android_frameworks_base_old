@@ -412,13 +412,7 @@ public class PhoneStatusBar extends BaseStatusBar {
         }
 
         // figure out which pixel-format to use for the status bar.
-        boolean translucent = false;
-        try {
-            translucent = mWindowManagerService.isBarTranslucent();
-        } catch (RemoteException ex) {
-            // do nothing
-        }
-        mPixelFormat = translucent ? PixelFormat.TRANSLUCENT : PixelFormat.OPAQUE;
+        updateTranslucentStatus();
 
         mSystemIconArea = (LinearLayout) mStatusBarView.findViewById(R.id.system_icon_area);
         mStatusIcons = (LinearLayout)mStatusBarView.findViewById(R.id.statusIcons);
@@ -821,12 +815,6 @@ public class PhoneStatusBar extends BaseStatusBar {
     }
 
     private WindowManager.LayoutParams getNavigationBarLayoutParams() {
-        boolean translucent = true;
-        try {
-            translucent = mWindowManagerService.isBarTranslucent();
-        } catch (RemoteException ex) {
-            // Do nothing
-        }
         WindowManager.LayoutParams lp = new WindowManager.LayoutParams(
                 LayoutParams.MATCH_PARENT, LayoutParams.MATCH_PARENT,
                 WindowManager.LayoutParams.TYPE_NAVIGATION_BAR,
@@ -836,13 +824,11 @@ public class PhoneStatusBar extends BaseStatusBar {
                     | WindowManager.LayoutParams.FLAG_NOT_TOUCH_MODAL
                     | WindowManager.LayoutParams.FLAG_WATCH_OUTSIDE_TOUCH
                     | WindowManager.LayoutParams.FLAG_SPLIT_TOUCH,
-                translucent ? PixelFormat.TRANSLUCENT : PixelFormat.OPAQUE);
+                PixelFormat.OPAQUE);
         // this will allow the navbar to run in an overlay on devices that support this
         if (ActivityManager.isHighEndGfx()) {
             lp.flags |= WindowManager.LayoutParams.FLAG_HARDWARE_ACCELERATED;
         }
-
-        mNavigationBarView.setHidden(translucent);
 
         lp.setTitle("NavigationBar");
         lp.windowAnimations = 0;
@@ -2382,6 +2368,7 @@ public class PhoneStatusBar extends BaseStatusBar {
                 // work around problem where mDisplay.getRotation() is not stable while screen is off (bug 7086018)
                 repositionNavigationBar();
                 notifyNavigationBarScreenOn(true);
+                updateTranslucentStatus();
             }
         }
     };
@@ -2422,6 +2409,19 @@ public class PhoneStatusBar extends BaseStatusBar {
         } catch (android.os.RemoteException ex) {
             // oh well
         }
+    }
+
+    public void updateTranslucentStatus() {
+        boolean translucent = false;
+        try {
+            translucent = mWindowManagerService.isBarTranslucent();
+        } catch (RemoteException ex) {
+            // do nothing
+        }
+        Log.e(TAG, "Translucent? " + translucent);
+        mPixelFormat = translucent ? PixelFormat.TRANSLUCENT : PixelFormat.OPAQUE;
+
+        mStatusBarView.getBackground().setAlpha(translucent ? 128 : 255);
     }
 
     /**

@@ -5139,7 +5139,8 @@ public class PhoneWindowManager implements WindowManagerPolicy {
 
     /** Translucent bars */
     public boolean isBarTranslucent() {
-        return mBarsAreTranslucent && true; // TODO: s/true/read from preferences
+        return mBarsAreTranslucent && (Settings.System.getInt(mContext.getContentResolver(),
+                Settings.System.STATUS_BAR_TRANSPARENT_ON_KEYGUARD, 1) == 1);
     }
 
     public void setBarTranslucentAllowed(boolean allowed) {
