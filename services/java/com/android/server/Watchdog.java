@@ -96,6 +96,7 @@ public class Watchdog extends Thread {
     int mPhonePid;
     IActivityController mController;
     boolean mAllowRestart = true;
+    int mActivityControllerPid;
 
     final Calendar mCalendar = Calendar.getInstance();
     int mMinScreenOff = MEMCHECK_DEFAULT_MIN_SCREEN_OFF;
@@ -224,6 +225,9 @@ public class Watchdog extends Thread {
         synchronized (this) {
             if ("com.android.phone".equals(name)) {
                 mPhonePid = pid;
+            }
+            else if ("ActivityController".equals(name)) {
+                     mActivityControllerPid = pid;
             }
         }
     }
@@ -456,6 +460,7 @@ public class Watchdog extends Thread {
             ArrayList<Integer> pids = new ArrayList<Integer>();
             pids.add(Process.myPid());
             if (mPhonePid > 0) pids.add(mPhonePid);
+            if (mActivityControllerPid > 0) pids.add(mActivityControllerPid);
             // Pass !waitedHalf so that just in case we somehow wind up here without having
             // dumped the halfway stacks, we properly re-initialize the trace file.
             final File stack = ActivityManagerService.dumpStackTraces(
@@ -480,6 +485,21 @@ public class Watchdog extends Thread {
                 Slog.e(TAG, e.getMessage());
             }
 
+            String tracesPath = SystemProperties.get("dalvik.vm.stack-trace-file", null);
+            if (tracesPath != null && tracesPath.length() != 0) {
+                File traceRenameFile = new File(tracesPath);
+                String newTracesPath;
+                int lpos = tracesPath.lastIndexOf (".");
+                if (-1 != lpos)
+                    newTracesPath = tracesPath.substring (0, lpos) + "_SystemServer_WDT" + tracesPath.substring (lpos);
+                else
+                    newTracesPath = tracesPath + "_SystemServer_WDT";
+                traceRenameFile.renameTo(new File(newTracesPath));
+                tracesPath = newTracesPath;
+            }
+
+            final File newFd = new File(tracesPath);
+
             // Try to add the error to the dropbox, but assuming that the ActivityManager
             // itself may be deadlocked.  (which has happened, causing this statement to
             // deadlock and the watchdog as a whole to be ineffective)
@@ -487,7 +507,7 @@ public class Watchdog extends Thread {
                     public void run() {
                         mActivity.addErrorToDropBox(
                                 "watchdog", null, "system_server", null, null,
-                                name, null, stack, null);
+                                name, null, newFd, null);
                     }
                 };
             dropboxThread.start();
