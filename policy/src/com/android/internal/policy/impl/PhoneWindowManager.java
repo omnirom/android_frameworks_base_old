@@ -2657,9 +2657,9 @@ public class PhoneWindowManager implements WindowManagerPolicy {
                     mStableBottom = mStableFullscreenBottom = mTmpNavigationFrame.top;
                     if (navVisible) {
                         mNavigationBar.showLw(true);
-                        mDockBottom = mTmpNavigationFrame.top;
-                        mRestrictedScreenHeight = mDockBottom - mRestrictedScreenTop;
-                        mRestrictedOverscanScreenHeight = mDockBottom - mRestrictedOverscanScreenTop;
+                        mDockBottom = mTmpNavigationFrame.top; //XPLOD
+                        mRestrictedScreenHeight = mTmpNavigationFrame.bottom - mRestrictedScreenTop;
+                        mRestrictedOverscanScreenHeight = mTmpNavigationFrame.bottom - mRestrictedOverscanScreenTop;
                     } else {
                         // We currently want to hide the navigation UI.
                         mNavigationBar.hideLw(true);
@@ -2668,7 +2668,7 @@ public class PhoneWindowManager implements WindowManagerPolicy {
                         // If the nav bar is currently requested to be visible,
                         // and not in the process of animating on or off, then
                         // we can tell the app that it is covered by it.
-                        mSystemBottom = mTmpNavigationFrame.top;
+                        //mSystemBottom = mTmpNavigationFrame.top;
                     }
                 } else {
                     // Landscape screen; nav bar goes to the right.
@@ -2766,7 +2766,7 @@ public class PhoneWindowManager implements WindowManagerPolicy {
         systemRect.bottom = mSystemBottom;
         if (!mBarsAreTranslucent) {
             if (mStatusBar != null) return mStatusBar.getSurfaceLayer();
-            if (mNavigationBar != null) return mNavigationBar.getSurfaceLayer();
+            //if (mNavigationBar != null) return mNavigationBar.getSurfaceLayer();
         }
         return 0;
     }
@@ -3068,12 +3068,12 @@ public class PhoneWindowManager implements WindowManagerPolicy {
                             + mOverscanScreenHeight;
                 } else if (attrs.type == WindowManager.LayoutParams.TYPE_WALLPAPER) {
                     // The wallpaper mostly goes into the overscan region.
-                    pf.left = df.left = of.left = cf.left = mRestrictedOverscanScreenLeft;
-                    pf.top = df.top = of.top = cf.top = mRestrictedOverscanScreenTop;
+                    pf.left = df.left = of.left = cf.left = 0;
+                    pf.top = df.top = of.top = cf.top = 0;
                     pf.right = df.right = of.right = cf.right
-                            = mRestrictedOverscanScreenLeft + mRestrictedOverscanScreenWidth;
+                            = mSystemRight;
                     pf.bottom = df.bottom = of.bottom = cf.bottom
-                            = mRestrictedOverscanScreenTop + mRestrictedOverscanScreenHeight;
+                            = mSystemBottom + (mTmpNavigationFrame.bottom - mTmpNavigationFrame.top);
                 } else if ((attrs.flags & FLAG_LAYOUT_IN_OVERSCAN) != 0
                         && attrs.type >= WindowManager.LayoutParams.FIRST_APPLICATION_WINDOW
                         && attrs.type <= WindowManager.LayoutParams.LAST_SUB_WINDOW) {
@@ -3085,10 +3085,10 @@ public class PhoneWindowManager implements WindowManagerPolicy {
                             = mOverscanScreenLeft + mOverscanScreenWidth;
                     pf.bottom = df.bottom = of.bottom = cf.bottom
                             = mOverscanScreenTop + mOverscanScreenHeight;
-                } else if (mCanHideNavigationBar
+                } else if ((mCanHideNavigationBar
                         && (sysUiFl & View.SYSTEM_UI_FLAG_LAYOUT_HIDE_NAVIGATION) != 0
                         && attrs.type >= WindowManager.LayoutParams.FIRST_APPLICATION_WINDOW
-                        && attrs.type <= WindowManager.LayoutParams.LAST_SUB_WINDOW) {
+                        && attrs.type <= WindowManager.LayoutParams.LAST_SUB_WINDOW) || true) {
                     // Asking for layout as if the nav bar is hidden, lets the
                     // application extend into the unrestricted screen area.  We
                     // only do this for application windows to ensure no window that
