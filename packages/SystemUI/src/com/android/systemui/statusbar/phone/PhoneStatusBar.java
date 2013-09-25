@@ -418,7 +418,7 @@ public class PhoneStatusBar extends BaseStatusBar {
         } catch (RemoteException ex) {
             // do nothing
         }
-        mPixelFormat = translucent ? PixelFormat.TRANSLUCENT : PixelFormat.OPAQUE;
+        mPixelFormat = true ? PixelFormat.TRANSLUCENT : PixelFormat.OPAQUE;
 
         mSystemIconArea = (LinearLayout) mStatusBarView.findViewById(R.id.system_icon_area);
         mStatusIcons = (LinearLayout)mStatusBarView.findViewById(R.id.statusIcons);
@@ -822,11 +822,6 @@ public class PhoneStatusBar extends BaseStatusBar {
 
     private WindowManager.LayoutParams getNavigationBarLayoutParams() {
         boolean translucent = true;
-        try {
-            translucent = mWindowManagerService.isBarTranslucent();
-        } catch (RemoteException ex) {
-            // Do nothing
-        }
         WindowManager.LayoutParams lp = new WindowManager.LayoutParams(
                 LayoutParams.MATCH_PARENT, LayoutParams.MATCH_PARENT,
                 WindowManager.LayoutParams.TYPE_NAVIGATION_BAR,
