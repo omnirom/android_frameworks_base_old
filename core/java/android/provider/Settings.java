@@ -2662,6 +2662,12 @@ public final class Settings {
         public static final String BATTERY_AROUND_LOCKSCREEN_RING = "battery_around_lockscreen_ring";
 
         /**
+         * Whether or not to make the navigation bar translucent
+         * @hide
+         */
+        public static final String TRANSLUCENT_NAVIGATION_BAR = "translucent_navigation_bar";
+
+        /**
          * Settings to backup. This is here so that it's in the same place as the settings
          * keys and easy to update.
          *
