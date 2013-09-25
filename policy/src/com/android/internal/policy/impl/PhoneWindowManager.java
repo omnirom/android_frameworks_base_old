@@ -235,6 +235,7 @@ public class PhoneWindowManager implements WindowManagerPolicy {
     int[] mNavigationBarHeightForRotation = new int[4];
     int[] mNavigationBarWidthForRotation = new int[4];
     boolean mBarsAreTranslucent = true;
+    boolean mNavigationBarTranslucent = true;
 
     WindowState mKeyguard = null;
     KeyguardViewMediator mKeyguardMediator;
@@ -533,6 +534,9 @@ public class PhoneWindowManager implements WindowManagerPolicy {
                     UserHandle.USER_ALL);
             resolver.registerContentObserver(Settings.System.getUriFor(
                     "fancy_rotation_anim"), false, this,
+                    UserHandle.USER_ALL);
+            resolver.registerContentObserver(Settings.System.getUriFor(
+                    Settings.System.TRANSLUCENT_NAVIGATION_BAR), false, this,
                     UserHandle.USER_ALL);
             updateSettings();
         }
@@ -1143,6 +1147,9 @@ public class PhoneWindowManager implements WindowManagerPolicy {
                 mHasSoftInput = hasSoftInput;
                 updateRotation = true;
             }
+
+            mNavigationBarTranslucent = (Settings.System.getIntForUser(resolver,
+                    Settings.System.TRANSLUCENT_NAVIGATION_BAR, 0, UserHandle.USER_CURRENT) == 1);
         }
         if (updateRotation) {
             updateRotation(true);
@@ -2668,14 +2675,16 @@ public class PhoneWindowManager implements WindowManagerPolicy {
                         // If the nav bar is currently requested to be visible,
                         // and not in the process of animating on or off, then
                         // we can tell the app that it is covered by it.
-                        mSystemBottom = mTmpNavigationFrame.top;
+                        if (!mNavigationBarTranslucent) {
+                            mSystemBottom = mTmpNavigationFrame.top;
+                        }
                     }
                 } else {
                     // Landscape screen; nav bar goes to the right.
                     int left = displayWidth - overscanRight
                             - mNavigationBarWidthForRotation[displayRotation];
                     mTmpNavigationFrame.set(left, 0, displayWidth - overscanRight, displayHeight);
-                    mStableRight = mStableFullscreenRight = mTmpNavigationFrame.left;
+                    mStableRight = mStableFullscreenRight = mTmpNavigationFrame.right;
                     if (navVisible) {
                         mNavigationBar.showLw(true);
                         mDockRight = mTmpNavigationFrame.left;
@@ -2689,7 +2698,13 @@ public class PhoneWindowManager implements WindowManagerPolicy {
                         // If the nav bar is currently requested to be visible,
                         // and not in the process of animating on or off, then
                         // we can tell the app that it is covered by it.
-                        mSystemRight = mTmpNavigationFrame.left;
+                        // Note about Translucency in phone landscape: We cannot
+                        // do it like this, because the status bar goes below the
+                        // navigation bar, and without mSystemRight remaining the
+                        // screen size, app background doesn't extend.
+                        //if (!mNavigationBarTranslucent) {
+                            mSystemRight = mTmpNavigationFrame.left;
+                        //}
                     }
                 }
                 // Make sure the content and current rectangles are updated to
@@ -2766,7 +2781,9 @@ public class PhoneWindowManager implements WindowManagerPolicy {
         systemRect.bottom = mSystemBottom;
         if (!mBarsAreTranslucent) {
             if (mStatusBar != null) return mStatusBar.getSurfaceLayer();
-            if (mNavigationBar != null) return mNavigationBar.getSurfaceLayer();
+            /*if (!mNavigationBarTranslucent) {
+                if (mNavigationBar != null) return mNavigationBar.getSurfaceLayer();
+            }*/
         }
         return 0;
     }
@@ -2867,7 +2884,7 @@ public class PhoneWindowManager implements WindowManagerPolicy {
         final Rect vf = mTmpVisibleFrame;
 
         final boolean hasNavBar = (isDefaultDisplay && mHasNavigationBar
-                && mNavigationBar != null && mNavigationBar.isVisibleLw());
+                && mNavigationBar != null && mNavigationBar.isVisibleLw() && !mNavigationBarTranslucent);
 
         final int adjust = sim & SOFT_INPUT_MASK_ADJUST;
 
@@ -2967,7 +2984,7 @@ public class PhoneWindowManager implements WindowManagerPolicy {
                         pf.right = df.right = mRestrictedOverscanScreenLeft
                                 + mRestrictedOverscanScreenWidth;
                         pf.bottom = df.bottom = mRestrictedOverscanScreenTop
-                                + mRestrictedOverscanScreenHeight;
+                                + (mTmpNavigationFrame.bottom - mRestrictedOverscanScreenTop);
                         // We need to tell the app about where the frame inside the overscan
                         // is, so it can inset its content by that amount -- it didn't ask
                         // to actually extend itself into the overscan region.
@@ -3026,8 +3043,8 @@ public class PhoneWindowManager implements WindowManagerPolicy {
                                         ? mRestrictedScreenLeft+mRestrictedScreenWidth
                                         : mUnrestrictedScreenLeft + mUnrestrictedScreenWidth;
                     pf.bottom = df.bottom = of.bottom = cf.bottom = hasNavBar
-                                          ? mRestrictedScreenTop+mRestrictedScreenHeight
-                                          : mUnrestrictedScreenTop + mUnrestrictedScreenHeight;
+                                          ? mRestrictedScreenTop+(mTmpNavigationFrame.bottom - mRestrictedScreenTop)
+                                          : mUnrestrictedScreenTop + (mTmpNavigationFrame.bottom - mRestrictedScreenTop);
                     if (DEBUG_LAYOUT) {
                         Log.v(TAG, String.format(
                                     "Laying out IN_SCREEN status bar window: (%d,%d - %d,%d)",
@@ -3068,12 +3085,21 @@ public class PhoneWindowManager implements WindowManagerPolicy {
                             + mOverscanScreenHeight;
                 } else if (attrs.type == WindowManager.LayoutParams.TYPE_WALLPAPER) {
                     // The wallpaper mostly goes into the overscan region.
-                    pf.left = df.left = of.left = cf.left = mRestrictedOverscanScreenLeft;
-                    pf.top = df.top = of.top = cf.top = mRestrictedOverscanScreenTop;
-                    pf.right = df.right = of.right = cf.right
-                            = mRestrictedOverscanScreenLeft + mRestrictedOverscanScreenWidth;
-                    pf.bottom = df.bottom = of.bottom = cf.bottom
-                            = mRestrictedOverscanScreenTop + mRestrictedOverscanScreenHeight;
+                    if (mNavigationBarTranslucent) {
+                        pf.left = df.left = of.left = cf.left = 0;
+                        pf.top = df.top = of.top = cf.top = 0;
+                        pf.right = df.right = of.right = cf.right
+                                = mSystemRight;
+                        pf.bottom = df.bottom = of.bottom = cf.bottom
+                                = mSystemBottom + (mTmpNavigationFrame.bottom - mTmpNavigationFrame.top);
+                    } else {
+                        pf.left = df.left = of.left = cf.left = mRestrictedOverscanScreenLeft;
+                        pf.top = df.top = of.top = cf.top = mRestrictedOverscanScreenTop;
+                        pf.right = df.right = of.right = cf.right
+                                = mRestrictedOverscanScreenLeft + mRestrictedOverscanScreenWidth;
+                        pf.bottom = df.bottom = of.bottom = cf.bottom
+                                = mRestrictedOverscanScreenTop + mRestrictedOverscanScreenHeight;
+                    }
                 } else if ((attrs.flags & FLAG_LAYOUT_IN_OVERSCAN) != 0
                         && attrs.type >= WindowManager.LayoutParams.FIRST_APPLICATION_WINDOW
                         && attrs.type <= WindowManager.LayoutParams.LAST_SUB_WINDOW) {
