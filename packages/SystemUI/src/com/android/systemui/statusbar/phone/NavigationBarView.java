@@ -22,6 +22,7 @@ import android.animation.LayoutTransition;
 import android.app.StatusBarManager;
 import android.content.Context;
 import android.content.res.Resources;
+import android.database.ContentObserver;
 import android.graphics.Point;
 import android.graphics.Rect;
 import android.graphics.drawable.Drawable;
