@@ -78,6 +78,16 @@
         android:layout_height="match_parent"
         android:gravity="center"
         >
+
+        <com.android.systemui.statusbar.policy.Traffic
+            android:id="@+id/traffic"
+            android:textAppearance="@style/TextAppearance.StatusBar.Traffic"
+            android:layout_width="wrap_content"
+            android:layout_height="match_parent"
+            android:singleLine="true"
+            android:layout_marginRight="4dp"
+            android:gravity="left|center_vertical"/>
+
         <com.android.systemui.statusbar.policy.Clock
             android:id="@+id/clock"
             android:textAppearance="@style/TextAppearance.StatusBar.Clock"
