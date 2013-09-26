@@ -25,12 +25,14 @@ import android.app.admin.DevicePolicyManager;
 import android.content.ComponentName;
 import android.content.Context;
 import android.content.Intent;
+import android.content.IntentFilter;
 import android.content.pm.PackageManager;
 import android.content.res.Configuration;
 import android.content.res.Resources;
 import android.graphics.Bitmap;
 import android.graphics.drawable.Drawable;
 import android.graphics.drawable.InsetDrawable;
+import android.os.BatteryManager;
 import android.os.UserHandle;
 import android.provider.Settings;
 import android.text.TextUtils;
@@ -67,6 +69,7 @@ public class KeyguardSelectorView extends LinearLayout implements KeyguardSecuri
     private String[] mStoredTargets;
     private int mTargetOffset;
     private boolean mIsScreenLarge;
+    private float mBatteryLevel;
 
     OnTriggerListener mOnTriggerListener = new OnTriggerListener() {
 
@@ -150,6 +153,11 @@ public class KeyguardSelectorView extends LinearLayout implements KeyguardSecuri
         @Override
         public void onSimStateChanged(State simState) {
             updateTargets();
+        }
+
+        @Override
+        public void onRefreshBatteryInfo(KeyguardUpdateMonitor.BatteryStatus batStatus) {
+            updateLockscreenBattery(batStatus);
         }
     };
 
@@ -244,6 +252,7 @@ public class KeyguardSelectorView extends LinearLayout implements KeyguardSecuri
         mSearchDisabled = disabledBySimState || !searchActionAvailable || !searchTargetPresent
                 || !currentUserSetup;
         updateResources();
+        updateLockscreenBattery(null);
     }
 
     public void updateResources() {
@@ -425,5 +434,13 @@ public class KeyguardSelectorView extends LinearLayout implements KeyguardSecuri
         mIsBouncing = false;
         KeyguardSecurityViewHelper.
                 hideBouncer(mSecurityMessageDisplay, mFadeView, mBouncerFrame, duration);
+    }
+
+    public void updateLockscreenBattery(KeyguardUpdateMonitor.BatteryStatus status) {
+        // TODO: Settings
+        if (true) {
+            if (status != null) mBatteryLevel = status.level;
+            mGlowPadView.setArc(mBatteryLevel * 3.6f, mBatteryLevel > 15 ? 0x8099CC00 : 0x80CC0000);
+        }
     }
 }
