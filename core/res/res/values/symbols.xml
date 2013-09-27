@@ -926,6 +926,7 @@
   <java-symbol type="array" name="config_masterVolumeRamp" />
   <java-symbol type="array" name="config_cdma_dun_supported_types" />
   <java-symbol type="array" name="config_disabledUntilUsedPreinstalledImes" />
+  <java-symbol type="array" name="notification_light_package_mapping" />
 
   <java-symbol type="drawable" name="default_wallpaper" />
   <java-symbol type="drawable" name="indicator_input_error" />
@@ -1559,6 +1560,7 @@
   <java-symbol type="bool" name="config_wifi_background_scan_support" />
   <java-symbol type="bool" name="config_wifi_dual_band_support" />
   <java-symbol type="bool" name="config_wimaxEnabled" />
+  <java-symbol type="bool" name="config_multiColorBatteryLed" />
   <java-symbol type="bool" name="show_ongoing_ime_switcher" />
   <java-symbol type="color" name="config_defaultNotificationColor" />
   <java-symbol type="drawable" name="ic_notification_ime_default" />
