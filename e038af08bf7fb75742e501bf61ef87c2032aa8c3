@@ -1,0 +1,38 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "3a045101_1d097d31",
+        "filename": "core/java/com/android/internal/widget/multiwaveview/GlowPadView.java",
+        "patchSetId": 4
+      },
+      "lineNbr": 330,
+      "author": {
+        "id": 1000008
+      },
+      "writtenOn": "2013-10-01T21:52:13Z",
+      "side": 1,
+      "message": "whitespace",
+      "revId": "e038af08bf7fb75742e501bf61ef87c2032aa8c3",
+      "serverId": "56841c99-7c94-43d4-bf0b-cb4707e66d55",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "3a045101_3d0c3942",
+        "filename": "policy/src/com/android/internal/policy/impl/keyguard/KeyguardSelectorView.java",
+        "patchSetId": 4
+      },
+      "lineNbr": 443,
+      "author": {
+        "id": 1000008
+      },
+      "writtenOn": "2013-10-01T21:52:13Z",
+      "side": 1,
+      "message": "Maybe make this logic match the default LED behavior for color?\nRed \u003c 15\nYellow for \u003e15 but \u003c90\nGreen for \u003e90?\n\nOr maybe do a hue fade from red to green between 15 and 90...  I should look to see if there are HSV to RGB helper functions.",
+      "revId": "e038af08bf7fb75742e501bf61ef87c2032aa8c3",
+      "serverId": "56841c99-7c94-43d4-bf0b-cb4707e66d55",
+      "unresolved": false
+    }
+  ]
+}
