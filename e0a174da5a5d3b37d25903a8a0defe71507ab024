@@ -19,6 +19,24 @@
     },
     {
       "key": {
+        "uuid": "3a045101_e847314a",
+        "filename": "policy/src/com/android/internal/policy/impl/keyguard/KeyguardSelectorView.java",
+        "patchSetId": 5
+      },
+      "lineNbr": 73,
+      "author": {
+        "id": 1000001
+      },
+      "writtenOn": "2013-10-02T19:38:42Z",
+      "side": 1,
+      "message": "Yes, because the lockscreen might get updated without battery status information (null), so it must re-use the previous value.",
+      "parentUuid": "3a045101_c826b5ba",
+      "revId": "e0a174da5a5d3b37d25903a8a0defe71507ab024",
+      "serverId": "56841c99-7c94-43d4-bf0b-cb4707e66d55",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "3a045101_a82b6981",
         "filename": "policy/src/com/android/internal/policy/impl/keyguard/KeyguardSelectorView.java",
         "patchSetId": 5
