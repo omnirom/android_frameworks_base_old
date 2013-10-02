@@ -1,0 +1,55 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "3a045101_c826b5ba",
+        "filename": "policy/src/com/android/internal/policy/impl/keyguard/KeyguardSelectorView.java",
+        "patchSetId": 5
+      },
+      "lineNbr": 73,
+      "author": {
+        "id": 1000008
+      },
+      "writtenOn": "2013-10-02T12:06:26Z",
+      "side": 1,
+      "message": "Does this need to be a class member since it\u0027s only used in one method?",
+      "revId": "e0a174da5a5d3b37d25903a8a0defe71507ab024",
+      "serverId": "56841c99-7c94-43d4-bf0b-cb4707e66d55",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "3a045101_a82b6981",
+        "filename": "policy/src/com/android/internal/policy/impl/keyguard/KeyguardSelectorView.java",
+        "patchSetId": 5
+      },
+      "lineNbr": 442,
+      "author": {
+        "id": 1000008
+      },
+      "writtenOn": "2013-10-02T12:06:26Z",
+      "side": 1,
+      "message": "Need to fix whitespace and look up naming conventions for variables that are limited in scope to the method they are in.",
+      "revId": "e0a174da5a5d3b37d25903a8a0defe71507ab024",
+      "serverId": "56841c99-7c94-43d4-bf0b-cb4707e66d55",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "3a045101_8820ad9c",
+        "filename": "policy/src/com/android/internal/policy/impl/keyguard/KeyguardSelectorView.java",
+        "patchSetId": 5
+      },
+      "lineNbr": 446,
+      "author": {
+        "id": 1000008
+      },
+      "writtenOn": "2013-10-02T12:06:26Z",
+      "side": 1,
+      "message": "There has to be a cleaner way to do this...",
+      "revId": "e0a174da5a5d3b37d25903a8a0defe71507ab024",
+      "serverId": "56841c99-7c94-43d4-bf0b-cb4707e66d55",
+      "unresolved": false
+    }
+  ]
+}
