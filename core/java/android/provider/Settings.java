@@ -7833,6 +7833,12 @@ public final class Settings {
         private static final Validator LOCKDOWN_IN_POWER_MENU_VALIDATOR = BOOLEAN_VALIDATOR;
 
         /**
+         * The TCP/IP port to run ADB on, or -1 for USB
+         * @hide
+         */
+        public static final String OMNI_ADB_PORT = "omni_adb_port";
+
+        /**
          * Backup manager behavioral parameters.
          * This is encoded as a key=value list, separated by commas. Ex:
          *
