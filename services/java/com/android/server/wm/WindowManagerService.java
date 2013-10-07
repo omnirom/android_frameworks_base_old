@@ -10751,6 +10751,9 @@ public class WindowManagerService extends IWindowManager.Stub
         int dw = realdw;
         int dh = realdh;
 
+	Log.wtf(TAG,"realdw was " + realdw + " and realdh was " + realdh + ",orientation was " + mRotation);
+	Log.wtf(TAG,"mAltOrientation was " + mAltOrientation);
+
         if (mAltOrientation) {
             if (realdw > realdh) {
                 // Turn landscape into portrait.
@@ -10767,9 +10770,13 @@ public class WindowManagerService extends IWindowManager.Stub
             }
         }
 
+	Log.wtf(TAG,"dw = " + dw + " , dh = " + dh);
+
         // Get application display metrics.
         final int appWidth = mPolicy.getNonDecorDisplayWidth(dw, dh, mRotation);
         final int appHeight = mPolicy.getNonDecorDisplayHeight(dw, dh, mRotation);
+
+	Log.wtf(TAG,"appWidth = " + appWidth + " , appHeight = " + appHeight);
 
         int location = mNextSplitViewLocation;
         if (mTaskLocation.containsKey(taskId)) {
