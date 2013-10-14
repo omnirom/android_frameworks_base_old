@@ -108,6 +108,8 @@ class ProcessList {
         // Allow more hidden apps on huge memory devices (1.5GB or higher)
         // or fetch from the system property
         MemInfoReader mi = new MemInfoReader();
+	// update the memory variables so mi.getTotalSize() does not return 0
+	mi.readMemInfo();	
         MAX_HIDDEN_APPS = SystemProperties.getInt("sys.mem.max_hidden_apps",
                 mi.getTotalSize() > 1572864 ? 40 : 24);
     }
