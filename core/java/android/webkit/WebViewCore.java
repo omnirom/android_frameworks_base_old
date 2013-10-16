@@ -1699,9 +1699,15 @@ public final class WebViewCore {
                             nativeInsertText(mNativeClass, (String) msg.obj);
                             break;
                         case SELECT_TEXT: {
-                            int handleId = (Integer) msg.obj;
-                            nativeSelectText(mNativeClass, handleId,
-                                    msg.arg1, msg.arg2);
+							//if it's message from clear selection
+							if(msg.obj == null) {
+								nativeClearTextSelection(mNativeClass);
+							}
+							else {
+								int handleId = (Integer) msg.obj;
+								nativeSelectText(mNativeClass, handleId,
+										msg.arg1, msg.arg2);
+							}
                             break;
                         }
                         case SELECT_WORD_AT: {
