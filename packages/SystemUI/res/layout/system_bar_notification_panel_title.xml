@@ -232,9 +232,12 @@
         <ImageView android:id="@+id/clear_all_button"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:scaleType="center"
-            android:src="@drawable/ic_notify_clear"
-            android:contentDescription="@string/accessibility_clear_all"
-            />
+            android:layout_toLeftOf="@+id/quick_buttons"
+            android:paddingTop="15dp"
+            android:layout_alignParentTop="true"
+            android:paddingRight="20dp"
+            android:src="@drawable/ic_notify_clear_normal"
+            android:contentDescription="@string/accessibility_clear_all"/>
+
     </LinearLayout>
 </com.android.systemui.statusbar.tablet.NotificationPanelTitle>

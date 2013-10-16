@@ -21,44 +21,63 @@ package android.os;
  * in the {@link android.content.Intent#ACTION_BATTERY_CHANGED} Intent.
  */
 public class BatteryManager {
+
     /**
      * Extra for {@link android.content.Intent#ACTION_BATTERY_CHANGED}:
      * integer containing the current status constant.
      */
     public static final String EXTRA_STATUS = "status";
-    
+
+    /**
+     * Integer containing the current status constant for the dock battery.
+     * @hide
+     */
+    public static final String EXTRA_DOCK_STATUS = "dock_status";
+
     /**
      * Extra for {@link android.content.Intent#ACTION_BATTERY_CHANGED}:
      * integer containing the current health constant.
      */
     public static final String EXTRA_HEALTH = "health";
-    
+
     /**
      * Extra for {@link android.content.Intent#ACTION_BATTERY_CHANGED}:
      * boolean indicating whether a battery is present.
      */
     public static final String EXTRA_PRESENT = "present";
-    
+
     /**
      * Extra for {@link android.content.Intent#ACTION_BATTERY_CHANGED}:
      * integer field containing the current battery level, from 0 to
      * {@link #EXTRA_SCALE}.
      */
     public static final String EXTRA_LEVEL = "level";
-    
+
+    /**
+     * Integer field containing the current dock battery level.
+     * @hide
+     */
+    public static final String EXTRA_DOCK_LEVEL = "dock_level";
+
+    /**
+     * Boolean field containing the current dock battery AC status.
+     * @hide
+     */
+    public static final String EXTRA_DOCK_AC_ONLINE = "dock_ac_online";
+
     /**
      * Extra for {@link android.content.Intent#ACTION_BATTERY_CHANGED}:
      * integer containing the maximum battery level.
      */
     public static final String EXTRA_SCALE = "scale";
-    
+
     /**
      * Extra for {@link android.content.Intent#ACTION_BATTERY_CHANGED}:
      * integer containing the resource ID of a small status bar icon
      * indicating the current battery state.
      */
     public static final String EXTRA_ICON_SMALL = "icon-small";
-    
+
     /**
      * Extra for {@link android.content.Intent#ACTION_BATTERY_CHANGED}:
      * integer indicating whether the device is plugged in to a power
@@ -66,19 +85,19 @@ public class BatteryManager {
      * types of power sources.
      */
     public static final String EXTRA_PLUGGED = "plugged";
-    
+
     /**
      * Extra for {@link android.content.Intent#ACTION_BATTERY_CHANGED}:
      * integer containing the current battery voltage level.
      */
     public static final String EXTRA_VOLTAGE = "voltage";
-    
+
     /**
      * Extra for {@link android.content.Intent#ACTION_BATTERY_CHANGED}:
      * integer containing the current battery temperature.
      */
     public static final String EXTRA_TEMPERATURE = "temperature";
-    
+
     /**
      * Extra for {@link android.content.Intent#ACTION_BATTERY_CHANGED}:
      * String describing the technology of the current battery.
@@ -108,6 +127,21 @@ public class BatteryManager {
     public static final int BATTERY_HEALTH_OVER_VOLTAGE = 5;
     public static final int BATTERY_HEALTH_UNSPECIFIED_FAILURE = 6;
     public static final int BATTERY_HEALTH_COLD = 7;
+
+    /** @hide */
+    public static final int DOCK_STATE_UNKNOWN = 0;
+
+    /** @hide */
+    public static final int DOCK_STATE_UNDOCKED = 1;
+
+    /** @hide */
+    public static final int DOCK_STATE_CHARGING = 2;
+
+    /** @hide */
+    public static final int DOCK_STATE_DOCKED = 3;
+
+    /** @hide */
+    public static final int DOCK_STATE_DISCHARGING = 4;
 
     // values of the "plugged" field in the ACTION_BATTERY_CHANGED intent.
     // These must be powers of 2.

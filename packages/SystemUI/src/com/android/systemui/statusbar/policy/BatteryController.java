@@ -88,8 +88,20 @@ public class BatteryController extends BroadcastReceiver {
     private ArrayList<BatteryStateChangeCallback> mChangeCallbacks =
             new ArrayList<BatteryStateChangeCallback>();
 
+    private int mLevel;
+    private boolean mPlugged;
+
+    // For HALO Mods
+    private ArrayList<BatteryStateChangeCallbackHalo> mChangeCallbacksHalo =
+            new ArrayList<BatteryStateChangeCallbackHalo>();
+
     public interface BatteryStateChangeCallback {
         public void onBatteryLevelChanged(int level, boolean pluggedIn);
+    }
+
+    //For HALO Mods
+    public interface BatteryStateChangeCallbackHalo {
+        public void onBatteryLevelChangedHalo(int level, boolean pluggedIn);
     }
 
     public BatteryController(Context context) {
@@ -117,6 +129,17 @@ public class BatteryController extends BroadcastReceiver {
     public void addStateChangedCallback(BatteryStateChangeCallback cb) {
         mChangeCallbacks.add(cb);
     }
+
+    // For Halo Mods
+    public void addStateChangedCallbackHalo(BatteryStateChangeCallbackHalo cb_Halo) {
+        mChangeCallbacksHalo.add(cb_Halo);
+    }
+
+    // For Halo Mods
+    public void removeStateChangedCallbackHalo(BatteryStateChangeCallbackHalo cb_Halo) {
+        mChangeCallbacksHalo.remove(cb_Halo);
+    }
+
 
     public void onReceive(Context context, Intent intent) {
         final String action = intent.getAction();
@@ -155,6 +178,11 @@ public class BatteryController extends BroadcastReceiver {
                 cb.onBatteryLevelChanged(level, mBatteryPlugged);
             }
             updateBattery();
+        }
+
+        // For HALO Mods
+        for (BatteryStateChangeCallbackHalo cb_Halo : mChangeCallbacksHalo) {
+            cb_Halo.onBatteryLevelChangedHalo(mLevel, mPlugged);
         }
     }
 

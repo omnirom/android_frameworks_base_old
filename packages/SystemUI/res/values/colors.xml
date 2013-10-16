@@ -35,4 +35,9 @@
     <!-- the darkening filter applied to notifications -->
     <drawable name="notification_icon_area_smoke">#aa000000</drawable>
     <color name="notification_panel_scrim_color">#B0000000</color>
+
+    <!-- Halo colors -->
+    <color name="halo_ping_color">#ff33b5e5</color>
+    <color name="halo_text_color">#ffffffff</color>
+
 </resources>
