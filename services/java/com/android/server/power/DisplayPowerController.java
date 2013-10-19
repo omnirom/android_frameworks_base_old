@@ -919,7 +919,7 @@ final class DisplayPowerController {
         if (mButtonBrightnessSupport){
             updateButtonLight();
         }
-  
+
         // Report whether the display is ready for use.
         // We mostly care about the screen state here, ignoring brightness changes
         // which will be handled asynchronously.
