@@ -47,6 +47,7 @@ import android.content.res.XmlResourceParser;
 import android.database.ContentObserver;
 import android.media.MediaPlayer.OnCompletionListener;
 import android.media.MediaPlayer.OnErrorListener;
+import android.net.Uri;
 import android.os.Binder;
 import android.os.Build;
 import android.os.Bundle;
@@ -272,6 +273,8 @@ public class AudioService extends IAudioService.Stub implements OnFinished {
             "STREAM_DTMF",
             "STREAM_TTS"
     };
+
+    private boolean mLinkNotificationWithVolume;
 
     private final AudioSystem.ErrorCallback mAudioSystemCallback = new AudioSystem.ErrorCallback() {
         public void onError(int error) {
@@ -658,6 +661,13 @@ public class AudioService extends IAudioService.Stub implements OnFinished {
             dtmfStreamAlias = AudioSystem.STREAM_VOICE_CALL;
         }
         mStreamVolumeAlias[AudioSystem.STREAM_DTMF] = dtmfStreamAlias;
+
+        if (mLinkNotificationWithVolume) {
+            mStreamVolumeAlias[AudioSystem.STREAM_NOTIFICATION] = AudioSystem.STREAM_RING;
+        } else {
+            mStreamVolumeAlias[AudioSystem.STREAM_NOTIFICATION] = AudioSystem.STREAM_NOTIFICATION;
+        }
+
         if (updateVolumes) {
             mStreamStates[AudioSystem.STREAM_DTMF].setAllIndexes(mStreamStates[dtmfStreamAlias]);
             sendMsg(mAudioHandler,
@@ -758,6 +768,9 @@ public class AudioService extends IAudioService.Stub implements OnFinished {
 
             readDockAudioSettings(cr);
         }
+
+        mLinkNotificationWithVolume = Settings.System.getIntForUser(cr,
+                Settings.System.VOLUME_LINK_NOTIFICATION, 1, UserHandle.USER_CURRENT) == 1;
 
         mMuteAffectedStreams = System.getIntForUser(cr,
                 System.MUTE_STREAMS_AFFECTED,
@@ -3651,42 +3664,56 @@ public class AudioService extends IAudioService.Stub implements OnFinished {
                 Settings.System.MODE_RINGER_STREAMS_AFFECTED), false, this);
             mContentResolver.registerContentObserver(Settings.Global.getUriFor(
                 Settings.Global.DOCK_AUDIO_MEDIA_ENABLED), false, this);
+            mContentResolver.registerContentObserver(Settings.System.getUriFor(
+                Settings.System.VOLUME_LINK_NOTIFICATION), false, this);
         }
 
         @Override
-        public void onChange(boolean selfChange) {
-            super.onChange(selfChange);
+        public void onChange(boolean selfChange, Uri uri) {
+            super.onChange(selfChange, uri);
             // FIXME This synchronized is not necessary if mSettingsLock only protects mRingerMode.
             //       However there appear to be some missing locks around mRingerModeMutedStreams
             //       and mRingerModeAffectedStreams, so will leave this synchronized for now.
             //       mRingerModeMutedStreams and mMuteAffectedStreams are safe (only accessed once).
             synchronized (mSettingsLock) {
-                int ringerModeAffectedStreams = Settings.System.getIntForUser(mContentResolver,
-                       Settings.System.MODE_RINGER_STREAMS_AFFECTED,
-                       ((1 << AudioSystem.STREAM_RING)|(1 << AudioSystem.STREAM_NOTIFICATION)|
-                       (1 << AudioSystem.STREAM_SYSTEM)|(1 << AudioSystem.STREAM_SYSTEM_ENFORCED)),
-                       UserHandle.USER_CURRENT);
-                if (mVoiceCapable) {
-                    ringerModeAffectedStreams &= ~(1 << AudioSystem.STREAM_MUSIC);
-                } else {
-                    ringerModeAffectedStreams |= (1 << AudioSystem.STREAM_MUSIC);
-                }
-                synchronized (mCameraSoundForced) {
-                    if (mCameraSoundForced) {
-                        ringerModeAffectedStreams &= ~(1 << AudioSystem.STREAM_SYSTEM_ENFORCED);
+                if (uri.equals(Settings.System.getUriFor(Settings.System.MODE_RINGER_STREAMS_AFFECTED))) {
+                    int ringerModeAffectedStreams = Settings.System.getIntForUser(mContentResolver,
+                           Settings.System.MODE_RINGER_STREAMS_AFFECTED,
+                           ((1 << AudioSystem.STREAM_RING)|(1 << AudioSystem.STREAM_NOTIFICATION)|
+                           (1 << AudioSystem.STREAM_SYSTEM)|(1 << AudioSystem.STREAM_SYSTEM_ENFORCED)),
+                           UserHandle.USER_CURRENT);
+                    if (mVoiceCapable) {
+                        ringerModeAffectedStreams &= ~(1 << AudioSystem.STREAM_MUSIC);
                     } else {
-                        ringerModeAffectedStreams |= (1 << AudioSystem.STREAM_SYSTEM_ENFORCED);
+                        ringerModeAffectedStreams |= (1 << AudioSystem.STREAM_MUSIC);
+                    }
+                    synchronized (mCameraSoundForced) {
+                        if (mCameraSoundForced) {
+                            ringerModeAffectedStreams &= ~(1 << AudioSystem.STREAM_SYSTEM_ENFORCED);
+                        } else {
+                            ringerModeAffectedStreams |= (1 << AudioSystem.STREAM_SYSTEM_ENFORCED);
+                        }
+                    }
+                    if (ringerModeAffectedStreams != mRingerModeAffectedStreams) {
+                        /*
+                         * Ensure all stream types that should be affected by ringer mode
+                         * are in the proper state.
+                         */
+                        mRingerModeAffectedStreams = ringerModeAffectedStreams;
+                        setRingerModeInt(getRingerMode(), false);
+                    }
+                } else if (uri.equals(Settings.Global.getUriFor(Settings.Global.DOCK_AUDIO_MEDIA_ENABLED))) {
+                    readDockAudioSettings(mContentResolver);
+
+                } else if (uri.equals(Settings.System.getUriFor(Settings.System.VOLUME_LINK_NOTIFICATION))) {
+                    mLinkNotificationWithVolume = Settings.System.getInt(mContentResolver,
+                            Settings.System.VOLUME_LINK_NOTIFICATION, 1) == 1;
+                    if (mLinkNotificationWithVolume) {
+                        mStreamVolumeAlias[AudioSystem.STREAM_NOTIFICATION] = AudioSystem.STREAM_RING;
+                    } else {
+                        mStreamVolumeAlias[AudioSystem.STREAM_NOTIFICATION] = AudioSystem.STREAM_NOTIFICATION;
                     }
                 }
-                if (ringerModeAffectedStreams != mRingerModeAffectedStreams) {
-                    /*
-                     * Ensure all stream types that should be affected by ringer mode
-                     * are in the proper state.
-                     */
-                    mRingerModeAffectedStreams = ringerModeAffectedStreams;
-                    setRingerModeInt(getRingerMode(), false);
-                }
-                readDockAudioSettings(mContentResolver);
             }
         }
     }
