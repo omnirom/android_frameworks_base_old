@@ -38,7 +38,33 @@
 #include <linux/android_alarm.h>
 #include <linux/rtc.h>
 
+#if HAVE_QC_TIME_SERVICES
+extern "C" {
+#include <private/time_genoff.h>
+}
+#endif
+
+
 namespace android {
+
+#if HAVE_QC_TIME_SERVICES
+int setTimeServicesTime(time_bases_type base, int64_t millis)
+{
+    int rc = 0;
+    time_genoff_info_type time_set;
+    uint64_t value = millis;
+    time_set.base = base;
+    time_set.unit = TIME_MSEC;
+    time_set.operation = T_SET;
+    time_set.ts_val = &value;
+    rc = time_genoff_operation(&time_set);
+    if (rc) {
+        ALOGE("Error setting generic offset: %d. Still setting system time\n", rc);
+        rc = -1;
+    }
+    return rc;
+}
+#endif
 
 static const size_t N_ANDROID_TIMERFDS = ANDROID_ALARM_TYPE_COUNT + 1;
 static const clockid_t android_alarm_to_clockid[N_ANDROID_TIMERFDS] = {
@@ -238,6 +264,14 @@ static jint android_server_AlarmManagerService_setKernelTime(JNIEnv*, jobject, j
     if (millis <= 0 || millis / 1000LL >= INT_MAX) {
         return -1;
     }
+
+#if HAVE_QC_TIME_SERVICES
+    int rc;
+    rc = setTimeServicesTime(ATS_USER, millis);
+    if (rc) {
+        ALOGE("Error setting generic offset: %d. Still setting system time\n", rc);
+    }
+#endif
 
     tv.tv_sec = (time_t) (millis / 1000LL);
     tv.tv_usec = (suseconds_t) ((millis % 1000LL) * 1000LL);
