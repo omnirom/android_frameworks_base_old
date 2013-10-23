@@ -4,6 +4,13 @@ LOCAL_REL_DIR := core/jni
 
 LOCAL_CFLAGS += -Wno-unused-parameter
 
+ifeq ($(BOARD_USES_QC_TIME_SERVICES),true)
+LOCAL_CFLAGS += -DHAVE_QC_TIME_SERVICES
+LOCAL_SHARED_LIBRARIES += libtime_genoff
+$(shell mkdir -p $(OUT)/obj/SHARED_LIBRARIES/libtime_genoff_intermediates/)
+$(shell touch $(OUT)/obj/SHARED_LIBRARIES/libtime_genoff_intermediates/export_includes)
+endif
+
 LOCAL_SRC_FILES += \
     $(LOCAL_REL_DIR)/com_android_server_AlarmManagerService.cpp \
     $(LOCAL_REL_DIR)/com_android_server_am_BatteryStatsService.cpp \
