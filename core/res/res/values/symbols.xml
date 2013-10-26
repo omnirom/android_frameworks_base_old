@@ -1871,6 +1871,8 @@
   <java-symbol type="array" name="shutdown_reboot_options" />
   <java-symbol type="array" name="shutdown_reboot_actions" />
   <java-symbol type="string" name="reboot_system" />
+  <java-symbol type="string" name="reboot_progress" />
+  <java-symbol type="string" name="reboot_confirm" />
 
   <!-- Wifi -->
   <java-symbol type="bool" name="config_wifiApStartInterface" />
