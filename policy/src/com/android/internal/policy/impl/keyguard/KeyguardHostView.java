@@ -1611,22 +1611,9 @@ public class KeyguardHostView extends KeyguardViewBase {
         }
     }
 
-    /**
-     * In general, we enable unlocking the insecure keyguard with the menu key. However, there are
-     * some cases where we wish to disable it, notably when the menu button placement or technology
-     * is prone to false positives.
-     *
-     * @return true if the menu key should be enabled
-     */
-    private static final String ENABLE_MENU_KEY_FILE = "/data/local/enable_menu_key";
     private boolean shouldEnableMenuKey() {
-        final Resources res = getResources();
-        final boolean configDisabled = res.getBoolean(
-                com.android.internal.R.bool.config_disableMenuKeyInLockScreen);
-        final boolean isTestHarness = ActivityManager.isRunningInTestHarness();
-        final boolean fileOverride = (new File(ENABLE_MENU_KEY_FILE)).exists();
         final boolean menuOverride = Settings.System.getInt(getContext().getContentResolver(), Settings.System.MENU_UNLOCK_SCREEN, 0) == 1;
-        return !configDisabled || isTestHarness || fileOverride || menuOverride;
+        return menuOverride;
     }
 
     private boolean shouldEnableHomeKey() {

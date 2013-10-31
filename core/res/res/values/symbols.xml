@@ -1859,7 +1859,6 @@
   <java-symbol type="string" name="websearch" />
   
   <!-- Lockscreen -->
-  <java-symbol type="bool" name="config_disableHomeUnlockSetting" />
 
   <!-- CM -->
   <java-symbol type="bool" name="config_smsSamsungCdmaAlternateMessageIDEncoding" />
