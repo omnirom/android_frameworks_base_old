@@ -4073,6 +4073,14 @@ public class AudioService extends IAudioService.Stub {
                         }
                     }
                 }
+            } else if (action.equals(Intent.ACTION_HEADSET_PLUG)) {
+                state = intent.getIntExtra("state", 0);
+                if (state == 1) {
+                    Intent playerIntent = new Intent(Intent.ACTION_MAIN);
+                    playerIntent.addCategory(Intent.CATEGORY_APP_MUSIC);
+                    playerIntent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
+                    context.startActivity(playerIntent);
+                }
             } else if (action.equals(Intent.ACTION_USB_AUDIO_ACCESSORY_PLUG) ||
                            action.equals(Intent.ACTION_USB_AUDIO_DEVICE_PLUG)) {
                 state = intent.getIntExtra("state", 0);
