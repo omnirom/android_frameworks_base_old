@@ -5467,6 +5467,12 @@ public final class Settings {
         public static final String OMNI_LONG_PRESS_POWER_TORCH = "long_press_power_torch";
 
         /**
+         * Boolean value whether to link ringtone and notification volume
+         * @hide
+         */
+        public static final String OMNI_VOLUME_LINK_NOTIFICATION = "volume_link_notification";
+
+        /**
          * Whether the battery light should be enabled (if hardware supports it)
          * The value is boolean (1 or 0).
          * @hide
@@ -5592,6 +5598,7 @@ public final class Settings {
             OMNI_USE_OLD_MOBILETYPE,
             OMNI_STATUS_BAR_BT_BATTERY,
             OMNI_LONG_PRESS_POWER_TORCH,
+            OMNI_VOLUME_LINK_NOTIFICATION,
             OMNI_BATTERY_LIGHT_ENABLED,
             OMNI_BATTERY_LIGHT_ALLOW_ON_DND,
             OMNI_BATTERY_LIGHT_LOW_BLINKING,
@@ -5652,6 +5659,7 @@ public final class Settings {
             OMNI_SETTINGS_VALIDATORS.put(OMNI_USE_OLD_MOBILETYPE, 0);
             OMNI_SETTINGS_VALIDATORS.put(OMNI_STATUS_BAR_BT_BATTERY, 0);
             OMNI_SETTINGS_VALIDATORS.put(OMNI_LONG_PRESS_POWER_TORCH, 0);
+            OMNI_SETTINGS_VALIDATORS.put(OMNI_VOLUME_LINK_NOTIFICATION, 0);
             OMNI_SETTINGS_VALIDATORS.put(OMNI_BATTERY_LIGHT_ENABLED, 0);
             OMNI_SETTINGS_VALIDATORS.put(OMNI_BATTERY_LIGHT_ALLOW_ON_DND, 0);
             OMNI_SETTINGS_VALIDATORS.put(OMNI_BATTERY_LIGHT_LOW_BLINKING, 0);
