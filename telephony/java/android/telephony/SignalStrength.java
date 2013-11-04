@@ -19,6 +19,7 @@ package android.telephony;
 import android.os.Bundle;
 import android.os.Parcel;
 import android.os.Parcelable;
+import android.os.SystemProperties;
 import android.telephony.Rlog;
 
 /**
@@ -462,6 +463,16 @@ public class SignalStrength implements Parcelable {
         return mLteCqi;
     }
 
+    /** @hide */
+    public boolean needsOldRilFeature(String feature) {
+        String[] features = SystemProperties.get("ro.telephony.ril.config", "").split(",");
+        for (String found: features) {
+            if (found.equals(feature))
+                return true;
+        }
+        return false;
+    }
+
     /**
      * Get signal level as an int from 0..4
      *
@@ -471,8 +482,9 @@ public class SignalStrength implements Parcelable {
         int level;
 
         if (isGsm) {
+            boolean oldRil = needsOldRilFeature("signalstrength");
             level = getLteLevel();
-            if (level == SIGNAL_STRENGTH_NONE_OR_UNKNOWN) {
+            if (level == SIGNAL_STRENGTH_NONE_OR_UNKNOWN || oldRil) {
                 level = getGsmLevel();
             }
         } else {
@@ -501,7 +513,8 @@ public class SignalStrength implements Parcelable {
     public int getAsuLevel() {
         int asuLevel;
         if (isGsm) {
-            if (getLteLevel() == SIGNAL_STRENGTH_NONE_OR_UNKNOWN) {
+            boolean oldRil = needsOldRilFeature("signalstrength");
+            if (getLteLevel() == SIGNAL_STRENGTH_NONE_OR_UNKNOWN || oldRil) {
                 asuLevel = getGsmAsuLevel();
             } else {
                 asuLevel = getLteAsuLevel();
@@ -533,8 +546,9 @@ public class SignalStrength implements Parcelable {
         int dBm;
 
         if(isGsm()) {
+            boolean oldRil = needsOldRilFeature("signalstrength");
             dBm = getLteDbm();
-            if (dBm == INVALID) {
+            if (dBm == INVALID || oldRil) {
                 dBm = getGsmDbm();
             }
         } else {
