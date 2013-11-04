@@ -936,7 +936,7 @@
          This needs to match the constants in
          policy/src/com/android/internal/policy/impl/PhoneWindowManager.java
     -->
-    <integer name="config_longPressOnHomeBehavior">0</integer>
+    <integer name="config_longPressOnHomeBehavior">1</integer>
 
     <!-- Control the behavior when the user double-taps the home button.
             0 - Nothing
@@ -2341,4 +2341,7 @@
     <!-- The BT name of the keyboard packaged with the device. If this is defined, SystemUI will
          automatically try to pair with it when the device exits tablet mode. -->
     <string translatable="false" name="config_packagedKeyboardName"></string>
+
+    <!-- Boolean to enable stk functionality on Samsung phones -->
+    <bool name="config_samsung_stk">false</bool>
 </resources>

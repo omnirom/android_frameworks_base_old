@@ -2231,6 +2231,9 @@
   <java-symbol type="bool" name="config_use_sim_language_file" />
   <java-symbol type="bool" name="config_LTE_eri_for_network_name" />
   <java-symbol type="bool" name="config_defaultInTouchMode" />
+  
+  <!-- Samsung STK -->
+  <java-symbol type="bool" name="config_samsung_stk" />
 
   <java-symbol type="string" name="usb_midi_peripheral_name" />
   <java-symbol type="string" name="usb_midi_peripheral_manufacturer_name" />
