@@ -967,4 +967,6 @@ public class WifiNative {
         // Note: optional feature on the driver. It is ok for this to fail.
         doBooleanCommand("DRIVER MIRACAST " + mode);
     }
+
+    public native static boolean setMode(int mode);
 }
