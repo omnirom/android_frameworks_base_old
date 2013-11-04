@@ -501,6 +501,11 @@
          The default is false. -->
     <bool name="config_lidControlsSleep">false</bool>
 
+    <!-- If a dock provides a lid switch, that lid can be removed. This
+         setting is used to determine, whether lidOpenRotation has to be
+         applied. -->
+    <bool name="config_hasRemovableLid">false</bool>
+
     <!-- Desk dock behavior -->
 
     <!-- The number of degrees to rotate the display when the device is in a desk dock.
