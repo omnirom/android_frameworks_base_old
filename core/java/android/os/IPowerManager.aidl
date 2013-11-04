@@ -54,6 +54,7 @@ interface IPowerManager
     // sets the attention light (used by phone app only)
     void setAttentionLight(boolean on, int color);
 
+    void cpuBoost(int duration);
     int getCurrentScreenBrightnessValue();
     int getCurrentButtonBrightnessValue();
     void setButtonBrightness(int brightness);
