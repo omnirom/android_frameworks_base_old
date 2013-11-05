@@ -29,7 +29,6 @@ import com.android.systemui.recent.RecentTasksLoader;
 import com.android.systemui.recent.RecentsActivity;
 import com.android.systemui.recent.TaskDescription;
 import com.android.systemui.statusbar.policy.NotificationRowLayout;
-import com.android.systemui.statusbar.tablet.StatusBarPanel;
 
 import android.app.Activity;
 import android.app.ActivityManager;
@@ -621,7 +620,7 @@ public abstract class BaseStatusBar extends SystemUI implements
                   cancelPreloadingRecentTasksList();
                   break;
              case MSG_TOGGLE_LAST_APP:
-                 if (DEBUG) Slog.d(TAG, "toggle last app");
+                 if (DEBUG) Log.d(TAG, "toggle last app");
                  toggleLastAppImpl();
                  break;
              case MSG_OPEN_SEARCH_PANEL:
