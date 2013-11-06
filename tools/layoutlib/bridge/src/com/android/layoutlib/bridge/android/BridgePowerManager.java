@@ -125,4 +125,18 @@ public class BridgePowerManager implements IPowerManager {
     public void wakeUp(long time) throws RemoteException {
         // pass for now.
     }
+
+    @Override
+    public int getCurrentScreenBrightnessValue(){
+        return -1;
+    }
+
+    @Override
+    public int getCurrentButtonBrightnessValue(){
+        return -1;
+    }
+
+    @Override
+    public void setButtonBrightness(int brightness){
+    }
 }

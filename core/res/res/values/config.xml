@@ -673,6 +673,9 @@
     <integer-array name="config_autoBrightnessButtonBacklightValues">
     </integer-array>
 
+    <!-- Boolean indicating whether we want button brightness support -->
+    <bool name="config_button_brightness_support">false</bool>
+
     <!-- Array of output values for keyboard backlight corresponding to the LUX values
          in the config_autoBrightnessLevels array.  This array should have size one greater
          than the size of the config_autoBrightnessLevels array.
