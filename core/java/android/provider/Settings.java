@@ -2713,6 +2713,11 @@ public final class Settings {
         public static final String VOLUME_WAKE_SCREEN = "volume_wake_screen";
 
         /**
+         *
+         */
+        public static final String STATUS_BAR_NETWORK_ACTIVITY = "status_bar_network_activity";
+
+        /**
          * Whether or not to show circle battery around the lockscreen ring
          * @hide
          */
