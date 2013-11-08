@@ -514,6 +514,12 @@ public class PhoneStatusBar extends BaseStatusBar implements DemoMode {
             // no window manager? good luck with that
         }
 
+
+        if (mRecreating) {
+        } else {
+            addActiveDisplayView();
+        }
+
         // figure out which pixel-format to use for the status bar.
         mPixelFormat = PixelFormat.OPAQUE;
 
