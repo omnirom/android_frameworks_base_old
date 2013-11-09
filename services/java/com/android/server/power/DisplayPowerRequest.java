@@ -67,6 +67,9 @@ final class DisplayPowerRequest {
     // potentially higher CPU usage and flicker.
     public float responsitivityFactor;
 
+    // Slim settings - override config for ElectronBeam mode
+    public int electronBeamMode;
+
     public DisplayPowerRequest() {
         screenState = SCREEN_STATE_BRIGHT;
         useProximitySensor = false;
@@ -75,6 +78,7 @@ final class DisplayPowerRequest {
         useAutoBrightness = false;
         blockScreenOn = false;
         responsitivityFactor = 1.0f;
+        electronBeamMode = 0;
     }
 
     public DisplayPowerRequest(DisplayPowerRequest other) {
@@ -89,6 +93,7 @@ final class DisplayPowerRequest {
         useAutoBrightness = other.useAutoBrightness;
         blockScreenOn = other.blockScreenOn;
         responsitivityFactor = other.responsitivityFactor;
+        electronBeamMode = other.electronBeamMode;
     }
 
     @Override
@@ -106,6 +111,7 @@ final class DisplayPowerRequest {
                 && useAutoBrightness == other.useAutoBrightness
                 && blockScreenOn == other.blockScreenOn
                 && Math.abs(responsitivityFactor - other.responsitivityFactor) < 1E-6;
+                && electronBeamMode == other.electronBeamMode;
     }
 
     @Override
@@ -122,5 +128,6 @@ final class DisplayPowerRequest {
                 + ", useAutoBrightness=" + useAutoBrightness
                 + ", blockScreenOn=" + blockScreenOn
                 + ", responsitivityFactor=" + responsitivityFactor;
+                + ", electronBeamMode=" + electronBeamMode;
     }
 }
