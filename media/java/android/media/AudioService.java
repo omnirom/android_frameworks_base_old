@@ -984,8 +984,10 @@ public class AudioService extends IAudioService.Stub {
                 (mStreamVolumeAlias[streamType] == getMasterStreamType())) {
             int newRingerMode;
             if (index == 0) {
-                newRingerMode = mHasVibrator ? AudioManager.RINGER_MODE_VIBRATE
+                synchronized (mSettingsLock) {
+                    newRingerMode = mHasVibrator ? AudioManager.RINGER_MODE_VIBRATE
                                               : AudioManager.RINGER_MODE_SILENT;
+                }
             } else {
                 newRingerMode = AudioManager.RINGER_MODE_NORMAL;
             }
@@ -3730,15 +3732,16 @@ public class AudioService extends IAudioService.Stub {
                      * are in the proper state.
                      */
                     setRingerModeInt(getRingerMode(), false);
-                }
-                readDockAudioSettings(mContentResolver);
+                
+                    readDockAudioSettings(mContentResolver);
 
-                mLinkNotificationWithVolume = Settings.System.getIntForUser(mContentResolver,
-                        Settings.System.VOLUME_LINK_NOTIFICATION, 1, UserHandle.USER_CURRENT) == 1;
-                if (mLinkNotificationWithVolume) {
-                    mStreamVolumeAlias[AudioSystem.STREAM_NOTIFICATION] = AudioSystem.STREAM_RING;
-                } else {
-                    mStreamVolumeAlias[AudioSystem.STREAM_NOTIFICATION] = AudioSystem.STREAM_NOTIFICATION;
+                    mLinkNotificationWithVolume = Settings.System.getIntForUser(mContentResolver,
+                            Settings.System.VOLUME_LINK_NOTIFICATION, 1, UserHandle.USER_CURRENT) == 1;
+                    if (mLinkNotificationWithVolume) {
+                        mStreamVolumeAlias[AudioSystem.STREAM_NOTIFICATION] = AudioSystem.STREAM_RING;
+                    } else {
+                        mStreamVolumeAlias[AudioSystem.STREAM_NOTIFICATION] = AudioSystem.STREAM_NOTIFICATION;
+                    }
                 }
             }
         }
