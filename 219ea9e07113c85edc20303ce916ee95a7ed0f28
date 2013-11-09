@@ -1,0 +1,21 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "ab89d9a9_688437a5",
+        "filename": "core/java/android/provider/Settings.java",
+        "patchSetId": 1
+      },
+      "lineNbr": 2815,
+      "author": {
+        "id": 1000026
+      },
+      "writtenOn": "2013-11-09T15:39:51Z",
+      "side": 1,
+      "message": "do we really want to add all of thise with this change?",
+      "revId": "219ea9e07113c85edc20303ce916ee95a7ed0f28",
+      "serverId": "56841c99-7c94-43d4-bf0b-cb4707e66d55",
+      "unresolved": false
+    }
+  ]
+}
