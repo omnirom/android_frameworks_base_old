@@ -387,6 +387,12 @@ final class DisplayPowerController {
     private boolean mTwilightChanged;
     private boolean mAutoBrightnessSettingsChanged;
 
+    // Screen-off animation
+    private static final int SCREEN_OFF_FADE = 0;
+    private static final int SCREEN_OFF_CRT = 1;
+    private static final int SCREEN_OFF_SCALE = 2;
+    private int mScreenOffAnimation;
+
     /**
      * Creates the display power controller.
      */
@@ -438,6 +444,10 @@ final class DisplayPowerController {
                         if (mButtonBrightnessSupport){
                             updateButtonLight();
                         }
+                    } else if (uri.equals(Settings.System.getUriFor(Settings.System.SCREEN_OFF_ANIMATION))) {
+                        mScreenOffAniamtion = Settings.System.getIntForUser(cr,
+                            Settings.System.SCREEN_OFF_ANIMATION,
+                            SCREEN_OFF_CRT, UserHandle.USER_CURRENT);
                     } else {
                         // As both LUX and BACKLIGHT might be changed at the same time, there's
                         // a potential race condition. As the settings provider API doesn't give
@@ -485,6 +495,16 @@ final class DisplayPowerController {
 
         mElectronBeamFadesConfig = resources.getBoolean(
                 com.android.internal.R.bool.config_animateScreenLights);
+
+        if (!mElectronBeamFadesConfig) {
+            cr.registerContentObserver(Settings.System.getUriFor(
+                    Settings.System.SCREEN_OFF_ANIMATION),
+                    false, observer, UserHandle.USER_ALL);
+ 
+           mScreenOffAniamtion = Settings.System.getIntForUser(cr,
+                    Settings.System.SCREEN_OFF_ANIMATION,
+                    SCREEN_OFF_CRT, UserHandle.USER_CURRENT);
+        }
 
         if (!DEBUG_PRETEND_PROXIMITY_SENSOR_ABSENT) {
             mProximitySensor = mSensorManager.getDefaultSensor(Sensor.TYPE_PROXIMITY);
@@ -900,14 +920,23 @@ final class DisplayPowerController {
             } else {
                 // Want screen off.
                 // Wait for previous on animation to complete beforehand.
+                int electronBeamMode = ElectronBeam.MODE_FADE;
+                if (!mElectronBeamFadesConfig) {
+                    switch (mScreenOffAnimation) {
+                    case SCREEN_OFF_CRT:
+                        electronBeamMode = ElectronBeam.MODE_CRT_OFF;
+                        break;
+                    case SCREEN_OFF_SCALE:
+                        electronBeamMode = ElectronBeam.MODE_SCALE_DOWN;
+                        break;
+                    }
+                }
+
                 if (!mElectronBeamOnAnimator.isStarted()) {
                     if (!mElectronBeamOffAnimator.isStarted()) {
                         if (mPowerState.getElectronBeamLevel() == 0.0f) {
                             setScreenOn(false);
-                        } else if (mPowerState.prepareElectronBeam(
-                                mElectronBeamFadesConfig ?
-                                        ElectronBeam.MODE_FADE :
-                                                ElectronBeam.MODE_COOL_DOWN)
+                        } else if (mPowerState.prepareElectronBeam(electronBeamMode)
                                 && mPowerState.isScreenOn()) {
                             mElectronBeamOffAnimator.start();
                         } else {
