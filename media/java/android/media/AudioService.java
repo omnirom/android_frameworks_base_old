@@ -984,8 +984,10 @@ public class AudioService extends IAudioService.Stub {
                 (mStreamVolumeAlias[streamType] == getMasterStreamType())) {
             int newRingerMode;
             if (index == 0) {
-                newRingerMode = mHasVibrator ? AudioManager.RINGER_MODE_VIBRATE
-                                              : AudioManager.RINGER_MODE_SILENT;
+                synchronized (mSettingsLock) {
+                    newRingerMode = mHasVibrator ? AudioManager.RINGER_MODE_VIBRATE
+                                                  : AudioManager.RINGER_MODE_SILENT;
+                }
             } else {
                 newRingerMode = AudioManager.RINGER_MODE_NORMAL;
             }
@@ -3723,7 +3725,9 @@ public class AudioService extends IAudioService.Stub {
             //       However there appear to be some missing locks around mRingerModeMutedStreams
             //       and mRingerModeAffectedStreams, so will leave this synchronized for now.
             //       mRingerModeMutedStreams and mMuteAffectedStreams are safe (only accessed once).
-            synchronized (mSettingsLock) {
+
+            // maxwen: google - please dont use the same lock again in setRingerModeInt :)
+            //synchronized (mSettingsLock) {
                 if (updateRingerModeAffectedStreams()) {
                     /*
                      * Ensure all stream types that should be affected by ringer mode
@@ -3740,7 +3744,7 @@ public class AudioService extends IAudioService.Stub {
                 } else {
                     mStreamVolumeAlias[AudioSystem.STREAM_NOTIFICATION] = AudioSystem.STREAM_NOTIFICATION;
                 }
-            }
+            //}
         }
     }
 
