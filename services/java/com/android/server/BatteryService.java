@@ -176,14 +176,9 @@ public final class BatteryService extends Binder {
             mBatteryPropertiesRegistrar.registerListener(mBatteryPropertiesListener);
         } catch (RemoteException e) {
             // Should never happen.
-
+        }
         SettingsObserver observer = new SettingsObserver(new Handler());
         observer.observe();
-
-        // set initial status
-        synchronized (mLock) {
-            updateLocked();
-        }
     }
 
     void systemReady() {
