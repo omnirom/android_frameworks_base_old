@@ -115,7 +115,6 @@ public class VolumePanel extends Handler implements OnSeekBarChangeListener, Vie
     private boolean mRingIsSilent;
     private boolean mShowCombinedVolumes;
     private boolean mVoiceCapable;
-    private boolean mVolumeLinkNotification;
     private int mCurrentOverlayStyle = -1;
 
     // True if we want to play tones on the system stream when the master stream is specified.
@@ -228,8 +227,6 @@ public class VolumePanel extends Handler implements OnSeekBarChangeListener, Vie
     private ContentObserver mSettingsObserver = new ContentObserver(this) {
         @Override
         public void onChange(boolean selfChange) {
-            mVolumeLinkNotification = Settings.System.getInt(mContext.getContentResolver(),
-                    Settings.System.VOLUME_LINK_NOTIFICATION, 1) == 1;
             int overlayStyle = Settings.System.getInt(mContext.getContentResolver(),
                     Settings.System.MODE_VOLUME_OVERLAY, VOLUME_OVERLAY_EXPANDABLE);
             changeOverlayStyle(overlayStyle);
@@ -343,8 +340,6 @@ public class VolumePanel extends Handler implements OnSeekBarChangeListener, Vie
         mVoiceCapable = context.getResources().getBoolean(R.bool.config_voice_capable);
 
         // Get the user's preferences
-        mVolumeLinkNotification = Settings.System.getInt(mContext.getContentResolver(),
-                Settings.System.VOLUME_LINK_NOTIFICATION, 1) == 1;
         int chosenStyle = Settings.System.getInt(context.getContentResolver(),
                 Settings.System.MODE_VOLUME_OVERLAY, VOLUME_OVERLAY_EXPANDABLE);
         changeOverlayStyle(chosenStyle);
@@ -517,11 +512,6 @@ public class VolumePanel extends Handler implements OnSeekBarChangeListener, Vie
             }
             // Skip ring volume for non-phone devices
             if (!mVoiceCapable && streamType == AudioManager.STREAM_RING) {
-                continue;
-            }
-            // Skip notification volume if linked with ring volume
-            if (mVoiceCapable && mVolumeLinkNotification &&
-                    streamType == AudioManager.STREAM_NOTIFICATION) {
                 continue;
             }
             StreamControl sc = mStreamControls.get(streamType);
