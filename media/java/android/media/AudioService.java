@@ -281,8 +281,6 @@ public class AudioService extends IAudioService.Stub {
             "STREAM_TTS"
     };
 
-    private boolean mLinkNotificationWithVolume;
-
     private final AudioSystem.ErrorCallback mAudioSystemCallback = new AudioSystem.ErrorCallback() {
         public void onError(int error) {
             switch (error) {
@@ -643,13 +641,6 @@ public class AudioService extends IAudioService.Stub {
             mRingerModeAffectedStreams |= (1 << AudioSystem.STREAM_DTMF);
         }
         mStreamVolumeAlias[AudioSystem.STREAM_DTMF] = dtmfStreamAlias;
-
-        if (mLinkNotificationWithVolume) {
-            mStreamVolumeAlias[AudioSystem.STREAM_NOTIFICATION] = AudioSystem.STREAM_RING;
-        } else {
-            mStreamVolumeAlias[AudioSystem.STREAM_NOTIFICATION] = AudioSystem.STREAM_NOTIFICATION;
-        }
-
         if (updateVolumes) {
             mStreamStates[AudioSystem.STREAM_DTMF].setAllIndexes(mStreamStates[dtmfStreamAlias]);
             // apply stream mute states according to new value of mRingerModeAffectedStreams
@@ -723,9 +714,6 @@ public class AudioService extends IAudioService.Stub {
             updateRingerModeAffectedStreams();
             readDockAudioSettings(cr);
         }
-
-        mLinkNotificationWithVolume = Settings.System.getIntForUser(cr,
-                Settings.System.VOLUME_LINK_NOTIFICATION, 1, UserHandle.USER_CURRENT) == 1;
 
         mMuteAffectedStreams = System.getIntForUser(cr,
                 System.MUTE_STREAMS_AFFECTED,
@@ -2574,8 +2562,9 @@ public class AudioService extends IAudioService.Stub {
                  (1 << AudioSystem.STREAM_SYSTEM)|(1 << AudioSystem.STREAM_SYSTEM_ENFORCED)),
                  UserHandle.USER_CURRENT);
 
-        // ringtone and system streams are always affected by ringer mode
+        // ringtone, notification and system streams are always affected by ringer mode
         ringerModeAffectedStreams |= (1 << AudioSystem.STREAM_RING)|
+                                        (1 << AudioSystem.STREAM_NOTIFICATION)|
                                         (1 << AudioSystem.STREAM_SYSTEM);
 
         if (mVoiceCapable) {
@@ -3712,8 +3701,6 @@ public class AudioService extends IAudioService.Stub {
                 Settings.System.MODE_RINGER_STREAMS_AFFECTED), false, this);
             mContentResolver.registerContentObserver(Settings.Global.getUriFor(
                 Settings.Global.DOCK_AUDIO_MEDIA_ENABLED), false, this);
-            mContentResolver.registerContentObserver(Settings.System.getUriFor(
-                Settings.System.VOLUME_LINK_NOTIFICATION), false, this);
         }
 
         @Override
@@ -3732,14 +3719,6 @@ public class AudioService extends IAudioService.Stub {
                     setRingerModeInt(getRingerMode(), false);
                 }
                 readDockAudioSettings(mContentResolver);
-
-                mLinkNotificationWithVolume = Settings.System.getIntForUser(mContentResolver,
-                        Settings.System.VOLUME_LINK_NOTIFICATION, 1, UserHandle.USER_CURRENT) == 1;
-                if (mLinkNotificationWithVolume) {
-                    mStreamVolumeAlias[AudioSystem.STREAM_NOTIFICATION] = AudioSystem.STREAM_RING;
-                } else {
-                    mStreamVolumeAlias[AudioSystem.STREAM_NOTIFICATION] = AudioSystem.STREAM_NOTIFICATION;
-                }
             }
         }
     }
