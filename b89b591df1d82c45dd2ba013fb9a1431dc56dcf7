@@ -1,0 +1,21 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "ab89d9a9_9922abfb",
+        "filename": "policy/src/com/android/internal/policy/impl/PhoneWindowManager.java",
+        "patchSetId": 1
+      },
+      "lineNbr": 212,
+      "author": {
+        "id": 1000026
+      },
+      "writtenOn": "2013-11-10T22:11:32Z",
+      "side": 0,
+      "message": "I know its picky but you should really only change whats required. Removing lines will make it even harder to apply upstream changes in the future",
+      "revId": "b89b591df1d82c45dd2ba013fb9a1431dc56dcf7",
+      "serverId": "56841c99-7c94-43d4-bf0b-cb4707e66d55",
+      "unresolved": false
+    }
+  ]
+}
