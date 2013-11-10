@@ -246,6 +246,25 @@ class GlobalActions implements DialogInterface.OnDismissListener, DialogInterfac
                     mWindowManagerFuncs.shutdown(true);
                 }
 
+                public boolean showDuringKeyguard() {
+                    return true;
+                }
+
+                public boolean showBeforeProvisioning() {
+                    return true;
+                }
+            });
+
+        // next: reboot
+        // Unlike in CM, we'll always have this here until we decide otherwise.
+        // The Settings component of this is a mess and how many people actually disable this?
+        // Someone else can readd the ability to disable this if they don't want it.
+        mItems.add(
+            new SinglePressAction(R.drawable.ic_lock_reboot, R.string.global_action_reboot) {
+                public void onPress() {
+                    mWindowManagerFuncs.reboot();
+                }
+
                 public boolean onLongPress() {
                     mWindowManagerFuncs.rebootSafeMode(true);
                     return true;
