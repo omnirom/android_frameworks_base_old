@@ -1,0 +1,247 @@
+From 6158f5313c26ab74c5948c55790b275a0a2aef48 Mon Sep 17 00:00:00 2001
+From: Mohhamad Rehan <rkrehanthedarkknight@gmail.com>
+Date: Mon, 11 Nov 2013 01:51:00 +0530
+Subject: [PATCH] add power mode support to the camera
+
+Change-Id: I81baffc7e1ace75e839d21e1e8a8ee83f637a17f
+---
+ api/current.txt                                  |   5 ++++
+ core/java/android/hardware/Camera.java           |  36 +++++++++++++++++++++++
+ core/res/res/drawable-hdpi/ic_launcher_phone.png | Bin 0 -> 5996 bytes
+ 3 files changed, 41 insertions(+)
+ create mode 100644 core/res/res/drawable-hdpi/ic_launcher_phone.png
+
+diff --git a/api/current.txt b/api/current.txt
+index 054f1cd..929a5ce 100644
+--- a/api/current.txt
++++ b/api/current.txt
+@@ -10535,6 +10535,7 @@ package android.hardware {
+     method public int getJpegQuality();
+     method public int getJpegThumbnailQuality();
+     method public android.hardware.Camera.Size getJpegThumbnailSize();
++    method public java.lang.String getPowerMode();
+     method public int getMaxExposureCompensation();
+     method public int getMaxNumDetectedFaces();
+     method public int getMaxNumFocusAreas();
+@@ -10571,6 +10572,7 @@ package android.hardware {
+     method public java.util.List<java.lang.Integer> getZoomRatios();
+     method public boolean isAutoExposureLockSupported();
+     method public boolean isAutoWhiteBalanceLockSupported();
++    method public boolean isPowerModeSupported(); 
+     method public boolean isSmoothZoomSupported();
+     method public boolean isVideoSnapshotSupported();
+     method public boolean isVideoStabilizationSupported();
+@@ -10598,6 +10600,7 @@ package android.hardware {
+     method public void setMeteringAreas(java.util.List<android.hardware.Camera.Area>);
+     method public void setPictureFormat(int);
+     method public void setPictureSize(int, int);
++    method public void setPowerMode(java.lang.String);
+     method public void setPreviewFormat(int);
+     method public void setPreviewFpsRange(int, int);
+     method public deprecated void setPreviewFrameRate(int);
+@@ -10637,6 +10640,8 @@ package android.hardware {
+     field public static final java.lang.String FOCUS_MODE_FIXED = "fixed";
+     field public static final java.lang.String FOCUS_MODE_INFINITY = "infinity";
+     field public static final java.lang.String FOCUS_MODE_MACRO = "macro";
++    field public static final java.lang.String LOW_POWER = "Low_Power"; 
++    field public static final java.lang.String NORMAL_POWER = "Normal_Power";
+     field public static final int PREVIEW_FPS_MAX_INDEX = 1; // 0x1
+     field public static final int PREVIEW_FPS_MIN_INDEX = 0; // 0x0
+     field public static final java.lang.String SCENE_MODE_ACTION = "action";
+diff --git a/core/java/android/hardware/Camera.java b/core/java/android/hardware/Camera.java
+index feb47aa..7e62895 100644
+--- a/core/java/android/hardware/Camera.java
++++ b/core/java/android/hardware/Camera.java
+@@ -1875,7 +1875,9 @@ public class Camera {
+         private static final String KEY_VIDEO_SNAPSHOT_SUPPORTED = "video-snapshot-supported";
+         private static final String KEY_VIDEO_STABILIZATION = "video-stabilization";
+         private static final String KEY_VIDEO_STABILIZATION_SUPPORTED = "video-stabilization-supported";
++        private static final String KEY_POWER_MODE_SUPPORTED = "power-mode-supported";
+ 
++        private static final String KEY_POWER_MODE = "power-mode";
+         // Parameter key suffix for supported values.
+         private static final String SUPPORTED_VALUES_SUFFIX = "-values";
+ 
+@@ -1909,6 +1911,10 @@ public class Camera {
+         public static final String ANTIBANDING_60HZ = "60hz";
+         public static final String ANTIBANDING_OFF = "off";
+ 
++        // Values for POWER MODE
++        public static final String LOW_POWER = "Low_Power";
++        public static final String NORMAL_POWER = "Normal_Power";
++
+         // Values for flash mode settings.
+         /**
+          * Flash will not be fired.
+@@ -3124,6 +3130,28 @@ public class Camera {
+             return get(KEY_FOCUS_MODE);
+         }
+ 
++        /**         
++         * Sets the Power mode.
++         *
++         * @param value Power mode.
++         * @see #getPowerMode()
++         */
++        public void setPowerMode(String value) {
++            set(KEY_POWER_MODE, value);
++        }
++
++        /**
++         * Gets the current power mode setting.
++         *
++         * @return current power mode. null if power mode setting is not
++         *         supported.
++         * @see #POWER_MODE_LOW
++         * @see #POWER_MODE_NORMAL
++         */
++        public String getPowerMode() {
++            return get(KEY_POWER_MODE);
++        }
++
+         /**
+          * Sets the focus mode.
+          *
+@@ -3690,6 +3718,14 @@ public class Camera {
+         }
+ 
+         /**
++         * @return true if full size video snapshot is supported.
++         */
++        public boolean isPowerModeSupported() {
++            String str = get(KEY_POWER_MODE_SUPPORTED);
++            return TRUE.equals(str);
++        }
++
++        /**
+          * <p>Enables and disables video stabilization. Use
+          * {@link #isVideoStabilizationSupported} to determine if calling this
+          * method is valid.</p>
+diff --git a/core/res/res/drawable-hdpi/ic_launcher_phone.png b/core/res/res/drawable-hdpi/ic_launcher_phone.png
+new file mode 100644
+index 0000000000000000000000000000000000000000..03a04db1507bd505d87e3e88ed009e41d23156bd
+GIT binary patch
+literal 5996
+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
+a@&5oxCY!+mk*yp60000<MNUMnLSTYEg)#vE
+
+literal 0
+HcmV?d00001
+
+-- 
+1.8.3.2
+
