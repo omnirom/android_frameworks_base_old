@@ -614,8 +614,8 @@
             1 - Menu key
             2 - Recent apps view in SystemUI
             3 - Launch assist intent
-            4 - Voice Search
-            5 - In-app Search 
+            4 - voice Search
+            5 - In-app Search
          This needs to match the constants in
          policy/src/com/android/internal/policy/impl/PhoneWindowManager.java
     -->
@@ -624,7 +624,7 @@
     <!-- Control the behavior when the user double-taps the home button.
             0 - Nothing
             1 - Menu key
-            2 - Recent apps view in SystemUI 
+            2 - Recent apps view in SystemUI
             3 - Launch assist intent
             4 - Voice Search
             5 - In-app Search
