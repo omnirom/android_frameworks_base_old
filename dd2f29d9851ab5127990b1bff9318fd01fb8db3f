@@ -16,6 +16,23 @@
       "revId": "dd2f29d9851ab5127990b1bff9318fd01fb8db3f",
       "serverId": "56841c99-7c94-43d4-bf0b-cb4707e66d55",
       "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "ab89d9a9_14fbc2de",
+        "filename": "services/java/com/android/server/power/DisplayPowerRequest.java",
+        "patchSetId": 1
+      },
+      "lineNbr": 130,
+      "author": {
+        "id": 1000030
+      },
+      "writtenOn": "2013-11-11T06:03:47Z",
+      "side": 1,
+      "message": "also remove the semicolon from like 124 please.",
+      "revId": "dd2f29d9851ab5127990b1bff9318fd01fb8db3f",
+      "serverId": "56841c99-7c94-43d4-bf0b-cb4707e66d55",
+      "unresolved": false
     }
   ]
 }
