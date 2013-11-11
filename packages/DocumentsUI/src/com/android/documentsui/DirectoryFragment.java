@@ -19,6 +19,7 @@ package com.android.documentsui;
 import static com.android.documentsui.DocumentsActivity.TAG;
 import static com.android.documentsui.DocumentsActivity.State.ACTION_CREATE;
 import static com.android.documentsui.DocumentsActivity.State.ACTION_MANAGE;
+import static com.android.documentsui.DocumentsActivity.State.ACTION_STANDALONE;
 import static com.android.documentsui.DocumentsActivity.State.MODE_GRID;
 import static com.android.documentsui.DocumentsActivity.State.MODE_LIST;
 import static com.android.documentsui.DocumentsActivity.State.MODE_UNKNOWN;
@@ -28,6 +29,7 @@ import static com.android.documentsui.model.DocumentInfo.getCursorLong;
 import static com.android.documentsui.model.DocumentInfo.getCursorString;
 
 import android.app.ActivityManager;
+import android.app.AlertDialog;
 import android.app.Fragment;
 import android.app.FragmentManager;
 import android.app.FragmentTransaction;
@@ -36,8 +38,10 @@ import android.content.ContentProviderClient;
 import android.content.ContentResolver;
 import android.content.ContentValues;
 import android.content.Context;
+import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.Loader;
+import android.content.res.Resources;
 import android.database.Cursor;
 import android.graphics.Bitmap;
 import android.graphics.Point;
@@ -447,11 +451,16 @@ public class DirectoryFragment extends Fragment {
             final MenuItem open = menu.findItem(R.id.menu_open);
             final MenuItem share = menu.findItem(R.id.menu_share);
             final MenuItem delete = menu.findItem(R.id.menu_delete);
+            final MenuItem copy = menu.findItem(R.id.menu_copy);
+            final MenuItem cut = menu.findItem(R.id.menu_cut);
 
             final boolean manageMode = state.action == ACTION_MANAGE;
-            open.setVisible(!manageMode);
-            share.setVisible(manageMode);
-            delete.setVisible(manageMode);
+            final boolean stdMode = state.action == ACTION_STANDALONE;
+            open.setVisible(!manageMode && !stdMode);
+            share.setVisible(manageMode || stdMode);
+            delete.setVisible(manageMode || stdMode);
+            copy.setVisible(stdMode);
+            cut.setVisible(stdMode);
 
             return true;
         }
@@ -485,6 +494,16 @@ public class DirectoryFragment extends Fragment {
                 mode.finish();
                 return true;
 
+            } else if (id == R.id.menu_copy) {
+                onCopyDocuments(docs);
+                mode.finish();
+                return true;
+
+            } else if (id == R.id.menu_cut) {
+                onCutDocuments(docs);
+                mode.finish();
+                return true;
+
             } else {
                 return false;
             }
@@ -506,7 +525,8 @@ public class DirectoryFragment extends Fragment {
                 if (cursor != null) {
                     final String docMimeType = getCursorString(cursor, Document.COLUMN_MIME_TYPE);
                     final int docFlags = getCursorInt(cursor, Document.COLUMN_FLAGS);
-                    if (!Document.MIME_TYPE_DIR.equals(docMimeType)) {
+                    final State state = getDisplayState(DirectoryFragment.this);
+                    if (!Document.MIME_TYPE_DIR.equals(docMimeType) || state.action == ACTION_STANDALONE) {
                         valid = isDocumentEnabled(docMimeType, docFlags);
                     }
                 }
@@ -569,7 +589,33 @@ public class DirectoryFragment extends Fragment {
         startActivity(intent);
     }
 
-    private void onDeleteDocuments(List<DocumentInfo> docs) {
+    private void onDeleteDocuments(final List<DocumentInfo> docs) {
+        final Context context = getActivity();
+        final ContentResolver resolver = context.getContentResolver();
+        final Resources resources = context.getResources();
+
+        // Open a confirmation dialog
+        AlertDialog.Builder builder = new AlertDialog.Builder(getActivity());
+
+        builder.setPositiveButton(R.string.ok, new DialogInterface.OnClickListener() {
+            public void onClick(DialogInterface dialog, int id) {
+                onDeleteDocumentsImpl(docs);
+            }
+        });
+        builder.setNegativeButton(R.string.cancel, new DialogInterface.OnClickListener() {
+            public void onClick(DialogInterface dialog, int id) {
+                // User cancelled the dialog, ignore actions
+            }
+        });
+
+        builder.setTitle(R.string.dialog_delete_confirm_title)
+            .setMessage(resources.getQuantityString(R.plurals.dialog_delete_confirm_message, docs.size(), docs.size()));
+
+        AlertDialog dialog = builder.create();
+        dialog.show();
+    }
+
+    private void onDeleteDocumentsImpl(final List<DocumentInfo> docs) {
         final Context context = getActivity();
         final ContentResolver resolver = context.getContentResolver();
 
@@ -585,6 +631,33 @@ public class DirectoryFragment extends Fragment {
             try {
                 client = DocumentsApplication.acquireUnstableProviderOrThrow(
                         resolver, doc.derivedUri.getAuthority());
+
+                if (Document.MIME_TYPE_DIR.equals(doc.mimeType)) {
+                    // In order to delete a directory, we must delete its contents first. We
+                    // recursively do so.
+                    Uri contentsUri = DocumentsContract.buildChildDocumentsUri(
+                        doc.authority, doc.documentId);
+                    final RootInfo root = getArguments().getParcelable(EXTRA_ROOT);
+                    
+                    // We get the contents of the directory
+                    DirectoryLoader loader = new DirectoryLoader(
+                            context, mType, root, doc, contentsUri, SORT_ORDER_UNKNOWN);
+                    
+                    DirectoryResult result = loader.loadInBackground();
+                    Cursor cursor = result.cursor;
+
+                    // Build a list of the docs to delete, and delete them
+                    ArrayList<DocumentInfo> docsToDelete = new ArrayList<DocumentInfo>();
+                    for (int i = 0; i < cursor.getCount(); i++) {
+                        cursor.moveToPosition(i);
+                        final DocumentInfo subDoc = DocumentInfo.fromDirectoryCursor(cursor);
+                        docsToDelete.add(subDoc);
+                    }
+
+                    onDeleteDocumentsImpl(docsToDelete);
+                }
+
+
                 DocumentsContract.deleteDocument(client, doc.derivedUri);
             } catch (Exception e) {
                 Log.w(TAG, "Failed to delete " + doc);
@@ -596,7 +669,21 @@ public class DirectoryFragment extends Fragment {
 
         if (hadTrouble) {
             Toast.makeText(context, R.string.toast_failed_delete, Toast.LENGTH_SHORT).show();
+        } else {
+            Toast.makeText(context, R.string.toast_success_delete, Toast.LENGTH_SHORT).show();
+
+            // Reload files in the current folder
+            getLoaderManager().restartLoader(mLoaderId, null, mCallbacks);
+            updateDisplayState();
         }
+    }
+
+    private void onCopyDocuments(final List<DocumentInfo> docs) {
+        ((DocumentsActivity) getActivity()).setClipboardDocuments(docs, true);
+    }
+
+    private void onCutDocuments(final List<DocumentInfo> docs) {
+        ((DocumentsActivity) getActivity()).setClipboardDocuments(docs, false);
     }
 
     private static State getDisplayState(Fragment fragment) {

@@ -44,6 +44,12 @@
     <string name="menu_share">Share</string>
     <!-- Menu item title that deletes the selected documents [CHAR LIMIT=24] -->
     <string name="menu_delete">Delete</string>
+    <!-- Menu item title that copies the selected documents [CHAR LIMIT=24] -->
+    <string name="menu_copy">Copy</string>
+    <!-- Menu item title that cuts the selected documents [CHAR LIMIT=24] -->
+    <string name="menu_cut">Cut</string>
+    <!-- Menu item title that pastes the selected documents [CHAR LIMIT=24] -->
+    <string name="menu_paste">Paste</string>
 
     <!-- Action mode title summarizing the number of documents selected [CHAR LIMIT=32] -->
     <string name="mode_selected_count"><xliff:g id="count" example="3">%1$d</xliff:g> selected</string>
@@ -97,5 +103,20 @@
 
     <!-- Title of dialog when prompting user to select an app to share documents with [CHAR LIMIT=32] -->
     <string name="share_via">Share via</string>
+
+    <!-- Text shown in a toast when the user copies files -->
+    <plurals name="files_copied">
+        <item quantity="one">The file has been put in the clipboard</item>
+        <item quantity="other">%d files have been put in the clipboard</item>
+    </plurals>
+
+    <!-- Text shown in a toast when the user pastes files -->
+    <plurals name="files_pasted">
+        <item quantity="one">The file has been pasted</item>
+        <item quantity="other">%d files have been pasted</item>
+    </plurals>
+
+    <!-- Text show in the progress dialog while files are being copied -->
+    <string name="copy_in_progress">Copying...</string>
 
 </resources>
