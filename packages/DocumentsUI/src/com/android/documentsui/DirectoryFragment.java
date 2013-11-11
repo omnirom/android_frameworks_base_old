@@ -19,6 +19,7 @@ package com.android.documentsui;
 import static com.android.documentsui.DocumentsActivity.TAG;
 import static com.android.documentsui.DocumentsActivity.State.ACTION_CREATE;
 import static com.android.documentsui.DocumentsActivity.State.ACTION_MANAGE;
+import static com.android.documentsui.DocumentsActivity.State.ACTION_STANDALONE;
 import static com.android.documentsui.DocumentsActivity.State.MODE_GRID;
 import static com.android.documentsui.DocumentsActivity.State.MODE_LIST;
 import static com.android.documentsui.DocumentsActivity.State.MODE_UNKNOWN;
@@ -28,6 +29,7 @@ import static com.android.documentsui.model.DocumentInfo.getCursorLong;
 import static com.android.documentsui.model.DocumentInfo.getCursorString;
 
 import android.app.ActivityManager;
+import android.app.AlertDialog;
 import android.app.Fragment;
 import android.app.FragmentManager;
 import android.app.FragmentTransaction;
@@ -36,8 +38,10 @@ import android.content.ContentProviderClient;
 import android.content.ContentResolver;
 import android.content.ContentValues;
 import android.content.Context;
+import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.Loader;
+import android.content.res.Resources;
 import android.database.Cursor;
 import android.graphics.Bitmap;
 import android.graphics.Point;
@@ -447,11 +451,14 @@ public class DirectoryFragment extends Fragment {
             final MenuItem open = menu.findItem(R.id.menu_open);
             final MenuItem share = menu.findItem(R.id.menu_share);
             final MenuItem delete = menu.findItem(R.id.menu_delete);
+            final MenuItem copy = menu.findItem(R.id.menu_copy);
 
             final boolean manageMode = state.action == ACTION_MANAGE;
-            open.setVisible(!manageMode);
-            share.setVisible(manageMode);
-            delete.setVisible(manageMode);
+            final boolean stdMode = state.action == ACTION_STANDALONE;
+            open.setVisible(!manageMode && !stdMode);
+            share.setVisible(manageMode || stdMode);
+            delete.setVisible(manageMode || stdMode);
+            copy.setVisible(stdMode);
 
             return true;
         }
@@ -482,6 +489,11 @@ public class DirectoryFragment extends Fragment {
 
             } else if (id == R.id.menu_delete) {
                 onDeleteDocuments(docs);
+                mode.finish();
+                return true;
+
+            } else if (id == R.id.menu_copy) {
+                onCopyDocuments(docs);
                 mode.finish();
                 return true;
 
@@ -569,34 +581,64 @@ public class DirectoryFragment extends Fragment {
         startActivity(intent);
     }
 
-    private void onDeleteDocuments(List<DocumentInfo> docs) {
+    private void onDeleteDocuments(final List<DocumentInfo> docs) {
         final Context context = getActivity();
         final ContentResolver resolver = context.getContentResolver();
+        final Resources resources = context.getResources();
 
-        boolean hadTrouble = false;
-        for (DocumentInfo doc : docs) {
-            if (!doc.isDeleteSupported()) {
-                Log.w(TAG, "Skipping " + doc);
-                hadTrouble = true;
-                continue;
+        // Open a confirmation dialog
+        AlertDialog.Builder builder = new AlertDialog.Builder(getActivity());
+        
+        builder.setPositiveButton(R.string.ok, new DialogInterface.OnClickListener() {
+            public void onClick(DialogInterface dialog, int id) {
+                boolean hadTrouble = false;
+                for (DocumentInfo doc : docs) {
+                    if (!doc.isDeleteSupported()) {
+                        Log.w(TAG, "Skipping " + doc);
+                        hadTrouble = true;
+                        continue;
+                    }
+
+                    ContentProviderClient client = null;
+                    try {
+                        client = DocumentsApplication.acquireUnstableProviderOrThrow(
+                                resolver, doc.derivedUri.getAuthority());
+                        DocumentsContract.deleteDocument(client, doc.derivedUri);
+                    } catch (Exception e) {
+                        Log.w(TAG, "Failed to delete " + doc);
+                        hadTrouble = true;
+                    } finally {
+                        ContentProviderClient.releaseQuietly(client);
+                    }
+                }
+
+                if (hadTrouble) {
+                    Toast.makeText(context, R.string.toast_failed_delete, Toast.LENGTH_SHORT).show();
+                } else {
+                    Toast.makeText(context, R.string.toast_success_delete, Toast.LENGTH_SHORT).show();
+                    
+                    // Reload files in the current folder
+                    getLoaderManager().restartLoader(mLoaderId, null, mCallbacks);
+                    updateDisplayState();
+                }
             }
-
-            ContentProviderClient client = null;
-            try {
-                client = DocumentsApplication.acquireUnstableProviderOrThrow(
-                        resolver, doc.derivedUri.getAuthority());
-                DocumentsContract.deleteDocument(client, doc.derivedUri);
-            } catch (Exception e) {
-                Log.w(TAG, "Failed to delete " + doc);
-                hadTrouble = true;
-            } finally {
-                ContentProviderClient.releaseQuietly(client);
+        });
+        builder.setNegativeButton(R.string.cancel, new DialogInterface.OnClickListener() {
+            public void onClick(DialogInterface dialog, int id) {
+                // User cancelled the dialog, ignore actions
             }
-        }
+        });
+        
+        builder.setTitle(R.string.dialog_delete_confirm_title)
+            .setMessage(resources.getQuantityString(R.plurals.dialog_delete_confirm_message, docs.size(), docs.size()));
+               
+        AlertDialog dialog = builder.create();
+        dialog.show();
+        
+    }
 
-        if (hadTrouble) {
-            Toast.makeText(context, R.string.toast_failed_delete, Toast.LENGTH_SHORT).show();
-        }
+    private void onCopyDocuments(final List<DocumentInfo> docs) {
+        ((DocumentsActivity) getActivity()).setDocumentsToCopy(docs);
     }
 
     private static State getDisplayState(Fragment fragment) {
