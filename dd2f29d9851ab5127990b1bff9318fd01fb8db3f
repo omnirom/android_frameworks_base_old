@@ -1,0 +1,21 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "ab89d9a9_d4f07afe",
+        "filename": "services/java/com/android/server/power/DisplayPowerRequest.java",
+        "patchSetId": 1
+      },
+      "lineNbr": 113,
+      "author": {
+        "id": 1000030
+      },
+      "writtenOn": "2013-11-11T06:00:57Z",
+      "side": 1,
+      "message": "remove the \";\" from line 108 please.",
+      "revId": "dd2f29d9851ab5127990b1bff9318fd01fb8db3f",
+      "serverId": "56841c99-7c94-43d4-bf0b-cb4707e66d55",
+      "unresolved": false
+    }
+  ]
+}
