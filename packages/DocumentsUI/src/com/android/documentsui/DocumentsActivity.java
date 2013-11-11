@@ -1,5 +1,6 @@
 /*
  * Copyright (C) 2013 The Android Open Source Project
+ * Modifications Copyright (C) 2013 The OmniROM Project
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -24,6 +25,7 @@ import static com.android.documentsui.DocumentsActivity.State.ACTION_CREATE;
 import static com.android.documentsui.DocumentsActivity.State.ACTION_GET_CONTENT;
 import static com.android.documentsui.DocumentsActivity.State.ACTION_MANAGE;
 import static com.android.documentsui.DocumentsActivity.State.ACTION_OPEN;
+import static com.android.documentsui.DocumentsActivity.State.ACTION_STANDALONE;
 import static com.android.documentsui.DocumentsActivity.State.MODE_GRID;
 import static com.android.documentsui.DocumentsActivity.State.MODE_LIST;
 
@@ -209,14 +211,19 @@ public class DocumentsActivity extends Activity {
             moreApps.setComponent(null);
             moreApps.setPackage(null);
             RootsFragment.show(getFragmentManager(), moreApps);
-        } else if (mState.action == ACTION_OPEN || mState.action == ACTION_CREATE) {
+        } else if (mState.action == ACTION_OPEN || mState.action == ACTION_CREATE
+            || mState.action == ACTION_STANDALONE) {
             RootsFragment.show(getFragmentManager(), null);
         }
 
         if (!mState.restored) {
             if (mState.action == ACTION_MANAGE) {
                 final Uri rootUri = getIntent().getData();
-                new RestoreRootTask(rootUri).executeOnExecutor(getCurrentExecutor());
+                if (rootUri != null) {
+                    new RestoreRootTask(rootUri).executeOnExecutor(getCurrentExecutor());
+                } else {
+                    new RestoreStackTask().execute();
+                }
             } else {
                 new RestoreStackTask().execute();
             }
@@ -238,11 +245,15 @@ public class DocumentsActivity extends Activity {
             mState.action = ACTION_GET_CONTENT;
         } else if (DocumentsContract.ACTION_MANAGE_ROOT.equals(action)) {
             mState.action = ACTION_MANAGE;
+        } else if (Intent.ACTION_MAIN.equals(action)) {
+            mState.action = ACTION_STANDALONE;
         }
 
         if (mState.action == ACTION_OPEN || mState.action == ACTION_GET_CONTENT) {
             mState.allowMultiple = intent.getBooleanExtra(
                     Intent.EXTRA_ALLOW_MULTIPLE, false);
+        } else if (mState.action == ACTION_STANDALONE) {
+            mState.allowMultiple = true;
         }
 
         if (mState.action == ACTION_MANAGE) {
@@ -436,6 +447,8 @@ public class DocumentsActivity extends Activity {
                 actionBar.setTitle(R.string.title_open);
             } else if (mState.action == ACTION_CREATE) {
                 actionBar.setTitle(R.string.title_save);
+            } else if (mState.action == ACTION_STANDALONE) {
+                actionBar.setTitle(R.string.title_standalone);
             }
         } else {
             final RootInfo root = getCurrentRoot();
@@ -971,6 +984,16 @@ public class DocumentsActivity extends Activity {
                     Toast.makeText(this, R.string.toast_no_application, Toast.LENGTH_SHORT).show();
                 }
             }
+        } else if (mState.action == ACTION_STANDALONE) {
+            final Intent view = new Intent(Intent.ACTION_VIEW);
+            view.setFlags(Intent.FLAG_GRANT_READ_URI_PERMISSION);
+            view.setData(doc.derivedUri);
+
+            try {
+                startActivity(view);
+            } catch (ActivityNotFoundException ex2) {
+                Toast.makeText(this, R.string.toast_no_application, Toast.LENGTH_SHORT).show();
+            }
         }
     }
 
@@ -1138,6 +1161,7 @@ public class DocumentsActivity extends Activity {
         public static final int ACTION_CREATE = 2;
         public static final int ACTION_GET_CONTENT = 3;
         public static final int ACTION_MANAGE = 4;
+        public static final int ACTION_STANDALONE = 5;
 
         public static final int MODE_UNKNOWN = 0;
         public static final int MODE_LIST = 1;
