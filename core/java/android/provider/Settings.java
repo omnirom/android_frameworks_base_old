@@ -2844,6 +2844,14 @@ public final class Settings {
         public static final String CLEAR_RECENTS_BUTTON_LOCATION = "clear_recents_button_location";
 
         /**
+         * Immersive mode global actions switch
+         * 0 = no
+         * 1 = yes
+         * @hide
+         */
+        public static final String IMMERSIVE_MODE = "immersive_mode";
+
+        /**
          * Show when WiFi or data mobile is sending/receiving data
          * @hide
          */

@@ -49,4 +49,10 @@
     <!-- QS Battery Tile -->
     <string name="quick_settings_battery_charging">Charging</string>
     <string name="quick_settings_battery_discharging">Discharging</string>
+
+    <!-- QuickSettings: Immersive mode [CHAR LIMIT=NONE] -->
+    <string name="quick_settings_immersive_mode_label">Immersive</string>
+    <!-- QuickSettings: Immersive mode (Off) [CHAR LIMIT=NONE] -->
+    <string name="quick_settings_immersive_mode_off_label">Immersive Off</string>
+
 </resources>
