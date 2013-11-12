@@ -1,5 +1,6 @@
 /*
  * Copyright (C) 2010 The Android Open Source Project
+ * This code has been modified. Portions copyright (C) 2013, ParanoidAndroid Project.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -85,6 +86,7 @@ import com.android.internal.statusbar.StatusBarIconList;
 import com.android.internal.widget.SizeAdaptiveLayout;
 import com.android.systemui.R;
 import com.android.systemui.RecentsComponent;
+import com.android.systemui.recent.RecentsActivity;
 import com.android.systemui.SearchPanelView;
 import com.android.systemui.SystemUI;
 import com.android.systemui.statusbar.policy.NotificationRowLayout;
@@ -101,6 +103,7 @@ public abstract class BaseStatusBar extends SystemUI implements
 
     protected static final int MSG_TOGGLE_RECENTS_PANEL = 1020;
     protected static final int MSG_CLOSE_RECENTS_PANEL = 1021;
+    protected static final int MSG_CLEAR_RECENTS_PANEL = 1028;
     protected static final int MSG_PRELOAD_RECENT_APPS = 1022;
     protected static final int MSG_CANCEL_PRELOAD_RECENT_APPS = 1023;
     protected static final int MSG_OPEN_SEARCH_PANEL = 1024;
@@ -459,6 +462,13 @@ public abstract class BaseStatusBar extends SystemUI implements
     }
 
     @Override
+    public void clearRecentApps() {
+        int msg = MSG_CLEAR_RECENTS_PANEL;
+        mHandler.removeMessages(msg);
+        mHandler.sendEmptyMessage(msg);
+    }
+
+    @Override
     public void preloadRecentApps() {
         int msg = MSG_PRELOAD_RECENT_APPS;
         mHandler.removeMessages(msg);
@@ -577,6 +587,14 @@ public abstract class BaseStatusBar extends SystemUI implements
         }
     };
 
+    protected boolean isRecentAppsVisible() {
+        return RecentsActivity.isActivityShowing();
+    }
+
+    protected boolean hasRecentApps() {
+        return RecentsActivity.getTasks() > 0;
+    }
+
     protected void toggleRecentsActivity() {
         if (mRecents != null) {
             mRecents.toggleRecents(mDisplay, mLayoutDirection, getStatusBarView());
@@ -613,6 +631,14 @@ public abstract class BaseStatusBar extends SystemUI implements
              case MSG_CLOSE_RECENTS_PANEL:
                  closeRecents();
                  break;
+             case MSG_CLEAR_RECENTS_PANEL:
+                  if (DEBUG) Log.d(TAG, "clearing recents panel");
+                  intent = new Intent(RecentsActivity.CLEAR_RECENTS_INTENT);
+                  intent.setClassName("com.android.systemui",
+                         "com.android.systemui.recent.RecentsActivity");
+                  mContext.startActivityAsUser(intent, new UserHandle(
+                         UserHandle.USER_CURRENT));
+                  break;
              case MSG_PRELOAD_RECENT_APPS:
                   preloadRecentTasksList();
                   break;
