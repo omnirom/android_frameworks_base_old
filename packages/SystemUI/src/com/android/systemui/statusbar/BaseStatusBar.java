@@ -37,6 +37,7 @@ import android.app.KeyguardManager;
 import android.app.Notification;
 import android.app.PendingIntent;
 import android.app.TaskStackBuilder;
+import android.content.ActivityNotFoundException;
 import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.Intent;
@@ -530,9 +531,6 @@ public abstract class BaseStatusBar extends SystemUI implements
     protected abstract View getStatusBarView();
 
     protected void toggleLastAppImpl() {
-        int lastAppId = 0;
-        int looper = 1;
-        String packageName;
         final Intent intent = new Intent(Intent.ACTION_MAIN);
         final ActivityManager am = (ActivityManager) mContext
                 .getSystemService(Activity.ACTIVITY_SERVICE);
@@ -542,19 +540,31 @@ public abstract class BaseStatusBar extends SystemUI implements
         if (res.activityInfo != null && !res.activityInfo.packageName.equals("android")) {
             defaultHomePackage = res.activityInfo.packageName;
         }
-        List <ActivityManager.RunningTaskInfo> tasks = am.getRunningTasks(5);
+	final List<ActivityManager.RecentTaskInfo> tasks =
+                am.getRecentTasks(5, ActivityManager.RECENT_IGNORE_UNAVAILABLE);
         // lets get enough tasks to find something to switch to
         // Note, we'll only get as many as the system currently has - up to 5
-        while ((lastAppId == 0) && (looper < tasks.size())) {
-            packageName = tasks.get(looper).topActivity.getPackageName();
+        int lastAppId = 0;
+	Intent lastAppIntent = null;
+	for (int i = 1; i < tasks.size() && lastAppIntent == null; i++) {
+            final String packageName = tasks.get(i).baseIntent.getComponent().getPackageName();
             if (!packageName.equals(defaultHomePackage) && !packageName.equals("com.android.systemui")) {
-                lastAppId = tasks.get(looper).id;
+		final ActivityManager.RecentTaskInfo info = tasks.get(i);
+                lastAppId = info.id;
+		lastAppIntent = info.baseIntent;
             }
-            looper++;
         }
-        if (lastAppId != 0) {
+        if (lastAppId > 0) {
             am.moveTaskToFront(lastAppId, am.MOVE_TASK_NO_USER_ACTION);
-        }
+        } else if (lastAppIntent != null) {
+            // last task is dead, restart it.
+	    lastAppIntent.addFlags(Intent.FLAG_ACTIVITY_LAUNCHED_FROM_HISTORY);
+            try {
+		mContext.startActivity(lastAppIntent);
+            } catch (ActivityNotFoundException e) {
+                Log.w("Recent", "Unable to launch recent task", e);
+            }
+	}
     }
 
     protected View.OnTouchListener mRecentsPreloadOnTouchListener = new View.OnTouchListener() {
