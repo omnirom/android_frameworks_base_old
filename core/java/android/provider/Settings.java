@@ -2512,6 +2512,11 @@ public final class Settings {
          */
         public static final String BATTERY_LIGHT_FULL_COLOR = "battery_light_full_color";
 
+        /**
+         * If volume rocker can be used to change the ringtone volume 
+         * @hide
+         */
+         public static final String VOLUME_ROCKER_RINGTONE_CHANGE_ENABLED = "volume_rocker_ringtone_volume_change";
 
         /** Sprint MWI Quirk: Show message wait indicator notifications
          * @hide
