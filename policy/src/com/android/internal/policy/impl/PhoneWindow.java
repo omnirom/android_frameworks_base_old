@@ -58,6 +58,7 @@ import android.os.Parcel;
 import android.os.Parcelable;
 import android.os.RemoteException;
 import android.os.ServiceManager;
+import android.provider.Settings;
 import android.util.AndroidRuntimeException;
 import android.util.DisplayMetrics;
 import android.util.EventLog;
@@ -1560,7 +1561,9 @@ public class PhoneWindow extends Window implements MenuBuilder.Callback {
                 // doesn't have one of these.  In this case, we execute it here and
                 // eat the event instead, because we have mVolumeControlStreamType
                 // and they don't.
-                getAudioManager().handleKeyDown(event, mVolumeControlStreamType);
+                if (!(AudioManager.USE_DEFAULT_STREAM_TYPE == mVolumeControlStreamType) || (Settings.System.getInt(getContext(), Settings.System.VOLUME_ROCKER_RINGTONE_CHANGE_ENABLED, 1) == 1)) {
+                    getAudioManager().handleKeyDown(event, mVolumeControlStreamType);
+                }
                 return true;
             }
 
@@ -1622,7 +1625,9 @@ public class PhoneWindow extends Window implements MenuBuilder.Callback {
                 // doesn't have one of these.  In this case, we execute it here and
                 // eat the event instead, because we have mVolumeControlStreamType
                 // and they don't.
-                getAudioManager().handleKeyUp(event, mVolumeControlStreamType);
+                if (!(AudioManager.USE_DEFAULT_STREAM_TYPE == mVolumeControlStreamType) || (Settings.System.getInt(getContext(), Settings.System.VOLUME_ROCKER_RINGTONE_CHANGE_ENABLED, 1) == 1)) {
+                    getAudioManager().handleKeyUp(event, mVolumeControlStreamType);
+                }
                 return true;
             }
 
