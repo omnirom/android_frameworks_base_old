@@ -27,6 +27,7 @@ import android.media.IAudioService;
 import android.os.RemoteException;
 import android.os.ServiceManager;
 import android.os.UserHandle;
+import android.provider.Settings;
 import android.telephony.TelephonyManager;
 import android.util.Log;
 import android.util.Slog;
@@ -82,7 +83,9 @@ public class PhoneFallbackEventHandler implements FallbackEventHandler {
             case KeyEvent.KEYCODE_VOLUME_UP:
             case KeyEvent.KEYCODE_VOLUME_DOWN:
             case KeyEvent.KEYCODE_VOLUME_MUTE: {
-                getAudioManager().handleKeyDown(event, AudioManager.USE_DEFAULT_STREAM_TYPE);
+                if (Settings.System.getInt(getContext(), Settings.System.VOLUME_ROCKER_RINGTONE_CHANGE_ENABLED, 1) == 1) {
+                    getAudioManager().handleKeyDown(event, AudioManager.USE_DEFAULT_STREAM_TYPE);
+                }
                 return true;
             }
 
