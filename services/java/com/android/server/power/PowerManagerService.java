@@ -371,6 +371,9 @@ public final class PowerManagerService extends IPowerManager.Stub
     // Time when we last logged a warning about calling userActivity() without permission.
     private long mLastWarningAboutUserActivityPermission = Long.MIN_VALUE;
 
+    // timeout for button backlight automatic turning off
+    private int mButtonTimeout;
+
     private native void nativeInit();
 
     private static native void nativeSetPowerState(boolean screenOn, boolean screenBright);
@@ -509,6 +512,9 @@ public final class PowerManagerService extends IPowerManager.Stub
             resolver.registerContentObserver(Settings.System.getUriFor(
                     Settings.System.AUTO_BRIGHTNESS_RESPONSIVENESS),
                     false, mSettingsObserver, UserHandle.USER_ALL);
+            resolver.registerContentObserver(Settings.System.getUriFor(
+                    Settings.System.BUTTON_BACKLIGHT_TIMEOUT),
+                    false, mSettingsObserver, UserHandle.USER_ALL);
 
             // Go.
             readConfigurationLocked();
@@ -582,6 +588,10 @@ public final class PowerManagerService extends IPowerManager.Stub
                 UserHandle.USER_CURRENT);
         mAutoBrightnessResponsitivityFactor =
                 Math.min(Math.max(newAutoBrightnessResponsitivityFactor, 0.2f), 3.0f);
+
+        mButtonTimeout = Settings.System.getIntForUser(resolver,
+                Settings.System.BUTTON_BACKLIGHT_TIMEOUT,
+                0, UserHandle.USER_CURRENT) * 1000;
 
         mDirty |= DIRTY_SETTINGS;
     }
@@ -1362,6 +1372,15 @@ public final class PowerManagerService extends IPowerManager.Stub
                     nextTimeout = mLastUserActivityTime
                             + screenOffTimeout - screenDimDuration;
                     if (now < nextTimeout) {
+                        if (mButtonTimeout != 0){
+                            if (now > mLastUserActivityTime + mButtonTimeout) {
+                                mDisplayPowerController.setButtonTimout(true);
+                            } else {
+                                mDisplayPowerController.setButtonTimout(false);
+                                nextTimeout = now + mButtonTimeout;
+                            }
+                        }
+
                         mUserActivitySummary |= USER_ACTIVITY_SCREEN_BRIGHT;
                     } else {
                         nextTimeout = mLastUserActivityTime + screenOffTimeout;
