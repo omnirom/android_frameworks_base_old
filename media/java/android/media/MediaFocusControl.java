@@ -966,8 +966,12 @@ public class MediaFocusControl implements OnFinished {
      * @param keyCode the key code associated with the key event
      * @return true if the key is one of the supported voice-based interaction triggers
      */
-    private static boolean isValidVoiceInputKeyCode(int keyCode) {
-        if (keyCode == KeyEvent.KEYCODE_HEADSETHOOK) {
+    private boolean isValidVoiceInputKeyCode(int keyCode) {
+        boolean launchVoice = Settings.System.getIntForUser(mContentResolver,
+                    Settings.System.HEADSETHOOK_LAUNCH_VOICE, 1, 
+                    UserHandle.USER_CURRENT) == 1;
+
+        if (keyCode == KeyEvent.KEYCODE_HEADSETHOOK && launchVoice) {
             return true;
         } else {
             return false;
