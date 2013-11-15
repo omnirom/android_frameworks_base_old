@@ -1,0 +1,21 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "ab89d9a9_6181ada5",
+        "filename": "packages/SystemUI/src/com/android/systemui/statusbar/phone/PhoneStatusBar.java",
+        "patchSetId": 1
+      },
+      "lineNbr": 548,
+      "author": {
+        "id": 1000001
+      },
+      "writtenOn": "2013-11-15T08:45:48Z",
+      "side": 1,
+      "message": "Why? Something might depend on changing datetime, not clock, through mDateTimeView. Use your own variable",
+      "revId": "8c01fbb3843b5a8f1d2b0dc195fcc53ab78388a0",
+      "serverId": "56841c99-7c94-43d4-bf0b-cb4707e66d55",
+      "unresolved": false
+    }
+  ]
+}
