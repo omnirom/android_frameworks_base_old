@@ -2713,6 +2713,11 @@ public final class Settings {
         public static final String VOLUME_WAKE_SCREEN = "volume_wake_screen";
 
         /**
+         * 
+         */
+        public static final String SHOW_CLEAR_RECENTS_BUTTON = "clear_recents_button";
+
+        /**
          * Whether or not to show circle battery around the lockscreen ring
          * @hide
          */
