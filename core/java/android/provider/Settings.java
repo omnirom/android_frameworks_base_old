@@ -2512,12 +2512,11 @@ public final class Settings {
          */
         public static final String BATTERY_LIGHT_FULL_COLOR = "battery_light_full_color";
 
-        /* Network speed indicator
+        /**
+         * Network speed indicator
          * @hide
          */
         public static final String STATUS_BAR_TRAFFIC = "status_bar_traffic";
-
-        /**
 
         /** Sprint MWI Quirk: Show message wait indicator notifications
          * @hide
@@ -6148,6 +6147,7 @@ public final class Settings {
 
         /**
          * Control whether the process CPU info meter should be shown.
+         * @hide
          */
         public static final String SHOW_CPU = "show_cpu";
 
