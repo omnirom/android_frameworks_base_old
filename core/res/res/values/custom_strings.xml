@@ -24,4 +24,7 @@
     <string name="global_action_reboot_sub">System</string>
     <string name="global_action_reboot_recovery">Recovery</string>
     <string name="global_action_reboot_bootloader">Bootloader</string>
+
+    <!-- HW button mapping -->
+    <string name="app_killed_message">App killed</string>
 </resources>
