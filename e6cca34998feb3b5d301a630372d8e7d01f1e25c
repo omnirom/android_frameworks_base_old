@@ -1,0 +1,21 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "ab89d9a9_12174d58",
+        "filename": "core/res/res/values-es/custom_strings.xml",
+        "patchSetId": 1
+      },
+      "lineNbr": 27,
+      "author": {
+        "id": 1000174
+      },
+      "writtenOn": "2013-11-19T17:23:05Z",
+      "side": 1,
+      "message": "Please fix that red space on the end. THANKS",
+      "revId": "e6cca34998feb3b5d301a630372d8e7d01f1e25c",
+      "serverId": "56841c99-7c94-43d4-bf0b-cb4707e66d55",
+      "unresolved": false
+    }
+  ]
+}
