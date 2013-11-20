@@ -31,7 +31,6 @@
 static struct {
     jclass clazz;
     jmethodID dispatchSensorEvent;
-    jmethodID dispatchFlushCompleteEvent;
 } gBaseEventQueueClassInfo;
 
 namespace android {
@@ -47,8 +46,6 @@ struct SensorOffsets
     jfieldID    resolution;
     jfieldID    power;
     jfieldID    minDelay;
-    jfieldID    fifoReservedEventCount;
-    jfieldID    fifoMaxEventCount;
 } gSensorOffsets;
 
 
@@ -70,9 +67,6 @@ nativeClassInit (JNIEnv *_env, jclass _this)
     sensorOffsets.resolution  = _env->GetFieldID(sensorClass, "mResolution","F");
     sensorOffsets.power       = _env->GetFieldID(sensorClass, "mPower",     "F");
     sensorOffsets.minDelay    = _env->GetFieldID(sensorClass, "mMinDelay",  "I");
-    sensorOffsets.fifoReservedEventCount =
-            _env->GetFieldID(sensorClass, "mFifoReservedEventCount",  "I");
-    sensorOffsets.fifoMaxEventCount = _env->GetFieldID(sensorClass, "mFifoMaxEventCount",  "I");
 }
 
 static jint
@@ -84,7 +78,7 @@ nativeGetNextSensor(JNIEnv *env, jclass clazz, jobject sensor, jint next)
     size_t count = mgr.getSensorList(&sensorList);
     if (size_t(next) >= count)
         return -1;
-
+    
     Sensor const* const list = sensorList[next];
     const SensorOffsets& sensorOffsets(gSensorOffsets);
     jstring name = env->NewStringUTF(list->getName().string());
@@ -98,9 +92,7 @@ nativeGetNextSensor(JNIEnv *env, jclass clazz, jobject sensor, jint next)
     env->SetFloatField(sensor, sensorOffsets.resolution, list->getResolution());
     env->SetFloatField(sensor, sensorOffsets.power,      list->getPowerUsage());
     env->SetIntField(sensor, sensorOffsets.minDelay,     list->getMinDelay());
-    env->SetIntField(sensor, sensorOffsets.fifoReservedEventCount,
-                     list->getFifoReservedEventCount());
-    env->SetIntField(sensor, sensorOffsets.fifoMaxEventCount, list->getFifoMaxEventCount());
+    
     next++;
     return size_t(next) < count ? next : 0;
 }
@@ -150,28 +142,14 @@ private:
         while ((n = q->read(buffer, 16)) > 0) {
             for (int i=0 ; i<n ; i++) {
 
-                if (buffer[i].type == SENSOR_TYPE_STEP_COUNTER) {
-                    // step-counter returns a uint64, but the java API only deals with floats
-                    float value = float(buffer[i].u64.step_counter);
-                    env->SetFloatArrayRegion(mScratch, 0, 1, &value);
-                } else {
-                    env->SetFloatArrayRegion(mScratch, 0, 16, buffer[i].data);
-                }
+                env->SetFloatArrayRegion(mScratch, 0, 16, buffer[i].data);
 
-                if (buffer[i].type == SENSOR_TYPE_META_DATA) {
-                    // This is a flush complete sensor event. Call dispatchFlushCompleteEvent
-                    // method.
-                    env->CallVoidMethod(mReceiverObject,
-                                        gBaseEventQueueClassInfo.dispatchFlushCompleteEvent,
-                                        buffer[i].meta_data.sensor);
-                } else {
-                    env->CallVoidMethod(mReceiverObject,
-                                        gBaseEventQueueClassInfo.dispatchSensorEvent,
-                                        buffer[i].sensor,
-                                        mScratch,
-                                        buffer[i].vector.status,
-                                        buffer[i].timestamp);
-                }
+                env->CallVoidMethod(mReceiverObject,
+                        gBaseEventQueueClassInfo.dispatchSensorEvent,
+                        buffer[i].sensor,
+                        mScratch,
+                        buffer[i].vector.status,
+                        buffer[i].timestamp);
 
                 if (env->ExceptionCheck()) {
                     ALOGE("Exception dispatching input event.");
@@ -202,11 +180,9 @@ static jint nativeInitSensorEventQueue(JNIEnv *env, jclass clazz, jobject eventQ
     return jint(receiver.get());
 }
 
-static jint nativeEnableSensor(JNIEnv *env, jclass clazz, jint eventQ, jint handle, jint rate_us,
-                               jint maxBatchReportLatency, jint reservedFlags) {
+static jint nativeEnableSensor(JNIEnv *env, jclass clazz, jint eventQ, jint handle, jint us) {
     sp<Receiver> receiver(reinterpret_cast<Receiver *>(eventQ));
-    return receiver->getSensorEventQueue()->enableSensor(handle, rate_us, maxBatchReportLatency,
-                                                         reservedFlags);
+    return receiver->getSensorEventQueue()->enableSensor(handle, us);
 }
 
 static jint nativeDisableSensor(JNIEnv *env, jclass clazz, jint eventQ, jint handle) {
@@ -220,10 +196,6 @@ static void nativeDestroySensorEventQueue(JNIEnv *env, jclass clazz, jint eventQ
     receiver->decStrong((void*)nativeInitSensorEventQueue);
 }
 
-static jint nativeFlushSensor(JNIEnv *env, jclass clazz, jint eventQ) {
-    sp<Receiver> receiver(reinterpret_cast<Receiver *>(eventQ));
-    return receiver->getSensorEventQueue()->flush();
-}
 
 //----------------------------------------------------------------------------
 
@@ -243,7 +215,7 @@ static JNINativeMethod gBaseEventQueueMethods[] = {
             (void*)nativeInitSensorEventQueue },
 
     {"nativeEnableSensor",
-            "(IIIII)I",
+            "(III)I",
             (void*)nativeEnableSensor },
 
     {"nativeDisableSensor",
@@ -253,10 +225,6 @@ static JNINativeMethod gBaseEventQueueMethods[] = {
     {"nativeDestroySensorEventQueue",
             "(I)V",
             (void*)nativeDestroySensorEventQueue },
-
-    {"nativeFlushSensor",
-            "(I)I",
-            (void*)nativeFlushSensor },
 };
 
 }; // namespace android
@@ -286,9 +254,6 @@ int register_android_hardware_SensorManager(JNIEnv *env)
             gBaseEventQueueClassInfo.clazz,
             "dispatchSensorEvent", "(I[FIJ)V");
 
-    GET_METHOD_ID(gBaseEventQueueClassInfo.dispatchFlushCompleteEvent,
-                  gBaseEventQueueClassInfo.clazz,
-                  "dispatchFlushCompleteEvent", "(I)V");
-
     return 0;
 }
+
