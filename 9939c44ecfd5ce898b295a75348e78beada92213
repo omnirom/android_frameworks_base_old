@@ -1,0 +1,21 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "ab89d9a9_71289696",
+        "filename": "core/java/android/provider/Settings.java",
+        "patchSetId": 7
+      },
+      "lineNbr": 2718,
+      "author": {
+        "id": 1000008
+      },
+      "writtenOn": "2013-11-21T15:55:39Z",
+      "side": 1,
+      "message": "This particular name is way too vague.  We need something a bit more clear as to what it is.  Also, it needs a description in the comments.\n\nPerhaps STATUS_BAR_NETWORK_ACTIVITY ?",
+      "revId": "9939c44ecfd5ce898b295a75348e78beada92213",
+      "serverId": "56841c99-7c94-43d4-bf0b-cb4707e66d55",
+      "unresolved": false
+    }
+  ]
+}
