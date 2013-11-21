@@ -1,0 +1,21 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "ab89d9a9_54fb80dd",
+        "filename": "packages/SystemUI/AndroidManifest.xml",
+        "patchSetId": 6
+      },
+      "lineNbr": 5,
+      "author": {
+        "id": 1000226
+      },
+      "writtenOn": "2013-11-21T20:22:26Z",
+      "side": 1,
+      "message": "This causes:\nframeworks/base/packages/SystemUI/AndroidManifest.xml:5: error: Error parsing XML: duplicate attribute",
+      "revId": "08a1c8e498f91e264f56c3101727e5c0c7c07df1",
+      "serverId": "56841c99-7c94-43d4-bf0b-cb4707e66d55",
+      "unresolved": false
+    }
+  ]
+}
