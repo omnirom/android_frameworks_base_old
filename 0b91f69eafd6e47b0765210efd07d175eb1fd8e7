@@ -1,0 +1,21 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "ab89d9a9_71ffb630",
+        "filename": "core/java/android/provider/Settings.java",
+        "patchSetId": 1
+      },
+      "lineNbr": 3573,
+      "author": {
+        "id": 1000026
+      },
+      "writtenOn": "2013-11-21T13:29:07Z",
+      "side": 1,
+      "message": "This setting is needed for the adb notify enablement setting. To make this work you need another change. Just dont remember where :)",
+      "revId": "0b91f69eafd6e47b0765210efd07d175eb1fd8e7",
+      "serverId": "56841c99-7c94-43d4-bf0b-cb4707e66d55",
+      "unresolved": false
+    }
+  ]
+}
