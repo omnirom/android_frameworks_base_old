@@ -1,0 +1,21 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "ab89d9a9_34b99ce6",
+        "filename": "core/java/android/provider/Settings.java",
+        "patchSetId": 4
+      },
+      "lineNbr": 2832,
+      "author": {
+        "id": 1000152
+      },
+      "writtenOn": "2013-11-22T08:19:50Z",
+      "side": 1,
+      "message": "And another whitespace^^",
+      "revId": "ef12abc056466d1d07cffecca33f72914360fe87",
+      "serverId": "56841c99-7c94-43d4-bf0b-cb4707e66d55",
+      "unresolved": false
+    }
+  ]
+}
