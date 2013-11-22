@@ -1,0 +1,21 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "ab89d9a9_d49f905f",
+        "filename": "core/java/android/provider/Settings.java",
+        "patchSetId": 10
+      },
+      "lineNbr": 2718,
+      "author": {
+        "id": 1000174
+      },
+      "writtenOn": "2013-11-22T10:54:50Z",
+      "side": 1,
+      "message": "I need to fix a typo here, please do not try or merge still",
+      "revId": "6a38eb01e087386758d39dcaf3f20c8fff953ffa",
+      "serverId": "56841c99-7c94-43d4-bf0b-cb4707e66d55",
+      "unresolved": false
+    }
+  ]
+}
