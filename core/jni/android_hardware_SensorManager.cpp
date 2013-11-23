@@ -158,6 +158,7 @@ private:
                     env->SetFloatArrayRegion(mScratch, 0, 16, buffer[i].data);
                 }
 
+#ifndef LEGACY_SENSORS
                 if (buffer[i].type == SENSOR_TYPE_META_DATA) {
                     // This is a flush complete sensor event. Call dispatchFlushCompleteEvent
                     // method.
@@ -165,13 +166,16 @@ private:
                                         gBaseEventQueueClassInfo.dispatchFlushCompleteEvent,
                                         buffer[i].meta_data.sensor);
                 } else {
+#endif
                     env->CallVoidMethod(mReceiverObject,
                                         gBaseEventQueueClassInfo.dispatchSensorEvent,
                                         buffer[i].sensor,
                                         mScratch,
                                         buffer[i].vector.status,
                                         buffer[i].timestamp);
+#ifndef LEGACY_SENSORS
                 }
+#endif
 
                 if (env->ExceptionCheck()) {
                     ALOGE("Exception dispatching input event.");
