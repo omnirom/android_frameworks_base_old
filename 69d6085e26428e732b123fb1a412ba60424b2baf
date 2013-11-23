@@ -1,0 +1,123 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "ab89d9a9_57ad42e5",
+        "filename": "core/java/android/provider/Settings.java",
+        "patchSetId": 1
+      },
+      "lineNbr": 2526,
+      "author": {
+        "id": 1000174
+      },
+      "writtenOn": "2013-11-23T16:57:41Z",
+      "side": 1,
+      "message": "please fix that",
+      "revId": "69d6085e26428e732b123fb1a412ba60424b2baf",
+      "serverId": "56841c99-7c94-43d4-bf0b-cb4707e66d55",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "ab89d9a9_77b2464b",
+        "filename": "core/java/android/provider/Settings.java",
+        "patchSetId": 1
+      },
+      "lineNbr": 3138,
+      "author": {
+        "id": 1000174
+      },
+      "writtenOn": "2013-11-23T16:57:41Z",
+      "side": 1,
+      "message": "that too",
+      "revId": "69d6085e26428e732b123fb1a412ba60424b2baf",
+      "serverId": "56841c99-7c94-43d4-bf0b-cb4707e66d55",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "ab89d9a9_97afcadc",
+        "filename": "policy/src/com/android/internal/policy/impl/GlobalActions.java",
+        "patchSetId": 1
+      },
+      "lineNbr": 314,
+      "author": {
+        "id": 1000174
+      },
+      "writtenOn": "2013-11-23T16:57:41Z",
+      "side": 1,
+      "message": "that too",
+      "revId": "69d6085e26428e732b123fb1a412ba60424b2baf",
+      "serverId": "56841c99-7c94-43d4-bf0b-cb4707e66d55",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "ab89d9a9_b7bcce1a",
+        "filename": "policy/src/com/android/internal/policy/impl/GlobalActions.java",
+        "patchSetId": 1
+      },
+      "lineNbr": 403,
+      "author": {
+        "id": 1000174
+      },
+      "writtenOn": "2013-11-23T16:57:41Z",
+      "side": 1,
+      "message": "that too",
+      "revId": "69d6085e26428e732b123fb1a412ba60424b2baf",
+      "serverId": "56841c99-7c94-43d4-bf0b-cb4707e66d55",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "ab89d9a9_d7b9522a",
+        "filename": "policy/src/com/android/internal/policy/impl/GlobalActions.java",
+        "patchSetId": 1
+      },
+      "lineNbr": 404,
+      "author": {
+        "id": 1000174
+      },
+      "writtenOn": "2013-11-23T16:57:41Z",
+      "side": 1,
+      "message": "that too",
+      "revId": "69d6085e26428e732b123fb1a412ba60424b2baf",
+      "serverId": "56841c99-7c94-43d4-bf0b-cb4707e66d55",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "ab89d9a9_f786566a",
+        "filename": "policy/src/com/android/internal/policy/impl/GlobalActions.java",
+        "patchSetId": 1
+      },
+      "lineNbr": 457,
+      "author": {
+        "id": 1000174
+      },
+      "writtenOn": "2013-11-23T16:57:41Z",
+      "side": 1,
+      "message": "and that too",
+      "revId": "69d6085e26428e732b123fb1a412ba60424b2baf",
+      "serverId": "56841c99-7c94-43d4-bf0b-cb4707e66d55",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "ab89d9a9_178c9a87",
+        "filename": "policy/src/com/android/internal/policy/impl/GlobalActions.java",
+        "patchSetId": 1
+      },
+      "lineNbr": 460,
+      "author": {
+        "id": 1000174
+      },
+      "writtenOn": "2013-11-23T16:57:41Z",
+      "side": 1,
+      "message": "also that one",
+      "revId": "69d6085e26428e732b123fb1a412ba60424b2baf",
+      "serverId": "56841c99-7c94-43d4-bf0b-cb4707e66d55",
+      "unresolved": false
+    }
+  ]
+}
