@@ -1,0 +1,38 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "8b8ed5af_de3b4595",
+        "filename": "core/res/res/values-de/custom_strings.xml",
+        "patchSetId": 1
+      },
+      "lineNbr": 11,
+      "author": {
+        "id": 1000152
+      },
+      "writtenOn": "2013-11-24T14:23:00Z",
+      "side": 1,
+      "message": "This and the other keys that stay on englisch aren\u0027t needed",
+      "revId": "4c8c1555e56f675faa7327654188f9b87a88dd00",
+      "serverId": "56841c99-7c94-43d4-bf0b-cb4707e66d55",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "8b8ed5af_be3679ae",
+        "filename": "core/res/res/values-de/custom_strings.xml",
+        "patchSetId": 1
+      },
+      "lineNbr": 27,
+      "author": {
+        "id": 1000152
+      },
+      "writtenOn": "2013-11-24T14:23:00Z",
+      "side": 1,
+      "message": "Whitespace ;)",
+      "revId": "4c8c1555e56f675faa7327654188f9b87a88dd00",
+      "serverId": "56841c99-7c94-43d4-bf0b-cb4707e66d55",
+      "unresolved": false
+    }
+  ]
+}
