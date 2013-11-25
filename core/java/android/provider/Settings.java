@@ -2700,6 +2700,12 @@ public final class Settings {
          */
         public static final String STATUS_BAR_BRIGHTNESS_CONTROL = "status_bar_brightness_control";
 
+         /**
+          * The type of battery icon to use
+          * @hide
+          */
+        public static final String STATUS_BAR_BATTERY_MODE = "status_bar_battery_mode";
+
         /**
          * Whether or not to launch default music player when headset is connected
          * @hide

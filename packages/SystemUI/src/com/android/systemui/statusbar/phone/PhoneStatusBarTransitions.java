@@ -20,6 +20,10 @@ import android.animation.Animator;
 import android.animation.AnimatorSet;
 import android.animation.ObjectAnimator;
 import android.content.res.Resources;
+import android.content.ContentResolver;
+import android.database.ContentObserver;
+import android.os.Handler;
+import android.provider.Settings;
 import android.view.View;
 
 import com.android.systemui.R;
@@ -34,10 +38,49 @@ public final class PhoneStatusBarTransitions extends BarTransitions {
 
     private View mLeftSide, mStatusIcons, mSignalCluster, mBattery, mClock;
     private Animator mCurrentAnimation;
+    private Handler mHandler;
+
+    public final static int BATTERY_MODE_NORMAL = 0;
+    public final static int BATTERY_MODE_HORIZONTAL = 1;
+
+    class SettingsObserver extends ContentObserver {
+        SettingsObserver(Handler handler) {
+            super(handler);
+        }
+
+        void observe() {
+            ContentResolver resolver = mView.getContext().getContentResolver();
+            resolver.registerContentObserver(Settings.System.getUriFor(
+                    Settings.System.STATUS_BAR_BATTERY_MODE), false, this);
+            update();
+        }
+
+        @Override
+        public void onChange(boolean selfChange) {
+            update();
+        }
+
+        public void update() {
+            ContentResolver resolver = mView.getContext().getContentResolver();
+            int batteryMode = Settings.System.getInt(
+                    resolver, Settings.System.STATUS_BAR_BATTERY_MODE, 0);
+
+            if (batteryMode == BATTERY_MODE_NORMAL) {
+                mBattery = mView.findViewById(R.id.battery);
+                mBattery.setVisibility(View.VISIBLE);
+                mView.findViewById(R.id.battery_horz).setVisibility(View.GONE);
+            } else if (batteryMode == BATTERY_MODE_HORIZONTAL) {
+                mBattery = mView.findViewById(R.id.battery_horz);
+                mBattery.setVisibility(View.VISIBLE);
+                mView.findViewById(R.id.battery).setVisibility(View.GONE);
+            }
+        }
+    }
 
     public PhoneStatusBarTransitions(PhoneStatusBarView view) {
         super(view, R.drawable.status_background);
         mView = view;
+        mHandler = new Handler();
         final Resources res = mView.getContext().getResources();
         mIconAlphaWhenOpaque = res.getFraction(R.dimen.status_bar_icon_drawing_alpha, 1, 1);
     }
@@ -50,6 +93,8 @@ public final class PhoneStatusBarTransitions extends BarTransitions {
         mClock = mView.findViewById(R.id.clock);
         applyModeBackground(-1, getMode(), false /*animate*/);
         applyMode(getMode(), false /*animate*/);
+        SettingsObserver observer = new SettingsObserver(mHandler);
+        observer.observe();
     }
 
     public ObjectAnimator animateTransitionTo(View v, float toAlpha) {

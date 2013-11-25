@@ -112,6 +112,15 @@
                     android:layout_marginBottom="2px"
                     android:layout_marginStart="4dip"
                     />
+                <!-- battery must be padded below by 2px to match assets -->
+                <com.android.systemui.HorizontalBatteryMeterView
+                    android:id="@+id/battery_horz"
+                    android:visibility="gone"
+                    android:layout_height="10.5dp"
+                    android:layout_width="16dp"
+                    android:layout_marginTop="1dip"
+                    android:layout_marginStart="4dip"
+                    />
             </LinearLayout>
     
             <com.android.systemui.statusbar.policy.Clock
