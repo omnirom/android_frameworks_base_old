@@ -49,6 +49,7 @@ import android.graphics.Point;
 import android.graphics.PorterDuff;
 import android.graphics.Rect;
 import android.graphics.drawable.Drawable;
+import android.graphics.drawable.TransitionDrawable;
 import android.inputmethodservice.InputMethodService;
 import android.os.Bundle;
 import android.os.Handler;
@@ -109,6 +110,8 @@ import com.android.systemui.statusbar.policy.NetworkController;
 import com.android.systemui.statusbar.policy.NotificationRowLayout;
 import com.android.systemui.statusbar.policy.OnSizeChangedListener;
 import com.android.systemui.statusbar.policy.RotationLockController;
+
+import com.android.systemui.omni.StatusHeaderMachine;
 
 import java.io.FileDescriptor;
 import java.io.PrintWriter;
@@ -274,6 +277,8 @@ public class PhoneStatusBar extends BaseStatusBar implements DemoMode {
     int mLinger;
     int mInitialTouchX;
     int mInitialTouchY;
+
+    StatusHeaderMachine mStatusHeaderMachine;
 
     // for disabling the status bar
     int mDisabled = 0;
@@ -531,6 +536,36 @@ public class PhoneStatusBar extends BaseStatusBar implements DemoMode {
         mExpandedContents = mPile; // was: expanded.findViewById(R.id.notificationLinearLayout);
 
         mNotificationPanelHeader = mStatusBarWindow.findViewById(R.id.header);
+
+        mStatusHeaderMachine = new StatusHeaderMachine(mContext);
+
+        // Setup the updating notification bar header image
+        Runnable notificationImageUpdater = new Runnable() {
+            private Drawable mPrevious = mNotificationPanelHeader.getBackground();
+
+            public void run() {
+                Drawable next = mStatusHeaderMachine.getCurrent();
+                if (next != mPrevious) {
+                    Log.i(TAG, "Updating status bar header background");
+
+                    Drawable[] arrayDrawable = new Drawable[2];
+                    arrayDrawable[0] = mPrevious;
+                    arrayDrawable[1] = next;
+
+                    mPrevious = next;
+
+                    TransitionDrawable transitionDrawable = new TransitionDrawable(arrayDrawable);
+                    transitionDrawable.setCrossFadeEnabled(true);
+                    mNotificationPanelHeader.setBackgroundDrawable(transitionDrawable);
+                    transitionDrawable.startTransition(1000);
+                }
+
+                // Check every hour. As postDelayed isn't holding a wakelock, it will basically
+                // only check when the CPU is on. Thus, not consuming battery overnight.
+                mHandler.postDelayed(this, 1000 * 3600);
+            }
+        };
+        mHandler.post(notificationImageUpdater);
 
         mClearButton = mStatusBarWindow.findViewById(R.id.clear_all_button);
         mClearButton.setOnClickListener(mClearButtonListener);
