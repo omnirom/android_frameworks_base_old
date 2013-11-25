@@ -121,6 +121,13 @@
                     android:gravity="bottom"
                     android:paddingLeft="4dip"
                     systemui:batteryView="statusbar"
+                <com.android.systemui.HorizontalBatteryMeterView
+                    android:id="@+id/battery_horz"
+                    android:visibility="gone"
+                    android:layout_height="10.5dp"
+                    android:layout_width="16dp"
+                    android:layout_marginTop="1dip"
+                    android:layout_marginStart="4dip"
                     />
             </LinearLayout>
     
