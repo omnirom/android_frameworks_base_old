@@ -1,0 +1,21 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "8b8ed5af_44dda271",
+        "filename": "packages/SystemUI/src/com/android/systemui/power/PowerUI.java",
+        "patchSetId": 1
+      },
+      "lineNbr": 40,
+      "author": {
+        "id": 1000022
+      },
+      "writtenOn": "2013-11-26T19:02:28Z",
+      "side": 1,
+      "message": "Don\u0027t need this",
+      "revId": "ed98a5c70ecd76e278470b484f76d91c63a7b10b",
+      "serverId": "56841c99-7c94-43d4-bf0b-cb4707e66d55",
+      "unresolved": false
+    }
+  ]
+}
