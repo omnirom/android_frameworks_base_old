@@ -33,10 +33,16 @@ import android.widget.TextView;
 
 import com.android.internal.widget.LockPatternUtils;
 
+import java.util.Arrays;
+import java.util.Collections;
+import java.util.List;
+
 public class NumPadKey extends ViewGroup {
     // list of "ABC", etc per digit, starting with '0'
     static String sKlondike[];
-
+    private static List<Integer> sDigits = Arrays.asList(0, 1, 2, 3, 4, 5, 6, 7, 8, 9);
+    private static int sCount = 0;
+    private static boolean sShuffled;
     private int mDigit = -1;
     private int mTextViewResId;
     private PasswordTextView mTextView;
@@ -44,6 +50,8 @@ public class NumPadKey extends ViewGroup {
     private TextView mKlondikeText;
     private boolean mEnableHaptics;
     private PowerManager mPM;
+
+    private TypedArray mStyleable;
 
     private View.OnClickListener mListener = new View.OnClickListener() {
         @Override
@@ -78,14 +86,9 @@ public class NumPadKey extends ViewGroup {
         super(context, attrs, defStyle);
         setFocusable(true);
 
-        TypedArray a = context.obtainStyledAttributes(attrs, R.styleable.NumPadKey);
+        mStyleable = context.obtainStyledAttributes(attrs, R.styleable.NumPadKey);
 
-        try {
-            mDigit = a.getInt(R.styleable.NumPadKey_digit, mDigit);
-            mTextViewResId = a.getResourceId(R.styleable.NumPadKey_textView, 0);
-        } finally {
-            a.recycle();
-        }
+        mTextViewResId = mStyleable.getResourceId(R.styleable.NumPadKey_textView, 0);
 
         setOnClickListener(mListener);
         setOnHoverListener(new LiftToActivateListener(context));
@@ -99,8 +102,23 @@ public class NumPadKey extends ViewGroup {
         inflater.inflate(R.layout.keyguard_num_pad_key, this, true);
 
         mDigitText = (TextView) findViewById(R.id.digit_text);
-        mDigitText.setText(Integer.toString(mDigit));
         mKlondikeText = (TextView) findViewById(R.id.klondike_text);
+
+        createNumKeyPad(false);
+    }
+
+    public void createNumKeyPad(boolean enableRandom) {
+        if (enableRandom) {
+            if (!sShuffled) {
+                Collections.shuffle(sDigits);
+                sShuffled = true;
+            }
+            mDigit = sDigits.get(sCount);
+        } else {
+            mDigit = mStyleable.getInt(R.styleable.NumPadKey_digit, mDigit);
+        }
+
+        mDigitText.setText(Integer.toString(mDigit));
 
         if (mDigit >= 0) {
             if (sKlondike == null) {
@@ -116,6 +134,7 @@ public class NumPadKey extends ViewGroup {
                 }
             }
         }
+        sCount++;
 
         setBackground(mContext.getDrawable(R.drawable.ripple_drawable));
         setContentDescription(mDigitText.getText().toString() + mKlondikeText.getText().toString());
@@ -164,5 +183,10 @@ public class NumPadKey extends ViewGroup {
                     HapticFeedbackConstants.FLAG_IGNORE_VIEW_SETTING
                     | HapticFeedbackConstants.FLAG_IGNORE_GLOBAL_SETTING);
         }
+    }
+
+    public void initNumKeyPad() {
+        sCount = 0;
+        sShuffled = false;
     }
 }
