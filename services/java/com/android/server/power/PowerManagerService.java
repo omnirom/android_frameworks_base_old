@@ -1372,7 +1372,7 @@ public final class PowerManagerService extends IPowerManager.Stub
                     nextTimeout = mLastUserActivityTime
                             + screenOffTimeout - screenDimDuration;
                     if (now < nextTimeout) {
-                        if (mButtonTimeout != 0){
+                        if (mSystemReady && mButtonTimeout != 0){
                             if (now > mLastUserActivityTime + mButtonTimeout) {
                                 mDisplayPowerController.setButtonTimout(true);
                             } else {
