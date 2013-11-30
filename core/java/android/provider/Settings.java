@@ -2810,10 +2810,24 @@ public final class Settings {
         public static final String SHOW_CLEAR_RECENTS_BUTTON = "clear_recents_button";
 
         /**
-         * location of the clear all rectents button
+         * location of the clear all recents button
          * @hide
          */
         public static final String CLEAR_RECENTS_BUTTON_LOCATION = "clear_recents_button_location";
+
+        /**
+         * Show circle memory indicator in recents panel view around clear all recents button
+         *  @hide
+         */
+        public static final String SHOW_RECENTS_MEMORY_INDICATOR = "show_recents_memory_indicator";
+
+        /**
+         * Always show circle memory indicator in recents panel view, even if
+         * clear all recents button is not visible
+         *  @hide
+         */
+        public static final String ALWAYS_SHOW_RECENTS_MEMORY_INDICATOR =
+                "always_show_recents_memory_indicator";
 
         /**
          * Show when WiFi or data mobile is sending/receiving data

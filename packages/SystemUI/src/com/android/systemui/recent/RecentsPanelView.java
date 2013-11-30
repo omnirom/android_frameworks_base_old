@@ -93,7 +93,7 @@ public class RecentsPanelView extends FrameLayout implements OnItemClickListener
     private boolean mFitThumbnailToXY;
     private int mRecentItemLayoutId;
     private boolean mHighEndGfx;
-    private ImageView mClearRecents;
+    private FrameLayout mClearRecents;
 
     public static interface RecentsScrollView {
         public int numItemsInOneScreenful();
@@ -343,12 +343,28 @@ public class RecentsPanelView extends FrameLayout implements OnItemClickListener
             mRecentsNoApps.setAlpha(1f);
             mRecentsNoApps.setVisibility(noApps ? View.VISIBLE : View.INVISIBLE);
 
-            boolean showClearAllButton = Settings.System.getInt(mContext.getContentResolver(), Settings.System.SHOW_CLEAR_RECENTS_BUTTON, 1) == 1;
+            boolean showClearAllButton = Settings.System.getInt(mContext.getContentResolver(),
+                    Settings.System.SHOW_CLEAR_RECENTS_BUTTON, 1) == 1;
+            boolean showMemoryIndicator = Settings.System.getInt(mContext.getContentResolver(),
+                    Settings.System.SHOW_RECENTS_MEMORY_INDICATOR, 1) == 1;
+            boolean showAlways = Settings.System.getInt(mContext.getContentResolver(),
+                    Settings.System.ALWAYS_SHOW_RECENTS_MEMORY_INDICATOR, 1) == 1;
 
             if (showClearAllButton) {
-                mClearRecents.setVisibility(noApps ? View.GONE : View.VISIBLE);
-                int clearAllButtonLocation = Settings.System.getInt(mContext.getContentResolver(), Settings.System.CLEAR_RECENTS_BUTTON_LOCATION, Constants.CLEAR_ALL_BUTTON_BOTTOM_LEFT);
-                FrameLayout.LayoutParams layoutParams = (FrameLayout.LayoutParams)mClearRecents.getLayoutParams();
+                if(!showMemoryIndicator)
+                    mClearRecents.findViewById(R.id.circle_meter).setVisibility(View.GONE);
+
+                if(showAlways)
+                    mClearRecents.findViewById(R.id.clear_all_button)
+                        .setVisibility(noApps ? View.GONE : View.VISIBLE);
+                else
+                    mClearRecents.setVisibility(noApps ? View.GONE : View.VISIBLE);
+
+                int clearAllButtonLocation = Settings.System.getInt(mContext.getContentResolver(),
+                        Settings.System.CLEAR_RECENTS_BUTTON_LOCATION,
+                        Constants.CLEAR_ALL_BUTTON_BOTTOM_LEFT);
+                FrameLayout.LayoutParams layoutParams = (FrameLayout.LayoutParams)
+                        mClearRecents.getLayoutParams();
                 switch (clearAllButtonLocation) {
                     case Constants.CLEAR_ALL_BUTTON_TOP_LEFT:
                         layoutParams.gravity = Gravity.TOP | Gravity.LEFT;
@@ -475,7 +491,7 @@ public class RecentsPanelView extends FrameLayout implements OnItemClickListener
         mRecentsScrim = findViewById(R.id.recents_bg_protect);
         mRecentsNoApps = findViewById(R.id.recents_no_apps);
 
-        mClearRecents = (ImageView) findViewById(R.id.recents_clear);
+        mClearRecents = (FrameLayout) findViewById(R.id.recents_clear);
         if (mClearRecents != null){
             mClearRecents.setOnClickListener(new OnClickListener() {
                 @Override
