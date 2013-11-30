@@ -24,8 +24,7 @@
     android:id="@+id/recents_root"
     android:layout_height="match_parent"
     android:layout_width="match_parent"
-    systemui:recentItemLayout="@layout/status_bar_recent_item"
-    >
+    systemui:recentItemLayout="@layout/status_bar_recent_item">
     <FrameLayout
         android:id="@+id/recents_bg_protect"
         android:background="@drawable/status_bar_recents_background"
@@ -55,14 +54,28 @@
 
         </com.android.systemui.recent.RecentsHorizontalScrollView>
 
-    <ImageView
+        <FrameLayout
             android:id="@+id/recents_clear"
-            android:clickable="true"
             android:layout_width="50dp"
             android:layout_height="50dp"
-            android:scaleType="center"
-            android:layout_gravity="top|right"
-            android:src="@drawable/ic_notify_clear" />
+            android:layout_marginTop="2dp"
+            android:layout_marginRight="2dp"
+            android:layout_gravity="top|right" >
+
+            <com.android.systemui.recent.CircleMemoryMeter
+                android:id="@+id/circle_meter"
+                android:layout_width="match_parent"
+                android:layout_height="match_parent" />
+
+            <ImageView
+                android:id="@+id/recents_clear_all"
+                android:layout_width="match_parent"
+                android:layout_height="match_parent"
+                android:padding="10dp"
+                android:scaleType="fitCenter"
+                android:src="@drawable/ic_notify_clear" />
+
+        </FrameLayout>
 
     </FrameLayout>
 
