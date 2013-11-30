@@ -1,0 +1,10 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+
+    <drawable name="custom_green_solid">#ffa6c63d</drawable>
+    <drawable name="custom_green_translucent">#aaa6c63d</drawable>
+
+    <color name="holo_orange_light_translucent">#aaffbb33</color>
+    <color name="holo_red_light_translucent">#aaff4444</color>
+
+</resources>
