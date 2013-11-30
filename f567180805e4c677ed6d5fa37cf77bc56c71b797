@@ -1,0 +1,38 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "8b8ed5af_39d43849",
+        "filename": "packages/Keyguard/src/com/android/keyguard/KeyguardViewMediator.java",
+        "patchSetId": 4
+      },
+      "lineNbr": 1168,
+      "author": {
+        "id": 1000001
+      },
+      "writtenOn": "2013-11-30T15:58:41Z",
+      "side": 1,
+      "message": "if (",
+      "revId": "f567180805e4c677ed6d5fa37cf77bc56c71b797",
+      "serverId": "56841c99-7c94-43d4-bf0b-cb4707e66d55",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "8b8ed5af_59c904ad",
+        "filename": "packages/Keyguard/src/com/android/keyguard/KeyguardViewMediator.java",
+        "patchSetId": 4
+      },
+      "lineNbr": 1170,
+      "author": {
+        "id": 1000001
+      },
+      "writtenOn": "2013-11-30T15:58:41Z",
+      "side": 1,
+      "message": "wrong indent",
+      "revId": "f567180805e4c677ed6d5fa37cf77bc56c71b797",
+      "serverId": "56841c99-7c94-43d4-bf0b-cb4707e66d55",
+      "unresolved": false
+    }
+  ]
+}
