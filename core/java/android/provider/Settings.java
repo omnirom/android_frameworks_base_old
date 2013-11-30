@@ -2832,16 +2832,29 @@ public final class Settings {
         public static final String VOLUME_WAKE_SCREEN = "volume_wake_screen";
 
         /**
-         * show clear all recents button
+         * Show clear all recents button
          *  @hide
          */
         public static final String SHOW_CLEAR_RECENTS_BUTTON = "clear_recents_button";
 
         /**
-         * location of the clear all rectents button
+         * Location of the clear all recents button
          * @hide
          */
         public static final String CLEAR_RECENTS_BUTTON_LOCATION = "clear_recents_button_location";
+
+        /**
+         * Show circle memory indicator in recents panel view around clear all recents button
+         *  @hide
+         */
+        public static final String SHOW_RECENTS_MEMORY_INDICATOR = "show_recents_memory_indicator";
+
+        /**
+         * Location of the memory indicator
+         * @hide
+         */
+        public static final String RECENTS_MEMORY_INDICATOR_LOCATION =
+                "recents_memory_indicator_location";
 
         /**
          * Immersive mode global actions switch
