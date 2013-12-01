@@ -2969,6 +2969,13 @@ public final class Settings {
          *
          * @hide
          */
+        public static final String QS_CUSTOM_ACTIONS = "qs_custom_actions";
+
+        /**
+         * Volume key controls ringtone or media sound stream
+         *
+         * @hide
+         */
         public static final String VOLUME_KEYS_DEFAULT = "volume_keys_default";
 
         /**

@@ -16,10 +16,12 @@
 
 package com.android.systemui.statusbar.phone;
 
+import android.content.ContentResolver;
 import android.content.Context;
 import android.content.res.Resources;
 import android.graphics.Canvas;
 import android.graphics.drawable.Drawable;
+import android.provider.Settings;
 import android.util.AttributeSet;
 import android.util.EventLog;
 import android.view.MotionEvent;
@@ -32,6 +34,8 @@ import com.android.systemui.statusbar.GestureRecorder;
 
 public class NotificationPanelView extends PanelView {
     public static final boolean DEBUG_GESTURES = true;
+
+    private static final float STATUS_BAR_SETTINGS_FLIP_PERCENTAGE = 0.3f;
 
     Drawable mHandleBar;
     int mHandleBarHeight;
@@ -110,29 +114,51 @@ public class NotificationPanelView extends PanelView {
             }
         }
         if (PhoneStatusBar.SETTINGS_DRAG_SHORTCUT && mStatusBar.mHasFlipSettings) {
+            boolean shouldFlip = false;
+
             switch (event.getActionMasked()) {
                 case MotionEvent.ACTION_DOWN:
                     mOkToFlip = getExpandedHeight() == 0;
-                    break;
-                case MotionEvent.ACTION_POINTER_DOWN:
-                    if (mOkToFlip) {
-                        float miny = event.getY(0);
-                        float maxy = miny;
-                        for (int i=1; i<event.getPointerCount(); i++) {
-                            final float y = event.getY(i);
-                            if (y < miny) miny = y;
-                            if (y > maxy) maxy = y;
-                        }
-                        if (maxy - miny < mHandleBarHeight) {
-                            if (getMeasuredHeight() < mHandleBarHeight) {
-                                mStatusBar.switchToSettings();
-                            } else {
-                                mStatusBar.flipToSettings();
+                    int qsCustomAction = Settings.System.getInt(getContext().getContentResolver(),
+                            Settings.System.QS_CUSTOM_ACTIONS, 1);
+                    switch(qsCustomAction) {
+                        case 0:
+                            break;
+                        case 1:
+                            if (event.getX(0) > getWidth() * (1.0f - STATUS_BAR_SETTINGS_FLIP_PERCENTAGE)){
+                                shouldFlip = true;
                             }
-                            mOkToFlip = false;
-                        }
+                            break;
+                        case 2:
+                            /* Check for Expanded View if Quick Pull Down not set
+                             * If we have no notifications and the Power Widget is disabled, flip to the settings panel */
+                            if(mStatusBar.skipToSettingsPanel()) {
+                                shouldFlip = true;
+                            }
+                            break;
                     }
                     break;
+                case MotionEvent.ACTION_POINTER_DOWN:
+                    shouldFlip = true;
+                    break;
+            }
+
+            if (mOkToFlip && shouldFlip) {
+                float miny = event.getY(0);
+                float maxy = miny;
+                for (int i=1; i<event.getPointerCount(); i++) {
+                    final float y = event.getY(i);
+                    if (y < miny) miny = y;
+                    if (y > maxy) maxy = y;
+                }
+                if (maxy - miny < mHandleBarHeight) {
+                    if (getMeasuredHeight() < mHandleBarHeight) {
+                        mStatusBar.switchToSettings();
+                    } else {
+                        mStatusBar.flipToSettings();
+                    }
+                    mOkToFlip = false;
+                }
             }
         }
         return mHandleView.dispatchTouchEvent(event);
