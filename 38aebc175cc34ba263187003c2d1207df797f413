@@ -1,0 +1,38 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "8b8ed5af_b9f68858",
+        "filename": "policy/src/com/android/internal/policy/impl/PhoneWindowManager.java",
+        "patchSetId": 4
+      },
+      "lineNbr": 604,
+      "author": {
+        "id": 1000036
+      },
+      "writtenOn": "2013-12-01T08:54:27Z",
+      "side": 1,
+      "message": "Whitespace",
+      "revId": "38aebc175cc34ba263187003c2d1207df797f413",
+      "serverId": "56841c99-7c94-43d4-bf0b-cb4707e66d55",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "8b8ed5af_d98fd4d4",
+        "filename": "policy/src/com/android/internal/policy/impl/PhoneWindowManager.java",
+        "patchSetId": 4
+      },
+      "lineNbr": 6036,
+      "author": {
+        "id": 1000036
+      },
+      "writtenOn": "2013-12-01T08:54:27Z",
+      "side": 1,
+      "message": "A newline would look good here",
+      "revId": "38aebc175cc34ba263187003c2d1207df797f413",
+      "serverId": "56841c99-7c94-43d4-bf0b-cb4707e66d55",
+      "unresolved": false
+    }
+  ]
+}
