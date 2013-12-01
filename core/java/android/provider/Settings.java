@@ -4100,6 +4100,13 @@ public final class Settings {
         public static final String VOLUME_DIALOG_HEADERS = "volume_dialog_headers";
 
         /**
+         * Whether to mute annoying notifications
+         * @hide
+         */
+        public static final String MUTE_ANNOYING_NOTIFICATIONS_THRESHOLD =
+                "mute_annoying_notifications_threshold";
+
+        /**
          * Whether the battery light should be enabled (if hardware supports it)
          * The value is boolean (1 or 0).
          * @hide
@@ -4588,6 +4595,7 @@ public final class Settings {
             PRIVATE_SETTINGS.add(FORCE_SAFE_MEDIA_VOLUME_DISABLED);
             PRIVATE_SETTINGS.add(DOUBLE_TAP_SLEEP_LOCKSCREEN);
             PRIVATE_SETTINGS.add(FORCE_AMBIENT_FOR_MEDIA);
+            PRIVATE_SETTINGS.add(MUTE_ANNOYING_NOTIFICATIONS_THRESHOLD);
         }
 
         /**
