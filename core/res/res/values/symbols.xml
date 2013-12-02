@@ -1684,6 +1684,9 @@
   <!-- From SettingsProvider -->
   <java-symbol type="raw" name="fallbackring" />
 
+  <!-- Config.xml entries -->
+  <java-symbol type="integer" name="config_backKillTimeout" />
+
   <!-- From Settings -->
   <java-symbol type="array" name="config_mobile_hotspot_provision_app" />
   <java-symbol type="bool" name="config_intrusiveNotificationLed" />
@@ -1781,5 +1784,8 @@
 
   <!-- Wifi -->
   <java-symbol type="bool" name="config_wifiApStartInterface" />
+
+  <!-- Developer settings - Kill app back press -->
+  <java-symbol type="string" name="app_killed_message" />
 
 </resources>
