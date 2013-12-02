@@ -1,0 +1,157 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "6b8b61a3_208164ff",
+        "filename": "core/java/android/app/Activity.java",
+        "patchSetId": 7
+      },
+      "lineNbr": 5260,
+      "author": {
+        "id": 1000174
+      },
+      "writtenOn": "2013-12-02T21:32:49Z",
+      "side": 1,
+      "message": "Guillaume, whitespace",
+      "revId": "6ed7351c14cacf384375f027bc581494f254bb82",
+      "serverId": "56841c99-7c94-43d4-bf0b-cb4707e66d55",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "6b8b61a3_407e7014",
+        "filename": "core/java/android/app/Activity.java",
+        "patchSetId": 7
+      },
+      "lineNbr": 5283,
+      "author": {
+        "id": 1000174
+      },
+      "writtenOn": "2013-12-02T21:32:49Z",
+      "side": 1,
+      "message": "Another whitespace",
+      "revId": "6ed7351c14cacf384375f027bc581494f254bb82",
+      "serverId": "56841c99-7c94-43d4-bf0b-cb4707e66d55",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "6b8b61a3_607b6c23",
+        "filename": "core/java/android/app/Activity.java",
+        "patchSetId": 7
+      },
+      "lineNbr": 5313,
+      "author": {
+        "id": 1000174
+      },
+      "writtenOn": "2013-12-02T21:32:49Z",
+      "side": 1,
+      "message": "Another whitespace",
+      "revId": "6ed7351c14cacf384375f027bc581494f254bb82",
+      "serverId": "56841c99-7c94-43d4-bf0b-cb4707e66d55",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "6b8b61a3_80787826",
+        "filename": "core/java/android/inputmethodservice/InputMethodService.java",
+        "patchSetId": 7
+      },
+      "lineNbr": 980,
+      "author": {
+        "id": 1000174
+      },
+      "writtenOn": "2013-12-02T21:32:49Z",
+      "side": 1,
+      "message": "Another whitespace",
+      "revId": "6ed7351c14cacf384375f027bc581494f254bb82",
+      "serverId": "56841c99-7c94-43d4-bf0b-cb4707e66d55",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "6b8b61a3_c08e0029",
+        "filename": "packages/SystemUI/src/com/android/systemui/recent/RecentsPanelView.java",
+        "patchSetId": 7
+      },
+      "lineNbr": 411,
+      "author": {
+        "id": 1000174
+      },
+      "writtenOn": "2013-12-02T21:32:49Z",
+      "side": 1,
+      "message": "Another one :P",
+      "revId": "6ed7351c14cacf384375f027bc581494f254bb82",
+      "serverId": "56841c99-7c94-43d4-bf0b-cb4707e66d55",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "6b8b61a3_a089f423",
+        "filename": "packages/SystemUI/src/com/android/systemui/recent/RecentsPanelView.java",
+        "patchSetId": 7
+      },
+      "lineNbr": 432,
+      "author": {
+        "id": 1000174
+      },
+      "writtenOn": "2013-12-02T21:32:49Z",
+      "side": 1,
+      "message": "Another one :)",
+      "revId": "6ed7351c14cacf384375f027bc581494f254bb82",
+      "serverId": "56841c99-7c94-43d4-bf0b-cb4707e66d55",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "6b8b61a3_209ec458",
+        "filename": "policy/src/com/android/internal/policy/impl/PhoneWindowManager.java",
+        "patchSetId": 7
+      },
+      "lineNbr": 3419,
+      "author": {
+        "id": 1000174
+      },
+      "writtenOn": "2013-12-02T21:32:49Z",
+      "side": 1,
+      "message": "Another one",
+      "revId": "6ed7351c14cacf384375f027bc581494f254bb82",
+      "serverId": "56841c99-7c94-43d4-bf0b-cb4707e66d55",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "6b8b61a3_e093fc51",
+        "filename": "services/java/com/android/server/am/ActivityManagerService.java",
+        "patchSetId": 7
+      },
+      "lineNbr": 15192,
+      "author": {
+        "id": 1000174
+      },
+      "writtenOn": "2013-12-02T21:32:49Z",
+      "side": 1,
+      "message": "Another whitespace",
+      "revId": "6ed7351c14cacf384375f027bc581494f254bb82",
+      "serverId": "56841c99-7c94-43d4-bf0b-cb4707e66d55",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "6b8b61a3_0099c870",
+        "filename": "services/java/com/android/server/am/ActivityManagerService.java",
+        "patchSetId": 7
+      },
+      "lineNbr": 15196,
+      "author": {
+        "id": 1000174
+      },
+      "writtenOn": "2013-12-02T21:32:49Z",
+      "side": 1,
+      "message": "Another one",
+      "revId": "6ed7351c14cacf384375f027bc581494f254bb82",
+      "serverId": "56841c99-7c94-43d4-bf0b-cb4707e66d55",
+      "unresolved": false
+    }
+  ]
+}
