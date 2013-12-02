@@ -1,0 +1,21 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "6b8b61a3_20b2444a",
+        "filename": "policy/src/com/android/internal/policy/impl/PhoneWindowManager.java",
+        "patchSetId": 6
+      },
+      "lineNbr": 5723,
+      "author": {
+        "id": 1000123
+      },
+      "writtenOn": "2013-12-02T17:39:34Z",
+      "side": 0,
+      "message": "Small nit-pick, this semi-colon should not be removed",
+      "revId": "8a0c9c2267ac1dd095385260fce3ebc51c59cbc6",
+      "serverId": "56841c99-7c94-43d4-bf0b-cb4707e66d55",
+      "unresolved": false
+    }
+  ]
+}
