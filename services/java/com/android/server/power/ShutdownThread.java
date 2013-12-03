@@ -213,7 +213,10 @@ public final class ShutdownThread extends Thread {
     }
 
     private static boolean advancedRebootEnabled(Context context) {
-        return Settings.Secure.getInt(context.getContentResolver(), Settings.Secure.ADVANCED_REBOOT, 1) == 1;
+        boolean devOptionsEnabled = Settings.Secure.getInt(context.getContentResolver(),
+                Settings.Secure.DEVELOPER_OPTIONS_ENABLED, 0) == 1;
+        return Settings.Secure.getInt(context.getContentResolver(), 
+                Settings.Secure.ADVANCED_REBOOT, devOptionsEnabled ? 1 : 0) == 1;
     }
 
     private static class CloseDialogReceiver extends BroadcastReceiver
