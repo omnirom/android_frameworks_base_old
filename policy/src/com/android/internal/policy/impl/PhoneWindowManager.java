@@ -4079,6 +4079,13 @@ public class PhoneWindowManager implements WindowManagerPolicy {
         }
     }
 
+    /** {@inheritDoc} */
+    public void notifySPenSwitchChanged(long whenNanos, boolean sPenOn) {
+        Intent intent = new Intent(ACTION_SPEN);
+        intent.putExtra(EXTRA_SPEN_PLUGGED_STATE, sPenOn);
+        mContext.sendStickyBroadcastAsUser(intent,UserHandle.ALL);
+    }
+
     void setHdmiPlugged(boolean plugged) {
         if (mHdmiPlugged != plugged) {
             mHdmiPlugged = plugged;
