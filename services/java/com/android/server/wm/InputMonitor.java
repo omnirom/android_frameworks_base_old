@@ -349,6 +349,12 @@ final class InputMonitor implements InputManagerService.WindowManagerCallbacks {
         mService.mPolicy.notifyLidSwitchChanged(whenNanos, lidOpen);
     }
 
+    /* Notifies spen changed state. */
+    @Override
+    public void notifySPenSwitchChanged(long whenNanos, boolean sPenOn) {
+        mService.mPolicy.notifySPenSwitchChanged(whenNanos, sPenOn);
+    }
+
     /* Provides an opportunity for the window manager policy to intercept early key
      * processing as soon as the key has been read from the device. */
     @Override
