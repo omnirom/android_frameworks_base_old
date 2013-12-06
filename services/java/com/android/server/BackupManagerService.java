@@ -46,6 +46,8 @@ import android.content.pm.IPackageInstallObserver;
 import android.content.pm.IPackageManager;
 import android.content.pm.PackageInfo;
 import android.content.pm.PackageManager;
+import android.content.pm.ResolveInfo;
+import android.content.pm.ServiceInfo;
 import android.content.pm.Signature;
 import android.content.pm.PackageManager.NameNotFoundException;
 import android.database.ContentObserver;
@@ -146,6 +148,7 @@ class BackupManagerService extends IBackupManager.Stub {
     static final boolean COMPRESS_FULL_BACKUPS = true; // should be true in production
 
     static final String SHARED_BACKUP_AGENT_PACKAGE = "com.android.sharedstoragebackup";
+    static final String SERVICE_ACTION_TRANSPORT_HOST = "android.backup.TRANSPORT_HOST";
 
     // How often we perform a backup pass.  Privileged external callers can
     // trigger an immediate pass.
@@ -157,6 +160,9 @@ class BackupManagerService extends IBackupManager.Stub {
     // The amount of time between the initial provisioning of the device and
     // the first backup pass.
     private static final long FIRST_BACKUP_INTERVAL = 12 * AlarmManager.INTERVAL_HOUR;
+
+    // Retry interval for clear/init when the transport is unavailable
+    private static final long TRANSPORT_RETRY_INTERVAL = 1 * AlarmManager.INTERVAL_HOUR;
 
     private static final String RUN_BACKUP_ACTION = "android.app.backup.intent.RUN";
     private static final String RUN_INITIALIZE_ACTION = "android.app.backup.intent.INIT";
@@ -171,6 +177,8 @@ class BackupManagerService extends IBackupManager.Stub {
     private static final int MSG_RESTORE_TIMEOUT = 8;
     private static final int MSG_FULL_CONFIRMATION_TIMEOUT = 9;
     private static final int MSG_RUN_FULL_RESTORE = 10;
+    private static final int MSG_RETRY_INIT = 11;
+    private static final int MSG_RETRY_CLEAR = 12;
 
     // backup task state machine tick
     static final int MSG_BACKUP_RESTORE_STEP = 20;
@@ -251,10 +259,13 @@ class BackupManagerService extends IBackupManager.Stub {
     volatile boolean mClearingData;
 
     // Transport bookkeeping
+    final HashMap<String,String> mTransportNames
+            = new HashMap<String,String>();             // component name -> registration name
     final HashMap<String,IBackupTransport> mTransports
-            = new HashMap<String,IBackupTransport>();
+            = new HashMap<String,IBackupTransport>();   // registration name -> binder
+    final ArrayList<TransportConnection> mTransportConnections
+            = new ArrayList<TransportConnection>();
     String mCurrentTransport;
-    IBackupTransport mLocalTransport, mGoogleTransport;
     ActiveRestoreSession mActiveRestoreSession;
 
     // Watch the device provisioning operation during setup
@@ -300,6 +311,7 @@ class BackupManagerService extends IBackupManager.Stub {
 
     class RestoreParams {
         public IBackupTransport transport;
+        public String dirName;
         public IRestoreObserver observer;
         public long token;
         public PackageInfo pkgInfo;
@@ -307,9 +319,10 @@ class BackupManagerService extends IBackupManager.Stub {
         public boolean needFullBackup;
         public String[] filterSet;
 
-        RestoreParams(IBackupTransport _transport, IRestoreObserver _obs,
+        RestoreParams(IBackupTransport _transport, String _dirName, IRestoreObserver _obs,
                 long _token, PackageInfo _pkg, int _pmToken, boolean _needFullBackup) {
             transport = _transport;
+            dirName = _dirName;
             observer = _obs;
             token = _token;
             pkgInfo = _pkg;
@@ -318,9 +331,10 @@ class BackupManagerService extends IBackupManager.Stub {
             filterSet = null;
         }
 
-        RestoreParams(IBackupTransport _transport, IRestoreObserver _obs, long _token,
-                boolean _needFullBackup) {
+        RestoreParams(IBackupTransport _transport, String _dirName, IRestoreObserver _obs,
+                long _token, boolean _needFullBackup) {
             transport = _transport;
+            dirName = _dirName;
             observer = _obs;
             token = _token;
             pkgInfo = null;
@@ -329,9 +343,10 @@ class BackupManagerService extends IBackupManager.Stub {
             filterSet = null;
         }
 
-        RestoreParams(IBackupTransport _transport, IRestoreObserver _obs, long _token,
-                String[] _filterSet, boolean _needFullBackup) {
+        RestoreParams(IBackupTransport _transport, String _dirName, IRestoreObserver _obs,
+                long _token, String[] _filterSet, boolean _needFullBackup) {
             transport = _transport;
+            dirName = _dirName;
             observer = _obs;
             token = _token;
             pkgInfo = null;
@@ -348,6 +363,16 @@ class BackupManagerService extends IBackupManager.Stub {
         ClearParams(IBackupTransport _transport, PackageInfo _info) {
             transport = _transport;
             packageInfo = _info;
+        }
+    }
+
+    class ClearRetryParams {
+        public String transportName;
+        public String packageName;
+
+        ClearRetryParams(String transport, String pkg) {
+            transportName = transport;
+            packageName = pkg;
         }
     }
 
@@ -510,13 +535,28 @@ class BackupManagerService extends IBackupManager.Stub {
                 // When it completes successfully, that old journal file will be
                 // deleted.  If we crash prior to that, the old journal is parsed
                 // at next boot and the journaled requests fulfilled.
+                boolean staged = true;
                 if (queue.size() > 0) {
                     // Spin up a backup state sequence and set it running
-                    PerformBackupTask pbt = new PerformBackupTask(transport, queue, oldJournal);
-                    Message pbtMessage = obtainMessage(MSG_BACKUP_RESTORE_STEP, pbt);
-                    sendMessage(pbtMessage);
+                    try {
+                        String dirName = transport.transportDirName();
+                        PerformBackupTask pbt = new PerformBackupTask(transport, dirName,
+                                queue, oldJournal);
+                        Message pbtMessage = obtainMessage(MSG_BACKUP_RESTORE_STEP, pbt);
+                        sendMessage(pbtMessage);
+                    } catch (RemoteException e) {
+                        // unable to ask the transport its dir name -- transient failure, since
+                        // the above check succeeded.  Try again next time.
+                        Slog.e(TAG, "Transport became unavailable attempting backup");
+                        staged = false;
+                    }
                 } else {
                     Slog.v(TAG, "Backup requested but nothing pending");
+                    staged = false;
+                }
+
+                if (!staged) {
+                    // if we didn't actually hand off the wakelock, rewind until next time
                     synchronized (mQueueLock) {
                         mBackupRunning = false;
                     }
@@ -566,7 +606,7 @@ class BackupManagerService extends IBackupManager.Stub {
                 RestoreParams params = (RestoreParams)msg.obj;
                 Slog.d(TAG, "MSG_RUN_RESTORE observer=" + params.observer);
                 PerformRestoreTask task = new PerformRestoreTask(
-                        params.transport, params.observer,
+                        params.transport, params.dirName, params.observer,
                         params.token, params.pkgInfo, params.pmToken,
                         params.needFullBackup, params.filterSet);
                 Message restoreMsg = obtainMessage(MSG_BACKUP_RESTORE_STEP, task);
@@ -593,6 +633,14 @@ class BackupManagerService extends IBackupManager.Stub {
                 break;
             }
 
+            case MSG_RETRY_CLEAR:
+            {
+                // reenqueues if the transport remains unavailable
+                ClearRetryParams params = (ClearRetryParams)msg.obj;
+                clearBackupData(params.transportName, params.packageName);
+                break;
+            }
+
             case MSG_RUN_INITIALIZE:
             {
                 HashSet<String> queue;
@@ -604,6 +652,16 @@ class BackupManagerService extends IBackupManager.Stub {
                 }
 
                 (new PerformInitializeTask(queue)).run();
+                break;
+            }
+
+            case MSG_RETRY_INIT:
+            {
+                synchronized (mQueueLock) {
+                    recordInitPendingLocked(msg.arg1 != 0, (String)msg.obj);
+                    mAlarmManager.set(AlarmManager.RTC_WAKEUP, System.currentTimeMillis(),
+                            mRunInitIntent);
+                }
                 break;
             }
 
@@ -815,13 +873,7 @@ class BackupManagerService extends IBackupManager.Stub {
         }
 
         // Set up our transport options and initialize the default transport
-        // TODO: Have transports register themselves somehow?
         // TODO: Don't create transports that we don't need to?
-        mLocalTransport = new LocalTransport(context);  // This is actually pretty cheap
-        ComponentName localName = new ComponentName(context, LocalTransport.class);
-        registerTransport(localName.flattenToShortString(), mLocalTransport);
-
-        mGoogleTransport = null;
         mCurrentTransport = Settings.Secure.getString(context.getContentResolver(),
                 Settings.Secure.BACKUP_TRANSPORT);
         if ("".equals(mCurrentTransport)) {
@@ -829,28 +881,43 @@ class BackupManagerService extends IBackupManager.Stub {
         }
         if (DEBUG) Slog.v(TAG, "Starting with transport " + mCurrentTransport);
 
-        // Attach to the Google backup transport.  When this comes up, it will set
-        // itself as the current transport because we explicitly reset mCurrentTransport
-        // to null.
-        ComponentName transportComponent = new ComponentName("com.google.android.backup",
-                "com.google.android.backup.BackupTransportService");
-        try {
-            // If there's something out there that is supposed to be the Google
-            // backup transport, make sure it's legitimately part of the OS build
-            // and not an app lying about its package name.
-            ApplicationInfo info = mPackageManager.getApplicationInfo(
-                    transportComponent.getPackageName(), 0);
-            if ((info.flags & ApplicationInfo.FLAG_SYSTEM) != 0) {
-                if (DEBUG) Slog.v(TAG, "Binding to Google transport");
-                Intent intent = new Intent().setComponent(transportComponent);
-                context.bindServiceAsUser(intent, mGoogleConnection, Context.BIND_AUTO_CREATE,
-                        UserHandle.OWNER);
-            } else {
-                Slog.w(TAG, "Possible Google transport spoof: ignoring " + info);
+        // Find transport hosts and bind to their services
+        Intent transportServiceIntent = new Intent(SERVICE_ACTION_TRANSPORT_HOST);
+        List<ResolveInfo> hosts = mPackageManager.queryIntentServicesAsUser(
+                transportServiceIntent, 0, UserHandle.USER_OWNER);
+        if (DEBUG) {
+            Slog.v(TAG, "Found transports: " + ((hosts == null) ? "null" : hosts.size()));
+        }
+        if (hosts != null) {
+            if (MORE_DEBUG) {
+                for (int i = 0; i < hosts.size(); i++) {
+                    ServiceInfo info = hosts.get(i).serviceInfo;
+                    Slog.v(TAG, "   " + info.packageName + "/" + info.name);
+                }
             }
-        } catch (PackageManager.NameNotFoundException nnf) {
-            // No such package?  No binding.
-            if (DEBUG) Slog.v(TAG, "Google transport not present");
+            for (int i = 0; i < hosts.size(); i++) {
+                try {
+                    ServiceInfo info = hosts.get(i).serviceInfo;
+                    PackageInfo packInfo = mPackageManager.getPackageInfo(info.packageName, 0);
+                    if ((packInfo.applicationInfo.flags & ApplicationInfo.FLAG_PRIVILEGED) != 0) {
+                        ComponentName svcName = new ComponentName(info.packageName, info.name);
+                        if (DEBUG) {
+                            Slog.i(TAG, "Binding to transport host " + svcName);
+                        }
+                        Intent intent = new Intent(transportServiceIntent);
+                        intent.setComponent(svcName);
+                        TransportConnection connection = new TransportConnection();
+                        mTransportConnections.add(connection);
+                        context.bindServiceAsUser(intent,
+                                connection, Context.BIND_AUTO_CREATE,
+                                UserHandle.OWNER);
+                    } else {
+                        Slog.w(TAG, "Transport package not privileged: " + info.packageName);
+                    }
+                } catch (Exception e) {
+                    Slog.e(TAG, "Problem resolving transport service: " + e.getMessage());
+                }
+            }
         }
 
         // Now that we know about valid backup participants, parse any
@@ -1235,29 +1302,47 @@ class BackupManagerService extends IBackupManager.Stub {
     void recordInitPendingLocked(boolean isPending, String transportName) {
         if (DEBUG) Slog.i(TAG, "recordInitPendingLocked: " + isPending
                 + " on transport " + transportName);
+        mBackupHandler.removeMessages(MSG_RETRY_INIT);
+
         try {
             IBackupTransport transport = getTransport(transportName);
-            String transportDirName = transport.transportDirName();
-            File stateDir = new File(mBaseStateDir, transportDirName);
-            File initPendingFile = new File(stateDir, INIT_SENTINEL_FILE_NAME);
+            if (transport != null) {
+                String transportDirName = transport.transportDirName();
+                File stateDir = new File(mBaseStateDir, transportDirName);
+                File initPendingFile = new File(stateDir, INIT_SENTINEL_FILE_NAME);
 
-            if (isPending) {
-                // We need an init before we can proceed with sending backup data.
-                // Record that with an entry in our set of pending inits, as well as
-                // journaling it via creation of a sentinel file.
-                mPendingInits.add(transportName);
-                try {
-                    (new FileOutputStream(initPendingFile)).close();
-                } catch (IOException ioe) {
-                    // Something is badly wrong with our permissions; just try to move on
+                if (isPending) {
+                    // We need an init before we can proceed with sending backup data.
+                    // Record that with an entry in our set of pending inits, as well as
+                    // journaling it via creation of a sentinel file.
+                    mPendingInits.add(transportName);
+                    try {
+                        (new FileOutputStream(initPendingFile)).close();
+                    } catch (IOException ioe) {
+                        // Something is badly wrong with our permissions; just try to move on
+                    }
+                } else {
+                    // No more initialization needed; wipe the journal and reset our state.
+                    initPendingFile.delete();
+                    mPendingInits.remove(transportName);
                 }
-            } else {
-                // No more initialization needed; wipe the journal and reset our state.
-                initPendingFile.delete();
-                mPendingInits.remove(transportName);
+                return; // done; don't fall through to the error case
             }
         } catch (RemoteException e) {
-            // can't happen; the transport is local
+            // transport threw when asked its name; fall through to the lookup-failed case
+        }
+
+        // The named transport doesn't exist or threw.  This operation is
+        // important, so we record the need for a an init and post a message
+        // to retry the init later.
+        if (isPending) {
+            mPendingInits.add(transportName);
+            mBackupHandler.sendMessageDelayed(
+                    mBackupHandler.obtainMessage(MSG_RETRY_INIT,
+                            (isPending ? 1 : 0),
+                            0,
+                            transportName),
+                    TRANSPORT_RETRY_INTERVAL);
         }
     }
 
@@ -1298,13 +1383,16 @@ class BackupManagerService extends IBackupManager.Stub {
 
     // Add a transport to our set of available backends.  If 'transport' is null, this
     // is an unregistration, and the transport's entry is removed from our bookkeeping.
-    private void registerTransport(String name, IBackupTransport transport) {
+    private void registerTransport(String name, String component, IBackupTransport transport) {
         synchronized (mTransports) {
-            if (DEBUG) Slog.v(TAG, "Registering transport " + name + " = " + transport);
+            if (DEBUG) Slog.v(TAG, "Registering transport "
+                    + component + "::" + name + " = " + transport);
             if (transport != null) {
                 mTransports.put(name, transport);
+                mTransportNames.put(component, name);
             } else {
-                mTransports.remove(name);
+                mTransports.remove(mTransportNames.get(component));
+                mTransportNames.remove(component);
                 // Nothing further to do in the unregistration case
                 return;
             }
@@ -1330,7 +1418,10 @@ class BackupManagerService extends IBackupManager.Stub {
                 }
             }
         } catch (RemoteException e) {
-            // can't happen, the transport is local
+            // the transport threw when asked its file naming prefs; declare it invalid
+            Slog.e(TAG, "Unable to register transport as " + name);
+            mTransportNames.remove(component);
+            mTransports.remove(name);
         }
     }
 
@@ -1390,18 +1481,23 @@ class BackupManagerService extends IBackupManager.Stub {
         }
     };
 
-    // ----- Track connection to GoogleBackupTransport service -----
-    ServiceConnection mGoogleConnection = new ServiceConnection() {
-        public void onServiceConnected(ComponentName name, IBinder service) {
-            if (DEBUG) Slog.v(TAG, "Connected to Google transport");
-            mGoogleTransport = IBackupTransport.Stub.asInterface(service);
-            registerTransport(name.flattenToShortString(), mGoogleTransport);
+    // ----- Track connection to transports service -----
+    class TransportConnection implements ServiceConnection {
+        @Override
+        public void onServiceConnected(ComponentName component, IBinder service) {
+            if (DEBUG) Slog.v(TAG, "Connected to transport " + component);
+            try {
+                IBackupTransport transport = IBackupTransport.Stub.asInterface(service);
+                registerTransport(transport.name(), component.flattenToShortString(), transport);
+            } catch (RemoteException e) {
+                Slog.e(TAG, "Unable to register transport " + component);
+            }
         }
 
-        public void onServiceDisconnected(ComponentName name) {
-            if (DEBUG) Slog.v(TAG, "Disconnected from Google transport");
-            mGoogleTransport = null;
-            registerTransport(name.flattenToShortString(), null);
+        @Override
+        public void onServiceDisconnected(ComponentName component) {
+            if (DEBUG) Slog.v(TAG, "Disconnected from transport " + component);
+            registerTransport(null, component.flattenToShortString(), null);
         }
     };
 
@@ -1645,7 +1741,7 @@ class BackupManagerService extends IBackupManager.Stub {
                     agent = mConnectedAgent;
                 }
             } catch (RemoteException e) {
-                // can't happen
+                // can't happen - ActivityManager is local
             }
         }
         return agent;
@@ -1821,17 +1917,13 @@ class BackupManagerService extends IBackupManager.Stub {
         int mStatus;
         boolean mFinished;
 
-        public PerformBackupTask(IBackupTransport transport, ArrayList<BackupRequest> queue,
-                File journal) {
+        public PerformBackupTask(IBackupTransport transport, String dirName,
+                ArrayList<BackupRequest> queue, File journal) {
             mTransport = transport;
             mOriginalQueue = queue;
             mJournal = journal;
 
-            try {
-                mStateDir = new File(mBaseStateDir, transport.transportDirName());
-            } catch (RemoteException e) {
-                // can't happen; the transport is local
-            }
+            mStateDir = new File(mBaseStateDir, dirName);
 
             mCurrentState = BackupState.INITIAL;
             mFinished = false;
@@ -2077,8 +2169,12 @@ class BackupManagerService extends IBackupManager.Stub {
                 addBackupTrace("success; recording token");
                 try {
                     mCurrentToken = mTransport.getCurrentRestoreSet();
-                } catch (RemoteException e) {} // can't happen
-                writeRestoreTokens();
+                    writeRestoreTokens();
+                } catch (RemoteException e) {
+                    // nothing for it at this point, unfortunately, but this will be
+                    // recorded the next time we fully succeed.
+                    addBackupTrace("transport threw returning token");
+                }
             }
 
             // Set up the next backup pass - at this point we can set mBackupRunning
@@ -2299,7 +2395,7 @@ class BackupManagerService extends IBackupManager.Stub {
                 addBackupTrace("unbinding " + mCurrentPackage.packageName);
                 try {  // unbind even on timeout, just in case
                     mActivityManager.unbindBackupAgent(mCurrentPackage.applicationInfo);
-                } catch (RemoteException e) {}
+                } catch (RemoteException e) { /* can't happen; activity manager is local */ }
             }
         }
 
@@ -4314,7 +4410,7 @@ class BackupManagerService extends IBackupManager.Stub {
             }
         }
 
-        PerformRestoreTask(IBackupTransport transport, IRestoreObserver observer,
+        PerformRestoreTask(IBackupTransport transport, String dirName, IRestoreObserver observer,
                 long restoreSetToken, PackageInfo targetPackage, int pmToken,
                 boolean needFullBackup, String[] filterSet) {
             mCurrentState = RestoreState.INITIAL;
@@ -4337,11 +4433,7 @@ class BackupManagerService extends IBackupManager.Stub {
                 mFilterSet = null;
             }
 
-            try {
-                mStateDir = new File(mBaseStateDir, transport.transportDirName());
-            } catch (RemoteException e) {
-                // can't happen; the transport is local
-            }
+            mStateDir = new File(mBaseStateDir, dirName);
         }
 
         // Execute one tick of whatever state machine the task implements
@@ -5067,8 +5159,8 @@ class BackupManagerService extends IBackupManager.Stub {
     }
 
     // Clear the given package's backup data from the current transport
-    public void clearBackupData(String packageName) {
-        if (DEBUG) Slog.v(TAG, "clearBackupData() of " + packageName);
+    public void clearBackupData(String transportName, String packageName) {
+        if (DEBUG) Slog.v(TAG, "clearBackupData() of " + packageName + " on " + transportName);
         PackageInfo info;
         try {
             info = mPackageManager.getPackageInfo(packageName, PackageManager.GET_SIGNATURES);
@@ -5099,13 +5191,22 @@ class BackupManagerService extends IBackupManager.Stub {
 
         // Is the given app an available participant?
         if (apps.contains(packageName)) {
-            if (DEBUG) Slog.v(TAG, "Found the app - running clear process");
             // found it; fire off the clear request
+            if (DEBUG) Slog.v(TAG, "Found the app - running clear process");
+            mBackupHandler.removeMessages(MSG_RETRY_CLEAR);
             synchronized (mQueueLock) {
+                final IBackupTransport transport = getTransport(transportName);
+                if (transport == null) {
+                    // transport is currently unavailable -- make sure to retry
+                    Message msg = mBackupHandler.obtainMessage(MSG_RETRY_CLEAR,
+                            new ClearRetryParams(transportName, packageName));
+                    mBackupHandler.sendMessageDelayed(msg, TRANSPORT_RETRY_INTERVAL);
+                    return;
+                }
                 long oldId = Binder.clearCallingIdentity();
                 mWakelock.acquire();
                 Message msg = mBackupHandler.obtainMessage(MSG_RUN_CLEAR,
-                        new ClearParams(getTransport(mCurrentTransport), info));
+                        new ClearParams(transport, info));
                 mBackupHandler.sendMessage(msg);
                 Binder.restoreCallingIdentity(oldId);
             }
@@ -5603,21 +5704,36 @@ class BackupManagerService extends IBackupManager.Stub {
                 + " restoreSet=" + Long.toHexString(restoreSet));
 
         if (mAutoRestore && mProvisioned && restoreSet != 0) {
-            // okay, we're going to attempt a restore of this package from this restore set.
-            // The eventual message back into the Package Manager to run the post-install
-            // steps for 'token' will be issued from the restore handling code.
+            // Do we have a transport to fetch data for us?
+            IBackupTransport transport = getTransport(mCurrentTransport);
+            if (transport == null) {
+                if (DEBUG) Slog.w(TAG, "No transport for install-time restore");
+                return;
+            }
 
-            // We can use a synthetic PackageInfo here because:
-            //   1. We know it's valid, since the Package Manager supplied the name
-            //   2. Only the packageName field will be used by the restore code
-            PackageInfo pkg = new PackageInfo();
-            pkg.packageName = packageName;
+            try {
+                // okay, we're going to attempt a restore of this package from this restore set.
+                // The eventual message back into the Package Manager to run the post-install
+                // steps for 'token' will be issued from the restore handling code.
 
-            mWakelock.acquire();
-            Message msg = mBackupHandler.obtainMessage(MSG_RUN_RESTORE);
-            msg.obj = new RestoreParams(getTransport(mCurrentTransport), null,
-                    restoreSet, pkg, token, true);
-            mBackupHandler.sendMessage(msg);
+                // This can throw and so *must* happen before the wakelock is acquired
+                String dirName = transport.transportDirName();
+
+                // We can use a synthetic PackageInfo here because:
+                //   1. We know it's valid, since the Package Manager supplied the name
+                //   2. Only the packageName field will be used by the restore code
+                PackageInfo pkg = new PackageInfo();
+                pkg.packageName = packageName;
+
+                mWakelock.acquire();
+                Message msg = mBackupHandler.obtainMessage(MSG_RUN_RESTORE);
+                msg.obj = new RestoreParams(transport, dirName, null,
+                        restoreSet, pkg, token, true);
+                mBackupHandler.sendMessage(msg);
+            } catch (RemoteException e) {
+                // Binding to the transport broke; back off and proceed with the installation.
+                Slog.e(TAG, "Unable to contact transport for install-time restore");
+            }
         } else {
             // Auto-restore disabled or no way to attempt a restore; just tell the Package
             // Manager to proceed with the post-install handling for this package.
@@ -5774,13 +5890,23 @@ class BackupManagerService extends IBackupManager.Stub {
                 return -1;
             }
 
+            String dirName;
+            try {
+                dirName = mRestoreTransport.transportDirName();
+            } catch (RemoteException e) {
+                // Transport went AWOL; fail.
+                Slog.e(TAG, "Unable to contact transport for restore");
+                return -1;
+            }
+
             synchronized (mQueueLock) {
                 for (int i = 0; i < mRestoreSets.length; i++) {
                     if (token == mRestoreSets[i].token) {
                         long oldId = Binder.clearCallingIdentity();
                         mWakelock.acquire();
                         Message msg = mBackupHandler.obtainMessage(MSG_RUN_RESTORE);
-                        msg.obj = new RestoreParams(mRestoreTransport, observer, token, true);
+                        msg.obj = new RestoreParams(mRestoreTransport, dirName,
+                                observer, token, true);
                         mBackupHandler.sendMessage(msg);
                         Binder.restoreCallingIdentity(oldId);
                         return 0;
@@ -5834,13 +5960,22 @@ class BackupManagerService extends IBackupManager.Stub {
                 return -1;
             }
 
+            String dirName;
+            try {
+                dirName = mRestoreTransport.transportDirName();
+            } catch (RemoteException e) {
+                // Transport went AWOL; fail.
+                Slog.e(TAG, "Unable to contact transport for restore");
+                return -1;
+            }
+
             synchronized (mQueueLock) {
                 for (int i = 0; i < mRestoreSets.length; i++) {
                     if (token == mRestoreSets[i].token) {
                         long oldId = Binder.clearCallingIdentity();
                         mWakelock.acquire();
                         Message msg = mBackupHandler.obtainMessage(MSG_RUN_RESTORE);
-                        msg.obj = new RestoreParams(mRestoreTransport, observer, token,
+                        msg.obj = new RestoreParams(mRestoreTransport, dirName, observer, token,
                                 packages, true);
                         mBackupHandler.sendMessage(msg);
                         Binder.restoreCallingIdentity(oldId);
@@ -5906,11 +6041,21 @@ class BackupManagerService extends IBackupManager.Stub {
                 return -1;
             }
 
+            String dirName;
+            try {
+                dirName = mRestoreTransport.transportDirName();
+            } catch (RemoteException e) {
+                // Transport went AWOL; fail.
+                Slog.e(TAG, "Unable to contact transport for restore");
+                return -1;
+            }
+
             // Ready to go:  enqueue the restore request and claim success
             long oldId = Binder.clearCallingIdentity();
             mWakelock.acquire();
             Message msg = mBackupHandler.obtainMessage(MSG_RUN_RESTORE);
-            msg.obj = new RestoreParams(mRestoreTransport, observer, token, app, 0, false);
+            msg.obj = new RestoreParams(mRestoreTransport, dirName,
+                    observer, token, app, 0, false);
             mBackupHandler.sendMessage(msg);
             Binder.restoreCallingIdentity(oldId);
             return 0;
