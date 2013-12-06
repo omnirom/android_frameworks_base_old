@@ -368,6 +368,9 @@
     <!-- label for item that takes screenshot in the phone options dialog -->
     <string name="global_action_screenshot">Screenshot</string>
 
+    <!-- label for item that takes screenrecord in the phone options dialog -->
+    <string name="global_action_screenrecord">Screen Record</string>
+
     <!-- label for item that generates a bug report in the phone options dialog -->
     <string name="global_action_bug_report">Bug report</string>
 
