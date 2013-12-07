@@ -1978,6 +1978,7 @@ public final class Settings {
 
         /**
          * Empty volume.
+         * @hide
          */
         public static final String VOLUME_DEFAULT = "volume_default";
 
