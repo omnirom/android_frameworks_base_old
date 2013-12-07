@@ -1106,10 +1106,10 @@ public class ActiveDisplayView extends FrameLayout {
     }
 
     private void updateWakedByPocketMode() {
-    	if (mTurnOffModeEnabled == true) {
-        	mWakedByPocketMode = true;
-       		Log.i(TAG, "ActiveDisplay: waked by Pocketmode");
-       	}
+        if (mTurnOffModeEnabled == true) {
+            mWakedByPocketMode = true;
+            Log.i(TAG, "ActiveDisplay: waked by Pocketmode");
+        }
     }
 
     private SensorEventListener mSensorListener = new SensorEventListener() {
@@ -1131,7 +1131,7 @@ public class ActiveDisplayView extends FrameLayout {
                             	updateWakedByPocketMode();
                                 showNotification(mNotification, true);
                             } else if (mPocketMode == POCKET_MODE_ALWAYS) {
-                            	updateWakedByPocketMode();
+                                updateWakedByPocketMode();
                                 showTime();
                             }
                         }
