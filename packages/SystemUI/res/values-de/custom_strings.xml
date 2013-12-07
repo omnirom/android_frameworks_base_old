@@ -1,0 +1,78 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- Copyright (C) 2013 The OmniROM Project
+
+This program is free software: you can redistribute it and/or modify
+it under the terms of the GNU General Public License as published by
+the Free Software Foundation, either version 2 of the License, or
+(at your option) any later version.
+
+This program is distributed in the hope that it will be useful,
+but WITHOUT ANY WARRANTY; without even the implied warranty of
+MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
+GNU General Public License for more details.
+
+You should have received a copy of the GNU General Public License
+along with this program. If not, see <http://www.gnu.org/licenses/>.
+
+-->
+<resources xmlns:xliff="urn:oasis:names:tc:xliff:document:1.2">
+    <string name="quick_settings_wifi_tethering_label">Tethering</string>
+    <string name="quick_settings_bluetooth_not_discoverable_label">Nicht sichtbar</string>
+    <string name="quick_settings_bluetooth_discoverable_label">Sichtbar</string>
+    <string name="quick_settings_bluetooth_disabled">Deaktiviert</string>
+    <string name="quick_settings_bluetooth_number_paired"><xliff:g id="number">%d</xliff:g> Geräte verbunden</string>
+    <string name="screenrecord_notif_ticker">Bildschirm wird aufgezeichnet</string>
+    <string name="screenrecord_notif_title">Bildschirm aufzeichnen</string>
+    <string name="screenrecord_notif_stop">Stop</string>
+    <string name="screenrecord_notif_pointer">Berührungen anzeigen</string>
+    <string name="screenrecord_notif_error">Bildschirmaufzeichnung nicht möglich</string>
+    <string name="quick_settings_battery_charging">Lädt</string>
+    <string name="quick_settings_battery_discharging">Entlädt</string>
+    <string name="quick_settings_immersive_mode_label">Immersive-Modus an</string>
+    <string name="quick_settings_immersive_mode_off_label">Immersive-Modus aus</string>
+    <string name="quick_settings_quiethours_label">Ruhemodus</string>
+    <string name="quick_settings_quiethours_off_label">Ruhemodus aus</string>
+    <string name="quick_settings_sleep_label_back_15">15 s</string>
+    <string name="quick_settings_sleep_label_back_30">30 s</string>
+    <string name="quick_settings_sleep_label_back_60">60 s</string>
+    <string name="quick_settings_sleep_label_back_120">2 min</string>
+    <string name="quick_settings_sleep_label_back_300">5 min</string>
+    <string name="quick_settings_sleep_label_back_600">10 min</string>
+    <string name="quick_settings_sleep_label_back_1800">30 min</string>
+    <string name="quick_settings_sleep_label_back_unknown">0000</string>
+    <string name="quick_settings_location_mode_high">Hoch</string>
+    <string name="quick_settings_location_mode_battery">Akku</string>
+    <string name="quick_settings_location_mode_sensors">Gerät</string>
+    <string name="quick_settings_network_type">Status</string>
+    <string name="quick_settings_network_unknown">Unbekannt</string>
+    <string name="quick_settings_network_disable">\nKeine Verbindung</string>
+    <string name="status_bar_notification_hide_icon_packages">l\'Benachrichtigung(en) ausblenden</string>
+    <string name="network_4G">4G</string>
+    <string name="quick_settings_ringer_on">Ton an</string>
+    <string name="quick_settings_ringer_off">Ton aus</string>
+    <string name="quick_settings_ringer_normal">Ton</string>
+    <string name="quick_settings_screen_sleep">Bildschirm aus</string>
+    <string name="quick_settings_sync">Synchronisation</string>
+    <string name="quick_settings_sync_off">Synchronisation deaktiviert</string>
+    <string name="quick_settings_torch">Taschenlampe</string>
+    <string name="quick_settings_torch_off">Taschenlampe aus</string>
+    <string name="quick_settings_vibration_on">Vibration an</string>
+    <string name="quick_settings_vibration_off">Vibration aus</string>
+    <string name="quick_settings_volume">Lautstärke</string>
+    <string name="quick_settings_volume_status">Status</string>
+    <string name="quick_settings_usb_tether_off_label">Getrennt</string>
+    <string name="quick_settings_usb_tether_connected_label">Tethering aus</string>
+    <string name="quick_settings_usb_tether_on_label">Tethering aktiv</string>
+    <string name="navbar_dialog_title">Aktion zuweisen</string>
+    <string name="navbar_home_button">Home-Taste</string>
+    <string name="navbar_recent_button">Recent-Taste</string>
+    <string name="navbar_search_button">Suchen-Taste</string>
+    <string name="navbar_back_button">Zurück-Taste</string>
+    <string name="navbar_empty_button">Leer-Taste</string>
+    <string name="navbar_menu_conditional_button">Menü-Taste (automatisch ausblenden)</string>
+    <string name="navbar_menu_always_button">Menü-Taste (immer sichtbar)</string>
+    <string name="navbar_menu_big_button">Menü-Taste</string>
+    <!-- AOSP untranslated -->
+    <string name="accessibility_battery_level">Akku <xliff:g id="number">%d</xliff:g> Prozent.</string>
+</resources>
+
