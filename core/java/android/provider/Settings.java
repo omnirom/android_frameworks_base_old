@@ -4072,6 +4072,13 @@ public final class Settings {
         public static final String LOCK_SCREEN_OWNER_INFO_ENABLED =
             "lock_screen_owner_info_enabled";
 
+        /**	4086
+         * Determines the width and height of the LockPatternView widget	4087
+         * @hide	4088
+         */	4089
+        public static final String LOCK_PATTERN_SIZE =	4090
+            "lock_pattern_size";
+
         /**
          * The Logging ID (a unique 64-bit value) as a hex string.
          * Used as a pseudonymous identifier for logging.
