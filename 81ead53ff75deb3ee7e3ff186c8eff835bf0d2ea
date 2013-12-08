@@ -1,0 +1,38 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "6b8b61a3_666c5f99",
+        "filename": "packages/Keyguard/src/com/android/keyguard/KeyguardViewManager.java",
+        "patchSetId": 1
+      },
+      "lineNbr": 127,
+      "author": {
+        "id": 1000032
+      },
+      "writtenOn": "2013-12-08T16:22:28Z",
+      "side": 1,
+      "message": "The transparency flags are enabled through a bool in frameworks-res. We shouldn\u0027t be bypassing that.",
+      "revId": "81ead53ff75deb3ee7e3ff186c8eff835bf0d2ea",
+      "serverId": "56841c99-7c94-43d4-bf0b-cb4707e66d55",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "6b8b61a3_86696b8a",
+        "filename": "packages/Keyguard/src/com/android/keyguard/KeyguardViewManager.java",
+        "patchSetId": 1
+      },
+      "lineNbr": 280,
+      "author": {
+        "id": 1000032
+      },
+      "writtenOn": "2013-12-08T16:22:28Z",
+      "side": 1,
+      "message": "This isn\u0027t the right way to go about it. See comment above.",
+      "revId": "81ead53ff75deb3ee7e3ff186c8eff835bf0d2ea",
+      "serverId": "56841c99-7c94-43d4-bf0b-cb4707e66d55",
+      "unresolved": false
+    }
+  ]
+}
