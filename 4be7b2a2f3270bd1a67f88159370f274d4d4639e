@@ -16,6 +16,24 @@
       "revId": "4be7b2a2f3270bd1a67f88159370f274d4d4639e",
       "serverId": "56841c99-7c94-43d4-bf0b-cb4707e66d55",
       "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "6b8b61a3_e94cc07a",
+        "filename": "packages/SystemUI/src/com/android/systemui/recent/RecentsPanelView.java",
+        "patchSetId": 16
+      },
+      "lineNbr": 350,
+      "author": {
+        "id": 1000305
+      },
+      "writtenOn": "2013-12-09T01:15:33Z",
+      "side": 1,
+      "message": "damn it, i knew i derped something.\n\nchanging when rebasing.\n\nim in bed atm so will take some hours :)",
+      "parentUuid": "6b8b61a3_690b5026",
+      "revId": "4be7b2a2f3270bd1a67f88159370f274d4d4639e",
+      "serverId": "56841c99-7c94-43d4-bf0b-cb4707e66d55",
+      "unresolved": false
     }
   ]
 }
