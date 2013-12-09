@@ -4107,6 +4107,12 @@ public final class Settings {
             "lock_screen_owner_info_enabled";
 
         /**
+         * This preference enables showing the power menu on LockScreen.
+         * @hide
+         */
+        public static final String LOCK_SCREEN_POWER_MENU = "lock_screen_power_menu";
+
+        /**
          * The Logging ID (a unique 64-bit value) as a hex string.
          * Used as a pseudonymous identifier for logging.
          * @deprecated This identifier is poorly initialized and has
