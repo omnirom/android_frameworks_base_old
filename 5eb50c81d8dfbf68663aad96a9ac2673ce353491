@@ -71,6 +71,24 @@
     },
     {
       "key": {
+        "uuid": "6b8b61a3_bc475856",
+        "filename": "packages/DocumentsUI/res/values-es/custom_strings.xml",
+        "patchSetId": 1
+      },
+      "lineNbr": 43,
+      "author": {
+        "id": 1000331
+      },
+      "writtenOn": "2013-12-09T23:24:29Z",
+      "side": 1,
+      "message": "Tienes razón, me confundí al leerlo.",
+      "parentUuid": "6b8b61a3_fc1c806b",
+      "revId": "5eb50c81d8dfbf68663aad96a9ac2673ce353491",
+      "serverId": "56841c99-7c94-43d4-bf0b-cb4707e66d55",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "6b8b61a3_09b3ac98",
         "filename": "packages/DocumentsUI/res/values-es/custom_strings.xml",
         "patchSetId": 1
@@ -176,6 +194,24 @@
     },
     {
       "key": {
+        "uuid": "6b8b61a3_dc4c247b",
+        "filename": "packages/DocumentsUI/res/values-es/custom_strings.xml",
+        "patchSetId": 1
+      },
+      "lineNbr": 55,
+      "author": {
+        "id": 1000331
+      },
+      "writtenOn": "2013-12-09T23:24:29Z",
+      "side": 1,
+      "message": "Sonar, suena mejor, simplemente lo limité porque no estaba seguro de si la cantidad de caracteres era demasiado grande para un cuadro de diálogo.",
+      "parentUuid": "6b8b61a3_9c153c44",
+      "revId": "5eb50c81d8dfbf68663aad96a9ac2673ce353491",
+      "serverId": "56841c99-7c94-43d4-bf0b-cb4707e66d55",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "6b8b61a3_5c3494db",
         "filename": "packages/DocumentsUI/res/values-es/custom_strings.xml",
         "patchSetId": 1
@@ -187,6 +223,24 @@
       "writtenOn": "2013-12-09T23:17:42Z",
       "side": 1,
       "message": "Entonces si usamos la pregunta de arriba esto tendría que ser un \"Sí\"",
+      "revId": "5eb50c81d8dfbf68663aad96a9ac2673ce353491",
+      "serverId": "56841c99-7c94-43d4-bf0b-cb4707e66d55",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "6b8b61a3_fc51e013",
+        "filename": "packages/DocumentsUI/res/values-es/custom_strings.xml",
+        "patchSetId": 1
+      },
+      "lineNbr": 58,
+      "author": {
+        "id": 1000331
+      },
+      "writtenOn": "2013-12-09T23:24:29Z",
+      "side": 1,
+      "message": "O un \"Confirmar\".",
+      "parentUuid": "6b8b61a3_5c3494db",
       "revId": "5eb50c81d8dfbf68663aad96a9ac2673ce353491",
       "serverId": "56841c99-7c94-43d4-bf0b-cb4707e66d55",
       "unresolved": false
