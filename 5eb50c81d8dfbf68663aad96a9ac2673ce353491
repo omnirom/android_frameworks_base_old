@@ -53,6 +53,24 @@
     },
     {
       "key": {
+        "uuid": "6b8b61a3_fc1c806b",
+        "filename": "packages/DocumentsUI/res/values-es/custom_strings.xml",
+        "patchSetId": 1
+      },
+      "lineNbr": 43,
+      "author": {
+        "id": 1000224
+      },
+      "writtenOn": "2013-12-09T23:17:42Z",
+      "side": 1,
+      "message": "Aquí no podemos poner movido, ya que si se ha copiado se estaría realizando un pegar, no? Aunque usaré tu orden de palabras \"Se ha pegado el archivo. La operación podría completarse en segundo plano.\"",
+      "parentUuid": "6b8b61a3_e9bda063",
+      "revId": "5eb50c81d8dfbf68663aad96a9ac2673ce353491",
+      "serverId": "56841c99-7c94-43d4-bf0b-cb4707e66d55",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "6b8b61a3_09b3ac98",
         "filename": "packages/DocumentsUI/res/values-es/custom_strings.xml",
         "patchSetId": 1
@@ -64,6 +82,24 @@
       "writtenOn": "2013-12-09T22:34:16Z",
       "side": 1,
       "message": "\"Se han movido %d archivos. La operación podría completarse en segundo plano.\"",
+      "revId": "5eb50c81d8dfbf68663aad96a9ac2673ce353491",
+      "serverId": "56841c99-7c94-43d4-bf0b-cb4707e66d55",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "6b8b61a3_1c220ca1",
+        "filename": "packages/DocumentsUI/res/values-es/custom_strings.xml",
+        "patchSetId": 1
+      },
+      "lineNbr": 44,
+      "author": {
+        "id": 1000224
+      },
+      "writtenOn": "2013-12-09T23:17:42Z",
+      "side": 1,
+      "message": "mismo que arriba",
+      "parentUuid": "6b8b61a3_09b3ac98",
       "revId": "5eb50c81d8dfbf68663aad96a9ac2673ce353491",
       "serverId": "56841c99-7c94-43d4-bf0b-cb4707e66d55",
       "unresolved": false
@@ -87,6 +123,24 @@
     },
     {
       "key": {
+        "uuid": "6b8b61a3_3c37c8e2",
+        "filename": "packages/DocumentsUI/res/values-es/custom_strings.xml",
+        "patchSetId": 1
+      },
+      "lineNbr": 54,
+      "author": {
+        "id": 1000224
+      },
+      "writtenOn": "2013-12-09T23:17:42Z",
+      "side": 1,
+      "message": "¿Quiere eliminar el archivo de forma permanente?",
+      "parentUuid": "6b8b61a3_6977d0d0",
+      "revId": "5eb50c81d8dfbf68663aad96a9ac2673ce353491",
+      "serverId": "56841c99-7c94-43d4-bf0b-cb4707e66d55",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "6b8b61a3_89841ca6",
         "filename": "packages/DocumentsUI/res/values-es/custom_strings.xml",
         "patchSetId": 1
@@ -98,6 +152,41 @@
       "writtenOn": "2013-12-09T22:34:16Z",
       "side": 1,
       "message": "\"¿Eliminar %d archivos de forma permanente?\"\no\n\"¿Eliminar %d archivos permanentemente?\"",
+      "revId": "5eb50c81d8dfbf68663aad96a9ac2673ce353491",
+      "serverId": "56841c99-7c94-43d4-bf0b-cb4707e66d55",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "6b8b61a3_9c153c44",
+        "filename": "packages/DocumentsUI/res/values-es/custom_strings.xml",
+        "patchSetId": 1
+      },
+      "lineNbr": 55,
+      "author": {
+        "id": 1000224
+      },
+      "writtenOn": "2013-12-09T23:17:42Z",
+      "side": 1,
+      "message": "¿Quiere eliminar los %d archivos de forma permanente? suena mejor?",
+      "parentUuid": "6b8b61a3_89841ca6",
+      "revId": "5eb50c81d8dfbf68663aad96a9ac2673ce353491",
+      "serverId": "56841c99-7c94-43d4-bf0b-cb4707e66d55",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "6b8b61a3_5c3494db",
+        "filename": "packages/DocumentsUI/res/values-es/custom_strings.xml",
+        "patchSetId": 1
+      },
+      "lineNbr": 58,
+      "author": {
+        "id": 1000224
+      },
+      "writtenOn": "2013-12-09T23:17:42Z",
+      "side": 1,
+      "message": "Entonces si usamos la pregunta de arriba esto tendría que ser un \"Sí\"",
       "revId": "5eb50c81d8dfbf68663aad96a9ac2673ce353491",
       "serverId": "56841c99-7c94-43d4-bf0b-cb4707e66d55",
       "unresolved": false
