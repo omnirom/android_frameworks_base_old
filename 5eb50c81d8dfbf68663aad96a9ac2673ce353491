@@ -19,6 +19,23 @@
     },
     {
       "key": {
+        "uuid": "6b8b61a3_0949ec8f",
+        "filename": "packages/DocumentsUI/res/values-es/custom_strings.xml",
+        "patchSetId": 1
+      },
+      "lineNbr": 37,
+      "author": {
+        "id": 1000331
+      },
+      "writtenOn": "2013-12-09T22:38:22Z",
+      "side": 1,
+      "message": "¿Porque no usar la misma estructura que lo de abajo?\n\"El archivo se ha copiado al portapapeles\"",
+      "revId": "5eb50c81d8dfbf68663aad96a9ac2673ce353491",
+      "serverId": "56841c99-7c94-43d4-bf0b-cb4707e66d55",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "6b8b61a3_e9bda063",
         "filename": "packages/DocumentsUI/res/values-es/custom_strings.xml",
         "patchSetId": 1
