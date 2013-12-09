@@ -2651,6 +2651,12 @@ public final class Settings {
         public static final String LOCKSCREEN_ENABLE_CAMERA = "lockscreen_enable_camera";
 
         /**
+         * This preference enables showing the power menu on LockScreen.
+         * @hide
+         */
+        public static final String LOCKSCREEN_ENABLE_POWER_MENU = "lockscreen_enable_power_menu";
+
+        /**
          * Whether to display notifications on screen when screen is off
          * @hide
          */
