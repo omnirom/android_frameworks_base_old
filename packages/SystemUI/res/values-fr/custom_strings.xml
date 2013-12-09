@@ -28,4 +28,6 @@
     <string name="screenrecord_notif_error">Impossible d\'enregistrer l\'écran</string>
     <string name="quick_settings_battery_charging">Chargement</string>
     <string name="quick_settings_battery_discharging">Déchargement</string>
+    <string name="quick_settings_immersive_mode_label">Mode immersif activé</string>
+    <string name="quick_settings_immersive_mode_off_label">Mode immersif désactivé</string>
 </resources>

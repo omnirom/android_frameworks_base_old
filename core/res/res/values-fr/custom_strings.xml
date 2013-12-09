@@ -17,4 +17,5 @@
     <string name="permdesc_revokePermissions">Permet de lire et d\'écrire les autorisations révoquées. Ne doit pas être utiliser par les applications courantes.</string>
     <string name="permlab_accessThemeService">Permet d\'accéder au service de gestion du thème. Ne doit pas être utiliser par les applications courantes.</string>
     <string name="permdesc_accessThemeService">Permet à une application de définir/réinitialiser les thèmes. Ne doit pas être utiliser par les applications courantes.</string>
+    <string name="stylus_app_not_installed">%s n\'est pas installé</string>
 </resources>
