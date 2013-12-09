@@ -1,0 +1,21 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "6b8b61a3_690b5026",
+        "filename": "packages/SystemUI/src/com/android/systemui/recent/RecentsPanelView.java",
+        "patchSetId": 16
+      },
+      "lineNbr": 350,
+      "author": {
+        "id": 1000026
+      },
+      "writtenOn": "2013-12-09T01:11:46Z",
+      "side": 1,
+      "message": "Oh well overseen this. Both should have a default value of 0",
+      "revId": "4be7b2a2f3270bd1a67f88159370f274d4d4639e",
+      "serverId": "56841c99-7c94-43d4-bf0b-cb4707e66d55",
+      "unresolved": false
+    }
+  ]
+}
