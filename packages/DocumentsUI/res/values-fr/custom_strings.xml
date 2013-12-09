@@ -1,0 +1,38 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- Copyright (C) 2013 The OmniROM Project
+
+     Licensed under the Apache License, Version 2.0 (the "License");
+     you may not use this file except in compliance with the License.
+     You may obtain a copy of the License at
+
+          http://www.apache.org/licenses/LICENSE-2.0
+
+     Unless required by applicable law or agreed to in writing, software
+     distributed under the License is distributed on an "AS IS" BASIS,
+     WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+     See the License for the specific language governing permissions and
+     limitations under the License.
+-->
+
+<resources xmlns:xliff="urn:oasis:names:tc:xliff:document:1.2">
+    <string name="title_standalone">Fichiers</string>
+    <string name="toast_success_delete">Fichiers supprimés</string>
+    <string name="dialog_delete_confirm_title">Supprimer le(s) fichier(s)\u00A0?</string>
+    <string name="menu_copy">Copier</string>
+    <string name="menu_cut">Couper</string>
+    <string name="menu_paste">Coller</string>
+    <plurals name="files_copied">
+        <item quantity="one">Le fichier a été copié dans le presse-papier</item>
+        <item quantity="other">%d fichiers ont été copiés dans le presse-papier</item>
+    </plurals>
+    <plurals name="files_pasted">
+        <item quantity="one">Le fichier a été collé. L\'opération peut se terminer en arrière plan.</item>
+        <item quantity="other">%d fichiers ont été collés. L\'opération peut se terminer en arrière plan.</item>
+    </plurals>
+    <string name="copy_in_progress">Copie\u2026</string>
+    <string name="delete_in_progress">Suppression\u2026</string>
+    <plurals name="dialog_delete_confirm_message">
+        <item quantity="one">Le fichier sera supprimé définitivement\u00A0!</item>
+        <item quantity="other">Les %d fichiers seront supprimés définitivement\u00A0!</item>
+    </plurals>
+</resources>
