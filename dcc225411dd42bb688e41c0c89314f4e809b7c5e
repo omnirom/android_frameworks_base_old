@@ -1,0 +1,38 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "6b8b61a3_bcf9181a",
+        "filename": "packages/DocumentsUI/res/values-fr/custom_strings.xml",
+        "patchSetId": 1
+      },
+      "lineNbr": 29,
+      "author": {
+        "id": 1000001
+      },
+      "writtenOn": "2013-12-09T23:04:53Z",
+      "side": 1,
+      "message": "Le fichier a été collé. L\u0027opération peut se terminer en arrière plan.\n(référence aux fait que les opérations Coller dans Drive par exemple peuvent être faites en différées, puisque c\u0027est le service Drive qui va effectivement uploader le fichier)",
+      "revId": "dcc225411dd42bb688e41c0c89314f4e809b7c5e",
+      "serverId": "56841c99-7c94-43d4-bf0b-cb4707e66d55",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "6b8b61a3_dcfee4fe",
+        "filename": "packages/DocumentsUI/res/values-fr/custom_strings.xml",
+        "patchSetId": 1
+      },
+      "lineNbr": 30,
+      "author": {
+        "id": 1000001
+      },
+      "writtenOn": "2013-12-09T23:04:53Z",
+      "side": 1,
+      "message": "%d fichiers ont été collés. L\u0027opération peut se terminer en arrière plan.",
+      "revId": "dcc225411dd42bb688e41c0c89314f4e809b7c5e",
+      "serverId": "56841c99-7c94-43d4-bf0b-cb4707e66d55",
+      "unresolved": false
+    }
+  ]
+}
