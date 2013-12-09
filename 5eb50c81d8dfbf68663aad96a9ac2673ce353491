@@ -1,0 +1,89 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "6b8b61a3_a98b98c2",
+        "filename": "packages/DocumentsUI/res/values-es/custom_strings.xml",
+        "patchSetId": 1
+      },
+      "lineNbr": 30,
+      "author": {
+        "id": 1000331
+      },
+      "writtenOn": "2013-12-09T22:34:16Z",
+      "side": 1,
+      "message": "\"Mover\" is the proper translation.",
+      "revId": "5eb50c81d8dfbf68663aad96a9ac2673ce353491",
+      "serverId": "56841c99-7c94-43d4-bf0b-cb4707e66d55",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "6b8b61a3_e9bda063",
+        "filename": "packages/DocumentsUI/res/values-es/custom_strings.xml",
+        "patchSetId": 1
+      },
+      "lineNbr": 43,
+      "author": {
+        "id": 1000331
+      },
+      "writtenOn": "2013-12-09T22:34:16Z",
+      "side": 1,
+      "message": "\"Se ha movido el archivo. La operación podría completarse en segundo plano.",
+      "revId": "5eb50c81d8dfbf68663aad96a9ac2673ce353491",
+      "serverId": "56841c99-7c94-43d4-bf0b-cb4707e66d55",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "6b8b61a3_09b3ac98",
+        "filename": "packages/DocumentsUI/res/values-es/custom_strings.xml",
+        "patchSetId": 1
+      },
+      "lineNbr": 44,
+      "author": {
+        "id": 1000331
+      },
+      "writtenOn": "2013-12-09T22:34:16Z",
+      "side": 1,
+      "message": "\"Se han movido %d archivos. La operación podría completarse en segundo plano.\"",
+      "revId": "5eb50c81d8dfbf68663aad96a9ac2673ce353491",
+      "serverId": "56841c99-7c94-43d4-bf0b-cb4707e66d55",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "6b8b61a3_6977d0d0",
+        "filename": "packages/DocumentsUI/res/values-es/custom_strings.xml",
+        "patchSetId": 1
+      },
+      "lineNbr": 54,
+      "author": {
+        "id": 1000331
+      },
+      "writtenOn": "2013-12-09T22:34:16Z",
+      "side": 1,
+      "message": "Creo que esto es un diálogo para confirmar que vamos a borrar un archivo. Entonces, incluso aunque la traducción inglesa original diga algo así, nosotros deberíamos hacerlo como pregunta:\n\n\"¿Eliminar el archivo permanentemente?\"\no\n\"¿Eliminar el archivo de forma permanente?\"",
+      "revId": "5eb50c81d8dfbf68663aad96a9ac2673ce353491",
+      "serverId": "56841c99-7c94-43d4-bf0b-cb4707e66d55",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "6b8b61a3_89841ca6",
+        "filename": "packages/DocumentsUI/res/values-es/custom_strings.xml",
+        "patchSetId": 1
+      },
+      "lineNbr": 55,
+      "author": {
+        "id": 1000331
+      },
+      "writtenOn": "2013-12-09T22:34:16Z",
+      "side": 1,
+      "message": "\"¿Eliminar %d archivos de forma permanente?\"\no\n\"¿Eliminar %d archivos permanentemente?\"",
+      "revId": "5eb50c81d8dfbf68663aad96a9ac2673ce353491",
+      "serverId": "56841c99-7c94-43d4-bf0b-cb4707e66d55",
+      "unresolved": false
+    }
+  ]
+}
