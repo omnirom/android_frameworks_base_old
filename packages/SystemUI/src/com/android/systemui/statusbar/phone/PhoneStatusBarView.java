@@ -26,6 +26,9 @@ import android.util.Log;
 import android.view.MotionEvent;
 import android.view.View;
 import android.view.accessibility.AccessibilityEvent;
+import android.view.GestureDetector;
+import android.os.PowerManager;
+import android.provider.Settings;
 
 import com.android.systemui.EventLogTags;
 import com.android.systemui.R;
@@ -47,6 +50,7 @@ public class PhoneStatusBarView extends PanelBar {
     private boolean mShouldFade;
     private final PhoneStatusBarTransitions mBarTransitions;
     private QuickSettingsContainerView mQSContainer;
+    private GestureDetector mGestureDetector;
 
     public PhoneStatusBarView(Context context, AttributeSet attrs) {
         super(context, attrs);
@@ -61,6 +65,20 @@ public class PhoneStatusBarView extends PanelBar {
         }
         mFullWidthNotifications = mSettingsPanelDragzoneFrac <= 0f;
         mBarTransitions = new PhoneStatusBarTransitions(this);
+
+        mGestureDetector = new GestureDetector(context, new GestureDetector.SimpleOnGestureListener() {
+            @Override
+            public boolean onDoubleTap(MotionEvent e) {
+                PowerManager pm = (PowerManager) mContext.getSystemService(Context.POWER_SERVICE);
+                Log.v(TAG, "Double tap on statusbar");
+                if (pm != null) {
+                    pm.goToSleep(e.getEventTime());
+                } else {
+                    Log.d(TAG, "getSystemService returned null PowerManager");
+                }
+                return true;
+            }
+        });
     }
 
     public BarTransitions getBarTransitions() {
@@ -206,6 +224,10 @@ public class PhoneStatusBarView extends PanelBar {
             }
         }
 
+        if (Settings.System.getInt(mContext.getContentResolver(),
+                    Settings.System.DOUBLE_TAP_TO_SLEEP, 0) == 1) {
+            mGestureDetector.onTouchEvent(event);
+        }
         return barConsumedEvent || super.onTouchEvent(event);
     }
 
