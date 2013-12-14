@@ -80,6 +80,11 @@ import android.content.ComponentName;
 import android.os.IBinder;
 import android.os.Messenger;
 
+import java.lang.reflect.Field;
+import java.lang.reflect.InvocationTargetException;
+import java.lang.reflect.Method;
+
+
 /**
  * Helper to show the global actions dialog.  Each item is an {@link Action} that
  * may show depending on whether the keyguard is showing, and whether the device
@@ -101,6 +106,8 @@ class GlobalActions implements DialogInterface.OnDismissListener, DialogInterfac
 
     private Action mSilentModeAction;
     private ToggleAction mAirplaneModeOn;
+    private ToggleAction mMobileDataOn;
+
 
     private MyAdapter mAdapter;
 
@@ -191,6 +198,21 @@ class GlobalActions implements DialogInterface.OnDismissListener, DialogInterfac
         mDialog.getWindow().getDecorView().setSystemUiVisibility(View.STATUS_BAR_DISABLE_EXPAND);
     }
 
+    private Boolean dataEnabled(){
+        boolean mobileDataEnabled = false; // Assume disabled
+        ConnectivityManager cm = (ConnectivityManager) mContext.getSystemService(Context.CONNECTIVITY_SERVICE);
+        try {
+            Class cmClass = Class.forName(cm.getClass().getName());
+            Method method = cmClass.getDeclaredMethod("getMobileDataEnabled");
+            method.setAccessible(true); // Make the method callable
+            // get the setting for "mobile data"
+            mobileDataEnabled = (Boolean)method.invoke(cm);
+        } catch (Exception e) {
+            //error
+        }
+        return mobileDataEnabled;
+    }
+
     /**
      * Create the global actions dialog.
      * @return A new dialog.
@@ -245,6 +267,62 @@ class GlobalActions implements DialogInterface.OnDismissListener, DialogInterfac
         };
         onAirplaneModeChanged();
 
+        mMobileDataOn = new ToggleAction(
+                R.drawable.ic_lock_mobile_data,
+                R.drawable.ic_lock_mobile_data_off,
+                R.string.global_actions_toggle_mobile_data,
+                R.string.global_actions_mobile_data_on_status,
+                R.string.global_actions_mobile_data_off_status) {
+
+            void onToggle(boolean on) {
+                // comment
+                Log.i(TAG, "onToggle");
+
+                try {
+                    ConnectivityManager dataManager;
+                    dataManager  = (ConnectivityManager) mContext.getSystemService(Context.CONNECTIVITY_SERVICE);
+                    Method dataMtd = ConnectivityManager.class.getDeclaredMethod("setMobileDataEnabled", boolean.class);
+                    dataMtd.setAccessible(true);
+                    if(dataEnabled()){
+                            dataMtd.invoke(dataManager, false);
+                    }else{
+                            dataMtd.invoke(dataManager, true);
+                    }
+                        
+                } catch (IllegalArgumentException e) {
+                        // TODO Auto-generated catch block
+                        //log(e);
+                        //e.printStackTrace();
+                } catch (IllegalAccessException e) {
+                        // TODO Auto-generated catch block
+                        //e.printStackTrace();
+                } catch (NoSuchMethodException e) {
+                        // TODO Auto-generated catch block
+                        //log(e);
+                        //e.printStackTrace();
+                } catch (InvocationTargetException e) {
+                        // TODO Auto-generated catch block
+                        //log(e);
+                        //e.printStackTrace();
+                }
+            }
+
+            @Override
+            protected void changeStateFromPress(boolean buttonOn) {
+                // comment
+                Log.i(TAG, "changeStateFromPress");
+            }
+
+            public boolean showDuringKeyguard() {
+                return true;
+            }
+
+            public boolean showBeforeProvisioning() {
+                return false;
+            }
+        };
+
+
         mItems = new ArrayList<Action>();
 
         // first: power off
@@ -290,6 +368,12 @@ class GlobalActions implements DialogInterface.OnDismissListener, DialogInterfac
                     return true;
                 }
             });
+
+        // next: mobile data
+        if (Settings.System.getInt(mContext.getContentResolver(),
+                Settings.System.MOBILE_DATA_IN_POWER_MENU, 0) != 0) {
+            mItems.add(mMobileDataOn);
+        }
 
      // next: screenshot, if enabled
         if (Settings.System.getInt(mContext.getContentResolver(),
@@ -344,7 +428,11 @@ class GlobalActions implements DialogInterface.OnDismissListener, DialogInterfac
         }
 
         // next: airplane mode
-        mItems.add(mAirplaneModeOn);
+        if (Settings.System.getInt(mContext.getContentResolver(),
+                Settings.System.AIRPLANE_MODE_IN_POWER_MENU, 0) != 0) {
+            mItems.add(mAirplaneModeOn);
+        }
+
 
         // next: bug report, if enabled
         if (Settings.Global.getInt(mContext.getContentResolver(),
@@ -396,7 +484,8 @@ class GlobalActions implements DialogInterface.OnDismissListener, DialogInterfac
         }
 
         // last: silent mode
-        if (mShowSilentToggle) {
+        if (Settings.System.getInt(mContext.getContentResolver(),
+                Settings.System.SOUND_TOGGLES_IN_POWER_MENU, 0) != 0) {
             mItems.add(mSilentModeAction);
         }
 
@@ -625,6 +714,7 @@ class GlobalActions implements DialogInterface.OnDismissListener, DialogInterfac
     private void prepareDialog() {
         refreshSilentMode();
         mAirplaneModeOn.updateState(mAirplaneState);
+        mMobileDataOn.updateState(dataEnabled() ? ToggleAction.State.On : ToggleAction.State.Off);
         mAdapter.notifyDataSetChanged();
         mDialog.getWindow().setType(WindowManager.LayoutParams.TYPE_KEYGUARD_DIALOG);
         if (mShowSilentToggle) {
