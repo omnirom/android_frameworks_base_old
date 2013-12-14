@@ -1822,4 +1822,7 @@
   <java-symbol type="drawable" name="ic_navigation_ring_vibrate" />
 
   <java-symbol type="bool" name="config_offscreenGestureSupport" />
+
+  <!-- UI theme mode -->
+  <java-symbol type="integer" name="config_uiThemeMode" />
 </resources>
