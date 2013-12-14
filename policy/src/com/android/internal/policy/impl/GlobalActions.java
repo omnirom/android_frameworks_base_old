@@ -93,6 +93,15 @@ import java.util.ArrayList;
 import java.util.List;
 
 /**
+ * Needed for takeScreenshot and takeScreenrecord
+ */
+import android.content.ServiceConnection;
+import android.content.ComponentName;
+import android.os.IBinder;
+import android.os.Messenger;
+
+
+/**
  * Helper to show the global actions dialog.  Each item is an {@link Action} that
  * may show depending on whether the keyguard is showing, and whether the device
  * is provisioned.
@@ -126,6 +135,9 @@ class GlobalActions implements DialogInterface.OnDismissListener, DialogInterfac
 
     private Action mSilentModeAction;
     private ToggleAction mAirplaneModeOn;
+    private ToggleAction mMobileDataOn;
+    private SinglePressAction mScreenshot;
+
 
     private MyAdapter mAdapter;
 
@@ -139,6 +151,7 @@ class GlobalActions implements DialogInterface.OnDismissListener, DialogInterfac
     private String[] mMenuActions;
     private boolean mRebootMenu;
     private boolean mUserMenu;
+    private ConnectivityManager mConnectivityManager;
 
     /**
      * @param context everything needs a context :(
@@ -166,6 +179,10 @@ class GlobalActions implements DialogInterface.OnDismissListener, DialogInterfac
         TelephonyManager telephonyManager =
                 (TelephonyManager) context.getSystemService(Context.TELEPHONY_SERVICE);
         telephonyManager.listen(mPhoneStateListener, PhoneStateListener.LISTEN_SERVICE_STATE);
+        mConnectivityManager = (ConnectivityManager)
+                context.getSystemService(Context.CONNECTIVITY_SERVICE);
+
+        mHasTelephony = mConnectivityManager.isNetworkSupported(ConnectivityManager.TYPE_MOBILE);
         mContext.getContentResolver().registerContentObserver(
                 Settings.Global.getUriFor(Settings.Global.AIRPLANE_MODE_ON), true,
                 mAirplaneModeObserver);
@@ -296,6 +313,59 @@ class GlobalActions implements DialogInterface.OnDismissListener, DialogInterfac
         };
         onAirplaneModeChanged();
 
+        // mobileData toggle
+        mMobileDataOn = new ToggleAction(
+                R.drawable.ic_lock_mobile_data,
+                R.drawable.ic_lock_mobile_data_off,
+                R.string.global_actions_toggle_mobile_data,
+                R.string.global_actions_mobile_data_on_status,
+                R.string.global_actions_mobile_data_off_status) {
+
+            void onToggle(boolean on) {
+                // comment
+                Log.i(TAG, "onToggle");
+                boolean currentState = mConnectivityManager.getMobileDataEnabled();
+                mConnectivityManager.setMobileDataEnabled(!currentState);
+            }
+
+            @Override
+            protected void changeStateFromPress(boolean buttonOn) {
+                // comment
+                Log.i(TAG, "changeStateFromPress");
+            }
+
+            @Override
+            public boolean showDuringKeyguard() {
+                return true;
+            }
+
+            @Override
+            public boolean showBeforeProvisioning() {
+                return false;
+            }
+        };
+
+        // screenshot toggle
+        mScreenshot = new SinglePressAction(com.android.internal.R.drawable.ic_lock_screenshot,
+                R.string.global_action_screenshot) {
+
+            public void onPress() {
+                takeScreenshot();
+            }
+
+            public boolean onLongPress() {
+                return false;
+            }
+
+            public boolean showDuringKeyguard() {
+                return true;
+            }
+
+            public boolean showBeforeProvisioning() {
+                return true;
+            }
+        };
+
         buildMenuList();
 
         mAdapter = new MyAdapter();
@@ -348,14 +418,18 @@ class GlobalActions implements DialogInterface.OnDismissListener, DialogInterfac
             } else if (advancedRebootEnabled(mContext) && GLOBAL_ACTION_KEY_REBOOT_BOOTLOADER.equals(actionKey)) {
                 mItems.add(new RebootBootloaderAction());
             } else if (GLOBAL_ACTION_KEY_AIRPLANE.equals(actionKey)) {
-                mItems.add(mAirplaneModeOn);
+                if (Settings.System.getInt(mContext.getContentResolver(),
+                        Settings.System.AIRPLANE_MODE_IN_POWER_MENU, 1) != 0) {
+                    mItems.add(mAirplaneModeOn);
+                }
             } else if (GLOBAL_ACTION_KEY_BUGREPORT.equals(actionKey)) {
                 if (Settings.Global.getInt(mContext.getContentResolver(),
                         Settings.Global.BUGREPORT_IN_POWER_MENU, 0) != 0 && isCurrentUserOwner()) {
                     mItems.add(getBugReportAction());
                 }
             } else if (GLOBAL_ACTION_KEY_SILENT.equals(actionKey)) {
-                if (mShowSilentToggle) {
+                if (mShowSilentToggle && Settings.System.getInt(mContext.getContentResolver(),
+                        Settings.System.SOUND_TOGGLES_IN_POWER_MENU, 1) != 0) {
                     mItems.add(mSilentModeAction);
                 }
             } else if (GLOBAL_ACTION_KEY_USERS.equals(actionKey)) {
@@ -371,6 +445,90 @@ class GlobalActions implements DialogInterface.OnDismissListener, DialogInterfac
             }
             // Add here so we don't add more than one.
             addedKeys.add(actionKey);
+        }
+        // next: mobile data
+        if (Settings.System.getInt(mContext.getContentResolver(),
+                Settings.System.MOBILE_DATA_IN_POWER_MENU, 0) != 0) {
+            mItems.add(mMobileDataOn);
+        }
+        // last: screenshot, if enabled
+        if (Settings.System.getInt(mContext.getContentResolver(),
+                Settings.System.SCREENSHOT_IN_POWER_MENU, 0) != 0) {
+            mItems.add(mScreenshot);
+        }
+    }
+
+    /**
+     * functions needed for taking screenshots.
+     */
+    final Object mScreenshotLock = new Object();
+    ServiceConnection mScreenshotConnection = null;
+
+    final Runnable mScreenshotTimeout = new Runnable() {
+        @Override public void run() {
+            synchronized (mScreenshotLock) {
+                if (mScreenshotConnection != null) {
+                    mContext.unbindService(mScreenshotConnection);
+                    mScreenshotConnection = null;
+                }
+            }
+        }
+    };
+
+    private void takeScreenshot() {
+        synchronized (mScreenshotLock) {
+            if (mScreenshotConnection != null) {
+                return;
+            }
+            ComponentName cn = new ComponentName("com.android.systemui",
+                    "com.android.systemui.screenshot.TakeScreenshotService");
+            Intent intent = new Intent();
+            intent.setComponent(cn);
+            ServiceConnection conn = new ServiceConnection() {
+                @Override
+                public void onServiceConnected(ComponentName name, IBinder service) {
+                    synchronized (mScreenshotLock) {
+                        if (mScreenshotConnection != this) {
+                            return;
+                        }
+                        Messenger messenger = new Messenger(service);
+                        Message msg = Message.obtain(null, 1);
+                        final ServiceConnection myConn = this;
+                        Handler h = new Handler(mHandler.getLooper()) {
+                            @Override
+                            public void handleMessage(Message msg) {
+                                synchronized (mScreenshotLock) {
+                                    if (mScreenshotConnection == myConn) {
+                                        mContext.unbindService(mScreenshotConnection);
+                                        mScreenshotConnection = null;
+                                        mHandler.removeCallbacks(mScreenshotTimeout);
+                                    }
+                                }
+                            }
+                        };
+                        msg.replyTo = new Messenger(h);
+                        msg.arg1 = msg.arg2 = 0;
+
+                        /* wait for the dialog box to close */
+                        try {
+                            Thread.sleep(1000);
+                        } catch (InterruptedException ie) {
+                        }
+
+                        /* take the screenshot */
+                        try {
+                            messenger.send(msg);
+                        } catch (RemoteException e) {
+                        }
+                    }
+                }
+                @Override
+                public void onServiceDisconnected(ComponentName name) {}
+            };
+            if (mContext.bindService(intent, conn, Context.BIND_AUTO_CREATE)) {
+                mScreenshotConnection = conn;
+                mHandler.postDelayed(mScreenshotTimeout, 10000);
+            }
         }
     }
 
@@ -788,6 +946,7 @@ class GlobalActions implements DialogInterface.OnDismissListener, DialogInterfac
 
     private void prepareDialog() {
         mAirplaneModeOn.updateState(mAirplaneState);
+        mMobileDataOn.updateState(mConnectivityManager.getMobileDataEnabled() ? ToggleAction.State.On : ToggleAction.State.Off);
         mAdapter.notifyDataSetChanged();
         mDialog.getWindow().setType(WindowManager.LayoutParams.TYPE_KEYGUARD_DIALOG);
     }
