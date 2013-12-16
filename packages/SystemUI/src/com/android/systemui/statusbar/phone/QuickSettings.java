@@ -522,17 +522,33 @@ class QuickSettings {
 
         if (mModel.deviceHasMobileData()) {
             // RSSI
+
             QuickSettingsTileView rssiTile = (QuickSettingsTileView)
                     inflater.inflate(R.layout.quick_settings_tile, parent, false);
             rssiTile.setContent(R.layout.quick_settings_tile_rssi, inflater);
+
+            if (LONG_PRESS_TOGGLES) {
+                 rssiTile.setOnLongClickListener(new View.OnLongClickListener() {
+                    @Override
+                    public boolean onLongClick(View v) {
+                        Intent intent = new Intent();
+                        intent.setComponent(new ComponentName(
+                                "com.android.settings",
+                                "com.android.settings.Settings$DataUsageSummaryActivity"));
+                        startSettingsActivity(intent);
+                        return true;
+                    }
+                });
+            }
+
             rssiTile.setOnClickListener(new View.OnClickListener() {
                 @Override
                 public void onClick(View v) {
-                    Intent intent = new Intent();
-                    intent.setComponent(new ComponentName(
-                            "com.android.settings",
-                            "com.android.settings.Settings$DataUsageSummaryActivity"));
-                    startSettingsActivity(intent);
+                    if (!cm.getMobileDataEnabled()) {
+                        cm.setMobileDataEnabled(true);
+                    } else {
+                        cm.setMobileDataEnabled(false);
+                    }
                 }
             });
             mModel.addRSSITile(rssiTile, new NetworkActivityCallback() {
