@@ -294,6 +294,7 @@ public class PhoneWindowManager implements WindowManagerPolicy {
     int mUiMode;
     int mDockMode = Intent.EXTRA_DOCK_STATE_UNDOCKED;
     int mLidOpenRotation;
+    boolean mHasRemovableLid;
     int mCarDockRotation;
     int mDeskDockRotation;
     int mUndockedHdmiRotation;
@@ -1085,6 +1086,8 @@ public class PhoneWindowManager implements WindowManagerPolicy {
                 com.android.internal.R.integer.config_lidNavigationAccessibility);
         mLidControlsSleep = mContext.getResources().getBoolean(
                 com.android.internal.R.bool.config_lidControlsSleep);
+        mHasRemovableLid = mContext.getResources().getBoolean(
+                com.android.internal.R.bool.config_hasRemovableLid);
         mTranslucentDecorEnabled = mContext.getResources().getBoolean(
                 com.android.internal.R.bool.config_enableTranslucentDecor);
         mDeviceHardwareKeys = mContext.getResources().getInteger(
@@ -5040,8 +5043,11 @@ public class PhoneWindowManager implements WindowManagerPolicy {
             }
 
             final int preferredRotation;
-            if (mLidState == LID_OPEN && mLidOpenRotation >= 0) {
-                // Ignore sensor when lid switch is open and rotation is forced.
+            if ((mLidState == LID_OPEN && mLidOpenRotation >= 0)
+                    && !(mHasRemovableLid
+                            && mDockMode == Intent.EXTRA_DOCK_STATE_UNDOCKED)) {
+                // Ignore sensor when lid switch is open and rotation is forced
+                // and a removable lid was not undocked.
                 preferredRotation = mLidOpenRotation;
             } else if (mDockMode == Intent.EXTRA_DOCK_STATE_CAR
                     && (mCarDockEnablesAccelerometer || mCarDockRotation >= 0)) {
