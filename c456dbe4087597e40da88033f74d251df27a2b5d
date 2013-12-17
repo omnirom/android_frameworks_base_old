@@ -34,6 +34,24 @@
       "revId": "c456dbe4087597e40da88033f74d251df27a2b5d",
       "serverId": "56841c99-7c94-43d4-bf0b-cb4707e66d55",
       "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "6b8b61a3_11810eca",
+        "filename": "packages/SystemUI/src/com/android/systemui/omni/OMNICaseView.java",
+        "patchSetId": 3
+      },
+      "lineNbr": 25,
+      "author": {
+        "id": 1000032
+      },
+      "writtenOn": "2013-12-17T23:59:27Z",
+      "side": 1,
+      "message": "Yes, but it\u0027s against conventions to do that.",
+      "parentUuid": "6b8b61a3_d12246fc",
+      "revId": "c456dbe4087597e40da88033f74d251df27a2b5d",
+      "serverId": "56841c99-7c94-43d4-bf0b-cb4707e66d55",
+      "unresolved": false
     }
   ]
 }
