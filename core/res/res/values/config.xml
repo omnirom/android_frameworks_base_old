@@ -1339,4 +1339,9 @@
 
     <!-- Boolean to enable Stylus gestures -->
     <bool name="config_stylusGestures">false</bool>
+    
+    <!-- If a dock provides a lid switch, that lid can be removed. This
+         setting is used to determine, whether lidOpenRotation has to be
+         applied. -->
+    <bool name="config_hasRemovableLid">false</bool>
 </resources>
