@@ -24,12 +24,15 @@ import android.os.Handler;
 import android.util.Slog;
 import android.view.animation.DecelerateInterpolator;
 
+import com.android.systemui.omni.OMNICaseView;
+
 public class DessertCase extends Activity {
     DessertCaseView mView;
 
     @Override
     public void onStart() {
         super.onStart();
+        final boolean isOMNI = getIntent().getBooleanExtra("is_omni", false);
 
         PackageManager pm = getPackageManager();
         final ComponentName cn = new ComponentName(this, DessertCaseDream.class);
@@ -40,7 +43,12 @@ public class DessertCase extends Activity {
                     PackageManager.DONT_KILL_APP);
         }
 
+        if (isOMNI) {
+            mView = new OMNICaseView(this);
+            Slog.v("DessertCase", "OmniROM enabled!");
+        } else {
         mView = new DessertCaseView(this);
+        }
 
         DessertCaseView.RescalingContainer container = new DessertCaseView.RescalingContainer(this);
 
