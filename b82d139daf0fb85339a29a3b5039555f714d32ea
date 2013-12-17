@@ -16,6 +16,24 @@
       "revId": "b82d139daf0fb85339a29a3b5039555f714d32ea",
       "serverId": "56841c99-7c94-43d4-bf0b-cb4707e66d55",
       "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "6b8b61a3_0e22c9b2",
+        "filename": "policy/src/com/android/internal/policy/impl/GlobalActions.java",
+        "patchSetId": 6
+      },
+      "lineNbr": 214,
+      "author": {
+        "id": 1000240
+      },
+      "writtenOn": "2013-12-17T11:31:59Z",
+      "side": 1,
+      "message": "ok, i will make a new patch this night.",
+      "parentUuid": "6b8b61a3_aef475bb",
+      "revId": "b82d139daf0fb85339a29a3b5039555f714d32ea",
+      "serverId": "56841c99-7c94-43d4-bf0b-cb4707e66d55",
+      "unresolved": false
     }
   ]
 }
