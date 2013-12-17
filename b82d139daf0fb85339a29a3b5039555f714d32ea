@@ -1,0 +1,21 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "6b8b61a3_aef475bb",
+        "filename": "policy/src/com/android/internal/policy/impl/GlobalActions.java",
+        "patchSetId": 6
+      },
+      "lineNbr": 214,
+      "author": {
+        "id": 1000026
+      },
+      "writtenOn": "2013-12-17T01:54:31Z",
+      "side": 1,
+      "message": "I dont like to see usage of reflection here :)",
+      "revId": "b82d139daf0fb85339a29a3b5039555f714d32ea",
+      "serverId": "56841c99-7c94-43d4-bf0b-cb4707e66d55",
+      "unresolved": false
+    }
+  ]
+}
