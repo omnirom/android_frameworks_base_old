@@ -2994,6 +2994,12 @@ public final class Settings {
          */
         public static final String KEY_APP_SWITCH_LONG_PRESS_ACTION = "key_app_switch_long_press_action";
 
+        /**
+         * Enable/disable haptic feedback for virtual keys
+         * @hide
+         */
+        public static final String VIRTUAL_KEYS_HAPTIC_FEEDBACK = "virtual_keys_haptic_feedback";
+
         /** Weather to allow headsethook to launch voice commands
          * @hide
          */
