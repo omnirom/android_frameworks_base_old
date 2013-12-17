@@ -16,6 +16,24 @@
       "revId": "c456dbe4087597e40da88033f74d251df27a2b5d",
       "serverId": "56841c99-7c94-43d4-bf0b-cb4707e66d55",
       "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "6b8b61a3_d12246fc",
+        "filename": "packages/SystemUI/src/com/android/systemui/omni/OMNICaseView.java",
+        "patchSetId": 3
+      },
+      "lineNbr": 25,
+      "author": {
+        "id": 1000174
+      },
+      "writtenOn": "2013-12-17T23:58:48Z",
+      "side": 1,
+      "message": "Is not needed to, it works that way too. Just need to be the same on both ways.",
+      "parentUuid": "6b8b61a3_9128bede",
+      "revId": "c456dbe4087597e40da88033f74d251df27a2b5d",
+      "serverId": "56841c99-7c94-43d4-bf0b-cb4707e66d55",
+      "unresolved": false
     }
   ]
 }
