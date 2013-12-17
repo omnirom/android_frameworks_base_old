@@ -45,11 +45,14 @@ public class PlatLogoActivity extends Activity {
     int mCount;
     final Handler mHandler = new Handler();
     static final int BGCOLOR = 0xffed1d24;
+    private boolean mIsOMNI;
+    static final int BGCOLOR2 = 0xff8efe8e;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
 
+        mIsOMNI = getIntent().hasExtra("is_omni");
         DisplayMetrics metrics = new DisplayMetrics();
         getWindowManager().getDefaultDisplay().getMetrics(metrics);
 
@@ -64,22 +67,29 @@ public class PlatLogoActivity extends Activity {
                 FrameLayout.LayoutParams.WRAP_CONTENT);
         lp.gravity = Gravity.CENTER;
 
+        // Add some padding to the platlogo for devices where the
+        // width of the logo is bigger than the device width
+        int p = (int) (20 * metrics.density);
+
         final ImageView logo = new ImageView(this);
-        logo.setImageResource(com.android.internal.R.drawable.platlogo);
+        logo.setImageResource(mIsOMNI
+                ? com.android.internal.R.drawable.omni_platlogo
+                : com.android.internal.R.drawable.platlogo);
+        logo.setPadding(p, 0, p, 0);
         logo.setScaleType(ImageView.ScaleType.CENTER_INSIDE);
         logo.setVisibility(View.INVISIBLE);
 
         final View bg = new View(this);
-        bg.setBackgroundColor(BGCOLOR);
+        bg.setBackgroundColor(mIsOMNI ? BGCOLOR2 : BGCOLOR);
         bg.setAlpha(0f);
 
         final TextView letter = new TextView(this);
 
         letter.setTypeface(bold);
-        letter.setTextSize(300);
-        letter.setTextColor(0xFFFFFFFF);
+        letter.setTextSize(mIsOMNI ? 150 : 300);
+        letter.setTextColor(mIsOMNI ? 0xffa6c63c : 0xFFFFFFFF);
         letter.setGravity(Gravity.CENTER);
-        letter.setText("K");
+        letter.setText(mIsOMNI ? "OMNI" : "K");
 
         final int p = (int)(4 * metrics.density);
 
@@ -90,7 +100,7 @@ public class PlatLogoActivity extends Activity {
         tv.setTextColor(0xFFFFFFFF);
         tv.setGravity(Gravity.CENTER);
         tv.setTransformationMethod(new AllCapsTransformationMethod(this));
-        tv.setText("Android " + Build.VERSION.RELEASE);
+        tv.setText(mIsOMNI ? "OmniROM " + Build.VERSION.RELEASE : "Android " + Build.VERSION.RELEASE);
         tv.setVisibility(View.INVISIBLE);
 
         mContent.addView(bg);
@@ -164,6 +174,7 @@ public class PlatLogoActivity extends Activity {
                         .setFlags(Intent.FLAG_ACTIVITY_NEW_TASK
                             | Intent.FLAG_ACTIVITY_CLEAR_TASK
                             | Intent.FLAG_ACTIVITY_EXCLUDE_FROM_RECENTS)
+                        .putExtra("is_omni", mIsOMNI)
                         .addCategory("com.android.internal.category.PLATLOGO"));
                 } catch (ActivityNotFoundException ex) {
                     android.util.Log.e("PlatLogoActivity", "Couldn't catch a break.");
