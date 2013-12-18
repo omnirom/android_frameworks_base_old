@@ -1,0 +1,72 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "6b8b61a3_11958ee7",
+        "filename": "core/res/res/values/config.xml",
+        "patchSetId": 2
+      },
+      "lineNbr": 1342,
+      "author": {
+        "id": 1000060
+      },
+      "writtenOn": "2013-12-18T03:33:19Z",
+      "side": 1,
+      "message": "whitespace",
+      "revId": "db23a64aa234ac9acb5ef70f936f8afa3caadbb2",
+      "serverId": "56841c99-7c94-43d4-bf0b-cb4707e66d55",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "6b8b61a3_b1f93a4c",
+        "filename": "core/res/res/values/symbols.xml",
+        "patchSetId": 2
+      },
+      "lineNbr": 1795,
+      "author": {
+        "id": 1000060
+      },
+      "writtenOn": "2013-12-18T03:33:19Z",
+      "side": 1,
+      "message": "whitespace",
+      "revId": "db23a64aa234ac9acb5ef70f936f8afa3caadbb2",
+      "serverId": "56841c99-7c94-43d4-bf0b-cb4707e66d55",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "6b8b61a3_d1f6c659",
+        "filename": "policy/src/com/android/internal/policy/impl/PhoneWindowManager.java",
+        "patchSetId": 2
+      },
+      "lineNbr": 1091,
+      "author": {
+        "id": 1000060
+      },
+      "writtenOn": "2013-12-18T03:33:19Z",
+      "side": 1,
+      "message": "remove extra space",
+      "revId": "db23a64aa234ac9acb5ef70f936f8afa3caadbb2",
+      "serverId": "56841c99-7c94-43d4-bf0b-cb4707e66d55",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "6b8b61a3_f18f42d4",
+        "filename": "policy/src/com/android/internal/policy/impl/PhoneWindowManager.java",
+        "patchSetId": 2
+      },
+      "lineNbr": 5052,
+      "author": {
+        "id": 1000060
+      },
+      "writtenOn": "2013-12-18T03:33:19Z",
+      "side": 1,
+      "message": "remove extra space",
+      "revId": "db23a64aa234ac9acb5ef70f936f8afa3caadbb2",
+      "serverId": "56841c99-7c94-43d4-bf0b-cb4707e66d55",
+      "unresolved": false
+    }
+  ]
+}
