@@ -7,4 +7,20 @@
     <string name="reboot_system" product="default">Riavvia il telefono</string>
     <string name="reboot_confirm" product="tablet">Il tablet sarà riavviato.</string>
     <string name="reboot_confirm" product="default">Il telefono sarà riavviato.</string>
+
+    <string name="app_killed_message">Applicazioni chiuse</string>
+
+    <!-- Title of an application permission that lets an application view/edit revoked permissions. -->
+    <string name="permlab_revokePermissions">Consente di visualizzare e modificare i permessi revocati. Da non usare con le normali applicazioni.</string>
+    <!-- Description of an application permission that lets lets an application view/edit revoked permissions. -->
+    <string name="permdesc_revokePermissions">Consente di leggere e scrivere i permessi revocati. Da non usare con le normali applicazioni.</string>
+
+    <!-- Title of an application permission that lets an application access the ThemeManagerService. -->
+    <string name="permlab_accessThemeService">Consente l\'accesso al servizio di gestione dei temi. Da non usare con le normali applicazioni.</string>
+    <!-- Description of an application permission that lets lets an application access the ThemeManagerService -->
+    <string name="permdesc_accessThemeService">Consente a un\'applicazione di impostare/ripristinare i temi. Da non usare con le normali applicazioni.</string>
+
+    <!-- stylus gestures support -->
+    <string name="stylus_app_not_installed">%s non è stato installato!</string>
+
 </resources>
