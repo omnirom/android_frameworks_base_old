@@ -1339,4 +1339,6 @@
 
     <!-- Boolean to enable Stylus gestures -->
     <bool name="config_stylusGestures">false</bool>
+
+    <bool name="config_offscreenGestureSupport">false</bool>
 </resources>
