@@ -1344,4 +1344,7 @@
          setting is used to determine, whether lidOpenRotation has to be
          applied. -->
     <bool name="config_hasRemovableLid">false</bool>
+
+    <!-- enable support for off-screen gesture support -->
+    <bool name="config_offscreenGestureSupport">false</bool>
 </resources>

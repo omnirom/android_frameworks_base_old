@@ -2857,6 +2857,12 @@ public final class Settings {
         public static final String VOLUME_WAKE_SCREEN = "volume_wake_screen";
 
         /**
+         * volume rocker music track control enable/disable
+         * @hide
+         */
+        public static final String VOLUME_MUSIC_CONTROL = "volume_music_control";
+
+        /**
          * Show clear all recents button
          *  @hide
          */
