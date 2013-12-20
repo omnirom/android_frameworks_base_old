@@ -39,4 +39,7 @@
     <!-- stylus gestures support -->
     <string name="stylus_app_not_installed">%s is not installed</string>
 
+    <!-- Storage description for the SD card on the dock. [CHAR LIMIT=NONE] -->
+    <string name="storage_sd_dock_card">Dock SD card</string>
+
 </resources> 
