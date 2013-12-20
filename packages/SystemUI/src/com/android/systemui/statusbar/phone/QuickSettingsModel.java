@@ -680,10 +680,9 @@ class QuickSettingsModel implements BluetoothStateChangeCallback,
         mBatteryCallback.refreshView(mBatteryTile, mBatteryState);
     }
     void refreshBatteryTile() {
-        if (mBatteryCallback == null) {
-            return;
+        if (mBatteryCallback != null) {
+            mBatteryCallback.refreshView(mBatteryTile, mBatteryState);
         }
-        mBatteryCallback.refreshView(mBatteryTile, mBatteryState);
     }
 
     // Location
