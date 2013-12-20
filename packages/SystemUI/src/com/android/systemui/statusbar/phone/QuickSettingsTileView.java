@@ -19,6 +19,10 @@ package com.android.systemui.statusbar.phone;
 import com.android.systemui.R;
 
 import android.content.Context;
+import android.graphics.drawable.ColorDrawable;
+import android.graphics.drawable.StateListDrawable;
+import android.os.UserHandle;
+import android.provider.Settings;
 import android.util.AttributeSet;
 import android.util.Log;
 import android.view.LayoutInflater;
@@ -29,7 +33,7 @@ import android.widget.FrameLayout;
 /**
  *
  */
-class QuickSettingsTileView extends FrameLayout {
+public class QuickSettingsTileView extends FrameLayout {
     private static final String TAG = "QuickSettingsTileView";
 
     private int mContentLayoutId;
@@ -42,6 +46,30 @@ class QuickSettingsTileView extends FrameLayout {
 
         mContentLayoutId = -1;
         mColSpan = 1;
+
+        int bgColor = Settings.System.getIntForUser(context.getContentResolver(),
+                Settings.System.QUICK_TILES_BG_COLOR, -2,
+                UserHandle.USER_CURRENT);
+        int presColor = Settings.System.getIntForUser(context.getContentResolver(),
+                Settings.System.QUICK_TILES_BG_PRESSED_COLOR, -2,
+                UserHandle.USER_CURRENT);
+        float bgAlpha = Settings.System.getFloatForUser(context.getContentResolver(),
+                Settings.System.QUICK_TILES_BG_ALPHA, 0.0f,
+                UserHandle.USER_CURRENT);
+
+        if (bgColor == -2) {
+            bgColor = context.getResources().getColor(R.color.qs_background_color);
+        }
+        if (presColor == -2) {
+            presColor = context.getResources().getColor(R.color.qs_background_pressed_color);
+        }
+        ColorDrawable bgDrawable = new ColorDrawable(bgColor);
+        ColorDrawable presDrawable = new ColorDrawable(presColor);
+        StateListDrawable states = new StateListDrawable();
+        states.addState(new int[] {android.R.attr.state_pressed}, presDrawable);
+        states.addState(new int[] {}, bgDrawable);
+        states.setAlpha((int) ((1 - bgAlpha) * 255));
+        setBackground(states);
     }
 
     void setColumnSpan(int span) {
@@ -52,7 +80,7 @@ class QuickSettingsTileView extends FrameLayout {
         return mColSpan;
     }
 
-    void setContent(int layoutId, LayoutInflater inflater) {
+    public void setContent(int layoutId, LayoutInflater inflater) {
         mContentLayoutId = layoutId;
         inflater.inflate(layoutId, this);
     }
