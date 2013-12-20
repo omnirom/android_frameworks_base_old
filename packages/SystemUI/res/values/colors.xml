@@ -37,4 +37,8 @@
     <color name="batterymeter_bolt_color">#B2000000</color><!-- 70% black -->
     <color name="status_bar_clock_color">#FFFFFFFF</color>
     <color name="status_bar_traffic_color">#FFFFFFFF</color>
+
+    <!-- Quick Settings -->
+    <color name="qs_background_color">#FF212121</color>
+    <color name="qs_background_pressed_color">#FF161616</color>
 </resources>
