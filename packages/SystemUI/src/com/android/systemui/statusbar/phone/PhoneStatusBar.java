@@ -52,6 +52,7 @@ import android.graphics.drawable.Drawable;
 import android.graphics.drawable.BitmapDrawable;
 import android.graphics.drawable.TransitionDrawable;
 import android.inputmethodservice.InputMethodService;
+import android.net.Uri;
 import android.os.Bundle;
 import android.os.Handler;
 import android.os.IBinder;
@@ -68,6 +69,7 @@ import android.service.notification.StatusBarNotification;
 import android.util.DisplayMetrics;
 import android.util.EventLog;
 import android.util.Log;
+import android.util.Pair;
 import android.view.Display;
 import android.view.Gravity;
 import android.view.HapticFeedbackConstants;
@@ -234,7 +236,8 @@ public class PhoneStatusBar extends BaseStatusBar implements DemoMode {
     View mNotificationPanelHeader;
     View mDateTimeView;
     View mClearButton;
-    ImageView mSettingsButton, mNotificationButton;
+    ImageView mSettingsButton, mNotificationButton, mEditModeButton;
+    boolean mAnimatingEditModeButton;
 
     // carrier/wifi label
     private TextView mCarrierLabel;
@@ -338,6 +341,8 @@ public class PhoneStatusBar extends BaseStatusBar implements DemoMode {
                     Settings.System.SCREEN_BRIGHTNESS_MODE), false, this);
             resolver.registerContentObserver(Settings.System.getUriFor(
                     Settings.System.STATUS_BAR_CUSTOM_HEADER), false, this);
+            resolver.registerContentObserver(Settings.System.getUriFor(
+                    Settings.System.QUICK_SETTINGS_TILES), false, this);
             update();
         }
 
@@ -356,7 +361,7 @@ public class PhoneStatusBar extends BaseStatusBar implements DemoMode {
                     resolver, Settings.System.STATUS_BAR_BRIGHTNESS_CONTROL, 0) == 1;
 
             updateCustomHeaderStatus();
-
+            if (mQS != null) mQS.updateResources();
         }
     }
 
@@ -735,6 +740,8 @@ public class PhoneStatusBar extends BaseStatusBar implements DemoMode {
                     mFlipSettingsView = ((ViewStub)settings_stub).inflate();
                     mFlipSettingsView.setVisibility(View.GONE);
                     mFlipSettingsView.setVerticalScrollBarEnabled(false);
+                    mEditModeButton = (ImageView) mStatusBarWindow.findViewById(R.id.edit_mode_button);
+                    mEditModeButton.setVisibility(View.INVISIBLE);
                 }
             } else {
                 // full quick settings panel
@@ -750,6 +757,7 @@ public class PhoneStatusBar extends BaseStatusBar implements DemoMode {
                         mSettingsPanel.setBackground(new FastColorDrawable(context.getResources().getColor(
                                 R.color.notification_panel_solid_background)));
                     }
+                    mEditModeButton = (ImageView) mSettingsPanel.findViewById(R.id.edit_mode_button);
                 }
             }
 
@@ -770,6 +778,21 @@ public class PhoneStatusBar extends BaseStatusBar implements DemoMode {
                 mQS.setBar(mStatusBarView);
                 mQS.setup(mNetworkController, mBluetoothController, mBatteryController,
                         mLocationController, mRotationLockController);
+                if (mEditModeButton != null) {
+                    mEditModeButton.setOnClickListener(mEditModeButtonListener);
+                    mEditModeButton.setOnLongClickListener(mEditModeLongButtonListener);
+                    mEditModeButton.setEnabled(true);
+                }
+
+                // set edit mode changed listener
+                mSettingsContainer.setOnEditModeChangedListener(
+                        new QuickSettingsContainerView.EditModeChangedListener() {
+                    @Override
+                    public void onEditModeChanged(final boolean enabled) {
+                        mEditModeButton.setImageResource(enabled ?
+                                R.drawable.ic_notify_edit_save : R.drawable.ic_notify_edit_normal);
+                    }
+                });
             } else {
                 mQS = null; // fly away, be free
             }
@@ -1218,6 +1241,12 @@ public class PhoneStatusBar extends BaseStatusBar implements DemoMode {
             // Force asset reloading
             ((ImageView)mClearButton).setImageDrawable(null);
             ((ImageView)mClearButton).setImageResource(R.drawable.ic_notify_clear);
+        }
+
+        if (mEditModeButton != null) {
+            // Force asset reloading
+            mEditModeButton.setImageDrawable(null);
+            mEditModeButton.setImageResource(R.drawable.ic_notify_edit_normal);
         }
 
         if (mSettingsButton != null) {
@@ -1734,7 +1763,7 @@ public class PhoneStatusBar extends BaseStatusBar implements DemoMode {
     final int FLIP_DURATION = (FLIP_DURATION_IN + FLIP_DURATION_OUT);
 
     Animator mScrollViewAnim, mFlipSettingsViewAnim, mNotificationButtonAnim,
-        mSettingsButtonAnim, mClearButtonAnim;
+        mSettingsButtonAnim, mClearButtonAnim, mEditModeButtonAnim;
 
     @Override
     public void animateExpandNotificationsPanel() {
@@ -1756,6 +1785,7 @@ public class PhoneStatusBar extends BaseStatusBar implements DemoMode {
         if (mScrollViewAnim != null) mScrollViewAnim.cancel();
         if (mSettingsButtonAnim != null) mSettingsButtonAnim.cancel();
         if (mNotificationButtonAnim != null) mNotificationButtonAnim.cancel();
+        if (mEditModeButtonAnim != null) mEditModeButtonAnim.cancel();
         if (mClearButtonAnim != null) mClearButtonAnim.cancel();
 
         mScrollView.setVisibility(View.VISIBLE);
@@ -1781,6 +1811,11 @@ public class PhoneStatusBar extends BaseStatusBar implements DemoMode {
         mSettingsButtonAnim = start(
             ObjectAnimator.ofFloat(mSettingsButton, View.ALPHA, 1f)
                 .setDuration(FLIP_DURATION));
+        mEditModeButtonAnim = start(
+            setVisibilityWhenDone(
+                ObjectAnimator.ofFloat(mEditModeButton, View.ALPHA, 0f)
+                    .setDuration(FLIP_DURATION),
+                mEditModeButton, View.INVISIBLE));
         mClearButton.setVisibility(View.VISIBLE);
         mClearButton.setAlpha(0f);
         setAreThereNotifications(); // this will show/hide the button as necessary
@@ -1824,6 +1859,8 @@ public class PhoneStatusBar extends BaseStatusBar implements DemoMode {
         mScrollView.setScaleX(0f);
         mNotificationButton.setVisibility(View.VISIBLE);
         mNotificationButton.setAlpha(1f);
+        mEditModeButton.setVisibility(View.VISIBLE);
+        mEditModeButton.setAlpha(1f);
         mClearButton.setVisibility(View.GONE);
     }
 
@@ -1835,6 +1872,7 @@ public class PhoneStatusBar extends BaseStatusBar implements DemoMode {
         if (mScrollViewAnim != null) mScrollViewAnim.cancel();
         if (mSettingsButtonAnim != null) mSettingsButtonAnim.cancel();
         if (mNotificationButtonAnim != null) mNotificationButtonAnim.cancel();
+        if (mEditModeButtonAnim != null) mEditModeButtonAnim.cancel();
         if (mClearButtonAnim != null) mClearButtonAnim.cancel();
 
         mFlipSettingsView.setVisibility(View.VISIBLE);
@@ -1860,6 +1898,10 @@ public class PhoneStatusBar extends BaseStatusBar implements DemoMode {
         mNotificationButton.setVisibility(View.VISIBLE);
         mNotificationButtonAnim = start(
             ObjectAnimator.ofFloat(mNotificationButton, View.ALPHA, 1f)
+                .setDuration(FLIP_DURATION));
+        mEditModeButton.setVisibility(View.VISIBLE);
+        mEditModeButtonAnim = start(
+            ObjectAnimator.ofFloat(mEditModeButton, View.ALPHA, 1f)
                 .setDuration(FLIP_DURATION));
         mClearButtonAnim = start(
             setVisibilityWhenDone(
@@ -1908,6 +1950,7 @@ public class PhoneStatusBar extends BaseStatusBar implements DemoMode {
             if (mScrollViewAnim != null) mScrollViewAnim.cancel();
             if (mSettingsButtonAnim != null) mSettingsButtonAnim.cancel();
             if (mNotificationButtonAnim != null) mNotificationButtonAnim.cancel();
+            if (mEditModeButtonAnim != null) mEditModeButtonAnim.cancel();
             if (mClearButtonAnim != null) mClearButtonAnim.cancel();
 
             mScrollView.setScaleX(1f);
@@ -1917,6 +1960,7 @@ public class PhoneStatusBar extends BaseStatusBar implements DemoMode {
             mNotificationPanel.setVisibility(View.GONE);
             mFlipSettingsView.setVisibility(View.GONE);
             mNotificationButton.setVisibility(View.GONE);
+            mEditModeButton.setVisibility(View.GONE);
             setAreThereNotifications(); // show the clear button
         }
 
@@ -2732,6 +2776,29 @@ public class PhoneStatusBar extends BaseStatusBar implements DemoMode {
         mContext.startActivityAsUser(intent, new UserHandle(UserHandle.USER_CURRENT));
         animateCollapsePanels();
     }
+
+    private View.OnClickListener mEditModeButtonListener = new View.OnClickListener() {
+        public void onClick(View v) {
+            final boolean enabled = mSettingsContainer.isEditModeEnabled();
+            if(mAnimatingEditModeButton) return;
+            mAnimatingEditModeButton = true;
+            mEditModeButton.animate().rotationYBy(180)
+                    .setListener(new AnimatorListenerAdapter() {
+                        public void onAnimationEnd(Animator animation) {
+                            mSettingsContainer.setEditModeEnabled(!enabled);
+                            mAnimatingEditModeButton = false;
+                        }
+                });
+        }
+    };
+
+    private View.OnLongClickListener mEditModeLongButtonListener = new View.OnLongClickListener() {
+        public boolean onLongClick(View v) {
+            Settings.System.putString(mContext.getContentResolver(),
+                        Settings.System.QUICK_SETTINGS_TILES, QuickSettings.DEFAULT_TILES);
+            return true;
+        }
+    };
 
     private View.OnClickListener mSettingsButtonListener = new View.OnClickListener() {
         public void onClick(View v) {
