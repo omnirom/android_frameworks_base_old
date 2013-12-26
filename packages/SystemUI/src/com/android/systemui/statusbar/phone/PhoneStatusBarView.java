@@ -46,6 +46,7 @@ public class PhoneStatusBarView extends PanelBar {
     PanelView mNotificationPanel, mSettingsPanel;
     private boolean mShouldFade;
     private final PhoneStatusBarTransitions mBarTransitions;
+    private QuickSettingsContainerView mQSContainer;
 
     public PhoneStatusBarView(Context context, AttributeSet attrs) {
         super(context, attrs);
@@ -166,6 +167,13 @@ public class PhoneStatusBarView extends PanelBar {
     @Override
     public void onAllPanelsCollapsed() {
         super.onAllPanelsCollapsed();
+
+        mQSContainer = (QuickSettingsContainerView)
+            mBar.mStatusBarWindow.findViewById(R.id.quick_settings_container);
+        if(mQSContainer != null && mQSContainer.isEditModeEnabled()) {
+            mQSContainer.setEditModeEnabled(false);
+        }
+
         // give animations time to settle
         mBar.makeExpandedInvisibleSoon();
         mFadingPanel = null;
@@ -214,7 +222,8 @@ public class PhoneStatusBarView extends PanelBar {
             Log.v(TAG, "panelExpansionChanged: f=" + frac);
         }
 
-        if (panel == mFadingPanel && mScrimColor != 0 && ActivityManager.isHighEndGfx()) {
+        if ((panel == mFadingPanel || mFadingPanel == null)
+                && mScrimColor != 0 && ActivityManager.isHighEndGfx()) {
             if (mShouldFade) {
                 frac = mPanelExpandedFractionSum; // don't judge me
                 // let's start this 20% of the way down the screen
