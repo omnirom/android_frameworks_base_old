@@ -1,5 +1,7 @@
 /*
  * Copyright (C) 2012 The Android Open Source Project
+ * This code has been modified. Portions copyright (C) 2013, OmniRom Project.
+ * This code has been modified. Portions copyright (C) 2013, ParanoidAndroid Project.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -17,14 +19,20 @@
 package com.android.systemui.statusbar.phone;
 
 import android.animation.LayoutTransition;
+import android.content.ContentResolver;
 import android.content.Context;
+import android.content.res.Configuration;
 import android.content.res.Resources;
+import android.provider.Settings;
+import android.text.TextUtils;
 import android.util.AttributeSet;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.FrameLayout;
 
 import com.android.systemui.R;
+
+import java.util.ArrayList;
 
 /**
  *
@@ -33,12 +41,34 @@ class QuickSettingsContainerView extends FrameLayout {
 
     // The number of columns in the QuickSettings grid
     private int mNumColumns;
+    private int mNumFinalColumns;
+    private int mNumFinalCol;
+    private boolean updateColumns = false;
 
     // The gap between tiles in the QuickSettings grid
     private float mCellGap;
 
+    private Context mContext;
+    private Resources mResources;
+
+    // Default layout transition
+    private LayoutTransition mLayoutTransition;
+
+    // Edit mode status
+    private boolean mEditModeEnabled;
+
+    // Edit mode changed listener
+    private EditModeChangedListener mEditModeChangedListener;
+
+    public interface EditModeChangedListener {
+        public abstract void onEditModeChanged(boolean enabled);
+    }
+
     public QuickSettingsContainerView(Context context, AttributeSet attrs) {
         super(context, attrs);
+
+        mContext = context;
+        mResources = getContext().getResources();
 
         updateResources();
     }
@@ -47,15 +77,33 @@ class QuickSettingsContainerView extends FrameLayout {
     protected void onFinishInflate() {
         super.onFinishInflate();
 
-        // TODO: Setup the layout transitions
-        LayoutTransition transitions = getLayoutTransition();
+        mLayoutTransition = getLayoutTransition();
+        mLayoutTransition.enableTransitionType(LayoutTransition.CHANGING);
     }
 
     void updateResources() {
-        Resources r = getContext().getResources();
-        mCellGap = r.getDimension(R.dimen.quick_settings_cell_gap);
-        mNumColumns = r.getInteger(R.integer.quick_settings_num_columns);
+        mCellGap = mResources.getDimension(R.dimen.quick_settings_cell_gap);
+        mNumColumns = mResources.getInteger(R.integer.quick_settings_num_columns);
+        mNumFinalColumns = mResources.getInteger(R.integer.quick_settings_numfinal_columns);
+        mNumFinalCol = shouldUpdateColumns() ? mNumFinalColumns : mNumColumns;
         requestLayout();
+    }
+
+    public void updateSpan() {
+        Resources r = getContext().getResources();
+        for(int i = 0; i < getChildCount(); i++) {
+            View v = getChildAt(i);
+            if(v instanceof QuickSettingsTileView) {
+                QuickSettingsTileView qs = (QuickSettingsTileView) v;
+                if (i < 3 && getTilesSize() < 10 + i) { // Modify span of the first three childs
+                    int span = r.getInteger(R.integer.quick_settings_user_time_settings_tile_span);
+                    qs.setColumnSpan(span);
+                } else {
+                    qs.setColumnSpan(1); // One column item
+                }
+                qs.setTextSizes(getTileTextSize());
+            }
+        }
     }
 
     @Override
@@ -64,8 +112,8 @@ class QuickSettingsContainerView extends FrameLayout {
         int width = MeasureSpec.getSize(widthMeasureSpec);
         int height = MeasureSpec.getSize(heightMeasureSpec);
         int availableWidth = (int) (width - getPaddingLeft() - getPaddingRight() -
-                (mNumColumns - 1) * mCellGap);
-        float cellWidth = (float) Math.ceil(((float) availableWidth) / mNumColumns);
+                (mNumFinalCol - 1) * mCellGap);
+        float cellWidth = (float) Math.ceil(((float) availableWidth) / mNumFinalCol);
 
         // Update each of the children's widths accordingly to the cell width
         final int N = getChildCount();
@@ -94,7 +142,7 @@ class QuickSettingsContainerView extends FrameLayout {
 
         // Set the measured dimensions.  We always fill the tray width, but wrap to the height of
         // all the tiles.
-        int numRows = (int) Math.ceil((float) cursor / mNumColumns);
+        int numRows = (int) Math.ceil((float) cursor / mNumFinalCol);
         int newHeight = (int) ((numRows * cellHeight) + ((numRows - 1) * mCellGap)) +
                 getPaddingTop() + getPaddingBottom();
         setMeasuredDimension(width, newHeight);
@@ -114,16 +162,16 @@ class QuickSettingsContainerView extends FrameLayout {
             QuickSettingsTileView child = (QuickSettingsTileView) getChildAt(i);
             ViewGroup.LayoutParams lp = child.getLayoutParams();
             if (child.getVisibility() != GONE) {
-                final int col = cursor % mNumColumns;
+                final int col = cursor % mNumFinalCol;
                 final int colSpan = child.getColumnSpan();
 
                 final int childWidth = lp.width;
                 final int childHeight = lp.height;
 
-                int row = (int) (cursor / mNumColumns);
+                int row = (int) (cursor / mNumFinalCol);
 
                 // Push the item to the next row if it can't fit on this one
-                if ((col + colSpan) > mNumColumns) {
+                if ((col + colSpan) > mNumFinalCol) {
                     x = getPaddingStart();
                     y += childHeight + mCellGap;
                     row++;
@@ -141,13 +189,89 @@ class QuickSettingsContainerView extends FrameLayout {
                 // Offset the position by the cell gap or reset the position and cursor when we
                 // reach the end of the row
                 cursor += child.getColumnSpan();
-                if (cursor < (((row + 1) * mNumColumns))) {
+                if (cursor < (((row + 1) * mNumFinalCol))) {
                     x += childWidth + mCellGap;
                 } else {
                     x = getPaddingStart();
                     y += childHeight + mCellGap;
                 }
             }
+        }
+    }
+
+    public void setOnEditModeChangedListener(EditModeChangedListener listener) {
+        mEditModeChangedListener = listener;
+    }
+
+    public void enableLayoutTransitions() {
+        setLayoutTransition(mLayoutTransition);
+    }
+
+    public boolean isEditModeEnabled() {
+        return mEditModeEnabled;
+    }
+
+    private boolean shouldUpdateColumns() {
+        return (getTilesSize() > 12) && !isLandscape();
+    }
+
+    private boolean isLandscape() {
+        final boolean isLandscape =
+            Resources.getSystem().getConfiguration().orientation
+                    == Configuration.ORIENTATION_LANDSCAPE;
+        return isLandscape;
+    }
+
+    private int getTilesSize() {
+        String tileContainer = Settings.System.getString(mContext.getContentResolver(),
+                Settings.System.QUICK_SETTINGS_TILES);
+        if (tileContainer == null) {
+            tileContainer = QuickSettings.DEFAULT_TILES;
+        }
+        String[] storedTiles = tileContainer.split(QuickSettings.DELIMITER);
+        return storedTiles.length;
+    }
+
+    private int getTileTextSize() {
+        // get tile text size based on column count
+        switch (mNumFinalCol) {
+            case 4:
+                return mResources.getDimensionPixelSize(R.dimen.qs_4_column_text_size);
+            case 3:
+            default:
+                return mResources.getDimensionPixelSize(R.dimen.qs_3_column_text_size);
+        }
+    }
+
+    public void setEditModeEnabled(boolean enabled) {
+        mEditModeEnabled = enabled;
+        mEditModeChangedListener.onEditModeChanged(enabled);
+        ArrayList<String> tiles = new ArrayList<String>();
+        for(int i = 0; i < getChildCount(); i++) {
+            View v = getChildAt(i);
+            if(v instanceof QuickSettingsTileView) {
+                QuickSettingsTileView qs = (QuickSettingsTileView) v;
+                qs.setEditMode(enabled);
+
+                // Add to provider string
+                if(!enabled && qs.getVisibility() == View.VISIBLE
+                        && !qs.isTemporary()) {
+                    tiles.add(qs.getTileId().toString());
+                }
+            }
+        }
+
+        if(!enabled) { // Store modifications
+            ContentResolver resolver = getContext().getContentResolver();
+            if(!tiles.isEmpty()) {
+                Settings.System.putString(resolver,
+                        Settings.System.QUICK_SETTINGS_TILES,
+                                TextUtils.join(QuickSettings.DELIMITER, tiles));
+            } else { // No tiles
+                Settings.System.putString(resolver,
+                        Settings.System.QUICK_SETTINGS_TILES, QuickSettings.NO_TILES);
+            }
+            updateSpan();
         }
     }
 }
