@@ -19,6 +19,7 @@ package com.android.systemui.statusbar.phone;
 import android.content.Context;
 import android.graphics.drawable.Drawable;
 import android.util.AttributeSet;
+import android.util.TypedValue;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.widget.FrameLayout;
@@ -81,6 +82,14 @@ class QuickSettingsBasicTile extends QuickSettingsTileView {
 
     public void setText(CharSequence text) {
         mTextView.setText(text);
+    }
+
+    void setTextSizes(int size) {
+        mTextView.setTextSize(TypedValue.COMPLEX_UNIT_PX, size);
+    }
+
+    void setTextPaddings(int pad) {
+        mTextView.setPadding(0, pad, 0, 0);
     }
 
     public void setTextResource(int resId) {
