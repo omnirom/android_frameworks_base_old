@@ -28,6 +28,7 @@ import android.content.pm.PackageManager;
 import android.content.res.Resources;
 import android.database.ContentObserver;
 import android.graphics.drawable.Drawable;
+import android.hardware.usb.UsbManager;
 import android.media.MediaRouter;
 import android.media.MediaRouter.RouteInfo;
 import android.net.ConnectivityManager;
@@ -44,6 +45,7 @@ import android.view.inputmethod.InputMethodInfo;
 import android.view.inputmethod.InputMethodManager;
 import android.view.inputmethod.InputMethodSubtype;
 
+import com.android.internal.telephony.Phone;
 import com.android.systemui.R;
 import com.android.systemui.settings.BrightnessController.BrightnessStateChangeCallback;
 import com.android.systemui.settings.CurrentUserTracker;
@@ -84,6 +86,7 @@ class QuickSettingsModel implements BluetoothStateChangeCallback,
         String signalContentDescription;
         int dataTypeIconId;
         String dataContentDescription;
+        String networkType;
     }
     static class WifiState extends ActivityState {
         String signalContentDescription;
@@ -94,6 +97,12 @@ class QuickSettingsModel implements BluetoothStateChangeCallback,
     }
     static class BrightnessState extends State {
         boolean autoBrightness;
+    }
+    static class ImmersiveState extends State {
+        boolean isEnabled;
+    }
+    static class QuiteHourState extends State {
+        boolean isEnabled;
     }
     public static class BluetoothState extends State {
         boolean connected = false;
@@ -142,6 +151,26 @@ class QuickSettingsModel implements BluetoothStateChangeCallback,
                 onAlarmChanged(intent);
                 onNextAlarmChanged();
             }
+        }
+    };
+
+    /** Broadcast receive to determine usb tether. */
+    private BroadcastReceiver mUsbIntentReceiver = new BroadcastReceiver() {
+        @Override
+        public void onReceive(Context context, Intent intent) {
+            if (intent.getAction().equals(UsbManager.ACTION_USB_STATE)) {
+                mUsbConnected = intent.getBooleanExtra(UsbManager.USB_CONNECTED, false);
+            }
+
+            if (intent.getAction().equals(Intent.ACTION_MEDIA_SHARED)) {
+                mMassStorageActive = true;
+            }
+
+            if (intent.getAction().equals(Intent.ACTION_MEDIA_UNSHARED)) {
+                mMassStorageActive = false;
+            }
+
+            onUsbChanged();
         }
     };
 
@@ -203,6 +232,46 @@ class QuickSettingsModel implements BluetoothStateChangeCallback,
         }
     }
 
+    /** ContentObserver to watch immersive **/
+    private class ImmersiveObserver extends ContentObserver {
+        public ImmersiveObserver(Handler handler) {
+            super(handler);
+        }
+
+        @Override
+        public void onChange(boolean selfChange) {
+            onImmersiveChanged();
+        }
+
+        public void startObserving() {
+            final ContentResolver cr = mContext.getContentResolver();
+            cr.unregisterContentObserver(this);
+            cr.registerContentObserver(
+                    Settings.System.getUriFor(Settings.System.IMMERSIVE_MODE),
+                    false, this, mUserTracker.getCurrentUserId());
+        }
+    }
+
+    /** ContentObserver to watch quitehour **/
+    private class QuiteHourObserver extends ContentObserver {
+        public QuiteHourObserver(Handler handler) {
+            super(handler);
+        }
+
+        @Override
+        public void onChange(boolean selfChange) {
+            onQuiteHourChanged();
+        }
+
+        public void startObserving() {
+            final ContentResolver cr = mContext.getContentResolver();
+            cr.unregisterContentObserver(this);
+            cr.registerContentObserver(
+                    Settings.System.getUriFor(Settings.System.QUIET_HOURS_ENABLED),
+                    false, this, mUserTracker.getCurrentUserId());
+        }
+    }
+
     /** Callback for changes to remote display routes. */
     private class RemoteDisplayRouteCallback extends MediaRouter.SimpleCallback {
         @Override
@@ -233,6 +302,14 @@ class QuickSettingsModel implements BluetoothStateChangeCallback,
     private final NextAlarmObserver mNextAlarmObserver;
     private final BugreportObserver mBugreportObserver;
     private final BrightnessObserver mBrightnessObserver;
+    private final ImmersiveObserver mImmersiveObserver;
+    private final QuiteHourObserver mQuiteHourObserver;
+
+    private ConnectivityManager mCM;
+    private boolean mUsbTethered = false;
+    private boolean mUsbConnected = false;
+    private boolean mMassStorageActive = false;
+    private String[] mUsbRegexs;
 
     private final MediaRouter mMediaRouter;
     private final RemoteDisplayRouteCallback mRemoteDisplayRouteCallback;
@@ -254,6 +331,10 @@ class QuickSettingsModel implements BluetoothStateChangeCallback,
     private QuickSettingsTileView mAirplaneModeTile;
     private RefreshCallback mAirplaneModeCallback;
     private State mAirplaneModeState = new State();
+
+    private QuickSettingsTileView mUsbModeTile;
+    private RefreshCallback mUsbModeCallback;
+    private State mUsbModeState = new State();
 
     private QuickSettingsTileView mWifiTile;
     private QuickSettingsTileView mWifiBackTile;
@@ -297,6 +378,14 @@ class QuickSettingsModel implements BluetoothStateChangeCallback,
     private RefreshCallback mBrightnessCallback;
     private BrightnessState mBrightnessState = new BrightnessState();
 
+    private QuickSettingsTileView mImmersiveTile;
+    private RefreshCallback mImmersiveCallback;
+    private ImmersiveState mImmersiveState = new ImmersiveState();
+
+    private QuickSettingsTileView mQuiteHourTile;
+    private RefreshCallback mQuiteHourCallback;
+    private QuiteHourState mQuiteHourState = new QuiteHourState();
+
     private QuickSettingsTileView mBugreportTile;
     private RefreshCallback mBugreportCallback;
     private State mBugreportState = new State();
@@ -318,11 +407,14 @@ class QuickSettingsModel implements BluetoothStateChangeCallback,
             @Override
             public void onUserSwitched(int newUserId) {
                 mBrightnessObserver.startObserving();
+                mImmersiveObserver.startObserving();
+                mQuiteHourObserver.startObserving();
                 refreshRotationLockTile();
                 onBrightnessLevelChanged();
                 onNextAlarmChanged();
                 onBugreportChanged();
                 rebindMediaRouterAsCurrentUser();
+                onUsbChanged();
             }
         };
 
@@ -332,19 +424,29 @@ class QuickSettingsModel implements BluetoothStateChangeCallback,
         mBugreportObserver.startObserving();
         mBrightnessObserver = new BrightnessObserver(mHandler);
         mBrightnessObserver.startObserving();
+        mImmersiveObserver = new ImmersiveObserver(mHandler);
+        mImmersiveObserver.startObserving();
+        mQuiteHourObserver = new QuiteHourObserver(mHandler);
+        mQuiteHourObserver.startObserving();
 
         mMediaRouter = (MediaRouter)context.getSystemService(Context.MEDIA_ROUTER_SERVICE);
         rebindMediaRouterAsCurrentUser();
 
         mRemoteDisplayRouteCallback = new RemoteDisplayRouteCallback();
 
-        ConnectivityManager cm = (ConnectivityManager)
-                context.getSystemService(Context.CONNECTIVITY_SERVICE);
-        mHasMobileData = cm.isNetworkSupported(ConnectivityManager.TYPE_MOBILE);
+        mCM = (ConnectivityManager) context.getSystemService(Context.CONNECTIVITY_SERVICE);
+        mHasMobileData = mCM.isNetworkSupported(ConnectivityManager.TYPE_MOBILE);
 
         IntentFilter alarmIntentFilter = new IntentFilter();
         alarmIntentFilter.addAction(Intent.ACTION_ALARM_CHANGED);
         context.registerReceiver(mAlarmIntentReceiver, alarmIntentFilter);
+
+        IntentFilter usbIntentFilter = new IntentFilter();
+        usbIntentFilter.addAction(ConnectivityManager.ACTION_TETHER_STATE_CHANGED);
+        usbIntentFilter.addAction(UsbManager.ACTION_USB_STATE);
+        usbIntentFilter.addAction(Intent.ACTION_MEDIA_SHARED);
+        usbIntentFilter.addAction(Intent.ACTION_MEDIA_UNSHARED);
+        context.registerReceiver(mUsbIntentReceiver, usbIntentFilter);
     }
 
     void updateResources() {
@@ -352,6 +454,8 @@ class QuickSettingsModel implements BluetoothStateChangeCallback,
         refreshBatteryTile();
         refreshBluetoothTile();
         refreshBrightnessTile();
+        refreshImmersiveTile();
+        refreshQuiteHourTile();
         refreshRotationLockTile();
         refreshRssiTile();
         refreshLocationTile();
@@ -409,6 +513,40 @@ class QuickSettingsModel implements BluetoothStateChangeCallback,
         mAlarmState.enabled = ! TextUtils.isEmpty(alarmText);
 
         mAlarmCallback.refreshView(mAlarmTile, mAlarmState);
+    }
+
+    // Usb Mode
+    void addUsbModeTile(QuickSettingsTileView view, RefreshCallback cb) {
+        mUsbModeTile = view;
+        mUsbModeTile.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                if (mUsbConnected) {
+                    setUsbTethering(!mUsbTethered);
+                }
+            }
+        });
+        mUsbModeCallback = cb;
+        onUsbChanged();
+    }
+
+    void onUsbChanged() {
+        updateState();
+        if (mUsbConnected && !mMassStorageActive) {
+            if (mUsbTethered) {
+                mUsbModeState.iconId = R.drawable.ic_qs_usb_tether_on;
+                mUsbModeState.label = mContext.getString(R.string.quick_settings_usb_tether_on_label);
+            } else {
+                mUsbModeState.iconId = R.drawable.ic_qs_usb_tether_connected;
+                mUsbModeState.label = mContext.getString(R.string.quick_settings_usb_tether_connected_label);
+            }
+            mUsbModeState.enabled = true;
+        } else {
+            mUsbModeState.iconId = R.drawable.ic_qs_usb_tether_off;
+            mUsbModeState.label = mContext.getString(R.string.quick_settings_usb_tether_off_label);
+            mUsbModeState.enabled = false;
+        }
+        mUsbModeCallback.refreshView(mUsbModeTile, mUsbModeState);
     }
 
     // Airplane Mode
@@ -577,8 +715,54 @@ class QuickSettingsModel implements BluetoothStateChangeCallback,
             mRSSIState.label = enabled
                     ? removeTrailingPeriod(enabledDesc)
                     : r.getString(R.string.quick_settings_rssi_emergency_only);
+            mRSSIState.networkType = getNetworkType(r);
             mRSSICallback.refreshView(mRSSITile, mRSSIState);
         }
+    }
+
+    private String getNetworkType(Resources r) {
+        int state = networkModeToState(get2G3G());
+        switch (state) {
+            case 1:
+                return r.getString(R.string.network_2G);
+            case 2:
+                return r.getString(R.string.network_3G_only);
+            case 3:
+                return r.getString(R.string.network_3G_auto);
+            case 4:
+                return r.getString(R.string.network_3G);
+        }
+        return "unknown";
+    }
+
+    private int get2G3G() {
+        int state = 99;
+        try {
+            state = Settings.Global.getInt(mContext.getContentResolver(),
+                    Settings.Global.PREFERRED_NETWORK_MODE);
+        } catch (SettingNotFoundException e) {
+            // Do nothing
+        }
+        return state;
+    }
+
+    private int networkModeToState(int what) {
+        switch (what) {
+            case Phone.NT_MODE_WCDMA_PREF:
+                return 4;
+            case Phone.NT_MODE_GSM_UMTS:
+                return 3;
+            case Phone.NT_MODE_WCDMA_ONLY:
+                return 2;
+            case Phone.NT_MODE_GSM_ONLY:
+                return 1;
+            case Phone.NT_MODE_CDMA:
+            case Phone.NT_MODE_CDMA_NO_EVDO:
+            case Phone.NT_MODE_EVDO_NO_CDMA:
+            case Phone.NT_MODE_GLOBAL:
+                return 0;
+        }
+        return 0;
     }
 
     void refreshRssiTile() {
@@ -923,6 +1107,56 @@ class QuickSettingsModel implements BluetoothStateChangeCallback,
         onBrightnessLevelChanged();
     }
 
+    // Immersive
+    void addImmersiveTile(QuickSettingsTileView view, RefreshCallback cb) {
+        mImmersiveTile = view;
+        mImmersiveCallback = cb;
+        onImmersiveChanged();
+    }
+
+    private void onImmersiveChanged() {
+        Resources r = mContext.getResources();
+        int mode = Settings.System.getIntForUser(mContext.getContentResolver(),
+                Settings.System.IMMERSIVE_MODE, 0,
+                mUserTracker.getCurrentUserId());
+        mImmersiveState.isEnabled = (mode == 1);
+        mImmersiveState.iconId = mImmersiveState.isEnabled
+                ? R.drawable.ic_qs_immersive_on
+                : R.drawable.ic_qs_immersive_off;
+        mImmersiveState.label = mImmersiveState.isEnabled
+                ? r.getString(R.string.quick_settings_immersive_mode_label)
+                : r.getString(R.string.quick_settings_immersive_mode_off_label);
+        mImmersiveCallback.refreshView(mImmersiveTile, mImmersiveState);
+    }
+    void refreshImmersiveTile() {
+        onImmersiveChanged();
+    }
+
+    // Immersive
+    void addQuiteHourTile(QuickSettingsTileView view, RefreshCallback cb) {
+        mQuiteHourTile = view;
+        mQuiteHourCallback = cb;
+        onQuiteHourChanged();
+    }
+
+    private void onQuiteHourChanged() {
+        Resources r = mContext.getResources();
+        int mode = Settings.System.getIntForUser(mContext.getContentResolver(),
+                Settings.System.QUIET_HOURS_ENABLED, 0,
+                mUserTracker.getCurrentUserId());
+        mQuiteHourState.isEnabled = (mode == 1);
+        mQuiteHourState.iconId = mQuiteHourState.isEnabled
+                ? R.drawable.ic_qs_quiet_hours_on
+                : R.drawable.ic_qs_quiet_hours_off;
+        mQuiteHourState.label = mQuiteHourState.isEnabled
+                ? r.getString(R.string.quick_settings_quiethours_label)
+                : r.getString(R.string.quick_settings_quiethours_off_label);
+        mQuiteHourCallback.refreshView(mQuiteHourTile, mQuiteHourState);
+    }
+    void refreshQuiteHourTile() {
+        onQuiteHourChanged();
+    }
+
     // SSL CA Cert warning.
     public void addSslCaCertWarningTile(QuickSettingsTileView view, RefreshCallback cb) {
         mSslCaCertWarningTile = view;
@@ -940,5 +1174,37 @@ class QuickSettingsModel implements BluetoothStateChangeCallback,
         }
         mSslCaCertWarningState.label = r.getString(R.string.ssl_ca_cert_warning);
         mSslCaCertWarningCallback.refreshView(mSslCaCertWarningTile, mSslCaCertWarningState);
+    }
+
+    private void updateState() {
+        mUsbRegexs = mCM.getTetherableUsbRegexs();
+
+        String[] available = mCM.getTetherableIfaces();
+        String[] tethered = mCM.getTetheredIfaces();
+        String[] errored = mCM.getTetheringErroredIfaces();
+        updateState(available, tethered, errored);
+    }
+
+    private void updateState(String[] available, String[] tethered,
+            String[] errored) {
+        updateUsbState(available, tethered, errored);
+    }
+
+    private void updateUsbState(String[] available, String[] tethered,
+            String[] errored) {
+
+        mUsbTethered = false;
+        for (String s : tethered) {
+            for (String regex : mUsbRegexs) {
+                if (s.matches(regex)) mUsbTethered = true;
+            }
+        }
+
+    }
+
+    private void setUsbTethering(boolean enabled) {
+        if (mCM.setUsbTethering(enabled) != ConnectivityManager.TETHER_ERROR_NO_ERROR) {
+            return;
+        }
     }
 }
