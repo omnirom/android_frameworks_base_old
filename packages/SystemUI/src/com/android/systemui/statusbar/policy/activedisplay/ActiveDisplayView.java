@@ -167,7 +167,7 @@ public class ActiveDisplayView extends FrameLayout {
     private Set<String> mExcludedApps = new HashSet<String>();
     private long mDisplayTimeout = 8000L;
     private long mProximityThreshold = 5000L;
-    private boolean mTurnOffModeEnabled = true;
+    private boolean mTurnOffModeEnabled = false;
 
     /**
      * Simple class that listens to changes in notifications
@@ -208,40 +208,19 @@ public class ActiveDisplayView extends FrameLayout {
                 disableProximitySensor();
                 mNotification = null;
                 hideNotificationView();
-                if (!mKeyguardManager.isKeyguardSecure()) {
-                    sendUnlockBroadcast();
-                    // This is a BUTT ugly hack to allow dismissing the slide lock
-                    Intent intent = new Intent(mContext, DummyActivity.class);
-                    intent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_CLEAR_TOP);
-                    try {
-                        // Dismiss the lock screen when Settings starts.
-                        ActivityManagerNative.getDefault().dismissKeyguardOnNextActivity();
-                        mContext.startActivityAsUser(intent, new UserHandle(UserHandle.USER_CURRENT));
-                    } catch (RemoteException e) {
-                    }
-                }
+                unlockKeyguardActivity();
+                Intent intent = new Intent(mContext, DummyActivity.class);
+                intent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_CLEAR_TOP);
+                mContext.startActivityAsUser(intent, new UserHandle(UserHandle.USER_CURRENT));
             } else if (target == OPEN_APP_TARGET) {
                 mWakedByPocketMode = false;
                 disableProximitySensor();
                 hideNotificationView();
-                if (!mKeyguardManager.isKeyguardSecure()) {
-                    sendUnlockBroadcast();
-                    try {
-                        // Dismiss the lock screen when Settings starts.
-                        ActivityManagerNative.getDefault().dismissKeyguardOnNextActivity();
-                    } catch (RemoteException e) {
-                    }
-                }
+                unlockKeyguardActivity();
                 launchNotificationPendingIntent();
             } else if (target == DISMISS_TARGET) {
                 dismissNotification();
             }
-        }
-
-        private void sendUnlockBroadcast() {
-            Intent u = new Intent();
-            u.setAction("com.android.lockscreen.ACTION_UNLOCK_RECEIVER");
-            mContext.sendBroadcastAsUser(u, UserHandle.ALL);
         }
 
         public void onReleased(final View v, final int handle) {
@@ -453,7 +432,8 @@ public class ActiveDisplayView extends FrameLayout {
         makeActiveDisplayView(mCreationOrientation, false);
     }
 
-    @Override protected void onAttachedToWindow() {
+    @Override
+    protected void onAttachedToWindow() {
         super.onAttachedToWindow();
         mSettingsObserver.observe();
         if (mRedisplayTimeout > 0 && !isScreenOn()) updateRedisplayTimer();
@@ -638,43 +618,74 @@ public class ActiveDisplayView extends FrameLayout {
         mHandler.sendEmptyMessage(MSG_DISMISS_NOTIFICATION);
     }
 
-    private void handleShowNotificationView() {
+    private final Runnable runSystemUiVis = new Runnable() {
+        public void run() {
+            mBar.disable(0xffffffff);
+        }
+    };
+
+    private void sendUnlockBroadcast() {
+        Intent u = new Intent();
+        u.setAction("com.android.lockscreen.ACTION_UNLOCK_RECEIVER");
+        mContext.sendBroadcastAsUser(u, UserHandle.ALL);
+    }
+
+    private void disabledKeyguard() {
         if (mKeyguardLock == null) {
             mKeyguardLock = mKeyguardManager.newKeyguardLock("active_display");
             mKeyguardLock.disableKeyguard();
         }
-        setVisibility(View.VISIBLE);
-        // delay hiding system ui a bit because if the keyguard has not dismissed
-        // yet it will end up changing the visibility which we don't want
-        mHandler.postDelayed(new Runnable() {
-            @Override
-            public void run() {
-                mBar.disable(0xffffffff);
-            }
-        }, 100);
-        registerSensorListener(mLightSensor);
     }
 
-    private void handleHideNotificationView() {
+    private void enabledKeyguard() {
         if (mKeyguardLock != null) {
             mKeyguardLock.reenableKeyguard();
             mKeyguardLock = null;
         }
+    }
+
+    private void unlockKeyguardActivity() {
+        if (!mKeyguardManager.isKeyguardSecure()) {
+            sendUnlockBroadcast();
+            try {
+                 // Dismiss the lock screen when Settings starts.
+                 ActivityManagerNative.getDefault().dismissKeyguardOnNextActivity();
+            } catch (RemoteException e) {
+            }
+        }
+    }
+
+    private static void setSystemUIVisibility(View v, int visibility) {
+        v.setSystemUiVisibility(visibility);
+    }
+
+    private void handleShowNotificationView() {
+        disabledKeyguard();
+        int activeDisplayVis = View.SYSTEM_UI_FLAG_LOW_PROFILE
+                             | View.SYSTEM_UI_FLAG_FULLSCREEN
+                             | View.SYSTEM_UI_FLAG_HIDE_NAVIGATION
+                             | View.SYSTEM_UI_FLAG_LAYOUT_HIDE_NAVIGATION;
+        setSystemUIVisibility(ActiveDisplayView.this, activeDisplayVis);
+        setVisibility(View.VISIBLE);
+        mHandler.removeCallbacks(runSystemUiVis);
+        mHandler.postDelayed(runSystemUiVis, 100);
+        registerSensorListener(mLightSensor);
+    }
+
+    private void handleHideNotificationView() {
+        mHandler.removeCallbacks(runSystemUiVis);
+        enabledKeyguard();
         setVisibility(View.GONE);
         restoreBrightness();
         mWakedByPocketMode = false;
-
-        // noone is taking care of reenable the bars in this case
-        if (isLockscreenDisabled()) {
-            mBar.disable(0);
-        }
         cancelTimeoutTimer();
+        mBar.disable(0);
         unregisterSensorListener(mLightSensor);
     }
 
     private void handleShowNotification(boolean ping) {
         if (!mDisplayNotifications || mNotification == null) return;
-        showNotificationView();
+        handleShowNotificationView();
         setActiveNotification(mNotification, true);
         inflateRemoteView(mNotification);
         if (!isScreenOn()) {
@@ -695,6 +706,8 @@ public class ActiveDisplayView extends FrameLayout {
             mNotification = getNextAvailableNotification();
             if (mNotification != null) {
                 setActiveNotification(mNotification, true);
+                invalidate();
+                mGlowPadView.ping();
                 userActivity();
                 return;
             }
@@ -712,7 +725,9 @@ public class ActiveDisplayView extends FrameLayout {
         updateTargets();
         showNotificationView();
         invalidate();
-        turnScreenOn();
+        if (!isScreenOn()) {
+            turnScreenOn();
+        }
     }
 
     private void onScreenTurnedOn() {
@@ -728,6 +743,7 @@ public class ActiveDisplayView extends FrameLayout {
     }
 
     private void turnScreenOff() {
+        mHandler.removeCallbacks(runWakeDevice);
         mWakedByPocketMode = false;
         Log.i(TAG, "ActiveDisplay: turn screen off");
         try {
@@ -739,15 +755,17 @@ public class ActiveDisplayView extends FrameLayout {
     private void turnScreenOn() {
         // to avoid flicker and showing any other screen than the ActiveDisplayView
         // we use a runnable posted with a 250ms delay to turn wake the device
-        mHandler.postDelayed(new Runnable() {
-            @Override
-            public void run() {
-                setBrightness(mInitialBrightness);
-                wakeDevice();
-                doTransition(ActiveDisplayView.this, 1f, 1000);
-            }
-        }, 250);
+        mHandler.removeCallbacks(runWakeDevice);
+        mHandler.postDelayed(runWakeDevice, 250);
     }
+
+    private final Runnable runWakeDevice = new Runnable() {
+        public void run() {
+            setBrightness(mInitialBrightness);
+            wakeDevice();
+            doTransition(ActiveDisplayView.this, 1f, 1000);
+        }
+    };
 
     private boolean isScreenOn() {
         try {
@@ -767,7 +785,7 @@ public class ActiveDisplayView extends FrameLayout {
     }
 
     private void disableProximitySensor() {
-        if (mPocketMode != POCKET_MODE_OFF && mDisplayNotifications) {
+        if (mPocketMode != POCKET_MODE_OFF) {
             Log.i(TAG, "ActiveDisplay: disable ProximitySensor");
             unregisterSensorListener(mProximitySensor);
         }
@@ -1112,7 +1130,7 @@ public class ActiveDisplayView extends FrameLayout {
     }
 
     private void updateWakedByPocketMode() {
-        if (mTurnOffModeEnabled == true) {
+        if (mTurnOffModeEnabled && mDisplayNotifications) {
             mWakedByPocketMode = true;
             Log.i(TAG, "ActiveDisplay: waked by Pocketmode");
         }
@@ -1126,7 +1144,7 @@ public class ActiveDisplayView extends FrameLayout {
                 boolean isFar = value >= mProximitySensor.getMaximumRange();
                 if (isFar) {
                     mProximityIsFar = true;
-                    if (!isScreenOn() && mPocketMode != POCKET_MODE_OFF && !isOnCall()) {
+                    if (!isScreenOn() && mPocketMode != POCKET_MODE_OFF && !isOnCall() && mDisplayNotifications) {
                         if (System.currentTimeMillis() >= (mPocketTime + mProximityThreshold) && mPocketTime != 0){
 
                             if (mNotification == null) {
@@ -1143,12 +1161,13 @@ public class ActiveDisplayView extends FrameLayout {
                         }
                     }
                 } else {
-                    if (mProximityIsFar) mPocketTime = System.currentTimeMillis();
-                    mProximityIsFar = false;
+                    if (mProximityIsFar) {
+                        mPocketTime = System.currentTimeMillis();
+                        mProximityIsFar = false;
+                    }
                     if (isScreenOn() && mPocketMode != POCKET_MODE_OFF && !isOnCall() && mWakedByPocketMode) {
                         mWakedByPocketMode = false;
                         Log.i(TAG, "ActiveDisplay: sent to sleep by Pocketmode");
-
                         restoreBrightness();
                         cancelTimeoutTimer();
                         turnScreenOff();
@@ -1271,8 +1290,7 @@ public class ActiveDisplayView extends FrameLayout {
         mExcludedApps = new HashSet<String>(Arrays.asList(appsToExclude));
     }
 
-    // copied from KeyguardViewMediator
-    private boolean isLockscreenDisabled() {
+    private boolean isLockScreenDisabled() {
         LockPatternUtils utils = new LockPatternUtils(mContext);
         utils.setCurrentUser(UserHandle.USER_OWNER);
         return utils.isLockScreenDisabled();
