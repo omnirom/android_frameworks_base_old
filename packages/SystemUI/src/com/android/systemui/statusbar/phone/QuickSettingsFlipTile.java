@@ -69,7 +69,10 @@ class QuickSettingsFlipTile extends QuickSettingsTileView {
 
     @Override
     public boolean dispatchTouchEvent(MotionEvent e) {
-        return mFlip3d.onTouch(this, e);
+        if (!isEditModeEnabled()) {
+            return mFlip3d.onTouch(this, e);
+        }
+        return super.dispatchTouchEvent(e);
     }
 
     public QuickSettingsTileView getFront() {
