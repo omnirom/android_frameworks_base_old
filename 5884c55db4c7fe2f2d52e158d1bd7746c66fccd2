@@ -1,0 +1,21 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "6b8b61a3_173499f7",
+        "filename": "packages/SystemUI/src/com/android/systemui/statusbar/phone/QuickSettingsDragListener.java",
+        "patchSetId": 6
+      },
+      "lineNbr": 58,
+      "author": {
+        "id": 1000313
+      },
+      "writtenOn": "2013-12-26T18:23:10Z",
+      "side": 1,
+      "message": "this cause force closing :/",
+      "revId": "5884c55db4c7fe2f2d52e158d1bd7746c66fccd2",
+      "serverId": "56841c99-7c94-43d4-bf0b-cb4707e66d55",
+      "unresolved": false
+    }
+  ]
+}
