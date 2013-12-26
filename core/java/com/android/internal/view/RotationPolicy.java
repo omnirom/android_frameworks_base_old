@@ -64,7 +64,7 @@ public final class RotationPolicy {
      * settings.
      */
     public static boolean isRotationLockToggleSupported(Context context) {
-        return isRotationSupported(context);
+        return true; // All of our devices support this
     }
 
     /**

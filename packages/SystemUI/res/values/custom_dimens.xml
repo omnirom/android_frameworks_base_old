@@ -45,4 +45,12 @@
     <!-- AM/PM size in active display -->
     <dimen name="ad_ampm_font_size">32dp</dimen>
 
+    <!-- Quick Settings tile geometry: gap between icon and text 4 per row-->
+    <dimen name="qs_4_column_text_padding">14dp</dimen>
+
+    <!-- Quick Settings tile geometry: text size for 3 tile per row-->
+    <dimen name="qs_3_column_text_size">12sp</dimen>
+    <!-- Quick Settings tile geometry: text size for 4 tile per row-->
+    <dimen name="qs_4_column_text_size">10sp</dimen>
+
 </resources>
