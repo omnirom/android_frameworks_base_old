@@ -139,6 +139,12 @@ public class SettingsPanelView extends PanelView {
     }
 
     @Override
+    public void collapse() {
+        if(mQSContainer.isEditModeEnabled()) mQSContainer.setEditModeEnabled(false);
+        super.collapse();
+    }
+
+    @Override
     public void draw(Canvas canvas) {
         super.draw(canvas);
         final int off = (int) (getHeight() - mHandleBarHeight - getPaddingBottom());
