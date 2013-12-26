@@ -23,6 +23,7 @@ import com.android.systemui.R;
 import android.content.Context;
 import android.graphics.drawable.Drawable;
 import android.util.AttributeSet;
+import android.util.TypedValue;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.widget.FrameLayout;
@@ -81,6 +82,11 @@ class QuickSettingsBasicBackTile extends QuickSettingsTileView {
 
     public void setImageResource(int resId) {
         mImageView.setImageResource(resId);
+    }
+
+    void setTextSizes(int size) {
+        mLabelView.setTextSize(TypedValue.COMPLEX_UNIT_PX, size);
+        mFunctionView.setTextSize(TypedValue.COMPLEX_UNIT_PX, size);
     }
 
     public void setLabel(CharSequence text) {
