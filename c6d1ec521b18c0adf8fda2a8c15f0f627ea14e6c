@@ -1,0 +1,21 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "6b8b61a3_cdc37e8c",
+        "filename": "core/res/res/values/public.xml",
+        "patchSetId": 2
+      },
+      "lineNbr": 2090,
+      "author": {
+        "id": 1000313
+      },
+      "writtenOn": "2013-12-28T20:22:26Z",
+      "side": 1,
+      "message": "why this in here?",
+      "revId": "c6d1ec521b18c0adf8fda2a8c15f0f627ea14e6c",
+      "serverId": "56841c99-7c94-43d4-bf0b-cb4707e66d55",
+      "unresolved": false
+    }
+  ]
+}
