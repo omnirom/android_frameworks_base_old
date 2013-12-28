@@ -16,6 +16,24 @@
       "revId": "c6d1ec521b18c0adf8fda2a8c15f0f627ea14e6c",
       "serverId": "56841c99-7c94-43d4-bf0b-cb4707e66d55",
       "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "6b8b61a3_ad439215",
+        "filename": "core/res/res/values/public.xml",
+        "patchSetId": 2
+      },
+      "lineNbr": 2090,
+      "author": {
+        "id": 1000183
+      },
+      "writtenOn": "2013-12-28T21:17:27Z",
+      "side": 1,
+      "message": "Basically, for some reason some devices report a physical keyboard when none actually exists, and this makes the software keyboard never show up. This is off by default but if set to true it forces the software keyboard to always show up.",
+      "parentUuid": "6b8b61a3_cdc37e8c",
+      "revId": "c6d1ec521b18c0adf8fda2a8c15f0f627ea14e6c",
+      "serverId": "56841c99-7c94-43d4-bf0b-cb4707e66d55",
+      "unresolved": false
     }
   ]
 }
