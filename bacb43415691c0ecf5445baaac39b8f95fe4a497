@@ -1,0 +1,38 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "6b8b61a3_a8dd4074",
+        "filename": "core/res/res/values-fr/custom_strings.xml",
+        "patchSetId": 7
+      },
+      "lineNbr": 25,
+      "author": {
+        "id": 1000519
+      },
+      "writtenOn": "2013-12-29T19:08:04Z",
+      "side": 1,
+      "message": "mobiles",
+      "revId": "bacb43415691c0ecf5445baaac39b8f95fe4a497",
+      "serverId": "56841c99-7c94-43d4-bf0b-cb4707e66d55",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "6b8b61a3_88e08428",
+        "filename": "core/res/res/values-fr/custom_strings.xml",
+        "patchSetId": 7
+      },
+      "lineNbr": 26,
+      "author": {
+        "id": 1000519
+      },
+      "writtenOn": "2013-12-29T19:08:04Z",
+      "side": 1,
+      "message": "Les données mobiles sont désactivées",
+      "revId": "bacb43415691c0ecf5445baaac39b8f95fe4a497",
+      "serverId": "56841c99-7c94-43d4-bf0b-cb4707e66d55",
+      "unresolved": false
+    }
+  ]
+}
