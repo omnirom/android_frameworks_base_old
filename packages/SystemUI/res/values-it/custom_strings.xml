@@ -1,4 +1,4 @@
-<?xml version="1.0" encoding="utf-8"?>
+﻿<?xml version="1.0" encoding="utf-8"?>
 <!-- Copyright (C) 2013 The OmniROM Project
 
  This program is free software: you can redistribute it and/or modify
@@ -48,11 +48,11 @@
 
     <!-- QS Battery Tile -->
     <string name="quick_settings_battery_charging">In carica</string>
-    <string name="quick_settings_battery_discharging">In uso</string>
+    <string name="quick_settings_battery_discharging">Non in carica</string>
 
     <!-- QuickSettings: Immersive mode [CHAR LIMIT=NONE] -->
-    <string name="quick_settings_immersive_mode_label">Sch.intero</string>
+    <string name="quick_settings_immersive_mode_label">Modalità immersiva</string>
     <!-- QuickSettings: Immersive mode (Off) [CHAR LIMIT=NONE] -->
-    <string name="quick_settings_immersive_mode_off_label">Sch.intero spento</string>
+    <string name="quick_settings_immersive_mode_off_label">Modalità immersiva</string>
 
 </resources>
