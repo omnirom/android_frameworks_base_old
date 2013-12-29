@@ -11,7 +11,8 @@
     <!-- Reboot Confirmation Dialog.  When the user chooses to reboot the phone, there will be a confirmation dialog.  This is the message. -->
     <string name="reboot_confirm" product="tablet">Il tablet sarà riavviato.</string>
     <string name="reboot_confirm" product="default">Il telefono sarà riavviato.</string>
-    <string name="app_killed_message">Applicazioni chiuse</string>
+	
+	<string name="app_killed_message">Applicazioni chiuse</string>
 
     <!-- Title of an application permission that lets an application view/edit revoked permissions. -->
     <string name="permlab_revokePermissions">Consente di visualizzare e modificare i permessi revocati. Da non usare con le normali applicazioni.</string>
@@ -25,4 +26,5 @@
 
     <!-- stylus gestures support -->
     <string name="stylus_app_not_installed">%s non è stato installato!</string>
+	
 </resources>
