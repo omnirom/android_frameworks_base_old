@@ -16,6 +16,57 @@
       "revId": "6dca415d1038b91fe837a1451c4e55edbe59fe3b",
       "serverId": "56841c99-7c94-43d4-bf0b-cb4707e66d55",
       "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "6b8b61a3_28c77017",
+        "filename": "core/res/res/values-fr/custom_strings.xml",
+        "patchSetId": 8
+      },
+      "lineNbr": 24,
+      "author": {
+        "id": 1000516
+      },
+      "writtenOn": "2013-12-30T10:51:03Z",
+      "side": 1,
+      "message": "\u0027Données mobiles\u0027 ?",
+      "revId": "6dca415d1038b91fe837a1451c4e55edbe59fe3b",
+      "serverId": "56841c99-7c94-43d4-bf0b-cb4707e66d55",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "6b8b61a3_48ccbc37",
+        "filename": "core/res/res/values-fr/custom_strings.xml",
+        "patchSetId": 8
+      },
+      "lineNbr": 25,
+      "author": {
+        "id": 1000516
+      },
+      "writtenOn": "2013-12-30T10:51:03Z",
+      "side": 1,
+      "message": "\u0027données mobiles\u0027 ?",
+      "revId": "6dca415d1038b91fe837a1451c4e55edbe59fe3b",
+      "serverId": "56841c99-7c94-43d4-bf0b-cb4707e66d55",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "6b8b61a3_68d178d1",
+        "filename": "core/res/res/values-fr/custom_strings.xml",
+        "patchSetId": 8
+      },
+      "lineNbr": 26,
+      "author": {
+        "id": 1000516
+      },
+      "writtenOn": "2013-12-30T10:51:03Z",
+      "side": 1,
+      "message": "\u0027données mobiles sont désactivées\u0027 ?",
+      "revId": "6dca415d1038b91fe837a1451c4e55edbe59fe3b",
+      "serverId": "56841c99-7c94-43d4-bf0b-cb4707e66d55",
+      "unresolved": false
     }
   ]
 }
