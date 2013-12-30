@@ -1,0 +1,21 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "6b8b61a3_c8536c6e",
+        "filename": "core/res/res/values-fr/custom_strings.xml",
+        "patchSetId": 8
+      },
+      "lineNbr": 23,
+      "author": {
+        "id": 1000516
+      },
+      "writtenOn": "2013-12-30T10:47:36Z",
+      "side": 1,
+      "message": "I think that \u0027Carte SD de la station d\u0027accueil\u0027 would be better.",
+      "revId": "6dca415d1038b91fe837a1451c4e55edbe59fe3b",
+      "serverId": "56841c99-7c94-43d4-bf0b-cb4707e66d55",
+      "unresolved": false
+    }
+  ]
+}
