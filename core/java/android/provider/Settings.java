@@ -3105,6 +3105,13 @@ public final class Settings {
         public static final String STATUS_BAR_CUSTOM_HEADER = "status_bar_custom_header";
 
         /**
+         * Quick Settings Quick Pulldown
+         *
+         * @hide
+         */
+        public static final String QS_QUICK_PULLDOWN = "qs_quick_pulldown";
+
+        /**
          * Volume key controls ringtone or media sound stream
          *
          * @hide
@@ -3147,12 +3154,6 @@ public final class Settings {
             "navigation_ring_targets_1",
             "navigation_ring_targets_2",
         };
-
-        /**
-         * Whether to have statusbar right side pulldown.  The value is boolean (1 or 0).
-         * @hide
-         */
-        public static final String STATUS_BAR_QS_QUICK_PULLDOWN = "status_bar_qs_quick_pulldown";
 
         /**
          * Settings to backup. This is here so that it's in the same place as the settings
