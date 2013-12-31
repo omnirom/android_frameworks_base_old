@@ -550,6 +550,7 @@ public class PhoneWindowManager implements WindowManagerPolicy {
 
     // Used when key is pressed and performing non-default action
     boolean mMenuDoCustomAction;
+    boolean mMenuWasInjected = false;
     boolean mBackDoCustomAction;
 
     // Tracks user-customisable behavior for certain key events
@@ -1369,6 +1370,7 @@ public class PhoneWindowManager implements WindowManagerPolicy {
                 break;
             case KEY_ACTION_MENU:
                 triggerVirtualKeypress(KeyEvent.KEYCODE_MENU);
+                mMenuWasInjected = true;
                 break;
             case KEY_ACTION_BACK:
                 triggerVirtualKeypress(KeyEvent.KEYCODE_BACK);
@@ -3045,6 +3047,20 @@ public class PhoneWindowManager implements WindowManagerPolicy {
                         performKeyAction(mPressOnMenuBehavior);
                         return -1;
                     }
+                }
+
+                if (canceled) {
+                    return -1;
+                }
+                // special handling - after injected KEYCODE_MENU
+                // ignore the up event that comes after the virtual one
+                // else the menu may auto-close again
+                if (!virtualKey && mMenuWasInjected){
+                    mMenuWasInjected = false;
+                    if (DEBUG_INPUT) {
+                        Log.d(TAG, "ignoring KeyEvent.KEYCODE_MENU up event after virtual keypress");
+                    }
+                    return -1;
                 }
             }
         } else if (keyCode == KeyEvent.KEYCODE_SEARCH) {
