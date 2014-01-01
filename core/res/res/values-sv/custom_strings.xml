@@ -1,0 +1,20 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources xmlns:xliff="urn:oasis:names:tc:xliff:document:1.2">
+    <string name="global_action_reboot">Omstart</string>
+    <string name="reboot_system" product="tablet">Starta om surfplatta</string>
+    <string name="reboot_system" product="default">Starta om telefon</string>
+    <string name="reboot_reboot">Starta om</string>
+    <string name="reboot_progress">Startar om\u2026</string>
+    <string name="reboot_confirm" product="tablet">Din surfplatta kommer att startas om.</string>
+    <string name="reboot_confirm" product="default">Din telefon kommer att startas om.</string>
+    <string name="app_killed_message">Tvångsavslutad</string>
+    <string name="permlab_revokePermissions">Tillåter granskning och ändring av återkallade behörigheter. Bör ej användas av vanliga applikationer.</string>
+    <string name="permdesc_revokePermissions">Tillåter läsning och skrivning för återkallade behörigheter. Bör ej användas av vanliga applikationer.</string>
+    <string name="permlab_accessThemeService">Tillåter åtkomst till temaväljaren. Bör ej användas av vanliga applikationer.</string>
+    <string name="permdesc_accessThemeService">Tillåter en applikation att ställa in/återställa teman. Bör ej användas av vanliga applikationer.</string>
+    <string name="stylus_app_not_installed">%s är inte installerad</string>
+    <string name="storage_sd_dock_card">SD-kort i docka</string>
+    <string name="global_actions_toggle_mobile_data">Mobildata</string>
+    <string name="global_actions_mobile_data_on_status">Mobildata är PÅ</string>
+    <string name="global_actions_mobile_data_off_status">Mobildata är AV</string>
+</resources>
