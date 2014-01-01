@@ -1,0 +1,21 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "6b8b61a3_5909f02d",
+        "filename": "core/res/res/values/config.xml",
+        "patchSetId": 2
+      },
+      "lineNbr": 967,
+      "author": {
+        "id": 1000026
+      },
+      "writtenOn": "2014-01-01T14:03:24Z",
+      "side": 1,
+      "message": "Do we really need this?\nCant imagine that a device wants to overwrite this especially since there is a setting for it anyway now",
+      "revId": "ad27c4e13a36e314123861eba1b6a4f9b3d6a9ac",
+      "serverId": "56841c99-7c94-43d4-bf0b-cb4707e66d55",
+      "unresolved": false
+    }
+  ]
+}
