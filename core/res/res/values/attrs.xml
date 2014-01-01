@@ -1564,9 +1564,18 @@
         <enum name="KEYCODE_RO" value="217" />
         <enum name="KEYCODE_KANA" value="218" />
         <enum name="KEYCODE_ASSIST" value="219" />
-        <enum name="KEYCODE_BRIGHTNESS_DOWN" value="220" />
-        <enum name="KEYCODE_BRIGHTNESS_UP" value="221" />
-        <enum name="KEYCODE_MEDIA_AUDIO_TRACK" value="222" />
+
+        <enum name="KEYCODE_WIRELESS" value="220" />
+        <enum name="KEYCODE_BLUETOOTH" value="221" />
+        <enum name="KEYCODE_TOUCHPAD" value="222" />
+        <enum name="KEYCODE_BRIGHTNESS_UP" value="223" />
+        <enum name="KEYCODE_BRIGHTNESS_DOWN" value="224" />
+        <enum name="KEYCODE_BRIGHTNESS_AUTO" value="225" />
+        <enum name="KEYCODE_CAPTURE" value="226" />
+        <enum name="KEYCODE_EUROPE_1" value="227" />
+        <enum name="KEYCODE_EUROPE_2" value="228" />
+        <enum name="KEYCODE_SLEEP" value="229" />
+        <enum name="KEYCODE_MEDIA_AUDIO_TRACK" value="230" />
     </attr>
 
     <!-- ***************************************************************** -->
