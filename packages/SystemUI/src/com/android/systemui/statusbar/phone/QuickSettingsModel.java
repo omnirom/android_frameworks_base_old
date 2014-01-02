@@ -56,7 +56,7 @@ import com.android.systemui.statusbar.policy.RotationLockController.RotationLock
 import java.util.List;
 import java.util.Set;
 
-class QuickSettingsModel implements BluetoothStateChangeCallback,
+public class QuickSettingsModel implements BluetoothStateChangeCallback,
         NetworkSignalChangedCallback,
         BatteryStateChangeCallback,
         BrightnessStateChangeCallback,
@@ -71,9 +71,9 @@ class QuickSettingsModel implements BluetoothStateChangeCallback,
         String label;
         boolean enabled = false;
     }
-    static class BatteryState extends State {
-        int batteryLevel;
-        boolean pluggedIn;
+    public static class BatteryState extends State {
+        public int batteryLevel;
+        public boolean pluggedIn;
     }
     static class ActivityState extends State {
         boolean activityIn;
