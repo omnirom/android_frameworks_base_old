@@ -746,9 +746,11 @@ public final class BatteryService extends Binder {
             if (!mLightEnabled) {
                 // No lights if explicitly disabled
                 mBatteryLight.turnOff();
-            } else if (QuietHoursHelper.inQuietHours(mContext, Settings.System.QUIET_HOURS_DIM)) {
+            } else if (QuietHoursHelper.inQuietHours(mContext, Settings.System.QUIET_HOURS_DIM) ||
+                    QuietHoursHelper.inQuietHours(mContext, Settings.System.QUIET_HOURS_BATTERY)) {
                 if (mLedPulseEnabled && level < mLowBatteryWarningLevel &&
-                        status != BatteryManager.BATTERY_STATUS_CHARGING) {
+                        status != BatteryManager.BATTERY_STATUS_CHARGING &&
+                        !QuietHoursHelper.inQuietHours(mContext, Settings.System.QUIET_HOURS_BATTERY)) {
                     // The battery is low, the device is not charging and the low battery pulse
                     // is enabled - ignore Quiet Hours
                     mBatteryLight.setFlashing(mBatteryLowARGB, LightsService.LIGHT_FLASH_TIMED,
