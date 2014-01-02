@@ -3203,8 +3203,15 @@ public final class Settings {
         public static final String QUIET_HOURS_RINGER = "quiet_hours_ringer";
 
         /**
+         * Whether to disable battery warning during quiet hours.
+         * @hide
+         */
+        public static final String QUIET_HOURS_BATTERY = "quiet_hours_battery";
+
+        /**
          * Quick Settings Quick Pulldown
          *
+         * Whether to have statusbar right side pulldown.  The value is boolean (1 or 0).
          * @hide
          */
         public static final String QS_QUICK_PULLDOWN = "qs_quick_pulldown";
