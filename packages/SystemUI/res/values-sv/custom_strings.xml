@@ -1,0 +1,33 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- Copyright (C) 2013 The OmniROM Project
+
+ This program is free software: you can redistribute it and/or modify
+ it under the terms of the GNU General Public License as published by
+ the Free Software Foundation, either version 2 of the License, or
+ (at your option) any later version.
+
+ This program is distributed in the hope that it will be useful,
+ but WITHOUT ANY WARRANTY; without even the implied warranty of
+ MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ GNU General Public License for more details.
+
+ You should have received a copy of the GNU General Public License
+ along with this program.  If not, see <http://www.gnu.org/licenses/>.
+
+-->
+<resources xmlns:xliff="urn:oasis:names:tc:xliff:document:1.2">
+    <string name="quick_settings_wifi_tethering_label">Internetdelning</string>
+    <string name="quick_settings_bluetooth_not_discoverable_label">Ej synlig</string>
+    <string name="quick_settings_bluetooth_discoverable_label">Synlig</string>
+    <string name="quick_settings_bluetooth_disabled">Inaktiverad</string>
+    <string name="quick_settings_bluetooth_number_paired"><xliff:g id="number">%d</xliff:g> enheter parkopplade</string>
+    <string name="screenrecord_notif_ticker">Skärmen spelas in</string>
+    <string name="screenrecord_notif_title">Spelar in skärmen</string>
+    <string name="screenrecord_notif_stop">Stoppa</string>
+    <string name="screenrecord_notif_pointer">Växla pekare</string>
+    <string name="screenrecord_notif_error">Kan inte spela in skärmen</string>
+    <string name="quick_settings_battery_charging">Laddar</string>
+    <string name="quick_settings_battery_discharging">Laddar ur</string>
+    <string name="quick_settings_immersive_mode_label">Helskärm</string>
+    <string name="quick_settings_immersive_mode_off_label">Helskärm av</string>
+</resources>
