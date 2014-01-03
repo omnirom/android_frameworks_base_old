@@ -2796,11 +2796,12 @@ public class PhoneStatusBar extends BaseStatusBar implements DemoMode {
 
     private View.OnLongClickListener mEditModeLongButtonListener = new View.OnLongClickListener() {
         public boolean onLongClick(View v) {
-            animateCollapsePanels();
             Settings.System.putString(mContext.getContentResolver(),
                         Settings.System.QUICK_SETTINGS_TILES, QuickSettings.DEFAULT_TILES);
             // Update the QuickSettings container
             if (mQS != null) mQS.updateTiles();
+            mSettingsContainer.setEditModeEnabled(true);
+            mAnimatingEditModeButton = false;
             return true;
         }
     };
