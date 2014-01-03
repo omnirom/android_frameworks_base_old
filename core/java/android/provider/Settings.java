@@ -3155,10 +3155,11 @@ public final class Settings {
         };
 
         /**
-         * Whether to have statusbar right side pulldown.  The value is boolean (1 or 0).
+         * Quick Settings Quick Pulldown
+         *
          * @hide
          */
-        public static final String STATUS_BAR_QS_QUICK_PULLDOWN = "status_bar_qs_quick_pulldown";
+        public static final String QS_QUICK_PULLDOWN = "qs_quick_pulldown";
 
         /**
          * Settings to backup. This is here so that it's in the same place as the settings
