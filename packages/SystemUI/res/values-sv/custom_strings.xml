@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="utf-8"?>
-<!-- Copyright (C) 2013 The OmniROM Project
+<!-- Copyright (C) 2013-2014 The OmniROM Project
 
  This program is free software: you can redistribute it and/or modify
  it under the terms of the GNU General Public License as published by
@@ -30,4 +30,19 @@
     <string name="quick_settings_battery_discharging">Laddar ur</string>
     <string name="quick_settings_immersive_mode_label">Helskärm</string>
     <string name="quick_settings_immersive_mode_off_label">Helskärm av</string>
+    <string name="quick_settings_ringer_on">Ljud på</string>
+    <string name="quick_settings_ringer_off">Ljud av</string>
+    <string name="quick_settings_ringer_normal">Ljud</string>
+    <string name="quick_settings_rssi_type_label">Typ</string>
+    <string name="quick_settings_screen_sleep">Somna</string>
+    <string name="quick_settings_sync">Synk</string>
+    <string name="quick_settings_sync_off">Synk av</string>
+    <string name="quick_settings_torch">Ficklampa</string>
+    <string name="quick_settings_torch_off">Ficklampa av</string>
+    <string name="quick_settings_vibration_on">Vibration på</string>
+    <string name="quick_settings_vibration_off">Vibration av</string>
+    <string name="quick_settings_volume">Volym</string>
+    <string name="quick_settings_usb_tether_off_label">Frånkopplad</string>
+    <string name="quick_settings_usb_tether_connected_label">Internetdelning av</string>
+    <string name="quick_settings_usb_tether_on_label">Internetdelning</string>
 </resources>
