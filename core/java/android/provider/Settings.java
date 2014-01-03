@@ -5529,6 +5529,11 @@ public final class Settings {
         public static final String RADIO_NFC = "nfc";
 
         /**
+         * Define when Nfc polling is activated.
+         */
+        public static final String RADIO_NFC_POLLING = "nfc_polling";
+
+        /**
          * A comma separated list of radios that need to be disabled when airplane mode
          * is on. This overrides WIFI_ON and BLUETOOTH_ON, if Wi-Fi and bluetooth are
          * included in the comma separated list.
