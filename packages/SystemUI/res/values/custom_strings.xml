@@ -61,6 +61,8 @@
     <string name="network_3G" translatable="false">2G/3G Pref</string>
     <string name="network_2G" translatable="false">2G Only</string>
 
+    <string name="quick_settings_quiethours_label">Quiet hours</string>
+    <string name="quick_settings_quiethours_off_label">Quiet hours off</string>
     <string name="quick_settings_ringer_on">Sound on</string>
     <string name="quick_settings_ringer_off">Sound off</string>
     <string name="quick_settings_ringer_normal">Sound</string>
