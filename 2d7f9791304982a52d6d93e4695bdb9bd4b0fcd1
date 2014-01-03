@@ -1,0 +1,21 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "6b8b61a3_445bc4fc",
+        "filename": "core/res/res/values-sv/custom_strings.xml",
+        "patchSetId": 2
+      },
+      "lineNbr": 1,
+      "author": {
+        "id": 1000026
+      },
+      "writtenOn": "2014-01-03T19:41:37Z",
+      "side": 1,
+      "message": "On the next change please also add  the copyright header",
+      "revId": "2d7f9791304982a52d6d93e4695bdb9bd4b0fcd1",
+      "serverId": "56841c99-7c94-43d4-bf0b-cb4707e66d55",
+      "unresolved": false
+    }
+  ]
+}
