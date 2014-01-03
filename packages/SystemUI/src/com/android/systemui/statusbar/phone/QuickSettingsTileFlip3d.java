@@ -55,6 +55,10 @@ public class QuickSettingsTileFlip3d extends GestureDetector.SimpleOnGestureList
         return (mFront.getVisibility() == View.VISIBLE);
     }
 
+    public boolean isBackSide() {
+        return (mBack.getVisibility() == View.VISIBLE);
+    }
+
     public ViewGroup getFront() {
         return mFront;
     }
