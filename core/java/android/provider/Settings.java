@@ -3111,6 +3111,12 @@ public final class Settings {
         public static final String QUICK_SETTINGS_TILES = "quick_settings_tiles";
 
         /**
+         * Quick settings tiles dynamic row
+         * @hide
+         */
+        public static final String QUICK_SETTINGS_TILES_ROW = "quick_settings_tiles_row";
+
+        /**
          * Volume key controls ringtone or media sound stream
          *
          * @hide
