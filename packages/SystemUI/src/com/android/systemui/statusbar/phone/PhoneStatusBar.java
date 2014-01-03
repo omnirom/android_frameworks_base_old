@@ -53,8 +53,8 @@ import android.graphics.drawable.BitmapDrawable;
 import android.graphics.drawable.LayerDrawable;
 import android.graphics.drawable.TransitionDrawable;
 import android.inputmethodservice.InputMethodService;
-import android.net.Uri;
 import android.os.Bundle;
+import android.net.Uri;
 import android.os.Handler;
 import android.os.IBinder;
 import android.os.IPowerManager;
@@ -88,8 +88,8 @@ import android.view.animation.AccelerateInterpolator;
 import android.view.animation.Animation;
 import android.view.animation.AnimationUtils;
 import android.view.animation.DecelerateInterpolator;
-import android.widget.FrameLayout;
 import android.widget.ImageView;
+import android.widget.FrameLayout;
 import android.widget.LinearLayout;
 import android.widget.ScrollView;
 import android.widget.TabHost;
@@ -285,6 +285,8 @@ public class PhoneStatusBar extends BaseStatusBar implements DemoMode {
     private Animator mLightsOnAnimation;
 
     private boolean mBrightnessControl = true;
+    private boolean mCustomHeader = false;
+
     private float mScreenWidth;
     private int mMinBrightness;
     int mLinger;
@@ -322,7 +324,7 @@ public class PhoneStatusBar extends BaseStatusBar implements DemoMode {
         }
     };
 
-    Runnable mLongPressBrightnessChange = new Runnable() {
+    private final Runnable mLongPressBrightnessChange = new Runnable() {
         @Override
         public void run() {
             mStatusBarView.performHapticFeedback(HapticFeedbackConstants.LONG_PRESS);
@@ -362,9 +364,12 @@ public class PhoneStatusBar extends BaseStatusBar implements DemoMode {
                     Settings.System.SCREEN_BRIGHTNESS_MODE_AUTOMATIC;
             mBrightnessControl = !autoBrightness && Settings.System.getInt(
                     resolver, Settings.System.STATUS_BAR_BRIGHTNESS_CONTROL, 0) == 1;
+            mCustomHeader = Settings.System.getInt(
+                    resolver, Settings.System.STATUS_BAR_CUSTOM_HEADER, 0) == 1;
 
             updateCustomHeaderStatus();
             if (mQS != null) mQS.updateResources();
+
         }
     }
 
@@ -631,6 +636,7 @@ public class PhoneStatusBar extends BaseStatusBar implements DemoMode {
         mHasSettingsPanel = res.getBoolean(R.bool.config_hasSettingsPanel);
         mHasFlipSettings = res.getBoolean(R.bool.config_hasFlipSettingsPanel);
 
+        // Notifications date time
         mDateTimeView = mNotificationPanelHeader.findViewById(R.id.datetime);
 
         mSettingsButton = (ImageView) mStatusBarWindow.findViewById(R.id.settings_button);
@@ -783,6 +789,7 @@ public class PhoneStatusBar extends BaseStatusBar implements DemoMode {
                 mQS.setBar(mStatusBarView);
                 mQS.setup(mNetworkController, mBluetoothController, mBatteryController,
                         mLocationController, mRotationLockController);
+
                 if (mEditModeButton != null) {
                     mEditModeButton.setOnClickListener(mEditModeButtonListener);
                     mEditModeButton.setOnLongClickListener(mEditModeLongButtonListener);
@@ -827,14 +834,10 @@ public class PhoneStatusBar extends BaseStatusBar implements DemoMode {
     }
 
     private void updateCustomHeaderStatus() {
-        ContentResolver resolver = mContext.getContentResolver();
-        boolean customHeader = Settings.System.getInt(
-                resolver, Settings.System.STATUS_BAR_CUSTOM_HEADER, 0) == 1;
-
         if (mNotificationPanelHeader == null) return;
 
         // Setup the updating notification bar header image
-        if (customHeader) {
+        if (mCustomHeader) {
             if (mStatusHeaderUpdater == null) {
                 mStatusHeaderUpdater = new Runnable() {
                     private Drawable mPrevious = mNotificationPanelHeader.getBackground();
@@ -860,6 +863,7 @@ public class PhoneStatusBar extends BaseStatusBar implements DemoMode {
             if (mStatusHeaderUpdater != null) {
                 mHandler.removeCallbacks(mStatusHeaderUpdater);
             }
+            Log.i(TAG, "Updating status bar header background to default");
             setNotificationPanelHeaderBackground(mStatusHeaderMachine.getDefault());
         }
     }
@@ -1968,8 +1972,9 @@ public class PhoneStatusBar extends BaseStatusBar implements DemoMode {
 
         mExpandedVisible = false;
         mPile.setLayoutTransitionsEnabled(false);
-        if (mNavigationBarView != null)
+        if (mNavigationBarView != null) {
             mNavigationBarView.setSlippery(false);
+        }
         visibilityChanged(false);
 
         // Shrink the window to the size of the status bar only
@@ -2781,27 +2786,42 @@ public class PhoneStatusBar extends BaseStatusBar implements DemoMode {
 
     private View.OnClickListener mEditModeButtonListener = new View.OnClickListener() {
         public void onClick(View v) {
-            final boolean enabled = mSettingsContainer.isEditModeEnabled();
-            if(mAnimatingEditModeButton) return;
-            mAnimatingEditModeButton = true;
-            mEditModeButton.animate().rotationYBy(180)
-                    .setListener(new AnimatorListenerAdapter() {
-                        public void onAnimationEnd(Animator animation) {
-                            mSettingsContainer.setEditModeEnabled(!enabled);
-                            mAnimatingEditModeButton = false;
-                        }
+            if (mSettingsContainer != null) {
+                final boolean enabled = mSettingsContainer.isEditModeEnabled();
+                if (mAnimatingEditModeButton) return;
+                mAnimatingEditModeButton = true;
+                mEditModeButton.animate().rotationYBy(180)
+                       .setListener(new AnimatorListenerAdapter() {
+                            @Override
+                            public void onAnimationEnd(Animator animation) {
+                                mSettingsContainer.setEditModeEnabled(!enabled);
+                                mAnimatingEditModeButton = false;
+                            }
                 });
+            }
         }
     };
 
     private View.OnLongClickListener mEditModeLongButtonListener = new View.OnLongClickListener() {
         public boolean onLongClick(View v) {
-            Settings.System.putString(mContext.getContentResolver(),
-                        Settings.System.QUICK_SETTINGS_TILES, QuickSettings.DEFAULT_TILES);
-            // Update the QuickSettings container
-            if (mQS != null) mQS.updateTiles();
-            mSettingsContainer.setEditModeEnabled(true);
-            mAnimatingEditModeButton = false;
+            if (mSettingsContainer != null) {
+                final boolean enabled = mSettingsContainer.isEditModeEnabled();
+                if (mAnimatingEditModeButton) return false;
+                mAnimatingEditModeButton = true;
+                mEditModeButton.animate().rotationYBy(180)
+                       .setListener(new AnimatorListenerAdapter() {
+                            @Override
+                            public void onAnimationStart(Animator animation) {
+                                mSettingsContainer.resetAllTiles();
+                            }
+                            @Override
+                            public void onAnimationEnd(Animator animation) {
+                                if (mQS != null) mQS.updateTiles();
+                                mSettingsContainer.setEditModeEnabled(!enabled);
+                                mAnimatingEditModeButton = false;
+                            }
+                });
+            }
             return true;
         }
     };
