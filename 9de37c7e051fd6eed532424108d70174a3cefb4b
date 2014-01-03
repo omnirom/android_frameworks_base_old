@@ -1,0 +1,21 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "6b8b61a3_64db6054",
+        "filename": "packages/SystemUI/src/com/android/systemui/statusbar/phone/PhoneStatusBar.java",
+        "patchSetId": 6
+      },
+      "lineNbr": 2818,
+      "author": {
+        "id": 1000106
+      },
+      "writtenOn": "2014-01-03T21:53:54Z",
+      "side": 1,
+      "message": "Should have if(enabled){\n\nYou could accidentally reset your tiles if you longpress while _not_ in edit mode",
+      "revId": "9de37c7e051fd6eed532424108d70174a3cefb4b",
+      "serverId": "56841c99-7c94-43d4-bf0b-cb4707e66d55",
+      "unresolved": false
+    }
+  ]
+}
