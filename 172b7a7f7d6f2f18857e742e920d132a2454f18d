@@ -1,0 +1,21 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "6b8b61a3_478d8634",
+        "filename": "core/java/android/inputmethodservice/InputMethodService.java",
+        "patchSetId": 30
+      },
+      "lineNbr": 339,
+      "author": {
+        "id": 1000226
+      },
+      "writtenOn": "2014-01-04T19:47:13Z",
+      "side": 1,
+      "message": "Derp :D (see 5 lines above)",
+      "revId": "172b7a7f7d6f2f18857e742e920d132a2454f18d",
+      "serverId": "56841c99-7c94-43d4-bf0b-cb4707e66d55",
+      "unresolved": false
+    }
+  ]
+}
