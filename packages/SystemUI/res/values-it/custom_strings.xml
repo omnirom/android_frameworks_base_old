@@ -54,5 +54,27 @@
     <string name="quick_settings_immersive_mode_label">Modalità immersiva</string>
     <!-- QuickSettings: Immersive mode (Off) [CHAR LIMIT=NONE] -->
     <string name="quick_settings_immersive_mode_off_label">Modalità immersiva</string>
+    <string name="network_4G">4G</string>
+    <string name="network_3G_only" translatable="false">Solo 3G</string>
+    <string name="network_3G_auto" translatable="false">Auto 2G/3G</string>
+    <string name="network_3G" translatable="false">Pref.2G/3G</string>
+    <string name="network_2G" translatable="false">Solo 2G</string>
+
+    <string name="quick_settings_ringer_on">Suoni attivati</string>
+    <string name="quick_settings_ringer_off">Suoni disattivati</string>
+    <string name="quick_settings_ringer_normal">Suoni</string>
+    <string name="quick_settings_rssi_type_label">Tipo</string>
+    <string name="quick_settings_screen_sleep">Standby</string>
+    <string name="quick_settings_sync">Sync</string>
+    <string name="quick_settings_sync_off">Sync disattivato</string>
+    <string name="quick_settings_torch">Torcia</string>
+    <string name="quick_settings_torch_off">Torcia disattivata</string>
+    <string name="quick_settings_vibration_on">Vibrazione attiva</string>
+    <string name="quick_settings_vibration_off">Vibrazione disattivata</string>
+    <string name="quick_settings_volume">Volume</string>
+    <string name="quick_settings_volume_status">Stato</string>
+    <string name="quick_settings_usb_tether_off_label">Disconnesso</string>
+    <string name="quick_settings_usb_tether_connected_label">Tethering disattivato</string>
+    <string name="quick_settings_usb_tether_on_label">Tethering</string>
 
 </resources>
