@@ -16,6 +16,24 @@
       "revId": "9de37c7e051fd6eed532424108d70174a3cefb4b",
       "serverId": "56841c99-7c94-43d4-bf0b-cb4707e66d55",
       "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "6b8b61a3_047c5c18",
+        "filename": "packages/SystemUI/src/com/android/systemui/statusbar/phone/PhoneStatusBar.java",
+        "patchSetId": 6
+      },
+      "lineNbr": 2818,
+      "author": {
+        "id": 1000313
+      },
+      "writtenOn": "2014-01-04T01:51:53Z",
+      "side": 1,
+      "message": "its only allowed to reset if not animating, like onclick does\n\nif _not_ in edit mode, longpress, it will reset and stay in edit mode (user can manage Tiles)\nwhile in edit mode, longpress, it will reset and stay in _not_ edit mode (leave default tiles)\n\ni will wait people for vote about this :D\n\nwe want to reset while in edit mode or not in edit mode?",
+      "parentUuid": "6b8b61a3_64db6054",
+      "revId": "9de37c7e051fd6eed532424108d70174a3cefb4b",
+      "serverId": "56841c99-7c94-43d4-bf0b-cb4707e66d55",
+      "unresolved": false
     }
   ]
 }
