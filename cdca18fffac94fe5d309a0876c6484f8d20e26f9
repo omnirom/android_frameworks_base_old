@@ -19,6 +19,24 @@
     },
     {
       "key": {
+        "uuid": "6b8b61a3_24823899",
+        "filename": "packages/SystemUI/res/values-nl/custom_strings.xml",
+        "patchSetId": 1
+      },
+      "lineNbr": 33,
+      "author": {
+        "id": 1000381
+      },
+      "writtenOn": "2014-01-04T11:13:33Z",
+      "side": 1,
+      "message": "Slapen lijkt mij beter. Als was iets met scherm uit duidelijker geweest (in de engelse staat ook go to sleep wat ik zelf niet heel logisch vind maar dat is niet relevant)",
+      "parentUuid": "6b8b61a3_c4599491",
+      "revId": "cdca18fffac94fe5d309a0876c6484f8d20e26f9",
+      "serverId": "56841c99-7c94-43d4-bf0b-cb4707e66d55",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "6b8b61a3_e456905f",
         "filename": "packages/SystemUI/res/values-nl/custom_strings.xml",
         "patchSetId": 1
