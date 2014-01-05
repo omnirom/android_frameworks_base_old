@@ -100,6 +100,9 @@ class QuickSettingsTileView extends FrameLayout {
         if (temporary) { // No listeners needed
             setOnTouchListener(null);
             setOnDragListener(null);
+        } else {
+            setOnTouchListener(mTouchListener);
+            setOnDragListener(mDragListener);
         }
     }
 
