@@ -61,7 +61,6 @@ import android.security.KeyChain;
 import android.provider.Settings.SettingNotFoundException;
 import android.util.Log;
 import android.util.Pair;
-import android.util.TypedValue;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -70,8 +69,6 @@ import android.view.WindowManagerGlobal;
 import android.widget.ImageView;
 import android.widget.TextView;
 
-import com.android.systemui.BatteryMeterView;
-import com.android.systemui.BatteryCircleMeterView;
 import com.android.internal.app.MediaRouteDialogPresenter;
 import com.android.internal.util.omni.OmniTorchConstants;
 import com.android.systemui.R;
@@ -150,9 +147,7 @@ class QuickSettings {
     boolean mEditModeEnabled = false;
 
     private Handler mHandler;
-    private QuickSettingsTileView mBatteryTile;
-    private BatteryMeterView mBattery;
-    private BatteryCircleMeterView mCircleBattery;
+    private QuickSettingsBasicBatteryTile mBatteryTile;
     private int mBatteryStyle;
 
     private PowerManager pm;
@@ -342,13 +337,12 @@ class QuickSettings {
     }
 
     public void updateBattery() {
-        if (mBattery == null || mModel == null) {
+        if (mBatteryTile == null || mModel == null) {
             return;
         }
         mBatteryStyle = Settings.System.getInt(mContext.getContentResolver(),
                                 Settings.System.STATUS_BAR_BATTERY_STYLE, 0);
-        mCircleBattery.updateSettings();
-        mBattery.updateSettings();
+        mBatteryTile.updateBatterySettings();
         mModel.refreshBatteryTile();
     }
 
@@ -570,10 +564,8 @@ class QuickSettings {
                } else if (Tile.RSSI.toString().equals(tile.toString())) { // rssi tile
                   if (mModel.deviceHasMobileData()) {
                       // RSSI
-                      QuickSettingsTileView rssiTile = (QuickSettingsTileView)
-                              inflater.inflate(R.layout.quick_settings_tile, parent, false);
+                      final QuickSettingsBasicNetworkTile rssiTile = new QuickSettingsBasicNetworkTile(mContext);
                       rssiTile.setTileId(Tile.RSSI);
-                      rssiTile.setContent(R.layout.quick_settings_tile_rssi, inflater);
                       final ConnectivityManager cms =
                          (ConnectivityManager) mContext.getSystemService(Context.CONNECTIVITY_SERVICE);
                       rssiTile.setOnClickListener(new View.OnClickListener() {
@@ -597,26 +589,20 @@ class QuickSettings {
                             @Override
                             public void refreshView(QuickSettingsTileView view, State state) {
                                 RSSIState rssiState = (RSSIState) state;
-                                ImageView iv = (ImageView) view.findViewById(R.id.rssi_image);
-                                ImageView iov = (ImageView) view.findViewById(R.id.rssi_overlay_image);
-                                TextView tv = (TextView) view.findViewById(R.id.rssi_textview);
-                                TextView itv = (TextView) view.findViewById(R.id.rssi_type_text);
                                 // Force refresh
-                                iv.setImageDrawable(null);
-                                iv.setImageResource(rssiState.signalIconId);
+                                rssiTile.setImageDrawable(null);
+                                rssiTile.setImageResource(rssiState.signalIconId);
 
                                 if (rssiState.dataTypeIconId > 0) {
-                                    iov.setImageResource(rssiState.dataTypeIconId);
+                                    rssiTile.setImageOverlayResource(rssiState.dataTypeIconId);
                                 } else {
-                                    iov.setImageDrawable(null);
+                                    rssiTile.setImageOverlayDrawable(null);
                                 }
                                 setActivity(view, rssiState);
 
-                                tv.setText(state.label);
-                                tv.setTextSize(TypedValue.COMPLEX_UNIT_PX, view.getTextSizes());
-                                itv.setText(rssiState.networkType);
-                                itv.setTextSize(TypedValue.COMPLEX_UNIT_PX, view.getTextSizes());
-                                view.setContentDescription(mContext.getResources().getString(
+                                rssiTile.setText(state.label);
+                                rssiTile.setNetworkText(rssiState.networkType);
+                                rssiTile.setContentDescription(mContext.getResources().getString(
                                      R.string.accessibility_quick_settings_mobile,
                                      rssiState.signalContentDescription, rssiState.dataContentDescription,
                                      state.label));
@@ -669,13 +655,7 @@ class QuickSettings {
                   }
                } else if (Tile.BATTERY.toString().equals(tile.toString())) { // battery tile
                   // Battery
-                  mBatteryTile = (QuickSettingsTileView)
-                         inflater.inflate(R.layout.quick_settings_tile, parent, false);
-                  mBatteryTile.setContent(R.layout.quick_settings_tile_battery, inflater);
-                  mBattery = (BatteryMeterView) mBatteryTile.findViewById(R.id.image);
-                  mBattery.setVisibility(View.GONE);
-                  mCircleBattery = (BatteryCircleMeterView)
-                  mBatteryTile.findViewById(R.id.circle_battery);
+                  mBatteryTile = new QuickSettingsBasicBatteryTile(mContext);
                   updateBattery();
                   mBatteryTile.setTileId(Tile.BATTERY);
                   mBatteryTile.setOnClickListener(new View.OnClickListener() {
@@ -705,8 +685,7 @@ class QuickSettings {
                                         : mContext.getString(R.string.quick_settings_battery_discharging);
                                 }
                             }
-                            ((TextView)mBatteryTile.findViewById(R.id.text)).setText(t);
-                            ((TextView)mBatteryTile.findViewById(R.id.text)).setTextSize(TypedValue.COMPLEX_UNIT_PX, unused.getTextSizes());
+                            mBatteryTile.setText(t);
                             mBatteryTile.setContentDescription(
                             mContext.getString(R.string.accessibility_quick_settings_battery, t));
                         }
@@ -1175,6 +1154,7 @@ class QuickSettings {
         LayoutInflater inflater = LayoutInflater.from(mContext);
         addTiles(mContainerView, inflater, false, true);
         addTemporaryTiles(mContainerView, inflater);
+        updateResources();
     }
 
     void updateResources() {
