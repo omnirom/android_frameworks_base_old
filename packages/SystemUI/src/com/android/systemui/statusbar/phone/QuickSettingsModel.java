@@ -934,6 +934,13 @@ class QuickSettingsModel implements BluetoothStateChangeCallback,
         }
     }
 
+    void refreshRssiTile() {
+        if (mRSSICallback == null) {
+            return;
+        }
+        mRSSICallback.refreshView(mRSSITile, mRSSIState);
+    }
+
     private String getNetworkType(Resources r) {
         int state = networkModeToState(get2G3G());
         switch (state) {
@@ -977,14 +984,6 @@ class QuickSettingsModel implements BluetoothStateChangeCallback,
                 return 0;
         }
         return 0;
-    }
-
-    void refreshRssiTile() {
-        if (mRSSITile != null) {
-            // We reinflate the original view due to potential styling changes that may have
-            // taken place due to a configuration change.
-            mRSSITile.reinflateContent(LayoutInflater.from(mContext));
-        }
     }
 
     // Bluetooth
@@ -1315,7 +1314,7 @@ class QuickSettingsModel implements BluetoothStateChangeCallback,
     }
     @Override
     public void onRotationLockStateChanged(boolean rotationLocked, boolean affordanceVisible) {
-        mRotationLockState.visible = affordanceVisible;
+        mRotationLockState.visible = true;
         mRotationLockState.enabled = rotationLocked;
         mRotationLockState.iconId = rotationLocked
                 ? R.drawable.ic_qs_rotation_locked
