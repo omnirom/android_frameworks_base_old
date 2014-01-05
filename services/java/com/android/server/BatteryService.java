@@ -164,6 +164,7 @@ public final class BatteryService extends Binder {
                 com.android.internal.R.integer.config_shutdownBatteryTemperature);
         mLightEnabled = mContext.getResources().getBoolean(
                 com.android.internal.R.bool.config_intrusiveBatteryLed);
+        Slog.i(TAG, "BatteryService ... 3");
 
         // watch for invalid charger messages if the invalid_charger switch exists
         if (new File("/sys/devices/virtual/switch/invalid_charger/state").exists()) {
@@ -171,18 +172,27 @@ public final class BatteryService extends Binder {
                     "DEVPATH=/devices/virtual/switch/invalid_charger");
         }
 
+        Slog.i(TAG, "BatteryService ... 4");
+
         mBatteryPropertiesListener = new BatteryListener();
 
-        IBinder b = ServiceManager.getService("batterypropreg");
-        mBatteryPropertiesRegistrar = IBatteryPropertiesRegistrar.Stub.asInterface(b);
+        Slog.i(TAG, "BatteryService ... 5");
 
+        IBinder b = ServiceManager.getService("batterypropreg");
+        Slog.i(TAG, "BatteryService ... 6");
+        mBatteryPropertiesRegistrar = IBatteryPropertiesRegistrar.Stub.asInterface(b);
+        Slog.i(TAG, "BatteryService ... 7");
+/*
         try {
             mBatteryPropertiesRegistrar.registerListener(mBatteryPropertiesListener);
         } catch (RemoteException e) {
             // Should never happen.
         }
+*/
+        Slog.i(TAG, "BatteryService ... 8");
         SettingsObserver observer = new SettingsObserver(new Handler());
         observer.observe();
+        Slog.i(TAG, "BatteryService ... 9 DONE");
     }
 
     void systemReady() {
@@ -205,7 +215,8 @@ public final class BatteryService extends Binder {
     private boolean isPoweredLocked(int plugTypeSet) {
         // assume we are powered if battery state is unknown so
         // the "stay on while plugged in" option will work.
-        if (mBatteryProps.batteryStatus == BatteryManager.BATTERY_STATUS_UNKNOWN) {
+        if (mBatteryProps == null ||
+               mBatteryProps.batteryStatus == BatteryManager.BATTERY_STATUS_UNKNOWN) {
             return true;
         }
         if ((plugTypeSet & BatteryManager.BATTERY_PLUGGED_AC) != 0 && mBatteryProps.chargerAcOnline) {
@@ -234,7 +245,11 @@ public final class BatteryService extends Binder {
      */
     public int getBatteryLevel() {
         synchronized (mLock) {
-            return mBatteryProps.batteryLevel;
+            if (mBatteryProps != null) {
+                return mBatteryProps.batteryLevel;
+            } else {
+                return 0;
+            }
         }
     }
 
@@ -243,7 +258,11 @@ public final class BatteryService extends Binder {
      */
     public boolean isBatteryLow() {
         synchronized (mLock) {
-            return mBatteryProps.batteryPresent && mBatteryProps.batteryLevel <= mLowBatteryWarningLevel;
+            if (mBatteryProps != null) {
+                return mBatteryProps.batteryPresent && mBatteryProps.batteryLevel <= mLowBatteryWarningLevel;
+            } else {
+                return false;
+            }
         }
     }
 
@@ -259,7 +278,8 @@ public final class BatteryService extends Binder {
     private void shutdownIfNoPowerLocked() {
         // shut down gracefully if our battery is critically low and we are not powered.
         // wait until the system has booted before attempting to display the shutdown dialog.
-        if (mBatteryProps.batteryLevel == 0 && !isPoweredLocked(BatteryManager.BATTERY_PLUGGED_ANY)) {
+        if (mBatteryProps != null &&
+                mBatteryProps.batteryLevel == 0 && !isPoweredLocked(BatteryManager.BATTERY_PLUGGED_ANY)) {
             mHandler.post(new Runnable() {
                 @Override
                 public void run() {
@@ -278,7 +298,8 @@ public final class BatteryService extends Binder {
         // shut down gracefully if temperature is too high (> 68.0C by default)
         // wait until the system has booted before attempting to display the
         // shutdown dialog.
-        if (mBatteryProps.batteryTemperature > mShutdownBatteryTemperature) {
+        if (mBatteryProps != null &&
+                mBatteryProps.batteryTemperature > mShutdownBatteryTemperature) {
             mHandler.post(new Runnable() {
                 @Override
                 public void run() {
@@ -306,6 +327,12 @@ public final class BatteryService extends Binder {
     private void processValuesLocked() {
         boolean logOutlier = false;
         long dischargeDuration = 0;
+
+        if (mBatteryProps == null) {
+            mPlugType = BatteryManager.BATTERY_PLUGGED_AC;
+            return;
+        }
+
 
         mBatteryLevelCritical = (mBatteryProps.batteryLevel <= mCriticalBatteryLevel);
         if (mBatteryProps.chargerAcOnline) {
