@@ -826,6 +826,7 @@ class QuickSettingsModel implements BluetoothStateChangeCallback,
         mRSSICallback = cb;
         mRSSICallback.refreshView(mRSSITile, mRSSIState);
     }
+
     // NetworkSignalChanged callback
     @Override
     public void onMobileDataSignalChanged(
@@ -855,6 +856,13 @@ class QuickSettingsModel implements BluetoothStateChangeCallback,
             mRSSIState.networkType = getNetworkType(r);
             mRSSICallback.refreshView(mRSSITile, mRSSIState);
         }
+    }
+
+    void refreshingRSSITile() {
+        if (mRSSICallback == null) {
+            return;
+        }
+        mRSSICallback.refreshView(mRSSITile, mRSSIState);
     }
 
     private String getNetworkType(Resources r) {
@@ -908,6 +916,7 @@ class QuickSettingsModel implements BluetoothStateChangeCallback,
             // taken place due to a configuration change.
             mRSSITile.reinflateContent(LayoutInflater.from(mContext));
         }
+        refreshingRSSITile();
     }
 
     // Bluetooth
