@@ -173,15 +173,20 @@ public class LightsService {
     };
 
     LightsService(Context context) {
-
+        mContext = context;
+/*        Slog.i(TAG, "Initializing LightsService... 1");
         mNativePointer = init_native();
+        Slog.i(TAG, "Initializing LightsService... 2");
         mContext = context;
 
+        Slog.i(TAG, "Initializing LightsService... 3");
         ServiceManager.addService("hardware", mLegacyFlashlightHack);
+        Slog.i(TAG, "Initializing LightsService... 4");
 
         for (int i = 0; i < LIGHT_ID_COUNT; i++) {
             mLights[i] = new Light(i);
         }
+        Slog.i(TAG, "Initializing LightsService... Done!");*/
     }
 
     protected void finalize() throws Throwable {
@@ -190,7 +195,9 @@ public class LightsService {
     }
 
     public Light getLight(int id) {
-        return mLights[id];
+        Slog.i(TAG, "GETLIGHT: RETURNS NULL!");
+        return null;
+//        return mLights[id];
     }
 
     private Handler mH = new Handler() {
