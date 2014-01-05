@@ -1175,6 +1175,7 @@ class QuickSettings {
         LayoutInflater inflater = LayoutInflater.from(mContext);
         addTiles(mContainerView, inflater, false, true);
         addTemporaryTiles(mContainerView, inflater);
+        updateResources();
     }
 
     void updateResources() {
@@ -1182,6 +1183,7 @@ class QuickSettings {
 
         // Update the model
         mModel.refreshBatteryTile();
+        mModel.refreshingRSSITile();
 
         QuickSettingsContainerView container = ((QuickSettingsContainerView)mContainerView);
 
