@@ -32,7 +32,7 @@ public final class PhoneStatusBarTransitions extends BarTransitions {
     private final PhoneStatusBarView mView;
     private final float mIconAlphaWhenOpaque;
 
-    private View mLeftSide, mStatusIcons, mSignalCluster, mBattery, mClock;
+    private View mLeftSide, mStatusIcons, mSignalCluster, mBattery, mClock, mCircleBattery, mTraffic;
     private Animator mCurrentAnimation;
 
     public PhoneStatusBarTransitions(PhoneStatusBarView view) {
@@ -47,6 +47,8 @@ public final class PhoneStatusBarTransitions extends BarTransitions {
         mStatusIcons = mView.findViewById(R.id.statusIcons);
         mSignalCluster = mView.findViewById(R.id.signal_cluster);
         mBattery = mView.findViewById(R.id.battery);
+        mCircleBattery = mView.findViewById(R.id.circle_battery);
+        mTraffic = mView.findViewById(R.id.traffic);
         mClock = mView.findViewById(R.id.clock);
         applyModeBackground(-1, getMode(), false /*animate*/);
         applyMode(getMode(), false /*animate*/);
@@ -90,7 +92,9 @@ public final class PhoneStatusBarTransitions extends BarTransitions {
                     animateTransitionTo(mLeftSide, newAlpha),
                     animateTransitionTo(mStatusIcons, newAlpha),
                     animateTransitionTo(mSignalCluster, newAlpha),
+                    animateTransitionTo(mTraffic, newAlpha),
                     animateTransitionTo(mBattery, newAlphaBC),
+                    animateTransitionTo(mCircleBattery, newAlphaBC),
                     animateTransitionTo(mClock, newAlphaBC)
                     );
             if (mode == MODE_LIGHTS_OUT) {
@@ -102,7 +106,9 @@ public final class PhoneStatusBarTransitions extends BarTransitions {
             mLeftSide.setAlpha(newAlpha);
             mStatusIcons.setAlpha(newAlpha);
             mSignalCluster.setAlpha(newAlpha);
+            mTraffic.setAlpha(newAlpha);
             mBattery.setAlpha(newAlphaBC);
+            mCircleBattery.setAlpha(newAlphaBC);
             mClock.setAlpha(newAlphaBC);
         }
     }
