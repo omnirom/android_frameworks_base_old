@@ -68,16 +68,4 @@
         android:layout_below="@id/rssi_images"
         android:textAllCaps="@bool/quick_settings_rssi_tile_capitalization"
         />
-    <TextView
-        style="@style/TextAppearance.QuickSettings.TileView"
-        android:id="@+id/rssi_type_text"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:layout_gravity="top|center_horizontal"
-        android:gravity="top|center_horizontal"
-        android:text="@string/quick_settings_rssi_type_label"
-        android:layout_centerHorizontal="true"
-        android:layout_below="@id/rssi_textview"
-        android:textAllCaps="@bool/quick_settings_rssi_tile_capitalization"
-        />
 </RelativeLayout>
