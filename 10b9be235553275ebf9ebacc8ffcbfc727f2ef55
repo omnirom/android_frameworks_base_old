@@ -1,0 +1,72 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "6b8b61a3_50237ea7",
+        "filename": "core/res/res/values-mcc204-mnc04/config.xml",
+        "patchSetId": 2
+      },
+      "lineNbr": 30,
+      "author": {
+        "id": 1000008
+      },
+      "writtenOn": "2014-01-06T23:13:24Z",
+      "side": 1,
+      "message": "Fairly certain the config for 20404 doesn\u0027t need 20404...",
+      "revId": "10b9be235553275ebf9ebacc8ffcbfc727f2ef55",
+      "serverId": "56841c99-7c94-43d4-bf0b-cb4707e66d55",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "6b8b61a3_70287a81",
+        "filename": "core/res/res/values-mcc204-mnc08/config.xml",
+        "patchSetId": 2
+      },
+      "lineNbr": 24,
+      "author": {
+        "id": 1000008
+      },
+      "writtenOn": "2014-01-06T23:13:24Z",
+      "side": 1,
+      "message": "Similarly, 20408 shouldn\u0027t have 20408...",
+      "revId": "10b9be235553275ebf9ebacc8ffcbfc727f2ef55",
+      "serverId": "56841c99-7c94-43d4-bf0b-cb4707e66d55",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "6b8b61a3_901d0668",
+        "filename": "core/res/res/values-mcc204-mnc12/config.xml",
+        "patchSetId": 2
+      },
+      "lineNbr": 25,
+      "author": {
+        "id": 1000008
+      },
+      "writtenOn": "2014-01-06T23:13:24Z",
+      "side": 1,
+      "message": "Same as the others.",
+      "revId": "10b9be235553275ebf9ebacc8ffcbfc727f2ef55",
+      "serverId": "56841c99-7c94-43d4-bf0b-cb4707e66d55",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "6b8b61a3_b022029f",
+        "filename": "core/res/res/values-mcc204-mnc16/config.xml",
+        "patchSetId": 2
+      },
+      "lineNbr": 26,
+      "author": {
+        "id": 1000008
+      },
+      "writtenOn": "2014-01-06T23:13:24Z",
+      "side": 1,
+      "message": "Same as the previous three",
+      "revId": "10b9be235553275ebf9ebacc8ffcbfc727f2ef55",
+      "serverId": "56841c99-7c94-43d4-bf0b-cb4707e66d55",
+      "unresolved": false
+    }
+  ]
+}
