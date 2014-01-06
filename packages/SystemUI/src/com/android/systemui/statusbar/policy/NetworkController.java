@@ -1209,7 +1209,9 @@ public class NetworkController extends BroadcastReceiver implements DemoMode {
                 ? mContentDescriptionDataType : mContentDescriptionWifi;
 
             mDataTypeIconId = 0;
-            mQSDataTypeIconId = 0;
+            if (!mHasMobileDataFeature) {
+                mQSDataTypeIconId = 0;
+            }
             if (isCdma()) {
                 if (isCdmaEri()) {
                     mDataTypeIconId = R.drawable.stat_sys_data_fully_connected_roam;

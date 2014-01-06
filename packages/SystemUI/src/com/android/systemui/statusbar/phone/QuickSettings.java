@@ -558,17 +558,19 @@ class QuickSettings {
                } else if (Tile.RSSI.toString().equals(tile.toString())) { // rssi tile
                   if (mModel.deviceHasMobileData()) {
                       // RSSI
-                      final QuickSettingsBasicNetworkTile rssiTile = new QuickSettingsBasicNetworkTile(mContext);
+                      final QuickSettingsNetworkFlipTile rssiTile
+                                  = new QuickSettingsNetworkFlipTile(mContext);
                       rssiTile.setTileId(Tile.RSSI);
                       final ConnectivityManager cms =
                          (ConnectivityManager) mContext.getSystemService(Context.CONNECTIVITY_SERVICE);
-                      rssiTile.setOnClickListener(new View.OnClickListener() {
+                      rssiTile.setBackLabel(mContext.getString(R.string.quick_settings_network_type));
+                      rssiTile.setFrontOnClickListener(new View.OnClickListener() {
                            @Override
                            public void onClick(View v) {
                               boolean currentState = cms.getMobileDataEnabled();
                               cms.setMobileDataEnabled(!currentState);
                       }} );
-                      rssiTile.setOnLongClickListener(new View.OnLongClickListener() {
+                      rssiTile.setFrontOnLongClickListener(new View.OnLongClickListener() {
                             @Override
                             public boolean onLongClick(View v) {
                                 Intent intent = new Intent();
@@ -579,27 +581,44 @@ class QuickSettings {
                                 return true;
                             }
                       });
-                      mModel.addRSSITile(rssiTile, new NetworkActivityCallback() {
+                      mModel.addRSSITile(rssiTile.getFront(), new NetworkActivityCallback() {
                             @Override
                             public void refreshView(QuickSettingsTileView view, State state) {
                                 RSSIState rssiState = (RSSIState) state;
                                 // Force refresh
-                                rssiTile.setImageDrawable(null);
-                                rssiTile.setImageResource(rssiState.signalIconId);
+                                rssiTile.setFrontImageDrawable(null);
+                                rssiTile.setFrontImageResource(rssiState.signalIconId);
 
                                 if (rssiState.dataTypeIconId > 0) {
-                                    rssiTile.setImageOverlayResource(rssiState.dataTypeIconId);
+                                    rssiTile.setFrontImageOverlayResource(rssiState.dataTypeIconId);
                                 } else {
-                                    rssiTile.setImageOverlayDrawable(null);
+                                    rssiTile.setFrontImageOverlayDrawable(null);
                                 }
                                 setActivity(view, rssiState);
 
-                                rssiTile.setText(state.label);
-                                rssiTile.setNetworkText(rssiState.networkType);
+                                rssiTile.setFrontText(state.label);
                                 rssiTile.setContentDescription(mContext.getResources().getString(
                                      R.string.accessibility_quick_settings_mobile,
                                      rssiState.signalContentDescription, rssiState.dataContentDescription,
                                      state.label));
+                           }
+                      });
+                      rssiTile.setBackOnLongClickListener(new View.OnLongClickListener() {
+                           @Override
+                           public boolean onLongClick(View v) {
+                               Intent intent = new Intent(Intent.ACTION_MAIN);
+                               intent.setClassName("com.android.phone", "com.android.phone.Settings");
+                               intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
+                               startSettingsActivity(intent);
+                               return true;
+                           }
+                      });
+
+                      mModel.addMobileNetworkTile(rssiTile.getBack(), new QuickSettingsModel.RefreshCallback() {
+                           @Override
+                           public void refreshView(QuickSettingsTileView view, State mobileNetworkState) {
+                               rssiTile.setBackFunction(mobileNetworkState.label);
+                               rssiTile.setBackImageResource(mobileNetworkState.iconId);
                            }
                       });
                       parent.addView(rssiTile);
