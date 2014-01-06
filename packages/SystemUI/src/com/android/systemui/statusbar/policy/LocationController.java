@@ -135,6 +135,33 @@ public class LocationController extends BroadcastReceiver {
                 .putIntForUser(cr, Settings.Secure.LOCATION_MODE, mode, currentUserId);
     }
 
+    public boolean setBackLocationEnabled(int location) {
+        int currentUserId = ActivityManager.getCurrentUser();
+        if (isUserLocationRestricted(currentUserId)) {
+            return false;
+        }
+        final ContentResolver cr = mContext.getContentResolver();
+        int mode = Settings.Secure.LOCATION_MODE_OFF;
+        switch (location) {
+            case Settings.Secure.LOCATION_MODE_OFF:
+                mode = Settings.Secure.LOCATION_MODE_SENSORS_ONLY;
+            case Settings.Secure.LOCATION_MODE_SENSORS_ONLY:
+                mode = Settings.Secure.LOCATION_MODE_BATTERY_SAVING;
+            case Settings.Secure.LOCATION_MODE_BATTERY_SAVING:
+                mode = Settings.Secure.LOCATION_MODE_HIGH_ACCURACY;
+            case Settings.Secure.LOCATION_MODE_HIGH_ACCURACY:
+                mode = Settings.Secure.LOCATION_MODE_OFF;
+        }
+        return Settings.Secure
+                .putIntForUser(cr, Settings.Secure.LOCATION_MODE, mode, currentUserId);
+    }
+
+    public int locationMode() {
+        ContentResolver resolver = mContext.getContentResolver();
+        return Settings.Secure.getIntForUser(resolver, Settings.Secure.LOCATION_MODE,
+                Settings.Secure.LOCATION_MODE_OFF, ActivityManager.getCurrentUser());
+    }
+
     /**
      * Returns true if location isn't disabled in settings.
      */
