@@ -115,7 +115,8 @@ class QuickSettings {
         SLEEP,
         SYNC,
         USBMODE,
-        TORCH
+        TORCH,
+        ALARM
     }
 
     public static final String NO_TILES = "NO_TILES";
@@ -125,7 +126,7 @@ class QuickSettings {
         + DELIMITER + Tile.RSSI + DELIMITER + Tile.BLUETOOTH + DELIMITER + Tile.VOLUME
         + DELIMITER + Tile.BATTERY + DELIMITER + Tile.ROTATION+ DELIMITER + Tile.IMMERSIVE
         + DELIMITER + Tile.LOCATION + DELIMITER + Tile.AIRPLANE
-        + DELIMITER + Tile.USBMODE + DELIMITER + Tile.SLEEP + DELIMITER + Tile.SYNC;
+        + DELIMITER + Tile.USBMODE + DELIMITER + Tile.SLEEP + DELIMITER + Tile.SYNC + Tile.ALARM;
 
     private Context mContext;
     private PanelBar mBar;
@@ -884,6 +885,29 @@ class QuickSettings {
                   });
                   parent.addView(SleepTile);
                   if (addMissing) SleepTile.setVisibility(View.GONE);
+               } else if (Tile.ALARM.toString().equals(tile.toString())) { // Alarm tile
+                  // Alarm tile
+                  final QuickSettingsBasicTile alarmTile
+                       = new QuickSettingsBasicTile(mContext);
+                  alarmTile.setImageResource(R.drawable.ic_qs_alarm_on);
+                  alarmTile.setOnClickListener(new View.OnClickListener() {
+                       @Override
+                       public void onClick(View v) {
+                           startSettingsActivity(new Intent(AlarmClock.ACTION_SHOW_ALARMS));
+                       }
+                  });
+                  mModel.addAlarmTile(alarmTile, new QuickSettingsModel.RefreshCallback() {
+                       @Override
+                       public void refreshView(QuickSettingsTileView unused, State alarmState) {
+                           alarmTile.setText(alarmState.label);
+                           alarmTile.setVisibility(alarmState.enabled ? View.VISIBLE : View.GONE);
+                           alarmTile.setTemporary(alarmState.enabled ? false : true);
+                           alarmTile.setContentDescription(mContext.getString(
+                                 R.string.accessibility_quick_settings_alarm, alarmState.label));
+                       }
+                  });
+                  parent.addView(alarmTile);
+                  if (addMissing) alarmTile.setVisibility(View.GONE);
                } else if (Tile.BLUETOOTH.toString().equals(tile.toString())) { // Bluetooth
                   // Bluetooth
                   if (mModel.deviceSupportsBluetooth()
@@ -1029,28 +1053,6 @@ class QuickSettings {
     }
 
     private void addTemporaryTiles(final ViewGroup parent, final LayoutInflater inflater) {
-        // Alarm tile
-        final QuickSettingsBasicTile alarmTile
-                = new QuickSettingsBasicTile(mContext);
-        alarmTile.setTemporary(true);
-        alarmTile.setImageResource(R.drawable.ic_qs_alarm_on);
-        alarmTile.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                startSettingsActivity(new Intent(AlarmClock.ACTION_SHOW_ALARMS));
-            }
-        });
-        mModel.addAlarmTile(alarmTile, new QuickSettingsModel.RefreshCallback() {
-            @Override
-            public void refreshView(QuickSettingsTileView unused, State alarmState) {
-                alarmTile.setText(alarmState.label);
-                alarmTile.setVisibility(alarmState.enabled ? View.VISIBLE : View.GONE);
-                alarmTile.setContentDescription(mContext.getString(
-                        R.string.accessibility_quick_settings_alarm, alarmState.label));
-            }
-        });
-        parent.addView(alarmTile);
-
         // Remote Display
         QuickSettingsBasicTile remoteDisplayTile
                 = new QuickSettingsBasicTile(mContext);
@@ -1123,22 +1125,6 @@ class QuickSettings {
             }
         });
         parent.addView(bugreportTile);
-        /*
-        QuickSettingsTileView mediaTile = (QuickSettingsTileView)
-                inflater.inflate(R.layout.quick_settings_tile, parent, false);
-        mediaTile.setContent(R.layout.quick_settings_tile_media, inflater);
-        parent.addView(mediaTile);
-        QuickSettingsTileView imeTile = (QuickSettingsTileView)
-                inflater.inflate(R.layout.quick_settings_tile, parent, false);
-        imeTile.setContent(R.layout.quick_settings_tile_ime, inflater);
-        imeTile.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                parent.removeViewAt(0);
-            }
-        });
-        parent.addView(imeTile);
-        */
 
         // SSL CA Cert Warning.
         final QuickSettingsBasicTile sslCaCertWarningTile =
