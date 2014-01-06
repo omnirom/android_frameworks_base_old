@@ -69,6 +69,9 @@
     <string name="quick_settings_sleep_label_back_600">10m</string>
     <string name="quick_settings_sleep_label_back_1800">30m</string>
     <string name="quick_settings_sleep_label_back_unknown">0000</string>
+    <string name="quick_settings_location_mode_high">High</string>
+    <string name="quick_settings_location_mode_battery">Battery</string>
+    <string name="quick_settings_location_mode_sensors">Device</string>
     <string name="quick_settings_ringer_on">Sound on</string>
     <string name="quick_settings_ringer_off">Sound off</string>
     <string name="quick_settings_ringer_normal">Sound</string>

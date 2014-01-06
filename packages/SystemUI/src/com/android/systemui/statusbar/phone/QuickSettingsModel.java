@@ -55,6 +55,7 @@ import com.android.systemui.R;
 import com.android.systemui.settings.BrightnessController.BrightnessStateChangeCallback;
 import com.android.systemui.settings.CurrentUserTracker;
 import com.android.systemui.statusbar.policy.BatteryController.BatteryStateChangeCallback;
+import com.android.systemui.statusbar.policy.LocationController;
 import com.android.systemui.statusbar.policy.LocationController.LocationSettingsChangeCallback;
 import com.android.systemui.statusbar.policy.NetworkController.NetworkSignalChangedCallback;
 import com.android.systemui.statusbar.policy.RotationLockController;
@@ -345,6 +346,7 @@ class QuickSettingsModel implements BluetoothStateChangeCallback,
     private final ImmersiveObserver mImmersiveObserver;
     private final RingerObserver mRingerObserver;
     private final SleepObserver mSleepObserver;
+    private LocationController mLocationController;
 
     private ConnectivityManager mCM;
     private boolean mUsbTethered = false;
@@ -446,6 +448,10 @@ class QuickSettingsModel implements BluetoothStateChangeCallback,
     private QuickSettingsTileView mLocationTile;
     private RefreshCallback mLocationCallback;
     private State mLocationState = new State();
+
+    private QuickSettingsTileView mBackLocationTile;
+    private RefreshCallback mBackLocationCallback;
+    private State mBackLocationState = new State();
 
     private QuickSettingsTileView mImeTile;
     private RefreshCallback mImeCallback = null;
@@ -573,6 +579,7 @@ class QuickSettingsModel implements BluetoothStateChangeCallback,
         refreshRssiTile();
         refreshLocationTile();
         updateSleepState();
+        refreshBackLocationTile();
     }
 
     // Settings
@@ -863,6 +870,7 @@ class QuickSettingsModel implements BluetoothStateChangeCallback,
         mRSSICallback = cb;
         mRSSICallback.refreshView(mRSSITile, mRSSIState);
     }
+
     // NetworkSignalChanged callback
     @Override
     public void onMobileDataSignalChanged(
@@ -1068,6 +1076,41 @@ class QuickSettingsModel implements BluetoothStateChangeCallback,
         mLocationState.label = label;
         mLocationState.iconId = locationIconId;
         mLocationCallback.refreshView(mLocationTile, mLocationState);
+        refreshBackLocationTile();
+    }
+
+    void addBackLocationTile(QuickSettingsTileView view, LocationController controller, RefreshCallback cb) {
+        mBackLocationTile = view;
+        mLocationController = controller;
+        mBackLocationCallback = cb;
+        mBackLocationCallback.refreshView(mBackLocationTile, mBackLocationState);
+    }
+
+    void refreshBackLocationTile() {
+        if (mBackLocationTile != null) {
+            onBackLocationSettingsChanged(mLocationController.locationMode(), mLocationState.enabled);
+        }
+    }
+
+    private void onBackLocationSettingsChanged(int mode, boolean locationEnabled) {
+        int locationIconId = locationEnabled
+                ? R.drawable.ic_qs_location_on : R.drawable.ic_qs_location_off;
+        mBackLocationState.enabled = locationEnabled;
+        mBackLocationState.label = getLocationMode(mContext.getResources(), mode);
+        mBackLocationState.iconId = locationIconId;
+        mBackLocationCallback.refreshView(mBackLocationTile, mBackLocationState);
+    }
+
+    private String getLocationMode(Resources r, int location) {
+        switch (location) {
+            case Settings.Secure.LOCATION_MODE_SENSORS_ONLY:
+                return r.getString(R.string.quick_settings_location_mode_sensors);
+            case Settings.Secure.LOCATION_MODE_BATTERY_SAVING:
+                return r.getString(R.string.quick_settings_location_mode_battery);
+            case Settings.Secure.LOCATION_MODE_HIGH_ACCURACY:
+                return r.getString(R.string.quick_settings_location_mode_high);
+        }
+        return r.getString(R.string.quick_settings_location_off_label);
     }
 
     // Bug report
