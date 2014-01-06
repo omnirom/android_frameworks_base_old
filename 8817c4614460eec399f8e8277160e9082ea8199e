@@ -1,0 +1,38 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "6b8b61a3_155e4846",
+        "filename": "packages/SystemUI/src/com/android/systemui/statusbar/phone/PhoneStatusBarTransitions.java",
+        "patchSetId": 3
+      },
+      "lineNbr": 98,
+      "author": {
+        "id": 1000117
+      },
+      "writtenOn": "2014-01-06T20:09:34Z",
+      "side": 1,
+      "message": "Let\u0027s try    \"animateTransitionTo(mTraffic, newAlpha)\"",
+      "revId": "8817c4614460eec399f8e8277160e9082ea8199e",
+      "serverId": "56841c99-7c94-43d4-bf0b-cb4707e66d55",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "6b8b61a3_355b4457",
+        "filename": "packages/SystemUI/src/com/android/systemui/statusbar/phone/PhoneStatusBarTransitions.java",
+        "patchSetId": 3
+      },
+      "lineNbr": 112,
+      "author": {
+        "id": 1000117
+      },
+      "writtenOn": "2014-01-06T20:09:34Z",
+      "side": 1,
+      "message": "Let\u0027s try   \"mTraffic.set alpha(newAlpha)\" here",
+      "revId": "8817c4614460eec399f8e8277160e9082ea8199e",
+      "serverId": "56841c99-7c94-43d4-bf0b-cb4707e66d55",
+      "unresolved": false
+    }
+  ]
+}
