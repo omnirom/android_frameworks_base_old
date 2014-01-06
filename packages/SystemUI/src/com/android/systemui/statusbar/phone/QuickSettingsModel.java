@@ -38,10 +38,12 @@ import android.net.ConnectivityManager;
 import android.net.wifi.WifiManager;
 import android.net.wifi.WifiInfo;
 import android.os.Handler;
+import android.os.SystemProperties;
 import android.os.UserHandle;
 import android.os.Vibrator;
 import android.provider.Settings;
 import android.provider.Settings.SettingNotFoundException;
+import android.telephony.TelephonyManager;
 import android.text.TextUtils;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -50,6 +52,7 @@ import android.view.inputmethod.InputMethodManager;
 import android.view.inputmethod.InputMethodSubtype;
 
 import com.android.internal.telephony.Phone;
+import com.android.internal.telephony.PhoneConstants;
 import com.android.internal.util.omni.OmniTorchConstants;
 import com.android.systemui.R;
 import com.android.systemui.settings.BrightnessController.BrightnessStateChangeCallback;
@@ -92,7 +95,6 @@ class QuickSettingsModel implements BluetoothStateChangeCallback,
         String signalContentDescription;
         int dataTypeIconId;
         String dataContentDescription;
-        String networkType;
     }
     static class WifiState extends ActivityState {
         String signalContentDescription;
@@ -273,6 +275,24 @@ class QuickSettingsModel implements BluetoothStateChangeCallback,
         }
     }
 
+    /** ContentObserver to watch Network State */
+    private class NetworkObserver extends ContentObserver {
+        public NetworkObserver(Handler handler) {
+            super(handler);
+        }
+
+        @Override
+        public void onChange(boolean selfChange) {
+            onMobileNetworkChanged();
+        }
+
+        public void startObserving() {
+            final ContentResolver cr = mContext.getContentResolver();
+            cr.registerContentObserver(Settings.Global.getUriFor(
+                    Settings.Global.PREFERRED_NETWORK_MODE), false, this);
+        }
+    }
+
     /** ContentObserver to watch immersive **/
     private class ImmersiveObserver extends ContentObserver {
         public ImmersiveObserver(Handler handler) {
@@ -325,6 +345,7 @@ class QuickSettingsModel implements BluetoothStateChangeCallback,
     private final BrightnessObserver mBrightnessObserver;
     private final ImmersiveObserver mImmersiveObserver;
     private final RingerObserver mRingerObserver;
+    private final NetworkObserver mMobileNetworkObserver;
 
     private ConnectivityManager mCM;
     private boolean mUsbTethered = false;
@@ -399,6 +420,10 @@ class QuickSettingsModel implements BluetoothStateChangeCallback,
     private RefreshCallback mRSSICallback;
     private RSSIState mRSSIState = new RSSIState();
 
+    private QuickSettingsTileView mMobileNetworkTile;
+    private RefreshCallback mMobileNetworkCallback;
+    private State mMobileNetworkState = new State();
+
     private QuickSettingsTileView mBluetoothTile;
     private QuickSettingsTileView mBluetoothBackTile;
     private RefreshCallback mBluetoothCallback;
@@ -464,13 +489,14 @@ class QuickSettingsModel implements BluetoothStateChangeCallback,
             public void onUserSwitched(int newUserId) {
                 mBrightnessObserver.startObserving();
                 mImmersiveObserver.startObserving();
+                mRingerObserver.startObserving();
+                mMobileNetworkObserver.startObserving();
                 refreshRotationLockTile();
                 onBrightnessLevelChanged();
                 onNextAlarmChanged();
                 onBugreportChanged();
                 rebindMediaRouterAsCurrentUser();
                 onUsbChanged();
-                updateRingerState();
             }
         };
 
@@ -484,6 +510,8 @@ class QuickSettingsModel implements BluetoothStateChangeCallback,
         mImmersiveObserver.startObserving();
         mRingerObserver = new RingerObserver(mHandler);
         mRingerObserver.startObserving();
+        mMobileNetworkObserver = new NetworkObserver(mHandler);
+        mMobileNetworkObserver.startObserving();
 
         mMediaRouter = (MediaRouter)context.getSystemService(Context.MEDIA_ROUTER_SERVICE);
         rebindMediaRouterAsCurrentUser();
@@ -536,6 +564,8 @@ class QuickSettingsModel implements BluetoothStateChangeCallback,
         refreshRotationLockTile();
         refreshRssiTile();
         refreshLocationTile();
+        updateRingerState();
+        onMobileNetworkChanged();
     }
 
     // Settings
@@ -826,6 +856,7 @@ class QuickSettingsModel implements BluetoothStateChangeCallback,
         mRSSICallback = cb;
         mRSSICallback.refreshView(mRSSITile, mRSSIState);
     }
+
     // NetworkSignalChanged callback
     @Override
     public void onMobileDataSignalChanged(
@@ -852,24 +883,151 @@ class QuickSettingsModel implements BluetoothStateChangeCallback,
             mRSSIState.label = enabled
                     ? removeTrailingPeriod(enabledDesc)
                     : r.getString(R.string.quick_settings_rssi_emergency_only);
-            mRSSIState.networkType = getNetworkType(r);
             mRSSICallback.refreshView(mRSSITile, mRSSIState);
         }
     }
 
+    void refreshRssiTile() {
+        if (mRSSICallback == null) {
+            return;
+        }
+        mRSSICallback.refreshView(mRSSITile, mRSSIState);
+    }
+
+    boolean deviceSupportsCDMALTE() {
+        final TelephonyManager tm =
+            (TelephonyManager) mContext.getSystemService(Context.TELEPHONY_SERVICE);
+        return (tm.getLteOnCdmaMode() == PhoneConstants.LTE_ON_CDMA_TRUE);
+    }
+
+    boolean deviceSupportsGSMLTE() {
+        final TelephonyManager tm =
+            (TelephonyManager) mContext.getSystemService(Context.TELEPHONY_SERVICE);
+        return (tm.getLteOnGsmMode() != 0);
+    }
+
+    // Mobile Network
+    void addMobileNetworkTile(QuickSettingsTileView view, RefreshCallback cb) {
+        mMobileNetworkTile = view;
+        mMobileNetworkTile.setOnClickListener(new View.OnClickListener() {
+              @Override
+              public void onClick(View v) {
+                  toggleMobileNetworkState();
+              }
+        });
+        mMobileNetworkCallback = cb;
+        onMobileNetworkChanged();
+    }
+
+    void onMobileNetworkChanged() {
+        if (deviceHasMobileData()) {
+            mMobileNetworkState.label = getNetworkType(mContext.getResources());
+            mMobileNetworkState.iconId = getNetworkTypeIcon();
+            mMobileNetworkState.enabled = true;
+            mMobileNetworkCallback.refreshView(mMobileNetworkTile, mMobileNetworkState);
+        }
+    }
+
+    private void toggleMobileNetworkState() {
+        TelephonyManager tm = (TelephonyManager)
+            mContext.getSystemService(Context.TELEPHONY_SERVICE);
+        boolean usesQcLte = SystemProperties.getBoolean(
+                        "ro.config.qc_lte_network_modes", false);
+        int network = get2G3G();
+        switch(network) {
+            case Phone.NT_MODE_GLOBAL:
+            case Phone.NT_MODE_LTE_CDMA_AND_EVDO:
+            case Phone.NT_MODE_LTE_GSM_WCDMA:
+            case Phone.NT_MODE_LTE_CMDA_EVDO_GSM_WCDMA:
+            case Phone.NT_MODE_LTE_ONLY:
+            case Phone.NT_MODE_LTE_WCDMA:
+                if (deviceSupportsGSMLTE()) {
+                    tm.toggleMobileNetwork(Phone.NT_MODE_GSM_ONLY); //2G only
+                } else if (deviceSupportsCDMALTE()) {
+                    tm.toggleMobileNetwork(Phone.NT_MODE_CDMA); //cdma/evdo auto
+                }
+                break;
+            case Phone.NT_MODE_CDMA: //cdma/evdo auto
+                tm.toggleMobileNetwork(Phone.NT_MODE_CDMA_NO_EVDO); //cdma only
+                break;
+            case Phone.NT_MODE_CDMA_NO_EVDO: //cdma only
+                tm.toggleMobileNetwork(Phone.NT_MODE_EVDO_NO_CDMA); //evdo only
+                break;
+            case Phone.NT_MODE_EVDO_NO_CDMA: //evdo only
+                if (deviceSupportsCDMALTE()) {
+                    if (usesQcLte) {
+                        tm.toggleMobileNetwork(Phone.NT_MODE_GLOBAL); //lte
+                    } else {
+                        tm.toggleMobileNetwork(Phone.NT_MODE_LTE_CDMA_AND_EVDO); //lte
+                    }
+                } else {
+                    tm.toggleMobileNetwork(Phone.NT_MODE_CDMA); //cdma/evdo auto
+                }
+                break;
+            case Phone.NT_MODE_GSM_UMTS: //2G3G auto
+                tm.toggleMobileNetwork(Phone.NT_MODE_WCDMA_PREF); //2G3G pref
+                break;
+            case Phone.NT_MODE_WCDMA_ONLY: //3G only
+                tm.toggleMobileNetwork(Phone.NT_MODE_GSM_UMTS); //2G3G auto
+                break;
+            case Phone.NT_MODE_GSM_ONLY: //2G only
+                tm.toggleMobileNetwork(Phone.NT_MODE_WCDMA_ONLY); //3G only
+                break;
+            case Phone.NT_MODE_WCDMA_PREF: //2G3G Auto
+                if (deviceSupportsGSMLTE()) {
+                    if (usesQcLte) {
+                        tm.toggleMobileNetwork(Phone.NT_MODE_GLOBAL); //lte
+                    } else {
+                        tm.toggleMobileNetwork(Phone.NT_MODE_LTE_GSM_WCDMA); //lte
+                    }
+                } else {
+                    tm.toggleMobileNetwork(Phone.NT_MODE_GSM_ONLY); //2G3G pref
+                }
+                break;
+        }
+    }
+
     private String getNetworkType(Resources r) {
-        int state = networkModeToState(get2G3G());
+                int state = get2G3G();
         switch (state) {
-            case 1:
-                return r.getString(R.string.network_2G);
-            case 2:
-                return r.getString(R.string.network_3G_only);
-            case 3:
+            case Phone.NT_MODE_GLOBAL:
+            case Phone.NT_MODE_LTE_CDMA_AND_EVDO:
+            case Phone.NT_MODE_LTE_GSM_WCDMA:
+            case Phone.NT_MODE_LTE_CMDA_EVDO_GSM_WCDMA:
+            case Phone.NT_MODE_LTE_ONLY:
+            case Phone.NT_MODE_LTE_WCDMA:
+                return r.getString(R.string.network_4G);
+            case Phone.NT_MODE_GSM_UMTS:
                 return r.getString(R.string.network_3G_auto);
-            case 4:
+            case Phone.NT_MODE_WCDMA_ONLY:
+                return r.getString(R.string.network_3G_only);
+            case Phone.NT_MODE_GSM_ONLY:
+                return r.getString(R.string.network_2G);
+            case Phone.NT_MODE_WCDMA_PREF:
                 return r.getString(R.string.network_3G);
         }
-        return "global";
+        return r.getString(R.string.quick_settings_network_unknown);
+    }
+
+    private int getNetworkTypeIcon() {
+        int state = get2G3G();
+        switch (state) {
+            case Phone.NT_MODE_GLOBAL:
+            case Phone.NT_MODE_LTE_CDMA_AND_EVDO:
+            case Phone.NT_MODE_LTE_GSM_WCDMA:
+            case Phone.NT_MODE_LTE_CMDA_EVDO_GSM_WCDMA:
+            case Phone.NT_MODE_LTE_ONLY:
+            case Phone.NT_MODE_LTE_WCDMA:
+                return R.drawable.ic_qs_lte_on;
+            case Phone.NT_MODE_WCDMA_ONLY:
+                return R.drawable.ic_qs_3g_on;
+            case Phone.NT_MODE_GSM_ONLY:
+                return R.drawable.ic_qs_2g_on;
+            case Phone.NT_MODE_WCDMA_PREF:
+            case Phone.NT_MODE_GSM_UMTS:
+                return R.drawable.ic_qs_2g3g_on;
+        }
+        return R.drawable.ic_qs_unexpected_network;
     }
 
     private int get2G3G() {
@@ -881,33 +1039,6 @@ class QuickSettingsModel implements BluetoothStateChangeCallback,
             // Do nothing
         }
         return state;
-    }
-
-    private int networkModeToState(int what) {
-        switch (what) {
-            case Phone.NT_MODE_WCDMA_PREF:
-                return 4;
-            case Phone.NT_MODE_GSM_UMTS:
-                return 3;
-            case Phone.NT_MODE_WCDMA_ONLY:
-                return 2;
-            case Phone.NT_MODE_GSM_ONLY:
-                return 1;
-            case Phone.NT_MODE_CDMA:
-            case Phone.NT_MODE_CDMA_NO_EVDO:
-            case Phone.NT_MODE_EVDO_NO_CDMA:
-            case Phone.NT_MODE_GLOBAL:
-                return 0;
-        }
-        return 0;
-    }
-
-    void refreshRssiTile() {
-        if (mRSSITile != null) {
-            // We reinflate the original view due to potential styling changes that may have
-            // taken place due to a configuration change.
-            mRSSITile.reinflateContent(LayoutInflater.from(mContext));
-        }
     }
 
     // Bluetooth
