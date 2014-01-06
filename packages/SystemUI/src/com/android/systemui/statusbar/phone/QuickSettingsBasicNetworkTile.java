@@ -31,7 +31,6 @@ import com.android.systemui.R;
 
 class QuickSettingsBasicNetworkTile extends QuickSettingsTileView {
     private final TextView mTextView;
-    private final TextView mNetworkTextView;
     private final ImageView mImageView;
     private final ImageView mImageViewOverlay;
 
@@ -58,7 +57,6 @@ class QuickSettingsBasicNetworkTile extends QuickSettingsTileView {
         mImageView = (ImageView) findViewById(R.id.rssi_image);
         mImageViewOverlay = (ImageView) findViewById(R.id.rssi_overlay_image);
         mTextView = (TextView) findViewById(R.id.rssi_textview);
-        mNetworkTextView = (TextView) findViewById(R.id.rssi_type_text);
     }
 
     @Override
@@ -98,14 +96,9 @@ class QuickSettingsBasicNetworkTile extends QuickSettingsTileView {
         mTextView.setText(text);
     }
 
-    public void setNetworkText(CharSequence text) {
-        mNetworkTextView.setText(text);
-    }
-
     @Override
     public void setTextSizes(int size) {
         mTextView.setTextSize(TypedValue.COMPLEX_UNIT_PX, size);
-        mNetworkTextView.setTextSize(TypedValue.COMPLEX_UNIT_PX, size);
         super.setTextSizes(size);
     }
 
