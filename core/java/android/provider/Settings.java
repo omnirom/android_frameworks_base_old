@@ -2937,6 +2937,7 @@ public final class Settings {
           * 7 - back
           * 8 - toggle last app
           * 9 - kill app
+          * 10 - go to sleep
           * @hide
           */
         public static final String HARDWARE_KEY_REBINDING = "hardware_key_rebinding";

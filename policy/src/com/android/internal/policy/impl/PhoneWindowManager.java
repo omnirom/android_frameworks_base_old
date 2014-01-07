@@ -176,6 +176,7 @@ public class PhoneWindowManager implements WindowManagerPolicy {
     private static final int KEY_ACTION_BACK = 7;
     private static final int KEY_ACTION_LAST_APP = 8;
     private static final int KEY_ACTION_KILL_APP = 9;
+    private static final int KEY_ACTION_SLEEP = 10;
 
     // Masks for checking presence of hardware keys.
     // Must match values in core/res/res/values/config.xml
@@ -331,6 +332,7 @@ public class PhoneWindowManager implements WindowManagerPolicy {
     int mPointerLocationMode = 0; // guarded by mLock
     int mDeviceHardwareKeys;
     int mBackKillTimeout;
+    boolean mBackKillPending;
     boolean mHasBackKey;
     boolean mHasHomeKey;
     boolean mHasMenuKey;
@@ -992,9 +994,13 @@ public class PhoneWindowManager implements WindowManagerPolicy {
                 break;
             case KEY_ACTION_KILL_APP:
                 mHandler.postDelayed(mKillTask, mBackKillTimeout);
+                mBackKillPending = true;
                 break;
             case KEY_ACTION_LAST_APP:
                 toggleLastApp();
+                break;
+            case KEY_ACTION_SLEEP:
+                mPowerManager.goToSleep(SystemClock.uptimeMillis());
                 break;
             default:
                 break;
@@ -2308,6 +2314,12 @@ public class PhoneWindowManager implements WindowManagerPolicy {
             }
         }
 
+        // if a kill app is pending and we lift finger
+        // stop the kill action
+        if (mBackKillPending && !down) {
+            mHandler.removeCallbacks(mKillTask);
+        }
+
         // First we always handle the home key here, so applications
         // can never break it, although if keyguard is on, we do let
         // it handle it, because that gives us the correct 5 second
@@ -2933,6 +2945,7 @@ public class PhoneWindowManager implements WindowManagerPolicy {
     // maxwen: TODO would make sense to put this in a general place
     Runnable mKillTask = new Runnable() {
         public void run() {
+            mBackKillPending = false;
             final Intent intent = new Intent(Intent.ACTION_MAIN);
             String defaultHomePackage = "com.android.launcher";
             intent.addCategory(Intent.CATEGORY_HOME);
