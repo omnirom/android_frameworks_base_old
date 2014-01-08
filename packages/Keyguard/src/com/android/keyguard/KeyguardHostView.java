@@ -456,7 +456,9 @@ public class KeyguardHostView extends KeyguardViewBase {
 
     private boolean cameraDisabledByDpm() {
         return mCameraDisabled
-                || (mDisabledFeatures & DevicePolicyManager.KEYGUARD_DISABLE_SECURE_CAMERA) != 0;
+                || (mDisabledFeatures & DevicePolicyManager.KEYGUARD_DISABLE_SECURE_CAMERA) != 0
+                || Settings.System.getInt(getContext().getContentResolver(),
+                           Settings.System.LOCKSCREEN_ENABLE_CAMERA, 1) == 0;
     }
 
     private void updateSecurityViews() {
