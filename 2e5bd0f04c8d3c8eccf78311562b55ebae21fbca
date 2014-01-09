@@ -1,0 +1,72 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "6b8b61a3_f69802c5",
+        "filename": "packages/SystemUI/res/values-de/custom_strings.xml",
+        "patchSetId": 2
+      },
+      "lineNbr": 44,
+      "author": {
+        "id": 1000026
+      },
+      "writtenOn": "2014-01-09T10:44:56Z",
+      "side": 1,
+      "message": "Pointer \u003d Zeiger - siehe auch Settings",
+      "revId": "2e5bd0f04c8d3c8eccf78311562b55ebae21fbca",
+      "serverId": "56841c99-7c94-43d4-bf0b-cb4707e66d55",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "6b8b61a3_96817e53",
+        "filename": "packages/SystemUI/res/values-de/custom_strings.xml",
+        "patchSetId": 2
+      },
+      "lineNbr": 64,
+      "author": {
+        "id": 1000026
+      },
+      "writtenOn": "2014-01-09T10:44:56Z",
+      "side": 1,
+      "message": "Bitte den google translations folgen. Sound \u003d Töne als bsp. siehe Settings",
+      "revId": "2e5bd0f04c8d3c8eccf78311562b55ebae21fbca",
+      "serverId": "56841c99-7c94-43d4-bf0b-cb4707e66d55",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "6b8b61a3_b6867a66",
+        "filename": "packages/SystemUI/res/values-de/custom_strings.xml",
+        "patchSetId": 2
+      },
+      "lineNbr": 69,
+      "author": {
+        "id": 1000026
+      },
+      "writtenOn": "2014-01-09T10:44:56Z",
+      "side": 1,
+      "message": "Synchronisierung",
+      "revId": "2e5bd0f04c8d3c8eccf78311562b55ebae21fbca",
+      "serverId": "56841c99-7c94-43d4-bf0b-cb4707e66d55",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "6b8b61a3_d69b06bf",
+        "filename": "packages/SystemUI/res/values-de/custom_strings.xml",
+        "patchSetId": 2
+      },
+      "lineNbr": 72,
+      "author": {
+        "id": 1000026
+      },
+      "writtenOn": "2014-01-09T10:44:56Z",
+      "side": 1,
+      "message": "Taschenlampe",
+      "revId": "2e5bd0f04c8d3c8eccf78311562b55ebae21fbca",
+      "serverId": "56841c99-7c94-43d4-bf0b-cb4707e66d55",
+      "unresolved": false
+    }
+  ]
+}
