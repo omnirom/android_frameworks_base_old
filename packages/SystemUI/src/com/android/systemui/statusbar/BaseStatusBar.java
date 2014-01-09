@@ -73,6 +73,7 @@ import com.android.internal.statusbar.IStatusBarService;
 import com.android.internal.statusbar.StatusBarIcon;
 import com.android.internal.statusbar.StatusBarIconList;
 import com.android.internal.widget.SizeAdaptiveLayout;
+import com.android.internal.util.omni.TaskUtils;
 import com.android.systemui.R;
 import com.android.systemui.RecentsComponent;
 import com.android.systemui.recent.RecentTasksLoader;
@@ -525,40 +526,7 @@ public abstract class BaseStatusBar extends SystemUI implements
     protected abstract View getStatusBarView();
 
     protected void toggleLastAppImpl() {
-        final Intent intent = new Intent(Intent.ACTION_MAIN);
-        final ActivityManager am = (ActivityManager) mContext
-                .getSystemService(Activity.ACTIVITY_SERVICE);
-        String defaultHomePackage = "com.android.launcher";
-        intent.addCategory(Intent.CATEGORY_HOME);
-        final ResolveInfo res = mContext.getPackageManager().resolveActivity(intent, 0);
-        if (res.activityInfo != null && !res.activityInfo.packageName.equals("android")) {
-            defaultHomePackage = res.activityInfo.packageName;
-        }
-	final List<ActivityManager.RecentTaskInfo> tasks =
-                am.getRecentTasks(5, ActivityManager.RECENT_IGNORE_UNAVAILABLE);
-        // lets get enough tasks to find something to switch to
-        // Note, we'll only get as many as the system currently has - up to 5
-        int lastAppId = 0;
-	Intent lastAppIntent = null;
-	for (int i = 1; i < tasks.size() && lastAppIntent == null; i++) {
-            final String packageName = tasks.get(i).baseIntent.getComponent().getPackageName();
-            if (!packageName.equals(defaultHomePackage) && !packageName.equals("com.android.systemui")) {
-		final ActivityManager.RecentTaskInfo info = tasks.get(i);
-                lastAppId = info.id;
-		lastAppIntent = info.baseIntent;
-            }
-        }
-        if (lastAppId > 0) {
-            am.moveTaskToFront(lastAppId, am.MOVE_TASK_NO_USER_ACTION);
-        } else if (lastAppIntent != null) {
-            // last task is dead, restart it.
-	    lastAppIntent.addFlags(Intent.FLAG_ACTIVITY_LAUNCHED_FROM_HISTORY);
-            try {
-		mContext.startActivity(lastAppIntent);
-            } catch (ActivityNotFoundException e) {
-                Log.w("Recent", "Unable to launch recent task", e);
-            }
-	}
+        TaskUtils.toggleLastApp(mContext);
     }
 
     protected View.OnTouchListener mRecentsPreloadOnTouchListener = new View.OnTouchListener() {
