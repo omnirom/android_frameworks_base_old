@@ -53,6 +53,24 @@
     },
     {
       "key": {
+        "uuid": "6b8b61a3_76f152ff",
+        "filename": "packages/SystemUI/res/values-de/custom_strings.xml",
+        "patchSetId": 2
+      },
+      "lineNbr": 69,
+      "author": {
+        "id": 1000572
+      },
+      "writtenOn": "2014-01-09T10:52:47Z",
+      "side": 1,
+      "message": "Synchronisierung is too long for quick setting",
+      "parentUuid": "6b8b61a3_b6867a66",
+      "revId": "2e5bd0f04c8d3c8eccf78311562b55ebae21fbca",
+      "serverId": "56841c99-7c94-43d4-bf0b-cb4707e66d55",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "6b8b61a3_d69b06bf",
         "filename": "packages/SystemUI/res/values-de/custom_strings.xml",
         "patchSetId": 2
@@ -64,6 +82,24 @@
       "writtenOn": "2014-01-09T10:44:56Z",
       "side": 1,
       "message": "Taschenlampe",
+      "revId": "2e5bd0f04c8d3c8eccf78311562b55ebae21fbca",
+      "serverId": "56841c99-7c94-43d4-bf0b-cb4707e66d55",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "6b8b61a3_56ec5625",
+        "filename": "packages/SystemUI/res/values-de/custom_strings.xml",
+        "patchSetId": 2
+      },
+      "lineNbr": 72,
+      "author": {
+        "id": 1000572
+      },
+      "writtenOn": "2014-01-09T10:52:47Z",
+      "side": 1,
+      "message": "Taschenlampe is to long for quick setting.... @see CM",
+      "parentUuid": "6b8b61a3_d69b06bf",
       "revId": "2e5bd0f04c8d3c8eccf78311562b55ebae21fbca",
       "serverId": "56841c99-7c94-43d4-bf0b-cb4707e66d55",
       "unresolved": false
