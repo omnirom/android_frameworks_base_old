@@ -12,9 +12,16 @@
     <string name="reboot_progress">Redémarrage\u2026</string>
     <string name="reboot_confirm" product="tablet">Votre tablette va redémarrer.</string>
     <string name="reboot_confirm" product="default">Votre téléphone va redémarrer.</string>
+    <string name="global_action_screenshot">Capture d\'écran</string>
+    <string name="global_action_screenrecord">Capture vidéo</string>
     <string name="app_killed_message">Application arrêtée</string>
-    <string name="permlab_revokePermissions">Permet d\'afficher et de modifier les autorisations révoquées. Ne doit pas être utiliser par les applications courantes.</string>
-    <string name="permdesc_revokePermissions">Permet de lire et d\'écrire les autorisations révoquées. Ne doit pas être utiliser par les applications courantes.</string>
-    <string name="permlab_accessThemeService">Permet d\'accéder au service de gestion du thème. Ne doit pas être utiliser par les applications courantes.</string>
-    <string name="permdesc_accessThemeService">Permet à une application de définir/réinitialiser les thèmes. Ne doit pas être utiliser par les applications courantes.</string>
+    <string name="permlab_revokePermissions">Permet d\'afficher et de modifier les autorisations révoquées. Ne doit pas être utilisé par les applications courantes.</string>
+    <string name="permdesc_revokePermissions">Permet de lire et d\'écrire les autorisations révoquées. Ne doit pas être utilisé par les applications courantes.</string>
+    <string name="permlab_accessThemeService">Permet d\'accéder au service de gestion du thème. Ne doit pas être utilisé par les applications courantes.</string>
+    <string name="permdesc_accessThemeService">Permet à une application de définir/réinitialiser les thèmes. Ne doit pas être utilisé par les applications courantes.</string>
+    <string name="stylus_app_not_installed">%s n\'est pas installé</string>
+    <string name="storage_sd_dock_card">Carte SD de la station d\'accueil</string>
+    <string name="global_actions_toggle_mobile_data">Données sur le réseau mobile</string>
+    <string name="global_actions_mobile_data_on_status">L\'accès aux données sur le réseau mobile est activé</string>
+    <string name="global_actions_mobile_data_off_status">L\'accès aux données sur le réseau mobile est désactivé</string>
 </resources>
