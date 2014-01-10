@@ -1,0 +1,55 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "6b8b61a3_76beb260",
+        "filename": "packages/SystemUI/res/values-de/custom_strings.xml",
+        "patchSetId": 3
+      },
+      "lineNbr": 32,
+      "author": {
+        "id": 1000026
+      },
+      "writtenOn": "2014-01-10T14:42:17Z",
+      "side": 1,
+      "message": "Da weiss google selber nicht so richtig was sie wollen :)\nIn settings wird \"Pairing\" nicht uebersetzt z.b..\n    \u003cstring name\u003d\"bluetooth_device_advanced_title\"\u003e\"Bluetooth-Gerät mit aktivem Pairing\"\u003c/string\u003e",
+      "revId": "6521311ba71480c4883fe2d2241172772a5ffd7d",
+      "serverId": "56841c99-7c94-43d4-bf0b-cb4707e66d55",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "6b8b61a3_96b33e97",
+        "filename": "packages/SystemUI/res/values-de/custom_strings.xml",
+        "patchSetId": 3
+      },
+      "lineNbr": 59,
+      "author": {
+        "id": 1000026
+      },
+      "writtenOn": "2014-01-10T14:42:17Z",
+      "side": 1,
+      "message": "Also wenn dann muss das \"Nur\" nach vorne. Also \"Nur 2G\"",
+      "revId": "6521311ba71480c4883fe2d2241172772a5ffd7d",
+      "serverId": "56841c99-7c94-43d4-bf0b-cb4707e66d55",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "6b8b61a3_36a50a44",
+        "filename": "packages/SystemUI/res/values-de/custom_strings.xml",
+        "patchSetId": 3
+      },
+      "lineNbr": 61,
+      "author": {
+        "id": 1000026
+      },
+      "writtenOn": "2014-01-10T14:42:17Z",
+      "side": 1,
+      "message": "Pref - bedeutet \"preferred\". Also \"Bevorzugt\" k.a. wie man das abkuerzen kann",
+      "revId": "6521311ba71480c4883fe2d2241172772a5ffd7d",
+      "serverId": "56841c99-7c94-43d4-bf0b-cb4707e66d55",
+      "unresolved": false
+    }
+  ]
+}
