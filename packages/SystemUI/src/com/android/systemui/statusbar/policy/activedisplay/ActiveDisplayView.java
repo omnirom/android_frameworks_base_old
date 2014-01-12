@@ -583,14 +583,14 @@ public class ActiveDisplayView extends FrameLayout {
                 }
                 KeyguardTouchDelegate.getInstance(mContext).dismiss();
             }
-            if (mNotification.isClearable()) {
-                try {
+            try {
+                 if (mNotification.isClearable()) {
                      mNM.cancelNotificationFromSystemListener(mNotificationListener,
-                             mNotification.getPackageName(), mNotification.getTag(),
-                             mNotification.getId());
-                } catch (RemoteException e) {
-                } catch (NullPointerException npe) {
-                }
+                         mNotification.getPackageName(), mNotification.getTag(),
+                         mNotification.getId());
+                 }
+            } catch (RemoteException e) {
+            } catch (NullPointerException npe) {
             }
             mNotification = null;
         }
@@ -742,6 +742,7 @@ public class ActiveDisplayView extends FrameLayout {
             }
             mNotification = getNextAvailableNotification();
             if (mNotification != null) {
+                mOverflowNotifications.removeAllViews();
                 setActiveNotification(mNotification, true);
                 invalidate();
                 mGlowPadView.ping();
@@ -959,7 +960,6 @@ public class ActiveDisplayView extends FrameLayout {
                     for (int i = sbns.length - 1; i >= 0; i--) {
                         if (isValidNotification(sbns[i])
                                 && mOverflowNotifications.getChildCount() < MAX_OVERFLOW_ICONS) {
-                            boolean updateOther = false;
                             ImageView iv = new ImageView(mContext);
                             if (mOverflowNotifications.getChildCount() < (MAX_OVERFLOW_ICONS - 1)) {
                                 Drawable iconDrawable = null;
@@ -969,12 +969,9 @@ public class ActiveDisplayView extends FrameLayout {
                                     iconDrawable = pkgContext.getResources()
                                             .getDrawable(sbns[i].getNotification().icon);
                                 } catch (NameNotFoundException nnfe) {
-                                    iconDrawable = null;
                                 } catch (Resources.NotFoundException nfe) {
-                                    iconDrawable = null;
                                 }
                                 if (iconDrawable != null) {
-                                    updateOther = true;
                                     iv.setImageDrawable(iconDrawable);
                                     iv.setTag(sbns[i]);
                                     if (sbns[i].getPackageName().equals(mNotification.getPackageName())
@@ -985,14 +982,11 @@ public class ActiveDisplayView extends FrameLayout {
                                     }
                                 }
                             } else {
-                                updateOther = true;
                                 iv.setImageResource(R.drawable.ic_ad_morenotifications);
                             }
                             iv.setPadding(mIconPadding, mIconPadding, mIconPadding, mIconPadding);
                             iv.setScaleType(ImageView.ScaleType.FIT_CENTER);
-                            if (updateOther) {
-                                mOverflowNotifications.addView(iv, mOverflowLayoutParams);
-                            }
+                            mOverflowNotifications.addView(iv, mOverflowLayoutParams);
                         }
                     }
                 } catch (RemoteException re) {
@@ -1105,19 +1099,19 @@ public class ActiveDisplayView extends FrameLayout {
         } catch (Resources.NotFoundException nfe) {
             mNotificationDrawable = null;
         }
-        if (mNotificationDrawable != null) {
-            post(new Runnable() {
-                 @Override
-                 public void run() {
+        post(new Runnable() {
+             @Override
+             public void run() {
+                 if (mNotificationDrawable != null) {
                      mCurrentNotificationIcon.setImageDrawable(mNotificationDrawable);
                      setHandleText(sbn);
                      mNotification = sbn;
-                     updateResources();
-                     mGlowPadView.invalidate();
-                     if (updateOthers) updateOtherNotifications();
                  }
-            });
-        }
+                 updateResources();
+                 mGlowPadView.invalidate();
+                 if (updateOthers) updateOtherNotifications();
+             }
+        });
     }
 
     /**
