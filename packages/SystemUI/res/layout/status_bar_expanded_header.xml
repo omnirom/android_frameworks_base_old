@@ -60,6 +60,7 @@
                 android:layout_marginEnd="8dp"
                 android:singleLine="true"
                 android:textAppearance="@style/TextAppearance.StatusBar.Expanded.Clock"
+                android:textColor="@color/text_onclick_highlight"
                 android:layout_centerVertical="true"
                 />
 
@@ -68,6 +69,7 @@
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:textAppearance="@style/TextAppearance.StatusBar.Expanded.Date"
+                android:textColor="@color/text_onclick_highlight"
                 android:layout_toEndOf="@id/clock"
                 android:layout_centerVertical="true"
                 />
