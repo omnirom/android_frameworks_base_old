@@ -20,10 +20,10 @@ import static android.app.StatusBarManager.NAVIGATION_HINT_BACK_ALT;
 import static android.app.StatusBarManager.WINDOW_STATE_HIDDEN;
 import static android.app.StatusBarManager.WINDOW_STATE_SHOWING;
 import static android.app.StatusBarManager.windowStateToString;
+import static com.android.systemui.statusbar.phone.BarTransitions.MODE_LIGHTS_OUT;
 import static com.android.systemui.statusbar.phone.BarTransitions.MODE_OPAQUE;
 import static com.android.systemui.statusbar.phone.BarTransitions.MODE_SEMI_TRANSPARENT;
 import static com.android.systemui.statusbar.phone.BarTransitions.MODE_TRANSLUCENT;
-import static com.android.systemui.statusbar.phone.BarTransitions.MODE_LIGHTS_OUT;
 
 import android.animation.Animator;
 import android.animation.AnimatorListenerAdapter;
@@ -49,11 +49,9 @@ import android.graphics.Point;
 import android.graphics.PorterDuff;
 import android.graphics.Rect;
 import android.graphics.drawable.Drawable;
-import android.graphics.drawable.BitmapDrawable;
 import android.graphics.drawable.LayerDrawable;
 import android.graphics.drawable.TransitionDrawable;
 import android.inputmethodservice.InputMethodService;
-import android.net.Uri;
 import android.os.Bundle;
 import android.os.Handler;
 import android.os.IBinder;
@@ -64,17 +62,15 @@ import android.os.RemoteException;
 import android.os.ServiceManager;
 import android.os.SystemClock;
 import android.os.UserHandle;
-import android.provider.Settings;
 import android.provider.AlarmClock;
+import android.provider.Settings;
 import android.service.notification.StatusBarNotification;
 import android.util.DisplayMetrics;
 import android.util.EventLog;
 import android.util.Log;
-import android.util.Pair;
 import android.view.Display;
 import android.view.Gravity;
 import android.view.HapticFeedbackConstants;
-import android.view.KeyEvent;
 import android.view.MotionEvent;
 import android.view.VelocityTracker;
 import android.view.View;
@@ -92,17 +88,16 @@ import android.widget.FrameLayout;
 import android.widget.ImageView;
 import android.widget.LinearLayout;
 import android.widget.ScrollView;
-import android.widget.TabHost;
-import android.widget.TabHost.TabSpec;
 import android.widget.TextView;
 
 import com.android.internal.statusbar.StatusBarIcon;
-import com.android.systemui.BatteryMeterView;
 import com.android.systemui.BatteryCircleMeterView;
 import com.android.systemui.BatteryPercentMeterView;
+import com.android.systemui.BatteryMeterView;
 import com.android.systemui.DemoMode;
 import com.android.systemui.EventLogTags;
 import com.android.systemui.R;
+import com.android.systemui.omni.StatusHeaderMachine;
 import com.android.systemui.statusbar.BaseStatusBar;
 import com.android.systemui.statusbar.CommandQueue;
 import com.android.systemui.statusbar.GestureRecorder;
@@ -117,17 +112,15 @@ import com.android.systemui.statusbar.policy.ClockCenter;
 import com.android.systemui.statusbar.policy.NetworkTraffic;
 import com.android.systemui.statusbar.policy.DateView;
 import com.android.systemui.statusbar.policy.HeadsUpNotificationView;
-import com.android.systemui.statusbar.policy.KeyButtonView;
 import com.android.systemui.statusbar.policy.LocationController;
 import com.android.systemui.statusbar.policy.NetworkController;
 import com.android.systemui.statusbar.policy.NotificationRowLayout;
 import com.android.systemui.statusbar.policy.OnSizeChangedListener;
 import com.android.systemui.statusbar.policy.RotationLockController;
 
-import com.android.systemui.omni.StatusHeaderMachine;
-
 import java.io.FileDescriptor;
 import java.io.PrintWriter;
+import java.net.URISyntaxException;
 import java.util.ArrayList;
 
 public class PhoneStatusBar extends BaseStatusBar implements DemoMode {
@@ -3010,14 +3003,42 @@ public class PhoneStatusBar extends BaseStatusBar implements DemoMode {
 
     private View.OnClickListener mClockClickListener = new View.OnClickListener() {
         public void onClick(View v) {
-            startActivityDismissingKeyguard(
-                    new Intent(AlarmClock.ACTION_SHOW_ALARMS), true); // have fun, everyone
+            Intent clockShortcutIntent = null;
+            String clockShortcutIntentUri = Settings.System.getString(mContext.getContentResolver(), Settings.System.CLOCK_SHORTCUT);
+            if(clockShortcutIntentUri != null) {
+                try {
+                    clockShortcutIntent = Intent.parseUri(clockShortcutIntentUri, 0);
+                } catch (URISyntaxException e) {
+                    clockShortcutIntent = null;
+                }
+            }
+
+            if(clockShortcutIntent != null) {
+                startActivityDismissingKeyguard(clockShortcutIntent, true);
+            } else {
+                startActivityDismissingKeyguard(
+                        new Intent(AlarmClock.ACTION_SHOW_ALARMS), true); // have fun, everyone
+            }
         }
     };
     private View.OnClickListener mCalendarClickListener = new View.OnClickListener() {
         public void onClick(View v) {
-            Intent intent=Intent.makeMainSelectorActivity(Intent.ACTION_MAIN, Intent.CATEGORY_APP_CALENDAR);
-            startActivityDismissingKeyguard(intent,true);
+            Intent calendarShortcutIntent = null;
+            String calendarShortcutIntentUri = Settings.System.getString(mContext.getContentResolver(), Settings.System.CALENDAR_SHORTCUT);
+            if(calendarShortcutIntentUri != null) {
+                try {
+                    calendarShortcutIntent = Intent.parseUri(calendarShortcutIntentUri, 0);
+                } catch (URISyntaxException e) {
+                    calendarShortcutIntent = null;
+                }
+            }
+
+            if(calendarShortcutIntent != null) {
+                startActivityDismissingKeyguard(calendarShortcutIntent, true);
+            } else {
+                Intent intent=Intent.makeMainSelectorActivity(Intent.ACTION_MAIN, Intent.CATEGORY_APP_CALENDAR);
+                startActivityDismissingKeyguard(intent,true);
+            }
         }
     };
 
