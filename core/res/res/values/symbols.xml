@@ -1807,6 +1807,11 @@
   <java-symbol type="bool" name="config_stylusGestures" />
   <java-symbol type="string" name="stylus_app_not_installed" />
 
+  <!-- Privacy Guard -->
+  <java-symbol type="string" name="privacy_guard_notification" />
+  <java-symbol type="string" name="privacy_guard_notification_detail" />
+  <java-symbol type="drawable" name="stat_notify_privacy_guard" />
+
   <!-- Navigation Ring -->
   <java-symbol type="drawable" name="ic_navigation_ring_blank_normal" />
   <java-symbol type="drawable" name="ic_navigation_ring_blank_activated" />
