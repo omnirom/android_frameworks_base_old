@@ -2969,6 +2969,18 @@ public final class Settings {
         public static final String QUICK_SWIPE = "quick_swipe";
 
         /**
+         * What application to launch when the user click the clock in the notification bar
+         * @hide
+         */
+        public static final String CLOCK_SHORTCUT = "clock_shortcut";
+
+        /**
+         * What application to launch when the user click the calendar in the notification bar
+         * @hide
+         */
+        public static final String CALENDAR_SHORTCUT = "calendar_shortcut";
+
+        /**
          * Show clear all recents button
          *  @hide
          */
