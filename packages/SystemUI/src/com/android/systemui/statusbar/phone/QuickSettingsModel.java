@@ -35,6 +35,8 @@ import android.media.AudioManager;
 import android.media.MediaRouter;
 import android.media.MediaRouter.RouteInfo;
 import android.net.ConnectivityManager;
+import android.net.NetworkInfo;
+import android.net.TrafficStats;
 import android.net.wifi.WifiManager;
 import android.net.wifi.WifiInfo;
 import android.os.Handler;
@@ -202,6 +204,27 @@ class QuickSettingsModel implements BluetoothStateChangeCallback,
         }
     };
 
+    /** Broadcast receive to determine smart radio. */
+    private BroadcastReceiver mSmartRadioReceiver = new BroadcastReceiver() {
+        @Override
+        public void onReceive(Context context, Intent intent) {
+            if (!getSmartRadioEnabled()) return;
+
+            if (intent.getAction().equals(Intent.ACTION_SCREEN_OFF) && !mBatterySaverActive) {
+                // If wifi enabled and connected do not change network type
+                // since this will handled by wifi state
+                if (isWifiEnabled() && isWifiConnected()) return;
+
+                // If music is playing do not change network type
+                if (mAudioManager != null && mAudioManager.isMusicActive()) return;
+
+                setNetworkTo2G();
+            } else if (intent.getAction().equals(Intent.ACTION_USER_PRESENT)) {
+                resetNetwork();
+            }
+        }
+    };
+
     /** ContentObserver to determine the ringer */
     private class RingerObserver extends ContentObserver {
         public RingerObserver(Handler handler) {
@@ -298,6 +321,7 @@ class QuickSettingsModel implements BluetoothStateChangeCallback,
         }
     }
 
+
     /** ContentObserver to watch Network State */
     private class NetworkObserver extends ContentObserver {
         public NetworkObserver(Handler handler) {
@@ -313,6 +337,24 @@ class QuickSettingsModel implements BluetoothStateChangeCallback,
             final ContentResolver cr = mContext.getContentResolver();
             cr.registerContentObserver(Settings.Global.getUriFor(
                     Settings.Global.PREFERRED_NETWORK_MODE), false, this);
+        }
+    }
+
+    /** ContentObserver to watch Smart Radio State */
+    private class SmartRadioObserver extends ContentObserver {
+        public SmartRadioObserver(Handler handler) {
+            super(handler);
+        }
+
+        @Override
+        public void onChange(boolean selfChange) {
+            onSmartRadioReset(false);
+        }
+
+        public void startObserving() {
+            final ContentResolver cr = mContext.getContentResolver();
+            cr.registerContentObserver(Settings.Global.getUriFor(
+                    Settings.Global.SMART_RADIO_OPTION), false, this);
         }
     }
 
@@ -390,6 +432,7 @@ class QuickSettingsModel implements BluetoothStateChangeCallback,
     private final QuiteHourObserver mQuiteHourObserver;
     private final RingerObserver mRingerObserver;
     private final SleepObserver mSleepObserver;
+    private final SmartRadioObserver mSmartRadioObserver;
     private LocationController mLocationController;
     private final NetworkObserver mMobileNetworkObserver;
 
@@ -427,6 +470,12 @@ class QuickSettingsModel implements BluetoothStateChangeCallback,
 
     private final MediaRouter mMediaRouter;
     private final RemoteDisplayRouteCallback mRemoteDisplayRouteCallback;
+
+    private int mSmartRadioReset = -1;
+    private boolean mBatterySaverActive = false;
+    private long mTrafficBytes;
+    private static final long TRAFFIC_BYTES_THRESHOLD = 10 * 1024 * 1024; // 10mb
+    private static final int SCREEN_OFF_DELAY_MINUTES = 5; // 5min
 
     private final boolean mHasMobileData;
 
@@ -563,6 +612,7 @@ class QuickSettingsModel implements BluetoothStateChangeCallback,
                 mSleepObserver.startObserving();
                 mMobileNetworkObserver.startObserving();
                 refreshRotationLockTile();
+                mSmartRadioObserver.startObserving();
                 onBrightnessLevelChanged();
                 onNextAlarmChanged();
                 onBugreportChanged();
@@ -587,6 +637,8 @@ class QuickSettingsModel implements BluetoothStateChangeCallback,
         mRingerObserver.startObserving();
         mMobileNetworkObserver = new NetworkObserver(mHandler);
         mMobileNetworkObserver.startObserving();
+        mSmartRadioObserver = new SmartRadioObserver(mHandler);
+        mSmartRadioObserver.startObserving();
 
         mMediaRouter = (MediaRouter)context.getSystemService(Context.MEDIA_ROUTER_SERVICE);
         rebindMediaRouterAsCurrentUser();
@@ -631,6 +683,11 @@ class QuickSettingsModel implements BluetoothStateChangeCallback,
         mRingers = new ArrayList<Ringer>();
         mAudioManager = (AudioManager) mContext.getSystemService(Context.AUDIO_SERVICE);
         mVibrator = (Vibrator) mContext.getSystemService(Context.VIBRATOR_SERVICE);
+
+        IntentFilter smartRadioFilter = new IntentFilter();
+        smartRadioFilter.addAction(Intent.ACTION_SCREEN_OFF);
+        smartRadioFilter.addAction(Intent.ACTION_USER_PRESENT);
+        context.registerReceiver(mSmartRadioReceiver, smartRadioFilter);
     }
 
     void updateResources() {
@@ -910,6 +967,11 @@ class QuickSettingsModel implements BluetoothStateChangeCallback,
         }
         mWifiCallback.refreshView(mWifiTile, mWifiState);
         mWifiBackCallback.refreshView(mWifiBackTile, mWifiBackState);
+        toggleSmartMobileNetworkState();
+    }
+
+    private boolean isWifiEnabled() {
+        return mWifiManager.getWifiState() == WifiManager.WIFI_STATE_ENABLED;
     }
 
     String getWifiIpAddr() {
@@ -1131,6 +1193,77 @@ class QuickSettingsModel implements BluetoothStateChangeCallback,
             mTM.toggleMobileNetwork(Phone.NT_MODE_GLOBAL);
         }
     };
+
+    private void toggleSmartMobileNetworkState() {
+        if (!getSmartRadioEnabled()) return;
+
+        if (!isWifiEnabled() || !isWifiConnected()) {
+            onSmartRadioReset(true);
+            return;
+        }
+
+        if (mSmartRadioReset == -1) {
+            mSmartRadioReset = get2G3G();
+        }
+        if (get2G3G() != Phone.NT_MODE_GSM_ONLY) {
+            mTM.toggleMobileNetwork(Phone.NT_MODE_GSM_ONLY);
+        }
+    }
+
+    private void setNetworkTo2G() {
+        mTrafficBytes = TrafficStats.getTotalRxBytes() + TrafficStats.getTotalTxBytes();
+        mHandler.postDelayed(mSetNetwork2G, SCREEN_OFF_DELAY_MINUTES * 60 * 1000); // timed delay before switching to 2G
+    }
+
+    private void resetNetwork() {
+        if (mBatterySaverActive) {
+            // reset network type to original state
+            onSmartRadioReset(true);
+            mBatterySaverActive = false;
+        } else {
+            // cancel changing network mode if device is unlocked before delay
+            mHandler.removeCallbacks(mSetNetwork2G);
+        }
+    }
+
+    private Runnable mSetNetwork2G = new Runnable() {
+        public void run() {
+            final long traffic = TrafficStats.getTotalRxBytes() + TrafficStats.getTotalTxBytes();
+            if ((traffic - mTrafficBytes) > TRAFFIC_BYTES_THRESHOLD) {
+                // traffic too heavy, delay 2g
+                mHandler.postDelayed(mSetNetwork2G, SCREEN_OFF_DELAY_MINUTES * 60 * 1000);
+                return;
+            }
+
+            // store current preferred network mode
+            if (mSmartRadioReset == -1) {
+                mSmartRadioReset = get2G3G();
+            }
+            if (get2G3G() != Phone.NT_MODE_GSM_ONLY) {
+                mTM.toggleMobileNetwork(Phone.NT_MODE_GSM_ONLY);
+                mBatterySaverActive = true;
+            }
+        }
+    };
+
+    private boolean isWifiConnected() {
+        NetworkInfo network = (mCM != null) ? mCM.getNetworkInfo(ConnectivityManager.TYPE_WIFI) : null;
+        return network != null && network.isConnected();
+    }
+
+    private void onSmartRadioReset(boolean force) {
+        if (!getSmartRadioEnabled() || force) {
+            if (mSmartRadioReset != -1) {
+                mTM.toggleMobileNetwork(mSmartRadioReset);
+                mSmartRadioReset = -1;
+            }
+        }
+    }
+
+    private boolean getSmartRadioEnabled() {
+        return deviceHasMobileData() && Settings.Global.getInt(mContext.getContentResolver(),
+                Settings.Global.SMART_RADIO_OPTION, 0) != 0;
+    }
 
     private String getNetworkType(Resources r) {
         int state = get2G3G();
