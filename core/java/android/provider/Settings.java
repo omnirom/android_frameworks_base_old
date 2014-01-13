@@ -3713,6 +3713,7 @@ public final class Settings {
             MOVED_TO_GLOBAL.add(Settings.Global.SET_GLOBAL_HTTP_PROXY);
             MOVED_TO_GLOBAL.add(Settings.Global.DEFAULT_DNS_SERVER);
             MOVED_TO_GLOBAL.add(Settings.Global.PREFERRED_NETWORK_MODE);
+            MOVED_TO_GLOBAL.add(Settings.Global.SMART_RADIO_OPTION);
         }
 
         /** @hide */
@@ -6698,6 +6699,12 @@ public final class Settings {
          */
         public static final String PREFERRED_NETWORK_MODE =
                 "preferred_network_mode";
+
+        /**
+         * @hide
+         */
+        public static final String SMART_RADIO_OPTION =
+                "smart_radio_option";
 
         /**
          * Name of an application package to be debugged.
