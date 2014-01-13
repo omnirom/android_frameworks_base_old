@@ -30,6 +30,8 @@ import android.app.ITransientNotification;
 import android.app.Notification;
 import android.app.NotificationManager;
 import android.app.PendingIntent;
+import android.app.ProfileGroup;
+import android.app.ProfileManager;
 import android.app.StatusBarManager;
 import android.content.BroadcastReceiver;
 import android.content.ComponentName;
@@ -1972,6 +1974,28 @@ public class NotificationManagerService extends INotificationManager.Stub
                             && canInterrupt
                             && mSystemReady) {
 
+					try {
+                        final ProfileManager profileManager =
+                            (ProfileManager) mContext.getSystemService(Context.PROFILE_SERVICE);
+
+                        ProfileGroup group = profileManager.getActiveProfileGroup(pkg);
+                        if (group != null) {
+                            // FIXME: local variable notification is accessed from within inner class; needs to be declared final
+                            //notification = group.processNotification(notification);
+                        }
+                    } catch(Throwable th) {
+                        Log.e(TAG, "An error occurred profiling the notification.", th);
+                    }
+
+                    final boolean alertsDisabled =
+                        (mDisabledNotifications & StatusBarManager.DISABLE_NOTIFICATION_ALERTS) != 0;
+                    boolean readyForAlerts = canInterrupt && mSystemReady &&
+                        (r.getUserId() == UserHandle.USER_ALL || r.getUserId() == userId && r.getUserId() == currentUser) &&
+                        (old == null || (notification.flags & Notification.FLAG_ONLY_ALERT_ONCE) == 0);
+                    boolean hasValidSound = false;
+
+                    // If we're not supposed to beep, vibrate, etc. then don't.
+                    if (readyForAlerts && !alertsDisabled) {
                         final AudioManager audioManager = (AudioManager) mContext
                         .getSystemService(Context.AUDIO_SERVICE);
 
@@ -1986,7 +2010,6 @@ public class NotificationManagerService extends INotificationManager.Stub
                                                .equals(notification.sound);
 
                         Uri soundUri = null;
-                        boolean hasValidSound = false;
 
                         if (!(QuietHoursHelper.inQuietHours(
                                     mContext, Settings.System.QUIET_HOURS_MUTE))
@@ -2028,8 +2051,11 @@ public class NotificationManagerService extends INotificationManager.Stub
                                 }
                             }
                         }
+                    }
 
                         // vibrate
+                        final AudioManager audioManager = (AudioManager)
+                            mContext.getSystemService(Context.AUDIO_SERVICE);
                         // Does the notification want to specify its own vibration?
                         final boolean hasCustomVibrate = notification.vibrate != null;
 
@@ -2088,6 +2114,8 @@ public class NotificationManagerService extends INotificationManager.Stub
                     if ((notification.flags & Notification.FLAG_SHOW_LIGHTS) != 0
                             && canInterrupt) {
                         mLights.add(r);
+                        // force reevaluation of active light
+                        mLedNotification = null;
                         updateLightsLocked();
                     } else {
                         if (old != null
@@ -2537,6 +2565,7 @@ public class NotificationManagerService extends INotificationManager.Stub
 
             pw.println("  mSoundNotification=" + mSoundNotification);
             pw.println("  mVibrateNotification=" + mVibrateNotification);
+            pw.println("  mLedNotification=" + mLedNotification);
             pw.println("  mDisabledNotifications=0x" + Integer.toHexString(mDisabledNotifications));
             pw.println("  mSystemReady=" + mSystemReady);
             pw.println("  mArchive=" + mArchive.toString());

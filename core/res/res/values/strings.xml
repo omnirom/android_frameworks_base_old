@@ -371,6 +371,9 @@
     <!-- label for item that takes screenrecord in the phone options dialog -->
     <string name="global_action_screenrecord">Screen Record</string>
 
+    <!-- Label for item that opens the profile choosing dialog -->
+    <string name="global_action_choose_profile">Profile</string>
+
     <!-- label for item that generates a bug report in the phone options dialog -->
     <string name="global_action_bug_report">Bug report</string>
 

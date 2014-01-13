@@ -3030,15 +3030,28 @@ public final class Settings {
         public static final String KEY_APP_SWITCH_LONG_PRESS_ACTION = "key_app_switch_long_press_action";
 
         /**
-         * Enable/disable haptic feedback for virtual keys
+        * Enable/disable haptic feedback for virtual keys
+        * @hide
+        */
+        public static final String VIRTUAL_KEYS_HAPTIC_FEEDBACK = "virtual_keys_haptic_feedback";
+
+
+        /**
+         * Whether power menu profiles switcher is enabled
          * @hide
          */
-        public static final String VIRTUAL_KEYS_HAPTIC_FEEDBACK = "virtual_keys_haptic_feedback";
+        public static final String POWER_MENU_PROFILES_ENABLED = "power_menu_profiles_enabled";
 
         /** Weather to allow headsethook to launch voice commands
          * @hide
          */
         public static final String HEADSETHOOK_LAUNCH_VOICE = "headsethook_launch_voice";
+
+        /**
+         * Show the pending notification counts as overlays on the status bar
+         * @hide
+         */
+        public static final String SYSTEM_PROFILES_ENABLED = "system_profiles_enabled";
 
         /**
          * Enable Stylus Gestures
@@ -3319,7 +3332,14 @@ public final class Settings {
             POINTER_SPEED,
             VIBRATE_WHEN_RINGING,
             RINGTONE,
-            NOTIFICATION_SOUND
+            NOTIFICATION_SOUND,
+            SYSTEM_PROFILES_ENABLED,
+            POWER_MENU_PROFILES_ENABLED,
+            PHONE_BLACKLIST_ENABLED,
+            PHONE_BLACKLIST_NOTIFY_ENABLED,
+            PHONE_BLACKLIST_PRIVATE_NUMBER_MODE,
+            PHONE_BLACKLIST_UNKNOWN_NUMBER_MODE,
+            PHONE_BLACKLIST_REGEX_ENABLED,
         };
 
         // Settings moved to Settings.Secure
