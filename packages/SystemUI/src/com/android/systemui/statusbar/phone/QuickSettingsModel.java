@@ -215,6 +215,25 @@ class QuickSettingsModel implements BluetoothStateChangeCallback,
         }
     }
 
+    /** ContentObserver to determine the SleepTime */
+    private class SleepObserver extends ContentObserver {
+        public SleepObserver(Handler handler) {
+            super(handler);
+        }
+
+        @Override 
+        public void onChange(boolean selfChange) {
+            updateSleepState();
+        }
+
+        public void startObserving() {
+            final ContentResolver cr = mContext.getContentResolver();
+            cr.registerContentObserver(
+                    Settings.System.getUriFor(Settings.System.SCREEN_OFF_TIMEOUT), false, this,
+                    UserHandle.USER_ALL);
+        }
+    }
+
     /** ContentObserver to determine the next alarm */
     private class NextAlarmObserver extends ContentObserver {
         public NextAlarmObserver(Handler handler) {
@@ -325,6 +344,7 @@ class QuickSettingsModel implements BluetoothStateChangeCallback,
     private final BrightnessObserver mBrightnessObserver;
     private final ImmersiveObserver mImmersiveObserver;
     private final RingerObserver mRingerObserver;
+    private final SleepObserver mSleepObserver;
 
     private ConnectivityManager mCM;
     private boolean mUsbTethered = false;
@@ -333,6 +353,15 @@ class QuickSettingsModel implements BluetoothStateChangeCallback,
     private boolean mTorchActive = false;
     private String[] mUsbRegexs;
     private Object mSyncObserverHandle = null;
+
+    // Sleep: Screen timeout sub-tile resources
+    private static final int SCREEN_TIMEOUT_15     =   15000;
+    private static final int SCREEN_TIMEOUT_30     =   30000;
+    private static final int SCREEN_TIMEOUT_60     =   60000;
+    private static final int SCREEN_TIMEOUT_120    =  120000;
+    private static final int SCREEN_TIMEOUT_300    =  300000;
+    private static final int SCREEN_TIMEOUT_600    =  600000;
+    private static final int SCREEN_TIMEOUT_1800   = 1800000;
 
     private static final Ringer[] RINGERS = new Ringer[] {
         new Ringer(AudioManager.RINGER_MODE_SILENT, false, R.drawable.ic_qs_ring_off, R.string.quick_settings_ringer_off),
@@ -375,6 +404,10 @@ class QuickSettingsModel implements BluetoothStateChangeCallback,
     private QuickSettingsTileView mRingerModeTile;
     private RefreshCallback mRingerModeCallback;
     private State mRingerModeState = new State();
+
+    private QuickSettingsTileView mSleepModeTile;
+    private RefreshCallback mSleepModeCallback;
+    private State mSleepModeState = new State();
 
     private QuickSettingsTileView mUsbModeTile;
     private RefreshCallback mUsbModeCallback;
@@ -464,6 +497,7 @@ class QuickSettingsModel implements BluetoothStateChangeCallback,
             public void onUserSwitched(int newUserId) {
                 mBrightnessObserver.startObserving();
                 mImmersiveObserver.startObserving();
+                mSleepObserver.startObserving();
                 refreshRotationLockTile();
                 onBrightnessLevelChanged();
                 onNextAlarmChanged();
@@ -482,6 +516,8 @@ class QuickSettingsModel implements BluetoothStateChangeCallback,
         mBrightnessObserver.startObserving();
         mImmersiveObserver = new ImmersiveObserver(mHandler);
         mImmersiveObserver.startObserving();
+        mSleepObserver = new SleepObserver(mHandler);
+        mSleepObserver.startObserving();
         mRingerObserver = new RingerObserver(mHandler);
         mRingerObserver.startObserving();
 
@@ -536,6 +572,7 @@ class QuickSettingsModel implements BluetoothStateChangeCallback,
         refreshRotationLockTile();
         refreshRssiTile();
         refreshLocationTile();
+        updateSleepState();
     }
 
     // Settings
@@ -1318,6 +1355,75 @@ class QuickSettingsModel implements BluetoothStateChangeCallback,
         if (mCM.setUsbTethering(enabled) != ConnectivityManager.TETHER_ERROR_NO_ERROR) {
             return;
         }
+    }
+
+    // Sleep Mode
+    void addSleepModeTile(QuickSettingsTileView view, RefreshCallback cb) {
+        mSleepModeTile = view;
+        mSleepModeTile.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                screenTimeoutChangeState();
+                updateSleepState();
+            }
+        });
+        mSleepModeCallback = cb;
+        updateSleepState();
+    }
+
+    private void updateSleepState() {
+        mSleepModeState.enabled = true;
+        mSleepModeState.iconId = R.drawable.ic_qs_sleep;
+        mSleepModeState.label = screenTimeoutGetLabel(getScreenTimeout());
+        mSleepModeCallback.refreshView(mSleepModeTile, mSleepModeState);
+    }
+
+    private String screenTimeoutGetLabel(int currentTimeout) {
+        switch(currentTimeout) {
+               case SCREEN_TIMEOUT_15:
+                   return mContext.getString(R.string.quick_settings_sleep_label_back_15);
+               case SCREEN_TIMEOUT_30:
+                   return mContext.getString(R.string.quick_settings_sleep_label_back_30);
+               case SCREEN_TIMEOUT_60:
+                   return mContext.getString(R.string.quick_settings_sleep_label_back_60);
+               case SCREEN_TIMEOUT_120:
+                   return mContext.getString(R.string.quick_settings_sleep_label_back_120);
+               case SCREEN_TIMEOUT_300:
+                   return mContext.getString(R.string.quick_settings_sleep_label_back_300);
+               case SCREEN_TIMEOUT_600:
+                   return mContext.getString(R.string.quick_settings_sleep_label_back_600);
+               case SCREEN_TIMEOUT_1800:
+                   return mContext.getString(R.string.quick_settings_sleep_label_back_1800);
+        }
+        return mContext.getString(R.string.quick_settings_sleep_label_back_unknown);
+    }
+
+    private int getScreenTimeout() {
+        return Settings.System.getInt(mContext.getContentResolver(),
+                Settings.System.SCREEN_OFF_TIMEOUT, 0);
+    }
+
+    private void screenTimeoutChangeState() {
+        int screenTimeout = getScreenTimeout();
+
+        if (screenTimeout == SCREEN_TIMEOUT_15) {
+            screenTimeout = SCREEN_TIMEOUT_30;
+        } else if (screenTimeout == SCREEN_TIMEOUT_30) {
+            screenTimeout = SCREEN_TIMEOUT_60;
+        } else if (screenTimeout == SCREEN_TIMEOUT_60) {
+            screenTimeout = SCREEN_TIMEOUT_120;
+        } else if (screenTimeout == SCREEN_TIMEOUT_120) {
+            screenTimeout = SCREEN_TIMEOUT_300;
+        } else if (screenTimeout == SCREEN_TIMEOUT_300) {
+            screenTimeout = SCREEN_TIMEOUT_600;
+        } else if (screenTimeout == SCREEN_TIMEOUT_600) {
+            screenTimeout = SCREEN_TIMEOUT_1800;
+        } else if (screenTimeout == SCREEN_TIMEOUT_1800) {
+            screenTimeout = SCREEN_TIMEOUT_15;
+        }
+
+        Settings.System.putInt(mContext.getContentResolver(),
+                Settings.System.SCREEN_OFF_TIMEOUT, screenTimeout);
     }
 
     // Ringer Mode
