@@ -32,7 +32,7 @@ import android.widget.ProgressBar;
 import android.widget.TextView;
 
 
-class QuickSettingsBasicBackTile extends QuickSettingsTileView {
+public class QuickSettingsBasicBackTile extends QuickSettingsTileView {
     private final TextView mLabelView;
     private final TextView mFunctionView;
     private final ImageView mImageView;
@@ -63,7 +63,7 @@ class QuickSettingsBasicBackTile extends QuickSettingsTileView {
     }
 
     @Override
-    void setContent(int layoutId, LayoutInflater inflater) {
+    public void setContent(int layoutId, LayoutInflater inflater) {
         throw new RuntimeException("why?");
     }
 
@@ -92,6 +92,27 @@ class QuickSettingsBasicBackTile extends QuickSettingsTileView {
         mLabelView.setTextSize(TypedValue.COMPLEX_UNIT_PX, size);
         mFunctionView.setTextSize(TypedValue.COMPLEX_UNIT_PX, size);
         super.setTextSizes(size);
+    }
+
+    @Override
+    public void switchToRibbonMode() {
+        TextView tv = (TextView) findViewById(R.id.label);
+        if (tv != null) {
+            tv.setVisibility(View.GONE);
+        }
+        TextView itv = (TextView) findViewById(R.id.function);
+        if (itv != null) {
+            itv.setVisibility(View.GONE);
+        }
+        View image = findViewById(R.id.images);
+        if (image != null) {
+            MarginLayoutParams params = (MarginLayoutParams) image.getLayoutParams();
+            int margin = mContext.getResources().getDimensionPixelSize(
+                    R.dimen.qs_tile_ribbon_icon_margin);
+            params.topMargin = params.bottomMargin = margin;
+            image.setLayoutParams(params);
+        }
+        super.switchToRibbonMode();
     }
 
     public void setLabel(CharSequence text) {
