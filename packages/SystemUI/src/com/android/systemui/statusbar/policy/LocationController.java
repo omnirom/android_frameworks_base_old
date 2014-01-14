@@ -68,8 +68,10 @@ public class LocationController extends BroadcastReceiver {
          *
          * @param locationEnabled A value of true indicates that at least one type of location
          *                        is enabled in settings.
+         * @param locationMode value indicates the type of location mode
+         *                        which is enabled in settings.
          */
-        public void onLocationSettingsChanged(boolean locationEnabled);
+        public void onLocationSettingsChanged(boolean locationEnabled, int locationMode);
     }
 
     public LocationController(Context context) {
@@ -128,13 +130,41 @@ public class LocationController extends BroadcastReceiver {
         final ContentResolver cr = mContext.getContentResolver();
         // When enabling location, a user consent dialog will pop up, and the
         // setting won't be fully enabled until the user accepts the agreement.
+        final int lastMode = Settings.Secure.getIntForUser(cr,
+                Settings.Secure.LOCATION_LAST_MODE,
+                Settings.Secure.LOCATION_MODE_HIGH_ACCURACY, currentUserId);
         int mode = enabled
-                ? mLastlocationMode : Settings.Secure.LOCATION_MODE_OFF;
+                ? lastMode : Settings.Secure.LOCATION_MODE_OFF;
         // QuickSettings always runs as the owner, so specifically set the settings
         // for the current foreground user.
         return Settings.Secure
                 .putIntForUser(cr, Settings.Secure.LOCATION_MODE, mode, currentUserId);
     }
+
+    public boolean setLocationMode(int mode) {
+        int currentUserId = ActivityManager.getCurrentUser();
+        if (isUserLocationRestricted(currentUserId)) {
+            return false;
+        }
+        final ContentResolver cr = mContext.getContentResolver();
+        // QuickSettings always runs as the owner, so specifically set the settings
+        // for the current foreground user.
+        return Settings.Secure
+                .putIntForUser(cr, Settings.Secure.LOCATION_MODE, mode, currentUserId);
+    }
+
+    /**
+     * Returns the actual location mode which is running
+     */
+    public int getLocationMode() {
+        ContentResolver resolver = mContext.getContentResolver();
+        // QuickSettings always runs as the owner, so specifically retrieve the settings
+        // for the current foreground user.
+        int mode = Settings.Secure.getIntForUser(resolver, Settings.Secure.LOCATION_MODE,
+                Settings.Secure.LOCATION_MODE_OFF, ActivityManager.getCurrentUser());
+        return mode;
+    }
+
 
     public boolean setBackLocationEnabled(int location) {
         switch (location) {
@@ -149,19 +179,6 @@ public class LocationController extends BroadcastReceiver {
                 break;
         }
         return setLocationMode(location);
-    }
-
-    public boolean setLocationMode(int mode) {
-        int currentUserId = ActivityManager.getCurrentUser();
-        if (isUserLocationRestricted(currentUserId)) {
-            return false;
-        }
-        mLastlocationMode = mode;
-        final ContentResolver cr = mContext.getContentResolver();
-        // QuickSettings always runs as the owner, so specifically set the settings
-        // for the current foreground user.
-        return Settings.Secure
-                .putIntForUser(cr, Settings.Secure.LOCATION_MODE, mode, currentUserId);
     }
 
     public int locationMode() {
@@ -254,8 +271,14 @@ public class LocationController extends BroadcastReceiver {
 
     private void locationSettingsChanged() {
         boolean isEnabled = isLocationEnabled();
+        int locationMode = getLocationMode();
+        if (isEnabled) {
+            Settings.Secure.putIntForUser(mContext.getContentResolver(),
+                    Settings.Secure.LOCATION_LAST_MODE, locationMode,
+                    ActivityManager.getCurrentUser());
+        }
         for (LocationSettingsChangeCallback cb : mSettingsChangeCallbacks) {
-            cb.onLocationSettingsChanged(isEnabled);
+            cb.onLocationSettingsChanged(isEnabled, locationMode);
         }
     }
 
