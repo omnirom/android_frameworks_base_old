@@ -94,6 +94,27 @@ class QuickSettingsBasicBackTile extends QuickSettingsTileView {
         super.setTextSizes(size);
     }
 
+    @Override
+    public void switchToRibbonMode() {
+        TextView tv = (TextView) findViewById(R.id.label);
+        if (tv != null) {
+            tv.setVisibility(View.GONE);
+        }
+        TextView itv = (TextView) findViewById(R.id.function);
+        if (itv != null) {
+            itv.setVisibility(View.GONE);
+        }
+        View image = findViewById(R.id.images);
+        if (image != null) {
+            MarginLayoutParams params = (MarginLayoutParams) image.getLayoutParams();
+            int margin = mContext.getResources().getDimensionPixelSize(
+                    R.dimen.qs_tile_ribbon_icon_margin);
+            params.topMargin = params.bottomMargin = margin;
+            image.setLayoutParams(params);
+        }
+        super.switchToRibbonMode();
+    }
+
     public void setLabel(CharSequence text) {
         mLabelView.setText(text);
     }

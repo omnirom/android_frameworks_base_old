@@ -433,6 +433,8 @@ class QuickSettingsModel implements BluetoothStateChangeCallback,
     private final boolean mHasMobileData;
     private long mLastClickTime = 0;
 
+    private boolean mRibbon = false;
+
     private QuickSettingsTileView mUserTile;
     private RefreshCallback mUserCallback;
     private UserState mUserState = new UserState();
@@ -553,8 +555,9 @@ class QuickSettingsModel implements BluetoothStateChangeCallback,
         }
     };
 
-    public QuickSettingsModel(Context context) {
+    public QuickSettingsModel(Context context, boolean ribbon) {
         mContext = context;
+        mRibbon = ribbon;
         mHandler = new Handler();
         mUserTracker = new CurrentUserTracker(mContext) {
             @Override
@@ -690,10 +693,14 @@ class QuickSettingsModel implements BluetoothStateChangeCallback,
         mAlarmCallback.refreshView(view, mAlarmState);
     }
     void onAlarmChanged(Intent intent) {
+        if (mRibbon) return;
+
         mAlarmState.enabled = intent.getBooleanExtra("alarmSet", false);
         mAlarmCallback.refreshView(mAlarmTile, mAlarmState);
     }
     void onNextAlarmChanged() {
+        if (mRibbon) return;
+
         final String alarmText = Settings.System.getStringForUser(mContext.getContentResolver(),
                 Settings.System.NEXT_ALARM_FORMATTED,
                 UserHandle.USER_CURRENT);
@@ -851,9 +858,100 @@ class QuickSettingsModel implements BluetoothStateChangeCallback,
     }
     void addWifiBackTile(QuickSettingsTileView view, RefreshCallback cb) {
         mWifiBackTile = view;
+        mWifiBackTile.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                if (mCM.getTetherableWifiRegexs().length != 0) {
+                    int state = mWifiManager.getWifiApState();
+                    switch (state) {
+                         case WifiManager.WIFI_AP_STATE_ENABLING:
+                         case WifiManager.WIFI_AP_STATE_ENABLED:
+                              setSoftapEnabled(false);
+                              break;
+                         case WifiManager.WIFI_AP_STATE_DISABLING:
+                         case WifiManager.WIFI_AP_STATE_DISABLED:
+                             setSoftapEnabled(true);
+                             break;
+                    }
+                }
+            }
+        });
         mWifiBackCallback = cb;
         mWifiCallback.refreshView(mWifiBackTile, mWifiBackState);
     }
+
+    private void setSoftapEnabled(boolean enable) {
+        final ContentResolver cr = mContext.getContentResolver();
+        /**
+         * Disable Wifi if enabling tethering
+         */
+        int wifiState = mWifiManager.getWifiState();
+        if (enable && ((wifiState == WifiManager.WIFI_STATE_ENABLING) ||
+                    (wifiState == WifiManager.WIFI_STATE_ENABLED))) {
+            mWifiManager.setWifiEnabled(false);
+            Settings.Global.putInt(cr, Settings.Global.WIFI_SAVED_STATE, 1);
+        }
+
+        // Turn on the Wifi AP
+        mWifiManager.setWifiApEnabled(null, enable);
+
+        /**
+         *  If needed, restore Wifi on tether disable
+         */
+        if (!enable) {
+            int wifiSavedState = 0;
+            try {
+                wifiSavedState = Settings.Global.getInt(cr, Settings.Global.WIFI_SAVED_STATE);
+            } catch (Settings.SettingNotFoundException e) {
+                // Do nothing here
+            }
+            if (wifiSavedState == 1) {
+                mWifiManager.setWifiEnabled(true);
+                Settings.Global.putInt(cr, Settings.Global.WIFI_SAVED_STATE, 0);
+            }
+        }
+    }
+
+    private int getWifiApTypeIcon() {
+        int state = mWifiManager.getWifiApState();
+        switch (state) {
+            case WifiManager.WIFI_AP_STATE_ENABLING:
+            case WifiManager.WIFI_AP_STATE_ENABLED:
+                return R.drawable.ic_qs_wifi_ap_on;
+            case WifiManager.WIFI_AP_STATE_DISABLING:
+            case WifiManager.WIFI_AP_STATE_DISABLED:
+                return R.drawable.ic_qs_wifi_ap_off;
+        }
+        return R.drawable.ic_qs_wifi_no_network;
+    }
+
+    private String getWifiApString() {
+        Resources r = mContext.getResources();
+        int state = mWifiManager.getWifiApState();
+        switch (state) {
+            case WifiManager.WIFI_AP_STATE_ENABLING:
+            case WifiManager.WIFI_AP_STATE_ENABLED:
+                return r.getString(R.string.quick_settings_wifi_label);
+            case WifiManager.WIFI_AP_STATE_DISABLING:
+            case WifiManager.WIFI_AP_STATE_DISABLED:
+                return r.getString(R.string.quick_settings_wifi_off_label);
+        }
+        return r.getString(R.string.quick_settings_wifi_off_label);
+    }
+
+    private boolean getWifiApEnabled() {
+        int state = mWifiManager.getWifiApState();
+        switch (state) {
+            case WifiManager.WIFI_AP_STATE_ENABLING:
+            case WifiManager.WIFI_AP_STATE_ENABLED:
+                return true;
+            case WifiManager.WIFI_AP_STATE_DISABLING:
+            case WifiManager.WIFI_AP_STATE_DISABLED:
+                return false;
+        }
+        return false;
+    }
+
     // Remove the double quotes that the SSID may contain
     public static String removeDoubleQuotes(String string) {
         if (string == null) return null;
@@ -886,33 +984,42 @@ class QuickSettingsModel implements BluetoothStateChangeCallback,
         mWifiState.connected = wifiConnected;
         mWifiState.activityIn = enabled && activityIn;
         mWifiState.activityOut = enabled && activityOut;
+        int wifiApIconId = getWifiApTypeIcon();
+        String wifiApString = getWifiApString();
         if (wifiConnected) {
             mWifiState.iconId = wifiSignalIconId;
             mWifiState.label = removeDoubleQuotes(enabledDesc);
             mWifiState.signalContentDescription = wifiSignalContentDescription;
 
-            mWifiBackState.iconId = wifiSignalIconId;
-            mWifiBackState.label = getWifiIpAddr();
+            wifiApIconId = wifiSignalIconId;
+            wifiApString = getWifiIpAddr();
             mWifiBackState.signalContentDescription = wifiSignalContentDescription;
         } else if (wifiNotConnected) {
             mWifiState.iconId = R.drawable.ic_qs_wifi_0;
             mWifiState.label = r.getString(R.string.quick_settings_wifi_label);
             mWifiState.signalContentDescription = r.getString(R.string.accessibility_no_wifi);
 
-            mWifiBackState.iconId = mWifiState.iconId;
-            mWifiBackState.label = mWifiState.label;
+            wifiApIconId = mWifiState.iconId;
+            wifiApString = mWifiState.label;
             mWifiBackState.signalContentDescription = mWifiState.signalContentDescription;
         } else {
             mWifiState.iconId = R.drawable.ic_qs_wifi_no_network;
             mWifiState.label = r.getString(R.string.quick_settings_wifi_off_label);
             mWifiState.signalContentDescription = r.getString(R.string.accessibility_wifi_off);
 
-            mWifiBackState.iconId = mWifiState.iconId;
-            mWifiBackState.label = mWifiState.label;
+            wifiApIconId = mWifiState.iconId;
+            wifiApString = mWifiState.label;
             mWifiBackState.signalContentDescription = mWifiState.signalContentDescription;
         }
+        mWifiBackState.iconId = getWifiApEnabled() ? getWifiApTypeIcon() : wifiApIconId;
+        mWifiBackState.label = getWifiApEnabled() ? getWifiApString() : wifiApString;
+        mWifiBackState.connected = getWifiApEnabled();
         mWifiCallback.refreshView(mWifiTile, mWifiState);
         mWifiBackCallback.refreshView(mWifiBackTile, mWifiBackState);
+    }
+
+    private boolean isWifiEnabled() {
+        return mWifiManager.getWifiState() == WifiManager.WIFI_STATE_ENABLED;
     }
 
     String getWifiIpAddr() {
@@ -1198,17 +1305,19 @@ class QuickSettingsModel implements BluetoothStateChangeCallback,
 
         // Back tile: Show paired devices
         if (mBluetoothBackTile != null) {
-            mBluetoothBackState.iconId = mBluetoothState.iconId;
-
+            boolean isPaired = false;
             final BluetoothAdapter adapter = BluetoothAdapter.getDefaultAdapter();
             Set<BluetoothDevice> btDevices = adapter.getBondedDevices();
             if (btDevices.size() == 1) {
                 // Show a generic label about the number of paired bluetooth devices
+                isPaired = true;
                 mBluetoothBackState.label = 
                     r.getString(R.string.quick_settings_bluetooth_number_paired, btDevices.size());
             } else {
+                isPaired = false;
                 mBluetoothBackState.label = r.getString(R.string.quick_settings_bluetooth_disabled);
             }
+            mBluetoothBackState.iconId = isBluetoothPaired(isPaired && bluetoothStateIn.enabled);
         }
 
         mBluetoothCallback.refreshView(mBluetoothTile, mBluetoothState);
@@ -1217,6 +1326,14 @@ class QuickSettingsModel implements BluetoothStateChangeCallback,
             mBluetoothBackCallback.refreshView(mBluetoothBackTile, mBluetoothBackState);
         }
     }
+
+    private int isBluetoothPaired(boolean paired) {
+        if (paired) {
+            return R.drawable.ic_qs_bluetooth_paired_on;
+        }
+        return R.drawable.ic_qs_bluetooth_off;
+    }
+
     void refreshBluetoothTile() {
         if (mBluetoothTile != null) {
             onBluetoothStateChange(mBluetoothState.enabled);
@@ -1262,7 +1379,7 @@ class QuickSettingsModel implements BluetoothStateChangeCallback,
                 : R.string.quick_settings_location_off_label;
         String label = mContext.getText(textResId).toString();
         int locationIconId = locationEnabled
-                ? R.drawable.ic_qs_location_on : R.drawable.ic_qs_location_off;
+                ? R.drawable.ic_qs_location_default_on : R.drawable.ic_qs_location_default_off;
         mLocationState.enabled = locationEnabled;
         mLocationState.label = label;
         mLocationState.iconId = locationIconId;
@@ -1312,6 +1429,8 @@ class QuickSettingsModel implements BluetoothStateChangeCallback,
     }
     // SettingsObserver callback
     public void onBugreportChanged() {
+        if (mRibbon) return;
+
         final ContentResolver cr = mContext.getContentResolver();
         boolean enabled = false;
         try {
@@ -1350,6 +1469,8 @@ class QuickSettingsModel implements BluetoothStateChangeCallback,
     }
 
     private void updateRemoteDisplays() {
+        if (mRibbon) return;
+
         MediaRouter.RouteInfo connectedRoute = mMediaRouter.getSelectedRoute(
                 MediaRouter.ROUTE_TYPE_REMOTE_DISPLAY);
         boolean enabled = connectedRoute != null
@@ -1429,6 +1550,8 @@ class QuickSettingsModel implements BluetoothStateChangeCallback,
         return false;
     }
     void onImeWindowStatusChanged(boolean visible) {
+        if (mRibbon) return;
+
         InputMethodManager imm =
                 (InputMethodManager) mContext.getSystemService(Context.INPUT_METHOD_SERVICE);
         List<InputMethodInfo> imis = imm.getInputMethodList();
@@ -1570,6 +1693,8 @@ class QuickSettingsModel implements BluetoothStateChangeCallback,
         setSslCaCertWarningTileInfo(false, true);
     }
     public void setSslCaCertWarningTileInfo(boolean hasCert, boolean isManaged) {
+        if (mRibbon) return;
+
         Resources r = mContext.getResources();
         mSslCaCertWarningState.enabled = hasCert;
         if (isManaged) {
@@ -1629,7 +1754,7 @@ class QuickSettingsModel implements BluetoothStateChangeCallback,
 
     private void updateSleepState() {
         mSleepModeState.enabled = true;
-        mSleepModeState.iconId = R.drawable.ic_qs_sleep;
+        mSleepModeState.iconId = R.drawable.ic_qs_screen_timeout;
         mSleepModeState.label = screenTimeoutGetLabel(getScreenTimeout());
         mSleepModeCallback.refreshView(mSleepModeTile, mSleepModeState);
     }
