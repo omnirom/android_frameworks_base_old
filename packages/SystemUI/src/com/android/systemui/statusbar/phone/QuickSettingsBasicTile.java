@@ -89,6 +89,29 @@ class QuickSettingsBasicTile extends QuickSettingsTileView {
         mTextView.setTextSize(TypedValue.COMPLEX_UNIT_PX, size);
     }
 
+    void switchToRibbonMode() {
+        TextView tv = (TextView) findViewById(R.id.text);
+        if (tv != null) {
+            tv.setVisibility(View.GONE);
+        }
+        View image = findViewById(R.id.image);
+        if (image != null) {
+            MarginLayoutParams params = (MarginLayoutParams) image.getLayoutParams();
+            int margin = mContext.getResources().getDimensionPixelSize(
+                    R.dimen.qs_tile_ribbon_icon_margin);
+            params.topMargin = params.bottomMargin = margin;
+            image.setLayoutParams(params);
+        }
+        View loadingImage = findViewById(R.id.loading);
+        if (loadingImage != null) {
+            MarginLayoutParams params = (MarginLayoutParams) loadingImage.getLayoutParams();
+            int margin = mContext.getResources().getDimensionPixelSize(
+                    R.dimen.qs_tile_ribbon_icon_margin);
+            params.topMargin = params.bottomMargin = margin;
+            loadingImage.setLayoutParams(params);
+        }
+    }
+
     public void setTextResource(int resId) {
         mTextView.setText(resId);
     }
