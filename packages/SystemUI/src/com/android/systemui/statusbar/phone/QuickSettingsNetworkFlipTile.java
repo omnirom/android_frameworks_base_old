@@ -55,9 +55,6 @@ class QuickSettingsNetworkFlipTile extends QuickSettingsTileView {
 
         mBack.setVisibility(View.GONE);
 
-        mFront.setTemporary(true);
-        mBack.setTemporary(true);
-
         addView(mFront,
                 new FrameLayout.LayoutParams(
                         FrameLayout.LayoutParams.MATCH_PARENT,
@@ -74,7 +71,16 @@ class QuickSettingsNetworkFlipTile extends QuickSettingsTileView {
         if (!isEditModeEnabled()) {
             return mFlip3d.onTouch(this, e);
         }
-        return super.onTouchEvent(e);
+        return super.dispatchTouchEvent(e);
+    }
+
+    @Override
+    public boolean onInterceptTouchEvent(MotionEvent ev) {
+        if (isEditModeEnabled()) {
+            return true;
+        } else {
+            return super.onInterceptTouchEvent(ev);
+        }
     }
 
     public void setFrontImageDrawable(Drawable drawable) {
@@ -120,6 +126,14 @@ class QuickSettingsNetworkFlipTile extends QuickSettingsTileView {
         super.setTextSizes(size);
     }
 
+    @Override
+    public void switchToRibbonMode() {
+        mBack.switchToRibbonMode();
+        mFront.switchToRibbonMode();
+        mFlip3d.switchToRibbonMode();
+        super.switchToRibbonMode();
+    }
+
     public void setFrontOnLongClickListener(View.OnLongClickListener listener) {
         mFront.setOnLongClickListener(listener);
     }
@@ -143,5 +157,4 @@ class QuickSettingsNetworkFlipTile extends QuickSettingsTileView {
     public QuickSettingsTileView getBack() {
         return mBack;
     }
-
 }
