@@ -129,6 +129,14 @@ class QuickSettingsNetworkFlipTile extends QuickSettingsTileView {
         super.setTextSizes(size);
     }
 
+    @Override
+    public void switchToRibbonMode() {
+        mBack.switchToRibbonMode();
+        mFront.switchToRibbonMode();
+        mFlip3d.switchToRibbonMode();
+        super.switchToRibbonMode();
+    }
+
     public void setFrontOnLongClickListener(View.OnLongClickListener listener) {
         mFront.setOnLongClickListener(listener);
     }

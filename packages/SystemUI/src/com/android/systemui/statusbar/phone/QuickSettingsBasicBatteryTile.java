@@ -89,6 +89,31 @@ class QuickSettingsBasicBatteryTile extends QuickSettingsTileView {
         super.setTextSizes(size);
     }
 
+    @Override
+    public void switchToRibbonMode() {
+        TextView tv = (TextView) findViewById(R.id.text);
+        if (tv != null) {
+            tv.setVisibility(View.GONE);
+        }
+        View image = findViewById(R.id.image);
+        if (image != null) {
+            MarginLayoutParams params = (MarginLayoutParams) image.getLayoutParams();
+            int margin = mContext.getResources().getDimensionPixelSize(
+                    R.dimen.qs_tile_ribbon_icon_margin);
+            params.topMargin = params.bottomMargin = margin;
+            image.setLayoutParams(params);
+        }
+        View circleImage = findViewById(R.id.circle_battery);
+        if (image != null) {
+            MarginLayoutParams params = (MarginLayoutParams) circleImage.getLayoutParams();
+            int margin = mContext.getResources().getDimensionPixelSize(
+                    R.dimen.qs_tile_ribbon_icon_margin);
+            params.topMargin = params.bottomMargin = margin;
+            circleImage.setLayoutParams(params);
+        }
+        super.switchToRibbonMode();
+    }
+
     public void setTextResource(int resId) {
         mTextView.setText(resId);
     }
