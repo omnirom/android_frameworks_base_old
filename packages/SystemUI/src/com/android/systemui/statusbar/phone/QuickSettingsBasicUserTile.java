@@ -88,6 +88,13 @@ class QuickSettingsBasicUserTile extends QuickSettingsTileView {
         mTextView.setTextSize(TypedValue.COMPLEX_UNIT_PX, size);
     }
 
+    void switchToRibbonMode() {
+        TextView tv = (TextView) findViewById(R.id.user_textview);
+        if (tv != null) {
+            tv.setVisibility(View.GONE);
+        }
+    }
+
     public void setTextResource(int resId) {
         mTextView.setText(resId);
     }
