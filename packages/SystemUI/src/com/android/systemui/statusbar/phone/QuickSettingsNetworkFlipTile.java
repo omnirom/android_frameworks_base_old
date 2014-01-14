@@ -21,22 +21,23 @@ package com.android.systemui.statusbar.phone;
 import com.android.systemui.R;
 
 import android.content.Context;
+import android.graphics.drawable.Drawable;
 import android.util.AttributeSet;
 import android.view.MotionEvent;
 import android.view.View;
 import android.widget.FrameLayout;
 
-class QuickSettingsFlipTile extends QuickSettingsTileView {
+class QuickSettingsNetworkFlipTile extends QuickSettingsTileView {
 
-    private final QuickSettingsBasicTile mFront;
+    private final QuickSettingsBasicNetworkTile mFront;
     private final QuickSettingsBasicBackTile mBack;
     private final QuickSettingsTileFlip3d mFlip3d;
 
-    public QuickSettingsFlipTile(Context context) {
+    public QuickSettingsNetworkFlipTile(Context context) {
         this(context, null);
     }
 
-    public QuickSettingsFlipTile(Context context, AttributeSet attrs) {
+    public QuickSettingsNetworkFlipTile(Context context, AttributeSet attrs) {
         super(context, attrs);
 
         setLayoutParams(new FrameLayout.LayoutParams(
@@ -44,7 +45,7 @@ class QuickSettingsFlipTile extends QuickSettingsTileView {
             context.getResources().getDimensionPixelSize(R.dimen.quick_settings_cell_height)
         ));
 
-        mFront = new QuickSettingsBasicTile(context);
+        mFront = new QuickSettingsBasicNetworkTile(context);
         mBack = new QuickSettingsBasicBackTile(context);
         mFlip3d = new QuickSettingsTileFlip3d(mFront, mBack);
 
@@ -82,24 +83,32 @@ class QuickSettingsFlipTile extends QuickSettingsTileView {
         }
     }
 
+    public void setFrontImageDrawable(Drawable drawable) {
+        mFront.setImageDrawable(drawable);
+    }
+
+    public void setFrontImageOverlayDrawable(Drawable drawable) {
+        mFront.setImageOverlayDrawable(drawable);
+    }
+
     public void setFrontImageResource(int id) {
         mFront.setImageResource(id);
     }
 
-    public void setBackImageResource(int id) {
-        mBack.setImageResource(id);
+    public void setFrontImageOverlayResource(int id) {
+        mFront.setImageOverlayResource(id);
     }
 
     public void setFrontText(CharSequence text) {
         mFront.setText(text);
     }
 
-    public void setBackLabel(CharSequence text) {
-        mBack.setLabel(text);
+    public void setBackImageResource(int id) {
+        mBack.setImageResource(id);
     }
 
-    public void setFrontContentDescription(CharSequence text) {
-        mFront.setContentDescription(text);
+    public void setBackLabel(CharSequence text) {
+        mBack.setLabel(text);
     }
 
     public void setBackContentDescription(CharSequence text) {
@@ -108,14 +117,6 @@ class QuickSettingsFlipTile extends QuickSettingsTileView {
 
     public void setBackFunction(CharSequence text) {
         mBack.setFunction(text);
-    }
-
-    public void setFrontLoading(boolean loading) {
-        mFront.setLoading(loading);
-    }
-
-    public void setFrontPressed(boolean press) {
-        mFront.setPressed(press);
     }
 
     @Override
