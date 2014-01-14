@@ -37,41 +37,73 @@ class QuickSettingsTouchListener implements OnTouchListener {
     private float mDegrees;
     private GestureDetector mDetector;
     private DecelerateInterpolator mInterpolator;
+    private boolean mRibbonMode = false;
+    private View mTile;
 
     public QuickSettingsTouchListener(Context context, final View tile) {
         mDegrees = 0;
+        mTile = tile;
         mDetector = new GestureDetector(context, new GestureDetector.SimpleOnGestureListener() {
             @Override
             public boolean onScroll(MotionEvent e1, MotionEvent e2, float dX, float dY) {
-                final float width = tile.getMeasuredWidth();
-
-                if (width > 0) {
-                    double radians = Math.toRadians(-dX * 0.05f);
-                    radians = Math.max(-1, radians);
-                    radians = Math.min(1, radians);
-
-                    float angle = (float) Math.toDegrees(Math.asin(radians));
-                    mDegrees += angle;
-                    if (mDegrees > 30.0f) mDegrees = 30.0f;
-                    else if (mDegrees < -30.0f) mDegrees = -30.0f;
-
-                    tile.setRotationY(mDegrees);
-                }
-
-                // Cancel events on the children view (if any)
-                MotionEvent evt = MotionEvent.obtain(0, 0,
-                    MotionEvent.ACTION_CANCEL, e1.getX(), e1.getY(), 0);
-                tile.onTouchEvent(evt);
-
-                return true;
+                return isOnScrolling(e1, e2, dX, dY);
             }
         });
         mInterpolator = new DecelerateInterpolator();
     }
 
+    private void rotateBy(float degrees) {
+        mDegrees += degrees;
+        if (mDegrees > 30.0f) {
+            mDegrees = 30.0f;
+        } else if (mDegrees < -30.0f) {
+            mDegrees = -30.0f;
+        }
+        if (mRibbonMode) {
+            mTile.setRotationX(mDegrees);
+        } else {
+            mTile.setRotationY(mDegrees);
+        }
+    }
+
+    private boolean isOnScrolling(MotionEvent e1, MotionEvent e2, float dX, float dY) {
+        final float width = mTile.getMeasuredWidth();
+        final float height = mTile.getMeasuredHeight();
+
+        if (mRibbonMode) {
+            if (height > 0) {
+                double radians = Math.toRadians(-dY * 0.05f);
+                radians = Math.max(-1, radians);
+                radians = Math.min(1, radians);
+
+                float angle = (float) Math.toDegrees(Math.asin(radians));
+                rotateBy(angle);
+            }
+        } else {
+            if (width > 0) {
+                double radians = Math.toRadians(-dX * 0.05f);
+                radians = Math.max(-1, radians);
+                radians = Math.min(1, radians);
+
+                float angle = (float) Math.toDegrees(Math.asin(radians));
+                rotateBy(angle);
+            }
+        }
+        // Cancel events on the children view (if any)
+        MotionEvent evt = MotionEvent.obtain(0, 0,
+                MotionEvent.ACTION_CANCEL, e1.getX(), e1.getY(), 0);
+        mTile.onTouchEvent(evt);
+        return true;
+    }
+
+    public void switchToRibbonMode() {
+        mRibbonMode = true;
+    }
+
     @Override
     public boolean onTouch(View view, MotionEvent event) {
         QuickSettingsTileView tile = ((QuickSettingsTileView) view);
+        mRibbonMode = tile.isRibbonMode();
 
         int action = event.getAction();
 
@@ -101,8 +133,11 @@ class QuickSettingsTouchListener implements OnTouchListener {
 
             if (event.getAction() == MotionEvent.ACTION_UP) {
                 mDegrees = 0;
-                view.animate().setInterpolator(mInterpolator).setDuration(150).rotationY(0).start();
-
+                if (mRibbonMode) {
+                    view.animate().setInterpolator(mInterpolator).setDuration(150).rotationX(0).start();
+                } else {
+                    view.animate().setInterpolator(mInterpolator).setDuration(150).rotationY(0).start();
+                }
                 return false;
             }
             return false;
