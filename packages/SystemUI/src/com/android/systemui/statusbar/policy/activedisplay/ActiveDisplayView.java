@@ -159,6 +159,7 @@ public class ActiveDisplayView extends FrameLayout {
     private boolean mHideLowPriorityNotifications = false;
     private int mPocketMode = POCKET_MODE_OFF;
     private long mRedisplayTimeout = 0;
+    private long mLockscreenTimeout = 0;
     private float mInitialBrightness = 1f;
     private int mBrightnessMode = -1;
     private int mUserBrightnessLevel = -1;
@@ -291,6 +292,8 @@ public class ActiveDisplayView extends FrameLayout {
                     Settings.System.ACTIVE_DISPLAY_THRESHOLD), false, this);
             resolver.registerContentObserver(Settings.System.getUriFor(
                     Settings.System.IMMERSIVE_MODE), false, this);
+            resolver.registerContentObserver(Settings.Secure.getUriFor(
+                    Settings.Secure.LOCK_SCREEN_LOCK_AFTER_TIMEOUT), false, this);
             update();
         }
 
@@ -337,6 +340,8 @@ public class ActiveDisplayView extends FrameLayout {
                     resolver, Settings.System.ACTIVE_DISPLAY_THRESHOLD, 8000L);
             mForceImmersiveMode = Settings.System.getInt(
                     resolver, Settings.System.IMMERSIVE_MODE, 0) == 1;
+            mLockscreenTimeout = Settings.Secure.getLong(
+                    resolver, Settings.Secure.LOCK_SCREEN_LOCK_AFTER_TIMEOUT, 5000L);
 
             createExcludedAppsSet(excludedApps);
 
@@ -633,6 +638,7 @@ public class ActiveDisplayView extends FrameLayout {
     }
 
     private final Runnable runSystemUiVisibilty = new Runnable() {
+        @Override
         public void run() {
             adjustStatusBarLocked(1);
         }
@@ -688,6 +694,7 @@ public class ActiveDisplayView extends FrameLayout {
     }
 
     private void handleShowNotificationView() {
+        Log.i(TAG, "ActiveDisplay: showing");
         setVisibility(View.VISIBLE);
         setSystemUIVisibility(false);
         mHandler.postDelayed(runSystemUiVisibilty, 100);
@@ -695,6 +702,7 @@ public class ActiveDisplayView extends FrameLayout {
     }
 
     private void handleHideNotificationView() {
+        Log.i(TAG, "ActiveDisplay: hiding");
         mHandler.removeCallbacks(runSystemUiVisibilty);
         setVisibility(View.GONE);
         restoreBrightness();
@@ -709,6 +717,7 @@ public class ActiveDisplayView extends FrameLayout {
     }
 
     private void handleForceHideNotificationView() {
+        Log.i(TAG, "ActiveDisplay: hiding");
         mHandler.removeCallbacks(runSystemUiVisibilty);
         setVisibility(View.GONE);
         restoreBrightness();
@@ -722,6 +731,7 @@ public class ActiveDisplayView extends FrameLayout {
         if (!mDisplayNotifications
             || mNotification == null
             || inQuietHoursDim()) return;
+        Log.i(TAG, "ActiveDisplay: showing");
         handleShowNotificationView();
         setActiveNotification(mNotification, true);
         inflateRemoteView(mNotification);
@@ -755,6 +765,7 @@ public class ActiveDisplayView extends FrameLayout {
     }
 
     private void handleShowTime() {
+        Log.i(TAG, "ActiveDisplay: showing");
         mCurrentNotificationIcon.setImageResource(R.drawable.ic_ad_unlock);
         mGlowPadView.setHandleText("");
         mNotificationDrawable = null;
@@ -769,6 +780,9 @@ public class ActiveDisplayView extends FrameLayout {
     }
 
     private void onScreenTurnedOn() {
+        if (!KeyguardTouchDelegate.getInstance(mContext).isShowingAndNotHidden()) {
+            handleForceHideNotificationView();
+        }
         cancelRedisplayTimer();
     }
 
@@ -798,6 +812,7 @@ public class ActiveDisplayView extends FrameLayout {
     }
 
     private final Runnable runWakeDevice = new Runnable() {
+        @Override
         public void run() {
             setBrightness(mInitialBrightness);
             wakeDevice();
@@ -870,7 +885,8 @@ public class ActiveDisplayView extends FrameLayout {
     }
 
     private void registerBroadcastReceiver() {
-        IntentFilter filter = new IntentFilter(ACTION_REDISPLAY_NOTIFICATION);
+        IntentFilter filter = new IntentFilter();
+        filter.addAction(ACTION_REDISPLAY_NOTIFICATION);
         filter.addAction(ACTION_DISPLAY_TIMEOUT);
         filter.addAction(Intent.ACTION_SCREEN_OFF);
         filter.addAction(Intent.ACTION_SCREEN_ON);
@@ -1246,22 +1262,26 @@ public class ActiveDisplayView extends FrameLayout {
         }
     };
 
-    private final BroadcastReceiver mBroadcastReceiver = new BroadcastReceiver() {
+    private BroadcastReceiver mBroadcastReceiver = new BroadcastReceiver() {
         @Override
         public void onReceive(Context context, Intent intent) {
             String action = intent.getAction();
-            if (ACTION_REDISPLAY_NOTIFICATION.equals(action)) {
+            if (action.equals(ACTION_REDISPLAY_NOTIFICATION)) {
+                Log.i(TAG, "ActiveDisplay: receive ACTION_REDISPLAY_NOTIFICATION");
                 if (mNotification == null) {
                     mNotification = getNextAvailableNotification();
                 }
                 if (mNotification != null) showNotification(mNotification, true);
-            } else if (ACTION_DISPLAY_TIMEOUT.equals(action)) {
+            } else if (action.equals(ACTION_DISPLAY_TIMEOUT)) {
                 turnScreenOff();
-            } else if (Intent.ACTION_SCREEN_OFF.equals(action)) {
+            } else if (action.equals(Intent.ACTION_SCREEN_OFF)) {
+                Log.i(TAG, "ActiveDisplay: receive SCREEN OFF");
                 onScreenTurnedOff();
-            } else if (Intent.ACTION_SCREEN_ON.equals(action)) {
+            } else if (action.equals(Intent.ACTION_SCREEN_ON)) {
+                Log.i(TAG, "ActiveDisplay: receive SCREEN ON");
                 onScreenTurnedOn();
-            } else if (ACTION_FORCE_DISPLAY.equals(action)) {
+            } else if (action.equals(ACTION_FORCE_DISPLAY)) {
+                Log.i(TAG, "ActiveDisplay: receive ACTION_FORCE_DISPLAY");
                 if (mNotification == null) {
                     mNotification = getNextAvailableNotification();
                 }
@@ -1344,5 +1364,11 @@ public class ActiveDisplayView extends FrameLayout {
         LockPatternUtils utils = new LockPatternUtils(mContext);
         utils.setCurrentUser(UserHandle.USER_OWNER);
         return utils.isLockScreenDisabled();
+    }
+
+    private boolean getPowerButtonInstantlyLocks() {
+        LockPatternUtils utils = new LockPatternUtils(mContext);
+        utils.setCurrentUser(UserHandle.USER_OWNER);
+        return utils.getPowerButtonInstantlyLocks();
     }
 }
