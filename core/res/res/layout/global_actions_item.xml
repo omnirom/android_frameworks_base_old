@@ -40,6 +40,7 @@
         android:layout_gravity="center_vertical"
         >
         <TextView android:id="@+id/message"
+			android:textColor="#ff404040"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:layout_gravity="top"
@@ -48,6 +49,7 @@
             android:textAppearance="?android:attr/textAppearanceLarge"
             />
         <TextView android:id="@+id/status"
+			android:textColor="#ff404040"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:layout_gravity="bottom"

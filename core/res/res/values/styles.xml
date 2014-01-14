@@ -229,7 +229,9 @@ please see styles_device_defaults.xml.
     <style name="TextAppearance.StatusBar">
         <item name="android:textAppearance">?android:attr/textAppearanceSmall</item>
     </style>
-    <style name="TextAppearance.StatusBar.Ticker">
+    <style name="TextAppearance.StatusBar.Ticker" parent="@style/TextAppearance.StatusBar">
+        <item name="textSize">@dimen/notification_subtext_size</item>
+        <item name="textColor">#ffffffff</item>
     </style>
     <style name="TextAppearance.StatusBar.Title">
         <item name="android:textStyle">bold</item>
@@ -280,7 +282,7 @@ please see styles_device_defaults.xml.
     </style>
 
     <style name="TextAppearance.AutoCorrectionSuggestion" parent="TextAppearance.Suggestion">
-        <item name="android:textUnderlineColor">@color/holo_blue_light</item>
+        <item name="android:textUnderlineColor">@color/amra_text</item>
     </style>
 
     <!-- Widget Styles -->
@@ -1438,7 +1440,7 @@ please see styles_device_defaults.xml.
 
     <style name="TextAppearance.Holo.DialogWindowTitle">
         <item name="android:textSize">22sp</item>
-        <item name="android:textColor">@android:color/holo_blue_light</item>
+        <item name="android:textColor">@android:color/amra_text</item>
     </style>
 
     <style name="TextAppearance.Holo.CalendarViewWeekDayView" parent="TextAppearance.Small.CalendarViewWeekDayView">
@@ -1537,7 +1539,7 @@ please see styles_device_defaults.xml.
 
     <style name="TextAppearance.Holo.Light.DialogWindowTitle">
         <item name="android:textSize">22sp</item>
-        <item name="android:textColor">@android:color/holo_blue_light</item>
+        <item name="android:textColor">@android:color/amra_text</item>
     </style>
 
     <style name="TextAppearance.Holo.Light.CalendarViewWeekDayView" parent="TextAppearance.Small.CalendarViewWeekDayView">
@@ -1560,8 +1562,8 @@ please see styles_device_defaults.xml.
     </style>
 
     <style name="Widget.Holo.StackView">
-        <item name="android:resOutColor">@android:color/holo_blue_light</item>
-        <item name="android:clickColor">@android:color/holo_blue_light</item>
+        <item name="android:resOutColor">@android:color/amra_text</item>
+        <item name="android:clickColor">@android:color/amra_text</item>
     </style>
 
     <style name="Widget.Holo.Button.Borderless">

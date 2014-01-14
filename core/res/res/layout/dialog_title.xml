@@ -25,7 +25,8 @@ enabled.
     android:orientation="vertical" 
     android:fitsSystemWindows="true">
     <TextView android:id="@android:id/title" style="?android:attr/windowTitleStyle"
-        android:layout_width="match_parent" 
+        android:layout_width="match_parent"
+		android:textColor="#ff404040" 
         android:layout_height="wrap_content"
         android:minHeight="53dip"
         android:paddingTop="9dip"

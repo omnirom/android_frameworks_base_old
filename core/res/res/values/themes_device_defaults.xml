@@ -201,12 +201,12 @@ easier.
     </style>
 
     <!-- Variant of {@link #Theme_DeviceDefault} with no action bar -->
-    <style name="Theme.DeviceDefault.NoActionBar" parent="Theme.Holo.NoActionBar" >
+    <style name="Theme.DeviceDefault.NoActionBar" parent="Theme.Holo.Light.NoActionBar" >
     </style>
 
     <!-- Variant of {@link #Theme_DeviceDefault} with no action bar and no status bar.  This theme
          sets {@link android.R.attr#windowFullscreen} to true.  -->
-    <style name="Theme.DeviceDefault.NoActionBar.Fullscreen" parent="Theme.Holo.NoActionBar.Fullscreen" >
+    <style name="Theme.DeviceDefault.NoActionBar.Fullscreen" parent="Theme.Holo.Light.NoActionBar.Fullscreen" >
     </style>
 
     <!-- Variant of {@link #Theme_DeviceDefault} with no action bar and no status bar and
@@ -254,6 +254,7 @@ easier.
 
         <item name="listSeparatorTextViewStyle">@android:style/Widget.DeviceDefault.Light.TextView.ListSeparator</item>
 
+        <!-- Window attributes -->
         <item name="windowTitleStyle">@android:style/WindowTitle.DeviceDefault</item>
         <item name="windowTitleBackgroundStyle">@android:style/WindowTitleBackground.DeviceDefault</item>
         <item name="android:windowAnimationStyle">@android:style/Animation.DeviceDefault.Activity</item>
@@ -391,28 +392,42 @@ easier.
     <!-- DeviceDefault theme for dialog windows and activities. This changes the window to be
     floating (not fill the entire screen), and puts a frame around its contents. You can set this
     theme on an activity if you would like to make an activity that looks like a Dialog. -->
-    <style name="Theme.DeviceDefault.Dialog" parent="Theme.Holo.Dialog" >
-        <item name="android:windowTitleStyle">@android:style/DialogWindowTitle.DeviceDefault</item>
-        <item name="android:windowAnimationStyle">@android:style/Animation.DeviceDefault.Dialog</item>
-
-        <item name="android:buttonBarStyle">@android:style/DeviceDefault.ButtonBar.AlertDialog</item>
-        <item name="borderlessButtonStyle">@android:style/Widget.DeviceDefault.Button.Borderless.Small</item>
-
-        <item name="textAppearance">@android:style/TextAppearance.DeviceDefault</item>
-        <item name="textAppearanceInverse">@android:style/TextAppearance.DeviceDefault.Inverse</item>
+    <style name="Theme.DeviceDefault.Dialog" parent="Theme.Holo.Light.Dialog" >
+        <item name="textAppearance">@style/TextAppearance.Holo.Light</item>
+        <item name="textAppearanceInverse">@style/TextAppearance.Holo.Light.Inverse</item>
+        <item name="windowBackground">@drawable/dialog_full_holo_light</item>
+        <item name="windowFrame">@null</item>
+        <item name="windowIsFloating">true</item>
+        <item name="windowContentOverlay">@null</item>
+        <item name="windowTitleStyle">@style/DialogWindowTitle.Holo.Light</item>
+        <item name="textColor">#ff404040</item>
+        <item name="background">#ffe5e5e5</item>
+        <item name="windowAnimationStyle">@style/Animation.Holo.Dialog</item>
+        <item name="windowSoftInputMode">adjustPan</item>
+        <item name="colorBackgroundCacheHint">@null</item>
+        <item name="windowActionBar">false</item>
+        <item name="windowActionModeOverlay">true</item>
+        <item name="borderlessButtonStyle">@style/Widget.Holo.Light.Button.Borderless.Small</item>
+        <item name="buttonBarStyle">@style/Holo.Light.ButtonBar.AlertDialog</item>
+        <item name="windowCloseOnTouchOutside">@bool/config_closeDialogWhenTouchOutside</item>
+        <item name="listPreferredItemPaddingLeft">16.0dip</item>
+        <item name="listPreferredItemPaddingRight">16.0dip</item>
+        <item name="listPreferredItemPaddingStart">16.0dip</item>
+        <item name="listPreferredItemPaddingEnd">16.0dip</item>
+        <item name="preferencePanelStyle">@style/PreferencePanel.Dialog</item>
     </style>
     <!-- Variant of {@link #Theme_DeviceDefault_Dialog} that has a nice minimum width for a
     regular dialog. -->
-    <style name="Theme.DeviceDefault.Dialog.MinWidth" parent="Theme.Holo.Dialog.MinWidth" >
+    <style name="Theme.DeviceDefault.Dialog.MinWidth" parent="Theme.Holo.Light.Dialog.MinWidth" >
 
     </style>
     <!-- Variant of {@link #Theme_DeviceDefault_Dialog} without an action bar -->
-    <style name="Theme.DeviceDefault.Dialog.NoActionBar" parent="Theme.Holo.Dialog.NoActionBar" >
+    <style name="Theme.DeviceDefault.Dialog.NoActionBar" parent="Theme.Holo.Light.Dialog.NoActionBar" >
 
     </style>
     <!-- Variant of {@link #Theme_DeviceDefault_Dialog_NoActionBar} that has a nice minimum width
     for a regular dialog. -->
-    <style name="Theme.DeviceDefault.Dialog.NoActionBar.MinWidth" parent="Theme.Holo.Dialog.NoActionBar.MinWidth" >
+    <style name="Theme.DeviceDefault.Dialog.NoActionBar.MinWidth" parent="Theme.Holo.Light.Dialog.NoActionBar.MinWidth" >
 
     </style>
 
@@ -436,14 +451,28 @@ easier.
     floating (not fill the entire screen), and puts a frame around its contents. You can set this
     theme on an activity if you would like to make an activity that looks like a Dialog.-->
     <style name="Theme.DeviceDefault.Light.Dialog" parent="Theme.Holo.Light.Dialog" >
-        <item name="android:windowTitleStyle">@android:style/DialogWindowTitle.DeviceDefault.Light</item>
-        <item name="android:windowAnimationStyle">@android:style/Animation.DeviceDefault.Dialog</item>
-
-        <item name="android:buttonBarStyle">@android:style/DeviceDefault.Light.ButtonBar.AlertDialog</item>
-        <item name="borderlessButtonStyle">@android:style/Widget.DeviceDefault.Light.Button.Borderless.Small</item>
-
-        <item name="textAppearance">@android:style/TextAppearance.DeviceDefault.Light</item>
-        <item name="textAppearanceInverse">@android:style/TextAppearance.DeviceDefault.Light.Inverse</item>
+        <item name="textAppearance">@style/TextAppearance.Holo.Light</item>
+        <item name="textAppearanceInverse">@style/TextAppearance.Holo.Light.Inverse</item>
+        <item name="windowBackground">@drawable/dialog_full_holo_light</item>
+        <item name="windowFrame">@null</item>
+        <item name="windowIsFloating">true</item>
+        <item name="windowContentOverlay">@null</item>
+        <item name="windowTitleStyle">@style/DialogWindowTitle.Holo.Light</item>
+        <item name="textColor">#ff404040</item>
+        <item name="background">#ffe5e5e5</item>
+        <item name="windowAnimationStyle">@style/Animation.Holo.Dialog</item>
+        <item name="windowSoftInputMode">adjustPan</item>
+        <item name="colorBackgroundCacheHint">@null</item>
+        <item name="windowActionBar">false</item>
+        <item name="windowActionModeOverlay">true</item>
+        <item name="borderlessButtonStyle">@style/Widget.Holo.Light.Button.Borderless.Small</item>
+        <item name="buttonBarStyle">@style/Holo.Light.ButtonBar.AlertDialog</item>
+        <item name="windowCloseOnTouchOutside">@bool/config_closeDialogWhenTouchOutside</item>
+        <item name="listPreferredItemPaddingLeft">16.0dip</item>
+        <item name="listPreferredItemPaddingRight">16.0dip</item>
+        <item name="listPreferredItemPaddingStart">16.0dip</item>
+        <item name="listPreferredItemPaddingEnd">16.0dip</item>
+        <item name="preferencePanelStyle">@style/PreferencePanel.Dialog</item>
     </style>
     <!-- Variant of {@link #Theme_DeviceDefault_Light_Dialog} that has a nice minimum width for a
     regular dialog. -->
@@ -478,13 +507,13 @@ easier.
 
     <!-- DeviceDefault theme for a window that will be displayed either full-screen on smaller
     screens (small, normal) or as a dialog on larger screens (large, xlarge). -->
-    <style name="Theme.DeviceDefault.DialogWhenLarge" parent="Theme.Holo.DialogWhenLarge" >
+    <style name="Theme.DeviceDefault.DialogWhenLarge" parent="Theme.Holo.Light.DialogWhenLarge" >
 
     </style>
     <!-- DeviceDefault theme for a window without an action bar that will be displayed either
     full-screen on smaller screens (small, normal) or as a dialog on larger screens (large,
     xlarge). -->
-    <style name="Theme.DeviceDefault.DialogWhenLarge.NoActionBar" parent="Theme.Holo.DialogWhenLarge.NoActionBar" >
+    <style name="Theme.DeviceDefault.DialogWhenLarge.NoActionBar" parent="Theme.Holo.Light.DialogWhenLarge.NoActionBar" >
 
     </style>
     <!-- DeviceDefault light theme for a window that will be displayed either full-screen on smaller
@@ -510,7 +539,7 @@ easier.
     <!-- DeviceDefault theme for panel windows. This removes all extraneous window
     decorations, so you basically have an empty rectangle in which to place your content. It makes
     the window floating, with a transparent background, and turns off dimming behind the window. -->
-    <style name="Theme.DeviceDefault.Panel" parent="Theme.Holo.Panel" >
+    <style name="Theme.DeviceDefault.Panel" parent="Theme.Holo.Light.Panel" >
 
     </style>
     <!-- DeviceDefault light theme for panel windows. This removes all extraneous window
@@ -551,13 +580,15 @@ easier.
 
     </style>
 
-    <style name="Theme.DeviceDefault.Dialog.Alert" parent="Theme.Holo.Dialog.Alert">
+    <style name="Theme.DeviceDefault.Dialog.Alert" parent="Theme.Holo.Light.Dialog.Alert">
         <item name="windowTitleStyle">@android:style/DialogWindowTitle.DeviceDefault</item>
+        <item name="textColor">#ff404040</item>
     </style>
     <style name="Theme.DeviceDefault.Light.Dialog.Alert" parent="Theme.Holo.Light.Dialog.Alert">
         <item name="windowTitleStyle">@android:style/DialogWindowTitle.DeviceDefault.Light</item>
+        <item name="textColor">#ff404040</item>
     </style>
-    <style name="Theme.DeviceDefault.SearchBar" parent="Theme.Holo.SearchBar">
+    <style name="Theme.DeviceDefault.SearchBar" parent="Theme.Holo.Light.SearchBar">
 
     </style>
     <style name="Theme.DeviceDefault.Light.SearchBar" parent="Theme.Holo.Light.SearchBar">

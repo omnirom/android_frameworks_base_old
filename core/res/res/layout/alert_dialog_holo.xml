@@ -34,7 +34,7 @@
             android:layout_width="match_parent"
             android:layout_height="2dip"
             android:visibility="gone"
-            android:background="@android:color/holo_blue_light" />
+            android:background="@android:color/black" />
         <LinearLayout android:id="@+id/title_template"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
@@ -60,7 +60,7 @@
             android:layout_width="match_parent"
             android:layout_height="2dip"
             android:visibility="gone"
-            android:background="@android:color/holo_blue_light" />
+            android:background="@android:color/black" />
         <!-- If the client uses a customTitle, it will be added here. -->
     </LinearLayout>
 
@@ -77,6 +77,7 @@
             <TextView android:id="@+id/message"
                 style="?android:attr/textAppearanceMedium"
                 android:layout_width="match_parent"
+                android:textColor="#ff404040"
                 android:layout_height="wrap_content"
                 android:paddingStart="16dip"
                 android:paddingEnd="16dip"
