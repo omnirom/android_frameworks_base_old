@@ -68,8 +68,10 @@ public class LocationController extends BroadcastReceiver {
          *
          * @param locationEnabled A value of true indicates that at least one type of location
          *                        is enabled in settings.
+         * @param locationMode value indicates the type of location mode
+         * which is enabled in settings.
          */
-        public void onLocationSettingsChanged(boolean locationEnabled);
+        public void onLocationSettingsChanged(boolean locationEnabled, int locationMode);
     }
 
     public LocationController(Context context) {
@@ -86,20 +88,28 @@ public class LocationController extends BroadcastReceiver {
         // Register to listen for changes in location settings.
         IntentFilter intentFilter = new IntentFilter();
         intentFilter.addAction(LocationManager.MODE_CHANGED_ACTION);
-        context.registerReceiverAsUser(new BroadcastReceiver() {
-            @Override
-            public void onReceive(Context context, Intent intent) {
-                String action = intent.getAction();
-                if (LocationManager.MODE_CHANGED_ACTION.equals(action)) {
-                    locationSettingsChanged();
-                }
-            }
-        }, UserHandle.ALL, intentFilter, null, new Handler());
+        context.registerReceiverAsUser(mBroadcastReceiver,
+               UserHandle.ALL, intentFilter, null, new Handler());
 
         // Examine the current location state and initialize the status view.
         updateActiveLocationRequests();
         refreshViews();
         mLastlocationMode = Settings.Secure.LOCATION_MODE_HIGH_ACCURACY;
+    }
+
+    private final BroadcastReceiver mBroadcastReceiver = new BroadcastReceiver() {
+        @Override
+        public void onReceive(Context context, Intent intent) {
+            String action = intent.getAction();
+            if (LocationManager.MODE_CHANGED_ACTION.equals(action)) {
+                locationSettingsChanged();
+            }
+        }
+    };
+
+    public void unregisterController(Context context) {
+        context.unregisterReceiver(this);
+        context.unregisterReceiver(mBroadcastReceiver);
     }
 
     /**
@@ -128,8 +138,11 @@ public class LocationController extends BroadcastReceiver {
         final ContentResolver cr = mContext.getContentResolver();
         // When enabling location, a user consent dialog will pop up, and the
         // setting won't be fully enabled until the user accepts the agreement.
+        final int lastMode = Settings.Secure.getIntForUser(cr,
+			Settings.Secure.LOCATION_LAST_MODE,
+			Settings.Secure.LOCATION_MODE_HIGH_ACCURACY, currentUserId);
         int mode = enabled
-                ? mLastlocationMode : Settings.Secure.LOCATION_MODE_OFF;
+                ? lastMode : Settings.Secure.LOCATION_MODE_OFF;
         // QuickSettings always runs as the owner, so specifically set the settings
         // for the current foreground user.
         return Settings.Secure
@@ -156,7 +169,6 @@ public class LocationController extends BroadcastReceiver {
         if (isUserLocationRestricted(currentUserId)) {
             return false;
         }
-        mLastlocationMode = mode;
         final ContentResolver cr = mContext.getContentResolver();
         // QuickSettings always runs as the owner, so specifically set the settings
         // for the current foreground user.
@@ -164,8 +176,8 @@ public class LocationController extends BroadcastReceiver {
                 .putIntForUser(cr, Settings.Secure.LOCATION_MODE, mode, currentUserId);
     }
 
-    public int locationMode() {
-        ContentResolver resolver = mContext.getContentResolver();
+    public int getLocationMode() {
+        final ContentResolver resolver = mContext.getContentResolver();
         return Settings.Secure.getIntForUser(resolver, Settings.Secure.LOCATION_MODE,
                 Settings.Secure.LOCATION_MODE_OFF, ActivityManager.getCurrentUser());
     }
@@ -254,8 +266,14 @@ public class LocationController extends BroadcastReceiver {
 
     private void locationSettingsChanged() {
         boolean isEnabled = isLocationEnabled();
+        int locationMode = getLocationMode();
+        if (isEnabled) {
+            Settings.Secure.putIntForUser(mContext.getContentResolver(),
+                     Settings.Secure.LOCATION_LAST_MODE, locationMode,
+                     ActivityManager.getCurrentUser());
+        }
         for (LocationSettingsChangeCallback cb : mSettingsChangeCallbacks) {
-            cb.onLocationSettingsChanged(isEnabled);
+            cb.onLocationSettingsChanged(isEnabled, locationMode);
         }
     }
 

@@ -26,7 +26,7 @@ import android.view.MotionEvent;
 import android.view.View;
 import android.widget.FrameLayout;
 
-class QuickSettingsFlipTile extends QuickSettingsTileView {
+public class QuickSettingsFlipTile extends QuickSettingsTileView {
 
     private final QuickSettingsBasicTile mFront;
     private final QuickSettingsBasicBackTile mBack;
@@ -123,6 +123,14 @@ class QuickSettingsFlipTile extends QuickSettingsTileView {
         mBack.setTextSizes(size);
         mFront.setTextSizes(size);
         super.setTextSizes(size);
+    }
+
+    @Override
+    public void switchToRibbonMode() {
+        mBack.switchToRibbonMode();
+        mFront.switchToRibbonMode();
+        mFlip3d.switchToRibbonMode();
+        super.switchToRibbonMode();
     }
 
     public void setFrontOnLongClickListener(View.OnLongClickListener listener) {

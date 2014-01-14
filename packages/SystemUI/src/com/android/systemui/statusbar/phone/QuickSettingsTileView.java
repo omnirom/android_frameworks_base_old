@@ -31,6 +31,8 @@ import android.view.LayoutInflater;
 import android.view.View;
 import android.view.View.OnClickListener;
 import android.view.View.OnLongClickListener;
+import android.view.ViewGroup;
+import android.view.ViewGroup.MarginLayoutParams;
 import android.view.ViewParent;
 import android.widget.FrameLayout;
 
@@ -44,9 +46,10 @@ class QuickSettingsTileView extends FrameLayout {
     private static final String HOVER_COLOR_WHITE = "#3FFFFFFF"; // 25% white
     private static final String HOVER_COLOR_BLACK = "#3F000000"; // 25% black
 
-    private static final float NON_EDITABLE = 1f;
+    private static final float DEFAULT = 1f;
     private static final float ENABLED = 0.95f;
     private static final float DISABLED = 0.65f;
+    private static final float DISAPPEAR = 0.0f;
 
     private Tile mTileId;
     private int mTileTextSize;
@@ -65,6 +68,7 @@ class QuickSettingsTileView extends FrameLayout {
     private boolean mTemporary;
     private boolean mEditMode;
     private boolean mVisible;
+    private boolean mRibbonMode = false;
 
     public QuickSettingsTileView(Context context, AttributeSet attrs) {
         super(context, attrs);
@@ -79,23 +83,23 @@ class QuickSettingsTileView extends FrameLayout {
         setOnDragListener(mDragListener);
     }
 
-    void setTileId(Tile id) {
+    public void setTileId(Tile id) {
         mTileId = id;
     }
 
-    QuickSettingsTouchListener getTouchListener() {
+    public QuickSettingsTouchListener getTouchListener() {
         return mTouchListener;
     }
 
-    QuickSettingsDragListener getDragListener() {
+    public QuickSettingsDragListener getDragListener() {
         return mDragListener;
     }
 
-    Tile getTileId() {
+    public Tile getTileId() {
         return mTileId;
     }
 
-    void setTemporary(boolean temporary) {
+    public void setTemporary(boolean temporary) {
         mTemporary = temporary;
         if (temporary) { // No listeners needed
             setOnTouchListener(null);
@@ -106,15 +110,15 @@ class QuickSettingsTileView extends FrameLayout {
         }
     }
 
-    boolean isTemporary() {
+    public boolean isTemporary() {
         return mTemporary;
     }
 
-    void setColumnSpan(int span) {
+    public void setColumnSpan(int span) {
         mColSpan = span;
     }
 
-    int getColumnSpan() {
+    public int getColumnSpan() {
         return mColSpan;
     }
 
@@ -122,16 +126,27 @@ class QuickSettingsTileView extends FrameLayout {
         mTileTextSize = size;
     }
 
-    int getTextSizes() {
+    public boolean isRibbonMode() {
+        return mRibbonMode;
+    }
+
+    public void switchToRibbonMode() {
+        mRibbonMode = true;
+        if (mTouchListener != null) {
+            mTouchListener.switchToRibbonMode();
+        }
+    }
+
+    public int getTextSizes() {
         return mTileTextSize;
     }
 
-    void setContent(int layoutId, LayoutInflater inflater) {
+    public void setContent(int layoutId, LayoutInflater inflater) {
         mContentLayoutId = layoutId;
         inflater.inflate(layoutId, this);
     }
 
-    void reinflateContent(LayoutInflater inflater) {
+    public void reinflateContent(LayoutInflater inflater) {
         if (mContentLayoutId != -1) {
             removeAllViews();
             setContent(mContentLayoutId, inflater);
@@ -140,16 +155,16 @@ class QuickSettingsTileView extends FrameLayout {
         }
     }
 
-    void setLoading(boolean loading) {
+    public void setLoading(boolean loading) {
         findViewById(R.id.loading).setVisibility(loading ? View.VISIBLE : View.GONE);
         findViewById(R.id.image).setVisibility(loading ? View.GONE : View.VISIBLE);
     }
 
-    void setHoverEffect(boolean hover) {
+    public void setHoverEffect(boolean hover) {
         setHoverEffect(HOVER_COLOR_WHITE, hover);
     }
 
-    void setHoverEffect(String color, boolean hover) {
+    public void setHoverEffect(String color, boolean hover) {
         if(hover) {
             setForeground(new ColorDrawable(Color.parseColor(color)));
         } else {
@@ -157,18 +172,19 @@ class QuickSettingsTileView extends FrameLayout {
         }
     }
 
-    void fadeOut() {
+    public void fadeOut() {
         animate().alpha(0.05f);
     }
 
-    void fadeIn() {
+    public void fadeIn() {
         animate().alpha(1f);
     }
 
-    void setEditMode(boolean enabled) {
+    public void setEditMode(boolean enabled) {
         mEditMode = enabled;
         mVisible = getVisibility() == View.VISIBLE
-                && (getScaleY() >= ENABLED || getScaleX() >= ENABLED);
+                && ((getScaleY() >= ENABLED || getScaleX() == DISAPPEAR) ||
+                    (getScaleX() >= ENABLED || getScaleX() == DISAPPEAR));
         if(!isTemporary() && enabled) {
             setVisibility(View.VISIBLE);
             setHoverEffect(HOVER_COLOR_BLACK, !mVisible);
@@ -183,7 +199,8 @@ class QuickSettingsTileView extends FrameLayout {
             setEditModeLongClickListener(null);
         } else {
             boolean temporaryEditMode = isTemporary() && enabled;
-            animate().scaleX(NON_EDITABLE).scaleY(NON_EDITABLE).setListener(null);
+            float scale = temporaryEditMode ? DISAPPEAR : DEFAULT;
+            animate().scaleX(scale).scaleY(scale).setListener(null);
             setOnClickListener(temporaryEditMode? null : mOnClickListener);
             setOnLongClickListener(temporaryEditMode? null : mOnLongClickListener);
             if(!mVisible) { // Item has been disabled
@@ -192,11 +209,11 @@ class QuickSettingsTileView extends FrameLayout {
         }
     }
 
-    boolean isEditModeEnabled() {
+    public boolean isEditModeEnabled() {
         return mEditMode;
     }
 
-    void toggleVisibility() {
+    public void toggleVisibility() {
         setHoverEffect(HOVER_COLOR_BLACK, mVisible);
         float scale = mVisible ? DISABLED : ENABLED;
         animate().scaleX(scale).scaleY(scale)
@@ -220,7 +237,7 @@ class QuickSettingsTileView extends FrameLayout {
         });
     }
 
-    void setEditModeClickListener(OnClickListener listener) {
+    public void setEditModeClickListener(OnClickListener listener) {
         super.setOnClickListener(listener);
     }
 

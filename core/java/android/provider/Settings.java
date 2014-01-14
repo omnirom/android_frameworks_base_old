@@ -2885,6 +2885,36 @@ public final class Settings {
         public static final String STATUS_BAR_BRIGHTNESS_CONTROL = "status_bar_brightness_control";
 
         /**
+         * Quick settings tiles to show on status bar
+         * @hide
+         */
+        public static final String QUICK_SETTINGS_TILES = "quick_settings_tiles";
+
+        /**
+         * Quick settings ribbon tiles to show on status bar
+         * @hide
+         */
+        public static final String QUICK_SETTINGS_RIBBON_TILES = "quick_settings_ribbon_tiles";
+
+        /**
+         * Quick settings tiles linked
+         * @hide
+         */
+        public static final String QUICK_SETTINGS_LINKED_TILES = "quick_settings_linked_tiles";
+
+        /**
+         * Quick settings tiles dynamic row
+         * @hide
+         */
+        public static final String QUICK_SETTINGS_TILES_ROW = "quick_settings_tiles_row";
+
+        /**
+         * Quick settings tiles to show on status bar
+         * @hide
+         */
+        public static final String QUICK_SETTINGS_RIBBON_ENABLED = "quick_settings_ribbon_enabled";
+
+        /**
          * Whether or not to launch default music player when headset is connected
          * @hide
          */
@@ -2943,6 +2973,8 @@ public final class Settings {
          * Immersive mode global actions switch
          * 0 = no
          * 1 = yes
+         * 2 = hide navigation bar
+         * 3 = hide status bar
          * @hide
          */
         public static final String IMMERSIVE_MODE = "immersive_mode";
@@ -3084,7 +3116,8 @@ public final class Settings {
          */
         public static final String VIRTUAL_KEYS_HAPTIC_FEEDBACK = "virtual_keys_haptic_feedback";
 
-        /** Weather to allow headsethook to launch voice commands
+        /** 
+         * Weather to allow headsethook to launch voice commands
          * @hide
          */
         public static final String HEADSETHOOK_LAUNCH_VOICE = "headsethook_launch_voice";
@@ -3162,18 +3195,6 @@ public final class Settings {
          * @hide
          */
         public static final String STATUS_BAR_CUSTOM_HEADER = "status_bar_custom_header";
-
-        /**
-         * Quick settings tiles to show on status bar
-         * @hide
-         */
-        public static final String QUICK_SETTINGS_TILES = "quick_settings_tiles";
-
-        /**
-         * Quick settings tiles dynamic row
-         * @hide
-         */
-        public static final String QUICK_SETTINGS_TILES_ROW = "quick_settings_tiles_row";
 
         /**
          * Navigation controls to Use
@@ -3331,13 +3352,13 @@ public final class Settings {
         public static final String STATUS_BAR_IME_SWITCHER = "status_bar_ime_switcher";
 
         /**
-         * Automatic keyboard rotation timeout.  0 to disable completely.
+         * Automatic keyboard rotation timeout. 0 to disable completely.
          * @hide
          */
         public static final String KEYBOARD_ROTATION_TIMEOUT = "keyboard_rotation_timeout";
 
         /**
-         * Forces formal text input.  1 to replace emoticon key with enter key.
+         * Forces formal text input. 1 to replace emoticon key with enter key.
          * @hide
          */
         public static final String FORMAL_TEXT_INPUT = "formal_text_input";
@@ -4326,6 +4347,17 @@ public final class Settings {
          * modes that might be added in the future.
          */
         public static final String LOCATION_MODE = "location_mode";
+
+        /**
+         * The last degree of location access enabled by the user.
+         * <p/>
+         * Must be one of {@link
+         * #LOCATION_MODE_HIGH_ACCURACY}, {@link #LOCATION_MODE_SENSORS_ONLY}, {@link
+         * #LOCATION_MODE_BATTERY_SAVING}.
+         *
+         * @hide
+         */
+        public static final String LOCATION_LAST_MODE = "location_last_mode";
 
         /**
          * Location access disabled.

@@ -30,7 +30,7 @@ import android.widget.TextView;
 
 import com.android.systemui.R;
 
-class QuickSettingsBasicTile extends QuickSettingsTileView {
+public class QuickSettingsBasicTile extends QuickSettingsTileView {
     private final TextView mTextView;
     private final ImageView mImageView;
     private final ProgressBar mLoadingView;
@@ -61,7 +61,7 @@ class QuickSettingsBasicTile extends QuickSettingsTileView {
     }
 
     @Override
-    void setContent(int layoutId, LayoutInflater inflater) {
+    public void setContent(int layoutId, LayoutInflater inflater) {
         throw new RuntimeException("why?");
     }
 
@@ -89,6 +89,31 @@ class QuickSettingsBasicTile extends QuickSettingsTileView {
     public void setTextSizes(int size) {
         mTextView.setTextSize(TypedValue.COMPLEX_UNIT_PX, size);
         super.setTextSizes(size);
+    }
+
+    @Override
+    public void switchToRibbonMode() {
+        TextView tv = (TextView) findViewById(R.id.text);
+        if (tv != null) {
+            tv.setVisibility(View.GONE);
+        }
+        View image = findViewById(R.id.image);
+        if (image != null) {
+            MarginLayoutParams params = (MarginLayoutParams) image.getLayoutParams();
+            int margin = mContext.getResources().getDimensionPixelSize(
+                    R.dimen.qs_tile_ribbon_icon_margin);
+            params.topMargin = params.bottomMargin = margin;
+            image.setLayoutParams(params);
+        }
+        View loadingImage = findViewById(R.id.loading);
+        if (loadingImage != null) {
+            MarginLayoutParams params = (MarginLayoutParams) loadingImage.getLayoutParams();
+            int margin = mContext.getResources().getDimensionPixelSize(
+                    R.dimen.qs_tile_ribbon_icon_margin);
+            params.topMargin = params.bottomMargin = margin;
+            loadingImage.setLayoutParams(params);
+        }
+        super.switchToRibbonMode();
     }
 
     public void setTextResource(int resId) {
