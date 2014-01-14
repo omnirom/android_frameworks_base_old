@@ -145,6 +145,7 @@ class QuickSettings {
     boolean mTilesSetUp = false;
     boolean mUseDefaultAvatar = false;
     boolean mEditModeEnabled = false;
+    boolean mRibbon = false;
 
     private Handler mHandler;
     private QuickSettingsBasicBatteryTile mBatteryTile;
@@ -152,13 +153,14 @@ class QuickSettings {
 
     private PowerManager pm;
 
-    public QuickSettings(Context context, QuickSettingsContainerView container) {
+    public QuickSettings(Context context, QuickSettingsContainerView container, boolean ribbon) {
         mDevicePolicyManager
             = (DevicePolicyManager) context.getSystemService(Context.DEVICE_POLICY_SERVICE);
         pm = (PowerManager) context.getSystemService(Context.POWER_SERVICE);
         mContext = context;
         mContainerView = container;
-        mModel = new QuickSettingsModel(context);
+        mRibbon = ribbon;
+        mModel = new QuickSettingsModel(context, ribbon);
         mBluetoothState = new QuickSettingsModel.BluetoothState();
         mBluetoothAdapter = BluetoothAdapter.getDefaultAdapter();
         mWifiManager = (WifiManager) context.getSystemService(Context.WIFI_SERVICE);
@@ -301,10 +303,12 @@ class QuickSettings {
 
     private void setupQuickSettings() {
         addTiles(mContainerView, false, false);
-        addTemporaryTiles(mContainerView);
+        if (!mRibbon) {
+            addTemporaryTiles(mContainerView);
+            queryForSslCaCerts();
+        }
 
         queryForUserInformation();
-        queryForSslCaCerts();
         mTilesSetUp = true;
     }
 
@@ -1194,9 +1198,29 @@ class QuickSettings {
         return array;
     }
 
+    public void shutdown() {
+        if (mReceiver != null) {
+            mContext.unregisterReceiver(mReceiver);
+        }
+        if (mProfileReceiver != null) {
+            mContext.unregisterReceiver(mProfileReceiver);
+        }
+        if (mModel != null) {
+            mModel = null;
+        }
+        if (mContainerView != null) {
+            mContainerView.removeAllViews();
+        }
+        if (mRibbon) {
+            mRibbon = false;
+        }
+    }
+
     public void updateTiles() {
         addTiles(mContainerView, false, true);
-        addTemporaryTiles(mContainerView);
+        if (!mRibbon) {
+            addTemporaryTiles(mContainerView);
+        }
         updateResources();
     }
 
@@ -1208,6 +1232,9 @@ class QuickSettings {
 
         QuickSettingsContainerView container = ((QuickSettingsContainerView)mContainerView);
 
+        if (mRibbon) {
+            container.updateRibbonMode();
+        }
         container.updateSpan();
         container.updateResources();
         mContainerView.requestLayout();
@@ -1266,7 +1293,9 @@ class QuickSettings {
         }
         if (mTilesSetUp) {
             queryForUserInformation();
-            queryForSslCaCerts();
+            if (!mRibbon) {
+                queryForSslCaCerts();
+            }
         }
     }
 
@@ -1291,7 +1320,9 @@ class QuickSettings {
                     queryForUserInformation();
                 }
             } else if (KeyChain.ACTION_STORAGE_CHANGED.equals(action)) {
-                queryForSslCaCerts();
+                if (!mRibbon) {
+                    queryForSslCaCerts();
+                }
             }
         }
     };
