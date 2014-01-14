@@ -27,7 +27,7 @@ import android.view.MotionEvent;
 import android.view.View;
 import android.widget.FrameLayout;
 
-class QuickSettingsNetworkFlipTile extends QuickSettingsTileView {
+public class QuickSettingsNetworkFlipTile extends QuickSettingsTileView {
 
     private final QuickSettingsBasicNetworkTile mFront;
     private final QuickSettingsBasicBackTile mBack;
@@ -54,9 +54,6 @@ class QuickSettingsNetworkFlipTile extends QuickSettingsTileView {
         setFocusable(true);
 
         mBack.setVisibility(View.GONE);
-
-        mFront.setTemporary(true);
-        mBack.setTemporary(true);
 
         addView(mFront,
                 new FrameLayout.LayoutParams(
@@ -129,6 +126,14 @@ class QuickSettingsNetworkFlipTile extends QuickSettingsTileView {
         super.setTextSizes(size);
     }
 
+    @Override
+    public void switchToRibbonMode() {
+        mBack.switchToRibbonMode();
+        mFront.switchToRibbonMode();
+        mFlip3d.switchToRibbonMode();
+        super.switchToRibbonMode();
+    }
+
     public void setFrontOnLongClickListener(View.OnLongClickListener listener) {
         mFront.setOnLongClickListener(listener);
     }
@@ -152,5 +157,4 @@ class QuickSettingsNetworkFlipTile extends QuickSettingsTileView {
     public QuickSettingsTileView getBack() {
         return mBack;
     }
-
 }

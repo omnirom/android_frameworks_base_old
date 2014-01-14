@@ -281,6 +281,13 @@ public class NetworkController extends BroadcastReceiver implements DemoMode {
         mLastLocale = mContext.getResources().getConfiguration().locale;
     }
 
+    public void unregisterController(Context context) {
+        context.unregisterReceiver(this); 
+        if (mPhone != null) {
+            mPhone.listen(mPhoneStateListener, PhoneStateListener.LISTEN_NONE);
+        }
+    }
+
     public boolean hasMobileDataFeature() {
         return mHasMobileDataFeature;
     }
