@@ -1,0 +1,21 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "cb5d2d02_123d9c28",
+        "filename": "packages/SystemUI/src/com/android/systemui/statusbar/phone/QuickSettings.java",
+        "patchSetId": 3
+      },
+      "lineNbr": 1014,
+      "author": {
+        "id": 1000313
+      },
+      "writtenOn": "2014-01-15T12:47:22Z",
+      "side": 1,
+      "message": "i prefer add like this\n\nboolean newLocationEnabledState \u003d mLocationController.isLocationEnabled();\n if (mLocationController.setLocationEnabled(newLocationEnabledState)\n       \u0026\u0026 mLocationController.isLocationAllowPanelCollapse()) {\n// If we\u0027ve successfully switched from location off to on, close the\n // notifications tray to show the network location provider consent dialog.\n Intent closeDialog \u003d new Intent(Intent.ACTION_CLOSE_SYSTEM_DIALOGS);\n mContext.sendBroadcast(closeDialog);\n }\n\nsince if Mode \u003d\u003d Battery or High, need to closed system dialog include collapse panel, so we can see google confirmation?",
+      "revId": "043ed732b293787c6eaf2e0d8211d7b6596707c4",
+      "serverId": "56841c99-7c94-43d4-bf0b-cb4707e66d55",
+      "unresolved": false
+    }
+  ]
+}
