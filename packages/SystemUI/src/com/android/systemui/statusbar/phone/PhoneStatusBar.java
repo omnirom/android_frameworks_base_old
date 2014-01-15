@@ -95,8 +95,10 @@ import android.widget.ScrollView;
 import android.widget.TabHost;
 import android.widget.TabHost.TabSpec;
 import android.widget.TextView;
+import android.widget.Toast;
 
 import com.android.internal.statusbar.StatusBarIcon;
+import com.android.internal.util.omni.TaskUtils;
 import com.android.systemui.BatteryMeterView;
 import com.android.systemui.BatteryCircleMeterView;
 import com.android.systemui.DemoMode;
@@ -285,8 +287,9 @@ public class PhoneStatusBar extends BaseStatusBar implements DemoMode {
     private Animator mLightsOnAnimation;
 
     private boolean mBrightnessControl = true;
-    private boolean mCustomHeader = false;
-
+    private boolean mCustomHeader;
+    private boolean mBackKillEnabled;
+    
     private float mScreenWidth;
     private int mMinBrightness;
     int mLinger;
@@ -306,6 +309,9 @@ public class PhoneStatusBar extends BaseStatusBar implements DemoMode {
     int mSystemUiVisibility = View.SYSTEM_UI_FLAG_VISIBLE;
 
     DisplayMetrics mDisplayMetrics = new DisplayMetrics();
+    
+    int mBackKillTimeout;
+    boolean mBackKillPending;
 
     // XXX: gesture research
     private final GestureRecorder mGestureRec = DEBUG_GESTURES
@@ -350,6 +356,9 @@ public class PhoneStatusBar extends BaseStatusBar implements DemoMode {
                     Settings.System.QUICK_SETTINGS_TILES), false, this);
             resolver.registerContentObserver(Settings.System.getUriFor(
                     Settings.System.QUICK_SETTINGS_TILES_ROW), false, this);
+            resolver.registerContentObserver(Settings.System.getUriFor(
+                    Settings.System.BACK_KILL_APP_ENABLE), false, this);
+
             update();
         }
 
@@ -368,7 +377,8 @@ public class PhoneStatusBar extends BaseStatusBar implements DemoMode {
                     resolver, Settings.System.STATUS_BAR_BRIGHTNESS_CONTROL, 0) == 1;
             mCustomHeader = Settings.System.getInt(
                     resolver, Settings.System.STATUS_BAR_CUSTOM_HEADER, 0) == 1;
-
+            mBackKillEnabled = Settings.System.getInt(
+                    resolver, Settings.System.BACK_KILL_APP_ENABLE, 0) == 1;
             updateCustomHeaderStatus();
             if (mQS != null) mQS.updateResources();
 
@@ -832,6 +842,9 @@ public class PhoneStatusBar extends BaseStatusBar implements DemoMode {
         mBattery = (BatteryMeterView) mStatusBarView.findViewById(R.id.battery);
         mCircleBattery = (BatteryCircleMeterView) mStatusBarView.findViewById(R.id.circle_battery);
 
+        mBackKillTimeout = mContext.getResources().getInteger(
+                com.android.internal.R.integer.config_backKillTimeout);
+
         return mStatusBarView;
     }
 
@@ -1002,6 +1015,41 @@ public class PhoneStatusBar extends BaseStatusBar implements DemoMode {
         }
     };
 
+    private View.OnLongClickListener mBackLongClickListener = new View.OnLongClickListener() {
+        public boolean onLongClick(View v) {
+            if (mBackKillEnabled){
+                mHandler.postDelayed(mKillRunnable, mBackKillTimeout);
+                mBackKillPending = true;
+            }
+            return true;
+        }
+    };
+
+    protected View.OnTouchListener mBackOnTouchListener = new View.OnTouchListener() {
+        @Override
+        public boolean onTouch(View v, MotionEvent event) {
+            int action = event.getAction() & MotionEvent.ACTION_MASK;
+            if (action == MotionEvent.ACTION_UP) {
+                // if a kill app is pending and we lift finger
+                // stop the kill action
+                if (mBackKillPending){
+                    mHandler.removeCallbacks(mKillRunnable);
+                    mBackKillPending = false;
+                }
+            }
+            return false;
+        }
+    };
+    final Runnable mKillRunnable = new Runnable() {
+        public void run() {
+            mBackKillPending = false;
+            if (TaskUtils.killActiveTask(mContext)) {
+                Toast.makeText(mContext,
+                        com.android.internal.R.string.app_killed_message, Toast.LENGTH_SHORT).show();
+            }
+        }
+    };
+
     private int mShowSearchHoldoff = 0;
     private Runnable mShowSearchPanel = new Runnable() {
         public void run() {
@@ -1048,6 +1096,8 @@ public class PhoneStatusBar extends BaseStatusBar implements DemoMode {
         mNavigationBarView.getRecentsButton().setOnTouchListener(mRecentsPreloadOnTouchListener);
         mNavigationBarView.getHomeButton().setOnTouchListener(mHomeSearchActionListener);
         mNavigationBarView.getSearchLight().setOnTouchListener(mHomeSearchActionListener);
+        mNavigationBarView.getBackButton().setOnLongClickListener(mBackLongClickListener);
+        mNavigationBarView.getBackButton().setOnTouchListener(mBackOnTouchListener);
         updateSearchPanel();
     }
 

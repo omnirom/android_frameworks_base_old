@@ -2320,6 +2320,7 @@ public class PhoneWindowManager implements WindowManagerPolicy {
         // stop the kill action
         if (mBackKillPending && !down) {
             mHandler.removeCallbacks(mKillTask);
+            mBackKillPending = false;
         }
 
         // First we always handle the home key here, so applications
