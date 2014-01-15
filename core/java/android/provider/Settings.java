@@ -2401,6 +2401,27 @@ public final class Settings {
         public static final String VIBRATE_WHEN_RINGING = "vibrate_when_ringing";
 
         /**
+         * Whether the phone ringtone should be played in an increasing manner
+         *
+         * @hide
+         */
+        public static final String INCREASING_RING = "increasing_ring";
+
+        /**
+         * Increase ringtone volume each ringing interval
+         *
+         * @hide
+         */
+        public static final String INCREASING_RING_INTERVAL = "increasing_ring_interval";
+
+        /**
+         * Volume level to start at for increasing ringtone
+         *
+         * @hide
+         */
+        public static final String INCREASING_RING_MIN_VOLUME = "increasing_ring_min_volume";
+
+        /**
          * Whether the audible DTMF tones are played by the dialer when dialing. The value is
          * boolean (1 or 0).
          */
@@ -3624,6 +3645,7 @@ public final class Settings {
             SIP_RECEIVE_CALLS,
             POINTER_SPEED,
             VIBRATE_WHEN_RINGING,
+            INCREASING_RING,
             RINGTONE,
             PHONE_BLACKLIST_ENABLED,
             PHONE_BLACKLIST_NOTIFY_ENABLED,
