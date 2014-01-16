@@ -3141,6 +3141,13 @@ public final class Settings {
         public static final String NON_INTRUSIVE_INCALL = "non_intrusive_incall";
 
         /**
+         * Should Dialer suggest nearby phone numbers
+         *
+         * @hide
+         */
+        public static final String ENABLE_DIALER_SUGGESTIONS = "enable_dialer_suggestions";
+
+        /**
          * Should Flip to Silence be used
          *
          * @hide
