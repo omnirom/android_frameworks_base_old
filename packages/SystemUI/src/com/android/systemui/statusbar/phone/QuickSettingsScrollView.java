@@ -20,9 +20,12 @@ import android.content.Context;
 import android.util.AttributeSet;
 import android.view.MotionEvent;
 import android.view.View;
+import android.view.ViewGroup;
 import android.widget.ScrollView;
 
 public class QuickSettingsScrollView extends ScrollView {
+
+    private float xDistance, yDistance, lastX, lastY;
 
     public QuickSettingsScrollView(Context context) {
         super(context);
@@ -34,6 +37,7 @@ public class QuickSettingsScrollView extends ScrollView {
 
     public QuickSettingsScrollView(Context context, AttributeSet attrs, int defStyle) {
         super(context, attrs, defStyle);
+        setFadingEdgeLength(0);
     }
 
     // Y U NO PROTECTED
@@ -45,6 +49,49 @@ public class QuickSettingsScrollView extends ScrollView {
                     child.getHeight() - (getHeight() - mPaddingBottom - mPaddingTop));
         }
         return scrollRange;
+    }
+
+    private View getChildAtPosition(MotionEvent ev) {
+        final float x = ev.getX() + getScrollX();
+        final float y = ev.getY() + getScrollY();
+        ViewGroup parent = (ViewGroup) getChildAt(0);
+        for (int i = 0; i < parent.getChildCount(); i++) {
+             View item = parent.getChildAt(i);
+             if (x >= item.getLeft() && x < item.getRight()
+                 && y >= item.getTop() && y < item.getBottom()) {
+                 return item;
+             }
+        }
+        return null;
+    }
+
+    @Override
+    public boolean onInterceptTouchEvent(MotionEvent ev) {
+        View tile = getChildAtPosition(ev);
+        switch (ev.getAction()) {
+                case MotionEvent.ACTION_DOWN:
+                     xDistance = yDistance = 0f;
+                     lastX = ev.getX();
+                     lastY = ev.getY();
+                     break;
+                case MotionEvent.ACTION_MOVE:
+                     final float curX = ev.getX();
+                     final float curY = ev.getY();
+                     xDistance += Math.abs(curX - lastX);
+                     yDistance += Math.abs(curY - lastY);
+                     lastX = curX;
+                     lastY = curY;
+                     if (xDistance > yDistance) {
+                        return false;
+                     }
+                     if (tile != null && (yDistance > xDistance)) {
+                         MotionEvent evt = MotionEvent.obtain(0, 0,
+                             MotionEvent.ACTION_CANCEL, lastX, lastY, 0);
+                         tile.onTouchEvent(evt);
+                     }
+                     break;
+        }
+        return super.onInterceptTouchEvent(ev);
     }
 
     @Override
