@@ -37,36 +37,46 @@ class QuickSettingsTouchListener implements OnTouchListener {
     private float mDegrees;
     private GestureDetector mDetector;
     private DecelerateInterpolator mInterpolator;
+    private View mTile;
 
     public QuickSettingsTouchListener(Context context, final View tile) {
         mDegrees = 0;
+        mTile = tile;
         mDetector = new GestureDetector(context, new GestureDetector.SimpleOnGestureListener() {
             @Override
             public boolean onScroll(MotionEvent e1, MotionEvent e2, float dX, float dY) {
-                final float width = tile.getMeasuredWidth();
-
-                if (width > 0) {
-                    double radians = Math.toRadians(-dX * 0.05f);
-                    radians = Math.max(-1, radians);
-                    radians = Math.min(1, radians);
-
-                    float angle = (float) Math.toDegrees(Math.asin(radians));
-                    mDegrees += angle;
-                    if (mDegrees > 30.0f) mDegrees = 30.0f;
-                    else if (mDegrees < -30.0f) mDegrees = -30.0f;
-
-                    tile.setRotationY(mDegrees);
-                }
-
-                // Cancel events on the children view (if any)
-                MotionEvent evt = MotionEvent.obtain(0, 0,
-                    MotionEvent.ACTION_CANCEL, e1.getX(), e1.getY(), 0);
-                tile.onTouchEvent(evt);
-
-                return true;
+                return isOnScrolling(e1, e2, dX, dY);
             }
         });
         mInterpolator = new DecelerateInterpolator();
+    }
+
+    private void rotateBy(float degrees) {
+        mDegrees += degrees;
+        if (mDegrees > 30.0f) {
+            mDegrees = 30.0f;
+        } else if (mDegrees < -30.0f) {
+            mDegrees = -30.0f;
+        }
+        mTile.setRotationY(mDegrees);
+    }
+
+    private boolean isOnScrolling(MotionEvent e1, MotionEvent e2, float dX, float dY) {
+        final float width = mTile.getMeasuredWidth();
+
+        if (width > 0) {
+            double radians = Math.toRadians(-dX * 0.05f);
+            radians = Math.max(-1, radians);
+            radians = Math.min(1, radians);
+
+            float angle = (float) Math.toDegrees(Math.asin(radians));
+            rotateBy(angle);
+        }
+        // Cancel events on the children view (if any)
+        MotionEvent evt = MotionEvent.obtain(0, 0,
+                MotionEvent.ACTION_CANCEL, e1.getX(), e1.getY(), 0);
+        mTile.onTouchEvent(evt);
+        return true;
     }
 
     @Override

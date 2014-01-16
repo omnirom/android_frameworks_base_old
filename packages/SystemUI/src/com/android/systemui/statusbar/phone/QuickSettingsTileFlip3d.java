@@ -102,6 +102,14 @@ public class QuickSettingsTileFlip3d extends GestureDetector.SimpleOnGestureList
         mDegrees = mDegrees % 360.0f;
     }
 
+    public void rotateReset() {
+        if (isFrontSide()) {
+            mFront.animate().setInterpolator(this).setDuration(150).rotationY(0).start();
+        } else {
+            mBack.animate().setInterpolator(this).setDuration(150).rotationY(0).start();
+        }
+    }
+
     private void updateRotation() {
         // Decide what view to display. We can rotate both to the right or to the left, so we
         // have to catch both -90 and 90 degrees.
@@ -154,9 +162,13 @@ public class QuickSettingsTileFlip3d extends GestureDetector.SimpleOnGestureList
     @Override
     public boolean onTouch(View v, MotionEvent event) {
         mDetector.onTouchEvent(event);
-        if (event.getAction() == MotionEvent.ACTION_UP) {
+        int action = event.getAction();
+        if (action == MotionEvent.ACTION_CANCEL) {
+            rotateReset();
+            dispatchEventToActive(event);
+        } else if (action == MotionEvent.ACTION_UP) {
             if (!mFlingCancelClamp) {
-              clampRotation();
+                clampRotation();
             }
             mFlingCancelClamp = false;
 
@@ -167,7 +179,7 @@ public class QuickSettingsTileFlip3d extends GestureDetector.SimpleOnGestureList
 
     @Override
     public boolean onScroll(MotionEvent e1, MotionEvent e2, float dX, float dY) {
-        float width = mFront.getVisibility() == View.VISIBLE ? mFront.getWidth() : mBack.getWidth();
+        float width = isFrontSide() ? mFront.getWidth() : mBack.getWidth();
 
         if (width > 0) {
             double radians = Math.toRadians(-dX * 0.5f);
