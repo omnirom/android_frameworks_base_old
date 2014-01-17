@@ -38,6 +38,8 @@ interface IAppOpsService {
     void resetAllModes();
 
     // Privacy guard methods
-    boolean getPrivacyGuardSettingForPackage(int uid, String packageName);
-    void setPrivacyGuardSettingForPackage(int uid, String packageName, boolean state);
+    List getPrivacyGuardOpsForPackage(String packageName);
+    int getPrivacyGuardSettingForPackage(int uid, String packageName);
+    void setPrivacyGuardSettingForPackage(int uid, String packageName,
+        boolean state, boolean forceAll);
 }
