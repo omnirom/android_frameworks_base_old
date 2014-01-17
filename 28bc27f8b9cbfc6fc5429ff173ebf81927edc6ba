@@ -16,6 +16,24 @@
       "revId": "28bc27f8b9cbfc6fc5429ff173ebf81927edc6ba",
       "serverId": "56841c99-7c94-43d4-bf0b-cb4707e66d55",
       "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "cb5d2d02_ce89bc23",
+        "filename": "packages/SystemUI/src/com/android/systemui/statusbar/phone/QuickSettingsTileFlip3d.java",
+        "patchSetId": 3
+      },
+      "lineNbr": 107,
+      "author": {
+        "id": 1000313
+      },
+      "writtenOn": "2014-01-17T20:44:12Z",
+      "side": 1,
+      "message": "Ew... I didnt notice that.. But im far from my pc now xD, i cant fix now, tommorow maybe?",
+      "parentUuid": "cb5d2d02_4e984c7c",
+      "revId": "28bc27f8b9cbfc6fc5429ff173ebf81927edc6ba",
+      "serverId": "56841c99-7c94-43d4-bf0b-cb4707e66d55",
+      "unresolved": false
     }
   ]
 }
