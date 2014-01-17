@@ -1,0 +1,72 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "cb5d2d02_334e1f98",
+        "filename": "packages/Keyguard/src/com/android/keyguard/KeyguardViewManager.java",
+        "patchSetId": 3
+      },
+      "lineNbr": 189,
+      "author": {
+        "id": 1000001
+      },
+      "writtenOn": "2014-01-17T17:35:27Z",
+      "side": 1,
+      "message": "Why create the RS context every time a bitmap has to be blurred? KeyguardViewManager is persistent, only destroy the rs context when it is really not needed anymore (ie. when disabled, or on shutdown).",
+      "revId": "e9af4d3e22f5baf93627ffa05052f53c1bf0cc23",
+      "serverId": "56841c99-7c94-43d4-bf0b-cb4707e66d55",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "cb5d2d02_7377b7d0",
+        "filename": "packages/Keyguard/src/com/android/keyguard/KeyguardViewManager.java",
+        "patchSetId": 3
+      },
+      "lineNbr": 193,
+      "author": {
+        "id": 1000001
+      },
+      "writtenOn": "2014-01-17T17:35:27Z",
+      "side": 1,
+      "message": "Cache the input and output allocation if the bitmap doesn\u0027t change - considering it should be the size of the screen, there shouldn\u0027t be the need to reallocate it every time.",
+      "revId": "e9af4d3e22f5baf93627ffa05052f53c1bf0cc23",
+      "serverId": "56841c99-7c94-43d4-bf0b-cb4707e66d55",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "cb5d2d02_13491b90",
+        "filename": "packages/Keyguard/src/com/android/keyguard/KeyguardViewManager.java",
+        "patchSetId": 3
+      },
+      "lineNbr": 195,
+      "author": {
+        "id": 1000001
+      },
+      "writtenOn": "2014-01-17T17:35:27Z",
+      "side": 1,
+      "message": "The script itself can be cached as well",
+      "revId": "e9af4d3e22f5baf93627ffa05052f53c1bf0cc23",
+      "serverId": "56841c99-7c94-43d4-bf0b-cb4707e66d55",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "cb5d2d02_d34ec399",
+        "filename": "packages/Keyguard/src/com/android/keyguard/KeyguardViewManager.java",
+        "patchSetId": 3
+      },
+      "lineNbr": 395,
+      "author": {
+        "id": 1000001
+      },
+      "writtenOn": "2014-01-17T17:35:27Z",
+      "side": 1,
+      "message": "Remove new line",
+      "revId": "e9af4d3e22f5baf93627ffa05052f53c1bf0cc23",
+      "serverId": "56841c99-7c94-43d4-bf0b-cb4707e66d55",
+      "unresolved": false
+    }
+  ]
+}
