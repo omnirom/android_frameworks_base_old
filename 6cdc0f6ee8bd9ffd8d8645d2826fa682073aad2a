@@ -1,0 +1,38 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "cb5d2d02_9350cbdc",
+        "filename": "packages/SystemUI/src/com/android/systemui/statusbar/phone/PhoneStatusBar.java",
+        "patchSetId": 8
+      },
+      "lineNbr": 1903,
+      "author": {
+        "id": 1000226
+      },
+      "writtenOn": "2014-01-17T12:26:55Z",
+      "side": 1,
+      "message": "Double \";\" on the line end.",
+      "revId": "6cdc0f6ee8bd9ffd8d8645d2826fa682073aad2a",
+      "serverId": "56841c99-7c94-43d4-bf0b-cb4707e66d55",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "cb5d2d02_b34dcf40",
+        "filename": "packages/SystemUI/src/com/android/systemui/statusbar/phone/PhoneStatusBar.java",
+        "patchSetId": 8
+      },
+      "lineNbr": 3247,
+      "author": {
+        "id": 1000226
+      },
+      "writtenOn": "2014-01-17T12:26:55Z",
+      "side": 1,
+      "message": "one of them could be deleted ;)",
+      "revId": "6cdc0f6ee8bd9ffd8d8645d2826fa682073aad2a",
+      "serverId": "56841c99-7c94-43d4-bf0b-cb4707e66d55",
+      "unresolved": false
+    }
+  ]
+}
