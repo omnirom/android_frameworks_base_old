@@ -279,7 +279,6 @@ public class PhoneStatusBar extends BaseStatusBar implements DemoMode {
     VelocityTracker mVelocityTracker;
 
     int[] mAbsPos = new int[2];
-    Runnable mPostCollapseCleanup = null;
 
     private Animator mLightsOutAnimation;
     private Animator mLightsOnAnimation;
@@ -289,6 +288,8 @@ public class PhoneStatusBar extends BaseStatusBar implements DemoMode {
 
     private float mScreenWidth;
     private int mMinBrightness;
+    private int mPeekHeight;
+    private boolean mJustPeeked;
     int mLinger;
     int mInitialTouchX;
     int mInitialTouchY;
@@ -330,6 +331,19 @@ public class PhoneStatusBar extends BaseStatusBar implements DemoMode {
             mStatusBarView.performHapticFeedback(HapticFeedbackConstants.LONG_PRESS);
             adjustBrightness(mInitialTouchX);
             mLinger = BRIGHTNESS_CONTROL_LINGER_THRESHOLD + 1;
+        }
+    };
+
+    private final Runnable mNotifyClearAll = new Runnable() {
+        @Override
+        public void run() {
+            if (DEBUG) {
+                Log.v(TAG, "Notifying status bar of notification clear");
+            }
+            try {
+                mPile.setViewRemoval(true);
+                mBarService.onClearAllNotifications();
+            } catch (RemoteException ex) { }
         }
     };
 
@@ -497,8 +511,6 @@ public class PhoneStatusBar extends BaseStatusBar implements DemoMode {
                     Settings.Global.getUriFor(SETTING_HEADS_UP), true,
                     mHeadsUpObserver);
         }
-        SettingsObserver sb = new SettingsObserver(new Handler());
-        sb.observe();
     }
 
     // ================================================================================
@@ -1228,11 +1240,6 @@ public class PhoneStatusBar extends BaseStatusBar implements DemoMode {
                     && old == mInterruptingNotificationEntry.notification) {
                 mHandler.sendEmptyMessage(MSG_HIDE_HEADS_UP);
             }
-
-            if (CLOSE_PANEL_WHEN_EMPTIED && mNotificationData.size() == 0
-                    && !mNotificationPanel.isTracking()) {
-                animateCollapsePanels();
-            }
         }
 
         setAreThereNotifications();
@@ -1814,7 +1821,7 @@ public class PhoneStatusBar extends BaseStatusBar implements DemoMode {
         mFlipSettingsViewAnim = start(
             setVisibilityWhenDone(
                 interpolator(mAccelerateInterpolator,
-                         ObjectAnimator.ofFloat(mFlipSettingsView, View.SCALE_X, 0f)
+                        ObjectAnimator.ofFloat(mFlipSettingsView, View.SCALE_X, 0f)
                         )
                     .setDuration(FLIP_DURATION_OUT),
                 mFlipSettingsView, View.INVISIBLE));
@@ -1894,31 +1901,33 @@ public class PhoneStatusBar extends BaseStatusBar implements DemoMode {
         }
     }
 
-    public void partialFlip(float percent) {
+    public void partialFlip(float progress) {
         if (mFlipSettingsViewAnim != null) mFlipSettingsViewAnim.cancel();
         if (mScrollViewAnim != null) mScrollViewAnim.cancel();
         if (mSettingsButtonAnim != null) mSettingsButtonAnim.cancel();
         if (mNotificationButtonAnim != null) mNotificationButtonAnim.cancel();
+        if (mEditModeButtonAnim != null) mEditModeButtonAnim.cancel();
         if (mClearButtonAnim != null) mClearButtonAnim.cancel();
 
-        percent = Math.min(Math.max(percent, -1f), 1f);
-        if (percent < 0f) { // notifications side
+        progress = Math.min(Math.max(progress, -1f), 1f);
+        if (progress < 0f) { // notifications side
             mFlipSettingsView.setScaleX(0f);
             mFlipSettingsView.setVisibility(View.GONE);
             mSettingsButton.setVisibility(View.VISIBLE);
-            mSettingsButton.setAlpha(-percent);
+            mSettingsButton.setAlpha(-progress);
             mScrollView.setVisibility(View.VISIBLE);
-            mScrollView.setScaleX(-percent);
+            mScrollView.setScaleX(-progress);
             mNotificationButton.setVisibility(View.GONE);
         } else { // settings side
-            mFlipSettingsView.setScaleX(percent);
+            mFlipSettingsView.setScaleX(progress);
             mFlipSettingsView.setVisibility(View.VISIBLE);
             mSettingsButton.setVisibility(View.GONE);
             mScrollView.setVisibility(View.GONE);
             mScrollView.setScaleX(0f);
             mNotificationButton.setVisibility(View.VISIBLE);
-            mNotificationButton.setAlpha(percent);
+            mNotificationButton.setAlpha(progress);
         }
+        mEditModeButton.setVisibility(View.GONE);
         mClearButton.setVisibility(View.GONE);
     }
 
@@ -1980,16 +1989,6 @@ public class PhoneStatusBar extends BaseStatusBar implements DemoMode {
         }, FLIP_DURATION - 150);
     }
 
-    public void flipPanels() {
-        if (mHasFlipSettings) {
-            if (mFlipSettingsView.getVisibility() != View.VISIBLE) {
-                flipToSettings();
-            } else {
-                flipToNotifications();
-            }
-        }
-    }
-
     public void animateCollapseQuickSettings() {
         mStatusBarView.collapseAllPanels(true);
     }
@@ -2049,11 +2048,6 @@ public class PhoneStatusBar extends BaseStatusBar implements DemoMode {
 
         // Close any "App info" popups that might have snuck on-screen
         dismissPopups();
-
-        if (mPostCollapseCleanup != null) {
-            mPostCollapseCleanup.run();
-            mPostCollapseCleanup = null;
-        }
 
         setInteracting(StatusBarManager.WINDOW_STATUS_BAR, false);
     }
@@ -2133,47 +2127,44 @@ public class PhoneStatusBar extends BaseStatusBar implements DemoMode {
         }
     }
 
-    private void brightnessControl(MotionEvent event)
-    {
-        if (mBrightnessControl)
-        {
-            final int action = event.getAction();
-            final int x = (int)event.getRawX();
-            final int y = (int)event.getRawY();
-            if (action == MotionEvent.ACTION_DOWN) {
+    private void brightnessControl(MotionEvent event) {
+        final int action = event.getAction();
+        final int x = (int) event.getRawX();
+        final int y = (int) event.getRawY();
+        if (action == MotionEvent.ACTION_DOWN) {
+            if (y < mNotificationHeaderHeight) {
                 mLinger = 0;
                 mInitialTouchX = x;
                 mInitialTouchY = y;
+                mJustPeeked = true;
                 mHandler.removeCallbacks(mLongPressBrightnessChange);
-                if (y < mNotificationHeaderHeight) {
-                    mHandler.postDelayed(mLongPressBrightnessChange,
-                            BRIGHTNESS_CONTROL_LONG_PRESS_TIMEOUT);
-                }
-            } else if (action == MotionEvent.ACTION_MOVE) {
-                if (y < mNotificationHeaderHeight) {
-                    mVelocityTracker.computeCurrentVelocity(1000);
-                    float yVel = mVelocityTracker.getYVelocity();
-                    yVel = Math.abs(yVel);
-                    if (yVel < 50.0f) {
-                        if (mLinger > BRIGHTNESS_CONTROL_LINGER_THRESHOLD) {
-                            adjustBrightness(x);
-                        } else {
-                            mLinger++;
-                        }
+                mHandler.postDelayed(mLongPressBrightnessChange,
+                        BRIGHTNESS_CONTROL_LONG_PRESS_TIMEOUT);
+            }
+        } else if (action == MotionEvent.ACTION_MOVE) {
+            if (y < mNotificationHeaderHeight && mJustPeeked) {
+                if (mLinger > BRIGHTNESS_CONTROL_LINGER_THRESHOLD) {
+                    adjustBrightness(x);
+                } else {
+                    final int xDiff = Math.abs(x - mInitialTouchX);
+                    final int yDiff = Math.abs(y - mInitialTouchY);
+                    final int touchSlop = ViewConfiguration.get(mContext).getScaledTouchSlop();
+                    if (xDiff > yDiff) {
+                        mLinger++;
                     }
-                    int touchSlop = ViewConfiguration.get(mContext).getScaledTouchSlop();
-                    if (Math.abs(x - mInitialTouchX) > touchSlop ||
-                            Math.abs(y - mInitialTouchY) > touchSlop) {
+                    if (xDiff > touchSlop || yDiff > touchSlop) {
                         mHandler.removeCallbacks(mLongPressBrightnessChange);
                     }
-                } else {
-                    mHandler.removeCallbacks(mLongPressBrightnessChange);
                 }
-            } else if (action == MotionEvent.ACTION_UP
-                    || action == MotionEvent.ACTION_CANCEL) {
+            } else {
+                if (y > mPeekHeight) {
+                    mJustPeeked = false;
+                }
                 mHandler.removeCallbacks(mLongPressBrightnessChange);
-                mLinger = 0;
             }
+        } else if (action == MotionEvent.ACTION_UP
+                || action == MotionEvent.ACTION_CANCEL) {
+            mHandler.removeCallbacks(mLongPressBrightnessChange);
         }
     }
 
@@ -2202,6 +2193,13 @@ public class PhoneStatusBar extends BaseStatusBar implements DemoMode {
             mGestureRec.add(event);
         }
 
+        if (mBrightnessControl) {
+            brightnessControl(event);
+            if ((mDisabled & StatusBarManager.DISABLE_EXPAND) != 0) {
+                return true;
+            }
+        }
+
         if (mStatusBarWindowState == WINDOW_STATE_SHOWING) {
             final boolean upOrCancel =
                     event.getAction() == MotionEvent.ACTION_UP ||
@@ -2212,9 +2210,6 @@ public class PhoneStatusBar extends BaseStatusBar implements DemoMode {
                 setInteracting(StatusBarManager.WINDOW_STATUS_BAR, true);
             }
         }
-
-        brightnessControl(event);
-
         return false;
     }
 
@@ -2722,6 +2717,17 @@ public class PhoneStatusBar extends BaseStatusBar implements DemoMode {
     }
 
     @Override
+    protected boolean isNotificationPanelFullyVisible() {
+        return mExpandedVisible &&
+                (!mHasFlipSettings || mScrollView.getVisibility() == View.VISIBLE);
+    }
+
+    @Override
+    protected boolean isTrackingNotificationPanel() {
+        return mNotificationPanel.isTracking();
+    }
+
+    @Override
     public void updateExpandedViewPos(int thingy) {
         if (SPEW) Log.v(TAG, "updateExpandedViewPos");
 
@@ -2776,64 +2782,41 @@ public class PhoneStatusBar extends BaseStatusBar implements DemoMode {
                         snapshot.add(child);
                     }
                 }
+
                 if (snapshot.isEmpty()) {
-                    animateCollapsePanels(CommandQueue.FLAG_EXCLUDE_NONE);
+                    maybeCollapseAfterNotificationRemoval(true);
                     return;
                 }
-                new Thread(new Runnable() {
-                    @Override
-                    public void run() {
-                        // Decrease the delay for every row we animate to give the sense of
-                        // accelerating the swipes
-                        final int ROW_DELAY_DECREMENT = 10;
-                        int currentDelay = 140;
-                        int totalDelay = 0;
 
-                        // Set the shade-animating state to avoid doing other work during
-                        // all of these animations. In particular, avoid layout and
-                        // redrawing when collapsing the shade.
-                        mPile.setViewRemoval(false);
+                // Decrease the delay for every row we animate to give the sense of
+                // accelerating the swipes
+                final int ROW_DELAY_DECREMENT = 10;
+                int currentDelay = 140;
+                int totalDelay = 0;
 
-                        mPostCollapseCleanup = new Runnable() {
-                            @Override
-                            public void run() {
-                                if (DEBUG) {
-                                    Log.v(TAG, "running post-collapse cleanup");
-                                }
-                                try {
-                                    mPile.setViewRemoval(true);
-                                    mBarService.onClearAllNotifications();
-                                } catch (Exception ex) { }
-                            }
-                        };
+                // Set the shade-animating state to avoid doing other work, in
+                // particular layout and redrawing, during all of these animations.
+                mPile.setViewRemoval(false);
 
-                        View sampleView = snapshot.get(0);
-                        int width = sampleView.getWidth();
-                        final int dir = sampleView.isLayoutRtl() ? -1 : +1;
-                        final int velocity = dir * width * 8; // 1000/8 = 125 ms duration
-                        for (final View _v : snapshot) {
-                            mHandler.postDelayed(new Runnable() {
-                                @Override
-                                public void run() {
-                                    mPile.dismissRowAnimated(_v, velocity);
-                                }
-                            }, totalDelay);
-                            currentDelay = Math.max(50, currentDelay - ROW_DELAY_DECREMENT);
-                            totalDelay += currentDelay;
+                View sampleView = snapshot.get(0);
+                int width = sampleView.getWidth();
+                final int dir = sampleView.isLayoutRtl() ? -1 : +1;
+                final int velocity = dir * width * 8; // 1000/8 = 125 ms duration
+                for (final View _v : snapshot) {
+                    mHandler.postDelayed(new Runnable() {
+                        @Override
+                        public void run() {
+                            mPile.dismissRowAnimated(_v, velocity);
                         }
-                        // Delay the collapse animation until after all swipe animations have
-                        // finished. Provide some buffer because there may be some extra delay
-                        // before actually starting each swipe animation. Ideally, we'd
-                        // synchronize the end of those animations with the start of the collaps
-                        // exactly.
-                        mHandler.postDelayed(new Runnable() {
-                            @Override
-                            public void run() {
-                                animateCollapsePanels(CommandQueue.FLAG_EXCLUDE_NONE);
-                            }
-                        }, totalDelay + 225);
-                    }
-                }).start();
+                    }, totalDelay);
+                    currentDelay = Math.max(50, currentDelay - ROW_DELAY_DECREMENT);
+                    totalDelay += currentDelay;
+                }
+
+                // After ending all animations, tell the service to remove the
+                // notifications, which will trigger collapsing the shade
+                final View lastEntry = snapshot.get(snapshot.size() - 1);
+                mPile.runOnDismiss(lastEntry, mNotifyClearAll);
             }
         }
     };
@@ -3005,6 +2988,7 @@ public class PhoneStatusBar extends BaseStatusBar implements DemoMode {
         animateCollapsePanels();
         updateNotificationIcons();
         resetUserSetupObserver();
+        super.userSwitched(newUserId);
     }
 
     private void resetUserSetupObserver() {
@@ -3049,6 +3033,15 @@ public class PhoneStatusBar extends BaseStatusBar implements DemoMode {
             } catch (android.os.RemoteException ex) {
                 // oh well
             }
+        }
+    }
+
+    private static void copyNotifications(ArrayList<Pair<IBinder, StatusBarNotification>> dest,
+            NotificationData source) {
+        int N = source.size();
+        for (int i = 0; i < N; i++) {
+            NotificationData.Entry entry = source.get(i);
+            dest.add(Pair.create(entry.key, entry.notification));
         }
     }
 
@@ -3124,7 +3117,7 @@ public class PhoneStatusBar extends BaseStatusBar implements DemoMode {
 
         mCarrierLabelHeight = res.getDimensionPixelSize(R.dimen.carrier_label_height);
         mNotificationHeaderHeight = res.getDimensionPixelSize(R.dimen.notification_panel_header_height);
-
+        mPeekHeight = res.getDimensionPixelSize(R.dimen.peek_height);
         mNotificationPanelMinHeightFrac = res.getFraction(R.dimen.notification_panel_min_height_frac, 1, 1);
         if (mNotificationPanelMinHeightFrac < 0f || mNotificationPanelMinHeightFrac > 1f) {
             mNotificationPanelMinHeightFrac = 0f;
@@ -3178,6 +3171,28 @@ public class PhoneStatusBar extends BaseStatusBar implements DemoMode {
         return !isDeviceProvisioned()
                 || mExpandedVisible
                 || (mDisabled & StatusBarManager.DISABLE_SEARCH) != 0;
+    }
+
+    public boolean skipToSettingsPanel() {
+        if (mPile == null || mNotificationData == null) {
+            return false;
+        }
+
+        int N = mNotificationData.size();
+        int thisUsersNotifications = 0;
+        for (int i=0; i<N; i++) {
+            Entry ent = mNotificationData.get(N-i-1);
+            if(ent != null
+                    && ent.notification != null && ent.notification.isClearable()
+                    && notificationIsForCurrentUser(ent.notification)) {
+                thisUsersNotifications++;
+            }
+        }
+        if (thisUsersNotifications == 0) {
+            return true;
+        }
+
+        return false;
     }
 
     private static class FastColorDrawable extends Drawable {
