@@ -340,6 +340,7 @@ public class PhoneWindowManager implements WindowManagerPolicy {
     boolean mHasMenuKey;
     boolean mHasAssistKey;
     boolean mHasAppSwitchKey;
+    boolean mSoftBackKillApp;
 
     // The last window we were told about in focusChanged.
     WindowState mFocusedWindow;
@@ -667,6 +668,9 @@ public class PhoneWindowManager implements WindowManagerPolicy {
                     UserHandle.USER_ALL);
             resolver.registerContentObserver(Settings.System.getUriFor(
                     Settings.System.VIRTUAL_KEYS_HAPTIC_FEEDBACK), false, this,
+                    UserHandle.USER_ALL);
+            resolver.registerContentObserver(Settings.System.getUriFor(
+                    Settings.System.SOFT_BACK_KILL_APP_ENABLE), false, this,
                     UserHandle.USER_ALL);
 
             updateSettings();
@@ -1223,6 +1227,10 @@ public class PhoneWindowManager implements WindowManagerPolicy {
         final boolean hasAppSwitch = (mDeviceHardwareKeys & KEY_MASK_APP_SWITCH) != 0;
         final ContentResolver resolver = mContext.getContentResolver();
 
+        mSoftBackKillApp = Settings.System.getIntForUser(resolver,
+                Settings.System.SOFT_BACK_KILL_APP_ENABLE,
+                0, UserHandle.USER_CURRENT) == 1;
+
         // initialize all assignments to sane defaults
         mPressOnHomeBehavior = KEY_ACTION_HOME;
         mPressOnMenuBehavior = KEY_ACTION_MENU;
@@ -1236,7 +1244,13 @@ public class PhoneWindowManager implements WindowManagerPolicy {
         mPressOnAppSwitchBehavior = KEY_ACTION_APP_SWITCH;
         mLongPressOnAppSwitchBehavior = KEY_ACTION_NOTHING;
         mPressOnBackBehavior = KEY_ACTION_BACK;
-        mLongPressOnBackBehavior = KEY_ACTION_NOTHING;
+
+        // sof key back kill app will overrule this default
+        if (mSoftBackKillApp){
+            mLongPressOnBackBehavior = KEY_ACTION_KILL_APP;
+        } else {
+            mLongPressOnBackBehavior = KEY_ACTION_NOTHING;
+        }
 
         mLongPressOnHomeBehavior = mContext.getResources().getInteger(
                 com.android.internal.R.integer.config_longPressOnHomeBehavior);
@@ -2320,6 +2334,7 @@ public class PhoneWindowManager implements WindowManagerPolicy {
         // stop the kill action
         if (mBackKillPending && !down) {
             mHandler.removeCallbacks(mKillTask);
+            mBackKillPending = false;
         }
 
         // First we always handle the home key here, so applications
