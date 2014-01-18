@@ -146,6 +146,8 @@ public class NotificationPanelView extends PanelView {
                             Settings.System.getInt(getContext().getContentResolver(),
                             Settings.System.QS_QUICK_PULLDOWN, 0) == 3) {
                         flip = true;
+                    } else if (mStatusBar.skipToSettingsPanel()) {
+                        flip = true;
                     }
                     break;
                 case MotionEvent.ACTION_POINTER_DOWN:
