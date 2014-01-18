@@ -116,22 +116,24 @@ public class NotificationPanelView extends PanelView {
 
     @Override
     public boolean onTouchEvent(MotionEvent event) {
+        boolean shouldRecycleEvent = false;
         if (DEBUG_GESTURES) {
             if (event.getActionMasked() != MotionEvent.ACTION_MOVE) {
                 EventLog.writeEvent(EventLogTags.SYSUI_NOTIFICATIONPANEL_TOUCH,
                        event.getActionMasked(), (int) event.getX(), (int) event.getY());
             }
         }
-        boolean shouldRecycleEvent = false;
         if (PhoneStatusBar.SETTINGS_DRAG_SHORTCUT && mStatusBar.mHasFlipSettings) {
+            boolean flip = false;
             boolean swipeFlipJustFinished = false;
             boolean swipeFlipJustStarted = false;
-            boolean flip = false;
             switch (event.getActionMasked()) {
                 case MotionEvent.ACTION_DOWN:
                     mGestureStartX = event.getX(0);
                     mGestureStartY = event.getY(0);
-                    mTrackingSwipe = isFullyExpanded();
+                    mTrackingSwipe = isFullyExpanded() &&
+                    // Pointer is at the handle portion of the view?
+                    mGestureStartY > getHeight() - mHandleBarHeight - getPaddingBottom();
                     mOkToFlip = getExpandedHeight() == 0;
                     if (event.getX(0) > getWidth() * (1.0f - STATUS_BAR_RIGHT_PERCENTAGE) &&
                             Settings.System.getInt(getContext().getContentResolver(),
@@ -153,7 +155,7 @@ public class NotificationPanelView extends PanelView {
                     break;
                 case MotionEvent.ACTION_MOVE:
                     if (Settings.System.getInt(getContext().getContentResolver(),
-                            Settings.System.QUICK_SWIPE, 0) == 1 && !mStatusBar.isEditModeEnabled()) {
+                            Settings.System.QUICK_SWIPE, 1) == 1 && !mStatusBar.isEditModeEnabled()) {
                         final float deltaX = Math.abs(event.getX(0) - mGestureStartX);
                         final float deltaY = Math.abs(event.getY(0) - mGestureStartY);
                         final float maxDeltaY = getHeight() * STATUS_BAR_SWIPE_VERTICAL_MAX_PERCENTAGE;
