@@ -149,6 +149,10 @@
     <color name="highlighted_text_holo_light">#6633b5e5</color>
     <color name="link_text_holo_dark">#5c5cff</color>
     <color name="link_text_holo_light">#0000ee</color>
+    <color name="default_dialog_text_holo_dark">@android:color/background_holo_light</color>
+    <color name="default_dialog_text_holo_light">@android:color/background_holo_dark</color>
+    <color name="default_dialog_divider_holo_dark">@android:color/background_holo_light</color>
+    <color name="default_dialog_divider_holo_light">#ffacacac</color>
 
     <!-- Group buttons -->
     <eat-comment />
@@ -206,5 +210,10 @@
     <color name="keyguard_avatar_frame_pressed_color">#ff35b5e5</color>
 
     <color name="accessibility_focus_highlight">#80ffff00</color>
+
+    <!-- Power menu colors -->
+    <color name="power_menu_icon_default_color">#ffffffff</color>
+    <color name="power_menu_text_default_color">#ffffffff</color>
+
 </resources>
 

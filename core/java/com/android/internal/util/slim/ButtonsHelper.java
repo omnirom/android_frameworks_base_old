@@ -42,7 +42,7 @@ public class ButtonsHelper {
 
     // get and set the navbar configs from provider and return propper arraylist objects
     // @ButtonConfig
-/*    public static ArrayList<ButtonConfig> getNavBarConfig(Context context) {
+    public static ArrayList<ButtonConfig> getNavBarConfig(Context context) {
         return (ConfigSplitHelper.getButtonsConfigValues(context,
             getNavBarProvider(context), null, null, false));
     }
@@ -53,8 +53,8 @@ public class ButtonsHelper {
         return (ConfigSplitHelper.getButtonsConfigValues(context,
             getNavBarProvider(context), values, entries, false));
     }
-*/
-/*    private static String getNavBarProvider(Context context) {
+
+    private static String getNavBarProvider(Context context) {
         String config = Settings.System.getStringForUser(
                     context.getContentResolver(),
                     Settings.System.NAVIGATION_BAR_CONFIG,
@@ -64,8 +64,8 @@ public class ButtonsHelper {
         }
         return config;
     }
-*/
-/*    public static void setNavBarConfig(Context context,
+
+    public static void setNavBarConfig(Context context,
             ArrayList<ButtonConfig> buttonsConfig, boolean reset) {
         String config;
         if (reset) {
@@ -77,10 +77,10 @@ public class ButtonsHelper {
                     Settings.System.NAVIGATION_BAR_CONFIG,
                     config);
     }
-*/
+
     // get and set the navring configs from provider and return propper arraylist objects
     // @ButtonConfig
-/*    public static ArrayList<ButtonConfig> getNavRingConfig(Context context) {
+    public static ArrayList<ButtonConfig> getNavRingConfig(Context context) {
         return (ConfigSplitHelper.getButtonsConfigValues(context,
             getNavRingProvider(context), null, null, false));
     }
@@ -90,8 +90,8 @@ public class ButtonsHelper {
         return (ConfigSplitHelper.getButtonsConfigValues(context,
             getNavRingProvider(context), values, entries, false));
     }
-*/
-/*    private static String getNavRingProvider(Context context) {
+
+    private static String getNavRingProvider(Context context) {
         String config = Settings.System.getStringForUser(
                     context.getContentResolver(),
                     Settings.System.NAVRING_CONFIG,
@@ -101,8 +101,8 @@ public class ButtonsHelper {
         }
         return config;
     }
-*/
-/*    public static void setNavRingConfig(Context context,
+
+    public static void setNavRingConfig(Context context,
             ArrayList<ButtonConfig> buttonsConfig, boolean reset) {
         String config;
         if (reset) {
@@ -114,11 +114,11 @@ public class ButtonsHelper {
                     Settings.System.NAVRING_CONFIG,
                     config);
     }
-*/
+
     // get and set the notification shortcut configs
     // from provider and return propper arraylist objects
     // @ButtonConfig
-/*    public static ArrayList<ButtonConfig> getNotificationsShortcutConfig(Context context) {
+    public static ArrayList<ButtonConfig> getNotificationsShortcutConfig(Context context) {
         String config = Settings.System.getStringForUser(
                     context.getContentResolver(),
                     Settings.System.NOTIFICATION_SHORTCUTS_CONFIG,
@@ -129,8 +129,8 @@ public class ButtonsHelper {
 
         return (ConfigSplitHelper.getButtonsConfigValues(context, config, null, null, true));
     }
-*/
-/*    public static void setNotificationShortcutConfig(
+
+    public static void setNotificationShortcutConfig(
             Context context, ArrayList<ButtonConfig> buttonsConfig, boolean reset) {
         String config;
         if (reset) {
@@ -146,10 +146,10 @@ public class ButtonsHelper {
                     Settings.System.NOTIFICATION_SHORTCUTS_CONFIG,
                     config);
     }
-*/
+
     // get and set the lockcreen shortcut configs from provider and return propper arraylist objects
     // @ButtonConfig
-/*    public static ArrayList<ButtonConfig> getLockscreenShortcutConfig(Context context) {
+    public static ArrayList<ButtonConfig> getLockscreenShortcutConfig(Context context) {
         String config = Settings.System.getStringForUser(
                     context.getContentResolver(),
                     Settings.System.LOCKSCREEN_SHORTCUTS,
@@ -172,7 +172,7 @@ public class ButtonsHelper {
         Settings.System.putString(context.getContentResolver(),
                     Settings.System.LOCKSCREEN_SHORTCUTS, config);
     }
-*/
+
     public static Drawable getButtonIconImage(Context context,
             String clickAction, String customIcon) {
         int resId = -1;

@@ -16,9 +16,14 @@
 
 package android.app;
 
+import android.content.Context;
 import android.Manifest;
 import android.os.Binder;
 import android.os.IBinder;
+import android.os.Parcel;
+import android.os.Parcelable;
+import android.os.Process;
+import android.os.RemoteException;
 import android.util.ArrayMap;
 
 import com.android.internal.app.IAppOpsService;
@@ -27,12 +32,6 @@ import com.android.internal.app.IAppOpsCallback;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
-
-import android.content.Context;
-import android.os.Parcel;
-import android.os.Parcelable;
-import android.os.Process;
-import android.os.RemoteException;
 
 /**
  * API for interacting with "application operation" tracking.

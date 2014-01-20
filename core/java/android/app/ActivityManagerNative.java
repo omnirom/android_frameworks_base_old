@@ -42,6 +42,7 @@ import android.os.Parcelable;
 import android.os.RemoteException;
 import android.os.ServiceManager;
 import android.os.StrictMode;
+import android.os.SystemClock;
 import android.text.TextUtils;
 import android.util.Log;
 import android.util.Singleton;
@@ -460,6 +461,15 @@ public abstract class ActivityManagerNative extends Binder implements IActivityM
             data.enforceInterface(IActivityManager.descriptor);
             IBinder token = data.readStrongBinder();
             String res = token != null ? getCallingPackage(token) : null;
+            reply.writeNoException();
+            reply.writeString(res);
+            return true;
+        }
+
+        case GET_CALLING_PACKAGE_FOR_BROADCAST_TRANSACTION: {
+            data.enforceInterface(IActivityManager.descriptor);
+            boolean foreground = data.readInt() == 1 ? true : false;
+            String res = getCallingPackageForBroadcast(foreground);
             reply.writeNoException();
             reply.writeString(res);
             return true;
@@ -2070,6 +2080,13 @@ class ActivityManagerProxy implements IActivityManager
             ParcelFileDescriptor profileFd, Bundle options) throws RemoteException {
         Parcel data = Parcel.obtain();
         Parcel reply = Parcel.obtain();
+
+        if (intent.getComponent() != null) {
+            Log.i("ActivityManager", "Timeline: Activity_launch_request id:"
+                    + intent.getComponent().getPackageName() + " time:"
+                    + SystemClock.uptimeMillis());
+        }
+
         data.writeInterfaceToken(IActivityManager.descriptor);
         data.writeStrongBinder(caller != null ? caller.asBinder() : null);
         data.writeString(callingPackage);
@@ -2419,6 +2436,8 @@ class ActivityManagerProxy implements IActivityManager
     public void activityIdle(IBinder token, Configuration config, boolean stopProfiling)
             throws RemoteException
     {
+        Log.i("ActivityManager", "Timeline: Activity_idle id: " + token + " time:"
+                + SystemClock.uptimeMillis());
         Parcel data = Parcel.obtain();
         Parcel reply = Parcel.obtain();
         data.writeInterfaceToken(IActivityManager.descriptor);
@@ -2506,6 +2525,19 @@ class ActivityManagerProxy implements IActivityManager
         data.writeInterfaceToken(IActivityManager.descriptor);
         data.writeStrongBinder(token);
         mRemote.transact(GET_CALLING_PACKAGE_TRANSACTION, data, reply, 0);
+        reply.readException();
+        String res = reply.readString();
+        data.recycle();
+        reply.recycle();
+        return res;
+    }
+    public String getCallingPackageForBroadcast(boolean foreground) throws RemoteException
+    {
+        Parcel data = Parcel.obtain();
+        Parcel reply = Parcel.obtain();
+        data.writeInterfaceToken(IActivityManager.descriptor);
+        data.writeInt(foreground ? 1 : 0);
+        mRemote.transact(GET_CALLING_PACKAGE_FOR_BROADCAST_TRANSACTION, data, reply, 0);
         reply.readException();
         String res = reply.readString();
         data.recycle();

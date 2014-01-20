@@ -40,7 +40,7 @@ public class PolicyHelper {
     private static final String SYSTEMUI_METADATA_NAME = "com.android.systemui";
 
     // get @ButtonConfig with description if needed and other then an app description
-/*    public static ArrayList<ButtonConfig> getPowerMenuConfigWithDescription(
+    public static ArrayList<ButtonConfig> getPowerMenuConfigWithDescription(
             Context context, String values, String entries) {
         String config = Settings.System.getStringForUser(
                     context.getContentResolver(),
@@ -51,8 +51,8 @@ public class PolicyHelper {
         }
         return (ConfigSplitHelper.getButtonsConfigValues(context, config, values, entries, true));
     }
-*/
-/*    public static void setPowerMenuConfig(Context context,
+
+    public static void setPowerMenuConfig(Context context,
             ArrayList<ButtonConfig> buttonsConfig, boolean reset) {
         String config;
         if (reset) {
@@ -64,7 +64,7 @@ public class PolicyHelper {
                     Settings.System.POWER_MENU_CONFIG,
                     config);
     }
-*/
+
     public static Drawable getPowerMenuIconImage(Context context,
             String clickAction, String customIcon, boolean colorize) {
         int resId = -1;
@@ -77,7 +77,7 @@ public class PolicyHelper {
             return null;
         }
 
-/*        if (colorize) {
+        if (colorize) {
             iconColor = Settings.System.getIntForUser(
                     context.getContentResolver(),
                     Settings.System.POWER_MENU_ICON_COLOR, -2,
@@ -92,7 +92,7 @@ public class PolicyHelper {
                     com.android.internal.R.color.power_menu_icon_default_color);
             }
         }
-*/
+
         if (!clickAction.startsWith("**")) {
             try {
                 d = pm.getActivityIcon(Intent.parseUri(clickAction, 0));
@@ -181,9 +181,9 @@ public class PolicyHelper {
         } else if (clickAction.equals(PolicyConstants.ACTION_AIRPLANE)) {
             return context.getResources().getDrawable(
                 com.android.internal.R.drawable.ic_lock_airplane_mode_off);
-//        } else if (clickAction.equals(PolicyConstants.ACTION_EXPANDED_DESKTOP)) {
-//            return context.getResources().getDrawable(
-//                com.android.internal.R.drawable.ic_lock_expanded_desktop);
+        } else if (clickAction.equals(PolicyConstants.ACTION_EXPANDED_DESKTOP)) {
+            return context.getResources().getDrawable(
+                com.android.internal.R.drawable.ic_lock_expanded_desktop);
         }
         return null;
     }

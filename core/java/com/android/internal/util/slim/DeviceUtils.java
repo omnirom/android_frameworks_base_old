@@ -74,17 +74,17 @@ public class DeviceUtils {
         return context.getPackageManager().hasSystemFeature(PackageManager.FEATURE_LOCATION_GPS);
     }
 
-/*    public static boolean deviceSupportsImeSwitcher(Context ctx) {
+    public static boolean deviceSupportsImeSwitcher(Context ctx) {
         Resources res = ctx.getResources();
         return res.getBoolean(com.android.internal.R.bool.config_show_IMESwitcher);
     }
-*/
+
     public static boolean deviceSupportsVibrator(Context ctx) {
         Vibrator vibrator = (Vibrator) ctx.getSystemService(Context.VIBRATOR_SERVICE);
         return vibrator.hasVibrator();
     }
 
-/*    public static boolean deviceSupportsTorch(Context context) {
+    public static boolean deviceSupportsTorch(Context context) {
         PackageManager pm = context.getPackageManager();
         try {
             List<ApplicationInfo> packages = pm.getInstalledApplications(0);
@@ -97,8 +97,8 @@ public class DeviceUtils {
         }
         return false;
     }
-*/
-/*    public static FilteredDeviceFeaturesArray filterUnsupportedDeviceFeatures(Context context,
+
+    public static FilteredDeviceFeaturesArray filterUnsupportedDeviceFeatures(Context context,
             String[] valuesArray, String[] entriesArray) {
         if (valuesArray == null || entriesArray == null || context == null) {
             return null;
@@ -132,7 +132,7 @@ public class DeviceUtils {
         }
         return true;
     }
-*/
+
     public static class FilteredDeviceFeaturesArray {
         public String[] entries;
         public String[] values;

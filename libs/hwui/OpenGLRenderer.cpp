@@ -1076,7 +1076,13 @@ void OpenGLRenderer::composeLayer(sp<Snapshot> current, sp<Snapshot> previous) {
         }
     } else if (!rect.isEmpty()) {
         dirtyLayer(rect.left, rect.top, rect.right, rect.bottom);
+
+        save(0);
+        // the layer contains screen buffer content that shouldn't be alpha modulated
+        // (and any necessary alpha modulation was handled drawing into the layer)
+        mSnapshot->alpha = 1.0f;
         composeLayerRect(layer, rect, true);
+        restore();
     }
 
     dirtyClip();
@@ -2215,7 +2221,7 @@ status_t OpenGLRenderer::drawBitmapMesh(SkBitmap* bitmap, int meshWidth, int mes
 
     const uint32_t count = meshWidth * meshHeight * 6;
 
-    ColorTextureVertex mesh[count];
+    ColorTextureVertex* mesh=new ColorTextureVertex[count];
     ColorTextureVertex* vertex = mesh;
 
     bool cleanupColors = false;
@@ -2267,6 +2273,7 @@ status_t OpenGLRenderer::drawBitmapMesh(SkBitmap* bitmap, int meshWidth, int mes
 
     if (quickReject(left, top, right, bottom)) {
         if (cleanupColors) delete[] colors;
+        delete[] mesh;
         return DrawGlInfo::kStatusDone;
     }
 
@@ -2274,6 +2281,7 @@ status_t OpenGLRenderer::drawBitmapMesh(SkBitmap* bitmap, int meshWidth, int mes
         texture = mCaches.textureCache.get(bitmap);
         if (!texture) {
             if (cleanupColors) delete[] colors;
+            delete[] mesh;
             return DrawGlInfo::kStatusDone;
         }
     }
@@ -2313,6 +2321,7 @@ status_t OpenGLRenderer::drawBitmapMesh(SkBitmap* bitmap, int meshWidth, int mes
     }
 
     if (cleanupColors) delete[] colors;
+    delete[] mesh;
 
     return DrawGlInfo::kStatusDrew;
 }
