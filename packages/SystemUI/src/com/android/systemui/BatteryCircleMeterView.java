@@ -1,19 +1,19 @@
 /*
- * Copyright (C) 2012 Sven Dawitz for the CyanogenMod Project
- * This code has been modified. Portions copyright (C) 2013, ParanoidAndroid Project.
- *
- * Licensed under the Apache License, Version 2.0 (the "License");
- * you may not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- *
- *      http://www.apache.org/licenses/LICENSE-2.0
- *
- * Unless required by applicable law or agreed to in writing, software
- * distributed under the License is distributed on an "AS IS" BASIS,
- * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- * See the License for the specific language governing permissions and
- * limitations under the License.
- */
+* Copyright (C) 2012 Sven Dawitz for the CyanogenMod Project
+* This code has been modified. Portions copyright (C) 2013, ParanoidAndroid Project.
+*
+* Licensed under the Apache License, Version 2.0 (the "License");
+* you may not use this file except in compliance with the License.
+* You may obtain a copy of the License at
+*
+* http://www.apache.org/licenses/LICENSE-2.0
+*
+* Unless required by applicable law or agreed to in writing, software
+* distributed under the License is distributed on an "AS IS" BASIS,
+* WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+* See the License for the specific language governing permissions and
+* limitations under the License.
+*/
 
 package com.android.systemui;
 
@@ -47,13 +47,13 @@ import com.android.internal.R;
 import com.android.systemui.BatteryMeterView;
 
 /***
- * Note about CircleBattery Implementation:
- *
- * Unfortunately, we cannot use BatteryController or DockBatteryController here,
- * since communication between controller and this view is not possible without
- * huge changes. As a result, this Class is doing everything by itself,
- * monitoring battery level and battery settings.
- */
+* Note about CircleBattery Implementation:
+*
+* Unfortunately, we cannot use BatteryController or DockBatteryController here,
+* since communication between controller and this view is not possible without
+* huge changes. As a result, this Class is doing everything by itself,
+* monitoring battery level and battery settings.
+*/
 
 public class BatteryCircleMeterView extends ImageView {
     final static String QuickSettings = "quicksettings";
@@ -63,32 +63,32 @@ public class BatteryCircleMeterView extends ImageView {
     private BatteryReceiver mBatteryReceiver = null;
 
     // state variables
-    private boolean mAttached;      // whether or not attached to a window
-    private boolean mActivated;     // whether or not activated due to system settings
+    private boolean mAttached; // whether or not attached to a window
+    private boolean mActivated; // whether or not activated due to system settings
     private boolean mCirclePercent; // whether or not to show percentage number
-    private boolean mIsCharging;    // whether or not device is currently charging
-    private int     mLevel;         // current battery level
-    private int     mAnimOffset;    // current level of charging animation
-    private boolean mIsAnimating;   // stores charge-animation status to reliably remove callbacks
-    private int     mDockLevel;     // current dock battery level
+    private boolean mIsCharging; // whether or not device is currently charging
+    private int mLevel; // current battery level
+    private int mAnimOffset; // current level of charging animation
+    private boolean mIsAnimating; // stores charge-animation status to reliably remove callbacks
+    private int mDockLevel; // current dock battery level
     private boolean mDockIsCharging;// whether or not dock battery is currently charging
-    private boolean mIsDocked = false;      // whether or not dock battery is connected
+    private boolean mIsDocked = false; // whether or not dock battery is connected
 
-    private int     mCircleSize;    // draw size of circle. read rather complicated from
+    private int mCircleSize; // draw size of circle. read rather complicated from
                                      // another status bar icon, so it fits the icon size
                                      // no matter the dps and resolution
-    private RectF   mRectLeft;      // contains the precalculated rect used in drawArc(), derived from mCircleSize
-    private RectF   mRectRight;     // contains the precalculated rect used in drawArc() for dock battery
-    private Float   mTextLeftX;     // precalculated x position for drawText() to appear centered
-    private Float   mTextY;         // precalculated y position for drawText() to appear vertical-centered
-    private Float   mTextRightX;    // precalculated x position for dock battery drawText()
+    private RectF mRectLeft; // contains the precalculated rect used in drawArc(), derived from mCircleSize
+    private RectF mRectRight; // contains the precalculated rect used in drawArc() for dock battery
+    private Float mTextLeftX; // precalculated x position for drawText() to appear centered
+    private Float mTextY; // precalculated y position for drawText() to appear vertical-centered
+    private Float mTextRightX; // precalculated x position for dock battery drawText()
 
     // quiet a lot of paint variables. helps to move cpu-usage from actual drawing to initialization
-    private Paint   mPaintFont;
-    private Paint   mPaintGray;
-    private Paint   mPaintSystem;
-    private Paint   mPaintRed;
-    private String  mCircleBatteryView;
+    private Paint mPaintFont;
+    private Paint mPaintGray;
+    private Paint mPaintSystem;
+    private Paint mPaintRed;
+    private String mCircleBatteryView;
 
     private int mCircleColor;
     private int mCircleTextColor;
@@ -156,8 +156,8 @@ public class BatteryCircleMeterView extends ImageView {
     }
 
     /***
-     * Start of CircleBattery implementation
-     */
+* Start of CircleBattery implementation
+*/
     public BatteryCircleMeterView(Context context) {
         this(context, null);
     }
@@ -202,9 +202,9 @@ public class BatteryCircleMeterView extends ImageView {
         if (mAttached) {
             mAttached = false;
             mBatteryReceiver.updateRegistration();
-            mRectLeft = null;   // makes sure, size based variables get
+            mRectLeft = null; // makes sure, size based variables get
                                 // recalculated on next attach
-            mCircleSize = 0;    // makes sure, mCircleSize is reread from icons on
+            mCircleSize = 0; // makes sure, mCircleSize is reread from icons on
                                 // next attach
         }
     }
@@ -284,8 +284,8 @@ public class BatteryCircleMeterView extends ImageView {
         mCircleColor = defaultColor;
 
         /*
-         * initialize vars and force redraw
-         */
+* initialize vars and force redraw
+*/
         initializeCircleVars();
         mRectLeft = null;
         mCircleSize = 0;
@@ -308,8 +308,8 @@ public class BatteryCircleMeterView extends ImageView {
     }
 
     /***
-     * Initialize the Circle vars for start
-     */
+* Initialize the Circle vars for start
+*/
     private void initializeCircleVars() {
         // initialize and setup all paint variables
         // stroke width is later set in initSizeBasedStuff()
@@ -338,10 +338,10 @@ public class BatteryCircleMeterView extends ImageView {
 
 
     /***
-     * updates the animation counter
-     * cares for timed callbacks to continue animation cycles
-     * uses mInvalidate for delayed invalidate() callbacks
-     */
+* updates the animation counter
+* cares for timed callbacks to continue animation cycles
+* uses mInvalidate for delayed invalidate() callbacks
+*/
     private void updateChargeAnim() {
         if (!(mIsCharging || mDockIsCharging) || (mLevel >= 97 && mDockLevel >= 97)) {
             if (mIsAnimating) {
@@ -365,10 +365,10 @@ public class BatteryCircleMeterView extends ImageView {
     }
 
     /***
-     * initializes all size dependent variables
-     * sets stroke width and text size of all involved paints
-     * YES! i think the method name is appropriate
-     */
+* initializes all size dependent variables
+* sets stroke width and text size of all involved paints
+* YES! i think the method name is appropriate
+*/
     private void initSizeBasedStuff() {
         if (mCircleSize == 0) {
             initSizeMeasureIconHeight();
@@ -401,12 +401,12 @@ public class BatteryCircleMeterView extends ImageView {
     }
 
     /***
-     * we need to measure the size of the circle battery by checking another
-     * resource. unfortunately, those resources have transparent/empty borders
-     * so we have to count the used pixel manually and deduct the size from
-     * it. quiet complicated, but the only way to fit properly into the
-     * statusbar for all resolutions
-     */
+* we need to measure the size of the circle battery by checking another
+* resource. unfortunately, those resources have transparent/empty borders
+* so we have to count the used pixel manually and deduct the size from
+* it. quiet complicated, but the only way to fit properly into the
+* statusbar for all resolutions
+*/
     private void initSizeMeasureIconHeight() {
         Bitmap measure = null;
         if (mCircleBatteryView.equals(QuickSettings)) {

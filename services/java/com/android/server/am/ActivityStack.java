@@ -37,7 +37,6 @@ import static com.android.server.am.ActivityStackSupervisor.DEBUG_STATES;
 import static com.android.server.am.ActivityStackSupervisor.HOME_STACK_ID;
 
 import com.android.internal.os.BatteryStatsImpl;
-import com.android.internal.util.Objects;
 import com.android.server.Watchdog;
 import com.android.server.am.ActivityManagerService.ItemMatcher;
 import com.android.server.wm.AppTransition;
@@ -48,6 +47,7 @@ import android.app.Activity;
 import android.app.ActivityManager;
 import android.app.ActivityOptions;
 import android.app.AppGlobals;
+import android.app.AppOpsManager;
 import android.app.IActivityController;
 import android.app.IThumbnailReceiver;
 import android.app.ResultInfo;
@@ -82,6 +82,7 @@ import java.lang.ref.WeakReference;
 import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
+import java.util.Objects;
 
 /**
  * State and management of a single stack of activities.
@@ -743,8 +744,9 @@ final class ActivityStack {
         prev.state = ActivityState.PAUSING;
         prev.task.touchActiveTime();
         clearLaunchTime(prev);
+
         final ActivityRecord next = mStackSupervisor.topRunningActivityLocked();
-        if (next == null || next.task != prev.task) {
+        if (!prev.isHomeActivity() && (next == null || next.task != prev.task)) {
             prev.updateThumbnail(screenshotActivities(prev), null);
         }
         stopFullyDrawnTraceIfNeeded();
@@ -980,6 +982,7 @@ final class ActivityStack {
         } else {
             next.cpuTimeAtResume = 0; // Couldn't get the cpu time of process
         }
+        updatePrivacyGuardNotificationLocked(next);
     }
 
     /**
@@ -1144,7 +1147,7 @@ final class ActivityStack {
                     } else if (isActivityOverHome(r)) {
                         if (DEBUG_VISBILITY) Slog.v(TAG, "Showing home: at " + r);
                         showHomeBehindStack = true;
-                        behindFullscreen = !isHomeStack();
+                        behindFullscreen = !isHomeStack() && r.frontOfTask && task.mOnTopOfHome;
                     }
                 } else {
                     if (DEBUG_VISBILITY) Slog.v(
@@ -1686,6 +1689,33 @@ final class ActivityStack {
             ++stackNdx;
         }
         mTaskHistory.add(stackNdx, task);
+    }
+
+    private final void updatePrivacyGuardNotificationLocked(ActivityRecord next) {
+        if (android.provider.Settings.Secure.getIntForUser(mContext.getContentResolver(),
+            android.provider.Settings.Secure.PRIVACY_GUARD_NOTIFICATION,
+            1, UserHandle.USER_CURRENT) == 0) {
+            return;
+        }
+        String privacyGuardPackageName = mStackSupervisor.mPrivacyGuardPackageName;
+        if (privacyGuardPackageName != null && privacyGuardPackageName.equals(next.packageName)) {
+            return;
+        }
+
+        int privacy = mService.mAppOpsService.getPrivacyGuardSettingForPackage(
+                next.app.uid, next.packageName);
+
+        if (privacyGuardPackageName != null && privacy == AppOpsManager.PRIVACY_GUARD_DISABLED) {
+            Message msg = mService.mHandler.obtainMessage(
+                    ActivityManagerService.CANCEL_PRIVACY_NOTIFICATION_MSG, next.userId);
+            msg.sendToTarget();
+            mStackSupervisor.mPrivacyGuardPackageName = null;
+        } else if (privacy > AppOpsManager.PRIVACY_GUARD_DISABLED) {
+            Message msg = mService.mHandler.obtainMessage(
+                    ActivityManagerService.POST_PRIVACY_NOTIFICATION_MSG, privacy, 0, next);
+            msg.sendToTarget();
+            mStackSupervisor.mPrivacyGuardPackageName = next.packageName;
+        }
     }
 
     final void startActivityLocked(ActivityRecord r, boolean newTask,
@@ -2359,7 +2389,7 @@ final class ActivityStack {
         ArrayList<ActivityRecord> activities = r.task.mActivities;
         for (int index = activities.indexOf(r); index >= 0; --index) {
             ActivityRecord cur = activities.get(index);
-            if (!Objects.equal(cur.taskAffinity, r.taskAffinity)) {
+            if (!Objects.equals(cur.taskAffinity, r.taskAffinity)) {
                 break;
             }
             finishActivityLocked(cur, Activity.RESULT_CANCELED, null, "request-affinity", true);
@@ -2526,6 +2556,7 @@ final class ActivityStack {
         // activity into the stopped state and then finish it.
         if (localLOGV) Slog.v(TAG, "Enqueueing pending finish: " + r);
         mStackSupervisor.mFinishingActivities.add(r);
+        r.resumeKeyDispatchingLocked();
         mStackSupervisor.getFocusedStack().resumeTopActivityLocked(null);
         return r;
     }
@@ -3160,9 +3191,7 @@ final class ActivityStack {
 
         final TaskRecord task = mResumedActivity != null ? mResumedActivity.task : null;
         if (task == tr && task.mOnTopOfHome || numTasks <= 1) {
-            if (task != null) {
-                task.mOnTopOfHome = false;
-            }
+            tr.mOnTopOfHome = false;
             return mStackSupervisor.resumeHomeActivity(null);
         }
 

@@ -1,20 +1,20 @@
 /*
- * Copyright (C) 2012 The Android Open Source Project
- * This code has been modified. Portions copyright (C) 2013, OmniRom Project.
- * This code has been modified. Portions copyright (C) 2013, ParanoidAndroid Project.
- *
- * Licensed under the Apache License, Version 2.0 (the "License");
- * you may not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- *
- *      http://www.apache.org/licenses/LICENSE-2.0
- *
- * Unless required by applicable law or agreed to in writing, software
- * distributed under the License is distributed on an "AS IS" BASIS,
- * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- * See the License for the specific language governing permissions and
- * limitations under the License.
- */
+* Copyright (C) 2012 The Android Open Source Project
+* This code has been modified. Portions copyright (C) 2013, OmniRom Project.
+* This code has been modified. Portions copyright (C) 2013, ParanoidAndroid Project.
+*
+* Licensed under the Apache License, Version 2.0 (the "License");
+* you may not use this file except in compliance with the License.
+* You may obtain a copy of the License at
+*
+* http://www.apache.org/licenses/LICENSE-2.0
+*
+* Unless required by applicable law or agreed to in writing, software
+* distributed under the License is distributed on an "AS IS" BASIS,
+* WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+* See the License for the specific language governing permissions and
+* limitations under the License.
+*/
 
 package com.android.systemui.statusbar.phone;
 
@@ -23,11 +23,14 @@ import android.content.ContentResolver;
 import android.content.Context;
 import android.content.res.Configuration;
 import android.content.res.Resources;
+import android.graphics.Point;
 import android.provider.Settings;
 import android.text.TextUtils;
 import android.util.AttributeSet;
+import android.view.Display;
 import android.view.View;
 import android.view.ViewGroup;
+import android.view.WindowManager;
 import android.widget.FrameLayout;
 
 import com.android.systemui.R;
@@ -35,8 +38,8 @@ import com.android.systemui.R;
 import java.util.ArrayList;
 
 /**
- *
- */
+*
+*/
 class QuickSettingsContainerView extends FrameLayout {
 
     // The number of columns in the QuickSettings grid
@@ -50,6 +53,8 @@ class QuickSettingsContainerView extends FrameLayout {
 
     private Context mContext;
     private Resources mResources;
+
+    private boolean mFirstStartUp = true;
 
     // Default layout transition
     private LayoutTransition mLayoutTransition;
@@ -140,7 +145,7 @@ class QuickSettingsContainerView extends FrameLayout {
             }
         }
 
-        // Set the measured dimensions.  We always fill the tray width, but wrap to the height of
+        // Set the measured dimensions. We always fill the tray width, but wrap to the height of
         // all the tiles.
         int numRows = (int) Math.ceil((float) cursor / mNumFinalCol);
         int newHeight = (int) ((numRows * cellHeight) + ((numRows - 1) * mCellGap)) +
@@ -157,6 +162,10 @@ class QuickSettingsContainerView extends FrameLayout {
         int x = getPaddingStart();
         int y = getPaddingTop();
         int cursor = 0;
+
+        // onMeasure is done onLayout called last time isLandscape()
+        // so first bootup is done, set it to false
+        mFirstStartUp = false;
 
         for (int i = 0; i < N; ++i) {
             QuickSettingsTileView child = (QuickSettingsTileView) getChildAt(i);
@@ -197,6 +206,7 @@ class QuickSettingsContainerView extends FrameLayout {
                 }
             }
         }
+        updateSpan();
     }
 
     public void setOnEditModeChangedListener(EditModeChangedListener listener) {
@@ -211,15 +221,27 @@ class QuickSettingsContainerView extends FrameLayout {
         return mEditModeEnabled;
     }
 
+    public boolean isDynamicEnabled() {
+        return Settings.System.getInt(mContext.getContentResolver(),
+                Settings.System.QUICK_SETTINGS_TILES_ROW, 1) != 0;
+    }
+
     private boolean shouldUpdateColumns() {
-        return (getTilesSize() > 12) && !isLandscape();
+        return (getTilesSize() > 12) && !isLandscape() && isDynamicEnabled();
     }
 
     private boolean isLandscape() {
-        final boolean isLandscape =
-            Resources.getSystem().getConfiguration().orientation
+        if (mFirstStartUp) {
+            WindowManager wm =
+                  ((WindowManager) mContext.getSystemService(mContext.WINDOW_SERVICE));
+            Display display = wm.getDefaultDisplay();
+            Point size = new Point();
+            display.getSize(size);
+            return size.x > size.y;
+        } else {
+            return Resources.getSystem().getConfiguration().orientation
                     == Configuration.ORIENTATION_LANDSCAPE;
-        return isLandscape;
+        }
     }
 
     private int getTilesSize() {
@@ -241,6 +263,11 @@ class QuickSettingsContainerView extends FrameLayout {
             default:
                 return mResources.getDimensionPixelSize(R.dimen.qs_3_column_text_size);
         }
+    }
+
+    public void resetAllTiles() {
+        Settings.System.putString(mContext.getContentResolver(),
+                   Settings.System.QUICK_SETTINGS_TILES, QuickSettings.DEFAULT_TILES);
     }
 
     public void setEditModeEnabled(boolean enabled) {

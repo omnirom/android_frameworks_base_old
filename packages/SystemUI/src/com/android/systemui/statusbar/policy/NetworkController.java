@@ -1,18 +1,18 @@
 /*
- * Copyright (C) 2010 The Android Open Source Project
- *
- * Licensed under the Apache License, Version 2.0 (the "License");
- * you may not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- *
- *      http://www.apache.org/licenses/LICENSE-2.0
- *
- * Unless required by applicable law or agreed to in writing, software
- * distributed under the License is distributed on an "AS IS" BASIS,
- * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- * See the License for the specific language governing permissions and
- * limitations under the License.
- */
+* Copyright (C) 2010 The Android Open Source Project
+*
+* Licensed under the Apache License, Version 2.0 (the "License");
+* you may not use this file except in compliance with the License.
+* You may obtain a copy of the License at
+*
+* http://www.apache.org/licenses/LICENSE-2.0
+*
+* Unless required by applicable law or agreed to in writing, software
+* distributed under the License is distributed on an "AS IS" BASIS,
+* WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+* See the License for the specific language governing permissions and
+* limitations under the License.
+*/
 
 package com.android.systemui.statusbar.policy;
 
@@ -208,8 +208,8 @@ public class NetworkController extends BroadcastReceiver implements DemoMode {
     }
 
     /**
-     * Construct this controller object and register for updates.
-     */
+* Construct this controller object and register for updates.
+*/
     public NetworkController(Context context) {
         mContext = context;
         final Resources res = context.getResources();
@@ -454,9 +454,9 @@ public class NetworkController extends BroadcastReceiver implements DemoMode {
             if (mContext.getResources().getBoolean(
                     com.android.internal.R.bool.config_combined_signal)) {
                 /*
-                 * if combined_signal is set to true only then consider data
-                 * service state for signal display
-                 */
+* if combined_signal is set to true only then consider data
+* service state for signal display
+*/
                 mDataServiceState = mServiceState.getDataRegState();
                 if (DEBUG) {
                     Log.d(TAG, "Combining data service state " + mDataServiceState + " for signal");
@@ -1065,9 +1065,9 @@ public class NetworkController extends BroadcastReceiver implements DemoMode {
             mobileLabel = "";
         } else {
             // We want to show the carrier name if in service and either:
-            //   - We are connected to mobile data, or
-            //   - We are not connected to mobile data, as long as the *reason* packets are not
-            //     being routed over that link is that we have better connectivity via wifi.
+            // - We are connected to mobile data, or
+            // - We are not connected to mobile data, as long as the *reason* packets are not
+            // being routed over that link is that we have better connectivity via wifi.
             // If data is disconnected for some other reason but wifi (or ethernet/bluetooth)
             // is connected, we show nothing.
             // Otherwise (nothing connected) we show "No internet connection".
@@ -1253,13 +1253,13 @@ public class NetworkController extends BroadcastReceiver implements DemoMode {
             notifySignalsChangedCallbacks(cb);
         }
 
-        if (mLastPhoneSignalIconId          != mPhoneSignalIconId
+        if (mLastPhoneSignalIconId != mPhoneSignalIconId
          || mLastDataDirectionOverlayIconId != combinedActivityIconId
-         || mLastWifiIconId                 != mWifiIconId
-         || mLastWimaxIconId                != mWimaxIconId
-         || mLastDataTypeIconId             != mDataTypeIconId
-         || mLastAirplaneMode               != mAirplaneMode
-         || mLastLocale                     != mLocale)
+         || mLastWifiIconId != mWifiIconId
+         || mLastWimaxIconId != mWimaxIconId
+         || mLastDataTypeIconId != mDataTypeIconId
+         || mLastAirplaneMode != mAirplaneMode
+         || mLastLocale != mLocale)
         {
             // NB: the mLast*s will be updated later
             for (SignalCluster cluster : mSignalClusters) {
@@ -1358,130 +1358,130 @@ public class NetworkController extends BroadcastReceiver implements DemoMode {
 
     public void dump(FileDescriptor fd, PrintWriter pw, String[] args) {
         pw.println("NetworkController state:");
-        pw.println(String.format("  %s network type %d (%s)",
+        pw.println(String.format(" %s network type %d (%s)",
                 mConnected?"CONNECTED":"DISCONNECTED",
                 mConnectedNetworkType, mConnectedNetworkTypeName));
-        pw.println("  - telephony ------");
-        pw.print("  hasVoiceCallingFeature()=");
+        pw.println(" - telephony ------");
+        pw.print(" hasVoiceCallingFeature()=");
         pw.println(hasVoiceCallingFeature());
-        pw.print("  hasService()=");
+        pw.print(" hasService()=");
         pw.println(hasService());
-        pw.print("  mHspaDataDistinguishable=");
+        pw.print(" mHspaDataDistinguishable=");
         pw.println(mHspaDataDistinguishable);
-        pw.print("  mDataConnected=");
+        pw.print(" mDataConnected=");
         pw.println(mDataConnected);
-        pw.print("  mSimState=");
+        pw.print(" mSimState=");
         pw.println(mSimState);
-        pw.print("  mPhoneState=");
+        pw.print(" mPhoneState=");
         pw.println(mPhoneState);
-        pw.print("  mDataState=");
+        pw.print(" mDataState=");
         pw.println(mDataState);
-        pw.print("  mDataActivity=");
+        pw.print(" mDataActivity=");
         pw.println(mDataActivity);
-        pw.print("  mDataNetType=");
+        pw.print(" mDataNetType=");
         pw.print(mDataNetType);
         pw.print("/");
         pw.println(TelephonyManager.getNetworkTypeName(mDataNetType));
-        pw.print("  mServiceState=");
+        pw.print(" mServiceState=");
         pw.println(mServiceState);
-        pw.print("  mSignalStrength=");
+        pw.print(" mSignalStrength=");
         pw.println(mSignalStrength);
-        pw.print("  mLastSignalLevel=");
+        pw.print(" mLastSignalLevel=");
         pw.println(mLastSignalLevel);
-        pw.print("  mNetworkName=");
+        pw.print(" mNetworkName=");
         pw.println(mNetworkName);
-        pw.print("  mNetworkNameDefault=");
+        pw.print(" mNetworkNameDefault=");
         pw.println(mNetworkNameDefault);
-        pw.print("  mNetworkNameSeparator=");
+        pw.print(" mNetworkNameSeparator=");
         pw.println(mNetworkNameSeparator.replace("\n","\\n"));
-        pw.print("  mPhoneSignalIconId=0x");
+        pw.print(" mPhoneSignalIconId=0x");
         pw.print(Integer.toHexString(mPhoneSignalIconId));
         pw.print("/");
-        pw.print("  mQSPhoneSignalIconId=0x");
+        pw.print(" mQSPhoneSignalIconId=0x");
         pw.print(Integer.toHexString(mQSPhoneSignalIconId));
         pw.print("/");
         pw.println(getResourceName(mPhoneSignalIconId));
-        pw.print("  mDataDirectionIconId=");
+        pw.print(" mDataDirectionIconId=");
         pw.print(Integer.toHexString(mDataDirectionIconId));
         pw.print("/");
         pw.println(getResourceName(mDataDirectionIconId));
-        pw.print("  mDataSignalIconId=");
+        pw.print(" mDataSignalIconId=");
         pw.print(Integer.toHexString(mDataSignalIconId));
         pw.print("/");
         pw.println(getResourceName(mDataSignalIconId));
-        pw.print("  mDataTypeIconId=");
+        pw.print(" mDataTypeIconId=");
         pw.print(Integer.toHexString(mDataTypeIconId));
         pw.print("/");
         pw.println(getResourceName(mDataTypeIconId));
-        pw.print("  mQSDataTypeIconId=");
+        pw.print(" mQSDataTypeIconId=");
         pw.print(Integer.toHexString(mQSDataTypeIconId));
         pw.print("/");
         pw.println(getResourceName(mQSDataTypeIconId));
 
-        pw.println("  - wifi ------");
-        pw.print("  mWifiEnabled=");
+        pw.println(" - wifi ------");
+        pw.print(" mWifiEnabled=");
         pw.println(mWifiEnabled);
-        pw.print("  mWifiConnected=");
+        pw.print(" mWifiConnected=");
         pw.println(mWifiConnected);
-        pw.print("  mWifiRssi=");
+        pw.print(" mWifiRssi=");
         pw.println(mWifiRssi);
-        pw.print("  mWifiLevel=");
+        pw.print(" mWifiLevel=");
         pw.println(mWifiLevel);
-        pw.print("  mWifiSsid=");
+        pw.print(" mWifiSsid=");
         pw.println(mWifiSsid);
-        pw.println(String.format("  mWifiIconId=0x%08x/%s",
+        pw.println(String.format(" mWifiIconId=0x%08x/%s",
                     mWifiIconId, getResourceName(mWifiIconId)));
-        pw.println(String.format("  mQSWifiIconId=0x%08x/%s",
+        pw.println(String.format(" mQSWifiIconId=0x%08x/%s",
                     mQSWifiIconId, getResourceName(mQSWifiIconId)));
-        pw.print("  mWifiActivity=");
+        pw.print(" mWifiActivity=");
         pw.println(mWifiActivity);
 
         if (mWimaxSupported) {
-            pw.println("  - wimax ------");
-            pw.print("  mIsWimaxEnabled="); pw.println(mIsWimaxEnabled);
-            pw.print("  mWimaxConnected="); pw.println(mWimaxConnected);
-            pw.print("  mWimaxIdle="); pw.println(mWimaxIdle);
-            pw.println(String.format("  mWimaxIconId=0x%08x/%s",
+            pw.println(" - wimax ------");
+            pw.print(" mIsWimaxEnabled="); pw.println(mIsWimaxEnabled);
+            pw.print(" mWimaxConnected="); pw.println(mWimaxConnected);
+            pw.print(" mWimaxIdle="); pw.println(mWimaxIdle);
+            pw.println(String.format(" mWimaxIconId=0x%08x/%s",
                         mWimaxIconId, getResourceName(mWimaxIconId)));
-            pw.println(String.format("  mWimaxSignal=%d", mWimaxSignal));
-            pw.println(String.format("  mWimaxState=%d", mWimaxState));
-            pw.println(String.format("  mWimaxExtraState=%d", mWimaxExtraState));
+            pw.println(String.format(" mWimaxSignal=%d", mWimaxSignal));
+            pw.println(String.format(" mWimaxState=%d", mWimaxState));
+            pw.println(String.format(" mWimaxExtraState=%d", mWimaxExtraState));
         }
 
-        pw.println("  - Bluetooth ----");
-        pw.print("  mBtReverseTethered=");
+        pw.println(" - Bluetooth ----");
+        pw.print(" mBtReverseTethered=");
         pw.println(mBluetoothTethered);
 
-        pw.println("  - connectivity ------");
-        pw.print("  mInetCondition=");
+        pw.println(" - connectivity ------");
+        pw.print(" mInetCondition=");
         pw.println(mInetCondition);
 
-        pw.println("  - icons ------");
-        pw.print("  mLastPhoneSignalIconId=0x");
+        pw.println(" - icons ------");
+        pw.print(" mLastPhoneSignalIconId=0x");
         pw.print(Integer.toHexString(mLastPhoneSignalIconId));
         pw.print("/");
         pw.println(getResourceName(mLastPhoneSignalIconId));
-        pw.print("  mLastDataDirectionIconId=0x");
+        pw.print(" mLastDataDirectionIconId=0x");
         pw.print(Integer.toHexString(mLastDataDirectionIconId));
         pw.print("/");
         pw.println(getResourceName(mLastDataDirectionIconId));
-        pw.print("  mLastDataDirectionOverlayIconId=0x");
+        pw.print(" mLastDataDirectionOverlayIconId=0x");
         pw.print(Integer.toHexString(mLastDataDirectionOverlayIconId));
         pw.print("/");
         pw.println(getResourceName(mLastDataDirectionOverlayIconId));
-        pw.print("  mLastWifiIconId=0x");
+        pw.print(" mLastWifiIconId=0x");
         pw.print(Integer.toHexString(mLastWifiIconId));
         pw.print("/");
         pw.println(getResourceName(mLastWifiIconId));
-        pw.print("  mLastCombinedSignalIconId=0x");
+        pw.print(" mLastCombinedSignalIconId=0x");
         pw.print(Integer.toHexString(mLastCombinedSignalIconId));
         pw.print("/");
         pw.println(getResourceName(mLastCombinedSignalIconId));
-        pw.print("  mLastDataTypeIconId=0x");
+        pw.print(" mLastDataTypeIconId=0x");
         pw.print(Integer.toHexString(mLastDataTypeIconId));
         pw.print("/");
         pw.println(getResourceName(mLastDataTypeIconId));
-        pw.print("  mLastCombinedLabel=");
+        pw.print(" mLastCombinedLabel=");
         pw.print(mLastCombinedLabel);
         pw.println("");
     }

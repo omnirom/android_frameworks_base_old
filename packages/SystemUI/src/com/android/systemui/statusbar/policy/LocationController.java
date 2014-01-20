@@ -1,18 +1,18 @@
 /*
- * Copyright (C) 2008 The Android Open Source Project
- *
- * Licensed under the Apache License, Version 2.0 (the "License");
- * you may not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- *
- *      http://www.apache.org/licenses/LICENSE-2.0
- *
- * Unless required by applicable law or agreed to in writing, software
- * distributed under the License is distributed on an "AS IS" BASIS,
- * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- * See the License for the specific language governing permissions and
- * limitations under the License.
- */
+* Copyright (C) 2008 The Android Open Source Project
+*
+* Licensed under the Apache License, Version 2.0 (the "License");
+* you may not use this file except in compliance with the License.
+* You may obtain a copy of the License at
+*
+* http://www.apache.org/licenses/LICENSE-2.0
+*
+* Unless required by applicable law or agreed to in writing, software
+* distributed under the License is distributed on an "AS IS" BASIS,
+* WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+* See the License for the specific language governing permissions and
+* limitations under the License.
+*/
 
 package com.android.systemui.statusbar.policy;
 
@@ -37,8 +37,8 @@ import java.util.ArrayList;
 import java.util.List;
 
 /**
- * A controller to manage changes of location related states and update the views accordingly.
- */
+* A controller to manage changes of location related states and update the views accordingly.
+*/
 public class LocationController extends BroadcastReceiver {
     // The name of the placeholder corresponding to the location request status icon.
     // This string corresponds to config_statusBarIcons in core/res/res/values/config.xml.
@@ -50,7 +50,7 @@ public class LocationController extends BroadcastReceiver {
         = new int[] {AppOpsManager.OP_MONITOR_HIGH_POWER_LOCATION};
 
     private Context mContext;
-
+    private int mLastlocationMode;
     private AppOpsManager mAppOpsManager;
     private StatusBarManager mStatusBarManager;
 
@@ -60,15 +60,15 @@ public class LocationController extends BroadcastReceiver {
             new ArrayList<LocationSettingsChangeCallback>();
 
     /**
-     * A callback for change in location settings (the user has enabled/disabled location).
-     */
+* A callback for change in location settings (the user has enabled/disabled location).
+*/
     public interface LocationSettingsChangeCallback {
         /**
-         * Called whenever location settings change.
-         *
-         * @param locationEnabled A value of true indicates that at least one type of location
-         *                        is enabled in settings.
-         */
+* Called whenever location settings change.
+*
+* @param locationEnabled A value of true indicates that at least one type of location
+* is enabled in settings.
+*/
         public void onLocationSettingsChanged(boolean locationEnabled);
     }
 
@@ -99,26 +99,27 @@ public class LocationController extends BroadcastReceiver {
         // Examine the current location state and initialize the status view.
         updateActiveLocationRequests();
         refreshViews();
+        mLastlocationMode = Settings.Secure.LOCATION_MODE_HIGH_ACCURACY;
     }
 
     /**
-     * Add a callback to listen for changes in location settings.
-     */
+* Add a callback to listen for changes in location settings.
+*/
     public void addSettingsChangedCallback(LocationSettingsChangeCallback cb) {
         mSettingsChangeCallbacks.add(cb);
     }
 
     /**
-     * Enable or disable location in settings.
-     *
-     * <p>This will attempt to enable/disable every type of location setting
-     * (e.g. high and balanced power).
-     *
-     * <p>If enabling, a user consent dialog will pop up prompting the user to accept.
-     * If the user doesn't accept, network location won't be enabled.
-     *
-     * @return true if attempt to change setting was successful.
-     */
+* Enable or disable location in settings.
+*
+* <p>This will attempt to enable/disable every type of location setting
+* (e.g. high and balanced power).
+*
+* <p>If enabling, a user consent dialog will pop up prompting the user to accept.
+* If the user doesn't accept, network location won't be enabled.
+*
+* @return true if attempt to change setting was successful.
+*/
     public boolean setLocationEnabled(boolean enabled) {
         int currentUserId = ActivityManager.getCurrentUser();
         if (isUserLocationRestricted(currentUserId)) {
@@ -128,16 +129,60 @@ public class LocationController extends BroadcastReceiver {
         // When enabling location, a user consent dialog will pop up, and the
         // setting won't be fully enabled until the user accepts the agreement.
         int mode = enabled
-                ? Settings.Secure.LOCATION_MODE_HIGH_ACCURACY : Settings.Secure.LOCATION_MODE_OFF;
+                ? mLastlocationMode : Settings.Secure.LOCATION_MODE_OFF;
         // QuickSettings always runs as the owner, so specifically set the settings
         // for the current foreground user.
         return Settings.Secure
                 .putIntForUser(cr, Settings.Secure.LOCATION_MODE, mode, currentUserId);
     }
 
+    public boolean setBackLocationEnabled(int location) {
+        switch (location) {
+            case Settings.Secure.LOCATION_MODE_SENSORS_ONLY:
+                location = Settings.Secure.LOCATION_MODE_BATTERY_SAVING;
+                break;
+            case Settings.Secure.LOCATION_MODE_BATTERY_SAVING:
+                location = Settings.Secure.LOCATION_MODE_HIGH_ACCURACY;
+                break;
+            case Settings.Secure.LOCATION_MODE_HIGH_ACCURACY:
+                location = Settings.Secure.LOCATION_MODE_SENSORS_ONLY;
+                break;
+        }
+        return setLocationMode(location);
+    }
+
+    public boolean setLocationMode(int mode) {
+        int currentUserId = ActivityManager.getCurrentUser();
+        if (isUserLocationRestricted(currentUserId)) {
+            return false;
+        }
+        mLastlocationMode = mode;
+        final ContentResolver cr = mContext.getContentResolver();
+        // QuickSettings always runs as the owner, so specifically set the settings
+        // for the current foreground user.
+        return Settings.Secure
+                .putIntForUser(cr, Settings.Secure.LOCATION_MODE, mode, currentUserId);
+    }
+
+    public int locationMode() {
+        ContentResolver resolver = mContext.getContentResolver();
+        return Settings.Secure.getIntForUser(resolver, Settings.Secure.LOCATION_MODE,
+                Settings.Secure.LOCATION_MODE_OFF, ActivityManager.getCurrentUser());
+    }
+
+    public boolean isLocationAllowPanelCollapse() {
+        ContentResolver resolver = mContext.getContentResolver();
+        // QuickSettings always runs as the owner, so specifically retrieve the settings
+        // for the current foreground user.
+        int mode = Settings.Secure.getIntForUser(resolver, Settings.Secure.LOCATION_MODE,
+                    Settings.Secure.LOCATION_MODE_OFF, ActivityManager.getCurrentUser());
+        return (mode == Settings.Secure.LOCATION_MODE_BATTERY_SAVING)
+                 || (mode == Settings.Secure.LOCATION_MODE_HIGH_ACCURACY);
+    }
+
     /**
-     * Returns true if location isn't disabled in settings.
-     */
+* Returns true if location isn't disabled in settings.
+*/
     public boolean isLocationEnabled() {
         ContentResolver resolver = mContext.getContentResolver();
         // QuickSettings always runs as the owner, so specifically retrieve the settings
@@ -148,8 +193,8 @@ public class LocationController extends BroadcastReceiver {
     }
 
     /**
-     * Returns true if the current user is restricted from using location.
-     */
+* Returns true if the current user is restricted from using location.
+*/
     private boolean isUserLocationRestricted(int userId) {
         final UserManager um = (UserManager) mContext.getSystemService(Context.USER_SERVICE);
         return um.hasUserRestriction(
@@ -158,8 +203,8 @@ public class LocationController extends BroadcastReceiver {
     }
 
     /**
-     * Returns true if there currently exist active high power location requests.
-     */
+* Returns true if there currently exist active high power location requests.
+*/
     private boolean areActiveHighPowerLocationRequests() {
         List<AppOpsManager.PackageOps> packages
             = mAppOpsManager.getPackagesForOps(mHighPowerRequestAppOpArray);

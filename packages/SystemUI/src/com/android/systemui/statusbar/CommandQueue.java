@@ -1,18 +1,18 @@
 /*
- * Copyright (C) 2010 The Android Open Source Project
- *
- * Licensed under the Apache License, Version 2.0 (the "License");
- * you may not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- *
- *      http://www.apache.org/licenses/LICENSE-2.0
- *
- * Unless required by applicable law or agreed to in writing, software
- * distributed under the License is distributed on an "AS IS" BASIS,
- * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- * See the License for the specific language governing permissions and
- * limitations under the License.
- */
+* Copyright (C) 2010 The Android Open Source Project
+*
+* Licensed under the Apache License, Version 2.0 (the "License");
+* you may not use this file except in compliance with the License.
+* You may obtain a copy of the License at
+*
+* http://www.apache.org/licenses/LICENSE-2.0
+*
+* Unless required by applicable law or agreed to in writing, software
+* distributed under the License is distributed on an "AS IS" BASIS,
+* WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+* See the License for the specific language governing permissions and
+* limitations under the License.
+*/
 
 package com.android.systemui.statusbar;
 
@@ -26,37 +26,37 @@ import com.android.internal.statusbar.StatusBarIcon;
 import com.android.internal.statusbar.StatusBarIconList;
 
 /**
- * This class takes the functions from IStatusBar that come in on
- * binder pool threads and posts messages to get them onto the main
- * thread, and calls onto Callbacks.  It also takes care of
- * coalescing these calls so they don't stack up.  For the calls
- * are coalesced, note that they are all idempotent.
- */
+* This class takes the functions from IStatusBar that come in on
+* binder pool threads and posts messages to get them onto the main
+* thread, and calls onto Callbacks. It also takes care of
+* coalescing these calls so they don't stack up. For the calls
+* are coalesced, note that they are all idempotent.
+*/
 public class CommandQueue extends IStatusBar.Stub {
     private static final int INDEX_MASK = 0xffff;
-    private static final int MSG_SHIFT  = 16;
-    private static final int MSG_MASK   = 0xffff << MSG_SHIFT;
+    private static final int MSG_SHIFT = 16;
+    private static final int MSG_MASK = 0xffff << MSG_SHIFT;
 
-    private static final int OP_SET_ICON    = 1;
+    private static final int OP_SET_ICON = 1;
     private static final int OP_REMOVE_ICON = 2;
 
-    private static final int MSG_ICON                       = 1 << MSG_SHIFT;
-    private static final int MSG_ADD_NOTIFICATION           = 2 << MSG_SHIFT;
-    private static final int MSG_UPDATE_NOTIFICATION        = 3 << MSG_SHIFT;
-    private static final int MSG_REMOVE_NOTIFICATION        = 4 << MSG_SHIFT;
-    private static final int MSG_DISABLE                    = 5 << MSG_SHIFT;
-    private static final int MSG_EXPAND_NOTIFICATIONS       = 6 << MSG_SHIFT;
-    private static final int MSG_COLLAPSE_PANELS            = 7 << MSG_SHIFT;
-    private static final int MSG_EXPAND_SETTINGS            = 8 << MSG_SHIFT;
-    private static final int MSG_SET_SYSTEMUI_VISIBILITY    = 9 << MSG_SHIFT;
-    private static final int MSG_TOP_APP_WINDOW_CHANGED     = 10 << MSG_SHIFT;
-    private static final int MSG_SHOW_IME_BUTTON            = 11 << MSG_SHIFT;
-    private static final int MSG_SET_HARD_KEYBOARD_STATUS   = 12 << MSG_SHIFT;
-    private static final int MSG_TOGGLE_RECENT_APPS         = 13 << MSG_SHIFT;
-    private static final int MSG_PRELOAD_RECENT_APPS        = 14 << MSG_SHIFT;
+    private static final int MSG_ICON = 1 << MSG_SHIFT;
+    private static final int MSG_ADD_NOTIFICATION = 2 << MSG_SHIFT;
+    private static final int MSG_UPDATE_NOTIFICATION = 3 << MSG_SHIFT;
+    private static final int MSG_REMOVE_NOTIFICATION = 4 << MSG_SHIFT;
+    private static final int MSG_DISABLE = 5 << MSG_SHIFT;
+    private static final int MSG_EXPAND_NOTIFICATIONS = 6 << MSG_SHIFT;
+    private static final int MSG_COLLAPSE_PANELS = 7 << MSG_SHIFT;
+    private static final int MSG_EXPAND_SETTINGS = 8 << MSG_SHIFT;
+    private static final int MSG_SET_SYSTEMUI_VISIBILITY = 9 << MSG_SHIFT;
+    private static final int MSG_TOP_APP_WINDOW_CHANGED = 10 << MSG_SHIFT;
+    private static final int MSG_SHOW_IME_BUTTON = 11 << MSG_SHIFT;
+    private static final int MSG_SET_HARD_KEYBOARD_STATUS = 12 << MSG_SHIFT;
+    private static final int MSG_TOGGLE_RECENT_APPS = 13 << MSG_SHIFT;
+    private static final int MSG_PRELOAD_RECENT_APPS = 14 << MSG_SHIFT;
     private static final int MSG_CANCEL_PRELOAD_RECENT_APPS = 15 << MSG_SHIFT;
-    private static final int MSG_SET_WINDOW_STATE           = 16 << MSG_SHIFT;
-    private static final int MSG_SET_AUTOROTATE_STATUS      = 17 << MSG_SHIFT;
+    private static final int MSG_SET_WINDOW_STATE = 16 << MSG_SHIFT;
+    private static final int MSG_SET_AUTOROTATE_STATUS = 17 << MSG_SHIFT;
 
     public static final int FLAG_EXCLUDE_NONE = 0;
     public static final int FLAG_EXCLUDE_SEARCH_PANEL = 1 << 0;
@@ -75,8 +75,8 @@ public class CommandQueue extends IStatusBar.Stub {
     }
 
     /**
-     * These methods are called back on the main thread.
-     */
+* These methods are called back on the main thread.
+*/
     public interface Callbacks {
         public void addIcon(String slot, int index, int viewIndex, StatusBarIcon icon);
         public void updateIcon(String slot, int index, int viewIndex,
@@ -329,4 +329,3 @@ public class CommandQueue extends IStatusBar.Stub {
         }
     }
 }
-

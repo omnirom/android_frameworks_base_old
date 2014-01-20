@@ -271,6 +271,10 @@ public class InputManagerService extends IInputManager.Stub
         registerPointerSpeedSettingObserver();
         registerShowTouchesSettingObserver();
         registerStylusIconEnabledSettingObserver();
+        if (mContext.getResources().getBoolean(
+                com.android.internal.R.bool.config_stylusGestures)) {
+            registerStylusIconEnabledSettingObserver();
+        }
 
         mContext.registerReceiver(new BroadcastReceiver() {
             @Override
