@@ -16,6 +16,24 @@
       "revId": "e1ee79667694b75899a7d4587bfae380533fa908",
       "serverId": "56841c99-7c94-43d4-bf0b-cb4707e66d55",
       "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "cb5d2d02_64ad282d",
+        "filename": "policy/src/com/android/internal/policy/impl/PhoneWindowManager.java",
+        "patchSetId": 4
+      },
+      "lineNbr": 888,
+      "author": {
+        "id": 1000117
+      },
+      "writtenOn": "2014-01-20T13:57:30Z",
+      "side": 1,
+      "message": "If keyguard screen is showing or in restricted key input mode (i.e. in keyguard password emergency screen)\nThis will return false if lockscreen is not showing or if there is a situation that user needs to enter password in some emergency where certain keys are disabled.",
+      "parentUuid": "cb5d2d02_449f4405",
+      "revId": "e1ee79667694b75899a7d4587bfae380533fa908",
+      "serverId": "56841c99-7c94-43d4-bf0b-cb4707e66d55",
+      "unresolved": false
     }
   ]
 }
