@@ -3272,6 +3272,12 @@ public final class Settings {
         public static final String SOFT_BACK_KILL_APP_ENABLE = "soft_back_kill_app_enable";
 
         /**
+         * Emulate pressing KEYCODE_MENU in the navbar
+         * @hide
+         */
+        public static final String EMULATE_MENU_KEY = "emulate_menu_key";
+
+        /**
          * Settings to backup. This is here so that it's in the same place as the settings
          * keys and easy to update.
          *
