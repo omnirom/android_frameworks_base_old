@@ -7,6 +7,7 @@ import android.content.ContentResolver;
 import android.content.Context;
 import android.content.Intent;
 import android.content.IntentFilter;
+import android.content.res.Resources;
 import android.database.ContentObserver;
 import android.net.ConnectivityManager;
 import android.net.NetworkInfo;
@@ -17,21 +18,40 @@ import android.os.Message;
 import android.os.SystemClock;
 import android.provider.Settings;
 import android.util.AttributeSet;
+import android.util.TypedValue;
 import android.view.View;
 import android.widget.TextView;
 
-public class Traffic extends TextView {
-    private boolean mAttached;
-    //TrafficStats mTrafficStats;
-    private long totalRxBytes;
-    private long lastUpdateTime;
-    private static DecimalFormat decimalFormat = new DecimalFormat("##0.0");
+import com.android.systemui.R;
+
+/*
+*
+* Seeing how an Integer object in java requires at least 16 Bytes, it seemed awfully wasteful
+* to only use it for a single boolean. 32-bits is plenty of room for what we need it to do.
+*
+*/
+public class NetworkTraffic extends TextView {
+    public static final int MASK_UP = 0x00000001;        // Least valuable bit
+    public static final int MASK_DOWN = 0x00000002;      // Second least valuable bit
+    public static final int MASK_BYTES = 0x00000004;     // Third least valuable bit
+    public static final int MASK_PERIOD = 0xFFFF0000;    // Most valuable 16 bits
+
+    private static final int KILOBIT = 1000;
+    private static final int KILOBYTE = 1024;
+
+    private static DecimalFormat decimalFormat = new DecimalFormat("##0.#");
     static {
         decimalFormat.setMaximumIntegerDigits(3);
         decimalFormat.setMaximumFractionDigits(1);
     }
-    private static final int KILOBIT = 1000;
-    private static final int KILOBYTE = 1024;
+
+    private int mState = 0;
+    private boolean mAttached;
+    private long totalRxBytes;
+    private long totalTxBytes;
+    private long lastUpdateTime;
+    private int txtSizeSingle;
+    private int txtSizeMulti;
     private int KB = KILOBIT;
     private int MB = KB * KB;
     private int GB = MB * KB;
@@ -39,23 +59,25 @@ public class Traffic extends TextView {
     private Handler mTrafficHandler = new Handler() {
         @Override
         public void handleMessage(Message msg) {
-            long td = SystemClock.elapsedRealtime() - lastUpdateTime;
+            long timeDelta = SystemClock.elapsedRealtime() - lastUpdateTime;
 
-            if (td < 950) {
+            if (timeDelta < getInterval(mState) * .95) {
                 if (msg.what != 1) {
                     // we just updated the view, nothing further to do
                     return;
                 }
-                if (td < 1) {
+                if (timeDelta < 1) {
                     // Can't div by 0 so make sure the value displayed is minimal
-                    td = Long.MAX_VALUE;
+                    timeDelta = Long.MAX_VALUE;
                 }
             }
             lastUpdateTime = SystemClock.elapsedRealtime();
 
             // Calculate the data rate from the change in total bytes and time
             long newTotalRxBytes = TrafficStats.getTotalRxBytes();
-            long newData = newTotalRxBytes - totalRxBytes;
+            long newTotalTxBytes = TrafficStats.getTotalTxBytes();
+            long rxData = newTotalRxBytes - totalRxBytes;
+            long txData = newTotalTxBytes - totalTxBytes;
 
             // If bit/s convert from Bytes to bits
             String symbol;
@@ -63,23 +85,61 @@ public class Traffic extends TextView {
                 symbol = "B/s";
             } else {
                 symbol = "b/s";
-                newData = newData * 8;
+                rxData = rxData * 8;
+                txData = txData * 8;
             }
-            long speed = (long)(newData / (td / 1000F));
-            if (speed < KB) {
-                setText(speed + symbol);
-            } else if (speed < MB) {
-                setText(decimalFormat.format(speed / (float)KB) + 'k' + symbol);
-            } else if (speed < GB) {
-                setText(decimalFormat.format(speed / (float)MB) + 'M' + symbol);
+
+            // Get information for uplink ready so the line return can be added
+            String output = "";
+            int drawableID = 0;
+            if (isSet(mState, MASK_UP)) {
+                output = formatOutput(timeDelta, txData, symbol);
+                drawableID = R.drawable.network_traffic_up;
+            }
+
+            // Ensure text size is where it needs to be
+            int textSize;
+            if (isSet(mState, MASK_UP + MASK_DOWN)) {
+                output += "\n";
+                textSize = txtSizeMulti;
+                drawableID = R.drawable.network_traffic_updown;
             } else {
-                setText(decimalFormat.format(speed / (float)GB) + 'G' + symbol);
+                textSize = txtSizeSingle;
+            }
+
+            // Add information for downlink if it's called for
+            if (isSet(mState, MASK_DOWN)) {
+                output = output + formatOutput(timeDelta, rxData, symbol);
+                if (drawableID == 0) {
+                    drawableID = R.drawable.network_traffic_down;
+                }
+            }
+
+            // Update view if there's anything new to show
+            if (! output.contentEquals(getText())) {
+                //setTextSize(TypedValue.COMPLEX_UNIT_DIP, textSize);
+                setTextSize(TypedValue.COMPLEX_UNIT_PX, (float)textSize);
+                setText(output);
+                setCompoundDrawablesWithIntrinsicBounds(0, 0, drawableID, 0);
             }
 
             // Post delayed message to refresh in ~1000ms
             totalRxBytes = newTotalRxBytes;
+            totalTxBytes = newTotalTxBytes;
             mTrafficHandler.removeCallbacks(mRunnable);
-            mTrafficHandler.postDelayed(mRunnable, 1000);
+            mTrafficHandler.postDelayed(mRunnable, getInterval(mState));
+        }
+
+        private String formatOutput(long timeDelta, long data, String symbol) {
+            long speed = (long)(data / (timeDelta / 1000F));
+            if (speed < KB) {
+                return decimalFormat.format(speed) + symbol;
+            } else if (speed < MB) {
+                return decimalFormat.format(speed / (float)KB) + 'k' + symbol;
+            } else if (speed < GB) {
+                return decimalFormat.format(speed / (float)MB) + 'M' + symbol;
+            }
+            return decimalFormat.format(speed / (float)GB) + 'G' + symbol;
         }
     };
 
@@ -97,7 +157,7 @@ public class Traffic extends TextView {
 
         void observe() {
             ContentResolver resolver = mContext.getContentResolver();
-            Uri uri = Settings.System.getUriFor(Settings.System.STATUS_BAR_TRAFFIC);
+            Uri uri = Settings.System.getUriFor(Settings.System.NETWORK_TRAFFIC_STATE);
             resolver.registerContentObserver(uri, false, this);
         }
 
@@ -113,25 +173,27 @@ public class Traffic extends TextView {
     /*
      *  @hide
      */
-    public Traffic(Context context) {
+    public NetworkTraffic(Context context) {
         this(context, null);
     }
 
     /*
      *  @hide
      */
-    public Traffic(Context context, AttributeSet attrs) {
+    public NetworkTraffic(Context context, AttributeSet attrs) {
         this(context, attrs, 0);
     }
 
     /*
      *  @hide
      */
-    public Traffic(Context context, AttributeSet attrs, int defStyle) {
+    public NetworkTraffic(Context context, AttributeSet attrs, int defStyle) {
         super(context, attrs, defStyle);
+        final Resources resources = getResources();
+        txtSizeSingle = resources.getDimensionPixelSize(R.dimen.net_traffic_single_text_size);
+        txtSizeMulti = resources.getDimensionPixelSize(R.dimen.net_traffic_multi_text_size);
         Handler mHandler = new Handler();
         SettingsObserver settingsObserver = new SettingsObserver(mHandler);
-        //mTrafficStats = new TrafficStats();
         settingsObserver.observe();
         updateSettings();
     }
@@ -177,8 +239,8 @@ public class Traffic extends TextView {
 
     private void updateSettings() {
         ContentResolver resolver = mContext.getContentResolver();
-        int intState = Settings.System.getInt(resolver, Settings.System.STATUS_BAR_TRAFFIC, 0);
-        if (intState == 2) {
+        mState = Settings.System.getInt(resolver, Settings.System.NETWORK_TRAFFIC_STATE, 0);
+        if (isSet(mState, MASK_BYTES)) {
             KB = KILOBYTE;
         } else {
             KB = KILOBIT;
@@ -186,7 +248,7 @@ public class Traffic extends TextView {
         MB = KB * KB;
         GB = MB * KB;
 
-        if (intState > 0) {
+        if (isSet(mState, MASK_UP) || isSet(mState, MASK_DOWN)) {
             if (getConnectAvailable()) {
                 if (mAttached) {
                     totalRxBytes = TrafficStats.getTotalRxBytes();
@@ -201,6 +263,15 @@ public class Traffic extends TextView {
             mTrafficHandler.removeMessages(0);
             mTrafficHandler.removeMessages(1);
         }
-    setVisibility(View.GONE);
+        setVisibility(View.GONE);
+    }
+
+    private static boolean isSet(int intState, int intMask) {
+        return (intState & intMask) == intMask;
+    }
+
+    private static int getInterval(int intState) {
+        int intInterval = intState >>> 16;
+        return (intInterval >= 250 && intInterval <= 32750) ? intInterval : 1000;
     }
 }
