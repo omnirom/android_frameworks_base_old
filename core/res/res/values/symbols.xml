@@ -1822,4 +1822,7 @@
   <java-symbol type="drawable" name="ic_navigation_ring_vibrate" />
 
   <java-symbol type="bool" name="config_offscreenGestureSupport" />
+  <java-symbol type="bool" name="config_hasRotationLockSwitch" />
+  <java-symbol type="string" name="toast_rotation_unlocked" />
+  <java-symbol type="string" name="toast_rotation_locked" />
 </resources>
