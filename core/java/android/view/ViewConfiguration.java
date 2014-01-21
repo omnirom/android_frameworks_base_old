@@ -212,6 +212,7 @@ public class ViewConfiguration {
      */
     private static final int OVERFLING_DISTANCE = 6;
 
+    private Context mContext;
     private final int mEdgeSlop;
     private final int mFadingEdgeLength;
     private final int mMinimumFlingVelocity;
@@ -266,6 +267,7 @@ public class ViewConfiguration {
      * @see android.util.DisplayMetrics
      */
     private ViewConfiguration(Context context) {
+        mContext = context;
         final Resources res = context.getResources();
         final DisplayMetrics metrics = res.getDisplayMetrics();
         final Configuration config = res.getConfiguration();
@@ -696,6 +698,21 @@ public class ViewConfiguration {
      * @return true if a permanent menu key is present, false otherwise.
      */
     public boolean hasPermanentMenuKey() {
+        // normally only one of those settings will be 1
+        // except for the use-case to force show soft keys on devices
+        // that have hardware buttons
+        boolean forceShowMenu = Settings.System.getInt(mContext.getContentResolver(),
+                    Settings.System.FORCE_SHOW_OVERFLOW_MENU, 0) == 1;
+
+        boolean emulateHwMenuKey = Settings.System.getInt(mContext.getContentResolver(),
+                    Settings.System.EMULATE_HW_MENU_KEY, 0) == 1;
+
+        if (forceShowMenu){
+            return false;
+        }
+        if (emulateHwMenuKey){
+            return true;
+        }
         return sHasPermanentMenuKey;
     }
 
