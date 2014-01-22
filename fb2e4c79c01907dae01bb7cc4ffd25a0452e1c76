@@ -1,0 +1,55 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "cb5d2d02_ea22defb",
+        "filename": "core/java/android/view/ViewConfiguration.java",
+        "patchSetId": 2
+      },
+      "lineNbr": 299,
+      "author": {
+        "id": 1000001
+      },
+      "writtenOn": "2014-01-22T08:03:39Z",
+      "side": 1,
+      "message": "Can you remove that line?",
+      "revId": "fb2e4c79c01907dae01bb7cc4ffd25a0452e1c76",
+      "serverId": "56841c99-7c94-43d4-bf0b-cb4707e66d55",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "cb5d2d02_2a8136ca",
+        "filename": "core/java/android/view/ViewConfiguration.java",
+        "patchSetId": 2
+      },
+      "lineNbr": 705,
+      "author": {
+        "id": 1000001
+      },
+      "writtenOn": "2014-01-22T08:03:39Z",
+      "side": 1,
+      "message": "No need for such a condition - if sHasPermanentMenuKey is true, it will return true anyway in the other return below",
+      "revId": "fb2e4c79c01907dae01bb7cc4ffd25a0452e1c76",
+      "serverId": "56841c99-7c94-43d4-bf0b-cb4707e66d55",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "cb5d2d02_0a7c72e6",
+        "filename": "core/java/android/view/ViewConfiguration.java",
+        "patchSetId": 2
+      },
+      "lineNbr": 709,
+      "author": {
+        "id": 1000001
+      },
+      "writtenOn": "2014-01-22T08:03:39Z",
+      "side": 1,
+      "message": "return sHasPermanentMenuKey || emulateMenuKey;",
+      "revId": "fb2e4c79c01907dae01bb7cc4ffd25a0452e1c76",
+      "serverId": "56841c99-7c94-43d4-bf0b-cb4707e66d55",
+      "unresolved": false
+    }
+  ]
+}
