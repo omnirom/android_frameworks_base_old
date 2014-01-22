@@ -1,0 +1,21 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "cb5d2d02_c5cd0b89",
+        "filename": "packages/SystemUI/src/com/android/systemui/statusbar/policy/activedisplay/ActiveDisplayView.java",
+        "patchSetId": 1
+      },
+      "lineNbr": 1258,
+      "author": {
+        "id": 1000226
+      },
+      "writtenOn": "2014-01-22T14:31:13Z",
+      "side": 1,
+      "message": "This wouldnt work anymore...",
+      "revId": "004df225a17e617e78fe2c00a76322d3e8a59079",
+      "serverId": "56841c99-7c94-43d4-bf0b-cb4707e66d55",
+      "unresolved": false
+    }
+  ]
+}
