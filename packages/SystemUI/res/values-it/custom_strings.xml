@@ -60,6 +60,19 @@
     <string name="network_3G" translatable="false">Pref.2G/3G</string>
     <string name="network_2G" translatable="false">Solo 2G</string>
 
+    <string name="quick_settings_quiethours_label">Ore silenziose</string>
+    <string name="quick_settings_quiethours_off_label">Ore silenziose disattivate</string>
+    <string name="quick_settings_sleep_label_back_15">15s</string>
+    <string name="quick_settings_sleep_label_back_30">30s</string>
+    <string name="quick_settings_sleep_label_back_60">60s</string>
+    <string name="quick_settings_sleep_label_back_120">2m</string>
+    <string name="quick_settings_sleep_label_back_300">5m</string>
+    <string name="quick_settings_sleep_label_back_600">10m</string>
+    <string name="quick_settings_sleep_label_back_1800">30m</string>
+    <string name="quick_settings_sleep_label_back_unknown">0000</string>
+    <string name="quick_settings_location_mode_high">Alto</string>
+    <string name="quick_settings_location_mode_battery">Batteria</string>
+    <string name="quick_settings_location_mode_sensors">Dispositivo</string>
     <string name="quick_settings_ringer_on">Suoni attivati</string>
     <string name="quick_settings_ringer_off">Suoni disattivati</string>
     <string name="quick_settings_ringer_normal">Suoni</string>
@@ -76,5 +89,6 @@
     <string name="quick_settings_usb_tether_off_label">Disconnesso</string>
     <string name="quick_settings_usb_tether_connected_label">Tethering disattivato</string>
     <string name="quick_settings_usb_tether_on_label">Tethering</string>
+    <string name="status_bar_notification_hide_icon_packages">Nascondi le notifiche nelle icone delle applicazioni</string>
 
 </resources>
