@@ -31,6 +31,11 @@
         <item name="android:textColor">@color/status_bar_traffic_color</item>
     </style>
 
+    <style name="TextAppearance.StatusBar.Time" parent="@*android:style/TextAppearance.StatusBar">
+        <item name="android:textSize">@dimen/notification_subtext_size</item>
+        <item name="android:textColor">#999999</item>
+    </style>
+
     <style name="ClingButton">
         <item name="android:layout_width">wrap_content</item>
         <item name="android:layout_height">wrap_content</item>
