@@ -102,9 +102,11 @@ class QuickSettingsBasicNetworkTile extends QuickSettingsTileView {
         mNetworkTextView.setText(text);
     }
 
-    void setTextSizes(int size) {
+    @Override
+    public void setTextSizes(int size) {
         mTextView.setTextSize(TypedValue.COMPLEX_UNIT_PX, size);
         mNetworkTextView.setTextSize(TypedValue.COMPLEX_UNIT_PX, size);
+        super.setTextSizes(size);
     }
 
     public void setTextResource(int resId) {
