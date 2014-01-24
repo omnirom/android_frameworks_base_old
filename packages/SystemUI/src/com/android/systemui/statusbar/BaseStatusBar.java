@@ -1146,14 +1146,17 @@ public abstract class BaseStatusBar extends SystemUI implements
     }
 
     protected void addActiveDisplayView() {
-        mActiveDisplayView = (ActiveDisplayView)View.inflate(mContext, R.layout.active_display, null);
-        mActiveDisplayView.setStatusBar(this);
-        mWindowManager.addView(mActiveDisplayView, getActiveDisplayViewLayoutParams());
+        if (mActiveDisplayView == null) {
+            mActiveDisplayView = (ActiveDisplayView)View.inflate(mContext, R.layout.active_display, null);
+            mActiveDisplayView.setStatusBar(this);
+            mWindowManager.addView(mActiveDisplayView, getActiveDisplayViewLayoutParams());
+        }
     }
 
     protected void removeActiveDisplayView() {
-        if (mActiveDisplayView != null)
+        if (mActiveDisplayView != null) {
             mWindowManager.removeView(mActiveDisplayView);
+        }
     }
 
     protected WindowManager.LayoutParams getActiveDisplayViewLayoutParams() {
