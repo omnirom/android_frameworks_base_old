@@ -134,7 +134,7 @@ public class PhoneWindowManager implements WindowManagerPolicy {
     static final boolean DEBUG = false;
     static final boolean localLOGV = false;
     static final boolean DEBUG_LAYOUT = false;
-    static final boolean DEBUG_INPUT = false;
+    static final boolean DEBUG_INPUT = true;
     static final boolean DEBUG_STARTING_WINDOW = false;
     static final boolean SHOW_STARTING_ANIMATIONS = true;
     static final boolean SHOW_PROCESSES_ON_ALT_MENU = false;
@@ -1252,13 +1252,7 @@ public class PhoneWindowManager implements WindowManagerPolicy {
         mPressOnAppSwitchBehavior = KEY_ACTION_APP_SWITCH;
         mLongPressOnAppSwitchBehavior = KEY_ACTION_NOTHING;
         mPressOnBackBehavior = KEY_ACTION_BACK;
-
-        // sof key back kill app will overrule this default
-        if (mSoftBackKillApp){
-            mLongPressOnBackBehavior = KEY_ACTION_KILL_APP;
-        } else {
-            mLongPressOnBackBehavior = KEY_ACTION_NOTHING;
-        }
+        mLongPressOnBackBehavior = KEY_ACTION_NOTHING;
 
         mLongPressOnHomeBehavior = mContext.getResources().getInteger(
                 com.android.internal.R.integer.config_longPressOnHomeBehavior);
@@ -2391,7 +2385,8 @@ public class PhoneWindowManager implements WindowManagerPolicy {
                     return -1;
                 }
 
-                if (mPressOnHomeBehavior != KEY_ACTION_HOME){
+                // dont change handling of virtual home button events
+                if (mPressOnHomeBehavior != KEY_ACTION_HOME && !virtualKey){
                     performKeyAction(mPressOnHomeBehavior);
                 } else {
                     launchHomeFromHotKey();
@@ -2643,6 +2638,21 @@ public class PhoneWindowManager implements WindowManagerPolicy {
                     if (mRecentAppsPreloaded &&
                             mLongPressOnBackBehavior != KEY_ACTION_APP_SWITCH) {
                         cancelPreloadRecentApps();
+                    }
+                    // specia case - hardware key assigned to none and soft key back kill enabled
+                    if (!keyguardOn && mLongPressOnBackBehavior == KEY_ACTION_NOTHING && mSoftBackKillApp) {
+                        if (!virtualKey){
+                            // ignore hard key press
+                            mBackDoCustomAction = false;
+                            return -1;
+                        } else {
+                            // allow soft key press
+                            performHapticFeedbackLw(null, HapticFeedbackConstants.LONG_PRESS, false);
+                            performKeyAction(KEY_ACTION_KILL_APP);
+                            // Do not perform action when key is released
+                            mBackDoCustomAction = false;
+                            return -1;
+                        }
                     }
                     if (!keyguardOn && mLongPressOnBackBehavior != KEY_ACTION_NOTHING) {
                         performHapticFeedbackLw(null, HapticFeedbackConstants.LONG_PRESS, false);
