@@ -1309,6 +1309,16 @@ public class PhoneWindowManager implements WindowManagerPolicy {
                 mLongPressOnBackBehavior = Settings.System.getIntForUser(resolver,
                         Settings.System.KEY_BACK_LONG_PRESS_ACTION, KEY_ACTION_NOTHING,
                         UserHandle.USER_CURRENT);
+                // ASSUMPTION! if mSoftBackKillApp == true this is a device with
+                // capacitive buttons but user has enabled soft keys somehow else this could
+                // not have been set to true.
+                // in that case use the mSoftBackKillApp and overrule the settings
+                // of long press back key since we can assume that user wants to
+                // disable the capactive buttons in that case which would
+                // mean set all buttons to "no action"
+                if(mSoftBackKillApp){
+                    mLongPressOnBackBehavior = KEY_ACTION_KILL_APP;
+                }
             }
             if (hasAssist) {
                 mPressOnAssistBehavior = Settings.System.getIntForUser(resolver,
@@ -2391,7 +2401,8 @@ public class PhoneWindowManager implements WindowManagerPolicy {
                     return -1;
                 }
 
-                if (mPressOnHomeBehavior != KEY_ACTION_HOME){
+                // dont change handling of virtual home button events
+                if (mPressOnHomeBehavior != KEY_ACTION_HOME && !virtualKey){
                     performKeyAction(mPressOnHomeBehavior);
                 } else {
                     launchHomeFromHotKey();
