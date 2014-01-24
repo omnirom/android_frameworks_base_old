@@ -31,6 +31,8 @@ import android.view.LayoutInflater;
 import android.view.View;
 import android.view.View.OnClickListener;
 import android.view.View.OnLongClickListener;
+import android.view.ViewGroup;
+import android.view.ViewGroup.MarginLayoutParams;
 import android.view.ViewParent;
 import android.widget.FrameLayout;
 
@@ -118,7 +120,7 @@ class QuickSettingsTileView extends FrameLayout {
         return mColSpan;
     }
 
-    void setTextSizes(int size) {
+    public void setTextSizes(int size) {
         mTileTextSize = size;
     }
 
@@ -155,6 +157,14 @@ class QuickSettingsTileView extends FrameLayout {
         } else {
             setForeground(new ColorDrawable(Color.TRANSPARENT));
         }
+    }
+
+    void fadeOut() {
+        animate().alpha(0.05f);
+    }
+
+    void fadeIn() {
+        animate().alpha(1f);
     }
 
     void setEditMode(boolean enabled) {

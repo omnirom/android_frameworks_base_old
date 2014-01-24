@@ -29,11 +29,14 @@ class QuickSettingsDragListener implements OnDragListener {
 
     @Override
     public boolean onDrag(View v, DragEvent event) {
-        final QuickSettingsTileView topView
-                = (QuickSettingsTileView) event.getLocalState();
-        final QuickSettingsTileView bottomView = (QuickSettingsTileView) v;
+        QuickSettingsTileView topView = (QuickSettingsTileView) event.getLocalState();
+        QuickSettingsTileView bottomView = (QuickSettingsTileView) v;
 
-        if(topView == bottomView) return false;
+        if (bottomView.getParent() instanceof QuickSettingsFlipTile) {
+            bottomView = (QuickSettingsFlipTile) bottomView.getParent();
+        }
+
+        if (topView == bottomView) return false;
 
         switch (event.getAction()) {
             case DragEvent.ACTION_DRAG_ENTERED:
@@ -41,6 +44,9 @@ class QuickSettingsDragListener implements OnDragListener {
                 break;
             case DragEvent.ACTION_DRAG_EXITED:
                 bottomView.setHoverEffect(false);
+                break;
+            case DragEvent.ACTION_DRAG_ENDED:
+                topView.fadeIn();
                 break;
             case DragEvent.ACTION_DROP:
                 // Disable hovering
