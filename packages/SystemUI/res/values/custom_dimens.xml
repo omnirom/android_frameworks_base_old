@@ -53,4 +53,7 @@
     <!-- Quick Settings tile geometry: text size for 4 tile per row-->
     <dimen name="qs_4_column_text_size">10sp</dimen>
 
+    <dimen name="notification_large_icon_width">64dp</dimen>
+    <dimen name="notification_large_icon_height">64dp</dimen>
+    <dimen name="notification_subtext_size">12dp</dimen>
 </resources>

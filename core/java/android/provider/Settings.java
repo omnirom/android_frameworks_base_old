@@ -2755,6 +2755,12 @@ public final class Settings {
         public static final String ACTIVE_DISPLAY_THRESHOLD = "active_display_threshold";
 
         /**
+         * use Active display content view instead default one.
+         * @hide
+         */
+        public static final String ACTIVE_DISPLAY_CONTENT = "active_display_content";
+
+        /**
          * Timeout of the display when there is no user interaction
          * @hide
          */
