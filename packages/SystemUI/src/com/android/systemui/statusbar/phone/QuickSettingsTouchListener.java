@@ -99,7 +99,9 @@ class QuickSettingsTouchListener implements OnTouchListener {
                 if (distance >= DISTANCE_THRESHOLD) {
                     ClipData data = ClipData.newPlainText("", "");
                     DragShadowBuilder shadowBuilder = new View.DragShadowBuilder(view);
+                    view.getParent().requestDisallowInterceptTouchEvent(true);
                     view.startDrag(data, shadowBuilder, view, 0);
+                    ((QuickSettingsTileView) view).fadeOut();
                     return true;
                 }
                 return false;

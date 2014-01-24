@@ -54,9 +54,6 @@ class QuickSettingsFlipTile extends QuickSettingsTileView {
 
         mBack.setVisibility(View.GONE);
 
-        mFront.setTemporary(true);
-        mBack.setTemporary(true);
-
         addView(mFront,
                 new FrameLayout.LayoutParams(
                         FrameLayout.LayoutParams.MATCH_PARENT,
@@ -73,7 +70,16 @@ class QuickSettingsFlipTile extends QuickSettingsTileView {
         if (!isEditModeEnabled()) {
             return mFlip3d.onTouch(this, e);
         }
-        return super.onTouchEvent(e);
+        return super.dispatchTouchEvent(e);
+    }
+
+    @Override
+    public boolean onInterceptTouchEvent(MotionEvent ev) {
+        if (isEditModeEnabled()) {
+            return true;
+        } else {
+            return super.onInterceptTouchEvent(ev);
+        }
     }
 
     public void setFrontImageResource(int id) {
@@ -112,9 +118,11 @@ class QuickSettingsFlipTile extends QuickSettingsTileView {
         mFront.setPressed(press);
     }
 
-    void setTextSizes(int size) {
-        mFront.setTextSizes(size);
+    @Override
+    public void setTextSizes(int size) {
         mBack.setTextSizes(size);
+        mFront.setTextSizes(size);
+        super.setTextSizes(size);
     }
 
     public void setFrontOnLongClickListener(View.OnLongClickListener listener) {
@@ -140,5 +148,4 @@ class QuickSettingsFlipTile extends QuickSettingsTileView {
     public QuickSettingsTileView getBack() {
         return mBack;
     }
-
 }
