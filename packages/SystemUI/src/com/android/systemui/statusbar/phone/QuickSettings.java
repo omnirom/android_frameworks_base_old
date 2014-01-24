@@ -112,6 +112,7 @@ class QuickSettings {
         SLEEP,
         SYNC,
         USBMODE,
+        NETADB,
         TORCH
     }
 
@@ -122,7 +123,8 @@ class QuickSettings {
         + DELIMITER + Tile.RSSI + DELIMITER + Tile.BLUETOOTH + DELIMITER + Tile.VOLUME
         + DELIMITER + Tile.BATTERY + DELIMITER + Tile.ROTATION+ DELIMITER + Tile.IMMERSIVE
         + DELIMITER + Tile.LOCATION + DELIMITER + Tile.AIRPLANE + DELIMITER + Tile.QUITEHOUR
-        + DELIMITER + Tile.USBMODE + DELIMITER + Tile.SLEEP + DELIMITER + Tile.SYNC;
+        + DELIMITER + Tile.USBMODE + DELIMITER + Tile.NETADB + DELIMITER + Tile.SLEEP
+        + DELIMITER + Tile.SYNC;
 
     private Context mContext;
     private PanelBar mBar;
@@ -1011,6 +1013,30 @@ class QuickSettings {
                       parent.addView(bluetoothTile);
                       if (addMissing) bluetoothTile.setVisibility(View.GONE);
                   }
+               } else if (Tile.NETADB.toString().equals(tile.toString())) { // Network ADB Tile
+                 // Network ADB mode
+                 final QuickSettingsBasicTile netAdbTile
+                       = new QuickSettingsBasicTile(mContext);
+                 netAdbTile.setTileId(Tile.NETADB);
+                 netAdbTile.setOnLongClickListener(new View.OnLongClickListener() {
+                       @Override
+                       public boolean onLongClick(View V) {
+                           Intent intent = new Intent(Intent.ACTION_MAIN);
+                           intent.setClassName("com.android.settings",
+                               "com.android.settings.Settings$DevelopmentSettingsActivity");
+                           startSettingsActivity(intent);
+                           return true;
+                       }
+                 });
+                 mModel.addNetAdbTile(netAdbTile, new QuickSettingsModel.RefreshCallback() {
+                       @Override
+                       public void refreshView(QuickSettingsTileView unused, State state) {
+                           netAdbTile.setImageResource(state.iconId);
+                           netAdbTile.setText(state.label);
+                       }
+                 });
+                 parent.addView(netAdbTile);
+                 if (addMissing) netAdbTile.setVisibility(View.GONE);
                } else if (Tile.LOCATION.toString().equals(tile.toString())) { // Location
                  // Location
                  final QuickSettingsFlipTile locationTile

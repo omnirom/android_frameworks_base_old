@@ -37,6 +37,7 @@ import android.media.MediaRouter.RouteInfo;
 import android.net.ConnectivityManager;
 import android.net.wifi.WifiManager;
 import android.net.wifi.WifiInfo;
+import android.net.NetworkUtils;
 import android.os.Handler;
 import android.os.SystemClock;
 import android.os.SystemProperties;
@@ -357,6 +358,26 @@ class QuickSettingsModel implements BluetoothStateChangeCallback,
         }
     }
 
+    /** ContentObserver to watch netAdb **/
+    private class NetAdbObserver extends ContentObserver {
+        public NetAdbObserver(Handler handler) {
+            super(handler);
+        }
+
+        @Override
+        public void onChange(boolean selfChange) {
+            onNetAdbChanged();
+        }
+
+        public void startObserving() {
+            final ContentResolver cr = mContext.getContentResolver();
+            cr.unregisterContentObserver(this);
+            cr.registerContentObserver(
+                    Settings.Secure.getUriFor(Settings.Secure.ADB_PORT),
+                    false, this, mUserTracker.getCurrentUserId());
+        }
+    }
+
     /** Callback for changes to remote display routes. */
     private class RemoteDisplayRouteCallback extends MediaRouter.SimpleCallback {
         @Override
@@ -389,6 +410,7 @@ class QuickSettingsModel implements BluetoothStateChangeCallback,
     private final BrightnessObserver mBrightnessObserver;
     private final ImmersiveObserver mImmersiveObserver;
     private final QuiteHourObserver mQuiteHourObserver;
+    private final NetAdbObserver mNetAdbObserver;
     private final RingerObserver mRingerObserver;
     private final SleepObserver mSleepObserver;
     private LocationController mLocationController;
@@ -527,6 +549,10 @@ class QuickSettingsModel implements BluetoothStateChangeCallback,
     private RefreshCallback mQuiteHourCallback;
     private QuiteHourState mQuiteHourState = new QuiteHourState();
 
+    private QuickSettingsTileView mNetAdbTile;
+    private RefreshCallback mNetAdbCallback;
+    private State mNetAdbState = new State();
+
     private QuickSettingsTileView mBugreportTile;
     private RefreshCallback mBugreportCallback;
     private State mBugreportState = new State();
@@ -565,6 +591,7 @@ class QuickSettingsModel implements BluetoothStateChangeCallback,
                 mRingerObserver.startObserving();
                 mSleepObserver.startObserving();
                 mMobileNetworkObserver.startObserving();
+                mNetAdbObserver.startObserving();
                 refreshRotationLockTile();
                 onBrightnessLevelChanged();
                 onNextAlarmChanged();
@@ -586,6 +613,8 @@ class QuickSettingsModel implements BluetoothStateChangeCallback,
         mQuiteHourObserver.startObserving();
         mSleepObserver = new SleepObserver(mHandler);
         mSleepObserver.startObserving();
+        mNetAdbObserver = new NetAdbObserver(mHandler);
+        mNetAdbObserver.startObserving();
         mRingerObserver = new RingerObserver(mHandler);
         mRingerObserver.startObserving();
         mMobileNetworkObserver = new NetworkObserver(mHandler);
@@ -643,6 +672,7 @@ class QuickSettingsModel implements BluetoothStateChangeCallback,
         refreshBrightnessTile();
         refreshImmersiveTile();
         onQuiteHourChanged();
+        refreshQuiteHourTile();
         refreshRotationLockTile();
         refreshRssiTile();
         refreshLocationTile();
@@ -1560,6 +1590,52 @@ class QuickSettingsModel implements BluetoothStateChangeCallback,
                 ? r.getString(R.string.quick_settings_quiethours_label)
                 : r.getString(R.string.quick_settings_quiethours_off_label);
         mQuiteHourCallback.refreshView(mQuiteHourTile, mQuiteHourState);
+    }
+    void refreshQuiteHourTile() {
+        onQuiteHourChanged();
+    }
+
+    // Network ADB Tile
+    void addNetAdbTile(QuickSettingsTileView view, RefreshCallback cb) {
+        mNetAdbTile = view;
+        mNetAdbTile.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                boolean checkModeOn = Settings.Secure.getInt(mContext.getContentResolver(),
+                    Settings.Secure.ADB_PORT, -1) > 0;
+                Settings.Secure.putInt(mContext.getContentResolver(), Settings.Secure.ADB_PORT,
+                    checkModeOn ? -1 : 5555);
+            }
+        });
+        mNetAdbCallback = cb;
+        onNetAdbChanged();
+    }
+
+    private void onNetAdbChanged() {
+        int port = Settings.Secure.getInt(mContext.getContentResolver(),
+            Settings.Secure.ADB_PORT, 0);
+        boolean netAdbOn = port > 0;
+
+        WifiInfo wifiInfo = null;
+
+        if (netAdbOn) {
+            WifiManager wifiManager = (WifiManager) mContext.getSystemService(Context.WIFI_SERVICE);
+            wifiInfo = wifiManager.getConnectionInfo();
+
+            mNetAdbState.iconId = R.drawable.ic_qs_netadb_on;
+
+            if (wifiInfo != null) {
+                mNetAdbState.label = NetworkUtils.intToInetAddress(
+                    wifiInfo.getIpAddress()).getHostAddress() + ":" + String.valueOf(port);
+            } else {
+                mNetAdbState.label = mContext.getString(R.string.quick_settings_network_adb_on);
+            }
+        } else {
+            mNetAdbState.iconId = R.drawable.ic_qs_netadb_off;
+            mNetAdbState.label = mContext.getString(R.string.quick_settings_network_adb_off);
+        }
+        mNetAdbState.enabled = netAdbOn;
+        mNetAdbCallback.refreshView(mNetAdbTile, mNetAdbState);
     }
 
     // SSL CA Cert warning.
