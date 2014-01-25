@@ -84,8 +84,10 @@ class QuickSettingsBasicUserTile extends QuickSettingsTileView {
         mTextView.setText(text);
     }
 
-    void setTextSizes(int size) {
+    @Override
+    public void setTextSizes(int size) {
         mTextView.setTextSize(TypedValue.COMPLEX_UNIT_PX, size);
+        super.setTextSizes(size);
     }
 
     public void setTextResource(int resId) {
