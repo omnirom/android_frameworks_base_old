@@ -108,6 +108,7 @@ import com.android.internal.statusbar.IStatusBarService;
 import com.android.internal.telephony.ITelephony;
 import com.android.internal.widget.PointerLocationView;
 import com.android.internal.util.omni.OmniTorchConstants;
+import com.android.internal.util.omni.OmniUtils;
 import com.android.internal.util.omni.TaskUtils;
 
 import java.io.File;
@@ -6167,8 +6168,10 @@ public class PhoneWindowManager implements WindowManagerPolicy {
                     if (DEBUG_INPUT){
                         Slog.d(TAG, "handleOffscreenGesture: " + "V gesture");
                     }
-                    mContext.sendBroadcastAsUser(new Intent(OmniTorchConstants.ACTION_TOGGLE_STATE),
+                    if (OmniUtils.deviceSupportsTorch(mContext)) {
+                        mContext.sendBroadcastAsUser(new Intent(OmniTorchConstants.ACTION_TOGGLE_STATE),
                             UserHandle.CURRENT_OR_SELF);
+                    }
                 }
                 break;
             case KeyEvent.KEYCODE_F6:
