@@ -20,6 +20,7 @@ import android.content.Context;
 import android.content.res.Resources;
 import android.graphics.Canvas;
 import android.graphics.drawable.Drawable;
+import android.os.UserHandle;
 import android.provider.Settings;
 import android.util.AttributeSet;
 import android.util.EventLog;
@@ -133,23 +134,18 @@ public class NotificationPanelView extends PanelView {
                     mGestureStartY = event.getY(0);
                     mTrackingSwipe = isFullyExpanded();
                     mOkToFlip = getExpandedHeight() == 0;
-                    int quickPulldownMode = Settings.System.getInt(getContext().getContentResolver(),
-                            Settings.System.QS_QUICK_PULLDOWN, 1);
-                    int smartPulldownMode = Settings.System.getInt(getContext().getContentResolver(),
-                            Settings.System.QS_SMART_PULLDOWN, 2);
-                    if (smartPulldownMode == 1 && !mStatusBar.hasClearableNotifications()) {
+                    if (event.getX(0) > getWidth() * (1.0f - STATUS_BAR_RIGHT_PERCENTAGE) &&
+                            Settings.System.getInt(getContext().getContentResolver(),
+                            Settings.System.QS_QUICK_PULLDOWN, 0) == 1) {
                         flip = true;
-                    } else if (smartPulldownMode == 2 && !mStatusBar.hasVisibleNotifications()) {
+                    } else if (event.getX(0) < getWidth() * (1.0f - STATUS_BAR_LEFT_PERCENTAGE) &&
+                            Settings.System.getInt(getContext().getContentResolver(),
+                            Settings.System.QS_QUICK_PULLDOWN, 0) == 2) {
                         flip = true;
-                    } else if (quickPulldownMode == 1 &&
-                            mGestureStartX > getWidth() * (1.0f - STATUS_BAR_RIGHT_PERCENTAGE)) {
-                        flip = true;
-                    } else if (quickPulldownMode == 2 &&
-                            mGestureStartX < getWidth() * (1.0f - STATUS_BAR_LEFT_PERCENTAGE)) {
-                        flip = true;
-                    } else if (quickPulldownMode == 3 &&
-                            mGestureStartX > getWidth() * (1.0f - STATUS_BAR_LEFT_PERCENTAGE) &&
-                            mGestureStartX < getWidth() * (1.0f - STATUS_BAR_RIGHT_PERCENTAGE)) {
+                    } else if (event.getX(0) > getWidth() * (1.0f - STATUS_BAR_LEFT_PERCENTAGE) &&
+                            event.getX(0) < getWidth() * (1.0f - STATUS_BAR_RIGHT_PERCENTAGE) &&
+                            Settings.System.getInt(getContext().getContentResolver(),
+                            Settings.System.QS_QUICK_PULLDOWN, 0) == 3) {
                         flip = true;
                     }
                     break;
