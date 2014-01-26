@@ -34,6 +34,8 @@ class QuickSettingsDragListener implements OnDragListener {
 
         if (bottomView.getParent() instanceof QuickSettingsFlipTile) {
             bottomView = (QuickSettingsFlipTile) bottomView.getParent();
+        } else if (bottomView.getParent() instanceof QuickSettingsBatteryFlipTile) {
+            bottomView = (QuickSettingsBatteryFlipTile) bottomView.getParent();
         }
 
         if (topView == bottomView) return false;
