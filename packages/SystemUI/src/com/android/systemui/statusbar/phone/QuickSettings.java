@@ -148,7 +148,7 @@ class QuickSettings {
     boolean mRibbon = false;
 
     private Handler mHandler;
-    private QuickSettingsBasicBatteryTile mBatteryTile;
+    private QuickSettingsBatteryFlipTile mBatteryTile;
     private int mBatteryStyle;
 
     private PowerManager pm;
@@ -671,17 +671,17 @@ class QuickSettings {
                   }
                } else if (Tile.BATTERY.toString().equals(tile.toString())) { // battery tile
                   // Battery
-                  mBatteryTile = new QuickSettingsBasicBatteryTile(mContext);
+                  mBatteryTile = new QuickSettingsBatteryFlipTile(mContext);
 
                   updateBattery();
                   mBatteryTile.setTileId(Tile.BATTERY);
-                  mBatteryTile.setOnClickListener(new View.OnClickListener() {
+                  mBatteryTile.setFrontOnClickListener(new View.OnClickListener() {
                         @Override
                         public void onClick(View v) {
                             startSettingsActivity(Intent.ACTION_POWER_USAGE_SUMMARY);
                         }
                   });
-                  mModel.addBatteryTile(mBatteryTile, new QuickSettingsModel.RefreshCallback() {
+                  mModel.addBatteryTile(mBatteryTile.getFront(), new QuickSettingsModel.RefreshCallback() {
                         @Override
                         public void refreshView(QuickSettingsTileView unused, State state) {
                             QuickSettingsModel.BatteryState batteryState =
@@ -702,9 +702,24 @@ class QuickSettings {
                                         : mContext.getString(R.string.quick_settings_battery_discharging);
                                 }
                             }
-                            mBatteryTile.setText(t);
-                            mBatteryTile.setContentDescription(
+                            mBatteryTile.setFrontText(t);
+                            mBatteryTile.setFrontContentDescription(
                             mContext.getString(R.string.accessibility_quick_settings_battery, t));
+                        }
+                  });
+                  mBatteryTile.setBackOnClickListener(new View.OnClickListener() {
+                        @Override
+                        public void onClick(View v) {
+                            startSettingsActivity(Intent.ACTION_POWER_USAGE_SUMMARY);
+                        }
+                  });
+                  mModel.addBackBatteryTile(mBatteryTile.getBack(), new QuickSettingsModel.RefreshCallback() {
+                        @Override
+                        public void refreshView(QuickSettingsTileView unused, State state) {
+                            QuickSettingsModel.BatteryBackState batteryState =
+                                   (QuickSettingsModel.BatteryBackState) state;
+                            mBatteryTile.setBackLabel(batteryState.temperature);
+                            mBatteryTile.setBackFunction(batteryState.voltage + batteryState.healthString);
                         }
                   });
                   parent.addView(mBatteryTile);
