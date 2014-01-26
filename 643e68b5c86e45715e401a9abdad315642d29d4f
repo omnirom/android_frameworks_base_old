@@ -1,0 +1,21 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "ab62b9bd_9d4e2399",
+        "filename": "packages/SystemUI/src/com/android/systemui/statusbar/policy/activedisplay/ActiveDisplayView.java",
+        "patchSetId": 7
+      },
+      "lineNbr": 1220,
+      "author": {
+        "id": 1000313
+      },
+      "writtenOn": "2014-01-26T16:27:09Z",
+      "side": 1,
+      "message": "Maybe i need to add option to change this? Since this is background color for notification",
+      "revId": "643e68b5c86e45715e401a9abdad315642d29d4f",
+      "serverId": "56841c99-7c94-43d4-bf0b-cb4707e66d55",
+      "unresolved": false
+    }
+  ]
+}
