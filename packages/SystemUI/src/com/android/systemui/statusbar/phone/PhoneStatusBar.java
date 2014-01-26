@@ -189,6 +189,8 @@ public class PhoneStatusBar extends BaseStatusBar implements DemoMode {
     int mIconHPadding = -1;
     Display mDisplay;
     Point mCurrentDisplaySize = new Point();
+    int mCurrUiThemeMode;
+    int mCurrOrientation;
     private float mHeadsUpVerticalOffset;
     private int[] mPilePosition = new int[2];
 
@@ -478,6 +480,8 @@ public class PhoneStatusBar extends BaseStatusBar implements DemoMode {
         mDisplay = ((WindowManager)mContext.getSystemService(Context.WINDOW_SERVICE))
                 .getDefaultDisplay();
         updateDisplaySize();
+
+        mCurrUiThemeMode = mContext.getResources().getConfiguration().uiThemeMode;
 
         super.start(); // calls createAndAddWindows()
 
@@ -1406,11 +1410,19 @@ public class PhoneStatusBar extends BaseStatusBar implements DemoMode {
         }
     }
 
+    protected boolean hasVisibleNotifications() {
+        return mNotificationData.hasVisibleItems();
+    }
+
+    protected boolean hasClearableNotifications() {
+        return mNotificationData.hasClearableItems();
+    }
+
     @Override
     protected void setAreThereNotifications() {
         final boolean any = mNotificationData.size() > 0;
 
-        final boolean clearable = any && mNotificationData.hasClearableItems();
+        final boolean clearable = any && hasClearableNotifications();
 
         if (SPEW) {
             Log.d(TAG, "setAreThereNotifications: N=" + mNotificationData.size()
@@ -1789,6 +1801,10 @@ public class PhoneStatusBar extends BaseStatusBar implements DemoMode {
     }
 
     public void flipToNotifications() {
+
+        // Settings are not available in setup
+        if (!mUserSetup) return;
+
         if (mFlipSettingsViewAnim != null) mFlipSettingsViewAnim.cancel();
         if (mScrollViewAnim != null) mScrollViewAnim.cancel();
         if (mSettingsButtonAnim != null) mSettingsButtonAnim.cancel();
@@ -1895,6 +1911,9 @@ public class PhoneStatusBar extends BaseStatusBar implements DemoMode {
     }
 
     public void partialFlip(float progress) {
+        // Settings are not available in setup
+        if (!mUserSetup) return;
+
         if (mFlipSettingsViewAnim != null) mFlipSettingsViewAnim.cancel();
         if (mScrollViewAnim != null) mScrollViewAnim.cancel();
         if (mSettingsButtonAnim != null) mSettingsButtonAnim.cancel();
@@ -3054,6 +3073,16 @@ public class PhoneStatusBar extends BaseStatusBar implements DemoMode {
         }
     }
 
+    private static void copyNotifications(ArrayList<Pair<IBinder, StatusBarNotification>> dest,
+            NotificationData source) {
+        int N = source.size();
+        for (int i = 0; i < N; i++) {
+            NotificationData.Entry entry = source.get(i);
+            dest.add(Pair.create(entry.key, entry.notification));
+        }
+    }
+
+
     /**
 * Reload some of our resources when the configuration changes.
 *
@@ -3065,12 +3094,33 @@ public class PhoneStatusBar extends BaseStatusBar implements DemoMode {
         final Context context = mContext;
         final Resources res = context.getResources();
 
+        // detect theme ui mode change
+        int uiThemeMode = res.getConfiguration().uiThemeMode;
+        if (uiThemeMode != mCurrUiThemeMode) {
+            mCurrUiThemeMode = uiThemeMode;
+
+            return;
+        }
+
         if (mClearButton instanceof TextView) {
             ((TextView)mClearButton).setText(context.getText(R.string.status_bar_clear_all_button));
         }
+        loadDimens();
 
-        // Update the QuickSettings container
-        if (mQS != null) mQS.updateResources();
+        // check for orientation change and update only the container layout
+        // for all other configuration changes update complete QS
+        int orientation = res.getConfiguration().orientation;
+        if (orientation != mCurrOrientation) {
+            mCurrOrientation = orientation;
+            // Update the settings container
+            if (mSettingsContainer != null) {
+                mSettingsContainer.updateResources();
+            }
+        } else {
+            if (mQS != null) {
+                mQS.updateResources();
+            }
+        }
 
         loadDimens();
     }

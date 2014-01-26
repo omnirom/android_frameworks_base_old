@@ -1,18 +1,18 @@
 /*
-* Copyright (C) 2013 The Android Open Source Project
-*
-* Licensed under the Apache License, Version 2.0 (the "License");
-* you may not use this file except in compliance with the License.
-* You may obtain a copy of the License at
-*
-* http://www.apache.org/licenses/LICENSE-2.0
-*
-* Unless required by applicable law or agreed to in writing, software
-* distributed under the License is distributed on an "AS IS" BASIS,
-* WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
-* See the License for the specific language governing permissions and
-* limitations under the License.
-*/
+ * Copyright (C) 2013 The Android Open Source Project
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *      http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
 
 package com.android.systemui.statusbar.phone;
 
@@ -28,13 +28,13 @@ import android.widget.ProgressBar;
 import android.widget.TextView;
 
 import com.android.systemui.BatteryMeterView;
-import com.android.systemui.BatteryCircleMeterView;
+import com.android.systemui.BatteryCircleQuickTile;
 import com.android.systemui.R;
 
 class QuickSettingsBasicBatteryTile extends QuickSettingsTileView {
     private final TextView mTextView;
     private BatteryMeterView mBattery;
-    private BatteryCircleMeterView mCircleBattery;
+    private BatteryCircleQuickTile mCircleBattery;
 
     public QuickSettingsBasicBatteryTile(Context context) {
         this(context, null);
@@ -59,7 +59,7 @@ class QuickSettingsBasicBatteryTile extends QuickSettingsTileView {
         mTextView = (TextView) findViewById(R.id.text);
         mBattery = (BatteryMeterView) findViewById(R.id.image);
         mBattery.setVisibility(View.GONE);
-        mCircleBattery = (BatteryCircleMeterView) findViewById(R.id.circle_battery);
+        mCircleBattery = (BatteryCircleQuickTile) findViewById(R.id.circle_battery);
     }
 
     @Override
@@ -71,7 +71,7 @@ class QuickSettingsBasicBatteryTile extends QuickSettingsTileView {
         return mBattery;
     }
 
-    public BatteryCircleMeterView getCircleBattery() {
+    public BatteryCircleQuickTile getCircleBattery() {
         return mCircleBattery;
     }
 
@@ -83,8 +83,10 @@ class QuickSettingsBasicBatteryTile extends QuickSettingsTileView {
         mTextView.setText(text);
     }
 
-    void setTextSizes(int size) {
+    @Override
+    public void setTextSizes(int size) {
         mTextView.setTextSize(TypedValue.COMPLEX_UNIT_PX, size);
+        super.setTextSizes(size);
     }
 
     public void setTextResource(int resId) {

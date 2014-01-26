@@ -212,8 +212,8 @@
     <color name="accessibility_focus_highlight">#80ffff00</color>
 
     <!-- Power menu colors -->
-    <color name="power_menu_icon_default_color">#ffffffff</color>
-    <color name="power_menu_text_default_color">#ffffffff</color>
+    <color name="power_menu_icon_default_color">#ff404040</color>
+    <color name="power_menu_text_default_color">#ff404040</color>
 
 </resources>
 

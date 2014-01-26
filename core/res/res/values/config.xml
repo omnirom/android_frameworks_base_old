@@ -424,7 +424,7 @@
              1 UI_THEME_MODE_NORMAL (default)
              2 UI_THEME_MODE_HOLO_DARK
              3 UI_THEME_MODE_HOLO_LIGHT -->
-    <integer name="config_uiThemeMode">1</integer>
+    <integer name="config_uiThemeMode">3</integer>
 
     <!-- Control whether being in the desk dock (and powered) always
          keeps the screen on.  By default it stays on when plugged in to

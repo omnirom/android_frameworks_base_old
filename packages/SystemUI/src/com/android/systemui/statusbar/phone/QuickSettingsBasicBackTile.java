@@ -42,6 +42,10 @@ class QuickSettingsBasicBackTile extends QuickSettingsTileView {
     }
 
     public QuickSettingsBasicBackTile(Context context, AttributeSet attrs) {
+        this(context, attrs, R.layout.quick_settings_tile_back);
+    }
+
+    public QuickSettingsBasicBackTile(Context context, AttributeSet attrs, int layoutId) {
         super(context, attrs);
 
         setLayoutParams(new FrameLayout.LayoutParams(
@@ -49,8 +53,7 @@ class QuickSettingsBasicBackTile extends QuickSettingsTileView {
             context.getResources().getDimensionPixelSize(R.dimen.quick_settings_cell_height)
         ));
         setBackgroundResource(R.drawable.qs_tile_background);
-        addView(LayoutInflater.from(context).inflate(
-                R.layout.quick_settings_tile_back, null),
+        addView(LayoutInflater.from(context).inflate(layoutId, null),
                 new FrameLayout.LayoutParams(
                         FrameLayout.LayoutParams.MATCH_PARENT,
                         FrameLayout.LayoutParams.MATCH_PARENT));
@@ -84,9 +87,11 @@ class QuickSettingsBasicBackTile extends QuickSettingsTileView {
         mImageView.setImageResource(resId);
     }
 
-    void setTextSizes(int size) {
+    @Override
+    public void setTextSizes(int size) {
         mLabelView.setTextSize(TypedValue.COMPLEX_UNIT_PX, size);
         mFunctionView.setTextSize(TypedValue.COMPLEX_UNIT_PX, size);
+        super.setTextSizes(size);
     }
 
     public void setLabel(CharSequence text) {

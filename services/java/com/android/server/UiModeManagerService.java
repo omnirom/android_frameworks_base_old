@@ -77,6 +77,7 @@ final class UiModeManagerService extends IUiModeManager.Stub
     private int mNightMode = UiModeManager.MODE_NIGHT_NO;
     private boolean mCarModeEnabled = false;
     private boolean mCharging = false;
+    private int mUiThemeMode;
     private int mUiThemeAutoMode;
     private final int mDefaultUiModeType;
     private final boolean mCarModeKeepsScreenOn;
@@ -208,6 +209,9 @@ final class UiModeManagerService extends IUiModeManager.Stub
         void observe() {
             ContentResolver resolver = mContext.getContentResolver();
             resolver.registerContentObserver(Settings.Secure.getUriFor(
+                    Settings.Secure.UI_THEME_MODE),
+                    false, this);
+            resolver.registerContentObserver(Settings.Secure.getUriFor(
                     Settings.Secure.UI_THEME_AUTO_MODE),
                     false, this);
         }
@@ -266,6 +270,17 @@ final class UiModeManagerService extends IUiModeManager.Stub
     }
 
     private void updateUiThemeMode() {
+        /* possible theme modes @link Configuration
+         * {@link #UI_THEME_MODE_NORMAL},
+         * {@link #UI_THEME_MODE_HOLO_DARK}, {@link #UI_THEME_MODE_HOLO_LIGHT},
+         */
+        mUiThemeMode = Settings.Secure.getIntForUser(mContext.getContentResolver(),
+                Settings.Secure.UI_THEME_MODE, mContext.getResources().getInteger(
+                com.android.internal.R.integer.config_uiThemeMode),
+                UserHandle.USER_CURRENT);
+
+        mConfiguration.uiThemeMode = mUiThemeMode;
+
         mUiThemeAutoMode = Settings.Secure.getIntForUser(
                 mContext.getContentResolver(),
                 Settings.Secure.UI_THEME_AUTO_MODE,

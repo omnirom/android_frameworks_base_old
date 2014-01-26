@@ -24,7 +24,6 @@
     android:layout_width="match_parent"
     android:layout_height="wrap_content"
     android:orientation="vertical"
-	android:textColor="#ff404040"
     android:paddingTop="9dip"
     android:paddingBottom="3dip"
     android:paddingStart="3dip"
@@ -54,7 +53,6 @@
             <com.android.internal.widget.DialogTitle android:id="@+id/alertTitle"
                 style="?android:attr/textAppearanceLarge"
                 android:singleLine="true"
-				android:textColor="#ff404040"
                 android:ellipsize="end"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
@@ -85,7 +83,6 @@
             android:overScrollMode="ifContentScrolls">
             <TextView android:id="@+id/message"
                 style="?android:attr/textAppearanceMedium"
-				android:textColor="#ff404040"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:padding="5dip" />

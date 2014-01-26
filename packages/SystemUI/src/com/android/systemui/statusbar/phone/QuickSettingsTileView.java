@@ -1,20 +1,20 @@
 /*
-* Copyright (C) 2012 The Android Open Source Project
-* This code has been modified. Portions copyright (C) 2013, 2014, OmniRom Project.
-* This code has been modified. Portions copyright (C) 2013, ParanoidAndroid Project.
-*
-* Licensed under the Apache License, Version 2.0 (the "License");
-* you may not use this file except in compliance with the License.
-* You may obtain a copy of the License at
-*
-* http://www.apache.org/licenses/LICENSE-2.0
-*
-* Unless required by applicable law or agreed to in writing, software
-* distributed under the License is distributed on an "AS IS" BASIS,
-* WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
-* See the License for the specific language governing permissions and
-* limitations under the License.
-*/
+ * Copyright (C) 2012 The Android Open Source Project
+ * This code has been modified. Portions copyright (C) 2013, 2014, OmniRom Project.
+ * This code has been modified. Portions copyright (C) 2013, ParanoidAndroid Project.
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *      http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
 
 package com.android.systemui.statusbar.phone;
 
@@ -37,8 +37,8 @@ import android.widget.FrameLayout;
 import com.android.systemui.statusbar.phone.QuickSettings.Tile;
 
 /**
-*
-*/
+ *
+ */
 class QuickSettingsTileView extends FrameLayout {
     private static final String TAG = "QuickSettingsTileView";
     private static final String HOVER_COLOR_WHITE = "#3FFFFFFF"; // 25% white
@@ -118,7 +118,7 @@ class QuickSettingsTileView extends FrameLayout {
         return mColSpan;
     }
 
-    void setTextSizes(int size) {
+    public void setTextSizes(int size) {
         mTileTextSize = size;
     }
 
@@ -155,6 +155,14 @@ class QuickSettingsTileView extends FrameLayout {
         } else {
             setForeground(new ColorDrawable(Color.TRANSPARENT));
         }
+    }
+
+    void fadeOut() {
+        animate().alpha(0.05f);
+    }
+
+    void fadeIn() {
+        animate().alpha(1f);
     }
 
     void setEditMode(boolean enabled) {
@@ -311,9 +319,9 @@ class QuickSettingsTileView extends FrameLayout {
     }
 
     /**
-* Called when the view's parent becomes visible or invisible to provide
-* an opportunity for the client to provide new content.
-*/
+     * Called when the view's parent becomes visible or invisible to provide
+     * an opportunity for the client to provide new content.
+     */
     public interface OnPrepareListener {
         void onPrepare();
         void onUnprepare();

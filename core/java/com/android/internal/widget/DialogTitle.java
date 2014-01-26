@@ -57,7 +57,7 @@ public class DialogTitle extends TextView {
 
                     final TypedArray a = mContext.obtainStyledAttributes(null,
                             android.R.styleable.TextAppearance, android.R.attr.textAppearanceMedium,
-                            android.R.style.TextAppearance_Medium);
+                            android.R.style.TextAppearance_Medium_Inverse);
                     final int textSize = a.getDimensionPixelSize(
                             android.R.styleable.TextAppearance_textSize, 0);
                     if (textSize != 0) {
