@@ -62,6 +62,15 @@
     <string name="network_3G" translatable="false">2G/3G Pref</string>
     <string name="network_2G" translatable="false">2G Only</string>
 
+    <string name="quick_settings_battery_health_unknown">\nUnknown</string>
+    <string name="quick_settings_battery_health_good">\nGood</string>
+    <string name="quick_settings_battery_health_overheat">\nOverheat</string>
+    <string name="quick_settings_battery_health_dead">\nDead</string>
+    <string name="quick_settings_battery_health_over_voltage">\nOver voltage</string>
+    <string name="quick_settings_battery_health_unspecified_failure">\nUnknown error</string>
+    <string name="quick_settings_battery_health_cold">\nCold</string>
+    <string name="quick_settings_battery_voltage_units">mV</string>
+    <string name="quick_settings_battery_temperature_units">\u00B0 C</string>
     <string name="quick_settings_quiethours_label">Quiet hours</string>
     <string name="quick_settings_quiethours_off_label">Quiet hours off</string>
     <string name="quick_settings_sleep_label_back_15">15s</string>
