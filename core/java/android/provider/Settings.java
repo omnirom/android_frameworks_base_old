@@ -6775,6 +6775,12 @@ public final class Settings {
         public static final String AUDIO_SAFE_VOLUME_STATE = "audio_safe_volume_state";
 
         /**
+         * Whether to enable the built-in safe media volume for headsets
+         * @hide
+         */
+        public static final String MANUAL_SAFE_MEDIA_VOLUME = "manual_safe_media_volume";
+
+        /**
          * URL for tzinfo (time zone) updates
          * @hide
          */
