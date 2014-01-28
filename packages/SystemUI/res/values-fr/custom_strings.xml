@@ -17,8 +17,10 @@
 -->
 <resources xmlns:xliff="urn:oasis:names:tc:xliff:document:1.2">
     <string name="quick_settings_wifi_tethering_label">Partage de connexion</string>
+    <string name="quick_settings_wifi_tethering_off_label">Partage de connexion désactivé</string>
     <string name="quick_settings_bluetooth_not_discoverable_label">Invisible</string>
     <string name="quick_settings_bluetooth_discoverable_label">Visible</string>
+    <string name="quick_settings_bluetooth_enabled">Activé</string>
     <string name="quick_settings_bluetooth_disabled">Désactivé</string>
     <string name="quick_settings_bluetooth_number_paired"><xliff:g id="number">%d</xliff:g> appareils appairés</string>
     <string name="screenrecord_notif_ticker">L\'écran est en cours d\'enregistrement</string>
@@ -26,12 +28,25 @@
     <string name="screenrecord_notif_stop">Arrêter</string>
     <string name="screenrecord_notif_pointer">Affichage du pointeur</string>
     <string name="screenrecord_notif_error">Impossible d\'enregistrer l\'écran</string>
+    <string name="active_display_privacy_content">Le contenu du message n\'est pas visible car le mode privée est activé</string>
     <string name="quick_settings_battery_charging">Chargement</string>
     <string name="quick_settings_battery_discharging">Déchargement</string>
     <string name="quick_settings_immersive_mode_label">Mode immersif activé</string>
     <string name="quick_settings_immersive_mode_off_label">Mode immersif désactivé</string>
-    <string name="quick_settings_quiethours_label">Heures silencieuses</string>
-    <string name="quick_settings_quiethours_off_label">Heures silencieuses désactivées</string>
+    <string name="network_4G">4G/LTE</string>
+    <string name="network_3G_only">3G seulement</string>
+    <string name="network_3G_auto">2G/3G automatique</string>
+    <string name="network_3G">2G/3G préféré</string>
+    <string name="network_2G">2G seulement</string>
+    <string name="quick_settings_battery_health_unknown">\nInconnun</string>
+    <string name="quick_settings_battery_health_good">\nDieu</string>
+    <string name="quick_settings_battery_health_overheat">\nSurchauffe</string>
+    <string name="quick_settings_battery_health_dead">\nMort</string>
+    <string name="quick_settings_battery_health_over_voltage">\nSurtension</string>
+    <string name="quick_settings_battery_health_unspecified_failure">\nErreur inconnue</string>
+    <string name="quick_settings_battery_health_cold">\nFroid</string>
+    <string name="quick_settings_battery_voltage_units">mV</string>
+    <string name="quick_settings_battery_temperature_units">\u00B0C</string>
     <string name="quick_settings_sleep_label_back_15">15 s</string>
     <string name="quick_settings_sleep_label_back_30">30 s</string>
     <string name="quick_settings_sleep_label_back_60">60 s</string>
@@ -43,12 +58,15 @@
     <string name="quick_settings_location_mode_high">Élevé</string>
     <string name="quick_settings_location_mode_battery">Batterie</string>
     <string name="quick_settings_location_mode_sensors">Appareil</string>
+    <string name="quick_settings_network_type">Statut</string>
+    <string name="quick_settings_network_unknown">Inconnu</string>
+    <string name="quick_settings_network_disable">\nAucune connexion</string>
+    <string name="quick_settings_quiethours_label">Heures silencieuses</string>
+    <string name="quick_settings_quiethours_off_label">Heures silencieuses désactivées</string>
     <string name="status_bar_notification_hide_icon_packages">Masquer l\'icône des notifications</string>
-    <string name="network_4G">4G</string>
     <string name="quick_settings_ringer_on">Son activé</string>
     <string name="quick_settings_ringer_off">Son désactivé</string>
     <string name="quick_settings_ringer_normal">Son</string>
-    <string name="quick_settings_rssi_type_label">Type</string>
     <string name="quick_settings_screen_sleep">Mettre en veille</string>
     <string name="quick_settings_sync">Synchronisation</string>
     <string name="quick_settings_sync_off">Synchronisation désactivée</string>
@@ -61,6 +79,15 @@
     <string name="quick_settings_usb_tether_off_label">Déconnecté</string>
     <string name="quick_settings_usb_tether_connected_label">Partage WiFi désactivé</string>
     <string name="quick_settings_usb_tether_on_label">Partage WiFi</string>
+    <string name="navbar_dialog_title">Définir une action à assigner</string>
+    <string name="navbar_home_button">Bouton Accueil</string>
+    <string name="navbar_recent_button">Bouton Récent</string>
+    <string name="navbar_search_button">Bouton Rechercher</string>
+    <string name="navbar_back_button">Bouton Retour</string>
+    <string name="navbar_empty_button">Bouton vide</string>
+    <string name="navbar_menu_conditional_button">Bouton Menu (Masquage automatique)</string>
+    <string name="navbar_menu_always_button">Bouton Menu (Toujours visible)</string>
+    <string name="navbar_menu_big_button">Bouton Menu</string>
     <!-- AOSP untranslated -->
     <string name="accessibility_battery_level">Batterie <xliff:g id="number">%d</xliff:g> pourcent.</string>
 </resources>
