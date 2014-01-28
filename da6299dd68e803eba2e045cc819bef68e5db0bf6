@@ -1,0 +1,21 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "ab62b9bd_ac65771c",
+        "filename": "packages/SystemUI/src/com/android/systemui/statusbar/phone/QuickSettingsBatteryFlipTile.java",
+        "patchSetId": 7
+      },
+      "lineNbr": 71,
+      "author": {
+        "id": 1000117
+      },
+      "writtenOn": "2014-01-28T13:32:30Z",
+      "side": 1,
+      "message": "isRibbonMode breaks build.",
+      "revId": "da6299dd68e803eba2e045cc819bef68e5db0bf6",
+      "serverId": "56841c99-7c94-43d4-bf0b-cb4707e66d55",
+      "unresolved": false
+    }
+  ]
+}
