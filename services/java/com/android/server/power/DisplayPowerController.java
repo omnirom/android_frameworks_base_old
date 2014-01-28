@@ -1724,6 +1724,9 @@ final class DisplayPowerController {
     };
 
     private void updateButtonLight() {
+        if (mPowerRequest == null){
+            return;
+        }
         boolean buttonlight_on = wantScreenOn(mPowerRequest.screenState) &&
                 (mPowerRequest.screenState != DisplayPowerRequest.SCREEN_STATE_DIM);
 
@@ -1774,6 +1777,9 @@ final class DisplayPowerController {
         if (mLightSensorEnabled){
             return mScreenAutoBrightness;
         }
+        if (mPowerRequest == null){
+            return 60;
+        }
         return mPowerRequest.screenBrightness;
     }
 
@@ -1791,6 +1797,9 @@ final class DisplayPowerController {
     }
 
     public void setButtonTimout(boolean value){
+        if (mPowerRequest == null){
+            return;
+        }
         if (mButtonBrightnessSupport){
             mButtonDisabledByTimeout = value;
             updateButtonLight();
