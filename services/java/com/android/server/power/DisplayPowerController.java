@@ -406,6 +406,8 @@ final class DisplayPowerController {
     private boolean mAutoBrightnessSettingsChanged;
 
     private KeyguardServiceWrapper mKeyguardService;
+    private final int MAX_BLUR_WIDTH = 900;
+    private final int MAX_BLUR_HEIGHT = 1600;
 
     private final ServiceConnection mKeyguardConnection = new ServiceConnection() {
         @Override
@@ -730,9 +732,6 @@ final class DisplayPowerController {
     public boolean requestPowerState(DisplayPowerRequest request,
             boolean waitForNegativeProximity) {
 
-        final int MAX_BLUR_WIDTH = 900;
-        final int MAX_BLUR_HEIGHT = 1600;
-
         if (DEBUG) {
             Slog.d(TAG, "requestPowerState: "
                     + request + ", waitForNegativeProximity=" + waitForNegativeProximity);
@@ -759,31 +758,8 @@ final class DisplayPowerController {
                 mDisplayReadyLocked = false;
             }
 
-            boolean seeThrough = Settings.System.getInt(mContext.getContentResolver(),
-                    Settings.System.LOCKSCREEN_SEE_THROUGH, 0) == 1;
             if (changed && !mPendingRequestChangedLocked) {
-                if ((mKeyguardService == null || !mKeyguardService.isShowing()) &&
-                            request.screenState == DisplayPowerRequest.SCREEN_STATE_OFF &&
-                            seeThrough) {
-                    DisplayInfo di = mDisplayManager
-                            .getDisplayInfo(mDisplayManager.getDisplayIds() [0]);
-                    /* Limit max screenshot capture layer to 22000.
-                       Prevents status bar and navigation bar from being captured.*/
-                    Bitmap bmp = SurfaceControl
-                            .screenshot(di.getNaturalWidth(),di.getNaturalHeight(), 0, 22000);
-                    if (bmp != null) {
-                        Bitmap tmpBmp = bmp;
-
-                        // scale image if its too large
-                        if (bmp.getWidth() > MAX_BLUR_WIDTH) {
-                                tmpBmp = bmp.createScaledBitmap(bmp, MAX_BLUR_WIDTH, MAX_BLUR_HEIGHT, true);
-                        }
-
-                        mKeyguardService.setBackgroundBitmap(tmpBmp);
-                        bmp.recycle();
-                        tmpBmp.recycle();
-                    }
-                } else if (!seeThrough) mKeyguardService.setBackgroundBitmap(null);
+                initSeeThrough(request);
                 mPendingRequestChangedLocked = true;
                 sendUpdatePowerStateLocked();
             }
@@ -1724,6 +1700,9 @@ final class DisplayPowerController {
     };
 
     private void updateButtonLight() {
+        if (mPowerRequest == null){
+            return;
+        }
         boolean buttonlight_on = wantScreenOn(mPowerRequest.screenState) &&
                 (mPowerRequest.screenState != DisplayPowerRequest.SCREEN_STATE_DIM);
 
@@ -1774,6 +1753,9 @@ final class DisplayPowerController {
         if (mLightSensorEnabled){
             return mScreenAutoBrightness;
         }
+        if (mPowerRequest == null){
+            return 60;
+        }
         return mPowerRequest.screenBrightness;
     }
 
@@ -1791,9 +1773,45 @@ final class DisplayPowerController {
     }
 
     public void setButtonTimout(boolean value){
+        if (mPowerRequest == null){
+            return;
+        }
         if (mButtonBrightnessSupport){
             mButtonDisabledByTimeout = value;
             updateButtonLight();
+        }
+    }
+
+    private void initSeeThrough(DisplayPowerRequest request){
+        if (mKeyguardService != null){
+            boolean seeThrough = Settings.System.getInt(mContext.getContentResolver(),
+                    Settings.System.LOCKSCREEN_SEE_THROUGH, 0) == 1;
+
+            if (!mKeyguardService.isShowing() &&
+                    request.screenState == DisplayPowerRequest.SCREEN_STATE_OFF){
+                if(seeThrough) {
+                    DisplayInfo di = mDisplayManager
+                            .getDisplayInfo(mDisplayManager.getDisplayIds() [0]);
+                    /* Limit max screenshot capture layer to 22000.
+                    Prevents status bar and navigation bar from being captured.*/
+                    Bitmap bmp = SurfaceControl
+                            .screenshot(di.getNaturalWidth(),di.getNaturalHeight(), 0, 22000);
+                    if (bmp != null) {
+                        Bitmap tmpBmp = bmp;
+
+                        // scale image if its too large
+                        if (bmp.getWidth() > MAX_BLUR_WIDTH) {
+                            tmpBmp = bmp.createScaledBitmap(bmp, MAX_BLUR_WIDTH, MAX_BLUR_HEIGHT, true);
+                        }
+
+                        mKeyguardService.setBackgroundBitmap(tmpBmp);
+                        bmp.recycle();
+                        tmpBmp.recycle();
+                    }
+                } else {
+                    mKeyguardService.setBackgroundBitmap(null);
+                }
+            }
         }
     }
 }
