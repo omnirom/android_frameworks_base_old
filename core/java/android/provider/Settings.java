@@ -5954,6 +5954,13 @@ public final class Settings {
         */
        public static final String NITZ_UPDATE_SPACING = "nitz_update_spacing";
 
+       /**
+        * Holds the text for the Carrier label. An empty string
+        * will bring the default text back.
+        * @hide
+        */
+       public static final String NOTIFICATION_CUSTOM_CARRIER_LABEL = "notification_custom_carrier_label";
+
        /** Preferred NTP server. {@hide} */
        public static final String NTP_SERVER = "ntp_server";
        /** Timeout in milliseconds to wait for NTP server. {@hide} */
