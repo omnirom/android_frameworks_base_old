@@ -65,9 +65,11 @@ import com.android.systemui.statusbar.policy.NetworkController.NetworkSignalChan
 import com.android.systemui.statusbar.policy.RotationLockController;
 import com.android.systemui.statusbar.policy.RotationLockController.RotationLockControllerCallback;
 
+import java.lang.reflect.Method;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Set;
+
 
 class QuickSettingsModel implements BluetoothStateChangeCallback,
         NetworkSignalChangedCallback,
@@ -958,6 +960,8 @@ class QuickSettingsModel implements BluetoothStateChangeCallback,
             mRSSIState.dataTypeIconId = enabled && (dataTypeIconId > 0) && !mWifiState.enabled
                     ? dataTypeIconId
                     : 0;
+            if (!isMobileDataEnabled())
+                mRSSIState.dataTypeIconId = R.drawable.ic_qs_signal_disabled;
             mRSSIState.activityIn = enabled && activityIn;
             mRSSIState.activityOut = enabled && activityOut;
             mRSSIState.dataContentDescription = enabled && (dataTypeIconId > 0) && !mWifiState.enabled
@@ -968,6 +972,7 @@ class QuickSettingsModel implements BluetoothStateChangeCallback,
                     : r.getString(R.string.quick_settings_rssi_emergency_only);
             mRSSICallback.refreshView(mRSSITile, mRSSIState);
         }
+
         onMobileNetworkChanged();
     }
 
@@ -985,6 +990,18 @@ class QuickSettingsModel implements BluetoothStateChangeCallback,
     boolean deviceSupportsGSMLTE() {
         return (mTM.getLteOnGsmMode() != 0);
     }
+    public Boolean isMobileDataEnabled(){
+        ConnectivityManager cm = (ConnectivityManager) mContext.getSystemService(mContext.CONNECTIVITY_SERVICE);
+        try {
+            Class<?> c = Class.forName(cm.getClass().getName());
+            Method m = c.getDeclaredMethod("getMobileDataEnabled");
+            m.setAccessible(true);
+            return (Boolean)m.invoke(cm);
+        } catch (Exception e) {
+            return false;
+        }
+    }
+
 
     // Mobile Network
     void addMobileNetworkTile(QuickSettingsTileView view, RefreshCallback cb) {
