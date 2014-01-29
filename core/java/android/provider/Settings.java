@@ -5960,6 +5960,13 @@ public final class Settings {
        public static final String NTP_TIMEOUT = "ntp_timeout";
 
        /**
+        * Holds the text for the Carrier label. An empty string
+        * will bring the default text back.
+        * @hide
+        */
+       public static final String NOTIFICATION_CUSTOM_CARRIER_LABEL = "notification_custom_carrier_label";
+
+       /**
         * Whether the package manager should send package verification broadcasts for verifiers to
         * review apps prior to installation.
         * 1 = request apps to be verified prior to installation, if a verifier exists.
