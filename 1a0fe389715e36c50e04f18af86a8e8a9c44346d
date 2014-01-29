@@ -1,0 +1,72 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "ab62b9bd_80a7974c",
+        "filename": "media/java/android/media/AudioService.java",
+        "patchSetId": 3
+      },
+      "lineNbr": 509,
+      "author": {
+        "id": 1000026
+      },
+      "writtenOn": "2014-01-29T21:18:58Z",
+      "side": 1,
+      "message": "Dont think this should be changed to the old code. All \"overruling\" of the limit is done by checking mManualSafeMediaVolume. Changing this woild change the defaut behaviour",
+      "revId": "1a0fe389715e36c50e04f18af86a8e8a9c44346d",
+      "serverId": "56841c99-7c94-43d4-bf0b-cb4707e66d55",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "ab62b9bd_20b88b70",
+        "filename": "media/java/android/media/AudioService.java",
+        "patchSetId": 3
+      },
+      "lineNbr": 4711,
+      "author": {
+        "id": 1000026
+      },
+      "writtenOn": "2014-01-29T21:18:58Z",
+      "side": 1,
+      "message": "Must use getIntForUser here since this is no longer in the Global section",
+      "revId": "1a0fe389715e36c50e04f18af86a8e8a9c44346d",
+      "serverId": "56841c99-7c94-43d4-bf0b-cb4707e66d55",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "ab62b9bd_a0a49b48",
+        "filename": "media/java/android/media/AudioService.java",
+        "patchSetId": 3
+      },
+      "lineNbr": 4712,
+      "author": {
+        "id": 1000026
+      },
+      "writtenOn": "2014-01-29T21:18:58Z",
+      "side": 1,
+      "message": "Should the default value really be 1? The default behaviour should not be changed",
+      "revId": "1a0fe389715e36c50e04f18af86a8e8a9c44346d",
+      "serverId": "56841c99-7c94-43d4-bf0b-cb4707e66d55",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "ab62b9bd_c0650f1c",
+        "filename": "media/java/android/media/AudioService.java",
+        "patchSetId": 3
+      },
+      "lineNbr": 4714,
+      "author": {
+        "id": 1000026
+      },
+      "writtenOn": "2014-01-29T21:18:58Z",
+      "side": 1,
+      "message": "why calling this is necessary?",
+      "revId": "1a0fe389715e36c50e04f18af86a8e8a9c44346d",
+      "serverId": "56841c99-7c94-43d4-bf0b-cb4707e66d55",
+      "unresolved": false
+    }
+  ]
+}
