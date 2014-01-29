@@ -3316,6 +3316,13 @@ public final class Settings {
         public static final String SOFT_BACK_KILL_APP_ENABLE = "soft_back_kill_app_enable";
 
         /**
+         * Holds the text for the Carrier label. An empty string
+         * will bring the default text back.
+         * @hide
+         */
+        public static final String NOTIFICATION_CUSTOM_CARRIER_LABEL = "notification_custom_carrier_label";
+
+        /**
          * Settings to backup. This is here so that it's in the same place as the settings
          * keys and easy to update.
          *
