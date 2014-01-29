@@ -1,0 +1,74 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- Copyright (C) 2013 The OmniROM Project
+
+This program is free software: you can redistribute it and/or modify
+it under the terms of the GNU General Public License as published by
+the Free Software Foundation, either version 2 of the License, or
+(at your option) any later version.
+
+This program is distributed in the hope that it will be useful,
+but WITHOUT ANY WARRANTY; without even the implied warranty of
+MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
+GNU General Public License for more details.
+
+You should have received a copy of the GNU General Public License
+along with this program. If not, see <http://www.gnu.org/licenses/>.
+
+-->
+<resources xmlns:xliff="urn:oasis:names:tc:xliff:document:1.2">
+    <string name="quick_settings_wifi_tethering_label">Tethering</string>
+    <string name="quick_settings_bluetooth_not_discoverable_label">unsichtbar</string>
+    <string name="quick_settings_bluetooth_discoverable_label">sichtbar</string>
+    <string name="quick_settings_bluetooth_disabled">aus</string>
+    <string name="quick_settings_bluetooth_number_paired"><xliff:g id="number">%d</xliff:g> gekoppelte Geräte</string>
+    <!-- need to be translated
+    <string name="screenrecord_notif_ticker">L\'écran est en cours d\'enregistrement</string>
+    <string name="screenrecord_notif_title">Enregistrement de l\écran</string>
+    -->
+    <string name="screenrecord_notif_stop">Stop</string>
+    <string name="screenrecord_notif_pointer">Pointer-Anzeige</string>
+    <!-- need to be translated
+    <string name="screenrecord_notif_error">Impossible d\'enregistrer l\'écran</string>
+    -->
+    <string name="quick_settings_battery_charging">geladen</string>
+    <string name="quick_settings_battery_discharging">entladen</string>
+    <string name="quick_settings_immersive_mode_label">Immersive-Modus</string>
+    <string name="quick_settings_immersive_mode_off_label">Immersive-Modus aus</string>
+    <string name="quick_settings_quiethours_label">Stille Stunden</string>
+    <string name="quick_settings_quiethours_off_label">Stille Stunden aus</string>
+    <string name="quick_settings_sleep_label_back_15">15 s</string>
+    <string name="quick_settings_sleep_label_back_30">30 s</string>
+    <string name="quick_settings_sleep_label_back_60">60 s</string>
+    <string name="quick_settings_sleep_label_back_120">2 min</string>
+    <string name="quick_settings_sleep_label_back_300">5 min</string>
+    <string name="quick_settings_sleep_label_back_600">10 min</string>
+    <string name="quick_settings_sleep_label_back_1800">30 min</string>
+    <string name="quick_settings_sleep_label_back_unknown">0000</string>
+    <string name="quick_settings_location_mode_high">hoch</string>
+    <string name="quick_settings_location_mode_battery">Batterie</string>
+    <string name="quick_settings_location_mode_sensors">Gerät</string>
+    <string name="status_bar_notification_hide_icon_packages">l\'Benachrichtigung(en) ausblenden</string>
+    <string name="network_4G">4G</string>
+    <string name="quick_settings_ringer_on">Ton an</string>
+    <string name="quick_settings_ringer_off">Ton aus</string>
+    <string name="quick_settings_ringer_normal">Ton</string>
+    <string name="quick_settings_rssi_type_label">Typ</string>
+    <string name="quick_settings_screen_sleep">Ruhezustand</string>
+    <string name="quick_settings_sync">Synchronisation</string>
+    <string name="quick_settings_sync_off">Synchronisation aus</string>
+    <string name="quick_settings_torch">Taschenlampe</string>
+    <string name="quick_settings_torch_off">Taschenlampe aus</string>
+    <string name="quick_settings_vibration_on">Vibration an</string>
+    <string name="quick_settings_vibration_off">Vibration aus</string>
+    <string name="quick_settings_volume">Lautstärke</string>
+    <string name="quick_settings_volume_status">Status</string>
+    <!-- need to be translated
+    <string name="quick_settings_usb_tether_off_label">Déconnecté</string>
+    <string name="quick_settings_usb_tether_connected_label">Partage WiFi désactivé</string>
+    <string name="quick_settings_usb_tether_on_label">Partage WiFi</string>
+    -->
+
+    <!-- AOSP untranslated -->
+    <string name="accessibility_battery_level">Batterie <xliff:g id="number">%d</xliff:g> Prozent.</string>
+</resources>
+
