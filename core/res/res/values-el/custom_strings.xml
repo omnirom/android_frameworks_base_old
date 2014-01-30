@@ -1,0 +1,54 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources xmlns:xliff="urn:oasis:names:tc:xliff:document:1.2">
+    <string name="global_action_reboot">Επανεκκίνηση</string>
+    <!-- Button to reboot the phone, within the Phone Options dialog -->
+    <string name="reboot_system" product="tablet">Επανεκκίνηση tablet</string>
+    <string name="reboot_system" product="default">Επανεκκίνηση τηλεφώνου</string>
+
+    <!-- Button to reboot the phone, within the Reboot Options dialog -->
+    <string name="reboot_reboot">Επανεκκίνηση</string>
+    <!-- Button to reboot the phone into recovery, within the Reboot Options dialog -->
+    <string name="reboot_recovery">Κατάσταση Επαναφοράς</string>
+    <!-- Button to reboot the phone into bootloader, within the Reboot Options dialog -->
+    <string name="reboot_bootloader">Φόρτωση εκκινητή</string>
+    <!-- Button to reboot the phone into bootmenu, within the Reboot Options dialog -->
+    <string name="reboot_bootmenu">Μενού εκκίνησης</string>
+    <!-- Button to reboot the phone into fastboot, within the Reboot Options dialog -->
+    <string name="reboot_fastboot">Γρήγορη εκκίνηση</string>
+    <!-- Button to reboot the phone into download, within the Reboot Options dialog -->
+    <string name="reboot_download">Κατάσταση Μεταφόρτωσης</string>
+
+    <!-- Reboot Progress Dialog. This is shown if the user chooses to reboot the phone. -->
+    <string name="reboot_progress">Επανεκκινεί\u2026</string>
+    <!-- Reboot Confirmation Dialog.  When the user chooses to reboot the phone, there will be a confirmation dialog.  This is the message. -->
+    <string name="reboot_confirm" product="tablet">Το tablet σας θα επανεκκινήσει.</string>
+    <string name="reboot_confirm" product="default">Το τηλέφωνό σας θα επανεκκινήσει.</string>
+
+    <string name="app_killed_message">Η εφαρμογή έκλεισε</string>
+
+    <!-- Title of an application permission that lets an application view/edit revoked permissions. -->
+    <string name="permlab_revokePermissions">Επιτρέπει την εμφάνιση και επεξεργασία ανακληθέντων δικαιωμάτων πρόσβασης. Όχι για χρήση από απλές εφαρμογές.</string>
+    <!-- Description of an application permission that lets lets an application view/edit revoked permissions. -->
+    <string name="permdesc_revokePermissions">Επιτρέπει την ανάγνωση και εγγραφή ανακληθέντων δικαιωμάτων πρόσβασης. Όχι για χρήση από απλές εφαρμογές.</string>
+
+    <!-- Title of an application permission that lets an application access the ThemeManagerService. -->
+    <string name="permlab_accessThemeService">Επιτρέπει τη πρόσβαση στην υπηρεσία διαχείρισης θεμάτων. Όχι για χρήση από απλές εφαρμογές.</string>
+    <!-- Description of an application permission that lets lets an application access the ThemeManagerService -->
+    <string name="permdesc_accessThemeService">Επιτρέπει σε μια εφαρμογή να θέσει/επαναφέρει θέματα. Όχι για χρήση από απλές εφαρμογές.</string>
+
+    <!-- stylus gestures support -->
+    <string name="stylus_app_not_installed">%s δεν είναι εγκατεστημένο</string>
+
+    <!-- Storage description for the SD card on the dock. [CHAR LIMIT=NONE] -->
+    <string name="storage_sd_dock_card">Σύνδεση κάρτας SD</string>
+
+    <!-- label for item that toggle mobile data -->
+    <string name="global_actions_toggle_mobile_data">Δεδομένα κινητής</string>
+
+    <!-- status message in phone options dialog for when mobile data is on -->
+    <string name="global_actions_mobile_data_on_status">Δεδομένα κινητής ενεργά</string>
+
+    <!-- status message in phone options dialog for when mobile data is off -->
+    <string name="global_actions_mobile_data_off_status">Δεδομένα κινητής ανενεργά</string>
+
+</resources>
