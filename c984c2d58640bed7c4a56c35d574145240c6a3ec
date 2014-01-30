@@ -1,0 +1,38 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "ab62b9bd_43c909ad",
+        "filename": "media/java/android/media/AudioService.java",
+        "patchSetId": 5
+      },
+      "lineNbr": 509,
+      "author": {
+        "id": 1000117
+      },
+      "writtenOn": "2014-01-30T14:04:53Z",
+      "side": 1,
+      "message": "Disabling it by default. It will be enabled/disabled by our custom setting.",
+      "revId": "c984c2d58640bed7c4a56c35d574145240c6a3ec",
+      "serverId": "56841c99-7c94-43d4-bf0b-cb4707e66d55",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "ab62b9bd_63c60da0",
+        "filename": "media/java/android/media/AudioService.java",
+        "patchSetId": 5
+      },
+      "lineNbr": 4714,
+      "author": {
+        "id": 1000117
+      },
+      "writtenOn": "2014-01-30T14:04:53Z",
+      "side": 1,
+      "message": "If we don\u0027t call this, volume warning will disable but volume won\u0027t go over safe limit.",
+      "revId": "c984c2d58640bed7c4a56c35d574145240c6a3ec",
+      "serverId": "56841c99-7c94-43d4-bf0b-cb4707e66d55",
+      "unresolved": false
+    }
+  ]
+}
