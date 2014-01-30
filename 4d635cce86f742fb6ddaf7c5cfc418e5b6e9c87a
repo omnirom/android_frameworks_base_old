@@ -1,0 +1,38 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "ab62b9bd_23641543",
+        "filename": "media/java/android/media/AudioService.java",
+        "patchSetId": 6
+      },
+      "lineNbr": 509,
+      "author": {
+        "id": 1000026
+      },
+      "writtenOn": "2014-01-30T22:15:31Z",
+      "side": 1,
+      "message": "This can stay unchanged. It doesnt influence the functionality of this change\nJust tested it",
+      "revId": "4d635cce86f742fb6ddaf7c5cfc418e5b6e9c87a",
+      "serverId": "56841c99-7c94-43d4-bf0b-cb4707e66d55",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "ab62b9bd_4359098f",
+        "filename": "media/java/android/media/AudioService.java",
+        "patchSetId": 6
+      },
+      "lineNbr": 4715,
+      "author": {
+        "id": 1000026
+      },
+      "writtenOn": "2014-01-30T22:15:31Z",
+      "side": 1,
+      "message": "The default value must be 1 to match the logic. The default must be to show the warning to match stock behaviour. The naming of mManualSafeMediaVolume is a little bit confusing since if it is true the warning will be shown if false not",
+      "revId": "4d635cce86f742fb6ddaf7c5cfc418e5b6e9c87a",
+      "serverId": "56841c99-7c94-43d4-bf0b-cb4707e66d55",
+      "unresolved": false
+    }
+  ]
+}
