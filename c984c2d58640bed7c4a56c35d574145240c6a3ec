@@ -19,6 +19,57 @@
     },
     {
       "key": {
+        "uuid": "ab62b9bd_43466928",
+        "filename": "media/java/android/media/AudioService.java",
+        "patchSetId": 5
+      },
+      "lineNbr": 4572,
+      "author": {
+        "id": 1000026
+      },
+      "writtenOn": "2014-01-30T14:33:21Z",
+      "side": 1,
+      "message": "no reason to have this proteced - would make it private",
+      "revId": "c984c2d58640bed7c4a56c35d574145240c6a3ec",
+      "serverId": "56841c99-7c94-43d4-bf0b-cb4707e66d55",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "ab62b9bd_c35a79f8",
+        "filename": "media/java/android/media/AudioService.java",
+        "patchSetId": 5
+      },
+      "lineNbr": 4605,
+      "author": {
+        "id": 1000026
+      },
+      "writtenOn": "2014-01-30T14:33:21Z",
+      "side": 1,
+      "message": "Use correct parenthesis placement",
+      "revId": "c984c2d58640bed7c4a56c35d574145240c6a3ec",
+      "serverId": "56841c99-7c94-43d4-bf0b-cb4707e66d55",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "ab62b9bd_23417510",
+        "filename": "media/java/android/media/AudioService.java",
+        "patchSetId": 5
+      },
+      "lineNbr": 4710,
+      "author": {
+        "id": 1000026
+      },
+      "writtenOn": "2014-01-30T14:33:21Z",
+      "side": 1,
+      "message": "why is this protected - is only called from insife this class - right?\nSo should be private",
+      "revId": "c984c2d58640bed7c4a56c35d574145240c6a3ec",
+      "serverId": "56841c99-7c94-43d4-bf0b-cb4707e66d55",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "ab62b9bd_63c60da0",
         "filename": "media/java/android/media/AudioService.java",
         "patchSetId": 5
@@ -30,6 +81,24 @@
       "writtenOn": "2014-01-30T14:04:53Z",
       "side": 1,
       "message": "If we don\u0027t call this, volume warning will disable but volume won\u0027t go over safe limit.",
+      "revId": "c984c2d58640bed7c4a56c35d574145240c6a3ec",
+      "serverId": "56841c99-7c94-43d4-bf0b-cb4707e66d55",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "ab62b9bd_e35f7de5",
+        "filename": "media/java/android/media/AudioService.java",
+        "patchSetId": 5
+      },
+      "lineNbr": 4714,
+      "author": {
+        "id": 1000026
+      },
+      "writtenOn": "2014-01-30T14:33:21Z",
+      "side": 1,
+      "message": "Really? isnt that done in checkSafeMediaVolume?\nAnd there it uses mManualSafeMediaVolume anyway",
+      "parentUuid": "ab62b9bd_63c60da0",
       "revId": "c984c2d58640bed7c4a56c35d574145240c6a3ec",
       "serverId": "56841c99-7c94-43d4-bf0b-cb4707e66d55",
       "unresolved": false
