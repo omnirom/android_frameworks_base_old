@@ -46,11 +46,18 @@ public class MediaActionSound {
     private int[]     mSoundIds;
     private int       mSoundIdToPlay;
 
+    /**
+     * Note: Omni Sound Themes
+     * Since we're a static class here, we have access to no Context, so
+     * we cannot lookup the Setting. Instead, we symlink the files in
+     * /data. Those symlinks are done by AudioService, so way before any
+     * app could request those sounds.
+     */
     private static final String[] SOUND_FILES = {
-        "/system/media/audio/ui/camera_click.ogg",
-        "/system/media/audio/ui/camera_focus.ogg",
-        "/system/media/audio/ui/VideoRecord.ogg",
-        "/system/media/audio/ui/VideoRecord.ogg"
+        "/data/system/soundlinks/camera_click.ogg",
+        "/data/system/soundlinks/camera_focus.ogg",
+        "/data/system/soundlinks/VideoRecord_start.ogg",
+        "/data/system/soundlinks/VideoRecord_stop.ogg"
     };
 
     private static final String TAG = "MediaActionSound";
@@ -160,6 +167,7 @@ public class MediaActionSound {
             throw new RuntimeException("Unknown sound requested: " + soundName);
         }
         if (mSoundIds[soundName] == SOUND_NOT_LOADED) {
+            Log.e("XPLOD/MEDIA", "LOADING TO PLAY: " + SOUND_FILES[soundName]);
             mSoundIdToPlay =
                     mSoundPool.load(SOUND_FILES[soundName], 1);
             mSoundIds[soundName] = mSoundIdToPlay;
