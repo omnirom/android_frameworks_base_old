@@ -1,0 +1,21 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "ab62b9bd_230fb5e4",
+        "filename": "policy/src/com/android/internal/policy/impl/PhoneWindowManager.java",
+        "patchSetId": 6
+      },
+      "lineNbr": 5174,
+      "author": {
+        "id": 1000117
+      },
+      "writtenOn": "2014-01-30T15:06:34Z",
+      "side": 1,
+      "message": "This will now declare value if it was null originally. So the default value in settings is of no use.",
+      "revId": "bd2828d79de11dcf56cdd5aba5b31b0ec84b8eac",
+      "serverId": "56841c99-7c94-43d4-bf0b-cb4707e66d55",
+      "unresolved": false
+    }
+  ]
+}
