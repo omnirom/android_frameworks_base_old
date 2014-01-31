@@ -1,0 +1,38 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "ab62b9bd_36c9b1ae",
+        "filename": "packages/SystemUI/res/values-fr/custom_strings.xml",
+        "patchSetId": 2
+      },
+      "lineNbr": 69,
+      "author": {
+        "id": 1000516
+      },
+      "writtenOn": "2014-01-31T18:05:36Z",
+      "side": 1,
+      "message": "R should be uppercase to follow the same rule as the 2 others",
+      "revId": "66d24466ac05fddef44958a957ea4d2038d01c6a",
+      "serverId": "56841c99-7c94-43d4-bf0b-cb4707e66d55",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "ab62b9bd_56c6259f",
+        "filename": "packages/SystemUI/res/values-fr/custom_strings.xml",
+        "patchSetId": 2
+      },
+      "lineNbr": 71,
+      "author": {
+        "id": 1000516
+      },
+      "writtenOn": "2014-01-31T18:05:36Z",
+      "side": 1,
+      "message": "Same here ?",
+      "revId": "66d24466ac05fddef44958a957ea4d2038d01c6a",
+      "serverId": "56841c99-7c94-43d4-bf0b-cb4707e66d55",
+      "unresolved": false
+    }
+  ]
+}
