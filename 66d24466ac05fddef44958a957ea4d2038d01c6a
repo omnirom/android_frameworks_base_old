@@ -36,6 +36,24 @@
     },
     {
       "key": {
+        "uuid": "ab62b9bd_b6330111",
+        "filename": "packages/SystemUI/res/values-fr/custom_strings.xml",
+        "patchSetId": 2
+      },
+      "lineNbr": 69,
+      "author": {
+        "id": 1000098
+      },
+      "writtenOn": "2014-02-01T21:20:18Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "ab62b9bd_f6df393c",
+      "revId": "66d24466ac05fddef44958a957ea4d2038d01c6a",
+      "serverId": "56841c99-7c94-43d4-bf0b-cb4707e66d55",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "ab62b9bd_56c6259f",
         "filename": "packages/SystemUI/res/values-fr/custom_strings.xml",
         "patchSetId": 2
@@ -65,6 +83,24 @@
       "side": 1,
       "message": "Je pense qu\u0027étant donné que le bouton n\u0027a pas d\u0027action, il n\u0027y a pas besoin de mettre une majuscule.",
       "parentUuid": "ab62b9bd_56c6259f",
+      "revId": "66d24466ac05fddef44958a957ea4d2038d01c6a",
+      "serverId": "56841c99-7c94-43d4-bf0b-cb4707e66d55",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "ab62b9bd_d63875ed",
+        "filename": "packages/SystemUI/res/values-fr/custom_strings.xml",
+        "patchSetId": 2
+      },
+      "lineNbr": 71,
+      "author": {
+        "id": 1000098
+      },
+      "writtenOn": "2014-02-01T21:20:18Z",
+      "side": 1,
+      "message": "D\u0027accord avec Kowalski",
+      "parentUuid": "ab62b9bd_16e58d07",
       "revId": "66d24466ac05fddef44958a957ea4d2038d01c6a",
       "serverId": "56841c99-7c94-43d4-bf0b-cb4707e66d55",
       "unresolved": false
