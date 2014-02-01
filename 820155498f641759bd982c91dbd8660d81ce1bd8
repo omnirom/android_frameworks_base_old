@@ -1,0 +1,21 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "ab62b9bd_161cad77",
+        "filename": "services/java/com/android/server/usb/UsbDebuggingManager.java",
+        "patchSetId": 1
+      },
+      "lineNbr": 242,
+      "author": {
+        "id": 1000001
+      },
+      "writtenOn": "2014-02-01T22:15:32Z",
+      "side": 1,
+      "message": "whitespaces!!11",
+      "revId": "820155498f641759bd982c91dbd8660d81ce1bd8",
+      "serverId": "56841c99-7c94-43d4-bf0b-cb4707e66d55",
+      "unresolved": false
+    }
+  ]
+}
