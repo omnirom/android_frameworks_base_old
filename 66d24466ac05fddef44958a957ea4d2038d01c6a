@@ -19,6 +19,23 @@
     },
     {
       "key": {
+        "uuid": "ab62b9bd_f6df393c",
+        "filename": "packages/SystemUI/res/values-fr/custom_strings.xml",
+        "patchSetId": 2
+      },
+      "lineNbr": 69,
+      "author": {
+        "id": 1000519
+      },
+      "writtenOn": "2014-02-01T05:31:12Z",
+      "side": 1,
+      "message": "Rechercher",
+      "revId": "66d24466ac05fddef44958a957ea4d2038d01c6a",
+      "serverId": "56841c99-7c94-43d4-bf0b-cb4707e66d55",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "ab62b9bd_56c6259f",
         "filename": "packages/SystemUI/res/values-fr/custom_strings.xml",
         "patchSetId": 2
@@ -30,6 +47,24 @@
       "writtenOn": "2014-01-31T18:05:36Z",
       "side": 1,
       "message": "Same here ?",
+      "revId": "66d24466ac05fddef44958a957ea4d2038d01c6a",
+      "serverId": "56841c99-7c94-43d4-bf0b-cb4707e66d55",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "ab62b9bd_16e58d07",
+        "filename": "packages/SystemUI/res/values-fr/custom_strings.xml",
+        "patchSetId": 2
+      },
+      "lineNbr": 71,
+      "author": {
+        "id": 1000519
+      },
+      "writtenOn": "2014-02-01T05:31:12Z",
+      "side": 1,
+      "message": "Je pense qu\u0027étant donné que le bouton n\u0027a pas d\u0027action, il n\u0027y a pas besoin de mettre une majuscule.",
+      "parentUuid": "ab62b9bd_56c6259f",
       "revId": "66d24466ac05fddef44958a957ea4d2038d01c6a",
       "serverId": "56841c99-7c94-43d4-bf0b-cb4707e66d55",
       "unresolved": false
