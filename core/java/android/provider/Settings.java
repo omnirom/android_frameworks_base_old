@@ -2724,6 +2724,7 @@ public final class Settings {
          */
         public static final String LOCKSCREEN_CAMERA_WIDGET = "lockscreen_camera_widget";
 
+        /**
          * Whether camera should be shown on lockscreen
          * @hide
          */
@@ -3250,12 +3251,6 @@ public final class Settings {
         public static final String QUICK_SETTINGS_TILES = "quick_settings_tiles";
 
         /**
-		* Quick settings tiles dynamic row
-		* @hide
-		*/
-        public static final String QUICK_SETTINGS_TILES_ROW = "quick_settings_tiles_row";
-
-        /**
          * Quick settings tiles dynamic row
          * @hide
          */
@@ -3283,13 +3278,6 @@ public final class Settings {
         public static final String NON_INTRUSIVE_INCALL = "non_intrusive_incall";
 
         /**
-		* Should Flip to Silence be used
-		*
-		* @hide
-		*/
-        public static final String FLIP_ACTION_KEY = "flip_action";
-
- 
          * Should Flip to Silence be used
          *
          * @hide
@@ -3420,12 +3408,6 @@ public final class Settings {
          * @hide
          */
         public static final String FORMAL_TEXT_INPUT = "formal_text_input";
-
-        /**
-* Enable long press on back kill for soft buttons.
-* @hide
-*/
-        public static final String SOFT_BACK_KILL_APP_ENABLE = "soft_back_kill_app_enable";
 
         /**
          * Show or hide clock
@@ -3865,6 +3847,8 @@ public final class Settings {
          * @hide
          */
         public static final String LISTVIEW_INTERPOLATOR = "listview_interpolator";
+        
+		/**
          * Enable long press on back kill for soft buttons.
          * @hide
          */

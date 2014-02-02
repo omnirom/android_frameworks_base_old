@@ -453,8 +453,6 @@ public class TelephonyManager {
     }
 
     /**
-* The contents of the /proc/cmdline file
-*/
      * {@hide}
      */
     public void toggleMobileNetwork(int networkState) {

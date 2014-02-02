@@ -2842,29 +2842,37 @@ public class AudioService extends IAudioService.Stub {
                     if (DEBUG_VOL)
                         Log.v(TAG, "getActiveStreamType: Forcing STREAM_MUSIC stream active");
                     return AudioSystem.STREAM_MUSIC;
-                } else
+                } else {
                     if (mMediaFocusControl.checkUpdateRemoteStateIfActive(AudioSystem.STREAM_MUSIC))
                     {
                         if (DEBUG_VOL)
                             Log.v(TAG, "getActiveStreamType: Forcing STREAM_REMOTE_MUSIC");
                         return STREAM_REMOTE_MUSIC;
                     } else {
-                        if (mVolumeKeysControlMediaStream) {
-                            if (DEBUG_VOL)
-                                Log.v(TAG, "getActiveStreamType: Forcing STREAM_MUSIC b/c default setting");
-                            return AudioSystem.STREAM_MUSIC;
-                        } else {
-                            if (DEBUG_VOL)
-                                Log.v(TAG, "getActiveStreamType: Forcing STREAM_RING b/c default");
-                             return AudioSystem.STREAM_RING;
+                        switch (mVolumeKeysDefault) {
+                            case AudioSystem.STREAM_DEFAULT:
+                                if (DEBUG_VOL)
+                                    Log.v(TAG, "getActiveStreamType: Forcing STREAM_DEFAULT b/c default setting");
+                                return AudioSystem.STREAM_DEFAULT;
+                            case AudioSystem.STREAM_MUSIC:
+                                if (DEBUG_VOL)
+                                    Log.v(TAG, "getActiveStreamType: Forcing STREAM_MUSIC b/c default setting");
+                                return AudioSystem.STREAM_MUSIC;
+                            case AudioSystem.STREAM_RING:
+                            default:
+                                if (DEBUG_VOL)
+                                    Log.v(TAG, "getActiveStreamType: Forcing STREAM_RING b/c default");
+                                return AudioSystem.STREAM_RING;
                         }
+                    }
                 }
             } else if (isAfMusicActiveRecently(0)) {
                 if (DEBUG_VOL)
                     Log.v(TAG, "getActiveStreamType: Forcing STREAM_MUSIC stream active");
                 return AudioSystem.STREAM_MUSIC;
             } else {
-                if (DEBUG_VOL) Log.v(TAG, "getActiveStreamType: Returning suggested type "
+                if (DEBUG_VOL)
+                    Log.v(TAG, "getActiveStreamType: Returning suggested type "
                         + suggestedStreamType);
                 return suggestedStreamType;
             }
@@ -3920,6 +3928,7 @@ public class AudioService extends IAudioService.Stub {
                 UserHandle.USER_ALL);
             mContentResolver.registerContentObserver(Settings.System.getUriFor(
                 Settings.System.VOLUME_KEYS_CONTROL_MEDIA_STREAM), false, this);
+            mContentResolver.registerContentObserver(Settings.System.getUriFor(
                 Settings.System.CUSTOM_SOUND_EFFECTS_PATH), false, this);
             mContentResolver.registerContentObserver(Settings.System.getUriFor(
                 Settings.System.MANUAL_SAFE_MEDIA_VOLUME), false, this);
