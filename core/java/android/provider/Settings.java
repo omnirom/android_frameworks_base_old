@@ -2170,6 +2170,12 @@ public final class Settings {
         public static final String VOLUME_LINK_NOTIFICATION = "volume_link_notification";
 
         /**
+         * Whether to enable the built-in safe media volume for headsets
+         * @hide
+         */
+        public static final String MANUAL_SAFE_MEDIA_VOLUME = "manual_safe_media_volume";
+
+        /**
          * Whether silent mode should allow vibration feedback. This is used
          * internally in AudioService and the Sound settings activity to
          * coordinate decoupling of vibrate and silent modes. This setting
@@ -2718,6 +2724,22 @@ public final class Settings {
          */
         public static final String LOCKSCREEN_CAMERA_WIDGET = "lockscreen_camera_widget";
 
+         * Whether camera should be shown on lockscreen
+         * @hide
+         */
+        public static final String LOCKSCREEN_ENABLE_CAMERA = "lockscreen_enable_camera";
+
+        /**
+         * This preference enables showing the power menu on LockScreen.
+         * @hide
+         */
+        public static final String LOCKSCREEN_ENABLE_POWER_MENU = "lockscreen_enable_power_menu";
+
+        /**
+         * Allows to show the background activity back the lockscreen
+         * @hide
+         */
+        public static final String LOCKSCREEN_SEE_THROUGH = "lockscreen_see_through";
 
         /**
          * Whether to display notifications on screen when screen is off
@@ -3022,6 +3044,12 @@ public final class Settings {
          */
         public static final String SCREEN_OFF_ANIMATION = "screen_off_animation";
 
+        /**
+         * Defines the custom path to use for UI sound effects (null for default)
+         * @hide
+         */
+        public static final String CUSTOM_SOUND_EFFECTS_PATH = "custom_sound_effects_path";
+
          /**
           * Action to perform when the key is pressed
           * 0 - Nothing
@@ -3228,6 +3256,19 @@ public final class Settings {
         public static final String QUICK_SETTINGS_TILES_ROW = "quick_settings_tiles_row";
 
         /**
+         * Quick settings tiles dynamic row
+         * @hide
+         */
+        public static final String QUICK_SETTINGS_TILES_ROW = "quick_settings_tiles_row";
+
+        /**
+         * Navigation controls to Use
+         *
+         * @hide
+         */
+        public static final String NAV_BUTTONS = "nav_buttons";
+
+        /**
          * Volume key controls ringtone or media sound stream
          *
          * @hide
@@ -3249,6 +3290,12 @@ public final class Settings {
         public static final String FLIP_ACTION_KEY = "flip_action";
 
  
+         * Should Flip to Silence be used
+         *
+         * @hide
+         */
+        public static final String FLIP_ACTION_KEY = "flip_action";
+
         /**
          * Should call status sounds be player
          *
@@ -3818,6 +3865,10 @@ public final class Settings {
          * @hide
          */
         public static final String LISTVIEW_INTERPOLATOR = "listview_interpolator";
+         * Enable long press on back kill for soft buttons.
+         * @hide
+         */
+        public static final String SOFT_BACK_KILL_APP_ENABLE = "soft_back_kill_app_enable";
 
         /**
          * Settings to backup. This is here so that it's in the same place as the settings

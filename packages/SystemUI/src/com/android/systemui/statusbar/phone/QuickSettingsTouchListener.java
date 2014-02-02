@@ -111,7 +111,8 @@ class QuickSettingsTouchListener implements OnTouchListener {
         } else {
             mDetector.onTouchEvent(event);
 
-            if (event.getAction() == MotionEvent.ACTION_UP) {
+            if (action == MotionEvent.ACTION_UP
+                || action == MotionEvent.ACTION_CANCEL) {
                 mDegrees = 0;
                 view.animate().setInterpolator(mInterpolator).setDuration(150).rotationY(0).start();
 

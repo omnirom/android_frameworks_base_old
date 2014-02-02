@@ -55,6 +55,10 @@ public class QuickSettingsTileFlip3d extends GestureDetector.SimpleOnGestureList
         return (mFront.getVisibility() == View.VISIBLE);
     }
 
+    public boolean isBackSide() {
+        return (mBack.getVisibility() == View.VISIBLE);
+    }
+
     public ViewGroup getFront() {
         return mFront;
     }
@@ -96,6 +100,14 @@ public class QuickSettingsTileFlip3d extends GestureDetector.SimpleOnGestureList
         mBack.animate().setInterpolator(this).setDuration(150).rotationY(-180.0f + degrees).start();
         updateVisibility();
         mDegrees = mDegrees % 360.0f;
+    }
+
+    public void rotateReset() {
+        if (isFrontSide()) {
+            mFront.animate().setInterpolator(this).setDuration(150).rotationY(0).start();
+        } else {
+            mBack.animate().setInterpolator(this).setDuration(150).rotationY(0).start();
+        }
     }
 
     private void updateRotation() {
@@ -150,9 +162,13 @@ public class QuickSettingsTileFlip3d extends GestureDetector.SimpleOnGestureList
     @Override
     public boolean onTouch(View v, MotionEvent event) {
         mDetector.onTouchEvent(event);
-        if (event.getAction() == MotionEvent.ACTION_UP) {
+        int action = event.getAction();
+        if (action == MotionEvent.ACTION_CANCEL) {
+            rotateReset();
+            dispatchEventToActive(event);
+        } else if (action == MotionEvent.ACTION_UP) {
             if (!mFlingCancelClamp) {
-              clampRotation();
+                clampRotation();
             }
             mFlingCancelClamp = false;
 
@@ -163,7 +179,7 @@ public class QuickSettingsTileFlip3d extends GestureDetector.SimpleOnGestureList
 
     @Override
     public boolean onScroll(MotionEvent e1, MotionEvent e2, float dX, float dY) {
-        float width = mFront.getVisibility() == View.VISIBLE ? mFront.getWidth() : mBack.getWidth();
+        float width = isFrontSide() ? mFront.getWidth() : mBack.getWidth();
 
         if (width > 0) {
             double radians = Math.toRadians(-dX * 0.5f);

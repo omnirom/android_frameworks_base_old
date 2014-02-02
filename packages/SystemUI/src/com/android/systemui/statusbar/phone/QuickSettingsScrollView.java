@@ -24,6 +24,8 @@ import android.widget.ScrollView;
 
 public class QuickSettingsScrollView extends ScrollView {
 
+    private float xDistance, yDistance, lastX, lastY;
+
     public QuickSettingsScrollView(Context context) {
         super(context);
     }
@@ -45,6 +47,29 @@ public class QuickSettingsScrollView extends ScrollView {
                     child.getHeight() - (getHeight() - mPaddingBottom - mPaddingTop));
         }
         return scrollRange;
+    }
+
+    @Override
+    public boolean onInterceptTouchEvent(MotionEvent ev) {
+        switch (ev.getAction()) {
+                case MotionEvent.ACTION_DOWN:
+                     xDistance = yDistance = 0f;
+                     lastX = ev.getX();
+                     lastY = ev.getY();
+                     break;
+                case MotionEvent.ACTION_MOVE:
+                     final float curX = ev.getX();
+                     final float curY = ev.getY();
+                     xDistance += Math.abs(curX - lastX);
+                     yDistance += Math.abs(curY - lastY);
+                     lastX = curX;
+                     lastY = curY;
+                     if (xDistance > yDistance) {
+                        return false;
+                     }
+                     break;
+        }
+        return super.onInterceptTouchEvent(ev);
     }
 
     @Override

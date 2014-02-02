@@ -79,9 +79,14 @@ import android.view.WindowManager;
 import com.android.internal.telephony.ITelephony;
 import com.android.internal.util.XmlUtils;
 
+import org.xmlpull.v1.XmlPullParser;
+import org.xmlpull.v1.XmlPullParserFactory;
 import org.xmlpull.v1.XmlPullParserException;
 
+import java.io.File;
 import java.io.FileDescriptor;
+import java.io.FileInputStream;
+import java.io.InputStreamReader;
 import java.io.IOException;
 import java.io.PrintWriter;
 import java.lang.reflect.Field;
@@ -193,8 +198,10 @@ public class AudioService extends IAudioService.Stub {
     private static final int MAX_BATCH_VOLUME_ADJUST_STEPS = 4;
 
     /* Sound effect file names  */
-    private static final String SOUND_EFFECTS_PATH = "/media/audio/ui/";
+    private static final String DEFAULT_SOUND_EFFECTS_PATH = Environment.getRootDirectory() + "/media/audio/ui/";
     private static final List<String> SOUND_EFFECT_FILES = new ArrayList<String>();
+    private String mActiveSoundEffectsPath = DEFAULT_SOUND_EFFECTS_PATH;
+    private XmlPullParser mActiveAudioAssetsXml = null;
 
     /* Sound effect file name mapping sound effect id (AudioManager.FX_xxx) to
      * file index in SOUND_EFFECT_FILES[] (first column) and indicating if effect
@@ -743,6 +750,7 @@ public class AudioService extends IAudioService.Stub {
 
             mVolumeKeysControlMediaStream = Settings.System.getIntForUser(cr,
                     Settings.System.VOLUME_KEYS_CONTROL_MEDIA_STREAM, 0, UserHandle.USER_CURRENT) == 1;
+            updateManualSafeMediaVolume();
         }
 
         mVolumeKeysDefault = Settings.System.getIntForUser(cr,
@@ -1732,6 +1740,11 @@ public class AudioService extends IAudioService.Stub {
 
     private static final String ASSET_FILE_VERSION = "1.0";
     private static final String GROUP_TOUCH_SOUNDS = "touch_sounds";
+    private static final String GROUP_LOCK_SOUNDS = "lock_sounds";
+    private static final String GROUP_CAMERA_SOUNDS = "camera_sounds";
+
+    private static final String CUSTOM_AUDIO_ASSETS_FILE = "audio_assets.xml";
+    private static final String CUSTOM_AUDIO_SYMLINK_PATH = "/data/system/soundlinks/";
 
     private static final int SOUND_EFECTS_LOAD_TIMEOUT_MS = 5000;
 
@@ -1745,24 +1758,89 @@ public class AudioService extends IAudioService.Stub {
             SOUND_EFFECT_FILES_MAP[i][0] = 0;
             SOUND_EFFECT_FILES_MAP[i][1] = -1;
         }
+
+        // Setup default symlinks for MediaActionSound sounds.
+        // See MediaActionSound.java for more details
+        File symlinkDir = new File(CUSTOM_AUDIO_SYMLINK_PATH);
+        symlinkDir.mkdirs();
+        symlinkDir.setReadable(true, false);
+        symlinkDir.setExecutable(true, false);
+        symlink("/system/media/audio/ui/camera_click.ogg",
+                CUSTOM_AUDIO_SYMLINK_PATH + "camera_click.ogg");
+        symlink("/system/media/audio/ui/camera_focus.ogg",
+                CUSTOM_AUDIO_SYMLINK_PATH + "camera_focus.ogg");
+        symlink("/system/media/audio/ui/VideoRecord.ogg",
+                CUSTOM_AUDIO_SYMLINK_PATH + "VideoRecord_start.ogg");
+        symlink("/system/media/audio/ui/VideoRecord.ogg",
+                CUSTOM_AUDIO_SYMLINK_PATH + "VideoRecord_stop.ogg");
+        
+        // Reset lock/unlock sounds
+        Settings.Global.putString(mContentResolver,
+                Settings.Global.LOCK_SOUND,
+                "/system/media/audio/ui/Lock.ogg");
+        Settings.Global.putString(mContentResolver,
+                Settings.Global.UNLOCK_SOUND,
+                "/system/media/audio/ui/Unlock.ogg");
+    }
+
+    private void symlink(String targetPath, String linkName) {
+        File existing = new File(linkName);
+        if (existing.exists() && !existing.delete()) {
+            Log.e(TAG, "Unable to delete symlink: " + linkName);
+        }
+        String[] cmd = new String[]{ "ln", "-s", targetPath, linkName };
+
+        try {
+            Runtime.getRuntime().exec(cmd);
+        } catch (IOException e) {
+            Log.e(TAG, "Unable to create symlink to " + linkName + ":", e);
+        }
+    }
+
+    private void reloadTouchSoundAssets() {
+        SOUND_EFFECT_FILES.clear();
+        loadTouchSoundAssets();
     }
 
     private void loadTouchSoundAssets() {
-        XmlResourceParser parser = null;
+        XmlPullParser parser = null;
 
         // only load assets once.
         if (!SOUND_EFFECT_FILES.isEmpty()) {
             return;
         }
 
+        // check if user has custom sounds
+        String customSoundsPath = Settings.System.getStringForUser(mContentResolver,
+                Settings.System.CUSTOM_SOUND_EFFECTS_PATH,
+                UserHandle.USER_CURRENT);
+
+        if (customSoundsPath != null) {
+            try {
+                mActiveSoundEffectsPath = customSoundsPath;
+                mActiveAudioAssetsXml = XmlPullParserFactory.newInstance().newPullParser();
+                mActiveAudioAssetsXml.setInput(new InputStreamReader(new FileInputStream(
+                        customSoundsPath + "/" + CUSTOM_AUDIO_ASSETS_FILE)));
+            } catch (IOException e) {
+                Log.e(TAG, "Unable to find audio assets XML", e);
+            } catch (XmlPullParserException e) {
+                Log.e(TAG, "Unable to parse audio assets XML", e);
+            }
+        } else {
+            mActiveSoundEffectsPath = DEFAULT_SOUND_EFFECTS_PATH;
+            mActiveAudioAssetsXml = mContext.getResources().getXml(com.android.internal.R.xml.audio_assets);
+        }
+
         loadTouchSoundAssetDefaults();
 
         try {
-            parser = mContext.getResources().getXml(com.android.internal.R.xml.audio_assets);
+            parser = mActiveAudioAssetsXml;
 
             XmlUtils.beginDocument(parser, TAG_AUDIO_ASSETS);
             String version = parser.getAttributeValue(null, ATTR_VERSION);
-            boolean inTouchSoundsGroup = false;
+            boolean inTouchSoundsGroup = false,
+                    inLockSoundsGroup = false,
+                    inCameraSoundsGroup = false;
 
             if (ASSET_FILE_VERSION.equals(version)) {
                 while (true) {
@@ -1804,8 +1882,72 @@ public class AudioService extends IAudioService.Stub {
                             SOUND_EFFECT_FILES.add(file);
                         }
                         SOUND_EFFECT_FILES_MAP[fx][0] = i;
+                    } else if (element.equals(TAG_GROUP)) {
+                        String name = parser.getAttributeValue(null, ATTR_GROUP_NAME);
+                        if (GROUP_LOCK_SOUNDS.equals(name)) {
+                            inLockSoundsGroup = true;
+                        }
+                        break;
                     } else {
                         break;
+                    }
+                }
+                while (inLockSoundsGroup) {
+                    XmlUtils.nextElement(parser);
+                    String element = parser.getName();
+                    if (element == null) {
+                        break;
+                    }
+                    if (element.equals(TAG_ASSET)) {
+                        String id = parser.getAttributeValue(null, ATTR_ASSET_ID);
+                        String file = parser.getAttributeValue(null, ATTR_ASSET_FILE);
+
+                        if (id.equals("FX_LOCK")) {
+                            Settings.Global.putString(mContentResolver,
+                                    Settings.Global.LOCK_SOUND,
+                                    mActiveSoundEffectsPath + file);
+                        } else if (id.equals("FX_UNLOCK")) {
+                            Settings.Global.putString(mContentResolver,
+                                    Settings.Global.UNLOCK_SOUND,
+                                    mActiveSoundEffectsPath + file);
+                        } else {
+                            Log.w(TAG, "Unrecognized lock sound ID: "+id);
+                        }
+                    } else if (element.equals(TAG_GROUP)) {
+                        String name = parser.getAttributeValue(null, ATTR_GROUP_NAME);
+                        if (GROUP_CAMERA_SOUNDS.equals(name)) {
+                            inCameraSoundsGroup = true;
+                        }
+                        break;
+                    } else {
+                        break;
+                    }
+                }
+                while (inCameraSoundsGroup) {
+                    XmlUtils.nextElement(parser);
+                    String element = parser.getName();
+                    if (element == null) {
+                        break;
+                    }
+                    if (element.equals(TAG_ASSET)) {
+                        String id = parser.getAttributeValue(null, ATTR_ASSET_ID);
+                        String file = parser.getAttributeValue(null, ATTR_ASSET_FILE);
+
+                        if (id.equals("CAMERA_SHUTTER")) {
+                            symlink(mActiveSoundEffectsPath + file,
+                                    CUSTOM_AUDIO_SYMLINK_PATH + "camera_click.ogg");
+                        } else if (id.equals("CAMERA_FOCUS")) {
+                            symlink(mActiveSoundEffectsPath + file,
+                                    CUSTOM_AUDIO_SYMLINK_PATH + "camera_focus.ogg");
+                        } else if (id.equals("VIDEO_REC_START")) {
+                            symlink(mActiveSoundEffectsPath + file,
+                                    CUSTOM_AUDIO_SYMLINK_PATH + "VideoRecord_start.ogg");
+                        } else if (id.equals("VIDEO_REC_STOP")) {
+                            symlink(mActiveSoundEffectsPath + file,
+                                    CUSTOM_AUDIO_SYMLINK_PATH + "VideoRecord_stop.ogg");
+                        } else {
+                            Log.w(TAG, "Unrecognized camera sound ID: "+id);
+                        }
                     }
                 }
             }
@@ -1816,8 +1958,8 @@ public class AudioService extends IAudioService.Stub {
         } catch (IOException e) {
             Log.w(TAG, "I/O exception reading touch sound assets", e);
         } finally {
-            if (parser != null) {
-                parser.close();
+            if (parser != null && parser instanceof XmlResourceParser) {
+                ((XmlResourceParser)parser).close();
             }
         }
     }
@@ -3394,8 +3536,7 @@ public class AudioService extends IAudioService.Stub {
                         continue;
                     }
                     if (poolId[SOUND_EFFECT_FILES_MAP[effect][0]] == -1) {
-                        String filePath = Environment.getRootDirectory()
-                                + SOUND_EFFECTS_PATH
+                        String filePath = mActiveSoundEffectsPath
                                 + SOUND_EFFECT_FILES.get(SOUND_EFFECT_FILES_MAP[effect][0]);
                         int sampleId = mSoundPool.load(filePath, 0);
                         if (sampleId <= 0) {
@@ -3502,7 +3643,7 @@ public class AudioService extends IAudioService.Stub {
                 } else {
                     MediaPlayer mediaPlayer = new MediaPlayer();
                     try {
-                        String filePath = Environment.getRootDirectory() + SOUND_EFFECTS_PATH +
+                        String filePath = mActiveSoundEffectsPath +
                                     SOUND_EFFECT_FILES.get(SOUND_EFFECT_FILES_MAP[effectType][0]);
                         mediaPlayer.setDataSource(filePath);
                         mediaPlayer.setAudioStreamType(AudioSystem.STREAM_SYSTEM);
@@ -3779,6 +3920,9 @@ public class AudioService extends IAudioService.Stub {
                 UserHandle.USER_ALL);
             mContentResolver.registerContentObserver(Settings.System.getUriFor(
                 Settings.System.VOLUME_KEYS_CONTROL_MEDIA_STREAM), false, this);
+                Settings.System.CUSTOM_SOUND_EFFECTS_PATH), false, this);
+            mContentResolver.registerContentObserver(Settings.System.getUriFor(
+                Settings.System.MANUAL_SAFE_MEDIA_VOLUME), false, this);
         }
 
         @Override
@@ -3824,6 +3968,7 @@ public class AudioService extends IAudioService.Stub {
                     }
                 }
                 readDockAudioSettings(mContentResolver);
+                updateManualSafeMediaVolume();
 
                 mLinkNotificationWithVolume = Settings.System.getIntForUser(mContentResolver,
                         Settings.System.VOLUME_LINK_NOTIFICATION, 1, UserHandle.USER_CURRENT) == 1;
@@ -3835,6 +3980,7 @@ public class AudioService extends IAudioService.Stub {
                 mVolumeKeysDefault = Settings.System.getIntForUser(mContentResolver,
                         Settings.System.VOLUME_KEYS_DEFAULT, 1, UserHandle.USER_CURRENT);
 
+                reloadTouchSoundAssets();
             }
         }
     }
@@ -4646,6 +4792,8 @@ public class AudioService extends IAudioService.Stub {
     // mSafeMediaVolumeDevices lists the devices for which safe media volume is enforced,
     private final int mSafeMediaVolumeDevices = AudioSystem.DEVICE_OUT_WIRED_HEADSET |
                                                 AudioSystem.DEVICE_OUT_WIRED_HEADPHONE;
+    // mManualSafeMediaVolume overrides the built-in safe media volume
+    private boolean mManualSafeMediaVolume;
     // mMusicActiveMs is the cumulative time of music activity since safe volume was disabled.
     // When this time reaches UNSAFE_VOLUME_MUSIC_ACTIVE_MS_MAX, the safe media volume is re-enabled
     // automatically. mMusicActiveMs is rounded to a multiple of MUSIC_ACTIVE_POLL_PERIOD_MS.
@@ -4678,6 +4826,11 @@ public class AudioService extends IAudioService.Stub {
     }
 
     private void enforceSafeMediaVolume() {
+        // return if safe volume has been manually turned off
+        if (!mManualSafeMediaVolume) {
+            return;
+        }
+
         VolumeStreamState streamState = mStreamStates[AudioSystem.STREAM_MUSIC];
         int devices = mSafeMediaVolumeDevices;
         int i = 0;
@@ -4708,7 +4861,7 @@ public class AudioService extends IAudioService.Stub {
                     (mSafeMediaVolumeState == SAFE_MEDIA_VOLUME_ACTIVE) &&
                     (mStreamVolumeAlias[streamType] == AudioSystem.STREAM_MUSIC) &&
                     ((device & mSafeMediaVolumeDevices) != 0) &&
-                    (index > mSafeMediaVolumeIndex)) {
+                    (index > mSafeMediaVolumeIndex) && mManualSafeMediaVolume) {
                 return false;
             }
             return true;
@@ -4780,5 +4933,12 @@ public class AudioService extends IAudioService.Stub {
         if (status != 0) {
             Log.w(TAG, "AudioFlinger informed of device's low RAM attribute; status " + status);
         }
+    }
+
+    private void updateManualSafeMediaVolume() {
+        int safeMediaVolumeEnable = Settings.System.getIntForUser(mContext.getContentResolver(),
+                Settings.System.MANUAL_SAFE_MEDIA_VOLUME, 1, UserHandle.USER_CURRENT);
+        mManualSafeMediaVolume = (safeMediaVolumeEnable == 1);
+        setSafeMediaVolumeEnabled(mManualSafeMediaVolume);
     }
 }

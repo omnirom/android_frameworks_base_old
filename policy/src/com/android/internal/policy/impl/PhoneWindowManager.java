@@ -22,6 +22,7 @@ import android.app.ActivityManager.RunningAppProcessInfo;
 import android.app.ActivityManagerNative;
 import android.app.AppOpsManager;
 import android.app.IUiModeManager;
+import android.app.KeyguardManager;
 import android.app.ProgressDialog;
 import android.app.SearchManager;
 import android.app.StatusBarManager;
@@ -340,6 +341,7 @@ public class PhoneWindowManager implements WindowManagerPolicy {
     boolean mHasMenuKey;
     boolean mHasAssistKey;
     boolean mHasAppSwitchKey;
+    boolean mSoftBackKillApp;
 
     // The last window we were told about in focusChanged.
     WindowState mFocusedWindow;
@@ -668,6 +670,9 @@ public class PhoneWindowManager implements WindowManagerPolicy {
             resolver.registerContentObserver(Settings.System.getUriFor(
                     Settings.System.VIRTUAL_KEYS_HAPTIC_FEEDBACK), false, this,
                     UserHandle.USER_ALL);
+            resolver.registerContentObserver(Settings.System.getUriFor(
+                    Settings.System.SOFT_BACK_KILL_APP_ENABLE), false, this,
+                    UserHandle.USER_ALL);
 
             updateSettings();
         }
@@ -883,7 +888,14 @@ public class PhoneWindowManager implements WindowManagerPolicy {
                         com.android.internal.R.integer.config_longPressOnPowerBehavior);
             }
             int resolvedBehavior = mLongPressOnPowerBehavior;
-            if (FactoryTest.isLongPressOnPowerOffEnabled()) {
+            KeyguardManager km = (KeyguardManager) mContext.getSystemService(Context.KEYGUARD_SERVICE);
+            boolean locked = km.inKeyguardRestrictedInputMode();
+            boolean globalActionsOnLockScreen = Settings.System.getInt(
+                    mContext.getContentResolver(), Settings.System.LOCKSCREEN_ENABLE_POWER_MENU, 1) == 1;
+            if (locked && !globalActionsOnLockScreen) {
+                resolvedBehavior = LONG_PRESS_POWER_NOTHING;
+            }
+            else if (FactoryTest.isLongPressOnPowerOffEnabled()) {
                 resolvedBehavior = LONG_PRESS_POWER_SHUT_OFF_NO_CONFIRM;
             }
 
@@ -1222,6 +1234,10 @@ public class PhoneWindowManager implements WindowManagerPolicy {
         final boolean hasAssist = (mDeviceHardwareKeys & KEY_MASK_ASSIST) != 0;
         final boolean hasAppSwitch = (mDeviceHardwareKeys & KEY_MASK_APP_SWITCH) != 0;
         final ContentResolver resolver = mContext.getContentResolver();
+
+        mSoftBackKillApp = Settings.System.getIntForUser(resolver,
+                Settings.System.SOFT_BACK_KILL_APP_ENABLE,
+                0, UserHandle.USER_CURRENT) == 1;
 
         // initialize all assignments to sane defaults
         mPressOnHomeBehavior = KEY_ACTION_HOME;
@@ -2320,6 +2336,7 @@ public class PhoneWindowManager implements WindowManagerPolicy {
         // stop the kill action
         if (mBackKillPending && !down) {
             mHandler.removeCallbacks(mKillTask);
+            mBackKillPending = false;
         }
 
         // First we always handle the home key here, so applications
@@ -2368,7 +2385,8 @@ public class PhoneWindowManager implements WindowManagerPolicy {
                     return -1;
                 }
 
-                if (mPressOnHomeBehavior != KEY_ACTION_HOME){
+                // dont change handling of virtual home button events
+                if (mPressOnHomeBehavior != KEY_ACTION_HOME && !virtualKey){
                     performKeyAction(mPressOnHomeBehavior);
                 } else {
                     launchHomeFromHotKey();
@@ -2621,12 +2639,29 @@ public class PhoneWindowManager implements WindowManagerPolicy {
                             mLongPressOnBackBehavior != KEY_ACTION_APP_SWITCH) {
                         cancelPreloadRecentApps();
                     }
-                    if (!keyguardOn && mLongPressOnBackBehavior != KEY_ACTION_NOTHING) {
-                        performHapticFeedbackLw(null, HapticFeedbackConstants.LONG_PRESS, false);
-                        performKeyAction(mLongPressOnBackBehavior);
-                        // Do not perform action when key is released
-                        mBackDoCustomAction = false;
-                        return -1;
+                    if (!keyguardOn){
+                        if (mLongPressOnBackBehavior != KEY_ACTION_NOTHING) {
+                            performHapticFeedbackLw(null, HapticFeedbackConstants.LONG_PRESS, false);
+                            performKeyAction(mLongPressOnBackBehavior);
+                            // Do not perform action when key is released
+                            mBackDoCustomAction = false;
+                            return -1;
+                        } else if (mSoftBackKillApp) {
+                            // device with hardware key assigned to none and soft key back kill enabled
+                            // OR device with only soft keys and soft key back kill enabled
+                            if (!virtualKey){
+                                // ignore hard key press
+                                mBackDoCustomAction = false;
+                                return -1;
+                            } else {
+                                // handle soft key press
+                                performHapticFeedbackLw(null, HapticFeedbackConstants.LONG_PRESS, false);
+                                performKeyAction(KEY_ACTION_KILL_APP);
+                                // Do not perform action when key is released
+                                mBackDoCustomAction = false;
+                                return -1;
+                            }
+                        }
                     }
                 }
             } else {

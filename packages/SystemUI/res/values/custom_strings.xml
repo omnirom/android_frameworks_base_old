@@ -55,7 +55,7 @@ along with this program. If not, see <http://www.gnu.org/licenses/>.
     <!-- QuickSettings: Immersive mode (Off) [CHAR LIMIT=NONE] -->
     <string name="quick_settings_immersive_mode_off_label">Immersive Off</string>
 
-    <string name="network_4G">4G</string>
+    <string name="network_4G">4G/LTE</string>
     <string name="network_3G_only" translatable="false">3G Only</string>
     <string name="network_3G_auto" translatable="false">2G/3G Auto</string>
     <string name="network_3G" translatable="false">2G/3G Pref</string>
@@ -74,10 +74,14 @@ along with this program. If not, see <http://www.gnu.org/licenses/>.
     <string name="quick_settings_location_mode_high">High</string>
     <string name="quick_settings_location_mode_battery">Battery</string>
     <string name="quick_settings_location_mode_sensors">Device</string>
+    <string name="quick_settings_network_type">Status</string>
+    <string name="quick_settings_network_unknown">Unknown</string>
+    <string name="quick_settings_network_disable">\nNo internet</string>
+    <string name="quick_settings_quiethours_label">Quiet hours</string>
+    <string name="quick_settings_quiethours_off_label">Quiet hours off</string>
     <string name="quick_settings_ringer_on">Sound on</string>
     <string name="quick_settings_ringer_off">Sound off</string>
     <string name="quick_settings_ringer_normal">Sound</string>
-    <string name="quick_settings_rssi_type_label">Type</string>
     <string name="quick_settings_screen_sleep">Go to sleep</string>
     <string name="quick_settings_sync">Sync</string>
     <string name="quick_settings_sync_off">Sync off</string>
@@ -92,5 +96,18 @@ along with this program. If not, see <http://www.gnu.org/licenses/>.
     <string name="quick_settings_usb_tether_on_label">Tethering</string>
 
      <string name="status_bar_notification_hide_icon_packages">Hide app\'s notification icon(s)</string>
+
+    <string name="status_bar_notification_hide_icon_packages">Hide app\'s notification icon(s)</string>
+
+    <!-- Dialog title for navigation bar button selection -->
+    <string name="navbar_dialog_title">Choose action to assign</string>
+    <string name="navbar_home_button">Home button</string>
+    <string name="navbar_recent_button">Recent button</string>
+    <string name="navbar_search_button">Search button</string>
+    <string name="navbar_back_button">Back button</string>
+    <string name="navbar_empty_button">Empty button</string>
+    <string name="navbar_menu_conditional_button">Menu (autoHide) button</string>
+    <string name="navbar_menu_always_button">Menu (alwaysShow) button</string>
+    <string name="navbar_menu_big_button">Menu button</string>
 
 </resources>
