@@ -1,0 +1,55 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "ab62b9bd_54e0dd26",
+        "filename": "packages/SystemUI/res/values-de/custom_strings.xml",
+        "patchSetId": 5
+      },
+      "lineNbr": 33,
+      "author": {
+        "id": 1000650
+      },
+      "writtenOn": "2014-02-03T15:20:53Z",
+      "side": 1,
+      "message": "Wird in den Einstellungen mit \"Ruhemodus\" übersetzt. (https://gerrit.omnirom.org/#/c/5247/). \"Ruhemodus\" wird auch auf Samsung ROMs verwendet.",
+      "revId": "d1f6fbbb2d8df8addcb2d9245614f4c425fb0692",
+      "serverId": "56841c99-7c94-43d4-bf0b-cb4707e66d55",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "ab62b9bd_74dde171",
+        "filename": "packages/SystemUI/res/values-de/custom_strings.xml",
+        "patchSetId": 5
+      },
+      "lineNbr": 44,
+      "author": {
+        "id": 1000650
+      },
+      "writtenOn": "2014-02-03T15:20:53Z",
+      "side": 1,
+      "message": "Akku?",
+      "revId": "d1f6fbbb2d8df8addcb2d9245614f4c425fb0692",
+      "serverId": "56841c99-7c94-43d4-bf0b-cb4707e66d55",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "ab62b9bd_94ea7503",
+        "filename": "packages/SystemUI/res/values-de/custom_strings.xml",
+        "patchSetId": 5
+      },
+      "lineNbr": 69,
+      "author": {
+        "id": 1000650
+      },
+      "writtenOn": "2014-02-03T15:20:53Z",
+      "side": 1,
+      "message": "Akku?",
+      "revId": "d1f6fbbb2d8df8addcb2d9245614f4c425fb0692",
+      "serverId": "56841c99-7c94-43d4-bf0b-cb4707e66d55",
+      "unresolved": false
+    }
+  ]
+}
