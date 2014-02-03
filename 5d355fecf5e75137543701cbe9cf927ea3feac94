@@ -1,0 +1,21 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "ab62b9bd_34fb69df",
+        "filename": "policy/src/com/android/internal/policy/impl/PhoneWindowManager.java",
+        "patchSetId": 7
+      },
+      "lineNbr": 5185,
+      "author": {
+        "id": 1000026
+      },
+      "writtenOn": "2014-02-03T15:24:12Z",
+      "side": 1,
+      "message": "I wouldnt write the value to setting. Just use the same default calculation here and in OmniGears. Only settings app should change the value",
+      "revId": "5d355fecf5e75137543701cbe9cf927ea3feac94",
+      "serverId": "56841c99-7c94-43d4-bf0b-cb4707e66d55",
+      "unresolved": false
+    }
+  ]
+}
