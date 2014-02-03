@@ -288,7 +288,6 @@ public class PhoneWindowManager implements WindowManagerPolicy {
     PowerManager mPowerManager;
     DreamManagerInternal mDreamManagerInternal;
     IStatusBarService mStatusBarService;
-    boolean mPreloadedRecentApps;
     final Object mServiceAquireLock = new Object();
     Vibrator mVibrator; // Vibrator for giving feedback of orientation changes
     SearchManager mSearchManager;
@@ -1374,18 +1373,7 @@ public class PhoneWindowManager implements WindowManagerPolicy {
                 triggerVirtualKeypress(KeyEvent.KEYCODE_BACK);
                 break;
             case KEY_ACTION_APP_SWITCH:
-                sendCloseSystemWindows(SYSTEM_DIALOG_REASON_RECENT_APPS);
-                try {
-                    IStatusBarService statusbar = getStatusBarService();
-                    if (statusbar != null) {
-                        statusbar.toggleRecentApps();
-                        mRecentAppsPreloaded = false;
-                    }
-                } catch (RemoteException e) {
-                    Slog.e(TAG, "RemoteException when showing recent apps", e);
-                    // re-acquire status bar service next time it is needed.
-                    mStatusBarService = null;
-                }
+                toggleRecentApps();
                 break;
             case KEY_ACTION_SEARCH:
                 launchAssistAction();
@@ -3533,7 +3521,7 @@ public class PhoneWindowManager implements WindowManagerPolicy {
     };
 
     private void toggleRecentApps() {
-        mPreloadedRecentApps = false; // preloading no longer needs to be canceled
+        mRecentAppsPreloaded = false; // preloading no longer needs to be canceled
         try {
             IStatusBarService statusbar = getStatusBarService();
             if (statusbar != null) {
@@ -3553,7 +3541,7 @@ public class PhoneWindowManager implements WindowManagerPolicy {
     }
 
     private void showRecentApps(boolean triggeredFromAltTab) {
-        mPreloadedRecentApps = false; // preloading no longer needs to be canceled
+        mRecentAppsPreloaded = false; // preloading no longer needs to be canceled
         try {
             IStatusBarService statusbar = getStatusBarService();
             if (statusbar != null) {
@@ -3567,7 +3555,7 @@ public class PhoneWindowManager implements WindowManagerPolicy {
     }
 
     private void hideRecentApps(boolean triggeredFromAltTab, boolean triggeredFromHome) {
-        mPreloadedRecentApps = false; // preloading no longer needs to be canceled
+        mRecentAppsPreloaded = false; // preloading no longer needs to be canceled
         try {
             IStatusBarService statusbar = getStatusBarService();
             if (statusbar != null) {

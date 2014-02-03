@@ -41,7 +41,16 @@ public class OmniSwitchConstants {
     public static final String ACTION_TOGGLE_OVERLAY = APP_PACKAGE_NAME + ".ACTION_TOGGLE_OVERLAY";
 
     /**
-     * Intent for launching the omniswitch settings actvity
+     * Intent broadcast action for omniswitch service started
+     */
+    public static final String ACTION_SERVICE_START = APP_PACKAGE_NAME + ".ACTION_SERVICE_START";
+
+    /**
+     * Intent broadcast action for omniswitch service stopped
+     */
+    public static final String ACTION_SERVICE_STOP = APP_PACKAGE_NAME + ".ACTION_SERVICE_STOP";
+
+    /**
      */
     public static Intent INTENT_LAUNCH_APP = new Intent(Intent.ACTION_MAIN)
             .setClassName(APP_PACKAGE_NAME, APP_PACKAGE_NAME + ".SettingsActivity");
