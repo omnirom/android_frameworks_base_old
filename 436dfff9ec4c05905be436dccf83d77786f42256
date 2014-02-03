@@ -1,0 +1,21 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "ab62b9bd_54cc5d65",
+        "filename": "policy/src/com/android/internal/policy/impl/PhoneWindowManager.java",
+        "patchSetId": 8
+      },
+      "lineNbr": 1483,
+      "author": {
+        "id": 1000026
+      },
+      "writtenOn": "2014-02-03T22:31:40Z",
+      "side": 1,
+      "message": "you are now ignoring config_allowAllRotations. if it is true the possible default should include 180 :)",
+      "revId": "436dfff9ec4c05905be436dccf83d77786f42256",
+      "serverId": "56841c99-7c94-43d4-bf0b-cb4707e66d55",
+      "unresolved": false
+    }
+  ]
+}
