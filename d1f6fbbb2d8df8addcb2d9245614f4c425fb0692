@@ -19,6 +19,23 @@
     },
     {
       "key": {
+        "uuid": "ab62b9bd_d4d5cd21",
+        "filename": "packages/SystemUI/res/values-de/custom_strings.xml",
+        "patchSetId": 5
+      },
+      "lineNbr": 35,
+      "author": {
+        "id": 1000206
+      },
+      "writtenOn": "2014-02-03T16:49:38Z",
+      "side": 1,
+      "message": "Die Zeitangaben könntest du weglassen. Oder geht es um das Leerzeichen ?",
+      "revId": "d1f6fbbb2d8df8addcb2d9245614f4c425fb0692",
+      "serverId": "56841c99-7c94-43d4-bf0b-cb4707e66d55",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "ab62b9bd_74dde171",
         "filename": "packages/SystemUI/res/values-de/custom_strings.xml",
         "patchSetId": 5
@@ -30,6 +47,23 @@
       "writtenOn": "2014-02-03T15:20:53Z",
       "side": 1,
       "message": "Akku?",
+      "revId": "d1f6fbbb2d8df8addcb2d9245614f4c425fb0692",
+      "serverId": "56841c99-7c94-43d4-bf0b-cb4707e66d55",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "ab62b9bd_f4dad14e",
+        "filename": "packages/SystemUI/res/values-de/custom_strings.xml",
+        "patchSetId": 5
+      },
+      "lineNbr": 47,
+      "author": {
+        "id": 1000206
+      },
+      "writtenOn": "2014-02-03T16:49:38Z",
+      "side": 1,
+      "message": "translatable\u003d\"false\" ? Die folgenden auch. Da passt wohl schon im Original was nicht.",
       "revId": "d1f6fbbb2d8df8addcb2d9245614f4c425fb0692",
       "serverId": "56841c99-7c94-43d4-bf0b-cb4707e66d55",
       "unresolved": false
