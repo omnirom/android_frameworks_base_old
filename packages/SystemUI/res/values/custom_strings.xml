@@ -61,8 +61,6 @@ along with this program. If not, see <http://www.gnu.org/licenses/>.
     <string name="network_3G" translatable="false">2G/3G Pref</string>
     <string name="network_2G" translatable="false">2G Only</string>
 
-    <string name="quick_settings_quiethours_label">Quiet hours</string>
-    <string name="quick_settings_quiethours_off_label">Quiet hours off</string>
     <string name="quick_settings_sleep_label_back_15">15s</string>
     <string name="quick_settings_sleep_label_back_30">30s</string>
     <string name="quick_settings_sleep_label_back_60">60s</string>
@@ -94,8 +92,6 @@ along with this program. If not, see <http://www.gnu.org/licenses/>.
     <string name="quick_settings_usb_tether_off_label">Disconnected</string>
     <string name="quick_settings_usb_tether_connected_label">Tethering off</string>
     <string name="quick_settings_usb_tether_on_label">Tethering</string>
-
-     <string name="status_bar_notification_hide_icon_packages">Hide app\'s notification icon(s)</string>
 
     <string name="status_bar_notification_hide_icon_packages">Hide app\'s notification icon(s)</string>
 
