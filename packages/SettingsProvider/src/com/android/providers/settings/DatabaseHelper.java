@@ -2274,6 +2274,11 @@ public class DatabaseHelper extends SQLiteOpenHelper {
             loadIntegerSetting(stmt, Settings.Global.LOW_BATTERY_SOUND_TIMEOUT,
                     R.integer.def_low_battery_sound_timeout);
 
+            type = SystemProperties.getInt("ro.telephony.tetherdunrequired", -1);
+            if (type == 0 || type == 1) {
+                loadSetting(stmt, Settings.Global.TETHER_DUN_REQUIRED, type);
+            }
+
             // --- New global settings start here
         } finally {
             if (stmt != null) stmt.close();
