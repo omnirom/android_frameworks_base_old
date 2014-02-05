@@ -56,10 +56,10 @@
     <string name="quick_settings_immersive_mode_off_label">Immersive Off</string>
 
     <string name="network_4G">4G/LTE</string>
-    <string name="network_3G_only" translatable="false">3G Only</string>
-    <string name="network_3G_auto" translatable="false">2G/3G Auto</string>
-    <string name="network_3G" translatable="false">2G/3G Pref</string>
-    <string name="network_2G" translatable="false">2G Only</string>
+    <string name="network_3G_only">3G Only</string>
+    <string name="network_3G_auto">2G/3G Auto</string>
+    <string name="network_3G">2G/3G Pref</string>
+    <string name="network_2G">2G Only</string>
 
     <string name="quick_settings_sleep_label_back_15">15s</string>
     <string name="quick_settings_sleep_label_back_30">30s</string>
