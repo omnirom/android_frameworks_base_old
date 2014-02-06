@@ -371,6 +371,9 @@
     <!-- label for item that takes screenrecord in the phone options dialog -->
     <string name="global_action_screenrecord">Screen record</string>
 
+    <!-- Label for item that opens the profile choosing dialog -->
+    <string name="global_action_choose_profile">Profile</string>
+
     <!-- label for item that generates a bug report in the phone options dialog -->
     <string name="global_action_bug_report">Bug report</string>
 
@@ -3785,6 +3788,8 @@
     <string name="progress_unmounting" product="nosdcard">Unmounting USB storage\u2026</string>
     <!-- Text for progress dialog while unmounting SD card [CHAR LIMIT=NONE] -->
     <string name="progress_unmounting" product="default">Unmounting SD card\u2026</string>
+    <!-- Text for progress dialog while formatting SD card [CHAR LIMIT=NONE] -->
+    <string name="progress_nomediapresent" product="default">No removable media present\u2026</string>
     <!-- Text for progress dialog while erasing USB storage volume [CHAR LIMIT=NONE] -->
     <string name="progress_erasing" product="nosdcard">Erasing USB storage\u2026</string>
     <!-- Text for progress dialog while erasing SD card [CHAR LIMIT=NONE] -->

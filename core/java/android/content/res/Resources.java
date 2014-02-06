@@ -132,8 +132,8 @@ public class Resources {
     /** @hide */
     public static int selectDefaultTheme(int curTheme, int targetSdkVersion) {
         return selectSystemTheme(curTheme, targetSdkVersion,
-                com.android.internal.R.style.Theme,
-                com.android.internal.R.style.Theme_Holo,
+                com.android.internal.R.style.Theme_Light,
+                com.android.internal.R.style.Theme_Holo_Light,
                 com.android.internal.R.style.Theme_DeviceDefault);
     }
     
@@ -1597,7 +1597,8 @@ public class Resources {
                     keyboardHidden, mConfiguration.navigation, width, height,
                     mConfiguration.smallestScreenWidthDp,
                     mConfiguration.screenWidthDp, mConfiguration.screenHeightDp,
-                    mConfiguration.screenLayout, mConfiguration.uiMode,
+                    mConfiguration.screenLayout,
+                    mConfiguration.uiThemeMode, mConfiguration.uiMode,
                     Build.VERSION.RESOURCES_SDK_INT);
 
             if (DEBUG_CONFIG) {
@@ -1622,6 +1623,20 @@ public class Resources {
     private void clearDrawableCacheLocked(
             LongSparseArray<WeakReference<ConstantState>> cache,
             int configChanges) {
+
+        /*
+         * Quick test to find out if the config change that occurred should
+         * trigger a full cache wipe.
+         */
+        if (Configuration.needNewResources(configChanges, ActivityInfo.CONFIG_UI_THEME_MODE)) {
+            if (DEBUG_CONFIG) {
+                Log.d(TAG, "Clear drawable cache from config changes: 0x"
+                        + Integer.toHexString(configChanges));
+            }
+            cache.clear();
+            return;
+        }
+
         int N = cache.size();
         if (DEBUG_CONFIG) {
             Log.d(TAG, "Cleaning up drawables config changes: 0x"
@@ -2025,6 +2040,13 @@ public class Resources {
 
     static private final int LAYOUT_DIR_CONFIG = ActivityInfo.activityInfoConfigToNative(
             ActivityInfo.CONFIG_LAYOUT_DIRECTION);
+
+    /** @hide */
+    public final void updateStringCache() {
+        synchronized (mTmpValue) {
+            mAssets.recreateStringBlocks();
+        }
+    }
 
     /*package*/ Drawable loadDrawable(TypedValue value, int id)
             throws NotFoundException {

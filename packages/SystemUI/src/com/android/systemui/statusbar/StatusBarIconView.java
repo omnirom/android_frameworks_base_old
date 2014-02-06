@@ -1,18 +1,18 @@
 /*
- * Copyright (C) 2008 The Android Open Source Project
- *
- * Licensed under the Apache License, Version 2.0 (the "License");
- * you may not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- *
- *      http://www.apache.org/licenses/LICENSE-2.0
- *
- * Unless required by applicable law or agreed to in writing, software
- * distributed under the License is distributed on an "AS IS" BASIS,
- * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- * See the License for the specific language governing permissions and
- * limitations under the License.
- */
+* Copyright (C) 2008 The Android Open Source Project
+*
+* Licensed under the Apache License, Version 2.0 (the "License");
+* you may not use this file except in compliance with the License.
+* You may obtain a copy of the License at
+*
+* http://www.apache.org/licenses/LICENSE-2.0
+*
+* Unless required by applicable law or agreed to in writing, software
+* distributed under the License is distributed on an "AS IS" BASIS,
+* WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+* See the License for the specific language governing permissions and
+* limitations under the License.
+*/
 
 package com.android.systemui.statusbar;
 
@@ -111,8 +111,8 @@ public class StatusBarIconView extends AnimatedImageView {
     }
 
     /**
-     * Returns whether the set succeeded.
-     */
+* Returns whether the set succeeded.
+*/
     public boolean set(StatusBarIcon icon) {
         return set(icon, false);
     }
@@ -177,13 +177,13 @@ public class StatusBarIconView extends AnimatedImageView {
     }
 
     /**
-     * Returns the right icon to use for this item, respecting the iconId and
-     * iconPackage (if set)
-     *
-     * @param context Context to use to get resources if iconPackage is not set
-     * @return Drawable for this item, or null if the package or item could not
-     *         be found
-     */
+* Returns the right icon to use for this item, respecting the iconId and
+* iconPackage (if set)
+*
+* @param context Context to use to get resources if iconPackage is not set
+* @return Drawable for this item, or null if the package or item could not
+* be found
+*/
     public static Drawable getIcon(Context context, StatusBarIcon icon) {
         Resources r = null;
 

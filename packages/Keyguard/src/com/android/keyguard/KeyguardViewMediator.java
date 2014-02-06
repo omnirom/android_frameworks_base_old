@@ -126,6 +126,7 @@ public class KeyguardViewMediator {
     private static final int DISPATCH_EVENT = 15;
     private static final int LAUNCH_CAMERA = 16;
     private static final int DISMISS = 17;
+    private static final int START_CUSTOM_INTENT = 18;
 
     /**
      * The default amount of time we stay awake (used for all key input)
@@ -1140,6 +1141,9 @@ public class KeyguardViewMediator {
                 case SHOW_ASSISTANT:
                     handleShowAssistant();
                     break;
+                case START_CUSTOM_INTENT:
+                    handleShowCustomIntent((Intent) msg.obj);
+                    break;
                 case DISPATCH_EVENT:
                     handleDispatchEvent((MotionEvent) msg.obj);
                     break;
@@ -1269,6 +1273,12 @@ public class KeyguardViewMediator {
                 if (DEBUG) Log.d(TAG, "handleShow");
             }
 
+            new Thread(new Runnable() {
+                public void run() {
+                    playSounds(true);
+                }
+            }).start();
+
             mKeyguardViewManager.show(options);
             mShowing = true;
             mKeyguardDonePending = false;
@@ -1279,9 +1289,6 @@ public class KeyguardViewMediator {
                 ActivityManagerNative.getDefault().closeSystemDialogs("lock");
             } catch (RemoteException e) {
             }
-
-            // Do this at the end to not slow down display of the keyguard.
-            playSounds(true);
 
             mShowKeyguardWakeLock.release();
         }
@@ -1411,6 +1418,15 @@ public class KeyguardViewMediator {
 
     public void handleShowAssistant() {
         mKeyguardViewManager.showAssistant();
+    }
+
+    public void showCustomIntent(Intent intent) {
+        Message msg = mHandler.obtainMessage(START_CUSTOM_INTENT, intent);
+        mHandler.sendMessage(msg);
+    }
+
+    public void handleShowCustomIntent(Intent intent) {
+        mKeyguardViewManager.showCustomIntent(intent);
     }
 
     private boolean isAssistantAvailable() {

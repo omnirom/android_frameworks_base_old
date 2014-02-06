@@ -5052,6 +5052,13 @@ public class PhoneWindowManager implements WindowManagerPolicy {
     }
 
     /** {@inheritDoc} */
+    public void showCustomIntentOnKeyguard(Intent intent) {
+        if (mKeyguardDelegate != null) {
+            mKeyguardDelegate.showCustomIntent(intent);
+        }
+    }
+
+    /** {@inheritDoc} */
     public boolean inKeyguardRestrictedKeyInputMode() {
         if (mKeyguardDelegate == null) return false;
         return mKeyguardDelegate.isInputRestricted();
@@ -5929,7 +5936,7 @@ public class PhoneWindowManager implements WindowManagerPolicy {
         }
     }
 
-    private boolean isImmersiveMode(int vis) {
+    public boolean isImmersiveMode(int vis) {
         final int flags = View.SYSTEM_UI_FLAG_IMMERSIVE | View.SYSTEM_UI_FLAG_IMMERSIVE_STICKY;
         return mNavigationBar != null
                 && (vis & View.SYSTEM_UI_FLAG_HIDE_NAVIGATION) != 0

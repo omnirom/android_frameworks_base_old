@@ -25,8 +25,11 @@ import com.android.internal.R;
 import android.app.ActivityManagerNative;
 import android.app.AlertDialog;
 import android.app.Dialog;
+import android.app.Profile;
+import android.app.ProfileManager;
 import android.content.BroadcastReceiver;
 import android.content.Context;
+import android.content.ContentResolver;
 import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.IntentFilter;
@@ -71,6 +74,7 @@ import android.widget.TextView;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.UUID;
 
 /**
  * Needed for takeScreenshot and takeScreenrecord
@@ -94,6 +98,8 @@ class GlobalActions implements DialogInterface.OnDismissListener, DialogInterfac
 
     private final Context mContext;
     private final WindowManagerFuncs mWindowManagerFuncs;
+
+    private Context mUiContext;
     private final AudioManager mAudioManager;
     private final IDreamManager mDreamManager;
 
@@ -113,6 +119,7 @@ class GlobalActions implements DialogInterface.OnDismissListener, DialogInterfac
     private boolean mIsWaitingForEcmExit = false;
     private boolean mHasTelephony;
     private boolean mHasVibrator;
+    private Profile mChosenProfile;
     private final boolean mShowSilentToggle;
     private final boolean mShowScreenRecord;
     private ConnectivityManager mConnectivityManager;
@@ -163,11 +170,16 @@ class GlobalActions implements DialogInterface.OnDismissListener, DialogInterfac
         mKeyguardShowing = keyguardShowing;
         mDeviceProvisioned = isDeviceProvisioned;
         if (mDialog != null) {
+            if (mUiContext != null) {
+                mUiContext = null;
+            }
             mDialog.dismiss();
             mDialog = null;
+            mDialog = createDialog();
             // Show delayed, so that the dismiss of the previous dialog completes
             mHandler.sendEmptyMessage(MESSAGE_SHOW);
         } else {
+            mDialog = createDialog();
             handleShow();
         }
     }
@@ -194,6 +206,12 @@ class GlobalActions implements DialogInterface.OnDismissListener, DialogInterfac
         mDialog.getWindow().setAttributes(attrs);
         mDialog.show();
         mDialog.getWindow().getDecorView().setSystemUiVisibility(View.STATUS_BAR_DISABLE_EXPAND);
+    }
+
+    private Context getUiContext() {
+        if (mUiContext == null) {
+        }
+        return mUiContext != null ? mUiContext : mContext;
     }
 
     /**
@@ -279,7 +297,7 @@ class GlobalActions implements DialogInterface.OnDismissListener, DialogInterfac
             }
         };
 
-
+        final ContentResolver cr = mContext.getContentResolver();
         mItems = new ArrayList<Action>();
 
         // first: power off
@@ -325,6 +343,34 @@ class GlobalActions implements DialogInterface.OnDismissListener, DialogInterfac
                     return true;
                 }
             });
+
+        // next: profile
+        // only shown if both system profiles and the menu item is enabled, enabled by default
+        boolean showProfiles =
+                Settings.System.getIntForUser(cr,
+                        Settings.System.SYSTEM_PROFILES_ENABLED, 1, UserHandle.USER_CURRENT) == 1
+                && Settings.System.getIntForUser(cr,
+                        Settings.System.POWER_MENU_PROFILES_ENABLED, 1, UserHandle.USER_CURRENT) == 1;
+        if (showProfiles) {
+            mItems.add(
+                new ProfileChooseAction() {
+                    public void onPress() {
+                        createProfileDialog();
+                    }
+
+                    public boolean onLongPress() {
+                        return true;
+                    }
+
+                    public boolean showDuringKeyguard() {
+                        return false;
+                    }
+
+                    public boolean showBeforeProvisioning() {
+                        return false;
+                    }
+                });
+        }
 
         // next: mobile data
         if (Settings.System.getInt(mContext.getContentResolver(),
@@ -476,6 +522,41 @@ class GlobalActions implements DialogInterface.OnDismissListener, DialogInterfac
         dialog.setOnDismissListener(this);
 
         return dialog;
+    }
+
+private void createProfileDialog() {
+        final ProfileManager profileManager = (ProfileManager) mContext
+                .getSystemService(Context.PROFILE_SERVICE);
+
+        final Profile[] profiles = profileManager.getProfiles();
+        UUID activeProfile = profileManager.getActiveProfile().getUuid();
+        final CharSequence[] names = new CharSequence[profiles.length];
+
+        int i = 0;
+        int checkedItem = 0;
+
+        for (Profile profile : profiles) {
+            if (profile.getUuid().equals(activeProfile)) {
+                checkedItem = i;
+                mChosenProfile = profile;
+            }
+            names[i++] = profile.getName();
+        }
+
+        final AlertDialog.Builder ab = new AlertDialog.Builder(getUiContext());
+
+        AlertDialog dialog = ab.setSingleChoiceItems(names, checkedItem,
+                new DialogInterface.OnClickListener() {
+                    public void onClick(DialogInterface dialog, int which) {
+                        if (which < 0)
+                            return;
+                        mChosenProfile = profiles[which];
+                        profileManager.setActiveProfile(mChosenProfile.getUuid());
+                        dialog.cancel();
+                    }
+                }).create();
+        dialog.getWindow().setType(WindowManager.LayoutParams.TYPE_SYSTEM_DIALOG);
+        dialog.show();
     }
 
     /**
@@ -775,6 +856,7 @@ class GlobalActions implements DialogInterface.OnDismissListener, DialogInterfac
 
         public View getView(int position, View convertView, ViewGroup parent) {
             Action action = getItem(position);
+            final Context context = getUiContext();
             return action.create(mContext, convertView, parent, LayoutInflater.from(mContext));
         }
     }
@@ -869,6 +951,46 @@ class GlobalActions implements DialogInterface.OnDismissListener, DialogInterfac
                 messageView.setText(mMessage);
             } else {
                 messageView.setText(mMessageResId);
+            }
+
+            return v;
+        }
+    }
+
+    /**
+     * A single press action maintains no state, just responds to a press
+     * and takes an action.
+     */
+    private abstract class ProfileChooseAction implements Action {
+        private ProfileManager mProfileManager;
+
+        protected ProfileChooseAction() {
+            mProfileManager = (ProfileManager)mContext.getSystemService(Context.PROFILE_SERVICE);
+        }
+
+        public boolean isEnabled() {
+            return true;
+        }
+
+        abstract public void onPress();
+
+        public View create(Context context, View convertView, ViewGroup parent, LayoutInflater inflater) {
+            View v = inflater.inflate(R.layout.global_actions_item, parent, false);
+
+            ImageView icon = (ImageView) v.findViewById(R.id.icon);
+            TextView messageView = (TextView) v.findViewById(R.id.message);
+            TextView statusView = (TextView) v.findViewById(R.id.status);
+            if (statusView != null) {
+                statusView.setVisibility(View.VISIBLE);
+                statusView.setText(mProfileManager.getActiveProfile().getName());
+            }
+
+            if (icon != null) {
+                icon.setImageDrawable(context.getResources().getDrawable(R.drawable.ic_lock_profile));
+            }
+
+            if (messageView != null) {
+                messageView.setText(R.string.global_action_choose_profile);
             }
 
             return v;

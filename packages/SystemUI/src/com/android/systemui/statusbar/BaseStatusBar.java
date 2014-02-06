@@ -1,18 +1,18 @@
 /*
- * Copyright (C) 2010 The Android Open Source Project
- *
- * Licensed under the Apache License, Version 2.0 (the "License");
- * you may not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- *
- *      http://www.apache.org/licenses/LICENSE-2.0
- *
- * Unless required by applicable law or agreed to in writing, software
- * distributed under the License is distributed on an "AS IS" BASIS,
- * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- * See the License for the specific language governing permissions and
- * limitations under the License.
- */
+* Copyright (C) 2010 The Android Open Source Project
+*
+* Licensed under the Apache License, Version 2.0 (the "License");
+* you may not use this file except in compliance with the License.
+* You may obtain a copy of the License at
+*
+* http://www.apache.org/licenses/LICENSE-2.0
+*
+* Unless required by applicable law or agreed to in writing, software
+* distributed under the License is distributed on an "AS IS" BASIS,
+* WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+* See the License for the specific language governing permissions and
+* limitations under the License.
+*/
 
 package com.android.systemui.statusbar;
 
@@ -150,9 +150,9 @@ public abstract class BaseStatusBar extends SystemUI implements
     // UI-specific methods
 
     /**
-     * Create all windows necessary for the status bar (including navigation, overlay panels, etc)
-     * and add them to the window manager.
-     */
+* Create all windows necessary for the status bar (including navigation, overlay panels, etc)
+* and add them to the window manager.
+*/
     protected abstract void createAndAddWindows();
 
     protected WindowManager mWindowManager;
@@ -198,7 +198,7 @@ public abstract class BaseStatusBar extends SystemUI implements
                 try {
                     // The intent we are sending is for the application, which
                     // won't have permission to immediately start an activity after
-                    // the user switches to home.  We know it is safe to do at this
+                    // the user switches to home. We know it is safe to do at this
                     // point, so make sure new activity switches are now allowed.
                     ActivityManagerNative.getDefault().resumeAppSwitches();
                     // Also, notifications can be launched from the lock screen,
@@ -419,7 +419,7 @@ public abstract class BaseStatusBar extends SystemUI implements
                 if(hideIconCheck != null) {
                     hideIconCheck.setChecked(isIconHiddenByUser(packageNameF));
                     if (packageNameF.equals("android")) {
-                        // cannot set it, no one likes a liar 
+                        // cannot set it, no one likes a liar
                         hideIconCheck.setVisible(false);
                     }
                 }
@@ -771,7 +771,7 @@ public abstract class BaseStatusBar extends SystemUI implements
             try {
                 // The intent we are sending is for the application, which
                 // won't have permission to immediately start an activity after
-                // the user switches to home.  We know it is safe to do at this
+                // the user switches to home. We know it is safe to do at this
                 // point, so make sure new activity switches are now allowed.
                 ActivityManagerNative.getDefault().resumeAppSwitches();
                 // Also, notifications can be launched from the lock screen,
@@ -789,7 +789,7 @@ public abstract class BaseStatusBar extends SystemUI implements
                 try {
                     mIntent.send(mContext, 0, overlay);
                 } catch (PendingIntent.CanceledException e) {
-                    // the stack trace isn't very helpful here.  Just log the exception message.
+                    // the stack trace isn't very helpful here. Just log the exception message.
                     Log.w(TAG, "Sending contentIntent failed: " + e);
                 }
 
@@ -808,12 +808,12 @@ public abstract class BaseStatusBar extends SystemUI implements
         }
     }
     /**
-     * The LEDs are turned o)ff when the notification panel is shown, even just a little bit.
-     * This was added last-minute and is inconsistent with the way the rest of the notifications
-     * are handled, because the notification isn't really cancelled.  The lights are just
-     * turned off.  If any other notifications happen, the lights will turn back on.  Steve says
-     * this is what he wants. (see bug 1131461)
-     */
+* The LEDs are turned o)ff when the notification panel is shown, even just a little bit.
+* This was added last-minute and is inconsistent with the way the rest of the notifications
+* are handled, because the notification isn't really cancelled. The lights are just
+* turned off. If any other notifications happen, the lights will turn back on. Steve says
+* this is what he wants. (see bug 1131461)
+*/
     protected void visibilityChanged(boolean visible) {
         if (mPanelSlightlyVisible != visible) {
             mPanelSlightlyVisible = visible;
@@ -826,11 +826,11 @@ public abstract class BaseStatusBar extends SystemUI implements
     }
 
     /**
-     * Cancel this notification and tell the StatusBarManagerService / NotificationManagerService
-     * about the failure.
-     *
-     * WARNING: this will call back into us.  Don't hold any locks.
-     */
+* Cancel this notification and tell the StatusBarManagerService / NotificationManagerService
+* about the failure.
+*
+* WARNING: this will call back into us. Don't hold any locks.
+*/
     void handleNotificationError(IBinder key, StatusBarNotification n, String message) {
         removeNotification(key);
         try {
@@ -964,7 +964,7 @@ public abstract class BaseStatusBar extends SystemUI implements
                     + " bigContentView=" + bigContentView);
         }
 
-        // Can we just reapply the RemoteViews in place?  If when didn't change, the order
+        // Can we just reapply the RemoteViews in place? If when didn't change, the order
         // didn't change.
 
         // 1U is never null
@@ -1021,7 +1021,7 @@ public abstract class BaseStatusBar extends SystemUI implements
                 updateExpansionStates();
             }
             catch (RuntimeException e) {
-                // It failed to add cleanly.  Log, and remove the view from the panel.
+                // It failed to add cleanly. Log, and remove the view from the panel.
                 Log.w(TAG, "Couldn't reapply views for package " + contentView.getPackage(), e);
                 removeNotificationViews(key);
                 addNotificationViews(key, notification);
@@ -1033,7 +1033,7 @@ public abstract class BaseStatusBar extends SystemUI implements
             if (DEBUG) Log.d(TAG, "notification is " + (isTopAnyway ? "top" : "not top"));
             final boolean wasExpanded = oldEntry.row.isUserExpanded();
             removeNotificationViews(key);
-            addNotificationViews(key, notification);  // will also replace the heads up
+            addNotificationViews(key, notification); // will also replace the heads up
             if (wasExpanded) {
                 final NotificationData.Entry newEntry = mNotificationData.findByKey(key);
                 newEntry.row.setExpanded(true);

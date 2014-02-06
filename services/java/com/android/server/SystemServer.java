@@ -22,9 +22,11 @@ import android.content.ComponentName;
 import android.content.ContentResolver;
 import android.content.Context;
 import android.content.Intent;
+import android.content.IntentFilter;
 import android.content.pm.IPackageManager;
 import android.content.pm.PackageManager;
 import android.content.res.Configuration;
+import android.database.Cursor;
 import android.media.AudioService;
 import android.net.wifi.p2p.WifiP2pService;
 import android.os.Environment;
@@ -39,6 +41,7 @@ import android.os.SystemProperties;
 import android.os.UserHandle;
 import android.provider.Settings;
 import android.service.dreams.DreamService;
+import android.text.TextUtils;
 import android.util.DisplayMetrics;
 import android.util.EventLog;
 import android.util.Log;
@@ -363,6 +366,7 @@ class ServerThread {
         StatusBarManagerService statusBar = null;
         InputMethodManagerService imm = null;
         AppWidgetService appWidget = null;
+        ProfileManagerService profile = null;
         NotificationManagerService notification = null;
         WallpaperManagerService wallpaper = null;
         LocationManagerService location = null;
@@ -580,6 +584,14 @@ class ServerThread {
                     contentService.systemReady();
             } catch (Throwable e) {
                 reportWtf("making Content Service ready", e);
+            }
+
+            try {
+                Slog.i(TAG, "Profile Manager");
+                profile = new ProfileManagerService(context);
+                ServiceManager.addService(Context.PROFILE_SERVICE, profile);
+            } catch (Throwable e) {
+                Slog.e(TAG, "Failure starting Profile Manager", e);
             }
 
             try {

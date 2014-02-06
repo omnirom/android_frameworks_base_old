@@ -256,6 +256,7 @@
   <java-symbol type="bool" name="config_duplicate_port_omadm_wappush" />
   <java-symbol type="bool" name="config_enable_emergency_call_while_sim_locked" />
   <java-symbol type="bool" name="config_enable_puk_unlock_screen" />
+  <java-symbol type="bool" name="config_hotswapCapable" />
   <java-symbol type="bool" name="config_mms_content_disposition_support" />
   <java-symbol type="bool" name="config_showMenuShortcutsWhenKeyboardPresent" />
   <java-symbol type="bool" name="config_sip_wifi_only" />
@@ -691,6 +692,7 @@
   <java-symbol type="string" name="mobile_provisioning_apn" />
   <java-symbol type="string" name="mobile_provisioning_url" />
   <java-symbol type="string" name="mobile_redirected_provisioning_url" />
+  <java-symbol type="string" name="progress_nomediapresent" />
   <java-symbol type="string" name="reboot_safemode_confirm" />
   <java-symbol type="string" name="reboot_safemode_title" />
   <java-symbol type="string" name="relationTypeAssistant" />
@@ -1660,8 +1662,8 @@
   <java-symbol type="dimen" name="status_bar_icon_size" />
   <java-symbol type="dimen" name="system_bar_icon_size" />
   <java-symbol type="drawable" name="list_selector_pressed_holo_dark" />
-  <java-symbol type="drawable" name="scrubber_control_disabled_holo" />
-  <java-symbol type="drawable" name="scrubber_control_selector_holo" />
+  <java-symbol type="drawable" name="scrubber_control_disabled_holo_dark" />
+  <java-symbol type="drawable" name="scrubber_control_selector_holo_dark" />
   <java-symbol type="drawable" name="scrubber_progress_horizontal_holo_dark" />
   <java-symbol type="drawable" name="usb_android" />
   <java-symbol type="drawable" name="usb_android_connected" />
@@ -1791,6 +1793,8 @@
   <java-symbol type="bool" name="config_samsung_stk" />
   <java-symbol type="drawable" name="ic_lock_reboot" />
   <java-symbol type="string" name="global_action_reboot" />
+  <java-symbol type="string" name="global_action_choose_profile" />
+  <java-symbol type="string" name="global_actions" />
   <java-symbol type="array" name="shutdown_reboot_options" />
   <java-symbol type="array" name="shutdown_reboot_actions" />
   <java-symbol type="string" name="reboot_system" />
@@ -1799,6 +1803,13 @@
   <java-symbol type="string" name="app_killed_message" />
   <java-symbol type="bool" name="config_hasRemovableLid" />
   <java-symbol type="bool" name="config_smsSamsungCdmaAlternateMessageIDEncoding" />
+  <java-symbol type="drawable" name="ic_lock_profile" />
+
+  <!-- Profiles -->
+  <java-symbol type="xml" name="profile_default" />
+  <java-symbol type="string" name="wildcardProfile" />
+  <java-symbol type="string" name="profile_picker_title" />
+  <java-symbol type="string" name="profile_none" />
 
   <!-- Wifi -->
   <java-symbol type="bool" name="config_wifiApStartInterface" />
@@ -1806,6 +1817,17 @@
   <!-- Stylus gestures -->
   <java-symbol type="bool" name="config_stylusGestures" />
   <java-symbol type="string" name="stylus_app_not_installed" />
+
+  <!-- Privacy Guard -->
+  <java-symbol type="string" name="privacy_guard_notification" />
+  <java-symbol type="string" name="privacy_guard_notification_detail" />
+  <java-symbol type="string" name="privacy_guard_custom_notification_detail" />
+  <java-symbol type="drawable" name="stat_notify_privacy_guard" />
+  <java-symbol type="drawable" name="stat_notify_privacy_guard_off" />
+  <java-symbol type="drawable" name="stat_notify_privacy_guard_custom" />
+  <java-symbol type="drawable" name="stat_notify_privacy_guard_plus" />
+  <java-symbol type="drawable" name="stat_notify_privacy_guard_off_plus" />
+  <java-symbol type="drawable" name="stat_notify_privacy_guard_custom_plus" />
 
   <!-- Navigation Ring -->
   <java-symbol type="drawable" name="ic_navigation_ring_blank_normal" />
@@ -1823,4 +1845,9 @@
   <java-symbol type="drawable" name="ic_navigation_ring_lastapp" />
 
   <java-symbol type="bool" name="config_offscreenGestureSupport" />
+
+  <!-- Config.xml entries -->
+  <java-symbol type="bool" name="config_samsung_stk" />
+  <java-symbol type="bool" name="config_smsSamsungCdmaAlternateMessageIDEncoding" />
+
 </resources>

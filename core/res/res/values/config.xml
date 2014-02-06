@@ -187,6 +187,7 @@
         <item>"mobile,0,0,0,-1,true"</item>
         <item>"mobile_mms,2,0,2,60000,true"</item>
         <item>"mobile_supl,3,0,2,60000,true"</item>
+        <item>"mobile_dun,4,0,2,60000,true"</item>
         <item>"mobile_hipri,5,0,3,60000,true"</item>
         <item>"mobile_fota,10,0,2,60000,true"</item>
         <item>"mobile_ims,11,0,2,60000,true"</item>
@@ -302,6 +303,7 @@
     <integer-array translatable="false" name="config_tether_upstream_types">
         <item>0</item>
         <item>1</item>
+        <item>4</item>
         <item>5</item>
         <item>7</item>
         <item>9</item>
@@ -319,6 +321,9 @@
          "name,apn,proxy,port,username,password,server,mmsc,mmsproxy,mmsport,mcc,mnc,auth,type"
          note that empty fields can be ommitted: "name,apn,,,,,,,,,310,260,,DUN" -->
     <string translatable="false" name="config_tether_apndata"></string>
+
+    <!-- Boolean indicating whether Softap requires reloading AP firmware -->
+    <bool name="config_wifiApFirmwareReload">true</bool>
 
     <!-- Boolean indicating whether the wifi chipset has dual frequency band support -->
     <bool translatable="false" name="config_wifi_dual_band_support">false</bool>
@@ -413,6 +418,13 @@
              5  UI_MODE_TYPE_APPLIANCE
          Any other values will have surprising consequences. -->
     <integer name="config_defaultUiModeType">1</integer>
+
+    <!-- Control the default theme mode for the UI to use.
+         One of the following values (See Configuration.java):
+             1 UI_THEME_MODE_NORMAL (default)
+             2 UI_THEME_MODE_HOLO_DARK
+             3 UI_THEME_MODE_HOLO_LIGHT -->
+    <integer name="config_uiThemeMode">3</integer>
 
     <!-- Control whether being in the desk dock (and powered) always
          keeps the screen on.  By default it stays on when plugged in to
@@ -579,6 +591,9 @@
     <!-- Is the notification LED intrusive? Used to decide if there should be a disable option -->
     <bool name="config_intrusiveNotificationLed">false</bool>
 
+    <!-- Does the notification LED support multiple colors? Used to decide if the used can change the colors -->
+    <bool name="config_multiColorNotificationLed">true</bool>
+
     <!-- Is the battery LED intrusive? Used to decide if there should be a disable option -->
     <bool name="config_intrusiveBatteryLed">false</bool>
 
@@ -602,6 +617,9 @@
 
     <!-- Enable translucent decor by default -->
     <bool name="config_enableTranslucentDecor">true</bool>
+
+    <!-- Is the device capable of hot swapping an UICC Card -->
+    <bool name="config_hotswapCapable">false</bool>
 
     <!-- Enable puk unlockscreen by default.
          If unlock screen is disabled, the puk should be unlocked through Emergency Dialer -->
@@ -962,6 +980,9 @@
     <!-- Sets whether menu shortcuts should be displayed on panel menus when
          a keyboard is present. -->
     <bool name="config_showMenuShortcutsWhenKeyboardPresent">false</bool>
+
+    <!-- Sets whether IME switcher on statusbar should be shown or not. -->
+    <bool name="config_show_IMESwitcher">true</bool>
 
     <!-- Do not translate. Defines the slots is Two Digit Number for dialing normally not USSD -->
     <string-array name="config_twoDigitNumberPattern" translatable="false">
@@ -1354,4 +1375,17 @@
    <!-- set to false if we dont need to consider data
          service state to display signal strength bars -->
     <bool name="config_combined_signal">true</bool>
+
+    <!-- The list of components which should be automatically disabled. -->
+    <string-array name="config_disabledComponents" translatable="false">
+    </string-array>
+
+    <!-- Enable statusbar double tap gesture to put device to sleep -->
+    <bool name="config_disableDoubleTapSleepGesture">false</bool>
+
+    <!-- Workaround for devices with broken keyboards -->
+    <bool name="config_forceDisableHardwareKeyboard">false</bool>
+
+  <!-- Force permanent menu key -->
+    <bool name="config_force_permanent_menu_key">false</bool>
 </resources>

@@ -445,8 +445,8 @@ class ContextImpl extends Context {
                                 Resources.selectSystemTheme(0,
                                         outerContext.getApplicationInfo().targetSdkVersion,
                                         com.android.internal.R.style.Theme_Dialog,
-                                        com.android.internal.R.style.Theme_Holo_Dialog,
-                                        com.android.internal.R.style.Theme_DeviceDefault_Dialog)),
+                                        com.android.internal.R.style.Theme_Holo_Light_Dialog,
+                                        com.android.internal.R.style.Theme_DeviceDefault_Light_Dialog)),
                         ctx.mMainThread.getHandler());
                 }});
 
@@ -587,6 +587,13 @@ class ContextImpl extends Context {
             public Object createService(ContextImpl ctx) {
                 return new ConsumerIrManager(ctx);
             }});
+
+        registerService(PROFILE_SERVICE, new ServiceFetcher() {
+                public Object createService(ContextImpl ctx) {
+                    final Context outerContext = ctx.getOuterContext();
+                    return new ProfileManager (outerContext, ctx.mMainThread.getHandler());
+                }});
+
     }
 
     static ContextImpl getImpl(Context context) {

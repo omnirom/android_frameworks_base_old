@@ -1342,7 +1342,7 @@ status_t compileResourceFile(Bundle* bundle,
                 curType = string16;
                 curFormat = ResTable_map::TYPE_REFERENCE|ResTable_map::TYPE_STRING;
                 curIsStyled = true;
-                curIsPseudolocalizable = true;
+                curIsPseudolocalizable = (translatable != false16);
             } else if (strcmp16(block.getElementName(&len), drawable16.string()) == 0) {
                 curTag = &drawable16;
                 curType = drawable16;
@@ -1408,15 +1408,24 @@ status_t compileResourceFile(Bundle* bundle,
                 // Check whether these strings need valid formats.
                 // (simplified form of what string16 does above)
                 size_t n = block.getAttributeCount();
+
+                // Pseudolocalizable by default, unless this string array isn't
+                // translatable.
+                curIsPseudolocalizable = true;
                 for (size_t i = 0; i < n; i++) {
                     size_t length;
                     const uint16_t* attr = block.getAttributeName(i, &length);
-                    if (strcmp16(attr, translatable16.string()) == 0
-                            || strcmp16(attr, formatted16.string()) == 0) {
+                    if (strcmp16(attr, translatable16.string()) == 0) {
+                        const uint16_t* value = block.getAttributeStringValue(i, &length);
+                        if (strcmp16(value, false16.string()) == 0) {
+                            curIsPseudolocalizable = false;
+                        }
+                    }
+
+                    if (strcmp16(attr, formatted16.string()) == 0) {
                         const uint16_t* value = block.getAttributeStringValue(i, &length);
                         if (strcmp16(value, false16.string()) == 0) {
                             curIsFormatted = false;
-                            break;
                         }
                     }
                 }
@@ -1426,7 +1435,6 @@ status_t compileResourceFile(Bundle* bundle,
                 curFormat = ResTable_map::TYPE_REFERENCE|ResTable_map::TYPE_STRING;
                 curIsBag = true;
                 curIsBagReplaceOnOverwrite = true;
-                curIsPseudolocalizable = true;
             } else if (strcmp16(block.getElementName(&len), integer_array16.string()) == 0) {
                 curTag = &integer_array16;
                 curType = array16;
@@ -2876,7 +2884,7 @@ status_t ResourceTable::flatten(Bundle* bundle, const sp<AaptFile>& dest)
                 ConfigDescription config = t->getUniqueConfigs().itemAt(ci);
 
                 NOISY(printf("Writing config %d config: imsi:%d/%d lang:%c%c cnt:%c%c "
-                     "orien:%d ui:%d touch:%d density:%d key:%d inp:%d nav:%d sz:%dx%d "
+                     "orien:%d uiTheme:%d ui:%d touch:%d density:%d key:%d inp:%d nav:%d sz:%dx%d "
                      "sw%ddp w%ddp h%ddp dir:%d\n",
                       ti+1,
                       config.mcc, config.mnc,
@@ -2885,6 +2893,7 @@ status_t ResourceTable::flatten(Bundle* bundle, const sp<AaptFile>& dest)
                       config.country[0] ? config.country[0] : '-',
                       config.country[1] ? config.country[1] : '-',
                       config.orientation,
+                      config.uiThemeMode,
                       config.uiMode,
                       config.touchscreen,
                       config.density,
@@ -2919,7 +2928,7 @@ status_t ResourceTable::flatten(Bundle* bundle, const sp<AaptFile>& dest)
                 tHeader->entriesStart = htodl(typeSize);
                 tHeader->config = config;
                 NOISY(printf("Writing type %d config: imsi:%d/%d lang:%c%c cnt:%c%c "
-                     "orien:%d ui:%d touch:%d density:%d key:%d inp:%d nav:%d sz:%dx%d "
+                     "orien:%d uiTheme:%d ui:%d touch:%d density:%d key:%d inp:%d nav:%d sz:%dx%d "
                      "sw%ddp w%ddp h%ddp dir:%d\n",
                       ti+1,
                       tHeader->config.mcc, tHeader->config.mnc,
@@ -2928,6 +2937,7 @@ status_t ResourceTable::flatten(Bundle* bundle, const sp<AaptFile>& dest)
                       tHeader->config.country[0] ? tHeader->config.country[0] : '-',
                       tHeader->config.country[1] ? tHeader->config.country[1] : '-',
                       tHeader->config.orientation,
+                      tHeader->config.uiThemeMode,
                       tHeader->config.uiMode,
                       tHeader->config.touchscreen,
                       tHeader->config.density,

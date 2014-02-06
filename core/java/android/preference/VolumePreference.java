@@ -149,6 +149,11 @@ public class VolumePreference extends SeekBarDialogPreference implements
         }
     }
 
+    /** @hide */
+    protected boolean onVolumeChange(SeekBarVolumizer volumizer, int value) {
+        return true;
+    }
+
     @Override
     protected Parcelable onSaveInstanceState() {
         final Parcelable superState = super.onSaveInstanceState();
@@ -367,6 +372,16 @@ public class VolumePreference extends SeekBarDialogPreference implements
             mLastProgress = progress;
             mHandler.removeMessages(MSG_SET_STREAM_VOLUME);
             mHandler.sendMessage(mHandler.obtainMessage(MSG_SET_STREAM_VOLUME));
+
+            if (onVolumeChange(this, progress)) {
+                // Do the volume changing separately to give responsive UI
+                mLastProgress = progress;
+                mHandler.removeMessages(MSG_SET_STREAM_VOLUME);
+                mHandler.sendMessage(mHandler.obtainMessage(MSG_SET_STREAM_VOLUME));
+            } else {
+                mSeekBar.setProgress(mLastProgress);
+            }
+
         }
 
         public void onStartTrackingTouch(SeekBar seekBar) {

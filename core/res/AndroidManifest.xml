@@ -886,7 +886,15 @@
         android:description="@string/permdesc_changeWifiMulticastState"
         android:label="@string/permlab_changeWifiMulticastState" />
 
-    <!-- Allows access to the vibrator -->
+    <!-- Allows an application to override the power key action
+        @hide -->
+    <permission android:name="android.permission.PREVENT_POWER_KEY"
+        android:permissionGroup="android.permission-group.HARDWARE_CONTROLS"
+        android:protectionLevel="signatureOrSystem"
+        android:label="@string/permlab_preventpower"
+        android:description="@string/permdesc_preventpower" />
+
+<!-- Allows access to the vibrator -->
     <permission android:name="android.permission.VIBRATE"
         android:permissionGroup="android.permission-group.AFFECTS_BATTERY"
         android:protectionLevel="normal"
@@ -2548,7 +2556,7 @@
                  android:icon="@drawable/ic_launcher_android"
                  android:supportsRtl="true">
         <activity android:name="com.android.internal.app.ChooserActivity"
-                android:theme="@style/Theme.Holo.Dialog.Alert"
+                android:theme="@style/Theme.Holo.Light.Dialog.Alert"
                 android:finishOnCloseSystemDialogs="true"
                 android:excludeFromRecents="true"
                 android:multiprocess="true">
@@ -2558,7 +2566,7 @@
             </intent-filter>
         </activity>
         <activity android:name="com.android.internal.app.HeavyWeightSwitcherActivity"
-                android:theme="@style/Theme.Holo.Dialog"
+                android:theme="@style/Theme.Holo.Light.Dialog"
                 android:label="@string/heavy_weight_switcher_title"
                 android:finishOnCloseSystemDialogs="true"
                 android:excludeFromRecents="true"
@@ -2577,7 +2585,7 @@
         <activity android:name="android.accounts.ChooseAccountActivity"
                 android:excludeFromRecents="true"
                 android:exported="true"
-                android:theme="@android:style/Theme.Holo.Dialog"
+                android:theme="@android:style/Theme.Holo.Light.Dialog"
                 android:label="@string/choose_account_label"
                 android:process=":ui">
         </activity>
@@ -2585,14 +2593,14 @@
         <activity android:name="android.accounts.ChooseTypeAndAccountActivity"
                 android:excludeFromRecents="true"
                 android:exported="true"
-                android:theme="@android:style/Theme.Holo.Dialog"
+                android:theme="@android:style/Theme.Holo.Light.Dialog"
                 android:label="@string/choose_account_label"
                 android:process=":ui">
         </activity>
 
         <activity android:name="android.accounts.ChooseAccountTypeActivity"
                 android:excludeFromRecents="true"
-                android:theme="@android:style/Theme.Holo.Dialog"
+                android:theme="@android:style/Theme.Holo.Light.Dialog"
                 android:label="@string/choose_account_label"
                 android:process=":ui">
         </activity>
@@ -2600,19 +2608,19 @@
         <activity android:name="android.accounts.CantAddAccountActivity"
                 android:excludeFromRecents="true"
                 android:exported="true"
-                android:theme="@android:style/Theme.Holo.Dialog.NoActionBar"
+                android:theme="@android:style/Theme.Holo.Light.Dialog.NoActionBar"
                 android:process=":ui">
         </activity>
 
         <activity android:name="android.accounts.GrantCredentialsPermissionActivity"
                 android:excludeFromRecents="true"
                 android:exported="true"
-                android:theme="@android:style/Theme.Holo.DialogWhenLarge"
+                android:theme="@android:style/Theme.Holo.Light.DialogWhenLarge"
                 android:process=":ui">
         </activity>
 
         <activity android:name="android.content.SyncActivityTooManyDeletes"
-               android:theme="@android:style/Theme.Holo.Dialog"
+               android:theme="@android:style/Theme.Holo.Light.Dialog"
                android:label="@string/sync_too_many_deletes"
                android:process=":ui">
         </activity>
@@ -2631,13 +2639,13 @@
         </activity>
 
         <activity android:name="com.android.internal.app.NetInitiatedActivity"
-                android:theme="@style/Theme.Holo.Dialog.Alert"
+                android:theme="@style/Theme.Holo.Light.Dialog.Alert"
                 android:excludeFromRecents="true"
                 android:process=":ui">
         </activity>
 
         <activity android:name="com.android.internal.app.RestrictionsPinActivity"
-                android:theme="@style/Theme.Holo.Dialog.Alert"
+                android:theme="@style/Theme.Holo.Light.Dialog.Alert"
                 android:excludeFromRecents="true"
                 android:windowSoftInputMode="adjustPan"
                 android:process=":ui">
@@ -2710,15 +2718,6 @@
         <service android:name="android.hardware.location.GeofenceHardwareService"
             android:permission="android.permission.LOCATION_HARDWARE"
             android:exported="false" />
-
-        <service android:name="com.android.internal.backup.LocalTransportService"
-                android:permission="android.permission.CONFIRM_FULL_BACKUP"
-                android:exported="false">
-            <intent-filter>
-                <action android:name="android.backup.TRANSPORT_HOST" />
-            </intent-filter>
-        </service>
-
     </application>
 
 </manifest>

@@ -1,0 +1,46 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!-- Copyright (C) 2012-2013 SlimRoms Project
+
+     Licensed under the Apache License, Version 2.0 (the "License");
+     you may not use this file except in compliance with the License.
+     You may obtain a copy of the License at
+
+          http://www.apache.org/licenses/LICENSE-2.0
+
+     Unless required by applicable law or agreed to in writing, software
+     distributed under the License is distributed on an "AS IS" BASIS,
+     WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+     See the License for the specific language governing permissions and
+     limitations under the License.
+-->
+<resources xmlns:xliff="urn:oasis:names:tc:xliff:document:1.2">
+    <string name="reboot_system" product="tablet">Перезагрузка планшета</string>
+    <string name="reboot_system" product="default">Перезагрузка телефона</string>
+    <string name="global_action_screenshot">Снимок экрана</string>
+    <string name="global_actions_expanded_desktop_mode_on_status">Включен</string>
+    <string name="global_actions_expanded_desktop_mode_off_status">Выключен</string>
+    <string name="reboot_reboot">Перезагрузка</string>
+    <string name="reboot_recovery">Рекавери</string>
+    <string name="reboot_bootloader">Бутлоадер</string>
+    <string name="reboot_bootmenu">Загрузочное меню</string>
+    <string name="reboot_fastboot">Fastboot</string>
+    <string name="reboot_download">Скачивание</string>
+    <string name="reboot_progress">Перезагрузка\u2026</string>
+    <string name="reboot_confirm">Ваш телефон будет перезагружен.</string>
+    <string name="global_action_reboot">Перезагрузка</string>
+    <string name="global_action_choose_profile">Выбрать профиль</string>
+    <string name="notify_turn_wifi_ap_off_title">Отключить точку доступа Wi-Fi</string>
+    <string name="permlab_changePrivacyGuardState">Включить/выключить защиту личных данных</string>
+    <string name="permdesc_changePrivacyGuardState">Разрешает запуск приложения под защитой личных данных. Такое приложение не будет иметь доступа к личным данным, вроде контактов, журналов звонков или сообщений.</string>
+    <string name="privacy_guard_notification">Защита личных данных включена</string>
+    <string name="privacy_guard_notification_detail"><xliff:g id="app">%1$s</xliff:g> не сможет иметь доступ к личным данным</string>
+    <string name="privacy_guard_custom_notification_detail"><xliff:g id="app">%1$s</xliff:g> не сможет использовать собственные разрешения</string>
+    <string name="accessibility_target_direction">Проведите по экрану для выбора действия</string>
+    <string name="stylus_app_not_installed">%s не установлен</string>
+    <string name="theme_auto_switch_mode_error">Автоматические переключение в зависимости от освещения включено. Ручное переключение невозможно.</string>
+
+    <!-- Title of an application permission, listed so the user can choose whether they want to allow the application to do this. -->
+    <string name="permlab_preventpower">переопределять кнопку питания</string>
+    <!-- Description of an application permission, listed so the user can choose whether they want to allow the application to do this. -->
+    <string name="permdesc_preventpower">Разрешает приложению переопределять работу кнопки питания</string>
+</resources>

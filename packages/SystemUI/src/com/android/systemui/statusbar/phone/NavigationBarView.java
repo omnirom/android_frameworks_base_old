@@ -1,18 +1,18 @@
 /*
- * Copyright (C) 2008 The Android Open Source Project
- *
- * Licensed under the Apache License, Version 2.0 (the "License");
- * you may not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- *
- *      http://www.apache.org/licenses/LICENSE-2.0
- *
- * Unless required by applicable law or agreed to in writing, software
- * distributed under the License is distributed on an "AS IS" BASIS,
- * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- * See the License for the specific language governing permissions and
- * limitations under the License.
- */
+* Copyright (C) 2008 The Android Open Source Project
+*
+* Licensed under the Apache License, Version 2.0 (the "License");
+* you may not use this file except in compliance with the License.
+* You may obtain a copy of the License at
+*
+* http://www.apache.org/licenses/LICENSE-2.0
+*
+* Unless required by applicable law or agreed to in writing, software
+* distributed under the License is distributed on an "AS IS" BASIS,
+* WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+* See the License for the specific language governing permissions and
+* limitations under the License.
+*/
 
 package com.android.systemui.statusbar.phone;
 
@@ -464,6 +464,9 @@ public class NavigationBarView extends LinearLayout {
             }
         }
 
+        getBackButton() .setVisibility(disableBack ? View.INVISIBLE : View.VISIBLE);
+        getHomeButton() .setVisibility(disableHome ? View.INVISIBLE : View.VISIBLE);
+        getRecentsButton().setVisibility(disableRecent ? View.INVISIBLE : View.VISIBLE);
         setButtonWithTagVisibility(NavbarEditor.NAVBAR_BACK, !disableBack);
         setButtonWithTagVisibility(NavbarEditor.NAVBAR_HOME, !disableHome);
         setButtonWithTagVisibility(NavbarEditor.NAVBAR_RECENT, !disableRecent);
@@ -495,6 +498,10 @@ public class NavigationBarView extends LinearLayout {
             try {
                 final int userId = ActivityManagerNative.getDefault().getCurrentUser().id;
                 final int disabledFlags = dpm.getKeyguardDisabledFeatures(null, userId);
+                final boolean disabledBecauseKeyguardSecure =
+                        (disabledFlags & DevicePolicyManager.KEYGUARD_DISABLE_SECURE_CAMERA) != 0
+                        && KeyguardTouchDelegate.getInstance(getContext()).isSecure();
+                return dpm.getCameraDisabled(null) || disabledBecauseKeyguardSecure;
                 final boolean disabledInKeyguard =
                         (disabledFlags & DevicePolicyManager.KEYGUARD_DISABLE_SECURE_CAMERA) != 0;
                 return dpm.getCameraDisabled(null) || disabledInKeyguard;
@@ -559,7 +566,7 @@ public class NavigationBarView extends LinearLayout {
     }
 
     private void enableAccessibility(boolean touchEnabled) {
-        Log.v(TAG, "touchEnabled:"  + touchEnabled);
+        Log.v(TAG, "touchEnabled:" + touchEnabled);
 
         // Add a touch handler or accessibility click listener for camera and search buttons
         // for all view orientations.
@@ -655,25 +662,25 @@ public class NavigationBarView extends LinearLayout {
     }
 
     /*
-    @Override
-    protected void onLayout (boolean changed, int left, int top, int right, int bottom) {
-        if (DEBUG) Log.d(TAG, String.format(
-                    "onLayout: %s (%d,%d,%d,%d)",
-                    changed?"changed":"notchanged", left, top, right, bottom));
-        super.onLayout(changed, left, top, right, bottom);
-    }
+@Override
+protected void onLayout (boolean changed, int left, int top, int right, int bottom) {
+if (DEBUG) Log.d(TAG, String.format(
+"onLayout: %s (%d,%d,%d,%d)",
+changed?"changed":"notchanged", left, top, right, bottom));
+super.onLayout(changed, left, top, right, bottom);
+}
 
-    // uncomment this for extra defensiveness in WORKAROUND_INVALID_LAYOUT situations: if all else
-    // fails, any touch on the display will fix the layout.
-    @Override
-    public boolean onInterceptTouchEvent(MotionEvent ev) {
-        if (DEBUG) Log.d(TAG, "onInterceptTouchEvent: " + ev.toString());
-        if (ev.getAction() == MotionEvent.ACTION_DOWN) {
-            postCheckForInvalidLayout("touch");
-        }
-        return super.onInterceptTouchEvent(ev);
-    }
-    */
+// uncomment this for extra defensiveness in WORKAROUND_INVALID_LAYOUT situations: if all else
+// fails, any touch on the display will fix the layout.
+@Override
+public boolean onInterceptTouchEvent(MotionEvent ev) {
+if (DEBUG) Log.d(TAG, "onInterceptTouchEvent: " + ev.toString());
+if (ev.getAction() == MotionEvent.ACTION_DOWN) {
+postCheckForInvalidLayout("touch");
+}
+return super.onInterceptTouchEvent(ev);
+}
+*/
 
 
     private String getResourceName(int resId) {
@@ -710,22 +717,22 @@ public class NavigationBarView extends LinearLayout {
         final Point size = new Point();
         mDisplay.getRealSize(size);
 
-        pw.println(String.format("      this: " + PhoneStatusBar.viewInfo(this)
+        pw.println(String.format(" this: " + PhoneStatusBar.viewInfo(this)
                         + " " + visibilityToString(getVisibility())));
 
         getWindowVisibleDisplayFrame(r);
         final boolean offscreen = r.right > size.x || r.bottom > size.y;
-        pw.println("      window: "
+        pw.println(" window: "
                 + r.toShortString()
                 + " " + visibilityToString(getWindowVisibility())
                 + (offscreen ? " OFFSCREEN!" : ""));
 
-        pw.println(String.format("      mCurrentView: id=%s (%dx%d) %s",
+        pw.println(String.format(" mCurrentView: id=%s (%dx%d) %s",
                         getResourceName(mCurrentView.getId()),
                         mCurrentView.getWidth(), mCurrentView.getHeight(),
                         visibilityToString(mCurrentView.getVisibility())));
 
-        pw.println(String.format("      disabled=0x%08x vertical=%s menu=%s",
+        pw.println(String.format(" disabled=0x%08x vertical=%s menu=%s",
                         mDisabledFlags,
                         mVertical ? "true" : "false",
                         mShowMenu ? "true" : "false"));
@@ -736,11 +743,11 @@ public class NavigationBarView extends LinearLayout {
         dumpButton(pw, "srch", getSearchLight());
         dumpButton(pw, "cmra", getCameraButton());
 
-        pw.println("    }");
+        pw.println(" }");
     }
 
     private static void dumpButton(PrintWriter pw, String caption, View button) {
-        pw.print("      " + caption + ": ");
+        pw.print(" " + caption + ": ");
         if (button == null) {
             pw.print("null");
         } else {

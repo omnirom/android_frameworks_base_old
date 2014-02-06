@@ -133,7 +133,6 @@ import com.android.internal.R;
 import com.android.internal.annotations.VisibleForTesting;
 import com.android.internal.util.FastXmlSerializer;
 import com.android.internal.util.IndentingPrintWriter;
-import com.android.internal.util.Objects;
 import com.google.android.collect.Lists;
 import com.google.android.collect.Maps;
 import com.google.android.collect.Sets;
@@ -155,6 +154,7 @@ import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
+import java.util.Objects;
 
 import libcore.io.IoUtils;
 
@@ -688,7 +688,7 @@ public class NetworkPolicyManagerService extends INetworkPolicyManager.Stub {
                 // mobile templates are relevant when SIM is ready and
                 // subscriberId matches.
                 if (tele.getSimState() == SIM_STATE_READY) {
-                    return Objects.equal(tele.getSubscriberId(), template.getSubscriberId());
+                    return Objects.equals(tele.getSubscriberId(), template.getSubscriberId());
                 } else {
                     return false;
                 }
@@ -946,7 +946,7 @@ public class NetworkPolicyManagerService extends INetworkPolicyManager.Stub {
                 // TODO: offer more granular control over radio states once
                 // 4965893 is available.
                 if (tele.getSimState() == SIM_STATE_READY
-                        && Objects.equal(tele.getSubscriberId(), template.getSubscriberId())) {
+                        && Objects.equals(tele.getSubscriberId(), template.getSubscriberId())) {
                     setPolicyDataEnable(TYPE_MOBILE, enabled);
                     setPolicyDataEnable(TYPE_WIMAX, enabled);
                 }
@@ -1435,6 +1435,12 @@ public class NetworkPolicyManagerService extends INetworkPolicyManager.Stub {
     public void setNetworkPolicies(NetworkPolicy[] policies) {
         mContext.enforceCallingOrSelfPermission(MANAGE_NETWORK_POLICY, TAG);
 
+        // Before clear and refresh mNetworkPolicy, we need to ensure all the
+        // policies to be added are validated, otherwise this service will throw
+        // IllegalArgumentException and cause system crash when updating network
+        // template after receiving ACTION_NETWORK_STATS_UPDATED.
+        validatePoliciesToSet(policies);
+
         maybeRefreshTrustedTime();
         synchronized (mRulesLock) {
             mNetworkPolicy.clear();
@@ -1446,6 +1452,27 @@ public class NetworkPolicyManagerService extends INetworkPolicyManager.Stub {
             updateNetworkRulesLocked();
             updateNotificationsLocked();
             writePolicyLocked();
+        }
+    }
+
+    /**
+     * ensure the policies have valid template
+     *
+     * @param policies
+     */
+    private void validatePoliciesToSet(NetworkPolicy[] policies) {
+        for (NetworkPolicy policy : policies) {
+            switch (policy.template.getMatchRule()) {
+                case MATCH_MOBILE_3G_LOWER:
+                case MATCH_MOBILE_4G:
+                case MATCH_MOBILE_ALL:
+                case MATCH_WIFI:
+                case MATCH_ETHERNET:
+                    break;
+                default:
+                    throw new IllegalArgumentException("unexpected template "
+                            + policy.template.getMatchRule());
+            }
         }
     }
 

@@ -16,6 +16,7 @@
 
 package com.android.internal.policy.impl.keyguard;
 
+import android.content.Intent;
 import android.graphics.Bitmap;
 import android.os.Bundle;
 import android.os.IBinder;
@@ -184,6 +185,14 @@ public class KeyguardServiceWrapper implements IKeyguardService {
     public void onBootCompleted() {
         try {
             mService.onBootCompleted();
+        } catch (RemoteException e) {
+            Slog.w(TAG , "Remote Exception", e);
+        }
+    }
+
+    public void showCustomIntent(Intent intent) {
+        try {
+            mService.showCustomIntent(intent);
         } catch (RemoteException e) {
             Slog.w(TAG , "Remote Exception", e);
         }

@@ -41,6 +41,8 @@
     <uses-permission android:name="android.permission.ACCESS_WIFI_STATE" />
     <uses-permission android:name="android.permission.CHANGE_WIFI_STATE" />
     <uses-permission android:name="android.permission.MANAGE_NETWORK_POLICY" />
+    <uses-permission android:name="android.permission.CHANGE_NETWORK_STATE" />
+    <uses-permission android:name="com.android.phone.CHANGE_NETWORK_MODE" />
 
     <!-- Physical hardware -->
     <uses-permission android:name="android.permission.MANAGE_USB" />
@@ -94,6 +96,12 @@
     <uses-permission android:name="android.permission.READ_SYNC_SETTINGS" />
     <uses-permission android:name="android.permission.WRITE_SYNC_SETTINGS" />
 
+    <!-- Reboot -->
+    <uses-permission android:name="android.permission.REBOOT" />
+
+    <!-- Record Audio QuickRecord -->
+    <uses-permission android:name="android.permission.RECORD_AUDIO" />
+
     <application
         android:persistent="true"
         android:allowClearUserData="false"
@@ -123,6 +131,8 @@
         <service android:name=".omni.screenrecord.TakeScreenrecordService"
             android:process=":screenrecord"
             android:exported="false" />
+        <receiver android:name=".screenshot.DeleteScreenshot"
+                android:exported="true" />
 
         <service android:name=".LoadAverageService"
                 android:exported="true" />
@@ -226,6 +236,177 @@
             android:launchMode="singleTop"
             android:taskAffinity="com.android.systemui.net"
             android:excludeFromRecents="true" />
+
+        <!-- Slim shortcut picker -->
+        <activity
+            android:name="com.android.systemui.CreateShortcut"
+            android:label="@string/shortcut_picker"
+            android:icon="@drawable/ic_qs_reboot_recovery"
+            android:configChanges="orientation|keyboardHidden|screenSize" >
+            <intent-filter>
+                <action android:name="android.intent.action.CREATE_SHORTCUT" />
+                <category android:name="android.intent.category.DEFAULT" />
+            </intent-filter>
+        </activity>
+
+        <!-- Shortcut activities -->
+        <activity
+            android:name="com.android.systemui.shortcuts.Immersive"
+            android:label="@string/shortcut_immersive"
+            android:icon="@drawable/ic_qs_expanded_desktop_on"
+            android:theme="@android:style/Theme.NoDisplay"
+            android:excludeFromRecents="true"
+            android:launchMode="singleInstance" >
+            <intent-filter>
+                <action android:name="android.intent.action.MAIN" />
+                <category android:name="com.android.systemui.SHORTCUT" />
+                <category android:name="com.android.systemui.SHORTCUT_EXTRA" />
+            </intent-filter>
+        </activity>
+        <activity
+            android:name="com.android.systemui.shortcuts.LastApp"
+            android:label="@string/shortcut_last_app"
+            android:icon="@drawable/ic_sysbar_lastapp"
+            android:theme="@android:style/Theme.NoDisplay"
+            android:excludeFromRecents="true"
+            android:launchMode="singleInstance" >
+            <intent-filter>
+                <action android:name="android.intent.action.MAIN" />
+                <category android:name="com.android.systemui.SHORTCUT" />
+                <category android:name="com.android.systemui.SHORTCUT_EXTRA" />
+            </intent-filter>
+        </activity>
+        <activity
+            android:name="com.android.systemui.shortcuts.PowerMenu"
+            android:label="@string/shortcut_power_menu"
+            android:icon="@drawable/ic_sysbar_power_menu"
+            android:theme="@android:style/Theme.NoDisplay"
+            android:excludeFromRecents="true"
+            android:launchMode="singleInstance" >
+            <intent-filter>
+                <action android:name="android.intent.action.MAIN" />
+                <category android:name="com.android.systemui.SHORTCUT" />
+                <category android:name="com.android.systemui.SHORTCUT_EXTRA" />
+            </intent-filter>
+        </activity>
+        <activity
+            android:name="com.android.systemui.shortcuts.QuietHours"
+            android:label="@string/shortcut_quiethours"
+            android:icon="@drawable/ic_qs_quiet_hours_on"
+            android:theme="@android:style/Theme.NoDisplay"
+            android:excludeFromRecents="true"
+            android:launchMode="singleInstance" >
+            <intent-filter>
+                <action android:name="android.intent.action.MAIN" />
+                <category android:name="com.android.systemui.SHORTCUT" />
+                <category android:name="com.android.systemui.SHORTCUT_EXTRA" />
+            </intent-filter>
+        </activity>
+        <activity
+            android:name="com.android.systemui.shortcuts.Reboot"
+            android:label="@string/shortcut_reboot"
+            android:icon="@drawable/ic_qs_reboot"
+            android:theme="@android:style/Theme.NoDisplay"
+            android:excludeFromRecents="true"
+            android:launchMode="singleInstance" >
+            <intent-filter>
+                <action android:name="android.intent.action.MAIN" />
+                <category android:name="com.android.systemui.SHORTCUT" />
+                <category android:name="com.android.systemui.SHORTCUT_EXTRA" />
+            </intent-filter>
+        </activity>
+        <activity
+            android:name="com.android.systemui.shortcuts.Recovery"
+            android:label="@string/shortcut_recovery"
+            android:icon="@drawable/ic_qs_reboot_recovery"
+            android:theme="@android:style/Theme.NoDisplay"
+            android:excludeFromRecents="true"
+            android:launchMode="singleInstance" >
+            <intent-filter>
+                <action android:name="android.intent.action.MAIN" />
+                <category android:name="com.android.systemui.SHORTCUT" />
+                <category android:name="com.android.systemui.SHORTCUT_EXTRA" />
+            </intent-filter>
+        </activity>
+        <activity
+            android:name="com.android.systemui.shortcuts.Rotation"
+            android:label="@string/shortcut_rotation"
+            android:icon="@drawable/ic_qs_auto_rotate"
+            android:theme="@android:style/Theme.NoDisplay"
+            android:excludeFromRecents="true"
+            android:launchMode="singleInstance" >
+            <intent-filter>
+                <action android:name="android.intent.action.MAIN" />
+                <category android:name="com.android.systemui.SHORTCUT" />
+                <category android:name="com.android.systemui.SHORTCUT_EXTRA" />
+            </intent-filter>
+        </activity>
+        <activity
+            android:name="com.android.systemui.shortcuts.Screenshot"
+            android:label="@string/shortcut_screenshot"
+            android:icon="@drawable/ic_sysbar_screenshot"
+            android:theme="@android:style/Theme.NoDisplay"
+            android:excludeFromRecents="true"
+            android:launchMode="singleInstance" >
+            <intent-filter>
+                <action android:name="android.intent.action.MAIN" />
+                <category android:name="com.android.systemui.SHORTCUT" />
+                <category android:name="com.android.systemui.SHORTCUT_EXTRA" />
+            </intent-filter>
+        </activity>
+        <activity
+            android:name="com.android.systemui.shortcuts.SleepScreen"
+            android:label="@string/shortcut_screensleep"
+            android:icon="@drawable/ic_qs_sleep"
+            android:theme="@android:style/Theme.NoDisplay"
+            android:excludeFromRecents="true"
+            android:launchMode="singleInstance" >
+            <intent-filter>
+                <action android:name="android.intent.action.MAIN" />
+                <category android:name="com.android.systemui.SHORTCUT" />
+                <category android:name="com.android.systemui.SHORTCUT_EXTRA" />
+            </intent-filter>
+        </activity>
+        <activity
+            android:name="com.android.systemui.shortcuts.Torch"
+            android:label="@string/shortcut_torch"
+            android:icon="@drawable/ic_qs_torch_on"
+            android:theme="@android:style/Theme.NoDisplay"
+            android:excludeFromRecents="true"
+            android:launchMode="singleInstance" >
+            <intent-filter>
+                <action android:name="android.intent.action.MAIN" />
+                <category android:name="com.android.systemui.SHORTCUT" />
+                <category android:name="com.android.systemui.SHORTCUT_EXTRA" />
+            </intent-filter>
+        </activity>
+        <activity
+            android:name="com.android.systemui.shortcuts.VolumePanel"
+            android:label="@string/shortcut_volume"
+            android:icon="@drawable/ic_qs_volume"
+            android:theme="@android:style/Theme.NoDisplay"
+            android:excludeFromRecents="true"
+            android:launchMode="singleInstance" >
+            <intent-filter>
+                <action android:name="android.intent.action.MAIN" />
+                <category android:name="com.android.systemui.SHORTCUT" />
+                <category android:name="com.android.systemui.SHORTCUT_EXTRA" />
+            </intent-filter>
+        </activity>
+
+        <!-- extremely secret launcher shortcut -->
+        <activity
+            android:name="com.android.systemui.shortcuts.ChamberOfSecrets"
+            android:label="@string/shortcut_chamber"
+            android:icon="@drawable/ic_qs_reboot_recovery"
+            android:theme="@android:style/Theme.NoDisplay"
+            android:excludeFromRecents="true"
+            android:launchMode="singleInstance" >
+            <intent-filter>
+                <action android:name="android.intent.action.MAIN" />
+                <category android:name="com.android.systemui.SHORTCUT_EXTRA" />
+            </intent-filter>
+        </activity>
 
         <!-- platform logo easter egg activity -->
         <activity

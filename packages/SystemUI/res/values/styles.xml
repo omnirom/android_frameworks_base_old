@@ -88,7 +88,7 @@
     <style name="TextAppearance.QuickSettings.TileView">
         <item name="android:textSize">12dp</item>
         <item name="android:textStyle">normal</item>
-        <item name="android:textColor">#CCCCCC</item>
+        <item name="android:textColor">#ff404040</item>
         <item name="android:textAllCaps">true</item>
         <item name="android:paddingStart">6dp</item>
         <item name="android:paddingEnd">6dp</item>
@@ -121,7 +121,8 @@
     </style>
 
     <style name="TextAppearance.QuickSettings.TileView.User" parent="@style/TextAppearance.QuickSettings.TileView">
-        <item name="android:background">#CC000000</item>
+        <item name="android:background">#CCffffff</item>
+        <item name="android:textColor">#ff404040</item>
         <item name="android:padding">4dp</item>
         <item name="android:singleLine">true</item>
         <item name="android:fadingEdge">horizontal</item>
@@ -130,9 +131,8 @@
     <style name="BaseBrightnessDialogContainer">
         <item name="android:layout_width">match_parent</item>
         <item name="android:layout_height">wrap_content</item>
-        <item name="android:layout_marginLeft">8dp</item>
-        <item name="android:layout_marginRight">8dp</item>
-        <item name="android:padding">16dp</item>
+        <item name="android:paddingTop">16dp</item>
+        <item name="android:paddingBottom">16dp</item>
     </style>
     
     <style name="BrightnessDialogContainer" parent="@style/BaseBrightnessDialogContainer" />
@@ -162,6 +162,13 @@
         parent="@*android:style/TextAppearance.StatusBar.Ticker">
         <!-- Note: must be dp to fit in status bar -->
         <item name="android:textSize">14dp</item>
+    </style>
+
+    <style name="TextAppearance.StatusBar.Battery" parent="@*android:style/TextAppearance.StatusBar.Icon">
+        <!-- Note: must be dp to fit in status bar -->
+        <item name="android:textSize">12dp</item>
+        <item name="android:textStyle">normal</item>
+        <item name="android:textColor">@color/batterymeter_charge_color</item>
     </style>
 
 </resources>

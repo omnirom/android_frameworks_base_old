@@ -1,20 +1,20 @@
 /*
- * Copyright (C) 2012 The Android Open Source Project
- * This code has been modified. Portions copyright (C) 2013, OmniRom Project.
- * This code has been modified. Portions copyright (C) 2013, ParanoidAndroid Project.
- *
- * Licensed under the Apache License, Version 2.0 (the "License");
- * you may not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- *
- *      http://www.apache.org/licenses/LICENSE-2.0
- *
- * Unless required by applicable law or agreed to in writing, software
- * distributed under the License is distributed on an "AS IS" BASIS,
- * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- * See the License for the specific language governing permissions and
- * limitations under the License.
- */
+* Copyright (C) 2012 The Android Open Source Project
+* This code has been modified. Portions copyright (C) 2013, OmniRom Project.
+* This code has been modified. Portions copyright (C) 2013, ParanoidAndroid Project.
+*
+* Licensed under the Apache License, Version 2.0 (the "License");
+* you may not use this file except in compliance with the License.
+* You may obtain a copy of the License at
+*
+* http://www.apache.org/licenses/LICENSE-2.0
+*
+* Unless required by applicable law or agreed to in writing, software
+* distributed under the License is distributed on an "AS IS" BASIS,
+* WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+* See the License for the specific language governing permissions and
+* limitations under the License.
+*/
 
 package com.android.systemui.statusbar.phone;
 
@@ -88,8 +88,8 @@ import java.util.Arrays;
 import java.util.List;
 
 /**
- *
- */
+*
+*/
 class QuickSettings {
     static final boolean DEBUG_GONE_TILES = false;
     private static final String TAG = "QuickSettings";
@@ -373,7 +373,7 @@ class QuickSettings {
                             final UserManager um = UserManager.get(mContext);
                             if (um.getUsers(true).size() > 1) {
                                 // Since keyguard and systemui were merged into the same process to save
-                                // memory, they share the same Looper and graphics context.  As a result,
+                                // memory, they share the same Looper and graphics context. As a result,
                                 // there's no way to allow concurrent animation while keyguard inflates.
                                 // The workaround is to add a slight delay to allow the animation to finish.
                                 mHandler.postDelayed(new Runnable() {
@@ -586,6 +586,18 @@ class QuickSettings {
                             public void refreshView(QuickSettingsTileView view, State state) {
                                 RSSIState rssiState = (RSSIState) state;
                                 // Force refresh
+                                rssiTile.setImageDrawable(null);
+                                rssiTile.setImageResource(rssiState.signalIconId);
+
+                                if (rssiState.dataTypeIconId > 0) {
+                                    rssiTile.setImageOverlayResource(rssiState.dataTypeIconId);
+                                } else {
+                                    rssiTile.setImageOverlayDrawable(null);
+                                }
+                                setActivity(view, rssiState);
+
+                                rssiTile.setText(state.label);
+                                rssiTile.setNetworkText(rssiState.networkType);
                                 rssiTile.setFrontImageDrawable(null);
                                 rssiTile.setFrontImageResource(rssiState.signalIconId);
 
@@ -689,7 +701,7 @@ class QuickSettings {
                                         ? mContext.getString(R.string.quick_settings_battery_charging_label,
                                         batteryState.batteryLevel)
                                         : mContext.getString(R.string.quick_settings_battery_charging);
-                                } else {     // battery bar or battery circle
+                                } else { // battery bar or battery circle
                                     t = (mBatteryStyle == 0 || mBatteryStyle == 2)
                                         ? mContext.getString(R.string.status_bar_settings_battery_meter_format,
                                         batteryState.batteryLevel)

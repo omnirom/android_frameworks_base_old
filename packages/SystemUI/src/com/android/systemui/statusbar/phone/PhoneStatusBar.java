@@ -1,18 +1,18 @@
 /*
- * Copyright (C) 2010 The Android Open Source Project
- *
- * Licensed under the Apache License, Version 2.0 (the "License");
- * you may not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- *
- *      http://www.apache.org/licenses/LICENSE-2.0
- *
- * Unless required by applicable law or agreed to in writing, software
- * distributed under the License is distributed on an "AS IS" BASIS,
- * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- * See the License for the specific language governing permissions and
- * limitations under the License.
- */
+* Copyright (C) 2010 The Android Open Source Project
+*
+* Licensed under the Apache License, Version 2.0 (the "License");
+* you may not use this file except in compliance with the License.
+* You may obtain a copy of the License at
+*
+* http://www.apache.org/licenses/LICENSE-2.0
+*
+* Unless required by applicable law or agreed to in writing, software
+* distributed under the License is distributed on an "AS IS" BASIS,
+* WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+* See the License for the specific language governing permissions and
+* limitations under the License.
+*/
 
 package com.android.systemui.statusbar.phone;
 
@@ -190,6 +190,8 @@ public class PhoneStatusBar extends BaseStatusBar implements DemoMode {
     int mIconHPadding = -1;
     Display mDisplay;
     Point mCurrentDisplaySize = new Point();
+    int mCurrUiThemeMode;
+    int mCurrOrientation;
     private float mHeadsUpVerticalOffset;
     private int[] mPilePosition = new int[2];
 
@@ -479,6 +481,8 @@ public class PhoneStatusBar extends BaseStatusBar implements DemoMode {
         mDisplay = ((WindowManager)mContext.getSystemService(Context.WINDOW_SERVICE))
                 .getDefaultDisplay();
         updateDisplaySize();
+
+        mCurrUiThemeMode = mContext.getResources().getConfiguration().uiThemeMode;
 
         super.start(); // calls createAndAddWindows()
 
@@ -1486,8 +1490,8 @@ public class PhoneStatusBar extends BaseStatusBar implements DemoMode {
     }
 
     /**
-     * State is one or more of the DISABLE constants from StatusBarManager.
-     */
+* State is one or more of the DISABLE constants from StatusBarManager.
+*/
     public void disable(int state) {
         final int old = mDisabled;
         final int diff = state ^ old;
@@ -1501,25 +1505,25 @@ public class PhoneStatusBar extends BaseStatusBar implements DemoMode {
         StringBuilder flagdbg = new StringBuilder();
         flagdbg.append("disable: < ");
         flagdbg.append(((state & StatusBarManager.DISABLE_EXPAND) != 0) ? "EXPAND" : "expand");
-        flagdbg.append(((diff  & StatusBarManager.DISABLE_EXPAND) != 0) ? "* " : " ");
+        flagdbg.append(((diff & StatusBarManager.DISABLE_EXPAND) != 0) ? "* " : " ");
         flagdbg.append(((state & StatusBarManager.DISABLE_NOTIFICATION_ICONS) != 0) ? "ICONS" : "icons");
-        flagdbg.append(((diff  & StatusBarManager.DISABLE_NOTIFICATION_ICONS) != 0) ? "* " : " ");
+        flagdbg.append(((diff & StatusBarManager.DISABLE_NOTIFICATION_ICONS) != 0) ? "* " : " ");
         flagdbg.append(((state & StatusBarManager.DISABLE_NOTIFICATION_ALERTS) != 0) ? "ALERTS" : "alerts");
-        flagdbg.append(((diff  & StatusBarManager.DISABLE_NOTIFICATION_ALERTS) != 0) ? "* " : " ");
+        flagdbg.append(((diff & StatusBarManager.DISABLE_NOTIFICATION_ALERTS) != 0) ? "* " : " ");
         flagdbg.append(((state & StatusBarManager.DISABLE_NOTIFICATION_TICKER) != 0) ? "TICKER" : "ticker");
-        flagdbg.append(((diff  & StatusBarManager.DISABLE_NOTIFICATION_TICKER) != 0) ? "* " : " ");
+        flagdbg.append(((diff & StatusBarManager.DISABLE_NOTIFICATION_TICKER) != 0) ? "* " : " ");
         flagdbg.append(((state & StatusBarManager.DISABLE_SYSTEM_INFO) != 0) ? "SYSTEM_INFO" : "system_info");
-        flagdbg.append(((diff  & StatusBarManager.DISABLE_SYSTEM_INFO) != 0) ? "* " : " ");
+        flagdbg.append(((diff & StatusBarManager.DISABLE_SYSTEM_INFO) != 0) ? "* " : " ");
         flagdbg.append(((state & StatusBarManager.DISABLE_BACK) != 0) ? "BACK" : "back");
-        flagdbg.append(((diff  & StatusBarManager.DISABLE_BACK) != 0) ? "* " : " ");
+        flagdbg.append(((diff & StatusBarManager.DISABLE_BACK) != 0) ? "* " : " ");
         flagdbg.append(((state & StatusBarManager.DISABLE_HOME) != 0) ? "HOME" : "home");
-        flagdbg.append(((diff  & StatusBarManager.DISABLE_HOME) != 0) ? "* " : " ");
+        flagdbg.append(((diff & StatusBarManager.DISABLE_HOME) != 0) ? "* " : " ");
         flagdbg.append(((state & StatusBarManager.DISABLE_RECENT) != 0) ? "RECENT" : "recent");
-        flagdbg.append(((diff  & StatusBarManager.DISABLE_RECENT) != 0) ? "* " : " ");
+        flagdbg.append(((diff & StatusBarManager.DISABLE_RECENT) != 0) ? "* " : " ");
         flagdbg.append(((state & StatusBarManager.DISABLE_CLOCK) != 0) ? "CLOCK" : "clock");
-        flagdbg.append(((diff  & StatusBarManager.DISABLE_CLOCK) != 0) ? "* " : " ");
+        flagdbg.append(((diff & StatusBarManager.DISABLE_CLOCK) != 0) ? "* " : " ");
         flagdbg.append(((state & StatusBarManager.DISABLE_SEARCH) != 0) ? "SEARCH" : "search");
-        flagdbg.append(((diff  & StatusBarManager.DISABLE_SEARCH) != 0) ? "* " : " ");
+        flagdbg.append(((diff & StatusBarManager.DISABLE_SEARCH) != 0) ? "* " : " ");
         flagdbg.append(">");
         Log.d(TAG, flagdbg.toString());
 
@@ -1605,8 +1609,8 @@ public class PhoneStatusBar extends BaseStatusBar implements DemoMode {
     }
 
     /**
-     * All changes to the status bar and notifications funnel through here and are batched.
-     */
+* All changes to the status bar and notifications funnel through here and are batched.
+*/
     private class H extends BaseStatusBar.H {
         public void handleMessage(Message m) {
             super.handleMessage(m);
@@ -1634,7 +1638,7 @@ public class PhoneStatusBar extends BaseStatusBar implements DemoMode {
         }
     }
 
-    /**  if the interrupting notification had a fullscreen intent, fire it now.  */
+    /** if the interrupting notification had a fullscreen intent, fire it now. */
     private void escalateHeadsUp() {
         if (mInterruptingNotificationEntry != null) {
             final StatusBarNotification sbn = mInterruptingNotificationEntry.notification;
@@ -2072,16 +2076,16 @@ public class PhoneStatusBar extends BaseStatusBar implements DemoMode {
     }
 
     /**
-     * Enables or disables layers on the children of the notifications pile.
-     *
-     * When layers are enabled, this method attempts to enable layers for the minimal
-     * number of children. Only children visible when the notification area is fully
-     * expanded will receive a layer. The technique used in this method might cause
-     * more children than necessary to get a layer (at most one extra child with the
-     * current UI.)
-     *
-     * @param layerType {@link View#LAYER_TYPE_NONE} or {@link View#LAYER_TYPE_HARDWARE}
-     */
+* Enables or disables layers on the children of the notifications pile.
+*
+* When layers are enabled, this method attempts to enable layers for the minimal
+* number of children. Only children visible when the notification area is fully
+* expanded will receive a layer. The technique used in this method might cause
+* more children than necessary to get a layer (at most one extra child with the
+* current UI.)
+*
+* @param layerType {@link View#LAYER_TYPE_NONE} or {@link View#LAYER_TYPE_HARDWARE}
+*/
     private void setPileLayers(int layerType) {
         final int count = mPile.getChildCount();
 
@@ -2442,9 +2446,9 @@ public class PhoneStatusBar extends BaseStatusBar implements DemoMode {
     }
 
     private void checkUserAutohide(View v, MotionEvent event) {
-        if ((mSystemUiVisibility & STATUS_OR_NAV_TRANSIENT) != 0  // a transient bar is revealed
+        if ((mSystemUiVisibility & STATUS_OR_NAV_TRANSIENT) != 0 // a transient bar is revealed
                 && event.getAction() == MotionEvent.ACTION_OUTSIDE // touch outside the source bar
-                && event.getX() == 0 && event.getY() == 0  // a touch outside both bars
+                && event.getX() == 0 && event.getY() == 0 // a touch outside both bars
                 ) {
             userAutohide();
         }
@@ -2515,7 +2519,7 @@ public class PhoneStatusBar extends BaseStatusBar implements DemoMode {
 
         // Show the ticker if one is requested. Also don't do this
         // until status bar window is attached to the window manager,
-        // because...  well, what's the point otherwise?  And trying to
+        // because... well, what's the point otherwise? And trying to
         // run a ticker without being attached will crash!
         if (n.getNotification().tickerText != null && mStatusBarWindow.getWindowToken() != null) {
             if (0 == (mDisabled & (StatusBarManager.DISABLE_NOTIFICATION_ICONS
@@ -2585,71 +2589,71 @@ public class PhoneStatusBar extends BaseStatusBar implements DemoMode {
     public void dump(FileDescriptor fd, PrintWriter pw, String[] args) {
         synchronized (mQueueLock) {
             pw.println("Current Status Bar state:");
-            pw.println("  mExpandedVisible=" + mExpandedVisible
+            pw.println(" mExpandedVisible=" + mExpandedVisible
                     + ", mTrackingPosition=" + mTrackingPosition);
-            pw.println("  mTicking=" + mTicking);
-            pw.println("  mTracking=" + mTracking);
-            pw.println("  mDisplayMetrics=" + mDisplayMetrics);
-            pw.println("  mPile: " + viewInfo(mPile));
-            pw.println("  mTickerView: " + viewInfo(mTickerView));
-            pw.println("  mScrollView: " + viewInfo(mScrollView)
+            pw.println(" mTicking=" + mTicking);
+            pw.println(" mTracking=" + mTracking);
+            pw.println(" mDisplayMetrics=" + mDisplayMetrics);
+            pw.println(" mPile: " + viewInfo(mPile));
+            pw.println(" mTickerView: " + viewInfo(mTickerView));
+            pw.println(" mScrollView: " + viewInfo(mScrollView)
                     + " scroll " + mScrollView.getScrollX() + "," + mScrollView.getScrollY());
         }
 
-        pw.print("  mInteractingWindows="); pw.println(mInteractingWindows);
-        pw.print("  mStatusBarWindowState=");
+        pw.print(" mInteractingWindows="); pw.println(mInteractingWindows);
+        pw.print(" mStatusBarWindowState=");
         pw.println(windowStateToString(mStatusBarWindowState));
-        pw.print("  mStatusBarMode=");
+        pw.print(" mStatusBarMode=");
         pw.println(BarTransitions.modeToString(mStatusBarMode));
         dumpBarTransitions(pw, "mStatusBarView", mStatusBarView.getBarTransitions());
         if (mNavigationBarView != null) {
-            pw.print("  mNavigationBarWindowState=");
+            pw.print(" mNavigationBarWindowState=");
             pw.println(windowStateToString(mNavigationBarWindowState));
-            pw.print("  mNavigationBarMode=");
+            pw.print(" mNavigationBarMode=");
             pw.println(BarTransitions.modeToString(mNavigationBarMode));
             dumpBarTransitions(pw, "mNavigationBarView", mNavigationBarView.getBarTransitions());
         }
 
-        pw.print("  mNavigationBarView=");
+        pw.print(" mNavigationBarView=");
         if (mNavigationBarView == null) {
             pw.println("null");
         } else {
             mNavigationBarView.dump(fd, pw, args);
         }
 
-        pw.println("  Panels: ");
+        pw.println(" Panels: ");
         if (mNotificationPanel != null) {
-            pw.println("    mNotificationPanel=" +
+            pw.println(" mNotificationPanel=" +
                 mNotificationPanel + " params=" + mNotificationPanel.getLayoutParams().debug(""));
-            pw.print  ("      ");
+            pw.print (" ");
             mNotificationPanel.dump(fd, pw, args);
         }
         if (mSettingsPanel != null) {
-            pw.println("    mSettingsPanel=" +
+            pw.println(" mSettingsPanel=" +
                 mSettingsPanel + " params=" + mSettingsPanel.getLayoutParams().debug(""));
-            pw.print  ("      ");
+            pw.print (" ");
             mSettingsPanel.dump(fd, pw, args);
         }
 
         if (DUMPTRUCK) {
             synchronized (mNotificationData) {
                 int N = mNotificationData.size();
-                pw.println("  notification icons: " + N);
+                pw.println(" notification icons: " + N);
                 for (int i=0; i<N; i++) {
                     NotificationData.Entry e = mNotificationData.get(i);
-                    pw.println("    [" + i + "] key=" + e.key + " icon=" + e.icon);
+                    pw.println(" [" + i + "] key=" + e.key + " icon=" + e.icon);
                     StatusBarNotification n = e.notification;
-                    pw.println("         pkg=" + n.getPackageName() + " id=" + n.getId() + " score=" + n.getScore());
-                    pw.println("         notification=" + n.getNotification());
-                    pw.println("         tickerText=\"" + n.getNotification().tickerText + "\"");
+                    pw.println(" pkg=" + n.getPackageName() + " id=" + n.getId() + " score=" + n.getScore());
+                    pw.println(" notification=" + n.getNotification());
+                    pw.println(" tickerText=\"" + n.getNotification().tickerText + "\"");
                 }
             }
 
             int N = mStatusIcons.getChildCount();
-            pw.println("  system icons: " + N);
+            pw.println(" system icons: " + N);
             for (int i=0; i<N; i++) {
                 StatusBarIconView ic = (StatusBarIconView) mStatusIcons.getChildAt(i);
-                pw.println("    [" + i + "] icon=" + ic);
+                pw.println(" [" + i + "] icon=" + ic);
             }
 
             if (false) {
@@ -2668,7 +2672,7 @@ public class PhoneStatusBar extends BaseStatusBar implements DemoMode {
         }
 
         if (DEBUG_GESTURES) {
-            pw.print("  status bar gestures: ");
+            pw.print(" status bar gestures: ");
             mGestureRec.dump(fd, pw, args);
         }
 
@@ -2676,7 +2680,7 @@ public class PhoneStatusBar extends BaseStatusBar implements DemoMode {
     }
 
     private static void dumpBarTransitions(PrintWriter pw, String var, BarTransitions transitions) {
-        pw.print("  "); pw.print(var); pw.print(".BarTransitions.mMode=");
+        pw.print(" "); pw.print(var); pw.print(".BarTransitions.mMode=");
         pw.println(BarTransitions.modeToString(transitions.getMode()));
     }
 
@@ -3069,23 +3073,54 @@ public class PhoneStatusBar extends BaseStatusBar implements DemoMode {
         }
     }
 
+    private static void copyNotifications(ArrayList<Pair<IBinder, StatusBarNotification>> dest,
+            NotificationData source) {
+        int N = source.size();
+        for (int i = 0; i < N; i++) {
+            NotificationData.Entry entry = source.get(i);
+            dest.add(Pair.create(entry.key, entry.notification));
+        }
+    }
+
+
     /**
-     * Reload some of our resources when the configuration changes.
-     *
-     * We don't reload everything when the configuration changes -- we probably
-     * should, but getting that smooth is tough.  Someday we'll fix that.  In the
-     * meantime, just update the things that we know change.
-     */
+* Reload some of our resources when the configuration changes.
+*
+* We don't reload everything when the configuration changes -- we probably
+* should, but getting that smooth is tough. Someday we'll fix that. In the
+* meantime, just update the things that we know change.
+*/
     void updateResources() {
         final Context context = mContext;
         final Resources res = context.getResources();
 
+        // detect theme ui mode change
+        int uiThemeMode = res.getConfiguration().uiThemeMode;
+        if (uiThemeMode != mCurrUiThemeMode) {
+            mCurrUiThemeMode = uiThemeMode;
+
+            return;
+        }
+
         if (mClearButton instanceof TextView) {
             ((TextView)mClearButton).setText(context.getText(R.string.status_bar_clear_all_button));
         }
+        loadDimens();
 
-        // Update the QuickSettings container
-        if (mQS != null) mQS.updateResources();
+        // check for orientation change and update only the container layout
+        // for all other configuration changes update complete QS
+        int orientation = res.getConfiguration().orientation;
+        if (orientation != mCurrOrientation) {
+            mCurrOrientation = orientation;
+            // Update the settings container
+            if (mSettingsContainer != null) {
+                mSettingsContainer.updateResources();
+            }
+        } else {
+            if (mQS != null) {
+                mQS.updateResources();
+            }
+        }
 
         loadDimens();
     }
@@ -3102,7 +3137,7 @@ public class PhoneStatusBar extends BaseStatusBar implements DemoMode {
             R.dimen.status_bar_icon_padding);
 
         if (newIconHPadding != mIconHPadding || newIconSize != mIconSize) {
-//            Log.d(TAG, "size=" + newIconSize + " padding=" + newIconHPadding);
+// Log.d(TAG, "size=" + newIconSize + " padding=" + newIconHPadding);
             mIconHPadding = newIconHPadding;
             mIconSize = newIconSize;
             //reloadAllNotificationIcons(); // reload the tray
@@ -3148,7 +3183,7 @@ public class PhoneStatusBar extends BaseStatusBar implements DemoMode {
         }
 
         mHeadsUpNotificationDecay = res.getInteger(R.integer.heads_up_notification_decay);
-        mRowHeight =  res.getDimensionPixelSize(R.dimen.notification_row_min_height);
+        mRowHeight = res.getDimensionPixelSize(R.dimen.notification_row_min_height);
 
         if (false) Log.v(TAG, "updateResources");
     }
