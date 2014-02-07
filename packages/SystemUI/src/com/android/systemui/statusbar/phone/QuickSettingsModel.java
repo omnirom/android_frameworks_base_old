@@ -128,6 +128,9 @@ class QuickSettingsModel implements BluetoothStateChangeCallback,
     static class QuiteHourState extends State {
         boolean isEnabled;
     }
+    static class BatterySaverState extends State {
+        boolean isEnabled;
+    }
     public static class BluetoothState extends State {
         boolean connected = false;
         String stateContentDescription;
@@ -426,6 +429,26 @@ class QuickSettingsModel implements BluetoothStateChangeCallback,
         }
     }
 
+    /** ContentObserver to watch batterysaver **/
+    private class BatterySaverObserver extends ContentObserver {
+        public BatterySaverObserver(Handler handler) {
+            super(handler);
+        }
+
+        @Override
+        public void onChange(boolean selfChange) {
+            onBatterySaverChanged();
+        }
+
+        public void startObserving() {
+            final ContentResolver cr = mContext.getContentResolver();
+            cr.unregisterContentObserver(this);
+            cr.registerContentObserver(
+                    Settings.Global.getUriFor(Settings.Global.BATTERY_SAVER_OPTION),
+                    false, this);
+        }
+    }
+
     /** Callback for changes to remote display routes. */
     private class RemoteDisplayRouteCallback extends MediaRouter.SimpleCallback {
         @Override
@@ -458,6 +481,7 @@ class QuickSettingsModel implements BluetoothStateChangeCallback,
     private final BrightnessObserver mBrightnessObserver;
     private final ImmersiveObserver mImmersiveObserver;
     private final QuiteHourObserver mQuiteHourObserver;
+    private final BatterySaverObserver mBatterySaverObserver;
     private final RingerObserver mRingerObserver;
     private final SleepObserver mSleepObserver;
     private LocationController mLocationController;
@@ -604,6 +628,10 @@ class QuickSettingsModel implements BluetoothStateChangeCallback,
     private RefreshCallback mQuiteHourCallback;
     private QuiteHourState mQuiteHourState = new QuiteHourState();
 
+    private QuickSettingsTileView mBatterySaverTile;
+    private RefreshCallback mBatterySaverCallback;
+    private BatterySaverState mBatterySaverState = new BatterySaverState();
+
     private QuickSettingsTileView mBugreportTile;
     private RefreshCallback mBugreportCallback;
     private State mBugreportState = new State();
@@ -643,6 +671,7 @@ class QuickSettingsModel implements BluetoothStateChangeCallback,
                 mBrightnessObserver.startObserving();
                 mImmersiveObserver.startObserving();
                 mQuiteHourObserver.startObserving();
+                mBatterySaverObserver.startObserving();
                 mRingerObserver.startObserving();
                 mSleepObserver.startObserving();
                 mMobileNetworkObserver.startObserving();
@@ -665,6 +694,8 @@ class QuickSettingsModel implements BluetoothStateChangeCallback,
         mImmersiveObserver.startObserving();
         mQuiteHourObserver = new QuiteHourObserver(mHandler);
         mQuiteHourObserver.startObserving();
+        mBatterySaverObserver = new BatterySaverObserver(mHandler);
+        mBatterySaverObserver.startObserving();
         mSleepObserver = new SleepObserver(mHandler);
         mSleepObserver.startObserving();
         mRingerObserver = new RingerObserver(mHandler);
@@ -744,6 +775,9 @@ class QuickSettingsModel implements BluetoothStateChangeCallback,
         refreshImmersiveFrontTile();
         refreshImmersiveBackTile();
         refreshNfcTile();
+        refreshImmersiveTile();
+        onQuiteHourChanged();
+        onBatterySaverChanged();
         refreshRotationLockTile();
         refreshRssiTile();
         refreshWifiTile();
@@ -2029,6 +2063,27 @@ class QuickSettingsModel implements BluetoothStateChangeCallback,
         if (mQuiteHourTile != null) {
             mQuiteHourCallback.refreshView(mQuiteHourTile, mQuiteHourState);
         }
+    }
+
+    // battery saver
+    void addBatterySaverTile(QuickSettingsTileView view, RefreshCallback cb) {
+        mBatterySaverTile = view;
+        mBatterySaverCallback = cb;
+        onBatterySaverChanged();
+    }
+
+    private void onBatterySaverChanged() {
+        Resources r = mContext.getResources();
+        int mode = Settings.Global.getInt(mContext.getContentResolver(),
+                       Settings.Global.BATTERY_SAVER_OPTION, 0);
+        mBatterySaverState.isEnabled = (mode == 1);
+        mBatterySaverState.iconId = mBatterySaverState.isEnabled
+                ? R.drawable.ic_qs_battery_saver_on
+                : R.drawable.ic_qs_battery_saver_off;
+        mBatterySaverState.label = mBatterySaverState.isEnabled
+                ? r.getString(R.string.quick_settings_battery_saver_label)
+                : r.getString(R.string.quick_settings_battery_saver_off_label);
+        mBatterySaverCallback.refreshView(mBatterySaverTile, mBatterySaverState);
     }
 
     // SSL CA Cert warning.
