@@ -1054,7 +1054,7 @@ class QuickSettings {
                   locationTile.setBackOnClickListener(new View.OnClickListener() {
                        @Override
                        public void onClick(View v) {
-                           int newLocationMode = mLocationController.locationMode();
+                           int newLocationMode = mLocationController.getLocationMode();
                            if (mLocationController.isLocationEnabled()) {
                                if (mLocationController.setBackLocationEnabled(newLocationMode)) {
                                    if (mLocationController.isLocationAllowPanelCollapse()) {
