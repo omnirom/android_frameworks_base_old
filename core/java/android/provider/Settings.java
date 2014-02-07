@@ -3777,6 +3777,16 @@ public final class Settings {
             MOVED_TO_GLOBAL.add(Settings.Global.SET_GLOBAL_HTTP_PROXY);
             MOVED_TO_GLOBAL.add(Settings.Global.DEFAULT_DNS_SERVER);
             MOVED_TO_GLOBAL.add(Settings.Global.PREFERRED_NETWORK_MODE);
+            MOVED_TO_GLOBAL.add(Settings.Global.SMART_RADIO_OPTION);
+            MOVED_TO_GLOBAL.add(Settings.Global.SMART_RADIO_NORMAL_MODE);
+            MOVED_TO_GLOBAL.add(Settings.Global.SMART_RADIO_POWER_SAVING_MODE);
+            MOVED_TO_GLOBAL.add(Settings.Global.SMART_RADIO_SCREEN_OFF);
+            MOVED_TO_GLOBAL.add(Settings.Global.SMART_RADIO_IGNORE_LOCKED);
+            MOVED_TO_GLOBAL.add(Settings.Global.SMART_RADIO_MODE_CHANGE_DELAY);
+            MOVED_TO_GLOBAL.add(Settings.Global.SMART_RADIO_BATTERY_MODE);
+            MOVED_TO_GLOBAL.add(Settings.Global.SMART_RADIO_BATTERY_LEVEL);
+            MOVED_TO_GLOBAL.add(Settings.Global.SMART_RADIO_BRIGHTNESS_MODE);
+            MOVED_TO_GLOBAL.add(Settings.Global.SMART_RADIO_BRIGHTNESS_LEVEL);
         }
 
         /** @hide */
@@ -6762,6 +6772,66 @@ public final class Settings {
          */
         public static final String PREFERRED_NETWORK_MODE =
                 "preferred_network_mode";
+
+        /**
+         * @hide
+         */
+        public static final String SMART_RADIO_OPTION =
+                "smart_radio_option";
+
+        /**
+         * @hide
+         */
+        public static final String SMART_RADIO_NORMAL_MODE =
+                "smart_radio_normal_mode";
+
+        /**
+         * @hide
+         */
+        public static final String SMART_RADIO_POWER_SAVING_MODE =
+                "smart_radio_power_saving_mode";
+
+        /**
+         * @hide
+         */
+        public static final String SMART_RADIO_SCREEN_OFF =
+                "smart_radio_screen_off";
+
+        /**
+         * @hide
+         */
+        public static final String SMART_RADIO_IGNORE_LOCKED =
+                "smart_radio_ignore_locked";
+
+        /**
+         * @hide
+         */
+        public static final String SMART_RADIO_MODE_CHANGE_DELAY =
+                "smart_radio_mode_change_delay";
+
+        /**
+         * @hide
+         */
+        public static final String SMART_RADIO_BATTERY_MODE =
+                "smart_radio_battery_mode";
+
+        /**
+         * @hide
+         */
+        public static final String SMART_RADIO_BATTERY_LEVEL =
+                "smart_radio_battery_level";
+
+        /**
+         * @hide
+         */
+        public static final String SMART_RADIO_BRIGHTNESS_MODE =
+                "smart_radio_brightness_mode";
+
+        /**
+         * @hide
+         */
+        public static final String SMART_RADIO_BRIGHTNESS_LEVEL =
+                "smart_radio_brightness_level";
 
         /**
          * Name of an application package to be debugged.

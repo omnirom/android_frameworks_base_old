@@ -44,7 +44,11 @@ public class BootReceiver extends BroadcastReceiver {
                 Intent cpuinfo = new Intent(context, com.android.systemui.CPUInfoService.class);
                 context.startService(cpuinfo);
             }
-
+            // Start the smart radio, if activated
+            if (Settings.Global.getInt(res, Settings.Global.SMART_RADIO_OPTION, 0) != 0) {
+                Intent smartRadio = new Intent(context, com.android.systemui.smartradio.SmartRadioService.class);
+                context.startService(smartRadio);
+            }
         } catch (Exception e) {
             Log.e(TAG, "Can't start load average service", e);
         }
