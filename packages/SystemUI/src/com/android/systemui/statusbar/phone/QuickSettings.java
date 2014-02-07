@@ -116,7 +116,8 @@ class QuickSettings {
         SLEEP,
         SYNC,
         USBMODE,
-        TORCH
+        TORCH,
+        BATTERYSAVER
     }
 
     public static final String NO_TILES = "NO_TILES";
@@ -127,7 +128,8 @@ class QuickSettings {
         + DELIMITER + Tile.BATTERY + DELIMITER + Tile.ROTATION+ DELIMITER + Tile.IMMERSIVE
         + DELIMITER + Tile.LOCATION + DELIMITER + Tile.AIRPLANE + DELIMITER + Tile.QUITEHOUR
         + DELIMITER + Tile.USBMODE + DELIMITER + Tile.SLEEP + DELIMITER + Tile.SYNC
-        + DELIMITER + Tile.NFC;
+        + DELIMITER + Tile.NFC
+        + DELIMITER + Tile.BATTERYSAVER;
 
     private Context mContext;
     private PanelBar mBar;
@@ -869,6 +871,37 @@ class QuickSettings {
                   });
                   parent.addView(SyncTile);
                   if (addMissing) SyncTile.setVisibility(View.GONE);
+               } else if (Tile.BATTERYSAVER.toString().equals(tile.toString())) { // battery saver tile
+                  // battery saver tile
+                  final QuickSettingsBasicTile batterySaverTile = new QuickSettingsBasicTile(mContext);
+
+                  batterySaverTile.setTileId(Tile.BATTERYSAVER);
+                  batterySaverTile.setImageResource(R.drawable.ic_qs_battery_saver_off);
+                  batterySaverTile.setTextResource(R.string.quick_settings_battery_saver_off_label);
+                  batterySaverTile.setOnClickListener(new View.OnClickListener() {
+                        @Override
+                        public void onClick(View v) {
+                            collapsePanels();
+                            boolean checkModeOn = Settings.Global.getInt(mContext.getContentResolver(),
+                                                Settings.Global.BATTERY_SAVER_OPTION, 0) == 1;
+                            Settings.Global.putInt(mContext.getContentResolver(),
+                                 Settings.Global.BATTERY_SAVER_OPTION, checkModeOn ? 0 : 1);
+                            Intent scheduleSaver = new Intent();
+                            scheduleSaver.setAction(Intent.ACTION_BATTERY_SERVICES);
+                            mContext.sendBroadcast(scheduleSaver);
+                        }
+                  });
+                  batterySaverTile.setOnLongClickListener(new View.OnLongClickListener() {
+                      @Override
+                      public boolean onLongClick(View v) {
+                          startSettingsActivity(Intent.ACTION_POWER_USAGE_SUMMARY);
+                          return true;
+                      }
+                  });
+                  mModel.addBatterySaverTile(batterySaverTile,
+                         new QuickSettingsModel.BasicRefreshCallback(batterySaverTile));
+                  parent.addView(batterySaverTile);
+                  if (addMissing) batterySaverTile.setVisibility(View.GONE);
                } else if (Tile.QUITEHOUR.toString().equals(tile.toString())) { // Quite hours tile
                   // Quite hours mode
                   final QuickSettingsBasicTile quiteHourTile
