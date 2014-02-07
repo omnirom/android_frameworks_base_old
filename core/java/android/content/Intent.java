@@ -680,6 +680,12 @@ public class Intent implements Parcelable, Cloneable {
     public static final String ACTION_POWERMENU = "android.intent.action.POWERMENU";
 
     /**
+     * Global Action: Battery services start/stop
+     * @hide
+     */
+    public static final String ACTION_BATTERY_SERVICES = "android.intent.action.BATTERY_SERVICES";
+
+    /**
      * Activity Action: Creates a shortcut.
      * <p>Input: Nothing.</p>
      * <p>Output: An Intent representing the shortcut. The intent must contain three
