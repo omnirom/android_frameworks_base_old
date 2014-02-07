@@ -226,7 +226,7 @@ public class LocationController extends BroadcastReceiver {
     /**
      * Returns true if there currently exist active high power location requests.
      */
-    private boolean areActiveHighPowerLocationRequests() {
+    public boolean areActiveHighPowerLocationRequests() {
         List<AppOpsManager.PackageOps> packages
             = mAppOpsManager.getPackagesForOps(mHighPowerRequestAppOpArray);
         // AppOpsManager can return null when there is no requested data.
