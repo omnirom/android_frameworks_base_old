@@ -103,6 +103,8 @@
     <string name="quick_settings_quiethours_off_label">Quiet hours disabled</string>
     <string name="quick_settings_quiethours_active_label">Quiet hours active</string>
     <string name="quick_settings_quiethours_paused_label">Quiet hours paused</string>
+    <string name="quick_settings_battery_saver_label">Battery saver on</string>
+    <string name="quick_settings_battery_saver_off_label">Battery saver off</string>
     <string name="quick_settings_ringer_on">Sound on</string>
     <string name="quick_settings_ringer_off">Sound off</string>
     <string name="quick_settings_ringer_normal">Sound</string>
@@ -127,6 +129,29 @@
     <string name="quick_settings_tinted_mode_on_label">Color enabled</string>
     <string name="quick_settings_tinted_mode_screen_label">Screen</string>
     <string name="quick_settings_tinted_mode_actionbar_label">Action bar</string>
+
+    <!-- battery saver mode -->
+    <string name="battery_saver_start">Battery Saver Enabled</string>
+    <string name="battery_saver_stop">Battery Saver Disabled</string>
+    <string name="battery_saver_change">Battery Saver Change network to</string>
+    <string name="battery_saver_network">Network restored</string>
+    <string name="battery_saver_data">Mobile data restored</string>
+    <string name="battery_saver_brightness">Screen Brightness restored</string>
+    <string name="battery_saver_bluetooth">Bluetooth restored</string>
+    <string name="battery_saver_location">Gps restored</string>
+    <string name="battery_saver_wifi">Wi-Fi restored</string>
+    <string name="battery_saver_cpu">CPU restored</string>
+    <string name="battery_saver_cpu_change">Battery Saver Change CPU freq to</string>
+    <string name="battery_saver_sync">Sync restored</string>
+    <string name="battery_saver_led">LED restored</string>
+    <string name="battery_saver_vibrate">Vibrate restored</string>
+    <string name="battery_saver_no_changes">No configuration restored</string>
+    <string name="battery_saver_all">All configuration restored</string>
+    <string name="battery_saver_enable_ticker">Battery saver mode running...</string>
+    <string name="battery_saver_enable_title">Battery saver mode</string>
+    <string name="battery_saver_airplane_ticker">Airplane mode enabled by battery saver</string>
+    <string name="battery_saver_airplane_text">Airplane mode enabled by battery saver because there is no signal after 5 minutes</string>
+    <string name="battery_saver_disable">Disable</string>
 
     <!-- Dialog title for navigation bar button selection -->
     <string name="navbar_dialog_title">Choose action to assign</string>
