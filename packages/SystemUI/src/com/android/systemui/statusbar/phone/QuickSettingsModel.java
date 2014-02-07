@@ -1281,7 +1281,7 @@ class QuickSettingsModel implements BluetoothStateChangeCallback,
 
     void refreshBackLocationTile() {
         if (mBackLocationTile != null) {
-            onBackLocationSettingsChanged(mLocationController.locationMode(), mLocationState.enabled);
+            onBackLocationSettingsChanged(mLocationController.getLocationMode(), mLocationState.enabled);
         }
     }
 
