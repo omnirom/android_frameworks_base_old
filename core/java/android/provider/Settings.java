@@ -2921,6 +2921,12 @@ public final class Settings {
                 "recents_memory_indicator_location";
 
         /**
+         * Alternative recent apps integration using OmniSwitch
+         * @hide
+         */
+        public static final String RECENTS_USE_OMNISWITCH = "recents_use_omniswitch";
+
+        /**
          * Immersive mode global actions switch
          * 0 = no
          * 1 = yes
