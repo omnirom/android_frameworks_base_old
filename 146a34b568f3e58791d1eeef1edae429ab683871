@@ -1,0 +1,21 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "ab62b9bd_659b6d68",
+        "filename": "packages/Keyguard/src/com/android/keyguard/CarrierText.java",
+        "patchSetId": 4
+      },
+      "lineNbr": 90,
+      "author": {
+        "id": 1000026
+      },
+      "writtenOn": "2014-02-08T15:48:39Z",
+      "side": 1,
+      "message": "hm - actually this is not user specific so this should be in Settings.Global",
+      "revId": "146a34b568f3e58791d1eeef1edae429ab683871",
+      "serverId": "56841c99-7c94-43d4-bf0b-cb4707e66d55",
+      "unresolved": false
+    }
+  ]
+}
