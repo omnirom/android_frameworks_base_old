@@ -51,16 +51,16 @@ please see styles_device_defaults.xml.
     </style>
 
     <style name="AlertDialog">
-        <item name="fullDark">@android:drawable/popup_full_dark</item>
-        <item name="topDark">@android:drawable/popup_top_dark</item>
-        <item name="centerDark">@android:drawable/popup_center_dark</item>
-        <item name="bottomDark">@android:drawable/popup_bottom_dark</item>
+        <item name="fullDark">@android:drawable/popup_full_bright</item>
+        <item name="topDark">@android:drawable/popup_top_bright</item>
+        <item name="centerDark">@android:drawable/popup_center_bright</item>
+        <item name="bottomDark">@android:drawable/popup_bottom_bright</item>
         <item name="fullBright">@android:drawable/popup_full_bright</item>
         <item name="topBright">@android:drawable/popup_top_bright</item>
         <item name="centerBright">@android:drawable/popup_center_bright</item>
         <item name="bottomBright">@android:drawable/popup_bottom_bright</item>
-        <item name="bottomMedium">@android:drawable/popup_bottom_medium</item>
-        <item name="centerMedium">@android:drawable/popup_center_medium</item>
+        <item name="bottomMedium">@android:drawable/popup_bottom_bright</item>
+        <item name="centerMedium">@android:drawable/popup_center_bright</item>
         <item name="progressLayout">@android:layout/progress_dialog</item>
         <item name="horizontalProgressLayout">@android:layout/alert_dialog_progress</item>
     </style>
@@ -313,7 +313,7 @@ please see styles_device_defaults.xml.
         <item name="android:uncertainGestureColor">#4800ff00</item>
     </style>
 
-    <style name="Widget.Button">
+    <style name="Widget.Button" parent="@style/Widget.Light">
         <item name="android:background">@android:drawable/btn_default</item>
         <item name="android:focusable">true</item>
         <item name="android:clickable">true</item>
@@ -336,7 +336,7 @@ please see styles_device_defaults.xml.
         <item name="android:textColor">@android:color/white</item>
     </style>
 
-    <style name="Widget.CompoundButton">
+    <style name="Widget.CompoundButton" parent="@style/Widget.Light">
         <item name="android:focusable">true</item>
         <item name="android:clickable">true</item>
         <item name="android:textAppearance">?android:attr/textAppearance</item>
@@ -363,7 +363,7 @@ please see styles_device_defaults.xml.
         <item name="android:disabledAlpha">?android:attr/disabledAlpha</item>
     </style>
 
-    <style name="Widget.ProgressBar">
+    <style name="Widget.ProgressBar" parent="@style/Widget.Light">
         <item name="android:indeterminateOnly">true</item>
         <item name="android:indeterminateDrawable">@android:drawable/progress_medium_white</item>
         <item name="android:indeterminateBehavior">repeat</item>
@@ -416,7 +416,7 @@ please see styles_device_defaults.xml.
         <item name="android:mirrorForRtl">true</item>
     </style>
 
-    <style name="Widget.SeekBar">
+    <style name="Widget.SeekBar" parent="@style/Widget.Light">
         <item name="android:indeterminateOnly">false</item>
         <item name="android:progressDrawable">@android:drawable/progress_horizontal</item>
         <item name="android:indeterminateDrawable">@android:drawable/progress_horizontal</item>
@@ -2385,17 +2385,17 @@ please see styles_device_defaults.xml.
     <!-- Dialog styles -->
 
     <style name="AlertDialog.Holo" parent="AlertDialog">
-        <item name="fullDark">@android:drawable/dialog_full_holo_dark</item>
-        <item name="topDark">@android:drawable/dialog_top_holo_dark</item>
-        <item name="centerDark">@android:drawable/dialog_middle_holo_dark</item>
-        <item name="bottomDark">@android:drawable/dialog_bottom_holo_dark</item>
-        <item name="fullBright">@android:drawable/dialog_full_holo_dark</item>
-        <item name="topBright">@android:drawable/dialog_top_holo_dark</item>
-        <item name="centerBright">@android:drawable/dialog_middle_holo_dark</item>
-        <item name="bottomBright">@android:drawable/dialog_bottom_holo_dark</item>
-        <item name="bottomMedium">@android:drawable/dialog_bottom_holo_dark</item>
-        <item name="centerMedium">@android:drawable/dialog_middle_holo_dark</item>
-        <item name="layout">@android:layout/alert_dialog_holo_dark</item>
+        <item name="fullDark">@android:drawable/dialog_full_holo_light</item>
+        <item name="topDark">@android:drawable/dialog_top_holo_light</item>
+        <item name="centerDark">@android:drawable/dialog_middle_holo_light</item>
+        <item name="bottomDark">@android:drawable/dialog_bottom_holo_light</item>
+        <item name="fullBright">@android:drawable/dialog_full_holo_light</item>
+        <item name="topBright">@android:drawable/dialog_top_holo_light</item>
+        <item name="centerBright">@android:drawable/dialog_middle_holo_light</item>
+        <item name="bottomBright">@android:drawable/dialog_bottom_holo_light</item>
+        <item name="bottomMedium">@android:drawable/dialog_bottom_holo_light</item>
+        <item name="centerMedium">@android:drawable/dialog_middle_holo_light</item>
+        <item name="layout">@android:layout/alert_dialog_holo_light</item>
         <item name="listLayout">@android:layout/select_dialog_holo</item>
         <item name="progressLayout">@android:layout/progress_dialog_holo</item>
         <item name="horizontalProgressLayout">@android:layout/alert_dialog_progress_holo</item>

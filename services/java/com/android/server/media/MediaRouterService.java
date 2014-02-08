@@ -16,6 +16,7 @@
 
 package com.android.server.media;
 
+import com.android.internal.util.Objects;
 import com.android.server.Watchdog;
 
 import android.Manifest;
@@ -51,7 +52,6 @@ import java.io.PrintWriter;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
-import java.util.Objects;
 
 /**
  * Provides a mechanism for discovering media routes and manages media playback
@@ -384,7 +384,7 @@ public final class MediaRouterService extends IMediaRouterService.Stub
         ClientRecord clientRecord = mAllClientRecords.get(client.asBinder());
         if (clientRecord != null) {
             final String oldRouteId = clientRecord.mSelectedRouteId;
-            if (!Objects.equals(routeId, oldRouteId)) {
+            if (!Objects.equal(routeId, oldRouteId)) {
                 if (DEBUG) {
                     Slog.d(TAG, clientRecord + ": Set selected route, routeId=" + routeId
                             + ", oldRouteId=" + oldRouteId
@@ -1257,12 +1257,12 @@ public final class MediaRouterService extends IMediaRouterService.Stub
                     mDescriptor = descriptor;
                     if (descriptor != null) {
                         final String name = computeName(descriptor);
-                        if (!Objects.equals(mMutableInfo.name, name)) {
+                        if (!Objects.equal(mMutableInfo.name, name)) {
                             mMutableInfo.name = name;
                             changed = true;
                         }
                         final String description = computeDescription(descriptor);
-                        if (!Objects.equals(mMutableInfo.description, description)) {
+                        if (!Objects.equal(mMutableInfo.description, description)) {
                             mMutableInfo.description = description;
                             changed = true;
                         }

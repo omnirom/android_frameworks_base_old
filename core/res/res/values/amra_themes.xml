@@ -1,0 +1,183 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!-- Copyright (C) 2011 The Android Open Source Project
+
+     Licensed under the Apache License, Version 2.0 (the "License");
+     you may not use this file except in compliance with the License.
+     You may obtain a copy of the License at
+
+          http://www.apache.org/licenses/LICENSE-2.0
+
+     Unless required by applicable law or agreed to in writing, software
+     distributed under the License is distributed on an "AS IS" BASIS,
+     WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+     See the License for the specific language governing permissions and
+     limitations under the License.
+-->
+
+<!--
+===============================================================
+                        PLEASE READ
+===============================================================
+This file contains the themes that are the Device Defaults.
+If you want to edit themes to skin your device, do it here.
+We recommend that you do not edit themes.xml and instead edit
+this file.
+
+Editing this file instead of themes.xml will greatly simplify
+merges for future platform versions and CTS compliance will be
+easier.
+===============================================================
+                        PLEASE READ
+===============================================================
+ -->
+<resources>
+
+    <!-- The default theme for apps that target API level 14 and higher.
+         <p>The DeviceDefault themes are aliases for a specific device’s native look and feel. The
+         DeviceDefault theme family and widget style family offer ways for you to target your app
+         to a device’s native theme with all device customizations intact.</p>
+         <p>For example, when you set your app's {@code targetSdkVersion} to 14 or higher, this
+         theme is applied to your application by default. As such, your app might appear with the
+         {@link #Theme_Holo Holo} styles on one device, but with a different set of styles on
+         another device. This is great if you want your app to fit with the device's native look and
+         feel. If, however, you prefer to keep your UI style the same across all devices, you should
+         apply a specific theme such as {@link #Theme_Holo Holo} or one of your own design. For more
+         information, read <a
+         href="http://android-developers.blogspot.com/2012/01/holo-everywhere.html">Holo
+         Everywhere</a>.</p>
+         <p>Styles used by the DeviceDefault theme are named using the convention
+         Type.DeviceDefault.Etc (for example, {@code Widget.DeviceDefault.Button} and
+         {@code TextAppearance.DeviceDefault.Widget.PopupMenu.Large}).</p>
+          -->
+
+<style name="Theme.Dialog.Light" parent="@style/Theme.Light">
+        <item name="android:windowFrame">@null</item>
+        <item name="android:windowTitleStyle">@android:style/DialogWindowTitle</item>
+        <item name="windowBackground">@drawable/panel_bg_holo_light</item>
+        <item name="android:windowIsFloating">true</item>
+        <item name="android:windowContentOverlay">@null</item>
+        <item name="android:windowAnimationStyle">@android:style/Animation.Dialog</item>
+        <item name="android:windowSoftInputMode">stateUnspecified|adjustPan</item>
+        <item name="android:windowCloseOnTouchOutside">@bool/config_closeDialogWhenTouchOutside</item>
+        <item name="android:windowActionModeOverlay">true</item>
+
+        <item name="android:colorBackgroundCacheHint">@null</item>
+        
+        <item name="textAppearance">@android:style/TextAppearance</item>
+        <item name="textAppearanceInverse">@android:style/TextAppearance.Inverse</item>
+
+        <item name="textColorPrimary">@android:color/primary_text_light</item>
+        <item name="textColorSecondary">@android:color/secondary_text_light</item>
+        <item name="textColorTertiary">@android:color/tertiary_text_dark</item>
+        <item name="textColorPrimaryInverse">@android:color/primary_text_light</item>
+        <item name="textColorSecondaryInverse">@android:color/secondary_text_light</item>
+        <item name="textColorTertiaryInverse">@android:color/tertiary_text_light</item>
+        <item name="textColorPrimaryDisableOnly">@android:color/primary_text_light_disable_only</item>
+        <item name="textColorPrimaryInverseDisableOnly">@android:color/primary_text_light_disable_only</item>
+        <item name="textColorPrimaryNoDisable">@android:color/primary_text_dark_nodisable</item>
+        <item name="textColorSecondaryNoDisable">@android:color/secondary_text_dark_nodisable</item>
+        <item name="textColorPrimaryInverseNoDisable">@android:color/primary_text_light_nodisable</item>
+        <item name="textColorSecondaryInverseNoDisable">@android:color/secondary_text_light_nodisable</item>
+        <item name="textColorHint">@android:color/hint_foreground_dark</item>
+        <item name="textColorHintInverse">@android:color/hint_foreground_light</item>
+        <item name="textColorSearchUrl">@android:color/search_url_text</item>
+
+        <item name="textAppearanceLarge">@android:style/TextAppearance.Large</item>
+        <item name="textAppearanceMedium">@android:style/TextAppearance.Medium</item>
+        <item name="textAppearanceSmall">@android:style/TextAppearance.Small</item>
+        <item name="textAppearanceLargeInverse">@android:style/TextAppearance.Large.Inverse</item>
+        <item name="textAppearanceMediumInverse">@android:style/TextAppearance.Medium.Inverse</item>
+        <item name="textAppearanceSmallInverse">@android:style/TextAppearance.Small.Inverse</item>
+
+        <item name="listPreferredItemPaddingLeft">10dip</item>
+        <item name="listPreferredItemPaddingRight">10dip</item>
+        <item name="listPreferredItemPaddingStart">10dip</item>
+        <item name="listPreferredItemPaddingEnd">10dip</item>
+
+        <item name="preferencePanelStyle">@style/PreferencePanel.Dialog</item>
+    </style>
+
+    <!-- Variant of {@link Theme_Dialog} that does not include a frame (or background).
+         The view hierarchy of the dialog is responsible for drawing all of
+         its pixels. -->
+
+    <style name="TextAppearance.Light" parent="@style/TextAppearance">
+        <item name="textSize">16.0sp</item>
+        <item name="textStyle">normal</item>
+        <item name="textColor">#ff404040</item>
+        <item name="textColorHighlight">?textColorHighlight</item>
+        <item name="textColorHint">?textColorHint</item>
+        <item name="textColorLink">?textColorLink</item>
+    </style>
+    <style name="Widget.Light" parent="@style/Widget">
+        <item name="textAppearance">?textAppearance</item>
+        <item name="textColor">#ff404040</item>
+    </style>
+    <style name="TextAppearance.Large.Light" parent="@style/TextAppearance.Light">
+        <item name="textSize">22.0sp</item>
+    </style>
+    <style name="TextAppearance.Medium.Light" parent="@style/TextAppearance.Light">
+        <item name="textSize">18.0sp</item>
+    </style>
+    <style name="TextAppearance.Small.Light" parent="@style/TextAppearance.Light">
+        <item name="textSize">14.0sp</item>
+    </style>
+    <style name="TextAppearance.Widget.Light" parent="@style/TextAppearance.Light" />
+    <style name="Widget.AbsListView.Light" parent="@style/Widget.Light">
+        <item name="scrollbars">vertical</item>
+        <item name="fadingEdge">vertical</item>
+    </style>
+    <style name="Widget.TextView.Light" parent="@style/Widget.Light">
+        <item name="textAppearance">?textAppearanceSmall</item>
+        <item name="textSelectHandleLeft">?textSelectHandleLeft</item>
+        <item name="textSelectHandleRight">?textSelectHandleRight</item>
+        <item name="textSelectHandle">?textSelectHandle</item>
+        <item name="textEditPasteWindowLayout">?textEditPasteWindowLayout</item>
+        <item name="textEditNoPasteWindowLayout">?textEditNoPasteWindowLayout</item>
+        <item name="textEditSidePasteWindowLayout">?textEditSidePasteWindowLayout</item>
+        <item name="textEditSideNoPasteWindowLayout">?textEditSideNoPasteWindowLayout</item>
+        <item name="textCursorDrawable">?textCursorDrawable</item>
+        <item name="textEditSuggestionItemLayout">?textEditSuggestionItemLayout</item>
+    </style>
+    <style name="Widget.ListView.Menu.Light" parent="@style/Widget.Holo.Light.ListView">
+        <item name="textColor">#ff404040</item>
+        <item name="background">#ffe5e5e5</item>
+        <item name="scrollbars">vertical</item>
+        <item name="fadingEdge">none</item>
+        <item name="cacheColorHint">@null</item>
+        <item name="divider">@drawable/divider_horizontal_dark</item>
+    </style>
+    <style name="Widget.EditText.Light" parent="@style/Widget.Light">
+        <item name="textAppearance">?textAppearanceMediumInverse</item>
+        <item name="textColor">?editTextColor</item>
+        <item name="gravity">center_vertical</item>
+        <item name="background">?editTextBackground</item>
+        <item name="focusable">true</item>
+        <item name="focusableInTouchMode">true</item>
+        <item name="clickable">true</item>
+    </style>
+    <style name="Widget.TextView.ListSeparator.Light" parent="@style/Widget.TextView.Light">
+        <item name="textSize">14.0sp</item>
+        <item name="textStyle">bold</item>
+        <item name="textColor">#ffaaaaaa</item>
+        <item name="gravity">center_vertical</item>
+        <item name="background">@drawable/light_header_dither</item>
+        <item name="layout_width">fill_parent</item>
+        <item name="layout_height">wrap_content</item>
+        <item name="paddingStart">8.0dip</item>
+    </style>
+    <style name="Widget.ExpandableListView.Light" parent="@style/Widget.ListView.Light">
+        <item name="textColor">#ff404040</item>
+        <item name="background">#ffe5e5e5</item>
+        <item name="groupIndicator">@drawable/expander_group</item>
+        <item name="indicatorLeft">?expandableListPreferredItemIndicatorLeft</item>
+        <item name="indicatorRight">?expandableListPreferredItemIndicatorRight</item>
+        <item name="childDivider">@drawable/divider_horizontal_dark_opaque</item>
+    </style>
+    <style name="Widget.ListView.Light" parent="@style/Widget.AbsListView.Light">
+        <item name="listSelector">@drawable/list_selector_background</item>
+        <item name="cacheColorHint">?colorBackgroundCacheHint</item>
+        <item name="divider">@drawable/divider_horizontal_bright_opaque</item>
+    </style>
+
+</resources>

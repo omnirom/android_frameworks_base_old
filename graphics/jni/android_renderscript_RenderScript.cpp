@@ -335,7 +335,7 @@ nContextSendMessage(JNIEnv *_env, jobject _this, RsContext con, jint id, jintArr
     jint len = 0;
     if (data) {
         len = _env->GetArrayLength(data);
-        ptr = _env->GetIntArrayElements(data, NULL);
+        jint *ptr = _env->GetIntArrayElements(data, NULL);
     }
     LOG_API("nContextSendMessage, con(%p), id(%i), len(%i)", con, id, len);
     rsContextSendMessage(con, id, (const uint8_t *)ptr, len * sizeof(int));

@@ -1193,22 +1193,11 @@ public class WifiP2pService extends IWifiP2pManager.Stub {
                     break;
                 case WifiMonitor.P2P_PROV_DISC_PBC_REQ_EVENT:
                 case WifiMonitor.P2P_PROV_DISC_ENTER_PIN_EVENT:
+                case WifiMonitor.P2P_PROV_DISC_SHOW_PIN_EVENT:
                     //We let the supplicant handle the provision discovery response
                     //and wait instead for the GO_NEGOTIATION_REQUEST_EVENT.
                     //Handling provision discovery and issuing a p2p_connect before
                     //group negotiation comes through causes issues
-                    break;
-                case WifiMonitor.P2P_PROV_DISC_SHOW_PIN_EVENT:
-                    WifiP2pProvDiscEvent provDisc = (WifiP2pProvDiscEvent) message.obj;
-                    WifiP2pDevice device = provDisc.device;
-                    if (device == null) {
-                        Slog.d(TAG, "Device entry is null");
-                        break;
-                    }
-                    notifyP2pProvDiscShowPinRequest(provDisc.pin, device.deviceAddress);
-                    mPeers.updateStatus(device.deviceAddress, WifiP2pDevice.INVITED);
-                    sendPeersChangedBroadcast();
-                    transitionTo(mGroupNegotiationState);
                     break;
                 case WifiP2pManager.CREATE_GROUP:
                     mAutonomousGroup = true;

@@ -586,18 +586,6 @@ class QuickSettings {
                             public void refreshView(QuickSettingsTileView view, State state) {
                                 RSSIState rssiState = (RSSIState) state;
                                 // Force refresh
-                                rssiTile.setImageDrawable(null);
-                                rssiTile.setImageResource(rssiState.signalIconId);
-
-                                if (rssiState.dataTypeIconId > 0) {
-                                    rssiTile.setImageOverlayResource(rssiState.dataTypeIconId);
-                                } else {
-                                    rssiTile.setImageOverlayDrawable(null);
-                                }
-                                setActivity(view, rssiState);
-
-                                rssiTile.setText(state.label);
-                                rssiTile.setNetworkText(rssiState.networkType);
                                 rssiTile.setFrontImageDrawable(null);
                                 rssiTile.setFrontImageResource(rssiState.signalIconId);
 

@@ -1,18 +1,18 @@
 /*
-* Copyright (C) 2007 The Android Open Source Project
-*
-* Licensed under the Apache License, Version 2.0 (the "License");
-* you may not use this file except in compliance with the License.
-* You may obtain a copy of the License at
-*
-* http://www.apache.org/licenses/LICENSE-2.0
-*
-* Unless required by applicable law or agreed to in writing, software
-* distributed under the License is distributed on an "AS IS" BASIS,
-* WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
-* See the License for the specific language governing permissions and
-* limitations under the License.
-*/
+ * Copyright (C) 2007 The Android Open Source Project
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *      http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
 
 package com.android.internal.widget;
 
@@ -49,78 +49,78 @@ import java.security.SecureRandom;
 import java.util.List;
 
 /**
-* Utilities for the lock pattern and its settings.
-*/
+ * Utilities for the lock pattern and its settings.
+ */
 public class LockPatternUtils {
 
     private static final String TAG = "LockPatternUtils";
 
     /**
-* The maximum number of incorrect attempts before the user is prevented
-* from trying again for {@link #FAILED_ATTEMPT_TIMEOUT_MS}.
-*/
+     * The maximum number of incorrect attempts before the user is prevented
+     * from trying again for {@link #FAILED_ATTEMPT_TIMEOUT_MS}.
+     */
     public static final int FAILED_ATTEMPTS_BEFORE_TIMEOUT = 5;
 
     /**
-* The number of incorrect attempts before which we fall back on an alternative
-* method of verifying the user, and resetting their lock pattern.
-*/
+     * The number of incorrect attempts before which we fall back on an alternative
+     * method of verifying the user, and resetting their lock pattern.
+     */
     public static final int FAILED_ATTEMPTS_BEFORE_RESET = 20;
 
     /**
-* How long the user is prevented from trying again after entering the
-* wrong pattern too many times.
-*/
+     * How long the user is prevented from trying again after entering the
+     * wrong pattern too many times.
+     */
     public static final long FAILED_ATTEMPT_TIMEOUT_MS = 30000L;
 
     /**
-* The interval of the countdown for showing progress of the lockout.
-*/
+     * The interval of the countdown for showing progress of the lockout.
+     */
     public static final long FAILED_ATTEMPT_COUNTDOWN_INTERVAL_MS = 1000L;
 
 
     /**
-* This dictates when we start telling the user that continued failed attempts will wipe
-* their device.
-*/
+     * This dictates when we start telling the user that continued failed attempts will wipe
+     * their device.
+     */
     public static final int FAILED_ATTEMPTS_BEFORE_WIPE_GRACE = 5;
 
     /**
-* The minimum number of dots in a valid pattern.
-*/
+     * The minimum number of dots in a valid pattern.
+     */
     public static final int MIN_LOCK_PATTERN_SIZE = 4;
 
     /**
-* The minimum number of dots the user must include in a wrong pattern
-* attempt for it to be counted against the counts that affect
-* {@link #FAILED_ATTEMPTS_BEFORE_TIMEOUT} and {@link #FAILED_ATTEMPTS_BEFORE_RESET}
-*/
+     * The minimum number of dots the user must include in a wrong pattern
+     * attempt for it to be counted against the counts that affect
+     * {@link #FAILED_ATTEMPTS_BEFORE_TIMEOUT} and {@link #FAILED_ATTEMPTS_BEFORE_RESET}
+     */
     public static final int MIN_PATTERN_REGISTER_FAIL = MIN_LOCK_PATTERN_SIZE;
 
     /**
-* Tells the keyguard to show the user switcher when the keyguard is created.
-*/
+     * Tells the keyguard to show the user switcher when the keyguard is created.
+     */
     public static final String KEYGUARD_SHOW_USER_SWITCHER = "showuserswitcher";
 
     /**
-* Tells the keyguard to show the security challenge when the keyguard is created.
-*/
+     * Tells the keyguard to show the security challenge when the keyguard is created.
+     */
     public static final String KEYGUARD_SHOW_SECURITY_CHALLENGE = "showsecuritychallenge";
 
     /**
-* Tells the keyguard to show the widget with the specified id when the keyguard is created.
-*/
+     * Tells the keyguard to show the widget with the specified id when the keyguard is created.
+     */
     public static final String KEYGUARD_SHOW_APPWIDGET = "showappwidget";
 
     /**
-* The bit in LOCK_BIOMETRIC_WEAK_FLAGS to be used to indicate whether liveliness should
-* be used
-*/
+     * The bit in LOCK_BIOMETRIC_WEAK_FLAGS to be used to indicate whether liveliness should
+     * be used
+     */
     public static final int FLAG_BIOMETRIC_WEAK_LIVELINESS = 0x1;
 
     /**
-* Pseudo-appwidget id we use to represent the default clock status widget
-*/
+     * Pseudo-appwidget id we use to represent the default clock status widget
+     */
     public static final int ID_DEFAULT_STATUS_WIDGET = -2;
 
     public final static String LOCKOUT_PERMANENT_KEY = "lockscreen.lockedoutpermanently";
@@ -168,8 +168,8 @@ public class LockPatternUtils {
     }
 
     /**
-* @param contentResolver Used to look up and save settings.
-*/
+     * @param contentResolver Used to look up and save settings.
+     */
     public LockPatternUtils(Context context) {
         mContext = context;
         mContentResolver = context.getContentResolver();
@@ -194,9 +194,9 @@ public class LockPatternUtils {
     }
 
     /**
-* Gets the device policy password mode. If the mode is non-specific, returns
-* MODE_PATTERN which allows the user to choose anything.
-*/
+     * Gets the device policy password mode. If the mode is non-specific, returns
+     * MODE_PATTERN which allows the user to choose anything.
+     */
     public int getRequestedPasswordQuality() {
         return getDevicePolicyManager().getPasswordQuality(null, getCurrentOrCallingUserId());
     }
@@ -236,10 +236,10 @@ public class LockPatternUtils {
     }
 
     /**
-* Returns the actual password mode, as set by keyguard after updating the password.
-*
-* @return
-*/
+     * Returns the actual password mode, as set by keyguard after updating the password.
+     *
+     * @return
+     */
     public void reportFailedPasswordAttempt() {
         getDevicePolicyManager().reportFailedPasswordAttempt(getCurrentOrCallingUserId());
     }
@@ -283,11 +283,11 @@ public class LockPatternUtils {
     }
 
     /**
-* Check to see if a pattern matches the saved pattern. If no pattern exists,
-* always returns true.
-* @param pattern The pattern to check.
-* @return Whether the pattern matches the stored one.
-*/
+     * Check to see if a pattern matches the saved pattern.  If no pattern exists,
+     * always returns true.
+     * @param pattern The pattern to check.
+     * @return Whether the pattern matches the stored one.
+     */
     public boolean checkPattern(List<LockPatternView.Cell> pattern) {
         final int userId = getCurrentOrCallingUserId();
         try {
@@ -298,11 +298,11 @@ public class LockPatternUtils {
     }
 
     /**
-* Check to see if a password matches the saved password. If no password exists,
-* always returns true.
-* @param password The password to check.
-* @return Whether the password matches the stored one.
-*/
+     * Check to see if a password matches the saved password.  If no password exists,
+     * always returns true.
+     * @param password The password to check.
+     * @return Whether the password matches the stored one.
+     */
     public boolean checkPassword(String password) {
         final int userId = getCurrentOrCallingUserId();
         try {
@@ -313,12 +313,12 @@ public class LockPatternUtils {
     }
 
     /**
-* Check to see if a password matches any of the passwords stored in the
-* password history.
-*
-* @param password The password to check.
-* @return Whether the password matches any in the history.
-*/
+     * Check to see if a password matches any of the passwords stored in the
+     * password history.
+     *
+     * @param password The password to check.
+     * @return Whether the password matches any in the history.
+     */
     public boolean checkPasswordHistory(String password) {
         String passwordHashString = new String(passwordToHash(password));
         String passwordHistory = getString(PASSWORD_HISTORY_KEY);
@@ -340,9 +340,9 @@ public class LockPatternUtils {
     }
 
     /**
-* Check to see if the user has stored a lock pattern.
-* @return Whether a saved pattern exists.
-*/
+     * Check to see if the user has stored a lock pattern.
+     * @return Whether a saved pattern exists.
+     */
     public boolean savedPatternExists() {
         try {
             return getLockSettings().havePattern(getCurrentOrCallingUserId());
@@ -352,9 +352,9 @@ public class LockPatternUtils {
     }
 
     /**
-* Check to see if the user has stored a lock pattern.
-* @return Whether a saved pattern exists.
-*/
+     * Check to see if the user has stored a lock pattern.
+     * @return Whether a saved pattern exists.
+     */
     public boolean savedPasswordExists() {
         try {
             return getLockSettings().havePassword(getCurrentOrCallingUserId());
@@ -364,29 +364,29 @@ public class LockPatternUtils {
     }
 
     /**
-* Return true if the user has ever chosen a pattern. This is true even if the pattern is
-* currently cleared.
-*
-* @return True if the user has ever chosen a pattern.
-*/
+     * Return true if the user has ever chosen a pattern.  This is true even if the pattern is
+     * currently cleared.
+     *
+     * @return True if the user has ever chosen a pattern.
+     */
     public boolean isPatternEverChosen() {
         return getBoolean(PATTERN_EVER_CHOSEN_KEY, false);
     }
 
     /**
-* Return true if the user has ever chosen biometric weak. This is true even if biometric
-* weak is not current set.
-*
-* @return True if the user has ever chosen biometric weak.
-*/
+     * Return true if the user has ever chosen biometric weak.  This is true even if biometric
+     * weak is not current set.
+     *
+     * @return True if the user has ever chosen biometric weak.
+     */
     public boolean isBiometricWeakEverChosen() {
         return getBoolean(BIOMETRIC_WEAK_EVER_CHOSEN_KEY, false);
     }
 
     /**
-* Used by device policy manager to validate the current password
-* information it has.
-*/
+     * Used by device policy manager to validate the current password
+     * information it has.
+     */
     public int getActivePasswordQuality() {
         int activePasswordQuality = DevicePolicyManager.PASSWORD_QUALITY_UNSPECIFIED;
         // Note we don't want to use getKeyguardStoredPasswordQuality() because we want this to
@@ -430,8 +430,8 @@ public class LockPatternUtils {
     }
 
     /**
-* Clear any lock pattern or password.
-*/
+     * Clear any lock pattern or password.
+     */
     public void clearLock(boolean isFallback) {
         if(!isFallback) deleteGallery();
         saveLockPassword(null, DevicePolicyManager.PASSWORD_QUALITY_SOMETHING);
@@ -442,28 +442,28 @@ public class LockPatternUtils {
     }
 
     /**
-* Disable showing lock screen at all when the DevicePolicyManager allows it.
-* This is only meaningful if pattern, pin or password are not set.
-*
-* @param disable Disables lock screen when true
-*/
+     * Disable showing lock screen at all when the DevicePolicyManager allows it.
+     * This is only meaningful if pattern, pin or password are not set.
+     *
+     * @param disable Disables lock screen when true
+     */
     public void setLockScreenDisabled(boolean disable) {
         setLong(DISABLE_LOCKSCREEN_KEY, disable ? 1 : 0);
     }
 
     /**
-* Determine if LockScreen can be disabled. This is used, for example, to tell if we should
-* show LockScreen or go straight to the home screen.
-*
-* @return true if lock screen is can be disabled
-*/
+     * Determine if LockScreen can be disabled. This is used, for example, to tell if we should
+     * show LockScreen or go straight to the home screen.
+     *
+     * @return true if lock screen is can be disabled
+     */
     public boolean isLockScreenDisabled() {
         return !isSecure() && getLong(DISABLE_LOCKSCREEN_KEY, 0) != 0;
     }
 
     /**
-* Calls back SetupFaceLock to delete the temporary gallery file
-*/
+     * Calls back SetupFaceLock to delete the temporary gallery file
+     */
     public void deleteTempGallery() {
         Intent intent = new Intent().setAction("com.android.facelock.DELETE_GALLERY");
         intent.putExtra("deleteTempGallery", true);
@@ -471,8 +471,8 @@ public class LockPatternUtils {
     }
 
     /**
-* Calls back SetupFaceLock to delete the gallery file when the lock type is changed
-*/
+     * Calls back SetupFaceLock to delete the gallery file when the lock type is changed
+    */
     void deleteGallery() {
         if(usingBiometricWeak()) {
             Intent intent = new Intent().setAction("com.android.facelock.DELETE_GALLERY");
@@ -482,18 +482,18 @@ public class LockPatternUtils {
     }
 
     /**
-* Save a lock pattern.
-* @param pattern The new pattern to save.
-*/
+     * Save a lock pattern.
+     * @param pattern The new pattern to save.
+     */
     public void saveLockPattern(List<LockPatternView.Cell> pattern) {
         this.saveLockPattern(pattern, false);
     }
 
     /**
-* Save a lock pattern.
-* @param pattern The new pattern to save.
-* @param isFallback Specifies if this is a fallback to biometric weak
-*/
+     * Save a lock pattern.
+     * @param pattern The new pattern to save.
+     * @param isFallback Specifies if this is a fallback to biometric weak
+     */
     public void saveLockPattern(List<LockPatternView.Cell> pattern, boolean isFallback) {
         try {
             getLockSettings().setLockPattern(patternToString(pattern), getCurrentOrCallingUserId());
@@ -539,8 +539,8 @@ public class LockPatternUtils {
     }
 
     /**
-* Compute the password quality from the given password string.
-*/
+     * Compute the password quality from the given password string.
+     */
     static public int computePasswordQuality(String password) {
         boolean hasDigit = false;
         boolean hasNonDigit = false;
@@ -588,37 +588,37 @@ public class LockPatternUtils {
     }
 
     /**
-* Save a lock password. Does not ensure that the password is as good
-* as the requested mode, but will adjust the mode to be as good as the
-* pattern.
-* @param password The password to save
-* @param quality {@see DevicePolicyManager#getPasswordQuality(android.content.ComponentName)}
-*/
+     * Save a lock password.  Does not ensure that the password is as good
+     * as the requested mode, but will adjust the mode to be as good as the
+     * pattern.
+     * @param password The password to save
+     * @param quality {@see DevicePolicyManager#getPasswordQuality(android.content.ComponentName)}
+     */
     public void saveLockPassword(String password, int quality) {
         this.saveLockPassword(password, quality, false, getCurrentOrCallingUserId());
     }
 
     /**
-* Save a lock password. Does not ensure that the password is as good
-* as the requested mode, but will adjust the mode to be as good as the
-* pattern.
-* @param password The password to save
-* @param quality {@see DevicePolicyManager#getPasswordQuality(android.content.ComponentName)}
-* @param isFallback Specifies if this is a fallback to biometric weak
-*/
+     * Save a lock password.  Does not ensure that the password is as good
+     * as the requested mode, but will adjust the mode to be as good as the
+     * pattern.
+     * @param password The password to save
+     * @param quality {@see DevicePolicyManager#getPasswordQuality(android.content.ComponentName)}
+     * @param isFallback Specifies if this is a fallback to biometric weak
+     */
     public void saveLockPassword(String password, int quality, boolean isFallback) {
         saveLockPassword(password, quality, isFallback, getCurrentOrCallingUserId());
     }
 
     /**
-* Save a lock password. Does not ensure that the password is as good
-* as the requested mode, but will adjust the mode to be as good as the
-* pattern.
-* @param password The password to save
-* @param quality {@see DevicePolicyManager#getPasswordQuality(android.content.ComponentName)}
-* @param isFallback Specifies if this is a fallback to biometric weak
-* @param userHandle The userId of the user to change the password for
-*/
+     * Save a lock password.  Does not ensure that the password is as good
+     * as the requested mode, but will adjust the mode to be as good as the
+     * pattern.
+     * @param password The password to save
+     * @param quality {@see DevicePolicyManager#getPasswordQuality(android.content.ComponentName)}
+     * @param isFallback Specifies if this is a fallback to biometric weak
+     * @param userHandle The userId of the user to change the password for
+     */
     public void saveLockPassword(String password, int quality, boolean isFallback, int userHandle) {
         try {
             getLockSettings().setLockPassword(password, userHandle);
@@ -705,20 +705,20 @@ public class LockPatternUtils {
 
 
     /**
-* @hide
-* Save a device encryption password. Does not do any checking on complexity.
-* @param password The password to save
-*/
+    * @hide
+    * Save a device encryption password. Does not do any checking on complexity.
+    * @param password The password to save
+    */
     public void saveEncryptionPassword(String password) {
         saveEncryptionPassword(password, getCurrentOrCallingUserId());
     }
 
     /**
-* @hide
-* Save a device encryption password. Does not do any checking on complexity.
-* @param password The password to save
-* @param userHandle The userId of the user to change the password for
-*/
+    * @hide
+    * Save a device encryption password. Does not do any checking on complexity.
+    * @param password The password to save
+    * @param userHandle The userId of the user to change the password for
+    */
     public void saveEncryptionPassword(String password, int userHandle) {
         if (password != null) {
             if (userHandle == UserHandle.USER_OWNER) {
@@ -729,11 +729,11 @@ public class LockPatternUtils {
     }
 
     /**
-* Retrieves the quality mode we're in.
-* {@see DevicePolicyManager#getPasswordQuality(android.content.ComponentName)}
-*
-* @return stored password quality
-*/
+     * Retrieves the quality mode we're in.
+     * {@see DevicePolicyManager#getPasswordQuality(android.content.ComponentName)}
+     *
+     * @return stored password quality
+     */
     public int getKeyguardStoredPasswordQuality() {
         int quality =
                 (int) getLong(PASSWORD_TYPE_KEY, DevicePolicyManager.PASSWORD_QUALITY_SOMETHING);
@@ -748,8 +748,8 @@ public class LockPatternUtils {
     }
 
     /**
-* @return true if the lockscreen method is set to biometric weak
-*/
+     * @return true if the lockscreen method is set to biometric weak
+     */
     public boolean usingBiometricWeak() {
         int quality =
                 (int) getLong(PASSWORD_TYPE_KEY, DevicePolicyManager.PASSWORD_QUALITY_SOMETHING);
@@ -757,10 +757,10 @@ public class LockPatternUtils {
     }
 
     /**
-* Deserialize a pattern.
-* @param string The pattern serialized with {@link #patternToString}
-* @return The pattern.
-*/
+     * Deserialize a pattern.
+     * @param string The pattern serialized with {@link #patternToString}
+     * @return The pattern.
+     */
     public static List<LockPatternView.Cell> stringToPattern(String string) {
         List<LockPatternView.Cell> result = Lists.newArrayList();
 
@@ -773,10 +773,10 @@ public class LockPatternUtils {
     }
 
     /**
-* Serialize a pattern.
-* @param pattern The pattern.
-* @return The pattern in string form.
-*/
+     * Serialize a pattern.
+     * @param pattern The pattern.
+     * @return The pattern in string form.
+     */
     public static String patternToString(List<LockPatternView.Cell> pattern) {
         if (pattern == null) {
             return "";
@@ -792,12 +792,12 @@ public class LockPatternUtils {
     }
 
     /*
-* Generate an SHA-1 hash for the pattern. Not the most secure, but it is
-* at least a second level of protection. First level is that the file
-* is in a location only readable by the system process.
-* @param pattern the gesture pattern.
-* @return the hash of the pattern in a byte array.
-*/
+     * Generate an SHA-1 hash for the pattern. Not the most secure, but it is
+     * at least a second level of protection. First level is that the file
+     * is in a location only readable by the system process.
+     * @param pattern the gesture pattern.
+     * @return the hash of the pattern in a byte array.
+     */
     public static byte[] patternToHash(List<LockPatternView.Cell> pattern) {
         if (pattern == null) {
             return null;
@@ -834,12 +834,12 @@ public class LockPatternUtils {
     }
 
     /*
-* Generate a hash for the given password. To avoid brute force attacks, we use a salted hash.
-* Not the most secure, but it is at least a second level of protection. First level is that
-* the file is in a location only readable by the system process.
-* @param password the gesture pattern.
-* @return the hash of the pattern in a byte array.
-*/
+     * Generate a hash for the given password. To avoid brute force attacks, we use a salted hash.
+     * Not the most secure, but it is at least a second level of protection. First level is that
+     * the file is in a location only readable by the system process.
+     * @param password the gesture pattern.
+     * @return the hash of the pattern in a byte array.
+     */
     public byte[] passwordToHash(String password) {
         if (password == null) {
             return null;
@@ -868,8 +868,8 @@ public class LockPatternUtils {
     }
 
     /**
-* @return Whether the lock password is enabled, or if it is set as a backup for biometric weak
-*/
+     * @return Whether the lock password is enabled, or if it is set as a backup for biometric weak
+     */
     public boolean isLockPasswordEnabled() {
         long mode = getLong(PASSWORD_TYPE_KEY, 0);
         long backupMode = getLong(PASSWORD_TYPE_ALTERNATE_KEY, 0);
@@ -887,8 +887,8 @@ public class LockPatternUtils {
     }
 
     /**
-* @return Whether the lock pattern is enabled, or if it is set as a backup for biometric weak
-*/
+     * @return Whether the lock pattern is enabled, or if it is set as a backup for biometric weak
+     */
     public boolean isLockPatternEnabled() {
         final boolean backupEnabled =
                 getLong(PASSWORD_TYPE_ALTERNATE_KEY, DevicePolicyManager.PASSWORD_QUALITY_SOMETHING)
@@ -901,8 +901,8 @@ public class LockPatternUtils {
     }
 
     /**
-* @return Whether biometric weak lock is installed and that the front facing camera exists
-*/
+     * @return Whether biometric weak lock is installed and that the front facing camera exists
+     */
     public boolean isBiometricWeakInstalled() {
         // Check that it's installed
         PackageManager pm = mContext.getPackageManager();
@@ -925,8 +925,8 @@ public class LockPatternUtils {
     }
 
     /**
-* Set whether biometric weak liveliness is enabled.
-*/
+     * Set whether biometric weak liveliness is enabled.
+     */
     public void setBiometricWeakLivelinessEnabled(boolean enabled) {
         long currentFlag = getLong(Settings.Secure.LOCK_BIOMETRIC_WEAK_FLAGS, 0L);
         long newFlag;
@@ -939,47 +939,47 @@ public class LockPatternUtils {
     }
 
     /**
-* @return Whether the biometric weak liveliness is enabled.
-*/
+     * @return Whether the biometric weak liveliness is enabled.
+     */
     public boolean isBiometricWeakLivelinessEnabled() {
         long currentFlag = getLong(Settings.Secure.LOCK_BIOMETRIC_WEAK_FLAGS, 0L);
         return ((currentFlag & FLAG_BIOMETRIC_WEAK_LIVELINESS) != 0);
     }
 
     /**
-* Set whether the lock pattern is enabled.
-*/
+     * Set whether the lock pattern is enabled.
+     */
     public void setLockPatternEnabled(boolean enabled) {
         setBoolean(Settings.Secure.LOCK_PATTERN_ENABLED, enabled);
     }
 
     /**
-* @return Whether the visible pattern is enabled.
-*/
+     * @return Whether the visible pattern is enabled.
+     */
     public boolean isVisiblePatternEnabled() {
         return getBoolean(Settings.Secure.LOCK_PATTERN_VISIBLE, false);
     }
 
     /**
-* Set whether the visible pattern is enabled.
-*/
+     * Set whether the visible pattern is enabled.
+     */
     public void setVisiblePatternEnabled(boolean enabled) {
         setBoolean(Settings.Secure.LOCK_PATTERN_VISIBLE, enabled);
     }
 
     /**
-* @return Whether tactile feedback for the pattern is enabled.
-*/
+     * @return Whether tactile feedback for the pattern is enabled.
+     */
     public boolean isTactileFeedbackEnabled() {
         return Settings.System.getIntForUser(mContentResolver,
                 Settings.System.HAPTIC_FEEDBACK_ENABLED, 1, UserHandle.USER_CURRENT) != 0;
     }
 
     /**
-* Set and store the lockout deadline, meaning the user can't attempt his/her unlock
-* pattern until the deadline has passed.
-* @return the chosen deadline.
-*/
+     * Set and store the lockout deadline, meaning the user can't attempt his/her unlock
+     * pattern until the deadline has passed.
+     * @return the chosen deadline.
+     */
     public long setLockoutAttemptDeadline() {
         final long deadline = SystemClock.elapsedRealtime() + FAILED_ATTEMPT_TIMEOUT_MS;
         setLong(LOCKOUT_ATTEMPT_DEADLINE, deadline);
@@ -987,10 +987,10 @@ public class LockPatternUtils {
     }
 
     /**
-* @return The elapsed time in millis in the future when the user is allowed to
-* attempt to enter his/her lock pattern, or 0 if the user is welcome to
-* enter a pattern.
-*/
+     * @return The elapsed time in millis in the future when the user is allowed to
+     *   attempt to enter his/her lock pattern, or 0 if the user is welcome to
+     *   enter a pattern.
+     */
     public long getLockoutAttemptDeadline() {
         final long deadline = getLong(LOCKOUT_ATTEMPT_DEADLINE, 0L);
         final long now = SystemClock.elapsedRealtime();
@@ -1001,22 +1001,22 @@ public class LockPatternUtils {
     }
 
     /**
-* @return Whether the user is permanently locked out until they verify their
-* credentials. Occurs after {@link #FAILED_ATTEMPTS_BEFORE_RESET} failed
-* attempts.
-*/
+     * @return Whether the user is permanently locked out until they verify their
+     *   credentials.  Occurs after {@link #FAILED_ATTEMPTS_BEFORE_RESET} failed
+     *   attempts.
+     */
     public boolean isPermanentlyLocked() {
         return getBoolean(LOCKOUT_PERMANENT_KEY, false);
     }
 
     /**
-* Set the state of whether the device is permanently locked, meaning the user
-* must authenticate via other means.
-*
-* @param locked Whether the user is permanently locked out until they verify their
-* credentials. Occurs after {@link #FAILED_ATTEMPTS_BEFORE_RESET} failed
-* attempts.
-*/
+     * Set the state of whether the device is permanently locked, meaning the user
+     * must authenticate via other means.
+     *
+     * @param locked Whether the user is permanently locked out until they verify their
+     *   credentials.  Occurs after {@link #FAILED_ATTEMPTS_BEFORE_RESET} failed
+     *   attempts.
+     */
     public void setPermanentlyLocked(boolean locked) {
         setBoolean(LOCKOUT_PERMANENT_KEY, locked);
     }
@@ -1037,9 +1037,9 @@ public class LockPatternUtils {
     }
 
     /**
-* @return A formatted string of the next alarm (for showing on the lock screen),
-* or null if there is no next alarm.
-*/
+     * @return A formatted string of the next alarm (for showing on the lock screen),
+     *   or null if there is no next alarm.
+     */
     public String getNextAlarm() {
         String nextAlarm = Settings.System.getStringForUser(mContentResolver,
                 Settings.System.NEXT_ALARM_FORMATTED, UserHandle.USER_CURRENT);
@@ -1264,24 +1264,24 @@ public class LockPatternUtils {
     }
 
     /**
-* Sets the emergency button visibility based on isEmergencyCallCapable().
-*
-* If the emergency button is visible, sets the text on the emergency button
-* to indicate what action will be taken.
-*
-* If there's currently a call in progress, the button will take them to the call
-* @param button the button to update
-* @param the phone state:
-* {@link TelephonyManager#CALL_STATE_IDLE}
-* {@link TelephonyManager#CALL_STATE_RINGING}
-* {@link TelephonyManager#CALL_STATE_OFFHOOK}
-* @param shown indicates whether the given screen wants the emergency button to show at all
-* @param button
-* @param phoneState
-* @param shown shown if true; hidden if false
-* @param upperCase if true, converts button label string to upper case
-*/
-    public void updateEmergencyCallButtonState(Button button, int phoneState, boolean shown,
+     * Sets the emergency button visibility based on isEmergencyCallCapable().
+     *
+     * If the emergency button is visible, sets the text on the emergency button
+     * to indicate what action will be taken.
+     *
+     * If there's currently a call in progress, the button will take them to the call
+     * @param button the button to update
+     * @param the phone state:
+     *  {@link TelephonyManager#CALL_STATE_IDLE}
+     *  {@link TelephonyManager#CALL_STATE_RINGING}
+     *  {@link TelephonyManager#CALL_STATE_OFFHOOK}
+     * @param shown indicates whether the given screen wants the emergency button to show at all
+     * @param button
+     * @param phoneState
+     * @param shown shown if true; hidden if false
+     * @param upperCase if true, converts button label string to upper case
+     */
+    public void updateEmergencyCallButtonState(Button button, int  phoneState, boolean shown,
             boolean showIcon) {
         if (isEmergencyCallCapable() && shown) {
             button.setVisibility(View.VISIBLE);
@@ -1305,11 +1305,11 @@ public class LockPatternUtils {
     }
 
     /**
-* Resumes a call in progress. Typically launched from the EmergencyCall button
-* on various lockscreens.
-*
-* @return true if we were able to tell InCallScreen to show.
-*/
+     * Resumes a call in progress. Typically launched from the EmergencyCall button
+     * on various lockscreens.
+     *
+     * @return true if we were able to tell InCallScreen to show.
+     */
     public boolean resumeCall() {
         ITelephony phone = ITelephony.Stub.asInterface(ServiceManager.checkService("phone"));
         try {
@@ -1352,10 +1352,10 @@ public class LockPatternUtils {
     }
 
     /**
-* Determine whether the user has selected any non-system widgets in keyguard
-*
-* @return true if widgets have been selected
-*/
+     * Determine whether the user has selected any non-system widgets in keyguard
+     *
+     * @return true if widgets have been selected
+     */
     public boolean hasWidgetsEnabledInKeyguard(int userid) {
         int widgets[] = getAppWidgets(userid);
         for (int i = 0; i < widgets.length; i++) {

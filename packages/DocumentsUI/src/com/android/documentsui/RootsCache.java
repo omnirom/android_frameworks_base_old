@@ -40,6 +40,7 @@ import com.android.documentsui.DocumentsActivity.State;
 import com.android.documentsui.model.RootInfo;
 import com.android.internal.annotations.GuardedBy;
 import com.android.internal.annotations.VisibleForTesting;
+import com.android.internal.util.Objects;
 import com.google.android.collect.Lists;
 import com.google.android.collect.Sets;
 import com.google.common.collect.ArrayListMultimap;
@@ -50,7 +51,6 @@ import libcore.io.IoUtils;
 import java.util.Collection;
 import java.util.HashSet;
 import java.util.List;
-import java.util.Objects;
 import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.TimeUnit;
 
@@ -295,7 +295,7 @@ public class RootsCache {
 
     private RootInfo getRootLocked(String authority, String rootId) {
         for (RootInfo root : mRoots.get(authority)) {
-            if (Objects.equals(root.rootId, rootId)) {
+            if (Objects.equal(root.rootId, rootId)) {
                 return root;
             }
         }
@@ -308,7 +308,7 @@ public class RootsCache {
         synchronized (mLock) {
             final int rootIcon = root.derivedIcon != 0 ? root.derivedIcon : root.icon;
             for (RootInfo test : mRoots.get(root.authority)) {
-                if (Objects.equals(test.rootId, root.rootId)) {
+                if (Objects.equal(test.rootId, root.rootId)) {
                     continue;
                 }
                 final int testIcon = test.derivedIcon != 0 ? test.derivedIcon : test.icon;

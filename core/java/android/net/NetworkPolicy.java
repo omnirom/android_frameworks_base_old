@@ -21,7 +21,7 @@ import static com.android.internal.util.Preconditions.checkNotNull;
 import android.os.Parcel;
 import android.os.Parcelable;
 
-import java.util.Objects;
+import com.android.internal.util.Objects;
 
 /**
  * Policy for networks matching a {@link NetworkTemplate}, including usage cycle
@@ -146,7 +146,7 @@ public class NetworkPolicy implements Parcelable, Comparable<NetworkPolicy> {
 
     @Override
     public int hashCode() {
-        return Objects.hash(template, cycleDay, cycleTimezone, warningBytes, limitBytes,
+        return Objects.hashCode(template, cycleDay, cycleTimezone, warningBytes, limitBytes,
                 lastWarningSnooze, lastLimitSnooze, metered, inferred);
     }
 
@@ -159,8 +159,8 @@ public class NetworkPolicy implements Parcelable, Comparable<NetworkPolicy> {
                     && lastWarningSnooze == other.lastWarningSnooze
                     && lastLimitSnooze == other.lastLimitSnooze && metered == other.metered
                     && inferred == other.inferred
-                    && Objects.equals(cycleTimezone, other.cycleTimezone)
-                    && Objects.equals(template, other.template);
+                    && Objects.equal(cycleTimezone, other.cycleTimezone)
+                    && Objects.equal(template, other.template);
         }
         return false;
     }

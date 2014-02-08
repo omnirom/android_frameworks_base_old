@@ -66,8 +66,7 @@ public class FisheyeFilter extends Filter {
             "void main() {\n" +
             "  const float m_pi_2 = 1.570963;\n" +
             "  vec2 coord = v_texcoord - vec2(0.5, 0.5);\n" +
-            "  highp vec2 scaled_coord = coord * scale;\n" +
-            "  float dist = length(scaled_coord);\n" +
+            "  float dist = length(coord * scale);\n" +
             "  float radian = m_pi_2 - atan(alpha * sqrt(radius2 - dist * dist), dist);\n" +
             "  float scalar = radian * factor / dist;\n" +
             "  vec2 new_coord = coord * scalar + vec2(0.5, 0.5);\n" +
