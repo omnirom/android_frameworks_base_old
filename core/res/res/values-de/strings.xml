@@ -1666,4 +1666,6 @@
   </plurals>
     <string name="restr_pin_try_later" msgid="973144472490532377">"Später erneut versuchen"</string>
     <string name="immersive_mode_confirmation" msgid="7227416894979047467">"Zum Schließen des Vollbilds von oben nach unten wischen"</string>
+    <string name="toast_rotation_unlocked">Display Rotation erlaubt</string>
+    <string name="toast_rotation_locked">Display Rotation gesperrt</string>
 </resources>
