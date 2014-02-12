@@ -1,0 +1,21 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "ab62b9bd_18fbef77",
+        "filename": "core/java/android/view/VolumePanel.java",
+        "patchSetId": 4
+      },
+      "lineNbr": 236,
+      "author": {
+        "id": 1000026
+      },
+      "writtenOn": "2014-02-12T21:51:17Z",
+      "side": 1,
+      "message": "This is more a nitpick - but based on the coding conventions all uppercase variables are reserved for unchangable \"final\" values. So I would add a instance variable - keep TIMEOUT_DELAY final and use it as the default for this getInt",
+      "revId": "16b61aa3905f1db59b837efe68825199ae49e505",
+      "serverId": "56841c99-7c94-43d4-bf0b-cb4707e66d55",
+      "unresolved": false
+    }
+  ]
+}
