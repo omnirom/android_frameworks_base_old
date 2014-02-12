@@ -85,7 +85,7 @@ public class VolumePanel extends Handler implements OnSeekBarChangeListener, Vie
     private static final int BEEP_DURATION = 150;
     private static final int MAX_VOLUME = 100;
     private static final int FREE_DELAY = 10000;
-    private static final int TIMEOUT_DELAY = 3000;
+    private static int TIMEOUT_DELAY = 3000;
 
     private static final int MSG_VOLUME_CHANGED = 0;
     private static final int MSG_FREE_RESOURCES = 1;
@@ -233,6 +233,8 @@ public class VolumePanel extends Handler implements OnSeekBarChangeListener, Vie
             int overlayStyle = Settings.System.getInt(mContext.getContentResolver(),
                     Settings.System.MODE_VOLUME_OVERLAY, VOLUME_OVERLAY_EXPANDABLE);
             changeOverlayStyle(overlayStyle);
+            TIMEOUT_DELAY = Settings.System.getInt(mContext.getContentResolver(),
+                    Settings.System.VOLUME_PANEL_TIMEOUT, 3000);
         }
     };
 
@@ -354,6 +356,9 @@ public class VolumePanel extends Handler implements OnSeekBarChangeListener, Vie
                 mSettingsObserver);
         context.getContentResolver().registerContentObserver(
                 Settings.System.getUriFor(Settings.System.MODE_VOLUME_OVERLAY), false,
+                mSettingsObserver);
+        context.getContentResolver().registerContentObserver(
+                Settings.System.getUriFor(Settings.System.VOLUME_PANEL_TIMEOUT), false,
                 mSettingsObserver);
 
         boolean masterVolumeKeySounds = mContext.getResources().getBoolean(
