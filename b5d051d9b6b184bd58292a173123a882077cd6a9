@@ -1,0 +1,21 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "ab62b9bd_b8be83a7",
+        "filename": "packages/SystemUI/src/com/android/systemui/statusbar/policy/LocationController.java",
+        "patchSetId": 6
+      },
+      "lineNbr": 156,
+      "author": {
+        "id": 1000026
+      },
+      "writtenOn": "2014-02-12T21:20:05Z",
+      "side": 1,
+      "message": "this is unused - right?",
+      "revId": "b5d051d9b6b184bd58292a173123a882077cd6a9",
+      "serverId": "56841c99-7c94-43d4-bf0b-cb4707e66d55",
+      "unresolved": false
+    }
+  ]
+}
