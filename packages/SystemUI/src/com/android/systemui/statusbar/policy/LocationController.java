@@ -157,14 +157,13 @@ public class LocationController extends BroadcastReceiver {
      * Returns the actual location mode which is running
      */
     public int getLocationMode() {
-        ContentResolver resolver = mContext.getContentResolver();
+        final ContentResolver resolver = mContext.getContentResolver();
         // QuickSettings always runs as the owner, so specifically retrieve the settings
         // for the current foreground user.
         int mode = Settings.Secure.getIntForUser(resolver, Settings.Secure.LOCATION_MODE,
                 Settings.Secure.LOCATION_MODE_OFF, ActivityManager.getCurrentUser());
         return mode;
     }
-
 
     public boolean setBackLocationEnabled(int location) {
         switch (location) {
@@ -179,12 +178,6 @@ public class LocationController extends BroadcastReceiver {
                 break;
         }
         return setLocationMode(location);
-    }
-
-    public int locationMode() {
-        ContentResolver resolver = mContext.getContentResolver();
-        return Settings.Secure.getIntForUser(resolver, Settings.Secure.LOCATION_MODE,
-                Settings.Secure.LOCATION_MODE_OFF, ActivityManager.getCurrentUser());
     }
 
     public boolean isLocationAllowPanelCollapse() {
