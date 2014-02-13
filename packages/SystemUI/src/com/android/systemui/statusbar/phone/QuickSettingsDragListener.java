@@ -25,7 +25,7 @@ import android.view.View.OnDragListener;
 
 import com.android.systemui.statusbar.phone.QuickSettings.Tile;
 
-class QuickSettingsDragListener implements OnDragListener {
+public class QuickSettingsDragListener implements OnDragListener {
 
     @Override
     public boolean onDrag(View v, DragEvent event) {
