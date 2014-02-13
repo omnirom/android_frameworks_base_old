@@ -52,6 +52,8 @@
     <dimen name="qs_3_column_text_size">12sp</dimen>
     <!-- Quick Settings tile geometry: text size for 4 tile per row-->
     <dimen name="qs_4_column_text_size">10sp</dimen>
+    <!-- Quick Settings tile geometry: text size for 5 tile per row-->
+    <dimen name="qs_5_column_text_size">8sp</dimen>
 
     <!-- Network traffic monitor single-line text size -->
     <dimen name="net_traffic_single_text_size">12dp</dimen>

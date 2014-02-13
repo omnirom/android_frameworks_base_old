@@ -21,8 +21,9 @@ package com.android.systemui.statusbar.phone;
 import com.android.systemui.R;
 
 import android.animation.Animator;
-import android.animation.Animator.AnimatorListener;
+import android.animation.AnimatorListenerAdapter;
 import android.content.Context;
+import android.content.res.Resources;
 import android.graphics.Color;
 import android.graphics.drawable.ColorDrawable;
 import android.util.AttributeSet;
@@ -31,6 +32,8 @@ import android.view.LayoutInflater;
 import android.view.View;
 import android.view.View.OnClickListener;
 import android.view.View.OnLongClickListener;
+import android.view.ViewGroup;
+import android.view.ViewGroup.MarginLayoutParams;
 import android.view.ViewParent;
 import android.widget.FrameLayout;
 
@@ -44,12 +47,12 @@ class QuickSettingsTileView extends FrameLayout {
     private static final String HOVER_COLOR_WHITE = "#3FFFFFFF"; // 25% white
     private static final String HOVER_COLOR_BLACK = "#3F000000"; // 25% black
 
-    private static final float NON_EDITABLE = 1f;
+    private static final float DEFAULT = 1f;
     private static final float ENABLED = 0.95f;
     private static final float DISABLED = 0.65f;
+    private static final float DISAPPEAR = 0.0f;
 
     private Tile mTileId;
-    private int mTileTextSize;
 
     private OnClickListener mOnClickListener;
     private OnLongClickListener mOnLongClickListener;
@@ -57,6 +60,7 @@ class QuickSettingsTileView extends FrameLayout {
     private int mContentLayoutId;
     private int mColSpan;
     private int mRowSpan;
+    private int mNumColumns;
 
     private boolean mPrepared;
     private OnPrepareListener mOnPrepareListener;
@@ -79,23 +83,23 @@ class QuickSettingsTileView extends FrameLayout {
         setOnDragListener(mDragListener);
     }
 
-    void setTileId(Tile id) {
+    public void setTileId(Tile id) {
         mTileId = id;
     }
 
-    QuickSettingsTouchListener getTouchListener() {
+    public QuickSettingsTouchListener getTouchListener() {
         return mTouchListener;
     }
 
-    QuickSettingsDragListener getDragListener() {
+    public QuickSettingsDragListener getDragListener() {
         return mDragListener;
     }
 
-    Tile getTileId() {
+    public Tile getTileId() {
         return mTileId;
     }
 
-    void setTemporary(boolean temporary) {
+    public void setTemporary(boolean temporary) {
         mTemporary = temporary;
         if (temporary) { // No listeners needed
             setOnTouchListener(null);
@@ -106,32 +110,33 @@ class QuickSettingsTileView extends FrameLayout {
         }
     }
 
-    boolean isTemporary() {
+    public boolean isTemporary() {
         return mTemporary;
     }
 
-    void setColumnSpan(int span) {
+    public void setColumnSpan(int span) {
         mColSpan = span;
     }
 
-    int getColumnSpan() {
+    public int getColumnSpan() {
         return mColSpan;
     }
 
+    public void setColumns(int columns) {
+        mNumColumns = columns;
+        setTextSizes(getTextSize());
+    }
+
     public void setTextSizes(int size) {
-        mTileTextSize = size;
+        // this will call changing text size on child views
     }
 
-    int getTextSizes() {
-        return mTileTextSize;
-    }
-
-    void setContent(int layoutId, LayoutInflater inflater) {
+    public void setContent(int layoutId, LayoutInflater inflater) {
         mContentLayoutId = layoutId;
         inflater.inflate(layoutId, this);
     }
 
-    void reinflateContent(LayoutInflater inflater) {
+    public void reinflateContent(LayoutInflater inflater) {
         if (mContentLayoutId != -1) {
             removeAllViews();
             setContent(mContentLayoutId, inflater);
@@ -140,16 +145,16 @@ class QuickSettingsTileView extends FrameLayout {
         }
     }
 
-    void setLoading(boolean loading) {
+    public void setLoading(boolean loading) {
         findViewById(R.id.loading).setVisibility(loading ? View.VISIBLE : View.GONE);
         findViewById(R.id.image).setVisibility(loading ? View.GONE : View.VISIBLE);
     }
 
-    void setHoverEffect(boolean hover) {
+    public void setHoverEffect(boolean hover) {
         setHoverEffect(HOVER_COLOR_WHITE, hover);
     }
 
-    void setHoverEffect(String color, boolean hover) {
+    public void setHoverEffect(String color, boolean hover) {
         if(hover) {
             setForeground(new ColorDrawable(Color.parseColor(color)));
         } else {
@@ -157,18 +162,19 @@ class QuickSettingsTileView extends FrameLayout {
         }
     }
 
-    void fadeOut() {
+    public void fadeOut() {
         animate().alpha(0.05f);
     }
 
-    void fadeIn() {
+    public void fadeIn() {
         animate().alpha(1f);
     }
 
-    void setEditMode(boolean enabled) {
+    public void setEditMode(boolean enabled) {
         mEditMode = enabled;
         mVisible = getVisibility() == View.VISIBLE
-                && (getScaleY() >= ENABLED || getScaleX() >= ENABLED);
+                && ((getScaleY() >= ENABLED || getScaleX() == DISAPPEAR) ||
+                    (getScaleX() >= ENABLED || getScaleX() == DISAPPEAR));
         if(!isTemporary() && enabled) {
             setVisibility(View.VISIBLE);
             setHoverEffect(HOVER_COLOR_BLACK, !mVisible);
@@ -183,7 +189,8 @@ class QuickSettingsTileView extends FrameLayout {
             setEditModeLongClickListener(null);
         } else {
             boolean temporaryEditMode = isTemporary() && enabled;
-            animate().scaleX(NON_EDITABLE).scaleY(NON_EDITABLE).setListener(null);
+            float scale = temporaryEditMode ? DISAPPEAR : DEFAULT;
+            animate().scaleX(scale).scaleY(scale).setListener(null);
             setOnClickListener(temporaryEditMode? null : mOnClickListener);
             setOnLongClickListener(temporaryEditMode? null : mOnLongClickListener);
             if(!mVisible) { // Item has been disabled
@@ -192,35 +199,23 @@ class QuickSettingsTileView extends FrameLayout {
         }
     }
 
-    boolean isEditModeEnabled() {
+    public boolean isEditModeEnabled() {
         return mEditMode;
     }
 
-    void toggleVisibility() {
+    public void toggleVisibility() {
         setHoverEffect(HOVER_COLOR_BLACK, mVisible);
         float scale = mVisible ? DISABLED : ENABLED;
         animate().scaleX(scale).scaleY(scale)
-                .setListener(new AnimatorListener() {
-            @Override
-            public void onAnimationCancel(Animator animation) {
-            }
-
+                .setListener(new AnimatorListenerAdapter() {
             @Override
             public void onAnimationEnd(Animator animation) {
                 mVisible = !mVisible;
             }
-
-            @Override
-            public void onAnimationRepeat(Animator animation) {
-            }
-
-            @Override
-            public void onAnimationStart(Animator animation) {
-            }
         });
     }
 
-    void setEditModeClickListener(OnClickListener listener) {
+    public void setEditModeClickListener(OnClickListener listener) {
         super.setOnClickListener(listener);
     }
 
@@ -270,6 +265,33 @@ class QuickSettingsTileView extends FrameLayout {
                 }
             });
         }
+    }
+
+    private int getTextSize() {
+        final Resources res = mContext.getResources();
+        switch (mNumColumns) {
+            case 5:
+                return res.getDimensionPixelSize(R.dimen.qs_5_column_text_size);
+            case 4:
+                return res.getDimensionPixelSize(R.dimen.qs_4_column_text_size);
+        }
+        return res.getDimensionPixelSize(R.dimen.qs_3_column_text_size);
+    }
+
+    public void callOnColumnsChange() {
+        // this will call invalidate() on child views
+    }
+
+    @Override
+    protected void onMeasure(int widthMeasureSpec, int heightMeasureSpec) {
+        callOnColumnsChange();
+        super.onMeasure(widthMeasureSpec, heightMeasureSpec);
+    }
+
+    @Override
+    protected void onLayout(boolean changed, int left, int top, int right, int bottom) {
+        callOnColumnsChange();
+        super.onLayout(changed, left, top, right, bottom);
     }
 
     @Override
