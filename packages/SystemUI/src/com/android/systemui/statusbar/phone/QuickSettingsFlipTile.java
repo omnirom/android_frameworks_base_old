@@ -26,7 +26,7 @@ import android.view.MotionEvent;
 import android.view.View;
 import android.widget.FrameLayout;
 
-class QuickSettingsFlipTile extends QuickSettingsTileView {
+public class QuickSettingsFlipTile extends QuickSettingsTileView {
 
     private final QuickSettingsBasicTile mFront;
     private final QuickSettingsBasicBackTile mBack;
