@@ -13,24 +13,28 @@
      See the License for the specific language governing permissions and
      limitations under the License.
 -->
-<FrameLayout
+<LinearLayout
     xmlns:android="http://schemas.android.com/apk/res/android"
     android:layout_width="match_parent"
     android:layout_height="match_parent">
-    <ImageView
-        android:id="@+id/user_imageview"
+    <FrameLayout
         android:layout_width="match_parent"
-        android:layout_height="match_parent"
-        android:src="@drawable/ic_qs_default_user"
-        android:scaleType="centerCrop"
-        />
-    <TextView
-        style="@style/TextAppearance.QuickSettings.TileView.User"
-        android:id="@+id/user_textview"
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:layout_gravity="center_horizontal|bottom"
-        android:gravity="center"
-        android:text="@string/quick_settings_user_label"
-        />
-</FrameLayout>
+        android:layout_height="match_parent">
+        <ImageView
+             android:id="@+id/user_imageview"
+             android:layout_width="match_parent"
+             android:layout_height="match_parent"
+             android:src="@drawable/ic_qs_default_user"
+             android:scaleType="centerCrop"
+             />
+        <TextView
+             style="@style/TextAppearance.QuickSettings.TileView.User"
+             android:id="@+id/user_textview"
+             android:layout_width="match_parent"
+             android:layout_height="wrap_content"
+             android:layout_gravity="center_horizontal|bottom"
+             android:gravity="center"
+             android:text="@string/quick_settings_user_label"
+             />
+    </FrameLayout>
+</LinearLayout>
