@@ -31,7 +31,7 @@ import com.android.systemui.BatteryMeterView;
 import com.android.systemui.BatteryCircleMeterView;
 import com.android.systemui.R;
 
-class QuickSettingsBasicBatteryTile extends QuickSettingsTileView {
+public class QuickSettingsBasicBatteryTile extends QuickSettingsTileView {
     private final TextView mTextView;
     private BatteryMeterView mBattery;
     private BatteryCircleMeterView mCircleBattery;
@@ -63,7 +63,7 @@ class QuickSettingsBasicBatteryTile extends QuickSettingsTileView {
     }
 
     @Override
-    void setContent(int layoutId, LayoutInflater inflater) {
+    public void setContent(int layoutId, LayoutInflater inflater) {
         throw new RuntimeException("why?");
     }
 
