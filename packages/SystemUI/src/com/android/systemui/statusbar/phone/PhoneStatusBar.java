@@ -55,7 +55,6 @@ import android.graphics.drawable.TransitionDrawable;
 import android.inputmethodservice.InputMethodService;
 import android.net.Uri;
 import android.os.Bundle;
-import android.net.Uri;
 import android.os.Handler;
 import android.os.IBinder;
 import android.os.IPowerManager;
@@ -191,6 +190,7 @@ public class PhoneStatusBar extends BaseStatusBar implements DemoMode {
     int mIconHPadding = -1;
     Display mDisplay;
     Point mCurrentDisplaySize = new Point();
+    int mCurrOrientation;
     private float mHeadsUpVerticalOffset;
     private int[] mPilePosition = new int[2];
 
@@ -352,10 +352,6 @@ public class PhoneStatusBar extends BaseStatusBar implements DemoMode {
                     Settings.System.SCREEN_BRIGHTNESS_MODE), false, this);
             resolver.registerContentObserver(Settings.System.getUriFor(
                     Settings.System.STATUS_BAR_CUSTOM_HEADER), false, this);
-            resolver.registerContentObserver(Settings.System.getUriFor(
-                    Settings.System.QUICK_SETTINGS_TILES), false, this);
-            resolver.registerContentObserver(Settings.System.getUriFor(
-                    Settings.System.QUICK_SETTINGS_TILES_ROW), false, this);
             update();
         }
 
@@ -374,13 +370,34 @@ public class PhoneStatusBar extends BaseStatusBar implements DemoMode {
                     resolver, Settings.System.STATUS_BAR_BRIGHTNESS_CONTROL, 0) == 1;
             mCustomHeader = Settings.System.getInt(
                     resolver, Settings.System.STATUS_BAR_CUSTOM_HEADER, 0) == 1;
-
             updateCustomHeaderStatus();
-            if (mQS != null) mQS.updateResources();
 
         }
     }
 
+    private class TilesChangedObserver extends ContentObserver {
+        TilesChangedObserver(Handler handler) {
+            super(handler);
+        }
+
+        void observe() {
+            ContentResolver resolver = mContext.getContentResolver();
+            resolver.registerContentObserver(Settings.System.getUriFor(
+                    Settings.System.QUICK_SETTINGS_TILES), false, this);
+            resolver.registerContentObserver(Settings.System.getUriFor(
+                    Settings.System.QUICK_SETTINGS_TILES_ROW), false, this);
+            update();
+        }
+
+        @Override
+        public void onChange(boolean selfChange) {
+            update();
+        }
+
+        public void update() {
+            if (mQS != null) mQS.updateResources();
+        }
+    }
 
     // ensure quick settings is disabled until the current user makes it through the setup wizard
     private boolean mUserSetup = false;
@@ -493,6 +510,8 @@ public class PhoneStatusBar extends BaseStatusBar implements DemoMode {
         observer.observe();
         BatteryIconSettingsObserver batteryIconObserver = new BatteryIconSettingsObserver(mHandler);
         batteryIconObserver.observe();
+        TilesChangedObserver tilesChangedObserver = new TilesChangedObserver(mHandler);
+        tilesChangedObserver.observe();
 
         // Lastly, call to the icon policy to install/update all the icons.
         mIconPolicy = new PhoneStatusBarPolicy(mContext);
@@ -1914,6 +1933,9 @@ public class PhoneStatusBar extends BaseStatusBar implements DemoMode {
     }
 
     public void completePartialFlip() {
+        // Settings are not available in setup
+        if (!mUserSetup) return;
+
         if (mHasFlipSettings) {
             if (mFlipSettingsView.getVisibility() == View.VISIBLE) {
                 flipToSettings();
@@ -2012,6 +2034,7 @@ public class PhoneStatusBar extends BaseStatusBar implements DemoMode {
                 updateCarrierLabelVisibility(false);
             }
         }, FLIP_DURATION - 150);
+        updateQuickSettings();
     }
 
     public void flipPanels() {
@@ -2920,6 +2943,13 @@ public class PhoneStatusBar extends BaseStatusBar implements DemoMode {
         return false;
     }
 
+    public boolean isDynamicEnabled() {
+        if (mSettingsContainer != null) {
+            return mSettingsContainer.isDynamicEnabled();
+        }
+        return false;
+    }
+
     private View.OnLongClickListener mEditModeLongButtonListener = new View.OnLongClickListener() {
         public boolean onLongClick(View v) {
             if (mSettingsContainer != null) {
@@ -2946,7 +2976,7 @@ public class PhoneStatusBar extends BaseStatusBar implements DemoMode {
         }
     };
 
-    private Runnable mEditModeEnabled = new Runnable() {
+    private final Runnable mEditModeEnabled = new Runnable() {
         public void run() {
             if (mSettingsContainer != null) {
                 mSettingsContainer.setEditModeEnabled(true);
@@ -3115,11 +3145,37 @@ public class PhoneStatusBar extends BaseStatusBar implements DemoMode {
         if (mClearButton instanceof TextView) {
             ((TextView)mClearButton).setText(context.getText(R.string.status_bar_clear_all_button));
         }
-
-        // Update the QuickSettings container
-        if (mQS != null) mQS.updateResources();
-
         loadDimens();
+
+        // check for orientation change and update only the container layout
+        // for all other configuration changes update complete QS
+        int orientation = res.getConfiguration().orientation;
+        if (orientation != mCurrOrientation) {
+            mCurrOrientation = orientation;
+            // Update the settings container
+            if (mSettingsContainer != null) {
+                mSettingsContainer.updateRotation(orientation);
+            }
+        } else {
+            // Update the QuickSettings container
+            if (mQS != null) mQS.updateResources();
+        }
+    }
+
+    private final Runnable mQuickSettingsUpdater= new Runnable() {
+        public void run() {
+            if (isShowingSettings() && isDynamicEnabled()) {
+                // Update the settings container
+                if (mSettingsContainer != null) {
+                    mSettingsContainer.updateResources();
+                }
+            }
+        }
+    };
+
+    public void updateQuickSettings() {
+        mHandler.removeCallbacks(mQuickSettingsUpdater);
+        mHandler.postDelayed(mQuickSettingsUpdater, FLIP_DURATION + 150);
     }
 
     protected void loadDimens() {
