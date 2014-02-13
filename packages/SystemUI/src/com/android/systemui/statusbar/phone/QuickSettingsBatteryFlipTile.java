@@ -27,17 +27,17 @@ import android.view.MotionEvent;
 import android.view.View;
 import android.widget.FrameLayout;
 
-public class QuickSettingsNetworkFlipTile extends QuickSettingsTileView {
+public class QuickSettingsBatteryFlipTile extends QuickSettingsTileView {
 
-    private final QuickSettingsBasicNetworkTile mFront;
-    private final QuickSettingsBasicBackTile mBack;
+    private final QuickSettingsBasicBatteryTile mFront;
+    private final QuickSettingsBasicBackBatteryTile mBack;
     private final QuickSettingsTileFlip3d mFlip3d;
 
-    public QuickSettingsNetworkFlipTile(Context context) {
+    public QuickSettingsBatteryFlipTile(Context context) {
         this(context, null);
     }
 
-    public QuickSettingsNetworkFlipTile(Context context, AttributeSet attrs) {
+    public QuickSettingsBatteryFlipTile(Context context, AttributeSet attrs) {
         super(context, attrs);
 
         setLayoutParams(new FrameLayout.LayoutParams(
@@ -45,8 +45,8 @@ public class QuickSettingsNetworkFlipTile extends QuickSettingsTileView {
             context.getResources().getDimensionPixelSize(R.dimen.quick_settings_cell_height)
         ));
 
-        mFront = new QuickSettingsBasicNetworkTile(context);
-        mBack = new QuickSettingsBasicBackTile(context);
+        mFront = new QuickSettingsBasicBatteryTile(context);
+        mBack = new QuickSettingsBasicBackBatteryTile(context);
         mFlip3d = new QuickSettingsTileFlip3d(mFront, mBack);
 
         setClickable(true);
@@ -83,36 +83,16 @@ public class QuickSettingsNetworkFlipTile extends QuickSettingsTileView {
         }
     }
 
-    public void setFrontImageDrawable(Drawable drawable) {
-        mFront.setImageDrawable(drawable);
-    }
-
-    public void setFrontImageOverlayDrawable(Drawable drawable) {
-        mFront.setImageOverlayDrawable(drawable);
-    }
-
-    public void setFrontImageResource(int id) {
-        mFront.setImageResource(id);
-    }
-
-    public void setFrontImageOverlayResource(int id) {
-        mFront.setImageOverlayResource(id);
-    }
-
     public void setFrontText(CharSequence text) {
         mFront.setText(text);
     }
 
-    public void setBackImageResource(int id) {
-        mBack.setImageResource(id);
+    public void setFrontContentDescription(CharSequence text) {
+        mFront.setContentDescription(text);
     }
 
     public void setBackLabel(CharSequence text) {
         mBack.setLabel(text);
-    }
-
-    public void setBackContentDescription(CharSequence text) {
-        mBack.setContentDescription(text);
     }
 
     public void setBackFunction(CharSequence text) {
@@ -131,14 +111,6 @@ public class QuickSettingsNetworkFlipTile extends QuickSettingsTileView {
         mFront.callOnColumnsChange();
     }
 
-    public void setFrontOnLongClickListener(View.OnLongClickListener listener) {
-        mFront.setOnLongClickListener(listener);
-    }
-
-    public void setBackOnLongClickListener(View.OnLongClickListener listener) {
-        mBack.setOnLongClickListener(listener);
-    }
-
     public void setFrontOnClickListener(View.OnClickListener listener) {
         mFront.setOnClickListener(listener);
     }
@@ -153,5 +125,10 @@ public class QuickSettingsNetworkFlipTile extends QuickSettingsTileView {
 
     public QuickSettingsTileView getBack() {
         return mBack;
+    }
+
+    public void updateBatterySettings() {
+        mBack.updateBatterySettings();
+        mFront.updateBatterySettings();
     }
 }

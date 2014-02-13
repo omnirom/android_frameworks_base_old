@@ -31,21 +31,24 @@ import android.widget.ImageView;
 import android.widget.ProgressBar;
 import android.widget.TextView;
 
+import com.android.systemui.BatteryMeterView;
+import com.android.systemui.BatteryCircleMeterView;
 
-public class QuickSettingsBasicBackTile extends QuickSettingsTileView {
+public class QuickSettingsBasicBackBatteryTile extends QuickSettingsTileView {
     private final TextView mLabelView;
     private final TextView mFunctionView;
-    private final ImageView mImageView;
+    private BatteryMeterView mBattery;
+    private BatteryCircleMeterView mCircleBattery;
 
-    public QuickSettingsBasicBackTile(Context context) {
+    public QuickSettingsBasicBackBatteryTile(Context context) {
         this(context, null);
     }
 
-    public QuickSettingsBasicBackTile(Context context, AttributeSet attrs) {
-        this(context, attrs, R.layout.quick_settings_tile_back);
+    public QuickSettingsBasicBackBatteryTile(Context context, AttributeSet attrs) {
+        this(context, attrs, R.layout.quick_settings_tile_back_battery);
     }
 
-    public QuickSettingsBasicBackTile(Context context, AttributeSet attrs, int layoutId) {
+    public QuickSettingsBasicBackBatteryTile(Context context, AttributeSet attrs, int layoutId) {
         super(context, attrs);
 
         setLayoutParams(new FrameLayout.LayoutParams(
@@ -59,7 +62,9 @@ public class QuickSettingsBasicBackTile extends QuickSettingsTileView {
                         FrameLayout.LayoutParams.MATCH_PARENT));
         mLabelView = (TextView) findViewById(R.id.label);
         mFunctionView = (TextView) findViewById(R.id.function);
-        mImageView = (ImageView) findViewById(R.id.image);
+        mBattery = (BatteryMeterView) findViewById(R.id.image);
+        mBattery.setVisibility(View.GONE);
+        mCircleBattery = (BatteryCircleMeterView) findViewById(R.id.circle_battery);
     }
 
     @Override
@@ -67,8 +72,12 @@ public class QuickSettingsBasicBackTile extends QuickSettingsTileView {
         throw new RuntimeException("why?");
     }
 
-    public ImageView getImageView() {
-        return mImageView;
+    public BatteryMeterView getBattery() {
+        return mBattery;
+    }
+
+    public BatteryCircleMeterView getCircleBattery() {
+        return mCircleBattery;
     }
 
     public TextView getLabelView() {
@@ -77,14 +86,6 @@ public class QuickSettingsBasicBackTile extends QuickSettingsTileView {
 
     public TextView getFunctionView() {
         return mFunctionView;
-    }
-
-    public void setImageDrawable(Drawable drawable) {
-        mImageView.setImageDrawable(drawable);
-    }
-
-    public void setImageResource(int resId) {
-        mImageView.setImageResource(resId);
     }
 
     @Override
@@ -113,5 +114,13 @@ public class QuickSettingsBasicBackTile extends QuickSettingsTileView {
 
     public void setFunctionResource(int resId) {
         mFunctionView.setText(resId);
+    }
+
+    public void updateBatterySettings() {
+        if (mBattery == null) {
+            return;
+        }
+        mCircleBattery.updateSettings();
+        mBattery.updateSettings();
     }
 }
