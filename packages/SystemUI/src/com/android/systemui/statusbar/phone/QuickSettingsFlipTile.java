@@ -26,7 +26,7 @@ import android.view.MotionEvent;
 import android.view.View;
 import android.widget.FrameLayout;
 
-class QuickSettingsFlipTile extends QuickSettingsTileView {
+public class QuickSettingsFlipTile extends QuickSettingsTileView {
 
     private final QuickSettingsBasicTile mFront;
     private final QuickSettingsBasicBackTile mBack;
@@ -122,7 +122,12 @@ class QuickSettingsFlipTile extends QuickSettingsTileView {
     public void setTextSizes(int size) {
         mBack.setTextSizes(size);
         mFront.setTextSizes(size);
-        super.setTextSizes(size);
+    }
+
+    @Override
+    public void callOnColumnsChange() {
+        mBack.callOnColumnsChange();
+        mFront.callOnColumnsChange();
     }
 
     public void setFrontOnLongClickListener(View.OnLongClickListener listener) {
