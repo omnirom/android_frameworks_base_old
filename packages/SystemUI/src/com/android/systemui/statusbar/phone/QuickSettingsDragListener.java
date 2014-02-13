@@ -25,7 +25,7 @@ import android.view.View.OnDragListener;
 
 import com.android.systemui.statusbar.phone.QuickSettings.Tile;
 
-class QuickSettingsDragListener implements OnDragListener {
+public class QuickSettingsDragListener implements OnDragListener {
 
     @Override
     public boolean onDrag(View v, DragEvent event) {
@@ -36,6 +36,8 @@ class QuickSettingsDragListener implements OnDragListener {
             bottomView = (QuickSettingsFlipTile) bottomView.getParent();
         } else if (bottomView.getParent() instanceof QuickSettingsNetworkFlipTile) {
             bottomView = (QuickSettingsNetworkFlipTile) bottomView.getParent();
+        } else if (bottomView.getParent() instanceof QuickSettingsBatteryFlipTile) {
+            bottomView = (QuickSettingsBatteryFlipTile) bottomView.getParent();
         }
 
         if (topView == bottomView) return false;
