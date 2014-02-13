@@ -30,7 +30,7 @@ import android.widget.TextView;
 
 import com.android.systemui.R;
 
-class QuickSettingsBasicTile extends QuickSettingsTileView {
+public class QuickSettingsBasicTile extends QuickSettingsTileView {
     private final TextView mTextView;
     private final ImageView mImageView;
     private final ProgressBar mLoadingView;
@@ -61,7 +61,7 @@ class QuickSettingsBasicTile extends QuickSettingsTileView {
     }
 
     @Override
-    void setContent(int layoutId, LayoutInflater inflater) {
+    public void setContent(int layoutId, LayoutInflater inflater) {
         throw new RuntimeException("why?");
     }
 
