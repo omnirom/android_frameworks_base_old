@@ -27,7 +27,7 @@ import android.view.View;
 import android.view.View.DragShadowBuilder;
 import android.view.View.OnTouchListener;
 
-class QuickSettingsTouchListener implements OnTouchListener {
+public class QuickSettingsTouchListener implements OnTouchListener {
 
     private final static double DISTANCE_THRESHOLD = 10.0;
 
