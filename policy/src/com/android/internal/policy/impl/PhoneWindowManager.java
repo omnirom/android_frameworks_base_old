@@ -109,6 +109,7 @@ import com.android.internal.statusbar.IStatusBarService;
 import com.android.internal.telephony.ITelephony;
 import com.android.internal.widget.PointerLocationView;
 import com.android.internal.util.omni.OmniTorchConstants;
+import com.android.internal.util.omni.DeviceUtils;
 import com.android.internal.util.omni.TaskUtils;
 
 import java.io.File;
@@ -595,6 +596,39 @@ public class PhoneWindowManager implements WindowManagerPolicy {
             setHdmiPlugged("1".equals(event.get("SWITCH_STATE")));
         }
     };
+
+    // Sleep tile long action receiver
+    PowerMenuReceiver mPowerMenuReceiver;
+    private class PowerMenuReceiver extends BroadcastReceiver {
+        private boolean mIsRegistered = false;
+
+       public PowerMenuReceiver(Context context) {
+        }
+        @Override
+        public void onReceive(Context context, Intent intent) {
+           final String action = intent.getAction();
+            if (action.equals(Intent.ACTION_POWERMENU)) {
+                showGlobalActionsDialog();
+            }
+        }
+
+        private void registerSelf() {
+            if (!mIsRegistered) {
+                mIsRegistered = true;
+
+                IntentFilter filter = new IntentFilter();
+                filter.addAction(Intent.ACTION_POWERMENU);
+                mContext.registerReceiver(mPowerMenuReceiver, filter);
+            }
+        }
+
+        private void unregisterSelf() {
+            if (mIsRegistered) {
+                mIsRegistered = false;
+                mContext.unregisterReceiver(this);
+            }
+        }
+    }
 
     class SettingsObserver extends ContentObserver {
         SettingsObserver(Handler handler) {
@@ -1222,6 +1256,9 @@ public class PhoneWindowManager implements WindowManagerPolicy {
         } else {
             screenTurnedOff(WindowManagerPolicy.OFF_BECAUSE_OF_USER);
         }
+
+        mPowerMenuReceiver = new PowerMenuReceiver(context);
+        mPowerMenuReceiver.registerSelf();
     }
 
     private void updateKeyAssignments() {
@@ -5846,7 +5883,6 @@ public class PhoneWindowManager implements WindowManagerPolicy {
                 && mFocusedApp == win.getAppToken()) {
             return 0;
         }
-
         final int visibility2 = visibility;
         mLastSystemUiFlags = visibility;
         mLastFocusNeedsMenu = needsMenu;
@@ -6208,8 +6244,10 @@ public class PhoneWindowManager implements WindowManagerPolicy {
                     if (DEBUG_INPUT){
                         Slog.d(TAG, "handleOffscreenGesture: " + "V gesture");
                     }
-                    mContext.sendBroadcastAsUser(new Intent(OmniTorchConstants.ACTION_TOGGLE_STATE),
+                    if (DeviceUtils.deviceSupportsTorch(mContext)) {
+                        mContext.sendBroadcastAsUser(new Intent(OmniTorchConstants.ACTION_TOGGLE_STATE),
                             UserHandle.CURRENT_OR_SELF);
+                    }
                 }
                 break;
             case KeyEvent.KEYCODE_F6:

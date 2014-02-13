@@ -32,7 +32,7 @@ import android.widget.ProgressBar;
 import android.widget.TextView;
 
 
-class QuickSettingsBasicBackTile extends QuickSettingsTileView {
+public class QuickSettingsBasicBackTile extends QuickSettingsTileView {
     private final TextView mLabelView;
     private final TextView mFunctionView;
     private final ImageView mImageView;
@@ -63,7 +63,7 @@ class QuickSettingsBasicBackTile extends QuickSettingsTileView {
     }
 
     @Override
-    void setContent(int layoutId, LayoutInflater inflater) {
+    public void setContent(int layoutId, LayoutInflater inflater) {
         throw new RuntimeException("why?");
     }
 
