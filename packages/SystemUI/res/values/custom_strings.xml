@@ -18,6 +18,7 @@
 <resources xmlns:xliff="urn:oasis:names:tc:xliff:document:1.2">
     <!-- Quick Settings Wi-Fi Back Tile Tethering label -->
     <string name="quick_settings_wifi_tethering_label">Tethering</string>
+    <string name="quick_settings_wifi_tethering_off_label">Tethering Off</string>
 
     <!-- Quick Settings Bluetooth Not Discoverable label -->
     <string name="quick_settings_bluetooth_not_discoverable_label">Not discoverable</string>
