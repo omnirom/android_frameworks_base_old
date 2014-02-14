@@ -1,0 +1,21 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "ab62b9bd_de16bfac",
+        "filename": "packages/SystemUI/src/com/android/systemui/statusbar/phone/PhoneStatusBar.java",
+        "patchSetId": 4
+      },
+      "lineNbr": 3150,
+      "author": {
+        "id": 1000313
+      },
+      "writtenOn": "2014-02-14T11:24:23Z",
+      "side": 1,
+      "message": "Add // in the front of this\n\nLike\n//if(mSettingsContainer !\u003dnull) {\n// mSettingsContainer.updateResources();\n//}",
+      "revId": "bafc706f53383d77be12b0f88724d846a3048cb3",
+      "serverId": "56841c99-7c94-43d4-bf0b-cb4707e66d55",
+      "unresolved": false
+    }
+  ]
+}
