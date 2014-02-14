@@ -1,0 +1,21 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "ab62b9bd_9e4c47e5",
+        "filename": "services/java/com/android/server/NotificationManagerService.java",
+        "patchSetId": 3
+      },
+      "lineNbr": 1219,
+      "author": {
+        "id": 1000727
+      },
+      "writtenOn": "2014-02-14T11:18:21Z",
+      "side": 1,
+      "message": "Should probably keep the casing of local variables",
+      "revId": "976c7f8cacfc867fda858311c172b60d7c1d2a03",
+      "serverId": "56841c99-7c94-43d4-bf0b-cb4707e66d55",
+      "unresolved": false
+    }
+  ]
+}
