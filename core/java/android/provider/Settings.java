@@ -3202,19 +3202,33 @@ public final class Settings {
          */
         public static final String NON_INTRUSIVE_INCALL = "non_intrusive_incall";
 
-        /**
-         * Should Dialer suggest nearby phone numbers
+       /**
+         * Enable looking up of phone numbers of nearby places
          *
          * @hide
          */
-        public static final String ENABLE_DIALER_SUGGESTIONS = "enable_dialer_suggestions";
+        public static final String ENABLE_FORWARD_LOOKUP = "enable_forward_lookup";
 
         /**
-         * Should Dialer reverse look up names for unknown phone numbers
+         * Enable looking up of information of phone numbers not in the contacts
          *
          * @hide
          */
-        public static final String ENABLE_DIALER_REVERSE_LOOKUP = "enable_dialer_reverse_lookup";
+        public static final String ENABLE_REVERSE_LOOKUP = "enable_reverse_lookup";
+
+        /**
+         * The forward lookup provider
+         *
+         * @hide
+         */
+        public static final String FORWARD_LOOKUP_PROVIDER = "forward_lookup_provider";
+
+        /**
+         * The reverse lookup provider
+         *
+         * @hide
+         */
+        public static final String REVERSE_LOOKUP_PROVIDER = "reverse_lookup_provider";
 
         /**
          * Should Flip to Silence be used
