@@ -370,7 +370,8 @@ class QuickSettingsModel implements BluetoothStateChangeCallback,
 
         @Override
         public void onChange(boolean selfChange) {
-            onImmersiveChanged();
+            onImmersiveFrontChanged();
+            onImmersiveBackChanged();
         }
 
         public void startObserving() {
@@ -568,9 +569,13 @@ class QuickSettingsModel implements BluetoothStateChangeCallback,
     private RefreshCallback mBrightnessCallback;
     private BrightnessState mBrightnessState = new BrightnessState();
 
-    private QuickSettingsTileView mImmersiveTile;
-    private RefreshCallback mImmersiveCallback;
-    private ImmersiveState mImmersiveState = new ImmersiveState();
+    private QuickSettingsTileView mImmersiveFrontTile;
+    private RefreshCallback mImmersiveFrontCallback;
+    private ImmersiveState mImmersiveFrontState = new ImmersiveState();
+
+    private QuickSettingsTileView mImmersiveBackTile;
+    private RefreshCallback mImmersiveBackCallback;
+    private ImmersiveState mImmersiveBackState = new ImmersiveState();
 
     private QuickSettingsTileView mQuiteHourTile;
     private RefreshCallback mQuiteHourCallback;
@@ -705,7 +710,8 @@ class QuickSettingsModel implements BluetoothStateChangeCallback,
         refreshBatteryBackTile();
         refreshBluetoothTile();
         refreshBrightnessTile();
-        refreshImmersiveTile();
+        refreshImmersiveFrontTile();
+        refreshImmersiveBackTile();
         onQuiteHourChanged();
         refreshRotationLockTile();
         refreshRssiTile();
@@ -1085,10 +1091,6 @@ class QuickSettingsModel implements BluetoothStateChangeCallback,
         mWifiBackCallback.refreshView(mWifiBackTile, mWifiBackState);
     }
 
-    private boolean isWifiEnabled() {
-        return mWifiManager.getWifiState() == WifiManager.WIFI_STATE_ENABLED;
-    }
-
     String getWifiIpAddr() {
         WifiInfo wifiInfo = mWifiManager.getConnectionInfo();
         int ip = wifiInfo.getIpAddress();
@@ -1154,12 +1156,13 @@ class QuickSettingsModel implements BluetoothStateChangeCallback,
         mMobileNetworkTile.setOnClickListener(new View.OnClickListener() {
               @Override
               public void onClick(View v) {
-                  if (SystemClock.elapsedRealtime() - mLastClickTime < 1000){
+                  if ((SystemClock.elapsedRealtime() - mLastClickTime) < 1000){
                       return;
                   }
+                  if (mLastClickTime != 0) {
+                      toggleMobileNetworkState();
+                  }
                   mLastClickTime = SystemClock.elapsedRealtime();
-
-                  toggleMobileNetworkState();
               }
         });
         mMobileNetworkCallback = cb;
@@ -1752,29 +1755,142 @@ class QuickSettingsModel implements BluetoothStateChangeCallback,
     }
 
     // Immersive
-    void addImmersiveTile(QuickSettingsTileView view, RefreshCallback cb) {
-        mImmersiveTile = view;
-        mImmersiveCallback = cb;
-        onImmersiveChanged();
+    private int immersiveModeLastState = 1;
+
+    private static final int IMMERSIVE_MODE_OFF = 0;
+    private static final int IMMERSIVE_MODE_FULL = 1;
+    private static final int IMMERSIVE_MODE_HIDE_ONLY_NAVBAR = 2;
+    private static final int IMMERSIVE_MODE_HIDE_ONLY_STATUSBAR = 3;
+
+    void addImmersiveFrontTile(QuickSettingsTileView view, RefreshCallback cb) {
+        mImmersiveFrontTile = view;
+        mImmersiveFrontTile.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                collapsePanels();
+                switchImmersiveFront();
+                refreshImmersiveFrontTile();
+            }
+        });
+        mImmersiveFrontCallback = cb;
+        onImmersiveFrontChanged();
     }
 
-    private void onImmersiveChanged() {
+    void addImmersiveBackTile(QuickSettingsTileView view, RefreshCallback cb) {
+        mImmersiveBackTile = view;
+        mImmersiveBackTile.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                switchImmersiveBack();
+                refreshImmersiveBackTile();
+            }
+        });
+        mImmersiveBackCallback = cb;
+        onImmersiveBackChanged();
+    }
+
+    private void onImmersiveFrontChanged() {
         Resources r = mContext.getResources();
-        int mode = Settings.System.getIntForUser(mContext.getContentResolver(),
-                Settings.System.IMMERSIVE_MODE, 0,
-                mUserTracker.getCurrentUserId());
-        mImmersiveState.isEnabled = (mode == 1);
-        mImmersiveState.iconId = mImmersiveState.isEnabled
-                ? R.drawable.ic_qs_immersive_on
-                : R.drawable.ic_qs_immersive_off;
-        mImmersiveState.label = mImmersiveState.isEnabled
-                ? r.getString(R.string.quick_settings_immersive_mode_label)
-                : r.getString(R.string.quick_settings_immersive_mode_off_label);
-        mImmersiveCallback.refreshView(mImmersiveTile, mImmersiveState);
+        int mode = getImmersiveMode();
+        int iconId = R.drawable.ic_qs_immersive_global_off;
+        String label = r.getString(R.string.quick_settings_immersive_global_off_label);
+        switch (mode) {
+               case IMMERSIVE_MODE_FULL:
+               case IMMERSIVE_MODE_HIDE_ONLY_NAVBAR:
+               case IMMERSIVE_MODE_HIDE_ONLY_STATUSBAR:
+                    iconId = R.drawable.ic_qs_immersive_global_on;
+                    label = r.getString(R.string.quick_settings_immersive_global_on_label);
+                    break;
+        }
+        mImmersiveFrontState.iconId = iconId;
+        mImmersiveFrontState.label = label;
+        mImmersiveFrontCallback.refreshView(mImmersiveFrontTile, mImmersiveFrontState);
     }
 
-    void refreshImmersiveTile() {
-        onImmersiveChanged();
+    private void onImmersiveBackChanged() {
+        Resources r = mContext.getResources();
+        int mode = getImmersiveMode();
+        int iconId = R.drawable.ic_qs_immersive_global_off;
+        String label = r.getString(R.string.quick_settings_immersive_mode_off_label);
+        switch (mode) {
+                case IMMERSIVE_MODE_FULL:
+                     iconId = R.drawable.ic_qs_immersive_off;
+                     label = r.getString(R.string.quick_settings_immersive_mode_full_label);
+                     break;
+                case IMMERSIVE_MODE_HIDE_ONLY_NAVBAR:
+                     iconId = R.drawable.ic_qs_immersive_status_bar_off;
+                     label = r.getString(R.string.quick_settings_immersive_mode_no_status_bar_label);
+                     break;
+                case IMMERSIVE_MODE_HIDE_ONLY_STATUSBAR:
+                     iconId = R.drawable.ic_qs_immersive_navigation_bar_off;
+                     label = r.getString(R.string.quick_settings_immersive_mode_no_navigation_bar_label);
+                     break;
+        }
+        mImmersiveBackState.iconId = iconId;
+        mImmersiveBackState.label = label;
+        mImmersiveBackCallback.refreshView(mImmersiveBackTile, mImmersiveBackState);
+    }
+
+    void refreshImmersiveFrontTile() {
+        onImmersiveFrontChanged();
+    }
+
+    void refreshImmersiveBackTile() {
+        onImmersiveBackChanged();
+    }
+
+    private int getImmersiveMode() {
+        return Settings.System.getInt(mContext.getContentResolver(),
+                Settings.System.IMMERSIVE_MODE, 0);
+    }
+
+    private void setImmersiveMode(int style) {
+        Settings.System.putInt(mContext.getContentResolver(),
+                Settings.System.IMMERSIVE_MODE, style);
+        if (style != 0) {
+            setImmersiveLastActiveState(style);
+        }
+    }
+
+    private int getImmersiveLastActiveState() {
+        return Settings.System.getInt(mContext.getContentResolver(),
+                Settings.System.IMMERSIVE_LAST_ACTIVE_STATE, immersiveModeLastState);
+    }
+
+    private void setImmersiveLastActiveState(int style) {
+        Settings.System.putInt(mContext.getContentResolver(),
+                Settings.System.IMMERSIVE_LAST_ACTIVE_STATE, style);
+    }
+
+    private void switchImmersiveFront() {
+        int mode = getImmersiveMode();
+        immersiveModeLastState = getImmersiveLastActiveState();
+        switch (mode) {
+               case IMMERSIVE_MODE_OFF:
+                    setImmersiveMode(immersiveModeLastState);
+                    break;
+               case IMMERSIVE_MODE_FULL:
+               case IMMERSIVE_MODE_HIDE_ONLY_NAVBAR:
+               case IMMERSIVE_MODE_HIDE_ONLY_STATUSBAR:
+                    setImmersiveMode(IMMERSIVE_MODE_OFF);
+                    break;
+        }
+    }
+
+    private void switchImmersiveBack() {
+        int mode = getImmersiveMode();
+        switch (mode) {
+                case IMMERSIVE_MODE_FULL:
+                     setImmersiveMode(IMMERSIVE_MODE_HIDE_ONLY_NAVBAR);
+                     break;
+                case IMMERSIVE_MODE_HIDE_ONLY_NAVBAR:
+                     setImmersiveMode(IMMERSIVE_MODE_HIDE_ONLY_STATUSBAR);
+                     break;
+                case IMMERSIVE_MODE_HIDE_ONLY_STATUSBAR:
+                     collapsePanels();
+                     setImmersiveMode(IMMERSIVE_MODE_FULL);
+                     break;
+        }
     }
 
     // QuietHour

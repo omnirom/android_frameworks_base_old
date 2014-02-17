@@ -26,6 +26,7 @@ import android.app.PendingIntent;
 import android.app.TaskStackBuilder;
 import android.content.ActivityNotFoundException;
 import android.content.BroadcastReceiver;
+import android.content.ContentResolver;
 import android.content.Context;
 import android.content.Intent;
 import android.content.IntentFilter;
@@ -165,6 +166,7 @@ public abstract class BaseStatusBar extends SystemUI implements
     protected Display mDisplay;
 
     private boolean mDeviceProvisioned = false;
+    protected int mImmersiveModeStyle;
 
     private RecentsComponent mRecents;
 
@@ -191,6 +193,32 @@ public abstract class BaseStatusBar extends SystemUI implements
             }
         }
     };
+
+    private class GlobalsObserver extends ContentObserver {
+        public GlobalsObserver(Handler handler) {
+            super(handler);
+        }
+
+        public void observe() {
+            final ContentResolver resolver = mContext.getContentResolver();
+            resolver.registerContentObserver(Settings.System.getUriFor(
+                    Settings.System.IMMERSIVE_MODE), false, this);
+            update();
+        }
+
+        @Override
+        public void onChange(boolean selfChange) {
+            update();
+        }
+
+        private void update() {
+            final ContentResolver resolver = mContext.getContentResolver();
+            mImmersiveModeStyle = Settings.System.getIntForUser(mContext.getContentResolver(),
+                        Settings.System.IMMERSIVE_MODE, 0, UserHandle.USER_CURRENT);
+        }
+    };
+
+    private GlobalsObserver mGlobalsObserver = new GlobalsObserver(mHandler);
 
     private RemoteViews.OnClickHandler mOnClickHandler = new RemoteViews.OnClickHandler() {
         @Override
@@ -257,6 +285,8 @@ public abstract class BaseStatusBar extends SystemUI implements
         mContext.getContentResolver().registerContentObserver(
                 Settings.Global.getUriFor(Settings.Global.DEVICE_PROVISIONED), true,
                 mSettingsObserver);
+
+        mGlobalsObserver.observe();
 
         mBarService = IStatusBarService.Stub.asInterface(
                 ServiceManager.getService(Context.STATUS_BAR_SERVICE));
@@ -431,7 +461,7 @@ public abstract class BaseStatusBar extends SystemUI implements
                         mNotificationBlamePopup.getMenu());
 
                 MenuItem hideIconCheck = mNotificationBlamePopup.getMenu().findItem(R.id.notification_hide_icon_packages);
-                if(hideIconCheck != null) {
+                if (hideIconCheck != null) {
                     hideIconCheck.setChecked(isIconHiddenByUser(packageNameF));
                     if (packageNameF.equals("android")) {
                         // cannot set it, no one likes a liar 
@@ -596,7 +626,7 @@ public abstract class BaseStatusBar extends SystemUI implements
             mContext.sendBroadcastAsUser(showIntent, UserHandle.CURRENT);
         } else {
             if (mRecents != null) {
-                mRecents.toggleRecents(mDisplay, mLayoutDirection, getStatusBarView());
+                mRecents.toggleRecents(mDisplay, mLayoutDirection, getStatusBarView(), mImmersiveModeStyle);
             }
         }
     }
@@ -934,6 +964,7 @@ public abstract class BaseStatusBar extends SystemUI implements
         }
         updateExpansionStates();
         updateNotificationIcons();
+        updateStatusBarVisibility();
     }
 
     private void addNotificationViews(IBinder key, StatusBarNotification notification) {
@@ -959,6 +990,23 @@ public abstract class BaseStatusBar extends SystemUI implements
             } else {
                 if (DEBUG) Log.d(TAG, "ignoring notification being held by user at " + i);
             }
+        }
+    }
+
+    protected boolean immersiveModeHidesStatusBar() {
+        return mImmersiveModeStyle == 1 || mImmersiveModeStyle == 3;
+    }
+
+    protected void updateStatusBarVisibility() {
+        boolean shouldShowStatusbar = (mNotificationData.size() != 0)
+                          && mNotificationData.hasClearableItems();
+        if (immersiveModeHidesStatusBar()) {
+            Settings.System.putInt(mContext.getContentResolver(),
+                    Settings.System.STATUSBAR_NOTIFICATION_ACTIVITY,
+                    shouldShowStatusbar ? 1 : 0);
+        } else {
+            Settings.System.putInt(mContext.getContentResolver(),
+                    Settings.System.STATUSBAR_NOTIFICATION_ACTIVITY, 0);
         }
     }
 

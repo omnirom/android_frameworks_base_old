@@ -31,6 +31,7 @@ public class QuickSettingsFlipTile extends QuickSettingsTileView {
     private final QuickSettingsBasicTile mFront;
     private final QuickSettingsBasicBackTile mBack;
     private final QuickSettingsTileFlip3d mFlip3d;
+    private boolean isSupportFlip = true;
 
     public QuickSettingsFlipTile(Context context) {
         this(context, null);
@@ -67,7 +68,7 @@ public class QuickSettingsFlipTile extends QuickSettingsTileView {
 
     @Override
     public boolean dispatchTouchEvent(MotionEvent e) {
-        if (!isEditModeEnabled()) {
+        if (!isEditModeEnabled() && isSupportFlip) {
             return mFlip3d.onTouch(this, e);
         }
         return super.dispatchTouchEvent(e);
@@ -80,6 +81,10 @@ public class QuickSettingsFlipTile extends QuickSettingsTileView {
         } else {
             return super.onInterceptTouchEvent(ev);
         }
+    }
+
+    public void setSupportFlip(boolean enabled) {
+        isSupportFlip = enabled;
     }
 
     public void setFrontImageResource(int id) {

@@ -2996,9 +2996,22 @@ public final class Settings {
          * Immersive mode global actions switch
          * 0 = no
          * 1 = yes
+         * 2 = hide navigation bar
+         * 3 = hide status bar
          * @hide
          */
         public static final String IMMERSIVE_MODE = "immersive_mode";
+
+        /*
+         * return value last immersive mode
+         * @hide
+         */
+        public static final String IMMERSIVE_LAST_ACTIVE_STATE = "immersive_last_active_state";
+
+        /**
+         * @hide
+         */
+        public static final String STATUSBAR_NOTIFICATION_ACTIVITY = "statusbar_notification_activity";
 
         /**
          * Show when WiFi or data mobile is sending/receiving data
