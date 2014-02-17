@@ -2912,6 +2912,36 @@ public final class Settings {
         public static final String STATUS_BAR_BRIGHTNESS_CONTROL = "status_bar_brightness_control";
 
         /**
+        /**
+         * Quick settings tiles to show on status bar
+         * @hide
+         */
+        public static final String QUICK_SETTINGS_TILES = "quick_settings_tiles";
+
+        /**
+         * Quick settings ribbon tiles to show on status bar
+         * @hide
+         */
+        public static final String QUICK_SETTINGS_RIBBON_TILES = "quick_settings_ribbon_tiles";
+
+        /**
+         * Quick settings tiles linked
+         * @hide
+         */
+        public static final String QUICK_SETTINGS_LINKED_TILES = "quick_settings_linked_tiles";
+
+        /**
+         * Quick settings tiles dynamic row
+         * @hide
+         */
+        public static final String QUICK_SETTINGS_TILES_ROW = "quick_settings_tiles_row";
+
+        /**
+         * Quick settings tiles to show on status bar
+         * @hide
+         */
+        public static final String QUICK_SETTINGS_RIBBON_ENABLED = "quick_settings_ribbon_enabled";
+
          * Whether or not to launch default music player when headset is connected
          * @hide
          */

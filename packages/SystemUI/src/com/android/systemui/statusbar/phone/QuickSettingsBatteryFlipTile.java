@@ -68,7 +68,7 @@ public class QuickSettingsBatteryFlipTile extends QuickSettingsTileView {
 
     @Override
     public boolean dispatchTouchEvent(MotionEvent e) {
-        if (!isEditModeEnabled()) {
+        if (!isEditModeEnabled() && !isRibbonMode()) {
             return mFlip3d.onTouch(this, e);
         }
         return super.dispatchTouchEvent(e);
@@ -109,6 +109,14 @@ public class QuickSettingsBatteryFlipTile extends QuickSettingsTileView {
     public void callOnColumnsChange() {
         mBack.callOnColumnsChange();
         mFront.callOnColumnsChange();
+    }
+
+    @Override
+    public void switchToRibbonMode() {
+        mBack.switchToRibbonMode();
+        mFront.switchToRibbonMode();
+        mFlip3d.switchToRibbonMode();
+        super.switchToRibbonMode();
     }
 
     public void setFrontOnClickListener(View.OnClickListener listener) {

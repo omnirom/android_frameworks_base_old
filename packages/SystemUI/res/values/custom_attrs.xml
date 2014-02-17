@@ -29,4 +29,8 @@
         <attr name="is_oval" format="boolean" />
         <attr name="android:scaleType" />
     </declare-styleable>
+
+    <declare-styleable name="QuickSettingsContainer">
+        <attr name="singleRow" format="boolean" />
+    </declare-styleable>
 </resources>

@@ -69,6 +69,7 @@ class QuickSettingsTileView extends FrameLayout {
     private boolean mTemporary;
     private boolean mEditMode;
     private boolean mVisible;
+    private boolean mRibbonMode = false;
 
     public QuickSettingsTileView(Context context, AttributeSet attrs) {
         super(context, attrs);
@@ -129,6 +130,17 @@ class QuickSettingsTileView extends FrameLayout {
 
     public void setTextSizes(int size) {
         // this will call changing text size on child views
+    }
+
+    public boolean isRibbonMode() {
+        return mRibbonMode;
+    }
+
+    public void switchToRibbonMode() {
+        mRibbonMode = true;
+        if (mTouchListener != null) {
+            mTouchListener.switchToRibbonMode();
+        }
     }
 
     public void setContent(int layoutId, LayoutInflater inflater) {
@@ -284,13 +296,17 @@ class QuickSettingsTileView extends FrameLayout {
 
     @Override
     protected void onMeasure(int widthMeasureSpec, int heightMeasureSpec) {
-        callOnColumnsChange();
+        if (!mRibbonMode) {
+            callOnColumnsChange();
+        }
         super.onMeasure(widthMeasureSpec, heightMeasureSpec);
     }
 
     @Override
     protected void onLayout(boolean changed, int left, int top, int right, int bottom) {
-        callOnColumnsChange();
+        if (!mRibbonMode) {
+            callOnColumnsChange();
+        }
         super.onLayout(changed, left, top, right, bottom);
     }
 
