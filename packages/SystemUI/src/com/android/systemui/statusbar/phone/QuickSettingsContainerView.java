@@ -23,6 +23,7 @@ import android.content.ContentResolver;
 import android.content.Context;
 import android.content.res.Configuration;
 import android.content.res.Resources;
+import android.content.res.TypedArray;
 import android.provider.Settings;
 import android.text.TextUtils;
 import android.util.AttributeSet;
@@ -47,6 +48,8 @@ public class QuickSettingsContainerView extends FrameLayout {
     // The gap between tiles in the QuickSettings grid
     private float mCellGap;
 
+    private boolean mSingleRow;
+
     private Context mContext;
     private Resources mResources;
     private int mCurrOrientation;
@@ -68,7 +71,11 @@ public class QuickSettingsContainerView extends FrameLayout {
         super(context, attrs);
 
         mContext = context;
-        mResources = getContext().getResources();
+        mResources = context.getResources();
+
+        TypedArray a = context.obtainStyledAttributes(attrs, R.styleable.QuickSettingsContainer, 0, 0);
+        mSingleRow = a.getBoolean(R.styleable.QuickSettingsContainer_singleRow, false);
+        a.recycle();
 
         updateResources();
     }
@@ -85,12 +92,28 @@ public class QuickSettingsContainerView extends FrameLayout {
         mCellGap = mResources.getDimension(R.dimen.quick_settings_cell_gap);
         mNumColumns = mResources.getInteger(R.integer.quick_settings_num_columns);
         mNumFinalColumns = mResources.getInteger(R.integer.quick_settings_numfinal_columns);
-        mNumFinalCol = shouldUpdateColumns() ? mNumFinalColumns : mNumColumns;
+        if (totalColumns() != 0 && !isDynamicEnabled()) {
+            mNumFinalCol = totalColumns();
+        } else {
+            mNumFinalCol = shouldUpdateColumns() ? mNumFinalColumns : mNumColumns;
+        }
         updateSpan();
         requestLayout();
     }
 
+    public void updateRibbonMode() {
+        for(int i = 0; i < getChildCount(); i++) {
+            View v = getChildAt(i);
+            if (v instanceof QuickSettingsTileView) {
+                QuickSettingsTileView qs = (QuickSettingsTileView) v;
+                qs.switchToRibbonMode();
+            }
+        }
+    }
+
     public void updateSpan() {
+        if (mSingleRow) return;
+
         for(int i = 0; i < getChildCount(); i++) {
             View v = getChildAt(i);
             if (v instanceof QuickSettingsTileView) {
@@ -109,8 +132,16 @@ public class QuickSettingsContainerView extends FrameLayout {
                 (mNumFinalCol - 1) * mCellGap);
         float cellWidth = (float) Math.ceil(((float) availableWidth) / mNumFinalCol);
 
-        int cellHeight = (int) mResources.getDimension(R.dimen.quick_settings_cell_height);
+        int cellHeight = 0;
         float cellGap = mCellGap;
+
+        if (mSingleRow) {
+            cellWidth = MeasureSpec.getSize(heightMeasureSpec);
+            cellHeight = (int) cellWidth;
+            cellGap /= 2;
+        } else {
+            cellHeight = (int) mResources.getDimension(R.dimen.quick_settings_cell_height);
+        }
 
         // Update each of the children's widths accordingly to the cell width
         int N = getChildCount();
@@ -140,7 +171,12 @@ public class QuickSettingsContainerView extends FrameLayout {
         int numRows = (int) Math.ceil((float) cursor / mNumFinalCol);
         int newHeight = (int) ((numRows * cellHeight) + ((numRows - 1) * cellGap)) +
                 getPaddingTop() + getPaddingBottom();
-        setMeasuredDimension(width, newHeight);
+        if (mSingleRow) {
+            int totalHeight = cellHeight + getPaddingTop() + getPaddingBottom();
+            setMeasuredDimension(totalWidth, totalHeight);
+        } else {
+            setMeasuredDimension(width, newHeight);
+        }
     }
 
     @Override
@@ -153,6 +189,10 @@ public class QuickSettingsContainerView extends FrameLayout {
         int cursor = 0;
 
         float cellGap = mCellGap;
+
+        if (mSingleRow) {
+            cellGap /= 2;
+        }
 
         for (int i = 0; i < N; ++i) {
             QuickSettingsTileView child = (QuickSettingsTileView) getChildAt(i);
@@ -167,7 +207,7 @@ public class QuickSettingsContainerView extends FrameLayout {
                 int row = (int) (cursor / mNumFinalCol);
 
                 // Push the item to the next row if it can't fit on this one
-                if ((col + colSpan) > mNumFinalCol) {
+                if ((col + colSpan) > mNumFinalCol && !mSingleRow) {
                     x = getPaddingStart();
                     y += childHeight + cellGap;
                     row++;
@@ -185,9 +225,9 @@ public class QuickSettingsContainerView extends FrameLayout {
                 // Offset the position by the cell gap or reset the position and cursor when we
                 // reach the end of the row
                 cursor += child.getColumnSpan();
-                if (cursor < (((row + 1) * mNumFinalCol))) {
+                if (cursor < (((row + 1) * mNumFinalCol)) || mSingleRow) {
                     x += childWidth + cellGap;
-                } else {
+                } else if (!mSingleRow) {
                     x = getPaddingStart();
                     y += childHeight + cellGap;
                 }
@@ -222,6 +262,15 @@ public class QuickSettingsContainerView extends FrameLayout {
         return (isEnabled == 1);
     }
 
+    private int totalColumns() {
+        int totalCol = Settings.System.getInt(mContext.getContentResolver(),
+                Settings.System.QUICK_SETTINGS_TILES_ROW, 1);
+        if (totalCol == 1) {
+            return 0;
+        }
+        return totalCol;
+    }
+
     private boolean shouldUpdateColumns() {
         return (getTilesSize() > 12) && !isLandscape() && isDynamicEnabled();
     }
@@ -246,6 +295,8 @@ public class QuickSettingsContainerView extends FrameLayout {
     }
 
     public void setEditModeEnabled(boolean enabled) {
+        if (mSingleRow) return;
+
         mEditModeEnabled = enabled;
         mEditModeChangedListener.onEditModeChanged(enabled);
         ArrayList<String> tiles = new ArrayList<String>();
