@@ -106,6 +106,14 @@ public class QuickSettingsBatteryFlipTile extends QuickSettingsTileView {
         super.setTextSizes(size);
     }
 
+    @Override
+    public void switchToRibbonMode() {
+        mBack.switchToRibbonMode();
+        mFront.switchToRibbonMode();
+        mFlip3d.switchToRibbonMode();
+        super.switchToRibbonMode();
+    }
+
     public void setFrontOnClickListener(View.OnClickListener listener) {
         mFront.setOnClickListener(listener);
     }
