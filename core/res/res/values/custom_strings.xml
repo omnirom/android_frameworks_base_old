@@ -51,4 +51,6 @@
     <!-- status message in phone options dialog for when mobile data is off -->
     <string name="global_actions_mobile_data_off_status">Mobile data is OFF</string>
 
+    <!-- Immersive mode confirmation: Pick confirmation window from bottom when status bar is visible -->
+    <string name="immersive_mode_confirmation_bottom">Swipe up from the bottom to exit full screen.</string>
 </resources> 
