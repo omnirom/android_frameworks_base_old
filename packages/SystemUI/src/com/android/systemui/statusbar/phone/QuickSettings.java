@@ -717,7 +717,10 @@ class QuickSettings {
                   mBatteryTile.setBackOnClickListener(new View.OnClickListener() {
                         @Override
                         public void onClick(View v) {
-                            startSettingsActivity(Intent.ACTION_POWER_USAGE_SUMMARY);
+                           Intent intent = new Intent(Intent.ACTION_MAIN);
+                           intent.setClassName("com.android.settings", "com.android.settings.BatteryInfo");
+                           intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
+                           startSettingsActivity(intent);
                         }
                   });
                   mModel.addBackBatteryTile(mBatteryTile.getBack(), new QuickSettingsModel.RefreshCallback() {
@@ -733,24 +736,31 @@ class QuickSettings {
                   if (addMissing) mBatteryTile.setVisibility(View.GONE);
                } else if (Tile.IMMERSIVE.toString().equals(tile.toString())) { // Immersive tile
                   // Immersive mode
-                  final QuickSettingsBasicTile immersiveTile
-                       = new QuickSettingsBasicTile(mContext);
+                  final QuickSettingsFlipTile immersiveTile
+                       = new QuickSettingsFlipTile(mContext);
 
                   immersiveTile.setTileId(Tile.IMMERSIVE);
-                  immersiveTile.setImageResource(R.drawable.ic_qs_immersive_off);
-                  immersiveTile.setTextResource(R.string.quick_settings_immersive_mode_off_label);
-                  immersiveTile.setOnClickListener(new View.OnClickListener() {
-                       @Override
-                       public void onClick(View v) {
-                           collapsePanels();
-                           boolean checkModeOn = Settings.System.getInt(mContext
-                                  .getContentResolver(), Settings.System.IMMERSIVE_MODE, 0) == 1;
-                           Settings.System.putInt(mContext.getContentResolver(),
-                                 Settings.System.IMMERSIVE_MODE, checkModeOn ? 0 : 1);
-                      }
+                  immersiveTile.setSupportFlip(DeviceUtils.deviceSupportNavigationBar(mContext));
+                  immersiveTile.setFrontImageResource(R.drawable.ic_qs_immersive_global_off);
+                  immersiveTile.setFrontText(mContext.getString(R.string.quick_settings_immersive_global_off_label));
+                  mModel.addImmersiveFrontTile(immersiveTile.getFront(), new QuickSettingsModel.RefreshCallback() {
+                        @Override
+                        public void refreshView(QuickSettingsTileView unused, State state) {
+                            immersiveTile.setFrontImageResource(state.iconId);
+                            immersiveTile.setFrontText(state.label);
+
+                        }
                   });
-                  mModel.addImmersiveTile(immersiveTile,
-                        new QuickSettingsModel.BasicRefreshCallback(immersiveTile));
+                  immersiveTile.setBackImageResource(R.drawable.ic_qs_immersive_off);
+                  immersiveTile.setBackLabel(mContext.getString(R.string.quick_settings_volume_status));
+                  mModel.addImmersiveBackTile(immersiveTile.getBack(), new QuickSettingsModel.RefreshCallback() {
+                        @Override
+                        public void refreshView(QuickSettingsTileView unused, State state) {
+                            immersiveTile.setBackImageResource(state.iconId);
+                            immersiveTile.setBackFunction(state.label);
+
+                        }
+                  });
                   parent.addView(immersiveTile);
                   if (addMissing) immersiveTile.setVisibility(View.GONE);
                } else if (Tile.AIRPLANE.toString().equals(tile.toString())) { // airplane tile
