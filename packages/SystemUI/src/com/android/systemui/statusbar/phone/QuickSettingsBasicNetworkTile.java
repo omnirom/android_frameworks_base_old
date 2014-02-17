@@ -106,6 +106,23 @@ public class QuickSettingsBasicNetworkTile extends QuickSettingsTileView {
         mTextView.invalidate();
     }
 
+    @Override
+    public void switchToRibbonMode() {
+        TextView tv = (TextView) findViewById(R.id.rssi_textview);
+        if (tv != null) {
+            tv.setVisibility(View.GONE);
+        }
+        View image = findViewById(R.id.rssi_images);
+        if (image != null) {
+            MarginLayoutParams params = (MarginLayoutParams) image.getLayoutParams();
+            int margin = mContext.getResources().getDimensionPixelSize(
+                    R.dimen.qs_tile_ribbon_icon_margin);
+            params.topMargin = params.bottomMargin = margin;
+            image.setLayoutParams(params);
+        }
+        super.switchToRibbonMode();
+    }
+
     public void setTextResource(int resId) {
         mTextView.setText(resId);
     }

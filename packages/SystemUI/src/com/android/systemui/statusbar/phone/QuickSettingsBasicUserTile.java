@@ -97,6 +97,15 @@ public class QuickSettingsBasicUserTile extends QuickSettingsTileView {
         mTextView.setBackgroundResource(R.drawable.qs_user_background);
     }
 
+    @Override
+    public void switchToRibbonMode() {
+        TextView tv = (TextView) findViewById(R.id.user_textview);
+        if (tv != null) {
+            tv.setVisibility(View.GONE);
+        }
+        super.switchToRibbonMode();
+    }
+
     public void setTextResource(int resId) {
         mTextView.setText(resId);
     }
