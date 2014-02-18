@@ -1850,4 +1850,7 @@
   <java-symbol type="bool" name="config_samsung_stk" />
   <java-symbol type="bool" name="config_smsSamsungCdmaAlternateMessageIDEncoding" />
 
+  <java-symbol type="bool" name="config_hasRotationLockSwitch" />
+  <java-symbol type="string" name="toast_rotation_unlocked" />
+  <java-symbol type="string" name="toast_rotation_locked" />
 </resources>

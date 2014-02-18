@@ -122,7 +122,7 @@ public class CamcorderProfile
 
     // Start and end of quality list
     private static final int QUALITY_LIST_START = QUALITY_LOW;
-    private static final int QUALITY_LIST_END = QUALITY_4kDCI;
+    private static final int QUALITY_LIST_END = QUALITY_WQVGA;
 
     /**
      * Time lapse quality level corresponding to the lowest available resolution.

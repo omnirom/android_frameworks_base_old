@@ -1375,6 +1375,7 @@
    <!-- set to false if we dont need to consider data
          service state to display signal strength bars -->
     <bool name="config_combined_signal">true</bool>
+    <bool name="config_hasRotationLockSwitch">false</bool>
 
     <!-- The list of components which should be automatically disabled. -->
     <string-array name="config_disabledComponents" translatable="false">
