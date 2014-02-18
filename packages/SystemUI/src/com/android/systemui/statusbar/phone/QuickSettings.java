@@ -715,9 +715,9 @@ class QuickSettings {
                        public void onClick(View v) {
                            collapsePanels();
                            boolean checkModeOn = Settings.System.getInt(mContext
-                                  .getContentResolver(), Settings.System.IMMERSIVE_MODE, 0) == 1;
+                                  .getContentResolver(), Settings.System.EXPANDED_DESKTOP_STATE, 0) == 1;
                            Settings.System.putInt(mContext.getContentResolver(),
-                                 Settings.System.IMMERSIVE_MODE, checkModeOn ? 0 : 1);
+                                 Settings.System.EXPANDED_DESKTOP_STATE, checkModeOn ? 0 : 1);
                       }
                   });
                   mModel.addImmersiveTile(immersiveTile,
