@@ -30,6 +30,8 @@ import com.android.systemui.statusbar.phone.NavbarEditor;
 import com.android.systemui.statusbar.phone.NavbarEditor.ButtonInfo;
 import com.android.systemui.statusbar.policy.KeyButtonView;
 
+import java.util.List;
+
 public final class NavigationBarTransitions extends BarTransitions {
 
     private static final float KEYGUARD_QUIESCENT_ALPHA = 0.5f;
@@ -87,6 +89,30 @@ public final class NavigationBarTransitions extends BarTransitions {
         setKeyButtonViewQuiescentAlpha(mView.getSearchLight(), KEYGUARD_QUIESCENT_ALPHA, animate);
         setKeyButtonViewQuiescentAlpha(mView.getCameraButton(), KEYGUARD_QUIESCENT_ALPHA, animate);
         applyBackButtonQuiescentAlpha(mode, animate);
+
+        final boolean isOpaque = mode == MODE_OPAQUE || mode == MODE_LIGHTS_OUT;
+        final View back = mView.getBackButton();
+        final View home = mView.getHomeButton();
+        final View recent = mView.getRecentsButton();
+        if (back != null) {
+            setKeyButtonViewQuiescentAlpha(back, alpha, animate);
+        }
+        if (home != null) {
+            setKeyButtonViewQuiescentAlpha(home, alpha, animate);
+        }
+        if (recent != null) {
+            setKeyButtonViewQuiescentAlpha(recent, alpha, animate);
+        }
+        List<Integer> buttonIdList = mView.getButtonIdList();
+        for (int i = 0; i < buttonIdList.size(); i++) {
+            final View customButton = mView.getCustomButton(buttonIdList.get(i));
+            if (customButton != null) {
+                setKeyButtonViewQuiescentAlpha(customButton, alpha, animate);
+            }
+        }
+        setKeyButtonViewQuiescentAlpha(mView.getLeftMenuButton(), alpha, animate);
+        setKeyButtonViewQuiescentAlpha(mView.getRightMenuButton(), alpha, animate);
+        setKeyButtonViewQuiescentAlpha(mView.getCameraButton(), alpha, animate);
 
         // apply to lights out
         applyLightsOut(mode == MODE_LIGHTS_OUT, animate, force);

@@ -92,6 +92,13 @@ public class SlimActions {
                         } catch (RemoteException ex) {
                         }
                     }
+
+            if (!action.equals(ButtonsConstants.ACTION_QS)
+                    && !action.equals(ButtonsConstants.ACTION_NOTIFICATIONS)) {
+                try {
+                    barService.collapsePanels();
+                } catch (RemoteException ex) {
+                }
             }
 
             // process the actions
@@ -172,7 +179,10 @@ public class SlimActions {
                         Settings.System.EXPANDED_DESKTOP_STATE,
                         expandDesktopModeOn ? 0 : 1, UserHandle.USER_CURRENT);
                 return;
- /*           } else if (action.equals(ButtonsConstants.ACTION_KILL)) {
+            }
+                context.sendBroadcast(new Intent("android.settings.SHOW_INPUT_METHOD_PICKER"));
+                return;
+            } else if (action.equals(ButtonsConstants.ACTION_KILL)) {
                 if (isKeyguardShowing) {
                     return;
                 }
@@ -223,7 +233,7 @@ public class SlimActions {
                 } catch (RemoteException e) {
                 }
                 return;
- */           } else if (action.equals(ButtonsConstants.ACTION_ASSIST)) {
+            } else if (action.equals(ButtonsConstants.ACTION_ASSIST)) {
                 Intent intent = ((SearchManager) context.getSystemService(Context.SEARCH_SERVICE))
                   .getAssistIntent(context, true, UserHandle.USER_CURRENT);
                 if (intent == null) {

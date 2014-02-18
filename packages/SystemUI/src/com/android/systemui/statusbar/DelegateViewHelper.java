@@ -1,18 +1,18 @@
 /*
-* Copyright (C) 2010 The Android Open Source Project
-*
-* Licensed under the Apache License, Version 2.0 (the "License");
-* you may not use this file except in compliance with the License.
-* You may obtain a copy of the License at
-*
-* http://www.apache.org/licenses/LICENSE-2.0
-*
-* Unless required by applicable law or agreed to in writing, software
-* distributed under the License is distributed on an "AS IS" BASIS,
-* WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
-* See the License for the specific language governing permissions and
-* limitations under the License.
-*/
+ * Copyright (C) 2010 The Android Open Source Project
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *      http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
 
 package com.android.systemui.statusbar;
 
@@ -22,6 +22,8 @@ import android.view.MotionEvent;
 import android.view.View;
 
 import com.android.systemui.R;
+
+import java.util.List;
 
 public class DelegateViewHelper {
     private View mDelegateView;
@@ -113,17 +115,17 @@ public class DelegateViewHelper {
     }
 
     /**
-* Selects the initial touch region based on a list of views. This is meant to be called by
-* a container widget on children over which the initial touch should be detected. Note this
-* will compute a minimum bound that contains all specified views.
-*
-* @param views
-*/
-    public void setInitialTouchRegion(View ... views) {
+     * Selects the initial touch region based on a list of views.  This is meant to be called by
+     * a container widget on children over which the initial touch should be detected.  Note this
+     * will compute a minimum bound that contains all specified views.
+     *
+     * @param views
+     */
+    public void setInitialTouchRegion(List<View> views) {
         RectF bounds = new RectF();
         int p[] = new int[2];
-        for (int i = 0; i < views.length; i++) {
-            View view = views[i];
+        for (int i = 0; i < views.size(); i++) {
+            View view = views.get(i);
             if (view == null) continue;
             view.getLocationOnScreen(p);
             if (i == 0) {
@@ -136,9 +138,9 @@ public class DelegateViewHelper {
     }
 
     /**
-* When rotation is set to NO_SENSOR, then this allows swapping x/y for gesture detection
-* @param swap
-*/
+     * When rotation is set to NO_SENSOR, then this allows swapping x/y for gesture detection
+     * @param swap
+     */
     public void setSwapXY(boolean swap) {
         mSwapXY = swap;
     }

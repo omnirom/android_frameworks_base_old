@@ -517,5 +517,6 @@ public class IWindowManagerImpl implements IWindowManager {
     /* @hide */
     @Override
     public int getCurrentNavigationBarSize() {
+
     }
 }

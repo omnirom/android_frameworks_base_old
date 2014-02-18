@@ -147,6 +147,10 @@ if (mStoredTargets == null) {
 
         }
 
+        public void onTargetChange(View v, int target) {
+
+        }
+
         public void onFinishFinalAnimation() {
 
         }
