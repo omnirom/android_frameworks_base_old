@@ -17,93 +17,93 @@
 -->
 <resources xmlns:xliff="urn:oasis:names:tc:xliff:document:1.2">
     <!-- Quick Settings Wi-Fi Back Tile Tethering label -->
-    <string name="quick_settings_wifi_tethering_label">Tethering</string>
+    <string name="quick_settings_wifi_tethering_label">Раздача Wi-Fi</string>
 
     <!-- Quick Settings Bluetooth Not Discoverable label -->
-    <string name="quick_settings_bluetooth_not_discoverable_label">Not discoverable</string>
+    <string name="quick_settings_bluetooth_not_discoverable_label">Не распознано</string>
 
     <!-- Quick Settings Bluetooth Discoverable label -->
-    <string name="quick_settings_bluetooth_discoverable_label">Discoverable</string>
+    <string name="quick_settings_bluetooth_discoverable_label">Распознано</string>
 
     <!-- Quick Settings Bluetooth Not Connected -->
-    <string name="quick_settings_bluetooth_disabled">Disabled</string>
+    <string name="quick_settings_bluetooth_disabled">Отключено</string>
 
     <!-- Quick Settings Bluetooth Number of Paired Devices -->
-    <string name="quick_settings_bluetooth_number_paired"><xliff:g id="number">%d</xliff:g> Devices paired</string>
+    <string name="quick_settings_bluetooth_number_paired"><xliff:g id="number">%d</xliff:g> Сопряженные устройства</string>
 
     <!-- Screenrecord Notification Ticker -->
-    <string name="screenrecord_notif_ticker">Screen is being recorded</string>
+    <string name="screenrecord_notif_ticker">Ведется запись экрана</string>
 
     <!-- Screenrecord notification title -->
-    <string name="screenrecord_notif_title">Recording screen</string>
+    <string name="screenrecord_notif_title">Запись экрана</string>
 
     <!-- Screenrecord notification action: Stop -->
-    <string name="screenrecord_notif_stop">Stop</string>
+    <string name="screenrecord_notif_stop">Остановить</string>
 
     <!-- Screenrecord notification action: Toggle pointer -->
-    <string name="screenrecord_notif_pointer">Toggle pointer</string>
+    <string name="screenrecord_notif_pointer">Указатель переключателей</string>
 
     <!-- Screen record notification error title -->
-    <string name="screenrecord_notif_error">Unable to record screen</string>
+    <string name="screenrecord_notif_error">Невозможно выполнить запись экрана</string>
 
     <!-- QS Battery Tile -->
-    <string name="quick_settings_battery_charging">Charging</string>
-    <string name="quick_settings_battery_discharging">Discharging</string>
+    <string name="quick_settings_battery_charging">Заряжается</string>
+    <string name="quick_settings_battery_discharging">Разряжается</string>
 
     <!-- QuickSettings: Immersive mode [CHAR LIMIT=NONE] -->
-    <string name="quick_settings_immersive_mode_label">Immersive</string>
+    <string name="quick_settings_immersive_mode_label">Полноэкранный режим включен</string>
     <!-- QuickSettings: Immersive mode (Off) [CHAR LIMIT=NONE] -->
-    <string name="quick_settings_immersive_mode_off_label">Immersive Off</string>
+    <string name="quick_settings_immersive_mode_off_label">Полноэкранный режим отключен</string>
 
     <string name="network_4G">4G/LTE</string>
-    <string name="network_3G_only">3G Only</string>
-    <string name="network_3G_auto">2G/3G Auto</string>
-    <string name="network_3G">2G/3G Pref</string>
-    <string name="network_2G">2G Only</string>
+    <string name="network_3G_only">Только 3G</string>
+    <string name="network_3G_auto">Автопереключение 2G/3G</string>
+    <string name="network_3G">Настройки 2G/3G</string>
+    <string name="network_2G">Только 2G</string>
 
-    <string name="quick_settings_sleep_label_back_15">15s</string>
-    <string name="quick_settings_sleep_label_back_30">30s</string>
-    <string name="quick_settings_sleep_label_back_60">60s</string>
-    <string name="quick_settings_sleep_label_back_120">2m</string>
-    <string name="quick_settings_sleep_label_back_300">5m</string>
-    <string name="quick_settings_sleep_label_back_600">10m</string>
-    <string name="quick_settings_sleep_label_back_1800">30m</string>
+    <string name="quick_settings_sleep_label_back_15">15 секунд</string>
+    <string name="quick_settings_sleep_label_back_30">30 секунд</string>
+    <string name="quick_settings_sleep_label_back_60">60 секунд</string>
+    <string name="quick_settings_sleep_label_back_120">2 минуты</string>
+    <string name="quick_settings_sleep_label_back_300">5 минут</string>
+    <string name="quick_settings_sleep_label_back_600">10 минут</string>
+    <string name="quick_settings_sleep_label_back_1800">30 минут</string>
     <string name="quick_settings_sleep_label_back_unknown">0000</string>
-    <string name="quick_settings_location_mode_high">High</string>
-    <string name="quick_settings_location_mode_battery">Battery</string>
-    <string name="quick_settings_location_mode_sensors">Device</string>
-    <string name="quick_settings_network_type">Status</string>
-    <string name="quick_settings_network_unknown">Unknown</string>
-    <string name="quick_settings_network_disable">\nNo internet</string>
-    <string name="quick_settings_quiethours_label">Quiet hours</string>
-    <string name="quick_settings_quiethours_off_label">Quiet hours off</string>
-    <string name="quick_settings_ringer_on">Sound on</string>
-    <string name="quick_settings_ringer_off">Sound off</string>
-    <string name="quick_settings_ringer_normal">Sound</string>
-    <string name="quick_settings_screen_sleep">Go to sleep</string>
-    <string name="quick_settings_sync">Sync</string>
-    <string name="quick_settings_sync_off">Sync off</string>
-    <string name="quick_settings_torch">Torch</string>
-    <string name="quick_settings_torch_off">Torch off</string>
-    <string name="quick_settings_vibration_on">Vibration on</string>
-    <string name="quick_settings_vibration_off">Vibration off</string>
-    <string name="quick_settings_volume">Volume</string>
-    <string name="quick_settings_volume_status">Status</string>
-    <string name="quick_settings_usb_tether_off_label">Disconnected</string>
-    <string name="quick_settings_usb_tether_connected_label">Tethering off</string>
-    <string name="quick_settings_usb_tether_on_label">Tethering</string>
+    <string name="quick_settings_location_mode_high">Высокий</string>
+    <string name="quick_settings_location_mode_battery">Батарея</string>
+    <string name="quick_settings_location_mode_sensors">Устройство</string>
+    <string name="quick_settings_network_type">Статус</string>
+    <string name="quick_settings_network_unknown">Неизвестно</string>
+    <string name="quick_settings_network_disable">Отсутствует подключение к Интернету</string>
+    <string name="quick_settings_quiethours_label">Тихие часы</string>
+    <string name="quick_settings_quiethours_off_label">Тихие часы отключены</string>
+    <string name="quick_settings_ringer_on">Звук включен</string>
+    <string name="quick_settings_ringer_off">Звук выключен</string>
+    <string name="quick_settings_ringer_normal">Звук</string>
+    <string name="quick_settings_screen_sleep">Уйти в режим сна</string>
+    <string name="quick_settings_sync">Синхронизация</string>
+    <string name="quick_settings_sync_off">Синхронизация отключена</string>
+    <string name="quick_settings_torch">Фонарик</string>
+    <string name="quick_settings_torch_off">Фонарик отключен</string>
+    <string name="quick_settings_vibration_on">Вибрация включена</string>
+    <string name="quick_settings_vibration_off">Вибрация выключена</string>
+    <string name="quick_settings_volume">Громкость</string>
+    <string name="quick_settings_volume_status">Статус</string>
+    <string name="quick_settings_usb_tether_off_label">Отключено</string>
+    <string name="quick_settings_usb_tether_connected_label">Раздача Wi-Fi отключена</string>
+    <string name="quick_settings_usb_tether_on_label">Раздача</string>
 
-    <string name="status_bar_notification_hide_icon_packages">Hide app\'s notification icon(s)</string>
+    <string name="status_bar_notification_hide_icon_packages">Спрятать иконку уведомления приложения</string>
 
     <!-- Dialog title for navigation bar button selection -->
     <string name="navbar_dialog_title">Choose action to assign</string>
-    <string name="navbar_home_button">Home button</string>
+    <string name="navbar_home_button">Кнопка "Домой"</string>
     <string name="navbar_recent_button">Recent button</string>
-    <string name="navbar_search_button">Search button</string>
-    <string name="navbar_back_button">Back button</string>
-    <string name="navbar_empty_button">Empty button</string>
-    <string name="navbar_menu_conditional_button">Menu (autoHide) button</string>
-    <string name="navbar_menu_always_button">Menu (alwaysShow) button</string>
-    <string name="navbar_menu_big_button">Menu button</string>
+    <string name="navbar_search_button">Кнопка поиска</string>
+    <string name="navbar_back_button">Кнопка "Назад"</string>
+    <string name="navbar_empty_button">Пустая кнопка</string>
+    <string name="navbar_menu_conditional_button">Кнопка автоскрытия Меню</string>
+    <string name="navbar_menu_always_button">Кнопка показывания меню</string>
+    <string name="navbar_menu_big_button">Кнопка "Меню"</string>
 
 </resources>
