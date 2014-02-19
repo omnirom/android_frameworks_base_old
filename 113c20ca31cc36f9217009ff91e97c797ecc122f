@@ -1,0 +1,21 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "8b77b57d_6af41fbb",
+        "filename": "core/java/android/preference/VolumePreference.java",
+        "patchSetId": 3
+      },
+      "lineNbr": 376,
+      "author": {
+        "id": 1000026
+      },
+      "writtenOn": "2014-02-19T13:10:30Z",
+      "side": 1,
+      "message": "dont think its was the intention of the creator to duplicate the code here.\nAll before is obsolete since its inside here which will be true by default",
+      "revId": "113c20ca31cc36f9217009ff91e97c797ecc122f",
+      "serverId": "56841c99-7c94-43d4-bf0b-cb4707e66d55",
+      "unresolved": false
+    }
+  ]
+}
