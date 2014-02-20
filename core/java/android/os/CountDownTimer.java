@@ -58,6 +58,11 @@ public abstract class CountDownTimer {
     private long mStopTimeInFuture;
 
     /**
+     * boolean representing if the timer was cancelled
+     */
+    private boolean mCancelled = false;
+
+    /**
      * @param millisInFuture The number of millis in the future from the call
      *   to {@link #start()} until the countdown is done and {@link #onFinish()}
      *   is called.
@@ -72,7 +77,8 @@ public abstract class CountDownTimer {
     /**
      * Cancel the countdown.
      */
-    public final void cancel() {
+    public synchronized final void cancel() {
+        mCancelled = true;
         mHandler.removeMessages(MSG);
     }
 
@@ -80,6 +86,7 @@ public abstract class CountDownTimer {
      * Start the countdown.
      */
     public synchronized final CountDownTimer start() {
+        mCancelled = false;
         if (mMillisInFuture <= 0) {
             onFinish();
             return this;
@@ -112,6 +119,10 @@ public abstract class CountDownTimer {
         public void handleMessage(Message msg) {
 
             synchronized (CountDownTimer.this) {
+                if (mCancelled) {
+                    return;
+                }
+
                 final long millisLeft = mStopTimeInFuture - SystemClock.elapsedRealtime();
 
                 if (millisLeft <= 0) {

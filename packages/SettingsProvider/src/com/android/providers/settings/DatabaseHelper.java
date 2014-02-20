@@ -1981,6 +1981,9 @@ public class DatabaseHelper extends SQLiteOpenHelper {
             // Set default tty mode
             loadSetting(stmt, Settings.System.TTY_MODE, 0);
 
+            // Set default noise suppression value
+            loadSetting(stmt, Settings.System.NOISE_SUPPRESSION, 0);
+
             loadIntegerSetting(stmt, Settings.System.SCREEN_BRIGHTNESS,
                     R.integer.def_screen_brightness);
 
@@ -2244,7 +2247,6 @@ public class DatabaseHelper extends SQLiteOpenHelper {
                     R.string.def_car_undock_sound);
             loadStringSetting(stmt, Settings.Global.WIRELESS_CHARGING_STARTED_SOUND,
                     R.string.def_wireless_charging_started_sound);
-
             loadIntegerSetting(stmt, Settings.Global.DOCK_AUDIO_MEDIA_ENABLED,
                     R.integer.def_dock_audio_media_enabled);
             loadBooleanSetting(stmt, Settings.Global.POWER_NOTIFICATIONS_ENABLED,
