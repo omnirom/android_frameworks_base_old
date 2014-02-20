@@ -36,6 +36,9 @@
     <color name="batterymeter_charge_color">#FFFFFFFF</color>
     <color name="batterymeter_bolt_color">#B2000000</color><!-- 70% black -->
     <color name="status_bar_clock_color">#FFFFFFFF</color>
+    <color name="batterymeter_percent_color">#FFFFFFFF</color>
+    <color name="batterymeter_percent_warn_color">#FFFF0000</color><!-- red -->
+    <color name="batterymeter_percent_critical_color">#FFFFFF00</color><!-- yellow -->
     <color name="qs_background_color">#FF161616</color>
     <color name="qs_background_pressed_color">#FF212121</color>
     <color name="ad_notification_background_color">#3fff</color>

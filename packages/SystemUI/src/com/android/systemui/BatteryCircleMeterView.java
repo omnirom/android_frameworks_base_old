@@ -293,8 +293,8 @@ public class BatteryCircleMeterView extends ImageView {
         int batteryStyle = Settings.System.getInt(getContext().getContentResolver(),
                                 Settings.System.STATUS_BAR_BATTERY_STYLE, 0);
 
-        mCirclePercent = batteryStyle == 3;
-        mActivated = (batteryStyle == 2 || mCirclePercent);
+        mCirclePercent = batteryStyle == 4;
+        mActivated = (batteryStyle == 3 || mCirclePercent);
 
         setVisibility(mActivated ? View.VISIBLE : View.GONE);
 
