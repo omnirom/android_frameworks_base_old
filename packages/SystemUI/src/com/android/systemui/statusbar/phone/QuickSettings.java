@@ -697,12 +697,13 @@ class QuickSettings {
                                 t = mContext.getString(R.string.quick_settings_battery_charged_label);
                             } else {
                                 if (batteryState.pluggedIn) {
-                                    t = mBatteryStyle != 3 // circle percent
+                                    t = mBatteryStyle != 4 && mBatteryStyle != 5 // circle percent or percent only
                                         ? mContext.getString(R.string.quick_settings_battery_charging_label,
                                         batteryState.batteryLevel)
                                         : mContext.getString(R.string.quick_settings_battery_charging);
-                                } else {     // battery bar or battery circle
-                                    t = (mBatteryStyle == 0 || mBatteryStyle == 2)
+                                } else {     // battery bar or battery circle or none
+                                    t = (mBatteryStyle == 0 || mBatteryStyle == 2 || mBatteryStyle == 3
+                                        || mBatteryStyle == 6)
                                         ? mContext.getString(R.string.status_bar_settings_battery_meter_format,
                                         batteryState.batteryLevel)
                                         : mContext.getString(R.string.quick_settings_battery_discharging);

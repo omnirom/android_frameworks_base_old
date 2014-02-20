@@ -36,11 +36,19 @@
             android:layout_width="22dp"
             android:layout_height="32dp"
             android:layout_gravity="top|center_horizontal"
+            systemui:batteryView="quicksettings"
             />
         <com.android.systemui.BatteryCircleMeterView
             android:id="@+id/circle_battery"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
+            android:layout_gravity="top|center_horizontal"
+            systemui:batteryView="quicksettings"
+            />
+        <com.android.systemui.BatteryPercentMeterView
+            android:id="@+id/percent_battery"
+            android:layout_width="wrap_content"
+            android:layout_height="32dp"
             android:layout_gravity="top|center_horizontal"
             systemui:batteryView="quicksettings"
             />
