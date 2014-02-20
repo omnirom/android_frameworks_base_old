@@ -58,9 +58,9 @@ public class SlimActions {
         processActionWithOptions(context, action, isLongpress, true);
     }
 
-    public static void processActionWithOptions(
-                Context context, String action, boolean isLongpress,
-                boolean collapseShade) {
+    public static void processActionWithOptions(Context context,
+            String action, boolean isLongpress, boolean collapseShade) {
+
             if (action == null || action.equals(ButtonsConstants.ACTION_NULL)) {
                 return;
             }
@@ -84,39 +84,37 @@ public class SlimActions {
             }
 
             if (collapseShade) {
-                    if (!action.equals(ButtonsConstants.ACTION_QS)
-                            && !action.equals(ButtonsConstants.ACTION_NOTIFICATIONS)
-                            && !action.equals(ButtonsConstants.ACTION_TORCH)) {
-                        try {
-                            barService.collapsePanels();
-                        } catch (RemoteException ex) {
-                        }
+                if (!action.equals(ButtonsConstants.ACTION_QS)
+                        && !action.equals(ButtonsConstants.ACTION_NOTIFICATIONS)
+                        && !action.equals(ButtonsConstants.ACTION_THEME_SWITCH)
+                        && !action.equals(ButtonsConstants.ACTION_TORCH)) {
+                    try {
+                        barService.collapsePanels();
+                    } catch (RemoteException ex) {
                     }
-
-            if (!action.equals(ButtonsConstants.ACTION_QS)
-                    && !action.equals(ButtonsConstants.ACTION_NOTIFICATIONS)) {
-                try {
-                    barService.collapsePanels();
-                } catch (RemoteException ex) {
                 }
             }
 
             // process the actions
             if (action.equals(ButtonsConstants.ACTION_HOME)) {
-                injectKeyDelayed(KeyEvent.KEYCODE_HOME, isLongpress, false);
+                triggerVirtualKeypress(KeyEvent.KEYCODE_HOME, isLongpress);
                 return;
             } else if (action.equals(ButtonsConstants.ACTION_BACK)) {
-                injectKeyDelayed(KeyEvent.KEYCODE_BACK, isLongpress, false);
+                triggerVirtualKeypress(KeyEvent.KEYCODE_BACK, isLongpress);
                 return;
             } else if (action.equals(ButtonsConstants.ACTION_SEARCH)) {
-                injectKeyDelayed(KeyEvent.KEYCODE_SEARCH, isLongpress, false);
+                triggerVirtualKeypress(KeyEvent.KEYCODE_SEARCH, isLongpress);
                 return;
             } else if (action.equals(ButtonsConstants.ACTION_MENU)
                     || action.equals(ButtonsConstants.ACTION_MENU_BIG)) {
-                injectKeyDelayed(KeyEvent.KEYCODE_MENU, isLongpress, false);
+                triggerVirtualKeypress(KeyEvent.KEYCODE_MENU, isLongpress);
                 return;
             } else if (action.equals(ButtonsConstants.ACTION_POWER_MENU)) {
-                injectKeyDelayed(KeyEvent.KEYCODE_POWER, isLongpress, true);
+                try {
+                    windowManagerService.toggleGlobalMenu();
+                } catch (RemoteException e) {
+                }
+                return;
             } else if (action.equals(ButtonsConstants.ACTION_POWER)) {
                 PowerManager pm = (PowerManager) context.getSystemService(Context.POWER_SERVICE);
                 pm.goToSleep(SystemClock.uptimeMillis());
@@ -133,6 +131,32 @@ public class SlimActions {
                         new Intent("android.settings.SHOW_INPUT_METHOD_PICKER"),
                         new UserHandle(UserHandle.USER_CURRENT));
                 return;
+            } else if (action.equals(ButtonsConstants.ACTION_PIE)) {
+                boolean pieState = isPieEnabled(context);
+                if (pieState && !isNavBarEnabled(context) && isNavBarDefault(context)) {
+                    Toast.makeText(context,
+                            com.android.internal.R.string.disable_pie_navigation_error,
+                            Toast.LENGTH_LONG).show();
+                    return;
+                }
+                Settings.System.putIntForUser(
+                        context.getContentResolver(),
+                        Settings.System.PIE_CONTROLS,
+                        pieState ? 0 : 1, UserHandle.USER_CURRENT);
+                return;
+            } else if (action.equals(ButtonsConstants.ACTION_NAVBAR)) {
+                boolean navBarState = isNavBarEnabled(context);
+                if (navBarState && !isPieEnabled(context) && isNavBarDefault(context)) {
+                    Toast.makeText(context,
+                            com.android.internal.R.string.disable_navigation_pie_error,
+                            Toast.LENGTH_LONG).show();
+                    return;
+                }
+                Settings.System.putIntForUser(
+                        context.getContentResolver(),
+                        Settings.System.NAVIGATION_BAR_SHOW,
+                        navBarState ? 0 : 1, UserHandle.USER_CURRENT);
+                return;
             } else if (action.equals(ButtonsConstants.ACTION_EXPANDED_DESKTOP)) {
                 boolean expandDesktopModeOn = Settings.System.getIntForUser(
                         context.getContentResolver(),
@@ -144,16 +168,20 @@ public class SlimActions {
                         expandDesktopModeOn ? 0 : 1, UserHandle.USER_CURRENT);
                 return;
             } else if (action.equals(ButtonsConstants.ACTION_THEME_SWITCH)) {
-                boolean enabled = Settings.Secure.getIntForUser(
+                boolean autoLightMode = Settings.Secure.getIntForUser(
                         context.getContentResolver(),
                         Settings.Secure.UI_THEME_AUTO_MODE, 0,
-                        UserHandle.USER_CURRENT) != 1;
+                        UserHandle.USER_CURRENT) == 1;
                 boolean state = context.getResources().getConfiguration().uiThemeMode
                         == Configuration.UI_THEME_MODE_HOLO_DARK;
-                if (!enabled) {
+                if (autoLightMode) {
+                    try {
+                        barService.collapsePanels();
+                    } catch (RemoteException ex) {
+                    }
                     Toast.makeText(context,
                             com.android.internal.R.string.theme_auto_switch_mode_error,
-                            Toast.LENGTH_SHORT).show();
+                            Toast.LENGTH_LONG).show();
                     return;
                 }
                 // Handle a switch change
@@ -178,9 +206,6 @@ public class SlimActions {
                         context.getContentResolver(),
                         Settings.System.EXPANDED_DESKTOP_STATE,
                         expandDesktopModeOn ? 0 : 1, UserHandle.USER_CURRENT);
-                return;
-            }
-                context.sendBroadcast(new Intent("android.settings.SHOW_INPUT_METHOD_PICKER"));
                 return;
             } else if (action.equals(ButtonsConstants.ACTION_KILL)) {
                 if (isKeyguardShowing) {
@@ -241,6 +266,23 @@ public class SlimActions {
                     intent = new Intent(Intent.ACTION_VIEW, Uri.parse("http://www.google.com"));
                 }
                 startActivity(context, windowManagerService, isKeyguardShowing, intent);
+                return;
+            } else if (action.equals(ButtonsConstants.ACTION_VOICE_SEARCH)) {
+                // launch the search activity
+                Intent intent = new Intent(Intent.ACTION_SEARCH_LONG_PRESS);
+                intent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
+                try {
+                    // TODO: This only stops the factory-installed search manager.
+                    // Need to formalize an API to handle others
+                    SearchManager searchManager =
+                            (SearchManager) context.getSystemService(Context.SEARCH_SERVICE);
+                    if (searchManager != null) {
+                        searchManager.stopSearch();
+                    }
+                startActivity(context, windowManagerService, isKeyguardShowing, intent);
+                } catch (ActivityNotFoundException e) {
+                    Log.e("SlimActions:", "No activity to handle assist long press action.", e);
+                }
                 return;
             } else if (action.equals(ButtonsConstants.ACTION_VIB)) {
                 AudioManager am = (AudioManager) context.getSystemService(Context.AUDIO_SERVICE);
@@ -314,6 +356,23 @@ public class SlimActions {
 
     }
 
+    public static boolean isPieEnabled(Context context) {
+        return Settings.System.getIntForUser(context.getContentResolver(),
+                Settings.System.PIE_CONTROLS,
+                0, UserHandle.USER_CURRENT) == 1;
+    }
+
+    public static boolean isNavBarEnabled(Context context) {
+        return Settings.System.getIntForUser(context.getContentResolver(),
+                Settings.System.NAVIGATION_BAR_SHOW,
+                isNavBarDefault(context) ? 1 : 0, UserHandle.USER_CURRENT) == 1;
+    }
+
+    public static boolean isNavBarDefault(Context context) {
+        return context.getResources().getBoolean(
+                com.android.internal.R.bool.config_showNavigationBar);
+    }
+
     private static void startActivity(Context context, IWindowManager windowManagerService,
                 boolean isKeyguardShowing, Intent intent) {
         if (intent == null) {
@@ -368,6 +427,7 @@ public class SlimActions {
     }
     private static H mHandler = new H();
 
+
     private static void injectKeyDelayed(int keyCode,
             boolean longpress, boolean sendOnlyDownMessage) {
         long when = SystemClock.uptimeMillis();
@@ -392,6 +452,28 @@ public class SlimActions {
                 KeyEvent.FLAG_FROM_SYSTEM | KeyEvent.FLAG_VIRTUAL_HARD_KEY,
                 InputDevice.SOURCE_KEYBOARD);
         mHandler.sendMessageDelayed(Message.obtain(mHandler, MSG_INJECT_KEY_UP, up), 30);
+    }
+        
+    private static void triggerVirtualKeypress(final int keyCode, boolean longpress) {
+        InputManager im = InputManager.getInstance();
+        long now = SystemClock.uptimeMillis();
+
+        int downflags = KeyEvent.FLAG_FROM_SYSTEM | KeyEvent.FLAG_VIRTUAL_HARD_KEY;
+        if (longpress) {
+            downflags |= KeyEvent.FLAG_LONG_PRESS;
+        }
+
+        final KeyEvent downEvent = new KeyEvent(now, now, KeyEvent.ACTION_DOWN,
+                keyCode, 0, 0, KeyCharacterMap.VIRTUAL_KEYBOARD, 0,
+                downflags,
+                InputDevice.SOURCE_KEYBOARD);
+        im.injectInputEvent(downEvent, InputManager.INJECT_INPUT_EVENT_MODE_ASYNC);
+
+        final KeyEvent upEvent = new KeyEvent(now, now, KeyEvent.ACTION_UP,
+                keyCode, 0, 0, KeyCharacterMap.VIRTUAL_KEYBOARD, 0,
+                KeyEvent.FLAG_FROM_SYSTEM | KeyEvent.FLAG_VIRTUAL_HARD_KEY,
+                InputDevice.SOURCE_KEYBOARD);
+        im.injectInputEvent(upEvent, InputManager.INJECT_INPUT_EVENT_MODE_ASYNC);
     }
 
 }

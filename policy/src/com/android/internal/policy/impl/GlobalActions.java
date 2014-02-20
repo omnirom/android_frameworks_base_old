@@ -35,9 +35,11 @@ import android.content.Intent;
 import android.content.IntentFilter;
 import android.content.pm.UserInfo;
 import android.database.ContentObserver;
+import android.graphics.drawable.BitmapDrawable;
 import android.graphics.drawable.Drawable;
 import android.media.AudioManager;
 import android.net.ConnectivityManager;
+import android.net.Uri;
 import android.os.Bundle;
 import android.os.Handler;
 import android.os.Message;
@@ -76,6 +78,13 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.UUID;
 
+import com.android.internal.statusbar.IStatusBarService;
+import com.android.internal.util.slim.ButtonConfig;
+import com.android.internal.util.slim.ImageHelper;
+import com.android.internal.util.slim.PolicyConstants;
+import com.android.internal.util.slim.PolicyHelper;
+import com.android.internal.util.slim.SlimActions;
+
 /**
  * Needed for takeScreenshot and takeScreenrecord
  */
@@ -105,17 +114,22 @@ class GlobalActions implements DialogInterface.OnDismissListener, DialogInterfac
 
     private ArrayList<Action> mItems;
     private GlobalActionsDialog mDialog;
+    private Handler mObservHandler = new Handler();
 
     private Action mSilentModeAction;
     private ToggleAction mAirplaneModeOn;
-    private ToggleAction mMobileDataOn;
-
+    private ToggleAction mExpandDesktopModeOn;
+    private ToggleAction mPieModeOn;
+    private ToggleAction mNavBarModeOn;
 
     private MyAdapter mAdapter;
 
     private boolean mKeyguardShowing = false;
     private boolean mDeviceProvisioned = false;
     private ToggleAction.State mAirplaneState = ToggleAction.State.Off;
+    private ToggleAction.State mExpandDesktopState = ToggleAction.State.Off;
+    private ToggleAction.State mPieState = ToggleAction.State.Off;
+    private ToggleAction.State mNavBarState = ToggleAction.State.Off;
     private boolean mIsWaitingForEcmExit = false;
     private boolean mHasTelephony;
     private boolean mHasVibrator;
@@ -123,6 +137,7 @@ class GlobalActions implements DialogInterface.OnDismissListener, DialogInterfac
     private final boolean mShowSilentToggle;
     private final boolean mShowScreenRecord;
     private ConnectivityManager mConnectivityManager;
+    private static int mTextColor;
 
     /**
      * @param context everything needs a context :(
@@ -145,10 +160,9 @@ class GlobalActions implements DialogInterface.OnDismissListener, DialogInterfac
         TelephonyManager telephonyManager =
                 (TelephonyManager) context.getSystemService(Context.TELEPHONY_SERVICE);
         telephonyManager.listen(mPhoneStateListener, PhoneStateListener.LISTEN_SERVICE_STATE);
-        mConnectivityManager = (ConnectivityManager)
+        ConnectivityManager cm = (ConnectivityManager)
                 context.getSystemService(Context.CONNECTIVITY_SERVICE);
-
-        mHasTelephony = mConnectivityManager.isNetworkSupported(ConnectivityManager.TYPE_MOBILE);
+        mHasTelephony = cm.isNetworkSupported(ConnectivityManager.TYPE_MOBILE);
         mContext.getContentResolver().registerContentObserver(
                 Settings.Global.getUriFor(Settings.Global.AIRPLANE_MODE_ON), true,
                 mAirplaneModeObserver);
@@ -197,9 +211,26 @@ class GlobalActions implements DialogInterface.OnDismissListener, DialogInterfac
     }
 
     private void handleShow() {
+        mTextColor = Settings.System.getIntForUser(
+                mContext.getContentResolver(),
+                Settings.System.POWER_MENU_TEXT_COLOR, -2,
+                UserHandle.USER_CURRENT);
+        if (mTextColor == -2) {
+            mTextColor = mContext.getResources().getColor(
+                com.android.internal.R.color.power_menu_icon_default_color);
+        }
+
         awakenIfNecessary();
         mDialog = createDialog();
         prepareDialog();
+
+        final IStatusBarService barService = IStatusBarService.Stub.asInterface(
+                ServiceManager.getService(Context.STATUS_BAR_SERVICE));
+        try {
+            barService.collapsePanels();
+        } catch (RemoteException ex) {
+            // bad bad
+        }
 
         WindowManager.LayoutParams attrs = mDialog.getWindow().getAttributes();
         attrs.setTitle("GlobalActions");
@@ -219,225 +250,20 @@ class GlobalActions implements DialogInterface.OnDismissListener, DialogInterfac
      * @return A new dialog.
      */
     private GlobalActionsDialog createDialog() {
+        ArrayList<ButtonConfig> powerMenuConfig =
+                PolicyHelper.getPowerMenuConfigWithDescription(
+                mContext, "shortcut_action_power_menu_values",
+                "shortcut_action_power_menu_entries");
+
         // Simple toggle style if there's no vibrator, otherwise use a tri-state
         if (!mHasVibrator) {
             mSilentModeAction = new SilentModeToggleAction();
         } else {
             mSilentModeAction = new SilentModeTriStateAction(mContext, mAudioManager, mHandler);
         }
-        mAirplaneModeOn = new ToggleAction(
-                R.drawable.ic_lock_airplane_mode,
-                R.drawable.ic_lock_airplane_mode_off,
-                R.string.global_actions_toggle_airplane_mode,
-                R.string.global_actions_airplane_mode_on_status,
-                R.string.global_actions_airplane_mode_off_status) {
-
-            void onToggle(boolean on) {
-                if (mHasTelephony && Boolean.parseBoolean(
-                        SystemProperties.get(TelephonyProperties.PROPERTY_INECM_MODE))) {
-                    mIsWaitingForEcmExit = true;
-                    // Launch ECM exit dialog
-                    Intent ecmDialogIntent =
-                            new Intent(TelephonyIntents.ACTION_SHOW_NOTICE_ECM_BLOCK_OTHERS, null);
-                    ecmDialogIntent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
-                    mContext.startActivity(ecmDialogIntent);
-                } else {
-                    changeAirplaneModeSystemSetting(on);
-                }
-            }
-
-            @Override
-            protected void changeStateFromPress(boolean buttonOn) {
-                if (!mHasTelephony) return;
-
-                // In ECM mode airplane state cannot be changed
-                if (!(Boolean.parseBoolean(
-                        SystemProperties.get(TelephonyProperties.PROPERTY_INECM_MODE)))) {
-                    mState = buttonOn ? State.TurningOn : State.TurningOff;
-                    mAirplaneState = mState;
-                }
-            }
-
-            public boolean showDuringKeyguard() {
-                return true;
-            }
-
-            public boolean showBeforeProvisioning() {
-                return false;
-            }
-        };
-        onAirplaneModeChanged();
-
-        mMobileDataOn = new ToggleAction(
-                R.drawable.ic_lock_mobile_data,
-                R.drawable.ic_lock_mobile_data_off,
-                R.string.global_actions_toggle_mobile_data,
-                R.string.global_actions_mobile_data_on_status,
-                R.string.global_actions_mobile_data_off_status) {
-
-            void onToggle(boolean on) {
-                // comment
-                Log.i(TAG, "onToggle");
-                boolean currentState = mConnectivityManager.getMobileDataEnabled();
-                mConnectivityManager.setMobileDataEnabled(!currentState);
-            }
-
-            @Override
-            protected void changeStateFromPress(boolean buttonOn) {
-                // comment
-                Log.i(TAG, "changeStateFromPress");
-            }
-
-            public boolean showDuringKeyguard() {
-                return true;
-            }
-
-            public boolean showBeforeProvisioning() {
-                return false;
-            }
-        };
-
-        final ContentResolver cr = mContext.getContentResolver();
         mItems = new ArrayList<Action>();
 
-        // first: power off
-        mItems.add(
-            new SinglePressAction(
-                    com.android.internal.R.drawable.ic_lock_power_off,
-                    R.string.global_action_power_off) {
-
-                public void onPress() {
-                    // shutdown by making sure radio and power are handled accordingly.
-                    mWindowManagerFuncs.shutdown(true);
-                }
-
-                public boolean showDuringKeyguard() {
-                    return true;
-                }
-
-                public boolean showBeforeProvisioning() {
-                    return true;
-                }
-            });
-
-        // next: reboot
-        // Unlike in CM, we'll always have this here until we decide otherwise.
-        // The Settings component of this is a mess and how many people actually disable this?
-        // Someone else can readd the ability to disable this if they don't want it.
-        mItems.add(
-            new SinglePressAction(R.drawable.ic_lock_reboot, R.string.global_action_reboot) {
-                public void onPress() {
-                    mWindowManagerFuncs.reboot();
-                }
-
-                public boolean onLongPress() {
-                    mWindowManagerFuncs.rebootSafeMode(true);
-                    return true;
-                }
-
-                public boolean showDuringKeyguard() {
-                    return true;
-                }
-
-                public boolean showBeforeProvisioning() {
-                    return true;
-                }
-            });
-
-        // next: profile
-        // only shown if both system profiles and the menu item is enabled, enabled by default
-        boolean showProfiles =
-                Settings.System.getIntForUser(cr,
-                        Settings.System.SYSTEM_PROFILES_ENABLED, 1, UserHandle.USER_CURRENT) == 1
-                && Settings.System.getIntForUser(cr,
-                        Settings.System.POWER_MENU_PROFILES_ENABLED, 1, UserHandle.USER_CURRENT) == 1;
-        if (showProfiles) {
-            mItems.add(
-                new ProfileChooseAction() {
-                    public void onPress() {
-                        createProfileDialog();
-                    }
-
-                    public boolean onLongPress() {
-                        return true;
-                    }
-
-                    public boolean showDuringKeyguard() {
-                        return false;
-                    }
-
-                    public boolean showBeforeProvisioning() {
-                        return false;
-                    }
-                });
-        }
-
-        // next: mobile data
-        if (Settings.System.getInt(mContext.getContentResolver(),
-                Settings.System.MOBILE_DATA_IN_POWER_MENU, 0) != 0) {
-            mItems.add(mMobileDataOn);
-        }
-
-     // next: screenshot, if enabled
-        if (Settings.System.getInt(mContext.getContentResolver(),
-                Settings.System.SCREENSHOT_IN_POWER_MENU, 0) != 0) {
-            mItems.add(
-                new SinglePressAction(com.android.internal.R.drawable.ic_lock_screenshot,
-                        R.string.global_action_screenshot) {
-
-                    public void onPress() {
-                        takeScreenshot();
-                    }
-
-                    public boolean onLongPress() {
-                        return false;
-                    }
-
-                    public boolean showDuringKeyguard() {
-                        return true;
-                    }
-
-                    public boolean showBeforeProvisioning() {
-                        return true;
-                    }
-                });
-        }
-
-        // next: screen record, if enabled
-        if (mShowScreenRecord) {
-            if (Settings.System.getInt(mContext.getContentResolver(),
-                    Settings.System.SCREENRECORD_IN_POWER_MENU, 0) != 0) {
-                mItems.add(
-                    new SinglePressAction(com.android.internal.R.drawable.ic_lock_screen_record,
-                            R.string.global_action_screenrecord) {
-
-                        public void onPress() {
-                            takeScreenrecord();
-                        }
-
-                        public boolean onLongPress() {
-                            return false;
-                        }
-
-                        public boolean showDuringKeyguard() {
-                            return true;
-                        }
-
-                        public boolean showBeforeProvisioning() {
-                            return true;
-                        }
-                    });
-            }
-        }
-
-        // next: airplane mode
-        if (Settings.System.getInt(mContext.getContentResolver(),
-                Settings.System.AIRPLANE_MODE_IN_POWER_MENU, 1) != 0) {
-            mItems.add(mAirplaneModeOn);
-        }
-
-
-        // next: bug report, if enabled
+        // bug report, if enabled
         if (Settings.Global.getInt(mContext.getContentResolver(),
                 Settings.Global.BUGREPORT_IN_POWER_MENU, 0) != 0 && isCurrentUserOwner()) {
             mItems.add(
@@ -486,10 +312,169 @@ class GlobalActions implements DialogInterface.OnDismissListener, DialogInterfac
                 });
         }
 
-        // last: silent mode
-        if (mShowSilentToggle && Settings.System.getInt(mContext.getContentResolver(),
-                Settings.System.SOUND_TOGGLES_IN_POWER_MENU, 1) != 0) {
-            mItems.add(mSilentModeAction);
+        for (final ButtonConfig config : powerMenuConfig) {
+            // power off
+            if (config.getClickAction().equals(PolicyConstants.ACTION_POWER_OFF)) {
+                mItems.add(
+                    new SinglePressAction(PolicyHelper.getPowerMenuIconImage(mContext,
+                            config.getClickAction(), config.getIcon(), true),
+                            config.getClickActionDescription()) {
+
+                        public void onPress() {
+                            // shutdown by making sure radio and power are handled accordingly.
+                            mWindowManagerFuncs.shutdown(true);
+                        }
+
+                        public boolean showDuringKeyguard() {
+                            return true;
+                        }
+
+                        public boolean showBeforeProvisioning() {
+                            return true;
+                        }
+                    });
+            // reboot
+            } else if (config.getClickAction().equals(PolicyConstants.ACTION_REBOOT)) {
+                mItems.add(
+                    new SinglePressAction(PolicyHelper.getPowerMenuIconImage(mContext,
+                            config.getClickAction(), config.getIcon(), true),
+                            config.getClickActionDescription()) {
+                        public void onPress() {
+                            mWindowManagerFuncs.reboot();
+                        }
+
+                        public boolean onLongPress() {
+                            mWindowManagerFuncs.rebootSafeMode(true);
+                            return true;
+                        }
+
+                        public boolean showDuringKeyguard() {
+                            return true;
+                        }
+
+                        public boolean showBeforeProvisioning() {
+                            return true;
+                        }
+                    });
+            // screenshot
+            } else if (config.getClickAction().equals(PolicyConstants.ACTION_SCREENSHOT)) {
+                mItems.add(
+                    new SinglePressAction(PolicyHelper.getPowerMenuIconImage(mContext,
+                            config.getClickAction(), config.getIcon(), true),
+                            config.getClickActionDescription()) {
+                        public void onPress() {
+                            SlimActions.processAction(
+                                mContext, config.getClickAction(), false);
+                        }
+
+                        public boolean showDuringKeyguard() {
+                            return true;
+                        }
+                        public boolean showBeforeProvisioning() {
+                            return true;
+                        }
+                    });
+                    // next: profile
+        // only shown if both system profiles and the menu item is enabled, enabled by default
+         } else if (config.getClickAction().equals(PolicyConstants.ACTION_PROFILE)) {
+        boolean showProfiles =
+                Settings.System.getIntForUser(mContext.getContentResolver(),
+                        Settings.System.SYSTEM_PROFILES_ENABLED, 1, UserHandle.USER_CURRENT) == 1
+                && Settings.System.getIntForUser(mContext.getContentResolver(),
+                        Settings.System.POWER_MENU_PROFILES_ENABLED, 1, UserHandle.USER_CURRENT) == 1;
+        if (showProfiles) {
+            mItems.add(
+                new ProfileChooseAction() {
+                    public void onPress() {
+                        createProfileDialog();
+                    }
+
+                    public boolean onLongPress() {
+                        return true;
+                    }
+
+                    public boolean showDuringKeyguard() {
+                        return false;
+                    }
+
+                    public boolean showBeforeProvisioning() {
+                        return false;
+                    }
+                });
+        }
+        // next: screen record, if enabled
+      } else if (config.getClickAction().equals(PolicyConstants.ACTION_SCREEN_RECORD)) {
+        if (mShowScreenRecord) {
+            if (Settings.System.getInt(mContext.getContentResolver(),
+                    Settings.System.SCREENRECORD_IN_POWER_MENU, 0) != 0) {
+                mItems.add(
+                    new SinglePressAction(com.android.internal.R.drawable.ic_lock_screen_record,
+                            R.string.global_action_screenrecord) {
+
+                        public void onPress() {
+                            takeScreenrecord();
+                        }
+
+                        public boolean onLongPress() {
+                            return false;
+                        }
+
+                        public boolean showDuringKeyguard() {
+                            return true;
+                        }
+
+                        public boolean showBeforeProvisioning() {
+                            return true;
+                        }
+                    });
+            }
+        }
+            // airplane mode
+            } else if (config.getClickAction().equals(PolicyConstants.ACTION_AIRPLANE)) {
+                constructAirPlaneModeToggle(PolicyHelper.getPowerMenuIconImage(mContext,
+                            config.getClickAction(), config.getIcon(), true),
+                            config.getClickActionDescription());
+                mItems.add(mAirplaneModeOn);
+            // expanded desktop mode
+            } else if (config.getClickAction().equals(PolicyConstants.ACTION_EXPANDED_DESKTOP)) {
+                constructExpandedDesktopToggle(PolicyHelper.getPowerMenuIconImage(mContext,
+                            config.getClickAction(), config.getIcon(), true),
+                            config.getClickActionDescription());
+                mItems.add(mExpandDesktopModeOn);
+            // Pie controls
+            } else if (config.getClickAction().equals(PolicyConstants.ACTION_PIE)) {
+                constructPieToggle(PolicyHelper.getPowerMenuIconImage(mContext,
+                            config.getClickAction(), config.getIcon(), true),
+                            config.getClickActionDescription());
+                mItems.add(mPieModeOn);
+            // Navigation bar
+            } else if (config.getClickAction().equals(PolicyConstants.ACTION_NAVBAR)) {
+                constructNavBarToggle(PolicyHelper.getPowerMenuIconImage(mContext,
+                            config.getClickAction(), config.getIcon(), true),
+                            config.getClickActionDescription());
+                mItems.add(mNavBarModeOn);
+            // silent mode
+            } else if ((config.getClickAction().equals(PolicyConstants.ACTION_SOUND)) && (mShowSilentToggle)) {
+                mItems.add(mSilentModeAction);
+            // must be a custom app or action shorcut
+            } else if (config.getClickAction() != null) {
+                mItems.add(
+                    new SinglePressAction(PolicyHelper.getPowerMenuIconImage(mContext,
+                            config.getClickAction(), config.getIcon(), true),
+                            config.getClickActionDescription()) {
+                        public void onPress() {
+                            SlimActions.processAction(
+                                mContext, config.getClickAction(), false);
+                        }
+
+                        public boolean showDuringKeyguard() {
+                            return true;
+                        }
+                        public boolean showBeforeProvisioning() {
+                            return true;
+                        }
+                    });
+            }
         }
 
         // one more thing: optionally add a list of users to switch to
@@ -559,79 +544,121 @@ private void createProfileDialog() {
         dialog.show();
     }
 
-    /**
-     * functions needed for taking screenshots.
-     */
-    final Object mScreenshotLock = new Object();
-    ServiceConnection mScreenshotConnection = null;
+    private void constructAirPlaneModeToggle(Drawable icon, String description) {
+        mAirplaneModeOn = new ToggleAction(
+                icon,
+                icon,
+                description,
+                R.string.global_actions_airplane_mode_on_status,
+                R.string.global_actions_airplane_mode_off_status) {
 
-    final Runnable mScreenshotTimeout = new Runnable() {
-        @Override public void run() {
-            synchronized (mScreenshotLock) {
-                if (mScreenshotConnection != null) {
-                    mContext.unbindService(mScreenshotConnection);
-                    mScreenshotConnection = null;
+            void onToggle(boolean on) {
+                if (mHasTelephony && Boolean.parseBoolean(
+                        SystemProperties.get(TelephonyProperties.PROPERTY_INECM_MODE))) {
+                    mIsWaitingForEcmExit = true;
+                    // Launch ECM exit dialog
+                    Intent ecmDialogIntent =
+                            new Intent(TelephonyIntents.ACTION_SHOW_NOTICE_ECM_BLOCK_OTHERS, null);
+                    ecmDialogIntent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
+                    mContext.startActivity(ecmDialogIntent);
+                } else {
+                    changeAirplaneModeSystemSetting(on);
                 }
             }
-        }
-    };
 
-    private void takeScreenshot() {
-        synchronized (mScreenshotLock) {
-            if (mScreenshotConnection != null) {
-                return;
-            }
-            ComponentName cn = new ComponentName("com.android.systemui",
-                    "com.android.systemui.screenshot.TakeScreenshotService");
-            Intent intent = new Intent();
-            intent.setComponent(cn);
-            ServiceConnection conn = new ServiceConnection() {
-                @Override
-                public void onServiceConnected(ComponentName name, IBinder service) {
-                    synchronized (mScreenshotLock) {
-                        if (mScreenshotConnection != this) {
-                            return;
-                        }
-                        Messenger messenger = new Messenger(service);
-                        Message msg = Message.obtain(null, 1);
-                        final ServiceConnection myConn = this;
-                        Handler h = new Handler(mHandler.getLooper()) {
-                            @Override
-                            public void handleMessage(Message msg) {
-                                synchronized (mScreenshotLock) {
-                                    if (mScreenshotConnection == myConn) {
-                                        mContext.unbindService(mScreenshotConnection);
-                                        mScreenshotConnection = null;
-                                        mHandler.removeCallbacks(mScreenshotTimeout);
-                                    }
-                                }
-                            }
-                        };
-                        msg.replyTo = new Messenger(h);
-                        msg.arg1 = msg.arg2 = 0;
+            @Override
+            protected void changeStateFromPress(boolean buttonOn) {
+                if (!mHasTelephony) return;
 
-                        /* wait for the dialog box to close */
-                        try {
-                            Thread.sleep(1000);
-                        } catch (InterruptedException ie) {
-                        }
-
-                        /* take the screenshot */
-                        try {
-                            messenger.send(msg);
-                        } catch (RemoteException e) {
-                        }
-                    }
+                // In ECM mode airplane state cannot be changed
+                if (!(Boolean.parseBoolean(
+                        SystemProperties.get(TelephonyProperties.PROPERTY_INECM_MODE)))) {
+                    mState = buttonOn ? State.TurningOn : State.TurningOff;
+                    mAirplaneState = mState;
                 }
-                @Override
-                public void onServiceDisconnected(ComponentName name) {}
-            };
-            if (mContext.bindServiceAsUser(
-                    intent, conn, Context.BIND_AUTO_CREATE, UserHandle.CURRENT)) {
-                mScreenshotConnection = conn;
-                mHandler.postDelayed(mScreenshotTimeout, 10000);
             }
-        }
+
+            public boolean showDuringKeyguard() {
+                return true;
+            }
+
+            public boolean showBeforeProvisioning() {
+                return false;
+            }
+        };
+        onAirplaneModeChanged();
+    }
+
+    private void constructExpandedDesktopToggle(Drawable icon, String description) {
+        mExpandDesktopModeOn = new ToggleAction(
+                icon,
+                icon,
+                description,
+                R.string.global_actions_expanded_desktop_mode_on_status,
+                R.string.global_actions_expanded_desktop_mode_off_status) {
+
+            void onToggle(boolean on) {
+                SlimActions.processAction(
+                    mContext, PolicyConstants.ACTION_EXPANDED_DESKTOP, false);
+            }
+
+            public boolean showDuringKeyguard() {
+                return true;
+            }
+
+            public boolean showBeforeProvisioning() {
+                return false;
+            }
+        };
+        onExpandDesktopModeChanged();
+    }
+
+    private void constructPieToggle(Drawable icon, String description) {
+        mPieModeOn = new ToggleAction(
+                icon,
+                icon,
+                description,
+                R.string.global_actions_pie_mode_on_status,
+                R.string.global_actions_pie_mode_off_status) {
+
+            void onToggle(boolean on) {
+                SlimActions.processAction(
+                    mContext, PolicyConstants.ACTION_PIE, false);
+            }
+
+            public boolean showDuringKeyguard() {
+                return true;
+            }
+
+            public boolean showBeforeProvisioning() {
+                return false;
+            }
+        };
+        onPieModeChanged();
+    }
+
+    private void constructNavBarToggle(Drawable icon, String description) {
+        mNavBarModeOn = new ToggleAction(
+                icon,
+                icon,
+                description,
+                R.string.global_actions_nav_bar_mode_on_status,
+                R.string.global_actions_nav_bar_mode_off_status) {
+
+            void onToggle(boolean on) {
+                SlimActions.processAction(
+                    mContext, PolicyConstants.ACTION_NAVBAR, false);
+            }
+
+            public boolean showDuringKeyguard() {
+                return true;
+            }
+
+            public boolean showBeforeProvisioning() {
+                return false;
+            }
+        };
+        onNavBarModeChanged();
     }
 
     /**
@@ -751,10 +778,28 @@ private void createProfileDialog() {
 
     private void prepareDialog() {
         refreshSilentMode();
-        mAirplaneModeOn.updateState(mAirplaneState);
-        mMobileDataOn.updateState(mConnectivityManager.getMobileDataEnabled() ? ToggleAction.State.On : ToggleAction.State.Off);
+        if (mAirplaneModeOn != null) {
+            mAirplaneModeOn.updateState(mAirplaneState);
+        }
+        if (mExpandDesktopModeOn != null) {
+            mExpandDesktopModeOn.updateState(mExpandDesktopState);
+        }
+        if (mPieModeOn != null) {
+            mPieModeOn.updateState(mPieState);
+        }
+        if (mNavBarModeOn != null) {
+            mNavBarModeOn.updateState(mNavBarState);
+        }
+
+        // Start observing setting changes during
+        // dialog shows up
+        mSettingsObserver.observe();
+
         mAdapter.notifyDataSetChanged();
         mDialog.getWindow().setType(WindowManager.LayoutParams.TYPE_KEYGUARD_DIALOG);
+
+        mDialog.setTitle(R.string.global_actions);
+
         if (mShowSilentToggle) {
             IntentFilter filter = new IntentFilter(AudioManager.RINGER_MODE_CHANGED_ACTION);
             mContext.registerReceiver(mRingerModeReceiver, filter);
@@ -780,6 +825,7 @@ private void createProfileDialog() {
                 Log.w(TAG, ie);
             }
         }
+        mContext.getContentResolver().unregisterContentObserver(mSettingsObserver);
     }
 
     /** {@inheritDoc} */
@@ -916,6 +962,13 @@ private void createProfileDialog() {
             mIcon = icon;
         }
 
+        protected SinglePressAction(Drawable icon, CharSequence message) {
+            mIconResId = 0;
+            mMessageResId = 0;
+            mMessage = message;
+            mIcon = icon;
+        }
+
         protected SinglePressAction(int iconResId, CharSequence message) {
             mIconResId = iconResId;
             mMessageResId = 0;
@@ -943,7 +996,9 @@ private void createProfileDialog() {
             v.findViewById(R.id.status).setVisibility(View.GONE);
             if (mIcon != null) {
                 icon.setImageDrawable(mIcon);
-                icon.setScaleType(ScaleType.CENTER_CROP);
+                if (mIconResId != 0) {
+                    icon.setScaleType(ScaleType.CENTER_CROP);
+                }
             } else if (mIconResId != 0) {
                 icon.setImageDrawable(context.getResources().getDrawable(mIconResId));
             }
@@ -952,6 +1007,7 @@ private void createProfileDialog() {
             } else {
                 messageView.setText(mMessageResId);
             }
+            messageView.setTextColor(mTextColor);
 
             return v;
         }
@@ -1023,9 +1079,9 @@ private void createProfileDialog() {
         protected State mState = State.Off;
 
         // prefs
-        protected int mEnabledIconResId;
-        protected int mDisabledIconResid;
-        protected int mMessageResId;
+        protected Drawable mEnabledIcon;
+        protected Drawable mDisabledIcon;
+        protected String mMessage;
         protected int mEnabledStatusMessageResId;
         protected int mDisabledStatusMessageResId;
 
@@ -1036,14 +1092,14 @@ private void createProfileDialog() {
          * @param enabledStatusMessageResId The on status message, e.g 'sound disabled'
          * @param disabledStatusMessageResId The off status message, e.g. 'sound enabled'
          */
-        public ToggleAction(int enabledIconResId,
-                int disabledIconResid,
-                int message,
+        public ToggleAction(Drawable enabledIcon,
+                Drawable disabledIcon,
+                String message,
                 int enabledStatusMessageResId,
                 int disabledStatusMessageResId) {
-            mEnabledIconResId = enabledIconResId;
-            mDisabledIconResid = disabledIconResid;
-            mMessageResId = message;
+            mEnabledIcon = enabledIcon;
+            mDisabledIcon = disabledIcon;
+            mMessage = message;
             mEnabledStatusMessageResId = enabledStatusMessageResId;
             mDisabledStatusMessageResId = disabledStatusMessageResId;
         }
@@ -1069,14 +1125,15 @@ private void createProfileDialog() {
             final boolean enabled = isEnabled();
 
             if (messageView != null) {
-                messageView.setText(mMessageResId);
+                messageView.setText(mMessage);
                 messageView.setEnabled(enabled);
+                messageView.setTextColor(mTextColor);
             }
 
             boolean on = ((mState == State.On) || (mState == State.TurningOn));
             if (icon != null) {
-                icon.setImageDrawable(context.getResources().getDrawable(
-                        (on ? mEnabledIconResId : mDisabledIconResid)));
+                icon.setImageDrawable(on ? mEnabledIcon : mDisabledIcon);
+                icon.setAlpha(on ? 1.0f : 0.3f);
                 icon.setEnabled(enabled);
             }
 
@@ -1084,6 +1141,7 @@ private void createProfileDialog() {
                 statusView.setText(on ? mEnabledStatusMessageResId : mDisabledStatusMessageResId);
                 statusView.setVisibility(View.VISIBLE);
                 statusView.setEnabled(enabled);
+                statusView.setTextColor(mTextColor);
             }
             v.setEnabled(enabled);
 
@@ -1128,9 +1186,9 @@ private void createProfileDialog() {
 
     private class SilentModeToggleAction extends ToggleAction {
         public SilentModeToggleAction() {
-            super(R.drawable.ic_audio_vol_mute,
-                    R.drawable.ic_audio_vol,
-                    R.string.global_action_toggle_silent_mode,
+            super(mContext.getResources().getDrawable(R.drawable.ic_audio_vol_mute),
+                    mContext.getResources().getDrawable(R.drawable.ic_audio_vol),
+                    mContext.getResources().getString(R.string.global_action_toggle_silent_mode),
                     R.string.global_action_silent_mode_on_status,
                     R.string.global_action_silent_mode_off_status);
         }
@@ -1155,6 +1213,7 @@ private void createProfileDialog() {
     private static class SilentModeTriStateAction implements Action, View.OnClickListener {
 
         private final int[] ITEM_IDS = { R.id.option1, R.id.option2, R.id.option3 };
+        private final int[] ICON_IDS = { R.id.icon1, R.id.icon2, R.id.icon3 };
 
         private final AudioManager mAudioManager;
         private final Handler mHandler;
@@ -1181,11 +1240,33 @@ private void createProfileDialog() {
             View v = inflater.inflate(R.layout.global_actions_silent_mode, parent, false);
 
             int selectedIndex = ringerModeToIndex(mAudioManager.getRingerMode());
+
+            int iconColor = Settings.System.getIntForUser(
+                    mContext.getContentResolver(),
+                    Settings.System.POWER_MENU_ICON_COLOR, -2,
+                    UserHandle.USER_CURRENT);
+            int colorMode = Settings.System.getIntForUser(
+                    mContext.getContentResolver(),
+                    Settings.System.POWER_MENU_ICON_COLOR_MODE, 0,
+                    UserHandle.USER_CURRENT);
+
+            if (iconColor == -2) {
+                iconColor = mContext.getResources().getColor(
+                    com.android.internal.R.color.power_menu_icon_default_color);
+            }
+
             for (int i = 0; i < 3; i++) {
                 View itemView = v.findViewById(ITEM_IDS[i]);
                 itemView.setSelected(selectedIndex == i);
                 // Set up click handler
                 itemView.setTag(i);
+                if (colorMode != 3) {
+                    ImageView icon = (ImageView) itemView.findViewById(ICON_IDS[i]);
+                    if (icon != null) {
+                        icon.setImageDrawable(ImageHelper.resize(mContext, new BitmapDrawable(
+                            ImageHelper.getColoredBitmap(icon.getDrawable(), iconColor)), 35));
+                    }
+                }
                 itemView.setOnClickListener(this);
             }
             return v;
@@ -1243,13 +1324,52 @@ private void createProfileDialog() {
         }
     };
 
+    private SettingsObserver mSettingsObserver = new SettingsObserver(new Handler());
+    private final class SettingsObserver extends ContentObserver {
+        SettingsObserver(Handler handler) {
+            super(handler);
+        }
+
+        void observe() {
+            ContentResolver resolver = mContext.getContentResolver();
+            resolver.registerContentObserver(Settings.System.getUriFor(
+                    Settings.System.PIE_CONTROLS), false, this,
+                    UserHandle.USER_ALL);
+            resolver.registerContentObserver(Settings.System.getUriFor(
+                    Settings.System.EXPANDED_DESKTOP_STATE), false, this,
+                    UserHandle.USER_ALL);
+            resolver.registerContentObserver(Settings.System.getUriFor(
+                    Settings.System.NAVIGATION_BAR_SHOW), false, this,
+                    UserHandle.USER_ALL);
+
+        }
+
+        @Override
+        public void onChange(boolean selfChange, Uri uri) {
+            super.onChange(selfChange, uri);
+            if (uri.equals(Settings.System.getUriFor(
+                    Settings.System.PIE_CONTROLS))) {
+                onPieModeChanged();
+            } else if (uri.equals(Settings.System.getUriFor(
+                Settings.System.EXPANDED_DESKTOP_STATE))) {
+                onExpandDesktopModeChanged();
+            } else if (uri.equals(Settings.System.getUriFor(
+                Settings.System.NAVIGATION_BAR_SHOW))) {
+                onNavBarModeChanged();
+            }
+            mAdapter.notifyDataSetChanged();
+        }
+    }
+
     PhoneStateListener mPhoneStateListener = new PhoneStateListener() {
         @Override
         public void onServiceStateChanged(ServiceState serviceState) {
             if (!mHasTelephony) return;
             final boolean inAirplaneMode = serviceState.getState() == ServiceState.STATE_POWER_OFF;
             mAirplaneState = inAirplaneMode ? ToggleAction.State.On : ToggleAction.State.Off;
-            mAirplaneModeOn.updateState(mAirplaneState);
+            if (mAirplaneModeOn != null) {
+                mAirplaneModeOn.updateState(mAirplaneState);
+            }
             mAdapter.notifyDataSetChanged();
         }
     };
@@ -1303,7 +1423,44 @@ private void createProfileDialog() {
                 Settings.Global.AIRPLANE_MODE_ON,
                 0) == 1;
         mAirplaneState = airplaneModeOn ? ToggleAction.State.On : ToggleAction.State.Off;
-        mAirplaneModeOn.updateState(mAirplaneState);
+        if (mAirplaneModeOn != null) {
+            mAirplaneModeOn.updateState(mAirplaneState);
+        }
+    }
+
+    private void onExpandDesktopModeChanged() {
+        boolean expandDesktopModeOn = Settings.System.getIntForUser(
+                mContext.getContentResolver(),
+                Settings.System.EXPANDED_DESKTOP_STATE,
+                0, UserHandle.USER_CURRENT) == 1;
+        mExpandDesktopState = expandDesktopModeOn ? ToggleAction.State.On : ToggleAction.State.Off;
+        if (mExpandDesktopModeOn != null) {
+            mExpandDesktopModeOn.updateState(mExpandDesktopState);
+        }
+    }
+
+    private void onPieModeChanged() {
+        boolean pieModeOn = Settings.System.getIntForUser(
+                mContext.getContentResolver(),
+                Settings.System.PIE_CONTROLS,
+                0, UserHandle.USER_CURRENT) == 1;
+        mPieState = pieModeOn ? ToggleAction.State.On : ToggleAction.State.Off;
+        if (mPieModeOn != null) {
+            mPieModeOn.updateState(mPieState);
+        }
+    }
+
+    private void onNavBarModeChanged() {
+        boolean defaultValue = mContext.getResources().getBoolean(
+                com.android.internal.R.bool.config_showNavigationBar);
+        boolean navBarModeOn = Settings.System.getIntForUser(
+                mContext.getContentResolver(),
+                Settings.System.NAVIGATION_BAR_SHOW,
+                defaultValue ? 1 : 0, UserHandle.USER_CURRENT) == 1;
+        mNavBarState = navBarModeOn ? ToggleAction.State.On : ToggleAction.State.Off;
+        if (mNavBarModeOn != null) {
+            mNavBarModeOn.updateState(mNavBarState);
+        }
     }
 
     /**

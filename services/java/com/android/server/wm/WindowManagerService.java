@@ -547,6 +547,8 @@ public class WindowManagerService extends IWindowManager.Stub
     final DisplayManagerService mDisplayManagerService;
     final DisplayManager mDisplayManager;
 
+    private boolean mForceDisableHardwareKeyboard = false;
+
     // Who is holding the screen on.
     Session mHoldingScreenOn;
     PowerManager.WakeLock mHoldingScreenWakeLock;
@@ -792,6 +794,9 @@ public class WindowManagerService extends IWindowManager.Stub
 
         mAnimator = new WindowAnimator(this);
 
+        mForceDisableHardwareKeyboard = context.getResources().getBoolean(
+                com.android.internal.R.bool.config_forceDisableHardwareKeyboard);
+
         initPolicy(UiThread.getHandler());
 
         // Add ourself to the Watchdog monitors.
@@ -808,6 +813,7 @@ public class WindowManagerService extends IWindowManager.Stub
 
         // Load hardware rotation from prop
         mSfHwRotation = android.os.SystemProperties.getInt("ro.sf.hwrotation",0) / 90;
+
     }
 
     public InputMonitor getInputMonitor() {
@@ -3199,8 +3205,15 @@ public class WindowManagerService extends IWindowManager.Stub
         // is running.
         if (okToDisplay()) {
             DisplayInfo displayInfo = getDefaultDisplayInfoLocked();
-            final int width = displayInfo.appWidth;
-            final int height = displayInfo.appHeight;
+            final int width;
+            final int height;
+            if (mPolicy.isImmersiveMode(mLastStatusBarVisibility)) {
+                width = displayInfo.logicalWidth;
+                height = displayInfo.logicalHeight;
+            } else {
+                width = displayInfo.appWidth;
+                height = displayInfo.appHeight;
+            }
             if (DEBUG_APP_TRANSITIONS || DEBUG_ANIM) Slog.v(TAG, "applyAnimation: atoken="
                     + atoken);
             Animation a = mAppTransition.loadAnimation(lp, transit, enter, width, height);
@@ -4319,6 +4332,10 @@ public class WindowManagerService extends IWindowManager.Stub
             // If we are preparing an app transition, then delay changing
             // the visibility of this token until we execute that transition.
             if (okToDisplay() && mAppTransition.isTransitionSet()) {
+                // Already in requested state, don't do anything more.
+                if (wtoken.hiddenRequested != visible) {
+                    return;
+                }
                 wtoken.hiddenRequested = !visible;
 
                 if (!wtoken.startingDisplayed) {
@@ -6759,7 +6776,10 @@ public class WindowManagerService extends IWindowManager.Stub
             }
 
             // Determine whether a hard keyboard is available and enabled.
-            boolean hardKeyboardAvailable = config.keyboard != Configuration.KEYBOARD_NOKEYS;
+            boolean hardKeyboardAvailable = false;
+            if (!mForceDisableHardwareKeyboard) {
+                hardKeyboardAvailable = config.keyboard != Configuration.KEYBOARD_NOKEYS;
+            }
             if (hardKeyboardAvailable != mHardKeyboardAvailable) {
                 mHardKeyboardAvailable = hardKeyboardAvailable;
                 mHardKeyboardEnabled = hardKeyboardAvailable;
@@ -8656,8 +8676,17 @@ public class WindowManagerService extends IWindowManager.Stub
                     drawSurface.release();
                     appAnimator.thumbnailLayer = topOpeningLayer;
                     DisplayInfo displayInfo = getDefaultDisplayInfoLocked();
+                    final int width;
+                    final int height;
+                    if (mPolicy.isImmersiveMode(mLastStatusBarVisibility)) {
+                        width = displayInfo.logicalWidth;
+                        height = displayInfo.logicalHeight;
+                    } else {
+                        width = displayInfo.appWidth;
+                        height = displayInfo.appHeight;
+                    }
                     Animation anim = mAppTransition.createThumbnailAnimationLocked(
-                            transit, true, true, displayInfo.appWidth, displayInfo.appHeight);
+                            transit, true, true, width, height);
                     appAnimator.thumbnailAnimation = anim;
                     anim.restrictDuration(MAX_ANIMATION_DURATION);
                     anim.scaleCurrentDuration(mTransitionAnimationScale);
@@ -10891,8 +10920,40 @@ public class WindowManagerService extends IWindowManager.Stub
         return mWindowMap;
     }
 
+    /* @hide */
+    @Override
+    public boolean expandedDesktopHidesNavigationBar() {
+        return mPolicy.expandedDesktopHidesNavigationBar();
+    }
+
+    /* @hide */
+    @Override
+    public boolean expandedDesktopHidesStatusBar() {
+        return mPolicy.expandedDesktopHidesStatusBar();
+    }
+
+    /* @hide */
+    @Override
+    public int getCurrentNavigationBarSize() {
+        return mPolicy.getCurrentNavigationBarSize();
+    }
+
+    /* @hide */
+    @Override
+    public void toggleGlobalMenu() {
+        mPolicy.toggleGlobalMenu();
+    }
+
+    /* @hide */
+    @Override
+    public void toggleStatusBar() {
+        mPolicy.toggleStatusBar();
+    }
+
+    /* @hide */
     @Override
     public void addSystemUIVisibilityFlag(int flag) {
         mLastStatusBarVisibility |= flag;
     }
+
 }

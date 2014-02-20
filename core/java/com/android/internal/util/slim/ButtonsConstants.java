@@ -23,6 +23,7 @@ public class ButtonsConstants {
     public static final String ACTION_HOME                 = "**home**";
     public static final String ACTION_BACK                 = "**back**";
     public static final String ACTION_SEARCH               = "**search**";
+    public static final String ACTION_VOICE_SEARCH         = "**voice_search**";
     public static final String ACTION_MENU                 = "**menu**";
     public static final String ACTION_MENU_BIG             = "**menu_big**";
     public static final String ACTION_POWER                = "**power**";
@@ -42,6 +43,10 @@ public class ButtonsConstants {
     public static final String ACTION_EXPANDED_DESKTOP     = "**expanded_desktop**";
     public static final String ACTION_THEME_SWITCH         = "**theme_switch**";
     public static final String ACTION_KEYGUARD_SEARCH      = "**keyguard_search**";
+    public static final String ACTION_PIE                  = "**pie**";
+    public static final String ACTION_NAVBAR               = "**nav_bar**";
+    public static final String ACTION_PROFILE               = "**profile**";
+    public static final String ACTION_SCREEN_RECORD               = "**screen_record**";
 
     // no action
     public static final String ACTION_NULL            = "**null**";

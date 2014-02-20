@@ -53,6 +53,7 @@ import java.io.PrintWriter;
 
 import com.android.internal.R;
 import com.android.internal.app.DisableCarModeActivity;
+import com.android.internal.statusbar.IStatusBarService;
 import com.android.server.TwilightService.TwilightState;
 
 final class UiModeManagerService extends IUiModeManager.Stub
@@ -80,7 +81,6 @@ final class UiModeManagerService extends IUiModeManager.Stub
     private int mNightMode = UiModeManager.MODE_NIGHT_NO;
     private boolean mCarModeEnabled = false;
     private boolean mCharging = false;
-    private int mUiThemeMode;
     private int mUiThemeAutoMode;
     private final int mDefaultUiModeType;
     private final boolean mCarModeKeepsScreenOn;
@@ -213,9 +213,6 @@ final class UiModeManagerService extends IUiModeManager.Stub
         void observe() {
             ContentResolver resolver = mContext.getContentResolver();
             resolver.registerContentObserver(Settings.Secure.getUriFor(
-                    Settings.Secure.UI_THEME_MODE),
-                    false, this);
-            resolver.registerContentObserver(Settings.Secure.getUriFor(
                     Settings.Secure.UI_THEME_AUTO_MODE),
                     false, this);
         }
@@ -274,17 +271,6 @@ final class UiModeManagerService extends IUiModeManager.Stub
     }
 
     private void updateUiThemeMode() {
-        /* possible theme modes @link Configuration
-         * {@link #UI_THEME_MODE_NORMAL},
-         * {@link #UI_THEME_MODE_HOLO_DARK}, {@link #UI_THEME_MODE_HOLO_LIGHT},
-         */
-        mUiThemeMode = Settings.Secure.getIntForUser(mContext.getContentResolver(),
-                Settings.Secure.UI_THEME_MODE, mContext.getResources().getInteger(
-                com.android.internal.R.integer.config_uiThemeMode),
-                UserHandle.USER_CURRENT);
-
-        mConfiguration.uiThemeMode = mUiThemeMode;
-
         mUiThemeAutoMode = Settings.Secure.getIntForUser(
                 mContext.getContentResolver(),
                 Settings.Secure.UI_THEME_AUTO_MODE,
@@ -298,6 +284,7 @@ final class UiModeManagerService extends IUiModeManager.Stub
                 filter.addAction(Intent.ACTION_SCREEN_ON);
                 mContext.registerReceiver(mBroadcastReceiver, filter);
                 registerLightSensor();
+                return;
             }
         } else {
             if (mAttached) {
@@ -309,7 +296,8 @@ final class UiModeManagerService extends IUiModeManager.Stub
         }
 
         if (mUiThemeAutoMode == 2) {
-            updateTwilightThemeAutoMode();
+            updateTwilight();
+            return;
         }
 
         synchronized (mLock) {
@@ -333,7 +321,7 @@ final class UiModeManagerService extends IUiModeManager.Stub
 
             if (mAllowConfigChange) {
                 mAllowConfigChange = false;
-                mHandler.postDelayed(mReleaseUiThemeModeBlock, 5000);
+                mHandler.postDelayed(mReleaseUiThemeModeBlock, 3000);
                 synchronized (mLock) {
                     if (mSystemReady) {
                         sendConfigurationLocked();
@@ -529,11 +517,22 @@ final class UiModeManagerService extends IUiModeManager.Stub
                 || mSetUiThemeMode != mConfiguration.uiThemeMode) {
             mSetUiMode = mConfiguration.uiMode;
 
-            mSetUiThemeMode = mConfiguration.uiThemeMode;
-            Settings.Secure.putIntForUser(mContext.getContentResolver(),
-                    Settings.Secure.UI_THEME_MODE, mSetUiThemeMode,
-                    UserHandle.USER_CURRENT);
+            if (mSetUiThemeMode != mConfiguration.uiThemeMode) {
+                final IStatusBarService barService = IStatusBarService.Stub.asInterface(
+                        ServiceManager.getService(Context.STATUS_BAR_SERVICE));
+                try {
+                    if (barService != null) {
+                        barService.collapsePanels();
+                    }
+                } catch (RemoteException e) {
+                    Slog.w(TAG, "Failure communicating with statusbar service", e);
+                }
 
+                mSetUiThemeMode = mConfiguration.uiThemeMode;
+                Settings.Secure.putIntForUser(mContext.getContentResolver(),
+                        Settings.Secure.UI_THEME_MODE, mSetUiThemeMode,
+                        UserHandle.USER_CURRENT);
+            }
             try {
                 ActivityManagerNative.getDefault().updateConfiguration(mConfiguration);
             } catch (RemoteException e) {
