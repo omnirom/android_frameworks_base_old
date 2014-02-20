@@ -127,6 +127,16 @@
                     android:paddingLeft="4dip"
                     systemui:batteryView="statusbar"
                     />
+                <com.android.systemui.BatteryPercentMeterView
+                    android:id="@+id/percent_battery"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:textAppearance="@style/TextAppearance.StatusBar.Battery"
+                    android:singleLine="true"
+                    android:gravity="bottom"
+                    android:paddingLeft="4dip"
+                    systemui:batteryView="statusbar"
+                    />
             </LinearLayout>
     
             <com.android.systemui.statusbar.policy.Clock
