@@ -31,6 +31,10 @@ import android.content.pm.ActivityInfo;
 import android.content.res.Configuration;
 import android.content.res.Resources;
 import android.database.ContentObserver;
+import android.graphics.Bitmap;
+import android.graphics.BitmapFactory;
+import android.graphics.drawable.BitmapDrawable;
+import android.graphics.drawable.ColorDrawable;
 import android.graphics.drawable.Drawable;
 import android.graphics.Canvas;
 import android.graphics.ColorFilter;
@@ -38,6 +42,7 @@ import android.graphics.Matrix;
 import android.graphics.PixelFormat;
 import android.graphics.PorterDuff;
 import android.graphics.Rect;
+import android.media.AudioManager;
 import android.os.Bundle;
 import android.os.Handler;
 import android.os.IBinder;
@@ -61,6 +66,11 @@ import android.view.ViewGroup;
 import android.view.ViewManager;
 import android.view.WindowManager;
 import android.widget.FrameLayout;
+
+import com.android.internal.policy.IKeyguardShowCallback;
+import com.android.internal.widget.LockPatternUtils;
+
+import java.io.File;
 
 /**
  * Manages creating, showing, hiding and resetting the keyguard.  Calls back
@@ -97,9 +107,13 @@ public class KeyguardViewManager {
     private boolean mScreenOn = false;
     private boolean mRotated = false;
     private LockPatternUtils mLockPatternUtils;
+    private AudioManager mAudioManager;
 
     private Bitmap mBlurredImage = null;
     private int mLastRotation = 0;
+
+    private static final String WALLPAPER_IMAGE_PATH =
+            "/data/data/com.android.settings/files/lockscreen_wallpaper";
 
     private KeyguardUpdateMonitorCallback mBackgroundChanger = new KeyguardUpdateMonitorCallback() {
         @Override
@@ -133,6 +147,7 @@ public class KeyguardViewManager {
         mViewManager = viewManager;
         mViewMediatorCallback = callback;
         mLockPatternUtils = lockPatternUtils;
+        mAudioManager = (AudioManager) mContext.getSystemService(Context.AUDIO_SERVICE);
     }
 
     /**
@@ -271,7 +286,37 @@ public class KeyguardViewManager {
         }
 
         public void setCustomBackground(Drawable d) {
+            if (!mAudioManager.isMusicActive()) {
+                int mBackgroundStyle = Settings.System.getInt(mContext.getContentResolver(),
+                        Settings.System.LOCKSCREEN_BACKGROUND_STYLE, 2);
+                int mBackgroundColor = Settings.System.getInt(mContext.getContentResolver(),
+                        Settings.System.LOCKSCREEN_BACKGROUND_COLOR, 0x00000000);
+                switch (mBackgroundStyle) {
+                    case 0:
+                        d = new ColorDrawable(mBackgroundColor);
+                        d.setColorFilter(BACKGROUND_COLOR, PorterDuff.Mode.SRC_OVER);
+                        mCustomBackground = d;
+                        break;
+                    case 1:
+                        try {
+                            String wallpaper = WALLPAPER_IMAGE_PATH;
+                            Bitmap bitmap = BitmapFactory.decodeFile(wallpaper);
+                            d = new BitmapDrawable(mContext.getResources(), bitmap);
+                            mCustomBackground = d;
+                        } catch (Exception e) {
+                        }
+                        break;
+                    case 2:
+                    default:
+                        mCustomBackground = d;
+                }
+                computeCustomBackgroundBounds();
+                setBackground(mBackgroundDrawable);
+            }
             mCustomBackground = d;
+            if (getWidth() == 0 || getHeight() == 0) {
+                d = null;
+            }
             if (d != null) {
                 d.setColorFilter(BACKGROUND_COLOR, PorterDuff.Mode.SRC_OVER);
             }

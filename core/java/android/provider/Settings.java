@@ -2689,6 +2689,18 @@ public final class Settings {
         public static final String LOCKSCREEN_SEE_THROUGH = "lockscreen_see_through";
 
         /**
+         * Sets the lockscreen background style
+         * @hide
+         */
+        public static final String LOCKSCREEN_BACKGROUND_STYLE = "lockscreen_background_style";
+
+        /**
+         * Color for lockscreen background when set to color fill
+         * @hide
+         */
+        public static final String LOCKSCREEN_BACKGROUND_COLOR = "lockscreen_background_color";
+
+        /**
          * Whether to display notifications on screen when screen is off
          * @hide
          */
