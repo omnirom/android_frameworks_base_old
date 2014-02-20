@@ -1787,7 +1787,7 @@ final class DisplayPowerController {
 
     private void initSeeThrough(DisplayPowerRequest request) {
         boolean seeThrough = Settings.System.getInt(mContext.getContentResolver(),
-                Settings.System.LOCKSCREEN_SEE_THROUGH, 0) == 1;
+                Settings.System.LOCKSCREEN_BACKGROUND_STYLE, 0) == 1;
 
         if ((mKeyguardService == null || !mKeyguardService.isShowing()) &&
                 request.screenState == DisplayPowerRequest.SCREEN_STATE_OFF &&
