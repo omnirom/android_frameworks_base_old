@@ -44,6 +44,13 @@
             android:layout_gravity="top|center_horizontal"
             systemui:batteryView="quicksettings"
             />
+        <com.android.systemui.BatteryPercentMeterView
+            android:id="@+id/percent_battery"
+            android:layout_width="wrap_content"
+            android:layout_height="32dp"
+            android:layout_gravity="top|center_horizontal"
+            systemui:batteryView="quicksettings"
+            />
         <TextView
             style="@style/TextAppearance.QuickSettings.TileView"
             android:id="@+id/label"
