@@ -218,6 +218,11 @@ final class ActivityStack {
     long mFullyDrawnStartTime = 0;
 
     /**
+     * Is the privacy guard currently enabled?
+     */
+    String mPrivacyGuardPackageName = null;
+
+    /**
      * Save the most recent screenshot for reuse. This keeps Recents from taking two identical
      * screenshots, one for the Recents thumbnail and one for the pauseActivity thumbnail.
      */
