@@ -1,0 +1,72 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "8b77b57d_0599dc70",
+        "filename": "core/java/android/provider/Settings.java",
+        "patchSetId": 1
+      },
+      "lineNbr": 2695,
+      "author": {
+        "id": 1000313
+      },
+      "writtenOn": "2014-02-21T13:49:08Z",
+      "side": 1,
+      "message": "LOCKSCREEN_BLUR_BEHIND \u003d\u003d LOCKSCREEN_SEE_THROUGH\n\nthey just renamed this :)",
+      "revId": "0c93ba91e527756b94fa8816655c013c8f216344",
+      "serverId": "56841c99-7c94-43d4-bf0b-cb4707e66d55",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "8b77b57d_259ed858",
+        "filename": "core/java/android/provider/Settings.java",
+        "patchSetId": 1
+      },
+      "lineNbr": 2696,
+      "author": {
+        "id": 1000313
+      },
+      "writtenOn": "2014-02-21T13:49:08Z",
+      "side": 1,
+      "message": "dont forget to add @hide here :)",
+      "revId": "0c93ba91e527756b94fa8816655c013c8f216344",
+      "serverId": "56841c99-7c94-43d4-bf0b-cb4707e66d55",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "8b77b57d_e5930052",
+        "filename": "packages/Keyguard/src/com/android/keyguard/KeyguardViewManager.java",
+        "patchSetId": 1
+      },
+      "lineNbr": 433,
+      "author": {
+        "id": 1000313
+      },
+      "writtenOn": "2014-02-21T13:49:08Z",
+      "side": 1,
+      "message": "can mBlurRadius goes to 0? since i read on settings parts, mBlurRadius minimum value is 12, so this will be not used, but if you remove this, you must delete } else { updateShowWallpaper(false); } because if mCustomImage \u003d\u003d null, Keyguard will call setbackground again :)\n\ncmiiw :)",
+      "revId": "0c93ba91e527756b94fa8816655c013c8f216344",
+      "serverId": "56841c99-7c94-43d4-bf0b-cb4707e66d55",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "8b77b57d_c58e0429",
+        "filename": "services/java/com/android/server/power/DisplayPowerController.java",
+        "patchSetId": 1
+      },
+      "lineNbr": 1795,
+      "author": {
+        "id": 1000313
+      },
+      "writtenOn": "2014-02-21T13:49:08Z",
+      "side": 1,
+      "message": "mKeyguardService \u003d\u003d null \u003c\u003c no need this since mKeyguardService !\u003d null already call before this :)",
+      "revId": "0c93ba91e527756b94fa8816655c013c8f216344",
+      "serverId": "56841c99-7c94-43d4-bf0b-cb4707e66d55",
+      "unresolved": false
+    }
+  ]
+}
