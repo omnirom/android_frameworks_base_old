@@ -16,6 +16,24 @@
       "revId": "0658f449e7917bc7b3bbcf3efa27e89c6108fe89",
       "serverId": "56841c99-7c94-43d4-bf0b-cb4707e66d55",
       "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "8b77b57d_0500fc6a",
+        "filename": "packages/SystemUI/src/com/android/systemui/statusbar/phone/QuickSettingsTileView.java",
+        "patchSetId": 19
+      },
+      "lineNbr": 274,
+      "author": {
+        "id": 1000313
+      },
+      "writtenOn": "2014-02-21T16:29:12Z",
+      "side": 1,
+      "message": "Can you remove this? Im out of my pc now xD",
+      "parentUuid": "8b77b57d_c505247f",
+      "revId": "0658f449e7917bc7b3bbcf3efa27e89c6108fe89",
+      "serverId": "56841c99-7c94-43d4-bf0b-cb4707e66d55",
+      "unresolved": false
     }
   ]
 }
