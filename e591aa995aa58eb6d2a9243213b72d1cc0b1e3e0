@@ -16,6 +16,24 @@
       "revId": "e591aa995aa58eb6d2a9243213b72d1cc0b1e3e0",
       "serverId": "56841c99-7c94-43d4-bf0b-cb4707e66d55",
       "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "8b77b57d_30cc5865",
+        "filename": "packages/SystemUI/res/values/custom_styles.xml",
+        "patchSetId": 30
+      },
+      "lineNbr": 27,
+      "author": {
+        "id": 1000313
+      },
+      "writtenOn": "2014-02-22T17:36:21Z",
+      "side": 1,
+      "message": "i will rebase again :)",
+      "parentUuid": "8b77b57d_90a52c9e",
+      "revId": "e591aa995aa58eb6d2a9243213b72d1cc0b1e3e0",
+      "serverId": "56841c99-7c94-43d4-bf0b-cb4707e66d55",
+      "unresolved": false
     }
   ]
 }
