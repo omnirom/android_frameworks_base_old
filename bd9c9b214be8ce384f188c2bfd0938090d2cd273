@@ -16,6 +16,24 @@
       "revId": "bd9c9b214be8ce384f188c2bfd0938090d2cd273",
       "serverId": "56841c99-7c94-43d4-bf0b-cb4707e66d55",
       "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "8b77b57d_90c0cc81",
+        "filename": "packages/SystemUI/res/values-fr/custom_strings.xml",
+        "patchSetId": 4
+      },
+      "lineNbr": 51,
+      "author": {
+        "id": 1000098
+      },
+      "writtenOn": "2014-02-22T13:17:33Z",
+      "side": 1,
+      "message": "Because it\u0027s a mistake. :)",
+      "parentUuid": "8b77b57d_70bc101a",
+      "revId": "bd9c9b214be8ce384f188c2bfd0938090d2cd273",
+      "serverId": "56841c99-7c94-43d4-bf0b-cb4707e66d55",
+      "unresolved": false
     }
   ]
 }
