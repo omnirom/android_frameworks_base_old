@@ -3285,6 +3285,10 @@ public class PhoneStatusBar extends BaseStatusBar implements DemoMode {
         if (false) Log.v(TAG, "updateResources");
     }
 
+    @Override
+    public void setButtonDrawable(int buttonId, int iconId) {
+        mNavigationBarView.setButtonDrawable(buttonId, iconId);
+    }
     //
     // tracing
     //
