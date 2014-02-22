@@ -1,0 +1,21 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "8b77b57d_90a52c9e",
+        "filename": "packages/SystemUI/res/values/custom_styles.xml",
+        "patchSetId": 30
+      },
+      "lineNbr": 27,
+      "author": {
+        "id": 1000630
+      },
+      "writtenOn": "2014-02-22T16:54:24Z",
+      "side": 1,
+      "message": "This is removed since 5129 got merged.",
+      "revId": "e591aa995aa58eb6d2a9243213b72d1cc0b1e3e0",
+      "serverId": "56841c99-7c94-43d4-bf0b-cb4707e66d55",
+      "unresolved": false
+    }
+  ]
+}
