@@ -40,5 +40,6 @@ oneway interface IStatusBar
     void cancelPreloadRecentApps();
     void setWindowState(int window, int state);
     void setAutoRotate(boolean enabled);
+    void setButtonDrawable(int buttonId, int iconId);
 }
 
