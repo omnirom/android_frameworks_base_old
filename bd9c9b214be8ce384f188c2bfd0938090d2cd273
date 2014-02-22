@@ -1,0 +1,21 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "8b77b57d_70bc101a",
+        "filename": "packages/SystemUI/res/values-fr/custom_strings.xml",
+        "patchSetId": 4
+      },
+      "lineNbr": 51,
+      "author": {
+        "id": 1000682
+      },
+      "writtenOn": "2014-02-22T11:40:39Z",
+      "side": 1,
+      "message": "Why capitalize Seulement?",
+      "revId": "bd9c9b214be8ce384f188c2bfd0938090d2cd273",
+      "serverId": "56841c99-7c94-43d4-bf0b-cb4707e66d55",
+      "unresolved": false
+    }
+  ]
+}
