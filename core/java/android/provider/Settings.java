@@ -3364,6 +3364,17 @@ public final class Settings {
         public static final String STATUSBAR_CLOCK_STYLE = "statusbar_clock_style";
 
         /**
+         * Settings for clock font style
+         * 0 - Bold
+         * 1 - Condensed
+         * 2 - Light
+         * 3 - Light Italic
+         * 4 - Normal
+         * @hide
+         */
+        public static final String STATUSBAR_CLOCK_FONT_STYLE = "statusbar_clock_font_style";
+
+        /**
         * @hide
         * Shows custom date before clock time
         * 0 - No Date
