@@ -1,0 +1,21 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "8b77b57d_8b789d26",
+        "filename": "packages/SystemUI/res/layout-sw600dp/active_display_content.xml",
+        "patchSetId": 1
+      },
+      "lineNbr": 58,
+      "author": {
+        "id": 1000313
+      },
+      "writtenOn": "2014-02-23T21:58:15Z",
+      "side": 1,
+      "message": "Missing android:src\u003d\"@drawable/ic_ad_unlock\" ?",
+      "revId": "3e1bc8ef78c37ace8ec149ac2e73af2217aaa20f",
+      "serverId": "56841c99-7c94-43d4-bf0b-cb4707e66d55",
+      "unresolved": false
+    }
+  ]
+}
