@@ -29,11 +29,12 @@ import android.widget.TextView;
 
 import com.android.systemui.BatteryMeterView;
 import com.android.systemui.BatteryCircleMeterView;
+import com.android.systemui.widget.RoundedImageView;
 import com.android.systemui.R;
 
 public class QuickSettingsBasicUserTile extends QuickSettingsTileView {
     private final TextView mTextView;
-    private final ImageView mImageView;
+    private final RoundedImageView mImageView;
 
     public QuickSettingsBasicUserTile(Context context) {
         this(context, null);
@@ -55,7 +56,7 @@ public class QuickSettingsBasicUserTile extends QuickSettingsTileView {
                 new FrameLayout.LayoutParams(
                         FrameLayout.LayoutParams.MATCH_PARENT,
                         FrameLayout.LayoutParams.MATCH_PARENT));
-        mImageView = (ImageView) findViewById(R.id.user_imageview);
+        mImageView = (RoundedImageView) findViewById(R.id.user_imageview);
         mTextView = (TextView) findViewById(R.id.user_textview);
     }
 
@@ -64,7 +65,7 @@ public class QuickSettingsBasicUserTile extends QuickSettingsTileView {
         throw new RuntimeException("why?");
     }
 
-    public ImageView getImageView() {
+    public RoundedImageView getImageView() {
         return mImageView;
     }
 
