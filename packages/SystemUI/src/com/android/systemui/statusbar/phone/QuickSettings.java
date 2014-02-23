@@ -369,11 +369,11 @@ class QuickSettings {
             if (addMissing) addTile = !addTile;
             if (addTile) {
                if (Tile.USER.toString().equals(tile.toString())) { // User
-                   final QuickSettingsBasicUserTile userTile
-                            = new QuickSettingsBasicUserTile(mContext);
+                   final QuickSettingsUserFlipTile userTile
+                            = new QuickSettingsUserFlipTile(mContext);
 
                    userTile.setTileId(Tile.USER);
-                   userTile.setOnClickListener(new View.OnClickListener() {
+                   userTile.setAllOnClickListener(new View.OnClickListener() {
                        @Override
                        public void onClick(View v) {
                             collapsePanels();
@@ -400,7 +400,7 @@ class QuickSettings {
                             }
                        }
                   });
-                  userTile.setOnLongClickListener(new View.OnLongClickListener() {
+                  userTile.setAllOnLongClickListener(new View.OnLongClickListener() {
                        @Override
                        public boolean onLongClick(View v) {
                            startSettingsActivity(android.provider.Settings.ACTION_SYNC_SETTINGS);
@@ -411,8 +411,8 @@ class QuickSettings {
                        @Override
                        public void refreshView(QuickSettingsTileView view, State state) {
                            UserState us = (UserState) state;
-                           userTile.setText(state.label);
-                           userTile.setImageDrawable(us.avatar);
+                           userTile.setAllText(state.label);
+                           userTile.setAllImageDrawable(us.avatar);
                            view.setContentDescription(mContext.getString(
                                   R.string.accessibility_quick_settings_user, state.label));
                        }

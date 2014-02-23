@@ -15,24 +15,21 @@
 -->
 <LinearLayout
     xmlns:android="http://schemas.android.com/apk/res/android"
-    xmlns:systemui="http://schemas.android.com/apk/res/com.android.systemui"
     android:layout_width="match_parent"
     android:layout_height="match_parent">
     <FrameLayout
         android:layout_width="match_parent"
         android:layout_height="match_parent">
-        <com.android.systemui.widget.RoundedImageView
-             android:id="@+id/user_imageview"
+        <ImageView
+             android:id="@+id/user_back_imageview"
              android:layout_width="match_parent"
              android:layout_height="match_parent"
              android:src="@drawable/ic_qs_default_user"
              android:scaleType="centerCrop"
-             systemui:corner_radius="30dip"
-             systemui:is_oval="true"
              />
         <TextView
              style="@style/TextAppearance.QuickSettings.TileView.User"
-             android:id="@+id/user_textview"
+             android:id="@+id/user_back_textview"
              android:layout_width="match_parent"
              android:layout_height="wrap_content"
              android:layout_gravity="center_horizontal|bottom"
