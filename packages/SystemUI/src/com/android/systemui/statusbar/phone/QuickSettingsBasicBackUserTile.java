@@ -27,22 +27,21 @@ import android.widget.ImageView;
 import android.widget.ProgressBar;
 import android.widget.TextView;
 
-import com.android.systemui.widget.RoundedImageView;
 import com.android.systemui.R;
 
-public class QuickSettingsBasicUserTile extends QuickSettingsTileView {
+public class QuickSettingsBasicBackUserTile extends QuickSettingsTileView {
     private final TextView mTextView;
-    private final RoundedImageView mImageView;
+    private final ImageView mImageView;
 
-    public QuickSettingsBasicUserTile(Context context) {
+    public QuickSettingsBasicBackUserTile(Context context) {
         this(context, null);
     }
 
-    public QuickSettingsBasicUserTile(Context context, AttributeSet attrs) {
-        this(context, attrs, R.layout.quick_settings_tile_user);
+    public QuickSettingsBasicBackUserTile(Context context, AttributeSet attrs) {
+        this(context, attrs, R.layout.quick_settings_tile_back_user);
     }
 
-    public QuickSettingsBasicUserTile(Context context, AttributeSet attrs, int layoutId) {
+    public QuickSettingsBasicBackUserTile(Context context, AttributeSet attrs, int layoutId) {
         super(context, attrs);
 
         setLayoutParams(new FrameLayout.LayoutParams(
@@ -54,8 +53,8 @@ public class QuickSettingsBasicUserTile extends QuickSettingsTileView {
                 new FrameLayout.LayoutParams(
                         FrameLayout.LayoutParams.MATCH_PARENT,
                         FrameLayout.LayoutParams.MATCH_PARENT));
-        mImageView = (RoundedImageView) findViewById(R.id.user_imageview);
-        mTextView = (TextView) findViewById(R.id.user_textview);
+        mImageView = (ImageView) findViewById(R.id.user_back_imageview);
+        mTextView = (TextView) findViewById(R.id.user_back_textview);
     }
 
     @Override
@@ -63,7 +62,7 @@ public class QuickSettingsBasicUserTile extends QuickSettingsTileView {
         throw new RuntimeException("why?");
     }
 
-    public RoundedImageView getImageView() {
+    public ImageView getImageView() {
         return mImageView;
     }
 
