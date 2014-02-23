@@ -1,0 +1,21 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "8b77b57d_0b8c8d35",
+        "filename": "packages/SystemUI/src/com/android/systemui/statusbar/policy/activedisplay/ActiveDisplayView.java",
+        "patchSetId": 32
+      },
+      "lineNbr": 605,
+      "author": {
+        "id": 1000008
+      },
+      "writtenOn": "2014-02-23T21:18:44Z",
+      "side": 1,
+      "message": "02-23 16:10:43.357 E/AndroidRuntime( 3589): FATAL EXCEPTION: main\n02-23 16:10:43.357 E/AndroidRuntime( 3589): Process: com.android.systemui, PID: 3589\n02-23 16:10:43.357 E/AndroidRuntime( 3589): java.lang.ClassCastException: android.widget.ImageView cannot be cast to com.android.systemui.widget.RoundedImageView\n02-23 16:10:43.357 E/AndroidRuntime( 3589):     at com.android.systemui.statusbar.policy.activedisplay.ActiveDisplayView.makeActiveDisplayView(ActiveDisplayView.java:605)\n02-23 16:10:43.357 E/AndroidRuntime( 3589):     at com.android.systemui.statusbar.policy.activedisplay.ActiveDisplayView.onFinishInflate(ActiveDisplayView.java:559)",
+      "revId": "752e13f6d74126c85dead13f1cecb5a66d0a4d1c",
+      "serverId": "56841c99-7c94-43d4-bf0b-cb4707e66d55",
+      "unresolved": false
+    }
+  ]
+}
