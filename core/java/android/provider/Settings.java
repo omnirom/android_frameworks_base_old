@@ -1465,6 +1465,61 @@ public final class Settings {
         }
 
         /**
+         * @hide
+         * Convenience function for retrieving a single system settings value
+         * as a boolean. Note that internally setting values are always
+         * stored as strings; this function converts the string to a boolean
+         * for you. It will only return true if the stored value is "1"
+         *
+         * @param cr The ContentResolver to access.
+         * @param name The name of the setting to retrieve.
+         * @param def Value to return if the setting is not defined.
+         *
+         * @return The setting's current value, or 'def' if it is not defined
+         * or not a valid integer.
+         */
+        public static boolean getBoolean(ContentResolver cr, String name, boolean def) {
+            return getBooleanForUser(cr, name, def, UserHandle.myUserId());
+        }
+
+        /** @hide */
+        public static boolean getBooleanForUser(ContentResolver cr, String name, boolean def,
+                int userHandle) {
+            String v = getStringForUser(cr, name, userHandle);
+            try {
+                if(v != null)
+                    return "1".equals(v);
+                else
+                    return def;
+            } catch (NumberFormatException e) {
+                return def;
+            }
+        }
+
+        /**
+         * @hide
+         * Convenience function for updating a single settings value as a
+         * boolean. This will either create a new entry in the table if the
+         * given name does not exist, or modify the value of the existing row
+         * with that name. Note that internally setting values are always
+         * stored as strings, so this function converts the given value to a
+         * string (1 or 0) before storing it.
+         *
+         * @param cr The ContentResolver to access.
+         * @param name The name of the setting to modify.
+         * @param value The new value for the setting.
+         * @return true if the value was set, false on database errors
+         */
+        public static boolean putBoolean(ContentResolver cr, String name, boolean value) {
+            return putBooleanForUser(cr, name, value, UserHandle.myUserId());
+        }
+
+        /** @hide */
+        public static boolean putBooleanForUser(ContentResolver cr, String name, boolean value, int userHandle) {
+            return putStringForUser(cr, name, value ? "1" : "0", userHandle);
+        }
+
+        /**
          * Convenience function to read all of the current
          * configuration-related settings into a
          * {@link Configuration} object.
@@ -2830,6 +2885,12 @@ public final class Settings {
         public static final String ACTIVE_DISPLAY_THRESHOLD = "active_display_threshold";
 
         /**
+         * use Active display content view instead default one.
+         * @hide
+         */
+        public static final String ACTIVE_DISPLAY_CONTENT = "active_display_content";
+
+        /**
          * Timeout of the display when there is no user interaction
          * @hide
          */
@@ -2841,6 +2902,20 @@ public final class Settings {
          * @hide
          */
         public static final String ACTIVE_DISPLAY_EXCLUDED_APPS = "active_display_excluded_apps";
+
+        /**
+         * A list of packages to exclude from being message displayed in active display.
+         * This should be a string of packages separated by |
+         * @hide
+         */
+        public static final String ACTIVE_DISPLAY_PRIVACY_APPS = "active_display_privacy_apps";
+
+        /**
+         * allow bypass active display when lockscreen isSecure
+         * and there is no notifications
+         * @hide
+         */
+        public static final String ACTIVE_DISPLAY_BYPASS = "active_display_bypass";
 
         /**
          * Whether to hide the lockscreen gadgets glowing hints

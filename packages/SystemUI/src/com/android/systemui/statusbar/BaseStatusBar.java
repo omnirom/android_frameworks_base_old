@@ -157,8 +157,6 @@ public abstract class BaseStatusBar extends SystemUI implements
 
     protected int mCurrentUserId = 0;
 
-    protected FrameLayout mStatusBarContainer;
-
     protected int mLayoutDirection = -1; // invalid
     private Locale mLocale;
     protected boolean mUseHeadsUp = false;
@@ -167,6 +165,8 @@ public abstract class BaseStatusBar extends SystemUI implements
     KeyguardManager mKeyguardManager;
     PowerManager mPowerManager;
     protected int mRowHeight;
+
+    protected FrameLayout mStatusBarContainer;
 
     /**
      * An interface for navigation key bars to allow status bars to signal which keys are

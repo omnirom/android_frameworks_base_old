@@ -18,12 +18,16 @@ package com.android.internal.widget;
 
 import android.Manifest;
 import android.app.ActivityManagerNative;
+import android.app.Profile;
+import android.app.ProfileManager;
 import android.app.admin.DevicePolicyManager;
 import android.appwidget.AppWidgetManager;
 import android.content.ContentResolver;
 import android.content.Context;
 import android.content.Intent;
 import android.content.pm.PackageManager;
+import android.database.Cursor;
+import android.net.Uri;
 import android.os.Binder;
 import android.os.IBinder;
 import android.os.RemoteException;
@@ -31,9 +35,12 @@ import android.os.ServiceManager;
 import android.os.SystemClock;
 import android.os.UserHandle;
 import android.os.storage.IMountService;
+import android.provider.CalendarContract;
 import android.provider.Settings;
 import android.telephony.TelephonyManager;
 import android.text.TextUtils;
+import android.text.format.DateFormat;
+import android.text.format.Time;
 import android.util.Log;
 import android.view.IWindowManager;
 import android.view.View;
@@ -46,7 +53,10 @@ import com.google.android.collect.Lists;
 import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
 import java.security.SecureRandom;
+import java.text.SimpleDateFormat;
+import java.util.Date;
 import java.util.List;
+import java.util.TimeZone;
 
 /**
  * Utilities for the lock pattern and its settings.
@@ -149,6 +159,7 @@ public class LockPatternUtils {
     private final ContentResolver mContentResolver;
     private DevicePolicyManager mDevicePolicyManager;
     private ILockSettings mLockSettingsService;
+    private ProfileManager mProfileManager;
 
     private final boolean mMultiUserMode;
 
@@ -173,6 +184,7 @@ public class LockPatternUtils {
     public LockPatternUtils(Context context) {
         mContext = context;
         mContentResolver = context.getContentResolver();
+        mProfileManager = (ProfileManager) context.getSystemService(Context.PROFILE_SERVICE);
 
         // If this is being called by the system or by an application like keyguard that
         // has permision INTERACT_ACROSS_USERS, then LockPatternUtils will operate in multi-user
@@ -1258,9 +1270,25 @@ public class LockPatternUtils {
                 || mode == DevicePolicyManager.PASSWORD_QUALITY_ALPHABETIC
                 || mode == DevicePolicyManager.PASSWORD_QUALITY_ALPHANUMERIC
                 || mode == DevicePolicyManager.PASSWORD_QUALITY_COMPLEX;
-        final boolean secure = isPattern && isLockPatternEnabled() && savedPatternExists()
-                || isPassword && savedPasswordExists();
-        return secure;
+        final boolean hasPattern = isPattern && isLockPatternEnabled() && savedPatternExists();
+        final boolean hasPassword = isPassword && savedPasswordExists();
+
+        return (hasPattern || hasPassword) &&
+                getActiveProfileLockMode() == Profile.LockMode.DEFAULT;
+    }
+
+    public int getActiveProfileLockMode() {
+        // Check device policy
+        DevicePolicyManager dpm = (DevicePolicyManager)
+                mContext.getSystemService(Context.DEVICE_POLICY_SERVICE);
+
+        if (dpm.requireSecureKeyguard(getCurrentOrCallingUserId())) {
+            // Always enforce lock screen
+            return Profile.LockMode.DEFAULT;
+        }
+
+        final Profile profile = mProfileManager.getActiveProfile();
+        return profile.getScreenLockMode();
     }
 
     /**

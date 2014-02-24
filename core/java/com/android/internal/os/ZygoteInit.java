@@ -71,7 +71,7 @@ public class ZygoteInit {
     private static final int LOG_BOOT_PROGRESS_PRELOAD_END = 3030;
 
     /** when preloading, GC after allocating this many bytes */
-    private static final int PRELOAD_GC_THRESHOLD = 50000;
+    private static final int PRELOAD_GC_THRESHOLD = 1000000;
 
     public static final String USAGE_STRING =
             " <\"start-system-server\"|\"\" for startSystemServer>";
@@ -88,7 +88,7 @@ public class ZygoteInit {
      * The number of times that the main Zygote loop
      * should run before calling gc() again.
      */
-    static final int GC_LOOP_COUNT = 10;
+    static final int GC_LOOP_COUNT = 15;
 
     /**
      * The name of a resource file that contains classes to preload.
@@ -96,7 +96,7 @@ public class ZygoteInit {
     private static final String PRELOADED_CLASSES = "preloaded-classes";
 
     /** Controls whether we should preload resources during zygote init. */
-    private static final boolean PRELOAD_RESOURCES = true;
+    private static final boolean PRELOAD_RESOURCES = false;
 
     /**
      * Invokes a static "main(argv[]) method on class "className".
@@ -199,6 +199,16 @@ public class ZygoteInit {
         }
 
         sServerSocket = null;
+    }
+
+    /**
+     * Return the server socket's underlying file descriptor, so that
+     * ZygoteConnection can pass it to the native code for proper
+     * closure after a child process is forked off.
+     */
+
+    static FileDescriptor getServerSocketFileDescriptor() {
+        return sServerSocket.getFileDescriptor();
     }
 
     private static final int UNPRIVILEGED_UID = 9999;
@@ -370,6 +380,8 @@ public class ZygoteInit {
                 ar.recycle();
                 Log.i(TAG, "...preloaded " + N + " resources in "
                         + (SystemClock.uptimeMillis()-startTime) + "ms.");
+            } else {
+                Log.i(TAG, "Preload resources disabled, skipped.");
             }
             mResources.finishPreloading();
         } catch (RuntimeException e) {
@@ -504,7 +516,7 @@ public class ZygoteInit {
         String args[] = {
             "--setuid=1000",
             "--setgid=1000",
-            "--setgroups=1001,1002,1003,1004,1005,1006,1007,1008,1009,1010,1018,1021,1032,3001,3002,3003,3004,3006,3007,3009",
+            "--setgroups=1001,1002,1003,1004,1005,1006,1007,1008,1009,1010,1018,1021,1032,3001,3002,3003,3006,3007,3009",
             "--capabilities=" + capabilities + "," + capabilities,
             "--runtime-init",
             "--nice-name=system_server",

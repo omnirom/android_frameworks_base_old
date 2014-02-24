@@ -74,6 +74,8 @@ import android.widget.ImageView.ScaleType;
 import android.widget.ListView;
 import android.widget.TextView;
 
+import com.android.internal.app.ThemeUtils;
+
 import java.util.ArrayList;
 import java.util.List;
 import java.util.UUID;
@@ -155,6 +157,8 @@ class GlobalActions implements DialogInterface.OnDismissListener, DialogInterfac
         filter.addAction(Intent.ACTION_SCREEN_OFF);
         filter.addAction(TelephonyIntents.ACTION_EMERGENCY_CALLBACK_MODE_CHANGED);
         context.registerReceiver(mBroadcastReceiver, filter);
+
+        ThemeUtils.registerThemeChangeReceiver(context, mThemeChangeReceiver);
 
         // get notified of phone state changes
         TelephonyManager telephonyManager =
@@ -241,6 +245,7 @@ class GlobalActions implements DialogInterface.OnDismissListener, DialogInterfac
 
     private Context getUiContext() {
         if (mUiContext == null) {
+            mUiContext = ThemeUtils.createUiContext(mContext);
         }
         return mUiContext != null ? mUiContext : mContext;
     }
@@ -484,12 +489,12 @@ class GlobalActions implements DialogInterface.OnDismissListener, DialogInterfac
 
         mAdapter = new MyAdapter();
 
-        AlertParams params = new AlertParams(mContext);
+        AlertParams params = new AlertParams(getUiContext());
         params.mAdapter = mAdapter;
         params.mOnClickListener = this;
         params.mForceInverseBackground = true;
 
-        GlobalActionsDialog dialog = new GlobalActionsDialog(mContext, params);
+        GlobalActionsDialog dialog = new GlobalActionsDialog(getUiContext(), params);
         dialog.setCanceledOnTouchOutside(false); // Handled by the custom class.
 
         dialog.getListView().setItemsCanFocus(true);
@@ -903,7 +908,7 @@ private void createProfileDialog() {
         public View getView(int position, View convertView, ViewGroup parent) {
             Action action = getItem(position);
             final Context context = getUiContext();
-            return action.create(mContext, convertView, parent, LayoutInflater.from(mContext));
+            return action.create(context, convertView, parent, LayoutInflater.from(context));
         }
     }
 
@@ -1360,6 +1365,12 @@ private void createProfileDialog() {
             mAdapter.notifyDataSetChanged();
         }
     }
+
+    private BroadcastReceiver mThemeChangeReceiver = new BroadcastReceiver() {
+        public void onReceive(Context context, Intent intent) {
+            mUiContext = null;
+        }
+    };
 
     PhoneStateListener mPhoneStateListener = new PhoneStateListener() {
         @Override

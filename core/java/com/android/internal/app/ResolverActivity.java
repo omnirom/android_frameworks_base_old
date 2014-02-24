@@ -122,8 +122,8 @@ public class ResolverActivity extends AlertActivity implements AdapterView.OnIte
             CharSequence title, Intent[] initialIntents, List<ResolveInfo> rList,
             boolean alwaysUseOption) {
         if (getResources().getConfiguration().uiThemeMode
-                    == Configuration.UI_THEME_MODE_HOLO_LIGHT) {
-              setTheme(R.style.Theme_DeviceDefault_Light_Dialog_Alert);
+                    == Configuration.UI_THEME_MODE_HOLO_DARK) {
+              setTheme(R.style.Theme_DeviceDefault_Dialog_Alert);
         } else {
               setTheme(R.style.Theme_DeviceDefault_Light_Dialog_Alert);
         }
