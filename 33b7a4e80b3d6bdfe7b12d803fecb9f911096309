@@ -1,0 +1,21 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "8b77b57d_ebcbd11e",
+        "filename": "policy/src/com/android/internal/policy/impl/ImmersiveModeConfirmation.java",
+        "patchSetId": 13
+      },
+      "lineNbr": 251,
+      "author": {
+        "id": 1000117
+      },
+      "writtenOn": "2014-02-24T07:49:04Z",
+      "side": 1,
+      "message": "For some reason it can\u0027t find this even though you have added the layout...",
+      "revId": "33b7a4e80b3d6bdfe7b12d803fecb9f911096309",
+      "serverId": "56841c99-7c94-43d4-bf0b-cb4707e66d55",
+      "unresolved": false
+    }
+  ]
+}
