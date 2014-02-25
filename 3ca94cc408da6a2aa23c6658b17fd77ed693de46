@@ -1,0 +1,21 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "8b77b57d_dd6a5ce9",
+        "filename": "packages/SystemUI/src/com/android/systemui/statusbar/policy/activedisplay/ActiveDisplayView.java",
+        "patchSetId": 2
+      },
+      "lineNbr": 1323,
+      "author": {
+        "id": 1000313
+      },
+      "writtenOn": "2014-02-25T16:42:42Z",
+      "side": 1,
+      "message": "The problem is here, since this value will return true if device has proximity sensor, and now i add this code to always return true for  device without proximity sensor so they can use AD to showing notification :)",
+      "revId": "3ca94cc408da6a2aa23c6658b17fd77ed693de46",
+      "serverId": "56841c99-7c94-43d4-bf0b-cb4707e66d55",
+      "unresolved": false
+    }
+  ]
+}
