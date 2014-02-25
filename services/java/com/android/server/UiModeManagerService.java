@@ -162,6 +162,13 @@ final class UiModeManagerService extends IUiModeManager.Stub
         }
     };
 
+    private final BroadcastReceiver mThemeChangeReceiver = new BroadcastReceiver() {
+        @Override
+        public void onReceive(Context context, Intent intent) {
+            mUiContext = null;
+        }
+    };
+
     private boolean mAttached;
     private BroadcastReceiver mBroadcastReceiver = new BroadcastReceiver() {
         public void onReceive(Context context, Intent intent) {
@@ -196,13 +203,6 @@ final class UiModeManagerService extends IUiModeManager.Stub
                     sendConfigurationLocked();
                 }
             }
-        }
-    };
-
-    private final BroadcastReceiver mThemeChangeReceiver = new BroadcastReceiver() {
-        @Override
-        public void onReceive(Context context, Intent intent) {
-            mUiContext = null;
         }
     };
 
@@ -243,8 +243,9 @@ final class UiModeManagerService extends IUiModeManager.Stub
         mContext.registerReceiver(mBatteryReceiver,
                 new IntentFilter(Intent.ACTION_BATTERY_CHANGED));
 
-        mSensorManager = (SensorManager)(context.getSystemService(Context.SENSOR_SERVICE));
         ThemeUtils.registerThemeChangeReceiver(mContext, mThemeChangeReceiver);
+
+        mSensorManager = (SensorManager)(context.getSystemService(Context.SENSOR_SERVICE));
 
         mPowerManager = (PowerManager)context.getSystemService(Context.POWER_SERVICE);
         mWakeLock = mPowerManager.newWakeLock(PowerManager.FULL_WAKE_LOCK, TAG);
@@ -294,7 +295,6 @@ final class UiModeManagerService extends IUiModeManager.Stub
                 filter.addAction(Intent.ACTION_SCREEN_ON);
                 mContext.registerReceiver(mBroadcastReceiver, filter);
                 registerLightSensor();
-                return;
             }
         } else {
             if (mAttached) {
@@ -306,8 +306,7 @@ final class UiModeManagerService extends IUiModeManager.Stub
         }
 
         if (mUiThemeAutoMode == 2) {
-            updateTwilight();
-            return;
+            updateTwilightThemeAutoMode();
         }
 
         synchronized (mLock) {

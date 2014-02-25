@@ -413,8 +413,8 @@ final class ActivityRecord {
             if (realTheme == 0) {
                 realTheme = aInfo.applicationInfo.targetSdkVersion
                         < Build.VERSION_CODES.HONEYCOMB
-                        ? android.R.style.Theme_Light
-                        : android.R.style.Theme_Holo_Light;
+                        ? android.R.style.Theme
+                        : android.R.style.Theme_Holo;
             }
             if ((aInfo.flags&ActivityInfo.FLAG_HARDWARE_ACCELERATED) != 0) {
                 windowFlags |= WindowManager.LayoutParams.FLAG_HARDWARE_ACCELERATED;
