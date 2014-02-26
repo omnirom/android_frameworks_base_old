@@ -38,5 +38,6 @@
     <color name="status_bar_clock_color">#FFFFFFFF</color>
     <color name="qs_background_color">#FF161616</color>
     <color name="qs_background_pressed_color">#FF212121</color>
+    <color name="ad_notification_background_color">#3fff</color>
     <drawable name="qs_user_background">#CC000000</drawable>
 </resources>
