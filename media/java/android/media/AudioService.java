@@ -739,7 +739,8 @@ public class AudioService extends IAudioService.Stub {
         }
 
         mVolumeKeysDefault = Settings.System.getIntForUser(cr,
-                Settings.System.VOLUME_KEYS_DEFAULT, 1, UserHandle.USER_CURRENT);
+                Settings.System.VOLUME_KEYS_DEFAULT, mVoiceCapable ? AudioSystem.STREAM_RING :
+                AudioSystem.STREAM_MUSIC, UserHandle.USER_CURRENT);
 
         mMuteAffectedStreams = System.getIntForUser(cr,
                 System.MUTE_STREAMS_AFFECTED,
@@ -2877,34 +2878,30 @@ public class AudioService extends IAudioService.Stub {
                 if (isAfMusicActiveRecently(DEFAULT_STREAM_TYPE_OVERRIDE_DELAY_MS)) {
                     if (DEBUG_VOL) Log.v(TAG, "getActiveStreamType: forcing STREAM_MUSIC");
                     return AudioSystem.STREAM_MUSIC;
-                } else
+                } else {
                     if (mMediaFocusControl.checkUpdateRemoteStateIfActive(AudioSystem.STREAM_MUSIC))
                     {
                         if (DEBUG_VOL)
                             Log.v(TAG, "getActiveStreamType: Forcing STREAM_REMOTE_MUSIC");
                         return STREAM_REMOTE_MUSIC;
-                } else {
-                    if (DEBUG_VOL) Log.v(TAG, "getActiveStreamType: using STREAM_MUSIC as default");
-                    return AudioSystem.STREAM_MUSIC;
+                    } else {
+                        switch (mVolumeKeysDefault) {
+                            case AudioSystem.STREAM_DEFAULT:
+                                if (DEBUG_VOL)
+                                    Log.v(TAG, "getActiveStreamType: Forcing STREAM_DEFAULT b/c default setting");
+                                return AudioSystem.STREAM_DEFAULT;
+                            case AudioSystem.STREAM_MUSIC:
+                            default:
+                                if (DEBUG_VOL)
+                                    Log.v(TAG, "getActiveStreamType: Forcing STREAM_MUSIC b/c default setting");
+                                return AudioSystem.STREAM_MUSIC;
+                        }
+                    }
                 }
             } else {
-                if (suggestedStreamType == AudioManager.USE_DEFAULT_STREAM_TYPE) {
-                    switch (mVolumeKeysDefault) {
-                        case AudioSystem.STREAM_DEFAULT:
-                            if (DEBUG_VOL)
-                                Log.v(TAG, "getActiveStreamType: Forcing STREAM_DEFAULT b/c default setting");
-                            return AudioSystem.STREAM_DEFAULT;
-                        case AudioSystem.STREAM_MUSIC:
-                        default:
-                            if (DEBUG_VOL)
-                                Log.v(TAG, "getActiveStreamType: Forcing STREAM_MUSIC b/c default setting");
-                            return AudioSystem.STREAM_MUSIC;
-                    }
-                } else {
-                    if (DEBUG_VOL) Log.v(TAG, "getActiveStreamType: Returning suggested type "
-                            + suggestedStreamType);
-                    return suggestedStreamType;
-                }
+                if (DEBUG_VOL) Log.v(TAG, "getActiveStreamType: Returning suggested type "
+                        + suggestedStreamType);
+                return suggestedStreamType;
             }
         }
     }
@@ -3936,7 +3933,8 @@ public class AudioService extends IAudioService.Stub {
                     mStreamVolumeAlias[AudioSystem.STREAM_NOTIFICATION] = AudioSystem.STREAM_NOTIFICATION;
                 }
                 mVolumeKeysDefault = Settings.System.getIntForUser(mContentResolver,
-                        Settings.System.VOLUME_KEYS_DEFAULT, 1, UserHandle.USER_CURRENT);
+                        Settings.System.VOLUME_KEYS_DEFAULT, mVoiceCapable ? AudioSystem.STREAM_RING :
+                        AudioSystem.STREAM_MUSIC, UserHandle.USER_CURRENT);
 
                 reloadTouchSoundAssets();
             }
