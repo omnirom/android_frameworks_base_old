@@ -38,7 +38,7 @@
     <string name="network_3G_auto">2G/3G automatique</string>
     <string name="network_3G">2G/3G préféré</string>
     <string name="network_2G">2G seulement</string>
-    <string name="quick_settings_battery_health_unknown">\nInconnun</string>
+    <string name="quick_settings_battery_health_unknown">\nInconnu</string>
     <string name="quick_settings_battery_health_good">\nDieu</string>
     <string name="quick_settings_battery_health_overheat">\nSurchauffe</string>
     <string name="quick_settings_battery_health_dead">\nMort</string>
