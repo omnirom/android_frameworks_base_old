@@ -27,7 +27,7 @@ import android.view.View;
 import android.view.View.DragShadowBuilder;
 import android.view.View.OnTouchListener;
 
-class QuickSettingsTouchListener implements OnTouchListener {
+public class QuickSettingsTouchListener implements OnTouchListener {
 
     private final static double DISTANCE_THRESHOLD = 10.0;
 
@@ -92,8 +92,8 @@ class QuickSettingsTouchListener implements OnTouchListener {
 
             if (action == MotionEvent.ACTION_MOVE) {
                 mCurrentPoint = new Point((int) event.getX(), (int) event.getY());
-                double distance = Math.sqrt(Math.pow(mDragPoint.x - mCurrentPoint.x, 2)
-                        + Math.pow(mCurrentPoint.y - mCurrentPoint.y, 2));
+                double distance = Math.abs(mDragPoint.x - mCurrentPoint.x)
+                        + Math.abs(mDragPoint.y - mCurrentPoint.y);
 
                 // Only allow drag & drop when on edit mode
                 if (distance >= DISTANCE_THRESHOLD) {

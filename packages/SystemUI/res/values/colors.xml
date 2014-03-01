@@ -54,6 +54,7 @@
     <!-- Quick Settings -->
     <color name="qs_background_color">#FFf8f8f8</color>
     <color name="qs_background_pressed_color">#FF404040</color>
+    <drawable name="qs_user_background">#CC000000</drawable>
 
     <!-- Pie controls -->
     <color name="pie_overlay_color">#ff000000</color>

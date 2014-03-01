@@ -5183,6 +5183,12 @@ public final class Settings {
         public static final String ADB_ENABLED = Global.ADB_ENABLED;
 
         /**
+         * The hostname for this device
+         * @hide
+         */
+        public static final String DEVICE_HOSTNAME = "device_hostname";
+
+        /**
          * The TCP/IP port to run ADB on, or -1 for USB
          * @hide
          */
@@ -5199,12 +5205,6 @@ public final class Settings {
          * @hide
          */
         public static final String ADB_PARANOID = "adb_paranoid";
-
-        /**
-         * The hostname for this device
-         * @hide
-         */
-        public static final String DEVICE_HOSTNAME = "device_hostname";
 
         /**
          * Setting to allow mock locations and location provider status to be injected into the
