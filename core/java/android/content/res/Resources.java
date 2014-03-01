@@ -132,8 +132,8 @@ public class Resources {
     /** @hide */
     public static int selectDefaultTheme(int curTheme, int targetSdkVersion) {
         return selectSystemTheme(curTheme, targetSdkVersion,
-                com.android.internal.R.style.Theme_Light,
-                com.android.internal.R.style.Theme_Holo_Light,
+                com.android.internal.R.style.Theme,
+                com.android.internal.R.style.Theme_Holo,
                 com.android.internal.R.style.Theme_DeviceDefault);
     }
     

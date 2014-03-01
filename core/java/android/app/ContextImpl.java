@@ -449,8 +449,8 @@ class ContextImpl extends Context {
                                 Resources.selectSystemTheme(0,
                                         outerContext.getApplicationInfo().targetSdkVersion,
                                         com.android.internal.R.style.Theme_Dialog,
-                                        com.android.internal.R.style.Theme_Holo_Light_Dialog,
-                                        com.android.internal.R.style.Theme_DeviceDefault_Light_Dialog)),
+                                        com.android.internal.R.style.Theme_Holo_Dialog,
+                                        com.android.internal.R.style.Theme_DeviceDefault_Dialog)),
                         ctx.mMainThread.getHandler());
                 }});
 

@@ -129,11 +129,11 @@ public class AlertDialog extends Dialog implements DialogInterface {
         if (resid == THEME_TRADITIONAL) {
             return com.android.internal.R.style.Theme_Dialog_Alert;
         } else if (resid == THEME_HOLO_DARK) {
-            return com.android.internal.R.style.Theme_Holo_Light_Dialog_Alert;
+            return com.android.internal.R.style.Theme_Holo_Dialog_Alert;
         } else if (resid == THEME_HOLO_LIGHT) {
             return com.android.internal.R.style.Theme_Holo_Light_Dialog_Alert;
         } else if (resid == THEME_DEVICE_DEFAULT_DARK) {
-            return com.android.internal.R.style.Theme_DeviceDefault_Light_Dialog_Alert;
+            return com.android.internal.R.style.Theme_DeviceDefault_Dialog_Alert;
         } else if (resid == THEME_DEVICE_DEFAULT_LIGHT) {
             return com.android.internal.R.style.Theme_DeviceDefault_Light_Dialog_Alert;
         } else if (resid >= 0x01000000) {   // start of real resource IDs.
