@@ -16,6 +16,58 @@
       "revId": "976c7f8cacfc867fda858311c172b60d7c1d2a03",
       "serverId": "56841c99-7c94-43d4-bf0b-cb4707e66d55",
       "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "8b77b57d_765fa512",
+        "filename": "services/java/com/android/server/NotificationManagerService.java",
+        "patchSetId": 3
+      },
+      "lineNbr": 1219,
+      "author": {
+        "id": 1000026
+      },
+      "writtenOn": "2014-03-01T11:22:48Z",
+      "side": 1,
+      "message": "yes it should",
+      "parentUuid": "ab62b9bd_9e4c47e5",
+      "revId": "976c7f8cacfc867fda858311c172b60d7c1d2a03",
+      "serverId": "56841c99-7c94-43d4-bf0b-cb4707e66d55",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "8b77b57d_965c411e",
+        "filename": "services/java/com/android/server/NotificationManagerService.java",
+        "patchSetId": 3
+      },
+      "lineNbr": 2371,
+      "author": {
+        "id": 1000026
+      },
+      "writtenOn": "2014-03-01T11:22:48Z",
+      "side": 1,
+      "message": "this should be create as class local variable and set using the already available SettingsObserver - there is no need to access that every time. See same code in mIntentReceiver above",
+      "revId": "976c7f8cacfc867fda858311c172b60d7c1d2a03",
+      "serverId": "56841c99-7c94-43d4-bf0b-cb4707e66d55",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "8b77b57d_5662a9d7",
+        "filename": "services/java/com/android/server/NotificationManagerService.java",
+        "patchSetId": 3
+      },
+      "lineNbr": 2385,
+      "author": {
+        "id": 1000026
+      },
+      "writtenOn": "2014-03-01T11:22:48Z",
+      "side": 1,
+      "message": "no need for an extra brace around ScreenOnNotificationLed",
+      "revId": "976c7f8cacfc867fda858311c172b60d7c1d2a03",
+      "serverId": "56841c99-7c94-43d4-bf0b-cb4707e66d55",
+      "unresolved": false
     }
   ]
 }
