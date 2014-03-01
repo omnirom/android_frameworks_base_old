@@ -77,7 +77,8 @@ public class Clock extends TextView implements DemoMode {
     protected int mClockDateDisplay = CLOCK_DATE_DISPLAY_GONE;
     protected int mClockDateStyle = CLOCK_DATE_STYLE_UPPERCASE;
     protected int mClockStyle = STYLE_CLOCK_RIGHT;
-    protected boolean mShowClock;
+    protected boolean mShowClock = true;
+    protected boolean mShowClockStatusBar = true;
 
     private int mAmPmStyle;
 
@@ -341,8 +342,13 @@ public class Clock extends TextView implements DemoMode {
 
     }
 
-    protected void updateClockVisibility() {
-        if (mClockStyle == STYLE_CLOCK_RIGHT && mShowClock) {
+    public void updateVisibilityFromStatusBar(boolean show) {
+        mShowClockStatusBar = show;
+        updateClockVisibility();
+    }
+
+    public void updateClockVisibility() {
+        if (mClockStyle == STYLE_CLOCK_RIGHT && mShowClock && mShowClockStatusBar) {
             setVisibility(View.VISIBLE);
         } else {
             setVisibility(View.GONE);

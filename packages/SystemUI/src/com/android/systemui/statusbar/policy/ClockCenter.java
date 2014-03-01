@@ -35,14 +35,15 @@ public class ClockCenter extends Clock {
         super(context, attrs, defStyle);
     }
 
+    @Override
     public void updateVisibilityFromStatusBar(boolean show) {
-        if (mClockStyle == STYLE_CLOCK_CENTER) {
-            setVisibility(show ? View.VISIBLE : View.GONE);
-        }
+        mShowClockStatusBar = show;
+        updateClockVisibility();
     }
 
-    protected void updateClockVisibility() {
-        if (mClockStyle == STYLE_CLOCK_CENTER && mShowClock) {
+    @Override
+    public void updateClockVisibility() {
+        if (mClockStyle == STYLE_CLOCK_CENTER && mShowClock && mShowClockStatusBar) {
             setVisibility(View.VISIBLE);
         } else {
             setVisibility(View.GONE);

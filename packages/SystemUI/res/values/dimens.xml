@@ -224,8 +224,6 @@
     <!-- Quick Settings tile geometry: gap between icon and text 5 per row-->
     <dimen name="qs_5_column_text_padding">12dp</dimen>
 
-    <!-- Quick Settings tile geometry: text size for 5 tile per row-->
-    <dimen name="qs_5_column_text_size">9sp</dimen>
 
     <!-- Pie controls -->
     <!-- Padding between the pie controls and the screen border -->
