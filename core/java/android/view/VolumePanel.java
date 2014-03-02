@@ -356,6 +356,8 @@ public class VolumePanel extends Handler implements OnSeekBarChangeListener, Vie
                 Settings.System.MODE_VOLUME_OVERLAY, VOLUME_OVERLAY_EXPANDABLE,
                 UserHandle.USER_CURRENT);
         changeOverlayStyle(chosenStyle);
+        mCustomTimeoutDelay = Settings.System.getInt(mContext.getContentResolver(),
+                Settings.System.VOLUME_PANEL_TIMEOUT, TIMEOUT_DELAY);
 
         context.getContentResolver().registerContentObserver(
                 Settings.System.getUriFor(Settings.System.VOLUME_LINK_NOTIFICATION), false,
@@ -363,6 +365,9 @@ public class VolumePanel extends Handler implements OnSeekBarChangeListener, Vie
         context.getContentResolver().registerContentObserver(
                 Settings.System.getUriFor(Settings.System.MODE_VOLUME_OVERLAY), false,
                 mSettingsObserver, UserHandle.USER_ALL);
+        context.getContentResolver().registerContentObserver(
+                Settings.System.getUriFor(Settings.System.VOLUME_PANEL_TIMEOUT), false,
+                mSettingsObserver);
         context.getContentResolver().registerContentObserver(
                 Settings.System.getUriFor(Settings.System.VOLUME_PANEL_TIMEOUT), false,
                 mSettingsObserver);

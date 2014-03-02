@@ -849,7 +849,7 @@ class ServerThread {
                 }
             }
 
-             if (context.getResources().getBoolean(R.bool.config_hasRotationLockSwitch)) {
+            if (context.getResources().getBoolean(R.bool.config_hasRotationLockSwitch)) {
                 try {
                     switchObserver = new RotationSwitchObserver(context);
                 }

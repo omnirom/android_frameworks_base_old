@@ -46,7 +46,7 @@ along with this program. If not, see <http://www.gnu.org/licenses/>.
     <string name="quick_settings_network_type">Status</string>
     <string name="quick_settings_network_unknown">Unbekannt</string>
     <string name="quick_settings_network_disable">\nKeine Verbindung</string>
-    <string name="status_bar_notification_hide_icon_packages">l\'Benachrichtigung(en) ausblenden</string>
+    <string name="status_bar_notification_hide_icon_packages">Benachrichtigung(en) ausblenden</string>
     <string name="network_4G">4G</string>
     <string name="quick_settings_ringer_on">Ton an</string>
     <string name="quick_settings_ringer_off">Ton aus</string>
