@@ -1,0 +1,38 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "8b77b57d_3698cd7b",
+        "filename": "packages/SystemUI/src/com/android/systemui/widget/RoundedDrawable.java",
+        "patchSetId": 6
+      },
+      "lineNbr": 3,
+      "author": {
+        "id": 1000032
+      },
+      "writtenOn": "2014-03-02T03:54:56Z",
+      "side": 1,
+      "message": "Holy Whitespace Batman",
+      "revId": "80f9500df265737a017b58d017e3a08162f6b5c2",
+      "serverId": "56841c99-7c94-43d4-bf0b-cb4707e66d55",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "8b77b57d_56954942",
+        "filename": "packages/SystemUI/src/com/android/systemui/widget/RoundedImageView.java",
+        "patchSetId": 6
+      },
+      "lineNbr": 3,
+      "author": {
+        "id": 1000032
+      },
+      "writtenOn": "2014-03-02T03:54:56Z",
+      "side": 1,
+      "message": "Holy Whitespace Batman",
+      "revId": "80f9500df265737a017b58d017e3a08162f6b5c2",
+      "serverId": "56841c99-7c94-43d4-bf0b-cb4707e66d55",
+      "unresolved": false
+    }
+  ]
+}
