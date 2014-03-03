@@ -90,22 +90,22 @@ public class CamcorderProfile
      */
     public static final int QUALITY_QVGA = 7;
 
-    /**
-     * {@hide}
+    /** @hide
+     * Quality level corresponding to the FWVGA resolution.
      */
     public static final int QUALITY_FWVGA = 8;
-    /**
-     * {@hide}
+    /** @hide
+     * Quality level corresponding to the WVGA resolution.
      */
     public static final int QUALITY_WVGA = 9;
 
-    /**
-     * {@hide}
+    /** @hide
+     * Quality level corresponding to the VGA resolution.
      */
     public static final int QUALITY_VGA = 10;
 
-    /**
-     * {@hide}
+    /** @hide
+     * Quality level corresponding to the WQVGA resolution.
      */
     public static final int QUALITY_WQVGA = 11;
 
@@ -122,7 +122,7 @@ public class CamcorderProfile
 
     // Start and end of quality list
     private static final int QUALITY_LIST_START = QUALITY_LOW;
-    private static final int QUALITY_LIST_END = QUALITY_WQVGA;
+    private static final int QUALITY_LIST_END = QUALITY_4kDCI;
 
     /**
      * Time lapse quality level corresponding to the lowest available resolution.

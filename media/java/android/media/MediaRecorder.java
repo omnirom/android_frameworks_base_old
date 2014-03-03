@@ -1,4 +1,7 @@
 /*
+ * Copyright (c) 2013, The Linux Foundation. All rights reserved.
+ * Not a Contribution.
+ *
  * Copyright (C) 2007 The Android Open Source Project
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
@@ -717,6 +720,10 @@ public class MediaRecorder
      * prepare().
      */
     public native void start() throws IllegalStateException;
+
+    /** @hide
+    */
+    public native void pause() throws IllegalStateException;
 
     /**
      * Stops recording. Call this after start(). Once recording is stopped,
