@@ -16,6 +16,24 @@
       "revId": "669b3aaab42bbdc2ce6ea5154bd2f99ece72e507",
       "serverId": "56841c99-7c94-43d4-bf0b-cb4707e66d55",
       "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "8b77b57d_47b2f14a",
+        "filename": "core/res/res/xml/storage_list_legacy.xml",
+        "patchSetId": 3
+      },
+      "lineNbr": 1,
+      "author": {
+        "id": 1000170
+      },
+      "writtenOn": "2014-03-06T23:53:03Z",
+      "side": 1,
+      "message": "I\u0027ll have to double check that my editor isn\u0027t doing that to them, but I think this was a straight copy of storage_list.xml.",
+      "parentUuid": "8b77b57d_67628dd8",
+      "revId": "669b3aaab42bbdc2ce6ea5154bd2f99ece72e507",
+      "serverId": "56841c99-7c94-43d4-bf0b-cb4707e66d55",
+      "unresolved": false
     }
   ]
 }
