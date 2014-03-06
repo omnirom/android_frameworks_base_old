@@ -57,6 +57,7 @@
     <TextView
         style="@style/TextAppearance.QuickSettings.TileView"
         android:id="@+id/function"
+        android:textAllCaps="false"
         android:layout_width="match_parent"
         android:layout_height="match_parent"
         android:layout_weight="1"
