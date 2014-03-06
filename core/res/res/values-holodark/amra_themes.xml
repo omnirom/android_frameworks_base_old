@@ -1,0 +1,271 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!-- Copyright (C) 2011 The Android Open Source Project
+
+     Licensed under the Apache License, Version 2.0 (the "License");
+     you may not use this file except in compliance with the License.
+     You may obtain a copy of the License at
+
+          http://www.apache.org/licenses/LICENSE-2.0
+
+     Unless required by applicable law or agreed to in writing, software
+     distributed under the License is distributed on an "AS IS" BASIS,
+     WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+     See the License for the specific language governing permissions and
+     limitations under the License.
+-->
+
+<!--
+===============================================================
+                        PLEASE READ
+===============================================================
+This file contains the themes that are the Device Defaults.
+If you want to edit themes to skin your device, do it here.
+We recommend that you do not edit themes.xml and instead edit
+this file.
+
+Editing this file instead of themes.xml will greatly simplify
+merges for future platform versions and CTS compliance will be
+easier.
+===============================================================
+                        PLEASE READ
+===============================================================
+ -->
+<resources>
+
+    <!-- The default theme for apps that target API level 14 and higher.
+         <p>The DeviceDefault themes are aliases for a specific device’s native look and feel. The
+         DeviceDefault theme family and widget style family offer ways for you to target your app
+         to a device’s native theme with all device customizations intact.</p>
+         <p>For example, when you set your app's {@code targetSdkVersion} to 14 or higher, this
+         theme is applied to your application by default. As such, your app might appear with the
+         {@link #Theme_Holo Holo} styles on one device, but with a different set of styles on
+         another device. This is great if you want your app to fit with the device's native look and
+         feel. If, however, you prefer to keep your UI style the same across all devices, you should
+         apply a specific theme such as {@link #Theme_Holo Holo} or one of your own design. For more
+         information, read <a
+         href="http://android-developers.blogspot.com/2012/01/holo-everywhere.html">Holo
+         Everywhere</a>.</p>
+         <p>Styles used by the DeviceDefault theme are named using the convention
+         Type.DeviceDefault.Etc (for example, {@code Widget.DeviceDefault.Button} and
+         {@code TextAppearance.DeviceDefault.Widget.PopupMenu.Large}).</p>
+          -->
+
+    <style name="Amra" parent="@style/Theme">
+    </style>
+    <style name="Amra.Theme" parent="@style/Amra">
+    </style>
+
+     <style name="Amra.Theme.Dialog" parent="@style/Theme">
+    </style>
+
+    <!-- Holo light theme for dialog windows and activities, which is used by the
+         {@link android.app.Dialog} class.  This changes the window to be
+         floating (not fill the entire screen), and puts a frame around its
+         contents.  You can set this theme on an activity if you would like to
+         make an activity that looks like a Dialog.
+         This is the default Dialog theme for applications targeting Honeycomb
+         or newer. -->
+    <style name="Amra.Theme.Holo.Dialog" parent="@style/Theme.Holo.Dialog">
+        <item name="android:windowFrame">@null</item>
+        <item name="android:textColor">#ffffffff</item>
+        <item name="android:windowTitleStyle">@android:style/DialogWindowTitle.Holo</item>
+        <item name="android:windowBackground">@android:drawable/dialog_full_holo_dark</item>
+        <item name="android:windowIsFloating">true</item>
+        <item name="android:windowContentOverlay">@null</item>
+        <item name="android:windowAnimationStyle">@android:style/Animation.Holo.Dialog</item>
+        <item name="android:windowSoftInputMode">stateUnspecified|adjustPan</item>
+        <item name="android:windowActionBar">false</item>
+        <item name="android:windowActionModeOverlay">true</item>
+        <item name="android:windowCloseOnTouchOutside">@bool/config_closeDialogWhenTouchOutside</item>
+
+        <item name="android:colorBackgroundCacheHint">@null</item>
+
+        <item name="android:buttonBarStyle">@android:style/Holo.ButtonBar.AlertDialog</item>
+        <item name="borderlessButtonStyle">@android:style/Widget.Holo.Button.Borderless.Small</item>
+        
+        <item name="textAppearance">@android:style/TextAppearance.Holo</item>
+        <item name="textAppearanceInverse">@android:style/TextAppearance.Holo.Inverse</item>
+
+        <item name="listPreferredItemPaddingLeft">16dip</item>
+        <item name="listPreferredItemPaddingRight">16dip</item>
+        <item name="listPreferredItemPaddingStart">16dip</item>
+        <item name="listPreferredItemPaddingEnd">16dip</item>
+
+        <item name="preferencePanelStyle">@style/PreferencePanel.Dialog</item>
+    </style>
+
+    <!-- Variant of Theme.Holo.Dialog that does not include a frame (or background).
+         The view hierarchy of the dialog is responsible for drawing all of
+         its pixels. -->
+    <style name="Amra.Theme.Holo.Dialog.NoFrame" parent="@style/Amra.Theme.Holo.Dialog">
+        <item name="windowBackground">@android:color/transparent</item>
+        <item name="android:textColor">#ffffffff</item>
+        <item name="android:windowFrame">@null</item>
+        <item name="windowContentOverlay">@null</item>
+        <item name="android:windowAnimationStyle">@null</item>
+        <item name="android:backgroundDimEnabled">false</item>
+        <item name="android:windowIsTranslucent">true</item>
+        <item name="android:windowNoTitle">true</item>
+        <item name="android:windowCloseOnTouchOutside">false</item>
+    </style>
+
+    <!-- Holo theme for alert dialog windows, which is used by the
+         {@link android.app.AlertDialog} class.  This is basically a dialog
+         but sets the background to empty so it can do two-tone backgrounds.
+         For applications targeting Honeycomb or newer, this is the default
+         AlertDialog theme. -->
+    <style name="Amra.Theme.Holo.Dialog.Alert" parent="@style/Amra.Theme.Holo.Dialog">
+        <item name="windowBackground">@android:color/transparent</item>
+        <item name="android:textColor">#ffffffff</item>
+        <item name="windowTitleStyle">@android:style/DialogWindowTitle.Holo</item>
+        <item name="windowContentOverlay">@null</item>
+        <item name="android:windowMinWidthMajor">@android:dimen/dialog_min_width_major</item>
+        <item name="android:windowMinWidthMinor">@android:dimen/dialog_min_width_minor</item>
+    </style>
+
+    <!-- Amra theme (dark version).  The widgets in the
+         holographic theme are translucent on their brackground, so applications
+         must ensure that any background they use with this theme is itself
+         light; otherwise, it will be difficult to see the widgets.  This
+         UI style also includes a full action bar by default. -->
+    <style name="Amra.Theme.Holo" parent="@android:style/Theme.Holo">
+    </style>
+
+    <!-- Variant of Amra.Theme.Holo.Dialog that does not include a title bar. -->
+    <style name="Amra.Theme.Holo.Dialog.NoActionBar" parent="@style/Theme.Holo.Light.Dialog.NoActionBar">
+        <item name="android:windowActionBar">false</item>
+        <item name="android:windowNoTitle">true</item>
+    </style>
+
+    <!-- Theme for a window that will be displayed either full-screen on
+         smaller screens (small, normal) or as a dialog on larger screens
+         (large, xlarge). -->
+    <style name="Amra.Theme.Holo.DialogWhenLarge" parent="@android:style/Theme.Holo.Light">
+    </style>
+
+    <!-- Theme for a window without an action bar that will be displayed either full-screen
+         on smaller screens (small, normal) or as a dialog on larger screens
+         (large, xlarge). -->
+    <style name="Amra.Theme.Holo.DialogWhenLarge.NoActionBar"
+            parent="@android:style/Theme.Holo.Light.NoActionBar">
+    </style>
+
+    <!-- Variant of {@link Theme_Dialog} that does not include a frame (or background).
+         The view hierarchy of the dialog is responsible for drawing all of
+         its pixels. -->
+
+    <style name="Amra.TextAppearance" parent="@style/TextAppearance">
+        <item name="textSize">16.0sp</item>
+        <item name="textStyle">normal</item>
+        <item name="textColor">#ffffffff</item>
+        <item name="textColorHighlight">?textColorHighlight</item>
+        <item name="textColorHint">?textColorHint</item>
+        <item name="textColorLink">?textColorLink</item>
+    </style>
+    <style name="Amra.Widget" parent="@style/Widget">
+        <item name="textAppearance">?textAppearance</item>
+        <item name="textColor">#ffffffff</item>
+    </style>
+    <style name="Amra.TextAppearance.Large" parent="@style/TextAppearance">
+        <item name="textSize">22.0sp</item>
+    </style>
+    <style name="Amra.TextAppearance.Medium" parent="@style/TextAppearance">
+        <item name="textSize">18.0sp</item>
+    </style>
+    <style name="Amra.TextAppearance.Small" parent="@style/TextAppearance">
+        <item name="textSize">14.0sp</item>
+    </style>
+    <style name="Amra.TextAppearance.Widget" parent="@style/TextAppearance" />
+    <style name="Widget.AbsListView.Light" parent="@style/Widget">
+        <item name="scrollbars">vertical</item>
+        <item name="fadingEdge">vertical</item>
+    </style>
+    <style name="Amra.Widget.TextView" parent="@style/Widget">
+        <item name="textAppearance">?textAppearanceSmall</item>
+        <item name="textSelectHandleLeft">?textSelectHandleLeft</item>
+        <item name="textSelectHandleRight">?textSelectHandleRight</item>
+        <item name="textSelectHandle">?textSelectHandle</item>
+        <item name="textEditPasteWindowLayout">?textEditPasteWindowLayout</item>
+        <item name="textEditNoPasteWindowLayout">?textEditNoPasteWindowLayout</item>
+        <item name="textEditSidePasteWindowLayout">?textEditSidePasteWindowLayout</item>
+        <item name="textEditSideNoPasteWindowLayout">?textEditSideNoPasteWindowLayout</item>
+        <item name="textCursorDrawable">?textCursorDrawable</item>
+        <item name="textEditSuggestionItemLayout">?textEditSuggestionItemLayout</item>
+    </style>
+    <style name="Amra.Widget.ListView.Menu" parent="@style/Widget.Holo.ListView">
+        <item name="textColor">#ffffffff</item>
+        <item name="background">#ff000000</item>
+        <item name="scrollbars">vertical</item>
+        <item name="fadingEdge">none</item>
+        <item name="cacheColorHint">@null</item>
+        <item name="divider">@drawable/divider_horizontal_dark</item>
+    </style>
+    <style name="Amra.Widget.EditText" parent="@style/Widget">
+        <item name="textAppearance">?textAppearanceMediumInverse</item>
+        <item name="textColor">?editTextColor</item>
+        <item name="gravity">center_vertical</item>
+        <item name="background">?editTextBackground</item>
+        <item name="focusable">true</item>
+        <item name="focusableInTouchMode">true</item>
+        <item name="clickable">true</item>
+    </style>
+    <style name="Amra.Widget.TextView.ListSeparator" parent="@style/Widget.TextView">
+        <item name="textSize">14.0sp</item>
+        <item name="textStyle">bold</item>
+        <item name="textColor">#ffffffff</item>
+        <item name="gravity">center_vertical</item>
+        <item name="background">@drawable/light_header_dither</item>
+        <item name="layout_width">fill_parent</item>
+        <item name="layout_height">wrap_content</item>
+        <item name="paddingStart">8.0dip</item>
+    </style>
+    <style name="Amra.Widget.ExpandableListView" parent="@style/Widget.ListView">
+        <item name="textColor">#ffffffff</item>
+        <item name="background">#ff000000</item>
+        <item name="groupIndicator">@drawable/expander_group</item>
+        <item name="indicatorLeft">?expandableListPreferredItemIndicatorLeft</item>
+        <item name="indicatorRight">?expandableListPreferredItemIndicatorRight</item>
+        <item name="childDivider">@drawable/divider_horizontal_dark_opaque</item>
+    </style>
+    <style name="Amra.Widget.ListView" parent="@style/Widget.AbsListView">
+        <item name="listSelector">@drawable/list_selector_background</item>
+        <item name="cacheColorHint">?colorBackgroundCacheHint</item>
+        <item name="divider">@drawable/divider_horizontal_bright_opaque</item>
+    </style>
+
+    <style name="Amra.AlertDialog">
+        <item name="fullDark">@android:drawable/popup_full_dark</item>
+        <item name="topDark">@android:drawable/popup_top_dark</item>
+        <item name="centerDark">@android:drawable/popup_center_dark</item>
+        <item name="bottomDark">@android:drawable/popup_bottom_dark</item>
+        <item name="fullBright">@android:drawable/popup_full_bright</item>
+        <item name="topBright">@android:drawable/popup_top_bright</item>
+        <item name="centerBright">@android:drawable/popup_center_bright</item>
+        <item name="bottomBright">@android:drawable/popup_bottom_bright</item>
+        <item name="bottomMedium">@android:drawable/popup_bottom_medium</item>
+        <item name="centerMedium">@android:drawable/popup_center_medium</item>
+        <item name="progressLayout">@android:layout/progress_dialog</item>
+        <item name="horizontalProgressLayout">@android:layout/alert_dialog_progress</item>
+    </style>
+
+    <style name="Amra.AlertDialog.Holo" parent="AlertDialog">
+        <item name="fullDark">@android:drawable/dialog_full_holo_dark</item>
+        <item name="topDark">@android:drawable/dialog_top_holo_dark</item>
+        <item name="centerDark">@android:drawable/dialog_middle_holo_dark</item>
+        <item name="bottomDark">@android:drawable/dialog_bottom_holo_dark</item>
+        <item name="fullBright">@android:drawable/dialog_full_holo_dark</item>
+        <item name="topBright">@android:drawable/dialog_top_holo_dark</item>
+        <item name="centerBright">@android:drawable/dialog_middle_holo_dark</item>
+        <item name="bottomBright">@android:drawable/dialog_bottom_holo_dark</item>
+        <item name="bottomMedium">@android:drawable/dialog_bottom_holo_dark</item>
+        <item name="centerMedium">@android:drawable/dialog_middle_holo_dark</item>
+        <item name="layout">@android:layout/alert_dialog_holo</item>
+        <item name="listLayout">@android:layout/select_dialog_holo</item>
+        <item name="progressLayout">@android:layout/progress_dialog_holo</item>
+        <item name="horizontalProgressLayout">@android:layout/alert_dialog_progress_holo</item>
+        <item name="listItemLayout">@android:layout/select_dialog_item_holo</item>
+        <item name="multiChoiceItemLayout">@android:layout/select_dialog_multichoice_holo</item>
+        <item name="singleChoiceItemLayout">@android:layout/select_dialog_singlechoice_holo</item>
+    </style>
+
+</resources>
