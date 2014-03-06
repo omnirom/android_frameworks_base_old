@@ -1,0 +1,21 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "8b77b57d_67628dd8",
+        "filename": "core/res/res/xml/storage_list_legacy.xml",
+        "patchSetId": 3
+      },
+      "lineNbr": 1,
+      "author": {
+        "id": 1000026
+      },
+      "writtenOn": "2014-03-06T23:22:26Z",
+      "side": 1,
+      "message": "any reason for this file to be in DOS format? :)",
+      "revId": "669b3aaab42bbdc2ce6ea5154bd2f99ece72e507",
+      "serverId": "56841c99-7c94-43d4-bf0b-cb4707e66d55",
+      "unresolved": false
+    }
+  ]
+}
