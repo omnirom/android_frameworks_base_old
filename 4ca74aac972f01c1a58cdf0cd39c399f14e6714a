@@ -1,0 +1,21 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "8b77b57d_a25c931d",
+        "filename": "core/java/android/provider/Settings.java",
+        "patchSetId": 22
+      },
+      "lineNbr": 5532,
+      "author": {
+        "id": 1000026
+      },
+      "writtenOn": "2014-03-08T11:14:30Z",
+      "side": 1,
+      "message": "this is missing a @hide",
+      "revId": "4ca74aac972f01c1a58cdf0cd39c399f14e6714a",
+      "serverId": "56841c99-7c94-43d4-bf0b-cb4707e66d55",
+      "unresolved": false
+    }
+  ]
+}
