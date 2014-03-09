@@ -47,6 +47,7 @@ public class ActiveDisplayHost extends FrameLayout {
     private Drawable mCustomBackground;
     private int mScreenWidth;
     private int mScreenHeight;
+    private Bitmap mBitmap = null;
 
     // This is a faster way to draw the background on devices without hardware acceleration
     private final Drawable mBackgroundDrawable = new Drawable() {
@@ -100,13 +101,17 @@ public class ActiveDisplayHost extends FrameLayout {
     }
 
     public void updateCustomBackground(boolean isBlur) {
-        Bitmap bmp = getBitmapForBackground();
-        if ((bmp != null) && isBlur) {
+        mBitmap = getBitmapForBackground();
+        if ((mBitmap != null) && isBlur) {
             setCustomBackground(new BitmapDrawable(mContext.getResources(),
-                bmp));
+                mBitmap));
         } else {
             setCustomBackground(null);
         }
+    }
+
+    public void updateWallpaper() {
+        mBitmap = getBitmapForBackground();
     }
 
     public void setCustomBackground(Drawable d) {
@@ -147,7 +152,8 @@ public class ActiveDisplayHost extends FrameLayout {
     }
 
     private void computeCustomBackgroundBounds(Drawable background) {
-        if (mCustomBackground == null) return; // Nothing to do
+        if (background == null) return; // Nothing to do
+        if (!isLaidOut()) return; // We'll do this later
 
         final int bgWidth = background.getIntrinsicWidth();
         final int bgHeight = background.getIntrinsicHeight();
