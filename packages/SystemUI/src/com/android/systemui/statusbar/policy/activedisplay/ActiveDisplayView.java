@@ -240,7 +240,7 @@ public class ActiveDisplayView extends FrameLayout
     private class INotificationListenerWrapper extends INotificationListener.Stub {
         @Override
         public void onNotificationPosted(final StatusBarNotification sbn) {
-            if (shouldShowNotification() && isValidNotification(sbn) && !inQuietHoursDim()) {
+            if (shouldShowNotification() && isValidNotification(sbn) && !inQuietHours()) {
                 // need to make sure either the screen is off or the user is currently
                 // viewing the notifications
                 if (getVisibility() == View.VISIBLE || !isScreenOn()) {
@@ -563,7 +563,7 @@ public class ActiveDisplayView extends FrameLayout
     public synchronized void onFar() {
         mProximityIsFar = true;
         if (!isScreenOn() && mPocketMode != POCKET_MODE_OFF
-            && !isOnCall() && mDisplayNotifications && !inQuietHoursDim()) {
+            && !isOnCall() && mDisplayNotifications && !inQuietHours()) {
             if ((System.currentTimeMillis() >= (mPocketTime + mProximityThreshold)) && (mPocketTime != 0)) {
                 if (mNotification == null) {
                     mNotification = getNextAvailableNotification();
@@ -932,7 +932,7 @@ public class ActiveDisplayView extends FrameLayout
     private void handleShowNotification(boolean ping) {
         if (!mDisplayNotifications
             || mNotification == null
-            || inQuietHoursDim()) return;
+            || inQuietHours()) return;
         handleShowNotificationView();
         setActiveNotification(mNotification, true);
         inflateRemoteView(mNotification);
@@ -993,8 +993,10 @@ public class ActiveDisplayView extends FrameLayout
         setVisibility(View.GONE);
     }
 
-    private boolean inQuietHoursDim() {
-        return QuietHoursHelper.inQuietHours(mContext, Settings.System.QUIET_HOURS_DIM);
+    private boolean inQuietHours() {
+        boolean isQuietHourDim = QuietHoursHelper.inQuietHours(mContext, Settings.System.QUIET_HOURS_DIM);
+        boolean isQuietHourMute = QuietHoursHelper.inQuietHours(mContext, Settings.System.QUIET_HOURS_MUTE);
+        return isQuietHourDim || isQuietHourMute;
     }
 
     private void onScreenTurnedOn() {
