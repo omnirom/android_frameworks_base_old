@@ -24,6 +24,7 @@ import android.app.Notification;
 import android.app.PendingIntent;
 import android.app.PendingIntent.CanceledException;
 import android.app.StatusBarManager;
+import android.app.WallpaperManager;
 import android.content.BroadcastReceiver;
 import android.content.ComponentName;
 import android.content.ContentResolver;
@@ -56,6 +57,11 @@ import android.os.ServiceManager;
 import android.os.SystemClock;
 import android.os.UserHandle;
 import android.provider.Settings;
+import android.renderscript.Allocation;
+import android.renderscript.Allocation.MipmapControl;
+import android.renderscript.Element;
+import android.renderscript.RenderScript;
+import android.renderscript.ScriptIntrinsicBlur;
 import android.service.notification.INotificationListener;
 import android.service.notification.StatusBarNotification;
 import android.telephony.TelephonyManager;
@@ -68,6 +74,7 @@ import android.view.MotionEvent;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.FrameLayout;
+import android.widget.ImageView;
 import android.widget.LinearLayout;
 import android.widget.RemoteViews;
 import android.widget.TextView;
@@ -122,7 +129,7 @@ public class ActiveDisplayView extends FrameLayout
 
     private static final int HIDE_NOTIFICATIONS_BELOW_SCORE = Notification.PRIORITY_LOW;
     private static final int SHOW_ANIMATION_DELAY = 1000;
-    private static final int SCREEN_ANIMATION_DELAY = 250;
+    private static final int SCREEN_ANIMATION_DELAY = 500;
 
     private final int GO_TO_SLEEP_REASON_USER = 0;
     private final int GO_TO_SLEEP_REASON_TIMEOUT = 2;
@@ -160,7 +167,7 @@ public class ActiveDisplayView extends FrameLayout
     private RoundedImageView mCurrentNotificationIcon;
     private FrameLayout mRemoteViewLayout;
     private FrameLayout mContents;
-    private ActiveDisplayHost mContentsHost;
+    private ImageView mContentsHost;
     private ObjectAnimator mAnim;
     private Drawable mNotificationDrawable;
     private Paint mInvertedPaint;
@@ -176,6 +183,7 @@ public class ActiveDisplayView extends FrameLayout
 
     // service
     private StatusBarManager mStatusBarManager;
+    private WallpaperManager mWallpaperManager;
     private AlarmManager mAM;
     private IPowerManager mPM;
     private TelephonyManager mTM;
@@ -196,10 +204,8 @@ public class ActiveDisplayView extends FrameLayout
     private boolean mIsInBrightLight = false;
     private boolean mWakedByPocketMode = false;
     private boolean mIsScreenOff = false;
-    private long mPocketTime = 0;
-    private long mTurnOffTime = 0;
-    private long mTurnOffTimeThreshold = 200L;
     private boolean mCallbacksRegistered = false;
+    private long mPocketTime = 0;
     private int mCancelRedisplaySequence;
     private int mCancelTimeoutSequence;
     private boolean mIsActive = false;
@@ -207,7 +213,7 @@ public class ActiveDisplayView extends FrameLayout
     private boolean mIsTurnOffBySensor = false;
 
     // user customizable settings
-    private boolean mDisplayNotifications = false;
+    private boolean mActiveDisplayEnabled = false;
     private boolean mDisplayNotificationText = false;
     private boolean mShowAllNotifications = false;
     private boolean mHideLowPriorityNotifications = false;
@@ -230,6 +236,7 @@ public class ActiveDisplayView extends FrameLayout
     private long mDisplayTimeout = 8000L;
     private long mProximityThreshold = 5000L;
     private int mInitialBrightness = 0;
+    private int mBlurRadius = 12;
     private Set<String> mExcludedApps = new HashSet<String>();
     private Set<String> mPrivacyApps = new HashSet<String>();
     private HashMap<String, Long> mAnnoyingNotifications = new HashMap<String, Long>();
@@ -238,9 +245,10 @@ public class ActiveDisplayView extends FrameLayout
      * Simple class that listens to changes in notifications
      */
     private class INotificationListenerWrapper extends INotificationListener.Stub {
+
         @Override
-        public void onNotificationPosted(final StatusBarNotification sbn) {
-            if (shouldShowNotification() && isValidNotification(sbn) && !inQuietHoursDim()) {
+        public void onNotificationPosted(StatusBarNotification sbn) {
+            if (shouldShowNotification() && isValidNotification(sbn) && !inQuietHours()) {
                 // need to make sure either the screen is off or the user is currently
                 // viewing the notifications
                 if (getVisibility() == View.VISIBLE || !isScreenOn()) {
@@ -248,8 +256,9 @@ public class ActiveDisplayView extends FrameLayout
                 }
             }
         }
+
         @Override
-        public void onNotificationRemoved(final StatusBarNotification sbn) {
+        public void onNotificationRemoved(StatusBarNotification sbn) {
             if (mNotification != null && sbn.getPackageName().equals(mNotification.getPackageName())) {
                 if (getVisibility() == View.VISIBLE && !mIsScreenOff) {
                     mNotification = getNextAvailableNotification();
@@ -267,7 +276,7 @@ public class ActiveDisplayView extends FrameLayout
 
     private OnTriggerListener mOnTriggerListener = new OnTriggerListener() {
 
-        public void onTrigger(final View v, final int target) {
+        public void onTrigger(View v, int target) {
             if (target == UNLOCK_TARGET) {
                 mIsUnlockByUser = true;
                 disableProximitySensor();
@@ -283,7 +292,7 @@ public class ActiveDisplayView extends FrameLayout
             }
         }
 
-        public void onReleased(final View v, final int handle) {
+        public void onReleased(View v, int handle) {
             ObjectAnimator.ofFloat(mCurrentNotificationIcon, "alpha", 1f).start();
             doTransition(mOverflowNotifications, 1.0f, 0);
             if (mRemoteView != null) {
@@ -294,7 +303,7 @@ public class ActiveDisplayView extends FrameLayout
             updateTimeoutTimer();
         }
 
-        public void onGrabbed(final View v, final int handle) {
+        public void onGrabbed(View v, int handle) {
             // prevent the ActiveDisplayView from turning off while user is interacting with it
             cancelTimeoutTimer();
             setUserActivity();
@@ -307,7 +316,7 @@ public class ActiveDisplayView extends FrameLayout
             }
         }
 
-        public void onGrabbedStateChange(final View v, final int handle) {
+        public void onGrabbedStateChange(View v, int handle) {
         }
 
         public void onFinishFinalAnimation() {
@@ -366,12 +375,14 @@ public class ActiveDisplayView extends FrameLayout
                     Settings.System.ACTIVE_DISPLAY_ANNOYING), false, this);
             resolver.registerContentObserver(Settings.System.getUriFor(
                     Settings.System.ACTIVE_DISPLAY_DOUBLE_TAP), false, this);
+            resolver.registerContentObserver(Settings.System.getUriFor(
+                    Settings.System.LOCKSCREEN_BLUR_RADIUS), false, this);
             update();
         }
 
         void unobserve() {
             mContext.getContentResolver().unregisterContentObserver(this);
-            if (mDisplayNotifications) {
+            if (mActiveDisplayEnabled) {
                 unregisterCallbacks();
             }
         }
@@ -383,7 +394,7 @@ public class ActiveDisplayView extends FrameLayout
 
         public void update() {
             final ContentResolver resolver = mContext.getContentResolver();
-            mDisplayNotifications = Settings.System.getIntForUser(
+            mActiveDisplayEnabled = Settings.System.getIntForUser(
                     resolver, Settings.System.ENABLE_ACTIVE_DISPLAY, 0,
                     UserHandle.USER_CURRENT_OR_SELF) == 1;
             mDisplayNotificationText = Settings.System.getIntForUser(
@@ -443,6 +454,9 @@ public class ActiveDisplayView extends FrameLayout
             mEnableDoubleTap = Settings.System.getIntForUser(
                     resolver, Settings.System.ACTIVE_DISPLAY_DOUBLE_TAP, 0,
                     UserHandle.USER_CURRENT_OR_SELF) != 0;
+            mBlurRadius = Settings.System.getIntForUser(
+                    resolver, Settings.System.LOCKSCREEN_BLUR_RADIUS, mBlurRadius,
+                    UserHandle.USER_CURRENT_OR_SELF);
 
             createExcludedAppsSet(excludedApps);
             createPrivacyAppsSet(privacyApps);
@@ -455,23 +469,23 @@ public class ActiveDisplayView extends FrameLayout
                 mUserBrightnessLevel = -1;
             }
 
-            if (!mDisplayNotifications || mRedisplayTimeout <= 0) {
+            if (!mActiveDisplayEnabled || mRedisplayTimeout <= 0) {
                 cancelRedisplayTimer();
             }
 
-            if (mDisplayNotifications) {
+            if (mActiveDisplayEnabled) {
                 registerCallbacks();
             } else {
                 unregisterCallbacks();
             }
 
-            if (mContentsHost != null) {
-                mContentsHost.updateCustomBackground(mEnableWallpaper);
+            if (mEnableWallpaper) {
+                updateCustomBackground(mEnableWallpaper);
             }
         }
     }
 
-    private Handler mHandler = new Handler(Looper.getMainLooper()) {
+    private Handler mHandler = new Handler() {
         @Override
         public void handleMessage(final Message msg) {
             switch (msg.what) {
@@ -514,6 +528,7 @@ public class ActiveDisplayView extends FrameLayout
         mPM = IPowerManager.Stub.asInterface(ServiceManager.getService(Context.POWER_SERVICE));
         mAM = (AlarmManager) context.getSystemService(Context.ALARM_SERVICE);
         mTM = (TelephonyManager) context.getSystemService(Context.TELEPHONY_SERVICE);
+        mWallpaperManager = (WallpaperManager) context.getSystemService(Context.WALLPAPER_SERVICE);
         mNM = INotificationManager.Stub.asInterface(
                 ServiceManager.getService(Context.NOTIFICATION_SERVICE));
         mNotificationListener = new INotificationListenerWrapper();
@@ -532,7 +547,7 @@ public class ActiveDisplayView extends FrameLayout
         mCreationOrientation = Resources.getSystem().getConfiguration().orientation;
         mInvertedPaint = makeInvertedPaint();
 
-        mDoubleTapGesture = new GestureDetector(mContext,
+        mDoubleTapGesture = new GestureDetector(context,
                 new GestureDetector.SimpleOnGestureListener() {
             @Override
             public boolean onDoubleTap(MotionEvent e) {
@@ -563,7 +578,7 @@ public class ActiveDisplayView extends FrameLayout
     public synchronized void onFar() {
         mProximityIsFar = true;
         if (!isScreenOn() && mPocketMode != POCKET_MODE_OFF
-            && !isOnCall() && mDisplayNotifications && !inQuietHoursDim()) {
+            && !isOnCall() && mActiveDisplayEnabled && !inQuietHours()) {
             if ((System.currentTimeMillis() >= (mPocketTime + mProximityThreshold)) && (mPocketTime != 0)) {
                 if (mNotification == null) {
                     mNotification = getNextAvailableNotification();
@@ -588,13 +603,17 @@ public class ActiveDisplayView extends FrameLayout
         if (mIsInBrightLight) {
             mIsInBrightLight = false;
         }
-        invalidate();
+        if (mSunlightModeEnabled) {
+            invalidate();
+        }
     }
 
     @Override
     public synchronized void onBrighter() {
         mIsInBrightLight = true;
-        invalidate();
+        if (mSunlightModeEnabled) {
+            invalidate();
+        }
     }
 
     private Paint makeInvertedPaint() {
@@ -612,7 +631,6 @@ public class ActiveDisplayView extends FrameLayout
     @Override
     protected void onFinishInflate() {
         super.onFinishInflate();
-        mContentsHost = (ActiveDisplayHost) findViewById(R.id.active_view_host);
         mContents = (FrameLayout) findViewById(R.id.active_view_contents);
         makeActiveDisplayView(mCreationOrientation, false);
     }
@@ -635,9 +653,6 @@ public class ActiveDisplayView extends FrameLayout
     @Override
     protected void onConfigurationChanged(Configuration newConfig) {
         makeActiveDisplayView(newConfig.orientation, true);
-        if (mContentsHost != null) {
-            mContentsHost.updateCustomBackground(mEnableWallpaper);
-        }
     }
 
     @Override
@@ -662,6 +677,7 @@ public class ActiveDisplayView extends FrameLayout
     private void makeActiveDisplayView(int orientation, boolean recreate) {
         mContents.removeAllViews();
         View contents = View.inflate(mContext, R.layout.active_display_content, mContents);
+        mContentsHost = (ImageView) contents.findViewById(R.id.active_view_host);
         mGlowPadView = (GlowPadView) contents.findViewById(R.id.glow_pad_view);
         mGlowPadView.setOnTriggerListener(mOnTriggerListener);
         mGlowPadView.setDrawOuterRing(false);
@@ -773,7 +789,7 @@ public class ActiveDisplayView extends FrameLayout
         mNotification = null;
         Intent intent = new Intent(mContext, DummyActivity.class);
         intent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_CLEAR_TOP);
-        mContext.startActivityAsUser(intent, new UserHandle(UserHandle.USER_CURRENT));
+        mContext.startActivityAsUser(intent, new UserHandle(UserHandle.USER_CURRENT_OR_SELF));
     }
 
     /**
@@ -886,7 +902,8 @@ public class ActiveDisplayView extends FrameLayout
             // windows that appear on top, ever
             int flags = StatusBarManager.DISABLE_NONE;
             if (hiding) {
-                flags |= StatusBarManager.DISABLE_MASK;
+                flags |= StatusBarManager.DISABLE_RECENT | StatusBarManager.DISABLE_HOME
+                      | StatusBarManager.DISABLE_BACK | StatusBarManager.DISABLE_SEARCH;
             }
             mStatusBarManager.disable(flags);
         }
@@ -930,9 +947,9 @@ public class ActiveDisplayView extends FrameLayout
     }
 
     private void handleShowNotification(boolean ping) {
-        if (!mDisplayNotifications
+        if (!mActiveDisplayEnabled
             || mNotification == null
-            || inQuietHoursDim()) return;
+            || inQuietHours()) return;
         handleShowNotificationView();
         setActiveNotification(mNotification, true);
         inflateRemoteView(mNotification);
@@ -993,8 +1010,10 @@ public class ActiveDisplayView extends FrameLayout
         setVisibility(View.GONE);
     }
 
-    private boolean inQuietHoursDim() {
-        return QuietHoursHelper.inQuietHours(mContext, Settings.System.QUIET_HOURS_DIM);
+    private boolean inQuietHours() {
+        boolean isQuietHourDim = QuietHoursHelper.inQuietHours(mContext, Settings.System.QUIET_HOURS_DIM);
+        boolean isQuietHourMute = QuietHoursHelper.inQuietHours(mContext, Settings.System.QUIET_HOURS_MUTE);
+        return isQuietHourDim || isQuietHourMute;
     }
 
     private void onScreenTurnedOn() {
@@ -1009,16 +1028,15 @@ public class ActiveDisplayView extends FrameLayout
     }
 
     private void onScreenTurnedOff() {
+        if (mEnableWallpaper) {
+            updateCustomBackground(mEnableWallpaper);
+        }
         enableProximitySensor();
-        mTurnOffTime = System.currentTimeMillis();
         mWakedByPocketMode = false;
         hideNotificationView();
         cancelTimeoutTimer();
         if (mRedisplayTimeout > 0) {
             updateRedisplayTimer();
-        }
-        if (mContentsHost != null) {
-            mContentsHost.updateCustomBackground(mEnableWallpaper);
         }
     }
 
@@ -1052,17 +1070,12 @@ public class ActiveDisplayView extends FrameLayout
     }
 
     private void turnScreenOnbySensor() {
-        if (mTurnOffModeEnabled && mDisplayNotifications) {
+        if (mTurnOffModeEnabled && mActiveDisplayEnabled) {
             mWakedByPocketMode = true;
         }
     }
 
     private void turnScreenOn() {
-        if ((System.currentTimeMillis() <= (mTurnOffTime + mTurnOffTimeThreshold))
-             && (mTurnOffTime != 0) && !mIsUnlockByUser) {
-            mHandler.removeCallbacks(runWakeDevice);
-            return;
-        }
         if (mIsTurnOffBySensor) {
             mIsTurnOffBySensor = false;
             mHandler.removeCallbacks(runWakeDevice);
@@ -1100,7 +1113,7 @@ public class ActiveDisplayView extends FrameLayout
     }
 
     private void enableProximitySensor() {
-        if (mPocketMode != POCKET_MODE_OFF && mDisplayNotifications) {
+        if (mPocketMode != POCKET_MODE_OFF && mActiveDisplayEnabled) {
             Log.i(TAG, "ActiveDisplay: enable ProximitySensor");
             mProximityIsFar = true;
             mProximitySensorManager.enable();
@@ -1170,6 +1183,7 @@ public class ActiveDisplayView extends FrameLayout
         filter.addAction(Intent.ACTION_SCREEN_OFF);
         filter.addAction(Intent.ACTION_SCREEN_ON);
         filter.addAction(Intent.ACTION_USER_PRESENT);
+        filter.addAction(Intent.ACTION_WALLPAPER_CHANGED);
         mContext.registerReceiver(mBroadcastReceiver, filter);
     }
 
@@ -1254,7 +1268,7 @@ public class ActiveDisplayView extends FrameLayout
                                     iv.setTag(sbns[i]);
                                     if (sbns[i].getPackageName().equals(mNotification.getPackageName())
                                            && sbns[i].getId() == mNotification.getId()) {
-                                        if (mEnableWallpaper) {
+                                        if (mUseActiveDisplayContent) {
                                             iv.setBackgroundResource(R.drawable.ad_active_notification_background_blur);
                                         } else {
                                             iv.setBackgroundResource(R.drawable.ad_active_notification_background);
@@ -1303,7 +1317,7 @@ public class ActiveDisplayView extends FrameLayout
                                 mLastChildPosition = i;
                                 if (sbn != null) {
                                     swapNotification(sbn);
-                                    if (mEnableWallpaper) {
+                                    if (mUseActiveDisplayContent) {
                                         iv.setBackgroundResource(R.drawable.ad_active_notification_background_blur);
                                     } else {
                                         iv.setBackgroundResource(R.drawable.ad_active_notification_background);
@@ -1405,7 +1419,7 @@ public class ActiveDisplayView extends FrameLayout
      * @param sbn StatusBarNotification to check.
      * @return True if has privacy mode, false otherwise.
      */
-    private boolean isPrivacyApp(final StatusBarNotification sbn) {
+    private boolean isPrivacyApp(StatusBarNotification sbn) {
         if (mPrivacyApps != null) {
             return mPrivacyApps.contains(sbn.getPackageName());
         }
@@ -1649,10 +1663,12 @@ public class ActiveDisplayView extends FrameLayout
             String action = intent.getAction();
             if (action.equals(Intent.ACTION_BATTERY_CHANGED)) {
                 final int level = intent.getIntExtra(BatteryManager.EXTRA_LEVEL, 0);
-                if (mBatteryLockscreen) {
-                    mGlowPadView.setArc(level * 3.6f, Color.WHITE);
-                } else {
-                    mGlowPadView.setArc(0, 0);
+                if (mGlowPadView != null) {
+                    if (mBatteryLockscreen) {
+                        mGlowPadView.setArc(level * 3.6f, Color.WHITE);
+                    } else {
+                        mGlowPadView.setArc(0, 0);
+                    }
                 }
             } else if (action.equals(ACTION_REDISPLAY_NOTIFICATION)) {
                 final int sequence = intent.getIntExtra("disp", 0);
@@ -1696,6 +1712,10 @@ public class ActiveDisplayView extends FrameLayout
                 } else {
                     mHandler.removeCallbacks(runScreenOn);
                     mHandler.postDelayed(runScreenOn, SCREEN_ANIMATION_DELAY);
+                }
+            } else if (action.equals(Intent.ACTION_WALLPAPER_CHANGED)) {
+                if (mEnableWallpaper) {
+                    updateCustomBackground(mEnableWallpaper);
                 }
             }
         }
@@ -1785,5 +1805,48 @@ public class ActiveDisplayView extends FrameLayout
         LockPatternUtils utils = new LockPatternUtils(mContext);
         utils.setCurrentUser(UserHandle.USER_OWNER);
         return utils.isLockScreenDisabled();
+    }
+
+    private void updateCustomBackground(boolean isBlur) {
+        Bitmap bmp = getBitmapForBackground();
+        if ((bmp != null) && isBlur) {
+            mContentsHost.setImageBitmap(bmp);
+        } else {
+            mContentsHost.setImageBitmap(null);
+        }
+    }
+
+    private Bitmap getBitmapForBackground() {
+        Bitmap bmp;
+        try {
+             bmp = mWallpaperManager.getBitmap();
+        } catch (RuntimeException e) {
+             bmp = null;
+        } catch (OutOfMemoryError e) {
+             bmp = null;
+        }
+        if ((bmp != null) && (mBlurRadius > 0)) {
+            return blurBitmap(bmp, mBlurRadius);
+        }
+        return bmp;
+    }
+
+    private Bitmap blurBitmap(Bitmap bmp, int radius) {
+        Bitmap out = Bitmap.createBitmap(bmp);
+        RenderScript rs = RenderScript.create(mContext);
+
+        Allocation input = Allocation.createFromBitmap(
+               rs, bmp, MipmapControl.MIPMAP_NONE, Allocation.USAGE_SCRIPT);
+        Allocation output = Allocation.createTyped(rs, input.getType());
+
+        ScriptIntrinsicBlur script = ScriptIntrinsicBlur.create(rs, Element.U8_4(rs));
+        script.setInput(input);
+        script.setRadius(radius);
+        script.forEach(output);
+
+        output.copyTo(out);
+
+        rs.destroy();
+        return out;
     }
 }
