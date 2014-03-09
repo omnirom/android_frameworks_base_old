@@ -147,7 +147,8 @@ public class ActiveDisplayHost extends FrameLayout {
     }
 
     private void computeCustomBackgroundBounds(Drawable background) {
-        if (mCustomBackground == null) return; // Nothing to do
+        if (background == null) return; // Nothing to do
+        if (!isLaidOut()) return; // We'll do this later
 
         final int bgWidth = background.getIntrinsicWidth();
         final int bgHeight = background.getIntrinsicHeight();
