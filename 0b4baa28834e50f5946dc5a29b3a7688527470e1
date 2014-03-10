@@ -34,6 +34,24 @@
       "revId": "0b4baa28834e50f5946dc5a29b3a7688527470e1",
       "serverId": "56841c99-7c94-43d4-bf0b-cb4707e66d55",
       "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "8b77b57d_a7c10237",
+        "filename": "packages/SystemUI/res/values/styles.xml",
+        "patchSetId": 4
+      },
+      "lineNbr": 64,
+      "author": {
+        "id": 1000026
+      },
+      "writtenOn": "2014-03-10T19:46:05Z",
+      "side": 1,
+      "message": "I have no strong preferences.I just wanted to understand if there was a specific reason. If you say it looks better that way I am fine with it",
+      "parentUuid": "8b77b57d_07b8f6c1",
+      "revId": "0b4baa28834e50f5946dc5a29b3a7688527470e1",
+      "serverId": "56841c99-7c94-43d4-bf0b-cb4707e66d55",
+      "unresolved": false
     }
   ]
 }
