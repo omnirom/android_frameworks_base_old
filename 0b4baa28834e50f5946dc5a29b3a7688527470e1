@@ -16,6 +16,24 @@
       "revId": "0b4baa28834e50f5946dc5a29b3a7688527470e1",
       "serverId": "56841c99-7c94-43d4-bf0b-cb4707e66d55",
       "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "8b77b57d_07b8f6c1",
+        "filename": "packages/SystemUI/res/values/styles.xml",
+        "patchSetId": 4
+      },
+      "lineNbr": 64,
+      "author": {
+        "id": 1000694
+      },
+      "writtenOn": "2014-03-10T19:15:07Z",
+      "side": 1,
+      "message": "Only because it has been in other implementations. It seems to blend into the clock a little if they\u0027re the same size. Personal preference though, and an easy change.",
+      "parentUuid": "8b77b57d_271c1578",
+      "revId": "0b4baa28834e50f5946dc5a29b3a7688527470e1",
+      "serverId": "56841c99-7c94-43d4-bf0b-cb4707e66d55",
+      "unresolved": false
     }
   ]
 }
