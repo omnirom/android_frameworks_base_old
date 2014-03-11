@@ -899,47 +899,49 @@ public abstract class WallpaperService extends Service {
         }
         
         void detach() {
-            if (mDestroyed) {
-                return;
-            }
-            
-            mDestroyed = true;
-            
-            if (mVisible) {
-                mVisible = false;
-                if (DEBUG) Log.v(TAG, "onVisibilityChanged(false): " + this);
-                onVisibilityChanged(false);
-            }
-            
-            reportSurfaceDestroyed();
-            
-            if (DEBUG) Log.v(TAG, "onDestroy(): " + this);
-            onDestroy();
-            
-            unregisterReceiver(mReceiver);
-            
-            if (mCreated) {
-                try {
-                    if (DEBUG) Log.v(TAG, "Removing window and destroying surface "
-                            + mSurfaceHolder.getSurface() + " of: " + this);
-                    
-                    if (mInputEventReceiver != null) {
-                        mInputEventReceiver.dispose();
-                        mInputEventReceiver = null;
-                    }
-                    
-                    mSession.remove(mWindow);
-                } catch (RemoteException e) {
-                }
-                mSurfaceHolder.mSurface.release();
-                mCreated = false;
-                
-                // Dispose the input channel after removing the window so the Window Manager
-                // doesn't interpret the input channel being closed as an abnormal termination.
-                if (mInputChannel != null) {
-                    mInputChannel.dispose();
-                    mInputChannel = null;
-                }
+           synchronized (mLock) {
+              if (mDestroyed) {
+                  return;
+              }
+
+              mDestroyed = true;
+
+              if (mVisible) {
+                  mVisible = false;
+                  if (DEBUG) Log.v(TAG, "onVisibilityChanged(false): " + this);
+                  onVisibilityChanged(false);
+              }
+
+              reportSurfaceDestroyed();
+
+              if (DEBUG) Log.v(TAG, "onDestroy(): " + this);
+              onDestroy();
+
+              unregisterReceiver(mReceiver);
+
+              if (mCreated) {
+                  try {
+                       if (DEBUG) Log.v(TAG, "Removing window and destroying surface "
+                              + mSurfaceHolder.getSurface() + " of: " + this);
+
+                       if (mInputEventReceiver != null) {
+                           mInputEventReceiver.dispose();
+                           mInputEventReceiver = null;
+                       }
+
+                       mSession.remove(mWindow);
+                  } catch (RemoteException e) {
+                  }
+                  mSurfaceHolder.mSurface.release();
+                  mCreated = false;
+
+                  // Dispose the input channel after removing the window so the Window Manager
+                  // doesn't interpret the input channel being closed as an abnormal termination.
+                  if (mInputChannel != null) {
+                      mInputChannel.dispose();
+                      mInputChannel = null;
+                  }
+               }
             }
         }
     }
@@ -1027,13 +1029,17 @@ public abstract class WallpaperService extends Service {
                     }
                     Engine engine = onCreateEngine();
                     mEngine = engine;
-                    mActiveEngines.add(engine);
+                    synchronized (mActiveEngines) {
+                        mActiveEngines.add(engine);
+                    }
                     engine.attach(this);
                     return;
                 }
                 case DO_DETACH: {
-                    mActiveEngines.remove(mEngine);
                     mEngine.detach();
+                    synchronized (mActiveEngines) {
+                        mActiveEngines.remove(mEngine);
+                    }
                     return;
                 }
                 case DO_SET_DESIRED_SIZE: {
@@ -1115,10 +1121,12 @@ public abstract class WallpaperService extends Service {
     @Override
     public void onDestroy() {
         super.onDestroy();
-        for (int i=0; i<mActiveEngines.size(); i++) {
-            mActiveEngines.get(i).detach();
+        synchronized (mActiveEngines) {
+            for (int i=0; i<mActiveEngines.size(); i++) {
+                 mActiveEngines.get(i).detach();
+            }
+            mActiveEngines.clear();
         }
-        mActiveEngines.clear();
     }
 
     /**
