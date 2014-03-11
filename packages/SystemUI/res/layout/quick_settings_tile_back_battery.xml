@@ -47,9 +47,12 @@
             />
         <com.android.systemui.BatteryPercentMeterView
             android:id="@+id/percent_battery"
+            style="@style/TextAppearance.QuickSettings.TileView"
+            android:textColor="@color/batterymeter_percent_color"
             android:layout_width="wrap_content"
-            android:layout_height="32dp"
-            android:layout_gravity="top|center_horizontal"
+            android:layout_height="wrap_content"
+            android:layout_gravity="center"
+            android:gravity="center_vertical"
             systemui:batteryView="quicksettings"
             />
         <TextView
