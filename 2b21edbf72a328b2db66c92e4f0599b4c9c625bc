@@ -16,6 +16,24 @@
       "revId": "2b21edbf72a328b2db66c92e4f0599b4c9c625bc",
       "serverId": "56841c99-7c94-43d4-bf0b-cb4707e66d55",
       "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "8b77b57d_cae7e53a",
+        "filename": "packages/SystemUI/src/com/android/systemui/statusbar/phone/QuickSettings.java",
+        "patchSetId": 1
+      },
+      "lineNbr": 717,
+      "author": {
+        "id": 1000026
+      },
+      "writtenOn": "2014-03-11T15:27:09Z",
+      "side": 1,
+      "message": "or normal -\u003e summary and long -\u003e details",
+      "parentUuid": "8b77b57d_2af699f7",
+      "revId": "2b21edbf72a328b2db66c92e4f0599b4c9c625bc",
+      "serverId": "56841c99-7c94-43d4-bf0b-cb4707e66d55",
+      "unresolved": false
     }
   ]
 }
