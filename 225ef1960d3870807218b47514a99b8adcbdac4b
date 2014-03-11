@@ -1,0 +1,72 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "8b77b57d_8a6c0d9a",
+        "filename": "packages/SystemUI/src/com/android/systemui/statusbar/policy/activedisplay/ActiveDisplayView.java",
+        "patchSetId": 12
+      },
+      "lineNbr": 911,
+      "author": {
+        "id": 1000313
+      },
+      "writtenOn": "2014-03-11T17:36:09Z",
+      "side": 1,
+      "message": "Add mContentHost.setVisibility(View.VISIBLE);",
+      "revId": "225ef1960d3870807218b47514a99b8adcbdac4b",
+      "serverId": "56841c99-7c94-43d4-bf0b-cb4707e66d55",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "8b77b57d_ca6605b8",
+        "filename": "packages/SystemUI/src/com/android/systemui/statusbar/policy/activedisplay/ActiveDisplayView.java",
+        "patchSetId": 12
+      },
+      "lineNbr": 929,
+      "author": {
+        "id": 1000313
+      },
+      "writtenOn": "2014-03-11T17:36:09Z",
+      "side": 1,
+      "message": "Add mContentHost.setVisibility(View.GONE);",
+      "revId": "225ef1960d3870807218b47514a99b8adcbdac4b",
+      "serverId": "56841c99-7c94-43d4-bf0b-cb4707e66d55",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "8b77b57d_eaff41aa",
+        "filename": "packages/SystemUI/src/com/android/systemui/statusbar/policy/activedisplay/ActiveDisplayView.java",
+        "patchSetId": 12
+      },
+      "lineNbr": 942,
+      "author": {
+        "id": 1000313
+      },
+      "writtenOn": "2014-03-11T17:36:09Z",
+      "side": 1,
+      "message": "Add mContentHost.setVisibility(View.GONE);",
+      "revId": "225ef1960d3870807218b47514a99b8adcbdac4b",
+      "serverId": "56841c99-7c94-43d4-bf0b-cb4707e66d55",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "8b77b57d_aa69c989",
+        "filename": "packages/SystemUI/src/com/android/systemui/statusbar/policy/activedisplay/ActiveDisplayView.java",
+        "patchSetId": 12
+      },
+      "lineNbr": 1006,
+      "author": {
+        "id": 1000313
+      },
+      "writtenOn": "2014-03-11T17:36:09Z",
+      "side": 1,
+      "message": "Add mContentHost.setVisibility(View.GONE);",
+      "revId": "225ef1960d3870807218b47514a99b8adcbdac4b",
+      "serverId": "56841c99-7c94-43d4-bf0b-cb4707e66d55",
+      "unresolved": false
+    }
+  ]
+}
