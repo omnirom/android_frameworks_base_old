@@ -1,0 +1,21 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "8b77b57d_2af699f7",
+        "filename": "packages/SystemUI/src/com/android/systemui/statusbar/phone/QuickSettings.java",
+        "patchSetId": 1
+      },
+      "lineNbr": 717,
+      "author": {
+        "id": 1000694
+      },
+      "writtenOn": "2014-03-11T15:17:04Z",
+      "side": 1,
+      "message": "You\u0027ll have to add setBackOnLongClickListener if you want to make it respond only to long presses as stated in the commit message. I think a single click response is pretty good here though.",
+      "revId": "2b21edbf72a328b2db66c92e4f0599b4c9c625bc",
+      "serverId": "56841c99-7c94-43d4-bf0b-cb4707e66d55",
+      "unresolved": false
+    }
+  ]
+}
