@@ -2812,6 +2812,12 @@ public final class Settings {
         public static final String LOCKSCREEN_SEE_THROUGH = "lockscreen_see_through";
 
         /**
+         * Allows setting the radius for blur
+         * @hide
+         */
+        public static final String LOCKSCREEN_BLUR_RADIUS = "lockscreen_blur_radius";
+
+        /**
          * Whether to display notifications on screen when screen is off
          * @hide
          */
@@ -2929,6 +2935,24 @@ public final class Settings {
          */
         public static final String LOCKSCREEN_USE_WIDGET_CONTAINER_CAROUSEL =
                 "lockscreen_use_widget_container_carousel";
+
+        /**
+         * Whether to showing wallpaper behind active display.
+         * @hide
+         */
+        public static final String ACTIVE_DISPLAY_WALLPAPER = "active_display_wallpaper";
+
+        /**
+         * Whether to not showing active display when there is annoying notifications.
+         * @hide
+         */
+        public static final String ACTIVE_DISPLAY_ANNOYING = "active_display_annoying";
+
+        /**
+         * double tap every where to sleep on active display.
+         * @hide
+         */
+        public static final String ACTIVE_DISPLAY_DOUBLE_TAP = "active_display_double_tap";
 
         /**
          * Screen-On Notification Light
