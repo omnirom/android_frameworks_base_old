@@ -28,6 +28,7 @@ import android.app.PendingIntent;
 import android.app.TaskStackBuilder;
 import android.content.ActivityNotFoundException;
 import android.content.BroadcastReceiver;
+import android.content.ContentResolver;
 import android.content.Context;
 import android.content.ComponentName;
 import android.content.Intent;
@@ -94,6 +95,7 @@ import com.android.systemui.recent.RecentsActivity;
 import com.android.systemui.recent.TaskDescription;
 import com.android.systemui.SearchPanelView;
 import com.android.systemui.SystemUI;
+import com.android.systemui.slimrecent.RecentController;
 import com.android.systemui.statusbar.phone.KeyguardTouchDelegate;
 import com.android.systemui.statusbar.phone.PhoneStatusBar;
 import com.android.systemui.statusbar.policy.NotificationRowLayout;
@@ -217,8 +219,13 @@ public abstract class BaseStatusBar extends SystemUI implements
     protected Display mDisplay;
 
     private boolean mDeviceProvisioned = false;
+    private int mAutoCollapseBehaviour;
 
     private RecentsComponent mRecents;
+    private RecentController mNewRecents;
+    private boolean mUseNewRecents = false;
+
+    private int mExpandedDesktopStyle = 0;
 
     protected ActiveDisplayView mActiveDisplayView;
 
@@ -243,6 +250,47 @@ public abstract class BaseStatusBar extends SystemUI implements
             }
         }
     };
+
+    private class SettingsObserver extends ContentObserver {
+        public SettingsObserver(Handler handler) {
+            super(handler);
+        }
+
+        public void observe() {
+            final ContentResolver resolver = mContext.getContentResolver();
+            resolver.registerContentObserver(Settings.System.getUriFor(
+                    Settings.System.STATUS_BAR_COLLAPSE_ON_DISMISS), false, this);
+            resolver.registerContentObserver(Settings.System.getUriFor(
+                    Settings.System.EXPANDED_DESKTOP_STATE), false, this);
+            resolver.registerContentObserver(Settings.System.getUriFor(
+                    Settings.System.EXPANDED_DESKTOP_STYLE), false, this);
+            resolver.registerContentObserver(Settings.Amra.getUriFor(
+                    Settings.Amra.NEW_RECENTS_SCREEN), false, this);
+            update();
+        }
+
+        @Override
+        public void onChange(boolean selfChange) {
+            update();
+        }
+
+        private void update() {
+            final ContentResolver resolver = mContext.getContentResolver();
+            mAutoCollapseBehaviour = Settings.System.getIntForUser(resolver,
+                    Settings.System.STATUS_BAR_COLLAPSE_ON_DISMISS,
+                    Settings.System.STATUS_BAR_COLLAPSE_IF_NO_CLEARABLE, UserHandle.USER_CURRENT);
+            mExpandedDesktopStyle = 0;
+            if (Settings.System.getIntForUser(resolver,
+                    Settings.System.EXPANDED_DESKTOP_STATE, 0, UserHandle.USER_CURRENT) != 0) {
+                mExpandedDesktopStyle = Settings.System.getIntForUser(mContext.getContentResolver(),
+                        Settings.System.EXPANDED_DESKTOP_STYLE, 0, UserHandle.USER_CURRENT);
+            }
+            mUseNewRecents = Settings.Amra.getBooleanForUser(resolver,
+                    Settings.Amra.NEW_RECENTS_SCREEN, false, UserHandle.USER_CURRENT);
+            createRecents();
+        }
+    }
+
 
     private RemoteViews.OnClickHandler mOnClickHandler = new RemoteViews.OnClickHandler() {
         @Override
@@ -313,7 +361,7 @@ public abstract class BaseStatusBar extends SystemUI implements
         mBarService = IStatusBarService.Stub.asInterface(
                 ServiceManager.getService(Context.STATUS_BAR_SERVICE));
 
-        mRecents = getComponent(RecentsComponent.class);
+        createRecents();
 
         mLocale = mContext.getResources().getConfiguration().locale;
         mLayoutDirection = TextUtils.getLayoutDirectionFromLocale(mLocale);
@@ -414,6 +462,16 @@ public abstract class BaseStatusBar extends SystemUI implements
     public void setOverwriteImeIsActive(boolean enabled) {
         if (mEdgeGestureManager != null) {
             mEdgeGestureManager.setOverwriteImeIsActive(enabled);
+        }
+    }
+
+    private void createRecents() {
+        if (mUseNewRecents) {
+            mNewRecents = new RecentController(mContext);
+            mRecents = null;
+        } else {
+            mNewRecents = null;
+            mRecents = getComponent(RecentsComponent.class);
         }
     }
 
@@ -722,6 +780,9 @@ public abstract class BaseStatusBar extends SystemUI implements
                 mRecents.toggleRecents(mDisplay, mLayoutDirection, getStatusBarView());
             }
         }
+        if (mNewRecents != null) {
+            mNewRecents.toggleRecents(mDisplay, mLayoutDirection, getStatusBarView());
+        }
     }
 
     protected void preloadRecentTasksList() {
@@ -730,6 +791,9 @@ public abstract class BaseStatusBar extends SystemUI implements
                 mRecents.preloadRecentTasksList();
             }
         }
+        if (mNewRecents != null) {
+            mNewRecents.preloadRecentTasksList();
+        }
     }
 
     protected void cancelPreloadingRecentTasksList() {
@@ -737,6 +801,9 @@ public abstract class BaseStatusBar extends SystemUI implements
             if (mRecents != null) {
                 mRecents.cancelPreloadingRecentTasksList();
             }
+        }
+        if (mNewRecents != null) {
+            mNewRecents.cancelPreloadingRecentTasksList();
         }
     }
 
@@ -748,6 +815,15 @@ public abstract class BaseStatusBar extends SystemUI implements
             if (mRecents != null) {
                 mRecents.closeRecents();
             }
+        }
+        if (mNewRecents != null) {
+            mNewRecents.closeRecents();
+        }
+    }
+
+    protected void rebuildRecentsScreen() {
+        if (mNewRecents != null) {
+            mNewRecents.rebuildRecentsScreen();
         }
     }
 

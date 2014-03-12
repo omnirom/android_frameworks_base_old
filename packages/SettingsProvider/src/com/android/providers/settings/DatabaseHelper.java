@@ -25,6 +25,7 @@ import android.content.pm.IPackageManager;
 import android.content.pm.PackageManager;
 import android.content.res.XmlResourceParser;
 import android.database.Cursor;
+import android.database.SQLException;
 import android.database.sqlite.SQLiteDatabase;
 import android.database.sqlite.SQLiteOpenHelper;
 import android.database.sqlite.SQLiteStatement;
@@ -60,6 +61,7 @@ import java.io.IOException;
 import java.util.HashSet;
 import java.util.List;
 
+
 /**
  * Database helper class for {@link SettingsProvider}.
  * Mostly just has a bit {@link #onCreate} to initialize the database.
@@ -72,7 +74,7 @@ public class DatabaseHelper extends SQLiteOpenHelper {
     // database gets upgraded properly. At a minimum, please confirm that 'upgradeVersion'
     // is properly propagated through your change.  Not doing so will result in a loss of user
     // settings.
-    private static final int DATABASE_VERSION = 98;
+    private static final int DATABASE_VERSION = 99;
 
     private Context mContext;
     private int mUserHandle;
@@ -82,11 +84,13 @@ public class DatabaseHelper extends SQLiteOpenHelper {
     private static final String TABLE_SYSTEM = "system";
     private static final String TABLE_SECURE = "secure";
     private static final String TABLE_GLOBAL = "global";
+    private static final String TABLE_AMRA = "amra";
 
     static {
         mValidTables.add(TABLE_SYSTEM);
         mValidTables.add(TABLE_SECURE);
         mValidTables.add(TABLE_GLOBAL);
+        mValidTables.add(TABLE_AMRA);
         mValidTables.add("bluetooth_devices");
         mValidTables.add("bookmarks");
 
@@ -137,6 +141,15 @@ public class DatabaseHelper extends SQLiteOpenHelper {
         db.execSQL("CREATE INDEX globalIndex1 ON global (name);");
     }
 
+    private void createAmraTable(SQLiteDatabase db) {
+        db.execSQL("CREATE TABLE IF NOT EXISTS amra (" +
+                "_id INTEGER PRIMARY KEY AUTOINCREMENT," +
+                "name TEXT UNIQUE ON CONFLICT REPLACE," +
+                "value TEXT" +
+                ");");
+        db.execSQL("CREATE INDEX IF NOT EXISTS amraIndex1 ON amra (name);");
+    }
+
     @Override
     public void onCreate(SQLiteDatabase db) {
         db.execSQL("CREATE TABLE system (" +
@@ -147,6 +160,8 @@ public class DatabaseHelper extends SQLiteOpenHelper {
         db.execSQL("CREATE INDEX systemIndex1 ON system (name);");
 
         createSecureTable(db);
+
+        createAmraTable(db);
 
         // Only create the global table for the singleton 'owner' user
         if (mUserHandle == UserHandle.USER_OWNER) {
@@ -1559,6 +1574,18 @@ public class DatabaseHelper extends SQLiteOpenHelper {
             upgradeVersion = 98;
         }
 
+        if (upgradeVersion == 98) {
+            //add Nameless table
+            db.beginTransaction();
+            try {
+                createAmraTable(db);
+                db.setTransactionSuccessful();
+            } finally {
+                db.endTransaction();
+            }
+            upgradeVersion = 99;
+        }
+
         // *** Remember to update DATABASE_VERSION above!
 
         if (upgradeVersion != currentVersion) {
@@ -1577,6 +1604,8 @@ public class DatabaseHelper extends SQLiteOpenHelper {
             db.execSQL("DROP INDEX IF EXISTS bookmarksIndex1");
             db.execSQL("DROP INDEX IF EXISTS bookmarksIndex2");
             db.execSQL("DROP TABLE IF EXISTS favorites");
+        db.execSQL("DROP TABLE IF EXISTS amra");
+        db.execSQL("DROP INDEX IF EXISTS amraIndex1");
             onCreate(db);
 
             // Added for diagnosing settings.db wipes after the fact
@@ -1959,6 +1988,7 @@ public class DatabaseHelper extends SQLiteOpenHelper {
         if (mUserHandle == UserHandle.USER_OWNER) {
             loadGlobalSettings(db);
         }
+        loadAmraSettings(db);
     }
 
     private void loadSystemSettings(SQLiteDatabase db) {
@@ -2128,6 +2158,18 @@ public class DatabaseHelper extends SQLiteOpenHelper {
 
         loadStringSetting(stmt, Settings.Secure.BACKUP_TRANSPORT,
                 R.string.def_backup_transport);
+    }
+
+     private void loadAmraSettings(SQLiteDatabase db) {
+        SQLiteStatement stmt = null;
+        try {
+            //stmt = db.compileStatement("INSERT OR IGNORE INTO nameless(name,value)"
+            //        + " VALUES(?,?);");
+            //loadBooleanSetting(stmt, Settings.Nameless.ENABLE_ACRA,
+            //        R.bool.def_enable_acra);
+        } finally {
+            if (stmt != null) stmt.close();
+        }
     }
 
     private void loadGlobalSettings(SQLiteDatabase db) {
