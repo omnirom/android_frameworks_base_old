@@ -97,9 +97,16 @@ public class KeyguardViewManager {
     private LockPatternUtils mLockPatternUtils;
 
     private Bitmap mCustomImage = null;
-    private int mBlurRadius = 12;
     private boolean mSeeThrough = false;
     private boolean mIsCoverflow = true;
+    private boolean mRotated = false;
+
+    private static final int ROTATE_0 = 0;
+    private static final int ROTATE_90 = 1;
+    private static final int ROTATE_180 = 2;
+    private static final int ROTATE_270 = 3;
+    private int mBlurRadius = 12;
+    private int mLastRotation = 0;
 
     private KeyguardUpdateMonitorCallback mBackgroundChanger = new KeyguardUpdateMonitorCallback() {
         @Override
@@ -250,6 +257,30 @@ public class KeyguardViewManager {
             @Override
             public void draw(Canvas canvas) {
                 if (mCustomBackground != null) {
+                    if (!mRotated && mCustomImage != null) {
+                        int rotation = mKeyguardView.getDisplay().getRotation();
+                        switch(rotation){
+                            case ROTATE_0:
+                            case ROTATE_90:
+                            case ROTATE_270:
+                                mCustomImage = rotateBmp(mCustomImage,
+                                                                mLastRotation - (rotation * 90));
+                                mLastRotation = rotation * 90;
+                                break;
+                            case ROTATE_180:
+                                mCustomImage = rotateBmp(mCustomImage,
+                                                                mLastRotation - (rotation * 180));
+                                mLastRotation = rotation * 180;
+                                break;
+                        }
+                        mRotated = true;
+                        setCustomBackground(new BitmapDrawable(mContext.getResources(),
+                                                mCustomImage));
+                        updateShowWallpaper(false);
+                    } else {
+                        mRotated = false;
+                    }
+
                     final Rect bounds = mCustomBackground.getBounds();
                     final int vWidth = getWidth();
                     final int vHeight = getHeight();
@@ -387,7 +418,6 @@ public class KeyguardViewManager {
     }
 
     SparseArray<Parcelable> mStateContainer = new SparseArray<Parcelable>();
-    int mLastRotation = 0;
     private void maybeCreateKeyguardLocked(boolean enableScreenRotation, boolean force,
             Bundle options) {
         if (mKeyguardHost != null) {
@@ -439,9 +469,6 @@ public class KeyguardViewManager {
 
         mKeyguardHost.restoreHierarchyState(mStateContainer);
         if (mCustomImage != null) {
-            int currentRotation = mKeyguardView.getDisplay().getRotation() * 90;
-            mCustomImage = rotateBmp(mCustomImage, mLastRotation - currentRotation);
-            mLastRotation = currentRotation;
             mIsCoverflow = false;
             setCustomBackground(mCustomImage);
         } else {
