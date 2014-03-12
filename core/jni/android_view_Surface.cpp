@@ -187,9 +187,9 @@ static inline SkColorType convertPixelFormat(PixelFormat format) {
     }
 }
 
-static void nativeSetDirtyRegion(JNIEnv* env, jclass clazz,
+static void nativeSetDirtyRect(JNIEnv* env, jclass clazz,
         jlong nativeObject, jobject dirtyRect) {
-
+#ifdef QCOM_HARDWARE
     sp<Surface> surface(reinterpret_cast<Surface *>(nativeObject));
 
     if (!isSurfaceValid(surface)) {
@@ -197,23 +197,14 @@ static void nativeSetDirtyRegion(JNIEnv* env, jclass clazz,
         return;
     }
 
-    // get dirty region
-    Region dirtyRegion;
-    Rect dirty;
+    Rect rect;
+    rect.left = env->GetIntField(dirtyRect, gRectClassInfo.left);
+    rect.top = env->GetIntField(dirtyRect, gRectClassInfo.top);
+    rect.right = env->GetIntField(dirtyRect, gRectClassInfo.right);
+    rect.bottom = env->GetIntField(dirtyRect, gRectClassInfo.bottom);
 
-    dirty.left = env->GetIntField(dirtyRect, gRectClassInfo.left);
-    dirty.top = env->GetIntField(dirtyRect, gRectClassInfo.top);
-    dirty.right = env->GetIntField(dirtyRect, gRectClassInfo.right);
-    dirty.bottom = env->GetIntField(dirtyRect, gRectClassInfo.bottom);
-
-    if (!dirty.isEmpty()) {
-       dirtyRegion.set(dirty);
-    }
-
-    status_t err = surface->setDirtyRegion(&dirtyRegion);
-    if (err < 0) {
-        doThrowIAE(env);
-    }
+    surface->setDirtyRect(&rect);
+#endif
 }
 
 static jlong nativeLockCanvas(JNIEnv* env, jclass clazz,
@@ -404,8 +395,8 @@ static JNINativeMethod gSurfaceMethods[] = {
             (void*)nativeReadFromParcel },
     {"nativeWriteToParcel", "(JLandroid/os/Parcel;)V",
             (void*)nativeWriteToParcel },
-    {"nativeSetDirtyRegion", "(JLandroid/graphics/Rect;)V",
-           (void*)nativeSetDirtyRegion },
+    {"nativeSetDirtyRect", "(JLandroid/graphics/Rect;)V",
+           (void*)nativeSetDirtyRect },
 };
 
 int register_android_view_Surface(JNIEnv* env)
