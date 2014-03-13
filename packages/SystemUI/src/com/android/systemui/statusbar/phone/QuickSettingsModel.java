@@ -709,6 +709,7 @@ class QuickSettingsModel implements BluetoothStateChangeCallback,
         onQuiteHourChanged();
         refreshRotationLockTile();
         refreshRssiTile();
+        refreshWifiTile();
         refreshLocationTile();
         refreshBackLocationTile();
         updateRingerState();
@@ -944,7 +945,7 @@ class QuickSettingsModel implements BluetoothStateChangeCallback,
             }
         });
         mWifiBackCallback = cb;
-        mWifiCallback.refreshView(mWifiBackTile, mWifiBackState);
+        mWifiBackCallback.refreshView(mWifiBackTile, mWifiBackState);
     }
 
     private void setSoftapEnabled(boolean enable) {
@@ -1085,8 +1086,11 @@ class QuickSettingsModel implements BluetoothStateChangeCallback,
         mWifiBackCallback.refreshView(mWifiBackTile, mWifiBackState);
     }
 
-    private boolean isWifiEnabled() {
-        return mWifiManager.getWifiState() == WifiManager.WIFI_STATE_ENABLED;
+    void refreshWifiTile() {
+        if (mWifiCallback == null) {
+            return;
+        }
+        mWifiCallback.refreshView(mWifiTile, mWifiState);
     }
 
     String getWifiIpAddr() {
@@ -1154,12 +1158,13 @@ class QuickSettingsModel implements BluetoothStateChangeCallback,
         mMobileNetworkTile.setOnClickListener(new View.OnClickListener() {
               @Override
               public void onClick(View v) {
-                  if (SystemClock.elapsedRealtime() - mLastClickTime < 1000){
+                  if ((SystemClock.elapsedRealtime() - mLastClickTime) < 1000){
                       return;
                   }
+                  if (mLastClickTime != 0) {
+                      toggleMobileNetworkState();
+                  }
                   mLastClickTime = SystemClock.elapsedRealtime();
-
-                  toggleMobileNetworkState();
               }
         });
         mMobileNetworkCallback = cb;
@@ -1230,11 +1235,6 @@ class QuickSettingsModel implements BluetoothStateChangeCallback,
                 }
                 break;
         }
-    }
-
-    private boolean isWifiConnected() {
-        NetworkInfo network = (mCM != null) ? mCM.getNetworkInfo(ConnectivityManager.TYPE_WIFI) : null;
-        return network != null && network.isConnected();
     }
 
     public boolean isMobileDataEnabled() {
