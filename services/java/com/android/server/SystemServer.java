@@ -68,6 +68,7 @@ import com.android.server.power.PowerManagerService;
 import com.android.server.power.ShutdownThread;
 import com.android.server.print.PrintManagerService;
 import com.android.server.search.SearchManagerService;
+import com.android.server.thermal.ThermalService;
 import com.android.server.usb.UsbService;
 import com.android.server.wifi.WifiService;
 import com.android.server.wm.WindowManagerService;
@@ -147,6 +148,7 @@ class ServerThread {
         DisplayManagerService display = null;
         BatteryService battery = null;
         VibratorService vibrator = null;
+        ThermalService thermalservice = null;
         AlarmManagerService alarm = null;
         MountService mountService = null;
         NetworkManagementService networkManagement = null;
@@ -304,6 +306,15 @@ class ServerThread {
             Slog.i(TAG, "Consumer IR Service");
             consumerIr = new ConsumerIrService(context);
             ServiceManager.addService(Context.CONSUMER_IR_SERVICE, consumerIr);
+
+            // Enable Thermal service if property is set
+            if ("1".equals(SystemProperties.get("persist.service.thermal", "0"))) {
+               Slog.i(TAG, "Thermal Service enabled");
+               thermalservice = new ThermalService(context);
+               ServiceManager.addService("thermalservice", thermalservice);
+            } else {
+               Log.i(TAG, "Thermal Service disabled");
+            }
 
             // only initialize the power service after we have started the
             // lights service, content providers and the battery service.

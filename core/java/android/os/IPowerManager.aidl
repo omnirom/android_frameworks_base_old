@@ -57,4 +57,7 @@ interface IPowerManager
     int getCurrentScreenBrightnessValue();
     int getCurrentButtonBrightnessValue();
     void setButtonBrightness(int brightness);
+
+    // Thermal Management API to cap brightness limit
+    void setThermalBrightnessLimit(int newBrightness, boolean immediate);
 }

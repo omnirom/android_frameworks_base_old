@@ -18,6 +18,7 @@ LOCAL_SRC_FILES:= \
     com_android_server_location_GpsLocationProvider.cpp \
     com_android_server_location_FlpHardwareProvider.cpp \
     com_android_server_connectivity_Vpn.cpp \
+    com_android_server_thermal_ThermalManager.cpp \
     onload.cpp
 
 LOCAL_C_INCLUDES += \

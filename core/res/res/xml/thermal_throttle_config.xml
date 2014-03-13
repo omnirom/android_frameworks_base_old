@@ -1,0 +1,110 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!--  Thermal Management Configuration File -->
+<!--  Intel Corporation 2011-2012  -->
+<thermalthrottleconfig>
+  <!--Cooling Devices-->
+  <ContributingDeviceInfo>
+    <CDeviceName>CPU</CDeviceName>
+    <CDeviceID>1</CDeviceID>
+    <CDeviceClassPath>com.android.server.thermal.CPUMaxFreqControl</CDeviceClassPath>
+    <CDeviceThrottlePath>auto</CDeviceThrottlePath>
+    <!--Throttle values are the set of values that a cooling device takes as input.-->
+    <!--The values can be a set of Frequencies for CPU cooling device,-->
+    <!--brightness limit (as percentage) for display cooling device etc.-->
+    <ThrottleValues>
+      <ThrottleNormal>1512000</ThrottleNormal>
+      <ThrottleWarning>1242000</ThrottleWarning>
+      <ThrottleAlert>1026000</ThrottleAlert>
+      <ThrottleCritical>702000</ThrottleCritical>
+    </ThrottleValues>
+  </ContributingDeviceInfo>
+  <ContributingDeviceInfo>
+    <CDeviceName>Display</CDeviceName>
+    <CDeviceID>2</CDeviceID>
+    <CDeviceClassPath>com.android.server.thermal.BrightnessControl</CDeviceClassPath>
+    <CDeviceThrottlePath>none</CDeviceThrottlePath>
+    <ThrottleValues>
+      <ThrottleNormal>100</ThrottleNormal>
+      <ThrottleWarning>50</ThrottleWarning>
+      <ThrottleAlert>40</ThrottleAlert>
+      <ThrottleCritical>30</ThrottleCritical>
+    </ThrottleValues>
+  </ContributingDeviceInfo>
+
+  <!--Map the cooling devices with specfic zones for throttling-->
+  <ZoneThrottleInfo>
+    <ZoneID>0</ZoneID>
+    <CriticalShutDown>1</CriticalShutDown>
+    <!--set CriticalShutDown to 1, if platform needs to shutdown
+        if this zone reaches critical thermal state to avoid any user impact-->
+    <!--list of cooling devices bound to this zone-->
+    <CoolingDeviceInfo>
+      <CoolingDevId>1</CoolingDevId>
+      <!--four states: Normal,Warning,Alert,Critical. 0 - disable throttling,1 - enable throttling-->
+      <ThrottleDeviceMask>
+          <Normal>0</Normal>
+          <Warning>1</Warning>
+          <Alert>1</Alert>
+          <Critical>1</Critical>
+      </ThrottleDeviceMask>
+      <!--four states: Normal,Warning,Alert,Critical. 0 - disable de-throttling,1 - enable de-throttling-->
+      <DethrottleDeviceMask>
+          <Normal>1</Normal>
+          <Warning>1</Warning>
+          <Alert>1</Alert>
+          <Critical>0</Critical>
+      </DethrottleDeviceMask>
+    </CoolingDeviceInfo>
+    <CoolingDeviceInfo>
+      <CoolingDevId>2</CoolingDevId>
+      <ThrottleDeviceMask>
+          <Normal>1</Normal>
+          <Warning>1</Warning>
+          <Alert>1</Alert>
+          <Critical>0</Critical>
+      </ThrottleDeviceMask>
+      <DethrottleDeviceMask>
+          <Normal>1</Normal>
+          <Warning>1</Warning>
+          <Alert>1</Alert>
+          <Critical>0</Critical>
+      </DethrottleDeviceMask>
+    </CoolingDeviceInfo>
+  </ZoneThrottleInfo>
+
+  <ZoneThrottleInfo>
+    <ZoneID>1</ZoneID>
+    <CriticalShutDown>1</CriticalShutDown>
+    <CoolingDeviceInfo>
+      <CoolingDevId>1</CoolingDevId>
+      <ThrottleDeviceMask>
+          <Normal>0</Normal>
+          <Warning>1</Warning>
+          <Alert>1</Alert>
+          <Critical>1</Critical>
+      </ThrottleDeviceMask>
+      <DethrottleDeviceMask>
+          <Normal>1</Normal>
+          <Warning>1</Warning>
+          <Alert>1</Alert>
+          <Critical>0</Critical>
+      </DethrottleDeviceMask>
+    </CoolingDeviceInfo>
+    <CoolingDeviceInfo>
+      <CoolingDevId>2</CoolingDevId>
+      <ThrottleDeviceMask>
+          <Normal>1</Normal>
+          <Warning>1</Warning>
+          <Alert>1</Alert>
+          <Critical>0</Critical>
+      </ThrottleDeviceMask>
+      <DethrottleDeviceMask>
+          <Normal>1</Normal>
+          <Warning>1</Warning>
+          <Alert>1</Alert>
+          <Critical>0</Critical>
+      </DethrottleDeviceMask>
+    </CoolingDeviceInfo>
+  </ZoneThrottleInfo>
+
+</thermalthrottleconfig>

@@ -1,0 +1,75 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!--  Thermal Management Configuration File -->
+<!--  Intel Corporation 2011-2012  -->
+<thermalconfig>
+<!--Thermal Zones-->
+<!--There are Five Thermal states for each zone, namely TM_OFF, NORMAL-->
+<!--WARNING, ALERT, and CRITICAL, in the increasing order of thermal severity-->
+  <Zone>
+        <ZoneID>0</ZoneID>
+        <ZoneName>FrontSkin</ZoneName>
+        <!--If 1, supports UEvent, otherwise poll-->
+        <SupportsUEvent>0</SupportsUEvent>
+        <!--1 AND logic, 0 OR Logic-->
+        <SensorLogic>0</SensorLogic>
+        <!--Debounce Interval for this Zone. In milli degree celsius-->
+        <DebounceInterval>1000</DebounceInterval>
+        <PollDelay>
+            <DelayTOff>30000</DelayTOff>
+            <DelayNormal>30000</DelayNormal>
+            <DelayWarning>30000</DelayWarning>
+            <DelayAlert>30000</DelayAlert>
+            <DelayCritical>30000</DelayCritical>
+        </PollDelay>
+        <Sensor>
+            <SensorID>1</SensorID>
+            <SensorName>pm8921_tz</SensorName>
+            <!--Sysfs path to read Temperature. "auto" means the path is standard
+                (/sys/class/thermal/thermal_zoneX/) and enumerated at run time-->
+            <SensorPath>auto</SensorPath>
+            <!--Sysfs Interface names to read Temperature-->
+            <InputTemp>temp</InputTemp>
+            <HighTemp>trip_point_1_temp</HighTemp>
+            <LowTemp>trip_point_0_temp</LowTemp>
+            <UEventDevPath>none</UEventDevPath>
+            <!--Temperature thresholds for various states in milli degree celsius-->
+            <Threshold>
+                <ThresholdTOff>0</ThresholdTOff>
+                <ThresholdNormal>35000</ThresholdNormal>
+                <ThresholdWarning>40000</ThresholdWarning>
+                <ThresholdAlert>65000</ThresholdAlert>
+                <ThresholdCritical>55000</ThresholdCritical>
+            </Threshold>
+        </Sensor>
+  </Zone>
+
+  <Zone>
+        <ZoneID>1</ZoneID>
+        <ZoneName>BackSkin</ZoneName>
+        <SupportsUEvent>0</SupportsUEvent>
+        <SensorLogic>0</SensorLogic>
+        <DebounceInterval>1000</DebounceInterval>
+        <PollDelay>
+               <DelayTOff>30000</DelayTOff>
+               <DelayNormal>30000</DelayNormal>
+               <DelayWarning>30000</DelayWarning>
+               <DelayAlert>30000</DelayAlert>
+               <DelayCritical>30000</DelayCritical>
+        </PollDelay>
+        <Sensor>
+               <SensorID>2</SensorID>
+               <SensorName>pm8821_tz</SensorName>
+               <SensorPath>auto</SensorPath>
+               <InputTemp>temp</InputTemp>
+               <HighTemp>trip_point1</HighTemp>
+               <LowTemp>trip_point0</LowTemp>
+               <Threshold>
+                <ThresholdTOff>0</ThresholdTOff>
+                <ThresholdNormal>34000</ThresholdNormal>
+                <ThresholdWarning>38000</ThresholdWarning>
+                <ThresholdAlert>62000</ThresholdAlert>
+                <ThresholdCritical>78000</ThresholdCritical>
+              </Threshold>
+        </Sensor>
+  </Zone>
+</thermalconfig>

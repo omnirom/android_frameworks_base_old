@@ -430,6 +430,28 @@ public final class PowerManagerService extends IPowerManager.Stub
         mDisplayBlanker.unblankAllDisplays();
     }
 
+    /**
+     * This function is called from Thermal Service to set the cap for
+     * Brightness limits when the platform is in a thermal condition.
+     * The cap is released by the Thermal Service as soon as the Thermal
+     * condition clears.
+     */
+    public void setThermalBrightnessLimit(int newBrightness, boolean immediate) {
+        // Update the max allowed brightness val synchronously.
+        // synchronize the step on mLock. This lock is used by PowerMangerService
+        // to synchronize operations
+        synchronized (mLock) {
+            // mScreenBrightnessSettingMaximum is the maximum allowed brightness value
+            mScreenBrightnessSettingMaximum = newBrightness;
+        }
+
+        // mScreenBrightnessSetting stores the current brightness value
+        // set the new brightness only if its lesser than the current brightness
+        if (immediate && newBrightness < mScreenBrightnessSetting) {
+            setScreenBrightnessOverrideFromWindowManager(newBrightness);
+        }
+    }
+
     public void setPolicy(WindowManagerPolicy policy) {
         synchronized (mLock) {
             mPolicy = policy;
