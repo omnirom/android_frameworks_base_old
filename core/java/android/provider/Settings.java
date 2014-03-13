@@ -1007,7 +1007,7 @@ public final class Settings {
          * The content:// style URL for this table
          */
         public static final Uri CONTENT_URI =
-            Uri.parse("content://" + AUTHORITY + "/system");
+                Uri.parse("content://" + AUTHORITY + "/system");
 
         private static final NameValueCache sNameValueCache = new NameValueCache(
                 SYS_PROP_SETTING_VERSION,
@@ -1116,6 +1116,46 @@ public final class Settings {
         }
 
         /**
+	     * Need to AOKP Custom Systems Animations
+	     *
+	     * Look up a boolean in the database.
+	     * @param resolver to access the database with
+	     * @param name to look up in the table
+	     * @param def Value to return if the setting is not defined.
+	     * @return The setting's current value, or 'def' if it is not defined
+	     * or not a valid boolean.
+	     */
+        public static boolean getBoolean(ContentResolver cr, String name, boolean def) {
+            String v = getString(cr, name);
+            try {
+                if (v != null)
+                    return "1".equals(v);
+                else
+                    return def;
+            } catch (NumberFormatException e) {
+                return def;
+            }
+        }
+	    /**
+	     * Need to AOKP Custom Systems Animations
+	     *
+	     * Convenience function for updating a single settings value as a
+	     * boolean. This will either create a new entry in the table if the
+	     * given name does not exist, or modify the value of the existing row
+	     * with that name. Note that internally setting values are always
+	     * stored as strings, so this function converts the given value to a
+	     * string before storing it.
+	     *
+	     * @param cr The ContentResolver to access.
+	     * @param name The name of the setting to modify.
+	     * @param value The new value for the setting.
+	     * @return true if the value was set, false on database errors
+	     */
+        public static boolean putBoolean(ContentResolver cr, String name, boolean value) {
+            return putString(cr, name, value ? "1" : "0");
+        }
+
+        /**
          * Look up a name in the database.
          * @param resolver to access the database with
          * @param name to look up in the table
@@ -1177,7 +1217,7 @@ public final class Settings {
         public static Uri getUriFor(String name) {
             if (MOVED_TO_SECURE.contains(name)) {
                 Log.w(TAG, "Setting " + name + " has moved from android.provider.Settings.System"
-                    + " to android.provider.Settings.Secure, returning Secure URI.");
+                       + " to android.provider.Settings.Secure, returning Secure URI.");
                 return Secure.getUriFor(Secure.CONTENT_URI, name);
             }
             if (MOVED_TO_GLOBAL.contains(name) || MOVED_TO_SECURE_THEN_GLOBAL.contains(name)) {
@@ -1499,7 +1539,7 @@ public final class Settings {
 
         /** @hide */
         public static boolean hasInterestingConfigurationChanges(int changes) {
-            return (changes&ActivityInfo.CONFIG_FONT_SCALE) != 0;
+            return (changes & ActivityInfo.CONFIG_FONT_SCALE) != 0;
         }
 
         /** @deprecated - Do not use */
@@ -3278,7 +3318,30 @@ public final class Settings {
         public static final String CALL_END_SOUND = "call_end_sound";
 
         /**
-         * Setting to show the battery percentage text
+         * If On-The-Go should be displayed at the power menu.
+         *
+         * @hide
+         */
+        public static final String POWER_MENU_ONTHEGO_ENABLED = "power_menu_onthego_enabled";
+
+        /**
+         * The alpha value of the On-The-Go overlay.
+         *
+         * @hide
+         */
+        public static final String ON_THE_GO_ALPHA = "on_the_go_alpha";
+
+        /**
+         * The camera instance to use.
+         * 0 = Rear Camera
+         * 1 = Front Camera
+         *
+         * @hide
+         */
+        public static final String ON_THE_GO_CAMERA = "on_the_go_camera";
+
+        /**
+         * Disable ads (HFM)
          * @hide
          */
         public static final String STATUS_BAR_BATTERY_STYLE = "status_bar_battery_style";
