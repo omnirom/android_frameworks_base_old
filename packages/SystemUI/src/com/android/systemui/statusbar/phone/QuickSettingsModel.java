@@ -715,6 +715,7 @@ class QuickSettingsModel implements BluetoothStateChangeCallback,
         onQuiteHourChanged();
         refreshRotationLockTile();
         refreshRssiTile();
+        refreshWifiTile();
         refreshLocationTile();
         refreshBackLocationTile();
         updateRingerState();
@@ -950,7 +951,7 @@ class QuickSettingsModel implements BluetoothStateChangeCallback,
             }
         });
         mWifiBackCallback = cb;
-        mWifiCallback.refreshView(mWifiBackTile, mWifiBackState);
+        mWifiBackCallback.refreshView(mWifiBackTile, mWifiBackState);
     }
 
     private void setSoftapEnabled(boolean enable) {
@@ -1089,6 +1090,13 @@ class QuickSettingsModel implements BluetoothStateChangeCallback,
         mWifiBackState.connected = getWifiApEnabled();
         mWifiCallback.refreshView(mWifiTile, mWifiState);
         mWifiBackCallback.refreshView(mWifiBackTile, mWifiBackState);
+    }
+
+    void refreshWifiTile() {
+        if (mWifiCallback == null) {
+            return;
+        }
+        mWifiCallback.refreshView(mWifiTile, mWifiState);
     }
 
     String getWifiIpAddr() {
@@ -1233,11 +1241,6 @@ class QuickSettingsModel implements BluetoothStateChangeCallback,
                 }
                 break;
         }
-    }
-
-    private boolean isWifiConnected() {
-        NetworkInfo network = (mCM != null) ? mCM.getNetworkInfo(ConnectivityManager.TYPE_WIFI) : null;
-        return network != null && network.isConnected();
     }
 
     public boolean isMobileDataEnabled() {
