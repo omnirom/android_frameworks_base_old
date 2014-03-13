@@ -17,6 +17,7 @@
 package com.android.systemui.statusbar.policy.activedisplay;
 
 import android.animation.ObjectAnimator;
+import android.app.ActivityManager;
 import android.app.ActivityManagerNative;
 import android.app.AlarmManager;
 import android.app.INotificationManager;
@@ -56,6 +57,9 @@ import android.os.ServiceManager;
 import android.os.SystemClock;
 import android.os.UserHandle;
 import android.provider.Settings;
+import android.speech.hotword.HotwordRecognitionListener;
+import android.speech.hotword.HotwordRecognitionService;
+import android.speech.hotword.HotwordRecognizer;
 import android.service.notification.INotificationListener;
 import android.service.notification.StatusBarNotification;
 import android.telephony.TelephonyManager;
@@ -97,6 +101,11 @@ public class ActiveDisplayView extends FrameLayout
 
     private static final boolean DEBUG = false;
     private static final String TAG = "ActiveDisplayView";
+
+    // Don't enable hotword on limited-memory devices.
+    private static final boolean ENABLE_HOTWORD = !ActivityManager.isLowRamDeviceStatic();
+    // Indicates if hotword is enabled, should it also be available on secure keyguard(s).
+    private static final boolean ENABLE_HOTWORD_SECURE = false;
 
     private static final String ACTION_REDISPLAY_NOTIFICATION
             = "com.android.systemui.action.REDISPLAY_NOTIFICATION";
@@ -180,6 +189,7 @@ public class ActiveDisplayView extends FrameLayout
     private IPowerManager mPM;
     private TelephonyManager mTM;
     private BaseStatusBar mBaseStatusBar;
+    private static HotwordRecognizer sHotwordClient;
 
     private Context mContext;
 
@@ -540,6 +550,10 @@ public class ActiveDisplayView extends FrameLayout
                 return true;
             }
         });
+
+        if (ENABLE_HOTWORD && sHotwordClient == null) {
+            sHotwordClient = HotwordRecognizer.createHotwordRecognizer(context);
+        }
     }
 
     public void setBar(BaseStatusBar bar) {
@@ -999,6 +1013,7 @@ public class ActiveDisplayView extends FrameLayout
 
     private void onScreenTurnedOn() {
         cancelRedisplayTimer();
+        maybeStopHotwordDetector();
         if (!mIsActive) {
             cancelTimeoutTimer();
         }
@@ -1011,6 +1026,7 @@ public class ActiveDisplayView extends FrameLayout
     private void onScreenTurnedOff() {
         enableProximitySensor();
         mTurnOffTime = System.currentTimeMillis();
+        maybeStartHotwordDetector();
         mWakedByPocketMode = false;
         hideNotificationView();
         cancelTimeoutTimer();
@@ -1786,4 +1802,69 @@ public class ActiveDisplayView extends FrameLayout
         utils.setCurrentUser(UserHandle.USER_OWNER);
         return utils.isLockScreenDisabled();
     }
+
+    /**
+     * Start the hotword detector if:
+     * <li> ENABLE_HOTWORD is true and
+     * <li> Hotword detection is not already running and
+     * <li> TelephonyManager is in CALL_STATE_IDLE
+     * <li> and Screen is turned on.
+     */
+    private void maybeStartHotwordDetector() {
+        if (!ENABLE_HOTWORD) return;
+
+        if (sHotwordClient != null) {
+            try {
+                sHotwordClient.startRecognition(mHotwordCallback);
+            } catch(Exception ex) {
+                sHotwordClient = null;
+            }
+        }
+    }
+
+    /**
+     * Stop hotword detector if:
+     * <li> ENABLE_HOTWORD is true
+     * <li> and hotword is running.
+     */
+    private void maybeStopHotwordDetector() {
+        if (!ENABLE_HOTWORD) return;
+
+        if (sHotwordClient != null) {
+            try {
+                sHotwordClient.stopRecognition();
+            } catch(Exception ex) {
+            } finally {
+                sHotwordClient = null;
+            }
+        }
+    }
+
+    private final HotwordRecognitionListener mHotwordCallback = new HotwordRecognitionListener() {
+
+        public void onHotwordRecognitionStarted() {
+        }
+
+        public void onHotwordRecognitionStopped() {
+        }
+
+        public void onHotwordEvent(int eventType, Bundle eventBundle) {
+            if (eventType == HotwordRecognitionService.EVENT_TYPE_PROMPT_CHANGED) {
+                if (eventBundle != null && eventBundle.containsKey(HotwordRecognitionService.KEY_PROMPT_TEXT)) {
+                    /*mIsUnlockByUser = true;
+                    disableProximitySensor();
+                    unlockKeyguardActivity();
+                    launchFakeActivityIntent();*/
+                }
+            }
+        }
+
+        public void onHotwordRecognized(final Intent intent) {
+            turnScreenOn();
+        }
+
+        public void onHotwordError(int errorCode) {
+            maybeStopHotwordDetector();
+        }
+    };
 }
