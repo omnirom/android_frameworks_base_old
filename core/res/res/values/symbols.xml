@@ -1231,6 +1231,8 @@
   <java-symbol type="xml" name="sms_short_codes" />
   <java-symbol type="xml" name="audio_assets" />
   <java-symbol type="xml" name="global_keys" />
+  <java-symbol type="xml" name="thermal_sensor_config" />
+  <java-symbol type="xml" name="thermal_throttle_config" />
 
   <java-symbol type="raw" name="accessibility_gestures" />
   <java-symbol type="raw" name="incognito_mode_start_page" />
