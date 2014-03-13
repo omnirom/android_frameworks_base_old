@@ -480,8 +480,8 @@ class QuickSettings {
                   if (addMissing) settingsTile.setVisibility(View.GONE);
                } else if (Tile.WIFI.toString().equals(tile.toString())) { // wifi tile
                   // Wi-fi
-                  final QuickSettingsFlipTile wifiTile
-                        = new QuickSettingsFlipTile(mContext);
+                  final QuickSettingsWifiFlipTile wifiTile
+                        = new QuickSettingsWifiFlipTile(mContext);
 
                   wifiTile.setTileId(Tile.WIFI);
                   wifiTile.setFrontOnLongClickListener(new View.OnLongClickListener() {
@@ -522,6 +522,9 @@ class QuickSettings {
                         public void refreshView(QuickSettingsTileView view, State state) {
                             WifiState wifiState = (WifiState) state;
                             wifiTile.setFrontImageResource(wifiState.iconId);
+
+                            setActivity(view, wifiState);
+
                             wifiTile.setFrontText(wifiState.label);
                             wifiTile.setFrontContentDescription(mContext.getString(
                                  R.string.accessibility_quick_settings_wifi,
