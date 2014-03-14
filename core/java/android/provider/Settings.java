@@ -2813,6 +2813,18 @@ public final class Settings {
         public static final String ACTIVE_DISPLAY_DOUBLE_TAP = "active_display_double_tap";
 
         /**
+         * shake device to show/hide active display.
+         * @hide
+         */
+        public static final String ACTIVE_DISPLAY_SHAKE_EVENT = "active_display_shake_event";
+
+        /**
+         * shake threshold active display.
+         * @hide
+         */
+        public static final String ACTIVE_DISPLAY_SHAKE_THRESHOLD = "active_display_shake_threshold";
+
+        /**
          * Screen-On Notification Light
          * 0 - disable, default
          * 1 - enable
