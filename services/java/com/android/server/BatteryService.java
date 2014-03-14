@@ -308,14 +308,21 @@ public final class BatteryService extends Binder {
         long dischargeDuration = 0;
 
         mBatteryLevelCritical = (mBatteryProps.batteryLevel <= mCriticalBatteryLevel);
-        if (mBatteryProps.chargerAcOnline) {
+        int chargingState = Settings.System.getInt(mContext.getContentResolver(),
+            Settings.System.DEVEL_CHARGING_STATE, 0);
+
+        if (mBatteryProps.chargerAcOnline || (chargingState == 1)) {
             mPlugType = BatteryManager.BATTERY_PLUGGED_AC;
-        } else if (mBatteryProps.chargerUsbOnline) {
+        } else if (mBatteryProps.chargerUsbOnline || (chargingState == 2)) {
             mPlugType = BatteryManager.BATTERY_PLUGGED_USB;
-        } else if (mBatteryProps.chargerWirelessOnline) {
+        } else if (mBatteryProps.chargerWirelessOnline || (chargingState == 3)) {
             mPlugType = BatteryManager.BATTERY_PLUGGED_WIRELESS;
         } else {
             mPlugType = BATTERY_PLUGGED_NONE;
+        }
+        // Simulate charging here.
+        if (chargingState != 0) {
+            mBatteryProps.batteryStatus = 2;
         }
 
         if (DEBUG) {
@@ -647,14 +654,23 @@ public final class BatteryService extends Binder {
                 String value = args[2];
                 try {
                     boolean update = true;
+                    int chargingState = Settings.System.getInt(mContext.getContentResolver(),
+                        Settings.System.DEVEL_CHARGING_STATE, 0);
                     if ("ac".equals(key)) {
-                        mBatteryProps.chargerAcOnline = Integer.parseInt(value) != 0;
+                        mBatteryProps.chargerAcOnline = (Integer.parseInt(value) != 0)
+                            || (chargingState == 1);
                     } else if ("usb".equals(key)) {
-                        mBatteryProps.chargerUsbOnline = Integer.parseInt(value) != 0;
+                        mBatteryProps.chargerUsbOnline = (Integer.parseInt(value) != 0)
+                            || (chargingState == 2);
                     } else if ("wireless".equals(key)) {
-                        mBatteryProps.chargerWirelessOnline = Integer.parseInt(value) != 0;
+                        mBatteryProps.chargerWirelessOnline = (Integer.parseInt(value) != 0)
+                            || (chargingState == 3);
                     } else if ("status".equals(key)) {
-                        mBatteryProps.batteryStatus = Integer.parseInt(value);
+                        if (chargingState != 0) {
+                            mBatteryProps.batteryStatus = 2;
+                        } else {
+                            mBatteryProps.batteryStatus = Integer.parseInt(value);
+                        }
                     } else if ("level".equals(key)) {
                         mBatteryProps.batteryLevel = Integer.parseInt(value);
                     } else if ("invalid".equals(key)) {
@@ -825,10 +841,15 @@ public final class BatteryService extends Binder {
                         Settings.System.BATTERY_LIGHT_REALLY_FULL_COLOR), false, this);
             }
 
+            // Development setting for charging simulation
+            resolver.registerContentObserver(Settings.System.getUriFor(
+                        Settings.System.DEVEL_CHARGING_STATE), false, this);
+
             update();
         }
 
         @Override public void onChange(boolean selfChange) {
+            processValuesLocked();
             update();
         }
 

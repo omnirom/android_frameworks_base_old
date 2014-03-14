@@ -1975,6 +1975,11 @@ public final class Settings {
          * @hide
          */
         public static final String VIBRATE_INPUT_DEVICES = "vibrate_input_devices";
+        
+        /**
+         * Holds the simulate charging state for debugging. 0 = disabled
+         */
+        public static final String DEVEL_CHARGING_STATE = "devel_charging_state";
 
         /**
          * Empty volume.
