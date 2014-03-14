@@ -24,21 +24,10 @@ import android.hardware.SensorManager;
 
 import javax.annotation.concurrent.GuardedBy;
 
-/**
- * Manages the light sensor and notifies a listener when enabled.
- */
 public class LightSensorManager {
-    /**
-     * Listener of the state of the light sensor.
-     * <p>
-     * This interface abstracts possible states for the light sensor.
-     * <p>
-     * The actual meaning of these states depends on the actual sensor.
-     */
+
     public interface LightListener {
-        /** Called when the light sensor transitions from the brighter to the darker state. */
         public void onDarker();
-        /** Called when the light sensor transitions from the darker to the brighter state. */
         public void onBrighter();
     }
 
@@ -48,36 +37,16 @@ public class LightSensorManager {
 
     private final LightSensorEventListener mLightSensorListener;
 
-    /**
-     * The current state of the manager, i.e., whether it is currently tracking the state of the
-     * sensor.
-     */
     private boolean mManagerEnabled;
 
-    /**
-     * The listener to the state of the sensor.
-     * <p>
-     * Contains most of the logic concerning tracking of the sensor.
-     * <p>
-     * After creating an instance of this object, one should call {@link #register()} and
-     * {@link #unregister()} to enable and disable the notifications.
-     */
     private static class LightSensorEventListener implements SensorEventListener {
         private final SensorManager mSensorManager;
         private final Sensor mLightSensor;
         private final float mMaxValue;
         private final LightListener mListener;
 
-        /**
-         * The last state of the sensor.
-         * <p>
-         * Before registering and after unregistering we are always in the {@link State#DARKER} state.
-         */
         @GuardedBy("this") private State mLastState;
-        /**
-         * If this flag is set to true, we are waiting to reach the {@link State#DARKER} state and
-         * should notify the listener and unregister when that happens.
-         */
+
         @GuardedBy("this") private boolean mWaitingForDarkerState;
 
         public LightSensorEventListener(SensorManager sensorManager, Sensor lightSensor,
@@ -86,30 +55,23 @@ public class LightSensorManager {
             mLightSensor = lightSensor;
             mMaxValue = lightSensor.getMaximumRange();
             mListener = listener;
-            // Initialize at darkerer state.
             mLastState = State.DARKER;
             mWaitingForDarkerState = false;
         }
 
         @Override
         public void onSensorChanged(SensorEvent event) {
-            // Make sure we have a valid value.
             if (event.values == null) return;
             if (event.values.length == 0) return;
             float value = event.values[0];
-            // Convert the sensor into a DARKER/BRIGHTER state.
             State state = getStateFromValue(value);
             synchronized (this) {
-                // No change in state, do nothing.
                 if (state == mLastState) return;
-                // Keep track of the current state.
                 mLastState = state;
-                // If we are waiting to reach the darker state and we are now in it, unregister.
                 if (mWaitingForDarkerState && mLastState == State.DARKER) {
                     unregisterWithoutNotification();
                 }
             }
-            // Notify the listener of the state change.
             switch (state) {
                 case DARKER:
                     mListener.onDarker();
@@ -123,34 +85,22 @@ public class LightSensorManager {
 
         @Override
         public void onAccuracyChanged(Sensor sensor, int accuracy) {
-            // Nothing to do here.
         }
 
-        /** Returns the state of the sensor given its current value. */
         private State getStateFromValue(float value) {
-            // Determine if the current value corresponds to the DARKER or BRIGHTER state.
-            // Take case of the case where the proximity sensor is binary: if the current value is
-            // equal to the maximum, we are always in the DARKER state.
             return (value > (mMaxValue * 0.8f)) ? State.BRIGHTER : State.DARKER;
         }
 
-        /**
-         * Unregister the next time the sensor reaches the {@link State#DARKER} state.
-         */
         public synchronized void unregisterWhenDarker() {
             if (mLastState == State.DARKER) {
-                // We are already in the darker state, just unregister now.
                 unregisterWithoutNotification();
             } else {
                 mWaitingForDarkerState = true;
             }
         }
 
-        /** Register the listener and call the listener as necessary. */
         public synchronized void register() {
-            // It is okay to register multiple times.
             mSensorManager.registerListener(this, mLightSensor, SensorManager.SENSOR_DELAY_UI);
-            // We should no longer be waiting for the darker state if we are registering again.
             mWaitingForDarkerState = false;
         }
 
@@ -159,11 +109,8 @@ public class LightSensorManager {
             synchronized (this) {
                 unregisterWithoutNotification();
                 lastState = mLastState;
-                // Always go back to the DARKER state. That way, when we register again we will get a
-                // transition when the sensor gets into the DARKER state.
                 mLastState = State.DARKER;
             }
-            // Notify the listener if we changed the state to DARKER while unregistering.
             if (lastState != State.DARKER) {
                 mListener.onDarker();
             }
@@ -181,7 +128,6 @@ public class LightSensorManager {
                 (SensorManager) context.getSystemService(Context.SENSOR_SERVICE);
         Sensor lightSensor = sensorManager.getDefaultSensor(Sensor.TYPE_LIGHT);
         if (lightSensor == null) {
-            // If there is no sensor, we should not do anything.
             mLightSensorListener = null;
         } else {
             mLightSensorListener =
@@ -189,13 +135,6 @@ public class LightSensorManager {
         }
     }
 
-    /**
-     * Enables the light manager.
-     * <p>
-     * The listener will start getting notifications of events.
-     * <p>
-     * This method is idempotent.
-     */
     public void enable() {
         if (mLightSensorListener != null && !mManagerEnabled) {
             mLightSensorListener.register();
@@ -203,21 +142,6 @@ public class LightSensorManager {
         }
     }
 
-    /**
-     * Disables the light manager.
-     * <p>
-     * The listener will stop receiving notifications of events, possibly after receiving a last
-     * {@link Listener#onDarker()} callback.
-     * <p>
-     * If {@code waitForDarkState} is true, if the sensor is not currently in the {@link State#DARKER}
-     * state, the listener will receive a {@link Listener#onDarker()} callback the next time the sensor
-     * actually reaches the {@link State#DARKER} state.
-     * <p>
-     * If {@code waitForDarkerState} is false, the listener will receive a {@link Listener#onDarker()}
-     * callback immediately if the sensor is currently not in the {@link State#DARKER} state.
-     * <p>
-     * This method is idempotent.
-     */
     public void disable(boolean waitForDarkerState) {
         if (mLightSensorListener != null && mManagerEnabled) {
             if (waitForDarkerState) {
