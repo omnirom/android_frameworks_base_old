@@ -72,6 +72,11 @@ import android.widget.LinearLayout;
 import android.widget.RemoteViews;
 import android.widget.TextView;
 
+import android.hardware.Sensor;
+import android.hardware.SensorEvent;
+import android.hardware.SensorEventListener;
+import android.hardware.SensorManager;
+
 import com.android.internal.util.omni.DeviceUtils;
 import com.android.internal.util.slim.QuietHoursHelper;
 import com.android.internal.widget.LockPatternUtils;
@@ -93,7 +98,7 @@ import java.util.HashSet;
 import java.util.Set;
 
 public class ActiveDisplayView extends FrameLayout
-               implements ProximitySensorManager.ProximityListener, LightSensorManager.LightListener {
+               implements ProximitySensorManager.ProximityListener, LightSensorManager.LightListener, SensorEventListener {
 
     private static final boolean DEBUG = false;
     private static final String TAG = "ActiveDisplayView";
@@ -153,6 +158,12 @@ public class ActiveDisplayView extends FrameLayout
     private static final int MSG_HIDE_NOTIFICATION_CALL = 1005;
     private static final int MSG_SHOW_NOTHING           = 1006;
 
+    // Shake
+    private long mLastUpdate = 0;
+    private float mLastX = 0.0f;
+    private float mLastY = 0.0f;
+    private float mLastZ = 0.0f;
+
     private GlowPadView mGlowPadView;
     private GestureDetector mDoubleTapGesture;
     private View mRemoteView;
@@ -190,6 +201,7 @@ public class ActiveDisplayView extends FrameLayout
     // sensor
     private ProximitySensorManager mProximitySensorManager;
     private LightSensorManager mLightSensorManager;
+    private SensorManager mSensorManager;
 
     private boolean mProximityIsFar = true;
     private boolean mIsInBrightLight = false;
@@ -215,6 +227,8 @@ public class ActiveDisplayView extends FrameLayout
     private boolean mBatteryLockscreen = false;
     private boolean mShowNotificationCount = false;
     private boolean mEnableDoubleTap = false;
+    private boolean mEnableShake = false;
+    private int mShakeThreshold = 600;
     private int mPocketMode = POCKET_MODE_OFF;
     private int mBrightnessMode = -1;
     private int mUserBrightnessLevel = -1;
@@ -362,6 +376,8 @@ public class ActiveDisplayView extends FrameLayout
                     Settings.System.ACTIVE_DISPLAY_ANNOYING), false, this);
             resolver.registerContentObserver(Settings.System.getUriFor(
                     Settings.System.ACTIVE_DISPLAY_DOUBLE_TAP), false, this);
+            resolver.registerContentObserver(Settings.System.getUriFor(
+                    Settings.System.ACTIVE_DISPLAY_SHAKE_EVENT), false, this);
             update();
         }
 
@@ -436,6 +452,9 @@ public class ActiveDisplayView extends FrameLayout
             mEnableDoubleTap = Settings.System.getIntForUser(
                     resolver, Settings.System.ACTIVE_DISPLAY_DOUBLE_TAP, 0,
                     UserHandle.USER_CURRENT_OR_SELF) != 0;
+            mEnableShake = Settings.System.getIntForUser(
+                    resolver, Settings.System.ACTIVE_DISPLAY_SHAKE_EVENT, 0,
+                    UserHandle.USER_CURRENT_OR_SELF) != 0;
 
             createExcludedAppsSet(excludedApps);
             createPrivacyAppsSet(privacyApps);
@@ -508,6 +527,11 @@ public class ActiveDisplayView extends FrameLayout
         mNotificationListener = new INotificationListenerWrapper();
         mProximitySensorManager = new ProximitySensorManager(context, this);
         mLightSensorManager = new LightSensorManager(context, this);
+        mSensorManager = (SensorManager) context.getSystemService(context.SENSOR_SERVICE);
+
+	mSensorManager.registerListener(this, 
+		mSensorManager.getDefaultSensor(Sensor.TYPE_ACCELEROMETER),
+		SensorManager.SENSOR_DELAY_NORMAL);
 
         PowerManager pm = (PowerManager) context.getSystemService(Context.POWER_SERVICE);
         mMinimumBacklight = pm.getMinimumScreenBrightnessSetting();
@@ -529,6 +553,43 @@ public class ActiveDisplayView extends FrameLayout
                 return true;
             }
         });
+
+    }
+
+    @Override
+    public void onAccuracyChanged(Sensor sensor,int accuracy){
+		
+    }
+	
+    @Override
+    public void onSensorChanged(SensorEvent event){
+	// check shake
+	boolean run_shake =  !isScreenOn() && !isOnCall() 
+                                 && mActiveDisplayEnabled && mEnableShake 
+                                 && event.sensor.getType()==Sensor.TYPE_ACCELEROMETER;
+
+	if(run_shake){
+           long curTime = System.currentTimeMillis();
+           // only allow one update every 100ms.
+           if ((curTime - mLastUpdate) > 100) {
+               long diffTime = (curTime - mLastUpdate);
+               mLastUpdate = curTime;
+
+               float x = event.values[SensorManager.DATA_X];
+               float y = event.values[SensorManager.DATA_Y];
+               float z = event.values[SensorManager.DATA_Z];
+
+               float speed = Math.abs(x+y+z - mLastX - mLastY - mLastZ) / diffTime * 10000;
+
+               if (speed > mShakeThreshold) {
+                   Log.d("sensor", "shake detected w/ speed: " + speed);
+               }
+
+               mLastX = x;
+               mLastY = y;
+               mLastZ = z;
+           }
+	}
     }
 
     public void setBar(BaseStatusBar bar) {
