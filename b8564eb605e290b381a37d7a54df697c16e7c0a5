@@ -2,6 +2,23 @@
   "comments": [
     {
       "key": {
+        "uuid": "8b77b57d_58c9efac",
+        "filename": "services/java/com/android/server/power/DisplayPowerController.java",
+        "patchSetId": 23
+      },
+      "lineNbr": 1792,
+      "author": {
+        "id": 1000313
+      },
+      "writtenOn": "2014-03-14T11:19:55Z",
+      "side": 1,
+      "message": "you must set mKeyguardService !\u003d null to call !mKeyguardService.isShowing()\nif not NPE :)",
+      "revId": "b8564eb605e290b381a37d7a54df697c16e7c0a5",
+      "serverId": "56841c99-7c94-43d4-bf0b-cb4707e66d55",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "8b77b57d_78622bd8",
         "filename": "services/java/com/android/server/power/DisplayPowerController.java",
         "patchSetId": 23
