@@ -4603,7 +4603,7 @@ public class PhoneWindowManager implements WindowManagerPolicy {
                                 break;
                             }
                         }
-                        if (!isScreenOn && !mVolumeWakeScreen) {
+                        if (!isScreenOn && !mVolumeWakeScreen && down) {
                             handleVolumeKey(AudioManager.STREAM_MUSIC, keyCode);
                         }
                     }
