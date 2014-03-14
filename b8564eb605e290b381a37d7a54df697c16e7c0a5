@@ -16,6 +16,24 @@
       "revId": "b8564eb605e290b381a37d7a54df697c16e7c0a5",
       "serverId": "56841c99-7c94-43d4-bf0b-cb4707e66d55",
       "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "8b77b57d_b85cc31d",
+        "filename": "services/java/com/android/server/power/DisplayPowerController.java",
+        "patchSetId": 23
+      },
+      "lineNbr": 1807,
+      "author": {
+        "id": 1000117
+      },
+      "writtenOn": "2014-03-14T08:33:37Z",
+      "side": 1,
+      "message": "Line 1792...",
+      "parentUuid": "8b77b57d_78622bd8",
+      "revId": "b8564eb605e290b381a37d7a54df697c16e7c0a5",
+      "serverId": "56841c99-7c94-43d4-bf0b-cb4707e66d55",
+      "unresolved": false
     }
   ]
 }
