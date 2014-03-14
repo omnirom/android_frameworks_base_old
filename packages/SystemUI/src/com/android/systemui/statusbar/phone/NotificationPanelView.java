@@ -32,7 +32,7 @@ import com.android.systemui.R;
 import com.android.systemui.statusbar.GestureRecorder;
 
 public class NotificationPanelView extends PanelView {
-    public static final boolean DEBUG_GESTURES = true;
+    public static final boolean DEBUG_GESTURES = false;
     private static final float STATUS_BAR_LEFT_PERCENTAGE = 0.7f;
     private static final float STATUS_BAR_RIGHT_PERCENTAGE = 0.3f;
     private static final float STATUS_BAR_SWIPE_TRIGGER_PERCENTAGE = 0.05f;
