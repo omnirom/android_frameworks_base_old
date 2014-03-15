@@ -75,6 +75,7 @@ import com.android.systemui.statusbar.policy.NetworkController.NetworkSignalChan
 import com.android.systemui.statusbar.policy.RotationLockController;
 import com.android.systemui.statusbar.policy.RotationLockController.RotationLockControllerCallback;
 import com.android.internal.util.slim.QuietHoursHelper;
+import com.android.systemui.nameless.onthego.OnTheGoReceiver;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -225,6 +226,20 @@ class QuickSettingsModel implements BluetoothStateChangeCallback,
         }
     };
 
+    /** Broadcast receive to determine on-the-go. */
+    private BroadcastReceiver mOnTheGoReceiver = new BroadcastReceiver() {
+        @Override
+        public void onReceive(Context context, Intent intent) {
+            String action = intent.getAction();
+            if (action.equals(OnTheGoReceiver.ACTION_START)) {
+                mOnTheGoRunning = true;
+            } else if (action.equals(OnTheGoReceiver.ACTION_ALREADY_STOP)) {
+                mOnTheGoRunning = false;
+            }
+            onOnTheGoChanged();
+        }
+    };
+
     /** Broadcast receive to determine battery. */
     private BroadcastReceiver mBatteryReceiver = new BroadcastReceiver() {
         @Override
@@ -308,6 +323,29 @@ class QuickSettingsModel implements BluetoothStateChangeCallback,
             cr.unregisterContentObserver(this);
             cr.registerContentObserver(
                     Settings.System.getUriFor(Settings.System.SCREEN_OFF_TIMEOUT), false, this,
+                    UserHandle.USER_ALL);
+        }
+    }
+
+    /** ContentObserver to determine the on-the-go tile */
+    private class OnTheGoObserver extends ContentObserver {
+        public OnTheGoObserver(Handler handler) {
+            super(handler);
+        }
+
+        @Override 
+        public void onChange(boolean selfChange) {
+            onOnTheGoChanged();
+        }
+
+        public void startObserving() {
+            final ContentResolver cr = mContext.getContentResolver();
+            cr.unregisterContentObserver(this);
+            cr.registerContentObserver(
+                    Settings.System.getUriFor(Settings.System.ONTHEGO_IN_POWER_MENU), false, this,
+                    UserHandle.USER_ALL);
+            cr.registerContentObserver(
+                    Settings.System.getUriFor(Settings.System.ON_THE_GO_CAMERA), false, this,
                     UserHandle.USER_ALL);
         }
     }
@@ -510,6 +548,8 @@ class QuickSettingsModel implements BluetoothStateChangeCallback,
     private final QuiteHourObserver mQuietHourObserver;
     private final RingerObserver mRingerObserver;
     private final SleepObserver mSleepObserver;
+    private final OnTheGoObserver mOnTheGoObserver;
+
     private LocationController mLocationController;
     private final NetworkObserver mMobileNetworkObserver;
 
@@ -552,6 +592,8 @@ class QuickSettingsModel implements BluetoothStateChangeCallback,
 
     private long mLastClickTime = 0;
 
+    private boolean mOnTheGoRunning = false;
+
     private QuickSettingsTileView mUserTile;
     private RefreshCallback mUserCallback;
     private UserState mUserState = new UserState();
@@ -563,6 +605,10 @@ class QuickSettingsModel implements BluetoothStateChangeCallback,
     private QuickSettingsTileView mAlarmTile;
     private RefreshCallback mAlarmCallback;
     private State mAlarmState = new State();
+
+    private QuickSettingsTileView mOnTheGoTile;
+    private RefreshCallback mOnTheGoCallback;
+    private State mOnTheGoState = new State();
 
     private QuickSettingsTileView mAirplaneModeTile;
     private RefreshCallback mAirplaneModeCallback;
@@ -706,6 +752,7 @@ class QuickSettingsModel implements BluetoothStateChangeCallback,
                 mQuietHourObserver.startObserving();
                 mRingerObserver.startObserving();
                 mSleepObserver.startObserving();
+                mOnTheGoObserver.startObserving();
                 mMobileNetworkObserver.startObserving();
                 refreshRotationLockTile();
                 onBrightnessLevelChanged();
@@ -730,6 +777,8 @@ class QuickSettingsModel implements BluetoothStateChangeCallback,
         mQuietHourObserver.startObserving();
         mSleepObserver = new SleepObserver(mHandler);
         mSleepObserver.startObserving();
+        mOnTheGoObserver = new OnTheGoObserver(mHandler);
+        mOnTheGoObserver.startObserving();
         mRingerObserver = new RingerObserver(mHandler);
         mRingerObserver.startObserving();
         mMobileNetworkObserver = new NetworkObserver(mHandler);
@@ -789,6 +838,11 @@ class QuickSettingsModel implements BluetoothStateChangeCallback,
         IntentFilter batteryFilter = new IntentFilter();
         batteryFilter.addAction(Intent.ACTION_BATTERY_CHANGED);
         context.registerReceiver(mBatteryReceiver, batteryFilter);
+
+        IntentFilter onTheGofilter = new IntentFilter();
+        onTheGofilter.addAction(OnTheGoReceiver.ACTION_START);
+        onTheGofilter.addAction(OnTheGoReceiver.ACTION_ALREADY_STOP);
+        context.registerReceiver(mOnTheGoReceiver, onTheGofilter);
     }
 
     public void setService(PhoneStatusBar phoneStatusBar) {
@@ -819,6 +873,7 @@ class QuickSettingsModel implements BluetoothStateChangeCallback,
         refreshBackLocationTile();
         updateRingerState();
         updateSleepState();
+        onOnTheGoChanged();
         onMobileNetworkChanged();
         onQuietHourChanged();
         refreshTintedFrontTile();
@@ -885,6 +940,31 @@ class QuickSettingsModel implements BluetoothStateChangeCallback,
         mTimeTile = view;
         mTimeCallback = cb;
         mTimeCallback.refreshView(view, mTimeState);
+    }
+
+    // on-the-go
+    void addOnTheGoTile(QuickSettingsTileView view, RefreshCallback cb) {
+        mOnTheGoTile = view;
+        mOnTheGoCallback = cb;
+        onOnTheGoChanged();
+    }
+
+    void onOnTheGoChanged() {
+        if (mOnTheGoTile == null) {
+            return;
+        }
+
+        Resources r = mContext.getResources();
+        ContentResolver resolver = mContext.getContentResolver();
+        int mode = Settings.System.getInt(resolver,
+                               Settings.System.ON_THE_GO_CAMERA, 0);
+        boolean changeCamera = (mode != 0);
+        mOnTheGoState.iconId = changeCamera ? R.drawable.ic_qs_onthego_front
+                        : R.drawable.ic_qs_onthego;
+        mOnTheGoState.label = changeCamera ? r.getString(R.string.quick_settings_onthego_front)
+                        : r.getString(R.string.quick_settings_onthego_back);
+        mOnTheGoState.enabled = mOnTheGoRunning;
+        mOnTheGoCallback.refreshView(mOnTheGoTile, mOnTheGoState);
     }
 
     // Alarm

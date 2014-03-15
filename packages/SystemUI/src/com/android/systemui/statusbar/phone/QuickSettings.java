@@ -27,6 +27,7 @@ import android.app.admin.DevicePolicyManager;
 import android.bluetooth.BluetoothAdapter;
 import android.content.BroadcastReceiver;
 import android.content.ComponentName;
+import android.content.ContentResolver;
 import android.content.Context;
 import android.content.DialogInterface;
 import android.content.DialogInterface.OnClickListener;
@@ -1303,6 +1304,35 @@ class QuickSettings {
              }
         });
         parent.addView(alarmTile);
+
+        // On-the-go tile
+        if (DeviceUtils.deviceSupportsCamera(mContext)
+            && DeviceUtils.deviceSupportsFrontCamera(mContext)) {
+            final QuickSettingsBasicTile onthegoTile
+                       = new QuickSettingsBasicTile(mContext);
+            onthegoTile.setImageResource(R.drawable.ic_qs_onthego);
+            onthegoTile.setTextResource(R.string.quick_settings_onthego_back);
+            onthegoTile.setTemporary(true);
+            onthegoTile.setOnClickListener(new View.OnClickListener() {
+                 @Override
+                 public void onClick(View v) {
+                     ContentResolver resolver = mContext.getContentResolver();
+                     int mode = Settings.System.getInt(resolver,
+                               Settings.System.ON_THE_GO_CAMERA, 0);
+                     Settings.System.putInt(resolver,
+                               Settings.System.ON_THE_GO_CAMERA, (mode != 0) ? 0 : 1);
+                 }
+            });
+            mModel.addOnTheGoTile(onthegoTile, new QuickSettingsModel.RefreshCallback() {
+                 @Override
+                 public void refreshView(QuickSettingsTileView unused, State state) {
+                     onthegoTile.setImageResource(state.iconId);
+                     onthegoTile.setText(state.label);
+                     onthegoTile.setVisibility(state.enabled ? View.VISIBLE : View.GONE);
+                 }
+            });
+            parent.addView(onthegoTile);
+        }
 
         // Remote Display
         QuickSettingsBasicTile remoteDisplayTile

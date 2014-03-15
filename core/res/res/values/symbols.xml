@@ -1340,6 +1340,7 @@
   <java-symbol type="drawable" name="ic_lock_airplane_mode_off" />
   <java-symbol type="drawable" name="ic_lock_mobile_data" />
   <java-symbol type="drawable" name="ic_lock_mobile_data_off" />
+  <java-symbol type="drawable" name="ic_lock_onthego" />
   <java-symbol type="drawable" name="ic_menu_cc" />
   <java-symbol type="drawable" name="jog_tab_bar_left_unlock" />
   <java-symbol type="drawable" name="jog_tab_bar_right_sound_off" />
@@ -1416,6 +1417,7 @@
   <java-symbol type="string" name="global_action_silent_mode_off_status" />
   <java-symbol type="string" name="global_action_silent_mode_on_status" />
   <java-symbol type="string" name="global_action_toggle_silent_mode" />
+  <java-symbol type="string" name="global_action_onthego" />
   <java-symbol type="string" name="invalidPuk" />
   <java-symbol type="string" name="lockscreen_carrier_default" />
   <java-symbol type="style" name="Animation.LockScreen" />

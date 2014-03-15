@@ -128,6 +128,19 @@
     <string name="quick_settings_tinted_mode_screen_label">Screen</string>
     <string name="quick_settings_tinted_mode_actionbar_label">Action bar</string>
 
+    <!-- On-The-Go mode strings -->
+    <string name="onthego_notif_ticker">On-The-Go activated</string>
+    <string name="onthego_notif_title">On-The-Go is active</string>
+    <string name="onthego_notif_stop">Stop</string>
+    <string name="onthego_notif_options">Options</string>
+    <string name="onthego_notif_error">Unable to start On-The-Go</string>
+    <string name="onthego_notif_restart">Restart On-The-Go</string>
+    <string name="onthego_notif_camera_changed">Camera mode changed</string>
+    <string name="onthego_transparency">Transparency</string>
+    <string name="onthego_front_camera">Use front camera</string>
+    <string name="quick_settings_onthego_back">Rear Camera</string>
+    <string name="quick_settings_onthego_front">Front Camera</string>
+
     <!-- Dialog title for navigation bar button selection -->
     <string name="navbar_dialog_title">Choose action to assign</string>
     <string name="navbar_home_button">Home button</string>

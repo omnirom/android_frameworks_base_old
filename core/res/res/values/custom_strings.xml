@@ -47,6 +47,9 @@
     <!-- Storage description for the SD card on the dock. [CHAR LIMIT=NONE] -->
     <string name="storage_sd_dock_card">Dock SD card</string>
 
+    <!-- label for item that takes On-The-Go in the phone options dialog -->
+    <string name="global_action_onthego">On-the-go mode</string>
+
     <!-- label for item that toggle mobile data -->
     <string name="global_actions_toggle_mobile_data">Mobile data</string>
 
