@@ -94,6 +94,9 @@
     <uses-permission android:name="android.permission.READ_SYNC_SETTINGS" />
     <uses-permission android:name="android.permission.WRITE_SYNC_SETTINGS" />
 
+    <!-- On the go -->
+    <uses-permission android:name="android.permission.CAMERA" />
+
     <application
         android:persistent="true"
         android:allowClearUserData="false"
@@ -123,6 +126,22 @@
         <service android:name=".omni.screenrecord.TakeScreenrecordService"
             android:process=":screenrecord"
             android:exported="false" />
+
+        <!-- on the go mode -->
+        <service android:name=".nameless.onthego.OnTheGoService"
+                android:process=":onthego"
+                android:exported="false" />
+
+        <receiver android:name=".nameless.onthego.OnTheGoReceiver"
+                android:exported="true" >
+            <intent-filter>
+                <action android:name="com.android.systemui.action.ON_THE_GO_START" />
+                <action android:name="com.android.systemui.action.ON_THE_GO_STOP" />
+                <action android:name="com.android.systemui.action.ON_THE_GO_RESTART" />
+                <action android:name="com.android.systemui.action.ON_THE_GO_TOOGLE_OPTIONS" />
+            </intent-filter>
+        </receiver>
+        <!-- on the go mode -->
 
         <service android:name=".LoadAverageService"
                 android:exported="true" />
