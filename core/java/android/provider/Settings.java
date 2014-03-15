@@ -2602,6 +2602,22 @@ public final class Settings {
         public static final String NETWORK_TRAFFIC_STATE = "network_traffic_state";
 
         /**
+         * The alpha value of the On-The-Go overlay.
+         *
+         * @hide
+         */
+        public static final String ON_THE_GO_ALPHA = "on_the_go_alpha";
+
+        /**
+         * The camera instance to use.
+         * 0 = Rear Camera
+         * 1 = Front Camera
+         *
+         * @hide
+         */
+        public static final String ON_THE_GO_CAMERA = "on_the_go_camera";
+
+        /**
          * Show Screenshot in Power Menu
          * @hide
          */
@@ -2612,6 +2628,12 @@ public final class Settings {
          * @hide
          */
         public static final String SCREENRECORD_IN_POWER_MENU = "screenrecord_in_power_menu";
+
+        /**
+         * Show on the go in Power Menu
+         * @hide
+         */
+        public static final String ONTHEGO_IN_POWER_MENU = "onthego_in_power_menu";
 
         /**
          * Show AirplaneMode in Power Menu
