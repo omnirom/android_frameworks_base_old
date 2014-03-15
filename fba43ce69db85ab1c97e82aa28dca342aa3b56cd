@@ -87,6 +87,24 @@
       "revId": "fba43ce69db85ab1c97e82aa28dca342aa3b56cd",
       "serverId": "56841c99-7c94-43d4-bf0b-cb4707e66d55",
       "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "8b77b57d_9353686f",
+        "filename": "packages/SystemUI/res/color/text_onclick_highlight.xml",
+        "patchSetId": 3
+      },
+      "lineNbr": 18,
+      "author": {
+        "id": 1000650
+      },
+      "writtenOn": "2014-03-15T23:07:40Z",
+      "side": 1,
+      "message": "I know. I thought about that but it does not look nice. We would have to add a layout around each textview to make this possible. The less code change, the better, I think. So font color is a good alternative. Try it out - it looks good in this context. :)",
+      "parentUuid": "8b77b57d_33645443",
+      "revId": "fba43ce69db85ab1c97e82aa28dca342aa3b56cd",
+      "serverId": "56841c99-7c94-43d4-bf0b-cb4707e66d55",
+      "unresolved": false
     }
   ]
 }
