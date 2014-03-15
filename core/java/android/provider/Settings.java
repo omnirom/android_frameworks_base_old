@@ -3281,7 +3281,8 @@ public final class Settings {
          */
         public static final String VIRTUAL_KEYS_HAPTIC_FEEDBACK = "virtual_keys_haptic_feedback";
 
-        /** Weather to allow headsethook to launch voice commands
+        /**
+         * Weather to allow headsethook to launch voice commands
          * @hide
          */
         public static final String HEADSETHOOK_LAUNCH_VOICE = "headsethook_launch_voice";
@@ -3422,6 +3423,18 @@ public final class Settings {
          * @hide
          */
         public static final String NON_INTRUSIVE_INCALL = "non_intrusive_incall";
+
+        /**
+         *
+         * @hide
+         */
+        public static final String SMART_PHONE_CALLER = "smart_phone_caller";
+
+        /**
+         *
+         * @hide
+         */
+        public static final String SMART_MMS_CALLER = "smart_mms_caller";
 
         /**
          * Should Dialer suggest nearby phone numbers
