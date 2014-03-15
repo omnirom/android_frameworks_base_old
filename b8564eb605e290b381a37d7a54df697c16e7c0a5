@@ -19,6 +19,24 @@
     },
     {
       "key": {
+        "uuid": "8b77b57d_3370d4a1",
+        "filename": "services/java/com/android/server/power/DisplayPowerController.java",
+        "patchSetId": 23
+      },
+      "lineNbr": 1792,
+      "author": {
+        "id": 1000117
+      },
+      "writtenOn": "2014-03-15T11:44:02Z",
+      "side": 1,
+      "message": "This can\u0027t cause NPE.\nif KeyguardService \u003d\u003d null, it will not check mKeyguardService.isShowing().\nif KeyguardService !\u003d null, it will check mKeyguardService.isShowing(), but it can\u0027t cause NPE.",
+      "parentUuid": "8b77b57d_58c9efac",
+      "revId": "b8564eb605e290b381a37d7a54df697c16e7c0a5",
+      "serverId": "56841c99-7c94-43d4-bf0b-cb4707e66d55",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "8b77b57d_78622bd8",
         "filename": "services/java/com/android/server/power/DisplayPowerController.java",
         "patchSetId": 23
