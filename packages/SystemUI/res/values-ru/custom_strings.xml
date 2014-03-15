@@ -21,10 +21,10 @@
     <string name="quick_settings_wifi_tethering_off_label">Режим модема выкл.</string>
 
     <!-- Quick Settings Bluetooth Not Discoverable label -->
-    <string name="quick_settings_bluetooth_not_discoverable_label">Нельзя обнаружить</string>
+    <string name="quick_settings_bluetooth_not_discoverable_label">Видимость выкл.</string>
 
     <!-- Quick Settings Bluetooth Discoverable label -->
-    <string name="quick_settings_bluetooth_discoverable_label">Видимый</string>
+    <string name="quick_settings_bluetooth_discoverable_label">Видимость</string>
 
     <!-- Quick Settings Bluetooth Not Connected -->
     <string name="quick_settings_bluetooth_enabled">Вкл.</string>
@@ -58,12 +58,12 @@
     <!-- QuickSettings: Immersive mode [CHAR LIMIT=NONE] -->
     <string name="quick_settings_immersive_mode_label">Расширенный</string>
     <!-- QuickSettings: Immersive mode (Off) [CHAR LIMIT=NONE] -->
-    <string name="quick_settings_immersive_mode_off_label">Расширенный выкл</string>
+    <string name="quick_settings_immersive_mode_off_label">Обычный</string>
 
     <string name="network_4G">4G/LTE</string>
     <string name="network_3G_only">Только 3G</string>
     <string name="network_3G_auto">Авто 2G/3G</string>
-    <string name="network_3G">2G/3G Пред</string>
+    <string name="network_3G">2G/3G переключение</string>
     <string name="network_2G">2G Только</string>
 
     <string name="quick_settings_battery_health_unknown">\nНеизвестно</string>
@@ -75,36 +75,36 @@
     <string name="quick_settings_battery_health_cold">\nХолодная</string>
     <string name="quick_settings_battery_voltage_units">mV</string>
     <string name="quick_settings_battery_temperature_units">\u00B0 C</string>
-    <string name="quick_settings_sleep_label_back_15">15с</string>
-    <string name="quick_settings_sleep_label_back_30">30с</string>
-    <string name="quick_settings_sleep_label_back_60">60с</string>
-    <string name="quick_settings_sleep_label_back_120">2м</string>
-    <string name="quick_settings_sleep_label_back_300">5м</string>
-    <string name="quick_settings_sleep_label_back_600">10м</string>
-    <string name="quick_settings_sleep_label_back_1800">30м</string>
+    <string name="quick_settings_sleep_label_back_15">15 с</string>
+    <string name="quick_settings_sleep_label_back_30">30 с</string>
+    <string name="quick_settings_sleep_label_back_60">60 с</string>
+    <string name="quick_settings_sleep_label_back_120">2 м</string>
+    <string name="quick_settings_sleep_label_back_300">5 м</string>
+    <string name="quick_settings_sleep_label_back_600">10 м</string>
+    <string name="quick_settings_sleep_label_back_1800">30 м</string>
     <string name="quick_settings_sleep_label_back_unknown">0000</string>
-    <string name="quick_settings_location_mode_high">Высоко</string>
-    <string name="quick_settings_location_mode_battery">Батарея</string>
-    <string name="quick_settings_location_mode_sensors">Устройство</string>
-    <string name="quick_settings_network_type">Состояние</string>
+    <string name="quick_settings_location_mode_high">Высокая точность</string>
+    <string name="quick_settings_location_mode_battery">Экономия заряда</string>
+    <string name="quick_settings_location_mode_sensors">По датчикам устройства</string>
+    <string name="quick_settings_network_type">Режим сети</string>
     <string name="quick_settings_network_unknown">Неизвестн.</string>
-    <string name="quick_settings_network_disable">\nНет интернета</string>
+    <string name="quick_settings_network_disable">\nНет сети</string>
     <string name="quick_settings_quiethours_label">Тихие часы</string>
     <string name="quick_settings_quiethours_off_label">Тихие часы выкл</string>
     <string name="quick_settings_ringer_on">Звук вкл</string>
     <string name="quick_settings_ringer_off">Звук выкл</string>
     <string name="quick_settings_ringer_normal">Звук</string>
     <string name="quick_settings_screen_sleep">Выключить экран</string>
-    <string name="quick_settings_sync">Синхронизация</string>
-    <string name="quick_settings_sync_off">Синхронизация выкл</string>
+    <string name="quick_settings_sync">Синхр.</string>
+    <string name="quick_settings_sync_off">Синхр. выкл</string>
     <string name="quick_settings_torch">Фонарь</string>
     <string name="quick_settings_torch_off">Фонарь выкл</string>
     <string name="quick_settings_vibration_on">Вибрация</string>
     <string name="quick_settings_vibration_off">Вибрация выкл</string>
     <string name="quick_settings_volume">Громкость</string>
-    <string name="quick_settings_volume_status">Состояние звука</string>
+    <string name="quick_settings_volume_status">Состояние</string>
     <string name="quick_settings_usb_tether_off_label">Отключено</string>
-    <string name="quick_settings_usb_tether_connected_label">USB-модем откл.</string>
+    <string name="quick_settings_usb_tether_connected_label">USB-модем выкл.</string>
     <string name="quick_settings_usb_tether_on_label">USB-модем</string>
 
     <string name="status_bar_notification_hide_icon_packages">Скрыть иконки уведомлениий</string>
@@ -112,7 +112,7 @@
     <!-- Dialog title for navigation bar button selection -->
     <string name="navbar_dialog_title">Выберите действие</string>
     <string name="navbar_home_button">Домой</string>
-    <string name="navbar_recent_button">Запущ. приложения</string>
+    <string name="navbar_recent_button">Недавние приложения</string>
     <string name="navbar_search_button">Поиск</string>
     <string name="navbar_back_button">Назад</string>
     <string name="navbar_empty_button">Пустая кнопка</string>
@@ -121,3 +121,4 @@
     <string name="navbar_menu_big_button">Меню</string>
 
 </resources>
+

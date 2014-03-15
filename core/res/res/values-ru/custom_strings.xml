@@ -8,15 +8,15 @@
     <!-- Button to reboot the phone, within the Reboot Options dialog -->
     <string name="reboot_reboot">Перезагрузка</string>
     <!-- Button to reboot the phone into recovery, within the Reboot Options dialog -->
-    <string name="reboot_recovery">Рекавери</string>
+    <string name="reboot_recovery">Режим восстановления</string>
     <!-- Button to reboot the phone into bootloader, within the Reboot Options dialog -->
-    <string name="reboot_bootloader">Бутлоадер</string>
+    <string name="reboot_bootloader">Загрузчик</string>
     <!-- Button to reboot the phone into bootmenu, within the Reboot Options dialog -->
     <string name="reboot_bootmenu">Загрузочное меню</string>
     <!-- Button to reboot the phone into fastboot, within the Reboot Options dialog -->
     <string name="reboot_fastboot">Fastboot</string>
     <!-- Button to reboot the phone into download, within the Reboot Options dialog -->
-    <string name="reboot_download">Скачивание</string>
+    <string name="reboot_download">Режим обновления ПО</string>
 
     <!-- Reboot Progress Dialog. This is shown if the user chooses to reboot the phone. -->
     <string name="reboot_progress">Перезагрузка\u2026</string>
@@ -27,12 +27,12 @@
     <string name="app_killed_message">Приложение закрыто</string>
 
     <!-- Title of an application permission that lets an application view/edit revoked permissions. -->
-    <string name="permlab_revokePermissions">Позволяет просматривать и редактировать отозванные разрешения. Не для использования обычными приложениями.</string>
+    <string name="permlab_revokePermissions">Просмотр и редактирование отозванных разрешений. Не для использования обычными приложениями.</string>
     <!-- Description of an application permission that lets lets an application view/edit revoked permissions. -->
-    <string name="permdesc_revokePermissions">Позволяет читать и записывать для отозванных разрешений. Не для использования обычными приложениями.</string>
+    <string name="permdesc_revokePermissions">Чтение и запись для отозванных разрешений. Не для использования обычными приложениями.</string>
 
     <!-- Title of an application permission that lets an application access the ThemeManagerService. -->
-    <string name="permlab_accessThemeService">Позволяет получить доступ к менеджеру тем. Не для использования обычными приложениями.</string>
+    <string name="permlab_accessThemeService">Предоставить доступ к менеджеру тем. Не для использования обычными приложениями.</string>
     <!-- Description of an application permission that lets lets an application access the ThemeManagerService -->
     <string name="permdesc_accessThemeService">Приложение сможет установить/сбросить тему. Не для использования обычными приложениями.</string>
 
@@ -52,3 +52,4 @@
     <string name="global_actions_mobile_data_off_status">Передача данных выкл</string>
 
 </resources> 
+
