@@ -69,6 +69,24 @@
       "revId": "fba43ce69db85ab1c97e82aa28dca342aa3b56cd",
       "serverId": "56841c99-7c94-43d4-bf0b-cb4707e66d55",
       "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "8b77b57d_33645443",
+        "filename": "packages/SystemUI/res/color/text_onclick_highlight.xml",
+        "patchSetId": 3
+      },
+      "lineNbr": 18,
+      "author": {
+        "id": 1000026
+      },
+      "writtenOn": "2014-03-15T22:43:42Z",
+      "side": 1,
+      "message": "Actually the \"android way\" to show \"push feedback\" is using background color. see e.g. buttons, settings a.s.o.",
+      "parentUuid": "8b77b57d_937a88e5",
+      "revId": "fba43ce69db85ab1c97e82aa28dca342aa3b56cd",
+      "serverId": "56841c99-7c94-43d4-bf0b-cb4707e66d55",
+      "unresolved": false
     }
   ]
 }
