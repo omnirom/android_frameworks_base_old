@@ -1,7 +1,5 @@
 /*
  * Copyright (C) 2012 The Android Open Source Project
- * This code has been modified. Portions copyright (C) 2013, 2014, OmniRom Project.
- * This code has been modified. Portions copyright (C) 2013, ParanoidAndroid Project.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -20,115 +18,66 @@ package com.android.systemui.statusbar.phone;
 
 import com.android.systemui.R;
 
-import android.animation.Animator;
-import android.animation.AnimatorListenerAdapter;
 import android.content.Context;
-import android.content.res.Resources;
-import android.graphics.Color;
 import android.graphics.drawable.ColorDrawable;
+import android.graphics.drawable.StateListDrawable;
+import android.os.UserHandle;
+import android.provider.Settings;
 import android.util.AttributeSet;
 import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
-import android.view.View.OnClickListener;
-import android.view.View.OnLongClickListener;
-import android.view.ViewGroup;
-import android.view.ViewGroup.MarginLayoutParams;
 import android.view.ViewParent;
 import android.widget.FrameLayout;
-
-import com.android.systemui.statusbar.phone.QuickSettings.Tile;
 
 /**
  *
  */
-class QuickSettingsTileView extends FrameLayout {
+public class QuickSettingsTileView extends FrameLayout {
     private static final String TAG = "QuickSettingsTileView";
-    private static final String HOVER_COLOR_WHITE = "#3FFFFFFF"; // 25% white
-    private static final String HOVER_COLOR_BLACK = "#3F000000"; // 25% black
-
-    private static final float DEFAULT = 1f;
-    private static final float ENABLED = 0.95f;
-    private static final float DISABLED = 0.65f;
-    private static final float DISAPPEAR = 0.0f;
-
-    private Tile mTileId;
-
-    private OnClickListener mOnClickListener;
-    private OnLongClickListener mOnLongClickListener;
 
     private int mContentLayoutId;
     private int mColSpan;
-    private int mRowSpan;
-    private int mNumColumns;
-
     private boolean mPrepared;
     private OnPrepareListener mOnPrepareListener;
-    private QuickSettingsTouchListener mTouchListener;
-    private QuickSettingsDragListener mDragListener;
-    private boolean mTemporary;
-    private boolean mEditMode;
-    private boolean mVisible;
 
     public QuickSettingsTileView(Context context, AttributeSet attrs) {
         super(context, attrs);
 
         mContentLayoutId = -1;
         mColSpan = 1;
-        mRowSpan = 1;
 
-        mTouchListener = new QuickSettingsTouchListener(context, this);
-        mDragListener = new QuickSettingsDragListener();
-        setOnTouchListener(mTouchListener);
-        setOnDragListener(mDragListener);
-    }
+        int bgColor = Settings.System.getIntForUser(context.getContentResolver(),
+                Settings.System.QUICK_TILES_BG_COLOR, -2,
+                UserHandle.USER_CURRENT);
+        int presColor = Settings.System.getIntForUser(context.getContentResolver(),
+                Settings.System.QUICK_TILES_BG_PRESSED_COLOR, -2,
+                UserHandle.USER_CURRENT);
+        float bgAlpha = Settings.System.getFloatForUser(context.getContentResolver(),
+                Settings.System.QUICK_TILES_BG_ALPHA, 0.0f,
+                UserHandle.USER_CURRENT);
 
-    public void setTileId(Tile id) {
-        mTileId = id;
-    }
-
-    public QuickSettingsTouchListener getTouchListener() {
-        return mTouchListener;
-    }
-
-    public QuickSettingsDragListener getDragListener() {
-        return mDragListener;
-    }
-
-    public Tile getTileId() {
-        return mTileId;
-    }
-
-    public void setTemporary(boolean temporary) {
-        mTemporary = temporary;
-        if (temporary) { // No listeners needed
-            setOnTouchListener(null);
-            setOnDragListener(null);
-        } else {
-            setOnTouchListener(mTouchListener);
-            setOnDragListener(mDragListener);
+        if (bgColor == -2) {
+            bgColor = context.getResources().getColor(R.color.qs_background_color);
         }
+        if (presColor == -2) {
+            presColor = context.getResources().getColor(R.color.qs_background_pressed_color);
+        }
+        ColorDrawable bgDrawable = new ColorDrawable(bgColor);
+        ColorDrawable presDrawable = new ColorDrawable(presColor);
+        StateListDrawable states = new StateListDrawable();
+        states.addState(new int[] {android.R.attr.state_pressed}, presDrawable);
+        states.addState(new int[] {}, bgDrawable);
+        states.setAlpha((int) ((1 - bgAlpha) * 255));
+        setBackground(states);
     }
 
-    public boolean isTemporary() {
-        return mTemporary;
-    }
-
-    public void setColumnSpan(int span) {
+    void setColumnSpan(int span) {
         mColSpan = span;
     }
 
-    public int getColumnSpan() {
+    int getColumnSpan() {
         return mColSpan;
-    }
-
-    public void setColumns(int columns) {
-        mNumColumns = columns;
-        setTextSizes(getTextSize());
-    }
-
-    public void setTextSizes(int size) {
-        // this will call changing text size on child views
     }
 
     public void setContent(int layoutId, LayoutInflater inflater) {
@@ -136,7 +85,7 @@ class QuickSettingsTileView extends FrameLayout {
         inflater.inflate(layoutId, this);
     }
 
-    public void reinflateContent(LayoutInflater inflater) {
+    void reinflateContent(LayoutInflater inflater) {
         if (mContentLayoutId != -1) {
             removeAllViews();
             setContent(mContentLayoutId, inflater);
@@ -145,98 +94,9 @@ class QuickSettingsTileView extends FrameLayout {
         }
     }
 
-    public void setLoading(boolean loading) {
+    void setLoading(boolean loading) {
         findViewById(R.id.loading).setVisibility(loading ? View.VISIBLE : View.GONE);
         findViewById(R.id.image).setVisibility(loading ? View.GONE : View.VISIBLE);
-    }
-
-    public void setHoverEffect(boolean hover) {
-        setHoverEffect(HOVER_COLOR_WHITE, hover);
-    }
-
-    public void setHoverEffect(String color, boolean hover) {
-        if(hover) {
-            setForeground(new ColorDrawable(Color.parseColor(color)));
-        } else {
-            setForeground(new ColorDrawable(Color.TRANSPARENT));
-        }
-    }
-
-    public void fadeOut() {
-        animate().alpha(0.05f);
-    }
-
-    public void fadeIn() {
-        animate().alpha(1f);
-    }
-
-    public void setEditMode(boolean enabled) {
-        mEditMode = enabled;
-        mVisible = getVisibility() == View.VISIBLE
-                && ((getScaleY() >= ENABLED || getScaleX() == DISAPPEAR) ||
-                    (getScaleX() >= ENABLED || getScaleX() == DISAPPEAR));
-        if(!isTemporary() && enabled) {
-            setVisibility(View.VISIBLE);
-            setHoverEffect(HOVER_COLOR_BLACK, !mVisible);
-            float scale = mVisible ? ENABLED : DISABLED;
-            animate().scaleX(scale).scaleY(scale).setListener(null);
-            setEditModeClickListener(new OnClickListener() {
-                @Override
-                public void onClick(View v) {
-                    toggleVisibility();
-                }
-            });
-            setEditModeLongClickListener(null);
-        } else {
-            boolean temporaryEditMode = isTemporary() && enabled;
-            float scale = temporaryEditMode ? DISAPPEAR : DEFAULT;
-            animate().scaleX(scale).scaleY(scale).setListener(null);
-            setOnClickListener(temporaryEditMode? null : mOnClickListener);
-            setOnLongClickListener(temporaryEditMode? null : mOnLongClickListener);
-            if(!mVisible) { // Item has been disabled
-                setVisibility(View.GONE);
-            }
-        }
-    }
-
-    public boolean isEditModeEnabled() {
-        return mEditMode;
-    }
-
-    public void toggleVisibility() {
-        setHoverEffect(HOVER_COLOR_BLACK, mVisible);
-        float scale = mVisible ? DISABLED : ENABLED;
-        animate().scaleX(scale).scaleY(scale)
-                .setListener(new AnimatorListenerAdapter() {
-            @Override
-            public void onAnimationEnd(Animator animation) {
-                mVisible = !mVisible;
-            }
-        });
-    }
-
-    public void setEditModeClickListener(OnClickListener listener) {
-        super.setOnClickListener(listener);
-    }
-
-    @Override
-    public void setOnClickListener(OnClickListener listener) {
-        if (!mEditMode) {
-            mOnClickListener = listener;
-        }
-        super.setOnClickListener(listener);
-    }
-
-    public void setEditModeLongClickListener(OnLongClickListener listener) {
-        super.setOnLongClickListener(listener);
-    }
-
-    @Override
-    public void setOnLongClickListener(OnLongClickListener listener) {
-        if (!mEditMode) {
-            mOnLongClickListener = listener;
-        }
-        super.setOnLongClickListener(listener);
     }
 
     @Override
@@ -265,33 +125,6 @@ class QuickSettingsTileView extends FrameLayout {
                 }
             });
         }
-    }
-
-    private int getTextSize() {
-        final Resources res = mContext.getResources();
-        switch (mNumColumns) {
-            case 5:
-                return res.getDimensionPixelSize(R.dimen.qs_5_column_text_size);
-            case 4:
-                return res.getDimensionPixelSize(R.dimen.qs_4_column_text_size);
-        }
-        return res.getDimensionPixelSize(R.dimen.qs_3_column_text_size);
-    }
-
-    public void callOnColumnsChange() {
-        // this will call invalidate() on child views
-    }
-
-    @Override
-    protected void onMeasure(int widthMeasureSpec, int heightMeasureSpec) {
-        callOnColumnsChange();
-        super.onMeasure(widthMeasureSpec, heightMeasureSpec);
-    }
-
-    @Override
-    protected void onLayout(boolean changed, int left, int top, int right, int bottom) {
-        callOnColumnsChange();
-        super.onLayout(changed, left, top, right, bottom);
     }
 
     @Override

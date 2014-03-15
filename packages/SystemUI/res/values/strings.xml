@@ -32,7 +32,7 @@
 
     <!-- Message shown in the middle of the screen after clicking on the recent apps button
          when there are no recent apps to show. Also used for accessibility. [CHAR LIMIT=45]-->
-    <string name="status_bar_no_recent_apps">No recent apps</string>
+    <string name="status_bar_no_recent_apps">All caught up!</string>
 
     <!-- Content description for the button to dismiss Recent Apps (only present on large
          devices) -->
@@ -510,4 +510,10 @@
          linebreak to position it correctly.  [CHAR LIMIT=45] -->
     <string name="ssl_ca_cert_warning">Network may\nbe monitored</string>
 
+    <string name="quick_settings_network_adb_disabled_label">Disabled</string>
+    <string name="quick_settings_network_adb_enabled_label">Enabled</string>
+
+    <!-- GPS QS tile strings -->
+    <string name="quick_settings_gps_on_label">GPS on</string>
+    <string name="quick_settings_gps_off_label">GPS off</string>
 </resources>

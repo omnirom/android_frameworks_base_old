@@ -26,6 +26,9 @@ import android.util.Log;
 import android.view.MotionEvent;
 import android.view.View;
 import android.view.accessibility.AccessibilityEvent;
+import android.view.GestureDetector;
+import android.os.PowerManager;
+import android.provider.Settings;
 
 import com.android.systemui.EventLogTags;
 import com.android.systemui.R;
@@ -33,7 +36,7 @@ import com.android.systemui.R;
 public class PhoneStatusBarView extends PanelBar {
     private static final String TAG = "PhoneStatusBarView";
     private static final boolean DEBUG = PhoneStatusBar.DEBUG;
-    private static final boolean DEBUG_GESTURES = true;
+    private static final boolean DEBUG_GESTURES = false;
 
     PhoneStatusBar mBar;
     int mScrimColor;
@@ -46,7 +49,7 @@ public class PhoneStatusBarView extends PanelBar {
     PanelView mNotificationPanel, mSettingsPanel;
     private boolean mShouldFade;
     private final PhoneStatusBarTransitions mBarTransitions;
-    private QuickSettingsContainerView mQSContainer;
+    private GestureDetector mDoubleTapGesture;
 
     public PhoneStatusBarView(Context context, AttributeSet attrs) {
         super(context, attrs);
@@ -61,6 +64,19 @@ public class PhoneStatusBarView extends PanelBar {
         }
         mFullWidthNotifications = mSettingsPanelDragzoneFrac <= 0f;
         mBarTransitions = new PhoneStatusBarTransitions(this);
+
+        mDoubleTapGesture = new GestureDetector(context, new GestureDetector.SimpleOnGestureListener() {
+            @Override
+            public boolean onDoubleTap(MotionEvent e) {
+                PowerManager pm = (PowerManager) mContext.getSystemService(Context.POWER_SERVICE);
+                if (pm != null) {
+                    pm.goToSleep(e.getEventTime());
+                } else {
+                    Log.d(TAG, "getSystemService returned null PowerManager");
+                }
+                return true;
+            }
+        });
     }
 
     public BarTransitions getBarTransitions() {
@@ -167,13 +183,6 @@ public class PhoneStatusBarView extends PanelBar {
     @Override
     public void onAllPanelsCollapsed() {
         super.onAllPanelsCollapsed();
-
-        mQSContainer = (QuickSettingsContainerView)
-            mBar.mStatusBarWindow.findViewById(R.id.quick_settings_container);
-        if(mQSContainer != null && mQSContainer.isEditModeEnabled()) {
-            mQSContainer.setEditModeEnabled(false);
-        }
-
         // give animations time to settle
         mBar.makeExpandedInvisibleSoon();
         mFadingPanel = null;
@@ -206,6 +215,10 @@ public class PhoneStatusBarView extends PanelBar {
             }
         }
 
+        if (Settings.System.getInt(mContext.getContentResolver(),
+                    Settings.System.DOUBLE_TAP_TO_SLEEP, 0) == 1) {
+            mDoubleTapGesture.onTouchEvent(event);
+        }
         return barConsumedEvent || super.onTouchEvent(event);
     }
 
@@ -256,6 +269,6 @@ public class PhoneStatusBarView extends PanelBar {
 
         mBar.animateHeadsUp(mNotificationPanel == panel, mPanelExpandedFractionSum);
 
-        mBar.updateCarrierLabelVisibility(false);
+        mBar.updateCarrierAndWifiLabelVisibility(false);
     }
 }

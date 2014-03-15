@@ -4,6 +4,7 @@ include $(CLEAR_VARS)
 LOCAL_CFLAGS += -DHAVE_CONFIG_H -DKHTML_NO_EXCEPTIONS -DGKWQ_NO_JAVA
 LOCAL_CFLAGS += -DNO_SUPPORT_JS_BINDING -DQT_NO_WHEELEVENT -DKHTML_NO_XBL
 LOCAL_CFLAGS += -U__APPLE__
+LOCAL_CFLAGS += -fstrict-aliasing
 
 ifeq ($(TARGET_ARCH), arm)
 	LOCAL_CFLAGS += -DPACKED="__attribute__ ((packed))"
@@ -211,13 +212,6 @@ LOCAL_SHARED_LIBRARIES := \
 	libusbhost \
 	libharfbuzz_ng \
 	libz
-
-ifeq ($(BOARD_USES_QC_TIME_SERVICES),true)
-LOCAL_CFLAGS += -DHAVE_QC_TIME_SERVICES=1
-LOCAL_SHARED_LIBRARIES += libtime_genoff
-$(shell mkdir -p $(OUT)/obj/SHARED_LIBRARIES/libtime_genoff_intermediates/)
-$(shell touch $(OUT)/obj/SHARED_LIBRARIES/libtime_genoff_intermediates/export_includes)
-endif
 
 ifeq ($(USE_OPENGL_RENDERER),true)
 	LOCAL_SHARED_LIBRARIES += libhwui

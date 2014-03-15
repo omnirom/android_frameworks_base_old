@@ -365,12 +365,6 @@
     <!-- label for item that turns off power in phone options dialog -->
     <string name="global_action_power_off">Power off</string>
 
-    <!-- label for item that takes screenshot in the phone options dialog -->
-    <string name="global_action_screenshot">Screenshot</string>
-
-    <!-- label for item that takes screenrecord in the phone options dialog -->
-    <string name="global_action_screenrecord">Screen record</string>
-
     <!-- label for item that generates a bug report in the phone options dialog -->
     <string name="global_action_bug_report">Bug report</string>
 
@@ -2292,10 +2286,10 @@
                                           --> <skip />
 
     <!-- On the keyguard screen, it shows the carrier the phone is connected to.  This is displayed if the phone is not connected to a carrier.-->
-    <string name="lockscreen_carrier_default">No service.</string>
+    <string name="lockscreen_carrier_default">No service</string>
 
     <!-- Shown in the lock screen to tell the user that the screen is locked. -->
-    <string name="lockscreen_screen_locked">Screen locked.</string>
+    <string name="lockscreen_screen_locked">Screen locked</string>
 
     <!-- when pattern lock is enabled, tell them about the emergency dial -->
     <string name="lockscreen_instructions_when_pattern_enabled">Press Menu to unlock or place emergency call.</string>
@@ -4526,7 +4520,8 @@
 
     <!-- Cling help message when hiding the navigation bar entering immersive mode [CHAR LIMIT=none] -->
     <string name="immersive_mode_confirmation" msgid="8554991488096662508">Swipe down from the top to exit full screen.</string>
-    <string name="toast_rotation_unlocked">Display rotation unlocked</string>
-    <string name="toast_rotation_locked">Display rotation locked</string>
+
+    <!-- In WiFi AP notification -->
+    <string name="notify_turn_wifi_ap_off_title">Turn Wi-Fi AP off</string>
 
 </resources>

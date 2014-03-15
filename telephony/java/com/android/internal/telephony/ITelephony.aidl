@@ -45,6 +45,13 @@ interface ITelephony {
     void call(String callingPackage, String number);
 
     /**
+     * Toggle between 3G and LTE (NT_MODE_CDMA, NT_MODE_GLOBAL)
+     * @param boolean to turn on and off LTE
+     * {@hide}
+     */
+    void toggleLTE(boolean on);
+
+    /**
      * If there is currently a call in progress, show the call screen.
      * The DTMF dialpad may or may not be visible initially, depending on
      * whether it was up when the user last exited the InCallScreen.
@@ -184,13 +191,6 @@ interface ITelephony {
     boolean handlePinMmi(String dialString);
 
     /**
-     * Toggle between 3G and 2G
-     * @param networkState {RILConstants.NETWORK_MODE}
-     * {@hide}
-     */
-     void toggleMobileNetwork(int networkState);
-
-    /**
      * Toggles the radio on or off.
      */
     void toggleRadioOnOff();
@@ -322,7 +322,12 @@ interface ITelephony {
      */
     int getLteOnCdmaMode();
 
-    int getLteOnGsmMode();
+    /**
+     * Toggle between 2G and 3G (NT_MODE_GSM, NT_MODE_WCDMA_PREF)
+     * @param boolean to turn on and off 2G
+     * @hide
+     */
+     void toggle2G(boolean on);
 
     /**
      * Returns the all observed cell information of the device.

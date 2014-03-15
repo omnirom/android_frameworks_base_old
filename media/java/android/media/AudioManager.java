@@ -20,6 +20,8 @@ import android.Manifest;
 import android.annotation.SdkConstant;
 import android.annotation.SdkConstant.SdkConstantType;
 import android.app.PendingIntent;
+import android.app.ProfileGroup;
+import android.app.ProfileManager;
 import android.bluetooth.BluetoothDevice;
 import android.content.ComponentName;
 import android.content.Context;
@@ -55,6 +57,7 @@ public class AudioManager {
     private final boolean mUseVolumeKeySounds;
     private final Binder mToken = new Binder();
     private static String TAG = "AudioManager";
+    private final ProfileManager mProfileManager;
 
     /**
      * Broadcast intent, a hint for applications that audio is about to become
@@ -434,6 +437,7 @@ public class AudioManager {
                 com.android.internal.R.bool.config_useMasterVolume);
         mUseVolumeKeySounds = mContext.getResources().getBoolean(
                 com.android.internal.R.bool.config_useVolumeKeySounds);
+        mProfileManager = (ProfileManager) context.getSystemService(Context.PROFILE_SERVICE);
     }
 
     private static IAudioService getService()
@@ -734,6 +738,36 @@ public class AudioManager {
             return 0;
         }
     }
+
+    /**
+     * Sets the maximum volume index for a particular stream.
+     *
+     * @param streamType The stream type whose maximum volume index is set.
+     * @param maxVol The maximum volume to set range 7 - 45.
+     * @return The maximum valid volume index for the stream.
+     * @see #setStreamVolume(int)
+     */
+    public void setStreamMaxVolume(int streamType, int maxVol) {
+        IAudioService service = getService();
+        try {
+            if (mUseMasterVolume) {
+                //service.setMasterMaxVolume(maxVol);
+            } else {
+                double previousMax = new Integer(getStreamMaxVolume(streamType)).doubleValue();
+                double previousVolume = new Integer(getStreamVolume(streamType)).doubleValue();
+                double newMax = new Integer(maxVol).doubleValue();
+                double newVolume = Math.floor((newMax / previousMax) * previousVolume);
+                service.setStreamMaxVolume(streamType,maxVol);
+                Log.i(TAG, "Volume steps for stream " + String.valueOf(streamType) + " set to " +
+                        String.valueOf(maxVol));
+                setStreamVolume(streamType, new Double(newVolume).intValue(), 0);
+                Log.i(TAG, "Volume adjusted from " + String.valueOf(previousVolume) + " to " +
+                        String.valueOf(newVolume));
+            }
+        } catch (RemoteException e) {
+            Log.e(TAG, "Dead object in setStreamMaxVolume", e);
+        }
+        }
 
     /**
      * Returns the current volume index for a particular stream.
@@ -1046,6 +1080,26 @@ public class AudioManager {
      * current ringer mode that can be queried via {@link #getRingerMode()}.
      */
     public boolean shouldVibrate(int vibrateType) {
+        String packageName = mContext.getPackageName();
+        // Don't apply profiles for "android" context, as these could
+        // come from the NotificationManager, and originate from a real package.
+        if (!packageName.equals("android")) {
+            ProfileGroup profileGroup = mProfileManager.getActiveProfileGroup(packageName);
+            if (profileGroup != null) {
+                Log.v(TAG, "shouldVibrate, group: " + profileGroup.getUuid()
+                        + " mode: " + profileGroup.getVibrateMode());
+                switch (profileGroup.getVibrateMode()) {
+                    case OVERRIDE :
+                        return true;
+                    case SUPPRESS :
+                        return false;
+                    case DEFAULT :
+                        // Drop through
+                }
+            }
+        } else {
+            Log.v(TAG, "Not applying override for 'android' package");
+        }
         IAudioService service = getService();
         try {
             return service.shouldVibrate(vibrateType);

@@ -2087,4 +2087,26 @@
   <public type="style" name="Theme.DeviceDefault.NoActionBar.TranslucentDecor" id="0x010301e3" />
   <public type="style" name="Theme.DeviceDefault.Light.NoActionBar.TranslucentDecor" id="0x010301e4" />
 
+<!-- ==============================================================
+     Resources added by The Evervolv Project v3.x.x
+     =============================================================== -->
+  <eat-comment />
+  <java-symbol type="array" name="shutdown_reboot_actions" />
+  <java-symbol type="array" name="shutdown_reboot_options" />
+  <java-symbol type="drawable" name="ic_lock_reboot" />
+  <java-symbol type="drawable" name="ic_lock_screenshot" />
+  <java-symbol type="string" name="global_action_reboot" />
+  <java-symbol type="string" name="global_action_screenshot" />
+  <java-symbol type="string" name="hot_reboot_progress" />
+  <java-symbol type="string" name="hot_reboot_title" />
+  <java-symbol type="string" name="reboot_hot" />
+  <java-symbol type="string" name="reboot_progress" />
+  <java-symbol type="string" name="reboot_system" />
+
+  <!-- Profiles -->
+  <java-symbol type="string" name="wildcardProfile" />
+  <java-symbol type="string" name="global_action_choose_profile" />
+  <java-symbol type="drawable" name="ic_lock_profile" />
+  <java-symbol type="xml" name="profile_default" />
+
 </resources>

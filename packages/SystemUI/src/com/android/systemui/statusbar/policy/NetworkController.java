@@ -41,6 +41,7 @@ import android.telephony.SignalStrength;
 import android.telephony.TelephonyManager;
 import android.util.Log;
 import android.view.View;
+import android.widget.ImageView;
 import android.widget.TextView;
 
 import com.android.internal.telephony.IccCardConstants;
@@ -141,6 +142,13 @@ public class NetworkController extends BroadcastReceiver implements DemoMode {
 
     // our ui
     Context mContext;
+    ArrayList<ImageView> mPhoneSignalIconViews = new ArrayList<ImageView>();
+    ArrayList<ImageView> mDataDirectionIconViews = new ArrayList<ImageView>();
+    ArrayList<ImageView> mDataDirectionOverlayIconViews = new ArrayList<ImageView>();
+    ArrayList<ImageView> mWifiIconViews = new ArrayList<ImageView>();
+    ArrayList<ImageView> mWimaxIconViews = new ArrayList<ImageView>();
+    ArrayList<ImageView> mCombinedSignalIconViews = new ArrayList<ImageView>();
+    ArrayList<ImageView> mDataTypeIconViews = new ArrayList<ImageView>();
     ArrayList<TextView> mCombinedLabelViews = new ArrayList<TextView>();
     ArrayList<TextView> mMobileLabelViews = new ArrayList<TextView>();
     ArrayList<TextView> mWifiLabelViews = new ArrayList<TextView>();
@@ -257,6 +265,7 @@ public class NetworkController extends BroadcastReceiver implements DemoMode {
 
         // broadcasts
         IntentFilter filter = new IntentFilter();
+        filter.addAction("com.android.settings.LABEL_CHANGED");
         filter.addAction(WifiManager.RSSI_CHANGED_ACTION);
         filter.addAction(WifiManager.WIFI_STATE_CHANGED_ACTION);
         filter.addAction(WifiManager.NETWORK_STATE_CHANGED_ACTION);
@@ -291,6 +300,33 @@ public class NetworkController extends BroadcastReceiver implements DemoMode {
 
     public boolean isEmergencyOnly() {
         return (mServiceState != null && mServiceState.isEmergencyOnly());
+    }
+
+    public void addPhoneSignalIconView(ImageView v) {
+        mPhoneSignalIconViews.add(v);
+    }
+
+    public void addDataDirectionIconView(ImageView v) {
+        mDataDirectionIconViews.add(v);
+    }
+
+    public void addDataDirectionOverlayIconView(ImageView v) {
+        mDataDirectionOverlayIconViews.add(v);
+    }
+
+    public void addWifiIconView(ImageView v) {
+        mWifiIconViews.add(v);
+    }
+    public void addWimaxIconView(ImageView v) {
+        mWimaxIconViews.add(v);
+    }
+
+    public void addCombinedSignalIconView(ImageView v) {
+        mCombinedSignalIconViews.add(v);
+    }
+
+    public void addDataTypeIconView(ImageView v) {
+        mDataTypeIconViews.add(v);
     }
 
     public void addCombinedLabelView(TextView v) {
@@ -348,6 +384,10 @@ public class NetworkController extends BroadcastReceiver implements DemoMode {
                     mContentDescriptionDataType);
         }
         cluster.setIsAirplaneMode(mAirplaneMode, mAirplaneIconId);
+    }
+
+    public void removeNetworkSignalChangedCallback(NetworkSignalChangedCallback cb) {
+        mSignalsChangedCallbacks.remove(cb);
     }
 
     void notifySignalsChangedCallbacks(NetworkSignalChangedCallback cb) {
@@ -413,6 +453,8 @@ public class NetworkController extends BroadcastReceiver implements DemoMode {
         } else if (action.equals(ConnectivityManager.CONNECTIVITY_ACTION) ||
                  action.equals(ConnectivityManager.INET_CONDITION_ACTION)) {
             updateConnectivity(intent);
+            refreshViews();
+        } else if (action.equals("com.android.settings.LABEL_CHANGED")) {
             refreshViews();
         } else if (action.equals(Intent.ACTION_CONFIGURATION_CHANGED)) {
             refreshLocale();
@@ -709,7 +751,8 @@ public class NetworkController extends BroadcastReceiver implements DemoMode {
                             R.string.accessibility_data_connection_3g);
                     break;
                 case TelephonyManager.NETWORK_TYPE_LTE:
-                    boolean show4GforLTE = mContext.getResources().getBoolean(R.bool.config_show4GForLTE);
+                    boolean show4GforLTE = Settings.System.getInt(mContext.getContentResolver(),
+                                Settings.System.SHOW_4G_FOR_LTE, 0) == 1;
                     if (show4GforLTE) {
                         mDataIconList = TelephonyIcons.DATA_4G[mInetCondition];
                         mDataTypeIconId = R.drawable.stat_sys_data_fully_connected_4g;
@@ -1058,6 +1101,8 @@ public class NetworkController extends BroadcastReceiver implements DemoMode {
         String mobileLabel = "";
         int N;
         final boolean emergencyOnly = isEmergencyOnly();
+        final String customLabel = Settings.System.getString(mContext.getContentResolver(),
+                Settings.System.CUSTOM_CARRIER_LABEL);
 
         if (!mHasMobileDataFeature) {
             mDataSignalIconId = mPhoneSignalIconId = 0;
@@ -1221,6 +1266,16 @@ public class NetworkController extends BroadcastReceiver implements DemoMode {
             }
         }
 
+        if (customLabel != null && customLabel.length() > 0) {
+            combinedLabel = customLabel;
+            mobileLabel = customLabel;
+        }
+
+        // Cleanup the double quotes
+        if (wifiLabel.length() > 0) {
+            wifiLabel = wifiLabel.replaceAll("^\"|\"$", "");
+        }
+
         if (DEBUG) {
             Log.d(TAG, "refreshViews connected={"
                     + (mWifiConnected?" wifi":"")
@@ -1278,30 +1333,105 @@ public class NetworkController extends BroadcastReceiver implements DemoMode {
         // the phone icon on phones
         if (mLastPhoneSignalIconId != mPhoneSignalIconId) {
             mLastPhoneSignalIconId = mPhoneSignalIconId;
+            N = mPhoneSignalIconViews.size();
+            for (int i=0; i<N; i++) {
+                final ImageView v = mPhoneSignalIconViews.get(i);
+                if (mPhoneSignalIconId == 0) {
+                    v.setVisibility(View.GONE);
+                } else {
+                    v.setVisibility(View.VISIBLE);
+                    v.setImageResource(mPhoneSignalIconId);
+                    v.setContentDescription(mContentDescriptionPhoneSignal);
+                }
+            }
         }
 
         // the data icon on phones
         if (mLastDataDirectionIconId != mDataDirectionIconId) {
             mLastDataDirectionIconId = mDataDirectionIconId;
+            N = mDataDirectionIconViews.size();
+            for (int i=0; i<N; i++) {
+                final ImageView v = mDataDirectionIconViews.get(i);
+                v.setImageResource(mDataDirectionIconId);
+                v.setContentDescription(mContentDescriptionDataType);
+            }
         }
 
         // the wifi icon on phones
         if (mLastWifiIconId != mWifiIconId) {
             mLastWifiIconId = mWifiIconId;
+            N = mWifiIconViews.size();
+            for (int i=0; i<N; i++) {
+                final ImageView v = mWifiIconViews.get(i);
+                if (mWifiIconId == 0) {
+                    v.setVisibility(View.GONE);
+                } else {
+                    v.setVisibility(View.VISIBLE);
+                    v.setImageResource(mWifiIconId);
+                    v.setContentDescription(mContentDescriptionWifi);
+                }
+            }
         }
 
         // the wimax icon on phones
         if (mLastWimaxIconId != mWimaxIconId) {
             mLastWimaxIconId = mWimaxIconId;
+            N = mWimaxIconViews.size();
+            for (int i=0; i<N; i++) {
+                final ImageView v = mWimaxIconViews.get(i);
+                if (mWimaxIconId == 0) {
+                    v.setVisibility(View.GONE);
+                } else {
+                    v.setVisibility(View.VISIBLE);
+                    v.setImageResource(mWimaxIconId);
+                    v.setContentDescription(mContentDescriptionWimax);
+                }
+           }
         }
         // the combined data signal icon
         if (mLastCombinedSignalIconId != combinedSignalIconId) {
             mLastCombinedSignalIconId = combinedSignalIconId;
+            N = mCombinedSignalIconViews.size();
+            for (int i=0; i<N; i++) {
+                final ImageView v = mCombinedSignalIconViews.get(i);
+                v.setImageResource(combinedSignalIconId);
+                v.setContentDescription(mContentDescriptionCombinedSignal);
+            }
         }
 
         // the data network type overlay
         if (mLastDataTypeIconId != mDataTypeIconId) {
             mLastDataTypeIconId = mDataTypeIconId;
+            N = mDataTypeIconViews.size();
+            for (int i=0; i<N; i++) {
+                final ImageView v = mDataTypeIconViews.get(i);
+                if (mDataTypeIconId == 0) {
+                    v.setVisibility(View.GONE);
+                } else {
+                    v.setVisibility(View.VISIBLE);
+                    v.setImageResource(mDataTypeIconId);
+                    v.setContentDescription(mContentDescriptionDataType);
+                }
+            }
+        }
+
+        // the data direction overlay
+        if (mLastDataDirectionOverlayIconId != combinedActivityIconId) {
+            if (DEBUG) {
+                Log.d(TAG, "changing data overlay icon id to " + combinedActivityIconId);
+            }
+            mLastDataDirectionOverlayIconId = combinedActivityIconId;
+            N = mDataDirectionOverlayIconViews.size();
+            for (int i=0; i<N; i++) {
+                final ImageView v = mDataDirectionOverlayIconViews.get(i);
+                if (combinedActivityIconId == 0) {
+                    v.setVisibility(View.GONE);
+                } else {
+                    v.setVisibility(View.VISIBLE);
+                    v.setImageResource(combinedActivityIconId);
+                    v.setContentDescription(mContentDescriptionDataType);
+                }
+            }
         }
 
         // the data direction overlay

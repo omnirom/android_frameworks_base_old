@@ -1573,9 +1573,12 @@ public class ConnectivityService extends IConnectivityManager.Stub {
             return false;
         }
         NetworkStateTracker tracker = mNetTrackers[networkType];
-        DetailedState netState = tracker.getNetworkInfo().getDetailedState();
+        DetailedState netState = DetailedState.DISCONNECTED;
+        if (tracker != null) {
+            netState = tracker.getNetworkInfo().getDetailedState();
+        }
 
-        if (tracker == null || (netState != DetailedState.CONNECTED &&
+        if ((netState != DetailedState.CONNECTED &&
                 netState != DetailedState.CAPTIVE_PORTAL_CHECK) ||
                 tracker.isTeardownRequested()) {
             if (VDBG) {
@@ -2560,7 +2563,7 @@ public class ConnectivityService extends IConnectivityManager.Stub {
         if (TextUtils.equals(mNetTrackers[netType].getNetworkInfo().getReason(),
                              PhoneConstants.REASON_LINK_PROPERTIES_CHANGED)) {
             if (isTetheringSupported()) {
-                mTethering.handleTetherIfaceChange();
+                mTethering.handleTetherIfaceChange(mNetTrackers[netType].getNetworkInfo());
             }
         }
     }

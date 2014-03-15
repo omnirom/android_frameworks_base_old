@@ -18,6 +18,11 @@ package android.view;
 
 import com.android.internal.R;
 
+import android.animation.Animator;
+import android.animation.Animator.AnimatorListener;
+import android.animation.AnimatorSet;
+import android.animation.ObjectAnimator;
+import android.app.ActivityManager;
 import android.app.AlertDialog;
 import android.app.Dialog;
 import android.content.DialogInterface.OnDismissListener;
@@ -42,6 +47,7 @@ import android.os.Vibrator;
 import android.provider.Settings;
 import android.util.Log;
 import android.view.WindowManager.LayoutParams;
+import android.view.animation.AccelerateInterpolator;
 import android.widget.ImageView;
 import android.widget.SeekBar;
 import android.widget.SeekBar.OnSeekBarChangeListener;
@@ -109,6 +115,9 @@ public class VolumePanel extends Handler implements OnSeekBarChangeListener, Vie
     public static final int VOLUME_OVERLAY_EXPANDED = 2;
     public static final int VOLUME_OVERLAY_NONE = 3;
 
+    private static final int TRANSLUCENT_START_LEVEL = 210;
+    private static final int TRANSLUCENT_TO_OPAQUE_DURATION = 400;
+
     protected Context mContext;
     private AudioManager mAudioManager;
     protected AudioService mAudioService;
@@ -116,8 +125,12 @@ public class VolumePanel extends Handler implements OnSeekBarChangeListener, Vie
     private boolean mShowCombinedVolumes;
     private boolean mVoiceCapable;
     private boolean mVolumeLinkNotification;
-    private int mCurrentOverlayStyle = -1;
-    private int mCustomTimeoutDelay = TIMEOUT_DELAY;
+    private boolean mVolumeAdjustSound;
+    private int mCurrentOverlayStyle;
+
+    private final boolean mTranslucentDialog;
+    private boolean mShouldRunDropTranslucentAnimation = false;
+    private boolean mRunningDropTranslucentAnimation = false;
 
     // True if we want to play tones on the system stream when the master stream is specified.
     private final boolean mPlayMasterStreamTones;
@@ -188,7 +201,7 @@ public class VolumePanel extends Handler implements OnSeekBarChangeListener, Vie
         int descRes;
         int iconRes;
         int iconMuteRes;
-        // RING, VOICE_CALL & BLUETOOTH_SCO are hidden unless explicitly requested
+        // VOICE_CALL & BLUETOOTH_SCO are hidden unless explicitly requested
         boolean show;
 
         StreamResources(int streamType, int descRes, int iconRes, int iconMuteRes, boolean show) {
@@ -231,11 +244,9 @@ public class VolumePanel extends Handler implements OnSeekBarChangeListener, Vie
         public void onChange(boolean selfChange) {
             mVolumeLinkNotification = Settings.System.getInt(mContext.getContentResolver(),
                     Settings.System.VOLUME_LINK_NOTIFICATION, 1) == 1;
-            int overlayStyle = Settings.System.getInt(mContext.getContentResolver(),
+            final int overlayStyle = Settings.System.getInt(mContext.getContentResolver(),
                     Settings.System.MODE_VOLUME_OVERLAY, VOLUME_OVERLAY_EXPANDABLE);
             changeOverlayStyle(overlayStyle);
-            mCustomTimeoutDelay = Settings.System.getInt(mContext.getContentResolver(),
-                    Settings.System.VOLUME_PANEL_TIMEOUT, TIMEOUT_DELAY);
         }
     };
 
@@ -281,6 +292,7 @@ public class VolumePanel extends Handler implements OnSeekBarChangeListener, Vie
         mContext = context;
         mAudioManager = (AudioManager) context.getSystemService(Context.AUDIO_SERVICE);
         mAudioService = volumeService;
+        mTranslucentDialog = ActivityManager.isHighEndGfx();
 
         // For now, only show master volume if master volume is supported
         boolean useMasterVolume = context.getResources().getBoolean(
@@ -335,33 +347,28 @@ public class VolumePanel extends Handler implements OnSeekBarChangeListener, Vie
         lp.type = LayoutParams.TYPE_VOLUME_OVERLAY;
         lp.width = LayoutParams.WRAP_CONTENT;
         lp.height = LayoutParams.WRAP_CONTENT;
-        lp.privateFlags |= LayoutParams.PRIVATE_FLAG_FORCE_SHOW_NAV_BAR;
         window.setAttributes(lp);
         window.addFlags(LayoutParams.FLAG_NOT_FOCUSABLE | LayoutParams.FLAG_NOT_TOUCH_MODAL
                 | LayoutParams.FLAG_WATCH_OUTSIDE_TOUCH);
 
         mToneGenerators = new ToneGenerator[AudioSystem.getNumStreamTypes()];
         mVibrator = (Vibrator)context.getSystemService(Context.VIBRATOR_SERVICE);
-
         mVoiceCapable = context.getResources().getBoolean(R.bool.config_voice_capable);
 
         // Get the user's preferences
         mVolumeLinkNotification = Settings.System.getInt(mContext.getContentResolver(),
                 Settings.System.VOLUME_LINK_NOTIFICATION, 1) == 1;
-        int chosenStyle = Settings.System.getInt(context.getContentResolver(),
+        mVolumeAdjustSound = Settings.System.getInt(mContext.getContentResolver(),
+                Settings.System.VOLUME_ADJUST_SOUNDS_ENABLED, 1) == 1;
+        final int chosenStyle = Settings.System.getInt(context.getContentResolver(),
                 Settings.System.MODE_VOLUME_OVERLAY, VOLUME_OVERLAY_EXPANDABLE);
         changeOverlayStyle(chosenStyle);
-        mCustomTimeoutDelay = Settings.System.getInt(mContext.getContentResolver(),
-                Settings.System.VOLUME_PANEL_TIMEOUT, TIMEOUT_DELAY);
 
         context.getContentResolver().registerContentObserver(
                 Settings.System.getUriFor(Settings.System.VOLUME_LINK_NOTIFICATION), false,
                 mSettingsObserver);
         context.getContentResolver().registerContentObserver(
                 Settings.System.getUriFor(Settings.System.MODE_VOLUME_OVERLAY), false,
-                mSettingsObserver);
-        context.getContentResolver().registerContentObserver(
-                Settings.System.getUriFor(Settings.System.VOLUME_PANEL_TIMEOUT), false,
                 mSettingsObserver);
 
         boolean masterVolumeKeySounds = mContext.getResources().getBoolean(
@@ -371,6 +378,39 @@ public class VolumePanel extends Handler implements OnSeekBarChangeListener, Vie
 
         mMoreButton.setOnClickListener(this);
         listenToRingerMode();
+
+        applyTranslucentWindow();
+    }
+
+    public void setLayoutDirection(int layoutDirection) {
+        mPanel.setLayoutDirection(layoutDirection);
+        updateStates();
+    }
+
+    private void listenToRingerMode() {
+        final IntentFilter filter = new IntentFilter();
+        filter.addAction(AudioManager.RINGER_MODE_CHANGED_ACTION);
+        mContext.registerReceiver(new BroadcastReceiver() {
+
+            public void onReceive(Context context, Intent intent) {
+                final String action = intent.getAction();
+
+                if (AudioManager.RINGER_MODE_CHANGED_ACTION.equals(action)) {
+                    removeMessages(MSG_RINGER_MODE_CHANGED);
+                    sendMessage(obtainMessage(MSG_RINGER_MODE_CHANGED));
+                }
+            }
+        }, filter);
+    }
+
+    private boolean isMuted(int streamType) {
+        if (streamType == STREAM_MASTER) {
+            return mAudioManager.isMasterMute();
+        } else if (streamType == AudioService.STREAM_REMOTE_MUSIC) {
+            return (mAudioService.getRemoteStreamVolume() <= 0);
+        } else {
+            return mAudioManager.isStreamMute(streamType);
+        }
     }
 
     private void changeOverlayStyle(int newStyle) {
@@ -404,37 +444,6 @@ public class VolumePanel extends Handler implements OnSeekBarChangeListener, Vie
                 mShowCombinedVolumes = false;
                 mCurrentOverlayStyle = VOLUME_OVERLAY_NONE;
                 break;
-        }
-    }
-
-    public void setLayoutDirection(int layoutDirection) {
-        mPanel.setLayoutDirection(layoutDirection);
-        updateStates();
-    }
-
-    private void listenToRingerMode() {
-        final IntentFilter filter = new IntentFilter();
-        filter.addAction(AudioManager.RINGER_MODE_CHANGED_ACTION);
-        mContext.registerReceiver(new BroadcastReceiver() {
-
-            public void onReceive(Context context, Intent intent) {
-                final String action = intent.getAction();
-
-                if (AudioManager.RINGER_MODE_CHANGED_ACTION.equals(action)) {
-                    removeMessages(MSG_RINGER_MODE_CHANGED);
-                    sendMessage(obtainMessage(MSG_RINGER_MODE_CHANGED));
-                }
-            }
-        }, filter);
-    }
-
-    private boolean isMuted(int streamType) {
-        if (streamType == STREAM_MASTER) {
-            return mAudioManager.isMasterMute();
-        } else if (streamType == AudioService.STREAM_REMOTE_MUSIC) {
-            return (mAudioService.getRemoteStreamVolume() <= 0);
-        } else {
-            return mAudioManager.isStreamMute(streamType);
         }
     }
 
@@ -1076,6 +1085,7 @@ public class VolumePanel extends Handler implements OnSeekBarChangeListener, Vie
 
             case MSG_TIMEOUT: {
                 if (mDialog.isShowing()) {
+                    applyTranslucentWindow();
                     mDialog.dismiss();
                     mActiveStreamType = -1;
                 }
@@ -1114,7 +1124,7 @@ public class VolumePanel extends Handler implements OnSeekBarChangeListener, Vie
 
     private void resetTimeout() {
         removeMessages(MSG_TIMEOUT);
-        sendMessageDelayed(obtainMessage(MSG_TIMEOUT), mCustomTimeoutDelay);
+        sendMessageDelayed(obtainMessage(MSG_TIMEOUT), TIMEOUT_DELAY);
     }
 
     private void forceTimeout() {
@@ -1135,6 +1145,9 @@ public class VolumePanel extends Handler implements OnSeekBarChangeListener, Vie
     }
 
     public void onStartTrackingTouch(SeekBar seekBar) {
+        if (mTranslucentDialog && mShouldRunDropTranslucentAnimation) {
+            startRemoveTranslucentAnimation();
+        }
     }
 
     public void onStopTrackingTouch(SeekBar seekBar) {
@@ -1152,6 +1165,9 @@ public class VolumePanel extends Handler implements OnSeekBarChangeListener, Vie
     }
 
     public void onClick(View v) {
+        if (mTranslucentDialog && mShouldRunDropTranslucentAnimation) {
+            startRemoveTranslucentAnimation();
+        }
         if (v == mMoreButton) {
             expand();
         } else if (v instanceof ImageView) {
@@ -1162,5 +1178,48 @@ public class VolumePanel extends Handler implements OnSeekBarChangeListener, Vie
             return;
         }
         resetTimeout();
+    }
+
+
+    private void applyTranslucentWindow() {
+        if (!mTranslucentDialog || mRunningDropTranslucentAnimation) return;
+
+        mPanel.getBackground().setAlpha(TRANSLUCENT_START_LEVEL);
+        mMoreButton.setAlpha(TRANSLUCENT_START_LEVEL);
+        mDivider.setAlpha(TRANSLUCENT_START_LEVEL);
+        mShouldRunDropTranslucentAnimation = true;
+    }
+
+    private void startRemoveTranslucentAnimation() {
+        if (mRunningDropTranslucentAnimation) return;
+        mRunningDropTranslucentAnimation = true;
+
+        AnimatorSet set = new AnimatorSet();
+        Animator panelAlpha = ObjectAnimator.ofInt(
+                mPanel.getBackground(), "alpha", mPanel.getBackground().getAlpha(), 255);
+        Animator moreAlpha = ObjectAnimator.ofFloat(
+                mMoreButton, "alpha", mMoreButton.getAlpha(), 255);
+        Animator dividerAlpha = ObjectAnimator.ofFloat(
+                mDivider, "alpha", mDivider.getAlpha(), 255);
+        set.setInterpolator(new AccelerateInterpolator());
+        set.addListener(new AnimatorListener() {
+            @Override
+            public void onAnimationStart(Animator animation) {}
+
+            @Override
+            public void onAnimationRepeat(Animator animation) {}
+
+            @Override
+            public void onAnimationEnd(Animator animation) {
+                mRunningDropTranslucentAnimation = false;
+                mShouldRunDropTranslucentAnimation = false;
+            }
+
+            @Override
+            public void onAnimationCancel(Animator animation) {}
+        });
+        set.setDuration(TRANSLUCENT_TO_OPAQUE_DURATION);
+        set.playTogether(panelAlpha, moreAlpha, dividerAlpha);
+        set.start();
     }
 }

@@ -105,6 +105,12 @@
     <integer name="config_activityShortDur">150</integer>
     <integer name="config_activityDefaultDur">220</integer>
 
+    <!-- The duration (in milliseconds) of recent app screen animation. -->
+    <integer name="config_recentDefaultDur">300</integer>
+
+    <!-- The duration (in milliseconds) of recent app screen exit animation. -->
+    <integer name="config_recentExitDur">450</integer>
+
     <!-- Duration for the dim animation behind a dialog.  This may be either
          a percentage, which is relative to the duration of the enter/open
          animation of the window being shown that is dimming behind, or it may
@@ -320,9 +326,6 @@
          note that empty fields can be ommitted: "name,apn,,,,,,,,,310,260,,DUN" -->
     <string translatable="false" name="config_tether_apndata"></string>
 
-    <!-- Boolean indicating whether Softap requires reloading AP firmware -->
-    <bool name="config_wifiApFirmwareReload">true</bool>
-
     <!-- Boolean indicating whether the wifi chipset has dual frequency band support -->
     <bool translatable="false" name="config_wifi_dual_band_support">false</bool>
 
@@ -416,6 +419,13 @@
              5  UI_MODE_TYPE_APPLIANCE
          Any other values will have surprising consequences. -->
     <integer name="config_defaultUiModeType">1</integer>
+
+    <!-- Control the default theme mode for the UI to use.
+         One of the following values (See Configuration.java):
+             1 UI_THEME_MODE_NORMAL (default)
+             2 UI_THEME_MODE_HOLO_DARK
+             3 UI_THEME_MODE_HOLO_LIGHT -->
+    <integer name="config_uiThemeMode">1</integer>
 
     <!-- Control whether being in the desk dock (and powered) always
          keeps the screen on.  By default it stays on when plugged in to
@@ -605,9 +615,6 @@
 
     <!-- Enable translucent decor by default -->
     <bool name="config_enableTranslucentDecor">true</bool>
-
-    <!-- Is the device capable of hot swapping an UICC Card -->
-    <bool name="config_hotswapCapable">false</bool>
 
     <!-- Enable puk unlockscreen by default.
          If unlock screen is disabled, the puk should be unlocked through Emergency Dialer -->
@@ -968,6 +975,9 @@
     <!-- Sets whether menu shortcuts should be displayed on panel menus when
          a keyboard is present. -->
     <bool name="config_showMenuShortcutsWhenKeyboardPresent">false</bool>
+
+    <!-- Sets whether IME switcher on statusbar should be shown or not. -->
+    <bool name="config_show_IMESwitcher">true</bool>
 
     <!-- Do not translate. Defines the slots is Two Digit Number for dialing normally not USSD -->
     <string-array name="config_twoDigitNumberPattern" translatable="false">
@@ -1346,6 +1356,11 @@
 
     <integer name="config_backKillTimeout">2000</integer>
 
+    <!-- LUN file to be used by legacy USB manager.
+         The existence of this file will be used to determine in the
+         legacy USB manager should be started. -->
+    <string name="config_legacyUmsLunFile">/sys/devices/platform/usb_mass_storage/lun0/file</string>
+
     <!-- Boolean to enable Stylus gestures -->
     <bool name="config_stylusGestures">false</bool>
 
@@ -1354,11 +1369,28 @@
          applied. -->
     <bool name="config_hasRemovableLid">false</bool>
 
-    <!-- enable support for off-screen gesture support -->
-    <bool name="config_offscreenGestureSupport">false</bool>
+    <!-- Device supports LED flashlight -->
+    <bool name="config_enableTorch">true</bool>
+
+      <!-- Workaround for devices with broken keyboards -->
+    <bool name="config_forceDisableHardwareKeyboard">false</bool>
+
+    <!-- Set default number of columns for QuickSettings -->
+    <integer name="config_defaultColumnsNum">5</integer>
 
    <!-- set to false if we dont need to consider data
          service state to display signal strength bars -->
     <bool name="config_combined_signal">true</bool>
-    <bool name="config_hasRotationLockSwitch">false</bool>
+
+    <!-- Set to empty string to disable. Can be added to device overlay for device-specific path -->
+    <string name="config_fastChargePath" translatable="false">/sys/kernel/fast_charge/force_fast_charge</string>
+
+    <!-- Boolean to enable adb by default on a per-device basis -->
+    <bool name="config_enableAdbByDefault">false</bool>
+
+    <!-- bool value to for enabling motion accelerometer -->
+    <bool name="use_motion_accel">false</bool>
+
+    <!-- enable support for off-screen gesture support -->
+    <bool name="config_offscreenGestureSupport">false</bool>
 </resources>

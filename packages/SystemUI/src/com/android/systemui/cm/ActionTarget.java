@@ -17,9 +17,7 @@
 
 package com.android.systemui.cm;
 
-import android.app.Activity;
 import android.app.ActivityManager;
-import android.app.ActivityManager.RunningAppProcessInfo;
 import android.app.ActivityManagerNative;
 import android.content.ActivityNotFoundException;
 import android.content.ComponentName;
@@ -35,7 +33,6 @@ import android.os.Handler;
 import android.os.IBinder;
 import android.os.Message;
 import android.os.Messenger;
-import android.os.Process;
 import android.os.RemoteException;
 import android.os.ServiceManager;
 import android.os.SystemClock;
@@ -50,13 +47,11 @@ import android.widget.Toast;
 
 import com.android.internal.statusbar.IStatusBarService;
 import com.android.internal.util.cm.TorchConstants;
-import com.android.internal.util.omni.TaskUtils;
 import static com.android.internal.util.cm.NavigationRingConstants.*;
 import com.android.systemui.R;
 import com.android.systemui.screenshot.TakeScreenshotService;
 
 import java.net.URISyntaxException;
-import java.util.List;
 
 /*
  * Helper classes for managing custom actions
@@ -128,9 +123,6 @@ public class ActionTarget {
             return true;
         } else if (action.equals(ACTION_KILL)) {
             mHandler.post(mKillRunnable);
-            return true;
-        } else if (action.equals(ACTION_LAST_APP)) {
-            TaskUtils.toggleLastApp(mContext);
             return true;
         } else if (action.equals(ACTION_VIBRATE)) {
             if (mAm.getRingerMode() != AudioManager.RINGER_MODE_VIBRATE) {
@@ -245,9 +237,28 @@ public class ActionTarget {
 
     final Runnable mKillRunnable = new Runnable() {
         public void run() {
-            if (TaskUtils.killActiveTask(mContext)) {
+            final ActivityManager am =
+                    (ActivityManager) mContext.getSystemService(Context.ACTIVITY_SERVICE);
+
+            final Intent intent = new Intent(Intent.ACTION_MAIN);
+            intent.addCategory(Intent.CATEGORY_HOME);
+
+            final ResolveInfo res = mContext.getPackageManager().resolveActivity(intent, 0);
+            final String homePackage;
+
+            if (res.activityInfo != null && !res.activityInfo.packageName.equals("android")) {
+                homePackage = res.activityInfo.packageName;
+            } else {
+                // use default launcher package if we couldn't resolve it
+                homePackage = "com.android.launcher";
+            }
+
+            final String packageName = am.getRunningTasks(1).get(0).topActivity.getPackageName();
+            if (!homePackage.equals(packageName)) {
+                am.forceStopPackage(packageName);
                 Toast.makeText(mContext,
-                        com.android.internal.R.string.app_killed_message, Toast.LENGTH_SHORT).show();
+                        com.android.internal.R.string.app_killed_message,
+                        Toast.LENGTH_SHORT).show();
             }
         }
     };

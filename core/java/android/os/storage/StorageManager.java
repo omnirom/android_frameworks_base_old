@@ -559,6 +559,9 @@ public class StorageManager {
         } catch (RemoteException e) {
             Log.e(TAG, "Failed to get volume state", e);
             return null;
+        } catch (IllegalArgumentException e) {
+            Log.e(TAG, "Failed to get volume state", e);
+            return null;
         }
     }
 

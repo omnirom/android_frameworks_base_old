@@ -272,6 +272,8 @@ public class DevicePolicyManager {
      */
     public static final int PASSWORD_QUALITY_COMPLEX = 0x60000;
 
+    public static final int PASSWORD_QUALITY_GESTURE_WEAK = 0x80000;
+
     /**
      * Called by an application that is administering the device to set the
      * password restrictions it is imposing.  After setting this, the user
@@ -1680,5 +1682,25 @@ public class DevicePolicyManager {
             }
         }
         return null;
+    }
+
+    /*
+     * CM: check if secure keyguard is required
+     * @hide
+     */
+    public boolean requireSecureKeyguard() {
+        return requireSecureKeyguard(UserHandle.myUserId());
+    }
+
+    /** @hide */
+    public boolean requireSecureKeyguard(int userHandle) {
+        if (mService != null) {
+            try {
+                return mService.requireSecureKeyguard(userHandle);
+            } catch (RemoteException re) {
+                Log.w(TAG, "Failed to get secure keyguard requirement");
+            }
+        }
+        return true;
     }
 }

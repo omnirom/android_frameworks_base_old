@@ -45,7 +45,7 @@
     <!-- Padding for text descriptions -->
     <dimen name="status_bar_recents_text_description_padding">8dp</dimen>
     <!-- Width of application label text -->
-    <dimen name="status_bar_recents_app_label_width">88dip</dimen>
+    <dimen name="status_bar_recents_app_label_width">89dip</dimen>
     <!-- Left margin of application label text -->
     <dimen name="status_bar_recents_app_label_left_margin">0dip</dimen>
     <!-- Padding between recents items -->
@@ -99,31 +99,31 @@
 
     <!-- Notification drawer tuning parameters (phone UI) -->
     <!-- Initial velocity of the shade when expanding on its own -->
-    <dimen name="self_expand_velocity">2000dp</dimen>
+    <dimen name="self_expand_velocity">3000dp</dimen>
     <!-- Initial velocity of the shade when collapsing on its own -->
-    <dimen name="self_collapse_velocity">2000dp</dimen>
+    <dimen name="self_collapse_velocity">2500dp</dimen>
     <!-- Minimum final velocity of gestures interpreted as expand requests -->
     <dimen name="fling_expand_min_velocity">100dp</dimen>
     <!-- Minimum final velocity of gestures interpreted as collapse requests -->
     <dimen name="fling_collapse_min_velocity">100dp</dimen>
     <!-- Cap on contribution of x dimension of gesture to overall velocity -->
-    <dimen name="fling_gesture_max_x_velocity">200dp</dimen>
+    <dimen name="fling_gesture_max_x_velocity">300dp</dimen>
     <!-- Cap on overall resulting fling speed (s^-1) -->
-    <dimen name="fling_gesture_max_output_velocity">3000dp</dimen>
+    <dimen name="fling_gesture_max_output_velocity">4000dp</dimen>
 
     <!-- Minimum distance a fling must travel (anti-jitter) -->
-    <dimen name="fling_gesture_min_dist">20dp</dimen>
+    <dimen name="fling_gesture_min_dist">30dp</dimen>
 
     <!-- Minimum fraction of the display a gesture must travel, at any velocity, to qualify as a
          collapse request -->
-    <item type="dimen" name="collapse_min_display_fraction">10%</item>
+    <item type="dimen" name="collapse_min_display_fraction">15%</item>
     <!-- Minimum fraction of the display a gesture must travel to qualify as an expand request -->
     <item type="dimen" name="expand_min_display_fraction">50%</item>
 
     <!-- Initial acceleration of an expand animation after fling -->
-    <dimen name="expand_accel">2000dp</dimen>
+    <dimen name="expand_accel">2500dp</dimen>
     <!-- Initial acceleration of an collapse animation after fling -->
-    <dimen name="collapse_accel">2000dp</dimen>
+    <dimen name="collapse_accel">2500dp</dimen>
 
     <!-- The padding on the global screenshot background image -->
     <dimen name="global_screenshot_bg_padding">20dp</dimen>
@@ -208,7 +208,7 @@
 
     <!-- Quick Settings tile geometry: top interior margin, above icon -->
     <dimen name="qs_tile_margin_above_icon">27dp</dimen>
-    <!-- Quick Settings tile geometry: gap between icon and text -->
+    <!-- Quick Settings tile geometry: gap between icon and text 3 per row-->
     <dimen name="qs_tile_margin_below_icon">17dp</dimen>
     <!-- Quick Settings tile geometry: icon size -->
     <dimen name="qs_tile_icon_size">32dp</dimen>
@@ -220,5 +220,31 @@
 
     <!-- used by DessertCase -->
     <dimen name="dessert_case_cell_size">192dp</dimen>
+
+    <!-- Network stats text size -->
+    <dimen name="network_stats_text_size">10dp</dimen>
+
+    <dimen name="halo_bubble_size">75dp</dimen>
+    <dimen name="halo_number_size">24dp</dimen>
+    <dimen name="halo_number_icon_size">18dp</dimen>
+    <dimen name="halo_number_text_size">14sp</dimen>
+    <dimen name="halo_speech_text_size">16sp</dimen>
+    <dimen name="halo_status_text_size">16sp</dimen>
+    <dimen name="halo_speech_hpadding_short">4dp</dimen>
+    <dimen name="halo_speech_hpadding_wide">13dp</dimen>
+    <dimen name="halo_speech_vpadding_top">3dp</dimen>
+    <dimen name="halo_speech_vpadding_bottom">3dp</dimen>
+    <dimen name="halo_content_max_width">250dp</dimen>
+
+    <!-- Quick Settings tile geometry: gap between icon and text 4 per row-->
+    <dimen name="qs_4_column_text_padding">14dp</dimen>
+    <!-- Quick Settings tile geometry: gap between icon and text 5 per row-->
+    <dimen name="qs_5_column_text_padding">12dp</dimen>
+    <!-- Quick Settings tile geometry: text size for 3 tile per row-->
+    <dimen name="qs_3_column_text_size">12sp</dimen>
+    <!-- Quick Settings tile geometry: text size for 4 tile per row-->
+    <dimen name="qs_4_column_text_size">10sp</dimen>
+    <!-- Quick Settings tile geometry: text size for 5 tile per row-->
+    <dimen name="qs_5_column_text_size">9sp</dimen>
 
 </resources>

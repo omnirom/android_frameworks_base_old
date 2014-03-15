@@ -456,8 +456,16 @@ public class ActivityManager {
      * @hide
      */
     static public boolean isHighEndGfx() {
-        return !isLowRamDeviceStatic() &&
-                !Resources.getSystem().getBoolean(com.android.internal.R.bool.config_avoidGfxAccel);
+        return (!isLowRamDeviceStatic() &&
+                !Resources.getSystem().getBoolean(com.android.internal.R.bool.config_avoidGfxAccel))
+                || isForcedHighEndGfx();
+    }
+
+    /**
+     * @hide
+     */
+    public static boolean isForcedHighEndGfx() {
+        return SystemProperties.getBoolean("persist.sys.force_highendgfx", false);
     }
 
     /**
@@ -566,6 +574,11 @@ public class ActivityManager {
      * recent tasks that currently are not available to the user.
      */
     public static final int RECENT_IGNORE_UNAVAILABLE = 0x0002;
+
+    /**
+     * @hide
+     */
+    public static final int RECENT_DO_NOT_COUNT_EXCLUDED = 0x0004;
 
     /**
      * Return a list of the tasks that the user has recently launched, with
