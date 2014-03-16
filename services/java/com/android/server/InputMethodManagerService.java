@@ -833,7 +833,7 @@ public class InputMethodManagerService extends IInputMethodManager.Stub
                 mStatusBar = statusBar;
                 statusBar.setIconVisibility("ime", false);
                 updateImeWindowStatusLocked();
-                if (isShowOngoingImeSwitcherForPhones()) {
+                if (mShowOngoingImeSwitcherForPhones) {
                     mWindowManagerService.setOnHardKeyboardStatusChangeListener(
                             mHardKeyboardListener);
                 }
@@ -1645,21 +1645,15 @@ public class InputMethodManagerService extends IInputMethodManager.Stub
             mCurMethodId = null;
             unbindCurrentMethodLocked(true, false);
         }
-
-        mShowOngoingImeSwitcherForPhones = isShowOngoingImeSwitcherForPhones();
-    }
-
-    private boolean isShowOngoingImeSwitcherForPhones() {
-        boolean isEnabled;
+        // code to disable the IME switcher with config_show_IMESwitcher set = false
         try {
-             isEnabled =
-                   Settings.System.getIntForUser(mContext.getContentResolver(),
-                   Settings.System.STATUS_BAR_IME_SWITCHER, UserHandle.USER_CURRENT) == 1;
+            mShowOngoingImeSwitcherForPhones =
+                Settings.System.getIntForUser(mContext.getContentResolver(),
+                Settings.System.STATUS_BAR_IME_SWITCHER, UserHandle.USER_CURRENT) == 1;
         } catch (SettingNotFoundException e) {
-             isEnabled = mRes.getBoolean(
-                   com.android.internal.R.bool.show_ongoing_ime_switcher);
+            mShowOngoingImeSwitcherForPhones = mRes.getBoolean(
+                com.android.internal.R.bool.config_show_IMESwitcher);
         }
-        return isEnabled;
     }
 
     /* package */ void setInputMethodLocked(String id, int subtypeId) {

@@ -564,7 +564,10 @@ public class ServiceState implements Parcelable {
                 + " EmergOnly=" + mIsEmergencyOnly);
     }
 
-    private void setNullState(int state) {
+   // BEGIN privacy-modified
+   // was originally private
+   void setNullState(int state) {
+   // END privacy-modified
         if (DBG) Rlog.d(LOG_TAG, "[ServiceState] setNullState=" + state);
         mVoiceRegState = state;
         mDataRegState = state;

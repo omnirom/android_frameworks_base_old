@@ -29,6 +29,12 @@
     android:layout_marginStart="@dimen/notification_panel_margin_left"
     >
 
+    <ImageView
+        android:id="@+id/notification_wallpaper"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:scaleType="centerCrop" />
+
     <View
         android:id="@+id/handle"
         android:layout_width="match_parent"
@@ -56,6 +62,12 @@
         <include layout="@layout/status_bar_expanded_header"
             android:layout_width="match_parent"
             android:layout_height="@dimen/notification_panel_header_height"
+            />
+
+        <ViewStub android:id="@+id/ribbon_settings_stub"
+            android:layout="@layout/ribbon_settings"
+            android:layout_width="match_parent"
+            android:layout_height="@dimen/notification_min_height"
             />
 
         <TextView

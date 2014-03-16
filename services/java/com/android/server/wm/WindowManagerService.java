@@ -312,7 +312,6 @@ public class WindowManagerService extends IWindowManager.Stub
     int mCurrentUserId;
 
     final Context mContext;
-    private Context mUiContext;
 
     final boolean mHaveInputMethods;
 
@@ -539,13 +538,15 @@ public class WindowManagerService extends IWindowManager.Stub
 
     PowerManagerService mPowerManager;
 
-    float mWindowAnimationScale = 1.0f;
-    float mTransitionAnimationScale = 1.0f;
-    float mAnimatorDurationScale = 1.0f;
+    float mWindowAnimationScale = 0.5f;
+    float mTransitionAnimationScale = 0.5f;
+    float mAnimatorDurationScale = 0.5f;
 
     final InputManagerService mInputManager;
     final DisplayManagerService mDisplayManagerService;
     final DisplayManager mDisplayManager;
+
+    private boolean mForceDisableHardwareKeyboard = false;
 
     // Who is holding the screen on.
     Session mHoldingScreenOn;
@@ -792,6 +793,9 @@ public class WindowManagerService extends IWindowManager.Stub
 
         mAnimator = new WindowAnimator(this);
 
+        mForceDisableHardwareKeyboard = context.getResources().getBoolean(
+                com.android.internal.R.bool.config_forceDisableHardwareKeyboard);
+
         initPolicy(UiThread.getHandler());
 
         // Add ourself to the Watchdog monitors.
@@ -813,10 +817,6 @@ public class WindowManagerService extends IWindowManager.Stub
     public InputMonitor getInputMonitor() {
         return mInputMonitor;
     }
-
-    private Context getUiContext() {
-       return mContext;
-   }
 
     @Override
     public boolean onTransact(int code, Parcel data, Parcel reply, int flags)
@@ -4319,6 +4319,10 @@ public class WindowManagerService extends IWindowManager.Stub
             // If we are preparing an app transition, then delay changing
             // the visibility of this token until we execute that transition.
             if (okToDisplay() && mAppTransition.isTransitionSet()) {
+                // Already in requested state, don't do anything more.
+                if (wtoken.hiddenRequested != visible) {
+                    return;
+                }
                 wtoken.hiddenRequested = !visible;
 
                 if (!wtoken.startingDisplayed) {
@@ -5193,6 +5197,12 @@ public class WindowManagerService extends IWindowManager.Stub
         ShutdownThread.rebootSafeMode(mContext, confirm);
     }
 
+    // Called by window manager policy.  Not exposed externally.
+    @Override
+    public void reboot(String reason) {
+        ShutdownThread.reboot(mContext,reason, true);
+    }
+
     @Override
     public void setInputFilter(IInputFilter filter) {
         if (!checkCallingPermission(android.Manifest.permission.FILTER_EVENTS, "setInputFilter()")) {
@@ -5204,12 +5214,6 @@ public class WindowManagerService extends IWindowManager.Stub
     @Override
     public void setTouchExplorationEnabled(boolean enabled) {
         mPolicy.setTouchExplorationEnabled(enabled);
-    }
-
-    // Called by window manager policy.  Not exposed externally.
-    @Override
-    public void reboot() {
-        ShutdownThread.reboot(getUiContext(), null, true);
     }
 
     public void setCurrentUser(final int newUserId) {
@@ -6750,7 +6754,10 @@ public class WindowManagerService extends IWindowManager.Stub
             }
 
             // Determine whether a hard keyboard is available and enabled.
-            boolean hardKeyboardAvailable = config.keyboard != Configuration.KEYBOARD_NOKEYS;
+            boolean hardKeyboardAvailable = false;
+            if (!mForceDisableHardwareKeyboard) {
+                hardKeyboardAvailable = config.keyboard != Configuration.KEYBOARD_NOKEYS;
+            }
             if (hardKeyboardAvailable != mHardKeyboardAvailable) {
                 mHardKeyboardAvailable = hardKeyboardAvailable;
                 mHardKeyboardEnabled = hardKeyboardAvailable;

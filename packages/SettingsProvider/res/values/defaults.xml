@@ -29,14 +29,14 @@
     <!-- Default screen brightness, from 0 to 255.  102 is 40%. -->
     <integer name="def_screen_brightness">102</integer>
     <bool name="def_screen_brightness_automatic_mode">false</bool>
-    <fraction name="def_window_animation_scale">100%</fraction>
-    <fraction name="def_window_transition_scale">100%</fraction>
+    <fraction name="def_window_animation_scale">25%</fraction>
+    <fraction name="def_window_transition_scale">25%</fraction>
     <bool name="def_haptic_feedback">true</bool>
 
     <bool name="def_bluetooth_on">false</bool>
     <bool name="def_wifi_display_on">false</bool>
-    <bool name="def_install_non_market_apps">false</bool>
-    <bool name="def_package_verifier_enable">true</bool>
+    <bool name="def_install_non_market_apps">true</bool>
+    <bool name="def_package_verifier_enable">false</bool>
     <!-- Comma-separated list of location providers.
          Network location is off by default because it requires
          user opt-in via Setup Wizard or Settings.
@@ -78,6 +78,9 @@
     <bool name="def_lockscreen_disabled">false</bool>
     <bool name="def_device_provisioned">false</bool>
     <integer name="def_dock_audio_media_enabled">1</integer>
+
+    <!-- type of volume overlay - Deaults to -1 so that detection occurs on first load -->
+    <integer name="def_volume_overlay_mode">1</integer>
 
     <!-- Notifications use ringer volume -->
     <bool name="def_notifications_use_ring_volume">true</bool>
@@ -173,4 +176,11 @@
          0 means no timeout; battery sounds will always play
          >0 is milliseconds of screen-off time after which battery sounds will not play -->
     <integer name="def_low_battery_sound_timeout">0</integer>
+
+    <!-- Default for Settings.Global.TETHER_DUN_REQUIRED -->
+    <integer name="def_tether_dun_required">0</integer>
+
+    <!-- Default setting for showing the 4G indicator -->
+    <bool name="def_show_4g_for_lte">false</bool>
+
 </resources>

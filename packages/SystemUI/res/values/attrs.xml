@@ -42,10 +42,20 @@
         <attr name="decayTime" format="integer" />
         <attr name="orientation" />
     </declare-styleable>
+    <declare-styleable name="BatteryIcon">
+        <attr name="batteryView" format="string" />
+    </declare-styleable>
 
     <attr name="orientation">
         <enum name="horizontal" value="0" />
         <enum name="vertical" value="1" />
     </attr>
+    <declare-styleable name="BatteryBarController">
+        <attr name="viewLocation" format="integer" />
+    </declare-styleable>
+
+    <declare-styleable name="QuickSettingsContainer">
+        <attr name="singleRow" format="boolean" />
+    </declare-styleable>
 </resources>
 

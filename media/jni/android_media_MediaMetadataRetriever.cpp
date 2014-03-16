@@ -262,6 +262,7 @@ static jobject android_media_MediaMetadataRetriever_getFrameAtTime(JNIEnv *env, 
                             width,
                             height,
                             config);
+    env->DeleteLocalRef(config);
 
     SkBitmap *bitmap =
             (SkBitmap *) env->GetIntField(jBitmap, fields.nativeBitmap);
@@ -290,6 +291,7 @@ static jobject android_media_MediaMetadataRetriever_getFrameAtTime(JNIEnv *env, 
                                     displayWidth,
                                     displayHeight,
                                     true);
+        env->DeleteLocalRef(jBitmap);
         return scaledBitmap;
     }
 

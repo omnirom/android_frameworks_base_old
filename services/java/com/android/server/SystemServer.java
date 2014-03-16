@@ -16,6 +16,11 @@
 
 package com.android.server;
 
+// BEGIN privacy-added
+import android.privacy.PrivacySettingsManagerService;
+//import android.privacy.surrogate.PrivacyTelephonyRegistry;
+// END privacy-added
+
 import android.app.ActivityManagerNative;
 import android.bluetooth.BluetoothAdapter;
 import android.content.ComponentName;
@@ -171,7 +176,6 @@ class ServerThread {
         InputManagerService inputManager = null;
         TelephonyRegistry telephonyRegistry = null;
         ConsumerIrService consumerIr = null;
-        RotationSwitchObserver switchObserver = null;
 
         // Create a handler thread just for the window manager to enjoy.
         HandlerThread wmHandlerThread = new HandlerThread("WindowManager");
@@ -230,7 +234,10 @@ class ServerThread {
             ServiceManager.addService(Context.DISPLAY_SERVICE, display, true);
 
             Slog.i(TAG, "Telephony Registry");
-            telephonyRegistry = new TelephonyRegistry(context);
+            // BEGIN privacy-modified
+            // telephonyRegistry = new TelephonyRegistry(context);
+            telephonyRegistry = new PrivacyTelephonyRegistry(context);
+            // END privacy-modified
             ServiceManager.addService("telephony.registry", telephonyRegistry);
 
             Slog.i(TAG, "Scheduling Policy");
@@ -286,6 +293,10 @@ class ServerThread {
             Slog.i(TAG, "Content Manager");
             contentService = ContentService.main(context,
                     factoryTest == SystemServer.FACTORY_TEST_LOW_LEVEL);
+	    
+            // BEGIN privacy-added
+            addPrivacyService(context);
+            // END privacy-added
 
             Slog.i(TAG, "System Content Providers");
             ActivityManagerService.installSystemProviders();
@@ -364,6 +375,7 @@ class ServerThread {
         StatusBarManagerService statusBar = null;
         InputMethodManagerService imm = null;
         AppWidgetService appWidget = null;
+        ProfileManagerService profile = null;
         NotificationManagerService notification = null;
         WallpaperManagerService wallpaper = null;
         LocationManagerService location = null;
@@ -581,6 +593,14 @@ class ServerThread {
                     contentService.systemReady();
             } catch (Throwable e) {
                 reportWtf("making Content Service ready", e);
+            }
+
+            try {
+                Slog.i(TAG, "Profile Manager");
+                profile = new ProfileManagerService(context);
+                ServiceManager.addService(Context.PROFILE_SERVICE, profile);
+            } catch (Throwable e) {
+                Slog.e(TAG, "Failure starting Profile Manager", e);
             }
 
             try {
@@ -832,15 +852,6 @@ class ServerThread {
                     reportWtf("starting MediaRouterService", e);
                 }
             }
-
-            if (context.getResources().getBoolean(R.bool.config_hasRotationLockSwitch)) {
-                try {
-                    switchObserver = new RotationSwitchObserver(context);
-                }
-                catch (Throwable e){
-                    reportWtf("starting RotationSwitchObserver failed", e);
-                }
-            }
         }
 
         Settings.Secure.putInt(mContentResolver, Settings.Secure.ADB_PORT,
@@ -962,7 +973,6 @@ class ServerThread {
         final TelephonyRegistry telephonyRegistryF = telephonyRegistry;
         final PrintManagerService printManagerF = printManager;
         final MediaRouterService mediaRouterF = mediaRouter;
-        final RotationSwitchObserver switchObserverF = switchObserver;
 
         // We now tell the activity manager it is okay to run third party
         // code.  It will call back into us once it has gotten to the state
@@ -1035,11 +1045,6 @@ class ServerThread {
                     if (recognitionF != null) recognitionF.systemReady();
                 } catch (Throwable e) {
                     reportWtf("making Recognition Service ready", e);
-                }
-                try {
-                    if (switchObserverF != null) switchObserverF.systemReady();
-                } catch (Throwable e) {
-                    reportWtf("Notifying RotationSwitchObserver running", e);
                 }
                 Watchdog.getInstance().start();
 
@@ -1140,6 +1145,19 @@ class ServerThread {
         //Slog.d(TAG, "Starting service: " + intent);
         context.startServiceAsUser(intent, UserHandle.OWNER);
     }
+
+    // BEGIN privacy-added
+    private void addPrivacyService(Context context) {
+        try {
+            Slog.i(TAG, "Privacy Service");
+            ServiceManager.addService("privacy", new PrivacySettingsManagerService(context));
+        } catch (Throwable e) {
+            Log.e(TAG, "Failure starting Privacy Service", e);
+        }        
+    }
+    // END privacy-added
+
+
 }
 
 public class SystemServer {

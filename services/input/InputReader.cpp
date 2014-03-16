@@ -5678,8 +5678,7 @@ nsecs_t TouchInputMapper::mLastStylusTime = 0;
 
 bool TouchInputMapper::rejectPalm(nsecs_t when) {
   return (when - mLastStylusTime < mConfig.stylusPalmRejectionTime) &&
-    mPointerSimple.currentProperties.toolType != AMOTION_EVENT_TOOL_TYPE_STYLUS &&
-    mPointerSimple.currentProperties.toolType != AMOTION_EVENT_TOOL_TYPE_ERASER;
+    mPointerSimple.currentProperties.toolType != AMOTION_EVENT_TOOL_TYPE_STYLUS;
 }
 
 bool TouchInputMapper::isPointInsideSurface(int32_t x, int32_t y) {

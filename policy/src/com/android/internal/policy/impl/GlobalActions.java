@@ -1,5 +1,6 @@
 /*
  * Copyright (C) 2008 The Android Open Source Project
+ * Copyright (C) 2011 David van Tonder
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -25,6 +26,8 @@ import com.android.internal.R;
 import android.app.ActivityManagerNative;
 import android.app.AlertDialog;
 import android.app.Dialog;
+import android.app.Profile;
+import android.app.ProfileManager;
 import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.DialogInterface;
@@ -71,6 +74,7 @@ import android.widget.TextView;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.UUID;
 
 /**
  * Needed for takeScreenshot and takeScreenrecord
@@ -79,6 +83,12 @@ import android.content.ServiceConnection;
 import android.content.ComponentName;
 import android.os.IBinder;
 import android.os.Messenger;
+import android.os.RemoteException;
+
+
+import java.lang.reflect.Field;
+import java.lang.reflect.InvocationTargetException;
+import java.lang.reflect.Method;
 
 
 /**
@@ -115,7 +125,16 @@ class GlobalActions implements DialogInterface.OnDismissListener, DialogInterfac
     private boolean mHasVibrator;
     private final boolean mShowSilentToggle;
     private final boolean mShowScreenRecord;
-    private ConnectivityManager mConnectivityManager;
+    private int mHiddenMenuOptions;
+    private boolean mDisableToolbox;
+
+    private static final int HIDE_REBOOT = 1;
+    private static final int HIDE_SCREENSHOT = 2;
+    private static final int HIDE_SOUND = 4;
+    private static final int HIDE_AIRPLANE = 8;
+    private Profile mChosenProfile;
+
+    private static final String SYSTEM_PROFILES_ENABLED = "system_profiles_enabled";
 
     /**
      * @param context everything needs a context :(
@@ -138,21 +157,19 @@ class GlobalActions implements DialogInterface.OnDismissListener, DialogInterfac
         TelephonyManager telephonyManager =
                 (TelephonyManager) context.getSystemService(Context.TELEPHONY_SERVICE);
         telephonyManager.listen(mPhoneStateListener, PhoneStateListener.LISTEN_SERVICE_STATE);
-        mConnectivityManager = (ConnectivityManager)
+        ConnectivityManager cm = (ConnectivityManager)
                 context.getSystemService(Context.CONNECTIVITY_SERVICE);
-
-        mHasTelephony = mConnectivityManager.isNetworkSupported(ConnectivityManager.TYPE_MOBILE);
+        mHasTelephony = cm.isNetworkSupported(ConnectivityManager.TYPE_MOBILE);
         mContext.getContentResolver().registerContentObserver(
                 Settings.Global.getUriFor(Settings.Global.AIRPLANE_MODE_ON), true,
                 mAirplaneModeObserver);
         Vibrator vibrator = (Vibrator) mContext.getSystemService(Context.VIBRATOR_SERVICE);
         mHasVibrator = vibrator != null && vibrator.hasVibrator();
-
         mShowSilentToggle = SHOW_SILENT_TOGGLE && !mContext.getResources().getBoolean(
                 com.android.internal.R.bool.config_useFixedVolume);
-
         mShowScreenRecord = mContext.getResources().getBoolean(
                 com.android.internal.R.bool.config_enableScreenrecordChord);
+        checkSettings();
     }
 
     /**
@@ -186,6 +203,8 @@ class GlobalActions implements DialogInterface.OnDismissListener, DialogInterfac
 
     private void handleShow() {
         awakenIfNecessary();
+        checkSettings();
+
         mDialog = createDialog();
         prepareDialog();
 
@@ -194,6 +213,21 @@ class GlobalActions implements DialogInterface.OnDismissListener, DialogInterfac
         mDialog.getWindow().setAttributes(attrs);
         mDialog.show();
         mDialog.getWindow().getDecorView().setSystemUiVisibility(View.STATUS_BAR_DISABLE_EXPAND);
+    }
+
+    private Boolean dataEnabled(){
+        boolean mobileDataEnabled = false; // Assume disabled
+        ConnectivityManager cm = (ConnectivityManager) mContext.getSystemService(Context.CONNECTIVITY_SERVICE);
+        try {
+            Class cmClass = Class.forName(cm.getClass().getName());
+            Method method = cmClass.getDeclaredMethod("getMobileDataEnabled");
+            method.setAccessible(true); // Make the method callable
+            // get the setting for "mobile data"
+            mobileDataEnabled = (Boolean)method.invoke(cm);
+        } catch (Exception e) {
+            //error
+        }
+        return mobileDataEnabled;
     }
 
     /**
@@ -260,8 +294,33 @@ class GlobalActions implements DialogInterface.OnDismissListener, DialogInterfac
             void onToggle(boolean on) {
                 // comment
                 Log.i(TAG, "onToggle");
-                boolean currentState = mConnectivityManager.getMobileDataEnabled();
-                mConnectivityManager.setMobileDataEnabled(!currentState);
+
+                try {
+                    ConnectivityManager dataManager;
+                    dataManager  = (ConnectivityManager) mContext.getSystemService(Context.CONNECTIVITY_SERVICE);
+                    Method dataMtd = ConnectivityManager.class.getDeclaredMethod("setMobileDataEnabled", boolean.class);
+                    dataMtd.setAccessible(true);
+                    if(dataEnabled()){
+                            dataMtd.invoke(dataManager, false);
+                    }else{
+                            dataMtd.invoke(dataManager, true);
+                    }
+                } catch (IllegalArgumentException e) {
+                        // TODO Auto-generated catch block
+                        //log(e);
+                        //e.printStackTrace();
+                } catch (IllegalAccessException e) {
+                        // TODO Auto-generated catch block
+                        //e.printStackTrace();
+                } catch (NoSuchMethodException e) {
+                        // TODO Auto-generated catch block
+                        //log(e);
+                        //e.printStackTrace();
+                } catch (InvocationTargetException e) {
+                        // TODO Auto-generated catch block
+                        //log(e);
+                        //e.printStackTrace();
+                }
             }
 
             @Override
@@ -301,30 +360,30 @@ class GlobalActions implements DialogInterface.OnDismissListener, DialogInterfac
                     return true;
                 }
             });
+        if (!mDisableToolbox && (mHiddenMenuOptions & HIDE_REBOOT) != HIDE_REBOOT) {
+            // next: reboot
+            mItems.add(
+                new SinglePressAction(
+                        com.android.internal.R.drawable.ic_lock_reboot,
+                        R.string.global_action_reboot) {
+                    public void onPress() {
+                        mWindowManagerFuncs.reboot("null");
+                    }
 
-        // next: reboot
-        // Unlike in CM, we'll always have this here until we decide otherwise.
-        // The Settings component of this is a mess and how many people actually disable this?
-        // Someone else can readd the ability to disable this if they don't want it.
-        mItems.add(
-            new SinglePressAction(R.drawable.ic_lock_reboot, R.string.global_action_reboot) {
-                public void onPress() {
-                    mWindowManagerFuncs.reboot();
-                }
+                    public boolean onLongPress() {
+                        mWindowManagerFuncs.rebootSafeMode(true);
+                        return true;
+                    }
 
-                public boolean onLongPress() {
-                    mWindowManagerFuncs.rebootSafeMode(true);
-                    return true;
-                }
+                    public boolean showDuringKeyguard() {
+                        return true;
+                    }
 
-                public boolean showDuringKeyguard() {
-                    return true;
-                }
-
-                public boolean showBeforeProvisioning() {
-                    return true;
-                }
-            });
+                    public boolean showBeforeProvisioning() {
+                        return true;
+                    }
+                });
+        }
 
         // next: mobile data
         if (Settings.System.getInt(mContext.getContentResolver(),
@@ -384,12 +443,33 @@ class GlobalActions implements DialogInterface.OnDismissListener, DialogInterfac
             }
         }
 
-        // next: airplane mode
-        if (Settings.System.getInt(mContext.getContentResolver(),
-                Settings.System.AIRPLANE_MODE_IN_POWER_MENU, 1) != 0) {
-            mItems.add(mAirplaneModeOn);
+        // next: profile - only shown if enabled, which is true by default
+        if (Settings.System.getInt(mContext.getContentResolver(), SYSTEM_PROFILES_ENABLED, 1) == 1) {
+            mItems.add(
+                new ProfileChooseAction() {
+                    public void onPress() {
+                        createProfileDialog();
+                    }
+
+                    public boolean onLongPress() {
+                        return true;
+                    }
+
+                    public boolean showDuringKeyguard() {
+                        return false;
+                    }
+
+                    public boolean showBeforeProvisioning() {
+                        return false;
+                    }
+                });
         }
 
+        // next: airplane mode
+        if (Settings.System.getInt(mContext.getContentResolver(),
+                Settings.System.AIRPLANE_MODE_IN_POWER_MENU, 0) != 0) {
+            mItems.add(mAirplaneModeOn);
+        }
 
         // next: bug report, if enabled
         if (Settings.Global.getInt(mContext.getContentResolver(),
@@ -442,7 +522,7 @@ class GlobalActions implements DialogInterface.OnDismissListener, DialogInterfac
 
         // last: silent mode
         if (mShowSilentToggle && Settings.System.getInt(mContext.getContentResolver(),
-                Settings.System.SOUND_TOGGLES_IN_POWER_MENU, 1) != 0) {
+                Settings.System.SOUND_TOGGLES_IN_POWER_MENU, 0) != 0) {
             mItems.add(mSilentModeAction);
         }
 
@@ -476,6 +556,54 @@ class GlobalActions implements DialogInterface.OnDismissListener, DialogInterfac
         dialog.setOnDismissListener(this);
 
         return dialog;
+    }
+
+    private UserInfo getCurrentUser() {
+        try {
+            return ActivityManagerNative.getDefault().getCurrentUser();
+        } catch (RemoteException re) {
+            return null;
+        }
+    }
+
+    private boolean isCurrentUserOwner() {
+        UserInfo currentUser = getCurrentUser();
+        return currentUser == null || currentUser.isPrimary();
+    }
+
+    private void addUsersToMenu(ArrayList<Action> items) {
+        List<UserInfo> users = ((UserManager) mContext.getSystemService(Context.USER_SERVICE))
+                .getUsers();
+        if (users.size() > 1) {
+            UserInfo currentUser = getCurrentUser();
+            for (final UserInfo user : users) {
+                boolean isCurrentUser = currentUser == null
+                        ? user.id == 0 : (currentUser.id == user.id);
+                Drawable icon = user.iconPath != null ? Drawable.createFromPath(user.iconPath)
+                        : null;
+                SinglePressAction switchToUser = new SinglePressAction(
+                        com.android.internal.R.drawable.ic_menu_cc, icon,
+                        (user.name != null ? user.name : "Primary")
+                        + (isCurrentUser ? " \u2714" : "")) {
+                    public void onPress() {
+                        try {
+                            ActivityManagerNative.getDefault().switchUser(user.id);
+                        } catch (RemoteException re) {
+                            Log.e(TAG, "Couldn't switch user " + re);
+                        }
+                    }
+
+                    public boolean showDuringKeyguard() {
+                        return true;
+                    }
+
+                    public boolean showBeforeProvisioning() {
+                        return false;
+                    }
+                };
+                items.add(switchToUser);
+            }
+        }
     }
 
     /**
@@ -620,61 +748,58 @@ class GlobalActions implements DialogInterface.OnDismissListener, DialogInterfac
         }
     }
 
-    private UserInfo getCurrentUser() {
-        try {
-            return ActivityManagerNative.getDefault().getCurrentUser();
-        } catch (RemoteException re) {
-            return null;
-        }
-    }
+    private void createProfileDialog(){
+        final ProfileManager profileManager = (ProfileManager)mContext.getSystemService(Context.PROFILE_SERVICE);
 
-    private boolean isCurrentUserOwner() {
-        UserInfo currentUser = getCurrentUser();
-        return currentUser == null || currentUser.isPrimary();
-    }
+        final Profile[] profiles = profileManager.getProfiles();
+        UUID activeProfile = profileManager.getActiveProfile().getUuid();
+        final CharSequence[] names = new CharSequence[profiles.length];
 
-    private void addUsersToMenu(ArrayList<Action> items) {
-        List<UserInfo> users = ((UserManager) mContext.getSystemService(Context.USER_SERVICE))
-                .getUsers();
-        if (users.size() > 1) {
-            UserInfo currentUser = getCurrentUser();
-            for (final UserInfo user : users) {
-                boolean isCurrentUser = currentUser == null
-                        ? user.id == 0 : (currentUser.id == user.id);
-                Drawable icon = user.iconPath != null ? Drawable.createFromPath(user.iconPath)
-                        : null;
-                SinglePressAction switchToUser = new SinglePressAction(
-                        com.android.internal.R.drawable.ic_menu_cc, icon,
-                        (user.name != null ? user.name : "Primary")
-                        + (isCurrentUser ? " \u2714" : "")) {
-                    public void onPress() {
-                        try {
-                            ActivityManagerNative.getDefault().switchUser(user.id);
-                        } catch (RemoteException re) {
-                            Log.e(TAG, "Couldn't switch user " + re);
-                        }
-                    }
+        int i=0;
+        int checkedItem = 0;
 
-                    public boolean showDuringKeyguard() {
-                        return true;
-                    }
-
-                    public boolean showBeforeProvisioning() {
-                        return false;
-                    }
-                };
-                items.add(switchToUser);
+        for(Profile profile : profiles) {
+            if(profile.getUuid().equals(activeProfile)) {
+                checkedItem = i;
+                mChosenProfile = profile;
             }
+            names[i++] = profile.getName();
         }
+
+        final AlertDialog.Builder ab = new AlertDialog.Builder(mContext);
+
+        AlertDialog dialog = ab
+                .setTitle(R.string.global_action_choose_profile)
+                .setSingleChoiceItems(names, checkedItem, new DialogInterface.OnClickListener() {
+                    public void onClick(DialogInterface dialog, int which) {
+                        if (which < 0)
+                            return;
+                        mChosenProfile = profiles[which];
+                    }
+                })
+                .setPositiveButton(com.android.internal.R.string.yes,
+                        new DialogInterface.OnClickListener() {
+                            public void onClick(DialogInterface dialog, int which) {
+                                profileManager.setActiveProfile(mChosenProfile.getUuid());
+                            }
+                        })
+                .setNegativeButton(com.android.internal.R.string.no,
+                        new DialogInterface.OnClickListener() {
+                            public void onClick(DialogInterface dialog, int which) {
+                                dialog.cancel();
+                            }
+                }).create();
+        dialog.getWindow().setType(WindowManager.LayoutParams.TYPE_SYSTEM_DIALOG);
+        dialog.show();
     }
 
     private void prepareDialog() {
         refreshSilentMode();
         mAirplaneModeOn.updateState(mAirplaneState);
-        mMobileDataOn.updateState(mConnectivityManager.getMobileDataEnabled() ? ToggleAction.State.On : ToggleAction.State.Off);
+        mMobileDataOn.updateState(dataEnabled() ? ToggleAction.State.On : ToggleAction.State.Off);
         mAdapter.notifyDataSetChanged();
         mDialog.getWindow().setType(WindowManager.LayoutParams.TYPE_KEYGUARD_DIALOG);
-        if (mShowSilentToggle) {
+        if (mShowSilentToggle && (mHiddenMenuOptions & HIDE_SOUND) != HIDE_SOUND) {
             IntentFilter filter = new IntentFilter(AudioManager.RINGER_MODE_CHANGED_ACTION);
             mContext.registerReceiver(mRingerModeReceiver, filter);
         }
@@ -691,7 +816,7 @@ class GlobalActions implements DialogInterface.OnDismissListener, DialogInterfac
 
     /** {@inheritDoc} */
     public void onDismiss(DialogInterface dialog) {
-        if (mShowSilentToggle) {
+        if (mShowSilentToggle && (mHiddenMenuOptions & HIDE_SOUND) != HIDE_SOUND) {
             try {
                 mContext.unregisterReceiver(mRingerModeReceiver);
             } catch (IllegalArgumentException ie) {
@@ -869,6 +994,46 @@ class GlobalActions implements DialogInterface.OnDismissListener, DialogInterfac
                 messageView.setText(mMessage);
             } else {
                 messageView.setText(mMessageResId);
+            }
+
+            return v;
+        }
+    }
+
+    /**
+     * A single press action maintains no state, just responds to a press
+     * and takes an action.
+     */
+    private abstract class ProfileChooseAction implements Action {
+        private ProfileManager mProfileManager;
+
+        protected ProfileChooseAction() {
+            mProfileManager = (ProfileManager)mContext.getSystemService(Context.PROFILE_SERVICE);
+        }
+
+        public boolean isEnabled() {
+            return true;
+        }
+
+        abstract public void onPress();
+
+        public View create(Context context, View convertView, ViewGroup parent, LayoutInflater inflater) {
+            View v = inflater.inflate(R.layout.global_actions_item, parent, false);
+
+            ImageView icon = (ImageView) v.findViewById(R.id.icon);
+            TextView messageView = (TextView) v.findViewById(R.id.message);
+            TextView statusView = (TextView) v.findViewById(R.id.status);
+            if (statusView != null) {
+                statusView.setVisibility(View.VISIBLE);
+                statusView.setText(mProfileManager.getActiveProfile().getName());
+            }
+
+            if (icon != null) {
+                icon.setImageDrawable(context.getResources().getDrawable(R.drawable.ic_lock_profile));
+            }
+
+            if (messageView != null) {
+                messageView.setText(R.string.global_action_choose_profile);
             }
 
             return v;
@@ -1124,7 +1289,7 @@ class GlobalActions implements DialogInterface.OnDismissListener, DialogInterfac
     PhoneStateListener mPhoneStateListener = new PhoneStateListener() {
         @Override
         public void onServiceStateChanged(ServiceState serviceState) {
-            if (!mHasTelephony) return;
+            if (!mHasTelephony || mAirplaneModeOn == null || mAdapter == null) return;
             final boolean inAirplaneMode = serviceState.getState() == ServiceState.STATE_POWER_OFF;
             mAirplaneState = inAirplaneMode ? ToggleAction.State.On : ToggleAction.State.Off;
             mAirplaneModeOn.updateState(mAirplaneState);
@@ -1199,6 +1364,11 @@ class GlobalActions implements DialogInterface.OnDismissListener, DialogInterfac
         if (!mHasTelephony) {
             mAirplaneState = on ? ToggleAction.State.On : ToggleAction.State.Off;
         }
+    }
+
+    private void checkSettings() {
+        mDisableToolbox = Settings.System.getInt(mContext.getContentResolver(),
+                Settings.System.DISABLE_TOOLBOX, 0) == 1;
     }
 
     private static final class GlobalActionsDialog extends Dialog implements DialogInterface {

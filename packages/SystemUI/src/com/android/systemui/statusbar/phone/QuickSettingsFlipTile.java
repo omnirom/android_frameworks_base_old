@@ -26,17 +26,19 @@ import android.view.MotionEvent;
 import android.view.View;
 import android.widget.FrameLayout;
 
-public class QuickSettingsFlipTile extends QuickSettingsTileView {
+class QuickSettingsFlipTile extends QuickSettingsTileView {
 
-    private final QuickSettingsBasicTile mFront;
-    private final QuickSettingsBasicBackTile mBack;
+    private final QuickSettingsTileView mFront;
+    private final QuickSettingsTileView mBack;
     private final QuickSettingsTileFlip3d mFlip3d;
 
-    public QuickSettingsFlipTile(Context context) {
-        this(context, null);
+    public QuickSettingsFlipTile(Context context, QuickSettingsTileView front,
+            QuickSettingsTileView back) {
+        this(context, null, front, back);
     }
 
-    public QuickSettingsFlipTile(Context context, AttributeSet attrs) {
+    public QuickSettingsFlipTile(Context context, AttributeSet attrs,
+            QuickSettingsTileView front, QuickSettingsTileView back) {
         super(context, attrs);
 
         setLayoutParams(new FrameLayout.LayoutParams(
@@ -44,8 +46,8 @@ public class QuickSettingsFlipTile extends QuickSettingsTileView {
             context.getResources().getDimensionPixelSize(R.dimen.quick_settings_cell_height)
         ));
 
-        mFront = new QuickSettingsBasicTile(context);
-        mBack = new QuickSettingsBasicBackTile(context);
+        mFront = front;
+        mBack = back;
         mFlip3d = new QuickSettingsTileFlip3d(mFront, mBack);
 
         setClickable(true);
@@ -67,83 +69,7 @@ public class QuickSettingsFlipTile extends QuickSettingsTileView {
 
     @Override
     public boolean dispatchTouchEvent(MotionEvent e) {
-        if (!isEditModeEnabled()) {
-            return mFlip3d.onTouch(this, e);
-        }
-        return super.dispatchTouchEvent(e);
-    }
-
-    @Override
-    public boolean onInterceptTouchEvent(MotionEvent ev) {
-        if (isEditModeEnabled()) {
-            return true;
-        } else {
-            return super.onInterceptTouchEvent(ev);
-        }
-    }
-
-    public void setFrontImageResource(int id) {
-        mFront.setImageResource(id);
-    }
-
-    public void setBackImageResource(int id) {
-        mBack.setImageResource(id);
-    }
-
-    public void setFrontText(CharSequence text) {
-        mFront.setText(text);
-    }
-
-    public void setBackLabel(CharSequence text) {
-        mBack.setLabel(text);
-    }
-
-    public void setFrontContentDescription(CharSequence text) {
-        mFront.setContentDescription(text);
-    }
-
-    public void setBackContentDescription(CharSequence text) {
-        mBack.setContentDescription(text);
-    }
-
-    public void setBackFunction(CharSequence text) {
-        mBack.setFunction(text);
-    }
-
-    public void setFrontLoading(boolean loading) {
-        mFront.setLoading(loading);
-    }
-
-    public void setFrontPressed(boolean press) {
-        mFront.setPressed(press);
-    }
-
-    @Override
-    public void setTextSizes(int size) {
-        mBack.setTextSizes(size);
-        mFront.setTextSizes(size);
-    }
-
-    @Override
-    public void callOnColumnsChange() {
-        mBack.callOnColumnsChange();
-        mFront.callOnColumnsChange();
-    }
-
-    public void setFrontOnLongClickListener(View.OnLongClickListener listener) {
-        mFront.setOnLongClickListener(listener);
-    }
-
-    public void setBackOnLongClickListener(View.OnLongClickListener listener) {
-        mBack.setOnLongClickListener(listener);
-    }
-
-    public void setFrontOnClickListener(View.OnClickListener listener) {
-        mFront.setOnClickListener(listener);
-    }
-
-    public void setBackOnClickListener(View.OnClickListener listener) {
-        mBack.setOnClickListener(listener);
+        return mFlip3d.onTouch(this, e);
     }
 
     public QuickSettingsTileView getFront() {
@@ -153,4 +79,5 @@ public class QuickSettingsFlipTile extends QuickSettingsTileView {
     public QuickSettingsTileView getBack() {
         return mBack;
     }
+
 }

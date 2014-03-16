@@ -49,13 +49,6 @@
         android:orientation="horizontal"
         >
 
-        <View
-            android:id="@+id/center_spacer"
-            android:layout_height="match_parent"
-            android:layout_width="1dp"
-            android:visibility="gone"
-            />
-
         <LinearLayout
             android:id="@+id/notification_icon_area"
             android:layout_width="0dip"
@@ -78,24 +71,36 @@
                 android:orientation="horizontal"/>
         </LinearLayout>
 
+        <View
+            android:id="@+id/center_spacer"
+            android:layout_height="match_parent"
+            android:layout_width="1dp"
+            android:visibility="gone"
+            />
+
         <LinearLayout android:id="@+id/system_icon_area"
             android:layout_width="wrap_content"
             android:layout_height="match_parent"
             android:orientation="horizontal">
 
-            <com.android.systemui.statusbar.policy.NetworkTraffic
-                android:id="@+id/networkTraffic"
-                android:layout_width="wrap_content"
-                android:layout_height="match_parent"
-                android:singleLine="false"
-                android:gravity="right|center_vertical"/>
+            <include layout="@layout/network_stats" />
 
-           <LinearLayout android:id="@+id/statusIcons"
+            <LinearLayout android:id="@+id/statusIcons"
                 android:layout_width="wrap_content"
                 android:layout_height="match_parent"
                 android:gravity="center_vertical"
                 android:orientation="horizontal"/>    
     
+            <com.android.systemui.statusbar.policy.Traffic
+                android:id="@+id/traffic"
+                android:textAppearance="@style/TextAppearance.StatusBar.Traffic"
+                android:layout_width="wrap_content"
+                android:layout_height="match_parent"
+                android:singleLine="true"
+                android:layout_marginRight="4dp"
+                android:gravity="left|center_vertical"
+                />  
+
             <LinearLayout
                 android:id="@+id/signal_battery_cluster"
                 android:layout_width="wrap_content"
@@ -108,16 +113,6 @@
                     android:id="@+id/signal_cluster"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
-                    />
-                <com.android.systemui.BatteryPercentMeterView
-                    android:id="@+id/percent_battery"
-                    android:layout_width="wrap_content"
-                    android:layout_height="match_parent"
-                    android:textAppearance="@style/TextAppearance.StatusBar.PercentBattery"
-                    android:singleLine="true"
-                    android:gravity="center_vertical"
-                    android:paddingLeft="4dip"
-                    systemui:batteryView="statusbar"
                     />
                 <!-- battery must be padded below to match assets -->
                 <com.android.systemui.BatteryMeterView
@@ -212,4 +207,8 @@
                 />
         </com.android.systemui.statusbar.phone.TickerView>
     </LinearLayout>
+    <com.android.systemui.statusbar.policy.BatteryBarController
+        android:layout_width="match_parent"
+        android:layout_height="1dp"
+        systemui:viewLocation="1" />
 </com.android.systemui.statusbar.phone.PhoneStatusBarView>

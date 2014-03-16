@@ -23,7 +23,6 @@ import com.android.systemui.R;
 import android.content.Context;
 import android.graphics.drawable.Drawable;
 import android.util.AttributeSet;
-import android.util.TypedValue;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.widget.FrameLayout;
@@ -32,7 +31,7 @@ import android.widget.ProgressBar;
 import android.widget.TextView;
 
 
-public class QuickSettingsBasicBackTile extends QuickSettingsTileView {
+class QuickSettingsBasicBackTile extends QuickSettingsTileView {
     private final TextView mLabelView;
     private final TextView mFunctionView;
     private final ImageView mImageView;
@@ -42,10 +41,6 @@ public class QuickSettingsBasicBackTile extends QuickSettingsTileView {
     }
 
     public QuickSettingsBasicBackTile(Context context, AttributeSet attrs) {
-        this(context, attrs, R.layout.quick_settings_tile_back);
-    }
-
-    public QuickSettingsBasicBackTile(Context context, AttributeSet attrs, int layoutId) {
         super(context, attrs);
 
         setLayoutParams(new FrameLayout.LayoutParams(
@@ -53,7 +48,8 @@ public class QuickSettingsBasicBackTile extends QuickSettingsTileView {
             context.getResources().getDimensionPixelSize(R.dimen.quick_settings_cell_height)
         ));
         setBackgroundResource(R.drawable.qs_tile_background);
-        addView(LayoutInflater.from(context).inflate(layoutId, null),
+        addView(LayoutInflater.from(context).inflate(
+                R.layout.quick_settings_tile_back, null),
                 new FrameLayout.LayoutParams(
                         FrameLayout.LayoutParams.MATCH_PARENT,
                         FrameLayout.LayoutParams.MATCH_PARENT));
@@ -85,18 +81,6 @@ public class QuickSettingsBasicBackTile extends QuickSettingsTileView {
 
     public void setImageResource(int resId) {
         mImageView.setImageResource(resId);
-    }
-
-    @Override
-    public void setTextSizes(int size) {
-        mLabelView.setTextSize(TypedValue.COMPLEX_UNIT_PX, size);
-        mFunctionView.setTextSize(TypedValue.COMPLEX_UNIT_PX, size);
-    }
-
-    @Override
-    public void callOnColumnsChange() {
-        mLabelView.invalidate();
-        mFunctionView.invalidate();
     }
 
     public void setLabel(CharSequence text) {

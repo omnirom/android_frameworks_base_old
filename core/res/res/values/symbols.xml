@@ -256,7 +256,6 @@
   <java-symbol type="bool" name="config_duplicate_port_omadm_wappush" />
   <java-symbol type="bool" name="config_enable_emergency_call_while_sim_locked" />
   <java-symbol type="bool" name="config_enable_puk_unlock_screen" />
-  <java-symbol type="bool" name="config_hotswapCapable" />
   <java-symbol type="bool" name="config_mms_content_disposition_support" />
   <java-symbol type="bool" name="config_showMenuShortcutsWhenKeyboardPresent" />
   <java-symbol type="bool" name="config_sip_wifi_only" />
@@ -291,6 +290,7 @@
   <java-symbol type="bool" name="config_forceDefaultOrientation" />
   <java-symbol type="bool" name="config_wifi_batched_scan_supported" />
   <java-symbol type="bool" name="flip_controller_fallback_keys" />
+  <java-symbol type="bool" name="config_forceDisableHardwareKeyboard" />
 
   <java-symbol type="integer" name="config_cursorWindowSize" />
   <java-symbol type="integer" name="config_extraFreeKbytesAdjust" />
@@ -321,6 +321,7 @@
   <java-symbol type="integer" name="config_mobile_mtu" />
   <java-symbol type="integer" name="config_volte_replacement_rat"/>
   <java-symbol type="integer" name="config_valid_wappush_index" />
+  <java-symbol type="integer" name="config_defaultColumnsNum" />
 
   <java-symbol type="color" name="tab_indicator_text_v4" />
 
@@ -1258,6 +1259,8 @@
   <java-symbol type="style" name="Theme.DeviceDefault.Dialog.NoFrame" />
   <java-symbol type="style" name="Theme.IconMenu" />
   <java-symbol type="style" name="Theme.Panel.Volume" />
+  <java-symbol type="style" name="Theme.DeviceDefault.FloatingWindow" />
+  <java-symbol type="style" name="Theme.DeviceDefault.FloatingWindowLight" />
 
   <java-symbol type="attr" name="mediaRouteButtonStyle" />
   <java-symbol type="attr" name="externalRouteEnabledDrawable" />
@@ -1276,6 +1279,8 @@
 
   <java-symbol type="dimen" name="config_minScalingSpan" />
   <java-symbol type="dimen" name="config_minScalingTouchMajor" />
+
+  <java-symbol type="string" name="config_fastChargePath" />
 
   <!-- From android.policy -->
   <java-symbol type="anim" name="app_starting_exit" />
@@ -1332,10 +1337,9 @@
   <java-symbol type="drawable" name="ic_jog_dial_sound_on" />
   <java-symbol type="drawable" name="ic_jog_dial_unlock" />
   <java-symbol type="drawable" name="ic_jog_dial_vibrate_on" />
-  <java-symbol type="drawable" name="ic_lock_screenshot" />
-  <java-symbol type="drawable" name="ic_lock_screen_record" />
   <java-symbol type="drawable" name="ic_lock_airplane_mode" />
   <java-symbol type="drawable" name="ic_lock_airplane_mode_off" />
+  <java-symbol type="drawable" name="ic_lock_screen_record" />
   <java-symbol type="drawable" name="ic_lock_mobile_data" />
   <java-symbol type="drawable" name="ic_lock_mobile_data_off" />
   <java-symbol type="drawable" name="ic_menu_cc" />
@@ -1401,9 +1405,8 @@
   <java-symbol type="string" name="bugreport_title" />
   <java-symbol type="string" name="bugreport_message" />
   <java-symbol type="string" name="faceunlock_multiple_failures" />
-  <java-symbol type="string" name="global_action_power_off" />
-  <java-symbol type="string" name="global_action_screenshot" />
   <java-symbol type="string" name="global_action_screenrecord" />
+  <java-symbol type="string" name="global_action_power_off" />
   <java-symbol type="string" name="global_actions_airplane_mode_off_status" />
   <java-symbol type="string" name="global_actions_airplane_mode_on_status" />
   <java-symbol type="string" name="global_actions_toggle_airplane_mode" />
@@ -1474,6 +1477,7 @@
   <java-symbol type="bool" name="config_enableGeocoderOverlay" />
   <java-symbol type="bool" name="config_enableGeofenceOverlay" />
   <java-symbol type="bool" name="config_enableNetworkLocationOverlay" />
+  <java-symbol type="bool" name="config_enableAdbByDefault" />
   <java-symbol type="bool" name="config_sf_limitedAlpha" />
   <java-symbol type="bool" name="config_unplugTurnsOnScreen" />
   <java-symbol type="bool" name="config_wifi_background_scan_support" />
@@ -1661,8 +1665,8 @@
   <java-symbol type="dimen" name="status_bar_icon_size" />
   <java-symbol type="dimen" name="system_bar_icon_size" />
   <java-symbol type="drawable" name="list_selector_pressed_holo_dark" />
-  <java-symbol type="drawable" name="scrubber_control_disabled_holo" />
-  <java-symbol type="drawable" name="scrubber_control_selector_holo" />
+  <java-symbol type="drawable" name="scrubber_control_disabled_holo_dark" />
+  <java-symbol type="drawable" name="scrubber_control_selector_holo_dark" />
   <java-symbol type="drawable" name="scrubber_progress_horizontal_holo_dark" />
   <java-symbol type="drawable" name="usb_android" />
   <java-symbol type="drawable" name="usb_android_connected" />
@@ -1790,24 +1794,94 @@
 
   <!-- CM -->
   <java-symbol type="bool" name="config_samsung_stk" />
-  <java-symbol type="drawable" name="ic_lock_reboot" />
-  <java-symbol type="string" name="global_action_reboot" />
-  <java-symbol type="array" name="shutdown_reboot_options" />
-  <java-symbol type="array" name="shutdown_reboot_actions" />
-  <java-symbol type="string" name="reboot_system" />
   <java-symbol type="integer" name="config_deviceHardwareKeys" />
   <java-symbol type="integer" name="config_backKillTimeout" />
   <java-symbol type="string" name="app_killed_message" />
   <java-symbol type="bool" name="config_hasRemovableLid" />
+  <java-symbol type="string" name="config_legacyUmsLunFile" />
   <java-symbol type="bool" name="config_smsSamsungCdmaAlternateMessageIDEncoding" />
+
+  <!-- In WiFi AP notification -->
+  <java-symbol type="string" name="notify_turn_wifi_ap_off_title" />
 
   <!-- Wifi -->
   <java-symbol type="bool" name="config_wifiApStartInterface" />
-  <java-symbol type="bool" name="config_wifiApFirmwareReload" />
+
+  <!-- Config IME switcher -->
+  <java-symbol type="bool" name="config_show_IMESwitcher" />
 
   <!-- Stylus gestures -->
   <java-symbol type="bool" name="config_stylusGestures" />
   <java-symbol type="string" name="stylus_app_not_installed" />
+
+  <!-- Boot message dialog -->
+  <java-symbol type="drawable" name="busy_dlg_animation" />
+  <java-symbol type="drawable" name="busy_dlg_animation_0" />
+  <java-symbol type="drawable" name="busy_dlg_animation_1" />
+  <java-symbol type="drawable" name="busy_dlg_animation_2" />
+  <java-symbol type="drawable" name="busy_dlg_animation_3" />
+  <java-symbol type="drawable" name="busy_dlg_animation_4" />
+  <java-symbol type="drawable" name="busy_dlg_animation_5" />
+  <java-symbol type="drawable" name="busy_dlg_animation_6" />
+  <java-symbol type="drawable" name="busy_dlg_animation_7" />
+  <java-symbol type="drawable" name="busy_dlg_animation_8" />
+  <java-symbol type="drawable" name="busy_dlg_animation_9" />
+  <java-symbol type="drawable" name="busy_dlg_animation_10" />
+  <java-symbol type="drawable" name="busy_dlg_animation_11" />
+  <java-symbol type="drawable" name="busy_dlg_icon" />
+  <java-symbol type="id" name="busy_dlg_animation" />
+  <java-symbol type="id" name="busy_dlg_title" />
+  <java-symbol type="layout" name="busy_dlg" />
+
+  <!-- UI theme mode -->
+  <java-symbol type="integer" name="config_uiThemeMode" />
+
+  <!-- Quick settings -->
+  <java-symbol type="string" name="hour" />
+  <java-symbol type="string" name="hours" />
+  <java-symbol type="string" name="minute" />
+  <java-symbol type="string" name="minutes" />
+  <java-symbol type="string" name="second" />
+  <java-symbol type="string" name="seconds" />
+
+  <!-- Privacy Guard -->
+  <java-symbol type="string" name="privacy_guard_notification" />
+  <java-symbol type="string" name="privacy_guard_notification_detail" />
+  <java-symbol type="string" name="privacy_guard_custom_notification_detail" />
+  <java-symbol type="drawable" name="stat_notify_privacy_guard" />
+  <java-symbol type="drawable" name="stat_notify_privacy_guard_off" />
+  <java-symbol type="drawable" name="stat_notify_privacy_guard_custom" />
+  <java-symbol type="drawable" name="stat_notify_privacy_guard_plus" />
+  <java-symbol type="drawable" name="stat_notify_privacy_guard_off_plus" />
+  <java-symbol type="drawable" name="stat_notify_privacy_guard_custom_plus" />
+
+  <!-- Profiles -->
+  <java-symbol type="xml" name="profile_default" />
+  <java-symbol type="string" name="wildcardProfile" />
+  <java-symbol type="string" name="profile_picker_title" />
+  <java-symbol type="string" name="profile_none" />
+
+  <!-- Progress Bar -->
+  <java-symbol type="dimen" name="spb_default_stroke_width" />
+  <java-symbol type="dimen" name="spb_default_stroke_separator_length" />
+  <java-symbol type="bool" name="spb_default_reversed" />
+  <java-symbol type="string" name="spb_default_speed" />
+  <java-symbol type="color" name="spb_default_color" />
+  <java-symbol type="integer" name="spb_default_sections_count" />
+  <java-symbol type="integer" name="spb_default_interpolator" />
+  <java-symbol type="bool" name="spb_default_mirror_mode" />
+  <java-symbol type="attr" name="spbStyle" />
+  <java-symbol type="array" name="pgcolors" />
+  <java-symbol type="array" name="gplus_colors" />
+  <java-symbol type="color" name="gplus_color_1" />
+  <java-symbol type="color" name="gplus_color_2" />
+  <java-symbol type="color" name="gplus_color_3" />
+  <java-symbol type="color" name="gplus_color_4" />
+  <java-symbol type="color" name="holo_blue_dark" />
+  <java-symbol type="color" name="holo_yellow_dark" />
+  <java-symbol type="color" name="holo_green_dark" />
+  <java-symbol type="color" name="holo_purple_dark" />
+  <java-symbol type="color" name="holo_red_dark" />
 
   <!-- Navigation Ring -->
   <java-symbol type="drawable" name="ic_navigation_ring_blank_normal" />
@@ -1822,10 +1896,35 @@
   <java-symbol type="drawable" name="ic_navigation_ring_torch_on" />
   <java-symbol type="drawable" name="ic_navigation_ring_torch_off" />
   <java-symbol type="drawable" name="ic_navigation_ring_vibrate" />
-  <java-symbol type="drawable" name="ic_navigation_ring_lastapp" />
+
+  <!-- DU Easter Egg -->
+  <java-symbol type="drawable" name="dirtyunicorns_bg_logo" />
+  <java-symbol type="drawable" name="dirtyunicorns_logo" />
+
+  <java-symbol type="bool" name="use_motion_accel" />
+
+  <!-- Toast Animation -->
+  <java-symbol type="style" name="Animation.Toast.Fade" />
+  <java-symbol type="style" name="Animation.Toast.SlideRight" />
+  <java-symbol type="style" name="Animation.Toast.SlideLeft" />
+  <java-symbol type="style" name="Animation.Toast.Xylon" />
+  <java-symbol type="style" name="Animation.Toast.Toko" />
+  <java-symbol type="style" name="Animation.Toast.Tn" />
+  <java-symbol type="style" name="Animation.Toast.Honami" />
+  <java-symbol type="style" name="Animation.Toast.FastFade" />
+  <java-symbol type="style" name="Animation.Toast.GrowFade" />
+  <java-symbol type="style" name="Animation.Toast.GrowFadeCenter" />
+  <java-symbol type="style" name="Animation.Toast.GrowFadeBottom" />
+  <java-symbol type="style" name="Animation.Toast.Translucent" />
+  <java-symbol type="style" name="Animation.Toast.SlideRightLeft" />
+  <java-symbol type="style" name="Animation.Toast.SlideLeftRight" />
+
+  <!-- Slim recent app screen-->
+  <java-symbol type="integer" name="config_recentDefaultDur" />
+  <java-symbol type="integer" name="config_recentExitDur" />
+  <java-symbol type="style" name="Animation.RecentScreen" />
+  <java-symbol type="anim" name="recent_screen_enter" />
+  <java-symbol type="anim" name="recent_screen_fade_out" />
 
   <java-symbol type="bool" name="config_offscreenGestureSupport" />
-  <java-symbol type="bool" name="config_hasRotationLockSwitch" />
-  <java-symbol type="string" name="toast_rotation_unlocked" />
-  <java-symbol type="string" name="toast_rotation_locked" />
 </resources>

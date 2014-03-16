@@ -28,10 +28,7 @@
     <dimen name="ad_notification_margin">4dp</dimen>
 
     <!-- Active display overflow notification icon size -->
-    <dimen name="overflow_icon_size">32dp</dimen>
-
-    <!-- Active display overflow background notification icon size -->
-    <dimen name="overflow_background_icon_size">56dp</dimen>
+    <dimen name="overflow_icon_size">28dp</dimen>
 
     <!-- Active display Handle notification icon size -->
     <dimen name="handle_icon_size">32dp</dimen>
@@ -48,23 +45,29 @@
     <!-- AM/PM size in active display -->
     <dimen name="ad_ampm_font_size">32dp</dimen>
 
-    <!-- Quick Settings tile geometry: gap between icon and text 4 per row-->
-    <dimen name="qs_4_column_text_padding">14dp</dimen>
+    <!-- Constant for hidden ribbon drag handle -->
+    <dimen name="ribbon_drag_handle_height">25dp</dimen>
 
-    <!-- Quick Settings tile geometry: text size for 3 tile per row-->
-    <dimen name="qs_3_column_text_size">12sp</dimen>
-    <!-- Quick Settings tile geometry: text size for 4 tile per row-->
-    <dimen name="qs_4_column_text_size">10sp</dimen>
-    <!-- Quick Settings tile geometry: text size for 5 tile per row-->
-    <dimen name="qs_5_column_text_size">8sp</dimen>
+    <!-- App sidebar -->
+    <dimen name="app_sidebar_item_height">64dp</dimen>
+    <dimen name="app_sidebar_item_size">60dp</dimen>
+    <dimen name="app_sidebar_item_padding">2dp</dimen>
+    <dimen name="tab_width">16dp</dimen>
+    <dimen name="tab_height">32dp</dimen>
+    <dimen name="drag_item_size">80dp</dimen>
+    <dimen name="icon_size">48dp</dimen>
+    <dimen name="item_title_text_size">12sp</dimen>
+    <dimen name="item_above_below_delta">16dp</dimen>
+    <dimen name="folder_padding">0dp</dimen>
+    <dimen name="folder_name_padding">10dp</dimen>
+    <dimen name="folder_width">290dp</dimen>
+    <dimen name="folder_height">480dp</dimen>
+    <dimen name="setup_sidebar_width">90dp</dimen>
 
-    <!-- Network traffic monitor single-line text size -->
-    <dimen name="net_traffic_single_text_size">12dp</dimen>
+    <!-- Slim recent -->
+    <dimen name="recent_width">230dp</dimen>
+    <dimen name="recent_app_icon_size">48dp</dimen>
+    <dimen name="recent_thumbnail_width">198dp</dimen>
+    <dimen name="recent_thumbnail_height">140dp</dimen>
 
-    <!-- Network traffic monitor multi-line text size -->
-    <dimen name="net_traffic_multi_text_size">9dp</dimen>
-
-    <dimen name="notification_large_icon_width">64dp</dimen>
-    <dimen name="notification_large_icon_height">64dp</dimen>
-    <dimen name="notification_subtext_size">12dp</dimen>
 </resources>

@@ -672,14 +672,6 @@ public class Intent implements Parcelable, Cloneable {
     public static final String ACTION_PICK = "android.intent.action.PICK";
 
     /**
-     * Global Action: Shows power menu dialog
-     * <p>Input: nothing
-     * <p>Output: nothing
-     * @hide
-     */
-    public static final String ACTION_POWERMENU = "android.intent.action.POWERMENU";
-
-    /**
      * Activity Action: Creates a shortcut.
      * <p>Input: Nothing.</p>
      * <p>Output: An Intent representing the shortcut. The intent must contain three
@@ -3618,6 +3610,11 @@ public class Intent implements Parcelable, Cloneable {
      * saw.   This can only be used in conjunction with {@link #FLAG_ACTIVITY_NEW_TASK}.
      */
     public static final int FLAG_ACTIVITY_TASK_ON_HOME = 0X00004000;
+    /**
+     * If set, this intent will always match start up as a floating window
+     * in mutil window scenarios.
+     */
+    public static final int FLAG_FLOATING_WINDOW = 0x00002000;
     /**
      * If set, when sending a broadcast only registered receivers will be
      * called -- no BroadcastReceiver components will be launched.

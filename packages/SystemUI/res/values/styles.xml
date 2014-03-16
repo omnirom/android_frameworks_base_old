@@ -34,6 +34,17 @@
         <item name="android:wallpaperIntraOpenExitAnimation">@anim/wallpaper_recents_launch_from_launcher_exit</item>
     </style>
 
+    <style name="RecentsAppsLabel">
+        <item name="android:fontFamily">sans-serif-light</item>
+        <item name="android:textColor">@color/status_bar_recents_app_label_color</item>
+    </style>
+
+    <style name="RecentsNoApps">
+        <item name="android:fontFamily">sans-serif-light</item>
+        <item name="android:textSize">17dp</item>
+        <item name="android:textColor">@color/status_bar_recents_app_label_color</item>
+    </style>
+
     <style name="TextAppearance.StatusBar.HeadsUp"
         parent="@*android:style/TextAppearance.StatusBar">
     </style>
@@ -59,11 +70,11 @@
         <item name="android:textColor">@color/status_bar_clock_color</item>
     </style>
 
-    <style name="TextAppearance.StatusBar.PercentBattery" parent="@*android:style/TextAppearance.StatusBar.Icon">
+    <style name="TextAppearance.StatusBar.Traffic" parent="@*android:style/TextAppearance.StatusBar.Icon">
         <!-- Note: must be dp to fit in status bar -->
-        <item name="android:textSize">16dp</item>
+        <item name="android:textSize">14dp</item>
         <item name="android:textStyle">normal</item>
-        <item name="android:textColor">@color/batterymeter_percent_color</item>
+        <item name="android:textColor">@color/status_bar_traffic_color</item>
     </style>
 
     <style name="TextAppearance.StatusBar.Expanded" parent="@*android:style/TextAppearance.StatusBar" />
@@ -84,7 +95,7 @@
 
     <style name="TextAppearance.StatusBar.Expanded.Network" parent="@style/TextAppearance.StatusBar.Expanded.Date">
         <item name="android:textColor">#999999</item>
-        </style>
+	</style>
 
     <style name="TextAppearance.StatusBar.Expanded.Network.EmergencyOnly">
     </style>
@@ -111,11 +122,7 @@
 
     <style name="TextAppearance.QuickSettings.Clock" parent="@style/TextAppearance.QuickSettings.TileView">
         <item name="android:textSize">20dp</item>
-        <item name="android:textColor">@android:color/holo_blue_light</item>
-    </style>
-
-    <style name="TextAppearance.QuickSettings.PercentBattery" parent="@style/TextAppearance.QuickSettings.TileView">
-        <item name="android:textSize">20dp</item>
+        <item name="android:textColor">@android:color/white</item>
     </style>
 
     <style name="TextAppearance.QuickSettings.Date" parent="@style/TextAppearance.QuickSettings.TileView">
@@ -132,6 +139,7 @@
     </style>
 
     <style name="TextAppearance.QuickSettings.TileView.User" parent="@style/TextAppearance.QuickSettings.TileView">
+        <item name="android:background">#CC000000</item>
         <item name="android:padding">4dp</item>
         <item name="android:singleLine">true</item>
         <item name="android:fadingEdge">horizontal</item>
@@ -173,5 +181,37 @@
         <!-- Note: must be dp to fit in status bar -->
         <item name="android:textSize">14dp</item>
     </style>
+
+    <style name="TextAppearance.StatusBar.Battery" parent="@*android:style/TextAppearance.StatusBar.Icon">
+        <!-- Note: must be dp to fit in status bar -->
+        <item name="android:textSize">12dp</item>
+        <item name="android:textStyle">normal</item>
+        <item name="android:textColor">@color/batterymeter_charge_color</item>
+    </style>
+
+    <style name="TextAppearance.StatusBar.NetworkStats"
+           parent="@*android:style/TextAppearance.StatusBar">
+        <item name="android:layout_width">wrap_content</item>
+        <item name="android:layout_height">wrap_content</item>
+        <item name="android:layout_weight">1</item>
+        <item name="android:textSize">@dimen/network_stats_text_size</item>
+        <item name="android:textColor">@android:color/primary_text_dark</item>
+    </style>
+
+    <style name="TextAppearance.AppSidebarInfo">
+        <item name="android:textSize">20sp</item>
+        <item name="android:textStyle">bold</item>
+        <item name="android:textColor">@color/app_sidebar_info_bubble_text_color</item>
+        <item name="android:shadowColor">@color/app_sidebar_info_bubble_text_shadow_color</item>
+        <item name="android:shadowDx">3</item>
+        <item name="android:shadowDy">3</item>
+        <item name="android:shadowRadius">1.25</item>
+    </style>
+
+    <style name="RecentBaseStyle"  parent="@*android:style/Theme.Holo.Light">
+        <item name="android:popupMenuStyle">@style/RecentPopupMenu</item>
+    </style>
+
+    <style name="RecentPopupMenu" parent="@*android:style/Widget.Holo.Light.ListPopupWindow" />
 
 </resources>

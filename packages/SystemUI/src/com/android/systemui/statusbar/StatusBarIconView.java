@@ -137,7 +137,7 @@ public class StatusBarIconView extends AnimatedImageView {
         }
 
         if (!numberEquals || force) {
-            if (icon.number > 1 && mShowNotificationCount) {
+            if (icon.number > 0 && mShowNotificationCount) {
                 if (mNumberBackground == null) {
                     mNumberBackground = getContext().getResources().getDrawable(
                             R.drawable.ic_notification_overlay);
@@ -228,6 +228,10 @@ public class StatusBarIconView extends AnimatedImageView {
         if (mNotification != null) {
             event.setParcelableData(mNotification);
         }
+    }
+
+    public String getStatusBarSlot() {
+        return mSlot;
     }
 
     @Override
