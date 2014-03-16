@@ -4579,8 +4579,8 @@ public class PhoneWindowManager implements WindowManagerPolicy {
                         }
                     }
                 }
-                if (keyCode != KeyEvent.KEYCODE_VOLUME_MUTE && (result & ACTION_PASS_TO_USER) == 0) {
-                    if (isMusicActive() && mVolumeMusicControl && down) {
+                if (isMusicActive() && (result & ACTION_PASS_TO_USER) == 0) {
+                    if (mVolumeMusicControl && down && (keyCode != KeyEvent.KEYCODE_VOLUME_MUTE)) {
                         mIsVolumeKeyLongPress = false;
                         Message msg = null;
 
@@ -4603,19 +4603,23 @@ public class PhoneWindowManager implements WindowManagerPolicy {
                                 break;
                             }
                         }
-                        if (!isScreenOn && !mVolumeWakeScreen && down) {
-                            handleVolumeKey(AudioManager.STREAM_MUSIC, keyCode);
+                        if (!isScreenOn && !mVolumeWakeScreen) {
+                            if (mVolumeMusicControl) {
+                                // we will only enter this on !down
+                                handleVolumeKey(AudioManager.STREAM_MUSIC, keyCode);
+                            } else if(!down){
+                                // else we would handle it twice
+                                handleVolumeKey(AudioManager.STREAM_MUSIC, keyCode);
+                            }
                         }
                     }
-
-                    if (isScreenOn || !mVolumeWakeScreen) {
-                        break;
-                    } else {
-                        result |= ACTION_WAKE_UP;
-                        break;
-                    }
                 }
-                break;
+                if (isScreenOn || !mVolumeWakeScreen) {
+                    break;
+                } else {
+                    result |= ACTION_WAKE_UP;
+                    break;
+                }
             }
 
             case KeyEvent.KEYCODE_ENDCALL: {
