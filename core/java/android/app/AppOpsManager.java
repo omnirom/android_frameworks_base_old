@@ -473,7 +473,7 @@ public class AppOpsManager {
      * Privacy Guard Ops and states need to
      * match general Ops map. Unused Ops are flagged as OP_NONE
      */
-    private static final int[] sPrivacyGuardOp = new int[] {
+ private static final int[] sPrivacyGuardOp = new int[] {
             OP_COARSE_LOCATION,
             OP_COARSE_LOCATION,
             OP_COARSE_LOCATION,
@@ -514,15 +514,16 @@ public class AppOpsManager {
             OP_NONE,
             OP_NONE,
             OP_NONE,
-            OP_NONE,
-            OP_COARSE_LOCATION,
-            OP_COARSE_LOCATION,
+            OP_WAKE_LOCK,
             OP_COARSE_LOCATION,
             OP_COARSE_LOCATION,
             OP_WIFI_CHANGE,
             OP_BLUETOOTH_CHANGE,
             OP_DATA_CONNECT_CHANGE,
             OP_ALARM_WAKEUP,
+            OP_SEND_MMS,
+            OP_READ_MMS,
+            OP_WRITE_MMS,
             OP_BOOT_COMPLETED,
     };
 
