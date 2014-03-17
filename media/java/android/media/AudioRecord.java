@@ -19,6 +19,10 @@ package android.media;
 import java.lang.ref.WeakReference;
 import java.nio.ByteBuffer;
 
+import android.app.ActivityThread;
+import android.app.AppOpsManager;
+import android.content.Context;
+import android.os.Binder;
 import android.os.Handler;
 import android.os.Looper;
 import android.os.Message;
@@ -493,6 +497,21 @@ public class AudioRecord
         return mSessionId;
     }
 
+    //--------------------------------------------------------
+    // Check user permission
+    //--------------------------------------------------------
+    private boolean checkPermission() {
+        AppOpsManager appOps = (AppOpsManager) ActivityThread.currentApplication().
+            getSystemService(Context.APP_OPS_SERVICE);
+        int callingUid = Binder.getCallingUid();
+        String callingPackage= ActivityThread.currentPackageName();
+        if (appOps.noteOp(AppOpsManager.OP_RECORD_AUDIO, callingUid, callingPackage) ==
+            AppOpsManager.MODE_ALLOWED)
+            return true;
+        else
+            return false;
+    }
+
     //---------------------------------------------------------
     // Transport control methods
     //--------------------
@@ -506,6 +525,10 @@ public class AudioRecord
             throw new IllegalStateException("startRecording() called on an "
                     + "uninitialized AudioRecord.");
         }
+
+        // check user permission
+        if (!checkPermission())
+            return;
 
         // start recording
         synchronized(mRecordingStateLock) {
@@ -528,6 +551,10 @@ public class AudioRecord
             throw new IllegalStateException("startRecording() called on an "
                     + "uninitialized AudioRecord.");
         }
+
+        // check user permission
+        if (!checkPermission())
+            return;
 
         // start recording
         synchronized(mRecordingStateLock) {
