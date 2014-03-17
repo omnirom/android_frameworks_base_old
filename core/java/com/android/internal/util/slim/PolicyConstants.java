@@ -28,6 +28,7 @@ public class PolicyConstants {
     public static final String ACTION_NAVBAR               = "**nav_bar**";
     public static final String ACTION_PROFILE               = "**profile**";
     public static final String ACTION_SCREEN_RECORD               = "**screen_record**";
+    public static final String ACTION_ONTHEGO               = "**onthego**";
 
     public static final String ACTION_DELIMITER  = "|";
     public static final String ICON_EMPTY = "empty";
