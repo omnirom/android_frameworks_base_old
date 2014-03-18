@@ -1,4 +1,6 @@
 /*
+ * Copyright (C) 2013 The Linux Foundation. All rights reserved
+ * Not a Contribution.
  * Copyright (c) 2008-2009, Motorola, Inc.
  *
  * All rights reserved.
@@ -75,6 +77,7 @@ public final class ObexHelper {
      * TODO: Should be removed as soon as Microsoft updates their driver.
      */
     public static final int MAX_CLIENT_PACKET_SIZE = 0xFC00;
+    public static final int A2DP_SCO_OBEX_MAX_CLIENT_PACKET_SIZE = 0x2000;
 
     public static final int OBEX_OPCODE_CONNECT = 0x80;
 
@@ -387,6 +390,11 @@ public final class ObexHelper {
                 if (nullOut) {
                     headImpl.setHeader(HeaderSet.NAME, null);
                 }
+            } else if (headImpl.getEmptyNameHeader()) {
+                out.write((byte) HeaderSet.NAME);
+                lengthArray[0] = (byte) 0x00;
+                lengthArray[1] = (byte) 0x03;
+                out.write(lengthArray);
             }
 
             // Type Header

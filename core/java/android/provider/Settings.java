@@ -4011,6 +4011,12 @@ public final class Settings {
         public static final String QUIET_HOURS_STILL = "quiet_hours_still";
 
         /**
+         * Whether to remove the system sounds during quiet hours.
+         * @hide
+         */
+        public static final String QUIET_HOURS_SYSTEM = "quiet_hours_system";
+
+        /**
          *
          * @hide
          */
@@ -6337,6 +6343,12 @@ public final class Settings {
         @Deprecated
         public static final String WIFI_MOBILE_DATA_TRANSITION_WAKELOCK_TIMEOUT_MS =
                 Global.WIFI_MOBILE_DATA_TRANSITION_WAKELOCK_TIMEOUT_MS;
+
+        /**
+         * Whether the Wimax should be on.  Only the WiMAX service should touch this.
+         * @hide
+         */
+        public static final String WIMAX_ON = "wimax_on";
 
         /**
          * Whether background data usage is allowed.

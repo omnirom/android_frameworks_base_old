@@ -1,4 +1,7 @@
 /*
+ * Copyright (c) 2013, The Linux Foundation. All rights reserved.
+ * Not a Contribution.
+ *
  * Copyright (C) 2007 The Android Open Source Project
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
@@ -44,6 +47,8 @@ import android.view.VolumePanel;
 import android.view.WindowManager;
 
 import java.util.HashMap;
+
+import com.android.internal.util.cm.QuietHoursUtils;
 
 /**
  * AudioManager provides access to volume and ringer mode control.
@@ -204,8 +209,28 @@ public class AudioManager {
     public static final String EXTRA_MASTER_VOLUME_MUTED =
         "android.media.EXTRA_MASTER_VOLUME_MUTED";
 
-    /** @hide No audio stream */
-    public static final int STREAM_DEFAULT = AudioSystem.STREAM_DEFAULT;
+
+    /**
+     * @hide Broadcast intent when RemoteControlClient list is updated.
+     */
+    @SdkConstant(SdkConstantType.BROADCAST_INTENT_ACTION)
+    public static final String RCC_CHANGED_ACTION = "org.codeaurora.bluetooth.RCC_CHANGED_ACTION";
+
+    /**
+     * @hide Used for sharing the calling package name
+     */
+    public static final String EXTRA_CALLING_PACKAGE_NAME = "org.codeaurora.bluetooth.EXTRA_CALLING_PACKAGE_NAME";
+
+    /**
+     * @hide Used for sharing the focus changed value
+     */
+    public static final String EXTRA_FOCUS_CHANGED_VALUE = "org.codeaurora.bluetooth.EXTRA_FOCUS_CHANGED_VALUE";
+
+    /**
+     * @hide Used for sharing the availability changed value
+     */
+    public static final String EXTRA_AVAILABLITY_CHANGED_VALUE = "org.codeaurora.bluetooth.EXTRA_AVAILABLITY_CHANGED_VALUE";
+
     /** The audio stream for phone calls */
     public static final int STREAM_VOICE_CALL = AudioSystem.STREAM_VOICE_CALL;
     /** The audio stream for system sounds */
@@ -226,6 +251,8 @@ public class AudioManager {
     public static final int STREAM_DTMF = AudioSystem.STREAM_DTMF;
     /** @hide The audio stream for text to speech (TTS) */
     public static final int STREAM_TTS = AudioSystem.STREAM_TTS;
+    /** @hide The audio stream for incall music delivery */
+    public static final int STREAM_INCALL_MUSIC = AudioSystem.STREAM_INCALL_MUSIC;
     /** Number of audio streams */
     /**
      * @deprecated Use AudioSystem.getNumStreamTypes() instead
@@ -244,7 +271,8 @@ public class AudioManager {
         7,  // STREAM_BLUETOOTH_SCO
         7,  // STREAM_SYSTEM_ENFORCED
         11, // STREAM_DTMF
-        11  // STREAM_TTS
+        11, // STREAM_TTS
+        4   // STREAM_INCALL_MUSIC
     };
 
     /**
@@ -539,9 +567,18 @@ public class AudioManager {
                 int flags = FLAG_SHOW_UI | FLAG_VIBRATE;
 
                 if (mUseMasterVolume) {
-                    adjustMasterVolume(direction, flags);
+                    adjustMasterVolume(
+                            keyCode == KeyEvent.KEYCODE_VOLUME_UP
+                                    ? ADJUST_RAISE
+                                    : ADJUST_LOWER,
+                            flags);
                 } else {
-                    adjustSuggestedStreamVolume(direction, stream, flags);
+                    adjustSuggestedStreamVolume(
+                            keyCode == KeyEvent.KEYCODE_VOLUME_UP
+                                    ? ADJUST_RAISE
+                                    : ADJUST_LOWER,
+                            stream,
+                            flags);
                 }
                 break;
             case KeyEvent.KEYCODE_VOLUME_MUTE:
@@ -1772,6 +1809,10 @@ public class AudioManager {
      */
     public void  playSoundEffect(int effectType) {
         if (effectType < 0 || effectType >= NUM_SOUND_EFFECTS) {
+            return;
+        }
+
+        if (QuietHoursUtils.inQuietHours(mContext, Settings.System.QUIET_HOURS_SYSTEM)) {
             return;
         }
 
