@@ -33,6 +33,23 @@
       "revId": "fff77bb6118ba6f31f70a0c4755ec9aec24818b1",
       "serverId": "56841c99-7c94-43d4-bf0b-cb4707e66d55",
       "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "8b77b57d_19cf79b5",
+        "filename": "packages/SystemUI/src/com/android/systemui/statusbar/policy/activedisplay/ProximitySensorManager.java",
+        "patchSetId": 9
+      },
+      "lineNbr": 30,
+      "author": {
+        "id": 1000313
+      },
+      "writtenOn": "2014-03-18T14:50:47Z",
+      "side": 0,
+      "message": "Oooppsss, my bad, didnt notice this, im upload my local repo, lol",
+      "revId": "fff77bb6118ba6f31f70a0c4755ec9aec24818b1",
+      "serverId": "56841c99-7c94-43d4-bf0b-cb4707e66d55",
+      "unresolved": false
     }
   ]
 }
