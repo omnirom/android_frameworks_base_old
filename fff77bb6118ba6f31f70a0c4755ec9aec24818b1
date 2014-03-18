@@ -1,0 +1,38 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "8b77b57d_39fb55df",
+        "filename": "packages/SystemUI/src/com/android/systemui/statusbar/policy/activedisplay/LightSensorManager.java",
+        "patchSetId": 9
+      },
+      "lineNbr": 27,
+      "author": {
+        "id": 1000026
+      },
+      "writtenOn": "2014-03-18T14:23:48Z",
+      "side": 0,
+      "message": "why this?",
+      "revId": "fff77bb6118ba6f31f70a0c4755ec9aec24818b1",
+      "serverId": "56841c99-7c94-43d4-bf0b-cb4707e66d55",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "8b77b57d_19f699f7",
+        "filename": "packages/SystemUI/src/com/android/systemui/statusbar/policy/activedisplay/ProximitySensorManager.java",
+        "patchSetId": 9
+      },
+      "lineNbr": 29,
+      "author": {
+        "id": 1000026
+      },
+      "writtenOn": "2014-03-18T14:23:48Z",
+      "side": 0,
+      "message": "why have you removed all the comments?",
+      "revId": "fff77bb6118ba6f31f70a0c4755ec9aec24818b1",
+      "serverId": "56841c99-7c94-43d4-bf0b-cb4707e66d55",
+      "unresolved": false
+    }
+  ]
+}
