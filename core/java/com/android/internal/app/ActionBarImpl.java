@@ -26,6 +26,7 @@ import com.android.internal.widget.ActionBarContainer;
 import com.android.internal.widget.ActionBarContextView;
 import com.android.internal.widget.ActionBarOverlayLayout;
 import com.android.internal.widget.ActionBarView;
+import com.android.internal.widget.FloatingWindowView;
 import com.android.internal.widget.ScrollingTabContainerView;
 
 import android.animation.Animator;
@@ -41,7 +42,12 @@ import android.content.Context;
 import android.content.res.Configuration;
 import android.content.res.Resources;
 import android.content.res.TypedArray;
+import android.graphics.Bitmap;
+import android.graphics.Bitmap.Config;
+import android.graphics.Canvas;
 import android.graphics.Color;
+import android.graphics.drawable.BitmapDrawable;
+import android.graphics.drawable.ColorDrawable;
 import android.graphics.drawable.Drawable;
 import android.os.Handler;
 import android.util.Log;
@@ -62,8 +68,6 @@ import android.widget.TextView;
 
 import java.lang.ref.WeakReference;
 import java.util.ArrayList;
-
-import com.android.internal.util.omni.ColorUtils;
 
 /**
  * ActionBarImpl is the ActionBar implementation used
@@ -417,6 +421,18 @@ public class ActionBarImpl extends ActionBar {
     /**
      * @hide
      */
+    public void setFloatingWindowBar(FloatingWindowView floatingWindowView) {
+        mFloatingWindowView = floatingWindowView;
+    }
+
+    private void changeFloatingWindowColor(int bg_color, int ic_color) {
+        mFloatingWindowView.setFloatingBackgroundColor(bg_color);
+        mFloatingWindowView.setFloatingColorFilter(ic_color);
+    }
+
+    /**
+     * @hide
+     */
     public void changeColorFromActionBar() {
         Drawable drawable = null;
         int textColor = -3;
@@ -442,6 +458,35 @@ public class ActionBarImpl extends ActionBar {
                 }
             }
         }
+
+        if (mFloatingWindowView != null) {
+            int textColor = -2;
+            int iconTint = Color.WHITE;
+            int color = Color.TRANSPARENT;
+            if (mActionView != null) {
+                TextView titleView = mActionView.getTitleViewActionBar();
+                if (titleView != null) {
+                    if (titleView.getVisibility() == View.VISIBLE) {
+                        textColor = titleView.getCurrentTextColor();
+                    }
+                }
+            }
+            if (textColor != -2) {
+                iconTint = textColor;
+            }
+            if (mContainerView != null) {
+                Drawable drawable = mContainerView.getPrimaryBackground();
+                if (drawable == null) {
+                    drawable = mContainerView.getStackedBackground();
+                    if (drawable == null) {
+                        drawable = mContainerView.getBackground();
+                    }
+                }
+                color = getMainColorFromActionBarDrawable(drawable);
+            }
+            changeFloatingWindowColor(color, iconTint);
+        }
+
         if (mActionView != null) {
             TextView titleView = mActionView.getTitleViewActionBar();
             if (titleView != null) {
@@ -459,6 +504,23 @@ public class ActionBarImpl extends ActionBar {
                 }
             }
         }
+        int color = ColorUtils.getMainColorFromDrawable(drawable);
+
+        if (textColor != -3) {
+            iconTint = textColor;
+        }
+
+        if (ColorUtils.isBrightColor(color)) {
+            iconTint = Color.BLACK;
+        }
+
+        if (color == -3) {
+            iconTint = -3;
+        }
+
+        mActivity.sendActionColorBroadcast(color, iconTint);
+
+    }
 
         int color = ColorUtils.getMainColorFromDrawable(drawable);
 
@@ -526,6 +588,48 @@ public class ActionBarImpl extends ActionBar {
         }
 
         mActivity.sendActionColorBroadcast(color, iconTint);
+    }
+
+    private int getMainColorFromActionBarDrawable(Drawable drawable) {
+        if (drawable == null) {
+            return Color.TRANSPARENT;
+        }
+
+        Drawable copyDrawable = drawable.getConstantState().newDrawable();
+        if (copyDrawable instanceof ColorDrawable) {
+            return ((ColorDrawable) drawable).getColor();
+        }
+        Bitmap bitmap = drawableToBitmap(copyDrawable);
+        int pixel = bitmap.getPixel(0, 5);
+        int red = Color.red(pixel);
+        int blue = Color.blue(pixel);
+        int green = Color.green(pixel);
+        int alpha = Color.alpha(pixel);
+        return Color.argb(alpha, red, green, blue);
+    }
+
+    private Bitmap drawableToBitmap(Drawable drawable) {
+        if (drawable == null) {
+            return null;
+        }
+
+        if (drawable instanceof BitmapDrawable) {
+            return ((BitmapDrawable) drawable).getBitmap();
+        }
+
+        Bitmap bitmap;
+        int width = drawable.getIntrinsicWidth();
+        int height = drawable.getIntrinsicHeight();
+        if (width > 0 && height > 0) {
+            bitmap = Bitmap.createBitmap(width, height, Config.ARGB_8888);
+            Canvas canvas = new Canvas(bitmap);
+            drawable.setBounds(0, 0, canvas.getWidth(), canvas.getHeight());
+            drawable.draw(canvas);
+        } else {
+            bitmap = null;
+        }
+
+        return bitmap;
     }
 
     public void setBackgroundDrawable(Drawable d) {
@@ -750,6 +854,10 @@ public class ActionBarImpl extends ActionBar {
             updateVisibility(false);
         }
         mActivity.sendActionColorBroadcast(-3, -3);
+
+        if (mFloatingWindowView != null) {
+            changeFloatingWindowColor(Color.TRANSPARENT, Color.WHITE);
+        }
     }
 
     private void hideForActionMode() {
