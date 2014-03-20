@@ -474,6 +474,12 @@ public class ActionBarImpl extends ActionBar {
         }
 
         mActivity.sendActionColorBroadcast(color, iconTint);
+
+        if (color != -3) {
+            mActivity.changeFloatingWindowColor(color, iconTint);
+        } else {
+            mActivity.changeFloatingWindowColor(Color.TRANSPARENT, iconTint);
+        }
     }
 
     public void setBackgroundDrawable(Drawable d) {
@@ -697,6 +703,7 @@ public class ActionBarImpl extends ActionBar {
             updateVisibility(false);
         }
         changeColorFromActionBar(null);
+        mActivity.changeFloatingWindowColor(Color.TRANSPARENT, Color.WHITE);
     }
 
     private void hideForActionMode() {
