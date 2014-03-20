@@ -39,6 +39,7 @@ import com.android.internal.widget.ActionBarContextView;
 import com.android.internal.widget.ActionBarOverlayLayout;
 import com.android.internal.widget.ActionBarView;
 
+import android.app.Activity;
 import android.app.KeyguardManager;
 import android.content.ComponentName;
 import android.content.ContentResolver;
@@ -2909,7 +2910,7 @@ public class PhoneWindow extends Window implements MenuBuilder.Callback {
         void updateWindowResizeState() {
             Drawable bg = getBackground();
             hackTurnOffWindowResizeAnim(bg == null || bg.getOpacity()
-                    != PixelFormat.OPAQUE);
+                    != PixelFormat.OPAQUE || mIsFloatingWindow);
         }
         
         @Override
