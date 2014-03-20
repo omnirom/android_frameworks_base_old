@@ -938,6 +938,7 @@ public class PhoneStatusBar extends BaseStatusBar implements DemoMode,
             /* AmraLab: GestureAnywhere - BEGIN */
             addGestureAnywhereView();
             /* AmraLab: GestureAnywhere - END */
+            addAppCircleSidebar();
         }
 
         // Setup pie container if enabled
