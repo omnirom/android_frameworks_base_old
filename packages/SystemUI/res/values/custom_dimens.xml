@@ -64,6 +64,8 @@
     <!-- Network traffic monitor multi-line text size -->
     <dimen name="net_traffic_multi_text_size">9dp</dimen>
 
+    <dimen name="app_sidebar_trigger_width">10dip</dimen>
+
     <dimen name="notification_large_icon_width">64dp</dimen>
     <dimen name="notification_large_icon_height">64dp</dimen>
     <dimen name="notification_subtext_size">12dp</dimen>
