@@ -680,6 +680,20 @@ public class Intent implements Parcelable, Cloneable {
     public static final String ACTION_POWERMENU = "android.intent.action.POWERMENU";
 
     /**
+     * Registered and foreground services only
+     * @hide
+     */
+    public static final String ACTION_ACTIVITY_LAUNCH_DETECTOR =
+            "android.intent.action.ACTIVITY_LAUNCH_DETECTOR";
+
+    /**
+     * Registered and foreground services only
+     * @hide
+     */
+    public static final String ACTION_ACTIVITY_END_DETECTOR =
+            "android.intent.action.ACTIVITY_END_DETECTOR";
+
+    /**
      * Activity Action: Creates a shortcut.
      * <p>Input: Nothing.</p>
      * <p>Output: An Intent representing the shortcut. The intent must contain three
