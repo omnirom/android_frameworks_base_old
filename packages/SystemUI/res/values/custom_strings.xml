@@ -128,6 +128,11 @@
     <string name="quick_settings_tinted_mode_screen_label">Screen</string>
     <string name="quick_settings_tinted_mode_actionbar_label">Action bar</string>
 
+    <!-- App circle sidebar -->
+    <string name="app_float_maximize_item_title">Maximize</string>
+    <string name="app_float_item_title">Float view</string>
+    <string name="app_stop_item_title">Kill app</string>
+
     <!-- Dialog title for navigation bar button selection -->
     <string name="navbar_dialog_title">Choose action to assign</string>
     <string name="navbar_home_button">Home button</string>

@@ -765,6 +765,7 @@ public class PhoneStatusBar extends BaseStatusBar implements DemoMode {
         if (mRecreating) {
         } else {
             addActiveDisplayView();
+            addAppCircleSidebar();
         }
 
         // figure out which pixel-format to use for the status bar.
