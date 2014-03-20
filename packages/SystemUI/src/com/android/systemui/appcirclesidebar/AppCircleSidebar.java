@@ -46,6 +46,7 @@ public class AppCircleSidebar extends FrameLayout implements PackageAdapter.OnCi
     private PackageAdapter mPackageAdapter;
     private Context mContext;
     private boolean mFirstTouch = false;
+    private boolean mFloatingWindow = false;
     private SettingsObserver mSettingsObserver;
 
     private PopupMenu mPopup;
@@ -358,6 +359,14 @@ public class AppCircleSidebar extends FrameLayout implements PackageAdapter.OnCi
         updateAutoHideTimer(500);
         PackageManager pm = mContext.getPackageManager();
         Intent intent = pm.getLaunchIntentForPackage(packageName);
+        if (mFloatingWindow) {
+            intent.addFlags(Intent.FLAG_FLOATING_WINDOW);
+            mFloatingWindow = false;
+        } else {
+            if ((intent.getFlags() & Intent.FLAG_FLOATING_WINDOW) == Intent.FLAG_FLOATING_WINDOW) {
+                intent.setFlags(intent.getFlags() & ~Intent.FLAG_FLOATING_WINDOW);
+            }
+        }
         mContext.startActivity(intent);
         showAppContainer(false);
     }
@@ -368,6 +377,7 @@ public class AppCircleSidebar extends FrameLayout implements PackageAdapter.OnCi
             final int position = (Integer) v.getTag(R.id.key_position);
             final ResolveInfo info = (ResolveInfo) mPackageAdapter.getItem(position);
             if (info != null) {
+                mFloatingWindow = true;
                 launchApplication(info.activityInfo.packageName);
             }
         }*/
@@ -410,7 +420,10 @@ public class AppCircleSidebar extends FrameLayout implements PackageAdapter.OnCi
                    popup.getMenu());
             popup.setOnMenuItemClickListener(new PopupMenu.OnMenuItemClickListener() {
                 public boolean onMenuItemClick(MenuItem item) {
-                    if (item.getItemId() == R.id.sidebar_inspect_item) {
+                    if (item.getItemId() == R.id.sidebar_float_item) {
+                        mFloatingWindow = true;
+                        launchApplication(info.activityInfo.packageName);
+                    } else if (item.getItemId() == R.id.sidebar_inspect_item) {
                         startApplicationDetailsActivity(info.activityInfo.packageName);
                     } else {
                         return false;
