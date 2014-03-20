@@ -149,8 +149,10 @@ public abstract class Window {
     private int mDefaultWindowFormat = PixelFormat.OPAQUE;
 
     private boolean mHasSoftInputMode = false;
-    
+
     private boolean mDestroyed;
+
+    public boolean mIsFloatingWindow = false;
 
     // The current window attributes.
     private final WindowManager.LayoutParams mWindowAttributes =
