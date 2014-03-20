@@ -2671,6 +2671,19 @@ public final class Settings {
         public static final String LOCKSCREEN_TARGETS = "lockscreen_targets";
 
         /**
+         * Whether to display app circle sidebar
+         * @hide
+         */
+        public static final String ENABLE_APP_CIRCLE_BAR = "enable_app_circle_bar";
+
+        /**
+         * A list of packages to exclude from being displayed in app circle bar.
+         * This should be a string of packages separated by |
+         * @hide
+         */
+        public static final String BLACKLIST_APP_CIRCLE_BAR = "blacklist_app_circle_bar";
+
+        /**
          * Whether camera should be shown on lockscreen
          * @hide
          */
