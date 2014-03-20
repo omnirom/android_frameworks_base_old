@@ -283,5 +283,10 @@ interface IWindowManager
      */
     void setTouchExplorationEnabled(boolean enabled);
 
+    /** FLOAT VIEW **/
+    Rect getAppFullscreenViewRect();
+    Rect getAppMinimumViewRect();
+    Rect getFloatViewRect();
+    void notifyFloatActivityTouched(IBinder token, boolean force);
     Bitmap getScreenshotFromApplications(IBinder appToken);
 }

@@ -500,6 +500,25 @@ public class IWindowManagerImpl implements IWindowManager {
     }
 
     @Override
+    public Rect getAppFullscreenViewRect() {
+        return new Rect(0,0,0,0);
+    }
+
+    @Override
+    public Rect getAppMinimumViewRect() {
+        return new Rect(0,0,0,0);
+    }
+
+    @Override
+    public Rect getFloatViewRect() {
+        return new Rect(0,0,0,0);
+    }
+
+    @Override
+    public void notifyFloatActivityTouched(IBinder token, boolean force) {
+    }
+
+    @Override
     public Bitmap getScreenshotFromApplications(IBinder appToken) {
         return null;
     }
