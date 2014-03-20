@@ -428,6 +428,7 @@ public class ActionBarImpl extends ActionBar {
     public void changeColorFromActionBar(Drawable drawable) {
         if (!mAppColorEnabled) {
             mActivity.sendActionColorBroadcast(-3, -3);
+            mActivity.changeFloatingWindowColor(Color.TRANSPARENT, Color.WHITE);
             return;
         }
 
@@ -483,6 +484,16 @@ public class ActionBarImpl extends ActionBar {
         }
 
         mActivity.sendActionColorBroadcast(color, iconTint);
+
+        if (color != -3) {
+            mActivity.changeFloatingWindowColor(color, iconTint);
+        } else {
+            if (iconTint != -3) {
+                mActivity.changeFloatingWindowColor(Color.TRANSPARENT, iconTint);
+            } else {
+                mActivity.changeFloatingWindowColor(Color.TRANSPARENT, Color.WHITE);
+            }
+        }
     }
 
     public void setBackgroundDrawable(Drawable d) {
