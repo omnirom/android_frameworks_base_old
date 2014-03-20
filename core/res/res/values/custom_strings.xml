@@ -56,6 +56,13 @@
     <!-- status message in phone options dialog for when mobile data is off -->
     <string name="global_actions_mobile_data_off_status">Mobile data is OFF</string>
 
+    <!-- Floating Window -->
+    <string name="floating_window_snap_top">Snap top</string>
+    <string name="floating_window_snap_bottom">Snap bottom</string>
+    <string name="floating_window_snap_left">Snap left</string>
+    <string name="floating_window_snap_right">Snap right</string>
+    <string name="floating_window_minimize">Minimize</string>
+
     <!-- Immersive mode confirmation: Pick confirmation window from bottom when status bar is visible -->
     <string name="immersive_mode_confirmation_bottom">Swipe up from the bottom to exit full screen.</string>
 </resources> 
