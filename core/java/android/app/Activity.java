@@ -39,6 +39,7 @@ import android.content.res.TypedArray;
 import android.database.Cursor;
 import android.graphics.Bitmap;
 import android.graphics.Canvas;
+import android.graphics.Rect;
 import android.graphics.drawable.Drawable;
 import android.media.AudioManager;
 import android.net.Uri;
@@ -59,18 +60,22 @@ import android.util.AttributeSet;
 import android.util.EventLog;
 import android.util.Log;
 import android.util.PrintWriterPrinter;
+import android.util.TypedValue;
 import android.util.Slog;
 import android.util.SparseArray;
 import android.view.ActionMode;
 import android.view.ContextMenu;
 import android.view.ContextMenu.ContextMenuInfo;
 import android.view.ContextThemeWrapper;
+import android.view.Gravity;
+import android.view.IWindowManager;
 import android.view.KeyEvent;
 import android.view.LayoutInflater;
 import android.view.Menu;
 import android.view.MenuInflater;
 import android.view.MenuItem;
 import android.view.MotionEvent;
+import android.view.ScaleGestureDetector;
 import android.view.View;
 import android.view.View.OnCreateContextMenuListener;
 import android.view.ViewGroup;
@@ -764,6 +769,16 @@ public class Activity extends ContextThemeWrapper
     private Thread mUiThread;
     final Handler mHandler = new Handler();
 
+    private Float screenX ;
+    private Float screenY ;
+    private Float viewX ;
+    private Float viewY ;
+    private Float leftFromScreen ;
+    private Float topFromScreen ;
+    private int mPreviousOrientation;
+    private boolean mIsActivityActive;
+    private ScaleGestureDetector mScaleGestureDetector;
+
     /** Return the intent that started this activity. */
     public Intent getIntent() {
         return mIntent;
@@ -902,6 +917,9 @@ public class Activity extends ContextThemeWrapper
         mFragments.dispatchCreate();
         getApplication().dispatchActivityCreated(this, savedInstanceState);
         mCalled = true;
+        mPreviousOrientation = getResources().getConfiguration().orientation;
+        sendAppLaunchBroadcast();
+        mScaleGestureDetector = new ScaleGestureDetector(getApplicationContext(), mScaleGestureListener);
     }
 
     /**
@@ -1421,8 +1439,8 @@ public class Activity extends ContextThemeWrapper
      */
     protected void onDestroy() {
         if (DEBUG_LIFECYCLE) Slog.v(TAG, "onDestroy " + this);
+        sendAppEndBroadcast();
         mCalled = true;
-
         // dismiss any dialogs we are managing.
         if (mManagedDialogs != null) {
             final int numDialogs = mManagedDialogs.size();
@@ -1503,6 +1521,19 @@ public class Activity extends ContextThemeWrapper
         if (mWindow != null) {
             // Pass the configuration changed event to the window
             mWindow.onConfigurationChanged(newConfig);
+            if (mWindow.mIsFloatingWindow) {
+                scaleFloatingWindow();
+                Configuration config = getResources().getConfiguration();
+                if (config.orientation != mPreviousOrientation) {
+                    WindowManager.LayoutParams params = mWindow.getAttributes();
+                    final int old_x = params.x;
+                    final int old_y = params.y;
+                    params.x = old_y;
+                    params.y = old_x;
+                    mWindow.setAttributes(params);
+                    mPreviousOrientation = config.orientation;
+                }
+            }
         }
 
         if (mActionBar != null) {
@@ -1511,7 +1542,7 @@ public class Activity extends ContextThemeWrapper
             mActionBar.onConfigurationChanged(newConfig);
         }
     }
-    
+
     /**
      * If this activity is being destroyed because it can not handle a
      * configuration parameter being changed (and thus its
@@ -1529,7 +1560,7 @@ public class Activity extends ContextThemeWrapper
     public int getChangingConfigurations() {
         return mConfigChangeFlags;
     }
-    
+
     /**
      * Retrieve the non-configuration instance data that was previously
      * returned by {@link #onRetainNonConfigurationInstance()}.  This will
@@ -1556,7 +1587,7 @@ public class Activity extends ContextThemeWrapper
         return mLastNonConfigurationInstances != null
                 ? mLastNonConfigurationInstances.activity : null;
     }
-    
+
     /**
      * Called by the system, as part of destroying an
      * activity due to a configuration change, when it is known that a new
@@ -1612,7 +1643,7 @@ public class Activity extends ContextThemeWrapper
     public Object onRetainNonConfigurationInstance() {
         return null;
     }
-    
+
     /**
      * Retrieve the non-configuration instance data that was previously
      * returned by {@link #onRetainNonConfigurationChildInstances()}.  This will
@@ -1634,7 +1665,7 @@ public class Activity extends ContextThemeWrapper
         return mLastNonConfigurationInstances != null
                 ? mLastNonConfigurationInstances.children : null;
     }
-    
+
     /**
      * This method is similar to {@link #onRetainNonConfigurationInstance()} except that
      * it should return either a mapping from  child activity id strings to arbitrary objects,
@@ -1645,7 +1676,7 @@ public class Activity extends ContextThemeWrapper
     HashMap<String,Object> onRetainNonConfigurationChildInstances() {
         return null;
     }
-    
+
     NonConfigurationInstances retainNonConfigurationInstances() {
         Object activity = onRetainNonConfigurationInstance();
         HashMap<String, Object> children = onRetainNonConfigurationChildInstances();
@@ -1711,7 +1742,7 @@ public class Activity extends ContextThemeWrapper
             }
         }
     }
-    
+
     /**
      * Called when a Fragment is being attached to this activity, immediately
      * after the call to its {@link Fragment#onAttach Fragment.onAttach()}
@@ -1719,7 +1750,7 @@ public class Activity extends ContextThemeWrapper
      */
     public void onAttachFragment(Fragment fragment) {
     }
-    
+
     /**
      * Wrapper around
      * {@link ContentResolver#query(android.net.Uri , String[], String, String[], String)}
@@ -1985,7 +2016,7 @@ public class Activity extends ContextThemeWrapper
     public void setFinishOnTouchOutside(boolean finish) {
         mWindow.setCloseOnTouchOutside(finish);
     }
-    
+
     /**
      * Use with {@link #setDefaultKeyMode} to turn off default handling of
      * keys.
@@ -2112,7 +2143,7 @@ public class Activity extends ContextThemeWrapper
             }
             return true;
         }
-        
+
         if (mDefaultKeyMode == DEFAULT_KEYS_DISABLE) {
             return false;
         } else if (mDefaultKeyMode == DEFAULT_KEYS_SHORTCUT) {
@@ -2205,7 +2236,7 @@ public class Activity extends ContextThemeWrapper
     public boolean onKeyMultiple(int keyCode, int repeatCount, KeyEvent event) {
         return false;
     }
-    
+
     /**
      * Called when the activity has detected the user's press of the back
      * key.  The default implementation simply finishes the current activity,
@@ -2246,10 +2277,9 @@ public class Activity extends ContextThemeWrapper
             finish();
             return true;
         }
-        
         return false;
     }
-    
+
     /**
      * Called when the trackball was moved and not handled by any of the
      * views inside of the activity.  So, for example, if the trackball moves
@@ -2318,7 +2348,7 @@ public class Activity extends ContextThemeWrapper
      */
     public void onUserInteraction() {
     }
-    
+
     public void onWindowAttributesChanged(WindowManager.LayoutParams params) {
         // Update window manager if: we have a view, that view is
         // attached to its parent (which will be a RootView), and
@@ -2363,7 +2393,7 @@ public class Activity extends ContextThemeWrapper
      */
     public void onWindowFocusChanged(boolean hasFocus) {
     }
-    
+
     /**
      * Called when the main window associated with the activity has been
      * attached to the window manager.
@@ -2373,7 +2403,7 @@ public class Activity extends ContextThemeWrapper
      */
     public void onAttachedToWindow() {
     }
-    
+
     /**
      * Called when the main window associated with the activity has been
      * detached from the window manager.
@@ -2383,7 +2413,7 @@ public class Activity extends ContextThemeWrapper
      */
     public void onDetachedFromWindow() {
     }
-    
+
     /**
      * Returns true if this activity's <em>main</em> window currently has window focus.
      * Note that this is not the same as the view itself having focus.
@@ -2402,7 +2432,7 @@ public class Activity extends ContextThemeWrapper
         }
         return false;
     }
-    
+
     /**
      * Called to process key events.  You can override this to intercept all 
      * key events before they are dispatched to the window.  Be sure to call 
@@ -2452,15 +2482,125 @@ public class Activity extends ContextThemeWrapper
      * @return boolean Return true if this event was consumed.
      */
     public boolean dispatchTouchEvent(MotionEvent ev) {
-        if (ev.getAction() == MotionEvent.ACTION_DOWN) {
-            onUserInteraction();
+        if (mWindow.mIsFloatingWindow) {
+            mScaleGestureDetector.onTouchEvent(ev);
+            switch (ev.getAction()) {
+                  case MotionEvent.ACTION_DOWN:
+                       viewX = ev.getX();
+                       viewY = ev.getY();
+                       onUserInteraction();
+                       updateFocusApp();
+                       if (!mIsActivityActive) {
+                           sendAppLaunchBroadcast();
+                       }
+                       break;
+                  case MotionEvent.ACTION_MOVE:
+                       ActionBar actionBar = getActionBar();
+                       int height = (actionBar != null) ? actionBar.getHeight()
+                                   : getAppDimensionPixel();
+                       if (viewY < height) {
+                           screenX = ev.getRawX();
+                           screenY = ev.getRawY();
+                           leftFromScreen = (screenX - viewX);
+                           topFromScreen = (screenY - viewY);
+                           initLayoutParams(leftFromScreen, topFromScreen);
+                       }
+                       break;
+             }
+        } else {
+             if (ev.getAction() == MotionEvent.ACTION_DOWN) {
+                 onUserInteraction();
+             }
         }
+
         if (getWindow().superDispatchTouchEvent(ev)) {
             return true;
         }
+
         return onTouchEvent(ev);
     }
-    
+
+    private void updateFocusApp() {
+        IWindowManager wm = (IWindowManager) WindowManagerGlobal.getWindowManagerService();
+        try {
+             wm.notifyFloatActivityTouched(mToken, false);
+        } catch (RemoteException e) {
+             Log.e(TAG, "Cannot notify activity touched", e);
+        }
+    }
+
+    private void initLayoutParams(float x , float y) {
+        mWindow.setCloseOnTouchOutside(false);
+        mWindow.setGravity(Gravity.LEFT | Gravity.TOP);
+        mWindow.addFlags(WindowManager.LayoutParams.FLAG_NOT_TOUCH_MODAL);
+        mWindow.addFlags(WindowManager.LayoutParams.FLAG_SPLIT_TOUCH);
+        WindowManager.LayoutParams param = mWindow.getAttributes();
+        param.x = (int) x;
+        param.y = (int) y;
+        param.privateFlags |= WindowManager.LayoutParams.PRIVATE_FLAG_NO_MOVE_ANIMATION;
+        mWindow.setAttributes(param);
+    }
+
+    private int getAppDimensionPixel() {
+        float scale = getResources().getDisplayMetrics().density;
+        int pixel = (int) (48 * scale + 0.5f);
+        return pixel;
+    }
+
+    private void sendAppLaunchBroadcast() {
+        mIsActivityActive = true;
+        Intent appIntent = new Intent(Intent.ACTION_ACTIVITY_LAUNCH_DETECTOR);
+        appIntent.putExtra("packagename", getPackageName());
+        appIntent.addFlags(
+                Intent.FLAG_RECEIVER_REGISTERED_ONLY | Intent.FLAG_RECEIVER_FOREGROUND);
+        sendBroadcast(appIntent);
+    }
+
+    private void sendAppEndBroadcast() {
+        mIsActivityActive = false;
+        Intent endIntent = new Intent(Intent.ACTION_ACTIVITY_END_DETECTOR);
+        endIntent.putExtra("packagename", getPackageName());
+        endIntent.addFlags(
+                Intent.FLAG_RECEIVER_REGISTERED_ONLY | Intent.FLAG_RECEIVER_FOREGROUND);
+        sendBroadcast(endIntent);
+    }
+
+    private final ScaleGestureDetector.OnScaleGestureListener mScaleGestureListener
+            = new ScaleGestureDetector.SimpleOnScaleGestureListener() {
+
+        private float lastSpanX;
+        private float lastSpanY;
+        private WindowManager.LayoutParams params;
+
+        @Override
+        public boolean onScaleBegin(ScaleGestureDetector scaleGestureDetector) {
+            lastSpanX = scaleGestureDetector.getCurrentSpanX();
+            lastSpanY = scaleGestureDetector.getCurrentSpanY();
+            params = mWindow.getAttributes();
+            params.privateFlags |= WindowManager.LayoutParams.PRIVATE_FLAG_NO_MOVE_ANIMATION;
+            mWindow.setAttributes(params);
+            return true;
+        }
+
+        @Override
+        public boolean onScale(ScaleGestureDetector scaleGestureDetector) {
+            float spanX = scaleGestureDetector.getCurrentSpanX();
+            float spanY = scaleGestureDetector.getCurrentSpanY();
+
+            float newWidth = lastSpanX / spanX * (float) params.width;
+            float newHeight = lastSpanY / spanY * (float) params.height;
+
+            Rect newMark = new Rect(0, 0, (int) newWidth, (int) newHeight);
+
+            mWindow.setLayout(newMark.right - newMark.left,
+                              newMark.bottom - newMark.top);
+
+            lastSpanX = spanX;
+            lastSpanY = spanY;
+            return true;
+        }
+    };
+
     /**
      * Called to process trackball events.  You can override this to
      * intercept all trackball events before they are dispatched to the
@@ -2612,7 +2752,7 @@ public class Activity extends ContextThemeWrapper
                     }
                 }
                 return false;
-                
+
             case Window.FEATURE_CONTEXT_MENU:
                 if(titleCondensed != null) {
                     EventLog.writeEvent(50000, 1, titleCondensed.toString());
@@ -2626,7 +2766,7 @@ public class Activity extends ContextThemeWrapper
                 return false;
         }
     }
-    
+
     /**
      * Default implementation of
      * {@link android.view.Window.Callback#onPanelClosed(int, Menu)} for
@@ -2642,7 +2782,7 @@ public class Activity extends ContextThemeWrapper
                 mFragments.dispatchOptionsMenuClosed(menu);
                 onOptionsMenuClosed(menu);
                 break;
-                
+
             case Window.FEATURE_CONTEXT_MENU:
                 onContextMenuClosed(menu);
                 break;
@@ -2662,7 +2802,7 @@ public class Activity extends ContextThemeWrapper
     public void invalidateOptionsMenu() {
         mWindow.invalidatePanelMenu(Window.FEATURE_OPTIONS_PANEL);
     }
-    
+
     /**
      * Initialize the contents of the Activity's standard options menu.  You
      * should place your menu items in to <var>menu</var>.
@@ -2864,7 +3004,7 @@ public class Activity extends ContextThemeWrapper
             mParent.onOptionsMenuClosed(menu);
         }
     }
-    
+
     /**
      * Programmatically opens the options menu. If the options menu is already
      * open, this method does nothing.
@@ -2872,7 +3012,7 @@ public class Activity extends ContextThemeWrapper
     public void openOptionsMenu() {
         mWindow.openPanel(Window.FEATURE_OPTIONS_PANEL, null);
     }
-    
+
     /**
      * Progammatically closes the options menu. If the options menu is already
      * closed, this method does nothing.
@@ -2910,7 +3050,7 @@ public class Activity extends ContextThemeWrapper
     public void registerForContextMenu(View view) {
         view.setOnCreateContextMenuListener(this);
     }
-    
+
     /**
      * Prevents a context menu to be shown for the given view. This method will remove the
      * {@link OnCreateContextMenuListener} on the view.
@@ -2921,7 +3061,7 @@ public class Activity extends ContextThemeWrapper
     public void unregisterForContextMenu(View view) {
         view.setOnCreateContextMenuListener(null);
     }
-    
+
     /**
      * Programmatically opens the context menu for a particular {@code view}.
      * The {@code view} should have been added via
@@ -2932,14 +3072,14 @@ public class Activity extends ContextThemeWrapper
     public void openContextMenu(View view) {
         view.showContextMenu();
     }
-    
+
     /**
      * Programmatically closes the most recently opened context menu, if showing.
      */
     public void closeContextMenu() {
         mWindow.closePanel(Window.FEATURE_CONTEXT_MENU);
     }
-    
+
     /**
      * This hook is called whenever an item in a context menu is selected. The
      * default implementation simply returns false to have the normal processing
@@ -3119,7 +3259,7 @@ public class Activity extends ContextThemeWrapper
             }
             mManagedDialogs.put(id, md);
         }
-        
+
         md.mArgs = args;
         onPrepareDialog(id, md.mDialog, args);
         md.mDialog.show();
@@ -3219,7 +3359,7 @@ public class Activity extends ContextThemeWrapper
         startSearch(null, false, null, false); 
         return true;
     }
-    
+
     /**
      * This hook is called to launch the search UI.
      * 
@@ -4225,6 +4365,10 @@ public class Activity extends ContextThemeWrapper
         }
     }
 
+    public void finishFloating() {
+        mMainThread.performFinishFloating();
+    }
+
     /**
      * Finish this activity as well as all activities immediately below it
      * in the current task that have the same affinity.  This is typically
@@ -5164,7 +5308,7 @@ public class Activity extends ContextThemeWrapper
     }
 
     // ------------------ Internal API ------------------
-    
+
     final void setParent(Activity parent) {
         mParent = parent;
     }
@@ -5176,7 +5320,7 @@ public class Activity extends ContextThemeWrapper
         attach(context, aThread, instr, token, 0, application, intent, info, title, parent, id,
             lastNonConfigurationInstances, config);
     }
-    
+
     final void attach(Context context, ActivityThread aThread,
             Instrumentation instr, IBinder token, int ident,
             Application application, Intent intent, ActivityInfo info,
@@ -5186,8 +5330,11 @@ public class Activity extends ContextThemeWrapper
         attachBaseContext(context);
 
         mFragments.attachActivity(this, mContainer, null);
-        
-        mWindow = PolicyManager.makeNewWindow(this);
+
+        if (makeNewWindow(context, intent, info)) {
+            parent = null;
+        }
+
         mWindow.setCallback(this);
         mWindow.getLayoutInflater().setPrivateFactory(this);
         if (info.softInputMode != WindowManager.LayoutParams.SOFT_INPUT_STATE_UNSPECIFIED) {
@@ -5197,7 +5344,7 @@ public class Activity extends ContextThemeWrapper
             mWindow.setUiOptions(info.uiOptions);
         }
         mUiThread = Thread.currentThread();
-        
+
         mMainThread = aThread;
         mInstrumentation = instr;
         mToken = token;
@@ -5220,6 +5367,61 @@ public class Activity extends ContextThemeWrapper
         }
         mWindowManager = mWindow.getWindowManager();
         mCurrentConfig = config;
+    }
+
+    private boolean makeNewWindow(Context context, Intent intent, ActivityInfo info) {
+        boolean floating = (intent.getFlags() & Intent.FLAG_FLOATING_WINDOW) == Intent.FLAG_FLOATING_WINDOW;
+        boolean history = (intent.getFlags() & Intent.FLAG_ACTIVITY_LAUNCHED_FROM_HISTORY) == Intent.FLAG_ACTIVITY_LAUNCHED_FROM_HISTORY;
+        if (intent != null && floating && !history) {
+
+            TypedArray styleArray = context.obtainStyledAttributes(info.theme, com.android.internal.R.styleable.Window);
+            TypedValue backgroundValue = styleArray.peekValue(com.android.internal.R.styleable.Window_windowBackground);
+
+            // Apps that have no title don't need no title bar
+            TypedValue outValue = new TypedValue();
+            boolean result = styleArray.getValue(com.android.internal.R.styleable.Window_windowNoTitle, outValue);
+
+            if (backgroundValue != null && backgroundValue.toString().contains("light")) {
+                context.getTheme().applyStyle(com.android.internal.R.style.Theme_DeviceDefault_FloatingWindowLight, true);
+            } else {
+                context.getTheme().applyStyle(com.android.internal.R.style.Theme_DeviceDefault_FloatingWindow, true);
+            }
+
+            // Create our new window
+            mWindow = PolicyManager.makeNewWindow(this);
+            mWindow.mIsFloatingWindow = true;
+            mWindow.setCloseOnTouchOutsideIfNotSet(true);
+            mWindow.setGravity(Gravity.CENTER);
+
+            if (android.os.Process.myUid() == android.os.Process.SYSTEM_UID) {
+                mWindow.setFlags(WindowManager.LayoutParams.FLAG_DIM_BEHIND,
+                        WindowManager.LayoutParams.FLAG_DIM_BEHIND);
+                WindowManager.LayoutParams params = mWindow.getAttributes();
+                params.alpha = 1f;
+                params.dimAmount = 0.25f;
+                mWindow.setAttributes(params);
+            }
+
+            // Scale it
+            scaleFloatingWindow();
+
+            return true;
+        } else {
+            mWindow = PolicyManager.makeNewWindow(this);
+            return false;
+        }
+    }
+
+    private void scaleFloatingWindow() {
+        final IWindowManager wm = (IWindowManager) WindowManagerGlobal.getWindowManagerService();
+
+        try {
+            Rect windowBounds = wm.getFloatViewRect();
+            mWindow.setLayout(windowBounds.right - windowBounds.left,
+                    windowBounds.bottom - windowBounds.top);
+        } catch (RemoteException e) {
+            Log.e(TAG, "Could not perform float view layout", e);
+        }
     }
 
     /** @hide */
@@ -5390,10 +5592,18 @@ public class Activity extends ContextThemeWrapper
                     }
                 }
             }
-    
+
             mStopped = true;
         }
         mResumed = false;
+
+        // Floatingwindows activities should be kept volatile to prevent new activities taking
+        // up front in a minimized space. Every stop call, for instance when pressing home,
+        // will terminate the activity. If the activity is already finishing we might just
+        // as well let it go.
+        if (!mChangingConfigurations && mWindow != null && mWindow.mIsFloatingWindow && !isFinishing()) {
+            finish();
+        }
     }
 
     final void performDestroy() {

@@ -282,4 +282,8 @@ interface IWindowManager
      * @param enabled Whether touch exploration is enabled.
      */
     void setTouchExplorationEnabled(boolean enabled);
+
+    /** FLOAT VIEW **/
+    Rect getFloatViewRect();
+    void notifyFloatActivityTouched(IBinder token, boolean force);
 }
