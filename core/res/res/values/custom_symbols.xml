@@ -68,4 +68,31 @@
     <!-- On-The-Go -->
     <java-symbol type="string" name="global_action_onthego" />
     <java-symbol type="drawable" name="ic_lock_onthego" />
+
+  <!-- We don't want to publish private symbols in android.R as part of the
+       SDK.  Instead, put them here. -->
+  <private-symbols package="com.android.internal" />
+
+  <!-- Private symbols that we need to reference from framework code.  See
+       frameworks/base/core/res/MakeJavaSymbols.sed for how to easily generate
+       this.
+  -->
+  <!-- Floating Window -->
+  <java-symbol type="drawable" name="ic_floating_window_close" />
+  <java-symbol type="drawable" name="ic_floating_window_max" />
+  <java-symbol type="drawable" name="ic_floating_window_min" />
+  <java-symbol type="drawable" name="ic_floating_window_more" />
+  <java-symbol type="id" name="floating_window_background" />
+  <java-symbol type="id" name="floating_window_titlebar" />
+  <java-symbol type="id" name="floating_window_close" />
+  <java-symbol type="id" name="floating_window_max" />
+  <java-symbol type="id" name="floating_window_min" />
+  <java-symbol type="id" name="floating_window_more" />
+  <java-symbol type="id" name="floating_window_line" />
+  <java-symbol type="layout" name="floating_window_layout" />
+  <java-symbol type="string" name="floating_window_snap_top"/>
+  <java-symbol type="string" name="floating_window_snap_bottom"/>
+  <java-symbol type="string" name="floating_window_snap_left"/>
+  <java-symbol type="string" name="floating_window_snap_right"/>
+  <java-symbol type="string" name="floating_window_minimize"/>
 </resources>

@@ -1124,6 +1124,7 @@ final class ActivityStack {
                             if (!r.visible) {
                                 if (DEBUG_VISBILITY) Slog.v(
                                         TAG, "Starting and making visible: " + r);
+                                r.visible = true;
                                 mWindowManager.setAppVisibility(r.appToken, true);
                             }
                             if (r != starting) {
@@ -1179,7 +1180,7 @@ final class ActivityStack {
 		            }
 		    }
 
-                    if (r.fullscreen && !isSplitView) {
+                    if (r.fullscreen && !isSplitView && !r.floatingWindow) {
                         // At this point, nothing else needs to be shown
                         if (DEBUG_VISBILITY) Slog.v(TAG, "Fullscreen: at " + r);
                         behindFullscreen = true;
@@ -1328,6 +1329,7 @@ final class ActivityStack {
 
         final TaskRecord nextTask = next.task;
         final TaskRecord prevTask = prev != null ? prev.task : null;
+        boolean isFloatingWindow = prev != null ? prev.floatingWindow : false;
         if (prevTask != null && prevTask.mOnTopOfHome && prev.finishing && prev.frontOfTask) {
             if (DEBUG_STACK)  mStackSupervisor.validateTopActivitiesLocked();
             if (prevTask == nextTask) {
@@ -1342,7 +1344,7 @@ final class ActivityStack {
                         break;
                     }
                 }
-            } else if (prevTask != topTask()) {
+            } else if (prevTask != topTask() && !isFloatingWindow) {
                 // This task is going away but it was supposed to return to the home task.
                 // Now the task above it has to return to the home task instead.
                 final int taskNdx = mTaskHistory.indexOf(prevTask) + 1;
@@ -2707,6 +2709,9 @@ final class ActivityStack {
             boolean setState) {
         if (mResumedActivity == r) {
             mResumedActivity = null;
+        }
+        if (mPausingActivity == r) {
+            mPausingActivity = null;
         }
         if (mService.mFocusedActivity == r) {
             mService.mFocusedActivity = null;

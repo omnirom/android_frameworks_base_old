@@ -326,4 +326,10 @@ interface IWindowManager
     void setSplitViewRect(int l, int t, int r, int b);
 
     /** SPLIT VIEW END **/
+
+    /** FLOAT VIEW **/
+    Rect getAppFullscreenViewRect();
+    Rect getAppMinimumViewRect();
+    Rect getFloatViewRect();
+    void notifyFloatActivityTouched(IBinder token, boolean force);
 }
