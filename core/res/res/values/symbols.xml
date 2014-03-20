@@ -1800,6 +1800,8 @@
   <java-symbol type="integer" name="config_backKillTimeout" />
   <java-symbol type="string" name="app_killed_message" />
   <java-symbol type="bool" name="config_hasRemovableLid" />
+  <java-symbol type="string" name="config_deviceKeyHandlerLib" />
+  <java-symbol type="string" name="config_deviceKeyHandlerClass" />
   <java-symbol type="bool" name="config_smsSamsungCdmaAlternateMessageIDEncoding" />
 
   <!-- Wifi -->
