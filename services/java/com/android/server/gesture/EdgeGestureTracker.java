@@ -61,8 +61,7 @@ public class EdgeGestureTracker {
     private int mGracePeriod;
 
     public interface OnActivationListener {
-        public void onActivation(MotionEvent event,
-                int touchX, int touchY, EdgeGesturePosition position);
+        public void onActivation(MotionEvent event, int touchX, int touchY, EdgeGesturePosition position);
     }
     private OnActivationListener mActivationListener;
 
@@ -79,7 +78,7 @@ public class EdgeGestureTracker {
     private void setSensitivity(int sensitivity) {
         float factor = 0.0f;
         if (sensitivity >= 1) {
-             factor = (sensitivity - 1) / 10.0f;
+             factor = (sensitivity - 1) / 4.0f;
         }
         if (DEBUG) {
             Slog.d(TAG, "sensitivity: " + sensitivity + " => factor:" + factor);
@@ -122,6 +121,7 @@ public class EdgeGestureTracker {
     }
 
     public boolean start(MotionEvent motionEvent, int positions, int sensitivity) {
+        final boolean unrestricted = (positions & EdgeServiceConstants.UNRESTRICTED) != 0;
         final int x = (int) motionEvent.getX();
         final float fx = motionEvent.getX() / mDisplayWidth;
         final int y = (int) motionEvent.getY();
@@ -138,7 +138,7 @@ public class EdgeGestureTracker {
             }
         }
         if ((positions & EdgeGesturePosition.BOTTOM.FLAG) != 0) {
-            if (y > mDisplayHeight - mThickness && fx > 0.1f && fx < 0.9f) {
+            if (y > mDisplayHeight - mThickness && (unrestricted || (fx > 0.1f && fx < 0.9f))) {
                 startWithPosition(motionEvent, EdgeGesturePosition.BOTTOM);
                 return true;
             }
@@ -151,7 +151,7 @@ public class EdgeGestureTracker {
             }
         }
         if ((positions & EdgeGesturePosition.TOP.FLAG) != 0) {
-            if (y < mThickness && fx > 0.1f && fx < 0.9f) {
+            if (y < mThickness && (unrestricted || (fx > 0.1f && fx < 0.9f))) {
                 startWithPosition(motionEvent, EdgeGesturePosition.TOP);
                 return true;
             }
