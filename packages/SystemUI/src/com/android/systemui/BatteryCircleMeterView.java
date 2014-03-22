@@ -59,7 +59,6 @@ public class BatteryCircleMeterView extends ImageView {
     final static String QuickSettings = "quicksettings";
     final static String StatusBar = "statusbar";
     private Handler mHandler;
-    private Context mContext;
     private BatteryReceiver mBatteryReceiver = null;
 
     // state variables
@@ -95,6 +94,8 @@ public class BatteryCircleMeterView extends ImageView {
     private int mCircleTextChargingColor;
     private int mCircleAnimSpeed = 4;
 
+    private int mWarningLevel;
+
     // runnable to invalidate view via mHandler.postDelayed() call
     private final Runnable mInvalidate = new Runnable() {
         public void run() {
@@ -106,10 +107,6 @@ public class BatteryCircleMeterView extends ImageView {
 
     // keeps track of current battery level and charger-plugged-state
     class BatteryReceiver extends BroadcastReceiver {
-        private boolean mIsRegistered = false;
-
-        public BatteryReceiver(Context context) {
-        }
 
         @Override
         public void onReceive(Context context, Intent intent) {
@@ -126,31 +123,6 @@ public class BatteryCircleMeterView extends ImageView {
 
                     invalidate();
                 }
-            }
-        }
-
-        private void registerSelf() {
-            if (!mIsRegistered) {
-                mIsRegistered = true;
-
-                IntentFilter filter = new IntentFilter();
-                filter.addAction(Intent.ACTION_BATTERY_CHANGED);
-                mContext.registerReceiver(mBatteryReceiver, filter);
-            }
-        }
-
-        private void unregisterSelf() {
-            if (mIsRegistered) {
-                mIsRegistered = false;
-                mContext.unregisterReceiver(this);
-            }
-        }
-
-        private void updateRegistration() {
-            if (mActivated && mAttached) {
-                registerSelf();
-            } else {
-                unregisterSelf();
             }
         }
     }
@@ -179,9 +151,9 @@ public class BatteryCircleMeterView extends ImageView {
             mCircleBatteryView = StatusBar;
         }
 
-        mContext = context;
         mHandler = new Handler();
-        mBatteryReceiver = new BatteryReceiver(mContext);
+        mBatteryReceiver = new BatteryReceiver();
+        initializeCircleVars();
         updateSettings();
     }
 
@@ -190,8 +162,13 @@ public class BatteryCircleMeterView extends ImageView {
         super.onAttachedToWindow();
         if (!mAttached) {
             mAttached = true;
-            mBatteryReceiver.updateRegistration();
-            updateSettings();
+            IntentFilter filter = new IntentFilter();
+            filter.addAction(Intent.ACTION_BATTERY_CHANGED);
+            final Intent sticky = getContext().registerReceiver(mBatteryReceiver, filter);
+            if (sticky != null) {
+                // preload the battery level
+                mBatteryReceiver.onReceive(getContext(), sticky);
+            }
             mHandler.postDelayed(mInvalidate, 250);
         }
     }
@@ -201,11 +178,7 @@ public class BatteryCircleMeterView extends ImageView {
         super.onDetachedFromWindow();
         if (mAttached) {
             mAttached = false;
-            mBatteryReceiver.updateRegistration();
-            mRectLeft = null;   // makes sure, size based variables get
-                                // recalculated on next attach
-            mCircleSize = 0;    // makes sure, mCircleSize is reread from icons on
-                                // next attach
+            getContext().unregisterReceiver(mBatteryReceiver);
         }
     }
 
@@ -244,7 +217,7 @@ public class BatteryCircleMeterView extends ImageView {
         // if chosen by options, draw percentage text in the middle
         // always skip percentage when 100, so layout doesnt break
         if (level < 100 && mCirclePercent) {
-            if (level <= 14) {
+            if (level <= mWarningLevel) {
                 mPaintFont.setColor(mPaintRed.getColor());
             } else if (mIsCharging) {
                 mPaintFont.setColor(mCircleTextChargingColor);
@@ -275,7 +248,7 @@ public class BatteryCircleMeterView extends ImageView {
 
     public void updateSettings() {
         Resources res = getResources();
-        ContentResolver resolver = mContext.getContentResolver();
+        ContentResolver resolver = getContext().getContentResolver();
 
         int defaultColor = res.getColor(com.android.systemui.R.color.batterymeter_charge_color);
 
@@ -283,10 +256,7 @@ public class BatteryCircleMeterView extends ImageView {
         mCircleTextChargingColor = defaultColor;
         mCircleColor = defaultColor;
 
-        /*
-         * initialize vars and force redraw
-         */
-        initializeCircleVars();
+        mPaintSystem.setColor(mCircleColor);
         mRectLeft = null;
         mCircleSize = 0;
 
@@ -298,10 +268,6 @@ public class BatteryCircleMeterView extends ImageView {
         mActivated = (batteryStyle == 3 || mCirclePercent);
 
         setVisibility(mActivated ? View.VISIBLE : View.GONE);
-
-        if (mBatteryReceiver != null) {
-            mBatteryReceiver.updateRegistration();
-        }
 
         if (mActivated && mAttached) {
             invalidate();
@@ -326,7 +292,6 @@ public class BatteryCircleMeterView extends ImageView {
         mPaintSystem = new Paint(mPaintFont);
         mPaintRed = new Paint(mPaintFont);
 
-        mPaintSystem.setColor(mCircleColor);
         // could not find the darker definition anywhere in resources
         // do not want to use static 0x404040 color value. would break theming.
         mPaintGray.setColor(res.getColor(R.color.darker_gray));
@@ -335,6 +300,8 @@ public class BatteryCircleMeterView extends ImageView {
         // font needs some extra settings
         mPaintFont.setTextAlign(Align.CENTER);
         mPaintFont.setFakeBoldText(true);
+
+        mWarningLevel = res.getInteger(com.android.internal.R.integer.config_lowBatteryWarningLevel);
     }
 
 
