@@ -63,6 +63,8 @@ along with this program. If not, see <http://www.gnu.org/licenses/>.
     <string name="quick_settings_usb_tether_off_label">Getrennt</string>
     <string name="quick_settings_usb_tether_connected_label">Tethering aus</string>
     <string name="quick_settings_usb_tether_on_label">Tethering aktiv</string>
+    <string name="quick_settings_nfc_off">NFC aus</string>
+    <string name="quick_settings_nfc_on">NFC an</string>
     <string name="navbar_dialog_title">Aktion zuweisen</string>
     <string name="navbar_home_button">Home-Taste</string>
     <string name="navbar_recent_button">Recent-Taste</string>
