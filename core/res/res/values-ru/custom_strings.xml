@@ -51,5 +51,11 @@
     <!-- status message in phone options dialog for when mobile data is off -->
     <string name="global_actions_mobile_data_off_status">Передача данных выкл</string>
 
+    <!-- label for item that takes screenshot in the phone options dialog -->
+    <string name="global_action_screenshot">Снимок экрана</string>
+
+    <!-- label for item that takes screenrecord in the phone options dialog -->
+    <string name="global_action_screenrecord">Запись с экрана</string>
+
 </resources> 
 
