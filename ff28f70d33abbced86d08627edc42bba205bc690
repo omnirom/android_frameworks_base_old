@@ -1,0 +1,21 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "8b77b57d_a1c9e756",
+        "filename": "packages/Keyguard/src/com/android/keyguard/KeyguardViewManager.java",
+        "patchSetId": 1
+      },
+      "lineNbr": 202,
+      "author": {
+        "id": 1000026
+      },
+      "writtenOn": "2014-03-25T22:51:51Z",
+      "side": 1,
+      "message": "Settings.System.ACCELEROMETER_ROTATION default value is 0 e.g. in PhoneWindowManager.java",
+      "revId": "ff28f70d33abbced86d08627edc42bba205bc690",
+      "serverId": "56841c99-7c94-43d4-bf0b-cb4707e66d55",
+      "unresolved": false
+    }
+  ]
+}
