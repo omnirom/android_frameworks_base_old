@@ -18,17 +18,17 @@
 <resources xmlns:xliff="urn:oasis:names:tc:xliff:document:1.2">
     <!-- Quick Settings Wi-Fi Back Tile Tethering label -->
     <string name="quick_settings_wifi_tethering_label">Режим модема</string>
-    <string name="quick_settings_wifi_tethering_off_label">Режим модема выкл.</string>
+    <string name="quick_settings_wifi_tethering_off_label">Режим модема выкл</string>
 
     <!-- Quick Settings Bluetooth Not Discoverable label -->
-    <string name="quick_settings_bluetooth_not_discoverable_label">Видимость выкл.</string>
+    <string name="quick_settings_bluetooth_not_discoverable_label">Видимость выкл</string>
 
     <!-- Quick Settings Bluetooth Discoverable label -->
     <string name="quick_settings_bluetooth_discoverable_label">Видимость</string>
 
     <!-- Quick Settings Bluetooth Not Connected -->
-    <string name="quick_settings_bluetooth_enabled">Вкл.</string>
-    <string name="quick_settings_bluetooth_disabled">Выкл.</string>
+    <string name="quick_settings_bluetooth_enabled">Вкл</string>
+    <string name="quick_settings_bluetooth_disabled">Выкл</string>
 
     <!-- Quick Settings Bluetooth Number of Paired Devices -->
     <string name="quick_settings_bluetooth_number_paired"><xliff:g id="number">%d</xliff:g> Подключенные устр.</string>
@@ -56,13 +56,13 @@
     <string name="quick_settings_battery_discharging">Разряжается</string>
 
     <!-- QuickSettings: Immersive mode [CHAR LIMIT=NONE] -->
-    <string name="quick_settings_immersive_mode_global_on_label">Расширенный</string>
+    <string name="quick_settings_immersive_global_on_label">Расширенный</string>
     <!-- QuickSettings: Immersive mode (Off) [CHAR LIMIT=NONE] -->
-    <string name="quick_settings_immersive_mode_global_off_label">Обычный</string>
+    <string name="quick_settings_immersive_global_off_label">Обычный</string>
     <!-- QuickSettings: Immersive extra modes [CHAR LIMIT=NONE] -->
     <string name="quick_settings_immersive_mode_off_label">Отключено</string>
     <string name="quick_settings_immersive_mode_full_label">Скрыть всё</string>
-    <string name="quick_settings_immersive_mode_no_status_bar_label">Строка навигации</string>
+    <string name="quick_settings_immersive_mode_no_status_bar_label">Панель навигации</string>
     <string name="quick_settings_immersive_mode_no_navigation_bar_label">Строка состояния</string>
 
     <string name="network_4G">4G/LTE</string>
@@ -107,9 +107,9 @@
     <string name="quick_settings_vibration_on">Вибрация</string>
     <string name="quick_settings_vibration_off">Вибрация выкл</string>
     <string name="quick_settings_volume">Громкость</string>
-    <string name="quick_settings_volume_status">Состояние</string>
+    <string name="quick_settings_volume_status">Режим</string>
     <string name="quick_settings_usb_tether_off_label">Отключено</string>
-    <string name="quick_settings_usb_tether_connected_label">USB-модем выкл.</string>
+    <string name="quick_settings_usb_tether_connected_label">USB-модем выкл</string>
     <string name="quick_settings_usb_tether_on_label">USB-модем</string>
 
     <string name="status_bar_notification_hide_icon_packages">Скрыть иконки уведомлениий</string>
@@ -124,6 +124,10 @@
     <string name="navbar_menu_conditional_button">Меню (если доступно)</string>
     <string name="navbar_menu_always_button">Меню (всегда)</string>
     <string name="navbar_menu_big_button">Меню</string>
+
+    <!-- QS NFC Tile -->
+    <string name="quick_settings_nfc_off">NFC выкл</string>
+    <string name="quick_settings_nfc_on">NFC</string>
 
 </resources>
 
