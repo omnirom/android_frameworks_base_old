@@ -1,5 +1,6 @@
 /*
  * Copyright (C) 2011 The Android Open Source Project
+ * Copyright (C) 2014 The OmniROM Project
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -96,6 +97,9 @@ public class RecentsPanelView extends FrameLayout implements OnItemClickListener
     private ImageView mClearAllRecents;
     private CircleMemoryMeter mRecentsMemoryIndicator;
     private boolean mUpdateMemoryIndicator;
+    private int mClearAllRecentsPadding = 0;
+    private int oClearAllSize;
+    private int mCircleSize = 0;
 
     public static interface RecentsScrollView {
         public int numItemsInOneScreenful();
@@ -331,6 +335,11 @@ public class RecentsPanelView extends FrameLayout implements OnItemClickListener
             } catch (RemoteException e) {
             }
         }
+    }
+
+    //this sets all the padding values borders of a Imageview to value
+    private void setPaddingOneValue(ImageView image, int value){
+     image.setPadding(value,value,value,value);
     }
 
     private void showImpl(boolean show) {
