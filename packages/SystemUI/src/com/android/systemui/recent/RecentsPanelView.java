@@ -1,5 +1,6 @@
 /*
  * Copyright (C) 2011 The Android Open Source Project
+ * Copyright (C) 2014 The OmniROM Project
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -96,6 +97,8 @@ public class RecentsPanelView extends FrameLayout implements OnItemClickListener
     private ImageView mClearAllRecents;
     private CircleMemoryMeter mRecentsMemoryIndicator;
     private boolean mUpdateMemoryIndicator;
+    private int mClearAllRecentsPadding = 0;
+    private int mCircleSize = 0;
 
     public static interface RecentsScrollView {
         public int numItemsInOneScreenful();
@@ -333,6 +336,11 @@ public class RecentsPanelView extends FrameLayout implements OnItemClickListener
         }
     }
 
+    //this sets all the padding values borders of a Imageview to value
+    private void setPaddingOneValue(ImageView image, int value){
+     image.setPadding(value,value,value,value);
+    }
+
     private void showImpl(boolean show) {
         sendCloseSystemWindows(mContext, BaseStatusBar.SYSTEM_DIALOG_REASON_RECENT_APPS);
 
@@ -407,6 +415,26 @@ public class RecentsPanelView extends FrameLayout implements OnItemClickListener
                         break;
                 }
                 mClearAllRecents.setLayoutParams(layoutParams);
+
+                if(mRecentsMemoryIndicator.isTablet() && showMemoryIndicator){
+                        if (mCircleSize == 0)
+                            mCircleSize = mRecentsMemoryIndicator.getmCircleSize();
+                        /*get the original image size and keep it, in this way
+                        the image is shown using its own size even when the frame is bigger,
+                        see next comment*/
+			Log.v(TAG,"mCircleSize = "+ mCircleSize);
+                    if(mClearAllRecentsPadding == 0){
+                      int oSize = mClearAllRecents.getLayoutParams().height;
+                      mClearAllRecentsPadding = Math.abs((oSize - mCircleSize))/2;
+                    }
+                    mClearAllRecents.getLayoutParams().height =
+                                    mCircleSize;
+                    mClearAllRecents.getLayoutParams().width =
+                                    mCircleSize;
+                    //put the image at the center of its frame reducing its size to the original one
+                    setPaddingOneValue(mClearAllRecents, mClearAllRecentsPadding);
+                }
+
                 mClearAllRecents.setVisibility(View.VISIBLE);
             } else {
                 mClearAllRecents.setVisibility(View.GONE);

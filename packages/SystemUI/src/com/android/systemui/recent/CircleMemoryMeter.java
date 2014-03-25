@@ -1,6 +1,6 @@
 /*
  * Copyright (C) 2013 The ChameleonOS Open Source Project
- * Copyright (C) 2013 The OmniROM Project
+ * Copyright (C) 2014 The OmniROM Project
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -30,6 +30,8 @@ import android.os.Handler;
 import android.util.AttributeSet;
 import android.widget.ImageView;
 import android.util.Log;
+import com.android.systemui.R;
+import android.util.DisplayMetrics;
 
 public class CircleMemoryMeter extends ImageView {
     private final Handler mHandler;
@@ -39,7 +41,7 @@ public class CircleMemoryMeter extends ImageView {
     private boolean mAttached;      // whether or not attached to a window
     private long mLevel;            // current meter level
 
-    private int mCircleSize;        // draw size of circle.
+    private int mCircleSize = 0;        // draw size of circle.
     private RectF mRectLeft;        // contains the precalculated rect used in drawArc(),
 
     // quiet a lot of paint variables.
@@ -60,6 +62,8 @@ public class CircleMemoryMeter extends ImageView {
     private String mAvailableMemory;
     private String mTotalMemory;
 
+    private boolean mIsTablet;
+    private DisplayMetrics metrics;
 
     public CircleMemoryMeter(Context context) {
         this(context, null);
@@ -77,7 +81,7 @@ public class CircleMemoryMeter extends ImageView {
 
         // initialize and setup all paint variables
         // stroke width is later set in initSizeBasedStuff()
-
+        mIsTablet = mContext.getResources().getBoolean(R.bool.config_recents_interface_for_tablets);
         mPaintText = new Paint();
         mPaintText.setAntiAlias(true);
         mPaintText.setDither(true);
@@ -102,6 +106,9 @@ public class CircleMemoryMeter extends ImageView {
         mPaintText.setTextAlign(Align.CENTER);
         mPaintText.setStyle(Paint.Style.FILL_AND_STROKE);
         mPaintText.setFakeBoldText(true);
+
+        if(mIsTablet)
+          metrics = mContext.getResources().getDisplayMetrics();
     }
 
     private void setLevels(long lowLevel, long mediumLevel, long highLevel) {
@@ -191,6 +198,18 @@ public class CircleMemoryMeter extends ImageView {
         drawCircle(canvas, getLevel(), mRectLeft);
     }
 
+    //permit the use of the CircleMemoryMeter size outside this class (ex. RecentsPanelView)
+    public int getmCircleSize(){
+     if (mCircleSize == 0){
+         initSizeMeasureIconHeight();
+        }
+    return mCircleSize;
+    }
+
+    public boolean isTablet(){
+    return mIsTablet;
+    }
+
     /**
      * initializes all size dependent variables
      * sets stroke width and text size of all involved paints
@@ -217,11 +236,19 @@ public class CircleMemoryMeter extends ImageView {
         mPaintText.setTextSize(strokeWidth);
         mArcOffset = (strokeWidth - levelStrokeWidth);
 
+        //put the rect's size equal to the circle it has to contain
+        getLayoutParams().height = mCircleSize+2;
+        getLayoutParams().width = mCircleSize+2;
+
         // force new measurement for wrap-content xml tag
         onMeasure(0, 0);
     }
 
     private void initSizeMeasureIconHeight() {
+    //for tablets calculate the size with the next formula (2/5 * ScreenDPI * cm)
+    if(mIsTablet)
+      mCircleSize = Math.round(2.0f / 5.0f * metrics.densityDpi * 1.5f);
+    else
         mCircleSize = Math.min(getWidth(), getHeight());
     }
 }
