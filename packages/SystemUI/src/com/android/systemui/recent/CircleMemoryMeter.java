@@ -1,6 +1,6 @@
 /*
  * Copyright (C) 2013 The ChameleonOS Open Source Project
- * Copyright (C) 2013 The OmniROM Project
+ * Copyright (C) 2014 The OmniROM Project
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -30,6 +30,7 @@ import android.os.Handler;
 import android.util.AttributeSet;
 import android.widget.ImageView;
 import android.util.Log;
+import com.android.systemui.R;
 
 public class CircleMemoryMeter extends ImageView {
     private final Handler mHandler;
@@ -60,6 +61,7 @@ public class CircleMemoryMeter extends ImageView {
     private String mAvailableMemory;
     private String mTotalMemory;
 
+    private boolean mIsTablet;
 
     public CircleMemoryMeter(Context context) {
         this(context, null);
@@ -77,7 +79,7 @@ public class CircleMemoryMeter extends ImageView {
 
         // initialize and setup all paint variables
         // stroke width is later set in initSizeBasedStuff()
-
+        mIsTablet = mContext.getResources().getBoolean(R.bool.config_recents_interface_for_tablets);
         mPaintText = new Paint();
         mPaintText.setAntiAlias(true);
         mPaintText.setDither(true);
@@ -191,6 +193,17 @@ public class CircleMemoryMeter extends ImageView {
         drawCircle(canvas, getLevel(), mRectLeft);
     }
 
+    //permit the use of the CircleCemoryMeter size outside this class (ex. RecentsPanelView)
+    public int getmCircleSize(){
+     if (mCircleSize == 0) {
+            initSizeMeasureIconHeight();
+        }
+    return mCircleSize;
+    }
+
+    public boolean isTablet(){
+    return mIsTablet;
+    }
     /**
      * initializes all size dependent variables
      * sets stroke width and text size of all involved paints
@@ -217,11 +230,17 @@ public class CircleMemoryMeter extends ImageView {
         mPaintText.setTextSize(strokeWidth);
         mArcOffset = (strokeWidth - levelStrokeWidth);
 
+        //put the rect's size equal to the circle it has to contain
+        getLayoutParams().height = mCircleSize+2;
+        getLayoutParams().width = mCircleSize+2;
+
         // force new measurement for wrap-content xml tag
         onMeasure(0, 0);
     }
 
     private void initSizeMeasureIconHeight() {
         mCircleSize = Math.min(getWidth(), getHeight());
+        //make CircleMemoryMeter bigger for tablets
+        if(mIsTablet) mCircleSize *= 2;
     }
 }
