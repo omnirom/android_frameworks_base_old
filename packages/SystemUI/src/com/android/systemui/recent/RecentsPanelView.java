@@ -96,6 +96,7 @@ public class RecentsPanelView extends FrameLayout implements OnItemClickListener
     private ImageView mClearAllRecents;
     private CircleMemoryMeter mRecentsMemoryIndicator;
     private boolean mUpdateMemoryIndicator;
+    private int mClearAllRecentsPadding = 0;
 
     public static interface RecentsScrollView {
         public int numItemsInOneScreenful();
@@ -407,6 +408,15 @@ public class RecentsPanelView extends FrameLayout implements OnItemClickListener
                         break;
                 }
                 mClearAllRecents.setLayoutParams(layoutParams);
+
+		if(mRecentsMemoryIndicator.isTablet()){
+		    if(mClearAllRecentsPadding == 0)
+		     mClearAllRecentsPadding = (mClearAllRecents.getLayoutParams().height - mRecentsMemoryIndicator.getmCircleSize() + 4)/2;
+		    mClearAllRecents.getLayoutParams().height = mRecentsMemoryIndicator.getmCircleSize() + 2;
+		    mClearAllRecents.getLayoutParams().width = mRecentsMemoryIndicator.getmCircleSize() + 2;
+		    Log.v(TAG,"mClearAllRecentsPadding = " +mClearAllRecentsPadding);	    mClearAllRecents.setPadding(mClearAllRecentsPadding,mClearAllRecentsPadding,mClearAllRecentsPadding,mClearAllRecentsPadding);
+		}
+
                 mClearAllRecents.setVisibility(View.VISIBLE);
             } else {
                 mClearAllRecents.setVisibility(View.GONE);
