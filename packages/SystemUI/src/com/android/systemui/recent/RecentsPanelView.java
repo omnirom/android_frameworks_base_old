@@ -96,6 +96,8 @@ public class RecentsPanelView extends FrameLayout implements OnItemClickListener
     private ImageView mClearAllRecents;
     private CircleMemoryMeter mRecentsMemoryIndicator;
     private boolean mUpdateMemoryIndicator;
+    private boolean isTablet;
+    private int mMarginsTablet = Math.min(getWidth(), getHeight()) * 2;
 
     public static interface RecentsScrollView {
         public int numItemsInOneScreenful();
@@ -406,6 +408,12 @@ public class RecentsPanelView extends FrameLayout implements OnItemClickListener
                         layoutParams.gravity = Gravity.BOTTOM | Gravity.LEFT;
                         break;
                 }
+
+                if(isTablet){
+                Log.v(TAG,"mMarginsTablet = " + mMarginsTablet);
+                layoutParams.setMargins(mMarginsTablet,mMarginsTablet,mMarginsTablet,mMarginsTablet);
+                }
+
                 mClearAllRecents.setLayoutParams(layoutParams);
                 mClearAllRecents.setVisibility(View.VISIBLE);
             } else {
@@ -501,6 +509,7 @@ public class RecentsPanelView extends FrameLayout implements OnItemClickListener
         final Resources res = mContext.getResources();
         mThumbnailWidth = Math.round(res.getDimension(R.dimen.status_bar_recents_thumbnail_width));
         mFitThumbnailToXY = res.getBoolean(R.bool.config_recents_thumbnail_image_fits_to_xy);
+        isTablet = res.getBoolean(R.bool.config_recents_interface_for_tablets);
     }
 
     @Override
