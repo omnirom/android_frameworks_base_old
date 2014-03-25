@@ -1,5 +1,6 @@
 /*
  * Copyright (C) 2011 The Android Open Source Project
+ * Copyright (C) 2014 The OmniROM Project
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -96,6 +97,7 @@ public class RecentsPanelView extends FrameLayout implements OnItemClickListener
     private ImageView mClearAllRecents;
     private CircleMemoryMeter mRecentsMemoryIndicator;
     private boolean mUpdateMemoryIndicator;
+    private int mClearAllRecentsPadding = 0;
 
     public static interface RecentsScrollView {
         public int numItemsInOneScreenful();
@@ -407,6 +409,15 @@ public class RecentsPanelView extends FrameLayout implements OnItemClickListener
                         break;
                 }
                 mClearAllRecents.setLayoutParams(layoutParams);
+
+                if(mRecentsMemoryIndicator.isTablet()){
+                    if(mClearAllRecentsPadding == 0)
+                      mClearAllRecentsPadding = (mClearAllRecents.getLayoutParams().height - mRecentsMemoryIndicator.getmCircleSize() + 4)/2;
+                    mClearAllRecents.getLayoutParams().height = mRecentsMemoryIndicator.getmCircleSize() + 2;
+                    mClearAllRecents.getLayoutParams().width = mRecentsMemoryIndicator.getmCircleSize() + 2;
+                    mClearAllRecents.setPadding(mClearAllRecentsPadding,mClearAllRecentsPadding,mClearAllRecentsPadding,mClearAllRecentsPadding);
+                }
+
                 mClearAllRecents.setVisibility(View.VISIBLE);
             } else {
                 mClearAllRecents.setVisibility(View.GONE);
