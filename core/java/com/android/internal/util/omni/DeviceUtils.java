@@ -38,10 +38,15 @@ import java.util.List;
 
 public class DeviceUtils {
 
+    public static final int IMMERSIVE_MODE_OFF = 0;
+    public static final int IMMERSIVE_MODE_FULL = 1;
+    public static final int IMMERSIVE_MODE_HIDE_ONLY_NAVBAR = 2;
+    public static final int IMMERSIVE_MODE_HIDE_ONLY_STATUSBAR = 3;
+
     // Device types
-    private static final int DEVICE_PHONE  = 0;
-    private static final int DEVICE_HYBRID = 1;
-    private static final int DEVICE_TABLET = 2;
+    public static final int DEVICE_PHONE  = 0;
+    public static final int DEVICE_HYBRID = 1;
+    public static final int DEVICE_TABLET = 2;
 
     public static boolean deviceSupportsUsbTether(Context context) {
         ConnectivityManager cm =

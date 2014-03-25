@@ -76,6 +76,11 @@ import com.android.internal.statusbar.StatusBarIconList;
 import com.android.internal.widget.SizeAdaptiveLayout;
 import com.android.internal.util.omni.TaskUtils;
 import com.android.internal.util.omni.OmniSwitchConstants;
+import static com.android.internal.util.omni.DeviceUtils.IMMERSIVE_MODE_OFF;
+import static com.android.internal.util.omni.DeviceUtils.IMMERSIVE_MODE_FULL;
+import static com.android.internal.util.omni.DeviceUtils.IMMERSIVE_MODE_HIDE_ONLY_NAVBAR;
+import static com.android.internal.util.omni.DeviceUtils.IMMERSIVE_MODE_HIDE_ONLY_STATUSBAR;
+
 import com.android.systemui.R;
 import com.android.systemui.RecentsComponent;
 import com.android.systemui.recent.RecentTasksLoader;
@@ -214,7 +219,7 @@ public abstract class BaseStatusBar extends SystemUI implements
         private void update() {
             final ContentResolver resolver = mContext.getContentResolver();
             mImmersiveModeStyle = Settings.System.getIntForUser(mContext.getContentResolver(),
-                        Settings.System.IMMERSIVE_MODE, 0, UserHandle.USER_CURRENT);
+                        Settings.System.IMMERSIVE_MODE, IMMERSIVE_MODE_OFF, UserHandle.USER_CURRENT);
         }
     };
 
@@ -964,7 +969,6 @@ public abstract class BaseStatusBar extends SystemUI implements
         }
         updateExpansionStates();
         updateNotificationIcons();
-        updateStatusBarVisibility();
     }
 
     private void addNotificationViews(IBinder key, StatusBarNotification notification) {
@@ -994,20 +998,8 @@ public abstract class BaseStatusBar extends SystemUI implements
     }
 
     protected boolean immersiveModeHidesStatusBar() {
-        return mImmersiveModeStyle == 1 || mImmersiveModeStyle == 3;
-    }
-
-    protected void updateStatusBarVisibility() {
-        boolean shouldShowStatusbar = (mNotificationData.size() != 0)
-                          && mNotificationData.hasClearableItems();
-        if (immersiveModeHidesStatusBar()) {
-            Settings.System.putInt(mContext.getContentResolver(),
-                    Settings.System.STATUSBAR_NOTIFICATION_ACTIVITY,
-                    shouldShowStatusbar ? 1 : 0);
-        } else {
-            Settings.System.putInt(mContext.getContentResolver(),
-                    Settings.System.STATUSBAR_NOTIFICATION_ACTIVITY, 0);
-        }
+        return (mImmersiveModeStyle == IMMERSIVE_MODE_FULL)
+            || (mImmersiveModeStyle == IMMERSIVE_MODE_HIDE_ONLY_STATUSBAR);
     }
 
     protected abstract void haltTicker();
@@ -1273,25 +1265,24 @@ public abstract class BaseStatusBar extends SystemUI implements
 
     protected void setIconHiddenByUser(String iconPackage, boolean hide) {
         if (iconPackage == null
-                || iconPackage.isEmpty()
-                || iconPackage.equals("android")) {
+            || iconPackage.isEmpty()
+            || iconPackage.equals("android")) {
             return;
         }
         mContext.getSharedPreferences("hidden_statusbar_icon_packages", 0)
-                .edit()
-                .putBoolean(iconPackage, hide)
-                .apply();
+            .edit()
+            .putBoolean(iconPackage, hide)
+            .apply();
     }
 
     protected boolean isIconHiddenByUser(String iconPackage) {
         if (iconPackage == null
-                || iconPackage.isEmpty()
-                || iconPackage.equals("android")) {
+            || iconPackage.isEmpty()
+            || iconPackage.equals("android")) {
             return false;
-
         }
         final boolean hide = mContext.getSharedPreferences("hidden_statusbar_icon_packages", 0)
-                .getBoolean(iconPackage, false);
+                   .getBoolean(iconPackage, false);
         return hide;
     }
 }
