@@ -57,9 +57,8 @@
     <!-- label for item that takes screenrecord in the phone options dialog -->
     <string name="global_action_screenrecord">Запись с экрана</string>
 
-<!-- Immersive mode confirmation: Pick confirmation window from bottom when status bar is visible -->
+    <!-- Immersive mode confirmation: Pick confirmation window from bottom when status bar is visible -->
     <string name="immersive_mode_confirmation_bottom">Проведите снизу вверх, чтобы вернуться в полноэкранный режим.</string>
-</resources>
 
 </resources>
 
