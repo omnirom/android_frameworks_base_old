@@ -30,11 +30,11 @@ import android.os.Handler;
 import android.util.AttributeSet;
 import android.widget.ImageView;
 import android.util.Log;
+import com.android.systemui.R;
 
 public class CircleMemoryMeter extends ImageView {
     private final Handler mHandler;
     private final Context mContext;
-
     // state variables
     private boolean mAttached;      // whether or not attached to a window
     private long mLevel;            // current meter level
@@ -60,6 +60,7 @@ public class CircleMemoryMeter extends ImageView {
     private String mAvailableMemory;
     private String mTotalMemory;
 
+    private boolean isTablet;
 
     public CircleMemoryMeter(Context context) {
         this(context, null);
@@ -77,7 +78,7 @@ public class CircleMemoryMeter extends ImageView {
 
         // initialize and setup all paint variables
         // stroke width is later set in initSizeBasedStuff()
-
+	isTablet = mContext.getResources().getBoolean(R.bool.config_recents_interface_for_tablets);
         mPaintText = new Paint();
         mPaintText.setAntiAlias(true);
         mPaintText.setDither(true);
@@ -217,11 +218,15 @@ public class CircleMemoryMeter extends ImageView {
         mPaintText.setTextSize(strokeWidth);
         mArcOffset = (strokeWidth - levelStrokeWidth);
 
+	getLayoutParams().height = mCircleSize+2;
+	getLayoutParams().width = mCircleSize+2;
+
         // force new measurement for wrap-content xml tag
         onMeasure(0, 0);
     }
 
     private void initSizeMeasureIconHeight() {
         mCircleSize = Math.min(getWidth(), getHeight());
+        if(isTablet) mCircleSize *= 2;
     }
 }
