@@ -1,0 +1,21 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "8b77b57d_049e29bc",
+        "filename": "packages/Keyguard/src/com/android/keyguard/KeyguardViewManager.java",
+        "patchSetId": 6
+      },
+      "lineNbr": 204,
+      "author": {
+        "id": 1000026
+      },
+      "writtenOn": "2014-03-26T23:23:34Z",
+      "side": 1,
+      "message": "ok this is tricky - before config_enableLockScreenRotation had a default of true so this default should stay the same without any change to the new setting. Now the default is false if user never changed. So LOCKSCREEN_ROTATION should actually have a default of 1 - dont forget the same change in Settings.",
+      "revId": "c0f08150611d487724d647fa012e31971dfcd68c",
+      "serverId": "56841c99-7c94-43d4-bf0b-cb4707e66d55",
+      "unresolved": false
+    }
+  ]
+}
