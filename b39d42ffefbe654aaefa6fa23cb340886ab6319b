@@ -1,0 +1,55 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "8b77b57d_04654942",
+        "filename": "packages/SystemUI/src/com/android/systemui/statusbar/policy/activedisplay/ActiveDisplayView.java",
+        "patchSetId": 13
+      },
+      "lineNbr": 666,
+      "author": {
+        "id": 1000313
+      },
+      "writtenOn": "2014-03-28T19:44:50Z",
+      "side": 1,
+      "message": "See proximity threshold, dont calculate in here",
+      "revId": "b39d42ffefbe654aaefa6fa23cb340886ab6319b",
+      "serverId": "56841c99-7c94-43d4-bf0b-cb4707e66d55",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "8b77b57d_246a4512",
+        "filename": "packages/SystemUI/src/com/android/systemui/statusbar/policy/activedisplay/ActiveDisplayView.java",
+        "patchSetId": 13
+      },
+      "lineNbr": 1851,
+      "author": {
+        "id": 1000313
+      },
+      "writtenOn": "2014-03-28T19:44:50Z",
+      "side": 1,
+      "message": "Same as above",
+      "revId": "b39d42ffefbe654aaefa6fa23cb340886ab6319b",
+      "serverId": "56841c99-7c94-43d4-bf0b-cb4707e66d55",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "8b77b57d_445f4176",
+        "filename": "packages/SystemUI/src/com/android/systemui/statusbar/policy/activedisplay/ActiveDisplayView.java",
+        "patchSetId": 13
+      },
+      "lineNbr": 1855,
+      "author": {
+        "id": 1000313
+      },
+      "writtenOn": "2014-03-28T19:44:50Z",
+      "side": 1,
+      "message": "Intent need a synchronizing to prevent alarmmanager call this without end\n\nSee updateRedisplayTimer and cancelRedisplayTimer",
+      "revId": "b39d42ffefbe654aaefa6fa23cb340886ab6319b",
+      "serverId": "56841c99-7c94-43d4-bf0b-cb4707e66d55",
+      "unresolved": false
+    }
+  ]
+}
