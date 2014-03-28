@@ -50,6 +50,7 @@ public class AppCircleSidebar extends FrameLayout implements PackageAdapter.OnCi
     private PackageAdapter mPackageAdapter;
     private Context mContext;
     private boolean mFirstTouch = false;
+    private boolean mFloatingWindow = false;
     private SettingsObserver mSettingsObserver;
     private ArrayList<String> mAppRunning;
     private ArrayList<String> mAppOpening;
@@ -406,6 +407,10 @@ public class AppCircleSidebar extends FrameLayout implements PackageAdapter.OnCi
         ComponentName cn = new ComponentName(packageName, className);
         Intent intent = Intent.makeMainActivity(cn);
         intent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
+        if (mFloatingWindow) {
+            intent.addFlags(Intent.FLAG_FLOATING_WINDOW);
+            mFloatingWindow = false;
+        }
         mContext.startActivity(intent);
     }
 
@@ -416,9 +421,14 @@ public class AppCircleSidebar extends FrameLayout implements PackageAdapter.OnCi
             Intent intent = Intent.makeMainActivity(cn);
             intent.setFlags(Intent.FLAG_ACTIVITY_LAUNCHED_FROM_HISTORY
                            | Intent.FLAG_ACTIVITY_NEW_TASK);
+            if (mFloatingWindow) {
+                intent.addFlags(Intent.FLAG_FLOATING_WINDOW);
+                mFloatingWindow = false;
+            }
             mContext.startActivity(intent);
         } else {
             updateAutoHideTimer(AUTO_HIDE_DELAY);
+            mFloatingWindow = false;
         }
     }
 
@@ -435,6 +445,7 @@ public class AppCircleSidebar extends FrameLayout implements PackageAdapter.OnCi
             if (info != null) {
                 String packageName = info.activityInfo.packageName;
                 if (!mAppRunning.isEmpty() && mAppRunning.contains(packageName)) {
+                    mFloatingWindow = true;
                     launchApplicationFromHistory(info.activityInfo.packageName, info.activityInfo.name);
                 }
             }
@@ -478,6 +489,9 @@ public class AppCircleSidebar extends FrameLayout implements PackageAdapter.OnCi
                    popup.getMenu());
             popup.setOnMenuItemClickListener(new PopupMenu.OnMenuItemClickListener() {
                 public boolean onMenuItemClick(MenuItem item) {
+                    if (item.getItemId() == R.id.sidebar_float_item) {
+                        mFloatingWindow = true;
+                        launchApplication(info.activityInfo.packageName, info.activityInfo.name);
                     } else if (item.getItemId() == R.id.sidebar_inspect_item) {
                         startApplicationDetailsActivity(info.activityInfo.packageName);
                     } else if (item.getItemId() == R.id.sidebar_stop_item) {
