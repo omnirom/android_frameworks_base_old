@@ -1804,6 +1804,17 @@ public class Camera {
     }
     private native final void native_sendMetaData();
 
+    /** @hide
+     * Configure longshot mode. Available only in ZSL.
+     *
+     * @param enable enable/disable this mode
+     */
+    public final void setLongshot(boolean enable)
+    {
+        native_setLongshot(enable);
+    }
+    private native final void native_setLongshot(boolean enable);
+
      /** @hide
      * Handles the Touch Co-ordinate.
      */
@@ -2041,6 +2052,9 @@ public class Camera {
         private static final String KEY_VIDEO_SNAPSHOT_SUPPORTED = "video-snapshot-supported";
         private static final String KEY_VIDEO_STABILIZATION = "video-stabilization";
         private static final String KEY_VIDEO_STABILIZATION_SUPPORTED = "video-stabilization-supported";
+        private static final String KEY_POWER_MODE_SUPPORTED = "power-mode-supported";
+
+        private static final String KEY_POWER_MODE = "power-mode";
 
         // Parameter key suffix for supported values.
         private static final String SUPPORTED_VALUES_SUFFIX = "-values";
@@ -2074,6 +2088,10 @@ public class Camera {
         public static final String ANTIBANDING_50HZ = "50hz";
         public static final String ANTIBANDING_60HZ = "60hz";
         public static final String ANTIBANDING_OFF = "off";
+
+        // Values for POWER MODE
+        public static final String LOW_POWER = "Low_Power";
+        public static final String NORMAL_POWER = "Normal_Power";
 
         // Values for flash mode settings.
         /**
@@ -3328,6 +3346,28 @@ public class Camera {
         }
 
         /**
+         * Sets the Power mode.
+         *
+         * @param value Power mode.
+         * @see #getPowerMode()
+         */
+        public void setPowerMode(String value) {
+            set(KEY_POWER_MODE, value);
+        }
+
+        /**
+         * Gets the current power mode setting.
+         *
+         * @return current power mode. null if power mode setting is not
+         *         supported.
+         * @see #POWER_MODE_LOW
+         * @see #POWER_MODE_NORMAL
+         */
+        public String getPowerMode() {
+            return get(KEY_POWER_MODE);
+        }
+
+        /**
          * Gets the current focus mode setting.
          *
          * @return current focus mode. This method will always return a non-null
@@ -3944,6 +3984,14 @@ public class Camera {
         }
 
         /**
+         * @return true if full size video snapshot is supported.
+         */
+        public boolean isPowerModeSupported() {
+            String str = get(KEY_POWER_MODE_SUPPORTED);
+            return TRUE.equals(str);
+        }
+
+        /**
          * <p>Enables and disables video stabilization. Use
          * {@link #isVideoStabilizationSupported} to determine if calling this
          * method is valid.</p>
@@ -4196,6 +4244,7 @@ public class Camera {
         private static final String KEY_QC_ZSL = "zsl";
         private static final String KEY_QC_CAMERA_MODE = "camera-mode";
         private static final String KEY_QC_VIDEO_HIGH_FRAME_RATE = "video-hfr";
+        private static final String KEY_QC_VIDEO_HDR = "video-hdr";
         /** @hide
         * KEY_QC_AE_BRACKET_HDR
         **/
@@ -4495,6 +4544,17 @@ public class Camera {
          */
          public List<String> getSupportedZSLModes() {
             String str = get(KEY_QC_ZSL + SUPPORTED_VALUES_SUFFIX);
+            return split(str);
+         }
+
+         /** @hide
+         * Gets the supported Video HDR modes.
+         *
+         * @return a List of Video HDR_OFF/OFF string constants. null if
+         * Video HDR mode setting is not supported.
+         */
+         public List<String> getSupportedVideoHDRModes() {
+            String str = get(KEY_QC_VIDEO_HDR + SUPPORTED_VALUES_SUFFIX);
             return split(str);
          }
 
@@ -4972,6 +5032,24 @@ public class Camera {
          */
          public void setVideoHighFrameRate(String hfr) {
             set(KEY_QC_VIDEO_HIGH_FRAME_RATE, hfr);
+         }
+
+         /** @hide
+         * Gets the current Video HDR Mode.
+         *
+         * @return Video HDR mode value
+         */
+         public String getVideoHDRMode() {
+            return get(KEY_QC_VIDEO_HDR);
+         }
+
+         /** @hide
+         * Sets the current Video HDR Mode.
+         *
+         * @return null
+         */
+         public void setVideoHDRMode(String videohdr) {
+            set(KEY_QC_VIDEO_HDR, videohdr);
          }
 
          /** @hide

@@ -26,6 +26,7 @@ import android.app.PendingIntent;
 import android.app.TaskStackBuilder;
 import android.content.ActivityNotFoundException;
 import android.content.BroadcastReceiver;
+import android.content.ContentResolver;
 import android.content.Context;
 import android.content.Intent;
 import android.content.IntentFilter;
@@ -75,6 +76,11 @@ import com.android.internal.statusbar.StatusBarIconList;
 import com.android.internal.widget.SizeAdaptiveLayout;
 import com.android.internal.util.omni.TaskUtils;
 import com.android.internal.util.omni.OmniSwitchConstants;
+import static com.android.internal.util.omni.DeviceUtils.IMMERSIVE_MODE_OFF;
+import static com.android.internal.util.omni.DeviceUtils.IMMERSIVE_MODE_FULL;
+import static com.android.internal.util.omni.DeviceUtils.IMMERSIVE_MODE_HIDE_ONLY_NAVBAR;
+import static com.android.internal.util.omni.DeviceUtils.IMMERSIVE_MODE_HIDE_ONLY_STATUSBAR;
+
 import com.android.systemui.R;
 import com.android.systemui.RecentsComponent;
 import com.android.systemui.recent.RecentTasksLoader;
@@ -165,6 +171,7 @@ public abstract class BaseStatusBar extends SystemUI implements
     protected Display mDisplay;
 
     private boolean mDeviceProvisioned = false;
+    protected int mImmersiveModeStyle;
 
     private RecentsComponent mRecents;
 
@@ -191,6 +198,32 @@ public abstract class BaseStatusBar extends SystemUI implements
             }
         }
     };
+
+    private class GlobalsObserver extends ContentObserver {
+        public GlobalsObserver(Handler handler) {
+            super(handler);
+        }
+
+        public void observe() {
+            final ContentResolver resolver = mContext.getContentResolver();
+            resolver.registerContentObserver(Settings.System.getUriFor(
+                    Settings.System.IMMERSIVE_MODE), false, this);
+            update();
+        }
+
+        @Override
+        public void onChange(boolean selfChange) {
+            update();
+        }
+
+        private void update() {
+            final ContentResolver resolver = mContext.getContentResolver();
+            mImmersiveModeStyle = Settings.System.getIntForUser(mContext.getContentResolver(),
+                        Settings.System.IMMERSIVE_MODE, IMMERSIVE_MODE_OFF, UserHandle.USER_CURRENT);
+        }
+    };
+
+    private GlobalsObserver mGlobalsObserver = new GlobalsObserver(mHandler);
 
     private RemoteViews.OnClickHandler mOnClickHandler = new RemoteViews.OnClickHandler() {
         @Override
@@ -257,6 +290,8 @@ public abstract class BaseStatusBar extends SystemUI implements
         mContext.getContentResolver().registerContentObserver(
                 Settings.Global.getUriFor(Settings.Global.DEVICE_PROVISIONED), true,
                 mSettingsObserver);
+
+        mGlobalsObserver.observe();
 
         mBarService = IStatusBarService.Stub.asInterface(
                 ServiceManager.getService(Context.STATUS_BAR_SERVICE));
@@ -431,7 +466,7 @@ public abstract class BaseStatusBar extends SystemUI implements
                         mNotificationBlamePopup.getMenu());
 
                 MenuItem hideIconCheck = mNotificationBlamePopup.getMenu().findItem(R.id.notification_hide_icon_packages);
-                if(hideIconCheck != null) {
+                if (hideIconCheck != null) {
                     hideIconCheck.setChecked(isIconHiddenByUser(packageNameF));
                     if (packageNameF.equals("android")) {
                         // cannot set it, no one likes a liar 
@@ -596,7 +631,7 @@ public abstract class BaseStatusBar extends SystemUI implements
             mContext.sendBroadcastAsUser(showIntent, UserHandle.CURRENT);
         } else {
             if (mRecents != null) {
-                mRecents.toggleRecents(mDisplay, mLayoutDirection, getStatusBarView());
+                mRecents.toggleRecents(mDisplay, mLayoutDirection, getStatusBarView(), mImmersiveModeStyle);
             }
         }
     }
@@ -962,6 +997,11 @@ public abstract class BaseStatusBar extends SystemUI implements
         }
     }
 
+    protected boolean immersiveModeHidesStatusBar() {
+        return (mImmersiveModeStyle == IMMERSIVE_MODE_FULL)
+            || (mImmersiveModeStyle == IMMERSIVE_MODE_HIDE_ONLY_STATUSBAR);
+    }
+
     protected abstract void haltTicker();
     protected abstract void setAreThereNotifications();
     protected abstract void updateNotificationIcons();
@@ -1225,25 +1265,24 @@ public abstract class BaseStatusBar extends SystemUI implements
 
     protected void setIconHiddenByUser(String iconPackage, boolean hide) {
         if (iconPackage == null
-                || iconPackage.isEmpty()
-                || iconPackage.equals("android")) {
+            || iconPackage.isEmpty()
+            || iconPackage.equals("android")) {
             return;
         }
         mContext.getSharedPreferences("hidden_statusbar_icon_packages", 0)
-                .edit()
-                .putBoolean(iconPackage, hide)
-                .apply();
+            .edit()
+            .putBoolean(iconPackage, hide)
+            .apply();
     }
 
     protected boolean isIconHiddenByUser(String iconPackage) {
         if (iconPackage == null
-                || iconPackage.isEmpty()
-                || iconPackage.equals("android")) {
+            || iconPackage.isEmpty()
+            || iconPackage.equals("android")) {
             return false;
-
         }
         final boolean hide = mContext.getSharedPreferences("hidden_statusbar_icon_packages", 0)
-                .getBoolean(iconPackage, false);
+                   .getBoolean(iconPackage, false);
         return hide;
     }
 }

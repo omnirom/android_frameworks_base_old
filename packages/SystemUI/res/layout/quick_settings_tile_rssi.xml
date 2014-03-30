@@ -41,7 +41,7 @@
             />
     </FrameLayout>
     <ImageView
-            android:id="@+id/activity_in"
+            android:id="@+id/rssi_activity_in"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:src="@drawable/ic_qs_signal_in"
@@ -49,7 +49,7 @@
             android:layout_alignBottom="@id/rssi_images"
             />
     <ImageView
-            android:id="@+id/activity_out"
+            android:id="@+id/rssi_activity_out"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:src="@drawable/ic_qs_signal_out"

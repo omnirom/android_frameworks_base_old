@@ -3199,8 +3199,15 @@ public class WindowManagerService extends IWindowManager.Stub
         // is running.
         if (okToDisplay()) {
             DisplayInfo displayInfo = getDefaultDisplayInfoLocked();
-            final int width = displayInfo.appWidth;
-            final int height = displayInfo.appHeight;
+            final int width;
+            final int height;
+            if (mPolicy.isImmersiveMode(mLastStatusBarVisibility)) {
+                width = displayInfo.logicalWidth;
+                height = displayInfo.logicalHeight;
+            } else {
+                width = displayInfo.appWidth;
+                height = displayInfo.appHeight;
+            }
             if (DEBUG_APP_TRANSITIONS || DEBUG_ANIM) Slog.v(TAG, "applyAnimation: atoken="
                     + atoken);
             Animation a = mAppTransition.loadAnimation(lp, transit, enter, width, height);
@@ -4319,6 +4326,11 @@ public class WindowManagerService extends IWindowManager.Stub
             // If we are preparing an app transition, then delay changing
             // the visibility of this token until we execute that transition.
             if (okToDisplay() && mAppTransition.isTransitionSet()) {
+                // Already in requested state, don't do anything more.
+                if (wtoken.hiddenRequested != visible) {
+                    return;
+                }
+
                 wtoken.hiddenRequested = !visible;
 
                 if (!wtoken.startingDisplayed) {
@@ -5639,10 +5651,6 @@ public class WindowManagerService extends IWindowManager.Stub
                         screenshotReady = true;
                     }
 
-                    if (fullscreen) {
-                        // No point in continuing down through windows.
-                        break;
-                    }
                 }
 
                 if (appToken != null && appWin == null) {
@@ -8647,8 +8655,17 @@ public class WindowManagerService extends IWindowManager.Stub
                     drawSurface.release();
                     appAnimator.thumbnailLayer = topOpeningLayer;
                     DisplayInfo displayInfo = getDefaultDisplayInfoLocked();
+                    final int width;
+                    final int height;
+                    if (mPolicy.isImmersiveMode(mLastStatusBarVisibility)) {
+                        width = displayInfo.logicalWidth;
+                        height = displayInfo.logicalHeight;
+                    } else {
+                        width = displayInfo.appWidth;
+                        height = displayInfo.appHeight;
+                    }
                     Animation anim = mAppTransition.createThumbnailAnimationLocked(
-                            transit, true, true, displayInfo.appWidth, displayInfo.appHeight);
+                            transit, true, true, width, height);
                     appAnimator.thumbnailAnimation = anim;
                     anim.restrictDuration(MAX_ANIMATION_DURATION);
                     anim.scaleCurrentDuration(mTransitionAnimationScale);

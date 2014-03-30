@@ -23,6 +23,7 @@ import android.content.res.Resources;
 import android.hardware.SensorManager;
 import android.net.ConnectivityManager;
 import android.nfc.NfcAdapter;
+import android.os.SystemProperties;
 import android.os.Vibrator;
 import android.telephony.TelephonyManager;
 import android.util.DisplayMetrics;
@@ -37,10 +38,15 @@ import java.util.List;
 
 public class DeviceUtils {
 
+    public static final int IMMERSIVE_MODE_OFF = 0;
+    public static final int IMMERSIVE_MODE_FULL = 1;
+    public static final int IMMERSIVE_MODE_HIDE_ONLY_NAVBAR = 2;
+    public static final int IMMERSIVE_MODE_HIDE_ONLY_STATUSBAR = 3;
+
     // Device types
-    private static final int DEVICE_PHONE  = 0;
-    private static final int DEVICE_HYBRID = 1;
-    private static final int DEVICE_TABLET = 2;
+    public static final int DEVICE_PHONE  = 0;
+    public static final int DEVICE_HYBRID = 1;
+    public static final int DEVICE_TABLET = 2;
 
     public static boolean deviceSupportsUsbTether(Context context) {
         ConnectivityManager cm =
@@ -111,6 +117,12 @@ public class DeviceUtils {
     public static boolean deviceSupportsLightSensor(Context context) {
         SensorManager sm = (SensorManager) context.getSystemService(Context.SENSOR_SERVICE);
         return sm.getDefaultSensor(TYPE_LIGHT) != null;
+    }
+
+    public static boolean deviceSupportNavigationBar(Context context) {
+        boolean hasNavBar = context.getResources().getBoolean(
+                com.android.internal.R.bool.config_showNavigationBar);
+        return hasNavBar || (SystemProperties.getInt("qemu.hw.mainkeys", 1) == 0);
     }
 
     public static boolean isAppInstalled(Context context, String appUri) {

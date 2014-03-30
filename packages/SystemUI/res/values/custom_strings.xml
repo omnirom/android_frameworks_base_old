@@ -55,10 +55,19 @@
     <string name="quick_settings_battery_charging">Charging</string>
     <string name="quick_settings_battery_discharging">Discharging</string>
 
+    <!-- QS NFC Tile -->
+    <string name="quick_settings_nfc_off">NFC off</string>
+    <string name="quick_settings_nfc_on">NFC on</string>
+
     <!-- QuickSettings: Immersive mode [CHAR LIMIT=NONE] -->
-    <string name="quick_settings_immersive_mode_label">Immersive</string>
+    <string name="quick_settings_immersive_global_on_label">Immersive</string>
     <!-- QuickSettings: Immersive mode (Off) [CHAR LIMIT=NONE] -->
-    <string name="quick_settings_immersive_mode_off_label">Immersive Off</string>
+    <string name="quick_settings_immersive_global_off_label">Immersive Off</string>
+    <!-- QuickSettings: Immersive extra modes [CHAR LIMIT=NONE] -->
+    <string name="quick_settings_immersive_mode_off_label">Disabled</string>
+    <string name="quick_settings_immersive_mode_full_label">Full</string>
+    <string name="quick_settings_immersive_mode_no_status_bar_label">Navigation bar</string>
+    <string name="quick_settings_immersive_mode_no_navigation_bar_label">Status bar</string>
 
     <string name="network_4G">4G/LTE</string>
     <string name="network_3G_only">3G Only</string>
