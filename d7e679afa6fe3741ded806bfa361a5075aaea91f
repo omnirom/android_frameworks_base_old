@@ -1,0 +1,21 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "8b77b57d_df14feef",
+        "filename": "packages/SystemUI/res/values-fr/custom_strings.xml",
+        "patchSetId": 2
+      },
+      "lineNbr": 41,
+      "author": {
+        "id": 1000519
+      },
+      "writtenOn": "2014-03-30T08:24:07Z",
+      "side": 1,
+      "message": "Barre de statut",
+      "revId": "d7e679afa6fe3741ded806bfa361a5075aaea91f",
+      "serverId": "56841c99-7c94-43d4-bf0b-cb4707e66d55",
+      "unresolved": false
+    }
+  ]
+}
