@@ -186,8 +186,7 @@ public class LocationController extends BroadcastReceiver {
         // for the current foreground user.
         int mode = Settings.Secure.getIntForUser(resolver, Settings.Secure.LOCATION_MODE,
                     Settings.Secure.LOCATION_MODE_OFF, ActivityManager.getCurrentUser());
-        return (mode == Settings.Secure.LOCATION_MODE_BATTERY_SAVING)
-                 || (mode == Settings.Secure.LOCATION_MODE_HIGH_ACCURACY);
+        return (mode == Settings.Secure.LOCATION_MODE_BATTERY_SAVING);
     }
 
     /**
