@@ -158,8 +158,9 @@ public class BatteryPercentMeterView extends TextView {
     public void updateSettings() {
         Resources res = getResources();
         ContentResolver resolver = mContext.getContentResolver();
-        int batteryStyle = Settings.System.getInt(getContext().getContentResolver(),
-                                Settings.System.STATUS_BAR_BATTERY_STYLE, 0);
+        int batteryStyle = Settings.System.getIntForUser(getContext().getContentResolver(),
+                                Settings.System.STATUS_BAR_BATTERY_STYLE, 0
+                                , UserHandle.USER_CURRENT);
         mActivated = batteryStyle == 5
             || (batteryStyle == 2 && mPercentBatteryView.equals(StatusBar));
         setVisibility(mActivated ? View.VISIBLE : View.GONE);
