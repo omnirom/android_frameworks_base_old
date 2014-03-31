@@ -1,0 +1,21 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "8b77b57d_baef50ab",
+        "filename": "core/java/android/provider/Downloads.java",
+        "patchSetId": 3
+      },
+      "lineNbr": 596,
+      "author": {
+        "id": 1000026
+      },
+      "writtenOn": "2014-03-31T15:26:52Z",
+      "side": 1,
+      "message": "@hide?",
+      "revId": "cf20085043e6d4196fc953b194ac0d8855ba3343",
+      "serverId": "56841c99-7c94-43d4-bf0b-cb4707e66d55",
+      "unresolved": false
+    }
+  ]
+}
