@@ -93,7 +93,7 @@ public class CircleMemoryMeter extends ImageView {
         mPaintOrange.setStrokeCap(Paint.Cap.BUTT);
         mPaintRed.setStrokeCap(Paint.Cap.BUTT);
 
-        mPaintBackground.setColor(Color.argb(200, 255, 255, 255));
+        mPaintBackground.setColor(Color.argb(200, 153, 153, 153));
         mPaintGreen.setColor(Color.argb(170, 166, 198, 61));
         mPaintOrange.setColor(Color.argb(170, 255, 187, 51));
         mPaintRed.setColor(Color.argb(170, 255, 68, 68));
