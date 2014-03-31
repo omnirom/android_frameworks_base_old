@@ -345,16 +345,17 @@ public class RecentsPanelView extends FrameLayout implements OnItemClickListener
             mRecentsNoApps.setAlpha(1f);
             mRecentsNoApps.setVisibility(noApps ? View.VISIBLE : View.INVISIBLE);
 
-            boolean showClearAllButton = Settings.System.getInt(mContext.getContentResolver(),
-                    Settings.System.SHOW_CLEAR_RECENTS_BUTTON, 0) == 1;
-            boolean showMemoryIndicator = Settings.System.getInt(mContext.getContentResolver(),
-                    Settings.System.SHOW_RECENTS_MEMORY_INDICATOR, 0) == 1;
+            boolean showClearAllButton = Settings.System.getIntForUser(mContext.getContentResolver(),
+                    Settings.System.SHOW_CLEAR_RECENTS_BUTTON, 0, UserHandle.USER_CURRENT) == 1;
+            boolean showMemoryIndicator = Settings.System.getIntForUser(mContext.getContentResolver(),
+                    Settings.System.SHOW_RECENTS_MEMORY_INDICATOR, 0, UserHandle.USER_CURRENT) == 1;
 
             if (showMemoryIndicator) {
-                int recentsMemoryIndicatorLocation = Settings.System.getInt(
+
+                int recentsMemoryIndicatorLocation = Settings.System.getIntForUser(
                         mContext.getContentResolver(),
                         Settings.System.RECENTS_MEMORY_INDICATOR_LOCATION,
-                        Constants.CLEAR_ALL_BUTTON_BOTTOM_LEFT);
+                        Constants.CLEAR_ALL_BUTTON_BOTTOM_LEFT, UserHandle.USER_CURRENT);
 
                 FrameLayout.LayoutParams layoutParams = (FrameLayout.LayoutParams)
                         mRecentsMemoryIndicator.getLayoutParams();
@@ -383,10 +384,10 @@ public class RecentsPanelView extends FrameLayout implements OnItemClickListener
             }
 
             if (showClearAllButton && !noApps) {
-                int clearAllButtonLocation = Settings.System.getInt(
+                int clearAllButtonLocation = Settings.System.getIntForUser(
                         mContext.getContentResolver(),
                         Settings.System.CLEAR_RECENTS_BUTTON_LOCATION,
-                        Constants.CLEAR_ALL_BUTTON_BOTTOM_LEFT);
+                        Constants.CLEAR_ALL_BUTTON_BOTTOM_LEFT, UserHandle.USER_CURRENT);
 
                 FrameLayout.LayoutParams layoutParams = (FrameLayout.LayoutParams)
                         mClearAllRecents.getLayoutParams();
@@ -530,18 +531,20 @@ public class RecentsPanelView extends FrameLayout implements OnItemClickListener
                 }
             });
         }
-        boolean showClearAllButton = Settings.System.getInt(mContext.getContentResolver(),
-                    Settings.System.SHOW_CLEAR_RECENTS_BUTTON, 0) == 1;
+
+        boolean showClearAllButton = Settings.System.getIntForUser(mContext.getContentResolver(),
+                   Settings.System.SHOW_CLEAR_RECENTS_BUTTON, 0, UserHandle.USER_CURRENT) == 1;
         if (!showClearAllButton){
             mClearAllRecents.setVisibility(View.GONE);
         }
 
         mRecentsMemoryIndicator = (CircleMemoryMeter) findViewById(R.id.circle_meter);
-        boolean showMemoryIndicator = Settings.System.getInt(mContext.getContentResolver(),
-                    Settings.System.SHOW_RECENTS_MEMORY_INDICATOR, 0) == 1;
+        boolean showMemoryIndicator = Settings.System.getIntForUser(mContext.getContentResolver(),
+                   Settings.System.SHOW_RECENTS_MEMORY_INDICATOR, 0, UserHandle.USER_CURRENT) == 1;
         if (!showMemoryIndicator){
             mRecentsMemoryIndicator.setVisibility(View.GONE);
         }
+
         if (mRecentsScrim != null) {
             mHighEndGfx = ActivityManager.isHighEndGfx();
             if (!mHighEndGfx) {

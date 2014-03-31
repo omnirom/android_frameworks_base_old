@@ -20,6 +20,7 @@ import android.content.Context;
 import android.content.res.Resources;
 import android.graphics.Canvas;
 import android.graphics.drawable.Drawable;
+import android.os.UserHandle;
 import android.provider.Settings;
 import android.util.AttributeSet;
 import android.util.EventLog;
@@ -133,10 +134,10 @@ public class NotificationPanelView extends PanelView {
                     mGestureStartY = event.getY(0);
                     mTrackingSwipe = isFullyExpanded();
                     mOkToFlip = getExpandedHeight() == 0;
-                    int quickPulldownMode = Settings.System.getInt(getContext().getContentResolver(),
-                            Settings.System.QS_QUICK_PULLDOWN, 0);
-                    int smartPulldownMode = Settings.System.getInt(getContext().getContentResolver(),
-                            Settings.System.QS_SMART_PULLDOWN, 0);
+                    int quickPulldownMode = Settings.System.getIntForUser(getContext().getContentResolver(),
+                            Settings.System.QS_QUICK_PULLDOWN, 0, UserHandle.USER_CURRENT);
+                    int smartPulldownMode = Settings.System.getIntForUser(getContext().getContentResolver(),
+                            Settings.System.QS_SMART_PULLDOWN, 0, UserHandle.USER_CURRENT);
                     if (smartPulldownMode == 1 && !mStatusBar.hasClearableNotifications()) {
                         flip = true;
                     } else if (smartPulldownMode == 2 && !mStatusBar.hasVisibleNotifications()) {
@@ -157,8 +158,9 @@ public class NotificationPanelView extends PanelView {
                     flip = true;
                     break;
                 case MotionEvent.ACTION_MOVE:
-                    if (Settings.System.getInt(getContext().getContentResolver(),
-                            Settings.System.QUICK_SWIPE, 1) == 1 && !mStatusBar.isEditModeEnabled()) {
+                    if (Settings.System.getIntForUser(getContext().getContentResolver(),
+                            Settings.System.QUICK_SWIPE, 1, UserHandle.USER_CURRENT) == 1
+                        && !mStatusBar.isEditModeEnabled()) {
                         final float deltaX = Math.abs(event.getX(0) - mGestureStartX);
                         final float deltaY = Math.abs(event.getY(0) - mGestureStartY);
                         final float maxDeltaY = getHeight() * STATUS_BAR_SWIPE_VERTICAL_MAX_PERCENTAGE;

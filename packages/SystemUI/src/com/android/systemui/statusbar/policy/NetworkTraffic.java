@@ -16,6 +16,7 @@ import android.net.Uri;
 import android.os.Handler;
 import android.os.Message;
 import android.os.SystemClock;
+import android.os.UserHandle;
 import android.provider.Settings;
 import android.util.AttributeSet;
 import android.util.TypedValue;
@@ -230,7 +231,8 @@ public class NetworkTraffic extends TextView {
 
     private void updateSettings() {
         ContentResolver resolver = mContext.getContentResolver();
-        mState = Settings.System.getInt(resolver, Settings.System.NETWORK_TRAFFIC_STATE, 0);
+        mState = Settings.System.getIntForUser(resolver, Settings.System.NETWORK_TRAFFIC_STATE, 0
+                 , UserHandle.USER_CURRENT);
         if (isSet(mState, MASK_UNIT)) {
             KB = KILOBYTE;
         } else {
