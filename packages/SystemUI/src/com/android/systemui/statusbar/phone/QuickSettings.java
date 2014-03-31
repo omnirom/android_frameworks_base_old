@@ -879,13 +879,12 @@ class QuickSettings {
                   quiteHourTile.setOnClickListener(new View.OnClickListener() {
                        @Override
                        public void onClick(View v) {
-                           boolean checkModeOn = Settings.System.getInt(mContext
-                                  .getContentResolver(), Settings.System.QUIET_HOURS_ENABLED, 0) == 1;
-                           Settings.System.putInt(mContext.getContentResolver(),
-                                 Settings.System.QUIET_HOURS_ENABLED, checkModeOn ? 0 : 1);
-                           Intent scheduleSms = new Intent();
-                           scheduleSms.setAction("com.android.settings.slim.service.SCHEDULE_SERVICE_COMMAND");
-                           mContext.sendBroadcast(scheduleSms);
+                           boolean checkModeOn = Settings.System.getIntForUser(mContext
+                                  .getContentResolver(), Settings.System.QUIET_HOURS_ENABLED, 0
+                                  , UserHandle.USER_CURRENT) != 0;
+                           Settings.System.putIntForUser(mContext.getContentResolver(),
+                                 Settings.System.QUIET_HOURS_ENABLED, checkModeOn ? 0 : 1
+                                 , UserHandle.USER_CURRENT);
                       }
                   });
                   quiteHourTile.setOnLongClickListener(new View.OnLongClickListener() {
