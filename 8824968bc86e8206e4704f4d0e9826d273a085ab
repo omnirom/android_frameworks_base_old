@@ -1,0 +1,21 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "8b77b57d_3ae260d2",
+        "filename": "core/java/android/preference/MultiSelectListPreference.java",
+        "patchSetId": 2
+      },
+      "lineNbr": 211,
+      "author": {
+        "id": 1000313
+      },
+      "writtenOn": "2014-03-31T14:55:50Z",
+      "side": 1,
+      "message": "when adding any defaultvalue for custom preference, this fetch from that too",
+      "revId": "8824968bc86e8206e4704f4d0e9826d273a085ab",
+      "serverId": "56841c99-7c94-43d4-bf0b-cb4707e66d55",
+      "unresolved": false
+    }
+  ]
+}
