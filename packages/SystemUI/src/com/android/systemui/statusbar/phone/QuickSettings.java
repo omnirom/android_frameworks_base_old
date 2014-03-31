@@ -347,8 +347,9 @@ class QuickSettings {
         if (mBatteryTile == null || mModel == null) {
             return;
         }
-        mBatteryStyle = Settings.System.getInt(mContext.getContentResolver(),
-                                Settings.System.STATUS_BAR_BATTERY_STYLE, 0);
+        mBatteryStyle = Settings.System.getIntForUser(mContext.getContentResolver(),
+                                Settings.System.STATUS_BAR_BATTERY_STYLE, 0
+                        , UserHandle.USER_CURRENT);
         mBatteryTile.updateBatterySettings();
         mModel.refreshBatteryTile();
     }
@@ -360,8 +361,8 @@ class QuickSettings {
         if (reset) {
             parent.removeAllViews();
         }
-        String tileContainer = Settings.System.getString(mContext.getContentResolver(),
-                Settings.System.QUICK_SETTINGS_TILES);
+        String tileContainer = Settings.System.getStringForUser(mContext.getContentResolver(),
+                Settings.System.QUICK_SETTINGS_TILES, UserHandle.USER_CURRENT);
         if (tileContainer == null) tileContainer = DEFAULT_TILES;
         Tile[] allTiles = Tile.values();
         String[] storedTiles = tileContainer.split(DELIMITER);
@@ -879,10 +880,12 @@ class QuickSettings {
                   quiteHourTile.setOnClickListener(new View.OnClickListener() {
                        @Override
                        public void onClick(View v) {
-                           boolean checkModeOn = Settings.System.getInt(mContext
-                                  .getContentResolver(), Settings.System.QUIET_HOURS_ENABLED, 0) == 1;
-                           Settings.System.putInt(mContext.getContentResolver(),
-                                 Settings.System.QUIET_HOURS_ENABLED, checkModeOn ? 0 : 1);
+                           boolean checkModeOn = Settings.System.getIntForUser(mContext
+                                  .getContentResolver(), Settings.System.QUIET_HOURS_ENABLED, 0
+                                  , UserHandle.USER_CURRENT) != 0;
+                           Settings.System.putIntForUser(mContext.getContentResolver(),
+                                 Settings.System.QUIET_HOURS_ENABLED, checkModeOn ? 0 : 1
+                                 , UserHandle.USER_CURRENT);
                            Intent scheduleSms = new Intent();
                            scheduleSms.setAction("com.android.settings.slim.service.SCHEDULE_SERVICE_COMMAND");
                            mContext.sendBroadcast(scheduleSms);
