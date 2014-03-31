@@ -146,7 +146,6 @@ public class SearchPanelView extends FrameLayout implements
         mGlowPadView = (GlowPadView) findViewById(R.id.glow_pad_view);
         mGlowPadView.setOnTriggerListener(mGlowPadViewListener);
         updateSettings();
-        setDrawables();
     }
 
     private void setDrawables() {
@@ -334,8 +333,9 @@ public class SearchPanelView extends FrameLayout implements
         return configuration.orientation == Configuration.ORIENTATION_PORTRAIT;
     }
 
-    private void updateSettings() {
+    public void updateSettings() {
         mTargetActivities = NavigationRingHelpers.getTargetActions(mContext);
+        setDrawables();
     }
 
     private class SettingsObserver extends ContentObserver {
@@ -348,7 +348,7 @@ public class SearchPanelView extends FrameLayout implements
             for (int i = 0; i < NavigationRingHelpers.MAX_ACTIONS; i++) {
                 resolver.registerContentObserver(
                         Settings.System.getUriFor(Settings.System.NAVIGATION_RING_TARGETS[i]),
-                        false, this);
+                        false, this, UserHandle.USER_ALL);
             }
         }
         void unobserve() {
@@ -358,7 +358,6 @@ public class SearchPanelView extends FrameLayout implements
         @Override
         public void onChange(boolean selfChange) {
             updateSettings();
-            setDrawables();
         }
     }
 }

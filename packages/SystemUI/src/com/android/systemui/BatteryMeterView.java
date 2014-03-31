@@ -35,6 +35,7 @@ import android.graphics.Typeface;
 import android.os.BatteryManager;
 import android.os.Bundle;
 import android.os.Handler;
+import android.os.UserHandle;
 import android.provider.Settings;
 import android.util.AttributeSet;
 import android.view.View;
@@ -273,8 +274,9 @@ public class BatteryMeterView extends View implements DemoMode {
     }
 
     public void updateSettings(){
-        int batteryStyle = Settings.System.getInt(getContext().getContentResolver(),
-                                Settings.System.STATUS_BAR_BATTERY_STYLE, 0);
+        int batteryStyle = Settings.System.getIntForUser(getContext().getContentResolver(),
+                                Settings.System.STATUS_BAR_BATTERY_STYLE, 0
+                                , UserHandle.USER_CURRENT);
 
         mShowPercent = batteryStyle == 1;
         boolean show = (batteryStyle == 0 || batteryStyle == 2 || mShowPercent
