@@ -886,9 +886,6 @@ class QuickSettings {
                            Settings.System.putIntForUser(mContext.getContentResolver(),
                                  Settings.System.QUIET_HOURS_ENABLED, checkModeOn ? 0 : 1
                                  , UserHandle.USER_CURRENT);
-                           Intent scheduleSms = new Intent();
-                           scheduleSms.setAction("com.android.settings.slim.service.SCHEDULE_SERVICE_COMMAND");
-                           mContext.sendBroadcast(scheduleSms);
                       }
                   });
                   quiteHourTile.setOnLongClickListener(new View.OnLongClickListener() {
