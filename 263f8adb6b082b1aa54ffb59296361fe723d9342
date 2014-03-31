@@ -1,0 +1,21 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "8b77b57d_fad708f7",
+        "filename": "packages/SystemUI/src/com/android/systemui/recent/RecentTasksLoader.java",
+        "patchSetId": 2
+      },
+      "lineNbr": 484,
+      "author": {
+        "id": 1000026
+      },
+      "writtenOn": "2014-03-31T14:33:55Z",
+      "side": 1,
+      "message": "nitpick :)",
+      "revId": "263f8adb6b082b1aa54ffb59296361fe723d9342",
+      "serverId": "56841c99-7c94-43d4-bf0b-cb4707e66d55",
+      "unresolved": false
+    }
+  ]
+}
