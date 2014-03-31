@@ -98,8 +98,10 @@
     <string name="quick_settings_network_type">Status</string>
     <string name="quick_settings_network_unknown">Unknown</string>
     <string name="quick_settings_network_disable">\nNo internet</string>
-    <string name="quick_settings_quiethours_label">Quiet hours</string>
-    <string name="quick_settings_quiethours_off_label">Quiet hours off</string>
+    <string name="quick_settings_quiethours_label">Quiet hours off</string>
+    <string name="quick_settings_quiethours_off_label">Quiet hours disabled</string>
+    <string name="quick_settings_quiethours_active_label">Quiet hours active</string>
+    <string name="quick_settings_quiethours_paused_label">Quiet hours paused</string>
     <string name="quick_settings_ringer_on">Sound on</string>
     <string name="quick_settings_ringer_off">Sound off</string>
     <string name="quick_settings_ringer_normal">Sound</string>
