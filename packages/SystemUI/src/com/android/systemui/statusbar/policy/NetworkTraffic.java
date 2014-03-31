@@ -16,6 +16,7 @@ import android.net.Uri;
 import android.os.Handler;
 import android.os.Message;
 import android.os.SystemClock;
+import android.os.UserHandle;
 import android.provider.Settings;
 import android.util.AttributeSet;
 import android.util.TypedValue;
@@ -150,7 +151,7 @@ public class NetworkTraffic extends TextView {
         void observe() {
             ContentResolver resolver = mContext.getContentResolver();
             Uri uri = Settings.System.getUriFor(Settings.System.NETWORK_TRAFFIC_STATE);
-            resolver.registerContentObserver(uri, false, this);
+            resolver.registerContentObserver(uri, false, this, UserHandle.USER_ALL);
         }
 
         /*
@@ -228,9 +229,10 @@ public class NetworkTraffic extends TextView {
         return network != null && network.isConnected();
     }
 
-    private void updateSettings() {
+    public void updateSettings() {
         ContentResolver resolver = mContext.getContentResolver();
-        mState = Settings.System.getInt(resolver, Settings.System.NETWORK_TRAFFIC_STATE, 0);
+        mState = Settings.System.getIntForUser(resolver, Settings.System.NETWORK_TRAFFIC_STATE, 0
+                 , UserHandle.USER_CURRENT);
         if (isSet(mState, MASK_UNIT)) {
             KB = KILOBYTE;
         } else {

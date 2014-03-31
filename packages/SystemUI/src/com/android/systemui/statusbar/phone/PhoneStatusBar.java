@@ -114,6 +114,7 @@ import com.android.systemui.statusbar.policy.BatteryController;
 import com.android.systemui.statusbar.policy.BluetoothController;
 import com.android.systemui.statusbar.policy.Clock;
 import com.android.systemui.statusbar.policy.ClockCenter;
+import com.android.systemui.statusbar.policy.NetworkTraffic;
 import com.android.systemui.statusbar.policy.DateView;
 import com.android.systemui.statusbar.policy.HeadsUpNotificationView;
 import com.android.systemui.statusbar.policy.KeyButtonView;
@@ -221,6 +222,7 @@ public class PhoneStatusBar extends BaseStatusBar implements DemoMode {
     Clock mClock;
     ClockCenter mClockCenter;
     View mCenterSpacer;
+    NetworkTraffic mNetworkTraffic;
 
     private BatteryMeterView mBattery;
     private BatteryCircleMeterView mCircleBattery;
@@ -354,11 +356,11 @@ public class PhoneStatusBar extends BaseStatusBar implements DemoMode {
         void observe() {
             ContentResolver resolver = mContext.getContentResolver();
             resolver.registerContentObserver(Settings.System.getUriFor(
-                    Settings.System.STATUS_BAR_BRIGHTNESS_CONTROL), false, this);
+                    Settings.System.STATUS_BAR_BRIGHTNESS_CONTROL), false, this, UserHandle.USER_ALL);
             resolver.registerContentObserver(Settings.System.getUriFor(
-                    Settings.System.SCREEN_BRIGHTNESS_MODE), false, this);
+                    Settings.System.SCREEN_BRIGHTNESS_MODE), false, this, UserHandle.USER_ALL);
             resolver.registerContentObserver(Settings.System.getUriFor(
-                    Settings.System.STATUS_BAR_CUSTOM_HEADER), false, this);
+                    Settings.System.STATUS_BAR_CUSTOM_HEADER), false, this, UserHandle.USER_ALL);
             update();
         }
 
@@ -370,17 +372,22 @@ public class PhoneStatusBar extends BaseStatusBar implements DemoMode {
         public void update() {
             final ContentResolver resolver = mContext.getContentResolver();
 
-            boolean autoBrightness = Settings.System.getInt(
-                    resolver, Settings.System.SCREEN_BRIGHTNESS_MODE, 0) ==
+            boolean autoBrightness = Settings.System.getIntForUser(
+                    resolver, Settings.System.SCREEN_BRIGHTNESS_MODE, 0
+                    , UserHandle.USER_CURRENT) ==
                     Settings.System.SCREEN_BRIGHTNESS_MODE_AUTOMATIC;
-            mBrightnessControl = !autoBrightness && Settings.System.getInt(
-                    resolver, Settings.System.STATUS_BAR_BRIGHTNESS_CONTROL, 0) == 1;
-            mCustomHeader = Settings.System.getInt(
-                    resolver, Settings.System.STATUS_BAR_CUSTOM_HEADER, 0) == 1;
+            mBrightnessControl = !autoBrightness && Settings.System.getIntForUser(
+                    resolver, Settings.System.STATUS_BAR_BRIGHTNESS_CONTROL, 0
+                    , UserHandle.USER_CURRENT) == 1;
+            mCustomHeader = Settings.System.getIntForUser(
+                    resolver, Settings.System.STATUS_BAR_CUSTOM_HEADER, 0
+                    , UserHandle.USER_CURRENT) == 1;
             updateCustomHeaderStatus();
 
         }
     }
+
+    private SettingsObserver mSettingsObserver = new SettingsObserver(mHandler);
 
     private class TilesChangedObserver extends ContentObserver {
         TilesChangedObserver(Handler handler) {
@@ -390,9 +397,9 @@ public class PhoneStatusBar extends BaseStatusBar implements DemoMode {
         void observe() {
             ContentResolver resolver = mContext.getContentResolver();
             resolver.registerContentObserver(Settings.System.getUriFor(
-                    Settings.System.QUICK_SETTINGS_TILES), false, this);
+                    Settings.System.QUICK_SETTINGS_TILES), false, this, UserHandle.USER_ALL);
             resolver.registerContentObserver(Settings.System.getUriFor(
-                    Settings.System.QUICK_SETTINGS_TILES_ROW), false, this);
+                    Settings.System.QUICK_SETTINGS_TILES_ROW), false, this, UserHandle.USER_ALL);
             update();
         }
 
@@ -405,6 +412,8 @@ public class PhoneStatusBar extends BaseStatusBar implements DemoMode {
             if (mQS != null) mQS.updateResources();
         }
     }
+
+    private TilesChangedObserver mTilesChangedObserver = new TilesChangedObserver(mHandler);
 
     // ensure quick settings is disabled until the current user makes it through the setup wizard
     private boolean mUserSetup = false;
@@ -459,14 +468,20 @@ public class PhoneStatusBar extends BaseStatusBar implements DemoMode {
 
         void observe() {
             mContext.getContentResolver().registerContentObserver(Settings.System.getUriFor(
-                    Settings.System.STATUS_BAR_BATTERY_STYLE), false, this);
+                    Settings.System.STATUS_BAR_BATTERY_STYLE), false, this, UserHandle.USER_ALL);
         }
 
         @Override
         public void onChange(boolean selfChange) {
+            update();
+        }
+
+        public void update() {
             updateBatteryIcons();
         }
     }
+
+    private BatteryIconSettingsObserver mBatteryIconSettingsObserver = new BatteryIconSettingsObserver(mHandler);
 
     private void updateBatteryIcons() {
         if (mQS != null) {
@@ -514,12 +529,9 @@ public class PhoneStatusBar extends BaseStatusBar implements DemoMode {
 
         addNavigationBar();
 
-        SettingsObserver observer = new SettingsObserver(mHandler);
-        observer.observe();
-        BatteryIconSettingsObserver batteryIconObserver = new BatteryIconSettingsObserver(mHandler);
-        batteryIconObserver.observe();
-        TilesChangedObserver tilesChangedObserver = new TilesChangedObserver(mHandler);
-        tilesChangedObserver.observe();
+        mSettingsObserver.observe();
+        mBatteryIconSettingsObserver.observe();
+        mTilesChangedObserver.observe();
 
         // Lastly, call to the icon policy to install/update all the icons.
         mIconPolicy = new PhoneStatusBarPolicy(mContext);
@@ -643,6 +655,7 @@ public class PhoneStatusBar extends BaseStatusBar implements DemoMode {
         mNotificationIcons.setClockCenter(mClockCenter);
         mNotificationIcons.setCenterSpacer(mCenterSpacer);
         mTickerView = mStatusBarView.findViewById(R.id.ticker);
+        mNetworkTraffic = (NetworkTraffic)mStatusBarView.findViewById(R.id.networkTraffic);
 
         mPile = (NotificationRowLayout)mStatusBarWindow.findViewById(R.id.latestItems);
         mPile.setLayoutTransitionsEnabled(false);
@@ -3083,6 +3096,14 @@ public class PhoneStatusBar extends BaseStatusBar implements DemoMode {
         if (mNavigationBarView != null) {
             mNavigationBarView.updateSettings();
         }
+        mSettingsObserver.update();
+        mBatteryIconSettingsObserver.update();
+        mTilesChangedObserver.update();
+        mNotificationIcons.updateSettings();
+        mNetworkTraffic.updateSettings();
+        mClock.updateSettings();
+        mClockCenter.updateSettings();
+
         super.userSwitched(newUserId);
     }
 

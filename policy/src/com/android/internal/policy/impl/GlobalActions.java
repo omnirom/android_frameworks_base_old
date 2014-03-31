@@ -327,14 +327,14 @@ class GlobalActions implements DialogInterface.OnDismissListener, DialogInterfac
             });
 
         // next: mobile data
-        if (Settings.System.getInt(mContext.getContentResolver(),
-                Settings.System.MOBILE_DATA_IN_POWER_MENU, 0) != 0) {
+        if (Settings.System.getIntForUser(mContext.getContentResolver(),
+                Settings.System.MOBILE_DATA_IN_POWER_MENU, 0, UserHandle.USER_CURRENT) != 0) {
             mItems.add(mMobileDataOn);
         }
 
      // next: screenshot, if enabled
-        if (Settings.System.getInt(mContext.getContentResolver(),
-                Settings.System.SCREENSHOT_IN_POWER_MENU, 0) != 0) {
+        if (Settings.System.getIntForUser(mContext.getContentResolver(),
+                Settings.System.SCREENSHOT_IN_POWER_MENU, 0, UserHandle.USER_CURRENT) != 0) {
             mItems.add(
                 new SinglePressAction(com.android.internal.R.drawable.ic_lock_screenshot,
                         R.string.global_action_screenshot) {
@@ -359,8 +359,8 @@ class GlobalActions implements DialogInterface.OnDismissListener, DialogInterfac
 
         // next: screen record, if enabled
         if (mShowScreenRecord) {
-            if (Settings.System.getInt(mContext.getContentResolver(),
-                    Settings.System.SCREENRECORD_IN_POWER_MENU, 0) != 0) {
+            if (Settings.System.getIntForUser(mContext.getContentResolver(),
+                    Settings.System.SCREENRECORD_IN_POWER_MENU, 0, UserHandle.USER_CURRENT) != 0) {
                 mItems.add(
                     new SinglePressAction(com.android.internal.R.drawable.ic_lock_screen_record,
                             R.string.global_action_screenrecord) {
@@ -385,8 +385,8 @@ class GlobalActions implements DialogInterface.OnDismissListener, DialogInterfac
         }
 
         // next: airplane mode
-        if (Settings.System.getInt(mContext.getContentResolver(),
-                Settings.System.AIRPLANE_MODE_IN_POWER_MENU, 1) != 0) {
+        if (Settings.System.getIntForUser(mContext.getContentResolver(),
+                Settings.System.AIRPLANE_MODE_IN_POWER_MENU, 1, UserHandle.USER_CURRENT) != 0) {
             mItems.add(mAirplaneModeOn);
         }
 
@@ -441,8 +441,8 @@ class GlobalActions implements DialogInterface.OnDismissListener, DialogInterfac
         }
 
         // last: silent mode
-        if (mShowSilentToggle && Settings.System.getInt(mContext.getContentResolver(),
-                Settings.System.SOUND_TOGGLES_IN_POWER_MENU, 1) != 0) {
+        if (mShowSilentToggle && Settings.System.getIntForUser(mContext.getContentResolver(),
+                Settings.System.SOUND_TOGGLES_IN_POWER_MENU, 1, UserHandle.USER_CURRENT) != 0) {
             mItems.add(mSilentModeAction);
         }
 

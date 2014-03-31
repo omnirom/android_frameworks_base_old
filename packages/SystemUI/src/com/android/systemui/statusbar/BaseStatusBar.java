@@ -207,7 +207,7 @@ public abstract class BaseStatusBar extends SystemUI implements
         public void observe() {
             final ContentResolver resolver = mContext.getContentResolver();
             resolver.registerContentObserver(Settings.System.getUriFor(
-                    Settings.System.IMMERSIVE_MODE), false, this);
+                    Settings.System.IMMERSIVE_MODE), false, this, UserHandle.USER_ALL);
             update();
         }
 
@@ -369,6 +369,10 @@ public abstract class BaseStatusBar extends SystemUI implements
 
     public void userSwitched(int newUserId) {
         // should be overridden
+        if (mSearchPanelView != null) {
+            mSearchPanelView.updateSettings();
+        }
+        mGlobalsObserver.update();
     }
 
     public boolean notificationIsForCurrentUser(StatusBarNotification n) {
@@ -616,8 +620,9 @@ public abstract class BaseStatusBar extends SystemUI implements
 
     private boolean isOmniSwitchEnabled() {
         // TODO no user specific value here
-        int settingsValue = Settings.System.getInt(
-                mContext.getContentResolver(), Settings.System.RECENTS_USE_OMNISWITCH, 0);
+        int settingsValue = Settings.System.getIntForUser(
+                mContext.getContentResolver(), Settings.System.RECENTS_USE_OMNISWITCH, 0
+                , UserHandle.USER_CURRENT);
         boolean omniSwitchStarted = false;
         if (mOmniSwitchStarted.containsKey(mCurrentUserId)){
             omniSwitchStarted = mOmniSwitchStarted.get(mCurrentUserId);
