@@ -267,6 +267,13 @@ public class DownloadManager {
     public final static int PAUSED_UNKNOWN = 4;
 
     /**
+     * Value of {@link #COLUMN_REASON} when the download is paused by manual.
+     *
+     * @hide
+     */
+    public final static int PAUSED_BY_MANUAL = 5;
+
+    /**
      * Broadcast intent action sent by the download manager when a download completes.
      */
     @SdkConstant(SdkConstantType.BROADCAST_INTENT_ACTION)
@@ -865,6 +872,7 @@ public class DownloadManager {
                     parts.add(statusClause("=", Downloads.Impl.STATUS_WAITING_TO_RETRY));
                     parts.add(statusClause("=", Downloads.Impl.STATUS_WAITING_FOR_NETWORK));
                     parts.add(statusClause("=", Downloads.Impl.STATUS_QUEUED_FOR_WIFI));
+                    parts.add(statusClause("=", Downloads.Impl.STATUS_PAUSED_BY_MANUAL));
                 }
                 if ((mStatusFlags & STATUS_SUCCESSFUL) != 0) {
                     parts.add(statusClause("=", Downloads.Impl.STATUS_SUCCESS));
@@ -972,6 +980,34 @@ public class DownloadManager {
         } 
         return mResolver.update(mBaseUri, values, getWhereClauseForIds(ids),
                 getWhereArgsForIds(ids));
+    }
+
+    /**
+     * Set the download status to STATUS_PAUSED_BY_MANUAL when user pause download.
+     *
+     * @param id the ID of the download to be paused
+     * @return the number of downloads actually updated
+     * @hide
+     */
+    public int pauseDownload(long id) {
+        ContentValues values = new ContentValues();
+        values.put(Downloads.Impl.COLUMN_STATUS, Downloads.Impl.STATUS_PAUSED_BY_MANUAL);
+
+        return mResolver.update(ContentUris.withAppendedId(mBaseUri, id), values, null, null);
+    }
+
+    /**
+     * Set the download status to STATUS_RUNNING when user resume a paused download.
+     *
+     * @param id the ID of the download to be resumed
+     * @return the number of downloads actually updated
+     * @hide
+     */
+    public int resumeDownload(long id) {
+        ContentValues values = new ContentValues();
+        values.put(Downloads.Impl.COLUMN_STATUS, Downloads.Impl.STATUS_RUNNING);
+
+        return mResolver.update(ContentUris.withAppendedId(mBaseUri, id), values, null, null);
     }
 
     /**
@@ -1360,6 +1396,9 @@ public class DownloadManager {
                 case Downloads.Impl.STATUS_QUEUED_FOR_WIFI:
                     return PAUSED_QUEUED_FOR_WIFI;
 
+                case Downloads.Impl.STATUS_PAUSED_BY_MANUAL:
+                    return PAUSED_BY_MANUAL;
+
                 default:
                     return PAUSED_UNKNOWN;
             }
@@ -1398,6 +1437,9 @@ public class DownloadManager {
                 case Downloads.Impl.STATUS_FILE_ALREADY_EXISTS_ERROR:
                     return ERROR_FILE_ALREADY_EXISTS;
 
+                case Downloads.Impl.STATUS_BLOCKED:
+                    return ERROR_BLOCKED;
+
                 default:
                     return ERROR_UNKNOWN;
             }
@@ -1415,6 +1457,7 @@ public class DownloadManager {
                 case Downloads.Impl.STATUS_WAITING_TO_RETRY:
                 case Downloads.Impl.STATUS_WAITING_FOR_NETWORK:
                 case Downloads.Impl.STATUS_QUEUED_FOR_WIFI:
+                case Downloads.Impl.STATUS_PAUSED_BY_MANUAL:
                     return STATUS_PAUSED;
 
                 case Downloads.Impl.STATUS_SUCCESS:
