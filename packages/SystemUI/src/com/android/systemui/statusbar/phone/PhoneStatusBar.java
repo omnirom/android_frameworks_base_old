@@ -370,13 +370,16 @@ public class PhoneStatusBar extends BaseStatusBar implements DemoMode {
         public void update() {
             final ContentResolver resolver = mContext.getContentResolver();
 
-            boolean autoBrightness = Settings.System.getInt(
-                    resolver, Settings.System.SCREEN_BRIGHTNESS_MODE, 0) ==
+            boolean autoBrightness = Settings.System.getIntForUser(
+                    resolver, Settings.System.SCREEN_BRIGHTNESS_MODE, 0
+                    , UserHandle.USER_CURRENT) ==
                     Settings.System.SCREEN_BRIGHTNESS_MODE_AUTOMATIC;
-            mBrightnessControl = !autoBrightness && Settings.System.getInt(
-                    resolver, Settings.System.STATUS_BAR_BRIGHTNESS_CONTROL, 0) == 1;
-            mCustomHeader = Settings.System.getInt(
-                    resolver, Settings.System.STATUS_BAR_CUSTOM_HEADER, 0) == 1;
+            mBrightnessControl = !autoBrightness && Settings.System.getIntForUser(
+                    resolver, Settings.System.STATUS_BAR_BRIGHTNESS_CONTROL, 0
+                    , UserHandle.USER_CURRENT) == 1;
+            mCustomHeader = Settings.System.getIntForUser(
+                    resolver, Settings.System.STATUS_BAR_CUSTOM_HEADER, 0
+                    , UserHandle.USER_CURRENT) == 1;
             updateCustomHeaderStatus();
 
         }
@@ -459,7 +462,7 @@ public class PhoneStatusBar extends BaseStatusBar implements DemoMode {
 
         void observe() {
             mContext.getContentResolver().registerContentObserver(Settings.System.getUriFor(
-                    Settings.System.STATUS_BAR_BATTERY_STYLE), false, this);
+                    Settings.System.STATUS_BAR_BATTERY_STYLE), false, this, UserHandle.USER_ALL);
         }
 
         @Override

@@ -780,6 +780,10 @@ class QuickSettingsModel implements BluetoothStateChangeCallback,
     }
 
     void refreshNfcTile() {
+        if (mNfcTile == null) {
+            return;
+        }
+
         try {
             Resources r = mContext.getResources();
             if(NfcAdapter.getNfcAdapter(mContext).isEnabled()) {
@@ -1947,26 +1951,29 @@ class QuickSettingsModel implements BluetoothStateChangeCallback,
     }
 
     private int getImmersiveMode() {
-        return Settings.System.getInt(mContext.getContentResolver(),
-                Settings.System.IMMERSIVE_MODE, IMMERSIVE_MODE_OFF);
+        return Settings.System.getIntForUser(mContext.getContentResolver(),
+                Settings.System.IMMERSIVE_MODE, IMMERSIVE_MODE_OFF, UserHandle.USER_CURRENT);
     }
 
     private void setImmersiveMode(int style) {
-        Settings.System.putInt(mContext.getContentResolver(),
-                Settings.System.IMMERSIVE_MODE, style);
+        Settings.System.putIntForUser(mContext.getContentResolver(),
+                Settings.System.IMMERSIVE_MODE, style
+                , UserHandle.USER_CURRENT);
         if (style != IMMERSIVE_MODE_OFF) {
             setImmersiveLastActiveState(style);
         }
     }
 
     private int getImmersiveLastActiveState() {
-        return Settings.System.getInt(mContext.getContentResolver(),
-                Settings.System.IMMERSIVE_LAST_ACTIVE_STATE, immersiveModeLastState);
+        return Settings.System.getIntForUser(mContext.getContentResolver(),
+                Settings.System.IMMERSIVE_LAST_ACTIVE_STATE, immersiveModeLastState
+                , UserHandle.USER_CURRENT);
     }
 
     private void setImmersiveLastActiveState(int style) {
-        Settings.System.putInt(mContext.getContentResolver(),
-                Settings.System.IMMERSIVE_LAST_ACTIVE_STATE, style);
+        Settings.System.putIntForUser(mContext.getContentResolver(),
+                Settings.System.IMMERSIVE_LAST_ACTIVE_STATE, style
+                , UserHandle.USER_CURRENT);
     }
 
     private void switchImmersiveFront() {
@@ -2120,8 +2127,9 @@ class QuickSettingsModel implements BluetoothStateChangeCallback,
     }
 
     private int getScreenTimeout() {
-        return Settings.System.getInt(mContext.getContentResolver(),
-                Settings.System.SCREEN_OFF_TIMEOUT, SCREEN_TIMEOUT_30);
+        return Settings.System.getIntForUser(mContext.getContentResolver(),
+                Settings.System.SCREEN_OFF_TIMEOUT, SCREEN_TIMEOUT_30
+               , UserHandle.USER_CURRENT);
     }
 
     private void screenTimeoutChangeState() {
@@ -2149,8 +2157,9 @@ class QuickSettingsModel implements BluetoothStateChangeCallback,
                     screenTimeout = SCREEN_TIMEOUT_15;
                     break;
         }
-        Settings.System.putInt(mContext.getContentResolver(),
-                Settings.System.SCREEN_OFF_TIMEOUT, screenTimeout);
+        Settings.System.putIntForUser(mContext.getContentResolver(),
+                Settings.System.SCREEN_OFF_TIMEOUT, screenTimeout
+                , UserHandle.USER_CURRENT);
     }
 
     // Ringer Mode
@@ -2172,9 +2181,8 @@ class QuickSettingsModel implements BluetoothStateChangeCallback,
         updateRingerSettings();
         findCurrentState();
         mRingerModeState.enabled = true;
-        mRingerModeState.iconId = mRingers.get(mRingerIndex).mDrawable;
-        mRingerModeState.label = r.getString(mRingers.get(mRingerIndex).mString);
-        mRingerModeCallback.refreshView(mRingerModeTile, mRingerModeState);
+        mRingerModeState.iconId = RINGERS[mRingerIndex].mDrawable;
+        mRingerModeState.label = r.getString(RINGERS[mRingerIndex].mString);
         if (mRingerModeTile != null) {
             mRingerModeCallback.refreshView(mRingerModeTile, mRingerModeState);
         }
@@ -2184,11 +2192,12 @@ class QuickSettingsModel implements BluetoothStateChangeCallback,
         boolean vibrateWhenRinging = Settings.System.getIntForUser(mContext.getContentResolver(),
                 Settings.System.VIBRATE_WHEN_RINGING, 0, UserHandle.USER_CURRENT) == 1;
         int ringerMode = mAudioManager.getRingerMode();
+        vibrateWhenRinging |= ringerMode == AudioManager.RINGER_MODE_VIBRATE;
 
         mRingerIndex = 0;
 
-        for (int i = 0; i < mRingers.size(); i++) {
-            Ringer r = mRingers.get(i);
+        for (int i = 0; i < RINGERS.length; i++) {
+            Ringer r = RINGERS[i];
             if (ringerMode == r.mRingerMode && vibrateWhenRinging == r.mVibrateWhenRinging) {
                 mRingerIndex = i;
                 break;
@@ -2212,12 +2221,14 @@ class QuickSettingsModel implements BluetoothStateChangeCallback,
     }
 
     private void toggleRingerState() {
-        mRingerIndex++;
-        if (mRingerIndex >= mRingers.size()) {
-            mRingerIndex = 0;
-        }
-
-        Ringer r = mRingers.get(mRingerIndex);
+        Ringer r;
+        do {
+            mRingerIndex++;
+            if (mRingerIndex >= RINGERS.length) {
+                mRingerIndex = 0;
+            }
+            r = RINGERS[mRingerIndex];
+        }  while(!mRingers.contains(r));
 
         // If we are setting a vibrating state, vibrate to indicate it
         if (r.mVibrateWhenRinging) {
