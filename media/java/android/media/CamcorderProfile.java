@@ -183,9 +183,14 @@ public class CamcorderProfile
      */
     public static final int QUALITY_TIME_LAPSE_WQVGA = 1012;
 
+    /** @hide
+     * Time lapse quality level corresponding to the 4K DCI resolution.
+     */
+    public static final int QUALITY_TIME_LAPSE_4KDCI = 1013;
+
     // Start and end of timelapse quality list
     private static final int QUALITY_TIME_LAPSE_LIST_START = QUALITY_TIME_LAPSE_LOW;
-    private static final int QUALITY_TIME_LAPSE_LIST_END = QUALITY_TIME_LAPSE_WQVGA;
+    private static final int QUALITY_TIME_LAPSE_LIST_END = QUALITY_TIME_LAPSE_4KDCI;
 
     /**
      * High speed ( >= 100fps) quality level corresponding to the lowest available resolution.
