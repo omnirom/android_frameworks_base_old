@@ -1,4 +1,6 @@
 /*
+ * Copyright (c) 2013 The Linux Foundation. All rights reserved.
+ * Not a Contribution.
  * Copyright (C) 2007 The Android Open Source Project
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
@@ -40,6 +42,7 @@ import android.os.UserHandle;
 import android.provider.Settings;
 import android.provider.Settings.Global;
 import android.provider.Settings.Secure;
+import android.telephony.MSimTelephonyManager;
 import android.telephony.TelephonyManager;
 import android.text.TextUtils;
 import android.util.Log;
@@ -61,6 +64,7 @@ import java.io.IOException;
 import java.util.HashSet;
 import java.util.List;
 
+import static com.android.internal.telephony.MSimConstants.MAX_PHONE_COUNT_TRI_SIM;
 
 /**
  * Database helper class for {@link SettingsProvider}.
@@ -204,6 +208,47 @@ public class DatabaseHelper extends SQLiteOpenHelper {
 
         // Load inital settings values
         loadSettings(db);
+    }
+
+    @Override
+    public void onOpen(SQLiteDatabase db) {
+        if (!db.isReadOnly()) {
+            // We do special conversion of some CM properties to avoid version conflict
+
+            // Settings.System.STATUS_BAR_BATTERY && Settings.System.STATUS_BAR_BATTERY_SHOW_PERCENT
+            //
+            // The old settings (pre cm-11,0) has these value.
+            // to meter mode
+            //   BATTERY_STYLE_NORMAL = 0
+            //   BATTERY_STYLE_NORMAL_PERCENT = 1
+            //   BATTERY_STYLE_CIRCLE = 2
+            //   BATTERY_STYLE_CIRCLE_PERCENT = 3
+            //   BATTERY_STYLE_GONE = 4
+            //
+            // Now the system supports
+            //   BATTERY_STYLE_NORMAL = 0 or BATTERY_STYLE_NORMAL_PERCENT = 1  ==> ICON PORTRAIT
+            //   BATTERY_STYLE_NORMAL = 5                                      ==> ICON LANDSCAPE
+            //   BATTERY_STYLE_CIRCLE = 2 or BATTERY_STYLE_CIRCLE_PERCENT = 3  ==> CIRCLE
+            //   BATTERY_STYLE_GONE = 4                                        ==> GONE
+            //
+            try {
+                // Update the show percent value to 1 if the old style has percent (1,3)
+                db.execSQL("update " + TABLE_SYSTEM + " set value = 1 where name = " +
+                        "'" + Settings.System.STATUS_BAR_BATTERY_SHOW_PERCENT + "' and " +
+                        "exists (select 'x' from " + TABLE_SYSTEM + " where name = '" +
+                        Settings.System.STATUS_BAR_BATTERY + "' and value in (1,3))");
+
+                // Convert old style ids to new style ids
+                db.execSQL("update " + TABLE_SYSTEM + " set value = 0 where " +
+                        "name = '" + Settings.System.STATUS_BAR_BATTERY + "' and value = 1");
+                db.execSQL("update " + TABLE_SYSTEM + " set value = 2 where " +
+                        "name = '" + Settings.System.STATUS_BAR_BATTERY + "' and value = 3");
+            } catch (SQLException sqlEx) {
+                // Fall-back to defaults values
+                Log.e(TAG, "Failed to convert STATUS_BAR_BATTERY and " +
+                        "STATUS_BAR_BATTERY_SHOW_PERCENT properties", sqlEx);
+            }
+        }
     }
 
     @Override
@@ -694,6 +739,9 @@ public class DatabaseHelper extends SQLiteOpenHelper {
                    Secure.LOCK_PATTERN_ENABLED,
                    Secure.LOCK_PATTERN_VISIBLE,
                    Secure.LOCK_PATTERN_TACTILE_FEEDBACK_ENABLED,
+                   Secure.LOCK_PATTERN_SIZE,
+                   Secure.LOCK_DOTS_VISIBLE,
+                   Secure.LOCK_SHOW_ERROR_PATH,
                    "lockscreen.password_type",
                    "lockscreen.lockoutattemptdeadline",
                    "lockscreen.patterneverchosen",
@@ -1575,7 +1623,7 @@ public class DatabaseHelper extends SQLiteOpenHelper {
         }
 
         if (upgradeVersion == 98) {
-            //add Nameless table
+            //add Amra table
             db.beginTransaction();
             try {
                 createAmraTable(db);
@@ -1591,28 +1639,40 @@ public class DatabaseHelper extends SQLiteOpenHelper {
         if (upgradeVersion != currentVersion) {
             Log.w(TAG, "Got stuck trying to upgrade from version " + upgradeVersion
                     + ", must wipe the settings provider");
-            db.execSQL("DROP TABLE IF EXISTS global");
-            db.execSQL("DROP TABLE IF EXISTS globalIndex1");
-            db.execSQL("DROP TABLE IF EXISTS system");
-            db.execSQL("DROP INDEX IF EXISTS systemIndex1");
-            db.execSQL("DROP TABLE IF EXISTS secure");
-            db.execSQL("DROP INDEX IF EXISTS secureIndex1");
-            db.execSQL("DROP TABLE IF EXISTS gservices");
-            db.execSQL("DROP INDEX IF EXISTS gservicesIndex1");
-            db.execSQL("DROP TABLE IF EXISTS bluetooth_devices");
-            db.execSQL("DROP TABLE IF EXISTS bookmarks");
-            db.execSQL("DROP INDEX IF EXISTS bookmarksIndex1");
-            db.execSQL("DROP INDEX IF EXISTS bookmarksIndex2");
-            db.execSQL("DROP TABLE IF EXISTS favorites");
+            wipeDB(db, oldVersion, upgradeVersion, currentVersion);
+        }
+    }
+
+    private void wipeDB(SQLiteDatabase db, int oldVersion, int upgradeVersion,
+     int currentVersion) {
+        db.execSQL("DROP TABLE IF EXISTS global");
+        db.execSQL("DROP TABLE IF EXISTS globalIndex1");
+        db.execSQL("DROP TABLE IF EXISTS system");
+        db.execSQL("DROP INDEX IF EXISTS systemIndex1");
+        db.execSQL("DROP TABLE IF EXISTS secure");
+        db.execSQL("DROP INDEX IF EXISTS secureIndex1");
+        db.execSQL("DROP TABLE IF EXISTS gservices");
+        db.execSQL("DROP INDEX IF EXISTS gservicesIndex1");
+        db.execSQL("DROP TABLE IF EXISTS bluetooth_devices");
+        db.execSQL("DROP TABLE IF EXISTS bookmarks");
+        db.execSQL("DROP INDEX IF EXISTS bookmarksIndex1");
+        db.execSQL("DROP INDEX IF EXISTS bookmarksIndex2");
+        db.execSQL("DROP TABLE IF EXISTS favorites");
         db.execSQL("DROP TABLE IF EXISTS amra");
         db.execSQL("DROP INDEX IF EXISTS amraIndex1");
-            onCreate(db);
+        onCreate(db);
 
-            // Added for diagnosing settings.db wipes after the fact
-            String wipeReason = oldVersion + "/" + upgradeVersion + "/" + currentVersion;
-            db.execSQL("INSERT INTO secure(name,value) values('" +
-                    "wiped_db_reason" + "','" + wipeReason + "');");
-        }
+        // Added for diagnosing settings.db wipes after the fact
+        String wipeReason = oldVersion + "/" + upgradeVersion + "/" + currentVersion;
+        db.execSQL("INSERT INTO secure(name,value) values('" +
+                "wiped_db_reason" + "','" + wipeReason + "');");
+    }
+
+    @Override
+    public void onDowngrade(SQLiteDatabase db, int oldVersion, int newVersion) {
+        // Not much can be done here - wipe database completely and create anew
+        // otherwise an exception will be thrown on boot preventing startup.
+        wipeDB(db, oldVersion, newVersion, oldVersion);
     }
 
     private String[] hashsetToStringArray(HashSet<String> set) {
@@ -1703,7 +1763,7 @@ public class DatabaseHelper extends SQLiteOpenHelper {
                 try {
                     LockPatternUtils lpu = new LockPatternUtils(mContext);
                     List<LockPatternView.Cell> cellPattern =
-                            LockPatternUtils.stringToPattern(lockPattern);
+                            lpu.stringToPattern(lockPattern);
                     lpu.saveLockPattern(cellPattern);
                 } catch (IllegalArgumentException e) {
                     // Don't want corrupted lock pattern to hang the reboot process
@@ -2034,6 +2094,27 @@ public class DatabaseHelper extends SQLiteOpenHelper {
 
             loadIntegerSetting(stmt, Settings.System.POINTER_SPEED,
                     R.integer.def_pointer_speed);
+
+            loadIntegerSetting(stmt, Settings.System.STATUS_BAR_BATTERY,
+                    R.integer.def_battery_style);
+
+            loadIntegerSetting(stmt, Settings.System.STATUS_BAR_BATTERY_SHOW_PERCENT,
+                    R.integer.def_battery_show_percent);
+
+            loadIntegerSetting(stmt, Settings.System.STATUS_BAR_NOTIF_COUNT,
+                    R.integer.def_notif_count);
+
+            loadIntegerSetting(stmt, Settings.System.QS_QUICK_PULLDOWN,
+                    R.integer.def_qs_quick_pulldown);
+
+            if (mContext.getResources()
+                    .getBoolean(com.android.internal.R.bool.config_voice_capable)) {
+                loadStringSetting(stmt, Settings.System.LOCKSCREEN_TARGETS,
+                        R.string.def_lockscreen_targets);
+            } else {
+                loadStringSetting(stmt, Settings.System.LOCKSCREEN_TARGETS,
+                        R.string.def_lockscreen_targets_no_telephony);
+            }
         } finally {
             if (stmt != null) stmt.close();
         }
@@ -2046,7 +2127,6 @@ public class DatabaseHelper extends SQLiteOpenHelper {
                 R.bool.def_sound_effects_enabled);
         loadBooleanSetting(stmt, Settings.System.HAPTIC_FEEDBACK_ENABLED,
                 R.bool.def_haptic_feedback);
-
         loadIntegerSetting(stmt, Settings.System.LOCKSCREEN_SOUNDS_ENABLED,
             R.integer.def_lockscreen_sounds_enabled);
     }
@@ -2163,9 +2243,9 @@ public class DatabaseHelper extends SQLiteOpenHelper {
      private void loadAmraSettings(SQLiteDatabase db) {
         SQLiteStatement stmt = null;
         try {
-            //stmt = db.compileStatement("INSERT OR IGNORE INTO nameless(name,value)"
+            //stmt = db.compileStatement("INSERT OR IGNORE INTO amra(name,value)"
             //        + " VALUES(?,?);");
-            //loadBooleanSetting(stmt, Settings.Nameless.ENABLE_ACRA,
+            //loadBooleanSetting(stmt, Settings.Amra.ENABLE_ACRA,
             //        R.bool.def_enable_acra);
         } finally {
             if (stmt != null) stmt.close();
@@ -2254,6 +2334,19 @@ public class DatabaseHelper extends SQLiteOpenHelper {
                             SystemProperties.get("ro.com.android.mobiledata",
                                     "true")) ? 1 : 0);
 
+            // SUB specific flags for Multisim devices
+            for (int i = 0; i < MAX_PHONE_COUNT_TRI_SIM; i++) {
+                // Mobile Data default, based on build
+                loadSetting(stmt, Settings.Global.MOBILE_DATA + i,
+                        "true".equalsIgnoreCase(
+                        SystemProperties.get("ro.com.android.mobiledata", "true")) ? 1 : 0);
+
+                // Data roaming default, based on build
+                loadSetting(stmt, Settings.Global.DATA_ROAMING + i,
+                        "true".equalsIgnoreCase(
+                        SystemProperties.get("ro.com.android.dataroaming", "true")) ? 1 : 0);
+            }
+
             loadBooleanSetting(stmt, Settings.Global.NETSTATS_ENABLED,
                     R.bool.def_netstats_enabled);
 
@@ -2291,6 +2384,7 @@ public class DatabaseHelper extends SQLiteOpenHelper {
                     R.string.def_wireless_charging_started_sound);
             loadIntegerSetting(stmt, Settings.Global.DOCK_AUDIO_MEDIA_ENABLED,
                     R.integer.def_dock_audio_media_enabled);
+
             loadBooleanSetting(stmt, Settings.Global.POWER_NOTIFICATIONS_ENABLED,
                     R.bool.def_power_notifications_enabled);
             loadBooleanSetting(stmt, Settings.Global.POWER_NOTIFICATIONS_VIBRATE,
@@ -2313,7 +2407,11 @@ public class DatabaseHelper extends SQLiteOpenHelper {
             int type;
             type = SystemProperties.getInt("ro.telephony.default_network",
                         RILConstants.PREFERRED_NETWORK_MODE);
-            loadSetting(stmt, Settings.Global.PREFERRED_NETWORK_MODE, type);
+            String val = Integer.toString(type);
+            if (MSimTelephonyManager.getDefault().isMultiSimEnabled()) {
+                val = type + "," + type;
+            }
+            loadSetting(stmt, Settings.Global.PREFERRED_NETWORK_MODE, val);
 
             // Set the preferred cdma subscription source to target desired value or default
             // value defined in CdmaSubscriptionSourceManager
@@ -2324,15 +2422,13 @@ public class DatabaseHelper extends SQLiteOpenHelper {
             loadIntegerSetting(stmt, Settings.Global.LOW_BATTERY_SOUND_TIMEOUT,
                     R.integer.def_low_battery_sound_timeout);
 
-            type = SystemProperties.getInt("ro.telephony.tetherdunrequired", -1);
-            if (type == 0 || type == 1) {
-                loadSetting(stmt, Settings.Global.TETHER_DUN_REQUIRED, type);
-            }
+            loadIntegerSetting(stmt, Settings.Global.WIFI_SCAN_ALWAYS_AVAILABLE,
+                    R.integer.def_wifi_scan_always_available);
+
+            loadIntegerSetting(stmt, Settings.Global.WIFI_SUSPEND_OPTIMIZATIONS_ENABLED,
+                    R.integer.def_wifi_suspend_optimizations_enabled);
 
             // --- New global settings start here
-            loadIntegerSetting(stmt, Settings.Global.TETHER_DUN_REQUIRED,
-                    R.integer.def_tether_dun_required);
-
         } finally {
             if (stmt != null) stmt.close();
         }

@@ -1843,7 +1843,7 @@
         android:description="@string/permdesc_updateBatteryStats"
         android:protectionLevel="signature|system" />
 
-    <!-- @hide Allows an application to collect battery statistics -->
+    <!-- @hide Allows an application to collect AppOp statistics -->
     <permission android:name="android.permission.GET_APP_OPS_STATS"
         android:permissionGroup="android.permission-group.SYSTEM_TOOLS"
         android:label="@string/permlab_getAppOpsStats"
@@ -2228,8 +2228,7 @@
         android:description="@string/permdesc_interceptSmsSent"
         android:protectionLevel="signature" />
 
-    <!-- Allows an application to broadcast an SMS receipt notification.
-    <p>Not for use by third-party applications. -->
+    <!-- Allows an application to broadcast an SMS receipt notification -->
     <permission android:name="android.permission.BROADCAST_SMS"
         android:permissionGroup="android.permission-group.MESSAGES"
         android:label="@string/permlab_broadcastSmsReceived"
@@ -2293,6 +2292,13 @@
         android:permissionGroup="android.permission-group.SYSTEM_TOOLS"
         android:label="@string/permlab_batteryStats"
         android:description="@string/permdesc_batteryStats"
+        android:protectionLevel="signature|system" />
+
+    <!-- @hide Allows an application to reset the device battery statistics -->
+    <permission android:name="android.permission.RESET_BATTERY_STATS"
+        android:permissionGroup="android.permission-group.SYSTEM_TOOLS"
+        android:label="@string/permlab_resetBatteryStats"
+        android:description="@string/permdesc_resetBatteryStats"
         android:protectionLevel="signature|system" />
 
     <!-- Allows an application to control the backup and restore process.
@@ -2411,26 +2417,6 @@
         android:label="@string/permlab_copyProtectedData"
         android:description="@string/permlab_copyProtectedData"
         android:protectionLevel="signature" />
-
-    <!-- Permission for reading writing revoked permissions
-         @hide -->
-    <permission android:name="android.permission.REVOKE_PERMISSIONS"
-        android:label="@string/permlab_revokePermissions"
-        android:description="@string/permdesc_revokePermissions"
-        android:protectionLevel="signature" />
-
-    <!-- Permission for reading writing revoked permissions
-         @hide -->
-    <permission android:name="android.permission.ACCESS_THEME_SERVICE"
-        android:label="@string/permlab_accessThemeService"
-        android:description="@string/permdesc_accessThemeService"
-        android:protectionLevel="signature" />
-
-    <!-- Internal permission protecting access to internal notification listener
-        @hide
-    -->
-    <permission android:name="android.permission.SYSTEM_NOTIFICATION_LISTENER"
-        android:protectionLevel="signature|system" />
 
     <!-- Internal permission protecting access to the encryption methods
         @hide
@@ -2578,7 +2564,7 @@
                  android:icon="@drawable/ic_launcher_android"
                  android:supportsRtl="true">
         <activity android:name="com.android.internal.app.ChooserActivity"
-                android:theme="@style/Amra.Theme.Holo.Dialog.Alert"
+                android:theme="@style/Theme.Holo.Dialog.Alert"
                 android:finishOnCloseSystemDialogs="true"
                 android:excludeFromRecents="true"
                 android:multiprocess="true">
@@ -2588,7 +2574,7 @@
             </intent-filter>
         </activity>
         <activity android:name="com.android.internal.app.HeavyWeightSwitcherActivity"
-                android:theme="@style/Amra.Theme.Holo.Dialog"
+                android:theme="@style/Theme.Holo.Dialog"
                 android:label="@string/heavy_weight_switcher_title"
                 android:finishOnCloseSystemDialogs="true"
                 android:excludeFromRecents="true"
@@ -2607,7 +2593,7 @@
         <activity android:name="android.accounts.ChooseAccountActivity"
                 android:excludeFromRecents="true"
                 android:exported="true"
-                android:theme="@android:style/Amra.Theme.Holo.Dialog"
+                android:theme="@android:style/Theme.Holo.Dialog"
                 android:label="@string/choose_account_label"
                 android:process=":ui">
         </activity>
@@ -2615,14 +2601,14 @@
         <activity android:name="android.accounts.ChooseTypeAndAccountActivity"
                 android:excludeFromRecents="true"
                 android:exported="true"
-                android:theme="@android:style/Amra.Theme.Holo.Dialog"
+                android:theme="@android:style/Theme.Holo.Dialog"
                 android:label="@string/choose_account_label"
                 android:process=":ui">
         </activity>
 
         <activity android:name="android.accounts.ChooseAccountTypeActivity"
                 android:excludeFromRecents="true"
-                android:theme="@android:style/Amra.Theme.Holo.Dialog"
+                android:theme="@android:style/Theme.Holo.Dialog"
                 android:label="@string/choose_account_label"
                 android:process=":ui">
         </activity>
@@ -2630,19 +2616,19 @@
         <activity android:name="android.accounts.CantAddAccountActivity"
                 android:excludeFromRecents="true"
                 android:exported="true"
-                android:theme="@android:style/Amra.Theme.Holo.Dialog.NoActionBar"
+                android:theme="@android:style/Theme.Holo.Dialog.NoActionBar"
                 android:process=":ui">
         </activity>
 
         <activity android:name="android.accounts.GrantCredentialsPermissionActivity"
                 android:excludeFromRecents="true"
                 android:exported="true"
-                android:theme="@android:style/Amra.Theme.Holo.DialogWhenLarge"
+                android:theme="@android:style/Theme.Holo.DialogWhenLarge"
                 android:process=":ui">
         </activity>
 
         <activity android:name="android.content.SyncActivityTooManyDeletes"
-               android:theme="@android:style/Amra.Theme.Holo.Dialog"
+               android:theme="@android:style/Theme.Holo.Dialog"
                android:label="@string/sync_too_many_deletes"
                android:process=":ui">
         </activity>
@@ -2661,13 +2647,13 @@
         </activity>
 
         <activity android:name="com.android.internal.app.NetInitiatedActivity"
-                android:theme="@style/Amra.Theme.Holo.Dialog.Alert"
+                android:theme="@style/Theme.Holo.Dialog.Alert"
                 android:excludeFromRecents="true"
                 android:process=":ui">
         </activity>
 
         <activity android:name="com.android.internal.app.RestrictionsPinActivity"
-                android:theme="@style/Amra.Theme.Holo.Dialog.Alert"
+                android:theme="@style/Theme.Holo.Dialog.Alert"
                 android:excludeFromRecents="true"
                 android:windowSoftInputMode="adjustPan"
                 android:process=":ui">

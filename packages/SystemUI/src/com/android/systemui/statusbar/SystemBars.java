@@ -1,18 +1,18 @@
 /*
-* Copyright (C) 2013 The Android Open Source Project
-*
-* Licensed under the Apache License, Version 2.0 (the "License");
-* you may not use this file except in compliance with the License.
-* You may obtain a copy of the License at
-*
-* http://www.apache.org/licenses/LICENSE-2.0
-*
-* Unless required by applicable law or agreed to in writing, software
-* distributed under the License is distributed on an "AS IS" BASIS,
-* WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
-* See the License for the specific language governing permissions and
-* limitations under the License.
-*/
+ * Copyright (C) 2013 The Android Open Source Project
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *      http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
 
 package com.android.systemui.statusbar;
 
@@ -27,12 +27,12 @@ import java.io.FileDescriptor;
 import java.io.PrintWriter;
 
 /**
-* Ensure a single status bar service implementation is running at all times.
-*
-* <p>The implementation either comes from a service component running in a remote process (defined
-* using a secure setting), else falls back to using the in-process implementation according
-* to the product config.
-*/
+ * Ensure a single status bar service implementation is running at all times.
+ *
+ * <p>The implementation either comes from a service component running in a remote process (defined
+ * using a secure setting), else falls back to using the in-process implementation according
+ * to the product config.
+ */
 public class SystemBars extends SystemUI implements ServiceMonitor.Callbacks {
     private static final String TAG = "SystemBars";
     private static final boolean DEBUG = false;
@@ -49,13 +49,13 @@ public class SystemBars extends SystemUI implements ServiceMonitor.Callbacks {
         if (DEBUG) Log.d(TAG, "start");
         mServiceMonitor = new ServiceMonitor(TAG, DEBUG,
                 mContext, Settings.Secure.BAR_SERVICE_COMPONENT, this);
-        mServiceMonitor.start(); // will call onNoService if no remote service is found
+        mServiceMonitor.start();  // will call onNoService if no remote service is found
     }
 
     @Override
     public void onNoService() {
         if (DEBUG) Log.d(TAG, "onNoService");
-        createStatusBarFromConfig(); // fallback to using an in-process implementation
+        createStatusBarFromConfig();  // fallback to using an in-process implementation
     }
 
     @Override

@@ -42,9 +42,7 @@ import android.os.ServiceManager;
 import android.provider.Settings;
 import android.util.Log;
 import android.view.KeyEvent;
-import android.view.Surface;
 import android.view.VolumePanel;
-import android.view.WindowManager;
 
 import java.util.HashMap;
 
@@ -65,7 +63,6 @@ public class AudioManager {
     private final Binder mToken = new Binder();
     private static String TAG = "AudioManager";
     private final ProfileManager mProfileManager;
-    private final WindowManager mWindowManager;
 
     /**
      * Broadcast intent, a hint for applications that audio is about to become
@@ -469,7 +466,6 @@ public class AudioManager {
         mUseVolumeKeySounds = mContext.getResources().getBoolean(
                 com.android.internal.R.bool.config_useVolumeKeySounds);
         mProfileManager = (ProfileManager) context.getSystemService(Context.PROFILE_SERVICE);
-        mWindowManager = (WindowManager) context.getSystemService(Context.WINDOW_SERVICE);
     }
 
     private static IAudioService getService()
@@ -552,18 +548,6 @@ public class AudioManager {
                  * Adjust the volume in on key down since it is more
                  * responsive to the user.
                  */
-                int direction;
-                int rotation = mWindowManager.getDefaultDisplay().getRotation();
-                if (rotation == Surface.ROTATION_90
-                        || rotation == Surface.ROTATION_180) {
-                    direction = keyCode == KeyEvent.KEYCODE_VOLUME_UP
-                            ? ADJUST_LOWER
-                            : ADJUST_RAISE;
-                } else {
-                    direction = keyCode == KeyEvent.KEYCODE_VOLUME_UP
-                            ? ADJUST_RAISE
-                            : ADJUST_LOWER;
-                }
                 int flags = FLAG_SHOW_UI | FLAG_VIBRATE;
 
                 if (mUseMasterVolume) {
@@ -782,6 +766,36 @@ public class AudioManager {
             return 0;
         }
     }
+
+    /**
+     * Sets the maximum volume index for a particular stream.
+     *
+     * @param streamType The stream type whose maximum volume index is set.
+     * @param maxVol The maximum volume to set range 7 - 45.
+     * @return The maximum valid volume index for the stream.
+     * @see #setStreamVolume(int)
+     */
+    public void setStreamMaxVolume(int streamType, int maxVol) {
+        IAudioService service = getService();
+        try {
+            if (mUseMasterVolume) {
+                //service.setMasterMaxVolume(maxVol);
+            } else {
+                double previousMax = new Integer(getStreamMaxVolume(streamType)).doubleValue();
+                double previousVolume = new Integer(getStreamVolume(streamType)).doubleValue();
+                double newMax = new Integer(maxVol).doubleValue();
+                double newVolume = Math.floor((newMax / previousMax) * previousVolume);
+                service.setStreamMaxVolume(streamType,maxVol);
+                Log.i(TAG, "Volume steps for stream " + String.valueOf(streamType) + " set to " +
+                        String.valueOf(maxVol));
+                setStreamVolume(streamType, new Double(newVolume).intValue(), 0);
+                Log.i(TAG, "Volume adjusted from " + String.valueOf(previousVolume) + " to " +
+                        String.valueOf(newVolume));
+            }
+        } catch (RemoteException e) {
+            Log.e(TAG, "Dead object in setStreamMaxVolume", e);
+        }
+        }
 
     /**
      * Returns the current volume index for a particular stream.

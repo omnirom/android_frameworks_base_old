@@ -1,6 +1,8 @@
 /*
  * Copyright (C) 2006 The Android Open Source Project
  * This code has been modified.  Portions copyright (C) 2010, T-Mobile USA, Inc.
+ * Copyright (c) 2012, 2013. The Linux Foundation. All rights reserved.
+ * Not a Contribution.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -28,7 +30,6 @@ import android.content.pm.IPackageManager;
 import android.content.pm.PackageManager;
 import android.content.res.Configuration;
 import android.database.ContentObserver;
-import android.database.Cursor;
 import android.media.AudioService;
 import android.net.wifi.p2p.WifiP2pService;
 import android.os.Environment;
@@ -49,7 +50,6 @@ import android.util.EventLog;
 import android.util.Log;
 import android.util.Slog;
 import android.view.WindowManager;
-import android.database.ContentObserver;
 
 import com.android.internal.R;
 import com.android.internal.os.BinderInternal;
@@ -61,6 +61,7 @@ import com.android.server.am.BatteryStatsService;
 import com.android.server.content.ContentService;
 import com.android.server.display.DisplayManagerService;
 import com.android.server.dreams.DreamManagerService;
+import com.android.server.gesture.GestureService;
 import com.android.server.input.InputManagerService;
 import com.android.server.media.MediaRouterService;
 import com.android.server.net.NetworkPolicyManagerService;
@@ -107,6 +108,32 @@ class ServerThread {
                 Settings.Secure.ADB_PORT, 0);
             // setting this will control whether ADB runs on TCP/IP or USB
             SystemProperties.set("service.adb.tcp.port", Integer.toString(adbPort));
+        }
+    }
+
+    private class PerformanceProfileObserver extends ContentObserver {
+        private final String mPropName;
+        private final String mPropDef;
+
+        public PerformanceProfileObserver(Context ctx) {
+            super(null);
+            mPropName =
+                    ctx.getString(com.android.internal.R.string.config_perf_profile_prop);
+            mPropDef =
+                    ctx.getString(com.android.internal.R.string.config_perf_profile_default_entry);
+        }
+        @Override
+        public void onChange(boolean selfChange) {
+            setSystemSetting();
+        }
+
+        void setSystemSetting() {
+            String perfProfile = Settings.System.getString(mContentResolver,
+                    Settings.System.PERFORMANCE_PROFILE);
+            if (perfProfile == null) {
+                perfProfile = mPropDef;
+            }
+            SystemProperties.set(mPropName, perfProfile);
         }
     }
 
@@ -167,6 +194,7 @@ class ServerThread {
         WindowManagerService wm = null;
         BluetoothManagerService bluetooth = null;
         DockObserver dock = null;
+        RotationSwitchObserver rotateSwitch = null;
         UsbService usb = null;
         SerialService serial = null;
         TwilightService twilight = null;
@@ -176,8 +204,8 @@ class ServerThread {
         CommonTimeManagementService commonTimeMgmtService = null;
         InputManagerService inputManager = null;
         TelephonyRegistry telephonyRegistry = null;
+        MSimTelephonyRegistry msimTelephonyRegistry = null;
         ConsumerIrService consumerIr = null;
-        RotationSwitchObserver switchObserver = null;
 
         // Create a handler thread just for the window manager to enjoy.
         HandlerThread wmHandlerThread = new HandlerThread("WindowManager");
@@ -238,6 +266,12 @@ class ServerThread {
             Slog.i(TAG, "Telephony Registry");
             telephonyRegistry = new TelephonyRegistry(context);
             ServiceManager.addService("telephony.registry", telephonyRegistry);
+
+            if (android.telephony.MSimTelephonyManager.getDefault().isMultiSimEnabled()) {
+                Slog.i(TAG, "MSimTelephony Registry");
+                msimTelephonyRegistry = new MSimTelephonyRegistry(context);
+                ServiceManager.addService("telephony.msim.registry", msimTelephonyRegistry);
+            }
 
             Slog.i(TAG, "Scheduling Policy");
             ServiceManager.addService("scheduling_policy", new SchedulingPolicyService());
@@ -366,6 +400,9 @@ class ServerThread {
             Slog.e("System", "************ Failure starting core service", e);
         }
 
+        boolean hasRotationLock = context.getResources().getBoolean(com.android
+                .internal.R.bool.config_hasRotationLockSwitch);
+
         DevicePolicyManagerService devicePolicy = null;
         StatusBarManagerService statusBar = null;
         InputMethodManagerService imm = null;
@@ -380,6 +417,7 @@ class ServerThread {
         DreamManagerService dreamy = null;
         AssetAtlasService atlas = null;
         PrintManagerService printManager = null;
+        GestureService gestureService = null;
         MediaRouterService mediaRouter = null;
         EdgeGestureService edgeGestureService = null;
 
@@ -695,6 +733,16 @@ class ServerThread {
                 }
             }
 
+            try {
+                if (hasRotationLock) {
+                    Slog.i(TAG, "Rotation Switch Observer");
+                    // Listen for switch changes
+                    rotateSwitch = new RotationSwitchObserver(context);
+                }
+            } catch (Throwable e) {
+                reportWtf("starting RotationSwitchObserver", e);
+            }
+
             if (!disableNonCoreServices) {
                 try {
                     Slog.i(TAG, "USB Service");
@@ -824,6 +872,17 @@ class ServerThread {
                 }
             }
 
+            if (context.getResources().getBoolean(
+                    com.android.internal.R.bool.config_enableGestureService)) {
+                try {
+                    Slog.i(TAG, "Gesture Sensor Service");
+                    gestureService = new GestureService(context, inputManager);
+                    ServiceManager.addService("gesture", gestureService);
+                } catch (Throwable e) {
+                    Slog.e(TAG, "Failure starting Gesture Sensor Service", e);
+                }
+            }
+
             try {
                 Slog.i(TAG, "IdleMaintenanceService");
                 new IdleMaintenanceService(context, battery);
@@ -849,22 +908,13 @@ class ServerThread {
                 }
             }
 
-            if (context.getResources().getBoolean(R.bool.config_hasRotationLockSwitch)) {
-                try {
-                    switchObserver = new RotationSwitchObserver(context);
-                }
-                catch (Throwable e){
-                    reportWtf("starting RotationSwitchObserver failed", e);
-                }
-            }
-
             try {
                 Slog.i(TAG, "AssetRedirectionManager Service");
                 ServiceManager.addService("assetredirection", new AssetRedirectionManagerService(context));
             } catch (Throwable e) {
                 Slog.e(TAG, "Failure starting AssetRedirectionManager Service", e);
             }
-        
+
             try {
                 Slog.i(TAG, "EdgeGesture service");
                 edgeGestureService = new EdgeGestureService(context, inputManager);
@@ -874,6 +924,7 @@ class ServerThread {
             }
         }
 
+        // make sure the ADB_ENABLED setting value matches the secure property value
         Settings.Secure.putInt(mContentResolver, Settings.Secure.ADB_PORT,
                 Integer.parseInt(SystemProperties.get("service.adb.tcp.port", "-1")));
 
@@ -881,6 +932,16 @@ class ServerThread {
         mContentResolver.registerContentObserver(
             Settings.Secure.getUriFor(Settings.Secure.ADB_PORT),
             false, new AdbPortObserver());
+        if (!TextUtils.isEmpty(context.getString(
+                com.android.internal.R.string.config_perf_profile_prop))) {
+            PerformanceProfileObserver observer = new PerformanceProfileObserver(context);
+            mContentResolver.registerContentObserver(
+                    Settings.System.getUriFor(Settings.System.PERFORMANCE_PROFILE),
+                    false, observer);
+
+            // Sync the system property with the current setting
+            observer.setSystemSetting();
+        }
 
         // Before things start rolling, be sure we have decided whether
         // we are in safe mode.
@@ -965,6 +1026,14 @@ class ServerThread {
             reportWtf("making Display Manager Service ready", e);
         }
 
+        if (gestureService != null) {
+            try {
+                gestureService.systemReady();
+            } catch (Throwable e) {
+                reportWtf("making Gesture Sensor Service ready", e);
+            }
+        }
+
         if (edgeGestureService != null) {
             try {
                 edgeGestureService.systemReady();
@@ -991,6 +1060,7 @@ class ServerThread {
         final NetworkPolicyManagerService networkPolicyF = networkPolicy;
         final ConnectivityService connectivityF = connectivity;
         final DockObserver dockF = dock;
+        final RotationSwitchObserver rotateSwitchF = rotateSwitch;
         final UsbService usbF = usb;
         final TwilightService twilightF = twilight;
         final UiModeManagerService uiModeF = uiMode;
@@ -1008,9 +1078,9 @@ class ServerThread {
         final AssetAtlasService atlasF = atlas;
         final InputManagerService inputManagerF = inputManager;
         final TelephonyRegistry telephonyRegistryF = telephonyRegistry;
+        final MSimTelephonyRegistry msimTelephonyRegistryF = msimTelephonyRegistry;
         final PrintManagerService printManagerF = printManager;
         final MediaRouterService mediaRouterF = mediaRouter;
-        final RotationSwitchObserver switchObserverF = switchObserver;
 
         // We now tell the activity manager it is okay to run third party
         // code.  It will call back into us once it has gotten to the state
@@ -1065,6 +1135,11 @@ class ServerThread {
                     reportWtf("making Dock Service ready", e);
                 }
                 try {
+                    if (rotateSwitchF != null) rotateSwitchF.systemReady();
+                } catch (Throwable e) {
+                    reportWtf("making Rotation Switch Service ready", e);
+                }
+                try {
                     if (usbF != null) usbF.systemReady();
                 } catch (Throwable e) {
                     reportWtf("making USB Service ready", e);
@@ -1083,11 +1158,6 @@ class ServerThread {
                     if (recognitionF != null) recognitionF.systemReady();
                 } catch (Throwable e) {
                     reportWtf("making Recognition Service ready", e);
-                }
-                try {
-                    if (switchObserverF != null) switchObserverF.systemReady();
-                } catch (Throwable e) {
-                    reportWtf("Notifying RotationSwitchObserver running", e);
                 }
                 Watchdog.getInstance().start();
 
@@ -1154,6 +1224,12 @@ class ServerThread {
 
                 try {
                     if (telephonyRegistryF != null) telephonyRegistryF.systemRunning();
+                } catch (Throwable e) {
+                    reportWtf("Notifying TelephonyRegistry running", e);
+                }
+
+                try {
+                    if (msimTelephonyRegistryF != null) msimTelephonyRegistryF.systemRunning();
                 } catch (Throwable e) {
                     reportWtf("Notifying TelephonyRegistry running", e);
                 }

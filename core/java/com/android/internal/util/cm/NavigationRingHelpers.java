@@ -1,18 +1,18 @@
 /*
-* Copyright (C) 2013 The CyanogenMod Project
-*
-* Licensed under the Apache License, Version 2.0 (the "License");
-* you may not use this file except in compliance with the License.
-* You may obtain a copy of the License at
-*
-* http://www.apache.org/licenses/LICENSE-2.0
-*
-* Unless required by applicable law or agreed to in writing, software
-* distributed under the License is distributed on an "AS IS" BASIS,
-* WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
-* See the License for the specific language governing permissions and
-* limitations under the License.
-*/
+ * Copyright (C) 2013 The CyanogenMod Project
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *      http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
 
 package com.android.internal.util.cm;
 
@@ -34,7 +34,8 @@ import android.provider.Settings;
 import android.text.TextUtils;
 
 import static com.android.internal.util.cm.NavigationRingConstants.*;
-import com.android.internal.util.cm.TorchConstants;
+import com.android.internal.util.amra.AmraUtils;
+import com.android.internal.util.amra.constants.FlashLightConstants;
 import com.android.internal.widget.multiwaveview.GlowPadView;
 import com.android.internal.widget.multiwaveview.TargetDrawable;
 
@@ -46,7 +47,7 @@ public class NavigationRingHelpers {
     private static final String ASSIST_ICON_METADATA_NAME = "com.android.systemui.action_assist_icon";
 
     private static final IntentFilter TORCH_STATE_FILTER =
-            new IntentFilter(TorchConstants.ACTION_STATE_CHANGED);
+            new IntentFilter(FlashLightConstants.ACTION_STATE_CHANGED);
 
     private NavigationRingHelpers() {
     }
@@ -68,7 +69,8 @@ public class NavigationRingHelpers {
         }
 
         filterAction(result, ACTION_ASSIST, isAssistantAvailable(context));
-        filterAction(result, ACTION_TORCH, isTorchAvailable(context));
+        filterAction(result, ACTION_TORCH,
+                AmraUtils.isPackageInstalled(context, FlashLightConstants.APP_PACKAGE_NAME));
 
         return result;
     }
@@ -96,16 +98,6 @@ public class NavigationRingHelpers {
                 .getAssistIntent(context, true, UserHandle.USER_CURRENT) != null;
     }
 
-    public static boolean isTorchAvailable(Context context) {
-        PackageManager pm = context.getPackageManager();
-        try {
-            return pm.getPackageInfo(TorchConstants.APP_PACKAGE_NAME, 0) != null;
-        } catch (PackageManager.NameNotFoundException e) {
-            // ignored, just catched so we can return false below
-        }
-        return false;
-    }
-
     public static TargetDrawable getTargetDrawable(Context context, String action) {
         int resourceId = -1;
         final Resources res = context.getResources();
@@ -124,8 +116,6 @@ public class NavigationRingHelpers {
             resourceId = getRingerDrawableResId(context);
         } else if (action.equals(ACTION_KILL)) {
             resourceId = com.android.internal.R.drawable.ic_navigation_ring_killtask;
-        } else if (action.equals(ACTION_LAST_APP)) {
-            resourceId = com.android.internal.R.drawable.ic_navigation_ring_lastapp;
         } else if (action.equals(ACTION_POWER)) {
             resourceId = com.android.internal.R.drawable.ic_navigation_ring_power;
         } else if (action.equals(ACTION_TORCH)) {
@@ -213,7 +203,7 @@ public class NavigationRingHelpers {
     private static int getTorchDrawableResId(Context context) {
         Intent stateIntent = context.registerReceiver(null, TORCH_STATE_FILTER);
         boolean active = stateIntent != null
-                && stateIntent.getIntExtra(TorchConstants.EXTRA_CURRENT_STATE, 0) != 0;
+                && stateIntent.getIntExtra(FlashLightConstants.EXTRA_CURRENT_STATE, 0) != 0;
 
         if (active) {
             return com.android.internal.R.drawable.ic_navigation_ring_torch_on;

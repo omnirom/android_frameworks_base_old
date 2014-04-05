@@ -32,11 +32,8 @@ import android.graphics.Region;
 import android.os.Bundle;
 import android.os.Handler;
 import android.os.IBinder;
-import android.os.RemoteException;
 import android.os.ResultReceiver;
-import android.os.ServiceManager;
 import android.os.SystemClock;
-import android.os.UserHandle;
 import android.provider.Settings;
 import android.text.InputType;
 import android.text.Layout;
@@ -73,7 +70,6 @@ import android.widget.Button;
 import android.widget.FrameLayout;
 import android.widget.LinearLayout;
 
-import com.android.internal.statusbar.IStatusBarService;
 import com.android.internal.util.aokp.AwesomeAnimationHelper;
 
 import java.io.FileDescriptor;
@@ -330,11 +326,7 @@ public class InputMethodService extends AbstractInputMethodService {
     int mStatusIcon;
     int mBackDisposition;
 
-    boolean mForcedAutoRotate;
     Handler mHandler;
-
-    private IStatusBarService mStatusBarService;
-    private Object mServiceAquireLock = new Object();
 
     private Window mWindowIme;
     private int mAnimationDuration;
@@ -461,7 +453,6 @@ public class InputMethodService extends AbstractInputMethodService {
             if (DEBUG) Log.v(TAG, "unbindInput(): binding=" + mInputBinding
                     + " ic=" + mInputConnection);
             onUnbindInput();
-            mInputStarted = false;
             mInputBinding = null;
             mInputConnection = null;
         }
@@ -801,8 +792,6 @@ public class InputMethodService extends AbstractInputMethodService {
         mCandidatesVisibility = getCandidatesHiddenVisibility();
         mCandidatesFrame.setVisibility(mCandidatesVisibility);
         mInputFrame.setVisibility(View.GONE);
-
-        mHandler = new Handler();
     }
 
     @Override
@@ -970,15 +959,7 @@ public class InputMethodService extends AbstractInputMethodService {
      * is currently running in fullscreen mode.
      */
     public void updateFullscreenMode() {
-        boolean fullScreenOverride = Settings.System.getIntForUser(getContentResolver(),
-                Settings.System.DISABLE_FULLSCREEN_KEYBOARD, 0,
-                UserHandle.USER_CURRENT_OR_SELF) != 0;
-        boolean isFullscreen;
-        if (fullScreenOverride) {
-            isFullscreen = false;
-        } else {
-            isFullscreen = mShowInputRequested && onEvaluateFullscreenMode();
-        }
+        boolean isFullscreen = mShowInputRequested && onEvaluateFullscreenMode();
         boolean changed = mLastShowInputRequested != mShowInputRequested;
         if (mIsFullscreen != isFullscreen || !mFullscreenApplied) {
             changed = true;
@@ -1515,28 +1496,6 @@ public class InputMethodService extends AbstractInputMethodService {
             mWindowWasVisible = true;
             mInShowWindow = false;
         }
-
-        IStatusBarService statusbar = getStatusBarService();
-        int mKeyboardRotationTimeout = Settings.System.getIntForUser(getContentResolver(),
-                Settings.System.KEYBOARD_ROTATION_TIMEOUT, 0, UserHandle.USER_CURRENT_OR_SELF);
-        if (mKeyboardRotationTimeout > 0) {
-            mHandler.removeCallbacks(restoreAutoRotation);
-            if (!mForcedAutoRotate) {
-                boolean isAutoRotate = (Settings.System.getIntForUser(getContentResolver(),
-                    Settings.System.ACCELEROMETER_ROTATION, 0,
-                    UserHandle.USER_CURRENT_OR_SELF) == 1);
-                if (!isAutoRotate) {
-                    try {
-                        if (statusbar != null) {
-                            statusbar.setAutoRotate(true);
-                            mForcedAutoRotate = true;
-                        }
-                    } catch (RemoteException e) {
-                        mStatusBarService = null;
-                    }
-                }
-            }
-        }
     }
 
     void showWindowInner(boolean showInput) {
@@ -1619,30 +1578,7 @@ public class InputMethodService extends AbstractInputMethodService {
             onWindowHidden();
             mWindowWasVisible = false;
         }
-
-        int mKeyboardRotationTimeout = Settings.System.getIntForUser(getContentResolver(),
-                Settings.System.KEYBOARD_ROTATION_TIMEOUT, 0, UserHandle.USER_CURRENT_OR_SELF);
-        if (mKeyboardRotationTimeout > 0) {
-            mHandler.removeCallbacks(restoreAutoRotation);
-            if (mForcedAutoRotate) {
-                mHandler.postDelayed(restoreAutoRotation, mKeyboardRotationTimeout);
-            }
-        }
     }
-
-    final Runnable restoreAutoRotation = new Runnable() {
-        @Override public void run() {
-            try {
-                IStatusBarService statusbar = getStatusBarService();
-                if (statusbar != null) {
-                    statusbar.setAutoRotate(false);
-                }
-                mForcedAutoRotate = false;
-            } catch (RemoteException e) {
-                mStatusBarService = null;
-            }
-        }
-    };
 
     /**
      * Called when the input method window has been shown to the user, after
@@ -1977,8 +1913,8 @@ public class InputMethodService extends AbstractInputMethodService {
             return false;
         }
         if (event.getKeyCode() == KeyEvent.KEYCODE_VOLUME_UP) {
-            mVolumeKeyCursorControl = Settings.System.getIntForUser(getContentResolver(),
-                    Settings.System.VOLUME_KEY_CURSOR_CONTROL, 0, UserHandle.USER_CURRENT_OR_SELF);
+            mVolumeKeyCursorControl = Settings.System.getInt(getContentResolver(),
+                    Settings.System.VOLUME_KEY_CURSOR_CONTROL, 0);
             if (isInputViewShown() && (mVolumeKeyCursorControl != VOLUME_CURSOR_OFF)) {
                 sendDownUpKeyEvents((mVolumeKeyCursorControl == VOLUME_CURSOR_ON_REVERSE)
                         ? KeyEvent.KEYCODE_DPAD_RIGHT : KeyEvent.KEYCODE_DPAD_LEFT);
@@ -1987,8 +1923,8 @@ public class InputMethodService extends AbstractInputMethodService {
             return false;
         }
         if (event.getKeyCode() == KeyEvent.KEYCODE_VOLUME_DOWN) {
-            mVolumeKeyCursorControl = Settings.System.getIntForUser(getContentResolver(),
-                    Settings.System.VOLUME_KEY_CURSOR_CONTROL, 0, UserHandle.USER_CURRENT_OR_SELF);
+            mVolumeKeyCursorControl = Settings.System.getInt(getContentResolver(),
+                    Settings.System.VOLUME_KEY_CURSOR_CONTROL, 0);
             if (isInputViewShown() && (mVolumeKeyCursorControl != VOLUME_CURSOR_OFF)) {
                 sendDownUpKeyEvents((mVolumeKeyCursorControl == VOLUME_CURSOR_ON_REVERSE)
                         ? KeyEvent.KEYCODE_DPAD_LEFT : KeyEvent.KEYCODE_DPAD_RIGHT);
@@ -2043,8 +1979,8 @@ public class InputMethodService extends AbstractInputMethodService {
         }
         if (event.getKeyCode() == KeyEvent.KEYCODE_VOLUME_UP
                  || keyCode == KeyEvent.KEYCODE_VOLUME_DOWN) {
-            mVolumeKeyCursorControl = Settings.System.getIntForUser(getContentResolver(),
-                    Settings.System.VOLUME_KEY_CURSOR_CONTROL, 0, UserHandle.USER_CURRENT_OR_SELF);
+            mVolumeKeyCursorControl = Settings.System.getInt(getContentResolver(),
+                    Settings.System.VOLUME_KEY_CURSOR_CONTROL, 0);
             if (isInputViewShown() && (mVolumeKeyCursorControl != VOLUME_CURSOR_OFF)) {
                 return true;
             }
@@ -2375,16 +2311,6 @@ public class InputMethodService extends AbstractInputMethodService {
             ic.performContextMenuAction(id);
         }
         return true;
-    }
-    
-    IStatusBarService getStatusBarService() {
-        synchronized (mServiceAquireLock) {
-            if (mStatusBarService == null) {
-                mStatusBarService = IStatusBarService.Stub.asInterface(
-                        ServiceManager.getService("statusbar"));
-            }
-            return mStatusBarService;
-        }
     }
 
     /**

@@ -1,18 +1,18 @@
 /*
-* Copyright (C) 2011 The Android Open Source Project
-*
-* Licensed under the Apache License, Version 2.0 (the "License");
-* you may not use this file except in compliance with the License.
-* You may obtain a copy of the License at
-*
-* http://www.apache.org/licenses/LICENSE-2.0
-*
-* Unless required by applicable law or agreed to in writing, software
-* distributed under the License is distributed on an "AS IS" BASIS,
-* WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
-* See the License for the specific language governing permissions and
-* limitations under the License.
-*/
+ * Copyright (C) 2011 The Android Open Source Project
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *      http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
 
 package com.android.systemui.statusbar.policy;
 
@@ -56,6 +56,7 @@ public class NotificationRowLayout
     HashMap<View, ValueAnimator> mDisappearingViews = new HashMap<View, ValueAnimator>();
 
     private SwipeHelper mSwipeHelper;
+    private HashMap<View, Runnable> mDismissRunnables = new HashMap<View, Runnable>();
 
     private OnSizeChangedListener mOnSizeChangedListener;
 
@@ -104,6 +105,10 @@ public class NotificationRowLayout
 
     public void setOnSizeChangedListener(OnSizeChangedListener l) {
         mOnSizeChangedListener = l;
+    }
+
+    public void runOnDismiss(View child, Runnable runnable) {
+        mDismissRunnables.put(child, runnable);
     }
 
     @Override
@@ -172,6 +177,14 @@ public class NotificationRowLayout
         if (veto != null && veto.getVisibility() != View.GONE && mRemoveViews) {
             veto.performClick();
         }
+        if (v instanceof ExpandableNotificationRow) {
+            ((ExpandableNotificationRow) v).setUserDismissed(true);
+        }
+
+        Runnable dismissRunnable = mDismissRunnables.remove(v);
+        if (dismissRunnable != null) {
+            dismissRunnable.run();
+        }
     }
 
     public void onBeginDrag(View v) {
@@ -225,11 +238,11 @@ public class NotificationRowLayout
 
 
     /**
-* Sets a flag to tell us whether to actually remove views. Removal is delayed by setting this
-* to false during some animations to smooth out performance. Callers should restore the
-* flag to true after the animation is done, and then they should make sure that the views
-* get removed properly.
-*/
+     * Sets a flag to tell us whether to actually remove views. Removal is delayed by setting this
+     * to false during some animations to smooth out performance. Callers should restore the
+     * flag to true after the animation is done, and then they should make sure that the views
+     * get removed properly.
+     */
     public void setViewRemoval(boolean removeViews) {
         if (DEBUG) Log.v(TAG, "setViewRemoval: " + removeViews);
         mRemoveViews = removeViews;
@@ -267,7 +280,7 @@ public class NotificationRowLayout
         if (DEBUG) logLayoutTransition();
         if (DEBUG) {
             //Log.d(TAG, "onDraw: canvas height: " + c.getHeight() + "px; measured height: "
-            // + getMeasuredHeight() + "px");
+            //        + getMeasuredHeight() + "px");
             c.save();
             c.clipRect(6, 6, c.getWidth() - 6, getMeasuredHeight() - 6,
                     android.graphics.Region.Op.DIFFERENCE);

@@ -715,7 +715,6 @@ public class Activity extends ContextThemeWrapper
     /*package*/ boolean mVisibleFromServer = false;
     /*package*/ boolean mVisibleFromClient = true;
     /*package*/ ActionBarImpl mActionBar = null;
-    private boolean mActionBarShowHideAnimationEnabled;
     private boolean mEnableDefaultActionBarUp;
 
     private CharSequence mTitle;
@@ -1114,8 +1113,7 @@ public class Activity extends ContextThemeWrapper
     protected void onPostResume() {
         final Window win = getWindow();
         if (win != null) win.makeActive();
-        mActionBarShowHideAnimationEnabled = true;
-        updateActionBarShowHideAnimation();
+        if (mActionBar != null) mActionBar.setShowHideAnimationEnabled(true);
         mCalled = true;
     }
 
@@ -1387,8 +1385,7 @@ public class Activity extends ContextThemeWrapper
      */
     protected void onStop() {
         if (DEBUG_LIFECYCLE) Slog.v(TAG, "onStop " + this);
-        mActionBarShowHideAnimationEnabled = false;
-        updateActionBarShowHideAnimation();
+        if (mActionBar != null) mActionBar.setShowHideAnimationEnabled(false);
         getApplication().dispatchActivityStopped(this);
         mTranslucentCallback = null;
         mCalled = true;
@@ -1917,15 +1914,8 @@ public class Activity extends ContextThemeWrapper
 
         mWindow.setDefaultIcon(mActivityInfo.getIconResource());
         mWindow.setDefaultLogo(mActivityInfo.getLogoResource());
-        updateActionBarShowHideAnimation();
     }
-
-    private void updateActionBarShowHideAnimation() {
-        if (mActionBar != null) {
-            mActionBar.setShowHideAnimationEnabled(mActionBarShowHideAnimationEnabled);
-        }
-    }
-
+    
     /**
      * Set the activity content from a layout resource.  The resource will be
      * inflated, adding all top-level views to the activity.

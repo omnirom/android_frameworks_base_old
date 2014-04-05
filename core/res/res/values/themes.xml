@@ -1369,9 +1369,9 @@ please see themes_device_defaults.xml.
         <item name="panelBackground">@android:drawable/menu_hardkey_panel_holo_light</item>
         <item name="panelFullBackground">@android:drawable/menu_background_fill_parent_width</item>
         <!-- These three attributes do not seems to be used by the framework. Declared public though -->
-        <item name="panelColorBackground">#ffe5e5e5</item>
+        <item name="panelColorBackground">#000</item>
         <item name="panelColorForeground">?android:attr/textColorPrimary</item>
-        <item name="panelTextAppearance">?android:attr/textAppearanceInverse</item>
+        <item name="panelTextAppearance">?android:attr/textAppearance</item>
 
         <item name="panelMenuIsCompact">true</item>
         <item name="panelMenuListWidth">250dip</item>

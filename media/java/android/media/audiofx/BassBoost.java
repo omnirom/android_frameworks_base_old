@@ -63,7 +63,6 @@ public class BassBoost extends AudioEffect {
     /**
      * Bass boost center frequency. Paremeter ID for
      * {@link android.media.audiofx.BassBoost.OnParameterChangeListener}
-     * @hide
      */
     public static final int PARAM_CENTER_FREQUENCY = 2;
     /**
@@ -160,7 +159,6 @@ public class BassBoost extends AudioEffect {
      * @throws IllegalStateException
      * @throws IllegalArgumentException
      * @throws UnsupportedOperationException
-     * @hide
      */
     public void setCenterFrequency(short freq)
     throws IllegalStateException, IllegalArgumentException, UnsupportedOperationException {
@@ -173,7 +171,6 @@ public class BassBoost extends AudioEffect {
      * @throws IllegalStateException
      * @throws IllegalArgumentException
      * @throws UnsupportedOperationException
-     * @hide
      */
     public short getCenterFrequency() {
         short[] value = new short[1];

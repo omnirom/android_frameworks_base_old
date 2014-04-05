@@ -31,7 +31,6 @@ import java.util.StringTokenizer;
 
 
 /**
- * @hide
  */
 
 public class StereoWide extends AudioEffect {
@@ -55,7 +54,6 @@ public class StereoWide extends AudioEffect {
 
     /**
      * Registered listener for parameter changes.
-     * @hide
      */
     private OnParameterChangeListener mParamListener = null;
 
@@ -205,7 +203,6 @@ public class StereoWide extends AudioEffect {
      * The Settings class regroups all StereoWide parameters. It is used in
      * conjuntion with getProperties() and setProperties() methods to backup and restore
      * all parameters in a single call.
-     * @hide
      */
     public static class Settings {
         public short strength;

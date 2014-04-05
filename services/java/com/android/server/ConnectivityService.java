@@ -75,6 +75,7 @@ import android.net.RouteInfo;
 import android.net.SamplingDataTracker;
 import android.net.Uri;
 import android.net.wifi.WifiStateTracker;
+import android.net.wimax.WimaxHelper;
 import android.net.wimax.WimaxManagerConstants;
 import android.os.AsyncTask;
 import android.os.Binder;
@@ -114,6 +115,7 @@ import com.android.internal.telephony.DctConstants;
 import com.android.internal.telephony.Phone;
 import com.android.internal.telephony.PhoneConstants;
 import com.android.internal.util.IndentingPrintWriter;
+import com.android.server.AlarmManagerService;
 import com.android.internal.util.XmlUtils;
 import com.android.server.am.BatteryStatsService;
 import com.android.server.connectivity.DataConnectionStats;
@@ -123,6 +125,7 @@ import com.android.server.connectivity.Tethering;
 import com.android.server.connectivity.Vpn;
 import com.android.server.net.BaseNetworkObserver;
 import com.android.server.net.LockdownVpnTracker;
+import com.android.server.power.PowerManagerService;
 import com.google.android.collect.Lists;
 import com.google.android.collect.Sets;
 
@@ -460,14 +463,12 @@ public class ConnectivityService extends IConnectivityManager.Stub {
         // setup our unique device name
         String hostname = Settings.Secure.getString(context.getContentResolver(),
                 Settings.Secure.DEVICE_HOSTNAME);
-        if (TextUtils.isEmpty(hostname)) {
+        if (TextUtils.isEmpty(hostname) && TextUtils.isEmpty(SystemProperties.get("net.hostname"))) {
             String id = Settings.Secure.getString(context.getContentResolver(),
                     Settings.Secure.ANDROID_ID);
             if (id != null && id.length() > 0) {
                 String name = new String("android-").concat(id);
-                if (TextUtils.isEmpty(SystemProperties.get("net.hostname"))) {
-                    SystemProperties.set("net.hostname", name);
-                }
+                SystemProperties.set("net.hostname", name);
             }
         } else {
             SystemProperties.set("net.hostname", hostname);
@@ -676,6 +677,7 @@ public class ConnectivityService extends IConnectivityManager.Stub {
 
         // start network sampling ..
         Intent intent = new Intent(ACTION_PKT_CNT_SAMPLE_INTERVAL_ELAPSED, null);
+        intent.addFlags(Intent.FLAG_RECEIVER_REGISTERED_ONLY_BEFORE_BOOT);
         mSampleIntervalElapsedIntent = PendingIntent.getBroadcast(mContext,
                 SAMPLE_INTERVAL_ELAPSED_REQUEST_CODE, intent, 0);
 
@@ -756,8 +758,6 @@ public class ConnectivityService extends IConnectivityManager.Stub {
         Class wimaxStateTrackerClass = null;
         Class wimaxServiceClass = null;
         Class wimaxManagerClass;
-        String wimaxJarLocation;
-        String wimaxLibLocation;
         String wimaxManagerClassName;
         String wimaxServiceClassName;
         String wimaxStateTrackerClassName;
@@ -769,10 +769,6 @@ public class ConnectivityService extends IConnectivityManager.Stub {
 
         if (isWimaxEnabled) {
             try {
-                wimaxJarLocation = context.getResources().getString(
-                        com.android.internal.R.string.config_wimaxServiceJarLocation);
-                wimaxLibLocation = context.getResources().getString(
-                        com.android.internal.R.string.config_wimaxNativeLibLocation);
                 wimaxManagerClassName = context.getResources().getString(
                         com.android.internal.R.string.config_wimaxManagerClassname);
                 wimaxServiceClassName = context.getResources().getString(
@@ -780,10 +776,7 @@ public class ConnectivityService extends IConnectivityManager.Stub {
                 wimaxStateTrackerClassName = context.getResources().getString(
                         com.android.internal.R.string.config_wimaxStateTrackerClassname);
 
-                if (DBG) log("wimaxJarLocation: " + wimaxJarLocation);
-                wimaxClassLoader =  new DexClassLoader(wimaxJarLocation,
-                        new ContextWrapper(context).getCacheDir().getAbsolutePath(),
-                        wimaxLibLocation, ClassLoader.getSystemClassLoader());
+                wimaxClassLoader = WimaxHelper.getWimaxClassLoader(context);
 
                 try {
                     wimaxManagerClass = wimaxClassLoader.loadClass(wimaxManagerClassName);
@@ -1574,12 +1567,9 @@ public class ConnectivityService extends IConnectivityManager.Stub {
             return false;
         }
         NetworkStateTracker tracker = mNetTrackers[networkType];
-        DetailedState netState = DetailedState.DISCONNECTED;
-        if (tracker != null) {
-            netState = tracker.getNetworkInfo().getDetailedState();
-        }
+        DetailedState netState = tracker.getNetworkInfo().getDetailedState();
 
-        if ((netState != DetailedState.CONNECTED &&
+        if (tracker == null || (netState != DetailedState.CONNECTED &&
                 netState != DetailedState.CAPTIVE_PORTAL_CHECK) ||
                 tracker.isTeardownRequested()) {
             if (VDBG) {
@@ -3941,6 +3931,23 @@ public class ConnectivityService extends IConnectivityManager.Stub {
             }
         }
         return ConnectivityManager.TYPE_NONE;
+    }
+
+    protected void updateBlockedUids(int uid, boolean isBlocked) {
+        try {
+            AlarmManagerService mAlarmMgrSvc =
+                (AlarmManagerService)ServiceManager.getService(Context.ALARM_SERVICE);
+            mAlarmMgrSvc.updateBlockedUids(uid,isBlocked);
+        } catch (NullPointerException e) {
+            Slog.w(TAG, "Could Not Update blocked Uids with alarmManager" + e);
+        }
+        try {
+            PowerManagerService mPowerMgrSvc =
+                (PowerManagerService)ServiceManager.getService(Context.POWER_SERVICE);
+            mPowerMgrSvc.updateBlockedUids(uid,isBlocked);
+        } catch (NullPointerException e) {
+            Slog.w(TAG, "Could Not Update blocked Uids with powerManager" + e);
+        }
     }
 
     /**

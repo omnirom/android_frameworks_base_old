@@ -18,11 +18,8 @@ package com.android.keyguard;
 import android.animation.Animator;
 import android.animation.Animator.AnimatorListener;
 import android.animation.AnimatorListenerAdapter;
-import android.content.Context;
 import android.os.Handler;
 import android.os.Looper;
-import android.os.UserHandle;
-import android.provider.Settings;
 import android.util.Log;
 import android.view.View;
 
@@ -340,18 +337,14 @@ public class KeyguardViewStateManager implements
         }
     };
 
-    public void showUsabilityHints(Context context) {
+    public void showUsabilityHints() {
         mMainQueue.postDelayed( new Runnable() {
             @Override
             public void run() {
                 mKeyguardSecurityContainer.showUsabilityHint();
             }
         } , SCREEN_ON_RING_HINT_DELAY);
-        if (Settings.System.getIntForUser(
-                context.getContentResolver(),
-                Settings.System.LOCKSCREEN_DISABLE_HINTS,
-                SHOW_INITIAL_PAGE_HINTS ? 0 : 1,
-                UserHandle.USER_CURRENT) == 0) {
+        if (SHOW_INITIAL_PAGE_HINTS) {
             mKeyguardWidgetPager.showInitialPageHints();
         }
         if (mHideHintsRunnable != null) {

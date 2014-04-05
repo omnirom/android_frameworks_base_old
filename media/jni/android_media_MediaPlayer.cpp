@@ -36,6 +36,9 @@
 #include "utils/KeyedVector.h"
 #include "utils/String8.h"
 #include "android_media_Utils.h"
+#ifdef QCOM_HARDWARE
+#include "android_media_ExtMediaPlayer.h"
+#endif
 
 #include "android_os_Parcel.h"
 #include "android_util_Binder.h"
@@ -649,6 +652,14 @@ android_media_MediaPlayer_native_setup(JNIEnv *env, jobject thiz, jobject weak_t
     // create new listener and give it to MediaPlayer
     sp<JNIMediaPlayerListener> listener = new JNIMediaPlayerListener(env, thiz, weak_this);
     mp->setListener(listener);
+#ifdef QCOM_HARDWARE
+    if (JNIExtMediaPlayerListener::checkExtMedia(env, thiz)) {
+      ALOGD("QCMediaPlayer mediaplayer present");
+       sp<JNIExtMediaPlayerListener> extmedialistener = new JNIExtMediaPlayerListener(
+                                                            env, thiz, weak_this, listener);
+       mp->setListener(extmedialistener);
+    }
+#endif
 
     // Stow our new C++ MediaPlayer in an opaque field in the Java object.
     setMediaPlayer(env, thiz, mp);
@@ -802,6 +813,38 @@ android_media_MediaPlayer_setNextMediaPlayer(JNIEnv *env, jobject thiz, jobject 
     ;
 }
 
+static jboolean
+android_media_MediaPlayer_suspend(JNIEnv *env, jobject thiz)
+{
+    sp<MediaPlayer> mp = getMediaPlayer(env, thiz);
+    if (mp == NULL) {
+        jniThrowException(env, "java/lang/IllegalStateException", NULL);
+        return false;
+    }
+
+    if (mp->suspend() != OK) {
+        return false;
+    }
+
+    return true;
+}
+
+static jboolean
+android_media_MediaPlayer_resume(JNIEnv *env, jobject thiz)
+{
+    sp<MediaPlayer> mp = getMediaPlayer(env, thiz);
+    if (mp == NULL) {
+        jniThrowException(env, "java/lang/IllegalStateException", NULL);
+        return false;
+    }
+
+    if (mp->resume() != OK) {
+        return false;
+    }
+
+    return true;
+}
+
 static void
 android_media_MediaPlayer_updateProxyConfig(
         JNIEnv *env, jobject thiz, jobject proxyProps)
@@ -826,16 +869,19 @@ android_media_MediaPlayer_updateProxyConfig(
         jstring exclusionListObj = (jstring)env->CallObjectMethod(
                 proxyProps, fields.proxyConfigGetExclusionList);
 
-        const char *exclusionList =
-            env->GetStringUTFChars(exclusionListObj, NULL);
-
         if (host != NULL && exclusionListObj != NULL) {
-            thisplayer->updateProxyConfig(host, port, exclusionList);
-        }
+            const char *exclusionList = env->GetStringUTFChars(exclusionListObj, NULL);
 
-        if (exclusionList != NULL) {
-            env->ReleaseStringUTFChars(exclusionListObj, exclusionList);
-            exclusionList = NULL;
+            if (exclusionList != NULL) {
+                thisplayer->updateProxyConfig(host, port, exclusionList);
+
+                env->ReleaseStringUTFChars(exclusionListObj, exclusionList);
+                exclusionList = NULL;
+            } else {
+                thisplayer->updateProxyConfig(host, port, "");
+            }
+        } else if (host != NULL) {
+            thisplayer->updateProxyConfig(host, port, "");
         }
 
         if (host != NULL) {
@@ -887,6 +933,8 @@ static JNINativeMethod gMethods[] = {
     {"native_setRetransmitEndpoint", "(Ljava/lang/String;I)I",  (void *)android_media_MediaPlayer_setRetransmitEndpoint},
     {"setNextMediaPlayer",  "(Landroid/media/MediaPlayer;)V",   (void *)android_media_MediaPlayer_setNextMediaPlayer},
     {"updateProxyConfig", "(Landroid/net/ProxyProperties;)V", (void *)android_media_MediaPlayer_updateProxyConfig},
+    {"_suspend",             "()Z",                             (void *)android_media_MediaPlayer_suspend},
+    {"_resume",              "()Z",                             (void *)android_media_MediaPlayer_resume},
 };
 
 static const char* const kClassPathName = "android/media/MediaPlayer";

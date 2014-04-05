@@ -131,8 +131,7 @@ public class EdgeGestureTracker {
         setSensitivity(sensitivity);
 
         if ((positions & EdgeGesturePosition.LEFT.FLAG) != 0) {
-            if (x < mThickness && fy > 0.15f
-                    && fy < (isImeActive(positions) ? 0.6f : 0.85f)) {
+            if (x < mThickness && (unrestricted || (fy > 0.1f && fy < 0.9f))) {
                 startWithPosition(motionEvent, EdgeGesturePosition.LEFT);
                 return true;
             }
@@ -144,8 +143,7 @@ public class EdgeGestureTracker {
             }
         }
         if ((positions & EdgeGesturePosition.RIGHT.FLAG) != 0) {
-            if (x > mDisplayWidth - mThickness && fy > 0.15f
-                    && fy < (isImeActive(positions) ? 0.6f : 0.85f)) {
+            if (x > mDisplayWidth - mThickness && (unrestricted || (fy > 0.1f && fy < 0.9f))) {
                 startWithPosition(motionEvent, EdgeGesturePosition.RIGHT);
                 return true;
             }

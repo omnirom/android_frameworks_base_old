@@ -234,6 +234,11 @@ interface IWindowManager
     boolean hasNavigationBar();
 
     /**
+     * Device can generate KEY_ACTION_MENU keypress
+     */
+    boolean hasMenuKeyEnabled();
+
+    /**
      * Lock the device immediately with the specified options (can be null).
      */
     void lockNow(in Bundle options);
@@ -292,26 +297,11 @@ interface IWindowManager
     void setTouchExplorationEnabled(boolean enabled);
 
     /**
-     * Get the current navigation bar state when expanded desktop is enabled.
+     * Get current system ui visibility mode.
      *
      * @hide
      */
-    boolean expandedDesktopHidesNavigationBar();
-
-    /**
-     * Get the current statusbar state when expanded desktop is enabled.
-     *
-     * @hide
-     */
-    boolean expandedDesktopHidesStatusBar();
-
-    /**
-     * Get the current navbar size depended on the user value
-     * and orientation.
-     *
-     * @hide
-     */
-    int getCurrentNavigationBarSize();
+    int getSystemUIVisibility();
 
     /**
      * Toggle global menu
@@ -319,11 +309,4 @@ interface IWindowManager
      * @hide
      */
     void toggleGlobalMenu();
-
-    /**
-     * Toggle statusbar on expanded desktop
-     *
-     * @hide
-     */
-    void toggleStatusBar();
 }

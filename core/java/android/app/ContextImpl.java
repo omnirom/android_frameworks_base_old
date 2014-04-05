@@ -1,4 +1,6 @@
 /*
+ * Copyright (c) 2012-2013 The Linux Foundation. All rights reserved.
+ * Not a Contribution.
  * Copyright (C) 2006 The Android Open Source Project
  * This code has been modified.  Portions copyright (C) 2010, T-Mobile USA, Inc.
  *
@@ -77,7 +79,10 @@ import android.net.wifi.IWifiManager;
 import android.net.wifi.WifiManager;
 import android.net.wifi.p2p.IWifiP2pManager;
 import android.net.wifi.p2p.WifiP2pManager;
+import android.net.wimax.WimaxHelper;
+import android.net.wimax.WimaxManagerConstants;
 import android.nfc.NfcManager;
+import android.os.BatteryManager;
 import android.os.Binder;
 import android.os.Bundle;
 import android.os.Debug;
@@ -100,6 +105,7 @@ import android.os.storage.IMountService;
 import android.os.storage.StorageManager;
 import android.print.IPrintManager;
 import android.print.PrintManager;
+import android.telephony.MSimTelephonyManager;
 import android.telephony.TelephonyManager;
 import android.content.ClipboardManager;
 import android.util.AndroidRuntimeException;
@@ -506,6 +512,11 @@ class ContextImpl extends Context {
                     return new TelephonyManager(ctx.getOuterContext());
                 }});
 
+        registerService(MSIM_TELEPHONY_SERVICE, new ServiceFetcher() {
+                public Object createService(ContextImpl ctx) {
+                    return new MSimTelephonyManager(ctx.getOuterContext());
+                }});
+
         registerService(UI_MODE_SERVICE, new ServiceFetcher() {
                 public Object createService(ContextImpl ctx) {
                     return new UiModeManager();
@@ -598,6 +609,17 @@ class ContextImpl extends Context {
                     return new ProfileManager (outerContext, ctx.mMainThread.getHandler());
                 }});
 
+        registerService(WimaxManagerConstants.WIMAX_SERVICE, new ServiceFetcher() {
+                public Object createService(ContextImpl ctx) {
+                    return WimaxHelper.createWimaxService(ctx, ctx.mMainThread.getHandler());
+                }});
+
+        registerService(BATTERY_SERVICE, new ServiceFetcher() {
+                public Object createService(ContextImpl ctx) {
+                    IBinder b = ServiceManager.getService(BATTERY_SERVICE);
+                    IBatteryService service = IBatteryService.Stub.asInterface(b);
+                    return new BatteryManager(service, ctx);
+                }});
     }
 
     static ContextImpl getImpl(Context context) {
@@ -2169,9 +2191,12 @@ class ContextImpl extends Context {
      * unable to create, they are filtered by replacing with {@code null}.
      */
     private File[] ensureDirsExistOrFilter(File[] dirs) {
-        File[] result = new File[dirs.length];
+        ArrayList<File> result = new ArrayList<File>(dirs.length);
         for (int i = 0; i < dirs.length; i++) {
             File dir = dirs[i];
+            if (Environment.MEDIA_REMOVED.equals(Environment.getStorageState(dir))) {
+                continue;
+            }
             if (!dir.exists()) {
                 if (!dir.mkdirs()) {
                     // recheck existence in case of cross-process race
@@ -2192,9 +2217,9 @@ class ContextImpl extends Context {
                     }
                 }
             }
-            result[i] = dir;
+            result.add(dir);
         }
-        return result;
+        return result.toArray(new File[result.size()]);
     }
 
     // ----------------------------------------------------------------------

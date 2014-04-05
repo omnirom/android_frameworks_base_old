@@ -368,11 +368,6 @@ public class VolumePreference extends SeekBarDialogPreference implements
         }
 
         void postSetVolume(int progress) {
-            // Do the volume changing separately to give responsive UI
-            mLastProgress = progress;
-            mHandler.removeMessages(MSG_SET_STREAM_VOLUME);
-            mHandler.sendMessage(mHandler.obtainMessage(MSG_SET_STREAM_VOLUME));
-
             if (onVolumeChange(this, progress)) {
                 // Do the volume changing separately to give responsive UI
                 mLastProgress = progress;
@@ -381,7 +376,6 @@ public class VolumePreference extends SeekBarDialogPreference implements
             } else {
                 mSeekBar.setProgress(mLastProgress);
             }
-
         }
 
         public void onStartTrackingTouch(SeekBar seekBar) {

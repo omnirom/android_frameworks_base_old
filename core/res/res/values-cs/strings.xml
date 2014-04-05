@@ -840,7 +840,7 @@
     <string name="lockscreen_plugged_in" msgid="8057762828355572315">"Nabíjení - <xliff:g id="NUMBER">%d</xliff:g> <xliff:g id="PERCENT">%%</xliff:g>"</string>
     <string name="lockscreen_charged" msgid="321635745684060624">"Nabito"</string>
     <string name="lockscreen_battery_short" msgid="4477264849386850266">"<xliff:g id="NUMBER">%d</xliff:g> <xliff:g id="PERCENT">%%</xliff:g>"</string>
-    <string name="lockscreen_low_battery" msgid="1482873981919249740">"Připojte dobíjecí zařízení."</string>
+    <string name="lockscreen_low_battery" msgid="1482873981919249740">"Připojte dobíjecí zařízení - <xliff:g id="number">%d</xliff:g><xliff:g id="percent">%%</xliff:g>"</string>
     <string name="lockscreen_missing_sim_message_short" msgid="5099439277819215399">"Není vložena SIM karta"</string>
     <string name="lockscreen_missing_sim_message" product="tablet" msgid="151659196095791474">"V tabletu není SIM karta."</string>
     <string name="lockscreen_missing_sim_message" product="default" msgid="2186920585695169078">"V telefonu není žádná SIM karta."</string>
@@ -1119,8 +1119,8 @@
     <string name="no" msgid="5141531044935541497">"Zrušit"</string>
     <string name="dialog_alert_title" msgid="2049658708609043103">"Upozornění"</string>
     <string name="loading" msgid="7933681260296021180">"Načítání..."</string>
-    <string name="capital_on" msgid="1544682755514494298">"I"</string>
-    <string name="capital_off" msgid="6815870386972805832">"O"</string>
+    <string name="capital_on" msgid="1544682755514494298">"\u2759"</string>
+    <string name="capital_off" msgid="6815870386972805832">"\u3007"</string>
     <string name="whichApplication" msgid="4533185947064773386">"Dokončit akci pomocí aplikace"</string>
     <string name="whichHomeApplication" msgid="4616420172727326782">"Vyberte domovskou aplikaci"</string>
     <string name="alwaysUse" msgid="4583018368000610438">"Použít jako výchozí nastavení pro tuto činnost."</string>

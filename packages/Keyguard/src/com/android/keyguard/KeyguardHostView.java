@@ -1,4 +1,6 @@
 /*
+ * Copyright (c) 2013, The Linux Foundation. All rights reserved.
+ * Not a Contribution.
  * Copyright (C) 2012 The Android Open Source Project
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
@@ -37,15 +39,8 @@ import android.content.IntentSender;
 import android.content.pm.PackageManager.NameNotFoundException;
 import android.content.pm.UserInfo;
 import android.content.res.Resources;
-import android.graphics.Bitmap;
-import android.graphics.Bitmap.Config;
-import android.graphics.BitmapFactory;
 import android.graphics.Canvas;
-import android.graphics.LightingColorFilter;
-import android.graphics.Paint;
 import android.graphics.Rect;
-import android.graphics.drawable.BitmapDrawable;
-import android.graphics.drawable.StateListDrawable;
 import android.media.RemoteControlClient;
 import android.os.Bundle;
 import android.os.Looper;
@@ -55,6 +50,7 @@ import android.os.SystemClock;
 import android.os.UserHandle;
 import android.os.UserManager;
 import android.provider.Settings;
+import android.telephony.MSimTelephonyManager;
 import android.util.AttributeSet;
 import android.util.Log;
 import android.util.Slog;
@@ -62,8 +58,8 @@ import android.view.HapticFeedbackConstants;
 import android.view.LayoutInflater;
 import android.view.MotionEvent;
 import android.view.View;
+import android.view.ViewStub;
 import android.view.WindowManager;
-import android.widget.ImageButton;
 import android.widget.RemoteViews.OnClickHandler;
 
 import java.io.File;
@@ -87,7 +83,7 @@ public class KeyguardHostView extends KeyguardViewBase {
     // Found in KeyguardAppWidgetPickActivity.java
     static final int APPWIDGET_HOST_ID = 0x4B455947;
 
-    private final int MAX_WIDGETS = 20;
+    private final int MAX_WIDGETS = 5;
 
     private AppWidgetHost mAppWidgetHost;
     private AppWidgetManager mAppWidgetManager;
@@ -97,10 +93,12 @@ public class KeyguardHostView extends KeyguardViewBase {
     private KeyguardSelectorView mKeyguardSelectorView;
     private KeyguardTransportControlView mTransportControl;
     private boolean mIsVerifyUnlockOnly;
-    private View mExpandChallengeView;
     private boolean mEnableFallback; // TODO: This should get the value from KeyguardPatternView
     private SecurityMode mCurrentSecuritySelection = SecurityMode.Invalid;
     private int mAppWidgetToShow;
+
+    private View mExpandChallengeView;
+
     private boolean mDefaultAppWidgetAttached;
 
     protected OnDismissAction mDismissAction;
@@ -375,18 +373,14 @@ public class KeyguardHostView extends KeyguardViewBase {
         // Grab instances of and make any necessary changes to the main layouts. Create
         // view state manager and wire up necessary listeners / callbacks.
         View deleteDropTarget = findViewById(R.id.keyguard_widget_pager_delete_target);
-        if (Settings.System.getIntForUser(getContext().getContentResolver(),
-                Settings.System.LOCKSCREEN_USE_WIDGET_CONTAINER_CAROUSEL,
-                0, UserHandle.USER_CURRENT) == 1) {
-            mAppWidgetContainerHidden =
-                (KeyguardWidgetPager) findViewById(R.id.app_widget_container);
-            mAppWidgetContainer =
-                (KeyguardWidgetPager) findViewById(R.id.app_widget_container_carousel);
-        } else {
-            mAppWidgetContainerHidden =
-                (KeyguardWidgetPager) findViewById(R.id.app_widget_container_carousel);
-            mAppWidgetContainer =
-                (KeyguardWidgetPager) findViewById(R.id.app_widget_container);
+        if (Settings.System.getInt(getContext().getContentResolver(),
+                Settings.System.LOCKSCREEN_USE_WIDGET_CONTAINER_CAROUSEL, 0) == 1) {
+            mAppWidgetContainerHidden = (KeyguardWidgetPager) findViewById(R.id.app_widget_container);
+            mAppWidgetContainer = (KeyguardWidgetPager) findViewById(R.id.app_widget_container_carousel);
+        }
+        else {
+            mAppWidgetContainerHidden = (KeyguardWidgetPager) findViewById(R.id.app_widget_container_carousel);
+            mAppWidgetContainer = (KeyguardWidgetPager) findViewById(R.id.app_widget_container);
         }
         mAppWidgetContainer.setVisibility(VISIBLE);
         removeView(mAppWidgetContainerHidden);
@@ -412,8 +406,6 @@ public class KeyguardHostView extends KeyguardViewBase {
         mSecurityViewContainer = (KeyguardSecurityViewFlipper) findViewById(R.id.view_flipper);
         mKeyguardSelectorView = (KeyguardSelectorView) findViewById(R.id.keyguard_selector_view);
         mViewStateManager.setSecurityViewContainer(mSecurityViewContainer);
-
-        setLockColor();
 
         setBackButtonEnabled(false);
 
@@ -472,44 +464,12 @@ public class KeyguardHostView extends KeyguardViewBase {
         mSwitchPageRunnable.run();
 
         // This needs to be called after the pages are all added.
-        mViewStateManager.showUsabilityHints(mContext);
+        mViewStateManager.showUsabilityHints();
     }
 
     private void maybeEnableAddButton() {
         if (!shouldEnableAddWidget()) {
             mAppWidgetContainer.setAddWidgetEnabled(false);
-        }
-    }
-
-    private void setLockColor() {
-        int color = Settings.Secure.getIntForUser(
-                mContext.getContentResolver(),
-                Settings.Secure.LOCKSCREEN_LOCK_COLOR, -2,
-                UserHandle.USER_CURRENT);
-
-        if (color != -2) {
-            ImageButton lock = (ImageButton) findViewById(R.id.expand_challenge_handle);
-            if (lock != null) {
-                StateListDrawable lockStates = new StateListDrawable();
-                Bitmap lockBitmap = BitmapFactory.decodeResource(
-                        getContext().getResources(), R.drawable.kg_security_lock_normal);
-                int height = lockBitmap.getHeight();
-                int width = lockBitmap.getWidth();
-                Bitmap overlayFocused = Bitmap.createBitmap(width, height, Bitmap.Config.ARGB_8888);
-                Bitmap overlayPressed = Bitmap.createBitmap(width, height, Bitmap.Config.ARGB_8888);
-                Canvas canvasFocused = new Canvas(overlayFocused);
-                Canvas canvasPressed = new Canvas(overlayPressed);
-                Paint paint = new Paint();
-                paint.setColorFilter(new LightingColorFilter(color, 1));
-                canvasFocused.drawBitmap(lockBitmap, 0, 0, paint);
-                paint.setAlpha(175);
-                canvasPressed.drawBitmap(lockBitmap, 0, 0, paint);
-                lockStates.addState(new int[] {android.R.attr.state_pressed},
-                        new BitmapDrawable(getResources(), overlayPressed));
-                lockStates.addState(new int[] {-android.R.attr.state_pressed},
-                        new BitmapDrawable(getResources(), overlayFocused));
-                lock.setImageDrawable(lockStates);
-            }
         }
     }
 
@@ -534,18 +494,17 @@ public class KeyguardHostView extends KeyguardViewBase {
     }
 
     private boolean widgetsDisabled() {
-        boolean disabledByLowRamDevice = ActivityManager.isLowRamDeviceStatic();
         boolean disabledByDpm =
                 (mDisabledFeatures & DevicePolicyManager.KEYGUARD_DISABLE_WIDGETS_ALL) != 0;
         boolean disabledByUser = !mLockPatternUtils.getWidgetsEnabled();
-        return disabledByLowRamDevice || disabledByDpm || disabledByUser;
+        return disabledByDpm || disabledByUser;
     }
 
     private boolean cameraDisabledByDpm() {
-        return mCameraDisabled
-                || (mDisabledFeatures & DevicePolicyManager.KEYGUARD_DISABLE_SECURE_CAMERA) != 0
-                || Settings.System.getInt(getContext().getContentResolver(),
-                           Settings.System.LOCKSCREEN_ENABLE_CAMERA, 1) == 0;
+        boolean disabledSecureKeyguard =
+                (mDisabledFeatures & DevicePolicyManager.KEYGUARD_DISABLE_SECURE_CAMERA) != 0
+                && mLockPatternUtils.isSecure();
+        return mCameraDisabled || disabledSecureKeyguard || !mLockPatternUtils.getCameraEnabled();
     }
 
     private void updateSecurityViews() {
@@ -1046,6 +1005,12 @@ public class KeyguardHostView extends KeyguardViewBase {
             final LayoutInflater inflater = LayoutInflater.from(mContext);
             if (DEBUG) Log.v(TAG, "inflating id = " + layoutId);
             View v = inflater.inflate(layoutId, mSecurityViewContainer, false);
+            if (KeyguardUpdateMonitor.sIsMultiSimEnabled) {
+                ViewStub vStub = (ViewStub) (v.findViewById(R.id.stub_msim_carrier_text));
+                if (vStub != null) {
+                    vStub.inflate();
+                }
+            }
             mSecurityViewContainer.addView(v);
             updateSecurityView(v);
             view = (KeyguardSecurityView)v;
@@ -1135,7 +1100,7 @@ public class KeyguardHostView extends KeyguardViewBase {
         requestLayout();
 
         if (mViewStateManager != null) {
-            mViewStateManager.showUsabilityHints(mContext);
+            mViewStateManager.showUsabilityHints();
         }
 
         requestFocus();
@@ -1201,10 +1166,9 @@ public class KeyguardHostView extends KeyguardViewBase {
                 || isSimOrAccount(mCurrentSecuritySelection, true)) {
             return;
         }
-
-        if (Settings.System.getIntForUser(mContext.getContentResolver(),
-                Settings.System.LOCKSCREEN_MAXIMIZE_WIDGETS, 0,
-                UserHandle.USER_CURRENT) == 1) {
+        int setting = Settings.System.getIntForUser(getContext().getContentResolver(),
+                Settings.System.LOCKSCREEN_MAXIMIZE_WIDGETS, 0, UserHandle.USER_CURRENT);
+        if (setting == 1) {
             mSlidingChallengeLayout.showChallenge(false);
         }
     }
@@ -1226,8 +1190,16 @@ public class KeyguardHostView extends KeyguardViewBase {
             case Password: return R.id.keyguard_password_view;
             case Biometric: return R.id.keyguard_face_unlock_view;
             case Account: return R.id.keyguard_account_view;
-            case SimPin: return R.id.keyguard_sim_pin_view;
-            case SimPuk: return R.id.keyguard_sim_puk_view;
+            case SimPin:
+                if (KeyguardUpdateMonitor.sIsMultiSimEnabled) {
+                    return R.id.msim_keyguard_sim_pin_view;
+                }
+                return R.id.keyguard_sim_pin_view;
+            case SimPuk:
+                if (KeyguardUpdateMonitor.sIsMultiSimEnabled) {
+                    return R.id.msim_keyguard_sim_puk_view;
+                }
+                return R.id.keyguard_sim_puk_view;
         }
         return 0;
     }
@@ -1240,8 +1212,16 @@ public class KeyguardHostView extends KeyguardViewBase {
             case Password: return R.layout.keyguard_password_view;
             case Biometric: return R.layout.keyguard_face_unlock_view;
             case Account: return R.layout.keyguard_account_view;
-            case SimPin: return R.layout.keyguard_sim_pin_view;
-            case SimPuk: return R.layout.keyguard_sim_puk_view;
+            case SimPin:
+                if (KeyguardUpdateMonitor.sIsMultiSimEnabled) {
+                    return R.layout.msim_keyguard_sim_pin_view;
+                }
+                return R.layout.keyguard_sim_pin_view;
+            case SimPuk:
+                if (KeyguardUpdateMonitor.sIsMultiSimEnabled) {
+                    return R.layout.msim_keyguard_sim_puk_view;
+                }
+                return R.layout.keyguard_sim_puk_view;
             default:
                 return 0;
         }
@@ -1345,11 +1325,7 @@ public class KeyguardHostView extends KeyguardViewBase {
         // cameras we can't trust.  TODO: plumb safe mode into camera creation code and only
         // inflate system-provided camera?
         if (!mSafeModeEnabled && !cameraDisabledByDpm() && mUserSetupCompleted
-                && Settings.System.getIntForUser(mContext.getContentResolver(),
-                Settings.System.LOCKSCREEN_CAMERA_WIDGET,
-                mContext.getResources().getBoolean(
-                    R.bool.kg_enable_camera_default_widget) ? 1 : 0,
-                UserHandle.USER_CURRENT) == 1) {
+                && mContext.getResources().getBoolean(R.bool.kg_enable_camera_default_widget)) {
             View cameraWidget =
                     CameraWidgetFrame.create(mContext, mCameraWidgetCallbacks, mActivityLauncher);
             if (cameraWidget != null) {
@@ -1796,9 +1772,21 @@ public class KeyguardHostView extends KeyguardViewBase {
         final boolean configDisabled = res.getBoolean(R.bool.config_disableMenuKeyInLockScreen);
         final boolean isTestHarness = ActivityManager.isRunningInTestHarness();
         final boolean fileOverride = (new File(ENABLE_MENU_KEY_FILE)).exists();
-        final boolean settingsEnabled = Settings.System.getInt(getContext().getContentResolver(), Settings.System.MENU_UNLOCK_SCREEN, configDisabled ? 0 : 1) == 1;
+        final boolean menuOverride = Settings.System.getInt(getContext().getContentResolver(),
+                Settings.System.MENU_UNLOCK_SCREEN, 0) == 1;
+        return !configDisabled || isTestHarness || fileOverride || menuOverride;
+    }
 
-        return settingsEnabled || isTestHarness || fileOverride;
+    private boolean shouldEnableHomeKey() {
+        final boolean homeOverride = Settings.System.getInt(getContext().getContentResolver(),
+                Settings.System.HOME_UNLOCK_SCREEN, 0) == 1;
+        return homeOverride;
+    }
+
+    private boolean shouldEnableCameraKey() {
+        final boolean cameraOverride = Settings.System.getInt(getContext().getContentResolver(),
+                Settings.System.CAMERA_UNLOCK_SCREEN, 0) == 1;
+        return cameraOverride;
     }
 
     public void goToWidget(int appWidgetId) {
@@ -1809,6 +1797,24 @@ public class KeyguardHostView extends KeyguardViewBase {
     public boolean handleMenuKey() {
         // The following enables the MENU key to work for testing automation
         if (shouldEnableMenuKey()) {
+            showNextSecurityScreenOrFinish(false);
+            return true;
+        }
+        return false;
+    }
+
+    public boolean handleHomeKey() {
+        // The following enables the HOME key to work for testing automation
+        if (shouldEnableHomeKey()) {
+            showNextSecurityScreenOrFinish(false);
+            return true;
+        }
+        return false;
+    }
+
+    public boolean handleCameraKey() {
+        // The following enables the CAMERA key to work for testing automation
+        if (shouldEnableCameraKey()) {
             showNextSecurityScreenOrFinish(false);
             return true;
         }

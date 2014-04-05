@@ -66,14 +66,14 @@
     <drawable name="stat_sys_download_done">@drawable/stat_sys_download_done_static</drawable>
     <drawable name="stat_sys_upload_done">@drawable/stat_sys_upload_anim0</drawable>
     <drawable name="dialog_frame">@drawable/panel_background</drawable>
-    <drawable name="alert_dark_frame">@drawable/popup_full_bright</drawable>
+    <drawable name="alert_dark_frame">@drawable/popup_full_dark</drawable>
     <drawable name="alert_light_frame">@drawable/popup_full_bright</drawable>
     <drawable name="menu_frame">@drawable/menu_background</drawable>
     <drawable name="menu_full_frame">@drawable/menu_background_fill_parent_width</drawable>
-    <drawable name="editbox_dropdown_dark_frame">@drawable/editbox_dropdown_background</drawable>
+    <drawable name="editbox_dropdown_dark_frame">@drawable/editbox_dropdown_background_dark</drawable>
     <drawable name="editbox_dropdown_light_frame">@drawable/editbox_dropdown_background</drawable>
 
-    <drawable name="dialog_holo_dark_frame">@drawable/dialog_full_holo_light</drawable>
+    <drawable name="dialog_holo_dark_frame">@drawable/dialog_full_holo_dark</drawable>
     <drawable name="dialog_holo_light_frame">@drawable/dialog_full_holo_light</drawable>
 
     <drawable name="input_method_fullscreen_background">#fff9f9f9</drawable>
@@ -145,8 +145,8 @@
     <color name="dim_foreground_inverse_holo_light">#bebebe</color>
     <color name="dim_foreground_inverse_disabled_holo_light">#80bebebe</color>
     <color name="hint_foreground_holo_light">#808080</color>
-    <color name="highlighted_text_holo_dark">#6633b5e5</color>
-    <color name="highlighted_text_holo_light">#6633b5e5</color>
+    <color name="highlighted_text_holo_dark">#66ffffff</color>
+    <color name="highlighted_text_holo_light">#66000000</color>
     <color name="link_text_holo_dark">#5c5cff</color>
     <color name="link_text_holo_light">#0000ee</color>
     <color name="default_dialog_text_holo_dark">@android:color/background_holo_light</color>
@@ -200,7 +200,7 @@
     <!-- Amra Text Color -->
     <color name="amra_text">#ff404040</color>
 
-    <drawable name="notification_template_icon_bg">#33404040</drawable>
+    <drawable name="notification_template_icon_bg">#3333B5E5</drawable>
     <drawable name="notification_template_icon_low_bg">#0cffffff</drawable>
 
     <!-- Keyguard colors -->
@@ -216,4 +216,3 @@
     <color name="power_menu_text_default_color">#ff404040</color>
 
 </resources>
-

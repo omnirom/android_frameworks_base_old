@@ -1,25 +1,23 @@
 /*
-* Copyright (C) 2013 AOKP by Mike Wilson - Zaphod-Beeblebrox && Steve Spear - Stevespear426
-* Copyright (C) 2013 The CyanogenMod Project
-*
-* Licensed under the Apache License, Version 2.0 (the "License");
-* you may not use this file except in compliance with the License.
-* You may obtain a copy of the License at
-*
-* http://www.apache.org/licenses/LICENSE-2.0
-*
-* Unless required by applicable law or agreed to in writing, software
-* distributed under the License is distributed on an "AS IS" BASIS,
-* WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
-* See the License for the specific language governing permissions and
-* limitations under the License.
-*/
+ * Copyright (C) 2013 AOKP by Mike Wilson - Zaphod-Beeblebrox && Steve Spear - Stevespear426
+ * Copyright (C) 2013 The CyanogenMod Project
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *      http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
 
 package com.android.systemui.cm;
 
-import android.app.Activity;
 import android.app.ActivityManager;
-import android.app.ActivityManager.RunningAppProcessInfo;
 import android.app.ActivityManagerNative;
 import android.content.ActivityNotFoundException;
 import android.content.ComponentName;
@@ -35,7 +33,6 @@ import android.os.Handler;
 import android.os.IBinder;
 import android.os.Message;
 import android.os.Messenger;
-import android.os.Process;
 import android.os.RemoteException;
 import android.os.ServiceManager;
 import android.os.SystemClock;
@@ -49,18 +46,17 @@ import android.view.KeyEvent;
 import android.widget.Toast;
 
 import com.android.internal.statusbar.IStatusBarService;
-import com.android.internal.util.cm.TorchConstants;
-import com.android.internal.util.omni.TaskUtils;
 import static com.android.internal.util.cm.NavigationRingConstants.*;
+
+import com.android.internal.util.amra.constants.FlashLightConstants;
 import com.android.systemui.R;
 import com.android.systemui.screenshot.TakeScreenshotService;
 
 import java.net.URISyntaxException;
-import java.util.List;
 
 /*
-* Helper classes for managing custom actions
-*/
+ * Helper classes for managing custom actions
+ */
 
 public class ActionTarget {
     private static final String TAG = "ActionTarget";
@@ -129,9 +125,6 @@ public class ActionTarget {
         } else if (action.equals(ACTION_KILL)) {
             mHandler.post(mKillRunnable);
             return true;
-        } else if (action.equals(ACTION_LAST_APP)) {
-            TaskUtils.toggleLastApp(mContext);
-            return true;
         } else if (action.equals(ACTION_VIBRATE)) {
             if (mAm.getRingerMode() != AudioManager.RINGER_MODE_VIBRATE) {
                 switchToVibrateMode();
@@ -164,7 +157,7 @@ public class ActionTarget {
             }
             return true;
         } else if (action.equals(ACTION_TORCH)) {
-            Intent intent = new Intent(TorchConstants.ACTION_TOGGLE_STATE);
+            Intent intent = new Intent(FlashLightConstants.ACTION_TOGGLE_STATE);
             mContext.sendBroadcast(intent);
             return true;
         } else {
@@ -245,9 +238,28 @@ public class ActionTarget {
 
     final Runnable mKillRunnable = new Runnable() {
         public void run() {
-            if (TaskUtils.killActiveTask(mContext)) {
+            final ActivityManager am =
+                    (ActivityManager) mContext.getSystemService(Context.ACTIVITY_SERVICE);
+
+            final Intent intent = new Intent(Intent.ACTION_MAIN);
+            intent.addCategory(Intent.CATEGORY_HOME);
+
+            final ResolveInfo res = mContext.getPackageManager().resolveActivity(intent, 0);
+            final String homePackage;
+
+            if (res.activityInfo != null && !res.activityInfo.packageName.equals("android")) {
+                homePackage = res.activityInfo.packageName;
+            } else {
+                // use default launcher package if we couldn't resolve it
+                homePackage = "com.android.launcher";
+            }
+
+            final String packageName = am.getRunningTasks(1).get(0).topActivity.getPackageName();
+            if (!homePackage.equals(packageName)) {
+                am.forceStopPackage(packageName);
                 Toast.makeText(mContext,
-                        com.android.internal.R.string.app_killed_message, Toast.LENGTH_SHORT).show();
+                        com.android.internal.R.string.app_killed_message,
+                        Toast.LENGTH_SHORT).show();
             }
         }
     };

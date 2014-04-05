@@ -39,7 +39,10 @@ public class LightsService {
     public static final int LIGHT_ID_ATTENTION = 5;
     public static final int LIGHT_ID_BLUETOOTH = 6;
     public static final int LIGHT_ID_WIFI = 7;
-    public static final int LIGHT_ID_COUNT = 8;
+    public static final int LIGHT_ID_CAPS = 8;
+    public static final int LIGHT_ID_FUNC = 9;
+    public static final int LIGHT_ID_MUSIC = 10;
+    public static final int LIGHT_ID_COUNT = 11;
 
     public static final int LIGHT_FLASH_NONE = 0;
     public static final int LIGHT_FLASH_TIMED = 1;
@@ -96,6 +99,7 @@ public class LightsService {
             synchronized (this) {
                 if (mColor == 0 && !mFlashing) {
                     setLightLocked(color, LIGHT_FLASH_HARDWARE, onMS, 1000, BRIGHTNESS_MODE_USER);
+                    mColor = 0;
                     mH.sendMessageDelayed(Message.obtain(mH, 1, this), onMS);
                 }
             }

@@ -16,6 +16,8 @@
 
 package android.media;
 
+import com.android.internal.util.Objects;
+
 import android.Manifest;
 import android.app.ActivityThread;
 import android.content.BroadcastReceiver;
@@ -41,7 +43,6 @@ import android.view.Display;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
-import java.util.Objects;
 import java.util.concurrent.CopyOnWriteArrayList;
 
 /**
@@ -492,11 +493,11 @@ public class MediaRouter {
             boolean volumeChanged = false;
             boolean presentationDisplayChanged = false;
 
-            if (!Objects.equals(route.mName, globalRoute.name)) {
+            if (!Objects.equal(route.mName, globalRoute.name)) {
                 route.mName = globalRoute.name;
                 changed = true;
             }
-            if (!Objects.equals(route.mDescription, globalRoute.description)) {
+            if (!Objects.equal(route.mDescription, globalRoute.description)) {
                 route.mDescription = globalRoute.description;
                 changed = true;
             }

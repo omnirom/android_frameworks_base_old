@@ -1,18 +1,18 @@
 /*
-* Copyright (C) 2012 The Android Open Source Project
-*
-* Licensed under the Apache License, Version 2.0 (the "License");
-* you may not use this file except in compliance with the License.
-* You may obtain a copy of the License at
-*
-* http://www.apache.org/licenses/LICENSE-2.0
-*
-* Unless required by applicable law or agreed to in writing, software
-* distributed under the License is distributed on an "AS IS" BASIS,
-* WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
-* See the License for the specific language governing permissions and
-* limitations under the License.
-*/
+ * Copyright (C) 2012 The Android Open Source Project
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *      http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
 package com.android.keyguard;
 
 import android.animation.Animator;
@@ -317,8 +317,8 @@ public class KeyguardWidgetPager extends PagedView implements PagedView.PageSwit
     }
 
     /*
-* We wrap widgets in a special frame which handles drawing the over scroll foreground.
-*/
+     * We wrap widgets in a special frame which handles drawing the over scroll foreground.
+     */
     public void addWidget(View widget, int pageIndex) {
         KeyguardWidgetFrame frame;
         // All views contained herein should be wrapped in a KeyguardWidgetFrame
@@ -330,7 +330,7 @@ public class KeyguardWidgetPager extends PagedView implements PagedView.PageSwit
 
             // The framework adds a default padding to AppWidgetHostView. We don't need this padding
             // for the Keyguard, so we override it to be 0.
-            widget.setPadding(0, 0, 0, 0);
+            widget.setPadding(0,  0, 0, 0);
             frame.addView(widget, lp);
 
             // We set whether or not this widget supports vertical resizing.
@@ -363,7 +363,7 @@ public class KeyguardWidgetPager extends PagedView implements PagedView.PageSwit
         }
 
         // Update the frame content description.
-        View content = (widget == frame) ? frame.getContent() : widget;
+        View content = (widget == frame) ?  frame.getContent() : widget;
         if (content != null) {
             String contentDescription = mContext.getString(
                 R.string.keyguard_accessibility_widget,
@@ -374,9 +374,9 @@ public class KeyguardWidgetPager extends PagedView implements PagedView.PageSwit
     }
 
     /**
-* Use addWidget() instead.
-* @deprecated
-*/
+     * Use addWidget() instead.
+     * @deprecated
+     */
     @Override
     public void addView(View child, int index) {
         enforceKeyguardWidgetFrame(child);
@@ -384,9 +384,9 @@ public class KeyguardWidgetPager extends PagedView implements PagedView.PageSwit
     }
 
     /**
-* Use addWidget() instead.
-* @deprecated
-*/
+     * Use addWidget() instead.
+     * @deprecated
+     */
     @Override
     public void addView(View child, int width, int height) {
         enforceKeyguardWidgetFrame(child);
@@ -394,9 +394,9 @@ public class KeyguardWidgetPager extends PagedView implements PagedView.PageSwit
     }
 
     /**
-* Use addWidget() instead.
-* @deprecated
-*/
+     * Use addWidget() instead.
+     * @deprecated
+     */
     @Override
     public void addView(View child, LayoutParams params) {
         enforceKeyguardWidgetFrame(child);
@@ -404,9 +404,9 @@ public class KeyguardWidgetPager extends PagedView implements PagedView.PageSwit
     }
 
     /**
-* Use addWidget() instead.
-* @deprecated
-*/
+     * Use addWidget() instead.
+     * @deprecated
+     */
     @Override
     public void addView(View child, int index, LayoutParams params) {
         enforceKeyguardWidgetFrame(child);
@@ -468,11 +468,11 @@ public class KeyguardWidgetPager extends PagedView implements PagedView.PageSwit
     }
 
     /*
-* This interpolator emulates the rate at which the perceived scale of an object changes
-* as its distance from a camera increases. When this interpolator is applied to a scale
-* animation on a view, it evokes the sense that the object is shrinking due to moving away
-* from the camera.
-*/
+     * This interpolator emulates the rate at which the perceived scale of an object changes
+     * as its distance from a camera increases. When this interpolator is applied to a scale
+     * animation on a view, it evokes the sense that the object is shrinking due to moving away
+     * from the camera.
+     */
     static class ZInterpolator implements TimeInterpolator {
         private float focalLength;
 
@@ -573,8 +573,8 @@ public class KeyguardWidgetPager extends PagedView implements PagedView.PageSwit
     }
 
     /**
-* Returns the bounded set of pages that are re-orderable. The range is fully inclusive.
-*/
+     * Returns the bounded set of pages that are re-orderable.  The range is fully inclusive.
+     */
     @Override
     void boundByReorderablePages(boolean isReordering, int[] range) {
         if (isReordering) {
@@ -842,7 +842,7 @@ public class KeyguardWidgetPager extends PagedView implements PagedView.PageSwit
         if (shouldSetTopAlignedPivotForWidget(curPage)) {
             currentPage.setPivotY(0);
             // Note: we are working around the issue that setting the x-pivot to the same value as it
-            // was does not actually work.
+            //       was does not actually work.
             currentPage.setPivotX(0);
             currentPage.setPivotX(currentPage.getMeasuredWidth() / 2);
         }
@@ -894,10 +894,10 @@ public class KeyguardWidgetPager extends PagedView implements PagedView.PageSwit
     }
 
     /**
-* Search given {@link View} hierarchy for {@link TextClock} instances that
-* show various time components. Returns combination of
-* {@link #FLAG_HAS_LOCAL_HOUR} and {@link #FLAG_HAS_LOCAL_MINUTE}.
-*/
+     * Search given {@link View} hierarchy for {@link TextClock} instances that
+     * show various time components. Returns combination of
+     * {@link #FLAG_HAS_LOCAL_HOUR} and {@link #FLAG_HAS_LOCAL_MINUTE}.
+     */
     private static int findClockInHierarchy(View view) {
         if (view instanceof TextClock) {
             return getClockFlags((TextClock) view);
@@ -915,10 +915,10 @@ public class KeyguardWidgetPager extends PagedView implements PagedView.PageSwit
     }
 
     /**
-* Return combination of {@link #FLAG_HAS_LOCAL_HOUR} and
-* {@link #FLAG_HAS_LOCAL_MINUTE} describing the time represented described
-* by the given {@link TextClock}.
-*/
+     * Return combination of {@link #FLAG_HAS_LOCAL_HOUR} and
+     * {@link #FLAG_HAS_LOCAL_MINUTE} describing the time represented described
+     * by the given {@link TextClock}.
+     */
     private static int getClockFlags(TextClock clock) {
         int flags = 0;
 

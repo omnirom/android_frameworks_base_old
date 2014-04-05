@@ -1006,6 +1006,32 @@ public class WifiManager {
     }
 
     /**
+     * Check if the chipset supports IBSS (Adhoc) mode
+     * @return {@code true} if supported, {@code false} otherwise.
+     * @hide
+     */
+    public boolean isIbssSupported() {
+        try {
+            return mService.isIbssSupported();
+        } catch (RemoteException e) {
+            return false;
+        }
+    }
+
+    /**
+     * Get a list of supported channels / frequencies
+     * @return a List of WifiChannels
+     * @hide
+     */
+    public List<WifiChannel> getSupportedChannels() {
+        try {
+            return mService.getSupportedChannels();
+        } catch (RemoteException e) {
+            return null;
+        }
+    }
+
+    /**
      * Return the DHCP-assigned addresses from the last successful DHCP request,
      * if any.
      * @return the DHCP information

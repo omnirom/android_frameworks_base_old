@@ -40,7 +40,6 @@ public class BrightnessDialog extends Dialog implements
 
     private BrightnessController mBrightnessController;
     private ToggleSlider mSlider;
-    private View mSetupButtonPlaceholder;
     private View mSetupButtonDivider;
     private ImageView mSetupButton;
     private final int mBrightnessDialogLongTimeout;
@@ -83,7 +82,6 @@ public class BrightnessDialog extends Dialog implements
         setCanceledOnTouchOutside(true);
 
         mSlider = (ToggleSlider) findViewById(R.id.brightness_slider);
-        mSetupButtonPlaceholder = findViewById(R.id.brightness_setup_button_placeholder);
         mSetupButtonDivider = findViewById(R.id.brightness_setup_button_divider);
         mSetupButton = (ImageView) findViewById(R.id.brightness_setup_button);
         mSetupButton.setOnClickListener(new View.OnClickListener() {
@@ -91,7 +89,7 @@ public class BrightnessDialog extends Dialog implements
             public void onClick(View view) {
                 Intent intent = new Intent();
                 intent.setClassName("com.android.settings",
-                        "com.android.settings.slim.AutoBrightnessSetup");
+                        "com.android.settings.cyanogenmod.AutoBrightnessSetup");
                 intent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK
                         | Intent.FLAG_ACTIVITY_SINGLE_TOP
                         | Intent.FLAG_ACTIVITY_CLEAR_TOP
@@ -126,7 +124,6 @@ public class BrightnessDialog extends Dialog implements
 
     private void updateSetupButtonVisibility() {
         boolean isAuto = mSlider.isChecked();
-        mSetupButtonPlaceholder.setVisibility(isAuto ? View.GONE : View.VISIBLE);
         mSetupButtonDivider.setVisibility(isAuto ? View.VISIBLE : View.GONE);
         mSetupButton.setVisibility(isAuto ? View.VISIBLE : View.GONE);
     }

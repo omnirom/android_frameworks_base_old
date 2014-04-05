@@ -17,6 +17,7 @@
 package com.android.systemui.amra.onthego;
 
 import android.app.Dialog;
+import android.content.ContentResolver;
 import android.content.Context;
 import android.content.Intent;
 import android.content.res.Resources;
@@ -25,7 +26,9 @@ import android.os.Handler;
 import android.provider.Settings;
 import android.view.Window;
 import android.view.WindowManager;
+import android.widget.CompoundButton;
 import android.widget.SeekBar;
+import android.widget.Switch;
 
 import com.android.systemui.R;
 
@@ -43,8 +46,6 @@ public class OnTheGoDialog extends Dialog {
                 OnTheGoDialog.this.dismiss();
             }
         }
-
-        ;
     };
 
     public OnTheGoDialog(Context ctx) {
@@ -52,9 +53,9 @@ public class OnTheGoDialog extends Dialog {
         mContext = ctx;
         final Resources r = mContext.getResources();
         mOnTheGoDialogLongTimeout =
-                r.getInteger(R.integer.quick_settings_brightness_dialog_long_timeout);
+                r.getInteger(R.integer.quick_settings_onthego_dialog_long_timeout);
         mOnTheGoDialogShortTimeout =
-                r.getInteger(R.integer.quick_settings_brightness_dialog_short_timeout);
+                r.getInteger(R.integer.quick_settings_onthego_dialog_short_timeout);
     }
 
     @Override
@@ -69,6 +70,8 @@ public class OnTheGoDialog extends Dialog {
 
         setContentView(R.layout.quick_settings_onthego_dialog);
         setCanceledOnTouchOutside(true);
+
+        final ContentResolver resolver = mContext.getContentResolver();
 
         final SeekBar mSlider = (SeekBar) findViewById(R.id.alpha_slider);
         final float value = Settings.Amra.getFloat(mContext.getContentResolver(),
@@ -89,6 +92,37 @@ public class OnTheGoDialog extends Dialog {
 
             @Override
             public void onStopTrackingTouch(SeekBar seekBar) {
+                dismissOnTheGoDialog(mOnTheGoDialogShortTimeout);
+            }
+        });
+
+        final Switch mServiceToggle = (Switch) findViewById(R.id.onthego_service_toggle);
+        final boolean restartService = Settings.Amra.getBoolean(resolver,
+                Settings.Amra.ON_THE_GO_SERVICE_RESTART,
+                false);
+        mServiceToggle.setChecked(restartService);
+        mServiceToggle.setOnCheckedChangeListener(new CompoundButton.OnCheckedChangeListener() {
+            @Override
+            public void onCheckedChanged(CompoundButton compoundButton, boolean b) {
+                Settings.Amra.putBoolean(resolver,
+                        Settings.Amra.ON_THE_GO_SERVICE_RESTART,
+                        b);
+                dismissOnTheGoDialog(mOnTheGoDialogShortTimeout);
+            }
+        });
+
+        final Switch mCamSwitch = (Switch) findViewById(R.id.onthego_camera_toggle);
+        final boolean useFrontCam = (Settings.Amra.getInt(resolver,
+                Settings.Amra.ON_THE_GO_CAMERA,
+                0) == 1);
+        mCamSwitch.setChecked(useFrontCam);
+        mCamSwitch.setOnCheckedChangeListener(new CompoundButton.OnCheckedChangeListener() {
+            @Override
+            public void onCheckedChanged(CompoundButton compoundButton, boolean b) {
+                Settings.Amra.putInt(resolver,
+                        Settings.Amra.ON_THE_GO_CAMERA,
+                        (b ? 1 : 0));
+                sendCameraBroadcast();
                 dismissOnTheGoDialog(mOnTheGoDialogShortTimeout);
             }
         });
@@ -121,6 +155,12 @@ public class OnTheGoDialog extends Dialog {
         alphaBroadcast.setAction(OnTheGoService.ACTION_TOGGLE_ALPHA);
         alphaBroadcast.putExtra(OnTheGoService.EXTRA_ALPHA, value);
         mContext.sendBroadcast(alphaBroadcast);
+    }
+
+    private void sendCameraBroadcast() {
+        final Intent cameraBroadcast = new Intent();
+        cameraBroadcast.setAction(OnTheGoService.ACTION_TOGGLE_CAMERA);
+        mContext.sendBroadcast(cameraBroadcast);
     }
 
 }

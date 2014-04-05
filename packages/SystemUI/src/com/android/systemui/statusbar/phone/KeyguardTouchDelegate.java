@@ -128,20 +128,6 @@ public class KeyguardTouchDelegate {
         return false;
     }
 
-    public boolean isShowing() {
-        final IKeyguardService service = mService;
-        if (service != null) {
-            try {
-                return service.isShowing();
-            } catch (RemoteException e) {
-                Slog.w(TAG , "Remote Exception", e);
-            }
-        } else {
-            Slog.w(TAG, "isShowing(): NO SERVICE!");
-        }
-        return false;
-    }
-
     public boolean isShowingAndNotHidden() {
         final IKeyguardService service = mService;
         if (service != null) {

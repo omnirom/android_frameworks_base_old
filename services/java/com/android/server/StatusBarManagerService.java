@@ -1,18 +1,18 @@
 /*
-* Copyright (C) 2007 The Android Open Source Project
-*
-* Licensed under the Apache License, Version 2.0 (the "License");
-* you may not use this file except in compliance with the License.
-* You may obtain a copy of the License at
-*
-* http://www.apache.org/licenses/LICENSE-2.0
-*
-* Unless required by applicable law or agreed to in writing, software
-* distributed under the License is distributed on an "AS IS" BASIS,
-* WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
-* See the License for the specific language governing permissions and
-* limitations under the License.
-*/
+ * Copyright (C) 2007 The Android Open Source Project
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *      http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
 
 package com.android.server;
 
@@ -45,9 +45,9 @@ import java.util.Map;
 
 
 /**
-* A note on locking: We rely on the fact that calls onto mBar are oneway or
-* if they are local, that they just enqueue messages to not deadlock.
-*/
+ * A note on locking:  We rely on the fact that calls onto mBar are oneway or
+ * if they are local, that they just enqueue messages to not deadlock.
+ */
 public class StatusBarManagerService extends IStatusBarService.Stub
     implements WindowManagerService.OnHardKeyboardStatusChangeListener
 {
@@ -101,8 +101,8 @@ public class StatusBarManagerService extends IStatusBarService.Stub
     }
 
     /**
-* Construct the service, add the status bar view to the window manager
-*/
+     * Construct the service, add the status bar view to the window manager
+     */
     public StatusBarManagerService(Context context, WindowManagerService windowManager) {
         mContext = context;
         mWindowManager = windowManager;
@@ -146,7 +146,7 @@ public class StatusBarManagerService extends IStatusBarService.Stub
 
         if (mBar != null) {
             try {
-                mBar.animateExpandSettingsPanel(true);
+                mBar.animateExpandSettingsPanel();
             } catch (RemoteException ex) {
             }
         }
@@ -167,7 +167,7 @@ public class StatusBarManagerService extends IStatusBarService.Stub
     private void disableLocked(int userId, int what, IBinder token, String pkg) {
         // It's important that the the callback and the call to mBar get done
         // in the same order when multiple threads are calling this function
-        // so they are paired correctly. The messages on the handler will be
+        // so they are paired correctly.  The messages on the handler will be
         // handled in the order they were enqueued, but will be outside the lock.
         manageDisableListLocked(userId, what, token, pkg);
 
@@ -262,9 +262,9 @@ public class StatusBarManagerService extends IStatusBarService.Stub
     }
 
     /**
-* Hide or show the on-screen Menu key. Only call this from the window manager, typically in
-* response to a window with FLAG_NEEDS_MENU_KEY set.
-*/
+     * Hide or show the on-screen Menu key. Only call this from the window manager, typically in
+     * response to a window with FLAG_NEEDS_MENU_KEY set.
+     */
     public void topAppWindowChanged(final boolean menuVisible) {
         enforceStatusBar();
 
@@ -418,15 +418,6 @@ public class StatusBarManagerService extends IStatusBarService.Stub
     }
 
     @Override
-    public void setAutoRotate(boolean enabled) {
-        if (mBar != null) {
-            try {
-                mBar.setAutoRotate(enabled);
-            } catch (RemoteException ex) {}
-        }
-    }
-
-    @Override
     public void toggleNotificationShade() {
         if (mBar != null) {
             try {
@@ -518,9 +509,9 @@ public class StatusBarManagerService extends IStatusBarService.Stub
     }
 
     /**
-* The status bar service should call this each time the user brings the panel from
-* invisible to visible in order to clear the notification light.
-*/
+     * The status bar service should call this each time the user brings the panel from
+     * invisible to visible in order to clear the notification light.
+     */
     public void onPanelRevealed() {
         enforceStatusBarService();
 
@@ -538,7 +529,7 @@ public class StatusBarManagerService extends IStatusBarService.Stub
             int uid, int initialPid, String message) {
         enforceStatusBarService();
 
-        // WARNING: this will call back into us to do the remove. Don't hold any locks.
+        // WARNING: this will call back into us to do the remove.  Don't hold any locks.
         mNotificationCallbacks.onNotificationError(pkg, tag, id, uid, initialPid, message);
     }
 
@@ -681,18 +672,18 @@ public class StatusBarManagerService extends IStatusBarService.Stub
             int i=0;
             pw.println("Notification list:");
             for (Map.Entry<IBinder,StatusBarNotification> e: mNotifications.entrySet()) {
-                pw.printf(" %2d: %s\n", i, e.getValue().toString());
+                pw.printf("  %2d: %s\n", i, e.getValue().toString());
                 i++;
             }
         }
 
         synchronized (mLock) {
-            pw.println(" mDisabled=0x" + Integer.toHexString(mDisabled));
+            pw.println("  mDisabled=0x" + Integer.toHexString(mDisabled));
             final int N = mDisableRecords.size();
-            pw.println(" mDisableRecords.size=" + N);
+            pw.println("  mDisableRecords.size=" + N);
             for (int i=0; i<N; i++) {
                 DisableRecord tok = mDisableRecords.get(i);
-                pw.println(" [" + i + "] userId=" + tok.userId
+                pw.println("    [" + i + "] userId=" + tok.userId
                                 + " what=0x" + Integer.toHexString(tok.what)
                                 + " pkg=" + tok.pkg
                                 + " token=" + tok.token);
@@ -708,16 +699,16 @@ public class StatusBarManagerService extends IStatusBarService.Stub
                 collapsePanels();
             }
             /*
-else if (Telephony.Intents.SPN_STRINGS_UPDATED_ACTION.equals(action)) {
-updateNetworkName(intent.getBooleanExtra(Telephony.Intents.EXTRA_SHOW_SPN, false),
-intent.getStringExtra(Telephony.Intents.EXTRA_SPN),
-intent.getBooleanExtra(Telephony.Intents.EXTRA_SHOW_PLMN, false),
-intent.getStringExtra(Telephony.Intents.EXTRA_PLMN));
-}
-else if (Intent.ACTION_CONFIGURATION_CHANGED.equals(action)) {
-updateResources();
-}
-*/
+            else if (Telephony.Intents.SPN_STRINGS_UPDATED_ACTION.equals(action)) {
+                updateNetworkName(intent.getBooleanExtra(Telephony.Intents.EXTRA_SHOW_SPN, false),
+                        intent.getStringExtra(Telephony.Intents.EXTRA_SPN),
+                        intent.getBooleanExtra(Telephony.Intents.EXTRA_SHOW_PLMN, false),
+                        intent.getStringExtra(Telephony.Intents.EXTRA_PLMN));
+            }
+            else if (Intent.ACTION_CONFIGURATION_CHANGED.equals(action)) {
+                updateResources();
+            }
+            */
         }
     };
 

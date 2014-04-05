@@ -23,7 +23,6 @@ import android.content.IntentFilter;
 import android.content.res.Resources;
 import android.database.ContentObserver;
 import android.os.Handler;
-import android.os.Looper;
 import android.provider.Settings;
 import android.text.TextUtils;
 import android.text.format.DateFormat;
@@ -63,15 +62,9 @@ public class KeyguardStatusView extends GridLayout {
         }
 
         @Override
-        void onKeyguardVisibilityChanged(boolean showing) {
-            // Do nothing
-        };
-
-        @Override
         public void onScreenTurnedOn() {
             setEnableMarquee(true);
             enableRefresh = true;
-            refresh();
         };
 
         @Override
@@ -158,6 +151,9 @@ public class KeyguardStatusView extends GridLayout {
 
         mContext.getContentResolver().registerContentObserver(
                 Settings.System.getUriFor(Settings.System.TIME_12_24), false, mContentObserver);
+        mContext.getContentResolver().registerContentObserver(
+                Settings.System.getUriFor(Settings.System.NEXT_ALARM_FORMATTED),
+                false, mContentObserver);
     }
 
     @Override

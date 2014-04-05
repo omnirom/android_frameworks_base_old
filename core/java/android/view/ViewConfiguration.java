@@ -17,6 +17,7 @@
 package android.view;
 
 import android.app.AppGlobals;
+import android.content.ContentResolver;
 import android.content.Context;
 import android.content.ContentResolver;
 import android.content.res.Configuration;
@@ -64,7 +65,7 @@ public class ViewConfiguration {
      * Defines the default duration in milliseconds before a press turns into
      * a long press
      */
-    private static final int DEFAULT_LONG_PRESS_TIMEOUT = 500;
+    private static final int DEFAULT_LONG_PRESS_TIMEOUT = 450;
 
     /**
      * Defines the time between successive key repeats in milliseconds.
@@ -76,21 +77,21 @@ public class ViewConfiguration {
      * appropriate button to bring up the global actions dialog (power off,
      * lock screen, etc).
      */
-    private static final int GLOBAL_ACTIONS_KEY_TIMEOUT = 500;
+    private static final int GLOBAL_ACTIONS_KEY_TIMEOUT = 450;
 
     /**
      * Defines the duration in milliseconds we will wait to see if a touch event
      * is a tap or a scroll. If the user does not move within this interval, it is
      * considered to be a tap.
      */
-    private static final int TAP_TIMEOUT = 180;
+    private static final int TAP_TIMEOUT = 175;
 
     /**
      * Defines the duration in milliseconds we will wait to see if a touch event
      * is a jump tap. If the user does not complete the jump tap within this interval, it is
      * considered to be a tap.
      */
-    private static final int JUMP_TAP_TIMEOUT = 500;
+    private static final int JUMP_TAP_TIMEOUT = 450;
 
     /**
      * Defines the duration in milliseconds between the first tap's up event and
@@ -124,12 +125,12 @@ public class ViewConfiguration {
      * Defines the duration in milliseconds we want to display zoom controls in response
      * to a user panning within an application.
      */
-    private static final int ZOOM_CONTROLS_TIMEOUT = 3000;
+    private static final int ZOOM_CONTROLS_TIMEOUT = 2800;
 
     /**
      * Inset in dips to look for touchable content when the user touches the edge of the screen
      */
-    private static final int EDGE_SLOP = 12;
+    private static final int EDGE_SLOP = 10;
 
     /**
      * Distance a touch can wander before we think the user is scrolling in dips.
@@ -183,13 +184,13 @@ public class ViewConfiguration {
     /**
      * Maximum velocity to initiate a fling, as measured in dips per second
      */
-    private static int MAXIMUM_FLING_VELOCITY = 8000;
+    private static int MAXIMUM_FLING_VELOCITY = 15000;
 
     /**
      * Maximum velocity to initiate a fling, as measured in dips per second
      * @hide
      */
-    public static final int DEFAULT_MAXIMUM_FLING_VELOCITY = 8000;
+    public static final int DEFAULT_MAXIMUM_FLING_VELOCITY = 15000;
 
     /**
      * Delay before dispatching a recurring accessibility event in milliseconds.
@@ -209,13 +210,13 @@ public class ViewConfiguration {
     /**
      * The coefficient of friction applied to flings/scrolls.
      */
-    private static float SCROLL_FRICTION = 0.015f;
+    private static float SCROLL_FRICTION = 0.011f;
 
     /**
      * The coefficient of friction applied to flings/scrolls.
      * @hide
      */
-    public static final float DEFAULT_SCROLL_FRICTION = 0.015f;
+    public static final float DEFAULT_SCROLL_FRICTION = 0.011f;
 
     /**
      * Max distance in dips to overscroll for edge effects
@@ -239,7 +240,6 @@ public class ViewConfiguration {
      */
     public static final int DEFAULT_OVERFLING_DISTANCE = 6;
 
-    private Context mContext;
     private final int mEdgeSlop;
     private final int mFadingEdgeLength;
     private final int mMinimumFlingVelocity;
@@ -254,10 +254,6 @@ public class ViewConfiguration {
     private final int mOverscrollDistance;
     private final int mOverflingDistance;
     private final boolean mFadingMarqueeEnabled;
-
-    private boolean sHasPermanentMenuKey;
-    private boolean sHasPermanentMenuKeySet;
-    private boolean sHasHwMenuKey;
 
     static final SparseArray<ViewConfiguration> sConfigurations =
             new SparseArray<ViewConfiguration>(2);
@@ -295,7 +291,6 @@ public class ViewConfiguration {
      * @see android.util.DisplayMetrics
      */
     private ViewConfiguration(Context context) {
-        mContext = context;
 
         final ContentResolver resolver = context.getContentResolver();
         if (Settings.System.getInt(resolver,
@@ -358,24 +353,6 @@ public class ViewConfiguration {
 
         mOverscrollDistance = (int) (sizeAndDensity * OVERSCROLL_DISTANCE + 0.5f);
         mOverflingDistance = (int) (sizeAndDensity * OVERFLING_DISTANCE + 0.5f);
-
-        if (!sHasPermanentMenuKeySet) {
-            IWindowManager wm = WindowManagerGlobal.getWindowManagerService();
-            try {
-                sHasPermanentMenuKey = !wm.hasNavigationBar()
-                        && !context.getResources().getBoolean(
-                                com.android.internal.R.bool.config_force_permanent_menu_key);
-                sHasPermanentMenuKeySet = true;
-            } catch (RemoteException ex) {
-                sHasPermanentMenuKey = false;
-            }
-
-            boolean hasNavBar = res.getBoolean(com.android.internal.R.bool.config_showNavigationBar);
-            int deviceKeys = res.getInteger(com.android.internal.R.integer.config_deviceHardwareKeys);
-            // TODO we should have those in some central place
-            final int KEY_MASK_MENU = 0x04;
-            sHasHwMenuKey = !hasNavBar && ((deviceKeys & KEY_MASK_MENU) != 0);
-        }
 
         mFadingMarqueeEnabled = res.getBoolean(
                 com.android.internal.R.bool.config_ui_enableFadingMarquee);
@@ -768,22 +745,22 @@ public class ViewConfiguration {
      * @return true if a permanent menu key is present, false otherwise.
      */
     public boolean hasPermanentMenuKey() {
-        // normally only one of those settings will be 1
-        // except for the use-case to force show soft keys on devices
-        // that have hardware buttons
-        boolean forceShowMenu = Settings.System.getInt(mContext.getContentResolver(),
-                    Settings.System.FORCE_SHOW_OVERFLOW_MENU, sHasHwMenuKey ? 0 : 1) == 1;
-
-        boolean emulateHwMenuKey = Settings.System.getInt(mContext.getContentResolver(),
-                    Settings.System.EMULATE_HW_MENU_KEY, 0) == 1;
-
-        if (forceShowMenu && sHasPermanentMenuKey){
-            return false;
+        IWindowManager wm = WindowManagerGlobal.getWindowManagerService();
+        // Report no menu key if device has soft buttons
+        try {
+            if (wm.hasNavigationBar()) {
+                return false;
+            }
+        } catch (RemoteException ex) {
+            // do nothing, continue trying to guess
         }
-        if (emulateHwMenuKey){
+
+        // Report menu key presence based on hardware key rebinding
+        try {
+            return wm.hasMenuKeyEnabled();
+        } catch (RemoteException ex) {
             return true;
         }
-        return sHasPermanentMenuKey;
     }
 
     /**

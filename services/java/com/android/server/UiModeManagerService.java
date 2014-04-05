@@ -53,7 +53,6 @@ import java.io.PrintWriter;
 
 import com.android.internal.R;
 import com.android.internal.app.DisableCarModeActivity;
-import com.android.internal.statusbar.IStatusBarService;
 import com.android.server.TwilightService.TwilightState;
 import com.android.internal.app.ThemeUtils;
 
@@ -62,9 +61,6 @@ final class UiModeManagerService extends IUiModeManager.Stub
 
     private static final String TAG = UiModeManager.class.getSimpleName();
     private static final boolean LOG = false;
-
-    private static float LIGHT_CONDITION = 25f;
-    private static float DARK_CONDITION  = 0.25f;
 
     // Enable launching of applications when entering the dock.
     private static final boolean ENABLE_LAUNCH_CAR_DOCK_APP = true;
@@ -94,7 +90,6 @@ final class UiModeManagerService extends IUiModeManager.Stub
     private int mSetUiMode = 0;
     private int mSetUiThemeMode = 0;
     private boolean mAllowConfigChange = true;
-    private float mCurrentSwitchLevel = DARK_CONDITION;
 
     private boolean mHoldingConfiguration = false;
     private Configuration mConfiguration = new Configuration();
@@ -320,17 +315,15 @@ final class UiModeManagerService extends IUiModeManager.Stub
     public void onSensorChanged(SensorEvent event) {
         int type = event.sensor.getType();
         if (type == Sensor.TYPE_LIGHT) {
-            if (event.values[0] <= mCurrentSwitchLevel) {
-                mCurrentSwitchLevel = LIGHT_CONDITION;
+            if (event.values[0] <= SensorManager.LIGHT_FULLMOON) {
                 mConfiguration.uiThemeMode = Configuration.UI_THEME_MODE_HOLO_DARK;
             } else {
-                mCurrentSwitchLevel = DARK_CONDITION;
                 mConfiguration.uiThemeMode = Configuration.UI_THEME_MODE_HOLO_LIGHT;
             }
 
             if (mAllowConfigChange) {
                 mAllowConfigChange = false;
-                mHandler.postDelayed(mReleaseUiThemeModeBlock, 3000);
+                mHandler.postDelayed(mReleaseUiThemeModeBlock, 5000);
                 synchronized (mLock) {
                     if (mSystemReady) {
                         sendConfigurationLocked();
@@ -526,22 +519,11 @@ final class UiModeManagerService extends IUiModeManager.Stub
                 || mSetUiThemeMode != mConfiguration.uiThemeMode) {
             mSetUiMode = mConfiguration.uiMode;
 
-            if (mSetUiThemeMode != mConfiguration.uiThemeMode) {
-                final IStatusBarService barService = IStatusBarService.Stub.asInterface(
-                        ServiceManager.getService(Context.STATUS_BAR_SERVICE));
-                try {
-                    if (barService != null) {
-                        barService.collapsePanels();
-                    }
-                } catch (RemoteException e) {
-                    Slog.w(TAG, "Failure communicating with statusbar service", e);
-                }
+            mSetUiThemeMode = mConfiguration.uiThemeMode;
+            Settings.Secure.putIntForUser(mContext.getContentResolver(),
+                    Settings.Secure.UI_THEME_MODE, mSetUiThemeMode,
+                    UserHandle.USER_CURRENT);
 
-                mSetUiThemeMode = mConfiguration.uiThemeMode;
-                Settings.Secure.putIntForUser(mContext.getContentResolver(),
-                        Settings.Secure.UI_THEME_MODE, mSetUiThemeMode,
-                        UserHandle.USER_CURRENT);
-            }
             try {
                 ActivityManagerNative.getDefault().updateConfiguration(mConfiguration);
             } catch (RemoteException e) {

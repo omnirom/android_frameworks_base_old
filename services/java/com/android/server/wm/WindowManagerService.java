@@ -5649,8 +5649,7 @@ public class WindowManagerService extends IWindowManager.Stub
 
                     // We keep on including windows until we go past a full-screen
                     // window.
-                    boolean fullscreen = ws.isFullscreen(dw, dh);
-                    including = !ws.mIsImWindow && !fullscreen;
+                    including = !ws.mIsImWindow && !ws.isFullscreen(dw, dh);
 
                     final WindowStateAnimator winAnim = ws.mWinAnimator;
                     if (maxLayer < winAnim.mSurfaceLayer) {
@@ -5675,11 +5674,6 @@ public class WindowManagerService extends IWindowManager.Stub
                     if (ws.mAppToken != null && ws.mAppToken.token == appToken &&
                             ws.isDisplayedLw()) {
                         screenshotReady = true;
-                    }
-
-                    if (fullscreen) {
-                        // No point in continuing down through windows.
-                        break;
                     }
                 }
 
@@ -10251,6 +10245,11 @@ public class WindowManagerService extends IWindowManager.Stub
     }
 
     @Override
+    public boolean hasMenuKeyEnabled() {
+        return mPolicy.hasMenuKeyEnabled();
+    }
+
+    @Override
     public void lockNow(Bundle options) {
         mPolicy.lockNow(options);
     }
@@ -10934,38 +10933,18 @@ public class WindowManagerService extends IWindowManager.Stub
 
     /* @hide */
     @Override
-    public boolean expandedDesktopHidesNavigationBar() {
-        return mPolicy.expandedDesktopHidesNavigationBar();
-    }
-
-    /* @hide */
-    @Override
-    public boolean expandedDesktopHidesStatusBar() {
-        return mPolicy.expandedDesktopHidesStatusBar();
-    }
-
-    /* @hide */
-    @Override
-    public int getCurrentNavigationBarSize() {
-        return mPolicy.getCurrentNavigationBarSize();
-    }
-
-    /* @hide */
-    @Override
     public void toggleGlobalMenu() {
         mPolicy.toggleGlobalMenu();
     }
-
-    /* @hide */
-    @Override
-    public void toggleStatusBar() {
-        mPolicy.toggleStatusBar();
-    }
-
-    /* @hide */
+    
     @Override
     public void addSystemUIVisibilityFlag(int flag) {
         mLastStatusBarVisibility |= flag;
     }
 
+    /* @hide */
+    @Override
+    public int getSystemUIVisibility() {
+        return mLastStatusBarVisibility;
+    }
 }

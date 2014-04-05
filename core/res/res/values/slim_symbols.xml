@@ -24,7 +24,6 @@
   <java-symbol type="array" name="notification_light_package_mapping" />
   <java-symbol type="bool" name="config_multiColorBatteryLed" />
   <java-symbol type="bool" name="config_intrusiveBatteryLed" />
-  <java-symbol type="bool" name="config_multiColorNotificationLed" />
 
   <!-- Privacy Guard -->
   <java-symbol type="string" name="privacy_guard_notification" />
@@ -49,9 +48,6 @@
 
   <java-symbol type="string" name="reboot_progress" />
   <java-symbol type="string" name="reboot_system" />
-
-  <!-- Config IME switcher -->
-  <java-symbol type="bool" name="config_show_IMESwitcher" />
 
   <!-- WiFi -->
   <java-symbol type="bool" name="config_wifiApFirmwareReload" />
@@ -103,12 +99,6 @@
   <!-- UI theme mode -->
   <java-symbol type="integer" name="config_uiThemeMode" />
   <java-symbol type="string" name="theme_auto_switch_mode_error" />
-
-  <!-- Statusbar double tap gesture -->
-  <java-symbol type="bool" name="config_disableDoubleTapSleepGesture" />
-
-  <!-- Force permanent menu key -->
-  <java-symbol type="bool" name="config_force_permanent_menu_key" />
 
   <!-- Advanced Reboot -->
   <java-symbol type="array" name="shutdown_reboot_options" />

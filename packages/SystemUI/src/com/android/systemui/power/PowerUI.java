@@ -20,6 +20,8 @@ import android.app.AlertDialog;
 import android.app.Notification;
 import android.app.NotificationManager;
 import android.app.PendingIntent;
+import android.app.Notification;
+import android.app.NotificationManager;
 import android.content.BroadcastReceiver;
 import android.content.ContentResolver;
 import android.content.Context;
@@ -37,7 +39,6 @@ import android.os.Handler;
 import android.os.PowerManager;
 import android.os.SystemClock;
 import android.os.UserHandle;
-import android.provider.Settings;
 import android.provider.Settings;
 import android.util.Slog;
 import android.view.View;
@@ -93,7 +94,7 @@ public class PowerUI extends SystemUI {
         final PowerManager pm = (PowerManager) mContext.getSystemService(Context.POWER_SERVICE);
         mScreenOffTime = pm.isScreenOn() ? -1 : SystemClock.elapsedRealtime();
 
-        // Register settings observer and set initial preferences
+	// Register settings observer and set initial preferences
         SettingsObserver settingsObserver = new SettingsObserver(new Handler());
         settingsObserver.observe();
         setPreferences();
@@ -256,8 +257,9 @@ public class PowerUI extends SystemUI {
                         && (bucket < oldBucket || oldPlugged)
                         && mBatteryStatus != BatteryManager.BATTERY_STATUS_UNKNOWN
                         && bucket < 0) {
+                    showLowBatteryWarning();
 
-                    if(mShowLowBatteryDialogWarning) {
+		    if(mShowLowBatteryDialogWarning) {
                         showLowBatteryWarning();
                     }
                     if(mShowLowBatteryNotificationWarning) {
@@ -279,8 +281,8 @@ public class PowerUI extends SystemUI {
                 mScreenOffTime = SystemClock.elapsedRealtime();
             } else if (Intent.ACTION_SCREEN_ON.equals(action)) {
                 mScreenOffTime = -1;
-            } else if (action.equals(Intent.ACTION_POWER_CONNECTED)
-                    || action.equals(Intent.ACTION_POWER_DISCONNECTED)) {
+            } else if (Intent.ACTION_POWER_CONNECTED.equals(action)
+                    || Intent.ACTION_POWER_DISCONNECTED.equals(action)) {
                 final ContentResolver cr = mContext.getContentResolver();
 
                 if (mIgnoreFirstPowerEvent) {

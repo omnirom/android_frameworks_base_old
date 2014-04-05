@@ -18,15 +18,9 @@
 -->
 
 <merge xmlns:android="http://schemas.android.com/apk/res/android">
-    <LinearLayout
-        android:id="@+id/keyguard_glow_pad_container"
+    <include layout="@layout/keyguard_glow_pad_view"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_gravity="bottom|center_horizontal"
-        android:layout_marginBottom="-52dp" >
-
-        <include layout="@layout/keyguard_glow_pad_view" />
-
-    </LinearLayout>
-
+        android:layout_marginBottom="@dimen/glowpadcontainer_bottom_margin"/>
 </merge>

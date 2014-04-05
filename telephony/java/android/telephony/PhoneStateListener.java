@@ -1,4 +1,6 @@
 /*
+ * Copyright (c) 2010-2013, The Linux Foundation. All rights reserved.
+ * Not a Contribution.
  * Copyright (C) 2008 The Android Open Source Project
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
@@ -24,6 +26,8 @@ import android.telephony.SignalStrength;
 import android.telephony.CellLocation;
 import android.telephony.CellInfo;
 import android.telephony.Rlog;
+import android.os.Looper;
+import android.telephony.MSimTelephonyManager;
 
 import com.android.internal.telephony.IPhoneStateListener;
 
@@ -165,7 +169,22 @@ public class PhoneStateListener {
      */
     public static final int LISTEN_CELL_INFO = 0x00000400;
 
+    /**
+     * Subscription used to listen to the phone state changes
+     * @hide
+     */
+    protected int mSubscription = 0;
+
     public PhoneStateListener() {
+        // If subscription is not passed set the default subscription.
+        mSubscription = MSimTelephonyManager.getDefault().getDefaultSubscription();
+    }
+
+    /**
+     * @hide
+     */
+    public PhoneStateListener(int subscription) {
+        mSubscription = subscription;
     }
 
     /**
@@ -346,7 +365,7 @@ public class PhoneStateListener {
         }
     };
 
-    Handler mHandler = new Handler() {
+    Handler mHandler = new Handler(Looper.getMainLooper() ) {
         public void handleMessage(Message msg) {
             //Rlog.d("TelephonyRegistry", "what=0x" + Integer.toHexString(msg.what) + " msg=" + msg);
             switch (msg.what) {

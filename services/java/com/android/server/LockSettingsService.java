@@ -1,18 +1,18 @@
 /*
-* Copyright (C) 2012 The Android Open Source Project
-*
-* Licensed under the Apache License, Version 2.0 (the "License");
-* you may not use this file except in compliance with the License.
-* You may obtain a copy of the License at
-*
-* http://www.apache.org/licenses/LICENSE-2.0
-*
-* Unless required by applicable law or agreed to in writing, software
-* distributed under the License is distributed on an "AS IS" BASIS,
-* WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
-* See the License for the specific language governing permissions and
-* limitations under the License.
-*/
+ * Copyright (C) 2012 The Android Open Source Project
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *      http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
 
 package com.android.server;
 
@@ -56,11 +56,11 @@ import java.util.Arrays;
 import java.util.List;
 
 /**
-* Keeps the lock pattern/password data and related settings for each user.
-* Used by LockPatternUtils. Needs to be a service because Settings app also needs
-* to be able to save lockscreen information for secondary users.
-* @hide
-*/
+ * Keeps the lock pattern/password data and related settings for each user.
+ * Used by LockPatternUtils. Needs to be a service because Settings app also needs
+ * to be able to save lockscreen information for secondary users.
+ * @hide
+ */
 public class LockSettingsService extends ILockSettings.Stub {
 
     private static final String PERMISSION = "android.permission.ACCESS_KEYGUARD_SECURE_STORAGE";
@@ -127,7 +127,7 @@ public class LockSettingsService extends ILockSettings.Stub {
                         Settings.Secure.putStringForUser(cr, ownerInfo, "", userId);
                     }
 
-                    // Migrate owner info enabled. Note there was a bug where older platforms only
+                    // Migrate owner info enabled.  Note there was a bug where older platforms only
                     // stored this value if the checkbox was toggled at least once. The code detects
                     // this case by handling the exception.
                     final String OWNER_INFO_ENABLED = Secure.LOCK_SCREEN_OWNER_INFO_ENABLED;
@@ -219,15 +219,38 @@ public class LockSettingsService extends ILockSettings.Stub {
         return readFromDb(key, defaultValue, userId);
     }
 
+    @Override
+    public byte getLockPatternSize(int userId) {
+        try {
+            long size = getLong(Settings.Secure.LOCK_PATTERN_SIZE, -1, userId);
+            if (size > 0 && size < 128) {
+                return (byte) size;
+            }
+        } catch (RemoteException re) {
+            //Any invalid size handled below
+        }
+        return LockPatternUtils.PATTERN_SIZE_DEFAULT;
+    }
+
+    private boolean isDefaultSize(int userId) {
+        return getLockPatternSize(userId) == LockPatternUtils.PATTERN_SIZE_DEFAULT;
+    }
+
     private String getLockPatternFilename(int userId) {
+        return getLockPatternFilename(userId, isDefaultSize(userId));
+    }
+
+    private String getLockPatternFilename(int userId, boolean defaultSize) {
         String dataSystemDirectory =
                 android.os.Environment.getDataDirectory().getAbsolutePath() +
                 SYSTEM_DIRECTORY;
+        String patternFile = (defaultSize ? "" : "cm_") + LOCK_PATTERN_FILE;
+
         if (userId == 0) {
             // Leave it in the same place for user 0
-            return dataSystemDirectory + LOCK_PATTERN_FILE;
+            return dataSystemDirectory + patternFile;
         } else {
-            return new File(Environment.getUserSystemDirectory(userId), LOCK_PATTERN_FILE)
+            return  new File(Environment.getUserSystemDirectory(userId), patternFile)
                     .getAbsolutePath();
         }
     }
@@ -240,7 +263,7 @@ public class LockSettingsService extends ILockSettings.Stub {
             // Leave it in the same place for user 0
             return dataSystemDirectory + LOCK_PASSWORD_FILE;
         } else {
-            return new File(Environment.getUserSystemDirectory(userId), LOCK_PASSWORD_FILE)
+            return  new File(Environment.getUserSystemDirectory(userId), LOCK_PASSWORD_FILE)
                     .getAbsolutePath();
         }
     }
@@ -279,9 +302,11 @@ public class LockSettingsService extends ILockSettings.Stub {
 
         maybeUpdateKeystore(pattern, userId);
 
-        final byte[] hash = LockPatternUtils.patternToHash(
-                LockPatternUtils.stringToPattern(pattern));
-        writeFile(getLockPatternFilename(userId), hash);
+        final byte[] hash = mLockPatternUtils.patternToHash(
+                mLockPatternUtils.stringToPattern(pattern));
+        boolean defaultSize = isDefaultSize(userId);
+        writeFile(getLockPatternFilename(userId,  defaultSize), hash);
+        writeFile(getLockPatternFilename(userId, !defaultSize), null);
     }
 
     @Override
@@ -306,8 +331,8 @@ public class LockSettingsService extends ILockSettings.Stub {
                 return true;
             }
             // Compare the hash from the file with the entered pattern's hash
-            final byte[] hash = LockPatternUtils.patternToHash(
-                    LockPatternUtils.stringToPattern(pattern));
+            final byte[] hash = mLockPatternUtils.patternToHash(
+                    mLockPatternUtils.stringToPattern(pattern));
             final boolean matched = Arrays.equals(stored, hash);
             if (matched && !TextUtils.isEmpty(pattern)) {
                 maybeUpdateKeystore(pattern, userId);
@@ -519,7 +544,10 @@ public class LockSettingsService extends ILockSettings.Stub {
         Secure.LOCK_PATTERN_ENABLED,
         Secure.LOCK_BIOMETRIC_WEAK_FLAGS,
         Secure.LOCK_PATTERN_VISIBLE,
-        Secure.LOCK_PATTERN_TACTILE_FEEDBACK_ENABLED
+        Secure.LOCK_PATTERN_TACTILE_FEEDBACK_ENABLED,
+        Secure.LOCK_PATTERN_SIZE,
+        Secure.LOCK_DOTS_VISIBLE,
+        Secure.LOCK_SHOW_ERROR_PATH,
     };
 
     // These are protected with a read permission

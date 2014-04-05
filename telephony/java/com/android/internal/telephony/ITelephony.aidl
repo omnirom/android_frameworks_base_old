@@ -5,7 +5,7 @@
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
  *
- * http://www.apache.org/licenses/LICENSE-2.0
+ *      http://www.apache.org/licenses/LICENSE-2.0
  *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
@@ -22,8 +22,8 @@ import android.telephony.NeighboringCellInfo;
 import android.telephony.CellInfo;
 
 /**
- * Interface used to interact with the phone. Mostly this is used by the
- * TelephonyManager class. A few places are still using this directly.
+ * Interface used to interact with the phone.  Mostly this is used by the
+ * TelephonyManager class.  A few places are still using this directly.
  * Please clean them up if possible and use TelephonyManager insteadl.
  *
  * {@hide}
@@ -45,6 +45,12 @@ interface ITelephony {
     void call(String callingPackage, String number);
 
     /**
+     * Toggle between 3G and LTE (NT_MODE_CDMA, NT_MODE_GLOBAL)
+     * {@hide}
+     */
+    void toggleLTE();
+
+    /**
      * If there is currently a call in progress, show the call screen.
      * The DTMF dialpad may or may not be visible initially, depending on
      * whether it was up when the user last exited the InCallScreen.
@@ -59,7 +65,7 @@ interface ITelephony {
      * comes up.
      *
      * @param showDialpad if true, make the dialpad visible initially,
-     * otherwise hide the dialpad initially.
+     *                    otherwise hide the dialpad initially.
      * @return true if the call screen was shown.
      *
      * @see showCallScreen
@@ -77,11 +83,11 @@ interface ITelephony {
      * Answer the currently-ringing call.
      *
      * If there's already a current active call, that call will be
-     * automatically put on hold. If both lines are currently in use, the
+     * automatically put on hold.  If both lines are currently in use, the
      * current active call will be ended.
      *
      * TODO: provide a flag to let the caller specify what policy to use
-     * if both lines are in use. (The current behavior is hardwired to
+     * if both lines are in use.  (The current behavior is hardwired to
      * "answer incoming, end ongoing", which is how the CALL button
      * is specced to behave.)
      *
@@ -95,11 +101,11 @@ interface ITelephony {
      * (If vibrating, stop the vibrator also.)
      *
      * It's safe to call this if the ringer has already been silenced, or
-     * even if there's no incoming call. (If so, this method will do nothing.)
+     * even if there's no incoming call.  (If so, this method will do nothing.)
      *
      * TODO: this should be a oneway call too (see above).
-     * (Actually *all* the methods here that return void can
-     * probably be oneway.)
+     *       (Actually *all* the methods here that return void can
+     *       probably be oneway.)
      */
     void silenceRinger();
 
@@ -139,27 +145,32 @@ interface ITelephony {
     void cancelMissedCallsNotification();
 
     /**
-     * Supply a pin to unlock the SIM. Blocks until a result is determined.
+     * Supply a pin to unlock the SIM.  Blocks until a result is determined.
      * @param pin The pin to check.
      * @return whether the operation was a success.
      */
     boolean supplyPin(String pin);
 
     /**
+     * Gets the number of attempts remaining for PIN1/PUK1 unlock.
+     */
+    int getIccPin1RetryCount();
+
+    /**
      * Supply puk to unlock the SIM and set SIM pin to new pin.
-     * Blocks until a result is determined.
+     *  Blocks until a result is determined.
      * @param puk The puk to check.
-     * pin The new pin to be set in SIM
+     *        pin The new pin to be set in SIM
      * @return whether the operation was a success.
      */
     boolean supplyPuk(String puk, String pin);
 
     /**
-     * Supply a pin to unlock the SIM. Blocks until a result is determined.
+     * Supply a pin to unlock the SIM.  Blocks until a result is determined.
      * Returns a specific success/error code.
      * @param pin The pin to check.
      * @return retValue[0] = Phone.PIN_RESULT_SUCCESS on success. Otherwise error code
-     * retValue[1] = number of attempts remaining if known otherwise -1
+     *         retValue[1] = number of attempts remaining if known otherwise -1
      */
     int[] supplyPinReportResult(String pin);
 
@@ -168,9 +179,9 @@ interface ITelephony {
      * Blocks until a result is determined.
      * Returns a specific success/error code
      * @param puk The puk to check
-     * pin The pin to check.
+     *        pin The pin to check.
      * @return retValue[0] = Phone.PIN_RESULT_SUCCESS on success. Otherwise error code
-     * retValue[1] = number of attempts remaining if known otherwise -1
+     *         retValue[1] = number of attempts remaining if known otherwise -1
      */
     int[] supplyPukReportResult(String puk, String pin);
 
@@ -182,13 +193,6 @@ interface ITelephony {
      * @return true if MMI command is executed.
      */
     boolean handlePinMmi(String dialString);
-
-    /**
-     * Toggle between 3G and 2G
-     * @param networkState {RILConstants.NETWORK_MODE}
-     * {@hide}
-     */
-     void toggleMobileNetwork(int networkState);
 
     /**
      * Toggles the radio on or off.
@@ -322,8 +326,6 @@ interface ITelephony {
      */
     int getLteOnCdmaMode();
 
-    int getLteOnGsmMode();
-
     /**
      * Returns the all observed cell information of the device.
      */
@@ -333,4 +335,7 @@ interface ITelephony {
      * Sets minimum time in milli-seconds between onCellInfoChanged
      */
     void setCellInfoListRate(int rateInMillis);
+
+    int getLteOnGsmMode();
 }
+

@@ -1979,17 +1979,12 @@ public class PhoneWindow extends Window implements MenuBuilder.Callback {
         private View mStatusGuard;
         // View added at runtime to draw under the navigation bar area
         private View mNavigationGuard;
-
         private SettingsObserver mSettingsObserver;
 
         public DecorView(Context context, int featureId) {
             super(context);
             mFeatureId = featureId;
             mSettingsObserver = new SettingsObserver(new Handler());
-            if (context.getResources().getBoolean(
-                    com.android.internal.R.bool.config_stylusGestures)) {
-                mSettingsObserver = new SettingsObserver(new Handler());
-            }
         }
 
         @Override
@@ -2113,8 +2108,6 @@ public class PhoneWindow extends Window implements MenuBuilder.Callback {
 
                 if (velocityX > (SWIPE_MIN_VELOCITY * getResources().getDisplayMetrics().density)
                         && xDistance > (SWIPE_MIN_DISTANCE * getResources().getDisplayMetrics().density)
-                        && xDistance > (SWIPE_MIN_DISTANCE
-                                * getResources().getDisplayMetrics().density)
                         && xDistance > yDistance) {
                     if (e1.getX() > e2.getX()) { // right to left
                         // Swipe Left
@@ -2200,6 +2193,10 @@ public class PhoneWindow extends Window implements MenuBuilder.Callback {
                     return;
             }
 
+            if (setting == null) {
+                return;
+            }
+
             try {
                 int value = Integer.valueOf(setting);
                 if (value == StylusGestureFilter.KEY_NO_ACTION) {
@@ -2260,8 +2257,7 @@ public class PhoneWindow extends Window implements MenuBuilder.Callback {
                             mContext.startActivity(launchIntent);
                         }
                     } catch (ActivityNotFoundException e) {
-                        Toast.makeText(mContext, mContext.getString(
-                            R.string.stylus_app_not_installed, setting),
+                        Toast.makeText(mContext, mContext.getString(R.string.stylus_app_not_installed, setting),
                             Toast.LENGTH_LONG).show();
                     }
                     break;
@@ -2925,10 +2921,6 @@ public class PhoneWindow extends Window implements MenuBuilder.Callback {
             
             mSettingsObserver.observe();
 
-            if (mSettingsObserver != null) {
-                mSettingsObserver.observe();
-            }
-
             updateWindowResizeState();
             
             final Callback cb = getCallback();
@@ -2953,10 +2945,6 @@ public class PhoneWindow extends Window implements MenuBuilder.Callback {
             super.onDetachedFromWindow();
             
             mSettingsObserver.unobserve();
-
-            if (mSettingsObserver != null) {
-                mSettingsObserver.unobserve();
-            }
 
             final Callback cb = getCallback();
             if (cb != null && mFeatureId < 0) {

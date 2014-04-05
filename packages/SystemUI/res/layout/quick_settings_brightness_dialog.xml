@@ -14,15 +14,15 @@
      limitations under the License.
 -->
 
-<LinearLayout 
+<LinearLayout
     xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:systemui="http://schemas.android.com/apk/res/com.android.systemui"
     style="@style/BrightnessDialogContainer">
 
     <ImageView
         android:id="@+id/brightness_icon"
-	    android:layout_width="wrap_content"
-	    android:layout_height="wrap_content"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
         android:layout_gravity="center_vertical"
         android:paddingStart="8dp"
         android:paddingEnd="10dp"
@@ -31,16 +31,11 @@
     <com.android.systemui.settings.ToggleSlider
         android:id="@+id/brightness_slider"
         android:layout_width="0dp"
-        android:layout_height="40dp"
+        android:layout_height="48dp"
         android:layout_weight="1"
         android:layout_marginEnd="2dp"
         android:layout_gravity="center_vertical"
         systemui:text="@string/status_bar_settings_auto_brightness_label"
-        />
-    <View
-        android:id="@+id/brightness_setup_button_placeholder"
-        android:layout_width="8dp"
-        android:layout_height="48dp"
         />
     <ImageView
         android:id="@+id/brightness_setup_button_divider"

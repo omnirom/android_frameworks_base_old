@@ -6,7 +6,7 @@
 ** you may not use this file except in compliance with the License.
 ** You may obtain a copy of the License at
 **
-** http://www.apache.org/licenses/LICENSE-2.0
+**     http://www.apache.org/licenses/LICENSE-2.0
 **
 ** Unless required by applicable law or agreed to in writing, software
 ** distributed under the License is distributed on an "AS IS" BASIS,
@@ -48,30 +48,31 @@
             android:id="@+id/datetime"
             android:layout_width="wrap_content"
             android:layout_height="match_parent"
-            android:paddingStart="8dp"
-            android:paddingEnd="8dp"
-            android:background="@drawable/ic_notify_button_bg"
             android:enabled="false"
             >
             <com.android.systemui.statusbar.policy.ClockStock
                 android:id="@+id/clock"
                 android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:layout_marginEnd="8dp"
+                android:layout_height="match_parent"
+                android:paddingStart="8dp"
+                android:paddingEnd="4dp"
                 android:singleLine="true"
                 android:textAppearance="@style/TextAppearance.StatusBar.Expanded.Clock"
-                android:layout_centerVertical="true"
+                android:background="@drawable/ic_notify_button_bg"
+                android:gravity="center_vertical"
+                android:clickable="true"
                 />
 
-            <com.android.systemui.statusbar.policy.DateView
-                android:id="@+id/date"
+            <com.android.systemui.statusbar.policy.DateView android:id="@+id/date"
                 android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
+                android:layout_height="match_parent"
                 android:textAppearance="@style/TextAppearance.StatusBar.Expanded.Date"
                 android:layout_toEndOf="@id/clock"
-                android:layout_centerVertical="true"
+                android:background="@drawable/ic_notify_button_bg"
+                android:gravity="center_vertical"
+                android:paddingStart="4dp"
+                android:paddingEnd="8dp"
                 />
-
         </RelativeLayout>
 
         <Space
@@ -93,7 +94,20 @@
             android:padding="2dp"
             />
 
-        <FrameLayout android:id="@+id/context_button_holder"
+        <TextView
+            android:id="@+id/header_debug_info"
+            android:visibility="invisible"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_gravity="center_vertical"
+            android:fontFamily="sans-serif-condensed"
+            android:textSize="11dp"
+            android:textStyle="bold"
+            android:textColor="#00A040"
+            android:padding="2dp"
+            />
+
+        <FrameLayout android:id="@+id/action_button_holder"
             android:layout_width="50dp"
             android:layout_height="50dp"
             android:layout_marginStart="12dp"
@@ -106,14 +120,15 @@
                 android:background="@drawable/ic_notify_button_bg"
                 android:contentDescription="@string/accessibility_clear_all"
                 />
-            <ImageView android:id="@+id/edit_mode_button"
+
+            <ImageView android:id="@+id/add_tile_button"
                 android:layout_width="50dp"
                 android:layout_height="50dp"
                 android:scaleType="center"
-                android:src="@drawable/ic_notify_edit_normal"
+                android:src="@drawable/ic_menu_add"
                 android:background="@drawable/ic_notify_button_bg"
                 android:visibility="gone"
-                android:contentDescription="@string/accessibility_clear_all"
+                android:contentDescription="@string/accessibility_desc_add_quick_settings"
                 />
         </FrameLayout>
 

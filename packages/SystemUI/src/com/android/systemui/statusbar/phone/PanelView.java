@@ -1,18 +1,18 @@
 /*
-* Copyright (C) 2012 The Android Open Source Project
-*
-* Licensed under the Apache License, Version 2.0 (the "License");
-* you may not use this file except in compliance with the License.
-* You may obtain a copy of the License at
-*
-* http://www.apache.org/licenses/LICENSE-2.0
-*
-* Unless required by applicable law or agreed to in writing, software
-* distributed under the License is distributed on an "AS IS" BASIS,
-* WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
-* See the License for the specific language governing permissions and
-* limitations under the License.
-*/
+ * Copyright (C) 2012 The Android Open Source Project
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *      http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
 
 package com.android.systemui.statusbar.phone;
 
@@ -83,10 +83,10 @@ public class PanelView extends FrameLayout {
     private FlingTracker mVelocityTracker;
 
     /**
-* A very simple low-pass velocity filter for motion events; not nearly as sophisticated as
-* VelocityTracker but optimized for the kinds of gestures we expect to see in status bar
-* panels.
-*/
+     * A very simple low-pass velocity filter for motion events; not nearly as sophisticated as
+     * VelocityTracker but optimized for the kinds of gestures we expect to see in status bar
+     * panels.
+     */
     private static class FlingTracker {
         static final boolean DEBUG = false;
         final int MAX_EVENTS = 8;
@@ -128,7 +128,7 @@ public class PanelView extends FrameLayout {
                     final float dy = (event.y - last.y);
                     if (FlingTracker.DEBUG) {
                         Log.v("FlingTracker", String.format(
-                                " [%d] (t=%d %.1f,%.1f) dx=%.1f dy=%.1f dt=%f vx=%.1f vy=%.1f",
+                                "   [%d] (t=%d %.1f,%.1f) dx=%.1f dy=%.1f dt=%f vx=%.1f vy=%.1f",
                                 i, event.t, event.x, event.y,
                                 dx, dy, dt,
                                 (dx/dt),
@@ -264,7 +264,7 @@ public class PanelView extends FrameLayout {
                 mClosing = mExpandedHeight > 0 && mVel < 0;
             }
         } else if (dtms > 0) {
-            final float dt = dtms * 0.001f; // ms -> s
+            final float dt = dtms * 0.001f;                  // ms -> s
             if (DEBUG) logf("tick: v=%.2fpx/s dt=%.4fs", mVel, dt);
             if (DEBUG) logf("tick: before: h=%d", (int) mExpandedHeight);
 
@@ -596,9 +596,9 @@ public class PanelView extends FrameLayout {
         if (DEBUG) logf("setExpansion: height=%.1f fh=%.1f tracking=%s rubber=%s", h, fh, mTracking?"T":"f", mRubberbanding?"T":"f");
 
         requestLayout();
-// FrameLayout.LayoutParams lp = (FrameLayout.LayoutParams) getLayoutParams();
-// lp.height = (int) mExpandedHeight;
-// setLayoutParams(lp);
+//        FrameLayout.LayoutParams lp = (FrameLayout.LayoutParams) getLayoutParams();
+//        lp.height = (int) mExpandedHeight;
+//        setLayoutParams(lp);
 
         mExpandedFraction = Math.min(1f, (fh == 0) ? 0 : h / fh);
     }

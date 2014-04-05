@@ -73,12 +73,12 @@ public class DeviceUtils {
     public static boolean deviceSupportsGps(Context context) {
         return context.getPackageManager().hasSystemFeature(PackageManager.FEATURE_LOCATION_GPS);
     }
-
+/*
     public static boolean deviceSupportsImeSwitcher(Context ctx) {
         Resources res = ctx.getResources();
         return res.getBoolean(com.android.internal.R.bool.config_show_IMESwitcher);
     }
-
+*/
     public static boolean deviceSupportsVibrator(Context ctx) {
         Vibrator vibrator = (Vibrator) ctx.getSystemService(Context.VIBRATOR_SERVICE);
         return vibrator.hasVibrator();

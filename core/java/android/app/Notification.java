@@ -561,6 +561,13 @@ public class Notification implements Parcelable
     public static final String EXTRA_AS_HEADS_UP = "headsup";
 
     /**
+     * Used by light picker in Settings to force
+     * notification lights on when screen is on
+     * @hide
+     */
+    public static final String EXTRA_FORCE_SHOW_LIGHTS = "android.forceShowLights";
+
+    /**
      * Value for {@link #EXTRA_AS_HEADS_UP}.
      * @hide
      */
@@ -571,6 +578,7 @@ public class Notification implements Parcelable
      * @hide
      */
     public static final int HEADS_UP_ALLOWED = 1;
+
 
     /**
      * Value for {@link #EXTRA_AS_HEADS_UP}.

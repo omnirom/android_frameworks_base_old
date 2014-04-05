@@ -1,3 +1,4 @@
+
 /*
  * Copyright (C) 2007 The Android Open Source Project
  * This code has been modified.  Portions copyright (C) 2010, T-Mobile USA, Inc.
@@ -51,6 +52,7 @@ import android.text.TextUtils;
 import android.util.DisplayMetrics;
 import android.util.Log;
 import android.util.Slog;
+import android.view.HardwareRenderer;
 
 import java.io.FileDescriptor;
 import java.io.FileOutputStream;
@@ -284,9 +286,15 @@ public class ActivityManager {
     /** @hide Process is being cached for later use and is empty. */
     public static final int PROCESS_STATE_CACHED_EMPTY = 13;
 
+    private static boolean GfxAccelCheck;
+
     /*package*/ ActivityManager(Context context, Handler handler) {
         mContext = context;
         mHandler = handler;
+
+        GfxAccelCheck = (isLowRamDeviceStatic() ||
+                !HardwareRenderer.isAvailable() ||
+                Resources.getSystem().getBoolean(com.android.internal.R.bool.config_avoidGfxAccel));
     }
 
     /**
@@ -458,8 +466,16 @@ public class ActivityManager {
      * @hide
      */
     static public boolean isHighEndGfx() {
-        return !isLowRamDeviceStatic() &&
-                !Resources.getSystem().getBoolean(com.android.internal.R.bool.config_avoidGfxAccel);
+        return (!isLowRamDeviceStatic() &&
+                !Resources.getSystem().getBoolean(com.android.internal.R.bool.config_avoidGfxAccel))
+                || isForcedHighEndGfx();
+    }
+
+    /**
+     * @hide
+     */
+    public static boolean isForcedHighEndGfx() {
+        return SystemProperties.getBoolean("persist.sys.force_highendgfx", false);
     }
 
     /**
@@ -570,35 +586,35 @@ public class ActivityManager {
     public static final int RECENT_IGNORE_UNAVAILABLE = 0x0002;
 
     /**
-* @hide
-*/
+     * @hide
+     */
     public static final int RECENT_DO_NOT_COUNT_EXCLUDED = 0x0004;
 
     /**
-* Return a list of the tasks that the user has recently launched, with
-* the most recent being first and older ones after in order.
-*
-* <p><b>Note: this method is only intended for debugging and presenting
-* task management user interfaces</b>. This should never be used for
-* core logic in an application, such as deciding between different
-* behaviors based on the information found here. Such uses are
-* <em>not</em> supported, and will likely break in the future. For
-* example, if multiple applications can be actively running at the
-* same time, assumptions made about the meaning of the data here for
-* purposes of control flow will be incorrect.</p>
-*
-* @param maxNum The maximum number of entries to return in the list. The
-* actual number returned may be smaller, depending on how many tasks the
-* user has started and the maximum number the system can remember.
-* @param flags Information about what to return. May be any combination
-* of {@link #RECENT_WITH_EXCLUDED} and {@link #RECENT_IGNORE_UNAVAILABLE}.
-*
-* @return Returns a list of RecentTaskInfo records describing each of
-* the recent tasks.
-*
-* @throws SecurityException Throws SecurityException if the caller does
-* not hold the {@link android.Manifest.permission#GET_TASKS} permission.
-*/
+     * Return a list of the tasks that the user has recently launched, with
+     * the most recent being first and older ones after in order.
+     *
+     * <p><b>Note: this method is only intended for debugging and presenting
+     * task management user interfaces</b>.  This should never be used for
+     * core logic in an application, such as deciding between different
+     * behaviors based on the information found here.  Such uses are
+     * <em>not</em> supported, and will likely break in the future.  For
+     * example, if multiple applications can be actively running at the
+     * same time, assumptions made about the meaning of the data here for
+     * purposes of control flow will be incorrect.</p>
+     *
+     * @param maxNum The maximum number of entries to return in the list.  The
+     * actual number returned may be smaller, depending on how many tasks the
+     * user has started and the maximum number the system can remember.
+     * @param flags Information about what to return.  May be any combination
+     * of {@link #RECENT_WITH_EXCLUDED} and {@link #RECENT_IGNORE_UNAVAILABLE}.
+     * 
+     * @return Returns a list of RecentTaskInfo records describing each of
+     * the recent tasks.
+     * 
+     * @throws SecurityException Throws SecurityException if the caller does
+     * not hold the {@link android.Manifest.permission#GET_TASKS} permission.
+     */
     public List<RecentTaskInfo> getRecentTasks(int maxNum, int flags)
             throws SecurityException {
         try {

@@ -48,9 +48,9 @@ import android.app.Activity;
 import android.app.ActivityManager;
 import android.app.ActivityOptions;
 import android.app.AppGlobals;
-import android.app.AppOpsManager;
 import android.app.IActivityController;
 import android.app.IThumbnailReceiver;
+import android.app.AppOpsManager;
 import android.app.ResultInfo;
 import android.app.ActivityManager.RunningTaskInfo;
 import android.content.ComponentName;
@@ -71,11 +71,14 @@ import android.os.Looper;
 import android.os.Message;
 import android.os.RemoteException;
 import android.os.SystemClock;
+import android.os.SystemProperties;
 import android.os.Trace;
 import android.os.UserHandle;
+import android.text.TextUtils;
 import android.util.EventLog;
 import android.util.Slog;
 import android.view.Display;
+import com.android.internal.app.ActivityTrigger;
 
 import java.io.FileDescriptor;
 import java.io.PrintWriter;
@@ -218,11 +221,6 @@ final class ActivityStack {
     long mFullyDrawnStartTime = 0;
 
     /**
-     * Is the privacy guard currently enabled?
-     */
-    String mPrivacyGuardPackageName = null;
-
-    /**
      * Save the most recent screenshot for reuse. This keeps Recents from taking two identical
      * screenshots, one for the Recents thumbnail and one for the pauseActivity thumbnail.
      */
@@ -259,7 +257,18 @@ final class ActivityStack {
 
     final Handler mHandler;
 
+    static final ActivityTrigger mActivityTrigger;
+
+    static {
+        if (!TextUtils.isEmpty(SystemProperties.get("ro.vendor.extension_library"))) {
+            mActivityTrigger = new ActivityTrigger();
+        } else {
+            mActivityTrigger = null;
+        }
+    }
+
     final class ActivityStackHandler extends Handler {
+
         //public Handler() {
         //    if (localLOGV) Slog.v(TAG, "Handler started!");
         //}
@@ -1151,7 +1160,7 @@ final class ActivityStack {
                     } else if (isActivityOverHome(r)) {
                         if (DEBUG_VISBILITY) Slog.v(TAG, "Showing home: at " + r);
                         showHomeBehindStack = true;
-                        behindFullscreen = !isHomeStack();
+                        behindFullscreen = !isHomeStack() && r.frontOfTask && task.mOnTopOfHome;
                     }
                 } else {
                     if (DEBUG_VISBILITY) Slog.v(
@@ -1351,6 +1360,10 @@ final class ActivityStack {
         next.updateOptionsLocked(options);
 
         if (DEBUG_SWITCH) Slog.v(TAG, "Resuming " + next);
+
+        if (mActivityTrigger != null) {
+            mActivityTrigger.activityResumeTrigger(next.intent);
+        }
 
         // If we are currently pausing an activity, then don't do anything
         // until that is done.
@@ -1696,7 +1709,7 @@ final class ActivityStack {
     }
 
     private final void updatePrivacyGuardNotificationLocked(ActivityRecord next) {
-        if (android.provider.Settings.Secure.getIntForUser(mContext.getContentResolver(),
+       if (android.provider.Settings.Secure.getIntForUser(mContext.getContentResolver(),
             android.provider.Settings.Secure.PRIVACY_GUARD_NOTIFICATION,
             1, UserHandle.USER_CURRENT) == 0) {
             return;
@@ -1786,6 +1799,9 @@ final class ActivityStack {
 
         r.putInHistory();
         r.frontOfTask = newTask;
+        if (mActivityTrigger != null) {
+            mActivityTrigger.activityStartTrigger(r.intent);
+        }
         if (!isHomeStack() || numActivities() > 0) {
             // We want to show the starting preview window if we are
             // switching to a new task, or the next activity's process is
@@ -3195,9 +3211,7 @@ final class ActivityStack {
 
         final TaskRecord task = mResumedActivity != null ? mResumedActivity.task : null;
         if (task == tr && task.mOnTopOfHome || numTasks <= 1) {
-            if (task != null) {
-                task.mOnTopOfHome = false;
-            }
+            tr.mOnTopOfHome = false;
             return mStackSupervisor.resumeHomeActivity(null);
         }
 

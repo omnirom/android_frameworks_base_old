@@ -1155,6 +1155,11 @@ public interface WindowManagerPolicy {
     public boolean hasNavigationBar();
 
     /**
+     * Specifies whether device can generate KEY_ACTION_MENU keypress
+     */
+    public boolean hasMenuKeyEnabled();
+
+    /**
      * Lock the device now.
      */
     public void lockNow(Bundle options);
@@ -1211,28 +1216,6 @@ public interface WindowManagerPolicy {
     public void setTouchExplorationEnabled(boolean enabled);
 
     /**
-     * Get the current navigation bar state when expanded desktop is enabled.
-     *
-     * @hide
-     */
-    public boolean expandedDesktopHidesNavigationBar();
-
-    /**
-     * Get the current statusbar state when expanded desktop is enabled.
-     *
-     * @hide
-     */
-    public boolean expandedDesktopHidesStatusBar();
-
-    /**
-     * Get the current navbar size depended on the user value
-     * and orientation.
-     *
-     * @hide
-     */
-    public int getCurrentNavigationBarSize();
-
-    /**
      * Check if immersive mode hides navigation bar
      *
      * @return True if navbar can be hidden by immersive mode
@@ -1245,12 +1228,4 @@ public interface WindowManagerPolicy {
      * @hide
      */
     public void toggleGlobalMenu();
-
-    /**
-     * Toggle statusbar on expanded desktop
-     *
-     * @hide
-     */
-    void toggleStatusBar();
-
 }

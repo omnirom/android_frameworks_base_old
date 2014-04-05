@@ -710,14 +710,12 @@ public abstract class AbsListView extends AdapterView<ListAdapter> implements Te
      * for ListView Animations
      */
     private boolean mIsWidget;
-    private int mListAnimationMode = 0;
-    private int mListAnimationInterpolatorMode = 0;
-    private boolean mListAnimationModeSet = false;
+    private boolean mIsScrolling;
     private int mWidth, mHeight = 0;
     private int mPositionV;
     private boolean mIsTap = false;
-    private boolean mIsScrolling;
     private Set<String> mExcludedApps = new HashSet<String>();
+    private int mListAnimationMode = 0;
 
     /**
      * Interface definition for a callback to be invoked when the list or grid
@@ -863,9 +861,6 @@ public abstract class AbsListView extends AdapterView<ListAdapter> implements Te
         mOverflingDistance = configuration.getScaledOverflingDistance();
 
         mDensityScale = getContext().getResources().getDisplayMetrics().density;
-
-        setPersistentDrawingCache(ViewGroup.PERSISTENT_ANIMATION_CACHE
-            | ViewGroup.PERSISTENT_SCROLLING_CACHE);
 
         int listAnimationCache = Settings.System.getInt(
                 mContext.getContentResolver(),
@@ -2302,10 +2297,6 @@ public abstract class AbsListView extends AdapterView<ListAdapter> implements Te
         if (scrapView != null) {
             child = mAdapter.getView(position, scrapView, this);
 
-            if (mListAnimationMode != 0 && !mIsWidget) {
-                child = setAnimation(child);
-            }
-            
             if (mIsScrolling && !mIsWidget) {
                 child = setAnimation(child);
             }
@@ -2468,7 +2459,7 @@ public abstract class AbsListView extends AdapterView<ListAdapter> implements Te
         }
         view.startAnimation(anim);
         return view;
-        }
+    }
 
     class ListItemAccessibilityDelegate extends AccessibilityDelegate {
         @Override
@@ -3654,9 +3645,8 @@ public abstract class AbsListView extends AdapterView<ListAdapter> implements Te
     }
 
     private void onTouchDown(MotionEvent ev) {
-        mIsTap = true;
         mActivePointerId = ev.getPointerId(0);
-        mInverse.sendEmptyMessageDelayed(0, 100);
+
         if (mTouchMode == TOUCH_MODE_OVERFLING) {
             // Stopped the fling. It is a scroll.
             mFlingRunnable.endFling();
@@ -4225,24 +4215,8 @@ public abstract class AbsListView extends AdapterView<ListAdapter> implements Te
                 mIsScrolling = true;
             }
         if (newState != mLastScrollState) {
-            mLastScrollState = newState;
-            if (newState == OnScrollListener.SCROLL_STATE_IDLE) {
-                mListAnimationModeSet = false;
-                mListAnimationMode = 0;
-            } else if (!mListAnimationModeSet) {
-                mListAnimationModeSet = true;
-                mListAnimationMode = Settings.System.getIntForUser(
-                        mContext.getContentResolver(),
-                        Settings.System.LISTVIEW_ANIMATION,
-                        0, UserHandle.USER_CURRENT_OR_SELF);
-                if (mListAnimationMode != 0) {
-                    mListAnimationInterpolatorMode = Settings.System.getIntForUser(
-                            mContext.getContentResolver(),
-                            Settings.System.LISTVIEW_INTERPOLATOR,
-                            0, UserHandle.USER_CURRENT_OR_SELF);
-                }
-            }
             if (mOnScrollListener != null) {
+                mLastScrollState = newState;
                 mOnScrollListener.onScrollStateChanged(this, newState);
             }
         }
@@ -4300,7 +4274,7 @@ public abstract class AbsListView extends AdapterView<ListAdapter> implements Te
             if (Math.abs(initialVelocity) > mDecacheThreshold) {
                 // For long flings, scrolling cache causes stutter, so don't use it
                 clearScrollingCache();
-            }
+              }
 
             int initialY = initialVelocity < 0 ? Integer.MAX_VALUE : 0;
             mLastFlingY = initialY;
@@ -4376,7 +4350,6 @@ public abstract class AbsListView extends AdapterView<ListAdapter> implements Te
         void endFling() {
             endFling(true);
         }
-
         void endFling(boolean clearCache) {
             mTouchMode = TOUCH_MODE_REST;
 
@@ -4384,9 +4357,8 @@ public abstract class AbsListView extends AdapterView<ListAdapter> implements Te
             removeCallbacks(mCheckFlywheel);
 
             reportScrollStateChange(OnScrollListener.SCROLL_STATE_IDLE);
-            if (clearCache) {
+            if (clearCache)
                 clearScrollingCache();
-            }
             mScroller.abortAnimation();
 
             if (mFlingStrictSpan != null) {
@@ -4803,7 +4775,7 @@ public abstract class AbsListView extends AdapterView<ListAdapter> implements Te
                     return;
                 }
 
-                if (lastPos == mLastSeenPos) {
+                if (lastPos == mLastSeenPos && getChildCount() > 1) {
                     // No new views, let things keep going.
                     postOnAnimation(this);
                     return;
@@ -4836,7 +4808,7 @@ public abstract class AbsListView extends AdapterView<ListAdapter> implements Te
                 }
                 final int nextPos = firstPos + nextViewIndex;
 
-                if (nextPos == mLastSeenPos) {
+                if (nextPos == mLastSeenPos && getChildCount() > 1) {
                     // No new views, let things keep going.
                     postOnAnimation(this);
                     return;
@@ -4862,7 +4834,7 @@ public abstract class AbsListView extends AdapterView<ListAdapter> implements Te
             }
 
             case MOVE_UP_POS: {
-                if (firstPos == mLastSeenPos) {
+                if (firstPos == mLastSeenPos && getChildCount() > 1) {
                     // No new views, let things keep going.
                     postOnAnimation(this);
                     return;
@@ -4893,7 +4865,7 @@ public abstract class AbsListView extends AdapterView<ListAdapter> implements Te
                 }
                 final int lastPos = firstPos + lastViewIndex;
 
-                if (lastPos == mLastSeenPos) {
+                if (lastPos == mLastSeenPos && getChildCount() > 1) {
                     // No new views, let things keep going.
                     postOnAnimation(this);
                     return;
@@ -4919,7 +4891,7 @@ public abstract class AbsListView extends AdapterView<ListAdapter> implements Te
             }
 
             case MOVE_OFFSET: {
-                if (mLastSeenPos == firstPos) {
+                if (mLastSeenPos == firstPos && getChildCount() > 1) {
                     // No new views, let things keep going.
                     postOnAnimation(this);
                     return;
@@ -6207,6 +6179,7 @@ public abstract class AbsListView extends AdapterView<ListAdapter> implements Te
                 dismissPopup();
             }
         }
+
     }
 
     /**

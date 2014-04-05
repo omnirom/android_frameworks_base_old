@@ -436,8 +436,7 @@ public class EdgeGestureInputFilter implements IInputFilter {
                 if (info.event.getActionMasked() == MotionEvent.ACTION_DOWN) {
                     mSyntheticDownTime = info.event.getDownTime() + offset;
                 }
-                sendMotionEventWithOffsetLocked(
-                        info.event, info.policyFlags, mSyntheticDownTime, offset);
+                sendMotionEventWithOffsetLocked(info.event, info.policyFlags, mSyntheticDownTime, offset);
                 if (info.event.getActionMasked() == MotionEvent.ACTION_UP) {
                     mSyntheticDownTime = -1;
                 }
