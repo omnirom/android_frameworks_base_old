@@ -141,7 +141,7 @@ public class PhoneWindowManager implements WindowManagerPolicy {
     static final boolean DEBUG = false;
     static final boolean localLOGV = false;
     static final boolean DEBUG_LAYOUT = false;
-    static final boolean DEBUG_INPUT = false;
+    static boolean DEBUG_INPUT = false;
     static final boolean DEBUG_STARTING_WINDOW = false;
     static final boolean SHOW_STARTING_ANIMATIONS = true;
     static final boolean SHOW_PROCESSES_ON_ALT_MENU = false;
@@ -1132,6 +1132,8 @@ public class PhoneWindowManager implements WindowManagerPolicy {
         mWindowManager = windowManager;
         mWindowManagerFuncs = windowManagerFuncs;
         mHeadless = "1".equals(SystemProperties.get("ro.config.headless", "0"));
+        boolean debugInputOverride = SystemProperties.getInt("config.override_debugInput", 0) == 1;
+        DEBUG_INPUT = DEBUG_INPUT || debugInputOverride;
         mHandler = new PolicyHandler();
         mOrientationListener = new MyOrientationListener(mContext, mHandler);
         try {
@@ -4834,8 +4836,15 @@ public class PhoneWindowManager implements WindowManagerPolicy {
             }
         }
 
-        if (!isScreenOn && mOffscreenGestureSupport) {
-            handleOffscreenGesture(event, keyCode, result, down);
+        if (mOffscreenGestureSupport) {
+            if (!isScreenOn){
+                handleOffscreenGesture(event, keyCode, result, down);
+            } else {
+                if (handleOnscreenGesture(event, keyCode, result, down)){
+                    // dont pass further if handled
+                    result &= ~ACTION_PASS_TO_USER;
+                }
+            }
         }
         return result;
     }
@@ -6306,11 +6315,14 @@ public class PhoneWindowManager implements WindowManagerPolicy {
 
     private boolean isOffscreenWakeKey(int keyCode) {
         return keyCode == KeyEvent.KEYCODE_F3 ||
-            keyCode == KeyEvent.KEYCODE_F4;
+            keyCode == KeyEvent.KEYCODE_F4 ||
+            keyCode == KeyEvent.KEYCODE_F1;
     }
 
     private void handleOffscreenGesture(KeyEvent event, int keyCode, int result, boolean down) {
         switch (keyCode) {
+            case KeyEvent.KEYCODE_F1:
+                // camera flip
             case KeyEvent.KEYCODE_F4:
                 // O gesture
                 if (down){
@@ -6370,6 +6382,26 @@ public class PhoneWindowManager implements WindowManagerPolicy {
                 break;
         }
     }
+
+    private boolean handleOnscreenGesture(KeyEvent event, int keyCode, int result, boolean down) {
+        switch (keyCode) {
+            case KeyEvent.KEYCODE_F1:
+                // camera flip
+                if (down){
+                    if (DEBUG_INPUT){
+                        Slog.d(TAG, "handleOnscreenGesture: " + "camera flip");
+                    }
+                    dismissKeyguardLw();
+                    Intent intent = new Intent(MediaStore.INTENT_ACTION_STILL_IMAGE_CAMERA);
+                    intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
+                    mContext.startActivityAsUser(intent, UserHandle.CURRENT);
+                    return true;
+                }
+                break;
+        }
+        return false;
+    }
+
 
     private Message createMediaEventMessage(KeyEvent event, int msgId, int eventId) {
         return mHandler.obtainMessage(msgId,
