@@ -117,6 +117,7 @@
     <string name="quick_settings_usb_tether_on_label">Tethering</string>
 
     <string name="status_bar_notification_hide_icon_packages">Hide app\'s notification icon(s)</string>
+    <string name="status_bar_notification_floating_window_title">Float view</string>
 
     <!-- Dialog title for navigation bar button selection -->
     <string name="navbar_dialog_title">Choose action to assign</string>
