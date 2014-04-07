@@ -1,0 +1,21 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "8b77b57d_90f27397",
+        "filename": "packages/SystemUI/res/layout/status_bar_recent_panel.xml",
+        "patchSetId": 17
+      },
+      "lineNbr": 80,
+      "author": {
+        "id": 1000632
+      },
+      "writtenOn": "2014-04-07T07:11:16Z",
+      "side": 1,
+      "message": "me see a \"z\" at the end :)",
+      "revId": "7577241121ecdb05bd141f2781cad69f11a8e267",
+      "serverId": "56841c99-7c94-43d4-bf0b-cb4707e66d55",
+      "unresolved": false
+    }
+  ]
+}
