@@ -309,4 +309,11 @@ interface IWindowManager
      * @hide
      */
     void toggleGlobalMenu();
+
+    /**
+     * Toggle statusbar on expanded desktop
+     *
+     * @hide
+     */
+    void toggleStatusBar();
 }

@@ -60,4 +60,10 @@
         <item>157</item><item>334</item>
         <item>0</item>  <item>334</item>
     </array>
+    <!-- BatteryMeterTileView colors -->
+    <array name="batterymetertile_color_values">
+        <item>@color/batterymetertile_critical</item>
+        <item>@color/batterymetertile_low</item>
+        <item>@color/batterymetertile_full</item>
+    </array>
 </resources>

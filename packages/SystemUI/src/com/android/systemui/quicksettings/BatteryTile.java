@@ -6,6 +6,7 @@ import android.provider.Settings;
 import android.view.View;
 import android.widget.TextView;
 
+import com.android.systemui.BatteryMeterTileView;
 import com.android.systemui.BatteryMeterView;
 import com.android.systemui.R;
 import com.android.systemui.BatteryMeterView.BatteryMeterMode;

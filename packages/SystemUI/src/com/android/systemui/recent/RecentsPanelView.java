@@ -788,6 +788,7 @@ public class RecentsPanelView extends RelativeLayout implements OnItemClickListe
         if (usingDrawingCache) {
             holder.thumbnailViewImage.setDrawingCacheEnabled(false);
         }
+        RecentTasksLoader.getInstance(mContext).cancelPreloadingFirstTask();
     }
 
     public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
@@ -809,6 +810,7 @@ public class RecentsPanelView extends RelativeLayout implements OnItemClickListe
         // mListAdapter.notifyDataSetChanged();
 
         if (mRecentTaskDescriptions.size() == 0) {
+            RecentTasksLoader.getInstance(mContext).cancelPreloadingFirstTask();
             dismissAndGoBack();
         }
 

@@ -72,7 +72,7 @@ import android.widget.LinearLayout;
 import android.widget.RemoteViews;
 import android.widget.TextView;
 
-import com.android.internal.util.omni.DeviceUtils;
+import com.android.internal.util.amra.DeviceUtils;
 import com.android.internal.util.slim.QuietHoursHelper;
 import com.android.internal.widget.multiwaveview.GlowPadView;
 import com.android.internal.widget.multiwaveview.GlowPadView.OnTriggerListener;

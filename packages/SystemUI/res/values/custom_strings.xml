@@ -63,6 +63,9 @@
     <string name="quick_settings_theme_switch_dark">Dark theme</string>
     <string name="quick_settings_theme_switch_light">Light theme</string>
 
+    <!-- Active Display -->
+    <string name="active_display_privacy_content">Content message not showing because privacy mode enabled</string>
+
     <string name="onthego_notif_ticker">On-The-Go activated</string>
     <string name="onthego_notif_title">On-The-Go is active</string>
     <string name="onthego_notif_stop">Stop</string>

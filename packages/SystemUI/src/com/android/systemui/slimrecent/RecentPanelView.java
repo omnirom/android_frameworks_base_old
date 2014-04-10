@@ -27,6 +27,7 @@ import android.content.Context;
 import android.content.Intent;
 import android.content.pm.ActivityInfo;
 import android.content.pm.PackageManager;
+import android.content.pm.PackageManager.NameNotFoundException;
 import android.content.pm.ResolveInfo;
 import android.net.Uri;
 import android.os.AsyncTask;
@@ -36,8 +37,13 @@ import android.os.UserHandle;
 import android.provider.Settings;
 import android.util.Log;
 import android.view.accessibility.AccessibilityEvent;
+import android.view.ContextThemeWrapper;
+import android.view.Gravity;
+import android.view.MenuItem;
 import android.view.View;
+import android.widget.ImageButton;
 import android.widget.ImageView;
+import android.widget.PopupMenu;
 
 import com.android.cards.internal.Card;
 import com.android.cards.internal.CardArrayAdapter;
@@ -59,15 +65,25 @@ import java.util.List;
 public class RecentPanelView {
 
     private static final String TAG = "RecentPanelView";
-    private static final boolean DEBUG = true;
+    private static final boolean DEBUG = false;
 
     private static final int DISPLAY_TASKS = 20;
     public static final int MAX_TASKS = DISPLAY_TASKS + 1; // allow extra for non-apps
 
-    private static final int EXPANDED_STATE_UNKNOWN   = 0;
+    private static final int EXPANDED_STATE_UNKNOWN  = 0;
     public static final int EXPANDED_STATE_EXPANDED  = 1;
     public static final int EXPANDED_STATE_COLLAPSED = 2;
     public static final int EXPANDED_STATE_BY_SYSTEM = 4;
+
+    private static final int MENU_APP_DETAILS_ID   = 0;
+    private static final int MENU_APP_PLAYSTORE_ID = 1;
+    private static final int MENU_APP_AMAZON_ID    = 2;
+
+    private static final String PLAYSTORE_REFERENCE = "com.android.vending";
+    private static final String AMAZON_REFERENCE    = "com.amazon.venezia";
+
+    private static final String PLAYSTORE_APP_URI_QUERY = "market://details?id=";
+    private static final String AMAZON_APP_URI_QUERY    = "amzn://apps/android?p=";
 
     private final Context mContext;
     private final CardListView mListView;
@@ -80,14 +96,22 @@ public class RecentPanelView {
     // Array list of all current cards
     private ArrayList<Card> mCards;
     // Array list of all current tasks
-    private final ArrayList<TaskDescription> mTasks = new ArrayList<TaskDescription>();;
+    private final ArrayList<TaskDescription> mTasks = new ArrayList<TaskDescription>();
+    // Our first task which is not displayed but needed for internal references.
+    private TaskDescription mFirstTask;
     // Array list of all expanded states of apps accessed during the session
     private final ArrayList<TaskExpandedStates> mExpandedTaskStates =
             new ArrayList<TaskExpandedStates>();
 
     private boolean mCancelledByUser;
     private boolean mTasksLoaded;
+    private boolean mIsLoading;
     private int mTasksSize;
+
+    private int mMainGravity;
+    private float mScaleFactor;
+
+    private PopupMenu mPopup;
 
     public interface OnExitListener {
         void onExit();
@@ -149,11 +173,13 @@ public class RecentPanelView {
                 startApplication(td);
             }
         });
-        // Listen for onLongClick to open app details with custom animation
+        // Listen for onLongClick to open popup menu
         card.setOnLongClickListener(new Card.OnLongCardClickListener() {
             @Override
             public boolean onLongClick(Card card, View view) {
-                startApplicationDetailsActivity(td.packageName);
+                constructMenu(
+                        (ImageButton) view.findViewById(R.id.card_header_button_expand),
+                        td.packageName);
                 return true;
             }
         });
@@ -184,6 +210,105 @@ public class RecentPanelView {
             }
         });
         return card;
+    }
+
+    /**
+     * Construct popup menu for longpress.
+     */
+    private void constructMenu(final View selectedView, final String packageName) {
+        if (selectedView == null) {
+            return;
+        }
+        // Force theme change to choose custom defined menu layout.
+        final Context layoutContext = new ContextThemeWrapper(mContext, R.style.RecentBaseStyle);
+
+        final PopupMenu popup = new PopupMenu(layoutContext, selectedView, Gravity.RIGHT);
+        mPopup = popup;
+
+        // If recent panel is drawn on the right edge we allow the menu
+        // if needed to draw over the left container edge.
+        popup.setAllowLeftOverdraw(mMainGravity == Gravity.RIGHT);
+
+        // Add app detail menu entry.
+        popup.getMenu().add(0, MENU_APP_DETAILS_ID, 0,
+                mContext.getResources().getString(R.string.status_bar_recent_inspect_item_title));
+
+        // Add playstore or amazon entry if it is provided by the application.
+        if (checkAppInstaller(packageName, PLAYSTORE_REFERENCE)) {
+            popup.getMenu().add(0, MENU_APP_PLAYSTORE_ID, 0,
+                    getApplicationLabel(PLAYSTORE_REFERENCE));
+        } else if (checkAppInstaller(packageName, AMAZON_REFERENCE)) {
+            popup.getMenu().add(0, MENU_APP_AMAZON_ID, 0,
+                    getApplicationLabel(AMAZON_REFERENCE));
+        }
+
+        // Actually peform the actions onClick.
+        popup.setOnMenuItemClickListener(new PopupMenu.OnMenuItemClickListener() {
+            public boolean onMenuItemClick(MenuItem item) {
+                if (item.getItemId() == MENU_APP_DETAILS_ID) {
+                    startApplicationDetailsActivity(packageName, null, null);
+                } else if (item.getItemId() == MENU_APP_PLAYSTORE_ID) {
+                    startApplicationDetailsActivity(null,
+                            PLAYSTORE_APP_URI_QUERY + packageName, PLAYSTORE_REFERENCE);
+                } else if (item.getItemId() == MENU_APP_AMAZON_ID) {
+                    startApplicationDetailsActivity(null,
+                            AMAZON_APP_URI_QUERY + packageName, AMAZON_REFERENCE);
+                }
+                return true;
+            }
+        });
+        popup.setOnDismissListener(new PopupMenu.OnDismissListener() {
+            public void onDismiss(PopupMenu menu) {
+                mPopup = null;
+            }
+        });
+        popup.show();
+    }
+
+    /**
+     * Check if the requested app was installed by the reference store.
+     */
+    private boolean checkAppInstaller(String packageName, String reference) {
+        if (packageName == null) {
+            return false;
+        }
+        PackageManager pm = mContext.getPackageManager();
+        if (!isReferenceInstalled(reference, pm)) {
+            return false;
+        }
+
+        String installer = pm.getInstallerPackageName(packageName);
+        if (DEBUG) Log.d(TAG, "Package was installed by: " + installer);
+        if (reference.equals(installer)) {
+            return true;
+        }
+        return false;
+    }
+
+    /**
+     * Check is store reference is installed.
+     */
+    private boolean isReferenceInstalled(String packagename, PackageManager pm) {
+        try {
+            pm.getPackageInfo(packagename, PackageManager.GET_ACTIVITIES);
+            return true;
+        } catch (NameNotFoundException e) {
+            if (DEBUG) Log.e(TAG, "Store is not installed: " + packagename, e);
+            return false;
+        }
+    }
+
+    /**
+     * Get application launcher label of installed references.
+     */
+    private String getApplicationLabel(String packageName) {
+        final PackageManager pm = mContext.getPackageManager();
+        final Intent intent = pm.getLaunchIntentForPackage(packageName);
+        final ResolveInfo resolveInfo = pm.resolveActivity(intent, 0);
+        if (resolveInfo != null) {
+            return resolveInfo.activityInfo.loadLabel(pm).toString();
+        }
+        return null;
     }
 
     /**
@@ -242,14 +367,14 @@ public class RecentPanelView {
      * Remove application bitmaps from LRU cache and expanded state list.
      */
     private void removeApplicationBitmapCacheAndExpandedState(TaskDescription td) {
-            // Remove application thumbnail.
-            CacheController.getInstance(mContext)
-                    .removeBitmapFromMemCache(String.valueOf(td.persistentTaskId));
-            // Remove application icon.
-            CacheController.getInstance(mContext)
-                    .removeBitmapFromMemCache(td.packageName);
-            // Remove from expanded state list.
-            removeExpandedTaskState(td.getLabel());
+        // Remove application thumbnail.
+        CacheController.getInstance(mContext)
+                .removeBitmapFromMemCache(String.valueOf(td.persistentTaskId));
+        // Remove application icon.
+        CacheController.getInstance(mContext)
+                .removeBitmapFromMemCache(td.packageName);
+        // Remove from expanded state list.
+        removeExpandedTaskState(td.getLabel());
     }
 
     /**
@@ -260,12 +385,9 @@ public class RecentPanelView {
         // Move it to foreground or start it with custom animation.
         final ActivityManager am = (ActivityManager)
                 mContext.getSystemService(Context.ACTIVITY_SERVICE);
-        final Bundle opts = ActivityOptions.makeCustomAnimation(
-                mContext, com.android.internal.R.anim.recent_screen_enter,
-                com.android.internal.R.anim.recent_screen_fade_out).toBundle();
         if (td.taskId >= 0) {
             // This is an active task; it should just go to the foreground.
-            am.moveTaskToFront(td.taskId, ActivityManager.MOVE_TASK_WITH_HOME, opts);
+            am.moveTaskToFront(td.taskId, ActivityManager.MOVE_TASK_WITH_HOME, getAnimation());
         } else {
             final Intent intent = td.intent;
             intent.addFlags(Intent.FLAG_ACTIVITY_LAUNCHED_FROM_HISTORY
@@ -273,7 +395,7 @@ public class RecentPanelView {
                     | Intent.FLAG_ACTIVITY_NEW_TASK);
             if (DEBUG) Log.v(TAG, "Starting activity " + intent);
             try {
-                mContext.startActivityAsUser(intent, opts,
+                mContext.startActivityAsUser(intent, getAnimation(),
                         new UserHandle(UserHandle.USER_CURRENT));
             } catch (SecurityException e) {
                 Log.e(TAG, "Recents does not have the permission to launch " + intent, e);
@@ -285,20 +407,59 @@ public class RecentPanelView {
     }
 
     /**
-     * Start application details screen.
+     * Start application details screen or play/amazon store details.
      */
-    private void startApplicationDetailsActivity(String packageName) {
+    private void startApplicationDetailsActivity(
+            String packageName, String uri, String uriReference) {
         // Starting app details screen is requested by the user.
         // Start it with custom animation.
-        final Bundle opts = ActivityOptions.makeCustomAnimation(
-                mContext, com.android.internal.R.anim.recent_screen_enter,
-                com.android.internal.R.anim.recent_screen_fade_out).toBundle();
-        final Intent intent = new Intent(Settings.ACTION_APPLICATION_DETAILS_SETTINGS,
-                Uri.fromParts("package", packageName, null));
+        Intent intent = null;
+        if (packageName != null) {
+            // App detail screen is requested. Prepare the intent.
+            intent = new Intent(Settings.ACTION_APPLICATION_DETAILS_SETTINGS,
+                    Uri.fromParts("package", packageName, null));
+        } else if (uri != null && uriReference != null) {
+            // Store app detail is requested. Prepare the intent.
+            intent = new Intent(Intent.ACTION_VIEW);
+            intent.setData(Uri.parse(uri));
+            // Exclude from recents if the store is not in our task list.
+            if (!storeIsInTaskList(uriReference)) {
+                intent.addFlags(Intent.FLAG_ACTIVITY_EXCLUDE_FROM_RECENTS);
+            }
+        }
+        if (intent == null) {
+            return;
+        }
         intent.setComponent(intent.resolveActivity(mContext.getPackageManager()));
         TaskStackBuilder.create(mContext)
-                .addNextIntentWithParentStack(intent).startActivities(opts);
+                .addNextIntentWithParentStack(intent).startActivities(getAnimation());
         exit();
+    }
+
+    /**
+     * Get custom animation for app starting.
+     * @return Bundle
+     */
+    private Bundle getAnimation() {
+        return ActivityOptions.makeCustomAnimation(mContext,
+                mMainGravity == Gravity.RIGHT ? com.android.internal.R.anim.recent_screen_enter
+                        : com.android.internal.R.anim.recent_screen_enter_left,
+                com.android.internal.R.anim.recent_screen_fade_out).toBundle();
+    }
+
+    /**
+     * Check if the requested store is in the task list to prevent it gets excluded.
+     */
+    private boolean storeIsInTaskList(String uriReference) {
+        if (mFirstTask != null && uriReference.equals(mFirstTask.packageName)) {
+            return true;
+        }
+        for (TaskDescription task : mTasks) {
+            if (uriReference.equals(task.packageName)) {
+                return true;
+            }
+        }
+        return false;
     }
 
     /**
@@ -340,8 +501,11 @@ public class RecentPanelView {
      * Load all tasks we want.
      */
     protected void loadTasks() {
+        if (isTasksLoaded() || mIsLoading) {
+            return;
+        }
         if (DEBUG) Log.v(TAG, "loading tasks");
-        mTasksLoaded = false;
+        mIsLoading = true;
         updateExpandedTaskStates();
         mTasks.clear();
 
@@ -362,11 +526,10 @@ public class RecentPanelView {
         final int firstExpandedItems =
                 mContext.getResources().getInteger(R.integer.expanded_items_default);
         // Get current task list. We do not need to do it in background. We only load MAX_TASKS.
-        // Skip the first task - assume it's either the home screen or the current activity.
-        final int first = 1;
-        for (int i = first, index = 0; i < numTasks && (index < MAX_TASKS); ++i) {
+        for (int i = 0, index = 0; i < numTasks && (index < MAX_TASKS); ++i) {
             if (mCancelledByUser) {
                 if (DEBUG) Log.v(TAG, "loading tasks cancelled");
+                mIsLoading = false;
                 return;
             }
             final ActivityManager.RecentTaskInfo recentInfo = recentTasks.get(i);
@@ -392,22 +555,27 @@ public class RecentPanelView {
                     recentInfo.origActivity, recentInfo.description, EXPANDED_STATE_UNKNOWN);
 
             if (item != null) {
-                // FirstExpandedItems value forces to show always the app screenshot
-                // if the old state is not known.
-                // All other items we check if they were expanded from the user
-                // in last known recent app list and restore the state.
-                int oldState = getExpandedState(item);
-                if (DEBUG) Log.v(TAG, "old expanded state = " + oldState);
-                if (firstItems < firstExpandedItems) {
-                    item.setExpandedState(oldState | EXPANDED_STATE_BY_SYSTEM);
+                if (i == 0) {
+                    // Skip the first task for our list but save it for later use.
+                    mFirstTask = item;
                 } else {
-                    if ((oldState & EXPANDED_STATE_BY_SYSTEM) != 0) {
-                        oldState &= ~EXPANDED_STATE_BY_SYSTEM;
+                    // FirstExpandedItems value forces to show always the app screenshot
+                    // if the old state is not known.
+                    // All other items we check if they were expanded from the user
+                    // in last known recent app list and restore the state.
+                    int oldState = getExpandedState(item);
+                    if (DEBUG) Log.v(TAG, "old expanded state = " + oldState);
+                    if (firstItems < firstExpandedItems) {
+                        item.setExpandedState(oldState | EXPANDED_STATE_BY_SYSTEM);
+                    } else {
+                        if ((oldState & EXPANDED_STATE_BY_SYSTEM) != 0) {
+                            oldState &= ~EXPANDED_STATE_BY_SYSTEM;
+                        }
+                        item.setExpandedState(oldState);
                     }
-                    item.setExpandedState(oldState);
+                    firstItems++;
+                    mTasks.add(item);
                 }
-                firstItems++;
-                mTasks.add(item);
             }
         }
 
@@ -523,8 +691,12 @@ public class RecentPanelView {
     protected void setCancelledByUser(boolean cancelled) {
         mCancelledByUser = cancelled;
         if (cancelled) {
-            mTasksLoaded = false;
+            setTasksLoaded(false);
         }
+    }
+
+    protected void setTasksLoaded(boolean loaded) {
+        mTasksLoaded = loaded;
     }
 
     protected boolean isCancelledByUser() {
@@ -535,12 +707,28 @@ public class RecentPanelView {
         return mTasksLoaded;
     }
 
+    protected void dismissPopup() {
+        if (mPopup != null) {
+            mPopup.dismiss();
+            mPopup = null;
+        }
+    }
+
+    protected void setMainGravity(int gravity) {
+        mMainGravity = gravity;
+    }
+
+    protected void setScaleFactor(float factor) {
+        mScaleFactor = factor;
+    }
+
     /**
      * Notify listener that tasks are loaded.
      */
     private void tasksLoaded() {
         if (mOnTasksLoadedListener != null) {
-            mTasksLoaded = true;
+            setTasksLoaded(true);
+            mIsLoading = false;
             mOnTasksLoadedListener.onTasksLoaded();
         }
     }
@@ -551,7 +739,6 @@ public class RecentPanelView {
     private void exit() {
         if (mOnExitListener != null) {
             mOnExitListener.onExit();
-            mTasksLoaded = false;
         }
     }
 
@@ -593,10 +780,11 @@ public class RecentPanelView {
             mOrigPri = Process.getThreadPriority(Process.myTid());
             Process.setThreadPriority(Process.THREAD_PRIORITY_BACKGROUND);
 
-            int oldSize = mCards.size();
+            final int oldSize = mCards.size();
+            final int newSize = mTasks.size();
             mCounter = 0;
             // Construct or update cards and publish cards recursive with current tasks.
-            for (int i = mTasksSize - 1; i >= 0; i--) {
+            for (int i = newSize - 1; i >= 0; i--) {
                 if (isCancelled() || mCancelledByUser) {
                     if (DEBUG) Log.v(TAG, "loading tasks cancelled");
                     return false;
@@ -611,7 +799,7 @@ public class RecentPanelView {
                     card = (RecentCard) mCards.get(mCounter);
                     if (card != null) {
                         if (DEBUG) Log.v(TAG, "loading tasks - update old card");
-                        card.updateCardContent(task);
+                        card.updateCardContent(task, mScaleFactor);
                         card = assignListeners(card, task);
                     }
                 }
@@ -619,7 +807,7 @@ public class RecentPanelView {
                 // No old card was present to update....so add a new one.
                 if (card == null) {
                     if (DEBUG) Log.v(TAG, "loading tasks - create new card");
-                    card = new RecentCard(mContext, task);
+                    card = new RecentCard(mContext, task, mScaleFactor);
                     card = assignListeners(card, task);
                     mCards.add(card);
                 }
@@ -629,8 +817,8 @@ public class RecentPanelView {
 
             // We may have unused cards left. Eg app was uninstalled but present
             // in the old task list. Let us remove them as well.
-            if (mTasksSize < oldSize) {
-                for (int i = oldSize - 1; i >= mTasksSize; i--) {
+            if (newSize < oldSize) {
+                for (int i = oldSize - 1; i >= newSize; i--) {
                     if (DEBUG) Log.v(TAG,
                             "loading tasks - remove not needed old card - position=" + i);
                     mCards.remove(i);

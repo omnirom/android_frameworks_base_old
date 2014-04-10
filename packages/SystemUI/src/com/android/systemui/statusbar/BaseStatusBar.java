@@ -392,6 +392,8 @@ public abstract class BaseStatusBar extends SystemUI implements
         mLocale = mContext.getResources().getConfiguration().locale;
         mLayoutDirection = TextUtils.getLayoutDirectionFromLocale(mLocale);
 
+        mNewRecents = new RecentController(mContext, mLayoutDirection);
+
         mStatusBarContainer = new FrameLayout(mContext);
 
         // Connect in to the status bar manager service
@@ -464,7 +466,7 @@ public abstract class BaseStatusBar extends SystemUI implements
 
     private void createRecents() {
         if (mUseNewRecents) {
-            mNewRecents = new RecentController(mContext);
+            mNewRecents = new RecentController(mContext, mLayoutDirection);
             mRecents = null;
         } else {
             mNewRecents = null;

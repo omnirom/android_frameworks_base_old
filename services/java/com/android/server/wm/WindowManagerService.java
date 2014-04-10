@@ -5649,7 +5649,8 @@ public class WindowManagerService extends IWindowManager.Stub
 
                     // We keep on including windows until we go past a full-screen
                     // window.
-                    including = !ws.mIsImWindow && !ws.isFullscreen(dw, dh);
+                    boolean fullscreen = ws.isFullscreen(dw, dh);
+                    including = !ws.mIsImWindow && !fullscreen;
 
                     final WindowStateAnimator winAnim = ws.mWinAnimator;
                     if (maxLayer < winAnim.mSurfaceLayer) {
@@ -5674,6 +5675,11 @@ public class WindowManagerService extends IWindowManager.Stub
                     if (ws.mAppToken != null && ws.mAppToken.token == appToken &&
                             ws.isDisplayedLw()) {
                         screenshotReady = true;
+                    }
+
+                    if (fullscreen) {
+                        // No point in continuing down through windows.
+                        break;
                     }
                 }
 
@@ -10936,7 +10942,14 @@ public class WindowManagerService extends IWindowManager.Stub
     public void toggleGlobalMenu() {
         mPolicy.toggleGlobalMenu();
     }
-    
+
+    /* @hide */
+    @Override
+    public void toggleStatusBar() {
+        mPolicy.toggleStatusBar();
+    }
+
+    /* @hide */
     @Override
     public void addSystemUIVisibilityFlag(int flag) {
         mLastStatusBarVisibility |= flag;
