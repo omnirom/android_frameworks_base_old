@@ -88,8 +88,6 @@ import com.android.internal.statusbar.IStatusBarService;
 import com.android.internal.statusbar.StatusBarIcon;
 import com.android.internal.statusbar.StatusBarIconList;
 import com.android.internal.widget.SizeAdaptiveLayout;
-import com.android.internal.util.omni.TaskUtils;
-import com.android.internal.util.omni.OmniSwitchConstants;
 import com.android.internal.util.slim.DeviceUtils;
 import com.android.systemui.R;
 import com.android.systemui.RecentsComponent;
@@ -242,9 +240,6 @@ public abstract class BaseStatusBar extends SystemUI implements
     protected ActiveDisplayView mActiveDisplayView;
 
     private int mExpandedDesktopStyle = 0;
-    private boolean mOmniSwitchEnabled;
-
-    private Map<Integer, Boolean> mOmniSwitchStarted = new HashMap<Integer, Boolean>();
 
     public IStatusBarService getStatusBarService() {
         return mBarService;
@@ -263,9 +258,6 @@ public abstract class BaseStatusBar extends SystemUI implements
                 mDeviceProvisioned = provisioned;
                 updateNotificationIcons();
             }
-            mOmniSwitchEnabled = Settings.System.getIntForUser(
-                    mContext.getContentResolver(), Settings.System.RECENTS_USE_OMNISWITCH,
-                    0, UserHandle.USER_CURRENT) == 1;
         }
     };
 
@@ -353,14 +345,6 @@ public abstract class BaseStatusBar extends SystemUI implements
                 userSwitched(mCurrentUserId);
                 if (mPieController != null) {
                     mPieController.refreshContainer();
-            } else if (OmniSwitchConstants.ACTION_SERVICE_START.equals(action)) {
-                int userId = intent.getIntExtra(Intent.EXTRA_USER_HANDLE, -1);
-                Log.v(TAG, "OmniSwitch service started " + userId);
-                mOmniSwitchStarted.put(userId, true);
-            } else if (OmniSwitchConstants.ACTION_SERVICE_STOP.equals(action)) {
-                int userId = intent.getIntExtra(Intent.EXTRA_USER_HANDLE, -1);
-                Log.v(TAG, "OmniSwitch service stoped " + userId);
-                mOmniSwitchStarted.put(userId, false);
                 }
             }
         }
@@ -379,20 +363,16 @@ public abstract class BaseStatusBar extends SystemUI implements
         mContext.getContentResolver().registerContentObserver(
                 Settings.Global.getUriFor(Settings.Global.DEVICE_PROVISIONED), true,
                 mProvisioningObserver);
-        mContext.getContentResolver().registerContentObserver(
-                Settings.System.getUriFor(Settings.System.RECENTS_USE_OMNISWITCH), true,
-                mSettingsObserver, UserHandle.USER_ALL);
+
+        mSettingsObserver.observe();
 
         mBarService = IStatusBarService.Stub.asInterface(
                 ServiceManager.getService(Context.STATUS_BAR_SERVICE));
 
-        mRecents = getComponent(RecentsComponent.class);
         createRecents();
 
         mLocale = mContext.getResources().getConfiguration().locale;
         mLayoutDirection = TextUtils.getLayoutDirectionFromLocale(mLocale);
-
-        mNewRecents = new RecentController(mContext, mLayoutDirection);
 
         mStatusBarContainer = new FrameLayout(mContext);
 
@@ -459,8 +439,6 @@ public abstract class BaseStatusBar extends SystemUI implements
 
         IntentFilter filter = new IntentFilter();
         filter.addAction(Intent.ACTION_USER_SWITCHED);
-        filter.addAction(OmniSwitchConstants.ACTION_SERVICE_START);
-        filter.addAction(OmniSwitchConstants.ACTION_SERVICE_STOP);
         mContext.registerReceiver(mBroadcastReceiver, filter);
     }
 
@@ -825,37 +803,19 @@ public abstract class BaseStatusBar extends SystemUI implements
         }
     };
 
-    private boolean isOmniSwitchEnabled() {
-        // TODO no user specific value here
-        int settingsValue = Settings.System.getInt(
-                mContext.getContentResolver(), Settings.System.RECENTS_USE_OMNISWITCH, 0);
-        boolean omniSwitchStarted = false;
-        if (mOmniSwitchStarted.containsKey(mCurrentUserId)){
-            omniSwitchStarted = mOmniSwitchStarted.get(mCurrentUserId);
-        }
-        return (settingsValue == 1) && omniSwitchStarted;
-    }
-
     protected void toggleRecentsActivity() {
-        if (isOmniSwitchEnabled()){
-            Intent showIntent = new Intent(OmniSwitchConstants.ACTION_TOGGLE_OVERLAY);
-            mContext.sendBroadcastAsUser(showIntent, UserHandle.CURRENT);
-        } else {
         if (mRecents != null) {
             mRecents.toggleRecents(mDisplay, mLayoutDirection, getStatusBarView(),
                     mExpandedDesktopStyle);
         }
-    }
         if (mNewRecents != null) {
             mNewRecents.toggleRecents(mDisplay, mLayoutDirection, getStatusBarView());
         }
     }
 
     protected void preloadRecentTasksList() {
-        if (!isOmniSwitchEnabled()){
-            if (mRecents != null) {
-                mRecents.preloadRecentTasksList();
-            }
+        if (mRecents != null) {
+            mRecents.preloadRecentTasksList();
         }
         if (mNewRecents != null) {
             mNewRecents.preloadRecentTasksList();
@@ -863,25 +823,18 @@ public abstract class BaseStatusBar extends SystemUI implements
     }
 
     protected void cancelPreloadingRecentTasksList() {
-        if (!isOmniSwitchEnabled()){
-            if (mRecents != null) {
-                mRecents.cancelPreloadingRecentTasksList();
-            }
-        } 
+        if (mRecents != null) {
+            mRecents.cancelPreloadingRecentTasksList();
+        }
         if (mNewRecents != null) {
             mNewRecents.cancelPreloadingRecentTasksList();
         }
     }
 
     protected void closeRecents() {
-        if (isOmniSwitchEnabled()){
-            Intent hideIntent = new Intent(OmniSwitchConstants.ACTION_HIDE_OVERLAY);
-            mContext.sendBroadcastAsUser(hideIntent, UserHandle.CURRENT);
-        } else {
-            if (mRecents != null) {
-                mRecents.closeRecents();
-            }
-        }   
+        if (mRecents != null) {
+            mRecents.closeRecents();
+        }
         if (mNewRecents != null) {
             mNewRecents.closeRecents();
         }
