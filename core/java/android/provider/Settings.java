@@ -2963,6 +2963,30 @@ public final class Settings {
         public static final String VOLUME_MUSIC_CONTROL = "volume_music_control";
 
         /**
+         * Whether to wake the screen with the camera key half-press.
+         * @hide
+         */
+        public static final String CAMERA_WAKE_SCREEN = "camera_wake_screen";
+
+        /**
+         * Whether or not to send device back to sleep if Camera button is released ("Peek")
+         * @hide
+         */
+        public static final String CAMERA_SLEEP_ON_RELEASE = "camera_sleep_on_release";
+
+        /**
+         * Whether or not camera button music controls should be enabled to play/pause media tracks
+         * @hide
+         */
+        public static final String CAMERA_MUSIC_CONTROLS = "camera_music_controls";
+
+        /**
+         * Whether to unlock the screen with the camera key. The value is boolean (1 or 0).
+         * @hide
+         */
+        public static final String CAMERA_UNLOCK_SCREEN = "camera_unlock_screen";
+
+        /**
          * Swipe between quick settings and notification drawer
          * @hide
          */
