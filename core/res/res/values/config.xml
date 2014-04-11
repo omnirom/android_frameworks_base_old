@@ -1344,6 +1344,10 @@
          config to 7. -->
     <integer name="config_deviceHardwareKeys">0</integer>
 
+    <!-- Indicates that the device has Single-stage Camera key
+         (without "Focus" state) instead of Dual-stage. -->
+    <bool name="config_singleStageCameraKey">false</bool>
+
     <integer name="config_backKillTimeout">1500</integer>
 
     <!-- Boolean to enable Stylus gestures -->
