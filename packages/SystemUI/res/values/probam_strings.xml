@@ -51,12 +51,13 @@ wn on the screen). [CHAR LIMIT=NONE] -->
     <!-- Title shown in recents popup for unlocking an app from being cleared -->
     <string name="status_bar_recent_unlock_item_title">Unlock</string>
 
-   <!-- battery saver mode -->
+    <!-- battery saver mode -->
     <string name="battery_saver_start">Battery Saver Enabled</string>
     <string name="battery_saver_stop">Battery Saver Disabled</string>
     <string name="battery_saver_change">Battery Saver Change network to</string>
     <string name="battery_saver_network">Network restored</string>
     <string name="battery_saver_wifi">Wifi restored</string>
     <string name="battery_saver_all">All configuration restored</string>
-
+    <string name="battery_saver_data">Mobile data restored</string>
+    <string name="battery_saver_no_changes">No configuration restored</string>
 </resources>
