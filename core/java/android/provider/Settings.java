@@ -2666,6 +2666,12 @@ public final class Settings {
         public static final String DOCK_SOUNDS_ENABLED = Global.DOCK_SOUNDS_ENABLED;
 
         /**
+         * Opens music app when headset is plugged.
+         * @hide
+         */
+        public static final String HEADSET_PLUG_ENABLED = "headset_plug_enabled";
+
+        /**
          * Whether to play sounds when the keyguard is shown and dismissed.
          * @hide
          */
