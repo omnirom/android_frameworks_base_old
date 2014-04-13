@@ -1,5 +1,5 @@
 /*
-* Copyright (C) 2014 The OmniROM Project
+* Copyright (C) 2014 The Amra Project
 *
 * This program is free software: you can redistribute it and/or modify
 * it under the terms of the GNU General Public License as published by
@@ -23,7 +23,7 @@ public class OmniSwitchConstants {
     /**
      * Package name of the omnniswitch app
      */
-    public static final String APP_PACKAGE_NAME = "org.omnirom.omniswitch";
+    public static final String APP_PACKAGE_NAME = "org.Amra.omniswitch";
 
     /**
      * Intent broadcast action for showing the omniswitch overlay

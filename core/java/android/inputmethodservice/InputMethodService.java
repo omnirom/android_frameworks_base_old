@@ -70,7 +70,7 @@ import android.widget.Button;
 import android.widget.FrameLayout;
 import android.widget.LinearLayout;
 
-import com.android.internal.util.aokp.AwesomeAnimationHelper;
+import com.android.internal.util.amra.AwesomeAnimationHelper;
 
 import java.io.FileDescriptor;
 import java.io.PrintWriter;

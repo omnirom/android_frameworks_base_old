@@ -138,6 +138,8 @@
         <service android:name=".LoadAverageService"
                 android:exported="true" />
 
+        <service android:name=".batterysaver.BatterySaverService" />
+
         <service android:name=".CPUInfoService"
                 android:exported="true" />
 

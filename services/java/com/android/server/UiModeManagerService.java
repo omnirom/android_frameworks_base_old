@@ -295,7 +295,6 @@ final class UiModeManagerService extends IUiModeManager.Stub
                 filter.addAction(Intent.ACTION_SCREEN_ON);
                 mContext.registerReceiver(mBroadcastReceiver, filter);
                 registerLightSensor();
-                return;
             }
         } else {
             if (mAttached) {
@@ -307,8 +306,7 @@ final class UiModeManagerService extends IUiModeManager.Stub
         }
 
         if (mUiThemeAutoMode == 2) {
-            updateTwilight();
-            return;
+            updateTwilightThemeAutoMode();
         }
 
         synchronized (mLock) {
@@ -332,7 +330,7 @@ final class UiModeManagerService extends IUiModeManager.Stub
 
             if (mAllowConfigChange) {
                 mAllowConfigChange = false;
-                mHandler.postDelayed(mReleaseUiThemeModeBlock, 3000);
+                mHandler.postDelayed(mReleaseUiThemeModeBlock, 5000);
                 synchronized (mLock) {
                     if (mSystemReady) {
                         sendConfigurationLocked();

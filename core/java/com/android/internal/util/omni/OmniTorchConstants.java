@@ -1,6 +1,6 @@
 /*
  * Copyright (C) 2013 The CyanogenMod Project
- * This code has been modified. Portions copyright (C) 2013, OmniRom Project.
+ * This code has been modified. Portions copyright (C) 2013, Amra Project.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -23,7 +23,7 @@ public class OmniTorchConstants {
     /**
      * Package name of the torch app
      */
-    public static final String APP_PACKAGE_NAME = "org.omnirom.torch";
+    public static final String APP_PACKAGE_NAME = "org.Amra.torch";
 
     /**
      * Intent broadcast action for toggling the torch state
