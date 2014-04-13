@@ -5728,6 +5728,9 @@ public final class Settings {
             MOVED_TO_GLOBAL.add(Settings.Global.BATTERY_SAVER_BATTERY_LEVEL);
             MOVED_TO_GLOBAL.add(Settings.Global.BATTERY_SAVER_WIFI_MODE);
             MOVED_TO_GLOBAL.add(Settings.Global.BATTERY_SAVER_DATA_MODE);
+            MOVED_TO_GLOBAL.add(Settings.Global.BATTERY_SAVER_SHOW_TOAST);
+            MOVED_TO_GLOBAL.add(Settings.Global.BATTERY_SAVER_NETWORK_INTERVAL_MODE);
+            MOVED_TO_GLOBAL.add(Settings.Global.BATTERY_SAVER_NOSIGNAL_MODE);
             MOVED_TO_GLOBAL.add(Settings.Global.BATTERY_SAVER_START);
             MOVED_TO_GLOBAL.add(Settings.Global.BATTERY_SAVER_END);
         }
@@ -8985,6 +8988,24 @@ public final class Settings {
          */
         public static final String BATTERY_SAVER_DATA_MODE =
                 "battery_saver_data_mode";
+
+        /**
+         * @hide
+         */
+        public static final String BATTERY_SAVER_NOSIGNAL_MODE =
+                "battery_saver_nosignal_mode";
+
+        /**
+         * @hide
+         */
+        public static final String BATTERY_SAVER_NETWORK_INTERVAL_MODE =
+                "battery_saver_network_interval_mode";
+
+        /**
+         * @hide
+         */
+        public static final String BATTERY_SAVER_SHOW_TOAST =
+                "battery_saver_show_toast";
 
         /**
          * @hide

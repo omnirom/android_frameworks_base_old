@@ -16,7 +16,9 @@
 package com.android.systemui.batterysaver;
 
 import android.content.Context;
+import android.net.TrafficStats;
 import android.os.Handler;
+import android.os.SystemClock;
 
 import com.android.systemui.R;
 import com.android.systemui.batterysaver.BatterySaverService.State;
@@ -34,6 +36,12 @@ public class ModeChanger implements Runnable {
     private boolean mEnabledByUser = false;
     private boolean mDisabledByService = false;
     private boolean mNormalize = false;
+    private boolean mShowToast = false;
+    private long mTrafficBytes;
+    private final long TRAFFIC_BYTES_THRESHOLD = 1 * 1024 * 1024; // 1mb
+    private boolean isFullTraffic = false;
+    private long mIntervalCheck = 0;
+    private final long mIntervalDuration = 30000; //30seconds
 
     public ModeChanger(Context context) {
         mContext = context;
@@ -46,6 +54,25 @@ public class ModeChanger implements Runnable {
         mCurrentState = st;
     }
 
+    public void onActivity(boolean activityIn, boolean activityOut) {
+        if (activityIn || activityOut) {
+            if ((SystemClock.elapsedRealtime() - mIntervalCheck) < mIntervalDuration) {
+                return;
+            }
+            if (mIntervalCheck != 0) {
+                isFullTraffic = true;
+            }
+            mIntervalCheck = SystemClock.elapsedRealtime();
+        } else {
+            isFullTraffic = false;
+            mIntervalCheck = 0;
+        }
+    }
+
+    public void updateTraffic() {
+        mTrafficBytes = TrafficStats.getTotalRxBytes() + TrafficStats.getTotalTxBytes();
+    }
+
     // user configuration
     public void setDelayed(int delay) {
         mDelayed = delay;
@@ -54,6 +81,11 @@ public class ModeChanger implements Runnable {
     // user configuration
     public void setModeEnabled(boolean enabled) {
         mModeEnabled = enabled;
+    }
+
+    // user configuration
+    public void setShowToast(boolean enabled) {
+        mShowToast = enabled;
     }
 
     public void setWasEnabled(boolean enabled) {
@@ -72,19 +104,23 @@ public class ModeChanger implements Runnable {
 
     public boolean wasEnabled() {
         return mWasEnabled;
-    };
+    }
 
     public boolean isModeEnabled() {
         return mModeEnabled;
-    };
+    }
+
+    public boolean isShowToast() {
+        return mShowToast;
+    }
 
     public boolean isEnabledByUser() {
         return mEnabledByUser;
-    };
+    }
 
     public boolean isDisabledByService() {
         return mDisabledByService;
-    };
+    }
 
     public boolean isNormalize() {
         return mNormalize;
@@ -92,27 +128,27 @@ public class ModeChanger implements Runnable {
 
     public int getNextMode() {
         return mNextMode;
-    };
+    }
 
     public boolean isDelayChanges() {
-        // override this
-        return false;
+        final long traffic = TrafficStats.getTotalRxBytes() + TrafficStats.getTotalTxBytes();
+        return ((traffic - mTrafficBytes) > TRAFFIC_BYTES_THRESHOLD) || isFullTraffic;
     }
 
     public boolean isStateEnabled() {
         // override this
         return false;
-    };
+    }
 
     public boolean isSupported() {
         // override this
         return false;
-    };
+    }
 
     public int getMode() {
         // override this
         return 0;
-    };
+    }
 
     public void stateNormal() {
         // override this
@@ -125,7 +161,7 @@ public class ModeChanger implements Runnable {
     public boolean checkModes() {
         // override this
         return true;
-    };
+    }
 
     public void setModes() {
         // override this and
@@ -135,12 +171,8 @@ public class ModeChanger implements Runnable {
 
     public boolean restoreState() {
         // override this if needed
-        if (isSupported()) {
-            if (mWasEnabled || mDisabledByService) {
-                stateNormal();
-            } else {
-                stateSaving();
-            }
+        if (isSupported() && mDisabledByService) {
+            stateNormal();
             return true;
         }
         return false;
@@ -149,19 +181,19 @@ public class ModeChanger implements Runnable {
     public void runModes() {
         if (mCurrentState == State.POWER_SAVING) {
             if ((mWasEnabled || mEnabledByUser)
-                 && mModeEnabled) {
+                 && isSupported()) {
                 stateSaving();
-                setDisabledByService(mEnabledByUser);
+                setDisabledByService(true);
             }
         } else if (mCurrentState == State.NORMAL) {
             if ((mWasEnabled || mDisabledByService)
-                && mModeEnabled) {
+                && isSupported()) {
                 stateNormal();
                 setDisabledByService(false);
             }
-         }
-         setModes();
-    };
+        }
+        setModes();
+    }
 
     @Override
     public void run() {

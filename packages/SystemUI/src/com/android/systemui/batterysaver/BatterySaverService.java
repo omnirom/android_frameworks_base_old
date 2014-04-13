@@ -15,6 +15,9 @@
  */
 package com.android.systemui.batterysaver;
 
+import android.app.Notification;
+import android.app.NotificationManager;
+import android.app.PendingIntent;
 import android.app.Service;
 import android.content.BroadcastReceiver;
 import android.content.ContentResolver;
@@ -32,7 +35,9 @@ import android.os.IBinder;
 import android.os.SystemClock;
 import android.os.UserHandle;
 import android.provider.Settings;
+import android.telephony.PhoneStateListener;
 import android.telephony.TelephonyManager;
+import android.util.Log;
 import android.widget.Toast;
 
 import com.android.systemui.R;
@@ -47,6 +52,9 @@ public class BatterySaverService extends Service implements NetworkSignalChanged
 
     public static final String TAG = "BatterySaverService";
 
+    public static final int BATTERY_SAVER_NOTIFICATION_ID = 5151;
+    public static final boolean DEBUG = false;
+
     public enum State { UNKNOWN, NORMAL, POWER_SAVING };
 
     private Handler mHandler;
@@ -54,8 +62,10 @@ public class BatterySaverService extends Service implements NetworkSignalChanged
     // services
     private ConnectivityManager mCM;
     private TelephonyManager mTM;
+    private NotificationManager mNotificationManager;
 
     // changing engine
+    private InCallChangeMode mInCallChangeMode;
     private MobileDataModeChanger mMobileDataModeChanger;
     private NetworkModeChanger mNetworkModeChanger;
     private WifiModeChanger mWifiModeChanger;
@@ -63,12 +73,14 @@ public class BatterySaverService extends Service implements NetworkSignalChanged
     // user configuration
     private int mNormalMode;
     private int mPowerSavingMode;
+    private int mLowBatteryLevel;
+    private long mUserCheckIntervalTime;
+    private boolean mSmartNoSignalEnabled;
     private boolean mBatterySaverEnabled;
     private boolean mSmartBatteryEnabled;
-    private boolean mIsScreenOff = false;
     private boolean mPowerSaveWhenScreenOff;
     private boolean mIgnoreWhileLocked;
-    private int mLowBatteryLevel;
+    private boolean mShowToast;
 
     // non-user configuration
     private Context mContext;
@@ -76,16 +88,20 @@ public class BatterySaverService extends Service implements NetworkSignalChanged
     private State mCurrentState = State.UNKNOWN;
     private SettingsObserver mSettingsObserver;
     private boolean mBatteryLowEvent = false;
+    private boolean mIsScreenOff = false;
     private boolean mSignalEvent = false;
     private boolean mWifiEvent = false;
+    private boolean mCallEvent = false;
+    private boolean mIsAirPlaneEnabled = false;
+    private long mLastNoSignalTime = 0;
+    private long mLastCheckIntervalTime = 0;
+    private final long mIntervalCheck = 300000; //5minutes 
 
     // controller
     private BatteryController mBatteryController;
     private NetworkController mNetworkController;
 
     // For filtering ACTION_POWER_DISCONNECTED on boot
-    private boolean mIgnoreFirstPowerDisconnectedEvent = true;
-    private boolean mIgnoreFirstPowerConnectedEvent = true;
     private boolean mPowerConnected = false;
 
     @Override
@@ -98,6 +114,9 @@ public class BatterySaverService extends Service implements NetworkSignalChanged
         // register all service needed
         mCM = (ConnectivityManager) this.getSystemService(CONNECTIVITY_SERVICE);
         mTM = (TelephonyManager) this.getSystemService(TELEPHONY_SERVICE);
+        mNotificationManager =
+            (NotificationManager) this.getSystemService(NOTIFICATION_SERVICE);
+        mInCallChangeMode = new InCallChangeMode(this, this);
 
         // register controller
         mBatteryController = new BatteryController(this);
@@ -130,8 +149,18 @@ public class BatterySaverService extends Service implements NetworkSignalChanged
         filter.addAction(Intent.ACTION_USER_PRESENT);
         registerReceiver(mBroadcastReceiver, filter);
 
-        // showing a message battery saver mode running
-        Toast.makeText(mContext, mResources.getString(R.string.battery_saver_start), Toast.LENGTH_SHORT).show();
+        IntentFilter cfilter = new IntentFilter();
+        cfilter.addAction(Intent.ACTION_TIME_TICK);
+        cfilter.addAction(Intent.ACTION_TIME_CHANGED);
+        cfilter.addAction(Intent.ACTION_TIMEZONE_CHANGED);
+        registerReceiver(mIntentReceiver, cfilter);
+
+        // register phone state
+        mTM.listen(mPhoneStateListener, PhoneStateListener.LISTEN_CALL_STATE);
+        if (DEBUG) {
+            Log.i(TAG, " Running... ");
+        }
+        notifyBatterySaver();
     }
 
     @Override
@@ -173,6 +202,12 @@ public class BatterySaverService extends Service implements NetworkSignalChanged
                     Settings.Global.BATTERY_SAVER_DATA_MODE), false, this);
             resolver.registerContentObserver(Settings.Global.getUriFor(
                     Settings.Global.BATTERY_SAVER_WIFI_MODE), false, this);
+            resolver.registerContentObserver(Settings.Global.getUriFor(
+                    Settings.Global.BATTERY_SAVER_NETWORK_INTERVAL_MODE), false, this);
+            resolver.registerContentObserver(Settings.Global.getUriFor(
+                    Settings.Global.BATTERY_SAVER_NOSIGNAL_MODE), false, this);
+            resolver.registerContentObserver(Settings.Global.getUriFor(
+                    Settings.Global.BATTERY_SAVER_SHOW_TOAST), false, this);
         }
 
         void unobserve() {
@@ -213,6 +248,12 @@ public class BatterySaverService extends Service implements NetworkSignalChanged
                         Settings.Global.BATTERY_SAVER_MODE_CHANGE_DELAY, 5));
                 mSmartBatteryEnabled = Settings.Global.getInt(resolver,
                         Settings.Global.BATTERY_SAVER_BATTERY_MODE, 0) != 0;
+                mUserCheckIntervalTime = Settings.Global.getLong(resolver,
+                        Settings.Global.BATTERY_SAVER_NETWORK_INTERVAL_MODE, 0);
+                mSmartNoSignalEnabled = Settings.Global.getInt(resolver,
+                        Settings.Global.BATTERY_SAVER_NOSIGNAL_MODE, 0) != 0;
+                setShowToast(Settings.Global.getInt(resolver,
+                        Settings.Global.BATTERY_SAVER_SHOW_TOAST, 0) != 0);
                 int lowBatteryLevels = mResources.getInteger(
                         com.android.internal.R.integer.config_lowBatteryWarningLevel);
                 mLowBatteryLevel = Settings.Global.getInt(resolver,
@@ -243,6 +284,12 @@ public class BatterySaverService extends Service implements NetworkSignalChanged
                         mNetworkModeChanger.getMode());
         mSmartBatteryEnabled = Settings.Global.getInt(resolver,
                         Settings.Global.BATTERY_SAVER_BATTERY_MODE, 0) != 0;
+        mUserCheckIntervalTime = Settings.Global.getLong(resolver,
+                        Settings.Global.BATTERY_SAVER_NETWORK_INTERVAL_MODE, 0);
+        mSmartNoSignalEnabled = Settings.Global.getInt(resolver,
+                        Settings.Global.BATTERY_SAVER_NOSIGNAL_MODE, 0) != 0;
+        setShowToast(Settings.Global.getInt(resolver,
+                        Settings.Global.BATTERY_SAVER_SHOW_TOAST, 0) != 0);
         int lowBatteryLevels = mResources.getInteger(
                         com.android.internal.R.integer.config_lowBatteryWarningLevel);
         mLowBatteryLevel = Settings.Global.getInt(resolver,
@@ -251,6 +298,13 @@ public class BatterySaverService extends Service implements NetworkSignalChanged
                         Settings.Global.BATTERY_SAVER_DATA_MODE, 1) != 0);
         mWifiModeChanger.setModeEnabled(Settings.Global.getInt(resolver,
                         Settings.Global.BATTERY_SAVER_WIFI_MODE, 0) != 0);
+    }
+
+    private void setShowToast(boolean enabled) {
+        mShowToast = enabled;
+        mMobileDataModeChanger.setShowToast(enabled);
+        mNetworkModeChanger.setShowToast(enabled);
+        mWifiModeChanger.setShowToast(enabled);
     }
 
     private void updateDelayed(int delay) {
@@ -264,7 +318,6 @@ public class BatterySaverService extends Service implements NetworkSignalChanged
         @Override
         public void onReceive(Context context, Intent intent) {
             String action = intent.getAction();
-            boolean shouldSwitch = !mWifiModeChanger.isWifiConnected() && !mBatteryLowEvent;
             if (action.equals(Intent.ACTION_BATTERY_CHANGED)) {
                 final int status = intent.getIntExtra(BatteryManager.EXTRA_STATUS,
                                BatteryManager.BATTERY_STATUS_UNKNOWN);
@@ -273,7 +326,7 @@ public class BatterySaverService extends Service implements NetworkSignalChanged
                         case BatteryManager.BATTERY_STATUS_FULL:
                              mPowerConnected = true;
                              // on charging state
-                             if (!mIsScreenOff && shouldSwitch) {
+                             if (!mIsScreenOff && shouldSwitch()) {
                                  switchToState(State.NORMAL);
                              }
                              break;
@@ -286,17 +339,44 @@ public class BatterySaverService extends Service implements NetworkSignalChanged
             } else if (action.equals(Intent.ACTION_SCREEN_OFF)) {
                 mIsScreenOff = true;
                 if (mPowerSaveWhenScreenOff && !isTethered() && !mPowerConnected) {
-                    switchToState(State.POWER_SAVING, true);
+                    switchToState(State.POWER_SAVING, true, false);
                 }
             } else if (action.equals(Intent.ACTION_SCREEN_ON)) {
                 mIsScreenOff = false;
                 if ((mPowerConnected || !mIgnoreWhileLocked
-                     || isLockScreenDisabled()) && shouldSwitch) {
+                     || isLockScreenDisabled()) && shouldSwitch()) {
                     switchToState(State.NORMAL);
                 }
             } else if (action.equals(Intent.ACTION_USER_PRESENT)) {
-                if (mIgnoreWhileLocked && shouldSwitch) {
+                if (mIgnoreWhileLocked && shouldSwitch()) {
                     switchToState(State.NORMAL);
+                }
+            }
+        }
+    };
+
+    private final BroadcastReceiver mIntentReceiver = new BroadcastReceiver() {
+        @Override
+        public void onReceive(Context context, Intent intent) {
+            // detect when need changing to normal state after screen turn off
+            autoSwitchAfterScreenTurnOff();
+
+        }
+    };
+
+    private PhoneStateListener mPhoneStateListener = new PhoneStateListener() {
+        @Override
+        public void onCallStateChanged(int state, String incomingNumber) {
+            if (state != TelephonyManager.CALL_STATE_IDLE) {
+                mCallEvent = true;
+                if (DEBUG) {
+                    Log.i(TAG, " InCall detected ");
+                }
+            } else if ((state == TelephonyManager.CALL_STATE_IDLE) && mCallEvent) {
+                mCallEvent = false;
+                mInCallChangeMode.callPosted();
+                if (DEBUG) {
+                    Log.i(TAG, " InCall ended ");
                 }
             }
         }
@@ -308,7 +388,16 @@ public class BatterySaverService extends Service implements NetworkSignalChanged
         // detect airplane mode
         // if enabled, force to power saving mode
         if (enabled && !mPowerConnected) {
-            switchToState(State.POWER_SAVING, enabled);
+            mIsAirPlaneEnabled = enabled;
+            switchToState(State.POWER_SAVING, enabled, false);
+            if (DEBUG) {
+                Log.i(TAG, " Airplane Mode Enabled ");
+            }
+        } else if (mIsAirPlaneEnabled && !mIsScreenOff && shouldSwitch()) {
+            switchToState(State.NORMAL);
+            if (DEBUG) {
+                Log.i(TAG, " Airplane Mode Disabled ");
+            }
         }
     }
 
@@ -324,8 +413,7 @@ public class BatterySaverService extends Service implements NetworkSignalChanged
         if (mSmartBatteryEnabled) {
             if (!pluggedIn && (level < mLowBatteryLevel)) {
                 mBatteryLowEvent = true;
-                if (!mIsScreenOff && !mWifiModeChanger.isWifiConnected()
-                    && !mBatteryLowEvent) {
+                if (!mIsScreenOff && !mWifiModeChanger.isWifiConnected()) {
                     // battery low, power saving running
                     switchToState(State.POWER_SAVING);
                 }
@@ -349,22 +437,56 @@ public class BatterySaverService extends Service implements NetworkSignalChanged
             }
             return;
         }
+        if (!mWifiModeChanger.isWifiConnected()) {
+            mMobileDataModeChanger.onActivity((enabled && activityIn), (enabled && activityOut));
+            mNetworkModeChanger.onActivity((enabled && activityIn), (enabled && activityOut));
+        }
         // detect user interacting while power saving running
         if (mMobileDataModeChanger.isEnabledByUser() != mMobileDataModeChanger.isStateEnabled()) {
             mMobileDataModeChanger.setEnabledByUser(mMobileDataModeChanger.isStateEnabled());
         }
+    }
 
-        // detect if no signal > 5 minutes
-        // change to airplane mode
-        // Todo this should be a user configuration, so this disabled for now 
-	        /*if (!mSignalEvent) {
-              if ((SystemClock.elapsedRealtime() - mLastNoSignalTime) > 300000){
-                  mHandler.removeCallbacks(mEnabledAirPlaneMode);
-                  mHandler.post(mEnabledAirPlaneMode);
-                  return;
-              }
-              mLastNoSignalTime = SystemClock.elapsedRealtime();
-        }*/
+    private void autoSwitchAfterScreenTurnOff() {
+        if (!mMobileDataModeChanger.isSupported() || !mNetworkModeChanger.isSupported()) {
+            return;
+        }
+        if (mIsScreenOff && (mUserCheckIntervalTime != 0) && shouldSwitch()
+            && mMobileDataModeChanger.isDisabledByService()) {
+            if ((SystemClock.elapsedRealtime() - mLastCheckIntervalTime) < mUserCheckIntervalTime) {
+                return;
+            }
+            if (mLastCheckIntervalTime != 0) {
+                switchToState(State.NORMAL, true);
+                if (DEBUG) {
+                    Log.i(TAG, " change to normal mode after = " +
+                          (SystemClock.elapsedRealtime() - mLastCheckIntervalTime));
+                }
+                mHandler.removeCallbacks(mDelayedChangeMode);
+                mHandler.postDelayed(mDelayedChangeMode, ((int) mUserCheckIntervalTime) / 2);
+            }
+            mLastCheckIntervalTime = SystemClock.elapsedRealtime();
+        } else if (!mIsScreenOff && (mLastCheckIntervalTime != 0)) {
+            mLastCheckIntervalTime = 0;
+        }
+    }
+
+    private void autoCheckNetworkMode() {
+        if (!mNetworkModeChanger.isSupported()) {
+            return;
+        }
+        if (!mSignalEvent && mSmartNoSignalEnabled && shouldSwitch()) {
+            if ((SystemClock.elapsedRealtime() - mLastNoSignalTime) < mIntervalCheck) {
+                return;
+            }
+            if (mLastNoSignalTime != 0) {
+                mHandler.removeCallbacks(mEnabledAirPlaneMode);
+                mHandler.post(mEnabledAirPlaneMode);
+            }
+            mLastNoSignalTime = SystemClock.elapsedRealtime();
+        } else if (mSignalEvent && (mLastNoSignalTime != 0)) {
+            mLastNoSignalTime = 0;
+        }
     }
 
     private final Runnable mEnabledAirPlaneMode = new Runnable() {
@@ -373,8 +495,26 @@ public class BatterySaverService extends Service implements NetworkSignalChanged
                 int airplaneMode = Settings.Global.getInt(mContext.getContentResolver(),
                       Settings.Global.AIRPLANE_MODE_ON, 0);
                 setAirplaneModeState(airplaneMode != 0);
+                if (DEBUG) {
+                    Log.i(TAG, " No signal, Airplane Mode enable ");
+                }
+                notifyBatterySaverChangeAirPlaneMode();
             } else {
                 mHandler.removeCallbacks(mEnabledAirPlaneMode);
+            }
+        }
+    };
+
+    private final Runnable mDelayedChangeMode = new Runnable() {
+        public void run() {
+            if (mIsScreenOff && shouldSwitch()) {
+                switchToState(State.POWER_SAVING, true);
+                if (DEBUG) {
+                    Log.i(TAG, " change to power saver mode after = " +
+                          ((int) mUserCheckIntervalTime) / 2);
+                }
+            } else {
+                mHandler.removeCallbacks(mDelayedChangeMode);
             }
         }
     };
@@ -407,6 +547,7 @@ public class BatterySaverService extends Service implements NetworkSignalChanged
                 mWifiModeChanger.setEnabledByUser(false);
             }
         }
+        mWifiModeChanger.onActivity((enabled && activityIn), (enabled && activityOut));
         if (!mBatteryLowEvent && !mPowerConnected) {
             if (wifiConnected && !mWifiEvent) {
                 mWifiEvent = true;
@@ -428,15 +569,26 @@ public class BatterySaverService extends Service implements NetworkSignalChanged
         if (!isTethered()) {
             if (mMobileDataModeChanger.restoreState()) {
                 mobiledata = true;
+                showToast(0);
             }
             if (mNetworkModeChanger.restoreState()) {
                 network = true;
+                showToast(1);
             }
             if (mWifiModeChanger.restoreState()) {
                 wifi = true;
+                showToast(2);
+            }
+        if (mobiledata && network && wifi) {
+            showToast(3);
+        } else if (!mobiledata && !network && !wifi) {
+            showToast(4);
             }
         }
-        showToast(mobiledata, network, wifi);
+    }
+
+	    private boolean shouldSwitch() {
+        return !mWifiModeChanger.isWifiConnected() && !mBatteryLowEvent;
     }
 
     private boolean isLockScreenDisabled() {
@@ -483,17 +635,26 @@ public class BatterySaverService extends Service implements NetworkSignalChanged
         return false;
     }
 
-    private void switchToState(State newState) {
+    public void switchToState(State newState) {
         switchToState(newState, false);
     }
 
-    private void switchToState(State newState, boolean force) {
+    public void switchToState(State newState, boolean checks) {
+        switchToState(newState, false, checks);
+    }
+
+    public void switchToState(State newState, boolean force, boolean checks) {
         if (mCurrentState == newState && !force) {
             return;
         } else if (!mBatterySaverEnabled) {
             return;
         } else if (isOnCall()) {
             // check condition
+            if (mInCallChangeMode.getState() != newState
+                || mInCallChangeMode.isForce() != force
+                || mInCallChangeMode.isChecks() != checks) {
+                mInCallChangeMode.InCallChangeState(newState, force, checks);
+            }
             return;
         }
 
@@ -512,7 +673,7 @@ public class BatterySaverService extends Service implements NetworkSignalChanged
         }
         mCurrentState = newState;
         updateCurrentState(newState);
-        if (!mWifiEvent || mBatteryLowEvent || force) {
+        if ((!mWifiEvent && !checks) || (force && !checks)) {
             if (mWifiModeChanger.isSupported()) {
                 mWifiModeChanger.updateTraffic();
                 mWifiModeChanger.changeMode(false, normalize);
@@ -543,29 +704,35 @@ public class BatterySaverService extends Service implements NetworkSignalChanged
                 mPowerSavingMode = mode;
             }
             if (mCurrentState == state) {
-                switchToState(state, true);
+                switchToState(state, true, false);
             }
         }
     }
 
-    private void showToast(boolean mobiledata, boolean network, boolean wifi) {
-        String[] what = new String[5];
-        if (mobiledata) {
-            what[0] = mResources.getString(R.string.battery_saver_data);
-        } else if (network) {
-            what[1] = mResources.getString(R.string.battery_saver_network);
-        } else if (wifi) {
-            what[2] = mResources.getString(R.string.battery_saver_wifi);
-        } else if (mobiledata && network && wifi) {
-            what[3] = mResources.getString(R.string.battery_saver_all);
-        } else {
-            what[4] = mResources.getString(R.string.battery_saver_no_changes);
+    private void showToast(int codes) {
+        if (!mShowToast) return;
+
+        String what = null;
+        switch (codes) {
+                case 0:
+                    what = mResources.getString(R.string.battery_saver_data);
+                    break;
+                case 1:
+                    what = mResources.getString(R.string.battery_saver_network);
+                    break;
+                case 2:
+                    what = mResources.getString(R.string.battery_saver_wifi);
+                    break;
+                case 3:
+                    what = mResources.getString(R.string.battery_saver_all);
+                    break;
+                case 4:
+                    what = mResources.getString(R.string.battery_saver_no_changes);
+                    break;
         }
 
-        for (String st : what) {
-             if (st != null) {
-                 Toast.makeText(mContext, st, Toast.LENGTH_SHORT).show();
-             }
+        if (what != null) {
+            Toast.makeText(mContext, what, Toast.LENGTH_SHORT).show();
         }
     }
 
@@ -583,6 +750,13 @@ public class BatterySaverService extends Service implements NetworkSignalChanged
         if (mBroadcastReceiver != null) {
             unregisterReceiver(mBroadcastReceiver);
         }
+        if (mIntentReceiver != null) {
+            unregisterReceiver(mIntentReceiver);
+        }
+        if (mTM != null) {
+            mTM.listen(mPhoneStateListener, PhoneStateListener.LISTEN_NONE);
+        }
+        mPhoneStateListener = null;
         // unregister controller
         if (mBatteryController != null) {
             mBatteryController.unregisterController(mContext);
@@ -592,6 +766,44 @@ public class BatterySaverService extends Service implements NetworkSignalChanged
             mNetworkController.unregisterController(mContext);
             mNetworkController.removeNetworkSignalChangedCallback(this);
         }
+        if (DEBUG) {
+            Log.i(TAG, " disabled ");
+        }
         super.onDestroy();
+    }
+
+    private void notifyBatterySaver() {
+        Resources r = mContext.getResources();
+
+        Intent batIntent = new Intent();
+        batIntent.setClass(mContext, DisableBatterySaverMode.class);
+
+        Notification.Builder b = new Notification.Builder(mContext)
+            .setTicker(r.getString(R.string.battery_saver_enable_ticker))
+            .setContentTitle(r.getString(R.string.battery_saver_enable_title))
+            .setContentText(r.getString(R.string.battery_saver_start))
+            .setWhen(System.currentTimeMillis())
+            .setAutoCancel(true);
+        mNotificationManager.notify(BATTERY_SAVER_NOTIFICATION_ID, b.build());
+    }
+
+    private void notifyBatterySaverChangeAirPlaneMode() {
+        Resources r = mContext.getResources();
+
+        Intent disIntent = new Intent();
+        disIntent.setClass(mContext, AirPlaneChangeMode.class);
+
+        Notification.Builder b = new Notification.Builder(mContext)
+            .setTicker(r.getString(R.string.battery_saver_airplane_ticker))
+            .setContentTitle(r.getString(R.string.battery_saver_enable_title))
+            .setContentText(r.getString(R.string.battery_saver_airplane_text))
+            .setSmallIcon(R.drawable.ic_qs_airplane_on)
+            .setWhen(System.currentTimeMillis())
+            .setAutoCancel(true)
+            .addAction(R.drawable.ic_qs_airplane_off,
+                     r.getString(R.string.battery_saver_disable),
+                     PendingIntent.getBroadcast(mContext, 0, disIntent,
+                        PendingIntent.FLAG_CANCEL_CURRENT));
+        mNotificationManager.notify(BATTERY_SAVER_NOTIFICATION_ID, b.build());
     }
 }

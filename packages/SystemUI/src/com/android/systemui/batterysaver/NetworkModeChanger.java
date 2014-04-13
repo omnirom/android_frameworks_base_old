@@ -18,9 +18,9 @@ package com.android.systemui.batterysaver;
 import android.content.Context;
 import android.content.res.Resources;
 import android.net.ConnectivityManager;
-import android.net.TrafficStats;
 import android.provider.Settings;
 import android.telephony.TelephonyManager;
+import android.util.Log;
 import android.widget.Toast;
 
 import com.android.systemui.R;
@@ -32,8 +32,6 @@ public class NetworkModeChanger extends ModeChanger {
     private int mDefaultMode;
     private ConnectivityManager mCM;
     private TelephonyManager mTM;
-    private long mTrafficBytes;
-    private final long TRAFFIC_BYTES_THRESHOLD = 5 * 1024 * 1024; // 5mb
 
     public NetworkModeChanger(Context context) {
         super(context);
@@ -44,10 +42,6 @@ public class NetworkModeChanger extends ModeChanger {
         mCM = cm;
         mTM = tm;
         mDefaultMode = getMode();
-    }
-
-    public void updateTraffic() {
-        mTrafficBytes = TrafficStats.getTotalRxBytes() + TrafficStats.getTotalTxBytes();
     }
 
     private String getNetworkType(int state, Resources r) {
@@ -76,9 +70,11 @@ public class NetworkModeChanger extends ModeChanger {
 
     private void setMode(int network) {
         if (!isSupported()) return;
-        Toast.makeText(mContext,
+        if (isShowToast()) {
+            Toast.makeText(mContext,
                   mResources.getString(R.string.battery_saver_change) + " "
                   + getNetworkType(network, mResources), Toast.LENGTH_SHORT).show();
+        }
         switch(network) {
             case Phone.NT_MODE_GLOBAL:
                 mTM.toggleMobileNetwork(Phone.NT_MODE_GLOBAL);
@@ -123,21 +119,15 @@ public class NetworkModeChanger extends ModeChanger {
     }
 
     @Override
-    public boolean isDelayChanges() {
-        final long traffic = TrafficStats.getTotalRxBytes() + TrafficStats.getTotalTxBytes();
-        return ((traffic - mTrafficBytes) > TRAFFIC_BYTES_THRESHOLD);
-    }
-
-    @Override
     public boolean isStateEnabled() {
         return true;
-    };
+    }
 
     @Override
     public boolean isSupported() {
         boolean isSupport = (mCM != null) ? mCM.isNetworkSupported(ConnectivityManager.TYPE_MOBILE) : false;
         return isModeEnabled() && isSupport;
-    };
+    }
 
     @Override
     public int getMode() {
@@ -159,10 +149,13 @@ public class NetworkModeChanger extends ModeChanger {
         if (isDelayChanges()) {
             // download/upload progress detected, delay changing mode
             changeModes(getNextMode(), true, false);
+            if (BatterySaverService.DEBUG) {
+                Log.i(BatterySaverService.TAG, " delayed network changing because traffic full ");
+            }
             return false;
         }
         return true;
-    };
+    }
 
     @Override
     public void setModes() {
@@ -172,7 +165,7 @@ public class NetworkModeChanger extends ModeChanger {
 
     @Override
     public boolean restoreState() {
-        if (isSupported()) {
+        if (isSupported() && (getMode() != mDefaultMode)) {
             setMode(mDefaultMode);
             return true;
         }

@@ -56,8 +56,13 @@ wn on the screen). [CHAR LIMIT=NONE] -->
     <string name="battery_saver_stop">Battery Saver Disabled</string>
     <string name="battery_saver_change">Battery Saver Change network to</string>
     <string name="battery_saver_network">Network restored</string>
-    <string name="battery_saver_wifi">Wifi restored</string>
-    <string name="battery_saver_all">All configuration restored</string>
     <string name="battery_saver_data">Mobile data restored</string>
+    <string name="battery_saver_wifi">Wi-Fi restored</string>
+    <string name="battery_saver_all">All configuration restored</string>
     <string name="battery_saver_no_changes">No configuration restored</string>
+    <string name="battery_saver_enable_ticker">Battery saver mode running...</string>
+    <string name="battery_saver_enable_title">Battery saver mode</string>
+    <string name="battery_saver_airplane_ticker">Airplane mode enabled by battery saver</string>
+    <string name="battery_saver_airplane_text">Airplane mode enabled by battery saver because there is no signal after 5 minutes</string>
+    <string name="battery_saver_disable">Disable</string>
 </resources>
