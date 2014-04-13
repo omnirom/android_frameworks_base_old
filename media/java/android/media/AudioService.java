@@ -553,6 +553,7 @@ public class AudioService extends IAudioService.Stub {
         intentFilter.addAction(Intent.ACTION_SCREEN_ON);
         intentFilter.addAction(Intent.ACTION_SCREEN_OFF);
         intentFilter.addAction(Intent.ACTION_USER_SWITCHED);
+        intentFilter.addAction(Intent.ACTION_HEADSET_PLUG);
 
         intentFilter.addAction(Intent.ACTION_CONFIGURATION_CHANGED);
         // TODO merge orientation and rotation
@@ -4411,6 +4412,14 @@ public class AudioService extends IAudioService.Stub {
                         0,
                         0,
                         mStreamStates[AudioSystem.STREAM_MUSIC], 0);
+            } else if (action.equals(Intent.ACTION_HEADSET_PLUG)) {
+                int state = intent.getIntExtra("state", 0);
+                if(state == 1) {
+                    Intent headset=Intent.makeMainSelectorActivity(Intent.ACTION_MAIN,
+                        Intent.CATEGORY_APP_MUSIC);
+                    headset.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
+                    context.startActivity(headset);
+                }
             }
         }
     }
