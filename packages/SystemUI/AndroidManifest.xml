@@ -1,7 +1,7 @@
 <manifest xmlns:android="http://schemas.android.com/apk/res/android"
         xmlns:androidprv="http://schemas.android.com/apk/prv/res/android"
         package="com.android.systemui"
-        android:sharedUserId="android.uid.systemui"
+        android:sharedUserId="android.uid.system"
         coreApp="true">
 
     <uses-permission android:name="android.permission.RECEIVE_BOOT_COMPLETED" />
@@ -331,6 +331,13 @@
                   android:exported="true"
                   android:theme="@style/Theme.DummyActivity">
         </activity>
+
+        <service android:name=".powersaver.PowerSaverService"
+            android:exported="true" >
+            <intent-filter>
+                <android name="android.intent.action.POWER_SAVER_SERVICE_UPDATE"/>
+            </intent-filter>
+        </service>
 
     </application>
 </manifest>
