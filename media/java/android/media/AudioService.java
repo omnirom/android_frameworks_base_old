@@ -88,6 +88,7 @@ import java.io.FileDescriptor;
 import java.io.FileInputStream;
 import java.io.InputStreamReader;
 import java.io.IOException;
+import java.net.URISyntaxException;
 import java.io.PrintWriter;
 import java.lang.reflect.Field;
 import java.util.ArrayList;
@@ -553,6 +554,7 @@ public class AudioService extends IAudioService.Stub {
         intentFilter.addAction(Intent.ACTION_SCREEN_ON);
         intentFilter.addAction(Intent.ACTION_SCREEN_OFF);
         intentFilter.addAction(Intent.ACTION_USER_SWITCHED);
+        intentFilter.addAction(Intent.ACTION_HEADSET_PLUG);
 
         intentFilter.addAction(Intent.ACTION_CONFIGURATION_CHANGED);
         // TODO merge orientation and rotation
@@ -4411,6 +4413,34 @@ public class AudioService extends IAudioService.Stub {
                         0,
                         0,
                         mStreamStates[AudioSystem.STREAM_MUSIC], 0);
+            } else if (action.equals(Intent.ACTION_HEADSET_PLUG)) {
+                // Only run when headset is inserted and is enabled at settings
+                int plugged = intent.getIntExtra("state", 0);
+                String headsetPlugIntenatUri = Settings.System.getStringForUser(
+                    mContext.getContentResolver(), Settings.System.HEADSET_PLUG_ENABLED, UserHandle.USER_CURRENT);
+
+                if(plugged != 1 || headsetPlugIntenatUri.equals("DISABLED")) {
+                    return;
+                }
+
+                Intent headsetPlugIntent = null;
+
+                if(headsetPlugIntenatUri != null) {
+                    try {
+                        headsetPlugIntent = Intent.parseUri(headsetPlugIntenatUri, 0);
+                    } catch (URISyntaxException e) {
+                        headsetPlugIntent = null;
+                    }
+
+                    if(headsetPlugIntent != null) {
+                        // TODO: Start selected app
+                    }
+                } else {
+                    headsetPlugIntent = Intent.makeMainSelectorActivity(Intent.ACTION_MAIN,
+                        Intent.CATEGORY_APP_MUSIC);
+                    headsetPlugIntent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
+                    context.startActivity(headsetPlugIntent);
+               }
             }
         }
     }
