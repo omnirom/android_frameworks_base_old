@@ -1,0 +1,21 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "8b77b57d_ddd08326",
+        "filename": "services/java/com/android/server/WiredAccessoryManager.java",
+        "patchSetId": 2
+      },
+      "lineNbr": 329,
+      "author": {
+        "id": 1000026
+      },
+      "writtenOn": "2014-04-14T11:56:46Z",
+      "side": 1,
+      "message": "whitespaces - please",
+      "revId": "dee98f4faaaa5b76303aa78a6524f087213dfbef",
+      "serverId": "56841c99-7c94-43d4-bf0b-cb4707e66d55",
+      "unresolved": false
+    }
+  ]
+}
