@@ -1,0 +1,21 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "8b77b57d_bdad872f",
+        "filename": "packages/Keyguard/src/com/android/keyguard/KeyguardViewManager.java",
+        "patchSetId": 33
+      },
+      "lineNbr": 198,
+      "author": {
+        "id": 1000026
+      },
+      "writtenOn": "2014-04-15T21:43:55Z",
+      "side": 1,
+      "message": "whats that for? why you disable it in that case?",
+      "revId": "cd770f49852ba729486fd4d04733bfa32dd1bfca",
+      "serverId": "56841c99-7c94-43d4-bf0b-cb4707e66d55",
+      "unresolved": false
+    }
+  ]
+}
