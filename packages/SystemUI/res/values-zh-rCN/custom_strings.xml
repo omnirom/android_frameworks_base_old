@@ -1,0 +1,132 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- Copyright (C) 2013 The OmniROM Project
+
+ This program is free software: you can redistribute it and/or modify
+ it under the terms of the GNU General Public License as published by
+ the Free Software Foundation, either version 2 of the License, or
+ (at your option) any later version.
+
+ This program is distributed in the hope that it will be useful,
+ but WITHOUT ANY WARRANTY; without even the implied warranty of
+ MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ GNU General Public License for more details.
+
+ You should have received a copy of the GNU General Public License
+ along with this program.  If not, see <http://www.gnu.org/licenses/>.
+
+-->
+<resources xmlns:xliff="urn:oasis:names:tc:xliff:document:1.2">
+    <!-- Quick Settings Wi-Fi Back Tile Tethering label -->
+    <string name="quick_settings_wifi_tethering_label">Wi-Fi网络共享</string>
+    <string name="quick_settings_wifi_tethering_off_label">网络共享已关闭</string>
+
+    <!-- Quick Settings Bluetooth Not Discoverable label -->
+    <string name="quick_settings_bluetooth_not_discoverable_label">不被发现</string>
+
+    <!-- Quick Settings Bluetooth Discoverable label -->
+    <string name="quick_settings_bluetooth_discoverable_label">可被发现</string>
+
+    <!-- Quick Settings Bluetooth Not Connected -->
+    <string name="quick_settings_bluetooth_enabled">启用</string>
+    <string name="quick_settings_bluetooth_disabled">禁用</string>
+
+    <!-- Quick Settings Bluetooth Number of Paired Devices -->
+    <string name="quick_settings_bluetooth_number_paired"><xliff:g id="number">%d</xliff:g> 个已配对的设备</string>
+
+    <!-- Screenrecord Notification Ticker -->
+    <string name="screenrecord_notif_ticker">屏幕正在被录制</string>
+
+    <!-- Screenrecord notification title -->
+    <string name="screenrecord_notif_title">正在录制屏幕</string>
+
+    <!-- Screenrecord notification action: Stop -->
+    <string name="screenrecord_notif_stop">停止</string>
+
+    <!-- Screenrecord notification action: Toggle pointer -->
+    <string name="screenrecord_notif_pointer">切换指针显示</string>
+
+    <!-- Screen record notification error title -->
+    <string name="screenrecord_notif_error">无法录制屏幕</string>
+
+    <!-- Active Display -->
+    <string name="active_display_privacy_content">因为隐私模式开启，无法显示消息内容</string>
+
+    <!-- QS Battery Tile -->
+    <string name="quick_settings_battery_charging">正在充电</string>
+    <string name="quick_settings_battery_discharging">正在放电</string>
+
+    <!-- QS NFC Tile -->
+    <string name="quick_settings_nfc_off">NFC 关闭</string>
+    <string name="quick_settings_nfc_on">NFC 打开</string>
+
+    <!-- QuickSettings: Immersive mode [CHAR LIMIT=NONE] -->
+    <string name="quick_settings_immersive_global_on_label">沉浸模式</string>
+    <!-- QuickSettings: Immersive mode (Off) [CHAR LIMIT=NONE] -->
+    <string name="quick_settings_immersive_global_off_label">沉浸模式已关闭</string>
+    <!-- QuickSettings: Immersive extra modes [CHAR LIMIT=NONE] -->
+    <string name="quick_settings_immersive_mode_off_label">禁用</string>
+    <string name="quick_settings_immersive_mode_full_label">全部隐藏</string>
+    <string name="quick_settings_immersive_mode_no_status_bar_label">显示导航栏</string>
+    <string name="quick_settings_immersive_mode_no_navigation_bar_label">显示状态栏</string>
+
+    <string name="network_4G">4G/LTE</string>
+    <string name="network_3G_only">仅3G</string>
+    <string name="network_3G_auto">2G/3G 自动</string>
+    <string name="network_3G">2G/3G 优先</string>
+    <string name="network_2G">仅2G</string>
+
+    <string name="quick_settings_battery_health_unknown">\n未知</string>
+    <string name="quick_settings_battery_health_good">\n良好</string>
+    <string name="quick_settings_battery_health_overheat">\n过热</string>
+    <string name="quick_settings_battery_health_dead">\n耗尽</string>
+    <string name="quick_settings_battery_health_over_voltage">\n过压</string>
+    <string name="quick_settings_battery_health_unspecified_failure">\n未知错误</string>
+    <string name="quick_settings_battery_health_cold">\n过冷</string>
+    <string name="quick_settings_battery_voltage_units">mV</string>
+    <string name="quick_settings_battery_temperature_units">\u00B0 C</string>
+    <string name="quick_settings_sleep_label_back_15">15秒</string>
+    <string name="quick_settings_sleep_label_back_30">30秒</string>
+    <string name="quick_settings_sleep_label_back_60">60秒</string>
+    <string name="quick_settings_sleep_label_back_120">2分钟</string>
+    <string name="quick_settings_sleep_label_back_300">5分钟</string>
+    <string name="quick_settings_sleep_label_back_600">10分钟</string>
+    <string name="quick_settings_sleep_label_back_1800">30分钟</string>
+    <string name="quick_settings_sleep_label_back_unknown">0000</string>
+    <string name="quick_settings_location_mode_high">准确度高</string>
+    <string name="quick_settings_location_mode_battery">耗电量低</string>
+    <string name="quick_settings_location_mode_sensors">仅限设备</string>
+    <string name="quick_settings_network_type">状态</string>
+    <string name="quick_settings_network_unknown">未知</string>
+    <string name="quick_settings_network_disable">\n无网络连接</string>
+    <string name="quick_settings_quiethours_label">安静时段</string>
+    <string name="quick_settings_quiethours_off_label">安静时段已关闭</string>
+    <string name="quick_settings_ringer_on">声音关闭</string>
+    <string name="quick_settings_ringer_off">声音开启</string>
+    <string name="quick_settings_ringer_normal">声音</string>
+    <string name="quick_settings_screen_sleep">立即休眠</string>
+    <string name="quick_settings_sync">自动同步</string>
+    <string name="quick_settings_sync_off">自动同步已关闭</string>
+    <string name="quick_settings_torch">手电筒</string>
+    <string name="quick_settings_torch_off">手电筒已关闭</string>
+    <string name="quick_settings_vibration_on">震动已开启</string>
+    <string name="quick_settings_vibration_off">震动已关闭</string>
+    <string name="quick_settings_volume">音量</string>
+    <string name="quick_settings_volume_status">状态</string>
+    <string name="quick_settings_usb_tether_off_label">未连接</string>
+    <string name="quick_settings_usb_tether_connected_label">网络共享已关闭</string>
+    <string name="quick_settings_usb_tether_on_label">正在分享网络</string>
+
+    <string name="status_bar_notification_hide_icon_packages">隐藏应用的通知图标</string>
+
+    <!-- Dialog title for navigation bar button selection -->
+    <string name="navbar_dialog_title">选择要分配的动作</string>
+    <string name="navbar_home_button">Home键</string>
+    <string name="navbar_recent_button">最近应用键</string>
+    <string name="navbar_search_button">搜索键</string>
+    <string name="navbar_back_button">返回键</string>
+    <string name="navbar_empty_button">空按键</string>
+    <string name="navbar_menu_conditional_button">菜单键（自动隐藏）</string>
+    <string name="navbar_menu_always_button">菜单键（总是显示）</string>
+    <string name="navbar_menu_big_button">菜单键</string>
+
+</resources>
