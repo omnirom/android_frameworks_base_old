@@ -6322,7 +6322,10 @@ public class PhoneWindowManager implements WindowManagerPolicy {
     private void handleOffscreenGesture(KeyEvent event, int keyCode, int result, boolean down) {
         switch (keyCode) {
             case KeyEvent.KEYCODE_F1:
-                // camera flip
+                // camera flip - nomulti-user here
+                if (Settings.System.getInt(mContext.getContentResolver(), Settings.System.OPPO_CAMERA_FLIP_ENABLED, 1) == 0){
+                    break;
+                }
             case KeyEvent.KEYCODE_F4:
                 // O gesture
                 if (down){
@@ -6388,6 +6391,10 @@ public class PhoneWindowManager implements WindowManagerPolicy {
             case KeyEvent.KEYCODE_F1:
                 // camera flip
                 if (down){
+                    // no multi-user here
+                    if (Settings.System.getInt(mContext.getContentResolver(), Settings.System.OPPO_CAMERA_FLIP_ENABLED, 1) == 0){
+                        break;
+                    }
                     if (DEBUG_INPUT){
                         Slog.d(TAG, "handleOnscreenGesture: " + "camera flip");
                     }
