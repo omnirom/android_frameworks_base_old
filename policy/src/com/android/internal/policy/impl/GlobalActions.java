@@ -28,13 +28,17 @@ import android.app.AlertDialog;
 import android.app.Dialog;
 import android.app.Profile;
 import android.app.ProfileManager;
+import android.content.ActivityNotFoundException;
 import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.ContentResolver;
 import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.IntentFilter;
+import android.content.pm.PackageManager;
+import android.content.pm.ThemeUtils;
 import android.content.pm.UserInfo;
+import android.content.pm.PackageManager.NameNotFoundException;
 import android.database.ContentObserver;
 import android.graphics.drawable.BitmapDrawable;
 import android.graphics.drawable.Drawable;
@@ -75,7 +79,6 @@ import android.widget.ImageView.ScaleType;
 import android.widget.ListView;
 import android.widget.TextView;
 
-import com.android.internal.app.ThemeUtils;
 import com.android.internal.util.amra.AmraActions;
 
 import java.util.ArrayList;
@@ -341,6 +344,18 @@ class GlobalActions implements DialogInterface.OnDismissListener, DialogInterfac
         final ContentResolver cr = mContext.getContentResolver();
         mItems = new ArrayList<Action>();
 
+        int quickbootAvailable = 1;
+        final PackageManager pm = mContext.getPackageManager();
+        try {
+            pm.getPackageInfo("com.qapp.quickboot", PackageManager.GET_META_DATA);
+        } catch (NameNotFoundException e) {
+            quickbootAvailable = 0;
+        }
+
+        final boolean quickbootEnabled = Settings.Global.getInt(
+                mContext.getContentResolver(), Settings.Global.ENABLE_QUICKBOOT,
+                quickbootAvailable) == 1;
+
         // first: power off
         mItems.add(
             new SinglePressAction(
@@ -348,8 +363,20 @@ class GlobalActions implements DialogInterface.OnDismissListener, DialogInterfac
                     R.string.global_action_power_off) {
 
                 public void onPress() {
+                    // goto quickboot mode
+                    if (quickbootEnabled) {
+                        startQuickBoot();
+                        return;
+                    }
+
                     // shutdown by making sure radio and power are handled accordingly.
                     mWindowManagerFuncs.shutdown(true);
+                }
+
+                public boolean onLongPress() {
+                    // long press always does a full shutdown in case quickboot is enabled
+                    mWindowManagerFuncs.shutdown(true);
+                    return true;
                 }
 
                 public boolean showDuringKeyguard() {
@@ -1565,6 +1592,16 @@ class GlobalActions implements DialogInterface.OnDismissListener, DialogInterfac
                 mContext.getContentResolver(),
                 Settings.System.EXPANDED_DESKTOP_STATE,
                 on ? 1 : 0, UserHandle.USER_CURRENT);
+    }
+
+    private void startQuickBoot() {
+
+        Intent intent = new Intent("org.codeaurora.action.QUICKBOOT");
+        intent.putExtra("mode", 0);
+        try {
+            mContext.startActivityAsUser(intent,UserHandle.CURRENT);
+        } catch (ActivityNotFoundException e) {
+        }
     }
 
     private static final class GlobalActionsDialog extends Dialog implements DialogInterface {

@@ -20,4 +20,7 @@
 <com.android.systemui.slimrecent.RecentImageView
     xmlns:android="http://schemas.android.com/apk/res/android"
     android:id="@+id/card_thumbnail_image"
-    style="@style/card.card_header_app_icon"/>
+    android:scaleType="centerCrop"
+    android:layout_width="@dimen/recent_app_icon_size"
+    android:layout_height="@dimen/recent_app_icon_size"
+    style="@style/card_thumbnail_image"/>

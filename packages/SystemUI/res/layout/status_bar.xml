@@ -24,7 +24,8 @@
     xmlns:systemui="http://schemas.android.com/apk/res/com.android.systemui"
     android:id="@+id/status_bar"
     android:background="@drawable/system_bar_background"
-    android:orientation="vertical"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
     android:focusable="true"
     android:descendantFocusability="afterDescendants"
     android:fitsSystemWindows="true"
@@ -78,6 +79,7 @@
 
             <com.android.systemui.statusbar.policy.NetworkTraffic
                 android:id="@+id/networkTraffic"
+                android:textAppearance="@style/TextAppearance.StatusBar.Traffic"
                 android:layout_width="wrap_content"
                 android:layout_height="match_parent"
                 android:singleLine="false"

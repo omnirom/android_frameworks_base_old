@@ -413,6 +413,8 @@ public class KeyguardViewManager {
                 } else if (action == KeyEvent.ACTION_UP) {
                     if (handleKeyUp(keyCode, event)) {
                         return true;
+                    } else if (keyCode == KeyEvent.KEYCODE_HOME && mKeyguardView.handleHomeKey()) {
+                        return true;
                     }
                 }
                 // Always process media keys, regardless of focus
@@ -731,6 +733,8 @@ public class KeyguardViewManager {
         } else {
             mWindowLayoutParams.flags &= ~WindowManager.LayoutParams.FLAG_SHOW_WALLPAPER;
         }
+        mWindowLayoutParams.format = show ? PixelFormat.TRANSLUCENT : PixelFormat.OPAQUE;
+
         mViewManager.updateViewLayout(mKeyguardHost, mWindowLayoutParams);
     }
 
@@ -779,12 +783,17 @@ public class KeyguardViewManager {
         if (DEBUG) Log.d(TAG, "onScreenTurnedOn()");
         mScreenOn = true;
 
-        // If keyguard is not showing, we need to inform PhoneWindowManager with a null
-        // token so it doesn't wait for us to draw...
-        final IBinder token = isShowing() ? mKeyguardHost.getWindowToken() : null;
+        final IBinder token;
 
-        if (DEBUG && token == null) Slog.v(TAG, "send wm null token: "
-                + (mKeyguardHost == null ? "host was null" : "not showing"));
+        // If keyguard is disabled or not showing, we need to inform PhoneWindowManager with a null
+        // token so it doesn't wait for us to draw...
+        final boolean disabled =
+                mLockPatternUtils.isLockScreenDisabled() && !mLockPatternUtils.isSecure();
+        if (!isShowing() || disabled) {
+            token = null;
+        } else {
+            token = mKeyguardHost.getWindowToken();
+        }
 
         if (mKeyguardView != null) {
             mKeyguardView.onScreenTurnedOn();
@@ -904,6 +913,10 @@ public class KeyguardViewManager {
         if (mKeyguardView != null) {
             mKeyguardView.dispatch(event);
         }
+    }
+
+    public void dispatchButtonClick(int buttonId) {
+        mNotificationView.onButtonClick(buttonId);
     }
 
     public void launchCamera() {

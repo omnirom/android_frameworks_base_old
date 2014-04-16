@@ -57,6 +57,7 @@ import java.util.HashSet;
  */
 final class ActivityRecord {
     static final String TAG = ActivityManagerService.TAG;
+    static final String TAG_TIMELINE = "Timeline";
     static final boolean DEBUG_SAVED_STATE = ActivityStackSupervisor.DEBUG_SAVED_STATE;
     final public static String RECENTS_PACKAGE_NAME = "com.android.systemui.recent";
 
@@ -929,7 +930,7 @@ final class ActivityRecord {
                 service.scheduleAppGcsLocked();
             }
         }
-        Log.i(ActivityManagerService.TAG, "Timeline: Activity_windows_visible id: "
+        Log.i(TAG_TIMELINE, "Timeline: Activity_windows_visible id: "
                 + this + " time:" + SystemClock.uptimeMillis());
     }
 
@@ -944,8 +945,8 @@ final class ActivityRecord {
         // for another app to start, then we have paused dispatching
         // for this activity.
         ActivityRecord r = this;
-        final ActivityStack stack = task.stack;
         if (r.waitingVisible) {
+            final ActivityStack stack = mStackSupervisor.getFocusedStack();
             // Hmmm, who might we be waiting for?
             r = stack.mResumedActivity;
             if (r == null) {

@@ -22,25 +22,31 @@ public class GPSTile extends QuickSettingsTile implements LocationSettingsChange
     ContentResolver mContentResolver;
     private LocationController mLocationController;
     private int mCurrentMode;
+    private boolean mLocationEnabled;
+    private int mLocationMode;
 
-    public GPSTile(Context context, QuickSettingsController qsc) {
+    public GPSTile(Context context, QuickSettingsController qsc, LocationController lc) {
         super(context, qsc);
 
         mContentResolver = mContext.getContentResolver();
         mLocationController = new LocationController(mContext);
         mLocationController.addSettingsChangedCallback(this);
+        mLocationMode = mLocationController.getLocationMode();
+        mLocationEnabled = mLocationController.isLocationEnabled();
 
         mOnClick = new OnClickListener() {
             @Override
             public void onClick(View v) {
-                changeLocationMode();
+                mLocationController.setLocationEnabled(!mLocationEnabled);
             }
         };
 
         mOnLongClick = new OnLongClickListener() {
             @Override
             public boolean onLongClick(View v) {
-                startSettingsActivity(Settings.ACTION_LOCATION_SOURCE_SETTINGS);
+                if (mLocationEnabled) {
+                    mLocationController.switchLocationMode(mLocationMode);
+                }
                 return true;
             }
         };
@@ -49,7 +55,7 @@ public class GPSTile extends QuickSettingsTile implements LocationSettingsChange
     private void changeLocationMode(){
         int newMode;
 
-        switch(mCurrentMode){
+        switch(mLocationMode){
         case Settings.Secure.LOCATION_MODE_BATTERY_SAVING:
             newMode = Settings.Secure.LOCATION_MODE_HIGH_ACCURACY;
             break;
@@ -79,6 +85,12 @@ public class GPSTile extends QuickSettingsTile implements LocationSettingsChange
     }
 
     @Override
+    public void onDestroy() {
+        super.onDestroy();
+        mLocationController.removeSettingsChangedCallback(this);
+    }
+
+    @Override
     public void updateResources() {
         updateTile();
         updateQuickSettings();
@@ -86,7 +98,7 @@ public class GPSTile extends QuickSettingsTile implements LocationSettingsChange
 
     private synchronized void updateTile() {
         int textResId;
-        switch(mCurrentMode) {
+        switch(mLocationMode) {
         case Settings.Secure.LOCATION_MODE_SENSORS_ONLY:
             textResId = R.string.location_mode_sensors_only_title;
             mDrawable = R.drawable.ic_qs_location_on;
@@ -108,9 +120,17 @@ public class GPSTile extends QuickSettingsTile implements LocationSettingsChange
     }
 
     @Override
-    public void onLocationSettingsChanged(boolean locationEnabled) {
-        mCurrentMode = Settings.Secure.getInt(mContext.getContentResolver(),
-                Settings.Secure.LOCATION_MODE, Settings.Secure.LOCATION_MODE_OFF);
+    public void onLocationSettingsChanged(boolean locationEnabled, int locationMode) {
+        // collapse all panels in case the confirmation dialog needs to show up
+        if ((mLocationMode == Settings.Secure.LOCATION_MODE_SENSORS_ONLY
+                        && locationMode == Settings.Secure.LOCATION_MODE_HIGH_ACCURACY)
+                || (!mLocationEnabled && locationEnabled
+                        && (locationMode == Settings.Secure.LOCATION_MODE_HIGH_ACCURACY
+                        || locationMode == Settings.Secure.LOCATION_MODE_BATTERY_SAVING))) {
+            
+        }
+        mLocationMode = locationMode;
+        mLocationEnabled = locationEnabled;
         updateResources();
     }
 }

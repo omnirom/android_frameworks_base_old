@@ -71,18 +71,18 @@
     <color name="pie_outline_color">#ff5c5c5c</color>
 
     <!-- Slim recent -->
-    <color name="recent_background">#B2000000</color>
+    <color name="recent_background">#F0000000</color>
 	<color name="recent_bottom_start">#ff494949</color>
 	<color name="recent_bottom_end">#ff292929</color>
 
     <!-- Card Color -->
-    <color name="card_background">#ff000000</color>
-    <color name="card_background_header">#ff000000</color>
-    <color name="card_backgroundExpand">#ff000000</color>
+    <color name="card_background">#ff1c1c1c</color>
+    <color name="card_background_header">#ff1c1c1c</color>
+    <color name="card_backgroundExpand">#ff252525</color>
 
     <color name="card_text_color_header">#ffffffff</color>
 
     <!-- Used by selector -->
-    <color name="card_pressed">#7e3c3c3c</color>
+    <color name="card_pressed">#7ef5f5f5</color>
 
 </resources>

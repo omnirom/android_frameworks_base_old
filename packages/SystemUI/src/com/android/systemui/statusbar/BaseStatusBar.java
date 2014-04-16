@@ -697,6 +697,9 @@ public abstract class BaseStatusBar extends SystemUI implements
     }
 
     @Override
+    public void setButtonDrawable(int buttonId, int iconId) {}
+
+    @Override
     public void toggleScreenshot() {
         int msg = MSG_TOGGLE_SCREENSHOT;
         mHandler.removeMessages(msg);
@@ -1181,6 +1184,9 @@ public abstract class BaseStatusBar extends SystemUI implements
     }
 
     protected void addNotificationViews(NotificationData.Entry entry) {
+        if (entry == null) {
+            return;
+        }
         // Add the expanded view and icon.
         int pos = mNotificationData.add(entry);
         if (DEBUG) {

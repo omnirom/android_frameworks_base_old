@@ -83,6 +83,14 @@ public class WallpaperCropActivity extends Activity {
         }
     }
 
+    @Override
+    protected void onDestroy() {
+        super.onDestroy();
+        if (mCropView != null) {
+            mCropView.destroy();
+        }
+    }
+
     protected void init() {
         setContentView(R.layout.wallpaper_cropper);
 
@@ -634,6 +642,14 @@ public class WallpaperCropActivity extends Activity {
                         mCropBounds.bottom /= scaleDownSampleSize;
                         mCropBounds.right /= scaleDownSampleSize;
                         mCropBounds.roundOut(roundedTrueCrop);
+                        if (roundedTrueCrop.right > mCropBounds.right) {
+                            roundedTrueCrop.set(roundedTrueCrop.left, roundedTrueCrop.top,
+                                    (int) mCropBounds.right, roundedTrueCrop.bottom);
+                        }
+                        if (roundedTrueCrop.bottom > mCropBounds.bottom) {
+                            roundedTrueCrop.set(roundedTrueCrop.left, roundedTrueCrop.top,
+                                    roundedTrueCrop.right, (int) mCropBounds.bottom);
+                        }
 
                         crop = Bitmap.createBitmap(fullSize, roundedTrueCrop.left,
                                 roundedTrueCrop.top, roundedTrueCrop.width(),
