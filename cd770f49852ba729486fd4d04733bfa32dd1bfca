@@ -2,6 +2,23 @@
   "comments": [
     {
       "key": {
+        "uuid": "8b77b57d_4023a6a7",
+        "filename": "packages/Keyguard/src/com/android/keyguard/KeyguardViewManager.java",
+        "patchSetId": 33
+      },
+      "lineNbr": 197,
+      "author": {
+        "id": 1000026
+      },
+      "writtenOn": "2014-04-16T15:15:45Z",
+      "side": 1,
+      "message": "Its is extremely confusing that changing a setting is changing another setting \"under the hood\" here. You must do such stuff only from the settings app but not in a ContentObserver. So whats the issue with lockscreen rotation and see-through? Why is it not working?",
+      "revId": "cd770f49852ba729486fd4d04733bfa32dd1bfca",
+      "serverId": "56841c99-7c94-43d4-bf0b-cb4707e66d55",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "8b77b57d_bdad872f",
         "filename": "packages/Keyguard/src/com/android/keyguard/KeyguardViewManager.java",
         "patchSetId": 33
