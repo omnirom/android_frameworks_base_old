@@ -4217,32 +4217,6 @@ public final class Settings {
          */
         public static final String QUIET_HOURS_HAPTIC = "quiet_hours_haptic";
 
-       /**
-        * Whether power saver is enabled
-         * @hide
-         */
-        public static final String POWER_SAVER_ENABLED = "power_saver_enabled";
-
-        /**
-         * @hide
-         */
-        public static final String POWER_SAVER_CPU = "power_saver_cpu";
-
-        /**
-         * @hide
-         */
-        public static final String POWER_SAVER_CPU_DEFAULT = "power_saver_cpu_default";
-
-        /**
-         * @hide
-         */
-        public static final String POWER_SAVER_GPS = "power_saver_gps";
-
-        /**
-         * @hide
-         */
-        public static final String POWER_SAVER_MOBILE_DATA = "power_saver_mobile_data";
-
         /**
          * Whether to remove the system sounds during quiet hours.
          * @hide
