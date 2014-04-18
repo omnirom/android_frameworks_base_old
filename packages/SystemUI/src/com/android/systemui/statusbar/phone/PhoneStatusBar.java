@@ -171,9 +171,6 @@ public class PhoneStatusBar extends BaseStatusBar implements DemoMode,
     public static final String ACTION_STATUSBAR_START
             = "com.android.internal.policy.statusbar.START";
 
-    public static final String MODLOCK_STATE
-             = "com.android.keyguard.modlock.STATE";
-
     private static final int MSG_OPEN_NOTIFICATION_PANEL = 1000;
     private static final int MSG_CLOSE_PANELS = 1001;
     private static final int MSG_OPEN_SETTINGS_PANEL = 1002;
@@ -248,7 +245,6 @@ public class PhoneStatusBar extends BaseStatusBar implements DemoMode,
 
     // left-hand icons
     LinearLayout mStatusIcons;
-
     // the icons themselves
     IconMerger mNotificationIcons;
     // [+>
@@ -472,12 +468,6 @@ public class PhoneStatusBar extends BaseStatusBar implements DemoMode,
         }
 
         @Override
-        public void onChange(boolean selfChange) {
-            updateSettings();
-        }
-
-        // Used for notification drawer background
-        @Override
         public void onChange(boolean selfChange, Uri uri) {
             super.onChange(selfChange, uri);
 
@@ -601,10 +591,6 @@ public class PhoneStatusBar extends BaseStatusBar implements DemoMode,
         }
 
         mCurrUiThemeMode = mContext.getResources().getConfiguration().uiThemeMode;
-        mLocationController = new LocationController(mContext);
-        mBatteryController = new BatteryController(mContext);
-        mDockBatteryController = new DockBatteryController(mContext);
-        mBluetoothController = new BluetoothController(mContext);
 
         super.start(); // calls createAndAddWindows()
 
@@ -796,10 +782,12 @@ public class PhoneStatusBar extends BaseStatusBar implements DemoMode,
 
         updateShowSearchHoldoff();
 
-        if (mNavigationBarView == null) {
-            mNavigationBarView =
-                (NavigationBarView) View.inflate(context, R.layout.navigation_bar, null);
-        }
+        try {
+            boolean showNav = mWindowManagerService.hasNavigationBar();
+            if (DEBUG) Log.v(TAG, "hasNavigationBar=" + showNav);
+            if (showNav && !mRecreating) {
+                mNavigationBarView =
+                    (NavigationBarView) View.inflate(context, R.layout.navigation_bar, null);
 
                 mNavigationBarView.setDisabledFlags(mDisabled);
                 mNavigationBarView.setBar(this);
@@ -827,11 +815,11 @@ public class PhoneStatusBar extends BaseStatusBar implements DemoMode,
 
         mSystemIconArea = (LinearLayout) mStatusBarView.findViewById(R.id.system_icon_area);
         mStatusIcons = (LinearLayout)mStatusBarView.findViewById(R.id.statusIcons);
-        mStatusBarContents = (LinearLayout)mStatusBarView.findViewById(R.id.status_bar_contents);
-        mCenterClockLayout = (LinearLayout)mStatusBarView.findViewById(R.id.center_clock_layout);
         mNotificationIcons = (IconMerger)mStatusBarView.findViewById(R.id.notificationIcons);
         mMoreIcon = mStatusBarView.findViewById(R.id.moreIcon);
         mNotificationIcons.setOverflowIndicator(mMoreIcon);
+        mStatusBarContents = (LinearLayout)mStatusBarView.findViewById(R.id.status_bar_contents);
+        mCenterClockLayout = (LinearLayout)mStatusBarView.findViewById(R.id.center_clock_layout);
         mTickerView = mStatusBarView.findViewById(R.id.ticker);
 
         mPile = (NotificationRowLayout)mStatusBarWindow.findViewById(R.id.latestItems);
@@ -1606,7 +1594,7 @@ public class PhoneStatusBar extends BaseStatusBar implements DemoMode,
     }
 
     @Override
-    public void updateNotificationIcons() {
+    protected void updateNotificationIcons() {
         if (mNotificationIcons == null) return;
 
         loadNotificationShade();
@@ -1777,7 +1765,7 @@ public class PhoneStatusBar extends BaseStatusBar implements DemoMode,
                 && mFlipSettingsView.getVisibility() == View.VISIBLE
                 && mScrollView.getVisibility() != View.VISIBLE) {
             // the flip settings panel is unequivocally showing; we should not be shown
-            mClearButton.setVisibility(View.GONE);
+            mClearButton.setVisibility(View.INVISIBLE);
         } else if (mClearButton.isShown()) {
             if (clearable != (mClearButton.getAlpha() == 1.0f)) {
                 ObjectAnimator clearAnimation = ObjectAnimator.ofFloat(
@@ -1786,7 +1774,7 @@ public class PhoneStatusBar extends BaseStatusBar implements DemoMode,
                     @Override
                     public void onAnimationEnd(Animator animation) {
                         if (mClearButton.getAlpha() <= 0.0f) {
-                            mClearButton.setVisibility(View.GONE);
+                            mClearButton.setVisibility(View.INVISIBLE);
                         }
                     }
 
@@ -2895,7 +2883,8 @@ public class PhoneStatusBar extends BaseStatusBar implements DemoMode,
         @Override
         public void run() {
             checkBarModes();
-        }};
+        }
+    };
 
     @Override
     public void setInteracting(int barWindow, boolean interacting) {
@@ -3433,12 +3422,6 @@ public class PhoneStatusBar extends BaseStatusBar implements DemoMode,
                     }
                 }
             }
-            else if (MODLOCK_STATE.equals(action)) {
-                boolean showing = intent.getBooleanExtra("showing", false);
-                if (null != mNavigationBarView) {
-                    mNavigationBarView.getBarTransitions().applyTransparent(showing);
-                }
-            }
         }
     };
 
@@ -3472,7 +3455,7 @@ public class PhoneStatusBar extends BaseStatusBar implements DemoMode,
     }
 
     private void updateSettings() {
-        ContentResolver resolver = mContext.getContentResolver();
+        final ContentResolver resolver = mContext.getContentResolver();
         int autoBrightnessSetting = Settings.System.getIntForUser(
                 resolver, Settings.System.SCREEN_BRIGHTNESS_MODE, 0, mCurrentUserId);
 
@@ -3620,6 +3603,7 @@ public class PhoneStatusBar extends BaseStatusBar implements DemoMode,
         mNotificationData.clear();
 
         makeStatusBarView();
+
         repositionNavigationBar();
         if (mNavigationBarView != null) {
             mNavigationBarView.updateResources();
@@ -3711,7 +3695,7 @@ public class PhoneStatusBar extends BaseStatusBar implements DemoMode,
             R.dimen.status_bar_icon_padding);
 
         if (newIconHPadding != mIconHPadding || newIconSize != mIconSize) {
-            //Log.d(TAG, "size=" + newIconSize + " padding=" + newIconHPadding);
+//            Log.d(TAG, "size=" + newIconSize + " padding=" + newIconHPadding);
             mIconHPadding = newIconHPadding;
             mIconSize = newIconSize;
             //reloadAllNotificationIcons(); // reload the tray
