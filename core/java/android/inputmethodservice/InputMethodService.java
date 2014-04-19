@@ -31,8 +31,11 @@ import android.graphics.Rect;
 import android.graphics.Region;
 import android.os.Bundle;
 import android.os.Handler;
+import android.os.UserHandle;
 import android.os.IBinder;
+import android.os.RemoteException;
 import android.os.ResultReceiver;
+import android.os.ServiceManager;
 import android.os.SystemClock;
 import android.provider.Settings;
 import android.text.InputType;
@@ -69,6 +72,8 @@ import android.view.inputmethod.InputMethodSubtype;
 import android.widget.Button;
 import android.widget.FrameLayout;
 import android.widget.LinearLayout;
+
+import com.android.internal.statusbar.IStatusBarService;
 
 import com.android.internal.util.amra.AwesomeAnimationHelper;
 
@@ -326,7 +331,12 @@ public class InputMethodService extends AbstractInputMethodService {
     int mStatusIcon;
     int mBackDisposition;
 
+
+    boolean mForcedAutoRotate;
     Handler mHandler;
+
+    private IStatusBarService mStatusBarService;
+    private Object mServiceAquireLock = new Object();
 
     private Window mWindowIme;
     private int mAnimationDuration;
@@ -453,6 +463,7 @@ public class InputMethodService extends AbstractInputMethodService {
             if (DEBUG) Log.v(TAG, "unbindInput(): binding=" + mInputBinding
                     + " ic=" + mInputConnection);
             onUnbindInput();
+	    mInputStarted = false;
             mInputBinding = null;
             mInputConnection = null;
         }
@@ -792,6 +803,8 @@ public class InputMethodService extends AbstractInputMethodService {
         mCandidatesVisibility = getCandidatesHiddenVisibility();
         mCandidatesFrame.setVisibility(mCandidatesVisibility);
         mInputFrame.setVisibility(View.GONE);
+
+	mHandler = new Handler();
     }
 
     @Override
@@ -959,7 +972,16 @@ public class InputMethodService extends AbstractInputMethodService {
      * is currently running in fullscreen mode.
      */
     public void updateFullscreenMode() {
-        boolean isFullscreen = mShowInputRequested && onEvaluateFullscreenMode();
+        boolean fullScreenOverride = Settings.System.getIntForUser(getContentResolver(),
+                Settings.System.DISABLE_FULLSCREEN_KEYBOARD, 0,
+                UserHandle.USER_CURRENT_OR_SELF) != 0;
+        int mHaloEnabled = (Settings.System.getInt(getContentResolver(), Settings.System.HALO_ENABLED, 0));
+        boolean isFullscreen;
+        if (fullScreenOverride) {
+            isFullscreen = false;
+        } else {
+            isFullscreen = (mHaloEnabled != 1) ? (onEvaluateFullscreenMode() || onEvaluateSplitView()) : mShowInputRequested && onEvaluateFullscreenMode();
+        }
         boolean changed = mLastShowInputRequested != mShowInputRequested;
         if (mIsFullscreen != isFullscreen || !mFullscreenApplied) {
             changed = true;
@@ -1054,6 +1076,21 @@ public class InputMethodService extends AbstractInputMethodService {
             return false;
         }
         return true;
+    }
+    
+    public boolean onEvaluateSplitView() {
+        if (mCandidatesFrame.getChildCount() > 0) {
+            Context candidateContext = mCandidatesFrame.getChildAt(0).getContext();
+            if (candidateContext instanceof Activity) {
+                return ((Activity) candidateContext).isSplitView();
+            } else {
+                Log.e("XPLOD", "NOT ACTIVITY");
+                return false;
+            }
+        } else {
+            Log.e("XPLOD", "NO CHILD");
+            return false;
+        }
     }
 
     /**
@@ -2311,6 +2348,16 @@ public class InputMethodService extends AbstractInputMethodService {
             ic.performContextMenuAction(id);
         }
         return true;
+    }
+
+    IStatusBarService getStatusBarService() {
+        synchronized (mServiceAquireLock) {
+            if (mStatusBarService == null) {
+                mStatusBarService = IStatusBarService.Stub.asInterface(
+                        ServiceManager.getService("statusbar"));
+            }
+            return mStatusBarService;
+        }
     }
 
     /**
