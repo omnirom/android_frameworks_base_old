@@ -3063,7 +3063,7 @@ public final class Settings {
          */
         public static final String IMMERSIVE_MODE = "immersive_mode";
 
-        /*
+        /**
          * return value last immersive mode
          * @hide
          */
