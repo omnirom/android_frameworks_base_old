@@ -54,7 +54,4 @@
         <item quantity="one">This file will be permanently deleted!</item>
         <item quantity="other">This will permanently delete the %d files selected!</item>
     </plurals>
-
-    <string name="ok">OK</string>
-    <string name="cancel">Cancel</string>
 </resources>
