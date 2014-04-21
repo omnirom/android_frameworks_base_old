@@ -18,9 +18,6 @@
     <string name="title_standalone">Fichiers</string>
     <string name="toast_success_delete">Fichiers supprimés</string>
     <string name="dialog_delete_confirm_title">Supprimer le(s) fichier(s)\u00A0?</string>
-    <string name="menu_copy">Copier</string>
-    <string name="menu_cut">Couper</string>
-    <string name="menu_paste">Coller</string>
     <plurals name="files_copied">
         <item quantity="one">Le fichier a été copié dans le presse-papier</item>
         <item quantity="other">%d fichiers ont été copiés dans le presse-papier</item>
