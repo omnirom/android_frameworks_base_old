@@ -24,14 +24,6 @@
     <!-- Title of the Delete confirmation dialog -->
     <string name="dialog_delete_confirm_title">¿Seguro que quiere borrar los archivos?</string>
 
-    <!-- Menu item title that copies the selected documents [CHAR LIMIT=24] -->
-    <string name="menu_copy">Copiar</string>
-    <!-- Menu item title that cuts the selected documents [CHAR LIMIT=24] -->
-    <string name="menu_cut">Mover</string>
-    <!-- Menu item title that pastes the selected documents [CHAR LIMIT=24] -->
-    <string name="menu_paste">Pegar</string>
-
-
     <!-- Text shown in a toast when the user copies files -->
     <plurals name="files_copied">
         <item quantity="one">El archivo se ha copiado al portapapeles</item>
