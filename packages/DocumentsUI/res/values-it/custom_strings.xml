@@ -24,14 +24,6 @@
     <!-- Title of the Delete confirmation dialog -->
     <string name="dialog_delete_confirm_title">Eliminare i file?</string>
 
-    <!-- Menu item title that copies the selected documents [CHAR LIMIT=24] -->
-    <string name="menu_copy">Copia</string>
-    <!-- Menu item title that cuts the selected documents [CHAR LIMIT=24] -->
-    <string name="menu_cut">Taglia</string>
-    <!-- Menu item title that pastes the selected documents [CHAR LIMIT=24] -->
-    <string name="menu_paste">Incolla</string>
-
-
     <!-- Text shown in a toast when the user copies files -->
     <plurals name="files_copied">
         <item quantity="one">Il file è stato messo nella clipboard</item>
