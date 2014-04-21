@@ -78,6 +78,9 @@
 
     <!-- Keyguard -->
     <uses-permission android:name="android.permission.CONTROL_KEYGUARD" />
+ 
+    <!--Halo-->
+    <uses-permission android:name="android.permission.SYSTEM_ALERT_WINDOW"/>
 
     <!-- Active display -->
     <uses-permission android:name="android.permission.SYSTEM_NOTIFICATION_LISTENER" />
@@ -331,6 +334,9 @@
                   android:exported="true"
                   android:theme="@style/Theme.DummyActivity">
         </activity>
+
+        <activity android:name="com.android.systemui.Transparent"
+            android:theme="@android:style/Theme.Translucent.NoTitleBar" />
 
     </application>
 </manifest>

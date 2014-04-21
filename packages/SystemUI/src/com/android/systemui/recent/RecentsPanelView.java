@@ -1030,7 +1030,14 @@ public class RecentsPanelView extends RelativeLayout implements OnItemClickListe
         final PopupMenu popup =
             new PopupMenu(mContext, anchorView == null ? selectedView : anchorView);
         mPopup = popup;
-        popup.getMenuInflater().inflate(R.menu.recent_popup_menu, popup.getMenu());
+
+	int mHaloEnabled = (Settings.System.getInt(mContext.getContentResolver(), Settings.System.HALO_ENABLED, 0));
+
+	if(mHaloEnabled != 1){
+        	popup.getMenuInflater().inflate(R.menu.recent_popup_menu_split, popup.getMenu());
+	}else{
+		popup.getMenuInflater().inflate(R.menu.recent_popup_menu, popup.getMenu());
+	}
 
         final ContentResolver cr = mContext.getContentResolver();
         if (Settings.Secure.getInt(cr,
