@@ -48,6 +48,9 @@
             android:id="@+id/datetime"
             android:layout_width="wrap_content"
             android:layout_height="match_parent"
+        	android:paddingStart="8dp"
+        	android:paddingEnd="4dp"
+        	android:background="@drawable/ic_notify_button_bg"
             android:enabled="false"
             >
             <com.android.systemui.statusbar.policy.ClockStock
@@ -75,24 +78,52 @@
                 />
         </RelativeLayout>
 
-        <Space
-            android:layout_width="0dp"
-            android:layout_height="0dp"
-            android:layout_weight="1"
-            />
+    <ImageView
+        android:id="@+id/spacer"
+        android:layout_width="2dp"
+        android:layout_height="30dp"
+        android:layout_marginTop="5dp"
+        android:layout_marginBottom="5dp"
+        android:layout_marginEnd="5dp"
+        android:layout_marginStart="5dp"
+        android:background="@android:drawable/divider_horizontal_dark"
+        />
 
+    <LinearLayout
+        android:id="@+id/reminder"
+        android:layout_width="wrap_content"
+        android:layout_height="match_parent"
+        android:paddingStart="4dp"
+        android:paddingEnd="4dp"
+        android:background="@drawable/ic_notify_button_bg"
+        android:orientation="vertical"
+        >
         <TextView
-            android:id="@+id/header_debug_info"
-            android:visibility="invisible"
+            android:id="@+id/title"
+            android:paddingTop="8dp"
+            android:paddingBottom="1dp"
+            android:textAllCaps="true"
+            android:textSize="12dp"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:layout_gravity="center_vertical"
-            android:fontFamily="sans-serif-condensed"
-            android:textSize="11dp"
-            android:textStyle="bold"
-            android:textColor="#00A040"
-            android:padding="2dp"
+            android:singleLine="true"
             />
+        <ViewFlipper
+            android:id="@+id/message"
+            android:inAnimation="@anim/reminder_fade_in"
+            android:outAnimation="@anim/reminder_fade_out"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:singleLine="true"
+            android:paddingBottom="8dp"
+            />
+    </LinearLayout>
+
+    <Space
+        android:layout_width="0dp"
+        android:layout_height="0dp"
+        android:layout_weight="1"
+        />
 
         <TextView
             android:id="@+id/header_debug_info"
