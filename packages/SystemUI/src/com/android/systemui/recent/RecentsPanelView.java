@@ -1019,6 +1019,14 @@ public class RecentsPanelView extends RelativeLayout implements OnItemClickListe
                     Log.e(TAG, "Recents does not have the permission to launch " + intent, e);
                 }
             }
+
+	    /** notify split view layout changes **/
+            try {
+                ActivityManagerNative.getDefault().notifySplitViewLayoutChanged();
+            } catch (RemoteException e) {
+                Log.e(TAG, "Could not notify split view layout", e);
+            }
+
         } else {
             throw new IllegalStateException("Oops, no tag on view to split!");
         }
