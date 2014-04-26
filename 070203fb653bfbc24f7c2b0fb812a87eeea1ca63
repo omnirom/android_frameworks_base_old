@@ -1,0 +1,89 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "8b77b57d_ee56635f",
+        "filename": "packages/SystemUI/res/values-zh-rCN/custom_strings.xml",
+        "patchSetId": 1
+      },
+      "lineNbr": 63,
+      "author": {
+        "id": 1000032
+      },
+      "writtenOn": "2014-04-26T21:22:20Z",
+      "side": 1,
+      "message": "觉得这改成全屏模式更好一点",
+      "revId": "070203fb653bfbc24f7c2b0fb812a87eeea1ca63",
+      "serverId": "56841c99-7c94-43d4-bf0b-cb4707e66d55",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "8b77b57d_0e547f55",
+        "filename": "packages/SystemUI/res/values-zh-rCN/custom_strings.xml",
+        "patchSetId": 1
+      },
+      "lineNbr": 69,
+      "author": {
+        "id": 1000032
+      },
+      "writtenOn": "2014-04-26T21:22:20Z",
+      "side": 1,
+      "message": "仅显示",
+      "revId": "070203fb653bfbc24f7c2b0fb812a87eeea1ca63",
+      "serverId": "56841c99-7c94-43d4-bf0b-cb4707e66d55",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "8b77b57d_2e513b66",
+        "filename": "packages/SystemUI/res/values-zh-rCN/custom_strings.xml",
+        "patchSetId": 1
+      },
+      "lineNbr": 81,
+      "author": {
+        "id": 1000032
+      },
+      "writtenOn": "2014-04-26T21:22:20Z",
+      "side": 1,
+      "message": "电压过高",
+      "revId": "070203fb653bfbc24f7c2b0fb812a87eeea1ca63",
+      "serverId": "56841c99-7c94-43d4-bf0b-cb4707e66d55",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "8b77b57d_4ec2f708",
+        "filename": "packages/SystemUI/res/values-zh-rCN/custom_strings.xml",
+        "patchSetId": 1
+      },
+      "lineNbr": 86,
+      "author": {
+        "id": 1000032
+      },
+      "writtenOn": "2014-04-26T21:22:20Z",
+      "side": 1,
+      "message": "数字与“秒”之间应有个空格",
+      "revId": "070203fb653bfbc24f7c2b0fb812a87eeea1ca63",
+      "serverId": "56841c99-7c94-43d4-bf0b-cb4707e66d55",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "8b77b57d_6ec7b316",
+        "filename": "packages/SystemUI/res/values-zh-rCN/custom_strings.xml",
+        "patchSetId": 1
+      },
+      "lineNbr": 90,
+      "author": {
+        "id": 1000032
+      },
+      "writtenOn": "2014-04-26T21:22:20Z",
+      "side": 1,
+      "message": "数字与“分钟”之间应有个空格",
+      "revId": "070203fb653bfbc24f7c2b0fb812a87eeea1ca63",
+      "serverId": "56841c99-7c94-43d4-bf0b-cb4707e66d55",
+      "unresolved": false
+    }
+  ]
+}
