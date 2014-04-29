@@ -38,6 +38,7 @@ import android.content.ContentResolver;
 import android.content.ContentValues;
 import android.content.Context;
 import android.content.Intent;
+import android.provider.Settings;
 import android.content.res.Resources;
 import android.media.MediaActionSound;
 import android.media.MediaScannerConnection;
@@ -45,6 +46,7 @@ import android.net.Uri;
 import android.os.Environment;
 import android.os.Handler;
 import android.os.Message;
+import android.os.UserHandle;
 import android.util.Log;
 
 import com.android.systemui.R;
@@ -160,8 +162,11 @@ class GlobalScreenrecord {
         mCaptureThread = new CaptureThread();
         mCaptureThread.start();
 
-        final Resources r = mContext.getResources();
+        updateNotification();
+    }
 
+    public void updateNotification(){
+        final Resources r = mContext.getResources();
         // Display a notification
         Notification.Builder builder = new Notification.Builder(mContext)
             .setTicker(r.getString(R.string.screenrecord_notif_ticker))
@@ -180,11 +185,19 @@ class GlobalScreenrecord {
         PendingIntent pointerPendIntent = PendingIntent.getService(mContext, 0, pointerIntent,
             PendingIntent.FLAG_UPDATE_CURRENT);
 
+        boolean showTouches = Settings.System.getIntForUser(mContext.getContentResolver(),
+                Settings.System.SHOW_TOUCHES, 0, UserHandle.USER_CURRENT) != 0;
+        int togglePointerIconId = showTouches ?
+                R.drawable.ic_pointer_off :
+                R.drawable.ic_pointer_on;
+        int togglePointerStringId = showTouches ?
+                R.string.screenrecord_notif_pointer_off :
+                R.string.screenrecord_notif_pointer_on;
         builder
             .addAction(com.android.internal.R.drawable.ic_media_stop,
                 r.getString(R.string.screenrecord_notif_stop), stopPendIntent)
-            .addAction(com.android.internal.R.drawable.ic_text_dot,
-                r.getString(R.string.screenrecord_notif_pointer), pointerPendIntent);
+            .addAction(togglePointerIconId,
+                r.getString(togglePointerStringId), pointerPendIntent);
 
         Notification notif = builder.build();
         mNotificationManager.notify(SCREENRECORD_NOTIFICATION_ID, notif);
