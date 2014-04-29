@@ -32,6 +32,4 @@
         <item quantity="one">Le fichier sera supprimé définitivement\u00A0!</item>
         <item quantity="other">Les %d fichiers seront supprimés définitivement\u00A0!</item>
     </plurals>
-    <string name="ok">OK</string>
-    <string name="cancel">Annuler</string>
 </resources>
