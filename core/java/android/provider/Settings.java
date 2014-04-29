@@ -54,6 +54,7 @@ import android.text.TextUtils;
 import android.util.AndroidException;
 import android.util.Log;
 
+import com.android.internal.util.cm.LockscreenBackgroundUtil;
 import com.android.internal.widget.ILockSettings;
 
 import java.net.URISyntaxException;
@@ -2649,6 +2650,12 @@ public final class Settings {
         public static final String LOCKSCREEN_BATTERY_VISIBILITY = "lockscreen_always_show_battery";
 
         /**
+         * Whether to enable the modlock keyguard
+         * @hide
+         */
+        public static final String LOCKSCREEN_MODLOCK_ENABLED = "lockscreen_modlock_enabled";
+
+        /**
          * @deprecated Use {@link android.provider.Settings.Global#LOW_BATTERY_SOUND}
          * instead
          * @hide
@@ -2765,6 +2772,14 @@ public final class Settings {
          */
         public static final String QUICK_SETTINGS_TILES = "quick_settings_tiles";
 
+
+        /**
+         * Quick Settings show small icons
+         *
+         * @hide
+         */
+        public static final String QUICK_SETTINGS_SMALL_ICONS = "qs_small_icons";
+
         /**
          * Enable looking up of phone numbers of nearby places
          *
@@ -2806,6 +2821,20 @@ public final class Settings {
          * @hide
          */
         public static final String REVERSE_LOOKUP_PROVIDER = "reverse_lookup_provider";
+
+        /**
+         * The OpenCNAM paid account ID
+         *
+         * @hide
+         */
+        public static final String DIALER_OPENCNAM_ACCOUNT_SID = "dialer_opencnam_account_sid";
+
+        /**
+         * The OpenCNAM authentication token
+         *
+         * @hide
+         */
+        public static final String DIALER_OPENCNAM_AUTH_TOKEN = "dialer_opencnam_auth_token";
 
         /**
          * Quick Settings Panel Dynamic Tiles
@@ -3141,6 +3170,12 @@ public final class Settings {
         public static final String MVNO_ROAMING = "mvno_roaming";
 
         /**
+         * Whether to enforce quiet hours regardless of the timer.
+         * @hide
+         */
+        public static final String QUIET_HOURS_FORCED = "quiet_hours_forced";
+
+        /**
          * Whether to enable quiet hours.
          * @hide
          */
@@ -3219,10 +3254,12 @@ public final class Settings {
         public static final String QUIET_HOURS_DIM = "quiet_hours_dim";
 
         /**
-         * Sets the lockscreen background style
+         * Sets the lockscreen background style. Integer.
+         * @see LockscreenBackgroundUtil#LOCKSCREEN_STYLE_DEFAULT
+         * @see LockscreenBackgroundUtil#LOCKSCREEN_STYLE_IMAGE
          * @hide
          */
-        public static final String LOCKSCREEN_BACKGROUND = "lockscreen_background";
+        public static final String LOCKSCREEN_BACKGROUND_STYLE = "lockscreen_background_style";
 
          /**
          * Action for long-pressing back button on lock screen
@@ -3518,6 +3555,20 @@ public final class Settings {
         public static final String DOUBLE_TAP_SLEEP_GESTURE = "double_tap_sleep_gesture";
 
         /**
+         * Whether to enable voice wakeup.  The value is boolean (1 or 0).
+         * @hide
+         */
+        public static final String VOICE_WAKEUP = "voice_wakeup";
+
+        /**
+         * An intent (a flattened Uri String) to launch when user voice launch
+         * action is detected. An empty or null string will launch the default
+         * voice search activity.
+         * @hide
+         */
+        public static final String VOICE_LAUNCH_INTENT = "voice_launch_intent";
+
+        /**
          * Settings to backup. This is here so that it's in the same place as the settings
          * keys and easy to update.
          *
@@ -3610,6 +3661,7 @@ public final class Settings {
             POWER_MENU_SOUND_ENABLED,
             POWER_MENU_USER_ENABLED,
             LOCKSCREEN_BATTERY_VISIBILITY,
+            LOCKSCREEN_MODLOCK_ENABLED,
             PHONE_BLACKLIST_ENABLED,
             PHONE_BLACKLIST_NOTIFY_ENABLED,
             PHONE_BLACKLIST_PRIVATE_NUMBER_MODE,
@@ -7217,6 +7269,13 @@ public final class Settings {
          * @hide
          */
         public static final String LOW_BATTERY_SOUND_TIMEOUT = "low_battery_sound_timeout";
+
+        /**
+         * Enable the QuickBoot feature
+         *
+         * @hide
+         */
+        public static final String ENABLE_QUICKBOOT = "enable_quickboot";
 
         /**
          * Settings to backup. This is here so that it's in the same place as the settings

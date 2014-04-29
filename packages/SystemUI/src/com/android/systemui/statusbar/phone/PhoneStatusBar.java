@@ -26,6 +26,7 @@ import static com.android.systemui.statusbar.phone.BarTransitions.MODE_OPAQUE;
 import static com.android.systemui.statusbar.phone.BarTransitions.MODE_SEMI_TRANSPARENT;
 import static com.android.systemui.statusbar.phone.BarTransitions.MODE_TRANSLUCENT;
 import static com.android.systemui.statusbar.phone.BarTransitions.MODE_LIGHTS_OUT;
+import static com.android.systemui.statusbar.phone.BarTransitions.MODE_TRANSPARENT;
 
 import android.animation.Animator;
 import android.animation.AnimatorListenerAdapter;
@@ -146,6 +147,9 @@ public class PhoneStatusBar extends BaseStatusBar implements DemoMode,
     public static final String ACTION_STATUSBAR_START
             = "com.android.internal.policy.statusbar.START";
 
+    public static final String MODLOCK_STATE
+             = "com.android.keyguard.modlock.STATE";
+
     private static final int MSG_OPEN_NOTIFICATION_PANEL = 1000;
     private static final int MSG_CLOSE_PANELS = 1001;
     private static final int MSG_OPEN_SETTINGS_PANEL = 1002;
@@ -190,7 +194,6 @@ public class PhoneStatusBar extends BaseStatusBar implements DemoMode,
     DockBatteryController mDockBatteryController;
     LocationController mLocationController;
     NetworkController mNetworkController;
-    RotationLockController mRotationLockController;
     MSimNetworkController mMSimNetworkController;
 
     int mNaturalBarHeight = -1;
@@ -328,6 +331,8 @@ public class PhoneStatusBar extends BaseStatusBar implements DemoMode,
 
     DisplayMetrics mDisplayMetrics = new DisplayMetrics();
 
+    boolean mTransparentNav = false;
+
     // XXX: gesture research
     private final GestureRecorder mGestureRec = DEBUG_GESTURES
         ? new GestureRecorder("/sdcard/statusbar_gestures.dat")
@@ -422,7 +427,7 @@ public class PhoneStatusBar extends BaseStatusBar implements DemoMode,
 
     private void forceAddNavigationBar() {
         // If we have no Navbar view and we should have one, create it
-        if (mNavigationBarView != null || mRecreating) {
+        if (mNavigationBarView != null) {
             return;
         }
 
@@ -515,6 +520,11 @@ public class PhoneStatusBar extends BaseStatusBar implements DemoMode,
         if (currentTheme != null) {
             mCurrentTheme = (CustomTheme)currentTheme.clone();
         }
+
+        mLocationController = new LocationController(mContext);
+        mBatteryController = new BatteryController(mContext);
+        mDockBatteryController = new DockBatteryController(mContext);
+        mBluetoothController = new BluetoothController(mContext);
 
         super.start(); // calls createAndAddWindows()
 
@@ -766,12 +776,6 @@ public class PhoneStatusBar extends BaseStatusBar implements DemoMode,
         setAreThereNotifications();
 
         // Other icons
-        mLocationController = new LocationController(mContext); // will post a notification
-        mBatteryController = new BatteryController(mContext);
-        mDockBatteryController = new DockBatteryController(mContext);
-        mBluetoothController = new BluetoothController(mContext);
-        mRotationLockController = new RotationLockController(mContext);
-
         mBatteryView = (BatteryMeterView) mStatusBarView.findViewById(R.id.battery);
         mDockBatteryView = (DockBatteryMeterView) mStatusBarView.findViewById(R.id.dock_battery);
 
@@ -960,6 +964,7 @@ public class PhoneStatusBar extends BaseStatusBar implements DemoMode,
         filter.addAction(Intent.ACTION_SCREEN_OFF);
         filter.addAction(Intent.ACTION_SCREEN_ON);
         filter.addAction(ACTION_DEMO);
+        filter.addAction(MODLOCK_STATE);
         context.registerReceiver(mBroadcastReceiver, filter);
 
         // listen for USER_SETUP_COMPLETE setting (per-user)
@@ -3052,6 +3057,12 @@ public class PhoneStatusBar extends BaseStatusBar implements DemoMode,
                     }
                 }
             }
+            else if (MODLOCK_STATE.equals(action)) {
+                boolean showing = intent.getBooleanExtra("showing", false);
+                if (null != mNavigationBarView) {
+                    mNavigationBarView.getBarTransitions().applyTransparent(showing);
+                }
+            }
         }
     };
 
@@ -3248,6 +3259,7 @@ public class PhoneStatusBar extends BaseStatusBar implements DemoMode,
             addNotificationViews(createNotificationViews(notifData.first, notifData.second));
         }
 
+        updateSettings();
         setAreThereNotifications();
 
         mStatusBarContainer.addView(mStatusBarWindow);
@@ -3283,7 +3295,10 @@ public class PhoneStatusBar extends BaseStatusBar implements DemoMode,
 
         // Update the QuickSettings container
         if (mQS != null) mQS.updateResources();
-
+        if (mNavigationBarView != null)  {
+            mNavigationBarView.updateResources();
+            updateSearchPanel();
+        }
     }
 
     protected void loadDimens() {
@@ -3548,6 +3563,12 @@ public class PhoneStatusBar extends BaseStatusBar implements DemoMode,
                     cleanupRibbon();
                     inflateRibbon();
                     mRibbonView.setVisibility(View.VISIBLE);
+            } else if (uri != null && uri.equals(Settings.System.getUriFor(
+                    Settings.System.QUICK_SETTINGS_SMALL_ICONS))) {
+                if (mSettingsContainer != null) {
+                    mQS.setupQuickSettings();
+                    mSettingsContainer.updateResources();
+                }
             } else if (mSettingsContainer != null) {
                 mQS.setupQuickSettings();
                 if (mQuickAccessLayoutLinked && mRibbonQS != null) {
@@ -3597,6 +3618,11 @@ public class PhoneStatusBar extends BaseStatusBar implements DemoMode,
             cr.registerContentObserver(
                     Settings.System.getUriFor(Settings.System.QUICK_SETTINGS_RIBBON_TILES),
                     false, this, UserHandle.USER_ALL);
+
+            cr.registerContentObserver(
+                    Settings.System.getUriFor(Settings.System.QUICK_SETTINGS_SMALL_ICONS),
+                    false, this, UserHandle.USER_ALL);
+
         }
     }
 }
