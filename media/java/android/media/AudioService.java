@@ -436,7 +436,6 @@ public class AudioService extends IAudioService.Stub {
     // Devices for which the volume is fixed and VolumePanel slider should be disabled
     final int mFixedVolumeDevices = AudioSystem.DEVICE_OUT_AUX_DIGITAL |
             AudioSystem.DEVICE_OUT_DGTL_DOCK_HEADSET |
-            AudioSystem.DEVICE_OUT_ALL_USB |
             AudioSystem.DEVICE_OUT_PROXY; // use fixed volume on proxy device(WiFi display)
 
     // TODO merge orientation and rotation
@@ -4140,7 +4139,7 @@ public class AudioService extends IAudioService.Stub {
                     (device == AudioSystem.DEVICE_OUT_WIRED_HEADPHONE))) {
                 setBluetoothA2dpOnInt(true);
             }
-            boolean isUsb = ((device & AudioSystem.DEVICE_OUT_ALL_USB) != 0);
+            boolean isUsb = ((device & (AudioSystem.DEVICE_OUT_ALL_USB | AudioSystem.DEVICE_IN_USB_DEVICE)) != 0);
             handleDeviceConnection((state == 1), device, (isUsb ? name : ""));
             if (state != 0) {
                 if ((device == AudioSystem.DEVICE_OUT_WIRED_HEADSET) ||
