@@ -2095,6 +2095,12 @@ public final class Settings {
                 "bluetooth_discoverability_timeout";
 
         /**
+         * If all file types can be accepted over Bluetooth OBEX.
+         */
+        public static final String BLUETOOTH_ACCEPT_ALL_FILES =
+            "bluetooth_accept_all_files";
+
+        /**
          * @deprecated Use {@link android.provider.Settings.Secure#LOCK_PATTERN_ENABLED}
          * instead
          */
@@ -5042,6 +5048,13 @@ public final class Settings {
          */
         public static final String NON_INTRUSIVE_INCALL = "non_intrusive_incall";
 
+        
+        /**
+	    * @hide
+	    */
+	    public static final String SMART_PHONE_CALLER = "smart_phone_caller";
+
+	
         /*
          * Holds the text for the Carrier label. An empty string
          * will bring the default text back.
