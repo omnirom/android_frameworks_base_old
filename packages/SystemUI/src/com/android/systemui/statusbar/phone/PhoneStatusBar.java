@@ -31,6 +31,8 @@ import android.animation.Animator;
 import android.animation.AnimatorListenerAdapter;
 import android.animation.ObjectAnimator;
 import android.animation.TimeInterpolator;
+import android.annotation.AmraLab;
+import android.annotation.AmraLab.Classification;
 import android.app.ActivityManager;
 import android.app.ActivityManagerNative;
 import android.app.AlarmManager;
@@ -827,6 +829,7 @@ public class PhoneStatusBar extends BaseStatusBar implements DemoMode,
     // ================================================================================
     // Constructing the view
     // ================================================================================
+    @AmraLab(name="GestureAnywhere", classification=Classification.CHANGE_CODE)
     protected PhoneStatusBarView makeStatusBarView() {
         final Context context = mContext;
 
@@ -932,6 +935,9 @@ public class PhoneStatusBar extends BaseStatusBar implements DemoMode,
         if (mRecreating) {
         } else {
             addActiveDisplayView();
+            /* AmraLab: GestureAnywhere - BEGIN */
+            addGestureAnywhereView();
+            /* AmraLab: GestureAnywhere - END */
         }
 
         // Setup pie container if enabled
