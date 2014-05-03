@@ -1,6 +1,19 @@
-/**
+/*
+ * Copyright (C) 2013 Slimroms
  *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *      http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
  */
+
 package com.android.systemui.recent;
 
 import android.content.Context;
@@ -10,58 +23,44 @@ import android.graphics.Paint;
 import android.graphics.Path;
 import android.graphics.Rect;
 import android.graphics.Shader;
+import android.provider.Settings;
 import android.util.AttributeSet;
 import android.util.DisplayMetrics;
 import android.widget.LinearLayout;
 
 public class LinearColorBar extends LinearLayout {
-    private static final int LEFT_COLOR = 0xffbebebe;
-    private static final int MIDDLE_COLOR = 0xffbebebe;
-    private static final int RIGHT_COLOR = 0xff888888;
-    private static final int GRAY_COLOR = 0xff555555;
-    private static final int WHITE_COLOR = 0xffffffff;
 
-    private float mRedRatio;
-    private float mYellowRatio;
+    static final int USED_MEM_COLOR = 0xff8d8d8d;
+    static final int USED_CACHE_COLOR = 0xff00aa00;
+    static final int USED_ACTIVE_APPS_COLOR = 0xff33b5e5;
+    static final int FREE_COLOR = 0xffaaaaaa;
 
-    private int mLeftColor = LEFT_COLOR;
-    private int mMiddleColor = MIDDLE_COLOR;
-    private int mRightColor = RIGHT_COLOR;
+    private float mRamBarMode;
 
-    private int mColoredRegions = REGION_RED | REGION_YELLOW | REGION_GREEN;
+    private float mUsedMemRatio;
+    private float mUsedCacheMemRatio;
+    private float mUsedActiveAppsMemRatio;
 
-    private final Rect mRect = new Rect();
-    private final Paint mPaint = new Paint();
+    private int mUsedMemColor;
+    private int mUsedCacheMemColor;
+    private int mUsedActiveAppsMemColor;
 
-    private int mLastInterestingLeft, mLastInterestingRight;
-    private int mLineWidth;
-
-    private final Path mColorPath = new Path();
-    private final Path mEdgePath = new Path();
-    private final Paint mColorGradientPaint = new Paint();
-    private final Paint mEdgeGradientPaint = new Paint();
-
-    public static final int REGION_RED = 1 << 0;
-    public static final int REGION_YELLOW = 1 << 1;
-    public static final int REGION_GREEN = 1 << 2;
+    final Rect mRect = new Rect();
+    final Paint mPaint = new Paint();
 
     public LinearColorBar(Context context, AttributeSet attrs) {
         super(context, attrs);
         setWillNotDraw(false);
         mPaint.setStyle(Paint.Style.FILL);
-        mColorGradientPaint.setStyle(Paint.Style.FILL);
-        mColorGradientPaint.setAntiAlias(true);
-        mEdgeGradientPaint.setStyle(Paint.Style.STROKE);
-        mLineWidth = (getResources().getDisplayMetrics().densityDpi >= DisplayMetrics.DENSITY_HIGH)
-                ? 2 : 1;
-        mEdgeGradientPaint.setStrokeWidth(mLineWidth);
-        mEdgeGradientPaint.setAntiAlias(true);
-
     }
 
-    public void setRatios(float red, float yellow, float green) {
-        mRedRatio = red;
-        mYellowRatio = yellow;
+    public void setRatios(float usedMem, float usedCacheMem, float usedActiveAppsMem) {
+        mUsedMemRatio = usedMem;
+	if (mUsedMemRatio < 0)
+            mUsedMemRatio = 0;
+        mUsedCacheMemRatio = usedCacheMem;
+        mUsedActiveAppsMemRatio = usedActiveAppsMem;
+        updateModeAndColors();
         invalidate();
     }
 
@@ -70,8 +69,17 @@ public class LinearColorBar extends LinearLayout {
         if (off < 0) off = 0;
         mRect.top = off;
         mRect.bottom = getHeight();
-        mEdgeGradientPaint.setShader(new LinearGradient(
-                0, 0, 0, off / 2, 0x00a0a0a0, 0xffa0a0a0, Shader.TileMode.CLAMP));
+    }
+
+    private void updateModeAndColors() {
+        mRamBarMode = (Settings.System.getInt(mContext.getContentResolver(),
+                             Settings.System.RECENTS_RAM_BAR_MODE, 0));
+        mUsedMemColor = (Settings.System.getInt(mContext.getContentResolver(),
+                               Settings.System.RECENTS_RAM_BAR_MEM_COLOR, USED_MEM_COLOR));
+        mUsedCacheMemColor = (Settings.System.getInt(mContext.getContentResolver(),
+                                    Settings.System.RECENTS_RAM_BAR_CACHE_COLOR, USED_CACHE_COLOR));
+        mUsedActiveAppsMemColor = (Settings.System.getInt(mContext.getContentResolver(),
+                                         Settings.System.RECENTS_RAM_BAR_ACTIVE_APPS_COLOR, USED_ACTIVE_APPS_COLOR));
     }
 
     @Override
@@ -81,92 +89,42 @@ public class LinearColorBar extends LinearLayout {
     }
 
     @Override
-    protected void dispatchSetPressed(boolean pressed) {
-        invalidate();
-    }
-
-    private int pickColor(int color, int region) {
-        if (isPressed()) {
-            return WHITE_COLOR;
-        }
-        if ((mColoredRegions & region) == 0) {
-            return GRAY_COLOR;
-        }
-        return color;
-    }
-
-    @Override
     protected void onDraw(Canvas canvas) {
         super.onDraw(canvas);
 
         int width = getWidth();
-
         int left = 0;
 
-        int right = left + (int) (width * mRedRatio);
-        int right2 = right + (int) (width * mYellowRatio);
+        int rightActiveApps = (int)(width*mUsedActiveAppsMemRatio);
+        int rightCache = (int)(width*mUsedCacheMemRatio);
+        int rightMem = (int)(width*mUsedMemRatio);
 
-        if (mLastInterestingLeft != right || mLastInterestingRight != right2) {
-            mColorPath.reset();
-            mEdgePath.reset();
-            if (right < right2) {
-                final int midTopY = mRect.top;
-                final int midBottomY = 0;
-                final int xoff = 2;
-                mColorPath.moveTo(right, mRect.top);
-                mColorPath.cubicTo(right, midBottomY,
-                        -xoff, midTopY,
-                        -xoff, 0);
-                mColorPath.lineTo(width + xoff - 1, 0);
-                mColorPath.cubicTo(width + xoff - 1, midTopY,
-                        right2, midBottomY,
-                        right2, mRect.top);
-                mColorPath.close();
-                final float lineOffset = mLineWidth + .5f;
-                mEdgePath.moveTo(-xoff + lineOffset, 0);
-                mEdgePath.cubicTo(-xoff + lineOffset, midTopY,
-                        right + lineOffset, midBottomY,
-                        right + lineOffset, mRect.top);
-                mEdgePath.moveTo(width + xoff - 1 - lineOffset, 0);
-                mEdgePath.cubicTo(width + xoff - 1 - lineOffset, midTopY,
-                        right2 - lineOffset, midBottomY,
-                        right2 - lineOffset, mRect.top);
-            }
-            mLastInterestingLeft = right;
-            mLastInterestingRight = right2;
-        }
+        mRect.left = left;
+        mRect.right = rightActiveApps;
+        mPaint.setColor(mUsedActiveAppsMemColor);
+        canvas.drawRect(mRect, mPaint);
+        left = rightActiveApps;
 
-        if (!mEdgePath.isEmpty()) {
-            canvas.drawPath(mEdgePath, mEdgeGradientPaint);
-            canvas.drawPath(mColorPath, mColorGradientPaint);
-        }
-
-        if (left < right) {
+        if (mRamBarMode == 2 || mRamBarMode == 3) {
             mRect.left = left;
-            mRect.right = right;
-            mPaint.setColor(pickColor(mLeftColor, REGION_RED));
+            mRect.right = left + rightCache;
+            mPaint.setColor(mUsedCacheMemColor);
             canvas.drawRect(mRect, mPaint);
-            width -= (right - left);
-            left = right;
+            left = left + rightCache;
         }
 
-        right = right2;
-
-        if (left < right) {
+        if (mRamBarMode == 3) {
             mRect.left = left;
-            mRect.right = right;
-            mPaint.setColor(pickColor(mMiddleColor, REGION_YELLOW));
+            mRect.right = left + rightMem;
+            mPaint.setColor(mUsedMemColor);
             canvas.drawRect(mRect, mPaint);
-            width -= (right - left);
-            left = right;
+            left = left + rightMem;
         }
 
-        right = left + width;
-        if (left < right) {
-            mRect.left = left;
-            mRect.right = right;
-            mPaint.setColor(pickColor(mRightColor, REGION_GREEN));
-            canvas.drawRect(mRect, mPaint);
-        }
+        mRect.left = left;
+        mRect.right = width;
+        mPaint.setColor(FREE_COLOR);
+        canvas.drawRect(mRect, mPaint);
+
     }
 }

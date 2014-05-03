@@ -51,13 +51,13 @@ public class RecentExpandedCard extends CardExpand {
     private String mLabel;
     private int mThumbnailWidth;
     private int mThumbnailHeight;
+    private int mBottomPadding;
     private float mScaleFactor;
     private boolean mScaleFactorChanged;
 
     private BitmapDownloaderTask mTask;
 
     private boolean mReload;
-    private boolean mIsExpanded;
     private boolean mDoNotNullBitmap;
 
     public RecentExpandedCard(Context context, int persistentTaskId,
@@ -102,17 +102,11 @@ public class RecentExpandedCard extends CardExpand {
                 R.dimen.recent_thumbnail_width) * mScaleFactor);
         mThumbnailHeight = (int) (res.getDimensionPixelSize(
                 R.dimen.recent_thumbnail_height) * mScaleFactor);
+        mBottomPadding = (int) (res.getDimensionPixelSize(
+                R.dimen.recent_thumbnail_bottom_padding) * mScaleFactor);
 
         mDefaultThumbnailBackground = new ColorDrawableWithDimensions(
                 res.getColor(R.color.card_backgroundExpand), mThumbnailWidth, mThumbnailHeight);
-    }
-
-    // Internal state if we are expanded or not.
-    // Used to reduce loading on second loading stage
-    // and to force later on third loading stage
-    // to load the actual needed thumbnail.
-    public void isExpanded(boolean isExpanded) {
-        mIsExpanded = isExpanded;
     }
 
     @Override
@@ -135,17 +129,14 @@ public class RecentExpandedCard extends CardExpand {
             // Take scale factor into account if it is different then default or it has changed.
             if (mScaleFactor != RecentController.DEFAULT_SCALE_FACTOR || mScaleFactorChanged) {
                 mScaleFactorChanged = false;
-                final ViewGroup.LayoutParams layoutParams = holder.thumbnailView.getLayoutParams();
+                final ViewGroup.MarginLayoutParams layoutParams =
+                        (ViewGroup.MarginLayoutParams) holder.thumbnailView.getLayoutParams();
                 layoutParams.width = mThumbnailWidth;
                 layoutParams.height = mThumbnailHeight;
+                layoutParams.setMargins(0, 0, 0, mBottomPadding);
                 holder.thumbnailView.setLayoutParams(layoutParams);
             }
             view.setTag(holder);
-        }
-
-        if (!mIsExpanded) {
-            holder.thumbnailView.setImageDrawable(mDefaultThumbnailBackground);
-            return;
         }
 
         // Assign task bitmap to our view via async task loader. If it is just

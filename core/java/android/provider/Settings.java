@@ -4035,6 +4035,13 @@ public final class Settings {
          */
         public static final String VOLUME_WAKE_SCREEN = "volume_wake_screen";
 
+        
+        /**
+         * Show ram bar in GBs for devices with memory over 1 GB.
+         *  @hide
+         */
+        public static final String SHOW_GB_RAMBAR = "show_gb_rambar";
+
         /**
          * Whether or not volume button music controls should be enabled to seek media tracks
          * @hide
@@ -5437,6 +5444,60 @@ public final class Settings {
          * @hide
          */
         public static final String HALO_UNLOCK_PING = "halo_unlock_ping";
+
+        /**
+         * @hide
+         */
+        public static final String LARGE_RECENT_THUMBS = "large_recent_thumbs";
+
+        /**
+         * @hide
+         */
+        public static final String RECENTS_PANEL_COLOR = "recents_panel_color";
+
+        /**
+         * User favorite tasks for recent panel.
+         * @hide
+         */
+        public static final String RECENT_PANEL_FAVORITES = "recent_panel_favorites";
+
+        
+        /**
+         * Recent panel expanded mode (auto = 0, always = 1, never = 2).
+         * default = 0.
+         *
+         * @hide
+         */
+        public static final String RECENT_PANEL_EXPANDED_MODE = "recent_panel_expanded_mode";
+
+        
+	/**
+         * whether which Ram Usage Bar mode is used on recent switcher
+         * 0 = none, 1 = only app use, 2 = app and cache use, 3 = app, cache and system use
+         * @hide
+         */
+        public static final String RECENTS_RAM_BAR_MODE = "recents_ram_bar_mode";
+
+        /**
+         * Ram Usage Bar system mem color
+         *
+         * @hide
+         */
+        public static final String RECENTS_RAM_BAR_MEM_COLOR = "recents_ram_bar_mem_color";
+
+        /**
+         * Ram Usage Bar cached mem color
+         *
+         * @hide
+         */
+        public static final String RECENTS_RAM_BAR_CACHE_COLOR = "recents_ram_bar_cache_color";
+
+        /**
+         * Ram Usage Bar app mem color
+         *
+         * @hide
+         */
+        public static final String RECENTS_RAM_BAR_ACTIVE_APPS_COLOR = "recents_ram_bar_active_apps_color";
 
         /**
          * Settings to backup. This is here so that it's in the same place as the settings

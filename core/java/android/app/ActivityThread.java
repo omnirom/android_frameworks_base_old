@@ -73,6 +73,7 @@ import android.os.SystemClock;
 import android.os.SystemProperties;
 import android.os.Trace;
 import android.os.UserHandle;
+import android.provider.Settings;
 import android.text.TextUtils;
 import android.util.AndroidRuntimeException;
 import android.util.ArrayMap;
@@ -2965,11 +2966,18 @@ public final class ActivityThread {
                 int h;
                 if (w < 0) {
                     Resources res = r.activity.getResources();
-                    mThumbnailHeight = h =
-                        res.getDimensionPixelSize(com.android.internal.R.dimen.thumbnail_height);
-
+                    boolean largeThumbs = Settings.System.getInt(mSystemContext.getContentResolver(),
+                            Settings.System.LARGE_RECENT_THUMBS, 0) == 1;
                     mThumbnailWidth = w =
-                        res.getDimensionPixelSize(com.android.internal.R.dimen.thumbnail_width);
+                            res.getDimensionPixelSize(
+                            com.android.internal.R.dimen.thumbnail_width);
+                    if (largeThumbs) {
+                        mThumbnailWidth = w = mThumbnailWidth * 2;
+                    }
+                    int height = res.getDisplayMetrics().heightPixels;
+                    int width = res.getDisplayMetrics().widthPixels;
+                    mThumbnailHeight = h = (height > width ? width : height) * mThumbnailWidth /
+                            (height > width ? height : width);
                 } else {
                     h = mThumbnailHeight;
                 }

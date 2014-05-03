@@ -37,7 +37,6 @@ import android.content.pm.PackageManager.NameNotFoundException;
 import android.content.res.Configuration;
 import android.content.res.Resources;
 import android.content.res.TypedArray;
-import android.database.ContentObserver;
 import android.graphics.Bitmap;
 import android.graphics.Canvas;
 import android.graphics.Matrix;
@@ -48,11 +47,9 @@ import android.graphics.drawable.BitmapDrawable;
 import android.graphics.drawable.Drawable;
 import android.net.Uri;
 import android.os.Bundle;
-import android.os.Handler;
 import android.os.RemoteException;
 import android.os.UserHandle;
 import android.provider.Settings;
-import android.text.format.Formatter;
 import android.util.AttributeSet;
 import android.util.Log;
 import android.view.Gravity;
@@ -77,7 +74,6 @@ import android.widget.FrameLayout;
 import android.widget.ImageView;
 import android.widget.ImageView.ScaleType;
 import android.widget.PopupMenu;
-import android.widget.RelativeLayout;
 import android.widget.TextView;
 
 
@@ -94,17 +90,17 @@ import java.io.BufferedReader;
 import java.io.FileReader;
 import java.io.IOException;
 
-public class RecentsPanelView extends RelativeLayout implements OnItemClickListener,
-        RecentsCallback, StatusBarPanel, Animator.AnimatorListener {
+public class RecentsPanelView extends FrameLayout implements OnItemClickListener, RecentsCallback,
+        StatusBarPanel, Animator.AnimatorListener {
     static final String TAG = "RecentsPanelView";
-    static final boolean DEBUG = PhoneStatusBar.DEBUG;
+    static final boolean DEBUG = PhoneStatusBar.DEBUG || false;
     private PopupMenu mPopup;
     private View mRecentsScrim;
     private View mRecentsNoApps;
+    //private View mRecentsRamBar;
     private RecentsScrollView mRecentsContainer;
 
     private boolean mShowing;
-    private boolean mAttached;
     private boolean mWaitingToShow;
     private ViewHolder mItemToAnimateInWhenWindowAnimationIsFinished;
     private boolean mAnimateIconOfFirstTask;
@@ -112,51 +108,35 @@ public class RecentsPanelView extends RelativeLayout implements OnItemClickListe
     private long mWindowAnimationStartTime;
     private boolean mCallUiHiddenBeforeNextReload;
 
-    private LinearColorBar mRamUsageBar;
-
     private RecentTasksLoader mRecentTasksLoader;
     private ArrayList<TaskDescription> mRecentTaskDescriptions;
     private TaskDescriptionAdapter mListAdapter;
     private int mThumbnailWidth;
+    private int mThumbnailHeight;
     private boolean mFitThumbnailToXY;
     private int mRecentItemLayoutId;
     private boolean mHighEndGfx;
 
     private ImageView mClearAllRecents;
+    private CircleMemoryMeter mRecentsMemoryIndicator;
 
     private int mDragPositionX;
     private int mDragPositionY;
     private ImageView mClearRecents;
 
-    private boolean ramBarEnabled;
-    private boolean ramBarIncludeCached;
+    private LinearColorBar mRamUsageBar;
+    private boolean mUpdateMemoryIndicator;
 
-    TextView mBackgroundProcessText;
-    TextView mForegroundProcessText;
+    private long mFreeMemory;
+    private long mTotalMemory;
+    private long mCachedMemory;
+    private long mActiveMemory;
 
-    Handler mHandler = new Handler();
-    ActivityManager mAm;
-    ActivityManager.MemoryInfo mMemInfo;
+    TextView mUsedMemText;
+    TextView mFreeMemText;
+    TextView mRamText;
 
     MemInfoReader mMemInfoReader = new MemInfoReader();
-
-    private ContentObserver mObserver = new ContentObserver(mHandler) {
-        @Override
-        public void onChange(boolean selfChange) {
-            updateSettings();
-            updateView();
-        }
-
-        @Override
-        public void onChange(boolean selfChange, android.net.Uri uri) {
-            updateSettings();
-            updateView();
-        }
-    };
-
-    public static interface OnRecentsPanelVisibilityChangedListener {
-        public void onRecentsPanelVisibilityChanged(boolean visible);
-    }
 
     public static interface RecentsScrollView {
         public int numItemsInOneScreenful();
@@ -215,6 +195,11 @@ public class RecentsPanelView extends RelativeLayout implements OnItemClickListe
             holder.thumbnailView = convertView.findViewById(R.id.app_thumbnail);
             holder.thumbnailViewImage =
                     (ImageView) convertView.findViewById(R.id.app_thumbnail_image);
+            ViewGroup.LayoutParams lp =
+                    (ViewGroup.LayoutParams) holder.thumbnailViewImage.getLayoutParams();
+            lp.height = mThumbnailHeight;
+            lp.width = mThumbnailWidth;
+            holder.thumbnailViewImage.setLayoutParams(lp);
             // If we set the default thumbnail now, we avoid an onLayout when we update
             // the thumbnail later (if they both have the same dimensions)
             updateThumbnail(holder, mRecentTasksLoader.getDefaultThumbnail(), false, false);
@@ -340,9 +325,6 @@ public class RecentsPanelView extends RelativeLayout implements OnItemClickListe
         super(context, attrs, defStyle);
         updateValuesFromResources();
 
-        mAm = (ActivityManager)
-                mContext.getSystemService(Context.ACTIVITY_SERVICE);
-        mMemInfo = new ActivityManager.MemoryInfo();
         TypedArray a = context.obtainStyledAttributes(attrs, R.styleable.RecentsPanelView,
                 defStyle, 0);
 
@@ -415,11 +397,82 @@ public class RecentsPanelView extends RelativeLayout implements OnItemClickListe
 
         if (show) {
             // if there are no apps, bring up a "No recent apps" message
-            final boolean noApps = mRecentTaskDescriptions != null
+            boolean noApps = mRecentTaskDescriptions != null
                     && (mRecentTaskDescriptions.size() == 0);
             mRecentsNoApps.setAlpha(1f);
             mRecentsNoApps.setVisibility(noApps ? View.VISIBLE : View.INVISIBLE);
+	 //   mClearRecents.setVisibility(noApps ? View.GONE : View.VISIBLE);
 
+	    boolean showClearAllButton = Settings.System.getInt(mContext.getContentResolver(),
+                    Settings.System.SHOW_CLEAR_RECENTS_BUTTON, 0) == 1;
+            boolean showMemoryIndicator = Settings.System.getInt(mContext.getContentResolver(),
+                    Settings.System.SHOW_RECENTS_MEMORY_INDICATOR, 0) == 1;
+
+            if (showMemoryIndicator) {
+                int recentsMemoryIndicatorLocation = Settings.System.getInt(
+                        mContext.getContentResolver(),
+                        Settings.System.RECENTS_MEMORY_INDICATOR_LOCATION,
+                        Constants.CLEAR_ALL_BUTTON_BOTTOM_LEFT);
+
+                FrameLayout.LayoutParams layoutParams = (FrameLayout.LayoutParams)
+                        mRecentsMemoryIndicator.getLayoutParams();
+
+                switch (recentsMemoryIndicatorLocation) {
+                    case Constants.CLEAR_ALL_BUTTON_TOP_LEFT:
+                        layoutParams.gravity = Gravity.TOP | Gravity.LEFT;
+                        break;
+                    case Constants.CLEAR_ALL_BUTTON_TOP_RIGHT:
+                        layoutParams.gravity = Gravity.TOP | Gravity.RIGHT;
+                        break;
+                    case Constants.CLEAR_ALL_BUTTON_BOTTOM_RIGHT:
+                        layoutParams.gravity = Gravity.BOTTOM | Gravity.RIGHT;
+                        break;
+                    case Constants.CLEAR_ALL_BUTTON_BOTTOM_LEFT:
+                    default:
+                        layoutParams.gravity = Gravity.BOTTOM | Gravity.LEFT;
+                        break;
+                }
+                mRecentsMemoryIndicator.setLayoutParams(layoutParams);
+                mRecentsMemoryIndicator.setVisibility(View.VISIBLE);
+                mUpdateMemoryIndicator = true;
+            } else {
+                mRecentsMemoryIndicator.setVisibility(View.GONE);
+                mUpdateMemoryIndicator = false;
+            }
+
+            if (showClearAllButton && !noApps) {
+                int clearAllButtonLocation = Settings.System.getInt(
+                        mContext.getContentResolver(),
+                        Settings.System.CLEAR_RECENTS_BUTTON_LOCATION,
+                        Constants.CLEAR_ALL_BUTTON_BOTTOM_LEFT);
+
+                FrameLayout.LayoutParams layoutParams = (FrameLayout.LayoutParams)
+                        mClearAllRecents.getLayoutParams();
+
+                switch (clearAllButtonLocation) {
+                    case Constants.CLEAR_ALL_BUTTON_TOP_LEFT:
+                        layoutParams.gravity = Gravity.TOP | Gravity.LEFT;
+                        break;
+                    case Constants.CLEAR_ALL_BUTTON_TOP_RIGHT:
+                        layoutParams.gravity = Gravity.TOP | Gravity.RIGHT;
+                        break;
+                    case Constants.CLEAR_ALL_BUTTON_BOTTOM_RIGHT:
+                        layoutParams.gravity = Gravity.BOTTOM | Gravity.RIGHT;
+                        break;
+                    case Constants.CLEAR_ALL_BUTTON_BOTTOM_LEFT:
+                    default:
+                        layoutParams.gravity = Gravity.BOTTOM | Gravity.LEFT;
+                        break;
+                }
+                mClearAllRecents.setLayoutParams(layoutParams);
+                mClearAllRecents.setVisibility(View.VISIBLE);
+            } else {
+                mClearAllRecents.setVisibility(View.GONE);
+            }
+
+            if (mUpdateMemoryIndicator) {
+                mRecentsMemoryIndicator.updateMemoryInfo();
+            }
             onAnimationEnd(null);
             setFocusable(true);
             setFocusableInTouchMode(true);
@@ -485,34 +538,11 @@ public class RecentsPanelView extends RelativeLayout implements OnItemClickListe
         }
     }
 
-    @Override
     protected void onAttachedToWindow () {
         super.onAttachedToWindow();
-        if (!mAttached) {
-            mAttached = true;
-
-            final ViewRootImpl root = getViewRootImpl();
-            if (root != null) {
-                root.setDrawDuringWindowsAnimating(true);
-            }
-            ContentResolver resolver = mContext.getContentResolver();
-            resolver.registerContentObserver(
-                    Settings.System.getUriFor(Settings.System.RAM_USAGE_BAR)
-                    , false, mObserver);
-            resolver.registerContentObserver(
-                    Settings.System.getUriFor(Settings.System.RAM_USAGE_BAR_CACHED)
-                    , false, mObserver);
-            updateSettings();
-            updateView();
-        }
-    }
-
-    @Override
-    protected void onDetachedFromWindow() {
-        super.onDetachedFromWindow();
-        if (mAttached) {
-            mAttached = false;
-            mContext.getContentResolver().unregisterContentObserver(mObserver);
+        final ViewRootImpl root = getViewRootImpl();
+        if (root != null) {
+            root.setDrawDuringWindowsAnimating(true);
         }
     }
 
@@ -582,13 +612,22 @@ public class RecentsPanelView extends RelativeLayout implements OnItemClickListe
 
     public void updateValuesFromResources() {
         final Resources res = mContext.getResources();
-        mThumbnailWidth = Math.round(res.getDimension(R.dimen.status_bar_recents_thumbnail_width));
-        mFitThumbnailToXY = res.getBoolean(R.bool.config_recents_thumbnail_image_fits_to_xy);
+        boolean largeThumbs = Settings.System.getIntForUser(mContext.getContentResolver(),
+                Settings.System.LARGE_RECENT_THUMBS, 0, UserHandle.USER_CURRENT) == 1;
+        mThumbnailWidth = Math.round(res.getDimension(
+                R.dimen.status_bar_recents_thumbnail_width));
+        if (largeThumbs) mThumbnailWidth = mThumbnailWidth * 2;
+        int height = res.getDisplayMetrics().heightPixels;
+        int width = res.getDisplayMetrics().widthPixels;
+        mThumbnailHeight = (height > width ? width : height) * mThumbnailWidth /
+                (height > width ? height : width);
+        mFitThumbnailToXY = true;
     }
 
     @Override
     protected void onFinishInflate() {
         super.onFinishInflate();
+
         mRecentsContainer = (RecentsScrollView) findViewById(R.id.recents_container);
         mRecentsContainer.setOnScrollListener(new Runnable() {
             public void run() {
@@ -602,8 +641,9 @@ public class RecentsPanelView extends RelativeLayout implements OnItemClickListe
 
         mRecentsScrim = findViewById(R.id.recents_bg_protect);
         mRecentsNoApps = findViewById(R.id.recents_no_apps);
+	//mRecentsRamBar = findViewById(R.id.recents_ram_bar);
 
-        mClearAllRecents = (ImageView) findViewById(R.id.recents_clear);
+	mClearAllRecents = (ImageView) findViewById(R.id.recents_clear_all);
         if (mClearAllRecents != null){
             mClearAllRecents.setOnClickListener(new OnClickListener() {
                 @Override
@@ -612,7 +652,18 @@ public class RecentsPanelView extends RelativeLayout implements OnItemClickListe
                 }
             });
         }
+        boolean showClearAllButton = Settings.System.getInt(mContext.getContentResolver(),
+                    Settings.System.SHOW_CLEAR_RECENTS_BUTTON, 0) == 1;
+        if (!showClearAllButton){
+            mClearAllRecents.setVisibility(View.GONE);
+        }
 
+        mRecentsMemoryIndicator = (CircleMemoryMeter) findViewById(R.id.circle_meter);
+        boolean showMemoryIndicator = Settings.System.getInt(mContext.getContentResolver(),
+                    Settings.System.SHOW_RECENTS_MEMORY_INDICATOR, 0) == 1;
+        if (!showMemoryIndicator){
+            mRecentsMemoryIndicator.setVisibility(View.GONE);
+        }
         if (mRecentsScrim != null) {
             mHighEndGfx = ActivityManager.isHighEndGfx();
             if (!mHighEndGfx) {
@@ -622,11 +673,7 @@ public class RecentsPanelView extends RelativeLayout implements OnItemClickListe
                 ((BitmapDrawable) mRecentsScrim.getBackground()).setTileModeY(TileMode.REPEAT);
             }
         }
-
-        mRamUsageBar = (LinearColorBar) findViewById(R.id.ram_usage_bar);
-        mForegroundProcessText = (TextView) findViewById(R.id.foregroundText);
-        mBackgroundProcessText = (TextView) findViewById(R.id.backgroundText);
-        mHandler.post(updateRamBarTask);
+	updateRamBar();
     }
 
     public void setMinSwipeAlpha(float minAlpha) {
@@ -741,6 +788,25 @@ public class RecentsPanelView extends RelativeLayout implements OnItemClickListe
         }
     }
 
+    public void setColor() {
+        int color = Settings.System.getIntForUser(mContext.getContentResolver(),
+                Settings.System.RECENTS_PANEL_COLOR, 0xe0000000, UserHandle.USER_CURRENT);
+
+        if (mRecentsScrim != null) {
+            mHighEndGfx = ActivityManager.isHighEndGfx();
+            if (color == 0xe0000000) {
+                if (!mHighEndGfx) {
+                    mRecentsScrim.setBackground(null);
+                } else if (mRecentsScrim.getBackground() instanceof BitmapDrawable) {
+                    // In order to save space, we make the background texture repeat in the Y direction
+                    ((BitmapDrawable) mRecentsScrim.getBackground()).setTileModeY(TileMode.REPEAT);
+                }
+            } else {
+                mRecentsScrim.setBackgroundColor(color);
+            }
+        }
+    }
+
     public void onWindowAnimationStart() {
         mWaitingForWindowAnimation = false;
         mWindowAnimationStartTime = System.currentTimeMillis();
@@ -753,7 +819,7 @@ public class RecentsPanelView extends RelativeLayout implements OnItemClickListe
             mRecentTasksLoader.cancelLoadingThumbnailsAndIcons(this);
             onTaskLoadingCancelled();
         }
-        mHandler.post(updateRamBarTask);
+	updateRamBar();
     }
 
     public void onTaskLoadingCancelled() {
@@ -762,13 +828,14 @@ public class RecentsPanelView extends RelativeLayout implements OnItemClickListe
             mRecentTaskDescriptions = null;
             mListAdapter.notifyDataSetInvalidated();
         }
-        mHandler.removeCallbacks(updateRamBarTask);
+	updateRamBar();
     }
 
     public void refreshViews() {
         mListAdapter.notifyDataSetInvalidated();
         updateUiElements();
         showIfReady();
+	updateRamBar();
     }
 
     public void refreshRecentTasksList() {
@@ -793,7 +860,6 @@ public class RecentsPanelView extends RelativeLayout implements OnItemClickListe
         if (((RecentsActivity) mContext).isActivityShowing()) {
             refreshViews();
         }
-        mHandler.post(updateRamBarTask);
     }
 
     private void updateUiElements() {
@@ -888,6 +954,7 @@ public class RecentsPanelView extends RelativeLayout implements OnItemClickListe
         if (usingDrawingCache) {
             holder.thumbnailViewImage.setDrawingCacheEnabled(false);
         }
+        RecentTasksLoader.getInstance(mContext).cancelPreloadingFirstTask();
     }
 
     public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
@@ -909,20 +976,28 @@ public class RecentsPanelView extends RelativeLayout implements OnItemClickListe
         // mListAdapter.notifyDataSetChanged();
 
         if (mRecentTaskDescriptions.size() == 0) {
+            RecentTasksLoader.getInstance(mContext).cancelPreloadingFirstTask();
             dismissAndGoBack();
         }
 
         // Currently, either direction means the same thing, so ignore direction and remove
         // the task.
-        mAm.removeTask(ad.persistentTaskId, ActivityManager.REMOVE_TASK_KILL_PROCESS);
+        final ActivityManager am = (ActivityManager)
+                mContext.getSystemService(Context.ACTIVITY_SERVICE);
+        if (am != null) {
+            am.removeTask(ad.persistentTaskId, ActivityManager.REMOVE_TASK_KILL_PROCESS);
 
-        // Accessibility feedback
-        setContentDescription(
-                mContext.getString(R.string.accessibility_recents_item_dismissed, ad.getLabel()));
-        sendAccessibilityEvent(AccessibilityEvent.TYPE_VIEW_SELECTED);
-        setContentDescription(null);
+            // Accessibility feedback
+            setContentDescription(
+                    mContext.getString(R.string.accessibility_recents_item_dismissed, ad.getLabel()));
+            sendAccessibilityEvent(AccessibilityEvent.TYPE_VIEW_SELECTED);
+            setContentDescription(null);
 
-        mHandler.post(updateRamBarTask);
+            if (mUpdateMemoryIndicator) {
+                mRecentsMemoryIndicator.updateMemoryInfo();
+            }
+        }
+	updateRamBar();
     }
 
     private void startApplicationDetailsActivity(String packageName) {
@@ -1156,62 +1231,186 @@ public class RecentsPanelView extends RelativeLayout implements OnItemClickListe
         mRecentsContainer.drawFadedEdges(canvas, left, right, top, bottom);
     }
 
-    private boolean hasHWbuttons() {
-        int hardwareKeyMask = mContext.getResources()
-                .getInteger(com.android.internal.R.integer.config_deviceHardwareKeys);
-        return (hardwareKeyMask != 0);
-    }
+    private void updateRamBar() {
+        mRamUsageBar = (LinearColorBar) findViewById(R.id.ram_usage_bar);
 
-    private int pxToDp(int px, Context context) {
-        float d = context.getResources().getDisplayMetrics().density;
-        return (int)(px * d);
-    }
+        int mRamBarMode = (Settings.System.getInt(mContext.getContentResolver(),
+                             Settings.System.RECENTS_RAM_BAR_MODE, 0));
 
-    private static boolean isTablet(Context context) {
-        boolean xlarge = ((context.getResources().getConfiguration().screenLayout
-                & Configuration.SCREENLAYOUT_SIZE_MASK) == 4);
-        boolean large = ((context.getResources().getConfiguration().screenLayout
-                & Configuration.SCREENLAYOUT_SIZE_MASK) == Configuration.SCREENLAYOUT_SIZE_LARGE);
-        return (xlarge || large);
-    }
+        if (mRamBarMode != 0 && mRamUsageBar != null) {
 
-    private final Runnable updateRamBarTask = new Runnable() {
-        @Override
-        public void run() {
-            if (!ramBarEnabled)
-                return;
+            long usedMem = 0;
+            long freeMem = 0;
+	    double usedMemD = 0;
+	    double freeMemD = 0;
 
-            mAm.getMemoryInfo(mMemInfo);
-            final long secServerMem = mMemInfo.secondaryServerThreshold;
-            mMemInfoReader.readMemInfo();
-            final long availMem = mMemInfoReader.getFreeSize()
-                    + (ramBarIncludeCached ? 0 : mMemInfoReader.getCachedSize())
-                    - secServerMem;
-            final long totalMem = mMemInfoReader.getTotalSize();
+                mRamUsageBar.setVisibility(View.VISIBLE);
+                updateMemoryInfo();
+   
+                switch (mRamBarMode) {
+                    case 1:
+                        usedMem = mActiveMemory;
+                        freeMem = mTotalMemory - mActiveMemory;
+                        break;
+                    case 2:
+                        usedMem = mActiveMemory + mCachedMemory;
+                        freeMem = mTotalMemory - mActiveMemory - mCachedMemory;
+                        break;
+                    case 3:
+                        usedMem = mTotalMemory - mFreeMemory;
+                        freeMem = mFreeMemory;
+                        break;
+                }
 
-            String sizeStr = Formatter.formatShortFileSize(mContext, totalMem-availMem);
-            mForegroundProcessText.setText(getResources().getString(
-                    (ramBarIncludeCached
-                            ? R.string.service_foreground_processes_cached
-                            : R.string.service_foreground_processes), sizeStr));
-            sizeStr = Formatter.formatShortFileSize(mContext, availMem);
-            mBackgroundProcessText.setText(getResources().getString(
-                    R.string.service_background_processes, sizeStr));
+            mUsedMemText = (TextView)findViewById(R.id.usedMemText);
+            mFreeMemText = (TextView)findViewById(R.id.freeMemText);
+            mRamText = (TextView)findViewById(R.id.ramText);
 
-            mRamUsageBar.setRatios(((float) totalMem - (float) availMem) / (float) totalMem, 0, 0);
+	    boolean showgbrambar = Settings.System.getInt(mContext.getContentResolver(), Settings.System.SHOW_GB_RAMBAR, 1) == 1;
+
+	if (showgbrambar) {
+            if (usedMem >= 1024) {
+            usedMemD = (double)usedMem / 1024;
+            String temp = String.format("%1$,.1f", usedMemD);
+            usedMemD = Double.parseDouble(temp);
+            mUsedMemText.setText(getResources().getString(
+                    R.string.service_used_mem, usedMemD + " GB"));
+            }
+            else {
+            mUsedMemText.setText(getResources().getString(
+                    R.string.service_used_mem, usedMem + " MB"));
+            }
+            if (freeMem >= 1024) {
+            freeMemD = (double)freeMem / 1024;
+            String temp = String.format("%1$,.1f", freeMemD);
+            freeMemD = Double.parseDouble(temp);
+            mFreeMemText.setText(getResources().getString(
+                    R.string.service_free_mem, freeMemD + " GB"));
+            }
+            else {
+             mFreeMemText.setText(getResources().getString(
+                     R.string.service_free_mem, freeMem + " MB"));
+            }
+	} else {
+             mUsedMemText.setText(getResources().getString(
+                     R.string.service_used_mem, usedMem + " MB"));
+             mFreeMemText.setText(getResources().getString(
+                     R.string.service_free_mem, freeMem + " MB"));
+	}
+
+            mRamText.setText(getResources().getString(
+                    R.string.memory));
+            float totalMem = mTotalMemory;
+            float totalShownMem = (mTotalMemory - mFreeMemory - mCachedMemory - mActiveMemory)/ totalMem;
+            float totalActiveMem = mActiveMemory / totalMem;
+            float totalCachedMem = mCachedMemory / totalMem;
+            mRamUsageBar.setRatios(totalShownMem, totalCachedMem, totalActiveMem);
+
+            mRamUsageBar.setOnClickListener(new OnClickListener() {
+                @Override
+                public void onClick(View v) {
+                    Intent intent = new Intent();
+                    intent.setComponent(new ComponentName(
+                            "com.android.settings",
+                            "com.android.settings.RunningServices"));
+
+                    try {
+                        // Dismiss the lock screen when Settings starts.
+                        ActivityManagerNative.getDefault().dismissKeyguardOnNextActivity();
+                    } catch (RemoteException e) {
+                    }
+                intent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK
+                            | Intent.FLAG_ACTIVITY_MULTIPLE_TASK
+                            | Intent.FLAG_ACTIVITY_EXCLUDE_FROM_RECENTS
+                            | Intent.FLAG_ACTIVITY_NO_HISTORY);
+                    mContext.startActivityAsUser(intent, new UserHandle(UserHandle.USER_CURRENT));
+                }
+            });
+
+            mRamUsageBar.setOnLongClickListener(new OnLongClickListener() {
+                @Override
+                public boolean onLongClick(View v) {
+                    Intent intent = new Intent();
+                    intent.setComponent(new ComponentName(
+                            "com.android.settings",
+                            "com.android.settings.Settings$RamBarActivity"));
+
+                    try {
+                        // Dismiss the lock screen when Settings starts.
+                        ActivityManagerNative.getDefault().dismissKeyguardOnNextActivity();
+                    } catch (RemoteException e) {
+                    }
+                    intent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK
+                            | Intent.FLAG_ACTIVITY_MULTIPLE_TASK
+                            | Intent.FLAG_ACTIVITY_EXCLUDE_FROM_RECENTS
+                            | Intent.FLAG_ACTIVITY_NO_HISTORY);
+                    mContext.startActivityAsUser(intent, new UserHandle(UserHandle.USER_CURRENT));
+                    return true;
+                }
+            });
+
+        } else if (mRamUsageBar != null) {
+            mRamUsageBar.setVisibility(View.GONE);
         }
-    };
-
-    public void updateSettings() {
-        ramBarEnabled = Settings.System.getBoolean(mContext.getContentResolver(),
-                Settings.System.RAM_USAGE_BAR, true);
-        ramBarIncludeCached = Settings.System.getBoolean(mContext.getContentResolver(),
-                Settings.System.RAM_USAGE_BAR_CACHED, false);
     }
 
-    private void updateView() {
-        if (mRamUsageBar != null) {
-            mRamUsageBar.setVisibility(ramBarEnabled ? View.VISIBLE : View.GONE);
+    private void updateMemoryInfo() {
+        long result = 0;
+        try {
+            String firstLine = readLine("/proc/meminfo", 1);
+            if (firstLine != null) {
+                String parts[] = firstLine.split("\\s+");
+                if (parts.length == 3) {
+                    result = Long.parseLong(parts[1])/1024;
+                }
+            }
+        } catch (IOException e) {}
+        mTotalMemory = result;
+
+        try {
+            String firstLine = readLine("/proc/meminfo", 2);
+            if (firstLine != null) {
+                String parts[] = firstLine.split("\\s+");
+                if (parts.length == 3) {
+                    result = Long.parseLong(parts[1])/1024;
+                }
+            }
+        } catch (IOException e) {}
+        mFreeMemory = result;
+
+        try {
+            String firstLine = readLine("/proc/meminfo", 6);
+            if (firstLine != null) {
+                String parts[] = firstLine.split("\\s+");
+                if (parts.length == 3) {
+                    result = Long.parseLong(parts[1])/1024;
+                }
+            }
+        } catch (IOException e) {}
+        mActiveMemory = result;
+
+        try {
+            String firstLine = readLine("/proc/meminfo", 4);
+            if (firstLine != null) {
+                String parts[] = firstLine.split("\\s+");
+                if (parts.length == 3) {
+                    result = Long.parseLong(parts[1])/1024;
+                }
+            }
+        } catch (IOException e) {}
+        mCachedMemory = result;
+
+    }
+
+    private static String readLine(String filename, int line) throws IOException {
+        BufferedReader reader = new BufferedReader(new FileReader(filename), 256);
+        try {
+            for(int i = 1; i < line; i++) {
+                reader.readLine();
+            }
+            return reader.readLine();
+        } finally {
+            reader.close();
         }
     }
 

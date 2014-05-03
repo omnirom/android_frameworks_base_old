@@ -75,8 +75,7 @@ public class RecentController implements RecentPanelView.OnExitListener,
 
     // Animation control values.
     private static final int ANIMATION_STATE_NONE = 0;
-    private static final int ANIMATION_STATE_IN   = 1;
-    private static final int ANIMATION_STATE_OUT  = 2;
+    private static final int ANIMATION_STATE_OUT  = 1;
 
     // Animation state.
     private int mAnimationState = ANIMATION_STATE_NONE;
@@ -171,13 +170,8 @@ public class RecentController implements RecentPanelView.OnExitListener,
                         new RecentListOnScaleGestureListener(mRecentWarningContent, cardListView));
 
         // Prepare recents panel view and set the listeners
-        cardListView.setOnTouchListener(new View.OnTouchListener() {
-            @Override
-            public boolean onTouch(View v, MotionEvent event) {
-                recentListGestureDetector.onTouchEvent(event);
-                return false;
-            }
-        });
+        cardListView.setGestureDetector(recentListGestureDetector);
+
         mRecentPanelView = new RecentPanelView(mContext, this, cardListView, mEmptyRecentView);
         mRecentPanelView.setOnExitListener(this);
         mRecentPanelView.setOnTasksLoadedListener(this);
@@ -311,8 +305,8 @@ public class RecentController implements RecentPanelView.OnExitListener,
      * External call. Preload recent tasks.
      */
     public void preloadRecentTasksList() {
-        if (DEBUG) Log.d(TAG, "preloading recents");
         if (mRecentPanelView != null) {
+            if (DEBUG) Log.d(TAG, "preloading recents");
             mIsPreloaded = true;
             setSystemUiVisibilityFlags();
             mRecentPanelView.setCancelledByUser(false);
@@ -324,8 +318,8 @@ public class RecentController implements RecentPanelView.OnExitListener,
      * External call. Cancel preload recent tasks.
      */
     public void cancelPreloadingRecentTasksList() {
-        if (DEBUG) Log.d(TAG, "cancel preloading recents");
-        if (mRecentPanelView != null) {
+        if (mRecentPanelView != null && !isShowing()) {
+            if (DEBUG) Log.d(TAG, "cancel preloading recents");
             mIsPreloaded = false;
             mRecentPanelView.setCancelledByUser(true);
         }
@@ -425,21 +419,21 @@ public class RecentController implements RecentPanelView.OnExitListener,
         if (isShowing()) {
             mIsPreloaded = false;
             mIsToggled = false;
+            mIsShowing = false;
             mRecentPanelView.setTasksLoaded(false);
             mRecentPanelView.dismissPopup();
             if (forceHide) {
                 if (DEBUG) Log.d(TAG, "force hide recent window");
-                mIsShowing = false;
                 CacheController.getInstance(mContext).setRecentScreenShowing(false);
                 mAnimationState = ANIMATION_STATE_NONE;
-                mHandler.removeCallbacks(mRecentThirdStageLoader);
+                mHandler.removeCallbacks(mRecentRunnable);
                 mWindowManager.removeViewImmediate(mParentView);
                 return true;
             } else if (mAnimationState != ANIMATION_STATE_OUT) {
                 if (DEBUG) Log.d(TAG, "out animation starting");
                 mAnimationState = ANIMATION_STATE_OUT;
-                mHandler.removeCallbacks(mRecentThirdStageLoader);
-                mHandler.postDelayed(mRecentThirdStageLoader, mContext.getResources().getInteger(
+                mHandler.removeCallbacks(mRecentRunnable);
+                mHandler.postDelayed(mRecentRunnable, mContext.getResources().getInteger(
                         com.android.internal.R.integer.config_recentDefaultDur));
                 mWindowManager.removeView(mParentView);
                 return true;
@@ -453,11 +447,9 @@ public class RecentController implements RecentPanelView.OnExitListener,
         if (DEBUG) Log.d(TAG, "in animation starting");
         mIsShowing = true;
         sendCloseSystemWindows();
+        mAnimationState = ANIMATION_STATE_NONE;
+        mHandler.removeCallbacks(mRecentRunnable);
         CacheController.getInstance(mContext).setRecentScreenShowing(true);
-        mAnimationState = ANIMATION_STATE_IN;
-        mHandler.removeCallbacks(mRecentThirdStageLoader);
-        mHandler.postDelayed(mRecentThirdStageLoader, mContext.getResources().getInteger(
-                com.android.internal.R.integer.config_recentDefaultDur));
         mWindowManager.addView(mParentView, generateLayoutParameter());
     }
 
@@ -487,31 +479,13 @@ public class RecentController implements RecentPanelView.OnExitListener,
     }
 
     /**
-     * Runnable for our last loading stage.
-     * It looks first weird to use a runable for it. But it does not harm here.
-     * It just gives our in animation a bit time before we start loading invisible
-     * content. Even in the case we are not ready and the user access allready not loaded
-     * content the content will be loaded in this moment due that it get called by either
-     * the third loading stage here or by the getView method from our cards arrayadapter.
-     * So we are save here to call the third loading stage with the default animation delay.
-     *
-     * This helps especially low end non gfx devices to play the animation proper.
+     * Runnable if recent panel closed to notify the cache controller about the state.
      */
-    private final Runnable mRecentThirdStageLoader = new Runnable() {
+    private final Runnable mRecentRunnable = new Runnable() {
         @Override
         public void run() {
-            if (mAnimationState == ANIMATION_STATE_IN) {
-                if (DEBUG) Log.d(TAG, "in animation finished");
-                // Now we can trigger 3rd loading stage and load
-                // all missing resources on invisble cards or
-                // content.
-                mRecentPanelView.updateInvisibleCards();
-                // We are now full visible. Notify to be safe the
-                // arrayadapter about this situation.
-                mRecentPanelView.notifyDataSetChanged(true);
-            } else if (mAnimationState == ANIMATION_STATE_OUT) {
+            if (mAnimationState == ANIMATION_STATE_OUT) {
                 if (DEBUG) Log.d(TAG, "out animation finished");
-                mIsShowing = false;
                 CacheController.getInstance(mContext).setRecentScreenShowing(false);
             }
             mAnimationState = ANIMATION_STATE_NONE;
@@ -534,6 +508,9 @@ public class RecentController implements RecentPanelView.OnExitListener,
                     false, this, UserHandle.USER_ALL);
             resolver.registerContentObserver(Settings.System.getUriFor(
                     Settings.System.RECENT_PANEL_SCALE_FACTOR),
+                    false, this, UserHandle.USER_ALL);
+            resolver.registerContentObserver(Settings.System.getUriFor(
+                    Settings.System.RECENT_PANEL_EXPANDED_MODE),
                     false, this, UserHandle.USER_ALL);
             update();
         }
@@ -564,15 +541,18 @@ public class RecentController implements RecentPanelView.OnExitListener,
                     UserHandle.USER_CURRENT) / 100.0f;
 
             // If changed set new scalefactor, rebuild the recent panel
-            // and notify RecentPanelView and CacheController about new value.
+            // and notify RecentPanelView about new value.
             if (scaleFactor != mScaleFactor) {
                 mScaleFactor = scaleFactor;
                 rebuildRecentsScreen();
             }
             if (mRecentPanelView != null) {
                 mRecentPanelView.setScaleFactor(mScaleFactor);
+                mRecentPanelView.setExpandedMode(Settings.System.getIntForUser(
+                    resolver, Settings.System.RECENT_PANEL_EXPANDED_MODE,
+                    mRecentPanelView.EXPANDED_MODE_AUTO,
+                    UserHandle.USER_CURRENT));
             }
-            CacheController.getInstance(mContext).setScaleFactor(mScaleFactor);
         }
     }
 
@@ -633,6 +613,9 @@ public class RecentController implements RecentPanelView.OnExitListener,
 
         @Override
         public boolean onScaleBegin(ScaleGestureDetector detector) {
+            if (!mRecentPanelView.hasClearableTasks()) {
+                return false;
+            }
             return true;
         }
 
@@ -646,6 +629,7 @@ public class RecentController implements RecentPanelView.OnExitListener,
 
             // Gesture was detected and activated. Prepare and play the animations.
             if (mActionDetected) {
+                final boolean hasFavorite = mRecentPanelView.hasFavorite();
 
                 // Setup animation for warning content - fade out.
                 ValueAnimator animation1 = ValueAnimator.ofFloat(1.0f, 0.0f);
@@ -678,8 +662,10 @@ public class RecentController implements RecentPanelView.OnExitListener,
                 });
 
                 // Setup animation for empty recent image - fade in.
-                mEmptyRecentView.setAlpha(0.0f);
-                mEmptyRecentView.setVisibility(View.VISIBLE);
+                if (!hasFavorite) {
+                    mEmptyRecentView.setAlpha(0.0f);
+                    mEmptyRecentView.setVisibility(View.VISIBLE);
+                }
                 ValueAnimator animation4 = ValueAnimator.ofFloat(0.0f, 1.0f);
                 animation4.setDuration(ANIMATION_FADE_IN_DURATION);
                 animation4.addUpdateListener(new ValueAnimator.AnimatorUpdateListener() {
@@ -692,18 +678,22 @@ public class RecentController implements RecentPanelView.OnExitListener,
                 // Start all ValueAnimator animations
                 // and listen onAnimationEnd to prepare the views for the next call.
                 AnimatorSet animationSet = new AnimatorSet();
-                animationSet.playTogether(animation1, animation2, animation3, animation4);
+                if (hasFavorite) {
+                    animationSet.playTogether(animation1, animation3);
+                } else {
+                    animationSet.playTogether(animation1, animation2, animation3, animation4);
+                }
                 animationSet.addListener(new AnimatorListenerAdapter() {
                     @Override
                     public void onAnimationEnd(Animator animation) {
                         // Animation is finished. Prepare warning content for next call.
                         mRecentWarningContent.setVisibility(View.GONE);
                         mRecentWarningContent.setAlpha(1.0f);
-                        // Prepare listview for next recent call.
-                        mCardListView.setVisibility(View.GONE);
-                        mCardListView.setAlpha(1.0f);
                         // Remove all tasks now.
                         if (mRecentPanelView.removeAllApplications()) {
+                            // Prepare listview for next recent call.
+                            mCardListView.setVisibility(View.GONE);
+                            mCardListView.setAlpha(1.0f);
                             // Finally hide our recents screen.
                             hideRecents(false);
                         }

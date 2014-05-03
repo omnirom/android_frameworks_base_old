@@ -19,17 +19,20 @@
 -->
 
 <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:systemui="http://schemas.android.com/apk/res/com.android.systemui"
     android:id="@+id/notification_shortcut_item"
     android:orientation="vertical"
     android:clickable="true"
     android:focusable="true"
     android:background="@drawable/stat_power_background">
 
-    <ImageView
+    <com.android.systemui.widget.RoundedImageView
         android:id="@+id/notification_shortcut_image"
         android:layout_width="match_parent"
         android:layout_height="48dip"
         android:layout_weight="1"
+	systemui:corner_radius="30dip"
+        systemui:is_oval="true"
         android:scaleType="center" />
 
 </LinearLayout>

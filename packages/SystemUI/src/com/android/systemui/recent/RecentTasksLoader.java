@@ -31,6 +31,7 @@ import android.os.AsyncTask;
 import android.os.Handler;
 import android.os.Process;
 import android.os.UserHandle;
+import android.provider.Settings;
 import android.util.Log;
 import android.view.MotionEvent;
 import android.view.View;
@@ -103,10 +104,16 @@ public class RecentTasksLoader implements View.OnTouchListener {
         mDefaultIconBackground = new ColorDrawableWithDimensions(0x00000000, iconSize, iconSize);
 
         // Render the default thumbnail background
+        boolean largeThumbs = Settings.System.getIntForUser(context.getContentResolver(),
+                Settings.System.LARGE_RECENT_THUMBS, 0, UserHandle.USER_CURRENT) == 1;
         int thumbnailWidth =
-                (int) res.getDimensionPixelSize(com.android.internal.R.dimen.thumbnail_width);
-        int thumbnailHeight =
-                (int) res.getDimensionPixelSize(com.android.internal.R.dimen.thumbnail_height);
+                res.getDimensionPixelSize(
+                com.android.internal.R.dimen.thumbnail_width);
+        if (largeThumbs) thumbnailWidth = thumbnailWidth * 2;
+        int height = res.getDisplayMetrics().heightPixels;
+        int width = res.getDisplayMetrics().widthPixels;
+        int thumbnailHeight = (height > width ? width : height) * thumbnailWidth /
+                (height > width ? height : width);
         int color = res.getColor(R.drawable.status_bar_recents_app_thumbnail_background);
 
         mDefaultThumbnailBackground =
@@ -288,11 +295,11 @@ public class RecentTasksLoader implements View.OnTouchListener {
         }
 
         if (mTaskLoader != null) {
-            mTaskLoader.cancel(true);
+            mTaskLoader.cancel(false);
             mTaskLoader = null;
         }
         if (mThumbnailLoader != null) {
-            mThumbnailLoader.cancel(true);
+            mThumbnailLoader.cancel(false);
             mThumbnailLoader = null;
         }
         mLoadedTasks = null;
@@ -491,9 +498,6 @@ public class RecentTasksLoader implements View.OnTouchListener {
                                 tasksWaitingForThumbnails.put(item);
                                 break;
                             } catch (InterruptedException e) {
-                                if (isCancelled()) {
-                                    return null;
-                                }
                             }
                         }
                         tasks.add(item);
@@ -520,9 +524,6 @@ public class RecentTasksLoader implements View.OnTouchListener {
                         tasksWaitingForThumbnails.put(new TaskDescription());
                         break;
                     } catch (InterruptedException e) {
-                        if (isCancelled()) {
-                            return null;
-                        }
                     }
                 }
 
@@ -567,9 +568,6 @@ public class RecentTasksLoader implements View.OnTouchListener {
                         try {
                             td = tasksWaitingForThumbnails.take();
                         } catch (InterruptedException e) {
-                            if (isCancelled()) {
-                                return null;
-                            }
                         }
                     }
                     if (td.isNull()) { // end sentinel
