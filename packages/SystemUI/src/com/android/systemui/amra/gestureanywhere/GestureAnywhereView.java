@@ -22,6 +22,7 @@ import java.util.List;
 
 import android.annotation.AmraLab;
 import android.annotation.AmraLab.Classification;
+import android.app.StatusBarManager;
 import android.content.ActivityNotFoundException;
 import android.content.ContentResolver;
 import android.content.Context;
@@ -48,6 +49,7 @@ import android.view.animation.DecelerateInterpolator;
 import android.view.animation.TranslateAnimation;
 import com.android.systemui.R;
 import com.android.systemui.amra.TriggerOverlayView;
+import com.android.systemui.statusbar.BaseStatusBar;
 
 import static android.view.KeyEvent.ACTION_DOWN;
 import static android.view.KeyEvent.KEYCODE_BACK;
@@ -65,6 +67,9 @@ public class GestureAnywhereView extends TriggerOverlayView implements GestureOv
     private boolean mTriggerVisible = false;
     private TranslateAnimation mSlideIn;
     private TranslateAnimation mSlideOut;
+
+    // Reference to the status bar
+    private BaseStatusBar mBar;
 
     class SettingsObserver extends ContentObserver {
         SettingsObserver(Handler handler) {
@@ -216,8 +221,38 @@ public class GestureAnywhereView extends TriggerOverlayView implements GestureOv
     protected void onConfigurationChanged(Configuration newConfig) {
         super.onConfigurationChanged(newConfig);
         if (mState == State.Collapsed) {
+            reposition();
             reduceToTriggerRegion();
         }
+    }
+
+    private void reposition() {
+        mViewHeight = getWindowHeight();
+        final ContentResolver resolver = mContext.getContentResolver();
+        setTopPercentage(Settings.System.getInt(
+                resolver, Settings.System.GESTURE_ANYWHERE_TRIGGER_TOP, 0) / 100f);
+        setBottomPercentage(Settings.System.getInt(
+                resolver, Settings.System.GESTURE_ANYWHERE_TRIGGER_HEIGHT, 100) / 100f);
+    }
+
+    public void setStatusBar(BaseStatusBar bar) {
+        mBar = bar;
+    }
+
+    /**
+     * Disables home, recent and search in the navbar when showing this view
+     */
+    private void disableNavButtons() {
+        mBar.disable(StatusBarManager.DISABLE_HOME
+                | StatusBarManager.DISABLE_RECENT
+                | StatusBarManager.DISABLE_SEARCH);
+    }
+
+    /**
+     * Re-enable home, recent, and search
+     */
+    private void enableNavButtons() {
+        mBar.disable(0);
     }
 
     private void switchToState(State state) {
@@ -232,6 +267,7 @@ public class GestureAnywhereView extends TriggerOverlayView implements GestureOv
                 }
                 mContent.setVisibility(View.GONE);
                 mGestureView.setVisibility(View.GONE);
+                enableNavButtons();
                 break;
             case Expanded:
                 mGestureView.setVisibility(View.VISIBLE);
@@ -242,6 +278,7 @@ public class GestureAnywhereView extends TriggerOverlayView implements GestureOv
                 expandFromTriggerRegion();
                 mContent.setVisibility(View.VISIBLE);
                 mContent.startAnimation(mSlideIn);
+                disableNavButtons();
                 break;
             case Closing:
                 mContent.startAnimation(mSlideOut);
