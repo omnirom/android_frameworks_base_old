@@ -1,0 +1,21 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "8b77b57d_da187e7c",
+        "filename": "packages/SystemUI/src/com/android/systemui/BatteryCircleMeterView.java",
+        "patchSetId": 9
+      },
+      "lineNbr": 198,
+      "author": {
+        "id": 1000117
+      },
+      "writtenOn": "2014-05-06T16:30:29Z",
+      "side": 1,
+      "message": "Should be changed too.",
+      "revId": "82b152a9f937f96b82875f808a1d266827b0593b",
+      "serverId": "56841c99-7c94-43d4-bf0b-cb4707e66d55",
+      "unresolved": false
+    }
+  ]
+}
