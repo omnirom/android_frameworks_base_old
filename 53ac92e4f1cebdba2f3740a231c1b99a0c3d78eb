@@ -67,6 +67,24 @@
       "revId": "53ac92e4f1cebdba2f3740a231c1b99a0c3d78eb",
       "serverId": "56841c99-7c94-43d4-bf0b-cb4707e66d55",
       "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "8b77b57d_9a6526e1",
+        "filename": "media/java/android/media/AudioService.java",
+        "patchSetId": 17
+      },
+      "lineNbr": 4448,
+      "author": {
+        "id": 1000686
+      },
+      "writtenOn": "2014-05-06T22:24:26Z",
+      "side": 1,
+      "message": "i don\u0027t have any consistent answer to any of your questions so i will do the changes :p thank you!",
+      "parentUuid": "8b77b57d_7a576a06",
+      "revId": "53ac92e4f1cebdba2f3740a231c1b99a0c3d78eb",
+      "serverId": "56841c99-7c94-43d4-bf0b-cb4707e66d55",
+      "unresolved": false
     }
   ]
 }
