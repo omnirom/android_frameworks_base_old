@@ -1,0 +1,72 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "8b77b57d_da46be54",
+        "filename": "media/java/android/media/AudioService.java",
+        "patchSetId": 17
+      },
+      "lineNbr": 4430,
+      "author": {
+        "id": 1000026
+      },
+      "writtenOn": "2014-05-06T20:35:20Z",
+      "side": 1,
+      "message": "I would add this string also to Settings then you can use it both here and in Settings",
+      "revId": "53ac92e4f1cebdba2f3740a231c1b99a0c3d78eb",
+      "serverId": "56841c99-7c94-43d4-bf0b-cb4707e66d55",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "8b77b57d_ba3902cd",
+        "filename": "media/java/android/media/AudioService.java",
+        "patchSetId": 17
+      },
+      "lineNbr": 4441,
+      "author": {
+        "id": 1000026
+      },
+      "writtenOn": "2014-05-06T20:35:20Z",
+      "side": 1,
+      "message": "why you added FLAG_ACTIVITY_CLEAR_TOP here but not below? IMHO its not needed here",
+      "revId": "53ac92e4f1cebdba2f3740a231c1b99a0c3d78eb",
+      "serverId": "56841c99-7c94-43d4-bf0b-cb4707e66d55",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "8b77b57d_9a3c46bd",
+        "filename": "media/java/android/media/AudioService.java",
+        "patchSetId": 17
+      },
+      "lineNbr": 4442,
+      "author": {
+        "id": 1000026
+      },
+      "writtenOn": "2014-05-06T20:35:20Z",
+      "side": 1,
+      "message": "You can use UserHandle.CURRENT instead",
+      "revId": "53ac92e4f1cebdba2f3740a231c1b99a0c3d78eb",
+      "serverId": "56841c99-7c94-43d4-bf0b-cb4707e66d55",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "8b77b57d_7a576a06",
+        "filename": "media/java/android/media/AudioService.java",
+        "patchSetId": 17
+      },
+      "lineNbr": 4448,
+      "author": {
+        "id": 1000026
+      },
+      "writtenOn": "2014-05-06T20:35:20Z",
+      "side": 1,
+      "message": "Why you dont use startActivityAsUser also here?",
+      "revId": "53ac92e4f1cebdba2f3740a231c1b99a0c3d78eb",
+      "serverId": "56841c99-7c94-43d4-bf0b-cb4707e66d55",
+      "unresolved": false
+    }
+  ]
+}
