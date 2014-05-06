@@ -1,6 +1,6 @@
 /*
- * Copyright (C) 2014 The Amra Project
- * This code has been modified. Portions copyright (C) 2014, Amra Project.
+ * Copyright (C) 2014 The OmniRom Project
+ * This code has been modified. Portions copyright (C) 2014, OmniRom Project.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.

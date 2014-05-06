@@ -3274,6 +3274,12 @@ public final class Settings {
         public static final String LOCKSCREEN_DISABLE_HINTS = "lockscreen_disable_hints";
 
         /**
+         * Whether to showing wallpaper behind active display.
+         * @hide
+         */
+        public static final String ACTIVE_DISPLAY_WALLPAPER = "active_display_wallpaper";
+
+        /**
          * Whether to not showing active display when there is annoying notifications.
          * @hide
          */
