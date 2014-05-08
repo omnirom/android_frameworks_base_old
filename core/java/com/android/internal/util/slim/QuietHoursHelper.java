@@ -21,6 +21,9 @@ import android.os.UserHandle;
 import android.provider.Settings;
 
 import java.util.Calendar;
+import java.util.List;
+import java.util.ArrayList;
+import java.util.Iterator;
 
 public class QuietHoursHelper {
    // broadcast event sent from service when quiet hours start
@@ -40,6 +43,54 @@ public class QuietHoursHelper {
 
    // broadcast event to external init quiet hours service
    public static final String QUIET_HOURS_INIT_COMMAND = "com.android.settings.slim.service.QUIET_HOURS_INIT_COMMAND";
+
+   public static class WhitelistContact {
+        public String mNumber;
+        public boolean mBypassCall;
+        public boolean mBypassMessage;
+
+        public WhitelistContact(String number, boolean bypassCall, boolean bypassMessage) {
+            mNumber = number;
+            mBypassCall = bypassCall;
+            mBypassMessage = bypassMessage;
+        }
+
+        public WhitelistContact() {
+        }
+
+        public void setBypassCall(boolean value){
+            mBypassCall = value;
+        }
+
+        public void setBypassMessage(boolean value){
+            mBypassMessage = value;
+        }
+
+        @Override
+        public boolean equals(Object o) {
+            if (this == o) {
+                return true;
+            }
+
+            if (!(o instanceof WhitelistContact)) {
+                return false;
+            }
+
+            WhitelistContact lhs = (WhitelistContact) o;
+            return mNumber.equals(lhs.mNumber);
+        }
+
+        public String toString() {
+            return mNumber + "##" + (mBypassCall ? "1" : "0") + "##" + (mBypassMessage ? "1" : "0");
+        }
+
+        public void fromString(String str) {
+            String[] parts = str.split("##");
+            mNumber = parts[0];
+            mBypassCall = Integer.parseInt(parts[1]) == 1;
+            mBypassMessage = Integer.parseInt(parts[2]) == 1;
+        }
+   }
    
    public static boolean inQuietHours(Context context, String option) {
         return inQuietHours(context, option, true, true);
@@ -91,6 +142,93 @@ public class QuietHoursHelper {
                 return (minutes >= quietHoursStart) || (minutes < quietHoursEnd);
             } else {
                 return (minutes >= quietHoursStart) && (minutes < quietHoursEnd);
+            }
+        }
+        return false;
+    }
+
+    public static List<WhitelistContact> loadContacts(Context context){
+        List<WhitelistContact> contacts = new ArrayList<WhitelistContact>();
+
+        String str = Settings.System.getString(context.getContentResolver(), Settings.System.QUIET_HOURS_WHITELIST);
+        if (str != null && str.length() != 0){
+            String[] parts = str.split("\\|\\|");
+            for (int i = 0; i < parts.length; i++){
+                WhitelistContact contact = new WhitelistContact();
+                contact.fromString(parts[i]);
+                contacts.add(contact);
+            }
+        }
+        return contacts;
+    }
+
+    public static boolean isCallBypass(Context context, String number){
+        List<WhitelistContact> contacts = loadContacts(context);
+        Iterator<WhitelistContact> nextContact = contacts.iterator();
+        while (nextContact.hasNext()){
+            WhitelistContact contact = nextContact.next();
+            if (contact.mNumber.equals(number)){
+                return contact.mBypassCall;
+            }
+        }
+        return false;
+    }
+
+    public static boolean hasCallBypass(Context context){
+        List<WhitelistContact> contacts = loadContacts(context);
+        Iterator<WhitelistContact> nextContact = contacts.iterator();
+        while (nextContact.hasNext()){
+            WhitelistContact contact = nextContact.next();
+            if (contact.mBypassCall){
+                return true;
+            }
+        }
+        return false;
+    }
+
+    public static boolean isMessageBypass(Context context, String number){
+        List<WhitelistContact> contacts = loadContacts(context);
+        Iterator<WhitelistContact> nextContact = contacts.iterator();
+        while (nextContact.hasNext()){
+            WhitelistContact contact = nextContact.next();
+            if (contact.mNumber.equals(number)){
+                return contact.mBypassMessage;
+            }
+        }
+        return false;
+    }
+
+    public static boolean hasMessageBypass(Context context){
+        List<WhitelistContact> contacts = loadContacts(context);
+        Iterator<WhitelistContact> nextContact = contacts.iterator();
+        while (nextContact.hasNext()){
+            WhitelistContact contact = nextContact.next();
+            if (contact.mBypassMessage){
+                return true;
+            }
+        }
+        return false;
+    }
+
+    public static boolean hasBypass(Context context){
+        List<WhitelistContact> contacts = loadContacts(context);
+        Iterator<WhitelistContact> nextContact = contacts.iterator();
+        while (nextContact.hasNext()){
+            WhitelistContact contact = nextContact.next();
+            if (contact.mBypassCall || contact.mBypassMessage){
+                return true;
+            }
+        }
+        return false;
+    }
+
+    public static boolean isWhitelistContact(Context context, String number){
+        List<WhitelistContact> contacts = loadContacts(context);
+        Iterator<WhitelistContact> nextContact = contacts.iterator();
+        while (nextContact.hasNext()){
+            WhitelistContact contact = nextContact.next();
+            if (contact.mNumber.equals(number)){
+                return true;
             }
         }
         return false;
