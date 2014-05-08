@@ -32,6 +32,8 @@ import static libcore.io.OsConstants.S_IXGRP;
 import static libcore.io.OsConstants.S_IROTH;
 import static libcore.io.OsConstants.S_IXOTH;
 
+import android.content.res.AssetManager;
+import android.util.Pair;
 import com.android.internal.app.IMediaContainerService;
 import com.android.internal.app.ResolverActivity;
 import com.android.internal.content.NativeLibraryHelper;
@@ -159,6 +161,8 @@ import java.io.PrintWriter;
 import java.nio.ByteBuffer;
 import java.nio.ByteOrder;
 import java.nio.IntBuffer;
+import java.security.DigestInputStream;
+import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
 import java.security.PublicKey;
 import java.security.cert.CertificateException;
@@ -296,8 +300,21 @@ public class PackageManagerService extends IPackageManager.Stub {
     //Where the icon pack can be found in a themed apk
     private static final String APK_PATH_TO_ICONS = "assets/icons/";
 
+    private static final String COMMON_OVERLAY = ThemeUtils.COMMON_RES_TARGET;
+    private static final String APK_PATH_TO_COMMON_OVERLAY = APK_PATH_TO_OVERLAY + COMMON_OVERLAY;
+
     // Where package redirections are stored for legacy themes
     private static final String REDIRECTIONS_PATH = "/data/app/redirections";
+
+    private static final long PACKAGE_HASH_EXPIRATION = 3*60*1000; // 3 minutes
+    private static final long COMMON_RESOURCE_EXPIRATION = 3*60*1000; // 3 minutes
+
+    /**
+     * IDMAP hash version code used to alter the resulting hash and force recreating
+     * of the idmap.  This value should be changed whenever there is a need to force
+     * an update to all idmaps.
+     */
+    private static final byte IDMAP_HASH_VERSION = 1;
 
     final HandlerThread mHandlerThread = new HandlerThread("PackageManager",
             Process.THREAD_PRIORITY_BACKGROUND);
@@ -491,6 +508,11 @@ public class PackageManagerService extends IPackageManager.Stub {
     private AppOpsManager mAppOps;
 
     private IconPackHelper mIconPackHelper;
+
+    private Map<String, Pair<Integer, Long>> mPackageHashes =
+            new HashMap<String, Pair<Integer, Long>>();
+
+    private Map<String, Long> mAvailableCommonResources = new HashMap<String, Long>();
 
     // Set of pending broadcasts for aggregating enable/disable of components.
     static class PendingPackageBroadcasts {
@@ -3673,7 +3695,8 @@ public class PackageManagerService extends IPackageManager.Stub {
             return false;
         }
         final int sharedGid = UserHandle.getSharedAppGid(pkg.applicationInfo.uid);
-        if (mInstaller.idmap(pkg.mScanPath, opkg.mScanPath, redirectionsPath, sharedGid) != 0) {
+        if (mInstaller.idmap(pkg.mScanPath, opkg.mScanPath, redirectionsPath, sharedGid,
+                getPackageHashCode(pkg), getPackageHashCode(opkg)) != 0) {
             Slog.e(TAG, "Failed to generate idmap for " + pkg.mScanPath + " and " + opkg.mScanPath);
             return false;
         }
@@ -5388,6 +5411,14 @@ public class PackageManagerService extends IPackageManager.Stub {
                 }
                 try {
                     ThemeUtils.createCacheDirIfNotExists();
+                    if (hasCommonResources(pkg)
+                            && shouldCompileCommonResources(pkg)) {
+                        ThemeUtils.createCacheDirIfNotExists();
+                        ThemeUtils.createResourcesDirIfNotExists(COMMON_OVERLAY,
+                                pkg.applicationInfo.publicSourceDir);
+                        compileResources(COMMON_OVERLAY, pkg);
+                        mAvailableCommonResources.put(pkg.packageName, System.currentTimeMillis());
+                    }
                     ThemeUtils.createResourcesDirIfNotExists(target, pkg.applicationInfo.publicSourceDir);
                     compileResources(target, pkg);
                     insertIntoOverlayMap(target, pkg);
@@ -5421,7 +5452,8 @@ public class PackageManagerService extends IPackageManager.Stub {
         //when creating the resource table. We care about the resource table's name because
         //it is used when removing the table by cookie.
         try {
-            createTempManifest(pkg.packageName);
+            createTempManifest(COMMON_OVERLAY.equals(target)
+                    ? ThemeUtils.getCommonPackageName(pkg.packageName) : pkg.packageName);
             compileResourcesWithAapt(target, pkg);
         } finally {
             cleanupTempManifest();
@@ -5466,13 +5498,37 @@ public class PackageManagerService extends IPackageManager.Stub {
         }
     }
 
-    private void compileResourcesWithAapt(String target, PackageParser.Package pkg) throws Exception {
+    private boolean hasCommonResources(PackageParser.Package pkg) throws Exception {
+        boolean ret = false;
+        // check if assets/overlays/common exists in this theme
+        Context themeContext = mContext.createPackageContext(pkg.packageName, 0);
+        if (themeContext != null) {
+            AssetManager assets = themeContext.getAssets();
+            String[] common = assets.list("overlays/common");
+            if (common != null && common.length > 0) ret = true;
+        }
+
+        return ret;
+    }
+
+    private void compileResourcesWithAapt(String target, PackageParser.Package pkg)
+            throws Exception {
         String internalPath = APK_PATH_TO_OVERLAY + target;
         String resPath = ThemeUtils.getResDir(target, pkg);
         final int sharedGid = UserHandle.getSharedAppGid(pkg.applicationInfo.uid);
-        int pkgId = target.equals("android") ? Resources.THEME_FRAMEWORK_PKG_ID : Resources.THEME_APP_PKG_ID;
+        int pkgId;
+        if ("android".equals(target)) {
+            pkgId = Resources.THEME_FRAMEWORK_PKG_ID;
+        } else if (COMMON_OVERLAY.equals(target)) {
+            pkgId = Resources.THEME_COMMON_PKG_ID;
+        } else {
+            pkgId = Resources.THEME_APP_PKG_ID;
+        }
 
-        if (mInstaller.aapt(pkg.mScanPath, internalPath, resPath, sharedGid, pkgId) != 0) {
+        boolean hasCommonResources = (hasCommonResources(pkg) && !COMMON_OVERLAY.equals(target));
+        if (mInstaller.aapt(pkg.mScanPath, internalPath, resPath, sharedGid, pkgId,
+                hasCommonResources ? ThemeUtils.getResDir(COMMON_OVERLAY, pkg)
+                        + File.separator + "resources.apk" : "") != 0) {
             throw new Exception("Failed to run aapt");
         }
     }
@@ -5481,7 +5537,8 @@ public class PackageManagerService extends IPackageManager.Stub {
         String resPath = ThemeUtils.getIconPackDir(pkg.packageName);
         final int sharedGid = UserHandle.getSharedAppGid(pkg.applicationInfo.uid);
 
-        if (mInstaller.aapt(pkg.mScanPath, APK_PATH_TO_ICONS, resPath, sharedGid, Resources.THEME_ICON_PKG_ID) != 0) {
+        if (mInstaller.aapt(pkg.mScanPath, APK_PATH_TO_ICONS, resPath, sharedGid,
+                Resources.THEME_ICON_PKG_ID, "") != 0) {
             throw new Exception("Failed to run aapt");
         }
     }
@@ -5590,8 +5647,8 @@ public class PackageManagerService extends IPackageManager.Stub {
     }
 
     /**
-     * Compares the last modified time of the target and overlay to those stored
-     * in the idmap and returns true if either time differs
+     * Compares the 32 bit hash of the target and overlay to those stored
+     * in the idmap and returns true if either hash differs
      * @param targetPkg
      * @param overlayPkg
      * @return
@@ -5601,23 +5658,38 @@ public class PackageManagerService extends IPackageManager.Stub {
                                       PackageParser.Package overlayPkg) {
         if (targetPkg == null || overlayPkg == null) return false;
 
+        int targetHash = getPackageHashCode(targetPkg);
+        int overlayHash = getPackageHashCode(overlayPkg);
+
         File idmap = new File(getIdmapPath(targetPkg, overlayPkg));
         if (!idmap.exists())
             return true;
 
-        int[] mtimes;
+        int[] hashes;
         try {
-            mtimes = getIdmapTimes(idmap);
+            hashes = getIdmapHashes(idmap);
         } catch (IOException e) {
             return true;
         }
-        File f = new File(targetPkg.mPath);
-        if ((int)(f.lastModified() / 1000) != mtimes[0]) {
+
+        if (targetHash == 0 || overlayHash == 0 ||
+                targetHash != hashes[0] || overlayHash != hashes[1]) {
+            // if the overlay changed we'll want to recreate the common resources if it has any
+            if (overlayHash != hashes[1]
+                    && mAvailableCommonResources.containsKey(overlayPkg.packageName)) {
+                mAvailableCommonResources.remove(overlayPkg.packageName);
+            }
             return true;
         }
+        return false;
+    }
 
-        f = new File(overlayPkg.mPath);
-        if ((int)(f.lastModified() / 1000) != mtimes[1]) {
+    private boolean shouldCompileCommonResources(PackageParser.Package pkg) {
+        if (!mAvailableCommonResources.containsKey(pkg.packageName)) return true;
+
+        long lastUpdated = mAvailableCommonResources.get(pkg.packageName);
+        long currentTime = System.currentTimeMillis();
+        if (currentTime - lastUpdated > COMMON_RESOURCE_EXPIRATION) {
             return true;
         }
         return false;
@@ -5629,7 +5701,7 @@ public class PackageManagerService extends IPackageManager.Stub {
      * @return
      * @throws IOException
      */
-    private int[] getIdmapTimes(File idmap) throws IOException {
+    private int[] getIdmapHashes(File idmap) throws IOException {
         int[] times = new int[2];
         ByteBuffer bb = ByteBuffer.allocate(20);
         bb.order(ByteOrder.LITTLE_ENDIAN);
@@ -5641,6 +5713,40 @@ public class PackageManagerService extends IPackageManager.Stub {
         times[1] = ib.get(4);
 
         return times;
+    }
+
+    /**
+     * Get a 32 bit hashcode for the given package.
+     * @param pkg
+     * @return
+     */
+    private int getPackageHashCode(PackageParser.Package pkg) {
+        Pair<Integer, Long> p = mPackageHashes.get(pkg.packageName);
+        if (p != null && (System.currentTimeMillis() - p.second < PACKAGE_HASH_EXPIRATION)) {
+            return p.first;
+        }
+        if (p != null) {
+            mPackageHashes.remove(p);
+        }
+
+        byte[] md5 = getFileMd5Sum(pkg.mPath);
+        if (md5 == null) return 0;
+
+        p = new Pair(Arrays.hashCode(ByteBuffer.wrap(md5).put(IDMAP_HASH_VERSION).array()),
+                System.currentTimeMillis());
+        mPackageHashes.put(pkg.packageName, p);
+        return p.first;
+    }
+
+    private byte[] getFileMd5Sum(String path) {
+        try {
+            MessageDigest md = MessageDigest.getInstance("MD5");
+            DigestInputStream dis = new DigestInputStream(new FileInputStream(path), md);
+            dis.close();
+            return md.digest();
+        } catch (Exception e) {
+        }
+        return null;
     }
 
     private void setUpCustomResolverActivity(PackageParser.Package pkg) {
