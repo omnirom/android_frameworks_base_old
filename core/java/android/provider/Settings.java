@@ -3559,6 +3559,12 @@ public final class Settings {
         public static final int QUIET_HOURS_RINGER_DISABLED = 3;
 
         /**
+         * Constant: Only ring for whitelist contacts during quiet hours
+         * @hide
+         */
+        public static final int QUIET_HOURS_RINGER_WHITELIST_ONLY = 4;
+
+        /**
          * Whether to pause (overrule) quiet hours for the moment
          * @hide
          */
@@ -3569,6 +3575,61 @@ public final class Settings {
          * @hide
          */
         public static final String QUIET_HOURS_FORCED = "quiet_hours_forced";
+
+        /**
+         * @hide
+         */
+        public static final String QUIET_HOURS_WHITELIST = "quiet_hours_whitelist";
+
+        /**
+         * @hide
+         */
+        public static final String QUIET_HOURS_CALL_BYPASS = "quiet_hours_call_bypass";
+
+        /**
+         * @hide
+         */
+        public static final String QUIET_HOURS_CALL_BYPASS_COUNT = "quiet_hours_call_bypass_count";
+
+        /**
+         * @hide
+         */
+        public static final String QUIET_HOURS_SMS_BYPASS = "quiet_hours_sms_bypass";
+
+        /**
+         * @hide
+         */
+        public static final String QUIET_HOURS_SMS_BYPASS_CODE = "quiet_hours_sms_bypass_code";
+
+        /**
+         * @hide
+         */
+        public static final String QUIET_HOURS_AUTO_SMS = "quiet_hours_auto_sms";
+
+        /**
+         * @hide
+         */
+        public static final String QUIET_HOURS_AUTO_SMS_TEXT = "quiet_hours_auto_sms_text";
+
+        /**
+         * @hide
+         */
+        public static final String QUIET_HOURS_AUTO_CALL = "quiet_hours_auto_call";
+
+        /**
+         * @hide
+         */
+        public static final String QUIET_HOURS_ALARM_TONE = "quiet_hours_alarm_tone";
+
+        /**
+         * @hide
+         */
+        public static final String QUIET_HOURS_ALARM_LOOP = "quiet_hours_alarm_loop";
+
+        /**
+         * @hide
+         */
+        public static final String QUIET_HOURS_ACTIVE = "quiet_hours_active";
 
         /**
          * Quick Settings Quick Pulldown
