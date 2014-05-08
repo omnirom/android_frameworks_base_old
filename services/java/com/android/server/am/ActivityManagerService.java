@@ -14156,6 +14156,9 @@ public final class ActivityManagerService extends ActivityManagerNative
         Configuration ci;
         synchronized(this) {
             ci = new Configuration(mConfiguration);
+            if (ci.customTheme == null) {
+                ci.customTheme = CustomTheme.getBootTheme(mContext.getContentResolver());
+            }
         }
         return ci;
     }
