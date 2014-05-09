@@ -41,6 +41,8 @@ import android.content.Intent;
 import android.content.IntentFilter;
 import android.content.res.Configuration;
 import android.content.res.Resources;
+import android.content.pm.PackageManager;
+import android.content.pm.PackageManager.NameNotFoundException;
 import android.database.ContentObserver;
 import android.graphics.Canvas;
 import android.graphics.ColorFilter;
@@ -3001,6 +3003,18 @@ public class PhoneStatusBar extends BaseStatusBar implements DemoMode {
         }
     };
 
+    private boolean isAvailableApp(String packageName) {
+        final PackageManager pm = mContext.getPackageManager();
+        try {
+            pm.getPackageInfo(packageName, PackageManager.GET_ACTIVITIES);
+            int enabled = pm.getApplicationEnabledSetting(packageName);
+            return enabled != PackageManager.COMPONENT_ENABLED_STATE_DISABLED &&
+                enabled != PackageManager.COMPONENT_ENABLED_STATE_DISABLED_USER;
+        } catch (NameNotFoundException e) {
+            return false;
+        }
+    }
+
     private View.OnClickListener mClockClickListener = new View.OnClickListener() {
         public void onClick(View v) {
             Intent clockShortcutIntent = null;
@@ -3015,7 +3029,16 @@ public class PhoneStatusBar extends BaseStatusBar implements DemoMode {
             }
 
             if(clockShortcutIntent != null) {
-                startActivityDismissingKeyguard(clockShortcutIntent, true);
+                String shortcutPackage = clockShortcutIntent.getComponent().getPackageName();
+                if (isAvailableApp(shortcutPackage)){
+                    startActivityDismissingKeyguard(clockShortcutIntent, true);
+                } else {
+                    // reset to default
+                    Settings.System.putStringForUser(mContext.getContentResolver(),
+                            Settings.System.CLOCK_SHORTCUT, null, UserHandle.USER_CURRENT);
+                    startActivityDismissingKeyguard(
+                            new Intent(AlarmClock.ACTION_SHOW_ALARMS), true); // have fun, everyone
+                }
             } else {
                 startActivityDismissingKeyguard(
                         new Intent(AlarmClock.ACTION_SHOW_ALARMS), true); // have fun, everyone
@@ -3036,7 +3059,16 @@ public class PhoneStatusBar extends BaseStatusBar implements DemoMode {
             }
 
             if(calendarShortcutIntent != null) {
-                startActivityDismissingKeyguard(calendarShortcutIntent, true);
+                String shortcutPackage = calendarShortcutIntent.getComponent().getPackageName();
+                if (isAvailableApp(shortcutPackage)){
+                    startActivityDismissingKeyguard(calendarShortcutIntent, true);
+                } else {
+                    // reset to default
+                    Settings.System.putStringForUser(mContext.getContentResolver(),
+                            Settings.System.CALENDAR_SHORTCUT, null, UserHandle.USER_CURRENT);
+                    Intent intent=Intent.makeMainSelectorActivity(Intent.ACTION_MAIN,
+                            Intent.CATEGORY_APP_CALENDAR);
+                    startActivityDismissingKeyguard(intent,true);                }
             } else {
                 Intent intent=Intent.makeMainSelectorActivity(Intent.ACTION_MAIN, Intent.CATEGORY_APP_CALENDAR);
                 startActivityDismissingKeyguard(intent,true);
