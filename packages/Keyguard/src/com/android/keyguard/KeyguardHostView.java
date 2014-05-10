@@ -1752,4 +1752,47 @@ public class KeyguardHostView extends KeyguardViewBase {
         mActivityLauncher.launchCamera(getHandler(), null);
     }
 
+    private void registerNfcUnlockReceivers() {
+        if (mBroadcastReceiverRegistered)
+            return;
+
+        mBroadcastReceiverRegistered = true;
+
+        PowerManager mPM = (PowerManager) mContext.getSystemService(Context.POWER_SERVICE);
+        mWakeLock = mPM.newWakeLock(PowerManager.FULL_WAKE_LOCK |
+            PowerManager.ACQUIRE_CAUSES_WAKEUP,
+            "NFCUnlockerKeyguardWakeup");
+
+        BroadcastReceiver receiver = new BroadcastReceiver() {
+            @Override
+            public void onReceive(Context context, Intent intent) {
+                if (INTENT_UNLOCK_DEVICE.equals(intent.getAction())) {
+
+                    String tagUid = intent.getStringExtra("tagUid");
+
+                    String tagIds = mLockPatternUtils.getNfcUnlockTags()[0];
+
+                    if(tagIds == null)
+                      return;
+
+                    if(tagIds.contains(tagUid + "|")){
+                        try {
+                            mCallback.reportSuccessfulUnlockAttempt();
+                            mCallback.dismiss(true);
+                            mViewMediatorCallback.keyguardDone(true);
+                            /* Wake up screen */
+                            mWakeLock.acquire();
+                            if (mWakeLock != null && mWakeLock.isHeld())
+                                mWakeLock.release();
+                        } catch (Exception e) {
+                            e.printStackTrace();
+                        }
+                    }
+                }
+            }
+        };
+
+        mContext.registerReceiver(receiver, new IntentFilter(INTENT_UNLOCK_DEVICE),
+            "com.android.permission.HANDOVER_STATUS", null);
+  }
 }
