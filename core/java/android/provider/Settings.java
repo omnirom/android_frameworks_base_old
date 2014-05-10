@@ -1017,7 +1017,7 @@ public final class Settings {
 
         private static final HashSet<String> MOVED_TO_SECURE;
         static {
-            MOVED_TO_SECURE = new HashSet<String>(30);
+            MOVED_TO_SECURE = new HashSet<String>(32);
             MOVED_TO_SECURE.add(Secure.ANDROID_ID);
             MOVED_TO_SECURE.add(Secure.HTTP_PROXY);
             MOVED_TO_SECURE.add(Secure.LOCATION_PROVIDERS_ALLOWED);
@@ -1026,6 +1026,8 @@ public final class Settings {
             MOVED_TO_SECURE.add(Secure.LOCK_PATTERN_VISIBLE);
             MOVED_TO_SECURE.add(Secure.LOCK_PATTERN_TACTILE_FEEDBACK_ENABLED);
             MOVED_TO_SECURE.add(Secure.LOCK_NUMPAD_RANDOM);
+            MOVED_TO_SECURE.add(Secure.LOCK_SCREEN_NFC_UNLOCK_TAG_IDS);
+            MOVED_TO_SECURE.add(Secure.LOCK_SCREEN_NFC_UNLOCK_TAG_NAMES);
             MOVED_TO_SECURE.add(Secure.LOGGING_ID);
             MOVED_TO_SECURE.add(Secure.PARENTAL_CONTROL_ENABLED);
             MOVED_TO_SECURE.add(Secure.PARENTAL_CONTROL_LAST_UPDATE);
@@ -4080,10 +4082,12 @@ public final class Settings {
         private static final HashSet<String> MOVED_TO_LOCK_SETTINGS;
         private static final HashSet<String> MOVED_TO_GLOBAL;
         static {
-            MOVED_TO_LOCK_SETTINGS = new HashSet<String>(3);
+            MOVED_TO_LOCK_SETTINGS = new HashSet<String>(5);
             MOVED_TO_LOCK_SETTINGS.add(Secure.LOCK_PATTERN_ENABLED);
             MOVED_TO_LOCK_SETTINGS.add(Secure.LOCK_PATTERN_VISIBLE);
             MOVED_TO_LOCK_SETTINGS.add(Secure.LOCK_PATTERN_TACTILE_FEEDBACK_ENABLED);
+            MOVED_TO_LOCK_SETTINGS.add(Secure.LOCK_SCREEN_NFC_UNLOCK_TAG_IDS);
+            MOVED_TO_LOCK_SETTINGS.add(Secure.LOCK_SCREEN_NFC_UNLOCK_TAG_NAMES);
 
             MOVED_TO_GLOBAL = new HashSet<String>();
             MOVED_TO_GLOBAL.add(Settings.Global.ADB_ENABLED);
@@ -4794,6 +4798,9 @@ public final class Settings {
         @Deprecated
         public static final String
                 LOCK_PATTERN_TACTILE_FEEDBACK_ENABLED = "lock_pattern_tactile_feedback_enabled";
+
+        public static final String LOCK_SCREEN_NFC_UNLOCK_TAG_IDS = "lock_screen_nfc_unlock_tag_ids";
+        public static final String LOCK_SCREEN_NFC_UNLOCK_TAG_NAMES = "lock_screen_nfc_unlock_tag_names";
 
         /**
          * This preference allows the device to be locked given time after screen goes off,
