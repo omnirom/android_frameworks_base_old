@@ -967,6 +967,18 @@ public class LockPatternUtils {
         setBoolean(Settings.Secure.LOCK_PATTERN_VISIBLE, enabled);
     }
 
+    public void setNfcUnlockTags(String uids, String names) {
+        setString(Settings.Secure.LOCK_SCREEN_NFC_UNLOCK_TAG_IDS, uids, getCurrentOrCallingUserId());
+        setString(Settings.Secure.LOCK_SCREEN_NFC_UNLOCK_TAG_NAMES, names, getCurrentOrCallingUserId());
+    }
+
+    public String[] getNfcUnlockTags() {
+        String[] tags = new String[2];
+        tags[0] = getString(Settings.Secure.LOCK_SCREEN_NFC_UNLOCK_TAG_IDS, getCurrentOrCallingUserId());
+        tags[1] = getString(Settings.Secure.LOCK_SCREEN_NFC_UNLOCK_TAG_NAMES, getCurrentOrCallingUserId());
+        return tags;
+    }
+
     /**
      * @return Whether tactile feedback for the pattern is enabled.
      */

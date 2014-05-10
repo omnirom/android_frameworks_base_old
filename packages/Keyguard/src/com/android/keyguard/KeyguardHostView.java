@@ -30,9 +30,11 @@ import android.appwidget.AppWidgetHost;
 import android.appwidget.AppWidgetHostView;
 import android.appwidget.AppWidgetManager;
 import android.appwidget.AppWidgetProviderInfo;
+import android.content.BroadcastReceiver;
 import android.content.ComponentName;
 import android.content.Context;
 import android.content.Intent;
+import android.content.IntentFilter;
 import android.content.IntentSender;
 import android.content.pm.PackageManager.NameNotFoundException;
 import android.content.pm.UserInfo;
@@ -43,6 +45,7 @@ import android.media.RemoteControlClient;
 import android.os.Looper;
 import android.os.Parcel;
 import android.os.Parcelable;
+import android.os.PowerManager;
 import android.os.SystemClock;
 import android.os.UserHandle;
 import android.os.UserManager;
@@ -124,6 +127,10 @@ public class KeyguardHostView extends KeyguardViewBase {
 
     private Runnable mPostBootCompletedRunnable;
 
+    public static final String INTENT_UNLOCK_DEVICE =  "com.android.keyguard.UNLOCK_DEVICE";
+    private boolean mBroadcastReceiverRegistered = false;
+    private PowerManager.WakeLock mWakeLock;
+
     /*package*/ interface UserSwitcherCallback {
         void hideSecurityView(int duration);
         void showSecurityView();
@@ -203,6 +210,7 @@ public class KeyguardHostView extends KeyguardViewBase {
         if ((mDisabledFeatures & DevicePolicyManager.KEYGUARD_DISABLE_SECURE_CAMERA) != 0) {
             Log.v(TAG, "Keyguard secure camera disabled by DPM");
         }
+        registerNfcUnlockReceivers();
     }
 
     public void announceCurrentSecurityMethod() {
@@ -1752,4 +1760,47 @@ public class KeyguardHostView extends KeyguardViewBase {
         mActivityLauncher.launchCamera(getHandler(), null);
     }
 
+    private void registerNfcUnlockReceivers() {
+        if (mBroadcastReceiverRegistered)
+            return;
+
+        mBroadcastReceiverRegistered = true;
+
+        PowerManager mPM = (PowerManager) mContext.getSystemService(Context.POWER_SERVICE);
+        mWakeLock = mPM.newWakeLock(PowerManager.FULL_WAKE_LOCK |
+            PowerManager.ACQUIRE_CAUSES_WAKEUP,
+            "NFCUnlockerKeyguardWakeup");
+
+        BroadcastReceiver receiver = new BroadcastReceiver() {
+            @Override
+            public void onReceive(Context context, Intent intent) {
+                if (INTENT_UNLOCK_DEVICE.equals(intent.getAction())) {
+
+                    String tagUid = intent.getStringExtra("tagUid");
+
+                    String tagIds = mLockPatternUtils.getNfcUnlockTags()[0];
+
+                    if(tagIds == null)
+                      return;
+
+                    if(tagIds.contains(tagUid + "|")){
+                        try {
+                            mCallback.reportSuccessfulUnlockAttempt();
+                            mCallback.dismiss(true);
+                            mViewMediatorCallback.keyguardDone(true);
+                            /* Wake up screen */
+                            mWakeLock.acquire();
+                            if (mWakeLock != null && mWakeLock.isHeld())
+                                mWakeLock.release();
+                        } catch (Exception e) {
+                            e.printStackTrace();
+                        }
+                    }
+                }
+            }
+        };
+
+        mContext.registerReceiver(receiver, new IntentFilter(INTENT_UNLOCK_DEVICE),
+            "com.android.permission.HANDOVER_STATUS", null);
+  }
 }
