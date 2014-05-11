@@ -110,5 +110,47 @@ public class TaskUtils {
             }
         }
     }
+
+    public static int getPackagePersistentId(String packageName, Context context) {
+        Context mContext = context;
+
+        final ActivityManager am = (ActivityManager) mContext
+            .getSystemService(Context.ACTIVITY_SERVICE);
+
+        List<ActivityManager.RecentTaskInfo> mTasks =
+            am.getRecentTasks(Integer.MAX_VALUE, ActivityManager.RECENT_IGNORE_UNAVAILABLE);
+
+        for (int i = 0; i < mTasks.size(); i++)
+        {
+            String name = mTasks.get(i).baseIntent
+                .getComponent().getPackageName();
+
+            if(name.equals(packageName)) {
+                return mTasks.get(i).persistentId;
+            }
+        }
+
+        return -1;
+    }
+
+    public static void killPackageProcess(int mId, Context context) {
+
+        Context mContext = context;
+
+        final ActivityManager am = (ActivityManager) mContext
+            .getSystemService(Context.ACTIVITY_SERVICE);
+
+        am.removeTask(mId, ActivityManager.REMOVE_TASK_KILL_PROCESS);
+    }
+
+    public static void movePackageToFront(int mId, Context context) {
+
+        Context mContext = context;
+
+        final ActivityManager am = (ActivityManager) mContext
+            .getSystemService(Context.ACTIVITY_SERVICE);
+
+        am.moveTaskToFront(mId, ActivityManager.MOVE_TASK_WITH_HOME);
+    }
 }
 
