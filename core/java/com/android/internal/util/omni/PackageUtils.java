@@ -16,8 +16,11 @@
 package com.android.internal.util.omni;
 
 import android.content.Context;
+import android.app.ActivityManager;
 import android.content.pm.PackageManager;
 import android.content.pm.PackageManager.NameNotFoundException;
+
+import java.util.List;
 
 public class PackageUtils {
 
@@ -43,4 +46,52 @@ public class PackageUtils {
             return false;
         }
     }
+
+    public static void killPackageProcess(String packageName, Context context) {
+
+        Context mContext = context;
+
+        final ActivityManager am = (ActivityManager) mContext
+            .getSystemService(Context.ACTIVITY_SERVICE);
+
+        List<ActivityManager.RecentTaskInfo> mTasks =
+            am.getRecentTasks(Integer.MAX_VALUE, ActivityManager.RECENT_IGNORE_UNAVAILABLE);
+
+        for (int i = 0; i < mTasks.size(); i++)
+        {
+            String name = mTasks.get(i).baseIntent
+                .getComponent().getPackageName();
+
+            if(name.equals(packageName)) {
+                am.removeTask(mTasks.get(i).persistentId,
+                    ActivityManager.REMOVE_TASK_KILL_PROCESS);
+                break;
+            }
+        }
+    }
+
+    // NOTICE: Actually this is a test
+    public static void stopPackageProcess(String packageName, Context context) {
+
+        Context mContext = context;
+
+        final ActivityManager am = (ActivityManager) mContext
+            .getSystemService(Context.ACTIVITY_SERVICE);
+
+        List<ActivityManager.RecentTaskInfo> mTasks =
+            am.getRecentTasks(Integer.MAX_VALUE, ActivityManager.RECENT_IGNORE_UNAVAILABLE);
+
+        for (int i = 0; i < mTasks.size(); i++)
+        {
+            String name = mTasks.get(i).baseIntent
+                .getComponent().getPackageName();
+
+            if(name.equals(packageName)) {
+                am.moveTaskToFront(mTasks.get(i).persistentId,
+                    ActivityManager.MOVE_TASK_WITH_HOME);
+                break;
+            }
+        }
+    }
+
 }
