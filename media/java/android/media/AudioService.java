@@ -43,6 +43,7 @@ import android.content.Intent;
 import android.content.IntentFilter;
 import android.content.pm.PackageManager;
 import android.content.pm.PackageManager.NameNotFoundException;
+import android.content.pm.ResolveInfo;
 import android.content.res.Configuration;
 import android.content.res.Resources;
 import android.content.res.XmlResourceParser;
@@ -4418,8 +4419,10 @@ public class AudioService extends IAudioService.Stub {
                 // Only run when headset is inserted and is enabled at settings
                 int plugged = intent.getIntExtra("state", 0);
 
-                String headsetPlugIntenatUri = Settings.System.getStringForUser(
-                    context.getContentResolver(), Settings.System.HEADSET_PLUG_ENABLED, UserHandle.USER_CURRENT);
+                String headsetPlugIntenatUri = Settings.System.getStringForUser(context.getContentResolver(),
+                        Settings.System.HEADSET_PLUG_ENABLED, UserHandle.USER_CURRENT);
+                boolean stopApp = Settings.System.getIntForUser(context.getContentResolver(),
+                        Settings.System.HEADSET_PLUG_STOP_APP, 0, UserHandle.USER_CURRENT) == 1;
 
                 Intent headsetPlugIntent = null;
 
@@ -4454,6 +4457,34 @@ public class AudioService extends IAudioService.Stub {
                             }
                         }
                     }
+                } else if (plugged == 0 && stopApp && headsetPlugIntenatUri != null) {
+                    String mKillAppName = null;
+
+                    if (headsetPlugIntenatUri.equals(Settings.System.HEADSET_PLUG_SYSTEM_DEFAULT)) {
+
+                        headsetPlugIntent = Intent.makeMainSelectorActivity(Intent.ACTION_MAIN,
+                            Intent.CATEGORY_APP_MUSIC);
+
+                        ResolveInfo da = mContext.getPackageManager()
+                            .resolveActivity(headsetPlugIntent, PackageManager.MATCH_DEFAULT_ONLY);
+
+                        mKillAppName = da.activityInfo.packageName;
+                    } else {
+
+                        try {
+                            headsetPlugIntent = Intent.parseUri(headsetPlugIntenatUri, 0);
+                        } catch (URISyntaxException e) {
+                            headsetPlugIntent = null;
+                        }
+
+                        if (headsetPlugIntent != null) {
+                            mKillAppName = headsetPlugIntent.getComponent().getPackageName();
+                        }
+                    }
+
+                    if (mKillAppName != null) {
+                       killApp(mKillAppName);
+                    }
                 }
             }
         }
@@ -4470,6 +4501,27 @@ public class AudioService extends IAudioService.Stub {
             return false;
         }
     }
+
+    private void killApp(String packageName) {
+        ActivityManager am = (ActivityManager) mContext
+            .getSystemService(Context.ACTIVITY_SERVICE);
+
+        List<ActivityManager.RecentTaskInfo> mTasks =
+            am.getRecentTasks(Integer.MAX_VALUE, ActivityManager.RECENT_IGNORE_UNAVAILABLE);
+
+        for (int i = 0; i < mTasks.size(); i++)
+        {
+            String name = mTasks.get(i).baseIntent
+                .getComponent().getPackageName();
+
+            if(name.equals(packageName)) {
+                am.removeTask(mTasks.get(i).persistentId,
+                    ActivityManager.REMOVE_TASK_KILL_PROCESS);
+                break;
+            }
+        }
+    }
+
     //==========================================================================================
     // RemoteControlDisplay / RemoteControlClient / Remote info
     //==========================================================================================
