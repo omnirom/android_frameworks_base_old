@@ -42,6 +42,7 @@ import android.content.Context;
 import android.content.Intent;
 import android.content.IntentFilter;
 import android.content.pm.PackageManager;
+import android.content.pm.ResolveInfo;
 import android.content.res.Configuration;
 import android.content.res.Resources;
 import android.content.res.XmlResourceParser;
@@ -76,6 +77,7 @@ import android.view.Surface;
 import android.view.VolumePanel;
 import android.view.WindowManager;
 import com.android.internal.util.omni.PackageUtils;
+import com.android.internal.util.omni.TaskUtils;
 
 import com.android.internal.telephony.ITelephony;
 import com.android.internal.util.XmlUtils;
@@ -175,6 +177,12 @@ public class AudioService extends IAudioService.Stub {
     private static final int BTA2DP_DOCK_TIMEOUT_MILLIS = 8000;
     // Timeout for connection to bluetooth headset service
     private static final int BT_HEADSET_CNCT_TIMEOUT_MS = 3000;
+
+    /* Headset actions */
+    private static final int HEADSET_NONE_ACTION = 0;
+    private static final int HEADSET_KILL_ACTION = 1;
+    private static final int HEADSET_FRONT_ACTION = 2;
+    private static final int HEADSET_APP_TOFRONT = 1;
 
     /** @see AudioSystemThread */
     private AudioSystemThread mAudioSystemThread;
@@ -466,6 +474,8 @@ public class AudioService extends IAudioService.Stub {
     private boolean mAvrcpAbsVolSupported = false;
 
     private int mVolumeKeysDefault;
+
+    private boolean mHeadsetAppStartedByShortcut = false;
 
     ///////////////////////////////////////////////////////////////////////////
     // Construction
@@ -4415,43 +4425,89 @@ public class AudioService extends IAudioService.Stub {
                         0,
                         mStreamStates[AudioSystem.STREAM_MUSIC], 0);
             } else if (action.equals(Intent.ACTION_HEADSET_PLUG)) {
-                // Only run when headset is inserted and is enabled at settings
+                String mAppName = null;
+
+                int mPersistentId = -1;
+
                 int plugged = intent.getIntExtra("state", 0);
 
                 String headsetPlugIntenatUri = Settings.System.getStringForUser(context.getContentResolver(),
                         Settings.System.HEADSET_PLUG_ENABLED, UserHandle.USER_CURRENT);
+
                 boolean disableMusicActive = Settings.System.getIntForUser(context.getContentResolver(),
                         Settings.System.HEADSET_PLUG_MUSIC_ACTIVE, 1, UserHandle.USER_CURRENT) == 1;
 
+                int mHeadsetAction = Settings.System.getIntForUser(context.getContentResolver(),
+                        Settings.System.HEADSET_PLUG_ACTIONS,0, UserHandle.USER_CURRENT);
+
+                int mHeadsetAppRunning = Settings.System.getIntForUser(context.getContentResolver(),
+                        Settings.System.HEADSET_PLUG_APP_RUNNING,0, UserHandle.USER_CURRENT);
+
+                boolean mHeadsetForceActions = Settings.System.getIntForUser(context.getContentResolver(),
+                        Settings.System.HEADSET_PLUG_FORCE_ACTIONS,0, UserHandle.USER_CURRENT) == 1;
+
                 Intent headsetPlugIntent = null;
 
-                if (plugged == 1 && headsetPlugIntenatUri != null){
-                    if (disableMusicActive && isLocalOrRemoteMusicActive()) {
+                // If is not enabled at settings
+                if (headsetPlugIntenatUri == null) {
+                    return;
+                }
+
+                // Let's found package name
+                if (headsetPlugIntenatUri.equals(Settings.System.HEADSET_PLUG_SYSTEM_DEFAULT)) {
+
+                    headsetPlugIntent = Intent.makeMainSelectorActivity(Intent.ACTION_MAIN,
+                        Intent.CATEGORY_APP_MUSIC);
+
+                    ResolveInfo da = mContext.getPackageManager()
+                        .resolveActivity(headsetPlugIntent, PackageManager.MATCH_DEFAULT_ONLY);
+
+                    mAppName = da.activityInfo.packageName;
+
+                } else {
+
+                    try {
+                        headsetPlugIntent = Intent.parseUri(headsetPlugIntenatUri, 0);
+                    } catch (URISyntaxException e) {
+                        headsetPlugIntent = null;
+                    }
+
+                    if (headsetPlugIntent != null) {
+                        mAppName = headsetPlugIntent.getComponent().getPackageName();
+                    }
+                }
+
+                // Let's found task id
+                if(mAppName != null) {
+                    mPersistentId = TaskUtils.getPackagePersistentId(mAppName, context);
+                }
+
+                if (plugged == 1){ // Run when inserted
+                    // The app is already running
+                    if(mPersistentId != -1) {
+                        if(mHeadsetAppRunning == HEADSET_APP_TOFRONT) {
+                            TaskUtils.movePackageToFront(mPersistentId, context);
+                        }
+                        // The same as mHeadsetAppRunning == HEADSET_APP_DONOTHING
+                        return;
+                    } else if (disableMusicActive && isLocalOrRemoteMusicActive()) {
+                        // The app is not running, but other app is playing music
                         return;
                     }
+
                     // Run default music app
                     if (headsetPlugIntenatUri.equals(Settings.System.HEADSET_PLUG_SYSTEM_DEFAULT)) {
-
-                        headsetPlugIntent = Intent.makeMainSelectorActivity(Intent.ACTION_MAIN,
-                            Intent.CATEGORY_APP_MUSIC);
+                        // Here headsetPlugIntent is never null
                         headsetPlugIntent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
                         context.startActivityAsUser(headsetPlugIntent, UserHandle.CURRENT);
+                        mHeadsetAppStartedByShortcut = true;
                     } else { // Try open a custom app
-
-                        try {
-                            headsetPlugIntent = Intent.parseUri(headsetPlugIntenatUri, 0);
-                        } catch (URISyntaxException e) {
-                            headsetPlugIntent = null;
-                        }
-
                         if (headsetPlugIntent != null) {
 
-                            String mPackage = headsetPlugIntent.getComponent()
-                                .getPackageName();
-
-                            if (PackageUtils.isAvailableApp(mPackage, context)) {
+                            if (PackageUtils.isAvailableApp(mAppName, context)) {
                                headsetPlugIntent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
                                context.startActivityAsUser(headsetPlugIntent, UserHandle.CURRENT);
+                               mHeadsetAppStartedByShortcut = true;
                             } else {
                                // Disable setting
                                Settings.System.putStringForUser(context.getContentResolver(),
@@ -4459,6 +4515,20 @@ public class AudioService extends IAudioService.Stub {
                             }
                         }
                     }
+                } else if (
+                    plugged == 0 // Run when removed
+                    && mHeadsetAction != HEADSET_NONE_ACTION // Enabled at settings
+                    && mPersistentId != -1 // App is runnig
+                    && (mHeadsetAppStartedByShortcut || mHeadsetForceActions) // App is started by us or actions are forced
+                ) {
+
+                    if (mHeadsetAction == HEADSET_FRONT_ACTION) {
+                        TaskUtils.movePackageToFront(mPersistentId, context);
+                    } else if (mHeadsetAction == HEADSET_KILL_ACTION) {
+                        TaskUtils.killPackageProcess(mPersistentId, context);
+                    }
+
+                    mHeadsetAppStartedByShortcut = false;
                 }
             }
         }
