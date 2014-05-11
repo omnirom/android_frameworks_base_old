@@ -4418,14 +4418,19 @@ public class AudioService extends IAudioService.Stub {
                 // Only run when headset is inserted and is enabled at settings
                 int plugged = intent.getIntExtra("state", 0);
 
-                String headsetPlugIntenatUri = Settings.System.getStringForUser(
-                    context.getContentResolver(), Settings.System.HEADSET_PLUG_ENABLED, UserHandle.USER_CURRENT);
+                String headsetPlugIntenatUri = Settings.System.getStringForUser(context.getContentResolver(),
+                        Settings.System.HEADSET_PLUG_ENABLED, UserHandle.USER_CURRENT);
+                boolean disableMusicActive = Settings.System.getIntForUser(context.getContentResolver(),
+                        Settings.System.HEADSET_PLUG_MUSIC_ACTIVE, 1, UserHandle.USER_CURRENT) == 1;
 
                 Intent headsetPlugIntent = null;
 
-                if(plugged == 1 && headsetPlugIntenatUri != null) {
+                if (plugged == 1 && headsetPlugIntenatUri != null){
+                    if (disableMusicActive && isLocalOrRemoteMusicActive()) {
+                        return;
+                    }
                     // Run default music app
-                    if(headsetPlugIntenatUri.equals(Settings.System.HEADSET_PLUG_SYSTEM_DEFAULT)){
+                    if (headsetPlugIntenatUri.equals(Settings.System.HEADSET_PLUG_SYSTEM_DEFAULT)) {
 
                         headsetPlugIntent = Intent.makeMainSelectorActivity(Intent.ACTION_MAIN,
                             Intent.CATEGORY_APP_MUSIC);
@@ -4439,7 +4444,7 @@ public class AudioService extends IAudioService.Stub {
                             headsetPlugIntent = null;
                         }
 
-                        if(headsetPlugIntent != null) {
+                        if (headsetPlugIntent != null) {
 
                             String mPackage = headsetPlugIntent.getComponent()
                                 .getPackageName();

@@ -2700,6 +2700,12 @@ public final class Settings {
         public static final String HEADSET_PLUG_SYSTEM_DEFAULT = "SYSTEM_DEFAULT";
 
         /**
+         * If true, music app will not open if music is active.
+         * @hide
+         */
+        public static final String HEADSET_PLUG_MUSIC_ACTIVE = "headset_plug_music_active";
+
+        /**
          * Whether to play sounds when the keyguard is shown and dismissed.
          * @hide
          */
