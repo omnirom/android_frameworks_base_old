@@ -42,6 +42,7 @@ import android.content.Context;
 import android.content.Intent;
 import android.content.IntentFilter;
 import android.content.pm.PackageManager;
+import android.content.pm.ResolveInfo;
 import android.content.res.Configuration;
 import android.content.res.Resources;
 import android.content.res.XmlResourceParser;
@@ -175,6 +176,11 @@ public class AudioService extends IAudioService.Stub {
     private static final int BTA2DP_DOCK_TIMEOUT_MILLIS = 8000;
     // Timeout for connection to bluetooth headset service
     private static final int BT_HEADSET_CNCT_TIMEOUT_MS = 3000;
+
+    /* Headset actions */
+    private static final int HEADSET_NONE_ACTION = 0;
+    private static final int HEADSET_KILL_ACTION = 1;
+    private static final int HEADSET_FRONT_ACTION = 2;
 
     /** @see AudioSystemThread */
     private AudioSystemThread mAudioSystemThread;
@@ -4415,14 +4421,16 @@ public class AudioService extends IAudioService.Stub {
                         0,
                         mStreamStates[AudioSystem.STREAM_MUSIC], 0);
             } else if (action.equals(Intent.ACTION_HEADSET_PLUG)) {
-                // Only run when headset is inserted and is enabled at settings
                 int plugged = intent.getIntExtra("state", 0);
 
-                String headsetPlugIntenatUri = Settings.System.getStringForUser(
-                    context.getContentResolver(), Settings.System.HEADSET_PLUG_ENABLED, UserHandle.USER_CURRENT);
+                String headsetPlugIntenatUri = Settings.System.getStringForUser(context.getContentResolver(),
+                        Settings.System.HEADSET_PLUG_ENABLED, UserHandle.USER_CURRENT);
+                int mHeadsetAction = Settings.System.getIntForUser(context.getContentResolver(),
+                        Settings.System.HEADSET_PLUG_ACTIONS,0, UserHandle.USER_CURRENT);
 
                 Intent headsetPlugIntent = null;
 
+                // Only run when headset is inserted and is enabled at settings
                 if(plugged == 1 && headsetPlugIntenatUri != null) {
                     // Run default music app
                     if(headsetPlugIntenatUri.equals(Settings.System.HEADSET_PLUG_SYSTEM_DEFAULT)){
@@ -4453,6 +4461,39 @@ public class AudioService extends IAudioService.Stub {
                                   Settings.System.HEADSET_PLUG_ENABLED, null, UserHandle.USER_CURRENT);
                             }
                         }
+                    }
+                } else if (plugged == 0 && headsetPlugIntenatUri != null && mHeadsetAction != HEADSET_NONE_ACTION) {
+
+                    String mKillAppName = null;
+
+                    if (headsetPlugIntenatUri.equals(Settings.System.HEADSET_PLUG_SYSTEM_DEFAULT)) {
+
+                        headsetPlugIntent = Intent.makeMainSelectorActivity(Intent.ACTION_MAIN,
+                            Intent.CATEGORY_APP_MUSIC);
+
+                        ResolveInfo da = mContext.getPackageManager()
+                            .resolveActivity(headsetPlugIntent, PackageManager.MATCH_DEFAULT_ONLY);
+
+                        mKillAppName = da.activityInfo.packageName;
+                    } else {
+
+                        try {
+                            headsetPlugIntent = Intent.parseUri(headsetPlugIntenatUri, 0);
+                        } catch (URISyntaxException e) {
+                            headsetPlugIntent = null;
+                        }
+
+                        if (headsetPlugIntent != null) {
+                            mKillAppName = headsetPlugIntent.getComponent().getPackageName();
+                        }
+                    }
+
+                    if (mKillAppName != null) {
+                       if (mHeadsetAction == HEADSET_FRONT_ACTION) {
+                           PackageUtils.movePackageToFront(mKillAppName, context);
+                       } else if (mHeadsetAction == HEADSET_KILL_ACTION) {
+                           PackageUtils.killPackageProcess(mKillAppName, context);
+                       }
                     }
                 }
             }
