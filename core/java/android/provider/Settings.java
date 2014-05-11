@@ -2706,6 +2706,24 @@ public final class Settings {
         public static final String HEADSET_PLUG_MUSIC_ACTIVE = "headset_plug_music_active";
 
         /**
+         * Actions when unplug headsets
+         * @hide
+         */
+        public static final String HEADSET_PLUG_ACTIONS = "headset_plug_actions";
+
+        /**
+         * Force actions when unplug headsets
+         * @hide
+         */
+        public static final String HEADSET_PLUG_FORCE_ACTIONS = "headset_plug_force_actions";
+
+        /**
+         * Actions if app is already running
+         * @hide
+         */
+        public static final String HEADSET_PLUG_APP_RUNNING = "headset_plug_app_runnig";
+
+        /**
          * Whether to play sounds when the keyguard is shown and dismissed.
          * @hide
          */
