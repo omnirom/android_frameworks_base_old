@@ -2700,6 +2700,12 @@ public final class Settings {
         public static final String HEADSET_PLUG_SYSTEM_DEFAULT = "SYSTEM_DEFAULT";
 
         /**
+         * If true, app will be closed when unplug headsets
+         * @hide
+         */
+        public static final String HEADSET_PLUG_ACTIONS = "headset_plug_actions";
+
+        /**
          * Whether to play sounds when the keyguard is shown and dismissed.
          * @hide
          */
