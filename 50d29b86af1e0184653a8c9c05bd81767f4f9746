@@ -16,6 +16,24 @@
       "revId": "50d29b86af1e0184653a8c9c05bd81767f4f9746",
       "serverId": "56841c99-7c94-43d4-bf0b-cb4707e66d55",
       "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "8b77b57d_50f1adfe",
+        "filename": "media/java/android/media/AudioService.java",
+        "patchSetId": 4
+      },
+      "lineNbr": 4518,
+      "author": {
+        "id": 1000686
+      },
+      "writtenOn": "2014-05-14T10:39:07Z",
+      "side": 1,
+      "message": "ummm maybe you like \"moveToBackgroud\" here? i never understood why android uses \"moveTaskToBack\" almost always, when i want to close and app i really mean \"close\", party ends, go off my RAM!\n\nI never understood why \"moveTaskToBack\" if i\u0027m not multitasking :( and unplug the headset is a very defined action, i really want to stop.",
+      "parentUuid": "8b77b57d_f05f1910",
+      "revId": "50d29b86af1e0184653a8c9c05bd81767f4f9746",
+      "serverId": "56841c99-7c94-43d4-bf0b-cb4707e66d55",
+      "unresolved": false
     }
   ]
 }
