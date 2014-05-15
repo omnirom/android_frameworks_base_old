@@ -3362,6 +3362,12 @@ public final class Settings {
         public static final String NAVIGATION_BAR_WIDTH = "navigation_bar_width";
 
         /**
+         * Navigation bar enable disable for devices that have hw buttons
+         * @hide
+         */
+        public static final String NAVIGATION_BAR_SHOW = "navigation_bar_show";
+
+        /**
          * Volume key controls ringtone or media sound stream
          *
          * @hide
