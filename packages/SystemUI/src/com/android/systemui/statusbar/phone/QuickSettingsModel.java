@@ -398,6 +398,7 @@ class QuickSettingsModel implements BluetoothStateChangeCallback,
 
         @Override
         public void onChange(boolean selfChange) {
+            onImmersiveFlipChanged();
             onImmersiveFrontChanged();
             onImmersiveBackChanged();
         }
@@ -408,6 +409,10 @@ class QuickSettingsModel implements BluetoothStateChangeCallback,
             cr.registerContentObserver(
                     Settings.System.getUriFor(Settings.System.IMMERSIVE_MODE),
                     false, this, mUserTracker.getCurrentUserId());
+            cr.registerContentObserver(
+                    Settings.System.getUriFor(Settings.System.NAVIGATION_BAR_SHOW),
+                    false, this, mUserTracker.getCurrentUserId());
+
         }
     }
 
@@ -610,6 +615,8 @@ class QuickSettingsModel implements BluetoothStateChangeCallback,
     private QuickSettingsTileView mBrightnessTile;
     private RefreshCallback mBrightnessCallback;
     private BrightnessState mBrightnessState = new BrightnessState();
+
+    private QuickSettingsFlipTile mImmersiveTile;
 
     private QuickSettingsTileView mImmersiveFrontTile;
     private RefreshCallback mImmersiveFrontCallback;
@@ -1889,6 +1896,10 @@ class QuickSettingsModel implements BluetoothStateChangeCallback,
     // Immersive
     private int immersiveModeLastState = IMMERSIVE_MODE_FULL;
 
+    void addImmersiveTile(QuickSettingsFlipTile tile) {
+        mImmersiveTile = tile;
+    }
+
     void addImmersiveFrontTile(QuickSettingsTileView view, RefreshCallback cb) {
         mImmersiveFrontTile = view;
         mImmersiveFrontTile.setOnClickListener(new View.OnClickListener() {
@@ -1914,6 +1925,11 @@ class QuickSettingsModel implements BluetoothStateChangeCallback,
         });
         mImmersiveBackCallback = cb;
         onImmersiveBackChanged();
+    }
+
+    private void onImmersiveFlipChanged() {
+        mImmersiveTile.flipToFront();
+        mImmersiveTile.setSupportFlip(DeviceUtils.deviceSupportNavigationBar(mContext));
     }
 
     private void onImmersiveFrontChanged() {

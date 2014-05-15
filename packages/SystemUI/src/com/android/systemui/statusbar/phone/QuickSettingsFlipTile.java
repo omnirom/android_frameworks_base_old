@@ -158,4 +158,8 @@ public class QuickSettingsFlipTile extends QuickSettingsTileView {
     public QuickSettingsTileView getBack() {
         return mBack;
     }
+
+    public void flipToFront() {
+        mFlip3d.rotateToFront(true);
+    }
 }

@@ -25,10 +25,12 @@ import android.net.ConnectivityManager;
 import android.nfc.NfcAdapter;
 import android.os.SystemProperties;
 import android.os.Vibrator;
+import android.os.UserHandle;
 import android.telephony.TelephonyManager;
 import android.util.DisplayMetrics;
 import android.view.DisplayInfo;
 import android.view.WindowManager;
+import android.provider.Settings;
 
 import com.android.internal.telephony.PhoneConstants;
 import static android.hardware.Sensor.TYPE_LIGHT;
@@ -120,9 +122,25 @@ public class DeviceUtils {
     }
 
     public static boolean deviceSupportNavigationBar(Context context) {
-        boolean hasNavBar = context.getResources().getBoolean(
+        final boolean showByDefault = context.getResources().getBoolean(
                 com.android.internal.R.bool.config_showNavigationBar);
-        return hasNavBar || (SystemProperties.getInt("qemu.hw.mainkeys", 1) == 0);
+        final int hasNavigationBar = Settings.System.getIntForUser(
+                context.getContentResolver(),
+                Settings.System.NAVIGATION_BAR_SHOW, -1,
+                UserHandle.USER_CURRENT);
+
+        if (hasNavigationBar == -1) {
+            String navBarOverride = SystemProperties.get("qemu.hw.mainkeys");
+            if ("1".equals(navBarOverride)) {
+                return true;
+            } else if ("0".equals(navBarOverride)) {
+                return false;
+            } else {
+                return showByDefault;
+            }
+        } else {
+            return hasNavigationBar == 1;
+        }
     }
 
     private static int getScreenType(Context con) {

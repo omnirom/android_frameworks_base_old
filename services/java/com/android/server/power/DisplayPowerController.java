@@ -29,7 +29,9 @@ import android.content.ComponentName;
 import android.content.ContentResolver;
 import android.content.Context;
 import android.content.Intent;
+import android.content.IntentFilter;
 import android.content.ServiceConnection;
+import android.content.BroadcastReceiver;
 import android.database.ContentObserver;
 import android.content.res.Resources;
 import android.graphics.Bitmap;
@@ -57,6 +59,7 @@ import android.view.SurfaceControl;
 
 import com.android.internal.policy.impl.keyguard.KeyguardServiceWrapper;
 import com.android.internal.policy.IKeyguardService;
+import com.android.internal.util.omni.DeviceUtils;
 
 /**
  * Controls the power state of the display.
@@ -396,6 +399,9 @@ final class DisplayPowerController {
     // set the display brightness.
     private boolean mUsingScreenAutoBrightness;
 
+    // overrule and disable brightness for buttons
+    private boolean mHardwareKeysDisable = false;
+
     // Animators.
     private ObjectAnimator mElectronBeamOnAnimator;
     private ObjectAnimator mElectronBeamOffAnimator;
@@ -428,6 +434,19 @@ final class DisplayPowerController {
     private static final int SCREEN_OFF_CRT = 1;
     private static final int SCREEN_OFF_SCALE = 2;
     private int mScreenOffAnimation;
+
+    private final BroadcastReceiver mBroadcastReceiver = new BroadcastReceiver() {
+        @Override
+        public void onReceive(Context context, Intent intent) {
+            String action = intent.getAction();
+            if (Intent.ACTION_USER_SWITCHED.equals(action)) {
+                if (DEBUG){
+                    Slog.d(TAG, "user switched - reload settings");
+                }
+                updateAutomaticBrightnessSettings();
+            }
+        }
+    };
 
     /**
      * Creates the display power controller.
@@ -512,7 +531,11 @@ final class DisplayPowerController {
                         false, observer, UserHandle.USER_ALL);
                 cr.registerContentObserver(
                         Settings.System.getUriFor(Settings.System.CUSTOM_BUTTON_DISABLE_BRIGHTNESS),
-                        false, observer, UserHandle.USER_ALL);   
+                        false, observer, UserHandle.USER_ALL);
+                cr.registerContentObserver(
+                        Settings.System.getUriFor(Settings.System.HARDWARE_KEYS_DISABLE),
+                        false, observer, UserHandle.USER_ALL);
+
                 // we need this only to update button brightness
                 // in manual mode to force a resetting of the buttons
                 cr.registerContentObserver(
@@ -523,6 +546,11 @@ final class DisplayPowerController {
             mLightSensorWarmUpTimeConfig = resources.getInteger(
                     com.android.internal.R.integer.config_lightSensorWarmupTime);
             updateAutomaticBrightnessSettings();
+
+            // to reload all user specific settings on user switch
+            IntentFilter filter = new IntentFilter();
+            filter.addAction(Intent.ACTION_USER_SWITCHED);
+            mContext.registerReceiver(mBroadcastReceiver, filter);
         }
 
         mElectronBeamFadesConfig = resources.getBoolean(
@@ -536,7 +564,6 @@ final class DisplayPowerController {
                     mScreenOffAnimation = Settings.System.getIntForUser(cr,
                         Settings.System.SCREEN_OFF_ANIMATION,
                         SCREEN_OFF_CRT, UserHandle.USER_CURRENT);
-                    Slog.e("XPLOD", "Set screen off to " + mScreenOffAnimation);
                 }
             };
 
@@ -577,6 +604,10 @@ final class DisplayPowerController {
     }
 
     private void updateAutomaticBrightnessSettings() {
+        if (DEBUG){
+            Slog.d(TAG, "updateAutomaticBrightnessSettings");
+        }
+
         int[] lux = getIntArrayForSetting(Settings.System.AUTO_BRIGHTNESS_LUX);
         int[] screenValues = getIntArrayForSetting(Settings.System.AUTO_BRIGHTNESS_SCREEN_BACKLIGHT);
         Resources res = mContext.getResources();
@@ -646,6 +677,9 @@ final class DisplayPowerController {
                     0, UserHandle.USER_CURRENT) != 0;
             mButtonDisableBrightness = Settings.System.getIntForUser(
                     mContext.getContentResolver(), Settings.System.CUSTOM_BUTTON_DISABLE_BRIGHTNESS,
+                    0, UserHandle.USER_CURRENT) != 0;
+            mHardwareKeysDisable = Settings.System.getIntForUser(
+                    mContext.getContentResolver(), Settings.System.HARDWARE_KEYS_DISABLE,
                     0, UserHandle.USER_CURRENT) != 0;
         }
     }
@@ -1729,7 +1763,7 @@ final class DisplayPowerController {
     private int calcButtonLight() {
         int buttonBrightness = 0;
 
-        if (mButtonDisableBrightness || mButtonDisabledByTimeout){
+        if (mButtonDisableBrightness || mButtonDisabledByTimeout || mHardwareKeysDisable){
             buttonBrightness = 0;
         } else {
             if (mPowerRequest.useAutoBrightness){
@@ -1742,8 +1776,8 @@ final class DisplayPowerController {
             } else {
                 if (mCustomButtonBrightness == -1 || mButtonUseScreenBrightness){
                     // use same value as screen
-                    buttonBrightness = Settings.System.getInt(mContext.getContentResolver(),
-                            Settings.System.SCREEN_BRIGHTNESS, 60);
+                    buttonBrightness = Settings.System.getIntForUser(mContext.getContentResolver(),
+                            Settings.System.SCREEN_BRIGHTNESS, 60, UserHandle.USER_CURRENT);
                 } else {
                     buttonBrightness = mCustomButtonBrightness;
                 }
