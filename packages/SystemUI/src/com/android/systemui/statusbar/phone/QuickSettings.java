@@ -154,6 +154,7 @@ class QuickSettings {
 
     private Handler mHandler;
     private QuickSettingsBatteryFlipTile mBatteryTile;
+    private QuickSettingsFlipTile mImmersiveTile;
     private int mBatteryStyle;
 
     private PowerManager pm;
@@ -745,33 +746,33 @@ class QuickSettings {
                   if (addMissing) mBatteryTile.setVisibility(View.GONE);
                } else if (Tile.IMMERSIVE.toString().equals(tile.toString())) { // Immersive tile
                   // Immersive mode
-                  final QuickSettingsFlipTile immersiveTile
-                       = new QuickSettingsFlipTile(mContext);
+                  mImmersiveTile = new QuickSettingsFlipTile(mContext);
 
-                  immersiveTile.setTileId(Tile.IMMERSIVE);
-                  immersiveTile.setSupportFlip(DeviceUtils.deviceSupportNavigationBar(mContext));
-                  immersiveTile.setFrontImageResource(R.drawable.ic_qs_immersive_global_off);
-                  immersiveTile.setFrontText(mContext.getString(R.string.quick_settings_immersive_global_off_label));
-                  mModel.addImmersiveFrontTile(immersiveTile.getFront(), new QuickSettingsModel.RefreshCallback() {
+                  mModel.addImmersiveTile(mImmersiveTile);
+                  mImmersiveTile.setTileId(Tile.IMMERSIVE);
+                  mImmersiveTile.setSupportFlip(DeviceUtils.deviceSupportNavigationBar(mContext));
+                  mImmersiveTile.setFrontImageResource(R.drawable.ic_qs_immersive_global_off);
+                  mImmersiveTile.setFrontText(mContext.getString(R.string.quick_settings_immersive_global_off_label));
+                  mModel.addImmersiveFrontTile(mImmersiveTile.getFront(), new QuickSettingsModel.RefreshCallback() {
                         @Override
                         public void refreshView(QuickSettingsTileView unused, State state) {
-                            immersiveTile.setFrontImageResource(state.iconId);
-                            immersiveTile.setFrontText(state.label);
+                            mImmersiveTile.setFrontImageResource(state.iconId);
+                            mImmersiveTile.setFrontText(state.label);
 
                         }
                   });
-                  immersiveTile.setBackImageResource(R.drawable.ic_qs_immersive_off);
-                  immersiveTile.setBackLabel(mContext.getString(R.string.quick_settings_volume_status));
-                  mModel.addImmersiveBackTile(immersiveTile.getBack(), new QuickSettingsModel.RefreshCallback() {
+                  mImmersiveTile.setBackImageResource(R.drawable.ic_qs_immersive_off);
+                  mImmersiveTile.setBackLabel(mContext.getString(R.string.quick_settings_volume_status));
+                  mModel.addImmersiveBackTile(mImmersiveTile.getBack(), new QuickSettingsModel.RefreshCallback() {
                         @Override
                         public void refreshView(QuickSettingsTileView unused, State state) {
-                            immersiveTile.setBackImageResource(state.iconId);
-                            immersiveTile.setBackFunction(state.label);
+                            mImmersiveTile.setBackImageResource(state.iconId);
+                            mImmersiveTile.setBackFunction(state.label);
 
                         }
                   });
-                  parent.addView(immersiveTile);
-                  if (addMissing) immersiveTile.setVisibility(View.GONE);
+                  parent.addView(mImmersiveTile);
+                  if (addMissing) mImmersiveTile.setVisibility(View.GONE);
                } else if (Tile.AIRPLANE.toString().equals(tile.toString())) { // airplane tile
                   // Airplane Mode
                   final QuickSettingsBasicTile airplaneTile
