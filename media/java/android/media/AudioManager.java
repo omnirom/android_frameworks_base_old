@@ -38,6 +38,9 @@ import android.provider.Settings;
 import android.util.Log;
 import android.view.KeyEvent;
 import android.view.VolumePanel;
+import android.view.Surface;
+import android.view.WindowManager;
+import com.android.internal.util.omni.DeviceUtils;
 
 import java.util.HashMap;
 
@@ -53,6 +56,7 @@ public class AudioManager {
     private long mVolumeKeyUpTime;
     private final boolean mUseMasterVolume;
     private final boolean mUseVolumeKeySounds;
+    private final WindowManager mWindowManager;
     private final Binder mToken = new Binder();
     private static String TAG = "AudioManager";
 
@@ -434,6 +438,7 @@ public class AudioManager {
                 com.android.internal.R.bool.config_useMasterVolume);
         mUseVolumeKeySounds = mContext.getResources().getBoolean(
                 com.android.internal.R.bool.config_useVolumeKeySounds);
+        mWindowManager = (WindowManager) mContext.getSystemService(Context.WINDOW_SERVICE);
     }
 
     private static IAudioService getService()
@@ -516,21 +521,33 @@ public class AudioManager {
                  * Adjust the volume in on key down since it is more
                  * responsive to the user.
                  */
+                int direction;
+                boolean swapKeys = Settings.System.getInt(mContext.getContentResolver(),
+                        Settings.System.SWAP_VOLUME_BUTTONS, 0) == 1;
+                boolean disabled90 = Settings.System.getInt(mContext.getContentResolver(),
+                        Settings.System.SWAP_VOLUME_DISABLED_90, DeviceUtils.isTablet(mContext) ? 1 : 0) == 1;
+                boolean disabled270 = Settings.System.getInt(mContext.getContentResolver(),
+                        Settings.System.SWAP_VOLUME_DISABLED_270, DeviceUtils.isTablet(mContext) ? 0 : 1) == 1;
+                int rotation = mWindowManager.getDefaultDisplay().getRotation();
+                if (swapKeys
+                        && ((!disabled90 && rotation == Surface.ROTATION_90)
+                        || rotation == Surface.ROTATION_180
+                        || (!disabled270 && rotation == Surface.ROTATION_270))) {
+                    direction = keyCode == KeyEvent.KEYCODE_VOLUME_UP
+                            ? ADJUST_LOWER
+                            : ADJUST_RAISE;
+                } else {
+                    direction = keyCode == KeyEvent.KEYCODE_VOLUME_UP
+                            ? ADJUST_RAISE
+                            : ADJUST_LOWER;
+                }
+
                 int flags = FLAG_SHOW_UI | FLAG_VIBRATE;
 
                 if (mUseMasterVolume) {
-                    adjustMasterVolume(
-                            keyCode == KeyEvent.KEYCODE_VOLUME_UP
-                                    ? ADJUST_RAISE
-                                    : ADJUST_LOWER,
-                            flags);
+                    adjustMasterVolume(direction, flags);
                 } else {
-                    adjustSuggestedStreamVolume(
-                            keyCode == KeyEvent.KEYCODE_VOLUME_UP
-                                    ? ADJUST_RAISE
-                                    : ADJUST_LOWER,
-                            stream,
-                            flags);
+                    adjustSuggestedStreamVolume(direction, stream, flags);
                 }
                 break;
             case KeyEvent.KEYCODE_VOLUME_MUTE:
