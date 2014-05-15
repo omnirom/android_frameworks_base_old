@@ -3057,6 +3057,24 @@ public final class Settings {
         public static final String VOLUME_WAKE_SCREEN = "volume_wake_screen";
 
         /**
+         * Swap volume buttons when the screen is rotated
+         * @hide
+         */
+        public static final String SWAP_VOLUME_BUTTONS = "swap_volume_buttons";
+
+        /**
+         * Swap volume disabled on 90 degrees
+         * @hide
+         */
+        public static final String SWAP_VOLUME_DISABLED_90 = "swap_volume_disabled_90";
+
+        /**
+         * Swap volume disabled on 270 degrees
+         * @hide
+         */
+        public static final String SWAP_VOLUME_DISABLED_270 = "swap_volume_disabled_270";
+
+        /**
          * volume rocker music track control enable/disable
          * @hide
          */
