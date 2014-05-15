@@ -708,13 +708,16 @@ public class ViewConfiguration {
         // normally only one of those settings will be 1
         // except for the use-case to force show soft keys on devices
         // that have hardware buttons
+        boolean hardwareKeysDisable = Settings.System.getInt(mContext.getContentResolver(),
+                    Settings.System.HARDWARE_KEYS_DISABLE, 0) == 1;
+
         boolean forceShowMenu = Settings.System.getInt(mContext.getContentResolver(),
                     Settings.System.FORCE_SHOW_OVERFLOW_MENU, sHasHwMenuKey ? 0 : 1) == 1;
 
         boolean emulateHwMenuKey = Settings.System.getInt(mContext.getContentResolver(),
                     Settings.System.EMULATE_HW_MENU_KEY, 0) == 1;
 
-        if (forceShowMenu && sHasPermanentMenuKey){
+        if (forceShowMenu && sHasPermanentMenuKey && !hardwareKeysDisable){
             return false;
         }
         if (emulateHwMenuKey){

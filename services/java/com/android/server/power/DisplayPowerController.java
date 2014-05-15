@@ -57,6 +57,7 @@ import android.view.SurfaceControl;
 
 import com.android.internal.policy.impl.keyguard.KeyguardServiceWrapper;
 import com.android.internal.policy.IKeyguardService;
+import com.android.internal.util.omni.DeviceUtils;
 
 /**
  * Controls the power state of the display.
@@ -396,6 +397,9 @@ final class DisplayPowerController {
     // set the display brightness.
     private boolean mUsingScreenAutoBrightness;
 
+    // overrule and disable brightness for buttons
+    private boolean mHardwareKeysDisable = false;
+
     // Animators.
     private ObjectAnimator mElectronBeamOnAnimator;
     private ObjectAnimator mElectronBeamOffAnimator;
@@ -512,7 +516,11 @@ final class DisplayPowerController {
                         false, observer, UserHandle.USER_ALL);
                 cr.registerContentObserver(
                         Settings.System.getUriFor(Settings.System.CUSTOM_BUTTON_DISABLE_BRIGHTNESS),
-                        false, observer, UserHandle.USER_ALL);   
+                        false, observer, UserHandle.USER_ALL);
+                cr.registerContentObserver(
+                        Settings.System.getUriFor(Settings.System.HARDWARE_KEYS_DISABLE),
+                        false, observer, UserHandle.USER_ALL);
+
                 // we need this only to update button brightness
                 // in manual mode to force a resetting of the buttons
                 cr.registerContentObserver(
@@ -646,6 +654,9 @@ final class DisplayPowerController {
                     0, UserHandle.USER_CURRENT) != 0;
             mButtonDisableBrightness = Settings.System.getIntForUser(
                     mContext.getContentResolver(), Settings.System.CUSTOM_BUTTON_DISABLE_BRIGHTNESS,
+                    0, UserHandle.USER_CURRENT) != 0;
+            mHardwareKeysDisable = Settings.System.getIntForUser(
+                    mContext.getContentResolver(), Settings.System.HARDWARE_KEYS_DISABLE,
                     0, UserHandle.USER_CURRENT) != 0;
         }
     }
@@ -1729,7 +1740,7 @@ final class DisplayPowerController {
     private int calcButtonLight() {
         int buttonBrightness = 0;
 
-        if (mButtonDisableBrightness || mButtonDisabledByTimeout){
+        if (mButtonDisableBrightness || mButtonDisabledByTimeout || mHardwareKeysDisable){
             buttonBrightness = 0;
         } else {
             if (mPowerRequest.useAutoBrightness){
