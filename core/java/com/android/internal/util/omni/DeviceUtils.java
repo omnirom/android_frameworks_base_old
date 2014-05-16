@@ -125,16 +125,6 @@ public class DeviceUtils {
         return hasNavBar || (SystemProperties.getInt("qemu.hw.mainkeys", 1) == 0);
     }
 
-    public static boolean isAppInstalled(Context context, String appUri) {
-        try {
-            PackageManager pm = context.getPackageManager();
-            pm.getPackageInfo(appUri, PackageManager.GET_ACTIVITIES);
-            return true;
-        } catch (Exception e) {
-            return false;
-        }
-    }
-
     private static int getScreenType(Context con) {
         WindowManager wm = (WindowManager)con.getSystemService(Context.WINDOW_SERVICE);
         DisplayInfo outDisplayInfo = new DisplayInfo();
