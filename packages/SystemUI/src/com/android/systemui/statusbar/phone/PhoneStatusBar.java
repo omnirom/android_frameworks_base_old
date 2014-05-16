@@ -41,8 +41,6 @@ import android.content.Intent;
 import android.content.IntentFilter;
 import android.content.res.Configuration;
 import android.content.res.Resources;
-import android.content.pm.PackageManager;
-import android.content.pm.PackageManager.NameNotFoundException;
 import android.database.ContentObserver;
 import android.graphics.Canvas;
 import android.graphics.ColorFilter;
@@ -119,6 +117,7 @@ import com.android.systemui.statusbar.policy.NetworkController;
 import com.android.systemui.statusbar.policy.NotificationRowLayout;
 import com.android.systemui.statusbar.policy.OnSizeChangedListener;
 import com.android.systemui.statusbar.policy.RotationLockController;
+import com.android.internal.util.omni.PackageUtils;
 
 import java.io.FileDescriptor;
 import java.io.PrintWriter;
@@ -3003,18 +3002,6 @@ public class PhoneStatusBar extends BaseStatusBar implements DemoMode {
         }
     };
 
-    private boolean isAvailableApp(String packageName) {
-        final PackageManager pm = mContext.getPackageManager();
-        try {
-            pm.getPackageInfo(packageName, PackageManager.GET_ACTIVITIES);
-            int enabled = pm.getApplicationEnabledSetting(packageName);
-            return enabled != PackageManager.COMPONENT_ENABLED_STATE_DISABLED &&
-                enabled != PackageManager.COMPONENT_ENABLED_STATE_DISABLED_USER;
-        } catch (NameNotFoundException e) {
-            return false;
-        }
-    }
-
     private View.OnClickListener mClockClickListener = new View.OnClickListener() {
         public void onClick(View v) {
             Intent clockShortcutIntent = null;
@@ -3030,7 +3017,7 @@ public class PhoneStatusBar extends BaseStatusBar implements DemoMode {
 
             if(clockShortcutIntent != null) {
                 String shortcutPackage = clockShortcutIntent.getComponent().getPackageName();
-                if (isAvailableApp(shortcutPackage)){
+                if (PackageUtils.isAvailableApp(shortcutPackage, mContext)){
                     startActivityDismissingKeyguard(clockShortcutIntent, true);
                 } else {
                     // reset to default
@@ -3060,7 +3047,7 @@ public class PhoneStatusBar extends BaseStatusBar implements DemoMode {
 
             if(calendarShortcutIntent != null) {
                 String shortcutPackage = calendarShortcutIntent.getComponent().getPackageName();
-                if (isAvailableApp(shortcutPackage)){
+                if (PackageUtils.isAvailableApp(shortcutPackage, mContext)){
                     startActivityDismissingKeyguard(calendarShortcutIntent, true);
                 } else {
                     // reset to default
