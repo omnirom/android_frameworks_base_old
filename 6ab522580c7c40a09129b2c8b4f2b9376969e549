@@ -1,0 +1,38 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "8b77b57d_860f8be2",
+        "filename": "core/java/android/provider/Settings.java",
+        "patchSetId": 5
+      },
+      "lineNbr": 2706,
+      "author": {
+        "id": 1000026
+      },
+      "writtenOn": "2014-05-19T22:24:11Z",
+      "side": 1,
+      "message": "It only takes maybe 1min longer to name stuff correctly :)\nBut it will save much more time to understand whenever someone reads it \nWhy dont name it HEADSET_PLUG_DISABLE_ON_MUSIC_ACTIVE",
+      "revId": "6ab522580c7c40a09129b2c8b4f2b9376969e549",
+      "serverId": "56841c99-7c94-43d4-bf0b-cb4707e66d55",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "8b77b57d_a6f487cd",
+        "filename": "media/java/android/media/AudioService.java",
+        "patchSetId": 5
+      },
+      "lineNbr": 4423,
+      "author": {
+        "id": 1000026
+      },
+      "writtenOn": "2014-05-19T22:24:11Z",
+      "side": 1,
+      "message": "same here - name it disableOnActiveMusic and it will be much clearer how this should work",
+      "revId": "6ab522580c7c40a09129b2c8b4f2b9376969e549",
+      "serverId": "56841c99-7c94-43d4-bf0b-cb4707e66d55",
+      "unresolved": false
+    }
+  ]
+}
