@@ -1,0 +1,38 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "8b77b57d_26295736",
+        "filename": "core/java/com/android/internal/util/omni/PackageUtils.java",
+        "patchSetId": 10
+      },
+      "lineNbr": 50,
+      "author": {
+        "id": 1000026
+      },
+      "writtenOn": "2014-05-19T23:26:22Z",
+      "side": 1,
+      "message": "We already have TaskUtils with similiar stuff like these two functions",
+      "revId": "d04445b2ebaf9f53b304f93916c2b62c11eab77c",
+      "serverId": "56841c99-7c94-43d4-bf0b-cb4707e66d55",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "8b77b57d_06fc5baf",
+        "filename": "media/java/android/media/AudioService.java",
+        "patchSetId": 10
+      },
+      "lineNbr": 4466,
+      "author": {
+        "id": 1000026
+      },
+      "writtenOn": "2014-05-19T23:26:22Z",
+      "side": 1,
+      "message": "IMHO the value of the \"disable on active\" nedd to be taken nto account here too right? Only if the app has been started from \"us\" we shoudl kill it?",
+      "revId": "d04445b2ebaf9f53b304f93916c2b62c11eab77c",
+      "serverId": "56841c99-7c94-43d4-bf0b-cb4707e66d55",
+      "unresolved": false
+    }
+  ]
+}
