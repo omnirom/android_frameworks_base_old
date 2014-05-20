@@ -52,6 +52,24 @@
       "revId": "7d5dfd681e22bd0b41e9077ba59211c2df44ea53",
       "serverId": "56841c99-7c94-43d4-bf0b-cb4707e66d55",
       "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "8b77b57d_26015773",
+        "filename": "media/java/android/media/AudioManager.java",
+        "patchSetId": 6
+      },
+      "lineNbr": 525,
+      "author": {
+        "id": 1000686
+      },
+      "writtenOn": "2014-05-20T23:26:05Z",
+      "side": 1,
+      "message": "tested on tilapia that is multi user device :) offtopic but...., i get a lot of crashes when creating a new user :(",
+      "parentUuid": "8b77b57d_a6cc8766",
+      "revId": "7d5dfd681e22bd0b41e9077ba59211c2df44ea53",
+      "serverId": "56841c99-7c94-43d4-bf0b-cb4707e66d55",
+      "unresolved": false
     }
   ]
 }
