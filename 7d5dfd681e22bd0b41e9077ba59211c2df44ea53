@@ -1,0 +1,21 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "8b77b57d_66ad0f7f",
+        "filename": "media/java/android/media/AudioManager.java",
+        "patchSetId": 6
+      },
+      "lineNbr": 525,
+      "author": {
+        "id": 1000026
+      },
+      "writtenOn": "2014-05-20T22:11:43Z",
+      "side": 1,
+      "message": "getIntForUser ?\nNot sure if this class is created in a user context\nIf you want to be sure you would need to test it on a multi-user device",
+      "revId": "7d5dfd681e22bd0b41e9077ba59211c2df44ea53",
+      "serverId": "56841c99-7c94-43d4-bf0b-cb4707e66d55",
+      "unresolved": false
+    }
+  ]
+}
