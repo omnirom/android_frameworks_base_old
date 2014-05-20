@@ -34,6 +34,24 @@
       "revId": "7d5dfd681e22bd0b41e9077ba59211c2df44ea53",
       "serverId": "56841c99-7c94-43d4-bf0b-cb4707e66d55",
       "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "8b77b57d_a6cc8766",
+        "filename": "media/java/android/media/AudioManager.java",
+        "patchSetId": 6
+      },
+      "lineNbr": 525,
+      "author": {
+        "id": 1000026
+      },
+      "writtenOn": "2014-05-20T22:52:23Z",
+      "side": 1,
+      "message": "Ok - confirmed - this runs in a user context so you can use the normal getInt",
+      "parentUuid": "8b77b57d_c6c42348",
+      "revId": "7d5dfd681e22bd0b41e9077ba59211c2df44ea53",
+      "serverId": "56841c99-7c94-43d4-bf0b-cb4707e66d55",
+      "unresolved": false
     }
   ]
 }
