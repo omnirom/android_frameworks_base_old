@@ -26,4 +26,5 @@
     <string name="global_actions_mobile_data_off_status">L\'accès aux données sur le réseau mobile est désactivé</string>
     <string name="toast_rotation_unlocked">Rotation de l\'affichage déverrouillée</string>
     <string name="toast_rotation_locked">Rotation de l\'affichage verrouillée</string>
+    <string name="immersive_mode_confirmation_bottom">Glisser de bas en haut pour sortir du mode plein écran.</string>
 </resources>
