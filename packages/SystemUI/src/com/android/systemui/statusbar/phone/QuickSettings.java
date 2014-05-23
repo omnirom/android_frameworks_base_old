@@ -890,8 +890,8 @@ class QuickSettings {
                                   Settings.System.QUIET_HOURS_FORCED, 0, UserHandle.USER_CURRENT) != 0;
                           boolean isActive = QuietHoursHelper.inQuietHours(mContext, null);
 
-                          // init quiet hours if required - service has never been started so far
-                          Intent intent = new Intent(QuietHoursHelper.SCHEDULE_SERVICE_COMMAND);
+                          // make sure quiet hours has been inited
+                          Intent intent = new Intent(QuietHoursHelper.QUIET_HOURS_INIT_COMMAND);
                           mContext.sendBroadcastAsUser(intent, UserHandle.CURRENT);
 
                           if (enabled){
@@ -903,15 +903,13 @@ class QuickSettings {
                                              UserHandle.USER_CURRENT);
                                   } else {
                                       // time active
-                                      Settings.System.putIntForUser(mContext.getContentResolver(),
-                                             Settings.System.QUIET_HOURS_PAUSED, 1,
-                                             UserHandle.USER_CURRENT);
+                                      intent = new Intent(QuietHoursHelper.QUIET_HOURS_PAUSE_COMMAND);
+                                      mContext.sendBroadcastAsUser(intent, UserHandle.CURRENT);
                                   }
                               } else {
                                   if (paused){
-                                      Settings.System.putIntForUser(mContext.getContentResolver(),
-                                             Settings.System.QUIET_HOURS_PAUSED, 0,
-                                             UserHandle.USER_CURRENT);
+                                      intent = new Intent(QuietHoursHelper.QUIET_HOURS_RESUME_COMMAND);
+                                      mContext.sendBroadcastAsUser(intent, UserHandle.CURRENT);
                                   } else {
                                       // if not time active - start now
                                       Settings.System.putIntForUser(mContext.getContentResolver(),

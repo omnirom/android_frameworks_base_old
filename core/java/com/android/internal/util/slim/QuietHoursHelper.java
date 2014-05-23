@@ -30,7 +30,16 @@ public class QuietHoursHelper {
    public static final String QUIET_HOURS_STOP  = "com.android.settings.slim.service.QUIET_HOURS_STOP";   
 
    // broadcast event to external schedule quiet hours service
-   public static final String SCHEDULE_SERVICE_COMMAND = "com.android.settings.slim.service.SCHEDULE_SERVICE_COMMAND";
+   public static final String QUIET_HOURS_SCHEDULE_COMMAND = "com.android.settings.slim.service.QUIET_HOURS_SCHEDULE_COMMAND";
+
+   // broadcast event to external pause quiet hours service
+   public static final String QUIET_HOURS_PAUSE_COMMAND = "com.android.settings.slim.service.QUIET_HOURS_PAUSE_COMMAND";
+
+   // broadcast event to external resume quiet hours service
+   public static final String QUIET_HOURS_RESUME_COMMAND = "com.android.settings.slim.service.QUIET_HOURS_RESUME_COMMAND";
+
+   // broadcast event to external init quiet hours service
+   public static final String QUIET_HOURS_INIT_COMMAND = "com.android.settings.slim.service.QUIET_HOURS_INIT_COMMAND";
    
    public static boolean inQuietHours(Context context, String option) {
         return inQuietHours(context, option, true, true);
