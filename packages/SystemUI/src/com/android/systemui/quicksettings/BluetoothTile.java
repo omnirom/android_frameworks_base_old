@@ -1,69 +1,104 @@
+/*
+ * Copyright (C) 2012 The Android Open Source Project
+ * Copyright (C) 2013 CyanogenMod Project
+ * Copyright (C) 2013 The SlimRoms Project
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *      http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+
 package com.android.systemui.quicksettings;
 
 import android.bluetooth.BluetoothAdapter;
-import android.bluetooth.BluetoothDevice;
+import android.bluetooth.BluetoothAdapter.BluetoothStateChangeCallback;
 import android.content.Context;
 import android.content.Intent;
-import android.os.Bundle;
+import android.view.LayoutInflater;
 import android.view.View;
 import android.view.View.OnClickListener;
 import android.view.View.OnLongClickListener;
 
 import com.android.systemui.R;
+import com.android.systemui.statusbar.phone.QuickSettingsContainerView;
 import com.android.systemui.statusbar.phone.QuickSettingsController;
 import com.android.systemui.statusbar.policy.BluetoothController;
 
-import java.util.Set;
+public class BluetoothTile extends QuickSettingsTile implements BluetoothStateChangeCallback{
 
-public class BluetoothTile extends QuickSettingsTile implements
-        BluetoothAdapter.BluetoothStateChangeCallback,
-        BluetoothController.BluetoothDeviceConnectionStateChangeCallback {
-
-    private boolean mEnabled = false;
-    private boolean mConnected = false;
+    private boolean enabled = false;
+    private boolean connected = false;
     private BluetoothAdapter mBluetoothAdapter;
     private BluetoothController mController;
 
-    public BluetoothTile(Context context, QuickSettingsController qsc, BluetoothController controller) {
+    public BluetoothTile(Context context, QuickSettingsController qsc,
+                BluetoothController controller) {
         super(context, qsc);
-
         mBluetoothAdapter = BluetoothAdapter.getDefaultAdapter();
         mController = controller;
+        enabled = mBluetoothAdapter.isEnabled();
+        connected = mBluetoothAdapter.getConnectionState() == BluetoothAdapter.STATE_CONNECTED;
 
         mOnClick = new OnClickListener() {
+
             @Override
             public void onClick(View v) {
-                if (mEnabled) {
+                if(enabled){
                     mBluetoothAdapter.disable();
-                } else {
+                }else{
                     mBluetoothAdapter.enable();
+                }
+                if (isFlipTilesEnabled()) {
+                    flipTile(0);
                 }
             }
         };
 
         mOnLongClick = new OnLongClickListener() {
+
             @Override
             public boolean onLongClick(View v) {
                 startSettingsActivity(android.provider.Settings.ACTION_BLUETOOTH_SETTINGS);
                 return true;
             }
         };
+        qsc.registerAction(BluetoothAdapter.ACTION_CONNECTION_STATE_CHANGED, this);
+        qsc.registerAction(BluetoothAdapter.ACTION_STATE_CHANGED, this);
     }
 
     @Override
-    void onPostCreate() {
-        checkBluetoothState();
-        updateTile();
-        mController.addStateChangedCallback(this);
-        mController.addConnectionStateChangedCallback(this);
-        super.onPostCreate();
+    public void onReceive(Context context, Intent intent) {
+        boolean update = false;
+        if(intent.getAction().equals(BluetoothAdapter.ACTION_STATE_CHANGED)){
+            int state = intent.getIntExtra(BluetoothAdapter.EXTRA_STATE,
+                    BluetoothAdapter.ERROR);
+            enabled = (state == BluetoothAdapter.STATE_ON);
+            update = true;
+        }
+
+        if(intent.getAction().equals(BluetoothAdapter.ACTION_CONNECTION_STATE_CHANGED)){
+            int state = intent.getIntExtra(BluetoothAdapter.EXTRA_CONNECTION_STATE,
+                    BluetoothAdapter.STATE_DISCONNECTED);
+            connected = (state == BluetoothAdapter.STATE_CONNECTED);
+            update = true;
+        }
+
+        if (update) {
+            updateResources();
+        }
     }
 
-    @Override
-    public void onDestroy() {
-        mController.removeStateChangedCallback(this);
-        mController.removeConnectionStateChangedCallback(this);
-        super.onDestroy();
+    void checkBluetoothState() {
+        enabled = mBluetoothAdapter.getState() == BluetoothAdapter.STATE_ON;
+        connected = mBluetoothAdapter.getConnectionState() == BluetoothAdapter.STATE_CONNECTED;
     }
 
     @Override
@@ -72,57 +107,38 @@ public class BluetoothTile extends QuickSettingsTile implements
         super.updateResources();
     }
 
-    void checkBluetoothState() {
-        mEnabled = mBluetoothAdapter.isEnabled() &&
-                mBluetoothAdapter.getState() == BluetoothAdapter.STATE_ON;
-        mConnected = mEnabled &&
-                mBluetoothAdapter.getConnectionState() == BluetoothAdapter.STATE_CONNECTED;
-    }
-
     private synchronized void updateTile() {
-        if (mEnabled) {
-            if (mConnected) {
-                final Set<BluetoothDevice> connected = mController.getConnectedBluetoothDevices();
-
+        if(enabled){
+            if(connected){
                 mDrawable = R.drawable.ic_qs_bluetooth_on;
-                if (connected.isEmpty()) {
-                    // shouldn't happen, but provide a sane fallback nevertheless
-                    mLabel = mContext.getString(R.string.quick_settings_bluetooth_label);
-                } else if (connected.size() == 1) {
-                    BluetoothDevice device = connected.iterator().next();
-                    mLabel = device.getAlias();
-                    if (mLabel == null) {
-                        mLabel = device.getName();
-                    }
-                } else {
-                    mLabel = mContext.getString(R.string.quick_settings_bluetooth_multi_label,
-                            connected.size());
-                }
-            } else {
+            }else{
                 mDrawable = R.drawable.ic_qs_bluetooth_not_connected;
-                mLabel = mContext.getString(R.string.quick_settings_bluetooth_label);
             }
-        } else {
+            mLabel = mContext.getString(R.string.quick_settings_bluetooth_label);
+        }else{
             mDrawable = R.drawable.ic_qs_bluetooth_off;
             mLabel = mContext.getString(R.string.quick_settings_bluetooth_off_label);
         }
     }
 
     @Override
-    public void onBluetoothStateChange(boolean on) {
+    void onPostCreate() {
         checkBluetoothState();
-        updateResources();
+        updateTile();
+        mController.addStateChangedCallback(this);
+        super.onPostCreate();
     }
 
     @Override
-    public void onDeviceConnectionStateChange(BluetoothDevice device) {
-        updateResources();
+    public void onDestroy() {
+        mController.removeStateChangedCallback(this);
+        super.onDestroy();
     }
 
     @Override
-    public void onDeviceNameChange(BluetoothDevice device) {
-        if (mController.getConnectedBluetoothDevices().size() == 1) {
-            updateResources();
-        }
+    public void onBluetoothStateChange(boolean on) {
+        this.enabled = on;
+        updateResources();
     }
+
 }

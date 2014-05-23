@@ -105,6 +105,4 @@ interface IDevicePolicyManager {
 
     boolean installCaCert(in byte[] certBuffer);
     void uninstallCaCert(in byte[] certBuffer);
-
-    boolean requireSecureKeyguard(int userHandle);
 }

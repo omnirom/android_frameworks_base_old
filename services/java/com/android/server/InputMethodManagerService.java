@@ -15,9 +15,9 @@
 
 package com.android.server;
 
-import android.content.pm.ThemeUtils;
 import android.provider.Settings.SettingNotFoundException;
 
+import com.android.internal.app.ThemeUtils;
 import com.android.internal.content.PackageMonitor;
 import com.android.internal.inputmethod.InputMethodUtils;
 import com.android.internal.inputmethod.InputMethodUtils.InputMethodSettings;
@@ -80,6 +80,7 @@ import android.os.ServiceManager;
 import android.os.SystemClock;
 import android.os.UserHandle;
 import android.provider.Settings;
+import android.provider.Settings.SettingNotFoundException;
 import android.text.TextUtils;
 import android.text.style.SuggestionSpan;
 import android.util.AtomicFile;
@@ -411,10 +412,11 @@ public class InputMethodManagerService extends IInputMethodManager.Stub
                         public void onChange(boolean selfChange) {
                             updateFromSettingsLocked(true);
                         }
-                    });
+                    }, UserHandle.USER_ALL);
         }
 
-        @Override public void onChange(boolean selfChange) {
+        @Override
+        public void onChange(boolean selfChange) {
             synchronized (mMethodMap) {
                 boolean enabledChanged = false;
                 String newEnabled = mSettings.getEnabledInputMethodsStr();
@@ -1669,13 +1671,15 @@ public class InputMethodManagerService extends IInputMethodManager.Stub
             mCurMethodId = null;
             unbindCurrentMethodLocked(true, false);
         }
-        // code to disable the CM Phone IME switcher with config_show_cmIMESwitcher set = false
+
+        // code to disable the IME switcher with config_show_IMESwitcher set = false
         try {
-            mShowOngoingImeSwitcherForPhones = Settings.System.getInt(mContext.getContentResolver(),
-            Settings.System.STATUS_BAR_IME_SWITCHER) == 1;
+            mShowOngoingImeSwitcherForPhones =
+                Settings.System.getIntForUser(mContext.getContentResolver(),
+                Settings.System.STATUS_BAR_IME_SWITCHER, UserHandle.USER_CURRENT) == 1;
         } catch (SettingNotFoundException e) {
             mShowOngoingImeSwitcherForPhones = mRes.getBoolean(
-            com.android.internal.R.bool.config_show_cmIMESwitcher);
+                com.android.internal.R.bool.config_show_IMESwitcher);
         }
     }
 

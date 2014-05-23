@@ -48,11 +48,13 @@ public class EdgeGestureManager {
         private IEdgeGestureHostCallback mCallback;
 
         private class Delegator extends IEdgeGestureActivationListener.Stub {
-            public void onEdgeGestureActivation(final int touchX, final int touchY, final int positionIndex, final int flags)
-                    throws RemoteException {
+            public void onEdgeGestureActivation(
+                    final int touchX, final int touchY, final int positionIndex, final int flags)
+                            throws RemoteException {
                 mHandler.post(new Runnable() {
                     public void run() {
-                        EdgeGestureActivationListener.this.onEdgeGestureActivation(touchX, touchY, EdgeGesturePosition.values()[positionIndex], flags);
+                        EdgeGestureActivationListener.this.onEdgeGestureActivation(
+                               touchX, touchY, EdgeGesturePosition.values()[positionIndex], flags);
                     }
                 });
             }
@@ -81,11 +83,12 @@ public class EdgeGestureManager {
          * @param flags currently 0.
          * @see IEdgeGestureActivationListener#onEdgeGestureActivation(int, int, int, int)
          */
-        public abstract void onEdgeGestureActivation(int touchX, int touchY, EdgeGesturePosition position, int flags);
+        public abstract void onEdgeGestureActivation(
+                int touchX, int touchY, EdgeGesturePosition position, int flags);
 
         /**
-         * After being activated, this allows the edge gesture control to steal focus from the current
-         * window.
+         * After being activated, this allows the edge gesture
+         * control to steal focus from the current window.
          *
          * @see IEdgeGestureHostCallback#gainTouchFocus(IBinder)
          */
@@ -110,8 +113,8 @@ public class EdgeGestureManager {
         }
 
         /**
-         * Turns listening for edge gesture activation gestures on again, after it was disabled during
-         * the call to the listener.
+         * Turns listening for edge gesture activation
+         * gestures on again, after it was disabled during the call to the listener.
          *
          * @see IEdgeGestureHostCallback#restoreListenerState()
          */
@@ -175,7 +178,8 @@ public class EdgeGestureManager {
             Slog.d(TAG, "Set edge gesture activation listener");
         }
         try {
-            IEdgeGestureHostCallback callback = mPs.registerEdgeGestureActivationListener(listener.mDelegator);
+            IEdgeGestureHostCallback callback =
+                    mPs.registerEdgeGestureActivationListener(listener.mDelegator);
             listener.setHostCallback(callback);
             return true;
         } catch (RemoteException e) {
@@ -191,9 +195,11 @@ public class EdgeGestureManager {
      * @param positions is a bit mask describing the positions to listen to.
      * @hide
      */
-    public void updateEdgeGestureActivationListener(EdgeGestureActivationListener listener, int positions) {
+    public void updateEdgeGestureActivationListener(
+            EdgeGestureActivationListener listener, int positions) {
         if (DEBUG) {
-            Slog.d(TAG, "Update edge gesture activation listener: 0x" + Integer.toHexString(positions));
+            Slog.d(TAG, "Update edge gesture activation listener: 0x"
+                    + Integer.toHexString(positions));
         }
         try {
             mPs.updateEdgeGestureActivationListener(listener.mDelegator.asBinder(), positions);

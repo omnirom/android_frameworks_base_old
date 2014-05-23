@@ -504,15 +504,25 @@ public class IWindowManagerImpl implements IWindowManager {
     @Override
     public void showCustomIntentOnKeyguard(Intent intent) {
     }
-    
+
+    /* @hide */
     @Override
-    public boolean hasMenuKeyEnabled() {
-        return true;
+    public boolean expandedDesktopHidesNavigationBar() {
+        // TODO Auto-generated method stub
+        return false;
     }
 
     /* @hide */
     @Override
-    public int getSystemUIVisibility() {
+    public boolean expandedDesktopHidesStatusBar() {
+        // TODO Auto-generated method stub
+        return false;
+    }
+
+    /* @hide */
+    @Override
+    public int getCurrentNavigationBarSize() {
+        // TODO Auto-generated method stub
         return 0;
     }
 
@@ -524,5 +534,11 @@ public class IWindowManagerImpl implements IWindowManager {
     /* @hide */
     @Override
     public void toggleStatusBar() {
+    }
+
+    /* @hide */
+    @Override
+    public int getSystemUIVisibility() {
+        return 0;
     }
 }

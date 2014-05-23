@@ -70,7 +70,7 @@ interface IAudioService {
     int getMasterVolume();
 
     int getStreamMaxVolume(int streamType);
-
+    
     void setStreamMaxVolume(int streamType, int maxVol);
 
     int getMasterMaxVolume();

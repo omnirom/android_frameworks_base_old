@@ -876,28 +876,21 @@ public class AppTransition implements Dump {
     }
 
     private class SettingsObserver extends ContentObserver {
-
         SettingsObserver(Handler handler) {
             super(handler);
         }
-
         void observe() {
             ContentResolver resolver = mContext.getContentResolver();
             resolver.registerContentObserver(
-                    Settings.System.getUriFor(Settings.System.ANIMATION_CONTROLS_DURATION),
-                    false, this);
+                    Settings.System.getUriFor(Settings.System.ANIMATION_CONTROLS_DURATION), false, this);
             resolver.registerContentObserver(
-                    Settings.System.getUriFor(Settings.System.ANIMATION_CONTROLS_NO_OVERRIDE),
-                    false, this);
+                    Settings.System.getUriFor(Settings.System.ANIMATION_CONTROLS_NO_OVERRIDE), false, this);
             for (int i = 0; i < 10; i++) {
-              resolver.registerContentObserver(
-                    Settings.System.getUriFor(Settings.System.ACTIVITY_ANIMATION_CONTROLS[i]),
-                    false, this);
+	            resolver.registerContentObserver(
+                    Settings.System.getUriFor(Settings.System.ACTIVITY_ANIMATION_CONTROLS[i]), false, this);
             }
-
         }
-
-        @Override
+         @Override
         public void onChange(boolean selfChange) {
             updateSettings();
         }
@@ -905,16 +898,14 @@ public class AppTransition implements Dump {
 
     private void updateSettings() {
         ContentResolver resolver = mContext.getContentResolver();
-        for (int i = 0; i < 10; i++) {
-            mActivityAnimations[i] = Settings.System.getInt(resolver,
-                 Settings.System.ACTIVITY_ANIMATION_CONTROLS[i], 0);
+        for (int i = 0; i < 10; i++) {  
+            mActivityAnimations[i] = Settings.System.getInt(resolver, Settings.System.ACTIVITY_ANIMATION_CONTROLS[i], 0);
         }
 
         mNoOverrides = Settings.System.getInt(resolver,
                  Settings.System.ANIMATION_CONTROLS_NO_OVERRIDE, 0) == 1;
 
-        int temp = Settings.System.getInt(resolver,
-                 Settings.System.ANIMATION_CONTROLS_DURATION, 0);
+        int temp = Settings.System.getInt(resolver, Settings.System.ANIMATION_CONTROLS_DURATION, 0);
         mAnimationDuration = temp * 15;
     }
 }

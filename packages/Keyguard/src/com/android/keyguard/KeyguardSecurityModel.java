@@ -1,6 +1,4 @@
 /*
- * Copyright (c) 2013, The Linux Foundation. All rights reserved.
- * Not a Contribution.
  * Copyright (C) 2012 The Android Open Source Project
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
@@ -18,9 +16,9 @@
 package com.android.keyguard;
 
 import android.app.Profile;
+import android.app.ProfileManager;
 import android.app.admin.DevicePolicyManager;
 import android.content.Context;
-import android.telephony.MSimTelephonyManager;
 import android.telephony.TelephonyManager;
 
 import com.android.internal.telephony.IccCardConstants;
@@ -40,15 +38,20 @@ public class KeyguardSecurityModel {
         Biometric, // Unlock with a biometric key (e.g. finger print or face unlock)
         Account, // Unlock by entering an account's login and password.
         SimPin, // Unlock by entering a sim pin.
-        SimPuk // Unlock by entering a sim puk
+        SimPuk, // Unlock by entering a sim puk
+        Gesture // unlock by drawing a gesture
     }
 
     private Context mContext;
     private LockPatternUtils mLockPatternUtils;
 
+    // We can use the profile manager to override security
+    private ProfileManager mProfileManager;
+
     KeyguardSecurityModel(Context context) {
         mContext = context;
         mLockPatternUtils = new LockPatternUtils(context);
+        mProfileManager = (ProfileManager) context.getSystemService(Context.PROFILE_SERVICE);
     }
 
     void setLockPatternUtils(LockPatternUtils utils) {
@@ -78,28 +81,24 @@ public class KeyguardSecurityModel {
     }
 
     SecurityMode getSecurityMode() {
+        return getSecurityMode(false);
+    }
+
+    SecurityMode getSecurityMode(boolean forceShowInsecure) {
         KeyguardUpdateMonitor updateMonitor = KeyguardUpdateMonitor.getInstance(mContext);
-        IccCardConstants.State simState = updateMonitor.getSimState();
-
-        int numPhones = MSimTelephonyManager.getDefault().getPhoneCount();
-        for (int i = 0; i < numPhones; i++) {
-            simState = updateMonitor.getSimState(i);
-            // We are intereseted only in PIN_REQUIRED or PUK_REQUIRED
-            // So continue to the next sub if the sim state is other
-            // than these two.
-            if (simState == IccCardConstants.State.PIN_REQUIRED
-                    || simState == IccCardConstants.State.PUK_REQUIRED) {
-                break;
-            }
-        }
-
+        final IccCardConstants.State simState = updateMonitor.getSimState();
+        final Profile profile = mProfileManager.getActiveProfile();
         SecurityMode mode = SecurityMode.None;
         if (simState == IccCardConstants.State.PIN_REQUIRED) {
             mode = SecurityMode.SimPin;
         } else if (simState == IccCardConstants.State.PUK_REQUIRED
                 && mLockPatternUtils.isPukUnlockScreenEnable()) {
             mode = SecurityMode.SimPuk;
-        } else if (mLockPatternUtils.getActiveProfileLockMode() != Profile.LockMode.INSECURE) {
+        } else if (profile.getScreenLockModeWithDPM(mContext) != Profile.LockMode.INSECURE) {
+            if (forceShowInsecure) {
+                // Slider or sim locks are forced by user
+                return mode;
+            }
             final int security = mLockPatternUtils.getKeyguardStoredPasswordQuality();
             switch (security) {
                 case DevicePolicyManager.PASSWORD_QUALITY_NUMERIC:
@@ -118,6 +117,12 @@ public class KeyguardSecurityModel {
                     if (mLockPatternUtils.isLockPatternEnabled()) {
                         mode = mLockPatternUtils.isPermanentlyLocked() ?
                             SecurityMode.Account : SecurityMode.Pattern;
+                    }
+                    break;
+                case DevicePolicyManager.PASSWORD_QUALITY_GESTURE_WEAK:
+                    if (mLockPatternUtils.isLockGestureEnabled()) {
+                        mode = mLockPatternUtils.isPermanentlyLocked() ?
+                            SecurityMode.Account : SecurityMode.Gesture;
                     }
                     break;
 
@@ -140,7 +145,8 @@ public class KeyguardSecurityModel {
         if (isBiometricUnlockEnabled() && !isBiometricUnlockSuppressed()
                 && (mode == SecurityMode.Password
                         || mode == SecurityMode.PIN
-                        || mode == SecurityMode.Pattern)) {
+                        || mode == SecurityMode.Pattern
+                        || mode == SecurityMode.Gesture )) {
             return SecurityMode.Biometric;
         }
         return mode; // no alternate, return what was given
@@ -157,6 +163,8 @@ public class KeyguardSecurityModel {
             case Biometric:
                 return getSecurityMode();
             case Pattern:
+                return SecurityMode.Account;
+            case Gesture:
                 return SecurityMode.Account;
         }
         return mode; // no backup, return current security mode

@@ -1,6 +1,4 @@
 /*
- * Copyright (c) 2013 The Linux Foundation. All rights reserved.
- * Not a Contribution.
  * Copyright (C) 2007 The Android Open Source Project
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
@@ -25,10 +23,8 @@ import android.content.Intent;
 import android.content.pm.ActivityInfo;
 import android.content.pm.IPackageManager;
 import android.content.pm.PackageManager;
-import android.content.pm.PackageManager.NameNotFoundException;
 import android.content.res.XmlResourceParser;
 import android.database.Cursor;
-import android.database.SQLException;
 import android.database.sqlite.SQLiteDatabase;
 import android.database.sqlite.SQLiteOpenHelper;
 import android.database.sqlite.SQLiteStatement;
@@ -43,7 +39,6 @@ import android.os.UserHandle;
 import android.provider.Settings;
 import android.provider.Settings.Global;
 import android.provider.Settings.Secure;
-import android.telephony.MSimTelephonyManager;
 import android.telephony.TelephonyManager;
 import android.text.TextUtils;
 import android.util.Log;
@@ -65,8 +60,6 @@ import java.io.IOException;
 import java.util.HashSet;
 import java.util.List;
 
-import static com.android.internal.telephony.MSimConstants.MAX_PHONE_COUNT_TRI_SIM;
-
 /**
  * Database helper class for {@link SettingsProvider}.
  * Mostly just has a bit {@link #onCreate} to initialize the database.
@@ -79,7 +72,7 @@ public class DatabaseHelper extends SQLiteOpenHelper {
     // database gets upgraded properly. At a minimum, please confirm that 'upgradeVersion'
     // is properly propagated through your change.  Not doing so will result in a loss of user
     // settings.
-    private static final int DATABASE_VERSION = 100;
+    private static final int DATABASE_VERSION = 98;
 
     private Context mContext;
     private int mUserHandle;
@@ -89,13 +82,11 @@ public class DatabaseHelper extends SQLiteOpenHelper {
     private static final String TABLE_SYSTEM = "system";
     private static final String TABLE_SECURE = "secure";
     private static final String TABLE_GLOBAL = "global";
-    private static final String TABLE_AMRA = "amra";
 
     static {
         mValidTables.add(TABLE_SYSTEM);
         mValidTables.add(TABLE_SECURE);
         mValidTables.add(TABLE_GLOBAL);
-        mValidTables.add(TABLE_AMRA);
         mValidTables.add("bluetooth_devices");
         mValidTables.add("bookmarks");
 
@@ -146,15 +137,6 @@ public class DatabaseHelper extends SQLiteOpenHelper {
         db.execSQL("CREATE INDEX globalIndex1 ON global (name);");
     }
 
-    private void createAmraTable(SQLiteDatabase db) {
-        db.execSQL("CREATE TABLE IF NOT EXISTS amra (" +
-                "_id INTEGER PRIMARY KEY AUTOINCREMENT," +
-                "name TEXT UNIQUE ON CONFLICT REPLACE," +
-                "value TEXT" +
-                ");");
-        db.execSQL("CREATE INDEX IF NOT EXISTS amraIndex1 ON amra (name);");
-    }
-
     @Override
     public void onCreate(SQLiteDatabase db) {
         db.execSQL("CREATE TABLE system (" +
@@ -165,8 +147,6 @@ public class DatabaseHelper extends SQLiteOpenHelper {
         db.execSQL("CREATE INDEX systemIndex1 ON system (name);");
 
         createSecureTable(db);
-
-        createAmraTable(db);
 
         // Only create the global table for the singleton 'owner' user
         if (mUserHandle == UserHandle.USER_OWNER) {
@@ -209,47 +189,6 @@ public class DatabaseHelper extends SQLiteOpenHelper {
 
         // Load inital settings values
         loadSettings(db);
-    }
-
-    @Override
-    public void onOpen(SQLiteDatabase db) {
-        if (!db.isReadOnly()) {
-            // We do special conversion of some CM properties to avoid version conflict
-
-            // Settings.System.STATUS_BAR_BATTERY && Settings.System.STATUS_BAR_BATTERY_SHOW_PERCENT
-            //
-            // The old settings (pre cm-11,0) has these value.
-            // to meter mode
-            //   BATTERY_STYLE_NORMAL = 0
-            //   BATTERY_STYLE_NORMAL_PERCENT = 1
-            //   BATTERY_STYLE_CIRCLE = 2
-            //   BATTERY_STYLE_CIRCLE_PERCENT = 3
-            //   BATTERY_STYLE_GONE = 4
-            //
-            // Now the system supports
-            //   BATTERY_STYLE_NORMAL = 0 or BATTERY_STYLE_NORMAL_PERCENT = 1  ==> ICON PORTRAIT
-            //   BATTERY_STYLE_NORMAL = 5                                      ==> ICON LANDSCAPE
-            //   BATTERY_STYLE_CIRCLE = 2 or BATTERY_STYLE_CIRCLE_PERCENT = 3  ==> CIRCLE
-            //   BATTERY_STYLE_GONE = 4                                        ==> GONE
-            //
-            try {
-                // Update the show percent value to 1 if the old style has percent (1,3)
-                db.execSQL("update " + TABLE_SYSTEM + " set value = 1 where name = " +
-                        "'" + Settings.System.STATUS_BAR_BATTERY_SHOW_PERCENT + "' and " +
-                        "exists (select 'x' from " + TABLE_SYSTEM + " where name = '" +
-                        Settings.System.STATUS_BAR_BATTERY + "' and value in (1,3))");
-
-                // Convert old style ids to new style ids
-                db.execSQL("update " + TABLE_SYSTEM + " set value = 0 where " +
-                        "name = '" + Settings.System.STATUS_BAR_BATTERY + "' and value = 1");
-                db.execSQL("update " + TABLE_SYSTEM + " set value = 2 where " +
-                        "name = '" + Settings.System.STATUS_BAR_BATTERY + "' and value = 3");
-            } catch (SQLException sqlEx) {
-                // Fall-back to defaults values
-                Log.e(TAG, "Failed to convert STATUS_BAR_BATTERY and " +
-                        "STATUS_BAR_BATTERY_SHOW_PERCENT properties", sqlEx);
-            }
-        }
     }
 
     @Override
@@ -740,9 +679,6 @@ public class DatabaseHelper extends SQLiteOpenHelper {
                    Secure.LOCK_PATTERN_ENABLED,
                    Secure.LOCK_PATTERN_VISIBLE,
                    Secure.LOCK_PATTERN_TACTILE_FEEDBACK_ENABLED,
-                   Secure.LOCK_PATTERN_SIZE,
-                   Secure.LOCK_DOTS_VISIBLE,
-                   Secure.LOCK_SHOW_ERROR_PATH,
                    "lockscreen.password_type",
                    "lockscreen.lockoutattemptdeadline",
                    "lockscreen.patterneverchosen",
@@ -1623,25 +1559,6 @@ public class DatabaseHelper extends SQLiteOpenHelper {
             upgradeVersion = 98;
         }
 
-        if (upgradeVersion == 98) {
-            //add Amra table
-            db.beginTransaction();
-            try {
-                createAmraTable(db);
-                db.setTransactionSuccessful();
-            } finally {
-                db.endTransaction();
-            }
-            upgradeVersion = 99;
-        }
-
-        if (upgradeVersion == 99) {
-            if (mUserHandle == UserHandle.USER_OWNER) {
-                loadQuickBootSetting(db);
-            }
-            upgradeVersion = 100;
-        }
-
         // *** Remember to update DATABASE_VERSION above!
 
         if (upgradeVersion != currentVersion) {
@@ -1666,8 +1583,6 @@ public class DatabaseHelper extends SQLiteOpenHelper {
         db.execSQL("DROP INDEX IF EXISTS bookmarksIndex1");
         db.execSQL("DROP INDEX IF EXISTS bookmarksIndex2");
         db.execSQL("DROP TABLE IF EXISTS favorites");
-        db.execSQL("DROP TABLE IF EXISTS amra");
-        db.execSQL("DROP INDEX IF EXISTS amraIndex1");
         onCreate(db);
 
         // Added for diagnosing settings.db wipes after the fact
@@ -2049,27 +1964,6 @@ public class DatabaseHelper extends SQLiteOpenHelper {
         }
     }
 
-    private void loadQuickBootSetting(SQLiteDatabase db) {
-        boolean qbEnabled = true;
-        final PackageManager pm = mContext.getPackageManager();
-        try {
-            pm.getPackageInfo("com.qapp.quickboot", PackageManager.GET_META_DATA);
-        } catch (NameNotFoundException e) {
-            qbEnabled = false;
-        }
-        db.beginTransaction();
-        SQLiteStatement stmt = null;
-        try {
-            stmt = db.compileStatement("INSERT OR REPLACE INTO global(name,value)"
-                    + " VALUES(?,?);");
-            loadSetting(stmt, Settings.Global.ENABLE_QUICKBOOT, qbEnabled ? 1 : 0);
-            db.setTransactionSuccessful();
-        } finally {
-            db.endTransaction();
-            if (stmt != null) stmt.close();
-        }
-    }
-
     private void loadSettings(SQLiteDatabase db) {
         loadSystemSettings(db);
         loadSecureSettings(db);
@@ -2077,7 +1971,6 @@ public class DatabaseHelper extends SQLiteOpenHelper {
         if (mUserHandle == UserHandle.USER_OWNER) {
             loadGlobalSettings(db);
         }
-        loadAmraSettings(db);
     }
 
     private void loadSystemSettings(SQLiteDatabase db) {
@@ -2127,23 +2020,14 @@ public class DatabaseHelper extends SQLiteOpenHelper {
             loadIntegerSetting(stmt, Settings.System.STATUS_BAR_BATTERY,
                     R.integer.def_battery_style);
 
-            loadIntegerSetting(stmt, Settings.System.STATUS_BAR_BATTERY_SHOW_PERCENT,
-                    R.integer.def_battery_show_percent);
-
             loadIntegerSetting(stmt, Settings.System.STATUS_BAR_NOTIF_COUNT,
                     R.integer.def_notif_count);
 
             loadIntegerSetting(stmt, Settings.System.QS_QUICK_PULLDOWN,
                     R.integer.def_qs_quick_pulldown);
 
-            if (mContext.getResources()
-                    .getBoolean(com.android.internal.R.bool.config_voice_capable)) {
-                loadStringSetting(stmt, Settings.System.LOCKSCREEN_TARGETS,
-                        R.string.def_lockscreen_targets);
-            } else {
-                loadStringSetting(stmt, Settings.System.LOCKSCREEN_TARGETS,
-                        R.string.def_lockscreen_targets_no_telephony);
-            }
+            loadStringSetting(stmt, Settings.System.LOCKSCREEN_TARGETS,
+                    R.string.def_lockscreen_targets);
         } finally {
             if (stmt != null) stmt.close();
         }
@@ -2269,18 +2153,6 @@ public class DatabaseHelper extends SQLiteOpenHelper {
                 R.string.def_backup_transport);
     }
 
-     private void loadAmraSettings(SQLiteDatabase db) {
-        SQLiteStatement stmt = null;
-        try {
-            //stmt = db.compileStatement("INSERT OR IGNORE INTO amra(name,value)"
-            //        + " VALUES(?,?);");
-            //loadBooleanSetting(stmt, Settings.Amra.ENABLE_ACRA,
-            //        R.bool.def_enable_acra);
-        } finally {
-            if (stmt != null) stmt.close();
-        }
-    }
-
     private void loadGlobalSettings(SQLiteDatabase db) {
         SQLiteStatement stmt = null;
         try {
@@ -2363,19 +2235,6 @@ public class DatabaseHelper extends SQLiteOpenHelper {
                             SystemProperties.get("ro.com.android.mobiledata",
                                     "true")) ? 1 : 0);
 
-            // SUB specific flags for Multisim devices
-            for (int i = 0; i < MAX_PHONE_COUNT_TRI_SIM; i++) {
-                // Mobile Data default, based on build
-                loadSetting(stmt, Settings.Global.MOBILE_DATA + i,
-                        "true".equalsIgnoreCase(
-                        SystemProperties.get("ro.com.android.mobiledata", "true")) ? 1 : 0);
-
-                // Data roaming default, based on build
-                loadSetting(stmt, Settings.Global.DATA_ROAMING + i,
-                        "true".equalsIgnoreCase(
-                        SystemProperties.get("ro.com.android.dataroaming", "true")) ? 1 : 0);
-            }
-
             loadBooleanSetting(stmt, Settings.Global.NETSTATS_ENABLED,
                     R.bool.def_netstats_enabled);
 
@@ -2413,6 +2272,12 @@ public class DatabaseHelper extends SQLiteOpenHelper {
                     R.string.def_wireless_charging_started_sound);
             loadIntegerSetting(stmt, Settings.Global.DOCK_AUDIO_MEDIA_ENABLED,
                     R.integer.def_dock_audio_media_enabled);
+            loadBooleanSetting(stmt, Settings.Global.POWER_NOTIFICATIONS_ENABLED,
+                    R.bool.def_power_notifications_enabled);
+            loadBooleanSetting(stmt, Settings.Global.POWER_NOTIFICATIONS_VIBRATE,
+                    R.bool.def_power_notifications_vibrate);
+            loadStringSetting(stmt, Settings.Global.POWER_NOTIFICATIONS_RINGTONE,
+                    R.string.def_power_notifications_ringtone);
 
             loadBooleanSetting(stmt, Settings.Global.POWER_NOTIFICATIONS_ENABLED,
                     R.bool.def_power_notifications_enabled);
@@ -2436,11 +2301,7 @@ public class DatabaseHelper extends SQLiteOpenHelper {
             int type;
             type = SystemProperties.getInt("ro.telephony.default_network",
                         RILConstants.PREFERRED_NETWORK_MODE);
-            String val = Integer.toString(type);
-            if (MSimTelephonyManager.getDefault().isMultiSimEnabled()) {
-                val = type + "," + type;
-            }
-            loadSetting(stmt, Settings.Global.PREFERRED_NETWORK_MODE, val);
+            loadSetting(stmt, Settings.Global.PREFERRED_NETWORK_MODE, type);
 
             // Set the preferred cdma subscription source to target desired value or default
             // value defined in CdmaSubscriptionSourceManager
@@ -2458,8 +2319,6 @@ public class DatabaseHelper extends SQLiteOpenHelper {
                     R.integer.def_wifi_suspend_optimizations_enabled);
 
             // --- New global settings start here
-            loadQuickBootSetting(db);
-
         } finally {
             if (stmt != null) stmt.close();
         }

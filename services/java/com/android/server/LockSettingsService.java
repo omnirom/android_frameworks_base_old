@@ -29,6 +29,11 @@ import android.database.Cursor;
 import android.database.sqlite.SQLiteDatabase;
 import android.database.sqlite.SQLiteOpenHelper;
 import android.database.sqlite.SQLiteStatement;
+import android.gesture.Gesture;
+import android.gesture.GestureLibraries;
+import android.gesture.GestureLibrary;
+import android.gesture.Prediction;
+import android.gesture.GestureStore;
 import android.media.AudioManager;
 import android.media.AudioService;
 import android.os.Binder;
@@ -44,6 +49,7 @@ import android.security.KeyStore;
 import android.text.TextUtils;
 import android.util.Log;
 import android.util.Slog;
+import java.util.ArrayList;
 
 import com.android.internal.widget.ILockSettings;
 import com.android.internal.widget.LockPatternUtils;
@@ -79,6 +85,9 @@ public class LockSettingsService extends ILockSettings.Stub {
     private static final String SYSTEM_DIRECTORY = "/system/";
     private static final String LOCK_PATTERN_FILE = "gesture.key";
     private static final String LOCK_PASSWORD_FILE = "password.key";
+    private static final String LOCK_GESTURE_FILE = "lock_gesture.key";
+
+    private static final String LOCK_GESTURE_NAME = "lock_gesture";
 
     private final Context mContext;
     private LockPatternUtils mLockPatternUtils;
@@ -219,6 +228,7 @@ public class LockSettingsService extends ILockSettings.Stub {
         return readFromDb(key, defaultValue, userId);
     }
 
+
     @Override
     public byte getLockPatternSize(int userId) {
         try {
@@ -245,6 +255,24 @@ public class LockSettingsService extends ILockSettings.Stub {
                 android.os.Environment.getDataDirectory().getAbsolutePath() +
                 SYSTEM_DIRECTORY;
         String patternFile = (defaultSize ? "" : "cm_") + LOCK_PATTERN_FILE;
+        if (userId == 0) {
+            // Leave it in the same place for user 0
+            return dataSystemDirectory + patternFile;
+        } else {
+            return  new File(Environment.getUserSystemDirectory(userId), patternFile)
+                    .getAbsolutePath();
+        }
+    }
+
+    private String getLockGestureFilename(int userId) {
+        return getLockGestureFilename(userId, isDefaultSize(userId));
+    }
+
+    private String getLockGestureFilename(int userId, boolean defaultSize) {
+        String dataSystemDirectory =
+                android.os.Environment.getDataDirectory().getAbsolutePath() +
+                SYSTEM_DIRECTORY;
+        String patternFile = LOCK_GESTURE_FILE;
 
         if (userId == 0) {
             // Leave it in the same place for user 0
@@ -282,6 +310,12 @@ public class LockSettingsService extends ILockSettings.Stub {
         return new File(getLockPatternFilename(userId)).length() > 0;
     }
 
+         @Override
+    public boolean haveGesture(int userId) throws RemoteException {
+        // Do we need a permissions check here?
+        return new File(getLockGestureFilename(userId)).length() > 0;
+    }
+
     private void maybeUpdateKeystore(String password, int userId) {
         if (userId == UserHandle.USER_OWNER) {
             final KeyStore keyStore = KeyStore.getInstance();
@@ -304,9 +338,50 @@ public class LockSettingsService extends ILockSettings.Stub {
 
         final byte[] hash = mLockPatternUtils.patternToHash(
                 mLockPatternUtils.stringToPattern(pattern));
+
         boolean defaultSize = isDefaultSize(userId);
         writeFile(getLockPatternFilename(userId,  defaultSize), hash);
         writeFile(getLockPatternFilename(userId, !defaultSize), null);
+    }
+
+         @Override
+    public void setLockGesture(Gesture gesture, int userId) throws RemoteException {
+        checkWritePermission(userId);
+        if (gesture == null)
+            return;
+
+        File storeFile = new File(getLockGestureFilename(userId));
+        GestureLibrary store = GestureLibraries.fromFile(storeFile);
+
+        store.load();
+        if (store.getGestures(LOCK_GESTURE_NAME) != null) {
+            store.removeEntry(LOCK_GESTURE_NAME);
+        }
+
+        store.addGesture(LOCK_GESTURE_NAME, gesture);
+        store.save();
+    }
+
+    @Override
+    public boolean checkGesture(Gesture gesture, int userId) throws RemoteException {
+        checkPasswordReadPermission(userId);
+
+        File storeFile = new File(getLockGestureFilename(userId));
+        GestureLibrary store = GestureLibraries.fromFile(storeFile);
+        int minPredictionScore = mContext.getResources().getInteger(
+                com.android.internal.R.integer.min_gesture_prediction_score);
+        store.setOrientationStyle(GestureStore.ORIENTATION_SENSITIVE);
+        store.load();
+        ArrayList<Prediction> predictions = store.recognize(gesture);
+        if (predictions.size() > 0) {
+            Prediction prediction = predictions.get(0);
+            if (prediction.score > minPredictionScore) {
+                if (prediction.name.equals(LOCK_GESTURE_NAME)) {
+                    return true;
+                }
+            }
+        }
+        return false;
     }
 
     @Override
@@ -544,10 +619,7 @@ public class LockSettingsService extends ILockSettings.Stub {
         Secure.LOCK_PATTERN_ENABLED,
         Secure.LOCK_BIOMETRIC_WEAK_FLAGS,
         Secure.LOCK_PATTERN_VISIBLE,
-        Secure.LOCK_PATTERN_TACTILE_FEEDBACK_ENABLED,
-        Secure.LOCK_PATTERN_SIZE,
-        Secure.LOCK_DOTS_VISIBLE,
-        Secure.LOCK_SHOW_ERROR_PATH,
+        Secure.LOCK_PATTERN_TACTILE_FEEDBACK_ENABLED
     };
 
     // These are protected with a read permission

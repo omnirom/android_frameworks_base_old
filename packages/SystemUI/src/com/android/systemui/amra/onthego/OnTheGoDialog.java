@@ -74,8 +74,8 @@ public class OnTheGoDialog extends Dialog {
         final ContentResolver resolver = mContext.getContentResolver();
 
         final SeekBar mSlider = (SeekBar) findViewById(R.id.alpha_slider);
-        final float value = Settings.Amra.getFloat(mContext.getContentResolver(),
-                Settings.Amra.ON_THE_GO_ALPHA,
+        final float value = Settings.System.getFloat(mContext.getContentResolver(),
+                Settings.System.ON_THE_GO_ALPHA,
                 0.5f);
         final int progress = ((int) (value * 100));
         mSlider.setProgress(progress);
@@ -97,30 +97,30 @@ public class OnTheGoDialog extends Dialog {
         });
 
         final Switch mServiceToggle = (Switch) findViewById(R.id.onthego_service_toggle);
-        final boolean restartService = Settings.Amra.getBoolean(resolver,
-                Settings.Amra.ON_THE_GO_SERVICE_RESTART,
+        final boolean restartService = Settings.System.getBoolean(resolver,
+                Settings.System.ON_THE_GO_SERVICE_RESTART,
                 false);
         mServiceToggle.setChecked(restartService);
         mServiceToggle.setOnCheckedChangeListener(new CompoundButton.OnCheckedChangeListener() {
             @Override
             public void onCheckedChanged(CompoundButton compoundButton, boolean b) {
-                Settings.Amra.putBoolean(resolver,
-                        Settings.Amra.ON_THE_GO_SERVICE_RESTART,
+                Settings.System.putBoolean(resolver,
+                        Settings.System.ON_THE_GO_SERVICE_RESTART,
                         b);
                 dismissOnTheGoDialog(mOnTheGoDialogShortTimeout);
             }
         });
 
         final Switch mCamSwitch = (Switch) findViewById(R.id.onthego_camera_toggle);
-        final boolean useFrontCam = (Settings.Amra.getInt(resolver,
-                Settings.Amra.ON_THE_GO_CAMERA,
+        final boolean useFrontCam = (Settings.System.getInt(resolver,
+                Settings.System.ON_THE_GO_CAMERA,
                 0) == 1);
         mCamSwitch.setChecked(useFrontCam);
         mCamSwitch.setOnCheckedChangeListener(new CompoundButton.OnCheckedChangeListener() {
             @Override
             public void onCheckedChanged(CompoundButton compoundButton, boolean b) {
-                Settings.Amra.putInt(resolver,
-                        Settings.Amra.ON_THE_GO_CAMERA,
+                Settings.System.putInt(resolver,
+                        Settings.System.ON_THE_GO_CAMERA,
                         (b ? 1 : 0));
                 sendCameraBroadcast();
                 dismissOnTheGoDialog(mOnTheGoDialogShortTimeout);

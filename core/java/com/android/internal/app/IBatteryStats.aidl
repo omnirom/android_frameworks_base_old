@@ -77,12 +77,4 @@ interface IBatteryStats {
     void setBatteryState(int status, int health, int plugType, int level, int temp, int volt);
     long getAwakeTimeBattery();
     long getAwakeTimePlugged();
-
-    // CM Implementation
-    /** @hide **/
-    byte[] getDockStatistics();
-    /** @hide **/
-    void resetStatistics();
-    /** @hide **/
-    void setDockBatteryState(int status, int health, int plugType, int level, int temp, int volt);
 }

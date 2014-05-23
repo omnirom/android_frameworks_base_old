@@ -198,6 +198,14 @@ class KeyguardMessageArea extends TextView {
 
         mSeparator = getResources().getString(R.string.kg_text_message_separator);
 
+        int textColor = Settings.Secure.getIntForUser(
+                mContext.getContentResolver(),
+                Settings.Secure.LOCKSCREEN_MISC_COLOR, -2,
+                UserHandle.USER_CURRENT);
+        if (textColor != -2) {
+            setTextColor(textColor);
+        }
+
         update();
     }
 

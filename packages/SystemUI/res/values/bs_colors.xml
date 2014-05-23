@@ -1,0 +1,38 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!--
+/*
+ * Copyright 2010, The Android Open Source Project
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *     http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+-->
+<resources>
+    
+    <!-- Notification Shortcuts -->
+    <drawable name="notification_shortcut_background_color">#00000000</drawable>
+    <drawable name="notification_item_background_color">#ff111111</drawable>
+    <drawable name="notification_item_background_color_pressed">#ffaaaaaa</drawable>
+    <color name="notification_shortcut_color">#FFFFFFFF</color>
+
+    <!-- Navigation bar -->
+    <color name="navigationbar_button_default_color">#FFFFFFFF</color>
+    <color name="navigationbar_button_glow_default_color">#FFFFFFFF</color>
+
+    <!-- Navigation ring -->
+    <color name="navring_system_icon_default_color">#FF000000</color>
+
+    <!-- Quick Settings -->
+    <color name="qs_background_color">#FF212121</color>
+    <color name="qs_background_pressed_color">#FF161616</color>
+
+</resources>

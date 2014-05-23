@@ -33,7 +33,7 @@ import android.view.View;
 import android.widget.ImageView;
 
 import com.android.internal.util.gesture.EdgeGesturePosition;
-import com.android.internal.util.slim.ImageHelper;
+import com.android.internal.util.beanstalk.ImageHelper;
 
 import com.android.systemui.R;
 import com.android.systemui.statusbar.pie.PieView.PieDrawable;

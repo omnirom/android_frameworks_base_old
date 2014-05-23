@@ -18,7 +18,6 @@ package com.android.systemui.shortcuts;
 
 import android.app.Activity;
 import android.content.Intent;
-import android.graphics.Color;
 import android.os.Bundle;
 import android.os.UserHandle;
 import android.provider.Settings;
@@ -34,6 +33,9 @@ public class ChamberOfSecrets extends Activity  {
     private static final int SECURE_LONG = 3;
     private static final int SYSTEM_FLOAT = 4;
     private static final int SECURE_FLOAT = 5;
+    private static final int GLOBAL_INT = 6;
+    private static final int GLOBAL_LONG = 7;
+    private static final int GLOBAL_FLOAT = 8;
 
     @Override
     public void onCreate(Bundle savedInstanceState) {
@@ -69,7 +71,7 @@ public class ChamberOfSecrets extends Activity  {
                                 setting, getNewInt(array, current));
                         break;
                     case SYSTEM_LONG:
-                        curLong= Settings.System.getIntForUser(getContentResolver(),
+                        curLong= Settings.System.getLongForUser(getContentResolver(),
                                 setting, 0, UserHandle.USER_CURRENT);
                         Settings.System.putLong(getContentResolver(),
                                 setting, getNewLong(array, curLong));
@@ -81,7 +83,7 @@ public class ChamberOfSecrets extends Activity  {
                                 setting, getNewLong(array, curLong));
                         break;
                     case SYSTEM_FLOAT:
-                        curFloat= Settings.System.getLongForUser(getContentResolver(),
+                        curFloat= Settings.System.getFloatForUser(getContentResolver(),
                                 setting, 0, UserHandle.USER_CURRENT);
                         Settings.System.putFloat(getContentResolver(),
                                 setting, getNewFloat(array, curFloat));
@@ -90,6 +92,24 @@ public class ChamberOfSecrets extends Activity  {
                         curFloat = Settings.Secure.getFloatForUser(getContentResolver(),
                                 setting, 0, UserHandle.USER_CURRENT);
                         Settings.Secure.putFloat(getContentResolver(),
+                                setting, getNewFloat(array, curFloat));
+                        break;
+                    case GLOBAL_INT:
+                        current = Settings.Global.getInt(getContentResolver(),
+                                setting, 0);
+                        Settings.Global.putInt(getContentResolver(),
+                                setting, getNewInt(array, current));
+                        break;
+                    case GLOBAL_LONG:
+                        curLong = Settings.Global.getLong(getContentResolver(),
+                                setting, 0);
+                        Settings.Global.putLong(getContentResolver(),
+                                setting, getNewLong(array, curLong));
+                        break;
+                    case GLOBAL_FLOAT:
+                        curFloat = Settings.Global.getFloat(getContentResolver(),
+                                setting, 0);
+                        Settings.Global.putFloat(getContentResolver(),
                                 setting, getNewFloat(array, curFloat));
                         break;
                 }
@@ -110,12 +130,8 @@ public class ChamberOfSecrets extends Activity  {
             try {
                 intArray[i] = Integer.parseInt(strArray[i]);
             } catch (NumberFormatException e) {
-                try {
-                    intArray[i] = Color.parseColor(strArray[i]);
-                } catch (IllegalArgumentException ex) {
-                    // We already checked this string
-                    // parse won't fail
-                }
+                // We already checked this string
+                // parse won't fail
             }
         }
         for (int i = 0; i < intArray.length; i++) {

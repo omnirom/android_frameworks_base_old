@@ -497,7 +497,6 @@
     <!-- QuickSettings: Brightness dialog auto brightness button [CHAR LIMIT=NONE] -->
     <string name="quick_settings_brightness_dialog_auto_brightness_label">AUTO</string>
 
-
     <!-- Glyph to be overlaid atop the battery when the level is extremely low. Do not translate. -->
     <string name="battery_meter_very_low_overlay_symbol">!</string>
 
@@ -507,18 +506,9 @@
          linebreak to position it correctly.  [CHAR LIMIT=45] -->
     <string name="ssl_ca_cert_warning">Network may\nbe monitored</string>
 
-    <string name="quick_settings_quick_record_nofile">Long-press</string>
-    <string name="quick_settings_quick_record_def">Quick Record</string>
-    <string name="quick_settings_quick_record_rec">Recording...</string>
-    <string name="quick_settings_quick_record_save">Saved</string>
-    <string name="quick_settings_quick_record_play">Playing...</string>
+    <!-- Development shortcut -->
+    <string name="advanced_dev_option_wipe_app">Wipe app data</string>
+    <string name="advanced_dev_option_force_stop">Force stop</string>
 
-    <!-- Battery Saver -->
-    <string name="network_4G">4G/LTE</string>
-    <string name="network_3G_only">3G Only</string>
-    <string name="network_3G_auto">2G/3G Auto</string>
-    <string name="network_3G">2G/3G Pref</string>
-    <string name="network_2G">2G Only</string>
-    <string name="quick_settings_network_unknown">Unknown</string>
-
+    <string name="powerwidget_screen_timeout_toast">Screen timeout set to: %1$d %2$s</string>
 </resources>

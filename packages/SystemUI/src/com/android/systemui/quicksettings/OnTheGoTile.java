@@ -1,21 +1,18 @@
 /*
-* <!--
-*    Copyright (C) 2014 The Amra Project
-*
-*    This program is free software: you can redistribute it and/or modify
-*    it under the terms of the GNU General Public License as published by
-*    the Free Software Foundation, either version 3 of the License, or
-*    (at your option) any later version.
-*
-*    This program is distributed in the hope that it will be useful,
-*    but WITHOUT ANY WARRANTY; without even the implied warranty of
-*    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-*    GNU General Public License for more details.
-*
-*    You should have received a copy of the GNU General Public License
-*    along with this program.  If not, see <http://www.gnu.org/licenses/>.
-* -->
-*/
+ * Copyright (C) 2014 The NamelessRom Project
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *      http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
 
 package com.android.systemui.quicksettings;
 
@@ -25,14 +22,14 @@ import android.content.Intent;
 import android.net.Uri;
 import android.provider.Settings;
 import android.view.View;
+import android.view.View.OnClickListener;
 import android.view.View.OnLongClickListener;
 
-import com.android.internal.util.amra.AmraActions;
-import com.android.internal.util.amra.AmraUtils;
+import com.android.internal.util.beanstalk.NamelessActions;
 import com.android.systemui.R;
 import com.android.systemui.amra.onthego.OnTheGoDialog;
-import com.android.systemui.amra.onthego.OnTheGoService;
 import com.android.systemui.statusbar.phone.QuickSettingsController;
+import com.android.systemui.statusbar.phone.QuickSettingsContainerView;
 
 public class OnTheGoTile extends QuickSettingsTile {
 
@@ -45,7 +42,7 @@ public class OnTheGoTile extends QuickSettingsTile {
         mOnClick = new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                AmraActions.processAction(mContext, AmraActions.ACTION_ONTHEGO_TOGGLE);
+                NamelessActions.processAction(mContext, NamelessActions.ACTION_ONTHEGO_TOGGLE);
             }
         };
 
@@ -57,41 +54,8 @@ public class OnTheGoTile extends QuickSettingsTile {
             }
         };
 
-        qsc.registerObservedContent(Settings.Amra.getUriFor(
-                Settings.Amra.ON_THE_GO_CAMERA), this);
-    }
-
-    @Override
-    public void onFlingRight() {
-        toggleCamera();
-        super.onFlingRight();
-    }
-
-    @Override
-    public void onFlingLeft() {
-        toggleCamera();
-        super.onFlingLeft();
-    }
-
-    private void toggleCamera() {
-        final ContentResolver resolver = mContext.getContentResolver();
-        final int camera = Settings.Amra.getInt(resolver,
-                Settings.Amra.ON_THE_GO_CAMERA,
-                0);
-
-        int newValue;
-        if (camera == 0) {
-            newValue = 1;
-        } else {
-            newValue = 0;
-        }
-
-        Settings.Amra.putInt(resolver,
-                Settings.Amra.ON_THE_GO_CAMERA,
-                newValue);
-
-        updateResources();
-        sendCameraBroadcast();
+        qsc.registerObservedContent(Settings.System.getUriFor(
+                Settings.System.ON_THE_GO_CAMERA), this);
     }
 
     @Override
@@ -106,14 +70,34 @@ public class OnTheGoTile extends QuickSettingsTile {
         super.updateResources();
     }
 
+    private void toggleCamera() {
+        final ContentResolver resolver = mContext.getContentResolver();
+        final int camera = Settings.System.getInt(resolver,
+                Settings.System.ON_THE_GO_CAMERA,
+                0);
+
+        int newValue;
+        if (camera == 0) {
+            newValue = 1;
+        } else {
+            newValue = 0;
+        }
+
+        Settings.System.putInt(resolver,
+                Settings.System.ON_THE_GO_CAMERA,
+                newValue);
+
+        updateResources();
+    }
+
     @Override
     public void onChangeUri(ContentResolver resolver, Uri uri) {
         updateResources();
     }
 
     private synchronized void updateTile() {
-        final int cameraMode = Settings.Amra.getInt(mContext.getContentResolver(),
-                Settings.Amra.ON_THE_GO_CAMERA,
+        final int cameraMode = Settings.System.getInt(mContext.getContentResolver(),
+                Settings.System.ON_THE_GO_CAMERA,
                 0);
 
         switch (cameraMode) {
@@ -130,10 +114,5 @@ public class OnTheGoTile extends QuickSettingsTile {
 
     }
 
-    private void sendCameraBroadcast() {
-        final Intent cameraBroadcast = new Intent();
-        cameraBroadcast.setAction(OnTheGoService.ACTION_TOGGLE_CAMERA);
-        mContext.sendBroadcast(cameraBroadcast);
-    }
-
 }
+

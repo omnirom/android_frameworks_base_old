@@ -30,12 +30,13 @@ import static com.android.server.am.ActivityStackSupervisor.HOME_STACK_ID;
 
 import android.app.AppOpsManager;
 import android.appwidget.AppWidgetManager;
-import android.content.pm.ThemeUtils;
 import android.util.ArrayMap;
 import com.android.internal.R;
 import com.android.internal.annotations.GuardedBy;
 import com.android.internal.app.IAppOpsService;
 import com.android.internal.app.ProcessStats;
+import com.android.internal.app.ResolverActivity;
+import com.android.internal.app.ThemeUtils;
 import com.android.internal.os.BackgroundThread;
 import com.android.internal.os.BatteryStatsImpl;
 import com.android.internal.os.ProcessCpuTracker;
@@ -330,8 +331,6 @@ public final class ActivityManagerService extends ActivityManagerNative
 
     // How many bytes to write into the dropbox log before truncating
     static final int DROPBOX_MAX_SIZE = 256 * 1024;
-
-    static final String PROP_REFRESH_THEME = "sys.refresh_theme";
 
     /** Run all ActivityStacks through this */
     ActivityStackSupervisor mStackSupervisor;
@@ -1367,10 +1366,7 @@ public final class ActivityManagerService extends ActivityManagerNative
                     String text = mContext.getString(R.string.heavy_weight_notification,
                             context.getApplicationInfo().loadLabel(context.getPackageManager()));
                     Notification notification = new Notification();
-                    //context.getApplicationInfo().icon;
-                    notification.icon = ((SystemProperties.getInt("ro.amra.secret", 0) == 1) ?
-                            com.android.internal.R.drawable.stat_sys_adb_egg :
-                            com.android.internal.R.drawable.stat_sys_adb);
+                    notification.icon = com.android.internal.R.drawable.stat_sys_adb; //context.getApplicationInfo().icon;
                     notification.when = 0;
                     notification.flags = Notification.FLAG_ONGOING_EVENT;
                     notification.tickerText = text;
@@ -2056,9 +2052,8 @@ public final class ActivityManagerService extends ActivityManagerNative
         File dataDir = Environment.getDataDirectory();
         File systemDir = new File(dataDir, "system");
         systemDir.mkdirs();
-        mBatteryStatsService = new BatteryStatsService(
-                new File(systemDir, "batterystats.bin").toString(),
-                new File(systemDir, "dockbatterystats.bin").toString());
+        mBatteryStatsService = new BatteryStatsService(new File(
+                systemDir, "batterystats.bin").toString());
         mBatteryStatsService.getActiveStatistics().readLocked();
         mBatteryStatsService.getActiveStatistics().writeAsyncLocked();
         mOnBattery = DEBUG_POWER ? true
@@ -2848,7 +2843,7 @@ public final class ActivityManagerService extends ActivityManagerNative
             // Run the app in safe mode if its manifest requests so or the
             // system is booted in safe mode.
             if ((app.info.flags & ApplicationInfo.FLAG_VM_SAFE_MODE) != 0 ||
-                SystemServer.inSafeMode == true) {
+                Zygote.systemInSafeMode == true) {
                 debugFlags |= Zygote.DEBUG_ENABLE_SAFEMODE;
             }
             if ("1".equals(SystemProperties.get("debug.checkjni"))) {
@@ -2861,18 +2856,11 @@ public final class ActivityManagerService extends ActivityManagerNative
                 debugFlags |= Zygote.DEBUG_ENABLE_ASSERT;
             }
 
-            //Check if zygote should refresh its fonts
-            boolean refreshTheme = false;
-            if (SystemProperties.getBoolean(PROP_REFRESH_THEME, false)) {
-                SystemProperties.set(PROP_REFRESH_THEME, "false");
-                refreshTheme = true;
-            }
-
             // Start the process.  It will either succeed and return a result containing
             // the PID of the new process, or else throw a RuntimeException.
             Process.ProcessStartResult startResult = Process.start("android.app.ActivityThread",
                     app.processName, uid, uid, gids, debugFlags, mountExternal,
-                    app.info.targetSdkVersion, app.info.seinfo, refreshTheme, null);
+                    app.info.targetSdkVersion, app.info.seinfo, null);
 
             BatteryStatsImpl bs = mBatteryStatsService.getActiveStatistics();
             synchronized (bs) {
@@ -7402,7 +7390,6 @@ public final class ActivityManagerService extends ActivityManagerNative
             ArrayList<ActivityStack> stacks = mStackSupervisor.getStacks();
             for (ActivityStack stack : stacks) {
                 TaskRecord r = stack.taskForIdLocked(task);
-
                 if (r != null && r.getTopActivity() != null) {
                     return r.getTopActivity().appToken;
                 } else {
@@ -7412,7 +7399,6 @@ public final class ActivityManagerService extends ActivityManagerNative
         }
         return null;
     }
-
 
     // =========================================================
     // THUMBNAILS
@@ -12583,7 +12569,6 @@ public final class ActivityManagerService extends ActivityManagerNative
         app.foregroundActivities = false;
         app.hasShownUi = false;
         app.hasAboveClient = false;
-        app.hasClientActivities = false;
 
         mServices.killServicesLocked(app, allowRestart);
 
@@ -14156,9 +14141,6 @@ public final class ActivityManagerService extends ActivityManagerNative
         Configuration ci;
         synchronized(this) {
             ci = new Configuration(mConfiguration);
-            if (ci.customTheme == null) {
-                ci.customTheme = CustomTheme.getBootTheme(mContext.getContentResolver());
-            }
         }
         return ci;
     }
@@ -14415,11 +14397,9 @@ public final class ActivityManagerService extends ActivityManagerNative
     }
 
     private void saveThemeResourceLocked(CustomTheme t, boolean isDiff){
-        if(isDiff) {
-            Settings.Secure.putString(mContext.getContentResolver(), Configuration.THEME_PACKAGE_NAME_PERSISTENCE_PROPERTY, t.getThemePackageName());
-            Settings.Secure.putString(mContext.getContentResolver(), Configuration.THEME_SYSTEMUI_PACKAGE_NAME_PERSISTENCE_PROPERTY, t.getSystemUiPackageName());
-            Settings.Secure.putString(mContext.getContentResolver(), Configuration.THEME_ICONPACK_PACKAGE_NAME_PERSISTENCE_PROPERTY, t.getIconPackPkgName());
-            Settings.Secure.putString(mContext.getContentResolver(), Configuration.THEME_FONT_PACKAGE_NAME_PERSISTENCE_PROPERTY, t.getFontPackPkgName());
+        if(isDiff){
+            SystemProperties.set(Configuration.THEME_ID_PERSISTENCE_PROPERTY, t.getThemeId());
+            SystemProperties.set(Configuration.THEME_PACKAGE_NAME_PERSISTENCE_PROPERTY, t.getThemePackageName());  
         }
     }
 
@@ -16855,7 +16835,8 @@ public final class ActivityManagerService extends ActivityManagerNative
 
         ActivityRecord starting = getFocusedStack().topRunningActivityLocked(null);
 
-        if (mWindowManager != null && starting != null && mWindowManager.isTaskSplitView(starting.task.taskId)) {
+        if (mWindowManager != null && starting != null &&
+                mWindowManager.isTaskSplitView(starting.task.taskId)) {
             Log.e("XPLOD", "[rAL] The current resumed task " + starting.task.taskId + " is split. Checking second");
 
             // This task was split, we resume the second task if this task wasn't already a resumed task
@@ -16866,7 +16847,7 @@ public final class ActivityManagerService extends ActivityManagerNative
                 ActivityRecord second = getFocusedStack().topRunningActivityLocked(starting);
 
                 // Is that second task split as well?
-                if (mWindowManager.isTaskSplitView(second.task.taskId)) {
+                if (second != null && mWindowManager.isTaskSplitView(second.task.taskId)) {
                     // Don't restore me again
                     Log.e("XPLOD", "[rAL] There is a second task that I should be ignoring next: " + second.task.taskId);
                     mSecondTaskToResume = second.task.taskId;

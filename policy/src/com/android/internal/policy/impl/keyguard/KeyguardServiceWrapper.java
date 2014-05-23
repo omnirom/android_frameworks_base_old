@@ -199,22 +199,18 @@ public class KeyguardServiceWrapper implements IKeyguardService {
     }
 
     public void setBackgroundBitmap(Bitmap bmp) {
-        try {
-            mService.setBackgroundBitmap(bmp);
-        } catch (RemoteException e) {
-            Slog.w(TAG, "Remote Exception", e);
-        }
+    	try {
+    		mService.setBackgroundBitmap(bmp);
+    	} catch (RemoteException e) {
+    		Slog.w(TAG, "Remote Exception", e);
+    	}
     }
-
+    
     public void showAssistant() {
         // Not used by PhoneWindowManager
     }
 
     public void dispatch(MotionEvent event) {
-        // Not used by PhoneWindowManager.  See code in {@link NavigationBarView}
-    }
-
-    public void dispatchButtonClick(int buttonId) {
         // Not used by PhoneWindowManager.  See code in {@link NavigationBarView}
     }
 

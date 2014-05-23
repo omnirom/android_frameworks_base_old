@@ -1,6 +1,4 @@
 /*
- * Copyright (C) 2006 The Android Open Source Project
- * This code has been modified.  Portions copyright (C) 2010, T-Mobile USA, Inc.
  * Copyright (c) 2012, 2013, 2014. The Linux Foundation. All rights reserved.
  * Not a Contribution.
  *
@@ -28,10 +26,9 @@ import android.content.Intent;
 import android.content.IntentFilter;
 import android.content.pm.IPackageManager;
 import android.content.pm.PackageManager;
-import android.content.pm.ThemeUtils;
 import android.content.res.Configuration;
-import android.content.res.CustomTheme;
 import android.database.ContentObserver;
+import android.database.Cursor;
 import android.media.AudioService;
 import android.net.wifi.p2p.WifiP2pService;
 import android.os.Environment;
@@ -215,7 +212,6 @@ class ServerThread {
         CommonTimeManagementService commonTimeMgmtService = null;
         InputManagerService inputManager = null;
         TelephonyRegistry telephonyRegistry = null;
-        MSimTelephonyRegistry msimTelephonyRegistry = null;
         ConsumerIrService consumerIr = null;
 
         // Create a handler thread just for the window manager to enjoy.
@@ -277,12 +273,6 @@ class ServerThread {
             Slog.i(TAG, "Telephony Registry");
             telephonyRegistry = new TelephonyRegistry(context);
             ServiceManager.addService("telephony.registry", telephonyRegistry);
-
-            if (android.telephony.MSimTelephonyManager.getDefault().isMultiSimEnabled()) {
-                Slog.i(TAG, "MSimTelephony Registry");
-                msimTelephonyRegistry = new MSimTelephonyRegistry(context);
-                ServiceManager.addService("telephony.msim.registry", msimTelephonyRegistry);
-            }
 
             Slog.i(TAG, "Scheduling Policy");
             ServiceManager.addService("scheduling_policy", new SchedulingPolicyService());
@@ -430,7 +420,6 @@ class ServerThread {
         PrintManagerService printManager = null;
         GestureService gestureService = null;
         MediaRouterService mediaRouter = null;
-        ThemeService themeService = null;
         EdgeGestureService edgeGestureService = null;
 
         // Bring up services needed for UI.
@@ -940,12 +929,12 @@ class ServerThread {
             }
 
             try {
-                Slog.i(TAG, "Theme Service");
-                themeService = new ThemeService(context);
-                ServiceManager.addService(Context.THEME_SERVICE, themeService);
+                Slog.i(TAG, "AssetRedirectionManager Service");
+                ServiceManager.addService("assetredirection", new AssetRedirectionManagerService(context));
             } catch (Throwable e) {
-                reportWtf("starting Theme Service", e);
-            }
+                Slog.e(TAG, "Failure starting AssetRedirectionManager Service", e);
+	    }
+
             if (!disableNonCoreServices) {
                 try {
                     Slog.i(TAG, "Media Router Service");
@@ -955,7 +944,6 @@ class ServerThread {
                     reportWtf("starting MediaRouterService", e);
                 }
             }
-
 
             try {
                 Slog.i(TAG, "EdgeGesture service");
@@ -991,7 +979,7 @@ class ServerThread {
         if (safeMode) {
             ActivityManagerService.self().enterSafeMode();
             // Post the safe mode state in the Zygote class
-            SystemServer.inSafeMode = true;
+            Zygote.systemInSafeMode = true;
             // Disable the JIT for the system_server process
             VMRuntime.getRuntime().disableJitCompilation();
         } else {
@@ -1076,6 +1064,15 @@ class ServerThread {
             }
         }
 
+        IntentFilter filter = new IntentFilter();
+        filter.addAction(Intent.ACTION_APP_LAUNCH_FAILURE);
+        filter.addAction(Intent.ACTION_APP_LAUNCH_FAILURE_RESET);
+        filter.addAction(Intent.ACTION_PACKAGE_ADDED);
+        filter.addAction(Intent.ACTION_PACKAGE_REMOVED);
+        filter.addCategory(Intent.CATEGORY_THEME_PACKAGE_INSTALLED_STATE_CHANGE);
+        filter.addDataScheme("package");
+        context.registerReceiver(new AppsLaunchFailureReceiver(), filter);
+
         if (edgeGestureService != null) {
             try {
                 edgeGestureService.systemReady();
@@ -1083,16 +1080,6 @@ class ServerThread {
                 reportWtf("making EdgeGesture service ready", e);
             }
         }
-
-        IntentFilter filter = new IntentFilter();
-        filter.addAction(Intent.ACTION_APP_LAUNCH_FAILURE);
-        filter.addAction(Intent.ACTION_APP_LAUNCH_FAILURE_RESET);
-        filter.addAction(Intent.ACTION_PACKAGE_ADDED);
-        filter.addAction(Intent.ACTION_PACKAGE_REMOVED);
-        filter.addAction(ThemeUtils.ACTION_THEME_CHANGED);
-        filter.addCategory(Intent.CATEGORY_THEME_PACKAGE_INSTALLED_STATE_CHANGE);
-        filter.addDataScheme("package");
-        context.registerReceiver(new AppsLaunchFailureReceiver(), filter);
 
         // These are needed to propagate to the runnable below.
         final Context contextF = context;
@@ -1121,10 +1108,8 @@ class ServerThread {
         final AssetAtlasService atlasF = atlas;
         final InputManagerService inputManagerF = inputManager;
         final TelephonyRegistry telephonyRegistryF = telephonyRegistry;
-        final MSimTelephonyRegistry msimTelephonyRegistryF = msimTelephonyRegistry;
         final PrintManagerService printManagerF = printManager;
         final MediaRouterService mediaRouterF = mediaRouter;
-        final IPackageManager pmf = pm;
 
         // We now tell the activity manager it is okay to run third party
         // code.  It will call back into us once it has gotten to the state
@@ -1273,12 +1258,6 @@ class ServerThread {
                 }
 
                 try {
-                    if (msimTelephonyRegistryF != null) msimTelephonyRegistryF.systemRunning();
-                } catch (Throwable e) {
-                    reportWtf("Notifying TelephonyRegistry running", e);
-                }
-
-                try {
                     if (printManagerF != null) printManagerF.systemRuning();
                 } catch (Throwable e) {
                     reportWtf("Notifying PrintManagerService running", e);
@@ -1289,15 +1268,6 @@ class ServerThread {
                 } catch (Throwable e) {
                     reportWtf("Notifying MediaRouterService running", e);
                 }
-
-                try {
-                    CustomTheme customTheme = CustomTheme.getBootTheme(contextF.getContentResolver());
-                    String iconPkg = customTheme.getIconPackPkgName();
-                    pmf.updateIconMapping(iconPkg);
-                } catch (Throwable e) {
-                    reportWtf("Icon Mapping failed", e);
-                }
-
             }
         });
 
@@ -1343,11 +1313,6 @@ public class SystemServer {
     // The earliest supported time.  We pick one day into 1970, to
     // give any timezone code room without going into negative time.
     private static final long EARLIEST_SUPPORTED_TIME = 86400 * 1000;
-
-   /**
-    * When set, all subsequent apps will be launched in safe mode.
-    */
-    public static boolean inSafeMode;
 
     /**
      * Called to initialize native system services.

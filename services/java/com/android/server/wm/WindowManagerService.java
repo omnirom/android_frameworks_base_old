@@ -23,11 +23,12 @@ import static com.android.server.am.ActivityStackSupervisor.HOME_STACK_ID;
 import static android.view.WindowManagerPolicy.FINISH_LAYOUT_REDO_WALLPAPER;
 
 import android.app.AppOpsManager;
-import android.content.pm.ThemeUtils;
 import android.util.TimeUtils;
 import android.view.IWindowId;
 
 import com.android.internal.app.IBatteryStats;
+import com.android.internal.app.ThemeUtils;
+
 import com.android.internal.policy.PolicyManager;
 import com.android.internal.policy.impl.PhoneWindowManager;
 import com.android.internal.util.FastPrintWriter;
@@ -828,10 +829,10 @@ public class WindowManagerService extends IWindowManager.Stub
             SurfaceControl.closeTransaction();
         }
 
-        ThemeUtils.registerThemeChangeReceiver(mContext, mThemeChangeReceiver);
-
         // Load hardware rotation from prop
         mSfHwRotation = android.os.SystemProperties.getInt("ro.sf.hwrotation",0) / 90;
+
+        ThemeUtils.registerThemeChangeReceiver(mContext, mThemeChangeReceiver);
     }
 
     private Context getUiContext() {
@@ -5254,10 +5255,10 @@ public class WindowManagerService extends IWindowManager.Stub
         mPolicy.setTouchExplorationEnabled(enabled);
     }
 
-    // Called by window manager policy.  Not exposed externally.
+    // Called by window manager policy. Not exposed externally.
     @Override
     public void reboot() {
-        ShutdownThread.reboot(getUiContext(), null, true);
+        ShutdownThread.reboot(mContext, null, true);
     }
 
     public void setCurrentUser(final int newUserId) {
@@ -5444,23 +5445,10 @@ public class WindowManagerService extends IWindowManager.Stub
             mInputMonitor.setEventDispatchingLw(mEventDispatchingEnabled);
         }
 
-        // start QuickBoot to check if need restore from exception
-        if (SystemProperties.getBoolean("persist.sys.quickboot_ongoing", false))
-            checkQuickBootException();
-
         mPolicy.enableScreenAfterBoot();
 
         // Make sure the last requested orientation has been applied.
         updateRotationUnchecked(false, false);
-    }
-
-    private void checkQuickBootException() {
-        Intent intent = new Intent("org.codeaurora.action.QUICKBOOT");
-        intent.putExtra("mode", 2);
-        try {
-            mContext.startActivityAsUser(intent,UserHandle.CURRENT);
-        } catch (ActivityNotFoundException e) {
-        }
     }
 
     public void showBootMessage(final CharSequence msg, final boolean always) {
@@ -9954,8 +9942,7 @@ public class WindowManagerService extends IWindowManager.Stub
                 }
             }
 
-            if (DEBUG_FOCUS_LIGHT) Slog.v(TAG, "findFocusedWindow: Found new focus @ " + i +
-                        " = " + win);
+            if (DEBUG_FOCUS_LIGHT) Slog.v(TAG, "findFocusedWindow: Found new focus @ " + i + " = " + win);
 
 	    int mHaloEnabled = (Settings.System.getInt(mContext.getContentResolver(), Settings.System.HALO_ENABLED, 0));
 
@@ -10983,6 +10970,25 @@ public class WindowManagerService extends IWindowManager.Stub
     }
 
     /* @hide */
+    @Override
+    public boolean expandedDesktopHidesNavigationBar() {
+        return mPolicy.expandedDesktopHidesNavigationBar();
+    }
+
+    /* @hide */
+    @Override
+    public boolean expandedDesktopHidesStatusBar() {
+        return mPolicy.expandedDesktopHidesStatusBar();
+    }
+
+    /* @hide */
+    @Override
+    public int getCurrentNavigationBarSize() {
+        return mPolicy.getCurrentNavigationBarSize();
+    }
+
+    /* @hide */
+
     @Override
     public void toggleGlobalMenu() {
         mPolicy.toggleGlobalMenu();

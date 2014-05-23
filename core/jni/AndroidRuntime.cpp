@@ -179,6 +179,7 @@ extern int register_android_content_res_Configuration(JNIEnv* env);
 extern int register_android_animation_PropertyValuesHolder(JNIEnv *env);
 extern int register_com_android_internal_content_NativeLibraryHelper(JNIEnv *env);
 extern int register_com_android_internal_net_NetworkStatsFactory(JNIEnv *env);
+extern int register_android_content_res_PackageRedirectionMap(JNIEnv* env);
 extern int register_com_android_internal_app_ActivityTrigger(JNIEnv *env);
 
 static AndroidRuntime* gCurRuntime = NULL;
@@ -754,13 +755,6 @@ int AndroidRuntime::startVm(JavaVM** pJavaVM, JNIEnv** pEnv)
         mOptions.add(opt);
     }
 
-    /*
-     * We don't have /tmp on the device, but we often have an SD card.  Apps
-     * shouldn't use this, but some test suites might want to exercise it.
-     */
-    opt.optionString = "-Djava.io.tmpdir=/sdcard";
-    mOptions.add(opt);
-
     initArgs.version = JNI_VERSION_1_4;
     initArgs.options = mOptions.editArray();
     initArgs.nOptions = mOptions.size();
@@ -1221,6 +1215,7 @@ static const RegJNIRec gRegJNI[] = {
     REG_JNI(register_android_animation_PropertyValuesHolder),
     REG_JNI(register_com_android_internal_content_NativeLibraryHelper),
     REG_JNI(register_com_android_internal_net_NetworkStatsFactory),
+    REG_JNI(register_android_content_res_PackageRedirectionMap),
 #ifdef QCOM_ACTIVITY_TRIGGER
     REG_JNI(register_com_android_internal_app_ActivityTrigger),
 #endif

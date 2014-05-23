@@ -63,7 +63,6 @@ LOCAL_SRC_FILES += \
 	core/java/android/app/IActivityPendingResult.aidl \
 	core/java/android/app/IAlarmManager.aidl \
 	core/java/android/app/IBackupAgent.aidl \
-	core/java/android/app/IBatteryService.aidl \
 	core/java/android/app/IInstrumentationWatcher.aidl \
 	core/java/android/app/INotificationManager.aidl \
 	core/java/android/app/IProfileManager.aidl \
@@ -127,8 +126,6 @@ LOCAL_SRC_FILES += \
 	core/java/android/content/pm/IPackageManager.aidl \
 	core/java/android/content/pm/IPackageMoveObserver.aidl \
 	core/java/android/content/pm/IPackageStatsObserver.aidl \
-	core/java/android/content/res/IThemeChangeListener.aidl \
-	core/java/android/content/res/IThemeService.aidl \
 	core/java/android/database/IContentObserver.aidl \
 	core/java/android/hardware/ICameraService.aidl \
 	core/java/android/hardware/ICameraServiceListener.aidl \
@@ -223,6 +220,7 @@ LOCAL_SRC_FILES += \
 	core/java/com/android/internal/app/IProcessStats.aidl \
 	core/java/com/android/internal/app/IUsageStats.aidl \
 	core/java/com/android/internal/app/IMediaContainerService.aidl \
+	core/java/com/android/internal/app/IAssetRedirectionManager.aidl \
 	core/java/com/android/internal/appwidget/IAppWidgetService.aidl \
 	core/java/com/android/internal/appwidget/IAppWidgetHost.aidl \
 	core/java/com/android/internal/backup/IBackupTransport.aidl \
@@ -283,12 +281,9 @@ LOCAL_SRC_FILES += \
 	media/java/android/media/IRingtonePlayer.aidl \
 	telephony/java/com/android/internal/telephony/IPhoneStateListener.aidl \
 	telephony/java/com/android/internal/telephony/IPhoneSubInfo.aidl \
-	telephony/java/com/android/internal/telephony/msim/IPhoneSubInfoMSim.aidl \
 	telephony/java/com/android/internal/telephony/ITelephony.aidl \
-	telephony/java/com/android/internal/telephony/msim/ITelephonyMSim.aidl \
 	telephony/java/com/android/internal/telephony/ISms.aidl \
 	telephony/java/com/android/internal/telephony/ITelephonyRegistry.aidl \
-	telephony/java/com/android/internal/telephony/ITelephonyRegistryMSim.aidl \
 	telephony/java/com/android/internal/telephony/IWapPushManager.aidl \
 	wifi/java/android/net/wifi/IWifiManager.aidl \
 	wifi/java/android/net/wifi/p2p/IWifiP2pManager.aidl \
@@ -330,7 +325,7 @@ LOCAL_STATIC_JAVA_LIBRARIES := framework-base
 LOCAL_DX_FLAGS := --core-library
 
 # Packages to include, use \* wildcard to include descendants.
-LOCAL_JAR_PACKAGES := android\*
+LOCAL_JAR_PACKAGES := android\* cos\*
 
 # List of classes and interfaces which should be loaded by the Zygote.
 LOCAL_JAVA_RESOURCE_FILES += $(LOCAL_PATH)/preloaded-classes
@@ -424,9 +419,7 @@ aidl_files := \
 	frameworks/base/location/java/com/android/internal/location/ProviderRequest.aidl \
 	frameworks/base/telephony/java/android/telephony/ServiceState.aidl \
 	frameworks/base/telephony/java/com/android/internal/telephony/IPhoneSubInfo.aidl \
-	frameworks/base/telephony/java/com/android/internal/telephony/msim/IPhoneSubInfoMSim.aidl \
 	frameworks/base/telephony/java/com/android/internal/telephony/ITelephony.aidl \
-    frameworks/base/telephony/java/com/android/internal/telephony/msim/ITelephonyMSim.aidl \
 	frameworks/base/wifi/java/android/net/wifi/BatchedScanSettings.aidl \
 	frameworks/base/wifi/java/android/net/wifi/BatchedScanResult.aidl \
 

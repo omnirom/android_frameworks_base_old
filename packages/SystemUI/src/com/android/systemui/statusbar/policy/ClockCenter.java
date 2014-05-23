@@ -42,10 +42,9 @@ public class ClockCenter extends Clock {
     }
 
     protected void updateClockVisibility() {
-        if (mClockStyle == STYLE_CLOCK_CENTER && mShowClock) {
+        if (mClockStyle == STYLE_CLOCK_CENTER && mShowClock)
             setVisibility(View.VISIBLE);
-        } else {
+        else
             setVisibility(View.GONE);
-        }
     }
 }

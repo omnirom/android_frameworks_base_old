@@ -43,29 +43,16 @@
         android:visibility="invisible"
         />
 
-    <LinearLayout
+    <include
+        layout="@layout/carrier_label"
+        android:layout_height="@dimen/carrier_label_height"
         android:layout_width="match_parent"
-        android:layout_height="wrap_content"
+        android:layout_marginBottom="@dimen/close_handle_height"
         android:layout_gravity="bottom"
-        android:orientation="vertical"
-        android:animateLayoutChanges="false"
-        >
-        <include
-            layout="@layout/subs_label"
-            android:layout_height="@dimen/carrier_label_height"
-            android:layout_width="match_parent"
-            android:layout_gravity="bottom"
-            />
+        />
 
-        <include
-            layout="@layout/carrier_label"
-            android:layout_height="@dimen/carrier_label_height"
-            android:layout_width="match_parent"
-            android:layout_marginBottom="@dimen/close_handle_height"
-            android:layout_gravity="bottom"
-            />
-    </LinearLayout>
     <LinearLayout
+        android:id="@+id/notification_panel_content"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:layout_marginBottom="@dimen/close_handle_underlap"
@@ -78,16 +65,18 @@
             android:layout_height="@dimen/notification_panel_header_height"
             />
 
-        <ViewStub android:id="@+id/ribbon_settings_stub"
-            android:layout="@layout/ribbon_settings"
+        <include layout="@layout/notification_reminder"
             android:layout_width="match_parent"
-            android:layout_height="@dimen/notification_min_height"
+            android:layout_height="32dp"
             />
 
-        <ViewStub android:id="@+id/notification_brightness_slider"
-            android:layout="@layout/status_bar_brightness_slider"
+        <com.android.systemui.statusbar.powerwidget.PowerWidget
+            android:id="@+id/exp_power_stat"
             android:layout_width="match_parent"
-            android:layout_height="@dimen/notification_row_min_height"/>
+            android:layout_height="wrap_content"
+            android:layout_marginTop="2dip"
+            android:visibility="gone"
+        />
 
         <TextView
             android:id="@+id/emergency_calls_only"
@@ -108,7 +97,7 @@
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 />
-
+    
             <ScrollView
                 android:id="@+id/scroll"
                 android:layout_width="match_parent"
@@ -125,4 +114,23 @@
             </ScrollView>
         </FrameLayout>
     </LinearLayout>
+    <HorizontalScrollView
+        android:id="@+id/custom_notification_scrollview"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:requiresFadingEdge="none"
+        android:fillViewport="true"
+        android:overScrollMode="never"
+        android:layout_above="@id/handle"
+        android:layout_gravity="bottom"
+        android:visibility="invisible"
+        android:layout_marginBottom="@dimen/notification_shortcuts_close_handle_height">
+
+        <com.android.systemui.statusbar.phone.ShortcutsWidget
+            android:id="@+id/custom_notificiation_shortcuts"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:orientation="horizontal"
+            />
+    </HorizontalScrollView>
 </com.android.systemui.statusbar.phone.NotificationPanelView><!-- end of sliding panel -->

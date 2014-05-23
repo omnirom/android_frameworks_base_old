@@ -31,7 +31,6 @@ import android.opengl.EGLSurface;
 import android.opengl.GLES10;
 import android.opengl.GLES11Ext;
 import android.os.Looper;
-import android.os.SystemProperties;
 import android.util.FloatMath;
 import android.util.Slog;
 import android.view.Display;
@@ -92,8 +91,8 @@ final class ElectronBeam {
     private EGLSurface mEglSurface;
     private boolean mSurfaceVisible;
     private float mSurfaceAlpha;
-    private final int mHWRotation;
-    private final boolean mSwapNeeded;
+
+    private int mElectronBeamMode;
 
     // Texture names.  We only use one texture, which contains the screenshot.
     private final int[] mTexNames = new int[1];
@@ -120,11 +119,14 @@ final class ElectronBeam {
      */
     public static final int MODE_FADE = 2;
 
+    /**
+     * Animates a scale down of the screen
+     */
+    public static final int MODE_SCALE_DOWN = 3;
 
-    public ElectronBeam(DisplayManagerService displayManager) {
+    public ElectronBeam(DisplayManagerService displayManager, int mode) {
         mDisplayManager = displayManager;
-        mHWRotation = Integer.parseInt(SystemProperties.get("ro.sf.hwrotation", "0")) / 90;
-        mSwapNeeded = mHWRotation % 2 == 1;
+	mElectronBeamMode = mode;
     }
 
     /**
@@ -145,14 +147,8 @@ final class ElectronBeam {
         // This is not expected to change while the electron beam surface is showing.
         DisplayInfo displayInfo = mDisplayManager.getDisplayInfo(Display.DEFAULT_DISPLAY);
         mDisplayLayerStack = displayInfo.layerStack;
-
-        if (mSwapNeeded) {
-            mDisplayWidth = displayInfo.getNaturalHeight();
-            mDisplayHeight = displayInfo.getNaturalWidth();
-        } else {
-            mDisplayWidth = displayInfo.getNaturalWidth();
-            mDisplayHeight = displayInfo.getNaturalHeight();
-        }
+        mDisplayWidth = displayInfo.getNaturalWidth();
+        mDisplayHeight = displayInfo.getNaturalHeight();
 
         // Prepare the surface for drawing.
         if (!tryPrepare()) {
@@ -170,7 +166,7 @@ final class ElectronBeam {
         // times.  The rest of the animation should run smoothly thereafter.
         // The frames we draw here aren't visible because we are essentially just
         // painting the screenshot as-is.
-        if (mode == MODE_COOL_DOWN) {
+        if (mode == MODE_COOL_DOWN || mode == MODE_SCALE_DOWN) {
             for (int i = 0; i < DEJANK_FRAMES; i++) {
                 draw(1.0f);
             }
@@ -231,16 +227,31 @@ final class ElectronBeam {
         if (!attachEglContext()) {
             return false;
         }
+	if (mSurfaceLayout == null) {
+            return false;
+        }
         try {
             // Clear frame to solid black.
             GLES10.glClearColor(0f, 0f, 0f, 1f);
             GLES10.glClear(GLES10.GL_COLOR_BUFFER_BIT);
 
             // Draw the frame.
-            if (level < HSTRETCH_DURATION) {
-                drawHStretch(1.0f - (level / HSTRETCH_DURATION));
+            if (mElectronBeamMode == 2 || (mElectronBeamMode == 3 && mSurfaceLayout.isLandscape())) {
+                // Draw the frame vertical.
+                if (level < VSTRETCH_DURATION) {
+                    drawHStretch(1.0f - (level / VSTRETCH_DURATION));
+                } else {
+                    drawVStretch(1.0f - ((level - VSTRETCH_DURATION) / HSTRETCH_DURATION));
+                }
+	    } else if (mElectronBeamMode == 4) {
+                drawScaled(level);
             } else {
-                drawVStretch(1.0f - ((level - HSTRETCH_DURATION) / VSTRETCH_DURATION));
+                // Draw the frame horizontal.
+                if (level < HSTRETCH_DURATION) {
+                   drawHStretch(1.0f - (level / HSTRETCH_DURATION));
+                } else {
+                    drawVStretch(1.0f - ((level - HSTRETCH_DURATION) / VSTRETCH_DURATION));
+                }
             }
             if (checkGlErrors("drawFrame")) {
                 return false;
@@ -251,6 +262,55 @@ final class ElectronBeam {
             detachEglContext();
         }
         return showSurface(1.0f);
+    }
+
+    private void drawScaled(float scale) {
+        final float curvedScale = scurve(scale, 8.0f);
+
+        // set blending, enable alpha operations
+        GLES10.glEnable(GLES10.GL_BLEND);
+        GLES10.glBlendFunc(GLES10.GL_SRC_ALPHA, GLES10.GL_ONE_MINUS_SRC_ALPHA);
+
+        // bind vertex buffer
+        GLES10.glVertexPointer(2, GLES10.GL_FLOAT, 0, mVertexBuffer);
+        GLES10.glEnableClientState(GLES10.GL_VERTEX_ARRAY);
+
+        // set-up texturing
+        GLES10.glDisable(GLES10.GL_TEXTURE_2D);
+        GLES10.glEnable(GLES11Ext.GL_TEXTURE_EXTERNAL_OES);
+
+        // bind texture and set blending for drawing planes
+        GLES10.glBindTexture(GLES11Ext.GL_TEXTURE_EXTERNAL_OES, mTexNames[0]);
+        GLES10.glTexEnvx(GLES10.GL_TEXTURE_ENV, GLES10.GL_TEXTURE_ENV_MODE,
+                mMode == MODE_WARM_UP ? GLES10.GL_MODULATE : GLES10.GL_REPLACE);
+        GLES10.glTexParameterx(GLES11Ext.GL_TEXTURE_EXTERNAL_OES,
+                GLES10.GL_TEXTURE_MAG_FILTER, GLES10.GL_LINEAR);
+        GLES10.glTexParameterx(GLES11Ext.GL_TEXTURE_EXTERNAL_OES,
+                GLES10.GL_TEXTURE_MIN_FILTER, GLES10.GL_LINEAR);
+        GLES10.glTexParameterx(GLES11Ext.GL_TEXTURE_EXTERNAL_OES,
+                GLES10.GL_TEXTURE_WRAP_S, GLES10.GL_CLAMP_TO_EDGE);
+        GLES10.glTexParameterx(GLES11Ext.GL_TEXTURE_EXTERNAL_OES,
+                GLES10.GL_TEXTURE_WRAP_T, GLES10.GL_CLAMP_TO_EDGE);
+        GLES10.glEnable(GLES11Ext.GL_TEXTURE_EXTERNAL_OES);
+        GLES10.glTexCoordPointer(2, GLES10.GL_FLOAT, 0, mTexCoordBuffer);
+        GLES10.glEnableClientState(GLES10.GL_TEXTURE_COORD_ARRAY);
+
+        // Draw the frame
+        setQuad(mVertexBuffer, mDisplayWidth / 2 * (1.0f - curvedScale),
+            mDisplayHeight / 2 * (1.0f - curvedScale),
+            mDisplayWidth * curvedScale, mDisplayHeight * curvedScale);
+        GLES10.glDrawArrays(GLES10.GL_TRIANGLE_FAN, 0, 4);
+
+        // dim progressively, using previous vertexes
+        GLES10.glDisable(GLES11Ext.GL_TEXTURE_EXTERNAL_OES);
+        GLES10.glDisableClientState(GLES10.GL_TEXTURE_COORD_ARRAY);
+        GLES10.glColorMask(true, true, true, true);
+        GLES10.glColor4f(0.0f, 0.0f, 0.0f, 1.0f - curvedScale);
+        GLES10.glDrawArrays(GLES10.GL_TRIANGLE_FAN, 0, 4);
+
+        // clean up after drawing planes
+        GLES10.glDisableClientState(GLES10.GL_VERTEX_ARRAY);
+        GLES10.glDisable(GLES10.GL_BLEND);
     }
 
     /**
@@ -299,17 +359,17 @@ final class ElectronBeam {
         GLES10.glEnableClientState(GLES10.GL_TEXTURE_COORD_ARRAY);
 
         // draw the red plane
-        setVStretchQuad(mVertexBuffer, mDisplayWidth, mDisplayHeight, ar, mSwapNeeded);
+        setVStretchQuad(mVertexBuffer, mDisplayWidth, mDisplayHeight, ar);
         GLES10.glColorMask(true, false, false, true);
         GLES10.glDrawArrays(GLES10.GL_TRIANGLE_FAN, 0, 4);
 
         // draw the green plane
-        setVStretchQuad(mVertexBuffer, mDisplayWidth, mDisplayHeight, ag, mSwapNeeded);
+        setVStretchQuad(mVertexBuffer, mDisplayWidth, mDisplayHeight, ag);
         GLES10.glColorMask(false, true, false, true);
         GLES10.glDrawArrays(GLES10.GL_TRIANGLE_FAN, 0, 4);
 
         // draw the blue plane
-        setVStretchQuad(mVertexBuffer, mDisplayWidth, mDisplayHeight, ab, mSwapNeeded);
+        setVStretchQuad(mVertexBuffer, mDisplayWidth, mDisplayHeight, ab);
         GLES10.glColorMask(false, false, true, true);
         GLES10.glDrawArrays(GLES10.GL_TRIANGLE_FAN, 0, 4);
 
@@ -349,7 +409,7 @@ final class ElectronBeam {
             GLES10.glEnableClientState(GLES10.GL_VERTEX_ARRAY);
 
             // draw narrow fading white line
-            setHStretchQuad(mVertexBuffer, mDisplayWidth, mDisplayHeight, ag, mSwapNeeded);
+            setHStretchQuad(mVertexBuffer, mDisplayWidth, mDisplayHeight, ag);
             GLES10.glColor4f(1.0f - ag*0.75f, 1.0f - ag*0.75f, 1.0f - ag*0.75f, 1.0f);
             GLES10.glDrawArrays(GLES10.GL_TRIANGLE_FAN, 0, 4);
 
@@ -358,11 +418,10 @@ final class ElectronBeam {
         }
     }
 
-    private static void setVStretchQuad(FloatBuffer vtx, float dw, float dh, float a,
-            boolean swap) {
+    private void setVStretchQuad(FloatBuffer vtx, float dw, float dh, float a) {
         final float w;
         final float h;
-        if (swap) {
+        if (mElectronBeamMode == 2 || (mElectronBeamMode == 3 && mSurfaceLayout.isLandscape())) {
             w = dw - (dw * a);
             h = dh + (dh * a);
         } else {
@@ -374,15 +433,14 @@ final class ElectronBeam {
         setQuad(vtx, x, y, w, h);
     }
 
-    private static void setHStretchQuad(FloatBuffer vtx, float dw, float dh, float a,
-            boolean swap) {
+    private void setHStretchQuad(FloatBuffer vtx, float dw, float dh, float a) {
         final float w;
         final float h;
-        if (swap) {
+        if (mElectronBeamMode == 2 || (mElectronBeamMode == 3 && mSurfaceLayout.isLandscape())) {
             w = 1.0f;
-            h = 2 * dh * (1.0f - a);
+            h = dw + (dw * a);
         } else {
-            w = 2 * dw * (1.0f - a);
+            w = dw + (dw * a);
             h = 1.0f;
         }
         final float x = (dw - w) * 0.5f;
@@ -554,8 +612,7 @@ final class ElectronBeam {
             mSurface = new Surface();
             mSurface.copyFrom(mSurfaceControl);
 
-            mSurfaceLayout = new NaturalSurfaceLayout(mDisplayManager, mSurfaceControl,
-                    mHWRotation);
+            mSurfaceLayout = new NaturalSurfaceLayout(mDisplayManager, mSurfaceControl);
             mSurfaceLayout.onDisplayTransaction();
         } finally {
             SurfaceControl.closeTransaction();
@@ -715,14 +772,12 @@ final class ElectronBeam {
     private static final class NaturalSurfaceLayout implements DisplayTransactionListener {
         private final DisplayManagerService mDisplayManager;
         private SurfaceControl mSurfaceControl;
-        private final int mHWRotation;
+	private boolean mIsLandscape;
 
-        public NaturalSurfaceLayout(DisplayManagerService displayManager,
-                SurfaceControl surfaceControl, int hwRotation) {
+        public NaturalSurfaceLayout(DisplayManagerService displayManager, SurfaceControl surfaceControl) {
             mDisplayManager = displayManager;
             mSurfaceControl = surfaceControl;
             mDisplayManager.registerDisplayTransactionListener(this);
-            mHWRotation = hwRotation;
         }
 
         public void dispose() {
@@ -730,6 +785,10 @@ final class ElectronBeam {
                 mSurfaceControl = null;
             }
             mDisplayManager.unregisterDisplayTransactionListener(this);
+        }
+
+	public boolean isLandscape() {
+            return mIsLandscape;
         }
 
         @Override
@@ -740,22 +799,26 @@ final class ElectronBeam {
                 }
 
                 DisplayInfo displayInfo = mDisplayManager.getDisplayInfo(Display.DEFAULT_DISPLAY);
-                switch ((displayInfo.rotation + mHWRotation) % 4) {
+                switch (displayInfo.rotation) {
                     case Surface.ROTATION_0:
                         mSurfaceControl.setPosition(0, 0);
                         mSurfaceControl.setMatrix(1, 0, 0, 1);
+			mIsLandscape = false;
                         break;
                     case Surface.ROTATION_90:
                         mSurfaceControl.setPosition(0, displayInfo.logicalHeight);
                         mSurfaceControl.setMatrix(0, -1, 1, 0);
+			mIsLandscape = true;
                         break;
                     case Surface.ROTATION_180:
                         mSurfaceControl.setPosition(displayInfo.logicalWidth, displayInfo.logicalHeight);
                         mSurfaceControl.setMatrix(-1, 0, 0, -1);
+			mIsLandscape = false;
                         break;
                     case Surface.ROTATION_270:
                         mSurfaceControl.setPosition(displayInfo.logicalWidth, 0);
                         mSurfaceControl.setMatrix(0, 1, -1, 0);
+			mIsLandscape = true;
                         break;
                 }
             }

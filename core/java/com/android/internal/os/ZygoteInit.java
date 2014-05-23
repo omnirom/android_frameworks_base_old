@@ -71,7 +71,7 @@ public class ZygoteInit {
     private static final int LOG_BOOT_PROGRESS_PRELOAD_END = 3030;
 
     /** when preloading, GC after allocating this many bytes */
-    private static final int PRELOAD_GC_THRESHOLD = 1000000;
+    private static final int PRELOAD_GC_THRESHOLD = 5000000;
 
     public static final String USAGE_STRING =
             " <\"start-system-server\"|\"\" for startSystemServer>";
@@ -87,6 +87,8 @@ public class ZygoteInit {
     /**
      * The number of times that the main Zygote loop
      * should run before calling gc() again.
+     *
+     * 10 loops per garbage collection? Let's reduce our carbon footprint.
      */
     static final int GC_LOOP_COUNT = 15;
 
@@ -380,6 +382,8 @@ public class ZygoteInit {
                 ar.recycle();
                 Log.i(TAG, "...preloaded " + N + " resources in "
                         + (SystemClock.uptimeMillis()-startTime) + "ms.");
+            } else {
+                Log.i(TAG, "Preload resources disabled, skipped.");
             }
             mResources.finishPreloading();
         } catch (RuntimeException e) {

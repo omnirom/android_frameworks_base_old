@@ -37,7 +37,6 @@
        <item><xliff:g id="id">volume</xliff:g></item>
        <item><xliff:g id="id">wifi</xliff:g></item>
        <item><xliff:g id="id">cdma_eri</xliff:g></item>
-       <item><xliff:g id="id">phone_signal_second_sub</xliff:g></item>
        <item><xliff:g id="id">data_connection</xliff:g></item>
        <item><xliff:g id="id">phone_evdo_signal</xliff:g></item>
        <item><xliff:g id="id">phone_signal</xliff:g></item>
@@ -520,6 +519,12 @@
     <!-- Class name for default keyguard appwidget [DO NOT TRANSLATE] -->
     <string name="widget_default_class_name"></string>
 
+    <!-- Package name for keyguard to use -->
+    <string name="config_keyguardPackage">com.android.keyguard</string>
+
+    <!-- Class name for keyguard service to use -->
+    <string name="config_keyguardService">com.android.keyguard.KeyguardService</string>
+
     <!-- Indicate whether the SD card is accessible without removing the battery. -->
     <bool name="config_batterySdCardAccessibility">false</bool>
 
@@ -797,8 +802,18 @@
          to false.
          -->
     <bool name="config_enableFusedLocationOverlay" translatable="false">true</bool>
+    <!-- Whether to enable fused hardware provider overlay which allows fused
+         hardware provider to be replaced by an app at run-time. When disabled,
+         only the config_fusedLocationProviderPackageName package will be
+         searched for fused location provider, otherwise packages whose
+         signature matches the signatures of config_locationProviderPackageNames
+         will be searched, and the service with the highest version number will
+         be picked. Anyone who wants to disable the overlay mechanism can set it
+         to false.
+         -->
+    <bool name="config_enableHwFlpOverlay" translatable="false">true</bool>
     <!-- Package name providing fused location support. Used only when
-         config_enableFusedLocationOverlay is false. -->
+         config_enableFusedLocationOverlay or config_enableHwFlpOverlay is false. -->
     <string name="config_fusedLocationProviderPackageName" translatable="false">com.android.location.fused</string>
 
     <!-- Whether to enable geocoder overlay which allows geocoder to be replaced
@@ -845,8 +860,11 @@
         <item>com.android.location.fused</item>
     </string-array>
 
-    <!-- Component name of the service providing geofence API support. -->
-    <string name="config_geofenceProvider" translatable="false">com.qualcomm.location</string>
+    <!-- Component name of the geofence services provider. -->
+    <string name="config_geofenceServicesProvider" translatable="false">com.qualcomm.location</string>
+
+    <!-- Component name of the combo network location provider. -->
+    <string name="config_comboNetworkLocationProvider" translatable="false">com.qualcomm.location</string>
 
     <!-- Boolean indicating if current platform supports bluetooth SCO for off call
     use cases -->
@@ -1021,6 +1039,9 @@
          a keyboard is present. -->
     <bool name="config_showMenuShortcutsWhenKeyboardPresent">false</bool>
 
+    <!-- Sets whether IME switcher on statusbar should be shown or not. -->
+    <bool name="config_show_IMESwitcher">true</bool>
+
     <!-- Do not translate. Defines the slots is Two Digit Number for dialing normally not USSD -->
     <string-array name="config_twoDigitNumberPattern" translatable="false">
     </string-array>
@@ -1185,10 +1206,6 @@
     <!-- Set to true to add links to Cell Broadcast app from Settings and MMS app. -->
     <bool name="config_cellBroadcastAppLinks">false</bool>
 
-    <!-- Boolean indicating if RADIO POWER OFF should be skipped on receiving SIM REFRESH with RESET-->
-    <!-- This will be handled by modem if it is true-->
-    <bool translatable="false" name="skip_radio_power_off_on_sim_refresh_reset">true</bool>
-
     <!-- The default value if the SyncStorageEngine should sync automatically or not -->
     <bool name="config_syncstorageengine_masterSyncAutomatically">true</bool>
 
@@ -1219,11 +1236,6 @@
     <!-- Configure mobile network MTU. The standard default is set here but each carrier
          may have a specific value set in an overlay config.xml file. -->
     <integer name="config_mobile_mtu">1500</integer>
-
-
-    <!-- Configuration to send sms on 1x when UE is attached to eHRPD and there is an active
-         1xRTT voice call, irrespective of IMS registration state  -->
-    <bool name="config_send_sms1x_on_voice_call">true</bool>
 
     <!-- Whether WiFi display is supported by this device.
          There are many prerequisites for this feature to work correctly.
@@ -1408,6 +1420,10 @@
         <item>353</item>
     </string-array>
 
+    <!-- Values greater or equal to 0 will enable electronbeam screen-on
+         animation with the specified delay (in milliseconds), -1 will disable the animation -->
+    <integer name="config_screenOnAnimation">-1</integer>
+
     <!-- True will enable the screen-off animation. -->
     <bool name="config_screenOffAnimation">true</bool>
 
@@ -1463,6 +1479,16 @@
 
     <!-- Device supports LED flashlight -->
     <bool name="config_enableTorch">false</bool>
+    
+     <!-- Defines the system property to set for performance profile xe: sys.cpu.modes. Leave it
+         blank if the device do not support performance profiles -->
+    <string name="config_perf_profile_prop" translatable="false"></string>
+
+    <!-- When config_perf_profile_prop is defined, this value MUST be the index of
+         one of the listes values in frameworks/base/core/res/res/values/cm_arrays.xml
+         for "perf_profile_values" array. Leave it blank if the device do not support
+         performance profiles  -->
+    <string name="config_perf_profile_default_entry" translatable="false"></string>
 
     <!-- Hardware 'face' keys present on the device, stored as a bit field.
          This integer should equal the sum of the corresponding value for each
@@ -1477,22 +1503,18 @@
          config to 7. -->
     <integer name="config_deviceHardwareKeys">15</integer>
 
+    <!-- Enable statusbar double tap gesture to put device to sleep -->
+    <bool name="config_disableDoubleTapSleepGesture">false</bool>
+
     <!-- Indicates that the device has Single-stage Camera key
          (without "Focus" state) instead of Dual-stage. -->
     <bool name="config_singleStageCameraKey">false</bool>
 
-    <!-- Defines the system property to set for performance profile xe: sys.cpu.modes. Leave it
-         blank if the device do not support performance profiles -->
-    <string name="config_perf_profile_prop" translatable="false"></string>
-
-    <!-- When config_perf_profile_prop is defined, this value MUST be the index of
-         one of the listes values in frameworks/base/core/res/res/values/cm_arrays.xml
-         for "perf_profile_values" array. Leave it blank if the device do not support
-         performance profiles  -->
-    <string name="config_perf_profile_default_entry" translatable="false"></string>
-
     <!-- bool value to for enabling motion accelerometer -->
     <bool name="use_motion_accel">false</bool>
+
+    <!-- Set to empty string to disable. Can be added to device overlay for device-specific path -->
+    <string name="config_fastChargePath" translatable="false">/sys/kernel/fast_charge/force_fast_charge</string>
 
     <!-- set to false if we dont need to consider data
          service state to display signal strength bars -->

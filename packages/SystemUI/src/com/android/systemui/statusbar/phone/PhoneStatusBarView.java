@@ -20,14 +20,14 @@ import android.app.ActivityManager;
 import android.content.Context;
 import android.content.res.Resources;
 import android.content.res.Resources.NotFoundException;
+import android.os.PowerManager;
 import android.util.AttributeSet;
 import android.util.EventLog;
 import android.util.Log;
+import android.view.GestureDetector;
 import android.view.MotionEvent;
 import android.view.View;
 import android.view.accessibility.AccessibilityEvent;
-import android.view.GestureDetector;
-import android.os.PowerManager;
 import android.provider.Settings;
 
 import com.android.internal.util.gesture.EdgeGesturePosition;
@@ -37,7 +37,7 @@ import com.android.systemui.R;
 public class PhoneStatusBarView extends PanelBar {
     private static final String TAG = "PhoneStatusBarView";
     private static final boolean DEBUG = PhoneStatusBar.DEBUG;
-    private static final boolean DEBUG_GESTURES = true;
+    private static final boolean DEBUG_GESTURES = false;
 
     PhoneStatusBar mBar;
     int mScrimColor;
@@ -59,7 +59,8 @@ public class PhoneStatusBarView extends PanelBar {
         mScrimColor = res.getColor(R.color.notification_panel_scrim_color);
         mSettingsPanelDragzoneMin = res.getDimension(R.dimen.settings_panel_dragzone_min);
         try {
-            mSettingsPanelDragzoneFrac = res.getFraction(R.dimen.settings_panel_dragzone_fraction, 1, 1);
+            mSettingsPanelDragzoneFrac = res.getFraction(
+                    R.dimen.settings_panel_dragzone_fraction, 1, 1);
         } catch (NotFoundException ex) {
             mSettingsPanelDragzoneFrac = 0f;
         }
@@ -195,6 +196,7 @@ public class PhoneStatusBarView extends PanelBar {
             mBar.mStatusBarWindow.setBackgroundColor(0);
         }
         mBar.restorePieTriggerMask();
+        mBar.setOverwriteImeIsActive(false);
     }
 
     @Override
@@ -210,6 +212,7 @@ public class PhoneStatusBarView extends PanelBar {
             mBar.updatePieTriggerMask(EdgeGesturePosition.LEFT.FLAG
                     | EdgeGesturePosition.RIGHT.FLAG
                     | EdgeGesturePosition.TOP.FLAG, true);
+            mBar.setOverwriteImeIsActive(true);
         }
 
         mFadingPanel = openPanel;
@@ -283,6 +286,34 @@ public class PhoneStatusBarView extends PanelBar {
 
         mBar.animateHeadsUp(mNotificationPanel == panel, mPanelExpandedFractionSum);
 
-        mBar.updateCarrierLabelVisibility(false);
+        updateShortcutsVisibility();
     }
+
+
+    public void updateShortcutsVisibility() {
+        // Notification Shortcuts check for fully expanded panel
+        if (mBar.mSettingsButton == null || mBar.mNotificationButton == null) {
+            // Tablet
+            if (mFullyOpenedPanel != null) {
+                mBar.updateNotificationShortcutsVisibility(true);
+		mBar.updateCarrierAndWifiLabelVisibility(false, false);
+            } else {
+                mBar.updateNotificationShortcutsVisibility(false);
+		mBar.updateCarrierAndWifiLabelVisibility(false, true);
+            }
+        } else {
+            // Phone
+            if (mFullyOpenedPanel != null
+                    && (mBar.mSettingsButton.getVisibility() == View.VISIBLE &&
+                    !(mBar.mSettingsButton.getVisibility() == View.VISIBLE &&
+                    mBar.mNotificationButton.getVisibility() == View.VISIBLE))) {
+                mBar.updateNotificationShortcutsVisibility(true);
+		mBar.updateCarrierAndWifiLabelVisibility(false, false);
+            } else {
+                mBar.updateNotificationShortcutsVisibility(false);
+		mBar.updateCarrierAndWifiLabelVisibility(false, true);
+            }
+        }
+    }
+
 }

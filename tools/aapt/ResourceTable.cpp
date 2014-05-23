@@ -1320,10 +1320,10 @@ status_t compileResourceFile(Bundle* bundle,
                         curIsFormatted = false;
                         // Untranslatable strings must only exist in the default [empty] locale
                         if (locale.size() > 0) {
-                            fprintf(stderr, "aapt: warning: string '%s' in %s marked untranslatable but exists"
-                                    " in locale '%s'\n", String8(name).string(),
-                                    bundle->getResourceSourceDirs()[0],
-                                    locale.string());
+                         //   fprintf(stderr, "aapt: warning: string '%s' in %s marked untranslatable but exists"
+                          //          " in locale '%s'\n", String8(name).string(),
+                         //           bundle->getResourceSourceDirs()[0],
+                         //           locale.string());
                             if (errorOnWarning) {
                                 hasErrors = localHasErrors = true;
                             }
@@ -1430,10 +1430,10 @@ status_t compileResourceFile(Bundle* bundle,
                             curIsFormatted = false;
                             // Untranslatable strings must only exist in the default [empty] locale
                             if (locale.size() > 0) {
-                                fprintf(stderr, "aapt: warning: string-array '%s' in %s marked untranslatable but exists"
-                                        " in locale '%s'\n", String8(name).string(),
-                                        bundle->getResourceSourceDirs()[0],
-                                        locale.string());
+                        //        fprintf(stderr, "aapt: warning: string-array '%s' in %s marked untranslatable but exists"
+                        //                " in locale '%s'\n", String8(name).string(),
+                        //                bundle->getResourceSourceDirs()[0],
+                        //                locale.string());
                                 if (errorOnWarning) {
                                     hasErrors = localHasErrors = true;
                                 }
@@ -2612,11 +2612,10 @@ ResourceTable::validateLocalizations(void)
          nameIter++) {
         const set<String8>& configSet = nameIter->second;   // naming convenience
 
-#ifdef SHOW_DEFAULT_TRANSLATION_WARNINGS
         // Look for strings with no default localization
         if (configSet.count(defaultLocale) == 0) {
-            fprintf(stderr, "aapt: warning: string '%s' has no default translation in %s; found:",
-                    String8(nameIter->first).string(), mBundle->getResourceSourceDirs()[0]);
+           // fprintf(stderr, "aapt: warning: string '%s' has no default translation in %s; found:",
+          //          String8(nameIter->first).string(), mBundle->getResourceSourceDirs()[0]);
             for (set<String8>::const_iterator locales = configSet.begin();
                  locales != configSet.end();
                  locales++) {
@@ -2627,8 +2626,7 @@ ResourceTable::validateLocalizations(void)
                 err = BAD_VALUE;
             }
         }
-#endif
-#ifdef SHOW_LOCALIZATION_WARNINGS
+
         // Check that all requested localizations are present for this string
         if (mBundle->getConfigurations() != NULL && mBundle->getRequireLocalization()) {
             const char* allConfigs = mBundle->getConfigurations();
@@ -2655,19 +2653,18 @@ ResourceTable::validateLocalizations(void)
                         String8 region(config.string(), 2);
                         if (configSet.find(region) == configSet.end()) {
                             if (configSet.count(defaultLocale) == 0) {
-                                fprintf(stdout, "aapt: warning: "
-                                        "**** string '%s' has no default or required localization "
-                                        "for '%s' in %s\n",
-                                        String8(nameIter->first).string(),
-                                        config.string(),
-                                        mBundle->getResourceSourceDirs()[0]);
+                          //      fprintf(stdout, "aapt: warning: "
+                           //             "**** string '%s' has no default or required localization "
+                         //               "for '%s' in %s\n",
+                         //               String8(nameIter->first).string(),
+                        //                config.string(),
+                       //                 mBundle->getResourceSourceDirs()[0]);
                             }
                         }
                     }
                 }
            } while (comma != NULL);
         }
-#endif
     }
 
     return err;
@@ -2904,7 +2901,7 @@ status_t ResourceTable::flatten(Bundle* bundle, const sp<AaptFile>& dest)
                 ConfigDescription config = t->getUniqueConfigs().itemAt(ci);
 
                 NOISY(printf("Writing config %d config: imsi:%d/%d lang:%c%c cnt:%c%c "
-                     "orien:%d uiTheme:%d ui:%d touch:%d density:%d key:%d inp:%d nav:%d sz:%dx%d "
+                     "orien:%d uiInverted:%d ui:%d touch:%d density:%d key:%d inp:%d nav:%d sz:%dx%d "
                      "sw%ddp w%ddp h%ddp dir:%d\n",
                       ti+1,
                       config.mcc, config.mnc,
@@ -2913,7 +2910,7 @@ status_t ResourceTable::flatten(Bundle* bundle, const sp<AaptFile>& dest)
                       config.country[0] ? config.country[0] : '-',
                       config.country[1] ? config.country[1] : '-',
                       config.orientation,
-                      config.uiThemeMode,
+                      config.uiInvertedMode,
                       config.uiMode,
                       config.touchscreen,
                       config.density,
@@ -2948,7 +2945,7 @@ status_t ResourceTable::flatten(Bundle* bundle, const sp<AaptFile>& dest)
                 tHeader->entriesStart = htodl(typeSize);
                 tHeader->config = config;
                 NOISY(printf("Writing type %d config: imsi:%d/%d lang:%c%c cnt:%c%c "
-                     "orien:%d uiTheme:%d ui:%d touch:%d density:%d key:%d inp:%d nav:%d sz:%dx%d "
+                     "orien:%d uiInverted:%d ui:%d touch:%d density:%d key:%d inp:%d nav:%d sz:%dx%d "
                      "sw%ddp w%ddp h%ddp dir:%d\n",
                       ti+1,
                       tHeader->config.mcc, tHeader->config.mnc,
@@ -2957,7 +2954,7 @@ status_t ResourceTable::flatten(Bundle* bundle, const sp<AaptFile>& dest)
                       tHeader->config.country[0] ? tHeader->config.country[0] : '-',
                       tHeader->config.country[1] ? tHeader->config.country[1] : '-',
                       tHeader->config.orientation,
-                      tHeader->config.uiThemeMode,
+                      tHeader->config.uiInvertedMode,
                       tHeader->config.uiMode,
                       tHeader->config.touchscreen,
                       tHeader->config.density,

@@ -21,7 +21,6 @@ import android.content.ContentResolver;
 import android.content.Context;
 import android.content.Intent;
 import android.content.res.Configuration;
-import android.database.ContentObserver;
 import android.graphics.drawable.Drawable;
 import android.provider.Settings;
 import android.net.Uri;
@@ -43,11 +42,10 @@ import android.widget.HorizontalScrollView;
 import android.widget.ImageView;
 import android.widget.LinearLayout;
 
-import com.android.internal.util.slim.ButtonsHelper;
-import com.android.internal.util.slim.ButtonConfig;
-import com.android.internal.util.slim.ButtonsConstants;
-import com.android.internal.util.slim.ImageHelper;
-import com.android.internal.util.slim.ColorHelper;
+import com.android.internal.util.beanstalk.ButtonsHelper;
+import com.android.internal.util.beanstalk.ButtonConfig;
+import com.android.internal.util.beanstalk.ButtonsConstants;
+import com.android.internal.util.beanstalk.ImageHelper;
 
 import com.android.systemui.R;
 
@@ -258,7 +256,7 @@ public class ShortcutsWidget extends LinearLayout {
                             && !buttonConfig.getIcon().equals(ButtonsConstants.ICON_EMPTY)
                             && mColorizeMode != 1))
                         && mColorizeMode != 3) {
-                        iv.setImageBitmap(ColorHelper.getColoredBitmap(front, mColor));
+                        iv.setImageBitmap(ImageHelper.getColoredBitmap(front, mColor));
                     } else {
                         iv.setImageDrawable(front);
                     }

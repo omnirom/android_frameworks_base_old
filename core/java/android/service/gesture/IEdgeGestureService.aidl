@@ -11,7 +11,8 @@ interface IEdgeGestureService {
      * bind the listener to positions.
      * Use the returned IEdgeGestureHostCallback to manipulate the state after activation.
      */
-    IEdgeGestureHostCallback registerEdgeGestureActivationListener(in IEdgeGestureActivationListener listener);
+    IEdgeGestureHostCallback registerEdgeGestureActivationListener(
+            in IEdgeGestureActivationListener listener);
 
     /** Update the listener to react on gestures in the given positions.
      */

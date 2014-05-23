@@ -2,8 +2,143 @@
 
 <resources>
 
+  <java-symbol type="string" name="action_null"/>
+  
+  <!--  Animations -->
+  <java-symbol type="string" name="animation_fade"/>
+  <java-symbol type="string" name="animation_slide_left"/>
+  <java-symbol type="string" name="animation_slide_right"/>
+  <java-symbol type="string" name="animation_slide_left_no_fade"/>
+  <java-symbol type="string" name="animation_slide_right_no_fade"/>
+  <java-symbol type="string" name="animation_slide_up"/>
+  <java-symbol type="string" name="animation_slide_down"/>
+  <java-symbol type="string" name="animation_default"/>
+  <java-symbol type="string" name="animation_translucent"/>
+  <java-symbol type="string" name="animation_grow_shrink"/>
+  <java-symbol type="string" name="animation_grow_shrink_center"/>
+  <java-symbol type="string" name="animation_grow_shrink_bottom"/>
+  <java-symbol type="string" name="animation_grow_shrink_left"/>
+  <java-symbol type="string" name="animation_grow_shrink_right"/>
+  <java-symbol type="anim" name="shrink_fade_out_ribbon" />
+  <java-symbol type="anim" name="shrink_fade_out_center_ribbon" />
+  <java-symbol type="anim" name="shrink_fade_out_right_ribbon" />
+  <java-symbol type="anim" name="shrink_fade_out_left_ribbon" />
+  <java-symbol type="anim" name="shrink_fade_out_from_bottom_ribbon" />
+  <java-symbol type="anim" name="grow_fade_in_ribbon" />
+  <java-symbol type="anim" name="grow_fade_in_center_ribbon" />
+  <java-symbol type="anim" name="grow_fade_in_left_ribbon" />
+  <java-symbol type="anim" name="grow_fade_in_right_ribbon" />
+  <java-symbol type="anim" name="grow_fade_in_from_bottom_ribbon" />
+  <java-symbol type="anim" name="translucent_enter_ribbon" />
+  <java-symbol type="anim" name="translucent_exit_ribbon" />
+  <java-symbol type="anim" name="slide_in_down" />
+  <java-symbol type="anim" name="slide_out_up" />
+  <java-symbol type="anim" name="slide_in_right_ribbon" />
+  <java-symbol type="anim" name="slide_out_right_ribbon" />
+  <java-symbol type="anim" name="slide_in_left_ribbon" />
+  <java-symbol type="anim" name="slide_out_left_ribbon" />
+  <java-symbol type="anim" name="slow_fade_in" />
+  <java-symbol type="anim" name="slow_fade_out" />
+  <java-symbol type="anim" name="slide_in_up_ribbon" />
+  <java-symbol type="anim" name="slide_out_down_ribbon" /> 
+  <java-symbol type="anim" name="slide_in_right_no_fade" />
+  <java-symbol type="anim" name="slide_out_left_no_fade" />
+  <java-symbol type="anim" name="slide_in_left_no_fade" />
+  <java-symbol type="anim" name="slide_out_right_no_fade" />
+  <java-symbol type="array" name="anim_controls_entries" />
+
+  <!-- Config Power Menu -->
+  <java-symbol type="drawable" name="ic_lock_reboot" />
+  <java-symbol type="drawable" name="ic_lock_screenshot" />
+  <java-symbol type="drawable" name="ic_lock_screenrecord" />
+  <java-symbol type="string" name="global_action_reboot" />
+  <java-symbol type="string" name="global_actions" />
+  <java-symbol type="string" name="global_action_screenshot" />
+  <java-symbol type="string" name="global_action_screenrecord" />
+
+  <java-symbol type="array" name="shutdown_reboot_actions" />
+  <java-symbol type="array" name="shutdown_reboot_options" />
+
+  <java-symbol type="string" name="reboot_progress" />
+  <java-symbol type="string" name="reboot_system" />
+
+  <!-- Config IME switcher -->
+  <java-symbol type="bool" name="config_show_IMESwitcher" />
+
+  <!-- Power menu -->
+  <java-symbol type="color" name="power_menu_icon_default_color" />
+  <java-symbol type="color" name="power_menu_text_default_color" />
+  <java-symbol type="id" name="icon1" />
+  <java-symbol type="id" name="icon2" />
+  <java-symbol type="id" name="icon3" />
+
+  <!-- Expanded desktop -->
+  <java-symbol type="string" name="global_actions_expanded_desktop_mode_on_status" />
+  <java-symbol type="string" name="global_actions_expanded_desktop_mode_off_status" />
+  <java-symbol type="drawable" name="ic_lock_expanded_desktop" />
+
   <!-- Halo -->
   <java-symbol type="style" name="Theme.DeviceDefault.FloatingWindow" />
   <java-symbol type="style" name="Theme.DeviceDefault.FloatingWindowLight" />
+
+  <!-- Description of accessibility direction for targets -->
+  <java-symbol type="string" name="accessibility_target_direction" />
+  <!-- Description of accessibility unlock target -->
+  <java-symbol type="string" name="description_target_unlock" />
   
+  <!-- Statusbar double tap gesture -->
+  <java-symbol type="bool" name="config_disableDoubleTapSleepGesture" />
+
+
+    <!-- ColorPickerPreference -->
+    <java-symbol type="id" name="color_picker_view" />
+    <java-symbol type="id" name="old_color_panel" />
+    <java-symbol type="id" name="new_color_panel" />
+    <java-symbol type="id" name="hex_val" />
+    <java-symbol type="id" name="white_panel" />
+    <java-symbol type="id" name="black_panel" />
+    <java-symbol type="id" name="cyan_panel" />
+    <java-symbol type="id" name="red_panel" />
+    <java-symbol type="id" name="green_panel" />
+    <java-symbol type="id" name="yellow_panel" />
+    <java-symbol type="layout" name="dialog_color_picker" />
+    <java-symbol type="string" name="dialog_color_picker" />
+
+    <!-- DJSeekBarPreference -->
+    <java-symbol type="layout" name="preference_widget_textsize_seekbar" />
+    <java-symbol type="id" name="min_value" />
+    <java-symbol type="id" name="current_value" />
+    <java-symbol type="id" name="max_value" />
+    <java-symbol type="id" name="textsize_seekbar" />
+
+  <!-- EdgeGesture service -->
+  <java-symbol type="dimen" name="edge_gesture_trigger_distance" />
+  <java-symbol type="dimen" name="edge_gesture_perpendicular_distance" />
+  <java-symbol type="dimen" name="edge_gesture_trigger_thickness" />
+
+  <!-- Pie controls -->
+  <java-symbol type="string" name="global_actions_pie_mode_on_status" />
+  <java-symbol type="string" name="global_actions_pie_mode_off_status" />
+  <java-symbol type="drawable" name="ic_lock_pie" />
+  <java-symbol type="string" name="disable_pie_navigation_error" />
+
+  <!-- Navigation bar -->
+  <java-symbol type="string" name="global_actions_nav_bar_mode_on_status" />
+  <java-symbol type="string" name="global_actions_nav_bar_mode_off_status" />
+  <java-symbol type="drawable" name="ic_lock_navbar" />
+  <java-symbol type="string" name="disable_navigation_pie_error" />
+
+  <!-- Slim recent app screen-->
+  <java-symbol type="integer" name="config_recentDefaultDur" />
+  <java-symbol type="integer" name="config_recentExitDur" />
+  <java-symbol type="style" name="Animation.RecentScreen" />
+  <java-symbol type="style" name="Animation.RecentScreen.Left" />
+  <java-symbol type="anim" name="recent_screen_enter" />
+  <java-symbol type="anim" name="recent_screen_enter_left" />
+  <java-symbol type="anim" name="recent_screen_fade_out" />
+
+  <!-- On-The-Go -->
+  <java-symbol type="string" name="global_action_onthego" />
+  <java-symbol type="drawable" name="ic_lock_onthego" />
+
 </resources>

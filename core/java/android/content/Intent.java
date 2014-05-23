@@ -673,15 +673,7 @@ public class Intent implements Parcelable, Cloneable {
     public static final String ACTION_PICK = "android.intent.action.PICK";
 
     /**
-     * Global Action: Shows power menu dialog
-     * <p>Input: nothing
-     * <p>Output: nothing
-     * @hide
-     */
-    public static final String ACTION_POWERMENU = "android.intent.action.POWERMENU";
-
-    /**
-     * Global Action: Battery services start/stop	683
+     * Global Action: Battery services start/stop
      * @hide
      */
     public static final String ACTION_BATTERY_SERVICES = "android.intent.action.BATTERY_SERVICES";
@@ -2654,19 +2646,6 @@ public class Intent implements Parcelable, Cloneable {
             "android.intent.action.QUICK_CLOCK";
 
     /**
-     * Broadcast Action: Indicate that unrecoverable error happened during app launch.
-     * Could indicate that curently applied theme is malicious.
-     * @hide
-     */
-    public static final String ACTION_APP_LAUNCH_FAILURE = "com.tmobile.intent.action.APP_LAUNCH_FAILURE";
-
-    /**
-     * Broadcast Action: Request to reset the unrecoverable errors count to 0.
-     * @hide
-     */
-    public static final String ACTION_APP_LAUNCH_FAILURE_RESET = "com.tmobile.intent.action.APP_LAUNCH_FAILURE_RESET";
-
-    /**
      * Broadcast Action: This is broadcast when a user action should request the
      * brightness setting dialog.
      * @hide
@@ -2756,6 +2735,19 @@ public class Intent implements Parcelable, Cloneable {
      */
     @SdkConstant(SdkConstantType.ACTIVITY_INTENT_ACTION)
     public static final String ACTION_CREATE_DOCUMENT = "android.intent.action.CREATE_DOCUMENT";
+
+    /**
+     * Broadcast Action: Indicate that unrecoverable error happened during app launch.
+     * Could indicate that curently applied theme is malicious.
+     * @hide
+     */
+    public static final String ACTION_APP_LAUNCH_FAILURE = "com.tmobile.intent.action.APP_LAUNCH_FAILURE";
+
+    /**
+     * Broadcast Action: Request to reset the unrecoverable errors count to 0.
+     * @hide
+     */
+    public static final String ACTION_APP_LAUNCH_FAILURE_RESET = "com.tmobile.intent.action.APP_LAUNCH_FAILURE_RESET";
 
     // ---------------------------------------------------------------------
     // ---------------------------------------------------------------------

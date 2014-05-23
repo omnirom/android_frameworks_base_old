@@ -29,7 +29,6 @@ import com.android.server.display.DisplayManagerService;
 import com.android.server.dreams.DreamManagerService;
 
 import android.Manifest;
-import android.app.ActivityManager;
 import android.app.AppOpsManager;
 import android.content.BroadcastReceiver;
 import android.content.ContentResolver;
@@ -71,7 +70,6 @@ import java.util.ArrayList;
 import java.util.Set;
 import java.util.HashSet;
 import java.util.Iterator;
-import java.util.List;
 
 import libcore.util.Objects;
 
@@ -226,7 +224,7 @@ public final class PowerManagerService extends IPowerManager.Stub
     private final ArrayList<WakeLock> mWakeLocks = new ArrayList<WakeLock>();
     private Set<String> mSeenWakeLocks = new HashSet<String>();
     private Set<String> mBlockedWakeLocks = new HashSet<String>();
-    private int mWakeLockBlockingEnabled;
+    private int mWakeLockBlockingEnabled;	
 
     // A bitfield that summarizes the state of all active wakelocks.
     private int mWakeLockSummary;
@@ -337,6 +335,11 @@ public final class PowerManagerService extends IPowerManager.Stub
 
     // The screen off timeout setting value in milliseconds.
     private int mScreenOffTimeoutSetting;
+
+    // Override config for ElectronBeam
+    // used here to send values to DispLayPowerController handler
+    // from SettingsObserver
+    private int mElectronBeamMode;
 
     // The maximum allowable screen off timeout according to the device
     // administration policy.  Overrides other settings.
@@ -569,6 +572,9 @@ public final class PowerManagerService extends IPowerManager.Stub
             resolver.registerContentObserver(Settings.System.getUriFor(
                     Settings.System.BUTTON_BACKLIGHT_TIMEOUT),
                     false, mSettingsObserver, UserHandle.USER_ALL);
+	    resolver.registerContentObserver(Settings.System.getUriFor(
+                    Settings.System.SYSTEM_POWER_CRT_MODE),
+                    false, mSettingsObserver, UserHandle.USER_ALL);
             resolver.registerContentObserver(Settings.System.getUriFor(
                     Settings.System.WAKELOCK_BLOCKING_ENABLED),
                     false, mSettingsObserver, UserHandle.USER_ALL);
@@ -624,8 +630,11 @@ public final class PowerManagerService extends IPowerManager.Stub
         mWakeUpWhenPluggedOrUnpluggedSetting = Settings.Global.getInt(resolver,
                 Settings.Global.WAKE_WHEN_PLUGGED_OR_UNPLUGGED,
                 (mWakeUpWhenPluggedOrUnpluggedConfig ? 1 : 0));
+	mElectronBeamMode = Settings.System.getIntForUser(resolver,
+                Settings.System.SYSTEM_POWER_CRT_MODE,
+                1, UserHandle.USER_CURRENT);
 
-        mWakeLockBlockingEnabled = Settings.System.getIntForUser(resolver,
+	mWakeLockBlockingEnabled = Settings.System.getIntForUser(resolver,
                 Settings.System.WAKELOCK_BLOCKING_ENABLED,
                 0, UserHandle.USER_CURRENT);
 
@@ -754,10 +763,12 @@ public final class PowerManagerService extends IPowerManager.Stub
                         + ", tag=\"" + tag + "\", ws=" + ws + ", uid=" + uid + ", pid=" + pid);
             }
 
-            boolean blockWakelock = false;
+	    boolean blockWakelock = false;
 
             if (!mSeenWakeLocks.contains(tag)){
-                mSeenWakeLocks.add(tag);
+                if ((flags & PowerManager.WAKE_LOCK_LEVEL_MASK) == PowerManager.PARTIAL_WAKE_LOCK){
+                    mSeenWakeLocks.add(tag);
+                }
             }
 
             if (mWakeLockBlockingEnabled == 1){
@@ -770,6 +781,7 @@ public final class PowerManagerService extends IPowerManager.Stub
             int index = findWakeLockIndexLocked(lock);
             if (index >= 0) {
                 wakeLock = mWakeLocks.get(index);
+		wakeLock.setIsBlocked(blockWakelock);
                 if (!wakeLock.hasSameProperties(flags, tag, ws, uid, pid)) {
                     // Update existing wake lock.  This shouldn't happen but is harmless.
                     notifyWakeLockReleasedLocked(wakeLock);
@@ -783,22 +795,14 @@ public final class PowerManagerService extends IPowerManager.Stub
                 } catch (RemoteException ex) {
                     throw new IllegalArgumentException("Wake lock is already dead.");
                 }
+		wakeLock.setIsBlocked(blockWakelock);
                 notifyWakeLockAcquiredLocked(wakeLock);
                 mWakeLocks.add(wakeLock);
             }
 
-            wakeLock.setIsBlocked(blockWakelock);
-
-            if (!wakeLock.isBlocked()){
-                applyWakeLockFlagsOnAcquireLocked(wakeLock);
-                mDirty |= DIRTY_WAKE_LOCKS;
-                updatePowerStateLocked();
-            } else {
-                Slog.d(TAG, "acquireWakeLockInternal: blocked lock=" + Objects.hashCode(lock)
-                        + ", flags=0x" + Integer.toHexString(flags)
-                        + ", tag=\"" + tag + "\", ws=" + ws + ", uid=" + uid + ", pid=" + pid);
-
-            }
+            applyWakeLockFlagsOnAcquireLocked(wakeLock);
+            mDirty |= DIRTY_WAKE_LOCKS;
+            updatePowerStateLocked();
         }
     }
 
@@ -1026,17 +1030,19 @@ public final class PowerManagerService extends IPowerManager.Stub
 
     private void notifyWakeLockAcquiredLocked(WakeLock wakeLock) {
         if (mSystemReady) {
-            wakeLock.mNotifiedAcquired = true;
-            mNotifier.onWakeLockAcquired(wakeLock.mFlags, wakeLock.mTag, wakeLock.mPackageName,
+            if (!wakeLock.isBlocked()){
+                mNotifier.onWakeLockAcquired(wakeLock.mFlags, wakeLock.mTag, wakeLock.mPackageName,
                     wakeLock.mOwnerUid, wakeLock.mOwnerPid, wakeLock.mWorkSource);
+	    }
         }
     }
 
     private void notifyWakeLockReleasedLocked(WakeLock wakeLock) {
-        if (mSystemReady && wakeLock.mNotifiedAcquired) {
-            wakeLock.mNotifiedAcquired = false;
-            mNotifier.onWakeLockReleased(wakeLock.mFlags, wakeLock.mTag, wakeLock.mPackageName,
+        if (mSystemReady) {
+            if (!wakeLock.isBlocked()){
+                mNotifier.onWakeLockReleased(wakeLock.mFlags, wakeLock.mTag, wakeLock.mPackageName,
                     wakeLock.mOwnerUid, wakeLock.mOwnerPid, wakeLock.mWorkSource);
+	    }
         }
     }
 
@@ -1067,24 +1073,6 @@ public final class PowerManagerService extends IPowerManager.Stub
                     return false;
             }
         }
-    }
-
-    private boolean isQuickBootCall() {
-
-        ActivityManager activityManager = (ActivityManager) mContext
-                .getSystemService(Context.ACTIVITY_SERVICE);
-
-        List<ActivityManager.RunningAppProcessInfo> runningList = activityManager
-                .getRunningAppProcesses();
-        int callingPid = Binder.getCallingPid();
-        for (ActivityManager.RunningAppProcessInfo processInfo : runningList) {
-            if (processInfo.pid == callingPid) {
-                String process = processInfo.processName;
-                if ("com.qapp.quickboot".equals(process))
-                    return true;
-            }
-        }
-        return false;
     }
 
     @Override // Binder call
@@ -1207,14 +1195,6 @@ public final class PowerManagerService extends IPowerManager.Stub
             throw new IllegalArgumentException("event time must not be in the future");
         }
 
-        // check wakeup caller under QuickBoot mode
-        if (SystemProperties.getInt("sys.quickboot.enable", 0) == 1) {
-            if (!isQuickBootCall()) {
-                    Slog.d(TAG, "ignore wakeup request under QuickBoot");
-                    return;
-                }
-        }
-
         mContext.enforceCallingOrSelfPermission(android.Manifest.permission.DEVICE_POWER, null);
 
         final long ident = Binder.clearCallingIdentity();
@@ -1270,17 +1250,6 @@ public final class PowerManagerService extends IPowerManager.Stub
         userActivityNoUpdateLocked(
                 eventTime, PowerManager.USER_ACTIVITY_EVENT_OTHER, 0, Process.SYSTEM_UID);
         return true;
-    }
-
-    private void enableQbCharger(boolean enable) {
-        if (SystemProperties.getInt("sys.quickboot.enable", 0) == 1 &&
-                SystemProperties.getInt("sys.quickboot.poweroff", 0) != 1) {
-            // only handle "charged" event, native charger will handle
-            // "uncharged" event itself
-            if (enable && mIsPowered && !isScreenOn()) {
-                SystemProperties.set("sys.qbcharger.enable", "true");
-            }
-        }
     }
 
     @Override // Binder call
@@ -1482,7 +1451,6 @@ public final class PowerManagerService extends IPowerManager.Stub
                         + ", mBatteryLevel=" + mBatteryLevel);
             }
 
-            enableQbCharger(mIsPowered);
             if (wasPowered != mIsPowered || oldPlugType != mPlugType) {
                 mDirty |= DIRTY_IS_POWERED;
 
@@ -1517,10 +1485,6 @@ public final class PowerManagerService extends IPowerManager.Stub
 
         // Don't wake when powered if disabled in settings.
         if (mWakeUpWhenPluggedOrUnpluggedSetting == 0) {
-            return false;
-        }
-
-       if (SystemProperties.getInt("sys.quickboot.enable", 0) == 1) {
             return false;
         }
 
@@ -1585,6 +1549,12 @@ public final class PowerManagerService extends IPowerManager.Stub
                 final WakeLock wakeLock = mWakeLocks.get(i);
                 switch (wakeLock.mFlags & PowerManager.WAKE_LOCK_LEVEL_MASK) {
                     case PowerManager.PARTIAL_WAKE_LOCK:
+			if (wakeLock.isBlocked()){
+                            //Slog.d(TAG, "updateWakeLockSummaryLocked: PARTIAL_WAKE_LOCK blocked tag=" + wakeLock.mTag);
+                          continue;
+                         }
+
+                        //Slog.d(TAG, "updateWakeLockSummaryLocked: PARTIAL_WAKE_LOCK tag=" + wakeLock.mTag);
                         mWakeLockSummary |= WAKE_LOCK_CPU;
                         break;
                     case PowerManager.FULL_WAKE_LOCK:
@@ -1728,11 +1698,13 @@ public final class PowerManagerService extends IPowerManager.Stub
 
     private int getScreenOffTimeoutLocked() {
         int timeout = mScreenOffTimeoutSetting;
-        if (isMaximumScreenOffTimeoutFromDeviceAdminEnforcedLocked()) {
-            timeout = Math.min(timeout, mMaximumScreenOffTimeoutFromDeviceAdmin);
-        }
-        if (mUserActivityTimeoutOverrideFromWindowManager >= 0) {
-            timeout = (int)Math.min(timeout, mUserActivityTimeoutOverrideFromWindowManager);
+        if (timeout != mMaximumScreenOffTimeoutFromDeviceAdmin) {
+            if (isMaximumScreenOffTimeoutFromDeviceAdminEnforcedLocked()) {
+                timeout = Math.min(timeout, mMaximumScreenOffTimeoutFromDeviceAdmin);
+            }
+            if (mUserActivityTimeoutOverrideFromWindowManager >= 0) {
+                timeout = (int)Math.min(timeout, mUserActivityTimeoutOverrideFromWindowManager);
+            }
         }
         return Math.max(timeout, MINIMUM_SCREEN_OFF_TIMEOUT);
     }
@@ -2010,6 +1982,8 @@ public final class PowerManagerService extends IPowerManager.Stub
             mDisplayPowerRequest.blockScreenOn = mScreenOnBlocker.isHeld();
 
             mDisplayPowerRequest.responsitivityFactor = mAutoBrightnessResponsitivityFactor;
+
+	    mDisplayPowerRequest.electronBeamMode = mElectronBeamMode;
 
             mDisplayReady = mDisplayPowerController.requestPowerState(mDisplayPowerRequest,
                     mRequestWaitForNegativeProximity);
@@ -2844,10 +2818,9 @@ public final class PowerManagerService extends IPowerManager.Stub
         public String mTag;
         public final String mPackageName;
         public WorkSource mWorkSource;
-        public final int mOwnerUid;
-        public final int mOwnerPid;
-        public boolean mNotifiedAcquired;
-        private boolean mIsBlocked;
+        public int mOwnerUid;
+        public int mOwnerPid;
+	private boolean mIsBlocked;
 
         public WakeLock(IBinder lock, int flags, String tag, String packageName,
                 WorkSource workSource, int ownerUid, int ownerPid) {
@@ -2936,7 +2909,7 @@ public final class PowerManagerService extends IPowerManager.Stub
             return result;
         }
 
-        public void setIsBlocked(boolean value){
+	public void setIsBlocked(boolean value){
             mIsBlocked = value;
         }
 

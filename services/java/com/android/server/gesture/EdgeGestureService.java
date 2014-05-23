@@ -78,9 +78,10 @@ public class EdgeGestureService extends IEdgeGestureService.Stub {
     private EdgeGestureInputFilter mInputFilter;
 
     private int mGlobalPositions = 0;
-    private int mGlobalSensitivity = 3;
+    private int mGlobalSensitivity = 5;
 
-    private final class EdgeGestureActivationListenerRecord extends IEdgeGestureHostCallback.Stub implements DeathRecipient {
+    private final class EdgeGestureActivationListenerRecord
+            extends IEdgeGestureHostCallback.Stub implements DeathRecipient {
         private boolean mActive;
 
         public EdgeGestureActivationListenerRecord(IEdgeGestureActivationListener listener) {
@@ -102,7 +103,8 @@ public class EdgeGestureService extends IEdgeGestureService.Stub {
             return (positions & positionFlag) != 0;
         }
 
-        private boolean notifyEdgeGestureActivation(int touchX, int touchY, EdgeGesturePosition position) {
+        private boolean notifyEdgeGestureActivation(
+                int touchX, int touchY, EdgeGesturePosition position) {
             if ((positions & position.FLAG) != 0) {
                 try {
                     mActive = true;
@@ -252,7 +254,8 @@ public class EdgeGestureService extends IEdgeGestureService.Stub {
     }
 
     // called through Binder
-    public IEdgeGestureHostCallback registerEdgeGestureActivationListener(IEdgeGestureActivationListener listener) {
+    public IEdgeGestureHostCallback registerEdgeGestureActivationListener(
+            IEdgeGestureActivationListener listener) {
         if (mContext.checkCallingOrSelfPermission(Manifest.permission.INJECT_EVENTS)
                 != PackageManager.PERMISSION_GRANTED) {
             Slog.w(TAG, "Permission Denial: can't register from from pid="
@@ -272,7 +275,8 @@ public class EdgeGestureService extends IEdgeGestureService.Stub {
                 try {
                     listener.asBinder().linkToDeath(record, 0);
                 } catch (RemoteException e) {
-                    Slog.w(TAG, "Recipient died during registration pid=" + Binder.getCallingPid());
+                    Slog.w(TAG, "Recipient died during registration pid="
+                            + Binder.getCallingPid());
                     return null;
                 }
                 mEdgeGestureActivationListener.add(record);

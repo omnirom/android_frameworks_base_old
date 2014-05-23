@@ -52,8 +52,6 @@ import android.widget.ImageView;
 import android.widget.SeekBar;
 import android.widget.SeekBar.OnSeekBarChangeListener;
 
-import com.android.internal.util.cm.QuietHoursUtils;
-
 import java.util.HashMap;
 
 /**
@@ -128,6 +126,7 @@ public class VolumePanel extends Handler implements OnSeekBarChangeListener, Vie
     private boolean mVoiceCapable;
     private boolean mVolumeLinkNotification;
     private int mCurrentOverlayStyle = -1;
+    private int mCustomTimeoutDelay = TIMEOUT_DELAY;
 
     private final boolean mTranslucentDialog;
     private boolean mShouldRunDropTranslucentAnimation = false;
@@ -248,6 +247,8 @@ public class VolumePanel extends Handler implements OnSeekBarChangeListener, Vie
             final int overlayStyle = Settings.System.getInt(mContext.getContentResolver(),
                     Settings.System.MODE_VOLUME_OVERLAY, VOLUME_OVERLAY_EXPANDABLE);
             changeOverlayStyle(overlayStyle);
+            mCustomTimeoutDelay = Settings.System.getInt(mContext.getContentResolver(),
+                    Settings.System.VOLUME_PANEL_TIMEOUT, TIMEOUT_DELAY);
         }
     };
 
@@ -362,12 +363,17 @@ public class VolumePanel extends Handler implements OnSeekBarChangeListener, Vie
         final int chosenStyle = Settings.System.getInt(context.getContentResolver(),
                 Settings.System.MODE_VOLUME_OVERLAY, VOLUME_OVERLAY_EXPANDABLE);
         changeOverlayStyle(chosenStyle);
+        mCustomTimeoutDelay = Settings.System.getInt(mContext.getContentResolver(),
+                Settings.System.VOLUME_PANEL_TIMEOUT, TIMEOUT_DELAY);
 
         context.getContentResolver().registerContentObserver(
                 Settings.System.getUriFor(Settings.System.VOLUME_LINK_NOTIFICATION), false,
                 mSettingsObserver);
         context.getContentResolver().registerContentObserver(
                 Settings.System.getUriFor(Settings.System.MODE_VOLUME_OVERLAY), false,
+                mSettingsObserver);
+        context.getContentResolver().registerContentObserver(
+                Settings.System.getUriFor(Settings.System.VOLUME_PANEL_TIMEOUT), false,
                 mSettingsObserver);
 
         // This is new with 4.2 it seems
@@ -415,16 +421,14 @@ public class VolumePanel extends Handler implements OnSeekBarChangeListener, Vie
                 mMoreButton.setVisibility(View.GONE);
                 mDivider.setVisibility(View.GONE);
                 mShowCombinedVolumes = false;
-                if (mCurrentOverlayStyle != -1) {
-                    reorderSliders(mActiveStreamType);
-                }
                 mCurrentOverlayStyle = VOLUME_OVERLAY_SINGLE;
                 break;
             case VOLUME_OVERLAY_EXPANDABLE :
                 mMoreButton.setVisibility(View.VISIBLE);
                 mDivider.setVisibility(View.VISIBLE);
                 mShowCombinedVolumes = true;
-                if (mCurrentOverlayStyle != -1) {
+                if (mCurrentOverlayStyle == VOLUME_OVERLAY_NONE
+                        || mCurrentOverlayStyle == VOLUME_OVERLAY_SINGLE) {
                     reorderSliders(mActiveStreamType);
                 }
                 mCurrentOverlayStyle = VOLUME_OVERLAY_EXPANDABLE;
@@ -433,7 +437,8 @@ public class VolumePanel extends Handler implements OnSeekBarChangeListener, Vie
                 mMoreButton.setVisibility(View.GONE);
                 mDivider.setVisibility(View.GONE);
                 mShowCombinedVolumes = true;
-                if (mCurrentOverlayStyle != -1) {
+                if (mCurrentOverlayStyle == VOLUME_OVERLAY_NONE
+                        || mCurrentOverlayStyle == VOLUME_OVERLAY_SINGLE) {
                     reorderSliders(mActiveStreamType);
                     expand();
                 }
@@ -883,13 +888,11 @@ public class VolumePanel extends Handler implements OnSeekBarChangeListener, Vie
             onStopSounds();
         }
 
-        if (!QuietHoursUtils.inQuietHours(mContext, Settings.System.QUIET_HOURS_SYSTEM)) {
-            synchronized (this) {
-                ToneGenerator toneGen = getOrCreateToneGenerator(streamType);
-                if (toneGen != null) {
-                    toneGen.startTone(ToneGenerator.TONE_PROP_BEEP);
-                    sendMessageDelayed(obtainMessage(MSG_STOP_SOUNDS), BEEP_DURATION);
-                }
+        synchronized (this) {
+            ToneGenerator toneGen = getOrCreateToneGenerator(streamType);
+            if (toneGen != null) {
+                toneGen.startTone(ToneGenerator.TONE_PROP_BEEP);
+                sendMessageDelayed(obtainMessage(MSG_STOP_SOUNDS), BEEP_DURATION);
             }
         }
     }
@@ -1141,7 +1144,7 @@ public class VolumePanel extends Handler implements OnSeekBarChangeListener, Vie
 
     private void resetTimeout() {
         removeMessages(MSG_TIMEOUT);
-        sendMessageDelayed(obtainMessage(MSG_TIMEOUT), TIMEOUT_DELAY);
+        sendMessageDelayed(obtainMessage(MSG_TIMEOUT), mCustomTimeoutDelay);
     }
 
     private void forceTimeout() {

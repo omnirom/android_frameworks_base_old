@@ -112,8 +112,8 @@ public class OnTheGoService extends Service {
         public void onReceive(Context context, Intent intent) {
             synchronized (mRestartObject) {
                 final ContentResolver resolver = getContentResolver();
-                final boolean restartService = Settings.Amra.getBoolean(resolver,
-                        Settings.Amra.ON_THE_GO_SERVICE_RESTART,
+                final boolean restartService = Settings.System.getBoolean(resolver,
+                        Settings.System.ON_THE_GO_SERVICE_RESTART,
                         false);
                 if (restartService) {
                     restartOnTheGo();
@@ -199,15 +199,15 @@ public class OnTheGoService extends Service {
     };
 
     private void toggleOnTheGoAlpha() {
-        final float alpha = Settings.Amra.getFloat(getContentResolver(),
-                Settings.Amra.ON_THE_GO_ALPHA,
+        final float alpha = Settings.System.getFloat(getContentResolver(),
+                Settings.System.ON_THE_GO_ALPHA,
                 0.5f);
         toggleOnTheGoAlpha(alpha);
     }
 
     private void toggleOnTheGoAlpha(float alpha) {
-        Settings.Amra.putFloat(getContentResolver(),
-                Settings.Amra.ON_THE_GO_ALPHA,
+        Settings.System.putFloat(getContentResolver(),
+                Settings.System.ON_THE_GO_ALPHA,
                 alpha);
 
         if (mOverlay != null) {
@@ -242,8 +242,8 @@ public class OnTheGoService extends Service {
     private void setupViews(final boolean isRestarting) {
         logDebug("Setup Views, restarting: " + (isRestarting ? "true" : "false"));
 
-        final int cameraType = Settings.Amra.getInt(getContentResolver(),
-                Settings.Amra.ON_THE_GO_CAMERA,
+        final int cameraType = Settings.System.getInt(getContentResolver(),
+                Settings.System.ON_THE_GO_CAMERA,
                 0);
 
         try {

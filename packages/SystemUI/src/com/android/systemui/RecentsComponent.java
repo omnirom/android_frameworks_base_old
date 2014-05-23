@@ -20,8 +20,7 @@ import android.view.Display;
 import android.view.View;
 
 public interface RecentsComponent {
-    void toggleRecents(Display display, int layoutDirection, View statusBarView,
-                       int expandedDesktopStyle);
+    void toggleRecents(Display display, int layoutDirection, View statusBarView);
 
     void preloadRecentTasksList();
 

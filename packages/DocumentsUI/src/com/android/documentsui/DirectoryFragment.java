@@ -14,9 +14,9 @@
  * limitations under the License.
  *
  * Per article 5 of the Apache 2.0 License, some modifications to this code
- * were made by the Amra Project.
+ * were made by the OmniROM Project.
  *
- * Modifications Copyright (C) 2013 The Amra Project
+ * Modifications Copyright (C) 2013 The OmniROM Project
  *
  * This program is free software; you can redistribute it and/or
  * modify it under the terms of the GNU General Public License

@@ -46,8 +46,6 @@ import android.view.VolumePanel;
 
 import java.util.HashMap;
 
-import com.android.internal.util.cm.QuietHoursUtils;
-
 /**
  * AudioManager provides access to volume and ringer mode control.
  * <p>
@@ -766,7 +764,7 @@ public class AudioManager {
             return 0;
         }
     }
-
+    
     /**
      * Sets the maximum volume index for a particular stream.
      *
@@ -781,21 +779,12 @@ public class AudioManager {
             if (mUseMasterVolume) {
                 //service.setMasterMaxVolume(maxVol);
             } else {
-                double previousMax = new Integer(getStreamMaxVolume(streamType)).doubleValue();
-                double previousVolume = new Integer(getStreamVolume(streamType)).doubleValue();
-                double newMax = new Integer(maxVol).doubleValue();
-                double newVolume = Math.floor((newMax / previousMax) * previousVolume);
                 service.setStreamMaxVolume(streamType,maxVol);
-                Log.i(TAG, "Volume steps for stream " + String.valueOf(streamType) + " set to " +
-                        String.valueOf(maxVol));
-                setStreamVolume(streamType, new Double(newVolume).intValue(), 0);
-                Log.i(TAG, "Volume adjusted from " + String.valueOf(previousVolume) + " to " +
-                        String.valueOf(newVolume));
             }
         } catch (RemoteException e) {
             Log.e(TAG, "Dead object in setStreamMaxVolume", e);
         }
-        }
+	}
 
     /**
      * Returns the current volume index for a particular stream.
@@ -1823,10 +1812,6 @@ public class AudioManager {
      */
     public void  playSoundEffect(int effectType) {
         if (effectType < 0 || effectType >= NUM_SOUND_EFFECTS) {
-            return;
-        }
-
-        if (QuietHoursUtils.inQuietHours(mContext, Settings.System.QUIET_HOURS_SYSTEM)) {
             return;
         }
 

@@ -19,7 +19,6 @@ package android.widget;
 import android.content.Context;
 import android.hardware.SensorManager;
 import android.os.Build;
-import android.os.PowerManager;
 import android.util.FloatMath;
 import android.view.ViewConfiguration;
 import android.view.animation.AnimationUtils;
@@ -155,8 +154,6 @@ public class Scroller  {
     private static float sViscousFluidScale;
     private static float sViscousFluidNormalize;
 
-    private final PowerManager mPm;
-
     /**
      * Create a Scroller with the default duration and interpolator.
      */
@@ -187,7 +184,6 @@ public class Scroller  {
         mFlywheel = flywheel;
 
         mPhysicalCoeff = computeDeceleration(0.84f); // look and feel tuning
-        mPm = (PowerManager) context.getSystemService(Context.POWER_SERVICE);
     }
 
     /**
@@ -400,7 +396,6 @@ public class Scroller  {
      * @param duration Duration of the scroll in milliseconds.
      */
     public void startScroll(int startX, int startY, int dx, int dy, int duration) {
-        mPm.cpuBoost(1550000);
         mMode = SCROLL_MODE;
         mFinished = false;
         mDuration = duration;

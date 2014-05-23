@@ -972,8 +972,11 @@ public class MediaFocusControl implements OnFinished {
      * @param keyCode the key code associated with the key event
      * @return true if the key is one of the supported voice-based interaction triggers
      */
-    private static boolean isValidVoiceInputKeyCode(int keyCode) {
-        if (keyCode == KeyEvent.KEYCODE_HEADSETHOOK) {
+    private boolean isValidVoiceInputKeyCode(int keyCode) {
+        boolean launchVoice = Settings.System.getInt(mContentResolver,
+                    Settings.System.HEADSETHOOK_LAUNCH_VOICE, 1) == 1;
+
+        if (keyCode == KeyEvent.KEYCODE_HEADSETHOOK && launchVoice) {
             return true;
         } else {
             return false;
@@ -2513,9 +2516,6 @@ public class MediaFocusControl implements OnFinished {
             } catch (ArrayIndexOutOfBoundsException e) {
                 // not expected to happen, indicates improper concurrent modification
                 Log.e(TAG, "Wrong index mRCStack on onNewPlaybackInfoForRcc, lock error? ", e);
-            } catch (NullPointerException npe) {
-               // not expected to happen, mVolumeControl is null
-               Log.e(TAG, "Volume controller is null", npe);
             }
         }
     }
@@ -2662,9 +2662,7 @@ public class MediaFocusControl implements OnFinished {
         }
 
         // fire up the UI
-        if (mVolumeController != null) {
-            mVolumeController.postRemoteVolumeChanged(streamType, flags);
-        }
+        mVolumeController.postRemoteVolumeChanged(streamType, flags);
     }
 
     private void sendVolumeUpdateToRemote(int rccId, int direction) {
@@ -2784,9 +2782,7 @@ public class MediaFocusControl implements OnFinished {
         synchronized (mMainRemote) {
             if (mHasRemotePlayback != hasRemotePlayback) {
                 mHasRemotePlayback = hasRemotePlayback;
-                if (mVolumeController != null) {
-                    mVolumeController.postRemoteSliderVisibility(hasRemotePlayback);
-                }
+                mVolumeController.postRemoteSliderVisibility(hasRemotePlayback);
             }
         }
     }

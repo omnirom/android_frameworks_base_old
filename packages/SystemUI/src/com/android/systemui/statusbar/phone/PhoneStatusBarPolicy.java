@@ -1,6 +1,4 @@
 /*
- * Copyright (c) 2012-2013 The Linux Foundation. All rights reserved.
- * Not a Contribution.
  * Copyright (C) 2008 The Android Open Source Project
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
@@ -26,11 +24,11 @@ import android.content.Intent;
 import android.content.IntentFilter;
 import android.media.AudioManager;
 import android.os.Handler;
-import android.telephony.MSimTelephonyManager;
+import android.os.UserHandle;
+import android.provider.Settings;
 import android.util.Log;
 
 import com.android.internal.telephony.IccCardConstants;
-import com.android.internal.telephony.MSimConstants;
 import com.android.internal.telephony.TelephonyIntents;
 import com.android.internal.telephony.cdma.TtyIntent;
 import com.android.systemui.R;
@@ -54,6 +52,9 @@ public class PhoneStatusBarPolicy {
 
     private static final int INET_CONDITION_THRESHOLD = 50;
 
+    private static final String SCHEDULE_SERVICE_COMMAND =
+            "com.android.settings.slim.service.SCHEDULE_SERVICE_COMMAND";
+
     private static final boolean SHOW_SYNC_ICON = false;
 
     private final Context mContext;
@@ -62,7 +63,7 @@ public class PhoneStatusBarPolicy {
 
     // Assume it's all good unless we hear otherwise.  We don't always seem
     // to get broadcasts that it *is* there.
-    IccCardConstants.State[] mSimState;
+    IccCardConstants.State mSimState = IccCardConstants.State.READY;
 
     // ringer volume
     private boolean mVolumeVisible;
@@ -121,12 +122,6 @@ public class PhoneStatusBarPolicy {
         filter.addAction(TtyIntent.TTY_ENABLED_CHANGE_ACTION);
         mContext.registerReceiver(mIntentReceiver, filter, null, mHandler);
 
-        int numPhones = MSimTelephonyManager.getDefault().getPhoneCount();
-        mSimState = new IccCardConstants.State[numPhones];
-        for (int i=0; i < numPhones; i++) {
-            mSimState[i] = IccCardConstants.State.READY;
-        }
-
         // TTY status
         mService.setIcon("tty",  R.drawable.stat_sys_tty_mode, 0, null);
         mService.setIconVisibility("tty", false);
@@ -174,38 +169,28 @@ public class PhoneStatusBarPolicy {
     }
 
     private final void updateSimState(Intent intent) {
-        IccCardConstants.State simState;
         String stateExtra = intent.getStringExtra(IccCardConstants.INTENT_KEY_ICC_STATE);
-
-        // Obtain the subscription info from intent
-        int sub = intent.getIntExtra(MSimConstants.SUBSCRIPTION_KEY, 0);
-        Log.d(TAG, "updateSimState for subscription :" + sub);
-
         if (IccCardConstants.INTENT_VALUE_ICC_ABSENT.equals(stateExtra)) {
-            simState = IccCardConstants.State.ABSENT;
-        }
-        else if (IccCardConstants.INTENT_VALUE_ICC_CARD_IO_ERROR.equals(stateExtra)) {
-            simState = IccCardConstants.State.CARD_IO_ERROR;
+            mSimState = IccCardConstants.State.ABSENT;
         }
         else if (IccCardConstants.INTENT_VALUE_ICC_READY.equals(stateExtra)) {
-            simState = IccCardConstants.State.READY;
+            mSimState = IccCardConstants.State.READY;
         }
         else if (IccCardConstants.INTENT_VALUE_ICC_LOCKED.equals(stateExtra)) {
             final String lockedReason =
                     intent.getStringExtra(IccCardConstants.INTENT_KEY_LOCKED_REASON);
             if (IccCardConstants.INTENT_VALUE_LOCKED_ON_PIN.equals(lockedReason)) {
-                simState = IccCardConstants.State.PIN_REQUIRED;
+                mSimState = IccCardConstants.State.PIN_REQUIRED;
             }
             else if (IccCardConstants.INTENT_VALUE_LOCKED_ON_PUK.equals(lockedReason)) {
-                simState = IccCardConstants.State.PUK_REQUIRED;
+                mSimState = IccCardConstants.State.PUK_REQUIRED;
             }
             else {
-                simState = IccCardConstants.State.PERSO_LOCKED;
+                mSimState = IccCardConstants.State.NETWORK_LOCKED;
             }
         } else {
-            simState = IccCardConstants.State.UNKNOWN;
+            mSimState = IccCardConstants.State.UNKNOWN;
         }
-        mSimState[sub] = simState;
     }
 
     private final void updateVolume() {
@@ -213,13 +198,29 @@ public class PhoneStatusBarPolicy {
         final int ringerMode = audioManager.getRingerMode();
         final boolean visible = ringerMode == AudioManager.RINGER_MODE_SILENT ||
                 ringerMode == AudioManager.RINGER_MODE_VIBRATE;
-
+        int quietHoursAuto = Settings.System.getIntForUser(
+                mContext.getContentResolver(), Settings.System.QUIET_HOURS_AUTOMATIC,
+                0, UserHandle.USER_CURRENT);
         final int iconId;
         String contentDescription = null;
         if (ringerMode == AudioManager.RINGER_MODE_VIBRATE) {
+            if (quietHoursAuto == 2) {
+                updateQuietHours(1);
+            } else if (quietHoursAuto == 1) {
+                updateQuietHours(0);
+            }
             iconId = R.drawable.stat_sys_ringer_vibrate;
             contentDescription = mContext.getString(R.string.accessibility_ringer_vibrate);
         } else {
+            if (ringerMode == AudioManager.RINGER_MODE_SILENT) {
+                if (quietHoursAuto == 1 || quietHoursAuto == 2) {
+                    updateQuietHours(1);
+                }
+            } else {
+                if (quietHoursAuto != 0) {
+                    updateQuietHours(0);
+                }
+            }
             iconId =  R.drawable.stat_sys_ringer_silent;
             contentDescription = mContext.getString(R.string.accessibility_ringer_silent);
         }
@@ -274,6 +275,20 @@ public class PhoneStatusBarPolicy {
             // TTY is off
             if (false) Log.v(TAG, "updateTTY: set TTY off");
             mService.setIconVisibility("tty", false);
+        }
+    }
+
+    private final void updateQuietHours(int enabled) {
+        int quietHours = Settings.System.getIntForUser(
+                mContext.getContentResolver(), Settings.System.QUIET_HOURS_ENABLED,
+                0, UserHandle.USER_CURRENT);
+        if (quietHours != enabled) {
+            Settings.System.putIntForUser(mContext.getContentResolver(),
+                    Settings.System.QUIET_HOURS_ENABLED,
+                    enabled, UserHandle.USER_CURRENT);
+            Intent scheduleSms = new Intent();
+            scheduleSms.setAction(SCHEDULE_SERVICE_COMMAND);
+            mContext.sendBroadcast(scheduleSms);
         }
     }
 }

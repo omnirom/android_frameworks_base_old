@@ -27,9 +27,8 @@ public class ChooserActivity extends ResolverActivity {
         Intent intent = getIntent();
         Parcelable targetParcelable = intent.getParcelableExtra(Intent.EXTRA_INTENT);
         if (!(targetParcelable instanceof Intent)) {
-            Log.w("ChooserActivity", "Target is not an intent: " + targetParcelable);
+            Log.w("ChooseActivity", "Target is not an intent: " + targetParcelable);
             finish();
-            super.onCreate(null);
             return;
         }
         Intent target = (Intent)targetParcelable;
@@ -43,10 +42,9 @@ public class ChooserActivity extends ResolverActivity {
             initialIntents = new Intent[pa.length];
             for (int i=0; i<pa.length; i++) {
                 if (!(pa[i] instanceof Intent)) {
-                    Log.w("ChooserActivity", "Initial intent #" + i
+                    Log.w("ChooseActivity", "Initial intent #" + i
                             + " not an Intent: " + pa[i]);
                     finish();
-                    super.onCreate(null);
                     return;
                 }
                 initialIntents[i] = (Intent)pa[i];

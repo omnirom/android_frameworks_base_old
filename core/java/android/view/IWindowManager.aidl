@@ -297,11 +297,36 @@ interface IWindowManager
     void setTouchExplorationEnabled(boolean enabled);
 
     /**
-     * Get current system ui visibility mode.
+     * Get the current navigation bar state when expanded desktop is enabled.
      *
      * @hide
      */
-    int getSystemUIVisibility();
+    boolean expandedDesktopHidesNavigationBar();
+
+    /**
+     * Get the current statusbar state when expanded desktop is enabled.
+     *
+     * @hide
+     */
+    boolean expandedDesktopHidesStatusBar();
+
+    /**
+     * Get the current navbar size depended on the user value
+     * and orientation.
+     *
+     * @hide
+     */
+    int getCurrentNavigationBarSize();
+
+    /** SPLIT VIEW **/
+    boolean isTaskSplitView(int taskId);
+    void setTaskSplitView(int taskId, boolean split);
+    void setTaskChildSplit(IBinder token, boolean split);
+    Rect getSplitViewRect(int taskId, boolean resetLocation);
+    void notifyActivityTouched(IBinder token, boolean force);
+    void setSplitViewRect(int l, int t, int r, int b);
+
+    /** SPLIT VIEW END **/
 
     /**
      * Toggle global menu
@@ -317,15 +342,12 @@ interface IWindowManager
      */
     void toggleStatusBar();
 
-    /** SPLIT VIEW **/
-    boolean isTaskSplitView(int taskId);
-    void setTaskSplitView(int taskId, boolean split);
-    void setTaskChildSplit(IBinder token, boolean split);
-    Rect getSplitViewRect(int taskId, boolean resetLocation);
-    void notifyActivityTouched(IBinder token, boolean force);
-    void setSplitViewRect(int l, int t, int r, int b);
-
-    /** SPLIT VIEW END **/
+    /**
+     * Get current system ui visibility mode.
+     *
+     * @hide
+     */
+    int getSystemUIVisibility();
 
     /** FLOAT VIEW **/
     Rect getAppFullscreenViewRect();

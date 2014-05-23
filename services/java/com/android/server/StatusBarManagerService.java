@@ -120,7 +120,7 @@ public class StatusBarManagerService extends IStatusBarService.Stub
     // From IStatusBarService
     // ================================================================================
     public void expandNotificationsPanel() {
-        enforceExpandStatusBar();
+        //enforceExpandStatusBar();
 
         if (mBar != null) {
             try {
@@ -142,11 +142,11 @@ public class StatusBarManagerService extends IStatusBarService.Stub
     }
 
     public void expandSettingsPanel() {
-        enforceExpandStatusBar();
+        //enforceExpandStatusBar();
 
         if (mBar != null) {
             try {
-                mBar.animateExpandSettingsPanel();
+                mBar.animateExpandSettingsPanel(true);
             } catch (RemoteException ex) {
             }
         }
@@ -186,13 +186,6 @@ public class StatusBarManagerService extends IStatusBarService.Stub
                 } catch (RemoteException ex) {
                 }
             }
-        }
-    }
-
-    public void setButtonDrawable(int buttonId, int iconId) {
-        try {
-            mBar.setButtonDrawable(buttonId, iconId);
-        } catch (RemoteException ex) {
         }
     }
 
@@ -268,7 +261,7 @@ public class StatusBarManagerService extends IStatusBarService.Stub
         }
     }
 
-    /**
+    /** 
      * Hide or show the on-screen Menu key. Only call this from the window manager, typically in
      * response to a window with FLAG_NEEDS_MENU_KEY set.
      */
@@ -425,6 +418,15 @@ public class StatusBarManagerService extends IStatusBarService.Stub
     }
 
     @Override
+    public void setAutoRotate(boolean enabled) {
+        if (mBar != null) {
+            try {
+                mBar.setAutoRotate(enabled);
+            } catch (RemoteException ex) {}
+        }
+    }
+
+    @Override
     public void toggleNotificationShade() {
         if (mBar != null) {
             try {
@@ -438,6 +440,15 @@ public class StatusBarManagerService extends IStatusBarService.Stub
         if (mBar != null) {
             try {
                 mBar.toggleQSShade();
+            } catch (RemoteException ex) {}
+        }
+    }
+
+    @Override
+    public void toggleSmartPulldown() {
+        if (mBar != null) {
+            try {
+                mBar.toggleSmartPulldown();
             } catch (RemoteException ex) {}
         }
     }

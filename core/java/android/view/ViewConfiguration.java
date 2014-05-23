@@ -19,7 +19,6 @@ package android.view;
 import android.app.AppGlobals;
 import android.content.ContentResolver;
 import android.content.Context;
-import android.content.ContentResolver;
 import android.content.res.Configuration;
 import android.content.res.Resources;
 import android.graphics.Point;
@@ -28,7 +27,6 @@ import android.os.UserHandle;
 import android.provider.Settings;
 import android.util.DisplayMetrics;
 import android.util.SparseArray;
-import android.provider.Settings;
 
 /**
  * Contains methods to standard constants used in the UI for timeouts, sizes, and distances.
@@ -184,13 +182,13 @@ public class ViewConfiguration {
     /**
      * Maximum velocity to initiate a fling, as measured in dips per second
      */
-    private static int MAXIMUM_FLING_VELOCITY = 15000;
+    private static int MAXIMUM_FLING_VELOCITY = 8000;
 
     /**
      * Maximum velocity to initiate a fling, as measured in dips per second
      * @hide
      */
-    public static final int DEFAULT_MAXIMUM_FLING_VELOCITY = 15000;
+    public static final int DEFAULT_MAXIMUM_FLING_VELOCITY = 8000;
 
     /**
      * Delay before dispatching a recurring accessibility event in milliseconds.
@@ -210,13 +208,13 @@ public class ViewConfiguration {
     /**
      * The coefficient of friction applied to flings/scrolls.
      */
-    private static float SCROLL_FRICTION = 0.011f;
+    private static float SCROLL_FRICTION = 0.015f;
 
     /**
      * The coefficient of friction applied to flings/scrolls.
      * @hide
      */
-    public static final float DEFAULT_SCROLL_FRICTION = 0.011f;
+    public static final float DEFAULT_SCROLL_FRICTION = 0.015f;
 
     /**
      * Max distance in dips to overscroll for edge effects
@@ -225,7 +223,6 @@ public class ViewConfiguration {
 
     /**
      * Max distance in dips to overscroll for edge effects
-     * @hide
      */
     public static final int DEFAULT_OVERSCROLL_DISTANCE = 0;
 
@@ -254,6 +251,8 @@ public class ViewConfiguration {
     private final int mOverscrollDistance;
     private final int mOverflingDistance;
     private final boolean mFadingMarqueeEnabled;
+
+    private Context mContext;
 
     static final SparseArray<ViewConfiguration> sConfigurations =
             new SparseArray<ViewConfiguration>(2);
@@ -324,7 +323,7 @@ public class ViewConfiguration {
                 OVERFLING_DISTANCE = overFlingDistance;
             }
         }
-
+     
         final Resources res = context.getResources();
         final DisplayMetrics metrics = res.getDisplayMetrics();
         final Configuration config = res.getConfiguration();
@@ -335,6 +334,8 @@ public class ViewConfiguration {
         } else {
             sizeAndDensity = density;
         }
+
+        mContext = context;
 
         mEdgeSlop = (int) (sizeAndDensity * EDGE_SLOP + 0.5f);
         mFadingEdgeLength = (int) (sizeAndDensity * FADING_EDGE_LENGTH + 0.5f);
@@ -753,6 +754,14 @@ public class ViewConfiguration {
             }
         } catch (RemoteException ex) {
             // do nothing, continue trying to guess
+        }
+
+        // Report no menu key if overflow button is forced to enabled
+        ContentResolver res = mContext.getContentResolver();
+        boolean forceOverflowButton = Settings.System.getInt(res,
+                Settings.System.UI_FORCE_OVERFLOW_BUTTON, 0) == 1;
+        if (forceOverflowButton) {
+            return false;
         }
 
         // Report menu key presence based on hardware key rebinding

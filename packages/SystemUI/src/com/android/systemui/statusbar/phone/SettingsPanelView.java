@@ -98,10 +98,6 @@ public class SettingsPanelView extends PanelView {
     public void setup(NetworkController networkController, BluetoothController bluetoothController,
             BatteryController batteryController, LocationController locationController,
             RotationLockController rotationLockController) {
-        if (mQS != null) {
-            /*mQS.setup(networkController, bluetoothController, batteryController,
-                    locationController, rotationLockController);*/
-        }
     }
 
     void updateResources() {
@@ -118,10 +114,10 @@ public class SettingsPanelView extends PanelView {
     public void fling(float vel, boolean always) {
         if (DEBUG_GESTURES) {
             GestureRecorder gr = ((PhoneStatusBarView) mBar).mBar.getGestureRecorder();
-            if (gr != null) {
+            if (gr != null ) {
                 gr.tag(
                     "fling " + ((vel > 0) ? "open" : "closed"),
-                    "settings,v=" + vel);
+                    "notifications,v=" + vel);
             }
         }
         super.fling(vel, always);
@@ -167,6 +163,9 @@ public class SettingsPanelView extends PanelView {
 
     @Override
     public boolean onTouchEvent(MotionEvent event) {
+        if (mQS == null) {
+            return false;
+        }
         if (DEBUG_GESTURES) {
             if (event.getActionMasked() != MotionEvent.ACTION_MOVE) {
                 EventLog.writeEvent(EventLogTags.SYSUI_QUICKPANEL_TOUCH,

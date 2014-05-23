@@ -23,7 +23,6 @@ import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.Intent;
 import android.content.IntentFilter;
-import android.os.Bundle;
 
 import java.util.ArrayList;
 import java.util.HashSet;
@@ -32,21 +31,13 @@ import java.util.Set;
 public class BluetoothController extends BroadcastReceiver {
     private static final String TAG = "StatusBar.BluetoothController";
 
-    public interface BluetoothDeviceConnectionStateChangeCallback {
-        void onDeviceConnectionStateChange(BluetoothDevice device);
-        void onDeviceNameChange(BluetoothDevice device);
-    }
-
     private boolean mEnabled = false;
     private boolean mConnected = false;
 
     private Set<BluetoothDevice> mBondedDevices = new HashSet<BluetoothDevice>();
-    private Set<BluetoothDevice> mConnectedDevices = new HashSet<BluetoothDevice>();
 
     private ArrayList<BluetoothStateChangeCallback> mChangeCallbacks =
             new ArrayList<BluetoothStateChangeCallback>();
-    private ArrayList<BluetoothDeviceConnectionStateChangeCallback> mConnectionChangeCallbacks =
-            new ArrayList<BluetoothDeviceConnectionStateChangeCallback>();
 
     private ArrayList<BluetoothConnectionChangeCallback> mConnectionCallbacks =
             new ArrayList<BluetoothConnectionChangeCallback>();
@@ -61,10 +52,6 @@ public class BluetoothController extends BroadcastReceiver {
         filter.addAction(BluetoothAdapter.ACTION_STATE_CHANGED);
         filter.addAction(BluetoothAdapter.ACTION_CONNECTION_STATE_CHANGED);
         filter.addAction(BluetoothDevice.ACTION_BOND_STATE_CHANGED);
-        filter.addAction(BluetoothDevice.ACTION_ACL_CONNECTED);
-        filter.addAction(BluetoothDevice.ACTION_ACL_DISCONNECTED);
-        filter.addAction(BluetoothDevice.ACTION_ALIAS_CHANGED);
-        filter.addAction(BluetoothDevice.ACTION_NAME_CHANGED);
         context.registerReceiver(this, filter);
 
         final BluetoothAdapter adapter = BluetoothAdapter.getDefaultAdapter();
@@ -86,27 +73,13 @@ public class BluetoothController extends BroadcastReceiver {
     public void addConnectionStateChangedCallback(BluetoothConnectionChangeCallback cnt) {
         mConnectionCallbacks.add(cnt);
     }
-    
-    public void addConnectionStateChangedCallback(
-            BluetoothDeviceConnectionStateChangeCallback cb) {
-        mConnectionChangeCallbacks.add(cb);
-    }
 
     public void removeConnectionStateChangedCallback(BluetoothConnectionChangeCallback cnt) {
         mConnectionCallbacks.remove(cnt);
     }
-    
-    public void removeConnectionStateChangedCallback(
-            BluetoothDeviceConnectionStateChangeCallback cb) {
-        mConnectionChangeCallbacks.remove(cb);
-    }
 
     public Set<BluetoothDevice> getBondedBluetoothDevices() {
         return mBondedDevices;
-    }
-
-    public Set<BluetoothDevice> getConnectedBluetoothDevices() {
-        return mConnectedDevices;
     }
 
     public void unregisterController(Context context) {
@@ -116,7 +89,6 @@ public class BluetoothController extends BroadcastReceiver {
     @Override
     public void onReceive(Context context, Intent intent) {
         final String action = intent.getAction();
-        final Bundle extras = intent.getExtras();
 
         if (action.equals(BluetoothAdapter.ACTION_STATE_CHANGED)) {
             handleAdapterStateChange(
@@ -125,27 +97,8 @@ public class BluetoothController extends BroadcastReceiver {
             handleConnectedStateChange(intent.getIntExtra(BluetoothAdapter.EXTRA_CONNECTION_STATE,
                         BluetoothAdapter.STATE_DISCONNECTED));
         }
-
-        if (action.equals(BluetoothAdapter.ACTION_STATE_CHANGED)
-                || action.equals(BluetoothAdapter.ACTION_CONNECTION_STATE_CHANGED)
-                || action.equals(BluetoothDevice.ACTION_BOND_STATE_CHANGED)) {
-            fireCallbacks();
-            updateBondedBluetoothDevices();
-        }
-
-        if (action.equals(BluetoothDevice.ACTION_ACL_CONNECTED)) {
-            BluetoothDevice device = extras.getParcelable(BluetoothDevice.EXTRA_DEVICE);
-            mConnectedDevices.add(device);
-            fireConnectionStateChanged(device);
-        } else if (action.equals(BluetoothDevice.ACTION_ACL_DISCONNECTED)) {
-            BluetoothDevice device = extras.getParcelable(BluetoothDevice.EXTRA_DEVICE);
-            mConnectedDevices.remove(device);
-            fireConnectionStateChanged(device);
-        } else if (BluetoothDevice.ACTION_ALIAS_CHANGED.equals(action) ||
-                BluetoothDevice.ACTION_NAME_CHANGED.equals(action)) {
-            BluetoothDevice device = extras.getParcelable(BluetoothDevice.EXTRA_DEVICE);
-            fireDeviceNameChanged(device);
-        }
+        fireCallbacks();
+        updateBondedBluetoothDevices();
     }
 
     private void updateBondedBluetoothDevices() {
@@ -156,7 +109,8 @@ public class BluetoothController extends BroadcastReceiver {
             Set<BluetoothDevice> devices = adapter.getBondedDevices();
             if (devices != null) {
                 for (BluetoothDevice device : devices) {
-                    if (device.getBondState() != BluetoothDevice.BOND_NONE) {
+                    if (device != null &&
+                           device.getBondState() != BluetoothDevice.BOND_NONE) {
                         mBondedDevices.add(device);
                     }
                 }
@@ -178,18 +132,6 @@ public class BluetoothController extends BroadcastReceiver {
         }
         for (BluetoothConnectionChangeCallback cnt : mConnectionCallbacks) {
             cnt.onBluetoothConnectionChange(mEnabled, mConnected);
-        }
-    }
-
-    private void fireConnectionStateChanged(BluetoothDevice device) {
-        for (BluetoothDeviceConnectionStateChangeCallback cb : mConnectionChangeCallbacks) {
-            cb.onDeviceConnectionStateChange(device);
-        }
-    }
-
-    private void fireDeviceNameChanged(BluetoothDevice device) {
-        for (BluetoothDeviceConnectionStateChangeCallback cb : mConnectionChangeCallbacks) {
-            cb.onDeviceNameChange(device);
         }
     }
 }

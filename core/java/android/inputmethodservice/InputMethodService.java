@@ -38,6 +38,7 @@ import android.os.ResultReceiver;
 import android.os.ServiceManager;
 import android.os.SystemClock;
 import android.provider.Settings;
+import android.service.gesture.IEdgeGestureService;
 import android.text.InputType;
 import android.text.Layout;
 import android.text.Spannable;
@@ -74,9 +75,7 @@ import android.widget.FrameLayout;
 import android.widget.LinearLayout;
 
 import com.android.internal.statusbar.IStatusBarService;
-
-import com.android.internal.util.amra.AwesomeAnimationHelper;
-
+import com.android.internal.util.beanstalk.AwesomeAnimationHelper;
 import java.io.FileDescriptor;
 import java.io.PrintWriter;
 
@@ -338,6 +337,8 @@ public class InputMethodService extends AbstractInputMethodService {
     private IStatusBarService mStatusBarService;
     private Object mServiceAquireLock = new Object();
 
+    private IEdgeGestureService mEdgeGestureService;
+
     private Window mWindowIme;
     private int mAnimationDuration;
     private int mAnimationEnterIndex;
@@ -345,6 +346,7 @@ public class InputMethodService extends AbstractInputMethodService {
     private int mInterpolatorIndex;
 
     private SettingsObserver mSettingsObserver;
+
     final Insets mTmpInsets = new Insets();
     final int[] mTmpLocation = new int[2];
 
@@ -420,7 +422,7 @@ public class InputMethodService extends AbstractInputMethodService {
         mInterpolatorIndex = Settings.System.getInt(getContentResolver(),
                       Settings.System.ANIMATION_IME_INTERPOLATOR, 0);
         int temp = Settings.System.getInt(getContentResolver(),
-                      Settings.System.ANIMATION_CONTROLS_DURATION, 0);
+                      Settings.System.ANIMATION_IME_DURATION, 0);
         mAnimationDuration = temp * 15;
     }
 
@@ -1529,9 +1531,42 @@ public class InputMethodService extends AbstractInputMethodService {
             mWindowWasVisible = mWindowVisible;
             mInShowWindow = true;
             showWindowInner(showInput);
+            if (showInput) {
+                // IME softkeyboard is showing. Notify EdgeGestureService.
+                IEdgeGestureService edgeGestureService = getEdgeGestureService();
+                try {
+                    if (edgeGestureService != null) {
+                        edgeGestureService.setImeIsActive(true);
+                    }
+                } catch (RemoteException e) {
+                    mEdgeGestureService = null;
+                }
+            }
         } finally {
             mWindowWasVisible = true;
             mInShowWindow = false;
+        }
+
+        IStatusBarService statusbar = getStatusBarService();
+        int mKeyboardRotationTimeout = Settings.System.getIntForUser(getContentResolver(),
+                Settings.System.KEYBOARD_ROTATION_TIMEOUT, 0, UserHandle.USER_CURRENT_OR_SELF);
+        if (mKeyboardRotationTimeout > 0) {
+            mHandler.removeCallbacks(restoreAutoRotation);
+            if (!mForcedAutoRotate) {
+                boolean isAutoRotate = (Settings.System.getIntForUser(getContentResolver(),
+                    Settings.System.ACCELEROMETER_ROTATION, 0,
+                    UserHandle.USER_CURRENT_OR_SELF) == 1);
+                if (!isAutoRotate) {
+                    try {
+                        if (statusbar != null) {
+                            statusbar.setAutoRotate(true);
+                            mForcedAutoRotate = true;
+                        }
+                    } catch (RemoteException e) {
+                        mStatusBarService = null;
+                    }
+                }
+            }
         }
     }
 
@@ -1615,7 +1650,41 @@ public class InputMethodService extends AbstractInputMethodService {
             onWindowHidden();
             mWindowWasVisible = false;
         }
+
+        // IME softkeyboard is hiding. Notify EdgeGestureService.
+        IEdgeGestureService edgeGestureService = getEdgeGestureService();
+        try {
+            if (edgeGestureService != null) {
+                edgeGestureService.setImeIsActive(false);
+            }
+        } catch (RemoteException e) {
+            mEdgeGestureService = null;
+        }
+
+        int mKeyboardRotationTimeout = Settings.System.getIntForUser(getContentResolver(),
+                Settings.System.KEYBOARD_ROTATION_TIMEOUT, 0, UserHandle.USER_CURRENT_OR_SELF);
+        if (mKeyboardRotationTimeout > 0) {
+            mHandler.removeCallbacks(restoreAutoRotation);
+            if (mForcedAutoRotate) {
+                mHandler.postDelayed(restoreAutoRotation, mKeyboardRotationTimeout);
+            }
+        }
     }
+
+
+    final Runnable restoreAutoRotation = new Runnable() {
+        @Override public void run() {
+            try {
+                IStatusBarService statusbar = getStatusBarService();
+                if (statusbar != null) {
+                    statusbar.setAutoRotate(false);
+                }
+                mForcedAutoRotate = false;
+            } catch (RemoteException e) {
+                mStatusBarService = null;
+            }
+        }
+    };
 
     /**
      * Called when the input method window has been shown to the user, after
@@ -2350,13 +2419,26 @@ public class InputMethodService extends AbstractInputMethodService {
         return true;
     }
 
-    IStatusBarService getStatusBarService() {
+    private IStatusBarService getStatusBarService() {
         synchronized (mServiceAquireLock) {
             if (mStatusBarService == null) {
                 mStatusBarService = IStatusBarService.Stub.asInterface(
                         ServiceManager.getService("statusbar"));
             }
             return mStatusBarService;
+        }
+    }
+
+    /**
+     * If not set till now get EdgeGestureService.
+     */
+    private IEdgeGestureService getEdgeGestureService() {
+        synchronized (mServiceAquireLock) {
+            if (mEdgeGestureService == null) {
+                mEdgeGestureService = IEdgeGestureService.Stub.asInterface(
+                            ServiceManager.getService("edgegestureservice"));
+            }
+            return mEdgeGestureService;
         }
     }
 

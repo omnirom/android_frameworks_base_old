@@ -2093,4 +2093,12 @@
   <public type="bool" name="config_useFixedVolume" id="0x1110056" />
   <public type="array" name="networkAttributes" id="0x107000b" />
 
+  <!-- Power widget -->
+  <java-symbol type="string" name="hour" />
+  <java-symbol type="string" name="hours" />
+  <java-symbol type="string" name="minute" />
+  <java-symbol type="string" name="minutes" />
+  <java-symbol type="string" name="second" />
+  <java-symbol type="string" name="seconds" />
+
 </resources>

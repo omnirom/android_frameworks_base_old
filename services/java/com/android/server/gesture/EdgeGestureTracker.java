@@ -61,7 +61,8 @@ public class EdgeGestureTracker {
     private int mGracePeriod;
 
     public interface OnActivationListener {
-        public void onActivation(MotionEvent event, int touchX, int touchY, EdgeGesturePosition position);
+        public void onActivation(MotionEvent event,
+                int touchX, int touchY, EdgeGesturePosition position);
     }
     private OnActivationListener mActivationListener;
 
@@ -78,7 +79,7 @@ public class EdgeGestureTracker {
     private void setSensitivity(int sensitivity) {
         float factor = 0.0f;
         if (sensitivity >= 1) {
-             factor = (sensitivity - 1) / 4.0f;
+             factor = (sensitivity - 1) / 10.0f;
         }
         if (DEBUG) {
             Slog.d(TAG, "sensitivity: " + sensitivity + " => factor:" + factor);
@@ -131,19 +132,21 @@ public class EdgeGestureTracker {
         setSensitivity(sensitivity);
 
         if ((positions & EdgeGesturePosition.LEFT.FLAG) != 0) {
-            if (x < mThickness && (unrestricted || (fy > 0.1f && fy < 0.9f))) {
+            if (x < mThickness && fy > 0.15f
+                    && fy < (isImeActive(positions) ? 0.6f : 0.85f)) {
                 startWithPosition(motionEvent, EdgeGesturePosition.LEFT);
                 return true;
             }
         }
         if ((positions & EdgeGesturePosition.BOTTOM.FLAG) != 0) {
-            if (y > mDisplayHeight - mThickness && (unrestricted || (fx > 0.1f && fx < 0.9f))) {
+            if (y > mDisplayHeight - mThickness && fx > 0.1f && fx < 0.9f) {
                 startWithPosition(motionEvent, EdgeGesturePosition.BOTTOM);
                 return true;
             }
         }
         if ((positions & EdgeGesturePosition.RIGHT.FLAG) != 0) {
-            if (x > mDisplayWidth - mThickness && (unrestricted || (fy > 0.1f && fy < 0.9f))) {
+            if (x > mDisplayWidth - mThickness && fy > 0.15f
+                    && fy < (isImeActive(positions) ? 0.6f : 0.85f)) {
                 startWithPosition(motionEvent, EdgeGesturePosition.RIGHT);
                 return true;
             }

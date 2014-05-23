@@ -43,6 +43,7 @@ import java.lang.Character;
 import java.lang.CharSequence;
 import java.lang.IllegalArgumentException;
 import java.lang.NumberFormatException;
+import java.lang.StringBuilder;
 
 public class CreateShortcut extends LauncherActivity {
 
@@ -58,6 +59,9 @@ public class CreateShortcut extends LauncherActivity {
     private static final int SECURE_LONG = 3;
     private static final int SYSTEM_FLOAT = 4;
     private static final int SECURE_FLOAT = 5;
+    private static final int GLOBAL_INT = 6;
+    private static final int GLOBAL_LONG = 7;
+    private static final int GLOBAL_FLOAT = 8;
 
     private int mSettingType = 0;
 
@@ -102,6 +106,7 @@ public class CreateShortcut extends LauncherActivity {
             showDialogSetting(DLG_SECRET);
         } else if (className.equals("Immersive")
                 || className.equals("QuietHours")
+                || className.equals("Torch")
                 || className.equals("Rotation")) {
             showDialogSetting(DLG_TOGGLE);
         } else {
@@ -120,16 +125,12 @@ public class CreateShortcut extends LauncherActivity {
             return R.drawable.ic_qs_torch_on;
         } else if (c.equals("LastApp")) {
             return R.drawable.ic_sysbar_lastapp;
-        } else if (c.equals("PowerMenu")) {
-            return R.drawable.ic_sysbar_power_menu;
         } else if (c.equals("Reboot")) {
             return R.drawable.ic_qs_reboot;
         } else if (c.equals("Recovery")) {
             return R.drawable.ic_qs_reboot_recovery;
         } else if (c.equals("Screenshot")) {
             return R.drawable.ic_sysbar_screenshot;
-        } else if (c.equals("SleepScreen")) {
-            return R.drawable.ic_qs_sleep;
         } else if (c.equals("VolumePanel")) {
             return R.drawable.ic_qs_volume;
         } else if (c.equals("ChamberOfSecrets")) {
@@ -204,42 +205,61 @@ public class CreateShortcut extends LauncherActivity {
                         float testFloat = 0;
                         // Necessary ugly code.  Do it here so we don't have to again.
                         try {
-                            test = Settings.System.getIntForUser(
-                                    getContentResolver(),
-                                    value, UserHandle.USER_CURRENT);
-                            mSettingType = SYSTEM_INT;
-                        } catch (Settings.SettingNotFoundException a) {
+                            Settings.Global.getInt(
+                                    getContentResolver(), value);
+                            mSettingType = GLOBAL_INT;
+                        } catch (SettingNotFoundException p) {
                             try {
-                                test = Settings.Secure.getIntForUser(
-                                        getContentResolver(),
-                                        value, UserHandle.USER_CURRENT);
-                                mSettingType = SECURE_INT;
-                            } catch (Settings.SettingNotFoundException b) {
+                                Settings.Global.getLong(
+                                        getContentResolver(), value);
+                                mSettingType = GLOBAL_LONG;
+                            } catch (SettingNotFoundException q) {
                                 try {
-                                    testLong = Settings.System.getLongForUser(
-                                            getContentResolver(),
-                                            value, UserHandle.USER_CURRENT);
-                                    mSettingType = SYSTEM_LONG;
-                                } catch (Settings.SettingNotFoundException c) {
+                                    Settings.Global.getFloat(
+                                            getContentResolver(), value);
+                                    mSettingType = GLOBAL_FLOAT;
+                                } catch (SettingNotFoundException r) {
                                     try {
-                                        testLong = Settings.Secure.getLongForUser(
+                                        Settings.System.getIntForUser(
                                                 getContentResolver(),
                                                 value, UserHandle.USER_CURRENT);
-                                        mSettingType = SECURE_LONG;
-                                    } catch (Settings.SettingNotFoundException d) {
+                                        mSettingType = SYSTEM_INT;
+                                    } catch (SettingNotFoundException a) {
                                         try {
-                                            testFloat = Settings.System.getFloatForUser(
+                                            Settings.Secure.getIntForUser(
                                                     getContentResolver(),
                                                     value, UserHandle.USER_CURRENT);
-                                            mSettingType = SYSTEM_FLOAT;
-                                        } catch (Settings.SettingNotFoundException e) {
+                                            mSettingType = SECURE_INT;
+                                        } catch (SettingNotFoundException b) {
                                             try {
-                                                testFloat = Settings.Secure.getFloatForUser(
+                                                Settings.System.getLongForUser(
                                                         getContentResolver(),
                                                         value, UserHandle.USER_CURRENT);
-                                                mSettingType = SECURE_FLOAT;
-                                            } catch (Settings.SettingNotFoundException f) {
-                                                resultOk = false;
+                                                mSettingType = SYSTEM_LONG;
+                                            } catch (SettingNotFoundException c) {
+                                                try {
+                                                    Settings.Secure.getLongForUser(
+                                                            getContentResolver(),
+                                                            value, UserHandle.USER_CURRENT);
+                                                    mSettingType = SECURE_LONG;
+                                                } catch (SettingNotFoundException d) {
+                                                    try {
+                                                        Settings.System.getFloatForUser(
+                                                                getContentResolver(),
+                                                                value, UserHandle.USER_CURRENT);
+                                                        mSettingType = SYSTEM_FLOAT;
+                                                    } catch (SettingNotFoundException e) {
+                                                        try {
+                                                            Settings.Secure.getFloatForUser(
+                                                                    getContentResolver(),
+                                                                    value,
+                                                                    UserHandle.USER_CURRENT);
+                                                            mSettingType = SECURE_FLOAT;
+                                                        } catch (SettingNotFoundException f) {
+                                                            resultOk = false;
+                                                        }
+                                                    }
+                                                }
                                             }
                                         }
                                     }
@@ -252,6 +272,9 @@ public class CreateShortcut extends LauncherActivity {
                         } else {
                             Toast.makeText(CreateShortcut.this,
                                     R.string.chamber_invalid,
+                                    Toast.LENGTH_LONG).show();
+                            Toast.makeText(CreateShortcut.this,
+                                    R.string.chamber_invalid_setting,
                                     Toast.LENGTH_LONG).show();
                             finish();
                         }
@@ -297,48 +320,63 @@ public class CreateShortcut extends LauncherActivity {
                         str = str.replaceAll("\\s+", "");
                         String[] strArray = str.split(",");
                         boolean resultOk = true;
-
-                        switch (mSettingType) {
-                            case SYSTEM_INT:
-                            case SECURE_INT:
-                                int[] intArray = new int[strArray.length];
-                                for (int i = 0; i < strArray.length; i++) {
-                                    try {
-                                        intArray[i] = Integer.parseInt(strArray[i]);
-                                    } catch (NumberFormatException e) {
+                        if (strArray.length >= 1 && str.length() > 0) {
+                            switch (mSettingType) {
+                                case SYSTEM_INT:
+                                case SECURE_INT:
+                                case GLOBAL_INT:
+                                    int[] intArray = new int[strArray.length];
+                                    for (int i = 0; i < strArray.length; i++) {
                                         try {
-                                            intArray[i] = Color.parseColor(strArray[i]);
-                                        } catch (IllegalArgumentException ex) {
+                                            intArray[i] = Integer.parseInt(strArray[i]);
+                                        } catch (NumberFormatException e) {
+                                            try {
+                                                intArray[i] = Color.parseColor(strArray[i]);
+                                                // Let's avoid color parsing a seond time.
+                                                strArray[i] = Integer.toString(
+                                                        Color.parseColor(strArray[i]));
+                                            } catch (IllegalArgumentException ex) {
+                                                resultOk = false;
+                                            }
+                                        }
+                                    }
+                                    break;
+                                case SYSTEM_LONG:
+                                case SECURE_LONG:
+                                case GLOBAL_LONG:
+                                    long[] longArray = new long[strArray.length];
+                                    for (int i = 0; i < strArray.length; i++) {
+                                        try {
+                                            longArray[i] = Long.parseLong(strArray[i]);
+                                        } catch (NumberFormatException e) {
                                             resultOk = false;
                                         }
                                     }
-                                }
-                                break;
-                            case SYSTEM_LONG:
-                            case SECURE_LONG:
-                                long[] longArray = new long[strArray.length];
-                                for (int i = 0; i < strArray.length; i++) {
-                                    try {
-                                        longArray[i] = Long.parseLong(strArray[i]);
-                                    } catch (NumberFormatException e) {
-                                        resultOk = false;
+                                    break;
+                                case SYSTEM_FLOAT:
+                                case SECURE_FLOAT:
+                                case GLOBAL_FLOAT:
+                                    float[] floatArray = new float[strArray.length];
+                                    for (int i = 0; i < strArray.length; i++) {
+                                        try {
+                                            floatArray[i] = Float.parseFloat(strArray[i]);
+                                        } catch (NumberFormatException ex) {
+                                            resultOk = false;
+                                        }
                                     }
-                                }
-                                break;
-                            case SYSTEM_FLOAT:
-                            case SECURE_FLOAT:
-                                float[] floatArray = new float[strArray.length];
-                                for (int i = 0; i < strArray.length; i++) {
-                                    try {
-                                        floatArray[i] = Float.parseFloat(strArray[i]);
-                                    } catch (NumberFormatException ex) {
-                                        resultOk = false;
-                                    }
-                                }
-                                break;
+                                    break;
+                            }
+                        } else {
+                            resultOk = false;
                         }
 
                         if (resultOk) {
+                            // Rebuild string with ints needed if color values are used.
+                            StringBuilder builder = new StringBuilder();
+                            for(String st : strArray) {
+                                builder.append(st + ",");
+                            }
+                            str = builder.toString();
                             // Set to string.  Launcher doesn't persist array
                             // extras after a reboot.
                             setSettingArray(str);

@@ -38,7 +38,17 @@
             android:clipToPadding="false"
             android:id="@+id/container"
             >
+            <com.android.systemui.statusbar.policy.KeyButtonView android:id="@+id/ime_navigation_left"
+                android:layout_width="48dp"
+                android:layout_height="match_parent"
+                android:layout_weight="0"
+                android:visibility="gone" />
             <include layout="@layout/mid_navigation_bar_port"/>
+            <com.android.systemui.statusbar.policy.KeyButtonView android:id="@+id/ime_navigation_right"
+                android:layout_width="48dp"
+                android:layout_height="match_parent"
+                android:layout_weight="0"
+                android:visibility="gone" />
         </LinearLayout>
 
        <LinearLayout
@@ -145,6 +155,11 @@
             android:id="@+id/container"
             >
             <include layout="@layout/mid_navigation_bar_land"/>
+            <com.android.systemui.statusbar.policy.KeyButtonView android:id="@+id/ime_navigation_right"
+                android:layout_width="48dp"
+                android:layout_height="match_parent"
+                android:layout_weight="0"
+                android:visibility="gone" />
         </LinearLayout>
 
                 <!-- lights out layout to match exactly -->

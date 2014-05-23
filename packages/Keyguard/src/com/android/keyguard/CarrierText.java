@@ -1,6 +1,4 @@
 /*
- * Copyright (c) 2013, The Linux Foundation. All rights reserved.
- * Not a Contribution.
  * Copyright (C) 2012 The Android Open Source Project
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
@@ -19,6 +17,7 @@
 package com.android.keyguard;
 
 import android.content.Context;
+import android.os.UserHandle;
 import android.provider.Settings;
 import android.text.method.SingleLineTransformationMethod;
 import android.text.TextUtils;
@@ -68,14 +67,13 @@ public class CarrierText extends TextView {
      */
     private static enum StatusMode {
         Normal, // Normal case (sim card present, it's not locked)
-        PersoLocked, // SIM card is 'perso locked'.
+        NetworkLocked, // SIM card is 'network locked'.
         SimMissing, // SIM card is missing.
         SimMissingLocked, // SIM card is missing, and device isn't provisioned; don't allow access
         SimPukLocked, // SIM card is PUK locked because SIM entered wrong too many times
         SimLocked, // SIM card is currently locked
         SimPermDisabled, // SIM card is permanently disabled due to PUK unlock failure
-        SimNotReady, // SIM is not ready yet. May never be on devices w/o a SIM.
-        SimIoError; //The sim card is faulty
+        SimNotReady; // SIM is not ready yet. May never be on devices w/o a SIM.
     }
 
     public CarrierText(Context context) {
@@ -87,15 +85,23 @@ public class CarrierText extends TextView {
         mLockPatternUtils = new LockPatternUtils(mContext);
         boolean useAllCaps = mContext.getResources().getBoolean(R.bool.kg_use_all_caps);
         setTransformationMethod(new CarrierTextTransformationMethod(mContext, useAllCaps));
+        int textColor = Settings.Secure.getIntForUser(
+                mContext.getContentResolver(),
+                Settings.Secure.LOCKSCREEN_MISC_COLOR, -2,
+                UserHandle.USER_CURRENT);
+        if (textColor != -2) {
+            setTextColor(textColor);
+        }
     }
 
     protected void updateCarrierText(State simState, CharSequence plmn, CharSequence spn) {
-        String customLabel = Settings.System.getString(mContext.getContentResolver(),
-                Settings.System.NOTIFICATION_CUSTOM_CARRIER_LABEL);
-         if (customLabel != null && customLabel.length() > 0) {
-             setText(customLabel);
-         } else {
-        setText(getCarrierTextForSimState(simState, plmn, spn));
+        CharSequence text = getCarrierTextForSimState(simState, plmn, spn);
+        String customLabel = Settings.System.getString(getContext().getContentResolver(),
+                Settings.System.CUSTOM_CARRIER_LABEL);
+        if (customLabel == null || customLabel.length() == 0) {
+            setText(text != null ? text.toString().toUpperCase() : null);
+        } else {
+            setText(customLabel);
         }
     }
 
@@ -110,9 +116,6 @@ public class CarrierText extends TextView {
     @Override
     protected void onAttachedToWindow() {
         super.onAttachedToWindow();
-        if (KeyguardUpdateMonitor.sIsMultiSimEnabled) {
-            return;
-        }
         KeyguardUpdateMonitor.getInstance(mContext).registerCallback(mCallback);
     }
 
@@ -131,7 +134,7 @@ public class CarrierText extends TextView {
      * @param spn
      * @return
      */
-    protected CharSequence getCarrierTextForSimState(IccCardConstants.State simState,
+    private CharSequence getCarrierTextForSimState(IccCardConstants.State simState,
             CharSequence plmn, CharSequence spn) {
         CharSequence carrierText = null;
         StatusMode status = getStatusForIccState(simState);
@@ -144,9 +147,9 @@ public class CarrierText extends TextView {
                 carrierText = null; // nothing to display yet.
                 break;
 
-            case PersoLocked:
+            case NetworkLocked:
                 carrierText = makeCarrierStringOnEmergencyCapable(
-                        getContext().getText(R.string.keyguard_perso_locked_message), plmn);
+                        mContext.getText(R.string.keyguard_network_locked_message), plmn);
                 break;
 
             case SimMissing:
@@ -181,12 +184,6 @@ public class CarrierText extends TextView {
                         getContext().getText(R.string.keyguard_sim_puk_locked_message),
                         plmn);
                 break;
-
-            case SimIoError:
-                carrierText = makeCarrierStringOnEmergencyCapable(
-                        getContext().getText(R.string.lockscreen_sim_error_message_short),
-                        plmn);
-                break;
         }
 
         return carrierText;
@@ -217,13 +214,13 @@ public class CarrierText extends TextView {
                 && (simState == IccCardConstants.State.ABSENT ||
                         simState == IccCardConstants.State.PERM_DISABLED);
 
-        // Assume we're PERSO_LOCKED if not provisioned
-        simState = missingAndNotProvisioned ? IccCardConstants.State.PERSO_LOCKED : simState;
+        // Assume we're NETWORK_LOCKED if not provisioned
+        simState = missingAndNotProvisioned ? IccCardConstants.State.NETWORK_LOCKED : simState;
         switch (simState) {
             case ABSENT:
                 return StatusMode.SimMissing;
-            case PERSO_LOCKED:
-                return StatusMode.PersoLocked;
+            case NETWORK_LOCKED:
+                return StatusMode.SimMissingLocked;
             case NOT_READY:
                 return StatusMode.SimNotReady;
             case PIN_REQUIRED:
@@ -236,8 +233,6 @@ public class CarrierText extends TextView {
                 return StatusMode.SimPermDisabled;
             case UNKNOWN:
                 return StatusMode.SimMissing;
-            case CARD_IO_ERROR:
-                return StatusMode.SimIoError;
         }
         return StatusMode.SimMissing;
     }
@@ -261,7 +256,7 @@ public class CarrierText extends TextView {
         int carrierHelpTextId = 0;
         StatusMode status = getStatusForIccState(simState);
         switch (status) {
-            case PersoLocked:
+            case NetworkLocked:
                 carrierHelpTextId = R.string.keyguard_instructions_when_pattern_disabled;
                 break;
 

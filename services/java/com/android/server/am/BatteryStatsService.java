@@ -36,7 +36,6 @@ import android.util.Slog;
 
 import com.android.internal.app.IBatteryStats;
 import com.android.internal.os.BatteryStatsImpl;
-import com.android.internal.os.DockBatteryStatsImpl;
 import com.android.internal.os.PowerProfile;
 
 import java.io.FileDescriptor;
@@ -51,16 +50,12 @@ public final class BatteryStatsService extends IBatteryStats.Stub {
     static IBatteryStats sService;
     
     final BatteryStatsImpl mStats;
-    // The dock stats only collect statistics about battery (no wakelocks, no counters, ...),
-    // just the dock battery history
-    final BatteryStatsImpl mDockStats;
     Context mContext;
     private boolean mBluetoothPendingStats;
     private BluetoothHeadset mBluetoothHeadset;
 
-    BatteryStatsService(String filename, String dockfilename) {
+    BatteryStatsService(String filename) {
         mStats = new BatteryStatsImpl(filename);
-        mDockStats = new DockBatteryStatsImpl(dockfilename);
     }
     
     public void publish(Context context) {
@@ -76,9 +71,6 @@ public final class BatteryStatsService extends IBatteryStats.Stub {
         Slog.w("BatteryStats", "Writing battery stats before shutdown...");
         synchronized (mStats) {
             mStats.shutdownLocked();
-        }
-        synchronized (mDockStats) {
-            mDockStats.shutdownLocked();
         }
     }
     
@@ -112,37 +104,6 @@ public final class BatteryStatsService extends IBatteryStats.Stub {
         return data;
     }
     
-    /**
-     * @hide
-     */
-    @Override
-    public byte[] getDockStatistics() {
-        mContext.enforceCallingPermission(
-                android.Manifest.permission.BATTERY_STATS, null);
-        //Slog.i("foo", "SENDING BATTERY INFO:");
-        //mStats.dumpLocked(new LogPrinter(Log.INFO, "foo", Log.LOG_ID_SYSTEM));
-        Parcel out = Parcel.obtain();
-        mDockStats.writeToParcel(out, 0);
-        byte[] data = out.marshall();
-        out.recycle();
-        return data;
-    }
-
-    /**
-     * @hide
-     */
-    @Override
-    public void resetStatistics() {
-        mContext.enforceCallingPermission(
-                android.Manifest.permission.RESET_BATTERY_STATS, null);
-        synchronized (mStats) {
-            mStats.resetAllStatsLocked();
-        }
-        synchronized (mDockStats) {
-            mDockStats.resetAllStatsLocked();
-        }
-    }
-
     public void noteStartWakelock(int uid, int pid, String name, int type) {
         enforceCallingPermission();
         synchronized (mStats) {
@@ -531,32 +492,6 @@ public final class BatteryStatsService extends IBatteryStats.Stub {
         return mStats.getAwakeTimePlugged();
     }
 
-    /** @hide **/
-    public boolean isDockOnBattery() {
-        return mDockStats.isOnBattery();
-    }
-
-    /** @hide **/
-    public void setDockBatteryState(int status, int health, int plugType, int level,
-            int temp, int volt) {
-        enforceCallingPermission();
-        mDockStats.setBatteryState(status, health, plugType, level, temp, volt);
-    }
-
-    /** @hide **/
-    public long getDockAwakeTimeBattery() {
-        mContext.enforceCallingOrSelfPermission(
-                android.Manifest.permission.BATTERY_STATS, null);
-        return mDockStats.getAwakeTimeBattery();
-    }
-
-    /** @hide **/
-    public long getDockAwakeTimePlugged() {
-        mContext.enforceCallingOrSelfPermission(
-                android.Manifest.permission.BATTERY_STATS, null);
-        return mDockStats.getAwakeTimePlugged();
-    }
-
     public void enforceCallingPermission() {
         if (Binder.getCallingPid() == Process.myPid()) {
             return;
@@ -603,14 +538,12 @@ public final class BatteryStatsService extends IBatteryStats.Stub {
                 } else if ("--reset".equals(arg)) {
                     synchronized (mStats) {
                         mStats.resetAllStatsLocked();
-                        mDockStats.resetAllStatsLocked();
                         pw.println("Battery stats reset.");
                         noOutput = true;
                     }
                 } else if ("--write".equals(arg)) {
                     synchronized (mStats) {
                         mStats.writeSyncLocked();
-                        mDockStats.writeSyncLocked();
                         pw.println("Battery stats written.");
                         noOutput = true;
                     }
@@ -644,15 +577,9 @@ public final class BatteryStatsService extends IBatteryStats.Stub {
             synchronized (mStats) {
                 mStats.dumpCheckinLocked(pw, apps, isUnpluggedOnly, includeHistory);
             }
-            synchronized (mDockStats) {
-                mDockStats.dumpCheckinLocked(pw, apps, isUnpluggedOnly, includeHistory);
-            }
         } else {
             synchronized (mStats) {
                 mStats.dumpLocked(pw, isUnpluggedOnly, reqUid);
-            }
-            synchronized (mDockStats) {
-                mDockStats.dumpLocked(pw, isUnpluggedOnly, reqUid);
             }
         }
     }

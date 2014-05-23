@@ -63,6 +63,7 @@ public class StatusBarWindowView extends FrameLayout
         mExpandHelper = new ExpandHelper(mContext, latestItems, minHeight, maxHeight);
         mExpandHelper.setEventSource(this);
         mExpandHelper.setScrollView(mScrollView);
+        mExpandHelper.onAttachToWindow();
 
         // We really need to be able to animate while window animations are going on
         // so that activities may be started asynchronously from panel animations
@@ -70,6 +71,12 @@ public class StatusBarWindowView extends FrameLayout
         if (root != null) {
             root.setDrawDuringWindowsAnimating(true);
         }
+    }
+
+    @Override
+    protected void onDetachedFromWindow() {
+        mExpandHelper.onDetachedFromWindow();
+        super.onDetachedFromWindow();
     }
 
     @Override
@@ -84,7 +91,7 @@ public class StatusBarWindowView extends FrameLayout
         boolean down = event.getAction() == KeyEvent.ACTION_DOWN;
         switch (event.getKeyCode()) {
         case KeyEvent.KEYCODE_BACK:
-            if (!down && !event.isCanceled()) {
+            if (!down) {
                 mService.animateCollapsePanels();
             }
             return true;

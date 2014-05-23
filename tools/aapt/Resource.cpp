@@ -124,13 +124,13 @@ public:
             String8 leaf(group->getLeaf());
             mLeafName = String8(leaf);
             mParams = file->getGroupEntry().toParams();
-            NOISY(printf("Dir %s: mcc=%d mnc=%d lang=%c%c cnt=%c%c orient=%d uiTheme=%d ui=%d density=%d touch=%d key=%d inp=%d nav=%d\n",
+            NOISY(printf("Dir %s: mcc=%d mnc=%d lang=%c%c cnt=%c%c orient=%d uiInverted=%d ui=%d density=%d touch=%d key=%d inp=%d nav=%d\n",
                    group->getPath().string(), mParams.mcc, mParams.mnc,
                    mParams.language[0] ? mParams.language[0] : '-',
                    mParams.language[1] ? mParams.language[1] : '-',
                    mParams.country[0] ? mParams.country[0] : '-',
                    mParams.country[1] ? mParams.country[1] : '-',
-                   mParams.orientation, mParams.uiThemeMode, mParams.uiMode,
+                   mParams.orientation, mParams.uiInvertedMode, mParams.uiMode,
                    mParams.density, mParams.touchscreen, mParams.keyboard,
                    mParams.inputFlags, mParams.navigation));
             mPath = "res";
@@ -178,7 +178,7 @@ bool isValidResourceType(const String8& type)
         || type == "color" || type == "menu" || type == "mipmap";
 }
 
-sp<AaptFile> getResourceFile(const sp<AaptAssets>& assets, bool makeIfNecessary)
+static sp<AaptFile> getResourceFile(const sp<AaptAssets>& assets, bool makeIfNecessary=true)
 {
     sp<AaptGroup> group = assets->getFiles().valueFor(String8("resources.arsc"));
     sp<AaptFile> file;

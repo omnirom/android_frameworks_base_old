@@ -405,8 +405,6 @@ setup_failure:
     }
 
     if (lpVisualizer) {
-        env->DeleteGlobalRef(lpJniStorage->mCallbackData.visualizer_class);
-        env->DeleteGlobalRef(lpJniStorage->mCallbackData.visualizer_ref);
         delete lpVisualizer;
     }
     env->SetIntField(thiz, fields.fidNativeVisualizer, 0);

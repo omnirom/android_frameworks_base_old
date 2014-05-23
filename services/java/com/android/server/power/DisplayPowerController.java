@@ -25,12 +25,13 @@ import com.android.server.display.DisplayManagerService;
 
 import android.animation.Animator;
 import android.animation.ObjectAnimator;
+import android.app.KeyguardManager;
 import android.content.ComponentName;
 import android.content.ContentResolver;
 import android.content.Context;
+import android.database.ContentObserver;
 import android.content.Intent;
 import android.content.ServiceConnection;
-import android.database.ContentObserver;
 import android.content.res.Resources;
 import android.graphics.Bitmap;
 import android.hardware.Sensor;
@@ -44,8 +45,6 @@ import android.os.Looper;
 import android.os.Message;
 import android.os.PowerManager;
 import android.os.SystemClock;
-import android.os.UserHandle;
-import android.provider.Settings;
 import android.os.UserHandle;
 import android.provider.Settings;
 import android.text.format.DateUtils;
@@ -196,7 +195,6 @@ final class DisplayPowerController {
     private final DisplayBlanker mDisplayBlanker;
 
     // Our context
-    // Used also in lockscreen blur
     private final Context mContext;
 
     // Our handler.
@@ -251,16 +249,10 @@ final class DisplayPowerController {
 
     // True if we should fade the screen while turning it off, false if we should play
     // a stylish electron beam animation instead.
-    private boolean mElectronBeamFadesConfig() {
-        return Settings.System.getInt(mContext.getContentResolver(),
-                Settings.System.SCREEN_ANIMATION_STYLE, 0) == 1;
-    }
+    private boolean mElectronBeamFadesConfig;
 
-    // True if we should allow showing the screen-off animation
-    private boolean useScreenOffAnimation() {
-        return Settings.System.getInt(mContext.getContentResolver(),
-                Settings.System.SCREEN_OFF_ANIMATION, 1) == 1;
-    }
+    // Override config for ElectronBeam
+    private int mElectronBeamMode;
 
     // The pending power request.
     // Initially null until the first call to requestPowerState.
@@ -390,21 +382,23 @@ final class DisplayPowerController {
     private boolean mAutoBrightnessSettingsChanged;
 
     private KeyguardServiceWrapper mKeyguardService;
-
+    
     private final ServiceConnection mKeyguardConnection = new ServiceConnection() {
         @Override
         public void onServiceConnected(ComponentName name, IBinder service) {
+            if (DEBUG) Log.v(TAG, "*** Keyguard connected (yay!)");
             mKeyguardService = new KeyguardServiceWrapper(
                     IKeyguardService.Stub.asInterface(service));
         }
 
         @Override
         public void onServiceDisconnected(ComponentName name) {
+            if (DEBUG) Log.v(TAG, "*** Keyguard disconnected (boo!)");
             mKeyguardService = null;
         }
 
     };
-
+    
     /**
      * Creates the display power controller.
      */
@@ -413,6 +407,7 @@ final class DisplayPowerController {
             DisplayManagerService displayManager,
             SuspendBlocker displaySuspendBlocker, DisplayBlanker displayBlanker,
             Callbacks callbacks, Handler callbackHandler) {
+
         mContext = context;
         mHandler = new DisplayControllerHandler(looper);
         mNotifier = notifier;
@@ -420,7 +415,7 @@ final class DisplayPowerController {
         mDisplayBlanker = displayBlanker;
         mCallbacks = callbacks;
         mCallbackHandler = callbackHandler;
-	
+
         mLights = lights;
         mTwilight = twilight;
         mSensorManager = sensorManager;
@@ -469,6 +464,9 @@ final class DisplayPowerController {
             updateAutomaticBrightnessSettings();
         }
 
+        mElectronBeamFadesConfig = resources.getBoolean(
+                com.android.internal.R.bool.config_animateScreenLights);
+
         if (!DEBUG_PRETEND_PROXIMITY_SENSOR_ABSENT) {
             mProximitySensor = mSensorManager.getDefaultSensor(Sensor.TYPE_PROXIMITY);
             if (mProximitySensor != null) {
@@ -485,11 +483,16 @@ final class DisplayPowerController {
         if (mUseSoftwareAutoBrightnessConfig && USE_TWILIGHT_ADJUSTMENT) {
             mTwilight.registerListener(mTwilightListener, mHandler);
         }
+        
 
-	Intent intent = new Intent();
+        Intent intent = new Intent();
         intent.setClassName("com.android.keyguard", "com.android.keyguard.KeyguardService");
-        context.bindServiceAsUser(intent, mKeyguardConnection,
-                Context.BIND_AUTO_CREATE, UserHandle.OWNER);
+        if (!context.bindServiceAsUser(intent, mKeyguardConnection,
+                Context.BIND_AUTO_CREATE, UserHandle.OWNER)) {
+            Log.e(TAG, "*** Keyguard: can't bind to keyguard");
+        } else {
+            Log.e(TAG, "*** Keyguard started");
+        }
     }
 
     private void updateAutomaticBrightnessSettings() {
@@ -610,11 +613,6 @@ final class DisplayPowerController {
      */
     public boolean requestPowerState(DisplayPowerRequest request,
             boolean waitForNegativeProximity) {
-
-	// Lockscreen blur
-	final int MAX_BLUR_WIDTH = 900;
-        final int MAX_BLUR_HEIGHT = 1600;
-
         if (DEBUG) {
             Slog.d(TAG, "requestPowerState: "
                     + request + ", waitForNegativeProximity=" + waitForNegativeProximity);
@@ -641,33 +639,23 @@ final class DisplayPowerController {
                 mDisplayReadyLocked = false;
             }
 
-	    boolean seeThrough = Settings.System.getInt(mContext.getContentResolver(),
-                    Settings.System.LOCKSCREEN_SEE_THROUGH, 0) == 1;
-            int blurRadius = Settings.System.getInt(mContext.getContentResolver(),
-                    Settings.System.LOCKSCREEN_BLUR_RADIUS, 12);
             if (changed && !mPendingRequestChangedLocked) {
-		if ((mKeyguardService == null || !mKeyguardService.isShowing()) &&
-                            request.screenState == DisplayPowerRequest.SCREEN_STATE_OFF &&
-                            seeThrough && blurRadius > 0) {
-                    DisplayInfo di = mDisplayManager
-                            .getDisplayInfo(mDisplayManager.getDisplayIds() [0]);
-                    /* Limit max screenshot capture layer to 22000.
-                       Prevents status bar and navigation bar from being captured.*/ 
-                    Bitmap bmp = SurfaceControl
-                            .screenshot(di.getNaturalWidth(),di.getNaturalHeight(), 0, 22000);
-                    if (bmp != null) {
-                        Bitmap tmpBmp = bmp;
-
-                        // scale image if its too large
-                        if (bmp.getWidth() > MAX_BLUR_WIDTH) {
-                            tmpBmp = bmp.createScaledBitmap(bmp, MAX_BLUR_WIDTH, MAX_BLUR_HEIGHT, true);
-                        }
-
-                        mKeyguardService.setBackgroundBitmap(tmpBmp);
-                        bmp.recycle();
-                        tmpBmp.recycle();
+                if ((mKeyguardService == null || !mKeyguardService.isShowing()) && request.screenState == DisplayPowerRequest.SCREEN_STATE_OFF &&
+                        Settings.System.getInt(mContext.getContentResolver(), Settings.System.LOCKSCREEN_BLUR_BEHIND, 0) == 1) {
+                    DisplayInfo di = mDisplayManager.getDisplayInfo(mDisplayManager.getDisplayIds()[0]);
+                    // Up to 22000, the layers seem to be used by apps. Everything above that is systemui or a system alert
+                    // and we don't want these on our screenshot.
+                    final Bitmap bmp = SurfaceControl.screenshot(di.getNaturalWidth(), di.getNaturalHeight(), 0, 22000);
+                    if(bmp != null) {
+                        mHandler.post(new Runnable() {
+                             @Override
+                             public void run() {
+                                mKeyguardService.setBackgroundBitmap(bmp);
+                                bmp.recycle();
+                            }
+                        });
                     }
-                } else if (mKeyguardService != null && (!seeThrough || blurRadius == 0)) mKeyguardService.setBackgroundBitmap(null);
+                }
                 mPendingRequestChangedLocked = true;
                 sendUpdatePowerStateLocked();
             }
@@ -693,7 +681,8 @@ final class DisplayPowerController {
 
     private void initialize() {
         mPowerState = new DisplayPowerState(
-                new ElectronBeam(mDisplayManager), mDisplayBlanker,
+                new ElectronBeam(mDisplayManager, mElectronBeamMode),
+                mDisplayBlanker,
                 mLights.getLight(LightsService.LIGHT_ID_BACKLIGHT));
 
         mElectronBeamOnAnimator = ObjectAnimator.ofFloat(
@@ -768,6 +757,12 @@ final class DisplayPowerController {
             }
 
             mustNotify = !mDisplayReadyLocked;
+        }
+
+	// update crt mode settings and force initialize if value changed
+        if (mElectronBeamMode != mPowerRequest.electronBeamMode) {
+            mElectronBeamMode = mPowerRequest.electronBeamMode;
+            mustInitialize = true;
         }
 
         // Initialize things the first time the power state is changed.
@@ -867,9 +862,9 @@ final class DisplayPowerController {
                                 if (mPowerState.getElectronBeamLevel() == 1.0f) {
                                     mPowerState.dismissElectronBeam();
                                 } else if (mPowerState.prepareElectronBeam(
-                                        mElectronBeamFadesConfig() ?
+                                        mElectronBeamFadesConfig ?
                                                 ElectronBeam.MODE_FADE :
-                                                ElectronBeam.MODE_WARM_UP)) {
+                                                        ElectronBeam.MODE_WARM_UP)) {
                                     mElectronBeamOnAnimator.start();
                                 } else {
                                     mElectronBeamOnAnimator.end();
@@ -890,11 +885,14 @@ final class DisplayPowerController {
                             setScreenOn(false);
                             unblockScreenOn();
                         } else if (mPowerState.prepareElectronBeam(
-                                mElectronBeamFadesConfig() ?
+                                //mElectronBeamFadesConfig ?
+				mElectronBeamMode == 0 ?
                                         ElectronBeam.MODE_FADE :
-                                        ElectronBeam.MODE_COOL_DOWN)
+                                        (mElectronBeamMode == 4
+                                            ? ElectronBeam.MODE_SCALE_DOWN
+                                            : ElectronBeam.MODE_COOL_DOWN))
                                 && mPowerState.isScreenOn()
-                                && useScreenOffAnimation()) {
+                                /*&& useScreenOffAnimation()*/) {
                             mElectronBeamOffAnimator.start();
                         } else {
                             mElectronBeamOffAnimator.end();
@@ -1168,10 +1166,13 @@ final class DisplayPowerController {
                         + ", mAmbientLux=" + mAmbientLux);
             }
             updateAutoBrightness(true);
+            return;
+        }
 
         // Determine whether the ambient environment appears to be brightening.
-        } else if (mRecentShortTermAverageLux > mBrighteningLuxThreshold
-                && mRecentLongTermAverageLux > mBrighteningLuxThreshold) {
+        float brighteningLuxThreshold = mAmbientLux * (1.0f + BRIGHTENING_LIGHT_HYSTERESIS);
+        if (mRecentShortTermAverageLux > brighteningLuxThreshold
+                && mRecentLongTermAverageLux > brighteningLuxThreshold) {
             long debounceDelay;
 
             if (mRecentShortTermAverageLux - mRecentLongTermAverageLux > BRIGHTENING_FAST_THRESHOLD) {
@@ -1180,52 +1181,70 @@ final class DisplayPowerController {
                 debounceDelay = BRIGHTENING_LIGHT_DEBOUNCE;
             }
             debounceDelay = (long) (mPowerRequest.responsitivityFactor * debounceDelay);
-
             if (mDebounceLuxDirection <= 0) {
                 mDebounceLuxDirection = 1;
                 mDebounceLuxTime = time;
                 if (DEBUG) {
                     Slog.d(TAG, "updateAmbientLux: Possibly brightened, waiting for "
                             + debounceDelay + " ms: "
-                            + "brighteningLuxThreshold=" + mBrighteningLuxThreshold
+                            + "brighteningLuxThreshold=" + brighteningLuxThreshold
                             + ", mRecentShortTermAverageLux=" + mRecentShortTermAverageLux
                             + ", mRecentLongTermAverageLux=" + mRecentLongTermAverageLux
                             + ", mAmbientLux=" + mAmbientLux);
                 }
             }
+
             long debounceTime = mDebounceLuxTime + debounceDelay;
-            if (time < debounceTime) {
+
+            if (time >= debounceTime) {
+                mAmbientLux = mRecentShortTermAverageLux;
+                if (DEBUG) {
+                    Slog.d(TAG, "updateAmbientLux: Brightened: "
+                            + "brighteningLuxThreshold=" + brighteningLuxThreshold
+                            + ", mRecentShortTermAverageLux=" + mRecentShortTermAverageLux
+                            + ", mRecentLongTermAverageLux=" + mRecentLongTermAverageLux
+                            + ", mAmbientLux=" + mAmbientLux);
+                }
+                updateAutoBrightness(true);
+            } else {
                 mHandler.sendEmptyMessageAtTime(MSG_LIGHT_SENSOR_DEBOUNCED, debounceTime);
                 return;
             }
-            setAmbientLux(mRecentShortTermAverageLux);
-            if (DEBUG) {
-                Slog.d(TAG, "updateAmbientLux: Brightened: "
-                        + "mBrighteningLuxThreshold=" + mBrighteningLuxThreshold
-                        + ", mRecentShortTermAverageLux=" + mRecentShortTermAverageLux
-                        + ", mRecentLongTermAverageLux=" + mRecentLongTermAverageLux
-                        + ", mAmbientLux=" + mAmbientLux);
-            }
-            updateAutoBrightness(true);
-        } else if (mRecentShortTermAverageLux < mDarkeningLuxThreshold
-                && mRecentLongTermAverageLux < mDarkeningLuxThreshold) {
+            return;
+        }
+
+        // Determine whether the ambient environment appears to be darkening.
+        float darkeningLuxThreshold = mAmbientLux * (1.0f - DARKENING_LIGHT_HYSTERESIS);
+        if (mRecentShortTermAverageLux < darkeningLuxThreshold
+                && mRecentLongTermAverageLux < darkeningLuxThreshold) {
             long debounceDelay = (long)
                     (mPowerRequest.responsitivityFactor * DARKENING_LIGHT_DEBOUNCE);
-            // The ambient environment appears to be darkening.
             if (mDebounceLuxDirection >= 0) {
                 mDebounceLuxDirection = -1;
                 mDebounceLuxTime = time;
                 if (DEBUG) {
                     Slog.d(TAG, "updateAmbientLux: Possibly darkened, waiting for "
                             + debounceDelay + " ms: "
-                            + "mDarkeningLuxThreshold=" + mDarkeningLuxThreshold
+                            + "darkeningLuxThreshold=" + darkeningLuxThreshold
                             + ", mRecentShortTermAverageLux=" + mRecentShortTermAverageLux
                             + ", mRecentLongTermAverageLux=" + mRecentLongTermAverageLux
                             + ", mAmbientLux=" + mAmbientLux);
                 }
             }
             long debounceTime = mDebounceLuxTime + debounceDelay;
-            if (time < debounceTime) {
+            if (time >= debounceTime) {
+                // Be conservative about reducing the brightness, only reduce it a little bit
+                // at a time to avoid having to bump it up again soon.
+                mAmbientLux = Math.max(mRecentShortTermAverageLux, mRecentLongTermAverageLux);
+                if (DEBUG) {
+                    Slog.d(TAG, "updateAmbientLux: Darkened: "
+                            + "darkeningLuxThreshold=" + darkeningLuxThreshold
+                            + ", mRecentShortTermAverageLux=" + mRecentShortTermAverageLux
+                            + ", mRecentLongTermAverageLux=" + mRecentLongTermAverageLux
+                            + ", mAmbientLux=" + mAmbientLux);
+                }
+                updateAutoBrightness(true);
+            } else {
                 mHandler.sendEmptyMessageAtTime(MSG_LIGHT_SENSOR_DEBOUNCED, debounceTime);
                 return;
             }
@@ -1254,16 +1273,13 @@ final class DisplayPowerController {
             }
         }
 
-        // Now that we've done all of that, we haven't yet posted a debounce
-        // message. So consider the case where current lux is beyond the
-        // threshold. It's possible that the light sensor may not report values
-        // if the light level does not change, so we need to occasionally
-        // synthesize sensor readings in order to make sure the brightness is
-        // adjusted accordingly. Note these thresholds may have changed since
-        // we entered the function because we called setAmbientLux and
-        // updateAutoBrightness along the way.
-        if (mLastObservedLux > mBrighteningLuxThreshold
-                || mLastObservedLux < mDarkeningLuxThreshold) {
+        // If the light level does not change, then the sensor may not report
+        // a new value.  This can cause problems for the auto-brightness algorithm
+        // because the filters might not be updated.  To work around it, we want to
+        // make sure to update the filters whenever the observed light level could
+        // possibly exceed one of the hysteresis thresholds.
+        if (mLastObservedLux > brighteningLuxThreshold
+                || mLastObservedLux < darkeningLuxThreshold) {
             long synthesizedDelay = (long)
                     (mPowerRequest.responsitivityFactor * SYNTHETIC_LIGHT_SENSOR_RATE_MILLIS);
             mHandler.sendEmptyMessageAtTime(MSG_LIGHT_SENSOR_DEBOUNCED, time + synthesizedDelay);
@@ -1592,4 +1608,9 @@ final class DisplayPowerController {
             updatePowerState();
         }
     };
+
+    //private boolean useScreenOffAnimation() {
+    //    return Settings.System.getInt(mContext.getContentResolver(),
+    //            Settings.System.SCREEN_OFF_ANIMATION, 1) == 1;
+    //}
 }

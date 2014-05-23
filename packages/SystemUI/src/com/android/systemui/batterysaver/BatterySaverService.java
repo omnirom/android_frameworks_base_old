@@ -40,7 +40,6 @@ import android.telephony.TelephonyManager;
 import android.util.Log;
 import android.widget.Toast;
 
-import com.android.systemui.BatteryMeterView.BatteryMeterMode;
 import com.android.systemui.R;
 import com.android.systemui.statusbar.policy.BatteryController;
 import com.android.systemui.statusbar.policy.BatteryController.BatteryStateChangeCallback;
@@ -516,7 +515,7 @@ public class BatterySaverService extends Service implements BluetoothConnectionC
     }
 
     @Override
-    public void onBatteryLevelChanged(boolean present, int level, boolean pluggedIn, int status) {
+    public void onBatteryLevelChanged(int level, boolean pluggedIn) {
         if (!mBatterySaverEnabled) return;
         if (mSmartBatteryEnabled) {
             if (!pluggedIn && (level < mLowBatteryLevel)) {
@@ -529,16 +528,6 @@ public class BatterySaverService extends Service implements BluetoothConnectionC
                 mBatteryLowEvent = false;
             }
         }
-    }
-
-    @Override
-    public void onBatteryMeterModeChanged(BatteryMeterMode mode) {
-        if (!mBatterySaverEnabled) return;
-    }
-    
-    @Override
-    public void onBatteryMeterShowPercent(boolean showPercent) {
-        if (!mBatterySaverEnabled) return;
     }
 
     @Override

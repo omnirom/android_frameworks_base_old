@@ -40,13 +40,13 @@ import android.content.res.AssetManager;
 import android.content.res.CompatibilityInfo;
 import android.content.res.Configuration;
 import android.content.res.CustomTheme;
+import android.content.res.PackageRedirectionMap;
 import android.content.res.Resources;
 import android.database.sqlite.SQLiteDatabase;
 import android.database.sqlite.SQLiteDebug;
 import android.database.sqlite.SQLiteDebug.DbStats;
 import android.graphics.Bitmap;
 import android.graphics.Canvas;
-import android.graphics.Typeface;
 import android.hardware.display.DisplayManagerGlobal;
 import android.net.IConnectivityManager;
 import android.net.Proxy;
@@ -101,7 +101,6 @@ import com.android.internal.os.BinderInternal;
 import com.android.internal.os.RuntimeInit;
 import com.android.internal.os.SamplingProfilerIntegration;
 import com.android.internal.util.FastPrintWriter;
-import com.android.internal.util.Objects;
 import com.android.org.conscrypt.OpenSSLSocketImpl;
 import com.google.android.collect.Lists;
 
@@ -117,6 +116,7 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Locale;
 import java.util.Map;
+import java.util.Objects;
 import java.util.TimeZone;
 import java.util.regex.Pattern;
 
@@ -232,7 +232,7 @@ public final class ActivityThread {
         public boolean equals(Object o) {
             if (o instanceof ProviderKey) {
                 final ProviderKey other = (ProviderKey) o;
-                return Objects.equal(authority, other.authority) && userId == other.userId;
+                return Objects.equals(authority, other.authority) && userId == other.userId;
             }
             return false;
         }
@@ -1539,11 +1539,11 @@ public final class ActivityThread {
     /**
      * Creates the top level resources for the given package.
      */
-    Resources getTopLevelResources(String resDir, String[] overlayDirs,
+    Resources getTopLevelResources(String resDir,
             int displayId, Configuration overrideConfiguration,
-            LoadedApk pkgInfo, Context context) {
-        return mResourcesManager.getTopLevelResources(resDir, overlayDirs, displayId, pkgInfo.mPackageName,
-                overrideConfiguration, pkgInfo.getCompatibilityInfo(), null, context);
+            LoadedApk pkgInfo) {
+        return mResourcesManager.getTopLevelResources(resDir, displayId, overrideConfiguration,
+                pkgInfo.getCompatibilityInfo(), null);
     }
 
     final Handler getHandler() {
@@ -2817,12 +2817,7 @@ public final class ActivityThread {
                 r.stopped = false;
                 r.state = null;
             } catch (Exception e) {
-                /*if (!mInstrumentation.onException(r.activity, e)) {
-                    throw new RuntimeException(
-                        "Unable to resume activity "
-                        + r.intent.getComponent().toShortString()
-                        + ": " + e.toString(), e);
-                }*/
+                // Unable to resume activity
             }
         }
         return r;
@@ -3981,10 +3976,8 @@ public final class ActivityThread {
         if (configDiff != 0) {
             // Ask text layout engine to free its caches if there is a locale change
             boolean hasLocaleConfigChange = ((configDiff & ActivityInfo.CONFIG_LOCALE) != 0);
-            boolean hasThemeConfigChange = ((configDiff & ActivityInfo.CONFIG_THEME_RESOURCE) != 0);
-            if (hasLocaleConfigChange || hasThemeConfigChange) {
+            if (hasLocaleConfigChange) {
                 Canvas.freeTextLayoutCaches();
-                Typeface.recreateDefaults();
                 if (DEBUG_CONFIGURATION) Slog.v(TAG, "Cleared TextLayout Caches");
             }
         }

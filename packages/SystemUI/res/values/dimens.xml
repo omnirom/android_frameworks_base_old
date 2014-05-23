@@ -78,7 +78,7 @@
     <dimen name="status_bar_icon_size">@*android:dimen/status_bar_icon_size</dimen>
 
     <!-- Height of a small notification in the status bar -->
-    <dimen name="notification_min_height">64dp</dimen>
+    <dimen name="notification_min_height">72dp</dimen>
 
     <!-- Height of a large notification in the status bar -->
     <dimen name="notification_max_height">256dp</dimen>
@@ -111,7 +111,7 @@
     <!-- Minimum final velocity of gestures interpreted as collapse requests -->
     <dimen name="fling_collapse_min_velocity">100dp</dimen>
     <!-- Cap on contribution of x dimension of gesture to overall velocity -->
-    <dimen name="fling_gesture_max_x_velocity">400dp</dimen>
+    <dimen name="fling_gesture_max_x_velocity">300dp</dimen>
     <!-- Cap on overall resulting fling speed (s^-1) -->
     <dimen name="fling_gesture_max_output_velocity">4000dp</dimen>
 
@@ -161,6 +161,12 @@
 
     <!-- Height of the notification panel header bar -->
     <dimen name="notification_panel_header_height">48dp</dimen>
+
+    <!-- Height of the notification panel brightness slider -->
+    <dimen name="notification_panel_brightness_height">42dp</dimen>
+
+    <!-- Height of the notification panel widget bar -->
+    <dimen name="notification_panel_widget_height">48dp</dimen>
 
     <!-- Extra space above the panel -->
     <dimen name="notification_panel_padding_top">0dp</dimen>
@@ -212,10 +218,8 @@
 
     <!-- Quick Settings tile geometry: top interior margin, above icon -->
     <dimen name="qs_tile_margin_above_icon">27dp</dimen>
-    <!-- Quick Settings tile geometry: gap between icon and text -->
+    <!-- Quick Settings tile geometry: gap between icon and text 3 per row-->
     <dimen name="qs_tile_margin_below_icon">17dp</dimen>
-    <!-- Quick Settings tile geometry: interior margin, above and below icon (ribbon mode) -->
-    <dimen name="qs_tile_ribbon_icon_margin">16dp</dimen>
     <!-- Quick Settings tile geometry: icon size -->
     <dimen name="qs_tile_icon_size">32dp</dimen>
     <!-- Quick Settings CA Cert Warning tile geometry: gap between icon and text -->
@@ -226,6 +230,18 @@
 
     <!-- used by DessertCase -->
     <dimen name="dessert_case_cell_size">192dp</dimen>
+
+    <!-- Quick Settings tile geometry: gap between icon and text 4 per row-->
+    <dimen name="qs_4_column_text_padding">14dp</dimen>
+    <!-- Quick Settings tile geometry: gap between icon and text 5 per row-->
+    <dimen name="qs_5_column_text_padding">12dp</dimen>
+
+    <!-- Quick Settings tile geometry: text size for 3 tile per row-->
+    <dimen name="qs_3_column_text_size">12sp</dimen>
+    <!-- Quick Settings tile geometry: text size for 4 tile per row-->
+    <dimen name="qs_4_column_text_size">10sp</dimen>
+    <!-- Quick Settings tile geometry: text size for 5 tile per row-->
+    <dimen name="qs_5_column_text_size">9sp</dimen>
 
     <!-- Padding under status bar battery icon -->
     <dimen name="status_bar_battery_bottom_padding">1px</dimen>
@@ -266,5 +282,5 @@
     <dimen name="recent_thumbnail_height">140dp</dimen>
     <dimen name="recent_header_width">120dp</dimen>
     <dimen name="recent_text_size">20dp</dimen>
-    <dimen name="recent_thumbnail_bottom_padding">3dp</dimen>
+    <dimen name="recent_thumbnail_bottom_padding">4dp</dimen>
 </resources>

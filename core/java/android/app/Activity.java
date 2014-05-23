@@ -64,8 +64,8 @@ import android.util.AttributeSet;
 import android.util.EventLog;
 import android.util.DisplayMetrics;
 import android.util.Log;
-import android.util.PrintWriterPrinter;
 import android.util.TypedValue;
+import android.util.PrintWriterPrinter;
 import android.util.Slog;
 import android.util.SparseArray;
 import android.view.ActionMode;
@@ -662,7 +662,7 @@ public class Activity extends ContextThemeWrapper
     private static final boolean DEBUG_LIFECYCLE = false;
 
     /** Standard activity result: operation canceled. */
-    public static final int RESULT_CANCELED     = 0;
+    public static final int RESULT_CANCELED    = 0;
     /** Standard activity result: operation succeeded. */
     public static final int RESULT_OK           = -1;
     /** Start of user-defined activity results. */
@@ -721,9 +721,8 @@ public class Activity extends ContextThemeWrapper
         ArrayList<Fragment> fragments;
         ArrayMap<String, LoaderManagerImpl> loaders;
     }
-
     /* package */ NonConfigurationInstances mLastNonConfigurationInstances;
-
+    
     private Window mWindow;
 
     private WindowManager mWindowManager;
@@ -732,6 +731,7 @@ public class Activity extends ContextThemeWrapper
     /*package*/ boolean mVisibleFromServer = false;
     /*package*/ boolean mVisibleFromClient = true;
     /*package*/ ActionBarImpl mActionBar = null;
+    private boolean mActionBarShowHideAnimationEnabled;
     private boolean mEnableDefaultActionBarUp;
 
     private CharSequence mTitle;
@@ -744,10 +744,10 @@ public class Activity extends ContextThemeWrapper
             return Activity.this.findViewById(id);
         }
     };
-
+    
     ArrayMap<String, LoaderManagerImpl> mAllLoaderManagers;
     LoaderManagerImpl mLoaderManager;
-
+    
     private static final class ManagedCursor {
         ManagedCursor(Cursor cursor) {
             mCursor = cursor;
@@ -759,7 +759,6 @@ public class Activity extends ContextThemeWrapper
         private boolean mReleased;
         private boolean mUpdated;
     }
-
     private final ArrayList<ManagedCursor> mManagedCursors =
         new ArrayList<ManagedCursor>();
 
@@ -773,7 +772,7 @@ public class Activity extends ContextThemeWrapper
 
     private int mDefaultKeyMode = DEFAULT_KEYS_DISABLE;
     private SpannableStringBuilder mDefaultKeySsb = null;
-
+    
     protected static final int[] FOCUSED_STATE_SET = {com.android.internal.R.attr.state_focused};
 
     @SuppressWarnings("unused")
@@ -856,7 +855,7 @@ public class Activity extends ContextThemeWrapper
     public final boolean isChild() {
         return mParent != null;
     }
-
+    
     /** Return the parent activity if this view is an embedded child. */
     public final Activity getParent() {
         return mParent;
@@ -890,7 +889,7 @@ public class Activity extends ContextThemeWrapper
         mLoaderManager = getLoaderManager("(root)", mLoadersStarted, true);
         return mLoaderManager;
     }
-
+    
     LoaderManagerImpl getLoaderManager(String who, boolean started, boolean create) {
         if (mAllLoaderManagers == null) {
             mAllLoaderManagers = new ArrayMap<String, LoaderManagerImpl>();
@@ -906,7 +905,7 @@ public class Activity extends ContextThemeWrapper
         }
         return lm;
     }
-
+    
     /**
      * Calls {@link android.view.Window#getCurrentFocus} on the
      * Window of this Activity to return the currently focused view.
@@ -1013,7 +1012,7 @@ public class Activity extends ContextThemeWrapper
             }
         }
     }
-
+    
     /**
      * Restore the state of any saved managed dialogs.
      *
@@ -1137,7 +1136,7 @@ public class Activity extends ContextThemeWrapper
     /**
      * Called after {@link #onCreate} &mdash; or after {@link #onRestart} when  
      * the activity had been stopped, but is now again being displayed to the 
-     * user.  It will be followed by {@link #onResume}.
+	 * user.  It will be followed by {@link #onResume}.
      *
      * <p><em>Derived classes must call through to the super class's
      * implementation of this method.  If they do not, an exception will be
@@ -1151,7 +1150,7 @@ public class Activity extends ContextThemeWrapper
         if (DEBUG_LIFECYCLE) Slog.v(TAG, "onStart " + this);
         setupFloatingActionBar(false);
         mCalled = true;
-
+        
         if (!mLoadersStarted) {
             mLoadersStarted = true;
             if (mLoaderManager != null) {
@@ -1267,6 +1266,7 @@ public class Activity extends ContextThemeWrapper
         final Window win = getWindow();
         if (win != null) win.makeActive();
         if (mActionBar != null) mActionBar.setShowHideAnimationEnabled(true);
+        updateActionBarShowHideAnimation();
         mCalled = true;
     }
 
@@ -1480,7 +1480,7 @@ public class Activity extends ContextThemeWrapper
      */
     protected void onUserLeaveHint() {
     }
-
+    
     /**
      * Generate a new thumbnail for this activity.  This method is called before
      * pausing the activity, and should draw into <var>outBitmap</var> the
@@ -1561,6 +1561,7 @@ public class Activity extends ContextThemeWrapper
     protected void onStop() {
         if (DEBUG_LIFECYCLE) Slog.v(TAG, "onStop " + this);
         if (mActionBar != null) mActionBar.setShowHideAnimationEnabled(false);
+        updateActionBarShowHideAnimation();
         getApplication().dispatchActivityStopped(this);
         mTranslucentCallback = null;
         mCalled = true;
@@ -1598,6 +1599,7 @@ public class Activity extends ContextThemeWrapper
         if (DEBUG_LIFECYCLE) Slog.v(TAG, "onDestroy " + this);
         sendAppEndBroadcast();
         mCalled = true;
+
         // dismiss any dialogs we are managing.
         if (mManagedDialogs != null) {
             final int numDialogs = mManagedDialogs.size();
@@ -1662,11 +1664,11 @@ public class Activity extends ContextThemeWrapper
      * by that attribute, then instead of reporting it the system will stop
      * and restart the activity (to have it launched with the new
      * configuration).
-     *
+     * 
      * <p>At the time that this function has been called, your Resources
      * object will have been updated to return resource values matching the
      * new configuration.
-     *
+     * 
      * @param newConfig The new device configuration.
      */
     public void onConfigurationChanged(Configuration newConfig) {
@@ -1731,7 +1733,7 @@ public class Activity extends ContextThemeWrapper
             mActionBar.onConfigurationChanged(newConfig);
         }
     }
-
+    
     /**
      * If this activity is being destroyed because it can not handle a
      * configuration parameter being changed (and thus its
@@ -1749,7 +1751,7 @@ public class Activity extends ContextThemeWrapper
     public int getChangingConfigurations() {
         return mConfigChangeFlags;
     }
-
+    
     /**
      * Retrieve the non-configuration instance data that was previously
      * returned by {@link #onRetainNonConfigurationInstance()}.  This will
@@ -1776,7 +1778,7 @@ public class Activity extends ContextThemeWrapper
         return mLastNonConfigurationInstances != null
                 ? mLastNonConfigurationInstances.activity : null;
     }
-
+    
     /**
      * Called by the system, as part of destroying an
      * activity due to a configuration change, when it is known that a new
@@ -1832,7 +1834,7 @@ public class Activity extends ContextThemeWrapper
     public Object onRetainNonConfigurationInstance() {
         return null;
     }
-
+    
     /**
      * Retrieve the non-configuration instance data that was previously
      * returned by {@link #onRetainNonConfigurationChildInstances()}.  This will
@@ -1854,7 +1856,7 @@ public class Activity extends ContextThemeWrapper
         return mLastNonConfigurationInstances != null
                 ? mLastNonConfigurationInstances.children : null;
     }
-
+    
     /**
      * This method is similar to {@link #onRetainNonConfigurationInstance()} except that
      * it should return either a mapping from  child activity id strings to arbitrary objects,
@@ -1865,7 +1867,7 @@ public class Activity extends ContextThemeWrapper
     HashMap<String,Object> onRetainNonConfigurationChildInstances() {
         return null;
     }
-
+    
     NonConfigurationInstances retainNonConfigurationInstances() {
         Object activity = onRetainNonConfigurationInstance();
         HashMap<String, Object> children = onRetainNonConfigurationChildInstances();
@@ -1892,7 +1894,7 @@ public class Activity extends ContextThemeWrapper
         if (activity == null && children == null && fragments == null && !retainLoaders) {
             return null;
         }
-
+        
         NonConfigurationInstances nci = new NonConfigurationInstances();
         nci.activity = activity;
         nci.children = children;
@@ -1931,7 +1933,7 @@ public class Activity extends ContextThemeWrapper
             }
         }
     }
-
+    
     /**
      * Called when a Fragment is being attached to this activity, immediately
      * after the call to its {@link Fragment#onAttach Fragment.onAttach()}
@@ -1939,7 +1941,7 @@ public class Activity extends ContextThemeWrapper
      */
     public void onAttachFragment(Fragment fragment) {
     }
-
+    
     /**
      * Wrapper around
      * {@link ContentResolver#query(android.net.Uri , String[], String, String[], String)}
@@ -2103,7 +2105,7 @@ public class Activity extends ContextThemeWrapper
     public View findViewById(int id) {
         return getWindow().findViewById(id);
     }
-
+    
     /**
      * Retrieve a reference to this activity's ActionBar.
      *
@@ -2113,7 +2115,7 @@ public class Activity extends ContextThemeWrapper
         initActionBar();
         return mActionBar;
     }
-
+    
     /**
      * Creates a new ActionBar, locates the inflated ActionBarView,
      * initializes the ActionBar with the view, and sets mActionBar.
@@ -2134,6 +2136,13 @@ public class Activity extends ContextThemeWrapper
 
         mWindow.setDefaultIcon(mActivityInfo.getIconResource());
         mWindow.setDefaultLogo(mActivityInfo.getLogoResource());
+        updateActionBarShowHideAnimation();
+    }
+
+    private void updateActionBarShowHideAnimation() {
+        if (mActionBar != null) {
+            mActionBar.setShowHideAnimationEnabled(mActionBarShowHideAnimationEnabled);
+        }
     }
 
     /**
@@ -2205,7 +2214,7 @@ public class Activity extends ContextThemeWrapper
     public void setFinishOnTouchOutside(boolean finish) {
         mWindow.setCloseOnTouchOutside(finish);
     }
-
+    
     /**
      * Use with {@link #setDefaultKeyMode} to turn off default handling of
      * keys.
@@ -2277,7 +2286,7 @@ public class Activity extends ContextThemeWrapper
      */
     public final void setDefaultKeyMode(int mode) {
         mDefaultKeyMode = mode;
-
+        
         // Some modes use a SpannableStringBuilder to track & dispatch input events
         // This list must remain in sync with the switch in onKeyDown()
         switch (mode) {
@@ -2332,7 +2341,7 @@ public class Activity extends ContextThemeWrapper
             }
             return true;
         }
-
+        
         if (mDefaultKeyMode == DEFAULT_KEYS_DISABLE) {
             return false;
         } else if (mDefaultKeyMode == DEFAULT_KEYS_SHORTCUT) {
@@ -2356,12 +2365,12 @@ public class Activity extends ContextThemeWrapper
 
                     final String str = mDefaultKeySsb.toString();
                     clearSpannable = true;
-
+                    
                     switch (mDefaultKeyMode) {
                     case DEFAULT_KEYS_DIALER:
                         Intent intent = new Intent(Intent.ACTION_DIAL,  Uri.parse("tel:" + str));
                         intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
-                        startActivity(intent);
+                        startActivity(intent);    
                         break;
                     case DEFAULT_KEYS_SEARCH_LOCAL:
                         startSearch(str, false, null, false);
@@ -2425,7 +2434,7 @@ public class Activity extends ContextThemeWrapper
     public boolean onKeyMultiple(int keyCode, int repeatCount, KeyEvent event) {
         return false;
     }
-
+    
     /**
      * Called when the activity has detected the user's press of the back
      * key.  The default implementation simply finishes the current activity,
@@ -2466,9 +2475,10 @@ public class Activity extends ContextThemeWrapper
             finish();
             return true;
         }
+        
         return false;
     }
-
+    
     /**
      * Called when the trackball was moved and not handled by any of the
      * views inside of the activity.  So, for example, if the trackball moves
@@ -2537,7 +2547,7 @@ public class Activity extends ContextThemeWrapper
      */
     public void onUserInteraction() {
     }
-
+    
     public void onWindowAttributesChanged(WindowManager.LayoutParams params) {
         // Update window manager if: we have a view, that view is
         // attached to its parent (which will be a RootView), and
@@ -2582,7 +2592,7 @@ public class Activity extends ContextThemeWrapper
      */
     public void onWindowFocusChanged(boolean hasFocus) {
     }
-
+    
     /**
      * Called when the main window associated with the activity has been
      * attached to the window manager.
@@ -2592,7 +2602,7 @@ public class Activity extends ContextThemeWrapper
      */
     public void onAttachedToWindow() {
     }
-
+    
     /**
      * Called when the main window associated with the activity has been
      * detached from the window manager.
@@ -2602,7 +2612,7 @@ public class Activity extends ContextThemeWrapper
      */
     public void onDetachedFromWindow() {
     }
-
+    
     /**
      * Returns true if this activity's <em>main</em> window currently has window focus.
      * Note that this is not the same as the view itself having focus.
@@ -2621,7 +2631,7 @@ public class Activity extends ContextThemeWrapper
         }
         return false;
     }
-
+    
     /**
      * Called to process key events.  You can override this to intercept all 
      * key events before they are dispatched to the window.  Be sure to call 
@@ -2716,10 +2726,19 @@ public class Activity extends ContextThemeWrapper
              }
         }
 
+	int mHaloEnabled = (Settings.System.getInt(getContentResolver(), Settings.System.HALO_ENABLED, 0));
+
+        if (mIsSplitView && mHaloEnabled != 1) {
+            IWindowManager wm = (IWindowManager) WindowManagerGlobal.getWindowManagerService();
+            try {
+                wm.notifyActivityTouched(mToken, false);
+            } catch (RemoteException e) {
+                Log.e(TAG, "Cannot notify activity touched", e);
+            }
+        }
         if (getWindow().superDispatchTouchEvent(ev)) {
             return true;
         }
-
         return onTouchEvent(ev);
     }
 
@@ -3364,7 +3383,7 @@ public class Activity extends ContextThemeWrapper
                     }
                 }
                 return false;
-
+                
             case Window.FEATURE_CONTEXT_MENU:
                 if(titleCondensed != null) {
                     EventLog.writeEvent(50000, 1, titleCondensed.toString());
@@ -3378,7 +3397,7 @@ public class Activity extends ContextThemeWrapper
                 return false;
         }
     }
-
+    
     /**
      * Default implementation of
      * {@link android.view.Window.Callback#onPanelClosed(int, Menu)} for
@@ -3394,7 +3413,7 @@ public class Activity extends ContextThemeWrapper
                 mFragments.dispatchOptionsMenuClosed(menu);
                 onOptionsMenuClosed(menu);
                 break;
-
+                
             case Window.FEATURE_CONTEXT_MENU:
                 onContextMenuClosed(menu);
                 break;
@@ -3414,7 +3433,7 @@ public class Activity extends ContextThemeWrapper
     public void invalidateOptionsMenu() {
         mWindow.invalidatePanelMenu(Window.FEATURE_OPTIONS_PANEL);
     }
-
+    
     /**
      * Initialize the contents of the Activity's standard options menu.  You
      * should place your menu items in to <var>menu</var>.
@@ -3616,7 +3635,7 @@ public class Activity extends ContextThemeWrapper
             mParent.onOptionsMenuClosed(menu);
         }
     }
-
+    
     /**
      * Programmatically opens the options menu. If the options menu is already
      * open, this method does nothing.
@@ -3624,7 +3643,7 @@ public class Activity extends ContextThemeWrapper
     public void openOptionsMenu() {
         mWindow.openPanel(Window.FEATURE_OPTIONS_PANEL, null);
     }
-
+    
     /**
      * Progammatically closes the options menu. If the options menu is already
      * closed, this method does nothing.
@@ -3662,7 +3681,7 @@ public class Activity extends ContextThemeWrapper
     public void registerForContextMenu(View view) {
         view.setOnCreateContextMenuListener(this);
     }
-
+    
     /**
      * Prevents a context menu to be shown for the given view. This method will remove the
      * {@link OnCreateContextMenuListener} on the view.
@@ -3673,7 +3692,7 @@ public class Activity extends ContextThemeWrapper
     public void unregisterForContextMenu(View view) {
         view.setOnCreateContextMenuListener(null);
     }
-
+    
     /**
      * Programmatically opens the context menu for a particular {@code view}.
      * The {@code view} should have been added via
@@ -3684,14 +3703,14 @@ public class Activity extends ContextThemeWrapper
     public void openContextMenu(View view) {
         view.showContextMenu();
     }
-
+    
     /**
      * Programmatically closes the most recently opened context menu, if showing.
      */
     public void closeContextMenu() {
         mWindow.closePanel(Window.FEATURE_CONTEXT_MENU);
     }
-
+    
     /**
      * This hook is called whenever an item in a context menu is selected. The
      * default implementation simply returns false to have the normal processing
@@ -3871,7 +3890,7 @@ public class Activity extends ContextThemeWrapper
             }
             mManagedDialogs.put(id, md);
         }
-
+        
         md.mArgs = args;
         onPrepareDialog(id, md.mDialog, args);
         md.mDialog.show();
@@ -3900,7 +3919,7 @@ public class Activity extends ContextThemeWrapper
         if (mManagedDialogs == null) {
             throw missingDialog(id);
         }
-
+        
         final ManagedDialog md = mManagedDialogs.get(id);
         if (md == null) {
             throw missingDialog(id);
@@ -3971,7 +3990,7 @@ public class Activity extends ContextThemeWrapper
         startSearch(null, false, null, false); 
         return true;
     }
-
+    
     /**
      * This hook is called to launch the search UI.
      * 
@@ -4885,7 +4904,7 @@ public class Activity extends ContextThemeWrapper
             }
         }
     }
-
+    
     void makeVisible() {
         if (!mWindowAdded) {
             ViewManager wm = getWindowManager();
@@ -4894,7 +4913,7 @@ public class Activity extends ContextThemeWrapper
         }
         mDecor.setVisibility(View.VISIBLE);
     }
-
+    
     /**
      * Check to see whether this activity is in the process of finishing,
      * either because you called {@link #finish} on it or someone else
@@ -5155,7 +5174,7 @@ public class Activity extends ContextThemeWrapper
             mParent.setRequestedOrientation(requestedOrientation);
         }
     }
-
+    
     /**
      * Return the current requested orientation of the activity.  This will
      * either be the orientation requested in its component's manifest, or
@@ -5178,7 +5197,7 @@ public class Activity extends ContextThemeWrapper
         }
         return ActivityInfo.SCREEN_ORIENTATION_UNSPECIFIED;
     }
-
+    
     /**
      * Return the identifier of the task this activity is in.  This identifier
      * will remain the same for the lifetime of the activity.
@@ -5281,7 +5300,7 @@ public class Activity extends ContextThemeWrapper
         
         mSearchManager = new SearchManager(this, null);
     }
-
+    
     @Override
     public Object getSystemService(String name) {
         if (getBaseContext() == null) {
@@ -5376,7 +5395,7 @@ public class Activity extends ContextThemeWrapper
         getWindow().setFeatureInt(Window.FEATURE_INDETERMINATE_PROGRESS,
                 visible ? Window.PROGRESS_VISIBILITY_ON : Window.PROGRESS_VISIBILITY_OFF);
     }
-
+    
     /**
      * Sets whether the horizontal progress bar in the title should be indeterminate (the circular
      * is always indeterminate).
@@ -5390,7 +5409,7 @@ public class Activity extends ContextThemeWrapper
         getWindow().setFeatureInt(Window.FEATURE_PROGRESS,
                 indeterminate ? Window.PROGRESS_INDETERMINATE_ON : Window.PROGRESS_INDETERMINATE_OFF);
     }
-
+    
     /**
      * Sets the progress for the progress bars in the title.
      * <p>
@@ -5404,7 +5423,7 @@ public class Activity extends ContextThemeWrapper
     public final void setProgress(int progress) {
         getWindow().setFeatureInt(Window.FEATURE_PROGRESS, progress + Window.PROGRESS_START);
     }
-
+    
     /**
      * Sets the secondary progress for the progress bar in the title. This
      * progress is drawn between the primary progress (set via
@@ -5454,7 +5473,7 @@ public class Activity extends ContextThemeWrapper
     public final int getVolumeControlStream() {
         return getWindow().getVolumeControlStream();
     }
-
+    
     /**
      * Runs the specified action on the UI thread. If the current thread is the UI
      * thread, then the action is executed immediately. If the current thread is
@@ -5499,7 +5518,7 @@ public class Activity extends ContextThemeWrapper
         if (!"fragment".equals(name)) {
             return onCreateView(name, context, attrs);
         }
-
+        
         String fname = attrs.getAttributeValue(null, "class");
         TypedArray a = 
             context.obtainStyledAttributes(attrs, com.android.internal.R.styleable.Fragment);
@@ -5509,7 +5528,7 @@ public class Activity extends ContextThemeWrapper
         int id = a.getResourceId(com.android.internal.R.styleable.Fragment_id, View.NO_ID);
         String tag = a.getString(com.android.internal.R.styleable.Fragment_tag);
         a.recycle();
-
+        
         int containerId = parent != null ? parent.getId() : 0;
         if (containerId == View.NO_ID && id == View.NO_ID && tag == null) {
             throw new IllegalArgumentException(attrs.getPositionDescription()
@@ -5920,7 +5939,7 @@ public class Activity extends ContextThemeWrapper
     }
 
     // ------------------ Internal API ------------------
-
+    
     final void setParent(Activity parent) {
         mParent = parent;
     }
@@ -5932,7 +5951,7 @@ public class Activity extends ContextThemeWrapper
         attach(context, aThread, instr, token, 0, application, intent, info, title, parent, id,
             lastNonConfigurationInstances, config);
     }
-
+    
     final void attach(Context context, ActivityThread aThread,
             Instrumentation instr, IBinder token, int ident,
             Application application, Intent intent, ActivityInfo info,
@@ -5942,7 +5961,7 @@ public class Activity extends ContextThemeWrapper
         attachBaseContext(context);
 
         mFragments.attachActivity(this, mContainer, null);
-
+        
         if (makeNewWindow(context, intent, info)) {
             parent = null;
         }
@@ -5956,7 +5975,7 @@ public class Activity extends ContextThemeWrapper
             mWindow.setUiOptions(info.uiOptions);
         }
         mUiThread = Thread.currentThread();
-
+        
         mMainThread = aThread;
         mInstrumentation = instr;
         mToken = token;
@@ -5990,7 +6009,8 @@ public class Activity extends ContextThemeWrapper
 
     private boolean makeNewWindow(Context context, Intent intent, ActivityInfo info) {
         boolean floating = (intent.getFlags() & Intent.FLAG_FLOATING_WINDOW) == Intent.FLAG_FLOATING_WINDOW;
-        if (intent != null && floating) {
+        boolean history = (intent.getFlags() & Intent.FLAG_ACTIVITY_LAUNCHED_FROM_HISTORY) == Intent.FLAG_ACTIVITY_LAUNCHED_FROM_HISTORY;
+        if (intent != null && floating && !history) {
 
             TypedArray styleArray = context.obtainStyledAttributes(info.theme, com.android.internal.R.styleable.Window);
             TypedValue backgroundValue = styleArray.peekValue(com.android.internal.R.styleable.Window_windowBackground);
@@ -6030,6 +6050,7 @@ public class Activity extends ContextThemeWrapper
             return true;
         } else {
             mWindow = PolicyManager.makeNewWindow(this);
+
             return false;
         }
     }
@@ -6148,7 +6169,7 @@ public class Activity extends ContextThemeWrapper
                 com.android.internal.R.styleable.Window_windowNoDisplay, false);
         mFragments.dispatchActivityCreated();
     }
-
+    
     final void performStart() {
         mFragments.noteStateNotSaved();
         mCalled = false;
@@ -6173,7 +6194,7 @@ public class Activity extends ContextThemeWrapper
             }
         }
     }
-
+    
     final void performRestart() {
         mFragments.noteStateNotSaved();
         updateSplitViewMetrics(false);
@@ -6213,14 +6234,14 @@ public class Activity extends ContextThemeWrapper
             performStart();
         }
     }
-
+    
     final void performResume() {
         performRestart();
-
+        
         mFragments.execPendingActions();
-
+        
         mLastNonConfigurationInstances = null;
-
+        
         mCalled = false;
         // mResumed is set by the instrumentation
         mInstrumentation.callActivityOnResume(this);
@@ -6232,10 +6253,10 @@ public class Activity extends ContextThemeWrapper
 
         // Now really resume, and install the current status bar and menu.
         mCalled = false;
-
+        
         mFragments.dispatchResume();
         mFragments.execPendingActions();
-
+        
         onPostResume();
         if (!mCalled) {
             throw new SuperNotCalledException(
@@ -6258,12 +6279,12 @@ public class Activity extends ContextThemeWrapper
         }
         mResumed = false;
     }
-
+    
     final void performUserLeaving() {
         onUserInteraction();
         onUserLeaveHint();
     }
-
+    
     final void performStop() {
         mDoReportFullyDrawn = false;
         if (mLoadersStarted) {
@@ -6276,7 +6297,7 @@ public class Activity extends ContextThemeWrapper
                 }
             }
         }
-
+        
         if (!mStopped) {
             if (mWindow != null) {
                 mWindow.closeAllPanels();
@@ -6285,9 +6306,9 @@ public class Activity extends ContextThemeWrapper
             if (mToken != null && mParent == null) {
                 WindowManagerGlobal.getInstance().setStoppedState(mToken, true);
             }
-
+            
             mFragments.dispatchStop();
-
+            
             mCalled = false;
             mInstrumentation.callActivityOnStop(this);
             if (!mCalled) {
@@ -6295,7 +6316,7 @@ public class Activity extends ContextThemeWrapper
                     "Activity " + mComponent.toShortString() +
                     " did not call through to super.onStop()");
             }
-
+    
             synchronized (mManagedCursors) {
                 final int N = mManagedCursors.size();
                 for (int i=0; i<N; i++) {
@@ -6306,7 +6327,7 @@ public class Activity extends ContextThemeWrapper
                     }
                 }
             }
-
+    
             mStopped = true;
         }
         mResumed = false;
@@ -6329,7 +6350,7 @@ public class Activity extends ContextThemeWrapper
             mLoaderManager.doDestroy();
         }
     }
-
+    
     /**
      * @hide
      */

@@ -58,7 +58,8 @@ public class MediaActionSound {
         "/data/system/soundlinks/camera_click.ogg",
         "/data/system/soundlinks/camera_focus.ogg",
         "/data/system/soundlinks/VideoRecord_start.ogg",
-        "/data/system/soundlinks/VideoRecord_stop.ogg"
+        "/data/system/soundlinks/VideoRecord_stop.ogg",
+        "/data/system/soundlinks/camera_click_realistic.ogg"
     };
 
     private static final String TAG = "MediaActionSound";
@@ -94,6 +95,12 @@ public class MediaActionSound {
      */
     public static final int STOP_VIDEO_RECORDING  = 3;
 
+    /*
+     * A "shutter click" that sounds like a shutter click.
+     * @hide
+     */
+    public static final int SHUTTER_CLICK_REALISTIC = 4;
+
     private static final int SOUND_NOT_LOADED = -1;
 
     private static final String PROP_CAMERA_SOUND = "persist.sys.camera-sound";
@@ -127,14 +134,12 @@ public class MediaActionSound {
      * @see #STOP_VIDEO_RECORDING
      */
     public synchronized void load(int soundName) {
-        if (SystemProperties.getBoolean(PROP_CAMERA_SOUND, true)) {
-            if (soundName < 0 || soundName >= SOUND_FILES.length) {
-                throw new RuntimeException("Unknown sound requested: " + soundName);
-            }
-            if (mSoundIds[soundName] == SOUND_NOT_LOADED) {
-                mSoundIds[soundName] =
-                        mSoundPool.load(SOUND_FILES[soundName], 1);
-            }
+        if (soundName < 0 || soundName >= SOUND_FILES.length) {
+            throw new RuntimeException("Unknown sound requested: " + soundName);
+        }
+        if (mSoundIds[soundName] == SOUND_NOT_LOADED) {
+            mSoundIds[soundName] =
+                    mSoundPool.load(SOUND_FILES[soundName], 1);
         }
     }
 
@@ -168,15 +173,23 @@ public class MediaActionSound {
      * @see #STOP_VIDEO_RECORDING
      */
     public synchronized void play(int soundName) {
-        if (soundName < 0 || soundName >= SOUND_FILES.length) {
-            throw new RuntimeException("Unknown sound requested: " + soundName);
-        }
-        if (mSoundIds[soundName] == SOUND_NOT_LOADED) {
-            mSoundIdToPlay =
-                    mSoundPool.load(SOUND_FILES[soundName], 1);
-            mSoundIds[soundName] = mSoundIdToPlay;
-        } else {
-            mSoundPool.play(mSoundIds[soundName], 1.0f, 1.0f, 0, 0, 1.0f);
+        final int propValue = SystemProperties.getInt(PROP_CAMERA_SOUND, 1);
+        if (propValue != 0) {
+            // handle additional 3rd option, and use the realistic click if we see it
+            if (propValue == 2 && soundName == SHUTTER_CLICK) {
+                soundName = SHUTTER_CLICK_REALISTIC;
+            }
+
+            if (soundName < 0 || soundName >= SOUND_FILES.length) {
+                throw new RuntimeException("Unknown sound requested: " + soundName);
+            }
+            if (mSoundIds[soundName] == SOUND_NOT_LOADED) {
+                mSoundIdToPlay =
+                        mSoundPool.load(SOUND_FILES[soundName], 1);
+                mSoundIds[soundName] = mSoundIdToPlay;
+            } else {
+                mSoundPool.play(mSoundIds[soundName], 1.0f, 1.0f, 0, 0, 1.0f);
+            }
         }
     }
 

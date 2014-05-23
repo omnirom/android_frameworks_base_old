@@ -16,13 +16,12 @@
 
 package android.app;
 
+import android.app.admin.DevicePolicyManager;
 import android.content.Context;
 import android.media.AudioManager;
 import android.os.Parcel;
 import android.os.ParcelUuid;
 import android.os.Parcelable;
-import android.os.UserHandle;
-import android.provider.Settings;
 import android.text.TextUtils;
 import android.util.Log;
 
@@ -79,19 +78,10 @@ public final class Profile implements Parcelable, Comparable {
 
     private int mScreenLockMode = LockMode.DEFAULT;
 
-    private int mExpandedDesktopMode = ExpandedDesktopMode.DEFAULT;
-
     /** @hide */
     public static class LockMode {
         public static final int DEFAULT = 0;
         public static final int INSECURE = 1;
-        public static final int DISABLE = 2;
-    }
-
-    /** @hide */
-    public static class ExpandedDesktopMode {
-        public static final int DEFAULT = 0;
-        public static final int ENABLE = 1;
         public static final int DISABLE = 2;
     }
 
@@ -357,7 +347,6 @@ public final class Profile implements Parcelable, Comparable {
         dest.writeParcelable(mAirplaneMode, flags);
         dest.writeInt(mScreenLockMode);
         dest.writeMap(mTriggers);
-        dest.writeInt(mExpandedDesktopMode);
     }
 
     /** @hide */
@@ -391,7 +380,6 @@ public final class Profile implements Parcelable, Comparable {
         mAirplaneMode = (AirplaneModeSettings) in.readParcelable(null);
         mScreenLockMode = in.readInt();
         in.readMap(mTriggers, null);
-        mExpandedDesktopMode = in.readInt();
     }
 
     public String getName() {
@@ -466,6 +454,18 @@ public final class Profile implements Parcelable, Comparable {
         mDirty = true;
     }
 
+    public int getScreenLockModeWithDPM(Context context) {
+        // Check device policy
+        DevicePolicyManager dpm = (DevicePolicyManager) context.getSystemService(Context.DEVICE_POLICY_SERVICE);
+
+        if (dpm.requireSecureKeyguard()) {
+            // Always enforce lock screen
+            return LockMode.DEFAULT;
+        }
+
+        return mScreenLockMode;
+    }
+
     public int getScreenLockMode() {
         return mScreenLockMode;
     }
@@ -475,20 +475,6 @@ public final class Profile implements Parcelable, Comparable {
             mScreenLockMode = LockMode.DEFAULT;
         } else {
             mScreenLockMode = screenLockMode;
-        }
-        mDirty = true;
-    }
-
-    public int getExpandedDesktopMode() {
-        return mExpandedDesktopMode;
-    }
-
-    public void setExpandedDesktopMode(int expandedDesktopMode) {
-        if (expandedDesktopMode < ExpandedDesktopMode.DEFAULT
-                || expandedDesktopMode > ExpandedDesktopMode.DISABLE) {
-            mExpandedDesktopMode = ExpandedDesktopMode.DEFAULT;
-        } else {
-            mExpandedDesktopMode = expandedDesktopMode;
         }
         mDirty = true;
     }
@@ -564,10 +550,6 @@ public final class Profile implements Parcelable, Comparable {
         builder.append("<screen-lock-mode>");
         builder.append(mScreenLockMode);
         builder.append("</screen-lock-mode>\n");
-
-        builder.append("<expanded-desktop-mode>");
-        builder.append(mExpandedDesktopMode);
-        builder.append("</expanded-desktop-mode>\n");
 
         mAirplaneMode.getXmlString(builder, context);
 
@@ -700,9 +682,6 @@ public final class Profile implements Parcelable, Comparable {
                 if (name.equals("screen-lock-mode")) {
                     profile.setScreenLockMode(Integer.valueOf(xpp.nextText()));
                 }
-                if (name.equals("expanded-desktop-mode")) {
-                    profile.setExpandedDesktopMode(Integer.valueOf(xpp.nextText()));
-                }
                 if (name.equals("profileGroup")) {
                     ProfileGroup pg = ProfileGroup.fromXml(xpp, context);
                     profile.addProfileGroup(pg);
@@ -747,14 +726,6 @@ public final class Profile implements Parcelable, Comparable {
         mRingMode.processOverride(context);
         // Set airplane mode
         mAirplaneMode.processOverride(context);
-
-        // Set expanded desktop
-        if (mExpandedDesktopMode != ExpandedDesktopMode.DEFAULT) {
-            Settings.System.putIntForUser(context.getContentResolver(),
-                    Settings.System.EXPANDED_DESKTOP_STATE,
-                    mExpandedDesktopMode == ExpandedDesktopMode.ENABLE ? 1 : 0,
-                    UserHandle.USER_CURRENT);
-        }
     }
 
     /** @hide */

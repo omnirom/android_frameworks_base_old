@@ -44,7 +44,7 @@ import android.view.InputDevice;
 
 import com.android.internal.app.IAppOpsService;
 import com.android.internal.app.IBatteryStats;
-import com.android.internal.util.cm.QuietHoursUtils;
+import com.android.internal.util.beanstalk.QuietHoursHelper;
 
 import java.util.ArrayList;
 import java.util.LinkedList;
@@ -203,11 +203,13 @@ public class VibratorService extends IVibratorService.Stub
         // either a timeout of > 0 or a non-null pattern.
         if (milliseconds <= 0 || (mCurrentVibration != null
                 && mCurrentVibration.hasLongerTimeout(milliseconds))
-                || QuietHoursUtils.inQuietHours(mContext, Settings.System.QUIET_HOURS_HAPTIC)) {
+                || QuietHoursHelper.inQuietHours(mContext, Settings.System.QUIET_HOURS_HAPTIC)) {
             // Ignore this vibration since the current vibration will play for
             // longer than milliseconds.
             return;
         }
+
+        milliseconds = userDuration(milliseconds);
 
         Vibration vib = new Vibration(token, milliseconds, uid, packageName);
 
@@ -234,13 +236,25 @@ public class VibratorService extends IVibratorService.Stub
         return true;
     }
 
+    private long userDuration(long millis) {
+        int userMillis = Settings.System.getIntForUser(
+                mContext.getContentResolver(),
+                Settings.System.MINIMUM_VIBRATION_DURATION,
+                0, UserHandle.USER_CURRENT_OR_SELF);
+        // Set length if <= userMillis && not default
+        if (userMillis != 0 && millis <= userMillis) {
+            millis = userMillis;
+        }
+        return millis;
+    }
+
     public void vibratePattern(int uid, String packageName, long[] pattern, int repeat,
             IBinder token) {
         if (mContext.checkCallingOrSelfPermission(android.Manifest.permission.VIBRATE)
                 != PackageManager.PERMISSION_GRANTED) {
             throw new SecurityException("Requires VIBRATE permission");
         }
-        if (QuietHoursUtils.inQuietHours(mContext, Settings.System.QUIET_HOURS_HAPTIC)) {
+        if (QuietHoursHelper.inQuietHours(mContext, Settings.System.QUIET_HOURS_HAPTIC)) {
             return;
         }
         if (Settings.Global.getInt(mContext.getContentResolver(),
@@ -422,7 +436,8 @@ public class VibratorService extends IVibratorService.Stub
                 try {
                     mVibrateInputDevicesSetting = Settings.System.getIntForUser(
                             mContext.getContentResolver(),
-                            Settings.System.VIBRATE_INPUT_DEVICES, UserHandle.USER_CURRENT) > 0;
+                            Settings.System.VIBRATE_INPUT_DEVICES,
+                            UserHandle.USER_CURRENT_OR_SELF) > 0;
                 } catch (SettingNotFoundException snfe) {
                 }
 
@@ -483,6 +498,8 @@ public class VibratorService extends IVibratorService.Stub
     }
 
     private void doVibratorOn(long millis, int uid) {
+        millis = userDuration(millis);
+
         synchronized (mInputDeviceVibrators) {
             try {
                 mBatteryStatsService.noteVibratorOn(uid, millis);

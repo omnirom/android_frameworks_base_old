@@ -1,5 +1,5 @@
 /*
- *  Copyright (C) 2013 The Amra Project
+ *  Copyright (C) 2013 The OmniROM Project
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -39,15 +39,18 @@ public class StatusHeaderMachine {
     private static final String TAG = "StatusHeaderMachine";
 
     // Daily calendar periods
-    // Night starts at 18:00
+    // Night starts at 22:00
     private static final int TIME_NIGHT = 22;
     private static final int DRAWABLE_NIGHT = R.drawable.notifhead_night;
-    // Morning starts at 07:00
-    private static final int TIME_MORNING = 7;
+    // Morning starts at 06:00
+    private static final int TIME_MORNING = 6;
     private static final int DRAWABLE_MORNING = R.drawable.notifhead_morning;
-    // Afternoon starts at 13:00
-    private static final int TIME_AFTERNOON = 13;
+    // Afternoon starts at 12:00
+    private static final int TIME_AFTERNOON = 12;
     private static final int DRAWABLE_AFTERNOON = R.drawable.notifhead_afternoon;
+    // Evening starts at 18:00
+    private static final int TIME_EVENING = 18;
+    private static final int DRAWABLE_EVENING = R.drawable.notifhead_evening;
 
     // Special events
     // Christmas is on Dec 25th
@@ -107,9 +110,12 @@ public class StatusHeaderMachine {
         } else if (hour >= TIME_MORNING && hour < TIME_AFTERNOON) {
             // It's morning, or before afternoon
             return loadOrFetch(DRAWABLE_MORNING);
-        } else if (hour >= TIME_AFTERNOON && hour < TIME_NIGHT) {
-            // It's afternoon
+        } else if (hour >= TIME_AFTERNOON && hour < TIME_EVENING) {
+            // It's afternoon, or before evening
             return loadOrFetch(DRAWABLE_AFTERNOON);
+        } else if (hour >= TIME_EVENING && hour < TIME_NIGHT) {
+            // It's evening, or before night
+            return loadOrFetch(DRAWABLE_EVENING);
         }
 
         // When all else fails, just be yourself

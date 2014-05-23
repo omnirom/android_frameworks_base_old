@@ -37,9 +37,6 @@ import com.android.internal.policy.IKeyguardService;
  *
  */
 public class KeyguardTouchDelegate {
-    // TODO: propagate changes to these to {@link KeyguardServiceDelegate}
-    static final String KEYGUARD_PACKAGE = "com.android.keyguard";
-    static final String KEYGUARD_CLASS = "com.android.keyguard.KeyguardService";
 
     private static KeyguardTouchDelegate sInstance;
 
@@ -66,11 +63,16 @@ public class KeyguardTouchDelegate {
     };
 
     private KeyguardTouchDelegate(Context context) {
+        final String keyguardPackage = context.getString(
+                com.android.internal.R.string.config_keyguardPackage);
+        final String keyguardClass = context.getString(
+                com.android.internal.R.string.config_keyguardService);
+
         Intent intent = new Intent();
-        intent.setClassName(KEYGUARD_PACKAGE, KEYGUARD_CLASS);
+        intent.setClassName(keyguardPackage, keyguardClass);
         if (!context.bindServiceAsUser(intent, mKeyguardConnection,
                 Context.BIND_AUTO_CREATE, UserHandle.OWNER)) {
-            if (DEBUG) Slog.v(TAG, "*** Keyguard: can't bind to " + KEYGUARD_CLASS);
+            if (DEBUG) Slog.v(TAG, "*** Keyguard: can't bind to " + keyguardClass);
         } else {
             if (DEBUG) Slog.v(TAG, "*** Keyguard started");
         }
@@ -102,7 +104,6 @@ public class KeyguardTouchDelegate {
         final IKeyguardService service = mService;
         if (service != null) {
             try {
-                Slog.e(TAG, "dispatch!");
                 service.dispatch(event);
                 return true;
             } catch (RemoteException e) {
@@ -115,20 +116,6 @@ public class KeyguardTouchDelegate {
         return false;
     }
 
-    public void dispatchButtonClick(int buttonId) {
-        final IKeyguardService service = mService;
-        if (service != null) {
-            try {
-                service.dispatchButtonClick(buttonId);
-            } catch (RemoteException e) {
-                // What to do?
-                Slog.e(TAG, "RemoteException sending event to keyguard!", e);
-            }
-        } else {
-            Slog.w(TAG, "dispatchButtonClick(buttonId): NO SERVICE!");
-        }
-    }
-
     public boolean isInputRestricted() {
         final IKeyguardService service = mService;
         if (service != null) {
@@ -139,20 +126,6 @@ public class KeyguardTouchDelegate {
             }
         } else {
             Slog.w(TAG, "isInputRestricted(): NO SERVICE!");
-        }
-        return false;
-    }
-
-    public boolean isShowing() {
-        final IKeyguardService service = mService;
-        if (service != null) {
-            try {
-                return service.isShowing();
-            } catch (RemoteException e) {
-                Slog.w(TAG , "Remote Exception", e);
-            }
-        } else {
-            Slog.w(TAG, "isShowing(): NO SERVICE!");
         }
         return false;
     }

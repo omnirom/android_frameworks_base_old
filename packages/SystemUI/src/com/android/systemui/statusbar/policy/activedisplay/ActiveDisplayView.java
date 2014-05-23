@@ -44,6 +44,10 @@ import android.graphics.drawable.Drawable;
 import android.graphics.drawable.InsetDrawable;
 import android.graphics.drawable.LayerDrawable;
 import android.graphics.drawable.StateListDrawable;
+import android.hardware.Sensor;
+import android.hardware.SensorEvent;
+import android.hardware.SensorEventListener;
+import android.hardware.SensorManager;
 import android.os.Bundle;
 import android.os.BatteryManager;
 import android.os.Handler;
@@ -72,8 +76,8 @@ import android.widget.LinearLayout;
 import android.widget.RemoteViews;
 import android.widget.TextView;
 
-import com.android.internal.util.omni.DeviceUtils;
-import com.android.internal.util.slim.QuietHoursHelper;
+import com.android.internal.util.amra.AmraDeviceUtils;
+import com.android.internal.util.beanstalk.QuietHoursHelper;
 import com.android.internal.widget.LockPatternUtils;
 import com.android.internal.widget.multiwaveview.GlowPadView;
 import com.android.internal.widget.multiwaveview.GlowPadView.OnTriggerListener;
@@ -326,6 +330,9 @@ public class ActiveDisplayView extends FrameLayout
 
         public void onGrabbedStateChange(View v, int handle) {
         }
+
+	public void onTargetChange(View v, int target) {
+	}
 
         public void onFinishFinalAnimation() {
         }
@@ -1562,11 +1569,11 @@ public class ActiveDisplayView extends FrameLayout
     }
 
     private boolean hasProximitySensor() {
-        return DeviceUtils.deviceSupportsProximitySensor(mContext);
+        return AmraDeviceUtils.deviceSupportsProximitySensor(mContext);
     }
 
     private boolean hasLightSensor() {
-        return DeviceUtils.deviceSupportsLightSensor(mContext);
+        return AmraDeviceUtils.deviceSupportsLightSensor(mContext);
     }
 
     /**

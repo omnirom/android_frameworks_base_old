@@ -29,7 +29,6 @@ import android.content.SharedPreferences;
 import android.content.SharedPreferences.Editor;
 import android.os.Bundle;
 import android.text.format.DateFormat;
-import android.text.InputFilter;
 import android.view.View;
 import android.widget.EditText;
 import android.widget.TimePicker;
@@ -62,10 +61,14 @@ public class ReminderTimeDialog extends Activity  {
     @Override
     public void onResume() {
         super.onResume();
-        if (getIntent().getBooleanExtra("clear", false)) {
-            startClearDialog();
-        } else {
+        String type = getIntent().getStringExtra("type");
+
+        if (type == null) {
             startTextDialog();
+        } else if (type.equals("time")) {
+            startTimerDialog();
+        } else {
+            startClearDialog();
         }
     }
 
@@ -76,7 +79,6 @@ public class ReminderTimeDialog extends Activity  {
         final SharedPreferences shared = this.getSharedPreferences(
                 KEY_REMINDER_ACTION, Context.MODE_PRIVATE);
         final EditText title = (EditText) view.findViewById(R.id.title);
-        title.setFilters(new InputFilter[] { new InputFilter.LengthFilter(maxChar) });
         final EditText message = (EditText) view.findViewById(R.id.message);
         String titleText = shared.getString("title", null);
         String messageText = shared.getString("message", null);
@@ -95,6 +97,7 @@ public class ReminderTimeDialog extends Activity  {
         .setPositiveButton(R.string.dlg_ok,
             new DialogInterface.OnClickListener() {
             public void onClick(DialogInterface dialog, int which) {
+                shared.edit().putBoolean("updated", true).commit();
                 shared.edit().putString("title", title.getText().toString()).commit();
                 shared.edit().putString("message", message.getText().toString()).commit();
                 startTimerDialog();
@@ -152,28 +155,28 @@ public class ReminderTimeDialog extends Activity  {
 
 
                 mCalendar.add(Calendar.MINUTE, timePicked);
+                mCalendar.add(Calendar.SECOND, -mCalendar.get(Calendar.SECOND));
+                mCalendar.add(Calendar.MILLISECOND, -mCalendar.get(Calendar.MILLISECOND));
                 AlarmManager am = (AlarmManager)
                         ReminderTimeDialog.this.getSystemService(Context.ALARM_SERVICE);
-                PendingIntent reminder = null;
                 Intent intent = new Intent();
                 intent.setAction(SCHEDULE_REMINDER_NOTIFY);
-                shared.edit().putBoolean("scheduled", false).commit();
-                updateView();
-                if (mCanceled == 0) {
-                    reminder = PendingIntent.getBroadcast(
+                PendingIntent reminder = PendingIntent.getBroadcast(
                             ReminderTimeDialog.this, 1, intent,
                             PendingIntent.FLAG_CANCEL_CURRENT);
-                    am.cancel(reminder);
+                am.cancel(reminder);
+                shared.edit().putBoolean("scheduled", false).commit();
+                if (mCanceled == 0) {
                     shared.edit().putInt("hours", hours).commit();
                     shared.edit().putInt("minutes", minutes).commit();
                     am.set(AlarmManager.RTC_WAKEUP,
                             mCalendar.getTimeInMillis(), reminder);
                 } else if (mCanceled == 1) {
-                    am.cancel(reminder);
                     shared.edit().putInt("hours", -1).commit();
                     shared.edit().putInt("minutes", -1).commit();
                     shared.edit().putInt("day", -1).commit();
                 }
+                updateView();
                 ReminderTimeDialog.this.finish();
             };
         }, hour, minutes, DateFormat.is24HourFormat(this));
