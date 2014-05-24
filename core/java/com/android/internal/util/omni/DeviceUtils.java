@@ -132,9 +132,9 @@ public class DeviceUtils {
         if (hasNavigationBar == -1) {
             String navBarOverride = SystemProperties.get("qemu.hw.mainkeys");
             if ("1".equals(navBarOverride)) {
-                return true;
-            } else if ("0".equals(navBarOverride)) {
                 return false;
+            } else if ("0".equals(navBarOverride)) {
+                return true;
             } else {
                 return showByDefault;
             }
