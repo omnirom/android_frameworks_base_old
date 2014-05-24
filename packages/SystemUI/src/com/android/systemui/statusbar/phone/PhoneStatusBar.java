@@ -384,9 +384,9 @@ public class PhoneStatusBar extends BaseStatusBar implements DemoMode {
                     resolver, Settings.System.STATUS_BAR_CUSTOM_HEADER, 0
                     , UserHandle.USER_CURRENT) == 1;
             boolean showNavBar = Settings.System.getIntForUser(
-                    resolver, Settings.System.NAVIGATION_BAR_SHOW, 0
+                    resolver, Settings.System.NAVIGATION_BAR_SHOW, -1
                     , UserHandle.USER_CURRENT) == 1;
-            if (showNavBar != mShowNavBar){
+            if (showNavBar != -1 && (showNavBar != mShowNavBar)){
                 // TODO disable immersive on value change
                 Settings.System.putIntForUser(resolver, Settings.System.IMMERSIVE_MODE
                         , IMMERSIVE_MODE_OFF, UserHandle.USER_CURRENT);
