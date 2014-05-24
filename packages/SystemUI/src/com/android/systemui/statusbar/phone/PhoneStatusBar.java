@@ -383,14 +383,14 @@ public class PhoneStatusBar extends BaseStatusBar implements DemoMode {
             mCustomHeader = Settings.System.getIntForUser(
                     resolver, Settings.System.STATUS_BAR_CUSTOM_HEADER, 0
                     , UserHandle.USER_CURRENT) == 1;
-            boolean showNavBar = Settings.System.getIntForUser(
-                    resolver, Settings.System.NAVIGATION_BAR_SHOW, 0
-                    , UserHandle.USER_CURRENT) == 1;
-            if (showNavBar != mShowNavBar){
-                // TODO disable immersive on value change
-                Settings.System.putIntForUser(resolver, Settings.System.IMMERSIVE_MODE
-                        , IMMERSIVE_MODE_OFF, UserHandle.USER_CURRENT);
-                updateNavigationBar();
+            int showNavBar = Settings.System.getIntForUser(
+                    resolver, Settings.System.NAVIGATION_BAR_SHOW, -1
+                    , UserHandle.USER_CURRENT);
+            if (showNavBar != -1){
+                boolean showNavBarBool = showNavBar == 1;
+                if (showNavBarBool !=  mShowNavBar){
+                    updateNavigationBar();
+                }
             }
             updateCustomHeaderStatus();
 
