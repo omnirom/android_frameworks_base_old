@@ -129,7 +129,7 @@ import static com.android.internal.util.omni.DeviceUtils.IMMERSIVE_MODE_OFF;
 
 public class PhoneStatusBar extends BaseStatusBar implements DemoMode {
     static final String TAG = "PhoneStatusBar";
-    public static final boolean DEBUG = true;
+    public static final boolean DEBUG = false;
     public static final boolean SPEW = false;
     public static final boolean DUMPTRUCK = true; // extra dumpsys info
     public static final boolean DEBUG_GESTURES = false;
