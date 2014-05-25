@@ -301,6 +301,33 @@ public abstract class BaseStatusBar extends SystemUI implements
         }
     };
 
+    private class SettingsObserver extends ContentObserver {
+        public SettingsObserver(Handler handler) {
+            super(handler);
+        }
+
+        public void observe() {
+            final ContentResolver resolver = mContext.getContentResolver();
+            resolver.registerContentObserver(Settings.Amra.getUriFor(
+                    Settings.Amra.NEW_RECENTS_SCREEN), false, this);
+            update();
+        }
+
+        @Override
+        public void onChange(boolean selfChange) {
+            update();
+        }
+
+        private void update() {
+            final ContentResolver resolver = mContext.getContentResolver();
+            mUseNewRecents = Settings.Amra.getBooleanForUser(resolver,
+                    Settings.Amra.NEW_RECENTS_SCREEN, false, UserHandle.USER_CURRENT);
+            createRecents();
+        }
+    }
+
+    private SettingsObserver mSettingsObserver = new SettingsObserver(mHandler);
+
     private RemoteViews.OnClickHandler mOnClickHandler = new RemoteViews.OnClickHandler() {
         @Override
         public boolean onClickHandler(View view, PendingIntent pendingIntent, Intent fillInIntent) {
@@ -362,6 +389,8 @@ public abstract class BaseStatusBar extends SystemUI implements
                 Settings.Global.getUriFor(Settings.Global.DEVICE_PROVISIONED), true,
                 mProvisioningObserver);
 
+        mSettingsObserver.observe();
+
 	mContext.getContentResolver().registerContentObserver(
                 Settings.System.getUriFor(Settings.System.LARGE_RECENT_THUMBS), true,
                 mShowNavObserver, UserHandle.USER_ALL);
@@ -369,16 +398,7 @@ public abstract class BaseStatusBar extends SystemUI implements
         mBarService = IStatusBarService.Stub.asInterface(
                 ServiceManager.getService(Context.STATUS_BAR_SERVICE));
 
-            mUseNewRecents = Settings.System.getBoolean(
-                    mContext.getContentResolver(), Settings.System.NEW_RECENTS_SCREEN, false);
-
-        if (mUseNewRecents) {
-            mNewRecents = new RecentController(mContext, mLayoutDirection);
-            mRecents = null;
-        } else {
-            mNewRecents = null;
-            mRecents = getComponent(RecentsComponent.class);
-        }
+        createRecents();
 
         mLocale = mContext.getResources().getConfiguration().locale;
         mLayoutDirection = TextUtils.getLayoutDirectionFromLocale(mLocale);
@@ -580,6 +600,16 @@ public abstract class BaseStatusBar extends SystemUI implements
     public void setOverwriteImeIsActive(boolean enabled) {
         if (mEdgeGestureManager != null) {
             mEdgeGestureManager.setOverwriteImeIsActive(enabled);
+        }
+    }
+
+    private void createRecents() {
+        if (mUseNewRecents) {
+            mNewRecents = new RecentController(mContext, mLayoutDirection);
+            mRecents = null;
+        } else {
+            mNewRecents = null;
+            mRecents = getComponent(RecentsComponent.class);
         }
     }
 
