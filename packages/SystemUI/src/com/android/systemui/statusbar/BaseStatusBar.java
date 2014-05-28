@@ -771,7 +771,7 @@ public abstract class BaseStatusBar extends SystemUI implements
 
                 //Long click menu broken on PIE mode...pop up menu is useless (auto-launch on long click)
                 if (expanded) {
-                    launchFloating(contentIntent);
+                    launchFloating(contentIntent, packageNameF);
                     animateCollapsePanels(CommandQueue.FLAG_EXCLUDE_NONE);
                     return true;
                 }
