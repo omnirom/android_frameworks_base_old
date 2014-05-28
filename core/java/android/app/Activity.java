@@ -4997,6 +4997,7 @@ public class Activity extends ContextThemeWrapper
     }
 
     public void finishFloating() {
+        getWindow().setSoftInputMode(WindowManager.LayoutParams.SOFT_INPUT_STATE_HIDDEN);
         mMainThread.performFinishFloating();
     }
 
