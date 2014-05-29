@@ -1,0 +1,21 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "8b77b57d_ba34a2dc",
+        "filename": "packages/SystemUI/src/com/android/systemui/statusbar/phone/QuickSettingsModel.java",
+        "patchSetId": 11
+      },
+      "lineNbr": 333,
+      "author": {
+        "id": 1000551
+      },
+      "writtenOn": "2014-05-29T18:33:44Z",
+      "side": 1,
+      "message": ":)",
+      "revId": "9c13a511cdd19781d15bd9f9c84c2b148490bb5d",
+      "serverId": "56841c99-7c94-43d4-bf0b-cb4707e66d55",
+      "unresolved": false
+    }
+  ]
+}
