@@ -247,6 +247,7 @@ public class KeyguardViewMediator {
     private int mLockSoundId;
     private int mUnlockSoundId;
     private int mLockSoundStreamId;
+    private boolean mDelayLockPending;
 
     /**
      * The volume applied to the lock/unlock sounds.
@@ -359,13 +360,16 @@ public class KeyguardViewMediator {
                         && !mScreenOn                           // screen off
                         && mExternallyEnabled) {                // not disabled by any app
 
-                    // note: this is a way to gracefully reenable the keyguard when the call
-                    // ends and the screen is off without always reenabling the keyguard
-                    // each time the screen turns off while in call (and having an occasional ugly
-                    // flicker while turning back on the screen and disabling the keyguard again).
-                    if (DEBUG) Log.d(TAG, "screen is off and call ended, let's make sure the "
-                            + "keyguard is showing");
-                    doKeyguardLocked(null);
+                    // if we still have a pending lock running dont lock imemdiately
+                    if (!mDelayLockPending){
+                        // note: this is a way to gracefully reenable the keyguard when the call
+                        // ends and the screen is off without always reenabling the keyguard
+                        // each time the screen turns off while in call (and having an occasional ugly
+                        // flicker while turning back on the screen and disabling the keyguard again).
+                        if (DEBUG) Log.d(TAG, "screen is off and call ended, let's make sure the "
+                                + "keyguard is showing");
+                        doKeyguardLocked(null);
+                    }
                 }
             }
         };
@@ -701,6 +705,7 @@ public class KeyguardViewMediator {
             doKeyguardLocked(null);
         } else {
             // Lock in the future
+            mDelayLockPending = true;
             long when = SystemClock.elapsedRealtime() + timeout;
             Intent intent = new Intent(DELAYED_KEYGUARD_ACTION);
             intent.putExtra("seq", mDelayedShowingSequence);
@@ -925,6 +930,7 @@ public class KeyguardViewMediator {
      * Enable the keyguard if the settings are appropriate.
      */
     private void doKeyguardLocked(Bundle options) {
+        mDelayLockPending = false;
         // if another app is disabling us, don't show
         if (!mExternallyEnabled) {
             if (DEBUG) Log.d(TAG, "doKeyguard: not showing because externally disabled");
@@ -1069,6 +1075,7 @@ public class KeyguardViewMediator {
         @Override
         public void onReceive(Context context, Intent intent) {
             if (DELAYED_KEYGUARD_ACTION.equals(intent.getAction())) {
+                mDelayLockPending = false;
                 final int sequence = intent.getIntExtra("seq", 0);
                 if (DEBUG) Log.d(TAG, "received DELAYED_KEYGUARD_ACTION with seq = "
                         + sequence + ", mDelayedShowingSequence = " + mDelayedShowingSequence);
