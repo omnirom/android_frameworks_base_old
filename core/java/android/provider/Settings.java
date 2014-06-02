@@ -3157,6 +3157,12 @@ public final class Settings {
         public static final String STATUS_BAR_NETWORK_ACTIVITY = "status_bar_network_activity";
 
         /**
+         * Handle activation of immersive mode on lockscreen
+         * @hide
+         */
+        public static final String LOCKSCREEN_IMMERSIVE_MODE = "lockscreen_immersive_mode";
+
+        /**
          * Whether or not to show circle battery around the lockscreen ring
          * @hide
          */
