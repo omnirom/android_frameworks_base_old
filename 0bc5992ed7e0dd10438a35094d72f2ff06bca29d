@@ -16,6 +16,41 @@
       "revId": "0bc5992ed7e0dd10438a35094d72f2ff06bca29d",
       "serverId": "56841c99-7c94-43d4-bf0b-cb4707e66d55",
       "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "8b77b57d_115ad484",
+        "filename": "core/res/res/values-es/custom_strings.xml",
+        "patchSetId": 3
+      },
+      "lineNbr": 28,
+      "author": {
+        "id": 1000501
+      },
+      "writtenOn": "2014-06-03T07:33:58Z",
+      "side": 1,
+      "message": "it\u0027s better \"Grabar Pantalla\" !",
+      "parentUuid": "8b77b57d_517b6cea",
+      "revId": "0bc5992ed7e0dd10438a35094d72f2ff06bca29d",
+      "serverId": "56841c99-7c94-43d4-bf0b-cb4707e66d55",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "8b77b57d_3157d05d",
+        "filename": "core/res/res/values-es/custom_strings.xml",
+        "patchSetId": 3
+      },
+      "lineNbr": 45,
+      "author": {
+        "id": 1000501
+      },
+      "writtenOn": "2014-06-03T07:33:58Z",
+      "side": 1,
+      "message": "For mi it\u0027s better \"Tarjeta SD\"",
+      "revId": "0bc5992ed7e0dd10438a35094d72f2ff06bca29d",
+      "serverId": "56841c99-7c94-43d4-bf0b-cb4707e66d55",
+      "unresolved": false
     }
   ]
 }
