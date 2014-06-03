@@ -46,7 +46,4 @@
         <item quantity="one">¿Quiere eliminar el archivo de forma permanente?</item>
         <item quantity="other">¿Quiere eliminar %d archivos de forma permanente?</item>
     </plurals>
-
-    <string name="ok">Confirmar</string>
-    <string name="cancel">Cancelar</string>
 </resources>
