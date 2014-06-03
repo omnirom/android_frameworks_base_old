@@ -86,6 +86,91 @@
       "revId": "0bc5992ed7e0dd10438a35094d72f2ff06bca29d",
       "serverId": "56841c99-7c94-43d4-bf0b-cb4707e66d55",
       "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "8b77b57d_1c358bd7",
+        "filename": "packages/SystemUI/res/values-es/custom_strings.xml",
+        "patchSetId": 3
+      },
+      "lineNbr": 20,
+      "author": {
+        "id": 1000501
+      },
+      "writtenOn": "2014-06-03T16:23:43Z",
+      "side": 1,
+      "message": "its better \"Anclaje de red\"",
+      "revId": "0bc5992ed7e0dd10438a35094d72f2ff06bca29d",
+      "serverId": "56841c99-7c94-43d4-bf0b-cb4707e66d55",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "8b77b57d_3c3247f0",
+        "filename": "packages/SystemUI/res/values-es/custom_strings.xml",
+        "patchSetId": 3
+      },
+      "lineNbr": 21,
+      "author": {
+        "id": 1000501
+      },
+      "writtenOn": "2014-06-03T16:23:43Z",
+      "side": 1,
+      "message": "its better \"Anclaje de red deshabilitado\"",
+      "revId": "0bc5992ed7e0dd10438a35094d72f2ff06bca29d",
+      "serverId": "56841c99-7c94-43d4-bf0b-cb4707e66d55",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "8b77b57d_fc37efde",
+        "filename": "packages/SystemUI/res/values-es/custom_strings.xml",
+        "patchSetId": 3
+      },
+      "lineNbr": 60,
+      "author": {
+        "id": 1000501
+      },
+      "writtenOn": "2014-06-03T16:23:43Z",
+      "side": 1,
+      "message": "in Spain its \"NFC encendido\"",
+      "revId": "0bc5992ed7e0dd10438a35094d72f2ff06bca29d",
+      "serverId": "56841c99-7c94-43d4-bf0b-cb4707e66d55",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "8b77b57d_dc2233a0",
+        "filename": "packages/SystemUI/res/values-es/custom_strings.xml",
+        "patchSetId": 3
+      },
+      "lineNbr": 85,
+      "author": {
+        "id": 1000501
+      },
+      "writtenOn": "2014-06-03T16:23:43Z",
+      "side": 1,
+      "message": "its \"Fría\"",
+      "revId": "0bc5992ed7e0dd10438a35094d72f2ff06bca29d",
+      "serverId": "56841c99-7c94-43d4-bf0b-cb4707e66d55",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "8b77b57d_bc1d7767",
+        "filename": "packages/SystemUI/res/values-es/custom_strings.xml",
+        "patchSetId": 3
+      },
+      "lineNbr": 91,
+      "author": {
+        "id": 1000501
+      },
+      "writtenOn": "2014-06-03T16:23:43Z",
+      "side": 1,
+      "message": "its \"Sin conexión\"",
+      "revId": "0bc5992ed7e0dd10438a35094d72f2ff06bca29d",
+      "serverId": "56841c99-7c94-43d4-bf0b-cb4707e66d55",
+      "unresolved": false
     }
   ]
 }
