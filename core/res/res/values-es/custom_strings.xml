@@ -24,4 +24,38 @@
     <string name="reboot_confirm" product="tablet">Se reiniciará tu tablet.</string>
     <string name="reboot_confirm" product="default">Se reiniciará tu teléfono.</string>
 
+    <string name="global_action_screenshot">Capturar Pantalla</string>
+    <string name="global_action_screenrecord">Grabar Pantalla</string>
+    <string name="app_killed_message">Apliación cerrada</string>
+
+    <!-- Title of an application permission that lets an application view/edit revoked permissions. -->
+    <string name="permlab_revokePermissions">Permite ver y editar los permisos revocados. No indicado para uso de aplicaciones normales.</string>
+    <!-- Description of an application permission that lets lets an application view/edit revoked permissions. -->
+    <string name="permdesc_revokePermissions">Permite leer y escribir los permisos revocados. No indicado para uso de aplicaciones normales.</string>
+
+    <!-- Title of an application permission that lets an application access the ThemeManagerService. -->
+    <string name="permlab_accessThemeService">>Permite acceder al gestor de temas. No indicado para uso de aplicaciones normales.</string>
+    <!-- Description of an application permission that lets lets an application access the ThemeManagerService -->
+    <string name="permdesc_accessThemeService">Permite a una aplicación configurar temas. No indicado para uso de aplicaciones normales.</string>
+
+    <!-- stylus gestures support -->
+    <string name="stylus_app_not_installed">%s no está isntalado</string>
+
+    <!-- Storage description for the SD card on the dock. [CHAR LIMIT=NONE] -->
+    <string name="storage_sd_dock_card">Tarjeta SD vía OTG</string>
+
+    <!-- label for item that toggle mobile data -->
+    <string name="global_actions_toggle_mobile_data">Datos Móviles</string>
+
+    <!-- status message in phone options dialog for when mobile data is on -->
+    <string name="global_actions_mobile_data_on_status">Datos móviles habilitados</string>
+
+    <!-- status message in phone options dialog for when mobile data is off -->
+    <string name="global_actions_mobile_data_off_status">Datos móviles deshabilitados</string>
+
+    <!-- Immersive mode confirmation: Pick confirmation window from bottom when status bar is visible -->
+    <string name="immersive_mode_confirmation_bottom">Deslice desde abajo hacia arriba para salir de la pantalla completa.</string>
+
+    <string name="toast_rotation_unlocked">Rotación de pantalla bloqueada</string>
+    <string name="toast_rotation_locked">Rotación de pantalla desbloqueada</string>
 </resources>

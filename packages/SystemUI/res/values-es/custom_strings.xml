@@ -1,0 +1,125 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- Copyright (C) 2013 The OmniROM Project
+
+ This program is free software: you can redistribute it and/or modify
+ it under the terms of the GNU General Public License as published by
+ the Free Software Foundation, either version 2 of the License, or
+ (at your option) any later version.
+
+ This program is distributed in the hope that it will be useful,
+ but WITHOUT ANY WARRANTY; without even the implied warranty of
+ MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ GNU General Public License for more details.
+
+ You should have received a copy of the GNU General Public License
+ along with this program.  If not, see <http://www.gnu.org/licenses/>.
+
+-->
+<resources xmlns:xliff="urn:oasis:names:tc:xliff:document:1.2">
+    <!-- Quick Settings Wi-Fi Back Tile Tethering label -->
+    <string name="quick_settings_wifi_tethering_label">Anclaje a red</string>
+    <string name="quick_settings_wifi_tethering_off_label">Anclaje a red deshabilitado</string>
+
+    <!-- Quick Settings Bluetooth Not Discoverable label -->
+    <string name="quick_settings_bluetooth_not_discoverable_label">No visible</string>
+
+    <!-- Quick Settings Bluetooth Discoverable label -->
+    <string name="quick_settings_bluetooth_discoverable_label">Visible</string>
+
+    <!-- Quick Settings Bluetooth Not Connected -->
+    <string name="quick_settings_bluetooth_enabled">Habilitado</string>
+    <string name="quick_settings_bluetooth_disabled">Deshabilitado</string>
+
+    <!-- Quick Settings Bluetooth Number of Paired Devices -->
+    <string name="quick_settings_bluetooth_number_paired"><xliff:g id="number">%d</xliff:g> Dispositivos emparejados</string>
+
+    <!-- Screenrecord Notification Ticker -->
+    <string name="screenrecord_notif_ticker">La pantalla se está grabando</string>
+
+    <!-- Screenrecord notification title -->
+    <string name="screenrecord_notif_title">Grabando pantalla</string>
+
+    <!-- Screenrecord notification action: Stop -->
+    <string name="screenrecord_notif_stop">Parar</string>
+
+    <!-- Screenrecord notification action: show/hide pointer -->
+    <string name="screenrecord_notif_pointer_on">Mostrar puntero</string>
+    <string name="screenrecord_notif_pointer_off">Ocultar puntero</string>
+
+    <!-- Screen record notification error title -->
+    <string name="screenrecord_notif_error">No se puede grabar la pantalla</string>
+
+    <!-- Active Display -->
+    <string name="active_display_privacy_content">El contenido del mensaje no muestra debido a que el modo de privacidad está habilitado</string>
+
+    <!-- QS Battery Tile -->
+    <string name="quick_settings_battery_charging">Cargando</string>
+    <string name="quick_settings_battery_discharging">Descargando</string>
+
+    <!-- QS NFC Tile -->
+    <string name="quick_settings_nfc_off">NFC encendido</string>
+    <string name="quick_settings_nfc_on">NFC apagado</string>
+
+    <!-- QuickSettings: Immersive mode [CHAR LIMIT=NONE] -->
+    <string name="quick_settings_immersive_global_on_label">Modo inmersivo</string>
+    <!-- QuickSettings: Immersive mode (Off) [CHAR LIMIT=NONE] -->
+    <string name="quick_settings_immersive_global_off_label">Modo inmersivo apagado</string>
+    <!-- QuickSettings: Immersive extra modes [CHAR LIMIT=NONE] -->
+    <string name="quick_settings_immersive_mode_off_label">Deshabilitado</string>
+    <string name="quick_settings_immersive_mode_full_label">Completo</string>
+    <string name="quick_settings_immersive_mode_no_status_bar_label">Barra de navegación</string>
+    <string name="quick_settings_immersive_mode_no_navigation_bar_label">Barra de estado</string>
+
+    <string name="network_4G">4G/LTE</string>
+    <string name="network_3G_only">Solo 3G</string>
+    <string name="network_3G_auto">2G/3G Auto</string>
+    <string name="network_3G">2G/3G Pref</string>
+    <string name="network_2G">Solo 2G</string>
+
+    <string name="quick_settings_battery_health_unknown">\nDesconocido</string>
+    <string name="quick_settings_battery_health_good">\nBuen estado</string>
+    <string name="quick_settings_battery_health_overheat">\nCaliente</string>
+    <string name="quick_settings_battery_health_dead">\nMuerta</string>
+    <string name="quick_settings_battery_health_over_voltage">\nSobre-voltaje</string>
+    <string name="quick_settings_battery_health_unspecified_failure">\nError desconocido</string>
+    <string name="quick_settings_battery_health_cold">\nFría</string>
+    <string name="quick_settings_location_mode_high">Preciso</string>
+    <string name="quick_settings_location_mode_battery">Batería</string>
+    <string name="quick_settings_location_mode_sensors">Dispositivo</string>
+    <string name="quick_settings_network_type">Estado</string>
+    <string name="quick_settings_network_unknown">Desconocido</string>
+    <string name="quick_settings_network_disable">\nSin conexión</string>
+    <string name="quick_settings_quiethours_label">Modo de descanso deshabilitado</string>
+    <string name="quick_settings_quiethours_off_label">Modo de descanso deshabilitado</string>
+    <string name="quick_settings_quiethours_active_label">Modo de descanso activo</string>
+    <string name="quick_settings_quiethours_paused_label">Modo de descanso pausado</string>
+    <string name="quick_settings_ringer_on">Sonido activo</string>
+    <string name="quick_settings_ringer_off">Silencio</string>
+    <string name="quick_settings_ringer_normal">Sonido</string>
+    <string name="quick_settings_screen_sleep">Suspender</string>
+    <string name="quick_settings_sync">Sincronización</string>
+    <string name="quick_settings_sync_off">Sincronización desactivada</string>
+    <string name="quick_settings_torch">Linterna</string>
+    <string name="quick_settings_torch_off">Linterna apagada</string>
+    <string name="quick_settings_vibration_on">Vibración habilitada</string>
+    <string name="quick_settings_vibration_off">Vibración deshabilitada</string>
+    <string name="quick_settings_volume">Volumen</string>
+    <string name="quick_settings_volume_status">Estado</string>
+    <string name="quick_settings_usb_tether_off_label">Desconectado</string>
+    <string name="quick_settings_usb_tether_connected_label">Anclaje por USB deshabilitado</string>
+    <string name="quick_settings_usb_tether_on_label">Anclaje por USB</string>
+
+    <string name="status_bar_notification_hide_icon_packages">Ocultar íconos de notificación de la aplicaciones</string>
+
+    <!-- Dialog title for navigation bar button selection -->
+    <string name="navbar_dialog_title">Seleccionar acción</string>
+    <string name="navbar_home_button">Inicio</string>
+    <string name="navbar_recent_button">Recientes</string>
+    <string name="navbar_search_button">Buscar</string>
+    <string name="navbar_back_button">Atrás</string>
+    <string name="navbar_empty_button">Vacío</string>
+    <string name="navbar_menu_conditional_button">Menú (automático)</string>
+    <string name="navbar_menu_always_button">Menú (persistente)</string>
+    <string name="navbar_menu_big_button">Menú</string>
+
+</resources>
