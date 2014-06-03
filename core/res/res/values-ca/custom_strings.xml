@@ -1,0 +1,61 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources xmlns:xliff="urn:oasis:names:tc:xliff:document:1.2">
+    <string name="global_action_reboot">Reiniciar</string>
+    <!-- Button to reboot the phone, within the Phone Options dialog -->
+    <string name="reboot_system" product="tablet">Reiniciar tablet</string>
+    <string name="reboot_system" product="default">Reiniciar telèfon</string>
+
+    <!-- Button to reboot the phone, within the Reboot Options dialog -->
+    <string name="reboot_reboot">Reiniciar</string>
+    <!-- Button to reboot the phone into recovery, within the Reboot Options dialog -->
+    <string name="reboot_recovery">Recovery</string>
+    <!-- Button to reboot the phone into bootloader, within the Reboot Options dialog -->
+    <string name="reboot_bootloader">Bootloader</string>
+    <!-- Button to reboot the phone into bootmenu, within the Reboot Options dialog -->
+    <string name="reboot_bootmenu">Bootmenu</string>
+    <!-- Button to reboot the phone into fastboot, within the Reboot Options dialog -->
+    <string name="reboot_fastboot">Fastboot</string>
+    <!-- Button to reboot the phone into download, within the Reboot Options dialog -->
+    <string name="reboot_download">Download</string>
+
+    <!-- Reboot Progress Dialog. This is shown if the user chooses to reboot the phone. -->
+    <string name="reboot_progress">Reiniciant\u2026</string>
+    <!-- Reboot Confirmation Dialog.  When the user chooses to reboot the phone, there will be a confirmation dialog.  This is the message. -->
+    <string name="reboot_confirm" product="tablet">El tablet es reiniciarà.</string>
+    <string name="reboot_confirm" product="default">El telèfon es reiniciarà.</string>
+
+    <string name="global_action_screenshot">Captura pantalla</string>
+    <string name="global_action_screenrecord">Gravar vídeo</string>
+    <string name="app_killed_message">App matat</string>
+
+    <!-- Title of an application permission that lets an application view/edit revoked permissions. -->
+    <string name="permlab_revokePermissions">Permet veure i editar els permisos revocats. No per a ús d\'aplicacions normals.</string>
+    <!-- Description of an application permission that lets lets an application view/edit revoked permissions. -->
+    <string name="permdesc_revokePermissions">Permet llegir i escriure per als permisos revocats. No per a ús d\'aplicacions normals.</string>
+
+    <!-- Title of an application permission that lets an application access the ThemeManagerService. -->
+    <string name="permlab_accessThemeService">Permet accedir al servei gestor de temes. No per a ús d\'aplicacions normals.</string>
+    <!-- Description of an application permission that lets lets an application access the ThemeManagerService -->
+    <string name="permdesc_accessThemeService">Permet a una aplicació configurar/temes de restabliment. No per a ús d\'aplicacions normals.</string>
+
+    <!-- stylus gestures support -->
+    <string name="stylus_app_not_installed">%s no està instal·lat</string>
+
+    <!-- Storage description for the SD card on the dock. [CHAR LIMIT=NONE] -->
+    <string name="storage_sd_dock_card">Targeta SD vía OTG</string>
+
+    <!-- label for item that toggle mobile data -->
+    <string name="global_actions_toggle_mobile_data">Dades mòbils</string>
+
+    <!-- status message in phone options dialog for when mobile data is on -->
+    <string name="global_actions_mobile_data_on_status">Dades mòbils està ON</string>
+
+    <!-- status message in phone options dialog for when mobile data is off -->
+    <string name="global_actions_mobile_data_off_status">Dades mòbils està OFF</string>
+
+    <!-- Immersive mode confirmation: Pick confirmation window from bottom when status bar is visible -->
+    <string name="immersive_mode_confirmation_bottom">Llisca cap amunt des del fons per sortir de la pantalla completa.</string>
+
+    <string name="toast_rotation_unlocked">Rotació de pantalla bloquejada</string>
+    <string name="toast_rotation_locked">Rotació de pantalla desbloquejada</string>
+</resources> 
