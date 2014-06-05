@@ -1,0 +1,125 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- Copyright (C) 2013 The OmniROM Project
+
+ This program is free software: you can redistribute it and/or modify
+ it under the terms of the GNU General Public License as published by
+ the Free Software Foundation, either version 2 of the License, or
+ (at your option) any later version.
+
+ This program is distributed in the hope that it will be useful,
+ but WITHOUT ANY WARRANTY; without even the implied warranty of
+ MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ GNU General Public License for more details.
+
+ You should have received a copy of the GNU General Public License
+ along with this program.  If not, see <http://www.gnu.org/licenses/>.
+
+-->
+<resources xmlns:xliff="urn:oasis:names:tc:xliff:document:1.2">
+    <!-- Quick Settings Wi-Fi Back Tile Tethering label -->
+    <string name="quick_settings_wifi_tethering_label">Ancoratge de xarxa</string>
+    <string name="quick_settings_wifi_tethering_off_label">Ancoratge de xarxa deshabilitat</string>
+
+    <!-- Quick Settings Bluetooth Not Discoverable label -->
+    <string name="quick_settings_bluetooth_not_discoverable_label">No visible</string>
+
+    <!-- Quick Settings Bluetooth Discoverable label -->
+    <string name="quick_settings_bluetooth_discoverable_label">Visible</string>
+
+    <!-- Quick Settings Bluetooth Not Connected -->
+    <string name="quick_settings_bluetooth_enabled">Habilitat</string>
+    <string name="quick_settings_bluetooth_disabled">Deshabilitat</string>
+
+    <!-- Quick Settings Bluetooth Number of Paired Devices -->
+    <string name="quick_settings_bluetooth_number_paired"><xliff:g id="number">%d</xliff:g> Dispositius aparellats</string>
+
+    <!-- Screenrecord Notification Ticker -->
+    <string name="screenrecord_notif_ticker">La pantalla s\'està gravant</string>
+
+    <!-- Screenrecord notification title -->
+    <string name="screenrecord_notif_title">Gravant pantalla</string>
+
+    <!-- Screenrecord notification action: Stop -->
+    <string name="screenrecord_notif_stop">Aturar</string>
+
+    <!-- Screenrecord notification action: show/hide pointer -->
+    <string name="screenrecord_notif_pointer_on">Mostra punter</string>
+    <string name="screenrecord_notif_pointer_off">Amaga punter</string>
+
+    <!-- Screen record notification error title -->
+    <string name="screenrecord_notif_error">No es pot gravar la pantalla</string>
+
+    <!-- Active Display -->
+    <string name="active_display_privacy_content">El contingut del missatge no mostra pel fet que la manera de privacitat està habilitat</string>
+
+    <!-- QS Battery Tile -->
+    <string name="quick_settings_battery_charging">Carregant</string>
+    <string name="quick_settings_battery_discharging">Descarregant</string>
+
+    <!-- QS NFC Tile -->
+    <string name="quick_settings_nfc_off">NFC apagat</string>
+    <string name="quick_settings_nfc_on">NFC encès</string>
+
+    <!-- QuickSettings: Immersive mode [CHAR LIMIT=NONE] -->
+    <string name="quick_settings_immersive_global_on_label">Mode inmersiu</string>
+    <!-- QuickSettings: Immersive mode (Off) [CHAR LIMIT=NONE] -->
+    <string name="quick_settings_immersive_global_off_label">Mode inmersiu apagat</string>
+    <!-- QuickSettings: Immersive extra modes [CHAR LIMIT=NONE] -->
+    <string name="quick_settings_immersive_mode_off_label">Deshabilitat</string>
+    <string name="quick_settings_immersive_mode_full_label">Complet</string>
+    <string name="quick_settings_immersive_mode_no_status_bar_label">Barra de navegació</string>
+    <string name="quick_settings_immersive_mode_no_navigation_bar_label">Barra de estat</string>
+
+    <string name="network_4G">4G/LTE</string>
+    <string name="network_3G_only">Solo 3G</string>
+    <string name="network_3G_auto">2G/3G Auto</string>
+    <string name="network_3G">2G/3G Pref</string>
+    <string name="network_2G">Solo 2G</string>
+
+    <string name="quick_settings_battery_health_unknown">\nDesconegut</string>
+    <string name="quick_settings_battery_health_good">\nBon estat</string>
+    <string name="quick_settings_battery_health_overheat">\nCalent</string>
+    <string name="quick_settings_battery_health_dead">\nMorta</string>
+    <string name="quick_settings_battery_health_over_voltage">\nSobre-voltaje</string>
+    <string name="quick_settings_battery_health_unspecified_failure">\nError desconegut</string>
+    <string name="quick_settings_battery_health_cold">\nFreda</string>
+    <string name="quick_settings_location_mode_high">Precís</string>
+    <string name="quick_settings_location_mode_battery">Batería</string>
+    <string name="quick_settings_location_mode_sensors">Dispositiu</string>
+    <string name="quick_settings_network_type">Estat</string>
+    <string name="quick_settings_network_unknown">Desconegut</string>
+    <string name="quick_settings_network_disable">\nSense conexió</string>
+    <string name="quick_settings_quiethours_label">Mode de descans deshabilitat</string>
+    <string name="quick_settings_quiethours_off_label">Mode de descans deshabilitat</string>
+    <string name="quick_settings_quiethours_active_label">Mode de descans actiu</string>
+    <string name="quick_settings_quiethours_paused_label">Mode de descans pausat</string>
+    <string name="quick_settings_ringer_on">So actiu</string>
+    <string name="quick_settings_ringer_off">Silenci</string>
+    <string name="quick_settings_ringer_normal">So</string>
+    <string name="quick_settings_screen_sleep">Suspendre</string>
+    <string name="quick_settings_sync">Sincronizació</string>
+    <string name="quick_settings_sync_off">Sincronizació desactivada</string>
+    <string name="quick_settings_torch">Llanterna</string>
+    <string name="quick_settings_torch_off">Llanterna apagada</string>
+    <string name="quick_settings_vibration_on">Vibració habilitada</string>
+    <string name="quick_settings_vibration_off">Vibració deshabilitada</string>
+    <string name="quick_settings_volume">Volum</string>
+    <string name="quick_settings_volume_status">Estat</string>
+    <string name="quick_settings_usb_tether_off_label">Desconectat</string>
+    <string name="quick_settings_usb_tether_connected_label">Anclaje per USB deshabilitat</string>
+    <string name="quick_settings_usb_tether_on_label">Ancoratge por USB</string>
+
+    <string name="status_bar_notification_hide_icon_packages">Amaga icones de notificació de les aplicacions</string>
+
+    <!-- Dialog title for navigation bar button selection -->
+    <string name="navbar_dialog_title">Seleccionar acció</string>
+    <string name="navbar_home_button">Inici</string>
+    <string name="navbar_recent_button">Recients</string>
+    <string name="navbar_search_button">Cercar</string>
+    <string name="navbar_back_button">Enrere</string>
+    <string name="navbar_empty_button">Buit</string>
+    <string name="navbar_menu_conditional_button">Menú (automátic)</string>
+    <string name="navbar_menu_always_button">Menú (persistent)</string>
+    <string name="navbar_menu_big_button">Menú</string>
+
+</resources>
