@@ -1,0 +1,38 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "8b77b57d_bc7017dc",
+        "filename": "packages/SystemUI/res/values-ca/custom_strings.xml",
+        "patchSetId": 3
+      },
+      "lineNbr": 60,
+      "author": {
+        "id": 1000501
+      },
+      "writtenOn": "2014-06-05T10:27:55Z",
+      "side": 1,
+      "message": "\"NFC apagat\"",
+      "revId": "4b6c56d5d583e35169b768b1b2ea53c68d766e00",
+      "serverId": "56841c99-7c94-43d4-bf0b-cb4707e66d55",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "8b77b57d_dc75d3ca",
+        "filename": "packages/SystemUI/res/values-ca/custom_strings.xml",
+        "patchSetId": 3
+      },
+      "lineNbr": 61,
+      "author": {
+        "id": 1000501
+      },
+      "writtenOn": "2014-06-05T10:27:55Z",
+      "side": 1,
+      "message": "\"NFC encès\"",
+      "revId": "4b6c56d5d583e35169b768b1b2ea53c68d766e00",
+      "serverId": "56841c99-7c94-43d4-bf0b-cb4707e66d55",
+      "unresolved": false
+    }
+  ]
+}
