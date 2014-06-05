@@ -57,8 +57,8 @@
     <string name="quick_settings_battery_discharging">Descargando</string>
 
     <!-- QS NFC Tile -->
-    <string name="quick_settings_nfc_off">NFC encendido</string>
-    <string name="quick_settings_nfc_on">NFC apagado</string>
+    <string name="quick_settings_nfc_off">NFC apagado</string>
+    <string name="quick_settings_nfc_on">NFC encendido</string>
 
     <!-- QuickSettings: Immersive mode [CHAR LIMIT=NONE] -->
     <string name="quick_settings_immersive_global_on_label">Modo inmersivo</string>
