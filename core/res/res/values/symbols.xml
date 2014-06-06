@@ -1129,6 +1129,10 @@
   <java-symbol type="drawable" name="ic_media_route_off_holo_dark" />
   <java-symbol type="drawable" name="ic_media_route_connecting_holo_dark" />
   <java-symbol type="drawable" name="ic_media_route_disabled_holo_dark" />
+  <java-symbol type="drawable" name="ic_media_route_on_holo_light" />
+  <java-symbol type="drawable" name="ic_media_route_off_holo_light" />
+  <java-symbol type="drawable" name="ic_media_route_connecting_holo_light" />
+  <java-symbol type="drawable" name="ic_media_route_disabled_holo_light" />
   <java-symbol type="drawable" name="ic_notification_cast_connecting" />
   <java-symbol type="drawable" name="ic_notification_cast_on" />
   <java-symbol type="drawable" name="cling_button" />
@@ -1984,6 +1988,10 @@
   <java-symbol type="id" name="busy_dlg_title" />
   <java-symbol type="layout" name="busy_dlg" />
 
+  <!-- Amra dialog -->
+  <java-symbol type="layout" name="amra_dlg" />
+  <java-symbol type="drawable" name="amra_card" />
+  
   <!-- Options that show upon long-pressing a key on the physical keyboard -->
   <java-symbol type="string" name="symbol_picker_0" />
   <java-symbol type="string" name="symbol_picker_1" />

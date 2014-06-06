@@ -21,7 +21,7 @@
         android:id="@+id/visible_panel"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:background="@android:drawable/dialog_full_holo_dark"
+        android:background="@android:drawable/dialog_full_holo_light"
         android:orientation="horizontal"
         >
 
@@ -37,7 +37,7 @@
 
         <ImageView
             android:id="@+id/expand_button_divider"
-            android:src="?attr/dividerVertical"
+            android:src="@drawable/divider_vertical_holo_light"
             android:layout_width="wrap_content"
             android:layout_height="32dip"
             android:scaleType="fitXY"
@@ -53,7 +53,7 @@
             android:layout_gravity="top"
             android:padding="16dip"
             android:background="?attr/selectableItemBackground"
-            android:src="@drawable/ic_sysbar_quicksettings"
+            android:src="@drawable/ic_volume_settings"
             />
 
     </LinearLayout>

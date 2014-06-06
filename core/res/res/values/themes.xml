@@ -867,7 +867,7 @@ please see themes_device_defaults.xml.
         <item name="android:windowCloseOnTouchOutside">false</item>
     </style>
 
-    <style name="Theme.Panel.Volume">
+    <style name="Theme.Panel.Volume" parent="Theme.Holo.Light.Panel">
         <item name="android:windowAnimationStyle">@android:style/Animation.VolumePanel</item>
         <item name="android:windowCloseOnTouchOutside">true</item>
     </style>

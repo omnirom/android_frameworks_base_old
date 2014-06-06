@@ -257,13 +257,13 @@ public class MediaRouteControllerDialog extends Dialog {
         if (mRoute.isConnecting()) {
             if (mMediaRouteConnectingDrawable == null) {
                 mMediaRouteConnectingDrawable = getContext().getResources().getDrawable(
-                        R.drawable.ic_media_route_connecting_holo_dark);
+                        R.drawable.ic_media_route_connecting_holo_light);
             }
             return mMediaRouteConnectingDrawable;
         } else {
             if (mMediaRouteOnDrawable == null) {
                 mMediaRouteOnDrawable = getContext().getResources().getDrawable(
-                        R.drawable.ic_media_route_on_holo_dark);
+                        R.drawable.ic_media_route_on_holo_light);
             }
             return mMediaRouteOnDrawable;
         }

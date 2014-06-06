@@ -193,8 +193,8 @@ public class VolumePanel extends Handler implements OnSeekBarChangeListener, Vie
                 false),
         RemoteStream(AudioService.STREAM_REMOTE_MUSIC,
                 R.string.volume_icon_description_media, //FIXME should have its own description
-                R.drawable.ic_media_route_on_holo_dark,
-                R.drawable.ic_media_route_disabled_holo_dark,
+                R.drawable.ic_media_route_on_holo_light,
+                R.drawable.ic_media_route_disabled_holo_light,
                 false);// will be dynamically updated
 
         int streamType;
