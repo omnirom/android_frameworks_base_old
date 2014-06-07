@@ -2621,7 +2621,7 @@
                  android:icon="@drawable/ic_launcher_android"
                  android:supportsRtl="true">
         <activity android:name="com.android.internal.app.ChooserActivity"
-                android:theme="@style/Theme.Holo.Dialog.Alert"
+                android:theme="@style/Theme.Holo.Light.Dialog.Alert"
                 android:finishOnCloseSystemDialogs="true"
                 android:excludeFromRecents="true"
                 android:multiprocess="true">
@@ -2631,7 +2631,7 @@
             </intent-filter>
         </activity>
         <activity android:name="com.android.internal.app.HeavyWeightSwitcherActivity"
-                android:theme="@style/Theme.Holo.Dialog"
+                android:theme="@style/Theme.Holo.Light.Dialog"
                 android:label="@string/heavy_weight_switcher_title"
                 android:finishOnCloseSystemDialogs="true"
                 android:excludeFromRecents="true"
@@ -2650,7 +2650,7 @@
         <activity android:name="android.accounts.ChooseAccountActivity"
                 android:excludeFromRecents="true"
                 android:exported="true"
-                android:theme="@android:style/Theme.Holo.Dialog"
+                android:theme="@android:style/Theme.Holo.Light.Dialog"
                 android:label="@string/choose_account_label"
                 android:process=":ui">
         </activity>
@@ -2658,14 +2658,14 @@
         <activity android:name="android.accounts.ChooseTypeAndAccountActivity"
                 android:excludeFromRecents="true"
                 android:exported="true"
-                android:theme="@android:style/Theme.Holo.Dialog"
+                android:theme="@android:style/Theme.Holo.Light.Dialog"
                 android:label="@string/choose_account_label"
                 android:process=":ui">
         </activity>
 
         <activity android:name="android.accounts.ChooseAccountTypeActivity"
                 android:excludeFromRecents="true"
-                android:theme="@android:style/Theme.Holo.Dialog"
+                android:theme="@android:style/Theme.Holo.Light.Dialog"
                 android:label="@string/choose_account_label"
                 android:process=":ui">
         </activity>
@@ -2685,13 +2685,14 @@
         </activity>
 
         <activity android:name="android.content.SyncActivityTooManyDeletes"
-               android:theme="@android:style/Theme.Holo.Dialog"
+               android:theme="@android:style/Theme.Holo.Light.Dialog"
                android:label="@string/sync_too_many_deletes"
                android:process=":ui">
         </activity>
 
         <activity android:name="com.android.server.ShutdownActivity"
             android:permission="android.permission.SHUTDOWN"
+            android:theme="@style/Theme.Holo.Light.Dialog.Alert"
             android:excludeFromRecents="true">
             <intent-filter>
                 <action android:name="android.intent.action.ACTION_REQUEST_SHUTDOWN" />
@@ -2704,13 +2705,13 @@
         </activity>
 
         <activity android:name="com.android.internal.app.NetInitiatedActivity"
-                android:theme="@style/Theme.Holo.Dialog.Alert"
+                android:theme="@style/Theme.Holo.Light.Dialog.Alert"
                 android:excludeFromRecents="true"
                 android:process=":ui">
         </activity>
 
         <activity android:name="com.android.internal.app.RestrictionsPinActivity"
-                android:theme="@style/Theme.Holo.Dialog.Alert"
+                android:theme="@style/Theme.Holo.Light.Dialog.Alert"
                 android:excludeFromRecents="true"
                 android:windowSoftInputMode="adjustPan"
                 android:process=":ui">

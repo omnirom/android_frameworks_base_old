@@ -95,7 +95,7 @@ public class AlertDialog extends Dialog implements DialogInterface {
     public static final int THEME_DEVICE_DEFAULT_LIGHT = 5;
     
     protected AlertDialog(Context context) {
-        this(context, resolveDialogTheme(context, 0), true);
+        this(context, resolveDialogTheme(context, 3), true);
     }
 
     /**
@@ -118,7 +118,7 @@ public class AlertDialog extends Dialog implements DialogInterface {
     }
 
     protected AlertDialog(Context context, boolean cancelable, OnCancelListener cancelListener) {
-        super(context, resolveDialogTheme(context, 0));
+        super(context, resolveDialogTheme(context, 3));
         mWindow.alwaysReadCloseOnTouchAttr();
         setCancelable(cancelable);
         setOnCancelListener(cancelListener);
