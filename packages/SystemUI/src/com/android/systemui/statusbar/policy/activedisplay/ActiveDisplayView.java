@@ -382,17 +382,17 @@ public class ActiveDisplayView extends FrameLayout
             resolver.registerContentObserver(Settings.System.getUriFor(
                     Settings.System.ACTIVE_DISPLAY_DOUBLE_TAP), false, this);
             resolver.registerContentObserver(Settings.System.getUriFor(
-                    Settings.System.ACTIVE_DISPLAY_SHAKE_EVENT), false, this);
+                    Settings.System.SHAKE_EVENT), false, this);
             resolver.registerContentObserver(Settings.System.getUriFor(
-                    Settings.System.ACTIVE_DISPLAY_SHAKE_FORCE), false, this);
+                    Settings.System.SHAKE_FORCE), false, this);
             resolver.registerContentObserver(Settings.System.getUriFor(
-                    Settings.System.ACTIVE_DISPLAY_SHAKE_QUITE_HOURS), false, this);
+                    Settings.System.SHAKE_QUITE_HOURS), false, this);
             resolver.registerContentObserver(Settings.System.getUriFor(
-                    Settings.System.ACTIVE_DISPLAY_SHAKE_THRESHOLD), false, this);
+                    Settings.System.SHAKE_THRESHOLD), false, this);
             resolver.registerContentObserver(Settings.System.getUriFor(
-                    Settings.System.ACTIVE_DISPLAY_SHAKE_LONGTHRESHOLD), false, this);
+                    Settings.System.SHAKE_LONGTHRESHOLD), false, this);
             resolver.registerContentObserver(Settings.System.getUriFor(
-                    Settings.System.ACTIVE_DISPLAY_SHAKE_TIMEOUT), false, this);
+                    Settings.System.SHAKE_TIMEOUT), false, this);
             update();
         }
 
@@ -468,22 +468,22 @@ public class ActiveDisplayView extends FrameLayout
                     resolver, Settings.System.ACTIVE_DISPLAY_DOUBLE_TAP, 0,
                     UserHandle.USER_CURRENT_OR_SELF) != 0;
             mEnableShake = Settings.System.getIntForUser(
-                    resolver, Settings.System.ACTIVE_DISPLAY_SHAKE_EVENT, 0,
+                    resolver, Settings.System.SHAKE_EVENT, 0,
                     UserHandle.USER_CURRENT_OR_SELF) != 0;
             mEnableShakeForce = Settings.System.getIntForUser(
-                    resolver, Settings.System.ACTIVE_DISPLAY_SHAKE_FORCE, 0,
+                    resolver, Settings.System.SHAKE_FORCE, 0,
                     UserHandle.USER_CURRENT_OR_SELF) != 0;
             mDisableShakeQuite = Settings.System.getIntForUser(
-                    resolver, Settings.System.ACTIVE_DISPLAY_SHAKE_QUITE_HOURS, 0,
+                    resolver, Settings.System.SHAKE_QUITE_HOURS, 0,
                     UserHandle.USER_CURRENT_OR_SELF) != 0;
             mShakeThreshold = Settings.System.getIntForUser(
-                    resolver, Settings.System.ACTIVE_DISPLAY_SHAKE_THRESHOLD, mShakeThreshold,
+                    resolver, Settings.System.SHAKE_THRESHOLD, mShakeThreshold,
                     UserHandle.USER_CURRENT_OR_SELF);
             mShakeLongThreshold = Settings.System.getIntForUser(
-                    resolver, Settings.System.ACTIVE_DISPLAY_SHAKE_LONGTHRESHOLD, mShakeLongThreshold,
+                    resolver, Settings.System.SHAKE_LONGTHRESHOLD, mShakeLongThreshold,
                     UserHandle.USER_CURRENT_OR_SELF);
             mShakeTimeout = Settings.System.getIntForUser(
-                    resolver, Settings.System.ACTIVE_DISPLAY_SHAKE_TIMEOUT, mShakeTimeout,
+                    resolver, Settings.System.SHAKE_TIMEOUT, mShakeTimeout,
                     UserHandle.USER_CURRENT_OR_SELF);
 
             createExcludedAppsSet(excludedApps);

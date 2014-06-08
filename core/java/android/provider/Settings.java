@@ -2992,37 +2992,37 @@ public final class Settings {
          * shake device to show/hide active display.
          * @hide
          */
-        public static final String ACTIVE_DISPLAY_SHAKE_EVENT = "active_display_shake_event";
+        public static final String SHAKE_EVENT = "active_display_shake_event";
 
         /**
          * force shake device to show active display.
          * @hide
          */
-        public static final String ACTIVE_DISPLAY_SHAKE_FORCE = "active_display_shake_force";
+        public static final String SHAKE_FORCE = "active_display_shake_force";
 
         /**
          * shake device to show/hide active display.
          * @hide
          */
-        public static final String ACTIVE_DISPLAY_SHAKE_QUITE_HOURS = "active_display_shake_quiet_hours";
+        public static final String SHAKE_QUITE_HOURS = "active_display_shake_quiet_hours";
 
         /**
          * shake threshold active display.
          * @hide
          */
-        public static final String ACTIVE_DISPLAY_SHAKE_THRESHOLD = "active_display_shake_threshold";
+        public static final String SHAKE_THRESHOLD = "active_display_shake_threshold";
 
         /**
          * shake timeout active display.
          * @hide
          */
-        public static final String ACTIVE_DISPLAY_SHAKE_TIMEOUT = "active_display_shake_timeout";
+        public static final String SHAKE_TIMEOUT = "active_display_shake_timeout";
 
         /**
          * shake between interval active display.
          * @hide
          */
-        public static final String ACTIVE_DISPLAY_SHAKE_LONGTHRESHOLD = "active_display_shake_long_threshold";
+        public static final String SHAKE_LONGTHRESHOLD = "active_display_shake_long_threshold";
 
         /**
          * Screen-On Notification Light
