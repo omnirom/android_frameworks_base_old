@@ -152,8 +152,8 @@ public final class Settings {
      * safeguard against this.
      * <p>
      * Input: Nothing.
-     * <p>
-     * Output: Nothing.
+      * <p>
+    * Output: Nothing.
      */
     @SdkConstant(SdkConstantType.ACTIVITY_INTENT_ACTION)
     public static final String ACTION_SECURITY_SETTINGS =
@@ -169,6 +169,7 @@ public final class Settings {
      * Input: Nothing.
      * <p>
      * Output: Nothing.
+     *
      * @hide
      */
     @SdkConstant(SdkConstantType.ACTIVITY_INTENT_ACTION)
@@ -2766,6 +2767,114 @@ public final class Settings {
         public static final String LOCKSCREEN_BLUR_RADIUS = "lockscreen_blur_radius";
 
         /**
+         * Enables/disables lockscreen notifications
+         *
+         * @hide
+         */
+        public static final String LOCKSCREEN_NOTIFICATIONS = "lockscreen_notifications";
+
+        /**
+         * Show non clearable notifications from lockscreen notifications
+         *
+         * @hide
+         */
+        public static final String LOCKSCREEN_NOTIFICATIONS_SHOW_NON_CLEARABLE = "lockscreen_notifications_show_non_clearable";
+
+        /**
+         * Allows dismissing even non-clearable notifications from lockscreen notifications.
+         * Of course, this doesn't really dismiss them, they're just not shown on lockscreen anymore.
+         *
+         * @hide
+         */
+        public static final String LOCKSCREEN_NOTIFICATIONS_DISMISS_ALL = "lockscreen_notifications_dismiss_all";
+
+        /**
+         * Controls whether clearable notifications are dismissed when removed from view.
+         *
+         * @hide
+         */
+        public static final String LOCKSCREEN_NOTIFICATIONS_DISMISS_NOTIFICATION = "lockscreen_notifications_dismiss_notification";
+
+        /**
+         * Hide low priority notifications such as google now weather notifications from lockscreen notifications
+         *
+         * @hide
+         */
+        public static final String LOCKSCREEN_NOTIFICATIONS_HIDE_LOW_PRIORITY = "lockscreen_notifications_hide_low_priority";
+
+        /**
+         * A list of packages to include low priority notifications from even when show low priority has been disabled
+         * This should be a string of packages separated by |
+         *
+         * @hide
+         */
+        public static final String LOCKSCREEN_NOTIFICATIONS_INCLUDED_APPS = "lockscreen_notifications_included_apps";
+
+        /**
+         * A list of packages to exclude from being displayed as lockscreen notifications.
+         * This should be a string of packages separated by |
+         *
+         * @hide
+         */
+        public static final String LOCKSCREEN_NOTIFICATIONS_EXCLUDED_APPS = "lockscreen_notifications_excluded_apps";
+
+        /**
+         * Wakes the device when a new notifications is received
+         *
+         * @hide
+         */
+        public static final String LOCKSCREEN_NOTIFICATIONS_WAKE_ON_NOTIFICATION = "lockscreen_notifications_wake_on_notification";
+
+        /**
+         * Enables dynamic with for shown notifications on devices >= xxhdpi
+         *
+         * @hide
+         */
+        public static final String LOCKSCREEN_NOTIFICATIONS_DYNAMIC_WIDTH = "lockscreen_notifications_dynamic_width";
+
+        /**
+         * Changes the offset of the notifications to the top of the screen
+         *
+         * @hide
+         */
+        public static final String LOCKSCREEN_NOTIFICATIONS_OFFSET_TOP = "lockscreen_notifications_offset_top";
+
+        /**
+         * Sets the count of notifications shown at once
+         *
+         * @hide
+         */
+        public static final String LOCKSCREEN_NOTIFICATIONS_HEIGHT = "lockscreen_notifications_height";
+
+        /**
+         * Set a custom notification background color
+         *
+         * @hide
+         */
+        public static final String LOCKSCREEN_NOTIFICATIONS_COLOR = "lockscreen_notifications_color";
+
+        /**
+         * Enables a privacy mode which disables showing notifications.
+         *
+         * @hide
+         */
+        public static final String LOCKSCREEN_NOTIFICATIONS_PRIVACY_MODE = "lockscreen_notifications_privacy_mode";
+
+        /**
+         * Toggle between extended and normal view by longpressing the notification
+         *
+         * @hide
+         */
+        public static final String LOCKSCREEN_NOTIFICATIONS_EXPANDED_VIEW = "lockscreen_notifications_expanded_view";
+
+        /**
+         * Show lockscreen notifications extended when possible
+         *
+         * @hide
+         */
+        public static final String LOCKSCREEN_NOTIFICATIONS_FORCE_EXPANDED_VIEW = "lockscreen_notifications_force_expanded_view";
+
+        /**
          * Whether to display notifications on screen when screen is off
          * @hide
          */
@@ -2790,10 +2899,17 @@ public final class Settings {
         public static final String ACTIVE_DISPLAY_BRIGHTNESS = "active_display_brightness";
 
         /**
-         * Display active display view when device comes out of the user's pocket, etc...
+         * Enable action when device comes out of the user's pocket, etc...
          * @hide
          */
-        public static final String ACTIVE_DISPLAY_POCKET_MODE = "active_display_pocket_mode";
+        public static final String POCKET_MODE_ENABLE = "pocket_mode_enable";
+
+        /**
+         * Action when device comes out of the user's pocket, etc...
+         *
+         * @hide
+         */
+        public static final String POCKET_MODE = "pocket_mode";
 
         /**
          * Whether to include ongoing/non-clearable notifications
@@ -2830,13 +2946,13 @@ public final class Settings {
          * Whether to turn off the device when gets pocketed again and was waked up by active display
          * @hide
          */
-        public static final String ACTIVE_DISPLAY_TURNOFF_MODE = "active_display_turnoff_mode";
+        public static final String POCKET_MODE_TURNOFF_MODE = "pocket_mode_turnoff_mode";
 
         /**
          * Threshold of the proximity sensor to turn on the device.
          * @hide
          */
-        public static final String ACTIVE_DISPLAY_THRESHOLD = "active_display_threshold";
+        public static final String POCKET_MODE_THRESHOLD = "pocket_mode_threshold";
 
         /**
          * use Active display content view instead default one.
@@ -2869,7 +2985,7 @@ public final class Settings {
          * and there is no notifications
          * @hide
          */
-        public static final String ACTIVE_DISPLAY_BYPASS = "active_display_bypass";
+        public static final String POCKET_MODE_BYPASS = "pocket_mode_bypass";
 
         /**
          * Whether to not showing active display when there is annoying notifications.
@@ -2884,40 +3000,67 @@ public final class Settings {
         public static final String ACTIVE_DISPLAY_DOUBLE_TAP = "active_display_double_tap";
 
         /**
-         * shake device to show/hide active display.
+         * shake device
          * @hide
          */
-        public static final String ACTIVE_DISPLAY_SHAKE_EVENT = "active_display_shake_event";
+        public static final String SHAKE_EVENT = "shake_event";
 
         /**
          * force shake device to show active display.
          * @hide
          */
-        public static final String ACTIVE_DISPLAY_SHAKE_FORCE = "active_display_shake_force";
+        public static final String SHAKE_FORCE = "shake_force";
 
         /**
-         * shake device to show/hide active display.
+         * shake device to during quiet hours
          * @hide
          */
-        public static final String ACTIVE_DISPLAY_SHAKE_QUITE_HOURS = "active_display_shake_quiet_hours";
+        public static final String SHAKE_QUITE_HOURS = "shake_quiet_hours";
 
         /**
-         * shake threshold active display.
+         * shake threshold.
          * @hide
          */
-        public static final String ACTIVE_DISPLAY_SHAKE_THRESHOLD = "active_display_shake_threshold";
+        public static final String SHAKE_THRESHOLD = "shake_threshold";
 
         /**
-         * shake timeout active display.
+         * shake timeout.
          * @hide
          */
-        public static final String ACTIVE_DISPLAY_SHAKE_TIMEOUT = "active_display_shake_timeout";
+        public static final String SHAKE_TIMEOUT = "shake_timeout";
 
         /**
-         * shake between interval active display.
+         * shake always.
          * @hide
          */
-        public static final String ACTIVE_DISPLAY_SHAKE_LONGTHRESHOLD = "active_display_shake_long_threshold";
+        public static final String SHAKE_ALWAYS = "shake_always_enable";
+
+        /**
+         * shake between interval
+         * @hide
+         */
+        public static final String SHAKE_LONGTHRESHOLD = "shake_long_threshold";
+
+        /**	
+         * Heads Up Notifications
+         *
+         * @hide
+         */
+        public static final String HEADS_UP_NOTIFICATION = "heads_up_enabled";
+
+        /**	
+         * Heads Up Notifications timeout
+         *
+         * @hide
+         */
+        public static final String HEADS_UP_TIMEOUT = "heads_up_timeout";
+
+        /**
+         * Which applications to disable heads up notifications for
+         *
+         * @hide
+         */
+        public static final String HEADS_UP_CUSTOM_VALUES = "heads_up_custom_values";
 
         /**
          * Screen-On Notification Light
@@ -4966,35 +5109,35 @@ public final class Settings {
         /**
          * Key bindings for navigation in built-in accessibility support for web content.
          * <p>
-         *   Note: These key bindings are for the built-in accessibility navigation for
-         *   web content which is used as a fall back solution if JavaScript in a WebView
-         *   is not enabled or the user has not opted-in script injection from Google.
+         * Note: These key bindings are for the built-in accessibility navigation for
+         * web content which is used as a fall back solution if JavaScript in a WebView
+         * is not enabled or the user has not opted-in script injection from Google.
          * </p>
          * <p>
-         *   The bindings are separated by semi-colon. A binding is a mapping from
-         *   a key to a sequence of actions (for more details look at
-         *   android.webkit.AccessibilityInjector). A key is represented as the hexademical
-         *   string representation of an integer obtained from a meta state (optional) shifted
-         *   sixteen times left and bitwise ored with a key code. An action is represented
-         *   as a hexademical string representation of an integer where the first two digits
-         *   are navigation action index, the second, the third, and the fourth digit pairs
-         *   represent the action arguments. The separate actions in a binding are colon
-         *   separated. The key and the action sequence it maps to are separated by equals.
+         * The bindings are separated by semi-colon. A binding is a mapping from
+         * a key to a sequence of actions (for more details look at
+         * android.webkit.AccessibilityInjector). A key is represented as the hexademical
+         * string representation of an integer obtained from a meta state (optional) shifted
+         * sixteen times left and bitwise ored with a key code. An action is represented
+         * as a hexademical string representation of an integer where the first two digits
+         * are navigation action index, the second, the third, and the fourth digit pairs
+         * represent the action arguments. The separate actions in a binding are colon
+         * separated. The key and the action sequence it maps to are separated by equals.
          * </p>
          * <p>
-         *   For example, the binding below maps the DPAD right button to traverse the
-         *   current navigation axis once without firing an accessibility event and to
-         *   perform the same traversal again but to fire an event:
-         *   <code>
-         *     0x16=0x01000100:0x01000101;
-         *   </code>
+         * For example, the binding below maps the DPAD right button to traverse the
+         * current navigation axis once without firing an accessibility event and to
+         * perform the same traversal again but to fire an event:
+         * <code>
+         * 0x16=0x01000100:0x01000101;
+         * </code>
          * </p>
          * <p>
-         *   The goal of this binding is to enable dynamic rebinding of keys to
-         *   navigation actions for web content without requiring a framework change.
+         * The goal of this binding is to enable dynamic rebinding of keys to
+         * navigation actions for web content without requiring a framework change.
          * </p>
          * <p>
-         *   This property represents a string value.
+         * This property represents a string value.
          * </p>
          * @hide
          */
