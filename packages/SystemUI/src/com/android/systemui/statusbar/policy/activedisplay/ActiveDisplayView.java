@@ -62,6 +62,7 @@ import android.telephony.TelephonyManager;
 import android.text.TextUtils;
 import android.util.AttributeSet;
 import android.util.Log;
+import android.util.Log;
 import android.view.GestureDetector;
 import android.view.Gravity;
 import android.view.MotionEvent;
@@ -73,6 +74,7 @@ import android.widget.RemoteViews;
 import android.widget.TextView;
 
 import com.android.internal.util.omni.DeviceUtils;
+import com.android.internal.util.omni.ShakeSensorManager;
 import com.android.internal.util.slim.QuietHoursHelper;
 import com.android.internal.widget.LockPatternUtils;
 import com.android.internal.widget.multiwaveview.GlowPadView;
@@ -93,8 +95,8 @@ import java.util.HashSet;
 import java.util.Set;
 
 public class ActiveDisplayView extends FrameLayout
-               implements ProximitySensorManager.ProximityListener,
-                   LightSensorManager.LightListener, ShakeSensorManager.ShakeListener {
+        implements ProximitySensorManager.ProximityListener,
+        LightSensorManager.LightListener, ShakeSensorManager.ShakeListener {
 
     private static final boolean DEBUG = false;
     private static final String TAG = "ActiveDisplayView";
@@ -114,12 +116,12 @@ public class ActiveDisplayView extends FrameLayout
     private static final String ACTION_UNLOCK_DEVICE
             = "com.android.systemui.action.UNLOCK_DEVICE";
 
-    private static final String[] AUTO_BANNED_PACKAGES = new String[] {
-        "android",
-        "com.android.music",
-        "com.andrew.apollo",
-        "com.google.android.music",
-        "com.android.providers.downloads"
+    private static final String[] AUTO_BANNED_PACKAGES = new String[]{
+            "android",
+            "com.android.music",
+            "com.andrew.apollo",
+            "com.google.android.music",
+            "com.android.providers.downloads"
     };
 
     private static final int MAX_OVERFLOW_ICONS = 8;
@@ -132,15 +134,20 @@ public class ActiveDisplayView extends FrameLayout
     private final int GO_TO_SLEEP_REASON_TIMEOUT = 2;
 
     // the different pocket mode options
-    private final int POCKET_MODE_OFF = 0;
     private final int POCKET_MODE_NOTIFICATIONS_ONLY = 1;
     private final int POCKET_MODE_ALWAYS = 2;
 
-    /** Screen turned off because of power button */
+    /**
+     * Screen turned off because of power button
+     */
     private final int OFF_BECAUSE_OF_USER = 2;
-    /** Screen turned off because of timeout */
+    /**
+     * Screen turned off because of timeout
+     */
     private final int OFF_BECAUSE_OF_TIMEOUT = 3;
-    /** Screen turned off because of proximity sensor */
+    /**
+     * Screen turned off because of proximity sensor
+     */
     private final int OFF_BECAUSE_OF_PROX_SENSOR = 4;
 
     // Targets
@@ -151,11 +158,11 @@ public class ActiveDisplayView extends FrameLayout
     // messages sent to the handler for processing
     private static final int MSG_SHOW_NOTIFICATION_VIEW = 1000;
     private static final int MSG_HIDE_NOTIFICATION_VIEW = 1001;
-    private static final int MSG_SHOW_NOTIFICATION      = 1002;
-    private static final int MSG_SHOW_TIME              = 1003;
-    private static final int MSG_DISMISS_NOTIFICATION   = 1004;
+    private static final int MSG_SHOW_NOTIFICATION = 1002;
+    private static final int MSG_SHOW_TIME = 1003;
+    private static final int MSG_DISMISS_NOTIFICATION = 1004;
     private static final int MSG_HIDE_NOTIFICATION_CALL = 1005;
-    private static final int MSG_SHOW_NOTHING           = 1006;
+    private static final int MSG_SHOW_NOTHING = 1006;
 
     private GlowPadView mGlowPadView;
     private GestureDetector mDoubleTapGesture;
@@ -225,9 +232,11 @@ public class ActiveDisplayView extends FrameLayout
     private boolean mEnableShake = false;
     private boolean mEnableShakeForce = false;
     private boolean mDisableShakeQuite = false;
-    private int mShakeTimeout = 3;
+    private boolean mShakeAlways = false;
+    private int mShakeTimeout = 10;
     private int mShakeThreshold = 10;
-    private int mPocketMode = POCKET_MODE_OFF;
+    private boolean mPocketModeEnable = false;
+    private int mPocketMode = POCKET_MODE_NOTIFICATIONS_ONLY;
     private int mBrightnessMode = -1;
     private int mUserBrightnessLevel = -1;
     private int mMinimumBacklight;
@@ -255,7 +264,7 @@ public class ActiveDisplayView extends FrameLayout
                 // viewing the notifications
                 if (getVisibility() == View.VISIBLE || !isScreenOn()) {
                     if (mEnableShakeForce) {
-                        if((mShakeTimeout > 0) && !inQuietHours()) {
+                        if (!mShakeAlways && (mDisableShakeQuite || !inQuietHours())) {
                             enableShakeSensor();
                             updateShakeTimer();
                             Log.i(TAG, "Shake enable by force option.");
@@ -350,7 +359,9 @@ public class ActiveDisplayView extends FrameLayout
             resolver.registerContentObserver(Settings.System.getUriFor(
                     Settings.System.ACTIVE_DISPLAY_HIDE_LOW_PRIORITY_NOTIFICATIONS), false, this);
             resolver.registerContentObserver(Settings.System.getUriFor(
-                    Settings.System.ACTIVE_DISPLAY_POCKET_MODE), false, this);
+                    Settings.System.POCKET_MODE_ENABLE), false, this);
+            resolver.registerContentObserver(Settings.System.getUriFor(
+                    Settings.System.POCKET_MODE), false, this);
             resolver.registerContentObserver(Settings.System.getUriFor(
                     Settings.System.ACTIVE_DISPLAY_REDISPLAY), false, this);
             resolver.registerContentObserver(Settings.System.getUriFor(
@@ -366,13 +377,13 @@ public class ActiveDisplayView extends FrameLayout
             resolver.registerContentObserver(Settings.System.getUriFor(
                     Settings.System.ACTIVE_DISPLAY_TIMEOUT), false, this);
             resolver.registerContentObserver(Settings.System.getUriFor(
-                    Settings.System.ACTIVE_DISPLAY_TURNOFF_MODE), false, this);
+                    Settings.System.POCKET_MODE_TURNOFF_MODE), false, this);
             resolver.registerContentObserver(Settings.System.getUriFor(
-                    Settings.System.ACTIVE_DISPLAY_THRESHOLD), false, this);
+                    Settings.System.POCKET_MODE_THRESHOLD), false, this);
             resolver.registerContentObserver(Settings.System.getUriFor(
                     Settings.System.ACTIVE_DISPLAY_CONTENT), false, this);
             resolver.registerContentObserver(Settings.System.getUriFor(
-                    Settings.System.ACTIVE_DISPLAY_BYPASS), false, this);
+                    Settings.System.POCKET_MODE_BYPASS), false, this);
             resolver.registerContentObserver(Settings.System.getUriFor(
                     Settings.System.BATTERY_AROUND_LOCKSCREEN_RING), false, this);
             resolver.registerContentObserver(Settings.System.getUriFor(
@@ -382,17 +393,19 @@ public class ActiveDisplayView extends FrameLayout
             resolver.registerContentObserver(Settings.System.getUriFor(
                     Settings.System.ACTIVE_DISPLAY_DOUBLE_TAP), false, this);
             resolver.registerContentObserver(Settings.System.getUriFor(
-                    Settings.System.ACTIVE_DISPLAY_SHAKE_EVENT), false, this);
+                    Settings.System.SHAKE_EVENT), false, this);
             resolver.registerContentObserver(Settings.System.getUriFor(
-                    Settings.System.ACTIVE_DISPLAY_SHAKE_FORCE), false, this);
+                    Settings.System.SHAKE_FORCE), false, this);
             resolver.registerContentObserver(Settings.System.getUriFor(
-                    Settings.System.ACTIVE_DISPLAY_SHAKE_QUITE_HOURS), false, this);
+                    Settings.System.SHAKE_QUITE_HOURS), false, this);
             resolver.registerContentObserver(Settings.System.getUriFor(
-                    Settings.System.ACTIVE_DISPLAY_SHAKE_THRESHOLD), false, this);
+                    Settings.System.SHAKE_THRESHOLD), false, this);
             resolver.registerContentObserver(Settings.System.getUriFor(
-                    Settings.System.ACTIVE_DISPLAY_SHAKE_LONGTHRESHOLD), false, this);
+                    Settings.System.SHAKE_LONGTHRESHOLD), false, this);
             resolver.registerContentObserver(Settings.System.getUriFor(
-                    Settings.System.ACTIVE_DISPLAY_SHAKE_TIMEOUT), false, this);
+                    Settings.System.SHAKE_TIMEOUT), false, this);
+            resolver.registerContentObserver(Settings.System.getUriFor(
+                    Settings.System.SHAKE_ALWAYS), false, this);
             update();
         }
 
@@ -422,8 +435,11 @@ public class ActiveDisplayView extends FrameLayout
             mHideLowPriorityNotifications = Settings.System.getIntForUser(
                     resolver, Settings.System.ACTIVE_DISPLAY_HIDE_LOW_PRIORITY_NOTIFICATIONS, 0,
                     UserHandle.USER_CURRENT_OR_SELF) == 1;
+            mPocketModeEnable = Settings.System.getIntForUser(
+                    resolver, Settings.System.POCKET_MODE_ENABLE, 0,
+                    UserHandle.USER_CURRENT_OR_SELF) == 1;
             mPocketMode = Settings.System.getIntForUser(
-                    resolver, Settings.System.ACTIVE_DISPLAY_POCKET_MODE, POCKET_MODE_OFF,
+                    resolver, Settings.System.POCKET_MODE, 1,
                     UserHandle.USER_CURRENT_OR_SELF);
             mRedisplayTimeout = Settings.System.getLongForUser(
                     resolver, Settings.System.ACTIVE_DISPLAY_REDISPLAY, 0L,
@@ -444,16 +460,16 @@ public class ActiveDisplayView extends FrameLayout
                     resolver, Settings.System.ACTIVE_DISPLAY_TIMEOUT, mDisplayTimeout,
                     UserHandle.USER_CURRENT_OR_SELF);
             mTurnOffModeEnabled = Settings.System.getIntForUser(
-                    resolver, Settings.System.ACTIVE_DISPLAY_TURNOFF_MODE, 0,
+                    resolver, Settings.System.POCKET_MODE_TURNOFF_MODE, 0,
                     UserHandle.USER_CURRENT_OR_SELF) == 1;
             mProximityThreshold = Settings.System.getLongForUser(
-                    resolver, Settings.System.ACTIVE_DISPLAY_THRESHOLD, mProximityThreshold,
+                    resolver, Settings.System.POCKET_MODE_THRESHOLD, mProximityThreshold,
                     UserHandle.USER_CURRENT_OR_SELF);
             mUseActiveDisplayContent = Settings.System.getIntForUser(
                     resolver, Settings.System.ACTIVE_DISPLAY_CONTENT, 1,
                     UserHandle.USER_CURRENT_OR_SELF) != 0;
             mBypassActiveDisplay = Settings.System.getIntForUser(
-                    resolver, Settings.System.ACTIVE_DISPLAY_BYPASS, 1,
+                    resolver, Settings.System.POCKET_MODE_BYPASS, 1,
                     UserHandle.USER_CURRENT_OR_SELF) != 0;
             mBatteryLockscreen = Settings.System.getIntForUser(
                     resolver, Settings.System.BATTERY_AROUND_LOCKSCREEN_RING, 0,
@@ -468,23 +484,26 @@ public class ActiveDisplayView extends FrameLayout
                     resolver, Settings.System.ACTIVE_DISPLAY_DOUBLE_TAP, 0,
                     UserHandle.USER_CURRENT_OR_SELF) != 0;
             mEnableShake = Settings.System.getIntForUser(
-                    resolver, Settings.System.ACTIVE_DISPLAY_SHAKE_EVENT, 0,
+                    resolver, Settings.System.SHAKE_EVENT, 0,
                     UserHandle.USER_CURRENT_OR_SELF) != 0;
             mEnableShakeForce = Settings.System.getIntForUser(
-                    resolver, Settings.System.ACTIVE_DISPLAY_SHAKE_FORCE, 0,
+                    resolver, Settings.System.SHAKE_FORCE, 0,
                     UserHandle.USER_CURRENT_OR_SELF) != 0;
             mDisableShakeQuite = Settings.System.getIntForUser(
-                    resolver, Settings.System.ACTIVE_DISPLAY_SHAKE_QUITE_HOURS, 0,
+                    resolver, Settings.System.SHAKE_QUITE_HOURS, 0,
                     UserHandle.USER_CURRENT_OR_SELF) != 0;
             mShakeThreshold = Settings.System.getIntForUser(
-                    resolver, Settings.System.ACTIVE_DISPLAY_SHAKE_THRESHOLD, mShakeThreshold,
+                    resolver, Settings.System.SHAKE_THRESHOLD, mShakeThreshold,
                     UserHandle.USER_CURRENT_OR_SELF);
             mShakeLongThreshold = Settings.System.getIntForUser(
-                    resolver, Settings.System.ACTIVE_DISPLAY_SHAKE_LONGTHRESHOLD, mShakeLongThreshold,
+                    resolver, Settings.System.SHAKE_LONGTHRESHOLD, mShakeLongThreshold,
                     UserHandle.USER_CURRENT_OR_SELF);
             mShakeTimeout = Settings.System.getIntForUser(
-                    resolver, Settings.System.ACTIVE_DISPLAY_SHAKE_TIMEOUT, mShakeTimeout,
+                    resolver, Settings.System.SHAKE_TIMEOUT, mShakeTimeout,
                     UserHandle.USER_CURRENT_OR_SELF);
+            mShakeAlways = Settings.System.getIntForUser(
+                    resolver, Settings.System.SHAKE_ALWAYS, 0,
+                    UserHandle.USER_CURRENT_OR_SELF) != 0;
 
             createExcludedAppsSet(excludedApps);
             createPrivacyAppsSet(privacyApps);
@@ -573,12 +592,13 @@ public class ActiveDisplayView extends FrameLayout
 
         mDoubleTapGesture = new GestureDetector(context,
                 new GestureDetector.SimpleOnGestureListener() {
-            @Override
-            public boolean onDoubleTap(MotionEvent e) {
-                turnScreenOff();
-                return true;
-            }
-        });
+                    @Override
+                    public boolean onDoubleTap(MotionEvent e) {
+                        turnScreenOff();
+                        return true;
+                    }
+                }
+        );
 
     }
 
@@ -592,7 +612,7 @@ public class ActiveDisplayView extends FrameLayout
             mPocketTime = System.currentTimeMillis();
             mProximityIsFar = false;
         }
-        if (isScreenOn() && mPocketMode != POCKET_MODE_OFF && !shouldDisableActiveDisplay() && mWakedByPocketMode) {
+        if (isScreenOn() && mPocketModeEnable && !shouldDisableActiveDisplay() && mWakedByPocketMode) {
             mWakedByPocketMode = false;
             Log.i(TAG, "ActiveDisplay: sent to sleep by Pocketmode");
             turnScreenOffbySensor();
@@ -602,7 +622,7 @@ public class ActiveDisplayView extends FrameLayout
     @Override
     public synchronized void onFar() {
         mProximityIsFar = true;
-        if (!isScreenOn() && mPocketMode != POCKET_MODE_OFF && !shouldDisableActiveDisplay()) {
+        if (!isScreenOn() && mPocketModeEnable && !shouldDisableActiveDisplay()) {
             if ((System.currentTimeMillis() >= (mPocketTime + mProximityThreshold)) && (mPocketTime != 0)) {
                 Log.i(TAG, "ActiveDisplay: wake by Pocketmode");
                 turnScreenOnbySensor();
@@ -663,7 +683,7 @@ public class ActiveDisplayView extends FrameLayout
                 }
             }
         } else if (mIsActive && mWakedByShakeMode && isScreenOn()) {
-            if ((System.currentTimeMillis() >= (mShakeTime + (long)(1000 * mShakeLongThreshold))) && (mShakeTime != 0)) {
+            if ((System.currentTimeMillis() >= (mShakeTime + (long) (1000 * mShakeLongThreshold))) && (mShakeTime != 0)) {
                 mWakedByShakeMode = false;
                 Log.i(TAG, "ActiveDisplay: sent to sleep by Shakemode");
                 turnScreenOff();
@@ -723,7 +743,7 @@ public class ActiveDisplayView extends FrameLayout
         int layer = 0;
         if (mIsInBrightLight && mSunlightModeEnabled) {
             layer = canvas.saveLayer(0, 0, getWidth(), getHeight(), mInvertedPaint,
-                   Canvas.HAS_ALPHA_LAYER_SAVE_FLAG | Canvas.FULL_COLOR_LAYER_SAVE_FLAG);
+                    Canvas.HAS_ALPHA_LAYER_SAVE_FLAG | Canvas.FULL_COLOR_LAYER_SAVE_FLAG);
         }
         super.dispatchDraw(canvas);
         if (mIsInBrightLight && mSunlightModeEnabled) canvas.restoreToCount(layer);
@@ -855,23 +875,24 @@ public class ActiveDisplayView extends FrameLayout
             PendingIntent contentIntent = mNotification.getNotification().contentIntent;
             if (contentIntent != null) {
                 try {
-                     Intent intent = contentIntent.getIntent();
-                     intent.setFlags(
+                    Intent intent = contentIntent.getIntent();
+                    intent.setFlags(
                             intent.getFlags()
-                            | Intent.FLAG_ACTIVITY_NEW_TASK
-                            | Intent.FLAG_ACTIVITY_SINGLE_TOP
-                            | Intent.FLAG_ACTIVITY_CLEAR_TOP);
+                                    | Intent.FLAG_ACTIVITY_NEW_TASK
+                                    | Intent.FLAG_ACTIVITY_SINGLE_TOP
+                                    | Intent.FLAG_ACTIVITY_CLEAR_TOP
+                    );
                     contentIntent.send();
                 } catch (CanceledException ce) {
                 }
                 KeyguardTouchDelegate.getInstance(mContext).dismiss();
             }
             try {
-                 if (mNotification.isClearable()) {
-                     mNM.cancelNotificationFromSystemListener(mNotificationListener,
-                         mNotification.getPackageName(), mNotification.getTag(),
-                         mNotification.getId());
-                 }
+                if (mNotification.isClearable()) {
+                    mNM.cancelNotificationFromSystemListener(mNotificationListener,
+                            mNotification.getPackageName(), mNotification.getTag(),
+                            mNotification.getId());
+                }
             } catch (RemoteException e) {
             } catch (NullPointerException npe) {
             }
@@ -929,14 +950,14 @@ public class ActiveDisplayView extends FrameLayout
         disableProximitySensor();
         disableShakeSensor();
         try {
-             // The intent we are sending is for the application, which
-             // won't have permission to immediately start an activity after
-             // the user switches to home.  We know it is safe to do at this
-             // point, so make sure new activity switches are now allowed.
-             ActivityManagerNative.getDefault().resumeAppSwitches();
-             // Also, notifications can be launched from the lock screen,
-             // so dismiss the lock screen when the activity starts.
-             ActivityManagerNative.getDefault().dismissKeyguardOnNextActivity();
+            // The intent we are sending is for the application, which
+            // won't have permission to immediately start an activity after
+            // the user switches to home.  We know it is safe to do at this
+            // point, so make sure new activity switches are now allowed.
+            ActivityManagerNative.getDefault().resumeAppSwitches();
+            // Also, notifications can be launched from the lock screen,
+            // so dismiss the lock screen when the activity starts.
+            ActivityManagerNative.getDefault().dismissKeyguardOnNextActivity();
         } catch (RemoteException e) {
         }
     }
@@ -960,7 +981,7 @@ public class ActiveDisplayView extends FrameLayout
             int flags = StatusBarManager.DISABLE_NONE;
             if (hiding) {
                 flags |= StatusBarManager.DISABLE_RECENT | StatusBarManager.DISABLE_HOME
-                      | StatusBarManager.DISABLE_BACK | StatusBarManager.DISABLE_SEARCH;
+                        | StatusBarManager.DISABLE_BACK | StatusBarManager.DISABLE_SEARCH;
             }
             mStatusBarManager.disable(flags);
         }
@@ -1096,7 +1117,7 @@ public class ActiveDisplayView extends FrameLayout
     private void onScreenTurnedOff() {
         enableProximitySensor();
 
-        if(mShakeTimeout == 0){
+        if (mShakeAlways) {
             enableShakeSensor();
             Log.i(TAG, "Shake always enable.");
         }
@@ -1129,7 +1150,7 @@ public class ActiveDisplayView extends FrameLayout
         Log.i(TAG, "ActiveDisplay: Screen Timeout");
         mWakedByPocketMode = false;
         mWakedByShakeMode = false;
-        if(mShakeTimeout > 0) {
+        if (!mShakeAlways && mShakeTimeout > 0) {
             enableShakeSensor();
             updateShakeTimer();
             Log.i(TAG, "Shake enable by screen time out.");
@@ -1143,7 +1164,7 @@ public class ActiveDisplayView extends FrameLayout
     private void turnScreenOffbySensor() {
         mIsTurnOffBySensor = true;
         KeyguardTouchDelegate.getInstance(mContext).onScreenTurnedOff(OFF_BECAUSE_OF_PROX_SENSOR);
-        if(mShakeTimeout > 0) {
+        if (!mShakeAlways && mShakeTimeout > 0) {
             enableShakeSensor();
             updateShakeTimer();
             Log.i(TAG, "Shake enable by sensor.");
@@ -1195,7 +1216,7 @@ public class ActiveDisplayView extends FrameLayout
     }
 
     private void enableProximitySensor() {
-        if (mPocketMode != POCKET_MODE_OFF && mActiveDisplayEnabled) {
+        if (mPocketModeEnable && mActiveDisplayEnabled) {
             Log.i(TAG, "ActiveDisplay: enable ProximitySensor");
             mProximityIsFar = true;
             mProximitySensorManager.enable();
@@ -1203,7 +1224,7 @@ public class ActiveDisplayView extends FrameLayout
     }
 
     private void disableProximitySensor() {
-        if (mPocketMode != POCKET_MODE_OFF) {
+        if (mPocketModeEnable) {
             Log.i(TAG, "ActiveDisplay: disable ProximitySensor");
             mProximitySensorManager.disable(true);
         }
@@ -1363,7 +1384,7 @@ public class ActiveDisplayView extends FrameLayout
                                     iv.setImageDrawable(iconDrawable);
                                     iv.setTag(sbns[i]);
                                     if (sbns[i].getPackageName().equals(mNotification.getPackageName())
-                                           && sbns[i].getId() == mNotification.getId()) {
+                                            && sbns[i].getId() == mNotification.getId()) {
                                         if (mUseActiveDisplayContent) {
                                             iv.setBackgroundResource(R.drawable.ad_active_notification_background_blur);
                                         } else {
@@ -1393,6 +1414,7 @@ public class ActiveDisplayView extends FrameLayout
 
     private OnTouchListener mOverflowTouchListener = new OnTouchListener() {
         int mLastChildPosition = -1;
+
         @Override
         public boolean onTouch(View v, MotionEvent event) {
             int action = event.getActionMasked();
@@ -1408,8 +1430,8 @@ public class ActiveDisplayView extends FrameLayout
                         final RoundedImageView iv = (RoundedImageView) mOverflowNotifications.getChildAt(i);
                         final StatusBarNotification sbn = (StatusBarNotification) iv.getTag();
                         iv.getHitRect(hitRect);
-                        if (i != mLastChildPosition ) {
-                            if (hitRect.contains((int)x, (int)y)) {
+                        if (i != mLastChildPosition) {
+                            if (hitRect.contains((int) x, (int) y)) {
                                 mLastChildPosition = i;
                                 if (sbn != null) {
                                     swapNotification(sbn);
@@ -1450,6 +1472,7 @@ public class ActiveDisplayView extends FrameLayout
 
     /**
      * Swaps the current StatusBarNotification with {@code sbn}
+     *
      * @param sbn The StatusBarNotification to swap with the current
      */
     private void swapNotification(StatusBarNotification sbn) {
@@ -1459,6 +1482,7 @@ public class ActiveDisplayView extends FrameLayout
 
     /**
      * Determine if a given notification should be used.
+     *
      * @param sbn StatusBarNotification to check.
      * @return True if it should be used, false otherwise.
      */
@@ -1471,7 +1495,8 @@ public class ActiveDisplayView extends FrameLayout
 
     /**
      * Determine if a given notification is for user current.
-     * @param sbn StatusBarNotification to check.
+     *
+     * @param sbn           StatusBarNotification to check.
      * @param BaseStatusBar notificationIsForCurrentUser to check.
      * @return True if this for current, false otherwise.
      */
@@ -1485,21 +1510,23 @@ public class ActiveDisplayView extends FrameLayout
 
     /**
      * Determine if a given notification is not came from auto banned app.
+     *
      * @return True if not, false otherwise.
      */
     private boolean isNotAppBanned(String getPackageName) {
         boolean showingApp = true;
         for (String packageName : AUTO_BANNED_PACKAGES) {
-             if (packageName.equals(getPackageName)) {
-                 showingApp = false;
-                 break;
-             }
+            if (packageName.equals(getPackageName)) {
+                showingApp = false;
+                break;
+            }
         }
         return showingApp;
     }
 
     /**
      * Determine if a given notification from exclude apps.
+     *
      * @param sbn StatusBarNotification to check.
      * @return True if has privacy mode, false otherwise.
      */
@@ -1512,6 +1539,7 @@ public class ActiveDisplayView extends FrameLayout
 
     /**
      * Determine if a given notification not from app that has privacy mode.
+     *
      * @param sbn StatusBarNotification to check.
      * @return True if has privacy mode, false otherwise.
      */
@@ -1524,6 +1552,7 @@ public class ActiveDisplayView extends FrameLayout
 
     /**
      * Determine if a given notification is annoying notification.
+     *
      * @return True if annoying, false otherwise.
      */
     private boolean notificationIsAnnoying(String pkg) {
@@ -1539,8 +1568,8 @@ public class ActiveDisplayView extends FrameLayout
 
         long currentTime = System.currentTimeMillis();
         if (mAnnoyingNotifications.containsKey(pkg)
-            && (currentTime - mAnnoyingNotifications.get(pkg)
-                      < annoyingNotificationThreshold)) {
+                && (currentTime - mAnnoyingNotifications.get(pkg)
+                < annoyingNotificationThreshold)) {
             // less than threshold; it's an annoying notification!!
             return true;
         } else {
@@ -1552,6 +1581,7 @@ public class ActiveDisplayView extends FrameLayout
 
     /**
      * Determine if we should show notifications or not.
+     *
      * @return True if we should show this view.
      */
     private boolean shouldShowNotification() {
@@ -1583,6 +1613,7 @@ public class ActiveDisplayView extends FrameLayout
 
     /**
      * Determine i a call is currently in progress.
+     *
      * @return True if a call is in progress.
      */
     private boolean isOnCall() {
@@ -1591,7 +1622,8 @@ public class ActiveDisplayView extends FrameLayout
 
     /**
      * Sets {@code sbn} as the current notification inside the ring.
-     * @param sbn StatusBarNotification to be placed as the current one.
+     *
+     * @param sbn          StatusBarNotification to be placed as the current one.
      * @param updateOthers Set to true to update the overflow notifications.
      */
     private void setActiveNotification(final StatusBarNotification sbn, final boolean updateOthers) {
@@ -1599,27 +1631,27 @@ public class ActiveDisplayView extends FrameLayout
         final Drawable drawable = mNotificationDrawable;
         final NotificationData nd = NotificationUtils.getNotificationData(mContext, sbn);
         post(new Runnable() {
-             @Override
-             public void run() {
-                 if (drawable != null) {
-                     mCurrentNotificationIcon.setImageDrawable(drawable);
-                     if (nd != null) {
-                         mCurrentNotificationIcon.placeNumber(nd.number, mShowNotificationCount);
-                     } else {
-                         mCurrentNotificationIcon.placeNumber(0, false);
-                     }
-                     setHandleText(sbn);
-                     mNotification = sbn;
-                 } else {
-                     mCurrentNotificationIcon.setImageDrawable(null);
-                     mCurrentNotificationIcon.setImageResource(R.drawable.ic_ad_unlock);
-                     mCurrentNotificationIcon.placeNumber(0, false);
-                     mNotification = null;
-                 }
-                 updateResources();
-                 mGlowPadView.invalidate();
-                 if (updateOthers) updateOtherNotifications();
-             }
+            @Override
+            public void run() {
+                if (drawable != null) {
+                    mCurrentNotificationIcon.setImageDrawable(drawable);
+                    if (nd != null) {
+                        mCurrentNotificationIcon.placeNumber(nd.number, mShowNotificationCount);
+                    } else {
+                        mCurrentNotificationIcon.placeNumber(0, false);
+                    }
+                    setHandleText(sbn);
+                    mNotification = sbn;
+                } else {
+                    mCurrentNotificationIcon.setImageDrawable(null);
+                    mCurrentNotificationIcon.setImageResource(R.drawable.ic_ad_unlock);
+                    mCurrentNotificationIcon.placeNumber(0, false);
+                    mNotification = null;
+                }
+                updateResources();
+                mGlowPadView.invalidate();
+                if (updateOthers) updateOtherNotifications();
+            }
         });
     }
 
@@ -1639,6 +1671,7 @@ public class ActiveDisplayView extends FrameLayout
     /**
      * Inflates the RemoteViews specified by {@code sbn}.  If bigContentView is available it will be
      * used otherwise the standard contentView will be inflated.
+     *
      * @param sbn The StatusBarNotification to inflate content from.
      */
     private void inflateRemoteView(StatusBarNotification sbn) {
@@ -1716,6 +1749,7 @@ public class ActiveDisplayView extends FrameLayout
 
     /**
      * Sets the text to be displayed around the outside of the ring.
+     *
      * @param sbn The StatusBarNotification to get the text from.
      */
     private void setHandleText(StatusBarNotification sbn) {
@@ -1738,6 +1772,7 @@ public class ActiveDisplayView extends FrameLayout
 
     /**
      * Creates a drawable with the required states for the center ring handle
+     *
      * @param handle Drawable to use as the base image
      * @return A StateListDrawable with the appropriate states defined.
      */
@@ -1840,7 +1875,7 @@ public class ActiveDisplayView extends FrameLayout
         Intent intent = new Intent(ACTION_REDISPLAY_NOTIFICATION);
         intent.putExtra("disp", mCancelRedisplaySequence);
         PendingIntent sender = PendingIntent.getBroadcast(mContext,
-                    0, intent, PendingIntent.FLAG_CANCEL_CURRENT);
+                0, intent, PendingIntent.FLAG_CANCEL_CURRENT);
         mAM.set(AlarmManager.ELAPSED_REALTIME_WAKEUP, when, sender);
     }
 
@@ -1848,12 +1883,12 @@ public class ActiveDisplayView extends FrameLayout
      * Restarts the timer for stop shake event.
      */
     private void updateShakeTimer() {
-        long when = SystemClock.elapsedRealtime() + (long)(mShakeTimeout * 1000);
+        long when = SystemClock.elapsedRealtime() + (long) (mShakeTimeout * 1000);
         Intent intent = new Intent(ACTION_SHAKE_TIMEOUT);
         PendingIntent sender = PendingIntent.getBroadcast(mContext,
-                    0, intent, PendingIntent.FLAG_CANCEL_CURRENT);
+                0, intent, PendingIntent.FLAG_CANCEL_CURRENT);
         mAM.set(AlarmManager.ELAPSED_REALTIME_WAKEUP, when, sender);
-	Log.i(TAG, "Shake timeout set.");
+        Log.i(TAG, "Shake timeout set.");
     }
 
     /**
@@ -1871,7 +1906,7 @@ public class ActiveDisplayView extends FrameLayout
         Intent intent = new Intent(ACTION_DISPLAY_TIMEOUT);
         intent.putExtra("seq", mCancelTimeoutSequence);
         PendingIntent sender = PendingIntent.getBroadcast(mContext,
-                    0, intent, PendingIntent.FLAG_CANCEL_CURRENT);
+                0, intent, PendingIntent.FLAG_CANCEL_CURRENT);
         mAM.set(AlarmManager.ELAPSED_REALTIME_WAKEUP, when, sender);
     }
 
@@ -1884,6 +1919,7 @@ public class ActiveDisplayView extends FrameLayout
 
     /**
      * Create the set of excluded apps given a string of packages delimited with '|'.
+     *
      * @param excludedApps
      */
     private void createExcludedAppsSet(String excludedApps) {
@@ -1897,6 +1933,7 @@ public class ActiveDisplayView extends FrameLayout
 
     /**
      * Create the set of privacy apps given a string of packages delimited with '|'.
+     *
      * @param privacyApps
      */
     private void createPrivacyAppsSet(String privacyApps) {
