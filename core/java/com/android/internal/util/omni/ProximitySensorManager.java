@@ -14,15 +14,13 @@
  * limitations under the License.
  */
 
-package com.android.systemui.statusbar.policy.activedisplay;
+package com.android.internal.util.omni;
 
 import android.content.Context;
 import android.hardware.Sensor;
 import android.hardware.SensorEvent;
 import android.hardware.SensorEventListener;
 import android.hardware.SensorManager;
-
-import javax.annotation.concurrent.GuardedBy;
 
 /**
  * Manages the proximity sensor and notifies a listener when enabled.
@@ -79,12 +77,12 @@ public class ProximitySensorManager {
          * <p>
          * Before registering and after unregistering we are always in the {@link State#FAR} state.
          */
-        @GuardedBy("this") private State mLastState;
+        private State mLastState;
         /**
          * If this flag is set to true, we are waiting to reach the {@link State#FAR} state and
          * should notify the listener and unregister when that happens.
          */
-        @GuardedBy("this") private boolean mWaitingForFarState;
+        private boolean mWaitingForFarState;
 
         public ProximitySensorEventListener(SensorManager sensorManager, Sensor proximitySensor,
                 ProximityListener listener) {
@@ -175,7 +173,6 @@ public class ProximitySensorManager {
             }
         }
 
-        @GuardedBy("this")
         private void unregisterWithoutNotification() {
             mSensorManager.unregisterListener(this);
             mWaitingForFarState = false;
