@@ -350,7 +350,7 @@ public class ActiveDisplayView extends FrameLayout
             resolver.registerContentObserver(Settings.System.getUriFor(
                     Settings.System.ACTIVE_DISPLAY_HIDE_LOW_PRIORITY_NOTIFICATIONS), false, this);
             resolver.registerContentObserver(Settings.System.getUriFor(
-                    Settings.System.ACTIVE_DISPLAY_POCKET_MODE), false, this);
+                    Settings.System.POCKET_MODE), false, this);
             resolver.registerContentObserver(Settings.System.getUriFor(
                     Settings.System.ACTIVE_DISPLAY_REDISPLAY), false, this);
             resolver.registerContentObserver(Settings.System.getUriFor(
@@ -368,7 +368,7 @@ public class ActiveDisplayView extends FrameLayout
             resolver.registerContentObserver(Settings.System.getUriFor(
                     Settings.System.ACTIVE_DISPLAY_TURNOFF_MODE), false, this);
             resolver.registerContentObserver(Settings.System.getUriFor(
-                    Settings.System.ACTIVE_DISPLAY_THRESHOLD), false, this);
+                    Settings.System.POCKET_MODE_THRESHOLD), false, this);
             resolver.registerContentObserver(Settings.System.getUriFor(
                     Settings.System.ACTIVE_DISPLAY_CONTENT), false, this);
             resolver.registerContentObserver(Settings.System.getUriFor(
@@ -382,17 +382,17 @@ public class ActiveDisplayView extends FrameLayout
             resolver.registerContentObserver(Settings.System.getUriFor(
                     Settings.System.ACTIVE_DISPLAY_DOUBLE_TAP), false, this);
             resolver.registerContentObserver(Settings.System.getUriFor(
-                    Settings.System.ACTIVE_DISPLAY_SHAKE_EVENT), false, this);
+                    Settings.System.SHAKE_EVENT), false, this);
             resolver.registerContentObserver(Settings.System.getUriFor(
-                    Settings.System.ACTIVE_DISPLAY_SHAKE_FORCE), false, this);
+                    Settings.System.SHAKE_FORCE), false, this);
             resolver.registerContentObserver(Settings.System.getUriFor(
-                    Settings.System.ACTIVE_DISPLAY_SHAKE_QUITE_HOURS), false, this);
+                    Settings.System.SHAKE_QUITE_HOURS), false, this);
             resolver.registerContentObserver(Settings.System.getUriFor(
-                    Settings.System.ACTIVE_DISPLAY_SHAKE_THRESHOLD), false, this);
+                    Settings.System.SHAKE_THRESHOLD), false, this);
             resolver.registerContentObserver(Settings.System.getUriFor(
-                    Settings.System.ACTIVE_DISPLAY_SHAKE_LONGTHRESHOLD), false, this);
+                    Settings.System.SHAKE_LONGTHRESHOLD), false, this);
             resolver.registerContentObserver(Settings.System.getUriFor(
-                    Settings.System.ACTIVE_DISPLAY_SHAKE_TIMEOUT), false, this);
+                    Settings.System.SHAKE_TIMEOUT), false, this);
             update();
         }
 
@@ -423,7 +423,7 @@ public class ActiveDisplayView extends FrameLayout
                     resolver, Settings.System.ACTIVE_DISPLAY_HIDE_LOW_PRIORITY_NOTIFICATIONS, 0,
                     UserHandle.USER_CURRENT_OR_SELF) == 1;
             mPocketMode = Settings.System.getIntForUser(
-                    resolver, Settings.System.ACTIVE_DISPLAY_POCKET_MODE, POCKET_MODE_OFF,
+                    resolver, Settings.System.POCKET_MODE, POCKET_MODE_OFF,
                     UserHandle.USER_CURRENT_OR_SELF);
             mRedisplayTimeout = Settings.System.getLongForUser(
                     resolver, Settings.System.ACTIVE_DISPLAY_REDISPLAY, 0L,
@@ -447,7 +447,7 @@ public class ActiveDisplayView extends FrameLayout
                     resolver, Settings.System.ACTIVE_DISPLAY_TURNOFF_MODE, 0,
                     UserHandle.USER_CURRENT_OR_SELF) == 1;
             mProximityThreshold = Settings.System.getLongForUser(
-                    resolver, Settings.System.ACTIVE_DISPLAY_THRESHOLD, mProximityThreshold,
+                    resolver, Settings.System.POCKET_MODE_THRESHOLD, mProximityThreshold,
                     UserHandle.USER_CURRENT_OR_SELF);
             mUseActiveDisplayContent = Settings.System.getIntForUser(
                     resolver, Settings.System.ACTIVE_DISPLAY_CONTENT, 1,
@@ -468,22 +468,22 @@ public class ActiveDisplayView extends FrameLayout
                     resolver, Settings.System.ACTIVE_DISPLAY_DOUBLE_TAP, 0,
                     UserHandle.USER_CURRENT_OR_SELF) != 0;
             mEnableShake = Settings.System.getIntForUser(
-                    resolver, Settings.System.ACTIVE_DISPLAY_SHAKE_EVENT, 0,
+                    resolver, Settings.System.SHAKE_EVENT, 0,
                     UserHandle.USER_CURRENT_OR_SELF) != 0;
             mEnableShakeForce = Settings.System.getIntForUser(
-                    resolver, Settings.System.ACTIVE_DISPLAY_SHAKE_FORCE, 0,
+                    resolver, Settings.System.SHAKE_FORCE, 0,
                     UserHandle.USER_CURRENT_OR_SELF) != 0;
             mDisableShakeQuite = Settings.System.getIntForUser(
-                    resolver, Settings.System.ACTIVE_DISPLAY_SHAKE_QUITE_HOURS, 0,
+                    resolver, Settings.System.SHAKE_QUITE_HOURS, 0,
                     UserHandle.USER_CURRENT_OR_SELF) != 0;
             mShakeThreshold = Settings.System.getIntForUser(
-                    resolver, Settings.System.ACTIVE_DISPLAY_SHAKE_THRESHOLD, mShakeThreshold,
+                    resolver, Settings.System.SHAKE_THRESHOLD, mShakeThreshold,
                     UserHandle.USER_CURRENT_OR_SELF);
             mShakeLongThreshold = Settings.System.getIntForUser(
-                    resolver, Settings.System.ACTIVE_DISPLAY_SHAKE_LONGTHRESHOLD, mShakeLongThreshold,
+                    resolver, Settings.System.SHAKE_LONGTHRESHOLD, mShakeLongThreshold,
                     UserHandle.USER_CURRENT_OR_SELF);
             mShakeTimeout = Settings.System.getIntForUser(
-                    resolver, Settings.System.ACTIVE_DISPLAY_SHAKE_TIMEOUT, mShakeTimeout,
+                    resolver, Settings.System.SHAKE_TIMEOUT, mShakeTimeout,
                     UserHandle.USER_CURRENT_OR_SELF);
 
             createExcludedAppsSet(excludedApps);
