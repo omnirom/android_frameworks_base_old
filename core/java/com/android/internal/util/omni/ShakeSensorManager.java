@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package com.android.systemui.statusbar.policy.activedisplay;
+package com.android.internal.util.omni;
 
 import android.content.Context;
 import android.hardware.Sensor;
