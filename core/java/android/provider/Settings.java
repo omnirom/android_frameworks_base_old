@@ -3099,29 +3099,17 @@ public final class Settings {
         public static final String CALENDAR_SHORTCUT = "calendar_shortcut";
 
         /**
-         * Show clear all recents button
+         * Show control panel in recents panel view
          *  @hide
          */
-        public static final String SHOW_CLEAR_RECENTS_BUTTON = "clear_recents_button";
+        public static final String SHOW_RECENT_CONTROL = "show_recent_control";
 
         /**
-         * Location of the clear all recents button
+         * Location of the control panel
          * @hide
          */
-        public static final String CLEAR_RECENTS_BUTTON_LOCATION = "clear_recents_button_location";
-
-        /**
-         * Show circle memory indicator in recents panel view
-         *  @hide
-         */
-        public static final String SHOW_RECENTS_MEMORY_INDICATOR = "show_recents_memory_indicator";
-
-        /**
-         * Location of the memory indicator
-         * @hide
-         */
-        public static final String RECENTS_MEMORY_INDICATOR_LOCATION =
-                "recents_memory_indicator_location";
+        public static final String RECENT_CONTROL_POSITION =
+                "recent_control_position";
 
         /**
          * Alternative recent apps integration using OmniSwitch

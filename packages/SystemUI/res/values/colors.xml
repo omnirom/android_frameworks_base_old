@@ -43,4 +43,5 @@
     <color name="qs_background_pressed_color">#FF212121</color>
     <color name="ad_notification_background_color">#3fff</color>
     <drawable name="qs_user_background">#CC000000</drawable>
+    <color name="text_shadow">#ff000000</color>
 </resources>
