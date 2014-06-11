@@ -23,6 +23,7 @@ import android.app.ActivityManager;
 import android.app.ActivityManagerNative;
 import android.app.ActivityOptions;
 import android.app.TaskStackBuilder;
+import android.app.ActivityManager.MemoryInfo;
 import android.content.ActivityNotFoundException;
 import android.content.Context;
 import android.content.Intent;
@@ -39,6 +40,7 @@ import android.net.Uri;
 import android.os.Bundle;
 import android.os.RemoteException;
 import android.os.UserHandle;
+import android.os.Handler;
 import android.provider.Settings;
 import android.util.AttributeSet;
 import android.util.Log;
@@ -57,10 +59,13 @@ import android.widget.AdapterView;
 import android.widget.AdapterView.OnItemClickListener;
 import android.widget.BaseAdapter;
 import android.widget.FrameLayout;
+import android.widget.ImageButton;
 import android.widget.ImageView;
 import android.widget.ImageView.ScaleType;
 import android.widget.PopupMenu;
 import android.widget.TextView;
+import android.widget.LinearLayout;
+import android.text.format.Formatter;
 
 import com.android.systemui.R;
 import com.android.systemui.statusbar.BaseStatusBar;
@@ -93,9 +98,13 @@ public class RecentsPanelView extends FrameLayout implements OnItemClickListener
     private boolean mFitThumbnailToXY;
     private int mRecentItemLayoutId;
     private boolean mHighEndGfx;
-    private ImageView mClearAllRecents;
-    private CircleMemoryMeter mRecentsMemoryIndicator;
+    private ImageButton mClearAllRecents;
     private boolean mUpdateMemoryIndicator;
+    private LinearColorBar mRamUsageBar;
+    private TextView mBackgroundProcessText;
+    private TextView mForegroundProcessText;
+    private Handler mHandler = new Handler();
+    private LinearLayout mRecentsControlContainer;
 
     public static interface RecentsScrollView {
         public int numItemsInOneScreenful();
@@ -350,76 +359,38 @@ public class RecentsPanelView extends FrameLayout implements OnItemClickListener
             mRecentsNoApps.setAlpha(1f);
             mRecentsNoApps.setVisibility(noApps ? View.VISIBLE : View.INVISIBLE);
 
-            boolean showClearAllButton = Settings.System.getIntForUser(mContext.getContentResolver(),
-                    Settings.System.SHOW_CLEAR_RECENTS_BUTTON, 0, UserHandle.USER_CURRENT) == 1;
-            boolean showMemoryIndicator = Settings.System.getIntForUser(mContext.getContentResolver(),
-                    Settings.System.SHOW_RECENTS_MEMORY_INDICATOR, 0, UserHandle.USER_CURRENT) == 1;
+            boolean showControl = Settings.System.getIntForUser(mContext.getContentResolver(),
+                    Settings.System.SHOW_RECENT_CONTROL, 0, UserHandle.USER_CURRENT) == 1;
+            int recentsMemoryIndicatorLocation = Settings.System.getIntForUser(
+                    mContext.getContentResolver(),
+                    Settings.System.RECENT_CONTROL_POSITION,
+                    Constants.RECENT_CONTROL_TOP, UserHandle.USER_CURRENT);
 
-            if (showMemoryIndicator) {
-
-                int recentsMemoryIndicatorLocation = Settings.System.getIntForUser(
-                        mContext.getContentResolver(),
-                        Settings.System.RECENTS_MEMORY_INDICATOR_LOCATION,
-                        Constants.CLEAR_ALL_BUTTON_BOTTOM_LEFT, UserHandle.USER_CURRENT);
-
+            if (showControl) {
                 FrameLayout.LayoutParams layoutParams = (FrameLayout.LayoutParams)
-                        mRecentsMemoryIndicator.getLayoutParams();
+                        mRecentsControlContainer.getLayoutParams();
 
                 switch (recentsMemoryIndicatorLocation) {
-                    case Constants.CLEAR_ALL_BUTTON_TOP_LEFT:
-                        layoutParams.gravity = Gravity.TOP | Gravity.LEFT;
+                    case Constants.RECENT_CONTROL_TOP:
+                        layoutParams.gravity = Gravity.TOP | Gravity.CENTER;
                         break;
-                    case Constants.CLEAR_ALL_BUTTON_TOP_RIGHT:
-                        layoutParams.gravity = Gravity.TOP | Gravity.RIGHT;
+                    case Constants.RECENT_CONTROL_BUTTOM:
+                        layoutParams.gravity = Gravity.BOTTOM | Gravity.CENTER;
                         break;
-                    case Constants.CLEAR_ALL_BUTTON_BOTTOM_RIGHT:
-                        layoutParams.gravity = Gravity.BOTTOM | Gravity.RIGHT;
-                        break;
-                    case Constants.CLEAR_ALL_BUTTON_BOTTOM_LEFT:
                     default:
-                        layoutParams.gravity = Gravity.BOTTOM | Gravity.LEFT;
+                        layoutParams.gravity = Gravity.TOP | Gravity.CENTER;
                         break;
                 }
-                mRecentsMemoryIndicator.setLayoutParams(layoutParams);
-                mRecentsMemoryIndicator.setVisibility(View.VISIBLE);
+                mRecentsControlContainer.setLayoutParams(layoutParams);
+                mRecentsControlContainer.setVisibility(View.VISIBLE);
                 mUpdateMemoryIndicator = true;
             } else {
-                mRecentsMemoryIndicator.setVisibility(View.GONE);
+                mRecentsControlContainer.setVisibility(View.GONE);
                 mUpdateMemoryIndicator = false;
             }
 
-            if (showClearAllButton && !noApps) {
-                int clearAllButtonLocation = Settings.System.getIntForUser(
-                        mContext.getContentResolver(),
-                        Settings.System.CLEAR_RECENTS_BUTTON_LOCATION,
-                        Constants.CLEAR_ALL_BUTTON_BOTTOM_LEFT, UserHandle.USER_CURRENT);
-
-                FrameLayout.LayoutParams layoutParams = (FrameLayout.LayoutParams)
-                        mClearAllRecents.getLayoutParams();
-
-                switch (clearAllButtonLocation) {
-                    case Constants.CLEAR_ALL_BUTTON_TOP_LEFT:
-                        layoutParams.gravity = Gravity.TOP | Gravity.LEFT;
-                        break;
-                    case Constants.CLEAR_ALL_BUTTON_TOP_RIGHT:
-                        layoutParams.gravity = Gravity.TOP | Gravity.RIGHT;
-                        break;
-                    case Constants.CLEAR_ALL_BUTTON_BOTTOM_RIGHT:
-                        layoutParams.gravity = Gravity.BOTTOM | Gravity.RIGHT;
-                        break;
-                    case Constants.CLEAR_ALL_BUTTON_BOTTOM_LEFT:
-                    default:
-                        layoutParams.gravity = Gravity.BOTTOM | Gravity.LEFT;
-                        break;
-                }
-                mClearAllRecents.setLayoutParams(layoutParams);
-                mClearAllRecents.setVisibility(View.VISIBLE);
-            } else {
-                mClearAllRecents.setVisibility(View.GONE);
-            }
-
             if (mUpdateMemoryIndicator) {
-                mRecentsMemoryIndicator.updateMemoryInfo();
+                mHandler.post(updateRamBarTask);
             }
             onAnimationEnd(null);
             setFocusable(true);
@@ -434,7 +405,7 @@ public class RecentsPanelView extends FrameLayout implements OnItemClickListener
             }
         }
     }
-
+    
     protected void onAttachedToWindow () {
         super.onAttachedToWindow();
         final ViewRootImpl root = getViewRootImpl();
@@ -527,27 +498,32 @@ public class RecentsPanelView extends FrameLayout implements OnItemClickListener
         mRecentsScrim = findViewById(R.id.recents_bg_protect);
         mRecentsNoApps = findViewById(R.id.recents_no_apps);
 
-        mClearAllRecents = (ImageView) findViewById(R.id.recents_clear_all);
+        mClearAllRecents = (ImageButton) findViewById(R.id.recents_clear_all);
         if (mClearAllRecents != null){
             mClearAllRecents.setOnClickListener(new OnClickListener() {
                 @Override
                 public void onClick(View v) {
-                    ((ViewGroup) mRecentsContainer).removeAllViewsInLayout();
+                    boolean noApps = mRecentTaskDescriptions != null
+                        && (mRecentTaskDescriptions.size() == 0);
+                    if (noApps) {
+                        dismiss();
+                    } else {
+                        ((ViewGroup) mRecentsContainer).removeAllViewsInLayout();
+                    }
                 }
             });
         }
 
-        boolean showClearAllButton = Settings.System.getIntForUser(mContext.getContentResolver(),
-                   Settings.System.SHOW_CLEAR_RECENTS_BUTTON, 0, UserHandle.USER_CURRENT) == 1;
-        if (!showClearAllButton){
-            mClearAllRecents.setVisibility(View.GONE);
-        }
+        boolean showControl = Settings.System.getIntForUser(mContext.getContentResolver(),
+                   Settings.System.SHOW_RECENT_CONTROL, 0, UserHandle.USER_CURRENT) == 1;
+        
+        mRamUsageBar = (LinearColorBar) findViewById(R.id.ram_usage_bar);
+        mForegroundProcessText = (TextView) findViewById(R.id.foregroundText);
+        mBackgroundProcessText = (TextView) findViewById(R.id.backgroundText);
 
-        mRecentsMemoryIndicator = (CircleMemoryMeter) findViewById(R.id.circle_meter);
-        boolean showMemoryIndicator = Settings.System.getIntForUser(mContext.getContentResolver(),
-                   Settings.System.SHOW_RECENTS_MEMORY_INDICATOR, 0, UserHandle.USER_CURRENT) == 1;
-        if (!showMemoryIndicator){
-            mRecentsMemoryIndicator.setVisibility(View.GONE);
+        mRecentsControlContainer = (LinearLayout) findViewById(R.id.recents_control_layout);
+        if (!showControl){
+            mRecentsControlContainer.setVisibility(View.GONE);
         }
 
         if (mRecentsScrim != null) {
@@ -840,7 +816,7 @@ public class RecentsPanelView extends FrameLayout implements OnItemClickListener
             setContentDescription(null);
 
             if (mUpdateMemoryIndicator) {
-                mRecentsMemoryIndicator.updateMemoryInfo();
+                mHandler.post(updateRamBarTask);
             }
         }
     }
@@ -920,4 +896,29 @@ public class RecentsPanelView extends FrameLayout implements OnItemClickListener
         }
         mRecentsContainer.drawFadedEdges(canvas, left, right, top, bottom);
     }
+    
+    private final Runnable updateRamBarTask = new Runnable() {
+        @Override
+        public void run() {
+            final ActivityManager am = (ActivityManager) mContext
+                    .getSystemService(Context.ACTIVITY_SERVICE);
+            MemoryInfo memInfo = new MemoryInfo();
+            am.getMemoryInfo(memInfo);
+
+            long availMem = memInfo.availMem;
+            long totalMem = memInfo.totalMem;
+
+            String sizeStr = Formatter.formatShortFileSize(mContext, totalMem
+                    - availMem);
+            mForegroundProcessText.setText(mContext.getResources().getString(
+                    R.string.service_foreground_processes, sizeStr));
+            sizeStr = Formatter.formatShortFileSize(mContext, availMem);
+            mBackgroundProcessText.setText(mContext.getResources().getString(
+                    R.string.service_background_processes, sizeStr));
+
+            float fTotalMem = totalMem;
+            float fAvailMem = availMem;
+            mRamUsageBar.setRatios((fTotalMem - fAvailMem) / fTotalMem, 0, 0);
+        }
+    };
 }
