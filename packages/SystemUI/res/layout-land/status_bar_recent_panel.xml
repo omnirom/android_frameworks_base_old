@@ -56,25 +56,24 @@
 
         </com.android.systemui.recent.RecentsHorizontalScrollView>
 
-        <com.android.systemui.recent.CircleMemoryMeter
-            android:id="@+id/circle_meter"
-            android:layout_width="50dp"
-            android:layout_height="50dp"
-            android:layout_marginTop="2dp"
-            android:layout_marginRight="2dp"
-            android:layout_gravity="top|left" />
+        <LinearLayout android:id="@+id/recents_control_layout"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:orientation="horizontal"
+                android:background="#99000000" >
+            <include layout="@layout/recents_rambar" />
 
-        <ImageView
-            android:id="@+id/recents_clear_all"
-            android:layout_width="50dp"
-            android:layout_height="50dp"
-            android:layout_marginTop="2dp"
-            android:layout_marginRight="2dp"
-            android:layout_gravity="top|right"
-            android:padding="10dp"
-            android:scaleType="fitCenter"
-            android:src="@drawable/ic_notify_clear" />
-
+            <ImageButton
+                android:id="@+id/recents_clear_all"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:minWidth="100dp"
+                android:layout_gravity="center_vertical"
+                android:scaleType="fitCenter"
+                android:layout_weight="0.3"
+                android:background="#99000000"
+                android:src="@drawable/ic_notify_clear" />
+        </LinearLayout>
     </FrameLayout>
 
     <include layout="@layout/status_bar_no_recent_apps"
