@@ -697,7 +697,8 @@ public class WifiStateMachine extends StateMachine {
                 R.integer.config_wifi_driver_stop_delay);
 
         mBackgroundScanSupported = mContext.getResources().getBoolean(
-                R.bool.config_wifi_background_scan_support);
+                R.bool.config_wifi_background_scan_support) && 
+                !mContext.getResources().getBoolean(R.bool.config_pryfi);
 
         mPrimaryDeviceType = mContext.getResources().getString(
                 R.string.config_wifi_p2p_device_type);
