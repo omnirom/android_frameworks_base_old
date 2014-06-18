@@ -1096,6 +1096,9 @@ public class Activity extends ContextThemeWrapper
         if (DEBUG_LIFECYCLE) Slog.v(TAG, "onResume " + this);
         getApplication().dispatchActivityResumed(this);
         mCalled = true;
+        Intent intent = new Intent("tb.newactivity");
+        intent.putExtra("packagename",getPackageName());
+        sendBroadcast(intent);
     }
 
     /**
