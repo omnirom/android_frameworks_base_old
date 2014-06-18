@@ -3644,7 +3644,7 @@ public class PhoneStatusBar extends BaseStatusBar implements DemoMode {
 				(int) dims[1]);
 		Bitmap cropped = null;
 		try {
-			if (mTransparent) {
+			if(mTransparent) {
 				if (!requiresRotation)
 					cropped = Bitmap.createBitmap(captured, 0,
 							(int) (getStatusBarHeight() * 0.99), 1, 1);
@@ -3682,7 +3682,7 @@ public class PhoneStatusBar extends BaseStatusBar implements DemoMode {
 		return color;
 	}
 
-	private void setStatusBarColor(int color) {
+	private void setStatusBarColor() {
 		for (ImageView icon : mIcons) {
 			if (icon != null) {
 				icon.setColorFilter(mCurrentColor, PorterDuff.Mode.MULTIPLY);
@@ -3693,11 +3693,14 @@ public class PhoneStatusBar extends BaseStatusBar implements DemoMode {
 
 		for (TextView tv : mTexts) {
 			if (tv != null) {
-				tv.setTextColor(color);
+                tv.setTextColor(mCurrentColor);
 			} else {
 				mTexts.remove(tv);
 			}
 		}
+        mBattery.mChameleonBatteryColor = mCurrentColor;
+        mBattery.updateBattery();
+        mBattery.invalidate();
 	}
 
 	private void updateBackgroundDelayed() {
@@ -3724,7 +3727,7 @@ public class PhoneStatusBar extends BaseStatusBar implements DemoMode {
 
 	private void refresh() {
 		setColorForLayout(mStatusIcons, mCurrentColor, PorterDuff.Mode.MULTIPLY);
-		setStatusBarColor(mCurrentColor);
+		setStatusBarColor();
 	}
 
 	private void setColorForLayout(LinearLayout statusIcons, int color,
