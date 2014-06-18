@@ -906,7 +906,6 @@ public class PhoneStatusBar extends BaseStatusBar implements DemoMode {
                 mQS = null; // fly away, be free
             }
         }
-        addText((TextView) mStatusBarView.findViewById(R.id.center_clock));
         addText((TextView) mStatusBarView.findViewById(R.id.clock));
 
         mKeyguardManager = (KeyguardManager) mContext.getSystemService(Context.KEYGUARD_SERVICE);
