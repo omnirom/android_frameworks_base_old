@@ -148,7 +148,8 @@ public:
 
     static void setFilterBitmap(JNIEnv* env, jobject paint, jboolean filterBitmap) {
         NPE_CHECK_RETURN_VOID(env, paint);
-        GraphicsJNI::getNativePaint(env, paint)->setFilterBitmap(filterBitmap);
+        GraphicsJNI::getNativePaint(env, paint)->setFilterLevel(
+                filterBitmap ? SkPaint::kLow_FilterLevel : SkPaint::kNone_FilterLevel);
     }
 
     static void setDither(JNIEnv* env, jobject paint, jboolean dither) {
@@ -565,7 +566,7 @@ public:
                 return 0;
             }
         }
-        jfloat advancesArray[count];
+        jfloat* advancesArray = new jfloat[count];
         jfloat totalAdvance = 0;
 
         TextLayout::getTextRunAdvances(paint, text, start, count, contextCount, flags,
@@ -574,6 +575,7 @@ public:
         if (advances != NULL) {
             env->SetFloatArrayRegion(advances, advancesIndex, count, advancesArray);
         }
+        delete [] advancesArray;
         return totalAdvance;
     }
 
@@ -600,7 +602,7 @@ public:
 
     static jint doTextRunCursor(JNIEnv *env, SkPaint* paint, const jchar *text, jint start,
             jint count, jint flags, jint offset, jint opt) {
-        jfloat scalarArray[count];
+        jfloat *scalarArray = new jfloat[count];
 
         TextLayout::getTextRunAdvances(paint, text, start, count, start + count, flags,
                 scalarArray, NULL /* dont need totalAdvance */);
@@ -638,6 +640,8 @@ public:
         if (pos != -1) {
           pos += start;
         }
+
+        delete [] scalarArray;
 
         return pos;
     }

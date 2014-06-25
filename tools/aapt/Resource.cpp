@@ -130,7 +130,7 @@ public:
                    mParams.language[1] ? mParams.language[1] : '-',
                    mParams.country[0] ? mParams.country[0] : '-',
                    mParams.country[1] ? mParams.country[1] : '-',
-                   mParams.orientation, mParams.uiInvertedMode, mParams.uiMode,
+                   mParams.orientation, mParams.uiThemeMode, mParams.uiMode,
                    mParams.density, mParams.touchscreen, mParams.keyboard,
                    mParams.inputFlags, mParams.navigation));
             mPath = "res";

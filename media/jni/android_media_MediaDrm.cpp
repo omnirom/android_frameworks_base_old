@@ -186,6 +186,7 @@ void JNIDrmListener::notify(DrmPlugin::EventType eventType, int extra,
             nativeParcel->setData(obj->data(), obj->dataSize());
             env->CallStaticVoidMethod(mClass, gFields.post_event, mObject,
                     jeventType, extra, jParcel);
+            env->DeleteLocalRef(jParcel);
         }
     }
 
@@ -491,7 +492,7 @@ static sp<JDrm> setDrm(
     if (old != NULL) {
         old->decStrong(thiz);
     }
-    env->SetIntField(thiz, gFields.context, (int)drm.get());
+    env->SetLongField(thiz, gFields.context, reinterpret_cast<jlong>(drm.get()));
 
     return old;
 }

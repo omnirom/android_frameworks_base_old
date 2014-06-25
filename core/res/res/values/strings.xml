@@ -2255,6 +2255,10 @@
     <!-- Other SIP address type. Same context as Other phone type. -->
     <string name="sipAddressTypeOther">Other</string>
 
+    <!-- Error message that is displayed when the user clicks on a quick contacts badge, but
+         there is no contacts application installed that can display the quick contact -->
+    <string name="quick_contacts_not_available">No application found to view this contact.</string>
+
     <!-- Instructions telling the user to enter their SIM PIN to unlock the keyguard.
          Displayed in one line in a large font.  -->
     <string name="keyguard_password_enter_pin_code">Type PIN code</string>
