@@ -32,6 +32,7 @@ public class IdenticonFactory {
     public static final int IDENTICON_STYLE_CONTEMPORARY = 1;
     public static final int IDENTICON_STYLE_SPIROGRAPH = 2;
     public static final int IDENTICON_STYLE_DOTMATRIX = 3;
+    public static final int IDENTICON_STYLE_GMAIL = 4;
 
     /**
      * Get the appropriate identicon class based on the type passed in
@@ -48,6 +49,8 @@ public class IdenticonFactory {
                 return new SpirographIdenticon();
             case IDENTICON_STYLE_DOTMATRIX:
                 return new DotMatrixIdenticon();
+            case IDENTICON_STYLE_GMAIL:
+                return new LetterTile();
             default:
                 throw new IllegalArgumentException("Unkown identicon type.");
         }

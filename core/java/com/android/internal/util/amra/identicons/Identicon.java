@@ -37,6 +37,7 @@ public abstract class Identicon {
     public static final String DEFAULT_IDENTICON_SALT =
             "zG~v(+&>fLX|!#9D*BTj*#K>amB&TUB}T/jBOQih|Sg8}@N-^Rk|?VEXI,9EQPH]";
 
+    protected int SIZE = 96;
     protected int mBackgroundColor = 0xFFDDDDDD;
 
     /**
