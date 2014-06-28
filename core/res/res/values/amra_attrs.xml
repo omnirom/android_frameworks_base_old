@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="utf-8"?>
-<!-- Copyright (C) 2012 The Android Open Source Project
+<!-- Copyright (C) 2006 The Android Open Source Project
 
      Licensed under the Apache License, Version 2.0 (the "License");
      you may not use this file except in compliance with the License.
@@ -14,17 +14,15 @@
      limitations under the License.
 -->
 
-<LinearLayout
-    xmlns:android="http://schemas.android.com/apk/res/android"
-    android:id="@+id/actions"
-    android:layout_width="match_parent"
-    android:layout_height="wrap_content"
-    android:orientation="horizontal"
-    android:visibility="gone"
-    android:layout_marginBottom="8dp"
-    android:showDividers="middle"
-    android:divider="@drawable/list_divider_holo_light"
-    android:dividerPadding="12dp"
-    >
-    <!-- actions will be added here -->
-</LinearLayout>
+<resources>
+
+  <declare-styleable name="RoundedImageView">
+    <attr name="corner_radius" format="dimension" />
+    <attr name="border_width" format="dimension" />
+    <attr name="border_color" format="color" />
+    <attr name="mutate_background" format="boolean" />
+    <attr name="oval" format="boolean" />
+    <attr name="android:scaleType" />
+  </declare-styleable>
+
+</resources>

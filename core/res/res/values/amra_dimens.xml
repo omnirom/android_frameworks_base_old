@@ -1,0 +1,12 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+
+    <!-- Rounded Drawable icon size -->
+    <dimen name="rounded_icon_size">32dp</dimen>
+
+    <!-- The width of the big icons in notifications. -->
+    <dimen name="notification_base_icon_width">48dp</dimen>
+    <!-- The width of the big icons in notifications. -->
+    <dimen name="notification_base_icon_height">48dp</dimen>
+
+</resources>

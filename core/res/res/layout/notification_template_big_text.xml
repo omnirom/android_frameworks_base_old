@@ -15,17 +15,19 @@
 -->
 <FrameLayout xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:internal="http://schemas.android.com/apk/prv/res/android"
-    android:background="@android:drawable/notification_bg"
+    android:background="@android:drawable/amra_card"
     android:id="@+id/status_bar_latest_event_content"
     android:layout_width="match_parent"
     android:layout_height="wrap_content"
+    android:layout_marginLeft = "10dp"
+    android:layout_marginRight = "10dp"
     internal:layout_minHeight="65dp"
     internal:layout_maxHeight="unbounded"
     >
     <ImageView android:id="@+id/icon"
         android:layout_width="@dimen/notification_large_icon_width"
         android:layout_height="@dimen/notification_large_icon_height"
-        android:background="@android:drawable/notification_template_icon_bg"
+        android:background="@android:drawable/amra_circle"
         android:scaleType="center"
         />
     <LinearLayout
@@ -101,7 +103,7 @@
                 android:layout_marginEnd="8dp"
                 android:visibility="gone"
                 android:layout_weight="0"
-                style="?android:attr/progressBarStyleHorizontal"
+                style="@android:style/Widget.Holo.Light.ProgressBar.Horizontal"
                 />
             <TextView android:id="@+id/big_text"
                 android:textAppearance="@style/TextAppearance.StatusBar.EventContent"
@@ -122,7 +124,7 @@
             android:layout_marginTop="-1px"
             android:id="@+id/action_divider"
             android:visibility="gone"
-            android:background="?android:attr/dividerHorizontal" />
+            android:background="@android:drawable/divider_horizontal_bright" />
         <include
             layout="@layout/notification_action_list"
             android:layout_width="match_parent"
@@ -136,7 +138,7 @@
             android:id="@+id/overflow_divider"
             android:layout_marginBottom="8dp"
             android:visibility="visible"
-            android:background="?android:attr/dividerHorizontal" />
+            android:background="@android:drawable/divider_horizontal_bright" />
         <LinearLayout
             android:id="@+id/line3"
             android:layout_width="match_parent"
@@ -177,6 +179,7 @@
                 android:scaleType="centerInside"
                 android:visibility="gone"
                 android:drawableAlpha="153"
+		android:background="@android:drawable/amra_circle"
                 />
         </LinearLayout>
     </LinearLayout>

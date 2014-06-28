@@ -16,17 +16,18 @@
 
 <FrameLayout xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:internal="http://schemas.android.com/apk/prv/res/android"
-    android:background="@android:drawable/notification_bg"
+    android:background="@android:drawable/amra_card"
     android:id="@+id/status_bar_latest_event_content"
     android:layout_width="match_parent"
     android:layout_height="wrap_content"
+    android:layout_marginLeft = "10dp"
+    android:layout_marginRight = "10dp"
     internal:layout_minHeight="65dp"
     internal:layout_maxHeight="unbounded"
     >
     <ImageView android:id="@+id/icon"
         android:layout_width="@dimen/notification_large_icon_width"
         android:layout_height="@dimen/notification_large_icon_height"
-        android:background="@android:drawable/notification_template_icon_bg"
         android:scaleType="center"
         />
     <LinearLayout
@@ -138,6 +139,7 @@
                     android:scaleType="centerInside"
                     android:visibility="gone"
                     android:drawableAlpha="153"
+		    android:background="@android:drawable/amra_circle"
                     />
             </LinearLayout>
             <ProgressBar
@@ -148,7 +150,7 @@
                 android:layout_marginStart="8dp"
                 android:layout_marginEnd="8dp"
                 android:visibility="gone"
-                style="?android:attr/progressBarStyleHorizontal"
+                style="@android:style/Widget.Holo.Light.ProgressBar.Horizontal"
                 />
         </LinearLayout>
         <ImageView
@@ -156,7 +158,7 @@
             android:layout_height="1px"
             android:id="@+id/action_divider"
             android:visibility="gone"
-            android:background="?android:attr/dividerHorizontal" />
+            android:background="@android:drawable/divider_horizontal_bright" />
         <include
             layout="@layout/notification_action_list"
             android:layout_width="match_parent"

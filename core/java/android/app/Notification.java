@@ -22,6 +22,14 @@ import android.content.Context;
 import android.content.Intent;
 import android.content.res.Resources;
 import android.graphics.Bitmap;
+import android.graphics.Canvas;
+import android.graphics.Color;
+import android.graphics.drawable.BitmapDrawable;
+import android.graphics.drawable.Drawable;
+import android.graphics.Path;
+import android.graphics.PixelFormat;
+import android.graphics.Rect;
+import android.graphics.Typeface;
 import android.media.AudioManager;
 import android.net.Uri;
 import android.os.BadParcelableException;
@@ -1640,14 +1648,18 @@ public class Notification implements Parcelable
             boolean showLine2 = false;
             int smallIconImageViewId = R.id.icon;
             if (mLargeIcon != null) {
-                contentView.setImageViewBitmap(R.id.icon, mLargeIcon);
+                contentView.setImageViewBitmap(R.id.icon, getRoundedShape(mLargeIcon));
                 smallIconImageViewId = R.id.right_icon;
+            } else {
+                contentView.setImageViewBitmap(R.id.icon, mLargeIcon);
+                contentView.setInt(R.id.icon,
+                        "setBackgroundResource", R.drawable.amra_circle);
             }
             if (mPriority < PRIORITY_LOW) {
                 contentView.setInt(R.id.icon,
-                        "setBackgroundResource", R.drawable.notification_template_icon_low_bg);
+                        "setBackgroundResource", R.drawable.amra_circle);
                 contentView.setInt(R.id.status_bar_latest_event_content,
-                        "setBackgroundResource", R.drawable.notification_bg_low);
+                        "setBackgroundResource", R.drawable.amra_notification);
             }
             if (mSmallIcon != 0) {
                 contentView.setImageViewResource(smallIconImageViewId, mSmallIcon);
@@ -1753,6 +1765,25 @@ public class Notification implements Parcelable
             return big;
         }
 
+    public Bitmap getRoundedShape(Bitmap scaleBitmapImage) {
+        int targetWidth = scaleBitmapImage.getWidth();
+        int targetHeight = scaleBitmapImage.getHeight();
+        Bitmap targetBitmap = Bitmap.createBitmap(
+                targetWidth, targetHeight, Bitmap.Config.ARGB_8888);
+
+        Canvas canvas = new Canvas(targetBitmap);
+        Path path = new Path();
+        path.addCircle(((float) targetWidth - 1) / 2, ((float) targetHeight - 1) / 2,
+                (Math.min(((float) targetWidth), ((float) targetHeight)) / 2), Path.Direction.CCW);
+
+        canvas.clipPath(path);
+        Bitmap sourceBitmap = scaleBitmapImage;
+        canvas.drawBitmap(sourceBitmap, 
+                new Rect(0, 0, sourceBitmap.getWidth(), sourceBitmap.getHeight()),
+                new Rect(0, 0, targetWidth, targetHeight), null);
+        return targetBitmap;
+    }
+
         private RemoteViews makeContentView() {
             if (mContentView != null) {
                 return mContentView;
@@ -1786,7 +1817,7 @@ public class Notification implements Parcelable
             RemoteViews button = new RemoteViews(mContext.getPackageName(),
                     tombstone ? R.layout.notification_action_tombstone
                               : R.layout.notification_action);
-            button.setTextViewCompoundDrawables(R.id.action0, action.icon, 0, 0, 0);
+            button.setTextViewCompoundDrawablesRelative(R.id.action0, action.icon, 0, 0, 0);
             button.setTextViewText(R.id.action0, action.title);
             if (!tombstone) {
                 button.setOnClickPendingIntent(R.id.action0, action.actionIntent);
