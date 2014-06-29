@@ -449,7 +449,7 @@ class BluetoothManagerService extends IBluetoothManager.Stub {
         return true;
     }
 
-    public boolean disable(boolean persist) {
+    public boolean disable(String callingPackage, boolean persist) {
         mContext.enforceCallingOrSelfPermission(BLUETOOTH_ADMIN_PERM,
                                                 "Need BLUETOOTH ADMIN permissicacheNameAndAddresson");
 
@@ -468,6 +468,13 @@ class BluetoothManagerService extends IBluetoothManager.Stub {
         if (DBG) {
             Log.d(TAG,"disable(): mBluetooth = " + mBluetooth +
                 " mBinding = " + mBinding);
+        }
+
+        AppOpsManager appOps = (AppOpsManager) mContext.getSystemService(Context.APP_OPS_SERVICE);
+        int callingUid = Binder.getCallingUid();
+        if (appOps.noteOp(AppOpsManager.OP_BLUETOOTH_CHANGE, callingUid, callingPackage) !=
+                AppOpsManager.MODE_ALLOWED) {
+            return false;
         }
 
         synchronized(mReceiver) {
@@ -753,6 +760,7 @@ class BluetoothManagerService extends IBluetoothManager.Stub {
                 }
                 case MESSAGE_SAVE_NAME_AND_ADDRESS: {
                     boolean unbind = false;
+                    boolean waitonofftimeout = false;
                     if (DBG) Log.d(TAG,"MESSAGE_SAVE_NAME_AND_ADDRESS");
                     synchronized(mConnection) {
                         if (!mEnable && mBluetooth != null) {
@@ -808,8 +816,10 @@ class BluetoothManagerService extends IBluetoothManager.Stub {
                             mHandler.sendMessage(getMsg);
                         }
                     }
-                    if (!mEnable && mBluetooth != null) waitForOnOff(false, true);
-                    if (unbind) {
+                    if (!mEnable && mBluetooth != null) {
+                        waitonofftimeout = waitForOnOff(false, true);
+                    }
+                    if (unbind && waitonofftimeout) {
                         unbindAndFinish();
                     }
                     break;

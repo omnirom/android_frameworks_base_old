@@ -26,6 +26,7 @@ import android.content.pm.ActivityInfo;
 import android.content.pm.IPackageManager;
 import android.content.pm.PackageManager;
 import android.content.pm.PackageManager.NameNotFoundException;
+import android.content.res.Configuration;
 import android.content.res.XmlResourceParser;
 import android.database.Cursor;
 import android.database.SQLException;
@@ -79,7 +80,7 @@ public class DatabaseHelper extends SQLiteOpenHelper {
     // database gets upgraded properly. At a minimum, please confirm that 'upgradeVersion'
     // is properly propagated through your change.  Not doing so will result in a loss of user
     // settings.
-    private static final int DATABASE_VERSION = 100;
+    private static final int DATABASE_VERSION = 102;
 
     private Context mContext;
     private int mUserHandle;
@@ -1617,12 +1618,40 @@ public class DatabaseHelper extends SQLiteOpenHelper {
             upgradeVersion = 99;
         }
 
-
         if (upgradeVersion == 99) {
             if (mUserHandle == UserHandle.USER_OWNER) {
                 loadScreenAnimationStyle(db);
             }
             upgradeVersion = 100;
+        }
+
+        if (upgradeVersion == 100) {
+            // We're setting some new defaults on these for certain devices, and adding
+            // a default for animator duration. Load them if the user hasn't set them.
+            db.beginTransaction();
+            SQLiteStatement stmt = null;
+            try {
+                stmt = db.compileStatement("INSERT OR IGNORE INTO system(name,value) VALUES(?,?);");
+                loadDefaultAnimationSettings(stmt);
+                    db.setTransactionSuccessful();
+            } finally {
+                db.endTransaction();
+            }
+            upgradeVersion = 101;
+        }
+
+        if (upgradeVersion == 101) {
+            db.beginTransaction();
+            SQLiteStatement stmt = null;
+            try {
+                stmt = db.compileStatement("INSERT OR IGNORE INTO secure(name,value) VALUES(?,?);");
+                loadDefaultThemeSettings(stmt);
+                db.setTransactionSuccessful();
+            } finally {
+                db.endTransaction();
+                if (stmt != null) stmt.close();
+            }
+            upgradeVersion = 102;
         }
 
         // *** Remember to update DATABASE_VERSION above!
@@ -2059,6 +2088,27 @@ public class DatabaseHelper extends SQLiteOpenHelper {
         }
     }
 
+    private void loadRibbonSetting(SQLiteStatement stmt) {
+        String tiles = mContext.getResources().getString(R.string.def_quick_settings_ribbon_tiles);
+        if (!TextUtils.isEmpty(tiles)) {
+            loadSetting(stmt, Settings.System.QS_QUICK_ACCESS, "1");
+            loadSetting(stmt, Settings.System.QS_QUICK_ACCESS_LINKED, "0");
+            loadSetting(stmt, Settings.System.QUICK_SETTINGS_RIBBON_TILES, tiles);
+        }
+    }
+
+    private void loadHeadsUpSetting(SQLiteStatement stmt) {
+        String dndValues = mContext.getResources()
+                .getString(R.string.def_heads_up_notification_dnd_values);
+        String blackListValues = mContext.getResources()
+                .getString(R.string.def_heads_up_notification_blacklist_values);
+        if (!TextUtils.isEmpty(dndValues)) {
+            loadSetting(stmt, Settings.System.HEADS_UP_NOTIFICATION, "0");
+            loadSetting(stmt, Settings.System.HEADS_UP_CUSTOM_VALUES, dndValues);
+            loadSetting(stmt, Settings.System.HEADS_UP_BLACKLIST_VALUES, blackListValues);
+        }
+    }
+
     private void loadSettings(SQLiteDatabase db) {
         loadSystemSettings(db);
         loadSecureSettings(db);
@@ -2136,6 +2186,14 @@ public class DatabaseHelper extends SQLiteOpenHelper {
 
             loadIntegerSetting(stmt, Settings.System.DEV_FORCE_SHOW_NAVBAR,
                     R.integer.def_force_disable_navkeys);
+
+            loadIntegerSetting(stmt, Settings.System.DOUBLE_TAP_SLEEP_GESTURE,
+                    R.integer.def_double_tap_sleep_gesture);
+
+            loadRibbonSetting(stmt);
+
+            loadHeadsUpSetting(stmt);
+
         } finally {
             if (stmt != null) stmt.close();
         }
@@ -2157,11 +2215,19 @@ public class DatabaseHelper extends SQLiteOpenHelper {
                 R.fraction.def_window_animation_scale, 1);
         loadFractionSetting(stmt, Settings.System.TRANSITION_ANIMATION_SCALE,
                 R.fraction.def_window_transition_scale, 1);
+        loadFractionSetting(stmt, Settings.System.ANIMATOR_DURATION_SCALE,
+                R.fraction.def_animator_duration_scale, 1);
     }
 
     private void loadDefaultHapticSettings(SQLiteStatement stmt) {
         loadBooleanSetting(stmt, Settings.System.HAPTIC_FEEDBACK_ENABLED,
                 R.bool.def_haptic_feedback);
+    }
+
+    private void loadDefaultThemeSettings(SQLiteStatement stmt) {
+        loadStringSetting(stmt, Settings.Secure.DEFAULT_THEME_PACKAGE, R.string.def_theme_package);
+        loadStringSetting(stmt, Settings.Secure.DEFAULT_THEME_COMPONENTS,
+                R.string.def_theme_components);
     }
 
     private void loadSecureSettings(SQLiteDatabase db) {
@@ -2248,6 +2314,8 @@ public class DatabaseHelper extends SQLiteOpenHelper {
 
             loadBooleanSetting(stmt, Settings.Secure.USER_SETUP_COMPLETE,
                     R.bool.def_user_setup_complete);
+
+            loadDefaultThemeSettings(stmt);
         } finally {
             if (stmt != null) stmt.close();
         }

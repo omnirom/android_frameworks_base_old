@@ -28,7 +28,10 @@ import android.net.Uri;
 import android.os.FileUtils;
 import android.os.SystemProperties;
 import android.provider.MediaStore;
+import android.provider.Settings;
+import android.text.TextUtils;
 import android.util.DisplayMetrics;
+import android.util.Log;
 import android.view.WindowManager;
 
 import java.io.BufferedInputStream;
@@ -46,17 +49,25 @@ import java.util.zip.ZipEntry;
 import java.util.zip.ZipInputStream;
 import java.util.zip.ZipOutputStream;
 
+import static android.content.res.CustomTheme.HOLO_DEFAULT;
+
 /**
  * @hide
  */
 public class ThemeUtils {
+    private static final String TAG = "ThemeUtils";
+
     /* Path inside a theme APK to the overlay folder */
     public static final String OVERLAY_PATH = "assets/overlays/";
     public static final String ICONS_PATH = "assets/icons/";
+    public static final String COMMON_RES_PATH = "assets/overlays/common/";
     public static final String FONT_XML = "fonts.xml";
     public static final String RESTABLE_EXTENSION = ".arsc";
     public static final String IDMAP_PREFIX = "/data/resource-cache/";
     public static final String IDMAP_SUFFIX = "@idmap";
+    public static final String COMMON_RES_SUFFIX = ".common";
+    public static final String COMMON_RES_TARGET = "common";
+    public static final String ICON_HASH_FILENAME = "hash";
 
     // path to external theme resources, i.e. bootanimation.zip
     public static final String SYSTEM_THEME_PATH = "/data/system/theme";
@@ -67,6 +78,8 @@ public class ThemeUtils {
             + File.separator + "notifications";
     public static final String SYSTEM_THEME_ALARM_PATH = SYSTEM_THEME_PATH
             + File.separator + "alarms";
+    public static final String SYSTEM_THEME_ICON_CACHE_DIR = SYSTEM_THEME_PATH
+            + File.separator + "icons";
     // internal path to bootanimation.zip inside theme apk
     public static final String THEME_BOOTANIMATION_PATH = "assets/bootanimation/bootanimation.zip";
 
@@ -81,6 +94,22 @@ public class ThemeUtils {
     private static final String MEDIA_CONTENT_URI = "content://media/internal/audio/media";
 
     public static final String ACTION_THEME_CHANGED = "org.cyanogenmod.intent.action.THEME_CHANGED";
+
+    public static final String CATEGORY_THEME_COMPONENT_PREFIX = "org.cyanogenmod.intent.category.";
+
+    // Actions in manifests which identify legacy icon packs
+    public static final String[] sSupportedActions = new String[] {
+            "org.adw.launcher.THEMES",
+            "com.gau.go.launcherex.theme"
+    };
+
+    // Categories in manifests which identify legacy icon packs
+    public static final String[] sSupportedCategories = new String[] {
+            "com.fede.launcher.THEME_ICONPACK",
+            "com.anddoes.launcher.THEME",
+            "com.teslacoilsw.launcher.THEME"
+    };
+
 
     /*
      * Retrieve the path to a resource table (ie resource.arsc)
@@ -125,6 +154,10 @@ public class ThemeUtils {
       return IDMAP_PREFIX + pkgName;
     }
 
+    public static String getIconHashFile(String pkgName) {
+        return getIconPackDir(pkgName) + File.separator  +  ICON_HASH_FILENAME;
+    }
+
     public static String getIconPackApkPath(String pkgName) {
         return getIconPackDir(pkgName) + "/resources.apk";
     }
@@ -139,6 +172,12 @@ public class ThemeUtils {
         sb.append(targetPkgName);
         sb.append('/');
         return sb.toString();
+    }
+
+    public static String getCommonPackageName(String themePackageName) {
+        if (TextUtils.isEmpty(themePackageName)) return null;
+
+        return COMMON_RES_TARGET;
     }
 
     public static void createCacheDirIfNotExists() throws IOException {
@@ -214,6 +253,17 @@ public class ThemeUtils {
      */
     public static void createAlarmDirIfNotExists() {
         createDirIfNotExists(SYSTEM_THEME_ALARM_PATH);
+    }
+
+    /**
+     * Create SYSTEM_THEME_ICON_CACHE_DIR directory if it does not exist
+     */
+    public static void createIconCacheDirIfNotExists() {
+        createDirIfNotExists(SYSTEM_THEME_ICON_CACHE_DIR);
+    }
+
+    public static void clearIconCache() {
+        deleteFilesInDir(SYSTEM_THEME_ICON_CACHE_DIR);
     }
 
     //Note: will not delete populated subdirs
@@ -463,19 +513,34 @@ public class ThemeUtils {
     }
 
     public static String getLockscreenWallpaperPath(AssetManager assetManager) throws IOException {
-        final String WALLPAPER_JPG = "wallpaper.jpg";
-        final String WALLPAPER_PNG = "wallpaper.png";
-
         String[] assets = assetManager.list("lockscreen");
         if (assets == null || assets.length == 0) return null;
-        for (String asset : assets) {
-            if (WALLPAPER_JPG.equals(asset)) {
-                return "lockscreen/" + WALLPAPER_JPG;
-            } else if (WALLPAPER_PNG.equals(asset)) {
-                return "lockscreen/" + WALLPAPER_PNG;
+
+        return "lockscreen/" + assets[0];
+    }
+
+    public static String getWallpaperPath(AssetManager assetManager) throws IOException {
+        String[] assets = assetManager.list("wallpapers");
+        if (assets == null || assets.length == 0) return null;
+        return "wallpapers/" + assets[0];
+    }
+
+    public static String getDefaultThemePackageName(Context context) {
+        final String defaultThemePkg = Settings.Secure.getString(context.getContentResolver(),
+                Settings.Secure.DEFAULT_THEME_PACKAGE);
+        if (!TextUtils.isEmpty(defaultThemePkg)) {
+            PackageManager pm = context.getPackageManager();
+            try {
+                if (pm.getPackageInfo(defaultThemePkg, 0) != null) {
+                    return defaultThemePkg;
+                }
+            } catch (PackageManager.NameNotFoundException e) {
+                // doesn't exist so holo will be default
+                Log.w(TAG, "Default theme " + defaultThemePkg + " not found", e);
             }
         }
-        return null;
+
+        return HOLO_DEFAULT;
     }
 
     private static class ThemedUiContext extends ContextWrapper {

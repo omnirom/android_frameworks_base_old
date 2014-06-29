@@ -683,6 +683,35 @@ public abstract class PackageManager {
     public static final int INSTALL_FAILED_USER_RESTRICTED = -111;
 
     /**
+     * Used by themes
+     * Installation failed return code: this is passed to the {@link IPackageInstallObserver} by
+     * {@link #installPackage(android.net.Uri, IPackageInstallObserver, int)}
+     * if the system failed to install the theme because aapt could not compile the app
+     * @hide
+     */
+    public static final int INSTALL_FAILED_THEME_AAPT_ERROR = -400;
+
+    /**
+     * Used by themes
+     * Installation failed return code: this is passed to the {@link IPackageInstallObserver} by
+     * {@link #installPackage(android.net.Uri, IPackageInstallObserver, int)}
+     * if the system failed to install the theme because idmap failed
+     * apps.
+     * @hide
+     */
+    public static final int INSTALL_FAILED_THEME_IDMAP_ERROR = -401;
+
+    /**
+     * Used by themes
+     * Installation failed return code: this is passed to the {@link IPackageInstallObserver} by
+     * {@link #installPackage(android.net.Uri, IPackageInstallObserver, int)}
+     * if the system failed to install the theme for an unknown reason
+     * apps.
+     * @hide
+     */
+    public static final int INSTALL_FAILED_THEME_UNKNOWN_ERROR = -402;
+
+    /**
      * Flag parameter for {@link #deletePackage} to indicate that you don't want to delete the
      * package's data directory.
      *
@@ -1344,6 +1373,22 @@ public abstract class PackageManager {
      */
     public static final String EXTRA_REQUEST_PERMISSION_PERMISSION_LIST
             = "android.content.pm.extra.PERMISSION_LIST";
+
+    /**
+     * Flag for {@link #setComponentProtectedSetting(android.content.ComponentName, boolean)}:
+     * This component or application has set to protected status
+     *
+     * @hide
+     */
+    public static final boolean COMPONENT_PROTECTED_STATUS = false;
+
+    /**
+     * Flag for {@link #setComponentProtectedSetting(android.content.ComponentName, boolean)}:
+     * This component or application has been explicitly set to visible status
+     *
+     * @hide
+     */
+    public static final boolean COMPONENT_VISIBLE_STATUS = true;
 
     /**
      * Retrieve overall information about an application package that is
@@ -2587,6 +2632,16 @@ public abstract class PackageManager {
             throws NameNotFoundException;
 
     /** @hide */
+    public abstract Resources getThemedResourcesForApplication(ApplicationInfo app,
+                                                               String themePkgName)
+            throws NameNotFoundException;
+
+    /** @hide */
+    public abstract Resources getThemedResourcesForApplication(String appPackageName,
+                                                               String themePkgName)
+            throws NameNotFoundException;
+
+    /** @hide */
     public abstract Resources getResourcesForApplicationAsUser(String appPackageName, int userId)
             throws NameNotFoundException;
 
@@ -3232,4 +3287,10 @@ public abstract class PackageManager {
      * @hide
      */
     public abstract void updateIconMaps(String pkgName);
+
+    /**
+     * Update Component protection state
+     * @hide
+     */
+    public abstract void setComponentProtectedSetting(ComponentName componentName, boolean newState);
 }

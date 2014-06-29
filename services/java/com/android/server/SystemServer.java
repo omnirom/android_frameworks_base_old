@@ -121,32 +121,6 @@ class ServerThread {
         }
     }
 
-    private class PerformanceProfileObserver extends ContentObserver {
-        private final String mPropName;
-        private final String mPropDef;
-
-        public PerformanceProfileObserver(Context ctx) {
-            super(null);
-            mPropName =
-                    ctx.getString(com.android.internal.R.string.config_perf_profile_prop);
-            mPropDef =
-                    ctx.getString(com.android.internal.R.string.config_perf_profile_default_entry);
-        }
-        @Override
-        public void onChange(boolean selfChange) {
-            setSystemSetting();
-        }
-
-        void setSystemSetting() {
-            String perfProfile = Settings.System.getString(mContentResolver,
-                    Settings.System.PERFORMANCE_PROFILE);
-            if (perfProfile == null) {
-                perfProfile = mPropDef;
-            }
-            SystemProperties.set(mPropName, perfProfile);
-        }
-    }
-
     public void initAndLoop() {
         EventLog.writeEvent(EventLogTags.BOOT_PROGRESS_SYSTEM_RUN,
             SystemClock.uptimeMillis());
@@ -254,7 +228,7 @@ class ServerThread {
             ServiceManager.addService(Context.POWER_SERVICE, power);
 
             Slog.i(TAG, "Activity Manager");
-            context = ActivityManagerService.main(factoryTest);
+            context = ActivityManagerService.main(factoryTest, power);
         } catch (RuntimeException e) {
             Slog.e("System", "******************************************");
             Slog.e("System", "************ Failure starting bootstrap service", e);
@@ -974,16 +948,6 @@ class ServerThread {
         mContentResolver.registerContentObserver(
             Settings.Secure.getUriFor(Settings.Secure.ADB_PORT),
             false, new AdbPortObserver());
-        if (!TextUtils.isEmpty(context.getString(
-                com.android.internal.R.string.config_perf_profile_prop))) {
-            PerformanceProfileObserver observer = new PerformanceProfileObserver(context);
-            mContentResolver.registerContentObserver(
-                    Settings.System.getUriFor(Settings.System.PERFORMANCE_PROFILE),
-                    false, observer);
-
-            // Sync the system property with the current setting
-            observer.setSystemSetting();
-        }
 
         // Before things start rolling, be sure we have decided whether
         // we are in safe mode.
@@ -998,6 +962,11 @@ class ServerThread {
             // Enable the JIT for the system_server process
             VMRuntime.getRuntime().startJitCompilation();
         }
+
+        if (accountManager != null) {
+            accountManager.setSafeMode(safeMode);
+        }
+
 
         // It is now time to start up the app processes...
 
@@ -1125,6 +1094,7 @@ class ServerThread {
         final PrintManagerService printManagerF = printManager;
         final MediaRouterService mediaRouterF = mediaRouter;
         final IPackageManager pmf = pm;
+        final ThemeService themeServiceF = themeService;
 
         // We now tell the activity manager it is okay to run third party
         // code.  It will call back into us once it has gotten to the state
@@ -1291,6 +1261,8 @@ class ServerThread {
                 }
 
                 try {
+                    // now that the system is up, apply default theme if applicable
+                    if (themeServiceF != null) themeServiceF.systemRunning();
                     CustomTheme customTheme = CustomTheme.getBootTheme(contextF.getContentResolver());
                     String iconPkg = customTheme.getIconPackPkgName();
                     pmf.updateIconMapping(iconPkg);
