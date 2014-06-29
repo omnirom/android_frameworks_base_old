@@ -22,7 +22,6 @@
     android:layout_height="175dp"
     internal:layout_minHeight="175dp"
     internal:layout_maxHeight="unbounded"
-    android:padding="4dp"
     >
     <ImageView android:id="@+id/icon"
         android:layout_width="@dimen/notification_base_icon_width"
