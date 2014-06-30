@@ -6052,6 +6052,13 @@ public final class Settings {
         public static final String RECENT_PANEL_EXPANDED_MODE = "recent_panel_expanded_mode";
 
         /**
+         * Recent panel: Show topmost task
+         *
+         * @hide
+         */
+        public static final String RECENT_PANEL_SHOW_TOPMOST = "recent_panel_show_topmost";
+
+        /**
          * Either if notification peek is enabled of disabled
          * 0 = disabled (default)
          * 1 = enabled
