@@ -135,4 +135,9 @@
     <!-- Content description of the data connection type DC-HSPA+ for accessibility (not shown on the screen). [CHAR LIMIT=NONE] -->
     <string name="accessibility_data_connection_DC" translatable="false">DC-HSPA+</string>
 
+    <!-- Heads up -->
+    <string name="status_bar_notification_heads_up_enable_title">Enable heads up</string>
+    <string name="status_bar_notification_heads_up_disable_title">Disable heads up</string>
+    <string name="heads_up_snooze_message">Heads up is disabled for <xliff:g id="number">%d</xliff:g> minutes.</string>
+
 </resources>

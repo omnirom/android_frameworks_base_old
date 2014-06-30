@@ -458,6 +458,12 @@ public class MockContext extends Context {
         throw new UnsupportedOperationException();
     }
 
+    /** @hide */
+    @Override
+    public boolean isHeadsUpEnabled() {
+        throw new UnsupportedOperationException();
+    }
+
     @Override
     public int checkPermission(String permission, int pid, int uid) {
         throw new UnsupportedOperationException();

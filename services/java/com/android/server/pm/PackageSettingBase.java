@@ -209,6 +209,14 @@ class PackageSettingBase extends GrantedPermissions {
         return readUserState(userId).lastDisableAppCaller;
     }
 
+    void setHeadsUp(boolean enabled, int userId) {
+        modifyUserState(userId).headsUp = enabled;
+    }
+
+    boolean isHeadsUp(int userId) {
+        return readUserState(userId).headsUp;
+    }
+
     void setInstalled(boolean inst, int userId) {
         modifyUserState(userId).installed = inst;
     }
@@ -269,7 +277,7 @@ class PackageSettingBase extends GrantedPermissions {
     }
 
     void setUserState(int userId, int enabled, boolean installed, boolean stopped,
-            boolean notLaunched, boolean blocked,
+            boolean notLaunched, boolean headsUp, boolean blocked,
             String lastDisableAppCaller, HashSet<String> enabledComponents,
             HashSet<String> disabledComponents) {
         PackageUserState state = modifyUserState(userId);
@@ -277,6 +285,7 @@ class PackageSettingBase extends GrantedPermissions {
         state.installed = installed;
         state.stopped = stopped;
         state.notLaunched = notLaunched;
+        state.headsUp = headsUp;
         state.blocked = blocked;
         state.lastDisableAppCaller = lastDisableAppCaller;
         state.enabledComponents = enabledComponents;

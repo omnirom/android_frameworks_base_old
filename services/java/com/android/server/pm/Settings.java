@@ -113,6 +113,7 @@ final class Settings {
     private static final String ATTR_STOPPED = "stopped";
     private static final String ATTR_BLOCKED = "blocked";
     private static final String ATTR_INSTALLED = "inst";
+    private static final String ATTR_HEADS_UP = "headsUp";
 
     private final File mSettingsFilename;
     private final File mBackupSettingsFilename;
@@ -481,6 +482,7 @@ final class Settings {
                                     installed,
                                     true, // stopped,
                                     true, // notLaunched
+                                    false, // heads up
                                     false, // blocked
                                     null, null, null);
                             writePackageRestrictionsLPr(user.id);
@@ -880,6 +882,7 @@ final class Settings {
                                 true,   // installed
                                 false,  // stopped
                                 false,  // notLaunched
+                                false,  // heads up
                                 false,  // blocked
                                 null, null, null);
                     }
@@ -941,6 +944,10 @@ final class Settings {
                     final boolean notLaunched = stoppedStr == null
                             ? false : Boolean.parseBoolean(notLaunchedStr);
 
+                    final String headsUpStr = parser.getAttributeValue(null, ATTR_HEADS_UP);
+                    final boolean headsUp = headsUpStr == null
+                            ? false : Boolean.parseBoolean(headsUpStr);
+
                     HashSet<String> enabledComponents = null;
                     HashSet<String> disabledComponents = null;
 
@@ -960,8 +967,8 @@ final class Settings {
                         }
                     }
 
-                    ps.setUserState(userId, enabled, installed, stopped, notLaunched, blocked,
-                            enabledCaller, enabledComponents, disabledComponents);
+                    ps.setUserState(userId, enabled, installed, stopped, notLaunched, headsUp,
+                            blocked, enabledCaller, enabledComponents, disabledComponents);
                 } else if (tagName.equals("preferred-activities")) {
                     readPreferredActivitiesLPw(parser, userId);
                 } else {
@@ -1066,7 +1073,7 @@ final class Settings {
 
             for (final PackageSetting pkg : mPackages.values()) {
                 PackageUserState ustate = pkg.readUserState(userId);
-                if (ustate.stopped || ustate.notLaunched || !ustate.installed
+                if (ustate.stopped || ustate.notLaunched || !ustate.installed || ustate.headsUp
                         || ustate.enabled != COMPONENT_ENABLED_STATE_DEFAULT
                         || ustate.blocked
                         || (ustate.enabledComponents != null
@@ -1085,6 +1092,9 @@ final class Settings {
                     }
                     if (ustate.notLaunched) {
                         serializer.attribute(null, ATTR_NOT_LAUNCHED, "true");
+                    }
+                    if (ustate.headsUp) {
+                        serializer.attribute(null, ATTR_HEADS_UP, "true");
                     }
                     if (ustate.blocked) {
                         serializer.attribute(null, ATTR_BLOCKED, "true");
@@ -2790,6 +2800,14 @@ final class Settings {
             throw new IllegalArgumentException("Unknown package: " + packageName);
         }
         return pkg.installerPackageName;
+    }
+
+    boolean getHeadsUpSettingLPr(String packageName, int userId) {
+        final PackageSetting pkg = mPackages.get(packageName);
+        if (pkg == null) {
+            throw new IllegalArgumentException("Unknown package: " + packageName);
+        }
+        return pkg.isHeadsUp(userId);
     }
 
     int getApplicationEnabledSettingLPr(String packageName, int userId) {

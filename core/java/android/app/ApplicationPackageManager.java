@@ -48,6 +48,7 @@ import android.content.res.Resources;
 import android.content.res.XmlResourceParser;
 import android.graphics.drawable.Drawable;
 import android.net.Uri;
+import android.os.Binder;
 import android.os.Process;
 import android.os.RemoteException;
 import android.os.UserHandle;
@@ -1334,6 +1335,31 @@ final class ApplicationPackageManager extends PackageManager {
         try {
             return mPM.getApplicationBlockedSettingAsUser(packageName, user.getIdentifier());
         } catch (RemoteException re) {
+            // Should never happen!
+        }
+        return false;
+    }
+
+    /**
+     * @hide
+     */
+    @Override
+    public void setHeadsUpSetting(String packageName, boolean enabled) {
+        try {
+            mPM.setHeadsUpSetting(packageName, enabled, mContext.getUserId());
+        } catch (RemoteException e) {
+            // Should never happen!
+        }
+    }
+
+    /**
+     * @hide
+     */
+    @Override
+    public boolean getHeadsUpSetting(String packageName) {
+        try {
+            return mPM.getHeadsUpSetting(packageName, mContext.getUserId());
+        } catch (RemoteException e) {
             // Should never happen!
         }
         return false;

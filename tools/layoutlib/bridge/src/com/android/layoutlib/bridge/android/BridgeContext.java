@@ -891,6 +891,12 @@ public final class BridgeContext extends Context {
         return 0;
     }
 
+     @Override
+    public boolean isHeadsUpEnabled() {
+        // pass
+        return false;
+    }
+
     @Override
     public int checkPermission(String arg0, int arg1, int arg2) {
         // pass
