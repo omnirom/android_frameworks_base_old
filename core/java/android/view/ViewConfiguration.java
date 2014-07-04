@@ -232,6 +232,14 @@ public class ViewConfiguration {
     private static int OVERFLING_DISTANCE = 6;
 
     /**
+     * Configuration values for overriding {@link #hasPermanentMenuKey()} behavior.
+     * These constants must match the definition in res/values/config.xml.
+     */
+    private static final int HAS_PERMANENT_MENU_KEY_AUTODETECT = 0;
+    private static final int HAS_PERMANENT_MENU_KEY_TRUE = 1;
+    private static final int HAS_PERMANENT_MENU_KEY_FALSE = 2;
+
+    /**
      * Max distance in dips to overfling for edge effects
      * @hide
      */
@@ -251,6 +259,9 @@ public class ViewConfiguration {
     private final int mOverscrollDistance;
     private final int mOverflingDistance;
     private final boolean mFadingMarqueeEnabled;
+
+    private boolean sHasPermanentMenuKey;
+    private boolean sHasPermanentMenuKeySet;
 
     private Context mContext;
 
@@ -354,6 +365,35 @@ public class ViewConfiguration {
 
         mOverscrollDistance = (int) (sizeAndDensity * OVERSCROLL_DISTANCE + 0.5f);
         mOverflingDistance = (int) (sizeAndDensity * OVERFLING_DISTANCE + 0.5f);
+
+        if (!sHasPermanentMenuKeySet) {
+            final int configVal = res.getInteger(
+                    com.android.internal.R.integer.config_overrideHasPermanentMenuKey);
+
+            switch (configVal) {
+                default:
+                case HAS_PERMANENT_MENU_KEY_AUTODETECT: {
+                    IWindowManager wm = WindowManagerGlobal.getWindowManagerService();
+                    try {
+                        sHasPermanentMenuKey = !wm.hasNavigationBar();
+                        sHasPermanentMenuKeySet = true;
+                    } catch (RemoteException ex) {
+                        sHasPermanentMenuKey = false;
+                    }
+                }
+                break;
+
+                case HAS_PERMANENT_MENU_KEY_TRUE:
+                    sHasPermanentMenuKey = true;
+                    sHasPermanentMenuKeySet = true;
+                    break;
+
+                case HAS_PERMANENT_MENU_KEY_FALSE:
+                    sHasPermanentMenuKey = false;
+                    sHasPermanentMenuKeySet = true;
+                    break;
+            }
+        }
 
         mFadingMarqueeEnabled = res.getBoolean(
                 com.android.internal.R.bool.config_ui_enableFadingMarquee);
@@ -734,42 +774,19 @@ public class ViewConfiguration {
     }
 
     /**
-     * Report if the device has a permanent menu key available to the user.
-     *
-     * <p>As of Android 3.0, devices may not have a permanent menu key available.
-     * Apps should use the action bar to present menu options to users.
-     * However, there are some apps where the action bar is inappropriate
-     * or undesirable. This method may be used to detect if a menu key is present.
-     * If not, applications should provide another on-screen affordance to access
-     * functionality.
-     *
-     * @return true if a permanent menu key is present, false otherwise.
-     */
+* Report if the device has a permanent menu key available to the user.
+*
+* <p>As of Android 3.0, devices may not have a permanent menu key available.
+* Apps should use the action bar to present menu options to users.
+* However, there are some apps where the action bar is inappropriate
+* or undesirable. This method may be used to detect if a menu key is present.
+* If not, applications should provide another on-screen affordance to access
+* functionality.
+*
+* @return true if a permanent menu key is present, false otherwise.
+*/
     public boolean hasPermanentMenuKey() {
-        IWindowManager wm = WindowManagerGlobal.getWindowManagerService();
-        // Report no menu key if device has soft buttons
-        try {
-            if (wm.hasNavigationBar()) {
-                return false;
-            }
-        } catch (RemoteException ex) {
-            // do nothing, continue trying to guess
-        }
-
-        // Report no menu key if overflow button is forced to enabled
-        ContentResolver res = mContext.getContentResolver();
-        boolean forceOverflowButton = Settings.System.getInt(res,
-                Settings.System.UI_FORCE_OVERFLOW_BUTTON, 0) == 1;
-        if (forceOverflowButton) {
-            return false;
-        }
-
-        // Report menu key presence based on hardware key rebinding
-        try {
-            return wm.hasMenuKeyEnabled();
-        } catch (RemoteException ex) {
-            return true;
-        }
+        return sHasPermanentMenuKey;
     }
 
     /**
