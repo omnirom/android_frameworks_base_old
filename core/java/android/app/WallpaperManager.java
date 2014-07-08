@@ -30,6 +30,7 @@ import android.graphics.ColorFilter;
 import android.graphics.Matrix;
 import android.graphics.Paint;
 import android.graphics.PixelFormat;
+import android.graphics.Point;
 import android.graphics.PorterDuff;
 import android.graphics.PorterDuffXfermode;
 import android.graphics.Rect;
@@ -67,6 +68,8 @@ public class WallpaperManager {
     private static boolean DEBUG = false;
     private float mWallpaperXStep = -1;
     private float mWallpaperYStep = -1;
+    private int mWallpaperXOverscroll = -1;
+    private int mWallpaperYOverscroll = -1;
 
     /**
      * Activity Action: Show settings for choosing wallpaper. Do not use directly to construct
@@ -218,8 +221,10 @@ public class WallpaperManager {
         private IWallpaperManager mService;
         private Bitmap mWallpaper;
         private Bitmap mDefaultWallpaper;
+        private Bitmap mKeyguardwallpaper;
         
         private static final int MSG_CLEAR_WALLPAPER = 1;
+        private static final int MSG_CLEAR_KEYGUARD_WALLPAPER = 2;
         
         private final Handler mHandler;
         
@@ -236,6 +241,11 @@ public class WallpaperManager {
                                 mDefaultWallpaper = null;
                             }
                             break;
+                        case MSG_CLEAR_KEYGUARD_WALLPAPER:
+                            synchronized (this) {
+                                mKeyguardwallpaper = null;
+                            }
+                            break;
                     }
                 }
             };
@@ -248,6 +258,10 @@ public class WallpaperManager {
              * fetch it.
              */
             mHandler.sendEmptyMessage(MSG_CLEAR_WALLPAPER);
+        }
+
+        public void onKeyguardWallpaperChanged() {
+            mHandler.sendEmptyMessage(MSG_CLEAR_KEYGUARD_WALLPAPER);
         }
 
         public Bitmap peekWallpaperBitmap(Context context, boolean returnDefault) {
@@ -276,6 +290,23 @@ public class WallpaperManager {
             }
         }
 
+        /**
+         * @hide
+         */
+        public Bitmap peekKeyguardWallpaperBitmap(Context context) {
+            synchronized (this) {
+                if (mKeyguardwallpaper != null) {
+                    return mKeyguardwallpaper;
+                }
+                try {
+                    mKeyguardwallpaper = getCurrentKeyguardWallpaperLocked(context);
+                } catch (OutOfMemoryError e) {
+                    Log.w(TAG, "No memory load current keyguard wallpaper", e);
+                }
+                return mKeyguardwallpaper;
+            }
+        }
+
         public void forgetLoadedWallpaper() {
             synchronized (this) {
                 mWallpaper = null;
@@ -294,9 +325,8 @@ public class WallpaperManager {
 
                     try {
                         BitmapFactory.Options options = new BitmapFactory.Options();
-                        Bitmap bm = BitmapFactory.decodeFileDescriptor(
+                        return BitmapFactory.decodeFileDescriptor(
                                 fd.getFileDescriptor(), null, options);
-                        return generateBitmap(context, bm, width, height);
                     } catch (OutOfMemoryError e) {
                         Log.w(TAG, "Can't decode file", e);
                     } finally {
@@ -312,7 +342,33 @@ public class WallpaperManager {
             }
             return null;
         }
-        
+
+        private Bitmap getCurrentKeyguardWallpaperLocked(Context context) {
+            try {
+                Bundle params = new Bundle();
+                ParcelFileDescriptor fd = mService.getKeyguardWallpaper(this, params);
+                if (fd != null) {
+                    try {
+                        BitmapFactory.Options options = new BitmapFactory.Options();
+                        Bitmap bm = BitmapFactory.decodeFileDescriptor(
+                                fd.getFileDescriptor(), null, options);
+                        return bm;
+                    } catch (OutOfMemoryError e) {
+                        Log.w(TAG, "Can't decode file", e);
+                    } finally {
+                        try {
+                            fd.close();
+                        } catch (IOException e) {
+                            // Ignore
+                        }
+                    }
+                }
+            } catch (RemoteException e) {
+                // Ignore
+            }
+            return null;
+        }
+
         private Bitmap getDefaultWallpaperLocked(Context context) {
             try {
                 InputStream is = context.getResources().openRawResource(
@@ -323,8 +379,7 @@ public class WallpaperManager {
 
                     try {
                         BitmapFactory.Options options = new BitmapFactory.Options();
-                        Bitmap bm = BitmapFactory.decodeStream(is, null, options);
-                        return generateBitmap(context, bm, width, height);
+                        return BitmapFactory.decodeStream(is, null, options);
                     } catch (OutOfMemoryError e) {
                         Log.w(TAG, "Can't decode stream", e);
                     } finally {
@@ -339,6 +394,18 @@ public class WallpaperManager {
                 // Ignore
             }
             return null;
+        }
+
+        public void clearKeyguardWallpaper() {
+            synchronized (this) {
+                try {
+                    mService.clearKeyguardWallpaper();
+                } catch (RemoteException e) {
+                    // ignore
+                }
+                mKeyguardwallpaper = null;
+                mHandler.removeMessages(MSG_CLEAR_KEYGUARD_WALLPAPER);
+            }
         }
     }
     
@@ -602,6 +669,15 @@ public class WallpaperManager {
         return null;
     }
 
+    /** @hide */
+    public Drawable getFastKeyguardDrawable() {
+        Bitmap bm = sGlobals.peekKeyguardWallpaperBitmap(mContext);
+        if (bm != null) {
+            return new FastBitmapDrawable(bm);
+        }
+        return null;
+    }
+
     /**
      * Like {@link #getFastDrawable()}, but if there is no wallpaper set,
      * a null pointer is returned.
@@ -624,6 +700,13 @@ public class WallpaperManager {
      */
     public Bitmap getBitmap() {
         return sGlobals.peekWallpaperBitmap(mContext, true);
+    }
+
+    /**
+     * @hide
+     */
+    public Bitmap getKeyguardBitmap() {
+        return sGlobals.peekKeyguardWallpaperBitmap(mContext);
     }
 
     /**
@@ -783,6 +866,35 @@ public class WallpaperManager {
     }
 
     /**
+     * @param bitmap
+     * @throws IOException
+     * @hide
+     */
+    public void setKeyguardBitmap(Bitmap bitmap) throws IOException {
+        if (sGlobals.mService == null) {
+            Log.w(TAG, "WallpaperService not running");
+            return;
+        }
+        try {
+            ParcelFileDescriptor fd = sGlobals.mService.setKeyguardWallpaper(null);
+            if (fd == null) {
+                return;
+            }
+            FileOutputStream fos = null;
+            try {
+                fos = new ParcelFileDescriptor.AutoCloseOutputStream(fd);
+                bitmap.compress(Bitmap.CompressFormat.PNG, 90, fos);
+            } finally {
+                if (fos != null) {
+                    fos.close();
+                }
+            }
+        } catch (RemoteException e) {
+            // Ignore
+        }
+    }
+
+    /**
      * Change the current system wallpaper to a specific byte stream.  The
      * give InputStream is copied into persistent storage and will now be
      * used as the wallpaper.  Currently it must be either a JPEG or PNG
@@ -804,6 +916,33 @@ public class WallpaperManager {
         }
         try {
             ParcelFileDescriptor fd = sGlobals.mService.setWallpaper(null);
+            if (fd == null) {
+                return;
+            }
+            FileOutputStream fos = null;
+            try {
+                fos = new ParcelFileDescriptor.AutoCloseOutputStream(fd);
+                setWallpaper(data, fos);
+            } finally {
+                if (fos != null) {
+                    fos.close();
+                }
+            }
+        } catch (RemoteException e) {
+            // Ignore
+        }
+    }
+
+    /**
+     * @hide
+     */
+    public void setKeyguardStream(InputStream data) throws IOException {
+        if (sGlobals.mService == null) {
+            Log.w(TAG, "WallpaperService not running");
+            return;
+        }
+        try {
+            ParcelFileDescriptor fd = sGlobals.mService.setKeyguardWallpaper(null);
             if (fd == null) {
                 return;
             }
@@ -950,12 +1089,47 @@ public class WallpaperManager {
     public void setWallpaperOffsets(IBinder windowToken, float xOffset, float yOffset) {
         try {
             //Log.v(TAG, "Sending new wallpaper offsets from app...");
-            WindowManagerGlobal.getWindowSession().setWallpaperPosition(
-                    windowToken, xOffset, yOffset, mWallpaperXStep, mWallpaperYStep);
+            WindowManagerGlobal.getWindowSession().setWallpaperPositionOverscroll(
+                    windowToken, xOffset, yOffset, mWallpaperXStep, mWallpaperYStep,
+                    -1, -1, mWallpaperXOverscroll, mWallpaperYOverscroll);
             //Log.v(TAG, "...app returning after sending offsets!");
         } catch (RemoteException e) {
             // Ignore.
         }
+    }
+
+    /**
+     * Set the position of the current wallpaper within any larger space, when
+     * that wallpaper is visible behind the given window.  The X and Y offsets
+     * are floating point numbers ranging from 0 to 1, representing where the
+     * wallpaper should be positioned within the range specified by setWallpaperOverscroll.
+     *
+     * @param windowToken The window who these offsets should be associated
+     * with, as returned by {@link android.view.View#getWindowToken()
+     * View.getWindowToken()}.
+     * @param xOverscrollOffset The overscroll offset along the X dimension, from 0 to 1.
+     * @param yOverscrollOffset The overscroll offset along the Y dimension, from 0 to 1.
+     *
+     * @hide
+     */
+    public void setWallpaperOverscrollOffsets(IBinder windowToken, float xOverscrollOffset,
+            float yOverscrollOffset) {
+        try {
+            //Log.v(TAG, "Sending new wallpaper offsets from app...");
+            WindowManagerGlobal.getWindowSession().setWallpaperPositionOverscroll(
+                    windowToken, -1, -1, mWallpaperXStep, mWallpaperYStep,
+                    xOverscrollOffset, yOverscrollOffset, mWallpaperXOverscroll,
+                    mWallpaperYOverscroll);
+            //Log.v(TAG, "...app returning after sending offsets!");
+        } catch (RemoteException e) {
+            // Ignore.
+        }
+    }
+
+    /** @hide */
+    public void setWallpaperOverscroll(int xOverscroll, int yOverscroll) {
+        mWallpaperXOverscroll = xOverscroll;
+        mWallpaperYOverscroll = yOverscroll;
     }
 
     /**
@@ -970,7 +1144,29 @@ public class WallpaperManager {
         mWallpaperXStep = xStep;
         mWallpaperYStep = yStep;
     }
-    
+
+    /** @hide */
+    public int getLastWallpaperX() {
+        try {
+            return WindowManagerGlobal.getWindowSession().getLastWallpaperX();
+        } catch (RemoteException e) {
+            // Ignore.
+        }
+
+        return -1;
+    }
+
+    /** @hide */
+    public int getLastWallpaperY() {
+        try {
+            return WindowManagerGlobal.getWindowSession().getLastWallpaperY();
+        } catch (RemoteException e) {
+            // Ignore.
+        }
+
+        return -1;
+    }
+
     /**
      * Send an arbitrary command to the current active wallpaper.
      * 
@@ -1029,7 +1225,14 @@ public class WallpaperManager {
     public void clear() throws IOException {
         setResource(com.android.internal.R.drawable.default_wallpaper);
     }
-    
+
+    /**
+     * @hide
+     */
+    public void clearKeyguardWallpaper() {
+        sGlobals.clearKeyguardWallpaper();
+    }
+
     static Bitmap generateBitmap(Context context, Bitmap bm, int width, int height) {
         if (bm == null) {
             return null;

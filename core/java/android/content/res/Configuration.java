@@ -82,6 +82,11 @@ public final class Configuration implements Parcelable, Comparable<Configuration
     public CustomTheme customTheme;
 
     /**
+     * @hide
+     */
+    public ThemeConfig themeConfig;
+
+    /**
      * Locale should persist on setting.  This is hidden because it is really
      * questionable whether this is the right way to expose the functionality.
      * @hide
@@ -421,14 +426,47 @@ public final class Configuration implements Parcelable, Comparable<Configuration
 
     /**
      * @hide
+     * @deprecated
      */
-    public static final String THEME_ID_PERSISTENCE_PROPERTY = "persist.sys.themeId";
+    public static final String THEME_PACKAGE_NAME_PERSISTENCE_PROPERTY = "persist.sys.themePackageName";
 
     /**
      * @hide
+     * @deprecated
      */
-    public static final String THEME_PACKAGE_NAME_PERSISTENCE_PROPERTY = "persist.sys.themePackageName";
-    
+    public static final String THEME_SYSTEMUI_PACKAGE_NAME_PERSISTENCE_PROPERTY = "persist.sys.themeSysUiPkgName";
+
+    /**
+     * @hide
+     * @deprecated
+     */
+    public static final String THEME_ICONPACK_PACKAGE_NAME_PERSISTENCE_PROPERTY = "themeIconPackPkgName";
+
+    /**
+     * @hide
+     * @deprecated
+     */
+    public static final String THEME_FONT_PACKAGE_NAME_PERSISTENCE_PROPERTY = "themeFontPackPkgName";
+
+    /**
+     * @hide
+     * Serialized json structure mapping app pkgnames to their set theme.
+     *
+     * {
+     *  "default":{
+     *"     stylePkgName":"com.jasonevil.theme.miuiv5dark",
+     *      "iconPkgName":"com.cyngn.hexo",
+     *      "fontPkgName":"com.cyngn.hexo"
+     *   }
+     * }
+
+     * If an app does not have a specific theme set then it will use the 'default' theme+
+     * example: 'default' -> overlayPkgName: 'org.blue.theme'
+     *          'com.android.phone' -> 'com.red.theme'
+     *          'com.google.vending' -> 'com.white.theme'
+     */
+    public static final String THEME_PKG_CONFIGURATION_PERSISTENCE_PROPERTY = "themeConfig";
+
     /**
      * Overall orientation of the screen.  May be one of
      * {@link #ORIENTATION_LANDSCAPE}, {@link #ORIENTATION_PORTRAIT}.
@@ -685,8 +723,8 @@ public final class Configuration implements Parcelable, Comparable<Configuration
         compatScreenHeightDp = o.compatScreenHeightDp;
         compatSmallestScreenWidthDp = o.compatSmallestScreenWidthDp;
         seq = o.seq;
-        if (o.customTheme != null) {
-            customTheme = (CustomTheme) o.customTheme.clone();
+        if (o.themeConfig != null) {
+            themeConfig = (ThemeConfig) o.themeConfig.clone();
         }
     }
 
@@ -832,7 +870,7 @@ public final class Configuration implements Parcelable, Comparable<Configuration
             sb.append(seq);
         }
         sb.append(" themeResource=");
-        sb.append(customTheme);
+        sb.append(themeConfig);
         sb.append('}');
         return sb.toString();
     }
@@ -860,7 +898,7 @@ public final class Configuration implements Parcelable, Comparable<Configuration
         smallestScreenWidthDp = compatSmallestScreenWidthDp = SMALLEST_SCREEN_WIDTH_DP_UNDEFINED;
         densityDpi = DENSITY_DPI_UNDEFINED;
         seq = 0;
-        customTheme = null;
+        themeConfig = null;
     }
 
     /** {@hide} */
@@ -1009,10 +1047,10 @@ public final class Configuration implements Parcelable, Comparable<Configuration
             seq = delta.seq;
         }
 
-        if (delta.customTheme != null
-                && (customTheme == null || !customTheme.equals(delta.customTheme))) {
+        if (delta.themeConfig != null
+                && (themeConfig == null || !themeConfig.equals(delta.themeConfig))) {
             changed |= ActivityInfo.CONFIG_THEME_RESOURCE;
-            customTheme = (CustomTheme)delta.customTheme.clone();
+            themeConfig = (ThemeConfig)delta.themeConfig.clone();
         }
 
         return changed;
@@ -1128,8 +1166,8 @@ public final class Configuration implements Parcelable, Comparable<Configuration
                 && densityDpi != delta.densityDpi) {
             changed |= ActivityInfo.CONFIG_DENSITY;
         }
-        if (delta.customTheme != null &&
-                (customTheme == null || !customTheme.equals(delta.customTheme))) {
+        if (delta.themeConfig != null &&
+                (themeConfig == null || !themeConfig.equals(delta.themeConfig))) {
             changed |= ActivityInfo.CONFIG_THEME_RESOURCE;
         }
         return changed;
@@ -1223,14 +1261,7 @@ public final class Configuration implements Parcelable, Comparable<Configuration
         dest.writeInt(compatScreenHeightDp);
         dest.writeInt(compatSmallestScreenWidthDp);
         dest.writeInt(seq);
-
-        if (customTheme == null) {
-            dest.writeInt(0);
-        } else {
-            dest.writeInt(1);
-            dest.writeString(customTheme.getThemeId());
-            dest.writeString(customTheme.getThemePackageName());
-        }
+        dest.writeParcelable(themeConfig, flags);
     }
 
     public void readFromParcel(Parcel source) {
@@ -1260,12 +1291,7 @@ public final class Configuration implements Parcelable, Comparable<Configuration
         compatScreenHeightDp = source.readInt();
         compatSmallestScreenWidthDp = source.readInt();
         seq = source.readInt();
-
-        if (source.readInt() != 0) {
-            String themeId = source.readString();
-            String themePackage = source.readString();
-            customTheme = new CustomTheme(themeId, themePackage);
-        }
+        themeConfig = source.readParcelable(ThemeConfig.class.getClassLoader());
     }
     
     public static final Parcelable.Creator<Configuration> CREATOR
@@ -1335,18 +1361,12 @@ public final class Configuration implements Parcelable, Comparable<Configuration
         n = this.smallestScreenWidthDp - that.smallestScreenWidthDp;
         if (n != 0) return n;
         n = this.densityDpi - that.densityDpi;
-        //if (n != 0) return n;
-        if (this.customTheme == null) {
-            if (that.customTheme != null) return 1;
-        } else if (that.customTheme == null) {
-            return -1;
+        if (n != 0) return n;
+        if (this.themeConfig == null) {
+            if (that.themeConfig != null) return 1;
         } else {
-            n = this.customTheme.getThemeId().compareTo(that.customTheme.getThemeId());
-            if (n != 0) return n;
-            n = this.customTheme.getThemePackageName().compareTo(that.customTheme.getThemePackageName());
-            if (n != 0) return n;
+            n = this.themeConfig.compareTo(that.themeConfig);
         }
-
         return n;
     }
 
@@ -1384,8 +1404,8 @@ public final class Configuration implements Parcelable, Comparable<Configuration
         result = 31 * result + screenHeightDp;
         result = 31 * result + smallestScreenWidthDp;
         result = 31 * result + densityDpi;
-        result = 31 * result + (this.customTheme != null ?
-                                  this.customTheme.hashCode() : 0);
+        result = 31 * result + (this.themeConfig != null ?
+                                  this.themeConfig.hashCode() : 0);
         return result;
     }
 

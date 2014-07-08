@@ -31,11 +31,15 @@ import android.content.Intent;
 import android.content.IntentFilter;
 import android.content.pm.ActivityInfo;
 import android.content.pm.PackageManager;
+import android.content.pm.PackageManager.NameNotFoundException;
+import android.content.res.Configuration;
 import android.content.res.Resources;
+import android.database.ContentObserver;
 import android.graphics.Point;
 import android.graphics.Rect;
 import android.graphics.drawable.BitmapDrawable;
 import android.graphics.drawable.Drawable;
+import android.os.Bundle;
 import android.os.Handler;
 import android.os.Message;
 import android.os.RemoteException;
@@ -114,7 +118,14 @@ public class NavigationBarView extends LinearLayout implements BaseStatusBar.Nav
     private int mDisabledFlags = 0;
     private int mNavigationIconHints = 0;
 
-    private Drawable mBackIcon, mBackAltIcon;
+    private Drawable mBackIcon, mBackLandIcon, mBackAltIcon, mBackAltLandIcon;
+    private Drawable mRecentIcon;
+    private Drawable mRecentLandIcon;
+
+    // Used in Lockscreen notifications navbar clear all notifs.
+    private Drawable mRecentAltIcon, mRecentAltLandIcon;
+
+    private Drawable mHomeIcon, mHomeLandIcon;
 
     protected DelegateViewHelper mDelegateHelper;
     private DeadZone mDeadZone;
@@ -259,6 +270,8 @@ public class NavigationBarView extends LinearLayout implements BaseStatusBar.Nav
         mVertical = false;
         mShowMenu = false;
         mDelegateHelper = new DelegateViewHelper(this);
+
+        getIcons(res);
 
         mBarTransitions = new NavigationBarTransitions(this);
 
@@ -459,6 +472,46 @@ public class NavigationBarView extends LinearLayout implements BaseStatusBar.Nav
 
     public void recreateNavigationBar() {
         updateSettings();
+    }
+
+    private void getIcons(Resources res) {
+        mBackIcon = res.getDrawable(R.drawable.ic_sysbar_back);
+        mBackLandIcon = res.getDrawable(R.drawable.ic_sysbar_back_land);
+        mBackAltIcon = res.getDrawable(R.drawable.ic_sysbar_back_ime);
+        mBackAltLandIcon = res.getDrawable(R.drawable.ic_sysbar_back_ime_land);
+        mRecentIcon = res.getDrawable(R.drawable.ic_sysbar_recent);
+        mRecentLandIcon = res.getDrawable(R.drawable.ic_sysbar_recent_land);
+        mRecentAltIcon = res.getDrawable(R.drawable.ic_sysbar_recent_clear);
+        mRecentAltLandIcon = res.getDrawable(R.drawable.ic_sysbar_recent_clear_land);
+        mHomeIcon = res.getDrawable(R.drawable.ic_sysbar_home);
+        mHomeLandIcon = res.getDrawable(R.drawable.ic_sysbar_home_land);
+    }
+
+    public void updateResources() {
+        getIcons(mContext.getResources());
+        for (int i = 0; i < mRotatedViews.length; i++) {
+            ViewGroup container = (ViewGroup) mRotatedViews[i];
+            if (container != null) {
+                updateKeyButtonViewResources(container);
+            }
+        }
+    }
+
+    private void updateKeyButtonViewResources(ViewGroup container) {
+        ViewGroup midNavButtons = (ViewGroup) container.findViewById(R.id.mid_nav_buttons);
+        if (midNavButtons != null) {
+            final int nChildern = midNavButtons.getChildCount();
+            for (int i = 0; i < nChildern; i++) {
+                final View child = midNavButtons.getChildAt(i);
+                if (child instanceof KeyButtonView) {
+                    ((KeyButtonView) child).updateResources();
+                }
+            }
+        }
+        KeyButtonView kbv = (KeyButtonView) findViewById(R.id.six);
+        if (kbv != null) {
+            kbv.updateResources();
+        }
     }
 
     private void colorizeStaticButtons() {
