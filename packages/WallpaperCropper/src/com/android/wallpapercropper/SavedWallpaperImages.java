@@ -81,7 +81,7 @@ public class SavedWallpaperImages extends BaseAdapter implements ListAdapter {
             return true;
         }
         @Override
-        public boolean isNamelessWallpaper() {
+        public boolean isAmraWallpaper() {
             return true;
         }
     }
