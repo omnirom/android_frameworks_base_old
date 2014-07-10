@@ -1830,4 +1830,16 @@
   <java-symbol type="bool" name="config_hasRotationLockSwitch" />
   <java-symbol type="string" name="toast_rotation_unlocked" />
   <java-symbol type="string" name="toast_rotation_locked" />
+
+  <!-- Omni -->
+  <java-symbol type="array" name="hwf_adaptiveBacklight" />
+  <java-symbol type="array" name="hwf_keyDisabler" />
+  <java-symbol type="array" name="hwf_longTermOrbits" />
+  <java-symbol type="array" name="hwf_mDNIeMode" />
+  <java-symbol type="array" name="hwf_mDNIeNegative" />
+  <java-symbol type="array" name="hwf_mDNIeScenario" />
+  <java-symbol type="array" name="hwf_altSerialNumber" />
+  <java-symbol type="array" name="hwf_tapToWake" />
+  <java-symbol type="array" name="hwf_vibrator" />
+
 </resources>
