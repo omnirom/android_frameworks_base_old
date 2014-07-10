@@ -24,4 +24,89 @@
         <item>com.google.android.gsf|com.google.android.talk</item>
     </string-array>
 
+
+    <!-- DEFAULT HARDWARE TUNABLES ARRAYS START -->
+
+    <!-- Hardware tunables arrays are always in the format of:
+
+    <array name="hwf_feature" translatable="false">
+        <item>false</item> <- Supported or not (Must be a boolean (true or false))
+        <item>Checkbox</item> <- What type of UI setting it will use (CheckBox, DialogSingleChoice, DialogSlider, DialogColor)
+        <item>null</item> <- path here, default is null, as seen here
+        <item>null</item> <- As many additional paths/values as necessary/appropriate. Refer to the corresponding tunable Java class
+    </array>
+
+    -->
+
+    <!-- Adaptive Backlight -->
+    <array name="hwf_adaptiveBacklight" translatable="false">
+        <item>false</item>
+        <item>CheckBox</item>
+        <item>null</item> <!-- sysfs path -->
+    </array>
+
+    <!-- Key Disabler -->
+    <array name="hwf_keyDisabler" translatable="false">
+        <item>false</item>
+        <item>CheckBox</item>
+        <item>null</item>
+    </array>
+
+    <!-- Long Term Orbits -->
+    <array name="hwf_longTermOrbits" translatable="false">
+        <item>true</item> <!-- Enabled by default; Most devices support this -->
+        <item>None</item> <!-- This feature does not require any UI element -->
+        <item>http://gllto.glpals.com/7day/v2/latest/lto2.dat</item> <!-- LTO Source -->
+        <item>/data/gps/lto.dat</item> <!-- LTO file destination -->
+        <item>259200000</item> <!-- Download interval (259200000 = 3 days) -->
+    </array>
+
+    <!-- mDNIe Mode -->
+    <array name="hwf_mDNIeMode" translatable="false">
+        <item>false</item>
+        <item>DialogSingleChoice</item>
+        <item>null</item> <!-- sysfs path -->
+        <item>null</item> <!-- Default value -->
+    </array>
+
+
+    <!-- mDNIe Negative Mode -->
+    <array name="hwf_mDNIeNegative" translatable="false">
+        <item>false</item>
+        <item>CheckBox</item>
+        <item>null</item> <!-- sysfs path -->
+    </array>
+
+    <!-- mDNIe Scenario -->
+    <array name="hwf_mDNIeScenario" translatable="false">
+        <item>false</item>
+        <item>DialogSingleChoice</item>
+        <item>null</item> <!-- sysfs path -->
+        <item>null</item> <!-- Default value -->
+    </array>
+
+    <!-- Serial number override -->
+    <array name="hwf_altSerialNumber" translatable="false">
+        <item>false</item>
+        <item>None</item> <!-- This feature does not require any UI element -->
+        <item>null</item> <!-- sysfs path -->
+    </array>
+
+    <!-- Tap to Wake -->
+    <array name="hwf_tapToWake" translatable="false">
+        <item>false</item>
+        <item>CheckBox</item>
+        <item>null</item> <!-- sysfs path -->
+    </array>
+
+    <!-- Vibrator -->
+    <array name="hwf_vibrator" translatable="false">
+        <item>false</item>
+        <item>DialogSlider</item>
+        <item>null</item> <!-- sysfs path -->
+        <item>null</item> <!-- Max intensity sysfs path/value (Enter either) -->
+        <item>null</item> <!-- Min intensity sysfs path/value (Enter either) -->
+        <item>null</item> <!-- Default intensity sysfs path/value (Enter either) -->
+        <item>null</item> <!-- Warning intensity sysfs path/value (Enter either) -->
+    </array>
 </resources>
