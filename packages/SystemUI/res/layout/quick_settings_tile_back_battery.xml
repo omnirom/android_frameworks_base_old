@@ -53,7 +53,7 @@
             android:layout_height="wrap_content"
             android:layout_gravity="center"
             android:gravity="center_vertical"
-            systemui:batteryView="quicksettings"
+            systemui:batteryView="quicksettings_back"
             />
         <TextView
             style="@style/TextAppearance.QuickSettings.TileView"
