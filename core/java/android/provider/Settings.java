@@ -6059,6 +6059,53 @@ public final class Settings {
         public static final String RECENT_PANEL_SHOW_TOPMOST = "recent_panel_show_topmost";
 
         /**
+         * Swipe recents for floating windows option
+         * @hide
+         */
+        public static final String RECENTS_SWIPE_FLOATING = "recents_swipe_floating";
+
+        /**
+         * Swipe notification for floating window option
+         * @hide
+         */
+        public static final String STATUS_BAR_NOTIFICATION_SWIPE_FLOATING = "status_bar_notification_swipe_floating";
+
+        /**
+         * Hover: long fade out delay, default is 5000ms (5s).
+         *
+         * @hide
+         */
+        public static final String HOVER_LONG_FADE_OUT_DELAY = "hover_long_fade_out_delay";
+
+        /**
+         * Hover: Exclude non-clearable notifications, default is 0 (off).
+         *
+         * @hide
+         */
+        public static final String HOVER_EXCLUDE_NON_CLEARABLE = "hover_exclude_non_clearable";
+
+        /**
+         * Hover: Exclude low priority notifications, default is 0 (off).
+         *
+         * @hide
+         */
+        public static final String HOVER_EXCLUDE_LOW_PRIORITY = "hover_exclude_low_priority";
+
+        /**
+         * Hover: Only show up if StatusBar is hidden, default is 0 (off).
+         *
+         * @hide
+         */
+        public static final String HOVER_REQUIRE_FULLSCREEN_MODE = "hover_require_fullscreen_mode";
+
+        /**
+         * Hover: Option to exclude topmost app, default is 0 (off).
+         *
+         * @hide
+         */
+        public static final String HOVER_EXCLUDE_TOPMOST = "hover_exclude_topmost";
+
+        /**
          * Either if notification peek is enabled of disabled
          * 0 = disabled (default)
          * 1 = enabled
@@ -6184,6 +6231,8 @@ public final class Settings {
             TELO_RADIO_LTE,
             TELO_RADIO_2G_SCREENOFF,
             TELO_RADIO_GO3G_UNLOCK,
+            RECENTS_SWIPE_FLOATING,
+            STATUS_BAR_NOTIFICATION_SWIPE_FLOATING
         };
 
         // Settings moved to Settings.Secure

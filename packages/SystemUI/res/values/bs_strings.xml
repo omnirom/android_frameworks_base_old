@@ -229,4 +229,37 @@
     <!-- Navigation bar IME navigation -->
     <string name="accessibility_ime_navigation_left">Cursor left</string>
     <string name="accessibility_ime_navigation_right">Cursor right</string>
+
+    <!-- Camera tile toasts -->
+    <string name="quick_settings_camera_error_connect">Can\'t connect to camera</string>
+
+    <!-- Title shown in notification popup for launching notification in floating mode -->
+    <string name="status_bar_notification_floating_item_title">Floating mode</string>
+
+    <!-- Title shown in recents popup for showing app in floating mode -->
+    <string name="status_bar_recent_floating_item_title">Floating mode</string>
+
+    <!-- Blacklisted app for floating mode -->
+    <string name="floating_mode_blacklisted_app">The current app is blacklisted as it may not work as expected in floating mode </string>
+
+    <!-- First time run hover -->
+    <string name="hover_cling_text">Hover is now enabled.\n\nWhen a new notification arrives, an overlay will show allowing you to respond to it without leaving current app.</string>
+    <string name="status_bar_floating_no_interface">App provides no interface</string>
+
+    <!-- Heads up -->
+    <string name="status_bar_notification_heads_up_enable_title">Enable heads up</string>
+    <string name="status_bar_notification_heads_up_disable_title">Disable heads up</string>
+    <string name="heads_up_snooze_message">Heads up is disabled for <xliff:g id="number">%d</xliff:g> minutes.</string>
+
+    <!-- Swipe recents for floating window confirmation dialog -->
+    <string name="recents_swipe_floating_title">Swipe recents to float</string>
+    <string name="recents_swipe_floating_message_portrait">Would you like to swipe left to open apps in floating window?</string>
+    <string name="recents_swipe_floating_message_landscape">Would you like to swipe down to open apps in floating window?</string>
+    <string name="recents_swipe_floating" translatable="false">@string/recents_swipe_floating_title</string>
+
+    <!-- Swipe notification for floating window confirmation dialog -->
+    <string name="status_bar_notification_swipe_floating_title">Swipe notification to float</string>
+    <string name="status_bar_notification_swipe_floating_message">Would you like to swipe left to open apps in floating window?</string>
+    <string name="status_bar_notification_swipe_floating" translatable="false">@string/status_bar_notification_swipe_floating_title</string>
+
 </resources>

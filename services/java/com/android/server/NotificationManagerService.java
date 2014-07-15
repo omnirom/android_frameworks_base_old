@@ -207,11 +207,12 @@ public class NotificationManagerService extends INotificationManager.Stub
     private HashSet<String> mEnabledListenerPackageNames = new HashSet<String>();
 
     // Notification control database. For now just contains disabled packages.
-    private AtomicFile mPolicyFile, mHaloPolicyFile;
+    private AtomicFile mPolicyFile, mHaloPolicyFile, mPeekPolicyFile, mFloatingModePolicyFile, mHoverPolicyFile;
     private HashSet<String> mBlockedPackages = new HashSet<String>();
     private HashSet<String> mHaloBlacklist = new HashSet<String>();
     private HashSet<String> mHaloWhitelist = new HashSet<String>();
     private boolean mHaloPolicyisBlack = true;
+    private HashSet<String> mFloatingModeBlacklist = new HashSet<String>();
 
     private static final int DB_VERSION = 1;
 
@@ -223,6 +224,8 @@ public class NotificationManagerService extends INotificationManager.Stub
     private static final String TAG_BLOCKED_PKGS = "blocked-packages";
     private static final String TAG_PACKAGE = "package";
     private static final String ATTR_NAME = "name";
+
+    private static final String FLOATING_MODE_POLICY = "floating_mode_policy.xml";
 
     private final ArrayList<NotificationScorer> mScorers = new ArrayList<NotificationScorer>();
 
@@ -465,6 +468,16 @@ public class NotificationManagerService extends INotificationManager.Stub
         }
     }
 
+    private void loadFloatingModeBlockDb() {
+        synchronized(mFloatingModeBlacklist) {
+            if (mFloatingModePolicyFile == null) {
+                mFloatingModePolicyFile = new AtomicFile(new File(SYSTEM_FOLDER, FLOATING_MODE_POLICY));
+                mFloatingModeBlacklist.clear();
+                readPolicy(mFloatingModePolicyFile, TAG_BLOCKED_PKGS, mFloatingModeBlacklist);
+            }
+        }
+    }
+
     private void writeBlockDb() {
         synchronized(mBlockedPackages) {
             FileOutputStream outfile = null;
@@ -583,6 +596,53 @@ public class NotificationManagerService extends INotificationManager.Stub
         }
     }
 
+    private void writeFloatingModeBlockDb() {
+        synchronized(mFloatingModeBlacklist) {
+            FileOutputStream outfile = null;
+            try {
+                outfile = mFloatingModePolicyFile.startWrite();
+
+                XmlSerializer out = new FastXmlSerializer();
+                out.setOutput(outfile, "utf-8");
+
+                out.startDocument(null, true);
+
+                out.startTag(null, TAG_BODY); {
+                    out.attribute(null, ATTR_VERSION, String.valueOf(DB_VERSION));
+                    out.startTag(null, TAG_BLOCKED_PKGS); {
+                        // write all known network policies
+                        for (String pkg : mFloatingModeBlacklist) {
+                            out.startTag(null, TAG_PACKAGE); {
+                                out.attribute(null, ATTR_NAME, pkg);
+                            } out.endTag(null, TAG_PACKAGE);
+                        }
+                    } out.endTag(null, TAG_BLOCKED_PKGS);
+                } out.endTag(null, TAG_BODY);
+
+                out.endDocument();
+
+                mFloatingModePolicyFile.finishWrite(outfile);
+            } catch (IOException e) {
+                if (outfile != null) {
+                    mFloatingModePolicyFile.failWrite(outfile);
+                }
+            }
+        }
+    }
+
+    public void setFloatingModeBlacklistStatus(String pkg, boolean status) {
+        if (status) {
+            mFloatingModeBlacklist.add(pkg);
+        } else {
+            mFloatingModeBlacklist.remove(pkg);
+        }
+        writeFloatingModeBlockDb();
+    }
+
+    public boolean isPackageAllowedForFloatingMode(String pkg) {
+        return !mFloatingModeBlacklist.contains(pkg);
+    }
+
     /**
      * Use this when you just want to know if notifications are OK for this package.
      */
@@ -618,6 +678,7 @@ public class NotificationManagerService extends INotificationManager.Stub
             cancelAllNotificationsInt(pkg, 0, 0, true, UserHandle.getUserId(uid));
         }
         writeBlockDb();
+        writeFloatingModeBlockDb();
     }
 
 
@@ -1692,6 +1753,7 @@ public class NotificationManagerService extends INotificationManager.Stub
 
         loadBlockDb();
         loadHaloBlockDb();
+        loadFloatingModeBlockDb();
 
         PackageManager pm = mContext.getPackageManager();
         for (String pkg : mBlockedPackages) {
