@@ -1177,13 +1177,11 @@ public class RecentsPanelView extends FrameLayout implements OnItemClickListener
         thumbnailView.setSelected(true);
         final PopupMenu popup =
             new PopupMenu(mContext, anchorView == null ? selectedView : anchorView);
-
         // initialize if null
         if (mNotificationManager == null) {
             mNotificationManager = INotificationManager.Stub.asInterface(
                     ServiceManager.getService(Context.NOTIFICATION_SERVICE));
         }
-
         mPopup = popup;
 
 	int mHaloEnabled = (Settings.System.getInt(mContext.getContentResolver(), Settings.System.HALO_ENABLED, 0));
@@ -1281,7 +1279,23 @@ public class RecentsPanelView extends FrameLayout implements OnItemClickListener
                     ViewHolder viewHolder = (ViewHolder) selectedView.getTag();
                     if (viewHolder != null) {
                         final TaskDescription ad = viewHolder.taskDescription;
-                        dismissAndGoBack();
+                        String currentViewPackage = ad.packageName;
+                        boolean allowed = true; // default on
+                        try {
+                            // preloaded apps are added to the blacklist array when is recreated, handled in the notification manager
+                            allowed = mNotificationManager.isPackageAllowedForFloatingMode(currentViewPackage);
+                        } catch (android.os.RemoteException ex) {
+                            // System is dead
+                        }
+                        if (!allowed) {
+                            dismissAndGoBack();
+                            String text = mContext.getResources().getString(R.string.floating_mode_blacklisted_app);
+                            int duration = Toast.LENGTH_LONG;
+                            Toast.makeText(mContext, text, duration).show();
+                            return true;
+                        } else {
+                            dismissAndGoBack();
+                        }
                         selectedView.post(new Runnable() {
                             @Override
                             public void run() {
