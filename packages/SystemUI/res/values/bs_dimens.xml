@@ -66,6 +66,10 @@
     <dimen name="halo_content_max_width">250dp</dimen>
  
     <!-- Hover dimens -->
-    <dimen name="hover_height">64dp</dimen>
+    <!-- Theme Engine overrides to avoid modifications that will affect hover view. -->
+    <dimen name="default_notification_min_height">64dp</dimen>
+    <dimen name="default_notification_max_height">256dp</dimen>
+    <dimen name="default_notification_row_min_height">70dp</dimen>
+    <dimen name="default_notification_row_max_height">260dp</dimen>
     <dimen name="hover_cling_width">-1px</dimen>
 </resources>
