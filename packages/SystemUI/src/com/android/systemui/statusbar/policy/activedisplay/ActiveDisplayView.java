@@ -77,7 +77,6 @@ import android.widget.RemoteViews;
 import android.widget.TextView;
 
 import com.android.internal.util.amra.AmraDeviceUtils;
-import com.android.internal.util.beanstalk.QuietHoursHelper;
 import com.android.internal.widget.LockPatternUtils;
 import com.android.internal.widget.multiwaveview.GlowPadView;
 import com.android.internal.widget.multiwaveview.GlowPadView.OnTriggerListener;
@@ -259,7 +258,7 @@ public class ActiveDisplayView extends FrameLayout
                 // viewing the notifications
                 if (getVisibility() == View.VISIBLE || !isScreenOn()) {
                     if (mEnableShakeForce) {
-                        if((mShakeTimeout > 0) && !inQuietHours()) {
+                        if(mShakeTimeout > 0) {
                             enableShakeSensor();
                             updateShakeTimer();
                             Log.i(TAG, "Shake enable by force option.");
@@ -649,7 +648,7 @@ public class ActiveDisplayView extends FrameLayout
 
     @Override
     public synchronized void onShake() {
-        if (!mEnableShake || (!mDisableShakeQuite && inQuietHours()) || isOnCall()) {
+        if (!mEnableShake || (!mDisableShakeQuite) || isOnCall()) {
             return;
         }
 
@@ -1076,14 +1075,8 @@ public class ActiveDisplayView extends FrameLayout
         setVisibility(View.GONE);
     }
 
-    private boolean inQuietHours() {
-        boolean isQuietHourDim = QuietHoursHelper.inQuietHours(mContext, Settings.System.QUIET_HOURS_DIM);
-        boolean isQuietHourMute = QuietHoursHelper.inQuietHours(mContext, Settings.System.QUIET_HOURS_MUTE);
-        return isQuietHourDim || isQuietHourMute;
-    }
-
     private boolean shouldDisableActiveDisplay() {
-        return inQuietHours() || isOnCall();
+        return isOnCall();
     }
 
     private void onScreenTurnedOn() {

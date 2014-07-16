@@ -4502,82 +4502,138 @@ public final class Settings {
         public static final String CUSTOM_RECENT = "custom_recent";
 
         /**
-         * Whether to enforce quiet hours regardless of the timer.
-         * @hide
-         */
-        public static final String QUIET_HOURS_FORCED = "quiet_hours_forced";
-
-        /**
          * Whether to enable quiet hours.
+         * 0 = Setting disabled
+         * 1 = Setting enabled but inactive
+         * 2 = Timout ignored and active
+         * 3 = Timeout enabled and active
+         * 4 = Timeout enabled and waiting on charging/wifi connected
          * @hide
          */
         public static final String QUIET_HOURS_ENABLED = "quiet_hours_enabled";
 
         /**
-         * Sets when quiet hours starts. This is stored in minutes from the start of the day.
+         * Whether quiet hours will enable or disable themselves on volume change
+         * 0 = Setting disabled
+         * 1 = When device is silenced
+         * 2 = When device is set to vibrate or silent
+         */
+        public static final String QUIET_HOURS_AUTOMATIC = "quiet_hours_automatic";
+
+        /**
+         * Whether to enable quiet hours.
+         * 0 = Setting disabled
+         * 1 = Setting enabled but inactive
+         * 2 = Setting enabled and power connected
+         * @hide
+         */
+        public static final String QUIET_HOURS_REQUIRE_CHARGING = "quiet_hours_require_charging";
+
+        /**
+         * Whether to enable quiet hours.
+         * 0 = Setting disabled
+         * 1 = Setting enabled but inactive
+         * 2 = Setting enabled and wifi connected
+         * @hide
+         */
+        public static final String QUIET_HOURS_REQUIRE_WIFI = "quiet_hours_require_wifi";
+
+        /**
+         * If we do or do not use daily time-range preferences
+         * @hide
+         */
+        public static final String QUIET_HOURS_DAILY = "quiet_hours_daily";
+
+        /**
+         * Holding cartridge for start times if single day preference is enabled
          * @hide
          */
         public static final String QUIET_HOURS_START = "quiet_hours_start";
 
         /**
-         * Sets when quiet hours end. This is stored in minutes from the start of the day.
+         * Holding cartridge for end times if single day preference is enabled
          * @hide
          */
         public static final String QUIET_HOURS_END = "quiet_hours_end";
 
         /**
+         * Sets when quiet hours starts for each day.  Parsed as a split string
+         * by a single controller to update all settings values simultaneiously.
+         * This is stored in minutes from the start of the day.
+         * 0 - 6 are parsed and compared to Sunday (1) through Saturday (7)
+         * @hide
+         */
+        public static final String[] QUIET_HOURS_START_TIMES = new String[] {
+            "quiet_hours_start_times_sun",
+            "quiet_hours_start_times_mon",
+            "quiet_hours_start_times_tues",
+            "quiet_hours_start_times_wed",
+            "quiet_hours_start_times_thurs",
+            "quiet_hours_start_times_fri",
+            "quiet_hours_start_times_sat"
+        };
+
+        /**
+         * Sets when quiet hours end for each day.  Parsed as a split string
+         * by a single controller to update all settings values simultaneiously.
+         * This is stored in minutes from the start of the day.
+         * 0 - 6 are parsed and compared to Sunday (1) through Saturday (7)
+         * @hide
+         */
+        public static final String[] QUIET_HOURS_END_TIMES = new String[] {
+            "quiet_hours_end_times_sun",
+            "quiet_hours_end_times_mon",
+            "quiet_hours_end_times_tues",
+            "quiet_hours_end_times_wed",
+            "quiet_hours_end_times_thurs",
+            "quiet_hours_end_times_fri",
+            "quiet_hours_end_times_sat"
+        };
+
+        /**
          * Whether to remove the sound from phone ringing during quiet hours.
+         * 0 = Setting disabled
+         * 1 = Setting enabled but inactive
+         * 2 = Setting enabled and active
          * @hide
          */
         public static final String QUIET_HOURS_RINGER = "quiet_hours_ringer";
 
         /**
-         * Constant: Keep ringer on for all numbers during quiet hours
-         * @hide
-         */
-        public static final int QUIET_HOURS_RINGER_ALLOW_ALL = 0;
-
-        /**
-         * Constant: Only ring for numbers in contact list during quiet hours
-         * @hide
-         */
-        public static final int QUIET_HOURS_RINGER_CONTACTS_ONLY = 1;
-
-        /**
-         * Constant: Only ring for favorite contacts during quiet hours
-         * @hide
-         */
-        public static final int QUIET_HOURS_RINGER_FAVORITES_ONLY = 2;
-
-        /**
-         * Constant: Disable ringer during quiet hours
-         * @hide
-         */
-        public static final int QUIET_HOURS_RINGER_DISABLED = 3;
-
-        /**
          * Whether to remove the sound from outgoing notifications during quiet hours.
+         * 0 = Setting disabled
+         * 1 = Setting enabled but inactive
+         * 2 = Setting enabled and active
          * @hide
          */
         public static final String QUIET_HOURS_MUTE = "quiet_hours_mute";
 
         /**
          * Whether to disable haptic feedback during quiet hours.
+         * 0 = Setting disabled
+         * 1 = Setting enabled but inactive
+         * 2 = Setting enabled and active
          * @hide
          */
         public static final String QUIET_HOURS_HAPTIC = "quiet_hours_haptic";
 
         /**
-         * Whether to remove the system sounds during quiet hours.
+         * Whether to remove the vibration from outgoing notifications during quiet hours.
+         * 0 = Setting disabled
+         * 1 = Setting enabled but inactive
+         * 2 = Setting enabled and active
          * @hide
          */
-        public static final String QUIET_HOURS_SYSTEM = "quiet_hours_system";
+        public static final String QUIET_HOURS_STILL = "quiet_hours_still";
 
         /**
-         * Whether quiet hours will enable or disable themselves on volume change
+         * Whether to attempt to dim the LED color during quiet hours.
+         * 0 = Setting disabled
+         * 1 = Setting enabled but inactive
+         * 2 = Setting enabled and active
          * @hide
          */
-        public static final String QUIET_HOURS_AUTOMATIC = "quiet_hours_automatic";
+        public static final String QUIET_HOURS_DIM = "quiet_hours_dim";
 
         /**
          * Whether to show statusbar signal text
@@ -4744,18 +4800,6 @@ public final class Settings {
          * @hide
          */
         public static final String NOTIFICATION_BRIGHTNESS_SLIDER = "notification_brightness_slider";
-
-        /**
-         * Whether to remove the vibration from outgoing notifications during quiet hours.
-         * @hide
-         */
-        public static final String QUIET_HOURS_STILL = "quiet_hours_still";
-
-        /**
-         * Whether to attempt to dim the LED color during quiet hours.
-         * @hide
-         */
-        public static final String QUIET_HOURS_DIM = "quiet_hours_dim";
 
         /**
          * Whether incomming call UI stays in background
@@ -6225,7 +6269,6 @@ public final class Settings {
             QUIET_HOURS_RINGER,
             QUIET_HOURS_MUTE,
             QUIET_HOURS_HAPTIC,
-            QUIET_HOURS_SYSTEM,
             QUIET_HOURS_STILL,
             QUIET_HOURS_DIM,
             SYSTEM_PROFILES_ENABLED,
