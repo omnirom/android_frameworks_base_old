@@ -65,4 +65,7 @@
     <dimen name="halo_speech_vpadding_bottom">3dp</dimen>
     <dimen name="halo_content_max_width">250dp</dimen>
  
+    <!-- Hover dimens -->
+    <dimen name="hover_height">64dp</dimen>
+    <dimen name="hover_cling_width">-1px</dimen>
 </resources>

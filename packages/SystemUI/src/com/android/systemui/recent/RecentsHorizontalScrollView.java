@@ -25,7 +25,6 @@ import android.provider.Settings;
 import android.graphics.Rect;
 import android.os.Handler;
 import android.graphics.Rect;
-import android.os.Handler;
 import android.util.AttributeSet;
 import android.util.DisplayMetrics;
 import android.util.FloatMath;
@@ -236,7 +235,7 @@ public class RecentsHorizontalScrollView extends HorizontalScrollView
         mSwipeHelper.dismissChild(v, 0);
     }
 
-    public void onChildDismissed(View v) {
+    public void onChildDismissed(View v, boolean direction) {
         addToRecycledViews(v);
         mLinearLayout.removeView(v);
         mCallback.handleSwipe(v);
