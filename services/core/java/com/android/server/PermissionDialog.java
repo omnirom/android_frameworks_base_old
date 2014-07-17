@@ -93,7 +93,7 @@ public class PermissionDialog extends BasePermissionDialog {
         String name = getAppName(mPackageName);
         if(name == null)
             name = mPackageName;
-        tv.setText(name + ": " + mOpLabels[mCode]);
+        tv.setText(res.getString(com.android.internal.R.string.permission_dialog_text, name, mOpLabels[mCode]));
         setView(mView);
 
         // After the timeout, pretend the user clicked the quit button
