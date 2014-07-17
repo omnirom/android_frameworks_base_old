@@ -109,6 +109,9 @@
     <!-- Amra Additions -->
     <uses-permission android:name="org.regulus.flashlight.TOGGLE_TORCH" />
 
+    <!-- Heads up -->
+    <uses-permission android:name="android.permission.CHANGE_HEADS_UP_STATE" />
+
     <application
         android:persistent="true"
         android:allowClearUserData="false"

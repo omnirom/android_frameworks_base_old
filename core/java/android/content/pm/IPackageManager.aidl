@@ -238,6 +238,10 @@ interface IPackageManager {
     int getPreferredActivities(out List<IntentFilter> outFilters,
             out List<ComponentName> outActivities, String packageName);
 
+    boolean getHeadsUpSetting(in String packageName, int userId);
+
+    void setHeadsUpSetting(in String packageName, boolean enabled, int userId);
+
     /**
      * Report the set of 'Home' activity candidates, plus (if any) which of them
      * is the current "always use this one" setting.

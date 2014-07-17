@@ -47,6 +47,9 @@ interface IStatusBarService
     void onClearAllNotifications();
     void onNotificationClear(String pkg, String tag, int id);
     void setSystemUiVisibility(int vis, int mask);
+    void hideHeadsUp();
+    void hideHeadsUpCandidate(String packageName);
+    void updateHeadsUpPosition(boolean statusBarShows);
     void setHardKeyboardEnabled(boolean enabled);
     void toggleRecentApps();
     void preloadRecentApps();

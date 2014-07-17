@@ -2427,6 +2427,15 @@ public abstract class Context {
     public static final String USER_SERVICE = "user";
 
     /**
+     * Determine whether the application or calling application has
+     * heads up notification enabled. Non system applications and content providers
+     * can check this value if they wish to honor the heads up feature.
+     *
+     * @hide
+     */
+    public abstract boolean isHeadsUpEnabled();
+
+    /**
      * Use with {@link #getSystemService} to retrieve a
      * {@link android.app.AppOpsManager} for tracking application operations
      * on the device.

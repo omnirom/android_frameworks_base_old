@@ -4502,6 +4502,63 @@ public final class Settings {
         public static final String CUSTOM_RECENT = "custom_recent";
 
         /**
+         * Whether heads up notification is expanded by default (default = disabled)
+         *
+         * @hide
+         */
+        public static final String HEADS_UP_EXPANDED = "heads_up_expanded";
+
+        /**
+         * Time where heads up is disabled by user interaction (default = 5 minutes)
+         *
+         * @hide
+         */
+        public static final String HEADS_UP_SNOOZE_TIME = "heads_up_snooze_time";
+
+        /**
+         * Time how long heads up will show till it is automatically hidden.
+         * If time = 0 notifications stays till the user interacts with it.
+         *
+         * @hide
+         */
+        public static final String HEADS_UP_NOTIFCATION_DECAY = "heads_up_notifcation_decay";
+
+        /**
+         * Whether notification updates from background notifications should be shown as heads up.
+         *
+         * @hide
+         */
+        public static final String HEADS_UP_SHOW_UPDATE = "heads_up_show_update";
+
+        /**
+         * Sensitivity of all system shake events
+         * @hide
+         */
+        public static final String SHAKE_SENSITIVITY = "shake_sensitivity";
+
+        /**
+         * Apps where shake events are disabled
+         * @hide
+         */
+        public static final String DISABLED_SHAKE_APPS = "disabled_shake_apps";
+
+        /**
+         * Whether to enable the shake listener actions.
+         * @hide
+         */
+        public static final String SHAKE_LISTENER_ENABLED = "shake_listener_enabled";
+
+        /**
+         * Shake events for shaking along the x, y, and z axis.
+         * @hide
+         */
+        public static final String[] SHAKE_EVENTS_REGULAR = new String[] {
+            "shake_events_regular_x",
+            "shake_events_regular_y",
+            "shake_events_regular_z"
+        };
+
+        /**
          * Whether to enable quiet hours.
          * 0 = Setting disabled
          * 1 = Setting enabled but inactive
@@ -4819,6 +4876,13 @@ public final class Settings {
          * @hide
          */
         public static final String EXPANDED_DESKTOP_STATE = "expanded_desktop_state";
+
+	/**
+         * Whether incomming call UI stays in background and shows as heads up notification
+         *
+         * @hide
+         */
+        public static final String CALL_UI_AS_HEADS_UP = "call_ui_as_heads_up";
 
         /**
          * Expanded desktop style (with status bar or without status bar)

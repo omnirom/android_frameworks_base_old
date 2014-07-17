@@ -3222,6 +3222,22 @@ public abstract class PackageManager {
     public abstract int getApplicationEnabledSetting(String packageName);
 
     /**
+     * @param packageName
+     * @return
+     *
+     * @hide
+     */
+    public abstract boolean getHeadsUpSetting(String packageName);
+
+    /**
+     * @param packageName
+     * @param enabled
+     *
+     * @hide
+     */
+    public abstract void setHeadsUpSetting(String packageName, boolean enabled);
+
+    /**
      * Puts the package in a blocked state, which is almost like an uninstalled state,
      * making the package unavailable, but it doesn't remove the data or the actual
      * package file.

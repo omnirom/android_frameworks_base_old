@@ -30,6 +30,7 @@ public class PackageUserState {
     public boolean installed;
     public boolean blocked; // Is the app restricted by owner / admin
     public int enabled;
+    public boolean headsUp;
 
     public String lastDisableAppCaller;
 
@@ -42,6 +43,7 @@ public class PackageUserState {
         installed = true;
         blocked = false;
         enabled = COMPONENT_ENABLED_STATE_DEFAULT;
+        headsUp = false;
     }
 
     public PackageUserState(PackageUserState o) {
@@ -49,6 +51,7 @@ public class PackageUserState {
         stopped = o.stopped;
         notLaunched = o.notLaunched;
         enabled = o.enabled;
+        headsUp = o.headsUp;
         blocked = o.blocked;
         lastDisableAppCaller = o.lastDisableAppCaller;
         disabledComponents = o.disabledComponents != null
