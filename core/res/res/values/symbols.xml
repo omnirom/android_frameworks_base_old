@@ -2123,16 +2123,4 @@
 
   <!-- SMS RIL_REQUEST_SEND_SMS_EXPECT_MORE -->
   <java-symbol type="bool" name="config_smsUseExpectMore" />
-
-  <!-- Label for the Android system components when they are shown to the user. -->
-  <java-symbol type="string" name="android_system_label" />
-
-  <!-- SmoothProgressBar -->
-  <java-symbol type="bool" name="spb_default_reversed" />
-  <java-symbol type="bool" name="spb_default_mirror_mode" />
-  <java-symbol type="bool" name="spb_default_progressiveStart_activated" />
-
-  <!-- LTE signal strength calculation -->
-  <java-symbol type="integer" name="config_LTE_antenna_bar_quantity_metric" />
-  <java-symbol type="integer" name="config_LTE_RSRP_threshold_type" />
 </resources>
