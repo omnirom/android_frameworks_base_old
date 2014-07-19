@@ -260,13 +260,13 @@ public class AudioManager {
         4,  // STREAM_VOICE_CALL
         7,  // STREAM_SYSTEM
         5,  // STREAM_RING
-        11, // STREAM_MUSIC
+        22, // STREAM_MUSIC
         6,  // STREAM_ALARM
         5,  // STREAM_NOTIFICATION
-        7,  // STREAM_BLUETOOTH_SCO
+        14, // STREAM_BLUETOOTH_SCO
         7,  // STREAM_SYSTEM_ENFORCED
-        11, // STREAM_DTMF
-        11, // STREAM_TTS
+        22, // STREAM_DTMF
+        22, // STREAM_TTS
         4   // STREAM_INCALL_MUSIC
     };
 

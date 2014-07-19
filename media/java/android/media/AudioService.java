@@ -222,8 +222,8 @@ public class AudioService extends IAudioService.Stub {
         7,  // STREAM_NOTIFICATION
         15, // STREAM_BLUETOOTH_SCO
         7,  // STREAM_SYSTEM_ENFORCED
-        15, // STREAM_DTMF
-        15  // STREAM_TTS
+        30, // STREAM_DTMF
+        30  // STREAM_TTS
     };
     /* mStreamVolumeAlias[] indicates for each stream if it uses the volume settings
      * of another stream: This avoids multiplying the volume settings for hidden
