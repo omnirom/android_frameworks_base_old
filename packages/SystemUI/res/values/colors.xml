@@ -94,4 +94,7 @@
     <!-- Used by selector -->
     <color name="card_pressed">#7e3c3c3c</color>
 
+    <!-- Weather Color -->
+    <color name="weather_color">#ff404040</color>
+
 </resources>

@@ -3756,6 +3756,21 @@ public final class Settings {
          */
         public static final String ALLOW_MULTIUSER = "allow_multiuser";
 
+	/**
+	* @hide
+	*/
+	public static final String SYSTEMUI_WEATHER_HEADER_VIEW = "amra_systemui_header_weather_view";
+
+	/**
+	* @hide
+	*/
+	public static final String SYSTEMUI_WEATHER_NOTIFICATION = "amra_weather_notification";
+
+	/**
+	* @hide
+	*/
+	public static final String SYSTEMUI_WEATHER_ICON = "amra_weather_icon";
+
         /**
          * Navigation controls to Use
          *
