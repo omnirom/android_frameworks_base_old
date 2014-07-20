@@ -51,7 +51,6 @@
             android:id="@+id/date"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:layout_marginEnd="6dp"
             android:textAppearance="@style/TextAppearance.StatusBar.Expanded.Date"
             android:layout_toEndOf="@id/clock"
             android:background="@drawable/ic_notify_button_bg"
@@ -59,18 +58,6 @@
             android:paddingBottom="8dp"
             android:layout_centerVertical="true"
             />
-
-        <com.android.systemui.statusbar.policy.WeatherView
-            android:id="@+id/weather_text"
-            android:layout_width="wrap_content"
-            android:layout_height="match_parent"
-            android:gravity="center"
-            android:layout_toEndOf="@id/date"
-            android:ellipsize="marquee"
-            android:visibility="gone"
-            android:singleLine="true"
-            android:textColor="@color/weather_color"
-            android:textSize="10dp" />
 
     </RelativeLayout>
 

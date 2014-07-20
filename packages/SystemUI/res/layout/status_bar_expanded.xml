@@ -51,6 +51,17 @@
         android:layout_gravity="bottom"
         />
 
+    <com.android.systemui.statusbar.policy.WeatherView
+        android:id="@+id/weather_text"
+        android:textAppearance="@style/TextAppearance.StatusBar.Expanded.Network"
+        android:layout_height="@dimen/carrier_label_height"
+        android:layout_width="match_parent"
+        android:layout_gravity="bottom"
+        android:layout_marginBottom="@dimen/weather_text_margin"
+        android:gravity="center"
+        android:visibility="invisible"
+        />
+
     <LinearLayout
         android:id="@+id/notification_panel_content"
         android:layout_width="match_parent"
@@ -63,6 +74,11 @@
         <include layout="@layout/status_bar_expanded_header"
             android:layout_width="match_parent"
             android:layout_height="@dimen/notification_panel_header_height"
+            />
+
+        <ViewStub android:id="@+id/weather_header"
+            android:layout_width="match_parent"
+            android:layout_height="28dp"
             />
 
         <include layout="@layout/notification_reminder"
