@@ -1024,17 +1024,17 @@ public class PhoneStatusBar extends BaseStatusBar implements DemoMode,
                 .getDefaultDisplay();
         updateDisplaySize();
 
-        mLocationController = new LocationController(mContext); // will post a notification
+        ThemeConfig currentTheme = mContext.getResources().getConfiguration().themeConfig;
+        if (currentTheme != null) {
+            mCurrentTheme = (ThemeConfig)currentTheme.clone();
+        }
+
+        mLocationController = new LocationController(mContext);
         mBatteryController = new BatteryController(mContext);
         mNetworkController = new NetworkController(mContext);
         mBluetoothController = new BluetoothController(mContext);
 
         mCurrUiThemeMode = mContext.getResources().getConfiguration().uiThemeMode;
-
-        ThemeConfig currentTheme = mContext.getResources().getConfiguration().themeConfig;
-        if (currentTheme != null) {
-            mCurrentTheme = (ThemeConfig)currentTheme.clone();
-        }
 
         super.start(); // calls createAndAddWindows()
 
@@ -4371,15 +4371,11 @@ public class PhoneStatusBar extends BaseStatusBar implements DemoMode,
 
         // detect theme change.
         ThemeConfig newTheme = res.getConfiguration().themeConfig;
-        int uiThemeMode = res.getConfiguration().uiThemeMode;
         if (newTheme != null &&
                 (mCurrentTheme == null || !mCurrentTheme.equals(newTheme))) {
             mCurrentTheme = (ThemeConfig)newTheme.clone();
             recreateStatusBar(true);
-        if (uiThemeMode != mCurrUiThemeMode) {
-            mCurrUiThemeMode = uiThemeMode;
-            //recreateStatusBar();
-        }
+        } else {
 
         if (mClearButton instanceof TextView) {
                 ((TextView)mClearButton).setText(context.getText(R.string.status_bar_clear_all_button));

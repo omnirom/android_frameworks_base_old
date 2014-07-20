@@ -22,9 +22,6 @@ import android.os.Parcel;
 import android.os.Parcelable;
 import android.text.TextUtils;
 import android.view.View;
-import android.util.Log;
-import android.os.SystemProperties;
-import android.text.TextUtils;
 
 import java.util.Locale;
 
@@ -75,11 +72,6 @@ public final class Configuration implements Parcelable, Comparable<Configuration
      * resource qualifier.
      */
     public Locale locale;
-
-    /**
-     * @hide
-     */
-    public CustomTheme customTheme;
 
     /**
      * @hide
@@ -421,20 +413,9 @@ public final class Configuration implements Parcelable, Comparable<Configuration
 
     /**
      * @hide
-     */
-    public static final int THEME_UNDEFINED = 0;
-
-    /**
-     * @hide
      * @deprecated
      */
     public static final String THEME_PACKAGE_NAME_PERSISTENCE_PROPERTY = "persist.sys.themePackageName";
-
-    /**
-     * @hide
-     * @deprecated
-     */
-    public static final String THEME_SYSTEMUI_PACKAGE_NAME_PERSISTENCE_PROPERTY = "persist.sys.themeSysUiPkgName";
 
     /**
      * @hide
