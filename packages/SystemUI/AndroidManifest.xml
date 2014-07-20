@@ -112,6 +112,10 @@
     <!-- Heads up -->
     <uses-permission android:name="android.permission.CHANGE_HEADS_UP_STATE" />
 
+    <!-- WallpaperManager -->
+    <uses-permission android:name="android.permission.SET_WALLPAPER" />
+
+
     <application
         android:persistent="true"
         android:allowClearUserData="false"
