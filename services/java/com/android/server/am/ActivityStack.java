@@ -1185,7 +1185,7 @@ final class ActivityStack {
 		            }
 		    }
 
-                    if (r.fullscreen && (!r.floatingWindow || !isSplitView)) {
+                    if (r.fullscreen && !isSplitView && !r.floatingWindow) {
                         // At this point, nothing else needs to be shown
                         if (DEBUG_VISBILITY) Slog.v(TAG, "Fullscreen: at " + r);
                         behindFullscreen = true;
@@ -2861,7 +2861,7 @@ final class ActivityStack {
                 if (r.finishing) {
                     continue;
                 }
-                if (r.fullscreen && !r.floatingWindow) {
+                if (r.fullscreen) {
                     lastIsOpaque = true;
                 }
                 if (owner != null && r.app != owner) {
