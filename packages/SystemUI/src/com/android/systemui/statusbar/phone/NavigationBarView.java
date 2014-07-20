@@ -60,6 +60,8 @@ import android.view.accessibility.AccessibilityManager.TouchExplorationStateChan
 import android.widget.FrameLayout;
 import android.widget.ImageView;
 import android.widget.LinearLayout;
+import android.widget.Toast;
+
 import com.android.internal.util.beanstalk.ButtonConfig;
 import com.android.internal.util.beanstalk.ButtonsConstants;
 import com.android.internal.util.beanstalk.ButtonsHelper;
@@ -153,6 +155,8 @@ public class NavigationBarView extends LinearLayout implements BaseStatusBar.Nav
 
     // performs manual animation in sync with layout transitions
     private final NavTransitionListener mTransitionListener = new NavTransitionListener();
+
+    private Resources mThemedResources;
 
     private class NavTransitionListener implements TransitionListener {
         private boolean mBackTransitioning;
@@ -487,8 +491,10 @@ public class NavigationBarView extends LinearLayout implements BaseStatusBar.Nav
         mHomeLandIcon = res.getDrawable(R.drawable.ic_sysbar_home_land);
     }
 
-    public void updateResources() {
-        getIcons(mContext.getResources());
+    public void updateResources(Resources res) {
+        mThemedResources = res;
+        getIcons(mThemedResources);
+        mBarTransitions.updateResources(res);
         for (int i = 0; i < mRotatedViews.length; i++) {
             ViewGroup container = (ViewGroup) mRotatedViews[i];
             if (container != null) {
@@ -500,17 +506,21 @@ public class NavigationBarView extends LinearLayout implements BaseStatusBar.Nav
     private void updateKeyButtonViewResources(ViewGroup container) {
         ViewGroup midNavButtons = (ViewGroup) container.findViewById(R.id.mid_nav_buttons);
         if (midNavButtons != null) {
-            final int nChildern = midNavButtons.getChildCount();
-            for (int i = 0; i < nChildern; i++) {
+            final int nChildren = midNavButtons.getChildCount();
+            for (int i = 0; i < nChildren; i++) {
                 final View child = midNavButtons.getChildAt(i);
                 if (child instanceof KeyButtonView) {
-                    ((KeyButtonView) child).updateResources();
+                    ((KeyButtonView) child).updateResources(mThemedResources);
                 }
             }
         }
-        KeyButtonView kbv = (KeyButtonView) findViewById(R.id.six);
+        KeyButtonView kbv = (KeyButtonView) findViewById(R.id.one);
         if (kbv != null) {
-            kbv.updateResources();
+            kbv.updateResources(mThemedResources);
+        }
+        kbv = (KeyButtonView) findViewById(R.id.six);
+        if (kbv != null) {
+            kbv.updateResources(mThemedResources);
         }
     }
 

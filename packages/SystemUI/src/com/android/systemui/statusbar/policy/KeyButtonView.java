@@ -20,11 +20,14 @@ import android.animation.Animator;
 import android.animation.AnimatorSet;
 import android.animation.ObjectAnimator;
 import android.content.Context;
+import android.content.res.Resources;
 import android.content.res.TypedArray;
 import android.graphics.Canvas;
 import android.graphics.PorterDuff.Mode;
 import android.graphics.RectF;
 import android.graphics.drawable.Drawable;
+import android.hardware.input.InputManager;
+import android.os.PowerManager;
 import android.os.RemoteException;
 import android.os.ServiceManager;
 import android.os.SystemClock;
@@ -34,6 +37,9 @@ import android.util.AttributeSet;
 import android.util.Log;
 import android.util.Slog;
 import android.view.HapticFeedbackConstants;
+import android.view.InputDevice;
+import android.view.KeyCharacterMap;
+import android.view.KeyEvent;
 import android.view.MotionEvent;
 import android.view.SoundEffectConstants;
 import android.view.View;
@@ -72,6 +78,8 @@ public class KeyButtonView extends ImageView {
     RectF mRect = new RectF();
     AnimatorSet mPressedAnim;
     Animator mAnimateToQuiescent = new ObjectAnimator();
+
+    private PowerManager mPm;
 
     IStatusBarService mStatusBarService;
     public static boolean sPreloadedRecentApps;
@@ -122,6 +130,7 @@ public class KeyButtonView extends ImageView {
 
         setClickable(true);
         mTouchSlop = ViewConfiguration.get(context).getScaledTouchSlop();
+        mPm = (PowerManager) context.getSystemService(Context.POWER_SERVICE);
     }
 
     public void setClickAction(String action) {
@@ -158,7 +167,7 @@ public class KeyButtonView extends ImageView {
         }
     }
 
-    public void updateResources() {
+    public void updateResources(Resources res) {
         if (mGlowBgId != 0) {
             mGlowBG = mContext.getResources().getDrawable(mGlowBgId);
         }
@@ -262,6 +271,10 @@ public class KeyButtonView extends ImageView {
     public void setPressed(boolean pressed) {
         if (mGlowBG != null) {
             if (pressed != isPressed()) {
+
+                // A lot of stuff is about to happen. Lets get ready.
+                mPm.cpuBoost(750000);
+
                 if (mPressedAnim != null && mPressedAnim.isRunning()) {
                     mPressedAnim.cancel();
                 }
