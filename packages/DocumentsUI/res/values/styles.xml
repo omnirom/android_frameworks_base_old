@@ -39,4 +39,7 @@
 
     <style name="DialogWhenLarge" parent="@android:style/Theme.Holo.Light.DialogWhenLarge" />
 
+    <style name="SettingsTheme" parent="@android:style/Theme.Holo.Light.DialogWhenLarge">
+    </style>
+
 </resources>
