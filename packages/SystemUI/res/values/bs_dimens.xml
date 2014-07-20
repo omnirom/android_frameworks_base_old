@@ -73,4 +73,8 @@
     <dimen name="default_notification_row_max_height">260dp</dimen>
     <dimen name="hover_cling_width">-1px</dimen>
     <dimen name="hover_tablet_width">478dp</dimen>
+
+    <dimen name="shadow_width">8dp</dimen>
+    <dimen name="layer_width">300dp</dimen>
+    <dimen name="offset_width">48dp</dimen>
 </resources>
