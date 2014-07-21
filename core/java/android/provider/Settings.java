@@ -4580,6 +4580,13 @@ public final class Settings {
         public static final String HEADS_UP_SHOW_UPDATE = "heads_up_show_update";
 
         /**
+         * Heads Up in Floating Window
+         *
+         * @hide
+         */
+        public static final String HEADS_UP_FLOATING_WINDOW = "heads_up_floating_window";
+
+        /**
          * Sensitivity of all system shake events
          * @hide
          */
