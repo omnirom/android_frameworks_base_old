@@ -34,6 +34,7 @@ import android.media.RingtoneManager;
 import android.net.Uri;
 import android.os.BatteryManager;
 import android.os.Handler;
+import android.os.Message;
 import android.os.PowerManager;
 import android.os.SystemClock;
 import android.os.UserHandle;
@@ -58,7 +59,10 @@ public class PowerUI extends SystemUI {
     private static final String UPDATE_QUIET_HOURS_MODES =
             "com.android.settings.slim.service.UPDATE_QUIET_HOURS_MODES";
 
+    static final int CLEAR_DIALOG = 1;
+
     Handler mHandler = new Handler();
+    Handler mWirelessDialogHandler;
 
     int mBatteryLevel = 100;
     int mBatteryStatus = BatteryManager.BATTERY_STATUS_UNKNOWN;
@@ -76,6 +80,7 @@ public class PowerUI extends SystemUI {
 
     AlertDialog mInvalidChargerDialog;
     AlertDialog mLowBatteryDialog;
+    AlertDialog mWirelessChargerDialog = null;
     TextView mBatteryLevelTextView;
 
     private long mScreenOffTime = -1;
@@ -108,6 +113,16 @@ public class PowerUI extends SystemUI {
         filter.addAction(Intent.ACTION_POWER_CONNECTED);
         filter.addAction(Intent.ACTION_POWER_DISCONNECTED);
         mContext.registerReceiver(mIntentReceiver, filter, null, mHandler);
+
+        mWirelessDialogHandler = new Handler(new Handler.Callback() {
+            @Override
+            public boolean handleMessage(Message msg) {
+                if (msg.what == CLEAR_DIALOG) {
+                    mWirelessChargerDialog.dismiss();
+                }
+                return false;
+            }
+        });
     }
 
     private final class SettingsObserver extends ContentObserver {
@@ -226,6 +241,17 @@ public class PowerUI extends SystemUI {
                 if (mIgnoreFirstPowerEvent && plugged) {
                     mIgnoreFirstPowerEvent = false;
                 }
+
+                if (!oldPlugged && plugged && mPlugType ==
+                        BatteryManager.BATTERY_PLUGGED_WIRELESS) {
+                    wirelessChargingNotification(true);
+                }
+
+                if (oldPlugged && !plugged && oldPlugType ==
+                        BatteryManager.BATTERY_PLUGGED_WIRELESS) {
+                    wirelessChargingNotification(false);
+                }
+
 
                 int oldBucket = findBatteryLevelBucket(oldBatteryLevel);
                 int bucket = findBatteryLevelBucket(mBatteryLevel);
@@ -515,6 +541,42 @@ public class PowerUI extends SystemUI {
         notificationManager.notify(0, powerNotify);
     }
 
+    void wirelessChargingNotification(boolean charging) {
+        boolean wakeUpPluggedUnplugged = mContext.getResources().getBoolean(
+                com.android.internal.R.bool.config_unplugTurnsOnScreen);
+        int wakeUpPluggedUnpluggedSetting = Settings.Global.getInt(mContext.getContentResolver(),
+                Settings.Global.WAKE_WHEN_PLUGGED_OR_UNPLUGGED,
+                (wakeUpPluggedUnplugged ? 1 : 0));
+        if (wakeUpPluggedUnpluggedSetting != 0) {
+            if (mWirelessChargerDialog != null) {
+                mWirelessDialogHandler.removeMessages(CLEAR_DIALOG);
+                mWirelessChargerDialog.dismiss();
+                mWirelessChargerDialog = null;
+            }
+
+            int titleId;
+            int messageId;
+            if (charging) {
+                titleId = R.string.wireless_charging_title;
+                messageId = R.string.wireless_charging_message;
+            } else {
+                titleId = R.string.wireless_charging_stop_title;
+                messageId = R.string.wireless_charging_stop_message;
+            }
+
+            mWirelessChargerDialog = new AlertDialog.Builder(mContext, AlertDialog.THEME_HOLO_DARK)
+                    .setTitle(titleId).setMessage(messageId).setCancelable(true).create();
+            mWirelessChargerDialog.getWindow().setType(
+                    WindowManager.LayoutParams.TYPE_SYSTEM_OVERLAY);
+            mWirelessChargerDialog.getWindow().addFlags(
+                    WindowManager.LayoutParams.FLAG_TURN_SCREEN_ON |
+                    WindowManager.LayoutParams.FLAG_SHOW_WHEN_LOCKED);
+
+            mWirelessChargerDialog.show();
+            mWirelessDialogHandler.sendEmptyMessageDelayed(CLEAR_DIALOG, 2500);
+        }
+    }
+
     public void dump(FileDescriptor fd, PrintWriter pw, String[] args) {
         pw.print("mLowBatteryAlertCloseLevel=");
         pw.println(mLowBatteryAlertCloseLevel);
@@ -547,4 +609,3 @@ public class PowerUI extends SystemUI {
         pw.println(Integer.toString(findBatteryLevelBucket(mBatteryLevel)));
     }
 }
-
