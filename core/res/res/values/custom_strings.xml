@@ -36,6 +36,11 @@
     <!-- Description of an application permission that lets lets an application access the ThemeManagerService -->
     <string name="permdesc_accessThemeService">Allows an application to set/reset themes. Not for use by normal applications.</string>
 
+    <!-- Title of an application permission, listed so the user can choose whether they want to allow the application to do this. -->
+    <string name="permlab_fakePackageSignature">mimic package signature</string>
+    <!-- Description of an application permission, listed so the user can choose whether they want to allow the application to do this. -->
+    <string name="permdesc_fakePackageSignature">Allows the app to use mimic another app\'s package signature.</string>
+
     <!-- stylus gestures support -->
     <string name="stylus_app_not_installed">%s is not installed</string>
 
