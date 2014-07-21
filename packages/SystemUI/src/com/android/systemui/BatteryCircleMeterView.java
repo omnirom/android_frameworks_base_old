@@ -208,6 +208,9 @@ public class BatteryCircleMeterView extends ImageView {
         int padLevel = level;
         if (padLevel >= 97) {
             padLevel = 100;
+        } else if (padLevel <= 3) {
+            // pad nearly invisible below 3% - looks odd
+            padLevel = 3;
         }
 
         // draw thin gray ring first
@@ -323,10 +326,9 @@ public class BatteryCircleMeterView extends ImageView {
         mIsAnimating = true;
 
         if (mAnimOffset > 360) {
-            mAnimOffset = 0;
-        } else {
-            mAnimOffset += mCircleAnimSpeed;
+            mAnimOffset -= 360;
         }
+        mAnimOffset += mCircleAnimSpeed;
 
         mHandler.removeCallbacks(mInvalidate);
         mHandler.postDelayed(mInvalidate, 50);
