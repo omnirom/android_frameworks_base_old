@@ -56,6 +56,7 @@ import static com.android.internal.util.beanstalk.QSConstants.TILE_INTERNALMEMOR
 import static com.android.internal.util.beanstalk.QSConstants.TILE_FCHARGE;
 import static com.android.internal.util.beanstalk.QSConstants.TILE_ONTHEGO;
 import static com.android.internal.util.cm.QSConstants.TILE_COMPASS;
+import static com.android.internal.util.beanstalk.QSConstants.TILE_REMOTEDISPLAY;
 
 import android.app.Activity;
 import android.app.ActivityManagerNative;
@@ -110,6 +111,7 @@ import com.android.systemui.quicksettings.TorchTile;
 import com.android.systemui.quicksettings.UsbTetherTile;
 import com.android.systemui.quicksettings.UserTile;
 import com.android.systemui.quicksettings.VolumeTile;
+import com.android.systemui.quicksettings.RemoteDisplayTile;
 import com.android.systemui.quicksettings.WiFiTile;
 import com.android.systemui.quicksettings.WifiAPTile;
 import com.android.systemui.quicksettings.RebootTile;
@@ -307,6 +309,9 @@ public class QuickSettingsController {
             } else if (tile.equals(TILE_USBTETHER)
                     && DeviceUtils.deviceSupportsUsbTether(mContext)) {
                 qs = new UsbTetherTile(mContext, this);
+            } else if (tile.equals(TILE_REMOTEDISPLAY)
+                    && DeviceUtils.deviceSupportsRemoteDisplay(mContext)) {
+                qs = new RemoteDisplayTile(mContext, this);
             }
 
             if (qs != null) {
