@@ -545,6 +545,8 @@ public class AudioService extends IAudioService.Stub {
         // array initialized by updateStreamVolumeAlias()
         updateStreamVolumeAlias(false /*updateVolumes*/);
         readPersistedSettings();
+        // must update link ring-notifications streams once the user preferences were read
+        updateLinkNotificationStreamVolumeAlias();
         mSettingsObserver = new SettingsObserver();
         //Update volumes steps before creatingStreamStates!
         initVolumeSteps();
@@ -742,11 +744,7 @@ public class AudioService extends IAudioService.Stub {
         }
         mStreamVolumeAlias[AudioSystem.STREAM_DTMF] = dtmfStreamAlias;
 
-        if (mLinkNotificationWithVolume) {
-            mStreamVolumeAlias[AudioSystem.STREAM_NOTIFICATION] = AudioSystem.STREAM_RING;
-        } else {
-            mStreamVolumeAlias[AudioSystem.STREAM_NOTIFICATION] = AudioSystem.STREAM_NOTIFICATION;
-        }
+        updateLinkNotificationStreamVolumeAlias();
 
         if (updateVolumes) {
             mStreamStates[AudioSystem.STREAM_DTMF].setAllIndexes(mStreamStates[dtmfStreamAlias]);
@@ -758,6 +756,14 @@ public class AudioService extends IAudioService.Stub {
                     0,
                     0,
                     mStreamStates[AudioSystem.STREAM_DTMF], 0);
+        }
+    }
+
+    private void updateLinkNotificationStreamVolumeAlias() {
+        if (mLinkNotificationWithVolume) {
+            mStreamVolumeAlias[AudioSystem.STREAM_NOTIFICATION] = AudioSystem.STREAM_RING;
+        } else {
+            mStreamVolumeAlias[AudioSystem.STREAM_NOTIFICATION] = AudioSystem.STREAM_NOTIFICATION;
         }
     }
 
