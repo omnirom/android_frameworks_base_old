@@ -22,9 +22,11 @@ import static com.android.internal.util.beanstalk.QSConstants.TILE_AIRPLANE;
 import static com.android.internal.util.beanstalk.QSConstants.TILE_ALARM;
 import static com.android.internal.util.beanstalk.QSConstants.TILE_AUTOROTATE;
 import static com.android.internal.util.beanstalk.QSConstants.TILE_BATTERY;
+import static com.android.internal.util.beanstalk.QSConstants.TILE_BATTERYSAVER;
 import static com.android.internal.util.beanstalk.QSConstants.TILE_BLUETOOTH;
 import static com.android.internal.util.beanstalk.QSConstants.TILE_BRIGHTNESS;
 import static com.android.internal.util.beanstalk.QSConstants.TILE_BUGREPORT;
+import static com.android.internal.util.beanstalk.QSConstants.TILE_CAMERA;
 import static com.android.internal.util.beanstalk.QSConstants.TILE_CONTACT;
 import static com.android.internal.util.beanstalk.QSConstants.TILE_CUSTOM;
 import static com.android.internal.util.beanstalk.QSConstants.TILE_CUSTOM_KEY;
@@ -83,9 +85,11 @@ import com.android.systemui.quicksettings.AirplaneModeTile;
 import com.android.systemui.quicksettings.AlarmTile;
 import com.android.systemui.quicksettings.AutoRotateTile;
 import com.android.systemui.quicksettings.BatteryTile;
+import com.android.systemui.quicksettings.BatterySaverTile;
 import com.android.systemui.quicksettings.BluetoothTile;
 import com.android.systemui.quicksettings.BrightnessTile;
 import com.android.systemui.quicksettings.BugReportTile;
+import com.android.systemui.quicksettings.CameraTile;
 import com.android.systemui.quicksettings.ContactTile;
 import com.android.systemui.quicksettings.CustomTile;
 import com.android.systemui.quicksettings.CompassTile;
@@ -117,6 +121,7 @@ import com.android.systemui.quicksettings.WifiAPTile;
 import com.android.systemui.quicksettings.RebootTile;
 import com.android.systemui.quicksettings.FastChargeTile;
 import com.android.systemui.quicksettings.OnTheGoTile;
+
 
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -173,6 +178,7 @@ public class QuickSettingsController {
 
     void loadTiles() {
         // Filter items not compatible with device
+        boolean cameraSupported = DeviceUtils.deviceSupportsCamera();
         boolean bluetoothSupported = DeviceUtils.deviceSupportsBluetooth();
         boolean mobileDataSupported = DeviceUtils.deviceSupportsMobileData(mContext);
         boolean lteSupported = DeviceUtils.deviceSupportsLte(mContext);
@@ -222,6 +228,8 @@ public class QuickSettingsController {
                 qs = new BluetoothTile(mContext, this, mStatusBarService.mBluetoothController);
             } else if (tile.equals(TILE_BRIGHTNESS)) {
                 qs = new BrightnessTile(mContext, this);
+            } else if (tile.equals(TILE_CAMERA) && cameraSupported) {
+            	qs = new CameraTile(mContext, this, mHandler);
             } else if (tile.equals(TILE_RINGER)) {
                 qs = new RingerModeTile(mContext, this);
             } else if (tile.equals(TILE_SYNC)) {
@@ -273,6 +281,8 @@ public class QuickSettingsController {
                 qs = new OnTheGoTile(mContext, this);
             } else if (tile.equals(TILE_COMPASS)) {
                 qs = new CompassTile(mContext, this);
+            } else if (tile.equals(TILE_BATTERYSAVER)) {
+                qs = new BatterySaverTile(mContext, this);
             }
 
             if (qs != null) {
