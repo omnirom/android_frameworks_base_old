@@ -925,6 +925,7 @@ class QuickSettingsModel implements BluetoothStateChangeCallback,
             @Override
             public void onClick(View v) {
                 Intent i = new Intent(OmniTorchConstants.ACTION_TOGGLE_STATE);
+                i.addFlags(Intent.FLAG_RECEIVER_FOREGROUND);
                 mContext.sendBroadcast(i);
             }
         });
