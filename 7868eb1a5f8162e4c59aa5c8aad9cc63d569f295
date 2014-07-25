@@ -1,0 +1,21 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "4b713d8b_5bf1f4da",
+        "filename": "packages/SystemUI/src/com/android/systemui/statusbar/policy/NetworkController.java",
+        "patchSetId": 1
+      },
+      "lineNbr": 285,
+      "author": {
+        "id": 1000026
+      },
+      "writtenOn": "2014-07-25T14:38:38Z",
+      "side": 1,
+      "message": "so small and already a whitespace :)",
+      "revId": "7868eb1a5f8162e4c59aa5c8aad9cc63d569f295",
+      "serverId": "56841c99-7c94-43d4-bf0b-cb4707e66d55",
+      "unresolved": false
+    }
+  ]
+}
