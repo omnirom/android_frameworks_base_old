@@ -26,7 +26,8 @@ import android.view.MotionEvent;
 import android.view.View;
 import android.widget.FrameLayout;
 
-public class QuickSettingsFlipTile extends QuickSettingsTileView {
+public class QuickSettingsFlipTile extends QuickSettingsTileView 
+            implements QuickSettingsTileFlip3d.OnRotationListener {
 
     private final QuickSettingsBasicTile mFront;
     private final QuickSettingsBasicBackTile mBack;
@@ -48,6 +49,7 @@ public class QuickSettingsFlipTile extends QuickSettingsTileView {
         mFront = new QuickSettingsBasicTile(context);
         mBack = new QuickSettingsBasicBackTile(context);
         mFlip3d = new QuickSettingsTileFlip3d(mFront, mBack);
+        mFlip3d.setOnRotationListener(this);
 
         setClickable(true);
         setSelected(true);
@@ -64,6 +66,8 @@ public class QuickSettingsFlipTile extends QuickSettingsTileView {
                 new FrameLayout.LayoutParams(
                         FrameLayout.LayoutParams.MATCH_PARENT,
                         FrameLayout.LayoutParams.MATCH_PARENT));
+
+        addSwitcherView();
     }
 
     @Override
@@ -81,6 +85,11 @@ public class QuickSettingsFlipTile extends QuickSettingsTileView {
         } else {
             return super.onInterceptTouchEvent(ev);
         }
+    }
+
+    @Override
+    public void onRotation(boolean isFront) {
+        updateSwitchView(isFront);
     }
 
     public void setSupportFlip(boolean enabled) {
