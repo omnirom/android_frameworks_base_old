@@ -29,6 +29,7 @@ import android.graphics.drawable.ColorDrawable;
 import android.util.AttributeSet;
 import android.util.Log;
 import android.view.LayoutInflater;
+import android.view.Gravity;
 import android.view.View;
 import android.view.View.OnClickListener;
 import android.view.View.OnLongClickListener;
@@ -36,6 +37,7 @@ import android.view.ViewGroup;
 import android.view.ViewGroup.MarginLayoutParams;
 import android.view.ViewParent;
 import android.widget.FrameLayout;
+import android.widget.ImageView;
 
 import com.android.systemui.statusbar.phone.QuickSettings.Tile;
 
@@ -69,6 +71,8 @@ class QuickSettingsTileView extends FrameLayout {
     private boolean mTemporary;
     private boolean mEditMode;
     private boolean mVisible;
+
+    public ImageView mSwitchView;
 
     public QuickSettingsTileView(Context context, AttributeSet attrs) {
         super(context, attrs);
@@ -175,7 +179,7 @@ class QuickSettingsTileView extends FrameLayout {
         mVisible = getVisibility() == View.VISIBLE
                 && ((getScaleY() >= ENABLED || getScaleX() == DISAPPEAR) ||
                     (getScaleX() >= ENABLED || getScaleX() == DISAPPEAR));
-        if(!isTemporary() && enabled) {
+        if (!isTemporary() && enabled) {
             setVisibility(View.VISIBLE);
             setHoverEffect(HOVER_COLOR_BLACK, !mVisible);
             float scale = mVisible ? ENABLED : DISABLED;
@@ -193,10 +197,11 @@ class QuickSettingsTileView extends FrameLayout {
             animate().scaleX(scale).scaleY(scale).setListener(null);
             setOnClickListener(temporaryEditMode? null : mOnClickListener);
             setOnLongClickListener(temporaryEditMode? null : mOnLongClickListener);
-            if(!mVisible) { // Item has been disabled
+            if (!mVisible) { // Item has been disabled
                 setVisibility(View.GONE);
             }
         }
+        setSwitchViewVisibility(enabled ? View.INVISIBLE : View.VISIBLE);
     }
 
     public boolean isEditModeEnabled() {
@@ -338,6 +343,33 @@ class QuickSettingsTileView extends FrameLayout {
             }
         }
         return true;
+    }
+
+    public void addSwitcherView() {
+        mSwitchView = new ImageView(mContext);
+
+        addView(mSwitchView,
+              new FrameLayout.LayoutParams(
+                   mContext.getResources()
+                       .getDimensionPixelSize(R.dimen.qs_tile_switch_icon_size),
+                   mContext.getResources()
+                       .getDimensionPixelSize(R.dimen.qs_tile_switch_icon_size),
+                   Gravity.RIGHT | Gravity.TOP));
+        updateSwitchView(true);
+    }
+
+    public void updateSwitchView(boolean isFront) {
+        if (mSwitchView != null) {
+            mSwitchView.setImageDrawable(isFront ?
+                 mContext.getResources().getDrawable(R.drawable.ic_qs_switch_front) :
+                 mContext.getResources().getDrawable(R.drawable.ic_qs_switch_back));
+        }
+    }
+
+    private void setSwitchViewVisibility(int vis) {
+        if (mSwitchView != null) {
+            mSwitchView.setVisibility(vis);
+        }
     }
 
     /**
