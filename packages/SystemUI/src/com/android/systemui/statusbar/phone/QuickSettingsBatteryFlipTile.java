@@ -27,7 +27,8 @@ import android.view.MotionEvent;
 import android.view.View;
 import android.widget.FrameLayout;
 
-public class QuickSettingsBatteryFlipTile extends QuickSettingsTileView {
+public class QuickSettingsBatteryFlipTile extends QuickSettingsTileView
+           implements QuickSettingsTileFlip3d.OnRotationListener {
 
     private final QuickSettingsBasicBatteryTile mFront;
     private final QuickSettingsBasicBackBatteryTile mBack;
@@ -48,6 +49,7 @@ public class QuickSettingsBatteryFlipTile extends QuickSettingsTileView {
         mFront = new QuickSettingsBasicBatteryTile(context);
         mBack = new QuickSettingsBasicBackBatteryTile(context);
         mFlip3d = new QuickSettingsTileFlip3d(mFront, mBack);
+        mFlip3d.setOnRotationListener(this);
 
         setClickable(true);
         setSelected(true);
@@ -64,6 +66,8 @@ public class QuickSettingsBatteryFlipTile extends QuickSettingsTileView {
                 new FrameLayout.LayoutParams(
                         FrameLayout.LayoutParams.MATCH_PARENT,
                         FrameLayout.LayoutParams.MATCH_PARENT));
+
+        addSwitcherView();
     }
 
     @Override
@@ -81,6 +85,11 @@ public class QuickSettingsBatteryFlipTile extends QuickSettingsTileView {
         } else {
             return super.onInterceptTouchEvent(ev);
         }
+    }
+
+    @Override
+    public void onRotation(boolean isFront) {
+        updateSwitchView(isFront);
     }
 
     public void setFrontText(CharSequence text) {
