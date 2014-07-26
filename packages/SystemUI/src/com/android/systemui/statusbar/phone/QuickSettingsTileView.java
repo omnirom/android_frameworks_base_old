@@ -269,13 +269,13 @@ class QuickSettingsTileView extends FrameLayout {
 
     private int getTextSize() {
         final Resources res = mContext.getResources();
-        switch (mNumColumns) {
-            case 5:
-                return res.getDimensionPixelSize(R.dimen.qs_5_column_text_size);
-            case 4:
-                return res.getDimensionPixelSize(R.dimen.qs_4_column_text_size);
+        if (mNumColumns >= 5) {
+            return res.getDimensionPixelSize(R.dimen.qs_5_column_text_size);
+        } else if (mNumColumns == 4) {
+            return res.getDimensionPixelSize(R.dimen.qs_4_column_text_size);
+        } else {
+            return res.getDimensionPixelSize(R.dimen.qs_3_column_text_size);
         }
-        return res.getDimensionPixelSize(R.dimen.qs_3_column_text_size);
     }
 
     public void callOnColumnsChange() {
