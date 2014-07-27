@@ -122,4 +122,8 @@
   <java-symbol type="anim" name="recent_screen_enter_left" />
   <java-symbol type="anim" name="recent_screen_fade_out" />
 
+  <!-- LTE signal strength calculation -->
+  <java-symbol type="integer" name="config_LTE_antenna_bar_quantity_metric" />
+  <java-symbol type="integer" name="config_LTE_RSRP_threshold_type" />
+
 </resources>
