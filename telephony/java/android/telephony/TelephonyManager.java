@@ -472,12 +472,22 @@ public class TelephonyManager {
         case RILConstants.NETWORK_MODE_GSM_UMTS:
         case RILConstants.NETWORK_MODE_LTE_GSM_WCDMA:
         case RILConstants.NETWORK_MODE_LTE_WCDMA:
-        case RILConstants.NETWORK_MODE_LTE_CMDA_EVDO_GSM_WCDMA:
+        case RILConstants.NETWORK_MODE_TD_SCDMA_ONLY:
+        case RILConstants.NETWORK_MODE_TD_SCDMA_WCDMA:
+        case RILConstants.NETWORK_MODE_TD_SCDMA_LTE:
+        case RILConstants.NETWORK_MODE_TD_SCDMA_GSM:
+        case RILConstants.NETWORK_MODE_TD_SCDMA_GSM_LTE:
+        case RILConstants.NETWORK_MODE_TD_SCDMA_GSM_WCDMA:
+        case RILConstants.NETWORK_MODE_TD_SCDMA_WCDMA_LTE:
+        case RILConstants.NETWORK_MODE_TD_SCDMA_GSM_WCDMA_LTE:
             return PhoneConstants.PHONE_TYPE_GSM;
 
         // Use CDMA Phone for the global mode including CDMA
         case RILConstants.NETWORK_MODE_GLOBAL:
         case RILConstants.NETWORK_MODE_LTE_CDMA_EVDO:
+        case RILConstants.NETWORK_MODE_LTE_CMDA_EVDO_GSM_WCDMA:
+        case RILConstants.NETWORK_MODE_TD_SCDMA_CDMA_EVDO_GSM_WCDMA:
+        case RILConstants.NETWORK_MODE_TD_SCDMA_LTE_CDMA_EVDO_GSM_WCDMA:
             return PhoneConstants.PHONE_TYPE_CDMA;
 
         case RILConstants.NETWORK_MODE_LTE_ONLY:
@@ -668,6 +678,11 @@ public class TelephonyManager {
     public static final int NETWORK_TYPE_EHRPD = 14;
     /** Current network is HSPA+ */
     public static final int NETWORK_TYPE_HSPAP = 15;
+    /** Current network is GSM {@hide} */
+    public static final int NETWORK_TYPE_GSM = 16;
+    /** Current network is TD_SCDMA {@hide} */
+    public static final int NETWORK_TYPE_TD_SCDMA = 17;
+
 
     /**
      * @return the NETWORK_TYPE_xxxx for current data connection.
@@ -697,6 +712,7 @@ public class TelephonyManager {
      * @see #NETWORK_TYPE_LTE
      * @see #NETWORK_TYPE_EHRPD
      * @see #NETWORK_TYPE_HSPAP
+     * @see #NETWORK_TYPE_TD_SCDMA
      *
      * @hide
      */
@@ -770,6 +786,7 @@ public class TelephonyManager {
     public static int getNetworkClass(int networkType) {
         switch (networkType) {
             case NETWORK_TYPE_GPRS:
+            case NETWORK_TYPE_GSM:
             case NETWORK_TYPE_EDGE:
             case NETWORK_TYPE_CDMA:
             case NETWORK_TYPE_1xRTT:
@@ -784,6 +801,7 @@ public class TelephonyManager {
             case NETWORK_TYPE_EVDO_B:
             case NETWORK_TYPE_EHRPD:
             case NETWORK_TYPE_HSPAP:
+            case NETWORK_TYPE_TD_SCDMA:
                 return NETWORK_CLASS_3_G;
             case NETWORK_TYPE_LTE:
                 return NETWORK_CLASS_4_G;
@@ -836,6 +854,10 @@ public class TelephonyManager {
                 return "iDEN";
             case NETWORK_TYPE_HSPAP:
                 return "HSPA+";
+            case NETWORK_TYPE_GSM:
+                return "GSM";
+            case NETWORK_TYPE_TD_SCDMA:
+                return "TD_SCDMA";
             default:
                 return "UNKNOWN";
         }
