@@ -833,7 +833,7 @@ please see styles_device_defaults.xml.
     <eat-comment />
 
     <style name="TextAppearance">
-        <item name="android:textColor">?textColorPrimary</item>
+        <item name="android:textColor">#ffffffff</item>
         <item name="android:textColorHighlight">?textColorHighlight</item>
         <item name="android:textColorHint">?textColorHint</item>
         <item name="android:textColorLink">?textColorLink</item>
@@ -842,25 +842,28 @@ please see styles_device_defaults.xml.
     </style>
 
     <style name="TextAppearance.Inverse">
-        <item name="textColor">?textColorPrimaryInverse</item>
+        <item name="android:textColor">#ffffffff</item>
         <item name="android:textColorHint">?textColorHintInverse</item>
         <item name="android:textColorHighlight">?textColorHighlightInverse</item>
         <item name="android:textColorLink">?textColorLinkInverse</item>
     </style>
 
-    <style name="TextAppearance.Theme" parent="Theme.Holo.Light">
+    <style name="TextAppearance.Theme">
+        <item name="android:textColor">#ffffffff</item>
     </style>
 
     <style name="TextAppearance.DialogWindowTitle">
         <item name="android:textSize">18sp</item>
+        <item name="android:textColor">#ffffffff</item>
     </style>
 
     <style name="TextAppearance.Large">
         <item name="android:textSize">22sp</item>
+        <item name="android:textColor">#ffffffff</item>
     </style>
 
     <style name="TextAppearance.Large.Inverse">
-        <item name="android:textColor">?textColorPrimaryInverse</item>
+        <item name="android:textColor">#ffffffff</item>
         <item name="android:textColorHint">?textColorHintInverse</item>
         <item name="android:textColorHighlight">?textColorHighlightInverse</item>
         <item name="android:textColorLink">?textColorLinkInverse</item>
@@ -868,10 +871,11 @@ please see styles_device_defaults.xml.
 
     <style name="TextAppearance.Medium">
         <item name="android:textSize">18sp</item>
+        <item name="android:textColor">#ffffffff</item>
     </style>
 
     <style name="TextAppearance.Medium.Inverse">
-        <item name="android:textColor">?textColorPrimaryInverse</item>
+        <item name="android:textColor">#ffffffff</item>
         <item name="android:textColorHint">?textColorHintInverse</item>
         <item name="android:textColorHighlight">?textColorHighlightInverse</item>
         <item name="android:textColorLink">?textColorLinkInverse</item>
@@ -879,17 +883,18 @@ please see styles_device_defaults.xml.
 
     <style name="TextAppearance.Small">
         <item name="android:textSize">14sp</item>
-        <item name="android:textColor">?textColorSecondary</item>
+        <item name="android:textColor">#ffffffff</item>
     </style>
 
     <style name="TextAppearance.Small.Inverse">
-        <item name="android:textColor">?textColorSecondaryInverse</item>
+        <item name="android:textColor">#ffffffff</item>
         <item name="android:textColorHint">?textColorHintInverse</item>
         <item name="android:textColorHighlight">?textColorHighlightInverse</item>
         <item name="android:textColorLink">?textColorLinkInverse</item>
     </style>
 
     <style name="TextAppearance.Theme.Dialog" parent="TextAppearance.Theme">
+        <item name="android:textColor">#ffffffff</item>
     </style>
 
     <style name="TextAppearance.Theme.Dialog.AppError">
@@ -897,14 +902,15 @@ please see styles_device_defaults.xml.
     </style>
 
     <style name="TextAppearance.Widget">
+        <item name="android:textColor">#ffffffff</item>
     </style>
 
     <style name="TextAppearance.Widget.Button" parent="TextAppearance.Small.Inverse">
-        <item name="android:textColor">@android:color/primary_text_light_nodisable</item>
+        <item name="android:textColor">#ffffffff</item>
     </style>
 
     <style name="TextAppearance.Widget.IconMenu.Item" parent="TextAppearance.Small">
-        <item name="android:textColor">?textColorPrimary</item>
+        <item name="android:textColor">#ffffffff</item>
         <!-- dp is used on purpose here instead of sp; there is not space
              for larger font sizes based on the user setting. Newer apps
              should not receive the legacy icon menu panel. -->
@@ -912,44 +918,44 @@ please see styles_device_defaults.xml.
     </style>
 
     <style name="TextAppearance.Widget.EditText">
-        <item name="android:textColor">@color/widget_edittext_dark</item>
+        <item name="android:textColor">#ffffffff</item>
         <item name="android:textColorHint">@android:color/hint_foreground_light</item>
     </style>
 
     <style name="TextAppearance.Widget.TabWidget">
         <item name="android:textSize">14sp</item>
         <item name="android:textStyle">normal</item>
-        <item name="android:textColor">@android:color/tab_indicator_text</item>
+        <item name="android:textColor">#ffffffff</item>
     </style>
     
     <style name="TextAppearance.Widget.TextView">
-        <item name="android:textColor">?textColorPrimaryDisableOnly</item>
+        <item name="android:textColor">#ffffffff</item>
         <item name="android:textColorHint">?textColorHint</item>
     </style>
 
     <style name="TextAppearance.Widget.TextView.PopupMenu">
         <item name="android:textSize">18sp</item>
-        <item name="android:textColor">?textColorPrimaryDisableOnly</item>
+        <item name="android:textColor">#ffffffff</item>
         <item name="android:textColorHint">?textColorHint</item>
     </style>
 
     <style name="TextAppearance.Widget.DropDownHint">
-        <item name="android:textColor">?textColorPrimaryInverse</item>
+        <item name="android:textColor">#ffffffff</item>
         <item name="android:textSize">14sp</item>
     </style>
 
     <style name="TextAppearance.Widget.DropDownItem">
-        <item name="android:textColor">@android:color/primary_text_light_disable_only</item>
+        <item name="android:textColor">#ffffffff</item>
     </style>
 
     <style name="TextAppearance.Widget.TextView.SpinnerItem">
-        <item name="android:textColor">@android:color/primary_text_light_disable_only</item>
+        <item name="android:textColor">#ffffffff</item>
     </style>
 
     <!-- @hide -->
     <style name="TextAppearance.SlidingTabNormal" 
         parent="@android:attr/textAppearanceMedium">
-        <item name="android:textColor">?android:attr/textColorTertiary</item>
+        <item name="android:textColor">#ffffffff</item>
         <item name="android:textSize">28sp</item>
         <item name="android:shadowColor">@android:color/sliding_tab_text_color_shadow</item>
         <item name="android:shadowDx">0.0</item>
@@ -960,14 +966,14 @@ please see styles_device_defaults.xml.
     <!-- @hide -->
     <style name="TextAppearance.SlidingTabActive" 
         parent="@android:attr/textAppearanceMedium">
-        <item name="android:textColor">@android:color/sliding_tab_text_color_active</item>
+        <item name="android:textColor">#ffffffff</item>
         <item name="android:textSize">28sp</item>
     </style>
 
     <!-- @hide -->
      <style name="TextAppearance.SearchResult">
          <item name="android:textStyle">normal</item>
-         <item name="android:textColor">?textColorPrimaryInverse</item>
+        <item name="android:textColor">#ffffffff</item>
          <item name="android:textColorHint">?textColorHintInverse</item>
      </style>	
 
@@ -983,13 +989,13 @@ please see styles_device_defaults.xml.
      </style>
 
     <style name="TextAppearance.WindowTitle">
-        <item name="android:textColor">#fff</item>
+        <item name="android:textColor">#ffffffff</item>
         <item name="android:textSize">14sp</item>
         <item name="android:textStyle">bold</item>
     </style>
 
     <style name="TextAppearance.Large.Inverse.NumberPickerInputText">
-        <item name="android:textColor">@android:color/primary_text_light</item>
+        <item name="android:textColor">#ffffffff</item>
         <item name="android:textSize">30sp</item>
     </style>
 
@@ -1050,11 +1056,13 @@ please see styles_device_defaults.xml.
     <style name="Preference.DialogPreference">
         <item name="android:positiveButtonText">@android:string/ok</item>
         <item name="android:negativeButtonText">@android:string/cancel</item>
+        <item name="android:textColor">#ffffffff</item>
     </style>
 
     <style name="Preference.DialogPreference.YesNoPreference">
         <item name="android:positiveButtonText">@android:string/yes</item>
         <item name="android:negativeButtonText">@android:string/no</item>
+        <item name="android:textColor">#ffffffff</item>
     </style>
 
     <style name="Preference.DialogPreference.EditTextPreference">
@@ -1341,40 +1349,44 @@ please see styles_device_defaults.xml.
 
     <!-- Text Styles -->
     <style name="TextAppearance.Holo" parent="TextAppearance">
+        <item name="android:textColor">#ffffffff</item>
     </style>
 
     <style name="TextAppearance.Holo.Inverse" parent="TextAppearance.Inverse">
-        <item name="android:textColor">?textColorPrimaryInverse</item>
+        <item name="android:textColor">#ffffffff</item>
         <item name="android:textColorHint">?textColorHintInverse</item>
         <item name="android:textColorHighlight">?textColorHighlightInverse</item>
         <item name="android:textColorLink">?textColorLinkInverse</item>
     </style>
 
     <style name="TextAppearance.Holo.Large" parent="TextAppearance.Large">
+        <item name="android:textColor">#ffffffff</item>
     </style>
 
     <style name="TextAppearance.Holo.Medium" parent="TextAppearance.Medium">
+        <item name="android:textColor">#ffffffff</item>
     </style>
 
     <style name="TextAppearance.Holo.Small" parent="TextAppearance.Small">
+        <item name="android:textColor">#ffffffff</item>
     </style>
 
     <style name="TextAppearance.Holo.Large.Inverse">
-        <item name="android:textColor">?textColorPrimaryInverse</item>
+        <item name="android:textColor">#ffffffff</item>
         <item name="android:textColorHint">?textColorHintInverse</item>
         <item name="android:textColorHighlight">?textColorHighlightInverse</item>
         <item name="android:textColorLink">?textColorLinkInverse</item>
     </style>
 
     <style name="TextAppearance.Holo.Medium.Inverse">
-        <item name="android:textColor">?textColorPrimaryInverse</item>
+        <item name="android:textColor">#ffffffff</item>
         <item name="android:textColorHint">?textColorHintInverse</item>
         <item name="android:textColorHighlight">?textColorHighlightInverse</item>
         <item name="android:textColorLink">?textColorLinkInverse</item>
     </style>
 
     <style name="TextAppearance.Holo.Small.Inverse">
-        <item name="android:textColor">?textColorSecondaryInverse</item>
+        <item name="android:textColor">#ffffffff</item>
         <item name="android:textColorHint">?textColorHintInverse</item>
         <item name="android:textColorHighlight">?textColorHighlightInverse</item>
         <item name="android:textColorLink">?textColorLinkInverse</item>
@@ -1382,7 +1394,7 @@ please see styles_device_defaults.xml.
 
     <style name="TextAppearance.Holo.SearchResult">
         <item name="android:textStyle">normal</item>
-        <item name="android:textColor">?textColorPrimary</item>
+        <item name="android:textColor">#ffffffff</item>
         <item name="android:textColorHint">?textColorHint</item>
     </style>
 
@@ -1517,14 +1529,14 @@ please see styles_device_defaults.xml.
     </style>
 
     <style name="TextAppearance.Holo.WindowTitle">
-        <item name="android:textColor">#ff404040</item>
+        <item name="android:textColor">#fff</item>
         <item name="android:textSize">14sp</item>
         <item name="android:textStyle">bold</item>
     </style>
 
     <style name="TextAppearance.Holo.DialogWindowTitle">
         <item name="android:textSize">22sp</item>
-        <item name="android:textColor">@android:color/default_dialog_text_holo_dark</item>
+        <item name="android:textColor">#ffffffff</item>
     </style>
 
     <style name="TextAppearance.Holo.CalendarViewWeekDayView" parent="TextAppearance.Small.CalendarViewWeekDayView">
@@ -1533,40 +1545,44 @@ please see styles_device_defaults.xml.
 
     <!-- Light text styles -->
     <style name="TextAppearance.Holo.Light" parent="TextAppearance.Holo">
+        <item name="android:textColor">#ffffffff</item>
     </style>
 
     <style name="TextAppearance.Holo.Light.Inverse">
-        <item name="android:textColor">?textColorPrimaryInverse</item>
+        <item name="android:textColor">#ffffffff</item>
         <item name="android:textColorHint">?textColorHintInverse</item>
         <item name="android:textColorHighlight">?textColorHighlightInverse</item>
         <item name="android:textColorLink">?textColorLinkInverse</item>
     </style>
 
     <style name="TextAppearance.Holo.Light.Large" parent="TextAppearance.Holo.Large">
+        <item name="android:textColor">#ffffffff</item>
     </style>
 
     <style name="TextAppearance.Holo.Light.Medium" parent="TextAppearance.Holo.Medium">
+        <item name="android:textColor">#ffffffff</item>
     </style>
 
     <style name="TextAppearance.Holo.Light.Small" parent="TextAppearance.Holo.Small">
+        <item name="android:textColor">#ffffffff</item>
     </style>
  
    <style name="TextAppearance.Holo.Light.Large.Inverse">
-        <item name="android:textColor">?textColorPrimaryInverse</item>
+        <item name="android:textColor">#ffffffff</item>
         <item name="android:textColorHint">?textColorHintInverse</item>
         <item name="android:textColorHighlight">?textColorHighlightInverse</item>
         <item name="android:textColorLink">?textColorLinkInverse</item>
     </style>
 
     <style name="TextAppearance.Holo.Light.Medium.Inverse">
-        <item name="android:textColor">?textColorPrimaryInverse</item>
+        <item name="android:textColor">#ffffffff</item>
         <item name="android:textColorHint">?textColorHintInverse</item>
         <item name="android:textColorHighlight">?textColorHighlightInverse</item>
         <item name="android:textColorLink">?textColorLinkInverse</item>
     </style>
 
     <style name="TextAppearance.Holo.Light.Small.Inverse">
-        <item name="android:textColor">?textColorPrimaryInverse</item>
+        <item name="android:textColor">#ffffffff</item>
         <item name="android:textColorHint">?textColorHintInverse</item>
         <item name="android:textColorHighlight">?textColorHighlightInverse</item>
         <item name="android:textColorLink">?textColorLinkInverse</item>
@@ -1623,7 +1639,7 @@ please see styles_device_defaults.xml.
 
     <style name="TextAppearance.Holo.Light.DialogWindowTitle">
         <item name="android:textSize">22sp</item>
-        <item name="android:textColor">@android:color/default_dialog_text_holo_light</item>
+        <item name="android:textColor">#ffffffff</item>>
     </style>
 
     <style name="TextAppearance.Holo.Light.CalendarViewWeekDayView" parent="TextAppearance.Small.CalendarViewWeekDayView">
@@ -2479,13 +2495,14 @@ please see styles_device_defaults.xml.
         <item name="bottomBright">@android:drawable/amra_dialog_bottom</item>
         <item name="bottomMedium">@android:drawable/amra_dialog_bottom</item>
         <item name="centerMedium">@android:drawable/amra_dialog_middle</item>
-        <item name="layout">@android:layout/alert_dialog_holo_light</item>
+        <item name="layout">@android:layout/alert_dialog_holo_dark</item>
         <item name="listLayout">@android:layout/select_dialog_holo</item>
         <item name="progressLayout">@android:layout/progress_dialog_holo</item>
         <item name="horizontalProgressLayout">@android:layout/alert_dialog_progress_holo</item>
         <item name="listItemLayout">@android:layout/select_dialog_item_holo</item>
         <item name="multiChoiceItemLayout">@android:layout/select_dialog_multichoice_holo</item>
         <item name="singleChoiceItemLayout">@android:layout/select_dialog_singlechoice_holo</item>
+        <item name="android:textColor">#ffffff</item>
     </style>
 
     <style name="AlertDialog.Holo.Light">
@@ -2499,7 +2516,8 @@ please see styles_device_defaults.xml.
         <item name="bottomBright">@android:drawable/amra_dialog_bottom</item>
         <item name="bottomMedium">@android:drawable/amra_dialog_bottom</item>
         <item name="centerMedium">@android:drawable/amra_dialog_middle</item>
-        <item name="layout">@android:layout/alert_dialog_holo_light</item>
+        <item name="layout">@android:layout/alert_dialog_holo_dark</item>
+        <item name="android:textColor">#ffffff</item>
     </style>
 
     <!-- Window title -->

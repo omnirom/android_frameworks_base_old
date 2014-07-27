@@ -1994,6 +1994,10 @@
   <!-- Amra dialog -->
   <java-symbol type="layout" name="amra_dlg" />
   <java-symbol type="drawable" name="amra_card" />
+  <java-symbol type="drawable" name="amra_dialog" />
+  <java-symbol type="drawable" name="amra_dialog_top" />
+  <java-symbol type="drawable" name="amra_dialog_middle" />
+  <java-symbol type="drawable" name="amra_dialog_bottom" />
   
   <!-- Options that show upon long-pressing a key on the physical keyboard -->
   <java-symbol type="string" name="symbol_picker_0" />

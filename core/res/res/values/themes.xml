@@ -1641,7 +1641,7 @@ please see themes_device_defaults.xml.
     <style name="Theme.Holo.Dialog">
         <item name="android:windowFrame">@null</item>
         <item name="android:windowTitleStyle">@android:style/DialogWindowTitle.Holo</item>
-        <item name="android:windowBackground">@android:drawable/dialog_full_holo_dark</item>
+        <item name="android:windowBackground">@android:drawable/amra_dialog</item>
         <item name="android:windowIsFloating">true</item>
         <item name="android:windowContentOverlay">@null</item>
         <item name="android:windowAnimationStyle">@android:style/Animation.Holo.Dialog</item>
@@ -1757,7 +1757,7 @@ please see themes_device_defaults.xml.
     <style name="Theme.Holo.Light.Dialog">
         <item name="android:windowFrame">@null</item>
         <item name="android:windowTitleStyle">@android:style/DialogWindowTitle.Holo.Light</item>
-        <item name="android:windowBackground">@android:drawable/dialog_full_holo_light</item>
+        <item name="android:windowBackground">@android:drawable/amra_dialog</item>
         <item name="android:windowIsFloating">true</item>
         <item name="android:windowContentOverlay">@null</item>
         <item name="android:windowAnimationStyle">@android:style/Animation.Holo.Dialog</item>
