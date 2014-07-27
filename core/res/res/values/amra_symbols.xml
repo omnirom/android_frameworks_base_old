@@ -33,4 +33,7 @@
     <!-- Circle Background -->
   <java-symbol type="drawable" name="amra_circle" />
 
+  <!-- Wifi auto connection -->
+  <java-symbol type="bool" name="wifi_autocon" />
+
 </resources>
