@@ -549,7 +549,6 @@ public class SignalStrength implements Parcelable {
     public int getAsuLevel() {
         int asuLevel = 0;
         if (isGsm) {
-            boolean lteChecks = (getLteRsrp() == INVALID && getLteRsrq() == INVALID && getLteRssnr() == INVALID && getLteSignalStrength() == 99);
             boolean oldRil = needsOldRilFeature("signalstrength");
             boolean lteChecks = (getLteRsrp() == INVALID && getLteRsrq() == INVALID && getLteRssnr() == INVALID && getLteSignalStrength() == 99);
             if ((getLteLevel() == SIGNAL_STRENGTH_NONE_OR_UNKNOWN && ( (getGsmAsuLevel() != 99 &&
