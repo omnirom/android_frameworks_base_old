@@ -27,8 +27,6 @@ import android.widget.ImageView;
 import android.widget.ProgressBar;
 import android.widget.TextView;
 
-import com.android.systemui.BatteryMeterView;
-import com.android.systemui.BatteryCircleMeterView;
 import com.android.systemui.R;
 
 public class QuickSettingsBasicUserTile extends QuickSettingsTileView {
@@ -62,6 +60,14 @@ public class QuickSettingsBasicUserTile extends QuickSettingsTileView {
     @Override
     public void setContent(int layoutId, LayoutInflater inflater) {
         throw new RuntimeException("why?");
+    }
+
+    @Override
+    public void setEditMode(boolean enabled) {
+        // No hover on edit mode
+        setBackgroundResource(enabled ? R.drawable.qs_tile_background_no_hover :
+                  R.drawable.qs_tile_background);
+        super.setEditMode(enabled);
     }
 
     public ImageView getImageView() {
