@@ -27,7 +27,8 @@ import android.view.MotionEvent;
 import android.view.View;
 import android.widget.FrameLayout;
 
-public class QuickSettingsBatteryFlipTile extends QuickSettingsTileView {
+public class QuickSettingsBatteryFlipTile extends QuickSettingsTileView
+           implements QuickSettingsTileFlip3d.OnRotationListener {
 
     private final QuickSettingsBasicBatteryTile mFront;
     private final QuickSettingsBasicBackBatteryTile mBack;
@@ -48,10 +49,12 @@ public class QuickSettingsBatteryFlipTile extends QuickSettingsTileView {
         mFront = new QuickSettingsBasicBatteryTile(context);
         mBack = new QuickSettingsBasicBackBatteryTile(context);
         mFlip3d = new QuickSettingsTileFlip3d(mFront, mBack);
+        mFlip3d.setOnRotationListener(this);
 
         setClickable(true);
         setSelected(true);
         setFocusable(true);
+        setSupportFlip(true);
 
         mBack.setVisibility(View.GONE);
 
@@ -68,7 +71,7 @@ public class QuickSettingsBatteryFlipTile extends QuickSettingsTileView {
 
     @Override
     public boolean dispatchTouchEvent(MotionEvent e) {
-        if (!isEditModeEnabled()) {
+        if (!isEditModeEnabled() && isSupportFlip()) {
             return mFlip3d.onTouch(this, e);
         }
         return super.dispatchTouchEvent(e);
@@ -80,6 +83,24 @@ public class QuickSettingsBatteryFlipTile extends QuickSettingsTileView {
             return true;
         } else {
             return super.onInterceptTouchEvent(ev);
+        }
+    }
+
+    @Override
+    public void onRotation(boolean isBack) {
+        if (isBack) {
+            mFront.setHoverEffect(true);
+        } else {
+            mBack.setHoverEffect(true);
+        }
+    }
+
+    @Override
+    public void onRotationReset(boolean isFront) {
+        if (isFront) {
+            mFront.setHoverEffect(false);
+        } else {
+            mBack.setHoverEffect(false);
         }
     }
 
@@ -130,5 +151,9 @@ public class QuickSettingsBatteryFlipTile extends QuickSettingsTileView {
     public void updateBatterySettings() {
         mBack.updateBatterySettings();
         mFront.updateBatterySettings();
+    }
+
+    public void flipToFront() {
+        mFlip3d.rotateToFront(true);
     }
 }

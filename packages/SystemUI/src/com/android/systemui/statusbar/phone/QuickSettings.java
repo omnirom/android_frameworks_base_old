@@ -952,6 +952,7 @@ class QuickSettings {
                         = new QuickSettingsFlipTile(mContext);
 
                   VolumeTile.setTileId(Tile.VOLUME);
+                  VolumeTile.setSupportFlip(true);
                   VolumeTile.setFrontImageResource(R.drawable.ic_qs_volume);
                   VolumeTile.setFrontText(mContext.getString(R.string.quick_settings_volume));
                   VolumeTile.setBackLabel(mContext.getString(R.string.quick_settings_volume_status));
@@ -992,6 +993,7 @@ class QuickSettings {
                        = new QuickSettingsFlipTile(mContext);
 
                   SleepTile.setTileId(Tile.SLEEP);
+                  SleepTile.setSupportFlip(true);
                   SleepTile.setFrontImageResource(R.drawable.ic_qs_sleep);
                   SleepTile.setFrontText(mContext.getString(R.string.quick_settings_screen_sleep));
                   SleepTile.setBackLabel(mContext.getString(R.string.quick_settings_volume_status));
@@ -1027,6 +1029,7 @@ class QuickSettings {
                             = new QuickSettingsFlipTile(mContext);
 
                       bluetoothTile.setTileId(Tile.BLUETOOTH);
+                      bluetoothTile.setSupportFlip(true);
                       bluetoothTile.setFrontOnLongClickListener(new View.OnLongClickListener() {
                             @Override
                             public boolean onLongClick(View v) {
@@ -1154,6 +1157,7 @@ class QuickSettings {
                           = new QuickSettingsFlipTile(mContext);
 
                      locationTile.setTileId(Tile.LOCATION);
+                     locationTile.setSupportFlip(true);
                      locationTile.setFrontImageResource(R.drawable.ic_qs_location_default_on);
                      locationTile.setFrontText(mContext.getString(R.string.quick_settings_location_label));
                      locationTile.setBackLabel(mContext.getString(R.string.quick_settings_volume_status));
@@ -1232,6 +1236,7 @@ class QuickSettings {
         // Alarm tile
         final QuickSettingsBasicTile alarmTile
                     = new QuickSettingsBasicTile(mContext);
+
         alarmTile.setImageResource(R.drawable.ic_qs_alarm_on);
         alarmTile.setTemporary(true);
         alarmTile.setOnClickListener(new View.OnClickListener() {
@@ -1254,6 +1259,7 @@ class QuickSettings {
         // Remote Display
         QuickSettingsBasicTile remoteDisplayTile
                 = new QuickSettingsBasicTile(mContext);
+
         remoteDisplayTile.setTemporary(true);
         remoteDisplayTile.setOnClickListener(new View.OnClickListener() {
             @Override
@@ -1284,6 +1290,7 @@ class QuickSettings {
             // IME
             final QuickSettingsBasicTile imeTile
                     = new QuickSettingsBasicTile(mContext);
+
             imeTile.setTemporary(true);
             imeTile.setImageResource(R.drawable.ic_qs_ime);
             imeTile.setOnClickListener(new View.OnClickListener() {
@@ -1306,6 +1313,7 @@ class QuickSettings {
         // Bug reports
         final QuickSettingsBasicTile bugreportTile
                 = new QuickSettingsBasicTile(mContext);
+
         bugreportTile.setTemporary(true);
         bugreportTile.setImageResource(com.android.internal.R.drawable.stat_sys_adb);
         bugreportTile.setTextResource(com.android.internal.R.string.bugreport_title);
@@ -1327,6 +1335,7 @@ class QuickSettings {
         // SSL CA Cert Warning.
         final QuickSettingsBasicTile sslCaCertWarningTile =
                 new QuickSettingsBasicTile(mContext, null, R.layout.quick_settings_tile_monitoring);
+
         sslCaCertWarningTile.setTemporary(true);
         sslCaCertWarningTile.setOnClickListener(new View.OnClickListener() {
             @Override
