@@ -19,6 +19,8 @@
 package com.android.systemui.statusbar.phone;
 
 import android.animation.TimeInterpolator;
+import android.os.Handler;
+import android.os.Message;
 import android.util.Log;
 import android.view.animation.DecelerateInterpolator;
 import android.view.GestureDetector;
@@ -41,6 +43,32 @@ public class QuickSettingsTileFlip3d extends GestureDetector.SimpleOnGestureList
     private DecelerateInterpolator mInterpolator;
     private boolean mFlingCancelClamp = false;
     private boolean mFrontSideOnDown = true;
+    private OnRotationListener mOnRotationListener;
+
+    private static final int FLIP_EFFECT = 1;
+    private static final int FLIP_STOP = 2;
+
+    private Handler mHandler = new Handler() {
+        @Override
+        public void handleMessage(final Message msg) {
+            switch (msg.what) {
+                case FLIP_EFFECT:
+                    removeMessages(FLIP_STOP);
+                    sendEmptyMessageDelayed(FLIP_STOP, 50);
+                    if (mOnRotationListener != null) {
+                        mOnRotationListener.onRotation(isBackSide());
+                    }
+                    break;
+                case FLIP_STOP:
+                    if (mOnRotationListener != null) {
+                        mOnRotationListener.onRotationReset(isFrontSide());
+                    }
+                    break;
+                default:
+                    break;
+            }
+        }
+    };
 
     public QuickSettingsTileFlip3d(ViewGroup front, ViewGroup back) {
         // In the initial state, the front tile is displayed, so degrees = 0
@@ -49,6 +77,12 @@ public class QuickSettingsTileFlip3d extends GestureDetector.SimpleOnGestureList
         mBack = back;
         mDetector = new GestureDetector(front.getContext(), this);
         mInterpolator = new DecelerateInterpolator();
+    }
+
+    public void setOnRotationListener(OnRotationListener listener) {
+        if (mOnRotationListener != listener) {
+            mOnRotationListener = listener;
+        }
     }
 
     public boolean isFrontSide() {
@@ -128,6 +162,8 @@ public class QuickSettingsTileFlip3d extends GestureDetector.SimpleOnGestureList
             mFront.setVisibility(View.VISIBLE);
             mBack.setVisibility(View.GONE);
         }
+        mHandler.removeMessages(FLIP_EFFECT);
+        mHandler.sendEmptyMessageDelayed(FLIP_EFFECT, 50);
     }
 
     private void clampRotation() {
@@ -162,19 +198,25 @@ public class QuickSettingsTileFlip3d extends GestureDetector.SimpleOnGestureList
     @Override
     public boolean onTouch(View v, MotionEvent event) {
         mDetector.onTouchEvent(event);
-        int action = event.getAction();
-        if (action == MotionEvent.ACTION_CANCEL) {
-            if (mFlingCancelClamp) {
-                rotateReset();
-            }
-            dispatchEventToActive(event);
-        } else if (action == MotionEvent.ACTION_UP) {
-            if (!mFlingCancelClamp) {
-                clampRotation();
-            }
-            mFlingCancelClamp = false;
-
-            dispatchEventToActive(event);
+        switch (event.getAction()) {
+             case MotionEvent.ACTION_UP:
+                  if (!mFlingCancelClamp) {
+                      clampRotation();
+                  }
+                  mFlingCancelClamp = false;
+                  dispatchEventToActive(event);
+                  break;
+             case MotionEvent.ACTION_CANCEL:
+                  if (mFlingCancelClamp) {
+                      rotateReset();
+                  }
+                  dispatchEventToActive(event);
+                  mHandler.removeMessages(FLIP_EFFECT);
+                  mHandler.removeMessages(FLIP_STOP);
+                  if (mOnRotationListener != null) {
+                      mOnRotationListener.onRotationReset(isFrontSide());
+                  }
+                  break;
         }
         return true;
     }
@@ -227,5 +269,10 @@ public class QuickSettingsTileFlip3d extends GestureDetector.SimpleOnGestureList
     public float getInterpolation(float input) {
         updateVisibility();
         return mInterpolator.getInterpolation(input);
+    }
+
+    public interface OnRotationListener {
+        void onRotation(boolean isBack);
+        void onRotationReset(boolean isFront);
     }
 }

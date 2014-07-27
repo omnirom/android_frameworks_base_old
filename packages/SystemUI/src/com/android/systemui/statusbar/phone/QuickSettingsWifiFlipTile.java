@@ -26,7 +26,8 @@ import android.view.MotionEvent;
 import android.view.View;
 import android.widget.FrameLayout;
 
-public class QuickSettingsWifiFlipTile extends QuickSettingsTileView {
+public class QuickSettingsWifiFlipTile extends QuickSettingsTileView
+           implements QuickSettingsTileFlip3d.OnRotationListener {
 
     private final QuickSettingsBasicWifiTile mFront;
     private final QuickSettingsBasicBackTile mBack;
@@ -47,10 +48,12 @@ public class QuickSettingsWifiFlipTile extends QuickSettingsTileView {
         mFront = new QuickSettingsBasicWifiTile(context);
         mBack = new QuickSettingsBasicBackTile(context);
         mFlip3d = new QuickSettingsTileFlip3d(mFront, mBack);
+        mFlip3d.setOnRotationListener(this);
 
         setClickable(true);
         setSelected(true);
         setFocusable(true);
+        setSupportFlip(true);
 
         mBack.setVisibility(View.GONE);
 
@@ -67,7 +70,7 @@ public class QuickSettingsWifiFlipTile extends QuickSettingsTileView {
 
     @Override
     public boolean dispatchTouchEvent(MotionEvent e) {
-        if (!isEditModeEnabled()) {
+        if (!isEditModeEnabled() && isSupportFlip()) {
             return mFlip3d.onTouch(this, e);
         }
         return super.dispatchTouchEvent(e);
@@ -79,6 +82,24 @@ public class QuickSettingsWifiFlipTile extends QuickSettingsTileView {
             return true;
         } else {
             return super.onInterceptTouchEvent(ev);
+        }
+    }
+
+    @Override
+    public void onRotation(boolean isBack) {
+        if (isBack) {
+            mFront.setFlipEffect(true);
+        } else {
+            mBack.setFlipEffect(true);
+        }
+    }
+
+    @Override
+    public void onRotationReset(boolean isFront) {
+        if (isFront) {
+            mFront.setFlipEffect(false);
+        } else {
+            mBack.setFlipEffect(false);
         }
     }
 
@@ -152,5 +173,9 @@ public class QuickSettingsWifiFlipTile extends QuickSettingsTileView {
 
     public QuickSettingsTileView getBack() {
         return mBack;
+    }
+
+    public void flipToFront() {
+        mFlip3d.rotateToFront(true);
     }
 }

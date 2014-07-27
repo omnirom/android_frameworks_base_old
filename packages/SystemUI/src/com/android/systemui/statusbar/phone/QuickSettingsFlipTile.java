@@ -26,12 +26,12 @@ import android.view.MotionEvent;
 import android.view.View;
 import android.widget.FrameLayout;
 
-public class QuickSettingsFlipTile extends QuickSettingsTileView {
+public class QuickSettingsFlipTile extends QuickSettingsTileView 
+            implements QuickSettingsTileFlip3d.OnRotationListener {
 
     private final QuickSettingsBasicTile mFront;
     private final QuickSettingsBasicBackTile mBack;
     private final QuickSettingsTileFlip3d mFlip3d;
-    private boolean isSupportFlip = true;
 
     public QuickSettingsFlipTile(Context context) {
         this(context, null);
@@ -48,6 +48,7 @@ public class QuickSettingsFlipTile extends QuickSettingsTileView {
         mFront = new QuickSettingsBasicTile(context);
         mBack = new QuickSettingsBasicBackTile(context);
         mFlip3d = new QuickSettingsTileFlip3d(mFront, mBack);
+        mFlip3d.setOnRotationListener(this);
 
         setClickable(true);
         setSelected(true);
@@ -68,7 +69,7 @@ public class QuickSettingsFlipTile extends QuickSettingsTileView {
 
     @Override
     public boolean dispatchTouchEvent(MotionEvent e) {
-        if (!isEditModeEnabled() && isSupportFlip) {
+        if (!isEditModeEnabled() && isSupportFlip()) {
             return mFlip3d.onTouch(this, e);
         }
         return super.dispatchTouchEvent(e);
@@ -83,8 +84,22 @@ public class QuickSettingsFlipTile extends QuickSettingsTileView {
         }
     }
 
-    public void setSupportFlip(boolean enabled) {
-        isSupportFlip = enabled;
+    @Override
+    public void onRotation(boolean isBack) {
+        if (isBack) {
+            mFront.setFlipEffect(true);
+        } else {
+            mBack.setFlipEffect(true);
+        }
+    }
+
+    @Override
+    public void onRotationReset(boolean isFront) {
+        if (isFront) {
+            mFront.setFlipEffect(false);
+        } else {
+            mBack.setFlipEffect(false);
+        }
     }
 
     public void setFrontImageResource(int id) {

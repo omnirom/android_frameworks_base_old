@@ -46,6 +46,7 @@ class QuickSettingsTileView extends FrameLayout {
     private static final String TAG = "QuickSettingsTileView";
     private static final String HOVER_COLOR_WHITE = "#3FFFFFFF"; // 25% white
     private static final String HOVER_COLOR_BLACK = "#3F000000"; // 25% black
+    private static final String FLIP_EFFECT_COLOR = "#FF212121";
 
     private static final float DEFAULT = 1f;
     private static final float ENABLED = 0.95f;
@@ -69,6 +70,8 @@ class QuickSettingsTileView extends FrameLayout {
     private boolean mTemporary;
     private boolean mEditMode;
     private boolean mVisible;
+
+    private boolean isSupportFlip = false;
 
     public QuickSettingsTileView(Context context, AttributeSet attrs) {
         super(context, attrs);
@@ -97,6 +100,14 @@ class QuickSettingsTileView extends FrameLayout {
 
     public Tile getTileId() {
         return mTileId;
+    }
+
+    public boolean isSupportFlip() {
+        return isSupportFlip;
+    }
+
+    public void setSupportFlip(boolean enabled) {
+        isSupportFlip = enabled;
     }
 
     public void setTemporary(boolean temporary) {
@@ -150,12 +161,16 @@ class QuickSettingsTileView extends FrameLayout {
         findViewById(R.id.image).setVisibility(loading ? View.GONE : View.VISIBLE);
     }
 
+    public void setFlipEffect(boolean isFlip) {
+        setHoverEffect(FLIP_EFFECT_COLOR, isFlip);
+    }
+
     public void setHoverEffect(boolean hover) {
         setHoverEffect(HOVER_COLOR_WHITE, hover);
     }
 
     public void setHoverEffect(String color, boolean hover) {
-        if(hover) {
+        if (hover) {
             setForeground(new ColorDrawable(Color.parseColor(color)));
         } else {
             setForeground(new ColorDrawable(Color.TRANSPARENT));
@@ -175,7 +190,7 @@ class QuickSettingsTileView extends FrameLayout {
         mVisible = getVisibility() == View.VISIBLE
                 && ((getScaleY() >= ENABLED || getScaleX() == DISAPPEAR) ||
                     (getScaleX() >= ENABLED || getScaleX() == DISAPPEAR));
-        if(!isTemporary() && enabled) {
+        if (!isTemporary() && enabled) {
             setVisibility(View.VISIBLE);
             setHoverEffect(HOVER_COLOR_BLACK, !mVisible);
             float scale = mVisible ? ENABLED : DISABLED;
@@ -193,7 +208,7 @@ class QuickSettingsTileView extends FrameLayout {
             animate().scaleX(scale).scaleY(scale).setListener(null);
             setOnClickListener(temporaryEditMode? null : mOnClickListener);
             setOnLongClickListener(temporaryEditMode? null : mOnLongClickListener);
-            if(!mVisible) { // Item has been disabled
+            if (!mVisible) { // Item has been disabled
                 setVisibility(View.GONE);
             }
         }
