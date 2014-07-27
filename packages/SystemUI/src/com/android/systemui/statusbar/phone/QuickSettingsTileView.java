@@ -83,6 +83,14 @@ class QuickSettingsTileView extends FrameLayout {
         setOnDragListener(mDragListener);
     }
 
+    public void setFlipTile(boolean isFlip) {
+        if (isFlip) {
+           setBackgroundResource(R.drawable.qs_flip_tile_background);
+        } else {
+           setBackgroundResource(R.drawable.qs_tile_background);
+        }
+    }
+
     public void setTileId(Tile id) {
         mTileId = id;
     }
@@ -175,7 +183,7 @@ class QuickSettingsTileView extends FrameLayout {
         mVisible = getVisibility() == View.VISIBLE
                 && ((getScaleY() >= ENABLED || getScaleX() == DISAPPEAR) ||
                     (getScaleX() >= ENABLED || getScaleX() == DISAPPEAR));
-        if(!isTemporary() && enabled) {
+        if (!isTemporary() && enabled) {
             setVisibility(View.VISIBLE);
             setHoverEffect(HOVER_COLOR_BLACK, !mVisible);
             float scale = mVisible ? ENABLED : DISABLED;
@@ -193,7 +201,7 @@ class QuickSettingsTileView extends FrameLayout {
             animate().scaleX(scale).scaleY(scale).setListener(null);
             setOnClickListener(temporaryEditMode? null : mOnClickListener);
             setOnLongClickListener(temporaryEditMode? null : mOnLongClickListener);
-            if(!mVisible) { // Item has been disabled
+            if (!mVisible) { // Item has been disabled
                 setVisibility(View.GONE);
             }
         }
