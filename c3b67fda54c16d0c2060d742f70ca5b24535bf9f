@@ -1,0 +1,21 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "4b713d8b_7e7bfe22",
+        "filename": "core/java/com/android/internal/util/omni/DeviceUtils.java",
+        "patchSetId": 1
+      },
+      "lineNbr": 76,
+      "author": {
+        "id": 1000026
+      },
+      "writtenOn": "2014-07-27T22:14:21Z",
+      "side": 1,
+      "message": "whitie :) and shouldnt that be \u0026\u0026?",
+      "revId": "c3b67fda54c16d0c2060d742f70ca5b24535bf9f",
+      "serverId": "56841c99-7c94-43d4-bf0b-cb4707e66d55",
+      "unresolved": false
+    }
+  ]
+}
