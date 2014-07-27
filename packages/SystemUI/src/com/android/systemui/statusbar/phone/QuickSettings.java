@@ -1117,7 +1117,7 @@ class QuickSettings {
                   }
                } else if (Tile.NFC.toString().equals(tile.toString())) { // NFC tile
                   // NFC
-                  if(mContext.getPackageManager().hasSystemFeature(PackageManager.FEATURE_NFC)) {
+                  if (DeviceUtils.deviceSupportsNfc(mContext)) {
                       final QuickSettingsBasicTile nfcTile = new QuickSettingsBasicTile(mContext);
 
                       nfcTile.setTileId(Tile.NFC);

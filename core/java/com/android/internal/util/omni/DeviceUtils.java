@@ -73,7 +73,8 @@ public class DeviceUtils {
     }
 
     public static boolean deviceSupportsNfc(Context context) {
-        return NfcAdapter.getDefaultAdapter(context) != null;
+        return (NfcAdapter.getDefaultAdapter(context) != null) ||
+           context.getPackageManager().hasSystemFeature(PackageManager.FEATURE_NFC);
     }
 
     public static boolean deviceSupportsLteCdma(Context context) {
