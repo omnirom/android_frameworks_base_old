@@ -1,0 +1,21 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "4b713d8b_9eb9ba2b",
+        "filename": "packages/SystemUI/src/com/android/systemui/statusbar/phone/QuickSettingsFlipTile.java",
+        "patchSetId": 1
+      },
+      "lineNbr": 50,
+      "author": {
+        "id": 1000313
+      },
+      "writtenOn": "2014-07-27T15:33:07Z",
+      "side": 1,
+      "message": "if we want front tile use same background like non flippep tile, this should be false\n\n@xplodwild",
+      "revId": "8f02c17ce55df10ed4d07255455c41f2771848b4",
+      "serverId": "56841c99-7c94-43d4-bf0b-cb4707e66d55",
+      "unresolved": false
+    }
+  ]
+}
