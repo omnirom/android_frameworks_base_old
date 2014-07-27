@@ -379,6 +379,7 @@ class QuickSettings {
                    final QuickSettingsBasicUserTile userTile
                             = new QuickSettingsBasicUserTile(mContext);
 
+                   userTile.setFlipTile(false);
                    userTile.setTileId(Tile.USER);
                    userTile.setOnClickListener(new View.OnClickListener() {
                        @Override
@@ -431,6 +432,7 @@ class QuickSettings {
                   final QuickSettingsBasicTile brightnessTile
                               = new QuickSettingsBasicTile(mContext);
 
+                  brightnessTile.setFlipTile(false);
                   brightnessTile.setTileId(Tile.BRIGHTNESS);
                   brightnessTile.setImageResource(R.drawable.ic_qs_brightness_auto_off);
                   brightnessTile.setOnClickListener(new View.OnClickListener() {
@@ -473,6 +475,7 @@ class QuickSettings {
                   // Settings tile
                   final QuickSettingsBasicTile settingsTile = new QuickSettingsBasicTile(mContext);
 
+                  settingsTile.setFlipTile(false);
                   settingsTile.setTileId(Tile.SETTINGS);
                   settingsTile.setImageResource(R.drawable.ic_qs_settings);
                   settingsTile.setOnClickListener(new View.OnClickListener() {
@@ -651,6 +654,7 @@ class QuickSettings {
                       final QuickSettingsBasicTile rotationLockTile
                             = new QuickSettingsBasicTile(mContext);
 
+                      rotationLockTile.setFlipTile(false);
                       rotationLockTile.setTileId(Tile.ROTATION);
                       rotationLockTile.setOnClickListener(new View.OnClickListener() {
                            @Override
@@ -778,6 +782,7 @@ class QuickSettings {
                   final QuickSettingsBasicTile airplaneTile
                         = new QuickSettingsBasicTile(mContext);
 
+                  airplaneTile.setFlipTile(false);
                   airplaneTile.setTileId(Tile.AIRPLANE);
                   mModel.addAirplaneModeTile(airplaneTile, new QuickSettingsModel.RefreshCallback() {
                         @Override
@@ -800,6 +805,7 @@ class QuickSettings {
                       final QuickSettingsBasicTile usbModeTile
                             = new QuickSettingsBasicTile(mContext);
 
+                      usbModeTile.setFlipTile(false);
                       usbModeTile.setTileId(Tile.USBMODE);
                       usbModeTile.setOnLongClickListener(new View.OnLongClickListener() {
                            @Override
@@ -828,6 +834,7 @@ class QuickSettings {
                       final QuickSettingsBasicTile torchTile
                            = new QuickSettingsBasicTile(mContext);
 
+                      torchTile.setFlipTile(false);
                       torchTile.setTileId(Tile.TORCH);
                       torchTile.setOnLongClickListener(new View.OnLongClickListener() {
                            @Override
@@ -851,6 +858,7 @@ class QuickSettings {
                   final QuickSettingsBasicTile SyncTile
                         = new QuickSettingsBasicTile(mContext);
 
+                  SyncTile.setFlipTile(false);
                   SyncTile.setTileId(Tile.SYNC);
                   SyncTile.setOnLongClickListener(new View.OnLongClickListener() {
                         @Override
@@ -876,6 +884,7 @@ class QuickSettings {
                   final QuickSettingsBasicTile quietHourTile
                        = new QuickSettingsBasicTile(mContext);
 
+                  quietHourTile.setFlipTile(false);
                   quietHourTile.setTileId(Tile.QUIETHOUR);
                   quietHourTile.setImageResource(R.drawable.ic_qs_quiet_hours_off);
                   quietHourTile.setText(mContext.getString(R.string.quick_settings_quiethours_off_label));
@@ -1120,6 +1129,7 @@ class QuickSettings {
                   if(mContext.getPackageManager().hasSystemFeature(PackageManager.FEATURE_NFC)) {
                       final QuickSettingsBasicTile nfcTile = new QuickSettingsBasicTile(mContext);
 
+                      nfcTile.setFlipTile(false);
                       nfcTile.setTileId(Tile.NFC);
                       nfcTile.setImageResource(R.drawable.ic_qs_nfc_off);
                       nfcTile.setTextResource(R.string.quick_settings_nfc_off);
@@ -1232,6 +1242,8 @@ class QuickSettings {
         // Alarm tile
         final QuickSettingsBasicTile alarmTile
                     = new QuickSettingsBasicTile(mContext);
+
+        alarmTile.setFlipTile(false);
         alarmTile.setImageResource(R.drawable.ic_qs_alarm_on);
         alarmTile.setTemporary(true);
         alarmTile.setOnClickListener(new View.OnClickListener() {
@@ -1254,6 +1266,8 @@ class QuickSettings {
         // Remote Display
         QuickSettingsBasicTile remoteDisplayTile
                 = new QuickSettingsBasicTile(mContext);
+
+        remoteDisplayTile.setFlipTile(false);
         remoteDisplayTile.setTemporary(true);
         remoteDisplayTile.setOnClickListener(new View.OnClickListener() {
             @Override
@@ -1284,6 +1298,8 @@ class QuickSettings {
             // IME
             final QuickSettingsBasicTile imeTile
                     = new QuickSettingsBasicTile(mContext);
+
+            imeTile.setFlipTile(false);
             imeTile.setTemporary(true);
             imeTile.setImageResource(R.drawable.ic_qs_ime);
             imeTile.setOnClickListener(new View.OnClickListener() {
@@ -1306,6 +1322,8 @@ class QuickSettings {
         // Bug reports
         final QuickSettingsBasicTile bugreportTile
                 = new QuickSettingsBasicTile(mContext);
+
+        bugreportTile.setFlipTile(false);
         bugreportTile.setTemporary(true);
         bugreportTile.setImageResource(com.android.internal.R.drawable.stat_sys_adb);
         bugreportTile.setTextResource(com.android.internal.R.string.bugreport_title);
@@ -1327,6 +1345,8 @@ class QuickSettings {
         // SSL CA Cert Warning.
         final QuickSettingsBasicTile sslCaCertWarningTile =
                 new QuickSettingsBasicTile(mContext, null, R.layout.quick_settings_tile_monitoring);
+
+        sslCaCertWarningTile.setFlipTile(false);
         sslCaCertWarningTile.setTemporary(true);
         sslCaCertWarningTile.setOnClickListener(new View.OnClickListener() {
             @Override

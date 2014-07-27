@@ -41,6 +41,7 @@ public class QuickSettingsTileFlip3d extends GestureDetector.SimpleOnGestureList
     private DecelerateInterpolator mInterpolator;
     private boolean mFlingCancelClamp = false;
     private boolean mFrontSideOnDown = true;
+    private OnRotationListener mOnRotationListener;
 
     public QuickSettingsTileFlip3d(ViewGroup front, ViewGroup back) {
         // In the initial state, the front tile is displayed, so degrees = 0
@@ -49,6 +50,12 @@ public class QuickSettingsTileFlip3d extends GestureDetector.SimpleOnGestureList
         mBack = back;
         mDetector = new GestureDetector(front.getContext(), this);
         mInterpolator = new DecelerateInterpolator();
+    }
+
+    public void setOnRotationListener(OnRotationListener listener) {
+        if (mOnRotationListener != listener) {
+            mOnRotationListener = listener;
+        }
     }
 
     public boolean isFrontSide() {
@@ -116,6 +123,9 @@ public class QuickSettingsTileFlip3d extends GestureDetector.SimpleOnGestureList
         mFront.setRotationY(mDegrees);
         mBack.setRotationY(-180.0f + mDegrees);
         updateVisibility();
+        if (mOnRotationListener != null) {
+            mOnRotationListener.onRotation(isBackSide());
+        }
     }
 
     private void updateVisibility() {
@@ -167,13 +177,18 @@ public class QuickSettingsTileFlip3d extends GestureDetector.SimpleOnGestureList
             if (mFlingCancelClamp) {
                 rotateReset();
             }
-            dispatchEventToActive(event);
         } else if (action == MotionEvent.ACTION_UP) {
             if (!mFlingCancelClamp) {
                 clampRotation();
             }
             mFlingCancelClamp = false;
+        }
 
+        if (action == MotionEvent.ACTION_CANCEL
+            || action == MotionEvent.ACTION_UP) {
+            if (mOnRotationListener != null) {
+                mOnRotationListener.onRotationReset(isFrontSide());
+            }
             dispatchEventToActive(event);
         }
         return true;
@@ -227,5 +242,10 @@ public class QuickSettingsTileFlip3d extends GestureDetector.SimpleOnGestureList
     public float getInterpolation(float input) {
         updateVisibility();
         return mInterpolator.getInterpolation(input);
+    }
+
+    public interface OnRotationListener {
+        void onRotation(boolean isBack);
+        void onRotationReset(boolean isFront);
     }
 }

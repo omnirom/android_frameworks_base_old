@@ -27,11 +27,13 @@ import android.view.MotionEvent;
 import android.view.View;
 import android.widget.FrameLayout;
 
-public class QuickSettingsNetworkFlipTile extends QuickSettingsTileView {
+public class QuickSettingsNetworkFlipTile extends QuickSettingsTileView
+           implements QuickSettingsTileFlip3d.OnRotationListener {
 
     private final QuickSettingsBasicNetworkTile mFront;
     private final QuickSettingsBasicBackTile mBack;
     private final QuickSettingsTileFlip3d mFlip3d;
+    private boolean isSupportFlip = true;
 
     public QuickSettingsNetworkFlipTile(Context context) {
         this(context, null);
@@ -46,8 +48,11 @@ public class QuickSettingsNetworkFlipTile extends QuickSettingsTileView {
         ));
 
         mFront = new QuickSettingsBasicNetworkTile(context);
+        mFront.setFlipTile(false);
         mBack = new QuickSettingsBasicBackTile(context);
+        mBack.setFlipTile(true);
         mFlip3d = new QuickSettingsTileFlip3d(mFront, mBack);
+        mFlip3d.setOnRotationListener(this);
 
         setClickable(true);
         setSelected(true);
@@ -68,7 +73,7 @@ public class QuickSettingsNetworkFlipTile extends QuickSettingsTileView {
 
     @Override
     public boolean dispatchTouchEvent(MotionEvent e) {
-        if (!isEditModeEnabled()) {
+        if (!isEditModeEnabled() && isSupportFlip) {
             return mFlip3d.onTouch(this, e);
         }
         return super.dispatchTouchEvent(e);
@@ -81,6 +86,28 @@ public class QuickSettingsNetworkFlipTile extends QuickSettingsTileView {
         } else {
             return super.onInterceptTouchEvent(ev);
         }
+    }
+
+    @Override
+    public void onRotation(boolean isBack) {
+        if (isBack) {
+            mFront.setFlipTile(true);
+        } else {
+            mBack.setFlipTile(true);
+        }
+    }
+
+    @Override
+    public void onRotationReset(boolean isFront) {
+        if (isFront) {
+            mFront.setFlipTile(false);
+        } else {
+            mBack.setFlipTile(false);
+        }
+    }
+
+    public void setSupportFlip(boolean enabled) {
+        isSupportFlip = enabled;
     }
 
     public void setFrontImageDrawable(Drawable drawable) {
@@ -153,5 +180,9 @@ public class QuickSettingsNetworkFlipTile extends QuickSettingsTileView {
 
     public QuickSettingsTileView getBack() {
         return mBack;
+    }
+
+    public void flipToFront() {
+        mFlip3d.rotateToFront(true);
     }
 }
