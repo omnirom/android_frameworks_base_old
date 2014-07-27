@@ -108,16 +108,17 @@ public class QuickSettingsTouchListener implements OnTouchListener {
             } else {
                 return false;
             }
-        } else {
+        } else if (!tile.isSupportFlip()) {
             mDetector.onTouchEvent(event);
 
             if (action == MotionEvent.ACTION_UP
                 || action == MotionEvent.ACTION_CANCEL) {
                 mDegrees = 0;
                 view.animate().setInterpolator(mInterpolator).setDuration(150).rotationY(0).start();
-
                 return false;
             }
+            return false;
+        } else {
             return false;
         }
     }
