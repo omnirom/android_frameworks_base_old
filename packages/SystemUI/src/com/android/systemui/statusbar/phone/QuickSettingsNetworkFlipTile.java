@@ -27,7 +27,8 @@ import android.view.MotionEvent;
 import android.view.View;
 import android.widget.FrameLayout;
 
-public class QuickSettingsNetworkFlipTile extends QuickSettingsTileView {
+public class QuickSettingsNetworkFlipTile extends QuickSettingsTileView
+           implements QuickSettingsTileFlip3d.OnRotationListener {
 
     private final QuickSettingsBasicNetworkTile mFront;
     private final QuickSettingsBasicBackTile mBack;
@@ -46,8 +47,11 @@ public class QuickSettingsNetworkFlipTile extends QuickSettingsTileView {
         ));
 
         mFront = new QuickSettingsBasicNetworkTile(context);
+        mFront.setFlipTile(true);
         mBack = new QuickSettingsBasicBackTile(context);
+        mBack.setFlipTile(true);
         mFlip3d = new QuickSettingsTileFlip3d(mFront, mBack);
+        mFlip3d.setOnRotationListener(this);
 
         setClickable(true);
         setSelected(true);
@@ -81,6 +85,10 @@ public class QuickSettingsNetworkFlipTile extends QuickSettingsTileView {
         } else {
             return super.onInterceptTouchEvent(ev);
         }
+    }
+
+    @Override
+    public void onRotation(boolean isFront) {
     }
 
     public void setFrontImageDrawable(Drawable drawable) {

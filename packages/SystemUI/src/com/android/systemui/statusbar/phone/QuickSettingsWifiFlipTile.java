@@ -26,7 +26,8 @@ import android.view.MotionEvent;
 import android.view.View;
 import android.widget.FrameLayout;
 
-public class QuickSettingsWifiFlipTile extends QuickSettingsTileView {
+public class QuickSettingsWifiFlipTile extends QuickSettingsTileView
+           implements QuickSettingsTileFlip3d.OnRotationListener {
 
     private final QuickSettingsBasicWifiTile mFront;
     private final QuickSettingsBasicBackTile mBack;
@@ -45,8 +46,11 @@ public class QuickSettingsWifiFlipTile extends QuickSettingsTileView {
         ));
 
         mFront = new QuickSettingsBasicWifiTile(context);
+        mFront.setFlipTile(true);
         mBack = new QuickSettingsBasicBackTile(context);
+        mBack.setFlipTile(true);
         mFlip3d = new QuickSettingsTileFlip3d(mFront, mBack);
+        mFlip3d.setOnRotationListener(this);
 
         setClickable(true);
         setSelected(true);
@@ -80,6 +84,10 @@ public class QuickSettingsWifiFlipTile extends QuickSettingsTileView {
         } else {
             return super.onInterceptTouchEvent(ev);
         }
+    }
+
+    @Override
+    public void onRotation(boolean isFront) {
     }
 
     public void setFrontImageResource(int id) {

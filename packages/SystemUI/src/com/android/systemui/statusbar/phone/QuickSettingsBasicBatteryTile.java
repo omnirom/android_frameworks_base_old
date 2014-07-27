@@ -53,7 +53,6 @@ public class QuickSettingsBasicBatteryTile extends QuickSettingsTileView {
             FrameLayout.LayoutParams.MATCH_PARENT,
             context.getResources().getDimensionPixelSize(R.dimen.quick_settings_cell_height)
         ));
-        setBackgroundResource(R.drawable.qs_tile_background);
         addView(LayoutInflater.from(context).inflate(layoutId, null),
                 new FrameLayout.LayoutParams(
                         FrameLayout.LayoutParams.MATCH_PARENT,
