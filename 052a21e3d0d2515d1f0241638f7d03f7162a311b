@@ -1,0 +1,21 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "4b713d8b_f11c9f6b",
+        "filename": "packages/SystemUI/src/com/android/systemui/BatteryPercentMeterView.java",
+        "patchSetId": 8
+      },
+      "lineNbr": 223,
+      "author": {
+        "id": 1000686
+      },
+      "writtenOn": "2014-07-29T09:06:26Z",
+      "side": 1,
+      "message": "Needs some cleanup :)",
+      "revId": "052a21e3d0d2515d1f0241638f7d03f7162a311b",
+      "serverId": "56841c99-7c94-43d4-bf0b-cb4707e66d55",
+      "unresolved": false
+    }
+  ]
+}
