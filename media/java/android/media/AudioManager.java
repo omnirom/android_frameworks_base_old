@@ -24,6 +24,8 @@ import android.bluetooth.BluetoothDevice;
 import android.content.ComponentName;
 import android.content.Context;
 import android.content.Intent;
+import android.content.res.Configuration;
+import android.view.View;
 import android.media.RemoteController.OnClientUpdateListener;
 import android.os.Binder;
 import android.os.Build;
@@ -521,21 +523,19 @@ public class AudioManager {
                  * Adjust the volume in on key down since it is more
                  * responsive to the user.
                  */
+                Configuration config = mContext.getResources().getConfiguration();
                 int direction;
+                int rotation = mWindowManager.getDefaultDisplay().getRotation();
+
                 boolean swapKeys = Settings.System.getInt(mContext.getContentResolver(),
                         Settings.System.SWAP_VOLUME_BUTTONS, 0) == 1;
-                boolean disabled90 = Settings.System.getInt(mContext.getContentResolver(),
-                        Settings.System.SWAP_VOLUME_DISABLED_90, DeviceUtils.isTablet(mContext) ? 1 : 0) == 1;
-                boolean disabled270 = Settings.System.getInt(mContext.getContentResolver(),
-                        Settings.System.SWAP_VOLUME_DISABLED_270, DeviceUtils.isTablet(mContext) ? 0 : 1) == 1;
-                int rotation = mWindowManager.getDefaultDisplay().getRotation();
+
                 if (swapKeys
-                        && ((!disabled90 && rotation == Surface.ROTATION_90)
-                        || rotation == Surface.ROTATION_180
-                        || (!disabled270 && rotation == Surface.ROTATION_270))) {
-                    direction = keyCode == KeyEvent.KEYCODE_VOLUME_UP
-                            ? ADJUST_LOWER
-                            : ADJUST_RAISE;
+                        && (rotation == Surface.ROTATION_90 || rotation == Surface.ROTATION_180)
+                        && config.getLayoutDirection() == View.LAYOUT_DIRECTION_LTR) {
+                     direction = keyCode == KeyEvent.KEYCODE_VOLUME_UP
+                             ? ADJUST_LOWER
+                             : ADJUST_RAISE;
                 } else {
                     direction = keyCode == KeyEvent.KEYCODE_VOLUME_UP
                             ? ADJUST_RAISE
