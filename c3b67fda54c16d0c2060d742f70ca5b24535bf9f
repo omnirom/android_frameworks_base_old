@@ -16,6 +16,24 @@
       "revId": "c3b67fda54c16d0c2060d742f70ca5b24535bf9f",
       "serverId": "56841c99-7c94-43d4-bf0b-cb4707e66d55",
       "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "4b713d8b_71d6cff8",
+        "filename": "core/java/com/android/internal/util/omni/DeviceUtils.java",
+        "patchSetId": 1
+      },
+      "lineNbr": 76,
+      "author": {
+        "id": 1000313
+      },
+      "writtenOn": "2014-07-30T04:40:03Z",
+      "side": 1,
+      "message": "I think this need to be || since this will check adapter or systemfeature",
+      "parentUuid": "4b713d8b_7e7bfe22",
+      "revId": "c3b67fda54c16d0c2060d742f70ca5b24535bf9f",
+      "serverId": "56841c99-7c94-43d4-bf0b-cb4707e66d55",
+      "unresolved": false
     }
   ]
 }
