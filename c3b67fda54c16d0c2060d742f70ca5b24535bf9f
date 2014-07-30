@@ -52,6 +52,24 @@
       "revId": "c3b67fda54c16d0c2060d742f70ca5b24535bf9f",
       "serverId": "56841c99-7c94-43d4-bf0b-cb4707e66d55",
       "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "4b713d8b_314297b4",
+        "filename": "core/java/com/android/internal/util/omni/DeviceUtils.java",
+        "patchSetId": 1
+      },
+      "lineNbr": 76,
+      "author": {
+        "id": 1000026
+      },
+      "writtenOn": "2014-07-30T11:10:15Z",
+      "side": 1,
+      "message": "Ok then only fix the whitespace and we are good to go :)",
+      "parentUuid": "4b713d8b_b12dc7fb",
+      "revId": "c3b67fda54c16d0c2060d742f70ca5b24535bf9f",
+      "serverId": "56841c99-7c94-43d4-bf0b-cb4707e66d55",
+      "unresolved": false
     }
   ]
 }
