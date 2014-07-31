@@ -42,7 +42,9 @@ import android.view.KeyEvent;
 import android.view.VolumePanel;
 import android.view.Surface;
 import android.view.WindowManager;
+
 import com.android.internal.util.omni.DeviceUtils;
+import com.android.internal.util.slim.QuietHoursHelper;
 
 import java.util.HashMap;
 
@@ -1809,7 +1811,10 @@ public class AudioManager {
      * Settings has an in memory cache, so this is fast.
      */
     private boolean querySoundEffectsEnabled() {
-        return Settings.System.getInt(mContext.getContentResolver(), Settings.System.SOUND_EFFECTS_ENABLED, 0) != 0;
+        boolean soundEffectEnabled = Settings.System.getInt(mContext.getContentResolver(),
+                           Settings.System.SOUND_EFFECTS_ENABLED, 0) != 0;
+        boolean inQuietHour = QuietHoursHelper.inQuietHours(mContext, Settings.System.QUIET_HOURS_SYSTEM);
+        return soundEffectEnabled && !inQuietHour;
     }
 
 
