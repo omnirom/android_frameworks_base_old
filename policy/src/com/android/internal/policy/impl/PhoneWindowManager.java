@@ -570,6 +570,7 @@ public class PhoneWindowManager implements WindowManagerPolicy {
 
     private boolean mOffscreenGestureSupport;
     private boolean mStartCameraFromGesture;
+    private boolean mStartTorchFromGesture;
 
     // Fallback actions by key code.
     private final SparseArray<KeyCharacterMap.FallbackAction> mFallbackActions =
@@ -5233,6 +5234,10 @@ public class PhoneWindowManager implements WindowManagerPolicy {
             dismissKeyguardLw();
             startCameraFromGesture();
         }
+        if (mStartTorchFromGesture) {
+            dismissKeyguardLw();
+            startTorchFromGesture();
+        }
     }
 
     @Override
@@ -6418,6 +6423,7 @@ public class PhoneWindowManager implements WindowManagerPolicy {
     private boolean isOffscreenWakeKey(int keyCode) {
         return keyCode == KeyEvent.KEYCODE_F3 ||
             keyCode == KeyEvent.KEYCODE_F4 ||
+            keyCode == KeyEvent.KEYCODE_F5 ||
             keyCode == KeyEvent.KEYCODE_F1;
     }
 
@@ -6444,8 +6450,7 @@ public class PhoneWindowManager implements WindowManagerPolicy {
                         Slog.d(TAG, "handleOffscreenGesture: " + "V gesture");
                     }
                     if (DeviceUtils.deviceSupportsTorch(mContext)) {
-                        mContext.sendBroadcastAsUser(new Intent(OmniTorchConstants.ACTION_TOGGLE_STATE),
-                            UserHandle.CURRENT_OR_SELF);
+                        mStartTorchFromGesture = true;
                     }
                 }
                 break;
@@ -6511,7 +6516,6 @@ public class PhoneWindowManager implements WindowManagerPolicy {
         return false;
     }
 
-
     private Message createMediaEventMessage(KeyEvent event, int msgId, int eventId) {
         return mHandler.obtainMessage(msgId,
                 new KeyEvent(event.getDownTime(), event.getEventTime(),
@@ -6519,9 +6523,21 @@ public class PhoneWindowManager implements WindowManagerPolicy {
     }
 
     private void startCameraFromGesture() {
+        if (DEBUG_INPUT){
+            Log.d(TAG, "startCameraFromGesture " + mStartCameraFromGesture);
+        }
         Intent intent = new Intent(MediaStore.INTENT_ACTION_STILL_IMAGE_CAMERA);
         intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
         mContext.startActivityAsUser(intent, UserHandle.CURRENT);
         mStartCameraFromGesture = false;
+    }
+
+    private void startTorchFromGesture() {
+        if (DEBUG_INPUT){
+            Log.d(TAG, "startTorchFromGesture " + mStartTorchFromGesture);
+        }
+        mContext.sendBroadcastAsUser(new Intent(OmniTorchConstants.ACTION_FLASH_STATE),
+                            UserHandle.CURRENT_OR_SELF);
+        mStartTorchFromGesture = false;
     }
 }
