@@ -54,7 +54,7 @@ public class BatteryPercentMeterView extends ImageView {
     private boolean mAttached;      // whether or not attached to a window
     private boolean mActivated;     // whether or not activated due to system settings
     private int     mLevel;         // current battery level
-    private String  mLevelString;
+    private String  mLevelString = "";
     private String  mPercentBatteryView;
     private boolean mIsCharging;    // whether or not device is currently charging
     private Paint   mPaintFontFg;
