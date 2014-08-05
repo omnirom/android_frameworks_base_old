@@ -1,0 +1,96 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "2b6ec9b0_f38af0e2",
+        "filename": "core/java/android/provider/Settings.java",
+        "patchSetId": 2
+      },
+      "lineNbr": 1029,
+      "author": {
+        "id": 1000026
+      },
+      "writtenOn": "2014-08-05T13:33:46Z",
+      "side": 1,
+      "message": "not needed since this is a new setting",
+      "range": {
+        "startLine": 1029,
+        "startChar": 39,
+        "endLine": 1029,
+        "endChar": 69
+      },
+      "revId": "7c4a6da49921ab2ae7aa68b32176ec8b5cdbd078",
+      "serverId": "56841c99-7c94-43d4-bf0b-cb4707e66d55",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "2b6ec9b0_13704c08",
+        "filename": "core/java/android/provider/Settings.java",
+        "patchSetId": 2
+      },
+      "lineNbr": 4089,
+      "author": {
+        "id": 1000026
+      },
+      "writtenOn": "2014-08-05T13:33:46Z",
+      "side": 1,
+      "message": "same here",
+      "range": {
+        "startLine": 4089,
+        "startChar": 38,
+        "endLine": 4089,
+        "endChar": 39
+      },
+      "revId": "7c4a6da49921ab2ae7aa68b32176ec8b5cdbd078",
+      "serverId": "56841c99-7c94-43d4-bf0b-cb4707e66d55",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "2b6ec9b0_336d482d",
+        "filename": "core/java/android/provider/Settings.java",
+        "patchSetId": 2
+      },
+      "lineNbr": 4802,
+      "author": {
+        "id": 1000026
+      },
+      "writtenOn": "2014-08-05T13:33:46Z",
+      "side": 1,
+      "message": "missing @hide for both",
+      "range": {
+        "startLine": 4802,
+        "startChar": 21,
+        "endLine": 4802,
+        "endChar": 22
+      },
+      "revId": "7c4a6da49921ab2ae7aa68b32176ec8b5cdbd078",
+      "serverId": "56841c99-7c94-43d4-bf0b-cb4707e66d55",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "2b6ec9b0_537ac4e7",
+        "filename": "packages/Keyguard/src/com/android/keyguard/KeyguardHostView.java",
+        "patchSetId": 2
+      },
+      "lineNbr": 1773,
+      "author": {
+        "id": 1000026
+      },
+      "writtenOn": "2014-08-05T13:33:46Z",
+      "side": 1,
+      "message": "whitespaces",
+      "range": {
+        "startLine": 1773,
+        "startChar": 0,
+        "endLine": 1773,
+        "endChar": 8
+      },
+      "revId": "7c4a6da49921ab2ae7aa68b32176ec8b5cdbd078",
+      "serverId": "56841c99-7c94-43d4-bf0b-cb4707e66d55",
+      "unresolved": false
+    }
+  ]
+}
