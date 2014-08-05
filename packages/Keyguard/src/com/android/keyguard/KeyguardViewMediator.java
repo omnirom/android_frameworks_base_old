@@ -57,7 +57,7 @@ import android.view.WindowManagerPolicy;
 
 import com.android.internal.telephony.IccCardConstants;
 import com.android.internal.widget.LockPatternUtils;
-
+import com.android.internal.util.slim.QuietHoursHelper;
 
 /**
  * Mediates requests related to the keyguard.  This includes queries about the
@@ -1232,6 +1232,10 @@ public class KeyguardViewMediator {
 
         if (mSuppressNextLockSound) {
             mSuppressNextLockSound = false;
+            return;
+        }
+
+        if (QuietHoursHelper.inQuietHours(mContext, Settings.System.QUIET_HOURS_SYSTEM)) {
             return;
         }
 

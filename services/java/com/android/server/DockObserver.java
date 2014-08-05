@@ -36,6 +36,8 @@ import android.util.Slog;
 import java.io.FileNotFoundException;
 import java.io.FileReader;
 
+import com.android.internal.util.slim.QuietHoursHelper;
+
 /**
  * <p>DockObserver monitors for a docking station.
  */
@@ -147,8 +149,9 @@ final class DockObserver extends UEventObserver {
 
             // Play a sound to provide feedback to confirm dock connection.
             // Particularly useful for flaky contact pins...
-            if (Settings.Global.getInt(cr,
-                    Settings.Global.DOCK_SOUNDS_ENABLED, 1) == 1) {
+            if ((Settings.Global.getInt(cr,
+                    Settings.Global.DOCK_SOUNDS_ENABLED, 1) == 1)
+                   && !QuietHoursHelper.inQuietHours(mContext, Settings.System.QUIET_HOURS_SYSTEM)) {
                 String whichSound = null;
                 if (mDockState == Intent.EXTRA_DOCK_STATE_UNDOCKED) {
                     if ((mPreviousDockState == Intent.EXTRA_DOCK_STATE_DESK) ||
