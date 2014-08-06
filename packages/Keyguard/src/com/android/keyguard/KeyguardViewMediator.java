@@ -54,6 +54,7 @@ import android.view.KeyEvent;
 import android.view.MotionEvent;
 import android.view.WindowManager;
 import android.view.WindowManagerPolicy;
+import android.view.WindowManagerPolicy.WindowManagerFuncs;
 
 import com.android.internal.telephony.IccCardConstants;
 import com.android.internal.widget.LockPatternUtils;
@@ -248,6 +249,8 @@ public class KeyguardViewMediator {
     private int mUnlockSoundId;
     private int mLockSoundStreamId;
     private boolean mDelayLockPending;
+
+    private int mLidState = WindowManagerPolicy.WindowManagerFuncs.LID_ABSENT;
 
     /**
      * The volume applied to the lock/unlock sounds.
@@ -523,6 +526,10 @@ public class KeyguardViewMediator {
         mShowKeyguardWakeLock.setReferenceCounted(false);
 
         mContext.registerReceiver(mBroadcastReceiver, new IntentFilter(DELAYED_KEYGUARD_ACTION));
+        IntentFilter filter = new IntentFilter();
+        filter.addAction(DELAYED_KEYGUARD_ACTION);
+        filter.addAction(WindowManagerPolicy.ACTION_LID_STATE_CHANGED);
+        mContext.registerReceiver(mBroadcastReceiver, filter);
 
         mKeyguardDisplayManager = new KeyguardDisplayManager(context);
 
@@ -1084,6 +1091,14 @@ public class KeyguardViewMediator {
                         // Don't play lockscreen SFX if the screen went off due to timeout.
                         mSuppressNextLockSound = true;
                         doKeyguardLocked(null);
+                    }
+                }
+            } else if (WindowManagerPolicy.ACTION_LID_STATE_CHANGED.equals(intent.getAction())) {
+                final int state = intent.getIntExtra(WindowManagerPolicy.EXTRA_LID_STATE, WindowManagerFuncs.LID_ABSENT);
+                synchronized (KeyguardViewMediator.this) {
+                    if(state != mLidState) {
+                        mLidState = state;
+                        mUpdateMonitor.dispatchLidStateChange(state);
                     }
                 }
             }
