@@ -184,9 +184,25 @@ public class CamcorderProfile
      */
     public static final int QUALITY_TIME_LAPSE_WQVGA = 1011;
 
+    /**
+    * @hide
+    */
+    public static final int QUALITY_TIME_LAPSE_4kUHD = 1012;
+
+    /**
+    * @hide
+    */
+    public static final int QUALITY_TIME_LAPSE_4kDCI = 1013;
+
     // Start and end of timelapse quality list
-    private static final int QUALITY_TIME_LAPSE_LIST_START = QUALITY_TIME_LAPSE_LOW;
-    private static final int QUALITY_TIME_LAPSE_LIST_END = QUALITY_TIME_LAPSE_WQVGA;
+    /**
+    * @hide
+    */
+    public static final int QUALITY_TIME_LAPSE_LIST_START = QUALITY_TIME_LAPSE_LOW;
+    /**
+    * @hide
+    */
+    public static final int QUALITY_TIME_LAPSE_LIST_END = QUALITY_TIME_LAPSE_4kDCI;
 
     /**
      * Default recording duration in seconds before the session is terminated.
