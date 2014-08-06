@@ -45,7 +45,7 @@
   <string name="reboot_confirm" product="default">Seu telefone irá reiniciar.</string>
   <string name="permlab_preventpower">substituir tecla de energia</string>
   <string name="permdesc_preventpower">Permite que o aplicativo substitua a tecla de energia</string>
-  <string name="permlab_sendMockSms">Simular envio de mensagens SMS</string>
+  <string name="permlab_sendMockSms">simular envio de mensagens SMS</string>
   <string name="permdesc_sendMockSms">Permite ao aplicativo simular envio de mensagens SMS.\n        Isto permite um aplicativo enviar SMS para aplicações confiáveis. Aplicativos maliciosos pode enviar mensagens continuamente, bloqueando o sistema de notificação do dispositivo e perturbar o usuário.</string>
   <string name="storage_sd_dock_card">Dock cartão SD</string>
   <string name="app_killed_message">Aplicativo terminado</string>
@@ -131,4 +131,6 @@
   <string name="adb_net_active_notification_title">ADB sobre rede ativado</string>
   <string name="adb_both_active_notification_title">ABD sobre USB e rede ativado</string>
   <string name="adb_active_generic_notification_message">Toque para desativar a depuração.</string>
+  <string name="extmedia_format_message_cm" product="nosdcard">Todos os dados em seu armazenamento USB (sob o caminho \'%1$s\') serão apagados. Esta ação não pode ser revertida!</string>
+  <string name="extmedia_format_message_cm" product="default">Todos os dados do seu cartão (no caminho de \'%1$s\') serão apagados. Esta ação não pode ser revertida!</string>
 </resources>

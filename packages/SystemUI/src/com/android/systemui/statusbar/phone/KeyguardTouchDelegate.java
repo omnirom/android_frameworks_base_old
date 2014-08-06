@@ -185,5 +185,4 @@ public class KeyguardTouchDelegate {
             Slog.w(TAG, "dismiss(): NO SERVICE!");
         }
     }
-
 }

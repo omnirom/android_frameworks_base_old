@@ -18,6 +18,8 @@
 <resources xmlns:xliff="urn:oasis:names:tc:xliff:document:1.2">
   <string name="accessibility_quick_settings_ringer">ශබ්දය <xliff:g id="state" example="Off">%s</xliff:g>.</string>
   <string name="accessibility_quick_settings_vibration">කම්පනය <xliff:g id="state" example="Off">%s</xliff:g>.</string>
+  <string name="accessibility_dpad_left">වම් කර්සරය</string>
+  <string name="accessibility_dpad_right">දකුණු කර්සරය</string>
   <string name="dessert_case_settings_cm_title">CM ගේ මංගල වස්තු පෙන්වන්න</string>
   <string name="dessert_case_settings_cm_summary">Android ගේ සිහිනය තුල ඇති අතුරුපසයන් සමග එක්ව CM ගේ මංගල වස්තු පෙන්වන්න</string>
   <string name="quick_settings_profile_label">පැතිකඩ</string>
@@ -83,4 +85,5 @@
   <string name="screenshot_delete_action">මකන්න</string>
   <string name="screenshot_delete_confirmation">තිර සේයාව මකා දැමුණි.</string>
   <string name="accessibility_desc_add_quick_settings">ඉක්මන් සැකසීම් එකතු කරන්න.</string>
+  <string name="status_bar_notification_spam_item_title">මෙවැනි පණිවිඩ අවහිර කරන්න</string>
 </resources>

@@ -18,6 +18,8 @@
 <resources xmlns:xliff="urn:oasis:names:tc:xliff:document:1.2">
   <string name="accessibility_quick_settings_ringer">Звук <xliff:g id="state" example="Off">%s</xliff:g></string>
   <string name="accessibility_quick_settings_vibration">Вибрација <xliff:g id="state" example="Off">%s</xliff:g>.</string>
+  <string name="accessibility_dpad_left">Курсор лево</string>
+  <string name="accessibility_dpad_right">Курсор десно</string>
   <string name="dessert_case_settings_cm_title">Прикажи CM маскоте</string>
   <string name="dessert_case_settings_cm_summary">Прикажи CM маскоте ѕаједно са Андроидовим</string>
   <string name="quick_settings_profile_label">Профил</string>
@@ -66,8 +68,8 @@
   <string name="location_mode_battery_saving_title">Уштеда батерије</string>
   <string name="location_mode_sensors_only_title">Само уређај</string>
   <string name="location_mode_location_off_title">Локација искључено</string>
-  <string name="quick_settings_expanded_desktop">Проширено</string>
-  <string name="quick_settings_expanded_desktop_off">Нормално</string>
+  <string name="quick_settings_expanded_desktop">Проширен</string>
+  <string name="quick_settings_expanded_desktop_off">Нормалaн</string>
   <string name="quick_settings_camera_error_connect">Немогуће повезивање са камером</string>
   <string name="navbar_dialog_title">Изабери акцију да доделиш</string>
   <string name="navbar_home_button">Главно дугме</string>
@@ -84,4 +86,5 @@
   <string name="screenshot_delete_action">Избриши</string>
   <string name="screenshot_delete_confirmation">Снимак екрана је избрисан.</string>
   <string name="accessibility_desc_add_quick_settings">Додај Брза подешавања.</string>
+  <string name="status_bar_notification_spam_item_title">Блокирај овакве поруке</string>
 </resources>

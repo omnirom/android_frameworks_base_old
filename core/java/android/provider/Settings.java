@@ -2772,6 +2772,13 @@ public final class Settings {
         public static final String EGG_MODE = "egg_mode";
 
         /**
+         * Global stats collection
+         *
+         * @hide
+         */
+        public static final String STATS_COLLECTION = "stats_collection";
+
+        /**
          * Quick Settings Panel Tiles to Use
          *
          * @hide
@@ -2934,6 +2941,13 @@ public final class Settings {
         public static final String QS_QUICK_ACCESS = "qs_quick_access";
 
         /**
+         * Quick Settings Quick access ribbon - size
+         *
+         * @hide
+         */
+        public static final String QS_QUICK_ACCESS_SIZE = "qs_quick_access_size";
+
+        /**
          * Quick Settings Quick access ribbon - linked layout
          *
          * @hide
@@ -3070,10 +3084,11 @@ public final class Settings {
                 "status_bar_battery_show_percent";
 
         /**
-         * Whether to show the clock in status bar
-         * of the stock battery icon
+         * Whether to hide the clock, show it in the default
+         * position or show it in the center
          * 0: don't show the clock
-         * 1: show the clock
+         * 1: show the clock in the default position
+         * 2: show the clock in the center
          * default: 1
          * @hide
          */
@@ -3289,6 +3304,11 @@ public final class Settings {
          * @hide
          */
         public static final String EXPANDED_DESKTOP_STATE = "expanded_desktop_state";
+
+        /**
+         * @hide
+         */
+        public static final String PROXIMITY_ON_WAKE = "proximity_on_wake";
 
         /**
          * Expanded desktop style (with status bar or without status bar)
@@ -3567,6 +3587,24 @@ public final class Settings {
         public static final String VOICE_LAUNCH_INTENT = "voice_launch_intent";
 
         /**
+         * Locale for secondary overlay on dialer for t9 search input
+         * @hide
+         */
+        public static final String T9_SEARCH_INPUT_LOCALE = "t9_search_input_locale";
+
+        /**
+         * The style of the incoming call screen.
+         * Default is {@link INCOMING_CALL_STYLE_FULLSCREEN_PHOTO}.
+         * @hide
+         */
+        public static final String INCOMING_CALL_STYLE = "incoming_call_style";
+
+        /** @hide */
+        public static final int INCOMING_CALL_STYLE_CLASSIC = 0;
+        /** @hide */
+        public static final int INCOMING_CALL_STYLE_FULLSCREEN_PHOTO = 1;
+
+        /**
          * Settings to backup. This is here so that it's in the same place as the settings
          * keys and easy to update.
          *
@@ -3666,6 +3704,7 @@ public final class Settings {
             PHONE_BLACKLIST_PRIVATE_NUMBER_MODE,
             PHONE_BLACKLIST_UNKNOWN_NUMBER_MODE,
             PHONE_BLACKLIST_REGEX_ENABLED,
+            INCOMING_CALL_STYLE,
         };
 
         // Settings moved to Settings.Secure

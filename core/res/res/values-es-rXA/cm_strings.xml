@@ -45,7 +45,7 @@
   <string name="reboot_confirm" product="default">El teléfonu va reaniciase.</string>
   <string name="permlab_preventpower">anular tecla encendíu</string>
   <string name="permdesc_preventpower">permite que l\'aplicación cambie\'l comportamientu de la tecla d\'encendíu.</string>
-  <string name="permlab_sendMockSms">Unviar mensaxes SMS simulaos</string>
+  <string name="permlab_sendMockSms">unviar mensaxes SMS simulaos</string>
   <string name="permdesc_sendMockSms">Permite que l\'aplicación unvie mensaxes SMS simulaos a aplicaciones de confianza. Les aplicaciones malicioses puen unviar mensaxes SMS continuamente, bloquiando la barra de notificaciones ya interrumpiendo al usuariu.</string>
   <string name="storage_sd_dock_card">Tarxeta SD de la base</string>
   <string name="app_killed_message">Aplicación finada</string>
@@ -131,4 +131,6 @@
   <string name="adb_net_active_notification_title">ADB sobre rede habilitáu</string>
   <string name="adb_both_active_notification_title">ADB sobre USB y rede habilitáu</string>
   <string name="adb_active_generic_notification_message">Toca pa deshabilitar la depuración.</string>
+  <string name="extmedia_format_message_cm" product="nosdcard">Va desaniciase tola información del almacenamientu USB (nel camín \u00AB%1$s\u00BB). ¡Esta aición nun pue desfacese!</string>
+  <string name="extmedia_format_message_cm" product="default">Van desaniciase tolos datos de la tarxeta (nel camín \'%1$s\'). Esta aición nun pue desfacese!</string>
 </resources>

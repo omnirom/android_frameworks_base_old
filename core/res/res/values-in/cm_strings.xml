@@ -45,7 +45,7 @@
   <string name="reboot_confirm" product="default">Ponsel Anda akan direboot.</string>
   <string name="permlab_preventpower">cegah tombol daya</string>
   <string name="permdesc_preventpower">Memungkinkan aplikasi mengubah tindakan tombol daya</string>
-  <string name="permlab_sendMockSms">Kirim pesan SMS tiruan</string>
+  <string name="permlab_sendMockSms">kirim pesan SMS tiruan</string>
   <string name="permdesc_sendMockSms">Perbolehkan aplikasi untuk mengirim pesan SMS tiruan. Hal ini memungkinkan aplikasi mengirim SMS ke aplikasi terpercaya. Aplikasi berbahaya bisa mengirim pesan secara terus-menerus, sehingga memblokir sistem notifikasi perangkat dan mengganggu pengguna.</string>
   <string name="storage_sd_dock_card">Dock kartu SD</string>
   <string name="app_killed_message">Aplikasi dimatikan</string>
@@ -131,4 +131,6 @@
   <string name="adb_net_active_notification_title">ADB melalui jaringan diaktifkan</string>
   <string name="adb_both_active_notification_title">ADB melalui USB &amp; jaringan diaktifkan</string>
   <string name="adb_active_generic_notification_message">Sentuh untuk menonaktifkan debug.</string>
+  <string name="extmedia_format_message_cm" product="nosdcard">Semua data pada penyimpanan USB Anda (di bawah jalur \'%1$s\') akan dihapus. Tindakan ini tidak dapat dikembalikan!</string>
+  <string name="extmedia_format_message_cm" product="default">Semua data pada kartu Anda (di bawah jalur \'%1$s\') akan dihapus. Tindakan ini tidak dapat dikembalikan!</string>
 </resources>

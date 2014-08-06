@@ -2417,11 +2417,15 @@ public final class ActivityManagerService extends ActivityManagerNative
             ProcessRecord client) {
         final boolean hasActivity = app.activities.size() > 0 || app.hasClientActivities;
         final boolean hasService = false; // not impl yet. app.services.size() > 0;
-        if (!activityChange && hasActivity) {
+        if (!activityChange && hasActivity && !(app.persistent && !mLruProcesses.contains(app))) {
             // The process has activties, so we are only going to allow activity-based
             // adjustments move it.  It should be kept in the front of the list with other
             // processes that have activities, and we don't want those to change their
             // order except due to activity operations.
+            // Also, do not return if the app is persistent and not found in mLruProcesses.
+            // For persistent apps, service records are not cleaned up and if we return
+            // here it will not be added to mLruProcesses and on its restart it might lead to
+            // securityException if app is not present in mLruProcesses.
             return;
         }
 
@@ -2906,6 +2910,7 @@ public final class ActivityManagerService extends ActivityManagerNative
             app.setPid(startResult.pid);
             app.usingWrapper = startResult.usingWrapper;
             app.removed = false;
+            app.killedByAm = false;
             synchronized (mPidsSelfLocked) {
                 this.mPidsSelfLocked.put(startResult.pid, app);
                 Message msg = mHandler.obtainMessage(PROC_START_TIMEOUT_MSG);
@@ -3419,6 +3424,24 @@ public final class ActivityManagerService extends ActivityManagerNative
         int ret = mStackSupervisor.startActivities(null, uid, callingPackage, intents, resolvedTypes,
                 resultTo, options, userId);
         return ret;
+    }
+
+    //explicitly remove thd old information in mRecentTasks when removing existing user.
+    private void removeRecentTaskLocked(int userId) {
+        if(userId <= 0) {
+            Slog.i(TAG, "Can't remove recent task on user " + userId);
+            return;
+        }
+
+        for (int i = mRecentTasks.size() - 1; i >= 0; --i) {
+            TaskRecord tr = mRecentTasks.get(i);
+            if (tr.userId == userId) {
+                if(DEBUG_TASKS) Slog.i(TAG, "remove RecentTask " + tr
+                                          + " when finishing user" + userId);
+                tr.disposeThumbnail();
+                mRecentTasks.remove(i);
+            }
+        }
     }
 
     final void addRecentTaskLocked(TaskRecord task) {
@@ -9459,6 +9482,16 @@ public final class ActivityManagerService extends ActivityManagerNative
         EventLog.writeEvent(EventLogTags.BOOT_PROGRESS_AMS_READY,
             SystemClock.uptimeMillis());
 
+        // Register system boot completed event, set max serial background services num threshold to normal
+        IntentFilter filter = new IntentFilter();
+        filter.addAction(Intent.ACTION_BOOT_COMPLETED);
+        mContext.registerReceiver(new BroadcastReceiver() {
+            @Override
+            public void onReceive(Context context, Intent intent) {
+                mServices.onBootCompleted();
+            }
+        }, filter);
+
         synchronized(this) {
             // Make sure we have no pre-ready processes sitting around.
             
@@ -10190,9 +10223,15 @@ public final class ActivityManagerService extends ActivityManagerNative
                     int pid = r != null ? r.pid : Binder.getCallingPid();
                     if (!mController.appCrashed(name, pid,
                             shortMsg, longMsg, timeMillis, crashInfo.stackTrace)) {
-                        Slog.w(TAG, "Force-killing crashed app " + name
-                                + " at watcher's request");
-                        Process.killProcess(pid);
+                        if ("1".equals(SystemProperties.get(SYSTEM_DEBUGGABLE, "0"))
+                                && "Native crash".equals(crashInfo.exceptionClassName)) {
+                            Slog.w(TAG, "Skip killing native crashed app " + name
+                                    + "(" + pid + ") during testing");
+                        } else {
+                            Slog.w(TAG, "Force-killing crashed app " + name
+                                    + " at watcher's request");
+                            Process.killProcess(pid);
+                        }
                         return;
                     }
                 } catch (RemoteException e) {
@@ -12554,6 +12593,7 @@ public final class ActivityManagerService extends ActivityManagerNative
         app.resetPackageList(mProcessStats);
         app.unlinkDeathRecipient();
         app.makeInactive(mProcessStats);
+        app.waitingToKill = null;
         app.forcingToForeground = null;
         app.foregroundServices = false;
         app.foregroundActivities = false;
@@ -16609,6 +16649,8 @@ public final class ActivityManagerService extends ActivityManagerNative
                 // Kill all the processes for the user.
                 forceStopUserLocked(userId, "finish user");
             }
+            //explicitly remove the old information in mRecentTasks when removing existing user.
+            removeRecentTaskLocked(userId);
         }
 
         for (int i=0; i<callbacks.size(); i++) {

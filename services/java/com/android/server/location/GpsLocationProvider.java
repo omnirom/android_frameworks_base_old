@@ -134,7 +134,6 @@ public class GpsLocationProvider implements LocationProviderInterface {
     private static final int LOCATION_HAS_ACCURACY = 16;
 
 // IMPORTANT - the GPS_DELETE_* symbols here must match constants in gps.h
-// and gps_extended_c.h
     private static final int GPS_DELETE_EPHEMERIS = 0x00000001;
     private static final int GPS_DELETE_ALMANAC = 0x00000002;
     private static final int GPS_DELETE_POSITION = 0x00000004;
@@ -149,19 +148,19 @@ public class GpsLocationProvider implements LocationProviderInterface {
     private static final int GPS_DELETE_CELLDB_INFO = 0x00000800;
     private static final int GPS_DELETE_ALMANAC_CORR = 0x00001000;
     private static final int GPS_DELETE_FREQ_BIAS_EST = 0x00002000;
-    private static final int GPS_DELETE_EPHEMERIS_GLO = 0x00004000;
-    private static final int GPS_DELETE_ALMANAC_GLO = 0x00008000;
-    private static final int GPS_DELETE_SVDIR_GLO = 0x00010000;
-    private static final int GPS_DELETE_SVSTEER_GLO = 0x00020000;
-    private static final int GPS_DELETE_ALMANAC_CORR_GLO = 0x00040000;
+    private static final int GLO_DELETE_EPHEMERIS = 0x00004000;
+    private static final int GLO_DELETE_ALMANAC = 0x00008000;
+    private static final int GLO_DELETE_SVDIR = 0x00010000;
+    private static final int GLO_DELETE_SVSTEER = 0x00020000;
+    private static final int GLO_DELETE_ALMANAC_CORR = 0x00040000;
     private static final int GPS_DELETE_TIME_GPS = 0x00080000;
-    private static final int GPS_DELETE_TIME_GLO = 0x00100000;
-    private static final int GPS_DELETE_SVDIR_BDS =  0X00200000;
-    private static final int GPS_DELETE_SVSTEER_BDS = 0X00400000;
-    private static final int GPS_DELETE_TIME_BDS = 0X00800000;
-    private static final int GPS_DELETE_ALMANAC_CORR_BDS = 0X01000000;
-    private static final int GPS_DELETE_EPHEMERIS_BDS = 0X02000000;
-    private static final int GPS_DELETE_ALMANAC_BDS = 0X04000000;
+    private static final int GLO_DELETE_TIME = 0x00100000;
+    private static final int BDS_DELETE_SVDIR =  0X00200000;
+    private static final int BDS_DELETE_SVSTEER = 0X00400000;
+    private static final int BDS_DELETE_TIME = 0X00800000;
+    private static final int BDS_DELETE_ALMANAC_CORR = 0X01000000;
+    private static final int BDS_DELETE_EPHEMERIS = 0X02000000;
+    private static final int BDS_DELETE_ALMANAC = 0X04000000;
     private static final int GPS_DELETE_ALL = 0xFFFFFFFF;
 
     // The GPS_CAPABILITY_* flags must match the values in gps.h
@@ -1037,6 +1036,21 @@ public class GpsLocationProvider implements LocationProviderInterface {
             if (extras.getBoolean("sadata")) flags |= GPS_DELETE_SADATA;
             if (extras.getBoolean("rti")) flags |= GPS_DELETE_RTI;
             if (extras.getBoolean("celldb-info")) flags |= GPS_DELETE_CELLDB_INFO;
+            if (extras.getBoolean("almanac-corr")) flags |= GPS_DELETE_ALMANAC_CORR;
+            if (extras.getBoolean("freq-bias-est")) flags |= GPS_DELETE_FREQ_BIAS_EST;
+            if (extras.getBoolean("ephemeris-GLO")) flags |= GLO_DELETE_EPHEMERIS;
+            if (extras.getBoolean("almanac-GLO")) flags |= GLO_DELETE_ALMANAC;
+            if (extras.getBoolean("svdir-GLO")) flags |= GLO_DELETE_SVDIR;
+            if (extras.getBoolean("svsteer-GLO")) flags |= GLO_DELETE_SVSTEER;
+            if (extras.getBoolean("almanac-corr-GLO")) flags |= GLO_DELETE_ALMANAC_CORR;
+            if (extras.getBoolean("time-gps")) flags |= GPS_DELETE_TIME_GPS;
+            if (extras.getBoolean("time-GLO")) flags |= GLO_DELETE_TIME;
+            if (extras.getBoolean("ephemeris-BDS")) flags |= BDS_DELETE_EPHEMERIS;
+            if (extras.getBoolean("almanac-BDS")) flags |= BDS_DELETE_ALMANAC;
+            if (extras.getBoolean("svdir-BDS")) flags |= BDS_DELETE_SVDIR;
+            if (extras.getBoolean("svsteer-BDS")) flags |= BDS_DELETE_SVSTEER;
+            if (extras.getBoolean("almanac-corr-BDS")) flags |= BDS_DELETE_ALMANAC_CORR;
+            if (extras.getBoolean("time-BDS")) flags |= BDS_DELETE_TIME;
             if (extras.getBoolean("all")) flags |= GPS_DELETE_ALL;
         }
 

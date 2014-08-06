@@ -381,6 +381,14 @@ public class ThemesContract {
         public static final Uri CONTENT_URI = Uri.withAppendedPath(AUTHORITY_URI, "previews");
 
         /**
+         * Uri for retrieving the previews for the currently applied components.
+         * Querying the themes provider using this URI will return a cursor with a single row
+         * containing all the previews for the components that are currently applied.
+         */
+        public static final Uri APPLIED_URI = Uri.withAppendedPath(AUTHORITY_URI,
+                "applied_previews");
+
+        /**
          * The unique ID for a row.
          * <P>Type: INTEGER (long)</P>
          */
@@ -447,6 +455,12 @@ public class ThemesContract {
         public static final String STATUSBAR_CLOCK_TEXT_COLOR = "statusbar_clock_text_color";
 
         /**
+         * Cached image of the themed navigation bar background.
+         * <P>Type: BLOB (bitmap)</P>
+         */
+        public static final String NAVBAR_BACKGROUND = "navbar_background";
+
+        /**
          * Cached image of the themed back button.
          * <P>Type: BLOB (bitmap)</P>
          */
@@ -493,6 +507,12 @@ public class ThemesContract {
          * <P>Type: BLOB (bitmap)</P>
          */
         public static final String STYLE_PREVIEW = "style_preview";
+
+        /**
+         * Cached thumbnail preview of UI controls representing the theme's style
+         * <P>Type: BLOB (bitmap)</P>
+         */
+        public static final String STYLE_THUMBNAIL = "style_thumbnail";
 
         /**
          * Cached thumbnail of the theme's boot animation
