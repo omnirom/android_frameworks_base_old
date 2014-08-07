@@ -1,0 +1,50 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "2b6ec9b0_99b2bbe4",
+        "filename": "core/java/android/provider/Settings.java",
+        "patchSetId": 4
+      },
+      "lineNbr": 4805,
+      "author": {
+        "id": 1000026
+      },
+      "writtenOn": "2014-08-07T22:40:45Z",
+      "side": 1,
+      "message": "if you dont need it remove all your chenges",
+      "range": {
+        "startLine": 4805,
+        "startChar": 17,
+        "endLine": 4805,
+        "endChar": 23
+      },
+      "revId": "ff904b609e63ed138835996c485186b15615b9bc",
+      "serverId": "56841c99-7c94-43d4-bf0b-cb4707e66d55",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "2b6ec9b0_79a5df9a",
+        "filename": "packages/Keyguard/src/com/android/keyguard/KeyguardHostView.java",
+        "patchSetId": 4
+      },
+      "lineNbr": 1755,
+      "author": {
+        "id": 1000026
+      },
+      "writtenOn": "2014-08-07T22:40:45Z",
+      "side": 1,
+      "message": "something is missing here :)\nnobody calls this",
+      "range": {
+        "startLine": 1755,
+        "startChar": 17,
+        "endLine": 1755,
+        "endChar": 43
+      },
+      "revId": "ff904b609e63ed138835996c485186b15615b9bc",
+      "serverId": "56841c99-7c94-43d4-bf0b-cb4707e66d55",
+      "unresolved": false
+    }
+  ]
+}
