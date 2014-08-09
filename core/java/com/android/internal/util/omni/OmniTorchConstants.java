@@ -26,9 +26,14 @@ public class OmniTorchConstants {
     public static final String APP_PACKAGE_NAME = "org.omnirom.torch";
 
     /**
-     * Intent broadcast action for toggling the torch state
+     * Intent broadcast action for toggling the torch state the torch activity is not started
      */
     public static final String ACTION_TOGGLE_STATE = APP_PACKAGE_NAME + ".TOGGLE_FLASHLIGHT";
+
+    /**
+     * Intent broadcast action for starting torch activity and turn it on
+     */
+    public static final String ACTION_FLASH_STATE = APP_PACKAGE_NAME + ".START_FLASHLIGHT";
 
     /**
      * Extra for {@link ACTION_TOGGLE_STATE}:
