@@ -7405,6 +7405,7 @@ public final class ActivityManagerService extends ActivityManagerNative
             ArrayList<ActivityStack> stacks = mStackSupervisor.getStacks();
             for (ActivityStack stack : stacks) {
                 TaskRecord r = stack.taskForIdLocked(task);
+
                 if (r != null && r.getTopActivity() != null) {
                     return r.getTopActivity().appToken;
                 } else {
@@ -7414,6 +7415,7 @@ public final class ActivityManagerService extends ActivityManagerNative
         }
         return null;
     }
+
 
     // =========================================================
     // THUMBNAILS
