@@ -105,6 +105,7 @@ public interface RILConstants {
     int DEVICE_IN_USE = 64;                   /* Operation cannot be performed because the device
                                                  is currently in use */
     int ABORTED = 65;                         /* Operation aborted */
+    int INVALID_PARAMETER = 66;
     // Below is list of OEM specific error codes which can by used by OEMs in case they don't want to
     // reveal particular replacement for Generic failure
     int OEM_ERROR_1 = 501;
@@ -411,6 +412,8 @@ cat include/telephony/ril.h | \
     int RIL_REQUEST_GET_ACTIVITY_INFO = 135;
     int RIL_REQUEST_SET_ALLOWED_CARRIERS = 136;
     int RIL_REQUEST_GET_ALLOWED_CARRIERS = 137;
+    int RIL_REQUEST_SIM_GET_ATR = 138;
+    int RIL_REQUEST_CAF_SIM_OPEN_CHANNEL_WITH_P2 = 139;
 
     int RIL_RESPONSE_ACKNOWLEDGEMENT = 800;
 
