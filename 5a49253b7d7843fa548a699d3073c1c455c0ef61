@@ -58,6 +58,24 @@
       "revId": "5a49253b7d7843fa548a699d3073c1c455c0ef61",
       "serverId": "56841c99-7c94-43d4-bf0b-cb4707e66d55",
       "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "0b49054d_72f198c9",
+        "filename": "packages/SystemUI/src/com/android/systemui/statusbar/phone/NavbarEditor.java",
+        "patchSetId": 1
+      },
+      "lineNbr": 327,
+      "author": {
+        "id": 1000032
+      },
+      "writtenOn": "2014-08-21T23:30:37Z",
+      "side": 1,
+      "message": "Say the length is 6, and we\u0027re on the last element, which would be 5, since arrays start at 0. If i \u003d 5, i + 1 \u003d 6, and 6 - 6 \u003d 0, hence becoming the beginning of the index.",
+      "parentUuid": "0b49054d_12ea0cd7",
+      "revId": "5a49253b7d7843fa548a699d3073c1c455c0ef61",
+      "serverId": "56841c99-7c94-43d4-bf0b-cb4707e66d55",
+      "unresolved": false
     }
   ]
 }
