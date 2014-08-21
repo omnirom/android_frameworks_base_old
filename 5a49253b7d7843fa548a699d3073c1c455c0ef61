@@ -22,6 +22,24 @@
       "revId": "5a49253b7d7843fa548a699d3073c1c455c0ef61",
       "serverId": "56841c99-7c94-43d4-bf0b-cb4707e66d55",
       "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "0b49054d_d2dfa43c",
+        "filename": "packages/SystemUI/src/com/android/systemui/statusbar/phone/NavbarEditor.java",
+        "patchSetId": 1
+      },
+      "lineNbr": 327,
+      "author": {
+        "id": 1000032
+      },
+      "writtenOn": "2014-08-21T23:05:32Z",
+      "side": 1,
+      "message": "No, same as length - 1 - i. :-P",
+      "parentUuid": "0b49054d_92d51c23",
+      "revId": "5a49253b7d7843fa548a699d3073c1c455c0ef61",
+      "serverId": "56841c99-7c94-43d4-bf0b-cb4707e66d55",
+      "unresolved": false
     }
   ]
 }
