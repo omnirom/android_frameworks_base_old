@@ -1193,9 +1193,16 @@ class MountService extends IMountService.Stub
         String pkg = mContext.getPackageName();
         int idAlt = resources.getIdentifier("storage_list_legacy", "xml", pkg);
         String legacy = SystemProperties.get("sys.storage_legacy", "");
+        int idLvm = resources.getIdentifier("storage_list_lvm", "xml", pkg);
+        String lvm = SystemProperties.get("ro.lvm_storage", "0");
         XmlResourceParser parser = null;
 
-        if ((legacy.equals("1") || legacy.equalsIgnoreCase("true")) && idAlt != 0) {
+        if ((lvm.equals("1") || lvm.equalsIgnoreCase("true")) && idLvm != 0) {
+            parser = resources.getXml(idLvm);
+            Slog.i(TAG, "readStorageListLocked: using LVM storage list");
+        }
+
+        if ((legacy.equals("1") || legacy.equalsIgnoreCase("true")) && idAlt != 0 && parser == null) {
             parser = resources.getXml(idAlt);
             Slog.i(TAG, "readStorageListLocked: using legacy storage list");
         }
