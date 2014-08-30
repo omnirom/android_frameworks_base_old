@@ -59,7 +59,7 @@ public final class NfcManager {
     }
 
     /**
-     * Get the default NFC Adapter for this device.
+     * Get the default NFC Adapter
      *
      * @return the default NFC Adapter
      */
