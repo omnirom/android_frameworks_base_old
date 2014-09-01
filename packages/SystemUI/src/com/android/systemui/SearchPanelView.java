@@ -65,6 +65,7 @@ public class SearchPanelView extends FrameLayout implements
     private static final String ASSIST_ICON_METADATA_NAME =
             "com.android.systemui.action_assist_icon";
     private final Context mContext;
+    private final boolean sIsScreenLarge;
     private BaseStatusBar mBar;
     private SettingsObserver mObserver;
 
@@ -86,6 +87,7 @@ public class SearchPanelView extends FrameLayout implements
         mContext = context;
         mActionTarget = new ActionTarget(context);
         mObserver = new SettingsObserver(new Handler());
+        sIsScreenLarge = isScreenLarge();
     }
 
     class GlowPadTriggerListener implements GlowPadView.OnTriggerListener {
@@ -148,13 +150,14 @@ public class SearchPanelView extends FrameLayout implements
         // TODO: fetch views
         mGlowPadView = (GlowPadView) findViewById(R.id.glow_pad_view);
         mGlowPadView.setOnTriggerListener(mGlowPadViewListener);
+
         updateSettings();
     }
 
     private void setDrawables() {
         final ArrayList<TargetDrawable> targets = new ArrayList<TargetDrawable>();
 
-        if (isScreenLarge() || isScreenPortrait()) {
+        if (sIsScreenLarge || isScreenPortrait()) {
             mStartPosOffset =  1;
             mEndPosOffset = 4;
         } else {
@@ -335,9 +338,9 @@ public class SearchPanelView extends FrameLayout implements
         int shortSide = height > width ? width : height;
         int shortSideDp = shortSide * metrics.DENSITY_DEFAULT / metrics.densityDpi;
 
-        boolean sLargeScreen = shortSideDp >= 600;
+        boolean largeScreen = shortSideDp >= 600;
 
-        return sLargeScreen;
+        return largeScreen;
     }
 
     private boolean isScreenPortrait() {
