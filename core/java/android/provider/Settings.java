@@ -3163,6 +3163,37 @@ public final class Settings {
         public static final String STATUS_BAR_NOTIF_COUNT = "status_bar_notif_count";
 
         /**
+         * option for tinted statusbar
+         * 0 = disabled
+         * 1 = follow actionbar
+         * 2 = follow screen
+         * 3 = follow all
+         * @hide
+         */
+        public static final String STATUS_BAR_TINTED_COLOR = "status_bar_tinted_color";
+
+        /**
+         * option for systemui color
+         * 0 = statusbar
+         * 1 = navigationbar
+         * 2 = both
+         * @hide
+         */
+        public static final String STATUS_BAR_TINTED_OPTION = "status_bar_tinted_option";
+
+        /**
+         * option for filter tinted statusbar
+         * @hide
+         */
+        public static final String STATUS_BAR_TINTED_FILTER = "status_bar_tinted_filter";
+
+        /**
+         * option for filter gradient statusbar
+         * @hide
+         */
+        public static final String STATUS_BAR_TINTED_GRADIENT = "status_bar_tinted_gradient";
+
+        /**
          * Weather to minimize lockscreen challenge on screen turned on
          * @hide
          */

@@ -282,4 +282,12 @@ interface IWindowManager
      * @param enabled Whether touch exploration is enabled.
      */
     void setTouchExplorationEnabled(boolean enabled);
+
+    /**
+     * Tinted statusbar
+     */
+    Bitmap getScreenshotFromApplications();
+    Bitmap getScaledScreenshotFromApplications();
+    int[] getColorFromTopBottomApplication();
+    Bitmap getBlurBitmapBackground(int radius);
 }
