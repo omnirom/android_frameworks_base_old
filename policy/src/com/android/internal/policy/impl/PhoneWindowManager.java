@@ -554,6 +554,7 @@ public class PhoneWindowManager implements WindowManagerPolicy {
     private boolean mVolumeWakeScreen;
     private boolean mVolumeMusicControl;
     private boolean mIsVolumeKeyLongPress;
+    private boolean mCurrentColorProgress;
 
     /* The number of steps between min and max brightness */
     private static final int BRIGHTNESS_STEPS = 10;
@@ -750,7 +751,9 @@ public class PhoneWindowManager implements WindowManagerPolicy {
             resolver.registerContentObserver(Settings.System.getUriFor(
                     Settings.System.HARDWARE_KEYS_DISABLE), false, this,
                     UserHandle.USER_ALL);
-
+            resolver.registerContentObserver(Settings.System.getUriFor(
+                    Settings.System.STATUS_BAR_TINTED_COLOR), false, this,
+                    UserHandle.USER_ALL);
             updateSettings();
         }
 
@@ -1259,6 +1262,14 @@ public class PhoneWindowManager implements WindowManagerPolicy {
                         }
                     }
                     @Override
+                    public void onTouchDown() {
+                        sendAppColorBroadcast(20);
+                    }
+                    @Override
+                    public void onTouchUpCancel() {
+                        sendAppColorBroadcast(40);
+                    }
+                    @Override
                     public void onDebug() {
                         // no-op
                     }
@@ -1619,7 +1630,7 @@ public class PhoneWindowManager implements WindowManagerPolicy {
 
             if (mHasNavigationBar) {
                 // Height of the navigation bar when presented horizontally at bottom *******
-                int navigationBarHeight = Settings.System.getIntForUser(mContext.getContentResolver(),
+                int navigationBarHeight = Settings.System.getIntForUser(resolver,
                         Settings.System.NAVIGATION_BAR_HEIGHT,
                         -1, UserHandle.USER_CURRENT);
                 if (navigationBarHeight == -1) {
@@ -1631,7 +1642,7 @@ public class PhoneWindowManager implements WindowManagerPolicy {
                 mNavigationBarHeightForRotation[mPortraitRotation] =
                 mNavigationBarHeightForRotation[mUpsideDownRotation] = navigationBarHeight;
 
-                int navigationBarHeightLandscape = Settings.System.getIntForUser(mContext.getContentResolver(),
+                int navigationBarHeightLandscape = Settings.System.getIntForUser(resolver,
                         Settings.System.NAVIGATION_BAR_HEIGHT_LANDSCAPE,
                         -1, UserHandle.USER_CURRENT);
                 if (navigationBarHeightLandscape == -1) {
@@ -1644,7 +1655,7 @@ public class PhoneWindowManager implements WindowManagerPolicy {
                 mNavigationBarHeightForRotation[mSeascapeRotation] = navigationBarHeightLandscape;
 
                 // Width of the navigation bar when presented vertically along one side
-                int navigationBarWidth = Settings.System.getIntForUser(mContext.getContentResolver(),
+                int navigationBarWidth = Settings.System.getIntForUser(resolver,
                         Settings.System.NAVIGATION_BAR_WIDTH,
                         -1, UserHandle.USER_CURRENT);
                 if (navigationBarWidth == -1) {
@@ -1681,6 +1692,10 @@ public class PhoneWindowManager implements WindowManagerPolicy {
             if (mImmersiveModeConfirmation != null) {
                 mImmersiveModeConfirmation.loadSetting();
             }
+
+            mCurrentColorProgress = Settings.System.getIntForUser(
+                    resolver, Settings.System.STATUS_BAR_TINTED_COLOR, 0
+                    , UserHandle.USER_CURRENT) != 0;
         }
         if (updateRotation) {
             updateRotation(true);
@@ -6173,6 +6188,10 @@ public class PhoneWindowManager implements WindowManagerPolicy {
 
         vis = mNavigationBarController.updateVisibilityLw(transientNavBarAllowed, oldVis, vis);
 
+        boolean notChangingColor = immersiveSticky
+                                     && hideStatusBarSysui
+                                       && hideNavBarSysui;
+        sendAppImmersiveMode(notChangingColor ? 1 : 0);
         return vis;
     }
 
@@ -6190,6 +6209,62 @@ public class PhoneWindowManager implements WindowManagerPolicy {
                 && (vis & View.SYSTEM_UI_FLAG_HIDE_NAVIGATION) != 0
                 && (vis & flags) != 0
                 && canHideNavigationBar();
+    }
+
+    public int getStatusbarDisplayHeight() {
+        return mStatusBarHeight;
+    }
+
+    public int getNavigationbarDisplayHeight(int rotation) {
+        if (mHasNavigationBar) {
+            return mNavigationBarHeightForRotation[rotation];
+        }
+        return mStatusBarHeight;
+    }
+
+    public void sendAppColorBroadcast(int duration) {
+        if (!mCurrentColorProgress) {
+            return;
+        }
+        try {
+             IStatusBarService statusbar = getStatusBarService();
+             if (statusbar != null) {
+                 statusbar.sendAppColorBroadcast(duration);
+             }
+        } catch (RemoteException e) {
+                 // re-acquire status bar service next time it is needed.
+             mStatusBarService = null;
+        }
+    }
+
+    public void sendActionColorBroadcast(int st_color, int ic_color) {
+        if (!mCurrentColorProgress) {
+            return;
+        }
+        try {
+             IStatusBarService statusbar = getStatusBarService();
+             if (statusbar != null) {
+                 statusbar.sendActionColorBroadcast(st_color, ic_color);
+             }
+        } catch (RemoteException e) {
+                 // re-acquire status bar service next time it is needed.
+             mStatusBarService = null;
+        }
+    }
+
+    private void sendAppImmersiveMode(int whats) {
+        if (!mCurrentColorProgress) {
+            return;
+        }
+        try {
+             IStatusBarService statusbar = getStatusBarService();
+             if (statusbar != null) {
+                 statusbar.sendAppImmersiveMode(whats);
+             }
+        } catch (RemoteException e) {
+                 // re-acquire status bar service next time it is needed.
+             mStatusBarService = null;
+        }
     }
 
     /**

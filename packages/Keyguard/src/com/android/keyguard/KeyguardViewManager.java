@@ -48,11 +48,6 @@ import android.os.RemoteException;
 import android.os.SystemProperties;
 import android.os.UserHandle;
 import android.provider.Settings;
-import android.renderscript.Allocation;
-import android.renderscript.Allocation.MipmapControl;
-import android.renderscript.Element;
-import android.renderscript.RenderScript;
-import android.renderscript.ScriptIntrinsicBlur;
 import android.util.Log;
 import android.util.Slog;
 import android.util.SparseArray;
@@ -68,6 +63,7 @@ import android.widget.FrameLayout;
 
 import com.android.internal.policy.IKeyguardShowCallback;
 import com.android.internal.widget.LockPatternUtils;
+import com.android.internal.util.omni.ColorUtils;
 import com.android.internal.util.omni.DeviceUtils;
 
 import java.io.File;
@@ -288,30 +284,11 @@ public class KeyguardViewManager {
     public void setBackgroundBitmap(Bitmap bmp) {
         if (bmp != null && mSeeThrough) {
             if (mBlurRadius > 0) {
-                mCustomImage = blurBitmap(bmp, mBlurRadius);
+                mCustomImage = ColorUtils.blurBitmap(mContext, bmp, mBlurRadius);
             } else {
                 mCustomImage = bmp;
             }
         }
-    }
-
-    private Bitmap blurBitmap(Bitmap bmp, int radius) {
-        Bitmap out = Bitmap.createBitmap(bmp);
-        RenderScript rs = RenderScript.create(mContext);
-
-        Allocation input = Allocation.createFromBitmap(
-                rs, bmp, MipmapControl.MIPMAP_NONE, Allocation.USAGE_SCRIPT);
-        Allocation output = Allocation.createTyped(rs, input.getType());
-
-        ScriptIntrinsicBlur script = ScriptIntrinsicBlur.create(rs, Element.U8_4(rs));
-        script.setInput(input);
-        script.setRadius(radius);
-        script.forEach(output);
-
-        output.copyTo(out);
-
-        rs.destroy();
-        return out;
     }
 
     class ViewManagerHost extends FrameLayout {
