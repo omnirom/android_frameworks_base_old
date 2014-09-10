@@ -91,6 +91,7 @@ public class NavbarEditor implements View.OnTouchListener {
      * Longpress runnable to assign buttons in edit mode
      */
     private Runnable mCheckLongPress = new Runnable() {
+        @Override
         public void run() {
             if (mInEditMode) {
                 mLongPressed = true;

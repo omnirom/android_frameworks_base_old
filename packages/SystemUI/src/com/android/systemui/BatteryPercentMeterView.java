@@ -212,6 +212,40 @@ public class BatteryPercentMeterView extends ImageView {
         }
     }
 
+    public void updateSettings(int defaultColor) {
+        int batteryStyle = Settings.System.getIntForUser(getContext().getContentResolver(),
+                                Settings.System.STATUS_BAR_BATTERY_STYLE, 0
+                                , UserHandle.USER_CURRENT);
+        mActivated = batteryStyle == 5
+            || (batteryStyle == 2 && mPercentBatteryView.equals(StatusBar));
+        setVisibility(mActivated ? View.VISIBLE : View.GONE);
+
+        mChargingColorBg = defaultColor;
+        mChargingColorDefault = defaultColor;
+        mChargingColorFg = mChargingColorDefault;
+
+        mPaintFontBg = new Paint();
+        mPaintFontBg.setAntiAlias(true);
+        mPaintFontBg.setDither(true);
+        mPaintFontBg.setStyle(Paint.Style.STROKE);
+        mPaintFontBg.setTextAlign(Align.CENTER);
+        mPaintFontBg.setTextSize(mTextSize);
+        mPaintFontBg.setColor(mChargingColorFg);
+
+        Rect bounds = new Rect();
+        mPaintFontBg.getTextBounds("100%", 0, "100%".length(), bounds);
+        mWidth = bounds.width();
+        mTextX = mWidth / 2.0f + getPaddingLeft();
+        mTextY = mSize / 2.0f + (bounds.bottom - bounds.top) / 2.0f;
+
+        mPaintFontFg = new Paint(mPaintFontBg);
+        mPaintFontFg.setColor(mChargingColorBg);
+
+        if (mActivated && mAttached) {
+            invalidate();
+        }
+    }
+
     @Override
     protected void onDraw(Canvas canvas) {
         canvas.drawText(mLevelString, mTextX, mTextY, mPaintFontBg);

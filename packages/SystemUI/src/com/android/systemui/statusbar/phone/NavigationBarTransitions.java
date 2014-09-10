@@ -19,6 +19,8 @@ package com.android.systemui.statusbar.phone;
 import android.animation.Animator;
 import android.animation.AnimatorListenerAdapter;
 import android.content.Context;
+import android.graphics.Color;
+import android.graphics.PorterDuff;
 import android.os.ServiceManager;
 import android.view.MotionEvent;
 import android.view.View;
@@ -41,6 +43,7 @@ public final class NavigationBarTransitions extends BarTransitions {
     private boolean mLightsOut;
     private boolean mVertical;
     private int mRequestedMode;
+    private int mCurrentColor;
 
     public NavigationBarTransitions(NavigationBarView view) {
         super(view, R.drawable.nav_background);
@@ -56,6 +59,7 @@ public final class NavigationBarTransitions extends BarTransitions {
     }
 
     public void setVertical(boolean isVertical) {
+        setIsVertical(isVertical);
         mVertical = isVertical;
         transitionTo(mRequestedMode, false /*animate*/);
     }
@@ -66,6 +70,9 @@ public final class NavigationBarTransitions extends BarTransitions {
         if (mVertical && mode == MODE_TRANSLUCENT) {
             // translucent mode not allowed when vertical
             mode = MODE_OPAQUE;
+        }
+        if (mode == MODE_SEMI_TRANSPARENT || mode == MODE_TRANSLUCENT) {
+            changeColorIconBackground(-3, -3);
         }
         super.transitionTo(mode, animate);
     }
@@ -141,6 +148,52 @@ public final class NavigationBarTransitions extends BarTransitions {
     private void setKeyButtonViewQuiescentAlpha(View button, float alpha, boolean animate) {
         if (button instanceof KeyButtonView) {
             ((KeyButtonView) button).setQuiescentAlpha(alpha, animate);
+        }
+    }
+
+    @Override
+    public void changeColorIconBackground(int bg_color, int ic_color) {
+        super.changeColorIconBackground(bg_color, ic_color);
+        if (getMode() == MODE_SEMI_TRANSPARENT || getMode() == MODE_TRANSLUCENT) {
+            if (mCurrentColor != -3) {
+                ic_color = -3;
+                mCurrentColor = -3;
+            } else {
+                return;
+            }
+        }
+        if (isBrightColor(bg_color)) {
+            ic_color = Color.BLACK;
+        }
+        mCurrentColor = ic_color;
+        setColorButtonNavigationBar(ic_color);
+    }
+
+    private void setColorButtonNavigationBar(int ic_color) {
+        setKeyButtonViewColor(NavbarEditor.NAVBAR_HOME, ic_color);
+        setKeyButtonViewColor(NavbarEditor.NAVBAR_RECENT, ic_color);
+        setKeyButtonViewColor(NavbarEditor.NAVBAR_CONDITIONAL_MENU, ic_color);
+        setKeyButtonViewColor(NavbarEditor.NAVBAR_ALWAYS_MENU, ic_color);
+        setKeyButtonViewColor(NavbarEditor.NAVBAR_MENU_BIG, ic_color);
+        setKeyButtonViewColor(NavbarEditor.NAVBAR_BACK, ic_color);
+        setKeyButtonViewButtonColor(mView.getSearchLight(), ic_color);
+        setKeyButtonViewButtonColor(mView.getCameraButton(), ic_color);
+    }
+
+    private void setKeyButtonViewColor(ButtonInfo info, int ic_color) {
+        View button = mView.findViewWithTag(info);
+        if (button != null) {
+            setKeyButtonViewButtonColor(button, ic_color);
+        }
+    }
+
+    private void setKeyButtonViewButtonColor(View button, int ic_color) {
+        if (button instanceof KeyButtonView) {
+            if (ic_color == -3) {
+                ((KeyButtonView) button).clearColorFilter();
+            } else {
+                ((KeyButtonView) button).setColorFilter(ic_color, PorterDuff.Mode.SRC_ATOP);
+            }
         }
     }
 
