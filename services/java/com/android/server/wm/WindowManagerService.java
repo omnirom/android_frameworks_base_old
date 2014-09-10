@@ -46,6 +46,7 @@ import com.android.server.power.ShutdownThread;
 
 import android.Manifest;
 import android.app.ActivityManager.StackBoxInfo;
+import android.app.ActivityManager;
 import android.app.ActivityManagerNative;
 import android.app.IActivityManager;
 import android.app.StatusBarManager;
@@ -61,6 +62,7 @@ import android.content.res.CompatibilityInfo;
 import android.content.res.Configuration;
 import android.graphics.Bitmap;
 import android.graphics.Bitmap.Config;
+import android.graphics.Color;
 import android.graphics.Canvas;
 import android.graphics.Matrix;
 import android.graphics.PixelFormat;
@@ -89,6 +91,11 @@ import android.os.SystemProperties;
 import android.os.Trace;
 import android.os.WorkSource;
 import android.provider.Settings;
+import android.renderscript.Allocation;
+import android.renderscript.Allocation.MipmapControl;
+import android.renderscript.Element;
+import android.renderscript.RenderScript;
+import android.renderscript.ScriptIntrinsicBlur;
 import android.util.DisplayMetrics;
 import android.util.EventLog;
 import android.util.FloatMath;
@@ -10921,4 +10928,136 @@ public class WindowManagerService extends IWindowManager.Stub
     public void addSystemUIVisibilityFlag(int flag) {
         mLastStatusBarVisibility |= flag;
     }
+
+    private float getDegreesForRotation(int value) {
+        switch (value) {
+            case Surface.ROTATION_90:
+                return 360f - 90f;
+            case Surface.ROTATION_180:
+                return 360f - 180f;
+            case Surface.ROTATION_270:
+                return 360f - 270f;
+        }
+        return 0f;
+    }
+
+    @Override
+    public Bitmap getScreenshotFromApplications() {
+        if (!checkCallingPermission(android.Manifest.permission.READ_FRAME_BUFFER,
+                "screenshotApplications()")) {
+            return null;
+        }
+        Matrix matrix = new Matrix();
+        int rot = getDefaultDisplayContentLocked().getDisplay().getRotation();
+        float[] dims = {mRealDisplayMetrics.widthPixels, mRealDisplayMetrics.heightPixels};
+        rot = (rot + mSfHwRotation) % 4;
+        float degrees = getDegreesForRotation(rot);
+        boolean requiresRotation = (degrees > 0);
+        if (requiresRotation) {
+            matrix.reset();
+            matrix.preRotate(-degrees);
+            matrix.mapPoints(dims);
+            dims[0] = Math.abs(dims[0]);
+            dims[1] = Math.abs(dims[1]);
+        }
+
+        Bitmap bitmap = SurfaceControl.screenshot((int) dims[0], (int) dims[1], 0, 22000);
+        if (bitmap == null) {
+            return null;
+        }
+        Bitmap ss = Bitmap.createBitmap(mRealDisplayMetrics.widthPixels,
+                mRealDisplayMetrics.heightPixels, Config.ARGB_8888);
+        Canvas c = new Canvas(ss);
+
+        if (requiresRotation) {
+            c.translate(ss.getWidth() / 2, ss.getHeight() / 2);
+            c.rotate(degrees);
+            c.translate(-dims[0] / 2, -dims[1] / 2);
+        }
+
+        c.drawBitmap(bitmap, 0, 0, null);
+        c.setBitmap(null);
+
+        bitmap.recycle();
+        bitmap = ss;
+
+        bitmap.setHasAlpha(false);
+        bitmap.prepareToDraw();
+
+        return bitmap;
+    }
+
+    private int getMainColorFromTop(Bitmap bitmap, int x, int y) {
+        if (bitmap == null) {
+            return -3;
+        }
+        int pixel = bitmap.getPixel(x, y);
+        int red = Color.red(pixel);
+        int blue = Color.blue(pixel);
+        int green = Color.green(pixel);
+        int alpha = Color.alpha(pixel);
+        return Color.argb(alpha, red, green, blue);
+    }
+
+    private int getMainColorFromBottom(Bitmap bitmap, int x, int y) {
+        if (bitmap == null) {
+            return -3;
+        }
+        int pixel = bitmap.getPixel(x, y);
+        int red = Color.red(pixel);
+        int blue = Color.blue(pixel);
+        int green = Color.green(pixel);
+        int alpha = Color.alpha(pixel);
+        return Color.argb(alpha, red, green, blue);
+    }
+
+    private Bitmap blurBitmap(Bitmap bmp, int radius) {
+        Bitmap out = Bitmap.createBitmap(bmp);
+        RenderScript rs = RenderScript.create(mContext);
+
+        Allocation input = Allocation.createFromBitmap(
+                rs, bmp, MipmapControl.MIPMAP_NONE, Allocation.USAGE_SCRIPT);
+        Allocation output = Allocation.createTyped(rs, input.getType());
+
+        ScriptIntrinsicBlur script = ScriptIntrinsicBlur.create(rs, Element.U8_4(rs));
+        script.setInput(input);
+        script.setRadius(radius);
+        script.forEach(output);
+
+        output.copyTo(out);
+
+        rs.destroy();
+        return out;
+    }
+
+    @Override
+    public Bitmap getBlurBitmapBackground(int radius) {
+        Bitmap bitmap = getScreenshotFromApplications();
+        if (bitmap == null) {
+            return null;
+        }
+        return blurBitmap(bitmap, radius);
+    }
+
+    @Override
+    public int[] getColorFromTopBottomApplication() {
+        Bitmap bitmap = getScreenshotFromApplications();
+        if (bitmap == null) {
+            return new int[] {-3,-3};
+        }
+        int rot = getDefaultDisplayContentLocked().getDisplay().getRotation();
+        rot = (rot + mSfHwRotation) % 4;
+        int statusBar = mPolicy.getStatusbarDisplayHeight();
+        int navigationBar = mPolicy.getNavigationbarDisplayHeight(mRotation);
+        int x = 10;
+        int y = bitmap.getHeight() - (statusBar + navigationBar);
+        if (rot == Surface.ROTATION_90 || rot == Surface.ROTATION_270) {
+            x = bitmap.getWidth() - (statusBar + navigationBar);
+        }
+        int colorTop = getMainColorFromTop(bitmap, x, statusBar);
+        int colorBottom = getMainColorFromBottom(bitmap, x, y);
+        Log.i(TAG, "Screenshot Color From top=" + colorTop + " bottom=" + colorBottom);
+        return new int[] {colorTop, colorBottom};
+    }
+
 }
