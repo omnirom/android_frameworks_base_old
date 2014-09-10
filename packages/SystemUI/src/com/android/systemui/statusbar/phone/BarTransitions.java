@@ -28,6 +28,8 @@ import android.graphics.Rect;
 import android.graphics.drawable.Drawable;
 import android.os.SystemClock;
 import android.util.Log;
+import android.widget.ImageView;
+import android.widget.TextView;
 import android.view.View;
 import android.view.animation.LinearInterpolator;
 
@@ -54,6 +56,54 @@ public class BarTransitions {
 
     private int mMode;
 
+    public boolean isBrightColor(int color) {
+        if (color == -3) {
+            return false;
+        }
+
+        if (color == Color.TRANSPARENT) {
+            return false;
+        }
+
+        if (color == Color.WHITE) {
+            return true;
+        }
+
+        boolean rtnValue = false;
+
+        int[] rgb = { Color.red(color), Color.green(color), Color.blue(color) };
+
+        int brightness = (int) Math.sqrt(rgb[0] * rgb[0] * .241 + rgb[1]
+            * rgb[1] * .691 + rgb[2] * rgb[2] * .068);
+
+        // color is light
+        if (brightness >= 180) {
+            rtnValue = true;
+        }
+
+        return rtnValue;
+    }
+
+    public int OpposeColor(int ColorToInvert) {
+        int RGBMAX = 255;
+        float[] hsv = new float[3];
+        float H;
+
+        Color.RGBToHSV(Color.red(ColorToInvert),
+              RGBMAX - Color.green(ColorToInvert),
+              Color.blue(ColorToInvert), hsv);
+
+        H = (float) (hsv[0] + 0.5);
+        if (H > 1) H -= 1;
+        return Color.HSVToColor(hsv);
+    }
+
+    public void setIsVertical(boolean isVertical) {
+        if (HIGH_END) {
+            mBarBackground.setIsVertical(isVertical);
+        }
+    }
+
     public BarTransitions(View view, int gradientResourceId) {
         mTag = "BarTransitions." + view.getClass().getSimpleName();
         mView = view;
@@ -65,6 +115,10 @@ public class BarTransitions {
 
     public int getMode() {
         return mMode;
+    }
+
+    public boolean isOpaque(int mode) {
+        return !(mode == MODE_SEMI_TRANSPARENT || mode == MODE_TRANSLUCENT);
     }
 
     public void transitionTo(int mode, boolean animate) {
@@ -100,6 +154,12 @@ public class BarTransitions {
         throw new IllegalArgumentException("Unknown mode " + mode);
     }
 
+    public void changeColorIconBackground(int bg_color, int ic_color) {
+        if (HIGH_END) {
+            mBarBackground.applyColorBackground(bg_color);
+        }
+    }
+
     public void finishAnimations() {
         mBarBackground.finishAnimation();
     }
@@ -116,6 +176,7 @@ public class BarTransitions {
 
         private int mMode = -1;
         private boolean mAnimating;
+        private boolean mIsVertical = false;
         private long mStartTime;
         private long mEndTime;
 
@@ -124,6 +185,8 @@ public class BarTransitions {
 
         private int mGradientAlphaStart;
         private int mColorStart;
+        private int mCurrentColor;
+        private int mLastColor;
 
         public BarBackgroundDrawable(Context context, int gradientResourceId) {
             final Resources res = context.getResources();
@@ -152,6 +215,29 @@ public class BarTransitions {
         protected void onBoundsChange(Rect bounds) {
             super.onBoundsChange(bounds);
             mGradient.setBounds(bounds);
+        }
+
+        public void setIsVertical(boolean isVertical) {
+            mIsVertical = isVertical;
+            if (isVertical) {
+                mCurrentColor = mLastColor;
+                mLastColor = mOpaque;
+                invalidateSelf();
+            } else {
+                applyColorBackground(mCurrentColor);
+            }
+        }
+
+        public void applyColorBackground(int bg_color) {
+            if (mIsVertical) {
+                return;
+            }
+            if (bg_color != -3) {
+                mLastColor = bg_color;
+            } else {
+                mLastColor = mOpaque;
+            }
+            invalidateSelf();
         }
 
         public void applyModeBackground(int oldMode, int newMode, boolean animate) {
@@ -185,10 +271,12 @@ public class BarTransitions {
             int targetGradientAlpha = 0, targetColor = 0;
             if (mMode == MODE_TRANSLUCENT) {
                 targetGradientAlpha = 0xff;
+                mLastColor = mOpaque;
             } else if (mMode == MODE_SEMI_TRANSPARENT) {
                 targetColor = mSemiTransparent;
+                mLastColor = mOpaque;
             } else {
-                targetColor = mOpaque;
+                targetColor = mLastColor;
             }
             if (!mAnimating) {
                 mColor = targetColor;
