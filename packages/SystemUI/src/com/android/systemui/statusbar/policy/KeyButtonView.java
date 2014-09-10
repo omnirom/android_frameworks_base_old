@@ -70,6 +70,7 @@ public class KeyButtonView extends ImageView {
     Animator mAnimateToQuiescent = new ObjectAnimator();
 
     Runnable mCheckLongPress = new Runnable() {
+        @Override
         public void run() {
             if (isPressed()) {
                 // Log.d("KeyButtonView", "longpressed: " + this);

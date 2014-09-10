@@ -28,6 +28,8 @@ import android.graphics.Rect;
 import android.graphics.drawable.Drawable;
 import android.os.SystemClock;
 import android.util.Log;
+import android.widget.ImageView;
+import android.widget.TextView;
 import android.view.View;
 import android.view.animation.LinearInterpolator;
 
@@ -54,6 +56,61 @@ public class BarTransitions {
 
     private int mMode;
 
+    public boolean isBrightColor(int color) {
+        if (color == -3) {
+            return false;
+        }
+
+        if (color == Color.TRANSPARENT) {
+            return false;
+        }
+
+        if (color == Color.WHITE) {
+            return true;
+        }
+
+        boolean rtnValue = false;
+
+        int[] rgb = { Color.red(color), Color.green(color), Color.blue(color) };
+
+        int brightness = (int) Math.sqrt(rgb[0] * rgb[0] * .241 + rgb[1]
+            * rgb[1] * .691 + rgb[2] * rgb[2] * .068);
+
+        // color is light
+        if (brightness >= 180) {
+            rtnValue = true;
+        }
+
+        return rtnValue;
+    }
+
+    public int opposeColor(int ColorToInvert) {
+        int RGBMAX = 255;
+        float[] hsv = new float[3];
+        float H;
+
+        Color.RGBToHSV(Color.red(ColorToInvert),
+              RGBMAX - Color.green(ColorToInvert),
+              Color.blue(ColorToInvert), hsv);
+
+        H = (float) (hsv[0] + 0.5);
+        if (H > 1) H -= 1;
+        return Color.HSVToColor(hsv);
+    }
+
+    public int changeCurrentColorTransparency(int colorToChange, int reduce) {
+        if (HIGH_END) {
+            return mBarBackground.changeColorTransparency(colorToChange, reduce);
+        }
+        return colorToChange;
+    }
+
+    public void setIsVertical(boolean isVertical) {
+        if (HIGH_END) {
+            mBarBackground.setIsVertical(isVertical);
+        }
+    }
+
     public BarTransitions(View view, int gradientResourceId) {
         mTag = "BarTransitions." + view.getClass().getSimpleName();
         mView = view;
@@ -65,6 +122,14 @@ public class BarTransitions {
 
     public int getMode() {
         return mMode;
+    }
+
+    protected boolean isOpaque(int mode) {
+        return !(mode == MODE_SEMI_TRANSPARENT || mode == MODE_TRANSLUCENT);
+    }
+
+    protected boolean isNotTransparent() {
+        return (mMode != MODE_TRANSLUCENT);
     }
 
     public void transitionTo(int mode, boolean animate) {
@@ -100,6 +165,18 @@ public class BarTransitions {
         throw new IllegalArgumentException("Unknown mode " + mode);
     }
 
+    public void changeColorIconBackground(int bg_color, int ic_color) {
+        if (HIGH_END) {
+            mBarBackground.applyColorBackground(bg_color);
+        }
+    }
+
+    public void changeGradientAlphaDynamic(boolean force) {
+        if (HIGH_END) {
+            mBarBackground.setGradientAlphaDynamic(force);
+        }
+    }
+
     public void finishAnimations() {
         mBarBackground.finishAnimation();
     }
@@ -116,6 +193,7 @@ public class BarTransitions {
 
         private int mMode = -1;
         private boolean mAnimating;
+        private boolean mIsVertical = false;
         private long mStartTime;
         private long mEndTime;
 
@@ -124,6 +202,8 @@ public class BarTransitions {
 
         private int mGradientAlphaStart;
         private int mColorStart;
+        private int mCurrentColor;
+        private int mLastColor;
 
         public BarBackgroundDrawable(Context context, int gradientResourceId) {
             final Resources res = context.getResources();
@@ -148,10 +228,42 @@ public class BarTransitions {
             // noop
         }
 
+        public int changeColorTransparency(int colorToChange, int reduce) {
+            int nots = 255 / 100;
+            int red = Color.red(colorToChange);
+            int blue = Color.blue(colorToChange);
+            int green = Color.green(colorToChange);
+            int alpha = nots * reduce;
+            return Color.argb(alpha, red, green, blue);
+        }
+
         @Override
         protected void onBoundsChange(Rect bounds) {
             super.onBoundsChange(bounds);
             mGradient.setBounds(bounds);
+        }
+
+        public void setIsVertical(boolean isVertical) {
+            mIsVertical = isVertical;
+            if (isVertical) {
+                mCurrentColor = mLastColor;
+                mLastColor = mOpaque;
+                forceRestartAnimation();
+            } else {
+                applyColorBackground(mCurrentColor);
+            }
+        }
+
+        public void applyColorBackground(int bg_color) {
+            if (mIsVertical) {
+                return;
+            }
+            if (bg_color != -3) {
+                mLastColor = bg_color;
+            } else {
+                mLastColor = mOpaque;
+            }
+            forceRestartAnimation();
         }
 
         public void applyModeBackground(int oldMode, int newMode, boolean animate) {
@@ -180,15 +292,62 @@ public class BarTransitions {
             }
         }
 
+        private int getGradientAlphaSemiTransparent() {
+            return mGradientAlpha & 127;
+        }
+
+        private int getGradientAlphaOpaque() {
+            return mGradientAlpha;
+        }
+
+        public void setGradientAlphaDynamic(boolean force) {
+            if (force) {
+                mGradientAlpha = 0xff;
+            } else {
+                mGradientAlpha = 0;
+            }
+            forceRestartAnimation();
+        }
+
+        private void forceRestartAnimation() {
+            long now = SystemClock.elapsedRealtime();
+            if (!mAnimating || now >= mEndTime) {
+                mGradientAlphaStart = mGradientAlpha;
+                mColorStart = mColor;
+            } else {
+                final float t = (now - mStartTime) / (float)(mEndTime - mStartTime);
+                final float v = Math.max(0, Math.min(mInterpolator.getInterpolation(t), 1));
+                mGradientAlphaStart = (int) (v * mGradientAlpha + mGradientAlphaStart * (1 - v));
+                mColorStart = Color.argb(
+                           (int) (v * Color.alpha(mColor) + Color.alpha(mColorStart) * (1 - v)),
+                           (int) (v * Color.red(mColor) + Color.red(mColorStart) * (1 - v)),
+                           (int) (v * Color.green(mColor) + Color.green(mColorStart) * (1 - v)),
+                           (int) (v * Color.blue(mColor) + Color.blue(mColorStart) * (1 - v)));
+            }
+            mStartTime = now;
+            mEndTime = now + BACKGROUND_DURATION;
+            mAnimating = true;
+            invalidateSelf();
+        }
+
+        private int getColorSemiTransparent() {
+            if (mLastColor != -3) {
+                return changeColorTransparency(mLastColor, 40);
+            }
+            return mSemiTransparent;
+        }
+
         @Override
         public void draw(Canvas canvas) {
             int targetGradientAlpha = 0, targetColor = 0;
             if (mMode == MODE_TRANSLUCENT) {
                 targetGradientAlpha = 0xff;
             } else if (mMode == MODE_SEMI_TRANSPARENT) {
-                targetColor = mSemiTransparent;
+                targetGradientAlpha = getGradientAlphaSemiTransparent();
+                targetColor = getColorSemiTransparent();
             } else {
-                targetColor = mOpaque;
+                targetGradientAlpha = getGradientAlphaOpaque();
+                targetColor = mLastColor;
             }
             if (!mAnimating) {
                 mColor = targetColor;

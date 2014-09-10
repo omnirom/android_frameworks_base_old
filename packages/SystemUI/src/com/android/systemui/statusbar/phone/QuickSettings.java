@@ -391,6 +391,7 @@ class QuickSettings {
                                 // there's no way to allow concurrent animation while keyguard inflates.
                                 // The workaround is to add a slight delay to allow the animation to finish.
                                 mHandler.postDelayed(new Runnable() {
+                                      @Override
                                       public void run() {
                                           try {
                                                WindowManagerGlobal.getWindowManagerService().lockNow(null);
@@ -1383,7 +1384,8 @@ class QuickSettings {
                     // dialog a chance to go away before it takes a
                     // screenshot.
                     mHandler.postDelayed(new Runnable() {
-                        @Override public void run() {
+                        @Override
+                        public void run() {
                             try {
                                 ActivityManagerNative.getDefault()
                                         .requestBugReport();
