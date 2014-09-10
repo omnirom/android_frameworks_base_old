@@ -23,8 +23,9 @@ import android.content.Context;
 import android.content.res.Resources;
 import android.content.res.TypedArray;
 import android.graphics.Canvas;
-import android.graphics.RectF;
 import android.graphics.drawable.Drawable;
+import android.graphics.RectF;
+import android.graphics.PorterDuff;
 import android.hardware.input.InputManager;
 import android.os.SystemClock;
 import android.util.AttributeSet;
@@ -44,6 +45,7 @@ import android.widget.ImageView;
 import com.android.systemui.R;
 import com.android.systemui.statusbar.phone.NavbarEditor;
 import com.android.systemui.statusbar.phone.NavbarEditor.ButtonInfo;
+import com.android.internal.util.omni.ColorUtils;
 
 public class KeyButtonView extends ImageView {
     private static final String TAG = "StatusBar.KeyButtonView";
@@ -70,6 +72,7 @@ public class KeyButtonView extends ImageView {
     Animator mAnimateToQuiescent = new ObjectAnimator();
 
     Runnable mCheckLongPress = new Runnable() {
+        @Override
         public void run() {
             if (isPressed()) {
                 // Log.d("KeyButtonView", "longpressed: " + this);
@@ -174,6 +177,24 @@ public class KeyButtonView extends ImageView {
         if (mGlowBG == null) return;
         mGlowAlpha = x;
         invalidate();
+    }
+
+    public void setColorFilterBg(int color, PorterDuff.Mode mode) {
+        setColorFilter(color, mode);
+        if (mGlowBG != null) {
+            int colorBg = ColorUtils.lighten(color, 0.5f);
+            if (ColorUtils.isBrightColor(color)) {
+                colorBg = ColorUtils.darken(color, 0.5f);
+            }
+            mGlowBG.setColorFilter(colorBg, mode);
+        }
+    }
+
+    public void clearColorFilterBg() {
+        clearColorFilter();
+        if (mGlowBG != null) {
+            mGlowBG.clearColorFilter();
+        }
     }
 
     public float getGlowScale() {

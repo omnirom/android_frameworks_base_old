@@ -28,10 +28,13 @@ import android.graphics.Rect;
 import android.graphics.drawable.Drawable;
 import android.os.SystemClock;
 import android.util.Log;
+import android.widget.ImageView;
+import android.widget.TextView;
 import android.view.View;
 import android.view.animation.LinearInterpolator;
 
 import com.android.systemui.R;
+import com.android.internal.util.omni.ColorUtils;
 
 public class BarTransitions {
     private static final boolean DEBUG = false;
@@ -54,6 +57,12 @@ public class BarTransitions {
 
     private int mMode;
 
+    public void setIsVertical(boolean isVertical) {
+        if (HIGH_END) {
+            mBarBackground.setIsVertical(isVertical);
+        }
+    }
+
     public BarTransitions(View view, int gradientResourceId) {
         mTag = "BarTransitions." + view.getClass().getSimpleName();
         mView = view;
@@ -65,6 +74,10 @@ public class BarTransitions {
 
     public int getMode() {
         return mMode;
+    }
+
+    public boolean isOpaque(int mode) {
+        return !(mode == MODE_SEMI_TRANSPARENT || mode == MODE_TRANSLUCENT);
     }
 
     public void transitionTo(int mode, boolean animate) {
@@ -100,8 +113,22 @@ public class BarTransitions {
         throw new IllegalArgumentException("Unknown mode " + mode);
     }
 
+    public void changeColorIconBackground(int bg_color, int ic_color) {
+        if (HIGH_END) {
+            mBarBackground.applyColorBackground(bg_color);
+        }
+    }
+
+    public void changeGradientAlphaDynamic(boolean force) {
+        if (HIGH_END) {
+            mBarBackground.setGradientAlphaDynamic(force);
+        }
+    }
+
     public void finishAnimations() {
-        mBarBackground.finishAnimation();
+        if (HIGH_END) {
+            mBarBackground.finishAnimation();
+        }
     }
 
     public void setContentVisible(boolean visible) {
@@ -116,6 +143,7 @@ public class BarTransitions {
 
         private int mMode = -1;
         private boolean mAnimating;
+        private boolean mIsVertical = false;
         private long mStartTime;
         private long mEndTime;
 
@@ -124,6 +152,8 @@ public class BarTransitions {
 
         private int mGradientAlphaStart;
         private int mColorStart;
+        private int mCurrentColor;
+        private int mLastColor;
 
         public BarBackgroundDrawable(Context context, int gradientResourceId) {
             final Resources res = context.getResources();
@@ -154,6 +184,29 @@ public class BarTransitions {
             mGradient.setBounds(bounds);
         }
 
+        public void setIsVertical(boolean isVertical) {
+            mIsVertical = isVertical;
+            if (isVertical) {
+                mCurrentColor = mLastColor;
+                mLastColor = mOpaque;
+                forceRestartAnimation();
+            } else {
+                applyColorBackground(mCurrentColor);
+            }
+        }
+
+        public void applyColorBackground(int bg_color) {
+            if (mIsVertical) {
+                return;
+            }
+            if (bg_color != -3) {
+                mLastColor = bg_color;
+            } else {
+                mLastColor = mOpaque;
+            }
+            forceRestartAnimation();
+        }
+
         public void applyModeBackground(int oldMode, int newMode, boolean animate) {
             if (mMode == newMode) return;
             mMode = newMode;
@@ -180,15 +233,62 @@ public class BarTransitions {
             }
         }
 
+        private int getGradientAlphaSemiTransparent() {
+            return mGradientAlpha & 127;
+        }
+
+        public void setGradientAlphaDynamic(boolean force) {
+            /*if (force) {
+                mGradientAlpha = 0xff;
+            } else {
+                mGradientAlpha = 0;
+            }
+            forceRestartAnimation();*/
+        }
+
+        private void forceRestartAnimation() {
+            long now = SystemClock.elapsedRealtime();
+            if (!mAnimating || now >= mEndTime) {
+                mGradientAlphaStart = mGradientAlpha;
+                mColorStart = mColor;
+            } else {
+                final float t = (now - mStartTime) / (float)(mEndTime - mStartTime);
+                final float v = Math.max(0, Math.min(mInterpolator.getInterpolation(t), 1));
+                mGradientAlphaStart = (int) (v * mGradientAlpha + mGradientAlphaStart * (1 - v));
+                mColorStart = Color.argb(
+                           (int) (v * Color.alpha(mColor) + Color.alpha(mColorStart) * (1 - v)),
+                           (int) (v * Color.red(mColor) + Color.red(mColorStart) * (1 - v)),
+                           (int) (v * Color.green(mColor) + Color.green(mColorStart) * (1 - v)),
+                           (int) (v * Color.blue(mColor) + Color.blue(mColorStart) * (1 - v)));
+            }
+            mStartTime = now;
+            mEndTime = now + BACKGROUND_DURATION;
+            mAnimating = true;
+            invalidateSelf();
+        }
+
+        private int getGradientAlphaFromColor() {
+            if (mIsVertical) {
+                return mGradientAlpha;
+            }
+            if (ColorUtils.isColorTransparency(mLastColor)) {
+                int alpha = Color.alpha(mLastColor);
+                return mGradientAlpha & alpha;
+            }
+            return mGradientAlpha;
+        }
+
         @Override
         public void draw(Canvas canvas) {
             int targetGradientAlpha = 0, targetColor = 0;
             if (mMode == MODE_TRANSLUCENT) {
                 targetGradientAlpha = 0xff;
             } else if (mMode == MODE_SEMI_TRANSPARENT) {
+                targetGradientAlpha = getGradientAlphaSemiTransparent();
                 targetColor = mSemiTransparent;
             } else {
-                targetColor = mOpaque;
+                targetGradientAlpha = getGradientAlphaFromColor();
+                targetColor = mLastColor;
             }
             if (!mAnimating) {
                 mColor = targetColor;
