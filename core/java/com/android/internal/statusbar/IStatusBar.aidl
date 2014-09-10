@@ -40,5 +40,8 @@ oneway interface IStatusBar
     void cancelPreloadRecentApps();
     void setWindowState(int window, int state);
     void setAutoRotate(boolean enabled);
+    void sendActionColorBroadcast(int st_color, int ic_color);
+    void sendAppColorBroadcast(int duration);
+    void sendAppImmersiveMode(int whats);
 }
 

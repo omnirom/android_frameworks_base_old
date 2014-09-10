@@ -417,6 +417,33 @@ public class StatusBarManagerService extends IStatusBarService.Stub
         }
     }
 
+    @Override
+    public void sendActionColorBroadcast(int st_color, int ic_color) {
+        if (mBar != null) {
+            try {
+                mBar.sendActionColorBroadcast(st_color, ic_color);
+            } catch (RemoteException ex) {}
+        }
+    }
+
+    @Override
+    public void sendAppColorBroadcast(int duration) {
+        if (mBar != null) {
+            try {
+                mBar.sendAppColorBroadcast(duration);
+            } catch (RemoteException ex) {}
+        }
+    }
+
+    @Override
+    public void sendAppImmersiveMode(int whats) {
+        if (mBar != null) {
+            try {
+                mBar.sendAppImmersiveMode(whats);
+            } catch (RemoteException ex) {}
+        }
+    }
+
     private void enforceStatusBar() {
         mContext.enforceCallingOrSelfPermission(android.Manifest.permission.STATUS_BAR,
                 "StatusBarManagerService");

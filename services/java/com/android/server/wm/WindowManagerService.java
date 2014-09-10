@@ -30,6 +30,7 @@ import com.android.internal.app.IBatteryStats;
 import com.android.internal.policy.PolicyManager;
 import com.android.internal.policy.impl.PhoneWindowManager;
 import com.android.internal.util.FastPrintWriter;
+import com.android.internal.util.omni.ColorUtils;
 import com.android.internal.view.IInputContext;
 import com.android.internal.view.IInputMethodClient;
 import com.android.internal.view.IInputMethodManager;
@@ -46,6 +47,7 @@ import com.android.server.power.ShutdownThread;
 
 import android.Manifest;
 import android.app.ActivityManager.StackBoxInfo;
+import android.app.ActivityManager;
 import android.app.ActivityManagerNative;
 import android.app.IActivityManager;
 import android.app.StatusBarManager;
@@ -10920,5 +10922,157 @@ public class WindowManagerService extends IWindowManager.Stub
     @Override
     public void addSystemUIVisibilityFlag(int flag) {
         mLastStatusBarVisibility |= flag;
+    }
+
+    private float getDegreesForRotation(int value) {
+        switch (value) {
+            case Surface.ROTATION_90:
+                return 360f - 90f;
+            case Surface.ROTATION_180:
+                return 360f - 180f;
+            case Surface.ROTATION_270:
+                return 360f - 270f;
+        }
+        return 0f;
+    }
+
+    @Override
+    public Bitmap getScreenshotFromApplications() {
+        if (!checkCallingPermission(android.Manifest.permission.READ_FRAME_BUFFER,
+                "screenshotApplications()")) {
+            return null;
+        }
+        Matrix matrix = new Matrix();
+        int rot = getDefaultDisplayContentLocked().getDisplay().getRotation();
+        float[] dims = {mRealDisplayMetrics.widthPixels, mRealDisplayMetrics.heightPixels};
+        rot = (rot + mSfHwRotation) % 4;
+        float degrees = getDegreesForRotation(rot);
+        boolean requiresRotation = (degrees > 0);
+        if (requiresRotation) {
+            matrix.reset();
+            matrix.preRotate(-degrees);
+            matrix.mapPoints(dims);
+            dims[0] = Math.abs(dims[0]);
+            dims[1] = Math.abs(dims[1]);
+        }
+
+        Bitmap bitmap = SurfaceControl.screenshot((int) dims[0], (int) dims[1], 0, 22000);
+        if (bitmap == null) {
+            return null;
+        }
+        Bitmap ss = Bitmap.createBitmap(mRealDisplayMetrics.widthPixels,
+                           mRealDisplayMetrics.heightPixels, Config.ARGB_8888);
+        Canvas c = new Canvas(ss);
+
+        if (requiresRotation) {
+            c.translate(ss.getWidth() / 2, ss.getHeight() / 2);
+            c.rotate(degrees);
+            c.translate(-dims[0] / 2, -dims[1] / 2);
+        }
+
+        c.drawBitmap(bitmap, 0, 0, null);
+        c.setBitmap(null);
+
+        bitmap.recycle();
+        bitmap = ss;
+
+        bitmap.setHasAlpha(false);
+        bitmap.prepareToDraw();
+
+        return bitmap;
+    }
+
+    @Override
+    public Bitmap getScaledScreenshotFromApplications() {
+        if (!checkCallingPermission(android.Manifest.permission.READ_FRAME_BUFFER,
+                "screenshotApplications()")) {
+            return null;
+        }
+        Matrix matrix = new Matrix();
+        int rot = getDefaultDisplayContentLocked().getDisplay().getRotation();
+        int minDimension = Math.min(mRealDisplayMetrics.widthPixels, mRealDisplayMetrics.heightPixels);
+        float scaleRatio = 100.0f / minDimension;
+        int dw = Math.round(mRealDisplayMetrics.widthPixels * scaleRatio);
+        int dh = Math.round(mRealDisplayMetrics.heightPixels * scaleRatio);
+        float[] dims = {dw, dh};
+        rot = (rot + mSfHwRotation) % 4;
+        float degrees = getDegreesForRotation(rot);
+        boolean requiresRotation = (degrees > 0);
+        if (requiresRotation) {
+            matrix.reset();
+            matrix.preRotate(-degrees);
+            matrix.mapPoints(dims);
+            dims[0] = Math.abs(dims[0]);
+            dims[1] = Math.abs(dims[1]);
+        }
+
+        Bitmap bitmap = SurfaceControl.screenshot((int) dims[0], (int) dims[1], 0, 22000);
+        if (bitmap == null) {
+            return null;
+        }
+        Bitmap ss = Bitmap.createBitmap(dw, dh, Config.ARGB_8888);
+        Canvas c = new Canvas(ss);
+
+        if (requiresRotation) {
+            c.translate(ss.getWidth() / 2, ss.getHeight() / 2);
+            c.rotate(degrees);
+            c.translate(-dims[0] / 2, -dims[1] / 2);
+        }
+
+        c.drawBitmap(bitmap, 0, 0, null);
+        c.setBitmap(null);
+
+        bitmap.recycle();
+        bitmap = ss;
+
+        bitmap.setHasAlpha(false);
+        bitmap.prepareToDraw();
+
+        return bitmap;
+    }
+
+    @Override
+    public Bitmap getBlurBitmapBackground(int radius) {
+        Bitmap bitmap = getScreenshotFromApplications();
+        if (bitmap == null) {
+            return null;
+        }
+        return ColorUtils.blurBitmap(mContext, bitmap, radius);
+    }
+
+    @Override
+    public int[] getColorFromTopBottomApplication() {
+        Bitmap bitmap = getScaledScreenshotFromApplications();
+        if (bitmap == null) {
+            return new int[] {-3,-3};
+        }
+        int minDimension = Math.min(mRealDisplayMetrics.widthPixels, mRealDisplayMetrics.heightPixels);
+        float scaleRatio = 100.0f / minDimension;
+        int rot = getDefaultDisplayContentLocked().getDisplay().getRotation();
+        rot = (rot + mSfHwRotation) % 4;
+        int statusBar = mPolicy.getStatusbarDisplayHeight();
+        int navbar = mPolicy.getNavigationbarDisplayHeight(mRotation);
+        int h = Math.round((statusBar + navbar) * scaleRatio);
+        int w = Math.round(h * scaleRatio);
+        int x = h;
+        int y = bitmap.getHeight() - (h - w);
+        if (rot == Surface.ROTATION_90 || rot == Surface.ROTATION_270) {
+            x = bitmap.getWidth() - h;
+        }
+        int colorTop = ColorUtils.getMainColorFromBitmap(bitmap, x, h);
+        int colorBottom = ColorUtils.getMainColorFromBitmap(bitmap, x, y);
+        Log.i(TAG, "Screenshot Color From top=" + colorTop + " bottom=" + colorBottom);
+        bitmap.recycle();
+        return new int[] {colorTop, colorBottom};
+    }
+
+    @Override
+    public void sendActionColorBroadcast(int st_color, int ic_color) {
+        mPolicy.sendActionColorBroadcast(st_color, ic_color);
+    }
+
+    @Override
+    public void sendAppColorBroadcast(int duration) {
+        mPolicy.sendAppColorBroadcast(duration);
     }
 }
