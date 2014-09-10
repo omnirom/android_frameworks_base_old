@@ -1259,6 +1259,14 @@ public class PhoneWindowManager implements WindowManagerPolicy {
                         }
                     }
                     @Override
+                    public void onTouchDown() {
+                        sendAppColorBroadcast();
+                    }
+                    @Override
+                    public void onTouchUpCancel() {
+                        sendAppColorBroadcast();
+                    }
+                    @Override
                     public void onDebug() {
                         // no-op
                     }
@@ -6190,6 +6198,21 @@ public class PhoneWindowManager implements WindowManagerPolicy {
                 && (vis & View.SYSTEM_UI_FLAG_HIDE_NAVIGATION) != 0
                 && (vis & flags) != 0
                 && canHideNavigationBar();
+    }
+
+    public int getStatusbarDisplayHeight() {
+        return mStatusBarHeight;
+    }
+
+    public int getNavigationbarDisplayHeight(int rotation) {
+        return mNavigationBarHeightForRotation[rotation];
+    }
+
+    private void sendAppColorBroadcast() {
+        Intent colorIntent = new Intent(Intent.ACTION_ACTIVITY_TOUCH_DETECTOR);
+        colorIntent.addFlags(
+                Intent.FLAG_RECEIVER_REGISTERED_ONLY | Intent.FLAG_RECEIVER_FOREGROUND);
+        mContext.sendBroadcastAsUser(colorIntent, UserHandle.CURRENT_OR_SELF);
     }
 
     /**
