@@ -1,0 +1,44 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "0b49054d_e1ce90b7",
+        "filename": "packages/SystemUI/src/com/android/systemui/appcirclesidebar/AppCircleSidebar.java",
+        "patchSetId": 22
+      },
+      "lineNbr": 56,
+      "author": {
+        "id": 1001071
+      },
+      "writtenOn": "2014-09-12T06:50:21Z",
+      "side": 1,
+      "message": "private AlarmManager mAM;",
+      "revId": "9184aea609a5105931140b561822c5959a8c830b",
+      "serverId": "56841c99-7c94-43d4-bf0b-cb4707e66d55",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "0b49054d_01d47448",
+        "filename": "packages/SystemUI/src/com/android/systemui/appcirclesidebar/AppCircleSidebar.java",
+        "patchSetId": 22
+      },
+      "lineNbr": 455,
+      "author": {
+        "id": 1001071
+      },
+      "writtenOn": "2014-09-12T06:50:21Z",
+      "side": 1,
+      "message": "} derp",
+      "range": {
+        "startLine": 455,
+        "startChar": 20,
+        "endLine": 455,
+        "endChar": 21
+      },
+      "revId": "9184aea609a5105931140b561822c5959a8c830b",
+      "serverId": "56841c99-7c94-43d4-bf0b-cb4707e66d55",
+      "unresolved": false
+    }
+  ]
+}
