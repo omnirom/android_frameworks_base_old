@@ -21,6 +21,7 @@ import android.app.ActivityManagerNative;
 import android.app.IActivityManager;
 import android.app.WallpaperManager;
 import android.content.BroadcastReceiver;
+import android.content.ComponentName;
 import android.content.ContentResolver;
 import android.content.ContentValues;
 import android.content.Context;
@@ -42,6 +43,7 @@ import android.graphics.BitmapFactory;
 import android.media.RingtoneManager;
 import android.net.Uri;
 import android.os.Binder;
+import android.os.Environment;
 import android.os.FileUtils;
 import android.os.Handler;
 import android.os.HandlerThread;
@@ -106,6 +108,7 @@ public class ThemeService extends IThemeService.Stub {
     private class ThemeWorkerHandler extends Handler {
         private static final int MESSAGE_CHANGE_THEME = 1;
         private static final int MESSAGE_APPLY_DEFAULT_THEME = 2;
+        private static final int MESSAGE_BUILD_ICON_CACHE = 3;
 
         public ThemeWorkerHandler(Looper looper) {
             super(looper);
@@ -120,6 +123,9 @@ public class ThemeService extends IThemeService.Stub {
                     break;
                 case MESSAGE_APPLY_DEFAULT_THEME:
                     doApplyDefaultTheme();
+                    break;
+                case MESSAGE_BUILD_ICON_CACHE:
+                    doBuildIconCache();
                     break;
                 default:
                     Log.w(TAG, "Unknown message " + msg.what);
@@ -167,53 +173,71 @@ public class ThemeService extends IThemeService.Stub {
         // TODO: provide progress updates that reflect the time needed for each component
         final int progressIncrement = 75 / componentMap.size();
 
-        updateProvider(componentMap);
-
         if (componentMap.containsKey(ThemesColumns.MODIFIES_ICONS)) {
-            updateIcons(componentMap.get(ThemesColumns.MODIFIES_ICONS));
+            if (!updateIcons(componentMap.get(ThemesColumns.MODIFIES_ICONS))) {
+                componentMap.remove(ThemesColumns.MODIFIES_ICONS);
+            }
             incrementProgress(progressIncrement);
         }
 
         if (componentMap.containsKey(ThemesColumns.MODIFIES_LAUNCHER)) {
             if (updateWallpaper(componentMap.get(ThemesColumns.MODIFIES_LAUNCHER))) {
                 mWallpaperChangedByUs = true;
+            } else {
+                componentMap.remove(ThemesColumns.MODIFIES_LAUNCHER);
             }
             incrementProgress(progressIncrement);
         }
 
         if (componentMap.containsKey(ThemesColumns.MODIFIES_LOCKSCREEN)) {
-            updateLockscreen(componentMap.get(ThemesColumns.MODIFIES_LOCKSCREEN));
+            if (!updateLockscreen(componentMap.get(ThemesColumns.MODIFIES_LOCKSCREEN))) {
+                componentMap.remove(ThemesColumns.MODIFIES_LOCKSCREEN);
+            }
             incrementProgress(progressIncrement);
         }
 
         if (componentMap.containsKey(ThemesColumns.MODIFIES_NOTIFICATIONS)) {
-            updateNotifications(componentMap.get(ThemesColumns.MODIFIES_NOTIFICATIONS));
+            if (!updateNotifications(componentMap.get(ThemesColumns.MODIFIES_NOTIFICATIONS))) {
+                componentMap.remove(ThemesColumns.MODIFIES_NOTIFICATIONS);
+            }
             incrementProgress(progressIncrement);
         }
 
+        Environment.setUserRequired(false);
         if (componentMap.containsKey(ThemesColumns.MODIFIES_ALARMS)) {
-            updateAlarms(componentMap.get(ThemesColumns.MODIFIES_ALARMS));
+            if (!updateAlarms(componentMap.get(ThemesColumns.MODIFIES_ALARMS))) {
+                componentMap.remove(ThemesColumns.MODIFIES_ALARMS);
+            }
             incrementProgress(progressIncrement);
         }
 
         if (componentMap.containsKey(ThemesColumns.MODIFIES_RINGTONES)) {
-            updateRingtones(componentMap.get(ThemesColumns.MODIFIES_RINGTONES));
+            if (!updateRingtones(componentMap.get(ThemesColumns.MODIFIES_RINGTONES))) {
+                componentMap.remove(ThemesColumns.MODIFIES_RINGTONES);
+            }
             incrementProgress(progressIncrement);
         }
 
         if (componentMap.containsKey(ThemesColumns.MODIFIES_BOOT_ANIM)) {
-            updateBootAnim(componentMap.get(ThemesColumns.MODIFIES_BOOT_ANIM));
+            if (!updateBootAnim(componentMap.get(ThemesColumns.MODIFIES_BOOT_ANIM))) {
+                componentMap.remove(ThemesColumns.MODIFIES_BOOT_ANIM);
+            }
+            incrementProgress(progressIncrement);
+        }
+        Environment.setUserRequired(true);
+
+        if (componentMap.containsKey(ThemesColumns.MODIFIES_FONTS)) {
+            if (!updateFonts(componentMap.get(ThemesColumns.MODIFIES_FONTS))) {
+                componentMap.remove(ThemesColumns.MODIFIES_FONTS);
+            }
             incrementProgress(progressIncrement);
         }
 
-        if (componentMap.containsKey(ThemesColumns.MODIFIES_FONTS)) {
-            updateFonts(componentMap.get(ThemesColumns.MODIFIES_FONTS));
-            incrementProgress(progressIncrement);
-        }
+        updateProvider(componentMap);
 
         updateConfiguration(componentMap);
 
-        killLaunchers();
+        killLaunchers(componentMap);
 
         postFinish(true, componentMap);
         mIsThemeApplying = false;
@@ -260,13 +284,20 @@ public class ThemeService extends IThemeService.Stub {
         }
     }
 
-    private void updateIcons(String pkgName) {
-        PackageManager pm = mContext.getPackageManager();
-        if (pkgName.equals(HOLO_DEFAULT)) {
-            pm.updateIconMaps(null);
-        } else {
-            pm.updateIconMaps(pkgName);
+    private boolean updateIcons(String pkgName) {
+        try {
+            PackageManager pm = mContext.getPackageManager();
+            if (pkgName.equals(HOLO_DEFAULT)) {
+                pm.updateIconMaps(null);
+            } else {
+                pm.updateIconMaps(pkgName);
+                mHandler.sendEmptyMessage(ThemeWorkerHandler.MESSAGE_BUILD_ICON_CACHE);
+            }
+        } catch (Exception e) {
+            Log.w(TAG, "Changing icons failed", e);
+            return false;
         }
+        return true;
     }
 
     private boolean updateFonts(String pkgName) {
@@ -316,9 +347,11 @@ public class ThemeService extends IThemeService.Stub {
         return true;
     }
 
-    private void updateBootAnim(String pkgName) {
-        clearBootAnimation();
-        if (HOLO_DEFAULT.equals(pkgName)) return;
+    private boolean updateBootAnim(String pkgName) {
+        if (HOLO_DEFAULT.equals(pkgName)) {
+            clearBootAnimation();
+            return true;
+        }
 
         PackageManager pm = mContext.getPackageManager();
         try {
@@ -326,7 +359,9 @@ public class ThemeService extends IThemeService.Stub {
             applyBootAnimation(ai.sourceDir);
         } catch (PackageManager.NameNotFoundException e) {
             Log.w(TAG, "Changing boot animation failed", e);
+            return false;
         }
+        return true;
     }
 
     private boolean updateAlarms(String pkgName) {
@@ -456,7 +491,7 @@ public class ThemeService extends IThemeService.Stub {
     }
 
     private boolean updateLockscreen(String pkgName) {
-        boolean success = false;
+        boolean success;
         success = setCustomLockScreenWallpaper(pkgName);
 
         if (success) {
@@ -467,11 +502,14 @@ public class ThemeService extends IThemeService.Stub {
     }
 
     private boolean setCustomLockScreenWallpaper(String pkgName) {
+        WallpaperManager wm = WallpaperManager.getInstance(mContext);
         try {
             if (HOLO_DEFAULT.equals(pkgName)) {
                 final Bitmap bmp = BitmapFactory.decodeResource(mContext.getResources(),
                         com.android.internal.R.drawable.default_wallpaper);
-                WallpaperManager.getInstance(mContext).setKeyguardBitmap(bmp);
+                wm.setKeyguardBitmap(bmp);
+            } else if (TextUtils.isEmpty(pkgName)) {
+                wm.clearKeyguardWallpaper();
             } else {
                 //Get input WP stream from the theme
                 Context themeCtx = mContext.createPackageContext(pkgName,
@@ -485,7 +523,7 @@ public class ThemeService extends IThemeService.Stub {
                 InputStream is = ThemeUtils.getInputStreamFromAsset(themeCtx,
                         "file:///android_asset/" + wpPath);
 
-                WallpaperManager.getInstance(mContext).setKeyguardStream(is);
+                wm.setKeyguardStream(is);
             }
         } catch (Exception e) {
             Log.e(TAG, "There was an error setting lockscreen wp for pkg " + pkgName, e);
@@ -495,18 +533,28 @@ public class ThemeService extends IThemeService.Stub {
     }
 
     private boolean updateWallpaper(String pkgName) {
-        String selection = ThemesContract.ThemesColumns.PKG_NAME + "= ?";
+        String selection = ThemesColumns.PKG_NAME + "= ?";
         String[] selectionArgs = { pkgName };
-        Cursor c = mContext.getContentResolver().query(ThemesContract.MixnMatchColumns.CONTENT_URI,
+        Cursor c = mContext.getContentResolver().query(ThemesColumns.CONTENT_URI,
                 null, selection,
                 selectionArgs, null);
         c.moveToFirst();
-
+        WallpaperManager wm = WallpaperManager.getInstance(mContext);
         if (HOLO_DEFAULT.equals(pkgName)) {
             try {
-                WallpaperManager.getInstance(mContext).clear();
+                wm.clear();
             } catch (IOException e) {
                 return false;
+            } finally {
+                c.close();
+            }
+        } else if (TextUtils.isEmpty(pkgName)) {
+            try {
+                wm.clear(false);
+            } catch (IOException e) {
+                return false;
+            } finally {
+                c.close();
             }
         } else {
             InputStream in = null;
@@ -514,10 +562,10 @@ public class ThemeService extends IThemeService.Stub {
                 Context themeContext = mContext.createPackageContext(pkgName,
                         Context.CONTEXT_IGNORE_SECURITY);
                 boolean isLegacyTheme = c.getInt(
-                        c.getColumnIndex(ThemesContract.ThemesColumns.IS_LEGACY_THEME)) == 1;
+                        c.getColumnIndex(ThemesColumns.IS_LEGACY_THEME)) == 1;
                 if (!isLegacyTheme) {
                     String wallpaper = c.getString(
-                            c.getColumnIndex(ThemesContract.ThemesColumns.WALLPAPER_URI));
+                                c.getColumnIndex(ThemesColumns.WALLPAPER_URI));
                     if (wallpaper != null) {
                         if (URLUtil.isAssetUrl(wallpaper)) {
                             in = ThemeUtils.getInputStreamFromAsset(themeContext, wallpaper);
@@ -538,13 +586,15 @@ public class ThemeService extends IThemeService.Stub {
                         in = ThemeUtils.getInputStreamFromAsset(themeCtx, "file:///android_asset/"
                                 + wpPath);
                     }
-                    WallpaperManager.getInstance(mContext).setStream(in);
+                    wm.setStream(in);
                 } else {
                     PackageManager pm = mContext.getPackageManager();
                     PackageInfo pi = pm.getPackageInfo(pkgName, 0);
                     if (pi.legacyThemeInfos != null && pi.legacyThemeInfos.length > 0) {
-                        WallpaperManager.getInstance(themeContext)
-                                .setResource(pi.legacyThemeInfos[0].wallpaperResourceId);
+                        // we need to get an instance of the WallpaperManager using the theme's
+                        // context so it can retrieve the resource
+                        wm = WallpaperManager.getInstance(themeContext);
+                        wm.setResource(pi.legacyThemeInfos[0].wallpaperResourceId);
                     } else {
                         return false;
                     }
@@ -553,6 +603,7 @@ public class ThemeService extends IThemeService.Stub {
                 return false;
             } finally {
                 ThemeUtils.closeQuietly(in);
+                c.close();
             }
         }
         return true;
@@ -627,7 +678,12 @@ public class ThemeService extends IThemeService.Stub {
 
     // Kill the current Home process, they tend to be evil and cache
     // drawable references in all apps
-    private void killLaunchers() {
+    private void killLaunchers(Map<String, String> componentMap) {
+        if (!(componentMap.containsKey(ThemesColumns.MODIFIES_ICONS)
+                || componentMap.containsKey(ThemesColumns.MODIFIES_OVERLAYS))) {
+            return;
+        }
+
         final ActivityManager am =
                 (ActivityManager) mContext.getSystemService(Context.ACTIVITY_SERVICE);
         final PackageManager pm = mContext.getPackageManager();
@@ -863,4 +919,20 @@ public class ThemeService extends IThemeService.Stub {
             return (int) (lhs.lastModified() - rhs.lastModified());
         }
     };
+
+    private void doBuildIconCache() {
+        PackageManager pm = mContext.getPackageManager();
+        Intent mainIntent = new Intent(Intent.ACTION_MAIN, null);
+        mainIntent.addCategory(Intent.CATEGORY_LAUNCHER);
+
+        List<ResolveInfo> infos = pm.queryIntentActivities(mainIntent, 0);
+        for(ResolveInfo info : infos) {
+            try {
+                pm.getActivityIcon(new ComponentName(info.activityInfo.packageName,
+                        info.activityInfo.name));
+            } catch (Exception e) {
+                Log.w(TAG, "Unable to fetch icon for " + info, e);
+            }
+        }
+    }
 }

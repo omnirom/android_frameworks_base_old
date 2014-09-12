@@ -21,8 +21,8 @@
     <integer name="def_screen_off_timeout">60000</integer>
     <bool name="def_airplane_mode_on">false</bool>
     <!-- Comma-separated list of bluetooth, wifi, and cell. -->
-    <string name="def_airplane_mode_radios" translatable="false">cell,bluetooth,wifi,nfc,wimax</string>
-    <string name="airplane_mode_toggleable_radios" translatable="false">bluetooth,wifi,nfc</string>
+    <string name="def_airplane_mode_radios" translatable="false">cell,bluetooth,wifi,nfc,wimax,ant</string>
+    <string name="airplane_mode_toggleable_radios" translatable="false">bluetooth,wifi,nfc,ant</string>
     <bool name="def_auto_time">true</bool>
     <bool name="def_auto_time_zone">true</bool>
     <bool name="def_accelerometer_rotation">true</bool>
@@ -184,6 +184,9 @@
 
     <!-- Default for Settings.Global.WIFI_SUSPEND_OPTIMIZATIONS_ENABLED -->
     <integer name="def_wifi_suspend_optimizations_enabled">1</integer>
+
+    <!-- Default for Settings.Global.SEND_ACTION_APP_ERROR -->
+    <integer name="def_send_action_app_error">0</integer>
 
     <!-- Default for Settings.System.STATUS_BAR_BATTERY -->
     <integer name="def_battery_style">0</integer>

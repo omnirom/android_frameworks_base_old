@@ -17,6 +17,7 @@
 package android.content.res;
 
 import android.app.ComposedIconInfo;
+import android.app.IconPackHelper;
 import com.android.internal.util.XmlUtils;
 
 import org.xmlpull.v1.XmlPullParser;
@@ -1184,8 +1185,8 @@ public class Resources {
         }
         boolean found = mAssets.getResourceValue(id, 0, outValue, resolveRefs);
         if (found) {
-            if (supportComposedIcons && mComposedIconInfo != null && info != null &&
-                    info.themedIcon == 0) {
+            if (supportComposedIcons && IconPackHelper.shouldComposeIcon(mComposedIconInfo)
+                    && info != null && info.themedIcon == 0) {
                 Drawable dr = loadDrawable(outValue, id);
                 IconCustomizer.getValue(this, id, outValue, dr);
             }
@@ -1222,9 +1223,29 @@ public class Resources {
         }
         boolean found = mAssets.getResourceValue(id, density, outValue, resolveRefs);
         if (found) {
-            if (supportComposedIcons && mComposedIconInfo != null && info != null &&
-                    info.themedIcon == 0) {
+            if (supportComposedIcons && IconPackHelper.shouldComposeIcon(mComposedIconInfo) &&
+                    info != null && info.themedIcon == 0) {
+                int tmpDensity = outValue.density;
+                /*
+                 * Pretend the requested density is actually the display density. If
+                 * the drawable returned is not the requested density, then force it
+                 * to be scaled later by dividing its density by the ratio of
+                 * requested density to actual device density. Drawables that have
+                 * undefined density or no density don't need to be handled here.
+                 */
+                if (outValue.density > 0 && outValue.density != TypedValue.DENSITY_NONE) {
+                    if (outValue.density == density) {
+                        outValue.density = mMetrics.densityDpi;
+                    } else {
+                        outValue.density = (outValue.density * mMetrics.densityDpi) / density;
+                    }
+                }
                 Drawable dr = loadDrawable(outValue, id);
+
+                // Return to original density. If we do not do this then
+                // the caller will get the wrong density for the given id and perform
+                // more of its own scaling in loadDrawable
+                outValue.density = tmpDensity;
                 IconCustomizer.getValue(this, id, outValue, dr);
             }
             return;
@@ -2096,14 +2117,19 @@ public class Resources {
         return sPreloadedDrawables[0];
     }
 
+    static private final int CONFIG_FONT_SCALE = ActivityInfo.activityInfoConfigToNative(
+            ActivityInfo.CONFIG_FONT_SCALE);
+    static private final int CONFIG_DENSITY = ActivityInfo.activityInfoConfigToNative(
+            ActivityInfo.CONFIG_DENSITY);
+    static private final int SPEC_PUBLIC = 0x40000000;
+
     private boolean verifyPreloadConfig(int changingConfigurations, int allowVarying,
             int resourceId, String name) {
         // We allow preloading of resources even if they vary by font scale (which
         // doesn't impact resource selection) or density (which we handle specially by
         // simply turning off all preloading), as well as any other configs specified
         // by the caller.
-        if (((changingConfigurations&~(ActivityInfo.CONFIG_FONT_SCALE |
-                ActivityInfo.CONFIG_DENSITY)) & ~allowVarying) != 0) {
+        if (((changingConfigurations&~(CONFIG_FONT_SCALE | CONFIG_DENSITY | SPEC_PUBLIC)) & ~allowVarying) != 0) {
             String resName;
             try {
                 resName = getResourceName(resourceId);

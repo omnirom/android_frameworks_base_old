@@ -5,6 +5,7 @@ import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.Intent;
 import android.content.pm.PackageManager;
+import android.hardware.Camera;
 import android.hardware.ITorchService;
 import android.os.Binder;
 import android.os.Handler;
@@ -26,8 +27,9 @@ public class TorchService extends ITorchService.Stub {
     private final Context mContext;
     private int mTorchAppUid = 0;
     private int mTorchAppCameraId = -1;
-    private SparseArray<CameraUserRecord> mCamerasInUse;
-    private Object mStopTorchLock = new Object();
+    private final SparseArray<CameraUserRecord> mCamerasInUse;
+    private final Object mStopTorchLock = new Object();
+    private boolean mTorchUsingSysfs;
 
     private static class CameraUserRecord {
         IBinder token;
@@ -44,6 +46,7 @@ public class TorchService extends ITorchService.Stub {
     private BroadcastReceiver mStopTorchDoneReceiver = new BroadcastReceiver() {
         @Override
         public void onReceive(Context context, Intent intent) {
+            if (DEBUG) Log.d(TAG, "Torch shutdown broadcast completed");
             synchronized (mStopTorchLock) {
                 mStopTorchLock.notify();
             }
@@ -57,54 +60,115 @@ public class TorchService extends ITorchService.Stub {
 
     @Override
     public void onCameraOpened(final IBinder token, final int cameraId) {
-        if (DEBUG) Log.d(TAG, "onCameraOpened()");
-        if (mTorchAppUid != 0 && Binder.getCallingUid() == mTorchAppUid) {
-            if (DEBUG) Log.d(TAG, "camera was opened by torch app");
-            mTorchAppCameraId = cameraId;
-        } else {
-            if (DEBUG) Log.d(TAG, "killing torch");
-            // As a synchronous broadcast is an expensive operation, only
-            // attempt to kill torch if it actually grabbed the camera before
-            if (cameraId == mTorchAppCameraId && mCamerasInUse.get(cameraId) != null) {
-                shutdownTorch();
+        if (DEBUG) Log.d(TAG, "onCameraOpened(token= " + token + ", cameraId=" + cameraId + ")");
+        boolean needTorchShutdown = false;
+
+        synchronized (mCamerasInUse) {
+            if (mTorchAppUid != 0 && Binder.getCallingUid() == mTorchAppUid) {
+                if (DEBUG) Log.d(TAG, "Camera was opened by torch app");
+                mTorchAppCameraId = cameraId;
+            } else {
+                // As a synchronous broadcast is an expensive operation, only
+                // attempt to kill torch if it actually grabbed the camera before
+                if (cameraId == mTorchAppCameraId) {
+                    if (mTorchUsingSysfs || mCamerasInUse.get(cameraId) != null) {
+                        if (DEBUG) Log.d(TAG, "Need to kill torch");
+                        needTorchShutdown = true;
+                    }
+                }
             }
         }
+
+        // Shutdown torch outside of lock - torch shutdown will call into onCameraClosed()
+        if (needTorchShutdown) {
+            shutdownTorch();
+        }
+
         try {
             token.linkToDeath(new IBinder.DeathRecipient() {
                 @Override
                 public void binderDied() {
-                    CameraUserRecord record = mCamerasInUse.get(cameraId);
-                    if (record != null && record.token == token) {
+                    synchronized (mCamerasInUse) {
                         if (DEBUG) Log.d(TAG, "Camera " + cameraId + " client died");
-                        mCamerasInUse.delete(cameraId);
+                        removeCameraUserLocked(token, cameraId);
                     }
                 }
             }, 0);
-            mCamerasInUse.put(cameraId, new CameraUserRecord(token));
+            synchronized (mCamerasInUse) {
+                mCamerasInUse.put(cameraId, new CameraUserRecord(token));
+            }
         } catch (RemoteException e) {
             // ignore, already dead
         }
     }
 
     @Override
-    public void onCameraClosed(int cameraId) {
-        mCamerasInUse.delete(cameraId);
-        if (cameraId == mTorchAppCameraId) {
-            mTorchAppCameraId = -1;
+    public void onCameraClosed(final IBinder token, int cameraId) {
+        if (DEBUG) Log.d(TAG, "onCameraClosed(token=" + token + ", cameraId=" + cameraId + ")");
+        synchronized (mCamerasInUse) {
+            removeCameraUserLocked(token, cameraId);
+            if (cameraId == mTorchAppCameraId && Binder.getCallingUid() == mTorchAppUid) {
+                mTorchAppCameraId = -1;
+            }
         }
     }
 
     @Override
     public boolean onStartingTorch(int cameraId) {
-        if (DEBUG) Log.d(TAG, "onStartingTorch()");
-        mTorchAppUid = Binder.getCallingUid();
-        if (cameraId == mTorchAppCameraId) {
+        if (DEBUG) Log.d(TAG, "onStartingTorch(cameraId=" + cameraId + ")");
+        synchronized (mCamerasInUse) {
+            mTorchAppUid = Binder.getCallingUid();
+            if (cameraId >= 0) {
+                if (cameraId == mTorchAppCameraId) {
+                    return true;
+                }
+                return mCamerasInUse.get(cameraId) == null;
+            }
+
+            // cameraId < 0 means torch is using sysfs
+            cameraId = getBackFacingCameraId();
+            if (mCamerasInUse.get(cameraId) != null) {
+                return false;
+            }
+            mTorchUsingSysfs = true;
+            mTorchAppCameraId = cameraId;
             return true;
         }
-        return mCamerasInUse.get(cameraId) == null;
+    }
+
+    @Override
+    public void onStopTorch() {
+        if (DEBUG) Log.d(TAG, "onStopTorch()");
+        synchronized (mCamerasInUse) {
+            if (mTorchUsingSysfs) {
+                mTorchAppCameraId = -1;
+            }
+            mTorchUsingSysfs = false;
+        }
+    }
+
+    private int getBackFacingCameraId() {
+        int numberOfCameras = Camera.getNumberOfCameras();
+        Camera.CameraInfo cameraInfo = new Camera.CameraInfo();
+        for (int i = 0; i < numberOfCameras; i++) {
+            Camera.getCameraInfo(i, cameraInfo);
+            if (cameraInfo.facing == Camera.CameraInfo.CAMERA_FACING_BACK) {
+                return i;
+            }
+        }
+        return 0;
+    }
+
+    private void removeCameraUserLocked(IBinder token, int cameraId) {
+        CameraUserRecord record = mCamerasInUse.get(cameraId);
+        if (record != null && record.token == token) {
+            if (DEBUG) Log.d(TAG, "Removing camera user " + token);
+            mCamerasInUse.delete(cameraId);
+        }
     }
 
     private void shutdownTorch() {
+        if (DEBUG) Log.d(TAG, "shutdownTorch()");
         // Ordered broadcasts are asynchronous (they only guarantee the order between
         // receivers), so make them synchronous manually by executing the broadcast in a
         // background thread and blocking the calling thread until the broadcast is done
@@ -114,9 +178,10 @@ public class TorchService extends ITorchService.Stub {
 
         Intent i = new Intent("net.cactii.flash2.TOGGLE_FLASHLIGHT");
         i.putExtra("stop", true);
+        i.addFlags(Intent.FLAG_FROM_BACKGROUND | Intent.FLAG_RECEIVER_FOREGROUND);
 
         synchronized (mStopTorchLock) {
-            if (DEBUG) Log.v(TAG, "sending torch shutdown broadcast");
+            if (DEBUG) Log.v(TAG, "Sending torch shutdown broadcast");
             mContext.sendOrderedBroadcastAsUser(i, UserHandle.CURRENT_OR_SELF, null,
                     mStopTorchDoneReceiver, handler, Activity.RESULT_OK, null, null);
 
@@ -127,7 +192,7 @@ public class TorchService extends ITorchService.Stub {
             }
         }
         stopTorchThread.quit();
-        if (DEBUG) Log.v(TAG, "torch shutdown completed");
+        if (DEBUG) Log.v(TAG, "Torch shutdown completed");
     }
 
     @Override
@@ -153,5 +218,7 @@ public class TorchService extends ITorchService.Stub {
             pw.println("): pid=" + record.pid + "; package=" + TextUtils.join(",", packages));
         }
         pw.println("  mTorchAppUid=" + mTorchAppUid);
+        pw.println("  mTorchAppCameraId=" + mTorchAppCameraId);
+        pw.println("  mTorchUsingSysfs=" + mTorchUsingSysfs);
     }
 }
