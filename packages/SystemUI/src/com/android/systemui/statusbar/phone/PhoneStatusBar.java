@@ -220,6 +220,7 @@ public class PhoneStatusBar extends BaseStatusBar implements DemoMode {
     ClockCenter mClockCenter;
     View mCenterSpacer;
     NetworkTraffic mNetworkTraffic;
+    private boolean showClockOnLockscreen = false;
 
     private BatteryMeterView mBattery;
     private BatteryCircleMeterView mCircleBattery;
@@ -361,6 +362,8 @@ public class PhoneStatusBar extends BaseStatusBar implements DemoMode {
                     Settings.System.STATUS_BAR_CUSTOM_HEADER), false, this, UserHandle.USER_ALL);
             resolver.registerContentObserver(Settings.System.getUriFor(
                     Settings.System.NAVIGATION_BAR_SHOW), false, this, UserHandle.USER_ALL);
+            resolver.registerContentObserver(Settings.System.getUriFor(
+                    Settings.System.STATUS_BAR_CLOCK_LOCKSCREEN), false, this, UserHandle.USER_ALL);
 
             update();
         }
@@ -386,6 +389,9 @@ public class PhoneStatusBar extends BaseStatusBar implements DemoMode {
             int showNavBar = Settings.System.getIntForUser(
                     resolver, Settings.System.NAVIGATION_BAR_SHOW, -1
                     , UserHandle.USER_CURRENT);
+            showClockOnLockscreen = Settings.System.getIntForUser(
+                    resolver, Settings.System.STATUS_BAR_CLOCK_LOCKSCREEN, 0
+                    , UserHandle.USER_CURRENT) == 1;
             if (showNavBar != -1){
                 boolean showNavBarBool = showNavBar == 1;
                 if (showNavBarBool !=  mShowNavBar){
@@ -1614,7 +1620,7 @@ public class PhoneStatusBar extends BaseStatusBar implements DemoMode {
         }
 
         if ((diff & StatusBarManager.DISABLE_CLOCK) != 0) {
-            boolean show = (state & StatusBarManager.DISABLE_CLOCK) == 0;
+            boolean show = ((state & StatusBarManager.DISABLE_CLOCK) == 0) || showClockOnLockscreen;
             showClock(show);
         }
         if ((diff & StatusBarManager.DISABLE_EXPAND) != 0) {
