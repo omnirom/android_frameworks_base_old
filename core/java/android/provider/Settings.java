@@ -3163,6 +3163,13 @@ public final class Settings {
         public static final String STATUS_BAR_NOTIF_COUNT = "status_bar_notif_count";
 
         /**
+         * Show the carrier logo on the status bar
+         * @hide
+         */
+
+        public static final String STATUS_BAR_CARRIER_LOGO = "status_bar_carrier_logo";
+
+        /**
          * option for tinted statusbar
          * 0 = disabled
          * 1 = follow actionbar
