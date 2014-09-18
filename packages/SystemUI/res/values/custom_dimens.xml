@@ -58,6 +58,9 @@
     <!-- Quick Settings tile geometry: text size for 5 tile or above per row-->
     <dimen name="qs_5_column_text_size">8sp</dimen>
 
+    <!-- Statusbar Carrier Logo -->
+    <dimen name="status_bar_carrier_logo_size">20sp</dimen>
+
     <!-- Network traffic monitor single-line text size -->
     <dimen name="net_traffic_single_text_size">12dp</dimen>
 
