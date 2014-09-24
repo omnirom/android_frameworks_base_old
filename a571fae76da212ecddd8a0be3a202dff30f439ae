@@ -1,0 +1,50 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "cb528df8_3360f2fd",
+        "filename": "packages/SystemUI/src/com/android/systemui/statusbar/policy/NetworkController.java",
+        "patchSetId": 4
+      },
+      "lineNbr": 1424,
+      "author": {
+        "id": 1000026
+      },
+      "writtenOn": "2014-09-24T13:35:47Z",
+      "side": 1,
+      "message": "why all those ( ) around replace arguments in replace???",
+      "range": {
+        "startLine": 1424,
+        "startChar": 32,
+        "endLine": 1424,
+        "endChar": 39
+      },
+      "revId": "a571fae76da212ecddd8a0be3a202dff30f439ae",
+      "serverId": "56841c99-7c94-43d4-bf0b-cb4707e66d55",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "cb528df8_535d7648",
+        "filename": "packages/SystemUI/src/com/android/systemui/statusbar/policy/NetworkController.java",
+        "patchSetId": 4
+      },
+      "lineNbr": 1437,
+      "author": {
+        "id": 1000026
+      },
+      "writtenOn": "2014-09-24T13:35:47Z",
+      "side": 1,
+      "message": "it is already lower case - no need to do it twice :)",
+      "range": {
+        "startLine": 1437,
+        "startChar": 14,
+        "endLine": 1437,
+        "endChar": 15
+      },
+      "revId": "a571fae76da212ecddd8a0be3a202dff30f439ae",
+      "serverId": "56841c99-7c94-43d4-bf0b-cb4707e66d55",
+      "unresolved": false
+    }
+  ]
+}
