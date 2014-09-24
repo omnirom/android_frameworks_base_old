@@ -43,6 +43,24 @@
     },
     {
       "key": {
+        "uuid": "cb528df8_b675b095",
+        "filename": "packages/SystemUI/src/com/android/systemui/statusbar/policy/NetworkController.java",
+        "patchSetId": 4
+      },
+      "lineNbr": 1424,
+      "author": {
+        "id": 1000026
+      },
+      "writtenOn": "2014-09-24T20:30:56Z",
+      "side": 1,
+      "message": "I mean that the () are actually unneeded",
+      "parentUuid": "cb528df8_13112e61",
+      "revId": "a571fae76da212ecddd8a0be3a202dff30f439ae",
+      "serverId": "56841c99-7c94-43d4-bf0b-cb4707e66d55",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "cb528df8_535d7648",
         "filename": "packages/SystemUI/src/com/android/systemui/statusbar/policy/NetworkController.java",
         "patchSetId": 4
