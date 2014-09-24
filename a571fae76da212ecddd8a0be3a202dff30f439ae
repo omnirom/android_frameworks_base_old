@@ -25,6 +25,24 @@
     },
     {
       "key": {
+        "uuid": "cb528df8_13112e61",
+        "filename": "packages/SystemUI/src/com/android/systemui/statusbar/policy/NetworkController.java",
+        "patchSetId": 4
+      },
+      "lineNbr": 1424,
+      "author": {
+        "id": 1000313
+      },
+      "writtenOn": "2014-09-24T14:33:43Z",
+      "side": 1,
+      "message": "example:\n\n\"AT\u0026T\" \u003d\u003e \"att\"\n\n\"Xl\u003cspace\u003eAxiata\" \u003d\u003e \"xlax\"\n\n\"1\u003cdot\u003e1\" \u003d\u003e \"1_1\"\n\n\"\u003cstar\u003eBliep\" \u003d\u003e \"blie\"\n\n\"cHat-r\" \u003d\u003e \"chat\"\n\n\"Pay\u0026Go\" \u003d\u003e \"pay_\"\n\n\"@Tuen\" \u003d\u003e \"tuen\"\n\nsince this a random word, so i make like this\n\nany idea to make this simple? xD",
+      "parentUuid": "cb528df8_3360f2fd",
+      "revId": "a571fae76da212ecddd8a0be3a202dff30f439ae",
+      "serverId": "56841c99-7c94-43d4-bf0b-cb4707e66d55",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "cb528df8_535d7648",
         "filename": "packages/SystemUI/src/com/android/systemui/statusbar/policy/NetworkController.java",
         "patchSetId": 4
@@ -42,6 +60,24 @@
         "endLine": 1437,
         "endChar": 15
       },
+      "revId": "a571fae76da212ecddd8a0be3a202dff30f439ae",
+      "serverId": "56841c99-7c94-43d4-bf0b-cb4707e66d55",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "cb528df8_b32142b0",
+        "filename": "packages/SystemUI/src/com/android/systemui/statusbar/policy/NetworkController.java",
+        "patchSetId": 4
+      },
+      "lineNbr": 1437,
+      "author": {
+        "id": 1000313
+      },
+      "writtenOn": "2014-09-24T14:33:43Z",
+      "side": 1,
+      "message": "just in case xD",
+      "parentUuid": "cb528df8_535d7648",
       "revId": "a571fae76da212ecddd8a0be3a202dff30f439ae",
       "serverId": "56841c99-7c94-43d4-bf0b-cb4707e66d55",
       "unresolved": false
