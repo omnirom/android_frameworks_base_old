@@ -1061,6 +1061,10 @@ public class Activity extends ContextThemeWrapper
                 if (reload && mActionBar.isShowing()) {
                     mActionBar.changeColorFromActionBar();
                 }
+            } else {
+                if (reload) {
+                    sendActionColorBroadcast(-3, -3);
+                }
             }
             if (reload) {
                 sendAppColorBroadcast(duration);
