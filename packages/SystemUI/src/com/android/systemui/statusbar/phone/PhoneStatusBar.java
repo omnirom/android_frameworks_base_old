@@ -330,7 +330,7 @@ public class PhoneStatusBar extends BaseStatusBar implements DemoMode {
     private boolean mColorFilterEnabled = false;
     private boolean mStatusbarIsReset = true;
     private boolean mNavbarIsReset = true;
-    private boolean mTintedNeedReset = false;
+    private boolean mTintedNeedReset = true;
     private boolean mImeStatusShow = false;
     private boolean mSystemUIOpaque = false;
     private int mStatusbarTransparent = 0;
