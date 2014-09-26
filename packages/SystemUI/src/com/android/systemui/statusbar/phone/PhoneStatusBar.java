@@ -2696,16 +2696,18 @@ public class PhoneStatusBar extends BaseStatusBar implements DemoMode {
                 altBack ? (mNavigationIconHints | NAVIGATION_HINT_BACK_ALT)
                         : (mNavigationIconHints & ~NAVIGATION_HINT_BACK_ALT));
         if (mQS != null) mQS.setImeWindowStatus(vis > 0);
-        if (mImeStatusShow) {
-            mImeStatusShow = altBack;
-            setSystemUIBackgroundColor(300);
-        } else {
-            mHandler.postDelayed(new Runnable() {
-                  @Override
-                  public void run() {
-                      mImeStatusShow = altBack;
-                  }
-            }, AUTOHIDE_TIMEOUT_MS);
+        if (mCurrentColorProgress != 0) {
+            if (mImeStatusShow) {
+                mImeStatusShow = altBack;
+                setSystemUIBackgroundColor(300);
+            } else {
+                mHandler.postDelayed(new Runnable() {
+                     @Override
+                     public void run() {
+                         mImeStatusShow = altBack;
+                     }
+                }, AUTOHIDE_TIMEOUT_MS);
+            }
         }
     }
 
