@@ -3281,7 +3281,9 @@ public class PhoneStatusBar extends BaseStatusBar implements DemoMode {
     public void sendActionColorBroadcast(int st_color, int ic_color) {
         if (mCurrentColorProgress != 0) {
             mPackageActbar = st_color;
-            mPackageIcSt = ic_color;
+            if (st_color != -3) {
+                mPackageIcSt = ic_color;
+            }
         }
     }
 
@@ -3373,6 +3375,7 @@ public class PhoneStatusBar extends BaseStatusBar implements DemoMode {
         if (!mTintedNeedReset) {
             return;
         }
+        Log.w(TAG, "Reset tinted statusbar");
         mTintedNeedReset = false;
         mHandler.removeCallbacks(mSetColorFromScreenShotRunnable);
         mHandler.removeCallbacks(mTintedStatusbarRunnable);
@@ -3393,7 +3396,6 @@ public class PhoneStatusBar extends BaseStatusBar implements DemoMode {
         if (mPercentBattery != null) {
             mPercentBattery.updateSettings();
         }
-        Log.w(TAG, "Reset tinted statusbar");
     }
 
     private void setSystemUIBackgroundGradient(boolean force) {
@@ -3414,7 +3416,6 @@ public class PhoneStatusBar extends BaseStatusBar implements DemoMode {
             if (mStatusbarTransparent < 100) {
                 mPackageSt = ColorUtils.changeColorTransparency(mPackageSt, mStatusbarTransparent);
             }
-            Log.w(TAG, "process statusbar color");
             mStatusBarView.getBarTransitions().changeColorIconBackground(mPackageSt, mPackageIcSt);
             int colorFromStatusbar = mStatusBarView.getPhoneStatusBarTransitions().getCurrentIconColor();
             boolean shouldChange = (colorFromStatusbar != -3);
@@ -3445,7 +3446,6 @@ public class PhoneStatusBar extends BaseStatusBar implements DemoMode {
             if (mNavbarTransparent < 100) {
                 mPackageNv = ColorUtils.changeColorTransparency(mPackageNv, mNavbarTransparent);
             }
-            Log.w(TAG, "process navbar color");
             mNavigationBarView.getBarTransitions().changeColorIconBackground(mPackageNv, mPackageIcSt);
         }
         if (mStatBackgroundMode || mNavBackgroundMode) {

@@ -39,6 +39,7 @@ import com.android.internal.util.omni.ColorUtils;
 public class BarTransitions {
     private static final boolean DEBUG = false;
     private static final boolean DEBUG_COLORS = false;
+    private static final boolean DEBUG_TINTED = true;
 
     public static final boolean HIGH_END = ActivityManager.isHighEndGfx();
 
@@ -116,6 +117,7 @@ public class BarTransitions {
     public void changeColorIconBackground(int bg_color, int ic_color) {
         if (HIGH_END) {
             mBarBackground.applyColorBackground(bg_color);
+            if (DEBUG_TINTED) Log.w(mTag, "process background color");
         }
     }
 
