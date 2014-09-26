@@ -1,0 +1,21 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "cb528df8_36d380da",
+        "filename": "packages/SystemUI/src/com/android/systemui/statusbar/phone/PhoneStatusBar.java",
+        "patchSetId": 1
+      },
+      "lineNbr": 3285,
+      "author": {
+        "id": 1000313
+      },
+      "writtenOn": "2014-09-26T16:00:28Z",
+      "side": 1,
+      "message": "mPackageIcSt will keep value from previouse app if support action bar\n\nNeed to reset this if App doesnt support action bar",
+      "revId": "76a0efe6c99ff8a2378171afdc88b09fd992c6e9",
+      "serverId": "56841c99-7c94-43d4-bf0b-cb4707e66d55",
+      "unresolved": false
+    }
+  ]
+}
