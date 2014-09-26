@@ -11061,7 +11061,6 @@ public class WindowManagerService extends IWindowManager.Stub
         }
         int colorTop = ColorUtils.getMainColorFromBitmap(bitmap, x, h);
         int colorBottom = ColorUtils.getMainColorFromBitmap(bitmap, x, y);
-        Log.i(TAG, "Screenshot Color From top=" + colorTop + " bottom=" + colorBottom);
         bitmap.recycle();
         return new int[] {colorTop, colorBottom};
     }
