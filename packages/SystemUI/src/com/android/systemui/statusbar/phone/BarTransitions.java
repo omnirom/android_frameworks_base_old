@@ -164,6 +164,7 @@ public class BarTransitions {
                 mOpaque = res.getColor(R.color.system_bar_background_opaque);
                 mSemiTransparent = res.getColor(R.color.system_bar_background_semi_transparent);
             }
+            mLastColor = mOpaque;
             mGradient = res.getDrawable(gradientResourceId);
             mInterpolator = new LinearInterpolator();
         }
