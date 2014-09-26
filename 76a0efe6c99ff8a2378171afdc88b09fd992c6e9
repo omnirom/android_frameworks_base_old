@@ -34,6 +34,24 @@
       "revId": "76a0efe6c99ff8a2378171afdc88b09fd992c6e9",
       "serverId": "56841c99-7c94-43d4-bf0b-cb4707e66d55",
       "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "cb528df8_3998d3c2",
+        "filename": "packages/SystemUI/src/com/android/systemui/statusbar/phone/PhoneStatusBar.java",
+        "patchSetId": 1
+      },
+      "lineNbr": 3285,
+      "author": {
+        "id": 1000026
+      },
+      "writtenOn": "2014-09-26T23:43:24Z",
+      "side": 1,
+      "message": "but you are right that mPackageIcSt doesnt get reset. Just seems to be the reset is on the wrong location or using the wrong check",
+      "parentUuid": "cb528df8_193cefba",
+      "revId": "76a0efe6c99ff8a2378171afdc88b09fd992c6e9",
+      "serverId": "56841c99-7c94-43d4-bf0b-cb4707e66d55",
+      "unresolved": false
     }
   ]
 }
