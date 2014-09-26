@@ -22,6 +22,24 @@
       "revId": "f1f5360b75a397bc2eeb58bf98d44cd6c141e2ec",
       "serverId": "56841c99-7c94-43d4-bf0b-cb4707e66d55",
       "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "cb528df8_b6a8508a",
+        "filename": "packages/SystemUI/src/com/android/systemui/statusbar/phone/PhoneStatusBar.java",
+        "patchSetId": 12
+      },
+      "lineNbr": 2701,
+      "author": {
+        "id": 1000313
+      },
+      "writtenOn": "2014-09-26T03:13:49Z",
+      "side": 1,
+      "message": "Ah, that is needed, or this will make tinted always enabled, maybe im forgot to rebase in my local changes, because i already add that, will push asap",
+      "parentUuid": "cb528df8_f6bd78d1",
+      "revId": "f1f5360b75a397bc2eeb58bf98d44cd6c141e2ec",
+      "serverId": "56841c99-7c94-43d4-bf0b-cb4707e66d55",
+      "unresolved": false
     }
   ]
 }
