@@ -1,0 +1,27 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "cb528df8_f6bd78d1",
+        "filename": "packages/SystemUI/src/com/android/systemui/statusbar/phone/PhoneStatusBar.java",
+        "patchSetId": 12
+      },
+      "lineNbr": 2701,
+      "author": {
+        "id": 1000026
+      },
+      "writtenOn": "2014-09-26T01:37:20Z",
+      "side": 1,
+      "message": "is there a if (mCurrentColorProgress !\u003d 0) missing like on all other locations?",
+      "range": {
+        "startLine": 2701,
+        "startChar": 12,
+        "endLine": 2701,
+        "endChar": 38
+      },
+      "revId": "f1f5360b75a397bc2eeb58bf98d44cd6c141e2ec",
+      "serverId": "56841c99-7c94-43d4-bf0b-cb4707e66d55",
+      "unresolved": false
+    }
+  ]
+}
