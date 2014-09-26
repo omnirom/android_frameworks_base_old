@@ -16,6 +16,24 @@
       "revId": "76a0efe6c99ff8a2378171afdc88b09fd992c6e9",
       "serverId": "56841c99-7c94-43d4-bf0b-cb4707e66d55",
       "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "cb528df8_193cefba",
+        "filename": "packages/SystemUI/src/com/android/systemui/statusbar/phone/PhoneStatusBar.java",
+        "patchSetId": 1
+      },
+      "lineNbr": 3285,
+      "author": {
+        "id": 1000026
+      },
+      "writtenOn": "2014-09-26T20:21:45Z",
+      "side": 1,
+      "message": "if we need to reset why you told me to call sendActionColorBroadcast(-3, -3); ?",
+      "parentUuid": "cb528df8_36d380da",
+      "revId": "76a0efe6c99ff8a2378171afdc88b09fd992c6e9",
+      "serverId": "56841c99-7c94-43d4-bf0b-cb4707e66d55",
+      "unresolved": false
     }
   ]
 }
