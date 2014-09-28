@@ -1223,6 +1223,11 @@ public interface WindowManagerPolicy {
     /**
      * @hide
      */
+    public boolean getCurrentColorState();
+
+    /**
+     * @hide
+     */
     public void sendActionColorBroadcast(int st_color, int ic_color);
 
     /**

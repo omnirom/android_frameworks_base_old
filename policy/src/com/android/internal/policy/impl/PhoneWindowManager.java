@@ -555,6 +555,7 @@ public class PhoneWindowManager implements WindowManagerPolicy {
     private boolean mVolumeMusicControl;
     private boolean mIsVolumeKeyLongPress;
     private boolean mCurrentColorProgress;
+    private boolean mCurrentColorState;
 
     /* The number of steps between min and max brightness */
     private static final int BRIGHTNESS_STEPS = 10;
@@ -753,6 +754,9 @@ public class PhoneWindowManager implements WindowManagerPolicy {
                     UserHandle.USER_ALL);
             resolver.registerContentObserver(Settings.System.getUriFor(
                     Settings.System.STATUS_BAR_TINTED_COLOR), false, this,
+                    UserHandle.USER_ALL);
+            resolver.registerContentObserver(Settings.System.getUriFor(
+                    Settings.System.STATUS_BAR_TINTED_STATE), false, this,
                     UserHandle.USER_ALL);
             updateSettings();
         }
@@ -1695,6 +1699,9 @@ public class PhoneWindowManager implements WindowManagerPolicy {
 
             mCurrentColorProgress = Settings.System.getIntForUser(
                     resolver, Settings.System.STATUS_BAR_TINTED_COLOR, 0
+                    , UserHandle.USER_CURRENT) != 0;
+            mCurrentColorState = Settings.System.getIntForUser(
+                    resolver, Settings.System.STATUS_BAR_TINTED_STATE, 0
                     , UserHandle.USER_CURRENT) != 0;
         }
         if (updateRotation) {
@@ -6220,6 +6227,10 @@ public class PhoneWindowManager implements WindowManagerPolicy {
             return mNavigationBarHeightForRotation[rotation];
         }
         return mStatusBarHeight;
+    }
+
+    public boolean getCurrentColorState() {
+        return mCurrentColorState;
     }
 
     public void sendAppColorBroadcast(int duration) {

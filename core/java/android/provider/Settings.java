@@ -3182,6 +3182,14 @@ public final class Settings {
         public static final String STATUS_BAR_TINTED_OPTION = "status_bar_tinted_option";
 
         /**
+         * option for systemui color state
+         * disable = static
+         * enable = dynamic
+         * @hide
+         */
+        public static final String STATUS_BAR_TINTED_STATE = "status_bar_tinted_state";
+
+        /**
          * option for filter tinted statusbar
          * @hide
          */
@@ -3324,7 +3332,8 @@ public final class Settings {
          */
         public static final String VIRTUAL_KEYS_HAPTIC_FEEDBACK = "virtual_keys_haptic_feedback";
 
-        /** Weather to allow headsethook to launch voice commands
+        /**
+         * Weather to allow headsethook to launch voice commands
          * @hide
          */
         public static final String HEADSETHOOK_LAUNCH_VOICE = "headsethook_launch_voice";
