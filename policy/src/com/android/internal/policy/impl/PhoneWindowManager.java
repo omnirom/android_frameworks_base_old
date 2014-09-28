@@ -1271,7 +1271,7 @@ public class PhoneWindowManager implements WindowManagerPolicy {
                     }
                     @Override
                     public void onTouchUpCancel() {
-                        sendAppColorBroadcast(40);
+                        sendAppColorBroadcast(100);
                     }
                     @Override
                     public void onDebug() {
@@ -4338,6 +4338,9 @@ public class PhoneWindowManager implements WindowManagerPolicy {
 
         // update since mAllowLockscreenWhenOn might have changed
         updateLockScreenTimeout();
+
+        // update tinted color after layout changes
+        sendAppColorBroadcast(800);
         return changes;
     }
 

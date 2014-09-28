@@ -11053,7 +11053,7 @@ public class WindowManagerService extends IWindowManager.Stub
         int statusBarH = Math.round(statusBar * scaleRatio);
         int statusBarW = Math.round(statusBarH * scaleRatio);
         if (mPolicy.getCurrentColorState()) {
-            statusBarW = bitmap.getWidth() / 2;
+            statusBarW = bitmap.getWidth() / 3;
         }
         int navBarH = Math.round(navbar * scaleRatio);
         int navBarY = bitmap.getHeight() - (navBarH + statusBarH);
