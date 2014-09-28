@@ -1039,7 +1039,7 @@ public class Activity extends ContextThemeWrapper
      */
     protected void onStart() {
         if (DEBUG_LIFECYCLE) Slog.v(TAG, "onStart " + this);
-        setupColorActionBar(false, 0);
+        setupColorActionBar(false);
         mCalled = true;
 
         if (!mLoadersStarted) {
@@ -1055,19 +1055,16 @@ public class Activity extends ContextThemeWrapper
         getApplication().dispatchActivityStarted(this);
     }
 
-    private void setupColorActionBar(boolean reload, int duration) {
+    private void setupColorActionBar(boolean reload) {
         if (getAppColorEnabled()) {
             if (mActionBar != null) {
                 if (reload && mActionBar.isShowing()) {
-                    mActionBar.changeColorFromActionBar();
+                    mActionBar.changeColorFromActionBar(null);
                 }
             } else {
                 if (reload) {
                     sendActionColorBroadcast(-3, -3);
                 }
-            }
-            if (reload) {
-                sendAppColorBroadcast(duration);
             }
         }
     }
@@ -1145,7 +1142,7 @@ public class Activity extends ContextThemeWrapper
         final Window win = getWindow();
         if (win != null) win.makeActive();
         if (mActionBar != null) mActionBar.setShowHideAnimationEnabled(true);
-        setupColorActionBar(true, 1000);
+        setupColorActionBar(true);
         mCalled = true;
     }
 
@@ -2393,9 +2390,6 @@ public class Activity extends ContextThemeWrapper
      * @see View#onWindowFocusChanged(boolean)
      */
     public void onWindowFocusChanged(boolean hasFocus) {
-        if (hasFocus) {
-            setupColorActionBar(true, 300);
-        }
     }
 
     /**
@@ -2505,18 +2499,9 @@ public class Activity extends ContextThemeWrapper
 
         try {
              wm.sendActionColorBroadcast(st_color, ic_color);
+             wm.sendAppColorBroadcast(300);
         } catch (RemoteException e) {
             Log.e(TAG, "Could not perform get action bar color", e);
-        }
-    }
-
-    private void sendAppColorBroadcast(int duration) {
-        final IWindowManager wm = (IWindowManager) WindowManagerGlobal.getWindowManagerService();
-
-        try {
-             wm.sendAppColorBroadcast(duration);
-        } catch (RemoteException e) {
-            Log.e(TAG, "Could not perform get app color", e);
         }
     }
 
