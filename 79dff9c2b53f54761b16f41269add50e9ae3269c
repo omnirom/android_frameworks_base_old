@@ -1,0 +1,38 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "cb528df8_39c9b355",
+        "filename": "packages/SystemUI/src/com/android/systemui/statusbar/phone/PhoneStatusBar.java",
+        "patchSetId": 2
+      },
+      "lineNbr": 228,
+      "author": {
+        "id": 1000313
+      },
+      "writtenOn": "2014-09-28T09:58:04Z",
+      "side": 1,
+      "message": "should be \"mForceShowClockOnLockscreen\"",
+      "revId": "79dff9c2b53f54761b16f41269add50e9ae3269c",
+      "serverId": "56841c99-7c94-43d4-bf0b-cb4707e66d55",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "cb528df8_19ccef64",
+        "filename": "packages/SystemUI/src/com/android/systemui/statusbar/phone/PhoneStatusBar.java",
+        "patchSetId": 2
+      },
+      "lineNbr": 1646,
+      "author": {
+        "id": 1000313
+      },
+      "writtenOn": "2014-09-28T09:58:04Z",
+      "side": 1,
+      "message": "why not here?\n\nif (mForceShowClockOnLockscreen) {\n    show \u003d true;\n}",
+      "revId": "79dff9c2b53f54761b16f41269add50e9ae3269c",
+      "serverId": "56841c99-7c94-43d4-bf0b-cb4707e66d55",
+      "unresolved": false
+    }
+  ]
+}
