@@ -11052,6 +11052,9 @@ public class WindowManagerService extends IWindowManager.Stub
         int navbar = mPolicy.getNavigationbarDisplayHeight(mRotation);
         int statusBarH = Math.round(statusBar * scaleRatio);
         int statusBarW = Math.round(statusBarH * scaleRatio);
+        if (mPolicy.getCurrentColorState()) {
+            statusBarW = bitmap.getWidth() / 2;
+        }
         int navBarH = Math.round(navbar * scaleRatio);
         int navBarY = bitmap.getHeight() - (navBarH + statusBarH);
         int colorTop = ColorUtils.getMainColorFromBitmap(bitmap, statusBarW, statusBarH);
