@@ -2515,9 +2515,6 @@ public class PhoneStatusBar extends BaseStatusBar implements DemoMode {
             }
             if (checkBarModes) {
                 checkBarModes();
-                if (mCurrentColorProgress != 0 && mTintedNeedReset) {
-                    resetSystemUIBackgroundColor();
-                }
             }
 
             final boolean sbVisible = (newVal & View.SYSTEM_UI_FLAG_FULLSCREEN) == 0
@@ -3251,9 +3248,6 @@ public class PhoneStatusBar extends BaseStatusBar implements DemoMode {
             }
             else if (Intent.ACTION_SCREEN_ON.equals(action)) {
                 mScreenOn = true;
-                if (mCurrentColorProgress != 0) {
-                    setSystemUIBackgroundColor(20);
-                }
                 // work around problem where mDisplay.getRotation() is not stable while screen is off (bug 7086018)
                 repositionNavigationBar();
                 notifyNavigationBarScreenOn(true);
@@ -3304,7 +3298,7 @@ public class PhoneStatusBar extends BaseStatusBar implements DemoMode {
                      public void run() {
                          mImeStatusShow = altBack;
                      }
-                }, 2000);
+                }, 1000);
             }
             setSystemUIBackgroundColor(500);
         }
@@ -3354,7 +3348,7 @@ public class PhoneStatusBar extends BaseStatusBar implements DemoMode {
         mHandler.postDelayed(mTintedStatusbarRunnable, duration);
     }
 
-    private Runnable mSetColorFromScreenShotRunnable = new Runnable() {
+    private final Runnable mSetColorFromScreenShotRunnable = new Runnable() {
         @Override
         public void run() {
             setColorFromScreenShot();
@@ -3368,7 +3362,6 @@ public class PhoneStatusBar extends BaseStatusBar implements DemoMode {
                  mPackageSt = colors[0];
              } else {
                  mPackageSt = mPackageActbar;
-                 mPackageActbar = -3;
              }
              mPackageNv = colors[1];
         } catch (RemoteException ex) {
@@ -3376,7 +3369,6 @@ public class PhoneStatusBar extends BaseStatusBar implements DemoMode {
                  mPackageSt = -3;
              } else {
                  mPackageSt = mPackageActbar;
-                 mPackageActbar = -3;
              }
              mPackageNv = -3;
         }
@@ -3464,7 +3456,7 @@ public class PhoneStatusBar extends BaseStatusBar implements DemoMode {
         }
     }
 
-    private Runnable mTintedStatusbarRunnable = new Runnable() {
+    private final Runnable mTintedStatusbarRunnable = new Runnable() {
         @Override
         public void run() {
             tintedStatusbarProgress();
