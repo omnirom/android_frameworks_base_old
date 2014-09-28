@@ -417,8 +417,7 @@ public class ActionBarImpl extends ActionBar {
     /**
      * @hide
      */
-    public void changeColorFromActionBar() {
-        Drawable drawable = null;
+    public void changeColorFromActionBar(Drawable drawable) {
         int textColor = -3;
         int iconTint = Color.WHITE;
 
@@ -477,60 +476,8 @@ public class ActionBarImpl extends ActionBar {
         mActivity.sendActionColorBroadcast(color, iconTint);
     }
 
-    private void changeColorFromActionBar(Drawable drawable) {
-        int textColor = -3;
-        int iconTint = Color.WHITE;
-
-        if (mContainerView != null) {
-            if (drawable == null) {
-                drawable = mContainerView.getPrimaryBackground();
-                if (drawable == null) {
-                    drawable = mContainerView.getStackedBackground();
-                    if (drawable == null) {
-                        drawable = mContainerView.getSplitBackground();
-                    }
-                }
-            }
-        }
-
-        if (mActionView != null) {
-            TextView titleView = mActionView.getTitleViewActionBar();
-            if (titleView != null) {
-                if (titleView.getVisibility() == View.VISIBLE) {
-                    textColor = titleView.getCurrentTextColor();
-                }
-            }
-            if ((drawable == null) && (textColor != -3)) {
-                drawable = mActionView.getBackgroundActionBar();
-                if (drawable == null) {
-                    View viewAV = mActionView.getCustomNavigationView();
-                    if (viewAV != null) {
-                        drawable = viewAV.getBackground();
-                    }
-                }
-            }
-        }
-
-        int color = ColorUtils.getMainColorFromDrawable(drawable);
-
-        if (textColor != -3) {
-            iconTint = textColor;
-        }
-
-        if (ColorUtils.isBrightColor(color)) {
-            iconTint = Color.BLACK;
-        }
-
-        if (color == -3) {
-            iconTint = -3;
-        }
-
-        mActivity.sendActionColorBroadcast(color, iconTint);
-    }
-
     public void setBackgroundDrawable(Drawable d) {
         mContainerView.setPrimaryBackground(d);
-        changeColorFromActionBar();
     }
 
     public void setStackedBackgroundDrawable(Drawable d) {
@@ -723,7 +670,7 @@ public class ActionBarImpl extends ActionBar {
             mHiddenByApp = false;
             updateVisibility(false);
         }
-        changeColorFromActionBar();
+        changeColorFromActionBar(null);
     }
 
     private void showForActionMode() {
@@ -749,7 +696,7 @@ public class ActionBarImpl extends ActionBar {
             mHiddenByApp = true;
             updateVisibility(false);
         }
-        mActivity.sendActionColorBroadcast(-3, -3);
+        changeColorFromActionBar(null);
     }
 
     private void hideForActionMode() {
@@ -1013,6 +960,7 @@ public class ActionBarImpl extends ActionBar {
             mActionView.sendAccessibilityEvent(AccessibilityEvent.TYPE_WINDOW_STATE_CHANGED);
 
             mActionMode = null;
+            changeColorFromActionBar(null);
         }
 
         @Override

@@ -40,12 +40,14 @@ public final class PhoneStatusBarTransitions extends BarTransitions {
     private final float mIconAlphaWhenOpaque;
 
     private ArrayList<ImageView> mIcons = new ArrayList<ImageView>();
+    private ArrayList<ImageView> mNotificationIcons = new ArrayList<ImageView>();
     private ArrayList<TextView> mTexts = new ArrayList<TextView>();
+    private ArrayList<TextView> mNotificationTexts = new ArrayList<TextView>();
 
     private View mLeftSide, mStatusIcons, mSignalCluster, mBattery, mClock, mCenterClock,
         mCircleBattery, mPercentBattery, mNetworkTraffic;
     private Animator mCurrentAnimation;
-    private int mCurrentColor;
+    private int mCurrentColor = -3;
     private int mCurrentBg;
 
     public PhoneStatusBarTransitions(PhoneStatusBarView view) {
@@ -96,9 +98,21 @@ public final class PhoneStatusBarTransitions extends BarTransitions {
         }
     }
 
+    public void addNotificationIcon(ImageView iv) {
+        if (!mNotificationIcons.contains(iv)) {
+            mNotificationIcons.add(iv);
+        }
+    }
+
     public void addText(TextView tv) {
         if (!mTexts.contains(tv)) {
             mTexts.add(tv);
+        }
+    }
+
+    public void addNotificationText(TextView tv) {
+        if (!mNotificationTexts.contains(tv)) {
+            mNotificationTexts.add(tv);
         }
     }
 
@@ -113,6 +127,7 @@ public final class PhoneStatusBarTransitions extends BarTransitions {
         }
         mCurrentColor = ic_color;
         setColorChangeIcon(ic_color);
+        setColorChangeNotificationIcon(ic_color);
         super.changeColorIconBackground(bg_color, ic_color);
     }
 
@@ -120,16 +135,20 @@ public final class PhoneStatusBarTransitions extends BarTransitions {
         return mCurrentColor;
     }
 
+    public void updateNotificationIconColor() {
+        setColorChangeNotificationIcon(mCurrentColor);
+    }
+
     private void setColorChangeIcon(int ic_color) {
-        for (ImageView icon : mIcons) {
-             if (icon != null) {
+        for (ImageView iv : mIcons) {
+             if (iv != null) {
                  if (ic_color == -3) {
-                     icon.clearColorFilter();
+                     iv.clearColorFilter();
                  } else {
-                     icon.setColorFilter(ic_color, PorterDuff.Mode.SRC_ATOP);
+                     iv.setColorFilter(ic_color, PorterDuff.Mode.SRC_ATOP);
                  }
              } else {
-                 mIcons.remove(icon);
+                 mIcons.remove(iv);
              }
         }
         for (TextView tv : mTexts) {
@@ -141,6 +160,31 @@ public final class PhoneStatusBarTransitions extends BarTransitions {
                  }
              } else {
                  mTexts.remove(tv);
+             }
+        }
+    }
+
+    private void setColorChangeNotificationIcon(int ic_color) {
+        for (ImageView notifiv : mNotificationIcons) {
+             if (notifiv != null) {
+                 if (ic_color == -3) {
+                     notifiv.clearColorFilter();
+                 } else {
+                     notifiv.setColorFilter(ic_color, PorterDuff.Mode.MULTIPLY);
+                 }
+             } else {
+                 mNotificationIcons.remove(notifiv);
+             }
+        }
+        for (TextView notiftv : mNotificationTexts) {
+             if (notiftv != null) {
+                 if (ic_color == -3) {
+                     notiftv.setTextColor(Color.WHITE);
+                 } else {
+                     notiftv.setTextColor(ic_color);
+                 }
+             } else {
+                 mNotificationTexts.remove(notiftv);
              }
         }
     }
