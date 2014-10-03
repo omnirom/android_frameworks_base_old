@@ -325,6 +325,7 @@ public class PhoneStatusBar extends BaseStatusBar implements DemoMode {
     private int mPackageSt = -3;
     private int mPackageNv = -3;
     private int mPackageIcSt = -3;
+    private int mPackageIcNv = -3;
     private boolean mStatBackgroundMode = false;
     private boolean mNavBackgroundMode = false;
     private boolean mIsImmersiveMode = false;
@@ -3324,6 +3325,7 @@ public class PhoneStatusBar extends BaseStatusBar implements DemoMode {
         }
         if (mCurrentColorProgress == 1) {
             mPackageNv = mPackageSt = mPackageActbar;
+            mPackageIcNv = mPackageIcSt;
         }
         if ((mStatBackgroundMode || mNavBackgroundMode) && mCurrentColorProgress == 2) {
             if (duration > 50) {
@@ -3390,13 +3392,13 @@ public class PhoneStatusBar extends BaseStatusBar implements DemoMode {
         mTintedNeedReset = false;
         mHandler.removeCallbacks(mSetColorFromScreenShotRunnable);
         mHandler.removeCallbacks(mTintedStatusbarRunnable);
-        mPackageActbar = mPackageSt = mPackageNv = mPackageIcSt = -3;
+        mPackageActbar = mPackageSt = mPackageNv = mPackageIcSt = mPackageIcNv = -3;
         mStatusbarIsReset = mNavbarIsReset = true;
         if (mStatusBarView != null) {
             mStatusBarView.getBarTransitions().changeColorIconBackground(mPackageSt, mPackageIcSt);
         }
         if (mNavigationBarView != null) {
-            mNavigationBarView.getBarTransitions().changeColorIconBackground(mPackageNv, mPackageIcSt);
+            mNavigationBarView.getBarTransitions().changeColorIconBackground(mPackageNv, mPackageIcNv);
         }
         if (mBattery != null) {
             mBattery.updateSettings(mPackageIcSt);
@@ -3457,7 +3459,7 @@ public class PhoneStatusBar extends BaseStatusBar implements DemoMode {
             if (mNavbarTransparent < 100) {
                 mPackageNv = ColorUtils.changeColorTransparency(mPackageNv, mNavbarTransparent);
             }
-            mNavigationBarView.getBarTransitions().changeColorIconBackground(mPackageNv, mPackageIcSt);
+            mNavigationBarView.getBarTransitions().changeColorIconBackground(mPackageNv, mPackageIcNv);
         }
         if (mStatBackgroundMode || mNavBackgroundMode) {
             mTintedNeedReset = true;
