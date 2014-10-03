@@ -124,11 +124,14 @@ public class QuickSettingsBasicBackBatteryTile extends QuickSettingsTileView {
     }
 
     public void updateBatterySettings() {
-        if (mBattery == null) {
-            return;
+        if (mBattery != null) {
+            mBattery.updateSettings();
         }
-        mCircleBattery.updateSettings();
-        mPercentBattery.updateSettings();
-        mBattery.updateSettings();
+        if (mCircleBattery != null) {
+            mCircleBattery.updateSettings();
+        }
+        if (mPercentBattery != null) {
+            mPercentBattery.updateSettings();
+        }
     }
 }

@@ -94,6 +94,8 @@ public class BatteryCircleMeterView extends ImageView {
     private int mCircleTextChargingColor;
     private int mCircleAnimSpeed = 4;
 
+    private int mCurrentColor = -3;
+
     private int mWarningLevel;
 
     // runnable to invalidate view via mHandler.postDelayed() call
@@ -254,10 +256,11 @@ public class BatteryCircleMeterView extends ImageView {
         ContentResolver resolver = getContext().getContentResolver();
 
         int defaultColor = res.getColor(com.android.systemui.R.color.batterymeter_charge_color);
+        int nowColor = mCurrentColor != -3 ? mCurrentColor : defaultColor;
 
-        mCircleTextColor = defaultColor;
-        mCircleTextChargingColor = defaultColor;
-        mCircleColor = defaultColor;
+        mCircleTextColor = nowColor;
+        mCircleTextChargingColor = nowColor;
+        mCircleColor = nowColor;
 
         mPaintSystem.setColor(mCircleColor);
         mRectLeft = null;
@@ -278,26 +281,9 @@ public class BatteryCircleMeterView extends ImageView {
     }
 
     public void updateSettings(int defaultColor) {
-
-        mCircleTextColor = defaultColor;
-        mCircleTextChargingColor = defaultColor;
-        mCircleColor = defaultColor;
-
-        mPaintSystem.setColor(mCircleColor);
-        mRectLeft = null;
-        mCircleSize = 0;
-
-        int batteryStyle = Settings.System.getIntForUser(getContext().getContentResolver(),
-                                Settings.System.STATUS_BAR_BATTERY_STYLE, 0
-                                , UserHandle.USER_CURRENT);
-
-        mCirclePercent = batteryStyle == 4;
-        mActivated = (batteryStyle == 3 || mCirclePercent);
-
-        setVisibility(mActivated ? View.VISIBLE : View.GONE);
-
-        if (mActivated && mAttached) {
-            invalidate();
+        if (mCurrentColor != defaultColor) {
+            mCurrentColor = defaultColor;
+            updateSettings();
         }
     }
 

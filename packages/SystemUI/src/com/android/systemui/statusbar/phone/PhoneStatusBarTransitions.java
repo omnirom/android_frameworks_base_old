@@ -40,8 +40,8 @@ public final class PhoneStatusBarTransitions extends BarTransitions {
     private final float mIconAlphaWhenOpaque;
 
     private ArrayList<ImageView> mIcons = new ArrayList<ImageView>();
+    private ArrayList<ImageView> mIconsReverse = new ArrayList<ImageView>();
     private ArrayList<ImageView> mNotificationIcons = new ArrayList<ImageView>();
-    private ArrayList<TextView> mTexts = new ArrayList<TextView>();
     private ArrayList<TextView> mNotificationTexts = new ArrayList<TextView>();
 
     private View mLeftSide, mStatusIcons, mSignalCluster, mBattery, mClock, mCenterClock,
@@ -98,15 +98,15 @@ public final class PhoneStatusBarTransitions extends BarTransitions {
         }
     }
 
-    public void addNotificationIcon(ImageView iv) {
-        if (!mNotificationIcons.contains(iv)) {
-            mNotificationIcons.add(iv);
+    public void addIconReverse(ImageView iv) {
+        if (!mIconsReverse.contains(iv)) {
+            mIconsReverse.add(iv);
         }
     }
 
-    public void addText(TextView tv) {
-        if (!mTexts.contains(tv)) {
-            mTexts.add(tv);
+    public void addNotificationIcon(ImageView iv) {
+        if (!mNotificationIcons.contains(iv)) {
+            mNotificationIcons.add(iv);
         }
     }
 
@@ -151,15 +151,19 @@ public final class PhoneStatusBarTransitions extends BarTransitions {
                  mIcons.remove(iv);
              }
         }
-        for (TextView tv : mTexts) {
-             if (tv != null) {
+        for (ImageView ivr : mIconsReverse) {
+             if (ivr != null) {
                  if (ic_color == -3) {
-                     tv.setTextColor(Color.WHITE);
+                     ivr.clearColorFilter();
                  } else {
-                     tv.setTextColor(ic_color);
+                     if (ColorUtils.isBrightColor(ic_color)) {
+                         ivr.setColorFilter(Color.BLACK, PorterDuff.Mode.SRC_ATOP);
+                     } else {
+                         ivr.setColorFilter(Color.WHITE, PorterDuff.Mode.SRC_ATOP);
+                     }
                  }
              } else {
-                 mTexts.remove(tv);
+                 mIconsReverse.remove(ivr);
              }
         }
     }

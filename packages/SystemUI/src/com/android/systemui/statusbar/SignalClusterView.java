@@ -89,11 +89,10 @@ public class SignalClusterView
 
         mStatusBar.addIconToColor(mWifi);
         mStatusBar.addIconToColor(mMobile);
-        mStatusBar.addIconToColor(mWifiActivity);
-        mStatusBar.addIconToColor(mMobileActivity);
         mStatusBar.addIconToColor(mMobileType);
         mStatusBar.addIconToColor(mAirplane);
-
+        mStatusBar.addIconToReverseColor(mWifiActivity);
+        mStatusBar.addIconToReverseColor(mMobileActivity);
         apply();
     }
 
@@ -176,7 +175,7 @@ public class SignalClusterView
             mMobileType.setImageDrawable(null);
         }
 
-        if(mAirplane != null) {
+        if (mAirplane != null) {
             mAirplane.setImageDrawable(null);
         }
 

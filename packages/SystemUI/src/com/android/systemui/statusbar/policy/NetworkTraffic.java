@@ -277,11 +277,12 @@ public class NetworkTraffic extends TextView {
         mTrafficHandler.removeMessages(1);
     }
 
-    @Override
-    public void setTextColor(int color) {
-        super.setTextColor(color);
-        mCurrentColor = color;
-        updateTrafficDrawable();
+    public void updateSettings(int defaultColor) {
+        if (mCurrentColor != defaultColor) {
+            mCurrentColor = defaultColor;
+            setTextColor(defaultColor);
+            updateTrafficDrawable();
+        }
     }
 
     private void updateTrafficDrawable() {
