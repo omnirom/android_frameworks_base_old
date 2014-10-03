@@ -478,6 +478,7 @@ public class ActionBarImpl extends ActionBar {
 
     public void setBackgroundDrawable(Drawable d) {
         mContainerView.setPrimaryBackground(d);
+        changeColorFromActionBar(d);
     }
 
     public void setStackedBackgroundDrawable(Drawable d) {
