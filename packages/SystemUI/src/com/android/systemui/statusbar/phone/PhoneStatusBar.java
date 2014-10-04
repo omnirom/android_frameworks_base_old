@@ -1660,6 +1660,10 @@ public class PhoneStatusBar extends BaseStatusBar implements DemoMode {
         mStatusBarView.getPhoneStatusBarTransitions().addIcon(iv);
     }
 
+    public void addIconToReverseColor(ImageView iv) {
+        mStatusBarView.getPhoneStatusBarTransitions().addIconReverse(iv);
+    }
+
     private void addNotificationIconToColor(ImageView iv) {
         mStatusBarView.getPhoneStatusBarTransitions().addNotificationIcon(iv);
     }

@@ -40,6 +40,7 @@ public final class PhoneStatusBarTransitions extends BarTransitions {
     private final float mIconAlphaWhenOpaque;
 
     private ArrayList<ImageView> mIcons = new ArrayList<ImageView>();
+    private ArrayList<ImageView> mIconsReverse = new ArrayList<ImageView>();
     private ArrayList<ImageView> mNotificationIcons = new ArrayList<ImageView>();
     private ArrayList<TextView> mTexts = new ArrayList<TextView>();
     private ArrayList<TextView> mNotificationTexts = new ArrayList<TextView>();
@@ -98,6 +99,12 @@ public final class PhoneStatusBarTransitions extends BarTransitions {
         }
     }
 
+    public void addIconReverse(ImageView iv) {
+        if (!mIconsReverse.contains(iv)) {
+            mIconsReverse.add(iv);
+        }
+    }
+
     public void addNotificationIcon(ImageView iv) {
         if (!mNotificationIcons.contains(iv)) {
             mNotificationIcons.add(iv);
@@ -149,6 +156,21 @@ public final class PhoneStatusBarTransitions extends BarTransitions {
                  }
              } else {
                  mIcons.remove(iv);
+             }
+        }
+        for (ImageView ivr : mIconsReverse) {
+             if (ivr != null) {
+                 if (ic_color == -3) {
+                     ivr.clearColorFilter();
+                 } else {
+                     if (ColorUtils.isBrightColor(ic_color)) {
+                         ivr.setColorFilter(Color.BLACK, PorterDuff.Mode.SRC_ATOP);
+                     } else {
+                         ivr.setColorFilter(Color.WHITE, PorterDuff.Mode.SRC_ATOP);
+                     }
+                 }
+             } else {
+                 mIconsReverse.remove(ivr);
              }
         }
         for (TextView tv : mTexts) {
