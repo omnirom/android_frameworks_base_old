@@ -72,6 +72,7 @@ import android.widget.LinearLayout;
 import android.widget.RemoteViews;
 import android.widget.TextView;
 
+import com.android.internal.util.cm.LockscreenTargetUtils;
 import com.android.internal.util.omni.DeviceUtils;
 import com.android.internal.util.slim.QuietHoursHelper;
 import com.android.internal.widget.LockPatternUtils;
@@ -147,6 +148,27 @@ public class ActiveDisplayView extends FrameLayout
     private static final int UNLOCK_TARGET = 0;
     private static final int OPEN_APP_TARGET = 4;
     private static final int DISMISS_TARGET = 6;
+    private String[] mStoredTargets;
+
+    private String[] mPortraitTargets = new String[] {
+             "empty",
+             "empty",
+             "empty",
+             "notification",
+             "empty",
+             "dismiss",
+             "empty"
+    };
+
+    private String[] mLandscapeTargets = new String[] {
+             "empty",
+             "notification",
+             "empty",
+             "dismiss",
+             "empty",
+             "empty",
+             "empty"
+    };
 
     // messages sent to the handler for processing
     private static final int MSG_SHOW_NOTIFICATION_VIEW = 1000;
@@ -158,6 +180,7 @@ public class ActiveDisplayView extends FrameLayout
     private static final int MSG_SHOW_NOTHING           = 1006;
 
     private GlowPadView mGlowPadView;
+    private int mTargetOffset;
     private GestureDetector mDoubleTapGesture;
     private View mRemoteView;
     private View mClock;
@@ -287,16 +310,21 @@ public class ActiveDisplayView extends FrameLayout
     private OnTriggerListener mOnTriggerListener = new OnTriggerListener() {
 
         public void onTrigger(View v, int target) {
-            if (target == UNLOCK_TARGET) {
+            if (target == mTargetOffset) {
                 mIsUnlockByUser = true;
                 unlockKeyguardActivity();
                 launchFakeActivityIntent();
-            } else if (target == OPEN_APP_TARGET) {
-                mIsUnlockByUser = true;
-                unlockKeyguardActivity();
-                launchNotificationPendingIntent();
-            } else if (target == DISMISS_TARGET) {
-                dismissNotification();
+            } else {
+                int realTarget = target - mTargetOffset - 1;
+                String targetUri = realTarget < mStoredTargets.length
+                       ? mStoredTargets[realTarget] : null;
+                if (targetUri.equals("notification")) {
+                    mIsUnlockByUser = true;
+                    unlockKeyguardActivity();
+                    launchNotificationPendingIntent();
+                } else if (targetUri.equals("dismiss")) {
+                    dismissNotification();
+                }
             }
         }
 
@@ -571,6 +599,8 @@ public class ActiveDisplayView extends FrameLayout
         mCreationOrientation = Resources.getSystem().getConfiguration().orientation;
         mInvertedPaint = makeInvertedPaint();
 
+        mTargetOffset = LockscreenTargetUtils.getTargetOffset(context);
+
         mDoubleTapGesture = new GestureDetector(context,
                 new GestureDetector.SimpleOnGestureListener() {
             @Override
@@ -707,6 +737,8 @@ public class ActiveDisplayView extends FrameLayout
 
     @Override
     protected void onConfigurationChanged(Configuration newConfig) {
+        super.onConfigurationChanged(newConfig);
+        mTargetOffset = LockscreenTargetUtils.getTargetOffset(mContext);
         makeActiveDisplayView(newConfig.orientation, true);
     }
 
@@ -739,17 +771,17 @@ public class ActiveDisplayView extends FrameLayout
                 R.drawable.ic_handle_notification_normal);
         mGlowPadView.setHandleDrawable(nDrawable);
         mGlowPadView.setOnTouchListener(mGlowPadTouchListener);
+        mCurrentNotificationIcon = (RoundedImageView) contents.findViewById(R.id.current_notification_icon);
 
         mRemoteViewLayout = (FrameLayout) contents.findViewById(R.id.remote_content_parent);
         mClock = contents.findViewById(R.id.clock_view);
-        mCurrentNotificationIcon = (RoundedImageView) contents.findViewById(R.id.current_notification_icon);
 
         mOverflowNotifications = (LinearLayout) contents.findViewById(R.id.keyguard_other_notifications);
         mOverflowNotifications.setOnTouchListener(mOverflowTouchListener);
 
         mRemoteViewLayoutParams = getRemoteViewLayoutParams(orientation);
         mOverflowLayoutParams = getOverflowLayoutParams();
-        updateTargets();
+        updateResources();
         if (recreate) {
             updateTimeoutTimer();
             if (mNotification == null) {
@@ -798,8 +830,9 @@ public class ActiveDisplayView extends FrameLayout
         return states;
     }
 
-    private void updateTargets() {
-        updateResources();
+    private boolean isScreenPortrait() {
+        final Configuration configuration = mContext.getResources().getConfiguration();
+        return configuration.orientation == Configuration.ORIENTATION_PORTRAIT;
     }
 
     public void updateResources() {
@@ -810,22 +843,49 @@ public class ActiveDisplayView extends FrameLayout
                 res.getDrawable(R.drawable.ic_lockscreen_target_activated);
         final InsetDrawable activeBack = new InsetDrawable(blankActiveDrawable, 0, 0, 0, 0);
 
+        mStoredTargets = isScreenPortrait() ? mPortraitTargets : mLandscapeTargets;
+
+        // Shift targets for landscape lockscreen on phones
+        for (int i = 0; i < mTargetOffset; i++) {
+             storedDraw.add(new TargetDrawable(res, null));
+        }
+
         // Add unlock target
         storedDraw.add(new TargetDrawable(res, res.getDrawable(R.drawable.ic_ad_target_unlock)));
-        if (mNotificationDrawable != null) {
-            storedDraw.add(new TargetDrawable(res, null));
-            storedDraw.add(new TargetDrawable(res, null));
-            storedDraw.add(new TargetDrawable(res, null));
-            storedDraw.add(new TargetDrawable(res, getLayeredDrawable(activeBack,
-                    mNotificationDrawable, targetInset, false)));
-            storedDraw.add(new TargetDrawable(res, null));
-            if (mNotification != null && mNotification.isClearable()) {
-                storedDraw.add(new TargetDrawable(res, res.getDrawable(R.drawable.ic_ad_dismiss_notification)));
-            } else {
-                storedDraw.add(new TargetDrawable(res, res.getDrawable(R.drawable.ic_qs_power)));
-            }
+
+        for (int i = 0; i < 8 - mTargetOffset - 1; i++) {
+             if (i >= mStoredTargets.length) {
+                 storedDraw.add(new TargetDrawable(res, 0));
+                 continue;
+             }
+             String uri = mStoredTargets[i];
+             if (uri.equals("empty")) {
+                 storedDraw.add(new TargetDrawable(res, null));
+                 continue;
+             }
+             if (uri.equals("notification")) {
+                 if (mNotificationDrawable != null) {
+                     storedDraw.add(new TargetDrawable(res, getLayeredDrawable(activeBack,
+                           mNotificationDrawable, targetInset, false)));
+                 } else {
+                     storedDraw.add(new TargetDrawable(res, null));
+                 }
+                 continue;
+             }
+             if (uri.equals("dismiss")) {
+                 if (mNotificationDrawable != null) {
+                     if (mNotification != null && mNotification.isClearable()) {
+                         storedDraw.add(new TargetDrawable(res, res.getDrawable(R.drawable.ic_ad_dismiss_notification)));
+                     } else {
+                         storedDraw.add(new TargetDrawable(res, res.getDrawable(R.drawable.ic_qs_power)));
+                     }
+                 } else {
+                     storedDraw.add(new TargetDrawable(res, null));
+                 }
+             }
         }
-        storedDraw.add(new TargetDrawable(res, null));
+        mGlowPadView.setTargetDescriptionsResourceId(0);
+        mGlowPadView.setDirectionDescriptionsResourceId(0);
         mGlowPadView.setTargetResources(storedDraw);
     }
 
@@ -1053,7 +1113,7 @@ public class ActiveDisplayView extends FrameLayout
         }
         mRemoteView = null;
         mOverflowNotifications.removeAllViews();
-        updateTargets();
+        updateResources();
         showNotificationView();
         invalidate();
         if (!isScreenOn()) {

@@ -46,13 +46,17 @@
         android:layout_width="match_parent"
         android:layout_height="match_parent">
 
-        <include layout="@layout/glow_pad_view" />
+        <include layout="@layout/glow_pad_view"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_centerInParent="true" />
 
         <com.android.systemui.widget.RoundedImageView
             android:id="@+id/current_notification_icon"
             android:layout_width="@dimen/handle_icon_size"
             android:layout_height="@dimen/handle_icon_size"
             android:layout_centerInParent="true"
+            android:orientation="horizontal"
             android:scaleType="fitCenter"
             systemui:corner_radius="30dip"
             systemui:is_oval="true"
