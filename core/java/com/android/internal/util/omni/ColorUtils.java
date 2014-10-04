@@ -141,12 +141,15 @@ public class ColorUtils {
         if (bitmap == null) {
             return -3;
         }
-        int pixel = bitmap.getPixel(0, 5);
-        int red = Color.red(pixel);
-        int blue = Color.blue(pixel);
-        int green = Color.green(pixel);
-        int alpha = Color.alpha(pixel);
-        return Color.argb(alpha, red, green, blue);
+        if (bitmap.getHeight() > 5) {
+            int pixel = bitmap.getPixel(0, 5);
+            int red = Color.red(pixel);
+            int blue = Color.blue(pixel);
+            int green = Color.green(pixel);
+            int alpha = Color.alpha(pixel);
+            return Color.argb(alpha, red, green, blue);
+        }
+        return -3;
     }
 
     public static Bitmap drawableToBitmap(Drawable drawable) {
