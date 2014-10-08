@@ -31,6 +31,11 @@ import android.renderscript.Element;
 import android.renderscript.RenderScript;
 import android.renderscript.ScriptIntrinsicBlur;
 
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.Map;
+import java.util.List;
+
 public class ColorUtils {
 
     public static Drawable getGradientDrawable(boolean isNav, int color) {
@@ -123,6 +128,205 @@ public class ColorUtils {
         return Color.argb(alpha, red, green, blue);
     }
 
+    public static boolean getIconWhiteBlackTransparent(Drawable drawable) {
+        int color = getDominantColor(drawable);
+        if (color == Color.WHITE) {
+            return true;
+        } else if (color == Color.BLACK) {
+            return true;
+        } else if (color == Color.TRANSPARENT) {
+            return true;
+        } else if (color == -3) {
+            return true;
+        }
+        return false;
+    }
+
+    public static int getIconColorFromDrawable(Drawable drawable) {
+        if (drawable == null) {
+            return -3;
+        }
+        if (drawable.getConstantState() == null) {
+            return -3;
+        }
+        Drawable copyDrawable = drawable.getConstantState().newDrawable();
+        if (copyDrawable == null) {
+            return -3;
+        }
+        if (copyDrawable instanceof ColorDrawable) {
+            return ((ColorDrawable) drawable).getColor();
+        }
+        Bitmap bitmap = drawableToBitmap(copyDrawable);
+        if (bitmap == null) {
+            return -3;
+        }
+        return getDominantColor(bitmap);
+    }
+
+    public static int getAverageColor(Drawable image) {
+        int hSamples = 20;
+        int vSamples = 20;
+        int sampleSize = hSamples * vSamples;
+        float[] sampleTotals = {0, 0, 0};
+        float minimumSaturation = 0.1f;
+        int minimumAlpha = 200;
+        Bitmap b = drawableToBitmap(image);
+        if (b == null) {
+            return -3;
+        }
+        int width = b.getWidth();
+        int height = b.getHeight();
+        float[] hsv = new float[3];
+        int sample;
+        for (int i = 0; i < width; i += (width / hSamples)) {
+             for (int j = 0; j < height; j += (height / vSamples)) {
+                  sample = b.getPixel(i, j);
+                  Color.colorToHSV(sample, hsv);
+                  if ((Color.alpha(sample) > minimumAlpha) && (hsv[1] >= minimumSaturation)) {
+                      sampleTotals[0] += hsv[0];
+                      sampleTotals[1] += hsv[1];
+                      sampleTotals[2] += hsv[2];
+                  }
+              }
+        }
+
+        float[] average = new float[3];
+        average[0] = sampleTotals[0] / sampleSize;
+        average[1] = sampleTotals[1] / sampleSize;
+        average[2] = 0.8f;
+
+        return Color.HSVToColor(average);
+    }
+
+    public static int getDominantExampleColor(Bitmap bitmap) {
+        if (bitmap == null) {
+            return -3;
+        }
+
+        int width = bitmap.getWidth();
+        int height = bitmap.getHeight();
+        int size = width * height;
+        int pixels[] = new int[size];
+
+        Bitmap bitmap2 = bitmap.copy(Config.ARGB_4444, false);
+
+        bitmap2.getPixels(pixels, 0, width, 0, 0, width, height);
+
+        final List<HashMap<Integer, Integer>> colorMap = new ArrayList<HashMap<Integer, Integer>>();
+        colorMap.add(new HashMap<Integer, Integer>());
+        colorMap.add(new HashMap<Integer, Integer>());
+        colorMap.add(new HashMap<Integer, Integer>());
+
+        int color = 0;
+        int r = 0;
+        int g = 0;
+        int b = 0;
+        Integer rC, gC, bC;
+        for (int i = 0; i < pixels.length; i++) {
+             color = pixels[i];
+
+             r = Color.red(color);
+             g = Color.green(color);
+             b = Color.blue(color);
+
+             rC = colorMap.get(0).get(r);
+             if (rC == null) {
+                 rC = 0;
+             }
+             colorMap.get(0).put(r, rC++);
+
+             gC = colorMap.get(1).get(g);
+             if (gC == null) {
+                 gC = 0;
+             }
+             colorMap.get(1).put(g, gC++);
+
+             bC = colorMap.get(2).get(b);
+             if (bC == null) {
+                 bC = 0;
+             }
+             colorMap.get(2).put(b, bC++);
+        }
+
+        int[] rgb = new int[3];
+        for (int i = 0; i < 3; i++) {
+             int max = 0;
+             int val = 0;
+             for (Map.Entry<Integer, Integer> entry : colorMap.get(i).entrySet()) {
+                  if (entry.getValue() > max) {
+                      max = entry.getValue();
+                      val = entry.getKey();
+                  }
+             }
+             rgb[i] = val;
+        }
+
+        int dominantColor = Color.rgb(rgb[0], rgb[1], rgb[2]);
+        return dominantColor;
+    }
+
+    public static int getDominantColor(Drawable drawable) {
+        if (drawable == null) {
+            return -3;
+        }
+        Bitmap bitmap = drawableToBitmap(drawable);
+        if (bitmap == null) {
+            return -3;
+        }
+        return getDominantColor(bitmap, true);
+    }
+
+    public static int getDominantColor(Bitmap source) {
+        return getDominantColor(source, true);
+    }
+
+    public static int getDominantColor(Bitmap source, boolean applyThreshold) {
+        if (source == null) {
+            return -3;
+        }
+        int[] colorBins = new int[36];
+        int maxBin = -1;
+        float[] sumHue = new float[36];
+        float[] sumSat = new float[36];
+        float[] sumVal = new float[36];
+        float[] hsv = new float[3];
+
+        int height = source.getHeight();
+        int width = source.getWidth();
+        int[] pixels = new int[width * height];
+        source.getPixels(pixels, 0, width, 0, 0, width, height);
+        for (int row = 0; row < height; row++) {
+             for (int col = 0; col < width; col++) {
+                  int c = pixels[col + row * width];
+                  if (Color.alpha(c) < 128) {
+                      continue;
+                  }
+                  Color.colorToHSV(c, hsv);
+
+                  if (applyThreshold && (hsv[1] <= 0.35f || hsv[2] <= 0.35f)) {
+                      continue;
+                  }
+
+                  int bin = (int) Math.floor(hsv[0] / 10.0f);
+                  sumHue[bin] = sumHue[bin] + hsv[0];
+                  sumSat[bin] = sumSat[bin] + hsv[1];
+                  sumVal[bin] = sumVal[bin] + hsv[2];
+                  colorBins[bin]++;
+                  if (maxBin < 0 || colorBins[bin] > colorBins[maxBin]) {
+                      maxBin = bin;
+                  }
+             }
+        }
+
+        if (maxBin < 0) {
+            return -3;
+        }
+        hsv[0] = sumHue[maxBin]/colorBins[maxBin];
+        hsv[1] = sumSat[maxBin]/colorBins[maxBin];
+        hsv[2] = sumVal[maxBin]/colorBins[maxBin];
+        return Color.HSVToColor(hsv);
+    }
+
     public static int getMainColorFromDrawable(Drawable drawable) {
         if (drawable == null) {
             return -3;
@@ -161,7 +365,7 @@ public class ColorUtils {
             return ((BitmapDrawable) drawable).getBitmap();
         }
 
-        Bitmap bitmap;
+        Bitmap bitmap = null;
         int width = drawable.getIntrinsicWidth();
         int height = drawable.getIntrinsicHeight();
         if (width > 0 && height > 0) {
@@ -169,10 +373,7 @@ public class ColorUtils {
             Canvas canvas = new Canvas(bitmap);
             drawable.setBounds(0, 0, canvas.getWidth(), canvas.getHeight());
             drawable.draw(canvas);
-        } else {
-            bitmap = null;
         }
-
         return bitmap;
     }
 

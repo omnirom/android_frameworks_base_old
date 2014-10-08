@@ -151,6 +151,12 @@ public final class NavigationBarTransitions extends BarTransitions {
     }
 
     @Override
+    public void finishAnimations() {
+        setColorButtonNavigationBar(-3);
+        super.finishAnimations();
+    }
+
+    @Override
     public void changeColorIconBackground(int bg_color, int ic_color) {
         if (mCurrentBg == bg_color) {
             return;

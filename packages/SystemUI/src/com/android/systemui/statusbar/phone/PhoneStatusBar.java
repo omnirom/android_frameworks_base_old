@@ -1315,6 +1315,8 @@ public class PhoneStatusBar extends BaseStatusBar implements DemoMode {
 
     public void removeIcon(String slot, int index, int viewIndex) {
         if (SPEW) Log.d(TAG, "removeIcon slot=" + slot + " index=" + index + " viewIndex=" + viewIndex);
+        ImageView view = (ImageView) mStatusIcons.getChildAt(viewIndex);
+        removeIconToColor(view);
         mStatusIcons.removeViewAt(viewIndex);
     }
 
@@ -1515,16 +1517,18 @@ public class PhoneStatusBar extends BaseStatusBar implements DemoMode {
         }
 
         for (View remove : toRemove) {
+            removeNotificationIconToColor((ImageView) remove);
             mNotificationIcons.removeView(remove);
         }
 
         for (int i=0; i<toShow.size(); i++) {
             View v = toShow.get(i);
-            addNotificationIconToColor((ImageView) v);
             if (v.getParent() == null) {
+                addNotificationIconToColor((ImageView) v);
                 mNotificationIcons.addView(v, i, params);
             }
         }
+        updateNotificationIconColor();
     }
 
     protected void updateCarrierLabelVisibility(boolean force) {
@@ -1661,6 +1665,10 @@ public class PhoneStatusBar extends BaseStatusBar implements DemoMode {
         mStatusBarView.getPhoneStatusBarTransitions().addIcon(iv);
     }
 
+    public void removeIconToColor(ImageView iv) {
+        mStatusBarView.getPhoneStatusBarTransitions().removeIcon(iv);
+    }
+
     public void addIconToReverseColor(ImageView iv) {
         mStatusBarView.getPhoneStatusBarTransitions().addIconReverse(iv);
     }
@@ -1669,17 +1677,35 @@ public class PhoneStatusBar extends BaseStatusBar implements DemoMode {
         mStatusBarView.getPhoneStatusBarTransitions().addNotificationIcon(iv);
     }
 
-    public void setColorToAllTextSwitcherChildren(TextSwitcher switcher) {
+    private void removeNotificationIconToColor(ImageView iv) {
+        mStatusBarView.getPhoneStatusBarTransitions().removeNotificationIcon(iv);
+    }
+
+    public void addColorToAllTextSwitcherChildren(TextSwitcher switcher) {
         for (int i = 0; i < switcher.getChildCount(); i++) {
              TextView view = (TextView) switcher.getChildAt(i);
              mStatusBarView.getPhoneStatusBarTransitions().addNotificationText(view);
         }
     }
 
-    public void setColorToAllImageSwitcherChildren(ImageSwitcher switcher) {
+    public void removeColorToAllTextSwitcherChildren(TextSwitcher switcher) {
+        for (int i = 0; i < switcher.getChildCount(); i++) {
+             TextView view = (TextView) switcher.getChildAt(i);
+             mStatusBarView.getPhoneStatusBarTransitions().removeNotificationText(view);
+        }
+    }
+
+    public void addColorToAllImageSwitcherChildren(ImageSwitcher switcher) {
         for (int i = 0; i < switcher.getChildCount(); i++) {
              ImageView view = (ImageView) switcher.getChildAt(i);
              mStatusBarView.getPhoneStatusBarTransitions().addNotificationIcon(view);
+        }
+    }
+
+    public void removeColorToAllImageSwitcherChildren(ImageSwitcher switcher) {
+        for (int i = 0; i < switcher.getChildCount(); i++) {
+             ImageView view = (ImageView) switcher.getChildAt(i);
+             mStatusBarView.getPhoneStatusBarTransitions().removeNotificationIcon(view);
         }
     }
 
