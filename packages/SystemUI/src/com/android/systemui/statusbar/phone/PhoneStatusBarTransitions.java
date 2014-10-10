@@ -50,7 +50,7 @@ public final class PhoneStatusBarTransitions extends BarTransitions {
         mCircleBattery, mPercentBattery, mNetworkTraffic;
     private Animator mCurrentAnimation;
     private int mCurrentColor = -3;
-    private int mCurrentBg;
+    private int mCurrentBg = -3;
     private String mFullColor = "fullcolor";
     private String mNonFullColor = "nonfullcolor";
 
@@ -160,12 +160,15 @@ public final class PhoneStatusBarTransitions extends BarTransitions {
         if (ColorUtils.isBrightColor(bg_color)) {
             ic_color = Color.BLACK;
         }
-        mCurrentColor = ic_color;
-        setColorChangeIcon(ic_color);
-        setColorChangeNotificationIcon(ic_color);
+        if (mCurrentColor != ic_color) {
+            mCurrentColor = ic_color;
+            setColorChangeIcon(ic_color);
+            setColorChangeNotificationIcon(ic_color);
+        }
         super.changeColorIconBackground(bg_color, ic_color);
     }
 
+    @Override
     public int getCurrentIconColor() {
         return mCurrentColor;
     }
@@ -180,7 +183,7 @@ public final class PhoneStatusBarTransitions extends BarTransitions {
                  if (ic_color == -3) {
                      iv.clearColorFilter();
                  } else {
-                     iv.setColorFilter(ic_color, PorterDuff.Mode.SRC_ATOP);
+                     iv.setColorFilter(ic_color, PorterDuff.Mode.MULTIPLY);
                  }
              } else {
                  mIcons.remove(iv);

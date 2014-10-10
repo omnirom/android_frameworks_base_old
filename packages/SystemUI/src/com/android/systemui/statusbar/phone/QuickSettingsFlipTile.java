@@ -31,7 +31,6 @@ public class QuickSettingsFlipTile extends QuickSettingsTileView {
     private final QuickSettingsBasicTile mFront;
     private final QuickSettingsBasicBackTile mBack;
     private final QuickSettingsTileFlip3d mFlip3d;
-    private boolean isSupportFlip = true;
 
     public QuickSettingsFlipTile(Context context) {
         this(context, null);
@@ -68,7 +67,7 @@ public class QuickSettingsFlipTile extends QuickSettingsTileView {
 
     @Override
     public boolean dispatchTouchEvent(MotionEvent e) {
-        if (!isEditModeEnabled() && isSupportFlip) {
+        if (!isEditModeEnabled() && isSupportFlip()) {
             return mFlip3d.onTouch(this, e);
         }
         return super.dispatchTouchEvent(e);
@@ -83,8 +82,18 @@ public class QuickSettingsFlipTile extends QuickSettingsTileView {
         }
     }
 
-    public void setSupportFlip(boolean enabled) {
-        isSupportFlip = enabled;
+    @Override
+    public void setEditMode(boolean enabled) {
+        if (isSupportFlip()) {
+            if (isBackVisible()) {
+                mBack.changeCurrentBackground(enabled);
+            } else {
+                mFront.changeCurrentBackground(enabled);
+            }
+        } else {
+            mFront.changeCurrentBackground(enabled);
+        }
+        super.setEditMode(enabled);
     }
 
     public void setFrontImageResource(int id) {
@@ -135,6 +144,12 @@ public class QuickSettingsFlipTile extends QuickSettingsTileView {
         mFront.callOnColumnsChange();
     }
 
+    @Override
+    public void changeColorIconBackground(int bg_color, int ic_color) {
+        mBack.changeColorIconBackground(bg_color, ic_color);
+        mFront.changeColorIconBackground(bg_color, ic_color);
+    }
+
     public void setFrontOnLongClickListener(View.OnLongClickListener listener) {
         mFront.setOnLongClickListener(listener);
     }
@@ -159,6 +174,12 @@ public class QuickSettingsFlipTile extends QuickSettingsTileView {
         return mBack;
     }
 
+    @Override
+    public boolean isBackVisible() {
+        return mFlip3d.isBackSide();
+    }
+
+    @Override
     public void flipToFront() {
         mFlip3d.rotateToFront(true);
     }
