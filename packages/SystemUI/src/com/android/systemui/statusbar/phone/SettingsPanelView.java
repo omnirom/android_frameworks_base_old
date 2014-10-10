@@ -57,13 +57,28 @@ public class SettingsPanelView extends PanelView {
         mQSContainer = (QuickSettingsContainerView) findViewById(R.id.quick_settings_container);
 
         Resources resources = getContext().getResources();
-        mHandleBar = resources.getDrawable(R.drawable.status_bar_close);
+        resetHandleBar(resources);
         mHandleBarHeight = resources.getDimensionPixelSize(R.dimen.close_handle_height);
         mHandleView = findViewById(R.id.handle);
     }
 
     public void setQuickSettings(QuickSettings qs) {
         mQS = qs;
+    }
+
+    private void resetHandleBar(Resources resources) {
+        mHandleBar = resources.getDrawable(R.drawable.status_bar_close);
+    }
+
+    public void setHandleViewColor(int color) {
+        if (color != -3) {
+            Drawable drawable = getStateListDrawable(color);
+            mHandleView.setBackground(drawable);
+            mHandleBar = drawable;
+        } else {
+            mHandleView.setBackgroundResource(R.drawable.status_bar_close);
+            resetHandleBar(getContext().getResources());
+        }
     }
 
     @Override
