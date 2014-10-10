@@ -20,6 +20,7 @@ import android.content.Intent;
 import android.content.IntentFilter;
 import android.content.res.Resources;
 import android.content.res.TypedArray;
+import android.graphics.Color;
 import android.os.BatteryManager;
 import android.os.Handler;
 import android.os.UserHandle;
@@ -41,6 +42,7 @@ import android.util.Log;
 import com.android.internal.R;
 import com.android.systemui.BatteryMeterView;
 
+import com.android.internal.util.omni.ColorUtils;
 
 public class BatteryPercentMeterView extends ImageView {
     final static String QuickSettings = "quicksettings";
@@ -70,13 +72,16 @@ public class BatteryPercentMeterView extends ImageView {
     private int    mChargingColorFg;
     private int    mChargingColorDefault;
     private int    mChargingBandHeight;
+    private final int mColorBg;
+    private final int mColorDefault;
 
     private int mCurrentColor = -3;
+    private int mCurrentBgColor = -3;
 
     // runnable to invalidate view via mHandler.postDelayed() call
     private final Runnable mInvalidate = new Runnable() {
         public void run() {
-            if(mActivated && mAttached) {
+            if (mActivated && mAttached) {
                 invalidate();
             }
         }
@@ -93,11 +98,12 @@ public class BatteryPercentMeterView extends ImageView {
                 mLevelString = Integer.toString(mLevel) + "%";
                 boolean isCharging = intent.getIntExtra(BatteryManager.EXTRA_PLUGGED, 0) != 0;
 
+                final Resources res = context.getResources();
                 mChargingColorFg = mChargingColorDefault;
-                if (mLevel < getContext().getResources().getInteger(com.android.internal.R.integer.config_lowBatteryWarningLevel)) {
-                    mChargingColorFg = getResources().getColor(com.android.systemui.R.color.batterymeter_percent_warn_color);
-                } else if (mLevel <= getContext().getResources().getInteger(com.android.internal.R.integer.config_criticalBatteryWarningLevel)) {
-                    mChargingColorFg = getResources().getColor(com.android.systemui.R.color.batterymeter_percent_critical_color);
+                if (mLevel < res.getInteger(com.android.internal.R.integer.config_lowBatteryWarningLevel)) {
+                    mChargingColorFg = res.getColor(com.android.systemui.R.color.batterymeter_percent_warn_color);
+                } else if (mLevel <= res.getInteger(com.android.internal.R.integer.config_criticalBatteryWarningLevel)) {
+                    mChargingColorFg = res.getColor(com.android.systemui.R.color.batterymeter_percent_critical_color);
                 }
                 mPaintFontBg.setColor(mChargingColorFg);
                 if (mActivated && mAttached) {
@@ -123,7 +129,7 @@ public class BatteryPercentMeterView extends ImageView {
 
     public BatteryPercentMeterView(Context context, AttributeSet attrs, int defStyle) {
         super(context, attrs, defStyle);
-
+        final Resources res = context.getResources();
         TypedArray percentBatteryType = context.obtainStyledAttributes(attrs,
             com.android.systemui.R.styleable.BatteryIcon, 0, 0);
 
@@ -133,10 +139,29 @@ public class BatteryPercentMeterView extends ImageView {
         if (mPercentBatteryView == null) {
             mPercentBatteryView = StatusBar;
         }
-
+        mColorBg = res.getColor(com.android.systemui.R.color.batterymeter_percent_charging);
+        mColorDefault = res.getColor(com.android.systemui.R.color.batterymeter_percent_color);
         mHandler = new Handler();
         mBatteryReceiver = new BatteryReceiver();
         initSizeMeasureIconHeight();
+
+        mPaintFontBg = new Paint();
+        mPaintFontBg.setAntiAlias(true);
+        mPaintFontBg.setDither(true);
+        mPaintFontBg.setStyle(Paint.Style.STROKE);
+        mPaintFontBg.setTextAlign(Align.CENTER);
+        mPaintFontBg.setTextSize(mTextSize);
+        mPaintFontBg.setColor(mColorDefault);
+
+        Rect bounds = new Rect();
+        mPaintFontBg.getTextBounds("100%", 0, "100%".length(), bounds);
+        mWidth = bounds.width();
+        mTextX = mWidth / 2.0f + getPaddingLeft();
+        mTextY = mSize / 2.0f + (bounds.bottom - bounds.top) / 2.0f;
+
+        mPaintFontFg = new Paint(mPaintFontBg);
+        mPaintFontFg.setColor(mColorBg);
+
         updateSettings();
     }
 
@@ -178,40 +203,18 @@ public class BatteryPercentMeterView extends ImageView {
         mHandler.postDelayed(mInvalidate, 50);
     }
 
-    public void updateSettings() {
-        Resources res = getResources();
-        ContentResolver resolver = mContext.getContentResolver();
-        int batteryStyle = Settings.System.getIntForUser(getContext().getContentResolver(),
-                                Settings.System.STATUS_BAR_BATTERY_STYLE, 0
-                                , UserHandle.USER_CURRENT);
-        mActivated = batteryStyle == 5
-            || (batteryStyle == 2 && mPercentBatteryView.equals(StatusBar));
-        setVisibility(mActivated ? View.VISIBLE : View.GONE);
-
-        int chargingColorBg = getResources().getColor(com.android.systemui.R.color.batterymeter_percent_charging);
-        int chargingColorDefault = getResources().getColor(com.android.systemui.R.color.batterymeter_percent_color);
-        int nowColorBg = mCurrentColor != -3 ? mCurrentColor : chargingColorBg;
-        int nowColorDefault = mCurrentColor != -3 ? mCurrentColor : chargingColorDefault;
-
-        mChargingColorBg = nowColorBg;
-        mChargingColorDefault = nowColorDefault;
+    private void doInvalidateView() {
+        mChargingColorDefault = mColorDefault;
+        if (mCurrentColor != -3) {
+            mChargingColorDefault = mCurrentColor;
+        }
         mChargingColorFg = mChargingColorDefault;
-
-        mPaintFontBg = new Paint();
-        mPaintFontBg.setAntiAlias(true);
-        mPaintFontBg.setDither(true);
-        mPaintFontBg.setStyle(Paint.Style.STROKE);
-        mPaintFontBg.setTextAlign(Align.CENTER);
-        mPaintFontBg.setTextSize(mTextSize);
         mPaintFontBg.setColor(mChargingColorFg);
 
-        Rect bounds = new Rect();
-        mPaintFontBg.getTextBounds("100%", 0, "100%".length(), bounds);
-        mWidth = bounds.width();
-        mTextX = mWidth / 2.0f + getPaddingLeft();
-        mTextY = mSize / 2.0f + (bounds.bottom - bounds.top) / 2.0f;
-
-        mPaintFontFg = new Paint(mPaintFontBg);
+        mChargingColorBg = mColorBg;
+        if (mCurrentBgColor != -3) {
+            mChargingColorBg = ColorUtils.opposeColor(mCurrentBgColor);
+        }
         mPaintFontFg.setColor(mChargingColorBg);
 
         if (mActivated && mAttached) {
@@ -219,11 +222,20 @@ public class BatteryPercentMeterView extends ImageView {
         }
     }
 
-    public void updateSettings(int defaultColor) {
-        if (mCurrentColor != defaultColor) {
-            mCurrentColor = defaultColor;
-            updateSettings();
-        }
+    public void updateSettings() {
+        int batteryStyle = Settings.System.getIntForUser(getContext().getContentResolver(),
+                                Settings.System.STATUS_BAR_BATTERY_STYLE, 0
+                                , UserHandle.USER_CURRENT);
+        mActivated = batteryStyle == 5
+            || (batteryStyle == 2 && mPercentBatteryView.equals(StatusBar));
+        setVisibility(mActivated ? View.VISIBLE : View.GONE);
+        doInvalidateView();
+    }
+
+    public void updateSettings(int defaultColor, int defaultBgColor) {
+        mCurrentBgColor = defaultBgColor;
+        mCurrentColor = defaultColor;
+        doInvalidateView();
     }
 
     @Override
