@@ -160,9 +160,11 @@ public final class PhoneStatusBarTransitions extends BarTransitions {
         if (ColorUtils.isBrightColor(bg_color)) {
             ic_color = Color.BLACK;
         }
-        mCurrentColor = ic_color;
-        setColorChangeIcon(ic_color);
-        setColorChangeNotificationIcon(ic_color);
+        if (mCurrentColor != ic_color) {
+            mCurrentColor = ic_color;
+            setColorChangeIcon(ic_color);
+            setColorChangeNotificationIcon(ic_color);
+        }
         super.changeColorIconBackground(bg_color, ic_color);
     }
 
@@ -180,7 +182,7 @@ public final class PhoneStatusBarTransitions extends BarTransitions {
                  if (ic_color == -3) {
                      iv.clearColorFilter();
                  } else {
-                     iv.setColorFilter(ic_color, PorterDuff.Mode.SRC_ATOP);
+                     iv.setColorFilter(ic_color, PorterDuff.Mode.MULTIPLY);
                  }
              } else {
                  mIcons.remove(iv);

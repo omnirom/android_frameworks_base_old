@@ -165,8 +165,10 @@ public final class NavigationBarTransitions extends BarTransitions {
         if (ColorUtils.isBrightColor(bg_color)) {
             ic_color = Color.BLACK;
         }
-        mCurrentColor = ic_color;
-        setColorButtonNavigationBar(ic_color);
+        if (mCurrentColor != ic_color) {
+            mCurrentColor = ic_color;
+            setColorButtonNavigationBar(ic_color);
+        }
         super.changeColorIconBackground(bg_color, ic_color);
     }
 
@@ -197,7 +199,7 @@ public final class NavigationBarTransitions extends BarTransitions {
             if (ic_color == -3) {
                 ((KeyButtonView) button).clearColorFilterBg();
             } else {
-                ((KeyButtonView) button).setColorFilterBg(ic_color, PorterDuff.Mode.SRC_ATOP);
+                ((KeyButtonView) button).setColorFilterBg(ic_color, PorterDuff.Mode.MULTIPLY);
             }
         }
     }
