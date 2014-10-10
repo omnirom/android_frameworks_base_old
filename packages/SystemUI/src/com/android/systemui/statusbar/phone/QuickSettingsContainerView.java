@@ -91,14 +91,24 @@ public class QuickSettingsContainerView extends FrameLayout {
         requestLayout();
     }
 
+    public void changeColorIconBackground(int bg_color, int ic_color) {
+        for (int i = 0; i < getChildCount(); i++) {
+             View v = getChildAt(i);
+             if (v instanceof QuickSettingsTileView) {
+                 QuickSettingsTileView qs = (QuickSettingsTileView) v;
+                 qs.changeColorIconBackground(bg_color, ic_color);
+             }
+        }
+    }
+
     public void updateSpan() {
-        for(int i = 0; i < getChildCount(); i++) {
-            View v = getChildAt(i);
-            if (v instanceof QuickSettingsTileView) {
-                QuickSettingsTileView qs = (QuickSettingsTileView) v;
-                // Update column on child view for text sizes
-                qs.setColumns(mNumFinalCol);
-            }
+        for (int i = 0; i < getChildCount(); i++) {
+             View v = getChildAt(i);
+             if (v instanceof QuickSettingsTileView) {
+                 QuickSettingsTileView qs = (QuickSettingsTileView) v;
+                 // Update column on child view for text sizes
+                 qs.setColumns(mNumFinalCol);
+             }
         }
     }
 

@@ -121,6 +121,13 @@
 
     <string name="status_bar_notification_hide_icon_packages">Hide app\'s notification icon(s)</string>
 
+    <string name="quick_settings_tinted_mode_status_label">Status</string>
+    <string name="quick_settings_tinted_mode_disable_label">Disabled</string>
+    <string name="quick_settings_tinted_mode_off_label">Color disabled</string>
+    <string name="quick_settings_tinted_mode_on_label">Color enabled</string>
+    <string name="quick_settings_tinted_mode_screen_label">Screen</string>
+    <string name="quick_settings_tinted_mode_actionbar_label">Action bar</string>
+
     <!-- Dialog title for navigation bar button selection -->
     <string name="navbar_dialog_title">Choose action to assign</string>
     <string name="navbar_home_button">Home button</string>
