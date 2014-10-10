@@ -75,6 +75,10 @@ public class PhoneStatusBarView extends PanelBar {
         mBar = bar;
     }
 
+    public void setPhoneStatusBar(PhoneStatusBar bar) {
+        mBarTransitions.setBar(bar);
+    }
+
     public boolean hasFullWidthNotifications() {
         return mFullWidthNotifications;
     }
