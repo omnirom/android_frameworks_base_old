@@ -22,13 +22,13 @@ import com.android.systemui.R;
 
 import android.content.Context;
 import android.graphics.drawable.Drawable;
+import android.graphics.PorterDuff;
 import android.util.AttributeSet;
 import android.util.TypedValue;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.widget.FrameLayout;
 import android.widget.ImageView;
-import android.widget.ProgressBar;
 import android.widget.TextView;
 
 
@@ -36,6 +36,7 @@ public class QuickSettingsBasicBackTile extends QuickSettingsTileView {
     private final TextView mLabelView;
     private final TextView mFunctionView;
     private final ImageView mImageView;
+    private int mCurrentUiColor = -3;
 
     public QuickSettingsBasicBackTile(Context context) {
         this(context, null);
@@ -65,6 +66,13 @@ public class QuickSettingsBasicBackTile extends QuickSettingsTileView {
     @Override
     public void setContent(int layoutId, LayoutInflater inflater) {
         throw new RuntimeException("why?");
+    }
+
+    @Override
+    public void setEditMode(boolean enabled) {
+        // No hover on edit mode
+        changeCurrentBackground(enabled);
+        super.setEditMode(enabled);
     }
 
     public ImageView getImageView() {
@@ -97,6 +105,41 @@ public class QuickSettingsBasicBackTile extends QuickSettingsTileView {
     public void callOnColumnsChange() {
         mLabelView.invalidate();
         mFunctionView.invalidate();
+    }
+
+    @Override
+    protected void changeCurrentUiColor(int ic_color) {
+        if (mCurrentUiColor == ic_color) {
+            return;
+        }
+        mCurrentUiColor = ic_color;
+        if (mLabelView != null) {
+            if (ic_color != -3) {
+                mLabelView.setTextColor(ic_color);
+            } else {
+                mLabelView.setTextColor(getDefaultColor());
+            }
+        }
+        if (mFunctionView != null) {
+            if (ic_color != -3) {
+                mFunctionView.setTextColor(ic_color);
+            } else {
+                mFunctionView.setTextColor(getDefaultColor());
+            }
+        }
+        if (mImageView != null) {
+            if (ic_color != -3) {
+                mImageView.setColorFilter(ic_color, PorterDuff.Mode.MULTIPLY);
+            } else {
+                mImageView.clearColorFilter();
+            }
+        }
+    }
+
+    @Override
+    public void changeColorIconBackground(int bg_color, int ic_color) {
+        changeCurrentUiColor(ic_color);
+        super.changeColorIconBackground(bg_color, ic_color);
     }
 
     public void setLabel(CharSequence text) {

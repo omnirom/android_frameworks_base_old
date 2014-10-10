@@ -18,13 +18,13 @@ package com.android.systemui.statusbar.phone;
 
 import android.content.Context;
 import android.graphics.drawable.Drawable;
+import android.graphics.PorterDuff;
 import android.util.AttributeSet;
 import android.util.TypedValue;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.widget.FrameLayout;
 import android.widget.ImageView;
-import android.widget.ProgressBar;
 import android.widget.TextView;
 
 import com.android.systemui.R;
@@ -33,6 +33,7 @@ public class QuickSettingsBasicNetworkTile extends QuickSettingsTileView {
     private final TextView mTextView;
     private final ImageView mImageView;
     private final ImageView mImageViewOverlay;
+    private int mCurrentUiColor = -3;
 
     public QuickSettingsBasicNetworkTile(Context context) {
         this(context, null);
@@ -62,6 +63,13 @@ public class QuickSettingsBasicNetworkTile extends QuickSettingsTileView {
     @Override
     public void setContent(int layoutId, LayoutInflater inflater) {
         throw new RuntimeException("why?");
+    }
+
+    @Override
+    public void setEditMode(boolean enabled) {
+        // No hover on edit mode
+        changeCurrentBackground(enabled);
+        super.setEditMode(enabled);
     }
 
     public ImageView getImageView() {
@@ -104,6 +112,41 @@ public class QuickSettingsBasicNetworkTile extends QuickSettingsTileView {
     @Override
     public void callOnColumnsChange() {
         mTextView.invalidate();
+    }
+
+    @Override
+    protected void changeCurrentUiColor(int ic_color) {
+        if (mCurrentUiColor == ic_color) {
+            return;
+        }
+        mCurrentUiColor = ic_color;
+        if (mTextView != null) {
+            if (ic_color != -3) {
+                mTextView.setTextColor(ic_color);
+            } else {
+                mTextView.setTextColor(getDefaultColor());
+            }
+        }
+        if (mImageView != null) {
+            if (ic_color != -3) {
+                mImageView.setColorFilter(ic_color, PorterDuff.Mode.MULTIPLY);
+            } else {
+                mImageView.clearColorFilter();
+            }
+        }
+        if (mImageViewOverlay != null) {
+            if (ic_color != -3) {
+                mImageViewOverlay.setColorFilter(ic_color, PorterDuff.Mode.MULTIPLY);
+            } else {
+                mImageViewOverlay.clearColorFilter();
+            }
+        }
+    }
+
+    @Override
+    public void changeColorIconBackground(int bg_color, int ic_color) {
+        changeCurrentUiColor(ic_color);
+        super.changeColorIconBackground(bg_color, ic_color);
     }
 
     public void setTextResource(int resId) {
