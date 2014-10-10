@@ -40,8 +40,17 @@ public class ColorUtils {
 
     public static Drawable getGradientDrawable(boolean isNav, int color) {
         int color2 = Color.argb(0, Color.red(color), Color.green(color), Color.blue(color));
-        return new GradientDrawable((isNav ? Orientation.BOTTOM_TOP : Orientation.TOP_BOTTOM),
+        GradientDrawable drawable = new GradientDrawable(
+                       (isNav ? Orientation.BOTTOM_TOP : Orientation.TOP_BOTTOM),
                                      new int[]{color, color2});
+        if (isBrightColor(color)) {
+            color = isNav ? Color.BLACK : Color.WHITE;
+        } else {
+            color = isNav ? Color.WHITE : Color.BLACK;
+        }
+        drawable.setDither(true);
+        drawable.setStroke(1, color);
+        return drawable;
     }
 
     public static int darken(final int color, float fraction) {
@@ -99,21 +108,18 @@ public class ColorUtils {
     public static boolean isBrightColor(int color) {
         if (color == -3) {
             return false;
-        }
-        if (color == Color.TRANSPARENT) {
+        } else if (color == Color.TRANSPARENT) {
             return false;
-        }
-        if (color == Color.WHITE) {
+        } else if (color == Color.WHITE) {
             return true;
         }
-        boolean rtnValue = false;
         int[] rgb = { Color.red(color), Color.green(color), Color.blue(color) };
         int brightness = (int) Math.sqrt(rgb[0] * rgb[0] * .241 + rgb[1]
             * rgb[1] * .691 + rgb[2] * rgb[2] * .068);
         if (brightness >= 170) {
-            rtnValue = true;
+            return true;
         }
-        return rtnValue;
+        return false;
     }
 
     public static int getMainColorFromBitmap(Bitmap bitmap, int x, int y) {

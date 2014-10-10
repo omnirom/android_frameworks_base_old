@@ -117,6 +117,7 @@ class QuickSettings {
         SLEEP,
         SYNC,
         USBMODE,
+        TINTED,
         TORCH
     }
 
@@ -128,7 +129,7 @@ class QuickSettings {
         + DELIMITER + Tile.BATTERY + DELIMITER + Tile.ROTATION+ DELIMITER + Tile.IMMERSIVE
         + DELIMITER + Tile.LOCATION + DELIMITER + Tile.AIRPLANE + DELIMITER + Tile.QUIETHOUR
         + DELIMITER + Tile.USBMODE + DELIMITER + Tile.SLEEP + DELIMITER + Tile.SYNC
-        + DELIMITER + Tile.NFC;
+        + DELIMITER + Tile.NFC + DELIMITER + Tile.TINTED;
 
     private Context mContext;
     private PanelBar mBar;
@@ -427,6 +428,52 @@ class QuickSettings {
                   });
                   parent.addView(userTile);
                   if (addMissing) userTile.setVisibility(View.GONE);
+               } else if (Tile.TINTED.toString().equals(tile.toString())) { // tinted tile
+                  final QuickSettingsFlipTile tintedTile
+                        = new QuickSettingsFlipTile(mContext);
+
+                  tintedTile.setTileId(Tile.TINTED);
+                  tintedTile.setSupportFlip(true);
+                  tintedTile.setFrontImageResource(R.drawable.ic_qs_dynamiccolors_off);
+                  tintedTile.setFrontText(mContext.getString(R.string.quick_settings_tinted_mode_off_label));
+                  tintedTile.setFrontOnLongClickListener(new View.OnLongClickListener() {
+                      @Override
+                      public boolean onLongClick(View v) {
+                          Intent intent = new Intent(Intent.ACTION_MAIN);
+                          intent.setClassName("com.android.settings",
+                                 "com.android.settings.Settings$BarsSettingsActivity");
+                          startSettingsActivity(intent);
+                          return true;
+                      }
+                  });
+                  tintedTile.setBackImageResource(R.drawable.ic_qs_dynamiccolors_off);
+                  tintedTile.setBackLabel(mContext.getString(R.string.quick_settings_tinted_mode_status_label));
+                  tintedTile.setBackOnLongClickListener(new View.OnLongClickListener() {
+                      @Override
+                      public boolean onLongClick(View v) {
+                          Intent intent = new Intent(Intent.ACTION_MAIN);
+                          intent.setClassName("com.android.settings",
+                                 "com.android.settings.Settings$BarsSettingsActivity");
+                          startSettingsActivity(intent);
+                          return true;
+                      }
+                  });
+                  mModel.addTintedFrontTile(tintedTile.getFront(), new QuickSettingsModel.RefreshCallback() {
+                        @Override
+                        public void refreshView(QuickSettingsTileView unused, State state) {
+                            tintedTile.setFrontImageResource(state.iconId);
+                            tintedTile.setFrontText(state.label);
+                        }
+                  });
+                  mModel.addTintedBackTile(tintedTile.getBack(), new QuickSettingsModel.RefreshCallback() {
+                        @Override
+                        public void refreshView(QuickSettingsTileView view, State state) {
+                            tintedTile.setBackImageResource(state.iconId);
+                            tintedTile.setBackFunction(state.label);
+                        }
+                  });
+                  parent.addView(tintedTile);
+                  if (addMissing) tintedTile.setVisibility(View.GONE);
                } else if (Tile.BRIGHTNESS.toString().equals(tile.toString())) { // brightness
                   // Brightness
                   final QuickSettingsBasicTile brightnessTile
@@ -953,6 +1000,7 @@ class QuickSettings {
                         = new QuickSettingsFlipTile(mContext);
 
                   VolumeTile.setTileId(Tile.VOLUME);
+                  VolumeTile.setSupportFlip(true);
                   VolumeTile.setFrontImageResource(R.drawable.ic_qs_volume);
                   VolumeTile.setFrontText(mContext.getString(R.string.quick_settings_volume));
                   VolumeTile.setBackLabel(mContext.getString(R.string.quick_settings_volume_status));
@@ -993,6 +1041,7 @@ class QuickSettings {
                        = new QuickSettingsFlipTile(mContext);
 
                   SleepTile.setTileId(Tile.SLEEP);
+                  SleepTile.setSupportFlip(true);
                   SleepTile.setFrontImageResource(R.drawable.ic_qs_sleep);
                   SleepTile.setFrontText(mContext.getString(R.string.quick_settings_screen_sleep));
                   SleepTile.setBackLabel(mContext.getString(R.string.quick_settings_volume_status));
@@ -1028,6 +1077,7 @@ class QuickSettings {
                             = new QuickSettingsFlipTile(mContext);
 
                       bluetoothTile.setTileId(Tile.BLUETOOTH);
+                      bluetoothTile.setSupportFlip(true);
                       bluetoothTile.setFrontOnLongClickListener(new View.OnLongClickListener() {
                             @Override
                             public boolean onLongClick(View v) {
@@ -1155,6 +1205,7 @@ class QuickSettings {
                           = new QuickSettingsFlipTile(mContext);
 
                      locationTile.setTileId(Tile.LOCATION);
+                     locationTile.setSupportFlip(true);
                      locationTile.setFrontImageResource(R.drawable.ic_qs_location_default_on);
                      locationTile.setFrontText(mContext.getString(R.string.quick_settings_location_label));
                      locationTile.setBackLabel(mContext.getString(R.string.quick_settings_volume_status));
@@ -1233,6 +1284,7 @@ class QuickSettings {
         // Alarm tile
         final QuickSettingsBasicTile alarmTile
                     = new QuickSettingsBasicTile(mContext);
+
         alarmTile.setImageResource(R.drawable.ic_qs_alarm_on);
         alarmTile.setTemporary(true);
         alarmTile.setOnClickListener(new View.OnClickListener() {
@@ -1255,6 +1307,7 @@ class QuickSettings {
         // Remote Display
         QuickSettingsBasicTile remoteDisplayTile
                 = new QuickSettingsBasicTile(mContext);
+
         remoteDisplayTile.setTemporary(true);
         remoteDisplayTile.setOnClickListener(new View.OnClickListener() {
             @Override
@@ -1285,6 +1338,7 @@ class QuickSettings {
             // IME
             final QuickSettingsBasicTile imeTile
                     = new QuickSettingsBasicTile(mContext);
+
             imeTile.setTemporary(true);
             imeTile.setImageResource(R.drawable.ic_qs_ime);
             imeTile.setOnClickListener(new View.OnClickListener() {
@@ -1307,6 +1361,7 @@ class QuickSettings {
         // Bug reports
         final QuickSettingsBasicTile bugreportTile
                 = new QuickSettingsBasicTile(mContext);
+
         bugreportTile.setTemporary(true);
         bugreportTile.setImageResource(com.android.internal.R.drawable.stat_sys_adb);
         bugreportTile.setTextResource(com.android.internal.R.string.bugreport_title);
@@ -1328,6 +1383,7 @@ class QuickSettings {
         // SSL CA Cert Warning.
         final QuickSettingsBasicTile sslCaCertWarningTile =
                 new QuickSettingsBasicTile(mContext, null, R.layout.quick_settings_tile_monitoring);
+
         sslCaCertWarningTile.setTemporary(true);
         sslCaCertWarningTile.setOnClickListener(new View.OnClickListener() {
             @Override
