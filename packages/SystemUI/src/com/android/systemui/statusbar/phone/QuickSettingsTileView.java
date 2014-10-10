@@ -52,6 +52,7 @@ class QuickSettingsTileView extends FrameLayout {
     private static final float DISABLED = 0.65f;
     private static final float DISAPPEAR = 0.0f;
 
+    private Context mContext;
     private Tile mTileId;
 
     private OnClickListener mOnClickListener;
@@ -61,6 +62,8 @@ class QuickSettingsTileView extends FrameLayout {
     private int mColSpan;
     private int mRowSpan;
     private int mNumColumns;
+    private int mCurrentBgColor = -3;
+    private int mCurrentTextColor = -3;
 
     private boolean mPrepared;
     private OnPrepareListener mOnPrepareListener;
@@ -70,9 +73,11 @@ class QuickSettingsTileView extends FrameLayout {
     private boolean mEditMode;
     private boolean mVisible;
 
+    private boolean isSupportFlip = false;
+
     public QuickSettingsTileView(Context context, AttributeSet attrs) {
         super(context, attrs);
-
+        mContext = context;
         mContentLayoutId = -1;
         mColSpan = 1;
         mRowSpan = 1;
@@ -97,6 +102,14 @@ class QuickSettingsTileView extends FrameLayout {
 
     public Tile getTileId() {
         return mTileId;
+    }
+
+    public boolean isSupportFlip() {
+        return isSupportFlip;
+    }
+
+    public void setSupportFlip(boolean enabled) {
+        isSupportFlip = enabled;
     }
 
     public void setTemporary(boolean temporary) {
@@ -155,10 +168,46 @@ class QuickSettingsTileView extends FrameLayout {
     }
 
     public void setHoverEffect(String color, boolean hover) {
-        if(hover) {
+        if (hover) {
             setForeground(new ColorDrawable(Color.parseColor(color)));
         } else {
             setForeground(new ColorDrawable(Color.TRANSPARENT));
+        }
+    }
+
+    protected int getDefaultColor() {
+        return mContext.getResources().getColor(R.color.qs_textview_color);
+    }
+
+    protected int getCurrentColor() {
+        return mCurrentTextColor;
+    }
+
+    public void changeCurrentBackground(boolean enabled) {
+        if (mCurrentBgColor != -3) {
+            if (enabled) {
+                setBackgroundResource(R.drawable.qs_tile_background_no_hover);
+            } else {
+                setBackground(new ColorDrawable(mCurrentBgColor));
+            }
+        } else {
+            setBackgroundResource(enabled ? R.drawable.qs_tile_background_no_hover :
+                   R.drawable.qs_tile_background);
+        }
+        changeCurrentUiColor(enabled ? -3 : mCurrentTextColor);
+    }
+
+    protected void changeCurrentUiColor(int ic_color) {
+        // this will call changing Ui color on child views when edit mode enabled
+    }
+
+    public void changeColorIconBackground(int bg_color, int ic_color) {
+        mCurrentBgColor = bg_color;
+        mCurrentTextColor = ic_color;
+        if (bg_color != -3) {
+            setBackground(new ColorDrawable(bg_color));
+        } else {
+            setBackgroundResource(R.drawable.qs_tile_background);
         }
     }
 
@@ -175,7 +224,7 @@ class QuickSettingsTileView extends FrameLayout {
         mVisible = getVisibility() == View.VISIBLE
                 && ((getScaleY() >= ENABLED || getScaleX() == DISAPPEAR) ||
                     (getScaleX() >= ENABLED || getScaleX() == DISAPPEAR));
-        if(!isTemporary() && enabled) {
+        if (!isTemporary() && enabled) {
             setVisibility(View.VISIBLE);
             setHoverEffect(HOVER_COLOR_BLACK, !mVisible);
             float scale = mVisible ? ENABLED : DISABLED;
@@ -193,7 +242,7 @@ class QuickSettingsTileView extends FrameLayout {
             animate().scaleX(scale).scaleY(scale).setListener(null);
             setOnClickListener(temporaryEditMode? null : mOnClickListener);
             setOnLongClickListener(temporaryEditMode? null : mOnLongClickListener);
-            if(!mVisible) { // Item has been disabled
+            if (!mVisible) { // Item has been disabled
                 setVisibility(View.GONE);
             }
         }
@@ -276,6 +325,15 @@ class QuickSettingsTileView extends FrameLayout {
         } else {
             return res.getDimensionPixelSize(R.dimen.qs_3_column_text_size);
         }
+    }
+
+    public boolean isBackVisible() {
+        // this will detect if back tile is visible
+        return false;
+    }
+
+    public void flipToFront() {
+        // this will call reset view on flip tiles
     }
 
     public void callOnColumnsChange() {

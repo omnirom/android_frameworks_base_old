@@ -219,7 +219,6 @@ public class QuickSettingsTileFlip3d extends GestureDetector.SimpleOnGestureList
     public boolean onDown(MotionEvent e) {
         mFrontSideOnDown = isFrontSide();
         dispatchEventToActive(e);
-
         return true;
     }
 

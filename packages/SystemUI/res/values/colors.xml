@@ -41,7 +41,11 @@
     <color name="batterymeter_percent_critical_color">#FFFFFF00</color><!-- yellow -->
     <color name="batterymeter_percent_charging">#FF555555</color>
     <color name="qs_background_color">#FF161616</color>
+    <color name="qs_textview_color">#CCCCCC</color>
     <color name="qs_background_pressed_color">#FF212121</color>
     <color name="ad_notification_background_color">#3fff</color>
     <drawable name="qs_user_background">#CC000000</drawable>
+    <color name="status_bar_expanded_clock_color">#ffffff</color>
+    <color name="status_bar_expanded_date_color">#cccccc</color>
+    <color name="status_bar_expanded_carrier_color">#999999</color>
 </resources>

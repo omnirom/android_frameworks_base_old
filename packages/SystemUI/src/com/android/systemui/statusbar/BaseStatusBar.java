@@ -74,6 +74,7 @@ import com.android.internal.statusbar.IStatusBarService;
 import com.android.internal.statusbar.StatusBarIcon;
 import com.android.internal.statusbar.StatusBarIconList;
 import com.android.internal.widget.SizeAdaptiveLayout;
+import com.android.internal.util.omni.ColorUtils;
 import com.android.internal.util.omni.TaskUtils;
 import com.android.internal.util.omni.OmniSwitchConstants;
 import static com.android.internal.util.omni.DeviceUtils.IMMERSIVE_MODE_OFF;
@@ -983,6 +984,114 @@ public abstract class BaseStatusBar extends SystemUI implements
                 if (DEBUG) Log.d(TAG, "ignoring notification being held by user at " + i);
             }
         }
+    }
+
+    private int mCurrentTextColor = -3;
+    private int mCurrentBgColor = -3;
+
+    protected void updateNotificationViewColor(int bg_color, int ic_color) {
+        mCurrentBgColor = bg_color;
+        mCurrentTextColor = ic_color;
+        int titleColor = mContext.getResources().getColor(R.color.status_bar_expanded_clock_color);
+        int textColor = mContext.getResources().getColor(R.color.status_bar_expanded_carrier_color);
+        if (ic_color != -3) {
+            titleColor = ic_color;
+            textColor = ColorUtils.changeColorTransparency(ic_color, 75);
+        }
+        int N = mNotificationData.size();
+        for (int i = 0; i < N; i++) {
+            NotificationData.Entry entry = mNotificationData.get(i);
+            if (!updateNotificationViewsColor(entry, entry.notification, bg_color, titleColor, textColor)) {
+                continue;
+            }
+        }
+    }
+
+    public boolean updateNotificationViewsColor(NotificationData.Entry entry) {
+        int titleColor = mContext.getResources().getColor(R.color.status_bar_expanded_clock_color);
+        int textColor = mContext.getResources().getColor(R.color.status_bar_expanded_carrier_color);
+        if (mCurrentTextColor != -3) {
+            titleColor = mCurrentTextColor;
+            textColor = ColorUtils.changeColorTransparency(mCurrentTextColor, 75);
+        }
+        return updateNotificationViewsColor(entry, entry.notification, mCurrentBgColor, titleColor, textColor);
+    }
+
+    public boolean updateNotificationViewsColor(NotificationData.Entry entry,
+            StatusBarNotification notification, int bg_color, int titleColor, int textColor) {
+        Notification n = notification.getNotification();
+        if (n.priority < Notification.PRIORITY_LOW) {
+            return false;
+        }
+        if (notification.isOngoing()) {
+            return false;
+        }
+        try {
+             final RemoteViews contentView = n.contentView;
+             final RemoteViews bigContentView = n.bigContentView;
+             final View expanded = entry.expanded;
+             final View expandedBig = entry.getBigContentView();
+             if (contentView != null && expanded != null) {
+                 contentView.setTextColor(com.android.internal.R.id.title, titleColor);
+                 contentView.setTextColor(com.android.internal.R.id.text, textColor);
+                 contentView.setTextColor(com.android.internal.R.id.big_text, textColor);
+                 contentView.setTextColor(com.android.internal.R.id.time, textColor);
+                 contentView.setTextColor(com.android.internal.R.id.text2, textColor);
+                 contentView.setTextColor(com.android.internal.R.id.info, textColor);
+
+                 if (bg_color != -3) {
+                     expanded.setBackgroundColor(bg_color);
+                     contentView.setInt(com.android.internal.R.id.status_bar_latest_event_content,
+                             "setBackgroundColor", bg_color);
+                 } else {
+                     expanded.setBackgroundResource(com.android.internal.R.drawable.notification_bg);
+                     contentView.setInt(com.android.internal.R.id.status_bar_latest_event_content,
+                        "setBackgroundResource", com.android.internal.R.drawable.notification_bg);
+                 }
+
+                 contentView.reapply(mContext, expanded, mOnClickHandler);
+             }
+             if (bigContentView != null && expandedBig != null) {
+                 bigContentView.setTextColor(com.android.internal.R.id.title, titleColor);
+                 bigContentView.setTextColor(com.android.internal.R.id.text, textColor);
+                 bigContentView.setTextColor(com.android.internal.R.id.big_text, textColor);
+                 bigContentView.setTextColor(com.android.internal.R.id.time, textColor);
+                 bigContentView.setTextColor(com.android.internal.R.id.text2, textColor);
+                 bigContentView.setTextColor(com.android.internal.R.id.info, textColor);
+
+                 int[] rowIds = {com.android.internal.R.id.inbox_text0, com.android.internal.R.id.inbox_text1,
+                    com.android.internal.R.id.inbox_text2, com.android.internal.R.id.inbox_text3,
+                    com.android.internal.R.id.inbox_text4, com.android.internal.R.id.inbox_text5,
+                    com.android.internal.R.id.inbox_text6};
+
+                 for (int rowId : rowIds) {
+                      bigContentView.setTextColor(rowId, textColor);
+                 }
+
+                 bigContentView.setTextColor(com.android.internal.R.id.inbox_more, textColor);
+
+                 if (n.actions != null) {
+                     for (int i = 0; i < n.actions.length; i++) {
+                          bigContentView.setTextColor(com.android.internal.R.id.action0, textColor);
+                     }
+                 }
+
+                 if (bg_color != -3) {
+                     expandedBig.setBackgroundColor(bg_color);
+                     bigContentView.setInt(com.android.internal.R.id.status_bar_latest_event_content,
+                             "setBackgroundColor", bg_color);
+                 } else {
+                     expandedBig.setBackgroundResource(com.android.internal.R.drawable.notification_bg);
+                     bigContentView.setInt(com.android.internal.R.id.status_bar_latest_event_content,
+                        "setBackgroundResource", com.android.internal.R.drawable.notification_bg);
+                 }
+
+                 bigContentView.reapply(mContext, expandedBig, mOnClickHandler);
+             }
+        } catch (RuntimeException e) {
+             return false;
+        }
+        return true;
     }
 
     protected boolean immersiveModeHidesStatusBar() {

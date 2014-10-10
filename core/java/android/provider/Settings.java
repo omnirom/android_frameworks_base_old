@@ -3173,6 +3173,12 @@ public final class Settings {
         public static final String STATUS_BAR_TINTED_COLOR = "status_bar_tinted_color";
 
         /**
+         * option for tinted statusbar last active
+         * @hide
+         */
+        public static final String STATUS_BAR_TINTED_LAST_ACTIVE_STATE = "status_bar_tinted_last_active_state";
+
+        /**
          * option for systemui color
          * 0 = statusbar
          * 1 = navigationbar
@@ -3204,6 +3210,12 @@ public final class Settings {
          * @hide
          */
         public static final String STATUS_BAR_TINTED_NAVBAR_TRANSPARENT = "status_bar_tinted_navbar_transparent";
+
+        /**
+         * option for full tinted system ui
+         * @hide
+         */
+        public static final String STATUS_BAR_TINTED_FULL_MODE = "status_bar_tinted_full_mode";
 
         /**
          * Weather to minimize lockscreen challenge on screen turned on
