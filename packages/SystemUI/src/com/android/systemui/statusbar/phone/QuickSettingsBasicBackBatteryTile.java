@@ -41,6 +41,7 @@ public class QuickSettingsBasicBackBatteryTile extends QuickSettingsTileView {
     private BatteryMeterView mBattery;
     private BatteryCircleMeterView mCircleBattery;
     private BatteryPercentMeterView mPercentBattery;
+    private int mCurrentUiColor = -3;
 
     public QuickSettingsBasicBackBatteryTile(Context context) {
         this(context, null);
@@ -75,6 +76,13 @@ public class QuickSettingsBasicBackBatteryTile extends QuickSettingsTileView {
         throw new RuntimeException("why?");
     }
 
+    @Override
+    public void setEditMode(boolean enabled) {
+        // No hover on edit mode
+        changeCurrentBackground(enabled);
+        super.setEditMode(enabled);
+    }
+
     public BatteryMeterView getBattery() {
         return mBattery;
     }
@@ -105,6 +113,43 @@ public class QuickSettingsBasicBackBatteryTile extends QuickSettingsTileView {
     public void callOnColumnsChange() {
         mLabelView.invalidate();
         mFunctionView.invalidate();
+    }
+
+    @Override
+    protected void changeCurrentUiColor(int ic_color) {
+        if (mCurrentUiColor == ic_color) {
+            return;
+        }
+        mCurrentUiColor = ic_color;
+        if (mLabelView != null) {
+            if (ic_color != -3) {
+                mLabelView.setTextColor(ic_color);
+            } else {
+                mLabelView.setTextColor(getDefaultColor());
+            }
+        }
+        if (mFunctionView != null) {
+            if (ic_color != -3) {
+                mFunctionView.setTextColor(ic_color);
+            } else {
+                mFunctionView.setTextColor(getDefaultColor());
+            }
+        }
+        if (mBattery != null) {
+            mBattery.updateSettings(ic_color);
+        }
+        if (mCircleBattery != null) {
+            mCircleBattery.updateSettings(ic_color);
+        }
+        if (mPercentBattery != null) {
+            mPercentBattery.updateSettings(ic_color);
+        }
+    }
+
+    @Override
+    public void changeColorIconBackground(int bg_color, int ic_color) {
+        changeCurrentUiColor(ic_color);
+        super.changeColorIconBackground(bg_color, ic_color);
     }
 
     public void setLabel(CharSequence text) {

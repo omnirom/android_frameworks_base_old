@@ -73,15 +73,19 @@ public class BarTransitions {
         }
     }
 
-    public String getCurrentTag() {
+    protected String getCurrentTag() {
         return mTag;
     }
 
-    public int getMode() {
+    protected int getMode() {
         return mMode;
     }
 
-    public boolean isOpaque(int mode) {
+    public int getCurrentIconColor() {
+        return -3;
+    }
+
+    protected boolean isOpaque(int mode) {
         return !(mode == MODE_SEMI_TRANSPARENT || mode == MODE_TRANSLUCENT);
     }
 

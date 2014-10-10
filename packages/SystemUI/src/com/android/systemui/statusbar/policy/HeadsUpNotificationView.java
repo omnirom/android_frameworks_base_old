@@ -73,6 +73,7 @@ public class HeadsUpNotificationView extends FrameLayout implements SwipeHelper.
     }
 
     public boolean setNotification(NotificationData.Entry headsUp) {
+        boolean isFullMode = mBar.updateNotificationViewsColor(headsUp);
         mHeadsUp = headsUp;
         mHeadsUp.row.setExpanded(false);
         if (mContentHolder == null) {
@@ -86,6 +87,10 @@ public class HeadsUpNotificationView extends FrameLayout implements SwipeHelper.
         mContentHolder.addView(mHeadsUp.row);
         mSwipeHelper.snapChild(mContentSlider, 1f);
         mStartTouchTime = System.currentTimeMillis() + mTouchSensitivityDelay;
+        mContentHolder.setBackgroundResource(0);
+        if (!isFullMode) {
+            mContentHolder.setBackgroundResource(R.drawable.heads_up_window_bg);
+        }
         return true;
     }
 

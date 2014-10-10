@@ -19,6 +19,7 @@ package com.android.systemui.statusbar.phone;
 
 import android.content.Context;
 import android.graphics.drawable.Drawable;
+import android.graphics.PorterDuff;
 import android.util.AttributeSet;
 import android.util.TypedValue;
 import android.view.LayoutInflater;
@@ -34,6 +35,7 @@ public class QuickSettingsBasicTile extends QuickSettingsTileView {
     private final TextView mTextView;
     private final ImageView mImageView;
     private final ProgressBar mLoadingView;
+    private int mCurrentUiColor = -3;
 
     public QuickSettingsBasicTile(Context context) {
         this(context, null);
@@ -65,6 +67,13 @@ public class QuickSettingsBasicTile extends QuickSettingsTileView {
         throw new RuntimeException("why?");
     }
 
+    @Override
+    public void setEditMode(boolean enabled) {
+        // No hover on edit mode
+        changeCurrentBackground(enabled);
+        super.setEditMode(enabled);
+    }
+
     public ImageView getImageView() {
         return mImageView;
     }
@@ -93,6 +102,34 @@ public class QuickSettingsBasicTile extends QuickSettingsTileView {
     @Override
     public void callOnColumnsChange() {
         mTextView.invalidate();
+    }
+
+    @Override
+    protected void changeCurrentUiColor(int ic_color) {
+        if (mCurrentUiColor == ic_color) {
+            return;
+        }
+        mCurrentUiColor = ic_color;
+        if (mTextView != null) {
+            if (ic_color != -3) {
+                mTextView.setTextColor(ic_color);
+            } else {
+                mTextView.setTextColor(getDefaultColor());
+            }
+        }
+        if (mImageView != null) {
+            if (ic_color != -3) {
+                mImageView.setColorFilter(ic_color, PorterDuff.Mode.MULTIPLY);
+            } else {
+                mImageView.clearColorFilter();
+            }
+        }
+    }
+
+    @Override
+    public void changeColorIconBackground(int bg_color, int ic_color) {
+        changeCurrentUiColor(ic_color);
+        super.changeColorIconBackground(bg_color, ic_color);
     }
 
     public void setTextResource(int resId) {
