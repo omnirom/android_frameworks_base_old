@@ -50,9 +50,10 @@ public final class PhoneStatusBarTransitions extends BarTransitions {
         mCircleBattery, mPercentBattery, mNetworkTraffic;
     private Animator mCurrentAnimation;
     private int mCurrentColor = -3;
-    private int mCurrentBg;
+    private int mCurrentBg = -3;
     private String mFullColor = "fullcolor";
     private String mNonFullColor = "nonfullcolor";
+    private boolean mColorEnabled = false;
 
     public PhoneStatusBarTransitions(PhoneStatusBarView view) {
         super(view, R.drawable.status_background);
@@ -145,9 +146,17 @@ public final class PhoneStatusBarTransitions extends BarTransitions {
     }
 
     @Override
+    public void setBackgroundColorEnabled(boolean force) {
+        mColorEnabled = force;
+    }
+
+    @Override
     public void finishAnimations() {
-        setColorChangeIcon(-3);
-        setColorChangeNotificationIcon(-3);
+        if (mColorEnabled) {
+            mCurrentColor = -3;
+            setColorChangeIcon(-3);
+            setColorChangeNotificationIcon(-3);
+        }
         super.finishAnimations();
     }
 
@@ -160,14 +169,26 @@ public final class PhoneStatusBarTransitions extends BarTransitions {
         if (ColorUtils.isBrightColor(bg_color)) {
             ic_color = Color.BLACK;
         }
-        mCurrentColor = ic_color;
-        setColorChangeIcon(ic_color);
-        setColorChangeNotificationIcon(ic_color);
+        if (mCurrentColor != ic_color) {
+            mCurrentColor = ic_color;
+            setColorChangeIcon(ic_color);
+            setColorChangeNotificationIcon(ic_color);
+        }
         super.changeColorIconBackground(bg_color, ic_color);
     }
 
+    @Override
     public int getCurrentIconColor() {
         return mCurrentColor;
+    }
+
+    @Override
+    protected void resetColorWhenTransient(boolean resets) {
+        if (mColorEnabled && resets) {
+            mCurrentColor = -3;
+            setColorChangeIcon(-3);
+            setColorChangeNotificationIcon(-3);
+        }
     }
 
     public void updateNotificationIconColor() {
@@ -180,7 +201,7 @@ public final class PhoneStatusBarTransitions extends BarTransitions {
                  if (ic_color == -3) {
                      iv.clearColorFilter();
                  } else {
-                     iv.setColorFilter(ic_color, PorterDuff.Mode.SRC_ATOP);
+                     iv.setColorFilter(ic_color, PorterDuff.Mode.MULTIPLY);
                  }
              } else {
                  mIcons.remove(iv);

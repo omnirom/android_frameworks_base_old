@@ -127,6 +127,9 @@ class QuickSettingsModel implements BluetoothStateChangeCallback,
     static class ImmersiveState extends State {
         boolean isEnabled;
     }
+    static class TintedState extends State {
+        boolean isEnabled;
+    }
     static class QuiteHourState extends State {
         boolean isEnabled;
         boolean isPaused;
@@ -416,11 +419,33 @@ class QuickSettingsModel implements BluetoothStateChangeCallback,
         }
     }
 
+    /** ContentObserver to watch tinted color **/
+    private class TintedObserver extends ContentObserver {
+        public TintedObserver(Handler handler) {
+            super(handler);
+        }
+
+        @Override
+        public void onChange(boolean selfChange) {
+            onTintedFrontChanged();
+            onTintedBackChanged();
+        }
+
+        public void startObserving() {
+            final ContentResolver cr = mContext.getContentResolver();
+            cr.unregisterContentObserver(this);
+            cr.registerContentObserver(
+                    Settings.System.getUriFor(Settings.System.STATUS_BAR_TINTED_COLOR),
+                    false, this, mUserTracker.getCurrentUserId());
+
+        }
+    }
+
     /** Broadcast receive to watch quitehour. */
     private BroadcastReceiver mQuietHoursIntentReceiver = new BroadcastReceiver() {
         @Override
         public void onReceive(Context context, Intent intent) {
-            onQuiteHourChanged();
+            onQuietHourChanged();
         }
     };
 
@@ -432,7 +457,7 @@ class QuickSettingsModel implements BluetoothStateChangeCallback,
 
         @Override
         public void onChange(boolean selfChange) {
-            onQuiteHourChanged();
+            onQuietHourChanged();
         }
 
         public void startObserving() {
@@ -481,6 +506,7 @@ class QuickSettingsModel implements BluetoothStateChangeCallback,
     private final BugreportObserver mBugreportObserver;
     private final BrightnessObserver mBrightnessObserver;
     private final ImmersiveObserver mImmersiveObserver;
+    private final TintedObserver mTintedObserver;
     private final QuiteHourObserver mQuietHourObserver;
     private final RingerObserver mRingerObserver;
     private final SleepObserver mSleepObserver;
@@ -626,6 +652,14 @@ class QuickSettingsModel implements BluetoothStateChangeCallback,
     private RefreshCallback mImmersiveBackCallback;
     private ImmersiveState mImmersiveBackState = new ImmersiveState();
 
+    private QuickSettingsTileView mTintedFrontTile;
+    private RefreshCallback mTintedFrontCallback;
+    private TintedState mTintedFrontState = new TintedState();
+
+    private QuickSettingsTileView mTintedBackTile;
+    private RefreshCallback mTintedBackCallback;
+    private TintedState mTintedBackState = new TintedState();
+
     private QuickSettingsTileView mQuietHourTile;
     private RefreshCallback mQuietHourCallback;
     private QuiteHourState mQuietHourState = new QuiteHourState();
@@ -668,6 +702,7 @@ class QuickSettingsModel implements BluetoothStateChangeCallback,
             public void onUserSwitched(int newUserId) {
                 mBrightnessObserver.startObserving();
                 mImmersiveObserver.startObserving();
+                mTintedObserver.startObserving();
                 mQuietHourObserver.startObserving();
                 mRingerObserver.startObserving();
                 mSleepObserver.startObserving();
@@ -689,6 +724,8 @@ class QuickSettingsModel implements BluetoothStateChangeCallback,
         mBrightnessObserver.startObserving();
         mImmersiveObserver = new ImmersiveObserver(mHandler);
         mImmersiveObserver.startObserving();
+        mTintedObserver = new TintedObserver(mHandler);
+        mTintedObserver.startObserving();
         mQuietHourObserver = new QuiteHourObserver(mHandler);
         mQuietHourObserver.startObserving();
         mSleepObserver = new SleepObserver(mHandler);
@@ -783,7 +820,9 @@ class QuickSettingsModel implements BluetoothStateChangeCallback,
         updateRingerState();
         updateSleepState();
         onMobileNetworkChanged();
-        onQuiteHourChanged();
+        onQuietHourChanged();
+        refreshTintedFrontTile();
+        refreshTintedBackTile();
     }
 
     // Settings
@@ -2048,14 +2087,151 @@ class QuickSettingsModel implements BluetoothStateChangeCallback,
         }
     }
 
+    // Tinted color
+    private int tintedModeLastState = 2;
+
+    void addTintedFrontTile(QuickSettingsTileView view, RefreshCallback cb) {
+        mTintedFrontTile = view;
+        mTintedFrontTile.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                switchTintedFront();
+                refreshTintedFrontTile();
+            }
+        });
+        mTintedFrontCallback = cb;
+        onTintedFrontChanged();
+    }
+
+    void addTintedBackTile(QuickSettingsTileView view, RefreshCallback cb) {
+        mTintedBackTile = view;
+        mTintedBackTile.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                switchTintedBack();
+                refreshTintedBackTile();
+            }
+        });
+        mTintedBackCallback = cb;
+        onTintedBackChanged();
+    }
+
+    private void onTintedFrontChanged() {
+        Resources r = mContext.getResources();
+        int mode = getTintedMode();
+        int iconId = R.drawable.ic_qs_dynamiccolors_off;
+        String label = r.getString(R.string.quick_settings_tinted_mode_off_label);
+        switch (mode) {
+               case 1:
+                    iconId = R.drawable.ic_qs_dynamiccolors_actionbar_on;
+                    label = r.getString(R.string.quick_settings_tinted_mode_on_label);
+                    break;
+               case 2:
+                    iconId = R.drawable.ic_qs_dynamiccolors_on;
+                    label = r.getString(R.string.quick_settings_tinted_mode_on_label);
+                    break;
+        }
+        mTintedFrontState.iconId = iconId;
+        mTintedFrontState.label = label;
+        if (mTintedFrontTile != null) {
+            mTintedFrontCallback.refreshView(mTintedFrontTile, mTintedFrontState);
+        }
+    }
+
+    private void onTintedBackChanged() {
+        Resources r = mContext.getResources();
+        int mode = getTintedMode();
+        int iconId = R.drawable.ic_qs_dynamiccolors_off;
+        String label = r.getString(R.string.quick_settings_tinted_mode_disable_label);
+        switch (mode) {
+               case 1:
+                    iconId = R.drawable.ic_qs_dynamiccolors_actionbar_on;
+                    label = r.getString(R.string.quick_settings_tinted_mode_actionbar_label);
+                    break;
+               case 2:
+                    iconId = R.drawable.ic_qs_dynamiccolors_on;
+                    label = r.getString(R.string.quick_settings_tinted_mode_screen_label);
+                    break;
+        }
+        mTintedBackState.iconId = iconId;
+        mTintedBackState.label = label;
+        if (mTintedBackTile != null) {
+            mTintedBackCallback.refreshView(mTintedBackTile, mTintedBackState);
+        }
+    }
+
+    void refreshTintedFrontTile() {
+        if (mTintedFrontTile != null) {
+            onTintedFrontChanged();
+        }
+    }
+
+    void refreshTintedBackTile() {
+        if (mTintedBackTile != null) {
+            onTintedBackChanged();
+        }
+    }
+
+    private int getTintedMode() {
+        return Settings.System.getIntForUser(mContext.getContentResolver(),
+                Settings.System.STATUS_BAR_TINTED_COLOR, 0, UserHandle.USER_CURRENT);
+    }
+
+    private void setTintedMode(int style) {
+        Settings.System.putIntForUser(mContext.getContentResolver(),
+                Settings.System.STATUS_BAR_TINTED_COLOR, style
+                , UserHandle.USER_CURRENT);
+        if (style != 0) {
+            setTintedLastActiveState(style);
+        }
+    }
+
+    private int getTintedLastActiveState() {
+        return Settings.System.getIntForUser(mContext.getContentResolver(),
+                Settings.System.STATUS_BAR_TINTED_LAST_ACTIVE_STATE, tintedModeLastState
+                , UserHandle.USER_CURRENT);
+    }
+
+    private void setTintedLastActiveState(int style) {
+        Settings.System.putIntForUser(mContext.getContentResolver(),
+                Settings.System.STATUS_BAR_TINTED_LAST_ACTIVE_STATE, style
+                , UserHandle.USER_CURRENT);
+    }
+
+    private void switchTintedFront() {
+        int mode = getTintedMode();
+        tintedModeLastState = getTintedLastActiveState();
+        switch (mode) {
+               case 0:
+                    setTintedMode(tintedModeLastState);
+                    break;
+               case 1:
+               case 2:
+                    setTintedMode(0);
+                    break;
+        }
+    }
+
+    private void switchTintedBack() {
+        int mode = getTintedMode();
+        switch (mode) {
+                case 1:
+                     setTintedMode(2);
+                     break;
+                case 2:
+                     setTintedMode(1);
+                     break;
+        }
+    }
+
     // QuietHour
     void addQuietHourTile(QuickSettingsTileView view, RefreshCallback cb) {
         mQuietHourTile = view;
         mQuietHourCallback = cb;
-        onQuiteHourChanged();
+        onQuietHourChanged();
     }
 
-    private void onQuiteHourChanged() {
+    private void onQuietHourChanged() {
         Resources r = mContext.getResources();
         int mode = Settings.System.getIntForUser(mContext.getContentResolver(),
                 Settings.System.QUIET_HOURS_ENABLED, 0,
