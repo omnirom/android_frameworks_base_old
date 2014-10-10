@@ -70,6 +70,13 @@ public class QuickSettingsBasicBatteryTile extends QuickSettingsTileView {
         throw new RuntimeException("why?");
     }
 
+    @Override
+    public void setEditMode(boolean enabled) {
+        // No hover on edit mode
+        changeCurrentBackground(enabled);
+        super.setEditMode(enabled);
+    }
+
     public BatteryMeterView getBattery() {
         return mBattery;
     }
@@ -98,6 +105,32 @@ public class QuickSettingsBasicBatteryTile extends QuickSettingsTileView {
     @Override
     public void callOnColumnsChange() {
         mTextView.invalidate();
+    }
+
+    @Override
+    protected void changeCurrentUiColor(int ic_color) {
+        if (mTextView != null) {
+            if (ic_color != -3) {
+                mTextView.setTextColor(ic_color);
+            } else {
+                mTextView.setTextColor(getDefaultColor());
+            }
+        }
+        if (mBattery != null) {
+            mBattery.updateSettings(ic_color, getCurrentBgColor());
+        }
+        if (mCircleBattery != null) {
+            mCircleBattery.updateSettings(ic_color, getCurrentBgColor());
+        }
+        if (mPercentBattery != null) {
+            mPercentBattery.updateSettings(ic_color, getCurrentBgColor());
+        }
+    }
+
+    @Override
+    public void changeColorIconBackground(int bg_color, int ic_color) {
+        changeCurrentUiColor(ic_color);
+        super.changeColorIconBackground(bg_color, ic_color);
     }
 
     public void setTextResource(int resId) {
