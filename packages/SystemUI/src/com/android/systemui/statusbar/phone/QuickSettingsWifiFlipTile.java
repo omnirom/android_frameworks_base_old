@@ -51,6 +51,7 @@ public class QuickSettingsWifiFlipTile extends QuickSettingsTileView {
         setClickable(true);
         setSelected(true);
         setFocusable(true);
+        setSupportFlip(true);
 
         mBack.setVisibility(View.GONE);
 
@@ -67,7 +68,7 @@ public class QuickSettingsWifiFlipTile extends QuickSettingsTileView {
 
     @Override
     public boolean dispatchTouchEvent(MotionEvent e) {
-        if (!isEditModeEnabled()) {
+        if (!isEditModeEnabled() && isSupportFlip()) {
             return mFlip3d.onTouch(this, e);
         }
         return super.dispatchTouchEvent(e);
@@ -80,6 +81,20 @@ public class QuickSettingsWifiFlipTile extends QuickSettingsTileView {
         } else {
             return super.onInterceptTouchEvent(ev);
         }
+    }
+
+    @Override
+    public void setEditMode(boolean enabled) {
+        if (isSupportFlip()) {
+            if (isBackVisible()) {
+                mBack.changeCurrentBackground(enabled);
+            } else {
+                mFront.changeCurrentBackground(enabled);
+            }
+        } else {
+            mFront.changeCurrentBackground(enabled);
+        }
+        super.setEditMode(enabled);
     }
 
     public void setFrontImageResource(int id) {
@@ -130,6 +145,12 @@ public class QuickSettingsWifiFlipTile extends QuickSettingsTileView {
         mFront.callOnColumnsChange();
     }
 
+    @Override
+    public void changeColorIconBackground(int bg_color, int ic_color) {
+        mBack.changeColorIconBackground(bg_color, ic_color);
+        mFront.changeColorIconBackground(bg_color, ic_color);
+    }
+
     public void setFrontOnLongClickListener(View.OnLongClickListener listener) {
         mFront.setOnLongClickListener(listener);
     }
@@ -152,5 +173,15 @@ public class QuickSettingsWifiFlipTile extends QuickSettingsTileView {
 
     public QuickSettingsTileView getBack() {
         return mBack;
+    }
+
+    @Override
+    public boolean isBackVisible() {
+        return mFlip3d.isBackSide();
+    }
+
+    @Override
+    public void flipToFront() {
+        mFlip3d.rotateToFront(true);
     }
 }
