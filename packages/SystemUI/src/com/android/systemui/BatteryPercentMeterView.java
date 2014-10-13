@@ -20,6 +20,7 @@ import android.content.Intent;
 import android.content.IntentFilter;
 import android.content.res.Resources;
 import android.content.res.TypedArray;
+import android.graphics.Color;
 import android.os.BatteryManager;
 import android.os.Handler;
 import android.os.UserHandle;
@@ -190,11 +191,18 @@ public class BatteryPercentMeterView extends ImageView {
 
         int chargingColorBg = getResources().getColor(com.android.systemui.R.color.batterymeter_percent_charging);
         int chargingColorDefault = getResources().getColor(com.android.systemui.R.color.batterymeter_percent_color);
-        int nowColorBg = mCurrentColor != -3 ? mCurrentColor : chargingColorBg;
-        int nowColorDefault = mCurrentColor != -3 ? mCurrentColor : chargingColorDefault;
 
-        mChargingColorBg = nowColorBg;
-        mChargingColorDefault = nowColorDefault;
+        if (mCurrentColor != -3) {
+            if (mCurrentColor == Color.WHITE) {
+                chargingColorBg = Color.BLACK;
+            } else {
+                chargingColorBg = mCurrentColor;
+            }
+            chargingColorDefault = mCurrentColor;
+        }
+
+        mChargingColorBg = chargingColorBg;
+        mChargingColorDefault = chargingColorDefault;
         mChargingColorFg = mChargingColorDefault;
 
         mPaintFontBg = new Paint();
