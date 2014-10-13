@@ -190,7 +190,7 @@ public class BatteryPercentMeterView extends ImageView {
 
         int chargingColorBg = getResources().getColor(com.android.systemui.R.color.batterymeter_percent_charging);
         int chargingColorDefault = getResources().getColor(com.android.systemui.R.color.batterymeter_percent_color);
-        int nowColorBg = mCurrentColor != -3 ? mCurrentColor : chargingColorBg;
+        int nowColorBg = chargingColorBg;
         int nowColorDefault = mCurrentColor != -3 ? mCurrentColor : chargingColorDefault;
 
         mChargingColorBg = nowColorBg;
