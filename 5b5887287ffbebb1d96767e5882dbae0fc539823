@@ -1,0 +1,27 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "6b39a1b3_ad38fdeb",
+        "filename": "packages/SystemUI/src/com/android/systemui/BatteryPercentMeterView.java",
+        "patchSetId": 2
+      },
+      "lineNbr": 199,
+      "author": {
+        "id": 1000026
+      },
+      "writtenOn": "2014-10-14T21:55:16Z",
+      "side": 1,
+      "message": "with this you dont even see the sall contrast betwee black and grey :)",
+      "range": {
+        "startLine": 199,
+        "startChar": 16,
+        "endLine": 199,
+        "endChar": 31
+      },
+      "revId": "5b5887287ffbebb1d96767e5882dbae0fc539823",
+      "serverId": "56841c99-7c94-43d4-bf0b-cb4707e66d55",
+      "unresolved": false
+    }
+  ]
+}
