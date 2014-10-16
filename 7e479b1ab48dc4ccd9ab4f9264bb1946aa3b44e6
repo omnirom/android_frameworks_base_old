@@ -1,0 +1,21 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "6b39a1b3_50f492ba",
+        "filename": "telephony/java/android/telephony/SignalStrength.java",
+        "patchSetId": 2
+      },
+      "lineNbr": 485,
+      "author": {
+        "id": 1000026
+      },
+      "writtenOn": "2014-10-16T11:23:26Z",
+      "side": 0,
+      "message": "where is the difference? please dont tell me that you mean the formatting??? :)",
+      "revId": "7e479b1ab48dc4ccd9ab4f9264bb1946aa3b44e6",
+      "serverId": "56841c99-7c94-43d4-bf0b-cb4707e66d55",
+      "unresolved": false
+    }
+  ]
+}
