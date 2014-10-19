@@ -140,13 +140,13 @@ public class NetworkController extends BroadcastReceiver implements DemoMode {
     protected boolean mAirplaneMode = false;
     protected boolean mLastAirplaneMode = true;
 
-    private Locale mLocale = null;
-    private Locale mLastLocale = null;
+    protected Locale mLocale = null;
+    protected Locale mLastLocale = null;
 
     //ethernet
     private boolean mEthernetConnected = false;
-    private int mEthernetIconId = 0;
-    private int mLastEthernetIconId = 0;
+    protected int mEthernetIconId = 0;
+    protected int mLastEthernetIconId = 0;
 
     // our ui
     protected Context mContext;
@@ -179,7 +179,7 @@ public class NetworkController extends BroadcastReceiver implements DemoMode {
 
     boolean mDataAndWifiStacked = false;
 
-    private UpdateUIListener mUpdateUIListener = null;
+    protected UpdateUIListener mUpdateUIListener = null;
 
     public interface SignalCluster {
         void setWifiIndicators(boolean visible, int strengthIcon, int activityIcon,
@@ -569,7 +569,9 @@ public class NetworkController extends BroadcastReceiver implements DemoMode {
         else if (IccCardConstants.INTENT_VALUE_ICC_CARD_IO_ERROR.equals(stateExtra)) {
             mSimState = IccCardConstants.State.CARD_IO_ERROR;
         }
-        else if (IccCardConstants.INTENT_VALUE_ICC_READY.equals(stateExtra)) {
+        else if (IccCardConstants.INTENT_VALUE_ICC_READY.equals(stateExtra)
+                || IccCardConstants.INTENT_VALUE_ICC_IMSI.equals(stateExtra)
+                || IccCardConstants.INTENT_VALUE_ICC_LOADED.equals(stateExtra)) {
             mSimState = IccCardConstants.State.READY;
         }
         else if (IccCardConstants.INTENT_VALUE_ICC_LOCKED.equals(stateExtra)) {
@@ -1168,7 +1170,8 @@ public class NetworkController extends BroadcastReceiver implements DemoMode {
             // We want to show the carrier name if in service and either:
             //   - We are connected to mobile data, or
             //   - We are not connected to mobile data, as long as the *reason* packets are not
-            //     being routed over that link is that we have better connectivity via wifi.
+            //     being routed over that link is that we have better connectivity via wifi
+            //     or wimax.
             // If data is disconnected for some other reason but wifi (or ethernet/bluetooth)
             // is connected, we show nothing.
             // Otherwise (nothing connected) we show "No internet connection".
@@ -1176,7 +1179,7 @@ public class NetworkController extends BroadcastReceiver implements DemoMode {
             if (mDataConnected) {
                 mobileLabel = mNetworkName;
             } else if (mConnected || emergencyOnly) {
-                if (hasService() || emergencyOnly) {
+                if (hasService() || mWimaxConnected || emergencyOnly) {
                     // The isEmergencyOnly test covers the case of a phone with no SIM
                     mobileLabel = mNetworkName;
                 } else {
@@ -1306,7 +1309,8 @@ public class NetworkController extends BroadcastReceiver implements DemoMode {
                 ? mContentDescriptionDataType : mContentDescriptionWifi;
         }
 
-        if (!mDataConnected) {
+        // wimax operates independently of mobile data but shares the same icon space
+        if (!mDataConnected && !mWimaxConnected) {
             mDataTypeIconId = 0;
             mQSDataTypeIconId = 0;
             if (isCdma()) {
