@@ -21,6 +21,7 @@ import android.content.Context;
 import android.content.res.Resources;
 import android.graphics.Canvas;
 import android.graphics.drawable.Drawable;
+import android.graphics.Rect;
 import android.util.AttributeSet;
 import android.util.EventLog;
 import android.view.MotionEvent;
@@ -72,9 +73,10 @@ public class SettingsPanelView extends PanelView {
 
     public void setHandleViewColor(int color) {
         if (color != -3) {
-            Drawable drawable = getStateListDrawable(color);
-            mHandleView.setBackground(drawable);
-            mHandleBar = drawable;
+            Rect bounds = mHandleBar.getBounds();
+            mHandleBar = getStateListDrawable(color);
+            mHandleBar.setBounds(bounds);
+            mHandleView.setBackground(mHandleBar);
         } else {
             mHandleView.setBackgroundResource(R.drawable.status_bar_close);
             resetHandleBar(getContext().getResources());

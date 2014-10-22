@@ -344,9 +344,8 @@ public class PanelView extends FrameLayout {
         color3 = isNav ? color : color2;
         color4 = isNav ? color2 : color;
         GradientDrawable drawable = new GradientDrawable(Orientation.BOTTOM_TOP,
-                                     new int[]{color4, color3, color4});
-        drawable.setDither(true);
-        drawable.setStroke(30, color4);
+                                     new int[]{color4, color4, color3, color4, color4,
+                                       Color.TRANSPARENT, Color.TRANSPARENT});
         return drawable;
     }
 

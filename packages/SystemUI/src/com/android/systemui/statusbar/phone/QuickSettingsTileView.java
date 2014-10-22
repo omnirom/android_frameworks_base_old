@@ -190,7 +190,11 @@ class QuickSettingsTileView extends FrameLayout {
 
     private Drawable getGradientDrawable(boolean isNav, int color) {
         if (isNav) {
-            color = ColorUtils.opposeColor(color);
+            if (ColorUtils.isBrightColor(color)) {
+                color = ColorUtils.darken(color, 0.5f);
+            } else {
+                color = ColorUtils.lighten(color, 0.5f);
+            }
         }
         GradientDrawable drawable = new GradientDrawable(Orientation.TOP_BOTTOM,
                                      new int[]{color, color});
