@@ -1,0 +1,21 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "4b469d43_ef8afde2",
+        "filename": "media/java/android/media/CamcorderProfile.java",
+        "patchSetId": 1
+      },
+      "lineNbr": 116,
+      "author": {
+        "id": 1000026
+      },
+      "writtenOn": "2014-11-06T00:07:43Z",
+      "side": 1,
+      "message": "since we reset av we have now a missmatch - see include/media/MediaProfiles.h - the constants must match",
+      "revId": "8d813d09f85410544ed98e2786016e4c012c8992",
+      "serverId": "56841c99-7c94-43d4-bf0b-cb4707e66d55",
+      "unresolved": false
+    }
+  ]
+}
