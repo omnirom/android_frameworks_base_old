@@ -1853,4 +1853,13 @@
     <bool name="config_switch_phone_on_voice_reg_state_change">true</bool>
 
     <bool name="config_sms_force_7bit_encoding">false</bool>
+
+    <!-- Omni -->
+  
+    <!-- Boolean to enable stk functionality on Samsung phones -->
+    <bool name="config_samsung_stk">false</bool>
+
+    <!-- If this value is true, we handle Samsung CDMA's message ID method -->
+    <bool name="config_smsSamsungCdmaAlternateMessageIDEncoding">false</bool>
+
 </resources>
