@@ -3529,6 +3529,8 @@ public class Camera {
          * @see #getAntibanding()
          */
         public void setAntibanding(String antibanding) {
+            List<String> supported = getSupportedAntibanding();
+            if(supported == null || ! supported.contains(antibanding)) return;
             set(KEY_ANTIBANDING, antibanding);
         }
 
