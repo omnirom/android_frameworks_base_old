@@ -313,8 +313,10 @@ public class FlashlightController {
             new CameraCaptureSession.StateListener() {
         @Override
         public void onConfigured(CameraCaptureSession session) {
-            mSession = session;
-            postUpdateFlashlight();
+            if (mSurface != null) {
+                mSession = session;
+                postUpdateFlashlight();
+            }
         }
 
         @Override
