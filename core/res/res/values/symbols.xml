@@ -788,6 +788,8 @@
   <java-symbol type="string" name="quick_contacts_not_available" />
   <java-symbol type="string" name="reboot_safemode_confirm" />
   <java-symbol type="string" name="reboot_safemode_title" />
+  <java-symbol type="string" name="reboot_title" />
+  <java-symbol type="string" name="reboot_confirm" />
   <java-symbol type="string" name="relationTypeAssistant" />
   <java-symbol type="string" name="relationTypeBrother" />
   <java-symbol type="string" name="relationTypeChild" />
@@ -2085,8 +2087,19 @@
   <java-symbol type="bool" name="config_switch_phone_on_voice_reg_state_change" />
   <java-symbol type="string" name="whichHomeApplicationNamed" />
   <java-symbol type="bool" name="config_sms_force_7bit_encoding" />
-  <java-symbol type="array" name="config_sms_convert_destination_number_support" />
+  <java-symbol type="array" name="config_sms_convert_destination_number_support" /> 
 
   <!-- omni additions -->
   <java-symbol type="bool" name="config_offscreenGestureSupport" />
+
+  <!-- Power menu reboot -->
+  <java-symbol name="ic_lock_power_reboot" type="drawable" />
+  <java-symbol name="global_action_reboot" type="string" />
+  <java-symbol name="global_action_reboot_sub" type="string" />
+  <java-symbol name="global_action_reboot_more" type="string" />
+  <java-symbol name="ic_lock_power_rebootrecovery" type="drawable" />
+  <java-symbol name="global_action_reboot_recovery" type="string" />
+  <java-symbol name="ic_lock_power_rebootbootloader" type="drawable" />
+  <java-symbol name="global_action_reboot_bootloader" type="string" />
+  <java-symbol type="array" name="config_rebootActionsList" />
 </resources>
