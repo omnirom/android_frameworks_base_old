@@ -14,6 +14,13 @@
      limitations under the License.
 -->
 
-<bitmap xmlns:android="http://schemas.android.com/apk/res/android"
-    android:src="@drawable/ic_lock_power_off_alpha"
-    android:tint="?attr/colorControlNormal" />
+<selector xmlns:android="http://schemas.android.com/apk/res/android" >
+    <item android:state_pressed="true"
+        android:drawable="@drawable/ic_lock_power_off_alpha"/>
+    <item>
+        <bitmap
+            android:src="@drawable/ic_lock_power_off_alpha"
+            android:tint="?attr/colorControlNormal" />
+    </item>
+</selector>
+
