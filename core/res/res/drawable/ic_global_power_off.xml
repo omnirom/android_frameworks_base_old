@@ -15,15 +15,12 @@
 -->
 
 <selector xmlns:android="http://schemas.android.com/apk/res/android" >
-    <item android:state_pressed="true">
-        <bitmap
-            android:src="@drawable/ic_lock_airplane_mode_alpha"
-            android:tint="@color/white" />
-    </item>
+    <item android:state_pressed="true"
+        android:drawable="@drawable/ic_lock_power_off_alpha"/>
     <item>
         <bitmap
-            android:src="@drawable/ic_lock_airplane_mode_alpha"
-            android:tint="?attr/colorControlActivated" />
+            android:src="@drawable/ic_lock_power_off_alpha"
+            android:tint="@color/global_actions_icon_color" />
     </item>
 </selector>
 
