@@ -1707,6 +1707,9 @@
          on the current state of the device.
          Each item must be one of the following strings:
          "power" = Power off
+         "rebootrecovery" = Add an option to reboot the device to recovery
+         "rebootbootloader" = Add an option to reboot the device to bootloader
+         "lockdown" = Add an action that locks the phone and enforces that it can't be unlocked without entering a credential
          "settings" = An action to launch settings
          "airplane" = Airplane mode toggle
          "bugreport" = Take bug report, if available
@@ -1715,6 +1718,8 @@
          -->
     <string-array translatable="false" name="config_globalActionsList">
         <item>power</item>
+        <item>rebootrecovery</item>
+        <item>rebootbootloader</item>
         <item>bugreport</item>
         <item>users</item>
     </string-array>
