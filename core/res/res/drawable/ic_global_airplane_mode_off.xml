@@ -23,7 +23,7 @@
     <item>
         <bitmap
             android:src="@drawable/ic_lock_airplane_mode_off_am_alpha"
-            android:tint="?attr/colorControlNormal" />
+            android:tint="@color/global_actions_icon_color" />
     </item>
 </selector>
 
