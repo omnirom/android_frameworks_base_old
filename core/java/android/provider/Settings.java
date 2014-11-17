@@ -3973,6 +3973,16 @@ public final class Settings {
         /**
          * @hide
          */
+        public static final String BUTTON_BACK_KILL_TIMEOUT = "button_back_kill_timeout";
+
+        /**
+         * @hide
+         */
+        public static final String BUTTON_BACK_KILL_ENABLE = "button_back_kill_enable";
+
+        /**
+         * @hide
+         */
         public static final String GLOBAL_ACTIONS_LIST = "global_actions_list";
 
         /**
@@ -4663,6 +4673,8 @@ public final class Settings {
             PRIVATE_SETTINGS.add(STATUSBAR_BATTERY_CHARGING_IMAGE);
             PRIVATE_SETTINGS.add(STATUSBAR_BATTERY_CHARGING_COLOR);
             PRIVATE_SETTINGS.add(STATUSBAR_BATTERY_CHARGING_COLOR_ENABLE);
+            PRIVATE_SETTINGS.add(BUTTON_BACK_KILL_TIMEOUT);
+            PRIVATE_SETTINGS.add(BUTTON_BACK_KILL_ENABLE);
         }
 
         /**
