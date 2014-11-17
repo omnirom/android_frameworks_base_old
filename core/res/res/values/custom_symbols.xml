@@ -99,4 +99,8 @@
   <java-symbol type="drawable" name="ic_audio_notification_mute_new" />
   <java-symbol type="drawable" name="ic_audio_notification_mute_alpha" />
 
+  <!-- back kill -->
+  <java-symbol type="integer" name="config_backKillTimeout" />
+  <java-symbol type="string" name="app_killed_message" />
+
 </resources>
