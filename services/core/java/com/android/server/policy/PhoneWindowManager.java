@@ -129,6 +129,8 @@ import android.app.ActivityManager.StackId;
 import android.app.ActivityManagerInternal;
 import android.app.ActivityManagerInternal.SleepToken;
 import android.app.ActivityThread;
+import android.app.ActivityManager.RunningAppProcessInfo;
+import android.app.IActivityManager;
 import android.app.AppOpsManager;
 import android.app.IUiModeManager;
 import android.app.ProgressDialog;
@@ -821,7 +823,6 @@ public class PhoneWindowManager implements WindowManagerPolicy {
     private boolean mGlobalActionsOnLockDisable;
     private int mLongPressOnHomeBehaviorCustom;
     private int mDoubleTapOnHomeBehaviorCustom;
-    private DeviceKeyHandler mDeviceKeyHandler;
     private boolean mHardwareKeysDisable;
     private int mUserRotationAngles = -1;
     private boolean mVolumeWakeSupport;
@@ -864,6 +865,12 @@ public class PhoneWindowManager implements WindowManagerPolicy {
             = new LogDecelerateInterpolator(100, 0);
 
     private final MutableBoolean mTmpBoolean = new MutableBoolean(false);
+
+    // Omni additions
+    private DeviceKeyHandler mDeviceKeyHandler;
+    private boolean mBackKillEnabled;
+    private int mBackKillTimeoutConfig;
+    private int mBackKillTimeout;
 
     private static final int MSG_ENABLE_POINTER_LOCATION = 1;
     private static final int MSG_DISABLE_POINTER_LOCATION = 2;
@@ -1089,6 +1096,12 @@ public class PhoneWindowManager implements WindowManagerPolicy {
                     UserHandle.USER_ALL);
             resolver.registerContentObserver(Settings.System.getUriFor(
                     Settings.System.BUTTON_DOUBLE_PRESS_HOME), false, this,
+                    UserHandle.USER_ALL);
+            resolver.registerContentObserver(Settings.System.getUriFor(
+                    Settings.System.BUTTON_BACK_KILL_TIMEOUT), false, this,
+                    UserHandle.USER_ALL);
+            resolver.registerContentObserver(Settings.System.getUriFor(
+                    Settings.System.BUTTON_BACK_KILL_ENABLE), false, this,
                     UserHandle.USER_ALL);
             updateSettings();
         }
@@ -1878,6 +1891,16 @@ public class PhoneWindowManager implements WindowManagerPolicy {
         }
     }
 
+    Runnable mBackLongPress = new Runnable() {
+        public void run() {
+            if (TaskUtils.killActiveTask(mContext, mCurrentUserId)){
+                performHapticFeedbackLw(null, HapticFeedbackConstants.LONG_PRESS, false);
+                Toast.makeText(mContext, R.string.app_killed_message,
+                        Toast.LENGTH_SHORT).show();
+            }
+        }
+    };
+
     boolean isDeviceProvisioned() {
         return Settings.Global.getInt(
                 mContext.getContentResolver(), Settings.Global.DEVICE_PROVISIONED, 0) != 0;
@@ -2198,6 +2221,11 @@ public class PhoneWindowManager implements WindowManagerPolicy {
 
         boolean debugInputOverride = SystemProperties.getBoolean("debug.inputEvent", false);
         DEBUG_INPUT = DEBUG_INPUT || debugInputOverride;
+
+        mUseTvRouting = AudioSystem.getPlatformType(mContext) == AudioSystem.PLATFORM_TELEVISION;
+
+        mBackKillTimeoutConfig = mContext.getResources().getInteger(
+                com.android.internal.R.integer.config_backKillTimeout);
 
         readConfigurationDependentBehaviors();
 
@@ -2618,6 +2646,14 @@ public class PhoneWindowManager implements WindowManagerPolicy {
             mPressOnAppSwitchBehavior = mSwapBackAndRecents ? KEY_ACTION_BACK : KEY_ACTION_APP_SWITCH;
             mPressOnBackBehavior = mSwapBackAndRecents ? KEY_ACTION_APP_SWITCH : KEY_ACTION_BACK;
             mPressOnMenuBehavior = mSwapMenuAndRecents ? (mSwapBackAndRecents ? KEY_ACTION_BACK : KEY_ACTION_APP_SWITCH) : KEY_ACTION_MENU;
+
+            mBackKillTimeout = Settings.System.getIntForUser(resolver,
+                    Settings.System.BUTTON_BACK_KILL_TIMEOUT, mBackKillTimeoutConfig,
+                    UserHandle.USER_CURRENT);
+            mBackKillEnabled = Settings.System.getIntForUser(resolver,
+                    Settings.System.BUTTON_BACK_KILL_ENABLE, 0,
+                    UserHandle.USER_CURRENT) != 0;
+
         }
         synchronized (mWindowManagerFuncs.getWindowManagerLock()) {
             PolicyControl.reloadFromSetting(mContext);
@@ -3684,6 +3720,10 @@ public class PhoneWindowManager implements WindowManagerPolicy {
             mPendingCapsLockToggle = false;
         }
 
+        if (keyCode == KeyEvent.KEYCODE_BACK && !down) {
+            mHandler.removeCallbacks(mBackLongPress);
+        }
+
         // First we always handle the home key here, so applications
         // can never break it, although if keyguard is on, we do let
         // it handle it, because that gives us the correct 5 second
@@ -4005,6 +4045,12 @@ public class PhoneWindowManager implements WindowManagerPolicy {
                 launchAssistAction(Intent.EXTRA_ASSIST_INPUT_HINT_KEYBOARD, event.getDeviceId());
             }
             return -1;
+        } else if (keyCode == KeyEvent.KEYCODE_BACK) {
+            if (mBackKillEnabled) {
+                if (down && repeatCount == 0) {
+                    mHandler.postDelayed(mBackLongPress, mBackKillTimeout);
+                }
+            }
         }
 
         // Shortcuts are invoked through Search+key, so intercept those here
