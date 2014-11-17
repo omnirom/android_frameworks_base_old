@@ -18,6 +18,9 @@ package com.android.server.policy;
 
 import static android.Manifest.permission.INTERNAL_SYSTEM_WINDOW;
 import static android.Manifest.permission.SYSTEM_ALERT_WINDOW;
+import static android.app.ActivityManager.LOCK_TASK_MODE_LOCKED;
+import static android.app.ActivityManager.LOCK_TASK_MODE_NONE;
+import static android.app.ActivityManager.LOCK_TASK_MODE_PINNED;
 import static android.app.ActivityManager.StackId.DOCKED_STACK_ID;
 import static android.app.ActivityManager.StackId.FREEFORM_WORKSPACE_STACK_ID;
 import static android.app.ActivityManager.StackId.HOME_STACK_ID;
@@ -129,6 +132,8 @@ import android.app.ActivityManager.StackId;
 import android.app.ActivityManagerInternal;
 import android.app.ActivityManagerInternal.SleepToken;
 import android.app.ActivityThread;
+import android.app.ActivityManager.RunningAppProcessInfo;
+import android.app.IActivityManager;
 import android.app.AppOpsManager;
 import android.app.IUiModeManager;
 import android.app.ProgressDialog;
@@ -285,6 +290,7 @@ public class PhoneWindowManager implements WindowManagerPolicy {
     static final boolean DEBUG_SPLASH_SCREEN = false;
     static final boolean DEBUG_WAKEUP = false;
     static final boolean SHOW_SPLASH_SCREENS = true;
+    static final boolean DEBUG_LOCK = true;
 
     // Whether to allow dock apps with METADATA_DOCK_HOME to temporarily take over the Home key.
     // No longer recommended for desk docks;
@@ -821,7 +827,6 @@ public class PhoneWindowManager implements WindowManagerPolicy {
     private boolean mGlobalActionsOnLockDisable;
     private int mLongPressOnHomeBehaviorCustom;
     private int mDoubleTapOnHomeBehaviorCustom;
-    private DeviceKeyHandler mDeviceKeyHandler;
     private boolean mHardwareKeysDisable;
     private int mUserRotationAngles = -1;
     private boolean mVolumeWakeSupport;
@@ -864,6 +869,12 @@ public class PhoneWindowManager implements WindowManagerPolicy {
             = new LogDecelerateInterpolator(100, 0);
 
     private final MutableBoolean mTmpBoolean = new MutableBoolean(false);
+
+    // Omni additions
+    private DeviceKeyHandler mDeviceKeyHandler;
+    private boolean mBackKillEnabled;
+    private int mBackKillTimeoutConfig;
+    private int mBackKillTimeout;
 
     private static final int MSG_ENABLE_POINTER_LOCATION = 1;
     private static final int MSG_DISABLE_POINTER_LOCATION = 2;
@@ -1089,6 +1100,12 @@ public class PhoneWindowManager implements WindowManagerPolicy {
                     UserHandle.USER_ALL);
             resolver.registerContentObserver(Settings.System.getUriFor(
                     Settings.System.BUTTON_DOUBLE_PRESS_HOME), false, this,
+                    UserHandle.USER_ALL);
+            resolver.registerContentObserver(Settings.System.getUriFor(
+                    Settings.System.BUTTON_BACK_KILL_TIMEOUT), false, this,
+                    UserHandle.USER_ALL);
+            resolver.registerContentObserver(Settings.System.getUriFor(
+                    Settings.System.BUTTON_BACK_KILL_ENABLE), false, this,
                     UserHandle.USER_ALL);
             updateSettings();
         }
@@ -1674,7 +1691,9 @@ public class PhoneWindowManager implements WindowManagerPolicy {
     private void backLongPress() {
         mBackKeyHandled = true;
 
-        if (isStopLockTaskMode(false)) {
+        if (isStopLockTaskMode() == false) {
+            // no longer possible
+            mHandler.removeCallbacks(mBackLongPress);
             return;
         }
 
@@ -1877,6 +1896,17 @@ public class PhoneWindowManager implements WindowManagerPolicy {
             mPowerManager.userActivity(SystemClock.uptimeMillis(), false);
         }
     }
+
+    Runnable mBackLongPress = new Runnable() {
+        public void run() {
+            mLongPressBackConsumed = true;
+            if (TaskUtils.killActiveTask(mContext, mCurrentUserId)){
+                performHapticFeedbackLw(null, HapticFeedbackConstants.LONG_PRESS, false);
+                Toast.makeText(mContext, R.string.app_killed_message,
+                        Toast.LENGTH_SHORT).show();
+            }
+        }
+    };
 
     boolean isDeviceProvisioned() {
         return Settings.Global.getInt(
@@ -2198,6 +2228,11 @@ public class PhoneWindowManager implements WindowManagerPolicy {
 
         boolean debugInputOverride = SystemProperties.getBoolean("debug.inputEvent", false);
         DEBUG_INPUT = DEBUG_INPUT || debugInputOverride;
+
+        mUseTvRouting = AudioSystem.getPlatformType(mContext) == AudioSystem.PLATFORM_TELEVISION;
+
+        mBackKillTimeoutConfig = mContext.getResources().getInteger(
+                com.android.internal.R.integer.config_backKillTimeout);
 
         readConfigurationDependentBehaviors();
 
@@ -2618,6 +2653,14 @@ public class PhoneWindowManager implements WindowManagerPolicy {
             mPressOnAppSwitchBehavior = mSwapBackAndRecents ? KEY_ACTION_BACK : KEY_ACTION_APP_SWITCH;
             mPressOnBackBehavior = mSwapBackAndRecents ? KEY_ACTION_APP_SWITCH : KEY_ACTION_BACK;
             mPressOnMenuBehavior = mSwapMenuAndRecents ? (mSwapBackAndRecents ? KEY_ACTION_BACK : KEY_ACTION_APP_SWITCH) : KEY_ACTION_MENU;
+
+            mBackKillTimeout = Settings.System.getIntForUser(resolver,
+                    Settings.System.BUTTON_BACK_KILL_TIMEOUT, mBackKillTimeoutConfig,
+                    UserHandle.USER_CURRENT);
+            mBackKillEnabled = Settings.System.getIntForUser(resolver,
+                    Settings.System.BUTTON_BACK_KILL_ENABLE, 0,
+                    UserHandle.USER_CURRENT) != 0;
+
         }
         synchronized (mWindowManagerFuncs.getWindowManagerLock()) {
             PolicyControl.reloadFromSetting(mContext);
@@ -3684,6 +3727,10 @@ public class PhoneWindowManager implements WindowManagerPolicy {
             mPendingCapsLockToggle = false;
         }
 
+        if (keyCode == KeyEvent.KEYCODE_BACK && !down) {
+            mHandler.removeCallbacks(mBackLongPress);
+        }
+
         // First we always handle the home key here, so applications
         // can never break it, although if keyguard is on, we do let
         // it handle it, because that gives us the correct 5 second
@@ -3826,6 +3873,15 @@ public class PhoneWindowManager implements WindowManagerPolicy {
                         return -1;
                     }
                     // back action is simple to continue and pass further
+                }
+            } else if (isVirtualHardKey && mBackKillEnabled && isStopLockTaskMode()) {
+                // back kill called from navbar back button
+                if (down) {
+                    if (repeatCount == 0) {
+                        mHandler.postDelayed(mBackLongPress, mBackKillTimeout);
+                    }
+                } else {
+                    mHandler.removeCallbacks(mBackLongPress);
                 }
             }
         } else if (keyCode == KeyEvent.KEYCODE_N && event.isMetaPressed()) {
@@ -4005,6 +4061,12 @@ public class PhoneWindowManager implements WindowManagerPolicy {
                 launchAssistAction(Intent.EXTRA_ASSIST_INPUT_HINT_KEYBOARD, event.getDeviceId());
             }
             return -1;
+        } else if (keyCode == KeyEvent.KEYCODE_BACK) {
+            if (mBackKillEnabled && isStopLockTaskMode()) {
+                if (down && repeatCount == 0) {
+                    mHandler.postDelayed(mBackLongPress, mBackKillTimeout);
+                }
+            }
         }
 
         // Shortcuts are invoked through Search+key, so intercept those here
@@ -4234,18 +4296,31 @@ public class PhoneWindowManager implements WindowManagerPolicy {
         }
     }
 
-    private boolean isStopLockTaskMode(boolean checkOnly) {
-        // in this case there is a different way to stop it
-        if (DeviceUtils.deviceSupportNavigationBar(mContext)) {
-            return false;
-        }
+    private boolean isStopLockTaskMode() {
         try {
-            if (ActivityManagerNative.getDefault().isInLockTaskMode()) {
-                if (!checkOnly) {
+            //if (ActivityManagerNative.getDefault().isInLockTaskMode()) {
+            if (DEBUG_LOCK) Log.i(TAG, "LockStatus = " + ActivityManagerNative.getDefault().getLockTaskModeState());
+            if (ActivityManagerNative.getDefault().getLockTaskModeState() == ActivityManager.LOCK_TASK_MODE_NONE) {
                     ActivityManagerNative.getDefault().stopSystemLockTaskMode();
-                }
                 return true;
+            } else {
+                return false;
             }
+            /*int mLockState = ActivityManagerNative.getDefault().getLockTaskModeState();
+            switch(ActivityManagerNative.getDefault().getLockTaskModeState()) {
+                case ActivityManager.LOCK_TASK_MODE_PINNED:
+
+                    return false;
+                case ActivityManager.LOCK_TASK_MODE_LOCKED:
+
+                    return false;
+                case ActivityManager.LOCK_TASK_MODE_NONE:
+                    if (!checkOnly) {
+                        ActivityManagerNative.getDefault().stopSystemLockTaskMode();
+                        //ActivityManagerNative.getDefault().stopLockTask();
+                    }
+                    return true;
+            }*/
         } catch (RemoteException e) {
             // ignore
         }
@@ -9263,6 +9338,10 @@ public class PhoneWindowManager implements WindowManagerPolicy {
             triggerLongPressTimeoutMessage(msg);
         }
         if (keyAction == KEY_ACTION_BACK) {
+            if (mBackKillEnabled && isStopLockTaskMode()) {
+                mLongPressBackConsumed = false;
+                mHandler.postDelayed(mBackLongPress, mBackKillTimeout);
+            }
             mBackKeyHandled = false;
             Message msg = mHandler.obtainMessage(MSG_BACK_LONG_PRESS);
             triggerLongPressTimeoutMessage(msg);
