@@ -55,4 +55,8 @@
   <java-symbol type="bool" name="config_sms_authorization_enabled" />
   <java-symbol type="bool" name="config_dozeAlwaysOnDisplayEnabledDefault" />
   <java-symbol type="bool" name="config_canForceDozeNotifications" />
+
+  <!-- back kill -->
+  <java-symbol type="integer" name="config_backKillTimeout" />
+  <java-symbol type="string" name="app_killed_message" />
 </resources>
