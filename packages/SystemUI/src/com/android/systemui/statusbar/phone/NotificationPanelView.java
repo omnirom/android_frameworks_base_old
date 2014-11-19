@@ -1517,7 +1517,8 @@ public class NotificationPanelView extends PanelView implements
         final float w = (header.getX() + header.getWidth());
         float region = (w * (1.f/4.f)); // TODO overlay region fraction?
 
-        boolean showQsOverride = isLayoutRtl() ? (x < region) : (w - region < x);
+        final boolean showQsOverride = isLayoutRtl() ? (x < region) : (w - region < x)
+                && mStatusBarState == StatusBarState.SHADE;
 
         if (mQsExpanded) {
             return onHeader || (mScrollView.isScrolledToBottom() && yDiff < 0) && isInQsArea(x, y);
