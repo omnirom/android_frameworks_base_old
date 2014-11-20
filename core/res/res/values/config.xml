@@ -1871,4 +1871,7 @@
     <string-array translatable="false" name="config_sms_convert_destination_number_support">
         <item>false</item>
     </string-array>
+
+    <!-- omni additions -->
+    <bool name="config_offscreenGestureSupport">false</bool>
 </resources>
