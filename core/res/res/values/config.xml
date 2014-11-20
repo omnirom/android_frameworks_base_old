@@ -1856,4 +1856,6 @@
 
     <bool name="config_sms_force_7bit_encoding">false</bool>
 
+    <!-- omni additions -->
+    <bool name="config_offscreenGestureSupport">false</bool>
 </resources>
