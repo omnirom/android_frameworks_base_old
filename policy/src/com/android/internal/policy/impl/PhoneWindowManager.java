@@ -526,6 +526,10 @@ public class PhoneWindowManager implements WindowManagerPolicy {
 
     private int mCurrentUserId;
 
+    private boolean mOffscreenGestureSupport;
+    private boolean mVolumeWakeSupport;
+    private boolean mHomeWakeSupport;
+
     // Maps global key codes to the components that will handle them.
     private GlobalKeyManager mGlobalKeyManager;
 
@@ -637,6 +641,13 @@ public class PhoneWindowManager implements WindowManagerPolicy {
             resolver.registerContentObserver(Settings.Global.getUriFor(
                     Settings.Global.POLICY_CONTROL), false, this,
                     UserHandle.USER_ALL);
+            resolver.registerContentObserver(Settings.Global.getUriFor(
+                    Settings.System.VOLUME_BUTTON_WAKE), false, this,
+                    UserHandle.USER_ALL);
+            resolver.registerContentObserver(Settings.Global.getUriFor(
+                    Settings.System.HOME_BUTTON_WAKE), false, this,
+                    UserHandle.USER_ALL);
+
             updateSettings();
         }
 
@@ -1022,6 +1033,9 @@ public class PhoneWindowManager implements WindowManagerPolicy {
                 com.android.internal.R.bool.config_lidControlsSleep);
         mTranslucentDecorEnabled = mContext.getResources().getBoolean(
                 com.android.internal.R.bool.config_enableTranslucentDecor);
+        mOffscreenGestureSupport = mContext.getResources().getBoolean(
+                com.android.internal.R.bool.config_offscreenGestureSupport);
+
         readConfigurationDependentBehaviors();
 
         mAccessibilityManager = (AccessibilityManager) context.getSystemService(
@@ -1309,6 +1323,15 @@ public class PhoneWindowManager implements WindowManagerPolicy {
                 mImmersiveModeConfirmation.loadSetting(mCurrentUserId);
             }
             PolicyControl.reloadFromSetting(mContext);
+
+            mVolumeWakeSupport = Settings.System.getIntForUser(resolver,
+                    Settings.System.VOLUME_BUTTON_WAKE,
+                    0,
+                    UserHandle.USER_CURRENT) != 0;
+            mHomeWakeSupport = Settings.System.getIntForUser(resolver,
+                    Settings.System.HOME_BUTTON_WAKE,
+                    0,
+                    UserHandle.USER_CURRENT) != 0;
         }
         if (updateRotation) {
             updateRotation(true);
@@ -4247,6 +4270,10 @@ public class PhoneWindowManager implements WindowManagerPolicy {
         int result;
         boolean isWakeKey = (policyFlags & WindowManagerPolicy.FLAG_WAKE) != 0
                 || event.isWakeKey();
+
+        if (mOffscreenGestureSupport && !isWakeKey) {
+            isWakeKey = isOffscreenWakeKey(keyCode);
+        }
         if (interactive || (isInjected && !isWakeKey)) {
             // When the device is interactive or the key is injected pass the
             // key to the application.
@@ -4533,6 +4560,11 @@ public class PhoneWindowManager implements WindowManagerPolicy {
      * is always considered a wake key.
      */
     private boolean isWakeKeyWhenScreenOff(int keyCode) {
+        if (mOffscreenGestureSupport){
+            if (isOffscreenWakeKey(keyCode)){
+                return true;
+            }
+        }
         switch (keyCode) {
             // ignore volume keys unless docked
             case KeyEvent.KEYCODE_VOLUME_UP:
@@ -6080,5 +6112,18 @@ public class PhoneWindowManager implements WindowManagerPolicy {
         if (mOrientationListener != null) {
             mOrientationListener.dump(pw, prefix);
         }
+    }
+
+    private boolean isOffscreenWakeKey(int keyCode) {
+        switch (keyCode) {
+            case KeyEvent.KEYCODE_F3:
+                return true;
+            case KeyEvent.KEYCODE_VOLUME_UP:
+            case KeyEvent.KEYCODE_VOLUME_DOWN:
+                return mVolumeWakeSupport;
+            case KeyEvent.KEYCODE_HOME:
+                return mHomeWakeSupport;
+        }
+        return false;
     }
 }
