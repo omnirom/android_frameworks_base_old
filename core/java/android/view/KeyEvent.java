@@ -1805,6 +1805,7 @@ public class KeyEvent extends InputEvent implements Parcelable {
         switch (keyCode) {
             case KeyEvent.KEYCODE_BACK:
             case KeyEvent.KEYCODE_POWER:
+            case KeyEvent.KEYCODE_HOME:
             case KeyEvent.KEYCODE_MENU:
             case KeyEvent.KEYCODE_SLEEP:
             case KeyEvent.KEYCODE_WAKEUP:
