@@ -23,6 +23,9 @@ import android.util.EventLog;
 import android.view.MotionEvent;
 import android.view.View;
 import android.view.accessibility.AccessibilityEvent;
+import android.view.GestureDetector;
+import android.os.PowerManager;
+import android.provider.Settings;
 
 import com.android.systemui.DejankUtils;
 import com.android.systemui.EventLogTags;
@@ -48,11 +51,27 @@ public class PhoneStatusBarView extends PanelBar {
         }
     };
 
+    private GestureDetector mDoubleTapGesture;
+
     public PhoneStatusBarView(Context context, AttributeSet attrs) {
         super(context, attrs);
 
         Resources res = getContext().getResources();
         mBarTransitions = new PhoneStatusBarTransitions(this);
+
+        mDoubleTapGesture = new GestureDetector(mContext, new GestureDetector.SimpleOnGestureListener() {
+            @Override
+            public boolean onDoubleTap(MotionEvent e) {
+                PowerManager pm = (PowerManager) mContext.getSystemService(Context.POWER_SERVICE);
+                Log.d(TAG, "Gesture!!");
+                if(pm != null)
+                    pm.goToSleep(e.getEventTime());
+                else
+                    Log.d(TAG, "getSystemService returned null PowerManager");
+
+                return true;
+            }
+        });
     }
 
     public BarTransitions getBarTransitions() {
