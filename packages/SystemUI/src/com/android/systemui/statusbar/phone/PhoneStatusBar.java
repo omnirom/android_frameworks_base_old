@@ -353,6 +353,7 @@ public class PhoneStatusBar extends BaseStatusBar implements DemoMode,
     int[] mAbsPos = new int[2];
     ArrayList<Runnable> mPostCollapseRunnables = new ArrayList<>();
 
+    // omni additions
     private boolean mBrightnessControl;
     private boolean mBrightnessChanged;
     private float mScreenWidth;
@@ -364,12 +365,12 @@ public class PhoneStatusBar extends BaseStatusBar implements DemoMode,
     private boolean mAutomatic;
     private IPowerManager mPower;
 
-    // omni additions
     private boolean mOmniSwitchRecents;
     private boolean mBackKillPending;
     private int mBackKillTimeout;
     private boolean mRecentsConsumed;
     private boolean mBackConsumed;
+    private boolean mDoubleTabSleep;
 
     /**
      * {@link android.provider.Settings.System#SCREEN_AUTO_BRIGHTNESS_ADJ} uses the range [-1, 1].
@@ -483,6 +484,10 @@ public class PhoneStatusBar extends BaseStatusBar implements DemoMode,
             mContext.getContentResolver().registerContentObserver(Settings.System.getUriFor(
                     Settings.System.NAVIGATION_BAR_RECENTS),
                     false, this, UserHandle.USER_ALL);
+            mContext.getContentResolver().registerContentObserver(Settings.System.getUriFor(
+                    Settings.System.DOUBLE_TAP_SLEEP_GESTURE),
+                    false, this, UserHandle.USER_ALL);
+
             update();
         }
 
@@ -509,6 +514,12 @@ public class PhoneStatusBar extends BaseStatusBar implements DemoMode,
                     mContext.getContentResolver(), Settings.System.STATUS_BAR_BRIGHTNESS_CONTROL, 0, mCurrentUserId) == 1;
             mOmniSwitchRecents = Settings.System.getIntForUser(
                     mContext.getContentResolver(), Settings.System.NAVIGATION_BAR_RECENTS, 0, mCurrentUserId) == 1;
+            mDoubleTabSleep = Settings.System.getIntForUser(
+                    mContext.getContentResolver(), Settings.System.DOUBLE_TAP_SLEEP_GESTURE, 0, mCurrentUserId) == 1;
+
+            if (mStatusBarWindow != null) {
+                mStatusBarWindow.setDoubleTabSleep(mDoubleTabSleep);
+            }
         }
     }
     private OmniSettingsObserver mOmniSettingsObserver = new OmniSettingsObserver(mHandler);
