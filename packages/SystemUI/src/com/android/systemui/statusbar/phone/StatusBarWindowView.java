@@ -20,6 +20,7 @@ import android.annotation.ColorInt;
 import android.annotation.DrawableRes;
 import android.annotation.LayoutRes;
 import android.app.StatusBarManager;
+import android.content.ContentResolver;
 import android.content.Context;
 import android.content.res.Configuration;
 import android.content.res.TypedArray;
@@ -33,9 +34,15 @@ import android.media.session.MediaSessionLegacyHelper;
 import android.net.Uri;
 import android.os.Bundle;
 import android.os.IBinder;
+import android.os.IPowerManager;
+import android.os.PowerManager;
+import android.os.RemoteException;
+import android.os.ServiceManager;
 import android.util.AttributeSet;
 import android.view.ActionMode;
 import android.view.InputQueue;
+import android.util.Log;
+import android.view.GestureDetector;
 import android.view.KeyEvent;
 import android.view.LayoutInflater;
 import android.view.Menu;
@@ -46,6 +53,7 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.view.ViewTreeObserver;
 import android.view.Window;
+import android.view.ViewConfiguration;
 import android.view.WindowManager;
 import android.view.WindowManagerGlobal;
 import android.widget.FrameLayout;
@@ -83,12 +91,19 @@ public class StatusBarWindowView extends FrameLayout {
     private FloatingToolbar mFloatingToolbar;
     private ViewTreeObserver.OnPreDrawListener mFloatingToolbarPreDrawListener;
 
+    private int mStatusBarHeaderHeight;
+
+    private boolean mDoubleTapToSleepEnabled;
+    private GestureDetector mDoubleTapGesture;
+
     public StatusBarWindowView(Context context, AttributeSet attrs) {
         super(context, attrs);
         setMotionEventSplittingEnabled(false);
         mTransparentSrcPaint.setColor(0);
         mTransparentSrcPaint.setXfermode(new PorterDuffXfermode(PorterDuff.Mode.SRC));
         mFalsingManager = FalsingManager.getInstance(context);
+        mStatusBarHeaderHeight = context
+                .getResources().getDimensionPixelSize(R.dimen.status_bar_header_height);
     }
 
     @Override
@@ -173,6 +188,20 @@ public class StatusBarWindowView extends FrameLayout {
     protected void onAttachedToWindow () {
         super.onAttachedToWindow();
 
+        mDoubleTapGesture = new GestureDetector(mContext, new GestureDetector.SimpleOnGestureListener() {
+            @Override
+            public boolean onDoubleTap(MotionEvent e) {
+                PowerManager pm = (PowerManager) mContext.getSystemService(Context.POWER_SERVICE);
+                Log.d(TAG, "Gesture!!");
+                if(pm != null)
+                    pm.goToSleep(e.getEventTime());
+                else
+                    Log.d(TAG, "getSystemService returned null PowerManager");
+
+                return true;
+            }
+        });
+
         // We need to ensure that our window doesn't suffer from overdraw which would normally
         // occur if our window is translucent. Since we are drawing the whole window anyway with
         // the scrim, we don't need the window to be cleared in the beginning.
@@ -244,6 +273,11 @@ public class StatusBarWindowView extends FrameLayout {
     @Override
     public boolean onInterceptTouchEvent(MotionEvent ev) {
         boolean intercept = false;
+        if (mDoubleTapToSleepEnabled
+                && ev.getY() < mStatusBarHeaderHeight) {
+            if (DEBUG) Log.w(TAG, "logging double tap gesture");
+            mDoubleTapGesture.onTouchEvent(ev);
+        }
         if (mNotificationPanel.isFullyExpanded()
                 && mStackScrollLayout.getVisibility() == View.VISIBLE
                 && mService.getBarState() == StatusBarState.KEYGUARD
@@ -674,5 +708,8 @@ public class StatusBarWindowView extends FrameLayout {
         }
     };
 
+    public void setDoubleTabSleep(boolean value) {
+        mDoubleTapToSleepEnabled = value;
+    }
 }
 
