@@ -280,6 +280,12 @@ public class ConnectivityService extends IConnectivityManager.Stub {
     private static final int EVENT_CHANGE_MOBILE_DATA_ENABLED = 2;
 
     /**
+     * used internally to set enable/disable cellular data
+     * arg1 = ENBALED or DISABLED
+     */
+    private static final int EVENT_SET_MOBILE_DATA = 7;
+
+    /**
      * used internally to clear a wakelock when transitioning
      * from one net to another.  Clear happens when we get a new
      * network - EVENT_EXPIRE_NET_TRANSITION_WAKELOCK happens
@@ -1321,6 +1327,32 @@ public class ConnectivityService extends IConnectivityManager.Stub {
         }
     };
 
+    /**
+     * @see ConnectivityManager#setMobileDataEnabled(boolean)
+     */
+    public void setMobileDataEnabled(boolean enabled) {
+        enforceChangePermission();
+        if (DBG) log("setMobileDataEnabled(" + enabled + ")");
+
+        mHandler.sendMessage(mHandler.obtainMessage(EVENT_SET_MOBILE_DATA,
+                (enabled ? ENABLED : DISABLED), 0));
+    }
+
+    private void handleSetMobileData(boolean enabled) {
+        if (mNetTrackers[ConnectivityManager.TYPE_MOBILE] != null) {
+            if (VDBG) {
+                log(mNetTrackers[ConnectivityManager.TYPE_MOBILE].toString() + enabled);
+            }
+            mNetTrackers[ConnectivityManager.TYPE_MOBILE].setUserDataEnable(enabled);
+        }
+        if (mNetTrackers[ConnectivityManager.TYPE_WIMAX] != null) {
+            if (VDBG) {
+                log(mNetTrackers[ConnectivityManager.TYPE_WIMAX].toString() + enabled);
+            }
+            mNetTrackers[ConnectivityManager.TYPE_WIMAX].setUserDataEnable(enabled);
+        }
+    }
+
     @Override
     public void setPolicyDataEnable(int networkType, boolean enabled) {
         // only someone like NPMS should only be calling us
@@ -2291,6 +2323,11 @@ public class ConnectivityService extends IConnectivityManager.Stub {
                 case EVENT_SEND_STICKY_BROADCAST_INTENT: {
                     Intent intent = (Intent)msg.obj;
                     sendStickyBroadcast(intent);
+                    break;
+                }
+                case EVENT_SET_MOBILE_DATA: {
+                    boolean enabled = (msg.arg1 == ENABLED);
+                    handleSetMobileData(enabled);
                     break;
                 }
                 case EVENT_SET_POLICY_DATA_ENABLE: {
