@@ -35,8 +35,8 @@
   <string name="quick_settings_usb_tether_off_label">Disconnesso</string>
   <string name="quick_settings_usb_tether_connected_label">Tethering OFF</string>
   <string name="quick_settings_usb_tether_on_label">Tethering</string>
-  <string name="quick_settings_wifiap">Wi-Fi AP</string>
-  <string name="quick_settings_wifiap_off">Wi-Fi AP OFF</string>
+  <string name="quick_settings_wifiap">Hotspot Wi-Fi</string>
+  <string name="quick_settings_wifiap_off">Hotspot Wi-Fi spento</string>
   <string name="quick_settings_quiethours">Periodo quiete</string>
   <string name="quick_settings_quiethours_off">Periodo quiete OFF</string>
   <string name="quick_settings_lte">LTE</string>
@@ -50,6 +50,7 @@
   <string name="quick_settings_compass_init">Inizializzazione\u2026</string>
   <string name="quick_settings_heads_up_on">Heads up attivo</string>
   <string name="quick_settings_heads_up_off">No interruzioni</string>
+  <string name="quick_settings_themes">Temi</string>
   <string name="location_mode_high_accuracy_title">Alta precisione</string>
   <string name="location_mode_battery_saving_title">Risparmio batteria</string>
   <string name="location_mode_sensors_only_title">Solo dispositivo</string>
@@ -71,9 +72,12 @@
   <string name="navbar_menu_big_button">Pulsante Menu</string>
   <string name="advanced_dev_option_wipe_app">Cancella dati</string>
   <string name="advanced_dev_option_force_stop">Arresto forzato</string>
+  <string name="advanced_dev_option_uninstall">Disinstalla</string>
   <string name="accessibility_dock_battery_level">Batteria Dock <xliff:g id="number">%d</xliff:g> percento.</string>
   <string name="screenshot_delete_action">Elimina</string>
   <string name="screenshot_delete_confirmation">Schermata eliminata.</string>
   <string name="accessibility_desc_add_quick_settings">Aggiungi Impostazioni rapide.</string>
   <string name="status_bar_notification_spam_item_title">Ignora messaggi simili</string>
+  <string name="protected_app_notification_title">Notifica app protetta</string>
+  <string name="protected_app_notification_summary">Tocca per aprire la notifica da app protetta</string>
 </resources>

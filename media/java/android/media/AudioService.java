@@ -79,6 +79,7 @@ import android.view.KeyEvent;
 import android.view.Surface;
 import android.view.VolumePanel;
 import android.view.WindowManager;
+import android.view.OrientationEventListener;
 
 import com.android.internal.telephony.ITelephony;
 import com.android.internal.util.XmlUtils;
@@ -474,6 +475,8 @@ public class AudioService extends IAudioService.Stub {
 
     private boolean mVolumeKeysControlRingStream;
 
+    private AudioOrientationEventListener mOrientationListener;
+
     ///////////////////////////////////////////////////////////////////////////
     // Construction
     ///////////////////////////////////////////////////////////////////////////
@@ -579,6 +582,10 @@ public class AudioService extends IAudioService.Stub {
             mDeviceRotation = ((WindowManager) mContext.getSystemService(Context.WINDOW_SERVICE))
                     .getDefaultDisplay().getRotation();
             Log.v(TAG, "monitoring device rotation, initial=" + mDeviceRotation);
+
+            mOrientationListener = new AudioOrientationEventListener(mContext);
+            mOrientationListener.enable();
+
             // initialize rotation in AudioSystem
             setRotationForAudioSystem();
         }
@@ -807,13 +814,29 @@ public class AudioService extends IAudioService.Stub {
         // Broadcast vibrate settings
         broadcastVibrateSetting(AudioManager.VIBRATE_TYPE_RINGER);
         broadcastVibrateSetting(AudioManager.VIBRATE_TYPE_NOTIFICATION);
-
-        // Restore the default media button receiver from the system settings
-        mMediaFocusControl.restoreMediaButtonReceiver();
     }
 
     private int rescaleIndex(int index, int srcStream, int dstStream) {
         return (index * mStreamStates[dstStream].getMaxIndex() + mStreamStates[srcStream].getMaxIndex() / 2) / mStreamStates[srcStream].getMaxIndex();
+    }
+
+    private class AudioOrientationEventListener
+            extends OrientationEventListener {
+        public AudioOrientationEventListener(Context context) {
+            super(context);
+        }
+
+        @Override
+        public void onOrientationChanged(int orientation) {
+            //Even though we're responding to phone orientation events,
+            //use display rotation so audio stays in sync with video/dialogs
+            int newRotation = ((WindowManager) mContext.getSystemService(
+                    Context.WINDOW_SERVICE)).getDefaultDisplay().getRotation();
+            if (newRotation != mDeviceRotation) {
+                mDeviceRotation = newRotation;
+                setRotationForAudioSystem();
+            }
+        }
     }
 
     ///////////////////////////////////////////////////////////////////////////
@@ -4374,8 +4397,16 @@ public class AudioService extends IAudioService.Stub {
                         SAFE_VOLUME_CONFIGURE_TIMEOUT_MS);
                 applyCurrentStreamVolume();
             } else if (action.equals(Intent.ACTION_SCREEN_ON)) {
+                if (mMonitorRotation) {
+                    mOrientationListener.onOrientationChanged(0); //argument is ignored anyway
+                    mOrientationListener.enable();
+                }
                 AudioSystem.setParameters("screen_state=on");
             } else if (action.equals(Intent.ACTION_SCREEN_OFF)) {
+                if (mMonitorRotation) {
+                    //reduce wakeups (save current) by only listening when display is on
+                    mOrientationListener.disable();
+                }
                 AudioSystem.setParameters("screen_state=off");
             } else if (action.equals(Intent.ACTION_CONFIGURATION_CHANGED)) {
                 handleConfigurationChanged(context);
@@ -4630,14 +4661,6 @@ public class AudioService extends IAudioService.Stub {
                 if (newOrientation != mDeviceOrientation) {
                     mDeviceOrientation = newOrientation;
                     setOrientationForAudioSystem();
-                }
-            }
-            if (mMonitorRotation) {
-                int newRotation = ((WindowManager) context.getSystemService(
-                        Context.WINDOW_SERVICE)).getDefaultDisplay().getRotation();
-                if (newRotation != mDeviceRotation) {
-                    mDeviceRotation = newRotation;
-                    setRotationForAudioSystem();
                 }
             }
             sendMsg(mAudioHandler,

@@ -46,7 +46,7 @@
   <string name="reboot_confirm" product="tablet">A táblagép újraindul.</string>
   <string name="reboot_confirm" product="default">A telefon újraindul.</string>
   <string name="permlab_preventpower">kikapcsológomb felülbírálata</string>
-  <string name="permdesc_preventpower">Lehetővé teszi egy alkalmazás számára a kikapcsológomb felülbírálatát</string>
+  <string name="permdesc_preventpower">Lehetővé teszi az alkalmazás számára a kikapcsológomb felülbírálatát</string>
   <string name="permlab_sendMockSms">SMS utánzatok küldése</string>
   <string name="permdesc_sendMockSms">Lehetővé teszi az alkalmazás számára, hogy SMS utánzatokat hozzon létre. A rosszindulatú alkalmazások folyamatos üzenet-létrehozással zavarhatják a felhasználót, és megbéníthatják az eszköz értesítési felületét.</string>
   <string name="storage_sd_dock_card">Dokkoló SD-kártyája</string>
@@ -67,6 +67,10 @@
   <string name="perf_profile_perf">Teljesítménycentrikus</string>
   <string name="permlab_interceptSmsSent">kimenő SMS üzenetek elfogása</string>
   <string name="permdesc_interceptSmsSent">Lehetővé teszi az alkalmazás számára, hogy elfogja a kimenő SMS üzeneteket. A rosszindulatú alkalmazások ezt felhasználhatják az SMS-küldés blokkolására.</string>
+  <string name="permlab_receiveProtectedSms">védett SMS fogadása</string>
+  <string name="permdesc_receiveProtectedSms">Lehetővé teszi az alkalmazás számára, hogy védett SMS-t fogadjon.</string>
+  <string name="permlab_modifyProtectedSmsList">védett SMS lista módosítása</string>
+  <string name="permdesc_modifyProtectedSmsList">Lehetővé teszi az alkalmazás számára, hogy módosítsa a védett SMS címlistát.</string>
   <string name="permlab_resetBatteryStats">akkumulátor használati statisztika törlése</string>
   <string name="permdesc_resetBatteryStats">Lehetővé teszi az alkalmazás számára, hogy törölhesse az akkumulátor használati adatokat</string>
   <string name="permgrouplab_security">Biztonság</string>
@@ -78,13 +82,17 @@
   <string name="permlab_accessThemeService">hozzáférés a témaszolgáltatáshoz</string>
   <string name="permdesc_accessThemeService">Lehetővé teszi az alkalmazás számára, hogy hozzáférjen a témaszolgáltatáshoz. Általános alkalmazásoknak soha nem kell ilyen engedély.</string>
   <string name="permlab_readThemes">téma információjának megtekintése</string>
-  <string name="permdesc_readThemesDesc">Lehetővé teszi az alkalmazásnak, hogy megtekintse a témákat és megállapítsa, melyik téma aktív.</string>
+  <string name="permdesc_readThemesDesc">Lehetővé teszi az alkalmazás számára, hogy megtekintse a témákat és megállapítsa, melyik téma aktív.</string>
   <string name="permlab_writeThemes">témák módosítása</string>
-  <string name="permdesc_writeThemesDesc">Lehetővé teszi az alkalmazásnak, hogy új témákat hozzon létre és módosítsa a jelenleg aktív témát.</string>
+  <string name="permdesc_writeThemesDesc">Lehetővé teszi az alkalmazás számára, hogy új témákat hozzon létre és módosítsa a jelenleg aktív témát.</string>
   <string name="permlab_setKeyguardWallpaper">billentyűzár háttérképének beállítása</string>
-  <string name="permdesc_setKeyguardWallpaper">Lehetővé teszi az alkalmazás számára a képernyőzár hátterének módosítását.</string>
+  <string name="permdesc_setKeyguardWallpaper">Lehetővé teszi az alkalmazás számára, hogy módosítsa a képernyőzár hátterét.</string>
   <string name="permlab_useHardwareFramework">hardver keretrendszert használ</string>
-  <string name="permdesc_useHardwareFramework">Lehetővé teszi az alkalmazás számára a CM hardver keretrendszerhez való a hozzáférést.</string>
+  <string name="permdesc_useHardwareFramework">Lehetővé teszi az alkalmazás számára, hogy a CM hardver hozzáférjen a keretrendszerhez.</string>
+  <string name="permlab_keyguardApplicationWidget">zárképernyő alkalmazás modul beállítása</string>
+  <string name="permdesc_keyguardApplicationWidget">Lehetővé teszi az alkalmazás számára, hogy a zárképernyőn alkalmazás modult állításon be.</string>
+  <string name="permlab_interceptPackageLaunch">alkalmazás indítás megakadályozása</string>
+  <string name="permdesc_interceptPackageLaunch">Lehetővé teszi az alkalmazás számára, hogy megakadályozza más alkalmazások elindítását</string>
   <string name="immersive_mode_confirmation_bottom">Csúsztasson lentről felfelé a teljesképernyős módból való kilépéshez.</string>
   <string name="app_ops_access_camera">hozzáférés a kamerához</string>
   <string name="app_ops_access_location">hozzáférés a helyadataihoz</string>
@@ -134,8 +142,8 @@
   <string name="adb_net_active_notification_title">ADB hálózaton keresztül engedélyezve</string>
   <string name="adb_both_active_notification_title">ADB USB-n &amp; hálózaton keresztül engedélyezve</string>
   <string name="adb_active_generic_notification_message">Érintse meg a hibakeresés letiltásához.</string>
-  <string name="extmedia_format_message_cm" product="nosdcard">Minden adat az USB tárolóról (ezen az útvonalon: \"%1$s\") el fog veszni. A műveletet nem lehet visszavonni!</string>
-  <string name="extmedia_format_message_cm" product="default">Minden adat a kártyájáról (ezen az útvonalon: \"%1$s\") el fog veszni. A műveletet nem lehet visszavonni!</string>
+  <string name="usb_extmedia_format_message">Minden adat az USB tárolóról (ezen az útvonalon: \"%1$s\") el fog veszni. A műveletet nem lehet visszavonni!</string>
+  <string name="sd_extmedia_format_message">Minden adat a kártyájáról (ezen az útvonalon: \"%1$s\") el fog veszni. A műveletet nem lehet visszavonni!</string>
   <string name="usb_storage_notification_manage_message">Kezeléshez érintse meg</string>
   <string name="sd_ext_media_checking_notification_title">SD kártya előkészítése\u2026</string>
   <string name="sd_ext_media_checking_notification_message">SD kártya ellenőrzése\u2026</string>
@@ -150,8 +158,8 @@
   <string name="sd_ext_media_nomedia_notification_title">Eltávolított SD kártya</string>
   <string name="sd_ext_media_nomedia_notification_message">SD kártya eltávolítva. Helyezzen be egy újat.</string>
   <string name="usb_ext_media_checking_notification_title">USB tárhely előkészítése\u2026</string>
-  <string name="usb_ext_media_checking_notification_message">USB tárhely ellenőrzése\2026</string>
-  <string name="usb_ext_media_nofs_notification_title">Üres USB tároló</string>
+  <string name="usb_ext_media_checking_notification_message">USB tároló hibáinak ellenőrzése\u2026</string>
+  <string name="usb_ext_media_nofs_notification_title">Üres az USB tároló</string>
   <string name="usb_ext_media_nofs_notification_message">Az USB tároló üres, vagy a fájlrendszere nem támogatott.</string>
   <string name="usb_ext_media_unmountable_notification_title">Sérült USB tároló</string>
   <string name="usb_ext_media_unmountable_notification_message">Az USB tároló sérült. Próbálja meg újraformázni.</string>
@@ -174,4 +182,19 @@
   <string name="stk_cc_ss_to_ss">SS kérés módosítva új SS kérésre.</string>
   <string name="theme_install_error_title">Téma telepítése sikertelen</string>
   <string name="theme_install_error_message">Sikertelen telepítés: %s</string>
+  <string name="storage_uicc">UICC tároló</string>
+  <string name="sd_progress_unmounting">SD-kártya leválasztása\u2026</string>
+  <string name="sd_progress_erasing">SD-kártya törlése\u2026</string>
+  <string name="sd_format_error">Nem lehet törölni az SD-kártyát.</string>
+  <string name="sd_media_bad_removal">SD-kártya eltávolításra került a leválasztás előtt.</string>
+  <string name="sd_media_checking">SD-kártya ellenőrzése folyamatban van.</string>
+  <string name="sd_media_removed">SD-kártya eltávolításra került.</string>
+  <string name="sd_media_shared">SD-kártyát jelenleg a számítógép használja.</string>
+  <string name="usb_progress_unmounting">USB tároló leválasztása\u2026</string>
+  <string name="usb_progress_erasing">USB tároló törlése\u2026</string>
+  <string name="usb_format_error">Nem lehet törölni az USB tárolót.</string>
+  <string name="usb_media_bad_removal">USB tároló eltávolításra került a leválasztás előtt.</string>
+  <string name="usb_media_checking">USB tároló ellenőrzése folyamatban van.</string>
+  <string name="usb_media_removed">USB tároló eltávolításra került.</string>
+  <string name="usb_media_shared">USB tárolót jelenleg a számítógép használja.</string>
 </resources>

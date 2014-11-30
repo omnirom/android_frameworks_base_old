@@ -71,6 +71,9 @@ import java.util.HashMap;
 import java.util.Iterator;
 import java.util.Set;
 
+import static libcore.io.OsConstants.AF_INET;
+import static libcore.io.OsConstants.AF_INET6;
+
 /**
  * @hide
  *
@@ -90,8 +93,11 @@ public class Tethering extends INetworkManagementEventObserver.Stub {
     public static final String UPSTREAM_IFACE_CHANGED_ACTION =
                          "com.android.server.connectivity.UPSTREAM_IFACE_CHANGED";
 
-    // Upstream Interface Name i.e rmnet_data0, wlan0 etc
+    // Upstream Interface Name i.e. rmnet_data0, wlan0 etc.
     public static final String EXTRA_UPSTREAM_IFACE = "tetheringUpstreamIface";
+
+    // Tethered Interface Name i.e. rndis0, wlan0, usb0 etc.
+    public static final String EXTRA_TETHERED_IFACE = "tetheredClientIface";
 
     // Upstream Interface IP Type i.e IPV6 or IPV4
     public static final String EXTRA_UPSTREAM_IP_TYPE = "tetheringUpstreamIpType";
@@ -101,8 +107,6 @@ public class Tethering extends INetworkManagementEventObserver.Stub {
 
     // Default Value for Extra Infomration
     public static final int EXTRA_UPSTREAM_INFO_DEFAULT = -1;
-
-    private enum IPAddrType { V4, V6 }
 
     private enum UpstreamInfoUpdateType {
         UPSTREAM_IFACE_REMOVED,
@@ -145,6 +149,7 @@ public class Tethering extends INetworkManagementEventObserver.Stub {
     // with 255.255.255.0
 
     private String[] mDhcpRange;
+    private static final int TETHER_RETRY_UPSTREAM_LIMIT = 5;
     private static final String[] DHCP_DEFAULT_RANGE = {
         "192.168.42.2", "192.168.42.254", "192.168.43.2", "192.168.43.254",
         "192.168.44.2", "192.168.44.254", "192.168.45.2", "192.168.45.254",
@@ -527,17 +532,19 @@ public class Tethering extends INetworkManagementEventObserver.Stub {
         }
     }
 
-    private void sendUpstreamIfaceChangeBroadcast( String upstreamIface,
-                                                   IPAddrType ip_type, UpstreamInfoUpdateType update_type) {
+    private void sendUpstreamIfaceChangeBroadcast( String upstreamIface, String tetheredIface,
+                                                   int ip_type,
+                                                   UpstreamInfoUpdateType update_type) {
         if (DBG) Log.d(TAG, "sendUpstreamIfaceChangeBroadcast upstreamIface:" + upstreamIface +
+                            " tetheredIface:" + tetheredIface +
                             " IP Type: "+ ip_type + " update_type" + update_type);
         Intent intent = new Intent(UPSTREAM_IFACE_CHANGED_ACTION);
         intent.putExtra(EXTRA_UPSTREAM_IFACE, upstreamIface);
-        intent.putExtra(EXTRA_UPSTREAM_IP_TYPE, ip_type.ordinal());
+        intent.putExtra(EXTRA_TETHERED_IFACE, tetheredIface);
+        intent.putExtra(EXTRA_UPSTREAM_IP_TYPE, ip_type);
         intent.putExtra(EXTRA_UPSTREAM_UPDATE_TYPE, update_type.ordinal());
 
         mContext.sendStickyBroadcastAsUser(intent, UserHandle.ALL);
-        if (VDBG) Log.d(TAG, "sendUpstreamIfaceChangeBroadcast: Intent broadcasted");
     }
 
     private void showTetheredNotification(int icon) {
@@ -619,7 +626,7 @@ public class Tethering extends INetworkManagementEventObserver.Stub {
                         mLastWifiClientCount = mCurrentClientCount;
                         Intent intent = new Intent();
                         intent.setClassName("com.android.settings",
-                                "com.android.settings.TetheringSettings");
+                                "com.android.settings.TetherSettings");
                         intent.setFlags(Intent.FLAG_ACTIVITY_NO_HISTORY);
 
                         PendingIntent pi = PendingIntent.getActivityAsUser(mContext, 0, intent, 0,
@@ -1018,6 +1025,12 @@ public class Tethering extends INetworkManagementEventObserver.Stub {
             }
         }
 
+        public String getTethered() {
+            synchronized (Tethering.this.mPublicSync) {
+                return mIfaceName;
+            }
+        }
+
         private void setTethered(boolean tethered) {
             synchronized (Tethering.this.mPublicSync) {
                 mTethered = tethered;
@@ -1149,10 +1162,13 @@ public class Tethering extends INetworkManagementEventObserver.Stub {
                         if (VDBG) Log.e(TAG, "Exception in forceUpdate: " + e.toString());
                     }
                     try {
+                        if(VDBG) Log.d(TAG, "Disabling NAT - Tethered Iface = " + mIfaceName +
+                                            " mMyUpstreamIfaceName= " + mMyUpstreamIfaceName);
                         mNMService.disableNat(mIfaceName, mMyUpstreamIfaceName);
-                        // Send intent to CNE Service
-                        sendUpstreamIfaceChangeBroadcast( mMyUpstreamIfaceName, IPAddrType.V4,
-                                                          UpstreamInfoUpdateType.UPSTREAM_IFACE_REMOVED);
+                        sendUpstreamIfaceChangeBroadcast( mMyUpstreamIfaceName,
+                                                     mIfaceName,
+                                                     AF_INET,
+                                                     UpstreamInfoUpdateType.UPSTREAM_IFACE_REMOVED);
                     } catch (Exception e) {
                         if (VDBG) Log.e(TAG, "Exception in disableNat: " + e.toString());
                     }
@@ -1196,17 +1212,23 @@ public class Tethering extends INetworkManagementEventObserver.Stub {
                         String newUpstreamIfaceName = (String)(message.obj);
                         if ((mMyUpstreamIfaceName == null && newUpstreamIfaceName == null) ||
                                 (mMyUpstreamIfaceName != null &&
-                                mMyUpstreamIfaceName.equals(newUpstreamIfaceName))) {
+                                mMyUpstreamIfaceName.equals(newUpstreamIfaceName)) ||
+                                (newUpstreamIfaceName != null &&
+                                newUpstreamIfaceName.equals(mIfaceName))) {
                             if (VDBG) Log.d(TAG, "Connection changed noop - dropping");
                             break;
                         }
                         cleanupUpstream();
                         if (newUpstreamIfaceName != null) {
                             try {
+                                if(VDBG) Log.d(TAG,"Enabling NAT - Tethered Iface = " + mIfaceName +
+                                                   " newUpstreamIfaceName =" +newUpstreamIfaceName);
                                 mNMService.enableNat(mIfaceName, newUpstreamIfaceName);
-                                // Send intent to CNE Service
-                                sendUpstreamIfaceChangeBroadcast( newUpstreamIfaceName, IPAddrType.V4,
-                                                                  UpstreamInfoUpdateType.UPSTREAM_IFACE_ADDED);
+                                sendUpstreamIfaceChangeBroadcast(
+                                                       newUpstreamIfaceName,
+                                                       mIfaceName,
+                                                       AF_INET,
+                                                       UpstreamInfoUpdateType.UPSTREAM_IFACE_ADDED);
                             } catch (Exception e) {
                                 Log.e(TAG, "Exception enabling Nat: " + e.toString());
                                 try {
@@ -1322,6 +1344,8 @@ public class Tethering extends INetworkManagementEventObserver.Stub {
         private int mMobileApnReserved = ConnectivityManager.TYPE_NONE;
 
         private String mUpstreamIfaceName = null;
+
+        protected int mRetryCount;
 
         private static final int UPSTREAM_SETTLE_TIME_MS     = 10000;
         private static final int CELL_CONNECTION_RENEW_MS    = 40000;
@@ -1460,8 +1484,10 @@ public class Tethering extends INetworkManagementEventObserver.Stub {
                 Log.d(TAG, "adding v6 interface " + iface);
                 try {
                     service.addUpstreamV6Interface(iface);
-                    sendUpstreamIfaceChangeBroadcast( iface, IPAddrType.V6,
-                                                      UpstreamInfoUpdateType.UPSTREAM_IFACE_ADDED);
+                    for (TetherInterfaceSM sm : mNotifyList) {
+                        sendUpstreamIfaceChangeBroadcast( iface, sm.getTethered(), AF_INET6,
+                                UpstreamInfoUpdateType.UPSTREAM_IFACE_ADDED);
+                    }
                 } catch (RemoteException e) {
                     Log.e(TAG, "Unable to append v6 upstream interface");
                 }
@@ -1474,8 +1500,10 @@ public class Tethering extends INetworkManagementEventObserver.Stub {
                 Log.d(TAG, "removing v6 interface " + iface);
                 try {
                     service.removeUpstreamV6Interface(iface);
-                    sendUpstreamIfaceChangeBroadcast( iface, IPAddrType.V6,
-                                                      UpstreamInfoUpdateType.UPSTREAM_IFACE_REMOVED);
+                    for (TetherInterfaceSM sm : mNotifyList) {
+                        sendUpstreamIfaceChangeBroadcast( iface, sm.getTethered(), AF_INET6,
+                                UpstreamInfoUpdateType.UPSTREAM_IFACE_REMOVED);
+                    }
                 } catch (RemoteException e) {
                     Log.e(TAG, "Unable to remove v6 upstream interface");
                 }
@@ -1545,6 +1573,10 @@ public class Tethering extends INetworkManagementEventObserver.Stub {
                             + mPreferredUpstreamMobileApn + ", got type=" + upType);
                 }
 
+                if (upType != ConnectivityManager.TYPE_NONE) {
+                    mRetryCount = 0;
+                }
+
                 // if we're on DUN, put our own grab on it
                 if (upType == ConnectivityManager.TYPE_MOBILE_DUN ||
                         upType == ConnectivityManager.TYPE_MOBILE_HIPRI) {
@@ -1560,14 +1592,29 @@ public class Tethering extends INetworkManagementEventObserver.Stub {
                 }
 
                 if (upType == ConnectivityManager.TYPE_NONE) {
-                    boolean tryAgainLater = true;
-                    if ((tryCell == TRY_TO_SETUP_MOBILE_CONNECTION) &&
-                            (turnOnUpstreamMobileConnection(mPreferredUpstreamMobileApn) == true)) {
-                        // we think mobile should be coming up - don't set a retry
-                        tryAgainLater = false;
-                    }
-                    if (tryAgainLater) {
-                        sendMessageDelayed(CMD_RETRY_UPSTREAM, UPSTREAM_SETTLE_TIME_MS);
+                    try {
+                        if (cm.getMobileDataEnabled()) {
+                            boolean tryAgainLater = true;
+                            if (mRetryCount < TETHER_RETRY_UPSTREAM_LIMIT) {
+                                if ((tryCell == TRY_TO_SETUP_MOBILE_CONNECTION) &&
+                                         (turnOnUpstreamMobileConnection
+                                                (mPreferredUpstreamMobileApn) == true)) {
+                                    // we think mobile should be coming up - don't set a retry
+                                    tryAgainLater = false;
+                                    mRetryCount++;
+                                }
+                                if (tryAgainLater) {
+                                    sendMessageDelayed(CMD_RETRY_UPSTREAM, UPSTREAM_SETTLE_TIME_MS);
+                                }
+                            } else {
+                               turnOffUpstreamMobileConnection();
+                               Log.d(TAG, "chooseUpstreamType: Reached MAX, NO RETRIES");
+                            }
+                        } else {
+                            Log.d(TAG, "Data is Disabled");
+                        }
+                    } catch (RemoteException e) {
+                        Log.d(TAG, "Exception in getMobileDataEnabled()");
                     }
                 } else {
                     LinkProperties linkProperties = null;
@@ -1664,6 +1711,7 @@ public class Tethering extends INetworkManagementEventObserver.Stub {
 
                 mTryCell = !WAIT_FOR_NETWORK_TO_SETTLE; // better try something first pass
                                                         // or crazy tests cases will fail
+                mRetryCount = 0;
                 chooseUpstreamType(mTryCell);
                 mTryCell = !mTryCell;
             }
@@ -1705,20 +1753,19 @@ public class Tethering extends INetworkManagementEventObserver.Stub {
                         }
                         break;
                     case CMD_UPSTREAM_CHANGED:
+                        if(VDBG) Log.d(TAG, "CMD_UPSTREAM_CHANGED event received");
                         // need to try DUN immediately if Wifi goes down
                         NetworkInfo info = (NetworkInfo) message.obj;
                         mTryCell = !WAIT_FOR_NETWORK_TO_SETTLE;
                         chooseUpstreamType(mTryCell);
-                        if (info != null) {
-                            if (!info.isConnected()) {
-                                IBinder b = ServiceManager.getService(Context.CONNECTIVITY_SERVICE);
-                                IConnectivityManager cm = IConnectivityManager.Stub.asInterface(b);
-                                try {
-                                    LinkProperties props = cm.getLinkProperties(info.getType());
-                                    removeUpstreamV6Interface(props.getInterfaceName());
-                                } catch(Exception e) {
-                                    Log.e(TAG, "Exception querying ConnectivityManager", e);
-                                }
+                        if ((info != null) && (!info.isConnected())) {
+                            IBinder b = ServiceManager.getService(Context.CONNECTIVITY_SERVICE);
+                            IConnectivityManager cm = IConnectivityManager.Stub.asInterface(b);
+                            try {
+                                LinkProperties props = cm.getLinkProperties(info.getType());
+                                removeUpstreamV6Interface(props.getInterfaceName());
+                            } catch(RemoteException e) {
+                                Log.e(TAG, "Exception querying ConnectivityManager", e);
                             }
                         }
                         mTryCell = !mTryCell;

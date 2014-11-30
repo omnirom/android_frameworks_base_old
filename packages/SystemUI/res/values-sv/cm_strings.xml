@@ -35,8 +35,6 @@
   <string name="quick_settings_usb_tether_off_label">Frånkopplad</string>
   <string name="quick_settings_usb_tether_connected_label">Tethering av</string>
   <string name="quick_settings_usb_tether_on_label">Tethering</string>
-  <string name="quick_settings_wifiap">Wi-Fi AP</string>
-  <string name="quick_settings_wifiap_off">Wi-Fi AP av</string>
   <string name="quick_settings_quiethours">Tysta timmar</string>
   <string name="quick_settings_quiethours_off">Tysta timmar av</string>
   <string name="quick_settings_lte">LTE</string>
@@ -67,6 +65,7 @@
   <string name="navbar_menu_big_button">Menyknapp</string>
   <string name="advanced_dev_option_wipe_app">Rensa data</string>
   <string name="advanced_dev_option_force_stop">Tvingad avslutning</string>
+  <string name="advanced_dev_option_uninstall">Avinstallera</string>
   <string name="accessibility_dock_battery_level">Batteri i docka <xliff:g id="number">%d</xliff:g> procent.</string>
   <string name="screenshot_delete_action">Ta bort</string>
   <string name="screenshot_delete_confirmation">Skärmdump borttagen.</string>

@@ -35,8 +35,8 @@
   <string name="quick_settings_usb_tether_off_label">Anclaje USB desactivado</string>
   <string name="quick_settings_usb_tether_connected_label">Anclaje USB conectado</string>
   <string name="quick_settings_usb_tether_on_label">Anclaje USB activado</string>
-  <string name="quick_settings_wifiap">Wi-Fi AP</string>
-  <string name="quick_settings_wifiap_off">Wi-Fi AP desactivado</string>
+  <string name="quick_settings_wifiap">Punto de acceso Wi-Fi</string>
+  <string name="quick_settings_wifiap_off">Punto de acceso Wi-Fi</string>
   <string name="quick_settings_quiethours">Modo descanso</string>
   <string name="quick_settings_quiethours_off">Modo descanso</string>
   <string name="quick_settings_lte">LTE</string>
@@ -50,6 +50,7 @@
   <string name="quick_settings_compass_init">Inicializando\u2026</string>
   <string name="quick_settings_heads_up_on">Notificaciones emergentes</string>
   <string name="quick_settings_heads_up_off">Notificaciones emergentes</string>
+  <string name="quick_settings_themes">Temas</string>
   <string name="location_mode_high_accuracy_title">Alta precisión</string>
   <string name="location_mode_battery_saving_title">Ahorro de batería</string>
   <string name="location_mode_sensors_only_title">Solo en dispositivo</string>
@@ -71,9 +72,12 @@
   <string name="navbar_menu_big_button">Botón Menú</string>
   <string name="advanced_dev_option_wipe_app">Borrar datos</string>
   <string name="advanced_dev_option_force_stop">Forzar detención</string>
+  <string name="advanced_dev_option_uninstall">Desinstalar</string>
   <string name="accessibility_dock_battery_level">Batería de la base al <xliff:g id="number">%d</xliff:g>%%.</string>
   <string name="screenshot_delete_action">Eliminar</string>
   <string name="screenshot_delete_confirmation">Captura eliminada.</string>
   <string name="accessibility_desc_add_quick_settings">Añadir controles rápidos.</string>
   <string name="status_bar_notification_spam_item_title">Ignorar notificaciones como estas</string>
+  <string name="protected_app_notification_title">Notificación de aplicación protegida</string>
+  <string name="protected_app_notification_summary">Toca para abrir la notificación de la aplicación protegida</string>
 </resources>

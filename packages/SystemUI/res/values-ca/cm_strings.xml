@@ -35,8 +35,8 @@
   <string name="quick_settings_usb_tether_off_label">Desconnectat</string>
   <string name="quick_settings_usb_tether_connected_label">Ancoratge apagat</string>
   <string name="quick_settings_usb_tether_on_label">Ancoratge</string>
-  <string name="quick_settings_wifiap">PA Wi-Fi</string>
-  <string name="quick_settings_wifiap_off">PA Wi-Fi Inactiu</string>
+  <string name="quick_settings_wifiap">Punt d\'accés Wi-Fi</string>
+  <string name="quick_settings_wifiap_off">Punt d\'accés Wi-Fi apagat</string>
   <string name="quick_settings_quiethours">Hores tranquil·les</string>
   <string name="quick_settings_quiethours_off">Hores silencioses Inactives</string>
   <string name="quick_settings_lte">LTE</string>
@@ -50,6 +50,7 @@
   <string name="quick_settings_compass_init">Inicialitzant\u2026</string>
   <string name="quick_settings_heads_up_on">Notificacions emergents activades</string>
   <string name="quick_settings_heads_up_off">Sense interrupcions</string>
+  <string name="quick_settings_themes">Temes</string>
   <string name="location_mode_high_accuracy_title">Alta precisió</string>
   <string name="location_mode_battery_saving_title">Estalvi de bateria</string>
   <string name="location_mode_sensors_only_title">Només dispositiu</string>
@@ -71,9 +72,12 @@
   <string name="navbar_menu_big_button">Botó Menú</string>
   <string name="advanced_dev_option_wipe_app">Neteja dades d\'app</string>
   <string name="advanced_dev_option_force_stop">Força tancament</string>
+  <string name="advanced_dev_option_uninstall">Desinstal·la</string>
   <string name="accessibility_dock_battery_level">Acoplament Bateria <xliff:g id="number">%d</xliff:g> percent.</string>
   <string name="screenshot_delete_action">Esborra</string>
   <string name="screenshot_delete_confirmation">Captura de pantalla esborrada.</string>
   <string name="accessibility_desc_add_quick_settings">Afegeix ajustaments ràpids.</string>
   <string name="status_bar_notification_spam_item_title">Ignora els missatges com aquest</string>
+  <string name="protected_app_notification_title">Notificació d\'app protegida</string>
+  <string name="protected_app_notification_summary">Pica per obrir la notificació de l\'app protegida</string>
 </resources>

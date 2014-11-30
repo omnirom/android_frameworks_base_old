@@ -55,6 +55,11 @@
   <string name="location_mode_sensors_only_title">По датчиках пристрою</string>
   <string name="quick_settings_expanded_desktop">Розширений</string>
   <string name="quick_settings_expanded_desktop_off">Звичайний</string>
+  <plurals name="quick_settings_bluetooth_multi_label">
+    <item quantity="one">%1$d підключено</item>
+    <item quantity="few">%1$d підключено</item>
+    <item quantity="other">%1$d підключено</item>
+  </plurals>
   <string name="quick_settings_camera_error_connect">Неможливо підключитися до камери</string>
   <string name="navbar_dialog_title">Виберіть дію щоб призначити</string>
   <string name="navbar_home_button">Кнопка Додому</string>
@@ -67,6 +72,7 @@
   <string name="navbar_menu_big_button">Кнопка Меню</string>
   <string name="advanced_dev_option_wipe_app">Стерти дані програм</string>
   <string name="advanced_dev_option_force_stop">Примусово зупинити</string>
+  <string name="advanced_dev_option_uninstall">Деінсталювати</string>
   <string name="accessibility_dock_battery_level">Заряд батареї док-станції <xliff:g id="number">%d</xliff:g> процентів.</string>
   <string name="screenshot_delete_action">Видалити</string>
   <string name="screenshot_delete_confirmation">Скріншот видалений.</string>

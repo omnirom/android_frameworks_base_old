@@ -67,6 +67,10 @@
   <string name="perf_profile_perf">Высокая производит.</string>
   <string name="permlab_interceptSmsSent">Перехват исходящих SMS</string>
   <string name="permdesc_interceptSmsSent">Приложение сможет перехватывать исходящие SMS. Вредоносные приложения могут использовать это разрешение, чтобы препятствовать отправке SMS-сообщений.</string>
+  <string name="permlab_receiveProtectedSms">Получение защищённых SMS</string>
+  <string name="permdesc_receiveProtectedSms">Приложение сможет получать входящие защищённые SMS-сообщения.</string>
+  <string name="permlab_modifyProtectedSmsList">Изменение списка защищённых SMS</string>
+  <string name="permdesc_modifyProtectedSmsList">Приложение сможет изменять список адресатов защищённых SMS-сообщений.</string>
   <string name="permlab_resetBatteryStats">Обнуление статистики батареи</string>
   <string name="permdesc_resetBatteryStats">Приложение сможет очищать данные об использовании аккумуляторной батареи устройства.</string>
   <string name="permgrouplab_security">Безопасность</string>
@@ -85,6 +89,10 @@
   <string name="permdesc_setKeyguardWallpaper">Приложение сможет изменять обои экрана блокировки устройства.</string>
   <string name="permlab_useHardwareFramework">Взаимодействие с оборудованием</string>
   <string name="permdesc_useHardwareFramework">Приложение сможет получать доступ к подсистеме аппаратных абстракций CyanogenMod.</string>
+  <string name="permlab_keyguardApplicationWidget">установка виджета быстрого запуска для экрана блокировки</string>
+  <string name="permdesc_keyguardApplicationWidget">Приложение сможет изменять виджет быстрого запуска на экране блокировки.</string>
+  <string name="permlab_interceptPackageLaunch">Перехват запуска приложений</string>
+  <string name="permdesc_interceptPackageLaunch">Приложение сможет перехватывать запуск других приложений на устройстве.</string>
   <string name="immersive_mode_confirmation_bottom">Чтобы вернуться в обычный режим, проведите пальцем вверх.</string>
   <string name="app_ops_access_camera">получить доступ к камере</string>
   <string name="app_ops_access_location">получить доступ к местоположению устройства</string>
@@ -134,8 +142,8 @@
   <string name="adb_net_active_notification_title">Отладка по сети разрешена</string>
   <string name="adb_both_active_notification_title">Отладка по сети и USB разрешена</string>
   <string name="adb_active_generic_notification_message">Нажмите, чтобы отключить отладку.</string>
-  <string name="extmedia_format_message_cm" product="nosdcard">Все данные на USB-накопителе (по адресу «%1$s») будут удалены. Это действие невозможно отменить!</string>
-  <string name="extmedia_format_message_cm" product="default">Все данные на карте (по адресу «%1$s») будут удалены. Это действие невозможно отменить!</string>
+  <string name="usb_extmedia_format_message">Все данные на USB-накопителе (по адресу «%1$s») будут удалены. Это действие невозможно отменить!</string>
+  <string name="sd_extmedia_format_message">Все данные на карте (по адресу «%1$s») будут удалены. Это действие невозможно отменить!</string>
   <string name="usb_storage_notification_manage_message">Нажмите, чтобы открыть список опций.</string>
   <string name="sd_ext_media_checking_notification_title">Подготовка SD-карты\u2026</string>
   <string name="sd_ext_media_checking_notification_message">Выполняется проверка карты на наличие ошибок\u2026</string>
@@ -174,4 +182,19 @@
   <string name="stk_cc_ss_to_ss">SS-запрос преобразован в новый SS-запрос.</string>
   <string name="theme_install_error_title">Не удалось установить тему</string>
   <string name="theme_install_error_message">Сбой при установке «%s»</string>
+  <string name="storage_uicc">Хранилище UICC</string>
+  <string name="sd_progress_unmounting">Отключение SD-карты\u2026</string>
+  <string name="sd_progress_erasing">Очистка SD-карты\u2026</string>
+  <string name="sd_format_error">Не удалось очистить SD-карту.</string>
+  <string name="sd_media_bad_removal">SD-карта была извлечена до отключения.</string>
+  <string name="sd_media_checking">Выполняется проверка SD-карты.</string>
+  <string name="sd_media_removed">SD-карта была отключена.</string>
+  <string name="sd_media_shared">Сейчас SD-карта используется компьютером.</string>
+  <string name="usb_progress_unmounting">Отключение USB-накопителя\u2026</string>
+  <string name="usb_progress_erasing">Очистка USB-накопителя\u2026</string>
+  <string name="usb_format_error">Не удалось очистить USB-накопитель.</string>
+  <string name="usb_media_bad_removal">USB-накопитель был извлечён до отключения.</string>
+  <string name="usb_media_checking">USB-накопитель проверяется.</string>
+  <string name="usb_media_removed">USB-накопитель извлечён.</string>
+  <string name="usb_media_shared">Сейчас USB-накопитель используется компьютером.</string>
 </resources>

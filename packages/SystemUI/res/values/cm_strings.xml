@@ -40,12 +40,11 @@
     <string name="quick_settings_torch_off">Torch off</string>
     <string name="quick_settings_nfc">NFC</string>
     <string name="quick_settings_nfc_off">NFC off</string>
-    <string name="quick_settings_screen_timeout_summary" translatable="false">%1$d %2$s</string>
     <string name="quick_settings_usb_tether_off_label">Disconnected</string>
     <string name="quick_settings_usb_tether_connected_label">Tethering off</string>
     <string name="quick_settings_usb_tether_on_label">Tethering</string>
-    <string name="quick_settings_wifiap">Wi-Fi AP</string>
-    <string name="quick_settings_wifiap_off">Wi-Fi AP off</string>
+    <string name="quick_settings_wifiap">Wi-Fi hotspot</string>
+    <string name="quick_settings_wifiap_off">Wi-Fi hotspot off</string>
     <string name="quick_settings_quiethours">Quiet hours</string>
     <string name="quick_settings_quiethours_off">Quiet hours off</string>
     <string name="quick_settings_lte">LTE</string>
@@ -60,6 +59,7 @@
     <string name="quick_settings_compass_value" translatable="false"><xliff:g id="degrees">%1$.0f</xliff:g>\u00b0 <xliff:g id="direction">%2$s</xliff:g></string>
     <string name="quick_settings_heads_up_on">Heads up enabled</string>
     <string name="quick_settings_heads_up_off">No interruptions</string>
+    <string name="quick_settings_themes">Themes</string>
     <!-- [CHAR LIMIT=30] Location settings screen, high accuracy location mode -->
     <string name="location_mode_high_accuracy_title">High accuracy</string>
     <!-- [CHAR LIMIT=30] Location settings screen, battery saving location mode -->
@@ -94,6 +94,7 @@
     <!-- Development shortcut -->
     <string name="advanced_dev_option_wipe_app">Wipe app data</string>
     <string name="advanced_dev_option_force_stop">Force stop</string>
+    <string name="advanced_dev_option_uninstall">Uninstall</string>
 
     <!-- Content description of the dock battery level icon for accessibility (not shown on the screen). [CHAR LIMIT=NONE] -->
     <string name="accessibility_dock_battery_level">Dock battery <xliff:g id="number">%d</xliff:g> percent.</string>
@@ -111,4 +112,7 @@
     <string name="sim_slot_3" translatable="false">3</string>
 
     <string name="status_bar_notification_spam_item_title">Ignore messages like this</string>
+
+    <string name="protected_app_notification_title">Protected app notification</string>
+    <string name="protected_app_notification_summary">Tap to open notification from protected app</string>
 </resources>

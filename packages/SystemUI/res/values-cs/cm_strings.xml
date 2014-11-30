@@ -35,8 +35,8 @@
   <string name="quick_settings_usb_tether_off_label">Odpojeno</string>
   <string name="quick_settings_usb_tether_connected_label">USB sdíl. VYP</string>
   <string name="quick_settings_usb_tether_on_label">USB sdíl.</string>
-  <string name="quick_settings_wifiap">Wi-Fi AP</string>
-  <string name="quick_settings_wifiap_off">Wi-Fi AP VYP</string>
+  <string name="quick_settings_wifiap">Wi-Fi hotspot</string>
+  <string name="quick_settings_wifiap_off">Wi-Fi hotspot vyp.</string>
   <string name="quick_settings_quiethours">Čas klidu</string>
   <string name="quick_settings_quiethours_off">Čas klidu VYP</string>
   <string name="quick_settings_lte">LTE</string>
@@ -50,6 +50,7 @@
   <string name="quick_settings_compass_init">Inicializace\u2026</string>
   <string name="quick_settings_heads_up_on">Plovoucí upozornění povoleno</string>
   <string name="quick_settings_heads_up_off">Bez přerušení</string>
+  <string name="quick_settings_themes">Motivy</string>
   <string name="location_mode_high_accuracy_title">Vysoká přesnost</string>
   <string name="location_mode_battery_saving_title">Úspora baterie</string>
   <string name="location_mode_sensors_only_title">Pouze zařízení</string>
@@ -72,9 +73,12 @@
   <string name="navbar_menu_big_button">Tlačítko Nabídka</string>
   <string name="advanced_dev_option_wipe_app">Vymazat data aplikací</string>
   <string name="advanced_dev_option_force_stop">Vynutit ukončení</string>
+  <string name="advanced_dev_option_uninstall">Odinstalovat</string>
   <string name="accessibility_dock_battery_level">Baterie doku: <xliff:g id="number">%d</xliff:g> procent.</string>
   <string name="screenshot_delete_action">Smazat</string>
   <string name="screenshot_delete_confirmation">Snímek obrazovky smazán.</string>
   <string name="accessibility_desc_add_quick_settings">Přidat rychlé nastavení.</string>
   <string name="status_bar_notification_spam_item_title">Ignorovat zprávy jako je tato</string>
+  <string name="protected_app_notification_title">Upozornění chráněné aplikace</string>
+  <string name="protected_app_notification_summary">Dotykem otevřít upozornění chráněné aplikace</string>
 </resources>

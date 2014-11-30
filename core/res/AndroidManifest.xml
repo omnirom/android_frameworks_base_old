@@ -1927,7 +1927,7 @@
     <permission android:name="android.permission.SET_ACTIVITY_WATCHER"
         android:label="@string/permlab_runSetActivityWatcher"
         android:description="@string/permdesc_runSetActivityWatcher"
-        android:protectionLevel="signature" />
+        android:protectionLevel="signature|system" />
 
     <!-- Allows an application to call the activity manager shutdown() API
          to put the higher-level system there into a shutdown state.
@@ -2224,6 +2224,24 @@
         android:permissionGroup="android.permission-group.SYSTEM_TOOLS"
         android:label="@string/permlab_broadcastPackageRemoved"
         android:description="@string/permdesc_broadcastPackageRemoved"
+        android:protectionLevel="signature" />
+
+    <!-- Allows an application to add an address to the whitelisted protected sms
+         list
+         @hide -->
+    <permission android:name="android.permission.MODIFY_PROTECTED_SMS_LIST"
+        android:permissionGroup="android.permission-group.MESSAGES"
+        android:label="@string/permlab_modifyProtectedSmsList"
+        android:description="@string/permdesc_modifyProtectedSmsList"
+        android:protectionLevel="signature" />
+
+    <!-- Allows an application to receive sms (usually for auth or registration)
+         from whitelisted addresses
+         @hide -->
+    <permission android:name="android.permission.RECEIVE_PROTECTED_SMS"
+        android:permissionGroup="android.permission-group.MESSAGES"
+        android:label="@string/permlab_receiveProtectedSms"
+        android:description="@string/permdesc_receiveProtectedSms"
         android:protectionLevel="signature" />
 
     <!-- Allows an application to intercept and rewrite outgoing SMS
@@ -2608,7 +2626,7 @@
     <permission android:name="android.permission.WRITE_THEMES"
         android:label="@string/permlab_writeThemes"
         android:description="@string/permdesc_writeThemesDesc"
-        android:protectionLevel="signature" />
+        android:protectionLevel="system|signature" />
 
     <!-- Allows an application access the CM hardware abstraction framework (DANGEROUS)
          <p>Not for use by third-party applications.
@@ -2618,6 +2636,22 @@
         android:description="@string/permdesc_useHardwareFramework"
         android:protectionLevel="signature" />
 
+
+    <!-- Allows an application to set the application widget on the keyguard.
+         <p> Not for use by third-party applications.
+         @hide -->
+    <permission android:name="android.permission.SET_KEYGUARD_APPLICATION_WIDGET"
+        android:label="@string/permlab_keyguardApplicationWidget"
+        android:description="@string/permdesc_keyguardApplicationWidget"
+        android:protectionLevel="system|signature" />
+
+    <!-- Allows an application to intercept package launch actions.
+         <p> Not for use by third-party applications.
+         @hide -->
+    <permission android:name="android.permission.INTERCEPT_PACKAGE_LAUNCH"
+        android:label="@string/permlab_interceptPackageLaunch"
+        android:description="@string/permdesc_interceptPackageLaunch"
+        android:protectionLevel="system|signature" />
 
     <!-- The system process is explicitly the only one allowed to launch the
          confirmation UI for full backup/restore -->

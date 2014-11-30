@@ -36,8 +36,8 @@
   <string name="quick_settings_usb_tether_off_label">Дисконектован</string>
   <string name="quick_settings_usb_tether_connected_label">Привезивање искључено</string>
   <string name="quick_settings_usb_tether_on_label">Привезивање</string>
-  <string name="quick_settings_wifiap">Wi-Fi AP</string>
-  <string name="quick_settings_wifiap_off">Wi-Fi AP искључено</string>
+  <string name="quick_settings_wifiap">Wi-Fi hotspot</string>
+  <string name="quick_settings_wifiap_off">Wi-Fi hotspot искључено</string>
   <string name="quick_settings_quiethours">Тихи сати</string>
   <string name="quick_settings_quiethours_off">Тихи сати искључено</string>
   <string name="quick_settings_lte">LTE</string>
@@ -51,6 +51,7 @@
   <string name="quick_settings_compass_init">Покретање\u2026</string>
   <string name="quick_settings_heads_up_on">Heads up омогућено</string>
   <string name="quick_settings_heads_up_off">Нема прекидања</string>
+  <string name="quick_settings_themes">Теме</string>
   <string name="location_mode_high_accuracy_title">Велика прецизност</string>
   <string name="location_mode_battery_saving_title">Уштеда батерије</string>
   <string name="location_mode_sensors_only_title">Само уређај</string>
@@ -74,9 +75,12 @@
   <string name="navbar_menu_big_button">Дугме за Мени</string>
   <string name="advanced_dev_option_wipe_app">Избриши податке апликације</string>
   <string name="advanced_dev_option_force_stop">Приморај заустављање</string>
+  <string name="advanced_dev_option_uninstall">Деинсталирај</string>
   <string name="accessibility_dock_battery_level">Батерија <xliff:g id="number">%d</xliff:g> процената.</string>
   <string name="screenshot_delete_action">Избриши</string>
   <string name="screenshot_delete_confirmation">Снимак екрана је избрисан.</string>
   <string name="accessibility_desc_add_quick_settings">Додај Брза подешавања.</string>
   <string name="status_bar_notification_spam_item_title">Игнориши овакве поруке</string>
+  <string name="protected_app_notification_title">Обавештење заштићених апликација</string>
+  <string name="protected_app_notification_summary">Додирните да отворите обавештења из заштићене апликације</string>
 </resources>
