@@ -5811,6 +5811,12 @@ public final class Settings {
        public static final String DATA_ROAMING = "data_roaming";
 
        /**
+        * Whether national data roaming should be used.
+        * @hide
+        */
+       public static final String MVNO_ROAMING = "mvno_roaming";
+
+        /**
         * The value passed to a Mobile DataConnection via bringUp which defines the
         * number of retries to preform when setting up the initial connection. The default
         * value defined in DataConnectionTrackerBase#DEFAULT_MDC_INITIAL_RETRY is currently 1.
