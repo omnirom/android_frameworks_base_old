@@ -63,6 +63,7 @@ import android.widget.ImageView;
 import android.widget.SeekBar;
 import android.widget.SeekBar.OnSeekBarChangeListener;
 import android.widget.TextView;
+import android.provider.Settings;
 
 import com.android.internal.R;
 import com.android.systemui.statusbar.phone.SystemUIDialog;
@@ -1111,6 +1112,11 @@ public class VolumePanel extends Handler {
     }
 
     protected void onPlaySound(int streamType, int flags) {
+        // If preference is no sound - just exit here
+        if (Settings.System.getInt(mContext.getContentResolver(),
+                 Settings.System.VOLUME_ADJUST_SOUND, 1) == 0) {
+             return;
+        }
 
         if (hasMessages(MSG_STOP_SOUNDS)) {
             removeMessages(MSG_STOP_SOUNDS);
