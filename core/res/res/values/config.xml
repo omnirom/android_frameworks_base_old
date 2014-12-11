@@ -820,6 +820,9 @@
     <integer-array name="config_autoBrightnessButtonBacklightValues">
     </integer-array>
 
+    <!-- Boolean indicating whether we want button brightness support -->
+    <bool name="config_button_brightness_support">false</bool>
+
     <!-- Array of output values for keyboard backlight corresponding to the LUX values
          in the config_autoBrightnessLevels array.  This array should have size one greater
          than the size of the config_autoBrightnessLevels array.
@@ -1675,6 +1678,21 @@
         <item>333</item>
         <item>353</item>
     </string-array>
+
+    <!-- Hardware 'face' keys present on the device, stored as a bit field.
+         This integer should equal the sum of the corresponding value for each
+         of the following keys present:
+             1 - Home
+             2 - Back
+             4 - Menu
+             8 - Assistant (search)
+            16 - App switch
+            32 - Camera
+         For example, a device with Home, Back and Menu keys would set this
+         config to 7. -->
+    <integer name="config_deviceHardwareKeys">0</integer>
+
+    <!-- <integer name="config_backKillTimeout">1500</integer> -->
 
     <!-- Override the default detection behavior for the framework method
          android.view.ViewConfiguration#hasPermanentMenuKey().

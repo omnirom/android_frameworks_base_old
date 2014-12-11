@@ -92,6 +92,7 @@ final class DisplayPowerController implements AutomaticBrightnessController.Call
     private static final int MSG_UPDATE_POWER_STATE = 1;
     private static final int MSG_PROXIMITY_SENSOR_DEBOUNCED = 2;
     private static final int MSG_SCREEN_ON_UNBLOCKED = 3;
+    private static final int MSG_UPDATE_BACKLIGHT_SETTINGS = 4;
 
     private static final int PROXIMITY_UNKNOWN = -1;
     private static final int PROXIMITY_NEGATIVE = 0;
@@ -242,6 +243,9 @@ final class DisplayPowerController implements AutomaticBrightnessController.Call
     // The controller for the automatic brightness level.
     private AutomaticBrightnessController mAutomaticBrightnessController;
 
+    // overrule and disable brightness for buttons
+    private boolean mHardwareKeysDisable = false; 
+
     // Animators.
     private ObjectAnimator mColorFadeOnAnimator;
     private ObjectAnimator mColorFadeOffAnimator;
@@ -342,7 +346,14 @@ final class DisplayPowerController implements AutomaticBrightnessController.Call
                         TYPICAL_PROXIMITY_THRESHOLD);
             }
         }
+        
+        mHardwareKeysDisable = Settings.System.getIntForUser(
+                        mContext.getContentResolver(), Settings.System.HARDWARE_KEYS_DISABLE,
+                        0, UserHandle.USER_CURRENT) != 0;
 
+        if (mHardwareKeysDisable) {
+            mLights.getLight(LightsService.LIGHT_ID_BUTTONS).setBrightness(0);
+        }
     }
 
     /**
@@ -1140,6 +1151,10 @@ final class DisplayPowerController implements AutomaticBrightnessController.Call
                         unblockScreenOn();
                         updatePowerState();
                     }
+                    break;
+                case MSG_UPDATE_BACKLIGHT_SETTINGS:
+                    // updateAutomaticBrightnessSettings();
+                    updatePowerState();
                     break;
             }
         }
