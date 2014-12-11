@@ -591,6 +591,8 @@
         <item>delete contacts</item>
         <item>delete call log</item>
         <item>turn on mobile data</item>
+        <item>read other accounts</item>
+        <item>read phone info</item>
     </string-array>
 
 </resources>
