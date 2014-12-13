@@ -1041,8 +1041,6 @@ public class PhoneWindowManager implements WindowManagerPolicy {
                 com.android.internal.R.bool.config_lidControlsSleep);
         mTranslucentDecorEnabled = mContext.getResources().getBoolean(
                 com.android.internal.R.bool.config_enableTranslucentDecor);
-        mOffscreenGestureSupport = mContext.getResources().getBoolean(
-                com.android.internal.R.bool.config_offscreenGestureSupport);
 
         readConfigurationDependentBehaviors();
 
@@ -1147,7 +1145,9 @@ public class PhoneWindowManager implements WindowManagerPolicy {
                 Constructor<?> constructor = klass.getConstructor(Context.class);
                 mDeviceKeyHandler = (DeviceKeyHandler) constructor.newInstance(
                         mContext);
-                if(DEBUG) Slog.d(TAG, "Device key handler loaded");
+                if(DEBUG) Slog.d(TAG, "Device key handler "
+                        + deviceKeyHandlerClass + " from class "
+                        + deviceKeyHandlerLib);
             } catch (Exception e) {
                 Slog.w(TAG, "Could not instantiate device key handler "
                         + deviceKeyHandlerClass + " from class "
@@ -4316,7 +4316,7 @@ public class PhoneWindowManager implements WindowManagerPolicy {
         boolean isWakeKey = (policyFlags & WindowManagerPolicy.FLAG_WAKE) != 0
                 || event.isWakeKey();
 
-        if (mOffscreenGestureSupport && !isWakeKey) {
+        if (!isWakeKey) {
             isWakeKey = isOffscreenWakeKey(keyCode);
         }
         if (interactive || (isInjected && !isWakeKey)) {
@@ -4617,10 +4617,8 @@ public class PhoneWindowManager implements WindowManagerPolicy {
      * is always considered a wake key.
      */
     private boolean isWakeKeyWhenScreenOff(int keyCode) {
-        if (mOffscreenGestureSupport){
-            if (isOffscreenWakeKey(keyCode)){
-                return true;
-            }
+        if (isOffscreenWakeKey(keyCode)){
+            return true;
         }
         switch (keyCode) {
             // ignore volume keys unless docked
@@ -6173,8 +6171,6 @@ public class PhoneWindowManager implements WindowManagerPolicy {
 
     private boolean isOffscreenWakeKey(int keyCode) {
         switch (keyCode) {
-            case KeyEvent.KEYCODE_F3:
-                return true;
             case KeyEvent.KEYCODE_VOLUME_UP:
             case KeyEvent.KEYCODE_VOLUME_DOWN:
                 return mVolumeWakeSupport;
