@@ -46,6 +46,7 @@ import android.util.ArraySet;
 import com.android.internal.app.IVoiceInteractor;
 import com.android.internal.os.BatteryStatsImpl;
 import com.android.server.Watchdog;
+import com.android.server.power.PowerManagerService;
 import com.android.server.am.ActivityManagerService.ItemMatcher;
 import com.android.server.am.ActivityStackSupervisor.ActivityContainer;
 import com.android.server.wm.AppTransition;
@@ -1597,6 +1598,9 @@ final class ActivityStack {
         mStackSupervisor.mWaitingVisibleActivities.remove(next);
 
         if (DEBUG_SWITCH) Slog.v(TAG, "Resuming " + next);
+
+        // Some activities may want to alter the system power management
+        mService.mPowerManager.handleAppChange(next.intent);
 
         // If we are currently pausing an activity, then don't do anything
         // until that is done.

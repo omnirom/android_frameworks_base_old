@@ -2659,6 +2659,31 @@ public final class Settings {
         public static final String VOLUME_ADJUST_SOUND = "volume_adjust_sound";
 
         /**
+         * @hide
+         */
+        public static final String POWER_PROFILE_ENABLED = "power_profile_enabled";
+
+        /**
+         * @hide
+         */
+        public static final String POWER_PROFILE_DEFAULT = "power_profile_default";
+
+        /**
+         * @hide
+         */
+        public static final String POWER_PROFILE_SCREEN_OFF = "power_profile_screen_off";
+
+        /**
+         * @hide
+         */
+        public static final String POWER_PROFILE_APPS = "power_profile_apps";
+
+        /**
+         * @hide
+         */
+        public static final String POWER_PROFILE_PLUGGED = "power_profile_plugged";
+
+        /**
          * Settings to backup. This is here so that it's in the same place as the settings
          * keys and easy to update.
          *
