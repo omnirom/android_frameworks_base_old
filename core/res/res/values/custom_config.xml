@@ -24,4 +24,6 @@
     <item>reboot_recovery</item>
     <item>reboot_bootloader</item>
   </string-array>
+
+    <bool name="config_powerProfilesSupported">false</bool>
 </resources>

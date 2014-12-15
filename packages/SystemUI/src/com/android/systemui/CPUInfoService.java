@@ -26,6 +26,7 @@ import android.graphics.Rect;
 import android.os.Handler;
 import android.os.IBinder;
 import android.os.Message;
+import android.os.PowerManager;
 import android.view.Gravity;
 import android.view.View;
 import android.view.WindowManager;
@@ -43,6 +44,8 @@ public class CPUInfoService extends Service {
     private View mView;
     private Thread mCurCPUThread;
     private final String TAG = "CPUInfoService";
+    private PowerManager mPowerManager;
+    private boolean mPowerProfilesSupported;
 
     private class CPUView extends View {
         private Paint mOnlinePaint;
@@ -59,6 +62,7 @@ public class CPUInfoService extends Service {
         private String[] mCurrGov={"", "", "", ""};
         private boolean mLpMode;
         private String mCPUTemp;
+        private String mPowerProfile;
 
         private Handler mCurCPUHandler = new Handler() {
             public void handleMessage(Message msg) {
@@ -66,29 +70,34 @@ public class CPUInfoService extends Service {
                     return;
                 }
                 if(msg.what==1){
-                    String[] parts=((String) msg.obj).split(";");
-                    if(parts.length!=3){
-                        return;
-                    }
-                    mCPUTemp=parts[0];
-                    mLpMode = parts[1].equals("1");
+                    String msgData = (String) msg.obj;
+                    try {
+                        String[] parts=msgData.split(";");
+                        mCPUTemp=parts[0];
+                        mLpMode = parts[1].equals("1");
 
-                    String[] cpuParts=parts[2].split("\\|");
-                    if(cpuParts.length!=4){
-                        return;
-                    }
-                    for(int i=0; i<cpuParts.length; i++){
-                        String cpuInfo=cpuParts[i];
-                        String cpuInfoParts[]=cpuInfo.split(":");
-                        if(cpuInfoParts.length==2){
-                            mCurrFreq[i]=cpuInfoParts[0];
-                            mCurrGov[i]=cpuInfoParts[1];
-                        } else {
-                            mCurrFreq[i]="0";
-                            mCurrGov[i]="";
+                        String[] cpuParts=parts[2].split("\\|");
+                        if(cpuParts.length!=4){
+                            return;
                         }
+                        for(int i=0; i<cpuParts.length; i++){
+                            String cpuInfo=cpuParts[i];
+                            String cpuInfoParts[]=cpuInfo.split(":");
+                            if(cpuInfoParts.length==2){
+                                mCurrFreq[i]=cpuInfoParts[0];
+                                mCurrGov[i]=cpuInfoParts[1];
+                            } else {
+                                mCurrFreq[i]="0";
+                                mCurrGov[i]="";
+                            }
+                        }
+                        if (mPowerProfilesSupported) {
+                            mPowerProfile = parts[3];
+                        }
+                        updateDisplay();
+                    } catch(ArrayIndexOutOfBoundsException e) {
+                        Log.e(TAG, "illegal data " + msgData);
                     }
-                    updateDisplay();
                 }
             }
         };
@@ -173,6 +182,11 @@ public class CPUInfoService extends Service {
 
             int y = mPaddingTop - (int)mAscent;
 
+            if (mPowerProfilesSupported) {
+                canvas.drawText("Profile:"+mPowerProfile, RIGHT-mPaddingRight-mMaxWidth,
+                    y-1, mOnlinePaint);
+                y += mFH;
+            }
             canvas.drawText("Temp:"+mCPUTemp, RIGHT-mPaddingRight-mMaxWidth,
                 y-1, mOnlinePaint);
             y += mFH;
@@ -197,7 +211,7 @@ public class CPUInfoService extends Service {
         }
 
         void updateDisplay() {
-            final int NW = 4;
+            final int NW = mPowerProfilesSupported ? 5 : 4;
 
             int neededWidth = mPaddingLeft + mPaddingRight + mMaxWidth;
             int neededHeight = mPaddingTop + mPaddingBottom + (mFH*(1+NW));
@@ -261,7 +275,6 @@ public class CPUInfoService extends Service {
                 while (!mInterrupt) {
                     sleep(500);
                     StringBuffer sb=new StringBuffer();
-
                     String cpuTemp = readOneLine(CPU_TEMP_HTC);
                     if (cpuTemp == null){
                         cpuTemp = readOneLine(CPU_TEMP_OPPO);
@@ -286,6 +299,10 @@ public class CPUInfoService extends Service {
                         sb.append(currFreq+":"+currGov+"|");
                     }
                     sb.deleteCharAt(sb.length()-1);
+                    sb.append(";");
+                    if (mPowerProfilesSupported) {
+                        sb.append(mPowerManager.getCurrentPowerProfile());
+                    }
                     mHandler.sendMessage(mHandler.obtainMessage(1, sb.toString()));
                 }
             } catch (InterruptedException e) {
@@ -313,6 +330,10 @@ public class CPUInfoService extends Service {
         mCurCPUThread.start();
 
         Log.d(TAG, "started CurCPUThread");
+
+        mPowerManager = (PowerManager)this.getSystemService(Context.POWER_SERVICE);
+        mPowerProfilesSupported = this.getResources().getBoolean(
+                com.android.internal.R.bool.config_powerProfilesSupported);
 
         WindowManager wm = (WindowManager)getSystemService(WINDOW_SERVICE);
         wm.addView(mView, params);
