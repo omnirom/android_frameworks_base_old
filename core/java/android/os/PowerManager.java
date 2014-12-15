@@ -833,6 +833,23 @@ public final class PowerManager {
     /** @hide */
     public static final String EXTRA_POWER_SAVE_MODE = "mode";
 
+    /** @hide */
+    public String getCurrentPowerProfile() {
+        try {
+            return mService.getCurrentPowerProfile();
+        } catch (RemoteException e) {
+            return null;
+        }
+    }
+
+    /** @hide */
+    void setPowerProfile(String profile) {
+        try {
+            mService.setPowerProfile(profile);
+        } catch (RemoteException e) {
+        }
+    }
+
     /**
      * A wake lock is a mechanism to indicate that your application needs
      * to have the device stay on.
