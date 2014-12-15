@@ -493,6 +493,7 @@ public final class SystemServer {
             ServiceManager.addService(Context.INPUT_SERVICE, inputManager);
 
             mActivityManagerService.setWindowManager(wm);
+            mActivityManagerService.setPowerManager(mPowerManagerService);
 
             inputManager.setWindowManagerCallbacks(wm.getInputMonitor());
             inputManager.start();
