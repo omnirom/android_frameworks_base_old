@@ -58,4 +58,9 @@ interface IPowerManager
 
     // sets the attention light (used by phone app only)
     void setAttentionLight(boolean on, int color);
+
+    String getCurrentPowerProfile();
+    // force overwrite
+    void setPowerProfile(String profile);
+
 }
