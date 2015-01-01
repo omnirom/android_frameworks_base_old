@@ -116,6 +116,8 @@ import com.android.internal.policy.impl.keyguard.KeyguardServiceDelegate.ShowLis
 import com.android.internal.statusbar.IStatusBarService;
 import com.android.internal.widget.PointerLocationView;
 import com.android.server.LocalServices;
+import com.android.internal.util.omni.TaskUtils;
+import com.android.internal.util.omni.OmniSwitchConstants;
 
 import dalvik.system.DexClassLoader;
 
@@ -198,6 +200,8 @@ public class PhoneWindowManager implements WindowManagerPolicy {
     private static final int KEY_ACTION_BACK = 7;
     private static final int KEY_ACTION_LAST_APP = 8;
     private static final int KEY_ACTION_KILL_APP = 9;
+    private static final int KEY_ACTION_SLEEP = 10;
+    private static final int KEY_ACTION_OMNISWITCH = 11;
 
     // Masks for checking presence of hardware keys.
     // Must match values in core/res/res/values/config.xml
@@ -397,6 +401,7 @@ public class PhoneWindowManager implements WindowManagerPolicy {
     boolean mHasMenuKey;
     boolean mHasAssistKey;
     boolean mHasAppSwitchKey;
+    boolean mBackKillPending;
 
     // The last window we were told about in focusChanged.
     WindowState mFocusedWindow;
@@ -1130,9 +1135,17 @@ public class PhoneWindowManager implements WindowManagerPolicy {
                 break;
             case KEY_ACTION_KILL_APP:
                 mHandler.postDelayed(mKillTask, mBackKillTimeout);
+                mBackKillPending = true;
                 break;
             case KEY_ACTION_LAST_APP:
-                toggleLastApp();
+                TaskUtils.toggleLastApp(mContext);
+                break;
+            case KEY_ACTION_SLEEP:
+                mPowerManager.goToSleep(SystemClock.uptimeMillis());
+                break;
+            case KEY_ACTION_OMNISWITCH:
+                Intent showIntent = new Intent(OmniSwitchConstants.ACTION_TOGGLE_OVERLAY);
+                mContext.sendBroadcastAsUser(showIntent, UserHandle.CURRENT);
                 break;
             default:
                 break;
@@ -2523,6 +2536,13 @@ public class PhoneWindowManager implements WindowManagerPolicy {
             mPendingMetaAction = false;
         }
 
+        // if a kill app is pending and we lift finger
+        // stop the kill action
+        if (mBackKillPending && !down) {
+            mHandler.removeCallbacks(mKillTask);
+            mBackKillPending = false;
+        }
+
         // First we always handle the home key here, so applications
         // can never break it, although if keyguard is on, we do let
         // it handle it, because that gives us the correct 5 second
@@ -3151,65 +3171,13 @@ public class PhoneWindowManager implements WindowManagerPolicy {
         }
     }
 
-    // maxwen: TODO might be unified with the impl in SystemUI
-    private void toggleLastApp() {
-        final Intent intent = new Intent(Intent.ACTION_MAIN);
-        final ActivityManager am = (ActivityManager) mContext
-                .getSystemService(Activity.ACTIVITY_SERVICE);
-        String defaultHomePackage = "com.android.launcher";
-        intent.addCategory(Intent.CATEGORY_HOME);
-        final ResolveInfo res = mContext.getPackageManager().resolveActivity(intent, 0);
-        if (res.activityInfo != null && !res.activityInfo.packageName.equals("android")) {
-            defaultHomePackage = res.activityInfo.packageName;
-        }
-        final List<ActivityManager.RecentTaskInfo> tasks =
-                am.getRecentTasks(5, ActivityManager.RECENT_IGNORE_UNAVAILABLE);
-        // lets get enough tasks to find something to switch to
-        // Note, we'll only get as many as the system currently has - up to 5
-        int lastAppId = 0;
-        Intent lastAppIntent = null;
-        for (int i = 1; i < tasks.size() && lastAppIntent == null; i++) {
-            final String packageName = tasks.get(i).baseIntent.getComponent().getPackageName();
-            if (!packageName.equals(defaultHomePackage) && !packageName.equals("com.android.systemui")) {
-                final ActivityManager.RecentTaskInfo info = tasks.get(i);
-                lastAppId = info.id;
-                lastAppIntent = info.baseIntent;
-            }
-        }
-        if (lastAppId > 0) {
-            am.moveTaskToFront(lastAppId, am.MOVE_TASK_NO_USER_ACTION);
-        } else if (lastAppIntent != null) {
-            // last task is dead, restart it.
-            lastAppIntent.addFlags(Intent.FLAG_ACTIVITY_LAUNCHED_FROM_HISTORY);
-            try {
-                mContext.startActivityAsUser(lastAppIntent, UserHandle.CURRENT);
-            } catch (ActivityNotFoundException e) {
-                Log.w("Recent", "Unable to launch recent task", e);
-            }
-        }
-    }
-
-    // maxwen: TODO would make sense to put this in a general place
     Runnable mKillTask = new Runnable() {
         public void run() {
-            final Intent intent = new Intent(Intent.ACTION_MAIN);
-            final ActivityManager am = (ActivityManager)mContext
-                    .getSystemService(Activity.ACTIVITY_SERVICE);
-            String defaultHomePackage = "com.android.launcher";
-            intent.addCategory(Intent.CATEGORY_HOME);
-            final ResolveInfo res = mContext.getPackageManager().resolveActivity(intent, 0);
-            if (res.activityInfo != null && !res.activityInfo.packageName.equals("android")) {
-                defaultHomePackage = res.activityInfo.packageName;
-            }
-            boolean targetKilled = false;
-            String packageName = am.getRunningTasks(1).get(0).topActivity.getPackageName();
-            if (!defaultHomePackage.equals(packageName)) {
-                am.forceStopPackage(packageName);
-                targetKilled = true;
-            }
-            if (targetKilled) {
+            mBackKillPending = false;
+            if (TaskUtils.killActiveTask(mContext)){
                 performHapticFeedbackLw(null, HapticFeedbackConstants.LONG_PRESS, false);
-                Toast.makeText(mContext, R.string.app_killed_message, Toast.LENGTH_SHORT).show();
+                Toast.makeText(mContext,
+                        com.android.internal.R.string.app_killed_message, Toast.LENGTH_SHORT).show();
             }
         }
     };
