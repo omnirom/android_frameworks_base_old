@@ -1,0 +1,21 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "ab30f9cd_10f5aa80",
+        "filename": "policy/src/com/android/internal/policy/impl/PhoneWindowManager.java",
+        "patchSetId": 2
+      },
+      "lineNbr": 1614,
+      "author": {
+        "id": 1000026
+      },
+      "writtenOn": "2015-01-05T13:00:47Z",
+      "side": 1,
+      "message": "Must use getIntForUser here",
+      "revId": "0ec0afe608764b93e44d3fe159b2afc14eba0781",
+      "serverId": "56841c99-7c94-43d4-bf0b-cb4707e66d55",
+      "unresolved": false
+    }
+  ]
+}
