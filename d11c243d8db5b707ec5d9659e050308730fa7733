@@ -1,0 +1,21 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "8b25f591_e6e93e7c",
+        "filename": "cmds/bootanimation/BootAnimation.cpp",
+        "patchSetId": 4
+      },
+      "lineNbr": 317,
+      "author": {
+        "id": 1000515
+      },
+      "writtenOn": "2015-01-07T23:46:02Z",
+      "side": 1,
+      "message": "not sure if the malloc size is enough due to low-fps- bootanimation size is 2171.325 kb and normal bootanimation size is 4321.079 kb",
+      "revId": "d11c243d8db5b707ec5d9659e050308730fa7733",
+      "serverId": "56841c99-7c94-43d4-bf0b-cb4707e66d55",
+      "unresolved": false
+    }
+  ]
+}
