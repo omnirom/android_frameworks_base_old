@@ -1086,9 +1086,16 @@ public class UserManager {
                 ++switchableUserCount;
             }
         }
+        return switchableUserCount > 1 || isGuestModeEnabled();
+    }
+
+    /**
+     * @hide
+     */
+    public boolean isGuestModeEnabled() {
         final boolean guestEnabled = Settings.Global.getInt(mContext.getContentResolver(),
                 Settings.Global.GUEST_USER_ENABLED, 0) == 1;
-        return switchableUserCount > 1 || guestEnabled;
+        return guestEnabled;
     }
 
     /**
@@ -1249,5 +1256,15 @@ public class UserManager {
             Log.w(TAG, "Could not set guest restrictions");
         }
         return new Bundle();
+    }
+
+    /**
+     * @hide
+     */
+    public boolean opensUserSwitcher() {
+        final boolean enableMultiUser = SystemProperties.getBoolean("fw.show_multiuserui",
+                Resources.getSystem().getBoolean(R.bool.config_enableMultiUserUI));
+
+        return enableMultiUser && (canAddMoreUsers() || isUserSwitcherEnabled());
     }
 }
