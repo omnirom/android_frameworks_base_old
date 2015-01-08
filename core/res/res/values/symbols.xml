@@ -2107,6 +2107,7 @@
   <java-symbol name="ic_lock_power_rebootbootloader" type="drawable" />
   <java-symbol name="global_action_reboot_bootloader" type="string" />
   <java-symbol type="array" name="config_rebootActionsList" />
+  <java-symbol name="global_action_current_user" type="string" />
 
   <!-- HW button mapping -->
   <java-symbol type="integer" name="config_deviceHardwareKeys" />
@@ -2115,4 +2116,6 @@
 
   <!-- power profiles -->
   <java-symbol type="bool" name="config_powerProfilesSupported" />
+
+  <java-symbol type="dimen" name="max_avatar_size" />
 </resources>

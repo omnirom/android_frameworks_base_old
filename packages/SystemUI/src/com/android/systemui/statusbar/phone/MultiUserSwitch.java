@@ -123,6 +123,6 @@ public class MultiUserSwitch extends FrameLayout implements View.OnClickListener
 
     private boolean opensUserSwitcherWhenClicked() {
         UserManager um = UserManager.get(getContext());
-        return UserManager.supportsMultipleUsers() && um.isUserSwitcherEnabled();
+        return um.opensUserSwitcher();
     }
 }
