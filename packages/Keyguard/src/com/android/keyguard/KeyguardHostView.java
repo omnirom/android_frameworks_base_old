@@ -32,6 +32,7 @@ import android.content.Context;
 import android.content.Intent;
 import android.content.IntentSender;
 import android.content.pm.PackageManager.NameNotFoundException;
+import android.content.pm.UserInfo;
 import android.content.res.Resources;
 import android.graphics.Rect;
 import android.media.RemoteControlClient;
@@ -51,6 +52,7 @@ import android.view.View;
 import android.widget.RemoteViews.OnClickHandler;
 
 import java.lang.ref.WeakReference;
+import java.util.List;
 
 public class KeyguardHostView extends KeyguardViewBase {
     private static final String TAG = "KeyguardHostView";
@@ -1020,7 +1022,8 @@ public class KeyguardHostView extends KeyguardViewBase {
         }
 
         // if there are multiple users, we need to enable to multi-user switcher
-        if (!um.isUserSwitcherEnabled()) {
+        List<UserInfo> users = um.getUsers(true);
+        if (!um.isUserSwitcherEnabled() || users.size() == 1) {
             return;
         }
 
@@ -1033,7 +1036,7 @@ public class KeyguardHostView extends KeyguardViewBase {
         if (multiUserView instanceof KeyguardMultiUserSelectorView) {
             mKeyguardMultiUserSelectorView = (KeyguardMultiUserSelectorView) multiUserView;
             mKeyguardMultiUserSelectorView.setVisibility(View.VISIBLE);
-            mKeyguardMultiUserSelectorView.addUsers(um.getUsers(true));
+            mKeyguardMultiUserSelectorView.addUsers(users);
             UserSwitcherCallback callback = new UserSwitcherCallback() {
                 @Override
                 public void hideSecurityView(int duration) {
