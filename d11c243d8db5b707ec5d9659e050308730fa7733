@@ -16,6 +16,24 @@
       "revId": "d11c243d8db5b707ec5d9659e050308730fa7733",
       "serverId": "56841c99-7c94-43d4-bf0b-cb4707e66d55",
       "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "8b25f591_26fc363a",
+        "filename": "cmds/bootanimation/BootAnimation.cpp",
+        "patchSetId": 4
+      },
+      "lineNbr": 317,
+      "author": {
+        "id": 1000026
+      },
+      "writtenOn": "2015-01-08T00:00:29Z",
+      "side": 1,
+      "message": "you dont have much control about how much memeory is really allocated from the process and/or the file buffer anyway. This depends on many different things (page size, read ahead buffer, ....) So it doesnt reall make sense to count bytes here :)",
+      "parentUuid": "8b25f591_e6e93e7c",
+      "revId": "d11c243d8db5b707ec5d9659e050308730fa7733",
+      "serverId": "56841c99-7c94-43d4-bf0b-cb4707e66d55",
+      "unresolved": false
     }
   ]
 }
