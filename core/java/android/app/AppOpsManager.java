@@ -247,7 +247,9 @@ public class AppOpsManager {
     /** @hide Read phone info like phone number and IMSI */
     public static final int OP_READ_PHONE_INFO = 61;
     /** @hide */
-    public static final int _NUM_OP = 62;
+    public static final int OP_ACCESS_INTERNET = 62;
+    /** @hide */
+    public static final int _NUM_OP = 63;
 
     /** Access to coarse location information. */
     public static final String OPSTR_COARSE_LOCATION =
@@ -380,6 +382,8 @@ public class AppOpsManager {
             "android:other_accounts";
     private static final String OPSTR_READ_PHONE_INFO =
             "android:read_phone_info";
+    private static final String OPSTR_ACCESS_INTERNET =
+            "android:access_internet";
 
     /**
      * This maps each operation to the operation that serves as the
@@ -452,6 +456,7 @@ public class AppOpsManager {
             OP_DATA_CONNECT_CHANGE,
             OP_OTHER_ACCOUNTS,
             OP_READ_PHONE_INFO,
+            OP_ACCESS_INTERNET,
     };
 
     /**
@@ -507,6 +512,7 @@ public class AppOpsManager {
             null,
             null,
             OPSTR_ACTIVATE_VPN,
+            null,
             null,
             null,
             null,
@@ -589,7 +595,8 @@ public class AppOpsManager {
         OPSTR_DELETE_CALL_LOG,
         OPSTR_DATA_CONNECT_CHANGE,
         OPSTR_OTHER_ACCOUNTS,
-        OPSTR_READ_PHONE_INFO
+        OPSTR_READ_PHONE_INFO,
+        OPSTR_ACCESS_INTERNET,
     };
 
     /**
@@ -659,6 +666,7 @@ public class AppOpsManager {
             "DATA_CONNECT_CHANGE",
             "OTHER_ACCOUNTS",
             "READ_PHONE_INFO",
+            "ACCESS_INTERNET",
     };
 
     /**
@@ -728,6 +736,7 @@ public class AppOpsManager {
             android.Manifest.permission.MODIFY_PHONE_STATE,
             android.Manifest.permission.GET_ACCOUNTS,
             android.Manifest.permission.READ_PHONE_STATE,
+            android.Manifest.permission.INTERNET,
     };
 
     /**
@@ -798,6 +807,7 @@ public class AppOpsManager {
             null, //DATA_CONNECT_CHANGE
             null, //OTHER_ACCOUNTS
             null, //READ_PHONE_INFO
+            null, //ACCESS_INTERNET
     };
 
     /**
@@ -867,6 +877,7 @@ public class AppOpsManager {
             false, //DATA_CONNECT_CHANGE
             true, //OTHER_ACCOUNTS
             true, //READ_PHONE_INFO
+            true, //ACCESS_INTERNET
     };
 
     /**
@@ -935,6 +946,7 @@ public class AppOpsManager {
             AppOpsManager.MODE_ALLOWED,
             AppOpsManager.MODE_ALLOWED,
             AppOpsManager.MODE_ALLOWED,
+            AppOpsManager.MODE_ALLOWED, //ACCESS_INTERNET
     };
 
     /**
@@ -1004,6 +1016,7 @@ public class AppOpsManager {
             AppOpsManager.MODE_ASK,     // OP_DATA_CONNECT_CHANGE
             AppOpsManager.MODE_ASK,     // OP_OTHER_ACCOUNTS
             AppOpsManager.MODE_ASK,     // OP_READ_PHONE_INFO
+            AppOpsManager.MODE_ASK,     // OP_ACCESS_INTERNET
     };
 
     /**
@@ -1072,6 +1085,7 @@ public class AppOpsManager {
         true,     // OP_DATA_CONNECT_CHANGE
         true,     // OP_OTHER_ACCOUNTS
         true,     // OP_READ_PHONE_INFO
+        true,     // OP_ACCESS_INTERNET
     };
 
     /**
@@ -1144,6 +1158,7 @@ public class AppOpsManager {
             false,     // OP_DATA_CONNECT_CHANGE
             false,     // OP_OTHER_ACCOUNTS
             false,     // OP_READ_PHONE_INFO
+            false,     // OP_ACCESS_INTERNET
     };
 
     private static HashMap<String, Integer> sOpStrToOp = new HashMap<String, Integer>();

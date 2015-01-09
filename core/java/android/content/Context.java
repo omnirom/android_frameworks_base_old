@@ -21,6 +21,8 @@ import android.annotation.NonNull;
 import android.annotation.Nullable;
 import android.annotation.StringDef;
 import android.annotation.SystemApi;
+import android.app.ActivityThread;
+import android.app.AppOpsManager;
 import android.content.pm.ApplicationInfo;
 import android.content.pm.PackageManager;
 import android.content.res.AssetManager;
@@ -34,6 +36,7 @@ import android.graphics.Bitmap;
 import android.graphics.drawable.Drawable;
 import android.media.MediaScannerConnection.OnScanCompletedListener;
 import android.net.Uri;
+import android.os.Binder;
 import android.os.Bundle;
 import android.os.Environment;
 import android.os.Handler;
@@ -56,6 +59,8 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
+import java.net.InetAddress;
+import java.net.UnknownHostException;
 
 /**
  * Interface to global information about an application environment.  This is
@@ -66,6 +71,24 @@ import java.lang.annotation.RetentionPolicy;
  * broadcasting and receiving intents, etc.
  */
 public abstract class Context {
+    static {
+        InetAddress.registerHook(new InetAddress.OnConnectInternetHook() {
+            @Override
+            public void checkIfOpIsAllowed() throws UnknownHostException {
+                AppOpsManager appOps = (AppOpsManager) ActivityThread
+                        .currentApplication().getSystemService(APP_OPS_SERVICE);
+                int callingUid = Binder.getCallingUid();
+                String callingPackage = ActivityThread.currentPackageName();
+
+                if (callingPackage != null
+                        && appOps.noteOp(AppOpsManager.OP_ACCESS_INTERNET, callingUid,
+                                callingPackage) != AppOpsManager.MODE_ALLOWED) {
+                    throw new UnknownHostException("blocked by app ops");
+                }
+            }
+        });
+    }
+
     /**
      * File creation mode: the default mode, where the created file can only
      * be accessed by the calling application (or all applications sharing the
