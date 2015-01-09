@@ -40,7 +40,9 @@ import static android.net.ConnectivityManager.isNetworkTypeValid;
 import static android.net.NetworkPolicyManager.RULE_ALLOW_ALL;
 import static android.net.NetworkPolicyManager.RULE_REJECT_METERED;
 
+import android.app.ActivityThread;
 import android.app.AlarmManager;
+import android.app.AppOpsManager;
 import android.app.Notification;
 import android.app.NotificationManager;
 import android.app.PendingIntent;
@@ -4229,6 +4231,17 @@ public class ConnectivityService extends IConnectivityManager.Stub {
     }
 
     private NetworkInfo getNetworkInfoForType(int networkType) {
+        AppOpsManager appOps = (AppOpsManager) ActivityThread
+                .currentApplication().getSystemService(Context.APP_OPS_SERVICE);
+        int callingUid = getCallingUid();
+        String callingPackage = ActivityThread.currentPackageName();
+
+        if (callingPackage != null
+                && appOps.noteOp(AppOpsManager.OP_ACCESS_INTERNET, callingUid,
+                        callingPackage) != AppOpsManager.MODE_ALLOWED) {
+            return null;
+        }
+
         if (!mLegacyTypeTracker.isTypeSupported(networkType))
             return null;
 
