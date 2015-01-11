@@ -5960,7 +5960,7 @@ public class PhoneWindowManager implements WindowManagerPolicy {
     /** {@inheritDoc} */
     @Override
     public void showBootMessage(final CharSequence msg, final boolean always) {
-        mHandler.post(new Runnable() {
+	mHandler.post(new Runnable() {
             @Override public void run() {
                 if (mBootMsgDialog == null) {
                     int theme;
@@ -5997,7 +5997,7 @@ public class PhoneWindowManager implements WindowManagerPolicy {
                             return true;
                         }
                     };
-                    mBootMsgDialog.setTitle(R.string.android_upgrading_title);
+                    mBootMsgDialog.setTitle(R.string.android_upgrading_installing_title);
                     mBootMsgDialog.setProgressStyle(ProgressDialog.STYLE_SPINNER);
                     mBootMsgDialog.setIndeterminate(true);
                     mBootMsgDialog.getWindow().setType(
