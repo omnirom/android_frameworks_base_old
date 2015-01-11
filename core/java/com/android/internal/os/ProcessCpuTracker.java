@@ -466,7 +466,7 @@ public class ProcessCpuTracker {
                         st.baseName = procStatsString[0];
                     }
                 } else {
-                    Slog.w(TAG, "Skipping unknown process pid " + pid);
+                    if (DEBUG) Slog.v(TAG, "Skipping unknown process pid " + pid);
                     st.baseName = "<unknown>";
                     st.base_utime = st.base_stime = 0;
                     st.base_minfaults = st.base_majfaults = 0;

@@ -6712,7 +6712,7 @@ public class PhoneWindowManager implements WindowManagerPolicy {
         switch (keyCode) {
             case KeyEvent.KEYCODE_VOLUME_UP:
             case KeyEvent.KEYCODE_VOLUME_DOWN:
-                Log.i(TAG, "isOffscreenWakeKey: mVolumeWakeSupport " + mVolumeWakeSupport);
+                if (DEBUG_WAKEUP) Log.i(TAG, "isOffscreenWakeKey: mVolumeWakeSupport " + mVolumeWakeSupport);
                 return mVolumeWakeSupport;
             case KeyEvent.KEYCODE_HOME:
                 return mHomeWakeSupport;
