@@ -23,9 +23,11 @@ import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.Intent;
 import android.content.IntentFilter;
+import android.content.ContentResolver;
 import android.media.AudioManager;
 import android.os.Handler;
 import android.os.UserHandle;
+import android.provider.Settings;
 import android.provider.Settings.Global;
 import android.telecom.TelecomManager;
 import android.util.Log;
@@ -161,8 +163,11 @@ public class PhoneStatusBarPolicy {
 
     private void updateAlarm() {
         AlarmManager alarmManager = (AlarmManager) mContext.getSystemService(Context.ALARM_SERVICE);
-	boolean alarmSet = alarmManager.getNextAlarmClock(UserHandle.USER_CURRENT) != null;
-        mService.setIconVisibility(SLOT_ALARM_CLOCK, alarmSet);
+	    boolean alarmSet = alarmManager.getNextAlarmClock(UserHandle.USER_CURRENT) != null;
+	    boolean alarmVisible = Settings.System.getIntForUser(mContext.getContentResolver(),
+	            Settings.System.STATUSBAR_SHOW_ALARM_ICON, 1, UserHandle.USER_CURRENT) == 1;
+        if (DEBUG) Log.v(TAG, "updateAlarm " + alarmSet + " "  + alarmVisible);
+        mService.setIconVisibility(SLOT_ALARM_CLOCK, alarmVisible && alarmSet);
     }
 
     private final void updateSyncState(Intent intent) {
