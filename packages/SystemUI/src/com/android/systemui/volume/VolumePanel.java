@@ -1133,6 +1133,8 @@ public class VolumePanel extends Handler {
 
     protected void onPlaySound(int streamType, int flags) {
         // If preference is no sound - just exit here
+        // should not happens since this is already checked in the
+        // key event handling
         if (Settings.System.getInt(mContext.getContentResolver(),
                  Settings.System.VOLUME_ADJUST_SOUND, 1) == 0) {
              return;
