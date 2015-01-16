@@ -31,6 +31,7 @@ import android.database.Cursor;
 import android.net.Uri;
 import android.os.AsyncTask;
 import android.os.Handler;
+import android.os.RemoteException;
 import android.os.SystemClock;
 import android.provider.DocumentsContract;
 import android.provider.DocumentsContract.Root;
@@ -259,14 +260,20 @@ public class RootsCache {
         try {
             client = DocumentsApplication.acquireUnstableProviderOrThrow(resolver, authority);
             cursor = client.query(rootsUri, null, null, null, null);
-            while (cursor.moveToNext()) {
-                final RootInfo root = RootInfo.fromRootsCursor(authority, cursor);
-                roots.add(root);
+            if (cursor != null){
+                while (cursor.moveToNext()) {
+                    final RootInfo root = RootInfo.fromRootsCursor(authority, cursor);
+                    roots.add(root);
+                }
+            } else {
+                Log.w(TAG, "Failed to load some roots from " + authority);
             }
-        } catch (Exception e) {
+        } catch (RemoteException e) {
             Log.w(TAG, "Failed to load some roots from " + authority + ": " + e);
         } finally {
-            IoUtils.closeQuietly(cursor);
+            if (cursor != null){
+                IoUtils.closeQuietly(cursor);
+            }
             ContentProviderClient.releaseQuietly(client);
         }
         return roots;
