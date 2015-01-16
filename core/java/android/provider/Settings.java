@@ -2800,6 +2800,13 @@ public final class Settings {
         public static final String STATUSBAR_SHOW_ALARM_ICON = "statusbar_show_alarm_icon";
 
         /**
+         * Should the alarm be shown in fullscreen instead of heads-up
+         *
+         * @hide
+         */
+        public static final String SHOW_ALARM_FULLSCREEN = "show_alarm_fullscreen";
+
+        /**
          * Settings to backup. This is here so that it's in the same place as the settings
          * keys and easy to update.
          *
