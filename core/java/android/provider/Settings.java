@@ -2671,6 +2671,12 @@ public final class Settings {
          */
         public static final String VOLUME_ADJUST_SOUND = "volume_adjust_sound";
 
+        /**
+         * Change volume up and down handlign based on rotation
+         * @hide
+         */
+        public static final String SWAP_VOLUME_BUTTONS = "swap_volume_buttons";
+
          /**
           * Action to perform when the key is pressed
           * 0 - Nothing
