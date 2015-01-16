@@ -1284,15 +1284,28 @@ public class PhoneStatusBar extends BaseStatusBar implements DemoMode,
     public void addNotification(StatusBarNotification notification, RankingMap ranking) {
         if (DEBUG) Log.d(TAG, "addNotification key=" + notification.getKey());
         if (mUseHeadsUp && shouldInterrupt(notification)) {
-            if (DEBUG) Log.d(TAG, "launching notification in heads up mode");
-            Entry interruptionCandidate = new Entry(notification, null);
-            ViewGroup holder = mHeadsUpNotificationView.getHolder();
-            if (inflateViewsForHeadsUp(interruptionCandidate, holder)) {
-                // 1. Populate mHeadsUpNotificationView
-                mHeadsUpNotificationView.showNotification(interruptionCandidate);
+            boolean headsUp = true;
+            // filter out alarms if required
+            if (notification.getNotification().category != null && 
+                    notification.getNotification().category.equals(Notification.CATEGORY_ALARM)) {
+                boolean fullscreenAlarm = Settings.System.getIntForUser(mContext.getContentResolver(),
+                        Settings.System.SHOW_ALARM_FULLSCREEN, 0, UserHandle.USER_CURRENT) == 1;
+                if (fullscreenAlarm) {
+                    if (DEBUG) Log.d(TAG, "launching alarm notification in fullscreen mode");
+                    headsUp = false;
+                }
+            }
+            if (headsUp) {
+                if (DEBUG) Log.d(TAG, "launching notification in heads up mode");
+                Entry interruptionCandidate = new Entry(notification, null);
+                ViewGroup holder = mHeadsUpNotificationView.getHolder();
+                if (inflateViewsForHeadsUp(interruptionCandidate, holder)) {
+                    // 1. Populate mHeadsUpNotificationView
+                    mHeadsUpNotificationView.showNotification(interruptionCandidate);
 
-                // do not show the notification in the shade, yet.
-                return;
+                    // do not show the notification in the shade, yet.
+                    return;
+                }
             }
         }
 
