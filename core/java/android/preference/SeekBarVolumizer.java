@@ -366,8 +366,14 @@ public class SeekBarVolumizer implements OnSeekBarChangeListener, Handler.Callba
             if (AudioManager.VOLUME_CHANGED_ACTION.equals(action)) {
                 int streamType = intent.getIntExtra(AudioManager.EXTRA_VOLUME_STREAM_TYPE, -1);
                 int streamValue = intent.getIntExtra(AudioManager.EXTRA_VOLUME_STREAM_VALUE, -1);
-                final boolean streamMatch = mNotificationOrRing ? isNotificationOrRing(streamType)
-                        : (streamType == mStreamType);
+                final boolean linkEnabled = Settings.System.getInt(context.getContentResolver(),
+                        Settings.System.VOLUME_LINK_NOTIFICATION, 1) == 1;
+                boolean streamMatch = streamType == mStreamType;
+                if (mNotificationOrRing) {
+                    if (linkEnabled) {
+                        streamMatch = isNotificationOrRing(streamType);
+                     }
+                }
                 if (mSeekBar != null && streamMatch && streamValue != -1) {
                     final boolean muted = mAudioManager.isStreamMute(mStreamType);
                     mUiHandler.postUpdateSlider(streamValue, muted);
