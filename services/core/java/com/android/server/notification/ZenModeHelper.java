@@ -252,12 +252,14 @@ public class ZenModeHelper {
                     forcedRingerMode = AudioManager.RINGER_MODE_SILENT;
                 }
             } else {
-                if (ringerMode == AudioManager.RINGER_MODE_SILENT) {
+				// it makes sense to use silent mode also with
+				// important zen mode
+                /*if (ringerMode == AudioManager.RINGER_MODE_SILENT) {
                     if (DEBUG) Slog.d(TAG, "Unsilencing ringer");
                     forcedRingerMode = mPreviousRingerMode != -1 ? mPreviousRingerMode
                             : AudioManager.RINGER_MODE_NORMAL;
                     mPreviousRingerMode = -1;
-                }
+                }*/
             }
             if (forcedRingerMode != -1) {
                 mAudioManager.setRingerMode(forcedRingerMode, false /*checkZen*/);
@@ -304,7 +306,8 @@ public class ZenModeHelper {
     }
 
     private void handleRingerModeChanged() {
-        if (mAudioManager != null) {
+        // why should ringer mode directly influence zen mode?
+        /*if (mAudioManager != null) {
             // follow ringer mode if necessary
             final int ringerMode = mAudioManager.getRingerMode();
             int newZen = -1;
@@ -321,7 +324,7 @@ public class ZenModeHelper {
                 ZenLog.traceFollowRingerMode(ringerMode, mZenMode, newZen);
                 setZenMode(newZen, "ringerMode");
             }
-        }
+        }*/
     }
 
     private void dispatchOnConfigChanged() {
