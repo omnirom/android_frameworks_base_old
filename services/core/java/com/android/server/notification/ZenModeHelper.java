@@ -304,7 +304,8 @@ public class ZenModeHelper {
     }
 
     private void handleRingerModeChanged() {
-        if (mAudioManager != null) {
+        // why should ringer mode directly influence zen mode?
+        /*if (mAudioManager != null) {
             // follow ringer mode if necessary
             final int ringerMode = mAudioManager.getRingerMode();
             int newZen = -1;
@@ -321,7 +322,7 @@ public class ZenModeHelper {
                 ZenLog.traceFollowRingerMode(ringerMode, mZenMode, newZen);
                 setZenMode(newZen, "ringerMode");
             }
-        }
+        }*/
     }
 
     private void dispatchOnConfigChanged() {

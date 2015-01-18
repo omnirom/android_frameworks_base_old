@@ -2902,6 +2902,20 @@ public final class Settings {
         public static final String VOLUME_LINK_NOTIFICATION = "volume_link_notification";
 
         /**
+         * int value of the volume panel state (0 collapsed 1 expanded)
+         *
+         * @hide
+         */
+        public static final String VOLUME_PANEL_EXPANDED = "volume_panel_expanded";
+
+        /**
+         * int value of the volume panel hide time in ms
+         *
+         * @hide
+         */
+        public static final String VOLUME_PANEL_TIMEOUT = "volume_panel_timeout";
+
+        /**
          * Settings to backup. This is here so that it's in the same place as the settings
          * keys and easy to update.
          *
