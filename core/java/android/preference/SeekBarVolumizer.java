@@ -259,6 +259,12 @@ public class SeekBarVolumizer implements OnSeekBarChangeListener, Handler.Callba
         }
     }
 
+    public void updateVolume() {
+        final int volume = mAudioManager.getStreamVolume(mStreamType);
+        mSeekBar.setProgress(volume);
+        mLastProgress = volume;
+    }
+
     private final class H extends Handler {
         private static final int UPDATE_SLIDER = 1;
 
