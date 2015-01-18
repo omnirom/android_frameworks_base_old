@@ -30,6 +30,7 @@ import android.content.pm.ServiceInfo;
 import android.content.res.Configuration;
 import android.content.res.Resources;
 import android.content.res.TypedArray;
+import android.database.ContentObserver;
 import android.graphics.PixelFormat;
 import android.graphics.drawable.ColorDrawable;
 import android.media.AudioAttributes;
@@ -139,6 +140,8 @@ public class VolumePanel extends Handler {
     private boolean mVoiceCapable;
     private boolean mZenModeAvailable;
     private boolean mZenPanelExpanded;
+    private boolean mExtendedPanelExpanded = false;
+    private boolean mVolumeLinkNotification;
     private int mTimeoutDelay = TIMEOUT_DELAY;
     private float mDisabledAlpha;
     private int mLastRingerMode = AudioManager.RINGER_MODE_NORMAL;
@@ -146,7 +149,6 @@ public class VolumePanel extends Handler {
 
     // True if we want to play tones on the system stream when the master stream is specified.
     private final boolean mPlayMasterStreamTones;
-
 
     /** Volume panel content view */
     private final View mView;
@@ -171,24 +173,24 @@ public class VolumePanel extends Handler {
     private enum StreamResources {
         BluetoothSCOStream(AudioManager.STREAM_BLUETOOTH_SCO,
                 R.string.volume_icon_description_bluetooth,
-                R.drawable.ic_audio_bt,
-                R.drawable.ic_audio_bt,
+                com.android.systemui.R.drawable.ic_audio_bt,
+                com.android.systemui.R.drawable.ic_audio_bt,
                 false),
         RingerStream(AudioManager.STREAM_RING,
                 R.string.volume_icon_description_ringer,
                 com.android.systemui.R.drawable.ic_ringer_audible,
                 com.android.systemui.R.drawable.ic_ringer_vibrate,
-                false),
+                true),
         VoiceStream(AudioManager.STREAM_VOICE_CALL,
                 R.string.volume_icon_description_incall,
-                R.drawable.ic_audio_phone,
-                R.drawable.ic_audio_phone,
-                false),
+                com.android.systemui.R.drawable.ic_ringer_audible,
+                com.android.systemui.R.drawable.ic_ringer_audible,
+                true),
         AlarmStream(AudioManager.STREAM_ALARM,
                 R.string.volume_alarm,
                 com.android.systemui.R.drawable.ic_audio_alarm,
                 com.android.systemui.R.drawable.ic_audio_alarm_mute,
-                false),
+                true),
         MediaStream(AudioManager.STREAM_MUSIC,
                 R.string.volume_icon_description_media,
                 IC_AUDIO_VOL,
@@ -196,8 +198,8 @@ public class VolumePanel extends Handler {
                 true),
         NotificationStream(AudioManager.STREAM_NOTIFICATION,
                 R.string.volume_icon_description_notification,
-                com.android.systemui.R.drawable.ic_ringer_audible,
-                com.android.systemui.R.drawable.ic_ringer_vibrate,
+                com.android.systemui.R.drawable.ic_notification_audible,
+                com.android.systemui.R.drawable.ic_notification_audible,
                 true),
         // for now, use media resources for master volume
         MasterStream(STREAM_MASTER,
@@ -207,8 +209,8 @@ public class VolumePanel extends Handler {
                 false),
         RemoteStream(STREAM_REMOTE_MUSIC,
                 R.string.volume_icon_description_media, //FIXME should have its own description
-                R.drawable.ic_media_route_on_holo_dark,
-                R.drawable.ic_media_route_disabled_holo_dark,
+                IC_AUDIO_VOL,
+                IC_AUDIO_VOL_MUTE,
                 false);// will be dynamically updated
 
         int streamType;
@@ -250,6 +252,7 @@ public class VolumePanel extends Handler {
         int iconRes;
         int iconMuteRes;
         int iconSuppressedRes;
+        ImageView expandPanel;
     }
 
     // Synchronize when accessing this
@@ -258,6 +261,15 @@ public class VolumePanel extends Handler {
 
     private static AlertDialog sSafetyWarning;
     private static Object sSafetyWarningLock = new Object();
+
+    private ContentObserver mSettingsObserver = new ContentObserver(this) {
+        @Override
+        public void onChange(boolean selfChange) {
+            mVolumeLinkNotification = Settings.System.getInt(mContext.getContentResolver(),
+                    Settings.System.VOLUME_LINK_NOTIFICATION, 1) == 1;
+        }
+    };
+
 
     private static class SafetyWarning extends SystemUIDialog
             implements DialogInterface.OnDismissListener, DialogInterface.OnClickListener {
@@ -420,6 +432,13 @@ public class VolumePanel extends Handler {
         mToneGenerators = new ToneGenerator[AudioSystem.getNumStreamTypes()];
         mVibrator = (Vibrator) context.getSystemService(Context.VIBRATOR_SERVICE);
         mVoiceCapable = context.getResources().getBoolean(R.bool.config_voice_capable);
+
+        mVolumeLinkNotification = Settings.System.getInt(mContext.getContentResolver(),
+                Settings.System.VOLUME_LINK_NOTIFICATION, 1) == 1;
+
+        context.getContentResolver().registerContentObserver(
+                Settings.System.getUriFor(Settings.System.VOLUME_LINK_NOTIFICATION), false,
+                mSettingsObserver);
 
         if (mZenController != null && !useMasterVolume) {
             mZenModeAvailable = mZenController.isZenAvailable();
@@ -637,9 +656,17 @@ public class VolumePanel extends Handler {
             sc.suppressorView =
                     (TextView) sc.group.findViewById(com.android.systemui.R.id.suppressor);
             sc.suppressorView.setVisibility(View.GONE);
-            final int plusOne = (streamType == AudioSystem.STREAM_BLUETOOTH_SCO ||
-                    streamType == AudioSystem.STREAM_VOICE_CALL) ? 1 : 0;
-            sc.seekbarView.setMax(getStreamMaxVolume(streamType) + plusOne);
+            sc.expandPanel = (ImageView)
+                    sc.group.findViewById(com.android.systemui.R.id.further_options);
+            sc.expandPanel.setClickable(true);
+            sc.expandPanel.setOnClickListener(new OnClickListener() {
+                @Override
+                public void onClick(View v) {
+                    expandVolumePanel();
+                    resetTimeout();
+                }
+            });
+            sc.seekbarView.setMax(getStreamMaxVolume(streamType));
             sc.seekbarView.setOnSeekBarChangeListener(mSeekListener);
             sc.seekbarView.setTag(sc);
             mStreamControls.put(streamType, sc);
@@ -658,18 +685,86 @@ public class VolumePanel extends Handler {
 
     private void reorderSliders(int activeStreamType) {
         mSliderPanel.removeAllViews();
-
         final StreamControl active = mStreamControls.get(activeStreamType);
         if (active == null) {
             Log.e(TAG, "Missing stream type! - " + activeStreamType);
             mActiveStreamType = -1;
-        } else {
+        } else if (!mExtendedPanelExpanded) {
             mSliderPanel.addView(active.group);
             mActiveStreamType = activeStreamType;
             active.group.setVisibility(View.VISIBLE);
             updateSlider(active);
-            updateTimeoutDelay();
-            updateZenPanelVisible();
+        }
+        updateTimeoutDelay();
+        updateZenPanelVisible();
+        hideVolumePanel();
+    }
+
+    private void showVolumePanel() {
+        mExtendedPanelExpanded = true;
+        for (int i = 0; i < STREAMS.length; i++) {
+            final int streamType = STREAMS[i].streamType;
+            if (isValidExpandedPanelControl(streamType)) {
+                StreamControl control = mStreamControls.get(streamType);
+                if (control != null && control.streamType != mActiveStreamType) {
+                    mSliderPanel.addView(control.group);
+                    control.group.setVisibility(View.VISIBLE);
+                    control.expandPanel.setVisibility(View.GONE);
+                    updateSlider(control);
+                }
+            }
+        }
+    }
+
+    private void diappearVolumePanel() {
+        mExtendedPanelExpanded = false;
+        for (int i = 0; i < STREAMS.length; i++) {
+            final int streamType = STREAMS[i].streamType;
+            if (isValidExpandedPanelControl(streamType)) {
+                StreamControl control = mStreamControls.get(streamType);
+                if (control != null && control.streamType != mActiveStreamType) {
+                    control.group.setVisibility(View.GONE);
+                    control.expandPanel.setVisibility(View.GONE);
+                    updateSlider(control);
+                }
+            }
+        }
+    }
+
+    private boolean isValidExpandedPanelControl(int streamType) {
+        switch (streamType) {
+            case AudioManager.STREAM_NOTIFICATION:
+                if (mVoiceCapable && mVolumeLinkNotification) {
+                    return false;
+                }
+            case AudioManager.STREAM_RING:
+                if (!mVoiceCapable) {
+                    return false;
+                }
+            case AudioManager.STREAM_MUSIC:
+            case AudioManager.STREAM_ALARM:
+                if (streamType != mActiveStreamType) {
+                    return true;
+                }
+                return false;
+            default:
+                return false;
+        }
+    }
+
+    private void hideVolumePanel() {
+        diappearVolumePanel();
+        StreamControl sc = mStreamControls.get(mActiveStreamType);
+        if (sc != null) {
+            sc.expandPanel.setVisibility(View.VISIBLE);
+        }
+    }
+
+    private void expandVolumePanel() {
+        showVolumePanel();
+        StreamControl sc = mStreamControls.get(mActiveStreamType);
+        if (sc != null) {
+            sc.expandPanel.setVisibility(View.GONE);
         }
     }
 
@@ -761,6 +856,10 @@ public class VolumePanel extends Handler {
                 (sc.streamType != mAudioManager.getMasterStreamType() && muted) ||
                 (sSafetyWarning != null)) {
             sc.seekbarView.setEnabled(false);
+            if (!mVolumeLinkNotification && sc.streamType == AudioManager.STREAM_NOTIFICATION) {
+                sc.icon.setEnabled(false);
+                sc.icon.setAlpha(mDisabledAlpha);
+            }
         } else {
             sc.seekbarView.setEnabled(true);
             sc.icon.setEnabled(true);
@@ -791,9 +890,10 @@ public class VolumePanel extends Handler {
         }
     }
 
-    private static boolean isNotificationOrRing(int streamType) {
-        return streamType == AudioManager.STREAM_RING
-                || streamType == AudioManager.STREAM_NOTIFICATION;
+    private boolean isNotificationOrRing(int streamType) {
+        return streamType == AudioManager.STREAM_RING ||
+                (mVolumeLinkNotification && streamType == AudioManager.STREAM_NOTIFICATION);
+
     }
 
     public void setCallback(Callback callback) {
@@ -836,7 +936,8 @@ public class VolumePanel extends Handler {
     }
 
     private void updateZenPanelVisible() {
-        setZenPanelVisible(mZenModeAvailable && isNotificationOrRing(mActiveStreamType));
+        // why show zen mode buttons only if ringer is active stream?
+        setZenPanelVisible(mZenModeAvailable /*&& isNotificationOrRing(mActiveStreamType)*/);
     }
 
     public void postVolumeChanged(int streamType, int flags) {
@@ -928,14 +1029,14 @@ public class VolumePanel extends Handler {
 
         if ((flags & AudioManager.FLAG_SHOW_UI) != 0) {
             synchronized (this) {
-                if (mActiveStreamType != streamType) {
+                if (mActiveStreamType != streamType && !mExtendedPanelExpanded) {
                     reorderSliders(streamType);
                 }
                 onShowVolumeChanged(streamType, flags, null);
             }
         }
 
-        if ((flags & AudioManager.FLAG_PLAY_SOUND) != 0 && ! mRingIsSilent) {
+        if ((flags & AudioManager.FLAG_PLAY_SOUND) != 0 && !mRingIsSilent) {
             removeMessages(MSG_PLAY_SOUND);
             sendMessageDelayed(obtainMessage(MSG_PLAY_SOUND, streamType, flags), PLAY_SOUND_DELAY);
         }
@@ -1021,7 +1122,7 @@ public class VolumePanel extends Handler {
             case AudioManager.STREAM_NOTIFICATION: {
                 Uri ringuri = RingtoneManager.getActualDefaultRingtoneUri(
                         mContext, RingtoneManager.TYPE_NOTIFICATION);
-                if (ringuri == null) {
+                if (ringuri == null && mVolumeLinkNotification) {
                     mRingIsSilent = true;
                 }
                 break;
@@ -1334,11 +1435,14 @@ public class VolumePanel extends Handler {
 
             case MSG_TIMEOUT: {
                 if (isShowing()) {
-                    mDialog.dismiss();
-                    clearRemoteStreamController();
-                    mActiveStreamType = -1;
-                    if (mCallback != null) {
-                        mCallback.onVisible(false);
+                    hideVolumePanel();
+                    if (mDialog != null) {
+                        mDialog.dismiss();
+                        clearRemoteStreamController();
+                        mActiveStreamType = -1;
+                        if (mCallback != null) {
+                            mCallback.onVisible(false);
+                        }
                     }
                 }
                 synchronized (sSafetyWarningLock) {
