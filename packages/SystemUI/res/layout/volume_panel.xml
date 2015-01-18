@@ -18,19 +18,39 @@
     android:id="@+id/visible_panel"
     android:layout_width="match_parent"
     android:layout_height="wrap_content"
-    android:orientation="vertical" >
+    android:orientation="vertical">
 
-    <FrameLayout
-        android:id="@+id/slider_panel"
-        android:layout_width="match_parent"
+    <LinearLayout
+        android:id="@+id/slider_panel_expand"
         android:layout_height="wrap_content"
+        android:layout_width="match_parent"
+        android:orientation="horizontal"
         android:background="@color/system_secondary_color"
         android:paddingTop="8dp"
-        android:paddingLeft="8dp"
-        android:paddingRight="8dp"
-        android:clipChildren="false" />
+        android:paddingBottom="8dp"
+        android:gravity="top" >
 
-     <include
+        <LinearLayout
+            android:id="@+id/slider_panel"
+            android:layout_height="wrap_content"
+            android:layout_width="0dp"
+            android:layout_marginStart="8dp"
+            android:orientation="vertical"
+            android:clipChildren="false"
+            android:layout_weight="1" />
+
+        <ImageView
+            android:id="@+id/arrow"
+            android:layout_width="48dp"
+            android:layout_height="48dp"
+            android:layout_marginStart="8dp"
+            android:layout_marginEnd="8dp"
+            android:scaleType="center"
+            android:src="@drawable/ic_expand_down"
+            android:background="?android:attr/actionBarItemBackground" />
+    </LinearLayout>
+
+    <include
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         layout="@layout/zen_mode_panel" />
