@@ -60,4 +60,6 @@
     <string name="qs_tile_bg_opacity_title">Background opacity</string>
     <string name="status_bar_silent">Silent mode</string>
 
+    <!-- NFC QS tile -->
+    <string name="quick_settings_nfc_label">NFC</string>
 </resources>
