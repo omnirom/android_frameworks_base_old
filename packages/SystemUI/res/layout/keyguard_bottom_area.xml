@@ -14,7 +14,7 @@
   ~ See the License for the specific language governing permissions and
   ~ limitations under the License
   -->
-
+<!-- exposed textcolor and other varibles for theming -->
 <com.android.systemui.statusbar.phone.KeyguardBottomAreaView
     xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:systemui="http://schemas.android.com/apk/res/com.android.systemui"
@@ -30,7 +30,7 @@
         android:layout_marginBottom="@dimen/keyguard_indication_margin_bottom"
         android:layout_gravity="bottom|center_horizontal"
         android:textStyle="italic"
-        android:textColor="#ffffff"
+        android:textColor="@color/exposed_kg_indication_text"
         android:textAppearance="?android:attr/textAppearanceSmall" />
 
     <FrameLayout
@@ -44,7 +44,7 @@
         android:layout_height="@dimen/keyguard_affordance_height"
         android:layout_width="@dimen/keyguard_affordance_width"
         android:layout_gravity="bottom|end"
-        android:tint="#ffffffff"
+        android:tint="@color/exposed_kg_camera_button"
         android:src="@drawable/ic_camera_alt_24dp"
         android:scaleType="center"
         android:contentDescription="@string/accessibility_camera_button" />
@@ -54,7 +54,7 @@
         android:layout_height="@dimen/keyguard_affordance_height"
         android:layout_width="@dimen/keyguard_affordance_width"
         android:layout_gravity="bottom|start"
-        android:tint="#ffffffff"
+        android:tint="@color/exposed_kg_phone_button"
         android:src="@drawable/ic_phone_24dp"
         android:scaleType="center"
         android:contentDescription="@string/accessibility_phone_button" />
@@ -66,7 +66,7 @@
         android:layout_gravity="bottom|center_horizontal"
         android:src="@drawable/ic_lock_24dp"
         android:scaleType="center"
-        android:tint="#ffffffff"
+        android:tint="@color/exposed_kg_lock_icon"
         android:contentDescription="@string/accessibility_unlock_button" />
 
 </com.android.systemui.statusbar.phone.KeyguardBottomAreaView>

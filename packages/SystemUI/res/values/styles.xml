@@ -42,7 +42,8 @@
 
     <!-- Performance optimized alternate Recents theme (no wallpaper) -->
     <style name="RecentsTheme.NoWallpaper">
-        <item name="android:windowBackground">@android:color/black</item>
+      <!-- exposed for theming -->
+        <item name="android:windowBackground">@color/exposed_bg_light</item>
     </style>
 
     <!-- Animations for a non-full-screen window or activity. -->
@@ -61,20 +62,25 @@
 
     <style name="TextAppearance.StatusBar.HeadsUp"
         parent="@*android:style/TextAppearance.StatusBar">
+        <item name="android:textStyle">normal</item>
+	<!-- exposed for theming -->
+        <item name="android:textColor">@color/exposed_primary_text_light</item>
     </style>
 
     <style name="TextAppearance.StatusBar.SystemPanel"
         parent="@*android:style/TextAppearance.StatusBar">
         <item name="android:textAppearance">?android:attr/textAppearance</item>
         <item name="android:textStyle">normal</item>
-        <item name="android:textColor">#FF808080</item>
+	<!-- exposed for theming -->
+        <item name="android:textColor">@color/exposed_system_panel_text_light</item>
     </style>
 
     <style name="TextAppearance.StatusBar.TextButton"
         parent="@*android:style/TextAppearance.StatusBar">
         <item name="android:textAppearance">?android:attr/textAppearance</item>
         <item name="android:textStyle">normal</item>
-        <item name="android:textColor">#FFFFFFFF</item>
+	<!-- exposed for theming -->
+        <item name="android:textColor">@color/exposed_TextAppearance.StatusBar.TextButton</item>
     </style>
 
     <style name="TextAppearance.StatusBar.Clock" parent="@*android:style/TextAppearance.StatusBar.Icon">
@@ -83,24 +89,30 @@
         <item name="android:textColor">@color/status_bar_clock_color</item>
     </style>
 
-    <style name="TextAppearance.StatusBar.Expanded" parent="@*android:style/TextAppearance.StatusBar" />
-
+    <style name="TextAppearance.StatusBar.Expanded" parent="@*android:style/TextAppearance.StatusBar">
+        <item name="android:textStyle">normal</item>
+	<!-- exposed for theming -->
+        <item name="android:textColor">@color/exposed_primary_text_light</item>
+    </style> 
     <style name="TextAppearance.StatusBar.Expanded.Clock">
         <item name="android:textSize">@dimen/qs_time_expanded_size</item>
         <item name="android:fontFamily">sans-serif-medium</item>
-        <item name="android:textColor">#ffffff</item>
+	<!-- exposed for theming -->
+        <item name="android:textColor">@color/exposed_primary_text_dark</item>
     </style>
 
     <style name="TextAppearance.StatusBar.Expanded.Date">
         <item name="android:textSize">@dimen/qs_date_collapsed_size</item>
         <item name="android:textStyle">normal</item>
-        <item name="android:textColor">#b2ffffff</item>
+	<!-- exposed for theming -->
+        <item name="android:textColor">@color/exposed_secondary_text_dark</item>
     </style>
 
     <style name="TextAppearance.StatusBar.Expanded.AboveDateTime">
         <item name="android:textSize">@dimen/qs_emergency_calls_only_text_size</item>
         <item name="android:textStyle">normal</item>
-        <item name="android:textColor">#66ffffff</item>
+	<!-- exposed for theming -->
+        <item name="android:textColor">@color/exposed_secondary_text_dark</item>
     </style>
 
     <style name="TextAppearance.StatusBar.Expanded.EmergencyCallsOnly"
@@ -110,10 +122,13 @@
             parent="TextAppearance.StatusBar.Expanded.AboveDateTime" />
 
     <style name="TextAppearance.StatusBar.Expanded.Network" parent="@style/TextAppearance.StatusBar.Expanded.Date">
-        <item name="android:textColor">#999999</item>
+      <!-- exposed for theming -->
+        <item name="android:textColor">@color/exposed_TextAppearance_Network</item>
 	</style>
 
     <style name="TextAppearance.StatusBar.Expanded.Network.EmergencyOnly">
+      <!-- exposed for theming -->
+      <item name="android:textColor">@color/exposed_primary_text_dark</item>
     </style>
 
     <style name="TextAppearance.StatusBar.Expanded.UserSwitcher">
@@ -221,7 +236,7 @@
     <style name="TextAppearance.StatusBar.PhoneTicker"
         parent="@*android:style/TextAppearance.StatusBar.Ticker">
         <!-- Note: must be dp to fit in status bar -->
-        <item name="android:textSize">14dp</item>
+      <item name="android:textSize">14dp</item>
     </style>
 
     <style name="systemui_theme" parent="@android:style/Theme.DeviceDefault">
@@ -232,6 +247,8 @@
     <style name="Theme.SystemUI.Dialog" parent="@android:style/Theme.DeviceDefault.Light.Dialog">
         <item name="android:colorPrimary">@color/system_primary_color</item>
         <item name="android:colorControlActivated">@color/system_accent_color</item>
+	<!-- exposed for theming -->
+	<item name="android:textColor">@color/exposed_primary_text_dark</item>
     </style>
 
     <style name="QSBorderlessButton">
@@ -249,7 +266,8 @@
     <style name="TextAppearance.Material.Notification.Parenthetical"
            parent="@*android:style/TextAppearance.Material.Notification">
         <item name="android:textStyle">italic</item>
-        <item name="android:textColor">#60000000</item>
+	<!-- exposed for theming -->
+        <item name="android:textColor">@color/exposed_TextAppearance.Material.Notification.Parenthetical</item>
     </style>
 
     <style name="SearchPanelCircle">

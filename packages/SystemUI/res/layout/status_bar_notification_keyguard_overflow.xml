@@ -30,7 +30,7 @@
         android:layout_width="match_parent"
         android:layout_height="match_parent"
         />
-
+<!-- exposed text for theming -->
     <LinearLayout
         android:layout_width="match_parent"
         android:layout_height="match_parent">
@@ -43,7 +43,7 @@
             android:layout_gravity="center_vertical"
             android:background="@drawable/keyguard_overflow_number_background"
             android:gravity="center"
-            android:textColor="#ff686868"
+            android:textColor="@color/exposed_more_text"
             android:textStyle="bold"
             android:textSize="14dp"
             />
