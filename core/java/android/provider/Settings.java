@@ -2671,6 +2671,12 @@ public final class Settings {
          */
         public static final String VOLUME_ADJUST_SOUND = "volume_adjust_sound";
 
+        /**
+         * Change volume up and down handlign based on rotation
+         * @hide
+         */
+        public static final String SWAP_VOLUME_BUTTONS = "swap_volume_buttons";
+
          /**
           * Action to perform when the key is pressed
           * 0 - Nothing
@@ -2798,6 +2804,13 @@ public final class Settings {
          * @hide
          */
         public static final String STATUSBAR_SHOW_ALARM_ICON = "statusbar_show_alarm_icon";
+
+        /**
+         * Should the alarm be shown in fullscreen instead of heads-up
+         *
+         * @hide
+         */
+        public static final String SHOW_ALARM_FULLSCREEN = "show_alarm_fullscreen";
 
         /**
          * Settings to backup. This is here so that it's in the same place as the settings
