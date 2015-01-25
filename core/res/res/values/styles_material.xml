@@ -419,12 +419,14 @@ please see styles_device_defaults.xml.
     </style>
 
     <style name="TextAppearance.Material.Notification">
-        <item name="textColor">@color/secondary_text_material_light</item>
+      <!-- exposed for themeing -->
+        <item name="textColor">@color/exposed_secondary_text_light</item>
         <item name="textSize">@dimen/notification_text_size</item>
     </style>
 
     <style name="TextAppearance.Material.Notification.Title">
-        <item name="textColor">@color/primary_text_default_material_light</item>
+      <!-- exposed for themeing -->
+        <item name="textColor">@color/exposed_primary_text_light</item>
         <item name="textSize">@dimen/notification_title_text_size</item>
     </style>
 
@@ -441,7 +443,8 @@ please see styles_device_defaults.xml.
     </style>
 
     <style name="TextAppearance.Material.Notification.Emphasis">
-        <item name="textColor">#66000000</item>
+      <!-- exposed for themeing -->
+        <item name="textColor">@color/exposed_secondary_text_light</item>
     </style>
 
     <style name="Widget.Material.Notification.ProgressBar" parent="Widget.Material.Light.ProgressBar.Horizontal" />
