@@ -61,6 +61,7 @@ import android.os.Parcel;
 import android.os.Parcelable;
 import android.os.RemoteException;
 import android.os.ServiceManager;
+import android.provider.Settings;
 import android.transition.Scene;
 import android.transition.Transition;
 import android.transition.TransitionInflater;
@@ -86,6 +87,7 @@ import android.view.LayoutInflater;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.MotionEvent;
+import android.view.Surface;
 import android.view.SurfaceHolder;
 import android.view.View;
 import android.view.ViewConfiguration;
@@ -1734,6 +1736,19 @@ public class PhoneWindow extends Window implements MenuBuilder.Callback {
             case KeyEvent.KEYCODE_VOLUME_DOWN: {
                 int direction = keyCode == KeyEvent.KEYCODE_VOLUME_UP ? AudioManager.ADJUST_RAISE
                         : AudioManager.ADJUST_LOWER;
+                final int rotation = getWindowManager().getDefaultDisplay().getRotation();
+                final Configuration config = getContext().getResources().getConfiguration();
+                final boolean swapKeys = Settings.System.getInt(getContext().getContentResolver(),
+                        Settings.System.SWAP_VOLUME_BUTTONS, 0) == 1;
+
+                if (swapKeys
+                        && (rotation == Surface.ROTATION_90 || rotation == Surface.ROTATION_180)
+                        && config.getLayoutDirection() == View.LAYOUT_DIRECTION_LTR) {
+                     direction = keyCode == KeyEvent.KEYCODE_VOLUME_UP
+                             ? AudioManager.ADJUST_LOWER
+                             : AudioManager.ADJUST_RAISE;
+                }
+
                 // If we have a session send it the volume command, otherwise
                 // use the suggested stream.
                 if (mMediaController != null) {
@@ -1825,13 +1840,18 @@ public class PhoneWindow extends Window implements MenuBuilder.Callback {
             case KeyEvent.KEYCODE_VOLUME_DOWN: {
                 // If we have a session send it the volume command, otherwise
                 // use the suggested stream.
-                if (mMediaController != null) {
-                    mMediaController.adjustVolume(0, AudioManager.FLAG_PLAY_SOUND
-                            | AudioManager.FLAG_VIBRATE);
-                } else {
-                    MediaSessionLegacyHelper.getHelper(getContext()).sendAdjustVolumeBy(
-                            mVolumeControlStreamType, 0,
-                            AudioManager.FLAG_PLAY_SOUND | AudioManager.FLAG_VIBRATE);
+                final boolean volumeKeySounds = getContext().getResources().getBoolean(
+                        com.android.internal.R.bool.config_useVolumeKeySounds);
+                if (volumeKeySounds && Settings.System.getInt(getContext().getContentResolver(),
+                        Settings.System.VOLUME_ADJUST_SOUND, 1) == 1) {
+                    if (mMediaController != null) {
+                        mMediaController.adjustVolume(0, AudioManager.FLAG_PLAY_SOUND
+                                | AudioManager.FLAG_VIBRATE);
+                    } else {
+                        MediaSessionLegacyHelper.getHelper(getContext()).sendAdjustVolumeBy(
+                                mVolumeControlStreamType, 0,
+                                AudioManager.FLAG_PLAY_SOUND | AudioManager.FLAG_VIBRATE);
+                    }
                 }
                 return true;
             }
