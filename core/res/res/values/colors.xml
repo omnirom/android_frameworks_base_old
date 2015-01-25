@@ -158,5 +158,25 @@
     <color name="user_icon_8">#ffff5722</color><!-- deep orange 500 -->
     <color name="user_icon_default_gray">#ff9e9e9e</color><!-- gray 500 -->
     <color name="user_icon_default_white">#ffffffff</color><!-- white -->
+    
+    <!-- Exposed resources for theming -->
+    <color name="exposed_bg_dark">#ffffffff</color>
+    <color name="exposed_bg_light">#ff212121</color>
+    <color name="exposed_primary_text_light">#de000000</color>
+    <color name="exposed_secondary_text_light">#8a000000</color>
+    <color name="exposed_primary_text_dark">#ffffffff</color>
+    <color name="exposed_secondary_text_dark">#b3ffffff</color>
+    <color name="exposed_notification_big_pic_bg">#cceeeeee</color>
+    <color name="exposed_resolver_list_bg">#ffffffff</color>
+    <color name="exposed_notify_action_text">#ff212121</color>
+    <color name="exposed_navigation_bar">#000000</color>
+    <color name="exposed_TextAppearance.StatusBar.EventContent">#999999</color>
+    <color name="exposed_TextAppearance.StatusBar.EventContent.Emphasis">#CCCCCC</color>
+    <color name="exposed_TextAppearance.EasyCorrectSuggestion">#88C8C8C8</color>
+    <color name="exposed_Widget.Material.Light.Button_TS">#555555</color>
+    
+    
+    
+    
 </resources>
 

@@ -16,6 +16,8 @@
 * limitations under the License.
 */
 -->
+
+<!-- Text and BG exposed for theming -->
 <com.android.internal.widget.ResolverDrawerLayout
     xmlns:android="http://schemas.android.com/apk/res/android"
     android:layout_width="match_parent"
@@ -37,7 +39,7 @@
               android:paddingEnd="16dp"
               android:paddingTop="8dp"
               android:paddingBottom="8dp"
-              android:background="@color/white"
+              android:background="@color/exposed_resolver_list_bg"
               android:elevation="8dp"
               />
 
@@ -47,7 +49,7 @@
         android:id="@+id/resolver_list"
         android:clipToPadding="false"
         android:scrollbarStyle="outsideOverlay"
-        android:background="@color/white"
+        android:background="@color/exposed_resolver_list_bg"
         android:elevation="8dp"
         android:nestedScrollingEnabled="true"
         android:divider="@null"
@@ -74,7 +76,7 @@
         android:orientation="horizontal"
         android:layoutDirection="locale"
         android:measureWithLargestChild="true"
-        android:background="@color/white"
+        android:background="@color/exposed_resolver_list_bg"
         android:paddingTop="8dp"
         android:paddingBottom="8dp"
         android:paddingStart="12dp"
