@@ -19,12 +19,12 @@
     android:layout_width="match_parent"
     android:layout_height="wrap_content"
     android:orientation="vertical" >
-
+<!-- exposed bg for theming -->
     <FrameLayout
         android:id="@+id/slider_panel"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:background="@color/system_secondary_color"
+        android:background="@color/exposed_volume_panel"
         android:paddingTop="8dp"
         android:paddingLeft="8dp"
         android:paddingRight="8dp"

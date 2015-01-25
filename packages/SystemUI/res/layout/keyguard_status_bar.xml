@@ -52,18 +52,19 @@
             >
             <include layout="@layout/system_icons" />
         </FrameLayout>
+	<!-- exposed for theming -->
         <TextView android:id="@+id/battery_level"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_gravity="center_vertical"
             android:layout_marginStart="@dimen/header_battery_margin_keyguard"
             android:paddingEnd="@dimen/battery_level_padding_end"
-            android:textColor="#ffffff"
+            android:textColor="@color/exposed_kg_batt_level"
             android:visibility="gone"
             android:textSize="@dimen/battery_level_text_size"
             android:importantForAccessibility="noHideDescendants"/>
     </LinearLayout>
-
+         <!-- exposed for theming -->
     <com.android.keyguard.CarrierText
         android:id="@+id/keyguard_carrier_text"
         android:layout_width="match_parent"
@@ -73,7 +74,7 @@
         android:gravity="center_vertical"
         android:ellipsize="marquee"
         android:textAppearance="?android:attr/textAppearanceSmall"
-        android:textColor="#ffffff"
+        android:textColor="@color/exposed_kg_carrier_text"
         android:singleLine="true" />
 
 </com.android.systemui.statusbar.phone.KeyguardStatusBarView>

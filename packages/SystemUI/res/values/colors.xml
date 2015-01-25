@@ -123,4 +123,41 @@
 
     <!-- Shadow color for the furthest pixels around the fake shadow for recents. -->
     <color name="fake_shadow_end_color">#03000000</color>
+    
+    <!-- Exposed resources for theming -->
+    <color name="exposed_bg_dark">#ffffffff</color>
+    <color name="exposed_bg_light">#ff212121</color>
+    <color name="exposed_volume_panel">#ff263238</color>
+    <color name="exposed_primary_text_light">#de000000</color>
+    <color name="exposed_secondary_text_light">#8a000000</color>
+    <color name="exposed_TextAppearance.Material.Notification.Parenthetical">#ff7e7d7d</color>
+    <color name="exposed_system_panel_text_light">#ff7e7d7d</color>
+    <color name="exposed_TextAppearance.StatusBar.TextButton">#ffffffff</color>
+    <color name="exposed_primary_text_dark">#ffffffff</color>
+    <color name="exposed_secondary_text_dark">#b3ffffff</color>
+    <color name="exposed_button">#b3ffffff</color>
+    <color name="exposed_TextAppearance_Network">#ff7e7d7d</color>
+    <color name="exposed_batt_text">#ffffffff</color>
+    <color name="exposed_kg_indication_text">#ffffffff</color>
+    <color name="exposed_kg_camera_button">#ffffffff</color>
+    <color name="exposed_kg_phone_button">#ffffffff</color>
+    <color name="exposed_kg_lock_icon">#ffffffff</color>
+    <color name="exposed_kg_batt_level">#ffffffff</color>
+    <color name="exposed_kg_carrier_text">#ffffffff</color>
+    <color name="exposed_recents_search_bar_label">#99ffffff</color>
+    <color name="exposed_no_notify">#ffffffff</color>
+    <color name="exposed_more_text">#ff686868</color>
+    <color name="exposed_speedbump_line">#6fdddddd</color>
+    <color name="exposed_toggle">#ff666666</color>
+    <color name="exposed_segmented_button_text_selector">#ffffffff</color>
+    <color name="exposed_qs_user_detail_name">#66ffffff</color>
+    <color name="exposed_headsup_scrim_start">#55000000</color>
+    <color name="exposed_headsup_scrim_end">#00000000</color>
+    
+    
+    
+    
+    
+    
+    
 </resources>

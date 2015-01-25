@@ -16,6 +16,8 @@
  * limitations under the License.
  */
 -->
+
+<!-- BG exposed for theming -->
 <TextView
     xmlns:android="http://schemas.android.com/apk/res/android"
     android:layout_width="match_parent"
@@ -29,6 +31,6 @@
     android:paddingEnd="16dp"
     android:paddingTop="8dp"
     android:paddingBottom="8dp"
-    android:background="@color/white"
+    android:background="@color/exposed_resolver_list_bg"
     android:elevation="8dp"
     />
