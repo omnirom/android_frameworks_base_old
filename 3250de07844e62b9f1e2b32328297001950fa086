@@ -1,0 +1,27 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "8b25f591_2d288e95",
+        "filename": "core/java/android/provider/Settings.java",
+        "patchSetId": 1
+      },
+      "lineNbr": 4846,
+      "author": {
+        "id": 1000026
+      },
+      "writtenOn": "2015-01-26T21:29:11Z",
+      "side": 1,
+      "message": "Why not just simply use 0/1 instead of storing 3 new things here? And as said in the OmniGears part. I dont see a reason why this is in Secure settings.",
+      "range": {
+        "startLine": 4846,
+        "startChar": 15,
+        "endLine": 4846,
+        "endChar": 21
+      },
+      "revId": "3250de07844e62b9f1e2b32328297001950fa086",
+      "serverId": "56841c99-7c94-43d4-bf0b-cb4707e66d55",
+      "unresolved": false
+    }
+  ]
+}
