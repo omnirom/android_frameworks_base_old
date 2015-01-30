@@ -1,0 +1,44 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "8b25f591_e693f351",
+        "filename": "packages/SystemUI/res/values/styles.xml",
+        "patchSetId": 2
+      },
+      "lineNbr": 46,
+      "author": {
+        "id": 1000026
+      },
+      "writtenOn": "2015-01-30T02:21:43Z",
+      "side": 1,
+      "message": "e.g. this - before it was black and now exposed_bg_light is\n    \u003ccolor name\u003d\"exposed_bg_light\"\u003e#ff212121\u003c/color\u003e\nwhich is not really the sane",
+      "revId": "7f4b0362ae1f2b02893a0d5156837cd491aaf584",
+      "serverId": "56841c99-7c94-43d4-bf0b-cb4707e66d55",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "8b25f591_0699ef70",
+        "filename": "packages/SystemUI/res/values/styles.xml",
+        "patchSetId": 2
+      },
+      "lineNbr": 115,
+      "author": {
+        "id": 1000026
+      },
+      "writtenOn": "2015-01-30T02:21:43Z",
+      "side": 1,
+      "message": "same here #66ffffff -\u003e     \u003ccolor name\u003d\"exposed_secondary_text_dark\"\u003e#b3ffffff\u003c/color\u003e",
+      "range": {
+        "startLine": 115,
+        "startChar": 46,
+        "endLine": 115,
+        "endChar": 73
+      },
+      "revId": "7f4b0362ae1f2b02893a0d5156837cd491aaf584",
+      "serverId": "56841c99-7c94-43d4-bf0b-cb4707e66d55",
+      "unresolved": false
+    }
+  ]
+}
