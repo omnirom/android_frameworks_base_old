@@ -66,6 +66,13 @@
     <!-- Screen off QS tile -->
     <string name="quick_settings_screen_off">Screen off</string>
 
+    <!-- Sync QS tile -->
+    <string name="quick_settings_sync_label">Sync</string>
+    <string name="accessibility_quick_settings_sync_off">Sync off</string>
+    <string name="accessibility_quick_settings_sync_on">Sync on</string>
+    <string name="accessibility_quick_settings_sync_changed_off">Sync turned off</string>
+    <string name="accessibility_quick_settings_sync_changed_on">Sync turned on</string>
+
     <!-- Screenshot Crop & Share -->
     <string name="action_delete_success">Deleted</string>
     <string name="action_delete_fault">Deleting was unsuccessful</string>
