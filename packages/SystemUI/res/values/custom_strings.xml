@@ -44,4 +44,7 @@
 
     <!-- no interuptions except alarms -->
     <string name="zen_no_interruptions_but_alarm">No interruptions. Except alarms.</string>
+
+    <!-- Usb Tether tile -->
+    <string name="quick_settings_usb_tether_label">USB tethering</string>
 </resources>
