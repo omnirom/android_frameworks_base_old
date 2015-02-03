@@ -2666,6 +2666,13 @@ public final class Settings {
         public static final String HOME_BUTTON_WAKE = "home_button_wake";
 
         /**
+         * What happens when the user presses the Home button when the
+         * phone is ringing.
+         * @hide
+         */
+        public static final String HOME_BUTTON_ANSWER = "home_button_answer";
+
+        /**
          * Volume Adjust Sounds Enable, This is the noise made when using volume hard buttons
          * Defaults to 1 - sounds enabled
          * @hide
