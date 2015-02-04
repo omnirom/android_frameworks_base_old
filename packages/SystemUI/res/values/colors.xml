@@ -125,8 +125,7 @@
     <color name="fake_shadow_end_color">#03000000</color>
     
     <!-- Exposed resources for theming -->
-    <color name="exposed_bg_dark">#ffffffff</color>
-    <color name="exposed_bg_light">#ff212121</color>
+    <color name="exposed_bg_dark">#ff000000</color>
     <color name="exposed_volume_panel">#ff263238</color>
     <color name="exposed_primary_text_light">#de000000</color>
     <color name="exposed_secondary_text_light">#8a000000</color>
