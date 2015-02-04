@@ -43,7 +43,7 @@
     <!-- Performance optimized alternate Recents theme (no wallpaper) -->
     <style name="RecentsTheme.NoWallpaper">
       <!-- exposed for theming -->
-        <item name="android:windowBackground">@color/exposed_bg_light</item>
+        <item name="android:windowBackground">@color/exposed_bg_dark</item>
     </style>
 
     <!-- Animations for a non-full-screen window or activity. -->
