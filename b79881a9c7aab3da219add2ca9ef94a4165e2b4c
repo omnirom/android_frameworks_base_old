@@ -1,0 +1,44 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "6b22818b_e81bcb7f",
+        "filename": "core/res/res/values/styles_material.xml",
+        "patchSetId": 3
+      },
+      "lineNbr": 423,
+      "author": {
+        "id": 1000026
+      },
+      "writtenOn": "2015-02-05T22:32:43Z",
+      "side": 1,
+      "message": "those are both state colors",
+      "revId": "b79881a9c7aab3da219add2ca9ef94a4165e2b4c",
+      "serverId": "56841c99-7c94-43d4-bf0b-cb4707e66d55",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "6b22818b_08110761",
+        "filename": "core/res/res/values/styles_material.xml",
+        "patchSetId": 3
+      },
+      "lineNbr": 429,
+      "author": {
+        "id": 1000026
+      },
+      "writtenOn": "2015-02-05T22:32:43Z",
+      "side": 1,
+      "message": "detto",
+      "range": {
+        "startLine": 429,
+        "startChar": 20,
+        "endLine": 429,
+        "endChar": 29
+      },
+      "revId": "b79881a9c7aab3da219add2ca9ef94a4165e2b4c",
+      "serverId": "56841c99-7c94-43d4-bf0b-cb4707e66d55",
+      "unresolved": false
+    }
+  ]
+}
