@@ -378,5 +378,6 @@
             android:exported="true"
             android:singleUser="true"
             android:permission="android.permission.BIND_DREAM_SERVICE" />
+
     </application>
 </manifest>
