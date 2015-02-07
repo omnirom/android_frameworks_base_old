@@ -856,7 +856,10 @@ public class Environment {
         return SystemProperties.getBoolean("config.disable_storage", false);
     }
 
-    private static StorageVolume getStorageVolume(File path) {
+    /**
+     * @hide
+     */
+    public static StorageVolume getStorageVolume(File path) {
         try {
             path = path.getCanonicalFile();
         } catch (IOException e) {
