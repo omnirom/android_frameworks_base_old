@@ -116,6 +116,14 @@ public class DozeParameters {
         return getInt("doze.pickup.vibration.threshold", R.integer.doze_pickup_vibration_threshold);
     }
 
+    public int getShakeAccelerometerThreshold() {
+        return getInt("doze.shake.accelerometer.threshold", R.integer.doze_shake_accelerometer_threshold);
+    }
+
+    public boolean setUsingAccelerometerAsSensorPickUp() {
+        return getBoolean("doze.use.accelerometer", com.android.internal.R.bool.config_dozeUseAccelerometer);
+    }
+
     private boolean getBoolean(String propName, int resId) {
         return SystemProperties.getBoolean(propName, mContext.getResources().getBoolean(resId));
     }
