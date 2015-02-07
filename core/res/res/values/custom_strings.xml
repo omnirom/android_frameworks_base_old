@@ -29,4 +29,10 @@
     <!-- HW button mapping -->
     <string name="app_killed_message">App killed</string>
 
+    <!-- Shown when external media is mounted [CHAR LIMIT=30] -->
+    <string name="ext_media_mounted_notification_title">mounted</string>
+    <string name="ext_media_unmounted_notification_title">unmounted</string>
+    <string name="ext_media_unmounted_notification_message">You can safely remove storage.</string>
+    <string name="ext_media_unmount_action">Unmount</string>
+    <string name="ext_media_mount_action">Mount</string>
 </resources>

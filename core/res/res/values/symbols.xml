@@ -2122,4 +2122,10 @@
   <java-symbol type="bool" name="config_samsung_stk" />
 
   <java-symbol type="dimen" name="max_avatar_size" />
+
+  <java-symbol type="string" name="ext_media_mounted_notification_title" />
+  <java-symbol type="string" name="ext_media_unmounted_notification_title" />
+  <java-symbol type="string" name="ext_media_unmounted_notification_message" />
+  <java-symbol type="string" name="ext_media_unmount_action" />
+  <java-symbol type="string" name="ext_media_mount_action" />
 </resources>
