@@ -378,5 +378,10 @@
             android:exported="true"
             android:singleUser="true"
             android:permission="android.permission.BIND_DREAM_SERVICE" />
+
+        <activity android:name=".usb.UsbUmountActivity"
+            android:theme="@android:style/Theme.NoDisplay"
+            android:excludeFromRecents="true">
+        </activity>
     </application>
 </manifest>
