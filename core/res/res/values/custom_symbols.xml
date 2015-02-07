@@ -42,6 +42,8 @@
   <!-- power profiles -->
   <java-symbol type="bool" name="config_powerProfilesSupported" />
 
+  <java-symbol type="bool" name="config_dozeUseAccelerometer" />
+
   <!-- Samsung STK -->
   <java-symbol type="bool" name="config_samsung_stk" />
 
