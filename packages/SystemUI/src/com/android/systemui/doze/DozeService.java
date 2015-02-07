@@ -76,6 +76,7 @@ public class DozeService extends DreamService {
     private boolean mNotificationLightOn;
     private boolean mPowerSaveActive;
     private boolean mCarMode;
+    private boolean mUseAccelerometer;
     private long mNotificationPulseTime;
     private int mScheduleResetsRemaining;
 
@@ -117,10 +118,13 @@ public class DozeService extends DreamService {
         setWindowless(true);
 
         mSensors = (SensorManager) mContext.getSystemService(Context.SENSOR_SERVICE);
-        mSigMotionSensor = new TriggerSensor(Sensor.TYPE_SIGNIFICANT_MOTION,
+        mUseAccelerometer = setUsingAccelerometerAsSensorPickUp();
+        if (!mUseAccelerometer) {
+            mSigMotionSensor = new TriggerSensor(Sensor.TYPE_SIGNIFICANT_MOTION,
                 mDozeParameters.getPulseOnSigMotion(), mDozeParameters.getVibrateOnSigMotion());
-        mPickupSensor = new TriggerSensor(Sensor.TYPE_PICK_UP_GESTURE,
+            mPickupSensor = new TriggerSensor(Sensor.TYPE_PICK_UP_GESTURE,
                 mDozeParameters.getPulseOnPickup(), mDozeParameters.getVibrateOnPickup());
+        }
         mPowerManager = (PowerManager) mContext.getSystemService(Context.POWER_SERVICE);
         mWakeLock = mPowerManager.newWakeLock(PowerManager.PARTIAL_WAKE_LOCK, mTag);
         mWakeLock.setReferenceCounted(true);
@@ -260,8 +264,10 @@ public class DozeService extends DreamService {
 
     private void listenForPulseSignals(boolean listen) {
         if (DEBUG) Log.d(mTag, "listenForPulseSignals: " + listen);
-        mSigMotionSensor.setListening(listen);
-        mPickupSensor.setListening(listen);
+        if (!mUseAccelerometer) {
+            mSigMotionSensor.setListening(listen);
+            mPickupSensor.setListening(listen);
+        }
         listenForBroadcasts(listen);
         listenForNotifications(listen);
     }
@@ -529,8 +535,9 @@ public class DozeService extends DreamService {
                 return;
             }
             // the pickup sensor interferes with the prox event, disable it until we have a result
-            mPickupSensor.setDisabled(true);
-
+            if (!mUseAccelerometer) {
+                mPickupSensor.setDisabled(true);
+            }
             mMaxRange = sensor.getMaximumRange();
             mSensors.registerListener(this, sensor, SensorManager.SENSOR_DELAY_NORMAL, 0, mHandler);
             mHandler.postDelayed(this, TIMEOUT_DELAY_MS);
@@ -561,7 +568,9 @@ public class DozeService extends DreamService {
                 mHandler.removeCallbacks(this);
                 mSensors.unregisterListener(this);
                 // we're done - reenable the pickup sensor
-                mPickupSensor.setDisabled(false);
+                if (!mUseAccelerometer) {
+                    mPickupSensor.setDisabled(false);
+                }
                 mRegistered = false;
             }
             onProximityResult(result);
