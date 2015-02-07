@@ -2821,6 +2821,13 @@ public final class Settings {
         public static final String SHOW_ALARM_FULLSCREEN = "show_alarm_fullscreen";
 
         /**
+         * Should the storage removed notification be shown
+         *
+         * @hide
+         */
+        public static final String STORAGE_MEDIA_REMOVED_NOTIFICTION = "storage_media_removed_notification";
+
+        /**
          * Settings to backup. This is here so that it's in the same place as the settings
          * keys and easy to update.
          *
