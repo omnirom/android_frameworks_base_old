@@ -1,0 +1,21 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "6b22818b_ee4d939b",
+        "filename": "core/res/res/values/symbols.xml",
+        "patchSetId": 3
+      },
+      "lineNbr": 2126,
+      "author": {
+        "id": 1000049
+      },
+      "writtenOn": "2015-02-10T21:00:56Z",
+      "side": 1,
+      "message": "Yanuar created custem_symbols.xml in his ambient display commit. Perhaps move this to custem_symbols also?",
+      "revId": "53ee655b4ff36580dfccf974569bc2b626b5450a",
+      "serverId": "56841c99-7c94-43d4-bf0b-cb4707e66d55",
+      "unresolved": false
+    }
+  ]
+}
