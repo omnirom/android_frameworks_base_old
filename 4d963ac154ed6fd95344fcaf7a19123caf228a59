@@ -1,0 +1,21 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "6b22818b_39aff7de",
+        "filename": "packages/SystemUI/res/values/custom_config.xml",
+        "patchSetId": 11
+      },
+      "lineNbr": 24,
+      "author": {
+        "id": 1000026
+      },
+      "writtenOn": "2015-02-11T13:18:39Z",
+      "side": 1,
+      "message": "you should document here what higher/smaller values mean",
+      "revId": "4d963ac154ed6fd95344fcaf7a19123caf228a59",
+      "serverId": "56841c99-7c94-43d4-bf0b-cb4707e66d55",
+      "unresolved": false
+    }
+  ]
+}
