@@ -1,0 +1,95 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "6b22818b_b98be770",
+        "filename": "packages/SystemUI/src/com/android/systemui/usb/StorageNotification.java",
+        "patchSetId": 7
+      },
+      "lineNbr": 75,
+      "author": {
+        "id": 1000026
+      },
+      "writtenOn": "2015-02-11T13:29:28Z",
+      "side": 1,
+      "message": "meh",
+      "revId": "4e0a5754bbc67a75642872087f1aa4108f32ab42",
+      "serverId": "56841c99-7c94-43d4-bf0b-cb4707e66d55",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "6b22818b_f9855f5c",
+        "filename": "packages/SystemUI/src/com/android/systemui/usb/StorageNotification.java",
+        "patchSetId": 7
+      },
+      "lineNbr": 93,
+      "author": {
+        "id": 1000026
+      },
+      "writtenOn": "2015-02-11T13:29:28Z",
+      "side": 1,
+      "message": "getIntForUser?",
+      "revId": "4e0a5754bbc67a75642872087f1aa4108f32ab42",
+      "serverId": "56841c99-7c94-43d4-bf0b-cb4707e66d55",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "6b22818b_d980a34f",
+        "filename": "packages/SystemUI/src/com/android/systemui/usb/StorageNotification.java",
+        "patchSetId": 7
+      },
+      "lineNbr": 120,
+      "author": {
+        "id": 1000026
+      },
+      "writtenOn": "2015-02-11T13:29:28Z",
+      "side": 1,
+      "message": "muh",
+      "range": {
+        "startLine": 120,
+        "startChar": 0,
+        "endLine": 120,
+        "endChar": 1
+      },
+      "revId": "4e0a5754bbc67a75642872087f1aa4108f32ab42",
+      "serverId": "56841c99-7c94-43d4-bf0b-cb4707e66d55",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "6b22818b_199b1bc2",
+        "filename": "packages/SystemUI/src/com/android/systemui/usb/UsbUmountActivity.java",
+        "patchSetId": 7
+      },
+      "lineNbr": 64,
+      "author": {
+        "id": 1000026
+      },
+      "writtenOn": "2015-02-11T13:29:28Z",
+      "side": 1,
+      "message": "show dialog with progress",
+      "revId": "4e0a5754bbc67a75642872087f1aa4108f32ab42",
+      "serverId": "56841c99-7c94-43d4-bf0b-cb4707e66d55",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "6b22818b_3998d7c2",
+        "filename": "packages/SystemUI/src/com/android/systemui/usb/UsbUmountActivity.java",
+        "patchSetId": 7
+      },
+      "lineNbr": 78,
+      "author": {
+        "id": 1000026
+      },
+      "writtenOn": "2015-02-11T13:29:28Z",
+      "side": 1,
+      "message": "show dialog with progress",
+      "revId": "4e0a5754bbc67a75642872087f1aa4108f32ab42",
+      "serverId": "56841c99-7c94-43d4-bf0b-cb4707e66d55",
+      "unresolved": false
+    }
+  ]
+}
