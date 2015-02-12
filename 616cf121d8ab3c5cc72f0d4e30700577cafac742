@@ -1,0 +1,21 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "6b22818b_59c11334",
+        "filename": "packages/SystemUI/src/com/android/systemui/doze/ShakeSensorManager.java",
+        "patchSetId": 15
+      },
+      "lineNbr": 68,
+      "author": {
+        "id": 1000026
+      },
+      "writtenOn": "2015-02-12T01:24:43Z",
+      "side": 1,
+      "message": "here - this isnt really a time value right?",
+      "revId": "616cf121d8ab3c5cc72f0d4e30700577cafac742",
+      "serverId": "56841c99-7c94-43d4-bf0b-cb4707e66d55",
+      "unresolved": false
+    }
+  ]
+}
