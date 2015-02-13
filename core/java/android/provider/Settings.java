@@ -6250,6 +6250,12 @@ public final class Settings {
        public static final String WIFI_COUNTRY_CODE = "wifi_country_code";
 
        /**
+        * 802.11 country code in ISO 3166 format set from the sim card
+        * @hide
+        */
+       public static final String WIFI_COUNTRY_CODE_SIM0 = "wifi_country_code_sim0";
+
+       /**
         * The interval in milliseconds to issue wake up scans when wifi needs
         * to connect. This is necessary to connect to an access point when
         * device is on the move and the screen is off.
