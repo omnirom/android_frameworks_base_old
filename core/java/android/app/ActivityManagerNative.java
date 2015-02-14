@@ -728,7 +728,6 @@ public abstract class ActivityManagerNative extends Binder implements IActivityM
         case RESIZE_STACK_TRANSACTION: {
             data.enforceInterface(IActivityManager.descriptor);
             int stackId = data.readInt();
-            float weight = data.readFloat();
             Rect r = Rect.CREATOR.createFromParcel(data);
             resizeStack(stackId, r);
             reply.writeNoException();
