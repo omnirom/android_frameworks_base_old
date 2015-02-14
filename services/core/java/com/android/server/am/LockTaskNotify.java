@@ -23,6 +23,7 @@ import android.view.accessibility.AccessibilityManager;
 import android.widget.Toast;
 
 import com.android.internal.R;
+import com.android.internal.util.omni.DeviceUtils;
 
 /**
  *  Helper to manage showing/hiding a image to notify them that they are entering
@@ -50,7 +51,8 @@ public class LockTaskNotify {
     public void handleShowToast(boolean isLocked) {
         String text = mContext.getString(isLocked
                 ? R.string.lock_to_app_toast_locked : R.string.lock_to_app_toast);
-        if (!isLocked && mAccessibilityManager.isEnabled()) {
+        boolean showSingleButtonMessage = !DeviceUtils.deviceSupportNavigationBar(mContext) || mAccessibilityManager.isEnabled();
+        if (!isLocked && showSingleButtonMessage) {
             text = mContext.getString(R.string.lock_to_app_toast_accessible);
         }
         if (mLastToast != null) {

@@ -17,20 +17,29 @@
 ** limitations under the License.
 */
 -->
-<FrameLayout
+<LinearLayout
     xmlns:android="http://schemas.android.com/apk/res/android"
     android:layout_width="match_parent"
     android:layout_height="wrap_content"
     android:paddingTop="15dip"
     android:paddingBottom="0dip"
-    android:paddingStart="12dip"
+    android:paddingStart="16dip"
     android:paddingEnd="25dip"
+    android:orientation="vertical"
     >
 
     <CheckBox
         android:id="@+id/lock_to_app_checkbox"
-        style="?android:attr/textAppearanceMedium"
+        style="?android:style/TextAppearance.Material.Subhead"
         android:layout_width="match_parent"
-        android:layout_height="wrap_content" />
+        android:layout_height="wrap_content"
+        android:visibility="gone" />
 
-</FrameLayout>
+    <CheckBox
+        android:id="@+id/hide_lock_to_app_checkbox"
+        style="?android:style/TextAppearance.Material.Subhead"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:text="@string/hide_lock_to_app_dialog" />
+
+</LinearLayout>
