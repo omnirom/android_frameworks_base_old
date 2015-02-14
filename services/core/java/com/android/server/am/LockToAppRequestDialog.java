@@ -20,6 +20,7 @@ import com.android.internal.R;
 import com.android.internal.widget.ILockSettings;
 import com.android.internal.widget.LockPatternUtils;
 import com.android.internal.widget.LockPatternUtilsCache;
+import com.android.internal.util.omni.DeviceUtils;
 
 public class LockToAppRequestDialog implements OnClickListener {
     private static final String TAG = "ActivityManager";
@@ -87,7 +88,8 @@ public class LockToAppRequestDialog implements OnClickListener {
         final int unlockStringId = getLockString(task.userId);
 
         final Resources r = Resources.getSystem();
-        final String description= r.getString(mAccessibilityService.isEnabled()
+        boolean showSingleButtonMessage = !DeviceUtils.deviceSupportNavigationBar(mContext) || mAccessibilityService.isEnabled();
+        final String description= r.getString(showSingleButtonMessage
                 ? R.string.lock_to_app_description_accessible
                 : R.string.lock_to_app_description);
         AlertDialog.Builder builder = new AlertDialog.Builder(mContext)
