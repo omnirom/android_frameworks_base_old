@@ -12,6 +12,7 @@ import android.os.ServiceManager;
 import android.provider.Settings;
 import android.provider.Settings.SettingNotFoundException;
 import android.util.Slog;
+import android.view.View;
 import android.view.WindowManager;
 import android.view.accessibility.AccessibilityManager;
 import android.widget.CheckBox;
@@ -20,6 +21,7 @@ import com.android.internal.R;
 import com.android.internal.widget.ILockSettings;
 import com.android.internal.widget.LockPatternUtils;
 import com.android.internal.widget.LockPatternUtilsCache;
+import com.android.internal.util.omni.DeviceUtils;
 
 public class LockToAppRequestDialog implements OnClickListener {
     private static final String TAG = "ActivityManager";
@@ -31,6 +33,7 @@ public class LockToAppRequestDialog implements OnClickListener {
     private TaskRecord mRequestedTask;
 
     private CheckBox mCheckbox;
+    private CheckBox mHideCheckbox;
 
     private ILockSettings mLockSettingsService;
 
@@ -87,7 +90,8 @@ public class LockToAppRequestDialog implements OnClickListener {
         final int unlockStringId = getLockString(task.userId);
 
         final Resources r = Resources.getSystem();
-        final String description= r.getString(mAccessibilityService.isEnabled()
+        boolean showSingleButtonMessage = !DeviceUtils.deviceSupportNavigationBar(mContext) || mAccessibilityService.isEnabled();
+        final String description= r.getString(showSingleButtonMessage
                 ? R.string.lock_to_app_description_accessible
                 : R.string.lock_to_app_description);
         AlertDialog.Builder builder = new AlertDialog.Builder(mContext)
@@ -95,20 +99,33 @@ public class LockToAppRequestDialog implements OnClickListener {
                         .setMessage(description)
                         .setPositiveButton(r.getString(R.string.lock_to_app_positive), this)
                         .setNegativeButton(r.getString(R.string.lock_to_app_negative), this);
-        if (unlockStringId != 0) {
-            builder.setView(R.layout.lock_to_app_checkbox);
-        }
+        builder.setView(R.layout.lock_to_app_checkbox);
         mDialog = builder.create();
 
         mDialog.getWindow().setType(WindowManager.LayoutParams.TYPE_SYSTEM_ALERT);
         mDialog.getWindow().getAttributes().privateFlags |=
                 WindowManager.LayoutParams.PRIVATE_FLAG_SHOW_FOR_ALL_USERS;
+
+        boolean hideDialog = false;
+        try {
+            hideDialog = Settings.System.getInt(mContext.getContentResolver(),
+                        Settings.System.LOCK_TO_APP_HIDE_DIALOG) != 0;
+        } catch (SettingNotFoundException e) {
+        }
+
+        if (hideDialog) {
+            mService.startLockTaskMode(mRequestedTask);
+            return;
+        }
         mDialog.show();
+
+        mHideCheckbox = (CheckBox) mDialog.findViewById(R.id.hide_lock_to_app_checkbox);
 
         if (unlockStringId != 0) {
             String unlockString = mContext.getString(unlockStringId);
             mCheckbox = (CheckBox) mDialog.findViewById(R.id.lock_to_app_checkbox);
             mCheckbox.setText(unlockString);
+            mCheckbox.setVisibility(View.VISIBLE);
 
             // Remember state.
             try {
@@ -130,6 +147,10 @@ public class LockToAppRequestDialog implements OnClickListener {
             Settings.System.putInt(mContext.getContentResolver(),
                     Settings.System.LOCK_TO_APP_EXIT_LOCKED,
                     mCheckbox != null && mCheckbox.isChecked() ? 1 : 0);
+
+            Settings.System.putInt(mContext.getContentResolver(),
+                    Settings.System.LOCK_TO_APP_HIDE_DIALOG,
+                    mHideCheckbox != null && mHideCheckbox.isChecked() ? 1 : 0);
 
             // Start lock-to-app.
             mService.startLockTaskMode(mRequestedTask);
