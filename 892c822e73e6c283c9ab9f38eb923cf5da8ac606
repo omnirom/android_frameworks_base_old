@@ -1,0 +1,21 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "6b22818b_9f7b6bf0",
+        "filename": "packages/SystemUI/src/com/android/systemui/statusbar/phone/DozeParameters.java",
+        "patchSetId": 22
+      },
+      "lineNbr": 138,
+      "author": {
+        "id": 1000026
+      },
+      "writtenOn": "2015-02-14T23:01:08Z",
+      "side": 1,
+      "message": "I would guess because of this :)",
+      "revId": "892c822e73e6c283c9ab9f38eb923cf5da8ac606",
+      "serverId": "56841c99-7c94-43d4-bf0b-cb4707e66d55",
+      "unresolved": false
+    }
+  ]
+}
