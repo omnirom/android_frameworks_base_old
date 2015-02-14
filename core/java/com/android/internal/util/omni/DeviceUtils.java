@@ -108,13 +108,14 @@ public class DeviceUtils {
         return sm.getDefaultSensor(TYPE_LIGHT) != null;
     }
 
-    /*public static boolean deviceSupportNavigationBar(Context context) {
+    public static boolean deviceSupportNavigationBar(Context context) {
         final boolean showByDefault = context.getResources().getBoolean(
                 com.android.internal.R.bool.config_showNavigationBar);
-        final int hasNavigationBar = Settings.System.getIntForUser(
+        final int hasNavigationBar = -1;
+        /*final int hasNavigationBar = Settings.System.getIntForUser(
                 context.getContentResolver(),
                 Settings.System.NAVIGATION_BAR_SHOW, -1,
-                UserHandle.USER_CURRENT);
+                UserHandle.USER_CURRENT);*/
 
         if (hasNavigationBar == -1) {
             String navBarOverride = SystemProperties.get("qemu.hw.mainkeys");
@@ -128,7 +129,7 @@ public class DeviceUtils {
         } else {
             return hasNavigationBar == 1;
         }
-    }*/
+    }
 
     private static int getScreenType(Context con) {
         WindowManager wm = (WindowManager)con.getSystemService(Context.WINDOW_SERVICE);
