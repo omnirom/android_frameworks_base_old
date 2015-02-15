@@ -1157,7 +1157,7 @@ public class PhoneWindowManager implements WindowManagerPolicy {
                 mBackKillPending = true;
                 break;
             case KEY_ACTION_LAST_APP:
-                TaskUtils.toggleLastApp(mContext);
+                TaskUtils.toggleLastApp(mContext, mCurrentUserId);
                 break;
             case KEY_ACTION_SLEEP:
                 mPowerManager.goToSleep(SystemClock.uptimeMillis());

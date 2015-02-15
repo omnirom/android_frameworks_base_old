@@ -18,28 +18,32 @@
 
 package com.android.internal.util.omni;
 
+import android.app.Activity;
+import android.app.ActivityOptions;
+import android.app.ActivityManager;
+import android.app.ActivityManager.RunningAppProcessInfo;
+import android.content.ActivityNotFoundException;
 import android.content.Context;
 import android.content.Intent;
-import android.os.Process;
-import android.os.UserHandle;
-import android.app.Activity;
 import android.content.pm.ActivityInfo;
 import android.content.pm.PackageManager;
 import android.content.pm.ResolveInfo;
-import android.content.ActivityNotFoundException;
-import android.app.ActivityManager;
-import android.app.ActivityManager.RunningAppProcessInfo;
+import android.os.Process;
+import android.os.UserHandle;
 import android.util.Log;
 
 import java.util.List;
 
 public class TaskUtils {
 
+    private static final String SYSTEMUI_PACKAGE = "com.android.systemui";
+
     public static boolean killActiveTask(final Context context){
         final Intent intent = new Intent(Intent.ACTION_MAIN);
         String defaultHomePackage = "com.android.launcher";
         intent.addCategory(Intent.CATEGORY_HOME);
-        final ResolveInfo res = context.getPackageManager().resolveActivity(intent, 0);
+        final PackageManager pm = context.getPackageManager();
+        final ResolveInfo res = pm.resolveActivity(intent, 0);
         if (res.activityInfo != null && !res.activityInfo.packageName.equals("android")) {
             defaultHomePackage = res.activityInfo.packageName;
         }
@@ -55,7 +59,7 @@ public class TaskUtils {
                     && appInfo.importance == RunningAppProcessInfo.IMPORTANCE_FOREGROUND) {
                 if (appInfo.pkgList != null && (appInfo.pkgList.length > 0)) {
                     for (String pkg : appInfo.pkgList) {
-                        if (!pkg.equals("com.android.systemui")
+                        if (!pkg.equals(SYSTEMUI_PACKAGE)
                                 && !pkg.equals(defaultHomePackage)) {
                             am.forceStopPackage(pkg);
                             targetKilled = true;
@@ -74,32 +78,37 @@ public class TaskUtils {
         return false;
     }
 
-    public static void toggleLastApp(final Context context){
+    public static void toggleLastApp(final Context context, int userId){
         final Intent intent = new Intent(Intent.ACTION_MAIN);
         final ActivityManager am = (ActivityManager) context
                 .getSystemService(Activity.ACTIVITY_SERVICE);
         String defaultHomePackage = "com.android.launcher";
         intent.addCategory(Intent.CATEGORY_HOME);
-        final ResolveInfo res = context.getPackageManager().resolveActivity(intent, 0);
+        final PackageManager pm = context.getPackageManager();
+        final ResolveInfo res = pm.resolveActivityAsUser(intent, 0, userId);
         if (res.activityInfo != null && !res.activityInfo.packageName.equals("android")) {
             defaultHomePackage = res.activityInfo.packageName;
         }
         final List<ActivityManager.RecentTaskInfo> tasks =
-                am.getRecentTasks(5, ActivityManager.RECENT_IGNORE_UNAVAILABLE);
+                am.getRecentTasks(5, ActivityManager.RECENT_IGNORE_UNAVAILABLE, userId);
         // lets get enough tasks to find something to switch to
         // Note, we'll only get as many as the system currently has - up to 5
         int lastAppId = 0;
         Intent lastAppIntent = null;
         for (int i = 1; i < tasks.size() && lastAppIntent == null; i++) {
             final String packageName = tasks.get(i).baseIntent.getComponent().getPackageName();
-            if (!packageName.equals(defaultHomePackage) && !packageName.equals("com.android.systemui")) {
+            if (!packageName.equals(defaultHomePackage)
+                     && !packageName.equals(SYSTEMUI_PACKAGE)) {
                 final ActivityManager.RecentTaskInfo info = tasks.get(i);
                 lastAppId = info.id;
                 lastAppIntent = info.baseIntent;
             }
         }
         if (lastAppId > 0) {
-            am.moveTaskToFront(lastAppId, am.MOVE_TASK_NO_USER_ACTION);
+            final ActivityOptions opts = ActivityOptions.makeCustomAnimation(context,
+                  com.android.internal.R.anim.last_app_in,
+                  com.android.internal.R.anim.last_app_out);
+            am.moveTaskToFront(lastAppId, am.MOVE_TASK_NO_USER_ACTION, opts.toBundle());
         } else if (lastAppIntent != null) {
             // last task is dead, restart it.
             lastAppIntent.addFlags(Intent.FLAG_ACTIVITY_LAUNCHED_FROM_HISTORY);
@@ -112,44 +121,30 @@ public class TaskUtils {
     }
 
     public static int getPackagePersistentId(String packageName, Context context) {
-        Context mContext = context;
-
-        final ActivityManager am = (ActivityManager) mContext
+        final ActivityManager am = (ActivityManager) context
             .getSystemService(Context.ACTIVITY_SERVICE);
 
         List<ActivityManager.RecentTaskInfo> mTasks =
             am.getRecentTasks(Integer.MAX_VALUE, ActivityManager.RECENT_IGNORE_UNAVAILABLE);
 
-        for (int i = 0; i < mTasks.size(); i++)
-        {
-            String name = mTasks.get(i).baseIntent
-                .getComponent().getPackageName();
-
-            if(name.equals(packageName)) {
+        for (int i = 0; i < mTasks.size(); i++) {
+            String name = mTasks.get(i).baseIntent.getComponent().getPackageName();
+            if (name.equals(packageName)) {
                 return mTasks.get(i).persistentId;
             }
         }
-
         return -1;
     }
 
     public static void killPackageProcess(int mId, Context context) {
-
-        Context mContext = context;
-
-        final ActivityManager am = (ActivityManager) mContext
+        final ActivityManager am = (ActivityManager) context
             .getSystemService(Context.ACTIVITY_SERVICE);
-
         am.removeTask(mId, ActivityManager.REMOVE_TASK_KILL_PROCESS);
     }
 
     public static void movePackageToFront(int mId, Context context) {
-
-        Context mContext = context;
-
-        final ActivityManager am = (ActivityManager) mContext
+        final ActivityManager am = (ActivityManager) context
             .getSystemService(Context.ACTIVITY_SERVICE);
-
         am.moveTaskToFront(mId, ActivityManager.MOVE_TASK_WITH_HOME);
     }
 }
