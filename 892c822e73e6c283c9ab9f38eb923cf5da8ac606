@@ -16,6 +16,24 @@
       "revId": "892c822e73e6c283c9ab9f38eb923cf5da8ac606",
       "serverId": "56841c99-7c94-43d4-bf0b-cb4707e66d55",
       "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "6b22818b_9fea8b71",
+        "filename": "packages/SystemUI/src/com/android/systemui/statusbar/phone/DozeParameters.java",
+        "patchSetId": 22
+      },
+      "lineNbr": 138,
+      "author": {
+        "id": 1000313
+      },
+      "writtenOn": "2015-02-15T03:41:02Z",
+      "side": 1,
+      "message": "No, see getPulseSchedule() :)",
+      "parentUuid": "6b22818b_9f7b6bf0",
+      "revId": "892c822e73e6c283c9ab9f38eb923cf5da8ac606",
+      "serverId": "56841c99-7c94-43d4-bf0b-cb4707e66d55",
+      "unresolved": false
     }
   ]
 }
