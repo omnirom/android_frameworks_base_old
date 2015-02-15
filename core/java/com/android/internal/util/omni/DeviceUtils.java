@@ -50,6 +50,14 @@ public class DeviceUtils {
     public static final int DEVICE_HYBRID = 1;
     public static final int DEVICE_TABLET = 2;
 
+    public static int dpToPx(Context context, int dp) {
+        return (int) ((dp * context.getResources().getDisplayMetrics().density) + 0.5);
+    }
+
+    public static int pxToDp(Context context, int px) {
+        return (int) ((px / context.getResources().getDisplayMetrics().density) + 0.5);
+    }
+
     public static boolean deviceSupportsUsbTether(Context context) {
         ConnectivityManager cm =
             (ConnectivityManager) context.getSystemService(Context.CONNECTIVITY_SERVICE);
@@ -108,7 +116,7 @@ public class DeviceUtils {
         return sm.getDefaultSensor(TYPE_LIGHT) != null;
     }
 
-    /*public static boolean deviceSupportNavigationBar(Context context) {
+    public static boolean deviceSupportNavigationBar(Context context) {
         final boolean showByDefault = context.getResources().getBoolean(
                 com.android.internal.R.bool.config_showNavigationBar);
         final int hasNavigationBar = Settings.System.getIntForUser(
@@ -128,7 +136,7 @@ public class DeviceUtils {
         } else {
             return hasNavigationBar == 1;
         }
-    }*/
+    }
 
     private static int getScreenType(Context con) {
         WindowManager wm = (WindowManager)con.getSystemService(Context.WINDOW_SERVICE);
