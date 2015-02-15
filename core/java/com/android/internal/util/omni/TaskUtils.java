@@ -18,17 +18,18 @@
 
 package com.android.internal.util.omni;
 
+import android.app.Activity;
+import android.app.ActivityOptions;
+import android.app.ActivityManager;
+import android.app.ActivityManager.RunningAppProcessInfo;
+import android.content.ActivityNotFoundException;
 import android.content.Context;
 import android.content.Intent;
-import android.os.Process;
-import android.os.UserHandle;
-import android.app.Activity;
 import android.content.pm.ActivityInfo;
 import android.content.pm.PackageManager;
 import android.content.pm.ResolveInfo;
-import android.content.ActivityNotFoundException;
-import android.app.ActivityManager;
-import android.app.ActivityManager.RunningAppProcessInfo;
+import android.os.Process;
+import android.os.UserHandle;
 import android.util.Log;
 
 import java.util.List;
@@ -99,7 +100,10 @@ public class TaskUtils {
             }
         }
         if (lastAppId > 0) {
-            am.moveTaskToFront(lastAppId, am.MOVE_TASK_NO_USER_ACTION);
+            final ActivityOptions opts = ActivityOptions.makeCustomAnimation(context,
+                  com.android.internal.R.anim.last_app_in,
+                  com.android.internal.R.anim.last_app_out);
+            am.moveTaskToFront(lastAppId, am.MOVE_TASK_NO_USER_ACTION, opts.toBundle());
         } else if (lastAppIntent != null) {
             // last task is dead, restart it.
             lastAppIntent.addFlags(Intent.FLAG_ACTIVITY_LAUNCHED_FROM_HISTORY);
@@ -112,44 +116,30 @@ public class TaskUtils {
     }
 
     public static int getPackagePersistentId(String packageName, Context context) {
-        Context mContext = context;
-
-        final ActivityManager am = (ActivityManager) mContext
+        final ActivityManager am = (ActivityManager) context
             .getSystemService(Context.ACTIVITY_SERVICE);
 
         List<ActivityManager.RecentTaskInfo> mTasks =
             am.getRecentTasks(Integer.MAX_VALUE, ActivityManager.RECENT_IGNORE_UNAVAILABLE);
 
-        for (int i = 0; i < mTasks.size(); i++)
-        {
-            String name = mTasks.get(i).baseIntent
-                .getComponent().getPackageName();
-
-            if(name.equals(packageName)) {
+        for (int i = 0; i < mTasks.size(); i++) {
+            String name = mTasks.get(i).baseIntent.getComponent().getPackageName();
+            if (name.equals(packageName)) {
                 return mTasks.get(i).persistentId;
             }
         }
-
         return -1;
     }
 
     public static void killPackageProcess(int mId, Context context) {
-
-        Context mContext = context;
-
-        final ActivityManager am = (ActivityManager) mContext
+        final ActivityManager am = (ActivityManager) context
             .getSystemService(Context.ACTIVITY_SERVICE);
-
         am.removeTask(mId, ActivityManager.REMOVE_TASK_KILL_PROCESS);
     }
 
     public static void movePackageToFront(int mId, Context context) {
-
-        Context mContext = context;
-
-        final ActivityManager am = (ActivityManager) mContext
+        final ActivityManager am = (ActivityManager) context
             .getSystemService(Context.ACTIVITY_SERVICE);
-
         am.moveTaskToFront(mId, ActivityManager.MOVE_TASK_WITH_HOME);
     }
 }
