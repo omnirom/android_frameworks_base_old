@@ -33,6 +33,24 @@
       "revId": "e77da568cb0a4fea5c7724630e924d616834b25b",
       "serverId": "56841c99-7c94-43d4-bf0b-cb4707e66d55",
       "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "6b22818b_1ac7894c",
+        "filename": "core/java/com/android/internal/util/omni/TaskUtils.java",
+        "patchSetId": 3
+      },
+      "lineNbr": 141,
+      "author": {
+        "id": 1000026
+      },
+      "writtenOn": "2015-02-16T15:00:34Z",
+      "side": 1,
+      "message": "But this makes more sense then the one above so its fine for me. Just you dont need that separation in internal and public",
+      "parentUuid": "6b22818b_bab755d3",
+      "revId": "e77da568cb0a4fea5c7724630e924d616834b25b",
+      "serverId": "56841c99-7c94-43d4-bf0b-cb4707e66d55",
+      "unresolved": false
     }
   ]
 }
