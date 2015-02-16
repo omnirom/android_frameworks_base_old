@@ -19,6 +19,24 @@
     },
     {
       "key": {
+        "uuid": "6b22818b_baef5580",
+        "filename": "core/java/com/android/internal/util/omni/TaskUtils.java",
+        "patchSetId": 6
+      },
+      "lineNbr": 45,
+      "author": {
+        "id": 1000313
+      },
+      "writtenOn": "2015-02-16T20:55:58Z",
+      "side": 1,
+      "message": "This now using IActivityManager and need to catch or throws remoteexception to fix build and also to make it simple :)",
+      "parentUuid": "6b22818b_3ad365da",
+      "revId": "885a70656b8228d90ec89301ae3f5b55f2e84a44",
+      "serverId": "56841c99-7c94-43d4-bf0b-cb4707e66d55",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "6b22818b_5ae02195",
         "filename": "core/java/com/android/internal/util/omni/TaskUtils.java",
         "patchSetId": 6
@@ -36,6 +54,24 @@
         "endLine": 89,
         "endChar": 23
       },
+      "revId": "885a70656b8228d90ec89301ae3f5b55f2e84a44",
+      "serverId": "56841c99-7c94-43d4-bf0b-cb4707e66d55",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "6b22818b_dae411a7",
+        "filename": "core/java/com/android/internal/util/omni/TaskUtils.java",
+        "patchSetId": 6
+      },
+      "lineNbr": 89,
+      "author": {
+        "id": 1000313
+      },
+      "writtenOn": "2015-02-16T20:55:58Z",
+      "side": 1,
+      "message": "Same above xD",
+      "parentUuid": "6b22818b_5ae02195",
       "revId": "885a70656b8228d90ec89301ae3f5b55f2e84a44",
       "serverId": "56841c99-7c94-43d4-bf0b-cb4707e66d55",
       "unresolved": false
