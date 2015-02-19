@@ -25,7 +25,7 @@
         android:layout_height="wrap_content"
         android:layout_width="match_parent"
         android:orientation="horizontal"
-        android:background="@color/system_secondary_color"
+        android:background="@color/volume_panel_background_color"
         android:paddingTop="8dp"
         android:paddingBottom="8dp"
         android:gravity="top" >
