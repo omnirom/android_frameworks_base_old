@@ -18,9 +18,13 @@ package com.android.systemui.qs.tiles;
 
 import android.content.Intent;
 import android.provider.Settings;
+import android.content.BroadcastReceiver;
+import android.content.Context;
+import android.content.Intent;
 
 import com.android.systemui.R;
 import com.android.systemui.qs.QSTile;
+import com.android.systemui.qs.UsageTracker;
 import com.android.systemui.statusbar.policy.KeyguardMonitor;
 import com.android.systemui.statusbar.policy.LocationController;
 import com.android.systemui.statusbar.policy.LocationController.LocationSettingsChangeCallback;
@@ -37,11 +41,21 @@ public class LocationTile extends QSTile<QSTile.BooleanState> {
     private final LocationController mController;
     private final KeyguardMonitor mKeyguard;
     private final Callback mCallback = new Callback();
+    private final UsageTracker mUsageTracker;
 
     public LocationTile(Host host) {
         super(host);
         mController = host.getLocationController();
         mKeyguard = host.getKeyguardMonitor();
+        mUsageTracker = new UsageTracker(host.getContext(), LocationTile.class,
+               R.integer.days_to_show_location_tile);
+        mUsageTracker.setListening(true);
+    }
+
+    @Override
+    protected void handleDestroy() {
+        super.handleDestroy();
+        mUsageTracker.setListening(false);
     }
 
     @Override
@@ -80,7 +94,7 @@ public class LocationTile extends QSTile<QSTile.BooleanState> {
         // Work around for bug 15916487: don't show location tile on top of lock screen. After the
         // bug is fixed, this should be reverted to only hiding it on secure lock screens:
         // state.visible = !(mKeyguard.isSecure() && mKeyguard.isShowing());
-        state.visible = !mKeyguard.isShowing();
+        state.visible = !mKeyguard.isShowing() && mUsageTracker.isRecentlyUsed();
         state.value = locationEnabled;
         if (locationEnabled) {
             state.icon = mEnable;
@@ -116,4 +130,20 @@ public class LocationTile extends QSTile<QSTile.BooleanState> {
             refreshState();
         }
     };
+
+    /**
+     * This will catch broadcasts for changes in location state so we can show
+     * the location tile for a number of days after use.
+     */
+    public static class LocationChangedReceiver extends BroadcastReceiver {
+        private UsageTracker mUsageTracker;
+
+        @Override
+        public void onReceive(Context context, Intent intent) {
+            if (mUsageTracker == null) {
+                mUsageTracker = new UsageTracker(context);
+            }
+            mUsageTracker.trackUsage();
+        }
+    }
 }
