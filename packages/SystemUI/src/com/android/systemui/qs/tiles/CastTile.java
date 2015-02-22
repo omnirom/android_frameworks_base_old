@@ -16,6 +16,7 @@
 
 package com.android.systemui.qs.tiles;
 
+import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.Intent;
 import android.provider.Settings;
@@ -25,6 +26,7 @@ import android.view.View.OnAttachStateChangeListener;
 import android.view.ViewGroup;
 
 import com.android.systemui.R;
+import com.android.systemui.qs.UsageTracker;
 import com.android.systemui.qs.QSDetailItems;
 import com.android.systemui.qs.QSDetailItems.Item;
 import com.android.systemui.qs.QSTile;
@@ -44,12 +46,24 @@ public class CastTile extends QSTile<QSTile.BooleanState> {
     private final CastDetailAdapter mDetailAdapter;
     private final KeyguardMonitor mKeyguard;
     private final Callback mCallback = new Callback();
+    private final UsageTracker mUsageTracker;
+
 
     public CastTile(Host host) {
         super(host);
         mController = host.getCastController();
         mDetailAdapter = new CastDetailAdapter();
         mKeyguard = host.getKeyguardMonitor();
+        mUsageTracker = new UsageTracker(host.getContext(), CastTile.class,
+                R.integer.days_to_show_cast_tile);
+        mUsageTracker.setListening(true);
+
+    }
+
+    @Override
+    protected void handleDestroy() {
+        super.handleDestroy();
+        mUsageTracker.setListening(false);
     }
 
     @Override
@@ -90,7 +104,7 @@ public class CastTile extends QSTile<QSTile.BooleanState> {
 
     @Override
     protected void handleUpdateState(BooleanState state, Object arg) {
-        state.visible = !(mKeyguard.isSecure() && mKeyguard.isShowing());
+        state.visible = !(mKeyguard.isSecure() && mKeyguard.isShowing()) && mUsageTracker.isRecentlyUsed();
         state.label = mContext.getString(R.string.quick_settings_cast_title);
         state.value = false;
         state.autoMirrorDrawable = false;
@@ -245,4 +259,21 @@ public class CastTile extends QSTile<QSTile.BooleanState> {
             mController.stopCasting(device);
         }
     }
+
+    /**
+     * This will catch broadcasts for changes in cast state so we can show
+     * the cast tile for a number of days after use.
+     */
+    public static class CastTileChangedReceiver extends BroadcastReceiver {
+        private UsageTracker mUsageTracker;
+
+        @Override
+        public void onReceive(Context context, Intent intent) {
+            if (mUsageTracker == null) {
+                mUsageTracker = new UsageTracker(context, CastTile.class);
+            }
+            mUsageTracker.trackUsage();
+        }
+    }
+
 }
