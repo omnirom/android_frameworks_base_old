@@ -287,6 +287,13 @@
     <!-- Color inversion tile: number of days to show after feature is used. -->
     <integer name="days_to_show_color_inversion_tile">7</integer>
 
+    <!-- Location tile: number of days to show after feature is used. -->
+    <integer name="days_to_show_location_tile">5</integer>
+
+    <!-- Cast tile: number of days to show after feature is used. -->
+    <integer name="days_to_show_cast_tile">3</integer>
+
+
     <!-- Number of times to show the strong alarm warning text in the volume dialog -->
     <integer name="zen_mode_alarm_warning_threshold">5</integer>
 
