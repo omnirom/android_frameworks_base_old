@@ -22,5 +22,11 @@
 <resources>
     <!-- Doze: shake accelerometer threshold minimum is 2 and maximum is 10-->
     <integer name="doze_shake_accelerometer_threshold">10</integer>
+
+    <!-- Location tile: number of days to show after feature is used. -->
+    <integer name="days_to_show_location_tile">5</integer>
+
+    <!-- Cast tile: number of days to show after feature is used. -->
+    <integer name="days_to_show_cast_tile">3</integer>
 </resources>
 
