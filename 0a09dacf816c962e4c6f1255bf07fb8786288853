@@ -87,6 +87,23 @@
     },
     {
       "key": {
+        "uuid": "6b22818b_c42193af",
+        "filename": "packages/SystemUI/res/layout/notification_public_default.xml",
+        "patchSetId": 4
+      },
+      "lineNbr": 34,
+      "author": {
+        "id": 1000026
+      },
+      "writtenOn": "2015-02-24T23:47:36Z",
+      "side": 1,
+      "message": "tabs - also below",
+      "revId": "0a09dacf816c962e4c6f1255bf07fb8786288853",
+      "serverId": "56841c99-7c94-43d4-bf0b-cb4707e66d55",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "6b22818b_64329f09",
         "filename": "packages/SystemUI/res/layout/status_bar_expanded_header.xml",
         "patchSetId": 4
