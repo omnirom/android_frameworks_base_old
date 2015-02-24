@@ -1,0 +1,123 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "6b22818b_447763d0",
+        "filename": "core/res/res/layout/notification_material_action.xml",
+        "patchSetId": 4
+      },
+      "lineNbr": 28,
+      "author": {
+        "id": 1000008
+      },
+      "writtenOn": "2015-02-24T23:33:57Z",
+      "side": 1,
+      "message": "Perhaps the solution here is to point exposed_notify_action_text forwards to secondary_text_material_light like CM did, instead of putting a fixed hex value in colors.xml for this\n\nThen it\u0027s up to the themer not to replace a state color with a fixed one",
+      "revId": "0a09dacf816c962e4c6f1255bf07fb8786288853",
+      "serverId": "56841c99-7c94-43d4-bf0b-cb4707e66d55",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "6b22818b_64845fa5",
+        "filename": "core/res/res/values/colors.xml",
+        "patchSetId": 4
+      },
+      "lineNbr": 171,
+      "author": {
+        "id": 1000008
+      },
+      "writtenOn": "2015-02-24T23:33:57Z",
+      "side": 1,
+      "message": "We might be OK if this points forward to secondary_text_material_dark instead of just ff212121",
+      "revId": "0a09dacf816c962e4c6f1255bf07fb8786288853",
+      "serverId": "56841c99-7c94-43d4-bf0b-cb4707e66d55",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "6b22818b_2463470d",
+        "filename": "core/res/res/values/colors.xml",
+        "patchSetId": 4
+      },
+      "lineNbr": 172,
+      "author": {
+        "id": 1000008
+      },
+      "writtenOn": "2015-02-24T23:33:57Z",
+      "side": 1,
+      "message": "Maybe just point this to color/black instead of raw hex just to be sure?",
+      "revId": "0a09dacf816c962e4c6f1255bf07fb8786288853",
+      "serverId": "56841c99-7c94-43d4-bf0b-cb4707e66d55",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "6b22818b_c4535343",
+        "filename": "core/res/res/values/styles_material.xml",
+        "patchSetId": 4
+      },
+      "lineNbr": 423,
+      "author": {
+        "id": 1000008
+      },
+      "writtenOn": "2015-02-24T23:33:57Z",
+      "side": 1,
+      "message": "Same state color issue as with notify action text, resolution TBD...",
+      "revId": "0a09dacf816c962e4c6f1255bf07fb8786288853",
+      "serverId": "56841c99-7c94-43d4-bf0b-cb4707e66d55",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "6b22818b_e4484f8e",
+        "filename": "core/res/res/values/styles_material.xml",
+        "patchSetId": 4
+      },
+      "lineNbr": 429,
+      "author": {
+        "id": 1000008
+      },
+      "writtenOn": "2015-02-24T23:33:57Z",
+      "side": 1,
+      "message": "Another potential state color issue",
+      "revId": "0a09dacf816c962e4c6f1255bf07fb8786288853",
+      "serverId": "56841c99-7c94-43d4-bf0b-cb4707e66d55",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "6b22818b_845a3b50",
+        "filename": "packages/SystemUI/res/values/styles.xml",
+        "patchSetId": 4
+      },
+      "lineNbr": 108,
+      "author": {
+        "id": 1000008
+      },
+      "writtenOn": "2015-02-24T23:33:57Z",
+      "side": 1,
+      "message": "This one is b2ffffff, but secondary_text_dark is defined as b3ffffff (probably a typo here...)",
+      "revId": "0a09dacf816c962e4c6f1255bf07fb8786288853",
+      "serverId": "56841c99-7c94-43d4-bf0b-cb4707e66d55",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "6b22818b_a433b710",
+        "filename": "packages/SystemUI/res/values/styles.xml",
+        "patchSetId": 4
+      },
+      "lineNbr": 115,
+      "author": {
+        "id": 1000008
+      },
+      "writtenOn": "2015-02-24T23:33:57Z",
+      "side": 1,
+      "message": "secondary_text_dark is b3ffffff, this is 66ffffff - problem!",
+      "revId": "0a09dacf816c962e4c6f1255bf07fb8786288853",
+      "serverId": "56841c99-7c94-43d4-bf0b-cb4707e66d55",
+      "unresolved": false
+    }
+  ]
+}
