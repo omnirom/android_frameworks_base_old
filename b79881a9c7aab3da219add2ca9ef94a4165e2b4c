@@ -2,6 +2,23 @@
   "comments": [
     {
       "key": {
+        "uuid": "6b22818b_a465771c",
+        "filename": "core/res/res/values/colors.xml",
+        "patchSetId": 3
+      },
+      "lineNbr": 171,
+      "author": {
+        "id": 1000008
+      },
+      "writtenOn": "2015-02-24T23:00:28Z",
+      "side": 1,
+      "message": "It appears that colors can point to other colors, why not point this to secondary_text_material_light, and themers can redefine it?\n\nCould be a problem though if a themer overrides a \"state color\" with one that is hardcoded...",
+      "revId": "b79881a9c7aab3da219add2ca9ef94a4165e2b4c",
+      "serverId": "56841c99-7c94-43d4-bf0b-cb4707e66d55",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "6b22818b_e81bcb7f",
         "filename": "core/res/res/values/styles_material.xml",
         "patchSetId": 3
