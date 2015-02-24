@@ -1,0 +1,27 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "6b22818b_e43dafda",
+        "filename": "packages/SystemUI/res/layout/volume_panel.xml",
+        "patchSetId": 4
+      },
+      "lineNbr": 27,
+      "author": {
+        "id": 1000026
+      },
+      "writtenOn": "2015-02-24T23:40:25Z",
+      "side": 0,
+      "message": "#ff384248",
+      "range": {
+        "startLine": 27,
+        "startChar": 36,
+        "endLine": 27,
+        "endChar": 44
+      },
+      "revId": "7b424056bf64da61de799886f137cbc9c36d3b96",
+      "serverId": "56841c99-7c94-43d4-bf0b-cb4707e66d55",
+      "unresolved": false
+    }
+  ]
+}

@@ -87,6 +87,23 @@
     },
     {
       "key": {
+        "uuid": "6b22818b_0443ab69",
+        "filename": "packages/SystemUI/res/layout/volume_panel.xml",
+        "patchSetId": 4
+      },
+      "lineNbr": 27,
+      "author": {
+        "id": 1000026
+      },
+      "writtenOn": "2015-02-24T23:40:25Z",
+      "side": 1,
+      "message": "\u003ccolor name\u003d\"exposed_volume_panel\"\u003e#ff263238\u003c/color\u003e",
+      "revId": "0a09dacf816c962e4c6f1255bf07fb8786288853",
+      "serverId": "56841c99-7c94-43d4-bf0b-cb4707e66d55",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "6b22818b_845a3b50",
         "filename": "packages/SystemUI/res/values/styles.xml",
         "patchSetId": 4
