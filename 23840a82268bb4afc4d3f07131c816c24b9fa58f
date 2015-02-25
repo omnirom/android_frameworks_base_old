@@ -1,0 +1,21 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "6b22818b_640b7f2d",
+        "filename": "core/res/res/values/colors.xml",
+        "patchSetId": 1
+      },
+      "lineNbr": 171,
+      "author": {
+        "id": 1000008
+      },
+      "writtenOn": "2015-02-25T00:18:05Z",
+      "side": 1,
+      "message": "We should probably not change this and rename the XML to point to the existing value now that I think about it.\n\nThis patch is more consistent with Google\u0027s conventions BUT swapping the names around will make it more compatible with existing overlays.",
+      "revId": "23840a82268bb4afc4d3f07131c816c24b9fa58f",
+      "serverId": "56841c99-7c94-43d4-bf0b-cb4707e66d55",
+      "unresolved": false
+    }
+  ]
+}
