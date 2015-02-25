@@ -14,8 +14,8 @@
   ~ See the License for the specific language governing permissions and
   ~ limitations under the License
   -->
-  
-  <!-- Textcolor exposed for theming -->
+
+<!-- Textcolor exposed for theming -->
 
 <Button xmlns:android="http://schemas.android.com/apk/res/android"
     style="@android:style/Widget.Material.Light.Button.Borderless.Small"

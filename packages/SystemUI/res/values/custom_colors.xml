@@ -1,0 +1,48 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!--
+/*
+ * Copyright 2010, The Android Open Source Project
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *     http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+-->
+<resources>
+    <!-- Exposed resources for theming -->
+    <color name="exposed_bg_light">#ff000000</color>
+    <color name="exposed_volume_panel">#ff384248</color>
+    <color name="exposed_primary_text_light">#de000000</color>
+    <color name="exposed_secondary_text_light">#8a000000</color>
+    <color name="exposed_TextAppearance.Material.Notification.Parenthetical">#ff7e7d7d</color>
+    <color name="exposed_system_panel_text_light">#ff7e7d7d</color>
+    <color name="exposed_TextAppearance.StatusBar.TextButton">#ffffffff</color>
+    <color name="exposed_primary_text_dark">#ffffffff</color>
+    <color name="exposed_secondary_text_dark">#b2ffffff</color>
+    <color name="exposed_button">#64ffffff</color>
+    <color name="exposed_TextAppearance_Network">#ff7e7d7d</color>
+    <color name="exposed_batt_text">#ffffffff</color>
+    <color name="exposed_kg_indication_text">#ffffffff</color>
+    <color name="exposed_kg_camera_button">#ffffffff</color>
+    <color name="exposed_kg_phone_button">#ffffffff</color>
+    <color name="exposed_kg_lock_icon">#ffffffff</color>
+    <color name="exposed_kg_batt_level">#ffffffff</color>
+    <color name="exposed_kg_carrier_text">#ffffffff</color>
+    <color name="exposed_recents_search_bar_label">#99ffffff</color>
+    <color name="exposed_no_notify">#ffffffff</color>
+    <color name="exposed_more_text">#ff686868</color>
+    <color name="exposed_speedbump_line">#6fdddddd</color>
+    <color name="exposed_toggle">#ff666666</color>
+    <color name="exposed_segmented_button_text_selector">#ffffffff</color>
+    <color name="exposed_qs_user_detail_name">#66ffffff</color>
+    <color name="exposed_headsup_scrim_start">#55000000</color>
+    <color name="exposed_headsup_scrim_end">#00000000</color>
+</resources>
