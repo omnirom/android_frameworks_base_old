@@ -1,0 +1,21 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "6b22818b_e703f10f",
+        "filename": "core/res/res/layout/notification_material_action.xml",
+        "patchSetId": 4
+      },
+      "lineNbr": 17,
+      "author": {
+        "id": 1000008
+      },
+      "writtenOn": "2015-02-25T02:50:41Z",
+      "side": 1,
+      "message": "whoops should remove this part of the revert",
+      "revId": "62fb88a318191c9506d45234b15a7790f713d01c",
+      "serverId": "56841c99-7c94-43d4-bf0b-cb4707e66d55",
+      "unresolved": false
+    }
+  ]
+}
