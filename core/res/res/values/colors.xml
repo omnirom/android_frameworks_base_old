@@ -168,7 +168,7 @@
     <color name="exposed_secondary_text_dark">#b3ffffff</color>
     <color name="exposed_notification_big_pic_bg">#cceeeeee</color>
     <color name="exposed_resolver_list_bg">#ffffffff</color>
-    <color name="exposed_notify_action_text">#ff212121</color>
+    <color name="default_exposed_notify_action_text">#ff212121</color>
     <color name="exposed_navigation_bar">#000000</color>
     <color name="exposed_TextAppearance.StatusBar.EventContent">#999999</color>
     <color name="exposed_TextAppearance.StatusBar.EventContent.Emphasis">#CCCCCC</color>
