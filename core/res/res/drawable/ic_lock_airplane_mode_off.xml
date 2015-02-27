@@ -17,7 +17,13 @@
  */
 -->
 
-<bitmap xmlns:android="http://schemas.android.com/apk/res/android"
-    android:src="@drawable/ic_lock_airplane_mode_off_am_alpha"
-    android:autoMirrored="true"
-    android:tint="?attr/colorControlNormal" />
+<selector xmlns:android="http://schemas.android.com/apk/res/android" >
+    <item android:state_pressed="true"
+        android:drawable="@drawable/ic_lock_airplane_mode_off_am_alpha"/>
+    <item>
+        <bitmap
+            android:src="@drawable/ic_lock_airplane_mode_off_am_alpha"
+            android:tint="?attr/colorControlNormal" />
+    </item>
+</selector>
+
