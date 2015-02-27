@@ -18,18 +18,8 @@
 */
 -->
 <resources xmlns:xliff="urn:oasis:names:tc:xliff:document:1.2">
-    <!-- Reboot -->
-    <string name="global_action_reboot">Reboot</string>
-    <string name="global_action_reboot_more">Reboot\u2026</string>
-    <string name="global_action_reboot_sub">System</string>
-    <string name="global_action_reboot_recovery">Recovery</string>
-    <string name="global_action_reboot_bootloader">Bootloader</string>
-    <string name="global_action_current_user">Current</string>
-
-    <!-- HW button mapping -->
-    <string name="app_killed_message">App killed</string>
-
-    <string name="hide_lock_to_app_dialog">Always start</string>
-    <string name="silent_mode_priority">Priority</string>
-    <string name="silent_mode_none">None</string>
+    <style name="GlobalActionsAnimation">
+        <item name="windowEnterAnimation">@anim/slide_in_up</item>
+        <item name="windowExitAnimation">@anim/slide_out_down</item>
+    </style>
 </resources>
