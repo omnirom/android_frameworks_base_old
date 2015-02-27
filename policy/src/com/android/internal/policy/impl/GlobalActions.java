@@ -61,6 +61,7 @@ import android.text.TextUtils;
 import android.util.ArraySet;
 import android.util.Log;
 import android.util.TypedValue;
+import android.view.Gravity;
 import android.view.InputDevice;
 import android.view.KeyEvent;
 import android.view.LayoutInflater;
@@ -221,6 +222,8 @@ class GlobalActions implements DialogInterface.OnDismissListener, DialogInterfac
         } else {
             WindowManager.LayoutParams attrs = mDialog.getWindow().getAttributes();
             attrs.setTitle("GlobalActions");
+            attrs.windowAnimations = R.style.GlobalActionsAnimation;
+            attrs.gravity = Gravity.BOTTOM|Gravity.CENTER_HORIZONTAL;
             mDialog.getWindow().setAttributes(attrs);
             mDialog.show();
             mDialog.getWindow().getDecorView().setSystemUiVisibility(View.STATUS_BAR_DISABLE_EXPAND);
@@ -293,8 +296,41 @@ class GlobalActions implements DialogInterface.OnDismissListener, DialogInterfac
         };
         onAirplaneModeChanged();
 
-        mItems = new ArrayList<Action>();
+        buildMenuList();
 
+        mAdapter = new MyAdapter();
+
+        AlertParams params = new AlertParams(mContext);
+        params.mAdapter = mAdapter;
+        params.mOnClickListener = this;
+        params.mForceInverseBackground = true;
+
+        GlobalActionsDialog dialog = new GlobalActionsDialog(mContext, params);
+        dialog.setCanceledOnTouchOutside(false); // Handled by the custom class.
+
+        dialog.getListView().setItemsCanFocus(true);
+        dialog.getListView().setLongClickable(true);
+        dialog.getListView().setOnItemLongClickListener(
+                new AdapterView.OnItemLongClickListener() {
+                    @Override
+                    public boolean onItemLongClick(AdapterView<?> parent, View view, int position,
+                            long id) {
+                        final Action action = mAdapter.getItem(position);
+                        if (action instanceof LongPressAction) {
+                            return ((LongPressAction) action).onLongPress();
+                        }
+                        return false;
+                    }
+        });
+        dialog.getWindow().setType(WindowManager.LayoutParams.TYPE_KEYGUARD_DIALOG);
+
+        dialog.setOnDismissListener(this);
+
+        return dialog;
+    }
+
+    private void buildMenuList() {
+        mItems = new ArrayList<Action>();
         ArraySet<String> addedKeys = new ArraySet<String>();
         for (int i = 0; i < mMenuActions.length; i++) {
             String actionKey = mMenuActions[i];
@@ -336,36 +372,6 @@ class GlobalActions implements DialogInterface.OnDismissListener, DialogInterfac
             // Add here so we don't add more than one.
             addedKeys.add(actionKey);
         }
-
-        mAdapter = new MyAdapter();
-
-        AlertParams params = new AlertParams(mContext);
-        params.mAdapter = mAdapter;
-        params.mOnClickListener = this;
-        params.mForceInverseBackground = true;
-
-        GlobalActionsDialog dialog = new GlobalActionsDialog(mContext, params);
-        dialog.setCanceledOnTouchOutside(false); // Handled by the custom class.
-
-        dialog.getListView().setItemsCanFocus(true);
-        dialog.getListView().setLongClickable(true);
-        dialog.getListView().setOnItemLongClickListener(
-                new AdapterView.OnItemLongClickListener() {
-                    @Override
-                    public boolean onItemLongClick(AdapterView<?> parent, View view, int position,
-                            long id) {
-                        final Action action = mAdapter.getItem(position);
-                        if (action instanceof LongPressAction) {
-                            return ((LongPressAction) action).onLongPress();
-                        }
-                        return false;
-                    }
-        });
-        dialog.getWindow().setType(WindowManager.LayoutParams.TYPE_KEYGUARD_DIALOG);
-
-        dialog.setOnDismissListener(this);
-
-        return dialog;
     }
 
     private final class PowerAction extends SinglePressAction implements LongPressAction {
@@ -407,7 +413,7 @@ class GlobalActions implements DialogInterface.OnDismissListener, DialogInterfac
         }
     }
 
-    private final class RebootAction extends SinglePressAction {
+    private final class RebootAction extends SinglePressAction implements View.OnClickListener {
         private RebootAction() {
             super(com.android.internal.R.drawable.ic_lock_power_reboot,
                     R.string.global_action_reboot);
@@ -439,18 +445,23 @@ class GlobalActions implements DialogInterface.OnDismissListener, DialogInterfac
         }
 
         @Override
-        public void onPress() {
-            if (mRebootMenu || !advancedRebootEnabled(mContext) || !showRebootSubmenu()) {
-                mWindowManagerFuncs.reboot(null, false);
-            } else {
+        public View create(Context context, View convertView, ViewGroup parent, LayoutInflater inflater) {
+            View v = super.create(context, convertView, parent, inflater);
+            v.setOnClickListener(this);
+            return v;
+        }
+
+        @Override
+        public void onClick(View v) {
+            if (!mRebootMenu && advancedRebootEnabled(mContext) && showRebootSubmenu()) {
+                mRebootMenu = true;
                 mMenuActions = mContext.getResources().getStringArray(
                     com.android.internal.R.array.config_rebootActionsList);
-                if (mDialog != null) {
-                    mDialog.dismiss();
-                    mDialog = null;
-                }
-                mRebootMenu = true;
-                handleShow();
+                buildMenuList();
+                mAdapter.notifyDataSetChanged();
+            } else {
+                mHandler.sendEmptyMessage(MESSAGE_DISMISS);
+                mWindowManagerFuncs.reboot(null, false);
             }
         }
     }
@@ -766,8 +777,6 @@ class GlobalActions implements DialogInterface.OnDismissListener, DialogInterfac
                     ringerMode != AudioManager.RINGER_MODE_NORMAL;
             ((ToggleAction)mSilentModeAction).updateState(
                     silentModeOn ? ToggleAction.State.On : ToggleAction.State.Off);
-        } else {
-            ((SilentModeTriStateAction)mSilentModeAction).updateState(ringerMode);
         }
     }
 
@@ -777,9 +786,6 @@ class GlobalActions implements DialogInterface.OnDismissListener, DialogInterfac
 
     /** {@inheritDoc} */
     public void onClick(DialogInterface dialog, int which) {
-        if (!(mAdapter.getItem(which) instanceof SilentModeTriStateAction)) {
-            dialog.dismiss();
-        }
         mAdapter.getItem(which).onPress();
     }
 
@@ -943,7 +949,8 @@ class GlobalActions implements DialogInterface.OnDismissListener, DialogInterfac
             mStatusMessage = status;
         }
 
-        abstract public void onPress();
+        public void onPress() {
+        }
 
         public CharSequence getLabelForAccessibility(Context context) {
             if (mMessage != null) {
@@ -1112,7 +1119,7 @@ class GlobalActions implements DialogInterface.OnDismissListener, DialogInterfac
         }
     }
 
-    private class SilentModeToggleAction extends ToggleAction {
+    private final class SilentModeToggleAction extends ToggleAction {
         public SilentModeToggleAction() {
             super(R.drawable.ic_audio_vol_mute,
                     R.drawable.ic_audio_vol,
@@ -1150,14 +1157,13 @@ class GlobalActions implements DialogInterface.OnDismissListener, DialogInterfac
         }
     }
 
-    private static class SilentModeTriStateAction implements Action, View.OnClickListener {
+    private final class SilentModeTriStateAction implements Action, View.OnClickListener {
 
-        private final int[] ITEM_IDS = { R.id.option1, R.id.option2, R.id.option3 };
+        private final int[] ITEM_IDS = { R.id.option1, R.id.option2, R.id.option3, R.id.option4 };
 
         private final AudioManager mAudioManager;
         private final Handler mHandler;
         private final Context mContext;
-        private int mRingerMode;
 
         SilentModeTriStateAction(Context context, AudioManager audioManager, Handler handler) {
             mAudioManager = audioManager;
@@ -1165,14 +1171,14 @@ class GlobalActions implements DialogInterface.OnDismissListener, DialogInterfac
             mContext = context;
         }
 
-        private int ringerModeToIndex(int ringerMode) {
-            // They just happen to coincide
-            return ringerMode;
-        }
-
         private int indexToRingerMode(int index) {
-            // They just happen to coincide
-            return index;
+            if (index == 0 || index == 1) {
+                return AudioManager.RINGER_MODE_SILENT;
+            }
+            if (index == 2) {
+                return AudioManager.RINGER_MODE_VIBRATE;
+            }
+            return AudioManager.RINGER_MODE_NORMAL;
         }
 
         @Override
@@ -1184,8 +1190,22 @@ class GlobalActions implements DialogInterface.OnDismissListener, DialogInterfac
                 LayoutInflater inflater) {
             View v = inflater.inflate(R.layout.global_actions_silent_mode, parent, false);
 
-            int selectedIndex = ringerModeToIndex(mRingerMode);
-            for (int i = 0; i < 3; i++) {
+            int ringerMode = mAudioManager.getRingerMode();
+            int zenMode = Global.getInt(mContext.getContentResolver(), Global.ZEN_MODE, Global.ZEN_MODE_OFF);
+            int selectedIndex = 0;
+            if (zenMode != Global.ZEN_MODE_OFF) {
+                if (zenMode == Global.ZEN_MODE_NO_INTERRUPTIONS) {
+                    selectedIndex = 0;
+                } else if (zenMode == Global.ZEN_MODE_IMPORTANT_INTERRUPTIONS) {
+                    selectedIndex = 1;
+                }
+            } else if (ringerMode == AudioManager.RINGER_MODE_VIBRATE) {
+                selectedIndex = 2;
+            } else if (ringerMode == AudioManager.RINGER_MODE_NORMAL) {
+                selectedIndex = 3;
+            }
+
+            for (int i = 0; i < 4; i++) {
                 View itemView = v.findViewById(ITEM_IDS[i]);
                 itemView.setSelected(selectedIndex == i);
                 // Set up click handler
@@ -1193,9 +1213,6 @@ class GlobalActions implements DialogInterface.OnDismissListener, DialogInterfac
                 itemView.setOnClickListener(this);
             }
             return v;
-        }
-
-        public void onPress() {
         }
 
         @Override
@@ -1225,23 +1242,28 @@ class GlobalActions implements DialogInterface.OnDismissListener, DialogInterfac
         void willCreate() {
         }
 
-        public void onClick(View v) {
-            if (!(v.getTag() instanceof Integer)) return;
-
-            int index = (Integer) v.getTag();
-            mRingerMode = indexToRingerMode(index);
-            mAudioManager.setRingerMode(mRingerMode);
-
-            if (mRingerMode == AudioManager.RINGER_MODE_SILENT) {
-                Global.putInt(mContext.getContentResolver(),
-                    Global.ZEN_MODE, Global.ZEN_MODE_NO_INTERRUPTIONS);
-            }
-
-            mHandler.sendEmptyMessageDelayed(MESSAGE_DISMISS, DIALOG_DISMISS_DELAY);
+        @Override
+        public void onPress() {
         }
 
-        public void updateState(int ringerMode) {
-            mRingerMode = ringerMode;
+        @Override
+        public void onClick(View v) {
+            if (!(v.getTag() instanceof Integer)) return;
+            int index = (Integer) v.getTag();
+            if (index == 0 || index == 1) {
+                int zenMode = index == 0
+                            ? Global.ZEN_MODE_NO_INTERRUPTIONS
+                            : Global.ZEN_MODE_IMPORTANT_INTERRUPTIONS;
+                Global.putInt(mContext.getContentResolver(), Global.ZEN_MODE, zenMode);
+            } else {
+                Global.putInt(mContext.getContentResolver(), Global.ZEN_MODE, Global.ZEN_MODE_OFF);
+            }
+            // must be after zen mode!
+            int ringerMode = indexToRingerMode(index);
+            mAudioManager.setRingerMode(ringerMode);
+
+            mAdapter.notifyDataSetChanged();
+            mHandler.sendEmptyMessageDelayed(MESSAGE_DISMISS, DIALOG_DISMISS_DELAY);
         }
     }
 
@@ -1299,7 +1321,6 @@ class GlobalActions implements DialogInterface.OnDismissListener, DialogInterfac
                 }
                 break;
             case MESSAGE_REFRESH:
-                refreshSilentMode();
                 mAdapter.notifyDataSetChanged();
                 break;
             case MESSAGE_SHOW:
