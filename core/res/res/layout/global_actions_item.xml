@@ -21,17 +21,18 @@
     android:layout_height="wrap_content"
     android:minHeight="?android:attr/listPreferredItemHeight"
     android:orientation="horizontal"
-
     android:paddingStart="8dip"
     android:paddingTop="6dip"
     android:paddingBottom="6dip"
+    android:background="?android:attr/selectableItemBackground"
     >
     <ImageView android:id="@+id/icon"
         android:layout_width="56dp"
         android:layout_height="56dp"
         android:layout_gravity="center"
         android:layout_marginEnd="8dip"
-        android:scaleType="center"/>
+        android:scaleType="center"
+        android:background="@drawable/global_action_indicator_oval" />
 
     <LinearLayout
         android:orientation="vertical"
