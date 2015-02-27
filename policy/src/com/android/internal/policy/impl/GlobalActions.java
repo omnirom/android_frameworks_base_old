@@ -221,6 +221,7 @@ class GlobalActions implements DialogInterface.OnDismissListener, DialogInterfac
         } else {
             WindowManager.LayoutParams attrs = mDialog.getWindow().getAttributes();
             attrs.setTitle("GlobalActions");
+            attrs.windowAnimations = R.style.GlobalActionsAnimation;
             mDialog.getWindow().setAttributes(attrs);
             mDialog.show();
             mDialog.getWindow().getDecorView().setSystemUiVisibility(View.STATUS_BAR_DISABLE_EXPAND);
@@ -766,8 +767,6 @@ class GlobalActions implements DialogInterface.OnDismissListener, DialogInterfac
                     ringerMode != AudioManager.RINGER_MODE_NORMAL;
             ((ToggleAction)mSilentModeAction).updateState(
                     silentModeOn ? ToggleAction.State.On : ToggleAction.State.Off);
-        } else {
-            ((SilentModeTriStateAction)mSilentModeAction).updateState(ringerMode);
         }
     }
 
@@ -1152,12 +1151,14 @@ class GlobalActions implements DialogInterface.OnDismissListener, DialogInterfac
 
     private static class SilentModeTriStateAction implements Action, View.OnClickListener {
 
-        private final int[] ITEM_IDS = { R.id.option1, R.id.option2, R.id.option3 };
+        private final int[] ITEM_IDS = { R.id.option1, R.id.option2, R.id.option3, R.id.option4 };
 
         private final AudioManager mAudioManager;
         private final Handler mHandler;
         private final Context mContext;
         private int mRingerMode;
+        private View mView;
+        private int mZenMode;
 
         SilentModeTriStateAction(Context context, AudioManager audioManager, Handler handler) {
             mAudioManager = audioManager;
@@ -1165,14 +1166,14 @@ class GlobalActions implements DialogInterface.OnDismissListener, DialogInterfac
             mContext = context;
         }
 
-        private int ringerModeToIndex(int ringerMode) {
-            // They just happen to coincide
-            return ringerMode;
-        }
-
         private int indexToRingerMode(int index) {
-            // They just happen to coincide
-            return index;
+            if (index == 0 || index == 1) {
+                return AudioManager.RINGER_MODE_SILENT;
+            }
+            if (index == 2) {
+                return AudioManager.RINGER_MODE_VIBRATE;
+            }
+            return AudioManager.RINGER_MODE_NORMAL;
         }
 
         @Override
@@ -1182,17 +1183,31 @@ class GlobalActions implements DialogInterface.OnDismissListener, DialogInterfac
 
         public View create(Context context, View convertView, ViewGroup parent,
                 LayoutInflater inflater) {
-            View v = inflater.inflate(R.layout.global_actions_silent_mode, parent, false);
+            mView = inflater.inflate(R.layout.global_actions_silent_mode, parent, false);
 
-            int selectedIndex = ringerModeToIndex(mRingerMode);
-            for (int i = 0; i < 3; i++) {
-                View itemView = v.findViewById(ITEM_IDS[i]);
+            mRingerMode = mAudioManager.getRingerMode();
+            mZenMode = Global.getInt(mContext.getContentResolver(), Global.ZEN_MODE, Global.ZEN_MODE_OFF);
+            int selectedIndex = 0;
+            if (mZenMode != Global.ZEN_MODE_OFF) {
+                if (mZenMode == Global.ZEN_MODE_NO_INTERRUPTIONS) {
+                    selectedIndex = 0;
+                } else if (mZenMode == Global.ZEN_MODE_IMPORTANT_INTERRUPTIONS) {
+                    selectedIndex = 1;
+                }
+            } else if (mRingerMode == AudioManager.RINGER_MODE_VIBRATE) {
+                selectedIndex = 2;
+            } else if (mRingerMode == AudioManager.RINGER_MODE_NORMAL) {
+                selectedIndex = 3;
+            }
+
+            for (int i = 0; i < 4; i++) {
+                View itemView = mView.findViewById(ITEM_IDS[i]);
                 itemView.setSelected(selectedIndex == i);
                 // Set up click handler
                 itemView.setTag(i);
                 itemView.setOnClickListener(this);
             }
-            return v;
+            return mView;
         }
 
         public void onPress() {
@@ -1225,23 +1240,22 @@ class GlobalActions implements DialogInterface.OnDismissListener, DialogInterfac
         void willCreate() {
         }
 
+        @Override
         public void onClick(View v) {
             if (!(v.getTag() instanceof Integer)) return;
-
             int index = (Integer) v.getTag();
+            if (index == 0 || index == 1) {
+                mZenMode = index == 0
+                            ? Global.ZEN_MODE_NO_INTERRUPTIONS
+                            : Global.ZEN_MODE_IMPORTANT_INTERRUPTIONS;
+                Global.putInt(mContext.getContentResolver(), Global.ZEN_MODE, mZenMode);
+            }
+            // must be after zen mode!
             mRingerMode = indexToRingerMode(index);
             mAudioManager.setRingerMode(mRingerMode);
 
-            if (mRingerMode == AudioManager.RINGER_MODE_SILENT) {
-                Global.putInt(mContext.getContentResolver(),
-                    Global.ZEN_MODE, Global.ZEN_MODE_NO_INTERRUPTIONS);
-            }
-
+            mHandler.sendEmptyMessage(MESSAGE_REFRESH);
             mHandler.sendEmptyMessageDelayed(MESSAGE_DISMISS, DIALOG_DISMISS_DELAY);
-        }
-
-        public void updateState(int ringerMode) {
-            mRingerMode = ringerMode;
         }
     }
 
@@ -1288,6 +1302,7 @@ class GlobalActions implements DialogInterface.OnDismissListener, DialogInterfac
     private static final int MESSAGE_REFRESH = 1;
     private static final int MESSAGE_SHOW = 2;
     private static final int DIALOG_DISMISS_DELAY = 300; // ms
+    private static final int DIALOG_REFRESH_DELAY = 150; // ms
 
     private Handler mHandler = new Handler() {
         public void handleMessage(Message msg) {
@@ -1299,7 +1314,6 @@ class GlobalActions implements DialogInterface.OnDismissListener, DialogInterfac
                 }
                 break;
             case MESSAGE_REFRESH:
-                refreshSilentMode();
                 mAdapter.notifyDataSetChanged();
                 break;
             case MESSAGE_SHOW:
