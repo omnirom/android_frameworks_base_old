@@ -1,0 +1,21 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "6b22818b_62344fdc",
+        "filename": "core/java/android/preference/SeekBarVolumizer.java",
+        "patchSetId": 5
+      },
+      "lineNbr": 264,
+      "author": {
+        "id": 1000026
+      },
+      "writtenOn": "2015-02-28T15:59:56Z",
+      "side": 1,
+      "message": "should check for mSeekBar!\u003dnull just to be sure",
+      "revId": "8d1b4434620e348d7442876933a5f927c015ca7e",
+      "serverId": "56841c99-7c94-43d4-bf0b-cb4707e66d55",
+      "unresolved": false
+    }
+  ]
+}
