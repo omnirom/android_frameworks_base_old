@@ -666,7 +666,8 @@ class MountService extends IMountService.Stub
             final UserHandle user = new UserHandle(userId);
 
             final String action = intent.getAction();
-            if (Intent.ACTION_USER_ADDED.equals(action)) {
+            // Create an emulated volume for the new user only if the volume is emulated
+            if (Intent.ACTION_USER_ADDED.equals(action) && isExternalStorageEmulated()) {
                 synchronized (mVolumesLock) {
                     createEmulatedVolumeForUserLocked(user);
                 }
