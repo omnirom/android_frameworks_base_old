@@ -1,0 +1,38 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "6b22818b_02e55ba0",
+        "filename": "policy/src/com/android/internal/policy/impl/GlobalActions.java",
+        "patchSetId": 12
+      },
+      "lineNbr": 1207,
+      "author": {
+        "id": 1000026
+      },
+      "writtenOn": "2015-03-02T11:38:03Z",
+      "side": 1,
+      "message": "dont mix zen mode with silent mode",
+      "revId": "7c7083b297047dbc4cc82bfb62b0ce5915858dfc",
+      "serverId": "56841c99-7c94-43d4-bf0b-cb4707e66d55",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "6b22818b_22ea5770",
+        "filename": "policy/src/com/android/internal/policy/impl/GlobalActions.java",
+        "patchSetId": 12
+      },
+      "lineNbr": 1295,
+      "author": {
+        "id": 1000026
+      },
+      "writtenOn": "2015-03-02T11:38:03Z",
+      "side": 1,
+      "message": "dont mix zen mode with silent mode",
+      "revId": "7c7083b297047dbc4cc82bfb62b0ce5915858dfc",
+      "serverId": "56841c99-7c94-43d4-bf0b-cb4707e66d55",
+      "unresolved": false
+    }
+  ]
+}
