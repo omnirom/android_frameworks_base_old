@@ -408,11 +408,15 @@ public class ZenModePanel extends LinearLayout {
         mZenSubhead.setVisibility(!mHidden && !zenOff ? VISIBLE : GONE);
         mZenSubheadExpanded.setVisibility(expanded ? VISIBLE : GONE);
         mZenSubheadCollapsed.setVisibility(!expanded ? VISIBLE : GONE);
-        mMoreSettings.setVisibility(zenImportant && expanded ? VISIBLE : GONE);
+        mMoreSettings.setVisibility(expanded ? VISIBLE : GONE);
         mZenConditions.setVisibility(!zenOff && expanded ? VISIBLE : GONE);
 
         if (zenNone) {
-            mZenSubheadExpanded.setText(R.string.zen_no_interruptions_with_warning);
+            if (mController.isAllowAlarms()) {
+                mZenSubheadExpanded.setText(R.string.zen_no_interruptions_but_alarm);
+            } else {
+                mZenSubheadExpanded.setText(R.string.zen_no_interruptions_with_warning);
+            }
             mZenSubheadCollapsed.setText(mExitConditionText);
         } else if (zenImportant) {
             mZenSubheadExpanded.setText(R.string.zen_important_interruptions);
