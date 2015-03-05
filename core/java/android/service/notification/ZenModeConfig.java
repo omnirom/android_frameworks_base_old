@@ -71,6 +71,7 @@ public class ZenModeConfig implements Parcelable {
     private static final String ALLOW_ATT_MESSAGES = "messages";
     private static final String ALLOW_ATT_FROM = "from";
     private static final String ALLOW_ATT_EVENTS = "events";
+    private static final String ALLOW_ATT_ALARMS = "alarms";
     private static final String SLEEP_TAG = "sleep";
     private static final String SLEEP_ATT_MODE = "mode";
 
@@ -96,6 +97,7 @@ public class ZenModeConfig implements Parcelable {
     public boolean allowMessages;
     public boolean allowEvents = DEFAULT_ALLOW_EVENTS;
     public int allowFrom = SOURCE_ANYONE;
+    public boolean allowAlarms;
 
     public String sleepMode;
     public int sleepStartHour;   // 0-23
@@ -133,6 +135,7 @@ public class ZenModeConfig implements Parcelable {
         allowFrom = source.readInt();
         exitCondition = source.readParcelable(null);
         exitConditionComponent = source.readParcelable(null);
+        allowAlarms = source.readInt() == 1;
     }
 
     @Override
@@ -165,6 +168,7 @@ public class ZenModeConfig implements Parcelable {
         dest.writeInt(allowFrom);
         dest.writeParcelable(exitCondition, 0);
         dest.writeParcelable(exitConditionComponent, 0);
+        dest.writeInt(allowAlarms ? 1 : 0);
     }
 
     @Override
@@ -183,6 +187,7 @@ public class ZenModeConfig implements Parcelable {
             .append(conditionIds == null ? null : TextUtils.join(",", conditionIds))
             .append(",exitCondition=").append(exitCondition)
             .append(",exitConditionComponent=").append(exitConditionComponent)
+            .append(",allowAlarms=").append(allowAlarms)
             .append(']').toString();
     }
 
@@ -208,6 +213,7 @@ public class ZenModeConfig implements Parcelable {
                 && other.allowMessages == allowMessages
                 && other.allowFrom == allowFrom
                 && other.allowEvents == allowEvents
+                && other.allowAlarms == allowAlarms
                 && Objects.equals(other.sleepMode, sleepMode)
                 && other.sleepStartHour == sleepStartHour
                 && other.sleepStartMinute == sleepStartMinute
@@ -294,6 +300,7 @@ public class ZenModeConfig implements Parcelable {
                     if (rt.allowFrom < SOURCE_ANYONE || rt.allowFrom > MAX_SOURCE) {
                         throw new IndexOutOfBoundsException("bad source in config:" + rt.allowFrom);
                     }
+                    rt.allowAlarms = safeBoolean(parser, ALLOW_ATT_ALARMS, false);
                 } else if (SLEEP_TAG.equals(tag)) {
                     final String mode = parser.getAttributeValue(null, SLEEP_ATT_MODE);
                     rt.sleepMode = isValidSleepMode(mode)? mode : null;
@@ -334,6 +341,7 @@ public class ZenModeConfig implements Parcelable {
         out.attribute(null, ALLOW_ATT_MESSAGES, Boolean.toString(allowMessages));
         out.attribute(null, ALLOW_ATT_EVENTS, Boolean.toString(allowEvents));
         out.attribute(null, ALLOW_ATT_FROM, Integer.toString(allowFrom));
+        out.attribute(null, ALLOW_ATT_ALARMS, Boolean.toString(allowAlarms));
         out.endTag(null, ALLOW_TAG);
 
         out.startTag(null, SLEEP_TAG);

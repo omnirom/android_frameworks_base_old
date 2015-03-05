@@ -854,7 +854,7 @@ public class VolumePanel extends Handler {
     private void updateSliderEnabled(final StreamControl sc, boolean muted, boolean fixedVolume) {
         final boolean wasEnabled = sc.seekbarView.isEnabled();
         final boolean isRinger = isNotificationOrRing(sc.streamType);
-        Log.d(TAG, "sc.streamType = " + sc.streamType + " muted = " + muted + " isRinger = " + isRinger + " fixedVolume = " + fixedVolume);
+        if (LOGD) Log.d(TAG, "sc.streamType = " + sc.streamType + " muted = " + muted + " isRinger = " + isRinger + " fixedVolume = " + fixedVolume);
         if (sc.streamType == STREAM_REMOTE_MUSIC) {
             // never disable touch interactions for remote playback, the muting is not tied to
             // the state of the phone.
