@@ -167,12 +167,17 @@ public class ZenModeHelper implements AudioManagerInternal.RingerModeDelegate {
         }
         switch (mZenMode) {
             case Global.ZEN_MODE_NO_INTERRUPTIONS:
+                if (mConfig.allowAlarms && isAlarm(record)) {
+                    ZenLog.traceNotIntercepted(record, "alarms");
+                    return false;
+                }
                 // #notevenalarms
                 ZenLog.traceIntercepted(record, "none");
                 return true;
             case Global.ZEN_MODE_IMPORTANT_INTERRUPTIONS:
                 if (isAlarm(record)) {
                     // Alarms are always priority
+                    ZenLog.traceNotIntercepted(record, "alarms");
                     return false;
                 }
                 // allow user-prioritized packages through in priority mode
@@ -255,7 +260,7 @@ public class ZenModeHelper implements AudioManagerInternal.RingerModeDelegate {
         applyRestrictions(muteCalls, USAGE_NOTIFICATION_RINGTONE);
 
         // alarm restrictions
-        final boolean muteAlarms = mZenMode == Global.ZEN_MODE_NO_INTERRUPTIONS;
+        final boolean muteAlarms = mZenMode == Global.ZEN_MODE_NO_INTERRUPTIONS && !mConfig.allowAlarms;
         applyRestrictions(muteAlarms, USAGE_ALARM);
     }
 
