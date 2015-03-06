@@ -1,0 +1,27 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "6b22818b_33eaabd7",
+        "filename": "policy/src/com/android/internal/policy/impl/PhoneWindowManager.java",
+        "patchSetId": 7
+      },
+      "lineNbr": 6770,
+      "author": {
+        "id": 1000983
+      },
+      "writtenOn": "2015-03-06T22:15:17Z",
+      "side": 1,
+      "message": "Max, you might want to add a check for !hasHome to that if-clause in order not to break h/w home button actions:\n\nif (mHomeWakeSupport \u0026\u0026 !hasHome)\n\nUnless it fails on navbar home button as well...",
+      "range": {
+        "startLine": 6770,
+        "startChar": 20,
+        "endLine": 6770,
+        "endChar": 36
+      },
+      "revId": "b3b934c025608053c28d15ba85eb4f619723566e",
+      "serverId": "56841c99-7c94-43d4-bf0b-cb4707e66d55",
+      "unresolved": false
+    }
+  ]
+}
