@@ -150,6 +150,7 @@ public class VolumePanel extends Handler {
     private float mDisabledAlpha;
     private int mLastRingerMode = AudioManager.RINGER_MODE_NORMAL;
     private int mLastRingerProgress = 0;
+    private boolean mVolumeAdjustSound = true;
 
     // True if we want to play tones on the system stream when the master stream is specified.
     private final boolean mPlayMasterStreamTones;
@@ -276,6 +277,8 @@ public class VolumePanel extends Handler {
                     Settings.System.VOLUME_LINK_NOTIFICATION, 1) == 1;
             mTimeoutDelaySettings = Settings.System.getInt(mContext.getContentResolver(),
                     Settings.System.VOLUME_PANEL_TIMEOUT, TIMEOUT_DELAY);
+            mVolumeAdjustSound = Settings.System.getInt(mContext.getContentResolver(),
+                    Settings.System.VOLUME_ADJUST_SOUND, 1) == 1;
         }
     };
 
@@ -441,6 +444,9 @@ public class VolumePanel extends Handler {
 
         mToneGenerators = new ToneGenerator[AudioSystem.getNumStreamTypes()];
         mVibrator = (Vibrator) context.getSystemService(Context.VIBRATOR_SERVICE);
+        if (mVibrator != null && !mVibrator.hasVibrator()) {
+            mVibrator = null;
+        }
         mVoiceCapable = context.getResources().getBoolean(R.bool.config_voice_capable);
 
         mVolumeLinkNotification = Settings.System.getInt(mContext.getContentResolver(),
@@ -449,6 +455,8 @@ public class VolumePanel extends Handler {
                 Settings.System.VOLUME_PANEL_EXPANDED, 0) == 1;
         mTimeoutDelaySettings = Settings.System.getInt(mContext.getContentResolver(),
                 Settings.System.VOLUME_PANEL_TIMEOUT, TIMEOUT_DELAY);
+        mVolumeAdjustSound = Settings.System.getInt(mContext.getContentResolver(),
+                Settings.System.VOLUME_ADJUST_SOUND, 1) == 1;
 
         mSliderPanelExpand = (LinearLayout) mView.findViewById(com.android.systemui.R.id.slider_panel_expand);
         mExpandPanel = (ImageView) mView.findViewById(com.android.systemui.R.id.arrow);
@@ -474,6 +482,9 @@ public class VolumePanel extends Handler {
                 mSettingsObserver);
         context.getContentResolver().registerContentObserver(
                 Settings.System.getUriFor(Settings.System.VOLUME_PANEL_TIMEOUT), false,
+                mSettingsObserver);
+        context.getContentResolver().registerContentObserver(
+                Settings.System.getUriFor(Settings.System.VOLUME_ADJUST_SOUND), false,
                 mSettingsObserver);
 
         if (mZenController != null && !useMasterVolume) {
@@ -702,14 +713,16 @@ public class VolumePanel extends Handler {
 
     private void toggle(StreamControl sc) {
         if (mAudioManager.getRingerMode() == AudioManager.RINGER_MODE_NORMAL) {
-            mAudioManager.setRingerMode(AudioManager.RINGER_MODE_VIBRATE);
-            postVolumeChanged(sc.streamType, AudioManager.FLAG_SHOW_UI | AudioManager.FLAG_VIBRATE);
+            if (mVibrator != null) {
+                mAudioManager.setRingerMode(AudioManager.RINGER_MODE_VIBRATE);
+                sendMessageDelayed(obtainMessage(MSG_VIBRATE), VIBRATE_DELAY);
+            } else {
+                mAudioManager.setRingerMode(AudioManager.RINGER_MODE_SILENT);
+            }
         } else if (mAudioManager.getRingerMode() == AudioManager.RINGER_MODE_VIBRATE){
             mAudioManager.setRingerMode(AudioManager.RINGER_MODE_SILENT);
-            postVolumeChanged(sc.streamType, AudioManager.FLAG_PLAY_SOUND);
         } else {
             mAudioManager.setRingerMode(AudioManager.RINGER_MODE_NORMAL);
-            postVolumeChanged(sc.streamType, AudioManager.FLAG_PLAY_SOUND);
         }
     }
 
@@ -854,7 +867,7 @@ public class VolumePanel extends Handler {
     private void updateSliderEnabled(final StreamControl sc, boolean muted, boolean fixedVolume) {
         final boolean wasEnabled = sc.seekbarView.isEnabled();
         final boolean isRinger = isNotificationOrRing(sc.streamType);
-        Log.d(TAG, "sc.streamType = " + sc.streamType + " muted = " + muted + " isRinger = " + isRinger + " fixedVolume = " + fixedVolume);
+        if (LOGD) Log.d(TAG, "sc.streamType = " + sc.streamType + " muted = " + muted + " isRinger = " + isRinger + " fixedVolume = " + fixedVolume);
         if (sc.streamType == STREAM_REMOTE_MUSIC) {
             // never disable touch interactions for remote playback, the muting is not tied to
             // the state of the phone.
@@ -1067,9 +1080,11 @@ public class VolumePanel extends Handler {
             }
         }
 
-        if ((flags & AudioManager.FLAG_PLAY_SOUND) != 0 && !mRingIsSilent) {
-            removeMessages(MSG_PLAY_SOUND);
-            sendMessageDelayed(obtainMessage(MSG_PLAY_SOUND, streamType, flags), PLAY_SOUND_DELAY);
+        if ((flags & AudioManager.FLAG_PLAY_SOUND) != 0) {
+            if (mVolumeAdjustSound) {
+                removeMessages(MSG_PLAY_SOUND);
+                sendMessageDelayed(obtainMessage(MSG_PLAY_SOUND, streamType, flags), PLAY_SOUND_DELAY);
+            }
         }
 
         if ((flags & AudioManager.FLAG_REMOVE_SOUND_AND_VIBRATE) != 0) {
@@ -1248,14 +1263,6 @@ public class VolumePanel extends Handler {
     }
 
     protected void onPlaySound(int streamType, int flags) {
-        // If preference is no sound - just exit here
-        // should not happens since this is already checked in the
-        // key event handling
-        if (Settings.System.getInt(mContext.getContentResolver(),
-                 Settings.System.VOLUME_ADJUST_SOUND, 1) == 0) {
-             return;
-        }
-
         if (hasMessages(MSG_STOP_SOUNDS)) {
             removeMessages(MSG_STOP_SOUNDS);
             // Force stop right now
@@ -1291,7 +1298,9 @@ public class VolumePanel extends Handler {
             return;
         }
 
-        mVibrator.vibrate(VIBRATE_DURATION, VIBRATION_ATTRIBUTES);
+        if (mVibrator != null) {
+            mVibrator.vibrate(VIBRATE_DURATION, VIBRATION_ATTRIBUTES);
+        }
     }
 
     protected void onRemoteVolumeChanged(MediaController controller, int flags) {
