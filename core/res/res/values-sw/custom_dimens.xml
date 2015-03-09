@@ -1,0 +1,14 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <!-- Lockscreen target insets -->
+    <item type="" name=""></item>
+
+    <!-- Font size for notification text -->
+    <dimen name=""></dimen>
+
+    <!-- Radius of notification text -->
+    <dimen name=""></dimen>
+
+    <!-- Top margin for overflow notifications shown in the P.O.R.N. view -->
+    <dimen name=""></dimen>
+</resources>
