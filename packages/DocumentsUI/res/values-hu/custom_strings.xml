@@ -15,21 +15,21 @@
      limitations under the License.
 -->
 <resources xmlns:xliff="urn:oasis:names:tc:xliff:document:1.2">
-  <string name="title_standalone">Dateien</string>
-  <string name="toast_success_delete">Dateien gelöscht</string>
-  <string name="dialog_delete_confirm_title">Dateien löschen?</string>
+  <string name="title_standalone">Fájlok</string>
+  <string name="toast_success_delete">Fájlok törölve</string>
+  <string name="dialog_delete_confirm_title">Törli a fájlokat?</string>
   <plurals name="files_copied">
-    <item quantity="one">Die Datei wurde in die Zwischenablage gelegt</item>
-    <item quantity="other">%d Dateien in die Zwischenablage gelegt</item>
+    <item quantity="one">A fájl a vágólapra került</item>
+    <item quantity="other">%d fájl a vágólapra került</item>
   </plurals>
   <plurals name="files_pasted">
-    <item quantity="one">Die Datei wurde eingefügt. Hochladen könnte im Hintergrund abgeschlossen werden.</item>
-    <item quantity="other">%d Dateien wurden eingefügt. Hochladen könnte im Hintergrund abgeschlossen werden.</item>
+    <item quantity="one">A fájl beillesztésre került. Lehet, hogy a feltöltés a háttérben fog befejeződni.</item>
+    <item quantity="other">%d fájl került beillesztésre. Lehet, hogy a feltöltés a háttérben fog befejeződni.</item>
   </plurals>
-  <string name="copy_in_progress">Kopieren...</string>
-  <string name="delete_in_progress">Löschen...</string>
+  <string name="copy_in_progress">Másolás...</string>
+  <string name="delete_in_progress">Törlés...</string>
   <plurals name="dialog_delete_confirm_message">
-    <item quantity="one">Diese Datei wird dauerhaft gelöscht!</item>
-    <item quantity="other">Dies wird die %d ausgewählten Dateien dauerhaft löschen!</item>
+    <item quantity="one">Ez a fájl véglegesen törlésre kerül!</item>
+    <item quantity="other">Ezzel véglegesen törli a kijelölt %d fájlt!</item>
   </plurals>
 </resources>
