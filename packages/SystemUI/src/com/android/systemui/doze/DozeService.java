@@ -169,7 +169,7 @@ public class DozeService extends DreamService implements ProximitySensorManager.
         if (mDozeParameters.getPocketMode()) {
             startPulsingFromSensor();
         } else {
-            requestPulse();
+            requestPulse(DozeLog.PULSE_REASON_INTENT);
         }
     }
 
@@ -233,7 +233,7 @@ public class DozeService extends DreamService implements ProximitySensorManager.
                     }
                     mWakeLock.release(); // needs to be unconditional to balance acquire
                 }
-            });
+            }, DozeLog.PULSE_REASON_INTENT);
         }
     }
 
