@@ -14,16 +14,6 @@
      limitations under the License.
 -->
 
-<selector xmlns:android="http://schemas.android.com/apk/res/android" >
-    <item android:state_pressed="true">
-        <bitmap
-            android:src="@drawable/ic_lock_airplane_mode_alpha"
-            android:tint="@color/white" />
-    </item>
-    <item>
-        <bitmap
-            android:src="@drawable/ic_lock_airplane_mode_alpha"
-            android:tint="?attr/colorControlActivated" />
-    </item>
-</selector>
-
+<bitmap xmlns:android="http://schemas.android.com/apk/res/android"
+    android:src="@drawable/ic_lock_airplane_mode_alpha"
+    android:tint="?attr/colorControlActivated" />
