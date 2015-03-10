@@ -91,6 +91,7 @@ import com.android.server.restrictions.RestrictionsManagerService;
 import com.android.server.search.SearchManagerService;
 import com.android.server.statusbar.StatusBarManagerService;
 import com.android.server.storage.DeviceStorageMonitorService;
+import com.android.server.telecom.TelecomLoaderService;
 import com.android.server.trust.TrustManagerService;
 import com.android.server.tv.TvInputManagerService;
 import com.android.server.twilight.TwilightService;
@@ -149,7 +150,6 @@ public final class SystemServer {
     private SystemServiceManager mSystemServiceManager;
 
     // TODO: remove all of these references by improving dependency resolution and boot phases
-    private Installer mInstaller;
     private PowerManagerService mPowerManagerService;
     private ActivityManagerService mActivityManagerService;
     private DisplayManagerService mDisplayManagerService;
@@ -324,12 +324,13 @@ public final class SystemServer {
         // Wait for installd to finish starting up so that it has a chance to
         // create critical directories such as /data/user with the appropriate
         // permissions.  We need this to complete before we initialize other services.
-        mInstaller = mSystemServiceManager.startService(Installer.class);
+        Installer installer = mSystemServiceManager.startService(Installer.class);
 
         // Activity manager runs the show.
         mActivityManagerService = mSystemServiceManager.startService(
                 ActivityManagerService.Lifecycle.class).getService();
         mActivityManagerService.setSystemServiceManager(mSystemServiceManager);
+        mActivityManagerService.setInstaller(installer);
 
         // Power manager needs to be started early because other services need it.
         // Native daemons may be watching for it to be registered so it must be ready
@@ -360,7 +361,7 @@ public final class SystemServer {
 
         // Start the package manager.
         Slog.i(TAG, "Package Manager");
-        mPackageManagerService = PackageManagerService.main(mSystemContext, mInstaller,
+        mPackageManagerService = PackageManagerService.main(mSystemContext, installer,
                 mFactoryTestMode != FactoryTest.FACTORY_TEST_OFF, mOnlyCore);
         mFirstBoot = mPackageManagerService.isFirstBoot();
         mPackageManager = mSystemContext.getPackageManager();
@@ -389,6 +390,8 @@ public final class SystemServer {
         mSystemServiceManager.startService(UsageStatsService.class);
         mActivityManagerService.setUsageStatsManager(
                 LocalServices.getService(UsageStatsManagerInternal.class));
+        // Update after UsageStatsService is available, needed before performBootDexOpt.
+        mPackageManagerService.getUsageStatsIfNoPackageUsageInfo();
 
         // Tracks whether the updatable WebView is in a ready state and watches for update installs.
         mSystemServiceManager.startService(WebViewUpdateService.class);
@@ -431,6 +434,7 @@ public final class SystemServer {
         boolean disableSystemUI = SystemProperties.getBoolean("config.disable_systemui", false);
         boolean disableNonCoreServices = SystemProperties.getBoolean("config.disable_noncore", false);
         boolean disableNetwork = SystemProperties.getBoolean("config.disable_network", false);
+        boolean disableNetworkTime = SystemProperties.getBoolean("config.disable_networktime", false);
         boolean isEmulator = SystemProperties.get("ro.kernel.qemu").equals("1");
 
         try {
@@ -439,6 +443,8 @@ public final class SystemServer {
 
             Slog.i(TAG, "Scheduling Policy");
             ServiceManager.addService("scheduling_policy", new SchedulingPolicyService());
+
+            mSystemServiceManager.startService(TelecomLoaderService.class);
 
             Slog.i(TAG, "Telephony Registry");
             telephonyRegistry = new TelephonyRegistry(context);
@@ -881,7 +887,7 @@ public final class SystemServer {
                 reportWtf("starting SamplingProfiler Service", e);
             }
 
-            if (!disableNetwork) {
+            if (!disableNetwork && !disableNetworkTime) {
                 try {
                     Slog.i(TAG, "NetworkTimeUpdateService");
                     networkTimeUpdater = new NetworkTimeUpdateService(context);
