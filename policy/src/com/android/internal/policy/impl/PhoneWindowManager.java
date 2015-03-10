@@ -1350,6 +1350,7 @@ public class PhoneWindowManager implements WindowManagerPolicy {
         if (mLongPressOnHomeBehavior != LONG_PRESS_HOME_NOTHING) {
             mHomeConsumed = true;
             performHapticFeedbackLw(null, HapticFeedbackConstants.LONG_PRESS, false);
+        }
 
         final KeyEvent downEvent = new KeyEvent(now, now, KeyEvent.ACTION_DOWN,
                 keyCode, 0, 0, KeyCharacterMap.VIRTUAL_KEYBOARD, 0,
