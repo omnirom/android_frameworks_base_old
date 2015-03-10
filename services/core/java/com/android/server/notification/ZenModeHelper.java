@@ -76,7 +76,6 @@ public class ZenModeHelper {
     private ZenModeConfig mConfig;
     private AudioManager mAudioManager;
     private int mPreviousRingerMode = -1;
-    private int mPreviousZenMode = -1;
 
     public ZenModeHelper(Context context, Handler handler) {
         mContext = context;
@@ -247,18 +246,17 @@ public class ZenModeHelper {
             int ringerMode = mAudioManager.getRingerMode();
             int forcedRingerMode = -1;
             if (mZenMode == Global.ZEN_MODE_NO_INTERRUPTIONS) {
-                // if new mode is no interrupt silence ringer
                 if (ringerMode != AudioManager.RINGER_MODE_SILENT) {
                     mPreviousRingerMode = ringerMode;
                     if (DEBUG) Slog.d(TAG, "Silencing ringer");
                     forcedRingerMode = AudioManager.RINGER_MODE_SILENT;
                 }
-            } else if (mPreviousZenMode != -1 && mPreviousZenMode == Global.ZEN_MODE_NO_INTERRUPTIONS) {
-                // when coming back from no interruption set back ringer
+            } else {
                 if (ringerMode == AudioManager.RINGER_MODE_SILENT) {
                     if (DEBUG) Slog.d(TAG, "Unsilencing ringer");
                     forcedRingerMode = mPreviousRingerMode != -1 ? mPreviousRingerMode
                             : AudioManager.RINGER_MODE_NORMAL;
+                    mPreviousRingerMode = -1;
                 }
             }
             if (forcedRingerMode != -1) {
@@ -266,7 +264,6 @@ public class ZenModeHelper {
                 ZenLog.traceSetRingerMode(forcedRingerMode);
             }
         }
-        mPreviousZenMode = mZenMode;
         dispatchOnZenModeChanged();
     }
 
@@ -311,13 +308,11 @@ public class ZenModeHelper {
             // follow ringer mode if necessary
             final int ringerMode = mAudioManager.getRingerMode();
             int newZen = -1;
-            // why should ringer mode directly influence important zen mode?
-            /*if (ringerMode == AudioManager.RINGER_MODE_SILENT) {
+            if (ringerMode == AudioManager.RINGER_MODE_SILENT) {
                 if (mZenMode == Global.ZEN_MODE_OFF) {
                     newZen = Global.ZEN_MODE_IMPORTANT_INTERRUPTIONS;
                 }
-            } else*/
-            if ((ringerMode == AudioManager.RINGER_MODE_NORMAL
+            } else if ((ringerMode == AudioManager.RINGER_MODE_NORMAL
                     || ringerMode == AudioManager.RINGER_MODE_VIBRATE)
                     && mZenMode == Global.ZEN_MODE_NO_INTERRUPTIONS) {
                 newZen = Global.ZEN_MODE_OFF;

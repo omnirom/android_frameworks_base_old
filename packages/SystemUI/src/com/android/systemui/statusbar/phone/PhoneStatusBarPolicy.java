@@ -210,7 +210,6 @@ public class PhoneStatusBarPolicy {
         boolean zenVisible = false;
         int zenIconId = 0;
         String zenDescription = null;
-        boolean zenModeNoInterruptions = false;
 
         boolean volumeVisible = false;
         int volumeIconId = 0;
@@ -218,7 +217,6 @@ public class PhoneStatusBarPolicy {
 
         if (mZen == Global.ZEN_MODE_NO_INTERRUPTIONS) {
             zenVisible = true;
-            zenModeNoInterruptions = true;
             zenIconId = R.drawable.stat_sys_zen_none;
             zenDescription = mContext.getString(R.string.zen_no_interruptions);
         } else if (mZen == Global.ZEN_MODE_IMPORTANT_INTERRUPTIONS) {
@@ -227,16 +225,11 @@ public class PhoneStatusBarPolicy {
             zenDescription = mContext.getString(R.string.zen_important_interruptions);
         }
 
-        if (audioManager.getRingerMode() == AudioManager.RINGER_MODE_VIBRATE) {
+        if (mZen != Global.ZEN_MODE_NO_INTERRUPTIONS &&
+                audioManager.getRingerMode() == AudioManager.RINGER_MODE_VIBRATE) {
             volumeVisible = true;
             volumeIconId = R.drawable.stat_sys_ringer_vibrate;
             volumeDescription = mContext.getString(R.string.accessibility_ringer_vibrate);
-        }
-
-        if (audioManager.getRingerMode() == AudioManager.RINGER_MODE_SILENT) {
-            volumeVisible = true;
-            volumeIconId = R.drawable.stat_sys_ringer_silent;
-            volumeDescription = mContext.getString(R.string.accessibility_ringer_silent);
         }
 
         if (zenVisible) {
@@ -245,10 +238,6 @@ public class PhoneStatusBarPolicy {
         if (zenVisible != mZenVisible) {
             mService.setIconVisibility(SLOT_ZEN, zenVisible);
             mZenVisible = zenVisible;
-        }
-        // overrules volume icon
-        if (zenModeNoInterruptions) {
-            volumeVisible = false;
         }
 
         if (volumeVisible) {
