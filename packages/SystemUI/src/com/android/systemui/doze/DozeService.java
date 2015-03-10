@@ -233,7 +233,7 @@ public class DozeService extends DreamService implements ProximitySensorManager.
                     }
                     mWakeLock.release(); // needs to be unconditional to balance acquire
                 }
-            });
+            }, DozeLog.PULSE_REASON_INTENT);
         }
     }
 

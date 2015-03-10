@@ -145,12 +145,6 @@ public class TaskUtils {
         return -1;
     }
 
-    public static void killPackageProcess(int mId, Context context) {
-        final ActivityManager am = (ActivityManager) context
-                .getSystemService(Context.ACTIVITY_SERVICE);
-        am.removeTask(mId, ActivityManager.REMOVE_TASK_KILL_PROCESS);
-    }
-
     public static void movePackageToFront(int mId, Context context) {
         final ActivityManager am = (ActivityManager) context
                 .getSystemService(Context.ACTIVITY_SERVICE);
