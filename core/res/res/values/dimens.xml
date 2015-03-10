@@ -424,4 +424,7 @@
      <item type="dimen" format="float" name="ambient_shadow_alpha">0.075</item>
      <item type="dimen" format="float" name="spot_shadow_alpha">0.15</item>
 
+     <!-- Largest size an avatar might need to be drawn in the user picker, status bar, or
+         quick settings header -->
+     <dimen name="max_avatar_size">48dp</dimen>
 </resources>

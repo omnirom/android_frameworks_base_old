@@ -48,7 +48,6 @@
   <java-symbol type="bool" name="config_samsung_stk" />
 
   <java-symbol type="dimen" name="max_avatar_size" />
-  <java-symbol type="id" name="hide_lock_to_app_checkbox" />
 
   <!-- Last app switch animations -->
   <java-symbol type="anim" name="last_app_in" />
