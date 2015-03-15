@@ -1,0 +1,21 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "6b22818b_5c6f338e",
+        "filename": "core/res/res/values/custom_strings.xml",
+        "patchSetId": 1
+      },
+      "lineNbr": 38,
+      "author": {
+        "id": 1000026
+      },
+      "writtenOn": "2015-03-15T21:46:42Z",
+      "side": 1,
+      "message": "can you please remove this line in the same go?\nits no longer aplyable in 5.1",
+      "revId": "4c29182fd30c4b534798752222301cf048947d02",
+      "serverId": "56841c99-7c94-43d4-bf0b-cb4707e66d55",
+      "unresolved": false
+    }
+  ]
+}
