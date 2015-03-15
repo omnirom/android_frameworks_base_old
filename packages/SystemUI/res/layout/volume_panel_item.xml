@@ -26,7 +26,7 @@
         android:layout_width="48dp"
         android:layout_height="48dp"
         android:scaleType="center"
-        android:background="@drawable/btn_borderless_rect"
+        android:background="?android:attr/actionBarItemBackground"
         android:contentDescription="@null" />
 
     <FrameLayout
@@ -69,6 +69,6 @@
         android:layout_width="48dp"
         android:layout_height="48dp"
         android:scaleType="center"
-        android:background="@drawable/btn_borderless_rect"
+        android:background="?android:attr/actionBarItemBackground"
         android:contentDescription="@null" />
 </LinearLayout>
