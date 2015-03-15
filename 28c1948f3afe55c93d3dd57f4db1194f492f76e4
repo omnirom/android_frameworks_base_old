@@ -1,0 +1,21 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "6b22818b_3c09972f",
+        "filename": "core/java/android/content/ContentProvider.java",
+        "patchSetId": 8
+      },
+      "lineNbr": 309,
+      "author": {
+        "id": 1000032
+      },
+      "writtenOn": "2015-03-15T03:13:42Z",
+      "side": 1,
+      "message": "Should be enforceDeletePermission here. I\u0027m assuming a mismerge happened.",
+      "revId": "28c1948f3afe55c93d3dd57f4db1194f492f76e4",
+      "serverId": "56841c99-7c94-43d4-bf0b-cb4707e66d55",
+      "unresolved": false
+    }
+  ]
+}
