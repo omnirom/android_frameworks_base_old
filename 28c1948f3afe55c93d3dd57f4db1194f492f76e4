@@ -16,6 +16,29 @@
       "revId": "28c1948f3afe55c93d3dd57f4db1194f492f76e4",
       "serverId": "56841c99-7c94-43d4-bf0b-cb4707e66d55",
       "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "6b22818b_1ccf7bb5",
+        "filename": "core/java/android/content/ContentProvider.java",
+        "patchSetId": 8
+      },
+      "lineNbr": 315,
+      "author": {
+        "id": 1000026
+      },
+      "writtenOn": "2015-03-15T17:01:54Z",
+      "side": 1,
+      "message": "will you upload a fix?",
+      "range": {
+        "startLine": 315,
+        "startChar": 15,
+        "endLine": 315,
+        "endChar": 82
+      },
+      "revId": "28c1948f3afe55c93d3dd57f4db1194f492f76e4",
+      "serverId": "56841c99-7c94-43d4-bf0b-cb4707e66d55",
+      "unresolved": false
     }
   ]
 }
