@@ -231,7 +231,7 @@ public abstract class ContentProvider implements ComponentCallbacks2 {
             validateIncomingUri(uri);
             int userId = getUserIdFromUri(uri);
             uri = getUriWithoutUserId(uri);
-            if (enforceWritePermission(callingPkg, uri, null) != AppOpsManager.MODE_ALLOWED) {
+            if (enforceDeletePermission(callingPkg, uri, null) != AppOpsManager.MODE_ALLOWED) {
                 return rejectInsert(uri, initialValues);
             }
             final String original = setCallingPackage(callingPkg);
