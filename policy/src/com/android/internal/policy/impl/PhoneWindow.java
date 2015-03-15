@@ -1867,18 +1867,13 @@ public class PhoneWindow extends Window implements MenuBuilder.Callback {
             case KeyEvent.KEYCODE_VOLUME_DOWN: {
                 // If we have a session send it the volume command, otherwise
                 // use the suggested stream.
-                final boolean volumeKeySounds = getContext().getResources().getBoolean(
-                        com.android.internal.R.bool.config_useVolumeKeySounds);
-                if (volumeKeySounds && Settings.System.getInt(getContext().getContentResolver(),
-                        Settings.System.VOLUME_ADJUST_SOUND, 1) == 1) {
-                    if (mMediaController != null) {
-                        mMediaController.adjustVolume(0, AudioManager.FLAG_PLAY_SOUND
-                                | AudioManager.FLAG_VIBRATE);
-                    } else {
-                        MediaSessionLegacyHelper.getHelper(getContext()).sendAdjustVolumeBy(
-                                mVolumeControlStreamType, 0,
-                                AudioManager.FLAG_PLAY_SOUND | AudioManager.FLAG_VIBRATE);
-                    }
+                if (mMediaController != null) {
+                    mMediaController.adjustVolume(0, AudioManager.FLAG_PLAY_SOUND
+                            | AudioManager.FLAG_VIBRATE);
+                } else {
+                    MediaSessionLegacyHelper.getHelper(getContext()).sendAdjustVolumeBy(
+                            mVolumeControlStreamType, 0,
+                            AudioManager.FLAG_PLAY_SOUND | AudioManager.FLAG_VIBRATE);
                 }
                 return true;
             }
