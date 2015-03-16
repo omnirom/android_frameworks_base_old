@@ -194,7 +194,8 @@ static inline SkColorType convertPixelFormat(PixelFormat format) {
 
 static void nativeSetDirtyRect(JNIEnv* env, jclass clazz,
         jlong nativeObject, jobject dirtyRect) {
-#ifdef QCOM_HARDWARE
+
+#ifdef QCOM_BSP
     sp<Surface> surface(reinterpret_cast<Surface *>(nativeObject));
 
     if (!isSurfaceValid(surface)) {
