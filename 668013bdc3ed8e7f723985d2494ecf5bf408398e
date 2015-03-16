@@ -1,0 +1,21 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "6b22818b_dc896323",
+        "filename": "packages/SystemUI/res/drawable/stat_sys_ringer_silent.xml",
+        "patchSetId": 3
+      },
+      "lineNbr": 19,
+      "author": {
+        "id": 1000026
+      },
+      "writtenOn": "2015-03-16T11:59:54Z",
+      "side": 1,
+      "message": "18dp",
+      "revId": "668013bdc3ed8e7f723985d2494ecf5bf408398e",
+      "serverId": "56841c99-7c94-43d4-bf0b-cb4707e66d55",
+      "unresolved": false
+    }
+  ]
+}
