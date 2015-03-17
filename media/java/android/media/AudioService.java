@@ -3138,7 +3138,6 @@ public class AudioService extends IAudioService.Stub {
             } else if (direction == AudioManager.ADJUST_RAISE) {
                 ringerMode = RINGER_MODE_NORMAL;
             }
-            result &= ~FLAG_ADJUST_VOLUME;
             break;
         case RINGER_MODE_SILENT:
             if (direction == AudioManager.ADJUST_RAISE) {
@@ -3152,7 +3151,6 @@ public class AudioService extends IAudioService.Stub {
                   }
                 }
             }
-            result &= ~FLAG_ADJUST_VOLUME;
             break;
         default:
             Log.e(TAG, "checkForRingerModeChange() wrong ringer mode: "+ringerMode);
@@ -3161,6 +3159,9 @@ public class AudioService extends IAudioService.Stub {
 
         setRingerMode(ringerMode, TAG + ".checkForRingerModeChange", false /*external*/);
 
+        if (ringerMode != RINGER_MODE_NORMAL) {
+            result &= ~FLAG_ADJUST_VOLUME;
+        }
         mPrevVolDirection = direction;
 
         return result;
