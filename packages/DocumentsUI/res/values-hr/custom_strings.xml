@@ -15,9 +15,9 @@
      limitations under the License.
 -->
 <resources xmlns:xliff="urn:oasis:names:tc:xliff:document:1.2">
-  <string name="title_standalone">Archivos</string>
-  <string name="toast_success_delete">Archivos borrados</string>
-  <string name="dialog_delete_confirm_title">¿Seguro que quiere borrar los archivos?</string>
-  <string name="copy_in_progress">Copiando...</string>
-  <string name="delete_in_progress">Borrando...</string>
+  <plurals name="files_pasted">
+    <item quantity="one">Datoteka je zalijepljena. Slanje datoteke u pozadini bi moglo biti dovršeno.</item>
+    <item quantity="few">%d datoteke su zalijepljene. Slanje datoteka u pozadini bi moglo biti dovršeno.</item>
+    <item quantity="other">%d datoteka je zalijepljeno. Slanje datoteka u pozadini bi moglo biti dovršeno.</item>
+  </plurals>
 </resources>
