@@ -15,21 +15,18 @@
      limitations under the License.
 -->
 <resources xmlns:xliff="urn:oasis:names:tc:xliff:document:1.2">
-  <string name="title_standalone">Dateien</string>
-  <string name="toast_success_delete">Dateien gelöscht</string>
-  <string name="dialog_delete_confirm_title">Dateien löschen?</string>
+  <string name="title_standalone">文件</string>
+  <string name="toast_success_delete">文件已删除</string>
+  <string name="dialog_delete_confirm_title">删除文件吗？</string>
   <plurals name="files_copied">
-    <item quantity="one">Die Datei wurde in die Zwischenablage gelegt</item>
-    <item quantity="other">%d Dateien in die Zwischenablage gelegt</item>
+    <item quantity="other">已将 %d 个文件放入剪贴板</item>
   </plurals>
   <plurals name="files_pasted">
-    <item quantity="one">Die Datei wurde eingefügt. Hochladen könnte im Hintergrund abgeschlossen werden.</item>
-    <item quantity="other">%d Dateien wurden eingefügt. Hochladen könnte im Hintergrund abgeschlossen werden.</item>
+    <item quantity="other">已粘贴 %d 个文件。上传可能正在后台完成。</item>
   </plurals>
-  <string name="copy_in_progress">Kopieren...</string>
-  <string name="delete_in_progress">Löschen...</string>
+  <string name="copy_in_progress">正在复制\u2026</string>
+  <string name="delete_in_progress">正在删除\u2026</string>
   <plurals name="dialog_delete_confirm_message">
-    <item quantity="one">Diese Datei wird dauerhaft gelöscht!</item>
-    <item quantity="other">Dies wird die %d ausgewählten Dateien dauerhaft löschen!</item>
+    <item quantity="other">这将永久删除选中的 %d 个文件 ！</item>
   </plurals>
 </resources>
