@@ -56,5 +56,7 @@
   <java-symbol type="layout" name="global_actions_dnd_mode" />
   <!-- global actions -->
   <java-symbol type="style" name="GlobalActionsAnimation" />
-
+  <!--OmniGears Battery lights -->
+  <java-symbol type="bool" name="config_multiColorBatteryLed" />
+  <java-symbol type="bool" name="config_intrusiveBatteryLed" />
 </resources>
