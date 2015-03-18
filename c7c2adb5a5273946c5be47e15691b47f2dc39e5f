@@ -1,0 +1,157 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "6b22818b_a72e5085",
+        "filename": "core/res/res/values/config.xml",
+        "patchSetId": 2
+      },
+      "lineNbr": 800,
+      "author": {
+        "id": 1000026
+      },
+      "writtenOn": "2015-03-18T15:07:09Z",
+      "side": 1,
+      "message": "unneeded change",
+      "revId": "c7c2adb5a5273946c5be47e15691b47f2dc39e5f",
+      "serverId": "56841c99-7c94-43d4-bf0b-cb4707e66d55",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "6b22818b_c747cc55",
+        "filename": "core/res/res/values/symbols.xml",
+        "patchSetId": 2
+      },
+      "lineNbr": 1627,
+      "author": {
+        "id": 1000026
+      },
+      "writtenOn": "2015-03-18T15:07:09Z",
+      "side": 1,
+      "message": "you need to add this to custom_symbols.xml and also to custom_config.xml",
+      "revId": "c7c2adb5a5273946c5be47e15691b47f2dc39e5f",
+      "serverId": "56841c99-7c94-43d4-bf0b-cb4707e66d55",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "6b22818b_e74cc87a",
+        "filename": "services/core/java/com/android/server/BatteryService.java",
+        "patchSetId": 2
+      },
+      "lineNbr": 188,
+      "author": {
+        "id": 1000026
+      },
+      "writtenOn": "2015-03-18T15:07:09Z",
+      "side": 1,
+      "message": "white space",
+      "revId": "c7c2adb5a5273946c5be47e15691b47f2dc39e5f",
+      "serverId": "56841c99-7c94-43d4-bf0b-cb4707e66d55",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "6b22818b_0752c417",
+        "filename": "services/core/java/com/android/server/BatteryService.java",
+        "patchSetId": 2
+      },
+      "lineNbr": 194,
+      "author": {
+        "id": 1000026
+      },
+      "writtenOn": "2015-03-18T15:07:09Z",
+      "side": 1,
+      "message": "unneded",
+      "revId": "c7c2adb5a5273946c5be47e15691b47f2dc39e5f",
+      "serverId": "56841c99-7c94-43d4-bf0b-cb4707e66d55",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "6b22818b_2757c007",
+        "filename": "services/core/java/com/android/server/BatteryService.java",
+        "patchSetId": 2
+      },
+      "lineNbr": 217,
+      "author": {
+        "id": 1000026
+      },
+      "writtenOn": "2015-03-18T15:07:09Z",
+      "side": 1,
+      "message": "spaces not tabs please",
+      "revId": "c7c2adb5a5273946c5be47e15691b47f2dc39e5f",
+      "serverId": "56841c99-7c94-43d4-bf0b-cb4707e66d55",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "6b22818b_473cbcbb",
+        "filename": "services/core/java/com/android/server/BatteryService.java",
+        "patchSetId": 2
+      },
+      "lineNbr": 711,
+      "author": {
+        "id": 1000026
+      },
+      "writtenOn": "2015-03-18T15:07:09Z",
+      "side": 1,
+      "message": "whitespace and tabs",
+      "revId": "c7c2adb5a5273946c5be47e15691b47f2dc39e5f",
+      "serverId": "56841c99-7c94-43d4-bf0b-cb4707e66d55",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "6b22818b_6739b8ca",
+        "filename": "services/core/java/com/android/server/BatteryService.java",
+        "patchSetId": 2
+      },
+      "lineNbr": 751,
+      "author": {
+        "id": 1000026
+      },
+      "writtenOn": "2015-03-18T15:07:09Z",
+      "side": 1,
+      "message": "tabs",
+      "revId": "c7c2adb5a5273946c5be47e15691b47f2dc39e5f",
+      "serverId": "56841c99-7c94-43d4-bf0b-cb4707e66d55",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "6b22818b_8746b453",
+        "filename": "services/core/java/com/android/server/BatteryService.java",
+        "patchSetId": 2
+      },
+      "lineNbr": 842,
+      "author": {
+        "id": 1000026
+      },
+      "writtenOn": "2015-03-18T15:07:09Z",
+      "side": 1,
+      "message": "whitespace",
+      "revId": "c7c2adb5a5273946c5be47e15691b47f2dc39e5f",
+      "serverId": "56841c99-7c94-43d4-bf0b-cb4707e66d55",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "6b22818b_a743b043",
+        "filename": "services/core/java/com/android/server/BatteryService.java",
+        "patchSetId": 2
+      },
+      "lineNbr": 906,
+      "author": {
+        "id": 1000026
+      },
+      "writtenOn": "2015-03-18T15:07:09Z",
+      "side": 1,
+      "message": "whitespace",
+      "revId": "c7c2adb5a5273946c5be47e15691b47f2dc39e5f",
+      "serverId": "56841c99-7c94-43d4-bf0b-cb4707e66d55",
+      "unresolved": false
+    }
+  ]
+}
