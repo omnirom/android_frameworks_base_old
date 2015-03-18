@@ -52,4 +52,7 @@
   <!-- Last app switch animations -->
   <java-symbol type="anim" name="last_app_in" />
   <java-symbol type="anim" name="last_app_out" />
+  
+  <!--OmniGears Battery lights -->
+  <java-symbol type="bool" name="config_multiColorBatteryLed" />
 </resources>
