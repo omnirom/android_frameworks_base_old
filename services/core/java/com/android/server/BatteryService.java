@@ -34,6 +34,7 @@ import android.content.ContentResolver;
 import android.content.Context;
 import android.content.Intent;
 import android.content.pm.PackageManager;
+import android.content.res.Resources;
 import android.os.BatteryManager;
 import android.os.BatteryManagerInternal;
 import android.os.BatteryProperties;
@@ -151,6 +152,14 @@ public final class BatteryService extends SystemService {
     private boolean mUpdatesStopped;
 
     private Led mLed;
+    private boolean mLightEnabled;
+    private boolean mLedPulseEnabled;
+    private boolean mLightOnlyFullyCharged;
+    private int mBatteryLowARGB;
+    private int mBatteryMediumARGB;
+    private int mBatteryFullARGB;
+    private int mBatteryReallyFullARGB;
+    private boolean mMultiColorLed;
 
     private boolean mSentLowBatteryBroadcast = false;
 
@@ -173,6 +182,8 @@ public final class BatteryService extends SystemService {
                 com.android.internal.R.integer.config_lowBatteryCloseWarningBump);
         mShutdownBatteryTemperature = mContext.getResources().getInteger(
                 com.android.internal.R.integer.config_shutdownBatteryTemperature);
+        mLightEnabled = mContext.getResources().getBoolean(
+                com.android.internal.R.bool.config_intrusiveBatteryLed);
 
         // watch for invalid charger messages if the invalid_charger switch exists
         if (new File("/sys/devices/virtual/switch/invalid_charger/state").exists()) {
@@ -227,6 +238,9 @@ public final class BatteryService extends SystemService {
                         false, obs, UserHandle.USER_ALL);
                 updateBatteryWarningLevelLocked();
             }
+        } else if (phase == PHASE_BOOT_COMPLETED) {
+            SettingsObserver observer = new SettingsObserver(mHandler);
+            observer.observe();
         }
     }
 
@@ -878,28 +892,24 @@ public final class BatteryService extends SystemService {
         proto.flush();
     }
 
+    private synchronized void updateLedPulse() {
+        mLed.updateLightsLocked();
+    }
+
     private final class Led {
         private final Light mBatteryLight;
-
-        private final int mBatteryLowARGB;
-        private final int mBatteryMediumARGB;
-        private final int mBatteryFullARGB;
         private final int mBatteryLedOn;
         private final int mBatteryLedOff;
 
         public Led(Context context, LightsManager lights) {
             mBatteryLight = lights.getLight(LightsManager.LIGHT_ID_BATTERY);
-
-            mBatteryLowARGB = context.getResources().getInteger(
-                    com.android.internal.R.integer.config_notificationsBatteryLowARGB);
-            mBatteryMediumARGB = context.getResources().getInteger(
-                    com.android.internal.R.integer.config_notificationsBatteryMediumARGB);
-            mBatteryFullARGB = context.getResources().getInteger(
-                    com.android.internal.R.integer.config_notificationsBatteryFullARGB);
             mBatteryLedOn = context.getResources().getInteger(
                     com.android.internal.R.integer.config_notificationsBatteryLedOn);
             mBatteryLedOff = context.getResources().getInteger(
                     com.android.internal.R.integer.config_notificationsBatteryLedOff);
+            // Does the device supports changing battery LED colors?
+            mMultiColorLed = context.getResources().getBoolean(
+                    com.android.internal.R.bool.config_multiColorBatteryLed);
         }
 
         /**
@@ -908,26 +918,56 @@ public final class BatteryService extends SystemService {
         public void updateLightsLocked() {
             final int level = mBatteryProps.batteryLevel;
             final int status = mBatteryProps.batteryStatus;
-            if (level < mLowBatteryWarningLevel) {
+            boolean lightEnabled = mLightEnabled;
+            int lightColor = mBatteryLowARGB;
+            boolean pulseColor = false;
+
+            if (!mLightEnabled) {
+                // No lights if explicitly disabled
+                lightEnabled = false;
+            } else if (level < mLowBatteryWarningLevel) {
                 if (status == BatteryManager.BATTERY_STATUS_CHARGING) {
                     // Solid red when battery is charging
-                    mBatteryLight.setColor(mBatteryLowARGB);
-                } else {
+                    lightEnabled = !mLightOnlyFullyCharged;
+                    lightColor = mBatteryLowARGB;
+                } else if (mLedPulseEnabled) {
                     // Flash red when battery is low and not charging
-                    mBatteryLight.setFlashing(mBatteryLowARGB, Light.LIGHT_FLASH_TIMED,
-                            mBatteryLedOn, mBatteryLedOff);
+                    pulseColor = true;
+                    lightEnabled = true;
+                    lightColor = mBatteryLowARGB;
+                } else {
+                    // "Pulse low battery light" is disabled, no lights.
+                    lightEnabled = false;
                 }
             } else if (status == BatteryManager.BATTERY_STATUS_CHARGING
                     || status == BatteryManager.BATTERY_STATUS_FULL) {
                 if (status == BatteryManager.BATTERY_STATUS_FULL || level >= 90) {
-                    // Solid green when full or charging and nearly full
-                    mBatteryLight.setColor(mBatteryFullARGB);
+                    if (level == 100){
+                        // Battery is really full
+                        lightEnabled = true;
+                        lightColor = mBatteryReallyFullARGB;
+                    } else {
+                        // Battery is full or charging and nearly full
+                        lightEnabled = !mLightOnlyFullyCharged;
+                        lightColor = mBatteryFullARGB;
+                    }
                 } else {
-                    // Solid orange when charging and halfway full
-                    mBatteryLight.setColor(mBatteryMediumARGB);
+                    // Battery is charging and halfway full
+                    lightEnabled = !mLightOnlyFullyCharged;
+                    lightColor = mBatteryMediumARGB;
                 }
             } else {
                 // No lights if not charging and not low
+                lightEnabled = false;
+            }
+            if (lightEnabled) {
+                if (pulseColor) {
+                    mBatteryLight.setFlashing(lightColor, Light.LIGHT_FLASH_TIMED,
+                            mBatteryLedOn, mBatteryLedOff);
+                } else {
+                    mBatteryLight.setColor(lightColor);
+                }
+            } else {
                 mBatteryLight.turnOff();
             }
         }
@@ -996,6 +1036,86 @@ public final class BatteryService extends SystemService {
             synchronized (mLock) {
                 return mInvalidCharger;
             }
+        }
+    }
+
+   private final class SettingsObserver extends ContentObserver {
+        SettingsObserver(Handler handler) {
+            super(handler);
+        }
+
+        void observe() {
+            ContentResolver resolver = mContext.getContentResolver();
+
+            // Battery light enabled
+            resolver.registerContentObserver(Settings.System.getUriFor(
+                    Settings.System.BATTERY_LIGHT_ENABLED), false, this,
+                    UserHandle.USER_ALL);
+
+            // Low battery pulse
+            resolver.registerContentObserver(Settings.System.getUriFor(
+                    Settings.System.BATTERY_LIGHT_PULSE), false, this,
+                    UserHandle.USER_ALL);
+
+            // Only light when fully charged
+            resolver.registerContentObserver(Settings.System.getUriFor(
+                    Settings.System.BATTERY_LIGHT_ONLY_FULLY_CHARGED), false, this,
+                    UserHandle.USER_ALL);
+
+            // Light colors
+            if (mMultiColorLed) {
+                // Register observer if we have a multi color led
+                resolver.registerContentObserver(Settings.System.getUriFor(
+                        Settings.System.BATTERY_LIGHT_LOW_COLOR), false, this,
+                        UserHandle.USER_ALL);
+                resolver.registerContentObserver(Settings.System.getUriFor(
+                        Settings.System.BATTERY_LIGHT_MEDIUM_COLOR), false, this,
+                        UserHandle.USER_ALL);
+                resolver.registerContentObserver(Settings.System.getUriFor(
+                        Settings.System.BATTERY_LIGHT_FULL_COLOR), false, this,
+                        UserHandle.USER_ALL);
+                resolver.registerContentObserver(Settings.System.getUriFor(
+                        Settings.System.BATTERY_LIGHT_REALLY_FULL_COLOR), false, this,
+                        UserHandle.USER_ALL);
+            }
+
+            update();
+        }
+
+        @Override public void onChange(boolean selfChange) {
+            update();
+        }
+
+        public void update() {
+            ContentResolver resolver = mContext.getContentResolver();
+            Resources res = mContext.getResources();
+
+            // Battery light enabled
+            mLightEnabled = Settings.System.getIntForUser(resolver,
+                    Settings.System.BATTERY_LIGHT_ENABLED, mLightEnabled ? 1 : 0, UserHandle.USER_CURRENT) != 0;
+
+            // Low battery pulse
+            mLedPulseEnabled = Settings.System.getIntForUser(resolver,
+                    Settings.System.BATTERY_LIGHT_PULSE, mLightEnabled ? 1 : 0, UserHandle.USER_CURRENT) != 0;
+
+            // Only light when fully charged
+            mLightOnlyFullyCharged = Settings.System.getIntForUser(resolver,
+                    Settings.System.BATTERY_LIGHT_ONLY_FULLY_CHARGED, 0, UserHandle.USER_CURRENT) != 0;
+
+            // Light colors
+            mBatteryLowARGB = Settings.System.getIntForUser(resolver,
+                    Settings.System.BATTERY_LIGHT_LOW_COLOR,
+                    res.getInteger(com.android.internal.R.integer.config_notificationsBatteryLowARGB), UserHandle.USER_CURRENT);
+            mBatteryMediumARGB = Settings.System.getIntForUser(resolver,
+                    Settings.System.BATTERY_LIGHT_MEDIUM_COLOR,
+                    res.getInteger(com.android.internal.R.integer.config_notificationsBatteryMediumARGB), UserHandle.USER_CURRENT);
+            mBatteryFullARGB = Settings.System.getIntForUser(resolver,
+                    Settings.System.BATTERY_LIGHT_FULL_COLOR,
+                    res.getInteger(com.android.internal.R.integer.config_notificationsBatteryFullARGB), UserHandle.USER_CURRENT);
+            mBatteryReallyFullARGB = Settings.System.getIntForUser(resolver,
+                    Settings.System.BATTERY_LIGHT_REALLY_FULL_COLOR, mBatteryFullARGB, UserHandle.USER_CURRENT);
+
+            updateLedPulse();
         }
     }
 }
