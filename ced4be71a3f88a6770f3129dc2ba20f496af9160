@@ -2,6 +2,23 @@
   "comments": [
     {
       "key": {
+        "uuid": "6b22818b_4d0e9b37",
+        "filename": "core/res/res/values/symbols.xml",
+        "patchSetId": 4
+      },
+      "lineNbr": 1627,
+      "author": {
+        "id": 1000026
+      },
+      "writtenOn": "2015-03-20T21:40:58Z",
+      "side": 1,
+      "message": "is already in custom_symbols!",
+      "revId": "ced4be71a3f88a6770f3129dc2ba20f496af9160",
+      "serverId": "56841c99-7c94-43d4-bf0b-cb4707e66d55",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "6b22818b_820b022c",
         "filename": "services/core/java/com/android/server/BatteryService.java",
         "patchSetId": 4
