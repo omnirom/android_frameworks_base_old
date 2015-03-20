@@ -1,0 +1,21 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "6b22818b_42ff4a30",
+        "filename": "core/res/res/values/themes_material.xml",
+        "patchSetId": 5
+      },
+      "lineNbr": 1242,
+      "author": {
+        "id": 1000174
+      },
+      "writtenOn": "2015-03-20T17:27:34Z",
+      "side": 1,
+      "message": "Better to put?\n\n\u003citem name\u003d\"navigationBarColor\"\u003e?colorPrimaryDark\u003c/item\u003e",
+      "revId": "9f781c20cf6b84de79b93d0a98d5a29a154bd139",
+      "serverId": "56841c99-7c94-43d4-bf0b-cb4707e66d55",
+      "unresolved": false
+    }
+  ]
+}
