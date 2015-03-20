@@ -1,0 +1,72 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "6b22818b_820b022c",
+        "filename": "services/core/java/com/android/server/BatteryService.java",
+        "patchSetId": 4
+      },
+      "lineNbr": 188,
+      "author": {
+        "id": 1000026
+      },
+      "writtenOn": "2015-03-20T21:40:06Z",
+      "side": 1,
+      "message": "dont change whats not needed :)",
+      "revId": "ced4be71a3f88a6770f3129dc2ba20f496af9160",
+      "serverId": "56841c99-7c94-43d4-bf0b-cb4707e66d55",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "6b22818b_620e063f",
+        "filename": "services/core/java/com/android/server/BatteryService.java",
+        "patchSetId": 4
+      },
+      "lineNbr": 214,
+      "author": {
+        "id": 1000026
+      },
+      "writtenOn": "2015-03-20T21:40:06Z",
+      "side": 1,
+      "message": "coding style - space after { and before else",
+      "revId": "ced4be71a3f88a6770f3129dc2ba20f496af9160",
+      "serverId": "56841c99-7c94-43d4-bf0b-cb4707e66d55",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "6b22818b_a208fe2f",
+        "filename": "services/core/java/com/android/server/BatteryService.java",
+        "patchSetId": 4
+      },
+      "lineNbr": 711,
+      "author": {
+        "id": 1000026
+      },
+      "writtenOn": "2015-03-20T21:40:06Z",
+      "side": 1,
+      "message": "still tabs instead of spaces",
+      "revId": "ced4be71a3f88a6770f3129dc2ba20f496af9160",
+      "serverId": "56841c99-7c94-43d4-bf0b-cb4707e66d55",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "6b22818b_cdf9ab19",
+        "filename": "services/core/java/com/android/server/BatteryService.java",
+        "patchSetId": 4
+      },
+      "lineNbr": 748,
+      "author": {
+        "id": 1000026
+      },
+      "writtenOn": "2015-03-20T21:40:06Z",
+      "side": 1,
+      "message": "tabs and format",
+      "revId": "ced4be71a3f88a6770f3129dc2ba20f496af9160",
+      "serverId": "56841c99-7c94-43d4-bf0b-cb4707e66d55",
+      "unresolved": false
+    }
+  ]
+}
