@@ -1,0 +1,27 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "6b22818b_adec6fb7",
+        "filename": "policy/src/com/android/internal/policy/impl/PhoneWindowManager.java",
+        "patchSetId": 3
+      },
+      "lineNbr": 1533,
+      "author": {
+        "id": 1000515
+      },
+      "writtenOn": "2015-03-21T23:15:09Z",
+      "side": 1,
+      "message": "opss...!\nsorry!\nLet me fix it",
+      "range": {
+        "startLine": 1533,
+        "startChar": 8,
+        "endLine": 1533,
+        "endChar": 27
+      },
+      "revId": "eb9f302d0e4b48887610cc86747f91f0dfa159a2",
+      "serverId": "56841c99-7c94-43d4-bf0b-cb4707e66d55",
+      "unresolved": false
+    }
+  ]
+}
