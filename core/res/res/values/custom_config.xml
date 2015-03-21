@@ -55,4 +55,7 @@
 
     <!-- Does the battery LED support multiple colors? Used to decide if the user can change the colors -->
     <bool name="config_multiColorBatteryLed">false</bool>
+
+    <!-- Set Home Button Wake Support as a persistent behaviour. -->
+    <bool name="config_persistHomeWakeSupport">false</bool>
 </resources>
