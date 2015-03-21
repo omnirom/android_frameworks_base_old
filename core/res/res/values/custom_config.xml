@@ -49,4 +49,7 @@
 
     <!-- Boolean to enable stk functionality on Samsung phones -->
     <bool name="config_samsung_stk">false</bool>
+
+    <!-- Set Home Button Wake Support as a persistent behaviour. -->
+    <bool name="config_persistHomeWakeSupport">false</bool>
 </resources>
