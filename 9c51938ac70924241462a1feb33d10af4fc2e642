@@ -1,0 +1,21 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "6b22818b_ed910755",
+        "filename": "services/core/java/com/android/server/BatteryService.java",
+        "patchSetId": 13
+      },
+      "lineNbr": 750,
+      "author": {
+        "id": 1000026
+      },
+      "writtenOn": "2015-03-21T17:37:38Z",
+      "side": 1,
+      "message": "you missed that! :)",
+      "revId": "9c51938ac70924241462a1feb33d10af4fc2e642",
+      "serverId": "56841c99-7c94-43d4-bf0b-cb4707e66d55",
+      "unresolved": false
+    }
+  ]
+}
