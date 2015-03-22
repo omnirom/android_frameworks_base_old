@@ -462,6 +462,8 @@ static JNINativeMethod gSurfaceMethods[] = {
             (void*)nativeReadFromParcel },
     {"nativeWriteToParcel", "(JLandroid/os/Parcel;)V",
             (void*)nativeWriteToParcel },
+    {"nativeSetDirtyRect", "(JLandroid/graphics/Rect;)V",
+           (void*)nativeSetDirtyRect },
     {"nativeGetWidth", "(J)I", (void*)nativeGetWidth },
     {"nativeGetHeight", "(J)I", (void*)nativeGetHeight },
 
