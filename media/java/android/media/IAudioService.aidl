@@ -204,4 +204,7 @@ interface IAudioService {
     oneway void playerHasOpPlayAudio(in int piid, in boolean hasOpPlayAudio);
 
     // WARNING: read warning at top of file, it is recommended to add new methods at the end
+    void setStreamMaxVolume(int streamType, int maxVol);
+
+    int getDefaultStreamMaxVolume(int streamType);
 }
