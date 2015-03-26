@@ -175,11 +175,7 @@ public class Camera {
     private boolean mOneShot;
     private boolean mWithBuffer;
     private boolean mFaceDetectionRunning = false;
-    private Object mAutoFocusCallbackLock = new Object();
-    /* ### QC ADD-ONS: START */
-    private CameraDataCallback mCameraDataCallback;
-    private CameraMetaDataCallback mCameraMetaDataCallback;
-    /* ### QC ADD-ONS: END */
+    private final Object mAutoFocusCallbackLock = new Object();
 
     private static final int NO_ERROR = 0;
     private static final int EACCESS = -13;
@@ -189,6 +185,10 @@ public class Camera {
     private static final int ENOSYS = -38;
     private static final int EUSERS = -87;
     private static final int EOPNOTSUPP = -95;
+    /* ### QC ADD-ONS: START */
+    private CameraDataCallback mCameraDataCallback;
+    private CameraMetaDataCallback mCameraMetaDataCallback;
+    /* ### QC ADD-ONS: END */
 
     /**
      * Broadcast Action:  A new picture is taken by the camera, and the entry of
@@ -1847,6 +1847,23 @@ public class Camera {
          * as a set. Either they are all valid, or none of them are.
          */
         public Point mouth = null;
+
+        /**
+         * {@hide}
+         */
+        public int smileDegree = 0;
+        /**
+         * {@hide}
+         */
+        public int smileScore = 0;
+        /**
+         * {@hide}
+         */
+        public int blinkDetected = 0;
+        /**
+         * {@hide}
+         */
+        public int faceRecognised = 0;
     }
 
     // Error codes match the enum in include/ui/Camera.h
@@ -1933,6 +1950,27 @@ public class Camera {
         String s = native_getParameters();
         p.unflatten(s);
         return p;
+    }
+
+    /** @hide
+     * Returns the current cct value of white balance.
+     *
+     * If it's in AWB mode, cct is determined by stats/awb module.
+     *
+     * If it's in Manual WB mode, it actually returns cct value
+     *     set by user via {@link #setParameters(Camera.Parameters)}.
+     */
+    public int getWBCurrentCCT() {
+        Parameters p = new Parameters();
+        String s = native_getParameters();
+        p.unflatten(s);
+
+        int cct = 0;
+        if (p.getWBCurrentCCT() != null) {
+            cct = Integer.parseInt(p.getWBCurrentCCT());
+        }
+
+        return cct;
     }
 
     /**
@@ -2076,6 +2114,27 @@ public class Camera {
         /** y co-ordinate for the touch event */
         public int yCoordinate;
     };
+
+    /** @hide
+     * Returns the current focus position.
+     *
+     * If it's in AF mode, it's the lens position after af is done.
+     *
+     * If it's in Manual Focus mode, it actually returns the value
+     *     set by user via {@link #setParameters(Camera.Parameters)}.
+     */
+    public int getCurrentFocusPosition() {
+        Parameters p = new Parameters();
+        String s = native_getParameters();
+        p.unflatten(s);
+
+        int focus_pos = -1;
+        if (p.getCurrentFocusPosition() != null) {
+            focus_pos = Integer.parseInt(p.getCurrentFocusPosition());
+        }
+        return focus_pos;
+    }
+
     /* ### QC ADD-ONS: END */
     /**
      * Returns a copied {@link Parameters}; for shim use only.
@@ -2324,6 +2383,10 @@ public class Camera {
         public static final String WHITE_BALANCE_CLOUDY_DAYLIGHT = "cloudy-daylight";
         public static final String WHITE_BALANCE_TWILIGHT = "twilight";
         public static final String WHITE_BALANCE_SHADE = "shade";
+        /** @hide
+         * wb manual cct mode.
+         */
+        public static final String WHITE_BALANCE_MANUAL_CCT = "manual-cct";
 
         // Values for color effect settings.
         public static final String EFFECT_NONE = "none";
@@ -2370,22 +2433,6 @@ public class Camera {
          * This can also be used for video recording.
          */
         public static final String FLASH_MODE_TORCH = "torch";
-
-        //Values for ISO settings
-        /** @hide */
-        public static final String ISO_AUTO = "auto";
-        /** @hide */
-        public static final String ISO_HJR = "ISO_HJR";
-        /** @hide */
-        public static final String ISO_100 = "ISO100";
-        /** @hide */
-        public static final String ISO_200 = "ISO200";
-        /** @hide */
-        public static final String ISO_400 = "ISO400";
-        /** @hide */
-        public static final String ISO_800 = "ISO800";
-        /** @hide */
-        public static final String ISO_1600 = "ISO1600";
 
         /** @hide
          * Scene mode is off.
@@ -2576,6 +2623,11 @@ public class Camera {
          * @see #FOCUS_MODE_CONTINUOUS_VIDEO
          */
         public static final String FOCUS_MODE_CONTINUOUS_PICTURE = "continuous-picture";
+
+        /** @hide
+         *  manual focus mode
+         */
+        public static final String FOCUS_MODE_MANUAL_POSITION = "manual";
 
         // Indices for focus distance array.
         /**
@@ -4451,7 +4503,13 @@ public class Camera {
         private static final String KEY_QC_TOUCH_AF_AEC = "touch-af-aec";
         private static final String KEY_QC_TOUCH_INDEX_AEC = "touch-index-aec";
         private static final String KEY_QC_TOUCH_INDEX_AF = "touch-index-af";
+        private static final String KEY_QC_MANUAL_FOCUS_POSITION = "manual-focus-position";
+        private static final String KEY_QC_MANUAL_FOCUS_POS_TYPE = "manual-focus-pos-type";
         private static final String KEY_QC_SCENE_DETECT = "scene-detect";
+        private static final String KEY_QC_ISO_MODE = "iso";
+        private static final String KEY_QC_EXPOSURE_TIME = "exposure-time";
+        private static final String KEY_QC_MIN_EXPOSURE_TIME = "min-exposure-time";
+        private static final String KEY_QC_MAX_EXPOSURE_TIME = "max-exposure-time";
         private static final String KEY_QC_LENSSHADE = "lensshade";
         private static final String KEY_QC_HISTOGRAM = "histogram";
         private static final String KEY_QC_SKIN_TONE_ENHANCEMENT = "skinToneEnhancement";
@@ -4471,6 +4529,15 @@ public class Camera {
         private static final String KEY_QC_ZSL = "zsl";
         private static final String KEY_QC_CAMERA_MODE = "camera-mode";
         private static final String KEY_QC_VIDEO_HIGH_FRAME_RATE = "video-hfr";
+        private static final String KEY_QC_VIDEO_HDR = "video-hdr";
+        private static final String KEY_QC_POWER_MODE = "power-mode";
+        private static final String KEY_QC_POWER_MODE_SUPPORTED = "power-mode-supported";
+        private static final String KEY_QC_WB_MANUAL_CCT = "wb-manual-cct";
+        private static final String KEY_QC_MIN_WB_CCT = "min-wb-cct";
+        private static final String KEY_QC_MAX_WB_CCT = "max-wb-cct";
+        private static final String KEY_QC_AUTO_HDR_ENABLE = "auto-hdr-enable";
+        private static final String KEY_QC_VIDEO_ROTATION = "video-rotation";
+
         /** @hide
         * KEY_QC_AE_BRACKET_HDR
         **/
@@ -4501,6 +4568,41 @@ public class Camera {
         * Auto exposure spot metering
         **/
         public static final String AUTO_EXPOSURE_SPOT_METERING = "spot-metering";
+
+        //Values for ISO settings
+        /** @hide
+        * ISO_AUTO
+        **/
+        public static final String ISO_AUTO = "auto";
+        /** @hide
+        * ISO_HJR
+        **/
+        public static final String ISO_HJR = "ISO_HJR";
+        /** @hide
+        * ISO_100
+        **/
+        public static final String ISO_100 = "ISO100";
+        /** @hide
+        * ISO_200
+        **/
+        public static final String ISO_200 = "ISO200";
+        /** @hide
+        * ISO_400
+        **/
+        public static final String ISO_400 = "ISO400";
+        /** @hide
+        * ISO_800
+        **/
+        public static final String ISO_800 = "ISO800";
+        /** @hide
+        * ISO_1600
+        **/
+        public static final String ISO_1600 = "ISO1600";
+
+        /** @hide
+        * ISO_3200
+        **/
+        public static final String ISO_3200 = "ISO3200";
 
         //Values for Lens Shading
         /** @hide
@@ -4566,6 +4668,16 @@ public class Camera {
         * AEC bracketing aec-bracket
         **/
         public static final String AE_BRACKET = "AE-Bracket";
+
+        // Values for Power mode.
+        /** @hide
+        * LOW_POWER
+        **/
+        public static final String LOW_POWER = "Low_Power";
+        /** @hide
+        * NORMAL_POWER
+        **/
+        public static final String NORMAL_POWER = "Normal_Power";
 
         // Values for HFR settings.
         /** @hide
@@ -4652,6 +4764,25 @@ public class Camera {
         **/
         public static final String FACE_DETECTION_ON = "on";
 
+        // Values for video rotation settings.
+
+        /** @hide
+        * VIDEO_ROTATION_0
+        **/
+        public static final String VIDEO_ROTATION_0 = "0";
+        /** @hide
+        * VIDEO_ROTATION_90
+        **/
+        public static final String VIDEO_ROTATION_90 = "90";
+        /** @hide
+        * VIDEO_ROTATION_180
+        **/
+        public static final String VIDEO_ROTATION_180 = "180";
+        /** @hide
+        * VIDEO_ROTATION_270
+        **/
+        public static final String VIDEO_ROTATION_270 = "270";
+
         /* ### QC ADDED PARAMETER APIS*/
          /** @hide
          * Gets the supported preview sizes in high frame rate recording mode.
@@ -4704,6 +4835,17 @@ public class Camera {
          */
          public List<String> getSupportedSceneDetectModes() {
             String str = get(KEY_QC_SCENE_DETECT + SUPPORTED_VALUES_SUFFIX);
+            return split(str);
+         }
+
+         /** @hide
+         * Gets the supported ISO values.
+         *
+         * @return a List of FLASH_MODE_XXX string constants. null if flash mode
+         *         setting is not supported.
+         */
+         public List<String> getSupportedIsoValues() {
+            String str = get(KEY_QC_ISO_MODE + SUPPORTED_VALUES_SUFFIX);
             return split(str);
          }
 
@@ -4770,6 +4912,17 @@ public class Camera {
          */
          public List<String> getSupportedZSLModes() {
             String str = get(KEY_QC_ZSL + SUPPORTED_VALUES_SUFFIX);
+            return split(str);
+         }
+
+         /** @hide
+         * Gets the supported Video HDR modes.
+         *
+         * @return a List of Video HDR_OFF/OFF string constants. null if
+         * Video HDR mode setting is not supported.
+         */
+         public List<String> getSupportedVideoHDRModes() {
+            String str = get(KEY_QC_VIDEO_HDR + SUPPORTED_VALUES_SUFFIX);
             return split(str);
          }
 
@@ -4945,6 +5098,14 @@ public class Camera {
                         "Invalid Saturation " + saturation);
 
             set(KEY_QC_SATURATION, String.valueOf(saturation));
+         }
+
+         /** @hide
+         * @return true if full size video snapshot is supported.
+         */
+         public boolean isPowerModeSupported() {
+            String str = get(KEY_QC_POWER_MODE_SUPPORTED);
+            return TRUE.equals(str);
          }
 
          /** @hide
@@ -5130,12 +5291,89 @@ public class Camera {
          }
 
          /** @hide
+         * Sets the Power mode.
+         *
+         * @param value Power mode.
+         * @see #getPowerMode()
+         */
+         public void setPowerMode(String value) {
+            set(KEY_QC_POWER_MODE, value);
+         }
+
+         /** @hide
+         * Gets the current power mode setting.
+         *
+         * @return current power mode. null if power mode setting is not
+         *         supported.
+         * @see #POWER_MODE_LOW
+         * @see #POWER_MODE_NORMAL
+         */
+         public String getPowerMode() {
+            return get(KEY_QC_POWER_MODE);
+         }
+
+         /** @hide
          * Set HDR-Bracketing Level
          *
          * @param value HDR-Bracketing
          */
          public void setAEBracket(String value){
             set(KEY_QC_AE_BRACKET_HDR, value);
+         }
+
+         /** @hide
+         * Gets the current ISO setting.
+         *
+         * @return one of ISO_XXX string constant. null if ISO
+         *         setting is not supported.
+         */
+         public String getISOValue() {
+            return get(KEY_QC_ISO_MODE);
+         }
+
+         /** @hide
+         * Sets the ISO.
+         *
+         * @param iso ISO_XXX string constant.
+         */
+         public void setISOValue(String iso) {
+            set(KEY_QC_ISO_MODE, iso);
+         }
+
+         /** @hide
+         * Sets the exposure time.
+         *
+         * @param value exposure time.
+         */
+         public void setExposureTime(int value) {
+            set(KEY_QC_EXPOSURE_TIME, Integer.toString(value));
+         }
+
+         /** @hide
+         * Gets the current exposure time.
+         *
+         * @return exposure time.
+         */
+         public String getExposureTime() {
+            return get(KEY_QC_EXPOSURE_TIME);
+         }
+
+         /** @hide
+         * Gets the min supported exposure time.
+         *
+         * @return min supported exposure time.
+         */
+         public String getMinExposureTime() {
+            return get(KEY_QC_MIN_EXPOSURE_TIME);
+         }
+
+         /** @hide
+         * Gets the max supported exposure time.
+         *
+         * @return max supported exposure time.
+         */
+         public String getMaxExposureTime() {
+            return get(KEY_QC_MAX_EXPOSURE_TIME);
          }
 
          /** @hide
@@ -5194,6 +5432,42 @@ public class Camera {
          }
 
          /** @hide
+         * Set white balance manual cct value.
+         *
+         * @param cct user CCT setting.
+         */
+         public void setWBManualCCT(int cct) {
+            set(KEY_QC_WB_MANUAL_CCT, Integer.toString(cct));
+         }
+
+         /** @hide
+         * Gets the WB min supported CCT.
+         *
+         * @return min cct value.
+         */
+         public String getWBMinCCT() {
+            return get(KEY_QC_MIN_WB_CCT);
+         }
+
+         /** @hide
+         * Gets the WB max supported CCT.
+         *
+         * @return max cct value.
+         */
+         public String getMaxWBCCT() {
+            return get(KEY_QC_MAX_WB_CCT);
+         }
+
+         /** @hide
+         * Gets the current WB CCT.
+         *
+         * @return CCT value
+         */
+         public String getWBCurrentCCT() {
+            return get(KEY_QC_WB_MANUAL_CCT);
+         }
+
+         /** @hide
          * Gets the current ZSL Mode.
          *
          * @return ZSL mode value
@@ -5209,6 +5483,15 @@ public class Camera {
          */
          public void setZSLMode(String zsl) {
             set(KEY_QC_ZSL, zsl);
+         }
+
+         /** @hide
+         * Sets the current Auto HDR Mode.
+         * @ auto_hdr auto hdr string for enable/disable
+         * @return null
+         */
+         public void setAutoHDRMode(String auto_hdr){
+             set(KEY_QC_AUTO_HDR_ENABLE,auto_hdr);
          }
 
          /** @hide
@@ -5231,6 +5514,28 @@ public class Camera {
            set(KEY_QC_CAMERA_MODE, cameraMode);
          }
 
+         private static final int MANUAL_FOCUS_POS_TYPE_INDEX = 0;
+         private static final int MANUAL_FOCUS_POS_TYPE_DAC = 1;
+         /** @hide
+         * Set focus position.
+         *
+         * @param pos user setting of focus position.
+         */
+         public void setFocusPosition(int type, int pos) {
+           set(KEY_QC_MANUAL_FOCUS_POS_TYPE, Integer.toString(type));
+           set(KEY_QC_MANUAL_FOCUS_POSITION, Integer.toString(pos));
+         }
+
+         /** @hide
+         * Gets the current focus position.
+         *
+         * @return current focus position
+         */
+         public String getCurrentFocusPosition() {
+            return get(KEY_QC_MANUAL_FOCUS_POSITION);
+         }
+
+
          /** @hide
          * Gets the current HFR Mode.
          *
@@ -5247,6 +5552,24 @@ public class Camera {
          */
          public void setVideoHighFrameRate(String hfr) {
             set(KEY_QC_VIDEO_HIGH_FRAME_RATE, hfr);
+         }
+
+         /** @hide
+         * Gets the current Video HDR Mode.
+         *
+         * @return Video HDR mode value
+         */
+         public String getVideoHDRMode() {
+            return get(KEY_QC_VIDEO_HDR);
+         }
+
+         /** @hide
+         * Sets the current Video HDR Mode.
+         *
+         * @return null
+         */
+         public void setVideoHDRMode(String videohdr) {
+            set(KEY_QC_VIDEO_HDR, videohdr);
          }
 
          /** @hide
@@ -5329,6 +5652,35 @@ public class Camera {
          */
          public void setFaceDetectionMode(String value) {
             set(KEY_QC_FACE_DETECTION, value);
+         }
+
+         /** @hide
+         * Gets the current video rotation setting.
+         *
+         * @return one of VIDEO_QC_ROTATION_XXX string constant. null if video rotation
+         *         setting is not supported.
+         */
+         public String getVideoRotation() {
+            return get(KEY_QC_VIDEO_ROTATION);
+         }
+
+         /** @hide
+         * Sets the current video rotation setting.
+         *
+         * @param value VIDEO_QC_ROTATION_XXX string constants.
+         */
+         public void setVideoRotation(String value) {
+            set(KEY_QC_VIDEO_ROTATION, value);
+         }
+         /** @hide
+         * Gets the supported video rotation  modes.
+         *
+         * @return a List of VIDEO_QC_ROTATION_XXX string constant. null if this
+         *         setting is not supported.
+         */
+         public List<String> getSupportedVideoRotationValues() {
+            String str = get(KEY_QC_VIDEO_ROTATION + SUPPORTED_VALUES_SUFFIX);
+            return split(str);
          }
 
          // Splits a comma delimited string to an ArrayList of Coordinate.
