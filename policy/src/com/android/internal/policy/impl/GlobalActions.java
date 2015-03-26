@@ -61,6 +61,7 @@ import android.text.TextUtils;
 import android.util.ArraySet;
 import android.util.Log;
 import android.util.TypedValue;
+import android.view.CircleRevealView;
 import android.view.Gravity;
 import android.view.InputDevice;
 import android.view.KeyEvent;
@@ -123,6 +124,9 @@ class GlobalActions implements DialogInterface.OnDismissListener, DialogInterfac
 
     private ArrayList<Action> mItems;
     private GlobalActionsDialog mDialog;
+    private CircleRevealView revealView;
+    private View selectedView;
+    private int backgroundColor;
 
     private Action mSilentModeAction;
     private ToggleAction mAirplaneModeOn;
@@ -140,6 +144,8 @@ class GlobalActions implements DialogInterface.OnDismissListener, DialogInterfac
     private boolean mRebootMenu;
     private boolean mUserMenu;
 
+    ProgressBar progress;
+
     /**
      * @param context everything needs a context :(
      */
@@ -149,6 +155,7 @@ class GlobalActions implements DialogInterface.OnDismissListener, DialogInterfac
         mAudioManager = (AudioManager) mContext.getSystemService(Context.AUDIO_SERVICE);
         mDreamManager = IDreamManager.Stub.asInterface(
                 ServiceManager.getService(DreamService.DREAM_SERVICE));
+	revealView=(CircularRevealView) view.findViewById(R.id.reveal);
 
         // receive broadcasts
         IntentFilter filter = new IntentFilter();
