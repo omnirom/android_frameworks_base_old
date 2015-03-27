@@ -2091,6 +2091,11 @@ public final class Settings {
         public static final String DOZE_TIME_MODE = "doze_time_mode";
 
         /**
+         * Quick unlock for Keyguard
+         */
+        public static final String KEYGUARD_QUICK_UNLOCK = "keyguard_quick_unlock";
+
+        /**
          * Control whether the process CPU usage meter should be shown.
          *
          * @deprecated Use {@link Global#SHOW_PROCESSES} instead
