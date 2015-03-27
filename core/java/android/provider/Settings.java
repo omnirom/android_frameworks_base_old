@@ -2085,6 +2085,11 @@ public final class Settings {
         public static final String DOZE_SHAKE_MODE = "doze_shake_mode";
 
         /**
+         * Quick unlock for Keyguard
+         */
+        public static final String KEYGUARD_QUICK_UNLOCK = "keyguard_quick_unlock";
+
+        /**
          * Time mode for ambient display
          * @hide
          */
