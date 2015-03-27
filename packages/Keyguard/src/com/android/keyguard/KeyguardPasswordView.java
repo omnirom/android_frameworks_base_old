@@ -152,6 +152,13 @@ public class KeyguardPasswordView extends KeyguardAbsKeyInputView
             }
         });
 
+        final boolean quickUnlockEnabled = Settings.System.getIntForUser(
+                mContext.getContentResolver(), Settings.System.KEYGUARD_QUICK_UNLOCK,
+                0, UserHandle.USER_CURRENT) == 1;
+        if (quickUnlockEnabled) {
+            quickVerifyPasswordAndUnlock();
+        }
+
         mPasswordEntry.requestFocus();
 
         // If there's more than one IME, enable the IME switcher button
