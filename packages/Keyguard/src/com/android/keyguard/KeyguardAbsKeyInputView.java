@@ -122,6 +122,16 @@ public abstract class KeyguardAbsKeyInputView extends LinearLayout
         resetPasswordText(true /* animate */);
     }
 
+    protected void quickVerifyPasswordAndUnlock() {
+        // Do not call resetPasswordText and do not reportUnlockAttempt
+        // as this is called for every entered number.
+        String entry = getPasswordText();
+        if (mLockPatternUtils.checkPassword(entry)) {
+            mCallback.reportUnlockAttempt(true);
+            mCallback.dismiss(true);
+        }
+    }
+
     protected abstract void resetPasswordText(boolean animate);
     protected abstract String getPasswordText();
     protected abstract void setPasswordEntryEnabled(boolean enabled);
