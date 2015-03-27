@@ -694,6 +694,42 @@ class AlarmManagerService extends SystemService {
             return;
         }
 
+        final long nowElapsed = SystemClock.elapsedRealtime();
+        String intentName = "Null name?";
+        Intent setIntent = operation.getIntent();
+
+        if(setIntent == null) {
+            intentName = "Null intent";
+        } else {
+            if(setIntent.getAction() != null ) {
+                intentName = setIntent.getAction();
+            } else if (setIntent.getComponent() != null) {
+                intentName = setIntent.getComponent().flattenToShortString();
+            }
+        }
+
+        final long fromNow = triggerAtTime - nowElapsed;
+/*        Slog.v("AlarmSet", "AlarmManagerService:setImpl called with type=" + labelForType(type) + " triggerAtTime=" +
+              triggerAtTime + " windowLength =" + windowLength + " interval=" +
+              interval + " intent name=" + intentName + " workSource=" + workSource +
+              " alarmClock=" + alarmClock + " at time=" + nowElapsed  + " fromNow=" + fromNow); */
+
+
+	if(intentName == "com.google.android.gms.nlp.ALARM_WAKEUP_LOCATOR" &&
+           type == 2 &&
+           windowLength > 0) {
+            triggerAtTime = nowElapsed + 5*fromNow;
+            windowLength *= 2;
+	    // Slog.v("AlarmSet", "Changing trigger time for com.google.android.gms.nlp.ALARM_WAKEUP_LOCATOR to " + triggerAtTime);
+	}
+
+	if(intentName == "com.google.android.gms.nlp.ALARM_WAKEUP_ACTIVITY_DETECTION" &&
+           type == 2 &&
+           windowLength > 0) {
+            triggerAtTime = nowElapsed + 4*fromNow;
+	    // Slog.v("AlarmSet", "Changing trigger time for com.google.android.gms.nlp.ALARM_WAKEUP_ACTIVITY_DETECTION to " + triggerAtTime);
+	}
+
         // Sanity check the window length.  This will catch people mistakenly
         // trying to pass an end-of-window timestamp rather than a duration.
         if (windowLength > AlarmManager.INTERVAL_HALF_DAY) {
@@ -723,7 +759,6 @@ class AlarmManagerService extends SystemService {
             triggerAtTime = 0;
         }
 
-        final long nowElapsed = SystemClock.elapsedRealtime();
         final long nominalTrigger = convertToElapsed(triggerAtTime, type);
         // Try to prevent spamming by making sure we aren't firing alarms in the immediate future
         final long minTrigger = nowElapsed + MIN_FUTURITY;
