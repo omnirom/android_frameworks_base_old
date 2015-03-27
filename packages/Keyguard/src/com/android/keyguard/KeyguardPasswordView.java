@@ -18,6 +18,8 @@ package com.android.keyguard;
 
 import android.content.Context;
 import android.graphics.Rect;
+import android.os.UserHandle;
+import android.provider.Settings;
 import android.text.Editable;
 import android.text.InputType;
 import android.text.TextWatcher;
@@ -292,6 +294,12 @@ public class KeyguardPasswordView extends KeyguardAbsKeyInputView
 
     @Override
     public void afterTextChanged(Editable s) {
+        final boolean quickUnlockEnabled = Settings.Secure.getIntForUser(
+                mContext.getContentResolver(), Settings.Secure.KEYGUARD_QUICK_UNLOCK,
+                0, UserHandle.USER_CURRENT) == 1;
+        if (quickUnlockEnabled) {
+            quickVerifyPasswordAndUnlock();
+        }
     }
 
     @Override
