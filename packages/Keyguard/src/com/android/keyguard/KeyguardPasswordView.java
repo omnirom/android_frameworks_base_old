@@ -292,6 +292,12 @@ public class KeyguardPasswordView extends KeyguardAbsKeyInputView
 
     @Override
     public void afterTextChanged(Editable s) {
+        final boolean quickUnlockEnabled = Settings.System.getIntForUser(
+                mContext.getContentResolver(), Settings.System.KEYGUARD_QUICK_UNLOCK,
+                0, UserHandle.USER_CURRENT) == 1;
+        if (quickUnlockEnabled) {
+            quickVerifyPasswordAndUnlock();
+        }
     }
 
     @Override

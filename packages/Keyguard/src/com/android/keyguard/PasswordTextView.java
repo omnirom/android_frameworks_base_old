@@ -92,6 +92,7 @@ public class PasswordTextView extends View {
     private Interpolator mDisappearInterpolator;
     private Interpolator mFastOutSlowInInterpolator;
     private boolean mShowPassword;
+    private ChangeListener mChangeListener;
 
     public PasswordTextView(Context context) {
         this(context, null);
@@ -204,6 +205,13 @@ public class PasswordTextView extends View {
         }
         userActivity();
         sendAccessibilityEventTypeViewTextChanged(textbefore, textbefore.length(), 0, 1);
+        if(mChangeListener != null) {
+            mChangeListener.onPasswordChanged();
+        }
+    }
+
+    public void setChangeListener(ChangeListener l) {
+        mChangeListener = l;
     }
 
     private void userActivity() {
@@ -666,6 +674,11 @@ public class PasswordTextView extends View {
                 canvas.restore();
             }
             return charWidth + mCharPadding * currentWidthFactor;
+        }
+    }
+
+    public static class ChangeListener {
+        public void onPasswordChanged() {
         }
     }
 }
