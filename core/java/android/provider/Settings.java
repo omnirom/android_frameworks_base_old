@@ -1218,7 +1218,6 @@ public final class Settings {
             MOVED_TO_SECURE.add(Secure.LOCK_PATTERN_ENABLED);
             MOVED_TO_SECURE.add(Secure.LOCK_PATTERN_VISIBLE);
             MOVED_TO_SECURE.add(Secure.LOCK_PATTERN_TACTILE_FEEDBACK_ENABLED);
-            MOVED_TO_SECURE.add(Secure.LOCK_NUMPAD_RANDOM);
             MOVED_TO_SECURE.add(Secure.LOGGING_ID);
             MOVED_TO_SECURE.add(Secure.PARENTAL_CONTROL_ENABLED);
             MOVED_TO_SECURE.add(Secure.PARENTAL_CONTROL_LAST_UPDATE);
@@ -2766,7 +2765,7 @@ public final class Settings {
         public static final String VOLUME_ADJUST_SOUND = "volume_adjust_sound";
 
         /**
-         * Screenshod sound enable, This is the noise made when taeking a screesnhot
+         * Screenshot sound enable, This is the noise made when taking a screenshot
          * Defaults to 1 - sounds enabled
          * @hide
          */
@@ -3985,6 +3984,12 @@ public final class Settings {
           */
 
         public static final String LOCK_NUMPAD_RANDOM = "lock_numpad_random";
+
+        /**
+         * Quick unlock for Keyguard
+         * @hide
+         */
+        public static final String KEYGUARD_QUICK_UNLOCK = "keyguard_quick_unlock";
 
         /**
          * Whether lock pattern will vibrate as user enters (0 = false, 1 =
