@@ -1,0 +1,21 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "6b22818b_fcea9a71",
+        "filename": "core/res/res/values/styles.xml",
+        "patchSetId": 1
+      },
+      "lineNbr": 119,
+      "author": {
+        "id": 1000174
+      },
+      "writtenOn": "2015-03-27T01:06:08Z",
+      "side": 1,
+      "message": "This anim is not in any of the animator xmls you uploaded with the commit, you are missing the animation",
+      "revId": "8417c41fd653d68e7ea35aaadd27cc85b119a64f",
+      "serverId": "56841c99-7c94-43d4-bf0b-cb4707e66d55",
+      "unresolved": false
+    }
+  ]
+}
