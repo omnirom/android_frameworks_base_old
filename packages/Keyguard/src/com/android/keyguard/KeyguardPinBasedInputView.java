@@ -92,6 +92,7 @@ public abstract class KeyguardPinBasedInputView extends KeyguardAbsKeyInputView
 
     private void performClick(View view) {
         view.performClick();
+        quickVerifyPasswordAndUnlock();
     }
 
     private void performNumberClick(int number) {
