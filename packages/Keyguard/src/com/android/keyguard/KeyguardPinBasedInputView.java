@@ -153,6 +153,11 @@ public abstract class KeyguardPinBasedInputView extends KeyguardAbsKeyInputView
                 mCallback.userActivity();
             }
         });
+        mPasswordEntry.setChangeListener(new PasswordTextView.ChangeListener() {
+            public void onPasswordChanged() {
+                quickVerifyPasswordAndUnlock();
+            }
+        });
 
         mOkButton = findViewById(R.id.key_enter);
         if (mOkButton != null) {
