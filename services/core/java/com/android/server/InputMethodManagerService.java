@@ -1504,6 +1504,9 @@ public class InputMethodManagerService extends IInputMethodManager.Stub
     }
 
     private boolean needsToShowImeSwitchOngoingNotification() {
+        boolean hideImeSwitcherNotification = Settings.System.getIntForUser(mContext.getContentResolver(),
+                   Settings.System.IME_SWITCHER_HIDE_NOTIFICATION, UserHandle.USER_CURRENT) == 1;
+        if (hideImeSwitcherNotification) return false;
         if (!mShowOngoingImeSwitcherForPhones) return false;
         if (mSwitchingDialog != null) return false;
         if (isScreenLocked()) return false;
