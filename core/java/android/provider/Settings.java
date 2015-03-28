@@ -2037,6 +2037,11 @@ public final class Settings {
         public static final int SCREEN_BRIGHTNESS_MODE_AUTOMATIC = 1;
 
         /**
+         * Boolean value whether to hide IME switcher notification
+         */
+        public static final String IME_SWITCHER_HIDE_NOTIFICATION = "ime_switcher_hide_notification";
+
+        /**
          * Enable/disable overwrite default value for ambient display
          * @hide
          */
