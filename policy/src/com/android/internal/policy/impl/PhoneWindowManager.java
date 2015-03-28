@@ -1500,6 +1500,8 @@ public class PhoneWindowManager implements WindowManagerPolicy {
                 com.android.internal.R.integer.config_backKillTimeout);
         mPersistHomeWakeSupport = mContext.getResources().getBoolean(
                 com.android.internal.R.bool.config_persistHomeWakeSupport);
+        boolean debugInputOverride = SystemProperties.getBoolean("debug.inputEvent", false);
+        DEBUG_INPUT = DEBUG_INPUT || debugInputOverride;
 
         updateKeyAssignments();
 
