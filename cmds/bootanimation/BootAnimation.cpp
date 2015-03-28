@@ -569,7 +569,9 @@ bool BootAnimation::movie()
 
     eglSwapBuffers(mDisplay, mSurface);
 
+#ifndef TEXTURE_WORKAROUND
     glBindTexture(GL_TEXTURE_2D, 0);
+#endif
     glEnable(GL_TEXTURE_2D);
     glTexEnvx(GL_TEXTURE_ENV, GL_TEXTURE_ENV_MODE, GL_REPLACE);
     glTexParameterx(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_REPEAT);
@@ -600,6 +602,9 @@ bool BootAnimation::movie()
                 mAudioPlayer->playFile(part.audioFile);
             }
 
+#ifdef TEXTURE_WORKAROUND
+            glBindTexture(GL_TEXTURE_2D, 0);
+#endif
             glClearColor(
                     part.backgroundColor[0],
                     part.backgroundColor[1],
@@ -610,6 +615,7 @@ bool BootAnimation::movie()
                 const Animation::Frame& frame(part.frames[j]);
                 nsecs_t lastFrame = systemTime();
 
+#ifndef TEXTURE_WORKAROUND
                 if (r > 0) {
                     glBindTexture(GL_TEXTURE_2D, frame.tid);
                 } else {
@@ -621,7 +627,9 @@ bool BootAnimation::movie()
                     }
                     initTexture(frame);
                 }
-
+#else // TEXTURE_WORKAROUND
+                initTexture(frame);
+#endif
                 if (!clearReg.isEmpty()) {
                     Region::const_iterator head(clearReg.begin());
                     Region::const_iterator tail(clearReg.end());
@@ -662,6 +670,7 @@ bool BootAnimation::movie()
                 break;
         }
 
+#ifndef TEXTURE_WORKAROUND
         // free the textures for this part
         if (part.count != 1) {
             for (size_t j=0 ; j<fcount ; j++) {
@@ -669,6 +678,7 @@ bool BootAnimation::movie()
                 glDeleteTextures(1, &frame.tid);
             }
         }
+#endif
     }
 
     return false;

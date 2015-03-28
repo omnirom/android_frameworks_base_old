@@ -16,15 +16,19 @@ LOCAL_SHARED_LIBRARIES := \
 	libandroidfw \
 	libutils \
 	libbinder \
-    libui \
+	libui \
 	libskia \
-    libEGL \
-    libGLESv1_CM \
-    libgui \
-    libtinyalsa
+	libEGL \
+	libGLESv1_CM \
+	libgui \
+	libtinyalsa
 
 ifeq ($(TARGET_BOOTANIMATION_USE_RGB565),true)
 LOCAL_CFLAGS += -DUSE_565
+endif
+
+ifeq ($(TARGET_BOOTANIMATION_TEXTURE_WORKAROUND),true)
+LOCAL_CFLAGS += -DTEXTURE_WORKAROUND
 endif
 
 LOCAL_MODULE:= bootanimation
