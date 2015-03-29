@@ -2766,6 +2766,13 @@ public final class Settings {
         public static final String VOLUME_ADJUST_SOUND = "volume_adjust_sound";
 
         /**
+         * Screenshod sound enable, This is the noise made when taeking a screesnhot
+         * Defaults to 1 - sounds enabled
+         * @hide
+         */
+        public static final String SCREENSHOT_SHUTTER_SOUND = "screenshot_shutter_sound";
+
+        /**
          * Change volume up and down handlign based on rotation
          * @hide
          */

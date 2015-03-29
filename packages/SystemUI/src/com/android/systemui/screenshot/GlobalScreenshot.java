@@ -44,6 +44,7 @@ import android.os.AsyncTask;
 import android.os.Environment;
 import android.os.Process;
 import android.provider.MediaStore;
+import android.provider.Settings;
 import android.util.DisplayMetrics;
 import android.view.Display;
 import android.view.LayoutInflater;
@@ -591,8 +592,10 @@ class GlobalScreenshot {
         mScreenshotLayout.post(new Runnable() {
             @Override
             public void run() {
-                // Play the shutter sound to notify that we've taken a screenshot
-                mCameraSound.play(MediaActionSound.SHUTTER_CLICK);
+                if (Settings.System.getInt(mContext.getContentResolver(), Settings.System.SCREENSHOT_SHUTTER_SOUND, 1) == 1) {
+                    // Play the shutter sound to notify that we've taken a screenshot
+                    mCameraSound.play(MediaActionSound.SHUTTER_CLICK);
+                }
 
                 mScreenshotView.setLayerType(View.LAYER_TYPE_HARDWARE, null);
                 mScreenshotView.buildLayer();
