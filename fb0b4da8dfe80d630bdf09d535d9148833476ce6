@@ -1,0 +1,21 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "6b22818b_951a591a",
+        "filename": "packages/Keyguard/src/com/android/keyguard/KeyguardPasswordView.java",
+        "patchSetId": 7
+      },
+      "lineNbr": 294,
+      "author": {
+        "id": 1000026
+      },
+      "writtenOn": "2015-03-29T20:40:41Z",
+      "side": 1,
+      "message": "missing import Settings and UserHandle",
+      "revId": "fb0b4da8dfe80d630bdf09d535d9148833476ce6",
+      "serverId": "56841c99-7c94-43d4-bf0b-cb4707e66d55",
+      "unresolved": false
+    }
+  ]
+}
