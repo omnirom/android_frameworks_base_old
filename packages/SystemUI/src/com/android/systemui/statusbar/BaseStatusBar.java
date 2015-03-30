@@ -85,6 +85,7 @@ import com.android.internal.statusbar.IStatusBarService;
 import com.android.internal.statusbar.StatusBarIcon;
 import com.android.internal.statusbar.StatusBarIconList;
 import com.android.internal.util.NotificationColorUtil;
+import com.android.internal.util.omni.OmniSwitchConstants;
 import com.android.internal.widget.LockPatternUtils;
 import com.android.systemui.R;
 import com.android.systemui.RecentsComponent;
@@ -224,6 +225,9 @@ public abstract class BaseStatusBar extends SystemUI implements
 
     protected int mZenMode;
 
+    private boolean mOmniSwitchEnabled;
+    private boolean mOmniSwitchStarted;
+
     // which notification is currently being longpress-examined by the user
     private NotificationGuts mNotificationGutsExposed;
 
@@ -254,6 +258,10 @@ public abstract class BaseStatusBar extends SystemUI implements
                 mDeviceProvisioned = provisioned;
                 updateNotifications();
             }
+            mOmniSwitchEnabled = Settings.System.getIntForUser(
+                    mContext.getContentResolver(), Settings.System.RECENTS_USE_OMNISWITCH,
+                    0, UserHandle.USER_CURRENT) == 1;
+
             final int mode = Settings.Global.getInt(mContext.getContentResolver(),
                     Settings.Global.ZEN_MODE, Settings.Global.ZEN_MODE_OFF);
             setZenMode(mode);
@@ -372,10 +380,15 @@ public abstract class BaseStatusBar extends SystemUI implements
                 mCurrentUserId = intent.getIntExtra(Intent.EXTRA_USER_HANDLE, -1);
                 updateCurrentProfilesCache();
                 if (true) Log.v(TAG, "userId " + mCurrentUserId + " is in the house");
-
                 updateLockscreenNotificationSetting();
 
                 userSwitched(mCurrentUserId);
+            } else if (OmniSwitchConstants.ACTION_SERVICE_START.equals(action)) {
+                Log.v(TAG, "OmniSwitch service started");
+                mOmniSwitchStarted = true;
+            } else if (OmniSwitchConstants.ACTION_SERVICE_STOP.equals(action)) {
+                Log.v(TAG, "OmniSwitch service stoped");
+                mOmniSwitchStarted = false;
             } else if (Intent.ACTION_USER_ADDED.equals(action)) {
                 updateCurrentProfilesCache();
             } else if (DevicePolicyManager.ACTION_DEVICE_POLICY_MANAGER_STATE_CHANGED.equals(
@@ -515,6 +528,9 @@ public abstract class BaseStatusBar extends SystemUI implements
                 Settings.Global.getUriFor(Settings.Global.DEVICE_PROVISIONED), true,
                 mSettingsObserver);
         mContext.getContentResolver().registerContentObserver(
+                Settings.System.getUriFor(Settings.System.RECENTS_USE_OMNISWITCH), true,
+                mSettingsObserver);
+        mContext.getContentResolver().registerContentObserver(
                 Settings.Global.getUriFor(Settings.Global.ZEN_MODE), false,
                 mSettingsObserver);
         mContext.getContentResolver().registerContentObserver(
@@ -607,6 +623,8 @@ public abstract class BaseStatusBar extends SystemUI implements
         filter.addAction(BANNER_ACTION_CANCEL);
         filter.addAction(BANNER_ACTION_SETUP);
         filter.addAction(DevicePolicyManager.ACTION_DEVICE_POLICY_MANAGER_STATE_CHANGED);
+        filter.addAction(OmniSwitchConstants.ACTION_SERVICE_START);
+        filter.addAction(OmniSwitchConstants.ACTION_SERVICE_STOP);
         mContext.registerReceiver(mBroadcastReceiver, filter);
 
         updateCurrentProfilesCache();
@@ -1125,21 +1143,29 @@ public abstract class BaseStatusBar extends SystemUI implements
     }
 
     protected void toggleRecents() {
-        if (mRecents != null) {
-            sendCloseSystemWindows(mContext, SYSTEM_DIALOG_REASON_RECENT_APPS);
-            mRecents.toggleRecents(mDisplay, mLayoutDirection, getStatusBarView());
-        }
+        if (mOmniSwitchEnabled && mOmniSwitchStarted){
+            Intent showIntent = new Intent(OmniSwitchConstants.ACTION_TOGGLE_OVERLAY);
+            mContext.sendBroadcast(showIntent);
+        } else {
+            if (mRecents != null) {
+                sendCloseSystemWindows(mContext, SYSTEM_DIALOG_REASON_RECENT_APPS);
+                mRecents.toggleRecents(mDisplay, mLayoutDirection, getStatusBarView());
+            }
     }
 
     protected void preloadRecents() {
-        if (mRecents != null) {
-            mRecents.preloadRecents();
+        if (!mOmniSwitchEnabled){
+            if (mRecents != null) {
+                mRecents.preloadRecents();
+            }
         }
     }
 
     protected void cancelPreloadingRecents() {
-        if (mRecents != null) {
-            mRecents.cancelPreloadingRecents();
+        if (!mOmniSwitchEnabled){
+            if (mRecents != null) {
+                mRecents.cancelPreloadingRecents();
+            }
         }
     }
 
