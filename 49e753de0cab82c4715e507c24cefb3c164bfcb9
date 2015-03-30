@@ -1,0 +1,21 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "6b22818b_b5e03596",
+        "filename": "core/java/android/provider/Settings.java",
+        "patchSetId": 14
+      },
+      "lineNbr": 1222,
+      "author": {
+        "id": 1000026
+      },
+      "writtenOn": "2015-03-30T20:38:45Z",
+      "side": 1,
+      "message": "you dont need this!",
+      "revId": "49e753de0cab82c4715e507c24cefb3c164bfcb9",
+      "serverId": "56841c99-7c94-43d4-bf0b-cb4707e66d55",
+      "unresolved": false
+    }
+  ]
+}
