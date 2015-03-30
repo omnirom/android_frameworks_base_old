@@ -1,0 +1,21 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "6b22818b_b54cb5e4",
+        "filename": "packages/Keyguard/src/com/android/keyguard/KeyguardPinBasedInputView.java",
+        "patchSetId": 10
+      },
+      "lineNbr": 158,
+      "author": {
+        "id": 1000026
+      },
+      "writtenOn": "2015-03-30T14:01:51Z",
+      "side": 1,
+      "message": "uh just noticed - compare to e.g. Settings.Secure.LOCK_NUMPAD_RANDOM security settings are normally in the Secure section of the settings",
+      "revId": "db79054b2987b21143a992382b29d01ab13781fc",
+      "serverId": "56841c99-7c94-43d4-bf0b-cb4707e66d55",
+      "unresolved": false
+    }
+  ]
+}
