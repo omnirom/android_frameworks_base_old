@@ -2766,7 +2766,7 @@ public final class Settings {
         public static final String VOLUME_ADJUST_SOUND = "volume_adjust_sound";
 
         /**
-         * Screenshod sound enable, This is the noise made when taeking a screesnhot
+         * Screenshot sound enable, This is the noise made when taking a screenshot
          * Defaults to 1 - sounds enabled
          * @hide
          */
