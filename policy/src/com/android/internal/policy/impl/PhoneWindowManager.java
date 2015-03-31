@@ -6359,7 +6359,7 @@ public class PhoneWindowManager implements WindowManagerPolicy {
                             PackageManager.FEATURE_TELEVISION)) {
                         theme = com.android.internal.R.style.Theme_Leanback_Dialog_Alert;
                     } else {
-                        theme = 0;
+                        theme = com.android.internal.R.style.Theme_Material_Dialog_Alert;
                     }
 
                     mBootMsgDialog = new ProgressDialog(mContext, theme) {
