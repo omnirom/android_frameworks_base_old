@@ -1,0 +1,72 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "6b22818b_b50bd52b",
+        "filename": "packages/SystemUI/res/values/config.xml",
+        "patchSetId": 3
+      },
+      "lineNbr": 296,
+      "author": {
+        "id": 1000174
+      },
+      "writtenOn": "2015-03-31T08:50:32Z",
+      "side": 1,
+      "message": "Delete this line.",
+      "revId": "fb9bfd7dcc9fc48e42f04289684bbd8af00eb790",
+      "serverId": "56841c99-7c94-43d4-bf0b-cb4707e66d55",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "6b22818b_d5085131",
+        "filename": "packages/SystemUI/src/com/android/systemui/qs/tiles/CastTile.java",
+        "patchSetId": 3
+      },
+      "lineNbr": 29,
+      "author": {
+        "id": 1000174
+      },
+      "writtenOn": "2015-03-31T08:50:32Z",
+      "side": 1,
+      "message": "This should be under import com.android.system.qs.QSTile;",
+      "revId": "fb9bfd7dcc9fc48e42f04289684bbd8af00eb790",
+      "serverId": "56841c99-7c94-43d4-bf0b-cb4707e66d55",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "6b22818b_f0f9db18",
+        "filename": "packages/SystemUI/src/com/android/systemui/qs/tiles/CastTile.java",
+        "patchSetId": 3
+      },
+      "lineNbr": 50,
+      "author": {
+        "id": 1000174
+      },
+      "writtenOn": "2015-03-31T08:50:32Z",
+      "side": 1,
+      "message": "Again delete this line, not needed",
+      "revId": "fb9bfd7dcc9fc48e42f04289684bbd8af00eb790",
+      "serverId": "56841c99-7c94-43d4-bf0b-cb4707e66d55",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "6b22818b_10ff57fc",
+        "filename": "packages/SystemUI/src/com/android/systemui/qs/tiles/LocationTile.java",
+        "patchSetId": 3
+      },
+      "lineNbr": 26,
+      "author": {
+        "id": 1000174
+      },
+      "writtenOn": "2015-03-31T08:50:32Z",
+      "side": 1,
+      "message": "This line should go under import com.android.systemui.qs.QSTile;",
+      "revId": "fb9bfd7dcc9fc48e42f04289684bbd8af00eb790",
+      "serverId": "56841c99-7c94-43d4-bf0b-cb4707e66d55",
+      "unresolved": false
+    }
+  ]
+}
