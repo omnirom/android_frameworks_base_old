@@ -87,6 +87,9 @@
          true will use SystemClock.elapsedRealtimeNanos() to set timestamp. -->
     <bool name="config_useSystemClockforRotationSensor">false</bool>
 
+    <!-- Automatic brightness enhancements -->
+    <integer name="config_autoBrightnessBrighteningLightFastDebounce">500</integer>
+
     <!-- ######## CAF #########-->
     <!--  operator custom sim icon feature -->
     <bool name="operator_custom_sim_icon">false</bool>
