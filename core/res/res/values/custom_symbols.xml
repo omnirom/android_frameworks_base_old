@@ -92,4 +92,6 @@
   <java-symbol type="array" name="config_notificationNoAlertsVibePattern" />
   <!-- LED pulse -->
   <java-symbol type="bool" name="config_ledCanPulse" />
+  <!-- Automatic brightness enhancements -->
+  <java-symbol type="integer" name="config_autoBrightnessBrighteningLightFastDebounce"/>
 </resources>
