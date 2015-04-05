@@ -116,7 +116,6 @@ public class ImageWallpaper extends WallpaperService {
         boolean mVisible = true;
         boolean mRedrawNeeded;
         boolean mOffsetsChanged;
-        boolean mSurfaceChanged;
         int mLastXTranslation;
         int mLastYTranslation;
 
@@ -274,7 +273,6 @@ public class ImageWallpaper extends WallpaperService {
             }
 
             super.onSurfaceChanged(holder, format, width, height);
-            mSurfaceChanged = true;
             drawFrame();
         }
 
