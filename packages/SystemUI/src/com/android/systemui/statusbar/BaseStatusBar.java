@@ -800,6 +800,15 @@ public abstract class BaseStatusBar extends SystemUI implements
             pkgicon = pmUser.getDefaultActivityIcon();
         }
         ((ImageView) row.findViewById(android.R.id.icon)).setImageDrawable(pkgicon);
+        row.findViewById(android.R.id.icon).setOnLongClickListener(new View.OnLongClickListener() {
+            public boolean onLongClick(View v) {
+                Intent intent = new Intent();
+                intent.setAction(Settings.ACTION_APPLICATION_DETAILS_SETTINGS);
+                intent.setData(Uri.fromParts("package", pkg, null));
+                mContext.startActivity(intent);
+                return true;
+            }
+        });
         ((DateTimeView) row.findViewById(R.id.timestamp)).setTime(sbn.getPostTime());
         ((TextView) row.findViewById(R.id.pkgname)).setText(appname);
         final View settingsButton = guts.findViewById(R.id.notification_inspect_item);
