@@ -176,7 +176,13 @@ public class StatusBarWindowManager {
     }
 
     public void setKeyguardShowing(boolean showing) {
+        final boolean oldKeyguardShowing = mCurrentState.keyguardShowing;
         mCurrentState.keyguardShowing = showing;
+        // if the keygurd went from hidden to showing and occluded is true
+        // reset occluded in the same step else we enter an undefined state
+        if (!oldKeyguardShowing && showing && mCurrentState.keyguardOccluded) {
+            mCurrentState.keyguardOccluded = false;
+        }
         apply(mCurrentState);
     }
 
