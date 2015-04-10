@@ -31,7 +31,7 @@
         android:layout_gravity="bottom|center_horizontal"
         android:gravity="center_horizontal"
         android:textStyle="italic"
-        android:textColor="#ffffff"
+        android:textColor="@color/kg_indication_text"
         android:textAppearance="?android:attr/textAppearanceSmall" />
 
     <FrameLayout
@@ -45,7 +45,7 @@
         android:layout_height="@dimen/keyguard_affordance_height"
         android:layout_width="@dimen/keyguard_affordance_width"
         android:layout_gravity="bottom|end"
-        android:tint="#ffffffff"
+        android:tint="@color/kg_camera_button_tint"
         android:src="@drawable/ic_camera_alt_24dp"
         android:scaleType="center"
         android:contentDescription="@string/accessibility_camera_button" />
@@ -55,7 +55,7 @@
         android:layout_height="@dimen/keyguard_affordance_height"
         android:layout_width="@dimen/keyguard_affordance_width"
         android:layout_gravity="bottom|start"
-        android:tint="#ffffffff"
+        android:tint="@color/kg_phone_button_tint"
         android:src="@drawable/ic_phone_24dp"
         android:scaleType="center"
         android:contentDescription="@string/accessibility_phone_button" />
@@ -67,7 +67,7 @@
         android:layout_gravity="bottom|center_horizontal"
         android:src="@drawable/ic_lock_24dp"
         android:scaleType="center"
-        android:tint="#ffffffff"
+        android:tint="@color/kg_lock_icon_tint"
         android:contentDescription="@string/accessibility_unlock_button" />
 
 </com.android.systemui.statusbar.phone.KeyguardBottomAreaView>

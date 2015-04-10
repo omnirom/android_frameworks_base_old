@@ -1,0 +1,59 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!--
+/*
+ * Copyright 2010, The Android Open Source Project
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *     http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+-->
+<resources>
+    <!-- Exposed resources for theming -->
+    <color name="qs_user_detail_name_text">@color/exposed_qs_user_detail_name</color>
+    <color name="headsup_scrim_start">@color/exposed_headsup_scrim_start</color>
+    <color name="headsup_scrim_end">@color/exposed_headsup_scrim_end</color>
+    <color name="kg_indication_text">@color/exposed_kg_indication_text</color>
+    <color name="kg_camera_button_tint">@color/exposed_kg_camera_button</color>
+    <color name="kg_phone_button_tint">@color/exposed_kg_phone_button</color>
+    <color name="kg_lock_icon_tint">@color/exposed_kg_lock_icon</color>
+    <color name="kg_battery_level_text">@color/exposed_kg_batt_level</color>
+    <color name="kg_carrier_text">@color/exposed_kg_carrier_text</color>
+    <color name="recents_search_bar_label_text">@color/exposed_recents_search_bar_label</color>
+    <color name="alarm_status_text">@color/exposed_button</color>
+    <color name="battery_level_text">@color/exposed_batt_text</color>
+    <color name="no_notifications_text">@color/exposed_no_notify</color>
+    <color name="more_text">@color/exposed_more_text</color>
+    <color name="speedbump_line_bg">@color/exposed_speedbump_line</color>
+    <color name="toggle_text">@color/exposed_toggle</color>
+    <color name="recents_theme_no_wallpaper_bg">@color/exposed_bg_light</color>
+    <color name="statusbar_headsup_text">@color/exposed_primary_text_light</color>
+    <color name="statusbar_system_panel_text">@color/exposed_system_panel_text_light</color>
+    <color name="statusbar_text_button_text">@color/exposed_TextAppearance.StatusBar.TextButton</color>
+    <color name="statusbar_expanded_text">@color/exposed_primary_text_light</color>
+    <color name="statusbar_expanded_clock_text">@color/exposed_primary_text_dark</color>
+    <color name="statusbar_expanded_date_text">@color/exposed_secondary_text_dark</color>
+    <color name="statusbar_expanded_above_date_time_text">@color/exposed_button</color>
+    <color name="statusbar_expanded_network_text">@color/exposed_TextAppearance_Network</color>
+    <color name="statusbar_expanded_network_emergency_only_text">@color/exposed_primary_text_dark</color>
+    <color name="system_dialog_text">@color/exposed_primary_text_dark</color>
+    <color name="material_notification_parenthetical_text">
+        @color/exposed_TextAppearance.Material.Notification.Parenthetical
+    </color>
+    <!-- Background of the volume panel. See also: volume_dialog_background -->
+    <color name="volume_panel_background_color">@color/system_secondary_color</color>
+    <!-- Battery base color -->
+    <color name="batterymeter_base_color">#FFFFFFFF</color>
+    <!-- Color for notification icons -->
+    <color name="notification_icon_color">#FFFFFFFF</color>
+    <!-- Navigation button ripple color -->
+    <color name="navbutton_ripple_color">#FFFFFFFF</color>
+</resources>
