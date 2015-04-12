@@ -32,4 +32,73 @@
     <string name="hide_lock_to_app_dialog">Always start</string>
     <string name="silent_mode_priority">Priority</string>
     <string name="silent_mode_none">None</string>
+
+    <!-- Title of dialog to confirm rebooting into safe mode. [CHAR LIMIT=50] -->
+    <string name="reboot_title">Reboot</string>
+    <!-- Reboot Confirmation Dialog.  Message in the confirmation dialog
+         when the user asks to reboot. [CHAR LIMIT=NONE] -->
+    <string name="reboot_confirm">Do you want to reboot?</string>
+
+    <!-- Text of the checkbox for the permission confirmation dialog to remember the user's choice. [CHAR LIMIT=40] -->
+    <string name="permission_remember_choice">Remember</string>
+    <string name="permission">Permission request</string>
+    <string name="permission_dialog_text">%1$s would like to %2$s</string>
+
+    <!-- App ops requests -->
+    <string name="app_ops_access_camera">access the camera</string>
+    <string name="app_ops_access_location">access your location</string>
+    <string name="app_ops_access_notifications">read your notifications</string>
+    <string name="app_ops_activate_vpn">activate VPN</string>
+    <string name="app_ops_delete_sms">delete SMS</string>
+    <string name="app_ops_delete_mms">delete MMS</string>
+    <string name="app_ops_delete_contacts">delete contacts</string>
+    <string name="app_ops_delete_call_log">delete call log</string>
+    <string name="app_ops_draw_on_top">draw windows on top</string>
+    <string name="app_ops_get_usage_stats">get usage stats</string>
+    <string name="app_ops_keep_device_awake">keep your device awake</string>
+    <string name="app_ops_modify_calendar">update your calendar</string>
+    <string name="app_ops_modify_call_log">update the call log</string>
+    <string name="app_ops_modify_clipboard">modify the clipboard</string>
+    <string name="app_ops_modify_contacts">modify your contacts</string>
+    <string name="app_ops_modify_icc_sms">write/modify ICC SMS messages</string>
+    <string name="app_ops_modify_settings">modify your settings</string>
+    <string name="app_ops_modify_sms">write/modify SMS messages</string>
+    <string name="app_ops_mute_mic">mute microphone</string>
+    <string name="app_ops_phone_call">make a phone call</string>
+    <string name="app_ops_play_audio">play audio</string>
+    <string name="app_ops_post_notification">post a notification</string>
+    <string name="app_ops_project_media">project media</string>
+    <string name="app_ops_read_calendar">read your calendar</string>
+    <string name="app_ops_read_call_log">read your call log</string>
+    <string name="app_ops_read_clipboard">read the clipboard</string>
+    <string name="app_ops_read_contacts">read your contacts</string>
+    <string name="app_ops_read_icc_sms">read ICC SMS messages</string>
+    <string name="app_ops_read_mm_storage">read MMS storage</string>
+    <string name="app_ops_read_other_accounts">read other accounts</string>
+    <string name="app_ops_read_phone_info">read phone info</string>
+    <string name="app_ops_read_sms">read your SMS messages</string>
+    <string name="app_ops_receive_emergency_sms"> emergency SMS</string>
+    <string name="app_ops_receive_mms">receive MMS messages</string>
+    <string name="app_ops_receive_sms">receive SMS messages</string>
+    <string name="app_ops_receive_wap_push">receive WAP push</string>
+    <string name="app_ops_record_audio">record audio</string>
+    <string name="app_ops_send_sms">send an SMS message</string>
+    <string name="app_ops_send_mms">send an MMS message</string>
+    <string name="app_ops_show_toast_window">show a toast window</string>
+    <string name="app_ops_start_at_bootup">start at bootup</string>
+    <string name="app_ops_toggle_bluetooth">turn on/off Bluetooth</string>
+    <string name="app_ops_toggle_nfc">turn on/off NFC</string>
+    <string name="app_ops_toggle_wifi">turn on/off WiFi</string>
+    <string name="app_ops_turn_on_mobile_data">turn on mobile data</string>
+    <string name="app_ops_use_alarm_volume">use alarm volume</string>
+    <string name="app_ops_use_audio_focus">use audio focus</string>
+    <string name="app_ops_use_bluetooth_volume">use bluetooth volume</string>
+    <string name="app_ops_use_master_volume">use master volume</string>
+    <string name="app_ops_use_media_buttons">use media buttons</string>
+    <string name="app_ops_use_media_volume">use media volume</string>
+    <string name="app_ops_use_notification_volume">use notification volume</string>
+    <string name="app_ops_use_ringer_volume">use ringer volume</string>
+    <string name="app_ops_use_vibrate">use haptic feedback</string>
+    <string name="app_ops_use_voice_volume">use voice volume</string>
+    <string name="app_ops_write_mms_storage">write MMS storage</string>
 </resources>
