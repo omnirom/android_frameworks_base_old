@@ -417,18 +417,12 @@
 
     <!-- Title of dialog to confirm rebooting into safe mode. [CHAR LIMIT=50] -->
     <string name="reboot_safemode_title">Reboot to safe mode</string>
-    <string name="reboot_title">Reboot</string>
 
     <!-- Shutdown Confirmation Dialog.  Message in the confirmation dialog
          when the user asks to reboot into safe mode. [CHAR LIMIT=NONE] -->
     <string name="reboot_safemode_confirm">Do you want to reboot into safe mode?
          This will disable all third party applications you have installed.
          They will be restored when you reboot again.</string>
-
-    <!-- Reboot Confirmation Dialog.  Message in the confirmation dialog
-         when the user asks to reboot. [CHAR LIMIT=NONE] -->
-    <string name="reboot_confirm">Do you want to reboot?</string>
-
 
     <!-- Recent Tasks dialog: title
      TODO: this should move to SystemUI.apk, but the code for the old
@@ -5148,11 +5142,6 @@
 
     <!-- Zen mode condition: no exit criteria. [CHAR LIMIT=NONE] -->
     <string name="zen_mode_forever">Indefinitely</string>
-
-    <!-- Text of the checkbox for the permission confirmation dialog to remember the user's choice. [CHAR LIMIT=40] -->
-    <string name="permission_remember_choice">Remember</string>
-    <string name="permission">Permission request</string>
-    <string name="permission_dialog_text">%1$s would like to %2$s</string>
 
     <!-- Content description for the Toolbar icon used to collapse an expanded action mode. [CHAR LIMIT=NONE] -->
     <string name="toolbar_collapse_description">Collapse</string>
