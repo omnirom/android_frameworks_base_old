@@ -176,7 +176,7 @@ class GlobalActions implements DialogInterface.OnDismissListener, DialogInterfac
         mShowSilentToggle = !mContext.getResources().getBoolean(
                 com.android.internal.R.bool.config_useFixedVolume);
         mMenuActions = mContext.getResources().getStringArray(
-                com.android.internal.R.array.config_globalActionsList);
+                com.android.internal.R.array.config_globalActionsList_custom);
     }
 
     /**
@@ -187,7 +187,7 @@ class GlobalActions implements DialogInterface.OnDismissListener, DialogInterfac
         mRebootMenu = false;
         mUserMenu = false;
         mMenuActions = mContext.getResources().getStringArray(
-                com.android.internal.R.array.config_globalActionsList);
+                com.android.internal.R.array.config_globalActionsList_custom);
 
         mKeyguardShowing = keyguardShowing;
         mDeviceProvisioned = isDeviceProvisioned;
