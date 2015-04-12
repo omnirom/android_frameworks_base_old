@@ -1,0 +1,47 @@
+From 4a32db5a7ad4d36d19af58a994fbf58ad067ddbe Mon Sep 17 00:00:00 2001
+From: Kyle Repinski <repinski23@gmail.com>
+Date: Wed, 25 Mar 2015 19:30:48 -0500
+Subject: [PATCH] inputservice: Allow disabling the usage of cursor layers.
+
+Some devices will otherwise fail to display any cursor.
+
+Change-Id: I08c1de366df502ba29e964cffb4fdb87a744f51e
+---
+ libs/input/Android.mk           | 4 ++++
+ libs/input/SpriteController.cpp | 7 +++++--
+ 2 files changed, 9 insertions(+), 2 deletions(-)
+
+diff --git a/libs/input/Android.mk b/libs/input/Android.mk
+index a7fb0e2..8986236 100644
+--- a/libs/input/Android.mk
++++ b/libs/input/Android.mk
+@@ -36,6 +36,10 @@ LOCAL_C_INCLUDES := \
+ 
+ LOCAL_CFLAGS += -Wno-unused-parameter
+ 
++ifeq ($(TARGET_DISABLE_CURSOR_LAYER),true)
++	LOCAL_CFLAGS += -DDISABLE_CURSOR_LAYER
++endif
++
+ LOCAL_MODULE:= libinputservice
+ 
+ LOCAL_MODULE_TAGS := optional
+diff --git a/libs/input/SpriteController.cpp b/libs/input/SpriteController.cpp
+index 5391393..108d40e 100644
+--- a/libs/input/SpriteController.cpp
++++ b/libs/input/SpriteController.cpp
+@@ -370,8 +370,11 @@ sp<SurfaceControl> SpriteController::obtainSurface(int32_t width, int32_t height
+ 
+     sp<SurfaceControl> surfaceControl = mSurfaceComposerClient->createSurface(
+             String8("Sprite"), width, height, PIXEL_FORMAT_RGBA_8888,
+-            ISurfaceComposerClient::eHidden |
+-            ISurfaceComposerClient::eCursorWindow);
++            ISurfaceComposerClient::eHidden
++#ifndef DISABLE_CURSOR_LAYER
++            | ISurfaceComposerClient::eCursorWindow
++#endif
++                                                   );
+     if (surfaceControl == NULL || !surfaceControl->isValid()) {
+         ALOGE("Error creating sprite surface.");
+         return NULL;
+
