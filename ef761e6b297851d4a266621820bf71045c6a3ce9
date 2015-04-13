@@ -1,0 +1,50 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "2b1c0951_43f4c6ba",
+        "filename": "packages/SystemUI/AndroidManifest.xml",
+        "patchSetId": 9
+      },
+      "lineNbr": 182,
+      "author": {
+        "id": 1000551
+      },
+      "writtenOn": "2015-04-13T19:02:16Z",
+      "side": 1,
+      "message": "tab?",
+      "range": {
+        "startLine": 182,
+        "startChar": 0,
+        "endLine": 182,
+        "endChar": 1
+      },
+      "revId": "ef761e6b297851d4a266621820bf71045c6a3ce9",
+      "serverId": "56841c99-7c94-43d4-bf0b-cb4707e66d55",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "2b1c0951_23e7ca0f",
+        "filename": "packages/SystemUI/AndroidManifest.xml",
+        "patchSetId": 9
+      },
+      "lineNbr": 187,
+      "author": {
+        "id": 1000551
+      },
+      "writtenOn": "2015-04-13T19:02:16Z",
+      "side": 1,
+      "message": "tab?",
+      "range": {
+        "startLine": 187,
+        "startChar": 0,
+        "endLine": 187,
+        "endChar": 1
+      },
+      "revId": "ef761e6b297851d4a266621820bf71045c6a3ce9",
+      "serverId": "56841c99-7c94-43d4-bf0b-cb4707e66d55",
+      "unresolved": false
+    }
+  ]
+}
