@@ -19,14 +19,14 @@
 */
 -->
 <resources xmlns:xliff="urn:oasis:names:tc:xliff:document:1.2">
-  <string name="global_action_reboot">Neustart</string>
-  <string name="global_action_reboot_more">Neustart\u2026</string>
+  <string name="global_action_reboot">Uruchom ponownie</string>
+  <string name="global_action_reboot_more">Uruchom ponownie\u2026</string>
   <string name="global_action_reboot_sub">System</string>
   <string name="global_action_reboot_recovery">Recovery</string>
   <string name="global_action_reboot_bootloader">Bootloader</string>
-  <string name="global_action_current_user">Aktuell</string>
-  <string name="app_killed_message">App beendet</string>
-  <string name="hide_lock_to_app_dialog">Immer starten</string>
-  <string name="silent_mode_priority">Priorität</string>
-  <string name="silent_mode_none">Keine</string>
+  <string name="global_action_current_user">Bieżący</string>
+  <string name="app_killed_message">Aplikacja zamknięta</string>
+  <string name="hide_lock_to_app_dialog">Zawsze uruchamiaj</string>
+  <string name="silent_mode_priority">Priorytet</string>
+  <string name="silent_mode_none">Żadne</string>
 </resources>
