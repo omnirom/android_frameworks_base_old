@@ -27,4 +27,6 @@
   <string name="global_action_current_user">Jelenlegi</string>
   <string name="app_killed_message">Alkalmazás leállítva</string>
   <string name="hide_lock_to_app_dialog">Mindig indít</string>
+  <string name="silent_mode_priority">Prioritás</string>
+  <string name="silent_mode_none">Nincs</string>
 </resources>
