@@ -63,4 +63,5 @@
   <java-symbol type="id" name="option5" />
   <java-symbol type="style" name="GlobalActionsAnimation" />
 
+  <java-symbol type="drawable" name="expander_open_mtrl_alpha" />
 </resources>
