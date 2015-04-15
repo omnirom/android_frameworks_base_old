@@ -1,0 +1,21 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "2b1c0951_e38a12e3",
+        "filename": "packages/SystemUI/src/com/android/systemui/qs/tiles/CastTile.java",
+        "patchSetId": 12
+      },
+      "lineNbr": 55,
+      "author": {
+        "id": 1000026
+      },
+      "writtenOn": "2015-04-15T21:54:15Z",
+      "side": 1,
+      "message": "this will not compile :)\nyou need to add private UsageTracker mUsageTracker;",
+      "revId": "860fa128f9a5f3ab3f51317f937d5ccd627a8fc7",
+      "serverId": "56841c99-7c94-43d4-bf0b-cb4707e66d55",
+      "unresolved": false
+    }
+  ]
+}
