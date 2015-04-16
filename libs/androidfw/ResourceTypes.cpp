@@ -5486,6 +5486,8 @@ status_t ResTable::getEntry(
     ResTable_config bestConfig;
     memset(&bestConfig, 0, sizeof(bestConfig));
 
+    bool currentTypeIsOverlay = false;
+
     // Iterate over the Types of each package.
     const size_t typeCount = typeList.size();
     for (size_t i = 0; i < typeCount; i++) {
@@ -5493,7 +5495,7 @@ status_t ResTable::getEntry(
 
         int realEntryIndex = entryIndex;
         int realTypeIndex = typeIndex;
-        bool currentTypeIsOverlay = false;
+        currentTypeIsOverlay = false;
 
         // Runtime overlay packages provide a mapping of app resource
         // ID to package resource ID.
@@ -5555,7 +5557,7 @@ status_t ResTable::getEntry(
                 // Check if this one is less specific than the last found.  If so,
                 // we will skip it.  We check starting with things we most care
                 // about to those we least care about.
-                if (!thisConfig.isBetterThan(bestConfig, config)) {
+                if (!currentTypeIsOverlay && !thisConfig.isBetterThan(bestConfig, config)) {
                     if (!currentTypeIsOverlay || thisConfig.compare(bestConfig) != 0) {
                         continue;
                     }
