@@ -5486,10 +5486,19 @@ status_t ResTable::getEntry(
     const ResTable_type* bestType = NULL;
     uint32_t bestOffset = ResTable_type::NO_ENTRY;
     const Package* bestPackage = NULL;
+    const ResTable_type* bestOverlayType = NULL;
+    uint32_t bestOverlayOffset = ResTable_type::NO_ENTRY;
+    const Package* bestOverlayPackage = NULL;
+
     uint32_t specFlags = 0;
     uint8_t actualTypeIndex = typeIndex;
+    uint8_t actualOverlayTypeIndex = typeIndex;
     ResTable_config bestConfig;
     memset(&bestConfig, 0, sizeof(bestConfig));
+    ResTable_config bestOverlayConfig;
+    memset(&bestConfig, 0, sizeof(bestOverlayConfig));
+
+    bool currentTypeIsOverlay = false;
 
     // Iterate over the Types of each package.
     const size_t typeCount = typeList.size();
@@ -5498,7 +5507,7 @@ status_t ResTable::getEntry(
 
         int realEntryIndex = entryIndex;
         int realTypeIndex = typeIndex;
-        bool currentTypeIsOverlay = false;
+        currentTypeIsOverlay = false;
 
         // Runtime overlay packages provide a mapping of app resource
         // ID to package resource ID.
@@ -5556,28 +5565,51 @@ status_t ResTable::getEntry(
                 continue;
             }
 
-            if (bestType != NULL) {
-                // Check if this one is less specific than the last found.  If so,
-                // we will skip it.  We check starting with things we most care
-                // about to those we least care about.
-                if (!thisConfig.isBetterThan(bestConfig, config)) {
-                    if (!currentTypeIsOverlay || thisConfig.compare(bestConfig) != 0) {
+            if (!currentTypeIsOverlay) {
+                if (bestType != NULL) {
+                    // Check if this one is less specific than the last found.  If so,
+                    // we will skip it.  We check starting with things we most care
+                    // about to those we least care about.
+                    if (!thisConfig.isBetterThan(bestConfig, config)) {
                         continue;
                     }
                 }
-            }
 
-            bestType = thisType;
-            bestOffset = thisOffset;
-            bestConfig = thisConfig;
-            bestPackage = typeSpec->package;
-            actualTypeIndex = realTypeIndex;
+                bestType = thisType;
+                bestOffset = thisOffset;
+                bestConfig = thisConfig;
+                bestPackage = typeSpec->package;
+                actualTypeIndex = realTypeIndex;
+            } else {
+                if (bestOverlayType != NULL) {
+                    // Check if this one is less specific than the last found.  If so,
+                    // we will skip it.  We check starting with things we most care
+                    // about to those we least care about.
+                    if (!thisConfig.isBetterThan(bestOverlayConfig, config)) {
+                        continue;
+                    }
+                }
+
+                bestOverlayType = thisType;
+                bestOverlayOffset = thisOffset;
+                bestOverlayConfig = thisConfig;
+                bestOverlayPackage = typeSpec->package;
+                actualOverlayTypeIndex = realTypeIndex;
+            }
 
             // If no config was specified, any type will do, so skip
             if (config == NULL) {
                 break;
             }
         }
+    }
+
+    if (bestOverlayType != NULL) {
+        bestType = bestOverlayType;
+        bestOffset = bestOverlayOffset;
+        bestConfig = bestOverlayConfig;
+        bestPackage = bestOverlayPackage;
+        actualTypeIndex = actualOverlayTypeIndex;
     }
 
     if (bestType == NULL) {
