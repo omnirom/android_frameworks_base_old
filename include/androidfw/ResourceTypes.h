@@ -1834,6 +1834,8 @@ private:
     status_t parsePackage(
         const ResTable_package* const pkg, const Header* const header);
 
+    bool isDynamicPackageId(const uint32_t pkgId) const;
+
     void print_value(const Package* pkg, const Res_value& value) const;
     
     mutable Mutex               mLock;

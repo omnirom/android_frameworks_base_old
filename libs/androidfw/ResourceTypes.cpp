@@ -2913,6 +2913,7 @@ struct ResTable::PackageGroup
         , largestTypeId(0)
         , bags(NULL)
         , dynamicRefTable(static_cast<uint8_t>(_id))
+        , overlayPackage(NULL)
     { }
 
     ~PackageGroup() {
@@ -2996,6 +2997,8 @@ struct ResTable::PackageGroup
     // by having these tables in a per-package scope rather than
     // per-package-group.
     DynamicRefTable                 dynamicRefTable;
+
+    Package*                        overlayPackage;
 };
 
 struct ResTable::bag_set
@@ -5645,15 +5648,14 @@ status_t ResTable::parsePackage(const ResTable_package* const pkg,
 
     uint32_t id = dtohl(pkg->id);
     KeyedVector<uint8_t, IdmapEntries> idmapEntries;
+    uint8_t targetPackageId = 0;
 
     if (header->resourceIDMap != NULL) {
-        uint8_t targetPackageId = 0;
         status_t err = parseIdmap(header->resourceIDMap, header->resourceIDMapSize, &targetPackageId, &idmapEntries);
         if (err != NO_ERROR) {
             ALOGW("Overlay is broken");
             return (mError=err);
         }
-        id = targetPackageId;
     }
 
     if (id >= 256) {
@@ -5723,6 +5725,15 @@ status_t ResTable::parsePackage(const ResTable_package* const pkg,
         return (mError=err);
     }
 
+    // Get the target group if this is an overlay
+    PackageGroup* targetGroup = NULL;
+    if (header->resourceIDMap != NULL) {
+        targetGroup = mPackageGroups.itemAt(mPackageMap[targetPackageId] - 1);
+        if (targetGroup != NULL) {
+            targetGroup->overlayPackage = package;
+        }
+    }
+
     // Iterate through all chunks.
     const ResChunk_header* chunk =
         (const ResChunk_header*)(((const uint8_t*)pkg)
@@ -5768,15 +5779,11 @@ status_t ResTable::parsePackage(const ResTable_package* const pkg,
 
             if (newEntryCount > 0) {
                 uint8_t typeIndex = typeSpec->id - 1;
-                ssize_t idmapIndex = idmapEntries.indexOfKey(typeSpec->id);
-                if (idmapIndex >= 0) {
-                    typeIndex = idmapEntries[idmapIndex].targetTypeId() - 1;
-                }
 
                 TypeList& typeList = group->types.editItemAt(typeIndex);
                 if (!typeList.isEmpty()) {
                     const Type* existingType = typeList[0];
-                    if (existingType->entryCount != newEntryCount && idmapIndex < 0) {
+                    if (existingType->entryCount != newEntryCount) {
                         ALOGW("ResTable_typeSpec entry count inconsistent: given %d, previously %d",
                                 (int) newEntryCount, (int) existingType->entryCount);
                         // We should normally abort here, but some legacy apps declare
@@ -5788,11 +5795,23 @@ status_t ResTable::parsePackage(const ResTable_package* const pkg,
                 t->typeSpec = typeSpec;
                 t->typeSpecFlags = (const uint32_t*)(
                         ((const uint8_t*)typeSpec) + dtohs(typeSpec->header.headerSize));
-                if (idmapIndex >= 0) {
-                    t->idmapEntries = idmapEntries[idmapIndex];
-                }
                 typeList.add(t);
                 group->largestTypeId = max(group->largestTypeId, typeSpec->id);
+
+                // Add this type spec to the targetGroup
+                if (targetGroup != NULL) {
+                    ssize_t idmapIndex = idmapEntries.indexOfKey(typeSpec->id);
+                    if (idmapIndex >= 0) {
+                        typeIndex = idmapEntries[idmapIndex].targetTypeId() - 1;
+                        TypeList& typeList = targetGroup->types.editItemAt(typeIndex);
+                        Type* t = new Type(header, package, newEntryCount);
+                        t->idmapEntries = idmapEntries[idmapIndex];
+                        t->typeSpec = typeSpec;
+                        t->typeSpecFlags = (const uint32_t*)(
+                                ((const uint8_t*)typeSpec) + dtohs(typeSpec->header.headerSize));
+                        typeList.add(t);
+                    }
+                }
             } else {
                 ALOGV("Skipping empty ResTable_typeSpec for type %d", typeSpec->id);
             }
@@ -5835,10 +5854,6 @@ status_t ResTable::parsePackage(const ResTable_package* const pkg,
 
             if (newEntryCount > 0) {
                 uint8_t typeIndex = type->id - 1;
-                ssize_t idmapIndex = idmapEntries.indexOfKey(type->id);
-                if (idmapIndex >= 0) {
-                    typeIndex = idmapEntries[idmapIndex].targetTypeId() - 1;
-                }
 
                 TypeList& typeList = group->types.editItemAt(typeIndex);
                 if (typeList.isEmpty()) {
@@ -5865,6 +5880,36 @@ status_t ResTable::parsePackage(const ResTable_package* const pkg,
                     thisConfig.copyFromDtoH(type->config);
                     ALOGI("Adding config to type %d: %s\n",
                           type->id, thisConfig.toString().string()));
+
+                // Add this type to the targetGroup
+                if (targetGroup != NULL) {
+                    ssize_t idmapIndex = idmapEntries.indexOfKey(type->id);
+                    if (idmapIndex >= 0) {
+                        typeIndex = idmapEntries[idmapIndex].targetTypeId() - 1;
+                        TypeList& typeList = targetGroup->types.editItemAt(typeIndex);
+                        if (typeList.isEmpty()) {
+                            ALOGE("No TypeSpec for type %d", type->id);
+                            return (mError=BAD_TYPE);
+                        }
+                        Type* t = typeList.editItemAt(typeList.size() - 1);
+                        if (newEntryCount != t->entryCount) {
+                            ALOGE("ResTable_type entry count inconsistent: given %d, previously %d",
+                                (int)newEntryCount, (int)t->entryCount);
+                            return (mError=BAD_TYPE);
+                        }
+                        if (t->package != package) {
+                            ALOGE("No TypeSpec for type %d", type->id);
+                            return (mError=BAD_TYPE);
+                        }
+                        t->configs.add(type);
+                        TABLE_GETENTRY(
+                            ResTable_config thisConfig;
+                            thisConfig.copyFromDtoH(type->config);
+                            ALOGI("Adding config to type %d: %s\n",
+                                  type->id, thisConfig.toString().string()));
+                    }
+                }
+
             } else {
                 ALOGV("Skipping empty ResTable_type for type %d", type->id);
             }
@@ -6065,6 +6110,17 @@ status_t ResTable::createIdmap(const ResTable& overlay,
     char16_t tmpName[sizeof(overlayPackageStruct->name)/sizeof(overlayPackageStruct->name[0])];
     strcpy16_dtoh(tmpName, overlayPackageStruct->name, sizeof(overlayPackageStruct->name)/sizeof(overlayPackageStruct->name[0]));
     const String16 overlayPackage(tmpName);
+    Package* pkg;
+    size_t typeCount;
+    uint32_t pkg_id;
+
+    const uint32_t groupCount = mPackageGroups.size();
+    for (int groupIdx = groupCount - 1; groupIdx >= 0; groupIdx--) {
+        bool foundRedirection = false;
+        pg = mPackageGroups[groupIdx];
+        pkg = pg->packages[0];
+        typeCount = pg->types.size();
+        pkg_id = pkg->package->id << 24;
 
     for (size_t typeIndex = 0; typeIndex < pg->types.size(); ++typeIndex) {
         const TypeList& typeList = pg->types[typeIndex];
@@ -6101,6 +6157,8 @@ status_t ResTable::createIdmap(const ResTable& overlay,
                     typeMap.entryOffset++;
                 }
                 continue;
+            } else {
+                overlayResID = pkg_id | (0x00ffffff & overlayResID);
             }
 
             if (typeMap.overlayTypeId == -1) {
@@ -6132,10 +6190,10 @@ status_t ResTable::createIdmap(const ResTable& overlay,
             *outSize += (4 * sizeof(uint16_t)) + (typeMap.entryMap.size() * sizeof(uint32_t));
         }
     }
+    }
 
     if (map.isEmpty()) {
         ALOGW("idmap: no resources in overlay package present in base package");
-        return UNKNOWN_ERROR;
     }
 
     if ((*outData = malloc(*outSize)) == NULL) {
