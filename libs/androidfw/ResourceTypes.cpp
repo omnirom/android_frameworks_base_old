@@ -71,6 +71,8 @@ namespace android {
 
 #define APP_PACKAGE_ID      0x7f
 #define SYS_PACKAGE_ID      0x01
+#define OVERLAY_APP_PACKAGE_ID  0x61
+#define OVERLAY_SYS_PACKAGE_ID  0x60
 
 // Standard C isspace() is only required to look at the low byte of its input, so
 // produces incorrect results for UTF-16 characters.  For safety's sake, assume that
@@ -4721,7 +4723,7 @@ bool ResTable::stringToValue(Res_value* outValue, String16* outString,
                 }
 
                 uint32_t packageId = Res_GETPACKAGE(rid) + 1;
-                if (packageId != APP_PACKAGE_ID && packageId != SYS_PACKAGE_ID) {
+                if (isDynamicPackageId(packageId)) {
                     outValue->dataType = Res_value::TYPE_DYNAMIC_REFERENCE;
                 }
                 outValue->data = rid;
@@ -4740,7 +4742,7 @@ bool ResTable::stringToValue(Res_value* outValue, String16* outString,
                         outValue->data = rid;
                         outValue->dataType = Res_value::TYPE_DYNAMIC_REFERENCE;
                         return true;
-                    } else if (packageId == APP_PACKAGE_ID || packageId == SYS_PACKAGE_ID) {
+                    } else if (!isDynamicPackageId(packageId)) {
                         // We accept packageId's generated as 0x01 in order to support
                         // building the android system resources
                         outValue->data = rid;
@@ -5951,6 +5953,8 @@ DynamicRefTable::DynamicRefTable(uint8_t packageId)
     // Reserved package ids
     mLookupTable[APP_PACKAGE_ID] = APP_PACKAGE_ID;
     mLookupTable[SYS_PACKAGE_ID] = SYS_PACKAGE_ID;
+    mLookupTable[OVERLAY_APP_PACKAGE_ID] = OVERLAY_APP_PACKAGE_ID;
+    mLookupTable[OVERLAY_SYS_PACKAGE_ID] = OVERLAY_SYS_PACKAGE_ID;
 }
 
 status_t DynamicRefTable::load(const ResTable_lib_header* const header)
@@ -6027,7 +6031,8 @@ status_t DynamicRefTable::lookupResourceId(uint32_t* resId) const {
     uint32_t res = *resId;
     size_t packageId = Res_GETPACKAGE(res) + 1;
 
-    if (packageId == APP_PACKAGE_ID) {
+    if (packageId == APP_PACKAGE_ID || packageId == OVERLAY_APP_PACKAGE_ID ||
+                packageId == OVERLAY_SYS_PACKAGE_ID) {
         // No lookup needs to be done, app package IDs are absolute.
         return NO_ERROR;
     }
@@ -6269,6 +6274,10 @@ bool ResTable::getIdmapInfo(const void* idmap, size_t sizeBytes,
     return true;
 }
 
+bool ResTable::isDynamicPackageId(const uint32_t pkgId) const {
+    return pkgId != APP_PACKAGE_ID && pkgId != SYS_PACKAGE_ID
+      && pkgId != OVERLAY_APP_PACKAGE_ID && pkgId != OVERLAY_SYS_PACKAGE_ID;
+}
 
 #define CHAR16_TO_CSTR(c16, len) (String8(String16(c16,len)).string())
 
