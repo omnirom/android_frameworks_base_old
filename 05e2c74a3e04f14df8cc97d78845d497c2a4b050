@@ -1,0 +1,55 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "2b1c0951_6678f025",
+        "filename": "libs/androidfw/ResourceTypes.cpp",
+        "patchSetId": 2
+      },
+      "lineNbr": 5656,
+      "author": {
+        "id": 1000008
+      },
+      "writtenOn": "2015-04-19T12:23:22Z",
+      "side": 0,
+      "message": "Yeah, things get fun here!\n\nI think this is where the issues with needing to much with PackageIDs start",
+      "revId": "05e2c74a3e04f14df8cc97d78845d497c2a4b050",
+      "serverId": "56841c99-7c94-43d4-bf0b-cb4707e66d55",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "2b1c0951_a68e6827",
+        "filename": "libs/androidfw/ResourceTypes.cpp",
+        "patchSetId": 2
+      },
+      "lineNbr": 5779,
+      "author": {
+        "id": 1000008
+      },
+      "writtenOn": "2015-04-19T12:23:22Z",
+      "side": 0,
+      "message": "I think this is where Horrible Things happen if the packageIDs are the same between an overlay and its target.  (Need to recheck a logcat, it may be elsewhere, see below...)\n\nBefore this patch, I believe this code would effectively cause the criteria here to get ignored if the package was an overlay as it would only be executed if idmapIndex was \u003c 0, which happens if there are no idmapEntries for this item.  After the patch, things are different.",
+      "revId": "05e2c74a3e04f14df8cc97d78845d497c2a4b050",
+      "serverId": "56841c99-7c94-43d4-bf0b-cb4707e66d55",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "2b1c0951_46a85474",
+        "filename": "libs/androidfw/ResourceTypes.cpp",
+        "patchSetId": 2
+      },
+      "lineNbr": 6138,
+      "author": {
+        "id": 1000008
+      },
+      "writtenOn": "2015-04-19T12:23:22Z",
+      "side": 0,
+      "message": "This allows an overlay to contain only resources for reference by other overlays.  This is likely most important for the common overlay - seems pointless for other overlays, although hints that multiple overlays for a single target ARE still OK after all these changes.",
+      "revId": "05e2c74a3e04f14df8cc97d78845d497c2a4b050",
+      "serverId": "56841c99-7c94-43d4-bf0b-cb4707e66d55",
+      "unresolved": false
+    }
+  ]
+}

@@ -1,0 +1,123 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "2b1c0951_86b24ce4",
+        "filename": "include/androidfw/ResourceTypes.h",
+        "patchSetId": 2
+      },
+      "lineNbr": 1837,
+      "author": {
+        "id": 1000008
+      },
+      "writtenOn": "2015-04-19T12:23:22Z",
+      "side": 1,
+      "message": "Whoops, this belongs in a different patch!\n\nWill fix this when I fix other stuff.",
+      "revId": "4b9ab1683aa5a4c1e891ac244e506b176210a820",
+      "serverId": "56841c99-7c94-43d4-bf0b-cb4707e66d55",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "2b1c0951_267ef813",
+        "filename": "libs/androidfw/ResourceTypes.cpp",
+        "patchSetId": 2
+      },
+      "lineNbr": 2916,
+      "author": {
+        "id": 1000008
+      },
+      "writtenOn": "2015-04-19T12:23:22Z",
+      "side": 1,
+      "message": "I think this may be unnecessary, I believe it\u0027s to facilitate easily removing an overlay on-the-fly without a reboot.",
+      "revId": "4b9ab1683aa5a4c1e891ac244e506b176210a820",
+      "serverId": "56841c99-7c94-43d4-bf0b-cb4707e66d55",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "2b1c0951_467bf422",
+        "filename": "libs/androidfw/ResourceTypes.cpp",
+        "patchSetId": 2
+      },
+      "lineNbr": 3001,
+      "author": {
+        "id": 1000008
+      },
+      "writtenOn": "2015-04-19T12:23:22Z",
+      "side": 1,
+      "message": "See above comment",
+      "revId": "4b9ab1683aa5a4c1e891ac244e506b176210a820",
+      "serverId": "56841c99-7c94-43d4-bf0b-cb4707e66d55",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "2b1c0951_86896c24",
+        "filename": "libs/androidfw/ResourceTypes.cpp",
+        "patchSetId": 2
+      },
+      "lineNbr": 5733,
+      "author": {
+        "id": 1000008
+      },
+      "writtenOn": "2015-04-19T12:23:22Z",
+      "side": 1,
+      "message": "I think setting overlayPackage may not be necessary, but the targetGroup stuff is important",
+      "revId": "4b9ab1683aa5a4c1e891ac244e506b176210a820",
+      "serverId": "56841c99-7c94-43d4-bf0b-cb4707e66d55",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "2b1c0951_069e5c58",
+        "filename": "libs/androidfw/ResourceTypes.cpp",
+        "patchSetId": 2
+      },
+      "lineNbr": 5896,
+      "author": {
+        "id": 1000008
+      },
+      "writtenOn": "2015-04-19T12:23:22Z",
+      "side": 1,
+      "message": "Actually I need to look through my logcats from a failure, this may have been where the issue was occurring.  (See above comment)",
+      "revId": "4b9ab1683aa5a4c1e891ac244e506b176210a820",
+      "serverId": "56841c99-7c94-43d4-bf0b-cb4707e66d55",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "2b1c0951_269b5869",
+        "filename": "libs/androidfw/ResourceTypes.cpp",
+        "patchSetId": 2
+      },
+      "lineNbr": 6123,
+      "author": {
+        "id": 1000008
+      },
+      "writtenOn": "2015-04-19T12:23:22Z",
+      "side": 1,
+      "message": "Yeah the indentation is wrong here, more specifically I didn\u0027t indent anything inside the loop - but it makes the actual changes much easier to review for the time being.  The indentation makes it harder to see changes that occur inside the loop.",
+      "revId": "4b9ab1683aa5a4c1e891ac244e506b176210a820",
+      "serverId": "56841c99-7c94-43d4-bf0b-cb4707e66d55",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "2b1c0951_66a5509b",
+        "filename": "libs/androidfw/ResourceTypes.cpp",
+        "patchSetId": 2
+      },
+      "lineNbr": 6161,
+      "author": {
+        "id": 1000008
+      },
+      "writtenOn": "2015-04-19T12:23:22Z",
+      "side": 1,
+      "message": "This is likely the root cause of where things explode if the packageIDs of an overlay and its target are the same.\n\nI don\u0027t think the else {} is actually necessary - thanks to the continue statement in the if() block, all code after this will only be executed in the else {} case",
+      "revId": "4b9ab1683aa5a4c1e891ac244e506b176210a820",
+      "serverId": "56841c99-7c94-43d4-bf0b-cb4707e66d55",
+      "unresolved": false
+    }
+  ]
+}
