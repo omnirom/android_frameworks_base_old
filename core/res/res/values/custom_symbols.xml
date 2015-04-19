@@ -64,4 +64,6 @@
   <java-symbol type="style" name="GlobalActionsAnimation" />
 
   <java-symbol type="drawable" name="expander_open_mtrl_alpha" />
+  <java-symbol type="array" name="entries_battery_styles" />
+  <java-symbol type="array" name="values_battery_styles" />
 </resources>
