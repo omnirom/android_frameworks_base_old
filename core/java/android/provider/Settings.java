@@ -2941,6 +2941,13 @@ public final class Settings {
         public static final String VOLUME_PANEL_EXPANDED = "volume_link_expanded";
 
         /**
+         * Int value of the battery style 0 is default
+         *
+         * @hide
+         */
+        public static final String STATUSBAR_BATTERY_STYLE = "statusbar_battery_style";
+
+        /**
          * Settings to backup. This is here so that it's in the same place as the settings
          * keys and easy to update.
          *

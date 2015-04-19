@@ -29,6 +29,8 @@ import android.graphics.drawable.Drawable;
 import android.util.AttributeSet;
 import android.util.MathUtils;
 import android.util.TypedValue;
+import android.util.Log;
+import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.view.ViewOutlineProvider;
@@ -39,7 +41,8 @@ import android.widget.Switch;
 import android.widget.TextView;
 
 import com.android.keyguard.KeyguardStatusView;
-import com.android.systemui.BatteryMeterView;
+import com.android.systemui.BatteryViewManager;
+import com.android.systemui.AbstractBatteryView;
 import com.android.systemui.FontSizeUtils;
 import com.android.systemui.R;
 import com.android.systemui.qs.QSPanel;
@@ -54,7 +57,8 @@ import java.text.NumberFormat;
  * The view to manage the header area in the expanded status bar.
  */
 public class StatusBarHeaderView extends RelativeLayout implements View.OnClickListener,
-        BatteryController.BatteryStateChangeCallback, NextAlarmController.NextAlarmChangeCallback {
+        BatteryController.BatteryStateChangeCallback, NextAlarmController.NextAlarmChangeCallback,
+        BatteryViewManager.BatteryViewManagerObserver {
 
     private boolean mExpanded;
     private boolean mListening;
@@ -121,6 +125,8 @@ public class StatusBarHeaderView extends RelativeLayout implements View.OnClickL
 
     private float mCurrentT;
     private boolean mShowingDetail;
+    private BatteryViewManager mBatteryViewManager;
+    private boolean mShowBatteryLevel = true;
 
     public StatusBarHeaderView(Context context, AttributeSet attrs) {
         super(context, attrs);
@@ -178,6 +184,8 @@ public class StatusBarHeaderView extends RelativeLayout implements View.OnClickL
             }
         });
         requestCaptureValues();
+        LinearLayout batteryContainer = (LinearLayout) findViewById(R.id.battery_container);
+        mBatteryViewManager = new BatteryViewManager(mContext, batteryContainer, null, this);
     }
 
     @Override
@@ -265,7 +273,7 @@ public class StatusBarHeaderView extends RelativeLayout implements View.OnClickL
 
     public void setBatteryController(BatteryController batteryController) {
         mBatteryController = batteryController;
-        ((BatteryMeterView) findViewById(R.id.battery)).setBatteryController(batteryController);
+        mBatteryViewManager.setBatteryController(mBatteryController);
     }
 
     public void setNextAlarmController(NextAlarmController nextAlarmController) {
@@ -327,7 +335,7 @@ public class StatusBarHeaderView extends RelativeLayout implements View.OnClickL
             updateSignalClusterDetachment();
         }
         mEmergencyCallsOnly.setVisibility(mExpanded && mShowEmergencyCallsOnly ? VISIBLE : GONE);
-        mBatteryLevel.setVisibility(mExpanded ? View.VISIBLE : View.GONE);
+        mBatteryLevel.setVisibility((mExpanded && mShowBatteryLevel) ? View.VISIBLE : View.GONE);
     }
 
     private void updateSignalClusterDetachment() {
@@ -793,4 +801,10 @@ public class StatusBarHeaderView extends RelativeLayout implements View.OnClickL
                     .start();
         }
     };
+
+    @Override
+    public void batteryStyleChanged(AbstractBatteryView batteryStyle) {
+        mShowBatteryLevel = batteryStyle != null ? !batteryStyle.isHidingPercentViews() : true;
+        mBatteryLevel.setVisibility((mExpanded && mShowBatteryLevel) ? View.VISIBLE : View.GONE);
+    }
 }
