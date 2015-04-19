@@ -65,6 +65,9 @@
 
   <java-symbol type="drawable" name="expander_open_mtrl_alpha" />
 
+  <java-symbol type="array" name="entries_battery_styles" />
+  <java-symbol type="array" name="values_battery_styles" />
+
   <java-symbol type="bool" name="config_button_brightness_support" />
   <java-symbol type="integer" name="config_button_brightness_default" />
 

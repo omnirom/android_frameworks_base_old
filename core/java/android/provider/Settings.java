@@ -2941,6 +2941,20 @@ public final class Settings {
         public static final String VOLUME_PANEL_EXPANDED = "volume_link_expanded";
 
         /**
+         * Int value of the battery style 0 is default
+         *
+         * @hide
+         */
+        public static final String STATUSBAR_BATTERY_STYLE = "statusbar_battery_style";
+
+        /**
+         * int value if the battery percent should be shown never/always/expanded
+         *
+         * @hide
+         */
+        public static final String STATUSBAR_BATTERY_PERCENT = "statusbar_battery_percent";
+
+        /**
          * Custom button brightness value for manual mode
          *
          * @hide
