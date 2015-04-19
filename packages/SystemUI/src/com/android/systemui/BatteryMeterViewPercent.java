@@ -34,8 +34,8 @@ import android.util.AttributeSet;
 import android.view.View;
 import android.util.Log;
 
-public class BatteryMeterView extends AbstractBatteryView {
-    public static final String TAG = BatteryMeterView.class.getSimpleName();
+public class BatteryMeterViewPercent extends AbstractBatteryView {
+    public static final String TAG = BatteryMeterViewPercent.class.getSimpleName();
 
     private static final boolean ENABLE_PERCENT = true;
     private static final boolean SINGLE_DIGIT_PERCENT = false;
@@ -70,15 +70,15 @@ public class BatteryMeterView extends AbstractBatteryView {
     private final Path mClipPath = new Path();
     private final Path mTextPath = new Path();
 
-    public BatteryMeterView(Context context) {
+    public BatteryMeterViewPercent(Context context) {
         this(context, null, 0);
     }
 
-    public BatteryMeterView(Context context, AttributeSet attrs) {
+    public BatteryMeterViewPercent(Context context, AttributeSet attrs) {
         this(context, attrs, 0);
     }
 
-    public BatteryMeterView(Context context, AttributeSet attrs, int defStyle) {
+    public BatteryMeterViewPercent(Context context, AttributeSet attrs, int defStyle) {
         super(context, attrs, defStyle);
 
         final Resources res = context.getResources();
@@ -98,8 +98,7 @@ public class BatteryMeterView extends AbstractBatteryView {
         levels.recycle();
         colors.recycle();
         atts.recycle();
-        mShowPercent = ENABLE_PERCENT && 0 != Settings.System.getInt(
-                context.getContentResolver(), "status_bar_show_battery_percent", 0);
+        mShowPercent = ENABLE_PERCENT;
         mWarningString = context.getString(R.string.battery_meter_very_low_overlay_symbol);
         mCriticalLevel = mContext.getResources().getInteger(
                 com.android.internal.R.integer.config_criticalBatteryWarningLevel);
