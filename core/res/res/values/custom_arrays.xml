@@ -83,4 +83,20 @@
         <item>@string/app_ops_read_other_accounts</item>
         <item>@string/app_ops_read_phone_info</item>
     </string-array>
+
+    <string-array name="entries_battery_styles" translatable="false">
+        <item>@string/battery_style_none</item>
+        <item>@string/battery_style_default</item>
+        <item>@string/battery_style_bar</item>
+        <item>@string/battery_style_meter_horizontal</item>
+        <item>@string/battery_style_circle</item>
+    </string-array>
+
+    <string-array name="values_battery_styles" translatable="false">
+        <item>-1</item>
+        <item>0</item>
+        <item>1</item>
+        <item>2</item>
+        <item>3</item>
+    </string-array>
 </resources>
