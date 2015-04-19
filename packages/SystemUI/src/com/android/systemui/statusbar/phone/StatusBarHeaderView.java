@@ -29,6 +29,7 @@ import android.graphics.drawable.Drawable;
 import android.util.AttributeSet;
 import android.util.MathUtils;
 import android.util.TypedValue;
+import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.view.ViewOutlineProvider;
@@ -39,7 +40,7 @@ import android.widget.Switch;
 import android.widget.TextView;
 
 import com.android.keyguard.KeyguardStatusView;
-import com.android.systemui.BatteryMeterView;
+import com.android.systemui.BatteryViewManager;
 import com.android.systemui.FontSizeUtils;
 import com.android.systemui.R;
 import com.android.systemui.qs.QSPanel;
@@ -121,6 +122,7 @@ public class StatusBarHeaderView extends RelativeLayout implements View.OnClickL
 
     private float mCurrentT;
     private boolean mShowingDetail;
+    private BatteryViewManager mBatteryViewManager;
 
     public StatusBarHeaderView(Context context, AttributeSet attrs) {
         super(context, attrs);
@@ -178,6 +180,8 @@ public class StatusBarHeaderView extends RelativeLayout implements View.OnClickL
             }
         });
         requestCaptureValues();
+        LinearLayout batteryContainer = (LinearLayout) findViewById(R.id.battery_container);
+        mBatteryViewManager = new BatteryViewManager(mContext, batteryContainer, null);
     }
 
     @Override
@@ -265,7 +269,7 @@ public class StatusBarHeaderView extends RelativeLayout implements View.OnClickL
 
     public void setBatteryController(BatteryController batteryController) {
         mBatteryController = batteryController;
-        ((BatteryMeterView) findViewById(R.id.battery)).setBatteryController(batteryController);
+        mBatteryViewManager.setBatteryController(mBatteryController);
     }
 
     public void setNextAlarmController(NextAlarmController nextAlarmController) {

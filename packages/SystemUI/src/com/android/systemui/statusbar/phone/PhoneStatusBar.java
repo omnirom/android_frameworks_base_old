@@ -123,7 +123,7 @@ import com.android.internal.statusbar.StatusBarIcon;
 import com.android.internal.util.omni.TaskUtils;
 import com.android.keyguard.KeyguardHostView.OnDismissAction;
 import com.android.keyguard.ViewMediatorCallback;
-import com.android.systemui.BatteryMeterView;
+import com.android.systemui.BatteryViewManager;
 import com.android.systemui.DemoMode;
 import com.android.systemui.EventLogConstants;
 import com.android.systemui.EventLogTags;
@@ -275,6 +275,7 @@ public class PhoneStatusBar extends BaseStatusBar implements DemoMode,
 
     StatusBarWindowView mStatusBarWindow;
     PhoneStatusBarView mStatusBarView;
+    BatteryViewManager mBatteryViewManager;
     private int mStatusBarWindowState = WINDOW_STATE_SHOWING;
     private StatusBarWindowManager mStatusBarWindowManager;
     private UnlockMethodCache mUnlockMethodCache;
@@ -917,8 +918,11 @@ public class PhoneStatusBar extends BaseStatusBar implements DemoMode,
         mUserInfoController.reloadUserInfo();
 
         mHeader.setBatteryController(mBatteryController);
-        ((BatteryMeterView) mStatusBarView.findViewById(R.id.battery)).setBatteryController(
-                mBatteryController);
+
+        LinearLayout batteryContainer = (LinearLayout) mStatusBarView.findViewById(R.id.battery_container);
+        mBatteryViewManager = new BatteryViewManager(mContext, batteryContainer, mStatusBarView.getBarTransitions());
+        mBatteryViewManager.setBatteryController(mBatteryController);
+
         mKeyguardStatusBar.setBatteryController(mBatteryController);
         mHeader.setNextAlarmController(mNextAlarmController);
 
@@ -3578,7 +3582,9 @@ public class PhoneStatusBar extends BaseStatusBar implements DemoMode,
             dispatchDemoCommandToView(command, args, R.id.clock);
         }
         if (modeChange || command.equals(COMMAND_BATTERY)) {
-            dispatchDemoCommandToView(command, args, R.id.battery);
+            LinearLayout batteryContainer = (LinearLayout) mStatusBarView.findViewById(R.id.battery_container);
+            View battery = batteryContainer.getChildAt(0);
+            dispatchDemoCommandToView(command, args, battery);
         }
         if (modeChange || command.equals(COMMAND_STATUS)) {
             if (mDemoStatusIcons == null) {
@@ -3621,6 +3627,13 @@ public class PhoneStatusBar extends BaseStatusBar implements DemoMode,
     private void dispatchDemoCommandToView(String command, Bundle args, int id) {
         if (mStatusBarView == null) return;
         View v = mStatusBarView.findViewById(id);
+        if (v instanceof DemoMode) {
+            ((DemoMode)v).dispatchDemoCommand(command, args);
+        }
+    }
+
+    private void dispatchDemoCommandToView(String command, Bundle args, View v) {
+        if (mStatusBarView == null) return;
         if (v instanceof DemoMode) {
             ((DemoMode)v).dispatchDemoCommand(command, args);
         }
