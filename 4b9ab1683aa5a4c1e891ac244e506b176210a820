@@ -87,6 +87,40 @@
     },
     {
       "key": {
+        "uuid": "2b1c0951_46d694f8",
+        "filename": "libs/androidfw/ResourceTypes.cpp",
+        "patchSetId": 2
+      },
+      "lineNbr": 6119,
+      "author": {
+        "id": 1000008
+      },
+      "writtenOn": "2015-04-20T02:37:36Z",
+      "side": 1,
+      "message": "This appears unused - need to look at original patch to see if I missed something.",
+      "revId": "4b9ab1683aa5a4c1e891ac244e506b176210a820",
+      "serverId": "56841c99-7c94-43d4-bf0b-cb4707e66d55",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "2b1c0951_66d39007",
+        "filename": "libs/androidfw/ResourceTypes.cpp",
+        "patchSetId": 2
+      },
+      "lineNbr": 6122,
+      "author": {
+        "id": 1000008
+      },
+      "writtenOn": "2015-04-20T02:37:36Z",
+      "side": 1,
+      "message": "Also appears unused.",
+      "revId": "4b9ab1683aa5a4c1e891ac244e506b176210a820",
+      "serverId": "56841c99-7c94-43d4-bf0b-cb4707e66d55",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "2b1c0951_269b5869",
         "filename": "libs/androidfw/ResourceTypes.cpp",
         "patchSetId": 2
