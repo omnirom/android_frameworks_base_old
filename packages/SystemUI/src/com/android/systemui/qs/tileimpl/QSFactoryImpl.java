@@ -38,6 +38,7 @@ import com.android.systemui.qs.tiles.ColorInversionTile;
 import com.android.systemui.qs.tiles.DataSaverTile;
 import com.android.systemui.qs.tiles.DndTile;
 import com.android.systemui.qs.tiles.FlashlightTile;
+import com.android.systemui.qs.tiles.HeadsUpTile;
 import com.android.systemui.qs.tiles.HotspotTile;
 import com.android.systemui.qs.tiles.IntentTile;
 import com.android.systemui.qs.tiles.LocationTile;
@@ -86,6 +87,7 @@ public class QSFactoryImpl implements QSFactory {
     private final Provider<AdbOverNetworkTile> mAdbOverNetworkProvider;
     private final Provider<ScreenrecordTile> mScrTileProvider;
     private final Provider<WeatherTile> mWeatherTileProvider;
+    private final Provider<HeadsUpTile> mHeadsUpTileProvider;
 
     private QSTileHost mHost;
 
@@ -113,7 +115,8 @@ public class QSFactoryImpl implements QSFactory {
             Provider<CaffeineTile> caffeineTileProvider,
             Provider<AdbOverNetworkTile> adbOverNetworkProvider,
             Provider<ScreenrecordTile> scrTileProvider,
-            Provider<WeatherTile> weatherTileProvider) {
+            Provider<WeatherTile> weatherTileProvider,
+            Provider<HeadsUpTile> headsUpTileProvider) {
         mWifiTileProvider = wifiTileProvider;
         mBluetoothTileProvider = bluetoothTileProvider;
         mCellularTileProvider = cellularTileProvider;
@@ -139,6 +142,7 @@ public class QSFactoryImpl implements QSFactory {
         mAdbOverNetworkProvider = adbOverNetworkProvider;
         mScrTileProvider = scrTileProvider;
         mWeatherTileProvider = weatherTileProvider;
+        mHeadsUpTileProvider = headsUpTileProvider;
     }
 
     public void setHost(QSTileHost host) {
@@ -203,6 +207,8 @@ public class QSFactoryImpl implements QSFactory {
                 return mScrTileProvider.get();
             case "weather":
                 return mWeatherTileProvider.get();
+            case "heads_up":
+                return mHeadsUpTileProvider.get();
         }
 
         // Intent tiles.
