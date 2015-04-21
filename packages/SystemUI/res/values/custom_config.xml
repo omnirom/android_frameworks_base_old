@@ -23,7 +23,7 @@
 
     <!-- The default tiles to display in QuickSettings -->
     <string name="quick_settings_tiles_extra" translatable="false">
-        adb_network,weather,pip,screenshot,caffeine
+        adb_network,weather,pip,screenshot,caffeine,headsup
     </string>
 
 </resources>
