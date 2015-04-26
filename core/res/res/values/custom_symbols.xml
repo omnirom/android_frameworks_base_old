@@ -64,4 +64,8 @@
   <java-symbol type="style" name="GlobalActionsAnimation" />
 
   <java-symbol type="drawable" name="expander_open_mtrl_alpha" />
+
+  <java-symbol type="bool" name="config_button_brightness_support" />
+  <java-symbol type="integer" name="config_button_brightness_default" />
+
 </resources>

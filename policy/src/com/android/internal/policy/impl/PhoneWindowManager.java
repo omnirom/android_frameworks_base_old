@@ -648,6 +648,7 @@ public class PhoneWindowManager implements WindowManagerPolicy {
     private boolean mVolumeWakeSupport;
     private boolean mHomeWakeSupport;
     private boolean mPersistHomeWakeSupport;
+    private boolean mHardwareKeysDisable;
 
     // Maps global key codes to the components that will handle them.
     private GlobalKeyManager mGlobalKeyManager;
@@ -816,6 +817,9 @@ public class PhoneWindowManager implements WindowManagerPolicy {
                     UserHandle.USER_ALL);
             resolver.registerContentObserver(Settings.System.getUriFor(
                     Settings.System.HOME_BUTTON_ANSWER), false, this,
+                    UserHandle.USER_ALL);
+            resolver.registerContentObserver(Settings.System.getUriFor(
+                    Settings.System.HARDWARE_KEYS_DISABLE), false, this,
                     UserHandle.USER_ALL);
 
             updateSettings();
@@ -1735,6 +1739,20 @@ public class PhoneWindowManager implements WindowManagerPolicy {
             }
         }
 
+        if (mHardwareKeysDisable){
+            mPressOnHomeBehavior = KEY_ACTION_NOTHING;
+            mLongPressOnHomeBehavior = KEY_ACTION_NOTHING;
+            mDoubleTapOnHomeBehavior = KEY_ACTION_NOTHING;;
+            mPressOnMenuBehavior = KEY_ACTION_NOTHING;
+            mLongPressOnMenuBehavior = KEY_ACTION_NOTHING;
+            mPressOnBackBehavior = KEY_ACTION_NOTHING;
+            mLongPressOnBackBehavior = KEY_ACTION_NOTHING;
+            mPressOnAppSwitchBehavior = KEY_ACTION_NOTHING;
+            mLongPressOnAppSwitchBehavior = KEY_ACTION_NOTHING;
+            mPressOnAssistBehavior = KEY_ACTION_NOTHING;
+            mLongPressOnAssistBehavior = KEY_ACTION_NOTHING;
+        }
+
         if (DEBUG_INPUT){
             Slog.d(TAG, "home = " + mPressOnHomeBehavior + " home long = " + mLongPressOnHomeBehavior + " home double = " + mDoubleTapOnHomeBehavior);
             Slog.d(TAG, "menu = " + mPressOnMenuBehavior + " menu long = " + mLongPressOnMenuBehavior);
@@ -1950,6 +1968,11 @@ public class PhoneWindowManager implements WindowManagerPolicy {
             mHomeWakeSupport = Settings.System.getIntForUser(resolver,
                     Settings.System.HOME_BUTTON_WAKE,
                     (mPersistHomeWakeSupport ? 1 : 0),
+                    UserHandle.USER_CURRENT) != 0;
+
+            mHardwareKeysDisable = Settings.System.getIntForUser(resolver,
+                    Settings.System.HARDWARE_KEYS_DISABLE,
+                    0,
                     UserHandle.USER_CURRENT) != 0;
         }
         if (updateRotation) {
@@ -5201,7 +5224,8 @@ public class PhoneWindowManager implements WindowManagerPolicy {
 
         boolean useHapticFeedback = down
                 && (policyFlags & WindowManagerPolicy.FLAG_VIRTUAL) != 0
-                && event.getRepeatCount() == 0;
+                && event.getRepeatCount() == 0
+                && !mHardwareKeysDisable;
 
         // Specific device key handling
         if (mDeviceKeyHandler != null) {
