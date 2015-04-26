@@ -78,4 +78,8 @@
   <java-symbol type="string" name="global_action_torch_on" />
   <java-symbol type="string" name="global_action_torch_off" />
   <java-symbol type="string" name="global_actions_toggle_torch_mode" />
+
+  <java-symbol type="bool" name="config_button_brightness_support" />
+  <java-symbol type="integer" name="config_button_brightness_default" />
+
 </resources>
