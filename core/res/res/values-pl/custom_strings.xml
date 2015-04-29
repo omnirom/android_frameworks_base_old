@@ -29,4 +29,7 @@
   <string name="hide_lock_to_app_dialog">Zawsze uruchamiaj</string>
   <string name="silent_mode_priority">Priorytet</string>
   <string name="silent_mode_none">Żadne</string>
+  <string name="reboot_title">Uruchom ponownie</string>
+  <string name="reboot_confirm">Czy chcesz uruchomić ponownie?</string>
+  <string name="permission_remember_choice">Zapamiętaj</string>
 </resources>
