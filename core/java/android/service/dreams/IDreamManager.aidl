@@ -35,6 +35,7 @@ interface IDreamManager {
     void testDream(int userId, in ComponentName componentName);
     @UnsupportedAppUsage
     boolean isDreaming();
+    boolean isDozing();
     void finishSelf(in IBinder token, boolean immediate);
     void startDozing(in IBinder token, int screenState, int screenBrightness);
     void stopDozing(in IBinder token);
