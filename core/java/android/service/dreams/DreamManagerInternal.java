@@ -99,4 +99,9 @@ public abstract class DreamManagerInternal {
         default void onDreamingStopped() {
         }
     }
+
+    /**
+     * Called by the power manager to determine whether the dream has gone to doze mode.
+     */
+    public abstract boolean isDozing();
 }
