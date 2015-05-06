@@ -179,6 +179,7 @@ import com.android.systemui.statusbar.stack.NotificationStackScrollLayout.OnChil
 import com.android.systemui.statusbar.stack.StackScrollAlgorithm;
 import com.android.systemui.statusbar.stack.StackScrollState.ViewState;
 import com.android.systemui.volume.VolumeComponent;
+import com.android.internal.util.omni.DeviceUtils;
 
 import java.io.FileDescriptor;
 import java.io.PrintWriter;
@@ -425,10 +426,42 @@ public class PhoneStatusBar extends BaseStatusBar implements DemoMode,
         }
     };
 
+    private class NavigationBarObserver extends ContentObserver {
+        NavigationBarObserver(Handler handler) {
+            super(handler);
+        }
+
+        void observe() {
+            mContext.getContentResolver().registerContentObserver(Settings.System.getUriFor(
+                    Settings.System.NAVIGATION_BAR_SHOW),
+                    false, this, UserHandle.USER_ALL);
+            update();
+        }
+
+        @Override
+        public void onChange(boolean selfChange) {
+            update();
+        }
+
+        public void update() {
+            int showNavBar = Settings.System.getIntForUser(
+                    mContext.getContentResolver(), Settings.System.NAVIGATION_BAR_SHOW,
+                    -1, UserHandle.USER_CURRENT);
+            if (showNavBar != -1){
+                boolean showNavBarBool = showNavBar == 1;
+                if (showNavBarBool !=  mShowNavBar){
+                    updateNavigationBar();
+                }
+            }
+        }
+    }
+    private NavigationBarObserver mNavigationBarObserver = new NavigationBarObserver(mHandler);
+
     private int mInteractingWindows;
     private boolean mAutohideSuspended;
     private int mStatusBarMode;
     private int mNavigationBarMode;
+    private boolean mShowNavBar;
 
     private ViewMediatorCallback mKeyguardViewMediatorCallback;
     private ScrimController mScrimController;
@@ -598,6 +631,8 @@ public class PhoneStatusBar extends BaseStatusBar implements DemoMode,
         // in session state
 
         addNavigationBar();
+        // must be after addNavigationBar
+        mNavigationBarObserver.observe();
 
         // Lastly, call to the icon policy to install/update all the icons.
         mIconPolicy = new PhoneStatusBarPolicy(mContext, mCastController, mHotspotController);
@@ -685,9 +720,9 @@ public class PhoneStatusBar extends BaseStatusBar implements DemoMode,
         updateShowSearchHoldoff();
 
         try {
-            boolean showNav = mWindowManagerService.hasNavigationBar();
-            if (DEBUG) Log.v(TAG, "hasNavigationBar=" + showNav);
-            if (showNav) {
+            mShowNavBar = mWindowManagerService.hasNavigationBar();
+            if (DEBUG) Log.v(TAG, "hasNavigationBar=" + mShowNavBar);
+            if (mShowNavBar) {
                 mNavigationBarView =
                     (NavigationBarView) View.inflate(context, R.layout.navigation_bar, null);
 
@@ -2618,12 +2653,11 @@ public class PhoneStatusBar extends BaseStatusBar implements DemoMode,
             }
 
             // update status bar mode
-            final int sbMode = computeBarMode(oldVal, newVal, mStatusBarView.getBarTransitions(),
+            final int sbMode = computeBarMode(oldVal, newVal,
                     View.STATUS_BAR_TRANSIENT, View.STATUS_BAR_TRANSLUCENT);
 
             // update navigation bar mode
-            final int nbMode = mNavigationBarView == null ? -1 : computeBarMode(
-                    oldVal, newVal, mNavigationBarView.getBarTransitions(),
+            final int nbMode = computeBarMode(oldVal, newVal,
                     View.NAVIGATION_BAR_TRANSIENT, View.NAVIGATION_BAR_TRANSLUCENT);
             final boolean sbModeChanged = sbMode != -1;
             final boolean nbModeChanged = nbMode != -1;
@@ -2666,7 +2700,7 @@ public class PhoneStatusBar extends BaseStatusBar implements DemoMode,
         }
     }
 
-    private int computeBarMode(int oldVis, int newVis, BarTransitions transitions,
+    private int computeBarMode(int oldVis, int newVis,
             int transientFlag, int translucentFlag) {
         final int oldMode = barMode(oldVis, transientFlag, translucentFlag);
         final int newMode = barMode(newVis, transientFlag, translucentFlag);
@@ -3236,6 +3270,7 @@ public class PhoneStatusBar extends BaseStatusBar implements DemoMode,
         updateNotifications();
         resetUserSetupObserver();
         setControllerUsers();
+        mNavigationBarObserver.update();
     }
 
     private void setControllerUsers() {
@@ -4405,6 +4440,45 @@ public class PhoneStatusBar extends BaseStatusBar implements DemoMode,
                         handleStopDozing();
                         break;
                 }
+            }
+        }
+    }
+
+    private void updateNavigationBar() {
+        mShowNavBar = DeviceUtils.deviceSupportNavigationBar(mContext);
+        if (DEBUG) Log.v(TAG, "updateNavigationBar=" + mShowNavBar);
+
+        if (mShowNavBar) {
+            if (mNavigationBarView == null) {
+                mNavigationBarView =
+                    (NavigationBarView) View.inflate(mContext, R.layout.navigation_bar, null);
+
+                mNavigationBarView.setDisabledFlags(mDisabled);
+                mNavigationBarView.setBar(this);
+                mNavigationBarView.setOnVerticalChangedListener(
+                        new NavigationBarView.OnVerticalChangedListener() {
+                    @Override
+                    public void onVerticalChanged(boolean isVertical) {
+                        if (mSearchPanelView != null) {
+                            mSearchPanelView.setHorizontal(isVertical);
+                        }
+                        mNotificationPanel.setQsScrimEnabled(!isVertical);
+                    }
+                });
+                mNavigationBarView.setOnTouchListener(new View.OnTouchListener() {
+                    @Override
+                    public boolean onTouch(View v, MotionEvent event) {
+                        checkUserAutohide(v, event);
+                        return false;
+                    }});
+                addNavigationBar();
+                checkBarModes();
+                notifyUiVisibilityChanged(mSystemUiVisibility);
+            }
+        } else {
+            if (mNavigationBarView != null){
+                mWindowManager.removeViewImmediate(mNavigationBarView);
+                mNavigationBarView = null;
             }
         }
     }
