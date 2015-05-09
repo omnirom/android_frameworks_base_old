@@ -186,6 +186,7 @@ public class InputManagerService extends IInputManager.Stub
             InputChannel fromChannel, InputChannel toChannel);
     private static native void nativeSetPointerSpeed(long ptr, int speed);
     private static native void nativeSetShowTouches(long ptr, boolean enabled);
+    private static native void nativeSetStylusIconEnabled(long ptr, boolean enabled);
     private static native void nativeSetInteractive(long ptr, boolean interactive);
     private static native void nativeReloadCalibration(long ptr);
     private static native void nativeVibrate(long ptr, int deviceId, long[] pattern,
@@ -288,6 +289,7 @@ public class InputManagerService extends IInputManager.Stub
 
         registerPointerSpeedSettingObserver();
         registerShowTouchesSettingObserver();
+	registerStylusIconEnabledSettingObserver();
 
         mContext.registerReceiver(new BroadcastReceiver() {
             @Override
@@ -299,6 +301,7 @@ public class InputManagerService extends IInputManager.Stub
 
         updatePointerSpeedFromSettings();
         updateShowTouchesFromSettings();
+	updateStylusIconEnabledFromSettings();
     }
 
     // TODO(BT) Pass in paramter for bluetooth system
@@ -1279,6 +1282,33 @@ public class InputManagerService extends IInputManager.Stub
         }
         return result;
     }
+
+    public void updateStylusIconEnabledFromSettings() {
+        int enabled = getStylusIconEnabled(0);
+        nativeSetStylusIconEnabled(mPtr, enabled != 0);
+    }
+
+    public void registerStylusIconEnabledSettingObserver() {
+        mContext.getContentResolver().registerContentObserver(
+                Settings.System.getUriFor(Settings.System.STYLUS_ICON_ENABLED), false,
+                new ContentObserver(mHandler) {
+                    @Override
+                    public void onChange(boolean selfChange) {
+                        updateStylusIconEnabledFromSettings();
+                    }
+                }, UserHandle.USER_ALL);
+    }
+
+    private int getStylusIconEnabled(int defaultValue) {
+        int result = defaultValue;
+        try {
+            result = Settings.System.getIntForUser(mContext.getContentResolver(),
+		    Settings.System.STYLUS_ICON_ENABLED,  UserHandle.USER_CURRENT);
+        } catch (SettingNotFoundException snfe) {
+        }
+        return result;
+    }
+
 
     // Binder call
     @Override
