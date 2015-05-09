@@ -2580,6 +2580,14 @@ public final class Settings {
          */
         public static final String SHOW_TOUCHES = "show_touches";
 
+	/**
+         * Show icon when stylus is used?
+         * 0 = no
+         * 1 = yes
+         * @hide
+         */
+        public static final String STYLUS_ICON_ENABLED = "stylus_icon_enabled";
+
         /**
          * Log raw orientation data from
          * {@link com.android.internal.policy.impl.WindowOrientationListener} for use with the

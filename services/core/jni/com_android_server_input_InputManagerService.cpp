@@ -189,6 +189,7 @@ public:
     void setSystemUiVisibility(int32_t visibility);
     void setPointerSpeed(int32_t speed);
     void setShowTouches(bool enabled);
+    void setStylusIconEnabled(bool enabled);
     void setInteractive(bool interactive);
     void reloadCalibration();
 
@@ -255,6 +256,9 @@ private:
         // Show touches feature enable/disable.
         bool showTouches;
 
+        // Show icon when stylus is used
+        bool stylusIconEnabled;
+
         // Sprite controller singleton, created on first use.
         sp<SpriteController> spriteController;
 
@@ -291,6 +295,7 @@ NativeInputManager::NativeInputManager(jobject contextObj,
         mLocked.pointerSpeed = 0;
         mLocked.pointerGesturesEnabled = true;
         mLocked.showTouches = false;
+	mLocked.stylusIconEnabled = false;
     }
 
     sp<EventHub> eventHub = new EventHub();
@@ -422,6 +427,8 @@ void NativeInputManager::getReaderConfiguration(InputReaderConfiguration* outCon
         outConfig->pointerGesturesEnabled = mLocked.pointerGesturesEnabled;
 
         outConfig->showTouches = mLocked.showTouches;
+
+	outConfig->stylusIconEnabled = mLocked.stylusIconEnabled;
 
         outConfig->setDisplayInfo(false /*external*/, mLocked.internalViewport);
         outConfig->setDisplayInfo(true /*external*/, mLocked.externalViewport);
@@ -744,6 +751,22 @@ void NativeInputManager::setShowTouches(bool enabled) {
 
     mInputManager->getReader()->requestRefreshConfiguration(
             InputReaderConfiguration::CHANGE_SHOW_TOUCHES);
+}
+
+void NativeInputManager::setStylusIconEnabled(bool enabled) {
+    { // acquire lock
+        AutoMutex _l(mLock);
+
+        if (mLocked.stylusIconEnabled == enabled) {
+            return;
+        }
+
+        ALOGI("Setting stylus icon enabled to %s.", enabled ? "enabled" : "disabled");
+        mLocked.stylusIconEnabled = enabled;
+    } // release lock
+
+    mInputManager->getReader()->requestRefreshConfiguration(
+            InputReaderConfiguration::CHANGE_STYLUS_ICON_ENABLED);
 }
 
 void NativeInputManager::setInteractive(bool interactive) {
@@ -1266,6 +1289,13 @@ static void nativeSetShowTouches(JNIEnv* env,
     im->setShowTouches(enabled);
 }
 
+static void nativeSetStylusIconEnabled(JNIEnv* env,
+        jclass clazz, jlong ptr, jboolean enabled) {
+    NativeInputManager* im = reinterpret_cast<NativeInputManager*>(ptr);
+
+    im->setStylusIconEnabled(enabled);
+}
+
 static void nativeSetInteractive(JNIEnv* env,
         jclass clazz, jlong ptr, jboolean interactive) {
     NativeInputManager* im = reinterpret_cast<NativeInputManager*>(ptr);
@@ -1383,6 +1413,8 @@ static JNINativeMethod gInputManagerMethods[] = {
             (void*) nativeSetPointerSpeed },
     { "nativeSetShowTouches", "(JZ)V",
             (void*) nativeSetShowTouches },
+    { "nativeSetStylusIconEnabled", "(JZ)V",
+            (void*) nativeSetStylusIconEnabled },
     { "nativeSetInteractive", "(JZ)V",
             (void*) nativeSetInteractive },
     { "nativeReloadCalibration", "(J)V",
