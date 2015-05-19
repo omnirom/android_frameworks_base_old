@@ -6323,6 +6323,13 @@ public final class Settings {
        public static final String WIFI_REENABLE_DELAY_MS = "wifi_reenable_delay";
 
        /**
+        * Enable agressive network blacklisting on failures
+        * default is enabled
+        * @hide
+        */
+       public static final String WIFI_AGGRESIVE_BLACKLIST = "wifi_aggressive_blacklist";
+
+       /**
         * Timeout for ephemeral networks when all known BSSIDs go out of range. We will disconnect
         * from an ephemeral network if there is no BSSID for that network with a non-null score that
         * has been seen in this time period.
