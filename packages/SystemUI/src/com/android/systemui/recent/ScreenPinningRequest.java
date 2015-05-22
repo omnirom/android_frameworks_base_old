@@ -42,6 +42,7 @@ import android.widget.TextView;
 
 import com.android.systemui.R;
 import com.android.systemui.recents.model.RecentsTaskLoader;
+import com.android.internal.util.omni.DeviceUtils;
 
 import java.util.ArrayList;
 
@@ -216,13 +217,14 @@ public class ScreenPinningRequest implements View.OnClickListener {
                         .setVisibility(View.INVISIBLE);
             }
 
-            final int description = mAccessibilityService.isEnabled()
+            boolean showSingleButtonMessage = !DeviceUtils.deviceSupportNavigationBar(mContext) || mAccessibilityService.isEnabled();
+            final int description = showSingleButtonMessage
                     ? R.string.screen_pinning_description_accessible
                     : R.string.screen_pinning_description;
             ((TextView) mLayout.findViewById(R.id.screen_pinning_description))
                     .setText(description);
             final int backBgVisibility =
-                    mAccessibilityService.isEnabled() ? View.INVISIBLE : View.VISIBLE;
+                    showSingleButtonMessage ? View.INVISIBLE : View.VISIBLE;
             mLayout.findViewById(R.id.screen_pinning_back_bg).setVisibility(backBgVisibility);
             mLayout.findViewById(R.id.screen_pinning_back_bg_light).setVisibility(backBgVisibility);
 
