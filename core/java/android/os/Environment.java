@@ -741,7 +741,7 @@ public class Environment {
     }
 
     public static String getSecondaryStorageState() {
-        final File externalDir = sCurrentUser.getExternalDirsForApp()[1];
+        final File externalDir = getSecondaryStorageDirectory();
         return getStorageState(externalDir);
     }
 
