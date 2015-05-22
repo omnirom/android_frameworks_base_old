@@ -43,6 +43,7 @@
   <string name="app_ops_delete_contacts">Löschen von Kontakten</string>
   <string name="app_ops_delete_call_log">Anrufprotokoll löschen</string>
   <string name="app_ops_draw_on_top">Fenster zuoberst zeichnen</string>
+  <string name="app_ops_get_usage_stats">App-Nutzungsstatistik erhalten</string>
   <string name="app_ops_keep_device_awake">Gerät wach halten</string>
   <string name="app_ops_modify_calendar">Ihren Kalender aktualisieren</string>
   <string name="app_ops_modify_call_log">Anrufprotokoll aktualisieren</string>
@@ -89,4 +90,9 @@
   <string name="app_ops_use_vibrate">haptische Rückmeldung verwenden</string>
   <string name="app_ops_use_voice_volume">Sprach-Lautstärke verwenden</string>
   <string name="app_ops_write_mms_storage">MMS-Speicher schreiben</string>
+  <string name="battery_style_none">Keine</string>
+  <string name="battery_style_default">Standard</string>
+  <string name="battery_style_bar">Vertikaler Balken</string>
+  <string name="battery_style_meter_horizontal">Horizontaler Balken</string>
+  <string name="battery_style_circle">Kreis</string>
 </resources>
