@@ -436,8 +436,7 @@ public class UserManager {
      * @hide
      */
     public static boolean supportsMultipleUsers() {
-        return getMaxSupportedUsers() > 1
-                && SystemProperties.getBoolean("fw.show_multiuserui",
+        return SystemProperties.getBoolean("fw.show_multiuserui",
                 Resources.getSystem().getBoolean(R.bool.config_enableMultiUserUI));
     }
 
