@@ -258,9 +258,9 @@ public class PhoneStatusBarPolicy {
             mZenVisible = zenVisible;
         }
         // overrules volume icon
-        if (zenModeNoInterruptions) {
+        /*if (zenModeNoInterruptions) {
             volumeVisible = false;
-        }
+        }*/
 
         if (volumeVisible) {
             mService.setIcon(SLOT_VOLUME, volumeIconId, 0, volumeDescription);

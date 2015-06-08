@@ -34,6 +34,8 @@ import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Calendar;
+import java.util.Iterator;
+import java.util.List;
 import java.util.Locale;
 import java.util.Objects;
 
@@ -80,6 +82,7 @@ public class ZenModeConfig implements Parcelable {
     private static final String SLEEP_TAG = "sleep";
     private static final String SLEEP_ATT_MODE = "mode";
     private static final String SLEEP_ATT_NONE = "none";
+    private static final String ALLOW_ATT_WHITELIST = "whitelist";
 
     private static final String SLEEP_ATT_START_HR = "startHour";
     private static final String SLEEP_ATT_START_MIN = "startMin";
@@ -115,6 +118,7 @@ public class ZenModeConfig implements Parcelable {
     public Uri[] conditionIds;
     public Condition exitCondition;
     public ComponentName exitConditionComponent;
+    public String whitelistString;
 
     public ZenModeConfig() { }
 
@@ -144,6 +148,9 @@ public class ZenModeConfig implements Parcelable {
         exitCondition = source.readParcelable(null);
         exitConditionComponent = source.readParcelable(null);
         allowAlarms = source.readInt() == 1;
+        if (source.readInt() == 1) {
+            whitelistString = source.readString();
+        }
     }
 
     @Override
@@ -178,6 +185,12 @@ public class ZenModeConfig implements Parcelable {
         dest.writeParcelable(exitCondition, 0);
         dest.writeParcelable(exitConditionComponent, 0);
         dest.writeInt(allowAlarms ? 1 : 0);
+        if (whitelistString != null) {
+            dest.writeInt(1);
+            dest.writeString(whitelistString);
+        } else {
+            dest.writeInt(0);
+        }
     }
 
     @Override
@@ -198,6 +211,7 @@ public class ZenModeConfig implements Parcelable {
             .append(",exitCondition=").append(exitCondition)
             .append(",exitConditionComponent=").append(exitConditionComponent)
             .append(",allowAlarms=").append(allowAlarms)
+            .append(",whitelist=").append(whitelistString)
             .append(']').toString();
     }
 
@@ -233,7 +247,8 @@ public class ZenModeConfig implements Parcelable {
                 && Objects.deepEquals(other.conditionComponents, conditionComponents)
                 && Objects.deepEquals(other.conditionIds, conditionIds)
                 && Objects.equals(other.exitCondition, exitCondition)
-                && Objects.equals(other.exitConditionComponent, exitConditionComponent);
+                && Objects.equals(other.exitConditionComponent, exitConditionComponent)
+                && Objects.equals(other.whitelistString, whitelistString);
     }
 
     @Override
@@ -312,7 +327,8 @@ public class ZenModeConfig implements Parcelable {
                         throw new IndexOutOfBoundsException("bad source in config:" + rt.allowFrom);
                     }
                     rt.allowAlarms = safeBoolean(parser, ALLOW_ATT_ALARMS, false);
-                } else if (SLEEP_TAG.equals(tag)) {
+                    rt.whitelistString= parser.getAttributeValue(null, ALLOW_ATT_WHITELIST);
+                 } else if (SLEEP_TAG.equals(tag)) {
                     final String mode = parser.getAttributeValue(null, SLEEP_ATT_MODE);
                     rt.sleepMode = isValidSleepMode(mode)? mode : null;
                     rt.sleepNone = safeBoolean(parser, SLEEP_ATT_NONE, false);
@@ -354,6 +370,9 @@ public class ZenModeConfig implements Parcelable {
         out.attribute(null, ALLOW_ATT_EVENTS, Boolean.toString(allowEvents));
         out.attribute(null, ALLOW_ATT_FROM, Integer.toString(allowFrom));
         out.attribute(null, ALLOW_ATT_ALARMS, Boolean.toString(allowAlarms));
+        if (whitelistString != null) {
+            out.attribute(null, ALLOW_ATT_WHITELIST, whitelistString);
+        }
         out.endTag(null, ALLOW_TAG);
 
         out.startTag(null, SLEEP_TAG);
@@ -621,4 +640,152 @@ public class ZenModeConfig implements Parcelable {
 
     // built-in next alarm conditions
     public static final String NEXT_ALARM_PATH = "next_alarm";
+
+    public static class WhitelistContact {
+        public String mNumber;
+        public boolean mBypassCall;
+        public boolean mBypassMessage;
+
+        public WhitelistContact(String number, boolean bypassCall, boolean bypassMessage) {
+            mNumber = number;
+            mBypassCall = bypassCall;
+            mBypassMessage = bypassMessage;
+        }
+
+        public WhitelistContact() {
+        }
+
+        public void setBypassCall(boolean value){
+            mBypassCall = value;
+        }
+
+        public void setBypassMessage(boolean value){
+            mBypassMessage = value;
+        }
+
+        @Override
+        public boolean equals(Object o) {
+            if (this == o) {
+                return true;
+            }
+
+            if (!(o instanceof WhitelistContact)) {
+                return false;
+            }
+
+            WhitelistContact lhs = (WhitelistContact) o;
+            return mNumber.equals(lhs.mNumber);
+        }
+
+        public String toString() {
+            return mNumber + "##" + (mBypassCall ? "1" : "0") + "##" + (mBypassMessage ? "1" : "0");
+        }
+
+        public void fromString(String str) {
+            String[] parts = str.split("##");
+            mNumber = parts[0];
+            mBypassCall = Integer.parseInt(parts[1]) == 1;
+            mBypassMessage = Integer.parseInt(parts[2]) == 1;
+        }
+    }
+
+    public void saveContacts(List<WhitelistContact> contacts){
+        StringBuffer str = new StringBuffer();
+        Iterator<WhitelistContact> nextContact = contacts.iterator();
+        while(nextContact.hasNext()){
+            WhitelistContact contact = nextContact.next();
+            str.append(contact.toString() + "||");
+        }
+        if (str.length() > 3){
+            str = str.delete(str.length() - 2, str.length());
+        }
+        whitelistString = str.toString();
+    }
+
+    public List<WhitelistContact> loadContacts(){
+        List<WhitelistContact> contacts = new ArrayList<WhitelistContact>();
+
+        String str = whitelistString;
+        if (str != null && str.length() != 0){
+            String[] parts = str.split("\\|\\|");
+            for (int i = 0; i < parts.length; i++){
+                WhitelistContact contact = new WhitelistContact();
+                contact.fromString(parts[i]);
+                contacts.add(contact);
+            }
+        }
+        return contacts;
+    }
+
+    public boolean isCallBypass(String number){
+        List<WhitelistContact> contacts = loadContacts();
+        Iterator<WhitelistContact> nextContact = contacts.iterator();
+        while (nextContact.hasNext()){
+            WhitelistContact contact = nextContact.next();
+            if (contact.mNumber.equals(number)){
+                return contact.mBypassCall;
+            }
+        }
+        return false;
+    }
+
+    public boolean hasCallBypass(){
+        List<WhitelistContact> contacts = loadContacts();
+        Iterator<WhitelistContact> nextContact = contacts.iterator();
+        while (nextContact.hasNext()){
+            WhitelistContact contact = nextContact.next();
+            if (contact.mBypassCall){
+                return true;
+            }
+        }
+        return false;
+    }
+
+    public boolean isMessageBypass(String number){
+        List<WhitelistContact> contacts = loadContacts();
+        Iterator<WhitelistContact> nextContact = contacts.iterator();
+        while (nextContact.hasNext()){
+            WhitelistContact contact = nextContact.next();
+            if (contact.mNumber.equals(number)){
+                return contact.mBypassMessage;
+            }
+        }
+        return false;
+    }
+
+    public boolean hasMessageBypass(){
+        List<WhitelistContact> contacts = loadContacts();
+        Iterator<WhitelistContact> nextContact = contacts.iterator();
+        while (nextContact.hasNext()){
+            WhitelistContact contact = nextContact.next();
+            if (contact.mBypassMessage){
+                return true;
+            }
+        }
+        return false;
+    }
+
+    public boolean hasBypass(){
+        List<WhitelistContact> contacts = loadContacts();
+        Iterator<WhitelistContact> nextContact = contacts.iterator();
+        while (nextContact.hasNext()){
+            WhitelistContact contact = nextContact.next();
+            if (contact.mBypassCall || contact.mBypassMessage){
+                return true;
+            }
+        }
+        return false;
+    }
+
+    public boolean isWhitelistContact(String number){
+        List<WhitelistContact> contacts = loadContacts();
+        Iterator<WhitelistContact> nextContact = contacts.iterator();
+        while (nextContact.hasNext()){
+            WhitelistContact contact = nextContact.next();
+            if (contact.mNumber.equals(number)){
+                return true;
+            }
+        }
+        return false;
+    }
 }
