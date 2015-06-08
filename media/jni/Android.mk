@@ -52,17 +52,29 @@ LOCAL_C_INCLUDES += \
     external/libexif/ \
     external/tremor/Tremor \
     frameworks/base/core/jni \
-    frameworks/av/media/libmedia \
-    frameworks/av/media/libstagefright \
-    frameworks/av/media/libstagefright/codecs/amrnb/enc/src \
-    frameworks/av/media/libstagefright/codecs/amrnb/common \
-    frameworks/av/media/libstagefright/codecs/amrnb/common/include \
-    frameworks/av/media/mtp \
     frameworks/native/include/media/openmax \
     $(call include-path-for, libhardware)/hardware \
     system/media/camera/include \
     $(PV_INCLUDES) \
     $(JNI_H_INCLUDE)
+
+ifeq ($(BOARD_USES_QCOM_HARDWARE),true)
+LOCAL_C_INCLUDES += \
+    frameworks/av-caf/media/libmedia \
+    frameworks/av-caf/media/libstagefright \
+    frameworks/av-caf/media/libstagefright/codecs/amrnb/enc/src \
+    frameworks/av-caf/media/libstagefright/codecs/amrnb/common \
+    frameworks/av-caf/media/libstagefright/codecs/amrnb/common/include \
+    frameworks/av-caf/media/mtp
+else
+LOCAL_C_INCLUDES += \
+    frameworks/av/media/libmedia \
+    frameworks/av/media/libstagefright \
+    frameworks/av/media/libstagefright/codecs/amrnb/enc/src \
+    frameworks/av/media/libstagefright/codecs/amrnb/common \
+    frameworks/av/media/libstagefright/codecs/amrnb/common/include \
+    frameworks/av/media/mtp
+endif
 
 LOCAL_CFLAGS +=
 
