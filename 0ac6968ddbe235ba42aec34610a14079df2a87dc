@@ -1,0 +1,106 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "18e79d95_3c5a112d",
+        "filename": "core/java/android/service/notification/ZenModeConfig.java",
+        "patchSetId": 1
+      },
+      "lineNbr": 85,
+      "author": {
+        "id": 1000008
+      },
+      "writtenOn": "2015-06-09T12:13:34Z",
+      "side": 1,
+      "message": "What does all this have to do with av?",
+      "revId": "0ac6968ddbe235ba42aec34610a14079df2a87dc",
+      "serverId": "56841c99-7c94-43d4-bf0b-cb4707e66d55",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "18e79d95_dc48c564",
+        "filename": "core/jni/Android.mk",
+        "patchSetId": 1
+      },
+      "lineNbr": 206,
+      "author": {
+        "id": 1000008
+      },
+      "writtenOn": "2015-06-09T12:13:34Z",
+      "side": 1,
+      "message": "Should consider BOARD_USES_QCOM_HARDWARE instead",
+      "revId": "0ac6968ddbe235ba42aec34610a14079df2a87dc",
+      "serverId": "56841c99-7c94-43d4-bf0b-cb4707e66d55",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "18e79d95_bc45014b",
+        "filename": "drm/jni/Android.mk",
+        "patchSetId": 1
+      },
+      "lineNbr": 39,
+      "author": {
+        "id": 1000008
+      },
+      "writtenOn": "2015-06-09T12:13:34Z",
+      "side": 1,
+      "message": "BOARD_USES_QCOM_HARDWARE",
+      "revId": "0ac6968ddbe235ba42aec34610a14079df2a87dc",
+      "serverId": "56841c99-7c94-43d4-bf0b-cb4707e66d55",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "18e79d95_9c723da9",
+        "filename": "media/jni/Android.mk",
+        "patchSetId": 1
+      },
+      "lineNbr": 61,
+      "author": {
+        "id": 1000008
+      },
+      "writtenOn": "2015-06-09T12:13:34Z",
+      "side": 1,
+      "message": "BOARD_USES_QCOM_HARDWARE",
+      "revId": "0ac6968ddbe235ba42aec34610a14079df2a87dc",
+      "serverId": "56841c99-7c94-43d4-bf0b-cb4707e66d55",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "18e79d95_fc3b89c0",
+        "filename": "packages/SystemUI/src/com/android/systemui/statusbar/phone/PhoneStatusBarPolicy.java",
+        "patchSetId": 1
+      },
+      "lineNbr": 261,
+      "author": {
+        "id": 1000008
+      },
+      "writtenOn": "2015-06-09T12:13:34Z",
+      "side": 1,
+      "message": "Looks like you accidentally squashed another patch in here?",
+      "revId": "0ac6968ddbe235ba42aec34610a14079df2a87dc",
+      "serverId": "56841c99-7c94-43d4-bf0b-cb4707e66d55",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "18e79d95_1c3f4db1",
+        "filename": "services/core/java/com/android/server/notification/ZenModeHelper.java",
+        "patchSetId": 1
+      },
+      "lineNbr": 370,
+      "author": {
+        "id": 1000008
+      },
+      "writtenOn": "2015-06-09T12:13:34Z",
+      "side": 1,
+      "message": "This looks unrelated to AV",
+      "revId": "0ac6968ddbe235ba42aec34610a14079df2a87dc",
+      "serverId": "56841c99-7c94-43d4-bf0b-cb4707e66d55",
+      "unresolved": false
+    }
+  ]
+}
