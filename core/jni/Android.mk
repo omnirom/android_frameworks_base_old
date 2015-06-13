@@ -179,7 +179,6 @@ LOCAL_C_INCLUDES += \
 	$(call include-path-for, libhardware)/hardware \
 	$(call include-path-for, libhardware_legacy)/hardware_legacy \
 	$(TOP)/bionic/libc/dns/include \
-	$(TOP)/frameworks/av/include \
 	$(TOP)/system/media/camera/include \
 	$(TOP)/system/netd/include \
 	external/icu/icu4c/source/common \
@@ -203,6 +202,14 @@ LOCAL_C_INCLUDES += \
 	frameworks/minikin/include \
 	external/freetype/include
 # TODO: clean up Minikin so it doesn't need the freetype include
+
+ifeq ($(BOARD_USES_QCOM_HARDWARE),true)
+LOCAL_C_INCLUDES += \
+        $(TOP)/frameworks/av-caf/include
+else
+LOCAL_C_INCLUDES += \
+        $(TOP)/frameworks/av/include
+endif
 
 LOCAL_SHARED_LIBRARIES := \
 	libmemtrack \

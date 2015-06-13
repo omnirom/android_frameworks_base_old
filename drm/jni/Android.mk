@@ -34,12 +34,19 @@ LOCAL_STATIC_LIBRARIES :=
 
 LOCAL_C_INCLUDES += \
     $(JNI_H_INCLUDE) \
-    $(TOP)/frameworks/av/drm/libdrmframework/include \
-    $(TOP)/frameworks/av/drm/libdrmframework/plugins/common/include \
-    $(TOP)/frameworks/av/include \
     $(TOP)/libcore/include
 
-
+ifeq ($(BOARD_USES_QCOM_HARDWARE),true)
+LOCAL_C_INCLUDES += \
+    $(TOP)/frameworks/av-caf/drm/libdrmframework/include \
+    $(TOP)/frameworks/av-caf/drm/libdrmframework/plugins/common/include \
+    $(TOP)/frameworks/av-caf/include
+else
+LOCAL_C_INCLUDES += \
+    $(TOP)/frameworks/av/drm/libdrmframework/include \
+    $(TOP)/frameworks/av/drm/libdrmframework/plugins/common/include \
+    $(TOP)/frameworks/av/include
+endif
 
 LOCAL_MODULE_TAGS := optional
 
