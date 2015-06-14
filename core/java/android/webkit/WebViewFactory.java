@@ -81,7 +81,7 @@ public final class WebViewFactory {
         String pkg = initialApp.getString(
                 com.android.internal.R.string.config_alternateWebViewPackageName);
         /* Attempt to use alternate WebView package first */
-        if (isPackageInstalled(initialApp, pkg)) {
+        if (isPackageInstalled(initialApp, pkg) && !SystemProperties.getBoolean("android.webview.force_aosp", false)) {
             return pkg;
         }
         return initialApp.getString(
