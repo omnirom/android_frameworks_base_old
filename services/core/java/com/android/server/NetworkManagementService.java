@@ -1133,7 +1133,7 @@ public class NetworkManagementService extends INetworkManagementService.Stub
     public void setIpForwardingEnabled(boolean enable) {
         mContext.enforceCallingOrSelfPermission(CONNECTIVITY_INTERNAL, TAG);
         try {
-            mConnector.execute("ipfwd", enable ? "enable" : "disable");
+            mConnector.execute("ipfwd", enable ? "enable" : "disable", "tethering");
         } catch (NativeDaemonConnectorException e) {
             throw e.rethrowAsParcelableException();
         }
@@ -1257,6 +1257,27 @@ public class NetworkManagementService extends INetworkManagementService.Stub
                 filtered.add(ia);
         }
         return filtered;
+    }
+
+    private void modifyInterfaceForward(boolean add, String fromIface, String toIface) {
+        final Command cmd = new Command("ipfwd", add ? "add" : "remove", fromIface, toIface);
+        try {
+            mConnector.execute(cmd);
+        } catch (NativeDaemonConnectorException e) {
+            throw e.rethrowAsParcelableException();
+        }
+    }
+
+    @Override
+    public void startInterfaceForwarding(String fromIface, String toIface) {
+        mContext.enforceCallingOrSelfPermission(CONNECTIVITY_INTERNAL, TAG);
+        modifyInterfaceForward(true, fromIface, toIface);
+    }
+
+    @Override
+    public void stopInterfaceForwarding(String fromIface, String toIface) {
+        mContext.enforceCallingOrSelfPermission(CONNECTIVITY_INTERNAL, TAG);
+        modifyInterfaceForward(false, fromIface, toIface);
     }
 
     private void modifyNat(String action, String internalInterface, String externalInterface)

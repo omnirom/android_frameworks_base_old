@@ -96,6 +96,8 @@
 
 
 
+
+
 <html>
 <head>
 
@@ -111,7 +113,7 @@
 href="//fonts.googleapis.com/css?family=Roboto+Condensed">
 <link rel="stylesheet" href="//fonts.googleapis.com/css?family=Roboto:light,regular,medium,thin,italic,mediumitalic,bold"
   title="roboto">
-<link href="/assets/css/default.css?v=4" rel="stylesheet" type="text/css">
+<link href="/assets/css/default.css?v=5" rel="stylesheet" type="text/css">
 
 
 
@@ -412,6 +414,7 @@ href="//fonts.googleapis.com/css?family=Roboto+Condensed">
                 <li><a href="/distribute/users/index.html">Get Users</a></li>
                 <li><a href="/distribute/engage/index.html">Engage &amp; Retain</a></li>
                 <li><a href="/distribute/monetize/index.html">Monetize</a></li>
+                <li><a href="/distribute/analyze/index.html">Analyze</a></li>
                 <li><a href="/distribute/tools/index.html">Tools &amp; Reference</a></li>
                 <li><a href="/distribute/stories/index.html">Developer Stories</a></li>
               </ul>
@@ -559,7 +562,18 @@ href="//fonts.googleapis.com/css?family=Roboto+Condensed">
           <span class="en">Wallet</span>
       </a></div>
   </li>
-
+  <li class="nav-section">
+    <div class="nav-section-header"><a href="/google/play/safetynet/index.html">
+          <span class="en">SafetyNet</span>
+      </a></div>
+      <ul>
+        <li>
+          <a href="/google/play/safetynet/start.html">
+            <span class="en">Getting Started</span>
+          </a>
+        </li>
+      </ul>
+  </li>
 
   <li class="nav-section">
     <div class="nav-section-header"><a href="/google/play-services/index.html">
@@ -593,14 +607,14 @@ href="//fonts.googleapis.com/css?family=Roboto+Condensed">
 
 
   <li class="nav-section">
-    <div class="nav-section-header"><a href="/google/play/billing/index.html">
+    <div class="nav-section-header"><a href="/google/play/billing/index.html" zh-cn-lang="应用内结算">
       <span class="en">Google Play In-app Billing</span></a>
     </div>
     <ul>
-      <li><a href="/google/play/billing/billing_overview.html">
+      <li><a href="/google/play/billing/billing_overview.html" zh-cn-lang="应用内结算概述">
               <span class="en">Overview</span></a>
       </li>
-      <li class="nav-section"><div class="nav-section-header"><a href="/google/play/billing/api.html">
+      <li class="nav-section"><div class="nav-section-header"><a href="/google/play/billing/api.html" zh-cn-lang="应用内结算 API">
               <span class="en">Version 3 API</span></a></div>
               <ul>
               <li><a href="/google/play/billing/billing_integrate.html">
@@ -623,13 +637,13 @@ href="//fonts.googleapis.com/css?family=Roboto+Condensed">
       <li><a href="/google/play/billing/billing_subscriptions.html">
               <span class="en">Subscriptions</span></a>
       </li>
-      <li><a href="/google/play/billing/billing_best_practices.html">
+      <li><a href="/google/play/billing/billing_best_practices.html" zh-cn-lang="安全性和设计">
               <span class="en">Security and Design</span></a>
       </li>
-      <li><a href="/google/play/billing/billing_testing.html">
+      <li><a href="/google/play/billing/billing_testing.html" zh-cn-lang="测试应用内结算">
               <span class="en">Testing In-app Billing</span></a>
       </li>
-      <li><a href="/google/play/billing/billing_admin.html">
+      <li><a href="/google/play/billing/billing_admin.html" zh-cn-lang="管理应用内结算">
               <span class="en">Administering In-app Billing</span></a>
       </li>
       <li><a href="/google/play/billing/versions.html">
@@ -663,21 +677,14 @@ href="//fonts.googleapis.com/css?family=Roboto+Condensed">
               <span class="en">HTTP</span></a></li>
               </ul>
         </li>
+        <li><a href="/google/gcm/server-ref.html">
+            <span class="en">Server Reference</span></a>
+        </li>
         <li><a href="/google/gcm/notifications.html">
               <span class="en">User Notifications</span></a>
         </li>
-        <li><a href="/google/gcm/adv.html">
-            <span class="en">Advanced Topics</span></a>
-        </li>
         <li><a href="/google/gcm/c2dm.html">
             <span class="en">Migration</span></a>
-        </li>
-        <li id="gcm-tree-list" class="nav-section">
-          <div class="nav-section-header">
-            <a href="/reference/gcm-packages.html">
-              <span class="en">Reference</span>
-            </a>
-          <div>
         </li>
       </ul>
   </li>
@@ -833,13 +840,31 @@ href="//fonts.googleapis.com/css?family=Roboto+Condensed">
 
 
 <div class="jd-descr">
+<p>
+  <p class="caution"><strong>
+      This interface is deprecated.</strong><br/>
+    Logger interface is deprecated. Use <code>adb shell setprop log.tag.GAv4 DEBUG</code> to
+ enable debug logging for Google Analytics.
 
+  </p>
 
 <h2>Class Overview</h2>
-<p itemprop="articleBody">Interface to be used for logging debug and informational messages from the SDK.
- Implementations of this interface can be provided to the <code><a href="/reference/com/google/android/gms/analytics/GoogleAnalytics.html">GoogleAnalytics</a></code>
- singleton to be used as the <code><a href="/reference/com/google/android/gms/analytics/Logger.html">Logger</a></code> for general use by the SDK.
- See <code><a href="/reference/com/google/android/gms/analytics/GoogleAnalytics.html#setLogger(com.google.android.gms.analytics.Logger)">setLogger(Logger)</a></code>.</p>
+<p itemprop="articleBody">Deprecated Analytics Logger interface.&nbsp;Google Analytics will log to logcat  under
+ <b>GAv4</b> tag using Android <code><a href="/reference/android/util/Log.html">Log</a></code> system. By default only ERROR, WARN
+ and INFO levels are enabled. To enable DEBUG level run the following adb command on your
+ device or emulator:
+
+ <br><br>
+ <pre>adb shell setprop log.tag.GAv4 DEBUG</pre>
+
+ <br> To see only Google Analytics messages from logcat use the following command:
+
+ <br><br>
+ <pre>adb logcat -v time -s GAv4</pre>
+
+ <br> For more information consult the
+ <a href="http://developer.android.com/tools/help/logcat.html">logcat</a> and
+ <a href="http://developer.android.com/tools/help/adb.html">adb</a> developer documentation.</p>
 
 
 
@@ -883,7 +908,10 @@ href="//fonts.googleapis.com/css?family=Roboto+Condensed">
         class</nobr></td>
       <td class="jd-linkcol"><a href="/reference/com/google/android/gms/analytics/Logger.LogLevel.html">Logger.LogLevel</a></td>
       <td class="jd-descrcol" width="100%">
-        Log level settings.&nbsp;
+        <em>
+      This class is deprecated.
+    See <code><a href="/reference/com/google/android/gms/analytics/Logger.html">Logger</a></code> interface for details.
+</em>&nbsp;
         
     
 
@@ -937,7 +965,10 @@ href="//fonts.googleapis.com/css?family=Roboto+Condensed">
         <span class="sympad"><a href="/reference/com/google/android/gms/analytics/Logger.html#error(java.lang.String)">error</a></span>(String message)</nobr>
         
         <div class="jd-descrdiv">
-          Used to log runtime errors or unexpected conditions.
+          <em>
+      This method is deprecated.
+    See <code><a href="/reference/com/google/android/gms/analytics/Logger.html">Logger</a></code> interface for details.
+</em>
           
     
 
@@ -960,7 +991,10 @@ href="//fonts.googleapis.com/css?family=Roboto+Condensed">
         <span class="sympad"><a href="/reference/com/google/android/gms/analytics/Logger.html#error(java.lang.Exception)">error</a></span>(Exception exception)</nobr>
         
         <div class="jd-descrdiv">
-          Used to log runtime errors or unexpected conditions.
+          <em>
+      This method is deprecated.
+    See <code><a href="/reference/com/google/android/gms/analytics/Logger.html">Logger</a></code> interface for details.
+</em>
           
     
 
@@ -983,7 +1017,10 @@ href="//fonts.googleapis.com/css?family=Roboto+Condensed">
         <span class="sympad"><a href="/reference/com/google/android/gms/analytics/Logger.html#getLogLevel()">getLogLevel</a></span>()</nobr>
         
         <div class="jd-descrdiv">
-          Return the current log level.
+          <em>
+      This method is deprecated.
+    See <code><a href="/reference/com/google/android/gms/analytics/Logger.html">Logger</a></code> interface for details.
+</em>
           
     
 
@@ -1006,8 +1043,10 @@ href="//fonts.googleapis.com/css?family=Roboto+Condensed">
         <span class="sympad"><a href="/reference/com/google/android/gms/analytics/Logger.html#info(java.lang.String)">info</a></span>(String message)</nobr>
         
         <div class="jd-descrdiv">
-          Used to log information on the flow through the system and other interesting
- events.
+          <em>
+      This method is deprecated.
+    See <code><a href="/reference/com/google/android/gms/analytics/Logger.html">Logger</a></code> interface for details.
+</em>
           
     
 
@@ -1030,7 +1069,10 @@ href="//fonts.googleapis.com/css?family=Roboto+Condensed">
         <span class="sympad"><a href="/reference/com/google/android/gms/analytics/Logger.html#setLogLevel(int)">setLogLevel</a></span>(int level)</nobr>
         
         <div class="jd-descrdiv">
-          Set the log level.
+          <em>
+      This method is deprecated.
+    See <code><a href="/reference/com/google/android/gms/analytics/Logger.html">Logger</a></code> interface for details.
+</em>
           
     
 
@@ -1053,7 +1095,10 @@ href="//fonts.googleapis.com/css?family=Roboto+Condensed">
         <span class="sympad"><a href="/reference/com/google/android/gms/analytics/Logger.html#verbose(java.lang.String)">verbose</a></span>(String message)</nobr>
         
         <div class="jd-descrdiv">
-          Used to log detailed information.
+          <em>
+      This method is deprecated.
+    See <code><a href="/reference/com/google/android/gms/analytics/Logger.html">Logger</a></code> interface for details.
+</em>
           
     
 
@@ -1076,8 +1121,10 @@ href="//fonts.googleapis.com/css?family=Roboto+Condensed">
         <span class="sympad"><a href="/reference/com/google/android/gms/analytics/Logger.html#warn(java.lang.String)">warn</a></span>(String message)</nobr>
         
         <div class="jd-descrdiv">
-          Used in situations like use of deprecated APIs, poor use of API, near errors, other runtime
- situations that are undesirable or unexpected, but not necessarily "wrong".
+          <em>
+      This method is deprecated.
+    See <code><a href="/reference/com/google/android/gms/analytics/Logger.html">Logger</a></code> interface for details.
+</em>
           
     
 
@@ -1159,16 +1206,20 @@ href="//fonts.googleapis.com/css?family=Roboto+Condensed">
       
     
 
-      
-  <div class="jd-tagdata jd-tagdescr"><p>Used to log runtime errors or unexpected conditions. These errors will likely result in
- data not being sent to the GA servers.</p></div>
+      <p>
+  <p class="caution"><strong>
+      This method is deprecated.</strong><br/>
+    See <code><a href="/reference/com/google/android/gms/analytics/Logger.html">Logger</a></code> interface for details.
+
+  </p>
+  <div class="jd-tagdata jd-tagdescr"><p>Used to log runtime errors or unexpected conditions. These errors will likely result in data
+ not being sent to the GA servers.</p></div>
   <div class="jd-tagdata">
       <h5 class="jd-tagtitle">Parameters</h5>
       <table class="jd-tagtable">
         <tr>
           <th>message</td>
-          <td>A string describing the error that occurred.
-</td>
+          <td>A string describing the error that occurred.</td>
         </tr>
       </table>
   </div>
@@ -1202,16 +1253,20 @@ href="//fonts.googleapis.com/css?family=Roboto+Condensed">
       
     
 
-      
-  <div class="jd-tagdata jd-tagdescr"><p>Used to log runtime errors or unexpected conditions. These errors will likely result in
- data not being sent to the GA servers.</p></div>
+      <p>
+  <p class="caution"><strong>
+      This method is deprecated.</strong><br/>
+    See <code><a href="/reference/com/google/android/gms/analytics/Logger.html">Logger</a></code> interface for details.
+
+  </p>
+  <div class="jd-tagdata jd-tagdescr"><p>Used to log runtime errors or unexpected conditions. These errors will likely result in data
+ not being sent to the GA servers.</p></div>
   <div class="jd-tagdata">
       <h5 class="jd-tagtitle">Parameters</h5>
       <table class="jd-tagtable">
         <tr>
           <th>exception</td>
-          <td>The exception that was thrown that caused the error.
-</td>
+          <td>The exception that was thrown that caused the error.</td>
         </tr>
       </table>
   </div>
@@ -1245,9 +1300,13 @@ href="//fonts.googleapis.com/css?family=Roboto+Condensed">
       
     
 
-      
-  <div class="jd-tagdata jd-tagdescr"><p>Return the current log level.
-</p></div>
+      <p>
+  <p class="caution"><strong>
+      This method is deprecated.</strong><br/>
+    See <code><a href="/reference/com/google/android/gms/analytics/Logger.html">Logger</a></code> interface for details.
+
+  </p>
+  <div class="jd-tagdata jd-tagdescr"><p>Return the current log level.</p></div>
 
     </div>
 </div>
@@ -1278,16 +1337,19 @@ href="//fonts.googleapis.com/css?family=Roboto+Condensed">
       
     
 
-      
-  <div class="jd-tagdata jd-tagdescr"><p>Used to log information on the flow through the system and other interesting
- events.</p></div>
+      <p>
+  <p class="caution"><strong>
+      This method is deprecated.</strong><br/>
+    See <code><a href="/reference/com/google/android/gms/analytics/Logger.html">Logger</a></code> interface for details.
+
+  </p>
+  <div class="jd-tagdata jd-tagdescr"><p>Used to log information on the flow through the system and other interesting events.</p></div>
   <div class="jd-tagdata">
       <h5 class="jd-tagtitle">Parameters</h5>
       <table class="jd-tagtable">
         <tr>
           <th>message</td>
-          <td>the message to log
-</td>
+          <td>the message to log</td>
         </tr>
       </table>
   </div>
@@ -1321,9 +1383,13 @@ href="//fonts.googleapis.com/css?family=Roboto+Condensed">
       
     
 
-      
-  <div class="jd-tagdata jd-tagdescr"><p>Set the log level. It is up to the implementation how the log level is used, but log
- messages outside the set log level should not be output.</p></div>
+      <p>
+  <p class="caution"><strong>
+      This method is deprecated.</strong><br/>
+    See <code><a href="/reference/com/google/android/gms/analytics/Logger.html">Logger</a></code> interface for details.
+
+  </p>
+  <div class="jd-tagdata jd-tagdescr"><p><code><a href="/reference/com/google/android/gms/analytics/Logger.html">Logger</a></code> is deprecated. Setting log level is ignored.</p></div>
 
     </div>
 </div>
@@ -1354,16 +1420,20 @@ href="//fonts.googleapis.com/css?family=Roboto+Condensed">
       
     
 
-      
-  <div class="jd-tagdata jd-tagdescr"><p>Used to log detailed information. This information will probably only be useful
- during development and debugging.</p></div>
+      <p>
+  <p class="caution"><strong>
+      This method is deprecated.</strong><br/>
+    See <code><a href="/reference/com/google/android/gms/analytics/Logger.html">Logger</a></code> interface for details.
+
+  </p>
+  <div class="jd-tagdata jd-tagdescr"><p>Used to log detailed information. This information will probably only be useful during
+ development and debugging.</p></div>
   <div class="jd-tagdata">
       <h5 class="jd-tagtitle">Parameters</h5>
       <table class="jd-tagtable">
         <tr>
           <th>message</td>
-          <td>the message to log
-</td>
+          <td>the message to log</td>
         </tr>
       </table>
   </div>
@@ -1397,7 +1467,12 @@ href="//fonts.googleapis.com/css?family=Roboto+Condensed">
       
     
 
-      
+      <p>
+  <p class="caution"><strong>
+      This method is deprecated.</strong><br/>
+    See <code><a href="/reference/com/google/android/gms/analytics/Logger.html">Logger</a></code> interface for details.
+
+  </p>
   <div class="jd-tagdata jd-tagdescr"><p>Used in situations like use of deprecated APIs, poor use of API, near errors, other runtime
  situations that are undesirable or unexpected, but not necessarily "wrong".</p></div>
   <div class="jd-tagdata">
@@ -1405,8 +1480,7 @@ href="//fonts.googleapis.com/css?family=Roboto+Condensed">
       <table class="jd-tagtable">
         <tr>
           <th>message</td>
-          <td>the message to log
-</td>
+          <td>the message to log</td>
         </tr>
       </table>
   </div>

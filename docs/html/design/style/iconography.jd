@@ -41,6 +41,14 @@ effectively down-scales your HDPI assets by 1/2 to match the expected size.</p>
 
 <h2 id="launcher">Launcher</h2>
 
+<a class="notice-designers-material"
+  href="http://www.google.com/design/spec/style/icons.html#icons-product-icons">
+  <div>
+    <h3>Material Design</h3>
+    <p>Product Icons<p>
+  </div>
+</a>
+
 <p>The launcher icon is the visual representation of your app on the Home or All Apps screen. Since the
 user can change the Home screen's wallpaper, make sure that your launcher icon is clearly visible on
 any type of background.</p>
@@ -122,6 +130,14 @@ from above, so that users perceive some depth.</p>
 
 
 <h2 id="action-bar">Action Bar</h2>
+
+<a class="notice-designers-material"
+  href="http://www.google.com/design/spec/style/icons.html#icons-system-icons">
+  <div>
+    <h3>Material Design</h3>
+    <p>System Icons<p>
+  </div>
+</a>
 
 <p>
 
@@ -220,6 +236,14 @@ Disabled: <strong>30%</strong> opacity</p>
 
 <h2 id="small-contextual">Small / Contextual Icons</h2>
 
+<a class="notice-designers-material"
+  href="http://www.google.com/design/spec/style/icons.html#icons-system-icons">
+  <div>
+    <h3>Material Design</h3>
+    <p>System Icons<p>
+  </div>
+</a>
+
 <p>Within the body of your app, use small icons to surface actions and/or provide status for specific
 items. For example, in the Gmail app, each message has a star icon that marks the message as
 important.</p>
@@ -299,6 +323,15 @@ the background.</p>
 
 
 <h2 id="notification">Notification Icons</h2>
+
+<a class="notice-designers-material"
+  href="http://www.google.com/design/spec/style/icons.html#icons-system-icons">
+  <div>
+    <h3>Material Design</h3>
+    <p>System Icons<p>
+  </div>
+</a>
+
 
 <p>If your app generates notifications, provide an icon that the system can display in the status bar
 whenever a new notification is available.</p>
@@ -516,23 +549,41 @@ application: </p>
         <em>finished_asset</em>.png
     drawable-xxhdpi/...
         <em>finished_asset</em>.png
+
+    mipmap-ldpi/...
+        <em>finished_launcher_asset</em>.png
+    mipmap-mdpi/...
+        <em>finished_launcher_asset</em>.png
+    mipmap-hdpi/...
+        <em>finished_launcher_asset</em>.png
+    mipmap-xhdpi/...
+        <em>finished_launcher_asset</em>.png
+    mipmap-xxhdpi/...
+        <em>finished_launcher_asset</em>.png
+    mipmap-xxxhdpi/...
+        <em>finished_launcher_asset</em>.png
 </pre>
 
 <p>For more information about how to save resources in the application project,
 see <a href="{@docRoot}guide/topics/resources/providing-resources.html">Providing Resources</a>.
 </p>
 
+<p> For more information about using the mipmap folders, see
+<a href="{@docRoot}tools/projects/index.html#mipmap">Managing Projects Overview</a>.</p>
 
 <h3 id="xxxhdpi-launcher">Provide an xxx-high-density launcher icon</h3>
 
-<p>Some devices scale-up the launcher icon by as much as 25%. For example, if your highest density 
+<p>Some devices scale-up the launcher icon by as much as 25%. For example, if your highest density
 launcher icon image is already extra-extra-high density, the scaling process will make it appear
-less crisp. So you should provide a higher density launcher icon in the <code>drawable-xxxhdpi
+less crisp. So you should provide a higher density launcher icon in the <code>mipmap-xxxhdpi
 </code> directory, which the system uses instead of scaling up a smaller version of the icon.</p>
 
-<p class="note"><strong>Note:</strong> the <code>drawable-xxxhdpi</code> qualifier is necessary only
-to provide a launcher icon that can appear larger than usual on an xxhdpi device. You do not need to
-provide xxxhdpi assets for all your app's images.</p>
+<p class="note"><strong>Note:</strong> The <code>mipmap-xxxhdpi</code> qualifier is necessary
+only to provide a launcher icon that can appear larger than usual on an xxhdpi device. It is best
+practice to place all your launcher icons in the <code>res/mipmap-[density]/</code> folders. This
+enables your app to display launcher icons that have a higher density than the device, without
+scaling up a lower density version of the icon. You do not need to provide xxxhdpi assets for all
+your app's images.</p>
 
 <p>See <a href="{@docRoot}guide/practices/screens_support.html">Supporting Multiple Screens</a> for
 more information.</p>

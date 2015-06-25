@@ -736,6 +736,10 @@ include the action bar on devices running Android 2.1 or higher."
             Displaying a Location Address
           </a>
           </li>
+          <li><a href="<?cs var:toroot ?>training/location/geofencing.html">
+            Creating and Monitoring Geofences
+          </a>
+          </li>
         </ul>
       </li>
     </ul>
@@ -994,10 +998,25 @@ include the action bar on devices running Android 2.1 or higher."
            Building TV Games</a>
       </li>
 
-      <li>
-        <a href="<?cs var:toroot ?>training/tv/tif/index.html"
+      <li class="nav-section">
+        <div class="nav-section-header">
+          <a href="<?cs var:toroot ?>training/tv/tif/index.html"
            description="How to build Live TV apps.">
            Building Live TV Apps</a>
+        </div>
+        <ul>
+          <li>
+            <a href="<?cs var:toroot ?>training/tv/tif/tvinput.html">
+              Developing a TV Input Service</a>
+          <li>
+            <a href="<?cs var:toroot ?>training/tv/tif/channel.html">
+              Working with Channel Data</a>
+          </li>
+          <li>
+            <a href="<?cs var:toroot ?>training/tv/tif/ui.html">
+              Managing User Interaction</a>
+          </li>
+        </ul>
       </li>
 
       <li>
@@ -1038,6 +1057,32 @@ include the action bar on devices running Android 2.1 or higher."
     </ul>
   </li>
   <!-- End: Building for Auto -->
+
+
+  <!-- Start: Building for Work -->
+  <li class="nav-section">
+    <div class="nav-section-header">
+      <a href="<?cs var:toroot ?>training/enterprise/index.html">
+      <span class="small">Building Apps for</span><br/>
+              Work
+      </a>
+    </div>
+    <ul>
+      <li><a href="<?cs var:toroot ?>training/enterprise/app-compatibility.html">
+        Ensuring Compatibility with Managed Profiles
+      </a>
+      </li>
+      <li><a href="<?cs var:toroot ?>training/enterprise/app-restrictions.html">
+        Implementing App Restrictions
+      </a>
+      </li>
+      <li><a href="<?cs var:toroot ?>training/enterprise/work-policy-ctrl.html">
+        Building a Work Policy Controller
+      </a>
+      </li>
+    </ul>
+  </li>
+  <!-- End: Building for Work -->
 
 
   <li class="nav-section">
@@ -1752,10 +1797,6 @@ results."
             Enhancing Security with Device Management Policies
           </a>
           </li>
-          <li><a href="<?cs var:toroot ?>training/enterprise/app-compatibility.html">
-            Ensuring Compatibility with Managed Profiles
-          </a>
-          </li>
         </ul>
       </li>
     </ul>
@@ -1794,6 +1835,24 @@ results."
           </li>
           <li><a href="<?cs var:toroot ?>training/activity-testing/activity-functional-testing.html">
             <span class="en">Creating Functional Tests</span>
+          </a>
+          </li>
+        </ul>
+      </li>
+    </ul>
+    <ul>
+      <li class="nav-section">
+      <div class="nav-section-header"><a href="<?cs var:toroot ?>training/testing/ui-testing/index.html"
+         description="How to automate your user interface tests for Android apps.">
+            Automating UI Tests
+          </a></div>
+        <ul>
+          <li><a href="<?cs var:toroot ?>training/testing/ui-testing/espresso-testing.html">
+            <span class="en">Testing UI for a Single App</span>
+          </a>
+          </li>
+          <li><a href="<?cs var:toroot ?>training/testing/ui-testing/uiautomator-testing.html">
+            <span class="en">Testing UI for Multiple Apps</span>
           </a>
           </li>
         </ul>

@@ -33,7 +33,10 @@ page.title=Migration
 </div>
 </div>
 
-<p>Android Cloud to Device Messaging (C2DM) is deprecated. The C2DM service will continue to be maintained in the short term, but C2DM will accept no new users, and it will grant no new quotas. <strong>C2DM developers are strongly encouraged to move to Google Cloud Messaging (GCM)</strong>. GCM is the next generation of C2DM.</p>
+<p>Android Cloud to Device Messaging (C2DM) was officially deprecated on June 26, 2012, and will be
+ shut down completely as of July 30, 2015.  <strong>C2DM developers are strongly encouraged to move
+  to Google Cloud Messaging (GCM)</strong>. GCM is the next generation of C2DM.</p>
+
 <p>This document is addressed to  C2DM developers who are moving to GCM. It describes the differences between GCM and C2DM, and explains how to migrate existing C2DM apps to GCM.</p>
 
 
@@ -75,7 +78,6 @@ page.title=Migration
 <dt><strong>Canonical registration ID</strong></dt>
 <dd>There may be situations where the server ends up with 2 registration IDs for the same device. If the GCM response contains a registration ID, simply replace the registration ID you have with the one provided. With this feature your application doesn't need to send the device ID to your server anymore. For more information, see <a href="adv.html#canonical">Advanced Topics</a>.</dd>
 </dl>
-<p>GCM also provides client and server <a href="{@docRoot}reference/com/google/android/gcm/package-summary.html">helper libraries</a> to make writing your code easier.</p>
 
 <h3 id="interop">Relationship between C2DM and GCM</h3>
 

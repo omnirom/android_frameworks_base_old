@@ -59,8 +59,7 @@ android {
     buildTypes {
         release {
             minifyEnabled true
-            proguardFiles getDefaultProguardFile('proguard-android.txt'), \
-            'proguard-rules.txt'
+            proguardFiles getDefaultProguardFile('proguard-android.txt'), 'proguard-rules.pro'
         }
     }
 }
@@ -187,8 +186,7 @@ android {
     buildTypes {
         release {
             minifyEnabled true
-            proguardFiles getDefaultProguardFile('proguard-android.txt'), \
-                          'proguard-rules.txt'
+            proguardFiles getDefaultProguardFile('proguard-android.txt'), 'proguard-rules.pro'
         }
     }
 }
@@ -197,7 +195,7 @@ android {
 
 <p><code>getDefaultProguardFile('proguard-android.txt')</code> obtains the default ProGuard
 settings from the Android SDK installation. Android Studio adds the module-specific rules file
-<code>proguard-rules.txt</code> at the root of the module, where you can add custom ProGuard
+<code>proguard-rules.pro</code> at the root of the module, where you can add custom ProGuard
 rules.</p>
 
 <h3 id="configureSigning">Configure signing settings</h3>
@@ -472,7 +470,11 @@ applied to each build. </p>
 <li>fullRelease</li>
 </ul>
 
-<p>To build this example, invoke the <code>assemble</code> task from Android Studio or from the
-command line.</p>
+<p>To build this example, click the <strong>Build</strong> menu option in Android Studio or invoke
+the <code>assemble</code> task from the command line. </p>
+
+<p class="note"><strong>Note:</strong> The <strong>Build &gt; Make Project</strong> option compiles
+all the source files in the entire project that have been modified since the last compilation. The
+<strong>Build &gt; Rebuild Project</strong> option recomplies all the source files in the project.</p>
 
 <p>Separate output folders are created for each build variant. </p>

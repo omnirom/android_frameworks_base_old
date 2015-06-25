@@ -96,6 +96,8 @@
 
 
 
+
+
 <html>
 <head>
 
@@ -111,7 +113,7 @@
 href="//fonts.googleapis.com/css?family=Roboto+Condensed">
 <link rel="stylesheet" href="//fonts.googleapis.com/css?family=Roboto:light,regular,medium,thin,italic,mediumitalic,bold"
   title="roboto">
-<link href="/assets/css/default.css?v=4" rel="stylesheet" type="text/css">
+<link href="/assets/css/default.css?v=5" rel="stylesheet" type="text/css">
 
 
 
@@ -412,6 +414,7 @@ href="//fonts.googleapis.com/css?family=Roboto+Condensed">
                 <li><a href="/distribute/users/index.html">Get Users</a></li>
                 <li><a href="/distribute/engage/index.html">Engage &amp; Retain</a></li>
                 <li><a href="/distribute/monetize/index.html">Monetize</a></li>
+                <li><a href="/distribute/analyze/index.html">Analyze</a></li>
                 <li><a href="/distribute/tools/index.html">Tools &amp; Reference</a></li>
                 <li><a href="/distribute/stories/index.html">Developer Stories</a></li>
               </ul>
@@ -559,7 +562,18 @@ href="//fonts.googleapis.com/css?family=Roboto+Condensed">
           <span class="en">Wallet</span>
       </a></div>
   </li>
-
+  <li class="nav-section">
+    <div class="nav-section-header"><a href="/google/play/safetynet/index.html">
+          <span class="en">SafetyNet</span>
+      </a></div>
+      <ul>
+        <li>
+          <a href="/google/play/safetynet/start.html">
+            <span class="en">Getting Started</span>
+          </a>
+        </li>
+      </ul>
+  </li>
 
   <li class="nav-section">
     <div class="nav-section-header"><a href="/google/play-services/index.html">
@@ -593,14 +607,14 @@ href="//fonts.googleapis.com/css?family=Roboto+Condensed">
 
 
   <li class="nav-section">
-    <div class="nav-section-header"><a href="/google/play/billing/index.html">
+    <div class="nav-section-header"><a href="/google/play/billing/index.html" zh-cn-lang="应用内结算">
       <span class="en">Google Play In-app Billing</span></a>
     </div>
     <ul>
-      <li><a href="/google/play/billing/billing_overview.html">
+      <li><a href="/google/play/billing/billing_overview.html" zh-cn-lang="应用内结算概述">
               <span class="en">Overview</span></a>
       </li>
-      <li class="nav-section"><div class="nav-section-header"><a href="/google/play/billing/api.html">
+      <li class="nav-section"><div class="nav-section-header"><a href="/google/play/billing/api.html" zh-cn-lang="应用内结算 API">
               <span class="en">Version 3 API</span></a></div>
               <ul>
               <li><a href="/google/play/billing/billing_integrate.html">
@@ -623,13 +637,13 @@ href="//fonts.googleapis.com/css?family=Roboto+Condensed">
       <li><a href="/google/play/billing/billing_subscriptions.html">
               <span class="en">Subscriptions</span></a>
       </li>
-      <li><a href="/google/play/billing/billing_best_practices.html">
+      <li><a href="/google/play/billing/billing_best_practices.html" zh-cn-lang="安全性和设计">
               <span class="en">Security and Design</span></a>
       </li>
-      <li><a href="/google/play/billing/billing_testing.html">
+      <li><a href="/google/play/billing/billing_testing.html" zh-cn-lang="测试应用内结算">
               <span class="en">Testing In-app Billing</span></a>
       </li>
-      <li><a href="/google/play/billing/billing_admin.html">
+      <li><a href="/google/play/billing/billing_admin.html" zh-cn-lang="管理应用内结算">
               <span class="en">Administering In-app Billing</span></a>
       </li>
       <li><a href="/google/play/billing/versions.html">
@@ -663,21 +677,14 @@ href="//fonts.googleapis.com/css?family=Roboto+Condensed">
               <span class="en">HTTP</span></a></li>
               </ul>
         </li>
+        <li><a href="/google/gcm/server-ref.html">
+            <span class="en">Server Reference</span></a>
+        </li>
         <li><a href="/google/gcm/notifications.html">
               <span class="en">User Notifications</span></a>
         </li>
-        <li><a href="/google/gcm/adv.html">
-            <span class="en">Advanced Topics</span></a>
-        </li>
         <li><a href="/google/gcm/c2dm.html">
             <span class="en">Migration</span></a>
-        </li>
-        <li id="gcm-tree-list" class="nav-section">
-          <div class="nav-section-header">
-            <a href="/reference/gcm-packages.html">
-              <span class="en">Reference</span>
-            </a>
-          <div>
         </li>
       </ul>
   </li>
@@ -833,7 +840,7 @@ Summary:
 <div id="jd-header">
     public
      
-    final 
+
     
     class
 <h1 itemprop="name">CampaignTrackingReceiver</h1>
@@ -895,6 +902,48 @@ Summary:
 
 
 
+<table class="jd-sumtable jd-sumtable-subclasses"><tr><td colspan="12" style="border:none;margin:0;padding:0;">
+
+  <a href="#" onclick="return toggleInherited(this, null)" id="subclasses-direct" class="jd-expando-trigger closed"
+          ><img id="subclasses-direct-trigger"
+          src="/assets/images/triangle-closed.png"
+          class="jd-expando-trigger-img" /></a>Known Direct Subclasses
+
+  <div id="subclasses-direct">
+      <div id="subclasses-direct-list"
+              class="jd-inheritedlinks"
+
+              >
+
+
+              <a href="/reference/com/google/android/gms/tagmanager/InstallReferrerReceiver.html">InstallReferrerReceiver</a>
+
+
+      </div>
+      <div id="subclasses-direct-summary"
+              style="display: none;"
+              >
+
+  <table class="jd-sumtable-expando">
+
+      <tr class="alt-color api apilevel-" >
+        <td class="jd-linkcol"><a href="/reference/com/google/android/gms/tagmanager/InstallReferrerReceiver.html">InstallReferrerReceiver</a></td>
+        <td class="jd-descrcol" width="100%">
+          The Google Play <code>com.android.vending.INSTALL_REFERRER</code> <code><a href="/reference/android/content/Intent.html">Intent</a></code> is broadcast when an
+ app is installed from the Google Play Store.&nbsp;
+
+
+
+        </td>
+      </tr>
+
+
+  </table>
+
+      </div>
+  </div>
+</td></tr></table>
+
 
 
 
@@ -902,29 +951,37 @@ Summary:
 
 
 <h2>Class Overview</h2>
-<p itemprop="articleBody">The Google Play <code>com.android.vending.INSTALL_REFERRER</code> <code><a href="/reference/android/content/Intent.html">Intent</a></code> is broadcast when an
- app is installed from the Google Play Store and has campaign data available (i.e. the app was
- installed from a link to the Google Play Store). This <code><a href="/reference/android/content/BroadcastReceiver.html">BroadcastReceiver</a></code> listens for that
- <code><a href="/reference/android/content/Intent.html">Intent</a></code>, passing the campaign data to Google Analytics.
- <p>
- To enable this receiver, add the following to your AndroidManifest.xml file:
+<p itemprop="articleBody">Google Analytics receiver for <code>com.android.vending.INSTALL_REFERRER</code>. Google Play will
+ broadcast the intent when an app is installed from the Google Play Store and has campaign data
+ available (i.e. the app was installed from a link to the Google Play Store).
+ This <code><a href="/reference/android/content/BroadcastReceiver.html">BroadcastReceiver</a></code> registers for that <code><a href="/reference/android/content/Intent.html">Intent</a></code> and passes the campaign data
+ to Google Analytics.
 
- <pre>
- <code>&lt;!-- Used for install referrer tracking--&gt;
- &lt;service android:name="com.google.android.gms.analytics.CampaignTrackingService"/&gt;
- &lt;receiver
-     android:name="com.google.android.gms.analytics.CampaignTrackingReceiver"
-     android:exported="true"&gt;
-     &lt;intent-filter&gt;
-         &lt;action android:name="com.android.vending.INSTALL_REFERRER" /&gt;
-     &lt;/intent-filter&gt;
- &lt;/receiver&gt;
- </code>
- </pre>
+ <p><p> To enable installation campaign reporting register both CampaignTrackingReceiver and
+ CampaignTrackingService in your AndroidManifest.xml file:
 
- Only one receiver can receive the install referrer setting. If Google Tag Manager is being
- used by the application, then only the Google Tag Manager receiver needs to be enabled.
- The Google Tag Manager receiver will invoke the Google Analytics receiver automatically.
+ <pre><code>&lt;manifest&gt;
+   &lt;application&gt;
+     &lt;!-- ... --&gt;
+
+     &lt;receiver android:name="com.google.android.gms.analytics.CampaignTrackingReceiver"
+         android:enabled="true"&gt;
+         &lt;intent-filter&gt;
+             &lt;action android:name="com.android.vending.INSTALL_REFERRER" /&gt;
+         &lt;/intent-filter&gt;
+     &lt;/receiver&gt;
+     &lt;service android:name="com.google.android.gms.analytics.CampaignTrackingService"
+         android:enabled="true"
+         android:exported="false"/&gt;
+
+     &lt;!-- ... --&gt;
+   &lt;/application&gt;
+ &lt;/manifest&gt;
+ </code></pre>
+
+ Only one receiver can receive the install referrer setting. If Google Tag Manager is being used
+ by the application, then only the Google Tag Manager receiver needs to be enabled. The Google Tag
+ Manager receiver will invoke the Google Analytics receiver automatically.
 </p>
 
 
@@ -1020,7 +1077,7 @@ Summary:
             void</nobr>
         </td>
         <td class="jd-linkcol" width="100%"><nobr>
-        <span class="sympad"><a href="/reference/com/google/android/gms/analytics/CampaignTrackingReceiver.html#onReceive(android.content.Context, android.content.Intent)">onReceive</a></span>(Context ctx, Intent intent)</nobr>
+        <span class="sympad"><a href="/reference/com/google/android/gms/analytics/CampaignTrackingReceiver.html#onReceive(android.content.Context, android.content.Intent)">onReceive</a></span>(Context context, Intent intent)</nobr>
         
   </td></tr>
 
@@ -1649,7 +1706,7 @@ From class
         void
       </span>
       <span class="sympad">onReceive</span>
-      <span class="normal">(Context ctx, Intent intent)</span>
+      <span class="normal">(Context context, Intent intent)</span>
     </h4>
       <div class="api-level">
         <div></div>

@@ -44,13 +44,14 @@ public abstract class BridgeActionBar {
     private final View mDecorContent;
     private final ActionBarCallback mCallback;
 
+    @SuppressWarnings("NullableProblems")  // Should be initialized by subclasses.
     @NonNull private FrameLayout mContentRoot;
 
     public BridgeActionBar(@NonNull BridgeContext context, @NonNull SessionParams params,
             @NonNull ViewGroup parentView) {
         mBridgeContext = context;
         mParams = params;
-        mCallback = params.getProjectCallback().getActionBarCallback();
+        mCallback = params.getLayoutlibCallback().getActionBarCallback();
         ResourceValue layoutName = getLayoutResource(context);
         if (layoutName == null) {
             throw new RuntimeException("Unable to find the layout for Action Bar.");
@@ -80,7 +81,7 @@ public abstract class BridgeActionBar {
         }
 
         // Inflate action bar layout.
-        mDecorContent = LayoutInflater.from(context).inflate(layoutId, mEnclosingLayout, true);
+        mDecorContent = getInflater(context).inflate(layoutId, mEnclosingLayout, true);
 
     }
 
@@ -91,7 +92,11 @@ public abstract class BridgeActionBar {
      */
     protected abstract ResourceValue getLayoutResource(BridgeContext context);
 
-    protected void setContentRoot(FrameLayout contentRoot) {
+    protected LayoutInflater getInflater(BridgeContext context) {
+        return LayoutInflater.from(context);
+    }
+
+    protected void setContentRoot(@NonNull FrameLayout contentRoot) {
         mContentRoot = contentRoot;
     }
 

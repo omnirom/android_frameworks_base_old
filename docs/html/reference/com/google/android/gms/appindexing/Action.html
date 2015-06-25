@@ -96,6 +96,8 @@
 
 
 
+
+
 <html>
 <head>
 
@@ -111,7 +113,7 @@
 href="//fonts.googleapis.com/css?family=Roboto+Condensed">
 <link rel="stylesheet" href="//fonts.googleapis.com/css?family=Roboto:light,regular,medium,thin,italic,mediumitalic,bold"
   title="roboto">
-<link href="/assets/css/default.css?v=4" rel="stylesheet" type="text/css">
+<link href="/assets/css/default.css?v=5" rel="stylesheet" type="text/css">
 
 
 
@@ -412,6 +414,7 @@ href="//fonts.googleapis.com/css?family=Roboto+Condensed">
                 <li><a href="/distribute/users/index.html">Get Users</a></li>
                 <li><a href="/distribute/engage/index.html">Engage &amp; Retain</a></li>
                 <li><a href="/distribute/monetize/index.html">Monetize</a></li>
+                <li><a href="/distribute/analyze/index.html">Analyze</a></li>
                 <li><a href="/distribute/tools/index.html">Tools &amp; Reference</a></li>
                 <li><a href="/distribute/stories/index.html">Developer Stories</a></li>
               </ul>
@@ -559,7 +562,18 @@ href="//fonts.googleapis.com/css?family=Roboto+Condensed">
           <span class="en">Wallet</span>
       </a></div>
   </li>
-
+  <li class="nav-section">
+    <div class="nav-section-header"><a href="/google/play/safetynet/index.html">
+          <span class="en">SafetyNet</span>
+      </a></div>
+      <ul>
+        <li>
+          <a href="/google/play/safetynet/start.html">
+            <span class="en">Getting Started</span>
+          </a>
+        </li>
+      </ul>
+  </li>
 
   <li class="nav-section">
     <div class="nav-section-header"><a href="/google/play-services/index.html">
@@ -593,14 +607,14 @@ href="//fonts.googleapis.com/css?family=Roboto+Condensed">
 
 
   <li class="nav-section">
-    <div class="nav-section-header"><a href="/google/play/billing/index.html">
+    <div class="nav-section-header"><a href="/google/play/billing/index.html" zh-cn-lang="应用内结算">
       <span class="en">Google Play In-app Billing</span></a>
     </div>
     <ul>
-      <li><a href="/google/play/billing/billing_overview.html">
+      <li><a href="/google/play/billing/billing_overview.html" zh-cn-lang="应用内结算概述">
               <span class="en">Overview</span></a>
       </li>
-      <li class="nav-section"><div class="nav-section-header"><a href="/google/play/billing/api.html">
+      <li class="nav-section"><div class="nav-section-header"><a href="/google/play/billing/api.html" zh-cn-lang="应用内结算 API">
               <span class="en">Version 3 API</span></a></div>
               <ul>
               <li><a href="/google/play/billing/billing_integrate.html">
@@ -623,13 +637,13 @@ href="//fonts.googleapis.com/css?family=Roboto+Condensed">
       <li><a href="/google/play/billing/billing_subscriptions.html">
               <span class="en">Subscriptions</span></a>
       </li>
-      <li><a href="/google/play/billing/billing_best_practices.html">
+      <li><a href="/google/play/billing/billing_best_practices.html" zh-cn-lang="安全性和设计">
               <span class="en">Security and Design</span></a>
       </li>
-      <li><a href="/google/play/billing/billing_testing.html">
+      <li><a href="/google/play/billing/billing_testing.html" zh-cn-lang="测试应用内结算">
               <span class="en">Testing In-app Billing</span></a>
       </li>
-      <li><a href="/google/play/billing/billing_admin.html">
+      <li><a href="/google/play/billing/billing_admin.html" zh-cn-lang="管理应用内结算">
               <span class="en">Administering In-app Billing</span></a>
       </li>
       <li><a href="/google/play/billing/versions.html">
@@ -663,21 +677,14 @@ href="//fonts.googleapis.com/css?family=Roboto+Condensed">
               <span class="en">HTTP</span></a></li>
               </ul>
         </li>
+        <li><a href="/google/gcm/server-ref.html">
+            <span class="en">Server Reference</span></a>
+        </li>
         <li><a href="/google/gcm/notifications.html">
               <span class="en">User Notifications</span></a>
         </li>
-        <li><a href="/google/gcm/adv.html">
-            <span class="en">Advanced Topics</span></a>
-        </li>
         <li><a href="/google/gcm/c2dm.html">
             <span class="en">Migration</span></a>
-        </li>
-        <li id="gcm-tree-list" class="nav-section">
-          <div class="nav-section-header">
-            <a href="/reference/gcm-packages.html">
-              <span class="en">Reference</span>
-            </a>
-          <div>
         </li>
       </ul>
   </li>
@@ -907,9 +914,9 @@ Summary:
  <p>
  To use this API, add the following to your <code><a href="/reference/android/app/Activity.html">Activity</a></code>:
  <pre>
- <code>Action action = Action.newAction(actionType, title, objectUrl);
+ <code>Action action = Action.newAction(actionType, title, appUri);
  AppIndex.AppIndexApi.action(mGoogleApiClient, action);
- </code>
+ </code></pre>
 </p>
 
 
@@ -982,6 +989,54 @@ Summary:
     
     <tr class="alt-color api apilevel-" >
         <td class="jd-typecol">String</td>
+        <td class="jd-linkcol"><a href="/reference/com/google/android/gms/appindexing/Action.html#STATUS_TYPE_ACTIVE">STATUS_TYPE_ACTIVE</a></td>
+        <td class="jd-descrcol" width="100%">
+          The status of an active action (i.e.
+
+
+
+        </td>
+    </tr>
+
+
+    <tr class=" api apilevel-" >
+        <td class="jd-typecol">String</td>
+        <td class="jd-linkcol"><a href="/reference/com/google/android/gms/appindexing/Action.html#STATUS_TYPE_COMPLETED">STATUS_TYPE_COMPLETED</a></td>
+        <td class="jd-descrcol" width="100%">
+          The status of a completed action.
+
+
+
+        </td>
+    </tr>
+
+
+    <tr class="alt-color api apilevel-" >
+        <td class="jd-typecol">String</td>
+        <td class="jd-linkcol"><a href="/reference/com/google/android/gms/appindexing/Action.html#STATUS_TYPE_FAILED">STATUS_TYPE_FAILED</a></td>
+        <td class="jd-descrcol" width="100%">
+          The status of a failed action.
+
+
+
+        </td>
+    </tr>
+
+
+    <tr class=" api apilevel-" >
+        <td class="jd-typecol">String</td>
+        <td class="jd-linkcol"><a href="/reference/com/google/android/gms/appindexing/Action.html#TYPE_ACTIVATE">TYPE_ACTIVATE</a></td>
+        <td class="jd-descrcol" width="100%">
+          The act of starting or activating a device or application.
+
+
+
+        </td>
+    </tr>
+
+
+    <tr class="alt-color api apilevel-" >
+        <td class="jd-typecol">String</td>
         <td class="jd-linkcol"><a href="/reference/com/google/android/gms/appindexing/Action.html#TYPE_ADD">TYPE_ADD</a></td>
         <td class="jd-descrcol" width="100%">
           The act of editing by adding an object to a collection.
@@ -996,7 +1051,7 @@ Summary:
         <td class="jd-typecol">String</td>
         <td class="jd-linkcol"><a href="/reference/com/google/android/gms/appindexing/Action.html#TYPE_BOOKMARK">TYPE_BOOKMARK</a></td>
         <td class="jd-descrcol" width="100%">
-          An agent bookmarks/flags/labels/tags/marks an object.
+          The act of bookmarking an object.
           
     
 
@@ -1004,6 +1059,31 @@ Summary:
     </tr>
     
     
+    <tr class="alt-color api apilevel-" >
+        <td class="jd-typecol">String</td>
+        <td class="jd-linkcol"><a href="/reference/com/google/android/gms/appindexing/Action.html#TYPE_COMMUNICATE">TYPE_COMMUNICATE</a></td>
+        <td class="jd-descrcol" width="100%">
+          The act of conveying information to another person via a communication medium (instrument)
+ such as speech, email, or telephone conversation.
+
+
+
+        </td>
+    </tr>
+
+
+    <tr class=" api apilevel-" >
+        <td class="jd-typecol">String</td>
+        <td class="jd-linkcol"><a href="/reference/com/google/android/gms/appindexing/Action.html#TYPE_FILM">TYPE_FILM</a></td>
+        <td class="jd-descrcol" width="100%">
+          The act of capturing sound and moving images on film, video, or digitally.
+
+
+
+        </td>
+    </tr>
+
+
     <tr class="alt-color api apilevel-" >
         <td class="jd-typecol">String</td>
         <td class="jd-linkcol"><a href="/reference/com/google/android/gms/appindexing/Action.html#TYPE_LIKE">TYPE_LIKE</a></td>
@@ -1030,6 +1110,42 @@ Summary:
     
     <tr class="alt-color api apilevel-" >
         <td class="jd-typecol">String</td>
+        <td class="jd-linkcol"><a href="/reference/com/google/android/gms/appindexing/Action.html#TYPE_PHOTOGRAPH">TYPE_PHOTOGRAPH</a></td>
+        <td class="jd-descrcol" width="100%">
+          The act of capturing still images of objects using a camera.
+
+
+
+        </td>
+    </tr>
+
+
+    <tr class=" api apilevel-" >
+        <td class="jd-typecol">String</td>
+        <td class="jd-linkcol"><a href="/reference/com/google/android/gms/appindexing/Action.html#TYPE_RESERVE">TYPE_RESERVE</a></td>
+        <td class="jd-descrcol" width="100%">
+          The act of making a reservation at a business such as a restaurant.
+
+
+
+        </td>
+    </tr>
+
+
+    <tr class="alt-color api apilevel-" >
+        <td class="jd-typecol">String</td>
+        <td class="jd-linkcol"><a href="/reference/com/google/android/gms/appindexing/Action.html#TYPE_SEARCH">TYPE_SEARCH</a></td>
+        <td class="jd-descrcol" width="100%">
+          The act of searching for an object.
+
+
+
+        </td>
+    </tr>
+
+
+    <tr class=" api apilevel-" >
+        <td class="jd-typecol">String</td>
         <td class="jd-linkcol"><a href="/reference/com/google/android/gms/appindexing/Action.html#TYPE_VIEW">TYPE_VIEW</a></td>
         <td class="jd-descrcol" width="100%">
           The act of consuming static visual content.
@@ -1040,7 +1156,7 @@ Summary:
     </tr>
     
     
-    <tr class=" api apilevel-" >
+    <tr class="alt-color api apilevel-" >
         <td class="jd-typecol">String</td>
         <td class="jd-linkcol"><a href="/reference/com/google/android/gms/appindexing/Action.html#TYPE_WANT">TYPE_WANT</a></td>
         <td class="jd-descrcol" width="100%">
@@ -1052,7 +1168,7 @@ Summary:
     </tr>
     
     
-    <tr class="alt-color api apilevel-" >
+    <tr class=" api apilevel-" >
         <td class="jd-typecol">String</td>
         <td class="jd-linkcol"><a href="/reference/com/google/android/gms/appindexing/Action.html#TYPE_WATCH">TYPE_WATCH</a></td>
         <td class="jd-descrcol" width="100%">
@@ -1098,7 +1214,7 @@ Summary:
             <a href="/reference/com/google/android/gms/appindexing/Action.html">Action</a></nobr>
         </td>
         <td class="jd-linkcol" width="100%"><nobr>
-        <span class="sympad"><a href="/reference/com/google/android/gms/appindexing/Action.html#newAction(java.lang.String, java.lang.String, android.net.Uri, android.net.Uri)">newAction</a></span>(String actionType, String objectName, Uri objectId, Uri objectUrl)</nobr>
+        <span class="sympad"><a href="/reference/com/google/android/gms/appindexing/Action.html#newAction(java.lang.String, java.lang.String, android.net.Uri, android.net.Uri)">newAction</a></span>(String actionType, String objectName, Uri objectId, Uri objectAppUri)</nobr>
         
         <div class="jd-descrdiv">
           Creates a new action.
@@ -1121,7 +1237,7 @@ Summary:
             <a href="/reference/com/google/android/gms/appindexing/Action.html">Action</a></nobr>
         </td>
         <td class="jd-linkcol" width="100%"><nobr>
-        <span class="sympad"><a href="/reference/com/google/android/gms/appindexing/Action.html#newAction(java.lang.String, java.lang.String, android.net.Uri)">newAction</a></span>(String actionType, String objectName, Uri objectUrl)</nobr>
+        <span class="sympad"><a href="/reference/com/google/android/gms/appindexing/Action.html#newAction(java.lang.String, java.lang.String, android.net.Uri)">newAction</a></span>(String actionType, String objectName, Uri objectAppUri)</nobr>
         
         <div class="jd-descrdiv">
           Creates a new action.
@@ -1380,6 +1496,166 @@ From class
 
 
 
+<A NAME="STATUS_TYPE_ACTIVE"></A>
+
+<div class="jd-details api apilevel-">
+    <h4 class="jd-details-title">
+      <span class="normal">
+        public
+        static
+        final
+        String
+      </span>
+        STATUS_TYPE_ACTIVE
+    </h4>
+      <div class="api-level">
+
+
+
+
+      </div>
+    <div class="jd-details-descr">
+
+
+
+
+  <div class="jd-tagdata jd-tagdescr"><p>The status of an active action (i.e. an action that has started but not yet completed). </p></div>
+
+
+        <div class="jd-tagdata">
+        <span class="jd-tagtitle">Constant Value: </span>
+        <span>
+
+                "http://schema.org/ActiveActionStatus"
+
+        </span>
+        </div>
+
+    </div>
+</div>
+
+
+
+<A NAME="STATUS_TYPE_COMPLETED"></A>
+
+<div class="jd-details api apilevel-">
+    <h4 class="jd-details-title">
+      <span class="normal">
+        public
+        static
+        final
+        String
+      </span>
+        STATUS_TYPE_COMPLETED
+    </h4>
+      <div class="api-level">
+
+
+
+
+      </div>
+    <div class="jd-details-descr">
+
+
+
+
+  <div class="jd-tagdata jd-tagdescr"><p>The status of a completed action. </p></div>
+
+
+        <div class="jd-tagdata">
+        <span class="jd-tagtitle">Constant Value: </span>
+        <span>
+
+                "http://schema.org/CompletedActionStatus"
+
+        </span>
+        </div>
+
+    </div>
+</div>
+
+
+
+<A NAME="STATUS_TYPE_FAILED"></A>
+
+<div class="jd-details api apilevel-">
+    <h4 class="jd-details-title">
+      <span class="normal">
+        public
+        static
+        final
+        String
+      </span>
+        STATUS_TYPE_FAILED
+    </h4>
+      <div class="api-level">
+
+
+
+
+      </div>
+    <div class="jd-details-descr">
+
+
+
+
+  <div class="jd-tagdata jd-tagdescr"><p>The status of a failed action. </p></div>
+
+
+        <div class="jd-tagdata">
+        <span class="jd-tagtitle">Constant Value: </span>
+        <span>
+
+                "http://schema.org/FailedActionStatus"
+
+        </span>
+        </div>
+
+    </div>
+</div>
+
+
+
+<A NAME="TYPE_ACTIVATE"></A>
+
+<div class="jd-details api apilevel-">
+    <h4 class="jd-details-title">
+      <span class="normal">
+        public
+        static
+        final
+        String
+      </span>
+        TYPE_ACTIVATE
+    </h4>
+      <div class="api-level">
+
+
+
+
+      </div>
+    <div class="jd-details-descr">
+
+
+
+
+  <div class="jd-tagdata jd-tagdescr"><p>The act of starting or activating a device or application. </p></div>
+
+
+        <div class="jd-tagdata">
+        <span class="jd-tagtitle">Constant Value: </span>
+        <span>
+
+                "http://schema.org/ActivateAction"
+
+        </span>
+        </div>
+
+    </div>
+</div>
+
+
+
 <A NAME="TYPE_ADD"></A>
 
 <div class="jd-details api apilevel-"> 
@@ -1443,7 +1719,7 @@ From class
     
 
       
-  <div class="jd-tagdata jd-tagdescr"><p>An agent bookmarks/flags/labels/tags/marks an object. </p></div>
+  <div class="jd-tagdata jd-tagdescr"><p>The act of bookmarking an object. </p></div>
 
     
         <div class="jd-tagdata">
@@ -1455,6 +1731,88 @@ From class
         </span>
         </div>
     
+    </div>
+</div>
+
+
+
+<A NAME="TYPE_COMMUNICATE"></A>
+
+<div class="jd-details api apilevel-">
+    <h4 class="jd-details-title">
+      <span class="normal">
+        public
+        static
+        final
+        String
+      </span>
+        TYPE_COMMUNICATE
+    </h4>
+      <div class="api-level">
+
+
+
+
+      </div>
+    <div class="jd-details-descr">
+
+
+
+
+  <div class="jd-tagdata jd-tagdescr"><p>The act of conveying information to another person via a communication medium (instrument)
+ such as speech, email, or telephone conversation.
+</p></div>
+
+
+        <div class="jd-tagdata">
+        <span class="jd-tagtitle">Constant Value: </span>
+        <span>
+
+                "http://schema.org/CommunicateAction"
+
+        </span>
+        </div>
+
+    </div>
+</div>
+
+
+
+<A NAME="TYPE_FILM"></A>
+
+<div class="jd-details api apilevel-">
+    <h4 class="jd-details-title">
+      <span class="normal">
+        public
+        static
+        final
+        String
+      </span>
+        TYPE_FILM
+    </h4>
+      <div class="api-level">
+
+
+
+
+      </div>
+    <div class="jd-details-descr">
+
+
+
+
+  <div class="jd-tagdata jd-tagdescr"><p>The act of capturing sound and moving images on film, video, or digitally. </p></div>
+
+
+        <div class="jd-tagdata">
+        <span class="jd-tagtitle">Constant Value: </span>
+        <span>
+
+                "http://schema.org/FilmAction"
+
+        </span>
+        </div>
+
     </div>
 </div>
 
@@ -1535,6 +1893,126 @@ From class
         </span>
         </div>
     
+    </div>
+</div>
+
+
+
+<A NAME="TYPE_PHOTOGRAPH"></A>
+
+<div class="jd-details api apilevel-">
+    <h4 class="jd-details-title">
+      <span class="normal">
+        public
+        static
+        final
+        String
+      </span>
+        TYPE_PHOTOGRAPH
+    </h4>
+      <div class="api-level">
+
+
+
+
+      </div>
+    <div class="jd-details-descr">
+
+
+
+
+  <div class="jd-tagdata jd-tagdescr"><p>The act of capturing still images of objects using a camera. </p></div>
+
+
+        <div class="jd-tagdata">
+        <span class="jd-tagtitle">Constant Value: </span>
+        <span>
+
+                "http://schema.org/PhotographAction"
+
+        </span>
+        </div>
+
+    </div>
+</div>
+
+
+
+<A NAME="TYPE_RESERVE"></A>
+
+<div class="jd-details api apilevel-">
+    <h4 class="jd-details-title">
+      <span class="normal">
+        public
+        static
+        final
+        String
+      </span>
+        TYPE_RESERVE
+    </h4>
+      <div class="api-level">
+
+
+
+
+      </div>
+    <div class="jd-details-descr">
+
+
+
+
+  <div class="jd-tagdata jd-tagdescr"><p>The act of making a reservation at a business such as a restaurant. </p></div>
+
+
+        <div class="jd-tagdata">
+        <span class="jd-tagtitle">Constant Value: </span>
+        <span>
+
+                "http://schema.org/ReserveAction"
+
+        </span>
+        </div>
+
+    </div>
+</div>
+
+
+
+<A NAME="TYPE_SEARCH"></A>
+
+<div class="jd-details api apilevel-">
+    <h4 class="jd-details-title">
+      <span class="normal">
+        public
+        static
+        final
+        String
+      </span>
+        TYPE_SEARCH
+    </h4>
+      <div class="api-level">
+
+
+
+
+      </div>
+    <div class="jd-details-descr">
+
+
+
+
+  <div class="jd-tagdata jd-tagdescr"><p>The act of searching for an object. </p></div>
+
+
+        <div class="jd-tagdata">
+        <span class="jd-tagtitle">Constant Value: </span>
+        <span>
+
+                "http://schema.org/SearchAction"
+
+        </span>
+        </div>
+
     </div>
 </div>
 
@@ -1693,7 +2171,7 @@ From class
         <a href="/reference/com/google/android/gms/appindexing/Action.html">Action</a>
       </span>
       <span class="sympad">newAction</span>
-      <span class="normal">(String actionType, String objectName, Uri objectId, Uri objectUrl)</span>
+      <span class="normal">(String actionType, String objectName, Uri objectId, Uri objectAppUri)</span>
     </h4>
       <div class="api-level">
         <div></div>
@@ -1720,12 +2198,11 @@ From class
         </tr>
         <tr>
           <th>objectId</td>
-          <td>Equivalent web url for the content, if available. See
- <a href="https://developers.google.com/app-indexing/">App Indexing</a>. Can be null.</td>
+          <td>The equivalent web url for the content, if available. Can be null.</td>
         </tr>
         <tr>
-          <th>objectUrl</td>
-          <td>The deep link of the content in the
+          <th>objectAppUri</td>
+          <td>The app URI of the content in the
  <a href="https://developers.google.com/app-indexing/">App Indexing</a> format.
 </td>
         </tr>
@@ -1749,7 +2226,7 @@ From class
         <a href="/reference/com/google/android/gms/appindexing/Action.html">Action</a>
       </span>
       <span class="sympad">newAction</span>
-      <span class="normal">(String actionType, String objectName, Uri objectUrl)</span>
+      <span class="normal">(String actionType, String objectName, Uri objectAppUri)</span>
     </h4>
       <div class="api-level">
         <div></div>
@@ -1772,11 +2249,11 @@ From class
         </tr>
         <tr>
           <th>objectName</td>
-          <td>Name of the content.</td>
+          <td>The name of the content.</td>
         </tr>
         <tr>
-          <th>objectUrl</td>
-          <td>The deep link of the content in the
+          <th>objectAppUri</td>
+          <td>The app URI of the content in the
  <a href="https://developers.google.com/app-indexing/">App Indexing</a> format.
 </td>
         </tr>

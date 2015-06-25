@@ -96,6 +96,8 @@
 
 
 
+
+
 <html>
 <head>
 
@@ -111,7 +113,7 @@
 href="//fonts.googleapis.com/css?family=Roboto+Condensed">
 <link rel="stylesheet" href="//fonts.googleapis.com/css?family=Roboto:light,regular,medium,thin,italic,mediumitalic,bold"
   title="roboto">
-<link href="/assets/css/default.css?v=4" rel="stylesheet" type="text/css">
+<link href="/assets/css/default.css?v=5" rel="stylesheet" type="text/css">
 
 
 
@@ -412,6 +414,7 @@ href="//fonts.googleapis.com/css?family=Roboto+Condensed">
                 <li><a href="/distribute/users/index.html">Get Users</a></li>
                 <li><a href="/distribute/engage/index.html">Engage &amp; Retain</a></li>
                 <li><a href="/distribute/monetize/index.html">Monetize</a></li>
+                <li><a href="/distribute/analyze/index.html">Analyze</a></li>
                 <li><a href="/distribute/tools/index.html">Tools &amp; Reference</a></li>
                 <li><a href="/distribute/stories/index.html">Developer Stories</a></li>
               </ul>
@@ -559,7 +562,18 @@ href="//fonts.googleapis.com/css?family=Roboto+Condensed">
           <span class="en">Wallet</span>
       </a></div>
   </li>
-
+  <li class="nav-section">
+    <div class="nav-section-header"><a href="/google/play/safetynet/index.html">
+          <span class="en">SafetyNet</span>
+      </a></div>
+      <ul>
+        <li>
+          <a href="/google/play/safetynet/start.html">
+            <span class="en">Getting Started</span>
+          </a>
+        </li>
+      </ul>
+  </li>
 
   <li class="nav-section">
     <div class="nav-section-header"><a href="/google/play-services/index.html">
@@ -593,14 +607,14 @@ href="//fonts.googleapis.com/css?family=Roboto+Condensed">
 
 
   <li class="nav-section">
-    <div class="nav-section-header"><a href="/google/play/billing/index.html">
+    <div class="nav-section-header"><a href="/google/play/billing/index.html" zh-cn-lang="应用内结算">
       <span class="en">Google Play In-app Billing</span></a>
     </div>
     <ul>
-      <li><a href="/google/play/billing/billing_overview.html">
+      <li><a href="/google/play/billing/billing_overview.html" zh-cn-lang="应用内结算概述">
               <span class="en">Overview</span></a>
       </li>
-      <li class="nav-section"><div class="nav-section-header"><a href="/google/play/billing/api.html">
+      <li class="nav-section"><div class="nav-section-header"><a href="/google/play/billing/api.html" zh-cn-lang="应用内结算 API">
               <span class="en">Version 3 API</span></a></div>
               <ul>
               <li><a href="/google/play/billing/billing_integrate.html">
@@ -623,13 +637,13 @@ href="//fonts.googleapis.com/css?family=Roboto+Condensed">
       <li><a href="/google/play/billing/billing_subscriptions.html">
               <span class="en">Subscriptions</span></a>
       </li>
-      <li><a href="/google/play/billing/billing_best_practices.html">
+      <li><a href="/google/play/billing/billing_best_practices.html" zh-cn-lang="安全性和设计">
               <span class="en">Security and Design</span></a>
       </li>
-      <li><a href="/google/play/billing/billing_testing.html">
+      <li><a href="/google/play/billing/billing_testing.html" zh-cn-lang="测试应用内结算">
               <span class="en">Testing In-app Billing</span></a>
       </li>
-      <li><a href="/google/play/billing/billing_admin.html">
+      <li><a href="/google/play/billing/billing_admin.html" zh-cn-lang="管理应用内结算">
               <span class="en">Administering In-app Billing</span></a>
       </li>
       <li><a href="/google/play/billing/versions.html">
@@ -663,21 +677,14 @@ href="//fonts.googleapis.com/css?family=Roboto+Condensed">
               <span class="en">HTTP</span></a></li>
               </ul>
         </li>
+        <li><a href="/google/gcm/server-ref.html">
+            <span class="en">Server Reference</span></a>
+        </li>
         <li><a href="/google/gcm/notifications.html">
               <span class="en">User Notifications</span></a>
         </li>
-        <li><a href="/google/gcm/adv.html">
-            <span class="en">Advanced Topics</span></a>
-        </li>
         <li><a href="/google/gcm/c2dm.html">
             <span class="en">Migration</span></a>
-        </li>
-        <li id="gcm-tree-list" class="nav-section">
-          <div class="nav-section-header">
-            <a href="/reference/gcm-packages.html">
-              <span class="en">Reference</span>
-            </a>
-          <div>
         </li>
       </ul>
   </li>
@@ -4025,13 +4032,29 @@ From class
             void</nobr>
         </td>
         <td class="jd-linkcol" width="100%"><nobr>
-        <span class="sympad">dispatchFreezeSelfOnly</span>(SparseArray&lt;Parcelable&gt; arg0)</nobr>
+        <span class="sympad">dispatchDrawableHotspotChanged</span>(float arg0, float arg1)</nobr>
         
   </td></tr>
 
 
 	 
     <tr class=" api apilevel-" >
+        <td class="jd-typecol"><nobr>
+            
+            
+            
+            
+            
+            void</nobr>
+        </td>
+        <td class="jd-linkcol" width="100%"><nobr>
+        <span class="sympad">dispatchFreezeSelfOnly</span>(SparseArray&lt;Parcelable&gt; arg0)</nobr>
+        
+  </td></tr>
+
+
+	 
+    <tr class="alt-color api apilevel-" >
         <td class="jd-typecol"><nobr>
             
             
@@ -4047,7 +4070,7 @@ From class
 
 
 	 
-    <tr class="alt-color api apilevel-" >
+    <tr class=" api apilevel-" >
         <td class="jd-typecol"><nobr>
             
             
@@ -4063,7 +4086,7 @@ From class
 
 
 	 
-    <tr class=" api apilevel-" >
+    <tr class="alt-color api apilevel-" >
         <td class="jd-typecol"><nobr>
             
             
@@ -4079,7 +4102,7 @@ From class
 
 
 	 
-    <tr class="alt-color api apilevel-" >
+    <tr class=" api apilevel-" >
         <td class="jd-typecol"><nobr>
             
             
@@ -4095,7 +4118,7 @@ From class
 
 
 	 
-    <tr class=" api apilevel-" >
+    <tr class="alt-color api apilevel-" >
         <td class="jd-typecol"><nobr>
             
             
@@ -4111,7 +4134,7 @@ From class
 
 
 	 
-    <tr class="alt-color api apilevel-" >
+    <tr class=" api apilevel-" >
         <td class="jd-typecol"><nobr>
             
             
@@ -4127,7 +4150,7 @@ From class
 
 
 	 
-    <tr class=" api apilevel-" >
+    <tr class="alt-color api apilevel-" >
         <td class="jd-typecol"><nobr>
             
             
@@ -4143,7 +4166,7 @@ From class
 
 
 	 
-    <tr class="alt-color api apilevel-" >
+    <tr class=" api apilevel-" >
         <td class="jd-typecol"><nobr>
             
             
@@ -4159,7 +4182,7 @@ From class
 
 
 	 
-    <tr class=" api apilevel-" >
+    <tr class="alt-color api apilevel-" >
         <td class="jd-typecol"><nobr>
             
             
@@ -4175,7 +4198,7 @@ From class
 
 
 	 
-    <tr class="alt-color api apilevel-" >
+    <tr class=" api apilevel-" >
         <td class="jd-typecol"><nobr>
             
             
@@ -4191,7 +4214,7 @@ From class
 
 
 	 
-    <tr class=" api apilevel-" >
+    <tr class="alt-color api apilevel-" >
         <td class="jd-typecol"><nobr>
             
             
@@ -4207,7 +4230,7 @@ From class
 
 
 	 
-    <tr class="alt-color api apilevel-" >
+    <tr class=" api apilevel-" >
         <td class="jd-typecol"><nobr>
             
             
@@ -4223,7 +4246,7 @@ From class
 
 
 	 
-    <tr class=" api apilevel-" >
+    <tr class="alt-color api apilevel-" >
         <td class="jd-typecol"><nobr>
             
             
@@ -4239,7 +4262,7 @@ From class
 
 
 	 
-    <tr class="alt-color api apilevel-" >
+    <tr class=" api apilevel-" >
         <td class="jd-typecol"><nobr>
             
             
@@ -4255,7 +4278,7 @@ From class
 
 
 	 
-    <tr class=" api apilevel-" >
+    <tr class="alt-color api apilevel-" >
         <td class="jd-typecol"><nobr>
             
             
@@ -4271,7 +4294,7 @@ From class
 
 
 	 
-    <tr class="alt-color api apilevel-" >
+    <tr class=" api apilevel-" >
         <td class="jd-typecol"><nobr>
             
             
@@ -4287,7 +4310,7 @@ From class
 
 
 	 
-    <tr class=" api apilevel-" >
+    <tr class="alt-color api apilevel-" >
         <td class="jd-typecol"><nobr>
             
             
@@ -4303,7 +4326,7 @@ From class
 
 
 	 
-    <tr class="alt-color api apilevel-" >
+    <tr class=" api apilevel-" >
         <td class="jd-typecol"><nobr>
             
             
@@ -4319,7 +4342,7 @@ From class
 
 
 	 
-    <tr class=" api apilevel-" >
+    <tr class="alt-color api apilevel-" >
         <td class="jd-typecol"><nobr>
             
             
@@ -4335,7 +4358,7 @@ From class
 
 
 	 
-    <tr class="alt-color api apilevel-" >
+    <tr class=" api apilevel-" >
         <td class="jd-typecol"><nobr>
             
             
@@ -4351,7 +4374,7 @@ From class
 
 
 	 
-    <tr class=" api apilevel-" >
+    <tr class="alt-color api apilevel-" >
         <td class="jd-typecol"><nobr>
             
             
@@ -4362,22 +4385,6 @@ From class
         </td>
         <td class="jd-linkcol" width="100%"><nobr>
         <span class="sympad">drawChild</span>(Canvas arg0, View arg1, long arg2)</nobr>
-        
-  </td></tr>
-
-
-	 
-    <tr class="alt-color api apilevel-" >
-        <td class="jd-typecol"><nobr>
-            
-            
-            
-            
-            
-            void</nobr>
-        </td>
-        <td class="jd-linkcol" width="100%"><nobr>
-        <span class="sympad">drawableHotspotChanged</span>(float arg0, float arg1)</nobr>
         
   </td></tr>
 
@@ -5318,6 +5325,22 @@ From class
             
             
             
+            boolean</nobr>
+        </td>
+        <td class="jd-linkcol" width="100%"><nobr>
+        <span class="sympad">onNestedPrePerformAccessibilityAction</span>(View arg0, int arg1, Bundle arg2)</nobr>
+
+  </td></tr>
+
+
+
+    <tr class="alt-color api apilevel-" >
+        <td class="jd-typecol"><nobr>
+
+
+
+
+
             void</nobr>
         </td>
         <td class="jd-linkcol" width="100%"><nobr>
@@ -5327,7 +5350,7 @@ From class
 
 
 	 
-    <tr class="alt-color api apilevel-" >
+    <tr class=" api apilevel-" >
         <td class="jd-typecol"><nobr>
             
             
@@ -5343,7 +5366,7 @@ From class
 
 
 	 
-    <tr class=" api apilevel-" >
+    <tr class="alt-color api apilevel-" >
         <td class="jd-typecol"><nobr>
             
             
@@ -5359,7 +5382,7 @@ From class
 
 
 	 
-    <tr class="alt-color api apilevel-" >
+    <tr class=" api apilevel-" >
         <td class="jd-typecol"><nobr>
             
             
@@ -5375,7 +5398,7 @@ From class
 
 
 	 
-    <tr class=" api apilevel-" >
+    <tr class="alt-color api apilevel-" >
         <td class="jd-typecol"><nobr>
             
             
@@ -5391,7 +5414,7 @@ From class
 
 
 	 
-    <tr class="alt-color api apilevel-" >
+    <tr class=" api apilevel-" >
         <td class="jd-typecol"><nobr>
             
             
@@ -5407,7 +5430,7 @@ From class
 
 
 	 
-    <tr class=" api apilevel-" >
+    <tr class="alt-color api apilevel-" >
         <td class="jd-typecol"><nobr>
             
             
@@ -5423,7 +5446,7 @@ From class
 
 
 	 
-    <tr class="alt-color api apilevel-" >
+    <tr class=" api apilevel-" >
         <td class="jd-typecol"><nobr>
             
             
@@ -5439,7 +5462,7 @@ From class
 
 
 	 
-    <tr class=" api apilevel-" >
+    <tr class="alt-color api apilevel-" >
         <td class="jd-typecol"><nobr>
             
             
@@ -5455,7 +5478,7 @@ From class
 
 
 	 
-    <tr class="alt-color api apilevel-" >
+    <tr class=" api apilevel-" >
         <td class="jd-typecol"><nobr>
             
             
@@ -5471,7 +5494,7 @@ From class
 
 
 	 
-    <tr class=" api apilevel-" >
+    <tr class="alt-color api apilevel-" >
         <td class="jd-typecol"><nobr>
             
             
@@ -5487,7 +5510,7 @@ From class
 
 
 	 
-    <tr class="alt-color api apilevel-" >
+    <tr class=" api apilevel-" >
         <td class="jd-typecol"><nobr>
             
             
@@ -5503,7 +5526,7 @@ From class
 
 
 	 
-    <tr class=" api apilevel-" >
+    <tr class="alt-color api apilevel-" >
         <td class="jd-typecol"><nobr>
             
             
@@ -5519,7 +5542,7 @@ From class
 
 
 	 
-    <tr class="alt-color api apilevel-" >
+    <tr class=" api apilevel-" >
         <td class="jd-typecol"><nobr>
             
             
@@ -5535,7 +5558,7 @@ From class
 
 
 	 
-    <tr class=" api apilevel-" >
+    <tr class="alt-color api apilevel-" >
         <td class="jd-typecol"><nobr>
             
             
@@ -5551,7 +5574,7 @@ From class
 
 
 	 
-    <tr class="alt-color api apilevel-" >
+    <tr class=" api apilevel-" >
         <td class="jd-typecol"><nobr>
             
             
@@ -5567,7 +5590,7 @@ From class
 
 
 	 
-    <tr class=" api apilevel-" >
+    <tr class="alt-color api apilevel-" >
         <td class="jd-typecol"><nobr>
             
             
@@ -5583,7 +5606,7 @@ From class
 
 
 	 
-    <tr class="alt-color api apilevel-" >
+    <tr class=" api apilevel-" >
         <td class="jd-typecol"><nobr>
             
             
@@ -5599,7 +5622,7 @@ From class
 
 
 	 
-    <tr class=" api apilevel-" >
+    <tr class="alt-color api apilevel-" >
         <td class="jd-typecol"><nobr>
             
             
@@ -5615,7 +5638,7 @@ From class
 
 
 	 
-    <tr class="alt-color api apilevel-" >
+    <tr class=" api apilevel-" >
         <td class="jd-typecol"><nobr>
             
             
@@ -5631,7 +5654,7 @@ From class
 
 
 	 
-    <tr class=" api apilevel-" >
+    <tr class="alt-color api apilevel-" >
         <td class="jd-typecol"><nobr>
             
             
@@ -5647,7 +5670,7 @@ From class
 
 
 	 
-    <tr class="alt-color api apilevel-" >
+    <tr class=" api apilevel-" >
         <td class="jd-typecol"><nobr>
             
             
@@ -5663,7 +5686,7 @@ From class
 
 
 	 
-    <tr class=" api apilevel-" >
+    <tr class="alt-color api apilevel-" >
         <td class="jd-typecol"><nobr>
             
             
@@ -5679,7 +5702,7 @@ From class
 
 
 	 
-    <tr class="alt-color api apilevel-" >
+    <tr class=" api apilevel-" >
         <td class="jd-typecol"><nobr>
             
             
@@ -5695,7 +5718,7 @@ From class
 
 
 	 
-    <tr class=" api apilevel-" >
+    <tr class="alt-color api apilevel-" >
         <td class="jd-typecol"><nobr>
             
             
@@ -5711,7 +5734,7 @@ From class
 
 
 	 
-    <tr class="alt-color api apilevel-" >
+    <tr class=" api apilevel-" >
         <td class="jd-typecol"><nobr>
             
             
@@ -5727,7 +5750,7 @@ From class
 
 
 	 
-    <tr class=" api apilevel-" >
+    <tr class="alt-color api apilevel-" >
         <td class="jd-typecol"><nobr>
             
             
@@ -5743,7 +5766,7 @@ From class
 
 
 	 
-    <tr class="alt-color api apilevel-" >
+    <tr class=" api apilevel-" >
         <td class="jd-typecol"><nobr>
             
             
@@ -5759,7 +5782,7 @@ From class
 
 
 	 
-    <tr class=" api apilevel-" >
+    <tr class="alt-color api apilevel-" >
         <td class="jd-typecol"><nobr>
             
             
@@ -5775,7 +5798,7 @@ From class
 
 
 	 
-    <tr class="alt-color api apilevel-" >
+    <tr class=" api apilevel-" >
         <td class="jd-typecol"><nobr>
             
             
@@ -5791,7 +5814,7 @@ From class
 
 
 	 
-    <tr class=" api apilevel-" >
+    <tr class="alt-color api apilevel-" >
         <td class="jd-typecol"><nobr>
             
             
@@ -5807,7 +5830,7 @@ From class
 
 
 	 
-    <tr class="alt-color api apilevel-" >
+    <tr class=" api apilevel-" >
         <td class="jd-typecol"><nobr>
             
             
@@ -5823,7 +5846,7 @@ From class
 
 
 	 
-    <tr class=" api apilevel-" >
+    <tr class="alt-color api apilevel-" >
         <td class="jd-typecol"><nobr>
             
             
@@ -5839,7 +5862,7 @@ From class
 
 
 	 
-    <tr class="alt-color api apilevel-" >
+    <tr class=" api apilevel-" >
         <td class="jd-typecol"><nobr>
             
             
@@ -5855,7 +5878,7 @@ From class
 
 
 	 
-    <tr class=" api apilevel-" >
+    <tr class="alt-color api apilevel-" >
         <td class="jd-typecol"><nobr>
             
             
@@ -5871,7 +5894,7 @@ From class
 
 
 	 
-    <tr class="alt-color api apilevel-" >
+    <tr class=" api apilevel-" >
         <td class="jd-typecol"><nobr>
             
             
@@ -5887,7 +5910,7 @@ From class
 
 
 	 
-    <tr class=" api apilevel-" >
+    <tr class="alt-color api apilevel-" >
         <td class="jd-typecol"><nobr>
             
             
@@ -5903,7 +5926,7 @@ From class
 
 
 	 
-    <tr class="alt-color api apilevel-" >
+    <tr class=" api apilevel-" >
         <td class="jd-typecol"><nobr>
             
             
@@ -5919,7 +5942,7 @@ From class
 
 
 	 
-    <tr class=" api apilevel-" >
+    <tr class="alt-color api apilevel-" >
         <td class="jd-typecol"><nobr>
             
             
@@ -5935,7 +5958,7 @@ From class
 
 
 	 
-    <tr class="alt-color api apilevel-" >
+    <tr class=" api apilevel-" >
         <td class="jd-typecol"><nobr>
             
             
@@ -5951,7 +5974,7 @@ From class
 
 
 	 
-    <tr class=" api apilevel-" >
+    <tr class="alt-color api apilevel-" >
         <td class="jd-typecol"><nobr>
             
             
@@ -5967,7 +5990,7 @@ From class
 
 
 	 
-    <tr class="alt-color api apilevel-" >
+    <tr class=" api apilevel-" >
         <td class="jd-typecol"><nobr>
             
             
@@ -5983,7 +6006,7 @@ From class
 
 
 	 
-    <tr class=" api apilevel-" >
+    <tr class="alt-color api apilevel-" >
         <td class="jd-typecol"><nobr>
             
             
@@ -5999,7 +6022,7 @@ From class
 
 
 	 
-    <tr class="alt-color api apilevel-" >
+    <tr class=" api apilevel-" >
         <td class="jd-typecol"><nobr>
             
             
@@ -6015,7 +6038,7 @@ From class
 
 
 	 
-    <tr class=" api apilevel-" >
+    <tr class="alt-color api apilevel-" >
         <td class="jd-typecol"><nobr>
             
             
@@ -6031,7 +6054,7 @@ From class
 
 
 	 
-    <tr class="alt-color api apilevel-" >
+    <tr class=" api apilevel-" >
         <td class="jd-typecol"><nobr>
             
             
@@ -6047,7 +6070,7 @@ From class
 
 
 	 
-    <tr class=" api apilevel-" >
+    <tr class="alt-color api apilevel-" >
         <td class="jd-typecol"><nobr>
             
             
@@ -6063,7 +6086,7 @@ From class
 
 
 	 
-    <tr class="alt-color api apilevel-" >
+    <tr class=" api apilevel-" >
         <td class="jd-typecol"><nobr>
             
             
@@ -6800,6 +6823,22 @@ From class
             
             
             
+            void</nobr>
+        </td>
+        <td class="jd-linkcol" width="100%"><nobr>
+        <span class="sympad">dispatchDrawableHotspotChanged</span>(float arg0, float arg1)</nobr>
+
+  </td></tr>
+
+
+
+    <tr class="alt-color api apilevel-" >
+        <td class="jd-typecol"><nobr>
+
+
+
+
+
             boolean</nobr>
         </td>
         <td class="jd-linkcol" width="100%"><nobr>
@@ -6809,7 +6848,7 @@ From class
 
 
 	 
-    <tr class="alt-color api apilevel-" >
+    <tr class=" api apilevel-" >
         <td class="jd-typecol"><nobr>
             
             
@@ -6825,7 +6864,7 @@ From class
 
 
 	 
-    <tr class=" api apilevel-" >
+    <tr class="alt-color api apilevel-" >
         <td class="jd-typecol"><nobr>
             
             
@@ -6841,7 +6880,7 @@ From class
 
 
 	 
-    <tr class="alt-color api apilevel-" >
+    <tr class=" api apilevel-" >
         <td class="jd-typecol"><nobr>
             
             
@@ -6857,7 +6896,7 @@ From class
 
 
 	 
-    <tr class=" api apilevel-" >
+    <tr class="alt-color api apilevel-" >
         <td class="jd-typecol"><nobr>
             
             
@@ -6873,7 +6912,7 @@ From class
 
 
 	 
-    <tr class="alt-color api apilevel-" >
+    <tr class=" api apilevel-" >
         <td class="jd-typecol"><nobr>
             
             
@@ -6889,7 +6928,7 @@ From class
 
 
 	 
-    <tr class=" api apilevel-" >
+    <tr class="alt-color api apilevel-" >
         <td class="jd-typecol"><nobr>
             
             
@@ -6905,7 +6944,7 @@ From class
 
 
 	 
-    <tr class="alt-color api apilevel-" >
+    <tr class=" api apilevel-" >
         <td class="jd-typecol"><nobr>
             
             
@@ -6921,7 +6960,7 @@ From class
 
 
 	 
-    <tr class=" api apilevel-" >
+    <tr class="alt-color api apilevel-" >
         <td class="jd-typecol"><nobr>
             
             
@@ -6937,6 +6976,22 @@ From class
 
 
 	 
+    <tr class=" api apilevel-" >
+        <td class="jd-typecol"><nobr>
+
+
+
+
+
+            boolean</nobr>
+        </td>
+        <td class="jd-linkcol" width="100%"><nobr>
+        <span class="sympad">dispatchNestedPrePerformAccessibilityAction</span>(int arg0, Bundle arg1)</nobr>
+
+  </td></tr>
+
+
+
     <tr class="alt-color api apilevel-" >
         <td class="jd-typecol"><nobr>
             
@@ -7408,6 +7463,38 @@ From class
             
             
             
+            int</nobr>
+        </td>
+        <td class="jd-linkcol" width="100%"><nobr>
+        <span class="sympad">getAccessibilityTraversalAfter</span>()</nobr>
+
+  </td></tr>
+
+
+
+    <tr class="alt-color api apilevel-" >
+        <td class="jd-typecol"><nobr>
+
+
+
+
+
+            int</nobr>
+        </td>
+        <td class="jd-linkcol" width="100%"><nobr>
+        <span class="sympad">getAccessibilityTraversalBefore</span>()</nobr>
+
+  </td></tr>
+
+
+
+    <tr class=" api apilevel-" >
+        <td class="jd-typecol"><nobr>
+
+
+
+
+
             float</nobr>
         </td>
         <td class="jd-linkcol" width="100%"><nobr>
@@ -11827,6 +11914,38 @@ From class
             void</nobr>
         </td>
         <td class="jd-linkcol" width="100%"><nobr>
+        <span class="sympad">setAccessibilityTraversalAfter</span>(int arg0)</nobr>
+        
+  </td></tr>
+
+
+	 
+    <tr class="alt-color api apilevel-" >
+        <td class="jd-typecol"><nobr>
+            
+            
+            
+            
+            
+            void</nobr>
+        </td>
+        <td class="jd-linkcol" width="100%"><nobr>
+        <span class="sympad">setAccessibilityTraversalBefore</span>(int arg0)</nobr>
+        
+  </td></tr>
+
+
+	 
+    <tr class=" api apilevel-" >
+        <td class="jd-typecol"><nobr>
+            
+            
+            
+            
+            
+            void</nobr>
+        </td>
+        <td class="jd-linkcol" width="100%"><nobr>
         <span class="sympad">setActivated</span>(boolean arg0)</nobr>
         
   </td></tr>
@@ -11860,39 +11979,39 @@ From class
         </td>
         <td class="jd-linkcol" width="100%"><nobr>
         <span class="sympad">setAnimation</span>(Animation arg0)</nobr>
-        
+
   </td></tr>
 
 
-	 
+
     <tr class="alt-color api apilevel-" >
         <td class="jd-typecol"><nobr>
-            
-            
-            
-            
-            
+
+
+
+
+
             void</nobr>
         </td>
         <td class="jd-linkcol" width="100%"><nobr>
         <span class="sympad">setBackground</span>(Drawable arg0)</nobr>
-        
+
   </td></tr>
 
 
-	 
+
     <tr class=" api apilevel-" >
         <td class="jd-typecol"><nobr>
-            
-            
-            
-            
-            
+
+
+
+
+
             void</nobr>
         </td>
         <td class="jd-linkcol" width="100%"><nobr>
         <span class="sympad">setBackgroundColor</span>(int arg0)</nobr>
-        
+
   </td></tr>
 
 
@@ -13931,244 +14050,6 @@ From class
 
 <tr class="api apilevel-" >
 <td colspan="12">
-  <a href="#" onclick="return toggleInherited(this, null)" id="inherited-methods-android.graphics.drawable.Drawable.Callback" class="jd-expando-trigger closed"
-          ><img id="inherited-methods-android.graphics.drawable.Drawable.Callback-trigger"
-          src="/assets/images/triangle-closed.png"
-          class="jd-expando-trigger-img" /></a>
-From interface
-
-  android.graphics.drawable.Drawable.Callback
-
-<div id="inherited-methods-android.graphics.drawable.Drawable.Callback">
-  <div id="inherited-methods-android.graphics.drawable.Drawable.Callback-list"
-        class="jd-inheritedlinks">
-  </div>
-  <div id="inherited-methods-android.graphics.drawable.Drawable.Callback-summary" style="display: none;">
-    <table class="jd-sumtable-expando">
-    
-
-
-	 
-    <tr class="alt-color api apilevel-" >
-        <td class="jd-typecol"><nobr>
-            abstract
-            
-            
-            
-            
-            void</nobr>
-        </td>
-        <td class="jd-linkcol" width="100%"><nobr>
-        <span class="sympad">invalidateDrawable</span>(Drawable arg0)</nobr>
-        
-  </td></tr>
-
-
-	 
-    <tr class=" api apilevel-" >
-        <td class="jd-typecol"><nobr>
-            abstract
-            
-            
-            
-            
-            void</nobr>
-        </td>
-        <td class="jd-linkcol" width="100%"><nobr>
-        <span class="sympad">scheduleDrawable</span>(Drawable arg0, Runnable arg1, long arg2)</nobr>
-        
-  </td></tr>
-
-
-	 
-    <tr class="alt-color api apilevel-" >
-        <td class="jd-typecol"><nobr>
-            abstract
-            
-            
-            
-            
-            void</nobr>
-        </td>
-        <td class="jd-linkcol" width="100%"><nobr>
-        <span class="sympad">unscheduleDrawable</span>(Drawable arg0, Runnable arg1)</nobr>
-        
-  </td></tr>
-
-
-</table>
-  </div>
-</div>
-</td></tr>
-
-
-
-<tr class="api apilevel-" >
-<td colspan="12">
-  <a href="#" onclick="return toggleInherited(this, null)" id="inherited-methods-android.view.KeyEvent.Callback" class="jd-expando-trigger closed"
-          ><img id="inherited-methods-android.view.KeyEvent.Callback-trigger"
-          src="/assets/images/triangle-closed.png"
-          class="jd-expando-trigger-img" /></a>
-From interface
-
-  android.view.KeyEvent.Callback
-
-<div id="inherited-methods-android.view.KeyEvent.Callback">
-  <div id="inherited-methods-android.view.KeyEvent.Callback-list"
-        class="jd-inheritedlinks">
-  </div>
-  <div id="inherited-methods-android.view.KeyEvent.Callback-summary" style="display: none;">
-    <table class="jd-sumtable-expando">
-    
-
-
-	 
-    <tr class="alt-color api apilevel-" >
-        <td class="jd-typecol"><nobr>
-            abstract
-            
-            
-            
-            
-            boolean</nobr>
-        </td>
-        <td class="jd-linkcol" width="100%"><nobr>
-        <span class="sympad">onKeyDown</span>(int arg0, KeyEvent arg1)</nobr>
-        
-  </td></tr>
-
-
-	 
-    <tr class=" api apilevel-" >
-        <td class="jd-typecol"><nobr>
-            abstract
-            
-            
-            
-            
-            boolean</nobr>
-        </td>
-        <td class="jd-linkcol" width="100%"><nobr>
-        <span class="sympad">onKeyLongPress</span>(int arg0, KeyEvent arg1)</nobr>
-        
-  </td></tr>
-
-
-	 
-    <tr class="alt-color api apilevel-" >
-        <td class="jd-typecol"><nobr>
-            abstract
-            
-            
-            
-            
-            boolean</nobr>
-        </td>
-        <td class="jd-linkcol" width="100%"><nobr>
-        <span class="sympad">onKeyMultiple</span>(int arg0, int arg1, KeyEvent arg2)</nobr>
-        
-  </td></tr>
-
-
-	 
-    <tr class=" api apilevel-" >
-        <td class="jd-typecol"><nobr>
-            abstract
-            
-            
-            
-            
-            boolean</nobr>
-        </td>
-        <td class="jd-linkcol" width="100%"><nobr>
-        <span class="sympad">onKeyUp</span>(int arg0, KeyEvent arg1)</nobr>
-        
-  </td></tr>
-
-
-</table>
-  </div>
-</div>
-</td></tr>
-
-
-
-<tr class="api apilevel-" >
-<td colspan="12">
-  <a href="#" onclick="return toggleInherited(this, null)" id="inherited-methods-android.view.ViewManager" class="jd-expando-trigger closed"
-          ><img id="inherited-methods-android.view.ViewManager-trigger"
-          src="/assets/images/triangle-closed.png"
-          class="jd-expando-trigger-img" /></a>
-From interface
-
-  android.view.ViewManager
-
-<div id="inherited-methods-android.view.ViewManager">
-  <div id="inherited-methods-android.view.ViewManager-list"
-        class="jd-inheritedlinks">
-  </div>
-  <div id="inherited-methods-android.view.ViewManager-summary" style="display: none;">
-    <table class="jd-sumtable-expando">
-    
-
-
-	 
-    <tr class="alt-color api apilevel-" >
-        <td class="jd-typecol"><nobr>
-            abstract
-            
-            
-            
-            
-            void</nobr>
-        </td>
-        <td class="jd-linkcol" width="100%"><nobr>
-        <span class="sympad">addView</span>(View arg0, ViewGroup.LayoutParams arg1)</nobr>
-        
-  </td></tr>
-
-
-	 
-    <tr class=" api apilevel-" >
-        <td class="jd-typecol"><nobr>
-            abstract
-            
-            
-            
-            
-            void</nobr>
-        </td>
-        <td class="jd-linkcol" width="100%"><nobr>
-        <span class="sympad">removeView</span>(View arg0)</nobr>
-        
-  </td></tr>
-
-
-	 
-    <tr class="alt-color api apilevel-" >
-        <td class="jd-typecol"><nobr>
-            abstract
-            
-            
-            
-            
-            void</nobr>
-        </td>
-        <td class="jd-linkcol" width="100%"><nobr>
-        <span class="sympad">updateViewLayout</span>(View arg0, ViewGroup.LayoutParams arg1)</nobr>
-        
-  </td></tr>
-
-
-</table>
-  </div>
-</div>
-</td></tr>
-
-
-
-<tr class="api apilevel-" >
-<td colspan="12">
   <a href="#" onclick="return toggleInherited(this, null)" id="inherited-methods-android.view.ViewParent" class="jd-expando-trigger closed"
           ><img id="inherited-methods-android.view.ViewParent-trigger"
           src="/assets/images/triangle-closed.png"
@@ -14594,6 +14475,22 @@ From interface
             
             
             
+            boolean</nobr>
+        </td>
+        <td class="jd-linkcol" width="100%"><nobr>
+        <span class="sympad">onNestedPrePerformAccessibilityAction</span>(View arg0, int arg1, Bundle arg2)</nobr>
+        
+  </td></tr>
+
+
+	 
+    <tr class="alt-color api apilevel-" >
+        <td class="jd-typecol"><nobr>
+            abstract
+            
+            
+            
+            
             void</nobr>
         </td>
         <td class="jd-linkcol" width="100%"><nobr>
@@ -14603,7 +14500,7 @@ From interface
 
 
 	 
-    <tr class="alt-color api apilevel-" >
+    <tr class=" api apilevel-" >
         <td class="jd-typecol"><nobr>
             abstract
             
@@ -14619,7 +14516,7 @@ From interface
 
 
 	 
-    <tr class=" api apilevel-" >
+    <tr class="alt-color api apilevel-" >
         <td class="jd-typecol"><nobr>
             abstract
             
@@ -14635,7 +14532,7 @@ From interface
 
 
 	 
-    <tr class="alt-color api apilevel-" >
+    <tr class=" api apilevel-" >
         <td class="jd-typecol"><nobr>
             abstract
             
@@ -14651,7 +14548,7 @@ From interface
 
 
 	 
-    <tr class=" api apilevel-" >
+    <tr class="alt-color api apilevel-" >
         <td class="jd-typecol"><nobr>
             abstract
             
@@ -14667,7 +14564,7 @@ From interface
 
 
 	 
-    <tr class="alt-color api apilevel-" >
+    <tr class=" api apilevel-" >
         <td class="jd-typecol"><nobr>
             abstract
             
@@ -14683,7 +14580,7 @@ From interface
 
 
 	 
-    <tr class=" api apilevel-" >
+    <tr class="alt-color api apilevel-" >
         <td class="jd-typecol"><nobr>
             abstract
             
@@ -14699,7 +14596,7 @@ From interface
 
 
 	 
-    <tr class="alt-color api apilevel-" >
+    <tr class=" api apilevel-" >
         <td class="jd-typecol"><nobr>
             abstract
             
@@ -14715,7 +14612,7 @@ From interface
 
 
 	 
-    <tr class=" api apilevel-" >
+    <tr class="alt-color api apilevel-" >
         <td class="jd-typecol"><nobr>
             abstract
             
@@ -14731,7 +14628,7 @@ From interface
 
 
 	 
-    <tr class="alt-color api apilevel-" >
+    <tr class=" api apilevel-" >
         <td class="jd-typecol"><nobr>
             abstract
             
@@ -14747,7 +14644,7 @@ From interface
 
 
 	 
-    <tr class=" api apilevel-" >
+    <tr class="alt-color api apilevel-" >
         <td class="jd-typecol"><nobr>
             abstract
             
@@ -14763,7 +14660,7 @@ From interface
 
 
 	 
-    <tr class="alt-color api apilevel-" >
+    <tr class=" api apilevel-" >
         <td class="jd-typecol"><nobr>
             abstract
             
@@ -14779,7 +14676,7 @@ From interface
 
 
 	 
-    <tr class=" api apilevel-" >
+    <tr class="alt-color api apilevel-" >
         <td class="jd-typecol"><nobr>
             abstract
             
@@ -14795,7 +14692,7 @@ From interface
 
 
 	 
-    <tr class="alt-color api apilevel-" >
+    <tr class=" api apilevel-" >
         <td class="jd-typecol"><nobr>
             abstract
             
@@ -14811,7 +14708,7 @@ From interface
 
 
 	 
-    <tr class=" api apilevel-" >
+    <tr class="alt-color api apilevel-" >
         <td class="jd-typecol"><nobr>
             abstract
             
@@ -14822,6 +14719,244 @@ From interface
         </td>
         <td class="jd-linkcol" width="100%"><nobr>
         <span class="sympad">startActionModeForChild</span>(View arg0, ActionMode.Callback arg1)</nobr>
+
+  </td></tr>
+
+
+</table>
+  </div>
+</div>
+</td></tr>
+
+
+
+<tr class="api apilevel-" >
+<td colspan="12">
+  <a href="#" onclick="return toggleInherited(this, null)" id="inherited-methods-android.view.ViewManager" class="jd-expando-trigger closed"
+          ><img id="inherited-methods-android.view.ViewManager-trigger"
+          src="/assets/images/triangle-closed.png"
+          class="jd-expando-trigger-img" /></a>
+From interface
+
+  android.view.ViewManager
+
+<div id="inherited-methods-android.view.ViewManager">
+  <div id="inherited-methods-android.view.ViewManager-list"
+        class="jd-inheritedlinks">
+  </div>
+  <div id="inherited-methods-android.view.ViewManager-summary" style="display: none;">
+    <table class="jd-sumtable-expando">
+
+
+
+
+    <tr class="alt-color api apilevel-" >
+        <td class="jd-typecol"><nobr>
+            abstract
+
+
+
+
+            void</nobr>
+        </td>
+        <td class="jd-linkcol" width="100%"><nobr>
+        <span class="sympad">addView</span>(View arg0, ViewGroup.LayoutParams arg1)</nobr>
+        
+  </td></tr>
+
+
+	 
+    <tr class=" api apilevel-" >
+        <td class="jd-typecol"><nobr>
+            abstract
+            
+            
+            
+            
+            void</nobr>
+        </td>
+        <td class="jd-linkcol" width="100%"><nobr>
+        <span class="sympad">removeView</span>(View arg0)</nobr>
+        
+  </td></tr>
+
+
+	 
+    <tr class="alt-color api apilevel-" >
+        <td class="jd-typecol"><nobr>
+            abstract
+            
+            
+            
+            
+            void</nobr>
+        </td>
+        <td class="jd-linkcol" width="100%"><nobr>
+        <span class="sympad">updateViewLayout</span>(View arg0, ViewGroup.LayoutParams arg1)</nobr>
+        
+  </td></tr>
+
+
+</table>
+  </div>
+</div>
+</td></tr>
+
+
+
+<tr class="api apilevel-" >
+<td colspan="12">
+  <a href="#" onclick="return toggleInherited(this, null)" id="inherited-methods-android.graphics.drawable.Drawable.Callback" class="jd-expando-trigger closed"
+          ><img id="inherited-methods-android.graphics.drawable.Drawable.Callback-trigger"
+          src="/assets/images/triangle-closed.png"
+          class="jd-expando-trigger-img" /></a>
+From interface
+
+  android.graphics.drawable.Drawable.Callback
+
+<div id="inherited-methods-android.graphics.drawable.Drawable.Callback">
+  <div id="inherited-methods-android.graphics.drawable.Drawable.Callback-list"
+        class="jd-inheritedlinks">
+  </div>
+  <div id="inherited-methods-android.graphics.drawable.Drawable.Callback-summary" style="display: none;">
+    <table class="jd-sumtable-expando">
+
+
+
+	 
+    <tr class="alt-color api apilevel-" >
+        <td class="jd-typecol"><nobr>
+            abstract
+            
+            
+            
+            
+            void</nobr>
+        </td>
+        <td class="jd-linkcol" width="100%"><nobr>
+        <span class="sympad">invalidateDrawable</span>(Drawable arg0)</nobr>
+        
+  </td></tr>
+
+
+	 
+    <tr class=" api apilevel-" >
+        <td class="jd-typecol"><nobr>
+            abstract
+            
+            
+            
+            
+            void</nobr>
+        </td>
+        <td class="jd-linkcol" width="100%"><nobr>
+        <span class="sympad">scheduleDrawable</span>(Drawable arg0, Runnable arg1, long arg2)</nobr>
+        
+  </td></tr>
+
+
+	 
+    <tr class="alt-color api apilevel-" >
+        <td class="jd-typecol"><nobr>
+            abstract
+            
+            
+            
+            
+            void</nobr>
+        </td>
+        <td class="jd-linkcol" width="100%"><nobr>
+        <span class="sympad">unscheduleDrawable</span>(Drawable arg0, Runnable arg1)</nobr>
+        
+  </td></tr>
+
+
+</table>
+  </div>
+</div>
+</td></tr>
+
+
+
+<tr class="api apilevel-" >
+<td colspan="12">
+  <a href="#" onclick="return toggleInherited(this, null)" id="inherited-methods-android.view.KeyEvent.Callback" class="jd-expando-trigger closed"
+          ><img id="inherited-methods-android.view.KeyEvent.Callback-trigger"
+          src="/assets/images/triangle-closed.png"
+          class="jd-expando-trigger-img" /></a>
+From interface
+
+  android.view.KeyEvent.Callback
+
+<div id="inherited-methods-android.view.KeyEvent.Callback">
+  <div id="inherited-methods-android.view.KeyEvent.Callback-list"
+        class="jd-inheritedlinks">
+  </div>
+  <div id="inherited-methods-android.view.KeyEvent.Callback-summary" style="display: none;">
+    <table class="jd-sumtable-expando">
+
+
+
+	 
+    <tr class="alt-color api apilevel-" >
+        <td class="jd-typecol"><nobr>
+            abstract
+            
+            
+            
+            
+            boolean</nobr>
+        </td>
+        <td class="jd-linkcol" width="100%"><nobr>
+        <span class="sympad">onKeyDown</span>(int arg0, KeyEvent arg1)</nobr>
+        
+  </td></tr>
+
+
+	 
+    <tr class=" api apilevel-" >
+        <td class="jd-typecol"><nobr>
+            abstract
+            
+            
+            
+            
+            boolean</nobr>
+        </td>
+        <td class="jd-linkcol" width="100%"><nobr>
+        <span class="sympad">onKeyLongPress</span>(int arg0, KeyEvent arg1)</nobr>
+        
+  </td></tr>
+
+
+	 
+    <tr class="alt-color api apilevel-" >
+        <td class="jd-typecol"><nobr>
+            abstract
+            
+            
+            
+            
+            boolean</nobr>
+        </td>
+        <td class="jd-linkcol" width="100%"><nobr>
+        <span class="sympad">onKeyMultiple</span>(int arg0, int arg1, KeyEvent arg2)</nobr>
+        
+  </td></tr>
+
+
+	 
+    <tr class=" api apilevel-" >
+        <td class="jd-typecol"><nobr>
+            abstract
+            
+            
+            
+            
+            boolean</nobr>
+        </td>
+        <td class="jd-linkcol" width="100%"><nobr>
+        <span class="sympad">onKeyUp</span>(int arg0, KeyEvent arg1)</nobr>
         
   </td></tr>
 

@@ -2,6 +2,9 @@ page.title=Providing Audio Playback for Auto
 page.tags="auto", "car", "automotive", "audio"
 page.article=true
 
+page.metaDescription=Learn how to extend your audio apps for use in Android Auto devices.
+page.image=auto/images/assets/icons/media_app_playback.png
+
 @jd:body
 
 <div id="tb-wrapper">
@@ -31,8 +34,8 @@ page.article=true
 
     <ul>
       <li>
-        <a href="{@docRoot}shareables/auto/AndroidAuto-media-apps.pdf">
-              User Experience Guidelines: Media Apps</a>
+        <a href="{@docRoot}shareables/auto/AndroidAuto-audio-apps.pdf">
+              User Experience Guidelines: Audio Apps</a>
       </li>
       <li><a href="{@docRoot}training/managing-audio/index.html">Managing Audio
         Playback</a></li>
@@ -279,8 +282,8 @@ hierarchies depending on what client is making the query. In particular, Auto
 applications have strict limits on how large a menu they can display. This is
 intended to prevent distracting the driver, and to make it easy for the driver
 to operate the app via voice commands. For more information on the Auto user
-experience restrictions, see the <a href="{@docRoot}shareables/auto/AndroidAuto-media-apps.pdf">
-Auto Media Apps</a> guidelines.</p>
+experience restrictions, see the <a href="{@docRoot}shareables/auto/AndroidAuto-audio-apps.pdf">
+Auto Audio Apps</a> guidelines.</p>
 
 <p>Your implementation of {@link android.service.media.MediaBrowserService#onGetRoot
 onGetRoot()} returns information about the root node of the menu
@@ -466,10 +469,4 @@ to be played over the car's speakers.</p>
 <p>For more information about playing audio content, see
 <a href="{@docRoot}guide/topics/media/mediaplayer.html">Media Playback</a>,
 <a href="{@docRoot}training/managing-audio/index.html">Managing Audio Playback</a>, and
-<a href="{@docRoot}guide/topics/media/exoplayer.html">ExoPlayer</a>.
-
-
-(for example, by using a {@link
-android.media.MediaPlayer} or <a
-href="{@docRoot}guide/topics/media/exoplayer.html">ExoPlayer</a>). If the phone
-is connected to an Auto device, .</p>
+<a href="{@docRoot}guide/topics/media/exoplayer.html">ExoPlayer</a>.</p>

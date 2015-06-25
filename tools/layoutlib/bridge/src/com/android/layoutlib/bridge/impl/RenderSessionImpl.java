@@ -16,18 +16,13 @@
 
 package com.android.layoutlib.bridge.impl;
 
-import static com.android.ide.common.rendering.api.Result.Status.ERROR_ANIM_NOT_FOUND;
-import static com.android.ide.common.rendering.api.Result.Status.ERROR_INFLATION;
-import static com.android.ide.common.rendering.api.Result.Status.ERROR_NOT_INFLATED;
-import static com.android.ide.common.rendering.api.Result.Status.ERROR_UNKNOWN;
-import static com.android.ide.common.rendering.api.Result.Status.ERROR_VIEWGROUP_NO_CHILDREN;
-import static com.android.ide.common.rendering.api.Result.Status.SUCCESS;
-
+import com.android.annotations.NonNull;
+import com.android.annotations.Nullable;
 import com.android.ide.common.rendering.api.AdapterBinding;
 import com.android.ide.common.rendering.api.HardwareConfig;
 import com.android.ide.common.rendering.api.IAnimationListener;
 import com.android.ide.common.rendering.api.ILayoutPullParser;
-import com.android.ide.common.rendering.api.IProjectCallback;
+import com.android.ide.common.rendering.api.LayoutlibCallback;
 import com.android.ide.common.rendering.api.RenderResources;
 import com.android.ide.common.rendering.api.RenderSession;
 import com.android.ide.common.rendering.api.ResourceReference;
@@ -51,13 +46,14 @@ import com.android.layoutlib.bridge.android.BridgeContext;
 import com.android.layoutlib.bridge.android.BridgeLayoutParamsMapAttributes;
 import com.android.layoutlib.bridge.android.BridgeXmlBlockParser;
 import com.android.layoutlib.bridge.android.SessionParamsFlags;
-import com.android.layoutlib.bridge.bars.BridgeActionBar;
+import com.android.layoutlib.bridge.android.support.RecyclerViewUtil;
 import com.android.layoutlib.bridge.bars.AppCompatActionBar;
+import com.android.layoutlib.bridge.bars.BridgeActionBar;
 import com.android.layoutlib.bridge.bars.Config;
+import com.android.layoutlib.bridge.bars.FrameworkActionBar;
 import com.android.layoutlib.bridge.bars.NavigationBar;
 import com.android.layoutlib.bridge.bars.StatusBar;
 import com.android.layoutlib.bridge.bars.TitleBar;
-import com.android.layoutlib.bridge.bars.FrameworkActionBar;
 import com.android.layoutlib.bridge.impl.binding.FakeAdapter;
 import com.android.layoutlib.bridge.impl.binding.FakeExpandableAdapter;
 import com.android.resources.Density;
@@ -112,6 +108,13 @@ import java.awt.image.BufferedImage;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
+
+import static com.android.ide.common.rendering.api.Result.Status.ERROR_ANIM_NOT_FOUND;
+import static com.android.ide.common.rendering.api.Result.Status.ERROR_INFLATION;
+import static com.android.ide.common.rendering.api.Result.Status.ERROR_NOT_INFLATED;
+import static com.android.ide.common.rendering.api.Result.Status.ERROR_UNKNOWN;
+import static com.android.ide.common.rendering.api.Result.Status.ERROR_VIEWGROUP_NO_CHILDREN;
+import static com.android.ide.common.rendering.api.Result.Status.SUCCESS;
 
 /**
  * Class implementing the render session.
@@ -216,7 +219,7 @@ public class RenderSessionImpl extends RenderAction<SessionParams> {
         WindowManagerGlobal_Delegate.setWindowManagerService(iwm);
 
         // build the inflater and parser.
-        mInflater = new BridgeInflater(context, params.getProjectCallback());
+        mInflater = new BridgeInflater(context, params.getLayoutlibCallback());
         context.setBridgeInflater(mInflater);
 
         mBlockParser = new BridgeXmlBlockParser(
@@ -398,7 +401,7 @@ public class RenderSessionImpl extends RenderAction<SessionParams> {
 
             // Sets the project callback (custom view loader) to the fragment delegate so that
             // it can instantiate the custom Fragment.
-            Fragment_Delegate.setProjectCallback(params.getProjectCallback());
+            Fragment_Delegate.setLayoutlibCallback(params.getLayoutlibCallback());
 
             String rootTag = params.getFlag(SessionParamsFlags.FLAG_KEY_ROOT_TAG);
             boolean isPreference = "PreferenceScreen".equals(rootTag);
@@ -413,13 +416,13 @@ public class RenderSessionImpl extends RenderAction<SessionParams> {
             // done with the parser, pop it.
             context.popParser();
 
-            Fragment_Delegate.setProjectCallback(null);
+            Fragment_Delegate.setLayoutlibCallback(null);
 
             // set the AttachInfo on the root view.
             AttachInfo_Accessor.setAttachInfo(mViewRoot);
 
             // post-inflate process. For now this supports TabHost/TabWidget
-            postInflateProcess(view, params.getProjectCallback(), isPreference ? view : null);
+            postInflateProcess(view, params.getLayoutlibCallback(), isPreference ? view : null);
 
             // get the background drawable
             if (mWindowBackground != null) {
@@ -672,7 +675,7 @@ public class RenderSessionImpl extends RenderAction<SessionParams> {
             animationResource = context.getRenderResources().getProjectResource(
                     ResourceType.ANIMATOR, animationName);
             if (animationResource != null) {
-                animationId = context.getProjectCallback().getResourceId(
+                animationId = context.getLayoutlibCallback().getResourceId(
                         ResourceType.ANIMATOR, animationName);
             }
         }
@@ -1114,8 +1117,7 @@ public class RenderSessionImpl extends RenderAction<SessionParams> {
             }
         } else {
             // action bar overrides title bar so only look for this one if action bar is hidden
-            boolean windowNoTitle = getBooleanThemeValue(resources,
-                    "windowNoTitle", false, !isThemeAppCompat(resources));
+            boolean windowNoTitle = getBooleanThemeValue(resources, "windowNoTitle", false, true);
 
             if (!windowNoTitle) {
 
@@ -1244,17 +1246,17 @@ public class RenderSessionImpl extends RenderAction<SessionParams> {
      * {@link TabWidget}, and the corresponding {@link FrameLayout} and make new tabs automatically
      * based on the content of the {@link FrameLayout}.
      * @param view the root view to process.
-     * @param projectCallback callback to the project.
+     * @param layoutlibCallback callback to the project.
      * @param skip the view and it's children are not processed.
      */
     @SuppressWarnings("deprecation")  // For the use of Pair
-    private void postInflateProcess(View view, IProjectCallback projectCallback, View skip)
+    private void postInflateProcess(View view, LayoutlibCallback layoutlibCallback, View skip)
             throws PostInflateException {
         if (view == skip) {
             return;
         }
         if (view instanceof TabHost) {
-            setupTabHost((TabHost) view, projectCallback);
+            setupTabHost((TabHost) view, layoutlibCallback);
         } else if (view instanceof QuickContactBadge) {
             QuickContactBadge badge = (QuickContactBadge) view;
             badge.setImageToDefault();
@@ -1273,8 +1275,8 @@ public class RenderSessionImpl extends RenderAction<SessionParams> {
 
                 // if there was no adapter binding, trying to get it from the call back.
                 if (binding == null) {
-                    binding = params.getProjectCallback().getAdapterBinding(listRef,
-                            context.getViewKey(view), view);
+                    binding = layoutlibCallback.getAdapterBinding(
+                            listRef, context.getViewKey(view), view);
                 }
 
                 if (binding != null) {
@@ -1290,7 +1292,7 @@ public class RenderSessionImpl extends RenderAction<SessionParams> {
                             for (int i = 0; i < count; i++) {
                                 Pair<View, Boolean> pair = context.inflateView(
                                         binding.getHeaderAt(i),
-                                        list, false /*attachToRoot*/, skipCallbackParser);
+                                        list, false, skipCallbackParser);
                                 if (pair.getFirst() != null) {
                                     list.addHeaderView(pair.getFirst());
                                 }
@@ -1302,7 +1304,7 @@ public class RenderSessionImpl extends RenderAction<SessionParams> {
                             for (int i = 0; i < count; i++) {
                                 Pair<View, Boolean> pair = context.inflateView(
                                         binding.getFooterAt(i),
-                                        list, false /*attachToRoot*/, skipCallbackParser);
+                                        list, false, skipCallbackParser);
                                 if (pair.getFirst() != null) {
                                     list.addFooterView(pair.getFirst());
                                 }
@@ -1313,37 +1315,52 @@ public class RenderSessionImpl extends RenderAction<SessionParams> {
 
                         if (view instanceof ExpandableListView) {
                             ((ExpandableListView) view).setAdapter(
-                                    new FakeExpandableAdapter(
-                                            listRef, binding, params.getProjectCallback()));
+                                    new FakeExpandableAdapter(listRef, binding, layoutlibCallback));
                         } else {
                             ((AbsListView) view).setAdapter(
-                                    new FakeAdapter(
-                                            listRef, binding, params.getProjectCallback()));
+                                    new FakeAdapter(listRef, binding, layoutlibCallback));
                         }
                     } else if (view instanceof AbsSpinner) {
                         ((AbsSpinner) view).setAdapter(
-                                new FakeAdapter(
-                                        listRef, binding, params.getProjectCallback()));
+                                new FakeAdapter(listRef, binding, layoutlibCallback));
                     }
                 }
             }
+        } else if (isInstanceOf(view, RecyclerViewUtil.CN_RECYCLER_VIEW)) {
+            RecyclerViewUtil.setAdapter(view, getContext(), getParams());
         } else if (view instanceof ViewGroup) {
             ViewGroup group = (ViewGroup) view;
             final int count = group.getChildCount();
             for (int c = 0; c < count; c++) {
                 View child = group.getChildAt(c);
-                postInflateProcess(child, projectCallback, skip);
+                postInflateProcess(child, layoutlibCallback, skip);
             }
         }
     }
 
     /**
+     * Check if the object is an instance of a class named {@code className}. This doesn't work
+     * for interfaces.
+     */
+    public static boolean isInstanceOf(Object object, String className) {
+        Class superClass = object.getClass();
+        while (superClass != null) {
+            String name = superClass.getName();
+            if (name.equals(className)) {
+                return true;
+            }
+            superClass = superClass.getSuperclass();
+        }
+        return false;
+    }
+
+    /**
      * Sets up a {@link TabHost} object.
      * @param tabHost the TabHost to setup.
-     * @param projectCallback The project callback object to access the project R class.
+     * @param layoutlibCallback The project callback object to access the project R class.
      * @throws PostInflateException
      */
-    private void setupTabHost(TabHost tabHost, IProjectCallback projectCallback)
+    private void setupTabHost(TabHost tabHost, LayoutlibCallback layoutlibCallback)
             throws PostInflateException {
         // look for the TabWidget, and the FrameLayout. They have their own specific names
         View v = tabHost.findViewById(android.R.id.tabs);
@@ -1386,8 +1403,9 @@ public class RenderSessionImpl extends RenderAction<SessionParams> {
 
         if (count == 0) {
             // Create a dummy child to get a single tab
-            TabSpec spec = tabHost.newTabSpec("tag").setIndicator("Tab Label",
-                    tabHost.getResources().getDrawable(android.R.drawable.ic_menu_info_details))
+            TabSpec spec = tabHost.newTabSpec("tag")
+                    .setIndicator("Tab Label", tabHost.getResources()
+                            .getDrawable(android.R.drawable.ic_menu_info_details, null))
                     .setContent(new TabHost.TabContentFactory() {
                         @Override
                         public View createTabContent(String tag) {
@@ -1403,7 +1421,7 @@ public class RenderSessionImpl extends RenderAction<SessionParams> {
                 @SuppressWarnings("ConstantConditions")  // child cannot be null.
                 int id = child.getId();
                 @SuppressWarnings("deprecation")
-                Pair<ResourceType, String> resource = projectCallback.resolveResourceId(id);
+                Pair<ResourceType, String> resource = layoutlibCallback.resolveResourceId(id);
                 String name;
                 if (resource != null) {
                     name = resource.getSecond();
@@ -1494,6 +1512,7 @@ public class RenderSessionImpl extends RenderAction<SessionParams> {
      * @return an array of length two, with ViewInfo at index 0 is without offset and ViewInfo at
      *         index 1 is with the offset.
      */
+    @NonNull
     private ViewInfo[] visitContentRoot(View view, int offset, boolean setExtendedInfo) {
         ViewInfo[] result = new ViewInfo[2];
         if (view == null) {
@@ -1589,6 +1608,7 @@ public class RenderSessionImpl extends RenderAction<SessionParams> {
      * The cookie for menu items are stored in menu item and not in the map from View stored in
      * BridgeContext.
      */
+    @Nullable
     private Object getViewKey(View view) {
         BridgeContext context = getContext();
         if (!(view instanceof MenuView.ItemView)) {

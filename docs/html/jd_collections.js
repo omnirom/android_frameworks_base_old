@@ -40,20 +40,59 @@ var RESOURCE_COLLECTIONS = {
   "launch/static": {
     "title": "",
     "resources": [
-      "http://www.youtube.com/watch?v=1RIz-cmTQB4",
-      "http://www.youtube.com/watch?v=MVBMWDzyHAI",
-      "http://android-developers.blogspot.com/2013/11/app-translation-service-now-available.html",
-      "http://android-developers.blogspot.com/2013/10/more-visibility-for-tablet-apps-in.html",
-      "http://android-developers.blogspot.com/2013/11/bring-your-apps-into-classroom-with.html",
-      "distribute/essentials/quality/tablets.html",
-      "distribute/users/build-buzz.html",
-      "distribute/monetize/premium.html",
+      "distribute/googleplay/about.html",
+      "distribute/googleplay/guide.html",
+      "about/versions/lollipop.html",
+      "distribute/googleplay/wear.html",
+      "distribute/googleplay/tv.html",
+      "distribute/googleplay/edu/about.html",
+      "distribute/googleplay/families/about.html",
+      "distribute/monetize/subscriptions.html",
       "distribute/monetize/freemium.html",
       "distribute/monetize/ads.html",
-      "distribute/essentials/best-practices/apps.html",
-      "distribute/essentials/best-practices/games.html",
-      "distribute/users/know-your-user.html",
-      "distribute/googleplay/developer-console.html"
+      "distribute/users/promote-with-ads.html",
+      "distribute/engage/deep-linking.html",
+      "distribute/engage/game-services.html",
+      "distribute/essentials/optimizing-your-app.html",
+      "distribute/engage/easy-signin.html",
+    ]
+  },
+  "launch/static/ja": {
+    "title": "",
+    "resources": [
+      "https://www.youtube.com/watch?v=xelYnWcYkuE",
+      "https://www.youtube.com/playlist?list=PLCOC_kP3nqGIHEgwm9mybvA04Vn4Cg9nn",
+      "http://googledevjp.blogspot.jp/2014/12/android-wear.html",
+      "http://googledevjp.blogspot.jp/2014/12/android-studio-10.html",
+      "http://googledevjp.blogspot.jp/2014/12/google-play-65.html",
+      "intl/ja/distribute/googleplay/developer-console.html#alpha-beta",
+      "intl/ja/distribute/googleplay/guide.html",
+      "intl/ja/distribute/essentials/quality/core.html",
+      "http://support.google.com/googleplay/android-developer/answer/4430948?hl=ja",
+      "intl/ja/support.html",
+      "intl/ja/distribute/essentials/quality/wear.html",
+      "intl/ja/training/tv/start/index.html",
+      "http://googleforwork-japan.blogspot.jp/2014/12/gcp-google-cloud-platform-rpg-gcp.html",
+      "intl/ja/distribute/monetize/ads.html"
+    ]
+  },
+  "launch/static/ko": {
+    "title": "",
+    "resources": [
+      "https://www.youtube.com/watch?v=7X9Ue0Nfdh4&index=2&list=PL_WJkTbDHdBksDBRoqfeyLchEQqBAOlNl",
+      "https://www.youtube.com/watch?v=83FpwuschCQ",
+      "http://googledevkr.blogspot.com/2014/11/android50guidefordevelopers.html",
+      "http://googledevkr.blogspot.com/2014/10/material-design-on-android-checklist.html",
+      "http://googledevkr.blogspot.com/2014/10/appcompat-v21-material-design-for-pre.html",
+      "intl/ko/distribute/googleplay/developer-console.html#alpha-beta",
+      "intl/ko/distribute/googleplay/guide.html",
+      "intl/ko/distribute/essentials/quality/core.html",
+      "https://support.google.com/googleplay/android-developer/answer/4430948?hl=ko",
+      "intl/ko/support.html",
+      "intl/ko/distribute/essentials/quality/wear.html",
+      "intl/ko/tv/index.html",
+      "intl/ko/google/play-services/games.html",
+      "intl/ko/distribute/monetize/ads.html"
     ]
   },
   "distribute/gp/gplanding": {
@@ -65,10 +104,11 @@ var RESOURCE_COLLECTIONS = {
   },
   "distribute/gp/gpfelanding": {
     "resources": [
-      "distribute/googleplay/guide.html",
+      "distribute/googleplay/auto.html",
       "distribute/googleplay/tv.html",
       "distribute/googleplay/wear.html",
-      "distribute/googleplay/edu/about.html"
+      "distribute/googleplay/edu/about.html",
+      "distribute/googleplay/families/about.html"
     ]
   },
   "distribute/essentials": {
@@ -1055,6 +1095,14 @@ var RESOURCE_COLLECTIONS = {
       "https://support.google.com/googleplay/answer/2651410"
     ]
   },
+  "autolanding": {
+    "title": "",
+    "resources": [
+      "auto/index.html",
+      "design/auto/index.html",
+      "training/auto/index.html"
+    ]
+  },
   "tvlanding": {
     "title": "",
     "resources": [
@@ -1080,9 +1128,40 @@ var RESOURCE_COLLECTIONS = {
   "design/auto/auto_ui_guidelines": {
     "title": "",
     "resources": [
-      "shareables/auto/AndroidAuto-media-apps.pdf",
+      "shareables/auto/AndroidAuto-audio-apps.pdf",
       "shareables/auto/AndroidAuto-messaging-apps.pdf",
       "shareables/auto/AndroidAuto-custom-colors.pdf"
+    ]
+  },
+  "training/auto/overview": {
+    "title": "",
+    "resources": [
+      "training/auto/start/index.html",
+      "design/auto/index.html",
+      "shareables/auto/AndroidAuto-custom-colors.pdf"
+    ]
+  },
+  "training/auto/messaging": {
+    "title": "",
+    "resources": [
+      "training/auto/messaging/index.html",
+      "shareables/auto/AndroidAuto-messaging-apps.pdf",
+      "samples/MessagingService/index.html"
+    ]
+  },
+  "training/auto/media": {
+    "title": "",
+    "resources": [
+      "training/auto/audio/index.html",
+      "shareables/auto/AndroidAuto-audio-apps.pdf",
+      "samples/MediaBrowserService/index.html"
+    ]
+  },
+  "training/auto/distribute": {
+    "title": "",
+    "resources": [
+      "distribute/essentials/quality/auto.html",
+      "distribute/googleplay/auto.html"
     ]
   },
   "distribute/stories/games": {
@@ -1185,6 +1264,22 @@ var RESOURCE_COLLECTIONS = {
       "training/basics/fragments/fragment-ui.html",
       "training/multiscreen/index.html",
       "training/monitoring-device-state/index.html"
+    ]
+  },
+  "training/work/apps": {
+    "title": "",
+    "resources": [
+      "training/enterprise/app-compatibility.html",
+      "training/enterprise/app-restrictions.html",
+      "samples/AppRestrictionSchema/index.html",
+      "samples/AppRestrictionEnforcer/index.html"
+    ]
+  },
+  "training/work/admin": {
+    "title": "",
+    "resources": [
+      "training/enterprise/work-policy-ctrl.html",
+      "samples/BasicManagedProfile/index.html"
     ]
   }
 }
