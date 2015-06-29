@@ -1,0 +1,21 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "f8eba960_6736c6af",
+        "filename": "packages/SystemUI/res/values/strings.xml",
+        "patchSetId": 1
+      },
+      "lineNbr": 805,
+      "author": {
+        "id": 1000026
+      },
+      "writtenOn": "2015-06-29T21:00:55Z",
+      "side": 1,
+      "message": "we should add a new one in custom_strings to get new translations. else we will get the shorter string only in en",
+      "revId": "270d1997d1f47f3565a7c8bb9736a805ecf3a83d",
+      "serverId": "56841c99-7c94-43d4-bf0b-cb4707e66d55",
+      "unresolved": false
+    }
+  ]
+}
