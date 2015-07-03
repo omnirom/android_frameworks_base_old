@@ -121,6 +121,7 @@ import android.widget.TextView;
 
 import com.android.internal.statusbar.StatusBarIcon;
 import com.android.internal.util.omni.TaskUtils;
+import com.android.internal.util.omni.OmniSwitchConstants;
 import com.android.keyguard.KeyguardHostView.OnDismissAction;
 import com.android.keyguard.ViewMediatorCallback;
 import com.android.systemui.BatteryViewManager;
@@ -1167,7 +1168,15 @@ public class PhoneStatusBar extends BaseStatusBar implements DemoMode,
     private View.OnClickListener mRecentsClickListener = new View.OnClickListener() {
         public void onClick(View v) {
             awakenDreams();
-            toggleRecentApps();
+            final boolean omnSwitchRecents = Settings.System.getIntForUser(mContext.getContentResolver(),
+                        Settings.System.NAVIGATION_BAR_RECENTS, 0, mCurrentUserId) == 1;
+            //final boolean omniSwitchRunning = OmniSwitchConstants.isOmniSwitchRunning(mContext));
+            if (omnSwitchRecents /*&& omniSwitchRunning*/) {
+                Intent showIntent = new Intent(OmniSwitchConstants.ACTION_TOGGLE_OVERLAY);
+                mContext.sendBroadcastAsUser(showIntent, getCurrentUserHandle());
+            } else {
+                toggleRecentApps();
+            }
         }
     };
 

@@ -17,6 +17,9 @@
 */
 package com.android.internal.util.omni;
 
+import android.app.ActivityManager;
+import android.app.ActivityManager.RunningServiceInfo;
+import android.content.Context;
 import android.content.Intent;
 
 public class OmniSwitchConstants {
@@ -45,4 +48,14 @@ public class OmniSwitchConstants {
      */
     public static Intent INTENT_LAUNCH_APP = new Intent(Intent.ACTION_MAIN)
             .setClassName(APP_PACKAGE_NAME, APP_PACKAGE_NAME + ".SettingsActivity");
+
+    public static boolean isOmniSwitchRunning(Context context) {
+        final ActivityManager manager = (ActivityManager) context.getSystemService(Context.ACTIVITY_SERVICE);
+        for (RunningServiceInfo service : manager.getRunningServices(Integer.MAX_VALUE)) {
+            if (service.service.getClassName().equals(APP_PACKAGE_NAME + ".SwitchService")) {
+                return true;
+            }
+        }
+        return false;
+    }
 }
