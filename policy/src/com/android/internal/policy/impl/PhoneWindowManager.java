@@ -1410,8 +1410,7 @@ public class PhoneWindowManager implements WindowManagerPolicy {
                 mPowerManager.goToSleep(SystemClock.uptimeMillis());
                 break;
             case KEY_ACTION_OMNISWITCH:
-                Intent showIntent = new Intent(OmniSwitchConstants.ACTION_TOGGLE_OVERLAY);
-                mContext.sendBroadcastAsUser(showIntent, UserHandle.CURRENT);
+                OmniSwitchConstants.toggleOmniSwitchRecents(mContext, UserHandle.CURRENT);
                 break;
             default:
                 break;
