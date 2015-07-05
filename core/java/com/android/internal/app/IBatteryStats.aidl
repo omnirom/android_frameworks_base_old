@@ -114,4 +114,17 @@ interface IBatteryStats {
     void setBatteryState(int status, int health, int plugType, int level, int temp, int volt);
     long getAwakeTimeBattery();
     long getAwakeTimePlugged();
+
+    /** @hide */
+    byte[] getDockStatistics();
+    /** @hide */
+    ParcelFileDescriptor getDockStatisticsStream();
+    /** @hide **/
+    void resetStatistics();
+    /** @hide **/
+    void setDockBatteryState(int status, int health, int plugType, int level, int temp, int volt);
+    /** @hide **/
+    long getAwakeTimeDockBattery();
+    /** @hide **/
+    long getAwakeTimeDockPlugged();
 }
