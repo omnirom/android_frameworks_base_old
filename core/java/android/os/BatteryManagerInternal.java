@@ -43,6 +43,26 @@ public abstract class BatteryManagerInternal {
     public abstract boolean getBatteryLevelLow();
 
     /**
+     * Returns whether dock batteries is supported
+     */
+    public abstract boolean isDockBatterySupported();
+
+    /**
+     * Returns the current dock plug type.
+     */
+    public abstract int getDockPlugType();
+
+    /**
+     * Returns dock battery level as a percentage.
+     */
+    public abstract int getDockBatteryLevel();
+
+    /**
+     * Returns whether we currently consider the dock battery level to be low.
+     */
+    public abstract boolean getDockBatteryLevelLow();
+
+    /**
      * Returns a non-zero value if an unsupported charger is attached.
      */
     public abstract int getInvalidCharger();
