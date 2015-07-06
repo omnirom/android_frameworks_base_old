@@ -1,0 +1,21 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "f8eba960_ea6f3b27",
+        "filename": "packages/SystemUI/src/com/android/systemui/statusbar/phone/DozeParameters.java",
+        "patchSetId": 28
+      },
+      "lineNbr": 112,
+      "author": {
+        "id": 1001140
+      },
+      "writtenOn": "2015-07-06T17:09:28Z",
+      "side": 1,
+      "message": "These default values for the overwrite values are not defined in xml. Therefore for example pulses don\u0027t time out when the values were never changed in settings. Hardcode them here or add them to the config?",
+      "revId": "db1a7e60e2106eb2be57bf1aaf00ef66edff4135",
+      "serverId": "56841c99-7c94-43d4-bf0b-cb4707e66d55",
+      "unresolved": false
+    }
+  ]
+}
