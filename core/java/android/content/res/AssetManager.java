@@ -66,6 +66,7 @@ public final class AssetManager implements AutoCloseable {
     private static final boolean DEBUG_REFS = false;
 
     private static final String FRAMEWORK_APK_PATH = "/system/framework/framework-res.apk";
+    private static final String OMNIROM_APK_PATH = "/system/framework/omnirom-res.apk";
 
     private static final Object sSync = new Object();
 
@@ -253,6 +254,7 @@ public final class AssetManager implements AutoCloseable {
             for (String idmapPath : systemIdmapPaths) {
                 apkAssets.add(ApkAssets.loadOverlayFromPath(idmapPath, ApkAssets.PROPERTY_SYSTEM));
             }
+            apkAssets.add(ApkAssets.loadFromPath(OMNIROM_APK_PATH, ApkAssets.PROPERTY_SYSTEM));
 
             sSystemApkAssetsSet = new ArraySet<>(apkAssets);
             sSystemApkAssets = apkAssets.toArray(new ApkAssets[apkAssets.size()]);
