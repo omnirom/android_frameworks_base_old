@@ -16,6 +16,6 @@
 -->
 <resources xmlns:xliff="urn:oasis:names:tc:xliff:document:1.2">
   <string name="crop_wallpaper">Divar kağızını kəs</string>
-  <string name="wallpaper_instructions">Divar kağızını nizamla</string>
+  <string name="wallpaper_instructions">Divar kağızını tənzimlə</string>
   <string name="wallpaper_load_fail">Təsvir divar kağızı kimi yüklənə bilmədi</string>
 </resources>

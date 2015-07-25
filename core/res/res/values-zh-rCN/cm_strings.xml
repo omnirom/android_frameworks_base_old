@@ -35,7 +35,7 @@
   <string name="global_actions_expanded_desktop_mode_off_status">已禁用</string>
   <string name="reboot_system" product="tablet">重启平板</string>
   <string name="reboot_system" product="default">重启手机</string>
-  <string name="reboot_reboot">重新启动</string>
+  <string name="reboot_reboot">重启</string>
   <string name="reboot_recovery">恢复模式</string>
   <string name="reboot_bootloader">引导程序</string>
   <string name="reboot_bootmenu">引导菜单</string>
@@ -70,6 +70,7 @@
   <string name="permlab_receiveProtectedSms">接收受保护的短信</string>
   <string name="permdesc_receiveProtectedSms">允许应用接收受保护的短信。</string>
   <string name="permlab_modifyProtectedSmsList">修改受保护的短信列表</string>
+  <string name="permdesc_modifyProtectedSmsList">允许应用修改受保护的短信地址列表。</string>
   <string name="permlab_resetBatteryStats">重置电池统计信息</string>
   <string name="permdesc_resetBatteryStats">允许应用重置当前低电量电池使用数据。</string>
   <string name="permgrouplab_security">安全</string>

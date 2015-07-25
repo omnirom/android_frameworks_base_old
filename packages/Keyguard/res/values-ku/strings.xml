@@ -31,7 +31,7 @@
   <string name="faceunlock_multiple_failures">هه‌وڵی زۆر درا بۆ کردنه‌وه‌ له‌ڕێی ڕوخساره‌وه‌</string>
   <string name="keyguard_charged">بارگاویی بوو</string>
   <string name="keyguard_plugged_in">بارگاویی بوون، <xliff:g id="number">%d</xliff:g><xliff:g id="percent">%%</xliff:g></string>
-  <string name="keyguard_low_battery">بیبەستە بە بارگاویکه‌ر.</string>
+  <string name="keyguard_low_battery">بارگاویکه‌رەکەت ببەستەوە.</string>
   <string name="keyguard_instructions_when_pattern_disabled">دەست بنێ بە پێڕستدا بۆ کردنه‌وه‌.</string>
   <string name="keyguard_network_locked_message">تۆڕی نێت داخرا</string>
   <string name="keyguard_missing_sim_message_short">سیمکارتی تێدا نییە</string>

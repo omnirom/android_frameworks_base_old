@@ -523,6 +523,8 @@ public class PackageManagerService extends IPackageManager.Stub {
 
     boolean mPreLaunchCheckPackagesReplaced = false;
 
+    ArrayList<ComponentName> mDisabledComponentsList;
+
     // Set of pending broadcasts for aggregating enable/disable of components.
     static class PendingPackageBroadcasts {
         // for each user id, a map of <package name -> components within that package>
@@ -1623,9 +1625,11 @@ public class PackageManagerService extends IPackageManager.Stub {
             }
 
             // Disable components marked for disabling at build-time
+            mDisabledComponentsList = new ArrayList<ComponentName>();
             for (String name : mContext.getResources().getStringArray(
                     com.android.internal.R.array.config_disabledComponents)) {
                 ComponentName cn = ComponentName.unflattenFromString(name);
+                mDisabledComponentsList.add(cn);
                 Slog.v(TAG, "Disabling " + name);
                 String className = cn.getClassName();
                 PackageSetting pkgSetting = mSettings.mPackages.get(cn.getPackageName());
@@ -1635,6 +1639,21 @@ public class PackageManagerService extends IPackageManager.Stub {
                     continue;
                 }
                 pkgSetting.disableComponentLPw(className, UserHandle.USER_OWNER);
+            }
+
+            // Enable components marked for forced-enable at build-time
+            for (String name : mContext.getResources().getStringArray(
+                    com.android.internal.R.array.config_forceEnabledComponents)) {
+                ComponentName cn = ComponentName.unflattenFromString(name);
+                Slog.v(TAG, "Enabling " + name);
+                String className = cn.getClassName();
+                PackageSetting pkgSetting = mSettings.mPackages.get(cn.getPackageName());
+                if (pkgSetting == null || pkgSetting.pkg == null
+                        || !pkgSetting.pkg.hasComponentClassName(className)) {
+                    Slog.w(TAG, "Unable to enable " + name);
+                    continue;
+                }
+                pkgSetting.enableComponentLPw(className, UserHandle.USER_OWNER);
             }
 
             // can downgrade to reader
@@ -5178,6 +5197,17 @@ public class PackageManagerService extends IPackageManager.Stub {
                 pkg.applicationInfo.themedIcon = id;
             }
 
+            // Clear out any icon in the cache so it can be recomopsed if needed
+            final boolean isBootScan = (scanMode & SCAN_BOOTING) != 0;
+            if (!isBootScan) {
+                String[] iconPaths =
+                        IconPackHelper.IconCustomizer.getCachedIconPaths(pkg.packageName);
+                for(String iconPath : iconPaths) {
+                    File file = new File(ThemeUtils.SYSTEM_THEME_ICON_CACHE_DIR, iconPath);
+                    file.delete();
+                }
+            }
+
             // Add the new setting to mPackages
             mPackages.put(pkg.applicationInfo.packageName, pkg);
             // Make sure we don't accidentally delete its data.
@@ -5495,7 +5525,6 @@ public class PackageManagerService extends IPackageManager.Stub {
 
             pkgSetting.setTimeStamp(scanFileTime);
 
-            final boolean isBootScan = (scanMode & SCAN_BOOTING) != 0;
             // Generate resources & idmaps if pkg is NOT a theme
             // We must compile resources here because during the initial boot process we may get
             // here before a default theme has had a chance to compile its resources
@@ -5780,6 +5809,18 @@ public class PackageManagerService extends IPackageManager.Stub {
     }
 
     private void uninstallThemeForAllApps(PackageParser.Package opkg) {
+        // Since we are uninstalling a theme, we need to check if it has any components applied
+        // and switch back to defaults.  Since this method will remove the resource cache for this
+        // theme, apps could still be trying to reference themed resources that no longer exist in
+        // the given path.  Any other components that are applied from this theme, and not part of
+        // the theme config, will be handled after package manager broadcasts its removal.
+        Map<String, String> returnToDefaultComponents = ThemeUtils.returnToDefaults(mContext,
+                opkg.packageName);
+        if (returnToDefaultComponents != null && returnToDefaultComponents.size() > 0) {
+            ThemeManager tm = (ThemeManager) mContext.getSystemService(Context.THEME_SERVICE);
+            tm.requestThemeChange(returnToDefaultComponents);
+        }
+
         for(String target : opkg.mOverlayTargets) {
             HashMap<String, PackageParser.Package> map = mOverlays.get(target);
             if (map != null) {
@@ -11260,6 +11301,12 @@ public class PackageManagerService extends IPackageManager.Stub {
     public void setComponentEnabledSetting(ComponentName componentName,
             int newState, int flags, int userId) {
         if (!sUserManager.exists(userId)) return;
+        // Don't allow to enable components marked for disabling at build-time
+        if (mDisabledComponentsList.contains(componentName)) {
+            Slog.d(TAG, "Ignoring attempt to set enabled state of disabled component "
+                    + componentName.flattenToString());
+            return;
+        }
         setEnabledSetting(componentName.getPackageName(),
                 componentName.getClassName(), newState, flags, userId, null);
     }
@@ -11274,6 +11321,7 @@ public class PackageManagerService extends IPackageManager.Stub {
             throw new IllegalArgumentException("Invalid new component state: "
                     + newState);
         }
+
         PackageSetting pkgSetting;
         final int uid = Binder.getCallingUid();
         final int permission = mContext.checkCallingOrSelfPermission(
@@ -12815,6 +12863,11 @@ public class PackageManagerService extends IPackageManager.Stub {
     public void setComponentProtectedSetting(ComponentName componentName, boolean newState,
             int userId) {
         enforceCrossUserPermission(Binder.getCallingUid(), userId, false, "set protected");
+
+        if (componentName == null) {
+            throw new IllegalArgumentException(
+                    "Must define component: " + componentName);
+        }
 
         String packageName = componentName.getPackageName();
         String className = componentName.getClassName();

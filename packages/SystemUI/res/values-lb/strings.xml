@@ -23,7 +23,7 @@
   <string name="status_bar_recent_remove_item_title">Aus der Lëscht eraushuelen</string>
   <string name="status_bar_recent_inspect_item_title">App-Info</string>
   <string name="status_bar_no_recent_apps">Keng rezent Appen</string>
-  <string name="status_bar_accessibility_dismiss_recents">Rezent Apps verwerfen</string>
+  <string name="status_bar_accessibility_dismiss_recents">Rezent Appe verwerfen</string>
   <plurals name="status_bar_accessibility_recent_apps">
     <item quantity="one">1 rezent App</item>
     <item quantity="other">%d rezent Appen</item>
@@ -64,12 +64,12 @@
   <string name="screenshot_saving_title">Schiermfoto gëtt gespäichert\u2026</string>
   <string name="screenshot_saving_text">Schiermfoto gëtt gespäichert.</string>
   <string name="screenshot_saved_title">Schiermfoto opgeholl.</string>
-  <string name="screenshot_saved_text">Drécke fir d\'Schiermfoto ze kucken.</string>
+  <string name="screenshot_saved_text">Drécke fir d\'Schiermfoto unzekucken.</string>
   <string name="screenshot_failed_title">Schiermfoto konnt net opgeholl ginn.</string>
   <string name="screenshot_failed_text">Schiermfoto konnt net gespäichert ginn. Eventuell gëtt de Späicher grad benotzt.</string>
   <string name="usb_preference_title">USB-Dateiiwwerdroungsoptiounen</string>
-  <string name="use_mtp_button_title">Als Medieplayer (MTP) bereetstellen</string>
-  <string name="use_ptp_button_title">Als Kamera (PTP) bereetstellen</string>
+  <string name="use_mtp_button_title">Als Medieplayer (MTP) abannen</string>
+  <string name="use_ptp_button_title">Als Kamera (PTP) abannen</string>
   <string name="installer_cd_button_title">D\'Fichiersiwwerdroungs-App fir Android um Mac installéieren</string>
   <string name="accessibility_back">Zréck</string>
   <string name="accessibility_home">Heem</string>
@@ -143,7 +143,7 @@
   <string name="accessibility_ringer_silent">Schellmodus \"Roueg\".</string>
   <string name="accessibility_recents_item_dismissed"><xliff:g id="app" example="Calendar">%s</xliff:g> verworf.</string>
   <string name="accessibility_notification_dismissed">Notifikatioun verworf.</string>
-  <string name="accessibility_desc_notification_shade">Notifikatiounsleescht.</string>
+  <string name="accessibility_desc_notification_shade">Notifikatiounsläischt.</string>
   <string name="accessibility_desc_quick_settings">Séier Astellungen.</string>
   <string name="accessibility_desc_recent_apps">Rezent Appen.</string>
   <string name="accessibility_quick_settings_user">Benotzer <xliff:g id="user" example="John Doe">%s</xliff:g>.</string>
@@ -200,7 +200,6 @@
   <string name="quick_settings_remote_display_no_connection_label">Schierm iwwerdroen</string>
   <string name="quick_settings_brightness_dialog_title">Hellegkeet</string>
   <string name="quick_settings_brightness_dialog_auto_brightness_label">AUTO</string>
-  <string name="battery_meter_very_low_overlay_symbol">!</string>
   <string name="ssl_ca_cert_warning">D\'Netzwierk kéint\n
 iwwerwaacht sinn</string>
 </resources>

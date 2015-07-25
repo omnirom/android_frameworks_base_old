@@ -334,6 +334,7 @@
   <java-symbol type="integer" name="config_overrideHasPermanentMenuKey" />
 
   <java-symbol type="color" name="tab_indicator_text_v4" />
+  <java-symbol type="color" name="lock_pattern_path_color" />
 
   <java-symbol type="dimen" name="accessibility_touch_slop" />
   <java-symbol type="dimen" name="config_prefDialogWidth" />
@@ -1909,6 +1910,7 @@
 
   <!-- Package Manager -->
   <java-symbol type="array" name="config_disabledComponents" />
+  <java-symbol type="array" name="config_forceEnabledComponents" />
 
   <!-- LED flashlight -->
   <java-symbol type="bool" name="config_enableTorch" />
@@ -2036,6 +2038,9 @@
   <java-symbol type="integer" name="config_proximityCheckTimeout" />
 
   <java-symbol type="array" name="config_ignored_sms_packages" />
+  <java-symbol type="array" name="config_packagesAllowedAccessToKillSwitch" />
+  <java-symbol type="string" name="config_killSwitchLib" />
+  <java-symbol type="string" name="config_killSwitchClass" />
 
   <!-- Last app switch animations -->
    <java-symbol type="anim" name="last_app_in" />
@@ -2109,4 +2114,7 @@
   <!-- Strings for MultiSim -->
   <java-symbol type="string" name="multi_sim_entry_format" />
   <java-symbol type="string" name="multi_sim_entry_format_no_carrier" />
+
+  <!-- Account Preference -->
+  <java-symbol type="style" name="AccountPreference" />
 </resources>

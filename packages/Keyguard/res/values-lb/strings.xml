@@ -24,8 +24,8 @@
   <string name="keyguard_password_enter_puk_prompt">SIM-PUK-Code</string>
   <string name="keyguard_password_enter_pin_prompt">Neie SIM-PIN-Code</string>
   <string name="keyguard_password_entry_touch_hint"><font size="17">Dréck fir d\'Passwuert anzeginn</font></string>
-  <string name="keyguard_password_enter_password_code">Passwuert antippe fir z\'entspären</string>
-  <string name="keyguard_password_enter_pin_password_code">PIN antippe fir z\'entspären</string>
+  <string name="keyguard_password_enter_password_code">Passwuert agi fir z\'entspären</string>
+  <string name="keyguard_password_enter_pin_password_code">PIN agi fir z\'entspären</string>
   <string name="keyguard_password_wrong_pin_code">Falsche PIN-Code.</string>
   <string name="keyguard_label_text">Menü an dann 0 drécke fir z\'entspären.</string>
   <string name="faceunlock_multiple_failures">Maximal Unzuel u Versich fir mam Gesiicht z\'entspären iwwerschratt</string>
@@ -41,7 +41,7 @@
   <string name="keyguard_missing_sim_instructions_long">D\'SIM-Kaart feelt oder ass net liesbar. Setz eng SIM-Kaart an.</string>
   <string name="keyguard_permanent_disabled_sim_message_short">Onbenotzbar SIM-Kaart.</string>
   <string name="keyguard_permanent_disabled_sim_instructions">Deng SIM-Kaart gouf permanent ausgeschalt.\n
-Kontaktéier däin Netzbedreiwer fir eng aner SIM-Kaart ze kréien.</string>
+Kontaktéier däi Provider fir eng aner SIM-Kaart ze kréien.</string>
   <string name="keyguard_sim_locked_message">D\'SIM-Kaart ass gespaart.</string>
   <string name="keyguard_sim_puk_locked_message">D\'SIM-Kaart ass PUK-gespaart.</string>
   <string name="keyguard_sim_unlock_progress_dialog_message">D\'SIM-Kaart gëtt entspaart\u2026</string>
@@ -55,8 +55,8 @@ Kontaktéier däin Netzbedreiwer fir eng aner SIM-Kaart ze kréien.</string>
   <string name="keyguard_accessibility_status">Status</string>
   <string name="keyguard_accessibility_camera">Fotoapparat</string>
   <string name="keygaurd_accessibility_media_controls">Steierelementer fir Medien</string>
-  <string name="keyguard_accessibility_widget_reorder_start">Neiuerdnung vun de Widgets gestart.</string>
-  <string name="keyguard_accessibility_widget_reorder_end">Neiuerdnung vun de Widgets gestoppt.</string>
+  <string name="keyguard_accessibility_widget_reorder_start">Neiuerdnung vun de Widgete gestart.</string>
+  <string name="keyguard_accessibility_widget_reorder_end">Neiuerdnung vun de Widgete gestoppt.</string>
   <string name="keyguard_accessibility_widget_deleted">Widget <xliff:g id="widget_index">%1$s</xliff:g> geläscht.</string>
   <string name="keyguard_accessibility_expand_lock_area">Erweider den Entspärberäich.</string>
   <string name="keyguard_accessibility_slide_unlock">Entspäre mat Fangerbeweegung.</string>
@@ -99,7 +99,7 @@ Kontaktéier däin Netzbedreiwer fir eng aner SIM-Kaart ze kréien.</string>
   <string name="description_direction_right">No riets réckele fir ze <xliff:g id="target_description" example="Unlock">%s</xliff:g>.</string>
   <string name="user_switched">Aktuelle Benotzer <xliff:g id="name" example="Bob">%1$s</xliff:g>.</string>
   <string name="kg_emergency_call_label">Noutruff</string>
-  <string name="kg_forgot_pattern_button_text">Muster vergiessen</string>
+  <string name="kg_forgot_pattern_button_text">Muster vergiess</string>
   <string name="kg_wrong_pattern">Falscht Muster</string>
   <string name="kg_wrong_password">Falscht Passwuert</string>
   <string name="kg_wrong_pin">Falsche PIN</string>
@@ -108,11 +108,11 @@ Kontaktéier däin Netzbedreiwer fir eng aner SIM-Kaart ze kréien.</string>
   <string name="kg_sim_pin_instructions">SIM-PIN aginn</string>
   <string name="kg_pin_instructions">PIN aginn</string>
   <string name="kg_password_instructions">Passwuert aginn</string>
-  <string name="kg_puk_enter_puk_hint">D\'SIM ass elo desaktivéiert. Gëff e PUK-Code a fir weiderzemaachen. Kontaktéier däin Netzbedreiwer fir Detailer.</string>
+  <string name="kg_puk_enter_puk_hint">D\'SIM ass elo desaktivéiert. Gëff e PUK-Code a fir weiderzemaachen. Kontaktéier däi Provider fir Detailer.</string>
   <string name="kg_puk_enter_pin_hint">Gëff de gewënschte PIN-Code an</string>
   <string name="kg_enter_confirm_pin_hint">Bestäteg de gewënschte PIN-Code</string>
   <string name="kg_sim_unlock_progress_dialog_message">D\'SIM-Kaart gëtt entspaart\u2026</string>
-  <string name="kg_invalid_sim_pin_hint">Tipp e PIN deen tëscht 4 an 8 Zifferen huet.</string>
+  <string name="kg_invalid_sim_pin_hint">Gëff e PIN an, deen tëscht 4 an 8 Zifferen huet.</string>
   <string name="kg_invalid_sim_puk_hint">De PUK-Code misst 8 oder méi Zifferen hunn.</string>
   <string name="kg_invalid_puk">Gëff de korrekte PUK-Code nees an. Bei widderhuelende Versich gëtt d\'SIM permanent desaktivéiert.</string>
   <string name="kg_invalid_confirm_pin_hint" product="default">D\'PIN-Codë stëmmen net iwwereneen</string>
@@ -124,49 +124,26 @@ Kontaktéier däin Netzbedreiwer fir eng aner SIM-Kaart ze kréien.</string>
   <string name="kg_login_invalid_input">Ongëltege Benotzernumm oder Passwuert.</string>
   <string name="kg_login_account_recovery_hint">Benotzernumm oder Passwuert vergiess\?\nBesich <b>google.com/accounts/recovery</b>.</string>
   <string name="kg_login_checking_password">Kont gëtt iwwerpréift\u2026</string>
-  <string name="kg_too_many_failed_pin_attempts_dialog_message">
-        Du hues däi PIN <xliff:g id="number">%d</xliff:g>-mol falsch aginn.
-        \n\nProbéier nees a(n) <xliff:g id="number">%d</xliff:g> Sekonnen.
-    </string>
+  <string name="kg_too_many_failed_pin_attempts_dialog_message">Du hues däi PIN <xliff:g id="number">%d</xliff:g>-mol falsch aginn.\n\nProbéier nees a(n) <xliff:g id="number">%d</xliff:g> Sekonnen.</string>
   <string name="kg_too_many_failed_password_attempts_dialog_message">Du hues däi Passwuert <xliff:g id="number">%d</xliff:g>-mol falsch aginn.\n\nProbéier nees a(n) <xliff:g id="number">%d</xliff:g> Sekonnen.</string>
   <string name="kg_too_many_failed_pattern_attempts_dialog_message">
         Du hues däin Entspärmuster <xliff:g id="number">%d</xliff:g>-mol falsch gemoolt.
         \n\nProbéier nees a(n) <xliff:g id="number">%d</xliff:g> Sekonnen.
     </string>
-  <string name="kg_failed_attempts_almost_at_wipe" product="tablet">
-       Du hues <xliff:g id="number">%d</xliff:g>-mol versicht den Tablet z\'entspären.
-       No <xliff:g id="number">%d</xliff:g> weider Versich gëtt den Tablet op Wierksastellungen zréckgesat an all d\'Benotzerdate si verluer.
-    </string>
-  <string name="kg_failed_attempts_almost_at_wipe" product="default">
-       Du hues <xliff:g id="number">%d</xliff:g>-mol versicht den Telefon z\'entspären.
-       No <xliff:g id="number">%d</xliff:g> weider Versich gëtt den Telefon op Wierksastellungen zréckgesat an all d\'Benotzerdate si verluer.
-    </string>
-  <string name="kg_failed_attempts_now_wiping" product="tablet">
-       Du hues <xliff:g id="number">%d</xliff:g>-mol versicht den Tablet z\'entspären.
-       E gëtt elo op Wierksastellungen zréckgesat.
-    </string>
-  <string name="kg_failed_attempts_now_wiping" product="default">
-       Du hues <xliff:g id="number">%d</xliff:g>-mol versicht den Telefon z\'entspären.
-       E gëtt elo op Wierksastellungen zréckgesat.
-    </string>
-  <string name="kg_failed_attempts_almost_at_login" product="tablet">
-       Du hues däin Entspärmuster <xliff:g id="number">%d</xliff:g>-mol falsch gemoolt.
-       No <xliff:g id="number">%d</xliff:g> weider Versich gëss du gefrot däin Tablet duerch en E-Mail-Kont z\'entspären.
-       Probéier nees a(n) <xliff:g id="number">%d</xliff:g> Sekonnen.
-    </string>
-  <string name="kg_failed_attempts_almost_at_login" product="default">
-       Du hues däin Entspärmuster <xliff:g id="number">%d</xliff:g>-mol falsch gemoolt.
-       No <xliff:g id="number">%d</xliff:g> weider Versich gëss du gefrot däin Telefon duerch en E-Mail-Kont z\'entspären.
-       Probéier nees a(n) <xliff:g id="number">%d</xliff:g> Sekonnen.
-    </string>
-  <string name="kg_text_message_separator" product="default">" \u2014 "</string>
+  <string name="kg_failed_attempts_almost_at_wipe" product="tablet">Du hues <xliff:g id="number">%d</xliff:g>-mol ouni Erfolleg versicht den Tablet z\'entspären. No <xliff:g id="number">%d</xliff:g> weidere feelgeschloene Versich gëtt den Tablet op d\'Wierksastellungen zréckgesat an all d\'Benotzerdate gi verluer.</string>
+  <string name="kg_failed_attempts_almost_at_wipe" product="default">Du hues <xliff:g id="number">%d</xliff:g>-mol ouni Erfolleg versicht den Telefon z\'entspären. No <xliff:g id="number">%d</xliff:g> weidere feelgeschloene Versich gëtt den Telefon op d\'Wierksastellungen zréckgesat an all d\'Benotzerdate gi verluer.</string>
+  <string name="kg_failed_attempts_now_wiping" product="tablet">Du hues <xliff:g id="number">%d</xliff:g>-mol versicht den Tablet z\'entspären. E gëtt elo op d\'Wierksastellungen zréckgesat.</string>
+  <string name="kg_failed_attempts_now_wiping" product="default">Du hues <xliff:g id="number">%d</xliff:g>-mol versicht den Telefon z\'entspären. E gëtt elo op d\'Wierksastellungen zréckgesat.</string>
+  <string name="kg_failed_attempts_almost_at_login" product="tablet">Du hues däin Entspärmuster <xliff:g id="number">%d</xliff:g>-mol falsch gemoolt. No <xliff:g id="number">%d</xliff:g> weidere feelgeschloene Versich gëss du gefrot däin Tablet duerch en E-Mail-Kont z\'entspären. Probéier nees a(n) <xliff:g id="number">%d</xliff:g> Sekonnen.</string>
+  <string name="kg_failed_attempts_almost_at_login" product="default">Du hues däin Entspärmuster <xliff:g id="number">%d</xliff:g>-mol falsch gemoolt. No <xliff:g id="number">%d</xliff:g> weidere feelgeschloene Versich gëss du gefrot däin Telefon duerch en E-Mail-Kont z\'entspären. Probéier nees a(n) <xliff:g id="number">%d</xliff:g> Sekonnen.</string>
+  <string name="kg_text_message_separator" product="default">" \u2014 "</string>
   <string name="kg_reordering_delete_drop_target_text">Ewechhuelen</string>
-  <string name="kg_password_wrong_pin_code_pukked">Inkorrekte SIM-PIN-Code. Du muss elo däin Netzbedreiwer kontaktéiere fir däin Apparat z\'entspären.</string>
+  <string name="kg_password_wrong_pin_code_pukked">Inkorrekte SIM-PIN-Code. Du muss elo däi Provider kontaktéiere fir däin Apparat z\'entspären.</string>
   <plurals name="kg_password_wrong_pin_code">
-    <item quantity="one">Inkorrekte SIM-PIN-Code, du hues nach <xliff:g id="number">%d</xliff:g> Versuch iwwreg ier s de däin Netzbedreiwer kontaktéiere muss fir däin Apparat z\'entspären.</item>
+    <item quantity="one">Inkorrekte SIM-PIN-Code, du hues nach <xliff:g id="number">%d</xliff:g> Versuch iwwreg ier s de däi Provider kontaktéiere muss fir däin Apparat z\'entspären.</item>
     <item quantity="other">Inkorrekte SIM-PIN-Code, du hues nach <xliff:g id="number">%d</xliff:g> Versich iwwreg.</item>
   </plurals>
-  <string name="kg_password_wrong_puk_code_dead">D\'SIM ass onbrauchbar. Kontaktéier däin Netzbedreiwer.</string>
+  <string name="kg_password_wrong_puk_code_dead">D\'SIM ass onbrauchbar. Kontaktéier däi Provider.</string>
   <plurals name="kg_password_wrong_puk_code">
     <item quantity="one">Inkorrekte SIM-PUK-Code, du hues nach <xliff:g id="number">%d</xliff:g> Versuch iwwreg ier deng SIM permanent onbrauchbar gëtt.</item>
     <item quantity="other">Inkorrekte SIM-PUK-Code, du hues nach <xliff:g id="number">%d</xliff:g> Versich iwwreg ier deng SIM permanent onbrauchbar gëtt.</item>

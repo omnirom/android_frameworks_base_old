@@ -53,8 +53,8 @@
   <string name="app_killed_message">Anwendung beendet</string>
   <string name="global_action_reboot">Neu starten</string>
   <string name="global_action_choose_profile">Profile</string>
-  <string name="toast_rotation_unlocked">Bildschirmausrichtung sperren</string>
-  <string name="toast_rotation_locked">Bildschirmausrichtung entsperren</string>
+  <string name="toast_rotation_unlocked">Bildschirmausrichtung entsperrt</string>
+  <string name="toast_rotation_locked">Bildschirmausrichtung gesperrt</string>
   <string name="stylus_app_not_installed">%s ist nicht installiert</string>
   <string name="permlab_changePrivacyGuardState">Datenschutz aktivieren oder deaktivieren</string>
   <string name="permdesc_changePrivacyGuardState">Ermöglicht der App, den Datenschutz für andere Apps zu aktivieren oder deaktivieren. Eine App mit aktiviertem Datenschutz hat keinen Zugriff auf persönliche Daten wie Kontakte, Nachrichten oder das Anrufprotokoll.</string>
@@ -69,6 +69,8 @@
   <string name="permdesc_interceptSmsSent">Ermöglicht der App, verschickte SMS abzufangen. Schädliche Apps können so das Versenden von SMS verhindern.</string>
   <string name="permlab_receiveProtectedSms">geschützte SMS empfangen</string>
   <string name="permdesc_receiveProtectedSms">Ermöglicht der App, eine eingehende, geschützte SMS zu empfangen.</string>
+  <string name="permlab_modifyProtectedSmsList">Liste der geschützten SMS ändern</string>
+  <string name="permdesc_modifyProtectedSmsList">Ermöglicht der App, die Liste der geschützten SMS zu ändern.</string>
   <string name="permlab_resetBatteryStats">Akku-Verlaufsdetails zurücksetzen</string>
   <string name="permdesc_resetBatteryStats">Ermöglicht der App, die Akku-Verlaufsdetails zurückzusetzen</string>
   <string name="permgrouplab_security">Sicherheit</string>
@@ -122,7 +124,7 @@
   <string name="app_ops_toggle_wifi">WLAN ein-/auszuschalten</string>
   <string name="app_ops_toggle_nfc">NFC an-/auszuschalten</string>
   <string name="app_ops_use_alarm_volume">die Weckerlautstärke zu ändern</string>
-  <string name="app_ops_use_audio_focus">denm Audiofokus zu ändern</string>
+  <string name="app_ops_use_audio_focus">den Audiofokus zu ändern</string>
   <string name="app_ops_use_bluetooth_volume">die Bluetooth-Laustärke zu ändern</string>
   <string name="app_ops_use_master_volume">die Gesamtlautstärke zu ändern</string>
   <string name="app_ops_use_media_buttons">Medienschaltflächen zu nutzen</string>
@@ -150,7 +152,7 @@
   <string name="sd_ext_media_unmountable_notification_title">SD-Karte ist beschädigt</string>
   <string name="sd_ext_media_unmountable_notification_message">SD-Karte ist beschädigt. Versuchen Sie, sie erneut zu formatieren.</string>
   <string name="sd_ext_media_badremoval_notification_title">SD-Karte wurde unerwartet entfernt</string>
-  <string name="sd_ext_media_badremoval_notification_message">Vor dem Entfernen die SD-Karte auswerfen, um Datenverlust zu vermeiden.</string>
+  <string name="sd_ext_media_badremoval_notification_message">SD-Karte erst auswerfen, dann entfernen, um Datenverlust zu vermeiden.</string>
   <string name="sd_ext_media_safe_unmount_notification_title">SD-Karte kann sicher entfernt werden</string>
   <string name="sd_ext_media_safe_unmount_notification_message">Die SD-Karte kann jetzt sicher entfernt werden.</string>
   <string name="sd_ext_media_nomedia_notification_title">SD-Karte entfernt</string>
@@ -162,7 +164,7 @@
   <string name="usb_ext_media_unmountable_notification_title">USB-Speicher ist beschädigt</string>
   <string name="usb_ext_media_unmountable_notification_message">USB-Speicher ist beschädigt. Versuchen Sie, ihn erneut zu formatieren.</string>
   <string name="usb_ext_media_badremoval_notification_title">USB-Speicher wurde unerwartet entfernt</string>
-  <string name="usb_ext_media_badremoval_notification_message">Vor dem Entfernen den USB-Speicher auswerfen, um Datenverlust zu vermeiden.</string>
+  <string name="usb_ext_media_badremoval_notification_message">USB-Speicher erst auswerfen, dann entfernen, um Datenverlust zu vermeiden.</string>
   <string name="usb_ext_media_safe_unmount_notification_title">USB-Speicher kann sicher entfernt werden</string>
   <string name="usb_ext_media_safe_unmount_notification_message">Sie können den USB-Speicher jetzt sicher entfernen.</string>
   <string name="usb_ext_media_nomedia_notification_title">USB-Speicher entfernt</string>

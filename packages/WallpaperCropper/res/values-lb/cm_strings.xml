@@ -27,4 +27,5 @@
   <string name="pick_wallpaper">Hannergrondbiller</string>
   <string name="activity_not_found">D\'App ass net installéiert.</string>
   <string name="lockscreen_wallpaper_instructions">Hannergrondbild fir de Spärschierm setzen</string>
+  <string name="image_decode_error">Bild kann net decodéiert ginn</string>
 </resources>

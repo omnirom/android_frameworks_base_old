@@ -65,8 +65,12 @@
   <string name="perf_profile_pwrsv">Économie d\'énergie</string>
   <string name="perf_profile_bal">Équilibré</string>
   <string name="perf_profile_perf">Performance</string>
-  <string name="permlab_interceptSmsSent">intercepte les SMS sortants</string>
+  <string name="permlab_interceptSmsSent">intercepter les SMS sortants</string>
   <string name="permdesc_interceptSmsSent">Permet à l\'application d\'intercepter les SMS sortants. Des applications malveillantes peuvent utiliser cela pour empêcher l\'envoie de SMS.</string>
+  <string name="permlab_receiveProtectedSms">recevoir des SMS protégés</string>
+  <string name="permdesc_receiveProtectedSms">Permet à l\'application de recevoir un SMS entrant protégé.</string>
+  <string name="permlab_modifyProtectedSmsList">modifier la liste des SMS protégés</string>
+  <string name="permdesc_modifyProtectedSmsList">Permet à l\'application de modifier la liste d\'adresse des SMS protégés.</string>
   <string name="permlab_resetBatteryStats">réinitialiser les statistiques de la batterie</string>
   <string name="permdesc_resetBatteryStats">Permet à une application de réinitialiser les données actuelles d\'utilisation de la batterie à faible niveau.</string>
   <string name="permgrouplab_security">Sécurité</string>
@@ -87,7 +91,9 @@
   <string name="permdesc_useHardwareFramework">Permet à une application l\'accès au framework matériel de CM.</string>
   <string name="permlab_keyguardApplicationWidget">définir le widget d\'écran de verrouillage</string>
   <string name="permdesc_keyguardApplicationWidget">Permet à l\'application de définir un widget sur l\'écran de verrouillage.</string>
-  <string name="immersive_mode_confirmation_bottom">Glisser de haut en bas pour quitter le mode plein écran.</string>
+  <string name="permlab_interceptPackageLaunch">intercepter le lancement d\'application</string>
+  <string name="permdesc_interceptPackageLaunch">Permet à l\'application d\'intercepter le lancement d\'autres applications</string>
+  <string name="immersive_mode_confirmation_bottom">Balayez de bas en haut pour quitter le mode plein écran.</string>
   <string name="app_ops_access_camera">accéder à l\'appareil photo</string>
   <string name="app_ops_access_location">accéder à votre localisation</string>
   <string name="app_ops_access_notifications">lire vos notifications</string>
@@ -164,7 +170,7 @@
   <string name="usb_ext_media_nomedia_notification_title">Stockage USB retiré</string>
   <string name="usb_ext_media_nomedia_notification_message">Stockage USB retiré. Insérez un nouveau média.</string>
   <string name="progress_nomediapresent" product="default">Aucun support amovible présent\u2026</string>
-  <string name="lockscreen_sim_error_message_short">Carte SIM non valide.</string>
+  <string name="lockscreen_sim_error_message_short">Carte SIM incorrecte.</string>
   <string name="lockscreen_airplane_mode_on">Mode Avion</string>
   <string name="lockscreen_sim_locked_message_cm">La carte SIM/RUIM est verrouillée.</string>
   <string name="pinpuk_attempts">\nTentatives restantes :</string>

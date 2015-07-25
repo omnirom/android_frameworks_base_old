@@ -2192,8 +2192,14 @@ public class DatabaseHelper extends SQLiteOpenHelper {
             loadIntegerSetting(stmt, Settings.System.SCREEN_ANIMATION_STYLE,
                     R.integer.def_screen_animation_style);
 
+            loadIntegerSetting(stmt, Settings.System.ENABLE_FORWARD_LOOKUP,
+                    R.integer.def_forward_lookup);
+
             loadIntegerSetting(stmt, Settings.System.ENABLE_PEOPLE_LOOKUP,
                     R.integer.def_people_lookup);
+
+            loadIntegerSetting(stmt, Settings.System.ENABLE_REVERSE_LOOKUP,
+                    R.integer.def_reverse_lookup);
 
             loadDefaultAnimationSettings(stmt);
 
@@ -2218,11 +2224,11 @@ public class DatabaseHelper extends SQLiteOpenHelper {
     }
 
     private void loadDefaultAnimationSettings(SQLiteStatement stmt) {
-        loadFractionSetting(stmt, Settings.System.WINDOW_ANIMATION_SCALE,
+        loadFractionSetting(stmt, Settings.Global.WINDOW_ANIMATION_SCALE,
                 R.fraction.def_window_animation_scale, 1);
-        loadFractionSetting(stmt, Settings.System.TRANSITION_ANIMATION_SCALE,
+        loadFractionSetting(stmt, Settings.Global.TRANSITION_ANIMATION_SCALE,
                 R.fraction.def_window_transition_scale, 1);
-        loadFractionSetting(stmt, Settings.System.ANIMATOR_DURATION_SCALE,
+        loadFractionSetting(stmt, Settings.Global.ANIMATOR_DURATION_SCALE,
                 R.fraction.def_animator_duration_scale, 1);
     }
 
@@ -2516,6 +2522,8 @@ public class DatabaseHelper extends SQLiteOpenHelper {
 
             loadIntegerSetting(stmt, Settings.Global.SEND_ACTION_APP_ERROR,
                     R.integer.def_send_action_app_error);
+
+            loadDefaultAnimationSettings(stmt);
 
             // --- New global settings start here
             loadQuickBootSetting(db);

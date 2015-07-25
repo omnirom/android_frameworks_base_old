@@ -17,7 +17,8 @@
 <resources xmlns:xliff="urn:oasis:names:tc:xliff:document:1.2">
   <string name="clear_keyguard_wallpaper">Temizle</string>
   <plurals name="number_of_items_selected">
-    <item quantity="other">%1$d seçildi</item>
+    <item quantity="one">%1$d öge seçildi</item>
+    <item quantity="other">%1$d öge seçildi</item>
   </plurals>
   <string name="wallpaper_accessibility_name">Duvarkağıdı %1$d / %2$d</string>
   <string name="announce_selection"><xliff:g id="label" example="Wallpaper 3 of 10">%1$s</xliff:g> seçildi</string>
@@ -26,4 +27,5 @@
   <string name="pick_wallpaper">Duvar kağıtları</string>
   <string name="activity_not_found">Uyg. yüklü değil.</string>
   <string name="lockscreen_wallpaper_instructions">Kilit ekranı duvar kağıdını ayarla</string>
+  <string name="image_decode_error">Görsel çözümlenemiyor</string>
 </resources>
