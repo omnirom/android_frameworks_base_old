@@ -204,9 +204,14 @@ LOCAL_C_INCLUDES += \
 # TODO: clean up Minikin so it doesn't need the freetype include
 
 ifeq ($(BOARD_USES_QCOM_HARDWARE),true)
+ifeq ($(BOARD_NO_USES_AV-CAF),true)
+LOCAL_C_INCLUDES += \
+        $(TOP)/frameworks/av/include
+else
 LOCAL_C_INCLUDES += \
         $(TOP)/frameworks/av-caf/include
-else
+endif
+else 
 LOCAL_C_INCLUDES += \
         $(TOP)/frameworks/av/include
 endif
