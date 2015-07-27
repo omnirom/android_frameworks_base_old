@@ -149,7 +149,7 @@ public class PhoneWindowManager implements WindowManagerPolicy {
     static final String TAG = "WindowManager";
     static final boolean DEBUG = false;
     static final boolean localLOGV = false;
-    static boolean DEBUG_INPUT = false;
+    static boolean DEBUG_INPUT = true;
     static final boolean DEBUG_KEYGUARD = false;
     static final boolean DEBUG_LAYOUT = false;
     static final boolean DEBUG_STARTING_WINDOW = false;
@@ -5159,7 +5159,7 @@ public class PhoneWindowManager implements WindowManagerPolicy {
         final boolean down = event.getAction() == KeyEvent.ACTION_DOWN;
         final boolean canceled = event.isCanceled();
         final int keyCode = event.getKeyCode();
-
+        final boolean virtualKey = event.getDeviceId() == KeyCharacterMap.VIRTUAL_KEYBOARD;
         final boolean isInjected = (policyFlags & WindowManagerPolicy.FLAG_INJECTED) != 0;
 
         // If screen is off then we treat the case where the keyguard is open but hidden
@@ -5221,10 +5221,14 @@ public class PhoneWindowManager implements WindowManagerPolicy {
             return result;
         }
 
+        // if mHardwareKeysDisable is true we have disabled all button rebindings
+        // so we can be sure that events that are !virtuaKey are only for real buttons
+        boolean disableFeeedback = !virtualKey && mHardwareKeysDisable;
+
         boolean useHapticFeedback = down
                 && (policyFlags & WindowManagerPolicy.FLAG_VIRTUAL) != 0
                 && event.getRepeatCount() == 0
-                && !mHardwareKeysDisable;
+                && !disableFeeedback;
 
         // Specific device key handling
         if (mDeviceKeyHandler != null) {
