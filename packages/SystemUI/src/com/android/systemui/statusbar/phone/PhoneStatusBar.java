@@ -427,8 +427,8 @@ public class PhoneStatusBar extends BaseStatusBar implements DemoMode,
         }
     };
 
-    private class NavigationBarObserver extends ContentObserver {
-        NavigationBarObserver(Handler handler) {
+    private class OmniSettingsObserver extends ContentObserver {
+        OmniSettingsObserver(Handler handler) {
             super(handler);
         }
 
@@ -436,6 +436,13 @@ public class PhoneStatusBar extends BaseStatusBar implements DemoMode,
             mContext.getContentResolver().registerContentObserver(Settings.System.getUriFor(
                     Settings.System.NAVIGATION_BAR_SHOW),
                     false, this, UserHandle.USER_ALL);
+            mContext.getContentResolver().registerContentObserver(Settings.System.getUriFor(
+                    Settings.System.LOCKSCREEN_ROTATION),
+                    false, this, UserHandle.USER_ALL);
+            mContext.getContentResolver().registerContentObserver(Settings.System.getUriFor(
+                    Settings.System.LOCKSCREEN_ROTATION),
+                    false, this, UserHandle.USER_ALL);
+
             update();
         }
 
@@ -454,9 +461,10 @@ public class PhoneStatusBar extends BaseStatusBar implements DemoMode,
                     updateNavigationBar();
                 }
             }
+            mStatusBarWindowManager.updateKeyguardScreenRotation();
         }
     }
-    private NavigationBarObserver mNavigationBarObserver = new NavigationBarObserver(mHandler);
+    private OmniSettingsObserver mOmniSettingsObserver = new OmniSettingsObserver(mHandler);
 
     private int mInteractingWindows;
     private boolean mAutohideSuspended;
@@ -633,7 +641,7 @@ public class PhoneStatusBar extends BaseStatusBar implements DemoMode,
 
         addNavigationBar();
         // must be after addNavigationBar
-        mNavigationBarObserver.observe();
+        mOmniSettingsObserver.observe();
 
         // Lastly, call to the icon policy to install/update all the icons.
         mIconPolicy = new PhoneStatusBarPolicy(mContext, mCastController, mHotspotController);
@@ -3277,7 +3285,7 @@ public class PhoneStatusBar extends BaseStatusBar implements DemoMode,
         updateNotifications();
         resetUserSetupObserver();
         setControllerUsers();
-        mNavigationBarObserver.update();
+        mOmniSettingsObserver.update();
     }
 
     private void setControllerUsers() {
