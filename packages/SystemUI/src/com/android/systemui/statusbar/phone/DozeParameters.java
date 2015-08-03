@@ -218,6 +218,17 @@ public class DozeParameters {
         return SystemProperties.get(propName, mContext.getString(resId));
     }
 
+    public int getDozeBrightness() {
+	final int dozeBrightnessDefault = mContext.getResources().getInteger(
+                    com.android.internal.R.integer.config_screenBrightnessDoze);
+        if (getOverwriteValue()) {
+            return Settings.System.getIntForUser(mContext.getContentResolver(),
+                Settings.System.SCREEN_BRIGHTNESS_DOZE, dozeBrightnessDefault,
+                    UserHandle.USER_CURRENT);
+        }
+        return dozeBrightnessDefault;
+    }
+
     public static class PulseSchedule {
         private static final Pattern PATTERN = Pattern.compile("(\\d+?)s", 0);
 
