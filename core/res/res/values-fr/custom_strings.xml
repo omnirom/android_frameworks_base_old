@@ -90,4 +90,9 @@
   <string name="app_ops_use_vibrate">utiliser le retour haptique</string>
   <string name="app_ops_use_voice_volume">utiliser le volume de la sortie vocale</string>
   <string name="app_ops_write_mms_storage">écrire des MMS</string>
+  <string name="battery_style_none">Aucun</string>
+  <string name="battery_style_default">Défaut</string>
+  <string name="battery_style_bar">Barre verticale</string>
+  <string name="battery_style_meter_horizontal">Barre horizontale</string>
+  <string name="battery_style_circle">Cercle</string>
 </resources>

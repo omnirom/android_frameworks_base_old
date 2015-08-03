@@ -90,4 +90,9 @@
   <string name="app_ops_use_vibrate">použít hmatovou zpětnou vazbu</string>
   <string name="app_ops_use_voice_volume">použít hlasitost volání</string>
   <string name="app_ops_write_mms_storage">zápis do úložiště MMS</string>
+  <string name="battery_style_none">Žádný</string>
+  <string name="battery_style_default">Výchozí</string>
+  <string name="battery_style_bar">Svislý pruh</string>
+  <string name="battery_style_meter_horizontal">Vodorovný pruh</string>
+  <string name="battery_style_circle">Kruh</string>
 </resources>

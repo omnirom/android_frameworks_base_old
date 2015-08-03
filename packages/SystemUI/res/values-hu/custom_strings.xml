@@ -31,4 +31,6 @@
   <string name="ext_media_unmounting_notification_title">leválasztás\u2026</string>
   <string name="ext_media_mounting_notification_title">csatlakoztatás\u2026</string>
   <string name="zen_no_interruptions_but_alarm">Megszakítás nélkül. Kivéve riasztás.</string>
+  <string name="battery_saver_dismiss_title">Elvetés</string>
+  <string name="battery_saver_notification_action_text_short">Kikapcsolás</string>
 </resources>
