@@ -23,14 +23,17 @@ import com.android.server.lights.LightsManager;
 
 import android.animation.Animator;
 import android.animation.ObjectAnimator;
+import android.content.ContentResolver;
 import android.content.Context;
 import android.content.res.Resources;
+import android.database.ContentObserver;
 import android.hardware.Sensor;
 import android.hardware.SensorEvent;
 import android.hardware.SensorEventListener;
 import android.hardware.SensorManager;
 import android.hardware.display.DisplayManagerInternal.DisplayPowerCallbacks;
 import android.hardware.display.DisplayManagerInternal.DisplayPowerRequest;
+import android.net.Uri;
 import android.os.Handler;
 import android.os.Looper;
 import android.os.Message;
@@ -38,6 +41,8 @@ import android.os.PowerManager;
 import android.os.RemoteException;
 import android.os.SystemClock;
 import android.os.Trace;
+import android.os.UserHandle;
+import android.provider.Settings;
 import android.util.MathUtils;
 import android.util.Slog;
 import android.util.Spline;
@@ -139,6 +144,7 @@ final class DisplayPowerController implements AutomaticBrightnessController.Call
 
     // The doze screen brightness.
     private final int mScreenBrightnessDozeConfig;
+    private int mScreenBrightnessDoze;
 
     // The dim screen brightness.
     private final int mScreenBrightnessDimConfig;
@@ -250,6 +256,19 @@ final class DisplayPowerController implements AutomaticBrightnessController.Call
     private ObjectAnimator mColorFadeOffAnimator;
     private RampAnimator<DisplayPowerState> mScreenBrightnessRampAnimator;
 
+    private SettingsObserver mSettingsObserver;
+
+    private final class SettingsObserver extends ContentObserver {
+        public SettingsObserver(Handler handler) {
+            super(handler);
+        }
+
+        @Override
+        public void onChange(boolean selfChange, Uri uri) {
+            updateSettings();
+        }
+    }
+
     /**
      * Creates the display power controller.
      */
@@ -353,6 +372,11 @@ final class DisplayPowerController implements AutomaticBrightnessController.Call
             }
         }
 
+        mSettingsObserver = new SettingsObserver(mHandler);
+        final ContentResolver resolver = mContext.getContentResolver();
+        resolver.registerContentObserver(Settings.System.getUriFor(
+                Settings.System.SCREEN_BRIGHTNESS_DOZE),
+                false, mSettingsObserver, UserHandle.USER_ALL);
     }
 
     /**
@@ -631,7 +655,7 @@ final class DisplayPowerController implements AutomaticBrightnessController.Call
         // Use default brightness when dozing unless overridden.
         if (brightness < 0 && (state == Display.STATE_DOZE
                 || state == Display.STATE_DOZE_SUSPEND)) {
-            brightness = mScreenBrightnessDozeConfig;
+            brightness = mScreenBrightnessDoze;
         }
 
         // Apply manual brightness.
@@ -1045,6 +1069,7 @@ final class DisplayPowerController implements AutomaticBrightnessController.Call
         pw.println();
         pw.println("Display Power Controller Configuration:");
         pw.println("  mScreenBrightnessDozeConfig=" + mScreenBrightnessDozeConfig);
+        pw.println("  mScreenBrightnessDoze=" + mScreenBrightnessDoze);
         pw.println("  mScreenBrightnessDimConfig=" + mScreenBrightnessDimConfig);
         pw.println("  mScreenBrightnessDarkConfig=" + mScreenBrightnessDarkConfig);
         pw.println("  mScreenBrightnessRangeMinimum=" + mScreenBrightnessRangeMinimum);
@@ -1200,5 +1225,13 @@ final class DisplayPowerController implements AutomaticBrightnessController.Call
             msg.setAsynchronous(true);
             mHandler.sendMessage(msg);
         }
+    }
+
+    private void updateSettings() {
+        final ContentResolver resolver = mContext.getContentResolver();
+        mScreenBrightnessDoze = Settings.System.getIntForUser(resolver,
+                Settings.System.SCREEN_BRIGHTNESS_DOZE,
+                mScreenBrightnessDozeConfig,
+                UserHandle.USER_CURRENT);
     }
 }
