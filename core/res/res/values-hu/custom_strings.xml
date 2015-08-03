@@ -90,4 +90,9 @@
   <string name="app_ops_use_vibrate">érintési visszajelzést használni</string>
   <string name="app_ops_use_voice_volume">hívás hangerőt használni</string>
   <string name="app_ops_write_mms_storage">MMS tároló írása</string>
+  <string name="battery_style_none">Nincs</string>
+  <string name="battery_style_default">Alapértelmezett</string>
+  <string name="battery_style_bar">Függőleges sáv</string>
+  <string name="battery_style_meter_horizontal">Vízszintes sáv</string>
+  <string name="battery_style_circle">Kör</string>
 </resources>
