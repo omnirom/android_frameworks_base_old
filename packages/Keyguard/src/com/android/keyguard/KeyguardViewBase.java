@@ -31,6 +31,7 @@ import android.os.RemoteException;
 import android.os.ServiceManager;
 import android.os.SystemClock;
 import android.os.UserHandle;
+import android.provider.Settings;
 import android.telephony.TelephonyManager;
 import android.util.AttributeSet;
 import android.util.Log;
@@ -409,10 +410,13 @@ public abstract class KeyguardViewBase extends FrameLayout implements SecurityCa
     private static final String ENABLE_MENU_KEY_FILE = "/data/local/enable_menu_key";
     private boolean shouldEnableMenuKey() {
         final Resources res = getResources();
+        final boolean hardwareKeysDisable = Settings.System.getIntForUser(getContext().getContentResolver(),
+                Settings.System.HARDWARE_KEYS_DISABLE, 0, UserHandle.USER_CURRENT) != 0;
+
         final boolean configDisabled = res.getBoolean(R.bool.config_disableMenuKeyInLockScreen);
         final boolean isTestHarness = ActivityManager.isRunningInTestHarness();
         final boolean fileOverride = (new File(ENABLE_MENU_KEY_FILE)).exists();
-        return !configDisabled || isTestHarness || fileOverride;
+        return !hardwareKeysDisable && (!configDisabled || isTestHarness || fileOverride);
     }
 
     public boolean handleMenuKey() {

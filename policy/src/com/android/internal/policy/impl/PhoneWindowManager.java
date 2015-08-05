@@ -5175,7 +5175,8 @@ public class PhoneWindowManager implements WindowManagerPolicy {
 
             Slog.d(TAG, "interceptKeyTq keycode=" + keyCode
                     + " interactive=" + interactive + " keyguardActive=" + keyguardActive
-                    + " policyFlags=" + Integer.toHexString(policyFlags) + " down=" + down);
+                    + " policyFlags=" + Integer.toHexString(policyFlags) + " down=" + down
+                    + " event.isWakeKey()= " + event.isWakeKey() + " isCustomWakeKey(keyCode)=" + isCustomWakeKey(keyCode));
         }
 
         // Basic policy based on interactive state.
@@ -5223,12 +5224,12 @@ public class PhoneWindowManager implements WindowManagerPolicy {
 
         // if mHardwareKeysDisable is true we have disabled all button rebindings
         // so we can be sure that events that are !virtuaKey are only for real buttons
-        boolean disableFeeedback = !virtualKey && mHardwareKeysDisable;
+        boolean disableKey = !virtualKey && mHardwareKeysDisable;
 
         boolean useHapticFeedback = down
                 && (policyFlags & WindowManagerPolicy.FLAG_VIRTUAL) != 0
                 && event.getRepeatCount() == 0
-                && !disableFeeedback;
+                && !disableKey;
 
         // Specific device key handling
         if (mDeviceKeyHandler != null) {
@@ -5461,7 +5462,15 @@ public class PhoneWindowManager implements WindowManagerPolicy {
                     msg.setAsynchronous(true);
                     msg.sendToTarget();
                 }
+                break;
             }
+            // WTH are those wake keys?
+            case KeyEvent.KEYCODE_BACK:
+            case KeyEvent.KEYCODE_MENU:
+                if (disableKey) {
+                    isWakeKey = false;
+                }
+                break;
         }
 
         if (useHapticFeedback) {
