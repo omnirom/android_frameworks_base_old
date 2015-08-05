@@ -30,6 +30,8 @@ import android.os.IBinder;
 import android.os.PowerManager;
 import android.os.RemoteException;
 import android.os.ServiceManager;
+import android.os.UserHandle;
+import android.provider.Settings;
 import android.util.Slog;
 import android.view.ActionMode;
 import android.view.Display;
@@ -202,16 +204,21 @@ public class DreamService extends Service implements Window.Callback {
     /** {@inheritDoc} */
     @Override
     public boolean dispatchKeyEvent(KeyEvent event) {
-        // TODO: create more flexible version of mInteractive that allows use of KEYCODE_BACK
-        if (!mInteractive) {
-            if (mDebug) Slog.v(TAG, "Waking up on keyEvent");
-            wakeUp();
-            return true;
-        } else if (event.getKeyCode() == KeyEvent.KEYCODE_BACK) {
-            if (mDebug) Slog.v(TAG, "Waking up on back key");
-            wakeUp();
-            return true;
-        }
+        final boolean hardwareKeysDisable = Settings.System.getIntForUser(getContentResolver(),
+                Settings.System.HARDWARE_KEYS_DISABLE, 0, UserHandle.USER_CURRENT) != 0;
+
+        if (!hardwareKeysDisable) {
+            // TODO: create more flexible version of mInteractive that allows use of KEYCODE_BACK
+            if (!mInteractive) {
+                if (mDebug) Slog.v(TAG, "Waking up on keyEvent");
+                wakeUp();
+                return true;
+            } else if (event.getKeyCode() == KeyEvent.KEYCODE_BACK) {
+                if (mDebug) Slog.v(TAG, "Waking up on back key");
+                wakeUp();
+                return true;
+            }
+	    }
         return mWindow.superDispatchKeyEvent(event);
     }
 
