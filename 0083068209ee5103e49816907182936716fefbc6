@@ -1,0 +1,21 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "f8eba960_8a6aeaea",
+        "filename": "core/java/android/service/dreams/DreamService.java",
+        "patchSetId": 2
+      },
+      "lineNbr": 207,
+      "author": {
+        "id": 1000026
+      },
+      "writtenOn": "2015-08-06T13:25:39Z",
+      "side": 1,
+      "message": "that helps nothing :)",
+      "revId": "0083068209ee5103e49816907182936716fefbc6",
+      "serverId": "56841c99-7c94-43d4-bf0b-cb4707e66d55",
+      "unresolved": false
+    }
+  ]
+}
