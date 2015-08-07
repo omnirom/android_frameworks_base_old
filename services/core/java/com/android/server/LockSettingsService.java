@@ -118,6 +118,7 @@ public class LockSettingsService extends ILockSettings.Stub {
     private static final int PROFILE_KEY_IV_SIZE = 12;
     private static final String SEPARATE_PROFILE_CHALLENGE_KEY = "lockscreen.profilechallenge";
     private final Object mSeparateChallengeLock = new Object();
+    private static final String DEFAULT_PASSWORD = "default_password";
 
     private final Context mContext;
     private final Handler mHandler;
@@ -130,6 +131,7 @@ public class LockSettingsService extends ILockSettings.Stub {
     private IGateKeeperService mGateKeeperService;
     private NotificationManager mNotificationManager;
     private UserManager mUserManager;
+    private static String mSavePassword = DEFAULT_PASSWORD;
 
     private final KeyStore mKeyStore = KeyStore.getInstance();
 
@@ -719,6 +721,45 @@ public class LockSettingsService extends ILockSettings.Stub {
         return mStorage.hasPattern(userId);
     }
 
+    public void retainPassword(String password) {
+        if (LockPatternUtils.isDeviceEncryptionEnabled()) {
+            if (password != null)
+                mSavePassword = password;
+            else
+                mSavePassword = DEFAULT_PASSWORD;
+        }
+    }
+
+    public void sanitizePassword() {
+        if (LockPatternUtils.isDeviceEncryptionEnabled()) {
+            mSavePassword = DEFAULT_PASSWORD;
+        }
+    }
+
+    private boolean checkCryptKeeperPermissions() {
+        boolean permission_err = false;
+        try {
+            mContext.enforceCallingOrSelfPermission(
+                       android.Manifest.permission.CRYPT_KEEPER,
+                       "no permission to get the password");
+        } catch (SecurityException e) {
+            permission_err = true;
+        }
+        return permission_err;
+    }
+
+    public String getPassword() {
+       /** if calling process does't have crypt keeper or admin permissions,
+         * throw the exception.
+         */
+       if (checkCryptKeeperPermissions())
+            mContext.enforceCallingOrSelfPermission(
+                    android.Manifest.permission.MANAGE_DEVICE_ADMINS,
+                    "no crypt_keeper or admin permission to get the password");
+
+       return mSavePassword;
+    }
+
     private void setKeystorePassword(String password, int userHandle) {
         final KeyStore ks = KeyStore.getInstance();
         ks.onUserPasswordChanged(userHandle, password);
@@ -1273,6 +1314,8 @@ public class LockSettingsService extends ILockSettings.Stub {
                && shouldReEnrollBaseZero) {
             setLockPatternInternal(pattern, patternToVerify, userId);
        }
+       if (response.getResponseCode() == VerifyCredentialResponse.RESPONSE_OK)
+           retainPassword(pattern);
 
        return response;
     }
@@ -1280,7 +1323,10 @@ public class LockSettingsService extends ILockSettings.Stub {
     @Override
     public VerifyCredentialResponse checkPassword(String password, int userId,
             ICheckCredentialProgressCallback progressCallback) throws RemoteException {
-        return doVerifyPassword(password, false, 0, userId, progressCallback);
+        VerifyCredentialResponse response = doVerifyPassword(password, false, 0, userId, progressCallback);
+        if (response.getResponseCode() == VerifyCredentialResponse.RESPONSE_OK)
+            retainPassword(password);
+        return response;
     }
 
     @Override
