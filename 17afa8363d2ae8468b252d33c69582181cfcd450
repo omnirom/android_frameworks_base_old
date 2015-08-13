@@ -1,0 +1,21 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "f8eba960_cddb6ceb",
+        "filename": "core/java/android/provider/Settings.java",
+        "patchSetId": 1
+      },
+      "lineNbr": 3099,
+      "author": {
+        "id": 1000026
+      },
+      "writtenOn": "2015-08-13T11:16:19Z",
+      "side": 1,
+      "message": "omni specific enhancements are normally not added to backup settings.\nand we should not start with this one cause welse we need to think about the zillion existing ones :)",
+      "revId": "17afa8363d2ae8468b252d33c69582181cfcd450",
+      "serverId": "56841c99-7c94-43d4-bf0b-cb4707e66d55",
+      "unresolved": false
+    }
+  ]
+}
