@@ -25,4 +25,8 @@
         <item name="android:displayOptions">showCustom</item>
         <item name="android:background">#88000000</item>
     </style>
+
+    <style name="ActionBarSetWallpaperStyle" parent="@android:style/Widget.DeviceDefault.ActionButton">
+        <item name="android:textColor">#ffffffff</item>
+    </style>
 </resources>
