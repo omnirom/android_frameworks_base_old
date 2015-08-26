@@ -2450,6 +2450,7 @@ class MountService extends IMountService.Stub
         try {
             NativeDaemonEvent event = mCryptConnector.execute("cryptfs", "changepw", CRYPTO_TYPES[type],
                         new SensitiveArg(currentPassword), new SensitiveArg(password));
+            lockSettings.sanitizePassword();
             return Integer.parseInt(event.getMessage());
         } catch (NativeDaemonConnectorException e) {
             // Encryption failed
