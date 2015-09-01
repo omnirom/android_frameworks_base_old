@@ -195,6 +195,9 @@ public class DisconnectCause {
     /** call failed due to LTE to 3G/2G handover not feasible */
     public static final int HO_NOT_FEASIBLE = 52;
 
+    public static final int LOCAL_LOW_BATTERY = 53;
+    public static final int LOW_BATTERY = 54;
+
     //*********************************************************************************************
     // When adding a disconnect type:
     // 1) Please assign the new type the next id value below.
@@ -210,7 +213,7 @@ public class DisconnectCause {
     public static final int MINIMUM_VALID_VALUE = NOT_DISCONNECTED;
 
     /** Largest valid value for call disconnect codes. */
-    public static final int MAXIMUM_VALID_VALUE = HO_NOT_FEASIBLE;
+    public static final int MAXIMUM_VALID_VALUE = LOW_BATTERY;
 
     /** Private constructor to avoid class instantiation. */
     private DisconnectCause() {
@@ -320,6 +323,10 @@ public class DisconnectCause {
             return "CDMA_ALREADY_ACTIVATED";
         case HO_NOT_FEASIBLE:
             return "HO_NOT_FEASIBLE";
+        case LOCAL_LOW_BATTERY:
+            return "LOCAL_LOW_BATTERY";
+        case LOW_BATTERY:
+            return "LOW_BATTERY";
         default:
             return "INVALID: " + cause;
         }
