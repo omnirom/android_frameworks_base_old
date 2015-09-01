@@ -124,13 +124,23 @@ public final class RotationPolicy {
     public static void setRotationLockForAccessibility(Context context, final boolean enabled) {
         Settings.System.putIntForUser(context.getContentResolver(),
                 Settings.System.HIDE_ROTATION_LOCK_TOGGLE_FOR_ACCESSIBILITY, enabled ? 1 : 0,
-                        UserHandle.USER_CURRENT);
+                UserHandle.USER_CURRENT);
 
         setRotationLock(enabled, NATURAL_ROTATION);
     }
 
     private static boolean areAllRotationsAllowed(Context context) {
-        return context.getResources().getBoolean(R.bool.config_allowAllRotations);
+        final int allowAllRotations = context.getResources().
+                getBoolean(com.android.internal.R.bool.config_allowAllRotations) ? 1 : 0;
+        final int mode = Settings.System.getIntForUser(context.getContentResolver(),
+                Settings.System.ACCELEROMETER_ROTATION_ANGLES, -1,
+                UserHandle.USER_CURRENT);
+        if (mode < 0) {
+            // defaults
+            return allowAllRotations == 1;
+        }
+        // if any rotation angle is enabled it is enough to allow enable locking in that rotation
+        return true;
     }
 
     private static void setRotationLock(final boolean enabled, final int rotation) {
