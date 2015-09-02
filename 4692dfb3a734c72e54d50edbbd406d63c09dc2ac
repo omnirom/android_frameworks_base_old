@@ -1,0 +1,21 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "d8f0a54e_a38de4db",
+        "filename": "core/java/com/android/internal/view/RotationPolicy.java",
+        "patchSetId": 3
+      },
+      "lineNbr": 138,
+      "author": {
+        "id": 1000026
+      },
+      "writtenOn": "2015-09-02T12:00:34Z",
+      "side": 1,
+      "message": "the default angles are 0,90,180 - so mode can be still -1 if rotation is already possible (possible angles never changed)\n\nWhy not always just return true?",
+      "revId": "4692dfb3a734c72e54d50edbbd406d63c09dc2ac",
+      "serverId": "56841c99-7c94-43d4-bf0b-cb4707e66d55",
+      "unresolved": false
+    }
+  ]
+}
