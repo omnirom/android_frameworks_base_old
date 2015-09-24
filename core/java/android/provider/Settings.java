@@ -3347,6 +3347,15 @@ public final class Settings {
                 "notification_light_pulse_default_color";
 
         /**
+         * Whether we automatically generate notification LED colors or just
+         * use the boring default.
+         *
+         * @hide
+         */
+        public static final String NOTIFICATION_LIGHT_COLOR_AUTO =
+                "notification_light_color_auto";
+
+        /**
          * How long to flash the notification LED by default
          * @hide
          */
@@ -3359,13 +3368,6 @@ public final class Settings {
          */
         public static final String NOTIFICATION_LIGHT_PULSE_DEFAULT_LED_OFF =
                 "notification_light_pulse_default_led_off";
-
-        /**
-         * How long to flash the voicemail notification LED
-         * @hide
-         */
-        public static final String NOTIFICATION_LIGHT_PULSE_VMAIL_LED_ON =
-                "notification_light_pulse_vmail_led_on";
 
         /**
          * Whether to use the custom LED values for the notification pulse LED.

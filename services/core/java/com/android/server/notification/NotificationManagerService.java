@@ -79,6 +79,7 @@ import android.content.pm.ParceledListSlice;
 import android.content.pm.UserInfo;
 import android.content.res.Resources;
 import android.database.ContentObserver;
+import android.graphics.drawable.Drawable;
 import android.media.AudioAttributes;
 import android.media.AudioManager;
 import android.media.AudioManagerInternal;
@@ -130,6 +131,7 @@ import android.widget.Toast;
 import com.android.internal.R;
 import com.android.internal.annotations.VisibleForTesting;
 import com.android.internal.statusbar.NotificationVisibility;
+import com.android.internal.util.omni.ColorUtils;
 import com.android.internal.util.FastXmlSerializer;
 import com.android.internal.util.Preconditions;
 import com.android.server.DeviceIdleController;
@@ -247,6 +249,8 @@ public class NotificationManagerService extends SystemService {
     private int mDefaultNotificationLedOff;
     private long[] mDefaultVibrationPattern;
 
+    private boolean mAutoGenerateNotificationColor = true;
+
     private boolean mScreenOnEnabled = false;
     private boolean mScreenOnDefault = false;
 
@@ -271,6 +275,8 @@ public class NotificationManagerService extends SystemService {
     private boolean mNotificationPulseEnabled;
     private ArrayMap<String, NotificationLedValues> mNotificationPulseCustomLedValues;
     private Map<String, String> mPackageNameMappings;
+    private final ArrayMap<String, Integer> mGeneratedPackageLedColors =
+        new ArrayMap<String, Integer>();
 
     // for checking lockscreen status
     private KeyguardManager mKeyguardManager;
@@ -308,6 +314,8 @@ public class NotificationManagerService extends SystemService {
     private NotificationRankers mRankerServices;
     private ConditionProviders mConditionProviders;
     private NotificationUsageStats mUsageStats;
+
+    private boolean mMultiColorNotificationLed;
 
     private static final int MY_UID = Process.myUid();
     private static final int MY_PID = Process.myPid();
@@ -873,6 +881,9 @@ public class NotificationManagerService extends SystemService {
                     false, this, UserHandle.USER_ALL);
             resolver.registerContentObserver(NOTIFICATION_RATE_LIMIT_URI,
                     false, this, UserHandle.USER_ALL);
+            resolver.registerContentObserver(Settings.System.getUriFor(
+                    Settings.System.NOTIFICATION_LIGHT_COLOR_AUTO),
+                    false, this, UserHandle.USER_ALL);
             update(null);
         }
 
@@ -885,6 +896,11 @@ public class NotificationManagerService extends SystemService {
             // LED enabled
             mNotificationPulseEnabled = Settings.System.getIntForUser(resolver,
                     Settings.System.NOTIFICATION_LIGHT_PULSE, 0, UserHandle.USER_CURRENT) != 0;
+
+            // Automatically pick a color for LED if not set
+            mAutoGenerateNotificationColor = Settings.System.getIntForUser(resolver,
+                    Settings.System.NOTIFICATION_LIGHT_COLOR_AUTO,
+                    1, UserHandle.USER_CURRENT) != 0;
 
             // LED default color
             mDefaultNotificationColor = Settings.System.getIntForUser(resolver,
@@ -900,6 +916,9 @@ public class NotificationManagerService extends SystemService {
             mDefaultNotificationLedOff = Settings.System.getIntForUser(resolver,
                     Settings.System.NOTIFICATION_LIGHT_PULSE_DEFAULT_LED_OFF,
                     mDefaultNotificationLedOff, UserHandle.USER_CURRENT);
+
+            // LED generated notification colors
+            mGeneratedPackageLedColors.clear();
 
             // LED custom notification colors
             mNotificationPulseCustomLedValues.clear();
@@ -1058,6 +1077,9 @@ public class NotificationManagerService extends SystemService {
                 R.integer.config_defaultNotificationLedOn);
         mDefaultNotificationLedOff = resources.getInteger(
                 R.integer.config_defaultNotificationLedOff);
+
+        mMultiColorNotificationLed = resources.getBoolean(
+                R.bool.config_multiColorNotificationLed);
 
         mNotificationPulseCustomLedValues = new ArrayMap<String, NotificationLedValues>();
 
@@ -3688,7 +3710,7 @@ public class NotificationManagerService extends SystemService {
                 ledOnMS = ledValues.onMS >= 0 ? ledValues.onMS : mDefaultNotificationLedOn;
                 ledOffMS = ledValues.offMS >= 0 ? ledValues.offMS : mDefaultNotificationLedOff;
             } else if ((ledno.defaults & Notification.DEFAULT_LIGHTS) != 0) {
-                ledARGB = mDefaultNotificationColor;
+                ledARGB = generateLedColorForNotification(ledNotification);
                 ledOnMS = mDefaultNotificationLedOn;
                 ledOffMS = mDefaultNotificationLedOff;
             } else {
@@ -3743,6 +3765,36 @@ public class NotificationManagerService extends SystemService {
     private NotificationLedValues getLedValuesForNotification(NotificationRecord ledNotification) {
         final String packageName = ledNotification.sbn.getPackageName();
         return mNotificationPulseCustomLedValues.get(mapPackage(packageName));
+    }
+
+    private int generateLedColorForNotification(NotificationRecord ledNotification) {
+        if (!mAutoGenerateNotificationColor) {
+            return mDefaultNotificationColor;
+        }
+        if (!mMultiColorNotificationLed) {
+            return mDefaultNotificationColor;
+        }
+        final String packageName = ledNotification.sbn.getPackageName();
+        final String mapping = mapPackage(packageName);
+        int color = mDefaultNotificationColor;
+
+        if (mGeneratedPackageLedColors.containsKey(mapping)) {
+            return mGeneratedPackageLedColors.get(mapping);
+        }
+
+        PackageManager pm = getContext().getPackageManager();
+        Drawable icon;
+        try {
+            icon = pm.getApplicationIcon(mapping);
+        } catch (NameNotFoundException e) {
+            Slog.e(TAG, e.getMessage(), e);
+            return color;
+        }
+
+        color = ColorUtils.getIconColorFromDrawable(icon);
+        mGeneratedPackageLedColors.put(mapping, color);
+
+        return color;
     }
 
     private String mapPackage(String pkg) {
