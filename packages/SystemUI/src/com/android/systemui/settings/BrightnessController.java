@@ -28,13 +28,15 @@ import android.os.RemoteException;
 import android.os.ServiceManager;
 import android.os.UserHandle;
 import android.provider.Settings;
+import android.view.MotionEvent;
+import android.view.View;
 import android.widget.ImageView;
 
 import java.util.ArrayList;
 
 public class BrightnessController implements ToggleSlider.Listener {
     private static final String TAG = "StatusBar.BrightnessController";
-    private static final boolean SHOW_AUTOMATIC_ICON = false;
+    private static final boolean SHOW_AUTOMATIC_ICON = true;
 
     /**
      * {@link android.provider.Settings.System#SCREEN_AUTO_BRIGHTNESS_ADJ} uses the range [-1, 1].
@@ -150,6 +152,17 @@ public class BrightnessController implements ToggleSlider.Listener {
         mAutomaticAvailable = context.getResources().getBoolean(
                 com.android.internal.R.bool.config_automatic_brightness_available);
         mPower = IPowerManager.Stub.asInterface(ServiceManager.getService("power"));
+
+        if (mAutomaticAvailable) {
+            mIcon.setOnTouchListener(new View.OnTouchListener() {
+                @Override
+                public boolean onTouch(View v, MotionEvent event) {
+                    int newMode = mAutomatic ? Settings.System.SCREEN_BRIGHTNESS_MODE_MANUAL : Settings.System.SCREEN_BRIGHTNESS_MODE_AUTOMATIC;
+                    setMode(newMode);
+                    return false;
+                }
+            });
+        }
     }
 
     public void addStateChangedCallback(BrightnessStateChangeCallback cb) {
