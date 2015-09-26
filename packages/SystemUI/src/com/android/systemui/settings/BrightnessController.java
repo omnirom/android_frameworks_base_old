@@ -28,13 +28,14 @@ import android.os.RemoteException;
 import android.os.ServiceManager;
 import android.os.UserHandle;
 import android.provider.Settings;
+import android.view.MotionEvent;
+import android.view.View;
 import android.widget.ImageView;
 
 import java.util.ArrayList;
 
 public class BrightnessController implements ToggleSlider.Listener {
     private static final String TAG = "StatusBar.BrightnessController";
-    private static final boolean SHOW_AUTOMATIC_ICON = false;
 
     /**
      * {@link android.provider.Settings.System#SCREEN_AUTO_BRIGHTNESS_ADJ} uses the range [-1, 1].
@@ -60,6 +61,7 @@ public class BrightnessController implements ToggleSlider.Listener {
     private boolean mAutomatic;
     private boolean mListening;
     private boolean mExternalChange;
+    private boolean mShowModeIcon;
 
     public interface BrightnessStateChangeCallback {
         public void onBrightnessLevelChanged();
@@ -129,9 +131,10 @@ public class BrightnessController implements ToggleSlider.Listener {
 
     }
 
-    public BrightnessController(Context context, ImageView icon, ToggleSlider control) {
+    public BrightnessController(Context context, ImageView icon, ToggleSlider control, boolean showModeIcon) {
         mContext = context;
         mIcon = icon;
+        mShowModeIcon = showModeIcon;
         mControl = control;
         mHandler = new Handler();
         mUserTracker = new CurrentUserTracker(mContext) {
@@ -150,6 +153,21 @@ public class BrightnessController implements ToggleSlider.Listener {
         mAutomaticAvailable = context.getResources().getBoolean(
                 com.android.internal.R.bool.config_automatic_brightness_available);
         mPower = IPowerManager.Stub.asInterface(ServiceManager.getService("power"));
+
+        if (mIcon != null) {
+            if (!mShowModeIcon || !mAutomaticAvailable) {
+                mIcon.setVisibility(View.GONE);
+            } else {
+                mIcon.setOnTouchListener(new View.OnTouchListener() {
+                    @Override
+                    public boolean onTouch(View v, MotionEvent event) {
+                        int newMode = mAutomatic ? Settings.System.SCREEN_BRIGHTNESS_MODE_MANUAL : Settings.System.SCREEN_BRIGHTNESS_MODE_AUTOMATIC;
+                        setMode(newMode);
+                        return false;
+                    }
+                });
+            }
+        }
     }
 
     public void addStateChangedCallback(BrightnessStateChangeCallback cb) {
@@ -252,7 +270,7 @@ public class BrightnessController implements ToggleSlider.Listener {
 
     private void updateIcon(boolean automatic) {
         if (mIcon != null) {
-            mIcon.setImageResource(automatic && SHOW_AUTOMATIC_ICON ?
+            mIcon.setImageResource(automatic ?
                     com.android.systemui.R.drawable.ic_qs_brightness_auto_on :
                     com.android.systemui.R.drawable.ic_qs_brightness_auto_off);
         }

@@ -106,7 +106,8 @@ public class QSPanel extends ViewGroup {
 
         mBrightnessController = new BrightnessController(getContext(),
                 (ImageView) findViewById(R.id.brightness_icon),
-                (ToggleSlider) findViewById(R.id.brightness_slider));
+                (ToggleSlider) findViewById(R.id.brightness_slider),
+                true);
 
         mDetailDoneButton.setOnClickListener(new OnClickListener() {
             @Override
