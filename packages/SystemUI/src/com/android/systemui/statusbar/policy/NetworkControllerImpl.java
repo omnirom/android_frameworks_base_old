@@ -140,6 +140,8 @@ public class NetworkControllerImpl extends BroadcastReceiver
     // The current user ID.
     private int mCurrentUserId;
 
+    private boolean mShowIndicators = false;
+
     /**
      * Construct this controller object and register for updates.
      */
@@ -659,6 +661,13 @@ public class NetworkControllerImpl extends BroadcastReceiver
         }
     }
 
+    public void setShowIndicators(boolean value) {
+        mWifiSignalController.setShowIndicators(value);
+        for (MobileSignalController controller : mMobileSignalControllers.values()) {
+            controller.setShowIndicators(value);
+        }
+    }
+
     private boolean isMobileDataConnected() {
         MobileSignalController controller = getDataController();
         return controller != null ? controller.getState().dataConnected : false;
@@ -879,7 +888,7 @@ public class NetworkControllerImpl extends BroadcastReceiver
             int signalClustersLength = mSignalClusters.size();
             for (int i = 0; i < signalClustersLength; i++) {
                 mSignalClusters.get(i).setWifiIndicators(wifiVisible, getCurrentIconId(),
-                        contentDescription);
+                        getActivityIconId(ssidPresent), contentDescription);
             }
         }
 
@@ -1215,6 +1224,7 @@ public class NetworkControllerImpl extends BroadcastReceiver
                 mSignalClusters.get(i).setMobileDataIndicators(
                         mCurrentState.enabled && !mCurrentState.airplaneMode,
                         getCurrentIconId(),
+                        getActivityIconId(mCurrentState.dataConnected),
                         typeIcon,
                         contentDescription,
                         dataContentDescription,
@@ -1535,6 +1545,7 @@ public class NetworkControllerImpl extends BroadcastReceiver
         private final State[] mHistory;
         // Where to copy the next state into.
         private int mHistoryIndex;
+        private boolean mShowIndicators = false;
 
         public SignalController(String tag, Context context, int type,
                 List<NetworkSignalChangedCallback> signalCallbacks,
@@ -1627,6 +1638,23 @@ public class NetworkControllerImpl extends BroadcastReceiver
             } else {
                 return getIcons().mSbNullState;
             }
+        }
+
+        public int getActivityIconId(boolean connected) {
+            if (connected && mShowIndicators) {
+                if (mCurrentState.activityIn && mCurrentState.activityOut) {
+                    return R.drawable.stat_sys_signal_inout;
+                } else if (mCurrentState.activityIn) {
+                    return R.drawable.stat_sys_signal_in;
+                } else if (mCurrentState.activityOut) {
+                    return R.drawable.stat_sys_signal_out;
+                }
+            }
+            return R.drawable.stat_sys_signal_none;
+        }
+
+        public void setShowIndicators(boolean value) {
+            mShowIndicators = value;
         }
 
         /**
@@ -1802,9 +1830,9 @@ public class NetworkControllerImpl extends BroadcastReceiver
     }
 
     public interface SignalCluster {
-        void setWifiIndicators(boolean visible, int strengthIcon, String contentDescription);
+        void setWifiIndicators(boolean visible, int strengthIcon, int activityIcon, String contentDescription);
 
-        void setMobileDataIndicators(boolean visible, int strengthIcon, int typeIcon,
+        void setMobileDataIndicators(boolean visible, int strengthIcon, int activityIcon, int typeIcon,
                 String contentDescription, String typeContentDescription, boolean isTypeIconWide,
                 int subId);
         void setSubs(List<SubscriptionInfo> subs);
