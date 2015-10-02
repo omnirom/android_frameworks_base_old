@@ -378,7 +378,7 @@ public class BluetoothControllerImpl implements BluetoothController {
             for (int i = 0; i < size; i++) {
                 BluetoothDevice device = mDeviceInfo.keyAt(i);
                 DeviceInfo info = mDeviceInfo.valueAt(i);
-                if (CONNECTION_STATES[info.connectionStateIndex]
+                if (info != null && CONNECTION_STATES[info.connectionStateIndex]
                         == BluetoothProfile.STATE_CONNECTED) {
                     mLastDevice = device;
                     break;

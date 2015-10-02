@@ -174,6 +174,7 @@ import com.android.systemui.statusbar.policy.KeyguardMonitor;
 import com.android.systemui.statusbar.policy.KeyguardUserSwitcher;
 import com.android.systemui.statusbar.policy.LocationControllerImpl;
 import com.android.systemui.statusbar.policy.NetworkControllerImpl;
+import com.android.systemui.statusbar.policy.NetworkTraffic;
 import com.android.systemui.statusbar.policy.NextAlarmController;
 import com.android.systemui.statusbar.policy.PreviewInflater;
 import com.android.systemui.statusbar.policy.RotationLockControllerImpl;
@@ -288,6 +289,7 @@ public class PhoneStatusBar extends BaseStatusBar implements DemoMode,
     StatusBarWindowView mStatusBarWindow;
     PhoneStatusBarView mStatusBarView;
     BatteryViewManager mBatteryViewManager;
+    NetworkTraffic mNetworkTraffic;
     private int mStatusBarWindowState = WINDOW_STATE_SHOWING;
     private StatusBarWindowManager mStatusBarWindowManager;
     private UnlockMethodCache mUnlockMethodCache;
@@ -1028,6 +1030,8 @@ public class PhoneStatusBar extends BaseStatusBar implements DemoMode,
         LinearLayout batteryContainer = (LinearLayout) mStatusBarView.findViewById(R.id.battery_container);
         mBatteryViewManager = new BatteryViewManager(mContext, batteryContainer, mStatusBarView.getBarTransitions(), null);
         mBatteryViewManager.setBatteryController(mBatteryController);
+
+        mNetworkTraffic = (NetworkTraffic) mStatusBarView.findViewById(R.id.networkTraffic);
 
         mKeyguardStatusBar.setBatteryController(mBatteryController);
         mHeader.setNextAlarmController(mNextAlarmController);
@@ -3458,6 +3462,8 @@ public class PhoneStatusBar extends BaseStatusBar implements DemoMode,
         resetUserSetupObserver();
         setControllerUsers();
         mOmniSettingsObserver.update();
+        mBatteryViewManager.update();
+        mNetworkTraffic.updateSettings();
     }
 
     private void setControllerUsers() {
