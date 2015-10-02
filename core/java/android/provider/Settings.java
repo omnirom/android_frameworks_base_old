@@ -2969,6 +2969,27 @@ public final class Settings {
         public static final String STATUSBAR_BATTERY_PERCENT = "statusbar_battery_percent";
 
         /**
+         * boolean value if the battery percent should be shown inside the image
+         *
+         * @hide
+         */
+        public static final String STATUSBAR_BATTERY_PERCENT_INSIDE = "statusbar_battery_percent_inside";
+
+        /**
+         * boolean value if the charging flash should be displayed
+         *
+         * @hide
+         */
+        public static final String STATUSBAR_BATTERY_CHARGING_IMAGE = "statusbar_battery_charging_image";
+
+        /**
+         * int value of the color to use when charging -1 disabled
+         *
+         * @hide
+         */
+        public static final String STATUSBAR_BATTERY_CHARGING_COLOR = "statusbar_battery_charging_color";
+
+        /**
          * Custom button brightness value for manual mode
          *
          * @hide

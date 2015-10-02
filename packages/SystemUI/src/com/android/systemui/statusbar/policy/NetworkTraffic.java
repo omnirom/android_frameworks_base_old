@@ -259,7 +259,7 @@ public class NetworkTraffic extends TextView {
         return network != null && network.isConnected();
     }
 
-    private void updateSettings() {
+    public void updateSettings() {
         ContentResolver resolver = mContext.getContentResolver();
 
         mAutoHide = Settings.System.getIntForUser(resolver,
@@ -270,20 +270,21 @@ public class NetworkTraffic extends TextView {
                 Settings.System.NETWORK_TRAFFIC_AUTOHIDE_THRESHOLD, 10,
                 UserHandle.USER_CURRENT);
 
-        mState = Settings.System.getInt(resolver, Settings.System.NETWORK_TRAFFIC_STATE, 0);
+        mState = Settings.System.getIntForUser(resolver, Settings.System.NETWORK_TRAFFIC_STATE, 0,
+                UserHandle.USER_CURRENT);
 
-	    int defaultColor = Settings.System.getInt(resolver,
-                Settings.System.NETWORK_TRAFFIC_COLOR, 0xFFFFFFFF);
+	int defaultColor = Settings.System.getIntForUser(resolver,
+                Settings.System.NETWORK_TRAFFIC_COLOR, 0xFFFFFFFF, UserHandle.USER_CURRENT);
 
-	    int mNetworkTrafficColor = Settings.System.getInt(resolver,
-                Settings.System.NETWORK_TRAFFIC_COLOR, -2);
+	int mNetworkTrafficColor = Settings.System.getIntForUser(resolver,
+                Settings.System.NETWORK_TRAFFIC_COLOR, -2, UserHandle.USER_CURRENT);
 
-	    if (mNetworkTrafficColor == Integer.MIN_VALUE
+	if (mNetworkTrafficColor == Integer.MIN_VALUE
                 || mNetworkTrafficColor == -2) {
             mNetworkTrafficColor = defaultColor;
         }
 
-	    setTextColor(mNetworkTrafficColor);
+	setTextColor(mNetworkTrafficColor);
 
         if (isSet(mState, MASK_UNIT)) {
             KB = KILOBYTE;
