@@ -2969,6 +2969,13 @@ public final class Settings {
         public static final String STATUSBAR_BATTERY_PERCENT = "statusbar_battery_percent";
 
         /**
+         * boolean value if the battery percent should be shown inside the image
+         *
+         * @hide
+         */
+        public static final String STATUSBAR_PERCENT_INSIDE = "statusbar_percent_inside";
+
+        /**
          * Custom button brightness value for manual mode
          *
          * @hide

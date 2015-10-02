@@ -47,7 +47,6 @@ public class BatteryMeterView extends AbstractBatteryView {
 
     private final int[] mColors;
 
-    boolean mShowPercent = true;
     private float mButtonHeightFraction;
     private float mSubpixelSmoothingLeft;
     private float mSubpixelSmoothingRight;

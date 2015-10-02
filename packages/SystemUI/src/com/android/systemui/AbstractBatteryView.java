@@ -46,6 +46,8 @@ public abstract class AbstractBatteryView extends View implements DemoMode,
     protected BatteryTracker mDemoTracker = new BatteryTracker();
     protected BatteryTracker mTracker = new BatteryTracker();
     private boolean mAttached;
+    protected boolean mShowPercent;
+    protected boolean mPercentInside;
 
     protected class BatteryTracker extends BroadcastReceiver {
         public static final int UNKNOWN_LEVEL = -1;
@@ -203,7 +205,15 @@ public abstract class AbstractBatteryView extends View implements DemoMode,
         }
     }
 
-    public boolean isHidingPercentViews() {
-        return false;
+    public void setShowPercent(boolean showPercent) {
+        mShowPercent = showPercent;
+    }
+
+    public void setPercentInside(boolean percentInside) {
+        mPercentInside = percentInside;
+    }
+
+    protected boolean isWideDisplay() {
+        return mShowPercent && !mPercentInside;
     }
 }
