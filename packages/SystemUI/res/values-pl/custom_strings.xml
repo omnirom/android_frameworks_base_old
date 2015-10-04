@@ -31,4 +31,6 @@
   <string name="ext_media_unmounting_notification_title">odmontowywanie\u2026</string>
   <string name="ext_media_mounting_notification_title">montowanie\u2026</string>
   <string name="zen_no_interruptions_but_alarm">Bez przerw. Z wyjątkiem alarmów.</string>
+  <string name="battery_saver_dismiss_title">Odrzuć</string>
+  <string name="battery_saver_notification_action_text_short">Wyłącz</string>
 </resources>
