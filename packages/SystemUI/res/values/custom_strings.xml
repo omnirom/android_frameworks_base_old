@@ -42,9 +42,6 @@
     <string name="ext_media_unmounting_notification_title">unmounting\u2026</string>
     <string name="ext_media_mounting_notification_title">mounting\u2026</string>
 
-    <!-- no interuptions except alarms -->
-    <string name="zen_no_interruptions_but_alarm">No interruptions. Except alarms.</string>
-
     <!-- Battery Saver Dimss -->
     <string name="battery_saver_dismiss_title">Dismiss</string>
     <string name="battery_saver_notification_action_text_short">Turn off</string>

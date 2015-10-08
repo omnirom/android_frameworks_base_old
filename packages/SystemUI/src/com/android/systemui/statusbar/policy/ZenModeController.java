@@ -28,7 +28,6 @@ public interface ZenModeController {
     void setExitCondition(Condition exitCondition);
     Condition getExitCondition();
     long getNextAlarm();
-    boolean isAllowAlarms();
     void setUserId(int userId);
     boolean isZenAvailable();
     ComponentName getEffectsSuppressor();
