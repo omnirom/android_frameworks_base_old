@@ -16,19 +16,24 @@
 
 package com.android.systemui;
 
+import android.animation.ArgbEvaluator;
 import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.Intent;
 import android.content.IntentFilter;
 import android.content.res.Resources;
 import android.content.res.TypedArray;
+import android.database.ContentObserver;
 import android.graphics.Canvas;
+import android.graphics.Color;
 import android.graphics.Paint;
 import android.graphics.Path;
 import android.graphics.RectF;
 import android.graphics.Typeface;
+import android.net.Uri;
 import android.os.BatteryManager;
 import android.os.Bundle;
+import android.os.Handler;
 import android.provider.Settings;
 import android.util.AttributeSet;
 import android.view.View;
@@ -36,10 +41,10 @@ import android.util.Log;
 
 public class BatteryMeterView extends AbstractBatteryView {
     public static final String TAG = BatteryMeterView.class.getSimpleName();
+    public static final String ACTION_LEVEL_TEST = "com.android.systemui.BATTERY_LEVEL_TEST";
+    public static final String SHOW_PERCENT_SETTING = "status_bar_show_battery_percent";
 
-    private static final boolean ENABLE_PERCENT = true;
     private static final boolean SINGLE_DIGIT_PERCENT = false;
-    private static final boolean SHOW_100_PERCENT = false;
 
     private static final int FULL = 96;
 
@@ -47,18 +52,19 @@ public class BatteryMeterView extends AbstractBatteryView {
 
     private final int[] mColors;
 
-    boolean mShowPercent = true;
+    private boolean mShowPercent;
     private float mButtonHeightFraction;
     private float mSubpixelSmoothingLeft;
     private float mSubpixelSmoothingRight;
     private final Paint mFramePaint, mBatteryPaint, mWarningTextPaint, mTextPaint, mBoltPaint;
     private float mTextHeight, mWarningTextHeight;
+    private int mIconTint = Color.WHITE;
 
     private int mHeight;
     private int mWidth;
     private String mWarningString;
     private final int mCriticalLevel;
-    private final int mChargeColor;
+    private int mChargeColor;
     private final float[] mBoltPoints;
     private final Path mBoltPath = new Path();
 
@@ -69,6 +75,18 @@ public class BatteryMeterView extends AbstractBatteryView {
     private final Path mShapePath = new Path();
     private final Path mClipPath = new Path();
     private final Path mTextPath = new Path();
+
+    private BatteryController mBatteryController;
+    private boolean mPowerSaveEnabled;
+
+    private int mDarkModeBackgroundColor;
+    private int mDarkModeFillColor;
+
+    private int mLightModeBackgroundColor;
+    private int mLightModeFillColor;
+
+    private BatteryTracker mTracker = new BatteryTracker();
+    private final SettingObserver mSettingObserver = new SettingObserver();
 
     public BatteryMeterView(Context context) {
         this(context, null, 0);
@@ -85,7 +103,7 @@ public class BatteryMeterView extends AbstractBatteryView {
         TypedArray atts = context.obtainStyledAttributes(attrs, R.styleable.BatteryMeterView,
                 defStyle, 0);
         final int frameColor = atts.getColor(R.styleable.BatteryMeterView_frameColor,
-                res.getColor(R.color.batterymeter_frame_color));
+                context.getColor(R.color.batterymeter_frame_color));
         TypedArray levels = res.obtainTypedArray(R.array.batterymeter_color_levels);
         TypedArray colors = res.obtainTypedArray(R.array.batterymeter_color_values);
 
@@ -98,8 +116,7 @@ public class BatteryMeterView extends AbstractBatteryView {
         levels.recycle();
         colors.recycle();
         atts.recycle();
-        mShowPercent = ENABLE_PERCENT && 0 != Settings.System.getInt(
-                context.getContentResolver(), "status_bar_show_battery_percent", 0);
+        updateShowPercent();
         mWarningString = context.getString(R.string.battery_meter_very_low_overlay_symbol);
         mCriticalLevel = mContext.getResources().getInteger(
                 com.android.internal.R.integer.config_criticalBatteryWarningLevel);
@@ -132,11 +149,44 @@ public class BatteryMeterView extends AbstractBatteryView {
         mWarningTextPaint.setTypeface(font);
         mWarningTextPaint.setTextAlign(Paint.Align.CENTER);
 
-        mChargeColor = getResources().getColor(R.color.batterymeter_charge_color);
+        mChargeColor = context.getColor(R.color.batterymeter_charge_color);
 
         mBoltPaint = new Paint(Paint.ANTI_ALIAS_FLAG);
-        mBoltPaint.setColor(res.getColor(R.color.batterymeter_bolt_color));
+        mBoltPaint.setColor(context.getColor(R.color.batterymeter_bolt_color));
         mBoltPoints = loadBoltPoints(res);
+
+        mDarkModeBackgroundColor =
+                context.getColor(R.color.dark_mode_icon_color_dual_tone_background);
+        mDarkModeFillColor = context.getColor(R.color.dark_mode_icon_color_dual_tone_fill);
+        mLightModeBackgroundColor =
+                context.getColor(R.color.light_mode_icon_color_dual_tone_background);
+        mLightModeFillColor = context.getColor(R.color.light_mode_icon_color_dual_tone_fill);
+    }
+
+    @Override
+    public void onAttachedToWindow() {
+        super.onAttachedToWindow();
+
+        IntentFilter filter = new IntentFilter();
+        filter.addAction(Intent.ACTION_BATTERY_CHANGED);
+        filter.addAction(ACTION_LEVEL_TEST);
+        final Intent sticky = getContext().registerReceiver(mTracker, filter);
+        if (sticky != null) {
+            // preload the battery level
+            mTracker.onReceive(getContext(), sticky);
+        }
+        mBatteryController.addStateChangedCallback(this);
+        getContext().getContentResolver().registerContentObserver(
+                Settings.System.getUriFor(SHOW_PERCENT_SETTING), false, mSettingObserver);
+    }
+
+    @Override
+    public void onDetachedFromWindow() {
+        super.onDetachedFromWindow();
+
+        getContext().unregisterReceiver(mTracker);
+        mBatteryController.removeStateChangedCallback(this);
+        getContext().getContentResolver().unregisterContentObserver(mSettingObserver);
     }
 
     private static float[] loadBoltPoints(Resources res) {
@@ -162,6 +212,11 @@ public class BatteryMeterView extends AbstractBatteryView {
         mWarningTextHeight = -mWarningTextPaint.getFontMetrics().ascent;
     }
 
+    private void updateShowPercent() {
+        mShowPercent = 0 != Settings.System.getInt(getContext().getContentResolver(),
+                SHOW_PERCENT_SETTING, 0);
+    }
+
     private int getColorForLevel(int percent) {
 
         // If we are in power save mode, always use the normal color.
@@ -172,9 +227,41 @@ public class BatteryMeterView extends AbstractBatteryView {
         for (int i=0; i<mColors.length; i+=2) {
             thresh = mColors[i];
             color = mColors[i+1];
-            if (percent <= thresh) return color;
+            if (percent <= thresh) {
+
+                // Respect tinting for "normal" level
+                if (i == mColors.length-2) {
+                    return mIconTint;
+                } else {
+                    return color;
+                }
+            }
         }
         return color;
+    }
+
+    public void setDarkIntensity(float darkIntensity) {
+        int backgroundColor = getBackgroundColor(darkIntensity);
+        int fillColor = getFillColor(darkIntensity);
+        mIconTint = fillColor;
+        mFramePaint.setColor(backgroundColor);
+        mBoltPaint.setColor(fillColor);
+        mChargeColor = fillColor;
+        invalidate();
+    }
+
+    private int getBackgroundColor(float darkIntensity) {
+        return getColorForDarkIntensity(
+                darkIntensity, mLightModeBackgroundColor, mDarkModeBackgroundColor);
+    }
+
+    private int getFillColor(float darkIntensity) {
+        return getColorForDarkIntensity(
+                darkIntensity, mLightModeFillColor, mDarkModeFillColor);
+    }
+
+    private int getColorForDarkIntensity(float darkIntensity, int lightColor, int darkColor) {
+        return (int) ArgbEvaluator.getInstance().evaluate(darkIntensity, lightColor, darkColor);
     }
 
     @Override
@@ -277,8 +364,7 @@ public class BatteryMeterView extends AbstractBatteryView {
         boolean pctOpaque = false;
         float pctX = 0, pctY = 0;
         String pctText = null;
-        if (!tracker.plugged && level > mCriticalLevel && mShowPercent
-                && !(tracker.level == 100 && !SHOW_100_PERCENT)) {
+        if (!tracker.plugged && level > mCriticalLevel && mShowPercent) {
             mTextPaint.setColor(getColorForLevel(level));
             mTextPaint.setTextSize(height *
                     (SINGLE_DIGIT_PERCENT ? 0.75f
@@ -323,4 +409,117 @@ public class BatteryMeterView extends AbstractBatteryView {
     public boolean hasOverlappingRendering() {
         return false;
     }
+
+    private boolean mDemoMode;
+    private BatteryTracker mDemoTracker = new BatteryTracker();
+
+    @Override
+    public void dispatchDemoCommand(String command, Bundle args) {
+        if (!mDemoMode && command.equals(COMMAND_ENTER)) {
+            mDemoMode = true;
+            mDemoTracker.level = mTracker.level;
+            mDemoTracker.plugged = mTracker.plugged;
+        } else if (mDemoMode && command.equals(COMMAND_EXIT)) {
+            mDemoMode = false;
+            postInvalidate();
+        } else if (mDemoMode && command.equals(COMMAND_BATTERY)) {
+           String level = args.getString("level");
+           String plugged = args.getString("plugged");
+           if (level != null) {
+               mDemoTracker.level = Math.min(Math.max(Integer.parseInt(level), 0), 100);
+           }
+           if (plugged != null) {
+               mDemoTracker.plugged = Boolean.parseBoolean(plugged);
+           }
+           postInvalidate();
+        }
+    }
+
+    private final class BatteryTracker extends BroadcastReceiver {
+        public static final int UNKNOWN_LEVEL = -1;
+
+        // current battery status
+        int level = UNKNOWN_LEVEL;
+        String percentStr;
+        int plugType;
+        boolean plugged;
+        int health;
+        int status;
+        String technology;
+        int voltage;
+        int temperature;
+        boolean testmode = false;
+
+        @Override
+        public void onReceive(Context context, Intent intent) {
+            final String action = intent.getAction();
+            if (action.equals(Intent.ACTION_BATTERY_CHANGED)) {
+                if (testmode && ! intent.getBooleanExtra("testmode", false)) return;
+
+                level = (int)(100f
+                        * intent.getIntExtra(BatteryManager.EXTRA_LEVEL, 0)
+                        / intent.getIntExtra(BatteryManager.EXTRA_SCALE, 100));
+
+                plugType = intent.getIntExtra(BatteryManager.EXTRA_PLUGGED, 0);
+                plugged = plugType != 0;
+                health = intent.getIntExtra(BatteryManager.EXTRA_HEALTH,
+                        BatteryManager.BATTERY_HEALTH_UNKNOWN);
+                status = intent.getIntExtra(BatteryManager.EXTRA_STATUS,
+                        BatteryManager.BATTERY_STATUS_UNKNOWN);
+                technology = intent.getStringExtra(BatteryManager.EXTRA_TECHNOLOGY);
+                voltage = intent.getIntExtra(BatteryManager.EXTRA_VOLTAGE, 0);
+                temperature = intent.getIntExtra(BatteryManager.EXTRA_TEMPERATURE, 0);
+
+                setContentDescription(
+                        context.getString(R.string.accessibility_battery_level, level));
+                postInvalidate();
+            } else if (action.equals(ACTION_LEVEL_TEST)) {
+                testmode = true;
+                post(new Runnable() {
+                    int curLevel = 0;
+                    int incr = 1;
+                    int saveLevel = level;
+                    int savePlugged = plugType;
+                    Intent dummy = new Intent(Intent.ACTION_BATTERY_CHANGED);
+                    @Override
+                    public void run() {
+                        if (curLevel < 0) {
+                            testmode = false;
+                            dummy.putExtra("level", saveLevel);
+                            dummy.putExtra("plugged", savePlugged);
+                            dummy.putExtra("testmode", false);
+                        } else {
+                            dummy.putExtra("level", curLevel);
+                            dummy.putExtra("plugged", incr > 0 ? BatteryManager.BATTERY_PLUGGED_AC
+                                    : 0);
+                            dummy.putExtra("testmode", true);
+                        }
+                        getContext().sendBroadcast(dummy);
+
+                        if (!testmode) return;
+
+                        curLevel += incr;
+                        if (curLevel == 100) {
+                            incr *= -1;
+                        }
+                        postDelayed(this, 200);
+                    }
+                });
+            }
+        }
+    }
+
+    private final class SettingObserver extends ContentObserver {
+        public SettingObserver() {
+            super(new Handler());
+        }
+
+        @Override
+        public void onChange(boolean selfChange, Uri uri) {
+            super.onChange(selfChange, uri);
+            updateShowPercent();
+            postInvalidate();
+        }
+    }
+
 }

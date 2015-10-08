@@ -29,8 +29,6 @@ import android.view.MotionEvent;
 import android.view.View;
 import android.view.ViewConfiguration;
 import android.view.ViewGroup;
-import android.view.accessibility.AccessibilityEvent;
-import android.view.accessibility.AccessibilityNodeInfo;
 import android.widget.RemoteViews.OnClickHandler;
 
 import java.util.ArrayList;
@@ -1085,14 +1083,7 @@ public abstract class AdapterViewAnimator extends AdapterView<Adapter>
     }
 
     @Override
-    public void onInitializeAccessibilityEvent(AccessibilityEvent event) {
-        super.onInitializeAccessibilityEvent(event);
-        event.setClassName(AdapterViewAnimator.class.getName());
-    }
-
-    @Override
-    public void onInitializeAccessibilityNodeInfo(AccessibilityNodeInfo info) {
-        super.onInitializeAccessibilityNodeInfo(info);
-        info.setClassName(AdapterViewAnimator.class.getName());
+    public CharSequence getAccessibilityClassName() {
+        return AdapterViewAnimator.class.getName();
     }
 }

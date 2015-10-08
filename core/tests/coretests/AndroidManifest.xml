@@ -112,6 +112,10 @@
 
     <application android:theme="@style/Theme">
         <uses-library android:name="android.test.runner" />
+        <uses-library android:name="org.apache.http.legacy" android:required="false" />
+        <meta-data
+            android:name="android.content.APP_RESTRICTIONS"
+            android:resource="@xml/app_restrictions" />
         <activity android:name="android.view.ViewAttachTestActivity" android:label="View Attach Test">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
@@ -1112,6 +1116,10 @@
         <activity android:name="android.app.activity.LaunchpadActivity" android:multiprocess="true">
         </activity>
         <activity android:name="android.app.activity.LaunchpadTabActivity" android:multiprocess="true">
+        </activity>
+        <activity android:name="com.android.internal.app.WindowDecorActionBarTestActivity">
+        </activity>
+        <activity android:name="com.android.internal.policy.PhoneWindowActionModeTestActivity">
         </activity>
 
         <receiver android:name="android.app.activity.AbortReceiver">

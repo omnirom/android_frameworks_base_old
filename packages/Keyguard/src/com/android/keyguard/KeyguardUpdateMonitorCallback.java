@@ -15,11 +15,11 @@
  */
 package com.android.keyguard;
 
-import android.app.PendingIntent;
 import android.app.admin.DevicePolicyManager;
 import android.graphics.Bitmap;
 import android.media.AudioManager;
 import android.os.SystemClock;
+import android.hardware.fingerprint.FingerprintManager;
 import android.telephony.TelephonyManager;
 import android.view.WindowManagerPolicy;
 
@@ -123,11 +123,6 @@ public class KeyguardUpdateMonitorCallback {
     public void onSimStateChanged(int subId, int slotId, IccCardConstants.State simState) { }
 
     /**
-     * Called when a user is removed.
-     */
-    public void onUserRemoved(int userId) { }
-
-    /**
      * Called when the user's info changed.
      */
     public void onUserInfoChanged(int userId) { }
@@ -153,17 +148,17 @@ public class KeyguardUpdateMonitorCallback {
     }
 
     /**
-     * Called when the screen turns on
+     * Called when the device has started waking up.
      */
-    public void onScreenTurnedOn() { }
+    public void onStartedWakingUp() { }
 
     /**
-     * Called when the screen turns off
+     * Called when the device has finished going to sleep.
      * @param why either {@link WindowManagerPolicy#OFF_BECAUSE_OF_ADMIN},
      * {@link WindowManagerPolicy#OFF_BECAUSE_OF_USER}, or
      * {@link WindowManagerPolicy#OFF_BECAUSE_OF_TIMEOUT}.
      */
-    public void onScreenTurnedOff(int why) { }
+    public void onFinishedGoingToSleep(int why) { }
 
     /**
      * Called when trust changes for a user.
@@ -176,23 +171,40 @@ public class KeyguardUpdateMonitorCallback {
     public void onTrustManagedChanged(int userId) { }
 
     /**
-     * Called when the user has proved to a trust agent that they want to use the device.
+     * Called after trust was granted with non-zero flags.
      */
-    public void onTrustInitiatedByUser(int userId) { }
+    public void onTrustGrantedWithFlags(int flags, int userId) { }
 
     /**
      * Called when a fingerprint is recognized.
-     * @param userId
+     * @param userId the user id for which the fingerprint was authenticated
+     * @param wakeAndUnlocking whether the authentication woke the device up and thus we'd like to
+     *                         dismiss the lockscreen before turning on the screen
      */
-    public void onFingerprintRecognized(int userId) { }
+    public void onFingerprintAuthenticated(int userId, boolean wakeAndUnlocking) { }
 
     /**
-     * Called when fingerprint is acquired but not yet recognized
+     * Called when fingerprint provides help string (e.g. "Try again")
+     * @param msgId
+     * @param helpString
      */
-    public void onFingerprintAcquired(int info) { }
+    public void onFingerprintHelp(int msgId, String helpString) { }
+
+    /**
+     * Called when fingerprint provides an semi-permanent error message
+     * (e.g. "Hardware not available").
+     * @param msgId one of the error messages listed in {@link FingerprintManager}
+     * @param errString
+     */
+    public void onFingerprintError(int msgId, String errString) { }
 
     /**
      * Called when the state of face unlock changed.
      */
     public void onFaceUnlockStateChanged(boolean running, int userId) { }
+
+    /**
+     * Called when the fingerprint running state changed.
+     */
+    public void onFingerprintRunningStateChanged(boolean running) { }
 }

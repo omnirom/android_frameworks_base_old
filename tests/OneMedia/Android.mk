@@ -9,6 +9,8 @@ LOCAL_SRC_FILES := $(call all-subdir-java-files) \
 LOCAL_PACKAGE_NAME := OneMedia
 LOCAL_CERTIFICATE := platform
 
+LOCAL_JAVA_LIBRARIES += org.apache.http.legacy
+
 LOCAL_PROGUARD_ENABLED := disabled
 
 include $(BUILD_PACKAGE)

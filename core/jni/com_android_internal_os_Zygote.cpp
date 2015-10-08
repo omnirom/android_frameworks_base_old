@@ -20,12 +20,16 @@
 #include <sys/mount.h>
 #include <linux/fs.h>
 
-#include <grp.h>
+#include <list>
+#include <string>
+
 #include <fcntl.h>
+#include <grp.h>
+#include <inttypes.h>
+#include <mntent.h>
 #include <paths.h>
 #include <signal.h>
 #include <stdlib.h>
-#include <unistd.h>
 #include <sys/capability.h>
 #include <sys/personality.h>
 #include <sys/prctl.h>
@@ -34,7 +38,7 @@
 #include <sys/types.h>
 #include <sys/utsname.h>
 #include <sys/wait.h>
-
+#include <unistd.h>
 
 #include <cutils/fs.h>
 #include <cutils/multiuser.h>
@@ -43,9 +47,8 @@
 #include <utils/String8.h>
 #include <selinux/android.h>
 #include <processgroup/processgroup.h>
-#include <inttypes.h>
 
-#include "android_runtime/AndroidRuntime.h"
+#include "core_jni_helpers.h"
 #include "JNIHelp.h"
 #include "ScopedLocalRef.h"
 #include "ScopedPrimitiveArray.h"
@@ -66,9 +69,9 @@ static jmethodID gCallPostForkChildHooks;
 // Must match values in com.android.internal.os.Zygote.
 enum MountExternalKind {
   MOUNT_EXTERNAL_NONE = 0,
-  MOUNT_EXTERNAL_SINGLEUSER = 1,
-  MOUNT_EXTERNAL_MULTIUSER = 2,
-  MOUNT_EXTERNAL_MULTIUSER_ALL = 3,
+  MOUNT_EXTERNAL_DEFAULT = 1,
+  MOUNT_EXTERNAL_READ = 2,
+  MOUNT_EXTERNAL_WRITE = 3,
 };
 
 static void RuntimeAbort(JNIEnv* env) {
@@ -105,7 +108,7 @@ static void SigChldHandler(int /*signal_number*/) {
     // so that it is restarted by init and system server will be restarted
     // from there.
     if (pid == gSystemServerPid) {
-      ALOGE("Exit zygote because system server (%d) has terminated");
+      ALOGE("Exit zygote because system server (%d) has terminated", pid);
       kill(getpid(), SIGKILL);
     }
   }
@@ -131,7 +134,7 @@ static void SetSigChldHandler() {
 
   int err = sigaction(SIGCHLD, &sa, NULL);
   if (err < 0) {
-    ALOGW("Error setting SIGCHLD handler: %d", errno);
+    ALOGW("Error setting SIGCHLD handler: %s", strerror(errno));
   }
 }
 
@@ -143,7 +146,7 @@ static void UnsetSigChldHandler() {
 
   int err = sigaction(SIGCHLD, &sa, NULL);
   if (err < 0) {
-    ALOGW("Error unsetting SIGCHLD handler: %d", errno);
+    ALOGW("Error unsetting SIGCHLD handler: %s", strerror(errno));
   }
 }
 
@@ -190,7 +193,8 @@ static void SetRLimits(JNIEnv* env, jobjectArray javaRlimits) {
 
     int rc = setrlimit(javaRlimit[0], &rlim);
     if (rc == -1) {
-      ALOGE("setrlimit(%d, {%d, %d}) failed", javaRlimit[0], rlim.rlim_cur, rlim.rlim_max);
+      ALOGE("setrlimit(%d, {%ld, %ld}) failed", javaRlimit[0], rlim.rlim_cur,
+            rlim.rlim_max);
       RuntimeAbort(env);
     }
   }
@@ -236,7 +240,7 @@ static void SetCapabilities(JNIEnv* env, int64_t permitted, int64_t effective) {
   capdata[1].permitted = permitted >> 32;
 
   if (capset(&capheader, &capdata[0]) == -1) {
-    ALOGE("capset(%lld, %lld) failed", permitted, effective);
+    ALOGE("capset(%" PRId64 ", %" PRId64 ") failed", permitted, effective);
     RuntimeAbort(env);
   }
 }
@@ -249,80 +253,79 @@ static void SetSchedulerPolicy(JNIEnv* env) {
   }
 }
 
+static int UnmountTree(const char* path) {
+    size_t path_len = strlen(path);
+
+    FILE* fp = setmntent("/proc/mounts", "r");
+    if (fp == NULL) {
+        ALOGE("Error opening /proc/mounts: %s", strerror(errno));
+        return -errno;
+    }
+
+    // Some volumes can be stacked on each other, so force unmount in
+    // reverse order to give us the best chance of success.
+    std::list<std::string> toUnmount;
+    mntent* mentry;
+    while ((mentry = getmntent(fp)) != NULL) {
+        if (strncmp(mentry->mnt_dir, path, path_len) == 0) {
+            toUnmount.push_front(std::string(mentry->mnt_dir));
+        }
+    }
+    endmntent(fp);
+
+    for (auto path : toUnmount) {
+        if (umount2(path.c_str(), MNT_DETACH)) {
+            ALOGW("Failed to unmount %s: %s", path.c_str(), strerror(errno));
+        }
+    }
+    return 0;
+}
+
 // Create a private mount namespace and bind mount appropriate emulated
 // storage for the given user.
-static bool MountEmulatedStorage(uid_t uid, jint mount_mode, bool force_mount_namespace) {
-  if (mount_mode == MOUNT_EXTERNAL_NONE && !force_mount_namespace) {
-    return true;
-  }
+static bool MountEmulatedStorage(uid_t uid, jint mount_mode,
+        bool force_mount_namespace) {
+    // See storage config details at http://source.android.com/tech/storage/
 
-  // Create a second private mount namespace for our process
-  if (unshare(CLONE_NEWNS) == -1) {
-      ALOGW("Failed to unshare(): %d", errno);
-      return false;
-  }
-
-  if (mount_mode == MOUNT_EXTERNAL_NONE) {
-    return true;
-  }
-
-  // See storage config details at http://source.android.com/tech/storage/
-  userid_t user_id = multiuser_get_user_id(uid);
-
-  // Create bind mounts to expose external storage
-  if (mount_mode == MOUNT_EXTERNAL_MULTIUSER || mount_mode == MOUNT_EXTERNAL_MULTIUSER_ALL) {
-    // These paths must already be created by init.rc
-    const char* source = getenv("EMULATED_STORAGE_SOURCE");
-    const char* target = getenv("EMULATED_STORAGE_TARGET");
-    const char* legacy = getenv("EXTERNAL_STORAGE");
-    if (source == NULL || target == NULL || legacy == NULL) {
-      ALOGW("Storage environment undefined; unable to provide external storage");
-      return false;
-    }
-
-    // Prepare source paths
-
-    // /mnt/shell/emulated/0
-    const String8 source_user(String8::format("%s/%d", source, user_id));
-    // /storage/emulated/0
-    const String8 target_user(String8::format("%s/%d", target, user_id));
-
-    if (fs_prepare_dir(source_user.string(), 0000, 0, 0) == -1
-        || fs_prepare_dir(target_user.string(), 0000, 0, 0) == -1) {
-      return false;
-    }
-
-    if (mount_mode == MOUNT_EXTERNAL_MULTIUSER_ALL) {
-      // Mount entire external storage tree for all users
-      if (TEMP_FAILURE_RETRY(mount(source, target, NULL, MS_BIND, NULL)) == -1) {
-        ALOGW("Failed to mount %s to %s :%d", source, target, errno);
+    // Create a second private mount namespace for our process
+    if (unshare(CLONE_NEWNS) == -1) {
+        ALOGW("Failed to unshare(): %s", strerror(errno));
         return false;
-      }
+    }
+
+    // Unmount storage provided by root namespace and mount requested view
+    UnmountTree("/storage");
+
+    String8 storageSource;
+    if (mount_mode == MOUNT_EXTERNAL_DEFAULT) {
+        storageSource = "/mnt/runtime/default";
+    } else if (mount_mode == MOUNT_EXTERNAL_READ) {
+        storageSource = "/mnt/runtime/read";
+    } else if (mount_mode == MOUNT_EXTERNAL_WRITE) {
+        storageSource = "/mnt/runtime/write";
     } else {
-      // Only mount user-specific external storage
-      if (TEMP_FAILURE_RETRY(
-              mount(source_user.string(), target_user.string(), NULL, MS_BIND, NULL)) == -1) {
-        ALOGW("Failed to mount %s to %s: %d", source_user.string(), target_user.string(), errno);
-        return false;
-      }
+        // Sane default of no storage visible
+        return true;
     }
-
-    if (fs_prepare_dir(legacy, 0000, 0, 0) == -1) {
+    if (TEMP_FAILURE_RETRY(mount(storageSource.string(), "/storage",
+            NULL, MS_BIND | MS_REC | MS_SLAVE, NULL)) == -1) {
+        ALOGW("Failed to mount %s to /storage: %s", storageSource.string(), strerror(errno));
         return false;
     }
 
-    // Finally, mount user-specific path into place for legacy users
-    if (TEMP_FAILURE_RETRY(
-            mount(target_user.string(), legacy, NULL, MS_BIND | MS_REC, NULL)) == -1) {
-      ALOGW("Failed to mount %s to %s: %d", target_user.string(), legacy, errno);
-      return false;
+    // Mount user-specific symlink helper into place
+    userid_t user_id = multiuser_get_user_id(uid);
+    const String8 userSource(String8::format("/mnt/user/%d", user_id));
+    if (fs_prepare_dir(userSource.string(), 0751, 0, 0) == -1) {
+        return false;
     }
-  } else {
-    ALOGW("Mount mode %d unsupported", mount_mode);
-    return false;
-  }
+    if (TEMP_FAILURE_RETRY(mount(userSource.string(), "/storage/self",
+            NULL, MS_BIND, NULL)) == -1) {
+        ALOGW("Failed to mount %s to /storage/self: %s", userSource.string(), strerror(errno));
+        return false;
+    }
 
-  return true;
+    return true;
 }
 
 static bool NeedsNoRandomizeWorkaround() {
@@ -365,13 +368,13 @@ static void DetachDescriptors(JNIEnv* env, jintArray fdsToClose) {
   for (i = 0; i < count; i++) {
     devnull = open("/dev/null", O_RDWR);
     if (devnull < 0) {
-      ALOGE("Failed to open /dev/null");
+      ALOGE("Failed to open /dev/null: %s", strerror(errno));
       RuntimeAbort(env);
       continue;
     }
-    ALOGV("Switching descriptor %d to /dev/null: %d", ar[i], errno);
+    ALOGV("Switching descriptor %d to /dev/null: %s", ar[i], strerror(errno));
     if (dup2(devnull, ar[i]) < 0) {
-      ALOGE("Failed dup2() on descriptor %d", ar[i]);
+      ALOGE("Failed dup2() on descriptor %d: %s", ar[i], strerror(errno));
       RuntimeAbort(env);
     }
     close(devnull);
@@ -401,23 +404,7 @@ void SetThreadName(const char* thread_name) {
   strlcpy(buf, s, sizeof(buf)-1);
   errno = pthread_setname_np(pthread_self(), buf);
   if (errno != 0) {
-    ALOGW("Unable to set the name of current thread to '%s'", buf);
-  }
-}
-
-  // Temporary timing check.
-uint64_t MsTime() {
-  timespec now;
-  clock_gettime(CLOCK_MONOTONIC, &now);
-  return static_cast<uint64_t>(now.tv_sec) * UINT64_C(1000) + now.tv_nsec / UINT64_C(1000000);
-}
-
-
-void ckTime(uint64_t start, const char* where) {
-  uint64_t now = MsTime();
-  if ((now-start) > 1000) {
-    // If we are taking more than a second, log about it.
-    ALOGW("Slow operation: %"PRIu64" ms in %s", (uint64_t)(now-start), where);
+    ALOGW("Unable to set the name of current thread to '%s': %s", buf, strerror(errno));
   }
 }
 
@@ -429,9 +416,7 @@ static pid_t ForkAndSpecializeCommon(JNIEnv* env, uid_t uid, gid_t gid, jintArra
                                      jstring java_se_info, jstring java_se_name,
                                      bool is_system_server, jintArray fdsToClose,
                                      jstring instructionSet, jstring dataDir) {
-  uint64_t start = MsTime();
   SetSigChldHandler();
-  ckTime(start, "ForkAndSpecializeCommon:SetSigChldHandler");
 
   pid_t pid = fork();
 
@@ -439,11 +424,8 @@ static pid_t ForkAndSpecializeCommon(JNIEnv* env, uid_t uid, gid_t gid, jintArra
     // The child process.
     gMallocLeakZygoteChild = 1;
 
-
     // Clean up any descriptors which must be closed immediately
     DetachDescriptors(env, fdsToClose);
-
-    ckTime(start, "ForkAndSpecializeCommon:Fork and detach");
 
     // Keep capabilities across UID change, unless we're staying root.
     if (uid != 0) {
@@ -504,13 +486,13 @@ static pid_t ForkAndSpecializeCommon(JNIEnv* env, uid_t uid, gid_t gid, jintArra
 
     int rc = setresgid(gid, gid, gid);
     if (rc == -1) {
-      ALOGE("setresgid(%d) failed", gid);
+      ALOGE("setresgid(%d) failed: %s", gid, strerror(errno));
       RuntimeAbort(env);
     }
 
     rc = setresuid(uid, uid, uid);
     if (rc == -1) {
-      ALOGE("setresuid(%d) failed", uid);
+      ALOGE("setresuid(%d) failed: %s", uid, strerror(errno));
       RuntimeAbort(env);
     }
 
@@ -519,7 +501,7 @@ static pid_t ForkAndSpecializeCommon(JNIEnv* env, uid_t uid, gid_t gid, jintArra
         int old_personality = personality(0xffffffff);
         int new_personality = personality(old_personality | ADDR_NO_RANDOMIZE);
         if (new_personality == -1) {
-            ALOGW("personality(%d) failed", new_personality);
+            ALOGW("personality(%d) failed: %s", new_personality, strerror(errno));
         }
     }
 
@@ -568,11 +550,8 @@ static pid_t ForkAndSpecializeCommon(JNIEnv* env, uid_t uid, gid_t gid, jintArra
 
     UnsetSigChldHandler();
 
-    ckTime(start, "ForkAndSpecializeCommon:child process setup");
-
     env->CallStaticVoidMethod(gZygoteClass, gCallPostForkChildHooks, debug_flags,
                               is_system_server ? NULL : instructionSet);
-    ckTime(start, "ForkAndSpecializeCommon:PostForkChildHooks returns");
     if (env->ExceptionCheck()) {
       ALOGE("Error calling post fork hooks.");
       RuntimeAbort(env);
@@ -609,7 +588,7 @@ static jint com_android_internal_os_Zygote_nativeForkSystemServer(
   pid_t pid = ForkAndSpecializeCommon(env, uid, gid, gids,
                                       debug_flags, rlimits,
                                       permittedCapabilities, effectiveCapabilities,
-                                      MOUNT_EXTERNAL_NONE, NULL, NULL, true, NULL,
+                                      MOUNT_EXTERNAL_DEFAULT, NULL, NULL, true, NULL,
                                       NULL, NULL);
   if (pid > 0) {
       // The zygote process checks whether the child process has died or not.
@@ -636,15 +615,11 @@ static JNINativeMethod gMethods[] = {
 };
 
 int register_com_android_internal_os_Zygote(JNIEnv* env) {
-  gZygoteClass = (jclass) env->NewGlobalRef(env->FindClass(kZygoteClassName));
-  if (gZygoteClass == NULL) {
-    RuntimeAbort(env);
-  }
-  gCallPostForkChildHooks = env->GetStaticMethodID(gZygoteClass, "callPostForkChildHooks",
+  gZygoteClass = MakeGlobalRefOrDie(env, FindClassOrDie(env, kZygoteClassName));
+  gCallPostForkChildHooks = GetStaticMethodIDOrDie(env, gZygoteClass, "callPostForkChildHooks",
                                                    "(ILjava/lang/String;)V");
 
-  return AndroidRuntime::registerNativeMethods(env, "com/android/internal/os/Zygote",
-      gMethods, NELEM(gMethods));
+  return RegisterMethodsOrDie(env, "com/android/internal/os/Zygote", gMethods, NELEM(gMethods));
 }
 }  // namespace android
 

@@ -42,7 +42,6 @@ import android.util.SizeF;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
-import java.util.Comparator;
 import java.util.List;
 
 import static com.android.internal.util.Preconditions.*;
@@ -56,7 +55,7 @@ import static android.hardware.camera2.legacy.ParameterUtils.*;
 @SuppressWarnings("deprecation")
 public class LegacyMetadataMapper {
     private static final String TAG = "LegacyMetadataMapper";
-    private static final boolean VERBOSE = Log.isLoggable(TAG, Log.VERBOSE);
+    private static final boolean DEBUG = false;
 
     private static final long NS_PER_MS = 1000000;
 
@@ -153,7 +152,7 @@ public class LegacyMetadataMapper {
         params.unflatten(parameters);
         mapCharacteristicsFromParameters(m, params);
 
-        if (VERBOSE) {
+        if (DEBUG) {
             Log.v(TAG, "createCharacteristics metadata:");
             Log.v(TAG, "--------------------------------------------------- (start)");
             m.dumpToLog();
@@ -285,7 +284,7 @@ public class LegacyMetadataMapper {
             Camera.Size maxJpegSize = SizeAreaComparator.findLargestByArea(jpegSizes);
             float jpegAspectRatio = maxJpegSize.width * 1.0f / maxJpegSize.height;
 
-            if (VERBOSE) {
+            if (DEBUG) {
                 Log.v(TAG, String.format("mapScalerStreamConfigs - largest JPEG area %dx%d, AR=%f",
                         maxJpegSize.width, maxJpegSize.height, jpegAspectRatio));
             }
@@ -301,7 +300,7 @@ public class LegacyMetadataMapper {
                         PREVIEW_ASPECT_RATIO_TOLERANCE) {
                     previewSizes.remove(index); // Assume removing from end is O(1)
 
-                    if (VERBOSE) {
+                    if (DEBUG) {
                         Log.v(TAG, String.format(
                                 "mapScalerStreamConfigs - removed preview size %dx%d, AR=%f "
                                         + "was not the same",
@@ -330,7 +329,7 @@ public class LegacyMetadataMapper {
         for (int format : p.getSupportedPreviewFormats()) {
             if (ImageFormat.isPublicFormat(format) && format != ImageFormat.NV21) {
                 appendStreamConfig(availableStreamConfigs, format, previewSizes);
-            } else if (VERBOSE) {
+            } else if (DEBUG) {
                 /*
                  *  Do not add any formats unknown to us
                  * (since it would fail runtime checks in StreamConfigurationMap)
@@ -389,7 +388,7 @@ public class LegacyMetadataMapper {
             int j = 0;
             for (String mode : antiBandingModes) {
                 int convertedMode = convertAntiBandingMode(mode);
-                if (VERBOSE && convertedMode == -1) {
+                if (DEBUG && convertedMode == -1) {
                     Log.v(TAG, "Antibanding mode " + ((mode == null) ? "NULL" : mode) +
                             " not supported, skipping...");
                 } else {
@@ -416,8 +415,9 @@ public class LegacyMetadataMapper {
             Range<Integer>[] ranges = new Range[rangesSize];
             int i = 0;
             for (int[] r : fpsRanges) {
-                ranges[i++] = Range.create(r[Camera.Parameters.PREVIEW_FPS_MIN_INDEX],
-                        r[Camera.Parameters.PREVIEW_FPS_MAX_INDEX]);
+                ranges[i++] = Range.create(
+                        (int) Math.floor(r[Camera.Parameters.PREVIEW_FPS_MIN_INDEX] / 1000.0),
+                        (int) Math.ceil(r[Camera.Parameters.PREVIEW_FPS_MAX_INDEX] / 1000.0));
             }
             m.set(CONTROL_AE_AVAILABLE_TARGET_FPS_RANGES, ranges);
         }
@@ -474,6 +474,15 @@ public class LegacyMetadataMapper {
 
             m.set(CONTROL_AE_COMPENSATION_STEP, ParamsUtils.createRational(step));
         }
+
+        /*
+         * control.aeLockAvailable
+         */
+        {
+            boolean aeLockAvailable = p.isAutoExposureLockSupported();
+
+            m.set(CONTROL_AE_LOCK_AVAILABLE, aeLockAvailable);
+        }
     }
 
 
@@ -517,7 +526,7 @@ public class LegacyMetadataMapper {
 
             m.set(CONTROL_AF_AVAILABLE_MODES, ArrayUtils.toIntArray(afAvail));
 
-            if (VERBOSE) {
+            if (DEBUG) {
                 Log.v(TAG, "mapControlAf - control.afAvailableModes set to " +
                         ListUtils.listToString(afAvail));
             }
@@ -567,9 +576,19 @@ public class LegacyMetadataMapper {
 
             m.set(CONTROL_AWB_AVAILABLE_MODES, ArrayUtils.toIntArray(awbAvail));
 
-            if (VERBOSE) {
+            if (DEBUG) {
                 Log.v(TAG, "mapControlAwb - control.awbAvailableModes set to " +
                         ListUtils.listToString(awbAvail));
+            }
+
+
+            /*
+             * control.awbLockAvailable
+             */
+            {
+                boolean awbLockAvailable = p.isAutoWhiteBalanceLockSupported();
+
+                m.set(CONTROL_AWB_LOCK_AVAILABLE, awbLockAvailable);
             }
         }
     }
@@ -618,17 +637,44 @@ public class LegacyMetadataMapper {
         /*
          * android.control.availableSceneModes
          */
+        int maxNumDetectedFaces = p.getMaxNumDetectedFaces();
         List<String> sceneModes = p.getSupportedSceneModes();
         List<Integer> supportedSceneModes =
                 ArrayUtils.convertStringListToIntList(sceneModes, sLegacySceneModes, sSceneModes);
-        if (supportedSceneModes == null) { // camera1 doesn't support scene mode settings
-            supportedSceneModes = new ArrayList<Integer>();
-            supportedSceneModes.add(CONTROL_SCENE_MODE_DISABLED); // disabled is always available
+
+        // Special case where the only scene mode listed is AUTO => no scene mode
+        if (sceneModes != null && sceneModes.size() == 1 &&
+                sceneModes.get(0) == Parameters.SCENE_MODE_AUTO) {
+            supportedSceneModes = null;
         }
-        if (p.getMaxNumDetectedFaces() > 0) { // always supports FACE_PRIORITY when face detecting
-            supportedSceneModes.add(CONTROL_SCENE_MODE_FACE_PRIORITY);
+
+        boolean sceneModeSupported = true;
+        if (supportedSceneModes == null && maxNumDetectedFaces == 0) {
+            sceneModeSupported = false;
         }
-        m.set(CONTROL_AVAILABLE_SCENE_MODES, ArrayUtils.toIntArray(supportedSceneModes));
+
+        if (sceneModeSupported) {
+            if (supportedSceneModes == null) {
+                supportedSceneModes = new ArrayList<Integer>();
+            }
+            if (maxNumDetectedFaces > 0) { // always supports FACE_PRIORITY when face detecting
+                supportedSceneModes.add(CONTROL_SCENE_MODE_FACE_PRIORITY);
+            }
+            // Remove all DISABLED occurrences
+            if (supportedSceneModes.contains(CONTROL_SCENE_MODE_DISABLED)) {
+                while(supportedSceneModes.remove(new Integer(CONTROL_SCENE_MODE_DISABLED))) {}
+            }
+            m.set(CONTROL_AVAILABLE_SCENE_MODES, ArrayUtils.toIntArray(supportedSceneModes));
+        } else {
+            m.set(CONTROL_AVAILABLE_SCENE_MODES, new int[] {CONTROL_SCENE_MODE_DISABLED});
+        }
+
+        /*
+         * android.control.availableModes
+         */
+        m.set(CONTROL_AVAILABLE_MODES, sceneModeSupported ?
+                new int[] { CONTROL_MODE_AUTO, CONTROL_MODE_USE_SCENE_MODE } :
+                new int[] { CONTROL_MODE_AUTO });
     }
 
     private static void mapLens(CameraMetadataNative m, Camera.Parameters p) {
@@ -636,7 +682,7 @@ public class LegacyMetadataMapper {
          *  We can tell if the lens is fixed focus;
          *  but if it's not, we can't tell the minimum focus distance, so leave it null then.
          */
-        if (VERBOSE) {
+        if (DEBUG) {
             Log.v(TAG, "mapLens - focus-mode='" + p.getFocusMode() + "'");
         }
 
@@ -646,11 +692,11 @@ public class LegacyMetadataMapper {
              */
             m.set(LENS_INFO_MINIMUM_FOCUS_DISTANCE, LENS_INFO_MINIMUM_FOCUS_DISTANCE_FIXED_FOCUS);
 
-            if (VERBOSE) {
+            if (DEBUG) {
                 Log.v(TAG, "mapLens - lens.info.minimumFocusDistance = 0");
             }
         } else {
-            if (VERBOSE) {
+            if (DEBUG) {
                 Log.v(TAG, "mapLens - lens.info.minimumFocusDistance is unknown");
             }
         }
@@ -707,11 +753,14 @@ public class LegacyMetadataMapper {
                     CameraCharacteristics.CONTROL_AE_AVAILABLE_TARGET_FPS_RANGES          ,
                     CameraCharacteristics.CONTROL_AE_COMPENSATION_RANGE                   ,
                     CameraCharacteristics.CONTROL_AE_COMPENSATION_STEP                    ,
+                    CameraCharacteristics.CONTROL_AE_LOCK_AVAILABLE                       ,
                     CameraCharacteristics.CONTROL_AF_AVAILABLE_MODES                      ,
                     CameraCharacteristics.CONTROL_AVAILABLE_EFFECTS                       ,
+                    CameraCharacteristics.CONTROL_AVAILABLE_MODES                         ,
                     CameraCharacteristics.CONTROL_AVAILABLE_SCENE_MODES                   ,
                     CameraCharacteristics.CONTROL_AVAILABLE_VIDEO_STABILIZATION_MODES     ,
                     CameraCharacteristics.CONTROL_AWB_AVAILABLE_MODES                     ,
+                    CameraCharacteristics.CONTROL_AWB_LOCK_AVAILABLE                      ,
                     CameraCharacteristics.CONTROL_MAX_REGIONS                             ,
                     CameraCharacteristics.FLASH_INFO_AVAILABLE                            ,
                     CameraCharacteristics.INFO_SUPPORTED_HARDWARE_LEVEL                   ,
@@ -1294,7 +1343,7 @@ public class LegacyMetadataMapper {
                 }
             }
 
-            if (VERBOSE) {
+            if (DEBUG) {
                 Log.v(TAG, "createRequestTemplate (templateId=" + templateId + ")," +
                         " afMode=" + afMode + ", minimumFocusDistance=" + minimumFocusDistance);
             }

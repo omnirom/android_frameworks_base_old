@@ -85,10 +85,6 @@ public:
         load(v);
     }
 
-    Matrix4(const Matrix4& v) {
-        load(v);
-    }
-
     Matrix4(const SkMatrix& v) {
         load(v);
     }
@@ -133,6 +129,12 @@ public:
     void loadOrtho(float left, float right, float bottom, float top, float near, float far);
 
     uint8_t getType() const;
+
+    void multiplyInverse(const Matrix4& v) {
+        Matrix4 inv;
+        inv.loadInverse(v);
+        multiply(inv);
+    }
 
     void multiply(const Matrix4& v) {
         Matrix4 u;
@@ -210,7 +212,7 @@ public:
 
     void decomposeScale(float& sx, float& sy) const;
 
-    void dump(const char* label = NULL) const;
+    void dump(const char* label = nullptr) const;
 
     static const Matrix4& identity();
 

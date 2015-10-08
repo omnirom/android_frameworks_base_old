@@ -20,8 +20,12 @@ import com.android.internal.telecom.IConnectionService;
 import com.android.internal.telecom.IVideoCallback;
 import com.android.internal.telecom.IVideoProvider;
 
+import android.annotation.Nullable;
 import android.annotation.SystemApi;
+import android.hardware.camera2.CameraManager;
 import android.net.Uri;
+import android.os.Bundle;
+import android.os.Handler;
 import android.os.IBinder;
 import android.os.RemoteException;
 import android.view.Surface;
@@ -38,11 +42,12 @@ import java.util.concurrent.ConcurrentHashMap;
  *
  * @see ConnectionService#createRemoteOutgoingConnection(PhoneAccountHandle, ConnectionRequest)
  * @see ConnectionService#createRemoteIncomingConnection(PhoneAccountHandle, ConnectionRequest)
- * @hide
  */
-@SystemApi
 public final class RemoteConnection {
 
+    /**
+     * Callback base class for {@link RemoteConnection}.
+     */
     public static abstract class Callback {
         /**
          * Invoked when the state of this {@code RemoteConnection} has changed. See
@@ -72,11 +77,6 @@ public final class RemoteConnection {
          * @param ringback Whether the {@code RemoteConnection} is requesting ringback.
          */
         public void onRingbackRequested(RemoteConnection connection, boolean ringback) {}
-
-        /** @hide */
-        @Deprecated public void onCallCapabilitiesChanged(
-                RemoteConnection connection,
-                int callCapabilities) {}
 
         /**
          * Indicates that the call capabilities of this {@code RemoteConnection} have changed.
@@ -156,7 +156,6 @@ public final class RemoteConnection {
          *
          * @param connection The {@code RemoteConnection} invoking this method.
          * @param videoState The new video state of the {@code RemoteConnection}.
-         * @hide
          */
         public void onVideoStateChanged(RemoteConnection connection, int videoState) {}
 
@@ -187,7 +186,6 @@ public final class RemoteConnection {
          * @param connection The {@code RemoteConnection} invoking this method.
          * @param videoProvider The new {@code VideoProvider} associated with this
          *         {@code RemoteConnection}.
-         * @hide
          */
         public void onVideoProviderChanged(
                 RemoteConnection connection, VideoProvider videoProvider) {}
@@ -203,46 +201,137 @@ public final class RemoteConnection {
         public void onConferenceChanged(
                 RemoteConnection connection,
                 RemoteConference conference) {}
+
+        /**
+         * Handles changes to the {@code RemoteConnection} extras.
+         *
+         * @param connection The {@code RemoteConnection} invoking this method.
+         * @param extras The extras containing other information associated with the connection.
+         */
+        public void onExtrasChanged(RemoteConnection connection, @Nullable Bundle extras) {}
     }
 
-    /** {@hide} */
+    /**
+     * {@link RemoteConnection.VideoProvider} associated with a {@link RemoteConnection}.  Used to
+     * receive video related events and control the video associated with a
+     * {@link RemoteConnection}.
+     *
+     * @see Connection.VideoProvider
+     */
     public static class VideoProvider {
 
-        public abstract static class Listener {
-            public void onReceiveSessionModifyRequest(
+        /**
+         * Callback class used by the {@link RemoteConnection.VideoProvider} to relay events from
+         * the {@link Connection.VideoProvider}.
+         */
+        public abstract static class Callback {
+            /**
+             * Reports a session modification request received from the
+             * {@link Connection.VideoProvider} associated with a {@link RemoteConnection}.
+             *
+             * @param videoProvider The {@link RemoteConnection.VideoProvider} invoking this method.
+             * @param videoProfile The requested video call profile.
+             * @see InCallService.VideoCall.Callback#onSessionModifyRequestReceived(VideoProfile)
+             * @see Connection.VideoProvider#receiveSessionModifyRequest(VideoProfile)
+             */
+            public void onSessionModifyRequestReceived(
                     VideoProvider videoProvider,
                     VideoProfile videoProfile) {}
 
-            public void onReceiveSessionModifyResponse(
+            /**
+             * Reports a session modification response received from the
+             * {@link Connection.VideoProvider} associated with a {@link RemoteConnection}.
+             *
+             * @param videoProvider The {@link RemoteConnection.VideoProvider} invoking this method.
+             * @param status Status of the session modify request.
+             * @param requestedProfile The original request which was sent to the peer device.
+             * @param responseProfile The actual profile changes made by the peer device.
+             * @see InCallService.VideoCall.Callback#onSessionModifyResponseReceived(int,
+             *      VideoProfile, VideoProfile)
+             * @see Connection.VideoProvider#receiveSessionModifyResponse(int, VideoProfile,
+             *      VideoProfile)
+             */
+            public void onSessionModifyResponseReceived(
                     VideoProvider videoProvider,
                     int status,
                     VideoProfile requestedProfile,
                     VideoProfile responseProfile) {}
 
-            public void onHandleCallSessionEvent(VideoProvider videoProvider, int event) {}
+            /**
+             * Reports a call session event received from the {@link Connection.VideoProvider}
+             * associated with a {@link RemoteConnection}.
+             *
+             * @param videoProvider The {@link RemoteConnection.VideoProvider} invoking this method.
+             * @param event The event.
+             * @see InCallService.VideoCall.Callback#onCallSessionEvent(int)
+             * @see Connection.VideoProvider#handleCallSessionEvent(int)
+             */
+            public void onCallSessionEvent(VideoProvider videoProvider, int event) {}
 
-            public void onPeerDimensionsChanged(VideoProvider videoProvider, int width, int height) {}
+            /**
+             * Reports a change in the peer video dimensions received from the
+             * {@link Connection.VideoProvider} associated with a {@link RemoteConnection}.
+             *
+             * @param videoProvider The {@link RemoteConnection.VideoProvider} invoking this method.
+             * @param width  The updated peer video width.
+             * @param height The updated peer video height.
+             * @see InCallService.VideoCall.Callback#onPeerDimensionsChanged(int, int)
+             * @see Connection.VideoProvider#changePeerDimensions(int, int)
+             */
+            public void onPeerDimensionsChanged(VideoProvider videoProvider, int width,
+                    int height) {}
 
-            public void onCallDataUsageChanged(VideoProvider videoProvider, int dataUsage) {}
+            /**
+             * Reports a change in the data usage (in bytes) received from the
+             * {@link Connection.VideoProvider} associated with a {@link RemoteConnection}.
+             *
+             * @param videoProvider The {@link RemoteConnection.VideoProvider} invoking this method.
+             * @param dataUsage The updated data usage (in bytes).
+             * @see InCallService.VideoCall.Callback#onCallDataUsageChanged(long)
+             * @see Connection.VideoProvider#setCallDataUsage(long)
+             */
+            public void onCallDataUsageChanged(VideoProvider videoProvider, long dataUsage) {}
 
+            /**
+             * Reports a change in the capabilities of the current camera, received from the
+             * {@link Connection.VideoProvider} associated with a {@link RemoteConnection}.
+             *
+             * @param videoProvider The {@link RemoteConnection.VideoProvider} invoking this method.
+             * @param cameraCapabilities The changed camera capabilities.
+             * @see InCallService.VideoCall.Callback#onCameraCapabilitiesChanged(
+             *      VideoProfile.CameraCapabilities)
+             * @see Connection.VideoProvider#changeCameraCapabilities(
+             *      VideoProfile.CameraCapabilities)
+             */
             public void onCameraCapabilitiesChanged(
                     VideoProvider videoProvider,
-                    CameraCapabilities cameraCapabilities) {}
+                    VideoProfile.CameraCapabilities cameraCapabilities) {}
+
+            /**
+             * Reports a change in the video quality received from the
+             * {@link Connection.VideoProvider} associated with a {@link RemoteConnection}.
+             *
+             * @param videoProvider The {@link RemoteConnection.VideoProvider} invoking this method.
+             * @param videoQuality  The updated peer video quality.
+             * @see InCallService.VideoCall.Callback#onVideoQualityChanged(int)
+             * @see Connection.VideoProvider#changeVideoQuality(int)
+             */
+            public void onVideoQualityChanged(VideoProvider videoProvider, int videoQuality) {}
         }
 
         private final IVideoCallback mVideoCallbackDelegate = new IVideoCallback() {
             @Override
             public void receiveSessionModifyRequest(VideoProfile videoProfile) {
-                for (Listener l : mListeners) {
-                    l.onReceiveSessionModifyRequest(VideoProvider.this, videoProfile);
+                for (Callback l : mCallbacks) {
+                    l.onSessionModifyRequestReceived(VideoProvider.this, videoProfile);
                 }
             }
 
             @Override
             public void receiveSessionModifyResponse(int status, VideoProfile requestedProfile,
                     VideoProfile responseProfile) {
-                for (Listener l : mListeners) {
-                    l.onReceiveSessionModifyResponse(
+                for (Callback l : mCallbacks) {
+                    l.onSessionModifyResponseReceived(
                             VideoProvider.this,
                             status,
                             requestedProfile,
@@ -252,29 +341,37 @@ public final class RemoteConnection {
 
             @Override
             public void handleCallSessionEvent(int event) {
-                for (Listener l : mListeners) {
-                    l.onHandleCallSessionEvent(VideoProvider.this, event);
+                for (Callback l : mCallbacks) {
+                    l.onCallSessionEvent(VideoProvider.this, event);
                 }
             }
 
             @Override
             public void changePeerDimensions(int width, int height) {
-                for (Listener l : mListeners) {
+                for (Callback l : mCallbacks) {
                     l.onPeerDimensionsChanged(VideoProvider.this, width, height);
                 }
             }
 
             @Override
-            public void changeCallDataUsage(int dataUsage) {
-                for (Listener l : mListeners) {
+            public void changeCallDataUsage(long dataUsage) {
+                for (Callback l : mCallbacks) {
                     l.onCallDataUsageChanged(VideoProvider.this, dataUsage);
                 }
             }
 
             @Override
-            public void changeCameraCapabilities(CameraCapabilities cameraCapabilities) {
-                for (Listener l : mListeners) {
+            public void changeCameraCapabilities(
+                    VideoProfile.CameraCapabilities cameraCapabilities) {
+                for (Callback l : mCallbacks) {
                     l.onCameraCapabilitiesChanged(VideoProvider.this, cameraCapabilities);
+                }
+            }
+
+            @Override
+            public void changeVideoQuality(int videoQuality) {
+                for (Callback l : mCallbacks) {
+                    l.onVideoQualityChanged(VideoProvider.this, videoQuality);
                 }
             }
 
@@ -294,25 +391,43 @@ public final class RemoteConnection {
          * load factor before resizing, 1 means we only expect a single thread to
          * access the map so make only a single shard
          */
-        private final Set<Listener> mListeners = Collections.newSetFromMap(
-                new ConcurrentHashMap<Listener, Boolean>(8, 0.9f, 1));
+        private final Set<Callback> mCallbacks = Collections.newSetFromMap(
+                new ConcurrentHashMap<Callback, Boolean>(8, 0.9f, 1));
 
-        public VideoProvider(IVideoProvider videoProviderBinder) {
+        VideoProvider(IVideoProvider videoProviderBinder) {
             mVideoProviderBinder = videoProviderBinder;
             try {
-                mVideoProviderBinder.setVideoCallback(mVideoCallbackServant.getStub().asBinder());
+                mVideoProviderBinder.addVideoCallback(mVideoCallbackServant.getStub().asBinder());
             } catch (RemoteException e) {
             }
         }
 
-        public void addListener(Listener l) {
-            mListeners.add(l);
+        /**
+         * Registers a callback to receive commands and state changes for video calls.
+         *
+         * @param l The video call callback.
+         */
+        public void registerCallback(Callback l) {
+            mCallbacks.add(l);
         }
 
-        public void removeListener(Listener l) {
-            mListeners.remove(l);
+        /**
+         * Clears the video call callback set via {@link #registerCallback}.
+         *
+         * @param l The video call callback to clear.
+         */
+        public void unregisterCallback(Callback l) {
+            mCallbacks.remove(l);
         }
 
+        /**
+         * Sets the camera to be used for the outgoing video for the
+         * {@link RemoteConnection.VideoProvider}.
+         *
+         * @param cameraId The id of the camera (use ids as reported by
+         * {@link CameraManager#getCameraIdList()}).
+         * @see Connection.VideoProvider#onSetCamera(String)
+         */
         public void setCamera(String cameraId) {
             try {
                 mVideoProviderBinder.setCamera(cameraId);
@@ -320,6 +435,13 @@ public final class RemoteConnection {
             }
         }
 
+        /**
+         * Sets the surface to be used for displaying a preview of what the user's camera is
+         * currently capturing for the {@link RemoteConnection.VideoProvider}.
+         *
+         * @param surface The {@link Surface}.
+         * @see Connection.VideoProvider#onSetPreviewSurface(Surface)
+         */
         public void setPreviewSurface(Surface surface) {
             try {
                 mVideoProviderBinder.setPreviewSurface(surface);
@@ -327,6 +449,13 @@ public final class RemoteConnection {
             }
         }
 
+        /**
+         * Sets the surface to be used for displaying the video received from the remote device for
+         * the {@link RemoteConnection.VideoProvider}.
+         *
+         * @param surface The {@link Surface}.
+         * @see Connection.VideoProvider#onSetDisplaySurface(Surface)
+         */
         public void setDisplaySurface(Surface surface) {
             try {
                 mVideoProviderBinder.setDisplaySurface(surface);
@@ -334,6 +463,13 @@ public final class RemoteConnection {
             }
         }
 
+        /**
+         * Sets the device orientation, in degrees, for the {@link RemoteConnection.VideoProvider}.
+         * Assumes that a standard portrait orientation of the device is 0 degrees.
+         *
+         * @param rotation The device orientation, in degrees.
+         * @see Connection.VideoProvider#onSetDeviceOrientation(int)
+         */
         public void setDeviceOrientation(int rotation) {
             try {
                 mVideoProviderBinder.setDeviceOrientation(rotation);
@@ -341,6 +477,12 @@ public final class RemoteConnection {
             }
         }
 
+        /**
+         * Sets camera zoom ratio for the {@link RemoteConnection.VideoProvider}.
+         *
+         * @param value The camera zoom ratio.
+         * @see Connection.VideoProvider#onSetZoom(float)
+         */
         public void setZoom(float value) {
             try {
                 mVideoProviderBinder.setZoom(value);
@@ -348,13 +490,28 @@ public final class RemoteConnection {
             }
         }
 
-        public void sendSessionModifyRequest(VideoProfile reqProfile) {
+        /**
+         * Issues a request to modify the properties of the current video session for the
+         * {@link RemoteConnection.VideoProvider}.
+         *
+         * @param fromProfile The video profile prior to the request.
+         * @param toProfile The video profile with the requested changes made.
+         * @see Connection.VideoProvider#onSendSessionModifyRequest(VideoProfile, VideoProfile)
+         */
+        public void sendSessionModifyRequest(VideoProfile fromProfile, VideoProfile toProfile) {
             try {
-                mVideoProviderBinder.sendSessionModifyRequest(reqProfile);
+                mVideoProviderBinder.sendSessionModifyRequest(fromProfile, toProfile);
             } catch (RemoteException e) {
             }
         }
 
+        /**
+         * Provides a response to a request to change the current call video session
+         * properties for the {@link RemoteConnection.VideoProvider}.
+         *
+         * @param responseProfile The response call video properties.
+         * @see Connection.VideoProvider#onSendSessionModifyResponse(VideoProfile)
+         */
         public void sendSessionModifyResponse(VideoProfile responseProfile) {
             try {
                 mVideoProviderBinder.sendSessionModifyResponse(responseProfile);
@@ -362,6 +519,12 @@ public final class RemoteConnection {
             }
         }
 
+        /**
+         * Issues a request to retrieve the capabilities of the current camera for the
+         * {@link RemoteConnection.VideoProvider}.
+         *
+         * @see Connection.VideoProvider#onRequestCameraCapabilities()
+         */
         public void requestCameraCapabilities() {
             try {
                 mVideoProviderBinder.requestCameraCapabilities();
@@ -369,6 +532,12 @@ public final class RemoteConnection {
             }
         }
 
+        /**
+         * Issues a request to retrieve the data usage (in bytes) of the video portion of the
+         * {@link RemoteConnection} for the {@link RemoteConnection.VideoProvider}.
+         *
+         * @see Connection.VideoProvider#onRequestConnectionDataUsage()
+         */
         public void requestCallDataUsage() {
             try {
                 mVideoProviderBinder.requestCallDataUsage();
@@ -376,7 +545,13 @@ public final class RemoteConnection {
             }
         }
 
-        public void setPauseImage(String uri) {
+        /**
+         * Sets the {@link Uri} of an image to be displayed to the peer device when the video signal
+         * is paused, for the {@link RemoteConnection.VideoProvider}.
+         *
+         * @see Connection.VideoProvider#onSetPauseImage(Uri)
+         */
+        public void setPauseImage(Uri uri) {
             try {
                 mVideoProviderBinder.setPauseImage(uri);
             } catch (RemoteException e) {
@@ -391,8 +566,8 @@ public final class RemoteConnection {
      * load factor before resizing, 1 means we only expect a single thread to
      * access the map so make only a single shard
      */
-    private final Set<Callback> mCallbacks = Collections.newSetFromMap(
-            new ConcurrentHashMap<Callback, Boolean>(8, 0.9f, 1));
+    private final Set<CallbackRecord> mCallbackRecords = Collections.newSetFromMap(
+            new ConcurrentHashMap<CallbackRecord, Boolean>(8, 0.9f, 1));
     private final List<RemoteConnection> mConferenceableConnections = new ArrayList<>();
     private final List<RemoteConnection> mUnmodifiableconferenceableConnections =
             Collections.unmodifiableList(mConferenceableConnections);
@@ -411,6 +586,7 @@ public final class RemoteConnection {
     private String mCallerDisplayName;
     private int mCallerDisplayNamePresentation;
     private RemoteConference mConference;
+    private Bundle mExtras;
 
     /**
      * @hide
@@ -469,7 +645,20 @@ public final class RemoteConnection {
      * @param callback A {@code Callback}.
      */
     public void registerCallback(Callback callback) {
-        mCallbacks.add(callback);
+        registerCallback(callback, new Handler());
+    }
+
+    /**
+     * Adds a callback to this {@code RemoteConnection}.
+     *
+     * @param callback A {@code Callback}.
+     * @param handler A {@code Handler} which command and status changes will be delivered to.
+     */
+    public void registerCallback(Callback callback, Handler handler) {
+        unregisterCallback(callback);
+        if (callback != null && handler != null) {
+            mCallbackRecords.add(new CallbackRecord(callback, handler));
+        }
     }
 
     /**
@@ -479,7 +668,12 @@ public final class RemoteConnection {
      */
     public void unregisterCallback(Callback callback) {
         if (callback != null) {
-            mCallbacks.remove(callback);
+            for (CallbackRecord record : mCallbackRecords) {
+                if (record.getCallback() == callback) {
+                    mCallbackRecords.remove(record);
+                    break;
+                }
+            }
         }
     }
 
@@ -575,8 +769,7 @@ public final class RemoteConnection {
     /**
      * Obtains the video state of this {@code RemoteConnection}.
      *
-     * @return The video state of the {@code RemoteConnection}. See {@link VideoProfile.VideoState}.
-     * @hide
+     * @return The video state of the {@code RemoteConnection}. See {@link VideoProfile}.
      */
     public int getVideoState() {
         return mVideoState;
@@ -584,12 +777,19 @@ public final class RemoteConnection {
 
     /**
      * Obtains the video provider of this {@code RemoteConnection}.
-     *
      * @return The video provider associated with this {@code RemoteConnection}.
-     * @hide
      */
     public final VideoProvider getVideoProvider() {
         return mVideoProvider;
+    }
+
+    /**
+     * Obtain the extras associated with this {@code RemoteConnection}.
+     *
+     * @return The extras for this connection.
+     */
+    public final Bundle getExtras() {
+        return mExtras;
     }
 
     /**
@@ -599,7 +799,7 @@ public final class RemoteConnection {
      *         ringback tone on its behalf.
      */
     public boolean isRingbackRequested() {
-        return false;
+        return mRingbackRequested;
     }
 
     /**
@@ -756,11 +956,24 @@ public final class RemoteConnection {
      * Set the audio state of this {@code RemoteConnection}.
      *
      * @param state The audio state of this {@code RemoteConnection}.
+     * @hide
+     * @deprecated Use {@link #setCallAudioState(CallAudioState) instead.
      */
+    @SystemApi
+    @Deprecated
     public void setAudioState(AudioState state) {
+        setCallAudioState(new CallAudioState(state));
+    }
+
+    /**
+     * Set the audio state of this {@code RemoteConnection}.
+     *
+     * @param state The audio state of this {@code RemoteConnection}.
+     */
+    public void setCallAudioState(CallAudioState state) {
         try {
             if (mConnected) {
-                mConnectionService.onAudioStateChanged(mConnectionId, state);
+                mConnectionService.onCallAudioStateChanged(mConnectionId, state);
             }
         } catch (RemoteException ignored) {
         }
@@ -800,11 +1013,18 @@ public final class RemoteConnection {
     /**
      * @hide
      */
-    void setState(int state) {
+    void setState(final int state) {
         if (mState != state) {
             mState = state;
-            for (Callback c: mCallbacks) {
-                c.onStateChanged(this, state);
+            for (CallbackRecord record: mCallbackRecords) {
+                final RemoteConnection connection = this;
+                final Callback callback = record.getCallback();
+                record.getHandler().post(new Runnable() {
+                    @Override
+                    public void run() {
+                        callback.onStateChanged(connection, state);
+                    }
+                });
             }
         }
     }
@@ -812,13 +1032,20 @@ public final class RemoteConnection {
     /**
      * @hide
      */
-    void setDisconnected(DisconnectCause disconnectCause) {
+    void setDisconnected(final DisconnectCause disconnectCause) {
         if (mState != Connection.STATE_DISCONNECTED) {
             mState = Connection.STATE_DISCONNECTED;
             mDisconnectCause = disconnectCause;
 
-            for (Callback c : mCallbacks) {
-                c.onDisconnected(this, mDisconnectCause);
+            for (CallbackRecord record : mCallbackRecords) {
+                final RemoteConnection connection = this;
+                final Callback callback = record.getCallback();
+                record.getHandler().post(new Runnable() {
+                    @Override
+                    public void run() {
+                        callback.onDisconnected(connection, disconnectCause);
+                    }
+                });
             }
         }
     }
@@ -826,11 +1053,18 @@ public final class RemoteConnection {
     /**
      * @hide
      */
-    void setRingbackRequested(boolean ringback) {
+    void setRingbackRequested(final boolean ringback) {
         if (mRingbackRequested != ringback) {
             mRingbackRequested = ringback;
-            for (Callback c : mCallbacks) {
-                c.onRingbackRequested(this, ringback);
+            for (CallbackRecord record : mCallbackRecords) {
+                final RemoteConnection connection = this;
+                final Callback callback = record.getCallback();
+                record.getHandler().post(new Runnable() {
+                    @Override
+                    public void run() {
+                        callback.onRingbackRequested(connection, ringback);
+                    }
+                });
             }
         }
     }
@@ -838,11 +1072,17 @@ public final class RemoteConnection {
     /**
      * @hide
      */
-    void setConnectionCapabilities(int connectionCapabilities) {
+    void setConnectionCapabilities(final int connectionCapabilities) {
         mConnectionCapabilities = connectionCapabilities;
-        for (Callback c : mCallbacks) {
-            c.onConnectionCapabilitiesChanged(this, connectionCapabilities);
-            c.onCallCapabilitiesChanged(this, connectionCapabilities);
+        for (CallbackRecord record : mCallbackRecords) {
+            final RemoteConnection connection = this;
+            final Callback callback = record.getCallback();
+            record.getHandler().post(new Runnable() {
+                @Override
+                public void run() {
+                    callback.onConnectionCapabilitiesChanged(connection, connectionCapabilities);
+                }
+            });
         }
     }
 
@@ -850,17 +1090,24 @@ public final class RemoteConnection {
      * @hide
      */
     void setDestroyed() {
-        if (!mCallbacks.isEmpty()) {
+        if (!mCallbackRecords.isEmpty()) {
             // Make sure that the callbacks are notified that the call is destroyed first.
             if (mState != Connection.STATE_DISCONNECTED) {
                 setDisconnected(
                         new DisconnectCause(DisconnectCause.ERROR, "Connection destroyed."));
             }
 
-            for (Callback c : mCallbacks) {
-                c.onDestroyed(this);
+            for (CallbackRecord record : mCallbackRecords) {
+                final RemoteConnection connection = this;
+                final Callback callback = record.getCallback();
+                record.getHandler().post(new Runnable() {
+                    @Override
+                    public void run() {
+                        callback.onDestroyed(connection);
+                    }
+                });
             }
-            mCallbacks.clear();
+            mCallbackRecords.clear();
 
             mConnected = false;
         }
@@ -869,91 +1116,178 @@ public final class RemoteConnection {
     /**
      * @hide
      */
-    void setPostDialWait(String remainingDigits) {
-        for (Callback c : mCallbacks) {
-            c.onPostDialWait(this, remainingDigits);
+    void setPostDialWait(final String remainingDigits) {
+        for (CallbackRecord record : mCallbackRecords) {
+            final RemoteConnection connection = this;
+            final Callback callback = record.getCallback();
+            record.getHandler().post(new Runnable() {
+                @Override
+                public void run() {
+                    callback.onPostDialWait(connection, remainingDigits);
+                }
+            });
         }
     }
 
     /**
      * @hide
      */
-    void onPostDialChar(char nextChar) {
-        for (Callback c : mCallbacks) {
-            c.onPostDialChar(this, nextChar);
+    void onPostDialChar(final char nextChar) {
+        for (CallbackRecord record : mCallbackRecords) {
+            final RemoteConnection connection = this;
+            final Callback callback = record.getCallback();
+            record.getHandler().post(new Runnable() {
+                @Override
+                public void run() {
+                    callback.onPostDialChar(connection, nextChar);
+                }
+            });
         }
     }
 
     /**
      * @hide
      */
-    void setVideoState(int videoState) {
+    void setVideoState(final int videoState) {
         mVideoState = videoState;
-        for (Callback c : mCallbacks) {
-            c.onVideoStateChanged(this, videoState);
+        for (CallbackRecord record : mCallbackRecords) {
+            final RemoteConnection connection = this;
+            final Callback callback = record.getCallback();
+            record.getHandler().post(new Runnable() {
+                @Override
+                public void run() {
+                    callback.onVideoStateChanged(connection, videoState);
+                }
+            });
         }
     }
 
     /**
      * @hide
      */
-    void setVideoProvider(VideoProvider videoProvider) {
+    void setVideoProvider(final VideoProvider videoProvider) {
         mVideoProvider = videoProvider;
-        for (Callback c : mCallbacks) {
-            c.onVideoProviderChanged(this, videoProvider);
+        for (CallbackRecord record : mCallbackRecords) {
+            final RemoteConnection connection = this;
+            final Callback callback = record.getCallback();
+            record.getHandler().post(new Runnable() {
+                @Override
+                public void run() {
+                    callback.onVideoProviderChanged(connection, videoProvider);
+                }
+            });
         }
     }
 
     /** @hide */
-    void setIsVoipAudioMode(boolean isVoip) {
+    void setIsVoipAudioMode(final boolean isVoip) {
         mIsVoipAudioMode = isVoip;
-        for (Callback c : mCallbacks) {
-            c.onVoipAudioChanged(this, isVoip);
+        for (CallbackRecord record : mCallbackRecords) {
+            final RemoteConnection connection = this;
+            final Callback callback = record.getCallback();
+            record.getHandler().post(new Runnable() {
+                @Override
+                public void run() {
+                    callback.onVoipAudioChanged(connection, isVoip);
+                }
+            });
         }
     }
 
     /** @hide */
-    void setStatusHints(StatusHints statusHints) {
+    void setStatusHints(final StatusHints statusHints) {
         mStatusHints = statusHints;
-        for (Callback c : mCallbacks) {
-            c.onStatusHintsChanged(this, statusHints);
+        for (CallbackRecord record : mCallbackRecords) {
+            final RemoteConnection connection = this;
+            final Callback callback = record.getCallback();
+            record.getHandler().post(new Runnable() {
+                @Override
+                public void run() {
+                    callback.onStatusHintsChanged(connection, statusHints);
+                }
+            });
         }
     }
 
     /** @hide */
-    void setAddress(Uri address, int presentation) {
+    void setAddress(final Uri address, final int presentation) {
         mAddress = address;
         mAddressPresentation = presentation;
-        for (Callback c : mCallbacks) {
-            c.onAddressChanged(this, address, presentation);
+        for (CallbackRecord record : mCallbackRecords) {
+            final RemoteConnection connection = this;
+            final Callback callback = record.getCallback();
+            record.getHandler().post(new Runnable() {
+                @Override
+                public void run() {
+                    callback.onAddressChanged(connection, address, presentation);
+                }
+            });
         }
     }
 
     /** @hide */
-    void setCallerDisplayName(String callerDisplayName, int presentation) {
+    void setCallerDisplayName(final String callerDisplayName, final int presentation) {
         mCallerDisplayName = callerDisplayName;
         mCallerDisplayNamePresentation = presentation;
-        for (Callback c : mCallbacks) {
-            c.onCallerDisplayNameChanged(this, callerDisplayName, presentation);
+        for (CallbackRecord record : mCallbackRecords) {
+            final RemoteConnection connection = this;
+            final Callback callback = record.getCallback();
+            record.getHandler().post(new Runnable() {
+                @Override
+                public void run() {
+                    callback.onCallerDisplayNameChanged(
+                            connection, callerDisplayName, presentation);
+                }
+            });
         }
     }
 
     /** @hide */
-    void setConferenceableConnections(List<RemoteConnection> conferenceableConnections) {
+    void setConferenceableConnections(final List<RemoteConnection> conferenceableConnections) {
         mConferenceableConnections.clear();
         mConferenceableConnections.addAll(conferenceableConnections);
-        for (Callback c : mCallbacks) {
-            c.onConferenceableConnectionsChanged(this, mUnmodifiableconferenceableConnections);
+        for (CallbackRecord record : mCallbackRecords) {
+            final RemoteConnection connection = this;
+            final Callback callback = record.getCallback();
+            record.getHandler().post(new Runnable() {
+                @Override
+                public void run() {
+                    callback.onConferenceableConnectionsChanged(
+                            connection, mUnmodifiableconferenceableConnections);
+                }
+            });
         }
     }
 
     /** @hide */
-    void setConference(RemoteConference conference) {
+    void setConference(final RemoteConference conference) {
         if (mConference != conference) {
             mConference = conference;
-            for (Callback c : mCallbacks) {
-                c.onConferenceChanged(this, conference);
+            for (CallbackRecord record : mCallbackRecords) {
+                final RemoteConnection connection = this;
+                final Callback callback = record.getCallback();
+                record.getHandler().post(new Runnable() {
+                    @Override
+                    public void run() {
+                        callback.onConferenceChanged(connection, conference);
+                    }
+                });
             }
+        }
+    }
+
+    /** @hide */
+    void setExtras(final Bundle extras) {
+        mExtras = extras;
+        for (CallbackRecord record : mCallbackRecords) {
+            final RemoteConnection connection = this;
+            final Callback callback = record.getCallback();
+            record.getHandler().post(new Runnable() {
+                @Override
+                public void run() {
+                    callback.onExtrasChanged(connection, extras);
+                }
+            });
         }
     }
 
@@ -968,5 +1302,23 @@ public final class RemoteConnection {
      */
     public static RemoteConnection failure(DisconnectCause disconnectCause) {
         return new RemoteConnection(disconnectCause);
+    }
+
+    private static final class CallbackRecord extends Callback {
+        private final Callback mCallback;
+        private final Handler mHandler;
+
+        public CallbackRecord(Callback callback, Handler handler) {
+            mCallback = callback;
+            mHandler = handler;
+        }
+
+        public Callback getCallback() {
+            return mCallback;
+        }
+
+        public Handler getHandler() {
+            return mHandler;
+        }
     }
 }

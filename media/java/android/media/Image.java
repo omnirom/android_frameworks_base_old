@@ -50,9 +50,24 @@ public abstract class Image implements AutoCloseable {
     /**
      * @hide
      */
+    protected boolean mIsImageValid = false;
+
+    /**
+     * @hide
+     */
     protected Image() {
     }
 
+    /**
+     * Throw IllegalStateException if the image is invalid (already closed).
+     *
+     * @hide
+     */
+    protected void throwISEIfImageIsInvalid() {
+        if (!mIsImageValid) {
+            throw new IllegalStateException("Image is already closed");
+        }
+    }
     /**
      * Get the format for this image. This format determines the number of
      * ByteBuffers needed to represent the image, and the general layout of the
@@ -86,6 +101,38 @@ public abstract class Image implements AutoCloseable {
      *     Each plane has its own row stride and pixel stride.</td>
      * </tr>
      * <tr>
+     *   <td>{@link android.graphics.ImageFormat#YUV_422_888 YUV_422_888}</td>
+     *   <td>3</td>
+     *   <td>A luminance plane followed by the Cb and Cr chroma planes.
+     *     The chroma planes have half the width and the full height of the luminance
+     *     plane (4:2:2 subsampling). Each pixel sample in each plane has 8 bits.
+     *     Each plane has its own row stride and pixel stride.</td>
+     * </tr>
+     * <tr>
+     *   <td>{@link android.graphics.ImageFormat#YUV_444_888 YUV_444_888}</td>
+     *   <td>3</td>
+     *   <td>A luminance plane followed by the Cb and Cr chroma planes.
+     *     The chroma planes have the same width and height as that of the luminance
+     *     plane (4:4:4 subsampling). Each pixel sample in each plane has 8 bits.
+     *     Each plane has its own row stride and pixel stride.</td>
+     * </tr>
+     * <tr>
+     *   <td>{@link android.graphics.ImageFormat#FLEX_RGB_888 FLEX_RGB_888}</td>
+     *   <td>3</td>
+     *   <td>A R (red) plane followed by the G (green) and B (blue) planes.
+     *     All planes have the same widths and heights.
+     *     Each pixel sample in each plane has 8 bits.
+     *     Each plane has its own row stride and pixel stride.</td>
+     * </tr>
+     * <tr>
+     *   <td>{@link android.graphics.ImageFormat#FLEX_RGBA_8888 FLEX_RGBA_8888}</td>
+     *   <td>4</td>
+     *   <td>A R (red) plane followed by the G (green), B (blue), and
+     *     A (alpha) planes. All planes have the same widths and heights.
+     *     Each pixel sample in each plane has 8 bits.
+     *     Each plane has its own row stride and pixel stride.</td>
+     * </tr>
+     * <tr>
      *   <td>{@link android.graphics.ImageFormat#RAW_SENSOR RAW_SENSOR}</td>
      *   <td>1</td>
      *   <td>A single plane of raw sensor image data, with 16 bits per color
@@ -115,13 +162,42 @@ public abstract class Image implements AutoCloseable {
     /**
      * Get the timestamp associated with this frame.
      * <p>
-     * The timestamp is measured in nanoseconds, and is monotonically
-     * increasing. However, the zero point and whether the timestamp can be
-     * compared against other sources of time or images depend on the source of
-     * this image.
+     * The timestamp is measured in nanoseconds, and is normally monotonically
+     * increasing. The timestamps for the images from different sources may have
+     * different timebases therefore may not be comparable. The specific meaning and
+     * timebase of the timestamp depend on the source providing images. See
+     * {@link android.hardware.Camera Camera},
+     * {@link android.hardware.camera2.CameraDevice CameraDevice},
+     * {@link MediaPlayer} and {@link MediaCodec} for more details.
      * </p>
      */
     public abstract long getTimestamp();
+
+    /**
+     * Set the timestamp associated with this frame.
+     * <p>
+     * The timestamp is measured in nanoseconds, and is normally monotonically
+     * increasing. The timestamps for the images from different sources may have
+     * different timebases therefore may not be comparable. The specific meaning and
+     * timebase of the timestamp depend on the source providing images. See
+     * {@link android.hardware.Camera Camera},
+     * {@link android.hardware.camera2.CameraDevice CameraDevice},
+     * {@link MediaPlayer} and {@link MediaCodec} for more details.
+     * </p>
+     * <p>
+     * For images dequeued from {@link ImageWriter} via
+     * {@link ImageWriter#dequeueInputImage()}, it's up to the application to
+     * set the timestamps correctly before sending them back to the
+     * {@link ImageWriter}, or the timestamp will be generated automatically when
+     * {@link ImageWriter#queueInputImage queueInputImage()} is called.
+     * </p>
+     *
+     * @param timestamp The timestamp to be set for this image.
+     */
+    public void setTimestamp(long timestamp) {
+        throwISEIfImageIsInvalid();
+        return;
+    }
 
     private Rect mCropRect;
 
@@ -132,6 +208,8 @@ public abstract class Image implements AutoCloseable {
      * using coordinates in the largest-resolution plane.
      */
     public Rect getCropRect() {
+        throwISEIfImageIsInvalid();
+
         if (mCropRect == null) {
             return new Rect(0, 0, getWidth(), getHeight());
         } else {
@@ -146,16 +224,24 @@ public abstract class Image implements AutoCloseable {
      * using coordinates in the largest-resolution plane.
      */
     public void setCropRect(Rect cropRect) {
+        throwISEIfImageIsInvalid();
+
         if (cropRect != null) {
             cropRect = new Rect(cropRect);  // make a copy
-            cropRect.intersect(0, 0, getWidth(), getHeight());
+            if (!cropRect.intersect(0, 0, getWidth(), getHeight())) {
+                cropRect.setEmpty();
+            }
         }
         mCropRect = cropRect;
     }
 
     /**
      * Get the array of pixel planes for this Image. The number of planes is
-     * determined by the format of the Image.
+     * determined by the format of the Image. The application will get an empty
+     * array if the image format is {@link android.graphics.ImageFormat#PRIVATE
+     * PRIVATE}, because the image pixel data is not directly accessible. The
+     * application can check the image format by calling
+     * {@link Image#getFormat()}.
      */
     public abstract Plane[] getPlanes();
 
@@ -164,12 +250,74 @@ public abstract class Image implements AutoCloseable {
      * <p>
      * After calling this method, calling any methods on this {@code Image} will
      * result in an {@link IllegalStateException}, and attempting to read from
-     * {@link ByteBuffer ByteBuffers} returned by an earlier
-     * {@link Plane#getBuffer} call will have undefined behavior.
+     * or write to {@link ByteBuffer ByteBuffers} returned by an earlier
+     * {@link Plane#getBuffer} call will have undefined behavior. If the image
+     * was obtained from {@link ImageWriter} via
+     * {@link ImageWriter#dequeueInputImage()}, after calling this method, any
+     * image data filled by the application will be lost and the image will be
+     * returned to {@link ImageWriter} for reuse. Images given to
+     * {@link ImageWriter#queueInputImage queueInputImage()} are automatically
+     * closed.
      * </p>
      */
     @Override
     public abstract void close();
+
+    /**
+     * <p>
+     * Check if the image can be attached to a new owner (e.g. {@link ImageWriter}).
+     * </p>
+     * <p>
+     * This is a package private method that is only used internally.
+     * </p>
+     *
+     * @return true if the image is attachable to a new owner, false if the image is still attached
+     *         to its current owner, or the image is a stand-alone image and is not attachable to
+     *         a new owner.
+     */
+    boolean isAttachable() {
+        throwISEIfImageIsInvalid();
+
+        return false;
+    }
+
+    /**
+     * <p>
+     * Get the owner of the {@link Image}.
+     * </p>
+     * <p>
+     * The owner of an {@link Image} could be {@link ImageReader}, {@link ImageWriter},
+     * {@link MediaCodec} etc. This method returns the owner that produces this image, or null
+     * if the image is stand-alone image or the owner is unknown.
+     * </p>
+     * <p>
+     * This is a package private method that is only used internally.
+     * </p>
+     *
+     * @return The owner of the Image.
+     */
+    Object getOwner() {
+        throwISEIfImageIsInvalid();
+
+        return null;
+    }
+
+    /**
+     * Get native context (buffer pointer) associated with this image.
+     * <p>
+     * This is a package private method that is only used internally. It can be
+     * used to get the native buffer pointer and passed to native, which may be
+     * passed to {@link ImageWriter#attachAndQueueInputImage} to avoid a reverse
+     * JNI call.
+     * </p>
+     *
+     * @return native context associated with this Image.
+     */
+    long getNativeContext() {
+        throwISEIfImageIsInvalid();
+
+        return 0;
+    }
 
     /**
      * <p>A single color plane of image data.</p>

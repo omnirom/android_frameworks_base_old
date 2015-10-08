@@ -29,8 +29,13 @@ import android.view.ViewGroup;
 import android.view.WindowManager;
 
 import com.android.keyguard.R;
+import com.android.systemui.keyguard.KeyguardViewMediator;
 import com.android.systemui.statusbar.BaseStatusBar;
 import com.android.systemui.statusbar.StatusBarState;
+
+import java.io.FileDescriptor;
+import java.io.PrintWriter;
+import java.lang.reflect.Field;
 
 /**
  * Encapsulates all logic for the status bar window state management.
@@ -123,11 +128,11 @@ public class StatusBarWindowManager {
     }
 
     private void applyFocusableFlag(State state) {
-        if (state.isKeyguardShowingAndNotOccluded() && state.keyguardNeedsInput
-                && state.bouncerShowing) {
+        boolean panelFocusable = state.statusBarFocusable && state.panelExpanded;
+        if (state.keyguardShowing && state.keyguardNeedsInput && state.bouncerShowing) {
             mLpChanged.flags &= ~WindowManager.LayoutParams.FLAG_NOT_FOCUSABLE;
             mLpChanged.flags &= ~WindowManager.LayoutParams.FLAG_ALT_FOCUSABLE_IM;
-        } else if (state.isKeyguardShowingAndNotOccluded() || state.statusBarFocusable) {
+        } else if (state.isKeyguardShowingAndNotOccluded() || panelFocusable) {
             mLpChanged.flags &= ~WindowManager.LayoutParams.FLAG_NOT_FOCUSABLE;
             mLpChanged.flags |= WindowManager.LayoutParams.FLAG_ALT_FOCUSABLE_IM;
         } else {
@@ -137,13 +142,18 @@ public class StatusBarWindowManager {
     }
 
     private void applyHeight(State state) {
-        boolean expanded = state.isKeyguardShowingAndNotOccluded() || state.statusBarExpanded
-                || state.keyguardFadingAway || state.bouncerShowing;
+        boolean expanded = isExpanded(state);
         if (expanded) {
             mLpChanged.height = ViewGroup.LayoutParams.MATCH_PARENT;
         } else {
             mLpChanged.height = mBarHeight;
         }
+    }
+
+    private boolean isExpanded(State state) {
+        return !state.forceCollapsed && (state.isKeyguardShowingAndNotOccluded()
+                || state.panelVisible || state.keyguardFadingAway || state.bouncerShowing
+                || state.headsUpShowing);
     }
 
     private void applyFitsSystemWindows(State state) {
@@ -154,7 +164,7 @@ public class StatusBarWindowManager {
         if (state.isKeyguardShowingAndNotOccluded()
                 && state.statusBarState == StatusBarState.KEYGUARD
                 && !state.qsExpanded) {
-            mLpChanged.userActivityTimeout = state.keyguardUserActivityTimeout;
+            mLpChanged.userActivityTimeout = KeyguardViewMediator.AWAKE_INTERVAL_DEFAULT_MS;
         } else {
             mLpChanged.userActivityTimeout = -1;
         }
@@ -174,14 +184,34 @@ public class StatusBarWindowManager {
 
     private void apply(State state) {
         applyKeyguardFlags(state);
+        applyForceStatusBarVisibleFlag(state);
         applyFocusableFlag(state);
         adjustScreenOrientation(state);
         applyHeight(state);
         applyUserActivityTimeout(state);
         applyInputFeatures(state);
         applyFitsSystemWindows(state);
+        applyModalFlag(state);
         if (mLp.copyFrom(mLpChanged) != 0) {
             mWindowManager.updateViewLayout(mStatusBarView, mLp);
+        }
+    }
+
+    private void applyForceStatusBarVisibleFlag(State state) {
+        if (state.forceStatusBarVisible) {
+            mLpChanged.privateFlags |= WindowManager
+                    .LayoutParams.PRIVATE_FLAG_FORCE_STATUS_BAR_VISIBLE_TRANSPARENT;
+        } else {
+            mLpChanged.privateFlags &= ~WindowManager
+                    .LayoutParams.PRIVATE_FLAG_FORCE_STATUS_BAR_VISIBLE_TRANSPARENT;
+        }
+    }
+
+    private void applyModalFlag(State state) {
+        if (state.headsUpShowing) {
+            mLpChanged.flags |= WindowManager.LayoutParams.FLAG_NOT_TOUCH_MODAL;
+        } else {
+            mLpChanged.flags &= ~WindowManager.LayoutParams.FLAG_NOT_TOUCH_MODAL;
         }
     }
 
@@ -206,19 +236,14 @@ public class StatusBarWindowManager {
         apply(mCurrentState);
     }
 
-    public void setStatusBarExpanded(boolean expanded) {
-        mCurrentState.statusBarExpanded = expanded;
-        mCurrentState.statusBarFocusable = expanded;
+    public void setPanelVisible(boolean visible) {
+        mCurrentState.panelVisible = visible;
+        mCurrentState.statusBarFocusable = visible;
         apply(mCurrentState);
     }
 
     public void setStatusBarFocusable(boolean focusable) {
         mCurrentState.statusBarFocusable = focusable;
-        apply(mCurrentState);
-    }
-
-    public void setKeyguardUserActivityTimeout(long timeout) {
-        mCurrentState.keyguardUserActivityTimeout = timeout;
         apply(mCurrentState);
     }
 
@@ -237,6 +262,11 @@ public class StatusBarWindowManager {
         apply(mCurrentState);
     }
 
+    public void setHeadsUpShowing(boolean showing) {
+        mCurrentState.headsUpShowing = showing;
+        apply(mCurrentState);
+    }
+
     /**
      * @param state The {@link StatusBarState} of the status bar.
      */
@@ -245,16 +275,44 @@ public class StatusBarWindowManager {
         apply(mCurrentState);
     }
 
+    public void setForceStatusBarVisible(boolean forceStatusBarVisible) {
+        mCurrentState.forceStatusBarVisible = forceStatusBarVisible;
+        apply(mCurrentState);
+    }
+
+    /**
+     * Force the window to be collapsed, even if it should theoretically be expanded.
+     * Used for when a heads-up comes in but we still need to wait for the touchable regions to
+     * be computed.
+     */
+    public void setForceWindowCollapsed(boolean force) {
+        mCurrentState.forceCollapsed = force;
+        apply(mCurrentState);
+    }
+
+    public void setPanelExpanded(boolean isExpanded) {
+        mCurrentState.panelExpanded = isExpanded;
+        apply(mCurrentState);
+    }
+
+    public void dump(FileDescriptor fd, PrintWriter pw, String[] args) {
+        pw.println("StatusBarWindowManager state:");
+        pw.println(mCurrentState);
+    }
+
     private static class State {
         boolean keyguardShowing;
         boolean keyguardOccluded;
         boolean keyguardNeedsInput;
-        boolean statusBarExpanded;
+        boolean panelVisible;
+        boolean panelExpanded;
         boolean statusBarFocusable;
-        long keyguardUserActivityTimeout;
         boolean bouncerShowing;
         boolean keyguardFadingAway;
         boolean qsExpanded;
+        boolean headsUpShowing;
+        boolean forceStatusBarVisible;
+        boolean forceCollapsed;
 
         /**
          * The {@link BaseStatusBar} state from the status bar.
@@ -263,6 +321,32 @@ public class StatusBarWindowManager {
 
         private boolean isKeyguardShowingAndNotOccluded() {
             return keyguardShowing && !keyguardOccluded;
+        }
+
+        @Override
+        public String toString() {
+            StringBuilder result = new StringBuilder();
+            String newLine = "\n";
+            result.append("Window State {");
+            result.append(newLine);
+
+            Field[] fields = this.getClass().getDeclaredFields();
+
+            // Print field names paired with their values
+            for (Field field : fields) {
+                result.append("  ");
+                try {
+                    result.append(field.getName());
+                    result.append(": ");
+                    //requires access to private field:
+                    result.append(field.get(this));
+                } catch (IllegalAccessException ex) {
+                }
+                result.append(newLine);
+            }
+            result.append("}");
+
+            return result.toString();
         }
     }
 }

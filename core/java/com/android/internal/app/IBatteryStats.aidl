@@ -34,11 +34,20 @@ interface IBatteryStats {
     void noteStopAudio(int uid);
     void noteResetVideo();
     void noteResetAudio();
+    void noteFlashlightOn(int uid);
+    void noteFlashlightOff(int uid);
+    void noteStartCamera(int uid);
+    void noteStopCamera(int uid);
+    void noteResetCamera();
+    void noteResetFlashlight();
 
     // Remaining methods are only used in Java.
     byte[] getStatistics();
 
     ParcelFileDescriptor getStatisticsStream();
+
+    // Return true if we see the battery as currently charging.
+    boolean isCharging();
 
     // Return the computed amount of time remaining on battery, in milliseconds.
     // Returns -1 if nothing could be computed.
@@ -69,13 +78,12 @@ interface IBatteryStats {
 
     void noteVibratorOn(int uid, long durationMillis);
     void noteVibratorOff(int uid);
-    void noteFlashlightOn();
-    void noteFlashlightOff();
     void noteStartGps(int uid);
     void noteStopGps(int uid);
     void noteScreenState(int state);
     void noteScreenBrightness(int brightness);
     void noteUserActivity(int uid, int event);
+    void noteWakeUp(String reason, int reasonUid);
     void noteInteractive(boolean interactive);
     void noteConnectivityChanged(int type, String extra);
     void noteMobileRadioPowerState(int powerState, long timestampNs);
@@ -92,9 +100,6 @@ interface IBatteryStats {
     void noteWifiState(int wifiState, String accessPoint);
     void noteWifiSupplicantStateChanged(int supplState, boolean failedAuth);
     void noteWifiRssiChanged(int newRssi);
-    void noteBluetoothOn();
-    void noteBluetoothOff();
-    void noteBluetoothState(int bluetoothState);
     void noteFullWifiLockAcquired(int uid);
     void noteFullWifiLockReleased(int uid);
     void noteWifiScanStarted(int uid);
@@ -109,8 +114,10 @@ interface IBatteryStats {
     void noteWifiBatchedScanStoppedFromSource(in WorkSource ws);
     void noteWifiMulticastEnabledFromSource(in WorkSource ws);
     void noteWifiMulticastDisabledFromSource(in WorkSource ws);
+    void noteWifiRadioPowerState(int powerState, long timestampNs);
     void noteNetworkInterfaceType(String iface, int type);
     void noteNetworkStatsEnabled();
+    void noteDeviceIdleMode(boolean enabled, String activeReason, int activeUid);
     void setBatteryState(int status, int health, int plugType, int level, int temp, int volt);
     long getAwakeTimeBattery();
     long getAwakeTimePlugged();

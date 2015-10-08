@@ -15,8 +15,6 @@
  */
 package android.media;
 
-import android.os.IBinder;
-
 import com.android.server.LocalServices;
 
 /**
@@ -29,8 +27,7 @@ import com.android.server.LocalServices;
 public abstract class AudioManagerInternal {
 
     public abstract void adjustSuggestedStreamVolumeForUid(int streamType, int direction,
-            int flags,
-            String callingPackage, int uid);
+            int flags, String callingPackage, int uid);
 
     public abstract void adjustStreamVolumeForUid(int streamType, int direction, int flags,
             String callingPackage, int uid);
@@ -38,25 +35,27 @@ public abstract class AudioManagerInternal {
     public abstract void setStreamVolumeForUid(int streamType, int direction, int flags,
             String callingPackage, int uid);
 
-    public abstract void adjustMasterVolumeForUid(int steps, int flags, String callingPackage,
-            int uid);
-
-    public abstract void setMasterMuteForUid(boolean state, int flags, String callingPackage,
-            IBinder cb, int uid);
-
     public abstract void setRingerModeDelegate(RingerModeDelegate delegate);
 
     public abstract int getRingerModeInternal();
 
     public abstract void setRingerModeInternal(int ringerMode, String caller);
 
+    public abstract int getVolumeControllerUid();
+
+    public abstract void updateRingerModeAffectedStreamsInternal();
+
     public interface RingerModeDelegate {
         /** Called when external ringer mode is evaluated, returns the new internal ringer mode */
         int onSetRingerModeExternal(int ringerModeOld, int ringerModeNew, String caller,
-                int ringerModeInternal);
+                int ringerModeInternal, VolumePolicy policy);
 
         /** Called when internal ringer mode is evaluated, returns the new external ringer mode */
         int onSetRingerModeInternal(int ringerModeOld, int ringerModeNew, String caller,
-                int ringerModeExternal);
+                int ringerModeExternal, VolumePolicy policy);
+
+        boolean canVolumeDownEnterSilent();
+
+        int getRingerModeAffectedStreams(int streams);
     }
 }

@@ -38,6 +38,7 @@ import android.widget.TextView;
 
 import com.android.systemui.FontSizeUtils;
 import com.android.systemui.R;
+import com.android.systemui.qs.QSTile.AnimationIcon;
 import com.android.systemui.qs.QSTile.State;
 
 import java.util.Objects;
@@ -82,20 +83,21 @@ public class QSTileView extends ViewGroup {
         setClipChildren(false);
 
         mTopBackgroundView = new View(context);
+        mTopBackgroundView.setId(View.generateViewId());
         addView(mTopBackgroundView);
 
         mIcon = createIcon();
         addView(mIcon);
 
         mDivider = new View(mContext);
-        mDivider.setBackgroundColor(res.getColor(R.color.qs_tile_divider));
+        mDivider.setBackgroundColor(context.getColor(R.color.qs_tile_divider));
         final int dh = res.getDimensionPixelSize(R.dimen.qs_tile_divider_height);
         mDivider.setLayoutParams(new LayoutParams(LayoutParams.MATCH_PARENT, dh));
         addView(mDivider);
 
         setClickable(true);
-
         updateTopPadding();
+        setId(View.generateViewId());
     }
 
     private void updateTopPadding() {
@@ -136,10 +138,10 @@ public class QSTileView extends ViewGroup {
         final Resources res = mContext.getResources();
         if (mDual) {
             mDualLabel = new QSDualTileLabel(mContext);
-            mDualLabel.setId(android.R.id.title);
+            mDualLabel.setId(View.generateViewId());
             mDualLabel.setBackgroundResource(R.drawable.btn_borderless_rect);
-            mDualLabel.setFirstLineCaret(res.getDrawable(R.drawable.qs_dual_tile_caret));
-            mDualLabel.setTextColor(res.getColor(R.color.qs_tile_text));
+            mDualLabel.setFirstLineCaret(mContext.getDrawable(R.drawable.qs_dual_tile_caret));
+            mDualLabel.setTextColor(mContext.getColor(R.color.qs_tile_text));
             mDualLabel.setPadding(0, mDualTileVerticalPaddingPx, 0, mDualTileVerticalPaddingPx);
             mDualLabel.setTypeface(CONDENSED);
             mDualLabel.setTextSize(TypedValue.COMPLEX_UNIT_PX,
@@ -154,10 +156,10 @@ public class QSTileView extends ViewGroup {
                 mDualLabel.setContentDescription(labelDescription);
             }
             addView(mDualLabel);
+            mDualLabel.setAccessibilityTraversalAfter(mTopBackgroundView.getId());
         } else {
             mLabel = new TextView(mContext);
-            mLabel.setId(android.R.id.title);
-            mLabel.setTextColor(res.getColor(R.color.qs_tile_text));
+            mLabel.setTextColor(mContext.getColor(R.color.qs_tile_text));
             mLabel.setGravity(Gravity.CENTER_HORIZONTAL);
             mLabel.setMinLines(2);
             mLabel.setPadding(0, 0, 0, 0);
@@ -316,8 +318,9 @@ public class QSTileView extends ViewGroup {
             iv.setImageDrawable(d);
             iv.setTag(R.id.qs_icon_tag, state.icon);
             if (d instanceof Animatable) {
-                if (!iv.isShown()) {
-                    ((Animatable) d).stop(); // skip directly to end state
+                Animatable a = (Animatable) d;
+                if (state.icon instanceof AnimationIcon && !iv.isShown()) {
+                    a.stop(); // skip directly to end state
                 }
             }
         }
@@ -325,6 +328,26 @@ public class QSTileView extends ViewGroup {
 
     public void onStateChanged(QSTile.State state) {
         mHandler.obtainMessage(H.STATE_CHANGED, state).sendToTarget();
+    }
+
+    /**
+     * Update the accessibility order for this view.
+     *
+     * @param previousView the view which should be before this one
+     * @return the last view in this view which is accessible
+     */
+    public View updateAccessibilityOrder(View previousView) {
+        View firstView;
+        View lastView;
+        if (mDual) {
+            lastView = mDualLabel;
+            firstView = mTopBackgroundView;
+        } else {
+            firstView = this;
+            lastView = this;
+        }
+        firstView.setAccessibilityTraversalAfter(previousView.getId());
+        return lastView;
     }
 
     private class H extends Handler {

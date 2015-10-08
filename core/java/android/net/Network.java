@@ -16,10 +16,11 @@
 
 package android.net;
 
-import android.net.NetworkUtils;
 import android.os.Parcelable;
 import android.os.Parcel;
 import android.system.ErrnoException;
+import android.system.Os;
+import android.system.OsConstants;
 
 import java.io.FileDescriptor;
 import java.io.IOException;
@@ -27,22 +28,20 @@ import java.net.DatagramSocket;
 import java.net.InetAddress;
 import java.net.InetSocketAddress;
 import java.net.MalformedURLException;
-import java.net.ProxySelector;
 import java.net.Socket;
 import java.net.SocketAddress;
 import java.net.SocketException;
 import java.net.UnknownHostException;
 import java.net.URL;
 import java.net.URLConnection;
-import java.net.URLStreamHandler;
-import java.util.concurrent.atomic.AtomicReference;
 import javax.net.SocketFactory;
 
 import com.android.okhttp.ConnectionPool;
-import com.android.okhttp.HostResolver;
 import com.android.okhttp.HttpHandler;
 import com.android.okhttp.HttpsHandler;
 import com.android.okhttp.OkHttpClient;
+import com.android.okhttp.OkUrlFactory;
+import com.android.okhttp.internal.Internal;
 
 /**
  * Identifies a {@code Network}.  This is supplied to applications via
@@ -51,7 +50,7 @@ import com.android.okhttp.OkHttpClient;
  * {@link ConnectivityManager#registerNetworkCallback} calls.
  * It is used to direct traffic to the given {@code Network}, either on a {@link Socket} basis
  * through a targeted {@link SocketFactory} or process-wide via
- * {@link ConnectivityManager#setProcessDefaultNetwork}.
+ * {@link ConnectivityManager#bindProcessToNetwork}.
  */
 public class Network implements Parcelable {
 
@@ -63,11 +62,11 @@ public class Network implements Parcelable {
     // Objects used to perform per-network operations such as getSocketFactory
     // and openConnection, and a lock to protect access to them.
     private volatile NetworkBoundSocketFactory mNetworkBoundSocketFactory = null;
-    // mLock should be used to control write access to mConnectionPool and mHostResolver.
+    // mLock should be used to control write access to mConnectionPool and mNetwork.
     // maybeInitHttpClient() must be called prior to reading either variable.
     private volatile ConnectionPool mConnectionPool = null;
-    private volatile HostResolver mHostResolver = null;
-    private Object mLock = new Object();
+    private volatile com.android.okhttp.internal.Network mNetwork = null;
+    private final Object mLock = new Object();
 
     // Default connection pool values. These are evaluated at startup, just
     // like the OkHttp code. Also like the OkHttp code, we will throw parse
@@ -220,10 +219,10 @@ public class Network implements Parcelable {
     // out) ConnectionPools.
     private void maybeInitHttpClient() {
         synchronized (mLock) {
-            if (mHostResolver == null) {
-                mHostResolver = new HostResolver() {
+            if (mNetwork == null) {
+                mNetwork = new com.android.okhttp.internal.Network() {
                     @Override
-                    public InetAddress[] getAllByName(String host) throws UnknownHostException {
+                    public InetAddress[] resolveInetAddresses(String host) throws UnknownHostException {
                         return Network.this.getAllByName(host);
                     }
                 };
@@ -245,14 +244,12 @@ public class Network implements Parcelable {
      * @see java.net.URL#openConnection()
      */
     public URLConnection openConnection(URL url) throws IOException {
-        final ConnectivityManager cm = ConnectivityManager.getInstance();
-        // TODO: Should this be optimized to avoid fetching the global proxy for every request?
-        ProxyInfo proxyInfo = cm.getGlobalProxy();
-        if (proxyInfo == null) {
-            // TODO: Should this be optimized to avoid fetching LinkProperties for every request?
-            final LinkProperties lp = cm.getLinkProperties(this);
-            if (lp != null) proxyInfo = lp.getHttpProxy();
+        final ConnectivityManager cm = ConnectivityManager.getInstanceOrNull();
+        if (cm == null) {
+            throw new IOException("No ConnectivityManager yet constructed, please construct one");
         }
+        // TODO: Should this be optimized to avoid fetching the global proxy for every request?
+        final ProxyInfo proxyInfo = cm.getProxyForNetwork(this);
         java.net.Proxy proxy = null;
         if (proxyInfo != null) {
             proxy = proxyInfo.makeProxy();
@@ -272,70 +269,120 @@ public class Network implements Parcelable {
      * @throws IllegalArgumentException if the argument proxy is null.
      * @throws IOException if an error occurs while opening the connection.
      * @see java.net.URL#openConnection()
-     * @hide
      */
     public URLConnection openConnection(URL url, java.net.Proxy proxy) throws IOException {
         if (proxy == null) throw new IllegalArgumentException("proxy is null");
         maybeInitHttpClient();
         String protocol = url.getProtocol();
-        OkHttpClient client;
-        // TODO: HttpHandler creates OkHttpClients that share the default ResponseCache.
+        OkUrlFactory okUrlFactory;
+        // TODO: HttpHandler creates OkUrlFactory instances that share the default ResponseCache.
         // Could this cause unexpected behavior?
         if (protocol.equals("http")) {
-            client = HttpHandler.createHttpOkHttpClient(proxy);
+            okUrlFactory = HttpHandler.createHttpOkUrlFactory(proxy);
         } else if (protocol.equals("https")) {
-            client = HttpsHandler.createHttpsOkHttpClient(proxy);
+            okUrlFactory = HttpsHandler.createHttpsOkUrlFactory(proxy);
         } else {
-            // OkHttpClient only supports HTTP and HTTPS and returns a null URLStreamHandler if
+            // OkHttp only supports HTTP and HTTPS and returns a null URLStreamHandler if
             // passed another protocol.
             throw new MalformedURLException("Invalid URL or unrecognized protocol " + protocol);
         }
-        return client.setSocketFactory(getSocketFactory())
-                .setHostResolver(mHostResolver)
-                .setConnectionPool(mConnectionPool)
-                .open(url);
+        OkHttpClient client = okUrlFactory.client();
+        client.setSocketFactory(getSocketFactory()).setConnectionPool(mConnectionPool);
+
+        // Use internal APIs to change the Network.
+        Internal.instance.setNetwork(client, mNetwork);
+
+        return okUrlFactory.open(url);
     }
 
     /**
      * Binds the specified {@link DatagramSocket} to this {@code Network}. All data traffic on the
      * socket will be sent on this {@code Network}, irrespective of any process-wide network binding
-     * set by {@link ConnectivityManager#setProcessDefaultNetwork}. The socket must not be
+     * set by {@link ConnectivityManager#bindProcessToNetwork}. The socket must not be
      * connected.
      */
     public void bindSocket(DatagramSocket socket) throws IOException {
-        // Apparently, the kernel doesn't update a connected UDP socket's routing upon mark changes.
-        if (socket.isConnected()) {
-            throw new SocketException("Socket is connected");
-        }
         // Query a property of the underlying socket to ensure that the socket's file descriptor
         // exists, is available to bind to a network and is not closed.
         socket.getReuseAddress();
-        bindSocketFd(socket.getFileDescriptor$());
+        bindSocket(socket.getFileDescriptor$());
     }
 
     /**
      * Binds the specified {@link Socket} to this {@code Network}. All data traffic on the socket
      * will be sent on this {@code Network}, irrespective of any process-wide network binding set by
-     * {@link ConnectivityManager#setProcessDefaultNetwork}. The socket must not be connected.
+     * {@link ConnectivityManager#bindProcessToNetwork}. The socket must not be connected.
      */
     public void bindSocket(Socket socket) throws IOException {
-        // Apparently, the kernel doesn't update a connected TCP socket's routing upon mark changes.
-        if (socket.isConnected()) {
-            throw new SocketException("Socket is connected");
-        }
         // Query a property of the underlying socket to ensure that the socket's file descriptor
         // exists, is available to bind to a network and is not closed.
         socket.getReuseAddress();
-        bindSocketFd(socket.getFileDescriptor$());
+        bindSocket(socket.getFileDescriptor$());
     }
 
-    private void bindSocketFd(FileDescriptor fd) throws IOException {
-        int err = NetworkUtils.bindSocketToNetwork(fd.getInt$(), netId);
+    /**
+     * Binds the specified {@link FileDescriptor} to this {@code Network}. All data traffic on the
+     * socket represented by this file descriptor will be sent on this {@code Network},
+     * irrespective of any process-wide network binding set by
+     * {@link ConnectivityManager#bindProcessToNetwork}. The socket must not be connected.
+     */
+    public void bindSocket(FileDescriptor fd) throws IOException {
+        try {
+            final SocketAddress peer = Os.getpeername(fd);
+            final InetAddress inetPeer = ((InetSocketAddress) peer).getAddress();
+            if (!inetPeer.isAnyLocalAddress()) {
+                // Apparently, the kernel doesn't update a connected UDP socket's
+                // routing upon mark changes.
+                throw new SocketException("Socket is connected");
+            }
+        } catch (ErrnoException e) {
+            // getpeername() failed.
+            if (e.errno != OsConstants.ENOTCONN) {
+                throw e.rethrowAsSocketException();
+            }
+        } catch (ClassCastException e) {
+            // Wasn't an InetSocketAddress.
+            throw new SocketException("Only AF_INET/AF_INET6 sockets supported");
+        }
+
+        final int err = NetworkUtils.bindSocketToNetwork(fd.getInt$(), netId);
         if (err != 0) {
             // bindSocketToNetwork returns negative errno.
             throw new ErrnoException("Binding socket to network " + netId, -err)
                     .rethrowAsSocketException();
         }
+    }
+
+    /**
+     * Returns a handle representing this {@code Network}, for use with the NDK API.
+     */
+    public long getNetworkHandle() {
+        // The network handle is explicitly not the same as the netId.
+        //
+        // The netId is an implementation detail which might be changed in the
+        // future, or which alone (i.e. in the absence of some additional
+        // context) might not be sufficient to fully identify a Network.
+        //
+        // As such, the intention is to prevent accidental misuse of the API
+        // that might result if a developer assumed that handles and netIds
+        // were identical and passing a netId to a call expecting a handle
+        // "just worked".  Such accidental misuse, if widely deployed, might
+        // prevent future changes to the semantics of the netId field or
+        // inhibit the expansion of state required for Network objects.
+        //
+        // This extra layer of indirection might be seen as paranoia, and might
+        // never end up being necessary, but the added complexity is trivial.
+        // At some future date it may be desirable to realign the handle with
+        // Multiple Provisioning Domains API recommendations, as made by the
+        // IETF mif working group.
+        //
+        // The HANDLE_MAGIC value MUST be kept in sync with the corresponding
+        // value in the native/android/net.c NDK implementation.
+        if (netId == 0) {
+            return 0L;  // make this zero condition obvious for debugging
+        }
+        final long HANDLE_MAGIC = 0xfacade;
+        return (((long) netId) << 32) | HANDLE_MAGIC;
     }
 
     // implement the Parcelable interface

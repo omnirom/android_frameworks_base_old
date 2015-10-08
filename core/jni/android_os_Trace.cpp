@@ -17,6 +17,8 @@
 #define LOG_TAG "Trace"
 // #define LOG_NDEBUG 0
 
+#include <inttypes.h>
+
 #include <JNIHelp.h>
 #include <ScopedUtfChars.h>
 #include <ScopedStringChars.h>
@@ -48,47 +50,44 @@ static void android_os_Trace_nativeTraceCounter(JNIEnv* env, jclass clazz,
         jlong tag, jstring nameStr, jint value) {
     ScopedUtfChars name(env, nameStr);
 
-    ALOGV("%s: %lld %s %d", __FUNCTION__, tag, name.c_str(), value);
+    ALOGV("%s: %" PRId64 " %s %d", __FUNCTION__, tag, name.c_str(), value);
     atrace_int(tag, name.c_str(), value);
 }
 
 static void android_os_Trace_nativeTraceBegin(JNIEnv* env, jclass clazz,
         jlong tag, jstring nameStr) {
-    const size_t MAX_SECTION_NAME_LEN = 127;
     ScopedStringChars jchars(env, nameStr);
     String8 utf8Chars(reinterpret_cast<const char16_t*>(jchars.get()), jchars.size());
     sanitizeString(utf8Chars);
 
-    ALOGV("%s: %lld %s", __FUNCTION__, tag, utf8Chars.string());
+    ALOGV("%s: %" PRId64 " %s", __FUNCTION__, tag, utf8Chars.string());
     atrace_begin(tag, utf8Chars.string());
 }
 
 static void android_os_Trace_nativeTraceEnd(JNIEnv* env, jclass clazz,
         jlong tag) {
 
-    ALOGV("%s: %lld", __FUNCTION__, tag);
+    ALOGV("%s: %" PRId64, __FUNCTION__, tag);
     atrace_end(tag);
 }
 
 static void android_os_Trace_nativeAsyncTraceBegin(JNIEnv* env, jclass clazz,
         jlong tag, jstring nameStr, jint cookie) {
-    const size_t MAX_SECTION_NAME_LEN = 127;
     ScopedStringChars jchars(env, nameStr);
     String8 utf8Chars(reinterpret_cast<const char16_t*>(jchars.get()), jchars.size());
     sanitizeString(utf8Chars);
 
-    ALOGV("%s: %lld %s %d", __FUNCTION__, tag, utf8Chars.string(), cookie);
+    ALOGV("%s: %" PRId64 " %s %d", __FUNCTION__, tag, utf8Chars.string(), cookie);
     atrace_async_begin(tag, utf8Chars.string(), cookie);
 }
 
 static void android_os_Trace_nativeAsyncTraceEnd(JNIEnv* env, jclass clazz,
         jlong tag, jstring nameStr, jint cookie) {
-    const size_t MAX_SECTION_NAME_LEN = 127;
     ScopedStringChars jchars(env, nameStr);
     String8 utf8Chars(reinterpret_cast<const char16_t*>(jchars.get()), jchars.size());
     sanitizeString(utf8Chars);
 
-    ALOGV("%s: %lld %s %d", __FUNCTION__, tag, utf8Chars.string(), cookie);
+    ALOGV("%s: %" PRId64 " %s %d", __FUNCTION__, tag, utf8Chars.string(), cookie);
     atrace_async_end(tag, utf8Chars.string(), cookie);
 }
 
@@ -112,19 +111,19 @@ static JNINativeMethod gTraceMethods[] = {
             "()J",
             (void*)android_os_Trace_nativeGetEnabledTags },
     { "nativeTraceCounter",
-            "(JLjava/lang/String;I)V",
+            "!(JLjava/lang/String;I)V",
             (void*)android_os_Trace_nativeTraceCounter },
     { "nativeTraceBegin",
-            "(JLjava/lang/String;)V",
+            "!(JLjava/lang/String;)V",
             (void*)android_os_Trace_nativeTraceBegin },
     { "nativeTraceEnd",
-            "(J)V",
+            "!(J)V",
             (void*)android_os_Trace_nativeTraceEnd },
     { "nativeAsyncTraceBegin",
-            "(JLjava/lang/String;I)V",
+            "!(JLjava/lang/String;I)V",
             (void*)android_os_Trace_nativeAsyncTraceBegin },
     { "nativeAsyncTraceEnd",
-            "(JLjava/lang/String;I)V",
+            "!(JLjava/lang/String;I)V",
             (void*)android_os_Trace_nativeAsyncTraceEnd },
     { "nativeSetAppTracingAllowed",
             "(Z)V",
@@ -137,7 +136,7 @@ static JNINativeMethod gTraceMethods[] = {
 int register_android_os_Trace(JNIEnv* env) {
     int res = jniRegisterNativeMethods(env, "android/os/Trace",
             gTraceMethods, NELEM(gTraceMethods));
-    LOG_FATAL_IF(res < 0, "Unable to register native methods.");
+    LOG_ALWAYS_FATAL_IF(res < 0, "Unable to register native methods.");
 
     return 0;
 }

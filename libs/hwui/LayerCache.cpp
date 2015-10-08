@@ -33,7 +33,7 @@ namespace uirenderer {
 
 LayerCache::LayerCache(): mSize(0), mMaxSize(MB(DEFAULT_LAYER_CACHE_SIZE)) {
     char property[PROPERTY_VALUE_MAX];
-    if (property_get(PROPERTY_LAYER_CACHE_SIZE, property, NULL) > 0) {
+    if (property_get(PROPERTY_LAYER_CACHE_SIZE, property, nullptr) > 0) {
         INIT_LOGD("  Setting layer cache size to %sMB", property);
         setMaxSize(MB(atof(property)));
     } else {
@@ -84,7 +84,7 @@ void LayerCache::deleteLayer(Layer* layer) {
                 layer->getFbo());
         mSize -= layer->getWidth() * layer->getHeight() * 4;
         layer->state = Layer::kState_DeletedFromCache;
-        layer->decStrong(0);
+        layer->decStrong(nullptr);
     }
 }
 
@@ -97,7 +97,7 @@ void LayerCache::clear() {
 }
 
 Layer* LayerCache::get(RenderState& renderState, const uint32_t width, const uint32_t height) {
-    Layer* layer = NULL;
+    Layer* layer = nullptr;
 
     LayerEntry entry(width, height);
     ssize_t index = mCache.indexOf(entry);
@@ -116,9 +116,6 @@ Layer* LayerCache::get(RenderState& renderState, const uint32_t width, const uin
 
         layer = new Layer(Layer::kType_DisplayList, renderState, entry.mWidth, entry.mHeight);
         layer->setBlend(true);
-        layer->setEmpty(true);
-        layer->setFbo(0);
-
         layer->generateTexture();
         layer->bindTexture();
         layer->setFilter(GL_NEAREST);
@@ -137,7 +134,7 @@ void LayerCache::dump() {
     size_t size = mCache.size();
     for (size_t i = 0; i < size; i++) {
         const LayerEntry& entry = mCache.itemAt(i);
-        LAYER_LOGD("  Layer size %dx%d", entry.mWidth, entry.mHeight);
+        ALOGD("  Layer size %dx%d", entry.mWidth, entry.mHeight);
     }
 }
 

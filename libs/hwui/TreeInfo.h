@@ -20,7 +20,6 @@
 
 #include <utils/Timers.h>
 
-#include "DamageAccumulator.h"
 #include "utils/Macros.h"
 
 namespace android {
@@ -30,6 +29,7 @@ namespace renderthread {
 class CanvasContext;
 }
 
+class DamageAccumulator;
 class OpenGLRenderer;
 class RenderState;
 
@@ -59,11 +59,11 @@ public:
         : mode(mode)
         , prepareTextures(mode == MODE_FULL)
         , runAnimations(true)
-        , damageAccumulator(NULL)
+        , damageAccumulator(nullptr)
         , renderState(renderState)
-        , renderer(NULL)
-        , errorHandler(NULL)
-        , canvasContext(NULL)
+        , renderer(nullptr)
+        , errorHandler(nullptr)
+        , canvasContext(nullptr)
     {}
 
     explicit TreeInfo(TraversalMode mode, const TreeInfo& clone)
@@ -95,7 +95,7 @@ public:
     // layer updates or similar. May be NULL.
     OpenGLRenderer* renderer;
     ErrorHandler* errorHandler;
-    // TODO: Remove this? May be NULL
+    // May be NULL (TODO: can it really?)
     renderthread::CanvasContext* canvasContext;
 
     struct Out {

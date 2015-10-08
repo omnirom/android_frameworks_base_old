@@ -32,6 +32,7 @@ int register_android_server_PowerManagerService(JNIEnv* env);
 int register_android_server_SerialService(JNIEnv* env);
 int register_android_server_SystemServer(JNIEnv* env);
 int register_android_server_UsbDeviceManager(JNIEnv* env);
+int register_android_server_UsbMidiDevice(JNIEnv* env);
 int register_android_server_UsbHostManager(JNIEnv* env);
 int register_android_server_VibratorService(JNIEnv* env);
 int register_android_server_location_GpsLocationProvider(JNIEnv* env);
@@ -40,13 +41,12 @@ int register_android_server_connectivity_Vpn(JNIEnv* env);
 int register_android_server_hdmi_HdmiCecController(JNIEnv* env);
 int register_android_server_tv_TvInputHal(JNIEnv* env);
 int register_android_server_PersistentDataBlockService(JNIEnv* env);
-int register_android_server_fingerprint_FingerprintService(JNIEnv* env);
 int register_android_server_Watchdog(JNIEnv* env);
 };
 
 using namespace android;
 
-extern "C" jint JNI_OnLoad(JavaVM* vm, void* reserved)
+extern "C" jint JNI_OnLoad(JavaVM* vm, void* /* reserved */)
 {
     JNIEnv* env = NULL;
     jint result = -1;
@@ -65,6 +65,7 @@ extern "C" jint JNI_OnLoad(JavaVM* vm, void* reserved)
     register_android_server_LightsService(env);
     register_android_server_AlarmManagerService(env);
     register_android_server_UsbDeviceManager(env);
+    register_android_server_UsbMidiDevice(env);
     register_android_server_UsbHostManager(env);
     register_android_server_VibratorService(env);
     register_android_server_SystemServer(env);
@@ -77,7 +78,6 @@ extern "C" jint JNI_OnLoad(JavaVM* vm, void* reserved)
     register_android_server_hdmi_HdmiCecController(env);
     register_android_server_tv_TvInputHal(env);
     register_android_server_PersistentDataBlockService(env);
-    register_android_server_fingerprint_FingerprintService(env);
     register_android_server_Watchdog(env);
 
     return JNI_VERSION_1_4;

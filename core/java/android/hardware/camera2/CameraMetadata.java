@@ -16,6 +16,7 @@
 
 package android.hardware.camera2;
 
+import android.annotation.NonNull;
 import android.hardware.camera2.impl.CameraMetadataNative;
 import android.hardware.camera2.impl.PublicKey;
 import android.hardware.camera2.impl.SyntheticKey;
@@ -50,7 +51,7 @@ import java.util.List;
 public abstract class CameraMetadata<TKey> {
 
     private static final String TAG = "CameraMetadataAb";
-    private static final boolean VERBOSE = Log.isLoggable(TAG, Log.VERBOSE);
+    private static final boolean DEBUG = false;
 
     /**
      * Set a camera metadata field to a value. The field definitions can be
@@ -103,6 +104,7 @@ public abstract class CameraMetadata<TKey> {
      * @return List of the keys contained in this map.
      */
     @SuppressWarnings("unchecked")
+    @NonNull
     public List<TKey> getKeys() {
         Class<CameraMetadata<TKey>> thisClass = (Class<CameraMetadata<TKey>>) getClass();
         return Collections.unmodifiableList(
@@ -129,7 +131,7 @@ public abstract class CameraMetadata<TKey> {
              CameraMetadata<TKey> instance,
              int[] filterTags) {
 
-        if (VERBOSE) Log.v(TAG, "getKeysStatic for " + type);
+        if (DEBUG) Log.v(TAG, "getKeysStatic for " + type);
 
         // TotalCaptureResult does not have any of the keys on it, use CaptureResult instead
         if (type.equals(TotalCaptureResult.class)) {
@@ -161,12 +163,34 @@ public abstract class CameraMetadata<TKey> {
                     if (shouldKeyBeAdded(key, field, filterTags)) {
                         keyList.add(key);
 
-                        if (VERBOSE) {
+                        if (DEBUG) {
                             Log.v(TAG, "getKeysStatic - key was added - " + key);
                         }
-                    } else if (VERBOSE) {
+                    } else if (DEBUG) {
                         Log.v(TAG, "getKeysStatic - key was filtered - " + key);
                     }
+                }
+            }
+        }
+
+        ArrayList<TKey> vendorKeys = CameraMetadataNative.getAllVendorKeys(keyClass);
+
+        if (vendorKeys != null) {
+            for (TKey k : vendorKeys) {
+                String keyName;
+                if (k instanceof CaptureRequest.Key<?>) {
+                    keyName = ((CaptureRequest.Key<?>) k).getName();
+                } else if (k instanceof CaptureResult.Key<?>) {
+                    keyName = ((CaptureResult.Key<?>) k).getName();
+                } else if (k instanceof CameraCharacteristics.Key<?>) {
+                    keyName = ((CameraCharacteristics.Key<?>) k).getName();
+                } else {
+                    continue;
+                }
+
+                if (filterTags == null || Arrays.binarySearch(filterTags,
+                        CameraMetadataNative.getTag(keyName)) >= 0) {
+                    keyList.add(k);
                 }
             }
         }
@@ -288,6 +312,13 @@ public abstract class CameraMetadata<TKey> {
      */
     public static final int LENS_FACING_BACK = 1;
 
+    /**
+     * <p>The camera device is an external camera, and has no fixed facing relative to the
+     * device's screen.</p>
+     * @see CameraCharacteristics#LENS_FACING
+     */
+    public static final int LENS_FACING_EXTERNAL = 2;
+
     //
     // Enumeration values for CameraCharacteristics#REQUEST_AVAILABLE_CAPABILITIES
     //
@@ -296,10 +327,13 @@ public abstract class CameraMetadata<TKey> {
      * <p>The minimal set of capabilities that every camera
      * device (regardless of {@link CameraCharacteristics#INFO_SUPPORTED_HARDWARE_LEVEL android.info.supportedHardwareLevel})
      * supports.</p>
-     * <p>This capability is listed by all devices, and
+     * <p>This capability is listed by all normal devices, and
      * indicates that the camera device has a feature set
      * that's comparable to the baseline requirements for the
      * older android.hardware.Camera API.</p>
+     * <p>Devices with the DEPTH_OUTPUT capability might not list this
+     * capability, indicating that they support only depth measurement,
+     * not standard color output.</p>
      *
      * @see CameraCharacteristics#INFO_SUPPORTED_HARDWARE_LEVEL
      * @see CameraCharacteristics#REQUEST_AVAILABLE_CAPABILITIES
@@ -340,6 +374,10 @@ public abstract class CameraMetadata<TKey> {
      * <li>{@link CaptureRequest#BLACK_LEVEL_LOCK android.blackLevel.lock}</li>
      * </ul>
      * </li>
+     * <li>Auto exposure lock<ul>
+     * <li>{@link CaptureRequest#CONTROL_AE_LOCK android.control.aeLock}</li>
+     * </ul>
+     * </li>
      * </ul>
      * <p>If any of the above 3A algorithms are enabled, then the camera
      * device will accurately report the values applied by 3A in the
@@ -351,6 +389,7 @@ public abstract class CameraMetadata<TKey> {
      * zero for each supported size-format combination.</p>
      *
      * @see CaptureRequest#BLACK_LEVEL_LOCK
+     * @see CaptureRequest#CONTROL_AE_LOCK
      * @see CameraCharacteristics#SCALER_STREAM_CONFIGURATION_MAP
      * @see CaptureRequest#SENSOR_EXPOSURE_TIME
      * @see CaptureRequest#SENSOR_FRAME_DURATION
@@ -367,13 +406,19 @@ public abstract class CameraMetadata<TKey> {
      * The camera device supports basic manual control of the image post-processing
      * stages. This means the following controls are guaranteed to be supported:</p>
      * <ul>
-     * <li>Manual tonemap control<ul>
+     * <li>
+     * <p>Manual tonemap control</p>
+     * <ul>
      * <li>{@link CaptureRequest#TONEMAP_CURVE android.tonemap.curve}</li>
      * <li>{@link CaptureRequest#TONEMAP_MODE android.tonemap.mode}</li>
      * <li>{@link CameraCharacteristics#TONEMAP_MAX_CURVE_POINTS android.tonemap.maxCurvePoints}</li>
+     * <li>{@link CaptureRequest#TONEMAP_GAMMA android.tonemap.gamma}</li>
+     * <li>{@link CaptureRequest#TONEMAP_PRESET_CURVE android.tonemap.presetCurve}</li>
      * </ul>
      * </li>
-     * <li>Manual white balance control<ul>
+     * <li>
+     * <p>Manual white balance control</p>
+     * <ul>
      * <li>{@link CaptureRequest#COLOR_CORRECTION_TRANSFORM android.colorCorrection.transform}</li>
      * <li>{@link CaptureRequest#COLOR_CORRECTION_GAINS android.colorCorrection.gains}</li>
      * </ul>
@@ -390,6 +435,10 @@ public abstract class CameraMetadata<TKey> {
      * <li>{@link CameraCharacteristics#COLOR_CORRECTION_AVAILABLE_ABERRATION_MODES android.colorCorrection.availableAberrationModes}</li>
      * </ul>
      * </li>
+     * <li>Auto white balance lock<ul>
+     * <li>{@link CaptureRequest#CONTROL_AWB_LOCK android.control.awbLock}</li>
+     * </ul>
+     * </li>
      * </ul>
      * <p>If auto white balance is enabled, then the camera device
      * will accurately report the values applied by AWB in the result.</p>
@@ -400,11 +449,14 @@ public abstract class CameraMetadata<TKey> {
      * @see CameraCharacteristics#COLOR_CORRECTION_AVAILABLE_ABERRATION_MODES
      * @see CaptureRequest#COLOR_CORRECTION_GAINS
      * @see CaptureRequest#COLOR_CORRECTION_TRANSFORM
+     * @see CaptureRequest#CONTROL_AWB_LOCK
      * @see CaptureRequest#SHADING_MODE
      * @see CaptureRequest#STATISTICS_LENS_SHADING_MAP_MODE
      * @see CaptureRequest#TONEMAP_CURVE
+     * @see CaptureRequest#TONEMAP_GAMMA
      * @see CameraCharacteristics#TONEMAP_MAX_CURVE_POINTS
      * @see CaptureRequest#TONEMAP_MODE
+     * @see CaptureRequest#TONEMAP_PRESET_CURVE
      * @see CameraCharacteristics#REQUEST_AVAILABLE_CAPABILITIES
      */
     public static final int REQUEST_AVAILABLE_CAPABILITIES_MANUAL_POST_PROCESSING = 2;
@@ -432,23 +484,45 @@ public abstract class CameraMetadata<TKey> {
     public static final int REQUEST_AVAILABLE_CAPABILITIES_RAW = 3;
 
     /**
-     * <p>The camera device supports the Zero Shutter Lag use case.</p>
+     * <p>The camera device supports the Zero Shutter Lag reprocessing use case.</p>
      * <ul>
-     * <li>At least one input stream can be used.</li>
-     * <li>RAW_OPAQUE is supported as an output/input format</li>
-     * <li>Using RAW_OPAQUE does not cause a frame rate drop
-     *   relative to the sensor's maximum capture rate (at that
-     *   resolution).</li>
-     * <li>RAW_OPAQUE will be reprocessable into both YUV_420_888
-     *   and JPEG formats.</li>
-     * <li>The maximum available resolution for RAW_OPAQUE streams
+     * <li>One input stream is supported, that is, <code>{@link CameraCharacteristics#REQUEST_MAX_NUM_INPUT_STREAMS android.request.maxNumInputStreams} == 1</code>.</li>
+     * <li>{@link android.graphics.ImageFormat#PRIVATE } is supported as an output/input format,
+     *   that is, {@link android.graphics.ImageFormat#PRIVATE } is included in the lists of
+     *   formats returned by {@link android.hardware.camera2.params.StreamConfigurationMap#getInputFormats } and {@link android.hardware.camera2.params.StreamConfigurationMap#getOutputFormats }.</li>
+     * <li>{@link android.hardware.camera2.params.StreamConfigurationMap#getValidOutputFormatsForInput }
+     *   returns non empty int[] for each supported input format returned by {@link android.hardware.camera2.params.StreamConfigurationMap#getInputFormats }.</li>
+     * <li>Each size returned by {@link android.hardware.camera2.params.StreamConfigurationMap#getInputSizes getInputSizes(ImageFormat.PRIVATE)} is also included in {@link android.hardware.camera2.params.StreamConfigurationMap#getOutputSizes getOutputSizes(ImageFormat.PRIVATE)}</li>
+     * <li>Using {@link android.graphics.ImageFormat#PRIVATE } does not cause a frame rate drop
+     *   relative to the sensor's maximum capture rate (at that resolution).</li>
+     * <li>{@link android.graphics.ImageFormat#PRIVATE } will be reprocessable into both
+     *   {@link android.graphics.ImageFormat#YUV_420_888 } and
+     *   {@link android.graphics.ImageFormat#JPEG } formats.</li>
+     * <li>The maximum available resolution for PRIVATE streams
      *   (both input/output) will match the maximum available
      *   resolution of JPEG streams.</li>
+     * <li>Static metadata {@link CameraCharacteristics#REPROCESS_MAX_CAPTURE_STALL android.reprocess.maxCaptureStall}.</li>
+     * <li>Only below controls are effective for reprocessing requests and
+     *   will be present in capture results, other controls in reprocess
+     *   requests will be ignored by the camera device.<ul>
+     * <li>android.jpeg.*</li>
+     * <li>{@link CaptureRequest#NOISE_REDUCTION_MODE android.noiseReduction.mode}</li>
+     * <li>{@link CaptureRequest#EDGE_MODE android.edge.mode}</li>
      * </ul>
+     * </li>
+     * <li>{@link CameraCharacteristics#NOISE_REDUCTION_AVAILABLE_NOISE_REDUCTION_MODES android.noiseReduction.availableNoiseReductionModes} and
+     *   {@link CameraCharacteristics#EDGE_AVAILABLE_EDGE_MODES android.edge.availableEdgeModes} will both list ZERO_SHUTTER_LAG as a supported mode.</li>
+     * </ul>
+     *
+     * @see CameraCharacteristics#EDGE_AVAILABLE_EDGE_MODES
+     * @see CaptureRequest#EDGE_MODE
+     * @see CameraCharacteristics#NOISE_REDUCTION_AVAILABLE_NOISE_REDUCTION_MODES
+     * @see CaptureRequest#NOISE_REDUCTION_MODE
+     * @see CameraCharacteristics#REPROCESS_MAX_CAPTURE_STALL
+     * @see CameraCharacteristics#REQUEST_MAX_NUM_INPUT_STREAMS
      * @see CameraCharacteristics#REQUEST_AVAILABLE_CAPABILITIES
-     * @hide
      */
-    public static final int REQUEST_AVAILABLE_CAPABILITIES_ZSL = 4;
+    public static final int REQUEST_AVAILABLE_CAPABILITIES_PRIVATE_REPROCESSING = 4;
 
     /**
      * <p>The camera device supports accurately reporting the sensor settings for many of
@@ -483,30 +557,217 @@ public abstract class CameraMetadata<TKey> {
     public static final int REQUEST_AVAILABLE_CAPABILITIES_READ_SENSOR_SETTINGS = 5;
 
     /**
-     * <p>The camera device supports capturing maximum-resolution
-     * images at &gt;= 20 frames per second, in at least the
-     * uncompressed YUV format, when post-processing settings
-     * are set to FAST.</p>
-     * <p>More specifically, this means that a size matching the
-     * camera device's active array size is listed as a
-     * supported size for the YUV_420_888 format in
-     * {@link CameraCharacteristics#SCALER_STREAM_CONFIGURATION_MAP android.scaler.streamConfigurationMap}, the minimum frame
-     * duration for that format and size is &lt;= 1/20 s, and
-     * the {@link CameraCharacteristics#CONTROL_AE_AVAILABLE_TARGET_FPS_RANGES android.control.aeAvailableTargetFpsRanges} entry
-     * lists at least one FPS range where the minimum FPS is</p>
-     * <blockquote>
-     * <p>= 1 / minimumFrameDuration for the maximum-size
-     * YUV_420_888 format.</p>
-     * </blockquote>
-     * <p>In addition, the {@link CameraCharacteristics#SYNC_MAX_LATENCY android.sync.maxLatency} field is
-     * guaranted to have a value between 0 and 4, inclusive.</p>
+     * <p>The camera device supports capturing high-resolution images at &gt;= 20 frames per
+     * second, in at least the uncompressed YUV format, when post-processing settings are set
+     * to FAST. Additionally, maximum-resolution images can be captured at &gt;= 10 frames
+     * per second.  Here, 'high resolution' means at least 8 megapixels, or the maximum
+     * resolution of the device, whichever is smaller.</p>
+     * <p>More specifically, this means that a size matching the camera device's active array
+     * size is listed as a supported size for the {@link android.graphics.ImageFormat#YUV_420_888 } format in either {@link android.hardware.camera2.params.StreamConfigurationMap#getOutputSizes } or {@link android.hardware.camera2.params.StreamConfigurationMap#getHighResolutionOutputSizes },
+     * with a minimum frame duration for that format and size of either &lt;= 1/20 s, or
+     * &lt;= 1/10 s, respectively; and the {@link CameraCharacteristics#CONTROL_AE_AVAILABLE_TARGET_FPS_RANGES android.control.aeAvailableTargetFpsRanges} entry
+     * lists at least one FPS range where the minimum FPS is &gt;= 1 / minimumFrameDuration
+     * for the maximum-size YUV_420_888 format.  If that maximum size is listed in {@link android.hardware.camera2.params.StreamConfigurationMap#getHighResolutionOutputSizes },
+     * then the list of resolutions for YUV_420_888 from {@link android.hardware.camera2.params.StreamConfigurationMap#getOutputSizes } contains at
+     * least one resolution &gt;= 8 megapixels, with a minimum frame duration of &lt;= 1/20
+     * s.</p>
+     * <p>If the device supports the {@link android.graphics.ImageFormat#RAW10 }, {@link android.graphics.ImageFormat#RAW12 }, then those can also be captured at the same rate
+     * as the maximum-size YUV_420_888 resolution is.</p>
+     * <p>If the device supports the PRIVATE_REPROCESSING capability, then the same guarantees
+     * as for the YUV_420_888 format also apply to the {@link android.graphics.ImageFormat#PRIVATE } format.</p>
+     * <p>In addition, the {@link CameraCharacteristics#SYNC_MAX_LATENCY android.sync.maxLatency} field is guaranted to have a value between 0
+     * and 4, inclusive. {@link CameraCharacteristics#CONTROL_AE_LOCK_AVAILABLE android.control.aeLockAvailable} and {@link CameraCharacteristics#CONTROL_AWB_LOCK_AVAILABLE android.control.awbLockAvailable}
+     * are also guaranteed to be <code>true</code> so burst capture with these two locks ON yields
+     * consistent image output.</p>
      *
      * @see CameraCharacteristics#CONTROL_AE_AVAILABLE_TARGET_FPS_RANGES
-     * @see CameraCharacteristics#SCALER_STREAM_CONFIGURATION_MAP
+     * @see CameraCharacteristics#CONTROL_AE_LOCK_AVAILABLE
+     * @see CameraCharacteristics#CONTROL_AWB_LOCK_AVAILABLE
      * @see CameraCharacteristics#SYNC_MAX_LATENCY
      * @see CameraCharacteristics#REQUEST_AVAILABLE_CAPABILITIES
      */
     public static final int REQUEST_AVAILABLE_CAPABILITIES_BURST_CAPTURE = 6;
+
+    /**
+     * <p>The camera device supports the YUV_420_888 reprocessing use case, similar as
+     * PRIVATE_REPROCESSING, This capability requires the camera device to support the
+     * following:</p>
+     * <ul>
+     * <li>One input stream is supported, that is, <code>{@link CameraCharacteristics#REQUEST_MAX_NUM_INPUT_STREAMS android.request.maxNumInputStreams} == 1</code>.</li>
+     * <li>{@link android.graphics.ImageFormat#YUV_420_888 } is supported as an output/input format, that is,
+     *   YUV_420_888 is included in the lists of formats returned by
+     *   {@link android.hardware.camera2.params.StreamConfigurationMap#getInputFormats } and
+     *   {@link android.hardware.camera2.params.StreamConfigurationMap#getOutputFormats }.</li>
+     * <li>{@link android.hardware.camera2.params.StreamConfigurationMap#getValidOutputFormatsForInput }
+     *   returns non-empty int[] for each supported input format returned by {@link android.hardware.camera2.params.StreamConfigurationMap#getInputFormats }.</li>
+     * <li>Each size returned by {@link android.hardware.camera2.params.StreamConfigurationMap#getInputSizes getInputSizes(YUV_420_888)} is also included in {@link android.hardware.camera2.params.StreamConfigurationMap#getOutputSizes getOutputSizes(YUV_420_888)}</li>
+     * <li>Using {@link android.graphics.ImageFormat#YUV_420_888 } does not cause a frame rate drop
+     *   relative to the sensor's maximum capture rate (at that resolution).</li>
+     * <li>{@link android.graphics.ImageFormat#YUV_420_888 } will be reprocessable into both
+     *   {@link android.graphics.ImageFormat#YUV_420_888 } and {@link android.graphics.ImageFormat#JPEG } formats.</li>
+     * <li>The maximum available resolution for {@link android.graphics.ImageFormat#YUV_420_888 } streams (both input/output) will match the
+     *   maximum available resolution of {@link android.graphics.ImageFormat#JPEG } streams.</li>
+     * <li>Static metadata {@link CameraCharacteristics#REPROCESS_MAX_CAPTURE_STALL android.reprocess.maxCaptureStall}.</li>
+     * <li>Only the below controls are effective for reprocessing requests and will be present
+     *   in capture results. The reprocess requests are from the original capture results that
+     *   are associated with the intermediate {@link android.graphics.ImageFormat#YUV_420_888 }
+     *   output buffers.  All other controls in the reprocess requests will be ignored by the
+     *   camera device.<ul>
+     * <li>android.jpeg.*</li>
+     * <li>{@link CaptureRequest#NOISE_REDUCTION_MODE android.noiseReduction.mode}</li>
+     * <li>{@link CaptureRequest#EDGE_MODE android.edge.mode}</li>
+     * <li>{@link CaptureRequest#REPROCESS_EFFECTIVE_EXPOSURE_FACTOR android.reprocess.effectiveExposureFactor}</li>
+     * </ul>
+     * </li>
+     * <li>{@link CameraCharacteristics#NOISE_REDUCTION_AVAILABLE_NOISE_REDUCTION_MODES android.noiseReduction.availableNoiseReductionModes} and
+     *   {@link CameraCharacteristics#EDGE_AVAILABLE_EDGE_MODES android.edge.availableEdgeModes} will both list ZERO_SHUTTER_LAG as a supported mode.</li>
+     * </ul>
+     *
+     * @see CameraCharacteristics#EDGE_AVAILABLE_EDGE_MODES
+     * @see CaptureRequest#EDGE_MODE
+     * @see CameraCharacteristics#NOISE_REDUCTION_AVAILABLE_NOISE_REDUCTION_MODES
+     * @see CaptureRequest#NOISE_REDUCTION_MODE
+     * @see CaptureRequest#REPROCESS_EFFECTIVE_EXPOSURE_FACTOR
+     * @see CameraCharacteristics#REPROCESS_MAX_CAPTURE_STALL
+     * @see CameraCharacteristics#REQUEST_MAX_NUM_INPUT_STREAMS
+     * @see CameraCharacteristics#REQUEST_AVAILABLE_CAPABILITIES
+     */
+    public static final int REQUEST_AVAILABLE_CAPABILITIES_YUV_REPROCESSING = 7;
+
+    /**
+     * <p>The camera device can produce depth measurements from its field of view.</p>
+     * <p>This capability requires the camera device to support the following:</p>
+     * <ul>
+     * <li>{@link android.graphics.ImageFormat#DEPTH16 } is supported as an output format.</li>
+     * <li>{@link android.graphics.ImageFormat#DEPTH_POINT_CLOUD } is optionally supported as an
+     *   output format.</li>
+     * <li>This camera device, and all camera devices with the same {@link CameraCharacteristics#LENS_FACING android.lens.facing},
+     *   will list the following calibration entries in both
+     *   {@link android.hardware.camera2.CameraCharacteristics } and
+     *   {@link android.hardware.camera2.CaptureResult }:<ul>
+     * <li>{@link CameraCharacteristics#LENS_POSE_TRANSLATION android.lens.poseTranslation}</li>
+     * <li>{@link CameraCharacteristics#LENS_POSE_ROTATION android.lens.poseRotation}</li>
+     * <li>{@link CameraCharacteristics#LENS_INTRINSIC_CALIBRATION android.lens.intrinsicCalibration}</li>
+     * <li>{@link CameraCharacteristics#LENS_RADIAL_DISTORTION android.lens.radialDistortion}</li>
+     * </ul>
+     * </li>
+     * <li>The {@link CameraCharacteristics#DEPTH_DEPTH_IS_EXCLUSIVE android.depth.depthIsExclusive} entry is listed by this device.</li>
+     * <li>A LIMITED camera with only the DEPTH_OUTPUT capability does not have to support
+     *   normal YUV_420_888, JPEG, and PRIV-format outputs. It only has to support the DEPTH16
+     *   format.</li>
+     * </ul>
+     * <p>Generally, depth output operates at a slower frame rate than standard color capture,
+     * so the DEPTH16 and DEPTH_POINT_CLOUD formats will commonly have a stall duration that
+     * should be accounted for (see
+     * {@link android.hardware.camera2.params.StreamConfigurationMap#getOutputStallDuration }).
+     * On a device that supports both depth and color-based output, to enable smooth preview,
+     * using a repeating burst is recommended, where a depth-output target is only included
+     * once every N frames, where N is the ratio between preview output rate and depth output
+     * rate, including depth stall time.</p>
+     *
+     * @see CameraCharacteristics#DEPTH_DEPTH_IS_EXCLUSIVE
+     * @see CameraCharacteristics#LENS_FACING
+     * @see CameraCharacteristics#LENS_INTRINSIC_CALIBRATION
+     * @see CameraCharacteristics#LENS_POSE_ROTATION
+     * @see CameraCharacteristics#LENS_POSE_TRANSLATION
+     * @see CameraCharacteristics#LENS_RADIAL_DISTORTION
+     * @see CameraCharacteristics#REQUEST_AVAILABLE_CAPABILITIES
+     */
+    public static final int REQUEST_AVAILABLE_CAPABILITIES_DEPTH_OUTPUT = 8;
+
+    /**
+     * <p>The device supports constrained high speed video recording (frame rate &gt;=120fps)
+     * use case. The camera device will support high speed capture session created by
+     * {@link android.hardware.camera2.CameraDevice#createConstrainedHighSpeedCaptureSession }, which
+     * only accepts high speed request lists created by
+     * {@link android.hardware.camera2.CameraConstrainedHighSpeedCaptureSession#createHighSpeedRequestList }.</p>
+     * <p>A camera device can still support high speed video streaming by advertising the high speed
+     * FPS ranges in {@link CameraCharacteristics#CONTROL_AE_AVAILABLE_TARGET_FPS_RANGES android.control.aeAvailableTargetFpsRanges}. For this case, all normal
+     * capture request per frame control and synchronization requirements will apply to
+     * the high speed fps ranges, the same as all other fps ranges. This capability describes
+     * the capability of a specialized operating mode with many limitations (see below), which
+     * is only targeted at high speed video recording.</p>
+     * <p>The supported high speed video sizes and fps ranges are specified in
+     * {@link android.hardware.camera2.params.StreamConfigurationMap#getHighSpeedVideoFpsRanges }.
+     * To get desired output frame rates, the application is only allowed to select video size
+     * and FPS range combinations provided by
+     * {@link android.hardware.camera2.params.StreamConfigurationMap#getHighSpeedVideoSizes }.
+     * The fps range can be controlled via {@link CaptureRequest#CONTROL_AE_TARGET_FPS_RANGE android.control.aeTargetFpsRange}.</p>
+     * <p>In this capability, the camera device will override aeMode, awbMode, and afMode to
+     * ON, AUTO, and CONTINUOUS_VIDEO, respectively. All post-processing block mode
+     * controls will be overridden to be FAST. Therefore, no manual control of capture
+     * and post-processing parameters is possible. All other controls operate the
+     * same as when {@link CaptureRequest#CONTROL_MODE android.control.mode} == AUTO. This means that all other
+     * android.control.* fields continue to work, such as</p>
+     * <ul>
+     * <li>{@link CaptureRequest#CONTROL_AE_TARGET_FPS_RANGE android.control.aeTargetFpsRange}</li>
+     * <li>{@link CaptureRequest#CONTROL_AE_EXPOSURE_COMPENSATION android.control.aeExposureCompensation}</li>
+     * <li>{@link CaptureRequest#CONTROL_AE_LOCK android.control.aeLock}</li>
+     * <li>{@link CaptureRequest#CONTROL_AWB_LOCK android.control.awbLock}</li>
+     * <li>{@link CaptureRequest#CONTROL_EFFECT_MODE android.control.effectMode}</li>
+     * <li>{@link CaptureRequest#CONTROL_AE_REGIONS android.control.aeRegions}</li>
+     * <li>{@link CaptureRequest#CONTROL_AF_REGIONS android.control.afRegions}</li>
+     * <li>{@link CaptureRequest#CONTROL_AWB_REGIONS android.control.awbRegions}</li>
+     * <li>{@link CaptureRequest#CONTROL_AF_TRIGGER android.control.afTrigger}</li>
+     * <li>{@link CaptureRequest#CONTROL_AE_PRECAPTURE_TRIGGER android.control.aePrecaptureTrigger}</li>
+     * </ul>
+     * <p>Outside of android.control.*, the following controls will work:</p>
+     * <ul>
+     * <li>{@link CaptureRequest#FLASH_MODE android.flash.mode} (TORCH mode only, automatic flash for still capture will not
+     * work since aeMode is ON)</li>
+     * <li>{@link CaptureRequest#LENS_OPTICAL_STABILIZATION_MODE android.lens.opticalStabilizationMode} (if it is supported)</li>
+     * <li>{@link CaptureRequest#SCALER_CROP_REGION android.scaler.cropRegion}</li>
+     * <li>{@link CaptureRequest#STATISTICS_FACE_DETECT_MODE android.statistics.faceDetectMode} (if it is supported)</li>
+     * </ul>
+     * <p>For high speed recording use case, the actual maximum supported frame rate may
+     * be lower than what camera can output, depending on the destination Surfaces for
+     * the image data. For example, if the destination surface is from video encoder,
+     * the application need check if the video encoder is capable of supporting the
+     * high frame rate for a given video size, or it will end up with lower recording
+     * frame rate. If the destination surface is from preview window, the actual preview frame
+     * rate will be bounded by the screen refresh rate.</p>
+     * <p>The camera device will only support up to 2 high speed simultaneous output surfaces
+     * (preview and recording surfaces)
+     * in this mode. Above controls will be effective only if all of below conditions are true:</p>
+     * <ul>
+     * <li>The application creates a camera capture session with no more than 2 surfaces via
+     * {@link android.hardware.camera2.CameraDevice#createConstrainedHighSpeedCaptureSession }. The
+     * targeted surfaces must be preview surface (either from
+     * {@link android.view.SurfaceView } or {@link android.graphics.SurfaceTexture }) or
+     * recording surface(either from {@link android.media.MediaRecorder#getSurface } or
+     * {@link android.media.MediaCodec#createInputSurface }).</li>
+     * <li>The stream sizes are selected from the sizes reported by
+     * {@link android.hardware.camera2.params.StreamConfigurationMap#getHighSpeedVideoSizes }.</li>
+     * <li>The FPS ranges are selected from
+     * {@link android.hardware.camera2.params.StreamConfigurationMap#getHighSpeedVideoFpsRanges }.</li>
+     * </ul>
+     * <p>When above conditions are NOT satistied,
+     * {@link android.hardware.camera2.CameraDevice#createConstrainedHighSpeedCaptureSession }
+     * will fail.</p>
+     * <p>Switching to a FPS range that has different maximum FPS may trigger some camera device
+     * reconfigurations, which may introduce extra latency. It is recommended that
+     * the application avoids unnecessary maximum target FPS changes as much as possible
+     * during high speed streaming.</p>
+     *
+     * @see CameraCharacteristics#CONTROL_AE_AVAILABLE_TARGET_FPS_RANGES
+     * @see CaptureRequest#CONTROL_AE_EXPOSURE_COMPENSATION
+     * @see CaptureRequest#CONTROL_AE_LOCK
+     * @see CaptureRequest#CONTROL_AE_PRECAPTURE_TRIGGER
+     * @see CaptureRequest#CONTROL_AE_REGIONS
+     * @see CaptureRequest#CONTROL_AE_TARGET_FPS_RANGE
+     * @see CaptureRequest#CONTROL_AF_REGIONS
+     * @see CaptureRequest#CONTROL_AF_TRIGGER
+     * @see CaptureRequest#CONTROL_AWB_LOCK
+     * @see CaptureRequest#CONTROL_AWB_REGIONS
+     * @see CaptureRequest#CONTROL_EFFECT_MODE
+     * @see CaptureRequest#CONTROL_MODE
+     * @see CaptureRequest#FLASH_MODE
+     * @see CaptureRequest#LENS_OPTICAL_STABILIZATION_MODE
+     * @see CaptureRequest#SCALER_CROP_REGION
+     * @see CaptureRequest#STATISTICS_FACE_DETECT_MODE
+     * @see CameraCharacteristics#REQUEST_AVAILABLE_CAPABILITIES
+     */
+    public static final int REQUEST_AVAILABLE_CAPABILITIES_CONSTRAINED_HIGH_SPEED_VIDEO = 9;
 
     //
     // Enumeration values for CameraCharacteristics#SCALER_CROPPING_TYPE
@@ -575,7 +836,7 @@ public abstract class CameraMetadata<TKey> {
 
     /**
      * <p>Timestamps from {@link CaptureResult#SENSOR_TIMESTAMP android.sensor.timestamp} are in the same timebase as
-     * android.os.SystemClock#elapsedRealtimeNanos(),
+     * {@link android.os.SystemClock#elapsedRealtimeNanos },
      * and they can be compared to other timestamps using that base.</p>
      *
      * @see CaptureResult#SENSOR_TIMESTAMP
@@ -726,8 +987,6 @@ public abstract class CameraMetadata<TKey> {
 
     /**
      * <p>Every frame has the requests immediately applied.</p>
-     * <p>Furthermore for all results,
-     * <code>android.sync.frameNumber == CaptureResult#getFrameNumber()</code></p>
      * <p>Changing controls over multiple requests one after another will
      * produce results that have those controls applied atomically
      * each frame.</p>
@@ -783,8 +1042,8 @@ public abstract class CameraMetadata<TKey> {
 
     /**
      * <p>Color correction processing operates at improved
-     * quality but reduced capture rate (relative to sensor raw
-     * output).</p>
+     * quality but the capture rate might be reduced (relative to sensor
+     * raw output rate)</p>
      * <p>Advanced white balance adjustments above and beyond
      * the specified white balance pipeline may be applied.</p>
      * <p>If AWB is enabled with <code>{@link CaptureRequest#CONTROL_AWB_MODE android.control.awbMode} != OFF</code>, then
@@ -814,8 +1073,8 @@ public abstract class CameraMetadata<TKey> {
     public static final int COLOR_CORRECTION_ABERRATION_MODE_FAST = 1;
 
     /**
-     * <p>Aberration correction operates at improved quality but reduced
-     * capture rate (relative to sensor raw output).</p>
+     * <p>Aberration correction operates at improved quality but the capture rate might be
+     * reduced (relative to sensor raw output rate)</p>
      * @see CaptureRequest#COLOR_CORRECTION_ABERRATION_MODE
      */
     public static final int COLOR_CORRECTION_ABERRATION_MODE_HIGH_QUALITY = 2;
@@ -965,6 +1224,14 @@ public abstract class CameraMetadata<TKey> {
      * @see CaptureRequest#CONTROL_AE_PRECAPTURE_TRIGGER
      */
     public static final int CONTROL_AE_PRECAPTURE_TRIGGER_START = 1;
+
+    /**
+     * <p>The camera device will cancel any currently active or completed
+     * precapture metering sequence, the auto-exposure routine will return to its
+     * initial state.</p>
+     * @see CaptureRequest#CONTROL_AE_PRECAPTURE_TRIGGER
+     */
+    public static final int CONTROL_AE_PRECAPTURE_TRIGGER_CANCEL = 2;
 
     //
     // Enumeration values for CaptureRequest#CONTROL_AF_MODE
@@ -1417,9 +1684,9 @@ public abstract class CameraMetadata<TKey> {
      * <p>Enabling this disables control.aeMode, control.awbMode and
      * control.afMode controls; the camera device will ignore
      * those settings while USE_SCENE_MODE is active (except for
-     * FACE_PRIORITY scene mode). Other control entries are still
-     * active.  This setting can only be used if scene mode is
-     * supported (i.e. {@link CameraCharacteristics#CONTROL_AVAILABLE_SCENE_MODES android.control.availableSceneModes}
+     * FACE_PRIORITY scene mode). Other control entries are still active.
+     * This setting can only be used if scene mode is supported (i.e.
+     * {@link CameraCharacteristics#CONTROL_AVAILABLE_SCENE_MODES android.control.availableSceneModes}
      * contain some modes other than DISABLED).</p>
      *
      * @see CameraCharacteristics#CONTROL_AVAILABLE_SCENE_MODES
@@ -1570,6 +1837,9 @@ public abstract class CameraMetadata<TKey> {
     public static final int CONTROL_SCENE_MODE_BARCODE = 16;
 
     /**
+     * <p>This is deprecated, please use {@link android.hardware.camera2.CameraDevice#createConstrainedHighSpeedCaptureSession }
+     * and {@link android.hardware.camera2.CameraConstrainedHighSpeedCaptureSession#createHighSpeedRequestList }
+     * for high speed video recording.</p>
      * <p>Optimized for high speed video recording (frame rate &gt;=60fps) use case.</p>
      * <p>The supported high speed video sizes and fps ranges are specified in
      * android.control.availableHighSpeedVideoConfigurations. To get desired
@@ -1644,6 +1914,7 @@ public abstract class CameraMetadata<TKey> {
      * @see CaptureRequest#SCALER_CROP_REGION
      * @see CaptureRequest#STATISTICS_FACE_DETECT_MODE
      * @see CaptureRequest#CONTROL_SCENE_MODE
+     * @deprecated Please refer to this API documentation to find the alternatives
      */
     public static final int CONTROL_SCENE_MODE_HIGH_SPEED_VIDEO = 17;
 
@@ -1686,6 +1957,40 @@ public abstract class CameraMetadata<TKey> {
      */
     public static final int CONTROL_SCENE_MODE_HDR = 18;
 
+    /**
+     * <p>Same as FACE_PRIORITY scene mode, except that the camera
+     * device will choose higher sensitivity values ({@link CaptureRequest#SENSOR_SENSITIVITY android.sensor.sensitivity})
+     * under low light conditions.</p>
+     * <p>The camera device may be tuned to expose the images in a reduced
+     * sensitivity range to produce the best quality images. For example,
+     * if the {@link CameraCharacteristics#SENSOR_INFO_SENSITIVITY_RANGE android.sensor.info.sensitivityRange} gives range of [100, 1600],
+     * the camera device auto-exposure routine tuning process may limit the actual
+     * exposure sensitivity range to [100, 1200] to ensure that the noise level isn't
+     * exessive in order to preserve the image quality. Under this situation, the image under
+     * low light may be under-exposed when the sensor max exposure time (bounded by the
+     * {@link CaptureRequest#CONTROL_AE_TARGET_FPS_RANGE android.control.aeTargetFpsRange} when {@link CaptureRequest#CONTROL_AE_MODE android.control.aeMode} is one of the
+     * ON_* modes) and effective max sensitivity are reached. This scene mode allows the
+     * camera device auto-exposure routine to increase the sensitivity up to the max
+     * sensitivity specified by {@link CameraCharacteristics#SENSOR_INFO_SENSITIVITY_RANGE android.sensor.info.sensitivityRange} when the scene is too
+     * dark and the max exposure time is reached. The captured images may be noisier
+     * compared with the images captured in normal FACE_PRIORITY mode; therefore, it is
+     * recommended that the application only use this scene mode when it is capable of
+     * reducing the noise level of the captured images.</p>
+     * <p>Unlike the other scene modes, {@link CaptureRequest#CONTROL_AE_MODE android.control.aeMode},
+     * {@link CaptureRequest#CONTROL_AWB_MODE android.control.awbMode}, and {@link CaptureRequest#CONTROL_AF_MODE android.control.afMode}
+     * remain active when FACE_PRIORITY_LOW_LIGHT is set.</p>
+     *
+     * @see CaptureRequest#CONTROL_AE_MODE
+     * @see CaptureRequest#CONTROL_AE_TARGET_FPS_RANGE
+     * @see CaptureRequest#CONTROL_AF_MODE
+     * @see CaptureRequest#CONTROL_AWB_MODE
+     * @see CameraCharacteristics#SENSOR_INFO_SENSITIVITY_RANGE
+     * @see CaptureRequest#SENSOR_SENSITIVITY
+     * @see CaptureRequest#CONTROL_SCENE_MODE
+     * @hide
+     */
+    public static final int CONTROL_SCENE_MODE_FACE_PRIORITY_LOW_LIGHT = 19;
+
     //
     // Enumeration values for CaptureRequest#CONTROL_VIDEO_STABILIZATION_MODE
     //
@@ -1713,17 +2018,43 @@ public abstract class CameraMetadata<TKey> {
     public static final int EDGE_MODE_OFF = 0;
 
     /**
-     * <p>Apply edge enhancement at a quality level that does not slow down frame rate relative to sensor
-     * output</p>
+     * <p>Apply edge enhancement at a quality level that does not slow down frame rate
+     * relative to sensor output. It may be the same as OFF if edge enhancement will
+     * slow down frame rate relative to sensor.</p>
      * @see CaptureRequest#EDGE_MODE
      */
     public static final int EDGE_MODE_FAST = 1;
 
     /**
-     * <p>Apply high-quality edge enhancement, at a cost of reducing output frame rate.</p>
+     * <p>Apply high-quality edge enhancement, at a cost of possibly reduced output frame rate.</p>
      * @see CaptureRequest#EDGE_MODE
      */
     public static final int EDGE_MODE_HIGH_QUALITY = 2;
+
+    /**
+     * <p>Edge enhancement is applied at different levels for different output streams,
+     * based on resolution. Streams at maximum recording resolution (see {@link android.hardware.camera2.CameraDevice#createCaptureSession }) or below have
+     * edge enhancement applied, while higher-resolution streams have no edge enhancement
+     * applied. The level of edge enhancement for low-resolution streams is tuned so that
+     * frame rate is not impacted, and the quality is equal to or better than FAST (since it
+     * is only applied to lower-resolution outputs, quality may improve from FAST).</p>
+     * <p>This mode is intended to be used by applications operating in a zero-shutter-lag mode
+     * with YUV or PRIVATE reprocessing, where the application continuously captures
+     * high-resolution intermediate buffers into a circular buffer, from which a final image is
+     * produced via reprocessing when a user takes a picture.  For such a use case, the
+     * high-resolution buffers must not have edge enhancement applied to maximize efficiency of
+     * preview and to avoid double-applying enhancement when reprocessed, while low-resolution
+     * buffers (used for recording or preview, generally) need edge enhancement applied for
+     * reasonable preview quality.</p>
+     * <p>This mode is guaranteed to be supported by devices that support either the
+     * YUV_REPROCESSING or PRIVATE_REPROCESSING capabilities
+     * ({@link CameraCharacteristics#REQUEST_AVAILABLE_CAPABILITIES android.request.availableCapabilities} lists either of those capabilities) and it will
+     * be the default mode for CAMERA3_TEMPLATE_ZERO_SHUTTER_LAG template.</p>
+     *
+     * @see CameraCharacteristics#REQUEST_AVAILABLE_CAPABILITIES
+     * @see CaptureRequest#EDGE_MODE
+     */
+    public static final int EDGE_MODE_ZERO_SHUTTER_LAG = 3;
 
     //
     // Enumeration values for CaptureRequest#FLASH_MODE
@@ -1775,7 +2106,7 @@ public abstract class CameraMetadata<TKey> {
 
     /**
      * <p>High-quality hot pixel correction is applied, at a cost
-     * of reducing frame rate relative to sensor raw output.</p>
+     * of possibly reduced frame rate relative to sensor raw output.</p>
      * <p>The hotpixel map may be returned in {@link CaptureResult#STATISTICS_HOT_PIXEL_MAP android.statistics.hotPixelMap}.</p>
      *
      * @see CaptureResult#STATISTICS_HOT_PIXEL_MAP
@@ -1811,17 +2142,51 @@ public abstract class CameraMetadata<TKey> {
 
     /**
      * <p>Noise reduction is applied without reducing frame rate relative to sensor
-     * output.</p>
+     * output. It may be the same as OFF if noise reduction will reduce frame rate
+     * relative to sensor.</p>
      * @see CaptureRequest#NOISE_REDUCTION_MODE
      */
     public static final int NOISE_REDUCTION_MODE_FAST = 1;
 
     /**
-     * <p>High-quality noise reduction is applied, at the cost of reducing frame rate
-     * relative to sensor output.</p>
+     * <p>High-quality noise reduction is applied, at the cost of possibly reduced frame
+     * rate relative to sensor output.</p>
      * @see CaptureRequest#NOISE_REDUCTION_MODE
      */
     public static final int NOISE_REDUCTION_MODE_HIGH_QUALITY = 2;
+
+    /**
+     * <p>MINIMAL noise reduction is applied without reducing frame rate relative to
+     * sensor output. </p>
+     * @see CaptureRequest#NOISE_REDUCTION_MODE
+     */
+    public static final int NOISE_REDUCTION_MODE_MINIMAL = 3;
+
+    /**
+     * <p>Noise reduction is applied at different levels for different output streams,
+     * based on resolution. Streams at maximum recording resolution (see {@link android.hardware.camera2.CameraDevice#createCaptureSession }) or below have noise
+     * reduction applied, while higher-resolution streams have MINIMAL (if supported) or no
+     * noise reduction applied (if MINIMAL is not supported.) The degree of noise reduction
+     * for low-resolution streams is tuned so that frame rate is not impacted, and the quality
+     * is equal to or better than FAST (since it is only applied to lower-resolution outputs,
+     * quality may improve from FAST).</p>
+     * <p>This mode is intended to be used by applications operating in a zero-shutter-lag mode
+     * with YUV or PRIVATE reprocessing, where the application continuously captures
+     * high-resolution intermediate buffers into a circular buffer, from which a final image is
+     * produced via reprocessing when a user takes a picture.  For such a use case, the
+     * high-resolution buffers must not have noise reduction applied to maximize efficiency of
+     * preview and to avoid over-applying noise filtering when reprocessing, while
+     * low-resolution buffers (used for recording or preview, generally) need noise reduction
+     * applied for reasonable preview quality.</p>
+     * <p>This mode is guaranteed to be supported by devices that support either the
+     * YUV_REPROCESSING or PRIVATE_REPROCESSING capabilities
+     * ({@link CameraCharacteristics#REQUEST_AVAILABLE_CAPABILITIES android.request.availableCapabilities} lists either of those capabilities) and it will
+     * be the default mode for CAMERA3_TEMPLATE_ZERO_SHUTTER_LAG template.</p>
+     *
+     * @see CameraCharacteristics#REQUEST_AVAILABLE_CAPABILITIES
+     * @see CaptureRequest#NOISE_REDUCTION_MODE
+     */
+    public static final int NOISE_REDUCTION_MODE_ZERO_SHUTTER_LAG = 4;
 
     //
     // Enumeration values for CaptureRequest#SENSOR_TEST_PATTERN_MODE
@@ -1948,7 +2313,7 @@ public abstract class CameraMetadata<TKey> {
 
     /**
      * <p>Apply high-quality lens shading correction, at the
-     * cost of reduced frame rate.</p>
+     * cost of possibly reduced frame rate.</p>
      * @see CaptureRequest#SHADING_MODE
      */
     public static final int SHADING_MODE_HIGH_QUALITY = 2;
@@ -2021,10 +2386,51 @@ public abstract class CameraMetadata<TKey> {
 
     /**
      * <p>High-quality gamma mapping and color enhancement will be applied, at
-     * the cost of reduced frame rate compared to raw sensor output.</p>
+     * the cost of possibly reduced frame rate compared to raw sensor output.</p>
      * @see CaptureRequest#TONEMAP_MODE
      */
     public static final int TONEMAP_MODE_HIGH_QUALITY = 2;
+
+    /**
+     * <p>Use the gamma value specified in {@link CaptureRequest#TONEMAP_GAMMA android.tonemap.gamma} to peform
+     * tonemapping.</p>
+     * <p>All color enhancement and tonemapping must be disabled, except
+     * for applying the tonemapping curve specified by {@link CaptureRequest#TONEMAP_GAMMA android.tonemap.gamma}.</p>
+     * <p>Must not slow down frame rate relative to raw sensor output.</p>
+     *
+     * @see CaptureRequest#TONEMAP_GAMMA
+     * @see CaptureRequest#TONEMAP_MODE
+     */
+    public static final int TONEMAP_MODE_GAMMA_VALUE = 3;
+
+    /**
+     * <p>Use the preset tonemapping curve specified in
+     * {@link CaptureRequest#TONEMAP_PRESET_CURVE android.tonemap.presetCurve} to peform tonemapping.</p>
+     * <p>All color enhancement and tonemapping must be disabled, except
+     * for applying the tonemapping curve specified by
+     * {@link CaptureRequest#TONEMAP_PRESET_CURVE android.tonemap.presetCurve}.</p>
+     * <p>Must not slow down frame rate relative to raw sensor output.</p>
+     *
+     * @see CaptureRequest#TONEMAP_PRESET_CURVE
+     * @see CaptureRequest#TONEMAP_MODE
+     */
+    public static final int TONEMAP_MODE_PRESET_CURVE = 4;
+
+    //
+    // Enumeration values for CaptureRequest#TONEMAP_PRESET_CURVE
+    //
+
+    /**
+     * <p>Tonemapping curve is defined by sRGB</p>
+     * @see CaptureRequest#TONEMAP_PRESET_CURVE
+     */
+    public static final int TONEMAP_PRESET_CURVE_SRGB = 0;
+
+    /**
+     * <p>Tonemapping curve is defined by ITU-R BT.709</p>
+     * @see CaptureRequest#TONEMAP_PRESET_CURVE
+     */
+    public static final int TONEMAP_PRESET_CURVE_REC709 = 1;
 
     //
     // Enumeration values for CaptureResult#CONTROL_AE_STATE
@@ -2073,7 +2479,10 @@ public abstract class CameraMetadata<TKey> {
      * <p>AE has been asked to do a precapture sequence
      * and is currently executing it.</p>
      * <p>Precapture can be triggered through setting
-     * {@link CaptureRequest#CONTROL_AE_PRECAPTURE_TRIGGER android.control.aePrecaptureTrigger} to START.</p>
+     * {@link CaptureRequest#CONTROL_AE_PRECAPTURE_TRIGGER android.control.aePrecaptureTrigger} to START. Currently
+     * active and completed (if it causes camera device internal AE lock) precapture
+     * metering sequence can be canceled through setting
+     * {@link CaptureRequest#CONTROL_AE_PRECAPTURE_TRIGGER android.control.aePrecaptureTrigger} to CANCEL.</p>
      * <p>Once PRECAPTURE completes, AE will transition to CONVERGED
      * or FLASH_REQUIRED as appropriate. This is a transient
      * state, the camera device may skip reporting this state in

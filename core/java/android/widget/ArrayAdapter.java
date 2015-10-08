@@ -16,8 +16,14 @@
 
 package android.widget;
 
+import android.annotation.ArrayRes;
+import android.annotation.IdRes;
+import android.annotation.LayoutRes;
+import android.annotation.NonNull;
 import android.content.Context;
+import android.content.res.Resources;
 import android.util.Log;
+import android.view.ContextThemeWrapper;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -44,13 +50,7 @@ import java.util.List;
  * or to have some of data besides toString() results fill the views,
  * override {@link #getView(int, View, ViewGroup)} to return the type of view you want.
  */
-public class ArrayAdapter<T> extends BaseAdapter implements Filterable {
-    /**
-     * Contains the list of objects that represent the data of this ArrayAdapter.
-     * The content of this list is referred to as "the array" in the documentation.
-     */
-    private List<T> mObjects;
-
+public class ArrayAdapter<T> extends BaseAdapter implements Filterable, ThemedSpinnerAdapter {
     /**
      * Lock used to modify the content of {@link #mObjects}. Any write operation
      * performed on the array should be synchronized on this lock. This lock is also
@@ -58,6 +58,14 @@ public class ArrayAdapter<T> extends BaseAdapter implements Filterable {
      * the original array of data.
      */
     private final Object mLock = new Object();
+
+    private final LayoutInflater mInflater;
+
+    /**
+     * Contains the list of objects that represent the data of this ArrayAdapter.
+     * The content of this list is referred to as "the array" in the documentation.
+     */
+    private List<T> mObjects;
 
     /**
      * The resource indicating what views to inflate to display the content of this
@@ -91,7 +99,8 @@ public class ArrayAdapter<T> extends BaseAdapter implements Filterable {
     private ArrayList<T> mOriginalValues;
     private ArrayFilter mFilter;
 
-    private LayoutInflater mInflater;
+    /** Layout inflater used for {@link #getDropDownView(int, View, ViewGroup)}. */
+    private LayoutInflater mDropDownInflater;
 
     /**
      * Constructor
@@ -100,8 +109,8 @@ public class ArrayAdapter<T> extends BaseAdapter implements Filterable {
      * @param resource The resource ID for a layout file containing a TextView to use when
      *                 instantiating views.
      */
-    public ArrayAdapter(Context context, int resource) {
-        init(context, resource, 0, new ArrayList<T>());
+    public ArrayAdapter(Context context, @LayoutRes int resource) {
+        this(context, resource, 0, new ArrayList<T>());
     }
 
     /**
@@ -112,8 +121,8 @@ public class ArrayAdapter<T> extends BaseAdapter implements Filterable {
      *                 instantiating views.
      * @param textViewResourceId The id of the TextView within the layout resource to be populated
      */
-    public ArrayAdapter(Context context, int resource, int textViewResourceId) {
-        init(context, resource, textViewResourceId, new ArrayList<T>());
+    public ArrayAdapter(Context context, @LayoutRes int resource, @IdRes int textViewResourceId) {
+        this(context, resource, textViewResourceId, new ArrayList<T>());
     }
 
     /**
@@ -124,33 +133,8 @@ public class ArrayAdapter<T> extends BaseAdapter implements Filterable {
      *                 instantiating views.
      * @param objects The objects to represent in the ListView.
      */
-    public ArrayAdapter(Context context, int resource, T[] objects) {
-        init(context, resource, 0, Arrays.asList(objects));
-    }
-
-    /**
-     * Constructor
-     *
-     * @param context The current context.
-     * @param resource The resource ID for a layout file containing a layout to use when
-     *                 instantiating views.
-     * @param textViewResourceId The id of the TextView within the layout resource to be populated
-     * @param objects The objects to represent in the ListView.
-     */
-    public ArrayAdapter(Context context, int resource, int textViewResourceId, T[] objects) {
-        init(context, resource, textViewResourceId, Arrays.asList(objects));
-    }
-
-    /**
-     * Constructor
-     *
-     * @param context The current context.
-     * @param resource The resource ID for a layout file containing a TextView to use when
-     *                 instantiating views.
-     * @param objects The objects to represent in the ListView.
-     */
-    public ArrayAdapter(Context context, int resource, List<T> objects) {
-        init(context, resource, 0, objects);
+    public ArrayAdapter(Context context, @LayoutRes int resource, @NonNull T[] objects) {
+        this(context, resource, 0, Arrays.asList(objects));
     }
 
     /**
@@ -162,8 +146,39 @@ public class ArrayAdapter<T> extends BaseAdapter implements Filterable {
      * @param textViewResourceId The id of the TextView within the layout resource to be populated
      * @param objects The objects to represent in the ListView.
      */
-    public ArrayAdapter(Context context, int resource, int textViewResourceId, List<T> objects) {
-        init(context, resource, textViewResourceId, objects);
+    public ArrayAdapter(Context context, @LayoutRes int resource, @IdRes int textViewResourceId,
+            @NonNull T[] objects) {
+        this(context, resource, textViewResourceId, Arrays.asList(objects));
+    }
+
+    /**
+     * Constructor
+     *
+     * @param context The current context.
+     * @param resource The resource ID for a layout file containing a TextView to use when
+     *                 instantiating views.
+     * @param objects The objects to represent in the ListView.
+     */
+    public ArrayAdapter(Context context, @LayoutRes int resource, @NonNull List<T> objects) {
+        this(context, resource, 0, objects);
+    }
+
+    /**
+     * Constructor
+     *
+     * @param context The current context.
+     * @param resource The resource ID for a layout file containing a layout to use when
+     *                 instantiating views.
+     * @param textViewResourceId The id of the TextView within the layout resource to be populated
+     * @param objects The objects to represent in the ListView.
+     */
+    public ArrayAdapter(Context context, @LayoutRes int resource, @IdRes int textViewResourceId,
+            @NonNull List<T> objects) {
+        mContext = context;
+        mInflater = LayoutInflater.from(context);
+        mResource = mDropDownResource = resource;
+        mObjects = objects;
+        mFieldId = textViewResourceId;
     }
 
     /**
@@ -305,14 +320,6 @@ public class ArrayAdapter<T> extends BaseAdapter implements Filterable {
         mNotifyOnChange = notifyOnChange;
     }
 
-    private void init(Context context, int resource, int textViewResourceId, List<T> objects) {
-        mContext = context;
-        mInflater = (LayoutInflater)context.getSystemService(Context.LAYOUT_INFLATER_SERVICE);
-        mResource = mDropDownResource = resource;
-        mObjects = objects;
-        mFieldId = textViewResourceId;
-    }
-
     /**
      * Returns the context associated with this array adapter. The context is used
      * to create views from the resource passed to the constructor.
@@ -359,16 +366,16 @@ public class ArrayAdapter<T> extends BaseAdapter implements Filterable {
      * {@inheritDoc}
      */
     public View getView(int position, View convertView, ViewGroup parent) {
-        return createViewFromResource(position, convertView, parent, mResource);
+        return createViewFromResource(mInflater, position, convertView, parent, mResource);
     }
 
-    private View createViewFromResource(int position, View convertView, ViewGroup parent,
-            int resource) {
+    private View createViewFromResource(LayoutInflater inflater, int position, View convertView,
+            ViewGroup parent, int resource) {
         View view;
         TextView text;
 
         if (convertView == null) {
-            view = mInflater.inflate(resource, parent, false);
+            view = inflater.inflate(resource, parent, false);
         } else {
             view = convertView;
         }
@@ -403,16 +410,42 @@ public class ArrayAdapter<T> extends BaseAdapter implements Filterable {
      * @param resource the layout resource defining the drop down views
      * @see #getDropDownView(int, android.view.View, android.view.ViewGroup)
      */
-    public void setDropDownViewResource(int resource) {
+    public void setDropDownViewResource(@LayoutRes int resource) {
         this.mDropDownResource = resource;
     }
 
     /**
-     * {@inheritDoc}
+     * Sets the {@link Resources.Theme} against which drop-down views are
+     * inflated.
+     * <p>
+     * By default, drop-down views are inflated against the theme of the
+     * {@link Context} passed to the adapter's constructor.
+     *
+     * @param theme the theme against which to inflate drop-down views or
+     *              {@code null} to use the theme from the adapter's context
+     * @see #getDropDownView(int, View, ViewGroup)
      */
     @Override
+    public void setDropDownViewTheme(Resources.Theme theme) {
+        if (theme == null) {
+            mDropDownInflater = null;
+        } else if (theme == mInflater.getContext().getTheme()) {
+            mDropDownInflater = mInflater;
+        } else {
+            final Context context = new ContextThemeWrapper(mContext, theme);
+            mDropDownInflater = LayoutInflater.from(context);
+        }
+    }
+
+    @Override
+    public Resources.Theme getDropDownViewTheme() {
+        return mDropDownInflater == null ? null : mDropDownInflater.getContext().getTheme();
+    }
+
+    @Override
     public View getDropDownView(int position, View convertView, ViewGroup parent) {
-        return createViewFromResource(position, convertView, parent, mDropDownResource);
+        final LayoutInflater inflater = mDropDownInflater == null ? mInflater : mDropDownInflater;
+        return createViewFromResource(inflater, position, convertView, parent, mDropDownResource);
     }
 
     /**
@@ -426,7 +459,7 @@ public class ArrayAdapter<T> extends BaseAdapter implements Filterable {
      * @return An ArrayAdapter<CharSequence>.
      */
     public static ArrayAdapter<CharSequence> createFromResource(Context context,
-            int textArrayResId, int textViewResId) {
+            @ArrayRes int textArrayResId, @LayoutRes int textViewResId) {
         CharSequence[] strings = context.getResources().getTextArray(textArrayResId);
         return new ArrayAdapter<CharSequence>(context, textViewResId, strings);
     }

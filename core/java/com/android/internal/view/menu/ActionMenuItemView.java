@@ -217,14 +217,14 @@ public class ActionMenuItemView extends TextView
     }
 
     @Override
-    public boolean dispatchPopulateAccessibilityEvent(AccessibilityEvent event) {
+    public boolean dispatchPopulateAccessibilityEventInternal(AccessibilityEvent event) {
         onPopulateAccessibilityEvent(event);
         return true;
     }
 
     @Override
-    public void onPopulateAccessibilityEvent(AccessibilityEvent event) {
-        super.onPopulateAccessibilityEvent(event);
+    public void onPopulateAccessibilityEventInternal(AccessibilityEvent event) {
+        super.onPopulateAccessibilityEventInternal(event);
         final CharSequence cdesc = getContentDescription();
         if (!TextUtils.isEmpty(cdesc)) {
             event.getText().add(cdesc);
@@ -273,7 +273,8 @@ public class ActionMenuItemView extends TextView
         Toast cheatSheet = Toast.makeText(context, mItemData.getTitle(), Toast.LENGTH_SHORT);
         if (midy < displayFrame.height()) {
             // Show along the top; follow action buttons
-            cheatSheet.setGravity(Gravity.TOP | Gravity.END, referenceX, height);
+            cheatSheet.setGravity(Gravity.TOP | Gravity.END, referenceX,
+                    screenPos[1] + height - displayFrame.top);
         } else {
             // Show along the bottom center
             cheatSheet.setGravity(Gravity.BOTTOM | Gravity.CENTER_HORIZONTAL, 0, height);

@@ -20,11 +20,14 @@
 #include <math.h>
 #include <utils/Log.h>
 #include <utils/Trace.h>
+#include <utils/Vector.h>
+#include <utils/MathUtils.h>
 
 #include "AmbientShadow.h"
-#include "Caches.h"
+#include "Properties.h"
 #include "ShadowTessellator.h"
 #include "SpotShadow.h"
+#include "Vector.h"
 
 namespace android {
 namespace uirenderer {
@@ -40,9 +43,8 @@ void ShadowTessellator::tessellateAmbientShadow(bool isCasterOpaque,
     float heightFactor = 1.0f / 128;
     const float geomFactor = 64;
 
-    Caches& caches = Caches::getInstance();
-    if (CC_UNLIKELY(caches.propertyAmbientRatio > 0.0f)) {
-        heightFactor *= caches.propertyAmbientRatio;
+    if (CC_UNLIKELY(Properties::overrideAmbientRatio > 0.0f)) {
+        heightFactor *= Properties::overrideAmbientRatio;
     }
 
     Rect ambientShadowBounds(casterBounds);
@@ -66,14 +68,12 @@ void ShadowTessellator::tessellateSpotShadow(bool isCasterOpaque,
         const Rect& casterBounds, const Rect& localClip, VertexBuffer& shadowVertexBuffer) {
     ATRACE_CALL();
 
-    Caches& caches = Caches::getInstance();
-
     Vector3 adjustedLightCenter(lightCenter);
-    if (CC_UNLIKELY(caches.propertyLightPosY > 0)) {
-        adjustedLightCenter.y = - caches.propertyLightPosY; // negated since this shifts up
+    if (CC_UNLIKELY(Properties::overrideLightPosY > 0)) {
+        adjustedLightCenter.y = - Properties::overrideLightPosY; // negated since this shifts up
     }
-    if (CC_UNLIKELY(caches.propertyLightPosZ > 0)) {
-        adjustedLightCenter.z = caches.propertyLightPosZ;
+    if (CC_UNLIKELY(Properties::overrideLightPosZ > 0)) {
+        adjustedLightCenter.z = Properties::overrideLightPosZ;
     }
 
 #if DEBUG_SHADOW
@@ -87,9 +87,8 @@ void ShadowTessellator::tessellateSpotShadow(bool isCasterOpaque,
     reverseReceiverTransform.loadInverse(receiverTransform);
     reverseReceiverTransform.mapPoint3d(adjustedLightCenter);
 
-    const int lightVertexCount = 8;
-    if (CC_UNLIKELY(caches.propertyLightDiameter > 0)) {
-        lightRadius = caches.propertyLightDiameter;
+    if (CC_UNLIKELY(Properties::overrideLightRadius > 0)) {
+        lightRadius = Properties::overrideLightRadius;
     }
 
     // Now light and caster are both in local space, we will check whether
@@ -111,33 +110,6 @@ void ShadowTessellator::tessellateSpotShadow(bool isCasterOpaque,
      if(shadowVertexBuffer.getVertexCount() <= 0) {
         ALOGD("Spot shadow generation failed %d", shadowVertexBuffer.getVertexCount());
      }
-#endif
-}
-
-void ShadowTessellator::generateShadowIndices(uint16_t* shadowIndices) {
-    int currentIndex = 0;
-    const int rays = SHADOW_RAY_COUNT;
-    // For the penumbra area.
-    for (int layer = 0; layer < 2; layer ++) {
-        int baseIndex = layer * rays;
-        for (int i = 0; i < rays; i++) {
-            shadowIndices[currentIndex++] = i + baseIndex;
-            shadowIndices[currentIndex++] = rays + i + baseIndex;
-        }
-        // To close the loop, back to the ray 0.
-        shadowIndices[currentIndex++] = 0 + baseIndex;
-         // Note this is the same as the first index of next layer loop.
-        shadowIndices[currentIndex++] = rays + baseIndex;
-    }
-
-#if DEBUG_SHADOW
-    if (currentIndex != MAX_SHADOW_INDEX_COUNT) {
-        ALOGW("vertex index count is wrong. current %d, expected %d",
-                currentIndex, MAX_SHADOW_INDEX_COUNT);
-    }
-    for (int i = 0; i < MAX_SHADOW_INDEX_COUNT; i++) {
-        ALOGD("vertex index is (%d, %d)", i, shadowIndices[i]);
-    }
 #endif
 }
 
@@ -187,70 +159,6 @@ Vector2 ShadowTessellator::calculateNormal(const Vector2& p1, const Vector2& p2)
     }
     return result;
 }
-/**
- * Test whether the polygon is order in clockwise.
- *
- * @param polygon the polygon as a Vector2 array
- * @param len the number of points of the polygon
- */
-bool ShadowTessellator::isClockwise(const Vector2* polygon, int len) {
-    if (len < 2 || polygon == NULL) {
-        return true;
-    }
-    double sum = 0;
-    double p1x = polygon[len - 1].x;
-    double p1y = polygon[len - 1].y;
-    for (int i = 0; i < len; i++) {
-
-        double p2x = polygon[i].x;
-        double p2y = polygon[i].y;
-        sum += p1x * p2y - p2x * p1y;
-        p1x = p2x;
-        p1y = p2y;
-    }
-    return sum < 0;
-}
-
-bool ShadowTessellator::isClockwisePath(const SkPath& path) {
-    SkPath::Iter iter(path, false);
-    SkPoint pts[4];
-    SkPath::Verb v;
-
-    Vector<Vector2> arrayForDirection;
-    while (SkPath::kDone_Verb != (v = iter.next(pts))) {
-            switch (v) {
-            case SkPath::kMove_Verb:
-                arrayForDirection.add((Vector2){pts[0].x(), pts[0].y()});
-                break;
-            case SkPath::kLine_Verb:
-                arrayForDirection.add((Vector2){pts[1].x(), pts[1].y()});
-                break;
-            case SkPath::kQuad_Verb:
-                arrayForDirection.add((Vector2){pts[1].x(), pts[1].y()});
-                arrayForDirection.add((Vector2){pts[2].x(), pts[2].y()});
-                break;
-            case SkPath::kCubic_Verb:
-                arrayForDirection.add((Vector2){pts[1].x(), pts[1].y()});
-                arrayForDirection.add((Vector2){pts[2].x(), pts[2].y()});
-                arrayForDirection.add((Vector2){pts[3].x(), pts[3].y()});
-                break;
-            default:
-                break;
-            }
-    }
-
-    return isClockwise(arrayForDirection.array(), arrayForDirection.size());
-}
-
-void ShadowTessellator::reverseVertexArray(Vertex* polygon, int len) {
-    int n = len / 2;
-    for (int i = 0; i < n; i++) {
-        Vertex tmp = polygon[i];
-        int k = len - 1 - i;
-        polygon[i] = polygon[k];
-        polygon[k] = tmp;
-    }
-}
 
 int ShadowTessellator::getExtraVertexNumber(const Vector2& vector1,
         const Vector2& vector2, float divisor) {
@@ -265,6 +173,8 @@ int ShadowTessellator::getExtraVertexNumber(const Vector2& vector1,
     // acos( )     --- [0, M_PI]
     // floor(...)  --- [0, EXTRA_VERTEX_PER_PI]
     float dotProduct = vector1.dot(vector2);
+    // make sure that dotProduct value is in acsof input range [-1, 1]
+    dotProduct = MathUtils::clamp(dotProduct, -1.0f, 1.0f);
     // TODO: Use look up table for the dotProduct to extraVerticesNumber
     // computation, if needed.
     float angle = acosf(dotProduct);

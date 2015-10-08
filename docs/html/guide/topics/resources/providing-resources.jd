@@ -129,7 +129,7 @@ are compiled into the following drawable resource subtypes:</p>
     <td><code>mipmap/</code></td>
     <td>Drawable files for different launcher icon densities. For more information on managing
     launcher icons with {@code mipmap/} folders, see
-    <a href="{@docRoot}tools/project/index.html#mipmap">Managing Projects Overview</a>.</td>
+    <a href="{@docRoot}tools/projects/index.html#mipmap">Managing Projects Overview</a>.</td>
   </tr>
 
   <tr>
@@ -549,6 +549,22 @@ is not related to the screen orientation.</p>
 which indicates whether the screen is long.</p>
       </td>
     </tr>
+    <tr id="ScreenRoundQualifier">
+      <td>Round screen</td>
+      <td>
+        <code>round</code><br/>
+        <code>notround</code>
+      </td>
+      <td>
+        <ul class="nolist">
+          <li>{@code round}: Round screens, such as a round wearable device</li>
+          <li>{@code notround}: Rectangular screens, such as phones or tablets</li>
+        </ul>
+        <p><em>Added in API level 23.</em></p>
+        <p>Also see the {@link android.content.res.Configuration#isScreenRound()} configuration
+method, which indicates whether the screen is round.</p>
+      </td>
+    </tr>
     <tr id="OrientationQualifier">
       <td>Screen orientation</td>
       <td>
@@ -938,7 +954,7 @@ same way. For example, a color:</p>
 &lt;?xml version="1.0" encoding="utf-8"?>
 &lt;resources>
     &lt;color name="yellow">#f00&lt;/color>
-    &lt;color name="highlight">@color/red&lt;/color>
+    &lt;color name="highlight">@color/yellow&lt;/color>
 &lt;/resources>
 </pre>
 

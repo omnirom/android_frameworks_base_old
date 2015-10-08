@@ -16,14 +16,19 @@
 
 #include "EglManager.h"
 
+#include "Caches.h"
+#include "Properties.h"
+#include "RenderThread.h"
+#include "renderstate/RenderState.h"
+
 #include <cutils/log.h>
 #include <cutils/properties.h>
-
-#include "../RenderState.h"
-#include "RenderThread.h"
+#include <EGL/eglext.h>
 
 #define PROPERTY_RENDER_DIRTY_REGIONS "debug.hwui.render_dirty_regions"
 #define GLES_VERSION 2
+
+#define WAIT_FOR_GPU_COMPLETION 0
 
 // Android-specific addition that is used to show when frames began in systrace
 EGLAPI void EGLAPIENTRY eglBeginFrame(EGLDisplay dpy, EGLSurface surface);
@@ -67,14 +72,13 @@ static bool load_dirty_regions_property() {
 EglManager::EglManager(RenderThread& thread)
         : mRenderThread(thread)
         , mEglDisplay(EGL_NO_DISPLAY)
-        , mEglConfig(0)
+        , mEglConfig(nullptr)
         , mEglContext(EGL_NO_CONTEXT)
         , mPBufferSurface(EGL_NO_SURFACE)
         , mAllowPreserveBuffer(load_dirty_regions_property())
         , mCurrentSurface(EGL_NO_SURFACE)
-        , mAtlasMap(NULL)
-        , mAtlasMapSize(0)
-        , mInFrame(false) {
+        , mAtlasMap(nullptr)
+        , mAtlasMapSize(0) {
     mCanSetPreserveBuffer = mAllowPreserveBuffer;
     ALOGD("Use EGL_SWAP_BEHAVIOR_PRESERVED: %s", mAllowPreserveBuffer ? "true" : "false");
 }
@@ -96,24 +100,14 @@ void EglManager::initialize() {
 
     loadConfig();
     createContext();
-    usePBufferSurface();
+    createPBufferSurface();
+    makeCurrent(mPBufferSurface);
     mRenderThread.renderState().onGLContextCreated();
     initAtlas();
 }
 
 bool EglManager::hasEglContext() {
     return mEglDisplay != EGL_NO_DISPLAY;
-}
-
-void EglManager::requireGlContext() {
-    LOG_ALWAYS_FATAL_IF(mEglDisplay == EGL_NO_DISPLAY, "No EGL context");
-
-    if (!mInFrame) {
-        // We can't be certain about the state of the current surface (whether
-        // or not it is destroyed, for example), so err on the side of using
-        // the pbuffer surface which we fully control
-        usePBufferSurface();
-    }
 }
 
 void EglManager::loadConfig() {
@@ -168,7 +162,6 @@ void EglManager::setTextureAtlas(const sp<GraphicBuffer>& buffer,
     mAtlasMapSize = mapSize;
 
     if (hasEglContext()) {
-        usePBufferSurface();
         initAtlas();
     }
 }
@@ -180,7 +173,7 @@ void EglManager::initAtlas() {
     }
 }
 
-void EglManager::usePBufferSurface() {
+void EglManager::createPBufferSurface() {
     LOG_ALWAYS_FATAL_IF(mEglDisplay == EGL_NO_DISPLAY,
             "usePBufferSurface() called on uninitialized GlobalContext!");
 
@@ -188,12 +181,11 @@ void EglManager::usePBufferSurface() {
         EGLint attribs[] = { EGL_WIDTH, 1, EGL_HEIGHT, 1, EGL_NONE };
         mPBufferSurface = eglCreatePbufferSurface(mEglDisplay, mEglConfig, attribs);
     }
-    makeCurrent(mPBufferSurface);
 }
 
 EGLSurface EglManager::createSurface(EGLNativeWindowType window) {
     initialize();
-    EGLSurface surface = eglCreateWindowSurface(mEglDisplay, mEglConfig, window, NULL);
+    EGLSurface surface = eglCreateWindowSurface(mEglDisplay, mEglConfig, window, nullptr);
     LOG_ALWAYS_FATAL_IF(surface == EGL_NO_SURFACE,
             "Failed to create EGLSurface for window %p, eglErr = %s",
             (void*) window, egl_error_str());
@@ -212,11 +204,6 @@ void EglManager::destroySurface(EGLSurface surface) {
 void EglManager::destroy() {
     if (mEglDisplay == EGL_NO_DISPLAY) return;
 
-    usePBufferSurface();
-    if (Caches::hasInstance()) {
-        Caches::getInstance().terminate();
-    }
-
     mRenderThread.renderState().onGLContextDestroyed();
     eglDestroyContext(mEglDisplay, mEglContext);
     eglDestroySurface(mEglDisplay, mPBufferSurface);
@@ -230,17 +217,22 @@ void EglManager::destroy() {
     mCurrentSurface = EGL_NO_SURFACE;
 }
 
-bool EglManager::makeCurrent(EGLSurface surface) {
+bool EglManager::makeCurrent(EGLSurface surface, EGLint* errOut) {
     if (isCurrent(surface)) return false;
 
     if (surface == EGL_NO_SURFACE) {
-        // If we are setting EGL_NO_SURFACE we don't care about any of the potential
-        // return errors, which would only happen if mEglDisplay had already been
-        // destroyed in which case the current context is already NO_CONTEXT
-        eglMakeCurrent(mEglDisplay, EGL_NO_SURFACE, EGL_NO_SURFACE, EGL_NO_CONTEXT);
-    } else if (!eglMakeCurrent(mEglDisplay, surface, surface, mEglContext)) {
-        LOG_ALWAYS_FATAL("Failed to make current on surface %p, error=%s",
-                (void*)surface, egl_error_str());
+        // Ensure we always have a valid surface & context
+        surface = mPBufferSurface;
+    }
+    if (!eglMakeCurrent(mEglDisplay, surface, surface, mEglContext)) {
+        if (errOut) {
+            *errOut = eglGetError();
+            ALOGW("Failed to make current on surface %p, error=%s",
+                    (void*)surface, egl_error_str(*errOut));
+        } else {
+            LOG_ALWAYS_FATAL("Failed to make current on surface %p, error=%s",
+                    (void*)surface, egl_error_str());
+        }
     }
     mCurrentSurface = surface;
     return true;
@@ -257,12 +249,44 @@ void EglManager::beginFrame(EGLSurface surface, EGLint* width, EGLint* height) {
         eglQuerySurface(mEglDisplay, surface, EGL_HEIGHT, height);
     }
     eglBeginFrame(mEglDisplay, surface);
-    mInFrame = true;
 }
 
-bool EglManager::swapBuffers(EGLSurface surface) {
-    mInFrame = false;
+bool EglManager::swapBuffers(EGLSurface surface, const SkRect& dirty,
+        EGLint width, EGLint height) {
+
+#if WAIT_FOR_GPU_COMPLETION
+    {
+        ATRACE_NAME("Finishing GPU work");
+        fence();
+    }
+#endif
+
+#ifdef EGL_KHR_swap_buffers_with_damage
+    if (CC_LIKELY(Properties::swapBuffersWithDamage)) {
+        SkIRect idirty;
+        dirty.roundOut(&idirty);
+        /*
+         * EGL_KHR_swap_buffers_with_damage spec states:
+         *
+         * The rectangles are specified relative to the bottom-left of the surface
+         * and the x and y components of each rectangle specify the bottom-left
+         * position of that rectangle.
+         *
+         * HWUI does everything with 0,0 being top-left, so need to map
+         * the rect
+         */
+        EGLint y = height - (idirty.y() + idirty.height());
+        // layout: {x, y, width, height}
+        EGLint rects[4] = { idirty.x(), y, idirty.width(), idirty.height() };
+        EGLint numrects = dirty.isEmpty() ? 0 : 1;
+        eglSwapBuffersWithDamageKHR(mEglDisplay, surface, rects, numrects);
+    } else {
+        eglSwapBuffers(mEglDisplay, surface);
+    }
+#else
     eglSwapBuffers(mEglDisplay, surface);
+#endif
+
     EGLint err = eglGetError();
     if (CC_LIKELY(err == EGL_SUCCESS)) {
         return true;
@@ -280,8 +304,11 @@ bool EglManager::swapBuffers(EGLSurface surface) {
     return false;
 }
 
-void EglManager::cancelFrame() {
-    mInFrame = false;
+void EglManager::fence() {
+    EGLSyncKHR fence = eglCreateSyncKHR(mEglDisplay, EGL_SYNC_FENCE_KHR, NULL);
+    eglClientWaitSyncKHR(mEglDisplay, fence,
+            EGL_SYNC_FLUSH_COMMANDS_BIT_KHR, EGL_FOREVER_KHR);
+    eglDestroySyncKHR(mEglDisplay, fence);
 }
 
 bool EglManager::setPreserveBuffer(EGLSurface surface, bool preserve) {

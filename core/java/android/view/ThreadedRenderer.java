@@ -16,29 +16,29 @@
 
 package android.view;
 
-import com.android.internal.R;
-
+import android.annotation.IntDef;
+import android.annotation.NonNull;
 import android.content.Context;
-import android.content.res.Resources;
 import android.content.res.TypedArray;
 import android.graphics.Bitmap;
+import android.graphics.Point;
 import android.graphics.Rect;
-import android.graphics.drawable.Drawable;
+import android.os.Binder;
 import android.os.IBinder;
+import android.os.ParcelFileDescriptor;
 import android.os.RemoteException;
 import android.os.ServiceManager;
-import android.os.SystemProperties;
 import android.os.Trace;
 import android.util.Log;
-import android.util.LongSparseArray;
-import android.util.TimeUtils;
 import android.view.Surface.OutOfResourcesException;
 import android.view.View.AttachInfo;
 
+import com.android.internal.R;
+
 import java.io.FileDescriptor;
 import java.io.PrintWriter;
-import java.util.ArrayList;
-import java.util.HashSet;
+import java.lang.annotation.Retention;
+import java.lang.annotation.RetentionPolicy;
 
 /**
  * Hardware renderer that proxies the rendering to a render thread. Most calls
@@ -74,6 +74,14 @@ public class ThreadedRenderer extends HardwareRenderer {
         PROFILE_PROPERTY_VISUALIZE_BARS,
     };
 
+    private static final int FLAG_DUMP_FRAMESTATS   = 1 << 0;
+    private static final int FLAG_DUMP_RESET        = 1 << 1;
+
+    @IntDef(flag = true, value = {
+            FLAG_DUMP_FRAMESTATS, FLAG_DUMP_RESET })
+    @Retention(RetentionPolicy.SOURCE)
+    public @interface DumpFlags {}
+
     // Size of the rendered content.
     private int mWidth, mHeight;
 
@@ -98,7 +106,6 @@ public class ThreadedRenderer extends HardwareRenderer {
     private boolean mInitialized = false;
     private RenderNode mRootNode;
     private Choreographer mChoreographer;
-    private boolean mProfilingEnabled;
     private boolean mRootNodeNeedsUpdate;
 
     ThreadedRenderer(Context context, boolean translucent) {
@@ -116,11 +123,7 @@ public class ThreadedRenderer extends HardwareRenderer {
         mRootNode.setClipToBounds(false);
         mNativeProxy = nCreateProxy(translucent, rootNodePtr);
 
-        AtlasInitializer.sInstance.init(context, mNativeProxy);
-
-        // Setup timing
-        mChoreographer = Choreographer.getInstance();
-        nSetFrameInterval(mNativeProxy, mChoreographer.getFrameIntervalNanos());
+        ProcessInitializer.sInstance.init(context, mNativeProxy);
 
         loadSystemProperties();
     }
@@ -145,7 +148,6 @@ public class ThreadedRenderer extends HardwareRenderer {
         mInitialized = true;
         updateEnabledState(surface);
         boolean status = nInitialize(mNativeProxy, surface);
-        surface.allocateBuffers();
         return status;
     }
 
@@ -190,10 +192,10 @@ public class ThreadedRenderer extends HardwareRenderer {
     }
 
     @Override
-    void setup(int width, int height, Rect surfaceInsets) {
-        final float lightX = width / 2.0f;
+    void setup(int width, int height, AttachInfo attachInfo, Rect surfaceInsets) {
         mWidth = width;
         mHeight = height;
+
         if (surfaceInsets != null && (surfaceInsets.left != 0 || surfaceInsets.right != 0
                 || surfaceInsets.top != 0 || surfaceInsets.bottom != 0)) {
             mHasInsets = true;
@@ -211,10 +213,23 @@ public class ThreadedRenderer extends HardwareRenderer {
             mSurfaceWidth = width;
             mSurfaceHeight = height;
         }
+
         mRootNode.setLeftTopRightBottom(-mInsetLeft, -mInsetTop, mSurfaceWidth, mSurfaceHeight);
-        nSetup(mNativeProxy, mSurfaceWidth, mSurfaceHeight,
-                lightX, mLightY, mLightZ, mLightRadius,
+        nSetup(mNativeProxy, mSurfaceWidth, mSurfaceHeight, mLightRadius,
                 mAmbientShadowAlpha, mSpotShadowAlpha);
+
+        setLightCenter(attachInfo);
+    }
+
+    @Override
+    void setLightCenter(AttachInfo attachInfo) {
+        // Adjust light position for window offsets.
+        final Point displaySize = attachInfo.mPoint;
+        attachInfo.mDisplay.getRealSize(displaySize);
+        final float lightX = displaySize.x / 2f - attachInfo.mWindowLeft;
+        final float lightY = mLightY - attachInfo.mWindowTop;
+
+        nSetLightCenter(mNativeProxy, lightX, lightY, mLightZ);
     }
 
     @Override
@@ -233,32 +248,25 @@ public class ThreadedRenderer extends HardwareRenderer {
     }
 
     @Override
-    void dumpGfxInfo(PrintWriter pw, FileDescriptor fd) {
+    void dumpGfxInfo(PrintWriter pw, FileDescriptor fd, String[] args) {
         pw.flush();
-        nDumpProfileInfo(mNativeProxy, fd);
-    }
-
-    private static int search(String[] values, String value) {
-        for (int i = 0; i < values.length; i++) {
-            if (values[i].equals(value)) return i;
+        int flags = 0;
+        for (int i = 0; i < args.length; i++) {
+            switch (args[i]) {
+                case "framestats":
+                    flags |= FLAG_DUMP_FRAMESTATS;
+                    break;
+                case "reset":
+                    flags |= FLAG_DUMP_RESET;
+                    break;
+            }
         }
-        return -1;
-    }
-
-    private static boolean checkIfProfilingRequested() {
-        String profiling = SystemProperties.get(HardwareRenderer.PROFILE_PROPERTY);
-        int graphType = search(VISUALIZERS, profiling);
-        return (graphType >= 0) || Boolean.parseBoolean(profiling);
+        nDumpProfileInfo(mNativeProxy, fd, flags);
     }
 
     @Override
     boolean loadSystemProperties() {
         boolean changed = nLoadSystemProperties(mNativeProxy);
-        boolean wantProfiling = checkIfProfilingRequested();
-        if (wantProfiling != mProfilingEnabled) {
-            mProfilingEnabled = wantProfiling;
-            changed = true;
-        }
         if (changed) {
             invalidateRoot();
         }
@@ -270,7 +278,7 @@ public class ThreadedRenderer extends HardwareRenderer {
         view.mRecreateDisplayList = (view.mPrivateFlags & View.PFLAG_INVALIDATED)
                 == View.PFLAG_INVALIDATED;
         view.mPrivateFlags &= ~View.PFLAG_INVALIDATED;
-        view.getDisplayList();
+        view.updateDisplayListIfDirty();
         view.mRecreateDisplayList = false;
     }
 
@@ -279,14 +287,14 @@ public class ThreadedRenderer extends HardwareRenderer {
         updateViewTreeDisplayList(view);
 
         if (mRootNodeNeedsUpdate || !mRootNode.isValid()) {
-            HardwareCanvas canvas = mRootNode.start(mSurfaceWidth, mSurfaceHeight);
+            DisplayListCanvas canvas = mRootNode.start(mSurfaceWidth, mSurfaceHeight);
             try {
                 final int saveCount = canvas.save();
                 canvas.translate(mInsetLeft, mInsetTop);
                 callbacks.onHardwarePreDraw(canvas);
 
                 canvas.insertReorderBarrier();
-                canvas.drawRenderNode(view.getDisplayList());
+                canvas.drawRenderNode(view.updateDisplayListIfDirty());
                 canvas.insertInorderBarrier();
 
                 callbacks.onHardwarePostDraw(canvas);
@@ -307,19 +315,11 @@ public class ThreadedRenderer extends HardwareRenderer {
     @Override
     void draw(View view, AttachInfo attachInfo, HardwareDrawCallbacks callbacks) {
         attachInfo.mIgnoreDirtyState = true;
-        long frameTimeNanos = mChoreographer.getFrameTimeNanos();
-        attachInfo.mDrawingTime = frameTimeNanos / TimeUtils.NANOS_PER_MS;
 
-        long recordDuration = 0;
-        if (mProfilingEnabled) {
-            recordDuration = System.nanoTime();
-        }
+        final Choreographer choreographer = attachInfo.mViewRootImpl.mChoreographer;
+        choreographer.mFrameInfo.markDrawStart();
 
         updateRootDisplayList(view, callbacks);
-
-        if (mProfilingEnabled) {
-            recordDuration = System.nanoTime() - recordDuration;
-        }
 
         attachInfo.mIgnoreDirtyState = false;
 
@@ -337,8 +337,8 @@ public class ThreadedRenderer extends HardwareRenderer {
             attachInfo.mPendingAnimatingRenderNodes = null;
         }
 
-        int syncResult = nSyncAndDrawFrame(mNativeProxy, frameTimeNanos,
-                recordDuration, view.getResources().getDisplayMetrics().density);
+        final long[] frameInfo = choreographer.mFrameInfo.mFrameInfo;
+        int syncResult = nSyncAndDrawFrame(mNativeProxy, frameInfo, frameInfo.length);
         if ((syncResult & SYNC_LOST_SURFACE_REWARD_IF_FOUND) != 0) {
             setEnabled(false);
             attachInfo.mViewRootImpl.mSurface.release();
@@ -369,7 +369,7 @@ public class ThreadedRenderer extends HardwareRenderer {
     @Override
     boolean copyLayerInto(final HardwareLayer layer, final Bitmap bitmap) {
         return nCopyLayerInto(mNativeProxy,
-                layer.getDeferredLayerUpdater(), bitmap.mNativeBitmap);
+                layer.getDeferredLayerUpdater(), bitmap);
     }
 
     @Override
@@ -384,6 +384,7 @@ public class ThreadedRenderer extends HardwareRenderer {
 
     @Override
     void setName(String name) {
+        nSetName(mNativeProxy, name);
     }
 
     @Override
@@ -420,15 +421,50 @@ public class ThreadedRenderer extends HardwareRenderer {
         nTrimMemory(level);
     }
 
-    private static class AtlasInitializer {
-        static AtlasInitializer sInstance = new AtlasInitializer();
+    public static void overrideProperty(@NonNull String name, @NonNull String value) {
+        if (name == null || value == null) {
+            throw new IllegalArgumentException("name and value must be non-null");
+        }
+        nOverrideProperty(name, value);
+    }
+
+    public static void dumpProfileData(byte[] data, FileDescriptor fd) {
+        nDumpProfileData(data, fd);
+    }
+
+    private static class ProcessInitializer {
+        static ProcessInitializer sInstance = new ProcessInitializer();
+        private static IBinder sProcToken;
 
         private boolean mInitialized = false;
 
-        private AtlasInitializer() {}
+        private ProcessInitializer() {}
 
         synchronized void init(Context context, long renderProxy) {
             if (mInitialized) return;
+            mInitialized = true;
+            initGraphicsStats(context, renderProxy);
+            initAssetAtlas(context, renderProxy);
+        }
+
+        private static void initGraphicsStats(Context context, long renderProxy) {
+            try {
+                IBinder binder = ServiceManager.getService("graphicsstats");
+                if (binder == null) return;
+                IGraphicsStats graphicsStatsService = IGraphicsStats.Stub
+                        .asInterface(binder);
+                sProcToken = new Binder();
+                final String pkg = context.getApplicationInfo().packageName;
+                ParcelFileDescriptor pfd = graphicsStatsService.
+                        requestBufferForProcess(pkg, sProcToken);
+                nSetProcessStatsBuffer(renderProxy, pfd.getFd());
+                pfd.close();
+            } catch (Throwable t) {
+                Log.w(LOG_TAG, "Could not acquire gfx stats buffer", t);
+            }
+        }
+
+        private static void initAssetAtlas(Context context, long renderProxy) {
             IBinder binder = ServiceManager.getService("assetatlas");
             if (binder == null) return;
 
@@ -439,10 +475,7 @@ public class ThreadedRenderer extends HardwareRenderer {
                     if (buffer != null) {
                         long[] map = atlas.getMap();
                         if (map != null) {
-                            // TODO Remove after fixing b/15425820
-                            validateMap(context, map);
                             nSetAtlas(renderProxy, buffer, map);
-                            mInitialized = true;
                         }
                         // If IAssetAtlas is not the same class as the IBinder
                         // we are using a remote service and we can safely
@@ -456,54 +489,29 @@ public class ThreadedRenderer extends HardwareRenderer {
                 Log.w(LOG_TAG, "Could not acquire atlas", e);
             }
         }
-
-        private static void validateMap(Context context, long[] map) {
-            Log.d("Atlas", "Validating map...");
-            HashSet<Long> preloadedPointers = new HashSet<Long>();
-
-            // We only care about drawables that hold bitmaps
-            final Resources resources = context.getResources();
-            final LongSparseArray<Drawable.ConstantState> drawables = resources.getPreloadedDrawables();
-
-            final int count = drawables.size();
-            ArrayList<Bitmap> tmpList = new ArrayList<Bitmap>();
-            for (int i = 0; i < count; i++) {
-                drawables.valueAt(i).addAtlasableBitmaps(tmpList);
-                for (int j = 0; j < tmpList.size(); j++) {
-                    preloadedPointers.add(tmpList.get(j).mNativeBitmap);
-                }
-                tmpList.clear();
-            }
-
-            for (int i = 0; i < map.length; i += 4) {
-                if (!preloadedPointers.contains(map[i])) {
-                    Log.w("Atlas", String.format("Pointer 0x%X, not in getPreloadedDrawables?", map[i]));
-                    map[i] = 0;
-                }
-            }
-        }
     }
 
     static native void setupShadersDiskCache(String cacheFile);
 
     private static native void nSetAtlas(long nativeProxy, GraphicBuffer buffer, long[] map);
+    private static native void nSetProcessStatsBuffer(long nativeProxy, int fd);
 
     private static native long nCreateRootRenderNode();
     private static native long nCreateProxy(boolean translucent, long rootRenderNode);
     private static native void nDeleteProxy(long nativeProxy);
 
-    private static native void nSetFrameInterval(long nativeProxy, long frameIntervalNanos);
     private static native boolean nLoadSystemProperties(long nativeProxy);
+    private static native void nSetName(long nativeProxy, String name);
 
     private static native boolean nInitialize(long nativeProxy, Surface window);
     private static native void nUpdateSurface(long nativeProxy, Surface window);
     private static native boolean nPauseSurface(long nativeProxy, Surface window);
     private static native void nSetup(long nativeProxy, int width, int height,
-            float lightX, float lightY, float lightZ, float lightRadius,
-            int ambientShadowAlpha, int spotShadowAlpha);
+            float lightRadius, int ambientShadowAlpha, int spotShadowAlpha);
+    private static native void nSetLightCenter(long nativeProxy,
+            float lightX, float lightY, float lightZ);
     private static native void nSetOpaque(long nativeProxy, boolean opaque);
-    private static native int nSyncAndDrawFrame(long nativeProxy,
-            long frameTimeNanos, long recordDuration, float density);
+    private static native int nSyncAndDrawFrame(long nativeProxy, long[] frameInfo, int size);
     private static native void nDestroy(long nativeProxy);
     private static native void nRegisterAnimatingRenderNode(long rootRenderNode, long animatingNode);
 
@@ -511,17 +519,20 @@ public class ThreadedRenderer extends HardwareRenderer {
 
     private static native long nCreateTextureLayer(long nativeProxy);
     private static native void nBuildLayer(long nativeProxy, long node);
-    private static native boolean nCopyLayerInto(long nativeProxy, long layer, long bitmap);
+    private static native boolean nCopyLayerInto(long nativeProxy, long layer, Bitmap bitmap);
     private static native void nPushLayerUpdate(long nativeProxy, long layer);
     private static native void nCancelLayerUpdate(long nativeProxy, long layer);
     private static native void nDetachSurfaceTexture(long nativeProxy, long layer);
 
     private static native void nDestroyHardwareResources(long nativeProxy);
     private static native void nTrimMemory(int level);
+    private static native void nOverrideProperty(String name, String value);
 
     private static native void nFence(long nativeProxy);
     private static native void nStopDrawing(long nativeProxy);
     private static native void nNotifyFramePending(long nativeProxy);
 
-    private static native void nDumpProfileInfo(long nativeProxy, FileDescriptor fd);
+    private static native void nDumpProfileInfo(long nativeProxy, FileDescriptor fd,
+            @DumpFlags int dumpFlags);
+    private static native void nDumpProfileData(byte[] data, FileDescriptor fd);
 }

@@ -16,7 +16,12 @@
 
 package com.android.server.am;
 
+import static android.app.ActivityManager.PROCESS_STATE_NONEXISTENT;
+import static com.android.server.am.ActivityManagerDebugConfig.TAG_AM;
+import static com.android.server.am.ActivityManagerDebugConfig.TAG_WITH_CLASS_NAME;
+
 import android.util.ArraySet;
+import android.util.DebugUtils;
 import android.util.EventLog;
 import android.util.Slog;
 import com.android.internal.app.ProcessStats;
@@ -35,6 +40,7 @@ import android.os.Bundle;
 import android.os.IBinder;
 import android.os.Process;
 import android.os.SystemClock;
+import android.os.Trace;
 import android.os.UserHandle;
 import android.util.ArrayMap;
 import android.util.PrintWriterPrinter;
@@ -48,6 +54,8 @@ import java.util.ArrayList;
  * is currently running.
  */
 final class ProcessRecord {
+    private static final String TAG = TAG_WITH_CLASS_NAME ? "ProcessRecord" : TAG_AM;
+
     private final BatteryStatsImpl mBatteryStats; // where to collect runtime statistics
     final ApplicationInfo info; // all about the first app in the process
     final boolean isolated;     // true if this is a special isolated process
@@ -55,8 +63,8 @@ final class ProcessRecord {
     final int userId;           // user of process.
     final String processName;   // name of the process
     // List of packages running in the process
-    final ArrayMap<String, ProcessStats.ProcessStateHolder> pkgList
-            = new ArrayMap<String, ProcessStats.ProcessStateHolder>();
+    final ArrayMap<String, ProcessStats.ProcessStateHolder> pkgList = new ArrayMap<>();
+    UidRecord uidRecord;        // overall state of process's uid.
     ArraySet<String> pkgDeps;   // additional packages we have a dependency on
     IApplicationThread thread;  // the actual proc...  may be null only if
                                 // 'persistent' is true (in which case we
@@ -83,10 +91,10 @@ final class ProcessRecord {
     int curSchedGroup;          // Currently desired scheduling class
     int setSchedGroup;          // Last set to background scheduling class
     int trimMemoryLevel;        // Last selected memory trimming level
-    int curProcState = -1;      // Currently computed process state: ActivityManager.PROCESS_STATE_*
-    int repProcState = -1;      // Last reported process state
-    int setProcState = -1;      // Last set process state in process tracker
-    int pssProcState = -1;      // The proc state we are currently requesting pss for
+    int curProcState = PROCESS_STATE_NONEXISTENT; // Currently computed process state
+    int repProcState = PROCESS_STATE_NONEXISTENT; // Last reported process state
+    int setProcState = PROCESS_STATE_NONEXISTENT; // Last set process state in process tracker
+    int pssProcState = PROCESS_STATE_NONEXISTENT; // Currently requesting pss for
     boolean serviceb;           // Process currently is on the service B list
     boolean serviceHighRam;     // We are forcing to service B list due to its RAM use
     boolean setIsForeground;    // Running foreground UI when last set?
@@ -105,6 +113,8 @@ final class ProcessRecord {
     boolean killedByAm;         // True when proc has been killed by activity manager, not for RAM
     boolean killed;             // True once we know the process has been killed
     boolean procStateChanged;   // Keep track of whether we changed 'setAdj'.
+    boolean reportedInteraction;// Whether we have told usage stats about it being an interaction
+    long fgInteractionTime;     // When we became foreground for interaction purposes
     String waitingToKill;       // Process is waiting to be killed when in the bg, and reason
     IBinder forcingToForeground;// Token that is forcing this process to be foreground
     int adjSeq;                 // Sequence id for identifying oom_adj assignment cycles
@@ -135,24 +145,20 @@ final class ProcessRecord {
     Object adjTarget;           // Debugging: target component impacting oom_adj.
     Runnable crashHandler;      // Optional local handler to be invoked in the process crash.
 
-    // contains HistoryRecord objects
-    final ArrayList<ActivityRecord> activities = new ArrayList<ActivityRecord>();
+    // all activities running in the process
+    final ArrayList<ActivityRecord> activities = new ArrayList<>();
     // all ServiceRecord running in this process
-    final ArraySet<ServiceRecord> services = new ArraySet<ServiceRecord>();
+    final ArraySet<ServiceRecord> services = new ArraySet<>();
     // services that are currently executing code (need to remain foreground).
-    final ArraySet<ServiceRecord> executingServices
-             = new ArraySet<ServiceRecord>();
+    final ArraySet<ServiceRecord> executingServices = new ArraySet<>();
     // All ConnectionRecord this process holds
-    final ArraySet<ConnectionRecord> connections
-            = new ArraySet<ConnectionRecord>();
+    final ArraySet<ConnectionRecord> connections = new ArraySet<>();
     // all IIntentReceivers that are registered from this process.
-    final ArraySet<ReceiverList> receivers = new ArraySet<ReceiverList>();
+    final ArraySet<ReceiverList> receivers = new ArraySet<>();
     // class (String) -> ContentProviderRecord
-    final ArrayMap<String, ContentProviderRecord> pubProviders
-            = new ArrayMap<String, ContentProviderRecord>();
+    final ArrayMap<String, ContentProviderRecord> pubProviders = new ArrayMap<>();
     // All ContentProviderRecord process is using
-    final ArrayList<ContentProviderConnection> conProviders
-            = new ArrayList<ContentProviderConnection>();
+    final ArrayList<ContentProviderConnection> conProviders = new ArrayList<>();
 
     boolean execServicesFg;     // do we need to be executing services in the foreground?
     boolean persistent;         // always keep this application running?
@@ -248,8 +254,9 @@ final class ProcessRecord {
                 pw.println();
         pw.print(prefix); pw.print("adjSeq="); pw.print(adjSeq);
                 pw.print(" lruSeq="); pw.print(lruSeq);
-                pw.print(" lastPss="); pw.print(lastPss);
-                pw.print(" lastCachedPss="); pw.println(lastCachedPss);
+                pw.print(" lastPss="); DebugUtils.printSizeValue(pw, lastPss*1024);
+                pw.print(" lastCachedPss="); DebugUtils.printSizeValue(pw, lastCachedPss*1024);
+                pw.println();
         pw.print(prefix); pw.print("cached="); pw.print(cached);
                 pw.print(" empty="); pw.println(empty);
         if (serviceb) {
@@ -286,6 +293,15 @@ final class ProcessRecord {
             pw.print(prefix); pw.print("setIsForeground="); pw.print(setIsForeground);
                     pw.print(" foregroundServices="); pw.print(foregroundServices);
                     pw.print(" forcingToForeground="); pw.println(forcingToForeground);
+        }
+        if (reportedInteraction || fgInteractionTime != 0) {
+            pw.print(prefix); pw.print("reportedInteraction=");
+            pw.print(reportedInteraction);
+            if (fgInteractionTime != 0) {
+                pw.print(" fgInteractionTime=");
+                TimeUtils.formatDuration(fgInteractionTime, SystemClock.elapsedRealtime(), pw);
+            }
+            pw.println();
         }
         if (persistent || removed) {
             pw.print(prefix); pw.print("persistent="); pw.print(persistent);
@@ -418,7 +434,7 @@ final class ProcessRecord {
                         tracker.getMemFactorLocked(), SystemClock.uptimeMillis(), pkgList);
                 origBase.makeInactive();
             }
-            baseProcessTracker = tracker.getProcessStateLocked(info.packageName, info.uid,
+            baseProcessTracker = tracker.getProcessStateLocked(info.packageName, uid,
                     info.versionCode, processName);
             baseProcessTracker.makeActive();
             for (int i=0; i<pkgList.size(); i++) {
@@ -426,7 +442,7 @@ final class ProcessRecord {
                 if (holder.state != null && holder.state != origBase) {
                     holder.state.makeInactive();
                 }
-                holder.state = tracker.getProcessStateLocked(pkgList.keyAt(i), info.uid,
+                holder.state = tracker.getProcessStateLocked(pkgList.keyAt(i), uid,
                         info.versionCode, processName);
                 if (holder.state != baseProcessTracker) {
                     holder.state.makeActive();
@@ -470,7 +486,7 @@ final class ProcessRecord {
         }
         return false;
     }
-    
+
     public void stopFreezingAllLocked() {
         int i = activities.size();
         while (i > 0) {
@@ -478,7 +494,7 @@ final class ProcessRecord {
             activities.get(i).stopFreezingScreenLocked(true);
         }
     }
-    
+
     public void unlinkDeathRecipient() {
         if (deathRecipient != null && thread != null) {
             thread.asBinder().unlinkToDeath(deathRecipient, 0);
@@ -521,9 +537,9 @@ final class ProcessRecord {
 
     void kill(String reason, boolean noisy) {
         if (!killedByAm) {
+            Trace.traceBegin(Trace.TRACE_TAG_ACTIVITY_MANAGER, "kill");
             if (noisy) {
-                Slog.i(ActivityManagerService.TAG, "Killing " + toShortString() + " (adj " + setAdj
-                        + "): " + reason);
+                Slog.i(TAG, "Killing " + toShortString() + " (adj " + setAdj + "): " + reason);
             }
             EventLog.writeEvent(EventLogTags.AM_KILL, userId, pid, processName, setAdj, reason);
             Process.killProcessQuiet(pid);
@@ -532,6 +548,7 @@ final class ProcessRecord {
                 killed = true;
                 killedByAm = true;
             }
+            Trace.traceEnd(Trace.TRACE_TAG_ACTIVITY_MANAGER);
         }
     }
 
@@ -617,7 +634,7 @@ final class ProcessRecord {
                     versionCode);
             if (baseProcessTracker != null) {
                 holder.state = tracker.getProcessStateLocked(
-                        pkg, info.uid, versionCode, processName);
+                        pkg, uid, versionCode, processName);
                 pkgList.put(pkg, holder);
                 if (holder.state != baseProcessTracker) {
                     holder.state.makeActive();
@@ -664,7 +681,7 @@ final class ProcessRecord {
                 }
                 pkgList.clear();
                 ProcessStats.ProcessState ps = tracker.getProcessStateLocked(
-                        info.packageName, info.uid, info.versionCode, processName);
+                        info.packageName, uid, info.versionCode, processName);
                 ProcessStats.ProcessStateHolder holder = new ProcessStats.ProcessStateHolder(
                         info.versionCode);
                 holder.state = ps;

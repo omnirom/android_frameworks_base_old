@@ -900,7 +900,9 @@ public abstract class WebSettings {
      * and therefore secure policy, this setting should be disabled.
      * Note that this setting affects only JavaScript access to file scheme
      * resources. Other access to such resources, for example, from image HTML
-     * elements, is unaffected.
+     * elements, is unaffected. To prevent possible violation of same domain policy
+     * on {@link android.os.Build.VERSION_CODES#ICE_CREAM_SANDWICH} and earlier
+     * devices, you should explicitly set this value to {@code false}.
      * <p>
      * The default value is true for API level
      * {@link android.os.Build.VERSION_CODES#ICE_CREAM_SANDWICH_MR1} and below,
@@ -920,7 +922,9 @@ public abstract class WebSettings {
      * the value of {@link #getAllowUniversalAccessFromFileURLs} is true.
      * Note too, that this setting affects only JavaScript access to file scheme
      * resources. Other access to such resources, for example, from image HTML
-     * elements, is unaffected.
+     * elements, is unaffected. To prevent possible violation of same domain policy
+     * on {@link android.os.Build.VERSION_CODES#ICE_CREAM_SANDWICH} and earlier
+     * devices, you should explicitly set this value to {@code false}.
      * <p>
      * The default value is true for API level
      * {@link android.os.Build.VERSION_CODES#ICE_CREAM_SANDWICH_MR1} and below,
@@ -1207,6 +1211,12 @@ public abstract class WebSettings {
     /**
      * Sets the WebView's user-agent string. If the string is null or empty,
      * the system default value will be used.
+     *
+     * Note that starting from {@link android.os.Build.VERSION_CODES#KITKAT} Android
+     * version, changing the user-agent while loading a web page causes WebView
+     * to initiate loading once again.
+     *
+     * @param ua new user-agent string
      */
     public abstract void setUserAgentString(String ua);
 
@@ -1285,7 +1295,7 @@ public abstract class WebSettings {
      * strongly discouraged.
      *
      * @param mode The mixed content mode to use. One of {@link #MIXED_CONTENT_NEVER_ALLOW},
-     *     {@link #MIXED_CONTENT_NEVER_ALLOW} or {@link #MIXED_CONTENT_COMPATIBILITY_MODE}.
+     *     {@link #MIXED_CONTENT_ALWAYS_ALLOW} or {@link #MIXED_CONTENT_COMPATIBILITY_MODE}.
      */
     public abstract void setMixedContentMode(int mode);
 
@@ -1293,7 +1303,7 @@ public abstract class WebSettings {
      * Gets the current behavior of the WebView with regard to loading insecure content from a
      * secure origin.
      * @return The current setting, one of {@link #MIXED_CONTENT_NEVER_ALLOW},
-     *     {@link #MIXED_CONTENT_NEVER_ALLOW} or {@link #MIXED_CONTENT_COMPATIBILITY_MODE}.
+     *     {@link #MIXED_CONTENT_ALWAYS_ALLOW} or {@link #MIXED_CONTENT_COMPATIBILITY_MODE}.
      */
     public abstract int getMixedContentMode();
 
@@ -1330,4 +1340,27 @@ public abstract class WebSettings {
      */
     @SystemApi
     public abstract boolean getVideoOverlayForEmbeddedEncryptedVideoEnabled();
+
+    /**
+     * Sets whether this WebView should raster tiles when it is
+     * offscreen but attached to a window. Turning this on can avoid
+     * rendering artifacts when animating an offscreen WebView on-screen.
+     * Offscreen WebViews in this mode use more memory. The default value is
+     * false.<br>
+     * Please follow these guidelines to limit memory usage:
+     * <ul>
+     * <li> WebView size should be not be larger than the device screen size.
+     * <li> Limit use of this mode to a small number of WebViews. Use it for
+     *   visible WebViews and WebViews about to be animated to visible.
+     * </ul>
+     */
+    public abstract void setOffscreenPreRaster(boolean enabled);
+
+    /**
+     * Gets whether this WebView should raster tiles when it is
+     * offscreen but attached to a window.
+     * @return true if this WebView will raster tiles when it is
+     * offscreen but attached to a window.
+     */
+    public abstract boolean getOffscreenPreRaster();
 }

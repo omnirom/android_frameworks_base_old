@@ -152,7 +152,7 @@ public class Clock extends TextView implements DemoMode {
         final char MAGIC2 = '\uEF01';
 
         SimpleDateFormat sdf;
-        String format = is24 ? d.timeFormat24 : d.timeFormat12;
+        String format = is24 ? d.timeFormat_Hm : d.timeFormat_hm;
         if (!format.equals(mClockFormatString)) {
             /*
              * Search for an unquoted "a" in the format string, so we can
@@ -232,7 +232,13 @@ public class Clock extends TextView implements DemoMode {
             } else if (hhmm != null && hhmm.length() == 4) {
                 int hh = Integer.parseInt(hhmm.substring(0, 2));
                 int mm = Integer.parseInt(hhmm.substring(2));
-                mCalendar.set(Calendar.HOUR, hh);
+                boolean is24 = DateFormat.is24HourFormat(
+                        getContext(), ActivityManager.getCurrentUser());
+                if (is24) {
+                    mCalendar.set(Calendar.HOUR_OF_DAY, hh);
+                } else {
+                    mCalendar.set(Calendar.HOUR, hh);
+                }
                 mCalendar.set(Calendar.MINUTE, mm);
             }
             setText(getSmallTime());

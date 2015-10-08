@@ -26,7 +26,10 @@ import android.os.Parcelable;
 import android.os.RemoteException;
 import android.os.UserHandle;
 import android.os.WorkSource;
-import android.os.Parcelable.Creator;
+import android.text.TextUtils;
+import libcore.util.ZoneInfoDB;
+
+import java.io.IOException;
 
 /**
  * This class provides access to the system alarm services.  These allow you
@@ -68,10 +71,7 @@ import android.os.Parcelable.Creator;
  * {@link android.content.Context#getSystemService
  * Context.getSystemService(Context.ALARM_SERVICE)}.
  */
-public class AlarmManager
-{
-    private static final String TAG = "AlarmManager";
-
+public class AlarmManager {
     /**
      * Alarm time in {@link System#currentTimeMillis System.currentTimeMillis()}
      * (wall clock time in UTC), which will wake up the device when
@@ -116,8 +116,52 @@ public class AlarmManager
     /** @hide */
     public static final long WINDOW_HEURISTIC = -1;
 
+    /**
+     * Flag for alarms: this is to be a stand-alone alarm, that should not be batched with
+     * other alarms.
+     * @hide
+     */
+    public static final int FLAG_STANDALONE = 1<<0;
+
+    /**
+     * Flag for alarms: this alarm would like to wake the device even if it is idle.  This
+     * is, for example, an alarm for an alarm clock.
+     * @hide
+     */
+    public static final int FLAG_WAKE_FROM_IDLE = 1<<1;
+
+    /**
+     * Flag for alarms: this alarm would like to still execute even if the device is
+     * idle.  This won't bring the device out of idle, just allow this specific alarm to
+     * run.  Note that this means the actual time this alarm goes off can be inconsistent
+     * with the time of non-allow-while-idle alarms (it could go earlier than the time
+     * requested by another alarm).
+     *
+     * @hide
+     */
+    public static final int FLAG_ALLOW_WHILE_IDLE = 1<<2;
+
+    /**
+     * Flag for alarms: same as {@link #FLAG_ALLOW_WHILE_IDLE}, but doesn't have restrictions
+     * on how frequently it can be scheduled.  Only available (and automatically applied) to
+     * system alarms.
+     *
+     * @hide
+     */
+    public static final int FLAG_ALLOW_WHILE_IDLE_UNRESTRICTED = 1<<3;
+
+    /**
+     * Flag for alarms: this alarm marks the point where we would like to come out of idle
+     * mode.  It may be moved by the alarm manager to match the first wake-from-idle alarm.
+     * Scheduling an alarm with this flag puts the alarm manager in to idle mode, where it
+     * avoids scheduling any further alarms until the marker alarm is executed.
+     * @hide
+     */
+    public static final int FLAG_IDLE_UNTIL = 1<<4;
+
     private final IAlarmManager mService;
     private final boolean mAlwaysExact;
+    private final int mTargetSdkVersion;
 
 
     /**
@@ -126,8 +170,8 @@ public class AlarmManager
     AlarmManager(IAlarmManager service, Context ctx) {
         mService = service;
 
-        final int sdkVersion = ctx.getApplicationInfo().targetSdkVersion;
-        mAlwaysExact = (sdkVersion < Build.VERSION_CODES.KITKAT);
+        mTargetSdkVersion = ctx.getApplicationInfo().targetSdkVersion;
+        mAlwaysExact = (mTargetSdkVersion < Build.VERSION_CODES.KITKAT);
     }
 
     private long legacyExactLength() {
@@ -205,7 +249,7 @@ public class AlarmManager
      * @see #RTC_WAKEUP
      */
     public void set(int type, long triggerAtMillis, PendingIntent operation) {
-        setImpl(type, triggerAtMillis, legacyExactLength(), 0, operation, null, null);
+        setImpl(type, triggerAtMillis, legacyExactLength(), 0, 0, operation, null, null);
     }
 
     /**
@@ -266,7 +310,8 @@ public class AlarmManager
      */
     public void setRepeating(int type, long triggerAtMillis,
             long intervalMillis, PendingIntent operation) {
-        setImpl(type, triggerAtMillis, legacyExactLength(), intervalMillis, operation, null, null);
+        setImpl(type, triggerAtMillis, legacyExactLength(), intervalMillis, 0, operation, null,
+                null);
     }
 
     /**
@@ -316,7 +361,7 @@ public class AlarmManager
      */
     public void setWindow(int type, long windowStartMillis, long windowLengthMillis,
             PendingIntent operation) {
-        setImpl(type, windowStartMillis, windowLengthMillis, 0, operation, null, null);
+        setImpl(type, windowStartMillis, windowLengthMillis, 0, 0, operation, null, null);
     }
 
     /**
@@ -354,7 +399,16 @@ public class AlarmManager
      * @see #RTC_WAKEUP
      */
     public void setExact(int type, long triggerAtMillis, PendingIntent operation) {
-        setImpl(type, triggerAtMillis, WINDOW_EXACT, 0, operation, null, null);
+        setImpl(type, triggerAtMillis, WINDOW_EXACT, 0, 0, operation, null, null);
+    }
+
+    /**
+     * Schedule an idle-until alarm, which will keep the alarm manager idle until
+     * the given time.
+     * @hide
+     */
+    public void setIdleUntil(int type, long triggerAtMillis, PendingIntent operation) {
+        setImpl(type, triggerAtMillis, WINDOW_EXACT, 0, FLAG_IDLE_UNTIL, operation, null, null);
     }
 
     /**
@@ -382,18 +436,19 @@ public class AlarmManager
      * @see android.content.Intent#filterEquals
      */
     public void setAlarmClock(AlarmClockInfo info, PendingIntent operation) {
-        setImpl(RTC_WAKEUP, info.getTriggerTime(), WINDOW_EXACT, 0, operation, null, info);
+        setImpl(RTC_WAKEUP, info.getTriggerTime(), WINDOW_EXACT, 0, 0, operation, null, info);
     }
 
     /** @hide */
     @SystemApi
     public void set(int type, long triggerAtMillis, long windowMillis, long intervalMillis,
             PendingIntent operation, WorkSource workSource) {
-        setImpl(type, triggerAtMillis, windowMillis, intervalMillis, operation, workSource, null);
+        setImpl(type, triggerAtMillis, windowMillis, intervalMillis, 0, operation, workSource,
+                null);
     }
 
     private void setImpl(int type, long triggerAtMillis, long windowMillis, long intervalMillis,
-            PendingIntent operation, WorkSource workSource, AlarmClockInfo alarmClock) {
+            int flags, PendingIntent operation, WorkSource workSource, AlarmClockInfo alarmClock) {
         if (triggerAtMillis < 0) {
             /* NOTYET
             if (mAlwaysExact) {
@@ -406,7 +461,7 @@ public class AlarmManager
         }
 
         try {
-            mService.set(type, triggerAtMillis, windowMillis, intervalMillis, operation,
+            mService.set(type, triggerAtMillis, windowMillis, intervalMillis, flags, operation,
                     workSource, alarmClock);
         } catch (RemoteException ex) {
         }
@@ -507,9 +562,113 @@ public class AlarmManager
      */
     public void setInexactRepeating(int type, long triggerAtMillis,
             long intervalMillis, PendingIntent operation) {
-        setImpl(type, triggerAtMillis, WINDOW_HEURISTIC, intervalMillis, operation, null, null);
+        setImpl(type, triggerAtMillis, WINDOW_HEURISTIC, intervalMillis, 0, operation, null, null);
     }
-    
+
+    /**
+     * Like {@link #set(int, long, PendingIntent)}, but this alarm will be allowed to execute
+     * even when the system is in low-power idle modes.  This type of alarm must <b>only</b>
+     * be used for situations where it is actually required that the alarm go off while in
+     * idle -- a reasonable example would be for a calendar notification that should make a
+     * sound so the user is aware of it.  When the alarm is dispatched, the app will also be
+     * added to the system's temporary whitelist for approximately 10 seconds to allow that
+     * application to acquire further wake locks in which to complete its work.</p>
+     *
+     * <p>These alarms can significantly impact the power use
+     * of the device when idle (and thus cause significant battery blame to the app scheduling
+     * them), so they should be used with care.  To reduce abuse, there are restrictions on how
+     * frequently these alarms will go off for a particular application.
+     * Under normal system operation, it will not dispatch these
+     * alarms more than about every minute (at which point every such pending alarm is
+     * dispatched); when in low-power idle modes this duration may be significantly longer,
+     * such as 15 minutes.</p>
+     *
+     * <p>Unlike other alarms, the system is free to reschedule this type of alarm to happen
+     * out of order with any other alarms, even those from the same app.  This will clearly happen
+     * when the device is idle (since this alarm can go off while idle, when any other alarms
+     * from the app will be held until later), but may also happen even when not idle.</p>
+     *
+     * <p>Regardless of the app's target SDK version, this call always allows batching of the
+     * alarm.</p>
+     *
+     * @param type One of {@link #ELAPSED_REALTIME}, {@link #ELAPSED_REALTIME_WAKEUP},
+     *        {@link #RTC}, or {@link #RTC_WAKEUP}.
+     * @param triggerAtMillis time in milliseconds that the alarm should go
+     * off, using the appropriate clock (depending on the alarm type).
+     * @param operation Action to perform when the alarm goes off;
+     * typically comes from {@link PendingIntent#getBroadcast
+     * IntentSender.getBroadcast()}.
+     *
+     * @see #set(int, long, PendingIntent)
+     * @see #setExactAndAllowWhileIdle
+     * @see #cancel
+     * @see android.content.Context#sendBroadcast
+     * @see android.content.Context#registerReceiver
+     * @see android.content.Intent#filterEquals
+     * @see #ELAPSED_REALTIME
+     * @see #ELAPSED_REALTIME_WAKEUP
+     * @see #RTC
+     * @see #RTC_WAKEUP
+     */
+    public void setAndAllowWhileIdle(int type, long triggerAtMillis, PendingIntent operation) {
+        setImpl(type, triggerAtMillis, WINDOW_HEURISTIC, 0, FLAG_ALLOW_WHILE_IDLE, operation,
+                null, null);
+    }
+
+    /**
+     * Like {@link #setExact(int, long, PendingIntent)}, but this alarm will be allowed to execute
+     * even when the system is in low-power idle modes.  If you don't need exact scheduling of
+     * the alarm but still need to execute while idle, consider using
+     * {@link #setAndAllowWhileIdle}.  This type of alarm must <b>only</b>
+     * be used for situations where it is actually required that the alarm go off while in
+     * idle -- a reasonable example would be for a calendar notification that should make a
+     * sound so the user is aware of it.  When the alarm is dispatched, the app will also be
+     * added to the system's temporary whitelist for approximately 10 seconds to allow that
+     * application to acquire further wake locks in which to complete its work.</p>
+     *
+     * <p>These alarms can significantly impact the power use
+     * of the device when idle (and thus cause significant battery blame to the app scheduling
+     * them), so they should be used with care.  To reduce abuse, there are restrictions on how
+     * frequently these alarms will go off for a particular application.
+     * Under normal system operation, it will not dispatch these
+     * alarms more than about every minute (at which point every such pending alarm is
+     * dispatched); when in low-power idle modes this duration may be significantly longer,
+     * such as 15 minutes.</p>
+     *
+     * <p>Unlike other alarms, the system is free to reschedule this type of alarm to happen
+     * out of order with any other alarms, even those from the same app.  This will clearly happen
+     * when the device is idle (since this alarm can go off while idle, when any other alarms
+     * from the app will be held until later), but may also happen even when not idle.
+     * Note that the OS will allow itself more flexibility for scheduling these alarms than
+     * regular exact alarms, since the application has opted into this behavior.  When the
+     * device is idle it may take even more liberties with scheduling in order to optimize
+     * for battery life.</p>
+     *
+     * @param type One of {@link #ELAPSED_REALTIME}, {@link #ELAPSED_REALTIME_WAKEUP},
+     *        {@link #RTC}, or {@link #RTC_WAKEUP}.
+     * @param triggerAtMillis time in milliseconds that the alarm should go
+     *        off, using the appropriate clock (depending on the alarm type).
+     * @param operation Action to perform when the alarm goes off;
+     *        typically comes from {@link PendingIntent#getBroadcast
+     *        IntentSender.getBroadcast()}.
+     *
+     * @see #set
+     * @see #setRepeating
+     * @see #setWindow
+     * @see #cancel
+     * @see android.content.Context#sendBroadcast
+     * @see android.content.Context#registerReceiver
+     * @see android.content.Intent#filterEquals
+     * @see #ELAPSED_REALTIME
+     * @see #ELAPSED_REALTIME_WAKEUP
+     * @see #RTC
+     * @see #RTC_WAKEUP
+     */
+    public void setExactAndAllowWhileIdle(int type, long triggerAtMillis, PendingIntent operation) {
+        setImpl(type, triggerAtMillis, WINDOW_EXACT, 0, FLAG_ALLOW_WHILE_IDLE, operation,
+                null, null);
+    }
+
     /**
      * Remove any alarms with a matching {@link Intent}.
      * Any alarm, of any type, whose Intent matches this one (as defined by
@@ -541,15 +700,50 @@ public class AlarmManager
     }
 
     /**
-     * Set the system default time zone.
-     * Requires the permission android.permission.SET_TIME_ZONE.
+     * Sets the system's persistent default time zone. This is the time zone for all apps, even
+     * after a reboot. Use {@link java.util.TimeZone#setDefault} if you just want to change the
+     * time zone within your app, and even then prefer to pass an explicit
+     * {@link java.util.TimeZone} to APIs that require it rather than changing the time zone for
+     * all threads.
      *
-     * @param timeZone in the format understood by {@link java.util.TimeZone}
+     * <p> On android M and above, it is an error to pass in a non-Olson timezone to this
+     * function. Note that this is a bad idea on all Android releases because POSIX and
+     * the {@code TimeZone} class have opposite interpretations of {@code '+'} and {@code '-'}
+     * in the same non-Olson ID.
+     *
+     * @param timeZone one of the Olson ids from the list returned by
+     *     {@link java.util.TimeZone#getAvailableIDs}
      */
     public void setTimeZone(String timeZone) {
+        if (TextUtils.isEmpty(timeZone)) {
+            return;
+        }
+
+        // Reject this timezone if it isn't an Olson zone we recognize.
+        if (mTargetSdkVersion >= Build.VERSION_CODES.M) {
+            boolean hasTimeZone = false;
+            try {
+                hasTimeZone = ZoneInfoDB.getInstance().hasTimeZone(timeZone);
+            } catch (IOException ignored) {
+            }
+
+            if (!hasTimeZone) {
+                throw new IllegalArgumentException("Timezone: " + timeZone + " is not an Olson ID");
+            }
+        }
+
         try {
             mService.setTimeZone(timeZone);
         } catch (RemoteException ex) {
+        }
+    }
+
+    /** @hide */
+    public long getNextWakeFromIdleTime() {
+        try {
+            return mService.getNextWakeFromIdleTime();
+        } catch (RemoteException ex) {
+            return Long.MAX_VALUE;
         }
     }
 

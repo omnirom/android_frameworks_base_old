@@ -24,9 +24,11 @@ import java.io.ByteArrayOutputStream;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashMap;
 import java.util.HashSet;
+import java.util.ListIterator;
 import java.util.Map;
 import java.util.Map.Entry;
 import java.util.Set;
@@ -72,6 +74,11 @@ public class AsmGenerator {
     /** FQCN Names of classes to refactor. All reference to old-FQCN will be updated to new-FQCN.
      * map old-FQCN => new-FQCN */
     private final HashMap<String, String> mRefactorClasses;
+    /** Methods to inject. FQCN of class in which method should be injected => runnable that does
+     * the injection. */
+    private final Map<String, ICreateInfo.InjectMethodRunnable> mInjectedMethodsMap;
+    /** A map { FQCN => set { field names } } which should be promoted to public visibility */
+    private final Map<String, Set<String>> mPromotedFields;
 
     /**
      * Creates a new generator that can generate the output JAR with the stubbed classes.
@@ -83,25 +90,29 @@ public class AsmGenerator {
     public AsmGenerator(Log log, String osDestJar, ICreateInfo createInfo) {
         mLog = log;
         mOsDestJar = osDestJar;
-        mInjectClasses = createInfo.getInjectedClasses();
+        ArrayList<Class<?>> injectedClasses =
+                new ArrayList<Class<?>>(Arrays.asList(createInfo.getInjectedClasses()));
+        // Search for and add anonymous inner classes also.
+        ListIterator<Class<?>> iter = injectedClasses.listIterator();
+        while (iter.hasNext()) {
+            Class<?> clazz = iter.next();
+            try {
+                int i = 1;
+                while(i < 100) {
+                    iter.add(Class.forName(clazz.getName() + "$" + i));
+                    i++;
+                }
+            } catch (ClassNotFoundException ignored) {
+                // Expected.
+            }
+        }
+        mInjectClasses = injectedClasses.toArray(new Class<?>[0]);
         mStubMethods = new HashSet<String>(Arrays.asList(createInfo.getOverriddenMethods()));
 
         // Create the map/set of methods to change to delegates
         mDelegateMethods = new HashMap<String, Set<String>>();
-        for (String signature : createInfo.getDelegateMethods()) {
-            int pos = signature.indexOf('#');
-            if (pos <= 0 || pos >= signature.length() - 1) {
-                continue;
-            }
-            String className = binaryToInternalClassName(signature.substring(0, pos));
-            String methodName = signature.substring(pos + 1);
-            Set<String> methods = mDelegateMethods.get(className);
-            if (methods == null) {
-                methods = new HashSet<String>();
-                mDelegateMethods.put(className, methods);
-            }
-            methods.add(methodName);
-        }
+        addToMap(createInfo.getDelegateMethods(), mDelegateMethods);
+
         for (String className : createInfo.getDelegateClassNatives()) {
             className = binaryToInternalClassName(className);
             Set<String> methods = mDelegateMethods.get(className);
@@ -164,6 +175,32 @@ public class AsmGenerator {
                 returnTypes = new HashSet<String>();
             }
             returnTypes.add(binaryToInternalClassName(className));
+        }
+
+        mPromotedFields = new HashMap<String, Set<String>>();
+        addToMap(createInfo.getPromotedFields(), mPromotedFields);
+
+        mInjectedMethodsMap = createInfo.getInjectedMethodsMap();
+    }
+
+    /**
+     * For each value in the array, split the value on '#' and add the parts to the map as key
+     * and value.
+     */
+    private void addToMap(String[] entries, Map<String, Set<String>> map) {
+        for (String entry : entries) {
+            int pos = entry.indexOf('#');
+            if (pos <= 0 || pos >= entry.length() - 1) {
+                return;
+            }
+            String className = binaryToInternalClassName(entry.substring(0, pos));
+            String methodOrFieldName = entry.substring(pos + 1);
+            Set<String> set = map.get(className);
+            if (set == null) {
+                set = new HashSet<String>();
+                map.put(className, set);
+            }
+            set.add(methodOrFieldName);
         }
     }
 
@@ -285,13 +322,7 @@ public class AsmGenerator {
      * e.g. it returns something like "com/foo/OuterClass$InnerClass1$InnerClass2.class"
      */
     private String classToEntryPath(Class<?> clazz) {
-        String name = "";
-        Class<?> parent;
-        while ((parent = clazz.getEnclosingClass()) != null) {
-            name = "$" + clazz.getSimpleName() + name;
-            clazz = parent;
-        }
-        return classNameToEntryPath(clazz.getCanonicalName() + name);
+        return classNameToEntryPath(clazz.getName());
     }
 
     /**
@@ -337,7 +368,7 @@ public class AsmGenerator {
         ClassVisitor cv = cw;
 
         if (mReplaceMethodCallsClasses.contains(className)) {
-            cv = new ReplaceMethodCallsAdapter(cv);
+            cv = new ReplaceMethodCallsAdapter(cv, className);
         }
 
         cv = new RefactorClassAdapter(cv, mRefactorClasses);
@@ -345,6 +376,10 @@ public class AsmGenerator {
             cv = new RenameClassAdapter(cv, className, newName);
         }
 
+        String binaryNewName = newName.replace('/', '.');
+        if (mInjectedMethodsMap.keySet().contains(binaryNewName)) {
+            cv = new InjectMethodsAdapter(cv, mInjectedMethodsMap.get(binaryNewName));
+        }
         cv = new TransformClassAdapter(mLog, mStubMethods, mDeleteReturns.get(className),
                 newName, cv, stubNativesOnly);
 
@@ -359,6 +394,10 @@ public class AsmGenerator {
             }
         }
 
+        Set<String> promoteFields = mPromotedFields.get(className);
+        if (promoteFields != null && !promoteFields.isEmpty()) {
+            cv = new PromoteFieldClassAdapter(cv, promoteFields);
+        }
         cr.accept(cv, 0);
         return cw.toByteArray();
     }

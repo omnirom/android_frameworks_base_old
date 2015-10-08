@@ -205,6 +205,20 @@ public final class PowerManager {
     public static final int DOZE_WAKE_LOCK = 0x00000040;
 
     /**
+     * Wake lock level: Keep the device awake enough to allow drawing to occur.
+     * <p>
+     * This is used by the window manager to allow applications to draw while the
+     * system is dozing.  It currently has no effect unless the power manager is in
+     * the dozing state.
+     * </p><p>
+     * Requires the {@link android.Manifest.permission#DEVICE_POWER} permission.
+     * </p>
+     *
+     * {@hide}
+     */
+    public static final int DRAW_WAKE_LOCK = 0x00000080;
+
+    /**
      * Mask for the wake lock level component of a combined wake lock level and flags integer.
      *
      * @hide
@@ -350,6 +364,12 @@ public final class PowerManager {
     public static final int GO_TO_SLEEP_REASON_HDMI = 5;
 
     /**
+     * Go to sleep reason code: Going to sleep due to the sleep button being pressed.
+     * @hide
+     */
+    public static final int GO_TO_SLEEP_REASON_SLEEP_BUTTON = 6;
+
+    /**
      * Go to sleep flag: Skip dozing state and directly go to full sleep.
      * @hide
      */
@@ -371,6 +391,8 @@ public final class PowerManager {
     final Context mContext;
     final IPowerManager mService;
     final Handler mHandler;
+
+    IDeviceIdleController mIDeviceIdleController;
 
     /**
      * {@hide}
@@ -489,6 +511,7 @@ public final class PowerManager {
             case FULL_WAKE_LOCK:
             case PROXIMITY_SCREEN_OFF_WAKE_LOCK:
             case DOZE_WAKE_LOCK:
+            case DRAW_WAKE_LOCK:
                 break;
             default:
                 throw new IllegalArgumentException("Must specify a valid wake lock level.");
@@ -635,7 +658,17 @@ public final class PowerManager {
      */
     public void wakeUp(long time) {
         try {
-            mService.wakeUp(time);
+            mService.wakeUp(time, "wakeUp", mContext.getOpPackageName());
+        } catch (RemoteException e) {
+        }
+    }
+
+    /**
+     * @hide
+     */
+    public void wakeUp(long time, String reason) {
+        try {
+            mService.wakeUp(time, reason, mContext.getOpPackageName());
         } catch (RemoteException e) {
         }
     }
@@ -687,6 +720,22 @@ public final class PowerManager {
         try {
             mService.boostScreenBrightness(time);
         } catch (RemoteException e) {
+        }
+    }
+
+    /**
+     * Returns whether the screen brightness is currently boosted to maximum, caused by a call
+     * to {@link #boostScreenBrightness(long)}.
+     * @return {@code True} if the screen brightness is currently boosted. {@code False} otherwise.
+     *
+     * @hide
+     */
+    @SystemApi
+    public boolean isScreenBrightnessBoosted() {
+        try {
+            return mService.isScreenBrightnessBoosted();
+        } catch (RemoteException e) {
+            return false;
         }
     }
 
@@ -835,12 +884,90 @@ public final class PowerManager {
     }
 
     /**
+     * Returns true if the device is currently in idle mode.  This happens when a device
+     * has been sitting unused and unmoving for a sufficiently long period of time, so that
+     * it decides to go into a lower power-use state.  This may involve things like turning
+     * off network access to apps.  You can monitor for changes to this state with
+     * {@link #ACTION_DEVICE_IDLE_MODE_CHANGED}.
+     *
+     * @return Returns true if currently in active device idle mode, else false.  This is
+     * when idle mode restrictions are being actively applied; it will return false if the
+     * device is in a long-term idle mode but currently running a maintenance window where
+     * restrictions have been lifted.
+     */
+    public boolean isDeviceIdleMode() {
+        try {
+            return mService.isDeviceIdleMode();
+        } catch (RemoteException e) {
+            return false;
+        }
+    }
+
+    /**
+     * Return whether the given application package name is on the device's power whitelist.
+     * Apps can be placed on the whitelist through the settings UI invoked by
+     * {@link android.provider.Settings#ACTION_IGNORE_BATTERY_OPTIMIZATION_SETTINGS}.
+     */
+    public boolean isIgnoringBatteryOptimizations(String packageName) {
+        synchronized (this) {
+            if (mIDeviceIdleController == null) {
+                mIDeviceIdleController = IDeviceIdleController.Stub.asInterface(
+                        ServiceManager.getService(Context.DEVICE_IDLE_CONTROLLER));
+            }
+        }
+        try {
+            return mIDeviceIdleController.isPowerSaveWhitelistApp(packageName);
+        } catch (RemoteException e) {
+            return false;
+        }
+    }
+
+    /**
+     * Turn off the device.
+     *
+     * @param confirm If true, shows a shutdown confirmation dialog.
+     * @param wait If true, this call waits for the shutdown to complete and does not return.
+     *
+     * @hide
+     */
+    public void shutdown(boolean confirm, boolean wait) {
+        try {
+            mService.shutdown(confirm, wait);
+        } catch (RemoteException e) {
+        }
+    }
+
+    /**
      * Intent that is broadcast when the state of {@link #isPowerSaveMode()} changes.
      * This broadcast is only sent to registered receivers.
      */
     @SdkConstant(SdkConstant.SdkConstantType.BROADCAST_INTENT_ACTION)
     public static final String ACTION_POWER_SAVE_MODE_CHANGED
             = "android.os.action.POWER_SAVE_MODE_CHANGED";
+
+    /**
+     * Intent that is broadcast when the state of {@link #isDeviceIdleMode()} changes.
+     * This broadcast is only sent to registered receivers.
+     */
+    @SdkConstant(SdkConstant.SdkConstantType.BROADCAST_INTENT_ACTION)
+    public static final String ACTION_DEVICE_IDLE_MODE_CHANGED
+            = "android.os.action.DEVICE_IDLE_MODE_CHANGED";
+
+    /**
+     * @hide Intent that is broadcast when the set of power save whitelist apps has changed.
+     * This broadcast is only sent to registered receivers.
+     */
+    @SdkConstant(SdkConstant.SdkConstantType.BROADCAST_INTENT_ACTION)
+    public static final String ACTION_POWER_SAVE_WHITELIST_CHANGED
+            = "android.os.action.POWER_SAVE_WHITELIST_CHANGED";
+
+    /**
+     * @hide Intent that is broadcast when the set of temporarily whitelisted apps has changed.
+     * This broadcast is only sent to registered receivers.
+     */
+    @SdkConstant(SdkConstant.SdkConstantType.BROADCAST_INTENT_ACTION)
+    public static final String ACTION_POWER_SAVE_TEMP_WHITELIST_CHANGED
+            = "android.os.action.POWER_SAVE_TEMP_WHITELIST_CHANGED";
 
     /**
      * Intent that is broadcast when the state of {@link #isPowerSaveMode()} is about to change.
@@ -856,29 +983,14 @@ public final class PowerManager {
     public static final String EXTRA_POWER_SAVE_MODE = "mode";
 
     /**
-     * Get current active power profile if supported
+     * Intent that is broadcast when the state of {@link #isScreenBrightnessBoosted()} has changed.
+     * This broadcast is only sent to registered receivers.
      *
      * @hide
-     */
-    public String getCurrentPowerProfile() {
-        try {
-            return mService.getCurrentPowerProfile();
-        } catch (RemoteException e) {
-            return null;
-        }
-    }
-
-    /**
-     * Force set a profile overruling automatic profile selection
-     *
-     * @hide
-     */
-    void setPowerProfile(String profile) {
-        try {
-            mService.setPowerProfile(profile);
-        } catch (RemoteException e) {
-        }
-    }
+     **/
+    @SystemApi
+    public static final String ACTION_SCREEN_BRIGHTNESS_BOOST_CHANGED
+            = "android.os.action.SCREEN_BRIGHTNESS_BOOST_CHANGED";
 
     /**
      * A wake lock is a mechanism to indicate that your application needs

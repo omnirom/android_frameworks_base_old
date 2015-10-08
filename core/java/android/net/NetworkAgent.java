@@ -21,8 +21,6 @@ import android.os.Handler;
 import android.os.Looper;
 import android.os.Message;
 import android.os.Messenger;
-import android.os.Parcel;
-import android.os.Parcelable;
 import android.util.Log;
 
 import com.android.internal.util.AsyncChannel;
@@ -42,12 +40,20 @@ import java.util.concurrent.atomic.AtomicBoolean;
  * @hide
  */
 public abstract class NetworkAgent extends Handler {
+    // Guaranteed to be valid (not NETID_UNSET), otherwise registerNetworkAgent() would have thrown
+    // an exception.
+    public final int netId;
+
     private volatile AsyncChannel mAsyncChannel;
     private final String LOG_TAG;
     private static final boolean DBG = true;
     private static final boolean VDBG = false;
     private final Context mContext;
     private final ArrayList<Message>mPreConnectedQueue = new ArrayList<Message>();
+    private volatile long mLastBwRefreshTime = 0;
+    private static final long BW_REFRESH_MIN_WIN_MS = 500;
+    private boolean mPollLceScheduled = false;
+    private AtomicBoolean mPollLcePending = new AtomicBoolean(false);
 
     private static final int BASE = Protocol.BASE_NETWORK_AGENT;
 
@@ -107,7 +113,7 @@ public abstract class NetworkAgent extends Handler {
     public static final int EVENT_UID_RANGES_REMOVED = BASE + 6;
 
     /**
-     * Sent by ConnectivitySerice to the NetworkAgent to inform the agent of the
+     * Sent by ConnectivityService to the NetworkAgent to inform the agent of the
      * networks status - whether we could use the network or could not, due to
      * either a bad network configuration (no internet link) or captive portal.
      *
@@ -122,8 +128,32 @@ public abstract class NetworkAgent extends Handler {
      * Sent by the NetworkAgent to ConnectivityService to indicate this network was
      * explicitly selected.  This should be sent before the NetworkInfo is marked
      * CONNECTED so it can be given special treatment at that time.
+     *
+     * obj = boolean indicating whether to use this network even if unvalidated
      */
     public static final int EVENT_SET_EXPLICITLY_SELECTED = BASE + 8;
+
+    /**
+     * Sent by ConnectivityService to the NetworkAgent to inform the agent of
+     * whether the network should in the future be used even if not validated.
+     * This decision is made by the user, but it is the network transport's
+     * responsibility to remember it.
+     *
+     * arg1 = 1 if true, 0 if false
+     */
+    public static final int CMD_SAVE_ACCEPT_UNVALIDATED = BASE + 9;
+
+    /** Sent by ConnectivityService to the NetworkAgent to inform the agent to pull
+     * the underlying network connection for updated bandwidth information.
+     */
+    public static final int CMD_REQUEST_BANDWIDTH_UPDATE = BASE + 10;
+
+    /**
+     * Sent by ConnectivityService to the NeworkAgent to inform the agent to avoid
+     * automatically reconnecting to this network (e.g. via autojoin).  Happens
+     * when user selects "No" option on the "Stay connected?" dialog box.
+     */
+    public static final int CMD_PREVENT_AUTOMATIC_RECONNECT = BASE + 11;
 
     public NetworkAgent(Looper looper, Context context, String logTag, NetworkInfo ni,
             NetworkCapabilities nc, LinkProperties lp, int score) {
@@ -142,7 +172,7 @@ public abstract class NetworkAgent extends Handler {
         if (VDBG) log("Registering NetworkAgent");
         ConnectivityManager cm = (ConnectivityManager)mContext.getSystemService(
                 Context.CONNECTIVITY_SERVICE);
-        cm.registerNetworkAgent(new Messenger(this), new NetworkInfo(ni),
+        netId = cm.registerNetworkAgent(new Messenger(this), new NetworkInfo(ni),
                 new LinkProperties(lp), new NetworkCapabilities(nc), score, misc);
     }
 
@@ -186,12 +216,41 @@ public abstract class NetworkAgent extends Handler {
                 log("Unhandled Message " + msg);
                 break;
             }
+            case CMD_REQUEST_BANDWIDTH_UPDATE: {
+                long currentTimeMs = System.currentTimeMillis();
+                if (VDBG) {
+                    log("CMD_REQUEST_BANDWIDTH_UPDATE request received.");
+                }
+                if (currentTimeMs >= (mLastBwRefreshTime + BW_REFRESH_MIN_WIN_MS)) {
+                    mPollLceScheduled = false;
+                    if (mPollLcePending.getAndSet(true) == false) {
+                        pollLceData();
+                    }
+                } else {
+                    // deliver the request at a later time rather than discard it completely.
+                    if (!mPollLceScheduled) {
+                        long waitTime = mLastBwRefreshTime + BW_REFRESH_MIN_WIN_MS -
+                                currentTimeMs + 1;
+                        mPollLceScheduled = sendEmptyMessageDelayed(
+                                CMD_REQUEST_BANDWIDTH_UPDATE, waitTime);
+                    }
+                }
+                break;
+            }
             case CMD_REPORT_NETWORK_STATUS: {
                 if (VDBG) {
                     log("CMD_REPORT_NETWORK_STATUS(" +
                             (msg.arg1 == VALID_NETWORK ? "VALID)" : "INVALID)"));
                 }
                 networkStatus(msg.arg1);
+                break;
+            }
+            case CMD_SAVE_ACCEPT_UNVALIDATED: {
+                saveAcceptUnvalidated(msg.arg1 != 0);
+                break;
+            }
+            case CMD_PREVENT_AUTOMATIC_RECONNECT: {
+                preventAutomaticReconnect();
                 break;
             }
         }
@@ -228,6 +287,8 @@ public abstract class NetworkAgent extends Handler {
      * Called by the bearer code when it has new NetworkCapabilities data.
      */
     public void sendNetworkCapabilities(NetworkCapabilities networkCapabilities) {
+        mPollLcePending.set(false);
+        mLastBwRefreshTime = System.currentTimeMillis();
         queueOrSendMessage(EVENT_NETWORK_CAPABILITIES_CHANGED,
                 new NetworkCapabilities(networkCapabilities));
     }
@@ -261,10 +322,16 @@ public abstract class NetworkAgent extends Handler {
     /**
      * Called by the bearer to indicate this network was manually selected by the user.
      * This should be called before the NetworkInfo is marked CONNECTED so that this
-     * Network can be given special treatment at that time.
+     * Network can be given special treatment at that time. If {@code acceptUnvalidated} is
+     * {@code true}, then the system will switch to this network. If it is {@code false} and the
+     * network cannot be validated, the system will ask the user whether to switch to this network.
+     * If the user confirms and selects "don't ask again", then the system will call
+     * {@link #saveAcceptUnvalidated} to persist the user's choice. Thus, if the transport ever
+     * calls this method with {@code acceptUnvalidated} set to {@code false}, it must also implement
+     * {@link #saveAcceptUnvalidated} to respect the user's choice.
      */
-    public void explicitlySelected() {
-        queueOrSendMessage(EVENT_SET_EXPLICITLY_SELECTED, 0);
+    public void explicitlySelected(boolean acceptUnvalidated) {
+        queueOrSendMessage(EVENT_SET_EXPLICITLY_SELECTED, acceptUnvalidated);
     }
 
     /**
@@ -274,6 +341,13 @@ public abstract class NetworkAgent extends Handler {
      * network won't be immediately requested again.
      */
     abstract protected void unwanted();
+
+    /**
+     * Called when ConnectivityService request a bandwidth update. The parent factory
+     * shall try to overwrite this method and produce a bandwidth update if capable.
+     */
+    protected void pollLceData() {
+    }
 
     /**
      * Called when the system determines the usefulness of this network.
@@ -291,6 +365,25 @@ public abstract class NetworkAgent extends Handler {
      * generate false negatives if we lose ip connectivity before the link is torn down.
      */
     protected void networkStatus(int status) {
+    }
+
+    /**
+     * Called when the user asks to remember the choice to use this network even if unvalidated.
+     * The transport is responsible for remembering the choice, and the next time the user connects
+     * to the network, should explicitlySelected with {@code acceptUnvalidated} set to {@code true}.
+     * This method will only be called if {@link #explicitlySelected} was called with
+     * {@code acceptUnvalidated} set to {@code false}.
+     */
+    protected void saveAcceptUnvalidated(boolean accept) {
+    }
+
+    /**
+     * Called when the user asks to not stay connected to this network because it was found to not
+     * provide Internet access.  Usually followed by call to {@code unwanted}.  The transport is
+     * responsible for making sure the device does not automatically reconnect to the same network
+     * after the {@code unwanted} call.
+     */
+    protected void preventAutomaticReconnect() {
     }
 
     protected void log(String s) {

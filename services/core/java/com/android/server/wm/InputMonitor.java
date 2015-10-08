@@ -16,10 +16,6 @@
 
 package com.android.server.wm;
 
-import com.android.server.input.InputManagerService;
-import com.android.server.input.InputApplicationHandle;
-import com.android.server.input.InputWindowHandle;
-
 import android.app.ActivityManagerNative;
 import android.graphics.Rect;
 import android.os.RemoteException;
@@ -30,17 +26,21 @@ import android.view.InputChannel;
 import android.view.KeyEvent;
 import android.view.WindowManager;
 
+import com.android.server.input.InputApplicationHandle;
+import com.android.server.input.InputManagerService;
+import com.android.server.input.InputWindowHandle;
+
 import java.util.Arrays;
 
 final class InputMonitor implements InputManagerService.WindowManagerCallbacks {
     private final WindowManagerService mService;
-    
+
     // Current window with input focus for keys and other non-touch events.  May be null.
     private WindowState mInputFocus;
-    
+
     // When true, prevents input dispatch from proceeding until set to false again.
     private boolean mInputDispatchFrozen;
-    
+
     // When true, input dispatch proceeds normally.  Otherwise all events are dropped.
     // Initially false, so that input does not get dispatched until boot is finished at
     // which point the ActivityManager will enable dispatching.
@@ -78,7 +78,7 @@ final class InputMonitor implements InputManagerService.WindowManagerCallbacks {
             WindowState windowState = (WindowState) inputWindowHandle.windowState;
             if (windowState != null) {
                 Slog.i(WindowManagerService.TAG, "WINDOW DIED " + windowState);
-                mService.removeWindowLocked(windowState.mSession, windowState);
+                mService.removeWindowLocked(windowState);
             }
         }
     }
@@ -148,7 +148,7 @@ final class InputMonitor implements InputManagerService.WindowManagerCallbacks {
                 if (timeout >= 0) {
                     // The activity manager declined to abort dispatching.
                     // Wait a bit longer and timeout again later.
-                    return timeout;
+                    return timeout * 1000000L; // nanoseconds
                 }
             } catch (RemoteException ex) {
             }
@@ -239,9 +239,6 @@ final class InputMonitor implements InputManagerService.WindowManagerCallbacks {
         // As an optimization, we could try to prune the list of windows but this turns
         // out to be difficult because only the native code knows for sure which window
         // currently has touch focus.
-        final WindowStateAnimator universeBackground = mService.mAnimator.mUniverseBackground;
-        final int aboveUniverseLayer = mService.mAnimator.mAboveUniverseLayer;
-        boolean addedUniverse = false;
         boolean disableWallpaperTouchEvents = false;
 
         // If there's a drag in flight, provide a pseudowindow to catch drag input
@@ -259,10 +256,7 @@ final class InputMonitor implements InputManagerService.WindowManagerCallbacks {
             }
         }
 
-        final int NFW = mService.mFakeWindows.size();
-        for (int i = 0; i < NFW; i++) {
-            addInputWindowHandleLw(mService.mFakeWindows.get(i).mWindowHandle);
-        }
+        boolean addInputConsumerHandle = mService.mInputConsumer != null;
 
         // Add all windows on the default display.
         final int numDisplays = mService.mDisplayContents.size();
@@ -275,6 +269,11 @@ final class InputMonitor implements InputManagerService.WindowManagerCallbacks {
                 if (inputChannel == null || inputWindowHandle == null || child.mRemoved) {
                     // Skip this window because it cannot possibly receive input.
                     continue;
+                }
+                if (addInputConsumerHandle
+                        && inputWindowHandle.layer <= mService.mInputConsumer.mWindowHandle.layer) {
+                    addInputWindowHandleLw(mService.mInputConsumer.mWindowHandle);
+                    addInputConsumerHandle = false;
                 }
 
                 final int flags = child.mAttrs.flags;
@@ -299,20 +298,8 @@ final class InputMonitor implements InputManagerService.WindowManagerCallbacks {
                     mService.mDragState.sendDragStartedIfNeededLw(child);
                 }
 
-                if (universeBackground != null && !addedUniverse
-                        && child.mBaseLayer < aboveUniverseLayer && onDefaultDisplay) {
-                    final WindowState u = universeBackground.mWin;
-                    if (u.mInputChannel != null && u.mInputWindowHandle != null) {
-                        addInputWindowHandleLw(u.mInputWindowHandle, u, u.mAttrs.flags,
-                                u.mAttrs.type, true, u == mInputFocus, false);
-                    }
-                    addedUniverse = true;
-                }
-
-                if (child.mWinAnimator != universeBackground) {
-                    addInputWindowHandleLw(inputWindowHandle, child, flags, type, isVisible,
-                            hasFocus, hasWallpaper);
-                }
+                addInputWindowHandleLw(inputWindowHandle, child, flags, type, isVisible, hasFocus,
+                        hasWallpaper);
             }
         }
 

@@ -20,6 +20,7 @@ import android.content.Context;
 import android.content.res.Resources;
 import android.content.res.TypedArray;
 import android.util.AttributeSet;
+import android.view.MotionEvent;
 import android.view.View;
 import android.widget.CompoundButton;
 import android.widget.CompoundButton.OnCheckedChangeListener;
@@ -34,14 +35,15 @@ import com.android.systemui.statusbar.policy.BrightnessMirrorController;
 public class ToggleSlider extends RelativeLayout {
     public interface Listener {
         public void onInit(ToggleSlider v);
-        public void onChanged(ToggleSlider v, boolean tracking, boolean checked, int value);
+        public void onChanged(ToggleSlider v, boolean tracking, boolean checked, int value,
+                boolean stopTracking);
     }
 
     private Listener mListener;
     private boolean mTracking;
 
     private CompoundButton mToggle;
-    private SeekBar mSlider;
+    private ToggleSeekBar mSlider;
     private TextView mLabel;
 
     private ToggleSlider mMirror;
@@ -67,11 +69,13 @@ public class ToggleSlider extends RelativeLayout {
         mToggle = (CompoundButton) findViewById(R.id.toggle);
         mToggle.setOnCheckedChangeListener(mCheckListener);
 
-        mSlider = (SeekBar) findViewById(R.id.slider);
+        mSlider = (ToggleSeekBar) findViewById(R.id.slider);
         mSlider.setOnSeekBarChangeListener(mSeekListener);
 
         mLabel = (TextView) findViewById(R.id.label);
         mLabel.setText(a.getString(R.styleable.ToggleSlider_text));
+
+        mSlider.setAccessibilityLabel(getContentDescription().toString());
 
         a.recycle();
     }
@@ -123,6 +127,16 @@ public class ToggleSlider extends RelativeLayout {
         }
     }
 
+    @Override
+    public boolean dispatchTouchEvent(MotionEvent ev) {
+        if (mMirror != null) {
+            MotionEvent copy = ev.copy();
+            mMirror.dispatchTouchEvent(copy);
+            copy.recycle();
+        }
+        return super.dispatchTouchEvent(ev);
+    }
+
     private final OnCheckedChangeListener mCheckListener = new OnCheckedChangeListener() {
         @Override
         public void onCheckedChanged(CompoundButton toggle, boolean checked) {
@@ -130,7 +144,7 @@ public class ToggleSlider extends RelativeLayout {
 
             if (mListener != null) {
                 mListener.onChanged(
-                        ToggleSlider.this, mTracking, checked, mSlider.getProgress());
+                        ToggleSlider.this, mTracking, checked, mSlider.getProgress(), false);
             }
 
             if (mMirror != null) {
@@ -144,11 +158,7 @@ public class ToggleSlider extends RelativeLayout {
         public void onProgressChanged(SeekBar seekBar, int progress, boolean fromUser) {
             if (mListener != null) {
                 mListener.onChanged(
-                        ToggleSlider.this, mTracking, mToggle.isChecked(), progress);
-            }
-
-            if (mMirror != null) {
-                mMirror.setValue(progress);
+                        ToggleSlider.this, mTracking, mToggle.isChecked(), progress, false);
             }
         }
 
@@ -157,15 +167,11 @@ public class ToggleSlider extends RelativeLayout {
             mTracking = true;
 
             if (mListener != null) {
-                mListener.onChanged(
-                        ToggleSlider.this, mTracking, mToggle.isChecked(), mSlider.getProgress());
+                mListener.onChanged(ToggleSlider.this, mTracking, mToggle.isChecked(),
+                        mSlider.getProgress(), false);
             }
 
             mToggle.setChecked(false);
-
-            if (mMirror != null) {
-                mMirror.mSlider.setPressed(true);
-            }
 
             if (mMirrorController != null) {
                 mMirrorController.showMirror();
@@ -178,12 +184,8 @@ public class ToggleSlider extends RelativeLayout {
             mTracking = false;
 
             if (mListener != null) {
-                mListener.onChanged(
-                        ToggleSlider.this, mTracking, mToggle.isChecked(), mSlider.getProgress());
-            }
-
-            if (mMirror != null) {
-                mMirror.mSlider.setPressed(false);
+                mListener.onChanged(ToggleSlider.this, mTracking, mToggle.isChecked(),
+                        mSlider.getProgress(), true);
             }
 
             if (mMirrorController != null) {

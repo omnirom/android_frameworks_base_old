@@ -52,11 +52,11 @@ class AppWindowToken extends WindowToken {
 
     final boolean voiceInteraction;
 
-    int groupId = -1;
+    Task mTask;
     boolean appFullscreen;
     int requestedOrientation = ActivityInfo.SCREEN_ORIENTATION_UNSPECIFIED;
     boolean layoutConfigChanges;
-    boolean showWhenLocked;
+    boolean showForAllUsers;
 
     // The input dispatching timeout for this application token in nanoseconds.
     long inputDispatchingTimeoutNanos;
@@ -107,7 +107,7 @@ class AppWindowToken extends WindowToken {
     // Input application handle used by the input dispatcher.
     final InputApplicationHandle mInputApplicationHandle;
 
-    boolean mDeferRemoval;
+    boolean mIsExiting;
 
     boolean mLaunchTaskBehind;
     boolean mEnteringAnimation;
@@ -252,6 +252,21 @@ class AppWindowToken extends WindowToken {
         return false;
     }
 
+    void removeAppFromTaskLocked() {
+        mIsExiting = false;
+        removeAllWindows();
+
+        // Use local variable because removeAppToken will null out mTask.
+        final Task task = mTask;
+        if (task != null) {
+            if (!task.removeAppToken(this)) {
+                Slog.e(WindowManagerService.TAG, "removeAppFromTaskLocked: token=" + this
+                        + " not found.");
+            }
+            task.mStack.mExitingAppTokens.remove(this);
+        }
+    }
+
     @Override
     void removeAllWindows() {
         for (int winNdx = allAppWindows.size() - 1; winNdx >= 0;
@@ -266,8 +281,10 @@ class AppWindowToken extends WindowToken {
                 Slog.w(WindowManagerService.TAG, "removeAllWindows: removing win=" + win);
             }
 
-            win.mService.removeWindowLocked(win.mSession, win);
+            service.removeWindowLocked(win);
         }
+        allAppWindows.clear();
+        windows.clear();
     }
 
     @Override
@@ -279,8 +296,8 @@ class AppWindowToken extends WindowToken {
         if (allAppWindows.size() > 0) {
             pw.print(prefix); pw.print("allAppWindows="); pw.println(allAppWindows);
         }
-        pw.print(prefix); pw.print("groupId="); pw.print(groupId);
-                pw.print(" appFullscreen="); pw.print(appFullscreen);
+        pw.print(prefix); pw.print("task="); pw.println(mTask);
+        pw.print(prefix); pw.print(" appFullscreen="); pw.print(appFullscreen);
                 pw.print(" requestedOrientation="); pw.println(requestedOrientation);
         pw.print(prefix); pw.print("hiddenRequested="); pw.print(hiddenRequested);
                 pw.print(" clientHidden="); pw.print(clientHidden);
@@ -304,11 +321,11 @@ class AppWindowToken extends WindowToken {
             pw.print(prefix); pw.print("inPendingTransaction=");
                     pw.println(inPendingTransaction);
         }
-        if (startingData != null || removed || firstWindowDrawn || mDeferRemoval) {
+        if (startingData != null || removed || firstWindowDrawn || mIsExiting) {
             pw.print(prefix); pw.print("startingData="); pw.print(startingData);
                     pw.print(" removed="); pw.print(removed);
                     pw.print(" firstWindowDrawn="); pw.print(firstWindowDrawn);
-                    pw.print(" mDeferRemoval="); pw.println(mDeferRemoval);
+                    pw.print(" mIsExiting="); pw.println(mIsExiting);
         }
         if (startingWindow != null || startingView != null
                 || startingDisplayed || startingMoved) {

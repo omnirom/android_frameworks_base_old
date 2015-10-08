@@ -16,6 +16,8 @@
 
 package android.view;
 
+import android.annotation.IdRes;
+import android.annotation.LayoutRes;
 import android.content.Context;
 import android.content.res.TypedArray;
 import android.graphics.Canvas;
@@ -69,8 +71,8 @@ import java.lang.ref.WeakReference;
  */
 @RemoteView
 public final class ViewStub extends View {
-    private int mLayoutResource = 0;
     private int mInflatedId;
+    private int mLayoutResource;
 
     private WeakReference<View> mInflatedViewRef;
 
@@ -78,7 +80,7 @@ public final class ViewStub extends View {
     private OnInflateListener mInflateListener;
 
     public ViewStub(Context context) {
-        initialize(context);
+        this(context, 0);
     }
 
     /**
@@ -87,39 +89,30 @@ public final class ViewStub extends View {
      * @param context The application's environment.
      * @param layoutResource The reference to a layout resource that will be inflated.
      */
-    public ViewStub(Context context, int layoutResource) {
+    public ViewStub(Context context, @LayoutRes int layoutResource) {
+        this(context, null);
+
         mLayoutResource = layoutResource;
-        initialize(context);
     }
 
     public ViewStub(Context context, AttributeSet attrs) {
         this(context, attrs, 0);
     }
 
-    @SuppressWarnings({"UnusedDeclaration"})
     public ViewStub(Context context, AttributeSet attrs, int defStyleAttr) {
         this(context, attrs, defStyleAttr, 0);
     }
 
     public ViewStub(Context context, AttributeSet attrs, int defStyleAttr, int defStyleRes) {
-        TypedArray a = context.obtainStyledAttributes(
-                attrs, com.android.internal.R.styleable.ViewStub, defStyleAttr, defStyleRes);
+        super(context);
 
+        final TypedArray a = context.obtainStyledAttributes(attrs,
+                R.styleable.ViewStub, defStyleAttr, defStyleRes);
         mInflatedId = a.getResourceId(R.styleable.ViewStub_inflatedId, NO_ID);
         mLayoutResource = a.getResourceId(R.styleable.ViewStub_layout, 0);
-
+        mID = a.getResourceId(R.styleable.ViewStub_id, NO_ID);
         a.recycle();
 
-        a = context.obtainStyledAttributes(
-                attrs, com.android.internal.R.styleable.View, defStyleAttr, defStyleRes);
-        mID = a.getResourceId(R.styleable.View_id, NO_ID);
-        a.recycle();
-
-        initialize(context);
-    }
-
-    private void initialize(Context context) {
-        mContext = context;
         setVisibility(GONE);
         setWillNotDraw(true);
     }
@@ -134,6 +127,7 @@ public final class ViewStub extends View {
      * @see #setInflatedId(int)
      * @attr ref android.R.styleable#ViewStub_inflatedId
      */
+    @IdRes
     public int getInflatedId() {
         return mInflatedId;
     }
@@ -149,7 +143,7 @@ public final class ViewStub extends View {
      * @attr ref android.R.styleable#ViewStub_inflatedId
      */
     @android.view.RemotableViewMethod
-    public void setInflatedId(int inflatedId) {
+    public void setInflatedId(@IdRes int inflatedId) {
         mInflatedId = inflatedId;
     }
 
@@ -165,6 +159,7 @@ public final class ViewStub extends View {
      * @see #inflate()
      * @attr ref android.R.styleable#ViewStub_layout
      */
+    @LayoutRes
     public int getLayoutResource() {
         return mLayoutResource;
     }
@@ -182,7 +177,7 @@ public final class ViewStub extends View {
      * @attr ref android.R.styleable#ViewStub_layout
      */
     @android.view.RemotableViewMethod
-    public void setLayoutResource(int layoutResource) {
+    public void setLayoutResource(@LayoutRes int layoutResource) {
         mLayoutResource = layoutResource;
     }
 

@@ -20,13 +20,13 @@
 
 <resources xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:xliff="urn:oasis:names:tc:xliff:document:1.2">
-    <string name="byteShort" msgid="8340973892742019101">"B"</string>
+    <string name="byteShort" msgid="8340973892742019101">"Б"</string>
     <string name="kilobyteShort" msgid="5973789783504771878">"КБ"</string>
     <string name="megabyteShort" msgid="6355851576770428922">"MБ"</string>
     <string name="gigabyteShort" msgid="3259882455212193214">"ГБ"</string>
     <string name="terabyteShort" msgid="231613018159186962">"TБ"</string>
     <string name="petabyteShort" msgid="5637816680144990219">"ПБ"</string>
-    <string name="fileSizeSuffix" msgid="9164292791500531949">"<xliff:g id="NUMBER">%1$s</xliff:g><xliff:g id="UNIT">%2$s</xliff:g>"</string>
+    <string name="fileSizeSuffix" msgid="8897567456150907538">"<xliff:g id="NUMBER">%1$s</xliff:g> <xliff:g id="UNIT">%2$s</xliff:g>"</string>
     <string name="durationDays" msgid="6652371460511178259">"<xliff:g id="DAYS">%1$d</xliff:g> күн"</string>
     <string name="durationDayHours" msgid="2713107458736744435">"<xliff:g id="DAYS">%1$d</xliff:g> күн <xliff:g id="HOURS">%2$d</xliff:g> сағ."</string>
     <string name="durationDayHour" msgid="7293789639090958917">"<xliff:g id="DAYS">%1$d</xliff:g> күн <xliff:g id="HOURS">%2$d</xliff:g> сағ."</string>
@@ -42,7 +42,7 @@
     <string name="untitled" msgid="4638956954852782576">"&lt;Атаусыз&gt;"</string>
     <string name="emptyPhoneNumber" msgid="7694063042079676517">"(Телефон нөмірі жоқ)"</string>
     <string name="unknownName" msgid="6867811765370350269">"Белгісіз"</string>
-    <string name="defaultVoiceMailAlphaTag" msgid="2660020990097733077">"Дауыс-хабар"</string>
+    <string name="defaultVoiceMailAlphaTag" msgid="2660020990097733077">"Дауыстық пошта"</string>
     <string name="defaultMsisdnAlphaTag" msgid="2850889754919584674">"MSISDN1"</string>
     <string name="mmiError" msgid="5154499457739052907">"Байланыс мәселесі немесе MMИ коды жарамсыз."</string>
     <string name="mmiFdnError" msgid="5224398216385316471">"Әрекет анықталған сандарды теруге шектелген."</string>
@@ -61,10 +61,10 @@
     <string name="needPuk" msgid="919668385956251611">"SIM картаңыз PUK арқылы бекітілген. Ашу үшін PUK кодын теріңіз."</string>
     <string name="needPuk2" msgid="4526033371987193070">"SIM картасын ашу үшін PUK2 кодын теріңіз."</string>
     <string name="enablePin" msgid="209412020907207950">"Сәтсіз, SIM/RUIM бекітпесін қосыңыз."</string>
-  <plurals name="pinpuk_attempts">
-    <item quantity="one" msgid="6596245285809790142">"<xliff:g id="NUMBER">%d</xliff:g> әрекеттен кейін SIM бекітіледі."</item>
-    <item quantity="other" msgid="7530597808358774740">"<xliff:g id="NUMBER">%d</xliff:g> әрекеттен кейін SIM бекітіледі."</item>
-  </plurals>
+    <plurals name="pinpuk_attempts" formatted="false" msgid="1251012001539225582">
+      <item quantity="other">SIM картасының бекітілуіне <xliff:g id="NUMBER_1">%d</xliff:g> әрекет қалды.</item>
+      <item quantity="one">SIM картасының бекітілуіне <xliff:g id="NUMBER_0">%d</xliff:g> әрекет қалды.</item>
+    </plurals>
     <string name="imei" msgid="2625429890869005782">"IMEI (Халықаралық мобильдік құрылғы анықтағышы)"</string>
     <string name="meid" msgid="4841221237681254195">"MEID (ұялы құрылғы анықтағыш)"</string>
     <string name="ClipMmi" msgid="6952821216480289285">"Келген қоңырау шалушының жеке анықтағышы"</string>
@@ -81,7 +81,7 @@
     <string name="ThreeWCMmi" msgid="9051047170321190368">"Қоңырау шалудың үш жолы"</string>
     <string name="RuacMmi" msgid="7827887459138308886">"Мазаны алатын, қалаусыз қоңыраулардан бас тарту"</string>
     <string name="CndMmi" msgid="3116446237081575808">"Қоңырау шалған нөмірді жеткізу"</string>
-    <string name="DndMmi" msgid="1265478932418334331">"Мазаламаңыз"</string>
+    <string name="DndMmi" msgid="1265478932418334331">"Мазаламау"</string>
     <string name="CLIRDefaultOnNextCallOn" msgid="429415409145781923">"Қоңырау шалушының жеке анықтағышы бастапқы бойынша шектелген. Келесі қоңырау: Шектелген"</string>
     <string name="CLIRDefaultOnNextCallOff" msgid="3092918006077864624">"Қоңырау шалушының жеке анықтағышы бастапқы бойынша шектелген. Келесі қоңырау: Шектелмеген"</string>
     <string name="CLIRDefaultOffNextCallOn" msgid="6179425182856418465">"Қоңырау шалушының жеке анықтағышы бастапқы бойынша шектелмеген. Келесі қоңырау: Шектелген"</string>
@@ -129,8 +129,7 @@
   <string-array name="wfcOperatorErrorNotificationMessages">
   </string-array>
     <string name="wfcSpnFormat" msgid="8211621332478306568">"%s"</string>
-    <!-- no translation found for wfcDataSpnFormat (1118052028767666883) -->
-    <skip />
+    <string name="wfcDataSpnFormat" msgid="1118052028767666883">"%s"</string>
     <string name="wifi_calling_off_summary" msgid="8720659586041656098">"Өшірулі"</string>
     <string name="wfc_mode_wifi_preferred_summary" msgid="1994113411286935263">"Қалаулы Wi-Fi"</string>
     <string name="wfc_mode_cellular_preferred_summary" msgid="5920549484600758786">"Қалаулы ұялы байланыс"</string>
@@ -173,6 +172,7 @@
     <string name="work_profile_deleted" msgid="5005572078641980632">"Жұмыс профилі жойылды"</string>
     <string name="work_profile_deleted_description" msgid="6305147513054341102">"Басқару қолданбасы болмағандықтан жұмыс профилі жойылды."</string>
     <string name="work_profile_deleted_details" msgid="226615743462361248">"Жұмыс профилінің басқару қолданбасы жоқ немесе бүлінген. Нәтижесінде жұмыс профиліңіз және қатысты деректер жойылды. Көмек алу үшін әкімшіге хабарласыңыз."</string>
+    <string name="work_profile_deleted_description_dpm_wipe" msgid="6019770344820507579">"Жұмыс профиліңіз осы құрылғыда енді қолжетімді емес."</string>
     <string name="factory_reset_warning" msgid="5423253125642394387">"Құрылғыңыздағы деректер өшіріледі"</string>
     <string name="factory_reset_message" msgid="4905025204141900666">"Басқару қолданбасында құрамдастар жетіспейді немесе ол бүлінген және оны пайдалану мүмкін емес. Құрылғыңыздағы деректер қазір өшіріледі. Көмек алу үшін әкімшіге хабарласыңыз."</string>
     <string name="me" msgid="6545696007631404292">"Мен"</string>
@@ -187,6 +187,12 @@
     <string name="silent_mode_silent" msgid="319298163018473078">"Қоңырау өшірулі"</string>
     <string name="silent_mode_vibrate" msgid="7072043388581551395">"Қоңырау тербелісі"</string>
     <string name="silent_mode_ring" msgid="8592241816194074353">"Қоңырау қосулы"</string>
+    <string name="reboot_to_update_title" msgid="6212636802536823850">"Android жүйе жаңартулары"</string>
+    <string name="reboot_to_update_prepare" msgid="6305853831955310890">"Жаңартуға дайындалуда..."</string>
+    <string name="reboot_to_update_package" msgid="3871302324500927291">"Жаңарту бумасы өңделуде…"</string>
+    <string name="reboot_to_update_reboot" msgid="6428441000951565185">"Қайта іске қосылуда…"</string>
+    <string name="reboot_to_reset_title" msgid="4142355915340627490">"Зауыттық деректерді қалпына келтіру"</string>
+    <string name="reboot_to_reset_message" msgid="2432077491101416345">"Қайта іске қосылуда…"</string>
     <string name="shutdown_progress" msgid="2281079257329981203">"Өшірілуде…"</string>
     <string name="shutdown_confirm" product="tablet" msgid="3385745179555731470">"Планшет өшіріледі."</string>
     <string name="shutdown_confirm" product="tv" msgid="476672373995075359">"ТД өшіріледі."</string>
@@ -203,8 +209,8 @@
     <string name="global_action_lock" msgid="2844945191792119712">"Экранды бекіту"</string>
     <string name="global_action_power_off" msgid="4471879440839879722">"Өшіру"</string>
     <string name="global_action_bug_report" msgid="7934010578922304799">"Вирус туралы хабарлау"</string>
-    <string name="bugreport_title" msgid="2667494803742548533">"Вирус туралы хабарды алу"</string>
-    <string name="bugreport_message" msgid="398447048750350456">"Бұл эл. хабар ретінде жіберу үшін қазіргі құрылғы күйі туралы ақпарат жинайды. Вирус жайлы хабар жіберуге әзір болғанша біраз уақыт керек болады; шыдай тұрыңыз."</string>
+    <string name="bugreport_title" msgid="2667494803742548533">"Қате туралы есеп құру"</string>
+    <string name="bugreport_message" msgid="398447048750350456">"Құрылғының қазіргі күйі туралы ақпаратты жинап, электрондық хабармен жібереді. Есеп әзір болғанша біраз уақыт кетеді, шыдай тұрыңыз."</string>
     <string name="global_action_toggle_silent_mode" msgid="8219525344246810925">"Үнсіз режимі"</string>
     <string name="global_action_silent_mode_on_status" msgid="3289841937003758806">"Дыбыс ӨШІРУЛІ"</string>
     <string name="global_action_silent_mode_off_status" msgid="1506046579177066419">"Дыбыс ҚОСУЛЫ"</string>
@@ -212,83 +218,40 @@
     <string name="global_actions_airplane_mode_on_status" msgid="2719557982608919750">"Ұшақ режимі ҚОСУЛЫ"</string>
     <string name="global_actions_airplane_mode_off_status" msgid="5075070442854490296">"Ұшақ режимі ӨШІРУЛІ"</string>
     <string name="global_action_settings" msgid="1756531602592545966">"Параметрлер"</string>
+    <string name="global_action_assist" msgid="3892832961594295030">"Көмек"</string>
+    <string name="global_action_voice_assist" msgid="7751191495200504480">"Дауыс көмекшісі"</string>
     <string name="global_action_lockdown" msgid="8751542514724332873">"Қазір бекіту"</string>
     <string name="status_bar_notification_info_overflow" msgid="5301981741705354993">"999+"</string>
     <string name="safeMode" msgid="2788228061547930246">"Қауіпсіз режим"</string>
     <string name="android_system_label" msgid="6577375335728551336">"Android жүйесі"</string>
-    <string name="user_owner_label" msgid="6465364741001216388">"Жеке қолданбалар"</string>
+    <string name="user_owner_label" msgid="2804351898001038951">"Жеке"</string>
     <string name="managed_profile_label" msgid="6260850669674791528">"Жұмыс"</string>
-    <string name="permgrouplab_costMoney" msgid="5429808217861460401">"Төлем талап ететін қызметтер"</string>
-    <string name="permgroupdesc_costMoney" msgid="3293301903409869495">"Төлем қажет ететін әрекеттерді жасау."</string>
-    <string name="permgrouplab_messages" msgid="7521249148445456662">"Сіздің хабарларыңыз"</string>
-    <string name="permgroupdesc_messages" msgid="7821999071003699236">"SMS, электрондық пошта және басқа хабарларыңызды оқу және жазу."</string>
-    <string name="permgrouplab_personalInfo" msgid="3519163141070533474">"Сіздің жеке ақпаратыңыз"</string>
-    <string name="permgroupdesc_personalInfo" msgid="8426453129788861338">"Байланыс картасында сақталған өзіңіз туралы ақпаратқа тікелей қол жетімділік."</string>
-    <string name="permgrouplab_socialInfo" msgid="5799096623412043791">"Сіздің әлеуметтік ақпаратыңыз"</string>
-    <string name="permgroupdesc_socialInfo" msgid="7129842457611643493">"Байланыстарыңыз бен әлеуметтік контактілеріңіз туралы ақпаратқа тікелей қол жетімділік."</string>
-    <string name="permgrouplab_location" msgid="635149742436692049">"Сіздің аймағыңыз"</string>
-    <string name="permgroupdesc_location" msgid="5704679763124170100">"Тұрған жеріңізді бақылау."</string>
-    <string name="permgrouplab_network" msgid="5808983377727109831">"Желі байланыстары"</string>
-    <string name="permgroupdesc_network" msgid="4478299413241861987">"Әртүрлі желі функцияларына қол жетімділік."</string>
-    <string name="permgrouplab_bluetoothNetwork" msgid="1585403544162128109">"Bluetooth"</string>
-    <string name="permgroupdesc_bluetoothNetwork" msgid="5625288577164282391">"Құрылғылар және желілерге Bluetooth арқылы кіру."</string>
-    <string name="permgrouplab_audioSettings" msgid="8329261670151871235">"Aудио параметрлері"</string>
-    <string name="permgroupdesc_audioSettings" msgid="2641515403347568130">"Аудио параметрлерін өзгерту."</string>
-    <string name="permgrouplab_affectsBattery" msgid="6209246653424798033">"Батареяға әсер етеді"</string>
-    <string name="permgroupdesc_affectsBattery" msgid="6441275320638916947">"Батареяны жылдам босататын фукцияларды қолдану."</string>
+    <string name="permgrouplab_contacts" msgid="3657758145679177612">"Контактілер"</string>
+    <string name="permgroupdesc_contacts" msgid="6951499528303668046">"контактілерге кіру"</string>
+    <string name="permgrouplab_location" msgid="7275582855722310164">"Орын"</string>
+    <string name="permgroupdesc_location" msgid="1346617465127855033">"бұл құрылғының орнына кіру"</string>
     <string name="permgrouplab_calendar" msgid="5863508437783683902">"Күнтізбе"</string>
-    <string name="permgroupdesc_calendar" msgid="5777534316982184416">"Күнтізбе мен шараларға тікелей қол жетімділік."</string>
-    <string name="permgrouplab_dictionary" msgid="4148597128843641379">"Пайдаланушы сөздігін оқу"</string>
-    <string name="permgroupdesc_dictionary" msgid="7921166355964764490">"Пайдаланушы сөздігінен сөздер оқу."</string>
-    <string name="permgrouplab_writeDictionary" msgid="8090237702432576788">"Пайдаланушы сөздігін жазу"</string>
-    <string name="permgroupdesc_writeDictionary" msgid="2711561994497361646">"Пайдаланушы сөздігіне сөз қосу."</string>
-    <string name="permgrouplab_bookmarks" msgid="1949519673103968229">"Бетбелгілер және Тарих"</string>
-    <string name="permgroupdesc_bookmarks" msgid="4169771606257963028">"Бетбелгілер мен браузерге тікелей қол жетімділік."</string>
-    <string name="permgrouplab_deviceAlarms" msgid="6117704629728824101">"Дабыл"</string>
-    <string name="permgroupdesc_deviceAlarms" msgid="4769356362251641175">"Оятқышты орнату."</string>
-    <string name="permgrouplab_voicemail" msgid="4162237145027592133">"Дауыс-хабар"</string>
-    <string name="permgroupdesc_voicemail" msgid="2498403969862951393">"Дауыс хабарына тікелей қол жетімділік."</string>
-    <string name="permgrouplab_microphone" msgid="171539900250043464">"Микрофон"</string>
-    <string name="permgroupdesc_microphone" msgid="7106618286905738408">"Аудио жазу үшін микрофонға тікелей қол жетімділік."</string>
-    <string name="permgrouplab_camera" msgid="4820372495894586615">"Камера"</string>
-    <string name="permgroupdesc_camera" msgid="2933667372289567714">"Фотосурет немесе бейне жазу үшін камераға тікелей қол жетімділік."</string>
-    <string name="permgrouplab_screenlock" msgid="8275500173330718168">"Бекіту экраны"</string>
-    <string name="permgroupdesc_screenlock" msgid="7067497128925499401">"Құрылғыдағы экранды бекіту әрекетіне әсер ету мүмкіндігі."</string>
-    <string name="permgrouplab_appInfo" msgid="8028789762634147725">"Қолданбаларыңыз туралы ақпарат"</string>
-    <string name="permgroupdesc_appInfo" msgid="3950378538049625907">"Құрылғыдағы басқа қолданбалардың іс-әрекетіне әсер ете алу қабілеті."</string>
-    <string name="permgrouplab_wallpaper" msgid="3850280158041175998">"Артқы фон"</string>
-    <string name="permgroupdesc_wallpaper" msgid="5630417854750540154">"Құрылғының артқы фонының параметрлерін өзгерту."</string>
-    <string name="permgrouplab_systemClock" msgid="406535759236612992">"Cағат"</string>
-    <string name="permgroupdesc_systemClock" msgid="3944359833624094992">"Құрылғы уақытын немесе уақыт аймағын өзгерту."</string>
-    <string name="permgrouplab_statusBar" msgid="2095862568113945398">"Күйін көрсету жолағы"</string>
-    <string name="permgroupdesc_statusBar" msgid="6242593432226807171">"Құрылғы күйін көрсету тақтасының параметрлерін өзгерту."</string>
-    <string name="permgrouplab_syncSettings" msgid="3341990986147826541">"Синхрондау параметрлері"</string>
-    <string name="permgroupdesc_syncSettings" msgid="7603195265129031797">"Синхрондау параметрлеріне қол жетімділік."</string>
-    <string name="permgrouplab_accounts" msgid="3359646291125325519">"Сіздің есептік жазбаларыңыз"</string>
-    <string name="permgroupdesc_accounts" msgid="4948732641827091312">"Қол жетімді есептік жазбаларға кіру."</string>
-    <string name="permgrouplab_hardwareControls" msgid="7998214968791599326">"Құрылғы басқарулары"</string>
-    <string name="permgroupdesc_hardwareControls" msgid="4357057861225462702">"Телефон апараттық құрылғысына тікелей қол жетімділік."</string>
-    <string name="permgrouplab_phoneCalls" msgid="9067173988325865923">"Телефон қоңырауларыңыз"</string>
-    <string name="permgroupdesc_phoneCalls" msgid="7489701620446183770">"Қоңырауларды бақылау, жазу және өңдеу."</string>
-    <string name="permgrouplab_systemTools" msgid="4652191644082714048">"Жүйе құралдары"</string>
-    <string name="permgroupdesc_systemTools" msgid="8162102602190734305">"Төмен деңгейлі қол жетімділік және жүйені басқару."</string>
-    <string name="permgrouplab_developmentTools" msgid="3446164584710596513">"Дамыту құралдары"</string>
-    <string name="permgroupdesc_developmentTools" msgid="7058828032358142018">"Тек қолданба әзірлеушілері үшін қажет мүмкіндіктер."</string>
-    <string name="permgrouplab_display" msgid="4279909676036402636">"Басқа қолданбалардың пайдаланушы интерфейсі"</string>
-    <string name="permgroupdesc_display" msgid="6051002031933013714">"Басқа қолданбалардың пайдаланушы интерфейсіне әсер ету."</string>
+    <string name="permgroupdesc_calendar" msgid="3889615280211184106">"күнтізбеге кіру"</string>
+    <string name="permgrouplab_sms" msgid="228308803364967808">"SMS"</string>
+    <string name="permgroupdesc_sms" msgid="4656988620100940350">"SMS хабарларын жіберу және көру"</string>
     <string name="permgrouplab_storage" msgid="1971118770546336966">"Жад"</string>
-    <string name="permgroupdesc_storage" product="nosdcard" msgid="7442318502446874999">"USB жадына кіру."</string>
-    <string name="permgroupdesc_storage" product="default" msgid="9203302214915355774">"SD картасына кіру."</string>
-    <string name="permgrouplab_accessibilityFeatures" msgid="7919025602283593907">"Қол жетімділік функциялары"</string>
-    <string name="permgroupdesc_accessibilityFeatures" msgid="4205196881678144335">"Көмекші технология өтіне алатын функциялар."</string>
-    <string name="capability_title_canRetrieveWindowContent" msgid="3901717936930170320">"Терез мазмұнына қол жеткізу"</string>
-    <string name="capability_desc_canRetrieveWindowContent" msgid="3772225008605310672">"Сіз қатынасып отырған терезе мазмұнын тексеру."</string>
-    <string name="capability_title_canRequestTouchExploration" msgid="3108723364676667320">"Шарлауды Түрту арқылы қосыңыз"</string>
-    <string name="capability_desc_canRequestTouchExploration" msgid="5800552516779249356">"Түртілген элементтер дауыстап айтылады және экранды қимылдар арқылы шарлау мүмкін болады."</string>
-    <string name="capability_title_canRequestEnhancedWebAccessibility" msgid="1739881766522594073">"Вебке кірудің жетілдірілген әдісін қосу"</string>
-    <string name="capability_desc_canRequestEnhancedWebAccessibility" msgid="7881063961507511765">"Қолданба мазұнына кіруді жеңілдету үшін шрифт орнатылуы мүмкін."</string>
+    <string name="permgroupdesc_storage" msgid="637758554581589203">"құрылғыдағы фотосуреттерге, мультимедиаға және файлдарға қол жеткізу"</string>
+    <string name="permgrouplab_microphone" msgid="171539900250043464">"Микрофон"</string>
+    <string name="permgroupdesc_microphone" msgid="4988812113943554584">"аудио жазу"</string>
+    <string name="permgrouplab_camera" msgid="4820372495894586615">"Камера"</string>
+    <string name="permgroupdesc_camera" msgid="3250611594678347720">"суретке түсіріп, бейне жазу"</string>
+    <string name="permgrouplab_phone" msgid="5229115638567440675">"Телефон"</string>
+    <string name="permgroupdesc_phone" msgid="6234224354060641055">"қоңырау шалу және телефон қоңырауларын басқару"</string>
+    <string name="permgrouplab_sensors" msgid="416037179223226722">"Дене датчиктері"</string>
+    <string name="permgroupdesc_sensors" msgid="7147968539346634043">"ағза күйінің көрсеткіштері туралы сенсор деректеріне қатынасу"</string>
+    <string name="capability_title_canRetrieveWindowContent" msgid="3901717936930170320">"Терезе мазмұнын оқып отыру."</string>
+    <string name="capability_desc_canRetrieveWindowContent" msgid="3772225008605310672">"Ашық тұрған терезе мазмұнын тексеру."</string>
+    <string name="capability_title_canRequestTouchExploration" msgid="3108723364676667320">"Түртілген элементтерді дыбыстау функциясын қосу"</string>
+    <string name="capability_desc_canRequestTouchExploration" msgid="5800552516779249356">"Түртілген элементтер дауыстап айтылады және экранды қимылдар арқылы басқару мүмкін болады."</string>
+    <string name="capability_title_canRequestEnhancedWebAccessibility" msgid="1739881766522594073">"Ғаламторға кірудің жетілдірілген әдісін қосу"</string>
+    <string name="capability_desc_canRequestEnhancedWebAccessibility" msgid="7881063961507511765">"Қолданба мазұнына кіруді жеңілдету үшін скрипт орнатылуы мүмкін."</string>
     <string name="capability_title_canRequestFilterKeyEvents" msgid="2103440391902412174">"Терілген мәтінді тексеру"</string>
-    <string name="capability_desc_canRequestFilterKeyEvents" msgid="7463135292204152818">"Кредит карта нөмірі және кілтсөздер сияқты жеке деректер бар."</string>
+    <string name="capability_desc_canRequestFilterKeyEvents" msgid="7463135292204152818">"Кредит карта нөмірі және кілтсөздер сияқты жеке деректерді қоса."</string>
     <string name="permlab_statusBar" msgid="7417192629601890791">"күйін көрсету тақтасын өшіру немесе өзгерту"</string>
     <string name="permdesc_statusBar" msgid="8434669549504290975">"Қолданбаға күй жолағын өшіруге немесе жүйелік белгішелерді қосуға және жоюға рұқсат береді."</string>
     <string name="permlab_statusBarService" msgid="7247281911387931485">"күйін көрсету жолағы"</string>
@@ -305,204 +268,38 @@
     <string name="permdesc_receiveSms" msgid="6424387754228766939">"Қолданбаға SMS хабарларын алу және өңдеу мүмкіндігін береді. Бұл қолданба құрылғыңызға жіберілген хабарларды сізге көрсетпестен қабылдай және жоя алады дегенді білдіреді."</string>
     <string name="permlab_receiveMms" msgid="1821317344668257098">"мәтін хабарларын алу (MMS)"</string>
     <string name="permdesc_receiveMms" msgid="533019437263212260">"Қолданбаға MMS хабарларын алу және өңдеу мүмкіндігін береді. Бұл қолданба құрылғыңызға жіберілген хабарларды сізге көрсетпестен қабылдай және жоя алады дегенді білдіреді."</string>
-    <string name="permlab_receiveEmergencyBroadcast" msgid="1803477660846288089">"төтенше ақпарат алу"</string>
-    <string name="permdesc_receiveEmergencyBroadcast" msgid="848524070262431974">"Қолданбаға төтенше таратылым хабарларын алуға және өңдеуге рұқсат береді. Бұл рұқсат тек жүйелік қолданбалар үшін қол жетімді."</string>
     <string name="permlab_readCellBroadcasts" msgid="1598328843619646166">"ұялы хабар тарату хабарларын оқу"</string>
     <string name="permdesc_readCellBroadcasts" msgid="6361972776080458979">"Қолданбаға ұялы таратылым хабарларын оқу мүмкіндігін береді. Ұялы таратылым дабылдары кейбір аймақтарда төтенше жағдай туралы ескерту үшін қолданылады. Төтенше ұялы хабарлар келгенде залалды қолданбалар құрылғының жұмысына кедергі жасауы мүмкін."</string>
-    <string name="permlab_sendSms" msgid="5600830612147671529">"SMS хабарларын жіберу"</string>
+    <string name="permlab_subscribedFeedsRead" msgid="4756609637053353318">"жазылған ағындарды оқу"</string>
+    <string name="permdesc_subscribedFeedsRead" msgid="5557058907906144505">"Қолданбаға қазіргі уақытта синхрондалған арналар туралы мәліметтерді алуға рұқсат береді."</string>
+    <string name="permlab_sendSms" msgid="7544599214260982981">"SMS хабарларын жіберу және көру"</string>
     <string name="permdesc_sendSms" msgid="7094729298204937667">"Қолданбаға SMS хабарларын жіберу мүмкіндігін береді. Бұл қосымша төлемдерге себеп болуы мүмкін. Залалды қолданбалар сіздің құптауыңызсыз хабар жіберіп, қосымша шығынға себеп болуы мүмкін."</string>
-    <string name="permlab_sendRespondViaMessageRequest" msgid="8713889105305943200">"хабар жіберу арқылы жауап беру"</string>
-    <string name="permdesc_sendRespondViaMessageRequest" msgid="7107648548468778734">"Қолданбаға басқа хабар жіберу қолданбаларына өтініш жолдап, келген қоңырауларға хабар жіберу арқылы жауап беру жұмысын жүктеу мүмкіндігін береді."</string>
     <string name="permlab_readSms" msgid="8745086572213270480">"өзіңіздің мәтін хабарларыңызды оқу (SMS немесе MMS)"</string>
     <string name="permdesc_readSms" product="tablet" msgid="2467981548684735522">"Қолданбаға планшетте сақталған SMS хабарларын немесе SIM картасын оқу мүмкіндігін береді. Бұл қолданбаға мазмұны немесе құпиялығына қарамастан барлық SMS хабарларын оқу мүмкіндігін береді."</string>
     <string name="permdesc_readSms" product="tv" msgid="5102425513647038535">"Қолданбаға ТД немесе SMS картасында сақталған SMS хабарларын оқуға рұқсат етеді. Бұл қолданбаға мазмұнына немесе құпиялығына қарамастан барлық SMS хабарларын оқуға рұқсат етеді."</string>
     <string name="permdesc_readSms" product="default" msgid="3695967533457240550">"Қолданбаға телефонда сақталған SMS хабарларын немесе SIM картасын оқу мүмкіндігін береді. Бұл қолданбаға мазмұны немесе құпиялығына қарамастан барлық SMS хабарларын оқу мүмкіндігін береді."</string>
-    <string name="permlab_writeSms" msgid="3216950472636214774">"мәтін хабарларын жөндеу (SMS немесе MMS)"</string>
-    <string name="permdesc_writeSms" product="tablet" msgid="5160413947794501538">"Қолданбаға планшетте немесе SIM картасында сақталған SMS хабарларына жазуға рұқсат береді. Зиянкес қолданбалар хабарларыңызды жоюы мүмкін."</string>
-    <string name="permdesc_writeSms" product="tv" msgid="955871498983538187">"Қолданбаға теледидарда немесе SIM картасында сақталған SMS хабарларына жазуға рұқсат етеді. Зиянкес қолданбалар хабарларыңызды жоюы мүмкін."</string>
-    <string name="permdesc_writeSms" product="default" msgid="7268668709052328567">"Қолданбаға телефонда немесе SIM картасында сақталған SMS хабарларына жазуға рұқсат береді. Зиянкес қолданбалар хабарларыңызды жоюы мүмкін."</string>
     <string name="permlab_receiveWapPush" msgid="5991398711936590410">"мәтін хабарларын алу (WAP)"</string>
     <string name="permdesc_receiveWapPush" msgid="748232190220583385">"Қолданбаға WAP хабарларын алу және өңдеу мүмкіндігін береді. Бұл қолданба құрылғыңызға жіберілген хабарларды сізге көрсетпестен қабылдай және жоя алады дегенді білдіреді."</string>
-    <string name="permlab_receiveBluetoothMap" msgid="7593811487142360528">"Bluetooth хабарларын (MAP) алу"</string>
-    <string name="permdesc_receiveBluetoothMap" msgid="8656755936919466345">"Қолданбаға Bluetooth MAP хабарларын алуға және өңдеуге рұқсат береді. Бұл қолданба құрылғыңызға жіберілген хабарларды сізге көрсетпестен бақылауы немесе жоюы мүмкін екенін білдіреді."</string>
     <string name="permlab_getTasks" msgid="6466095396623933906">"жұмыс істеп жатқан қолданбаларды шығарып алу"</string>
     <string name="permdesc_getTasks" msgid="7454215995847658102">"Қолданбаларға ағымдағы және соңғы тапсырмалар туралы ақпарат алу мүмкіндігін береді. Бұл қолданбаға құрылғы қолданатын басқа қолданбалар туралы деректері анықтау мүмкіндігін беруі ықтимал."</string>
-    <string name="permlab_startTasksFromRecents" msgid="8990073877885690623">"тапсырманы жақындағылардан бастау"</string>
-    <string name="permdesc_startTasksFromRecents" msgid="7382133554871222235">"Қолданбаға ActivityManager.getRecentTaskList() функциясынан қайтарылған ескіріп кеткен тапсырманы іске қосу үшін ActivityManager.RecentTaskInfo нысанын пайдалануға рұқсат етеді."</string>
-    <string name="permlab_interactAcrossUsers" msgid="7114255281944211682">"барлық пайдаланушылармен қарым-қатынас жасау"</string>
-    <string name="permdesc_interactAcrossUsers" msgid="364670963623385786">"Қолданбаға құрылғыдағы әртүрлі пайдаланушылар арасында әрекеттер орындау мүмкіндігін береді. Залалды қолданбалар бұны пайдаланушылар арасындағы қорғанысты бұзу үшін пайдалануы мүмкін."</string>
-    <string name="permlab_interactAcrossUsersFull" msgid="2567734285545074105">"барлық пайдаланушылармен қарым-қатынас жасау лицензиясы"</string>
-    <string name="permdesc_interactAcrossUsersFull" msgid="376841368395502366">"Пайдаланушылар арасында барлық қарым-қатынастар мүмкіндігін ұсынады."</string>
-    <string name="permlab_manageUsers" msgid="1676150911672282428">"пайдаланушыларды басқару"</string>
-    <string name="permdesc_manageUsers" msgid="8409306667645355638">"Қолданбаға құрылғыдағы пайдаланушыларды, сұрақтар, жасақтау және жою әрекеттерін қоса, басқару мүмкіндігін береді."</string>
-    <string name="permlab_getDetailedTasks" msgid="6229468674753529501">"қосылып тұрған қолданбалар туралы егжей-тегжейлі деректер алу"</string>
-    <string name="permdesc_getDetailedTasks" msgid="153824741440717599">"Қолданбаларға ағымдағы және соңғы тапсырмалар туралы ақпарат алу мүмкіндігін береді. Залалды қолданбалар басқа қолданбалар жайлы құпия ақпаратқа ие болуы мүмкін."</string>
+    <string name="permlab_manageProfileAndDeviceOwners" msgid="5979288447973722097">"Профиль және құрылғы иелерін басқару"</string>
+    <string name="permdesc_manageProfileAndDeviceOwners" msgid="106894851498657169">"Қолданбаларға профиль иелері мен құрылғы иесін орнатуға мүмкіндік береді."</string>
     <string name="permlab_reorderTasks" msgid="2018575526934422779">"жұмыс істеп жатқан қолданбалардың ретін өзгерту"</string>
     <string name="permdesc_reorderTasks" msgid="7734217754877439351">"Қолданбаға тапсырмаларды алғы немесе артқы шепке жылжыту мүмкіндігін береді. Қолданба бұны сіздің қатысуыңызсыз жасауы мүмкін."</string>
-    <string name="permlab_removeTasks" msgid="6821513401870377403">"жұмыс істеп жатқан қолданбаларды тоқтату"</string>
-    <string name="permdesc_removeTasks" msgid="1394714352062635493">"Қолданбаға тапсырмалар мен қолданбаларды жою мүмкіндігін береді. Залалды қолданбалар басқа қолданбалардың жұмысына кері әсер етуі мүмкін."</string>
-    <string name="permlab_manageActivityStacks" msgid="7391191384027303065">"әрекеттер қатарын басқару"</string>
-    <string name="permdesc_manageActivityStacks" msgid="1615881933034084440">"Қолданбаға басқа қолданбалар жүретін әрекеттер қатарына әрекет қосу, алу немесе өзгерту мүмкіндігін береді. Залалды қолданбалар басқа қолданбалардың әрекеттерін тоқтатуы мүмкін."</string>
-    <string name="permlab_startAnyActivity" msgid="2918768238045206456">"қандай да әрекет бастау"</string>
-    <string name="permdesc_startAnyActivity" msgid="997823695343584001">"Қолданбаға қандай да әрекетті қорғалған рұқсатына немесе экспортталу күйіне қарамастан бастауға мүмкіндік береді."</string>
-    <string name="permlab_setScreenCompatibility" msgid="6975387118861842061">"экран үйлесімділігін реттеу"</string>
-    <string name="permdesc_setScreenCompatibility" msgid="692043618693917374">"Қолданбаға басқа қолданбалардың экран үйлесімділігін басқару мүмкіндігін береді. Залалды қолданбалар басқа қолданбалардың іс-әрекетін қиратуы мүмкін."</string>
-    <string name="permlab_setDebugApp" msgid="3022107198686584052">"қолданба күйін келтіруді қосу"</string>
-    <string name="permdesc_setDebugApp" msgid="4474512416299013256">"Қолданбаға басқа қолданбаның жөндеу функциясын қосу мүмкіндігін береді. Залалды қолданбалар бұны басқа қолданбаларды құрту үшін қолдануы мүмкін."</string>
-    <string name="permlab_changeConfiguration" msgid="4162092185124234480">"жүйе дисплей параметрлерін өзгерту"</string>
-    <string name="permdesc_changeConfiguration" msgid="4372223873154296076">"Қолданбаға ағымдағы конфигурацияны, мысалы, тіл немесе шрифт өлшемін, өзгертуге мүмкіндік береді."</string>
     <string name="permlab_enableCarMode" msgid="5684504058192921098">"автокөлік режимін қосу"</string>
     <string name="permdesc_enableCarMode" msgid="4853187425751419467">"Қолданбаға көлік режимін қосуға рұқсат береді."</string>
     <string name="permlab_killBackgroundProcesses" msgid="3914026687420177202">"басқа қолданбаларды жабу"</string>
     <string name="permdesc_killBackgroundProcesses" msgid="4593353235959733119">"Қолданбаға басқа қолданбалардың артқы шеп үрдістерін тоқтату мүмкіндігін береді. Бұл басқа қолданбалардың жұмысын тоқтатуы мүмкін."</string>
-    <string name="permlab_forceStopPackages" msgid="2329627428832067700">"басқа қолданбаларды мәжбүрлеп жабу"</string>
-    <string name="permdesc_forceStopPackages" msgid="5253157296183940812">"Қолданбаға басқа қолданбаларды мәжбүрлеп тоқтатуға рұқсат береді."</string>
-    <string name="permlab_forceBack" msgid="652935204072584616">"қолданбаны мәжбүрлеп жабу"</string>
-    <string name="permdesc_forceBack" msgid="3892295830419513623">"Қолданбаға алдыңғы фондағы кез келген әрекетті мәжбүрлеп жабуға және оралуға рұқсат береді. Қалыпты қолданбалар үшін ешқашан қажет болмайды."</string>
-    <string name="permlab_dump" msgid="1681799862438954752">"жүйенің ішкі күйін шығару"</string>
-    <string name="permdesc_dump" msgid="1778299088692290329">"Қолданбаға жүйенің ішкі күйін шығарып алуға рұқсат береді. Зиянкес қолданбалар әдетте ешқашан қажет етпейтін жеке және қорғалған ақпараттың кең ауқымын шығарып алуы мүмкін."</string>
-    <string name="permlab_retrieve_window_content" msgid="8022588608994589938">"экран мазмұнын шығарып алу"</string>
-    <string name="permdesc_retrieve_window_content" msgid="3193269069469700265">"Қолданбаға белсенді терезенің мазмұнын шығарып алуға рұқсат береді. Зиянкес қолданбалар бүкіл терезенің мазмұнын шығарып алуы және оның құпия сөздерден басқа бүкіл мәтінін қарауы мүмкін."</string>
-    <string name="permlab_temporary_enable_accessibility" msgid="2312612135127310254">"қол жетімділікті уақытша қосу"</string>
-    <string name="permdesc_temporary_enable_accessibility" msgid="8079456293182975464">"Қолданбаға құрылғыға кіруді уақытша қосу мүмкіндігін береді. Залалды қолданбалар қол жетімділікті пайдаланушының келісімінсіз қосуы мүмкін."</string>
-    <string name="permlab_retrieveWindowToken" msgid="7154762602367758602">"терезе таңбалауышын шығарып алу"</string>
-    <string name="permdesc_retrieveWindowToken" msgid="668173747687795074">"Қолданбаға терезе таңбалауышын шығарып алуға рұқсат береді. Зиянкес қолданбалар жүйені білдіретін қолданба терезесімен рұқсат етілмеген өзара әрекеттесуді орындауы мүмкін."</string>
-    <string name="permlab_frameStats" msgid="7056374987314361639">"кадр статистикасын шығарып алу"</string>
-    <string name="permdesc_frameStats" msgid="4758001089491284919">"Қолданбаға кадр статистикасын жинауға рұқсат береді. Зиянкес қолданбалар басқа қолданбалардың терезелерінің кадр статистикасын бақылауы мүмкін."</string>
-    <string name="permlab_filter_events" msgid="8675535648807427389">"сүзгі шаралары"</string>
-    <string name="permdesc_filter_events" msgid="8006236315888347680">"Қолданбаға пайдаланушы шараларының ағымын олар жіберілгенше сұрыптайтын кіріс сүзгісіне тіркелу мүмкіндігін береді. Залалды қолданбалар пайдаланушы интерфейсін пайдаланушының қатысуынсыз басқаруы мүмкін."</string>
-    <string name="permlab_shutdown" msgid="7185747824038909016">"жартылай өшіру"</string>
-    <string name="permdesc_shutdown" msgid="7046500838746291775">"Әрекет менеджерін өшірілген күйіне қояды. Толық өшіруді орындамайды."</string>
-    <string name="permlab_stopAppSwitches" msgid="4138608610717425573">"қолданба ауысуларын болдырмау"</string>
-    <string name="permdesc_stopAppSwitches" msgid="8262195802582255021">"Пайдаланушының басқа қолданбаға ауысуын болдырмайды."</string>
-    <string name="permlab_getTopActivityInfo" msgid="2537922311411546016">"ағымдағы қолданба жайлы ақпарат алу"</string>
-    <string name="permdesc_getTopActivityInfo" msgid="2512448855496067131">"Пайдаланушыға экранның алдыңғы шебіндегі ағымдағы қолданба туралы жеке ақпарат алу мүмкіндігін береді."</string>
-    <string name="permlab_runSetActivityWatcher" msgid="892239094867182656">"бүкіл қолданбаны іске қосуды бақылау және басқару"</string>
-    <string name="permdesc_runSetActivityWatcher" msgid="6003603162578577406">"Қолданбаға жүйенің әрекеттерді іске қосу әдісін бақылауға және басқаруға рұқсат береді. Зиянкес қолданбалар бүкіл жүйеге қауіп төндіруі мүмкін. Бұл рұқсат тек әзірлеу үшін қажет, ешқашан қалыпты пайдалану үшін қажет болмайды."</string>
-    <string name="permlab_broadcastPackageRemoved" msgid="2576333434893532475">"жинақтан алынған ақпаратты жіберу"</string>
-    <string name="permdesc_broadcastPackageRemoved" msgid="6621901216207931089">"Қолданба қолданба бумасы жойылғаны туралы хабарландыруды таратуға рұқсат береді. Зиянкес қолданбалар мұны кез келген басқа жұмыс істеп жатқан қолданбаны «өлтіру» үшін пайдалана алады."</string>
-    <string name="permlab_broadcastSmsReceived" msgid="5689095009030336593">"SMS арқылы алынған ақпаратты жіберу"</string>
-    <string name="permdesc_broadcastSmsReceived" msgid="4152037720034365492">"Қолданбаға SMS хабары алынғаны туралы хабарландыруды таратуға рұқсат береді. Зиянкес қолданбалар мұны жалған кіріс SMS хабарларын жасау үшін пайдалануы мүмкін."</string>
-    <string name="permlab_broadcastWapPush" msgid="3145347413028582371">"WAP-PUSH арқылы алынған ақпаратты жіберу"</string>
-    <string name="permdesc_broadcastWapPush" msgid="4783402525039442729">"Қолданбаға WAP PUSH хабары алынғаны туралы хабарландыруды таратуға рұқсат береді. Зиянкес қолданбалар мұны жалған MMS хабарын алуды немесе кез келген веб-беттің мазмұнын зиянкес нұсқалармен тыныш ауыстыру үшін пайдалануы мүмкін."</string>
-    <string name="permlab_setProcessLimit" msgid="2451873664363662666">"ағымдағы үрдістер санын шектеу"</string>
-    <string name="permdesc_setProcessLimit" msgid="7318061314040879542">"Қолданбаға іске қосылатын процестердің ең көп санын басқаруға рұқсат береді. Қалыпты қолданбалар үшін ешқашан қажет болмайды."</string>
-    <string name="permlab_setAlwaysFinish" msgid="550958507798796965">"артқы шептегі қолданбаларды күштеп өшіру"</string>
-    <string name="permdesc_setAlwaysFinish" msgid="7471310652868841499">"Қолданбаға әрекеттер фонға өткенде әрқашан аяқтала ма, соны басқаруға рұқсат береді. Қалыпты қолданбалар үшін ешқашан қажет болмайды."</string>
-    <string name="permlab_batteryStats" msgid="2789610673514103364">"батарея туралы статистиканы оқу"</string>
-    <string name="permdesc_batteryStats" msgid="5897346582882915114">"Қолданбаға ағымдағы батареяның қуаты төмендеу деректерін оқу мүмкіндігін береді. Қолданбаға сіз қолданатын қолданбаларды анықтауға рұқсат беруі мүмкін."</string>
-    <string name="permlab_updateBatteryStats" msgid="3719689764536379557">"батарея статистикасын өзгерту"</string>
-    <string name="permdesc_updateBatteryStats" msgid="6862817857178025002">"Қолданбаға батарея туралы жиналған статистиканы өзгерту мүмкіндігін береді. Қалыпты қолданбалар пайдалана алмайды."</string>
-    <string name="permlab_getAppOpsStats" msgid="1508779687436585744">"қолданбалар жұмысы жайлы санақтық ақпарат алу"</string>
-    <string name="permdesc_getAppOpsStats" msgid="6243887041577912877">"Қолданбаға қолданба жұмысы туралы жинақталған санақтық ақпаратты алу мүмкіндігін береді."</string>
-    <string name="permlab_updateAppOpsStats" msgid="8829097373851521505">"қолданбалар жұмысы жайлы санақтық ақпарат"</string>
-    <string name="permdesc_updateAppOpsStats" msgid="50784596594403483">"Қолданбаға жиналған қолданба жұмысының санақтық ақпаратын өзгерту мүмкіндігін береді. Қалыпты  қолданбалар қолданысына арналмаған."</string>
-    <string name="permlab_backup" msgid="470013022865453920">"жүйенің сақтық көшірмесін жасауды және қалпына келтіруді басқару"</string>
-    <string name="permdesc_backup" msgid="6912230525140589891">"Қолданбаға жүйенің сақтық көшірме жасау және қалпына келтіру механизмін басқаруға рұқсат береді. Қалыпты қолданбалардың пайдалануына арналмаған."</string>
-    <string name="permlab_confirm_full_backup" msgid="5557071325804469102">"толық сақтық көшірмесін немесе қалпына келтіруді растау"</string>
-    <string name="permdesc_confirm_full_backup" msgid="1748762171637699562">"Қолданбаға толық сақтық көшірмені растау ПИ іске қосуға рұқсат береді. Ешбір қолданбаның пайдалануына арналмаған."</string>
-    <string name="permlab_internalSystemWindow" msgid="2148563628140193231">"рұқсаты жоқ терезелерді көрсету"</string>
-    <string name="permdesc_internalSystemWindow" msgid="7458387759461466397">"Қолданбаға ішкі жүйені пайдаланушы интерфейсі қолданатын терезелер жасау мүмкіндігін береді. Қалыпты қолданбалар қолдана алмайды."</string>
     <string name="permlab_systemAlertWindow" msgid="3543347980839518613">"басқа қолданбалардың үстінен жазу"</string>
     <string name="permdesc_systemAlertWindow" msgid="8584678381972820118">"Қолданбаға басқа қолданбалар немесе пайдаланушы интерфейсінің бөліктерінің үстінен сызу мүмкіндігін береді. Олар сіздің кез келген қолданбадағы интерфейсті қолдану жұмысыңызға кірісуі немесе басқа қолданбалардан көріп тұрған нәрселеріңізді өзгертуі мүмкін."</string>
-    <string name="permlab_setAnimationScale" msgid="2805103241153907174">"жаһандық анимация жылдамдығын өзгерту"</string>
-    <string name="permdesc_setAnimationScale" msgid="7690063428924343571">"Қолданбаға жаһандық анимация жылдамдығын кез келген уақытта өзгерту мүмкіндігін береді (жылдамырақ немесе баялау анимация)."</string>
-    <string name="permlab_manageAppTokens" msgid="1286505717050121370">"қолданба таңбалауыштарын басқару"</string>
-    <string name="permdesc_manageAppTokens" msgid="8043431713014395671">"Қолданбаға қалыпты Z ретін айналып өтіп, жеке таңбалауыштарын жасауға рұқсат береді. Қалыпты қолданбалар үшін ешқашан қажет болмайды."</string>
-    <string name="permlab_freezeScreen" msgid="4708181184441880175">"экранды қатыру"</string>
-    <string name="permdesc_freezeScreen" msgid="8558923789222670064">"Қолданбаға толық экран режиміне көшу үшін экранды уақытша қатыру мүмкіндігін береді."</string>
-    <string name="permlab_injectEvents" msgid="1378746584023586600">"пернелер мен басқару түймелерін басу"</string>
-    <string name="permdesc_injectEvents" product="tablet" msgid="206352565599968632">"Қолданбаға жеке енгізу оқиғаларын (пернелерді басулар, т.б.) басқа қолданбаларға жеткізуге рұқсат береді. Зиянкес қолданбалар мұны планшетті басқаруды алу үшін пайдалануы мүмкін."</string>
-    <string name="permdesc_injectEvents" product="tv" msgid="4681361983270791611">"Қолданбаға басқа қолданбаларға жеке енгізу оқиғаларын (пернелерді басулар, т.б.) жеткізуге рұқсат етеді. Зиянкес қолданбалар мұны ТД басып алу үшін пайдалануы мүмкін."</string>
-    <string name="permdesc_injectEvents" product="default" msgid="653128057572326253">"Қолданбаға жеке енгізу оқиғаларын (пернелерді басулар, т.б.) басқа қолданбаларға жеткізуге рұқсат береді. Зиянкес қолданбалар мұны телефонды басқаруды алу үшін пайдалануы мүмкін."</string>
-    <string name="permlab_readInputState" msgid="469428900041249234">"терілген жазбалар мен жасалған әрекеттерді тіркеу"</string>
-    <string name="permdesc_readInputState" msgid="8387754901688728043">"Қолданбаға тіпті басқа қолданбамен өзара әрекеттесіп жатқанда да (мысалы, құпия сөзді теріп жатқанда) сіз басқан пернелерді көруге рұқсат береді. Қалыпты қолданбалар үшін ешқашан қажет болмайды."</string>
-    <string name="permlab_bindInputMethod" msgid="3360064620230515776">"енгізу әдісіне байланыстыру"</string>
-    <string name="permdesc_bindInputMethod" msgid="3250440322807286331">"Пайдаланушыға енгізу әдісінің жоғары деңгейлі интерфейсіне байластыруға рұқсат береді. Қалыпты қолданбалар үшін ешқашан қажет болмайды."</string>
-    <string name="permlab_bindAccessibilityService" msgid="5357733942556031593">"қол жетімділік қызметіне байланысу"</string>
-    <string name="permdesc_bindAccessibilityService" msgid="7034615928609331368">"Пайдаланушыға қол жетімділік қызметінің жоғары деңгейлі интерфейсіне байланысу мүмкіндігін береді. Қалыпты қолданбаны ешқашан қажет етпеуі тиіс."</string>
-    <string name="permlab_bindPrintService" msgid="8462815179572748761">"принтер қызметіне қосылу"</string>
-    <string name="permdesc_bindPrintService" msgid="7960067623209111135">"Пайдаланушыға басып шығару қызметінің жоғары деңгейлі интерфейсіне жалғану мүмкіндігін ұсынады. Қалыпты қолданбаны ешқашан қажет етпеуі тиіс."</string>
-    <string name="permlab_bindPrintSpoolerService" msgid="6807762783744125954">"басып шығару спулері қызметіне қосылу"</string>
-    <string name="permdesc_bindPrintSpoolerService" msgid="3680552285933318372">"Пайдаланушыға басу спулері қызметінің жоғары деңгейлі интерфейсіне жалғану мүмкіндігін ұсынады. Қалыпты қолданбаны ешқашан қажет етпеуі тиіс."</string>
-    <string name="permlab_bindNfcService" msgid="2752731300419410724">"ЖӨБ қызметіне қосылу"</string>
-    <string name="permdesc_bindNfcService" msgid="6120647629174066862">"Пайдаланушыға ЖӨБ карталарына еліктейтін қолданбаларға жалғану мүмкіндігін ұсынады. Қалыпты қолданбаны ешқашан қажет етпеуі тиіс."</string>
-    <string name="permlab_bindTextService" msgid="7358378401915287938">"мәтін қызметіне байланыстыру"</string>
-    <string name="permdesc_bindTextService" msgid="8151968910973998670">"Пайдаланушыға мәтіндік қызметтің (мысалы, SpellCheckerService) жоғары деңгейлі интерфейсіне байластыруға рұқсат береді. Қалыпты қолданбалар үшін ешқашан қажет болмайды."</string>
-    <string name="permlab_bindVpnService" msgid="4708596021161473255">"ВЖЖ қызметіне байланыстыру"</string>
-    <string name="permdesc_bindVpnService" msgid="2067845564581693905">"Пайдаланушыға VPN қызметінің жоғары деңгейлі интерфейсіне байластыруға рұқсат береді. Қалыпты қолданбалар үшін ешқашан қажет болмайды."</string>
-    <string name="permlab_bindWallpaper" msgid="8716400279937856462">"артқы фонға байланыстыру"</string>
-    <string name="permdesc_bindWallpaper" msgid="7108428692595491668">"Пайдаланушыға экранның артқы фонының жоғары деңгейлі интерфейсіне байластыруға рұқсат береді. Қалыпты қолданбалар үшін ешқашан қажет болмайды."</string>
-    <string name="permlab_bindVoiceInteraction" msgid="5334852580713715068">"дауыс өзара әрекеттесушісіне байластыру"</string>
-    <string name="permdesc_bindVoiceInteraction" msgid="2345721766501778101">"Пайдаланушыға дауыспен өзара әрекеттесу қызметінің жоғары деңгейлі интерфейсіне байластыруға рұқсат береді. Қалыпты қолданбалар үшін ешқашан қажет болмайды."</string>
-    <string name="permlab_manageVoiceKeyphrases" msgid="1252285102392793548">"дауыстық кілт фразаларды басқару"</string>
-    <string name="permdesc_manageVoiceKeyphrases" msgid="8476560722907530008">"Пайдаланушыға дауыстық арнайы сөзді анықтау үшін кілт фразаларды басқаруға рұқсат береді. Қалыпты қолданбалар үшін ешқашан қажет болмайды."</string>
-    <string name="permlab_bindRemoteDisplay" msgid="1782923938029941960">"қашықтан басқарылатын дисплейге қосылу"</string>
-    <string name="permdesc_bindRemoteDisplay" msgid="1261242718727295981">"Пайдаланушыға қашықтан басқарылатын дисплейдің жоғары деңгейлі интерфейсіне жалғану мүмкіндігін ұсынады. Қалыпты қолданбаны ешқашан қажет етпеуі тиіс."</string>
-    <string name="permlab_bindRemoteViews" msgid="5697987759897367099">"виджет қызметіне байланыстыру"</string>
-    <string name="permdesc_bindRemoteViews" msgid="4717987810137692572">"Пайдаланушыға виджет қызметінің жоғары деңгейлі интерфейсіне байластыруға рұқсат береді. Қалыпты қолданбалар үшін ешқашан қажет болмайды."</string>
-    <string name="permlab_bindDeviceAdmin" msgid="8704986163711455010">"құрал әкімшісімен қатынасу"</string>
-    <string name="permdesc_bindDeviceAdmin" msgid="569715419543907930">"Иесіне ниеттерді құрылғы әкімшісіне жіберуге рұқсат береді. Қалыпты қолданбалар үшін ешқашан қажет болмайды."</string>
-    <string name="permlab_bindTvInput" msgid="5601264742478168987">"ТД кірісіне байластыру"</string>
-    <string name="permdesc_bindTvInput" msgid="2371008331852001924">"Пайдаланушыға теледидар кірісінің жоғары деңгейлі интерфейсіне байластыруға рұқсат береді. Қалыпты қолданбалар үшін ешқашан қажет болмайды."</string>
-    <string name="permlab_modifyParentalControls" msgid="4611318225997592242">"ата-аналық бақылау ережелерін өзгерту"</string>
-    <string name="permdesc_modifyParentalControls" msgid="7438482894162282039">"Иесіне жүйенің ата-аналық бақылау ережелерінің деректерін өзгертуге рұқсат етеді. Қалыпты қолданбалар үшін ешқашан қажет болмайды."</string>
-    <string name="permlab_manageDeviceAdmins" msgid="4248828900045808722">"құрылғы әкімшісін қосу немесе алу"</string>
-    <string name="permdesc_manageDeviceAdmins" msgid="5025608167709942485">"Пайдаланушыға белсенді құрылғы әкімшілерін қосу немесе алу мүмкіндігін береді. Қалыпты қолданбаны қажет етпеуі тиіс."</string>
-    <string name="permlab_setOrientation" msgid="3365947717163866844">"экран бағытын өзгерту"</string>
-    <string name="permdesc_setOrientation" msgid="3046126619316671476">"Қолданбаға экранды бұру бұрышын кез келген уақытта өзгертуге рұқсат береді. Қалыпты қолданбалар үшін ешқашан қажет болмайды."</string>
-    <string name="permlab_setPointerSpeed" msgid="9175371613322562934">"меңзер жылдамдығын өзгерту"</string>
-    <string name="permdesc_setPointerSpeed" msgid="6866563234274104233">"Қолданбаға тінтуір немесе трекпад меңзерінің жылдамдығын кез келген уақытта өзгертуге рұқсат береді. Қалыпты қолданбалар үшін ешқашан қажет болмайды."</string>
-    <string name="permlab_setKeyboardLayout" msgid="4778731703600909340">"пернетақта орналасуын өзгерту"</string>
-    <string name="permdesc_setKeyboardLayout" msgid="8480016771134175879">"Қолданбаға пернетақта орналасуын өзгерту мүмкіндігін береді. Қалыпты қолданбаны ешқашан қажет етпеуі тиіс."</string>
-    <string name="permlab_signalPersistentProcesses" msgid="4539002991947376659">"қолданбаларға Linux сигналдарын жіберу"</string>
-    <string name="permdesc_signalPersistentProcesses" msgid="4896992079182649141">"Қолданбаға берілген сигналдың барлық тұрақты процестерге жіберілуін сұрауға рұқсат береді."</string>
     <string name="permlab_persistentActivity" msgid="8841113627955563938">"қолданбаны әрқашан жұмыс істейтін ету"</string>
     <string name="permdesc_persistentActivity" product="tablet" msgid="8525189272329086137">"Қолданбаға өзінің бөліктерін жадта бекіндіру мүмкіндігін береді. Бұл басқа қолданбалардың жадқа қол жетімділігін шектеп, планшетті баяулатуы мүмкін."</string>
     <string name="permdesc_persistentActivity" product="tv" msgid="5086862529499103587">"Қолданбаға өзінің бөліктерін жадта тұрақты етуге рұқсат етеді. Бұл басқа қолданбаларға қол жетімді жадты шектеп, ТД баяулатуы мүмкін."</string>
     <string name="permdesc_persistentActivity" product="default" msgid="4384760047508278272">"Қолданбаға өзінің бөліктерін жадта бекіндіру мүмкіндігін береді. Бұл басқа қолданбалардың жадқа қол жетімділігін шектеп, телефонды баяулатуы мүмкін."</string>
-    <string name="permlab_deletePackages" msgid="184385129537705938">"қолданбаларды жою"</string>
-    <string name="permdesc_deletePackages" msgid="7411480275167205081">"Қолданбаға Android бумаларын жоюға рұқсат береді. Зиянкес қолданбалар мұны маңызды қолданбаларды жою үшін пайдалануы мүмкін."</string>
-    <string name="permlab_clearAppUserData" msgid="274109191845842756">"басқа қолданбалардың деректерін жою"</string>
-    <string name="permdesc_clearAppUserData" msgid="4625323684125459488">"Қолданбаға пайдаланушы деректерін тазалауға рұқсат береді."</string>
-    <string name="permlab_deleteCacheFiles" msgid="3128665571837408675">"басқа қолданбалардың кэштерін жою"</string>
-    <string name="permdesc_deleteCacheFiles" msgid="3812998599006730196">"Қолданбаға кэш файлдарын жоюға рұқсат береді."</string>
     <string name="permlab_getPackageSize" msgid="7472921768357981986">"қолданба жадындағы бос орынды өлшеу"</string>
     <string name="permdesc_getPackageSize" msgid="3921068154420738296">"Қолданбаға оның кодын, деректерін және кэш өлшемдерін шығарып алуға рұқсат береді"</string>
-    <string name="permlab_installPackages" msgid="2199128482820306924">"қолданбаларды тікелей орнату"</string>
-    <string name="permdesc_installPackages" msgid="5628530972548071284">"Қолданбаға жаңа немесе жаңартылған Android бумаларын орнатуға рұқсат береді. Зиянкес қолданбалар мұны кездейсоқ қуатты рұқсаттар бар жаңа қолданбаларды қосу үшін пайдалануы мүмкін."</string>
-    <string name="permlab_clearAppCache" msgid="7487279391723526815">"қолданбаның бүкіл кэш деректерін жою"</string>
-    <string name="permdesc_clearAppCache" product="tablet" msgid="8974640871945434565">"Қолданбаларға қолданбалардың кэштелген қалталарынан файлдарды жою арқылы планшет жадын босату мүмкіндігін береді. Бұл басқа қолданбалардың баяу қосылуына себеп болуы мүмкін, себебі оларға өз деректеріне қол жеткізу қажет болады."</string>
-    <string name="permdesc_clearAppCache" product="tv" msgid="244647416303997022">"Қолданбаға басқа қолданбалардың кэш каталогтарындағы файлдарды жою арқылы ТД қоймасын босатуға рұқсат етеді. Бұл басқа қолданбалардың баяуырақ іске қосылуына әкелуі мүмкін, өйткені олар деректерін шығарып алуы керек."</string>
-    <string name="permdesc_clearAppCache" product="default" msgid="2459441021956436779">"Қолданбаларға қолданбалардың кэштелген қалталарынан файлдарды жою арқылы телефон жадын босату мүмкіндігін береді. Бұл басқа қолданбалардың баяу қосылуына себеп болуы мүмкін, себебі оларға өз деректеріне қол жеткізу қажет болады."</string>
-    <string name="permlab_movePackage" msgid="3289890271645921411">"қолданба ресурстарын жылжыту"</string>
-    <string name="permdesc_movePackage" msgid="319562217778244524">"Қолданбаға қолданба ресурстарын ішкіден сыртқы тасушыға және керісінше жылжытуға рұқсат береді."</string>
-    <string name="permlab_readLogs" msgid="6615778543198967614">"тіркелген маңызды деректерді оқу"</string>
-    <string name="permdesc_readLogs" product="tablet" msgid="82061313293455151">"Қолданбаға жүйенің әр түрлі журнал файлдарын оқуға рұқсат береді. Бұл оған планшетпен не істеп жатқаныңыз туралы ақпаратты, мүмкін жеке немесе құпия ақпаратты қоса, ашуға рұқсат береді."</string>
-    <string name="permdesc_readLogs" product="tv" msgid="9023899974809538988">"Қолданбаға жүйенің әр түрлі журнал файлдарынан оқуға рұқсат етеді. Бұл оған теледидармен не істеп жатқаныңыз туралы жалпы ақпаратты, мүмкін, жеке немесе құпия ақпаратты ашуға рұқсат етуі мүмкін."</string>
-    <string name="permdesc_readLogs" product="default" msgid="2063438140241560443">"Қолданбаға жүйенің әр түрлі журнал файлдарын оқуға рұқсат береді. Бұл оған телефонмен не істеп жатқаныңыз туралы ақпаратты, мүмкін жеке немесе құпия ақпаратты қоса, ашуға рұқсат береді."</string>
-    <string name="permlab_anyCodecForPlayback" msgid="715805555823881818">"ойнату үшін медиа декодерін қолдану"</string>
-    <string name="permdesc_anyCodecForPlayback" msgid="8283912488433189010">"Қолданбаға ойнату үшін орнатылған медиа декодерін қолдану мүмкіндігін береді."</string>
-    <string name="permlab_manageCaCertificates" msgid="1678391896786882014">"сенімді растау деректерін басқару"</string>
-    <string name="permdesc_manageCaCertificates" msgid="4015644047196937014">"Қолданбаларға Растау орталықтарының сертификаттарын сенімді растау деректері ретінде орнату және алып тастау мүмкіндігін береді."</string>
-    <string name="permlab_bindJobService" msgid="3637568367978271086">"қолданбаның жоспарланған фондық жұмысын орындау"</string>
-    <string name="permdesc_bindJobService" msgid="3473288460524119838">"Бұл рұқсат Android жүйесіне сұралғанда қолданбаны фонда іске қосуға рұқсат береді."</string>
-    <string name="permlab_diagnostic" msgid="8076743953908000342">"диаг меншігіндегі дереккөздерге оқу/жазу"</string>
-    <string name="permdesc_diagnostic" msgid="6608295692002452283">"Қолданбаға diag тобы иелік ететін кез келген ресурсты оқуға және оған жазуға рұқсат береді; мысалы, /dev ішіндегі файлдарға. Бұл жүйенің тұрақтылығына және қауіпсіздігіне әсер етуі мүмкін. Мұны өндіруші немесе оператор ТЕК жабдықты диагностикалау үшін пайдалануы керек."</string>
-    <string name="permlab_changeComponentState" msgid="6335576775711095931">"қолданба құрамдастарын қосу немесе өшіру"</string>
-    <string name="permdesc_changeComponentState" product="tablet" msgid="8887435740982237294">"Қолданбаға басқа қолданбаның құрамдасы қосылған-қосылмаған болуын өзгертуге рұқсат береді. Зиянкес қолданбалар мұны маңызды планшет мүмкіндіктерін өшіру үшін пайдалануы мүмкін. Бұл рұқсатты абайлап пайдалану керек, өйткені қолданба құрамдастары пайдалану мүмкін емес, үйлесімді емес немесе тұрақсыз күйге келуі мүмкін."</string>
-    <string name="permdesc_changeComponentState" product="tv" msgid="9151634188264231389">"Қолданбаға басқа қолданбаның құрамдасы қосылған-қосылмағанын өзгертуге рұқсат етеді. Зиянкес қолданбалар мұны маңызды ТД мүмкіндіктерін өшіру үшін пайдалануы мүмкін. Бұл рұқсатты сақтықпен пайдалану керек, өйткені қолданба құрамдастару пайдалану мүмкін емес, үйлесімді емес немесе тұрақсыз күйге келуі мүмкін."</string>
-    <string name="permdesc_changeComponentState" product="default" msgid="1827232484416505615">"Қолданбаға басқа қолданбаның құрамдасы қосылған-қосылмаған болуын өзгертуге рұқсат береді. Зиянкес қолданбалар мұны маңызды телефон мүмкіндіктерін өшіру үшін пайдалануы мүмкін. Бұл рұқсатты абайлап пайдалану керек, өйткені қолданба құрамдастары пайдалану мүмкін емес, үйлесімді емес немесе тұрақсыз күйге келуі мүмкін."</string>
-    <string name="permlab_grantRevokePermissions" msgid="4627315351093508795">"рұқсаттар беру немесе олардың күшін жою"</string>
-    <string name="permdesc_grantRevokePermissions" msgid="4088642654085850662">"Қолданбаға осы үшін немесе басқа қолданбалар үшін ерекше рұқсат беру немесе рұқсат күшін жою мүмкіндігін береді. Залалды колданбалар бұны рұқсат берілмеген функцияларға кіру үшін қолдануы мүмкін."</string>
-    <string name="permlab_setPreferredApplications" msgid="8463181628695396391">"таңдаулы қолданбаларды орнату"</string>
-    <string name="permdesc_setPreferredApplications" msgid="4973986762241783712">"Қолданбаға таңдаулы қолданбаларды өзгертуге рұқсат береді. Зиянкес қолданбалар сізден жеке деректерді жинау үшін іске қосылатын қолданбаларды тыныш өзгертіп, бар қолданбалардың спуфингін жасауы мүмкін."</string>
     <string name="permlab_writeSettings" msgid="2226195290955224730">"жүйе параметрлерін өзгерту"</string>
     <string name="permdesc_writeSettings" msgid="7775723441558907181">"Қолданбаға жүйенің параметрлерінің деректерін өзгертуге рұқсат береді. Зиянкес қолданбалар жүйенің конфигурациясын бүлдіруі мүмкін."</string>
-    <string name="permlab_writeSecureSettings" msgid="204676251876718288">"қауіпсіз жүйе параметрлерін өзгерту"</string>
-    <string name="permdesc_writeSecureSettings" msgid="8159535613020137391">"Қолданбаға жүйенің қорғалған параметрлерінің деректерін өзгертуге рұқсат береді. Қалыпты қолданбалардың пайдалануына арналмаған."</string>
-    <string name="permlab_writeGservices" msgid="2149426664226152185">"Google қызметтер картасын өзгерту"</string>
-    <string name="permdesc_writeGservices" msgid="1287309437638380229">"Қолданбаға Google қызметтерінің картасын өзгертуге рұқсат береді. Қалыпты қолданбалардың пайдалануына арналмаған."</string>
     <string name="permlab_receiveBootCompleted" msgid="5312965565987800025">"басталу барысында қосылу"</string>
     <string name="permdesc_receiveBootCompleted" product="tablet" msgid="7390304664116880704">"Қолданбаға жүйе жүктелуін аяқтағаннан кейін өзін іске қосуға рұқсат береді. Бұл планшеттің іске қосылуын ұзағырақ етуі және қолданбаның әрқашан жұмыс істеу арқылы жалпы планшетті баяулатуына мүмкіндік беруі мүмкін."</string>
     <string name="permdesc_receiveBootCompleted" product="tv" msgid="4525890122209673621">"Қолданбаға жүйе жүктелуін аяқтай сала өзін іске қосуға рұқсат етеді. Бұл ТД іске қосуды ұзағырақ етуі және қолданбаға әрқашан жұмыс істеп тұру арқылы бүкіл планшетті баяулатуға мүмкіндік беруі мүмкін."</string>
@@ -527,16 +324,8 @@
     <string name="permdesc_writeCallLog" product="tablet" msgid="6661806062274119245">"Қолданбаға сіздің планшетіңіздегі қоңырау тіркеуін, келетін немесе шығатын қоңыраулар туралы деректерді қоса, өзгерту мүмкіндігін береді. Залалды қолданбалар бұны сіздің қоңырау тіркеуіңізді өшіру үшін қолдануы мүмкін."</string>
     <string name="permdesc_writeCallLog" product="tv" msgid="4225034892248398019">"Қолданбаға ТД қоңыраулар журналын, соның ішінде, кіріс және шығыс қоңыраулар туралы деректерді өзгертуге рұқсат етеді. Зиянкес қолданбалар мұны қоңыраулар журналын өшіру немесе өзгерту үшін пайдалануы мүмкін."</string>
     <string name="permdesc_writeCallLog" product="default" msgid="683941736352787842">"Қолданбаға сіздің телефоныңыздың қоңырау тіркеуін, келетін немесе шығатын қоңыраулар туралы деректерді қоса, өзгерту мүмкіндігін береді. Залалды қолданбалар бұны сіздің қоңырау тіркеуіңізді өшіру үшін қолдануы мүмкін."</string>
-    <string name="permlab_readProfile" msgid="4701889852612716678">"өзіңіздің контакт картаңызды оқу"</string>
-    <string name="permdesc_readProfile" product="default" msgid="5462475151849888848">"Қолданбаға құрылғыда сақталған сіздің аты-жөніңіз және байланыс ақпаратыңыз сияқты жеке ақпаратты оқу мүмкіндігін береді. Бұл қолданба сізді анықтап, сіз туралы жеке ақпаратты басқаларға жібере алады дегенді білдіреді."</string>
-    <string name="permlab_writeProfile" msgid="907793628777397643">"өзіңіздің байланыс картаңызды өзгерту"</string>
-    <string name="permdesc_writeProfile" product="default" msgid="5552084294598465899">"Қолданбаға құрылғыда сақталған сіздің аты-жөніңіз және байланыс ақпаратыңыз сияқты жеке ақпаратты өзгерту немесе қосу мүмкіндігін береді. Бұл - қолданба сізді анықтап, сіз туралы жеке ақпаратты басқаларға жібере алады дегенді білдіреді."</string>
     <string name="permlab_bodySensors" msgid="4871091374767171066">"дене сен-ры (жүрек соғу жиіл. мон-ры сияқты)"</string>
     <string name="permdesc_bodySensors" product="default" msgid="4380015021754180431">"Қолданбаға жүрек соғу жиілігіңіз сияқты дене күйіңізді бақылайтын сенсорлардың деректеріне қатынасуға рұқсат етеді."</string>
-    <string name="permlab_readSocialStream" product="default" msgid="1268920956152419170">"әлеуметтік ағымды оқу"</string>
-    <string name="permdesc_readSocialStream" product="default" msgid="4255706027172050872">"Қолданбаға сіз және достарыңыздың әлеуметтік жаңартуларына кіру және синхрондау мүмкіндігін береді. Ақпарат бөліскенде абай болыңыз -- бұл қолданбаға сіз және достарыңызды әлеуметтік желілердегі қарым-қатынасты, құпиялығына қарамастан, оқу мүмкіндігін берді. Есіңізде болсын: бұл рұқсатты барлық әлеуметтік желілер қолданбайды."</string>
-    <string name="permlab_writeSocialStream" product="default" msgid="3504179222493235645">"әлеуметтік ағынға жазу"</string>
-    <string name="permdesc_writeSocialStream" product="default" msgid="3086557552204114849">"Қолданбаға сіздің достарыңыздың әлеуметтік желі жаңартуларын көрсету мүмкіндігін береді. Ақпарат бөліскенде абай болыңыз -- бұл қолданбаға сіздің досыңыздан келген сияқты болып көрінетін хабар жіберу мүмкіндігін береді. Есіңізде болсын: әлеуметтік желілер бұл рұқсатты қолданбауы мүмкін."</string>
     <string name="permlab_readCalendar" msgid="5972727560257612398">"күнтізбе шаралары мен құпия ақпаратты оқу"</string>
     <string name="permdesc_readCalendar" product="tablet" msgid="4216462049057658723">"Қолданбаға планшетте сақталған барлық күнтізбе шараларын, достар немесе әріптестердің шараларын қоса, оқу мүмкіндігін береді. Бұл қолданбаға күнтізбе деректерін, құпиялығы мен сезімталдығына қарамастан, бөлісу немесе сақтау мүмкіндігін беруі ықтимал."</string>
     <string name="permdesc_readCalendar" product="tv" msgid="3191352452242394196">"Қолданбаға теледидарда сақталған бүкіл күнтізбе оқиғаларын, соның ішінде, достардыкін немесе әріптестердікін, оқуға рұқсат етеді. Бұл қолданбаға құпиялығына немесе сезімталдығына қарамастан күнтізбе деректеріңізді бөлісуге рұқсат етуі мүмкін."</string>
@@ -545,40 +334,12 @@
     <string name="permdesc_writeCalendar" product="tablet" msgid="6679035520113668528">"Қолданбаға планшеттегі сізге өзгертуге болатын шараларды, достарыңыз бен әріптестеріңіздің шараларын қоса, қосу, алу және өзгерту мүмкіндігін береді. Бұл қолданбаға күнтізбе иелерінен келген сияқты көрсетілетін хабарлар жіберу немесе иесінің хабарынсыз шараларды өзгерту мүмкіндігін береді."</string>
     <string name="permdesc_writeCalendar" product="tv" msgid="1273290605500902507">"Қолданбаға сіз теледидарда өзгерте алатын оқиғаларды, соның ішінде, достардың немесе әріптестердің оқиғаларын қосуға, жоюға, өзгертуге рұқсат етеді. Бұл қолданбаға күнтізбе иелерінен келген болып көрінетін хабарларды жіберуге немесе иесінің білуінсіз оқиғаларды өзгертуге мүмкіндік беруі мүмкін."</string>
     <string name="permdesc_writeCalendar" product="default" msgid="2324469496327249376">"Қолданбаға телефондағы сізге өзгертуге болатын шараларды, достарыңыз бен әріптестеріңіздің шараларын қоса, қосу, алу және өзгерту мүмкіндігін береді. Бұл қолданбаға күнтізбе иелерінен келген сияқты көрсетілетін хабарлар жіберу немесе иесінің хабарынсыз шараларды өзгерту мүмкіндігін береді."</string>
-    <string name="permlab_accessMockLocation" msgid="8688334974036823330">"тест үшін аймақ көздеріне еліктеу"</string>
-    <string name="permdesc_accessMockLocation" msgid="5808711039482051824">"Тексеру үшін жасанды аймақ көздерін жасақтаңыз немесе жаңа аймақ жабдықтаушы орнатыңыз. Бұл қолданбаға аймақты және/немесе GPS немесе аймақ жабдықтаушы сияқты аймақ көздерінен оралған күйлерін үстінен жазу мүмкіндігін береді."</string>
     <string name="permlab_accessLocationExtraCommands" msgid="2836308076720553837">"қосымша аймақ жабдықтаушы пәрмендеріне қол жетімділік"</string>
     <string name="permdesc_accessLocationExtraCommands" msgid="6078307221056649927">"Қолданбаға орын жеткізушісінің қосымша пәрмендеріне қатынасуға рұқсат береді. Бұл қолданбаға GPS немесе басқа орын көздерінің жұмысына кедергі келтіруге рұқсат беруі мүмкін."</string>
-    <string name="permlab_installLocationProvider" msgid="6578101199825193873">"аймақ жабдықтаушыны орнатуға рұқсат беру"</string>
-    <string name="permdesc_installLocationProvider" msgid="9066146120470591509">"Тексеру үшін жасанды аймақ көздерін жасақтаңыз немесе жаңа аймақ жабдықтаушы орнатыңыз. Бұл қолданбаға аймақты және/немесе GPS немесе аймақ жабдықтаушы сияқты аймақ көздерінен оралған күйлерін үстінен жазу мүмкіндігін береді."</string>
     <string name="permlab_accessFineLocation" msgid="1191898061965273372">"нақты аймақ (GPS және желі негізделген)"</string>
     <string name="permdesc_accessFineLocation" msgid="5295047563564981250">"Қолданбаға Жаһандық Аймақ Анықтау Жүйесін (GPS) немесе ұялы мұнара және Wi-Fi сияқты желі арқылы аймақ анықтау қызметтерін қолданып, тұрған жеріңізді нақты анықтау мүмкіндігін береді. Бұл аймақ қызметтері қолданбаларға қол жетімді болу үшін қосылып тұруы қажет. Қолданбалар оны сіздің тұрған жеріңізді шамалап анықтау үшін қолдануы мүмкін және батарея тұтынуы мүмкін."</string>
     <string name="permlab_accessCoarseLocation" msgid="4887895362354239628">"шамаланған аймақ (желі негізінде)"</string>
     <string name="permdesc_accessCoarseLocation" msgid="2538200184373302295">"Қолданбаға сіздің тұрған жеріңізді шамалап анықтау мүмкіндігін береді. Бұл аймақ ұялы мұнара және Wi-Fi сияқты желі арқылы аймақ анықтау қызметтерін қолданатын аймақ анықтау функциясы арқылы анықталған. Бұл аймақ қызметтері қолданбаларға қол жетімді болу үшін қосылып тұруы қажет. Қолданбалар оны сіздің тұрған жеріңізді шамалап анықтау үшін қолдануы мүмкін."</string>
-    <string name="permlab_accessSurfaceFlinger" msgid="2363969641792388947">"SurfaceFlinger қызметіне кіру"</string>
-    <string name="permdesc_accessSurfaceFlinger" msgid="1041619516733293551">"Қолданбаға SurfaceFlinger төмен деңгейлі функцияларды пайдалануына рұқсат береді."</string>
-    <string name="permlab_readFrameBuffer" msgid="6690504248178498136">"жақтау буферін оқу"</string>
-    <string name="permdesc_readFrameBuffer" msgid="4937405521809454680">"Қолданбаға кадр буферінің мазмұнын оқуға рұқсат береді."</string>
-    <string name="permlab_accessInputFlinger" msgid="5348635270689553857">"InputFlinger қызметіне кіру"</string>
-    <string name="permdesc_accessInputFlinger" msgid="2104864941201226616">"Қолданбаның InputFlinger төмен деңгейлі функцияларды қолдану мүмкіндігін ұсынады."</string>
-    <string name="permlab_configureWifiDisplay" msgid="5595661694746742168">"Wifi дисплейлерін конфигурациялау"</string>
-    <string name="permdesc_configureWifiDisplay" msgid="7916815158690218065">"Қолданбаларға Wifi дисплейлерін конфигурациялау және қосылу мүмкіндігін береді."</string>
-    <string name="permlab_controlWifiDisplay" msgid="393641276723695496">"Wifi дисплейлерін басқару"</string>
-    <string name="permdesc_controlWifiDisplay" msgid="4543912292681826986">"Қолданбаларға Wifi дисплейлерінің төмен деңгейлі функцияларын басқару мүмкіндігін береді."</string>
-    <string name="permlab_controlVpn" msgid="2618442789397588200">"control Virtual Private Networks"</string>
-    <string name="permdesc_controlVpn" msgid="762852603315861214">"Allows the app to control low-level features of Virtual Private Networks."</string>
-    <string name="permlab_captureAudioOutput" msgid="6857134498402346708">"аудио шығысын жазып алу"</string>
-    <string name="permdesc_captureAudioOutput" msgid="6210597754212208853">"Қолданбаға аудио сигналды қабылдап, басқа бағытта жөнелту мүмкіндігін ұсынады."</string>
-    <string name="permlab_captureAudioHotword" msgid="1890553935650349808">"Байланыс сөзін анықтау"</string>
-    <string name="permdesc_captureAudioHotword" msgid="9151807958153056810">"Қолданбаға Байланыс сөзін анықтау үшін аудио сигнал қабылдау мүмкіндігін береді. Қабылдау артқы шепте орын алады бірақ басқа аудио сигналдарды қабылдауға бөгет жасамайды (мысалы, Camcorder)."</string>
-    <string name="permlab_modifyAudioRouting" msgid="7738060354490807723">"Аудионы бағыттау"</string>
-    <string name="permdesc_modifyAudioRouting" msgid="7205731074267199735">"Қолданбаға аудионы бағыттауды тікелей басқаруға және аудио саясатының шешімдерін қайта анықтауға рұқсат береді."</string>
-    <string name="permlab_captureVideoOutput" msgid="2246828773589094023">"бейне шығысын жазып алу"</string>
-    <string name="permdesc_captureVideoOutput" msgid="359481658034149860">"Қолданбаға бейне таспаны қабылдап, басқа бағытта жөнелту мүмкіндігін ұсынады."</string>
-    <string name="permlab_captureSecureVideoOutput" msgid="7815398969303382016">"қауіпсіз бейне таспасын жазып алу"</string>
-    <string name="permdesc_captureSecureVideoOutput" msgid="2779793064709350289">"Қолданбаға қауіпсіз бейне таспасын қабылдап, басқа бағытта жөнелту мүмкіндігін ұсынады."</string>
-    <string name="permlab_mediaContentControl" msgid="8749790560720562511">"медиа ойнатуды және метадеректерге қол жетімділікті басқару"</string>
-    <string name="permdesc_mediaContentControl" msgid="1637478200272062">"Қолданбаға медиа ойнатуды басқару және медиа ақпаратын жинау (атауы, авто...) мүмкіндігін береді."</string>
     <string name="permlab_modifyAudioSettings" msgid="6095859937069146086">"аудио параметрлерін өзгерту"</string>
     <string name="permdesc_modifyAudioSettings" msgid="3522565366806248517">"Қолданбаға дыбыс қаттылығы және аудио шығыс үндеткішін таңдау сияқты жаһандық аудио параметрлерін өзгерту мүмкіндігін береді."</string>
     <string name="permlab_recordAudio" msgid="3876049771427466323">"аудио жазу"</string>
@@ -587,68 +348,16 @@
     <string name="permdesc_sim_communication" msgid="5725159654279639498">"Қолданбаға SIM картасына пәрмен жіберу мүмкіндігін береді. Бұл өте қауіпті."</string>
     <string name="permlab_camera" msgid="3616391919559751192">"фотосурет жасау және бейне жазу"</string>
     <string name="permdesc_camera" msgid="8497216524735535009">"Қолданбаға камераны қолданып, фотосурет немесе бейне жазу мүмкіндігін береді. Бұл рұқсат камераны кез келген уақытта сіздің құптауыңызды қажет етпей қолдану мүмкіндігін береді."</string>
-    <string name="permlab_cameraDisableTransmitLed" msgid="2651072630501126222">"камера қолданыста болғанда жарық диодты шамы бар көрсеткішті өшіру"</string>
-    <string name="permdesc_cameraDisableTransmitLed" msgid="4764585465480295341">"Алдын ала орнатылған жүйе қолданбасына камераның жарық диодты көрсеткішті қолдануын өшіру мүмкіндігін береді."</string>
-    <string name="permlab_brick" product="tablet" msgid="2961292205764488304">"планшетті мүлдем өшіру"</string>
-    <string name="permlab_brick" product="tv" msgid="4912674222121249410">"ТД біржола өшіру"</string>
-    <string name="permlab_brick" product="default" msgid="8337817093326370537">"телефонды мүлдем өшіру"</string>
-    <string name="permdesc_brick" product="tablet" msgid="4334818808001699530">"Қолданбаға бүкіл планшетті біржола өшіруге рұқсат береді. Бұл өте қауіпті."</string>
-    <string name="permdesc_brick" product="tv" msgid="7070924544316356349">"Қолданбаға бүкіл теледидарды біржола өшіруге рұқсат береді. Бұл өте қауіпті."</string>
-    <string name="permdesc_brick" product="default" msgid="5788903297627283099">"Қолданбаға бүкіл телефонды біржола өшіруге рұқсат береді. Бұл өте қауіпті."</string>
-    <string name="permlab_reboot" product="tablet" msgid="3436634972561795002">"планшетті күштеп қайта қосу"</string>
-    <string name="permlab_reboot" product="tv" msgid="2112102119558886236">"ТД мәжбүрлеп қайта жүктеу"</string>
-    <string name="permlab_reboot" product="default" msgid="2898560872462638242">"телефонды күштеп қайта қосу"</string>
-    <string name="permdesc_reboot" product="tablet" msgid="8172056180063700741">"Қолданбаға планшетті мәжбүрлеп қайта жүктеуге рұқсат береді."</string>
-    <string name="permdesc_reboot" product="tv" msgid="7116222694344401650">"Қолданбаға ТД мәжбүрлеп қайта жүктеуге рұқсат етеді."</string>
-    <string name="permdesc_reboot" product="default" msgid="5326008124289989969">"Қолданбаға телефонды мәжбүрлеп қайта жүктеуге рұқсат береді."</string>
-    <string name="permlab_mount_unmount_filesystems" product="nosdcard" msgid="2927361537942591841">"USB жадының файлжүйесіне кіру"</string>
-    <string name="permlab_mount_unmount_filesystems" product="default" msgid="4402305049890953810">"SD картасының файлжүйесіне кіру"</string>
-    <string name="permdesc_mount_unmount_filesystems" msgid="1829290701658992347">"Қолданбаға алынбалы жад файлдық жүйелерін қосуға және ажыратуға рұқсат береді."</string>
-    <string name="permlab_mount_format_filesystems" product="nosdcard" msgid="6227819582624904972">"USB жадын өшіру"</string>
-    <string name="permlab_mount_format_filesystems" product="default" msgid="262582698639274056">"SD картасын өшіру"</string>
-    <string name="permdesc_mount_format_filesystems" msgid="8784268246779198627">"Қолданбаға алынбалы жадты пішімдеуге рұқсат береді."</string>
-    <string name="permlab_asec_access" msgid="3411338632002193846">"ішкі жад туралы ақпарат алу"</string>
-    <string name="permdesc_asec_access" msgid="3094563844593878548">"Қолданбаға ішкі жад туралы ақпарат алуға рұқсат береді."</string>
-    <string name="permlab_asec_create" msgid="6414757234789336327">"ішкі жадты жасақтау"</string>
-    <string name="permdesc_asec_create" msgid="4558869273585856876">"Қолданбаға ішкі жадты жасауға рұқсат береді."</string>
-    <string name="permlab_asec_destroy" msgid="526928328301618022">"ішкі жадты қирату"</string>
-    <string name="permdesc_asec_destroy" msgid="7218749286145526537">"Қолданбаға ішкі жадты жоюға рұқсат береді."</string>
-    <string name="permlab_asec_mount_unmount" msgid="8877998101944999386">"ішкі жадты қосу/ажырату"</string>
-    <string name="permdesc_asec_mount_unmount" msgid="3451360114902490929">"Қолданбаға ішкі жадты қосуға/ажыратуға рұқсат береді."</string>
-    <string name="permlab_asec_rename" msgid="7496633954080472417">"ішкі жад атауын өзгерту"</string>
-    <string name="permdesc_asec_rename" msgid="1794757588472127675">"Қолданбаға ішкі жадтың атын өзгертуге рұқсат береді."</string>
     <string name="permlab_vibrate" msgid="7696427026057705834">"тербелісті басқару"</string>
     <string name="permdesc_vibrate" msgid="6284989245902300945">"Қолданбаға вибраторды басқаруға рұқсат береді."</string>
     <string name="permlab_flashlight" msgid="2155920810121984215">"сигналдық шамды басқару"</string>
     <string name="permdesc_flashlight" msgid="6522284794568368310">"Қолданбаға қалта шамын басқаруға рұқсат береді."</string>
-    <string name="permlab_manageUsb" msgid="1113453430645402723">"USB құралдары үшін қалаулылар мен рұқсаттарды басқару"</string>
-    <string name="permdesc_manageUsb" msgid="7776155430218239833">"Қолданбаға USB құрылғыларының параметрлерін және рұқсаттарын басқаруға рұқсат береді."</string>
-    <string name="permlab_accessMtp" msgid="4953468676795917042">"MTP протоколын орындау"</string>
-    <string name="permdesc_accessMtp" msgid="6532961200486791570">"MTP USB протоколын орындау үшін орталық MTP жетегіне кіру мүмкіндігін береді."</string>
-    <string name="permlab_hardware_test" msgid="4148290860400659146">"құрылғыны тексеру"</string>
-    <string name="permdesc_hardware_test" msgid="6597964191208016605">"Қолданбаға жабдықты сынау мақсатында әр түрлі перифериялық құрылғыларды басқаруға рұқсат береді."</string>
-    <string name="permlab_fm" msgid="8749504526866832">"FM радиосына қатынасу"</string>
-    <string name="permdesc_fm" msgid="4145699441237962818">"Қолданбаға бағдарламаларды тыңдау үшін FM радиосына қатынасуға рұқсат береді."</string>
     <string name="permlab_callPhone" msgid="3925836347681847954">"нөмірлерге тікелей телефон шалу"</string>
     <string name="permdesc_callPhone" msgid="3740797576113760827">"Қолданбаға сіздің қатысуыңызсыз қоңырау шалу мүмкіндігін береді. Нәтижесінде қосымша төлем немесе күтпеген қоңырау алуыңыз мүмкін. Есіңізде болсын, қолданба төтенше байланыстарға қоңырау шала алмайды. Залалды қолданбалар сіздің рұқсатыңызсыз қоңыраулар шалып, күтпеген төлемдерге себеп болуы мүмкін."</string>
-    <string name="permlab_callPrivileged" msgid="4198349211108497879">"кез келген нөмірлерге тікелей телефон шалу"</string>
-    <string name="permdesc_callPrivileged" msgid="1689024901509996810">"Қолданбаға араласуыңызсыз кез келген телефон нөміріне, соның ішінде, төтенше нөмірлерге қоңырау шалуға рұқсат береді. Зиянкес қолданбалар төтенше қызметтерге қажет емес және заңсыз қоңыраулар шалуы мүмкін."</string>
-    <string name="permlab_performCdmaProvisioning" product="tablet" msgid="4842576994144604821">"тікелей CDMA планшет орнатуларын бастау"</string>
-    <string name="permlab_performCdmaProvisioning" product="tv" msgid="3485391974208100809">"CDMA ТД параметрлерін орнатуды тікелей бастау"</string>
-    <string name="permlab_performCdmaProvisioning" product="default" msgid="5604848095315421425">"тікелей CDMA телефон орнатуларын бастау"</string>
-    <string name="permdesc_performCdmaProvisioning" msgid="1994193538802314186">"Қолданбаға CDMA дайындауды бастауға рұқсат береді. Зиянкес қолданбалар CDMA дайындауды қажет емес кезде бастауы мүмкін."</string>
-    <string name="permlab_locationUpdates" msgid="7785408253364335740">"аймақ жаңарту хабарларын басқару"</string>
-    <string name="permdesc_locationUpdates" msgid="1120741557891438876">"Қолданбаға радиодан алынатын орынды жаңарту туралы хабарландыруларды қосуға/өшіруге рұқсат береді. Қалыпты қолданбалардың пайдалануына арналмаған."</string>
-    <string name="permlab_checkinProperties" msgid="7855259461268734914">"тіркелу деректеріне кіру"</string>
-    <string name="permdesc_checkinProperties" msgid="4024526968630194128">"Қолданбаға тіркеу қызметі арқылы кері жүктелген сипаттарға оқу/жазу қатынасына рұқсат береді. Қалыпты қолданбалардың пайдалануына арналмаған."</string>
-    <string name="permlab_bindGadget" msgid="776905339015863471">"виджеттерді таңдау"</string>
-    <string name="permdesc_bindGadget" msgid="8261326938599049290">"Қолданбаға жүйеге қай қолданба қай виджеттерді пайдалана алатынын айтуға рұқсат береді. Осы рұқсаты бар қолданба басқа қолданбаларға жеке деректерге қатынасты бере алады. Қалыпты қолданбалардың пайдалануына арналмаған."</string>
-    <string name="permlab_modifyPhoneState" msgid="8423923777659292228">"телефон күйін өзгерту"</string>
-    <string name="permdesc_modifyPhoneState" msgid="1029877529007686732">"Қолданбаға құрылғының телефон мүмкіндіктерін басқаруға рұқсат береді. Мұндай рұқсаты бар қолданба тіпті сізге хабарлаусыз желілерді ауыстыра алады, телефон радиосын қоса және өшіре алады және сол сияқты әрекеттерді орындай алады."</string>
+    <string name="permlab_accessImsCallService" msgid="3574943847181793918">"IMS қоңырау қызметін пайдалану"</string>
+    <string name="permdesc_accessImsCallService" msgid="8992884015198298775">"Сіздің қатысуыңызсыз қоңыраулар соғу үшін қолданбаға IMS қызметін пайдалануға рұқсат етеді."</string>
     <string name="permlab_readPhoneState" msgid="9178228524507610486">"телефон күйін оқу немесе анықтау"</string>
     <string name="permdesc_readPhoneState" msgid="1639212771826125528">"Қолданбаға құрылғыдағы телефон функцияларына кіру мүмкіндігін береді. Бұл рұқсат қолданбаға телефон нөмірі, құрылғы жеке анықтағышы, қоңырау белсенділігі және сол қоңырауға байланысты қашықтағы нөмірді анықтау мүмкіндігін береді."</string>
-    <string name="permlab_readPrecisePhoneState" msgid="5476483020282007597">"телефонның нақты күйлерін оқу"</string>
-    <string name="permdesc_readPrecisePhoneState" msgid="6648009074263855418">"Қолданбаның телефонның нақты күйлерін анықтау мүмкіндігін ұсынады. Бұл рұқсат қолданбаға қоңыраудың нағыз күйін анықтауға, яғни, қоңыраудың сол сәтте немесе артқы шепте орын алуын, сәтсіз қоңырауларды, деректердің нақты  байланысын немесе іске аспаған байланыстарды анықтау мүмкіндігін береді."</string>
     <string name="permlab_wakeLock" product="tablet" msgid="1531731435011495015">"планшетті ұйқыдан бөгеу"</string>
     <string name="permlab_wakeLock" product="tv" msgid="2601193288949154131">"ТД ұйықтауын болдырмау"</string>
     <string name="permlab_wakeLock" product="default" msgid="573480187941496130">"телефонды ұйқыдан бөгеу"</string>
@@ -659,59 +368,29 @@
     <string name="permdesc_transmitIr" product="tablet" msgid="5358308854306529170">"Қолданбаға планшеттің инфрақызыл қабылдағышын қолдану мүмкіндігін береді."</string>
     <string name="permdesc_transmitIr" product="tv" msgid="3926790828514867101">"Қолданбаға ТД инфрақызыл таратқышын пайдалануға рұқсат етеді."</string>
     <string name="permdesc_transmitIr" product="default" msgid="7957763745020300725">"Қолданбаға телефонның инфрақызыл қабылдағышын қолдану мүмкіндігін береді."</string>
-    <string name="permlab_devicePower" product="tablet" msgid="2787034722616350417">"планшетті қосу немесе өшіру"</string>
-    <string name="permlab_devicePower" product="tv" msgid="7579718349658943416">"ТД қуатын қосу немесе өшіру"</string>
-    <string name="permlab_devicePower" product="default" msgid="4928622470980943206">"телефонды қуат көзіне қосу немесе ажырату"</string>
-    <string name="permdesc_devicePower" product="tablet" msgid="6689862878984631831">"Қолданбаға планшетті қосуға немесе өшіруге рұқсат береді."</string>
-    <string name="permdesc_devicePower" product="tv" msgid="1334908641773273512">"Қолданбаға теледидарды қосуға немесе өшіруге рұқсат береді."</string>
-    <string name="permdesc_devicePower" product="default" msgid="6037057348463131032">"Қолданбаға телефонды қосуға немесе өшіруге рұқсат береді."</string>
-    <string name="permlab_userActivity" msgid="1677844893921729548">"дисплейдің күту уақытының бітуін қалпына келтіру"</string>
-    <string name="permdesc_userActivity" msgid="651746160252248024">"Қолданбаға дисплейдің күту уақытының бітуін қалпына келтіруге рұқсат етеді."</string>
-    <string name="permlab_factoryTest" msgid="3715225492696416187">"зауыт тесті режимінде жүргізу"</string>
-    <string name="permdesc_factoryTest" product="tablet" msgid="3952059318359653091">"Төмен деңгейлі өндіріс тесті ретінде қосып, планшеттің қатты дискісіне кіру мүмкіндігін беру. Планшет өндіріс тесті режимінде жұмыс істегенде ғана қол жетімді."</string>
-    <string name="permdesc_factoryTest" product="tv" msgid="2105643629211155695">"Төмен деңгейлі өндірушінің сынағы ретінде іске қосу, бұл ТД жабдығына толық қатынасуға рұқсат етеді. Тек ТД өндіруші сынағы режимінде жұмыс істегенде қол жетімді."</string>
-    <string name="permdesc_factoryTest" product="default" msgid="8136644990319244802">"Төмен деңгейлі өндіріс тесті ретінде қосып, телефонның қатты дискісіне кіру мүмкіндігін беру. Телефон өндіріс тесті режимінде жұмыс істегенде ғана қол жетімді."</string>
     <string name="permlab_setWallpaper" msgid="6627192333373465143">"артқы фонды орнату"</string>
     <string name="permdesc_setWallpaper" msgid="7373447920977624745">"Қолданбаға жүйелік экранның артқы фонын орнатуға рұқсат береді."</string>
     <string name="permlab_setWallpaperHints" msgid="3278608165977736538">"артқы фон өлшемін реттеу"</string>
     <string name="permdesc_setWallpaperHints" msgid="8235784384223730091">"Қолданбаға жүйелік экранның артқы фонының өлшемі туралы кеңестерді орнатуға рұқсат береді."</string>
-    <string name="permlab_masterClear" msgid="2315750423139697397">"жүйенің зауыттық параметрлерін қайта реттеу"</string>
-    <string name="permdesc_masterClear" msgid="3665380492633910226">"Қолданбаға барлық деректерді, конфигурацияны және орнатылған қолданбаларды өшіріп, жүйенің зауыттық параметрлерін толығымен қалпына келтіруге рұқсат береді."</string>
-    <string name="permlab_setTime" msgid="2021614829591775646">"уақыт реттеу"</string>
-    <string name="permdesc_setTime" product="tablet" msgid="1896341438151152881">"Қолданбаға планшет сағатының уақытын өзгертуге рұқсат береді."</string>
-    <string name="permdesc_setTime" product="tv" msgid="1826398919861882682">"Қолданбаға ТД сағатының уақытын өзгертуге рұқсат етеді."</string>
-    <string name="permdesc_setTime" product="default" msgid="1855702730738020">"Қолданбаға телефон сағатының уақытын өзгертуге рұқсат береді."</string>
     <string name="permlab_setTimeZone" msgid="2945079801013077340">"уақыт аймағын реттеу"</string>
     <string name="permdesc_setTimeZone" product="tablet" msgid="1676983712315827645">"Қолданбаға планшеттің уақыт белдеуін өзгертуге рұқсат береді."</string>
     <string name="permdesc_setTimeZone" product="tv" msgid="888864653946175955">"Қолданбаға ТД уақыт белдеуін өзгертуге рұқсат етеді."</string>
     <string name="permdesc_setTimeZone" product="default" msgid="4499943488436633398">"Қолданбаға телефонның уақыт белдеуін өзгертуге рұқсат береді."</string>
-    <string name="permlab_accountManagerService" msgid="4829262349691386986">"Есептік менеджер қызметі ретінде әрекет ету"</string>
-    <string name="permdesc_accountManagerService" msgid="1948455552333615954">"Қолданбаға ЕсептікжазбаРастаушыларына қоңырау шалу мүмкіндігін береді."</string>
     <string name="permlab_getAccounts" msgid="1086795467760122114">"құрылғыдағы есептік жазбаларды табу"</string>
     <string name="permdesc_getAccounts" product="tablet" msgid="2741496534769660027">"Қолданбаға планшет арқылы белгілі есептік жазбалар тізімін алу мүмкіндігін береді. Сіз орнатқан қолданбалар жасақтаған есептік жазбалар да қамтылуы мүмкін."</string>
     <string name="permdesc_getAccounts" product="tv" msgid="4190633395633907543">"Қолданбаға ТД үшін белгілі есептік жазбалар тізімін алуға рұқсат етеді. Бұл сіз орнатқан қолданбалар жасаған кез келген есептік жазбаларды қамтуы мүмкін."</string>
     <string name="permdesc_getAccounts" product="default" msgid="3448316822451807382">"Қолданбаға телефон арқылы белгілі есептік жазбалар тізімін алу мүмкіндігін береді. Сіз орнатқан қолданбалар жасақтаған есептік жазбалар да қамтылуы мүмкін."</string>
-    <string name="permlab_authenticateAccounts" msgid="5265908481172736933">"есептік жазбалар жасақтап, кілстсөздер тағайындау"</string>
-    <string name="permdesc_authenticateAccounts" msgid="5472124296908977260">"Қолданбаға AccountManager есептік жазба аутентификаторы мүмкіндіктерін пайдалануға, соның ішінде, есептік жазбаларды жасауға және олардың құпия сөздерін орнатуға рұқсат береді."</string>
-    <string name="permlab_manageAccounts" msgid="4983126304757177305">"есептік жазбаларды қосу немесе алып тастау"</string>
-    <string name="permdesc_manageAccounts" msgid="8698295625488292506">"Қолданбаларға есептік жазбаларды қосу және жою, әрі олардың құпия сөзін жою сияқты әрекеттерді орындауға рұқсат береді."</string>
-    <string name="permlab_useCredentials" msgid="235481396163877642">"құрылғыдағы есептік жазбаларды қолдану"</string>
-    <string name="permdesc_useCredentials" msgid="7984227147403346422">"Қолданбаға аутентификация таңбалауыштарын сұрауға рұқсат береді."</string>
     <string name="permlab_accessNetworkState" msgid="4951027964348974773">"желі байланыстарын көру"</string>
     <string name="permdesc_accessNetworkState" msgid="8318964424675960975">"Қолданбаға желі байланысы туралы ақпаратты, мысалы, қайсысы бар және қосылған деген сияқты, көру мүмкіндігін береді."</string>
     <string name="permlab_createNetworkSockets" msgid="8018758136404323658">"желіге толық қол жетімділік"</string>
     <string name="permdesc_createNetworkSockets" msgid="3403062187779724185">"Қолданбаларға желі ұяларын жасақтау және қалыпты желі протоколдарын қолдану мүмкіндігін береді. Деректерді интернетке жіберу үшін бұл рұқсат талап етілмес үшін браузер және басқа қолданбалар деректерді интернетке жіберу жолдарын қамтамасыз етеді."</string>
-    <string name="permlab_writeApnSettings" msgid="505660159675751896">"желі параметрлері мен кептелісті өзгерту/тоқтату"</string>
-    <string name="permdesc_writeApnSettings" msgid="5333798886412714193">"Қолданбаға желілік параметрлерді өзгертуге, әрі бүкіл желілік трафикті ұстап алуға және тексеруге, мысалы, кез келген APN прокси-серверін және портын өзгертуге рұқсат береді. Зиянкес қолданбалар сіздің білуіңізсіз желілік бумаларды бақылауы, қайта бағыттауы немесе өзгертуі мүмкін."</string>
     <string name="permlab_changeNetworkState" msgid="958884291454327309">"желі байланысын өзгерту"</string>
     <string name="permdesc_changeNetworkState" msgid="6789123912476416214">"Қолданбаға желілік қосылым күйін өзгертуге рұқсат береді."</string>
     <string name="permlab_changeTetherState" msgid="5952584964373017960">"интернетке байланыс түрін өзгерту"</string>
     <string name="permdesc_changeTetherState" msgid="1524441344412319780">"Қолданбаға байланысқан желілік қосылымның күйін өзгертуге рұқсат береді."</string>
-    <string name="permlab_changeBackgroundDataSetting" msgid="1400666012671648741">"тарихы туралы деректерді қолдану параметрлерін өзгерту"</string>
-    <string name="permdesc_changeBackgroundDataSetting" msgid="5347729578468744379">"Қолданбаға фондық деректерді пайдалану параметрін өзгертуге рұқсат береді."</string>
     <string name="permlab_accessWifiState" msgid="5202012949247040011">"Wi-Fi байланыстарын көру"</string>
     <string name="permdesc_accessWifiState" msgid="5002798077387803726">"Қолданбаға Wi-Fi желісі туралы, мысалы, Wi-Fi байланысының қосылғаны немесе қосылған Wi-Fi құрылғыларының атаулары сияқты, ақпаратты көру мүмкіндігін береді."</string>
-    <string name="permlab_changeWifiState" msgid="6550641188749128035">"Wi-Fi жалғану және ажырау"</string>
+    <string name="permlab_changeWifiState" msgid="6550641188749128035">"Wi-Fi желісіне қосылу/ажырау"</string>
     <string name="permdesc_changeWifiState" msgid="7137950297386127533">"Қолданбаларға Wi-Fi нүктелеріне қосылу және ажырау және Wi-Fi желілеріне арналған құрылғы конфигурацияларына өзгерістер енгізу мүмкіндігін береді."</string>
     <string name="permlab_changeWifiMulticastState" msgid="1368253871483254784">"Wi-Fi бірнеше мекенжайға ақпарат тарату мүмкіндігі"</string>
     <string name="permdesc_changeWifiMulticastState" product="tablet" msgid="7969774021256336548">"Қолданбаға Wi-Fi желісіндегі барлық құрылғыларға мекенжайлар тобы арқылы, сіздің планшетіңіз арқылы ғана емес, жіберілген жинақтарды алу мүмкіндігін береді. Бұл мекенжайлар тобы емес режимге қарағанда қуатты көбірек тұтынуы мүмкін."</string>
@@ -721,46 +400,47 @@
     <string name="permdesc_bluetoothAdmin" product="tablet" msgid="6921177471748882137">"Қолданбаға жергілікті Bluetooth планшетін конфигурациялауға, әрі қашықтағы құрылғыларды табуға және олармен жұптауға рұқсат береді."</string>
     <string name="permdesc_bluetoothAdmin" product="tv" msgid="3373125682645601429">"Қолданбаға жергілікті Bluetooth теледидарын конфигурациялауға, әрі қашықтағы құрылғыларды табуға және олармен жұптауға рұқсат етеді."</string>
     <string name="permdesc_bluetoothAdmin" product="default" msgid="8931682159331542137">"Қолданбаға жергілікті Bluetooth телефонын конфигурациялауға, әрі қашықтағы құрылғыларды табуға және олармен жұптауға рұқсат береді."</string>
-    <string name="permlab_bluetoothPriv" msgid="4009494246009513828">"Қолданбаның Bluetooth байланысымен жұпталу мүмкіндігі"</string>
-    <string name="permdesc_bluetoothPriv" product="tablet" msgid="8045735193417468857">"Қолданбаның қашықтан басқарылатын құрылығыларымен пайдаланушының қатысуынсыз жұпталу мүмкіндігін береді."</string>
-    <string name="permdesc_bluetoothPriv" product="tv" msgid="8045735193417468857">"Қолданбаның қашықтан басқарылатын құрылығыларымен пайдаланушының қатысуынсыз жұпталу мүмкіндігін береді."</string>
-    <string name="permdesc_bluetoothPriv" product="default" msgid="8045735193417468857">"Қолданбаның қашықтан басқарылатын құрылығыларымен пайдаланушының қатысуынсыз жұпталу мүмкіндігін береді."</string>
-    <string name="permlab_bluetoothMap" msgid="6372198338939197349">"Bluetooth MAP деректеріне қатынасу"</string>
-    <string name="permdesc_bluetoothMap" product="tablet" msgid="5784090105926959958">"Қолданбаға Bluetooth MAP деректеріне қатынасуға рұқсат етеді."</string>
-    <string name="permdesc_bluetoothMap" product="tv" msgid="5784090105926959958">"Қолданбаға Bluetooth MAP деректеріне қатынасуға рұқсат етеді."</string>
-    <string name="permdesc_bluetoothMap" product="default" msgid="5784090105926959958">"Қолданбаға Bluetooth MAP деректеріне қатынасуға рұқсат етеді."</string>
     <string name="permlab_accessWimaxState" msgid="4195907010610205703">"WiMAX байланысына жалғану және ажырау"</string>
     <string name="permdesc_accessWimaxState" msgid="6360102877261978887">"Қолданбаға WiMAX қосылғаны және қосылған қандай да WiMAX желісі жайлы ақпаратты анықтау мүмкіндігін береді."</string>
     <string name="permlab_changeWimaxState" msgid="2405042267131496579">"WiMAX күйін өзгерту"</string>
     <string name="permdesc_changeWimaxState" product="tablet" msgid="3156456504084201805">"Қолданбаларға планшетті WiMAX желілеріне қосу және ажырату мүмкіндіктерін береді."</string>
     <string name="permdesc_changeWimaxState" product="tv" msgid="6022307083934827718">"Қолданбаға теледидарға қосылуға және теледидарды WiMAX желілерінен ажыратуға рұқсат етеді."</string>
     <string name="permdesc_changeWimaxState" product="default" msgid="697025043004923798">"Қолданбаларға телефонды WiMAX желілеріне қосу және ажырату мүмкіндіктерін береді."</string>
-    <string name="permlab_scoreNetworks" msgid="6445777779383587181">"желілерді бағалау"</string>
-    <string name="permdesc_scoreNetworks" product="tablet" msgid="1304304745850215556">"Қолданбаға желілерді бағалауға және планшет қай желілерді жөн көруі керектігіне әсер етуге рұқсат береді."</string>
-    <string name="permdesc_scoreNetworks" product="tv" msgid="5444434643862417649">"Қолданбаға желілерді бағалауға және ТД қай желілерді жөн көруі керектігіне әсер етуге рұқсат береді."</string>
-    <string name="permdesc_scoreNetworks" product="default" msgid="1831501848178651379">"Қолданбаға желілерді бағалауға және телефон қай желілерді жөн көруі керектігіне әсер етуге рұқсат береді."</string>
     <string name="permlab_bluetooth" msgid="6127769336339276828">"Bluetooth құрылғыларымен жұпталу"</string>
     <string name="permdesc_bluetooth" product="tablet" msgid="3480722181852438628">"Қолданбаға планшеттегі Bluetooth конфигурациясын көру және жұпталған құрылғымен байланыс орнату немесе қабылдау мүмкіндігін береді."</string>
     <string name="permdesc_bluetooth" product="tv" msgid="3974124940101104206">"Қолданбаға теледидардағы Bluetooth конфигурациясын көруге және жұпталған құрылғылармен байланыстарды қабылдауға рұқсат етеді."</string>
     <string name="permdesc_bluetooth" product="default" msgid="3207106324452312739">"Қолданбаға телефондағы Bluetooth конфигурациясын көру және жұпталған құрылғымен байланыс орнату немесе қабылдау мүмкіндігін береді"</string>
-    <string name="permlab_nfc" msgid="4423351274757876953">"Жақын Өріс Байланысын басқару"</string>
+    <string name="permlab_nfc" msgid="4423351274757876953">"NFC функциясын басқару"</string>
     <string name="permdesc_nfc" msgid="7120611819401789907">"Қолданбаға NFC белгілерімен, карталармен және оқу құралдарымен байланысуға рұқсат береді."</string>
     <string name="permlab_disableKeyguard" msgid="3598496301486439258">"экран бекітпесін істен шығару"</string>
     <string name="permdesc_disableKeyguard" msgid="6034203065077122992">"Қолданбаларға кілтперне және басқа кілтсөзге қатысты қауіпсіздік шараларын өшіру мүмкіндігін береді. Мысалы, телефон кіріс қоңырауларын алғанда кілтпернені өшіреді және қоңырау аяқталғанда қайта қосады."</string>
+    <string name="permlab_manageFingerprint" msgid="5640858826254575638">"саусақ ізі жабдығын басқару"</string>
+    <string name="permdesc_manageFingerprint" msgid="178208705828055464">"Қолданбаға пайдаланатын саусақ ізі үлгілерін қосу және жою әдістерін шақыруға мүмкіндік береді."</string>
+    <string name="permlab_useFingerprint" msgid="3150478619915124905">"саусақ ізі жабдығын пайдалану"</string>
+    <string name="permdesc_useFingerprint" msgid="9165097460730684114">"Қолданбаға аутентификацияалу үшін саусақ ізі жабдығын пайдалануға мүмкіндік береді"</string>
+    <string name="fingerprint_acquired_partial" msgid="735082772341716043">"Саусақ ізі ішінара анықталды. Әрекетті қайталаңыз."</string>
+    <string name="fingerprint_acquired_insufficient" msgid="4596546021310923214">"Саусақ ізін өңдеу мүмкін емес. Әрекетті қайталаңыз."</string>
+    <string name="fingerprint_acquired_imager_dirty" msgid="1087209702421076105">"Саусақ ізі сенсоры лас. Тазалап, әрекетті қайталаңыз."</string>
+    <string name="fingerprint_acquired_too_fast" msgid="6470642383109155969">"Саусағыңызды тым жылдам қозғалттыңыз. Әрекетті қайталап көріңіз."</string>
+    <string name="fingerprint_acquired_too_slow" msgid="59250885689661653">"Саусағыңызды тым баяу қозғалттыңыз. Әрекетті қайталап көріңіз."</string>
+  <string-array name="fingerprint_acquired_vendor">
+  </string-array>
+    <string name="fingerprint_error_hw_not_available" msgid="7955921658939936596">"Саусақ ізі жабдығы қолжетімді емес."</string>
+    <string name="fingerprint_error_no_space" msgid="1055819001126053318">"Саусақ ізін сақтау мүмкін емес. Бар саусақ ізін жойыңыз."</string>
+    <string name="fingerprint_error_timeout" msgid="3927186043737732875">"Саусақ ізін күту уақыты бітті. Әрекетті қайталаңыз."</string>
+    <string name="fingerprint_error_canceled" msgid="4402024612660774395">"Саусақ ізі операциясынан бас тартылған."</string>
+    <string name="fingerprint_error_lockout" msgid="5536934748136933450">"Талпыныстар тым көп. Кейінірек қайталап көріңіз."</string>
+    <string name="fingerprint_error_unable_to_process" msgid="6107816084103552441">"Әрекетті қайталаңыз."</string>
+    <string name="fingerprint_name_template" msgid="5870957565512716938">"<xliff:g id="FINGERID">%d</xliff:g> саусағы"</string>
+  <string-array name="fingerprint_error_vendor">
+  </string-array>
+    <string name="fingerprint_icon_content_description" msgid="2340202869968465936">"Саусақ ізі белгішесі"</string>
     <string name="permlab_readSyncSettings" msgid="6201810008230503052">"синх параметрлерін оқу"</string>
     <string name="permdesc_readSyncSettings" msgid="2706745674569678644">"Қолданбаға есептік жазба синхрондау параметрлерін оқу мүмкіндігін береді. Мысалы, бұл арқылы People қолданбасының есептік жазбамен сихрондалғаны анықталуы мүмкін."</string>
     <string name="permlab_writeSyncSettings" msgid="5408694875793945314">"синх қосу және өшіру арасында ауысу"</string>
     <string name="permdesc_writeSyncSettings" msgid="8956262591306369868">"Қолданбаға есептік жазбаның синхрондау параметрлерін жөндеу мүмкіндігін береді. Мысалы, бұл People қолданбасын есептік жазбамен синхрондауды қосу үшін қолданылуы мүмкін."</string>
     <string name="permlab_readSyncStats" msgid="7396577451360202448">"үйлестіру санақтық ақпаратын оқу"</string>
     <string name="permdesc_readSyncStats" msgid="1510143761757606156">"Қолданбаға есептік жазбаның синхрондалу статистикаларын, оның ішінде синхрондау шараларының тарихы және қанша дерек синхрондалғаны жайлы, оқу мүмкіндігін береді."</string>
-    <string name="permlab_subscribedFeedsRead" msgid="4756609637053353318">"жазылма материалдарын оқу"</string>
-    <string name="permdesc_subscribedFeedsRead" msgid="5557058907906144505">"Қолданбаға қазіргі уақытта синхрондалған арналар туралы мәліметтерді алуға рұқсат береді."</string>
-    <string name="permlab_subscribedFeedsWrite" msgid="9015246325408209296">"жазылма материалдарын жазу"</string>
-    <string name="permdesc_subscribedFeedsWrite" msgid="6928930188826089413">"Қолданбаға қазіргі уақытта синхрондалған арналарды өзгертуге рұқсат береді. Зиянкес қолданбалар синхрондалған арналарды өзгертуі мүмкін."</string>
-    <string name="permlab_readDictionary" msgid="4107101525746035718">"сөздікке сіз қосқан шарттарды оқу"</string>
-    <string name="permdesc_readDictionary" msgid="659614600338904243">"Қолданбаға пайдаланушы сөздігінде сақталған барлық сөздер, аттар және фразаларды оқу мүмкіндігін береді."</string>
-    <string name="permlab_writeDictionary" msgid="2183110402314441106">"пайдаланушы анықтаған сөздікке сөздер қосу"</string>
-    <string name="permdesc_writeDictionary" msgid="8185385716255065291">"Қолданбаға пайдаланушы сөздігіне жаңа сөздерді жазуға рұқсат береді."</string>
     <string name="permlab_sdcardRead" product="nosdcard" msgid="367275095159405468">"Өзіңіздің USB жадыңыздың мазмұнын оқу"</string>
     <string name="permlab_sdcardRead" product="default" msgid="2188156462934977940">"Өзіңіздің SD картаңыздың мазмұнын оқу"</string>
     <string name="permdesc_sdcardRead" product="nosdcard" msgid="3446988712598386079">"Қолданбаға  USB жадыңыздың мазмұнын оқу мүмкіндігін береді."</string>
@@ -769,14 +449,6 @@
     <string name="permlab_sdcardWrite" product="default" msgid="8805693630050458763">"SD картаңыздың мазмұнын өзгерту немесе жою"</string>
     <string name="permdesc_sdcardWrite" product="nosdcard" msgid="6175406299445710888">"Қолданбаға USB қоймасына жазуға рұқсат береді."</string>
     <string name="permdesc_sdcardWrite" product="default" msgid="4337417790936632090">"Қолданбаға SD картасына жазуға рұқсат береді."</string>
-    <string name="permlab_mediaStorageWrite" product="default" msgid="6859839199706879015">"ішкі жад мазмұнын өзгерту/жою"</string>
-    <string name="permdesc_mediaStorageWrite" product="default" msgid="8189160597698529185">"Қолданбаға ішкі тасушы жадының мазмұнын өзгертуге рұқсат береді."</string>
-    <string name="permlab_manageDocs" product="default" msgid="5778318598448849829">"құжат жадын басқару"</string>
-    <string name="permdesc_manageDocs" product="default" msgid="8704323176914121484">"Қолданбаға құжат қорын басқару мүмкіндігін береді."</string>
-    <string name="permlab_sdcardAccessAll" msgid="8150613823900460576">"барлық пайдаланушылардың сыртқы жадына кіру"</string>
-    <string name="permdesc_sdcardAccessAll" msgid="3215208357415891320">"Қолданбаға барлық пайдаланушылардың сыртқы жадына кіру мүмкіндігін береді."</string>
-    <string name="permlab_cache_filesystem" msgid="5656487264819669824">"кэш файл жүйесіне кіру"</string>
-    <string name="permdesc_cache_filesystem" msgid="5578967642265550955">"Қолданбаға кэш файлдық жүйесін оқуға және оған жазуға рұқсат береді."</string>
     <string name="permlab_use_sip" msgid="2052499390128979920">"SIP қоңырауларын шалу/қабылдау"</string>
     <string name="permdesc_use_sip" msgid="2297804849860225257">"Қолданбаға SIP қоңырауларын шалуға және қабылдауға рұқсат етеді."</string>
     <string name="permlab_register_sim_subscription" msgid="3166535485877549177">"жаңа телекоммуникациялық SIM байланыстарын тіркеу"</string>
@@ -819,30 +491,41 @@
     <string name="permdesc_removeDrmCertificates" msgid="7272999075113400993">"Қолданбаға DRM сертификаттарын жоюға рұқсат етеді. Қалыпты қолданбалар үшін ешқашан қажет болмайды."</string>
     <string name="permlab_bindCarrierMessagingService" msgid="1490229371796969158">"оператордың хабар алмасу қызметіне байластыру"</string>
     <string name="permdesc_bindCarrierMessagingService" msgid="2762882888502113944">"Иесіне оператордың хабар алмасу қызметінің жоғарғы деңгейлі интерфейсіне байластыруға рұқсат етеді. Қалыпты қолданбалар үшін ешқашан қажет болмайды."</string>
+    <string name="permlab_bindCarrierServices" msgid="3233108656245526783">"оператор қызметтеріне қосылу"</string>
+    <string name="permdesc_bindCarrierServices" msgid="1391552602551084192">"Иесіне оператор қызметтеріне қосылуға мүмкіндік береді. Қалыпты қолданбалар үшін қажет болмайды."</string>
+    <string name="permlab_access_notification_policy" msgid="4247510821662059671">"«Мазаламау» режиміне кіру"</string>
+    <string name="permdesc_access_notification_policy" msgid="3296832375218749580">"Қолданбаға «Мазаламау» конфигурациясын оқу және жазу мүмкіндігін береді."</string>
     <string name="policylab_limitPassword" msgid="4497420728857585791">"Кілтсөз ережелерін тағайындау"</string>
-    <string name="policydesc_limitPassword" msgid="3252114203919510394">"Экранды ашу кілтсөздерінің ұзындығы мен қолдануға болатын таңбаларды басқару."</string>
+    <string name="policydesc_limitPassword" msgid="2502021457917874968">"Экран бекітпесінің құпия сөздерінің және PIN кодтарының ұзындығын және оларда рұқсат етілген таңбаларды басқару."</string>
     <string name="policylab_watchLogin" msgid="914130646942199503">"Экранды ашу әркеттерін бақылау"</string>
     <string name="policydesc_watchLogin" product="tablet" msgid="3215729294215070072">"Экран бекітпесін ашқан кезде терілген қате құпия сөздердің санын бақылау және планшетті бекіту немесе тым көп қате құпия сөздер терілген болса, планшеттің бүкіл деректерін өшіру."</string>
     <string name="policydesc_watchLogin" product="TV" msgid="2707817988309890256">"Экран бекітпесін ашу кезінде терілген дұрыс емес құпия сөздердің санын бақылау және тым көп дұрыс емес құпия сөз терілсе, ТД бекіту немесе бүкіл ТД деректерін өшіру."</string>
     <string name="policydesc_watchLogin" product="default" msgid="5712323091846761073">"Экран бекітпесін ашқан кезде терілген қате құпия сөздердің санын бақылау және телефонды бекіту немесе тым көп қате құпия сөздер терілген болса, телефонның бүкіл деректерін өшіру."</string>
-    <string name="policylab_resetPassword" msgid="2620077191242688955">"Экранды ашу кілтсөзін өзгерту"</string>
-    <string name="policydesc_resetPassword" msgid="605963962301904458">"Экранды ашу кілтсөзін өзгерту."</string>
+    <string name="policydesc_watchLogin_secondaryUser" product="tablet" msgid="4280246270601044505">"Экран бекітпесін ашқанда терілген қате құпия сөздердің санын бақылау және тым көп қате құпия сөздер терілсе, планшетті бекіту немесе осы пайдаланушының барлық деректерін өшіру."</string>
+    <string name="policydesc_watchLogin_secondaryUser" product="TV" msgid="3484832653564483250">"Экран бекітпесін ашқанда терілген қате құпия сөздердің санын бақылау және тым көп қате құпия сөздер терілсе, теледидарды бекіту немесе осы пайдаланушының барлық деректерін өшіру."</string>
+    <string name="policydesc_watchLogin_secondaryUser" product="default" msgid="2185480427217127147">"Экран бекітпесін ашқанда терілген қате құпия сөздердің санын бақылау және тым көп қате құпия сөздер терілсе, телефонды бекіту немесе осы пайдаланушының барлық деректерін өшіру."</string>
+    <string name="policylab_resetPassword" msgid="4934707632423915395">"Экран бекітпесін өзгерту"</string>
+    <string name="policydesc_resetPassword" msgid="1278323891710619128">"Экран бекітпесін өзгерту."</string>
     <string name="policylab_forceLock" msgid="2274085384704248431">"Экранды бекіту"</string>
     <string name="policydesc_forceLock" msgid="1141797588403827138">"Экранның қашан және қалай бекітілетінін басқару."</string>
     <string name="policylab_wipeData" msgid="3910545446758639713">"Барлық деректерді өшіру"</string>
     <string name="policydesc_wipeData" product="tablet" msgid="4306184096067756876">"Планшет дерекқорын ескертусіз, зауыттық дерекқорын қайта реттеу арқылы өшіру."</string>
     <string name="policydesc_wipeData" product="tv" msgid="5816221315214527028">"Зауыттық деректерді қалпына келтіруді орындау арқылы ТД деректерін ескертусіз өшіру."</string>
-    <string name="policydesc_wipeData" product="default" msgid="5096895604574188391">"Телефон дерекқорын ескертусіз, зауыттық дерекқорын қайта реттеу арқылы өшіру."</string>
+    <string name="policydesc_wipeData" product="default" msgid="5096895604574188391">"Зауыттық деректерге қайтару арқылы телефон деректерін ескертусіз өшіру."</string>
+    <string name="policylab_wipeData_secondaryUser" msgid="8362863289455531813">"Пайдаланушы деректерін өшіру"</string>
+    <string name="policydesc_wipeData_secondaryUser" product="tablet" msgid="6336255514635308054">"Осы пайдаланушының осы планшеттегі деректерін ескертусіз өшіру."</string>
+    <string name="policydesc_wipeData_secondaryUser" product="tv" msgid="2086473496848351810">"Осы пайдаланушының осы теледидардағы деректерін ескертусіз өшіру."</string>
+    <string name="policydesc_wipeData_secondaryUser" product="default" msgid="6787904546711590238">"Осы пайдаланушының осы телефондағы деректерін ескертусіз өшіру."</string>
     <string name="policylab_setGlobalProxy" msgid="2784828293747791446">"Құрылғы жаһандық прокси қызметін орнату"</string>
-    <string name="policydesc_setGlobalProxy" msgid="6387497466660154931">"Саясат қосылғанда қолдану үшін құрылғы жаһандық прокси қызметін орнату. Бірінші құрылғы әкімшісі ғана қолданыстағы жаһандық проксиді орнатады."</string>
-    <string name="policylab_expirePassword" msgid="885279151847254056">"Экранды бекіту кілт сөзінің жарамдылық мерзімін тағайындау"</string>
-    <string name="policydesc_expirePassword" msgid="1729725226314691591">"Экранды бекіту кілтсөзін өзгерту жиілігін басқару."</string>
+    <string name="policydesc_setGlobalProxy" msgid="8459859731153370499">"Саясат қосулы болғанда пайдаланылатын құрылғының ғаламдық прокси-серверін орнатыңыз. Ғаламдық прокси-серверді тек құрылғы иесі орната алады."</string>
+    <string name="policylab_expirePassword" msgid="5610055012328825874">"Экран бекітпесі құпия сөзінің мерзімін орнату"</string>
+    <string name="policydesc_expirePassword" msgid="5367525762204416046">"Экран бекітпесінің құпия сөзін, PIN кодын немесе өрнегін өзгерту жиілігін өзгерту."</string>
     <string name="policylab_encryptedStorage" msgid="8901326199909132915">"Жад қорының шрифтін тағайындау"</string>
     <string name="policydesc_encryptedStorage" msgid="2637732115325316992">"Сақталған қолданба деректерінің кодталуын қажет етеді."</string>
     <string name="policylab_disableCamera" msgid="6395301023152297826">"Камераларды өшіру"</string>
     <string name="policydesc_disableCamera" msgid="2306349042834754597">"Құрылғыдағы барлық камералар қолданысын бөгеу."</string>
-    <string name="policylab_disableKeyguardFeatures" msgid="266329104542638802">"Кілтпернедегі функциялары өшіру"</string>
-    <string name="policydesc_disableKeyguardFeatures" msgid="3467082272186534614">"Кілтпернедегі кейбір функцияларды қолдануды бөгеу."</string>
+    <string name="policylab_disableKeyguardFeatures" msgid="8552277871075367771">"Экран құлпы функцияларын өшіру"</string>
+    <string name="policydesc_disableKeyguardFeatures" msgid="2044755691354158439">"Кейбір экранды құлыптау мүмкіндіктерін пайдалануға тыйым салынады."</string>
   <string-array name="phoneTypes">
     <item msgid="8901098336658710359">"Үй"</item>
     <item msgid="869923650527136615">"Ұялы тел."</item>
@@ -930,7 +613,7 @@
     <string name="imProtocolYahoo" msgid="8271439408469021273">"Yahoo"</string>
     <string name="imProtocolSkype" msgid="9019296744622832951">"Skype"</string>
     <string name="imProtocolQq" msgid="8887484379494111884">"QQ"</string>
-    <string name="imProtocolGoogleTalk" msgid="493902321140277304">"Кездесулер"</string>
+    <string name="imProtocolGoogleTalk" msgid="493902321140277304">"Hangouts"</string>
     <string name="imProtocolIcq" msgid="1574870433606517315">"ICQ"</string>
     <string name="imProtocolJabber" msgid="2279917630875771722">"Jabber"</string>
     <string name="imProtocolNetMeeting" msgid="8287625655986827971">"NetMeeting"</string>
@@ -941,16 +624,16 @@
     <string name="relationTypeAssistant" msgid="6274334825195379076">"Көмекші"</string>
     <string name="relationTypeBrother" msgid="8757913506784067713">"Аға-іні"</string>
     <string name="relationTypeChild" msgid="1890746277276881626">"Бала"</string>
-    <string name="relationTypeDomesticPartner" msgid="6904807112121122133">"Үй серіктес"</string>
+    <string name="relationTypeDomesticPartner" msgid="6904807112121122133">"Азаматтық жолдас"</string>
     <string name="relationTypeFather" msgid="5228034687082050725">"Әке"</string>
     <string name="relationTypeFriend" msgid="7313106762483391262">"Дос"</string>
-    <string name="relationTypeManager" msgid="6365677861610137895">"Менеджер"</string>
+    <string name="relationTypeManager" msgid="6365677861610137895">"Бастық"</string>
     <string name="relationTypeMother" msgid="4578571352962758304">"Ана"</string>
     <string name="relationTypeParent" msgid="4755635567562925226">"Ата-ана"</string>
     <string name="relationTypePartner" msgid="7266490285120262781">"Серіктес"</string>
     <string name="relationTypeReferredBy" msgid="101573059844135524">"Ұсынған"</string>
     <string name="relationTypeRelative" msgid="1799819930085610271">"Туыс"</string>
-    <string name="relationTypeSister" msgid="1735983554479076481">"Әпке"</string>
+    <string name="relationTypeSister" msgid="1735983554479076481">"Әпке/сіңлі/қарындас"</string>
     <string name="relationTypeSpouse" msgid="394136939428698117">"Жұбай"</string>
     <string name="sipAddressTypeCustom" msgid="2473580593111590945">"Қалыпты"</string>
     <string name="sipAddressTypeHome" msgid="6093598181069359295">"Үй"</string>
@@ -972,11 +655,11 @@
     <string name="lockscreen_instructions_when_pattern_enabled" msgid="46154051614126049">"Бекітпесін ашу үшін немесе төтенше қоңырауды табу үшін Мәзір тармағын басыңыз."</string>
     <string name="lockscreen_instructions_when_pattern_disabled" msgid="686260028797158364">"Ашу үшін Мәзір пернесін басыңыз."</string>
     <string name="lockscreen_pattern_instructions" msgid="7478703254964810302">"Бекітпесін ашу үшін кескінді сызыңыз"</string>
-    <string name="lockscreen_emergency_call" msgid="5347633784401285225">"Төтенше қоңырау"</string>
+    <string name="lockscreen_emergency_call" msgid="5298642613417801888">"Төтенше жағдай"</string>
     <string name="lockscreen_return_to_call" msgid="5244259785500040021">"Қоңырауға оралу"</string>
     <string name="lockscreen_pattern_correct" msgid="9039008650362261237">"Дұрыс!"</string>
-    <string name="lockscreen_pattern_wrong" msgid="4317955014948108794">"Әрекетті қайталау"</string>
-    <string name="lockscreen_password_wrong" msgid="5737815393253165301">"Әрекетті қайталау"</string>
+    <string name="lockscreen_pattern_wrong" msgid="4317955014948108794">"Қайталап көріңіз"</string>
+    <string name="lockscreen_password_wrong" msgid="5737815393253165301">"Қайталап көріңіз"</string>
     <string name="faceunlock_multiple_failures" msgid="754137583022792429">"Бет-әлпет арқылы ашу әрекеттері анықталған шегінен асып кетті"</string>
     <string name="lockscreen_missing_sim_message_short" msgid="5099439277819215399">"SIM картасы жоқ"</string>
     <string name="lockscreen_missing_sim_message" product="tablet" msgid="151659196095791474">"Планшетте SIM картасы жоқ."</string>
@@ -999,9 +682,9 @@
     <string name="lockscreen_sim_puk_locked_instructions" msgid="8127916255245181063">"Пайдаланушы нұсқаулығын қараңыз немесе тұтынушыларды қолдау орталығына хабарласыңыз."</string>
     <string name="lockscreen_sim_locked_message" msgid="8066660129206001039">"SIM картасы бөгелген."</string>
     <string name="lockscreen_sim_unlock_progress_dialog_message" msgid="595323214052881264">"SIM картаны ашуда…"</string>
-    <string name="lockscreen_too_many_failed_attempts_dialog_message" msgid="6481623830344107222">"Бекітпесін ашу өрнегін <xliff:g id="NUMBER_0">%d</xliff:g> рет қате салдыңыз. \n\n <xliff:g id="NUMBER_1">%d</xliff:g> секундтан кейін әрекетті қайталаңыз."</string>
-    <string name="lockscreen_too_many_failed_password_attempts_dialog_message" msgid="2725973286239344555">"Құпия сөзді <xliff:g id="NUMBER_0">%d</xliff:g> рет қате тердіңіз. \n\n <xliff:g id="NUMBER_1">%d</xliff:g> секундтан кейін әрекетті қайталаңыз."</string>
-    <string name="lockscreen_too_many_failed_pin_attempts_dialog_message" msgid="6216672706545696955">"PIN кодын <xliff:g id="NUMBER_0">%d</xliff:g> рет қате тердіңіз. \n\n <xliff:g id="NUMBER_1">%d</xliff:g> секундтан кейін әркетті қайталаңыз."</string>
+    <string name="lockscreen_too_many_failed_attempts_dialog_message" msgid="6481623830344107222">"Құлыпты ашу өрнегін <xliff:g id="NUMBER_0">%d</xliff:g> рет қате салдыңыз. \n\n <xliff:g id="NUMBER_1">%d</xliff:g> секундтан кейін әрекетті қайталаңыз."</string>
+    <string name="lockscreen_too_many_failed_password_attempts_dialog_message" msgid="2725973286239344555">"Құпия сөзді <xliff:g id="NUMBER_0">%d</xliff:g> рет қате тердіңіз. \n\n <xliff:g id="NUMBER_1">%d</xliff:g> секундтан кейін қайталаңыз."</string>
+    <string name="lockscreen_too_many_failed_pin_attempts_dialog_message" msgid="6216672706545696955">"PIN кодын <xliff:g id="NUMBER_0">%d</xliff:g> рет қате тердіңіз. \n\n <xliff:g id="NUMBER_1">%d</xliff:g> секундтан кейін қайталаңыз."</string>
     <string name="lockscreen_failed_attempts_almost_glogin" product="tablet" msgid="9191611984625460820">"Бекітпесін ашу өрнегін <xliff:g id="NUMBER_0">%d</xliff:g> рет қате салдыңыз. Тағы <xliff:g id="NUMBER_1">%d</xliff:g> сәтсіз әрекеттен кейін сізден Google жүйесіне кіріп планшет бекітпесін ашу сұралады.\n\n <xliff:g id="NUMBER_2">%d</xliff:g> секундтан кейін әрекетті қайталаңыз."</string>
     <string name="lockscreen_failed_attempts_almost_glogin" product="tv" msgid="5316664559603394684">"Бекітпесін ашу өрнегін <xliff:g id="NUMBER_0">%d</xliff:g> рет дұрыс емес салдыңыз. Тағы <xliff:g id="NUMBER_1">%d</xliff:g> сәтсіз әрекеттен кейін сізден Google кіруді пайдаланып ТД бекітпесін ашу сұралады.\n\n Әрекетті <xliff:g id="NUMBER_2">%d</xliff:g> секундтан кейін қайталаңыз."</string>
     <string name="lockscreen_failed_attempts_almost_glogin" product="default" msgid="2590227559763762751">"Бекітпесін ашу өрнегін <xliff:g id="NUMBER_0">%d</xliff:g> рет қате салдыңыз. Тағы <xliff:g id="NUMBER_1">%d</xliff:g> сәтсіз әрекеттен кейін сізден Google жүйесіне кіріп телефон бекітпесін ашу сұралады.\n\n <xliff:g id="NUMBER_2">%d</xliff:g> секундтан кейін әрекетті қайталаңыз."</string>
@@ -1028,7 +711,9 @@
     <string name="lockscreen_access_pattern_start" msgid="3941045502933142847">"Кескін басталды"</string>
     <string name="lockscreen_access_pattern_cleared" msgid="5583479721001639579">"Кескін өшірілді"</string>
     <string name="lockscreen_access_pattern_cell_added" msgid="6756031208359292487">"Тор қосылды"</string>
+    <string name="lockscreen_access_pattern_cell_added_verbose" msgid="7264580781744026939">"<xliff:g id="CELL_INDEX">%1$s</xliff:g> ұяшығы қосылды"</string>
     <string name="lockscreen_access_pattern_detected" msgid="4988730895554057058">"Кескін аяқталды"</string>
+    <string name="lockscreen_access_pattern_area" msgid="400813207572953209">"Өрнек аумағы."</string>
     <string name="keyguard_accessibility_widget_changed" msgid="5678624624681400191">"%1$s. %2$d виджет, барлығы %3$d."</string>
     <string name="keyguard_accessibility_add_widget" msgid="8273277058724924654">"Виджет қосу."</string>
     <string name="keyguard_accessibility_widget_empty_slot" msgid="1281505703307930757">"Бос"</string>
@@ -1097,24 +782,10 @@
     <string name="permdesc_writeHistoryBookmarks" product="default" msgid="8497389531014185509">"Қолданбаларға телефонда сақталған Браузер кіріп шыққан барлық URL тарихын және Браузер бетбелгілерін өзгерту мүмкіндігін береді. Есіңізде болсын: бұл рұқсатты үшінші жақ браузерлері немесе веб шолу қабілеті бар басқа қолданбалар қолданбауы мүмкін."</string>
     <string name="permlab_setAlarm" msgid="1379294556362091814">"дабылды орнату"</string>
     <string name="permdesc_setAlarm" msgid="316392039157473848">"Қолданбаға орнатылған оятқыш қолданбасында дабылды орнатуға рұқсат береді. Кейбір қолданбаларда бұл мүмкіндік іске асырылмауы мүмкін."</string>
-    <string name="permlab_writeVoicemail" msgid="7309899891683938100">"дауыстық хабарлар жазу"</string>
-    <string name="permdesc_writeVoicemail" msgid="6592572839715924830">"Қолданбаға дауыстық поштаңыздың «Кіріс» қалтасындағы хабарларды өзгертуге және жоюға рұқсат етеді."</string>
     <string name="permlab_addVoicemail" msgid="5525660026090959044">"дауыс хабарын қосу"</string>
     <string name="permdesc_addVoicemail" msgid="6604508651428252437">"Қолданбаға дауыстық поштаңыздың «Кіріс» қалтасына хабарлар қосуға рұқсат береді."</string>
-    <string name="permlab_readVoicemail" msgid="8415201752589140137">"дауыстық поштаны оқу"</string>
-    <string name="permdesc_readVoicemail" msgid="8926534735321616550">"Қолданбаға дауыстық хабарларыңызды оқуға рұқсат етеді."</string>
     <string name="permlab_writeGeolocationPermissions" msgid="5962224158955273932">"браузердің геолокация рұқсаттарын өзгерту"</string>
     <string name="permdesc_writeGeolocationPermissions" msgid="1083743234522638747">"Қолданбаға браузердің геолокация рұқсаттарын өзгертуге рұқсат береді. Зиянкес қолданбалар мұны кездейсоқ веб-сайттарға орын туралы ақпаратты жіберуге рұқсат беру үшін пайдалануы мүмкін."</string>
-    <string name="permlab_packageVerificationAgent" msgid="5568139100645829117">"жинақтарды растау"</string>
-    <string name="permdesc_packageVerificationAgent" msgid="8437590190990843381">"Қолданбаға буманы орнатуға болатынын тексеруге рұқсат береді."</string>
-    <string name="permlab_bindPackageVerifier" msgid="4187786793360326654">"жинақ растау қызметіне байланыстыру"</string>
-    <string name="permdesc_bindPackageVerifier" msgid="3180741773233862126">"Пайдаланушыға бума верификаторларының сұрауларын жасауға рұқсат береді. Қалыпты қолданбалар үшін ешқашан қажет болмайды."</string>
-    <string name="permlab_serialPort" msgid="546083327654631076">"сериялық портқа кіру"</string>
-    <string name="permdesc_serialPort" msgid="2991639985224598193">"Пайдаланушыға Сериялық Менеджер қолданба бағдарламалау интерфейсін қолданып, сериялық порттарға кіру мүмкіндігін ұсынады."</string>
-    <string name="permlab_accessContentProvidersExternally" msgid="5077774297943409285">"мазмұн жабдықтаушыларға сырттан қатынасу"</string>
-    <string name="permdesc_accessContentProvidersExternally" msgid="4544346486697853685">"Пайдаланушыға қабыршық арқылы келетін мазмұн жабдықтушыларға кіру мүмкіндігін ұсынады. Қалыпты қолданбаны ешқашан қажет етпейді."</string>
-    <string name="permlab_updateLock" msgid="3527558366616680889">"құрылғылардың автоматты жаңартылуын бөгеу"</string>
-    <string name="permdesc_updateLock" msgid="1655625832166778492">"Қолданбаға құрылғыны жаңарту үшін интерактивті емес қайта қосуды қай уақытта жүргізсе дұрыс болатыны жайлы ақпарат ұсыну мүмкіндігін береді."</string>
     <string name="save_password_message" msgid="767344687139195790">"Браузердің осы кілтсөзді жадында сақтауын қалайсыз ба?"</string>
     <string name="save_password_notnow" msgid="6389675316706699758">"Қазір емес"</string>
     <string name="save_password_remember" msgid="6491879678996749466">"Жадында сақтау"</string>
@@ -1138,75 +809,12 @@
     <string name="enable_explore_by_touch_warning_message" product="default" msgid="2708199672852373195">"<xliff:g id="ACCESSIBILITY_SERVICE_NAME">%1$s</xliff:g> Сенсор арқылы шолу функциясын іске қосуды қалайды. Сенсор арқылы шолу функциясы қосылғанда саусақ астындағы нысан сипаттарын естуге немесе көруге болады немесе телефонмен қатынасу қимылдарын орындауға болады."</string>
     <string name="oneMonthDurationPast" msgid="7396384508953779925">"1 ай бұрын"</string>
     <string name="beforeOneMonthDurationPast" msgid="909134546836499826">"Осыған дейін 1 ай бұрын"</string>
-  <plurals name="num_seconds_ago">
-    <item quantity="one" msgid="4869870056547896011">"1 секунд бұрын"</item>
-    <item quantity="other" msgid="3903706804349556379">"<xliff:g id="COUNT">%d</xliff:g> секунд бұрын"</item>
-  </plurals>
-  <plurals name="num_minutes_ago">
-    <item quantity="one" msgid="3306787433088810191">"1 минут бұрын"</item>
-    <item quantity="other" msgid="2176942008915455116">"<xliff:g id="COUNT">%d</xliff:g> минут бұрын"</item>
-  </plurals>
-  <plurals name="num_hours_ago">
-    <item quantity="one" msgid="9150797944610821849">"1 сағат бұрын"</item>
-    <item quantity="other" msgid="2467273239587587569">"<xliff:g id="COUNT">%d</xliff:g> сағат бұрын"</item>
-  </plurals>
-  <plurals name="last_num_days">
-    <item quantity="other" msgid="3069992808164318268">"Соңғы <xliff:g id="COUNT">%d</xliff:g> күнде"</item>
-  </plurals>
+    <plurals name="last_num_days" formatted="false" msgid="5104533550723932025">
+      <item quantity="other">Соңғы <xliff:g id="COUNT_1">%d</xliff:g> күн</item>
+      <item quantity="one">Соңғы <xliff:g id="COUNT_0">%d</xliff:g> күн</item>
+    </plurals>
     <string name="last_month" msgid="3959346739979055432">"Соңғы ай"</string>
     <string name="older" msgid="5211975022815554840">"Ескілеу"</string>
-  <plurals name="num_days_ago">
-    <item quantity="one" msgid="861358534398115820">"кеше"</item>
-    <item quantity="other" msgid="2479586466153314633">"<xliff:g id="COUNT">%d</xliff:g> күн бұрын"</item>
-  </plurals>
-  <plurals name="in_num_seconds">
-    <item quantity="one" msgid="2729745560954905102">"1 секундта"</item>
-    <item quantity="other" msgid="1241926116443974687">"<xliff:g id="COUNT">%d</xliff:g> секундта"</item>
-  </plurals>
-  <plurals name="in_num_minutes">
-    <item quantity="one" msgid="8793095251325200395">"1 минутта"</item>
-    <item quantity="other" msgid="3330713936399448749">"<xliff:g id="COUNT">%d</xliff:g> минутта"</item>
-  </plurals>
-  <plurals name="in_num_hours">
-    <item quantity="one" msgid="7164353342477769999">"1 сағатта"</item>
-    <item quantity="other" msgid="547290677353727389">"<xliff:g id="COUNT">%d</xliff:g> сағатта"</item>
-  </plurals>
-  <plurals name="in_num_days">
-    <item quantity="one" msgid="5413088743009839518">"ертең"</item>
-    <item quantity="other" msgid="5109449375100953247">"<xliff:g id="COUNT">%d</xliff:g> күнде"</item>
-  </plurals>
-  <plurals name="abbrev_num_seconds_ago">
-    <item quantity="one" msgid="1849036840200069118">"1 секунд бұрын"</item>
-    <item quantity="other" msgid="3699169366650930415">"<xliff:g id="COUNT">%d</xliff:g> секунд бұрын"</item>
-  </plurals>
-  <plurals name="abbrev_num_minutes_ago">
-    <item quantity="one" msgid="6361490147113871545">"1 минут бұрын"</item>
-    <item quantity="other" msgid="851164968597150710">"<xliff:g id="COUNT">%d</xliff:g> минут бұрын"</item>
-  </plurals>
-  <plurals name="abbrev_num_hours_ago">
-    <item quantity="one" msgid="4796212039724722116">"1 сағат бұрын"</item>
-    <item quantity="other" msgid="6889970745748538901">"<xliff:g id="COUNT">%d</xliff:g> сағат бұрын"</item>
-  </plurals>
-  <plurals name="abbrev_num_days_ago">
-    <item quantity="one" msgid="8463161711492680309">"кеше"</item>
-    <item quantity="other" msgid="3453342639616481191">"<xliff:g id="COUNT">%d</xliff:g> күн бұрын"</item>
-  </plurals>
-  <plurals name="abbrev_in_num_seconds">
-    <item quantity="one" msgid="5842225370795066299">"1 секундта"</item>
-    <item quantity="other" msgid="5495880108825805108">"<xliff:g id="COUNT">%d</xliff:g> секундта"</item>
-  </plurals>
-  <plurals name="abbrev_in_num_minutes">
-    <item quantity="one" msgid="562786149928284878">"1 минутта"</item>
-    <item quantity="other" msgid="4216113292706568726">"<xliff:g id="COUNT">%d</xliff:g> минутта"</item>
-  </plurals>
-  <plurals name="abbrev_in_num_hours">
-    <item quantity="one" msgid="3274708118124045246">"1 сағатта"</item>
-    <item quantity="other" msgid="3705373766798013406">"<xliff:g id="COUNT">%d</xliff:g> сағатта"</item>
-  </plurals>
-  <plurals name="abbrev_in_num_days">
-    <item quantity="one" msgid="2178576254385739855">"ертең"</item>
-    <item quantity="other" msgid="2973062968038355991">"<xliff:g id="COUNT">%d</xliff:g> күнде"</item>
-  </plurals>
     <string name="preposition_for_date" msgid="9093949757757445117">"<xliff:g id="DATE">%s</xliff:g> күні"</string>
     <string name="preposition_for_time" msgid="5506831244263083793">"<xliff:g id="TIME">%s</xliff:g> уақытында"</string>
     <string name="preposition_for_year" msgid="5040395640711867177">"<xliff:g id="YEAR">%s</xliff:g> жылда"</string>
@@ -1222,18 +830,18 @@
     <string name="weeks" msgid="6509623834583944518">"апталар"</string>
     <string name="year" msgid="4001118221013892076">"жыл"</string>
     <string name="years" msgid="6881577717993213522">"жылдар"</string>
-  <plurals name="duration_seconds">
-    <item quantity="one" msgid="6962015528372969481">"1 секунд"</item>
-    <item quantity="other" msgid="1886107766577166786">"<xliff:g id="COUNT">%d</xliff:g> секунд"</item>
-  </plurals>
-  <plurals name="duration_minutes">
-    <item quantity="one" msgid="4915414002546085617">"1 минут"</item>
-    <item quantity="other" msgid="3165187169224908775">"<xliff:g id="COUNT">%d</xliff:g> минут"</item>
-  </plurals>
-  <plurals name="duration_hours">
-    <item quantity="one" msgid="8917467491248809972">"1 сағат"</item>
-    <item quantity="other" msgid="3863962854246773930">"<xliff:g id="COUNT">%d</xliff:g> сағат"</item>
-  </plurals>
+    <plurals name="duration_seconds" formatted="false" msgid="4527986939729687805">
+      <item quantity="other"><xliff:g id="COUNT">%d</xliff:g> секунд</item>
+      <item quantity="one">1 секунд</item>
+    </plurals>
+    <plurals name="duration_minutes" formatted="false" msgid="643786953939956125">
+      <item quantity="other"><xliff:g id="COUNT">%d</xliff:g> минут</item>
+      <item quantity="one">1 минут</item>
+    </plurals>
+    <plurals name="duration_hours" formatted="false" msgid="6826233369186668274">
+      <item quantity="other"><xliff:g id="COUNT">%d</xliff:g> сағат</item>
+      <item quantity="one">1 сағат</item>
+    </plurals>
     <string name="VideoView_error_title" msgid="3534509135438353077">"Бейне ақаулығы"</string>
     <string name="VideoView_error_text_invalid_progressive_playback" msgid="3186670335938670444">"Бұл бейне осы құрылғыға ағынын жіберуге жарамсыз."</string>
     <string name="VideoView_error_text_unknown" msgid="3450439155187810085">"Бұл бейне таспаны ойната алмайды."</string>
@@ -1311,6 +919,7 @@
     <string name="android_start_title" msgid="8418054686415318207">"Android іске қосылуда…"</string>
     <string name="android_upgrading_fstrim" msgid="8036718871534640010">"Қойманы оңтайландыру."</string>
     <string name="android_upgrading_apk" msgid="7904042682111526169">"<xliff:g id="NUMBER_1">%2$d</xliff:g> ішінен <xliff:g id="NUMBER_0">%1$d</xliff:g> қолданба оңтайландырылуда."</string>
+    <string name="android_preparing_apk" msgid="8162599310274079154">"<xliff:g id="APPNAME">%1$s</xliff:g> дайындалуда."</string>
     <string name="android_upgrading_starting_apps" msgid="451464516346926713">"Қолданбалар іске қосылуда."</string>
     <string name="android_upgrading_complete" msgid="1405954754112999229">"Қосуды аяқтауда."</string>
     <string name="heavy_weight_notification" msgid="9087063985776626166">"<xliff:g id="APP">%1$s</xliff:g> қосылған"</string>
@@ -1321,6 +930,10 @@
     <string name="old_app_description" msgid="2082094275580358049">"Жаңа қолданбаны іске қоспау."</string>
     <string name="new_app_action" msgid="5472756926945440706">"<xliff:g id="OLD_APP">%1$s</xliff:g> қолданбасын қосу"</string>
     <string name="new_app_description" msgid="1932143598371537340">"Ескі қолданбаны сақтаусыз тоқтату."</string>
+    <string name="dump_heap_notification" msgid="2618183274836056542">"<xliff:g id="PROC">%1$s</xliff:g> жад шегінен асты"</string>
+    <string name="dump_heap_notification_detail" msgid="2075673362317481664">"Үйінді дамп жиналды; бөлісу үшін басыңыз"</string>
+    <string name="dump_heap_title" msgid="5864292264307651673">"Үйінді дамппен бөлісу қажет пе?"</string>
+    <string name="dump_heap_text" msgid="4809417337240334941">"<xliff:g id="PROC">%1$s</xliff:g> процесі <xliff:g id="SIZE">%2$s</xliff:g> процесс жады шегінен асып кетті. Үйінді дамп оның әзірлеушісімен ​​бөлісуге қолжетімді. Абай болыңыз: бұл үйінді дампта бағдарлама кіре алатын кейбір жеке ақпараттарыңыз болуы мүмкін."</string>
     <string name="sendText" msgid="5209874571959469142">"Мәтін үшін әрекет таңдау"</string>
     <string name="volume_ringtone" msgid="6885421406845734650">"Қоңырау шырылының қаттылығы"</string>
     <string name="volume_music" msgid="5421651157138628171">"Meдиа дыбысының қаттылығы"</string>
@@ -1339,22 +952,27 @@
     <string name="ringtone_default" msgid="3789758980357696936">"Бастапқы қоңырау әуені"</string>
     <string name="ringtone_default_with_actual" msgid="8129563480895990372">"Бастапқы қоңырау әуені (<xliff:g id="ACTUAL_RINGTONE">%1$s</xliff:g>)"</string>
     <string name="ringtone_silent" msgid="7937634392408977062">"Ешқандай"</string>
-    <string name="ringtone_picker_title" msgid="3515143939175119094">"Бастапқы қоңырау әуендері"</string>
+    <string name="ringtone_picker_title" msgid="3515143939175119094">"Қоңырау әуендері"</string>
     <string name="ringtone_unknown" msgid="5477919988701784788">"Белгісіз қоңырау әуені"</string>
-  <plurals name="wifi_available">
-    <item quantity="one" msgid="6654123987418168693">"Wi-Fi желісі қол жетімді"</item>
-    <item quantity="other" msgid="4192424489168397386">"Wi-Fi желілері қол жетімді"</item>
-  </plurals>
-  <plurals name="wifi_available_detailed">
-    <item quantity="one" msgid="1634101450343277345">"Ашық Wi-Fi желісі қол жетімді"</item>
-    <item quantity="other" msgid="7915895323644292768">"Ашық Wi-Fi желілері қол жетімді"</item>
-  </plurals>
-    <string name="wifi_available_sign_in" msgid="4029489716605255386">"Wi-Fi желісіне кіру"</string>
-    <string name="network_available_sign_in" msgid="8495155593358054676">"Желіге кіру"</string>
+    <plurals name="wifi_available" formatted="false" msgid="7900333017752027322">
+      <item quantity="other">Wi-Fi желілері қол жетімді</item>
+      <item quantity="one">Wi-Fi желісі қол жетімді</item>
+    </plurals>
+    <plurals name="wifi_available_detailed" formatted="false" msgid="1140699367193975606">
+      <item quantity="other">Ашық Wi-Fi желілері қол жетімді</item>
+      <item quantity="one">Ашық Wi-Fi желісі қол жетімді</item>
+    </plurals>
+    <string name="wifi_available_sign_in" msgid="9157196203958866662">"Wi-Fi желісіне кіру"</string>
+    <string name="network_available_sign_in" msgid="1848877297365446605">"Желіге кіру"</string>
     <!-- no translation found for network_available_sign_in_detailed (8000081941447976118) -->
     <skip />
+    <string name="wifi_no_internet" msgid="8451173622563841546">"Wi-Fi желісінде интернет байланысы жоқ"</string>
+    <string name="wifi_no_internet_detailed" msgid="7593858887662270131">"Опцияларға кіру үшін түртіңіз"</string>
     <string name="wifi_watchdog_network_disabled" msgid="7904214231651546347">"Wi-Fi желісіне қосыла алмады"</string>
     <string name="wifi_watchdog_network_disabled_detailed" msgid="5548780776418332675">" Интернет байланысы нашар."</string>
+    <string name="wifi_connect_alert_title" msgid="8455846016001810172">"Қосылуға рұқсат ету керек пе?"</string>
+    <string name="wifi_connect_alert_message" msgid="6451273376815958922">"%1$s қолданбасы %2$s Wi-Fi желісіне қосылғысы келеді"</string>
+    <string name="wifi_connect_default_application" msgid="7143109390475484319">"Қолданба"</string>
     <string name="wifi_p2p_dialog_title" msgid="97611782659324517">"Wi-Fi тікелей"</string>
     <string name="wifi_p2p_turnon_message" msgid="2909250942299627244">"Wi-Fi Тікелей байланысын бастау. Бұл Wi-Fi клиент/хот-спотты өшіреді."</string>
     <string name="wifi_p2p_failed_message" msgid="3763669677935623084">"Wi-Fi Тікелей байланысын қоса алмады."</string>
@@ -1387,14 +1005,14 @@
     <string name="sms_short_code_confirm_never_allow" msgid="446992765774269673">"Ешқашан рұқсат бермеу"</string>
     <string name="sim_removed_title" msgid="6227712319223226185">"SIM картасы алынды"</string>
     <string name="sim_removed_message" msgid="5450336489923274918">"Жарамды SIM картасын салып қайта іске қосқанша ұялы желі қол жетімді болмайды."</string>
-    <string name="sim_done_button" msgid="827949989369963775">"Орындалды"</string>
+    <string name="sim_done_button" msgid="827949989369963775">"Дайын"</string>
     <string name="sim_added_title" msgid="3719670512889674693">"SIM картасы қосылды"</string>
     <string name="sim_added_message" msgid="7797975656153714319">"Ұялы желіге қатынасу үшін құрылғыны қайта іске қосыңыз."</string>
     <string name="sim_restart_button" msgid="4722407842815232347">"Қайта бастау"</string>
     <string name="time_picker_dialog_title" msgid="8349362623068819295">"Уақытты реттеу"</string>
     <string name="date_picker_dialog_title" msgid="5879450659453782278">"Мезгілін реттеу"</string>
     <string name="date_time_set" msgid="5777075614321087758">"Орнату"</string>
-    <string name="date_time_done" msgid="2507683751759308828">"Орындалды"</string>
+    <string name="date_time_done" msgid="2507683751759308828">"Дайын"</string>
     <string name="perms_new_perm_prefix" msgid="8257740710754301407"><font size="12" fgcolor="#ff33b5e5">"ЖАҢА: "</font></string>
     <string name="perms_description_app" msgid="5139836143293299417">"Жабдықтаған <xliff:g id="APP_NAME">%1$s</xliff:g>."</string>
     <string name="no_permissions" msgid="7283357728219338112">"Рұқсат қажет емес"</string>
@@ -1419,18 +1037,14 @@
     <string name="dlg_confirm_kill_storage_users_text" msgid="5100428757107469454">"Егер USB жадын қоссаңыз, қолданыстағы қолданбалар тоқтайды және USB жадын қайта қосқанша қол жетімсіз болады."</string>
     <string name="dlg_error_title" msgid="7323658469626514207">"USB жұмысы сәтсіз"</string>
     <string name="dlg_ok" msgid="7376953167039865701">"Жарайды"</string>
-    <string name="usb_mtp_notification_title" msgid="3699913097391550394">"Медиа құралы ретінде қосылған"</string>
-    <string name="usb_ptp_notification_title" msgid="1960817192216064833">"Камера ретінде жалғанған"</string>
-    <string name="usb_cd_installer_notification_title" msgid="6774712827892090754">"Орнату құрылғысына жалғанған"</string>
+    <string name="usb_charging_notification_title" msgid="4004114449249406402">"Зарядтауға арналған USB"</string>
+    <string name="usb_mtp_notification_title" msgid="8396264943589760855">"Файлды тасымалдауға арналған USB"</string>
+    <string name="usb_ptp_notification_title" msgid="1347328437083192112">"Фотосуретті тасымалдауға арналған USB"</string>
+    <string name="usb_midi_notification_title" msgid="4850904915889144654">"MIDI режиміне арналған USB"</string>
     <string name="usb_accessory_notification_title" msgid="7848236974087653666">"USB жабдығына қосылған"</string>
-    <string name="usb_notification_message" msgid="2290859399983720271">"Басқа USB oпцияларын түрту."</string>
-    <string name="extmedia_format_title" product="nosdcard" msgid="9020092196061007262">"USB қой. піш. к. пе?"</string>
-    <string name="extmedia_format_title" product="default" msgid="3648415921526526069">"SD картасын пішімдеу керек пе?"</string>
-    <string name="extmedia_format_message" product="nosdcard" msgid="3934016853425761078">"USB қоймасында сақталған бүкіл файлдар өшіріледі. Бұл әрекетті қайтару мүмкін емес!"</string>
-    <string name="extmedia_format_message" product="default" msgid="14131895027543830">"Картаңыздағы бүкіл деректер жоғалады."</string>
-    <string name="extmedia_format_button_format" msgid="4131064560127478695">"Формат"</string>
+    <string name="usb_notification_message" msgid="7347368030849048437">"Қосымша параметрлер үшін түртіңіз."</string>
     <string name="adb_active_notification_title" msgid="6729044778949189918">"USB жөндеу қосылған"</string>
-    <string name="adb_active_notification_message" msgid="1016654627626476142">"USB күйін келтіруді өшіру үшін түртіңіз."</string>
+    <string name="adb_active_notification_message" msgid="1016654627626476142">"USB жөндеуді өшіру үшін түртіңіз."</string>
     <string name="select_input_method" msgid="8547250819326693584">"Пернетақтаны өзгерту"</string>
     <string name="configure_input_methods" msgid="4769971288371946846">"Пернетақталарды таңдау"</string>
     <string name="show_ime" msgid="9157568568695230830">"Енгізу әдісін көрсету"</string>
@@ -1440,61 +1054,56 @@
     <string name="fast_scroll_alphabet" msgid="5433275485499039199">" ABCDEFGHIJKLMNOPQRSTUVWXYZ"</string>
     <string name="fast_scroll_numeric_alphabet" msgid="4030170524595123610">" 0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZ"</string>
     <string name="candidates_style" msgid="4333913089637062257"><u>"үміткерлер"</u></string>
-    <string name="ext_media_checking_notification_title" product="nosdcard" msgid="3449816005351468560">"USB жадын әзірлеу"</string>
-    <string name="ext_media_checking_notification_title" product="default" msgid="5457603418970994050">"SD картаны әзірлеу"</string>
-    <string name="ext_media_checking_notification_message" msgid="8287319882926737053">"Қателіктер мүмкіндігін тексеру."</string>
-    <string name="ext_media_nofs_notification_title" product="nosdcard" msgid="7788040745686229307">"Бос USB жады"</string>
-    <string name="ext_media_nofs_notification_title" product="default" msgid="780477838241212997">"Бос SD картасы"</string>
-    <string name="ext_media_nofs_notification_message" product="nosdcard" msgid="7840121067427269500">"USB жады бос немесе файл жүйесінің қолдауы жоқ."</string>
-    <string name="ext_media_nofs_notification_message" product="default" msgid="8641065641786923604">"SD картасы бос немесе файл жүйесінің қолдауы жоқ."</string>
-    <string name="ext_media_unmountable_notification_title" product="nosdcard" msgid="2090046769532713563">"Бүлінген USB жады"</string>
-    <string name="ext_media_unmountable_notification_title" product="default" msgid="6410723906019100189">"Бүлінген SD картасы"</string>
-    <string name="ext_media_unmountable_notification_message" product="nosdcard" msgid="1795917578395333280">"USB жады бүлінген. Қайта форматтап көріңіз."</string>
-    <string name="ext_media_unmountable_notification_message" product="default" msgid="1753898567525568253">"SD картасы бүлінген. Қайта форматтап көріңіз."</string>
-    <string name="ext_media_badremoval_notification_title" product="nosdcard" msgid="1661683031330951073">"USB жады күтпеген жерден алынып тасталды"</string>
-    <string name="ext_media_badremoval_notification_title" product="default" msgid="6872152882604407837">"SD картасы күтпеген жерден алынды"</string>
-    <string name="ext_media_badremoval_notification_message" product="nosdcard" msgid="4329848819865594241">"Аларда, деректер жоғалмас үшін, USB жадын шығарып алыңыз."</string>
-    <string name="ext_media_badremoval_notification_message" product="default" msgid="7260183293747448241">"Аларда, деректер жоғалмас үшін, SD картасын шығарыңыз."</string>
-    <string name="ext_media_safe_unmount_notification_title" product="nosdcard" msgid="3967973893270360230">"USB жады қауіпсіз алуға әзір"</string>
-    <string name="ext_media_safe_unmount_notification_title" product="default" msgid="6729801130790616200">"SD шығаруға әзір"</string>
-    <string name="ext_media_safe_unmount_notification_message" product="nosdcard" msgid="6142195361606493530">"USB жадын қауіпсіз шығарып алуыңызға болады."</string>
-    <string name="ext_media_safe_unmount_notification_message" product="default" msgid="568841278138377604">"SD картасын қауіпсіз шығарып алуыңызға болады."</string>
-    <string name="ext_media_nomedia_notification_title" product="nosdcard" msgid="4486377230140227651">"Алынып тасталған USB жады"</string>
-    <string name="ext_media_nomedia_notification_title" product="default" msgid="8902518030404381318">"Шығарылған SD картасы"</string>
-    <string name="ext_media_nomedia_notification_message" product="nosdcard" msgid="6921126162580574143">"USB жады алынды. Жаңа медиа салыңыз."</string>
-    <string name="ext_media_nomedia_notification_message" product="default" msgid="3870120652983659641">"SD картасы алынды. Жаңасын салыңыз."</string>
+    <string name="ext_media_checking_notification_title" msgid="5734005953288045806">"<xliff:g id="NAME">%s</xliff:g> дайындалуда"</string>
+    <string name="ext_media_checking_notification_message" msgid="4747432538578886744">"Қателер тексерілуде"</string>
+    <string name="ext_media_new_notification_message" msgid="7589986898808506239">"Жаңа <xliff:g id="NAME">%s</xliff:g> анықталды"</string>
+    <string name="ext_media_ready_notification_message" msgid="4083398150380114462">"Фотосуреттер мен медиа файлдарын тасымалдау үшін"</string>
+    <string name="ext_media_unmountable_notification_title" msgid="8295123366236989588">"Бүлінген <xliff:g id="NAME">%s</xliff:g>"</string>
+    <string name="ext_media_unmountable_notification_message" msgid="1586311304430052169">"<xliff:g id="NAME">%s</xliff:g> бүлінген. Түзету үшін түртіңіз."</string>
+    <string name="ext_media_unsupported_notification_title" msgid="3797642322958803257">"Қолданылмайтын <xliff:g id="NAME">%s</xliff:g>"</string>
+    <string name="ext_media_unsupported_notification_message" msgid="8789610369456474891">"Бұл құрылғы осы <xliff:g id="NAME">%s</xliff:g> картасын қолдамайды. Қолдау көрсетілетін пішімде орнату үшін түртіңіз."</string>
+    <string name="ext_media_badremoval_notification_title" msgid="3206248947375505416">"<xliff:g id="NAME">%s</xliff:g> кенеттен шығарылды"</string>
+    <string name="ext_media_badremoval_notification_message" msgid="380176703346946313">"Деректер жоғалып қалмауы үшін <xliff:g id="NAME">%s</xliff:g> құрылғысын ажыратып барып, шығару керек"</string>
+    <string name="ext_media_nomedia_notification_title" msgid="1704840188641749091">"<xliff:g id="NAME">%s</xliff:g> жоқ"</string>
+    <string name="ext_media_nomedia_notification_message" msgid="6471542972147056586">"<xliff:g id="NAME">%s</xliff:g> шығарылды; жаңасын салыңыз"</string>
+    <string name="ext_media_unmounting_notification_title" msgid="640674168454809372">"<xliff:g id="NAME">%s</xliff:g> әлі шығарылуда…"</string>
+    <string name="ext_media_unmounting_notification_message" msgid="4182843895023357756">"Шығармаңыз"</string>
+    <string name="ext_media_init_action" msgid="7952885510091978278">"Реттеу"</string>
+    <string name="ext_media_unmount_action" msgid="1121883233103278199">"Шығару"</string>
+    <string name="ext_media_browse_action" msgid="8322172381028546087">"Зерттеу"</string>
+    <string name="ext_media_missing_title" msgid="620980315821543904">"<xliff:g id="NAME">%s</xliff:g> жоқ"</string>
+    <string name="ext_media_missing_message" msgid="5761133583368750174">"Бұл құрылғыны қайта салыңыз"</string>
+    <string name="ext_media_move_specific_title" msgid="1471100343872375842">"<xliff:g id="NAME">%s</xliff:g> тасымалдануда"</string>
+    <string name="ext_media_move_title" msgid="1022809140035962662">"Деректер тасымалдануда"</string>
+    <string name="ext_media_move_success_title" msgid="8575300932957954671">"Тасымалданып болды"</string>
+    <string name="ext_media_move_success_message" msgid="4199002148206265426">"Деректер <xliff:g id="NAME">%s</xliff:g> ішіне тасымалданды"</string>
+    <string name="ext_media_move_failure_title" msgid="7613189040358789908">"Деректерді тасымалдау мүмкін емес"</string>
+    <string name="ext_media_move_failure_message" msgid="1978096440816403360">"Деректер бастапқы орнында қалды"</string>
+    <string name="ext_media_status_removed" msgid="6576172423185918739">"Алынды"</string>
+    <string name="ext_media_status_unmounted" msgid="2551560878416417752">"Ажыратылды"</string>
+    <string name="ext_media_status_checking" msgid="6193921557423194949">"Тексерілуде…"</string>
+    <string name="ext_media_status_mounted" msgid="7253821726503179202">"Дайын"</string>
+    <string name="ext_media_status_mounted_ro" msgid="8020978752406021015">"Тек оқуға арналған"</string>
+    <string name="ext_media_status_bad_removal" msgid="8395398567890329422">"Қауіпсіз түрде алынды"</string>
+    <string name="ext_media_status_unmountable" msgid="805594039236667894">"Бүлінген"</string>
+    <string name="ext_media_status_unsupported" msgid="4691436711745681828">"Қолданылмайды"</string>
+    <string name="ext_media_status_ejecting" msgid="5463887263101234174">"Ажыратылуда..."</string>
+    <string name="ext_media_status_formatting" msgid="1085079556538644861">"Пішімделуде..."</string>
+    <string name="ext_media_status_missing" msgid="5638633895221670766">"Салынбады"</string>
     <string name="activity_list_empty" msgid="1675388330786841066">"Сәйкес әрекеттер табылмады."</string>
-    <string name="permlab_pkgUsageStats" msgid="8787352074326748892">"бөлшек қолдану санақтық ақпаратын жаңарту"</string>
-    <string name="permdesc_pkgUsageStats" msgid="1106612424254277630">"Қолданбаға жиналған құрамдасты пайдалану статистикасын өзгертуге рұқсат береді. Қалыпты қолданбалардың пайдалануына арналмаған."</string>
-    <string name="permlab_copyProtectedData" msgid="4341036311211406692">"мазмұнды көшіру"</string>
-    <string name="permdesc_copyProtectedData" msgid="4390697124288317831">"Қолданбаға мазмұнды көшіру үшін әдепкі контейнер қызметін шақыруға рұқсат береді. Қалыпты қолданбалардың пайдалануына арналмаған."</string>
     <string name="permlab_route_media_output" msgid="1642024455750414694">"Медиа шығысын бағыттау"</string>
     <string name="permdesc_route_media_output" msgid="4932818749547244346">"Қолданбаға медиа шығысын басқа сыртқы құрылғыларға бағыттау мүмкіндігін береді."</string>
-    <string name="permlab_access_keyguard_secure_storage" msgid="7565552237977815047">"Кілтпернемен қорғалған сақтау қорына кіру"</string>
-    <string name="permdesc_access_keyguard_secure_storage" msgid="5866245484303285762">"Қолданбаға кілтсөзбен қорғалған жадқа кіру мүмкіндігін береді."</string>
-    <string name="permlab_control_keyguard" msgid="172195184207828387">"Кілтпернелерді көрсету және жасыру"</string>
-    <string name="permdesc_control_keyguard" msgid="3043732290518629061">"Қолданбаға кілтпернелерді басқару мүмкіндігін береді."</string>
-    <string name="permlab_trust_listener" msgid="1765718054003704476">"Сенімді күй өзгерістерін тыңдау."</string>
-    <string name="permdesc_trust_listener" msgid="8233895334214716864">"Қолданбаға сенім күйіндегі өзгерістерді тыңдауға рұқсат береді."</string>
-    <string name="permlab_provide_trust_agent" msgid="5465587586091358316">"Сенімді агентті қамтамасыз ету."</string>
-    <string name="permdesc_provide_trust_agent" msgid="3865702641053068148">"Қолданбаға сенімді агентті қамтамасыз етуге рұқсат береді."</string>
-    <string name="permlab_launch_trust_agent_settings" msgid="5859430082240410200">"Сенімді агенттің параметрлер мәзірін іске қосу."</string>
-    <string name="permdesc_launch_trust_agent_settings" msgid="8185142708644913381">"Қолданбаға сенімді агенттің мінез-құлқын өзгертетін әрекетті іске қосуға рұқсат береді."</string>
-    <string name="permlab_bind_trust_agent_service" msgid="8242093169457695334">"Сенімді агент қызметіне байластыру"</string>
-    <string name="permdesc_bind_trust_agent_service" msgid="7041930026024507515">"Қолданбаға сенімді агент қызметіне байластыруға рұқсат береді."</string>
-    <string name="permlab_recovery" msgid="3157024487744125846">"Жаңарту және қалпына келтіру жүйелерімен қатынасу"</string>
-    <string name="permdesc_recovery" msgid="8511774533266359571">"Қолданбаның қалпына келтіру жүйесімен және жүйе жаңартуларымен қатынасу мүмкіндігін береді."</string>
-    <string name="permlab_manageMediaProjection" msgid="1120495449419929218">"Тасушыны проекциялау сеанстарын басқару"</string>
-    <string name="permdesc_manageMediaProjection" msgid="8053759147529492856">"Қолданбаға тасушыны проекциялау сеанстарын басқаруға рұқсат етеді. Бұл сеанстар қолданбаларға дисплей және аудио мазмұнын жазу мүмкіндігін қамтамасыз етеді. Қалыпты қолданбалар үшін ешқашан қажет болмайды."</string>
     <string name="permlab_readInstallSessions" msgid="6165432407628065939">"Орнату сеанстарын оқу"</string>
     <string name="permdesc_readInstallSessions" msgid="2049771699626019849">"Қолданбаға орнату сеанстарын оқуға рұқсат етеді. Бұл оған белсенді бума орнатулары туралы мәліметтерді көруге рұқсат етеді."</string>
+    <string name="permlab_requestInstallPackages" msgid="1772330282283082214">"Бумаларды орнатуға рұқсат сұрау"</string>
+    <string name="permdesc_requestInstallPackages" msgid="5740101072486783082">"Қолданбаның бумаларды орнатуға рұқсат сұрауына мүмкіндік береді."</string>
     <string name="tutorial_double_tap_to_zoom_message_short" msgid="4070433208160063538">"Масштабтауды басқару үшін екі рет түртіңіз"</string>
     <string name="gadget_host_error_inflating" msgid="4882004314906466162">"Виджетті қосу."</string>
     <string name="ime_action_go" msgid="8320845651737369027">"Өту"</string>
     <string name="ime_action_search" msgid="658110271822807811">"Іздеу"</string>
     <string name="ime_action_send" msgid="2316166556349314424">"Жіберу"</string>
     <string name="ime_action_next" msgid="3138843904009813834">"Келесі"</string>
-    <string name="ime_action_done" msgid="8971516117910934605">"Орындалды"</string>
+    <string name="ime_action_done" msgid="8971516117910934605">"Дайын"</string>
     <string name="ime_action_previous" msgid="1443550039250105948">"Алдыңғы"</string>
     <string name="ime_action_default" msgid="2840921885558045721">"Орындау"</string>
     <string name="dial_number_using" msgid="5789176425167573586">"Нөмірді\n <xliff:g id="NUMBER">%s</xliff:g> қолданып теріңіз"</string>
@@ -1536,31 +1145,20 @@
     <string name="skip_button_label" msgid="1275362299471631819">"Аттап өту"</string>
     <string name="no_matches" msgid="8129421908915840737">"Сәйкес табылмады"</string>
     <string name="find_on_page" msgid="1946799233822820384">"Беттен табу"</string>
-  <plurals name="matches_found">
-    <item quantity="one" msgid="8167147081136579439">"1 сәйкестік"</item>
-    <item quantity="other" msgid="4641872797067609177">"<xliff:g id="INDEX">%d</xliff:g>, барлығы <xliff:g id="TOTAL">%d</xliff:g>"</item>
-  </plurals>
-    <string name="action_mode_done" msgid="7217581640461922289">"Орындалды"</string>
-    <string name="progress_unmounting" product="nosdcard" msgid="3923810448507612746">"USB жадын шығаруда…"</string>
-    <string name="progress_unmounting" product="default" msgid="1327894998409537190">"SD картасын шығаруда…"</string>
+    <plurals name="matches_found" formatted="false" msgid="1210884353962081884">
+      <item quantity="other"><xliff:g id="TOTAL">%d</xliff:g> ішінен <xliff:g id="INDEX">%d</xliff:g></item>
+      <item quantity="one">1 сәйкестік</item>
+    </plurals>
+    <string name="action_mode_done" msgid="7217581640461922289">"Дайын"</string>
     <string name="progress_erasing" product="nosdcard" msgid="4521573321524340058">"USB жадын өшіруде…"</string>
     <string name="progress_erasing" product="default" msgid="6596988875507043042">"SD картаны өшіруде…"</string>
-    <string name="format_error" product="nosdcard" msgid="6299769563624776948">"USB жадын өшіре алмады."</string>
-    <string name="format_error" product="default" msgid="7315248696644510935">"SD картасын өшіре алмады."</string>
-    <string name="media_bad_removal" msgid="7960864061016603281">"SD картасы қолданыс кезінде алынды."</string>
-    <string name="media_checking" product="nosdcard" msgid="418188720009569693">"USB жады қазір тексерілуде."</string>
-    <string name="media_checking" product="default" msgid="7334762503904827481">"SD картасы қазір тексерілуде."</string>
-    <string name="media_removed" msgid="7001526905057952097">"SD картасы алынды."</string>
-    <string name="media_shared" product="nosdcard" msgid="5830814349250834225">"USB жадын қазір компьютер қолдануда."</string>
-    <string name="media_shared" product="default" msgid="5706130568133540435">"SD картасын қазір компьютер қолдануда."</string>
-    <string name="media_unknown_state" msgid="729192782197290385">"Сыртқы медиа белгісіз күйде."</string>
     <string name="share" msgid="1778686618230011964">"Бөлісу"</string>
     <string name="find" msgid="4808270900322985960">"Табу"</string>
     <string name="websearch" msgid="4337157977400211589">"Веб іздеу"</string>
     <string name="find_next" msgid="5742124618942193978">"Келесіні табу"</string>
     <string name="find_previous" msgid="2196723669388360506">"Алдыңғыны табу"</string>
-    <string name="gpsNotifTicker" msgid="5622683912616496172">"Аймақ туралы өтініші жіберген <xliff:g id="NAME">%s</xliff:g>"</string>
-    <string name="gpsNotifTitle" msgid="5446858717157416839">"Аймақ туралы өтініш"</string>
+    <string name="gpsNotifTicker" msgid="5622683912616496172">"Орын туралы өтініші жіберген <xliff:g id="NAME">%s</xliff:g>"</string>
+    <string name="gpsNotifTitle" msgid="5446858717157416839">"Орын туралы өтініш"</string>
     <string name="gpsNotifMessage" msgid="1374718023224000702">"Өтініш жіберген <xliff:g id="NAME">%1$s</xliff:g> (<xliff:g id="SERVICE">%2$s</xliff:g>)"</string>
     <string name="gpsVerifYes" msgid="2346566072867213563">"Иә"</string>
     <string name="gpsVerifNo" msgid="1146564937346454865">"Жоқ"</string>
@@ -1588,10 +1186,12 @@
     <string name="date_picker_decrement_day_button" msgid="4131881521818750031">"Күн азайту"</string>
     <string name="date_picker_increment_year_button" msgid="6318697384310808899">"Жыл арттыру"</string>
     <string name="date_picker_decrement_year_button" msgid="4482021813491121717">"Жыл азайту"</string>
+    <string name="date_picker_prev_month_button" msgid="2858244643992056505">"Алдыңғы ай"</string>
+    <string name="date_picker_next_month_button" msgid="5559507736887605055">"Келесі ай"</string>
     <string name="keyboardview_keycode_alt" msgid="4856868820040051939">"Alt"</string>
     <string name="keyboardview_keycode_cancel" msgid="1203984017245783244">"Өшіру"</string>
     <string name="keyboardview_keycode_delete" msgid="3337914833206635744">"Жою"</string>
-    <string name="keyboardview_keycode_done" msgid="1992571118466679775">"Орындалды"</string>
+    <string name="keyboardview_keycode_done" msgid="1992571118466679775">"Дайын"</string>
     <string name="keyboardview_keycode_mode_change" msgid="4547387741906537519">"Режим өзгерту"</string>
     <string name="keyboardview_keycode_shift" msgid="2270748814315147690">"Shift"</string>
     <string name="keyboardview_keycode_enter" msgid="2985864015076059467">"Енгізу"</string>
@@ -1610,8 +1210,10 @@
     <string name="action_bar_home_subtitle_description_format" msgid="6985546530471780727">"%1$s, %2$s, %3$s"</string>
     <string name="storage_internal" msgid="4891916833657929263">"Ішкі жад"</string>
     <string name="storage_sd_card" msgid="3282948861378286745">"SD картасы"</string>
+    <string name="storage_sd_card_label" msgid="6347111320774379257">"<xliff:g id="MANUFACTURER">%s</xliff:g> SD картасы"</string>
+    <string name="storage_usb_drive" msgid="6261899683292244209">"USB дискі"</string>
+    <string name="storage_usb_drive_label" msgid="4501418548927759953">"<xliff:g id="MANUFACTURER">%s</xliff:g> USB дискі"</string>
     <string name="storage_usb" msgid="3017954059538517278">"USB жады"</string>
-    <string name="extract_edit_menu_button" msgid="8940478730496610137">"Өзгерту"</string>
     <string name="data_usage_warning_title" msgid="1955638862122232342">"Дерекқор қолдануға қатысты ескерту"</string>
     <string name="data_usage_warning_body" msgid="2814673551471969954">"Қолданыс және параметрлерді көру үшін түртіңіз."</string>
     <string name="data_usage_3g_limit_title" msgid="4361523876818447683">"2G-3G деректер шегіне жеттіңіз"</string>
@@ -1624,7 +1226,7 @@
     <string name="data_usage_mobile_limit_snoozed_title" msgid="4941346653729943789">"Ұялы деректер шегі асырылды"</string>
     <string name="data_usage_wifi_limit_snoozed_title" msgid="8743856006384825974">"Wi-Fi дерекқор шектеуінен асып кетті"</string>
     <string name="data_usage_limit_snoozed_body" msgid="7035490278298441767">"Анықталған уақтыттан <xliff:g id="SIZE">%s</xliff:g> асты."</string>
-    <string name="data_usage_restricted_title" msgid="5965157361036321914">"Тарихы туралы дерекқор шектелген"</string>
+    <string name="data_usage_restricted_title" msgid="5965157361036321914">"Фондық деректер шектелген"</string>
     <string name="data_usage_restricted_body" msgid="6741521330997452990">"Шектеуді алу үшін түртіңіз."</string>
     <string name="ssl_certificate" msgid="6510040486049237639">"Қауіпсіздік сертификаты"</string>
     <string name="ssl_certificate_is_valid" msgid="6825263250774569373">"Бұл сертификат жарамды."</string>
@@ -1675,9 +1277,8 @@
     <string name="display_manager_overlay_display_name" msgid="5142365982271620716">"№<xliff:g id="ID">%1$d</xliff:g> қабаттама"</string>
     <string name="display_manager_overlay_display_title" msgid="652124517672257172">"<xliff:g id="NAME">%1$s</xliff:g>: <xliff:g id="WIDTH">%2$d</xliff:g>x<xliff:g id="HEIGHT">%3$d</xliff:g>, <xliff:g id="DPI">%4$d</xliff:g> dpi"</string>
     <string name="display_manager_overlay_display_secure_suffix" msgid="6022119702628572080">", қауіпсіз"</string>
-    <string name="kg_emergency_call_label" msgid="684946192523830531">"Төтенше қоңырау"</string>
     <string name="kg_forgot_pattern_button_text" msgid="8852021467868220608">"Кескінді ұмытып қалу"</string>
-    <string name="kg_wrong_pattern" msgid="1850806070801358830">"Қате кескін"</string>
+    <string name="kg_wrong_pattern" msgid="1850806070801358830">"Қате өрнек"</string>
     <string name="kg_wrong_password" msgid="2333281762128113157">"Қате кілтсөз"</string>
     <string name="kg_wrong_pin" msgid="1131306510833563801">"Қате PIN"</string>
     <string name="kg_too_many_failed_attempts_countdown" msgid="6358110221603297548">"<xliff:g id="NUMBER">%1$d</xliff:g> секундтан кейін қайта әрекеттеніңіз."</string>
@@ -1702,9 +1303,9 @@
     <string name="kg_login_invalid_input" msgid="5754664119319872197">"Пайдаланушы атауы немесе кілтсөз жарамсыз."</string>
     <string name="kg_login_account_recovery_hint" msgid="5690709132841752974">"Пайдаланушы атауын немесе кілтсөзді ұмытып қалдыңыз ба?\n"<b>"google.com/accounts/recovery"</b>" веб-сайтына кіріңіз."</string>
     <string name="kg_login_checking_password" msgid="1052685197710252395">"Есептік жазбаны тексеруде…"</string>
-    <string name="kg_too_many_failed_pin_attempts_dialog_message" msgid="8276745642049502550">"PIN кодты <xliff:g id="NUMBER_0">%d</xliff:g> рет қате тердіңіз. \n\n <xliff:g id="NUMBER_1">%d</xliff:g> секундтан кейін қайта әркеттеніңіз."</string>
-    <string name="kg_too_many_failed_password_attempts_dialog_message" msgid="7813713389422226531">"Кілсөзді <xliff:g id="NUMBER_0">%d</xliff:g> рет қате тердіңіз. \n\n <xliff:g id="NUMBER_1">%d</xliff:g> секундтан кейін қайта әрекеттеніңіз."</string>
-    <string name="kg_too_many_failed_pattern_attempts_dialog_message" msgid="74089475965050805">"Бекітпесін ашу кескінін <xliff:g id="NUMBER_0">%d</xliff:g> қате сыздыңыз. \n\n <xliff:g id="NUMBER_1">%d</xliff:g> секундтан кейін қайта әркеттеніңіз."</string>
+    <string name="kg_too_many_failed_pin_attempts_dialog_message" msgid="8276745642049502550">"PIN кодты <xliff:g id="NUMBER_0">%d</xliff:g> рет қате тердіңіз. \n\n <xliff:g id="NUMBER_1">%d</xliff:g> секундтан кейін қайталаңыз."</string>
+    <string name="kg_too_many_failed_password_attempts_dialog_message" msgid="7813713389422226531">"Құпия сөзді <xliff:g id="NUMBER_0">%d</xliff:g> рет қате тердіңіз. \n\n <xliff:g id="NUMBER_1">%d</xliff:g> секундтан кейін қайталаңыз."</string>
+    <string name="kg_too_many_failed_pattern_attempts_dialog_message" msgid="74089475965050805">"Құлыпты ашу өрнегін <xliff:g id="NUMBER_0">%d</xliff:g> рет қате салдыңыз. \n\n <xliff:g id="NUMBER_1">%d</xliff:g> секундтан кейін әрекетті қайталаңыз."</string>
     <string name="kg_failed_attempts_almost_at_wipe" product="tablet" msgid="1575557200627128949">"Планшетті ашуға <xliff:g id="NUMBER_0">%d</xliff:g> рет қате әрекеттендіңіз. <xliff:g id="NUMBER_1">%d</xliff:g> сәтсіз әрекеттен кейін телефоныңыз бастапқы зауыттық параметрлеріне қайта реттеледі және барлық пайдаланушы деректері жойылады."</string>
     <string name="kg_failed_attempts_almost_at_wipe" product="tv" msgid="5621231220154419413">"ТД бекітпесін <xliff:g id="NUMBER_0">%d</xliff:g> рет дұрыс емес ашу әрекетін жасадыңыз. Тағы <xliff:g id="NUMBER_1">%d</xliff:g> сәтсіз әрекеттен кейін ТД зауыттық әдепкі параметрлері қалпына келтіріледі және бүкіл пайдаланушы деректері жоғалады."</string>
     <string name="kg_failed_attempts_almost_at_wipe" product="default" msgid="4051015943038199910">"Телефонды ашуға <xliff:g id="NUMBER_0">%d</xliff:g> рет қате әрекеттендіңіз. <xliff:g id="NUMBER_1">%d</xliff:g> сәтсіз әрекеттен кейін телефоныңыз бастапқы зауыттық параметрлеріне қайта реттеледі және барлық пайдаланушы деректері жойылады."</string>
@@ -1825,56 +1426,77 @@
     <string name="restr_pin_create_pin" msgid="8017600000263450337">"Шектеулерді өзгертуге арналған PIN жасақтау"</string>
     <string name="restr_pin_error_doesnt_match" msgid="2224214190906994548">"PIN кодтар сәйкес емес. Қайта әрекеттеніңіз."</string>
     <string name="restr_pin_error_too_short" msgid="8173982756265777792">"PIN тым қысқа. Кем дегенде 4 бірлік болуы тиіс."</string>
-  <plurals name="restr_pin_countdown">
-    <item quantity="one" msgid="311050995198548675">"1 секундтан кейін қайта әрекеттеніңіз"</item>
-    <item quantity="other" msgid="4730868920742952817">"<xliff:g id="COUNT">%d</xliff:g> секундтан кейін қайта әрекеттеніңіз"</item>
-  </plurals>
+    <plurals name="restr_pin_countdown" formatted="false" msgid="9061246974881224688">
+      <item quantity="other">Әрекетті <xliff:g id="COUNT">%d</xliff:g> секундтан кейін қайталаңыз</item>
+      <item quantity="one">Әрекетті 1 секундтан кейін қайталаңыз</item>
+    </plurals>
     <string name="restr_pin_try_later" msgid="973144472490532377">"Кейінірек қайта әрекеттеніңіз."</string>
-    <string name="immersive_mode_confirmation" msgid="7227416894979047467">"Толық экраннан шығу үшін саусағыңызды жоғарыдан төмен қарай жылжытыңыз."</string>
-    <string name="done_label" msgid="2093726099505892398">"Орындалды"</string>
+    <string name="immersive_cling_title" msgid="8394201622932303336">"Толық экранда көру"</string>
+    <string name="immersive_cling_description" msgid="3482371193207536040">"Шығу үшін жоғарыдан төмен қарай жанап өтіңіз."</string>
+    <string name="immersive_cling_positive" msgid="5016839404568297683">"Түсіндім"</string>
+    <string name="done_label" msgid="2093726099505892398">"Дайын"</string>
     <string name="hour_picker_description" msgid="6698199186859736512">"Сағаттар айналымының қозғалтқышы"</string>
     <string name="minute_picker_description" msgid="8606010966873791190">"Минут айналымын қозғалтқыш"</string>
     <string name="select_hours" msgid="6043079511766008245">"Сағат таңдау"</string>
     <string name="select_minutes" msgid="3974345615920336087">"Минут таңдау"</string>
-    <string name="day_picker_description" msgid="8990847925961297968">"Күндердің айлық торлары"</string>
-    <string name="year_picker_description" msgid="5524331207436052403">"Жыл тізімі"</string>
     <string name="select_day" msgid="7774759604701773332">"Ай мен күнді таңдау"</string>
     <string name="select_year" msgid="7952052866994196170">"Жыл таңдау"</string>
-    <string name="item_is_selected" msgid="949687401682476608">"<xliff:g id="ITEM">%1$s</xliff:g> таңдалды"</string>
     <string name="deleted_key" msgid="7659477886625566590">"<xliff:g id="KEY">%1$s</xliff:g> жойылды"</string>
     <string name="managed_profile_label_badge" msgid="2355652472854327647">"Жұмыс <xliff:g id="LABEL">%1$s</xliff:g>"</string>
     <string name="lock_to_app_toast" msgid="7570091317001980053">"Осы экранды босату үшін «Кері» және «Шолу» пәрмендерін бір уақытта түртіп, ұстап тұрыңыз."</string>
     <string name="lock_to_app_toast_accessible" msgid="8239120109365070664">"Осы экранды босату үшін «Шолу» пәрменін түртіп, ұстап тұрыңыз."</string>
-    <string name="lock_to_app_toast_locked" msgid="8739004135132606329">"Экран түйрелген. Босатуға ұйымыңыз рұқсат етпейді."</string>
+    <string name="lock_to_app_toast_locked" msgid="9125176335701699164">"Бағдарлама белгіленді: Бұл құрылғыда белгіні алуға рұқсат берілмейді."</string>
     <string name="lock_to_app_start" msgid="6643342070839862795">"Экран түйрелді"</string>
     <string name="lock_to_app_exit" msgid="8598219838213787430">"Экран босатылды"</string>
     <string name="lock_to_app_unlock_pin" msgid="2552556656504331634">"Босату алдында PIN кодын сұрау"</string>
     <string name="lock_to_app_unlock_pattern" msgid="4182192144797225137">"Босату алдында бекітпесін ашу өрнегін сұрау"</string>
     <string name="lock_to_app_unlock_password" msgid="6380979775916974414">"Босату алдында құпия сөзді сұрау"</string>
+    <string name="package_installed_device_owner" msgid="8420696545959087545">"Әкімші орнатқан"</string>
+    <string name="package_updated_device_owner" msgid="8856631322440187071">"Әкімші жаңартты"</string>
+    <string name="package_deleted_device_owner" msgid="7650577387493101353">"Әкімші жойған"</string>
     <string name="battery_saver_description" msgid="1960431123816253034">"Батареяның қызмет көрсету мерзімін жақсарту үшін батарея үнемдегіш құрылғының өнімділігін төмендетеді және дірілді, орынды анықтау қызметтерін және фондық деректердің көпшілігін шектейді. Электрондық пошта, хабар алмасу және синхрондауға негізделген басқа қолданбалар ашқанша жаңартылмауы мүмкін.\n\nБатарея үнемдегіш құрылғы зарядталып жатқанда автоматты түрде өшеді."</string>
-    <string name="downtime_condition_summary" msgid="8761776337475705749">"<xliff:g id="FORMATTEDTIME">%1$s</xliff:g> уақытында әрекетсіздік аяқталғанша"</string>
-    <string name="downtime_condition_line_one" msgid="8762708714645352010">"Бос тұру уақыты аяқталғанша"</string>
-  <plurals name="zen_mode_duration_minutes_summary">
-    <item quantity="one" msgid="3177683545388923234">"Бір минут бойы (<xliff:g id="FORMATTEDTIME">%2$s</xliff:g> дейін)"</item>
-    <item quantity="other" msgid="2787867221129368935">"%1$d минут бойы (<xliff:g id="FORMATTEDTIME">%2$s</xliff:g> дейін)"</item>
-  </plurals>
-  <plurals name="zen_mode_duration_hours_summary">
-    <item quantity="one" msgid="597194865053253679">"Бір сағат бойы (<xliff:g id="FORMATTEDTIME">%2$s</xliff:g> дейін)"</item>
-    <item quantity="other" msgid="2827214920627669898">"%1$d сағат бойы (<xliff:g id="FORMATTEDTIME">%2$s</xliff:g> дейін)"</item>
-  </plurals>
-  <plurals name="zen_mode_duration_minutes">
-    <item quantity="one" msgid="9040808414992812341">"Бір минут бойы"</item>
-    <item quantity="other" msgid="6924190729213550991">"%d минут бойы"</item>
-  </plurals>
-  <plurals name="zen_mode_duration_hours">
-    <item quantity="one" msgid="3480040795582254384">"Бір сағат бойы"</item>
-    <item quantity="other" msgid="5408537517529822157">"%d сағат бойы"</item>
-  </plurals>
+    <plurals name="zen_mode_duration_minutes_summary" formatted="false" msgid="4367877408072000848">
+      <item quantity="other">%1$d минут бойы (<xliff:g id="FORMATTEDTIME_1">%2$s</xliff:g> дейін)</item>
+      <item quantity="one">Бір минут бойы (<xliff:g id="FORMATTEDTIME_0">%2$s</xliff:g> дейін)</item>
+    </plurals>
+    <plurals name="zen_mode_duration_minutes_summary_short" formatted="false" msgid="6830154222366042597">
+      <item quantity="other">%1$d минут (<xliff:g id="FORMATTEDTIME_1">%2$s</xliff:g> дейін)</item>
+      <item quantity="one">1 минут (<xliff:g id="FORMATTEDTIME_0">%2$s</xliff:g> дейін)</item>
+    </plurals>
+    <plurals name="zen_mode_duration_hours_summary" formatted="false" msgid="8152974162096743862">
+      <item quantity="other">%1$d сағат бойы (<xliff:g id="FORMATTEDTIME_1">%2$s</xliff:g> дейін)</item>
+      <item quantity="one">Бір сағат бойы (<xliff:g id="FORMATTEDTIME_0">%2$s</xliff:g> дейін)</item>
+    </plurals>
+    <plurals name="zen_mode_duration_hours_summary_short" formatted="false" msgid="4787552595253082371">
+      <item quantity="other">%1$d сағат (<xliff:g id="FORMATTEDTIME_1">%2$s</xliff:g> дейін)</item>
+      <item quantity="one">1 сағат (<xliff:g id="FORMATTEDTIME_0">%2$s</xliff:g> дейін)</item>
+    </plurals>
+    <plurals name="zen_mode_duration_minutes" formatted="false" msgid="5127407202506485571">
+      <item quantity="other">%d минут бойы</item>
+      <item quantity="one">Бір минут бойы</item>
+    </plurals>
+    <plurals name="zen_mode_duration_minutes_short" formatted="false" msgid="2199350154433426128">
+      <item quantity="other">%d минут</item>
+      <item quantity="one">1 минут</item>
+    </plurals>
+    <plurals name="zen_mode_duration_hours" formatted="false" msgid="3938821308277433854">
+      <item quantity="other">%d сағат бойы</item>
+      <item quantity="one">Бір сағат бойы</item>
+    </plurals>
+    <plurals name="zen_mode_duration_hours_short" formatted="false" msgid="6748277774662434217">
+      <item quantity="other">%d сағат</item>
+      <item quantity="one">1 сағат</item>
+    </plurals>
     <string name="zen_mode_until" msgid="7336308492289875088">"<xliff:g id="FORMATTEDTIME">%1$s</xliff:g> дейін"</string>
-    <string name="zen_mode_forever" msgid="4316804956488785559">"Белгісіз уақыт бойы"</string>
+    <string name="zen_mode_forever" msgid="7420011936770086993">"Сіз осыны өшіргенше"</string>
+    <string name="zen_mode_forever_dnd" msgid="3792132696572189081">"Өшірмейінше мазаламау"</string>
+    <string name="zen_mode_rule_name_combination" msgid="191109939968076477">"<xliff:g id="FIRST">%1$s</xliff:g>/<xliff:g id="REST">%2$s</xliff:g>"</string>
     <string name="toolbar_collapse_description" msgid="2821479483960330739">"Тасалау"</string>
-    <string name="zen_mode_next_alarm_summary" msgid="5915140424683747372">"<xliff:g id="FORMATTEDTIME">%1$s</xliff:g> уақытындағы келесі дабылға дейін"</string>
-    <string name="zen_mode_next_alarm_line_one" msgid="5537042951553420916">"Келесі дабылға дейін"</string>
+    <string name="zen_mode_feature_name" msgid="5254089399895895004">"Мазаламау"</string>
+    <string name="zen_mode_downtime_feature_name" msgid="2626974636779860146">"Бос тұру уақыты"</string>
+    <string name="zen_mode_default_weeknights_name" msgid="3081318299464998143">"Жұмыс күндері кешке"</string>
+    <string name="zen_mode_default_weekends_name" msgid="2786495801019345244">"Демалыс күндері"</string>
+    <string name="zen_mode_default_events_name" msgid="8158334939013085363">"Оқиға"</string>
     <string name="muted_by" msgid="6147073845094180001">"<xliff:g id="THIRD_PARTY">%1$s</xliff:g> үнін өшірген"</string>
     <string name="system_error_wipe_data" msgid="6608165524785354962">"There\'s an internal problem with your device, and it may be unstable until you factory data reset."</string>
     <string name="system_error_manufacturer" msgid="8086872414744210668">"There\'s an internal problem with your device. Contact your manufacturer for details."</string>
@@ -1884,4 +1506,14 @@
     <string name="stk_cc_ss_to_dial" msgid="2151304435775557162">"SS сұрауы DIAL сұрауына өзгертілді."</string>
     <string name="stk_cc_ss_to_ussd" msgid="3951862188105305589">"SS сұрауы USSD сұрауына өзгертілді."</string>
     <string name="stk_cc_ss_to_ss" msgid="5470768854991452695">"SS сұрауы жаңа SS сұрауына өзгертілді."</string>
+    <string name="notification_work_profile_content_description" msgid="4600554564103770764">"Жұмыс профилі"</string>
+    <string name="usb_midi_peripheral_name" msgid="7221113987741003817">"Android USB перифериялық порты"</string>
+    <string name="usb_midi_peripheral_manufacturer_name" msgid="7176526170008970168">"Android"</string>
+    <string name="usb_midi_peripheral_product_name" msgid="4971827859165280403">"USB перифериялық порты"</string>
+    <string name="floating_toolbar_open_overflow_description" msgid="4797287862999444631">"Қосымша опциялар"</string>
+    <string name="floating_toolbar_close_overflow_description" msgid="559796923090723804">"Артық толуды жабу"</string>
+    <plurals name="selected_count" formatted="false" msgid="7187339492915744615">
+      <item quantity="other"><xliff:g id="COUNT_1">%1$d</xliff:g> таңдалды</item>
+      <item quantity="one"><xliff:g id="COUNT_0">%1$d</xliff:g> таңдалды</item>
+    </plurals>
 </resources>

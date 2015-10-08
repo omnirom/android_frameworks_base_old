@@ -17,6 +17,7 @@
 package android.view;
 
 import android.annotation.IntDef;
+import android.annotation.SystemApi;
 import android.content.Context;
 import android.content.pm.ActivityInfo;
 import android.content.res.CompatibilityInfo;
@@ -105,6 +106,13 @@ public interface WindowManagerPolicy {
     public final static String EXTRA_HDMI_PLUGGED_STATE = "state";
 
     /**
+     * Set to {@code true} when intent was invoked from pressing the home key.
+     * @hide
+     */
+    @SystemApi
+    public static final String EXTRA_FROM_HOME_KEY = "android.intent.extra.FROM_HOME_KEY";
+
+    /**
      * Pass this event to the user / app.  To be returned from
      * {@link #interceptKeyBeforeQueueing}.
      */
@@ -150,10 +158,12 @@ public interface WindowManagerPolicy {
          * @param decorFrame The decor frame specified by policy specific to this window,
          * to use for proper cropping during animation.
          * @param stableFrame The frame around which stable system decoration is positioned.
+         * @param outsetFrame The frame that includes areas that aren't part of the surface but we
+         * want to treat them as such.
          */
         public void computeFrameLw(Rect parentFrame, Rect displayFrame,
                 Rect overlayFrame, Rect contentFrame, Rect visibleFrame, Rect decorFrame,
-                Rect stableFrame);
+                Rect stableFrame, Rect outsetFrame);
 
         /**
          * Retrieve the current frame of the window that has been assigned by
@@ -266,11 +276,18 @@ public interface WindowManagerPolicy {
          * Get the layer at which this window's surface will be Z-ordered.
          */
         public int getSurfaceLayer();
-        
+
         /**
-         * Return the token for the application (actually activity) that owns 
-         * this window.  May return null for system windows. 
-         * 
+         * Retrieve the type of the top-level window.
+         *
+         * @return the base type of the parent window if attached or its own type otherwise
+         */
+        public int getBaseType();
+
+        /**
+         * Return the token for the application (actually activity) that owns
+         * this window.  May return null for system windows.
+         *
          * @return An IApplicationToken identifying the owning activity.
          */
         public IApplicationToken getAppToken();
@@ -325,6 +342,14 @@ public interface WindowManagerPolicy {
         boolean isGoneForLayoutLw();
 
         /**
+         * Returns true if the window has a surface that it has drawn a
+         * complete UI in to. Note that this is different from {@link #hasDrawnLw()}
+         * in that it also returns true if the window is READY_TO_SHOW, but was not yet
+         * promoted to HAS_DRAWN.
+         */
+        boolean isDrawnLw();
+
+        /**
          * Returns true if this window has been shown on screen at some time in 
          * the past.  Must be called with the window manager lock held.
          */
@@ -357,15 +382,20 @@ public interface WindowManagerPolicy {
          * @return true if window is on default display.
          */
         public boolean isDefaultDisplay();
+
+        /**
+         * Check whether the window is currently dimming.
+         */
+        public boolean isDimming();
     }
 
     /**
-     * Representation of a "fake window" that the policy has added to the
-     * window manager to consume events.
+     * Representation of a input consumer that the policy has added to the
+     * window manager to consume input events going to windows below it.
      */
-    public interface FakeWindow {
+    public interface InputConsumer {
         /**
-         * Remove the fake window from the window manager.
+         * Remove the input consumer from the window manager.
          */
         void dismiss();
     }
@@ -389,13 +419,10 @@ public interface WindowManagerPolicy {
         public void reevaluateStatusBarVisibility();
 
         /**
-         * Add a fake window to the window manager.  This window sits
-         * at the top of the other windows and consumes events.
+         * Add a input consumer which will consume all input events going to any window below it.
          */
-        public FakeWindow addFakeWindow(Looper looper,
-                InputEventReceiver.Factory inputEventReceiverFactory,
-                String name, int windowType, int layoutParamsFlags, int layoutParamsPrivateFlags,
-                boolean canReceiveKeys, boolean hasFocus, boolean touchFullscreen);
+        public InputConsumer addInputConsumer(Looper looper,
+                InputEventReceiver.Factory inputEventReceiverFactory);
 
         /**
          * Returns a code that describes the current state of the lid switch.
@@ -578,13 +605,6 @@ public interface WindowManagerPolicy {
      * allowed to be in.
      */
     public int getMaxWallpaperLayer();
-
-    /**
-     * Return the window layer at which windows appear above the normal
-     * universe (that is no longer impacted by the universe background
-     * transform).
-     */
-    public int getAboveUniverseLayer();
 
     /**
      * Return the display width available after excluding any screen
@@ -869,13 +889,15 @@ public interface WindowManagerPolicy {
      * be correct.
      *
      * @param attrs The LayoutParams of the window.
+     * @param rotation Rotation of the display.
      * @param outContentInsets The areas covered by system windows, expressed as positive insets.
      * @param outStableInsets The areas covered by stable system windows irrespective of their
      *                        current visibility. Expressed as positive insets.
+     * @param outOutsets The areas that are not real display, but we would like to treat as such.
      *
      */
-    public void getInsetHintLw(WindowManager.LayoutParams attrs, Rect outContentInsets,
-            Rect outStableInsets);
+    public void getInsetHintLw(WindowManager.LayoutParams attrs, int rotation,
+            Rect outContentInsets, Rect outStableInsets, Rect outOutsets);
 
     /**
      * Called when layout of the windows is finished.  After this function has
@@ -938,17 +960,30 @@ public interface WindowManagerPolicy {
     public int focusChangedLw(WindowState lastFocus, WindowState newFocus);
 
     /**
-     * Called when the device is waking up.
+     * Called when the device has started waking up.
      */
-    public void wakingUp();
+    public void startedWakingUp();
 
     /**
-     * Called when the device is going to sleep.
-     *
-     * @param why {@link #OFF_BECAUSE_OF_USER} or
-     * {@link #OFF_BECAUSE_OF_TIMEOUT}.
+     * Called when the device has finished waking up.
      */
-    public void goingToSleep(int why);
+    public void finishedWakingUp();
+
+    /**
+     * Called when the device has started going to sleep.
+     *
+     * @param why {@link #OFF_BECAUSE_OF_USER}, {@link #OFF_BECAUSE_OF_ADMIN},
+     * or {@link #OFF_BECAUSE_OF_TIMEOUT}.
+     */
+    public void startedGoingToSleep(int why);
+
+    /**
+     * Called when the device has finished going to sleep.
+     *
+     * @param why {@link #OFF_BECAUSE_OF_USER}, {@link #OFF_BECAUSE_OF_ADMIN},
+     * or {@link #OFF_BECAUSE_OF_TIMEOUT}.
+     */
+    public void finishedGoingToSleep(int why);
 
     /**
      * Called when the device is about to turn on the screen to show content.
@@ -960,6 +995,12 @@ public interface WindowManagerPolicy {
      * is ready for the screen to go on (i.e. the lock screen is shown).
      */
     public void screenTurningOn(ScreenOnListener screenOnListener);
+
+    /**
+     * Called when the device has actually turned on the screen, i.e. the display power state has
+     * been set to ON and the screen is unblocked.
+     */
+    public void screenTurnedOn();
 
     /**
      * Called when the device has turned the screen off.
@@ -1034,6 +1075,13 @@ public interface WindowManagerPolicy {
      * @return true if in keyguard is secure.
      */
     public boolean isKeyguardSecure();
+
+    /**
+     * Return whether the keyguard is on.
+     *
+     * @return true if in keyguard is on.
+     */
+    public boolean isKeyguardShowingOrOccluded();
 
     /**
      * inKeyguardRestrictedKeyInputMode

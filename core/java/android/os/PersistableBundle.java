@@ -16,6 +16,7 @@
 
 package android.os;
 
+import android.annotation.Nullable;
 import android.util.ArrayMap;
 import com.android.internal.util.XmlUtils;
 import org.xmlpull.v1.XmlPullParser;
@@ -42,6 +43,16 @@ public final class PersistableBundle extends BaseBundle implements Cloneable, Pa
         EMPTY = new PersistableBundle();
         EMPTY.mMap = ArrayMap.EMPTY;
         EMPTY_PARCEL = BaseBundle.EMPTY_PARCEL;
+    }
+
+    /** @hide */
+    public static boolean isValidType(Object value) {
+        return (value instanceof Integer) || (value instanceof Long) ||
+                (value instanceof Double) || (value instanceof String) ||
+                (value instanceof int[]) || (value instanceof long[]) ||
+                (value instanceof double[]) || (value instanceof String[]) ||
+                (value instanceof PersistableBundle) || (value == null) ||
+                (value instanceof Boolean) || (value instanceof boolean[]);
     }
 
     /**
@@ -77,29 +88,22 @@ public final class PersistableBundle extends BaseBundle implements Cloneable, Pa
      * @param map a Map containing only those items that can be persisted.
      * @throws IllegalArgumentException if any element of #map cannot be persisted.
      */
-    private PersistableBundle(Map<String, Object> map) {
+    private PersistableBundle(ArrayMap<String, Object> map) {
         super();
 
         // First stuff everything in.
         putAll(map);
 
         // Now verify each item throwing an exception if there is a violation.
-        Set<String> keys = map.keySet();
-        Iterator<String> iterator = keys.iterator();
-        while (iterator.hasNext()) {
-            String key = iterator.next();
-            Object value = map.get(key);
-            if (value instanceof Map) {
+        final int N = mMap.size();
+        for (int i=0; i<N; i++) {
+            Object value = mMap.valueAt(i);
+            if (value instanceof ArrayMap) {
                 // Fix up any Maps by replacing them with PersistableBundles.
-                putPersistableBundle(key, new PersistableBundle((Map<String, Object>) value));
-            } else if (!(value instanceof Integer) && !(value instanceof Long) &&
-                    !(value instanceof Double) && !(value instanceof String) &&
-                    !(value instanceof int[]) && !(value instanceof long[]) &&
-                    !(value instanceof double[]) && !(value instanceof String[]) &&
-                    !(value instanceof PersistableBundle) && (value != null) &&
-                    !(value instanceof Boolean) && !(value instanceof boolean[])) {
-                throw new IllegalArgumentException("Bad value in PersistableBundle key=" + key +
-                        " value=" + value);
+                mMap.setValueAt(i, new PersistableBundle((ArrayMap<String, Object>) value));
+            } else if (!isValidType(value)) {
+                throw new IllegalArgumentException("Bad value in PersistableBundle key="
+                        + mMap.keyAt(i) + " value=" + value);
             }
         }
     }
@@ -135,7 +139,7 @@ public final class PersistableBundle extends BaseBundle implements Cloneable, Pa
      * @param key a String, or null
      * @param value a Bundle object, or null
      */
-    public void putPersistableBundle(String key, PersistableBundle value) {
+    public void putPersistableBundle(@Nullable String key, @Nullable PersistableBundle value) {
         unparcel();
         mMap.put(key, value);
     }
@@ -148,7 +152,8 @@ public final class PersistableBundle extends BaseBundle implements Cloneable, Pa
      * @param key a String, or null
      * @return a Bundle value, or null
      */
-    public PersistableBundle getPersistableBundle(String key) {
+    @Nullable
+    public PersistableBundle getPersistableBundle(@Nullable String key) {
         unparcel();
         Object o = mMap.get(key);
         if (o == null) {
@@ -240,8 +245,9 @@ public final class PersistableBundle extends BaseBundle implements Cloneable, Pa
         while (((event = in.next()) != XmlPullParser.END_DOCUMENT) &&
                 (event != XmlPullParser.END_TAG || in.getDepth() < outerDepth)) {
             if (event == XmlPullParser.START_TAG) {
-                return new PersistableBundle((Map<String, Object>)
-                        XmlUtils.readThisMapXml(in, startTag, tagName, new MyReadMapCallback()));
+                return new PersistableBundle((ArrayMap<String, Object>)
+                        XmlUtils.readThisArrayMapXml(in, startTag, tagName,
+                        new MyReadMapCallback()));
             }
         }
         return EMPTY;

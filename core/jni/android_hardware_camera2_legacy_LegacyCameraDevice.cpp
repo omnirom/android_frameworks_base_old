@@ -23,7 +23,7 @@
 
 #include "jni.h"
 #include "JNIHelp.h"
-#include "android_runtime/AndroidRuntime.h"
+#include "core_jni_helpers.h"
 #include "android_runtime/android_view_Surface.h"
 #include "android_runtime/android_graphics_SurfaceTexture.h"
 
@@ -52,12 +52,12 @@ using namespace android;
  * Convert from RGB 888 to Y'CbCr using the conversion specified in JFIF v1.02
  */
 static void rgbToYuv420(uint8_t* rgbBuf, size_t width, size_t height, uint8_t* yPlane,
-        uint8_t* uPlane, uint8_t* vPlane, size_t chromaStep, size_t yStride, size_t chromaStride) {
+        uint8_t* crPlane, uint8_t* cbPlane, size_t chromaStep, size_t yStride, size_t chromaStride) {
     uint8_t R, G, B;
     size_t index = 0;
     for (size_t j = 0; j < height; j++) {
-        uint8_t* u = uPlane;
-        uint8_t* v = vPlane;
+        uint8_t* cr = crPlane;
+        uint8_t* cb = cbPlane;
         uint8_t* y = yPlane;
         bool jEven = (j & 1) == 0;
         for (size_t i = 0; i < width; i++) {
@@ -66,18 +66,18 @@ static void rgbToYuv420(uint8_t* rgbBuf, size_t width, size_t height, uint8_t* y
             B = rgbBuf[index++];
             *y++ = (77 * R + 150 * G +  29 * B) >> 8;
             if (jEven && (i & 1) == 0) {
-                *v = (( -43 * R - 85 * G + 128 * B) >> 8) + 128;
-                *u = (( 128 * R - 107 * G - 21 * B) >> 8) + 128;
-                u += chromaStep;
-                v += chromaStep;
+                *cb = (( -43 * R - 85 * G + 128 * B) >> 8) + 128;
+                *cr = (( 128 * R - 107 * G - 21 * B) >> 8) + 128;
+                cr += chromaStep;
+                cb += chromaStep;
             }
             // Skip alpha
             index++;
         }
         yPlane += yStride;
         if (jEven) {
-            uPlane += chromaStride;
-            vPlane += chromaStride;
+            crPlane += chromaStride;
+            cbPlane += chromaStride;
         }
     }
 }
@@ -315,8 +315,8 @@ static status_t produceFrame(const sp<ANativeWindow>& anw,
         case HAL_PIXEL_FORMAT_BLOB: {
             int8_t* img = NULL;
             struct camera3_jpeg_blob footer = {
-                jpeg_blob_id: CAMERA3_JPEG_BLOB_ID,
-                jpeg_size: (uint32_t)bufferLength
+                .jpeg_blob_id = CAMERA3_JPEG_BLOB_ID,
+                .jpeg_size = (uint32_t)bufferLength
             };
 
             size_t totalJpegSize = bufferLength + sizeof(footer);
@@ -373,8 +373,7 @@ static sp<ANativeWindow> getNativeWindow(JNIEnv* env, jobject surface) {
         return NULL;
     }
     if (anw == NULL) {
-        jniThrowExceptionFmt(env, "java/lang/IllegalArgumentException",
-                "Surface had no valid native window.");
+        ALOGE("%s: Surface had no valid native window.", __FUNCTION__);
         return NULL;
     }
     return anw;
@@ -431,6 +430,23 @@ static jint LegacyCameraDevice_nativeDetectSurfaceType(JNIEnv* env, jobject thiz
     status_t err = anw->query(anw.get(), NATIVE_WINDOW_FORMAT, &fmt);
     if(err != NO_ERROR) {
         ALOGE("%s: Error while querying surface pixel format %s (%d).", __FUNCTION__, strerror(-err),
+                err);
+        return err;
+    }
+    return fmt;
+}
+
+static jint LegacyCameraDevice_nativeDetectSurfaceDataspace(JNIEnv* env, jobject thiz, jobject surface) {
+    ALOGV("nativeDetectSurfaceDataspace");
+    sp<ANativeWindow> anw;
+    if ((anw = getNativeWindow(env, surface)) == NULL) {
+        ALOGE("%s: Could not retrieve native window from surface.", __FUNCTION__);
+        return BAD_VALUE;
+    }
+    int32_t fmt = 0;
+    status_t err = anw->query(anw.get(), NATIVE_WINDOW_DEFAULT_DATASPACE, &fmt);
+    if(err != NO_ERROR) {
+        ALOGE("%s: Error while querying surface dataspace  %s (%d).", __FUNCTION__, strerror(-err),
                 err);
         return err;
     }
@@ -622,7 +638,7 @@ static jlong LegacyCameraDevice_nativeGetSurfaceId(JNIEnv* env, jobject thiz, jo
         ALOGE("%s: Could not retrieve IGraphicBufferProducer from surface.", __FUNCTION__);
         return 0;
     }
-    sp<IBinder> b = gbp->asBinder();
+    sp<IBinder> b = IInterface::asBinder(gbp);
     if (b == NULL) {
         ALOGE("%s: Could not retrieve IBinder from surface.", __FUNCTION__);
         return 0;
@@ -690,6 +706,23 @@ static jint LegacyCameraDevice_nativeSetNextTimestamp(JNIEnv* env, jobject thiz,
     return NO_ERROR;
 }
 
+static jint LegacyCameraDevice_nativeSetScalingMode(JNIEnv* env, jobject thiz, jobject surface,
+        jint mode) {
+    ALOGV("nativeSetScalingMode");
+    sp<ANativeWindow> anw;
+    if ((anw = getNativeWindow(env, surface)) == NULL) {
+        ALOGE("%s: Could not retrieve native window from surface.", __FUNCTION__);
+        return BAD_VALUE;
+    }
+    status_t err = NO_ERROR;
+    if ((err = native_window_set_scaling_mode(anw.get(), static_cast<int>(mode))) != NO_ERROR) {
+        ALOGE("%s: Unable to set surface scaling mode, error %s (%d)", __FUNCTION__,
+                strerror(-err), err);
+        return err;
+    }
+    return NO_ERROR;
+}
+
 static jint LegacyCameraDevice_nativeGetJpegFooterSize(JNIEnv* env, jobject thiz) {
     ALOGV("nativeGetJpegFooterSize");
     return static_cast<jint>(sizeof(struct camera3_jpeg_blob));
@@ -701,6 +734,9 @@ static JNINativeMethod gCameraDeviceMethods[] = {
     { "nativeDetectSurfaceType",
     "(Landroid/view/Surface;)I",
     (void *)LegacyCameraDevice_nativeDetectSurfaceType },
+    { "nativeDetectSurfaceDataspace",
+    "(Landroid/view/Surface;)I",
+    (void *)LegacyCameraDevice_nativeDetectSurfaceDataspace },
     { "nativeDetectSurfaceDimens",
     "(Landroid/view/Surface;[I)I",
     (void *)LegacyCameraDevice_nativeDetectSurfaceDimens },
@@ -734,13 +770,16 @@ static JNINativeMethod gCameraDeviceMethods[] = {
     { "nativeDetectSurfaceUsageFlags",
     "(Landroid/view/Surface;)I",
     (void *)LegacyCameraDevice_nativeDetectSurfaceUsageFlags },
+    { "nativeSetScalingMode",
+    "(Landroid/view/Surface;I)I",
+    (void *)LegacyCameraDevice_nativeSetScalingMode },
 };
 
 // Get all the required offsets in java class and register native functions
 int register_android_hardware_camera2_legacy_LegacyCameraDevice(JNIEnv* env)
 {
     // Register native functions
-    return AndroidRuntime::registerNativeMethods(env,
+    return RegisterMethodsOrDie(env,
             CAMERA_DEVICE_CLASS_NAME,
             gCameraDeviceMethods,
             NELEM(gCameraDeviceMethods));

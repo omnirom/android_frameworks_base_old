@@ -21,90 +21,184 @@
 #include "unicode/brkiter.h"
 #include "utils/misc.h"
 #include "utils/Log.h"
+#include "ScopedStringChars.h"
 #include "ScopedPrimitiveArray.h"
 #include "JNIHelp.h"
-#include <android_runtime/AndroidRuntime.h>
+#include "core_jni_helpers.h"
+#include <cstdint>
 #include <vector>
+#include <list>
+#include <algorithm>
+
+#include "SkPaint.h"
+#include "SkTypeface.h"
+#include "MinikinSkia.h"
+#include "MinikinUtils.h"
+#include "Paint.h"
+#include "minikin/LineBreaker.h"
 
 namespace android {
 
-class ScopedBreakIterator {
-    public:
-        ScopedBreakIterator(JNIEnv* env, BreakIterator* breakIterator, jcharArray inputText,
-                            jint length) : mBreakIterator(breakIterator), mChars(env, inputText) {
-            UErrorCode status = U_ZERO_ERROR;
-            mUText = utext_openUChars(NULL, mChars.get(), length, &status);
-            if (mUText == NULL) {
-                return;
-            }
-
-            mBreakIterator->setText(mUText, status);
-        }
-
-        inline BreakIterator* operator->() {
-            return mBreakIterator;
-        }
-
-        ~ScopedBreakIterator() {
-            utext_close(mUText);
-            delete mBreakIterator;
-        }
-    private:
-        BreakIterator* mBreakIterator;
-        ScopedCharArrayRO mChars;
-        UText* mUText;
-
-        // disable copying and assignment
-        ScopedBreakIterator(const ScopedBreakIterator&);
-        void operator=(const ScopedBreakIterator&);
+struct JLineBreaksID {
+    jfieldID breaks;
+    jfieldID widths;
+    jfieldID flags;
 };
 
-static jintArray nLineBreakOpportunities(JNIEnv* env, jclass, jstring javaLocaleName,
-                                        jcharArray inputText, jint length,
-                                        jintArray recycle) {
-    jintArray ret;
-    std::vector<jint> breaks;
+static jclass gLineBreaks_class;
+static JLineBreaksID gLineBreaks_fieldID;
 
-    ScopedIcuLocale icuLocale(env, javaLocaleName);
-    if (icuLocale.valid()) {
-        UErrorCode status = U_ZERO_ERROR;
-        BreakIterator* it = BreakIterator::createLineInstance(icuLocale.locale(), status);
-        if (!U_SUCCESS(status) || it == NULL) {
-            if (it) {
-                delete it;
-            }
-        } else {
-            ScopedBreakIterator breakIterator(env, it, inputText, length);
-            for (int loc = breakIterator->first(); loc != BreakIterator::DONE;
-                    loc = breakIterator->next()) {
-                breaks.push_back(loc);
-            }
-        }
-    }
-
-    breaks.push_back(-1); // sentinel terminal value
-
-    if (recycle != NULL && static_cast<size_t>(env->GetArrayLength(recycle)) >= breaks.size()) {
-        ret = recycle;
+// set text and set a number of parameters for creating a layout (width, tabstops, strategy,
+// hyphenFrequency)
+static void nSetupParagraph(JNIEnv* env, jclass, jlong nativePtr, jcharArray text, jint length,
+        jfloat firstWidth, jint firstWidthLineLimit, jfloat restWidth,
+        jintArray variableTabStops, jint defaultTabStop, jint strategy, jint hyphenFrequency) {
+    LineBreaker* b = reinterpret_cast<LineBreaker*>(nativePtr);
+    b->resize(length);
+    env->GetCharArrayRegion(text, 0, length, b->buffer());
+    b->setText();
+    b->setLineWidths(firstWidth, firstWidthLineLimit, restWidth);
+    if (variableTabStops == nullptr) {
+        b->setTabStops(nullptr, 0, defaultTabStop);
     } else {
-        ret = env->NewIntArray(breaks.size());
+        ScopedIntArrayRO stops(env, variableTabStops);
+        b->setTabStops(stops.get(), stops.size(), defaultTabStop);
     }
+    b->setStrategy(static_cast<BreakStrategy>(strategy));
+    b->setHyphenationFrequency(static_cast<HyphenationFrequency>(hyphenFrequency));
+}
 
-    if (ret != NULL) {
-        env->SetIntArrayRegion(ret, 0, breaks.size(), &breaks.front());
+static void recycleCopy(JNIEnv* env, jobject recycle, jintArray recycleBreaks,
+                        jfloatArray recycleWidths, jintArray recycleFlags,
+                        jint recycleLength, size_t nBreaks, const jint* breaks,
+                        const jfloat* widths, const jint* flags) {
+    if ((size_t)recycleLength < nBreaks) {
+        // have to reallocate buffers
+        recycleBreaks = env->NewIntArray(nBreaks);
+        recycleWidths = env->NewFloatArray(nBreaks);
+        recycleFlags = env->NewIntArray(nBreaks);
+
+        env->SetObjectField(recycle, gLineBreaks_fieldID.breaks, recycleBreaks);
+        env->SetObjectField(recycle, gLineBreaks_fieldID.widths, recycleWidths);
+        env->SetObjectField(recycle, gLineBreaks_fieldID.flags, recycleFlags);
     }
+    // copy data
+    env->SetIntArrayRegion(recycleBreaks, 0, nBreaks, breaks);
+    env->SetFloatArrayRegion(recycleWidths, 0, nBreaks, widths);
+    env->SetIntArrayRegion(recycleFlags, 0, nBreaks, flags);
+}
 
-    return ret;
+static jint nComputeLineBreaks(JNIEnv* env, jclass, jlong nativePtr,
+                               jobject recycle, jintArray recycleBreaks,
+                               jfloatArray recycleWidths, jintArray recycleFlags,
+                               jint recycleLength) {
+    LineBreaker* b = reinterpret_cast<LineBreaker*>(nativePtr);
+
+    size_t nBreaks = b->computeBreaks();
+
+    recycleCopy(env, recycle, recycleBreaks, recycleWidths, recycleFlags, recycleLength,
+            nBreaks, b->getBreaks(), b->getWidths(), b->getFlags());
+
+    b->finish();
+
+    return static_cast<jint>(nBreaks);
+}
+
+static jlong nNewBuilder(JNIEnv*, jclass) {
+    return reinterpret_cast<jlong>(new LineBreaker);
+}
+
+static void nFreeBuilder(JNIEnv*, jclass, jlong nativePtr) {
+    delete reinterpret_cast<LineBreaker*>(nativePtr);
+}
+
+static void nFinishBuilder(JNIEnv*, jclass, jlong nativePtr) {
+    LineBreaker* b = reinterpret_cast<LineBreaker*>(nativePtr);
+    b->finish();
+}
+
+static jlong nLoadHyphenator(JNIEnv* env, jclass, jstring patternData) {
+    ScopedStringChars str(env, patternData);
+    Hyphenator* hyphenator = Hyphenator::load(str.get(), str.size());
+    return reinterpret_cast<jlong>(hyphenator);
+}
+
+static void nSetLocale(JNIEnv* env, jclass, jlong nativePtr, jstring javaLocaleName,
+        jlong nativeHyphenator) {
+    ScopedIcuLocale icuLocale(env, javaLocaleName);
+    LineBreaker* b = reinterpret_cast<LineBreaker*>(nativePtr);
+    Hyphenator* hyphenator = reinterpret_cast<Hyphenator*>(nativeHyphenator);
+
+    if (icuLocale.valid()) {
+        b->setLocale(icuLocale.locale(), hyphenator);
+    }
+}
+
+static void nSetIndents(JNIEnv* env, jclass, jlong nativePtr, jintArray indents) {
+    ScopedIntArrayRO indentArr(env, indents);
+    std::vector<float> indentVec(indentArr.get(), indentArr.get() + indentArr.size());
+    LineBreaker* b = reinterpret_cast<LineBreaker*>(nativePtr);
+    b->setIndents(indentVec);
+}
+
+// Basically similar to Paint.getTextRunAdvances but with C++ interface
+static jfloat nAddStyleRun(JNIEnv* env, jclass, jlong nativePtr,
+        jlong nativePaint, jlong nativeTypeface, jint start, jint end, jboolean isRtl) {
+    LineBreaker* b = reinterpret_cast<LineBreaker*>(nativePtr);
+    Paint* paint = reinterpret_cast<Paint*>(nativePaint);
+    TypefaceImpl* typeface = reinterpret_cast<TypefaceImpl*>(nativeTypeface);
+    FontCollection *font;
+    MinikinPaint minikinPaint;
+    FontStyle style = MinikinUtils::prepareMinikinPaint(&minikinPaint, &font, paint, typeface);
+    return b->addStyleRun(&minikinPaint, font, style, start, end, isRtl);
+}
+
+// Accept width measurements for the run, passed in from Java
+static void nAddMeasuredRun(JNIEnv* env, jclass, jlong nativePtr,
+        jint start, jint end, jfloatArray widths) {
+    LineBreaker* b = reinterpret_cast<LineBreaker*>(nativePtr);
+    env->GetFloatArrayRegion(widths, start, end - start, b->charWidths() + start);
+    b->addStyleRun(nullptr, nullptr, FontStyle{}, start, end, false);
+}
+
+static void nAddReplacementRun(JNIEnv* env, jclass, jlong nativePtr,
+        jint start, jint end, jfloat width) {
+    LineBreaker* b = reinterpret_cast<LineBreaker*>(nativePtr);
+    b->addReplacement(start, end, width);
+}
+
+static void nGetWidths(JNIEnv* env, jclass, jlong nativePtr, jfloatArray widths) {
+    LineBreaker* b = reinterpret_cast<LineBreaker*>(nativePtr);
+    env->SetFloatArrayRegion(widths, 0, b->size(), b->charWidths());
 }
 
 static JNINativeMethod gMethods[] = {
-    {"nLineBreakOpportunities", "(Ljava/lang/String;[CI[I)[I", (void*) nLineBreakOpportunities}
+    // TODO performance: many of these are candidates for fast jni, awaiting guidance
+    {"nNewBuilder", "()J", (void*) nNewBuilder},
+    {"nFreeBuilder", "(J)V", (void*) nFreeBuilder},
+    {"nFinishBuilder", "(J)V", (void*) nFinishBuilder},
+    {"nLoadHyphenator", "(Ljava/lang/String;)J", (void*) nLoadHyphenator},
+    {"nSetLocale", "(JLjava/lang/String;J)V", (void*) nSetLocale},
+    {"nSetupParagraph", "(J[CIFIF[IIII)V", (void*) nSetupParagraph},
+    {"nSetIndents", "(J[I)V", (void*) nSetIndents},
+    {"nAddStyleRun", "(JJJIIZ)F", (void*) nAddStyleRun},
+    {"nAddMeasuredRun", "(JII[F)V", (void*) nAddMeasuredRun},
+    {"nAddReplacementRun", "(JIIF)V", (void*) nAddReplacementRun},
+    {"nGetWidths", "(J[F)V", (void*) nGetWidths},
+    {"nComputeLineBreaks", "(JLandroid/text/StaticLayout$LineBreaks;[I[F[II)I",
+        (void*) nComputeLineBreaks}
 };
 
 int register_android_text_StaticLayout(JNIEnv* env)
 {
-    return AndroidRuntime::registerNativeMethods(env, "android/text/StaticLayout",
-            gMethods, NELEM(gMethods));
+    gLineBreaks_class = MakeGlobalRefOrDie(env,
+            FindClassOrDie(env, "android/text/StaticLayout$LineBreaks"));
+
+    gLineBreaks_fieldID.breaks = GetFieldIDOrDie(env, gLineBreaks_class, "breaks", "[I");
+    gLineBreaks_fieldID.widths = GetFieldIDOrDie(env, gLineBreaks_class, "widths", "[F");
+    gLineBreaks_fieldID.flags = GetFieldIDOrDie(env, gLineBreaks_class, "flags", "[I");
+
+    return RegisterMethodsOrDie(env, "android/text/StaticLayout", gMethods, NELEM(gMethods));
 }
 
 }

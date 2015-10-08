@@ -47,6 +47,15 @@ public class FieldPacker {
         // subAlign() can never work correctly for copied FieldPacker objects.
     }
 
+    static FieldPacker createFromArray(Object[] args) {
+        FieldPacker fp = new FieldPacker(RenderScript.sPointerSize * 8);
+        for (Object arg : args) {
+            fp.addSafely(arg);
+        }
+        fp.resize(fp.mPos);
+        return fp;
+    }
+
     public void align(int v) {
         if ((v <= 0) || ((v & (v - 1)) != 0)) {
             throw new RSIllegalArgumentException("argument must be a non-negative non-zero power of 2: " + v);
@@ -241,8 +250,7 @@ public class FieldPacker {
                 addI64(0);
                 addI64(0);
                 addI64(0);
-            }
-            else {
+            } else {
                 addI32((int)obj.getID(null));
             }
         } else {
@@ -619,11 +627,182 @@ public class FieldPacker {
         return mPos;
     }
 
-    private final byte mData[];
+    private void add(Object obj) {
+        if (obj instanceof Boolean) {
+            addBoolean((Boolean)obj);
+            return;
+        }
+
+        if (obj instanceof Byte) {
+            addI8((Byte)obj);
+            return;
+        }
+
+        if (obj instanceof Short) {
+            addI16((Short)obj);
+            return;
+        }
+
+        if (obj instanceof Integer) {
+            addI32((Integer)obj);
+            return;
+        }
+
+        if (obj instanceof Long) {
+            addI64((Long)obj);
+            return;
+        }
+
+        if (obj instanceof Float) {
+            addF32((Float)obj);
+            return;
+        }
+
+        if (obj instanceof Double) {
+            addF64((Double)obj);
+            return;
+        }
+
+        if (obj instanceof Byte2) {
+            addI8((Byte2)obj);
+            return;
+        }
+
+        if (obj instanceof Byte3) {
+            addI8((Byte3)obj);
+            return;
+        }
+
+        if (obj instanceof Byte4) {
+            addI8((Byte4)obj);
+            return;
+        }
+
+        if (obj instanceof Short2) {
+            addI16((Short2)obj);
+            return;
+        }
+
+        if (obj instanceof Short3) {
+            addI16((Short3)obj);
+            return;
+        }
+
+        if (obj instanceof Short4) {
+            addI16((Short4)obj);
+            return;
+        }
+
+        if (obj instanceof Int2) {
+            addI32((Int2)obj);
+            return;
+        }
+
+        if (obj instanceof Int3) {
+            addI32((Int3)obj);
+            return;
+        }
+
+        if (obj instanceof Int4) {
+            addI32((Int4)obj);
+            return;
+        }
+
+        if (obj instanceof Long2) {
+            addI64((Long2)obj);
+            return;
+        }
+
+        if (obj instanceof Long3) {
+            addI64((Long3)obj);
+            return;
+        }
+
+        if (obj instanceof Long4) {
+            addI64((Long4)obj);
+            return;
+        }
+
+        if (obj instanceof Float2) {
+            addF32((Float2)obj);
+            return;
+        }
+
+        if (obj instanceof Float3) {
+            addF32((Float3)obj);
+            return;
+        }
+
+        if (obj instanceof Float4) {
+            addF32((Float4)obj);
+            return;
+        }
+
+        if (obj instanceof Double2) {
+            addF64((Double2)obj);
+            return;
+        }
+
+        if (obj instanceof Double3) {
+            addF64((Double3)obj);
+            return;
+        }
+
+        if (obj instanceof Double4) {
+            addF64((Double4)obj);
+            return;
+        }
+
+        if (obj instanceof Matrix2f) {
+            addMatrix((Matrix2f)obj);
+            return;
+        }
+
+        if (obj instanceof Matrix3f) {
+            addMatrix((Matrix3f)obj);
+            return;
+        }
+
+        if (obj instanceof Matrix4f) {
+            addMatrix((Matrix4f)obj);
+            return;
+        }
+
+        if (obj instanceof BaseObj) {
+            addObj((BaseObj)obj);
+            return;
+        }
+    }
+
+    private boolean resize(int newSize) {
+        if (newSize == mLen) {
+            return false;
+        }
+
+        byte[] newData = new byte[newSize];
+        System.arraycopy(mData, 0, newData, 0, mPos);
+        mData = newData;
+        mLen = newSize;
+        return true;
+    }
+
+    private void addSafely(Object obj) {
+        boolean retry;
+        final int oldPos = mPos;
+        do {
+            retry = false;
+            try {
+                add(obj);
+            } catch (ArrayIndexOutOfBoundsException e) {
+                mPos = oldPos;
+                resize(mLen * 2);
+                retry = true;
+            }
+        } while (retry);
+    }
+
+    private byte mData[];
     private int mPos;
     private int mLen;
     private BitSet mAlignment;
-
 }
-
-

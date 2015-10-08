@@ -19,6 +19,7 @@
 #include <SkPath.h>
 
 #include "Rect.h"
+#include "utils/MathUtils.h"
 
 namespace android {
 namespace uirenderer {
@@ -85,6 +86,11 @@ public:
         return mShouldClip && (mType == kOutlineType_RoundRect);
     }
 
+    bool willRoundRectClip() const {
+        // only round rect outlines can be used for clipping
+        return willClip() && MathUtils::isPositive(mRadius);
+    }
+
     bool getAsRoundRect(Rect* outRect, float* outRadius) const {
         if (mType == kOutlineType_RoundRect) {
             outRect->set(mBounds);
@@ -95,7 +101,7 @@ public:
     }
 
     const SkPath* getPath() const {
-        if (mType == kOutlineType_None || mType == kOutlineType_Empty) return NULL;
+        if (mType == kOutlineType_None || mType == kOutlineType_Empty) return nullptr;
 
         return &mPath;
     }

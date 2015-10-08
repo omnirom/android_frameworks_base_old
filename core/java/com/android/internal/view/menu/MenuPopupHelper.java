@@ -43,8 +43,6 @@ import java.util.ArrayList;
 public class MenuPopupHelper implements AdapterView.OnItemClickListener, View.OnKeyListener,
         ViewTreeObserver.OnGlobalLayoutListener, PopupWindow.OnDismissListener,
         View.OnAttachStateChangeListener, MenuPresenter {
-    private static final String TAG = "MenuPopupHelper";
-
     static final int ITEM_LAYOUT = com.android.internal.R.layout.popup_menu_item_layout;
 
     private final Context mContext;
@@ -118,6 +116,10 @@ public class MenuPopupHelper implements AdapterView.OnItemClickListener, View.On
         mDropDownGravity = gravity;
     }
 
+    public int getGravity() {
+        return mDropDownGravity;
+    }
+
     public void show() {
         if (!tryShow()) {
             throw new IllegalStateException("MenuPopupHelper cannot be used without an anchor");
@@ -128,14 +130,25 @@ public class MenuPopupHelper implements AdapterView.OnItemClickListener, View.On
         return mPopup;
     }
 
+    /**
+     * Attempts to show the popup anchored to the view specified by
+     * {@link #setAnchorView(View)}.
+     *
+     * @return {@code true} if the popup was shown or was already showing prior
+     *         to calling this method, {@code false} otherwise
+     */
     public boolean tryShow() {
+        if (isShowing()) {
+            return true;
+        }
+
         mPopup = new ListPopupWindow(mContext, null, mPopupStyleAttr, mPopupStyleRes);
         mPopup.setOnDismissListener(this);
         mPopup.setOnItemClickListener(this);
         mPopup.setAdapter(mAdapter);
         mPopup.setModal(true);
 
-        View anchor = mAnchorView;
+        final View anchor = mAnchorView;
         if (anchor != null) {
             final boolean addGlobalListener = mTreeObserver == null;
             mTreeObserver = anchor.getViewTreeObserver(); // Refresh to latest
@@ -165,6 +178,7 @@ public class MenuPopupHelper implements AdapterView.OnItemClickListener, View.On
         }
     }
 
+    @Override
     public void onDismiss() {
         mPopup = null;
         mMenu.close();
@@ -186,6 +200,7 @@ public class MenuPopupHelper implements AdapterView.OnItemClickListener, View.On
         adapter.mAdapterMenu.performItemAction(adapter.getItem(position), 0);
     }
 
+    @Override
     public boolean onKey(View v, int keyCode, KeyEvent event) {
         if (event.getAction() == KeyEvent.ACTION_UP && keyCode == KeyEvent.KEYCODE_MENU) {
             dismiss();

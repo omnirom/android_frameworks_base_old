@@ -21,6 +21,7 @@ import android.net.LocalSocketAddress;
 import android.system.Os;
 import android.util.Log;
 import com.android.internal.os.Zygote;
+import dalvik.system.VMRuntime;
 import java.io.BufferedWriter;
 import java.io.DataInputStream;
 import java.io.IOException;
@@ -614,9 +615,9 @@ public class Process {
         synchronized(Process.class) {
             ArrayList<String> argsForZygote = new ArrayList<String>();
 
-            // --runtime-init, --setuid=, --setgid=,
+            // --runtime-args, --setuid=, --setgid=,
             // and --setgroups= must go first
-            argsForZygote.add("--runtime-init");
+            argsForZygote.add("--runtime-args");
             argsForZygote.add("--setuid=" + uid);
             argsForZygote.add("--setgid=" + gid);
             if ((debugFlags & Zygote.DEBUG_ENABLE_JNI_LOGGING) != 0) {
@@ -631,13 +632,21 @@ public class Process {
             if ((debugFlags & Zygote.DEBUG_ENABLE_CHECKJNI) != 0) {
                 argsForZygote.add("--enable-checkjni");
             }
+            if ((debugFlags & Zygote.DEBUG_ENABLE_JIT) != 0) {
+                argsForZygote.add("--enable-jit");
+            }
+            if ((debugFlags & Zygote.DEBUG_GENERATE_DEBUG_INFO) != 0) {
+                argsForZygote.add("--generate-debug-info");
+            }
             if ((debugFlags & Zygote.DEBUG_ENABLE_ASSERT) != 0) {
                 argsForZygote.add("--enable-assert");
             }
-            if (mountExternal == Zygote.MOUNT_EXTERNAL_MULTIUSER) {
-                argsForZygote.add("--mount-external-multiuser");
-            } else if (mountExternal == Zygote.MOUNT_EXTERNAL_MULTIUSER_ALL) {
-                argsForZygote.add("--mount-external-multiuser-all");
+            if (mountExternal == Zygote.MOUNT_EXTERNAL_DEFAULT) {
+                argsForZygote.add("--mount-external-default");
+            } else if (mountExternal == Zygote.MOUNT_EXTERNAL_READ) {
+                argsForZygote.add("--mount-external-read");
+            } else if (mountExternal == Zygote.MOUNT_EXTERNAL_WRITE) {
+                argsForZygote.add("--mount-external-write");
             }
             argsForZygote.add("--target-sdk-version=" + targetSdkVersion);
 
@@ -740,7 +749,14 @@ public class Process {
      * @return  Returns the number of milliseconds this process has return.
      */
     public static final native long getElapsedCpuTime();
-    
+
+    /**
+     * Returns true if the current process is a 64-bit runtime.
+     */
+    public static final boolean is64Bit() {
+        return VMRuntime.getRuntime().is64Bit();
+    }
+
     /**
      * Returns the identifier of this process, which can be used with
      * {@link #killProcess} and {@link #sendSignal}.
@@ -790,7 +806,12 @@ public class Process {
      * @hide
      */
     public static final boolean isIsolated() {
-        int uid = UserHandle.getAppId(myUid());
+        return isIsolated(myUid());
+    }
+
+    /** {@hide} */
+    public static final boolean isIsolated(int uid) {
+        uid = UserHandle.getAppId(uid);
         return uid >= FIRST_ISOLATED_UID && uid <= LAST_ISOLATED_UID;
     }
 

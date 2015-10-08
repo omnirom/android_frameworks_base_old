@@ -17,21 +17,22 @@
 package android.net.wifi;
 
 import android.annotation.SystemApi;
+import android.content.pm.PackageManager;
 import android.net.IpConfiguration;
 import android.net.IpConfiguration.ProxySettings;
-import android.net.IpConfiguration.IpAssignment;
 import android.net.ProxyInfo;
 import android.net.StaticIpConfiguration;
 import android.os.Parcel;
 import android.os.Parcelable;
 import android.text.TextUtils;
-import android.annotation.SystemApi;
+import android.util.Log;
 
 import java.util.HashMap;
 import java.util.BitSet;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Comparator;
+import java.util.HashSet;
 
 /**
  * A class representing a configured Wi-Fi network, including the
@@ -59,6 +60,7 @@ public class WifiConfiguration implements Parcelable {
     public static final String updateIdentiferVarName = "update_identifier";
     /** {@hide} */
     public static final int INVALID_NETWORK_ID = -1;
+
     /**
      * Recognized key management schemes.
      */
@@ -192,6 +194,9 @@ public class WifiConfiguration implements Parcelable {
     /** @hide */
     public static final int DISABLED_BY_WIFI_MANAGER                        = 5;
 
+    /** @hide */
+    public static final int UNKNOWN_UID = -1;
+
     /**
      * The ID number that the supplicant uses to identify this
      * network configuration entry. This must be passed as an argument
@@ -233,17 +238,23 @@ public class WifiConfiguration implements Parcelable {
      * <code>XX:XX:XX:XX:XX:XX</code> where each <code>X</code> is a hex digit.
      */
     public String BSSID;
+
     /**
-     * Fully qualified domain name (FQDN) of AAA server or RADIUS server
-     * e.g. {@code "mail.example.com"}.
-     */
-    public String FQDN;
-    /**
-     * Network access identifier (NAI) realm, for Passpoint credential.
-     * e.g. {@code "myhost.example.com"}.
+     * The band which AP resides on
+     * 0-2G  1-5G
+     * By default, 2G is chosen
      * @hide
      */
-    public String naiRealm;
+    public int apBand = 0;
+
+    /**
+     * The channel which AP resides on,currently, US only
+     * 2G  1-11
+     * 5G  36,40,44,48,149,153,157,161,165
+     * 0 - find a random available channel according to the apBand
+     * @hide
+     */
+    public int apChannel = 0;
 
     /**
      * Pre-shared key for use with WPA-PSK.
@@ -328,6 +339,22 @@ public class WifiConfiguration implements Parcelable {
     public WifiEnterpriseConfig enterpriseConfig;
 
     /**
+     * Fully qualified domain name of a passpoint configuration
+     */
+    public String FQDN;
+
+    /**
+     * Name of passpoint credential provider
+     */
+    public String providerFriendlyName;
+
+    /**
+     * Roaming Consortium Id list for passpoint credential; identifies a set of networks where
+     * passpoint credential will be considered valid
+     */
+    public long[] roamingConsortiumIds;
+
+    /**
      * @hide
      */
     private IpConfiguration mIpConfiguration;
@@ -378,16 +405,31 @@ public class WifiConfiguration implements Parcelable {
 
     /**
      * @hide
+     * Universal name for app creating the configuration
+     *    see {#link {@link PackageManager#getNameForUid(int)}
+     */
+    @SystemApi
+    public String creatorName;
+
+    /**
+     * @hide
+     * Universal name for app updating the configuration
+     *    see {#link {@link PackageManager#getNameForUid(int)}
+     */
+    @SystemApi
+    public String lastUpdateName;
+
+    /**
+     * @hide
      * Uid used by autoJoin
      */
     public String autoJoinBSSID;
 
     /**
      * @hide
-     * BSSID list on which this configuration was seen.
-     * TODO: prevent this list to grow infinitely, age-out the results
+     * Status of user approval for connection
      */
-    public HashMap<String, ScanResult> scanResultCache;
+    public int userApproved = USER_UNSPECIFIED;
 
     /** The Below RSSI thresholds are used to configure AutoJoin
      *  - GOOD/LOW/BAD thresholds are used so as to calculate link score
@@ -478,7 +520,7 @@ public class WifiConfiguration implements Parcelable {
      * A summary of the RSSI and Band status for that configuration
      * This is used as a temporary value by the auto-join controller
      */
-    public final class Visibility {
+    public static final class Visibility {
         public int rssi5;   // strongest 5GHz RSSI
         public int rssi24;  // strongest 2.4GHz RSSI
         public int num5;    // number of BSSIDs on 5GHz
@@ -554,47 +596,8 @@ public class WifiConfiguration implements Parcelable {
      * age in milliseconds: we will consider only ScanResults that are more recent,
      * i.e. younger.
      ***/
-    public Visibility setVisibility(long age) {
-        if (scanResultCache == null) {
-            visibility = null;
-            return null;
-        }
-
-        Visibility status = new Visibility();
-
-        long now_ms = System.currentTimeMillis();
-        for(ScanResult result : scanResultCache.values()) {
-            if (result.seen == 0)
-                continue;
-
-            if (result.is5GHz()) {
-                //strictly speaking: [4915, 5825]
-                //number of known BSSID on 5GHz band
-                status.num5 = status.num5 + 1;
-            } else if (result.is24GHz()) {
-                //strictly speaking: [2412, 2482]
-                //number of known BSSID on 2.4Ghz band
-                status.num24 = status.num24 + 1;
-            }
-
-            if ((now_ms - result.seen) > age) continue;
-
-            if (result.is5GHz()) {
-                if (result.level > status.rssi5) {
-                    status.rssi5 = result.level;
-                    status.age5 = result.seen;
-                    status.BSSID5 = result.BSSID;
-                }
-            } else if (result.is24GHz()) {
-                if (result.level > status.rssi24) {
-                    status.rssi24 = result.level;
-                    status.age24 = result.seen;
-                    status.BSSID24 = result.BSSID;
-                }
-            }
-        }
+    public void setVisibility(Visibility status) {
         visibility = status;
-        return status;
     }
 
     /** @hide */
@@ -629,6 +632,28 @@ public class WifiConfiguration implements Parcelable {
     /** @hide */
     public static final int AUTO_JOIN_DELETED  = 200;
 
+    // States for the userApproved field
+    /**
+     * @hide
+     * User hasn't specified if connection is okay
+     */
+    public static final int USER_UNSPECIFIED = 0;
+    /**
+     * @hide
+     * User has approved this for connection
+     */
+    public static final int USER_APPROVED = 1;
+    /**
+     * @hide
+     * User has banned this from connection
+     */
+    public static final int USER_BANNED = 2;
+    /**
+     * @hide
+     * Waiting for user input
+     */
+    public static final int USER_PENDING = 3;
+
     /**
      * @hide
      */
@@ -660,6 +685,18 @@ public class WifiConfiguration implements Parcelable {
 
     /**
      * @hide
+     * For debug: date at which the config was last updated
+     */
+    public String updateTime;
+
+    /**
+     * @hide
+     * For debug: date at which the config was last updated
+     */
+    public String creationTime;
+
+    /**
+     * @hide
      * The WiFi configuration is considered to have no internet access for purpose of autojoining
      * if there has been a report of it having no internet access, and, it never have had
      * internet access in the past.
@@ -667,6 +704,14 @@ public class WifiConfiguration implements Parcelable {
     public boolean hasNoInternetAccess() {
         return numNoInternetAccessReports > 0 && !validatedInternetAccess;
     }
+
+    /**
+     * The WiFi configuration is expected not to have Internet access (e.g., a wireless printer, a
+     * Chromecast hotspot, etc.). This will be set if the user explicitly confirms a connection to
+     * this configuration and selects "don't ask again".
+     * @hide
+     */
+    public boolean noInternetAccessExpected;
 
     /**
      * @hide
@@ -862,7 +907,7 @@ public class WifiConfiguration implements Parcelable {
         SSID = null;
         BSSID = null;
         FQDN = null;
-        naiRealm = null;
+        roamingConsortiumIds = new long[0];
         priority = 0;
         hiddenSSID = false;
         disableReason = DISABLED_UNKNOWN_REASON;
@@ -882,33 +927,18 @@ public class WifiConfiguration implements Parcelable {
         ephemeral = false;
         validatedInternetAccess = false;
         mIpConfiguration = new IpConfiguration();
+        lastUpdateUid = -1;
+        creatorUid = -1;
     }
 
     /**
-     * indicates whether the configuration is valid
-     * @return true if valid, false otherwise
-     * @hide
+     * Identify if this configuration represents a passpoint network
      */
-    public boolean isValid() {
-
-        if (allowedKeyManagement == null)
-            return false;
-
-        if (allowedKeyManagement.cardinality() > 1) {
-            if (allowedKeyManagement.cardinality() != 2) {
-                return false;
-            }
-            if (allowedKeyManagement.get(KeyMgmt.WPA_EAP) == false) {
-                return false;
-            }
-            if ((allowedKeyManagement.get(KeyMgmt.IEEE8021X) == false)
-                    && (allowedKeyManagement.get(KeyMgmt.WPA_PSK) == false)) {
-                return false;
-            }
-        }
-
-        // TODO: Add more checks
-        return true;
+    public boolean isPasspoint() {
+        return !TextUtils.isEmpty(FQDN)
+                && !TextUtils.isEmpty(providerFriendlyName)
+                && enterpriseConfig != null
+                && enterpriseConfig.getEapMethod() != WifiEnterpriseConfig.Eap.NONE;
     }
 
     /**
@@ -926,28 +956,12 @@ public class WifiConfiguration implements Parcelable {
     }
 
     /**
-     * most recent time we have seen this configuration
-     * @return most recent scanResult
+     * Helper function, idenfity if a configuration should be treated as an enterprise network
      * @hide
      */
-    public ScanResult lastSeen() {
-        ScanResult mostRecent = null;
-
-        if (scanResultCache == null) {
-            return null;
-        }
-
-        for (ScanResult result : scanResultCache.values()) {
-            if (mostRecent == null) {
-                if (result.seen != 0)
-                   mostRecent = result;
-            } else {
-                if (result.seen > mostRecent.seen) {
-                   mostRecent = result;
-                }
-            }
-        }
-        return mostRecent;
+    public boolean isEnterprise() {
+        return allowedKeyManagement.get(KeyMgmt.WPA_EAP) ||
+            allowedKeyManagement.get(KeyMgmt.IEEE8021X);
     }
 
     /** @hide **/
@@ -964,75 +978,6 @@ public class WifiConfiguration implements Parcelable {
         }
     }
 
-    /** @hide
-     *  trim the scan Result Cache
-     * @param: number of entries to keep in the cache
-     */
-    public void trimScanResultsCache(int num) {
-        if (this.scanResultCache == null) {
-            return;
-        }
-        int currenSize = this.scanResultCache.size();
-        if (currenSize <= num) {
-            return; // Nothing to trim
-        }
-        ArrayList<ScanResult> list = new ArrayList<ScanResult>(this.scanResultCache.values());
-        if (list.size() != 0) {
-            // Sort by descending timestamp
-            Collections.sort(list, new Comparator() {
-                public int compare(Object o1, Object o2) {
-                    ScanResult a = (ScanResult)o1;
-                    ScanResult b = (ScanResult)o2;
-                    if (a.seen > b.seen) {
-                        return 1;
-                    }
-                    if (a.seen < b.seen) {
-                        return -1;
-                    }
-                    return a.BSSID.compareTo(b.BSSID);
-                }
-            });
-        }
-        for (int i = 0; i < currenSize - num ; i++) {
-            // Remove oldest results from scan cache
-            ScanResult result = list.get(i);
-            this.scanResultCache.remove(result.BSSID);
-        }
-    }
-
-    /* @hide */
-    private ArrayList<ScanResult> sortScanResults() {
-        ArrayList<ScanResult> list = new ArrayList<ScanResult>(this.scanResultCache.values());
-        if (list.size() != 0) {
-            Collections.sort(list, new Comparator() {
-                public int compare(Object o1, Object o2) {
-                    ScanResult a = (ScanResult)o1;
-                    ScanResult b = (ScanResult)o2;
-                    if (a.numIpConfigFailures > b.numIpConfigFailures) {
-                        return 1;
-                    }
-                    if (a.numIpConfigFailures < b.numIpConfigFailures) {
-                        return -1;
-                    }
-                    if (a.seen > b.seen) {
-                        return -1;
-                    }
-                    if (a.seen < b.seen) {
-                        return 1;
-                    }
-                    if (a.level > b.level) {
-                        return -1;
-                    }
-                    if (a.level < b.level) {
-                        return 1;
-                    }
-                    return a.BSSID.compareTo(b.BSSID);
-                }
-            });
-        }
-        return list;
-    }
-
     @Override
     public String toString() {
         StringBuilder sbuf = new StringBuilder();
@@ -1042,8 +987,9 @@ public class WifiConfiguration implements Parcelable {
             sbuf.append("- DSBLE ");
         }
         sbuf.append("ID: ").append(this.networkId).append(" SSID: ").append(this.SSID).
+                append(" PROVIDER-NAME: ").append(this.providerFriendlyName).
                 append(" BSSID: ").append(this.BSSID).append(" FQDN: ").append(this.FQDN).
-                append(" REALM: ").append(this.naiRealm).append(" PRIO: ").append(this.priority).
+                append(" PRIO: ").append(this.priority).
                 append('\n');
         if (this.numConnectionFailures > 0) {
             sbuf.append(" numConnectFailures ").append(this.numConnectionFailures).append("\n");
@@ -1066,6 +1012,12 @@ public class WifiConfiguration implements Parcelable {
         if (this.numNoInternetAccessReports > 0) {
             sbuf.append(" numNoInternetAccessReports ");
             sbuf.append(this.numNoInternetAccessReports).append("\n");
+        }
+        if (this.updateTime != null) {
+            sbuf.append("update ").append(this.updateTime).append("\n");
+        }
+        if (this.creationTime != null) {
+            sbuf.append("creation").append(this.creationTime).append("\n");
         }
         if (this.didSelfAdd) sbuf.append(" didSelfAdd");
         if (this.selfAdded) sbuf.append(" selfAdded");
@@ -1142,7 +1094,6 @@ public class WifiConfiguration implements Parcelable {
         sbuf.append("IP config:\n");
         sbuf.append(mIpConfiguration.toString());
 
-        if (this.creatorUid != 0)  sbuf.append(" uid=" + Integer.toString(creatorUid));
         if (this.autoJoinBSSID != null) sbuf.append(" autoJoinBSSID=" + autoJoinBSSID);
         long now_ms = System.currentTimeMillis();
         if (this.blackListTimestamp != 0) {
@@ -1151,36 +1102,45 @@ public class WifiConfiguration implements Parcelable {
             if (diff <= 0) {
                 sbuf.append(" blackListed since <incorrect>");
             } else {
-                sbuf.append(" blackListed: ").append(Long.toString(diff/1000)).append( "sec");
+                sbuf.append(" blackListed: ").append(Long.toString(diff/1000)).append( "sec ");
             }
         }
+        if (creatorUid != 0)  sbuf.append(" cuid=" + Integer.toString(creatorUid));
+        if (creatorName != null) sbuf.append(" cname=" + creatorName);
+        if (lastUpdateUid != 0) sbuf.append(" luid=" + lastUpdateUid);
+        if (lastUpdateName != null) sbuf.append(" lname=" + lastUpdateName);
+        sbuf.append(" lcuid=" + lastConnectUid);
+        sbuf.append(" userApproved=" + userApprovedAsString(userApproved));
+        sbuf.append(" noInternetAccessExpected=" + noInternetAccessExpected);
+        sbuf.append(" ");
+
         if (this.lastConnected != 0) {
             sbuf.append('\n');
             long diff = now_ms - this.lastConnected;
             if (diff <= 0) {
                 sbuf.append("lastConnected since <incorrect>");
             } else {
-                sbuf.append("lastConnected: ").append(Long.toString(diff/1000)).append( "sec");
+                sbuf.append("lastConnected: ").append(Long.toString(diff/1000)).append( "sec ");
             }
         }
         if (this.lastConnectionFailure != 0) {
             sbuf.append('\n');
             long diff = now_ms - this.lastConnectionFailure;
             if (diff <= 0) {
-                sbuf.append("lastConnectionFailure since <incorrect>");
+                sbuf.append("lastConnectionFailure since <incorrect> ");
             } else {
                 sbuf.append("lastConnectionFailure: ").append(Long.toString(diff/1000));
-                sbuf.append( "sec");
+                sbuf.append( "sec ");
             }
         }
         if (this.lastRoamingFailure != 0) {
             sbuf.append('\n');
             long diff = now_ms - this.lastRoamingFailure;
             if (diff <= 0) {
-                sbuf.append("lastRoamingFailure since <incorrect>");
+                sbuf.append("lastRoamingFailure since <incorrect> ");
             } else {
                 sbuf.append("lastRoamingFailure: ").append(Long.toString(diff/1000));
-                sbuf.append( "sec");
+                sbuf.append( "sec ");
             }
         }
         sbuf.append("roamingFailureBlackListTimeMilli: ").
@@ -1200,42 +1160,6 @@ public class WifiConfiguration implements Parcelable {
                     sbuf.append(" = ").append(choice);
                     sbuf.append('\n');
                 }
-            }
-        }
-        if (this.scanResultCache != null) {
-            sbuf.append("Scan Cache:  ").append('\n');
-            ArrayList<ScanResult> list = sortScanResults();
-            if (list.size() > 0) {
-                for (ScanResult result : list) {
-                    long milli = now_ms - result.seen;
-                    long ageSec = 0;
-                    long ageMin = 0;
-                    long ageHour = 0;
-                    long ageMilli = 0;
-                    long ageDay = 0;
-                    if (now_ms > result.seen && result.seen > 0) {
-                        ageMilli = milli % 1000;
-                        ageSec   = (milli / 1000) % 60;
-                        ageMin   = (milli / (60*1000)) % 60;
-                        ageHour  = (milli / (60*60*1000)) % 24;
-                        ageDay   = (milli / (24*60*60*1000));
-                    }
-                    sbuf.append("{").append(result.BSSID).append(",").append(result.frequency);
-                    sbuf.append(",").append(String.format("%3d", result.level));
-                    if (result.autoJoinStatus > 0) {
-                        sbuf.append(",st=").append(result.autoJoinStatus);
-                    }
-                    if (ageSec > 0 || ageMilli > 0) {
-                        sbuf.append(String.format(",%4d.%02d.%02d.%02d.%03dms", ageDay,
-                                ageHour, ageMin, ageSec, ageMilli));
-                    }
-                    if (result.numIpConfigFailures > 0) {
-                        sbuf.append(",ipfail=");
-                        sbuf.append(result.numIpConfigFailures);
-                    }
-                    sbuf.append("} ");
-                }
-                sbuf.append('\n');
             }
         }
         sbuf.append("triggeredLow: ").append(this.numUserTriggeredWifiDisableLowRSSI);
@@ -1288,6 +1212,20 @@ public class WifiConfiguration implements Parcelable {
             return wifiSsid.toString();
         }
         return SSID;
+    }
+
+    /** @hide **/
+    public static String userApprovedAsString(int userApproved) {
+        switch (userApproved) {
+            case USER_APPROVED:
+                return "USER_APPROVED";
+            case USER_BANNED:
+                return "USER_BANNED";
+            case USER_UNSPECIFIED:
+                return "USER_UNSPECIFIED";
+            default:
+                return "INVALID";
+        }
     }
 
     /**
@@ -1354,8 +1292,8 @@ public class WifiConfiguration implements Parcelable {
 
     /** @hide */
     public int getAuthType() {
-        if (isValid() == false) {
-            throw new IllegalStateException("Invalid configuration");
+        if (allowedKeyManagement.cardinality() > 1) {
+            throw new IllegalStateException("More than one auth type set");
         }
         if (allowedKeyManagement.get(KeyMgmt.WPA_PSK)) {
             return KeyMgmt.WPA_PSK;
@@ -1383,6 +1321,8 @@ public class WifiConfiguration implements Parcelable {
         String key;
         if (allowCached && mCachedConfigKey != null) {
             key = mCachedConfigKey;
+        } else if (providerFriendlyName != null) {
+            key = FQDN + KeyMgmt.strings[KeyMgmt.WPA_EAP];
         } else {
             if (allowedKeyManagement.get(KeyMgmt.WPA_PSK)) {
                 key = SSID + KeyMgmt.strings[KeyMgmt.WPA_PSK];
@@ -1498,8 +1438,12 @@ public class WifiConfiguration implements Parcelable {
             SSID = source.SSID;
             BSSID = source.BSSID;
             FQDN = source.FQDN;
-            naiRealm = source.naiRealm;
+            roamingConsortiumIds = source.roamingConsortiumIds.clone();
+            providerFriendlyName = source.providerFriendlyName;
             preSharedKey = source.preSharedKey;
+
+            apBand = source.apBand;
+            apChannel = source.apChannel;
 
             wepKeys = new String[4];
             for (int i = 0; i < wepKeys.length; i++) {
@@ -1520,11 +1464,6 @@ public class WifiConfiguration implements Parcelable {
             defaultGwMacAddress = source.defaultGwMacAddress;
 
             mIpConfiguration = new IpConfiguration(source.mIpConfiguration);
-
-            if ((source.scanResultCache != null) && (source.scanResultCache.size() > 0)) {
-                scanResultCache = new HashMap<String, ScanResult>();
-                scanResultCache.putAll(source.scanResultCache);
-            }
 
             if ((source.connectChoices != null) && (source.connectChoices.size() > 0)) {
                 connectChoices = new HashMap<String, Integer>();
@@ -1550,6 +1489,8 @@ public class WifiConfiguration implements Parcelable {
             lastConnectUid = source.lastConnectUid;
             lastUpdateUid = source.lastUpdateUid;
             creatorUid = source.creatorUid;
+            creatorName = source.creatorName;
+            lastUpdateName = source.lastUpdateName;
             peerWifiConfiguration = source.peerWifiConfiguration;
             blackListTimestamp = source.blackListTimestamp;
             lastConnected = source.lastConnected;
@@ -1576,7 +1517,11 @@ public class WifiConfiguration implements Parcelable {
                     = source.autoJoinUseAggressiveJoinAttemptThreshold;
             autoJoinBailedDueToLowRssi = source.autoJoinBailedDueToLowRssi;
             dirty = source.dirty;
+            userApproved = source.userApproved;
             numNoInternetAccessReports = source.numNoInternetAccessReports;
+            noInternetAccessExpected = source.noInternetAccessExpected;
+            creationTime = source.creationTime;
+            updateTime = source.updateTime;
         }
     }
 
@@ -1593,9 +1538,15 @@ public class WifiConfiguration implements Parcelable {
         dest.writeInt(disableReason);
         dest.writeString(SSID);
         dest.writeString(BSSID);
+        dest.writeInt(apBand);
+        dest.writeInt(apChannel);
         dest.writeString(autoJoinBSSID);
         dest.writeString(FQDN);
-        dest.writeString(naiRealm);
+        dest.writeString(providerFriendlyName);
+        dest.writeInt(roamingConsortiumIds.length);
+        for (long roamingConsortiumId : roamingConsortiumIds) {
+            dest.writeLong(roamingConsortiumId);
+        }
         dest.writeString(preSharedKey);
         for (String wepKey : wepKeys) {
             dest.writeString(wepKey);
@@ -1625,6 +1576,8 @@ public class WifiConfiguration implements Parcelable {
         dest.writeInt(creatorUid);
         dest.writeInt(lastConnectUid);
         dest.writeInt(lastUpdateUid);
+        dest.writeString(creatorName);
+        dest.writeString(lastUpdateName);
         dest.writeLong(blackListTimestamp);
         dest.writeLong(lastConnectionFailure);
         dest.writeLong(lastRoamingFailure);
@@ -1645,7 +1598,9 @@ public class WifiConfiguration implements Parcelable {
         dest.writeInt(numUserTriggeredJoinAttempts);
         dest.writeInt(autoJoinUseAggressiveJoinAttemptThreshold);
         dest.writeInt(autoJoinBailedDueToLowRssi ? 1 : 0);
+        dest.writeInt(userApproved);
         dest.writeInt(numNoInternetAccessReports);
+        dest.writeInt(noInternetAccessExpected ? 1 : 0);
     }
 
     /** Implement the Parcelable interface {@hide} */
@@ -1658,9 +1613,16 @@ public class WifiConfiguration implements Parcelable {
                 config.disableReason = in.readInt();
                 config.SSID = in.readString();
                 config.BSSID = in.readString();
+                config.apBand = in.readInt();
+                config.apChannel = in.readInt();
                 config.autoJoinBSSID = in.readString();
                 config.FQDN = in.readString();
-                config.naiRealm = in.readString();
+                config.providerFriendlyName = in.readString();
+                int numRoamingConsortiumIds = in.readInt();
+                config.roamingConsortiumIds = new long[numRoamingConsortiumIds];
+                for (int i = 0; i < numRoamingConsortiumIds; i++) {
+                    config.roamingConsortiumIds[i] = in.readLong();
+                }
                 config.preSharedKey = in.readString();
                 for (int i = 0; i < config.wepKeys.length; i++) {
                     config.wepKeys[i] = in.readString();
@@ -1690,6 +1652,8 @@ public class WifiConfiguration implements Parcelable {
                 config.creatorUid = in.readInt();
                 config.lastConnectUid = in.readInt();
                 config.lastUpdateUid = in.readInt();
+                config.creatorName = in.readString();
+                config.lastUpdateName = in.readString();
                 config.blackListTimestamp = in.readLong();
                 config.lastConnectionFailure = in.readLong();
                 config.lastRoamingFailure = in.readLong();
@@ -1710,7 +1674,9 @@ public class WifiConfiguration implements Parcelable {
                 config.numUserTriggeredJoinAttempts = in.readInt();
                 config.autoJoinUseAggressiveJoinAttemptThreshold = in.readInt();
                 config.autoJoinBailedDueToLowRssi = in.readInt() != 0;
+                config.userApproved = in.readInt();
                 config.numNoInternetAccessReports = in.readInt();
+                config.noInternetAccessExpected = in.readInt() != 0;
                 return config;
             }
 

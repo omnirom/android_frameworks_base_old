@@ -214,15 +214,15 @@ static void agps_status_callback(AGpsStatus* agps_status)
 
     size_t status_size = agps_status->size;
     if (status_size == sizeof(AGpsStatus_v3)) {
-      ALOGV("AGpsStatus is V3: %d", status_size);
+      ALOGV("AGpsStatus is V3: %zd", status_size);
       switch (agps_status->addr.ss_family)
       {
       case AF_INET:
           {
             struct sockaddr_in *in = (struct sockaddr_in*)&(agps_status->addr);
-            uint32_t *pAddr = (uint32_t*)&(in->sin_addr);
-            byteArray = convert_to_ipv4(*pAddr, true /* net_order */);
-            if (byteArray != NULL) {
+            uint32_t ipAddr = *(uint32_t*)&(in->sin_addr);
+            byteArray = convert_to_ipv4(ipAddr, true /* net_order */);
+            if (ipAddr == INADDR_NONE || byteArray != NULL) {
                 isSupported = true;
             }
             IF_ALOGD() {
@@ -256,7 +256,7 @@ static void agps_status_callback(AGpsStatus* agps_status)
           break;
       }
     } else if (status_size >= sizeof(AGpsStatus_v2)) {
-      ALOGV("AGpsStatus is V2+: %d", status_size);
+      ALOGV("AGpsStatus is V2+: %zd", status_size);
       // for back-compatibility reasons we check in v2 that the data structure size is greater or
       // equal to the declared size in gps.h
       uint32_t ipaddr = agps_status->ipaddr;
@@ -266,12 +266,12 @@ static void agps_status_callback(AGpsStatus* agps_status)
           isSupported = true;
       }
     } else if (status_size >= sizeof(AGpsStatus_v1)) {
-        ALOGV("AGpsStatus is V1+: %d", status_size);
+        ALOGV("AGpsStatus is V1+: %zd", status_size);
         // because we have to check for >= with regards to v2, we also need to relax the check here
         // and only make sure that the size is at least what we expect
         isSupported = true;
     } else {
-        ALOGE("Invalid size of AGpsStatus found: %d.", status_size);
+        ALOGE("Invalid size of AGpsStatus found: %zd.", status_size);
     }
 
     if (isSupported) {
@@ -509,12 +509,22 @@ static void android_location_GpsLocationProvider_class_init_native(JNIEnv* env, 
     }
 }
 
-static jboolean android_location_GpsLocationProvider_is_supported(JNIEnv* env, jclass clazz) {
-    if (sGpsInterface != NULL) {
-        return JNI_TRUE;
-    } else {
-        return JNI_FALSE;
-    }
+static jboolean android_location_GpsLocationProvider_is_supported(
+        JNIEnv* /* env */, jclass /* clazz */)
+{
+    return (sGpsInterface != NULL) ?  JNI_TRUE : JNI_FALSE;
+}
+
+static jboolean android_location_GpsLocationProvider_is_agps_ril_supported(
+        JNIEnv* /* env */, jclass /* clazz */)
+{
+    return (sAGpsRilInterface != NULL) ? JNI_TRUE : JNI_FALSE;
+}
+
+static jboolean android_location_gpsLocationProvider_is_gnss_configuration_supported(
+        JNIEnv* /* env */, jclass /* jclazz */)
+{
+    return (sGnssConfigurationInterface != NULL) ? JNI_TRUE : JNI_FALSE;
 }
 
 static jboolean android_location_GpsLocationProvider_init(JNIEnv* env, jobject obj)
@@ -543,14 +553,15 @@ static jboolean android_location_GpsLocationProvider_init(JNIEnv* env, jobject o
     return JNI_TRUE;
 }
 
-static void android_location_GpsLocationProvider_cleanup(JNIEnv* env, jobject obj)
+static void android_location_GpsLocationProvider_cleanup(JNIEnv* /* env */, jobject /* obj */)
 {
     if (sGpsInterface)
         sGpsInterface->cleanup();
 }
 
-static jboolean android_location_GpsLocationProvider_set_position_mode(JNIEnv* env, jobject obj,
-        jint mode, jint recurrence, jint min_interval, jint preferred_accuracy, jint preferred_time)
+static jboolean android_location_GpsLocationProvider_set_position_mode(JNIEnv* /* env */,
+        jobject /* obj */, jint mode, jint recurrence, jint min_interval, jint preferred_accuracy,
+        jint preferred_time)
 {
     if (sGpsInterface) {
         if (sGpsInterface->set_position_mode(mode, recurrence, min_interval, preferred_accuracy,
@@ -564,7 +575,7 @@ static jboolean android_location_GpsLocationProvider_set_position_mode(JNIEnv* e
         return JNI_FALSE;
 }
 
-static jboolean android_location_GpsLocationProvider_start(JNIEnv* env, jobject obj)
+static jboolean android_location_GpsLocationProvider_start(JNIEnv* /* env */, jobject /* obj */)
 {
     if (sGpsInterface) {
         if (sGpsInterface->start() == 0) {
@@ -577,7 +588,7 @@ static jboolean android_location_GpsLocationProvider_start(JNIEnv* env, jobject 
         return JNI_FALSE;
 }
 
-static jboolean android_location_GpsLocationProvider_stop(JNIEnv* env, jobject obj)
+static jboolean android_location_GpsLocationProvider_stop(JNIEnv* /* env */, jobject /* obj */)
 {
     if (sGpsInterface) {
         if (sGpsInterface->stop() == 0) {
@@ -590,13 +601,15 @@ static jboolean android_location_GpsLocationProvider_stop(JNIEnv* env, jobject o
         return JNI_FALSE;
 }
 
-static void android_location_GpsLocationProvider_delete_aiding_data(JNIEnv* env, jobject obj, jint flags)
+static void android_location_GpsLocationProvider_delete_aiding_data(JNIEnv* /* env */,
+                                                                    jobject /* obj */,
+                                                                    jint flags)
 {
     if (sGpsInterface)
         sGpsInterface->delete_aiding_data(flags);
 }
 
-static jint android_location_GpsLocationProvider_read_sv_status(JNIEnv* env, jobject obj,
+static jint android_location_GpsLocationProvider_read_sv_status(JNIEnv* env, jobject /* obj */,
         jintArray prnArray, jfloatArray snrArray, jfloatArray elevArray, jfloatArray azumArray,
         jintArray maskArray)
 {
@@ -627,8 +640,8 @@ static jint android_location_GpsLocationProvider_read_sv_status(JNIEnv* env, job
     return (jint) num_svs;
 }
 
-static void android_location_GpsLocationProvider_agps_set_reference_location_cellid(JNIEnv* env,
-        jobject obj, jint type, jint mcc, jint mnc, jint lac, jint cid)
+static void android_location_GpsLocationProvider_agps_set_reference_location_cellid(
+        JNIEnv* /* env */, jobject /* obj */, jint type, jint mcc, jint mnc, jint lac, jint cid)
 {
     AGpsRefLocation location;
 
@@ -655,7 +668,7 @@ static void android_location_GpsLocationProvider_agps_set_reference_location_cel
 }
 
 static void android_location_GpsLocationProvider_agps_send_ni_message(JNIEnv* env,
-        jobject obj, jbyteArray ni_msg, jint size)
+        jobject /* obj */, jbyteArray ni_msg, jint size)
 {
     size_t sz;
 
@@ -671,8 +684,8 @@ static void android_location_GpsLocationProvider_agps_send_ni_message(JNIEnv* en
     env->ReleaseByteArrayElements(ni_msg,b,0);
 }
 
-static void android_location_GpsLocationProvider_agps_set_id(JNIEnv *env,
-        jobject obj, jint type, jstring  setid_string)
+static void android_location_GpsLocationProvider_agps_set_id(JNIEnv *env, jobject /* obj */,
+                                                             jint type, jstring  setid_string)
 {
     if (!sAGpsRilInterface) {
         ALOGE("no AGPS RIL interface in agps_set_id");
@@ -684,7 +697,7 @@ static void android_location_GpsLocationProvider_agps_set_id(JNIEnv *env,
     env->ReleaseStringUTFChars(setid_string, setid);
 }
 
-static jint android_location_GpsLocationProvider_read_nmea(JNIEnv* env, jobject obj,
+static jint android_location_GpsLocationProvider_read_nmea(JNIEnv* env, jobject /* obj */,
                                             jbyteArray nmeaArray, jint buffer_size)
 {
     // this should only be called from within a call to reportNmea
@@ -697,30 +710,27 @@ static jint android_location_GpsLocationProvider_read_nmea(JNIEnv* env, jobject 
     return (jint) length;
 }
 
-static void android_location_GpsLocationProvider_inject_time(JNIEnv* env, jobject obj,
+static void android_location_GpsLocationProvider_inject_time(JNIEnv* /* env */, jobject /* obj */,
         jlong time, jlong timeReference, jint uncertainty)
 {
     if (sGpsInterface)
         sGpsInterface->inject_time(time, timeReference, uncertainty);
 }
 
-static void android_location_GpsLocationProvider_inject_location(JNIEnv* env, jobject obj,
-        jdouble latitude, jdouble longitude, jfloat accuracy)
+static void android_location_GpsLocationProvider_inject_location(JNIEnv* /* env */,
+        jobject /* obj */, jdouble latitude, jdouble longitude, jfloat accuracy)
 {
     if (sGpsInterface)
         sGpsInterface->inject_location(latitude, longitude, accuracy);
 }
 
-static jboolean android_location_GpsLocationProvider_supports_xtra(JNIEnv* env, jobject obj)
+static jboolean android_location_GpsLocationProvider_supports_xtra(
+        JNIEnv* /* env */, jobject /* obj */)
 {
-    if (sGpsXtraInterface != NULL) {
-        return JNI_TRUE;
-    } else {
-        return JNI_FALSE;
-    }
+    return (sGpsXtraInterface != NULL) ? JNI_TRUE : JNI_FALSE;
 }
 
-static void android_location_GpsLocationProvider_inject_xtra_data(JNIEnv* env, jobject obj,
+static void android_location_GpsLocationProvider_inject_xtra_data(JNIEnv* env, jobject /* obj */,
         jbyteArray data, jint length)
 {
     if (!sGpsXtraInterface) {
@@ -734,7 +744,7 @@ static void android_location_GpsLocationProvider_inject_xtra_data(JNIEnv* env, j
 }
 
 static void android_location_GpsLocationProvider_agps_data_conn_open(
-        JNIEnv* env, jobject obj, jstring apn, jint apnIpType)
+        JNIEnv* env, jobject /* obj */, jstring apn, jint apnIpType)
 {
     if (!sAGpsInterface) {
         ALOGE("no AGPS interface in agps_data_conn_open");
@@ -753,13 +763,14 @@ static void android_location_GpsLocationProvider_agps_data_conn_open(
     } else if (interface_size == sizeof(AGpsInterface_v1)) {
         sAGpsInterface->data_conn_open(apnStr);
     } else {
-        ALOGE("Invalid size of AGpsInterface found: %d.", interface_size);
+        ALOGE("Invalid size of AGpsInterface found: %zd.", interface_size);
     }
 
     env->ReleaseStringUTFChars(apn, apnStr);
 }
 
-static void android_location_GpsLocationProvider_agps_data_conn_closed(JNIEnv* env, jobject obj)
+static void android_location_GpsLocationProvider_agps_data_conn_closed(JNIEnv* /* env */,
+                                                                       jobject /* obj */)
 {
     if (!sAGpsInterface) {
         ALOGE("no AGPS interface in agps_data_conn_closed");
@@ -768,7 +779,8 @@ static void android_location_GpsLocationProvider_agps_data_conn_closed(JNIEnv* e
     sAGpsInterface->data_conn_closed();
 }
 
-static void android_location_GpsLocationProvider_agps_data_conn_failed(JNIEnv* env, jobject obj)
+static void android_location_GpsLocationProvider_agps_data_conn_failed(JNIEnv* /* env */,
+                                                                       jobject /* obj */)
 {
     if (!sAGpsInterface) {
         ALOGE("no AGPS interface in agps_data_conn_failed");
@@ -777,7 +789,7 @@ static void android_location_GpsLocationProvider_agps_data_conn_failed(JNIEnv* e
     sAGpsInterface->data_conn_failed();
 }
 
-static void android_location_GpsLocationProvider_set_agps_server(JNIEnv* env, jobject obj,
+static void android_location_GpsLocationProvider_set_agps_server(JNIEnv* env, jobject /* obj */,
         jint type, jstring hostname, jint port)
 {
     if (!sAGpsInterface) {
@@ -789,8 +801,8 @@ static void android_location_GpsLocationProvider_set_agps_server(JNIEnv* env, jo
     env->ReleaseStringUTFChars(hostname, c_hostname);
 }
 
-static void android_location_GpsLocationProvider_send_ni_response(JNIEnv* env, jobject obj,
-      jint notifId, jint response)
+static void android_location_GpsLocationProvider_send_ni_response(JNIEnv* /* env */,
+      jobject /* obj */, jint notifId, jint response)
 {
     if (!sGpsNiInterface) {
         ALOGE("no NI interface in send_ni_response");
@@ -800,8 +812,8 @@ static void android_location_GpsLocationProvider_send_ni_response(JNIEnv* env, j
     sGpsNiInterface->respond(notifId, response);
 }
 
-static jstring android_location_GpsLocationProvider_get_internal_state(JNIEnv* env, jobject obj)
-{
+static jstring android_location_GpsLocationProvider_get_internal_state(JNIEnv* env,
+                                                                       jobject /* obj */) {
     jstring result = NULL;
     if (sGpsDebugInterface) {
         const size_t maxLength = 2047;
@@ -814,7 +826,7 @@ static jstring android_location_GpsLocationProvider_get_internal_state(JNIEnv* e
     return result;
 }
 
-static void android_location_GpsLocationProvider_update_network_state(JNIEnv* env, jobject obj,
+static void android_location_GpsLocationProvider_update_network_state(JNIEnv* env, jobject /* obj */,
         jboolean connected, jint type, jboolean roaming, jboolean available, jstring extraInfo, jstring apn)
 {
 
@@ -837,16 +849,14 @@ static void android_location_GpsLocationProvider_update_network_state(JNIEnv* en
     }
 }
 
-static jboolean android_location_GpsLocationProvider_is_geofence_supported(JNIEnv* env,
-          jobject obj) {
-    if (sGpsGeofencingInterface != NULL) {
-        return JNI_TRUE;
-    }
-    return JNI_FALSE;
+static jboolean android_location_GpsLocationProvider_is_geofence_supported(
+        JNIEnv* /* env */, jobject /* obj */)
+{
+    return (sGpsGeofencingInterface != NULL) ? JNI_TRUE : JNI_FALSE;
 }
 
-static jboolean android_location_GpsLocationProvider_add_geofence(JNIEnv* env, jobject obj,
-        jint geofence_id, jdouble latitude, jdouble longitude, jdouble radius,
+static jboolean android_location_GpsLocationProvider_add_geofence(JNIEnv* /* env */,
+        jobject /* obj */, jint geofence_id, jdouble latitude, jdouble longitude, jdouble radius,
         jint last_transition, jint monitor_transition, jint notification_responsiveness,
         jint unknown_timer) {
     if (sGpsGeofencingInterface != NULL) {
@@ -860,8 +870,8 @@ static jboolean android_location_GpsLocationProvider_add_geofence(JNIEnv* env, j
     return JNI_FALSE;
 }
 
-static jboolean android_location_GpsLocationProvider_remove_geofence(JNIEnv* env, jobject obj,
-        jint geofence_id) {
+static jboolean android_location_GpsLocationProvider_remove_geofence(JNIEnv* /* env */,
+        jobject /* obj */, jint geofence_id) {
     if (sGpsGeofencingInterface != NULL) {
         sGpsGeofencingInterface->remove_geofence_area(geofence_id);
         return JNI_TRUE;
@@ -871,8 +881,8 @@ static jboolean android_location_GpsLocationProvider_remove_geofence(JNIEnv* env
     return JNI_FALSE;
 }
 
-static jboolean android_location_GpsLocationProvider_pause_geofence(JNIEnv* env, jobject obj,
-        jint geofence_id) {
+static jboolean android_location_GpsLocationProvider_pause_geofence(JNIEnv* /* env */,
+        jobject /* obj */, jint geofence_id) {
     if (sGpsGeofencingInterface != NULL) {
         sGpsGeofencingInterface->pause_geofence(geofence_id);
         return JNI_TRUE;
@@ -882,8 +892,8 @@ static jboolean android_location_GpsLocationProvider_pause_geofence(JNIEnv* env,
     return JNI_FALSE;
 }
 
-static jboolean android_location_GpsLocationProvider_resume_geofence(JNIEnv* env, jobject obj,
-        jint geofence_id, jint monitor_transition) {
+static jboolean android_location_GpsLocationProvider_resume_geofence(JNIEnv* /* env */,
+        jobject /* obj */, jint geofence_id, jint monitor_transition) {
     if (sGpsGeofencingInterface != NULL) {
         sGpsGeofencingInterface->resume_geofence(geofence_id, monitor_transition);
         return JNI_TRUE;
@@ -1253,7 +1263,7 @@ static void measurement_callback(GpsData* data) {
         env->DeleteLocalRef(gpsMeasurementsEventClass);
         env->DeleteLocalRef(gpsMeasurementsEvent);
     } else {
-        ALOGE("Invalid GpsData size found in gps_measurement_callback, size=%d", data->size);
+        ALOGE("Invalid GpsData size found in gps_measurement_callback, size=%zd", data->size);
     }
 }
 
@@ -1304,7 +1314,7 @@ static jobject translate_gps_navigation_message(JNIEnv* env, GpsNavigationMessag
     size_t dataLength = message->data_length;
     uint8_t* data = message->data;
     if (dataLength == 0 || data == NULL) {
-        ALOGE("Invalid Navigation Message found: data=%p, length=%d", data, dataLength);
+        ALOGE("Invalid Navigation Message found: data=%p, length=%zd", data, dataLength);
         return NULL;
     }
 
@@ -1363,7 +1373,7 @@ static void navigation_message_callback(GpsNavigationMessage* message) {
         env->DeleteLocalRef(navigationMessageEventClass);
         env->DeleteLocalRef(navigationMessageEvent);
     } else {
-        ALOGE("Invalid GpsNavigationMessage size found: %d", message->size);
+        ALOGE("Invalid GpsNavigationMessage size found: %zd", message->size);
     }
 }
 
@@ -1428,6 +1438,10 @@ static JNINativeMethod sMethods[] = {
      /* name, signature, funcPtr */
     {"class_init_native", "()V", (void *)android_location_GpsLocationProvider_class_init_native},
     {"native_is_supported", "()Z", (void*)android_location_GpsLocationProvider_is_supported},
+    {"native_is_agps_ril_supported", "()Z",
+            (void*)android_location_GpsLocationProvider_is_agps_ril_supported},
+    {"native_is_gnss_configuration_supported", "()Z",
+            (void*)android_location_gpsLocationProvider_is_gnss_configuration_supported},
     {"native_init", "()Z", (void*)android_location_GpsLocationProvider_init},
     {"native_cleanup", "()V", (void*)android_location_GpsLocationProvider_cleanup},
     {"native_set_position_mode",

@@ -28,8 +28,8 @@ import android.database.Cursor;
 import android.database.sqlite.SQLiteDatabase;
 import android.database.sqlite.SQLiteOpenHelper;
 import android.database.sqlite.SQLiteStatement;
+import android.media.AudioSystem;
 import android.media.AudioManager;
-import android.media.AudioService;
 import android.net.ConnectivityManager;
 import android.os.Build;
 import android.os.Environment;
@@ -58,12 +58,21 @@ import java.io.File;
 import java.io.IOException;
 import java.util.HashSet;
 import java.util.List;
+import java.util.Set;
 
 /**
- * Database helper class for {@link SettingsProvider}.
- * Mostly just has a bit {@link #onCreate} to initialize the database.
+ * Legacy settings database helper class for {@link SettingsProvider}.
+ *
+ * IMPORTANT: Do not add any more upgrade steps here as the global,
+ * secure, and system settings are no longer stored in a database
+ * but are kept in memory and persisted to XML.
+ *
+ * See: SettingsProvider.UpgradeController#onUpgradeLocked
+ *
+ * @deprecated The implementation is frozen.  Do not add any new code to this class!
  */
-public class DatabaseHelper extends SQLiteOpenHelper {
+@Deprecated
+class DatabaseHelper extends SQLiteOpenHelper {
     private static final String TAG = "SettingsProvider";
     private static final String DATABASE_NAME = "settings.db";
 
@@ -78,6 +87,9 @@ public class DatabaseHelper extends SQLiteOpenHelper {
 
     private static final HashSet<String> mValidTables = new HashSet<String>();
 
+    private static final String DATABASE_JOURNAL_SUFFIX = "-journal";
+    private static final String DATABASE_BACKUP_SUFFIX = "-backup";
+
     private static final String TABLE_SYSTEM = "system";
     private static final String TABLE_SECURE = "secure";
     private static final String TABLE_GLOBAL = "global";
@@ -86,13 +98,13 @@ public class DatabaseHelper extends SQLiteOpenHelper {
         mValidTables.add(TABLE_SYSTEM);
         mValidTables.add(TABLE_SECURE);
         mValidTables.add(TABLE_GLOBAL);
-        mValidTables.add("bluetooth_devices");
-        mValidTables.add("bookmarks");
 
         // These are old.
+        mValidTables.add("bluetooth_devices");
+        mValidTables.add("bookmarks");
         mValidTables.add("favorites");
-        mValidTables.add("gservices");
         mValidTables.add("old_favorites");
+        mValidTables.add("android_metadata");
     }
 
     static String dbNameForUser(final int userHandle) {
@@ -116,6 +128,33 @@ public class DatabaseHelper extends SQLiteOpenHelper {
 
     public static boolean isValidTable(String name) {
         return mValidTables.contains(name);
+    }
+
+    public void dropDatabase() {
+        close();
+        File databaseFile = mContext.getDatabasePath(getDatabaseName());
+        if (databaseFile.exists()) {
+            databaseFile.delete();
+        }
+        File databaseJournalFile = mContext.getDatabasePath(getDatabaseName()
+                + DATABASE_JOURNAL_SUFFIX);
+        if (databaseJournalFile.exists()) {
+            databaseJournalFile.delete();
+        }
+    }
+
+    public void backupDatabase() {
+        close();
+        File databaseFile = mContext.getDatabasePath(getDatabaseName());
+        if (!databaseFile.exists()) {
+            return;
+        }
+        File backupFile = mContext.getDatabasePath(getDatabaseName()
+                + DATABASE_BACKUP_SUFFIX);
+        if (backupFile.exists()) {
+            return;
+        }
+        databaseFile.renameTo(backupFile);
     }
 
     private void createSecureTable(SQLiteDatabase db) {
@@ -568,7 +607,7 @@ public class DatabaseHelper extends SQLiteOpenHelper {
                 stmt = db.compileStatement("INSERT OR IGNORE INTO system(name,value)"
                         + " VALUES(?,?);");
                 loadSetting(stmt, Settings.System.VOLUME_BLUETOOTH_SCO,
-                        AudioService.getDefaultStreamVolume(AudioManager.STREAM_BLUETOOTH_SCO));
+                        AudioSystem.getDefaultStreamVolume(AudioManager.STREAM_BLUETOOTH_SCO));
                 db.setTransactionSuccessful();
             } finally {
                 db.endTransaction();
@@ -1221,9 +1260,11 @@ public class DatabaseHelper extends SQLiteOpenHelper {
                     // Migrate now-global settings. Note that this happens before
                     // new users can be created.
                     createGlobalTable(db);
-                    String[] settingsToMove = hashsetToStringArray(SettingsProvider.sSystemGlobalKeys);
+                    String[] settingsToMove = setToStringArray(
+                            SettingsProvider.sSystemMovedToGlobalSettings);
                     moveSettingsToNewTable(db, TABLE_SYSTEM, TABLE_GLOBAL, settingsToMove, false);
-                    settingsToMove = hashsetToStringArray(SettingsProvider.sSecureGlobalKeys);
+                    settingsToMove = setToStringArray(
+                            SettingsProvider.sSecureMovedToGlobalSettings);
                     moveSettingsToNewTable(db, TABLE_SECURE, TABLE_GLOBAL, settingsToMove, false);
 
                     db.setTransactionSuccessful();
@@ -1489,9 +1530,11 @@ public class DatabaseHelper extends SQLiteOpenHelper {
                 db.beginTransaction();
                 try {
                     // Migrate now-global settings
-                    String[] settingsToMove = hashsetToStringArray(SettingsProvider.sSystemGlobalKeys);
+                    String[] settingsToMove = setToStringArray(
+                            SettingsProvider.sSystemMovedToGlobalSettings);
                     moveSettingsToNewTable(db, TABLE_SYSTEM, TABLE_GLOBAL, settingsToMove, true);
-                    settingsToMove = hashsetToStringArray(SettingsProvider.sSecureGlobalKeys);
+                    settingsToMove = setToStringArray(
+                            SettingsProvider.sSecureMovedToGlobalSettings);
                     moveSettingsToNewTable(db, TABLE_SECURE, TABLE_GLOBAL, settingsToMove, true);
 
                     db.setTransactionSuccessful();
@@ -1855,7 +1898,8 @@ public class DatabaseHelper extends SQLiteOpenHelper {
                 try {
                     stmt = db.compileStatement("INSERT OR IGNORE INTO global(name,value)"
                             + " VALUES(?,?);");
-                    loadSetting(stmt, Settings.Global.ENHANCED_4G_MODE_ENABLED, ImsConfig.FeatureValueConstants.ON);
+                    loadSetting(stmt, Settings.Global.ENHANCED_4G_MODE_ENABLED,
+                            ImsConfig.FeatureValueConstants.ON);
                     db.setTransactionSuccessful();
                 } finally {
                     db.endTransaction();
@@ -1895,34 +1939,45 @@ public class DatabaseHelper extends SQLiteOpenHelper {
             }
             upgradeVersion = 118;
         }
-        // *** Remember to update DATABASE_VERSION above!
+
+        /*
+         * IMPORTANT: Do not add any more upgrade steps here as the global,
+         * secure, and system settings are no longer stored in a database
+         * but are kept in memory and persisted to XML.
+         *
+         * See: SettingsProvider.UpgradeController#onUpgradeLocked
+         */
 
         if (upgradeVersion != currentVersion) {
-            Log.w(TAG, "Got stuck trying to upgrade from version " + upgradeVersion
-                    + ", must wipe the settings provider");
-            db.execSQL("DROP TABLE IF EXISTS global");
-            db.execSQL("DROP TABLE IF EXISTS globalIndex1");
-            db.execSQL("DROP TABLE IF EXISTS system");
-            db.execSQL("DROP INDEX IF EXISTS systemIndex1");
-            db.execSQL("DROP TABLE IF EXISTS secure");
-            db.execSQL("DROP INDEX IF EXISTS secureIndex1");
-            db.execSQL("DROP TABLE IF EXISTS gservices");
-            db.execSQL("DROP INDEX IF EXISTS gservicesIndex1");
-            db.execSQL("DROP TABLE IF EXISTS bluetooth_devices");
-            db.execSQL("DROP TABLE IF EXISTS bookmarks");
-            db.execSQL("DROP INDEX IF EXISTS bookmarksIndex1");
-            db.execSQL("DROP INDEX IF EXISTS bookmarksIndex2");
-            db.execSQL("DROP TABLE IF EXISTS favorites");
-            onCreate(db);
-
-            // Added for diagnosing settings.db wipes after the fact
-            String wipeReason = oldVersion + "/" + upgradeVersion + "/" + currentVersion;
-            db.execSQL("INSERT INTO secure(name,value) values('" +
-                    "wiped_db_reason" + "','" + wipeReason + "');");
+            recreateDatabase(db, oldVersion, upgradeVersion, currentVersion);
         }
     }
 
-    private String[] hashsetToStringArray(HashSet<String> set) {
+    public void recreateDatabase(SQLiteDatabase db, int oldVersion,
+            int upgradeVersion, int currentVersion) {
+        db.execSQL("DROP TABLE IF EXISTS global");
+        db.execSQL("DROP TABLE IF EXISTS globalIndex1");
+        db.execSQL("DROP TABLE IF EXISTS system");
+        db.execSQL("DROP INDEX IF EXISTS systemIndex1");
+        db.execSQL("DROP TABLE IF EXISTS secure");
+        db.execSQL("DROP INDEX IF EXISTS secureIndex1");
+        db.execSQL("DROP TABLE IF EXISTS gservices");
+        db.execSQL("DROP INDEX IF EXISTS gservicesIndex1");
+        db.execSQL("DROP TABLE IF EXISTS bluetooth_devices");
+        db.execSQL("DROP TABLE IF EXISTS bookmarks");
+        db.execSQL("DROP INDEX IF EXISTS bookmarksIndex1");
+        db.execSQL("DROP INDEX IF EXISTS bookmarksIndex2");
+        db.execSQL("DROP TABLE IF EXISTS favorites");
+
+        onCreate(db);
+
+        // Added for diagnosing settings.db wipes after the fact
+        String wipeReason = oldVersion + "/" + upgradeVersion + "/" + currentVersion;
+        db.execSQL("INSERT INTO secure(name,value) values('" +
+                "wiped_db_reason" + "','" + wipeReason + "');");
+    }
+
+    private String[] setToStringArray(Set<String> set) {
         String[] array = new String[set.size()];
         return set.toArray(array);
     }
@@ -2011,7 +2066,7 @@ public class DatabaseHelper extends SQLiteOpenHelper {
                     LockPatternUtils lpu = new LockPatternUtils(mContext);
                     List<LockPatternView.Cell> cellPattern =
                             LockPatternUtils.stringToPattern(lockPattern);
-                    lpu.saveLockPattern(cellPattern);
+                    lpu.saveLockPattern(cellPattern, null, UserHandle.USER_OWNER);
                 } catch (IllegalArgumentException e) {
                     // Don't want corrupted lock pattern to hang the reboot process
                 }
@@ -2051,11 +2106,11 @@ public class DatabaseHelper extends SQLiteOpenHelper {
         int vibrateSetting = getIntValueFromSystem(db, Settings.System.VIBRATE_ON, 0);
         // If the ringer vibrate value is invalid, set it to the default
         if ((vibrateSetting & 3) == AudioManager.VIBRATE_SETTING_OFF) {
-            vibrateSetting = AudioService.getValueForVibrateSetting(0,
+            vibrateSetting = AudioSystem.getValueForVibrateSetting(0,
                     AudioManager.VIBRATE_TYPE_RINGER, AudioManager.VIBRATE_SETTING_ONLY_SILENT);
         }
         // Apply the same setting to the notification vibrate value
-        vibrateSetting = AudioService.getValueForVibrateSetting(vibrateSetting,
+        vibrateSetting = AudioSystem.getValueForVibrateSetting(vibrateSetting,
                 AudioManager.VIBRATE_TYPE_NOTIFICATION, vibrateSetting);
 
         SQLiteStatement stmt = null;
@@ -2199,25 +2254,25 @@ public class DatabaseHelper extends SQLiteOpenHelper {
                     + " VALUES(?,?);");
 
             loadSetting(stmt, Settings.System.VOLUME_MUSIC,
-                    AudioService.getDefaultStreamVolume(AudioManager.STREAM_MUSIC));
+                    AudioSystem.getDefaultStreamVolume(AudioManager.STREAM_MUSIC));
             loadSetting(stmt, Settings.System.VOLUME_RING,
-                    AudioService.getDefaultStreamVolume(AudioManager.STREAM_RING));
+                    AudioSystem.getDefaultStreamVolume(AudioManager.STREAM_RING));
             loadSetting(stmt, Settings.System.VOLUME_SYSTEM,
-                    AudioService.getDefaultStreamVolume(AudioManager.STREAM_SYSTEM));
+                    AudioSystem.getDefaultStreamVolume(AudioManager.STREAM_SYSTEM));
             loadSetting(
                     stmt,
                     Settings.System.VOLUME_VOICE,
-                    AudioService.getDefaultStreamVolume(AudioManager.STREAM_VOICE_CALL));
+                    AudioSystem.getDefaultStreamVolume(AudioManager.STREAM_VOICE_CALL));
             loadSetting(stmt, Settings.System.VOLUME_ALARM,
-                    AudioService.getDefaultStreamVolume(AudioManager.STREAM_ALARM));
+                    AudioSystem.getDefaultStreamVolume(AudioManager.STREAM_ALARM));
             loadSetting(
                     stmt,
                     Settings.System.VOLUME_NOTIFICATION,
-                    AudioService.getDefaultStreamVolume(AudioManager.STREAM_NOTIFICATION));
+                    AudioSystem.getDefaultStreamVolume(AudioManager.STREAM_NOTIFICATION));
             loadSetting(
                     stmt,
                     Settings.System.VOLUME_BLUETOOTH_SCO,
-                    AudioService.getDefaultStreamVolume(AudioManager.STREAM_BLUETOOTH_SCO));
+                    AudioSystem.getDefaultStreamVolume(AudioManager.STREAM_BLUETOOTH_SCO));
 
             // By default:
             // - ringtones, notification, system and music streams are affected by ringer mode
@@ -2236,10 +2291,7 @@ public class DatabaseHelper extends SQLiteOpenHelper {
                     ringerModeAffectedStreams);
 
             loadSetting(stmt, Settings.System.MUTE_STREAMS_AFFECTED,
-                    ((1 << AudioManager.STREAM_MUSIC) |
-                     (1 << AudioManager.STREAM_RING) |
-                     (1 << AudioManager.STREAM_NOTIFICATION) |
-                     (1 << AudioManager.STREAM_SYSTEM)));
+                    AudioSystem.DEFAULT_MUTE_STREAMS_AFFECTED);
         } finally {
             if (stmt != null) stmt.close();
         }
@@ -2259,10 +2311,10 @@ public class DatabaseHelper extends SQLiteOpenHelper {
 
             // Vibrate on by default for ringer, on for notification
             int vibrate = 0;
-            vibrate = AudioService.getValueForVibrateSetting(vibrate,
+            vibrate = AudioSystem.getValueForVibrateSetting(vibrate,
                     AudioManager.VIBRATE_TYPE_NOTIFICATION,
                     AudioManager.VIBRATE_SETTING_ONLY_SILENT);
-            vibrate |= AudioService.getValueForVibrateSetting(vibrate,
+            vibrate |= AudioSystem.getValueForVibrateSetting(vibrate,
                     AudioManager.VIBRATE_TYPE_RINGER, AudioManager.VIBRATE_SETTING_ONLY_SILENT);
             loadSetting(stmt, Settings.System.VIBRATE_ON, vibrate);
         } finally {
@@ -2337,6 +2389,14 @@ public class DatabaseHelper extends SQLiteOpenHelper {
 
             loadIntegerSetting(stmt, Settings.System.POINTER_SPEED,
                     R.integer.def_pointer_speed);
+
+            /*
+             * IMPORTANT: Do not add any more upgrade steps here as the global,
+             * secure, and system settings are no longer stored in a database
+             * but are kept in memory and persisted to XML.
+             *
+             * See: SettingsProvider.UpgradeController#onUpgradeLocked
+             */
         } finally {
             if (stmt != null) stmt.close();
         }
@@ -2468,6 +2528,14 @@ public class DatabaseHelper extends SQLiteOpenHelper {
 
             loadIntegerSetting(stmt, Settings.Secure.SLEEP_TIMEOUT,
                     R.integer.def_sleep_timeout);
+
+            /*
+             * IMPORTANT: Do not add any more upgrade steps here as the global,
+             * secure, and system settings are no longer stored in a database
+             * but are kept in memory and persisted to XML.
+             *
+             * See: SettingsProvider.UpgradeController#onUpgradeLocked
+             */
         } finally {
             if (stmt != null) stmt.close();
         }
@@ -2614,9 +2682,6 @@ public class DatabaseHelper extends SQLiteOpenHelper {
             // Set default cdma call auto retry
             loadSetting(stmt, Settings.Global.CALL_AUTO_RETRY, 0);
 
-            // Set default simplified carrier network settings to 0
-            loadSetting(stmt, Settings.Global.HIDE_CARRIER_NETWORK_SETTINGS, 0);
-
             // Set the preferred network mode to target desired value or Default
             // value defined in RILConstants
             int type;
@@ -2642,8 +2707,16 @@ public class DatabaseHelper extends SQLiteOpenHelper {
 
             loadBooleanSetting(stmt, Settings.Global.GUEST_USER_ENABLED,
                     R.bool.def_guest_user_enabled);
-            loadSetting(stmt, Settings.Global.ENHANCED_4G_MODE_ENABLED, ImsConfig.FeatureValueConstants.ON);
-            // --- New global settings start here
+            loadSetting(stmt, Settings.Global.ENHANCED_4G_MODE_ENABLED,
+                    ImsConfig.FeatureValueConstants.ON);
+
+            /*
+             * IMPORTANT: Do not add any more upgrade steps here as the global,
+             * secure, and system settings are no longer stored in a database
+             * but are kept in memory and persisted to XML.
+             *
+             * See: SettingsProvider.UpgradeController#onUpgradeLocked
+             */
         } finally {
             if (stmt != null) stmt.close();
         }

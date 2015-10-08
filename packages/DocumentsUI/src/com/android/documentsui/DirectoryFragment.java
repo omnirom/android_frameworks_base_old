@@ -30,18 +30,20 @@
 
 package com.android.documentsui;
 
+import static com.android.documentsui.BaseActivity.State.ACTION_BROWSE;
+import static com.android.documentsui.BaseActivity.State.ACTION_BROWSE_ALL;
+import static com.android.documentsui.BaseActivity.State.ACTION_CREATE;
+import static com.android.documentsui.BaseActivity.State.ACTION_MANAGE;
+import static com.android.documentsui.BaseActivity.State.ACTION_STANDALONE;
+import static com.android.documentsui.BaseActivity.State.MODE_GRID;
+import static com.android.documentsui.BaseActivity.State.MODE_LIST;
+import static com.android.documentsui.BaseActivity.State.MODE_UNKNOWN;
+import static com.android.documentsui.BaseActivity.State.SORT_ORDER_UNKNOWN;
 import static com.android.documentsui.DocumentsActivity.TAG;
-import static com.android.documentsui.DocumentsActivity.State.ACTION_CREATE;
-import static com.android.documentsui.DocumentsActivity.State.ACTION_MANAGE;
-import static com.android.documentsui.DocumentsActivity.State.ACTION_STANDALONE;
-import static com.android.documentsui.DocumentsActivity.State.MODE_GRID;
-import static com.android.documentsui.DocumentsActivity.State.MODE_LIST;
-import static com.android.documentsui.DocumentsActivity.State.MODE_UNKNOWN;
-import static com.android.documentsui.DocumentsActivity.State.SORT_ORDER_UNKNOWN;
 import static com.android.documentsui.model.DocumentInfo.getCursorInt;
 import static com.android.documentsui.model.DocumentInfo.getCursorLong;
 import static com.android.documentsui.model.DocumentInfo.getCursorString;
-
+import android.app.Activity;
 import android.app.ActivityManager;
 import android.app.AlertDialog;
 import android.app.Fragment;
@@ -66,11 +68,14 @@ import android.net.Uri;
 import android.os.AsyncTask;
 import android.os.Bundle;
 import android.os.CancellationSignal;
+import android.os.Handler;
+import android.os.Looper;
 import android.os.OperationCanceledException;
 import android.os.Parcelable;
 import android.os.RemoteException;
 import android.provider.DocumentsContract;
 import android.provider.DocumentsContract.Document;
+import android.text.TextUtils;
 import android.text.format.DateUtils;
 import android.text.format.Formatter;
 import android.text.format.Time;
@@ -95,10 +100,11 @@ import android.widget.ListView;
 import android.widget.TextView;
 import android.widget.Toast;
 
-import com.android.documentsui.DocumentsActivity.State;
+import com.android.documentsui.BaseActivity.State;
 import com.android.documentsui.ProviderExecutor.Preemptable;
 import com.android.documentsui.RecentsProvider.StateColumns;
 import com.android.documentsui.model.DocumentInfo;
+import com.android.documentsui.model.DocumentStack;
 import com.android.documentsui.model.RootInfo;
 import com.google.android.collect.Lists;
 
@@ -129,6 +135,8 @@ public class DirectoryFragment extends Fragment {
     public static final int ANIM_DOWN = 3;
     public static final int ANIM_UP = 4;
 
+    public static final int REQUEST_COPY_DESTINATION = 1;
+
     private int mType = TYPE_NORMAL;
     private String mStateKey;
 
@@ -152,6 +160,8 @@ public class DirectoryFragment extends Fragment {
 
     private final int mLoaderId = 42;
     private DirectoryLoader mLoader;
+
+    private final Handler mHandler = new Handler(Looper.getMainLooper());
 
     public static void showNormal(FragmentManager fm, RootInfo root, DocumentInfo doc, int anim) {
         show(fm, TYPE_NORMAL, root, doc, null, anim);
@@ -315,6 +325,21 @@ public class DirectoryFragment extends Fragment {
 
             @Override
             public void onLoadFinished(Loader<DirectoryResult> loader, DirectoryResult result) {
+                if (result == null || result.exception != null) {
+                    // onBackPressed does a fragment transaction, which can't be done inside
+                    // onLoadFinished
+                    mHandler.post(new Runnable() {
+                        @Override
+                        public void run() {
+                            final Activity activity = getActivity();
+                            if (activity != null) {
+                                activity.onBackPressed();
+                            }
+                        }
+                    });
+                    return;
+                }
+
                 if (!isAdded()) return;
 
                 mAdapter.swapResult(result);
@@ -325,12 +350,13 @@ public class DirectoryFragment extends Fragment {
                     state.derivedMode = result.mode;
                 }
                 state.derivedSortOrder = result.sortOrder;
-                ((DocumentsActivity) context).onStateChanged();
+                ((BaseActivity) context).onStateChanged();
 
                 updateDisplayState();
 
                 // When launched into empty recents, show drawer
-                if (mType == TYPE_RECENT_OPEN && mAdapter.isEmpty() && !state.stackTouched) {
+                if (mType == TYPE_RECENT_OPEN && mAdapter.isEmpty() && !state.stackTouched &&
+                        context instanceof DocumentsActivity) {
                     ((DocumentsActivity) context).setRootsDrawerOpen(true);
                 }
 
@@ -358,6 +384,23 @@ public class DirectoryFragment extends Fragment {
         updateDisplayState();
 
         mLoader = new DirectoryLoader(context);
+    }
+
+    @Override
+    public void onActivityResult(int requestCode, int resultCode, Intent data) {
+        // There's only one request code right now. Replace this with a switch statement or
+        // something more scalable when more codes are added.
+        if (requestCode != REQUEST_COPY_DESTINATION) {
+            return;
+        }
+        if (resultCode == Activity.RESULT_CANCELED || data == null) {
+            // User pressed the back button or otherwise cancelled the destination pick. Don't
+            // proceed with the copy.
+            return;
+        }
+
+        CopyService.start(getActivity(), getDisplayState(this).selectedDocumentsForCopy,
+                (DocumentStack) data.getParcelableExtra(CopyService.EXTRA_STACK));
     }
 
     @Override
@@ -412,7 +455,7 @@ public class DirectoryFragment extends Fragment {
         // Mode change is just visual change; no need to kick loader, and
         // deliver change event immediately.
         state.derivedMode = state.userMode;
-        ((DocumentsActivity) getActivity()).onStateChanged();
+        ((BaseActivity) getActivity()).onStateChanged();
 
         updateDisplayState();
     }
@@ -467,7 +510,7 @@ public class DirectoryFragment extends Fragment {
                 final int docFlags = getCursorInt(cursor, Document.COLUMN_FLAGS);
                 if (isDocumentEnabled(docMimeType, docFlags)) {
                     final DocumentInfo doc = DocumentInfo.fromDirectoryCursor(cursor);
-                    ((DocumentsActivity) getActivity()).onDocumentPicked(doc);
+                    ((BaseActivity) getActivity()).onDocumentPicked(doc);
                 }
             }
         }
@@ -477,8 +520,7 @@ public class DirectoryFragment extends Fragment {
         @Override
         public boolean onCreateActionMode(ActionMode mode, Menu menu) {
             mode.getMenuInflater().inflate(R.menu.mode_directory, menu);
-            mode.setTitle(getResources()
-                    .getString(R.string.mode_selected_count, mCurrentView.getCheckedItemCount()));
+            mode.setTitle(TextUtils.formatSelectedCount(mCurrentView.getCheckedItemCount()));
             return true;
         }
 
@@ -492,13 +534,16 @@ public class DirectoryFragment extends Fragment {
             final MenuItem copy = menu.findItem(R.id.menu_copy);
             final MenuItem cut = menu.findItem(R.id.menu_cut);
 
-            final boolean manageMode = state.action == ACTION_MANAGE;
+            final boolean manageOrBrowse = (state.action == ACTION_MANAGE
+                    || state.action == ACTION_BROWSE || state.action == ACTION_BROWSE_ALL);
             final boolean stdMode = state.action == ACTION_STANDALONE;
-            open.setVisible(!manageMode && !stdMode);
-            share.setVisible(manageMode || stdMode);
-            delete.setVisible(manageMode || stdMode);
-            copy.setVisible(stdMode);
-            cut.setVisible(stdMode);
+
+
+            open.setVisible(!manageOrBrowse && !stdMode);
+            share.setVisible(manageOrBrowse || stdMode);
+            delete.setVisible(manageOrBrowse || stdMode);
+            // Disable copying from the Recents view.
+            copy.setVisible(manageOrBrowse && mType != TYPE_RECENT_OPEN);
 
             return true;
         }
@@ -518,7 +563,7 @@ public class DirectoryFragment extends Fragment {
 
             final int id = item.getItemId();
             if (id == R.id.menu_open) {
-                DocumentsActivity.get(DirectoryFragment.this).onDocumentsPicked(docs);
+                BaseActivity.get(DirectoryFragment.this).onDocumentsPicked(docs);
                 mode.finish();
                 return true;
 
@@ -536,7 +581,13 @@ public class DirectoryFragment extends Fragment {
                 onCopyDocuments(docs);
                 mode.finish();
                 return true;
-
+            } else if (id == R.id.menu_select_all) {
+                int count = mCurrentView.getCount();
+                for (int i = 0; i < count; i++) {
+                    mCurrentView.setItemChecked(i, true);
+                }
+                updateDisplayState();
+                return true;
             } else if (id == R.id.menu_cut) {
                 onCutDocuments(docs);
                 mode.finish();
@@ -586,8 +637,7 @@ public class DirectoryFragment extends Fragment {
                 }
             }
 
-            mode.setTitle(getResources()
-                    .getString(R.string.mode_selected_count, mCurrentView.getCheckedItemCount()));
+            mode.setTitle(TextUtils.formatSelectedCount(mCurrentView.getCheckedItemCount()));
         }
     };
 
@@ -607,8 +657,17 @@ public class DirectoryFragment extends Fragment {
 
     private void onShareDocuments(List<DocumentInfo> docs) {
         Intent intent;
-        if (docs.size() == 1) {
-            final DocumentInfo doc = docs.get(0);
+
+        // Filter out directories - those can't be shared.
+        List<DocumentInfo> docsForSend = Lists.newArrayList();
+        for (DocumentInfo doc: docs) {
+            if (!Document.MIME_TYPE_DIR.equals(doc.mimeType)) {
+                docsForSend.add(doc);
+            }
+        }
+
+        if (docsForSend.size() == 1) {
+            final DocumentInfo doc = docsForSend.get(0);
 
             intent = new Intent(Intent.ACTION_SEND);
             intent.addFlags(Intent.FLAG_GRANT_READ_URI_PERMISSION);
@@ -616,14 +675,14 @@ public class DirectoryFragment extends Fragment {
             intent.setType(doc.mimeType);
             intent.putExtra(Intent.EXTRA_STREAM, doc.derivedUri);
 
-        } else if (docs.size() > 1) {
+        } else if (docsForSend.size() > 1) {
             intent = new Intent(Intent.ACTION_SEND_MULTIPLE);
             intent.addFlags(Intent.FLAG_GRANT_READ_URI_PERMISSION);
             intent.addCategory(Intent.CATEGORY_DEFAULT);
 
             final ArrayList<String> mimeTypes = Lists.newArrayList();
             final ArrayList<Uri> uris = Lists.newArrayList();
-            for (DocumentInfo doc : docs) {
+            for (DocumentInfo doc : docsForSend) {
                 mimeTypes.add(doc.mimeType);
                 uris.add(doc.derivedUri);
             }
@@ -727,8 +786,29 @@ public class DirectoryFragment extends Fragment {
         ((DocumentsActivity) getActivity()).setClipboardDocuments(docs, false);
     }
 
+    private void onCopyDocuments(List<DocumentInfo> docs) {
+        getDisplayState(this).selectedDocumentsForCopy = docs;
+
+        // Pop up a dialog to pick a destination.  This is inadequate but works for now.
+        // TODO: Implement a picker that is to spec.
+        final Intent intent = new Intent(
+                BaseActivity.DocumentsIntent.ACTION_OPEN_COPY_DESTINATION,
+                Uri.EMPTY,
+                getActivity(),
+                DocumentsActivity.class);
+        boolean directoryCopy = false;
+        for (DocumentInfo info : docs) {
+            if (Document.MIME_TYPE_DIR.equals(info.mimeType)) {
+                directoryCopy = true;
+                break;
+            }
+        }
+        intent.putExtra(BaseActivity.DocumentsIntent.EXTRA_DIRECTORY_COPY, directoryCopy);
+        startActivityForResult(intent, REQUEST_COPY_DESTINATION);
+    }
+
     private static State getDisplayState(Fragment fragment) {
-        return ((DocumentsActivity) fragment.getActivity()).getDisplayState();
+        return ((BaseActivity) fragment.getActivity()).getDisplayState();
     }
 
     private static abstract class Footer {

@@ -60,19 +60,23 @@ option java_package com.android.server
 2752 notification_cancel_all (uid|1|5),(pid|1|5),(pkg|3),(userid|1|5),(required_flags|1),(forbidden_flags|1),(reason|1|5),(listener|3)
 # when the notification panel is shown
 # Note: New tag range starts here since 2753+ have been used below.
-27500 notification_panel_revealed
+27500 notification_panel_revealed (items|1)
 # when the notification panel is hidden
 27501 notification_panel_hidden
 # when notifications are newly displayed on screen, or disappear from screen
 27510 notification_visibility_changed (newlyVisibleKeys|3),(noLongerVisibleKeys|3)
 # when notifications are expanded, or contracted
-27511 notification_expansion (key|3),(user_action|1),(expanded|1)
+27511 notification_expansion (key|3),(user_action|1),(expanded|1),(lifespan|1),(freshness|1),(exposure|1)
 # when a notification has been clicked
-27520 notification_clicked (key|3)
+27520 notification_clicked (key|3),(lifespan|1),(freshness|1),(exposure|1)
 # when a notification action button has been clicked
-27521 notification_action_clicked (key|3),(action_index|1)
+27521 notification_action_clicked (key|3),(action_index|1),(lifespan|1),(freshness|1),(exposure|1)
 # when a notification has been canceled
-27530 notification_canceled (key|3),(reason|1)
+27530 notification_canceled (key|3),(reason|1),(lifespan|1),(freshness|1),(exposure|1)
+# replaces 27510 with a row per notification
+27531 notification_visibility (key|3),(visibile|1),(lifespan|1),(freshness|1),(exposure|1),(rank|1)
+# a notification emited noise, vibration, or light
+27532 notification_alert (key|3),(buzz|1),(beep|1),(blink|1)
 
 # ---------------------------
 # Watchdog.java
@@ -173,6 +177,24 @@ option java_package com.android.server
 # ---------------------------
 33000 wp_wallpaper_crashed (component|3)
 
+# ---------------------------
+# Device idle
+# ---------------------------
+34000 device_idle (state|1|5), (reason|3)
+34001 device_idle_step
+34002 device_idle_wake_from_idle (is_idle|1|5), (reason|3)
+34003 device_idle_on_start
+34004 device_idle_on_phase (what|3)
+34005 device_idle_on_complete
+34006 device_idle_off_start (reason|3)
+34007 device_idle_off_phase (what|3)
+34008 device_idle_off_complete
+
+# ---------------------------
+# DisplayManagerService.java
+# ---------------------------
+# Auto-brightness adjustments by the user.
+35000 auto_brightness_adj (old_adj|5),(old_lux|5),(old_brightness|5),(old_gamma|5),(new_adj|5),(new_lux|5),(new_brightness|5),(new_gamma|5)
 
 # ---------------------------
 # ConnectivityService.java
@@ -208,11 +230,17 @@ option java_package com.android.server
 # ---------------------------
 # IdleMaintenanceService.java
 # ---------------------------
-2753 idle_maintenance_window_start (time|2|3), (lastUserActivity|2|3), (batteryLevel|1|6), (batteryCharging|1|5)
-2754 idle_maintenance_window_finish (time|2|3), (lastUserActivity|2|3), (batteryLevel|1|6), (batteryCharging|1|5)
+51500 idle_maintenance_window_start (time|2|3), (lastUserActivity|2|3), (batteryLevel|1|6), (batteryCharging|1|5)
+51501 idle_maintenance_window_finish (time|2|3), (lastUserActivity|2|3), (batteryLevel|1|6), (batteryCharging|1|5)
 
 # ---------------------------
 # MountService.java
 # ---------------------------
 2755 fstrim_start (time|2|3)
 2756 fstrim_finish (time|2|3)
+
+# ---------------------------
+# AudioService.java
+# ---------------------------
+40000 volume_changed (stream|1), (prev_level|1), (level|1), (max_level|1), (caller|3)
+40001 stream_devices_changed (stream|1), (prev_devices|1), (devices|1)

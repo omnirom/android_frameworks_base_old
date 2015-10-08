@@ -18,6 +18,7 @@ package com.android.internal.telecom;
 
 import android.app.PendingIntent;
 import android.net.Uri;
+import android.os.Bundle;
 import android.telecom.ConnectionRequest;
 import android.telecom.DisconnectCause;
 import android.telecom.ParcelableConnection;
@@ -56,6 +57,8 @@ oneway interface IConnectionServiceAdapter {
 
     void setIsConferenced(String callId, String conferenceCallId);
 
+    void setConferenceMergeFailed(String callId);
+
     void addConferenceCall(String callId, in ParcelableConference conference);
 
     void removeCall(String callId);
@@ -81,4 +84,6 @@ oneway interface IConnectionServiceAdapter {
     void setConferenceableConnections(String callId, in List<String> conferenceableCallIds);
 
     void addExistingConnection(String callId, in ParcelableConnection connection);
+
+    void setExtras(String callId, in Bundle extras);
 }

@@ -14,8 +14,8 @@
  * limitations under the License.
  */
 
-#ifndef ANDROID_GRAPHICS_PAINT_H
-#define ANDROID_GRAPHICS_PAINT_H
+#ifndef ANDROID_GRAPHICS_PAINT_H_
+#define ANDROID_GRAPHICS_PAINT_H_
 
 #include <SkPaint.h>
 #include <string>
@@ -57,7 +57,7 @@ public:
         mTextLocale = textLocale;
     }
 
-    std::string getTextLocale() const {
+    const std::string& getTextLocale() const {
         return mTextLocale;
     }
 
@@ -69,13 +69,22 @@ public:
         return mFontVariant;
     }
 
+    void setHyphenEdit(uint32_t hyphen) {
+        mHyphenEdit = hyphen;
+    }
+
+    uint32_t getHyphenEdit() const {
+        return mHyphenEdit;
+    }
+
 private:
-    float mLetterSpacing;
+    float mLetterSpacing = 0;
     std::string mFontFeatureSettings;
     std::string mTextLocale;
     FontVariant mFontVariant;
+    uint32_t mHyphenEdit = 0;
 };
 
 }  // namespace android
 
-#endif // ANDROID_GRAPHICS_PAINT_H
+#endif // ANDROID_GRAPHICS_PAINT_H_

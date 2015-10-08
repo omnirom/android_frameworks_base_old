@@ -19,16 +19,18 @@
 
 #include "RenderTask.h"
 
-#include <memory>
-#include <set>
+#include "../JankTracker.h"
+#include "TimeLord.h"
 
 #include <cutils/compiler.h>
+#include <ui/DisplayInfo.h>
 #include <utils/Looper.h>
 #include <utils/Mutex.h>
 #include <utils/Singleton.h>
 #include <utils/Thread.h>
 
-#include "TimeLord.h"
+#include <memory>
+#include <set>
 
 namespace android {
 
@@ -88,9 +90,12 @@ public:
     TimeLord& timeLord() { return mTimeLord; }
     RenderState& renderState() { return *mRenderState; }
     EglManager& eglManager() { return *mEglManager; }
+    JankTracker& jankTracker() { return *mJankTracker; }
+
+    const DisplayInfo& mainDisplayInfo() { return mDisplayInfo; }
 
 protected:
-    virtual bool threadLoop();
+    virtual bool threadLoop() override;
 
 private:
     friend class Singleton<RenderThread>;
@@ -118,6 +123,8 @@ private:
     nsecs_t mNextWakeup;
     TaskQueue mQueue;
 
+    DisplayInfo mDisplayInfo;
+
     DisplayEventReceiver* mDisplayEventReceiver;
     bool mVsyncRequested;
     std::set<IFrameCallback*> mFrameCallbacks;
@@ -132,6 +139,8 @@ private:
     TimeLord mTimeLord;
     RenderState* mRenderState;
     EglManager* mEglManager;
+
+    JankTracker* mJankTracker = nullptr;
 };
 
 } /* namespace renderthread */

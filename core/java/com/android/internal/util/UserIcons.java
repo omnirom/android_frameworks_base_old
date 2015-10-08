@@ -48,9 +48,12 @@ public class UserIcons {
         if (icon == null) {
             return null;
         }
-        Bitmap bitmap = Bitmap.createBitmap(icon.getIntrinsicWidth(), icon.getIntrinsicHeight(),
-                Bitmap.Config.ARGB_8888);
-        icon.draw(new Canvas(bitmap));
+        final int width = icon.getIntrinsicWidth();
+        final int height = icon.getIntrinsicHeight();
+        Bitmap bitmap = Bitmap.createBitmap(width, height, Bitmap.Config.ARGB_8888);
+        Canvas canvas = new Canvas(bitmap);
+        icon.setBounds(0, 0, width, height);
+        icon.draw(canvas);
         return bitmap;
     }
 
@@ -67,8 +70,8 @@ public class UserIcons {
             // Return colored icon instead
             colorResId = USER_ICON_COLORS[userId % USER_ICON_COLORS.length];
         }
-        Drawable icon = Resources.getSystem().getDrawable(R.drawable.ic_account_circle).mutate();
-        icon.setColorFilter(Resources.getSystem().getColor(colorResId), Mode.SRC_IN);
+        Drawable icon = Resources.getSystem().getDrawable(R.drawable.ic_account_circle, null).mutate();
+        icon.setColorFilter(Resources.getSystem().getColor(colorResId, null), Mode.SRC_IN);
         icon.setBounds(0, 0, icon.getIntrinsicWidth(), icon.getIntrinsicHeight());
         return icon;
     }

@@ -17,13 +17,12 @@
 package android.widget;
 
 
+import android.annotation.AnimRes;
 import android.content.Context;
 import android.content.res.TypedArray;
 import android.util.AttributeSet;
 import android.view.View;
 import android.view.ViewGroup;
-import android.view.accessibility.AccessibilityEvent;
-import android.view.accessibility.AccessibilityNodeInfo;
 import android.view.animation.Animation;
 import android.view.animation.AnimationUtils;
 
@@ -311,7 +310,7 @@ public class ViewAnimator extends FrameLayout {
      * @see #getInAnimation()
      * @see #setInAnimation(android.view.animation.Animation)
      */
-    public void setInAnimation(Context context, int resourceID) {
+    public void setInAnimation(Context context, @AnimRes int resourceID) {
         setInAnimation(AnimationUtils.loadAnimation(context, resourceID));
     }
 
@@ -324,7 +323,7 @@ public class ViewAnimator extends FrameLayout {
      * @see #getOutAnimation()
      * @see #setOutAnimation(android.view.animation.Animation)
      */
-    public void setOutAnimation(Context context, int resourceID) {
+    public void setOutAnimation(Context context, @AnimRes int resourceID) {
         setOutAnimation(AnimationUtils.loadAnimation(context, resourceID));
     }
 
@@ -358,14 +357,7 @@ public class ViewAnimator extends FrameLayout {
     }
 
     @Override
-    public void onInitializeAccessibilityEvent(AccessibilityEvent event) {
-        super.onInitializeAccessibilityEvent(event);
-        event.setClassName(ViewAnimator.class.getName());
-    }
-
-    @Override
-    public void onInitializeAccessibilityNodeInfo(AccessibilityNodeInfo info) {
-        super.onInitializeAccessibilityNodeInfo(info);
-        info.setClassName(ViewAnimator.class.getName());
+    public CharSequence getAccessibilityClassName() {
+        return ViewAnimator.class.getName();
     }
 }

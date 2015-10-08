@@ -286,11 +286,14 @@ interface IBackupManager {
      * Notify the backup manager that a BackupAgent has completed the operation
      * corresponding to the given token.
      *
-     * @param token The transaction token passed to a BackupAgent's doBackup() or
-     *        doRestore() method.
+     * @param token The transaction token passed to the BackupAgent method being
+     *        invoked.
+     * @param result In the case of a full backup measure operation, the estimated
+     *        total file size that would result from the operation. Unused in all other
+     *        cases.
      * {@hide}
      */
-    void opComplete(int token);
+    void opComplete(int token, long result);
 
     /**
      * Make the device's backup and restore machinery (in)active.  When it is inactive,
@@ -310,4 +313,17 @@ interface IBackupManager {
      *     is being queried.
      */
     boolean isBackupServiceActive(int whichUser);
+
+    /**
+     * Ask the framework which dataset, if any, the given package's data would be
+     * restored from if we were to install it right now.
+     *
+     * <p>Callers must hold the android.permission.BACKUP permission to use this method.
+     *
+     * @param packageName The name of the package whose most-suitable dataset we
+     *     wish to look up
+     * @return The dataset token from which a restore should be attempted, or zero if
+     *     no suitable data is available.
+     */
+    long getAvailableRestoreToken(String packageName);
 }

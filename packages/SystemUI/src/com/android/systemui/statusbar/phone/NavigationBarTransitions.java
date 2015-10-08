@@ -26,18 +26,13 @@ import android.view.animation.AccelerateInterpolator;
 
 import com.android.internal.statusbar.IStatusBarService;
 import com.android.systemui.R;
-import com.android.systemui.statusbar.policy.KeyButtonView;
 
 public final class NavigationBarTransitions extends BarTransitions {
-
-    private static final int CONTENT_FADE_DURATION = 200;
 
     private final NavigationBarView mView;
     private final IStatusBarService mBarService;
 
     private boolean mLightsOut;
-    private boolean mVertical;
-    private int mRequestedMode;
 
     public NavigationBarTransitions(NavigationBarView view) {
         super(view, R.drawable.nav_background);
@@ -46,29 +41,9 @@ public final class NavigationBarTransitions extends BarTransitions {
                 ServiceManager.getService(Context.STATUS_BAR_SERVICE));
     }
 
-    public void init(boolean isVertical) {
-        setVertical(isVertical);
+    public void init() {
         applyModeBackground(-1, getMode(), false /*animate*/);
         applyMode(getMode(), false /*animate*/, true /*force*/);
-    }
-
-    public void setVertical(boolean isVertical) {
-        mVertical = isVertical;
-        transitionTo(mRequestedMode, false /*animate*/);
-    }
-
-    @Override
-    public void transitionTo(int mode, boolean animate) {
-        mRequestedMode = mode;
-        if (mVertical) {
-            // translucent mode not allowed when vertical
-            if (mode == MODE_TRANSLUCENT || mode == MODE_TRANSPARENT) {
-                mode = MODE_OPAQUE;
-            } else if (mode == MODE_LIGHTS_OUT_TRANSPARENT) {
-                mode = MODE_LIGHTS_OUT;
-            }
-        }
-        super.transitionTo(mode, animate);
     }
 
     @Override
@@ -78,46 +53,9 @@ public final class NavigationBarTransitions extends BarTransitions {
     }
 
     private void applyMode(int mode, boolean animate, boolean force) {
-        // apply to key buttons
-        final float alpha = alphaForMode(mode);
-        setKeyButtonViewQuiescentAlpha(mView.getHomeButton(), alpha, animate);
-        setKeyButtonViewQuiescentAlpha(mView.getRecentsButton(), alpha, animate);
-        setKeyButtonViewQuiescentAlpha(mView.getMenuButton(), alpha, animate);
-        setKeyButtonViewQuiescentAlpha(mView.getImeSwitchButton(), alpha, animate);
-
-        applyBackButtonQuiescentAlpha(mode, animate);
 
         // apply to lights out
         applyLightsOut(isLightsOut(mode), animate, force);
-    }
-
-    private float alphaForMode(int mode) {
-        final boolean isOpaque = mode == MODE_OPAQUE || mode == MODE_LIGHTS_OUT;
-        return isOpaque ? KeyButtonView.DEFAULT_QUIESCENT_ALPHA : 1f;
-    }
-
-    public void applyBackButtonQuiescentAlpha(int mode, boolean animate) {
-        float backAlpha = 0;
-        backAlpha = maxVisibleQuiescentAlpha(backAlpha, mView.getHomeButton());
-        backAlpha = maxVisibleQuiescentAlpha(backAlpha, mView.getRecentsButton());
-        backAlpha = maxVisibleQuiescentAlpha(backAlpha, mView.getMenuButton());
-        backAlpha = maxVisibleQuiescentAlpha(backAlpha, mView.getImeSwitchButton());
-        if (backAlpha > 0) {
-            setKeyButtonViewQuiescentAlpha(mView.getBackButton(), backAlpha, animate);
-        }
-    }
-
-    private static float maxVisibleQuiescentAlpha(float max, View v) {
-        if ((v instanceof KeyButtonView) && v.isShown()) {
-            return Math.max(max, ((KeyButtonView)v).getQuiescentAlpha());
-        }
-        return max;
-    }
-
-    private void setKeyButtonViewQuiescentAlpha(View button, float alpha, boolean animate) {
-        if (button instanceof KeyButtonView) {
-            ((KeyButtonView) button).setQuiescentAlpha(alpha, animate);
-        }
     }
 
     private void applyLightsOut(boolean lightsOut, boolean animate, boolean force) {

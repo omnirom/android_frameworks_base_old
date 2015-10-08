@@ -24,11 +24,11 @@ import android.content.Context;
 import android.content.res.AssetManager;
 import android.graphics.Bitmap;
 import android.graphics.SurfaceTexture;
-import android.os.Process;
 import android.util.Log;
 import android.view.Surface;
 import android.os.SystemProperties;
 import android.os.Trace;
+import java.util.ArrayList;
 
 /**
  * This class provides access to a RenderScript context, which controls RenderScript
@@ -48,6 +48,12 @@ public class RenderScript {
     static final boolean DEBUG  = false;
     @SuppressWarnings({"UnusedDeclaration", "deprecation"})
     static final boolean LOG_ENABLED = false;
+
+    static private ArrayList<RenderScript> mProcessContextList = new ArrayList<RenderScript>();
+    private boolean mIsProcessContext = false;
+    private int mContextFlags = 0;
+    private int mContextSdkVersion = 0;
+
 
     private Context mApplicationContext;
 
@@ -123,37 +129,33 @@ public class RenderScript {
     native void nContextInitToClient(long con);
     native void nContextDeinitToClient(long con);
 
-    static File mCacheDir;
-
     // this should be a monotonically increasing ID
     // used in conjunction with the API version of a device
-    static final long sMinorID = 1;
+    static final long sMinorVersion = 1;
+
+    /**
+     * @hide
+     *
+     * Only exist to be compatible with old version RenderScript Support lib.
+     * Will eventually be removed.
+     *
+     * @return Always return 1
+     *
+     */
+    public static long getMinorID() {
+        return 1;
+    }
+
 
     /**
      * Returns an identifier that can be used to identify a particular
      * minor version of RS.
      *
-     * @hide
-     */
-    public static long getMinorID() {
-        return sMinorID;
-    }
-
-     /**
-     * Sets the directory to use as a persistent storage for the
-     * renderscript object file cache.
+     * @return The minor RenderScript version number
      *
-     * @hide
-     * @param cacheDir A directory the current process can write to
      */
-    public static void setupDiskCache(File cacheDir) {
-        if (!sInitialized) {
-            Log.e(LOG_TAG, "RenderScript.setupDiskCache() called when disabled");
-            return;
-        }
-
-        // Defer creation of cache path to nScriptCCreate().
-        mCacheDir = cacheDir;
+    public static long getMinorVersion() {
+        return sMinorVersion;
     }
 
     /**
@@ -244,6 +246,11 @@ public class RenderScript {
         validate();
         rsnContextSetPriority(mContext, p);
     }
+    native void rsnContextSetCacheDir(long con, String cacheDir);
+    synchronized void nContextSetCacheDir(String cacheDir) {
+        validate();
+        rsnContextSetCacheDir(mContext, cacheDir);
+    }
     native void rsnContextDump(long con, int bits);
     synchronized void nContextDump(int bits) {
         validate();
@@ -300,6 +307,69 @@ public class RenderScript {
     synchronized void nContextResume() {
         validate();
         rsnContextResume(mContext);
+    }
+
+    native long rsnClosureCreate(long con, long kernelID, long returnValue,
+        long[] fieldIDs, long[] values, int[] sizes, long[] depClosures,
+        long[] depFieldIDs);
+    synchronized long nClosureCreate(long kernelID, long returnValue,
+        long[] fieldIDs, long[] values, int[] sizes, long[] depClosures,
+        long[] depFieldIDs) {
+      validate();
+      long c = rsnClosureCreate(mContext, kernelID, returnValue, fieldIDs, values,
+          sizes, depClosures, depFieldIDs);
+      if (c == 0) {
+          throw new RSRuntimeException("Failed creating closure.");
+      }
+      return c;
+    }
+
+    native long rsnInvokeClosureCreate(long con, long invokeID, byte[] params,
+        long[] fieldIDs, long[] values, int[] sizes);
+    synchronized long nInvokeClosureCreate(long invokeID, byte[] params,
+        long[] fieldIDs, long[] values, int[] sizes) {
+      validate();
+      long c = rsnInvokeClosureCreate(mContext, invokeID, params, fieldIDs,
+          values, sizes);
+      if (c == 0) {
+          throw new RSRuntimeException("Failed creating closure.");
+      }
+      return c;
+    }
+
+    native void rsnClosureSetArg(long con, long closureID, int index,
+      long value, int size);
+    synchronized void nClosureSetArg(long closureID, int index, long value,
+        int size) {
+      validate();
+      rsnClosureSetArg(mContext, closureID, index, value, size);
+    }
+
+    native void rsnClosureSetGlobal(long con, long closureID, long fieldID,
+        long value, int size);
+    // Does this have to be synchronized?
+    synchronized void nClosureSetGlobal(long closureID, long fieldID,
+        long value, int size) {
+      validate(); // TODO: is this necessary?
+      rsnClosureSetGlobal(mContext, closureID, fieldID, value, size);
+    }
+
+    native long rsnScriptGroup2Create(long con, String name, String cachePath,
+                                      long[] closures);
+    synchronized long nScriptGroup2Create(String name, String cachePath,
+                                          long[] closures) {
+      validate();
+      long g = rsnScriptGroup2Create(mContext, name, cachePath, closures);
+      if (g == 0) {
+          throw new RSRuntimeException("Failed creating script group.");
+      }
+      return g;
+    }
+
+    native void rsnScriptGroup2Execute(long con, long groupID);
+    synchronized void nScriptGroup2Execute(long groupID) {
+      validate();
+      rsnScriptGroup2Execute(mContext, groupID);
     }
 
     native void rsnAssignName(long con, long obj, byte[] name);
@@ -436,16 +506,18 @@ public class RenderScript {
     }
 
 
-    native void rsnAllocationData1D(long con, long id, int off, int mip, int count, Object d, int sizeBytes, int dt);
-    synchronized void nAllocationData1D(long id, int off, int mip, int count, Object d, int sizeBytes, Element.DataType dt) {
+    native void rsnAllocationData1D(long con, long id, int off, int mip, int count, Object d, int sizeBytes, int dt,
+                                    int mSize, boolean usePadding);
+    synchronized void nAllocationData1D(long id, int off, int mip, int count, Object d, int sizeBytes, Element.DataType dt,
+                                        int mSize, boolean usePadding) {
         validate();
-        rsnAllocationData1D(mContext, id, off, mip, count, d, sizeBytes, dt.mID);
+        rsnAllocationData1D(mContext, id, off, mip, count, d, sizeBytes, dt.mID, mSize, usePadding);
     }
 
-    native void rsnAllocationElementData1D(long con,long id, int xoff, int mip, int compIdx, byte[] d, int sizeBytes);
-    synchronized void nAllocationElementData1D(long id, int xoff, int mip, int compIdx, byte[] d, int sizeBytes) {
+    native void rsnAllocationElementData(long con,long id, int xoff, int yoff, int zoff, int mip, int compIdx, byte[] d, int sizeBytes);
+    synchronized void nAllocationElementData(long id, int xoff, int yoff, int zoff, int mip, int compIdx, byte[] d, int sizeBytes) {
         validate();
-        rsnAllocationElementData1D(mContext, id, xoff, mip, compIdx, d, sizeBytes);
+        rsnAllocationElementData(mContext, id, xoff, yoff, zoff, mip, compIdx, d, sizeBytes);
     }
 
     native void rsnAllocationData2D(long con,
@@ -469,11 +541,13 @@ public class RenderScript {
     }
 
     native void rsnAllocationData2D(long con, long id, int xoff, int yoff, int mip, int face,
-                                    int w, int h, Object d, int sizeBytes, int dt);
+                                    int w, int h, Object d, int sizeBytes, int dt,
+                                    int mSize, boolean usePadding);
     synchronized void nAllocationData2D(long id, int xoff, int yoff, int mip, int face,
-                                        int w, int h, Object d, int sizeBytes, Element.DataType dt) {
+                                        int w, int h, Object d, int sizeBytes, Element.DataType dt,
+                                        int mSize, boolean usePadding) {
         validate();
-        rsnAllocationData2D(mContext, id, xoff, yoff, mip, face, w, h, d, sizeBytes, dt.mID);
+        rsnAllocationData2D(mContext, id, xoff, yoff, mip, face, w, h, d, sizeBytes, dt.mID, mSize, usePadding);
     }
 
     native void rsnAllocationData2D(long con, long id, int xoff, int yoff, int mip, int face, Bitmap b);
@@ -501,33 +575,56 @@ public class RenderScript {
     }
 
     native void rsnAllocationData3D(long con, long id, int xoff, int yoff, int zoff, int mip,
-                                    int w, int h, int depth, Object d, int sizeBytes, int dt);
+                                    int w, int h, int depth, Object d, int sizeBytes, int dt,
+                                    int mSize, boolean usePadding);
     synchronized void nAllocationData3D(long id, int xoff, int yoff, int zoff, int mip,
-                                        int w, int h, int depth, Object d, int sizeBytes, Element.DataType dt) {
+                                        int w, int h, int depth, Object d, int sizeBytes, Element.DataType dt,
+                                        int mSize, boolean usePadding) {
         validate();
-        rsnAllocationData3D(mContext, id, xoff, yoff, zoff, mip, w, h, depth, d, sizeBytes, dt.mID);
+        rsnAllocationData3D(mContext, id, xoff, yoff, zoff, mip, w, h, depth, d, sizeBytes,
+                            dt.mID, mSize, usePadding);
     }
 
-    native void rsnAllocationRead(long con, long id, Object d, int dt);
-    synchronized void nAllocationRead(long id, Object d, Element.DataType dt) {
+    native void rsnAllocationRead(long con, long id, Object d, int dt, int mSize, boolean usePadding);
+    synchronized void nAllocationRead(long id, Object d, Element.DataType dt, int mSize, boolean usePadding) {
         validate();
-        rsnAllocationRead(mContext, id, d, dt.mID);
+        rsnAllocationRead(mContext, id, d, dt.mID, mSize, usePadding);
     }
 
     native void rsnAllocationRead1D(long con, long id, int off, int mip, int count, Object d,
-                                    int sizeBytes, int dt);
+                                    int sizeBytes, int dt, int mSize, boolean usePadding);
     synchronized void nAllocationRead1D(long id, int off, int mip, int count, Object d,
-                                        int sizeBytes, Element.DataType dt) {
+                                        int sizeBytes, Element.DataType dt, int mSize, boolean usePadding) {
         validate();
-        rsnAllocationRead1D(mContext, id, off, mip, count, d, sizeBytes, dt.mID);
+        rsnAllocationRead1D(mContext, id, off, mip, count, d, sizeBytes, dt.mID, mSize, usePadding);
+    }
+
+    native void rsnAllocationElementRead(long con,long id, int xoff, int yoff, int zoff,
+                                         int mip, int compIdx, byte[] d, int sizeBytes);
+    synchronized void nAllocationElementRead(long id, int xoff, int yoff, int zoff,
+                                             int mip, int compIdx, byte[] d, int sizeBytes) {
+        validate();
+        rsnAllocationElementRead(mContext, id, xoff, yoff, zoff, mip, compIdx, d, sizeBytes);
     }
 
     native void rsnAllocationRead2D(long con, long id, int xoff, int yoff, int mip, int face,
-                                    int w, int h, Object d, int sizeBytes, int dt);
+                                    int w, int h, Object d, int sizeBytes, int dt,
+                                    int mSize, boolean usePadding);
     synchronized void nAllocationRead2D(long id, int xoff, int yoff, int mip, int face,
-                                        int w, int h, Object d, int sizeBytes, Element.DataType dt) {
+                                        int w, int h, Object d, int sizeBytes, Element.DataType dt,
+                                        int mSize, boolean usePadding) {
         validate();
-        rsnAllocationRead2D(mContext, id, xoff, yoff, mip, face, w, h, d, sizeBytes, dt.mID);
+        rsnAllocationRead2D(mContext, id, xoff, yoff, mip, face, w, h, d, sizeBytes, dt.mID, mSize, usePadding);
+    }
+
+    native void rsnAllocationRead3D(long con, long id, int xoff, int yoff, int zoff, int mip,
+                                    int w, int h, int depth, Object d, int sizeBytes, int dt,
+                                    int mSize, boolean usePadding);
+    synchronized void nAllocationRead3D(long id, int xoff, int yoff, int zoff, int mip,
+                                        int w, int h, int depth, Object d, int sizeBytes, Element.DataType dt,
+                                        int mSize, boolean usePadding) {
+        validate();
+        rsnAllocationRead3D(mContext, id, xoff, yoff, zoff, mip, w, h, depth, d, sizeBytes, dt.mID, mSize, usePadding);
     }
 
     native long  rsnAllocationGetType(long con, long id);
@@ -540,6 +637,20 @@ public class RenderScript {
     synchronized void nAllocationResize1D(long id, int dimX) {
         validate();
         rsnAllocationResize1D(mContext, id, dimX);
+    }
+
+    native long  rsnAllocationAdapterCreate(long con, long allocId, long typeId);
+    synchronized long nAllocationAdapterCreate(long allocId, long typeId) {
+        validate();
+        return rsnAllocationAdapterCreate(mContext, allocId, typeId);
+    }
+
+    native void  rsnAllocationAdapterOffset(long con, long id, int x, int y, int z,
+                                            int mip, int face, int a1, int a2, int a3, int a4);
+    synchronized void nAllocationAdapterOffset(long id, int x, int y, int z,
+                                               int mip, int face, int a1, int a2, int a3, int a4) {
+        validate();
+        rsnAllocationAdapterOffset(mContext, id, x, y, z, mip, face, a1, a2, a3, a4);
     }
 
     native long rsnFileA3DCreateFromAssetStream(long con, long assetStream);
@@ -605,52 +716,14 @@ public class RenderScript {
         validate();
         rsnScriptInvoke(mContext, id, slot);
     }
-    native void rsnScriptForEach(long con, long id, int slot, long ain, long aout, byte[] params);
-    native void rsnScriptForEach(long con, long id, int slot, long ain, long aout);
-    native void rsnScriptForEachClipped(long con, long id, int slot, long ain, long aout, byte[] params,
-                                        int xstart, int xend, int ystart, int yend, int zstart, int zend);
-    native void rsnScriptForEachClipped(long con, long id, int slot, long ain, long aout,
-                                        int xstart, int xend, int ystart, int yend, int zstart, int zend);
-    synchronized void nScriptForEach(long id, int slot, long ain, long aout, byte[] params) {
+
+    native void rsnScriptForEach(long con, long id, int slot, long[] ains,
+                                 long aout, byte[] params, int[] limits);
+
+    synchronized void nScriptForEach(long id, int slot, long[] ains, long aout,
+                                     byte[] params, int[] limits) {
         validate();
-        if (params == null) {
-            rsnScriptForEach(mContext, id, slot, ain, aout);
-        } else {
-            rsnScriptForEach(mContext, id, slot, ain, aout, params);
-        }
-    }
-
-    synchronized void nScriptForEachClipped(long id, int slot, long ain, long aout, byte[] params,
-                                            int xstart, int xend, int ystart, int yend, int zstart, int zend) {
-        validate();
-        if (params == null) {
-            rsnScriptForEachClipped(mContext, id, slot, ain, aout, xstart, xend, ystart, yend, zstart, zend);
-        } else {
-            rsnScriptForEachClipped(mContext, id, slot, ain, aout, params, xstart, xend, ystart, yend, zstart, zend);
-        }
-    }
-
-    /**
-     * Multi-input code.
-     *
-     */
-
-    // @hide
-    native void rsnScriptForEachMultiClipped(long con, long id, int slot, long[] ains, long aout, byte[] params,
-                                             int xstart, int xend, int ystart, int yend, int zstart, int zend);
-    // @hide
-    native void rsnScriptForEachMultiClipped(long con, long id, int slot, long[] ains, long aout,
-                                             int xstart, int xend, int ystart, int yend, int zstart, int zend);
-
-    // @hide
-    synchronized void nScriptForEachMultiClipped(long id, int slot, long[] ains, long aout, byte[] params,
-                                                 int xstart, int xend, int ystart, int yend, int zstart, int zend) {
-        validate();
-        if (params == null) {
-            rsnScriptForEachMultiClipped(mContext, id, slot, ains, aout, xstart, xend, ystart, yend, zstart, zend);
-        } else {
-            rsnScriptForEachMultiClipped(mContext, id, slot, ains, aout, params, xstart, xend, ystart, yend, zstart, zend);
-        }
+        rsnScriptForEach(mContext, id, slot, ains, aout, params, limits);
     }
 
     native void rsnScriptInvokeV(long con, long id, int slot, byte[] params);
@@ -741,6 +814,12 @@ public class RenderScript {
     synchronized long nScriptKernelIDCreate(long sid, int slot, int sig) {
         validate();
         return rsnScriptKernelIDCreate(mContext, sid, slot, sig);
+    }
+
+    native long  rsnScriptInvokeIDCreate(long con, long sid, int slot);
+    synchronized long nScriptInvokeIDCreate(long sid, int slot) {
+        validate();
+        return rsnScriptInvokeIDCreate(mContext, sid, slot);
     }
 
     native long  rsnScriptFieldIDCreate(long con, long sid, int slot);
@@ -850,14 +929,70 @@ public class RenderScript {
         rsnMeshGetIndices(mContext, id, idxIds, primitives, vtxIdCount);
     }
 
-    native long rsnPathCreate(long con, int prim, boolean isStatic, long vtx, long loop, float q);
-    synchronized long nPathCreate(int prim, boolean isStatic, long vtx, long loop, float q) {
+    native void rsnScriptIntrinsicBLAS_Single(long con, long id, int func, int TransA,
+                                              int TransB, int Side, int Uplo, int Diag, int M, int N, int K,
+                                              float alpha, long A, long B, float beta, long C, int incX, int incY,
+                                              int KL, int KU);
+    synchronized void nScriptIntrinsicBLAS_Single(long id, int func, int TransA,
+                                                  int TransB, int Side, int Uplo, int Diag, int M, int N, int K,
+                                                  float alpha, long A, long B, float beta, long C, int incX, int incY,
+                                                  int KL, int KU) {
         validate();
-        return rsnPathCreate(mContext, prim, isStatic, vtx, loop, q);
+        rsnScriptIntrinsicBLAS_Single(mContext, id, func, TransA, TransB, Side, Uplo, Diag, M, N, K, alpha, A, B, beta, C, incX, incY, KL, KU);
     }
+
+    native void rsnScriptIntrinsicBLAS_Double(long con, long id, int func, int TransA,
+                                              int TransB, int Side, int Uplo, int Diag, int M, int N, int K,
+                                              double alpha, long A, long B, double beta, long C, int incX, int incY,
+                                              int KL, int KU);
+    synchronized void nScriptIntrinsicBLAS_Double(long id, int func, int TransA,
+                                                  int TransB, int Side, int Uplo, int Diag, int M, int N, int K,
+                                                  double alpha, long A, long B, double beta, long C, int incX, int incY,
+                                                  int KL, int KU) {
+        validate();
+        rsnScriptIntrinsicBLAS_Double(mContext, id, func, TransA, TransB, Side, Uplo, Diag, M, N, K, alpha, A, B, beta, C, incX, incY, KL, KU);
+    }
+
+    native void rsnScriptIntrinsicBLAS_Complex(long con, long id, int func, int TransA,
+                                               int TransB, int Side, int Uplo, int Diag, int M, int N, int K,
+                                               float alphaX, float alphaY, long A, long B, float betaX, float betaY, long C, int incX, int incY,
+                                               int KL, int KU);
+    synchronized void nScriptIntrinsicBLAS_Complex(long id, int func, int TransA,
+                                                   int TransB, int Side, int Uplo, int Diag, int M, int N, int K,
+                                                   float alphaX, float alphaY, long A, long B, float betaX, float betaY, long C, int incX, int incY,
+                                                   int KL, int KU) {
+        validate();
+        rsnScriptIntrinsicBLAS_Complex(mContext, id, func, TransA, TransB, Side, Uplo, Diag, M, N, K, alphaX, alphaY, A, B, betaX, betaY, C, incX, incY, KL, KU);
+    }
+
+    native void rsnScriptIntrinsicBLAS_Z(long con, long id, int func, int TransA,
+                                         int TransB, int Side, int Uplo, int Diag, int M, int N, int K,
+                                         double alphaX, double alphaY, long A, long B, double betaX, double betaY, long C, int incX, int incY,
+                                         int KL, int KU);
+    synchronized void nScriptIntrinsicBLAS_Z(long id, int func, int TransA,
+                                             int TransB, int Side, int Uplo, int Diag, int M, int N, int K,
+                                             double alphaX, double alphaY, long A, long B, double betaX, double betaY, long C, int incX, int incY,
+                                             int KL, int KU) {
+        validate();
+        rsnScriptIntrinsicBLAS_Z(mContext, id, func, TransA, TransB, Side, Uplo, Diag, M, N, K, alphaX, alphaY, A, B, betaX, betaY, C, incX, incY, KL, KU);
+    }
+
+    native void rsnScriptIntrinsicBLAS_BNNM(long con, long id, int M, int N, int K,
+                                             long A, int a_offset, long B, int b_offset, long C, int c_offset,
+                                             int c_mult_int);
+    synchronized void nScriptIntrinsicBLAS_BNNM(long id, int M, int N, int K,
+                                             long A, int a_offset, long B, int b_offset, long C, int c_offset,
+                                             int c_mult_int) {
+        validate();
+        rsnScriptIntrinsicBLAS_BNNM(mContext, id, M, N, K, A, a_offset, B, b_offset, C, c_offset, c_mult_int);
+    }
+
+
 
     long     mDev;
     long     mContext;
+    private boolean mDestroyed = false;
+
     @SuppressWarnings({"FieldCanBeLocal"})
     MessageThread mMessageThread;
 
@@ -869,6 +1004,7 @@ public class RenderScript {
     Element mElement_I32;
     Element mElement_U64;
     Element mElement_I64;
+    Element mElement_F16;
     Element mElement_F32;
     Element mElement_F64;
     Element mElement_BOOLEAN;
@@ -891,6 +1027,10 @@ public class RenderScript {
     Element mElement_RGBA_5551;
     Element mElement_RGBA_4444;
     Element mElement_RGBA_8888;
+
+    Element mElement_HALF_2;
+    Element mElement_HALF_3;
+    Element mElement_HALF_4;
 
     Element mElement_FLOAT_2;
     Element mElement_FLOAT_3;
@@ -1040,8 +1180,10 @@ public class RenderScript {
      * their priority to LOW to avoid starving forground processes.
      */
     public enum Priority {
-        LOW (Process.THREAD_PRIORITY_BACKGROUND + (5 * Process.THREAD_PRIORITY_LESS_FAVORABLE)),
-        NORMAL (Process.THREAD_PRIORITY_DISPLAY);
+        // These values used to represent official thread priority values
+        // now they are simply enums to be used by the runtime side
+        LOW (15),
+        NORMAL (-8);
 
         int mID;
         Priority(int id) {
@@ -1203,20 +1345,12 @@ public class RenderScript {
     }
 
     /**
-     * @hide
-     */
-    public static RenderScript create(Context ctx, int sdkVersion) {
-        return create(ctx, sdkVersion, ContextType.NORMAL, CREATE_FLAG_NONE);
-    }
-
-    /**
      * Create a RenderScript context.
      *
-     * @hide
      * @param ctx The context.
      * @return RenderScript
      */
-    public static RenderScript create(Context ctx, int sdkVersion, ContextType ct, int flags) {
+    private static RenderScript internalCreate(Context ctx, int sdkVersion, ContextType ct, int flags) {
         if (!sInitialized) {
             Log.e(LOG_TAG, "RenderScript.create() called when disabled; someone is likely to crash");
             return null;
@@ -1231,16 +1365,28 @@ public class RenderScript {
         rs.mDev = rs.nDeviceCreate();
         rs.mContext = rs.nContextCreate(rs.mDev, flags, sdkVersion, ct.mID);
         rs.mContextType = ct;
+        rs.mContextFlags = flags;
+        rs.mContextSdkVersion = sdkVersion;
         if (rs.mContext == 0) {
             throw new RSDriverException("Failed to create RS context.");
         }
+
+        // set up cache directory for entire context
+        final String CACHE_PATH = "com.android.renderscript.cache";
+        File f = new File(RenderScriptCacheDir.mCacheDir, CACHE_PATH);
+        String mCachePath = f.getAbsolutePath();
+        f.mkdirs();
+        rs.nContextSetCacheDir(mCachePath);
+
         rs.mMessageThread = new MessageThread(rs);
         rs.mMessageThread.start();
         return rs;
     }
 
     /**
-     * Create a RenderScript context.
+     * calls create(ctx, ContextType.NORMAL, CREATE_FLAG_NONE)
+     *
+     * See documentation for @create for details
      *
      * @param ctx The context.
      * @return RenderScript
@@ -1250,21 +1396,33 @@ public class RenderScript {
     }
 
     /**
-     * Create a RenderScript context.
+     * calls create(ctx, ct, CREATE_FLAG_NONE)
      *
+     * See documentation for @create for details
      *
      * @param ctx The context.
      * @param ct The type of context to be created.
      * @return RenderScript
      */
     public static RenderScript create(Context ctx, ContextType ct) {
-        int v = ctx.getApplicationInfo().targetSdkVersion;
-        return create(ctx, v, ct, CREATE_FLAG_NONE);
+        return create(ctx, ct, CREATE_FLAG_NONE);
     }
 
-     /**
-     * Create a RenderScript context.
+
+    /**
+     * Gets or creates a RenderScript context of the specified type.
      *
+     * The returned context will be cached for future reuse within
+     * the process. When an application is finished using
+     * RenderScript it should call releaseAllContexts()
+     *
+     * A process context is a context designed for easy creation and
+     * lifecycle management.  Multiple calls to this function will
+     * return the same object provided they are called with the same
+     * options.  This allows it to be used any time a RenderScript
+     * context is needed.
+     *
+     * Prior to API 23 this always created a new context.
      *
      * @param ctx The context.
      * @param ct The type of context to be created.
@@ -1275,6 +1433,96 @@ public class RenderScript {
         int v = ctx.getApplicationInfo().targetSdkVersion;
         return create(ctx, v, ct, flags);
     }
+
+    /**
+     * calls create(ctx, sdkVersion, ContextType.NORMAL, CREATE_FLAG_NONE)
+     *
+     * Used by the RenderScriptThunker to maintain backward compatibility.
+     *
+     * @hide
+     * @param ctx The context.
+     * @param sdkVersion The target SDK Version.
+     * @return RenderScript
+     */
+    public static RenderScript create(Context ctx, int sdkVersion) {
+        return create(ctx, sdkVersion, ContextType.NORMAL, CREATE_FLAG_NONE);
+    }
+
+     /**
+     * Gets or creates a RenderScript context of the specified type.
+     *
+     * @param ctx The context.
+     * @param ct The type of context to be created.
+     * @param sdkVersion The target SDK Version.
+     * @param flags The OR of the CREATE_FLAG_* options desired
+     * @return RenderScript
+     */
+    private static RenderScript create(Context ctx, int sdkVersion, ContextType ct, int flags) {
+        if (sdkVersion < 23) {
+            return internalCreate(ctx, sdkVersion, ct, flags);
+        }
+
+        synchronized (mProcessContextList) {
+            for (RenderScript prs : mProcessContextList) {
+                if ((prs.mContextType == ct) &&
+                    (prs.mContextFlags == flags) &&
+                    (prs.mContextSdkVersion == sdkVersion)) {
+
+                    return prs;
+                }
+            }
+
+            RenderScript prs = internalCreate(ctx, sdkVersion, ct, flags);
+            prs.mIsProcessContext = true;
+            mProcessContextList.add(prs);
+            return prs;
+        }
+    }
+
+    /**
+     * Releases all the process contexts.  This is the same as
+     * calling .destroy() on each unique context retreived with
+     * create(...). If no contexts have been created this
+     * function does nothing.
+     *
+     * Typically you call this when your application is losing focus
+     * and will not be using a context for some time.
+     *
+     * This has no effect on a context created with
+     * createMultiContext()
+     */
+    public static void releaseAllContexts() {
+        ArrayList<RenderScript> oldList;
+        synchronized (mProcessContextList) {
+            oldList = mProcessContextList;
+            mProcessContextList = new ArrayList<RenderScript>();
+        }
+
+        for (RenderScript prs : oldList) {
+            prs.mIsProcessContext = false;
+            prs.destroy();
+        }
+        oldList.clear();
+    }
+
+
+
+    /**
+     * Create a RenderScript context.
+     *
+     * This is an advanced function intended for applications which
+     * need to create more than one RenderScript context to be used
+     * at the same time.
+     *
+     * If you need a single context please use create()
+     *
+     * @param ctx The context.
+     * @return RenderScript
+     */
+    public static RenderScript createMultiContext(Context ctx, ContextType ct, int flags, int API_number) {
+        return internalCreate(ctx, API_number, ct, flags);
+    }
+
 
     /**
      * Print the currently available debugging information about the state of
@@ -1295,27 +1543,55 @@ public class RenderScript {
         nContextFinish();
     }
 
+    private void helpDestroy() {
+        boolean shouldDestroy = false;
+        synchronized(this) {
+            if (!mDestroyed) {
+                shouldDestroy = true;
+                mDestroyed = true;
+            }
+        }
+
+        if (shouldDestroy) {
+            nContextFinish();
+
+            nContextDeinitToClient(mContext);
+            mMessageThread.mRun = false;
+            try {
+                mMessageThread.join();
+            } catch(InterruptedException e) {
+            }
+
+            nContextDestroy();
+
+            nDeviceDestroy(mDev);
+            mDev = 0;
+        }
+    }
+
+    protected void finalize() throws Throwable {
+        helpDestroy();
+        super.finalize();
+    }
+
+
     /**
      * Destroys this RenderScript context.  Once this function is called,
      * using this context or any objects belonging to this context is
      * illegal.
      *
+     * API 23+, this function is a NOP if the context was created
+     * with create().  Please use releaseAllContexts() to clean up
+     * contexts created with the create function.
+     *
      */
     public void destroy() {
-        validate();
-        nContextFinish();
-
-        nContextDeinitToClient(mContext);
-        mMessageThread.mRun = false;
-        try {
-            mMessageThread.join();
-        } catch(InterruptedException e) {
+        if (mIsProcessContext) {
+            // users cannot destroy a process context
+            return;
         }
-
-        nContextDestroy();
-
-        nDeviceDestroy(mDev);
-        mDev = 0;
+        validate();
+        helpDestroy();
     }
 
     boolean isAlive() {

@@ -17,11 +17,11 @@
 package android.telecom;
 
 import android.annotation.SdkConstant;
-import android.annotation.SystemApi;
 import android.app.Service;
 import android.content.ComponentName;
 import android.content.Intent;
 import android.net.Uri;
+import android.os.Bundle;
 import android.os.Handler;
 import android.os.IBinder;
 import android.os.Looper;
@@ -41,8 +41,8 @@ import java.util.UUID;
 import java.util.concurrent.ConcurrentHashMap;
 
 /**
- * {@code ConnectionService} is an abstract service that should be implemented by any app which can
- * make phone calls and want those calls to be integrated into the built-in phone app.
+ * An abstract service that should be implemented by any apps which can make phone calls (VoIP or
+ * otherwise) and want those calls to be integrated into the built-in phone app.
  * Once implemented, the {@code ConnectionService} needs two additional steps before it will be
  * integrated into the phone app:
  * <p>
@@ -51,7 +51,7 @@ import java.util.concurrent.ConcurrentHashMap;
  * <pre>
  * &lt;service android:name="com.example.package.MyConnectionService"
  *    android:label="@string/some_label_for_my_connection_service"
- *    android:permission="android.permission.BIND_CONNECTION_SERVICE"&gt;
+ *    android:permission="android.permission.BIND_TELECOM_CONNECTION_SERVICE"&gt;
  *  &lt;intent-filter&gt;
  *   &lt;action android:name="android.telecom.ConnectionService" /&gt;
  *  &lt;/intent-filter&gt;
@@ -62,7 +62,7 @@ import java.util.concurrent.ConcurrentHashMap;
  * <br/>
  * See {@link PhoneAccount} and {@link TelecomManager#registerPhoneAccount} for more information.
  * <p>
- * Once registered and enabled by the user in the dialer settings, telecom will bind to a
+ * Once registered and enabled by the user in the phone app settings, telecom will bind to a
  * {@code ConnectionService} implementation when it wants that {@code ConnectionService} to place
  * a call or the service has indicated that is has an incoming call through
  * {@link TelecomManager#addNewIncomingCall}. The {@code ConnectionService} can then expect a call
@@ -72,9 +72,7 @@ import java.util.concurrent.ConcurrentHashMap;
  * receives call-commands such as answer, reject, hold and disconnect.
  * <p>
  * When there are no more live calls, telecom will unbind from the {@code ConnectionService}.
- * @hide
  */
-@SystemApi
 public abstract class ConnectionService extends Service {
     /**
      * The {@link Intent} that must be declared as handled by the service.
@@ -93,7 +91,7 @@ public abstract class ConnectionService extends Service {
     private static final int MSG_DISCONNECT = 6;
     private static final int MSG_HOLD = 7;
     private static final int MSG_UNHOLD = 8;
-    private static final int MSG_ON_AUDIO_STATE_CHANGED = 9;
+    private static final int MSG_ON_CALL_AUDIO_STATE_CHANGED = 9;
     private static final int MSG_PLAY_DTMF_TONE = 10;
     private static final int MSG_STOP_DTMF_TONE = 11;
     private static final int MSG_CONFERENCE = 12;
@@ -150,7 +148,6 @@ public abstract class ConnectionService extends Service {
         }
 
         @Override
-        /** @hide */
         public void answerVideo(String callId, int videoState) {
             SomeArgs args = SomeArgs.obtain();
             args.arg1 = callId;
@@ -184,11 +181,11 @@ public abstract class ConnectionService extends Service {
         }
 
         @Override
-        public void onAudioStateChanged(String callId, AudioState audioState) {
+        public void onCallAudioStateChanged(String callId, CallAudioState callAudioState) {
             SomeArgs args = SomeArgs.obtain();
             args.arg1 = callId;
-            args.arg2 = audioState;
-            mHandler.obtainMessage(MSG_ON_AUDIO_STATE_CHANGED, args).sendToTarget();
+            args.arg2 = callAudioState;
+            mHandler.obtainMessage(MSG_ON_CALL_AUDIO_STATE_CHANGED, args).sendToTarget();
         }
 
         @Override
@@ -308,12 +305,12 @@ public abstract class ConnectionService extends Service {
                 case MSG_UNHOLD:
                     unhold((String) msg.obj);
                     break;
-                case MSG_ON_AUDIO_STATE_CHANGED: {
+                case MSG_ON_CALL_AUDIO_STATE_CHANGED: {
                     SomeArgs args = (SomeArgs) msg.obj;
                     try {
                         String callId = (String) args.arg1;
-                        AudioState audioState = (AudioState) args.arg2;
-                        onAudioStateChanged(callId, audioState);
+                        CallAudioState audioState = (CallAudioState) args.arg2;
+                        onCallAudioStateChanged(callId, new CallAudioState(audioState));
                     } finally {
                         args.recycle();
                     }
@@ -417,9 +414,30 @@ public abstract class ConnectionService extends Service {
         }
 
         @Override
+        public void onVideoStateChanged(Conference c, int videoState) {
+            String id = mIdByConference.get(c);
+            Log.d(this, "onVideoStateChanged set video state %d", videoState);
+            mAdapter.setVideoState(id, videoState);
+        }
+
+        @Override
+        public void onVideoProviderChanged(Conference c, Connection.VideoProvider videoProvider) {
+            String id = mIdByConference.get(c);
+            Log.d(this, "onVideoProviderChanged: Connection: %s, VideoProvider: %s", c,
+                    videoProvider);
+            mAdapter.setVideoProvider(id, videoProvider);
+        }
+
+        @Override
         public void onStatusHintsChanged(Conference conference, StatusHints statusHints) {
             String id = mIdByConference.get(conference);
             mAdapter.setStatusHints(id, statusHints);
+        }
+
+        @Override
+        public void onExtrasChanged(Conference conference, Bundle extras) {
+            String id = mIdByConference.get(conference);
+            mAdapter.setExtras(id, extras);
         }
     };
 
@@ -514,6 +532,8 @@ public abstract class ConnectionService extends Service {
         @Override
         public void onVideoProviderChanged(Connection c, Connection.VideoProvider videoProvider) {
             String id = mIdByConnection.get(c);
+            Log.d(this, "onVideoProviderChanged: Connection: %s, VideoProvider: %s", c,
+                    videoProvider);
             mAdapter.setVideoProvider(id, videoProvider);
         }
 
@@ -531,7 +551,7 @@ public abstract class ConnectionService extends Service {
 
         @Override
         public void onConferenceablesChanged(
-                Connection connection, List<IConferenceable> conferenceables) {
+                Connection connection, List<Conferenceable> conferenceables) {
             mAdapter.setConferenceableConnections(
                     mIdByConnection.get(connection),
                     createIdList(conferenceables));
@@ -546,6 +566,22 @@ public abstract class ConnectionService extends Service {
                     conferenceId = mIdByConference.get(conference);
                 }
                 mAdapter.setIsConferenced(id, conferenceId);
+            }
+        }
+
+        @Override
+        public void onConferenceMergeFailed(Connection connection) {
+            String id = mIdByConnection.get(connection);
+            if (id != null) {
+                mAdapter.onConferenceMergeFailed(id);
+            }
+        }
+
+        @Override
+        public void onExtrasChanged(Connection connection, Bundle extras) {
+            String id = mIdByConnection.get(connection);
+            if (id != null) {
+                mAdapter.setExtras(id, extras);
             }
         }
     };
@@ -615,9 +651,11 @@ public abstract class ConnectionService extends Service {
                         connection.getVideoState(),
                         connection.isRingbackRequested(),
                         connection.getAudioModeIsVoip(),
+                        connection.getConnectTimeMillis(),
                         connection.getStatusHints(),
                         connection.getDisconnectCause(),
-                        createIdList(connection.getConferenceables())));
+                        createIdList(connection.getConferenceables()),
+                        connection.getExtras()));
     }
 
     private void abort(String callId) {
@@ -667,12 +705,14 @@ public abstract class ConnectionService extends Service {
         }
     }
 
-    private void onAudioStateChanged(String callId, AudioState audioState) {
-        Log.d(this, "onAudioStateChanged %s %s", callId, audioState);
+    private void onCallAudioStateChanged(String callId, CallAudioState callAudioState) {
+        Log.d(this, "onAudioStateChanged %s %s", callId, callAudioState);
         if (mConnectionById.containsKey(callId)) {
-            findConnectionForAction(callId, "onAudioStateChanged").setAudioState(audioState);
+            findConnectionForAction(callId, "onCallAudioStateChanged").setCallAudioState(
+                    callAudioState);
         } else {
-            findConferenceForAction(callId, "onAudioStateChanged").setAudioState(audioState);
+            findConferenceForAction(callId, "onCallAudioStateChanged").setCallAudioState(
+                    callAudioState);
         }
     }
 
@@ -877,6 +917,8 @@ public abstract class ConnectionService extends Service {
      * @param conference The new conference object.
      */
     public final void addConference(Conference conference) {
+        Log.d(this, "addConference: conference=%s", conference);
+
         String id = addConferenceInternal(conference);
         if (id != null) {
             List<String> connectionIds = new ArrayList<>(2);
@@ -890,9 +932,16 @@ public abstract class ConnectionService extends Service {
                     conference.getState(),
                     conference.getConnectionCapabilities(),
                     connectionIds,
+                    conference.getVideoProvider() == null ?
+                            null : conference.getVideoProvider().getInterface(),
+                    conference.getVideoState(),
                     conference.getConnectTimeMillis(),
-                    conference.getStatusHints());
+                    conference.getStatusHints(),
+                    conference.getExtras());
+
             mAdapter.addConferenceCall(id, parcelableConference);
+            mAdapter.setVideoProvider(id, conference.getVideoProvider());
+            mAdapter.setVideoState(id, conference.getVideoState());
 
             // Go through any child calls and set the parent.
             for (Connection connection : conference.getConnections()) {
@@ -931,9 +980,11 @@ public abstract class ConnectionService extends Service {
                     connection.getVideoState(),
                     connection.isRingbackRequested(),
                     connection.getAudioModeIsVoip(),
+                    connection.getConnectTimeMillis(),
                     connection.getStatusHints(),
                     connection.getDisconnectCause(),
-                    emptyList);
+                    emptyList,
+                    connection.getExtras());
             mAdapter.addExistingConnection(id, parcelableConnection);
         }
     }
@@ -1153,14 +1204,14 @@ public abstract class ConnectionService extends Service {
 
     /**
      * Builds a list of {@link Connection} and {@link Conference} IDs based on the list of
-     * {@link IConferenceable}s passed in.
+     * {@link Conferenceable}s passed in.
      *
-     * @param conferenceables The {@link IConferenceable} connections and conferences.
+     * @param conferenceables The {@link Conferenceable} connections and conferences.
      * @return List of string conference and call Ids.
      */
-    private List<String> createIdList(List<IConferenceable> conferenceables) {
+    private List<String> createIdList(List<Conferenceable> conferenceables) {
         List<String> ids = new ArrayList<>();
-        for (IConferenceable c : conferenceables) {
+        for (Conferenceable c : conferenceables) {
             // Only allow Connection and Conference conferenceables.
             if (c instanceof Connection) {
                 Connection connection = (Connection) c;

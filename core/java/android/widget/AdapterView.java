@@ -16,6 +16,8 @@
 
 package android.widget;
 
+import android.annotation.NonNull;
+import android.annotation.Nullable;
 import android.content.Context;
 import android.database.DataSetObserver;
 import android.os.Parcelable;
@@ -28,6 +30,7 @@ import android.view.SoundEffectConstants;
 import android.view.View;
 import android.view.ViewDebug;
 import android.view.ViewGroup;
+import android.view.ViewHierarchyEncoder;
 import android.view.accessibility.AccessibilityEvent;
 import android.view.accessibility.AccessibilityManager;
 import android.view.accessibility.AccessibilityNodeInfo;
@@ -276,7 +279,7 @@ public abstract class AdapterView<T extends Adapter> extends ViewGroup {
      *
      * @param listener The callback that will be invoked.
      */
-    public void setOnItemClickListener(OnItemClickListener listener) {
+    public void setOnItemClickListener(@Nullable OnItemClickListener listener) {
         mOnItemClickListener = listener;
     }
 
@@ -284,6 +287,7 @@ public abstract class AdapterView<T extends Adapter> extends ViewGroup {
      * @return The callback to be invoked with an item in this AdapterView has
      *         been clicked, or null id no callback has been set.
      */
+    @Nullable
     public final OnItemClickListener getOnItemClickListener() {
         return mOnItemClickListener;
     }
@@ -300,16 +304,19 @@ public abstract class AdapterView<T extends Adapter> extends ViewGroup {
      *         called, false otherwise is returned.
      */
     public boolean performItemClick(View view, int position, long id) {
+        final boolean result;
         if (mOnItemClickListener != null) {
             playSoundEffect(SoundEffectConstants.CLICK);
             mOnItemClickListener.onItemClick(this, view, position, id);
-            if (view != null) {
-                view.sendAccessibilityEvent(AccessibilityEvent.TYPE_VIEW_CLICKED);
-            }
-            return true;
+            result = true;
+        } else {
+            result = false;
         }
 
-        return false;
+        if (view != null) {
+            view.sendAccessibilityEvent(AccessibilityEvent.TYPE_VIEW_CLICKED);
+        }
+        return result;
     }
 
     /**
@@ -394,10 +401,11 @@ public abstract class AdapterView<T extends Adapter> extends ViewGroup {
      *
      * @param listener The callback that will run
      */
-    public void setOnItemSelectedListener(OnItemSelectedListener listener) {
+    public void setOnItemSelectedListener(@Nullable OnItemSelectedListener listener) {
         mOnItemSelectedListener = listener;
     }
 
+    @Nullable
     public final OnItemSelectedListener getOnItemSelectedListener() {
         return mOnItemSelectedListener;
     }
@@ -604,7 +612,7 @@ public abstract class AdapterView<T extends Adapter> extends ViewGroup {
         View listItem = view;
         try {
             View v;
-            while (!(v = (View) listItem.getParent()).equals(this)) {
+            while ((v = (View) listItem.getParent()) != null && !v.equals(this)) {
                 listItem = v;
             }
         } catch (ClassCastException e) {
@@ -612,11 +620,13 @@ public abstract class AdapterView<T extends Adapter> extends ViewGroup {
             return INVALID_POSITION;
         }
 
-        // Search the children for the list item
-        final int childCount = getChildCount();
-        for (int i = 0; i < childCount; i++) {
-            if (getChildAt(i).equals(listItem)) {
-                return mFirstPosition + i;
+        if (listItem != null) {
+            // Search the children for the list item
+            final int childCount = getChildCount();
+            for (int i = 0; i < childCount; i++) {
+                if (getChildAt(i).equals(listItem)) {
+                    return mFirstPosition + i;
+                }
             }
         }
 
@@ -929,8 +939,9 @@ public abstract class AdapterView<T extends Adapter> extends ViewGroup {
         }
     }
 
+    /** @hide */
     @Override
-    public boolean dispatchPopulateAccessibilityEvent(AccessibilityEvent event) {
+    public boolean dispatchPopulateAccessibilityEventInternal(AccessibilityEvent event) {
         View selectedView = getSelectedView();
         if (selectedView != null && selectedView.getVisibility() == VISIBLE
                 && selectedView.dispatchPopulateAccessibilityEvent(event)) {
@@ -939,9 +950,10 @@ public abstract class AdapterView<T extends Adapter> extends ViewGroup {
         return false;
     }
 
+    /** @hide */
     @Override
-    public boolean onRequestSendAccessibilityEvent(View child, AccessibilityEvent event) {
-        if (super.onRequestSendAccessibilityEvent(child, event)) {
+    public boolean onRequestSendAccessibilityEventInternal(View child, AccessibilityEvent event) {
+        if (super.onRequestSendAccessibilityEventInternal(child, event)) {
             // Add a record for ourselves as well.
             AccessibilityEvent record = AccessibilityEvent.obtain();
             onInitializeAccessibilityEvent(record);
@@ -954,9 +966,14 @@ public abstract class AdapterView<T extends Adapter> extends ViewGroup {
     }
 
     @Override
-    public void onInitializeAccessibilityNodeInfo(AccessibilityNodeInfo info) {
-        super.onInitializeAccessibilityNodeInfo(info);
-        info.setClassName(AdapterView.class.getName());
+    public CharSequence getAccessibilityClassName() {
+        return AdapterView.class.getName();
+    }
+
+    /** @hide */
+    @Override
+    public void onInitializeAccessibilityNodeInfoInternal(AccessibilityNodeInfo info) {
+        super.onInitializeAccessibilityNodeInfoInternal(info);
         info.setScrollable(isScrollableForAccessibility());
         View selectedView = getSelectedView();
         if (selectedView != null) {
@@ -964,10 +981,10 @@ public abstract class AdapterView<T extends Adapter> extends ViewGroup {
         }
     }
 
+    /** @hide */
     @Override
-    public void onInitializeAccessibilityEvent(AccessibilityEvent event) {
-        super.onInitializeAccessibilityEvent(event);
-        event.setClassName(AdapterView.class.getName());
+    public void onInitializeAccessibilityEventInternal(AccessibilityEvent event) {
+        super.onInitializeAccessibilityEventInternal(event);
         event.setScrollable(isScrollableForAccessibility());
         View selectedView = getSelectedView();
         if (selectedView != null) {
@@ -1234,5 +1251,17 @@ public abstract class AdapterView<T extends Adapter> extends ViewGroup {
                 mSyncMode = SYNC_FIRST_POSITION;
             }
         }
+    }
+
+    /** @hide */
+    @Override
+    protected void encodeProperties(@NonNull ViewHierarchyEncoder encoder) {
+        super.encodeProperties(encoder);
+
+        encoder.addProperty("scrolling:firstPosition", mFirstPosition);
+        encoder.addProperty("list:nextSelectedPosition", mNextSelectedPosition);
+        encoder.addProperty("list:nextSelectedRowId", mNextSelectedRowId);
+        encoder.addProperty("list:selectedPosition", mSelectedPosition);
+        encoder.addProperty("list:itemCount", mItemCount);
     }
 }

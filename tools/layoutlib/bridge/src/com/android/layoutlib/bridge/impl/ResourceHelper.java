@@ -16,11 +16,12 @@
 
 package com.android.layoutlib.bridge.impl;
 
-import com.android.annotations.NonNull;
+import com.android.SdkConstants;
 import com.android.ide.common.rendering.api.DensityBasedResourceValue;
 import com.android.ide.common.rendering.api.LayoutLog;
 import com.android.ide.common.rendering.api.RenderResources;
 import com.android.ide.common.rendering.api.ResourceValue;
+import com.android.internal.util.XmlUtils;
 import com.android.layoutlib.bridge.Bridge;
 import com.android.layoutlib.bridge.android.BridgeContext;
 import com.android.layoutlib.bridge.android.BridgeXmlBlockParser;
@@ -31,6 +32,7 @@ import com.android.resources.Density;
 import org.xmlpull.v1.XmlPullParser;
 import org.xmlpull.v1.XmlPullParserException;
 
+import android.annotation.NonNull;
 import android.content.res.ColorStateList;
 import android.content.res.Resources.Theme;
 import android.graphics.Bitmap;
@@ -70,6 +72,10 @@ public final class ResourceHelper {
     public static int getColor(String value) {
         if (value != null) {
             if (!value.startsWith("#")) {
+                if (value.startsWith(SdkConstants.PREFIX_THEME_REF)) {
+                    throw new NumberFormatException(String.format(
+                            "Attribute '%s' not found. Are you using the right theme?", value));
+                }
                 throw new NumberFormatException(
                         String.format("Color value '%s' must start with #", value));
             }
@@ -320,6 +326,25 @@ public final class ResourceHelper {
         }
 
         return null;
+    }
+
+    /**
+     * Looks for an attribute in the current theme.
+     *
+     * @param resources the render resources
+     * @param name the name of the attribute
+     * @param defaultValue the default value.
+     * @param isFrameworkAttr if the attribute is in android namespace
+     * @return the value of the attribute or the default one if not found.
+     */
+    public static boolean getBooleanThemeValue(@NonNull RenderResources resources, String name,
+            boolean isFrameworkAttr, boolean defaultValue) {
+        ResourceValue value = resources.findItemInTheme(name, isFrameworkAttr);
+        value = resources.resolveResValue(value);
+        if (value == null) {
+            return defaultValue;
+        }
+        return XmlUtils.convertValueToBoolean(value.getValue(), defaultValue);
     }
 
     // ------- TypedValue stuff

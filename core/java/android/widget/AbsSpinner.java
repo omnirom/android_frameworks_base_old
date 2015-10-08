@@ -28,8 +28,6 @@ import android.util.AttributeSet;
 import android.util.SparseArray;
 import android.view.View;
 import android.view.ViewGroup;
-import android.view.accessibility.AccessibilityEvent;
-import android.view.accessibility.AccessibilityNodeInfo;
 
 /**
  * An abstract base class for spinner widgets. SDK users will probably not
@@ -73,13 +71,12 @@ public abstract class AbsSpinner extends AdapterView<SpinnerAdapter> {
         initAbsSpinner();
 
         final TypedArray a = context.obtainStyledAttributes(
-                attrs, com.android.internal.R.styleable.AbsSpinner, defStyleAttr, defStyleRes);
+                attrs, R.styleable.AbsSpinner, defStyleAttr, defStyleRes);
 
-        CharSequence[] entries = a.getTextArray(R.styleable.AbsSpinner_entries);
+        final CharSequence[] entries = a.getTextArray(R.styleable.AbsSpinner_entries);
         if (entries != null) {
-            ArrayAdapter<CharSequence> adapter =
-                    new ArrayAdapter<CharSequence>(context,
-                            R.layout.simple_spinner_item, entries);
+            final ArrayAdapter<CharSequence> adapter = new ArrayAdapter<CharSequence>(
+                    context, R.layout.simple_spinner_item, entries);
             adapter.setDropDownViewResource(R.layout.simple_spinner_dropdown_item);
             setAdapter(adapter);
         }
@@ -472,14 +469,7 @@ public abstract class AbsSpinner extends AdapterView<SpinnerAdapter> {
     }
 
     @Override
-    public void onInitializeAccessibilityEvent(AccessibilityEvent event) {
-        super.onInitializeAccessibilityEvent(event);
-        event.setClassName(AbsSpinner.class.getName());
-    }
-
-    @Override
-    public void onInitializeAccessibilityNodeInfo(AccessibilityNodeInfo info) {
-        super.onInitializeAccessibilityNodeInfo(info);
-        info.setClassName(AbsSpinner.class.getName());
+    public CharSequence getAccessibilityClassName() {
+        return AbsSpinner.class.getName();
     }
 }

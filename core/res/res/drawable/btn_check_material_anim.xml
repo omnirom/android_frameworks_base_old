@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="utf-8"?>
-<!-- Copyright (C) 2014 The Android Open Source Project
+<!-- Copyright (C) 2015 The Android Open Source Project
 
      Licensed under the Apache License, Version 2.0 (the "License");
      you may not use this file except in compliance with the License.
@@ -15,121 +15,19 @@
 -->
 
 <animated-selector xmlns:android="http://schemas.android.com/apk/res/android">
-    <item android:state_enabled="false" android:state_checked="true">
-        <bitmap android:src="@drawable/btn_check_to_on_mtrl_015" android:tint="?attr/colorControlActivated" android:alpha="?attr/disabledAlpha" />
-    </item>
-    <item android:state_enabled="false">
-        <bitmap android:src="@drawable/btn_check_to_on_mtrl_000" android:tint="?attr/colorControlNormal" android:alpha="?attr/disabledAlpha" />
-    </item>
-    <item android:state_checked="true" android:id="@+id/on">
-        <bitmap android:src="@drawable/btn_check_to_on_mtrl_015" android:tint="?attr/colorControlActivated" />
-    </item>
-    <item android:id="@+id/off">
-        <bitmap android:src="@drawable/btn_check_to_on_mtrl_000" android:tint="?attr/colorControlNormal" />
-    </item>
-    <transition android:fromId="@+id/off" android:toId="@+id/on">
-        <animation-list>
-            <item android:duration="15">
-                <bitmap android:src="@drawable/btn_check_to_on_mtrl_000" android:tint="?attr/colorControlNormal" />
-            </item>
-            <item android:duration="15">
-                <bitmap android:src="@drawable/btn_check_to_on_mtrl_001" android:tint="?attr/colorControlNormal" />
-            </item>
-            <item android:duration="15">
-                <bitmap android:src="@drawable/btn_check_to_on_mtrl_002" android:tint="?attr/colorControlNormal" />
-            </item>
-            <item android:duration="15">
-                <bitmap android:src="@drawable/btn_check_to_on_mtrl_003" android:tint="?attr/colorControlNormal" />
-            </item>
-            <item android:duration="15">
-                <bitmap android:src="@drawable/btn_check_to_on_mtrl_004" android:tint="?attr/colorControlNormal" />
-            </item>
-            <item android:duration="15">
-                <bitmap android:src="@drawable/btn_check_to_on_mtrl_005" android:tint="?attr/colorControlNormal" />
-            </item>
-            <item android:duration="15">
-                <bitmap android:src="@drawable/btn_check_to_on_mtrl_006" android:tint="?attr/colorControlNormal" />
-            </item>
-            <item android:duration="15">
-                <bitmap android:src="@drawable/btn_check_to_on_mtrl_007" android:tint="?attr/colorControlNormal" />
-            </item>
-            <item android:duration="15">
-                <bitmap android:src="@drawable/btn_check_to_on_mtrl_008" android:tint="?attr/colorControlActivated" />
-            </item>
-            <item android:duration="15">
-                <bitmap android:src="@drawable/btn_check_to_on_mtrl_009" android:tint="?attr/colorControlActivated" />
-            </item>
-            <item android:duration="15">
-                <bitmap android:src="@drawable/btn_check_to_on_mtrl_010" android:tint="?attr/colorControlActivated" />
-            </item>
-            <item android:duration="15">
-                <bitmap android:src="@drawable/btn_check_to_on_mtrl_011" android:tint="?attr/colorControlActivated" />
-            </item>
-            <item android:duration="15">
-                <bitmap android:src="@drawable/btn_check_to_on_mtrl_012" android:tint="?attr/colorControlActivated" />
-            </item>
-            <item android:duration="15">
-                <bitmap android:src="@drawable/btn_check_to_on_mtrl_013" android:tint="?attr/colorControlActivated" />
-            </item>
-            <item android:duration="15">
-                <bitmap android:src="@drawable/btn_check_to_on_mtrl_014" android:tint="?attr/colorControlActivated" />
-            </item>
-            <item android:duration="15">
-                <bitmap android:src="@drawable/btn_check_to_on_mtrl_015" android:tint="?attr/colorControlActivated" />
-            </item>
-        </animation-list>
-    </transition>
-    <transition android:fromId="@+id/on" android:toId="@+id/off">
-        <animation-list>
-            <item android:duration="15">
-                <bitmap android:src="@drawable/btn_check_to_off_mtrl_000" android:tint="?attr/colorControlActivated" />
-            </item>
-            <item android:duration="15">
-                <bitmap android:src="@drawable/btn_check_to_off_mtrl_001" android:tint="?attr/colorControlActivated" />
-            </item>
-            <item android:duration="15">
-                <bitmap android:src="@drawable/btn_check_to_off_mtrl_002" android:tint="?attr/colorControlActivated" />
-            </item>
-            <item android:duration="15">
-                <bitmap android:src="@drawable/btn_check_to_off_mtrl_003" android:tint="?attr/colorControlActivated" />
-            </item>
-            <item android:duration="15">
-                <bitmap android:src="@drawable/btn_check_to_off_mtrl_004" android:tint="?attr/colorControlActivated" />
-            </item>
-            <item android:duration="15">
-                <bitmap android:src="@drawable/btn_check_to_off_mtrl_005" android:tint="?attr/colorControlActivated" />
-            </item>
-            <item android:duration="15">
-                <bitmap android:src="@drawable/btn_check_to_off_mtrl_006" android:tint="?attr/colorControlActivated" />
-            </item>
-            <item android:duration="15">
-                <bitmap android:src="@drawable/btn_check_to_off_mtrl_007" android:tint="?attr/colorControlActivated" />
-            </item>
-            <item android:duration="15">
-                <bitmap android:src="@drawable/btn_check_to_off_mtrl_008" android:tint="?attr/colorControlNormal" />
-            </item>
-            <item android:duration="15">
-                <bitmap android:src="@drawable/btn_check_to_off_mtrl_009" android:tint="?attr/colorControlNormal" />
-            </item>
-            <item android:duration="15">
-                <bitmap android:src="@drawable/btn_check_to_off_mtrl_010" android:tint="?attr/colorControlNormal" />
-            </item>
-            <item android:duration="15">
-                <bitmap android:src="@drawable/btn_check_to_off_mtrl_011" android:tint="?attr/colorControlNormal" />
-            </item>
-            <item android:duration="15">
-                <bitmap android:src="@drawable/btn_check_to_off_mtrl_012" android:tint="?attr/colorControlNormal" />
-            </item>
-            <item android:duration="15">
-                <bitmap android:src="@drawable/btn_check_to_off_mtrl_013" android:tint="?attr/colorControlNormal" />
-            </item>
-            <item android:duration="15">
-                <bitmap android:src="@drawable/btn_check_to_off_mtrl_014" android:tint="?attr/colorControlNormal" />
-            </item>
-            <item android:duration="15">
-                <bitmap android:src="@drawable/btn_check_to_off_mtrl_015" android:tint="?attr/colorControlNormal" />
-            </item>
-        </animation-list>
-    </transition>
+    <item
+        android:id="@+id/checked"
+        android:state_checked="true"
+        android:drawable="@drawable/ic_checkbox_checked" />
+    <item
+        android:id="@+id/unchecked"
+        android:drawable="@drawable/ic_checkbox_unchecked" />
+    <transition
+        android:fromId="@+id/unchecked"
+        android:toId="@+id/checked"
+        android:drawable="@drawable/ic_checkbox_unchecked_to_checked_animation" />
+    <transition
+        android:fromId="@+id/checked"
+        android:toId="@+id/unchecked"
+        android:drawable="@drawable/ic_checkbox_checked_to_unchecked_animation" />
 </animated-selector>
-

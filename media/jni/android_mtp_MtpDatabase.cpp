@@ -765,7 +765,7 @@ MtpResponseCode MyMtpDatabase::getObjectPropertyList(MtpObjectHandle handle,
     return result;
 }
 
-static void foreachentry(ExifEntry *entry, void * /*user*/) {
+static void foreachentry(ExifEntry *entry, void* /* user */) {
     char buf[1024];
     ALOGI("entry %x, format %d, size %d: %s",
             entry->tag, entry->format, entry->size, exif_entry_get_value(entry, buf, sizeof(buf)));
@@ -783,7 +783,6 @@ static long getLongFromExifEntry(ExifEntry *e) {
 
 MtpResponseCode MyMtpDatabase::getObjectInfo(MtpObjectHandle handle,
                                             MtpObjectInfo& info) {
-    char            date[20];
     MtpString       path;
     int64_t         length;
     MtpObjectFormat format;
@@ -811,13 +810,15 @@ MtpResponseCode MyMtpDatabase::getObjectInfo(MtpObjectHandle handle,
     info.mDateModified = longValues[1];
     env->ReleaseLongArrayElements(mLongBuffer, longValues, 0);
 
-//    info.mAssociationType = (format == MTP_FORMAT_ASSOCIATION ?
-//                            MTP_ASSOCIATION_TYPE_GENERIC_FOLDER :
-//                            MTP_ASSOCIATION_TYPE_UNDEFINED);
+    if ((false)) {
+        info.mAssociationType = (format == MTP_FORMAT_ASSOCIATION ?
+                                MTP_ASSOCIATION_TYPE_GENERIC_FOLDER :
+                                MTP_ASSOCIATION_TYPE_UNDEFINED);
+    }
     info.mAssociationType = MTP_ASSOCIATION_TYPE_UNDEFINED;
 
     jchar* str = env->GetCharArrayElements(mStringBuffer, 0);
-    MtpString temp(str);
+    MtpString temp(reinterpret_cast<char16_t*>(str));
     info.mName = strdup((const char *)temp);
     env->ReleaseCharArrayElements(mStringBuffer, str, 0);
 
@@ -826,7 +827,9 @@ MtpResponseCode MyMtpDatabase::getObjectInfo(MtpObjectHandle handle,
 
         ExifData *exifdata = exif_data_new_from_file(path);
         if (exifdata) {
-            //exif_data_foreach_content(exifdata, foreachcontent, NULL);
+            if ((false)) {
+                exif_data_foreach_content(exifdata, foreachcontent, NULL);
+            }
 
             // XXX get this from exif, or parse jpeg header instead?
             ExifEntry *w = exif_content_get_entry(
@@ -884,7 +887,8 @@ MtpResponseCode MyMtpDatabase::getObjectFilePath(MtpObjectHandle handle,
     }
 
     jchar* str = env->GetCharArrayElements(mStringBuffer, 0);
-    outFilePath.setTo(str, strlen16(str));
+    outFilePath.setTo(reinterpret_cast<char16_t*>(str),
+                      strlen16(reinterpret_cast<char16_t*>(str)));
     env->ReleaseCharArrayElements(mStringBuffer, str, 0);
 
     jlong* longValues = env->GetLongArrayElements(mLongBuffer, 0);
@@ -1178,8 +1182,6 @@ static JNINativeMethod gMtpPropertyGroupMethods[] = {
     {"format_date_time",        "(J)Ljava/lang/String;",
                                         (void *)android_mtp_MtpPropertyGroup_format_date_time},
 };
-
-static const char* const kClassPathName = "android/mtp/MtpDatabase";
 
 int register_android_mtp_MtpDatabase(JNIEnv *env)
 {

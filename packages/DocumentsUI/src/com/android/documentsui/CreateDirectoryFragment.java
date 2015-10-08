@@ -59,7 +59,11 @@ public class CreateDirectoryFragment extends DialogFragment {
         final Context context = getActivity();
         final ContentResolver resolver = context.getContentResolver();
 
-        final AlertDialog.Builder builder = new AlertDialog.Builder(context);
+        // We need to specify android.R.style.Theme_DeviceDefault_Dialog explicitly,
+        // because the application theme 'DialogWhenReallyLarge' has
+        // fixed window size properties for large screen devices.
+        final AlertDialog.Builder builder = new AlertDialog.Builder(
+                context, AlertDialog.THEME_DEVICE_DEFAULT_LIGHT);
         final LayoutInflater dialogInflater = LayoutInflater.from(builder.getContext());
 
         final View view = dialogInflater.inflate(R.layout.dialog_create_dir, null, false);
@@ -73,7 +77,7 @@ public class CreateDirectoryFragment extends DialogFragment {
             public void onClick(DialogInterface dialog, int which) {
                 final String displayName = text1.getText().toString();
 
-                final DocumentsActivity activity = (DocumentsActivity) getActivity();
+                final BaseActivity activity = (BaseActivity) getActivity();
                 final DocumentInfo cwd = activity.getCurrentDirectory();
 
                 new CreateDirectoryTask(activity, cwd, displayName).executeOnExecutor(
@@ -86,12 +90,12 @@ public class CreateDirectoryFragment extends DialogFragment {
     }
 
     private class CreateDirectoryTask extends AsyncTask<Void, Void, DocumentInfo> {
-        private final DocumentsActivity mActivity;
+        private final BaseActivity mActivity;
         private final DocumentInfo mCwd;
         private final String mDisplayName;
 
         public CreateDirectoryTask(
-                DocumentsActivity activity, DocumentInfo cwd, String displayName) {
+                BaseActivity activity, DocumentInfo cwd, String displayName) {
             mActivity = activity;
             mCwd = cwd;
             mDisplayName = displayName;

@@ -20,6 +20,7 @@ import android.app.ActivityManager;
 import android.app.ActivityManagerNative;
 import android.app.ActivityOptions;
 import android.app.AppGlobals;
+import android.app.IActivityContainer;
 import android.app.IActivityManager;
 import android.app.ITaskStackListener;
 import android.app.SearchManager;
@@ -47,27 +48,36 @@ import android.graphics.Rect;
 import android.graphics.drawable.ColorDrawable;
 import android.graphics.drawable.Drawable;
 import android.os.Bundle;
+import android.os.Handler;
+import android.os.HandlerThread;
 import android.os.ParcelFileDescriptor;
 import android.os.RemoteException;
+import android.os.SystemProperties;
 import android.os.UserHandle;
+import android.os.UserManager;
 import android.provider.Settings;
 import android.util.Log;
+import android.util.MutableBoolean;
 import android.util.Pair;
+import android.util.SparseArray;
 import android.view.Display;
 import android.view.DisplayInfo;
 import android.view.SurfaceControl;
 import android.view.WindowManager;
 import android.view.accessibility.AccessibilityManager;
+
+import com.android.internal.app.AssistUtils;
+import com.android.systemui.Prefs;
 import com.android.systemui.R;
-import com.android.systemui.recents.AlternateRecentsComponent;
 import com.android.systemui.recents.Constants;
+import com.android.systemui.recents.Recents;
+import com.android.systemui.recents.RecentsAppWidgetHost;
 
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Random;
-import java.util.concurrent.atomic.AtomicBoolean;
 
 /**
  * Acts as a shim around the real system services that we need to access data from, and provides
@@ -77,6 +87,15 @@ public class SystemServicesProxy {
     final static String TAG = "SystemServicesProxy";
 
     final static BitmapFactory.Options sBitmapOptions;
+    final static HandlerThread sBgThread;
+
+    static {
+        sBgThread = new HandlerThread("Recents-SystemServicesProxy",
+                android.os.Process.THREAD_PRIORITY_BACKGROUND);
+        sBgThread.start();
+        sBitmapOptions = new BitmapFactory.Options();
+        sBitmapOptions.inMutable = true;
+    }
 
     AccessibilityManager mAccm;
     ActivityManager mAm;
@@ -84,22 +103,19 @@ public class SystemServicesProxy {
     AppWidgetManager mAwm;
     PackageManager mPm;
     IPackageManager mIpm;
-    SearchManager mSm;
+    AssistUtils mAssistUtils;
     WindowManager mWm;
     Display mDisplay;
     String mRecentsPackage;
     ComponentName mAssistComponent;
+
+    Handler mBgThreadHandler;
 
     Bitmap mDummyIcon;
     int mDummyThumbnailWidth;
     int mDummyThumbnailHeight;
     Paint mBgProtectionPaint;
     Canvas mBgProtectionCanvas;
-
-    static {
-        sBitmapOptions = new BitmapFactory.Options();
-        sBitmapOptions.inMutable = true;
-    }
 
     /** Private constructor */
     public SystemServicesProxy(Context context) {
@@ -109,10 +125,11 @@ public class SystemServicesProxy {
         mAwm = AppWidgetManager.getInstance(context);
         mPm = context.getPackageManager();
         mIpm = AppGlobals.getPackageManager();
-        mSm = (SearchManager) context.getSystemService(Context.SEARCH_SERVICE);
+        mAssistUtils = new AssistUtils(context);
         mWm = (WindowManager) context.getSystemService(Context.WINDOW_SERVICE);
         mDisplay = mWm.getDefaultDisplay();
         mRecentsPackage = context.getPackageName();
+        mBgThreadHandler = new Handler(sBgThread.getLooper());
 
         // Get the dummy thumbnail width/heights
         Resources res = context.getResources();
@@ -128,10 +145,7 @@ public class SystemServicesProxy {
         mBgProtectionCanvas = new Canvas();
 
         // Resolve the assist intent
-        Intent assist = mSm.getAssistIntent(context, false);
-        if (assist != null) {
-            mAssistComponent = assist.getComponent();
-        }
+        mAssistComponent = mAssistUtils.getAssistComponentForUser(UserHandle.myUserId());
 
         if (Constants.DebugFlags.App.EnableSystemServicesProxy) {
             // Create a dummy icon
@@ -187,7 +201,7 @@ public class SystemServicesProxy {
 
         // Break early if we can't get a valid set of tasks
         if (tasks == null) {
-            return new ArrayList<ActivityManager.RecentTaskInfo>();
+            return new ArrayList<>();
         }
 
         boolean isFirstValidTask = true;
@@ -214,7 +228,7 @@ public class SystemServicesProxy {
     }
 
     /** Returns a list of the running tasks */
-    public List<ActivityManager.RunningTaskInfo> getRunningTasks(int numTasks) {
+    private List<ActivityManager.RunningTaskInfo> getRunningTasks(int numTasks) {
         if (mAm == null) return null;
         return mAm.getRunningTasks(numTasks);
     }
@@ -222,7 +236,7 @@ public class SystemServicesProxy {
     /** Returns the top task. */
     public ActivityManager.RunningTaskInfo getTopMostTask() {
         List<ActivityManager.RunningTaskInfo> tasks = getRunningTasks(1);
-        if (!tasks.isEmpty()) {
+        if (tasks != null && !tasks.isEmpty()) {
             return tasks.get(0);
         }
         return null;
@@ -230,24 +244,75 @@ public class SystemServicesProxy {
 
     /** Returns whether the recents is currently running */
     public boolean isRecentsTopMost(ActivityManager.RunningTaskInfo topTask,
-            AtomicBoolean isHomeTopMost) {
+            MutableBoolean isHomeTopMost) {
         if (topTask != null) {
             ComponentName topActivity = topTask.topActivity;
 
             // Check if the front most activity is recents
-            if (topActivity.getPackageName().equals(AlternateRecentsComponent.sRecentsPackage) &&
-                    topActivity.getClassName().equals(AlternateRecentsComponent.sRecentsActivity)) {
+            if (topActivity.getPackageName().equals(Recents.sRecentsPackage) &&
+                    topActivity.getClassName().equals(Recents.sRecentsActivity)) {
                 if (isHomeTopMost != null) {
-                    isHomeTopMost.set(false);
+                    isHomeTopMost.value = false;
                 }
                 return true;
             }
 
             if (isHomeTopMost != null) {
-                isHomeTopMost.set(isInHomeStack(topTask.id));
+                isHomeTopMost.value = isInHomeStack(topTask.id);
             }
         }
         return false;
+    }
+
+    /** Get the bounds of a stack / task. */
+    public Rect getTaskBounds(int stackId) {
+        ActivityManager.StackInfo info = getAllStackInfos().get(stackId);
+        if (info != null)
+          return info.bounds;
+        return new Rect();
+    }
+
+    /** Resize a given task. */
+    public void resizeTask(int taskId, Rect bounds) {
+        if (mIam == null) return;
+
+        try {
+            mIam.resizeTask(taskId, bounds);
+        } catch (RemoteException e) {
+            e.printStackTrace();
+        }
+    }
+
+    /** Returns the stack info for all stacks. */
+    public SparseArray<ActivityManager.StackInfo> getAllStackInfos() {
+        if (mIam == null) return new SparseArray<ActivityManager.StackInfo>();
+
+        try {
+            SparseArray<ActivityManager.StackInfo> stacks =
+                    new SparseArray<ActivityManager.StackInfo>();
+            List<ActivityManager.StackInfo> infos = mIam.getAllStackInfos();
+            int stackCount = infos.size();
+            for (int i = 0; i < stackCount; i++) {
+                ActivityManager.StackInfo info = infos.get(i);
+                stacks.put(info.stackId, info);
+            }
+            return stacks;
+        } catch (RemoteException e) {
+            e.printStackTrace();
+            return new SparseArray<ActivityManager.StackInfo>();
+        }
+    }
+
+    /** Returns the focused stack id. */
+    public int getFocusedStack() {
+        if (mIam == null) return -1;
+
+        try {
+            return mIam.getFocusedStackId();
+        } catch (RemoteException e) {
+            e.printStackTrace();
+            return -1;
+        }
     }
 
     /** Returns whether the specified task is in the home stack */
@@ -313,7 +378,7 @@ public class SystemServicesProxy {
         return thumbnail;
     }
 
-    /** Moves a task to the front with the specified activity options */
+    /** Moves a task to the front with the specified activity options. */
     public void moveTaskToFront(int taskId, ActivityOptions opts) {
         if (mAm == null) return;
         if (Constants.DebugFlags.App.EnableSystemServicesProxy) return;
@@ -327,12 +392,17 @@ public class SystemServicesProxy {
     }
 
     /** Removes the task */
-    public void removeTask(int taskId) {
+    public void removeTask(final int taskId) {
         if (mAm == null) return;
         if (Constants.DebugFlags.App.EnableSystemServicesProxy) return;
 
         // Remove the task.
-        mAm.removeTask(taskId);
+        mBgThreadHandler.post(new Runnable() {
+            @Override
+            public void run() {
+                mAm.removeTask(taskId);
+            }
+        });
     }
 
     /**
@@ -382,6 +452,33 @@ public class SystemServicesProxy {
         return info.loadLabel(mPm).toString();
     }
 
+    /** Returns the application label */
+    public String getApplicationLabel(Intent baseIntent, int userId) {
+        if (mPm == null) return null;
+
+        // If we are mocking, then return a mock label
+        if (Constants.DebugFlags.App.EnableSystemServicesProxy) {
+            return "Recent Task";
+        }
+
+        ResolveInfo ri = mPm.resolveActivityAsUser(baseIntent, 0, userId);
+        CharSequence label = (ri != null) ? ri.loadLabel(mPm) : null;
+        return (label != null) ? label.toString() : null;
+    }
+
+    /** Returns the content description for a given task */
+    public String getContentDescription(Intent baseIntent, int userId, String activityLabel,
+            Resources res) {
+        String applicationLabel = getApplicationLabel(baseIntent, userId);
+        if (applicationLabel == null) {
+            return getBadgedLabel(activityLabel, userId);
+        }
+        String badgedApplicationLabel = getBadgedLabel(applicationLabel, userId);
+        return applicationLabel.equals(activityLabel) ? badgedApplicationLabel
+                : res.getString(R.string.accessibility_recents_task_header,
+                        badgedApplicationLabel, activityLabel);
+    }
+
     /**
      * Returns the activity icon for the ActivityInfo for a user, badging if
      * necessary.
@@ -406,6 +503,16 @@ public class SystemServicesProxy {
             icon = mPm.getUserBadgedIcon(icon, new UserHandle(userId));
         }
         return icon;
+    }
+
+    /**
+     * Returns the given label for a user, badging if necessary.
+     */
+    public String getBadgedLabel(String label, int userId) {
+        if (userId != UserHandle.myUserId()) {
+            label = mPm.getUserBadgedLabel(label, new UserHandle(userId)).toString();
+        }
+        return label;
     }
 
     /** Returns the package name of the home activity. */
@@ -436,14 +543,58 @@ public class SystemServicesProxy {
     }
 
     /**
-     * Resolves and returns the first Recents widget from the same package as the global
-     * assist activity.
+     * Returns the current search widget id.
      */
-    public AppWidgetProviderInfo resolveSearchAppWidget() {
-        if (mAwm == null) return null;
-        if (mAssistComponent == null) return null;
+    public int getSearchAppWidgetId(Context context) {
+        return Prefs.getInt(context, Prefs.Key.SEARCH_APP_WIDGET_ID, -1);
+    }
 
-        // Find the first Recents widget from the same package as the global assist activity
+    /**
+     * Returns the current search widget info, binding a new one if necessary.
+     */
+    public AppWidgetProviderInfo getOrBindSearchAppWidget(Context context, AppWidgetHost host) {
+        int searchWidgetId = Prefs.getInt(context, Prefs.Key.SEARCH_APP_WIDGET_ID, -1);
+        AppWidgetProviderInfo searchWidgetInfo = mAwm.getAppWidgetInfo(searchWidgetId);
+        AppWidgetProviderInfo resolvedSearchWidgetInfo = resolveSearchAppWidget();
+
+        // Return the search widget info if it hasn't changed
+        if (searchWidgetInfo != null && resolvedSearchWidgetInfo != null &&
+                searchWidgetInfo.provider.equals(resolvedSearchWidgetInfo.provider)) {
+            if (Prefs.getString(context, Prefs.Key.SEARCH_APP_WIDGET_PACKAGE, null) == null) {
+                Prefs.putString(context, Prefs.Key.SEARCH_APP_WIDGET_PACKAGE,
+                        searchWidgetInfo.provider.getPackageName());
+            }
+            return searchWidgetInfo;
+        }
+
+        // Delete the old widget
+        if (searchWidgetId != -1) {
+            host.deleteAppWidgetId(searchWidgetId);
+        }
+
+        // And rebind a new search widget
+        if (resolvedSearchWidgetInfo != null) {
+            Pair<Integer, AppWidgetProviderInfo> widgetInfo = bindSearchAppWidget(host,
+                    resolvedSearchWidgetInfo);
+            if (widgetInfo != null) {
+                Prefs.putInt(context, Prefs.Key.SEARCH_APP_WIDGET_ID, widgetInfo.first);
+                Prefs.putString(context, Prefs.Key.SEARCH_APP_WIDGET_PACKAGE,
+                        widgetInfo.second.provider.getPackageName());
+                return widgetInfo.second;
+            }
+        }
+
+        // If we fall through here, then there is no resolved search widget, so clear the state
+        Prefs.remove(context, Prefs.Key.SEARCH_APP_WIDGET_ID);
+        Prefs.remove(context, Prefs.Key.SEARCH_APP_WIDGET_PACKAGE);
+        return null;
+    }
+
+    /**
+     * Returns the first Recents widget from the same package as the global assist activity.
+     */
+    private AppWidgetProviderInfo resolveSearchAppWidget() {
+        if (mAssistComponent == null) return null;
         List<AppWidgetProviderInfo> widgets = mAwm.getInstalledProviders(
                 AppWidgetProviderInfo.WIDGET_CATEGORY_SEARCHBOX);
         for (AppWidgetProviderInfo info : widgets) {
@@ -457,45 +608,21 @@ public class SystemServicesProxy {
     /**
      * Resolves and binds the search app widget that is to appear in the recents.
      */
-    public Pair<Integer, AppWidgetProviderInfo> bindSearchAppWidget(AppWidgetHost host) {
+    private Pair<Integer, AppWidgetProviderInfo> bindSearchAppWidget(AppWidgetHost host,
+            AppWidgetProviderInfo resolvedSearchWidgetInfo) {
         if (mAwm == null) return null;
         if (mAssistComponent == null) return null;
-
-        // Find the first Recents widget from the same package as the global assist activity
-        AppWidgetProviderInfo searchWidgetInfo = resolveSearchAppWidget();
-
-        // Return early if there is no search widget
-        if (searchWidgetInfo == null) return null;
 
         // Allocate a new widget id and try and bind the app widget (if that fails, then just skip)
         int searchWidgetId = host.allocateAppWidgetId();
         Bundle opts = new Bundle();
         opts.putInt(AppWidgetManager.OPTION_APPWIDGET_HOST_CATEGORY,
                 AppWidgetProviderInfo.WIDGET_CATEGORY_SEARCHBOX);
-        if (!mAwm.bindAppWidgetIdIfAllowed(searchWidgetId, searchWidgetInfo.provider, opts)) {
+        if (!mAwm.bindAppWidgetIdIfAllowed(searchWidgetId, resolvedSearchWidgetInfo.provider, opts)) {
             host.deleteAppWidgetId(searchWidgetId);
             return null;
         }
-        return new Pair<Integer, AppWidgetProviderInfo>(searchWidgetId, searchWidgetInfo);
-    }
-
-    /**
-     * Returns the app widget info for the specified app widget id.
-     */
-    public AppWidgetProviderInfo getAppWidgetInfo(int appWidgetId) {
-        if (mAwm == null) return null;
-
-        return mAwm.getAppWidgetInfo(appWidgetId);
-    }
-
-    /**
-     * Destroys the specified app widget.
-     */
-    public void unbindSearchAppWidget(AppWidgetHost host, int appWidgetId) {
-        if (mAwm == null) return;
-
-        // Delete the app widget
-        host.deleteAppWidgetId(appWidgetId);
+        return new Pair<>(searchWidgetId, resolvedSearchWidgetInfo);
     }
 
     /**
@@ -524,6 +651,13 @@ public class SystemServicesProxy {
     }
 
     /**
+     * Returns a system property.
+     */
+    public String getSystemProperty(String key) {
+        return SystemProperties.get(key);
+    }
+
+    /**
      * Returns the window rect.
      */
     public Rect getWindowRect() {
@@ -534,22 +668,6 @@ public class SystemServicesProxy {
         mWm.getDefaultDisplay().getRealSize(p);
         windowRect.set(0, 0, p.x, p.y);
         return windowRect;
-    }
-
-    /**
-     * Takes a screenshot of the current surface.
-     */
-    public Bitmap takeScreenshot() {
-        DisplayInfo di = new DisplayInfo();
-        mDisplay.getDisplayInfo(di);
-        return SurfaceControl.screenshot(di.getNaturalWidth(), di.getNaturalHeight());
-    }
-
-    /**
-     * Takes a screenshot of the current app.
-     */
-    public Bitmap takeAppScreenshot() {
-        return takeScreenshot();
     }
 
     /** Starts an activity from recents. */

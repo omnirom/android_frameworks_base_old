@@ -19,6 +19,7 @@ package android.service.voice;
 import android.app.Service;
 import android.content.Context;
 import android.content.Intent;
+import android.content.res.Configuration;
 import android.os.Bundle;
 import android.os.IBinder;
 import android.os.Looper;
@@ -28,6 +29,9 @@ import android.os.ServiceManager;
 import com.android.internal.app.IVoiceInteractionManagerService;
 import com.android.internal.os.HandlerCaller;
 import com.android.internal.os.SomeArgs;
+
+import java.io.FileDescriptor;
+import java.io.PrintWriter;
 
 /**
  * An active voice interaction session, initiated by a {@link VoiceInteractionService}.
@@ -40,9 +44,9 @@ public abstract class VoiceInteractionSessionService extends Service {
     VoiceInteractionSession mSession;
 
     IVoiceInteractionSessionService mInterface = new IVoiceInteractionSessionService.Stub() {
-        public void newSession(IBinder token, Bundle args) {
-            mHandlerCaller.sendMessage(mHandlerCaller.obtainMessageOO(MSG_NEW_SESSION,
-                    token, args));
+        public void newSession(IBinder token, Bundle args, int startFlags) {
+            mHandlerCaller.sendMessage(mHandlerCaller.obtainMessageIOO(MSG_NEW_SESSION,
+                    startFlags, token, args));
 
         }
     };
@@ -54,7 +58,7 @@ public abstract class VoiceInteractionSessionService extends Service {
             SomeArgs args = (SomeArgs)msg.obj;
             switch (msg.what) {
                 case MSG_NEW_SESSION:
-                    doNewSession((IBinder)args.arg1, (Bundle)args.arg2);
+                    doNewSession((IBinder)args.arg1, (Bundle)args.arg2, args.argi1);
                     break;
             }
         }
@@ -76,7 +80,41 @@ public abstract class VoiceInteractionSessionService extends Service {
         return mInterface.asBinder();
     }
 
-    void doNewSession(IBinder token, Bundle args) {
+    @Override
+    public void onConfigurationChanged(Configuration newConfig) {
+        super.onConfigurationChanged(newConfig);
+        if (mSession != null) {
+            mSession.onConfigurationChanged(newConfig);
+        }
+    }
+
+    @Override
+    public void onLowMemory() {
+        super.onLowMemory();
+        if (mSession != null) {
+            mSession.onLowMemory();
+        }
+    }
+
+    @Override
+    public void onTrimMemory(int level) {
+        super.onTrimMemory(level);
+        if (mSession != null) {
+            mSession.onTrimMemory(level);
+        }
+    }
+
+    @Override
+    protected void dump(FileDescriptor fd, PrintWriter writer, String[] args) {
+        if (mSession == null) {
+            writer.println("(no active session)");
+        } else {
+            writer.println("VoiceInteractionSession:");
+            mSession.dump("  ", fd, writer, args);
+        }
+    }
+
+    void doNewSession(IBinder token, Bundle args, int startFlags) {
         if (mSession != null) {
             mSession.doDestroy();
             mSession = null;
@@ -84,7 +122,7 @@ public abstract class VoiceInteractionSessionService extends Service {
         mSession = onNewSession(args);
         try {
             mSystemService.deliverNewSession(token, mSession.mSession, mSession.mInteractor);
-            mSession.doCreate(mSystemService, token, args);
+            mSession.doCreate(mSystemService, token);
         } catch (RemoteException e) {
         }
     }

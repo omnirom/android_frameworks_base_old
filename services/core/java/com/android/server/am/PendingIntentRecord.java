@@ -16,6 +16,9 @@
 
 package com.android.server.am;
 
+import static com.android.server.am.ActivityManagerDebugConfig.TAG_AM;
+import static com.android.server.am.ActivityManagerDebugConfig.TAG_WITH_CLASS_NAME;
+
 import android.app.ActivityManager;
 import android.app.IActivityContainer;
 import android.content.IIntentSender;
@@ -26,13 +29,18 @@ import android.os.Binder;
 import android.os.Bundle;
 import android.os.IBinder;
 import android.os.RemoteException;
+import android.os.TransactionTooLargeException;
 import android.os.UserHandle;
 import android.util.Slog;
+
+import com.android.server.am.ActivityStackSupervisor.ActivityContainer;
 
 import java.io.PrintWriter;
 import java.lang.ref.WeakReference;
 
 final class PendingIntentRecord extends IIntentSender.Stub {
+    private static final String TAG = TAG_WITH_CLASS_NAME ? "PendingIntentRecord" : TAG_AM;
+
     final ActivityManagerService owner;
     final Key key;
     final int uid;
@@ -43,7 +51,7 @@ final class PendingIntentRecord extends IIntentSender.Stub {
     String stringName;
     String lastTagPrefix;
     String lastTag;
-    
+
     final static class Key {
         final int type;
         final String packageName;
@@ -159,7 +167,7 @@ final class PendingIntentRecord extends IIntentSender.Stub {
         public int hashCode() {
             return hashCode;
         }
-        
+
         public String toString() {
             return "Key{" + typeName() + " pkg=" + packageName
                 + " intent="
@@ -167,7 +175,7 @@ final class PendingIntentRecord extends IIntentSender.Stub {
                         ? requestIntent.toShortString(false, true, false, false) : "<null>")
                 + " flags=0x" + Integer.toHexString(flags) + " u=" + userId + "}";
         }
-        
+
         String typeName() {
             switch (type) {
                 case ActivityManager.INTENT_SENDER_ACTIVITY:
@@ -182,7 +190,7 @@ final class PendingIntentRecord extends IIntentSender.Stub {
             return Integer.toString(type);
         }
     }
-    
+
     PendingIntentRecord(ActivityManagerService _owner, Key _k, int _u) {
         owner = _owner;
         key = _k;
@@ -190,39 +198,53 @@ final class PendingIntentRecord extends IIntentSender.Stub {
         ref = new WeakReference<PendingIntentRecord>(this);
     }
 
-    public int send(int code, Intent intent, String resolvedType,
-            IIntentReceiver finishedReceiver, String requiredPermission) {
+    public int send(int code, Intent intent, String resolvedType, IIntentReceiver finishedReceiver,
+            String requiredPermission, Bundle options) throws TransactionTooLargeException {
         return sendInner(code, intent, resolvedType, finishedReceiver,
-                requiredPermission, null, null, 0, 0, 0, null, null);
+                requiredPermission, null, null, 0, 0, 0, options, null);
     }
-    
-    int sendInner(int code, Intent intent, String resolvedType,
-            IIntentReceiver finishedReceiver, String requiredPermission,
-            IBinder resultTo, String resultWho, int requestCode,
-            int flagsMask, int flagsValues, Bundle options, IActivityContainer container) {
+
+    int sendInner(int code, Intent intent, String resolvedType, IIntentReceiver finishedReceiver,
+            String requiredPermission, IBinder resultTo, String resultWho, int requestCode,
+            int flagsMask, int flagsValues, Bundle options, IActivityContainer container)
+            throws TransactionTooLargeException {
         synchronized(owner) {
+            final ActivityContainer activityContainer = (ActivityContainer)container;
+            if (activityContainer != null && activityContainer.mParentActivity != null &&
+                    activityContainer.mParentActivity.state
+                            != ActivityStack.ActivityState.RESUMED) {
+                // Cannot start a child activity if the parent is not resumed.
+                return ActivityManager.START_CANCELED;
+            }
             if (!canceled) {
                 sent = true;
                 if ((key.flags&PendingIntent.FLAG_ONE_SHOT) != 0) {
                     owner.cancelIntentSenderLocked(this, true);
                     canceled = true;
                 }
+
                 Intent finalIntent = key.requestIntent != null
                         ? new Intent(key.requestIntent) : new Intent();
-                if (intent != null) {
-                    int changes = finalIntent.fillIn(intent, key.flags);
-                    if ((changes&Intent.FILL_IN_DATA) == 0) {
+
+                final boolean immutable = (key.flags & PendingIntent.FLAG_IMMUTABLE) != 0;
+                if (!immutable) {
+                    if (intent != null) {
+                        int changes = finalIntent.fillIn(intent, key.flags);
+                        if ((changes & Intent.FILL_IN_DATA) == 0) {
+                            resolvedType = key.requestResolvedType;
+                        }
+                    } else {
                         resolvedType = key.requestResolvedType;
                     }
+                    flagsMask &= ~Intent.IMMUTABLE_FLAGS;
+                    flagsValues &= flagsMask;
+                    finalIntent.setFlags((finalIntent.getFlags() & ~flagsMask) | flagsValues);
                 } else {
                     resolvedType = key.requestResolvedType;
                 }
-                flagsMask &= ~Intent.IMMUTABLE_FLAGS;
-                flagsValues &= flagsMask;
-                finalIntent.setFlags((finalIntent.getFlags()&~flagsMask) | flagsValues);
-                
+
                 final long origId = Binder.clearCallingIdentity();
-                
+
                 boolean sendFinish = finishedReceiver != null;
                 int userId = key.userId;
                 if (userId == UserHandle.USER_CURRENT) {
@@ -257,41 +279,40 @@ final class PendingIntentRecord extends IIntentSender.Stub {
                                         options, userId, container, null);
                             }
                         } catch (RuntimeException e) {
-                            Slog.w(ActivityManagerService.TAG,
-                                    "Unable to send startActivity intent", e);
+                            Slog.w(TAG, "Unable to send startActivity intent", e);
                         }
                         break;
                     case ActivityManager.INTENT_SENDER_ACTIVITY_RESULT:
-                        key.activity.task.stack.sendActivityResultLocked(-1, key.activity,
-                                key.who, key.requestCode, code, finalIntent);
+                        if (key.activity.task.stack != null) {
+                            key.activity.task.stack.sendActivityResultLocked(-1, key.activity,
+                                    key.who, key.requestCode, code, finalIntent);
+                        }
                         break;
                     case ActivityManager.INTENT_SENDER_BROADCAST:
                         try {
                             // If a completion callback has been requested, require
                             // that the broadcast be delivered synchronously
                             int sent = owner.broadcastIntentInPackage(key.packageName, uid,
-                                    finalIntent, resolvedType,
-                                    finishedReceiver, code, null, null,
-                                requiredPermission, (finishedReceiver != null), false, userId);
+                                    finalIntent, resolvedType, finishedReceiver, code, null, null,
+                                    requiredPermission, options, (finishedReceiver != null),
+                                    false, userId);
                             if (sent == ActivityManager.BROADCAST_SUCCESS) {
                                 sendFinish = false;
                             }
                         } catch (RuntimeException e) {
-                            Slog.w(ActivityManagerService.TAG,
-                                    "Unable to send startActivity intent", e);
+                            Slog.w(TAG, "Unable to send startActivity intent", e);
                         }
                         break;
                     case ActivityManager.INTENT_SENDER_SERVICE:
                         try {
-                            owner.startServiceInPackage(uid,
-                                    finalIntent, resolvedType, userId);
+                            owner.startServiceInPackage(uid, finalIntent,
+                                    resolvedType, key.packageName, userId);
                         } catch (RuntimeException e) {
-                            Slog.w(ActivityManagerService.TAG,
-                                    "Unable to send startService intent", e);
+                            Slog.w(TAG, "Unable to send startService intent", e);
                         }
                         break;
                 }
-                
+
                 if (sendFinish) {
                     try {
                         finishedReceiver.performReceive(new Intent(finalIntent), 0,

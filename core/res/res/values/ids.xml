@@ -89,4 +89,31 @@
   <item type="id" name="parentMatrix" />
   <item type="id" name="statusBarBackground" />
   <item type="id" name="navigationBarBackground" />
+  <item type="id" name="pasteAsPlainText" />
+  <item type="id" name="undo" />
+  <item type="id" name="redo" />
+  <item type="id" name="replaceText" />
+  <item type="id" name="shareText" />
+  <item type="id" name="floating_toolbar_menu_item_image_button" />
+
+  <!-- Accessibility action identifier for {@link android.view.accessibility.AccessibilityNodeInfo.AccessibilityAction#ACTION_SHOW_ON_SCREEN}. -->
+  <item type="id" name="accessibilityActionShowOnScreen" />
+
+  <!-- Accessibility action identifier for {@link android.view.accessibility.AccessibilityNodeInfo.AccessibilityAction#ACTION_SCROLL_TO_POSITION}. -->
+  <item type="id" name="accessibilityActionScrollToPosition" />
+
+  <!-- Accessibility action identifier for {@link android.view.accessibility.AccessibilityNodeInfo.AccessibilityAction#ACTION_SCROLL_UP}. -->
+  <item type="id" name="accessibilityActionScrollUp" />
+
+  <!-- Accessibility action identifier for {@link android.view.accessibility.AccessibilityNodeInfo.AccessibilityAction#ACTION_SCROLL_LEFT}. -->
+  <item type="id" name="accessibilityActionScrollLeft" />
+
+  <!-- Accessibility action identifier for {@link android.view.accessibility.AccessibilityNodeInfo.AccessibilityAction#ACTION_SCROLL_DOWN}. -->
+  <item type="id" name="accessibilityActionScrollDown" />
+
+  <!-- Accessibility action identifier for {@link android.view.accessibility.AccessibilityNodeInfo.AccessibilityAction#ACTION_SCROLL_RIGHT}. -->
+  <item type="id" name="accessibilityActionScrollRight" />
+  
+  <!-- Accessibility action identifier for {@link android.view.accessibility.AccessibilityNodeInfo.AccessibilityAction#ACTION_CONTEXT_CLICK}. -->
+  <item type="id" name="accessibilityActionContextClick" />
 </resources>

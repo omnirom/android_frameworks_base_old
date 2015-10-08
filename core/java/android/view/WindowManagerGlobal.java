@@ -20,8 +20,8 @@ import android.animation.ValueAnimator;
 import android.app.ActivityManager;
 import android.content.ComponentCallbacks2;
 import android.content.Context;
+import android.content.pm.ApplicationInfo;
 import android.content.res.Configuration;
-import android.os.Build;
 import android.os.IBinder;
 import android.os.RemoteException;
 import android.os.ServiceManager;
@@ -68,12 +68,6 @@ public final class WindowManagerGlobal {
      * The window manager has changed the surface from the last call.
      */
     public static final int RELAYOUT_RES_SURFACE_CHANGED = 0x4;
-
-    /**
-     * The window manager is currently animating.  It will call
-     * IWindow.doneAnimating() when done.
-     */
-    public static final int RELAYOUT_RES_ANIMATING = 0x8;
 
     /**
      * Flag for relayout: the client will be later giving
@@ -190,6 +184,39 @@ public final class WindowManagerGlobal {
         }
     }
 
+    public ArrayList<ViewRootImpl> getRootViews(IBinder token) {
+        ArrayList<ViewRootImpl> views = new ArrayList<>();
+        synchronized (mLock) {
+            final int numRoots = mRoots.size();
+            for (int i = 0; i < numRoots; ++i) {
+                WindowManager.LayoutParams params = mParams.get(i);
+                if (params.token == null) {
+                    continue;
+                }
+                if (params.token != token) {
+                    boolean isChild = false;
+                    if (params.type >= WindowManager.LayoutParams.FIRST_SUB_WINDOW
+                            && params.type <= WindowManager.LayoutParams.LAST_SUB_WINDOW) {
+                        for (int j = 0 ; j < numRoots; ++j) {
+                            View viewj = mViews.get(j);
+                            WindowManager.LayoutParams paramsj = mParams.get(j);
+                            if (params.token == viewj.getWindowToken()
+                                    && paramsj.token == token) {
+                                isChild = true;
+                                break;
+                            }
+                        }
+                    }
+                    if (!isChild) {
+                        continue;
+                    }
+                }
+                views.add(mRoots.get(i));
+            }
+        }
+        return views;
+    }
+
     public View getRootView(String name) {
         synchronized (mLock) {
             for (int i = mRoots.size() - 1; i >= 0; --i) {
@@ -213,15 +240,16 @@ public final class WindowManagerGlobal {
             throw new IllegalArgumentException("Params must be WindowManager.LayoutParams");
         }
 
-        final WindowManager.LayoutParams wparams = (WindowManager.LayoutParams)params;
+        final WindowManager.LayoutParams wparams = (WindowManager.LayoutParams) params;
         if (parentWindow != null) {
             parentWindow.adjustLayoutParamsForSubWindow(wparams);
         } else {
-            // If there's no parent and we're running on L or above (or in the
-            // system context), assume we want hardware acceleration.
+            // If there's no parent, then hardware acceleration for this view is
+            // set from the application's hardware acceleration setting.
             final Context context = view.getContext();
             if (context != null
-                    && context.getApplicationInfo().targetSdkVersion >= Build.VERSION_CODES.LOLLIPOP) {
+                    && (context.getApplicationInfo().flags
+                            & ApplicationInfo.FLAG_HARDWARE_ACCELERATED) != 0) {
                 wparams.flags |= WindowManager.LayoutParams.FLAG_HARDWARE_ACCELERATED;
             }
         }
@@ -459,7 +487,7 @@ public final class WindowManagerGlobal {
         }
     }
 
-    public void dumpGfxInfo(FileDescriptor fd) {
+    public void dumpGfxInfo(FileDescriptor fd, String[] args) {
         FileOutputStream fout = new FileOutputStream(fd);
         PrintWriter pw = new FastPrintWriter(fout);
         try {
@@ -476,7 +504,7 @@ public final class WindowManagerGlobal {
                     HardwareRenderer renderer =
                             root.getView().mAttachInfo.mHardwareRenderer;
                     if (renderer != null) {
-                        renderer.dumpGfxInfo(pw, fd);
+                        renderer.dumpGfxInfo(pw, fd, args);
                     }
                 }
 
@@ -519,7 +547,7 @@ public final class WindowManagerGlobal {
             for (int i = 0; i < count; i++) {
                 if (token == null || mParams.get(i).token == token) {
                     ViewRootImpl root = mRoots.get(i);
-                    root.setStopped(stopped);
+                    root.setWindowStopped(stopped);
                 }
             }
         }

@@ -16,14 +16,20 @@
 
 package android.content;
 
+import android.annotation.AttrRes;
+import android.annotation.CheckResult;
 import android.annotation.IntDef;
 import android.annotation.NonNull;
 import android.annotation.Nullable;
 import android.annotation.StringDef;
+import android.annotation.StringRes;
+import android.annotation.StyleRes;
+import android.annotation.StyleableRes;
 import android.annotation.SystemApi;
 import android.content.pm.ApplicationInfo;
 import android.content.pm.PackageManager;
 import android.content.res.AssetManager;
+import android.content.res.ColorStateList;
 import android.content.res.Configuration;
 import android.content.res.Resources;
 import android.content.res.TypedArray;
@@ -32,7 +38,6 @@ import android.database.sqlite.SQLiteDatabase;
 import android.database.sqlite.SQLiteDatabase.CursorFactory;
 import android.graphics.Bitmap;
 import android.graphics.drawable.Drawable;
-import android.media.MediaScannerConnection.OnScanCompletedListener;
 import android.net.Uri;
 import android.os.Bundle;
 import android.os.Environment;
@@ -129,7 +134,15 @@ public abstract class Context {
      * explicitly set if desired.
      *
      * @see #getSharedPreferences
+     *
+     * @deprecated MODE_MULTI_PROCESS does not work reliably in
+     * some versions of Android, and furthermore does not provide any
+     * mechanism for reconciling concurrent modifications across
+     * processes.  Applications should not attempt to use it.  Instead,
+     * they should use an explicit cross-process data management
+     * approach such as {@link android.content.ContentProvider ContentProvider}.
      */
+    @Deprecated
     public static final int MODE_MULTI_PROCESS = 0x0004;
 
     /**
@@ -146,12 +159,13 @@ public abstract class Context {
     @IntDef(flag = true,
             value = {
                 BIND_AUTO_CREATE,
-                BIND_AUTO_CREATE,
                 BIND_DEBUG_UNBIND,
                 BIND_NOT_FOREGROUND,
                 BIND_ABOVE_CLIENT,
                 BIND_ALLOW_OOM_MANAGEMENT,
-                BIND_WAIVE_PRIORITY
+                BIND_WAIVE_PRIORITY,
+                BIND_IMPORTANT,
+                BIND_ADJUST_WITH_ACTIVITY
             })
     @Retention(RetentionPolicy.SOURCE)
     public @interface BindServiceFlags {}
@@ -244,6 +258,21 @@ public abstract class Context {
      * is used to impact it.
      */
     public static final int BIND_ADJUST_WITH_ACTIVITY = 0x0080;
+
+    /**
+     * @hide Flag for {@link #bindService}: Like {@link #BIND_FOREGROUND_SERVICE},
+     * but only applies while the device is awake.
+     */
+    public static final int BIND_FOREGROUND_SERVICE_WHILE_AWAKE = 0x02000000;
+
+    /**
+     * @hide Flag for {@link #bindService}: For only the case where the binding
+     * is coming from the system, set the process state to FOREGROUND_SERVICE
+     * instead of the normal maximum of IMPORTANT_FOREGROUND.  That is, this is
+     * saying that the process shouldn't participate in the normal power reduction
+     * modes (removing network access etc).
+     */
+    public static final int BIND_FOREGROUND_SERVICE = 0x04000000;
 
     /**
      * @hide Flag for {@link #bindService}: Treat the binding as hosting
@@ -363,44 +392,87 @@ public abstract class Context {
      *
      * @param resId Resource id for the CharSequence text
      */
-    public final CharSequence getText(int resId) {
+    public final CharSequence getText(@StringRes int resId) {
         return getResources().getText(resId);
     }
 
     /**
-     * Return a localized string from the application's package's
+     * Returns a localized string from the application's package's
      * default string table.
      *
      * @param resId Resource id for the string
+     * @return The string data associated with the resource, stripped of styled
+     *         text information.
      */
-    public final String getString(int resId) {
+    @NonNull
+    public final String getString(@StringRes int resId) {
         return getResources().getString(resId);
     }
 
     /**
-     * Return a localized formatted string from the application's package's
+     * Returns a localized formatted string from the application's package's
      * default string table, substituting the format arguments as defined in
      * {@link java.util.Formatter} and {@link java.lang.String#format}.
      *
      * @param resId Resource id for the format string
-     * @param formatArgs The format arguments that will be used for substitution.
+     * @param formatArgs The format arguments that will be used for
+     *                   substitution.
+     * @return The string data associated with the resource, formatted and
+     *         stripped of styled text information.
      */
-
-    public final String getString(int resId, Object... formatArgs) {
+    @NonNull
+    public final String getString(@StringRes int resId, Object... formatArgs) {
         return getResources().getString(resId, formatArgs);
     }
 
     /**
-     * Return a drawable object associated with a particular resource ID and
+     * Returns a color associated with a particular resource ID and styled for
+     * the current theme.
+     *
+     * @param id The desired resource identifier, as generated by the aapt
+     *           tool. This integer encodes the package, type, and resource
+     *           entry. The value 0 is an invalid identifier.
+     * @return A single color value in the form 0xAARRGGBB.
+     * @throws android.content.res.Resources.NotFoundException if the given ID
+     *         does not exist.
+     */
+    @Nullable
+    public final int getColor(int id) {
+        return getResources().getColor(id, getTheme());
+    }
+
+    /**
+     * Returns a drawable object associated with a particular resource ID and
      * styled for the current theme.
      *
      * @param id The desired resource identifier, as generated by the aapt
      *           tool. This integer encodes the package, type, and resource
      *           entry. The value 0 is an invalid identifier.
-     * @return Drawable An object that can be used to draw this resource.
+     * @return An object that can be used to draw this resource, or
+     *         {@code null} if the resource could not be resolved.
+     * @throws android.content.res.Resources.NotFoundException if the given ID
+     *         does not exist.
      */
+    @Nullable
     public final Drawable getDrawable(int id) {
         return getResources().getDrawable(id, getTheme());
+    }
+
+    /**
+     * Returns a color state list associated with a particular resource ID and
+     * styled for the current theme.
+     *
+     * @param id The desired resource identifier, as generated by the aapt
+     *           tool. This integer encodes the package, type, and resource
+     *           entry. The value 0 is an invalid identifier.
+     * @return A color state list, or {@code null} if the resource could not be
+     *         resolved.
+     * @throws android.content.res.Resources.NotFoundException if the given ID
+     *         does not exist.
+     */
+    @Nullable
+    public final ColorStateList getColorStateList(int id) {
+        return getResources().getColorStateList(id, getTheme());
     }
 
      /**
@@ -411,7 +483,7 @@ public abstract class Context {
      *
      * @param resid The style resource describing the theme.
      */
-    public abstract void setTheme(int resid);
+    public abstract void setTheme(@StyleRes int resid);
 
     /** @hide Needed for some internal implementation...  not public because
      * you can't assume this actually means anything. */
@@ -427,49 +499,49 @@ public abstract class Context {
 
     /**
      * Retrieve styled attribute information in this Context's theme.  See
-     * {@link Resources.Theme#obtainStyledAttributes(int[])}
+     * {@link android.content.res.Resources.Theme#obtainStyledAttributes(int[])}
      * for more information.
      *
-     * @see Resources.Theme#obtainStyledAttributes(int[])
+     * @see android.content.res.Resources.Theme#obtainStyledAttributes(int[])
      */
-    public final TypedArray obtainStyledAttributes(
-            int[] attrs) {
+    public final TypedArray obtainStyledAttributes(@StyleableRes int[] attrs) {
         return getTheme().obtainStyledAttributes(attrs);
     }
 
     /**
      * Retrieve styled attribute information in this Context's theme.  See
-     * {@link Resources.Theme#obtainStyledAttributes(int, int[])}
+     * {@link android.content.res.Resources.Theme#obtainStyledAttributes(int, int[])}
      * for more information.
      *
-     * @see Resources.Theme#obtainStyledAttributes(int, int[])
+     * @see android.content.res.Resources.Theme#obtainStyledAttributes(int, int[])
      */
     public final TypedArray obtainStyledAttributes(
-            int resid, int[] attrs) throws Resources.NotFoundException {
+            @StyleRes int resid, @StyleableRes int[] attrs) throws Resources.NotFoundException {
         return getTheme().obtainStyledAttributes(resid, attrs);
     }
 
     /**
      * Retrieve styled attribute information in this Context's theme.  See
-     * {@link Resources.Theme#obtainStyledAttributes(AttributeSet, int[], int, int)}
+     * {@link android.content.res.Resources.Theme#obtainStyledAttributes(AttributeSet, int[], int, int)}
      * for more information.
      *
-     * @see Resources.Theme#obtainStyledAttributes(AttributeSet, int[], int, int)
+     * @see android.content.res.Resources.Theme#obtainStyledAttributes(AttributeSet, int[], int, int)
      */
     public final TypedArray obtainStyledAttributes(
-            AttributeSet set, int[] attrs) {
+            AttributeSet set, @StyleableRes int[] attrs) {
         return getTheme().obtainStyledAttributes(set, attrs, 0, 0);
     }
 
     /**
      * Retrieve styled attribute information in this Context's theme.  See
-     * {@link Resources.Theme#obtainStyledAttributes(AttributeSet, int[], int, int)}
+     * {@link android.content.res.Resources.Theme#obtainStyledAttributes(AttributeSet, int[], int, int)}
      * for more information.
      *
-     * @see Resources.Theme#obtainStyledAttributes(AttributeSet, int[], int, int)
+     * @see android.content.res.Resources.Theme#obtainStyledAttributes(AttributeSet, int[], int, int)
      */
     public final TypedArray obtainStyledAttributes(
-            AttributeSet set, int[] attrs, int defStyleAttr, int defStyleRes) {
+            AttributeSet set, @StyleableRes int[] attrs, @AttrRes int defStyleAttr,
+            @StyleRes int defStyleRes) {
         return getTheme().obtainStyledAttributes(
             set, attrs, defStyleAttr, defStyleRes);
     }
@@ -540,11 +612,7 @@ public abstract class Context {
      * editor (SharedPreferences.edit()) and then commit changes (Editor.commit()).
      * @param mode Operating mode.  Use 0 or {@link #MODE_PRIVATE} for the
      * default operation, {@link #MODE_WORLD_READABLE}
-     * and {@link #MODE_WORLD_WRITEABLE} to control permissions.  The bit
-     * {@link #MODE_MULTI_PROCESS} can also be used if multiple processes
-     * are mutating the same SharedPreferences file.  {@link #MODE_MULTI_PROCESS}
-     * is always on in apps targeting Gingerbread (Android 2.3) and below, and
-     * off by default in later versions.
+     * and {@link #MODE_WORLD_WRITEABLE} to control permissions.
      *
      * @return The single {@link SharedPreferences} instance that can be used
      *         to retrieve and modify the preference values.
@@ -552,7 +620,6 @@ public abstract class Context {
      * @see #MODE_PRIVATE
      * @see #MODE_WORLD_READABLE
      * @see #MODE_WORLD_WRITEABLE
-     * @see #MODE_MULTI_PROCESS
      */
     public abstract SharedPreferences getSharedPreferences(String name,
             int mode);
@@ -711,7 +778,8 @@ public abstract class Context {
      * are not automatically scanned by the media scanner, you can explicitly
      * add them to the media database with
      * {@link android.media.MediaScannerConnection#scanFile(Context, String[], String[],
-     *      OnScanCompletedListener) MediaScannerConnection.scanFile}.
+     *      android.media.MediaScannerConnection.OnScanCompletedListener)
+     *      MediaScannerConnection.scanFile}.
      * Note that this is not the same as
      * {@link android.os.Environment#getExternalStoragePublicDirectory
      * Environment.getExternalStoragePublicDirectory()}, which provides
@@ -1188,7 +1256,7 @@ public abstract class Context {
      * @param intent The description of the activity to start.
      *
      * @throws ActivityNotFoundException &nbsp;
-     *
+     *`
      * @see #startActivity(Intent, Bundle)
      * @see PackageManager#resolveActivity
      */
@@ -1251,6 +1319,34 @@ public abstract class Context {
      */
     public void startActivityAsUser(Intent intent, @Nullable Bundle options, UserHandle userId) {
         throw new RuntimeException("Not implemented. Must override in a subclass.");
+    }
+
+    /**
+     * Version of {@link #startActivity(Intent, Bundle)} that returns a result to the caller. This
+     * is only supported for Views and Fragments.
+     * @param who The identifier for the calling element that will receive the result.
+     * @param intent The intent to start.
+     * @param requestCode The code that will be returned with onActivityResult() identifying this
+     *          request.
+     * @param options Additional options for how the Activity should be started.
+     *          May be null if there are no options.  See {@link android.app.ActivityOptions}
+     *          for how to build the Bundle supplied here; there are no supported definitions
+     *          for building it manually.
+     * @hide
+     */
+    public void startActivityForResult(
+            @NonNull String who, Intent intent, int requestCode, @Nullable Bundle options) {
+        throw new RuntimeException("This method is only implemented for Activity-based Contexts. "
+                + "Check canStartActivityForResult() before calling.");
+    }
+
+    /**
+     * Identifies whether this Context instance will be able to process calls to
+     * {@link #startActivityForResult(String, Intent, int, Bundle)}.
+     * @hide
+     */
+    public boolean canStartActivityForResult() {
+        return false;
     }
 
     /**
@@ -1420,6 +1516,65 @@ public abstract class Context {
     public abstract void sendBroadcast(Intent intent,
             @Nullable String receiverPermission);
 
+
+    /**
+     * Broadcast the given intent to all interested BroadcastReceivers, allowing
+     * an array of required permissions to be enforced.  This call is asynchronous; it returns
+     * immediately, and you will continue executing while the receivers are run.  No results are
+     * propagated from receivers and receivers can not abort the broadcast. If you want to allow
+     * receivers to propagate results or abort the broadcast, you must send an ordered broadcast
+     * using {@link #sendOrderedBroadcast(Intent, String)}.
+     *
+     * <p>See {@link BroadcastReceiver} for more information on Intent broadcasts.
+     *
+     * @param intent The Intent to broadcast; all receivers matching this
+     *               Intent will receive the broadcast.
+     * @param receiverPermissions Array of names of permissions that a receiver must hold
+     *                            in order to receive your broadcast.
+     *                            If null or empty, no permissions are required.
+     *
+     * @see android.content.BroadcastReceiver
+     * @see #registerReceiver
+     * @see #sendBroadcast(Intent)
+     * @see #sendOrderedBroadcast(Intent, String)
+     * @see #sendOrderedBroadcast(Intent, String, BroadcastReceiver, Handler, int, String, Bundle)
+     * @hide
+     */
+    public abstract void sendBroadcastMultiplePermissions(Intent intent,
+            String[] receiverPermissions);
+
+    /**
+     * Broadcast the given intent to all interested BroadcastReceivers, allowing
+     * an optional required permission to be enforced.  This
+     * call is asynchronous; it returns immediately, and you will continue
+     * executing while the receivers are run.  No results are propagated from
+     * receivers and receivers can not abort the broadcast. If you want
+     * to allow receivers to propagate results or abort the broadcast, you must
+     * send an ordered broadcast using
+     * {@link #sendOrderedBroadcast(Intent, String)}.
+     *
+     * <p>See {@link BroadcastReceiver} for more information on Intent broadcasts.
+     *
+     * @param intent The Intent to broadcast; all receivers matching this
+     *               Intent will receive the broadcast.
+     * @param receiverPermission (optional) String naming a permission that
+     *               a receiver must hold in order to receive your broadcast.
+     *               If null, no permission is required.
+     * @param options (optional) Additional sending options, generated from a
+     * {@link android.app.BroadcastOptions}.
+     *
+     * @see android.content.BroadcastReceiver
+     * @see #registerReceiver
+     * @see #sendBroadcast(Intent)
+     * @see #sendOrderedBroadcast(Intent, String)
+     * @see #sendOrderedBroadcast(Intent, String, BroadcastReceiver, Handler, int, String, Bundle)
+     * @hide
+     */
+    @SystemApi
+    public abstract void sendBroadcast(Intent intent,
+            @Nullable String receiverPermission,
+            @Nullable Bundle options);
+
     /**
      * Like {@link #sendBroadcast(Intent, String)}, but also allows specification
      * of an associated app op as per {@link android.app.AppOpsManager}.
@@ -1492,9 +1647,58 @@ public abstract class Context {
      * @see android.app.Activity#RESULT_OK
      */
     public abstract void sendOrderedBroadcast(@NonNull Intent intent,
-            @Nullable String receiverPermission, BroadcastReceiver resultReceiver,
+            @Nullable String receiverPermission, @Nullable BroadcastReceiver resultReceiver,
             @Nullable Handler scheduler, int initialCode, @Nullable String initialData,
             @Nullable Bundle initialExtras);
+
+    /**
+     * Version of {@link #sendBroadcast(Intent)} that allows you to
+     * receive data back from the broadcast.  This is accomplished by
+     * supplying your own BroadcastReceiver when calling, which will be
+     * treated as a final receiver at the end of the broadcast -- its
+     * {@link BroadcastReceiver#onReceive} method will be called with
+     * the result values collected from the other receivers.  The broadcast will
+     * be serialized in the same way as calling
+     * {@link #sendOrderedBroadcast(Intent, String)}.
+     *
+     * <p>Like {@link #sendBroadcast(Intent)}, this method is
+     * asynchronous; it will return before
+     * resultReceiver.onReceive() is called.
+     *
+     * <p>See {@link BroadcastReceiver} for more information on Intent broadcasts.
+     *
+     *
+     * @param intent The Intent to broadcast; all receivers matching this
+     *               Intent will receive the broadcast.
+     * @param receiverPermission String naming a permissions that
+     *               a receiver must hold in order to receive your broadcast.
+     *               If null, no permission is required.
+     * @param options (optional) Additional sending options, generated from a
+     * {@link android.app.BroadcastOptions}.
+     * @param resultReceiver Your own BroadcastReceiver to treat as the final
+     *                       receiver of the broadcast.
+     * @param scheduler A custom Handler with which to schedule the
+     *                  resultReceiver callback; if null it will be
+     *                  scheduled in the Context's main thread.
+     * @param initialCode An initial value for the result code.  Often
+     *                    Activity.RESULT_OK.
+     * @param initialData An initial value for the result data.  Often
+     *                    null.
+     * @param initialExtras An initial value for the result extras.  Often
+     *                      null.
+     * @see #sendBroadcast(Intent)
+     * @see #sendBroadcast(Intent, String)
+     * @see #sendOrderedBroadcast(Intent, String)
+     * @see android.content.BroadcastReceiver
+     * @see #registerReceiver
+     * @see android.app.Activity#RESULT_OK
+     * @hide
+     */
+    @SystemApi
+    public abstract void sendOrderedBroadcast(@NonNull Intent intent,
+            @Nullable String receiverPermission, @Nullable Bundle options,
+            @Nullable BroadcastReceiver resultReceiver, @Nullable Handler scheduler,
+            int initialCode, @Nullable String initialData, @Nullable Bundle initialExtras);
 
     /**
      * Like {@link #sendOrderedBroadcast(Intent, String, BroadcastReceiver, android.os.Handler,
@@ -1535,6 +1739,28 @@ public abstract class Context {
      */
     public abstract void sendBroadcastAsUser(Intent intent, UserHandle user,
             @Nullable String receiverPermission);
+
+
+    /**
+     * Version of {@link #sendBroadcast(Intent, String)} that allows you to specify the
+     * user the broadcast will be sent to.  This is not available to applications
+     * that are not pre-installed on the system image.  Using it requires holding
+     * the INTERACT_ACROSS_USERS permission.
+     *
+     * @param intent The Intent to broadcast; all receivers matching this
+     *               Intent will receive the broadcast.
+     * @param user UserHandle to send the intent to.
+     * @param receiverPermission (optional) String naming a permission that
+     *               a receiver must hold in order to receive your broadcast.
+     *               If null, no permission is required.
+     * @param appOp The app op associated with the broadcast.
+     *
+     * @see #sendBroadcast(Intent, String)
+     *
+     * @hide
+     */
+    public abstract void sendBroadcastAsUser(Intent intent, UserHandle user,
+            @Nullable String receiverPermission, int appOp);
 
     /**
      * Version of
@@ -1581,6 +1807,17 @@ public abstract class Context {
             @Nullable String receiverPermission, int appOp, BroadcastReceiver resultReceiver,
             @Nullable Handler scheduler, int initialCode, @Nullable String initialData,
             @Nullable  Bundle initialExtras);
+
+    /**
+     * Similar to above but takes an appOp as well, to enforce restrictions, and an options Bundle.
+     * @see #sendOrderedBroadcastAsUser(Intent, UserHandle, String,
+     *       BroadcastReceiver, Handler, int, String, Bundle)
+     * @hide
+     */
+    public abstract void sendOrderedBroadcastAsUser(Intent intent, UserHandle user,
+            @Nullable String receiverPermission, int appOp, @Nullable Bundle options,
+            BroadcastReceiver resultReceiver, @Nullable Handler scheduler, int initialCode,
+            @Nullable String initialData, @Nullable  Bundle initialExtras);
 
     /**
      * <p>Perform a {@link #sendBroadcast(Intent)} that is "sticky," meaning the
@@ -1876,7 +2113,7 @@ public abstract class Context {
      * @return The first sticky intent found that matches <var>filter</var>,
      *         or null if there are none.
      *
-     * @see #registerReceiver(BroadcastReceiver, IntentFilter, String, Handler
+     * @see #registerReceiver(BroadcastReceiver, IntentFilter, String, Handler)
      * @see #sendBroadcast
      * @see #unregisterReceiver
      */
@@ -2039,7 +2276,9 @@ public abstract class Context {
      * @hide
      */
     @SystemApi
-    public boolean bindServiceAsUser(Intent service, ServiceConnection conn, int flags, UserHandle user) {
+    @SuppressWarnings("unused")
+    public boolean bindServiceAsUser(Intent service, ServiceConnection conn,
+            int flags, UserHandle user) {
         throw new RuntimeException("Not implemented. Must override in a subclass.");
     }
 
@@ -2104,25 +2343,31 @@ public abstract class Context {
             CONNECTIVITY_SERVICE,
             //@hide: UPDATE_LOCK_SERVICE,
             //@hide: NETWORKMANAGEMENT_SERVICE,
-            //@hide: NETWORK_STATS_SERVICE,
+            NETWORK_STATS_SERVICE,
             //@hide: NETWORK_POLICY_SERVICE,
             WIFI_SERVICE,
             WIFI_PASSPOINT_SERVICE,
             WIFI_P2P_SERVICE,
             WIFI_SCANNING_SERVICE,
+            //@hide: WIFI_RTT_SERVICE,
             //@hide: ETHERNET_SERVICE,
             WIFI_RTT_SERVICE,
             NSD_SERVICE,
             AUDIO_SERVICE,
+            FINGERPRINT_SERVICE,
             MEDIA_ROUTER_SERVICE,
             TELEPHONY_SERVICE,
+            TELEPHONY_SUBSCRIPTION_SERVICE,
+            CARRIER_CONFIG_SERVICE,
             TELECOM_SERVICE,
             CLIPBOARD_SERVICE,
             INPUT_METHOD_SERVICE,
             TEXT_SERVICES_MANAGER_SERVICE,
             APPWIDGET_SERVICE,
+            //@hide: VOICE_INTERACTION_MANAGER_SERVICE,
             //@hide: BACKUP_SERVICE,
             DROPBOX_SERVICE,
+            //@hide: DEVICE_IDLE_CONTROLLER,
             DEVICE_POLICY_SERVICE,
             UI_MODE_SERVICE,
             DOWNLOAD_SERVICE,
@@ -2132,17 +2377,26 @@ public abstract class Context {
             USB_SERVICE,
             LAUNCHER_APPS_SERVICE,
             //@hide: SERIAL_SERVICE,
+            //@hide: HDMI_CONTROL_SERVICE,
             INPUT_SERVICE,
             DISPLAY_SERVICE,
-            //@hide: SCHEDULING_POLICY_SERVICE,
             USER_SERVICE,
-            //@hide: APP_OPS_SERVICE
+            RESTRICTIONS_SERVICE,
+            APP_OPS_SERVICE,
             CAMERA_SERVICE,
             PRINT_SERVICE,
+            CONSUMER_IR_SERVICE,
+            //@hide: TRUST_SERVICE,
+            TV_INPUT_SERVICE,
+            //@hide: NETWORK_SCORE_SERVICE,
+            USAGE_STATS_SERVICE,
             MEDIA_SESSION_SERVICE,
             BATTERY_SERVICE,
             JOB_SCHEDULER_SERVICE,
+            //@hide: PERSISTENT_DATA_BLOCK_SERVICE,
             MEDIA_PROJECTION_SERVICE,
+            MIDI_SERVICE,
+            RADIO_SERVICE,
     })
     @Retention(RetentionPolicy.SOURCE)
     public @interface ServiceName {}
@@ -2201,6 +2455,9 @@ public abstract class Context {
      * <dd> A {@link android.os.BatteryManager} for managing battery state
      * <dt> {@link #JOB_SCHEDULER_SERVICE} ("taskmanager")
      * <dd>  A {@link android.app.job.JobScheduler} for managing scheduled tasks
+     * <dt> {@link #NETWORK_STATS_SERVICE} ("netstats")
+     * <dd> A {@link android.app.usage.NetworkStatsManager NetworkStatsManager} for querying network
+     * usage statistics.
      * </dl>
      *
      * <p>Note:  System services obtained via this API may be closely associated with
@@ -2248,6 +2505,8 @@ public abstract class Context {
      * @see android.telephony.TelephonyManager
      * @see #TELEPHONY_SUBSCRIPTION_SERVICE
      * @see android.telephony.SubscriptionManager
+     * @see #CARRIER_CONFIG_SERVICE
+     * @see android.telephony.CarrierConfigManager
      * @see #INPUT_METHOD_SERVICE
      * @see android.view.inputmethod.InputMethodManager
      * @see #UI_MODE_SERVICE
@@ -2258,8 +2517,54 @@ public abstract class Context {
      * @see android.os.BatteryManager
      * @see #JOB_SCHEDULER_SERVICE
      * @see android.app.job.JobScheduler
+     * @see #NETWORK_STATS_SERVICE
+     * @see android.app.usage.NetworkStatsManager
      */
     public abstract Object getSystemService(@ServiceName @NonNull String name);
+
+    /**
+     * Return the handle to a system-level service by class.
+     * <p>
+     * Currently available classes are:
+     * {@link android.view.WindowManager}, {@link android.view.LayoutInflater},
+     * {@link android.app.ActivityManager}, {@link android.os.PowerManager},
+     * {@link android.app.AlarmManager}, {@link android.app.NotificationManager},
+     * {@link android.app.KeyguardManager}, {@link android.location.LocationManager},
+     * {@link android.app.SearchManager}, {@link android.os.Vibrator},
+     * {@link android.net.ConnectivityManager},
+     * {@link android.net.wifi.WifiManager},
+     * {@link android.media.AudioManager}, {@link android.media.MediaRouter},
+     * {@link android.telephony.TelephonyManager}, {@link android.telephony.SubscriptionManager},
+     * {@link android.view.inputmethod.InputMethodManager},
+     * {@link android.app.UiModeManager}, {@link android.app.DownloadManager},
+     * {@link android.os.BatteryManager}, {@link android.app.job.JobScheduler},
+     * {@link android.app.usage.NetworkStatsManager}.
+     * </p><p>
+     * Note: System services obtained via this API may be closely associated with
+     * the Context in which they are obtained from.  In general, do not share the
+     * service objects between various different contexts (Activities, Applications,
+     * Services, Providers, etc.)
+     * </p>
+     *
+     * @param serviceClass The class of the desired service.
+     * @return The service or null if the class is not a supported system service.
+     */
+    @SuppressWarnings("unchecked")
+    public final <T> T getSystemService(Class<T> serviceClass) {
+        // Because subclasses may override getSystemService(String) we cannot
+        // perform a lookup by class alone.  We must first map the class to its
+        // service name then invoke the string-based method.
+        String serviceName = getSystemServiceName(serviceClass);
+        return serviceName != null ? (T)getSystemService(serviceName) : null;
+    }
+
+    /**
+     * Gets the name of the system-level service that is represented by the specified class.
+     *
+     * @param serviceClass The class of the desired service.
+     * @return The service name or null if the class is not a supported system service.
+     */
+    public abstract String getSystemServiceName(Class<?> serviceClass);
 
     /**
      * Use with {@link #getSystemService} to retrieve a
@@ -2460,7 +2765,13 @@ public abstract class Context {
      */
     public static final String NETWORKMANAGEMENT_SERVICE = "network_management";
 
-    /** {@hide} */
+    /**
+     * Use with {@link #getSystemService} to retrieve a {@link
+     * android.app.usage.NetworkStatsManager} for querying network usage stats.
+     *
+     * @see #getSystemService
+     * @see android.app.usage.NetworkStatsManager
+     */
     public static final String NETWORK_STATS_SERVICE = "netstats";
     /** {@hide} */
     public static final String NETWORK_POLICY_SERVICE = "netpolicy";
@@ -2552,12 +2863,11 @@ public abstract class Context {
 
     /**
      * Use with {@link #getSystemService} to retrieve a
-     * {@link android.service.fingerprint.FingerprintManager} for handling management
+     * {@link android.hardware.fingerprint.FingerprintManager} for handling management
      * of fingerprints.
      *
      * @see #getSystemService
-     * @see android.app.FingerprintManager
-     * @hide
+     * @see android.hardware.fingerprint.FingerprintManager
      */
     public static final String FINGERPRINT_SERVICE = "fingerprint";
 
@@ -2612,11 +2922,21 @@ public abstract class Context {
 
     /**
      * Use with {@link #getSystemService} to retrieve a
+     * {@link android.telephony.CarrierConfigManager} for reading carrier configuration values.
+     *
+     * @see #getSystemService
+     * @see android.telephony.CarrierConfigManager
+     */
+    public static final String CARRIER_CONFIG_SERVICE = "carrier_config";
+
+    /**
+     * Use with {@link #getSystemService} to retrieve a
      * {@link android.text.ClipboardManager} for accessing and modifying
+     * {@link android.content.ClipboardManager} for accessing and modifying
      * the contents of the global clipboard.
      *
      * @see #getSystemService
-     * @see android.text.ClipboardManager
+     * @see android.content.ClipboardManager
      */
     public static final String CLIPBOARD_SERVICE = "clipboard";
 
@@ -2674,6 +2994,13 @@ public abstract class Context {
     public static final String DROPBOX_SERVICE = "dropbox";
 
     /**
+     * System service name for the DeviceIdleController.  There is no Java API for this.
+     * @see #getSystemService
+     * @hide
+     */
+    public static final String DEVICE_IDLE_CONTROLLER = "deviceidle";
+
+    /**
      * Use with {@link #getSystemService} to retrieve a
      * {@link android.app.admin.DevicePolicyManager} for working with global
      * device policy management.
@@ -2716,7 +3043,7 @@ public abstract class Context {
 
     /**
      * Use with {@link #getSystemService} to retrieve a
-     * {@link android.bluetooth.BluetoothAdapter} for using Bluetooth.
+     * {@link android.bluetooth.BluetoothManager} for using Bluetooth.
      *
      * @see #getSystemService
      */
@@ -2911,9 +3238,27 @@ public abstract class Context {
      * android.media.projection.MediaProjectionManager} instance for managing
      * media projection sessions.
      * @see #getSystemService
-     * @see android.media.projection.ProjectionManager
+     * @see android.media.projection.MediaProjectionManager
      */
     public static final String MEDIA_PROJECTION_SERVICE = "media_projection";
+
+    /**
+     * Use with {@link #getSystemService} to retrieve a
+     * {@link android.media.midi.MidiManager} for accessing the MIDI service.
+     *
+     * @see #getSystemService
+     */
+    public static final String MIDI_SERVICE = "midi";
+
+
+    /**
+     * Use with {@link #getSystemService} to retrieve a
+     * {@link android.hardware.radio.RadioManager} for accessing the broadcast radio service.
+     *
+     * @see #getSystemService
+     * @hide
+     */
+    public static final String RADIO_SERVICE = "radio";
 
     /**
      * Determine whether the given permission is allowed for a particular
@@ -2931,6 +3276,7 @@ public abstract class Context {
      * @see PackageManager#checkPermission(String, String)
      * @see #checkCallingPermission
      */
+    @CheckResult(suggest="#enforcePermission(String,int,int,String)")
     @PackageManager.PermissionResult
     public abstract int checkPermission(@NonNull String permission, int pid, int uid);
 
@@ -2960,6 +3306,7 @@ public abstract class Context {
      * @see #checkPermission
      * @see #checkCallingOrSelfPermission
      */
+    @CheckResult(suggest="#enforceCallingPermission(String,String)")
     @PackageManager.PermissionResult
     public abstract int checkCallingPermission(@NonNull String permission);
 
@@ -2979,8 +3326,23 @@ public abstract class Context {
      * @see #checkPermission
      * @see #checkCallingPermission
      */
+    @CheckResult(suggest="#enforceCallingOrSelfPermission(String,String)")
     @PackageManager.PermissionResult
     public abstract int checkCallingOrSelfPermission(@NonNull String permission);
+
+    /**
+     * Determine whether <em>you</em> have been granted a particular permission.
+     *
+     * @param permission The name of the permission being checked.
+     *
+     * @return {@link PackageManager#PERMISSION_GRANTED} if you have the
+     * permission, or {@link PackageManager#PERMISSION_DENIED} if not.
+     *
+     * @see PackageManager#checkPermission(String, String)
+     * @see #checkCallingPermission(String)
+     */
+    @PackageManager.PermissionResult
+    public abstract int checkSelfPermission(@NonNull String permission);
 
     /**
      * If the given permission is not allowed for a particular process
@@ -3123,6 +3485,7 @@ public abstract class Context {
      *
      * @see #checkCallingUriPermission
      */
+    @CheckResult(suggest="#enforceUriPermission(Uri,int,int,String)")
     public abstract int checkUriPermission(Uri uri, int pid, int uid,
             @Intent.AccessUriMode int modeFlags);
 
@@ -3151,6 +3514,7 @@ public abstract class Context {
      *
      * @see #checkUriPermission(Uri, int, int, int)
      */
+    @CheckResult(suggest="#enforceCallingUriPermission(Uri,int,String)")
     public abstract int checkCallingUriPermission(Uri uri, @Intent.AccessUriMode int modeFlags);
 
     /**
@@ -3170,6 +3534,7 @@ public abstract class Context {
      *
      * @see #checkCallingUriPermission
      */
+    @CheckResult(suggest="#enforceCallingOrSelfUriPermission(Uri,int,String)")
     public abstract int checkCallingOrSelfUriPermission(Uri uri,
             @Intent.AccessUriMode int modeFlags);
 
@@ -3195,6 +3560,7 @@ public abstract class Context {
      * is allowed to access that uri or holds one of the given permissions, or
      * {@link PackageManager#PERMISSION_DENIED} if it is not.
      */
+    @CheckResult(suggest="#enforceUriPermission(Uri,String,String,int,int,int,String)")
     public abstract int checkUriPermission(@Nullable Uri uri, @Nullable String readPermission,
             @Nullable String writePermission, int pid, int uid,
             @Intent.AccessUriMode int modeFlags);
@@ -3338,7 +3704,7 @@ public abstract class Context {
      * are not shared, however they share common state (Resources, ClassLoader,
      * etc) so the Context instance itself is fairly lightweight.
      *
-     * <p>Throws {@link PackageManager.NameNotFoundException} if there is no
+     * <p>Throws {@link android.content.pm.PackageManager.NameNotFoundException} if there is no
      * application with the given package name.
      *
      * <p>Throws {@link java.lang.SecurityException} if the Context requested

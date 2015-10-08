@@ -237,6 +237,12 @@ please see styles_device_defaults.xml.
         <item name="windowExitAnimation">@anim/fade_out</item>
     </style>
 
+    <!-- Window animations used for immersive mode confirmation. -->
+    <style name="Animation.ImmersiveModeConfirmation">
+        <item name="windowEnterAnimation">@null</item>
+        <item name="windowExitAnimation">@anim/fast_fade_out</item>
+    </style>
+
     <!-- Window animations for screen savers. {@hide} -->
     <style name="Animation.Dream">
         <item name="windowEnterAnimation">@anim/slow_fade_in</item>
@@ -491,6 +497,8 @@ please see styles_device_defaults.xml.
         <item name="textEditSideNoPasteWindowLayout">?attr/textEditSideNoPasteWindowLayout</item>
         <item name="textEditSuggestionItemLayout">?attr/textEditSuggestionItemLayout</item>
         <item name="textCursorDrawable">?attr/textCursorDrawable</item>
+        <item name="breakStrategy">high_quality</item>
+        <item name="hyphenationFrequency">normal</item>
     </style>
 
     <style name="Widget.CheckedTextView">
@@ -521,6 +529,8 @@ please see styles_device_defaults.xml.
         <item name="textAppearance">?attr/textAppearanceMediumInverse</item>
         <item name="textColor">?attr/editTextColor</item>
         <item name="gravity">center_vertical</item>
+        <item name="breakStrategy">simple</item>
+        <item name="hyphenationFrequency">normal</item>
     </style>
 
     <style name="Widget.ExpandableListView" parent="Widget.ListView">
@@ -1007,6 +1017,10 @@ please see styles_device_defaults.xml.
         <item name="negativeButtonText">@string/no</item>
     </style>
 
+    <style name="Preference.DialogPreference.SeekBarPreference">
+        <item name="dialogLayout">@layout/preference_dialog_seekbar</item>
+    </style>
+
     <style name="Preference.DialogPreference.EditTextPreference">
         <item name="dialogLayout">@layout/preference_dialog_edittext</item>
     </style>
@@ -1269,6 +1283,8 @@ please see styles_device_defaults.xml.
     </style>
 
     <style name="Widget.ActionButton.CloseMode">
+        <!-- Should match Widget.Toolbar.Button.Navigation minWidth. -->
+        <item name="minWidth">56dp</item>
     </style>
 
     <style name="Widget.ActionBar.TabView" parent="Widget">

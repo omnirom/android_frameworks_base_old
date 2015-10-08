@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2010 Google Inc.
+ * Copyright (C) 2015 The Android Open Source Project
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -17,6 +17,7 @@
 package com.android.systemui.usb;
 
 import android.app.Notification;
+import android.app.Notification.Action;
 import android.app.NotificationManager;
 import android.app.PendingIntent;
 import android.database.ContentObserver;
@@ -24,23 +25,22 @@ import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.Intent;
 import android.content.IntentFilter;
-import android.content.res.Resources;
+import android.content.pm.PackageManager;
+import android.content.pm.PackageManager.MoveCallback;
 import android.os.Bundle;
-import android.os.Environment;
 import android.os.Handler;
-import android.os.HandlerThread;
-import android.os.IBinder;
-import android.os.RemoteException;
-import android.os.ServiceManager;
 import android.os.UserHandle;
+import android.os.storage.DiskInfo;
 import android.os.storage.StorageEventListener;
 import android.os.storage.StorageManager;
-import android.os.storage.StorageVolume;
-import android.os.storage.IMountService;
+import android.os.storage.VolumeInfo;
+import android.os.storage.VolumeRecord;
 import android.text.TextUtils;
-import android.provider.Settings;
+import android.text.format.DateUtils;
 import android.util.Log;
+import android.util.SparseArray;
 
+import com.android.internal.R;
 import com.android.systemui.SystemUI;
 import com.android.systemui.R;
 
@@ -51,565 +51,631 @@ import java.util.ArrayList;
 import java.util.Iterator;
 import java.lang.Thread;
 
+import java.util.List;
+
 public class StorageNotification extends SystemUI {
     private static final String TAG = "StorageNotification";
-    private static final boolean DEBUG = false;
 
-    private static final boolean POP_UMS_ACTIVITY_ON_CONNECT = true;
-    private static final String UNMOUNT_ACTION = "storage_notification_unmount";
-    private static final String MOUNT_ACTION = "storage_notification_mount";
+    private static final int PUBLIC_ID = 0x53505542; // SPUB
+    private static final int PRIVATE_ID = 0x53505256; // SPRV
+    private static final int DISK_ID = 0x5344534b; // SDSK
+    private static final int MOVE_ID = 0x534d4f56; // SMOV
 
-    /**
-     * The notification that is shown when a USB mass storage host
-     * is connected.
-     * <p>
-     * This is lazily created, so use {@link #setUsbStorageNotification()}.
-     */
-    private Notification mUsbStorageNotification;
+    private static final String ACTION_SNOOZE_VOLUME = "com.android.systemui.action.SNOOZE_VOLUME";
+    private static final String ACTION_FINISH_WIZARD = "com.android.systemui.action.FINISH_WIZARD";
 
-    /**
-     * The notification that is shown when the following media events occur:
-     *     - Media is being checked
-     *     - Media is blank (or unknown filesystem)
-     *     - Media is corrupt
-     *     - Media is safe to unmount
-     *     - Media is missing
-     * <p>
-     * This is lazily created, so use {@link #setMediaStorageNotification()}.
-     */
-    private Notification   mMediaStorageNotification;
-    private boolean        mUmsAvailable;
+    // TODO: delay some notifications to avoid bumpy fast operations
+
+    private NotificationManager mNotificationManager;
     private StorageManager mStorageManager;
 
-    private Handler        mAsyncEventHandler;
+    private static class MoveInfo {
+        public int moveId;
+        public Bundle extras;
+        public String packageName;
+        public String label;
+        public String volumeUuid;
+    }
 
-    private List<StorageEntry> mStorageList = new ArrayList<StorageEntry>();
+    private final SparseArray<MoveInfo> mMoves = new SparseArray<>();
 
-    private final BroadcastReceiver mBroadcastReceiver = new BroadcastReceiver() {
+    private final StorageEventListener mListener = new StorageEventListener() {
+        @Override
+        public void onVolumeStateChanged(VolumeInfo vol, int oldState, int newState) {
+            onVolumeStateChangedInternal(vol);
+        }
+
+        @Override
+        public void onVolumeRecordChanged(VolumeRecord rec) {
+            // Avoid kicking notifications when getting early metadata before
+            // mounted. If already mounted, we're being kicked because of a
+            // nickname or init'ed change.
+            final VolumeInfo vol = mStorageManager.findVolumeByUuid(rec.getFsUuid());
+            if (vol != null && vol.isMountedReadable()) {
+                onVolumeStateChangedInternal(vol);
+            }
+        }
+
+        @Override
+        public void onVolumeForgotten(String fsUuid) {
+            // Stop annoying the user
+            mNotificationManager.cancelAsUser(fsUuid, PRIVATE_ID, UserHandle.ALL);
+        }
+
+        @Override
+        public void onDiskScanned(DiskInfo disk, int volumeCount) {
+            onDiskScannedInternal(disk, volumeCount);
+        }
+    };
+
+    private final BroadcastReceiver mSnoozeReceiver = new BroadcastReceiver() {
         @Override
         public void onReceive(Context context, Intent intent) {
-            String action = intent.getAction();
-            Bundle b = intent.getExtras();
-            String path = b.getCharSequence("path").toString();
-
-            if (action.equals(UNMOUNT_ACTION)) {
-                if (DEBUG) Log.i(TAG, "unmount " + path);
-                StorageEntry entry = findEntry(path);
-                if (entry != null) {
-                    if (showMeditMountedNotification(path)) {
-                        setMediaStorageMountNotification(entry.mMounted, path, false, 1);
-                    }
-                }
-                unmount(path);
-            } else if (action.equals(MOUNT_ACTION)) {
-                if (DEBUG) Log.i(TAG, "mount " + path);
-                StorageEntry entry = findEntry(path);
-                if (entry != null) {
-                    if (showMeditMountedNotification(path)) {
-                        setMediaStorageMountNotification(entry.mMounted, path, false, 2);
-                    }
-                }
-                mount(path);
-            }
+            // TODO: kick this onto background thread
+            final String fsUuid = intent.getStringExtra(VolumeRecord.EXTRA_FS_UUID);
+            mStorageManager.setVolumeSnoozed(fsUuid, true);
         }
     };
 
-    private static class StorageEntry {
-        public String mPath;
-        public boolean mMounted;
-        public boolean mRemoved;
-        public boolean mPlugged;
+    private final BroadcastReceiver mFinishReceiver = new BroadcastReceiver() {
+        @Override
+        public void onReceive(Context context, Intent intent) {
+            // When finishing the adoption wizard, clean up any notifications
+            // for moving primary storage
+            mNotificationManager.cancelAsUser(null, MOVE_ID, UserHandle.ALL);
+        }
+    };
+
+    private final MoveCallback mMoveCallback = new MoveCallback() {
+        @Override
+        public void onCreated(int moveId, Bundle extras) {
+            final MoveInfo move = new MoveInfo();
+            move.moveId = moveId;
+            move.extras = extras;
+            if (extras != null) {
+                move.packageName = extras.getString(Intent.EXTRA_PACKAGE_NAME);
+                move.label = extras.getString(Intent.EXTRA_TITLE);
+                move.volumeUuid = extras.getString(VolumeRecord.EXTRA_FS_UUID);
+            }
+            mMoves.put(moveId, move);
+        }
 
         @Override
-        public boolean equals(Object o) {
-            if (o instanceof StorageEntry) {
-                return mPath.equals(((StorageEntry)o).mPath);
+        public void onStatusChanged(int moveId, int status, long estMillis) {
+            final MoveInfo move = mMoves.get(moveId);
+            if (move == null) {
+                Log.w(TAG, "Ignoring unknown move " + moveId);
+                return;
             }
-            return false;
-        }
-    }
-    private final ContentObserver mSettingsObserver = new ContentObserver(new Handler()) {
-        public void onChange(boolean selfChange) {
-            String notificationConfig = android.provider.Settings.System.getString(mContext.getContentResolver(),
-                    android.provider.Settings.System.STORAGE_MOUNT_NOTIFICATION);
-            if (DEBUG) Log.i(TAG, "onChange " + notificationConfig);
-            List<String> pathList = new ArrayList<String>();
-            if (notificationConfig != null) {
-                String[] pathArray = notificationConfig.split("\\|\\|");
-                pathList.addAll(Arrays.asList(pathArray));
-            }
-            // first delete all
-            Iterator<StorageEntry> nextEntry = mStorageList.iterator();
-            while(nextEntry.hasNext()) {
-                StorageEntry entry = nextEntry.next();
-                setMediaStorageMountNotification(false, entry.mPath, true, 0);
-            }
-            // now add still required
-            Iterator<String> nextPath = pathList.iterator();
-            while(nextPath.hasNext()) {
-                String path = nextPath.next();
-                StorageEntry entry = findEntry(path);
-                if (entry != null) {
-                    if (!entry.mRemoved) {
-                        setMediaStorageMountNotification(entry.mMounted, path, false, 0);
-                    }
-                }
-            }
-        };
-    };
 
-    private class StorageNotificationEventListener extends StorageEventListener {
-        public void onUsbMassStorageConnectionChanged(final boolean connected) {
-            mAsyncEventHandler.post(new Runnable() {
-                @Override
-                public void run() {
-                    onUsbMassStorageConnectionChangedAsync(connected);
-                }
-            });
+            if (PackageManager.isMoveStatusFinished(status)) {
+                onMoveFinished(move, status);
+            } else {
+                onMoveProgress(move, status, estMillis);
+            }
         }
-        public void onStorageStateChanged(final String path,
-                final String oldState, final String newState) {
-            mAsyncEventHandler.post(new Runnable() {
-                @Override
-                public void run() {
-                    onStorageStateChangedAsync(path, oldState, newState);
-                }
-            });
-        }
-    }
+    };
 
     @Override
     public void start() {
-        mStorageManager = (StorageManager) mContext.getSystemService(Context.STORAGE_SERVICE);
-        final boolean connected = mStorageManager.isUsbMassStorageConnected();
-        if (DEBUG) Log.d(TAG, String.format( "Startup with UMS connection %s (media state %s)",
-                mUmsAvailable, Environment.getExternalStorageState()));
+        mNotificationManager = mContext.getSystemService(NotificationManager.class);
 
-        HandlerThread thr = new HandlerThread("SystemUI StorageNotification");
-        thr.start();
-        mAsyncEventHandler = new Handler(thr.getLooper());
+        mStorageManager = mContext.getSystemService(StorageManager.class);
+        mStorageManager.registerListener(mListener);
 
-        StorageNotificationEventListener listener = new StorageNotificationEventListener();
-        listener.onUsbMassStorageConnectionChanged(connected);
-        mStorageManager.registerListener(listener);
+        mContext.registerReceiver(mSnoozeReceiver, new IntentFilter(ACTION_SNOOZE_VOLUME),
+                android.Manifest.permission.MOUNT_UNMOUNT_FILESYSTEMS, null);
+        mContext.registerReceiver(mFinishReceiver, new IntentFilter(ACTION_FINISH_WIZARD),
+                android.Manifest.permission.MOUNT_UNMOUNT_FILESYSTEMS, null);
 
-        final StorageVolume[] storageVolumes = mStorageManager.getVolumeList();
-        for (StorageVolume volume : storageVolumes) {
-            if (volume.isRemovable()) {
-                StorageEntry entry = new StorageEntry();
-                entry.mPath = volume.getPath();
-                entry.mMounted = false;
-                entry.mRemoved = true;
-                entry.mPlugged = false;
-                mStorageList.add(entry);
-            }
+        // Kick current state into place
+        final List<DiskInfo> disks = mStorageManager.getDisks();
+        for (DiskInfo disk : disks) {
+            onDiskScannedInternal(disk, disk.volumeCount);
         }
-        mContext.getContentResolver().registerContentObserver(
-                Settings.System.getUriFor(Settings.System.STORAGE_MOUNT_NOTIFICATION), true,
-                mSettingsObserver, UserHandle.USER_ALL);
 
-        IntentFilter filter = new IntentFilter();
-        filter.addAction(UNMOUNT_ACTION);
-        filter.addAction(MOUNT_ACTION);
+        final List<VolumeInfo> vols = mStorageManager.getVolumes();
+        for (VolumeInfo vol : vols) {
+            onVolumeStateChangedInternal(vol);
+        }
 
-        mContext.registerReceiver(mBroadcastReceiver, filter);
+        mContext.getPackageManager().registerMoveCallback(mMoveCallback, new Handler());
+
+        updateMissingPrivateVolumes();
     }
 
-    private void onUsbMassStorageConnectionChangedAsync(boolean connected) {
-        mUmsAvailable = connected;
-        /*
-         * Even though we may have a UMS host connected, we the SD card
-         * may not be in a state for export.
-         */
-        String st = Environment.getExternalStorageState();
+    private void updateMissingPrivateVolumes() {
+        final List<VolumeRecord> recs = mStorageManager.getVolumeRecords();
+        for (VolumeRecord rec : recs) {
+            if (rec.getType() != VolumeInfo.TYPE_PRIVATE) continue;
 
-        if (DEBUG) Log.i(TAG, String.format("UMS connection changed to %s (media state %s)",
-                connected, st));
+            final String fsUuid = rec.getFsUuid();
+            final VolumeInfo info = mStorageManager.findVolumeByUuid(fsUuid);
+            if ((info != null && info.isMountedWritable()) || rec.isSnoozed()) {
+                // Yay, private volume is here, or user snoozed
+                mNotificationManager.cancelAsUser(fsUuid, PRIVATE_ID, UserHandle.ALL);
 
-        if (connected && (st.equals(
-                Environment.MEDIA_REMOVED) || st.equals(Environment.MEDIA_CHECKING))) {
-            /*
-             * No card or card being checked = don't display
-             */
-            connected = false;
-        }
-        updateUsbMassStorageNotification(connected);
-    }
-
-    private void onStorageStateChangedAsync(String path, String oldState, String newState) {
-        if (DEBUG) Log.i(TAG, String.format(
-                "Media {%s} state changed from {%s} -> {%s}", path, oldState, newState));
-        StorageEntry entry = findEntry(path);
-        if (entry != null) {
-            if (DEBUG) Log.i(TAG, "E: removed:" + entry.mRemoved + " mounted:" + entry.mMounted + " plugged:" + entry.mPlugged);
-        }
-
-        if (newState.equals(Environment.MEDIA_SHARED)) {
-            /*
-             * Storage is now shared. Modify the UMS notification
-             * for stopping UMS.
-             */
-            Intent intent = new Intent();
-            intent.setClass(mContext, com.android.systemui.usb.UsbStorageActivity.class);
-            PendingIntent pi = PendingIntent.getActivity(mContext, 0, intent, 0);
-            setUsbStorageNotification(
-                    com.android.internal.R.string.usb_storage_stop_notification_title,
-                    com.android.internal.R.string.usb_storage_stop_notification_message,
-                    com.android.internal.R.drawable.stat_sys_warning, false, true, pi);
-        } else if (newState.equals(Environment.MEDIA_CHECKING)) {
-            /*
-             * Storage is now checking. Update media notification and disable
-             * UMS notification.
-             */
-            boolean isPlugged = true;
-            if (entry != null) {
-                isPlugged = entry.mPlugged;
-            }
-            if (!showMeditMountedNotification(path) || isPlugged) {
-                // this is disturbing the mount notification which anyway shows a progress
-                setMediaStorageNotification(
-                        com.android.internal.R.string.ext_media_checking_notification_title,
-                        com.android.internal.R.string.ext_media_checking_notification_message,
-                        com.android.internal.R.drawable.stat_notify_sdcard_prepare, true, false, null);
-            }
-            updateUsbMassStorageNotification(false);
-        } else if (newState.equals(Environment.MEDIA_MOUNTED)) {
-            /*
-             * Storage is now mounted. Dismiss any media notifications,
-             * and enable UMS notification if connected.
-             */
-            if (Environment.isExternalStorageRemovable(new File(path))) {
-                if (entry != null) {
-                    entry.mMounted = true;
-                    entry.mRemoved = false;
-                    entry.mPlugged = false;
-                }
-                if (showMeditMountedNotification(path)) {
-                    setMediaStorageMountNotification(true, path, false, 0);
-                }
-            }
-            setMediaStorageNotification(0, 0, 0, false, false, null);
-            updateUsbMassStorageNotification(mUmsAvailable);
-        } else if (newState.equals(Environment.MEDIA_UNMOUNTED)) {
-            /*
-             * Storage is now unmounted. We may have been unmounted
-             * because the user is enabling/disabling UMS, in which case we don't
-             * want to display the 'safe to unmount' notification.
-             */
-            if (!mStorageManager.isUsbMassStorageEnabled()) {
-                if (oldState.equals(Environment.MEDIA_SHARED)) {
-                    /*
-                     * The unmount was due to UMS being enabled. Dismiss any
-                     * media notifications, and enable UMS notification if connected
-                     */
-                    setMediaStorageNotification(0, 0, 0, false, false, null);
-                    updateUsbMassStorageNotification(mUmsAvailable);
-                } else {
-                    /*
-                     * Show safe to unmount media notification, and enable UMS
-                     * notification if connected.
-                     */
-                    if (Environment.isExternalStorageRemovable(new File(path))) {
-                        boolean wasMounted = false;
-                        if (entry != null) {
-                            wasMounted = entry.mMounted;
-                            if (entry.mRemoved) {
-                                entry.mPlugged = true;
-                            } else {
-                                entry.mPlugged = false;
-                            }
-                            entry.mMounted = false;
-                            entry.mRemoved = false;
-                        }
-                        if (wasMounted) {
-                            if (showMeditMountedNotification(path)) {
-                                setMediaStorageMountNotification(false, path, false, 0);
-                            } else {
-                                setMediaStorageNotification(
-                                        com.android.internal.R.string.ext_media_safe_unmount_notification_title,
-                                        com.android.internal.R.string.ext_media_safe_unmount_notification_message,
-                                        com.android.internal.R.drawable.stat_notify_sdcard, true, true, null);
-                            }
-                        }
-                    } else {
-                        // This device does not have removable storage, so
-                        // don't tell the user they can remove it.
-                        setMediaStorageNotification(0, 0, 0, false, false, null);
-                    }
-                    updateUsbMassStorageNotification(mUmsAvailable);
-                }
             } else {
-                /*
-                 * The unmount was due to UMS being enabled. Dismiss any
-                 * media notifications, and disable the UMS notification
-                 */
-                setMediaStorageNotification(0, 0, 0, false, false, null);
-                updateUsbMassStorageNotification(false);
-            }
-        } else if (newState.equals(Environment.MEDIA_NOFS)) {
-            /*
-             * Storage has no filesystem. Show blank media notification,
-             * and enable UMS notification if connected.
-             */
-            Intent intent = new Intent();
-            intent.setClass(mContext, com.android.internal.app.ExternalMediaFormatActivity.class);
-            PendingIntent pi = PendingIntent.getActivity(mContext, 0, intent, 0);
+                // Boo, annoy the user to reinsert the private volume
+                final CharSequence title = mContext.getString(R.string.ext_media_missing_title,
+                        rec.getNickname());
+                final CharSequence text = mContext.getString(R.string.ext_media_missing_message);
 
-            // just to be sure
-            if (entry != null) {
-                entry.mMounted = false;
-                entry.mRemoved = false;
-                entry.mPlugged = false;
-            }
-            setMediaStorageMountNotification(false, path, true, 0);
+                final Notification notif = new Notification.Builder(mContext)
+                        .setSmallIcon(R.drawable.ic_sd_card_48dp)
+                        .setColor(mContext.getColor(R.color.system_notification_accent_color))
+                        .setContentTitle(title)
+                        .setContentText(text)
+                        .setContentIntent(buildForgetPendingIntent(rec))
+                        .setStyle(new Notification.BigTextStyle().bigText(text))
+                        .setVisibility(Notification.VISIBILITY_PUBLIC)
+                        .setLocalOnly(true)
+                        .setCategory(Notification.CATEGORY_SYSTEM)
+                        .setDeleteIntent(buildSnoozeIntent(fsUuid))
+                        .build();
 
-            setMediaStorageNotification(
-                    com.android.internal.R.string.ext_media_nofs_notification_title,
-                    com.android.internal.R.string.ext_media_nofs_notification_message,
-                    com.android.internal.R.drawable.stat_notify_sdcard_usb, true, false, pi);
-            updateUsbMassStorageNotification(mUmsAvailable);
-        } else if (newState.equals(Environment.MEDIA_UNMOUNTABLE)) {
-            /*
-             * Storage is corrupt. Show corrupt media notification,
-             * and enable UMS notification if connected.
-             */
-            Intent intent = new Intent();
-            intent.setClass(mContext, com.android.internal.app.ExternalMediaFormatActivity.class);
-            PendingIntent pi = PendingIntent.getActivity(mContext, 0, intent, 0);
-
-            // just to be sure
-            if (entry != null) {
-                entry.mMounted = false;
-                entry.mRemoved = false;
-                entry.mPlugged = false;
+                mNotificationManager.notifyAsUser(fsUuid, PRIVATE_ID, notif, UserHandle.ALL);
             }
-            setMediaStorageMountNotification(false, path, true, 0);
-
-            setMediaStorageNotification(
-                    com.android.internal.R.string.ext_media_unmountable_notification_title,
-                    com.android.internal.R.string.ext_media_unmountable_notification_message,
-                    com.android.internal.R.drawable.stat_notify_sdcard_usb, true, false, pi);
-            updateUsbMassStorageNotification(mUmsAvailable);
-        } else if (newState.equals(Environment.MEDIA_REMOVED)) {
-            setMediaStorageNotification(0, 0, 0, false, false, null);
-            if (entry != null) {
-                entry.mMounted = false;
-                entry.mRemoved = true;
-                entry.mPlugged = false;
-            }
-            setMediaStorageMountNotification(false, path, true, 0);
-
-            /*
-             * Storage has been removed. Show nomedia media notification,
-             * and disable UMS notification regardless of connection state.
-             */
-             if (Settings.System.getIntForUser(mContext.getContentResolver(),
-                    Settings.System.STORAGE_MEDIA_REMOVED_NOTIFICTION, 1, UserHandle.USER_CURRENT) == 1) {
-                setMediaStorageNotification(
-                        com.android.internal.R.string.ext_media_nomedia_notification_title,
-                        com.android.internal.R.string.ext_media_nomedia_notification_message,
-                        com.android.internal.R.drawable.stat_notify_sdcard_usb,
-                        true, true, null);
-            }
-            updateUsbMassStorageNotification(false);
-        } else if (newState.equals(Environment.MEDIA_BAD_REMOVAL)) {
-            setMediaStorageNotification(0, 0, 0, false, false, null);
-            if (entry != null) {
-                entry.mMounted = false;
-                entry.mRemoved = true;
-                entry.mPlugged = false;
-            }
-            setMediaStorageMountNotification(false, path, true, 0);
-
-            /*
-             * Storage has been removed unsafely. Show bad removal media notification,
-             * and disable UMS notification regardless of connection state.
-             */
-            setMediaStorageNotification(
-                    com.android.internal.R.string.ext_media_badremoval_notification_title,
-                    com.android.internal.R.string.ext_media_badremoval_notification_message,
-                    com.android.internal.R.drawable.stat_sys_warning,
-                    true, true, null);
-            updateUsbMassStorageNotification(false);
-        } else {
-            Log.w(TAG, String.format("Ignoring unknown state {%s}", newState));
         }
         if (entry != null) {
             if (DEBUG) Log.i(TAG, "X: removed:" + entry.mRemoved + " mounted:" + entry.mMounted + " plugged:" + entry.mPlugged);
         }
     }
 
-    /**
-     * Update the state of the USB mass storage notification
-     */
-    void updateUsbMassStorageNotification(boolean available) {
+    private void onDiskScannedInternal(DiskInfo disk, int volumeCount) {
+        if (volumeCount == 0 && disk.size > 0) {
+            // No supported volumes found, give user option to format
+            final CharSequence title = mContext.getString(
+                    R.string.ext_media_unsupported_notification_title, disk.getDescription());
+            final CharSequence text = mContext.getString(
+                    R.string.ext_media_unsupported_notification_message, disk.getDescription());
 
-        if (available) {
-            Intent intent = new Intent();
-            intent.setClass(mContext, com.android.systemui.usb.UsbStorageActivity.class);
-            intent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
+            final Notification notif = new Notification.Builder(mContext)
+                    .setSmallIcon(getSmallIcon(disk, VolumeInfo.STATE_UNMOUNTABLE))
+                    .setColor(mContext.getColor(R.color.system_notification_accent_color))
+                    .setContentTitle(title)
+                    .setContentText(text)
+                    .setContentIntent(buildInitPendingIntent(disk))
+                    .setStyle(new Notification.BigTextStyle().bigText(text))
+                    .setVisibility(Notification.VISIBILITY_PUBLIC)
+                    .setLocalOnly(true)
+                    .setCategory(Notification.CATEGORY_ERROR)
+                    .build();
 
-            PendingIntent pi = PendingIntent.getActivity(mContext, 0, intent, 0);
-            setUsbStorageNotification(
-                    com.android.internal.R.string.usb_storage_notification_title,
-                    com.android.internal.R.string.usb_storage_notification_message,
-                    com.android.internal.R.drawable.stat_sys_data_usb,
-                    false, true, pi);
+            mNotificationManager.notifyAsUser(disk.getId(), DISK_ID, notif, UserHandle.ALL);
+
         } else {
-            setUsbStorageNotification(0, 0, 0, false, false, null);
+            // Yay, we have volumes!
+            mNotificationManager.cancelAsUser(disk.getId(), DISK_ID, UserHandle.ALL);
         }
     }
 
-    /**
-     * Sets the USB storage notification.
-     */
-    private synchronized void setUsbStorageNotification(int titleId, int messageId, int icon,
-            boolean sound, boolean visible, PendingIntent pi) {
-
-        if (!visible && mUsbStorageNotification == null) {
-            return;
-        }
-
-        NotificationManager notificationManager = (NotificationManager) mContext
-                .getSystemService(Context.NOTIFICATION_SERVICE);
-
-        if (notificationManager == null) {
-            return;
-        }
-
-        if (visible) {
-            Resources r = Resources.getSystem();
-            CharSequence title = r.getText(titleId);
-            CharSequence message = r.getText(messageId);
-
-            if (mUsbStorageNotification == null) {
-                mUsbStorageNotification = new Notification();
-                mUsbStorageNotification.icon = icon;
-                mUsbStorageNotification.when = 0;
-            }
-
-            if (sound) {
-                mUsbStorageNotification.defaults |= Notification.DEFAULT_SOUND;
-            } else {
-                mUsbStorageNotification.defaults &= ~Notification.DEFAULT_SOUND;
-            }
-
-            mUsbStorageNotification.flags = Notification.FLAG_ONGOING_EVENT;
-
-            mUsbStorageNotification.tickerText = title;
-            if (pi == null) {
-                Intent intent = new Intent();
-                pi = PendingIntent.getBroadcastAsUser(mContext, 0, intent, 0,
-                        UserHandle.CURRENT);
-            }
-            mUsbStorageNotification.color = mContext.getResources().getColor(
-                    com.android.internal.R.color.system_notification_accent_color);
-            mUsbStorageNotification.setLatestEventInfo(mContext, title, message, pi);
-            mUsbStorageNotification.visibility = Notification.VISIBILITY_PUBLIC;
-            mUsbStorageNotification.category = Notification.CATEGORY_SYSTEM;
-
-            final boolean adbOn = 1 == Settings.Global.getInt(
-                mContext.getContentResolver(),
-                Settings.Global.ADB_ENABLED,
-                0);
-
-            if (POP_UMS_ACTIVITY_ON_CONNECT && !adbOn) {
-                // Pop up a full-screen alert to coach the user through enabling UMS. The average
-                // user has attached the device to USB either to charge the phone (in which case
-                // this is harmless) or transfer files, and in the latter case this alert saves
-                // several steps (as well as subtly indicates that you shouldn't mix UMS with other
-                // activities on the device).
-                //
-                // If ADB is enabled, however, we suppress this dialog (under the assumption that a
-                // developer (a) knows how to enable UMS, and (b) is probably using USB to install
-                // builds or use adb commands.
-                mUsbStorageNotification.fullScreenIntent = pi;
-            }
-        }
-
-        final int notificationId = mUsbStorageNotification.icon;
-        if (visible) {
-            notificationManager.notifyAsUser(null, notificationId, mUsbStorageNotification,
-                    UserHandle.ALL);
-        } else {
-            notificationManager.cancelAsUser(null, notificationId, UserHandle.ALL);
+    private void onVolumeStateChangedInternal(VolumeInfo vol) {
+        switch (vol.getType()) {
+            case VolumeInfo.TYPE_PRIVATE:
+                onPrivateVolumeStateChangedInternal(vol);
+                break;
+            case VolumeInfo.TYPE_PUBLIC:
+                onPublicVolumeStateChangedInternal(vol);
+                break;
         }
     }
 
-    private synchronized boolean getMediaStorageNotificationDismissable() {
-        if ((mMediaStorageNotification != null) &&
-            ((mMediaStorageNotification.flags & Notification.FLAG_AUTO_CANCEL) ==
-                    Notification.FLAG_AUTO_CANCEL))
-            return true;
+    private void onPrivateVolumeStateChangedInternal(VolumeInfo vol) {
+        Log.d(TAG, "Notifying about private volume: " + vol.toString());
 
-        return false;
+        updateMissingPrivateVolumes();
     }
 
-    /**
-     * Sets the media storage notification.
-     */
-    private synchronized void setMediaStorageNotification(int titleId, int messageId, int icon, boolean visible,
-                                                          boolean dismissable, PendingIntent pi) {
+    private void onPublicVolumeStateChangedInternal(VolumeInfo vol) {
+        Log.d(TAG, "Notifying about public volume: " + vol.toString());
 
-        if (!visible && mMediaStorageNotification == null) {
-            return;
+        final Notification notif;
+        switch (vol.getState()) {
+            case VolumeInfo.STATE_UNMOUNTED:
+                notif = onVolumeUnmounted(vol);
+                break;
+            case VolumeInfo.STATE_CHECKING:
+                notif = onVolumeChecking(vol);
+                break;
+            case VolumeInfo.STATE_MOUNTED:
+            case VolumeInfo.STATE_MOUNTED_READ_ONLY:
+                notif = onVolumeMounted(vol);
+                break;
+            case VolumeInfo.STATE_FORMATTING:
+                notif = onVolumeFormatting(vol);
+                break;
+            case VolumeInfo.STATE_EJECTING:
+                notif = onVolumeEjecting(vol);
+                break;
+            case VolumeInfo.STATE_UNMOUNTABLE:
+                notif = onVolumeUnmountable(vol);
+                break;
+            case VolumeInfo.STATE_REMOVED:
+                notif = onVolumeRemoved(vol);
+                break;
+            case VolumeInfo.STATE_BAD_REMOVAL:
+                notif = onVolumeBadRemoval(vol);
+                break;
+            default:
+                notif = null;
+                break;
         }
 
-        NotificationManager notificationManager = (NotificationManager) mContext
-                .getSystemService(Context.NOTIFICATION_SERVICE);
-
-        if (notificationManager == null) {
-            return;
-        }
-
-        if (mMediaStorageNotification != null && visible) {
-            /*
-             * Dismiss the previous notification - we're about to
-             * re-use it.
-             */
-            final int notificationId = mMediaStorageNotification.icon;
-            notificationManager.cancel(notificationId);
-        }
-
-        if (visible) {
-            Resources r = Resources.getSystem();
-            CharSequence title = r.getText(titleId);
-            CharSequence message = r.getText(messageId);
-
-            if (mMediaStorageNotification == null) {
-                mMediaStorageNotification = new Notification();
-                mMediaStorageNotification.when = 0;
-            }
-
-            mMediaStorageNotification.defaults &= ~Notification.DEFAULT_SOUND;
-
-            if (dismissable) {
-                mMediaStorageNotification.flags = Notification.FLAG_AUTO_CANCEL;
-            } else {
-                mMediaStorageNotification.flags = Notification.FLAG_ONGOING_EVENT;
-            }
-
-            if (pi == null) {
-                Intent intent = new Intent();
-                pi = PendingIntent.getBroadcastAsUser(mContext, 0, intent, 0,
-                        UserHandle.CURRENT);
-            }
-            mMediaStorageNotification.tickerText = title;
-            mMediaStorageNotification.icon = icon;
-            mMediaStorageNotification.color = mContext.getResources().getColor(
-                    com.android.internal.R.color.system_notification_accent_color);
-            mMediaStorageNotification.setLatestEventInfo(mContext, title, message, pi);
-            mMediaStorageNotification.visibility = Notification.VISIBILITY_PUBLIC;
-            mMediaStorageNotification.category = Notification.CATEGORY_SYSTEM;
-        }
-
-        final int notificationId = mMediaStorageNotification.icon;
-        if (visible) {
-            notificationManager.notifyAsUser(null, notificationId,
-                    mMediaStorageNotification, UserHandle.ALL);
+        if (notif != null) {
+            mNotificationManager.notifyAsUser(vol.getId(), PUBLIC_ID, notif, UserHandle.ALL);
         } else {
-            notificationManager.cancelAsUser(null, notificationId, UserHandle.ALL);
+            mNotificationManager.cancelAsUser(vol.getId(), PUBLIC_ID, UserHandle.ALL);
         }
+    }
+
+    private Notification onVolumeUnmounted(VolumeInfo vol) {
+        // Ignored
+        return null;
+    }
+
+    private Notification onVolumeChecking(VolumeInfo vol) {
+        final DiskInfo disk = vol.getDisk();
+        final CharSequence title = mContext.getString(
+                R.string.ext_media_checking_notification_title, disk.getDescription());
+        final CharSequence text = mContext.getString(
+                R.string.ext_media_checking_notification_message, disk.getDescription());
+
+        return buildNotificationBuilder(vol, title, text)
+                .setCategory(Notification.CATEGORY_PROGRESS)
+                .setPriority(Notification.PRIORITY_LOW)
+                .setOngoing(true)
+                .build();
+    }
+
+    private Notification onVolumeMounted(VolumeInfo vol) {
+        final VolumeRecord rec = mStorageManager.findRecordByUuid(vol.getFsUuid());
+        final DiskInfo disk = vol.getDisk();
+
+        // Don't annoy when user dismissed in past.  (But make sure the disk is adoptable; we
+        // used to allow snoozing non-adoptable disks too.)
+        if (rec.isSnoozed() && disk.isAdoptable()) {
+            return null;
+        }
+
+        if (disk.isAdoptable() && !rec.isInited()) {
+            final CharSequence title = disk.getDescription();
+            final CharSequence text = mContext.getString(
+                    R.string.ext_media_new_notification_message, disk.getDescription());
+
+            final PendingIntent initIntent = buildInitPendingIntent(vol);
+            return buildNotificationBuilder(vol, title, text)
+                    .addAction(new Action(R.drawable.ic_settings_24dp,
+                            mContext.getString(R.string.ext_media_init_action), initIntent))
+                    .addAction(new Action(R.drawable.ic_eject_24dp,
+                            mContext.getString(R.string.ext_media_unmount_action),
+                            buildUnmountPendingIntent(vol)))
+                    .setContentIntent(initIntent)
+                    .setDeleteIntent(buildSnoozeIntent(vol.getFsUuid()))
+                    .setCategory(Notification.CATEGORY_SYSTEM)
+                    .build();
+
+        } else {
+            final CharSequence title = disk.getDescription();
+            final CharSequence text = mContext.getString(
+                    R.string.ext_media_ready_notification_message, disk.getDescription());
+
+            final PendingIntent browseIntent = buildBrowsePendingIntent(vol);
+            final Notification.Builder builder = buildNotificationBuilder(vol, title, text)
+                    .addAction(new Action(R.drawable.ic_folder_24dp,
+                            mContext.getString(R.string.ext_media_browse_action),
+                            browseIntent))
+                    .addAction(new Action(R.drawable.ic_eject_24dp,
+                            mContext.getString(R.string.ext_media_unmount_action),
+                            buildUnmountPendingIntent(vol)))
+                    .setContentIntent(browseIntent)
+                    .setCategory(Notification.CATEGORY_SYSTEM)
+                    .setPriority(Notification.PRIORITY_LOW);
+            // Non-adoptable disks can't be snoozed.
+            if (disk.isAdoptable()) {
+                builder.setDeleteIntent(buildSnoozeIntent(vol.getFsUuid()));
+            }
+
+            return builder.build();
+        }
+    }
+
+    private Notification onVolumeFormatting(VolumeInfo vol) {
+        // Ignored
+        return null;
+    }
+
+    private Notification onVolumeEjecting(VolumeInfo vol) {
+        final DiskInfo disk = vol.getDisk();
+        final CharSequence title = mContext.getString(
+                R.string.ext_media_unmounting_notification_title, disk.getDescription());
+        final CharSequence text = mContext.getString(
+                R.string.ext_media_unmounting_notification_message, disk.getDescription());
+
+        return buildNotificationBuilder(vol, title, text)
+                .setCategory(Notification.CATEGORY_PROGRESS)
+                .setPriority(Notification.PRIORITY_LOW)
+                .setOngoing(true)
+                .build();
+    }
+
+    private Notification onVolumeUnmountable(VolumeInfo vol) {
+        final DiskInfo disk = vol.getDisk();
+        final CharSequence title = mContext.getString(
+                R.string.ext_media_unmountable_notification_title, disk.getDescription());
+        final CharSequence text = mContext.getString(
+                R.string.ext_media_unmountable_notification_message, disk.getDescription());
+
+        return buildNotificationBuilder(vol, title, text)
+                .setContentIntent(buildInitPendingIntent(vol))
+                .setCategory(Notification.CATEGORY_ERROR)
+                .build();
+    }
+
+    private Notification onVolumeRemoved(VolumeInfo vol) {
+        if (!vol.isPrimary()) {
+            // Ignore non-primary media
+            return null;
+        }
+
+        final DiskInfo disk = vol.getDisk();
+        final CharSequence title = mContext.getString(
+                R.string.ext_media_nomedia_notification_title, disk.getDescription());
+        final CharSequence text = mContext.getString(
+                R.string.ext_media_nomedia_notification_message, disk.getDescription());
+
+        return buildNotificationBuilder(vol, title, text)
+                .setCategory(Notification.CATEGORY_ERROR)
+                .build();
+    }
+
+    private Notification onVolumeBadRemoval(VolumeInfo vol) {
+        if (!vol.isPrimary()) {
+            // Ignore non-primary media
+            return null;
+        }
+
+        final DiskInfo disk = vol.getDisk();
+        final CharSequence title = mContext.getString(
+                R.string.ext_media_badremoval_notification_title, disk.getDescription());
+        final CharSequence text = mContext.getString(
+                R.string.ext_media_badremoval_notification_message, disk.getDescription());
+
+        return buildNotificationBuilder(vol, title, text)
+                .setCategory(Notification.CATEGORY_ERROR)
+                .build();
+    }
+
+    private void onMoveProgress(MoveInfo move, int status, long estMillis) {
+        final CharSequence title;
+        if (!TextUtils.isEmpty(move.label)) {
+            title = mContext.getString(R.string.ext_media_move_specific_title, move.label);
+        } else {
+            title = mContext.getString(R.string.ext_media_move_title);
+        }
+
+        final CharSequence text;
+        if (estMillis < 0) {
+            text = null;
+        } else {
+            text = DateUtils.formatDuration(estMillis);
+        }
+
+        final PendingIntent intent;
+        if (move.packageName != null) {
+            intent = buildWizardMovePendingIntent(move);
+        } else {
+            intent = buildWizardMigratePendingIntent(move);
+        }
+
+        final Notification notif = new Notification.Builder(mContext)
+                .setSmallIcon(R.drawable.ic_sd_card_48dp)
+                .setColor(mContext.getColor(R.color.system_notification_accent_color))
+                .setContentTitle(title)
+                .setContentText(text)
+                .setContentIntent(intent)
+                .setStyle(new Notification.BigTextStyle().bigText(text))
+                .setVisibility(Notification.VISIBILITY_PUBLIC)
+                .setLocalOnly(true)
+                .setCategory(Notification.CATEGORY_PROGRESS)
+                .setPriority(Notification.PRIORITY_LOW)
+                .setProgress(100, status, false)
+                .setOngoing(true)
+                .build();
+
+        mNotificationManager.notifyAsUser(move.packageName, MOVE_ID, notif, UserHandle.ALL);
+    }
+
+    private void onMoveFinished(MoveInfo move, int status) {
+        if (move.packageName != null) {
+            // We currently ignore finished app moves; just clear the last
+            // published progress
+            mNotificationManager.cancelAsUser(move.packageName, MOVE_ID, UserHandle.ALL);
+            return;
+        }
+
+        final VolumeInfo privateVol = mContext.getPackageManager().getPrimaryStorageCurrentVolume();
+        final String descrip = mStorageManager.getBestVolumeDescription(privateVol);
+
+        final CharSequence title;
+        final CharSequence text;
+        if (status == PackageManager.MOVE_SUCCEEDED) {
+            title = mContext.getString(R.string.ext_media_move_success_title);
+            text = mContext.getString(R.string.ext_media_move_success_message, descrip);
+        } else {
+            title = mContext.getString(R.string.ext_media_move_failure_title);
+            text = mContext.getString(R.string.ext_media_move_failure_message);
+        }
+
+        // Jump back into the wizard flow if we moved to a real disk
+        final PendingIntent intent;
+        if (privateVol != null && privateVol.getDisk() != null) {
+            intent = buildWizardReadyPendingIntent(privateVol.getDisk());
+        } else if (privateVol != null) {
+            intent = buildVolumeSettingsPendingIntent(privateVol);
+        } else {
+            intent = null;
+        }
+
+        final Notification notif = new Notification.Builder(mContext)
+                .setSmallIcon(R.drawable.ic_sd_card_48dp)
+                .setColor(mContext.getColor(R.color.system_notification_accent_color))
+                .setContentTitle(title)
+                .setContentText(text)
+                .setContentIntent(intent)
+                .setStyle(new Notification.BigTextStyle().bigText(text))
+                .setVisibility(Notification.VISIBILITY_PUBLIC)
+                .setLocalOnly(true)
+                .setCategory(Notification.CATEGORY_SYSTEM)
+                .setPriority(Notification.PRIORITY_LOW)
+                .setAutoCancel(true)
+                .build();
+
+        mNotificationManager.notifyAsUser(move.packageName, MOVE_ID, notif, UserHandle.ALL);
+    }
+
+    private int getSmallIcon(DiskInfo disk, int state) {
+        if (disk.isSd()) {
+            switch (state) {
+                case VolumeInfo.STATE_CHECKING:
+                case VolumeInfo.STATE_EJECTING:
+                    return R.drawable.ic_sd_card_48dp;
+                default:
+                    return R.drawable.ic_sd_card_48dp;
+            }
+        } else if (disk.isUsb()) {
+            return R.drawable.ic_usb_48dp;
+        } else {
+            return R.drawable.ic_sd_card_48dp;
+        }
+    }
+
+    private Notification.Builder buildNotificationBuilder(VolumeInfo vol, CharSequence title,
+            CharSequence text) {
+        return new Notification.Builder(mContext)
+                .setSmallIcon(getSmallIcon(vol.getDisk(), vol.getState()))
+                .setColor(mContext.getColor(R.color.system_notification_accent_color))
+                .setContentTitle(title)
+                .setContentText(text)
+                .setStyle(new Notification.BigTextStyle().bigText(text))
+                .setVisibility(Notification.VISIBILITY_PUBLIC)
+                .setLocalOnly(true);
+    }
+
+    private PendingIntent buildInitPendingIntent(DiskInfo disk) {
+        final Intent intent = new Intent();
+        intent.setClassName("com.android.settings",
+                "com.android.settings.deviceinfo.StorageWizardInit");
+        intent.putExtra(DiskInfo.EXTRA_DISK_ID, disk.getId());
+
+        final int requestKey = disk.getId().hashCode();
+        return PendingIntent.getActivityAsUser(mContext, requestKey, intent,
+                PendingIntent.FLAG_CANCEL_CURRENT, null, UserHandle.CURRENT);
+    }
+
+    private PendingIntent buildInitPendingIntent(VolumeInfo vol) {
+        final Intent intent = new Intent();
+        intent.setClassName("com.android.settings",
+                "com.android.settings.deviceinfo.StorageWizardInit");
+        intent.putExtra(VolumeInfo.EXTRA_VOLUME_ID, vol.getId());
+
+        final int requestKey = vol.getId().hashCode();
+        return PendingIntent.getActivityAsUser(mContext, requestKey, intent,
+                PendingIntent.FLAG_CANCEL_CURRENT, null, UserHandle.CURRENT);
+    }
+
+    private PendingIntent buildUnmountPendingIntent(VolumeInfo vol) {
+        final Intent intent = new Intent();
+        intent.setClassName("com.android.settings",
+                "com.android.settings.deviceinfo.StorageUnmountReceiver");
+        intent.putExtra(VolumeInfo.EXTRA_VOLUME_ID, vol.getId());
+
+        final int requestKey = vol.getId().hashCode();
+        return PendingIntent.getBroadcastAsUser(mContext, requestKey, intent,
+                PendingIntent.FLAG_CANCEL_CURRENT, UserHandle.CURRENT);
+    }
+
+    private PendingIntent buildBrowsePendingIntent(VolumeInfo vol) {
+        final Intent intent = vol.buildBrowseIntent();
+
+        final int requestKey = vol.getId().hashCode();
+        return PendingIntent.getActivityAsUser(mContext, requestKey, intent,
+                PendingIntent.FLAG_CANCEL_CURRENT, null, UserHandle.CURRENT);
+    }
+
+    private PendingIntent buildVolumeSettingsPendingIntent(VolumeInfo vol) {
+        final Intent intent = new Intent();
+        switch (vol.getType()) {
+            case VolumeInfo.TYPE_PRIVATE:
+                intent.setClassName("com.android.settings",
+                        "com.android.settings.Settings$PrivateVolumeSettingsActivity");
+                break;
+            case VolumeInfo.TYPE_PUBLIC:
+                intent.setClassName("com.android.settings",
+                        "com.android.settings.Settings$PublicVolumeSettingsActivity");
+                break;
+            default:
+                return null;
+        }
+        intent.putExtra(VolumeInfo.EXTRA_VOLUME_ID, vol.getId());
+
+        final int requestKey = vol.getId().hashCode();
+        return PendingIntent.getActivityAsUser(mContext, requestKey, intent,
+                PendingIntent.FLAG_CANCEL_CURRENT, null, UserHandle.CURRENT);
+    }
+
+    private PendingIntent buildSnoozeIntent(String fsUuid) {
+        final Intent intent = new Intent(ACTION_SNOOZE_VOLUME);
+        intent.putExtra(VolumeRecord.EXTRA_FS_UUID, fsUuid);
+
+        final int requestKey = fsUuid.hashCode();
+        return PendingIntent.getBroadcastAsUser(mContext, requestKey, intent,
+                PendingIntent.FLAG_CANCEL_CURRENT, UserHandle.CURRENT);
+    }
+
+    private PendingIntent buildForgetPendingIntent(VolumeRecord rec) {
+        final Intent intent = new Intent();
+        intent.setClassName("com.android.settings",
+                "com.android.settings.Settings$PrivateVolumeForgetActivity");
+        intent.putExtra(VolumeRecord.EXTRA_FS_UUID, rec.getFsUuid());
+
+        final int requestKey = rec.getFsUuid().hashCode();
+        return PendingIntent.getActivityAsUser(mContext, requestKey, intent,
+                PendingIntent.FLAG_CANCEL_CURRENT, null, UserHandle.CURRENT);
+    }
+
+    private PendingIntent buildWizardMigratePendingIntent(MoveInfo move) {
+        final Intent intent = new Intent();
+        intent.setClassName("com.android.settings",
+                "com.android.settings.deviceinfo.StorageWizardMigrateProgress");
+        intent.putExtra(PackageManager.EXTRA_MOVE_ID, move.moveId);
+
+        final VolumeInfo vol = mStorageManager.findVolumeByQualifiedUuid(move.volumeUuid);
+        intent.putExtra(VolumeInfo.EXTRA_VOLUME_ID, vol.getId());
+
+        return PendingIntent.getActivityAsUser(mContext, move.moveId, intent,
+                PendingIntent.FLAG_CANCEL_CURRENT, null, UserHandle.CURRENT);
+    }
+
+    private PendingIntent buildWizardMovePendingIntent(MoveInfo move) {
+        final Intent intent = new Intent();
+        intent.setClassName("com.android.settings",
+                "com.android.settings.deviceinfo.StorageWizardMoveProgress");
+        intent.putExtra(PackageManager.EXTRA_MOVE_ID, move.moveId);
+
+        return PendingIntent.getActivityAsUser(mContext, move.moveId, intent,
+                PendingIntent.FLAG_CANCEL_CURRENT, null, UserHandle.CURRENT);
+    }
+
+    private PendingIntent buildWizardReadyPendingIntent(DiskInfo disk) {
+        final Intent intent = new Intent();
+        intent.setClassName("com.android.settings",
+                "com.android.settings.deviceinfo.StorageWizardReady");
+        intent.putExtra(DiskInfo.EXTRA_DISK_ID, disk.getId());
+
+        final int requestKey = disk.getId().hashCode();
+        return PendingIntent.getActivityAsUser(mContext, requestKey, intent,
+                PendingIntent.FLAG_CANCEL_CURRENT, null, UserHandle.CURRENT);
     }
 
     private boolean showMeditMountedNotification(final String volumePath) {

@@ -15,8 +15,12 @@
  */
 package android.widget;
 
+import android.annotation.NonNull;
+import android.annotation.Nullable;
+import android.annotation.StyleRes;
 import android.content.Context;
 import android.content.res.Configuration;
+import android.graphics.drawable.Drawable;
 import android.util.AttributeSet;
 import android.view.ContextThemeWrapper;
 import android.view.Gravity;
@@ -25,6 +29,7 @@ import android.view.MenuItem;
 import android.view.View;
 import android.view.ViewDebug;
 import android.view.ViewGroup;
+import android.view.ViewHierarchyEncoder;
 import android.view.accessibility.AccessibilityEvent;
 import com.android.internal.view.menu.ActionMenuItemView;
 import com.android.internal.view.menu.MenuBuilder;
@@ -84,7 +89,7 @@ public class ActionMenuView extends LinearLayout implements MenuBuilder.ItemInvo
      * @param resId theme used to inflate popup menus
      * @see #getPopupTheme()
      */
-    public void setPopupTheme(int resId) {
+    public void setPopupTheme(@StyleRes int resId) {
         if (mPopupTheme != resId) {
             mPopupTheme = resId;
             if (resId == 0) {
@@ -116,11 +121,14 @@ public class ActionMenuView extends LinearLayout implements MenuBuilder.ItemInvo
     @Override
     public void onConfigurationChanged(Configuration newConfig) {
         super.onConfigurationChanged(newConfig);
-        mPresenter.updateMenuView(false);
 
-        if (mPresenter != null && mPresenter.isOverflowMenuShowing()) {
-            mPresenter.hideOverflowMenu();
-            mPresenter.showOverflowMenu();
+        if (mPresenter != null) {
+            mPresenter.updateMenuView(false);
+
+            if (mPresenter.isOverflowMenuShowing()) {
+                mPresenter.hideOverflowMenu();
+                mPresenter.showOverflowMenu();
+            }
         }
     }
 
@@ -533,6 +541,27 @@ public class ActionMenuView extends LinearLayout implements MenuBuilder.ItemInvo
         dismissPopupMenus();
     }
 
+    /**
+     * Set the icon to use for the overflow button.
+     *
+     * @param icon Drawable to set, may be null to clear the icon
+     */
+    public void setOverflowIcon(@Nullable Drawable icon) {
+        getMenu();
+        mPresenter.setOverflowIcon(icon);
+    }
+
+    /**
+     * Return the current drawable used as the overflow icon.
+     *
+     * @return The overflow icon drawable
+     */
+    @Nullable
+    public Drawable getOverflowIcon() {
+        getMenu();
+        return mPresenter.getOverflowIcon();
+    }
+
     /** @hide */
     public boolean isOverflowReserved() {
         return mReserveOverflow;
@@ -700,7 +729,8 @@ public class ActionMenuView extends LinearLayout implements MenuBuilder.ItemInvo
         return result;
     }
 
-    public boolean dispatchPopulateAccessibilityEvent(AccessibilityEvent event) {
+    /** @hide */
+    public boolean dispatchPopulateAccessibilityEventInternal(AccessibilityEvent event) {
         return false;
     }
 
@@ -802,6 +832,18 @@ public class ActionMenuView extends LinearLayout implements MenuBuilder.ItemInvo
         public LayoutParams(int width, int height, boolean isOverflowButton) {
             super(width, height);
             this.isOverflowButton = isOverflowButton;
+        }
+
+        /** @hide */
+        @Override
+        protected void encodeProperties(@NonNull ViewHierarchyEncoder encoder) {
+            super.encodeProperties(encoder);
+
+            encoder.addProperty("layout:overFlowButton", isOverflowButton);
+            encoder.addProperty("layout:cellsUsed", cellsUsed);
+            encoder.addProperty("layout:extraPixels", extraPixels);
+            encoder.addProperty("layout:expandable", expandable);
+            encoder.addProperty("layout:preventEdgeOffset", preventEdgeOffset);
         }
     }
 }

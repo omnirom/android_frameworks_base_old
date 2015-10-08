@@ -19,10 +19,20 @@ package android.provider;
 import android.Manifest;
 import android.annotation.SdkConstant;
 import android.annotation.SdkConstant.SdkConstantType;
+import android.content.ComponentName;
+import android.content.ContentResolver;
+import android.content.ContentValues;
+import android.content.Context;
 import android.content.Intent;
 import android.database.ContentObserver;
+import android.database.Cursor;
 import android.net.Uri;
 import android.provider.CallLog.Calls;
+import android.telecom.PhoneAccount;
+import android.telecom.PhoneAccountHandle;
+import android.telecom.Voicemail;
+
+import java.util.List;
 
 /**
  * The contract between the voicemail provider and applications. Contains
@@ -199,13 +209,122 @@ public class VoicemailContract {
          */
         public static final String _DATA = "_data";
 
+        // Note: PHONE_ACCOUNT_* constant values are "subscription_*" due to a historic naming
+        // that was encoded into call log databases.
+
+        /**
+         * The {@link ComponentName} of the {@link PhoneAccount} in string form. The
+         * {@link PhoneAccount} of the voicemail is used to differentiate voicemails from different
+         * sources.
+         * <P>Type: TEXT</P>
+         */
+        public static final String PHONE_ACCOUNT_COMPONENT_NAME = "subscription_component_name";
+
+        /**
+         * The identifier of a {@link PhoneAccount} that is unique to a specified
+         * {@link ComponentName}. The {@link PhoneAccount} of the voicemail is used to differentiate
+         * voicemails from different sources.
+         * <P>Type: TEXT</P>
+         */
+        public static final String PHONE_ACCOUNT_ID = "subscription_id";
+
+        /**
+         * Flag used to indicate that local, unsynced changes are present.
+         * Currently, this is used to indicate that the voicemail was read or deleted.
+         * The value will be 1 if dirty is true, 0 if false.
+         * <P>Type: INTEGER (boolean)</P>
+         */
+        public static final String DIRTY = "dirty";
+
+        /**
+         * Flag used to indicate that the voicemail was deleted but not synced to the server.
+         * A deleted row should be ignored.
+         * The value will be 1 if deleted is true, 0 if false.
+         * <P>Type: INTEGER (boolean)</P>
+         */
+        public static final String DELETED = "deleted";
+
         /**
          * A convenience method to build voicemail URI specific to a source package by appending
          * {@link VoicemailContract#PARAM_KEY_SOURCE_PACKAGE} param to the base URI.
          */
         public static Uri buildSourceUri(String packageName) {
             return Voicemails.CONTENT_URI.buildUpon()
-                    .appendQueryParameter(PARAM_KEY_SOURCE_PACKAGE, packageName).build();
+                    .appendQueryParameter(PARAM_KEY_SOURCE_PACKAGE, packageName)
+                    .build();
+        }
+
+        /**
+         * Inserts a new voicemail into the voicemail content provider.
+         *
+         * @param context The context of the app doing the inserting
+         * @param voicemail Data to be inserted
+         * @return {@link Uri} of the newly inserted {@link Voicemail}
+         *
+         * @hide
+         */
+        public static Uri insert(Context context, Voicemail voicemail) {
+            ContentResolver contentResolver = context.getContentResolver();
+            ContentValues contentValues = getContentValues(voicemail);
+            return contentResolver.insert(buildSourceUri(context.getPackageName()), contentValues);
+        }
+
+        /**
+         * Inserts a list of voicemails into the voicemail content provider.
+         *
+         * @param context The context of the app doing the inserting
+         * @param voicemails Data to be inserted
+         * @return the number of voicemails inserted
+         *
+         * @hide
+         */
+        public static int insert(Context context, List<Voicemail> voicemails) {
+            ContentResolver contentResolver = context.getContentResolver();
+            int count = voicemails.size();
+            for (int i = 0; i < count; i++) {
+                ContentValues contentValues = getContentValues(voicemails.get(i));
+                contentResolver.insert(buildSourceUri(context.getPackageName()), contentValues);
+            }
+            return count;
+        }
+
+        /**
+         * Clears all voicemails accessible to this voicemail content provider for the calling
+         * package. By default, a package only has permission to delete voicemails it inserted.
+         *
+         * @return the number of voicemails deleted
+         *
+         * @hide
+         */
+        public static int deleteAll(Context context) {
+            return context.getContentResolver().delete(
+                    buildSourceUri(context.getPackageName()), "", new String[0]);
+        }
+
+        /**
+         * Maps structured {@link Voicemail} to {@link ContentValues} in content provider.
+         */
+        private static ContentValues getContentValues(Voicemail voicemail) {
+            ContentValues contentValues = new ContentValues();
+            contentValues.put(Voicemails.DATE, String.valueOf(voicemail.getTimestampMillis()));
+            contentValues.put(Voicemails.NUMBER, voicemail.getNumber());
+            contentValues.put(Voicemails.DURATION, String.valueOf(voicemail.getDuration()));
+            contentValues.put(Voicemails.SOURCE_PACKAGE, voicemail.getSourcePackage());
+            contentValues.put(Voicemails.SOURCE_DATA, voicemail.getSourceData());
+            contentValues.put(Voicemails.IS_READ, voicemail.isRead() ? 1 : 0);
+
+            PhoneAccountHandle phoneAccount = voicemail.getPhoneAccount();
+            if (phoneAccount != null) {
+                contentValues.put(Voicemails.PHONE_ACCOUNT_COMPONENT_NAME,
+                        phoneAccount.getComponentName().flattenToString());
+                contentValues.put(Voicemails.PHONE_ACCOUNT_ID, phoneAccount.getId());
+            }
+
+            if (voicemail.getTranscription() != null) {
+                contentValues.put(Voicemails.TRANSCRIPTION, voicemail.getTranscription());
+            }
+
+            return contentValues;
         }
     }
 
@@ -222,10 +341,29 @@ public class VoicemailContract {
         private Status() {
         }
         /**
-         * The package name of the voicemail source. There can only be a one entry per source.
+         * The package name of the voicemail source. There can only be a one entry per account
+         * per source.
          * <P>Type: TEXT</P>
          */
         public static final String SOURCE_PACKAGE = SOURCE_PACKAGE_FIELD;
+
+        // Note: Multiple entries may exist for a single source if they are differentiated by the
+        // PHONE_ACCOUNT_* fields.
+
+        /**
+         * The {@link ComponentName} of the {@link PhoneAccount} in string form. The
+         * {@link PhoneAccount} differentiates voicemail sources from the same package.
+         * <P>Type: TEXT</P>
+         */
+        public static final String PHONE_ACCOUNT_COMPONENT_NAME = "phone_account_component_name";
+
+        /**
+         * The identifier of a {@link PhoneAccount} that is unique to a specified component. The
+         * {@link PhoneAccount} differentiates voicemail sources from the same package.
+         * <P>Type: TEXT</P>
+         */
+        public static final String PHONE_ACCOUNT_ID = "phone_account_id";
+
         /**
          * The URI to call to invoke source specific voicemail settings screen. On a user request
          * to setup voicemail an intent with action VIEW with this URI will be fired by the system.
@@ -317,6 +455,53 @@ public class VoicemailContract {
         public static Uri buildSourceUri(String packageName) {
             return Status.CONTENT_URI.buildUpon()
                     .appendQueryParameter(PARAM_KEY_SOURCE_PACKAGE, packageName).build();
+        }
+
+        /**
+         * A helper method to set the status of a voicemail source.
+         *
+         * @param context The context from the package calling the method. This will be the source.
+         * @param accountHandle The handle for the account the source is associated with.
+         * @param configurationState See {@link Status#CONFIGURATION_STATE}
+         * @param dataChannelState See {@link Status#DATA_CHANNEL_STATE}
+         * @param notificationChannelState See {@link Status#NOTIFICATION_CHANNEL_STATE}
+         *
+         * @hide
+         */
+        public static void setStatus(Context context, PhoneAccountHandle accountHandle,
+                int configurationState, int dataChannelState, int notificationChannelState) {
+            ContentResolver contentResolver = context.getContentResolver();
+            Uri statusUri = buildSourceUri(context.getPackageName());
+            ContentValues values = new ContentValues();
+            values.put(Status.PHONE_ACCOUNT_COMPONENT_NAME,
+                    accountHandle.getComponentName().flattenToString());
+            values.put(Status.PHONE_ACCOUNT_ID, accountHandle.getId());
+            values.put(Status.CONFIGURATION_STATE, configurationState);
+            values.put(Status.DATA_CHANNEL_STATE, dataChannelState);
+            values.put(Status.NOTIFICATION_CHANNEL_STATE, notificationChannelState);
+
+            if (isStatusPresent(contentResolver, statusUri)) {
+                contentResolver.update(statusUri, values, null, null);
+            } else {
+                contentResolver.insert(statusUri, values);
+            }
+        }
+
+        /**
+         * Determines if a voicemail source exists in the status table.
+         *
+         * @param contentResolver A content resolver constructed from the appropriate context.
+         * @param statusUri The content uri for the source.
+         * @return {@code true} if a status entry for this source exists
+         */
+        private static boolean isStatusPresent(ContentResolver contentResolver, Uri statusUri) {
+            Cursor cursor = null;
+            try {
+                cursor = contentResolver.query(statusUri, null, null, null, null);
+                return cursor != null && cursor.getCount() != 0;
+            } finally {
+                if (cursor != null) cursor.close();
+            }
         }
     }
 }

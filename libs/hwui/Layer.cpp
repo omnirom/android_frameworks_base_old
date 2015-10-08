@@ -16,16 +16,17 @@
 
 #define LOG_TAG "OpenGLRenderer"
 
-#include <utils/Log.h>
+#include "Layer.h"
 
 #include "Caches.h"
 #include "DeferredDisplayList.h"
-#include "Layer.h"
 #include "LayerRenderer.h"
 #include "OpenGLRenderer.h"
 #include "RenderNode.h"
-#include "RenderState.h"
+#include "renderstate/RenderState.h"
 #include "utils/TraceUtils.h"
+
+#include <utils/Log.h>
 
 #define ATRACE_LAYER_WORK(label) \
     ATRACE_FORMAT("%s HW Layer DisplayList %s %ux%u", \
@@ -36,7 +37,7 @@
 namespace android {
 namespace uirenderer {
 
-Layer::Layer(Type layerType, RenderState& renderState, const uint32_t layerWidth, const uint32_t layerHeight)
+Layer::Layer(Type layerType, RenderState& renderState, uint32_t layerWidth, uint32_t layerHeight)
         : state(kState_Uncached)
         , caches(Caches::getInstance())
         , renderState(renderState)
@@ -44,27 +45,10 @@ Layer::Layer(Type layerType, RenderState& renderState, const uint32_t layerWidth
         , type(layerType) {
     // TODO: This is a violation of Android's typical ref counting, but it
     // preserves the old inc/dec ref locations. This should be changed...
-    incStrong(0);
-    mesh = NULL;
-    meshElementCount = 0;
-    cacheable = true;
-    dirty = false;
+    incStrong(nullptr);
     renderTarget = GL_TEXTURE_2D;
     texture.width = layerWidth;
     texture.height = layerHeight;
-    colorFilter = NULL;
-    deferredUpdateScheduled = false;
-    renderer = NULL;
-    renderNode = NULL;
-    fbo = 0;
-    stencil = NULL;
-    debugDrawUpdate = false;
-    hasDrawnSinceUpdate = false;
-    forceFilter = false;
-    deferredList = NULL;
-    convexMask = NULL;
-    rendererLightPosDirty = true;
-    wasBuildLayered = false;
     renderState.registerLayer(this);
 }
 
@@ -79,8 +63,6 @@ Layer::~Layer() {
     }
 
     delete[] mesh;
-    delete deferredList;
-    delete renderer;
 }
 
 void Layer::onGlContextLost() {
@@ -98,7 +80,7 @@ uint32_t Layer::computeIdealHeight(uint32_t layerHeight) {
 
 void Layer::requireRenderer() {
     if (!renderer) {
-        renderer = new LayerRenderer(renderState, this);
+        renderer.reset(new LayerRenderer(renderState, this));
         renderer->initProperties();
     }
 }
@@ -108,8 +90,10 @@ void Layer::updateLightPosFromRenderer(const OpenGLRenderer& rootRenderer) {
         // re-init renderer's light position, based upon last cached location in window
         Vector3 lightPos = rootRenderer.getLightCenter();
         cachedInvTransformInWindow.mapPoint3d(lightPos);
-        renderer->initLight(lightPos, rootRenderer.getLightRadius(),
-                rootRenderer.getAmbientShadowAlpha(), rootRenderer.getSpotShadowAlpha());
+        renderer->initLight(rootRenderer.getLightRadius(),
+                rootRenderer.getAmbientShadowAlpha(),
+                rootRenderer.getSpotShadowAlpha());
+        renderer->setLightCenter(lightPos);
         rendererLightPosDirty = false;
     }
 }
@@ -137,7 +121,7 @@ bool Layer::resize(const uint32_t width, const uint32_t height) {
     setSize(desiredWidth, desiredHeight);
 
     if (fbo) {
-        caches.activeTexture(0);
+        caches.textureState().activateTexture(0);
         bindTexture();
         allocateTexture();
 
@@ -168,7 +152,7 @@ void Layer::removeFbo(bool flush) {
         renderState.bindFramebuffer(previousFbo);
 
         caches.renderBufferCache.put(stencil);
-        stencil = NULL;
+        stencil = nullptr;
     }
 
     if (fbo) {
@@ -189,7 +173,7 @@ void Layer::updateDeferred(RenderNode* renderNode, int left, int top, int right,
 
 void Layer::setPaint(const SkPaint* paint) {
     OpenGLRenderer::getAlphaAndModeDirect(paint, &alpha, &mode);
-    setColorFilter((paint) ? paint->getColorFilter() : NULL);
+    setColorFilter((paint) ? paint->getColorFilter() : nullptr);
 }
 
 void Layer::setColorFilter(SkColorFilter* filter) {
@@ -198,7 +182,7 @@ void Layer::setColorFilter(SkColorFilter* filter) {
 
 void Layer::bindTexture() const {
     if (texture.id) {
-        caches.bindTexture(renderTarget, texture.id);
+        caches.textureState().bindTexture(renderTarget, texture.id);
     }
 }
 
@@ -222,7 +206,7 @@ void Layer::deleteTexture() {
 }
 
 void Layer::clearTexture() {
-    caches.unbindTexture(texture.id);
+    caches.textureState().unbindTexture(texture.id);
     texture.id = 0;
 }
 
@@ -233,7 +217,7 @@ void Layer::allocateTexture() {
     if (texture.id) {
         glPixelStorei(GL_UNPACK_ALIGNMENT, 4);
         glTexImage2D(renderTarget, 0, GL_RGBA, getWidth(), getHeight(), 0,
-                GL_RGBA, GL_UNSIGNED_BYTE, NULL);
+                GL_RGBA, GL_UNSIGNED_BYTE, nullptr);
     }
 }
 
@@ -249,8 +233,7 @@ void Layer::defer(const OpenGLRenderer& rootRenderer) {
         dirtyRect.set(0, 0, width, height);
     }
 
-    delete deferredList;
-    deferredList = new DeferredDisplayList(dirtyRect);
+    deferredList.reset(new DeferredDisplayList(dirtyRect));
 
     DeferStateStruct deferredState(*deferredList, *renderer,
             RenderNode::kReplayFlag_ClipChildren);
@@ -266,19 +249,16 @@ void Layer::defer(const OpenGLRenderer& rootRenderer) {
 }
 
 void Layer::cancelDefer() {
-    renderNode = NULL;
+    renderNode = nullptr;
     deferredUpdateScheduled = false;
-    if (deferredList) {
-        delete deferredList;
-        deferredList = NULL;
-    }
+    deferredList.release();
 }
 
 void Layer::flush() {
     // renderer is checked as layer may be destroyed/put in layer cache with flush scheduled
     if (deferredList && renderer) {
         ATRACE_LAYER_WORK("Issue");
-        renderer->startMark((renderNode.get() != NULL) ? renderNode->getName() : "Layer");
+        renderer->startMark((renderNode.get() != nullptr) ? renderNode->getName() : "Layer");
 
         renderer->setViewport(layer.getWidth(), layer.getHeight());
         renderer->prepareDirty(dirtyRect.left, dirtyRect.top, dirtyRect.right, dirtyRect.bottom,
@@ -289,7 +269,7 @@ void Layer::flush() {
         renderer->finish();
 
         dirtyRect.setEmpty();
-        renderNode = NULL;
+        renderNode = nullptr;
 
         renderer->endMark();
     }
@@ -310,7 +290,7 @@ void Layer::render(const OpenGLRenderer& rootRenderer) {
     dirtyRect.setEmpty();
 
     deferredUpdateScheduled = false;
-    renderNode = NULL;
+    renderNode = nullptr;
 }
 
 void Layer::postDecStrong() {

@@ -20,7 +20,7 @@
 
 #include <JNIHelp.h>
 #include <jni.h>
-#include <android_runtime/AndroidRuntime.h>
+#include "core_jni_helpers.h"
 
 #include <utils/Log.h>
 #include <utils/String8.h>
@@ -82,7 +82,7 @@ static jbyteArray DdmHandleNativeHeap_getLeakInfo(JNIEnv* env, jobject) {
     get_malloc_leak_info(&allocBytes, &header.allocSize, &header.allocInfoSize,
                          &header.totalMemory, &header.backtraceSize);
 
-    ALOGD("*** mapSize: %d allocSize: %d allocInfoSize: %d totalMemory: %d",
+    ALOGD("*** mapSize: %zu allocSize: %zu allocInfoSize: %zu totalMemory: %zu",
           header.mapSize, header.allocSize, header.allocInfoSize, header.totalMemory);
 
 #if defined(__LP64__)
@@ -110,7 +110,8 @@ static JNINativeMethod method_table[] = {
 };
 
 int register_android_ddm_DdmHandleNativeHeap(JNIEnv* env) {
-    return AndroidRuntime::registerNativeMethods(env, "android/ddm/DdmHandleNativeHeap", method_table, NELEM(method_table));
+    return RegisterMethodsOrDie(env, "android/ddm/DdmHandleNativeHeap", method_table,
+                                NELEM(method_table));
 }
 
 };

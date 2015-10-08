@@ -18,6 +18,7 @@ package com.android.systemui.qs;
 
 import android.content.Context;
 import android.content.Intent;
+import android.graphics.drawable.Animatable;
 import android.graphics.drawable.AnimatedVectorDrawable;
 import android.graphics.drawable.Drawable;
 import android.os.Handler;
@@ -32,12 +33,12 @@ import com.android.systemui.qs.QSTile.State;
 import com.android.systemui.statusbar.policy.BluetoothController;
 import com.android.systemui.statusbar.policy.CastController;
 import com.android.systemui.statusbar.policy.FlashlightController;
+import com.android.systemui.statusbar.policy.HotspotController;
 import com.android.systemui.statusbar.policy.KeyguardMonitor;
 import com.android.systemui.statusbar.policy.Listenable;
 import com.android.systemui.statusbar.policy.LocationController;
 import com.android.systemui.statusbar.policy.NetworkController;
 import com.android.systemui.statusbar.policy.RotationLockController;
-import com.android.systemui.statusbar.policy.HotspotController;
 import com.android.systemui.statusbar.policy.ZenModeController;
 
 import java.util.Collection;
@@ -60,13 +61,22 @@ public abstract class QSTile<TState extends State> implements Listenable {
     protected final Handler mUiHandler = new Handler(Looper.getMainLooper());
 
     private Callback mCallback;
-    protected final TState mState = newTileState();
-    private final TState mTmpState = newTileState();
+    protected TState mState = newTileState();
+    private TState mTmpState = newTileState();
     private boolean mAnnounceNextStateChange;
 
     abstract protected TState newTileState();
     abstract protected void handleClick();
     abstract protected void handleUpdateState(TState state, Object arg);
+
+    /**
+     * Declare the category of this tile.
+     *
+     * Categories are defined in {@link com.android.internal.logging.MetricsLogger}
+     * or if there is no relevant existing category you may define one in
+     * {@link com.android.systemui.qs.QSTile}.
+     */
+    abstract public int getMetricsCategory();
 
     protected QSTile(Host host) {
         mHost = host;
@@ -96,6 +106,7 @@ public abstract class QSTile<TState extends State> implements Listenable {
         View createDetailView(Context context, View convertView, ViewGroup parent);
         Intent getSettingsIntent();
         void setToggleState(boolean state);
+        int getMetricsCategory();
     }
 
     // safe to call from any thread
@@ -128,6 +139,10 @@ public abstract class QSTile<TState extends State> implements Listenable {
         mHandler.obtainMessage(H.REFRESH_STATE, arg).sendToTarget();
     }
 
+    public final void clearState() {
+        mHandler.sendEmptyMessage(H.CLEAR_STATE);
+    }
+
     public void userSwitch(int newUserId) {
         mHandler.obtainMessage(H.USER_SWITCH, newUserId, 0).sendToTarget();
     }
@@ -148,6 +163,10 @@ public abstract class QSTile<TState extends State> implements Listenable {
         return mState;
     }
 
+    public void setDetailListening(boolean listening) {
+        // optional
+    }
+
     // call only on tile worker looper
 
     private void handleSetCallback(Callback callback) {
@@ -161,6 +180,11 @@ public abstract class QSTile<TState extends State> implements Listenable {
 
     protected void handleLongClick() {
         // optional
+    }
+
+    protected void handleClearState() {
+        mTmpState = newTileState();
+        mState = newTileState();
     }
 
     protected void handleRefreshState(Object arg) {
@@ -231,6 +255,7 @@ public abstract class QSTile<TState extends State> implements Listenable {
         private static final int TOGGLE_STATE_CHANGED = 8;
         private static final int SCAN_STATE_CHANGED = 9;
         private static final int DESTROY = 10;
+        private static final int CLEAR_STATE = 11;
 
         private H(Looper looper) {
             super(looper);
@@ -274,6 +299,9 @@ public abstract class QSTile<TState extends State> implements Listenable {
                 } else if (msg.what == LONG_CLICK) {
                     name = "handleLongClick";
                     handleLongClick();
+                } else if (msg.what == CLEAR_STATE) {
+                    name = "handleClearState";
+                    handleClearState();
                 } else {
                     throw new IllegalArgumentException("Unknown msg: " + msg.what);
                 }
@@ -294,7 +322,7 @@ public abstract class QSTile<TState extends State> implements Listenable {
     }
 
     public interface Host {
-        void startSettingsActivity(Intent intent);
+        void startActivityDismissingKeyguard(Intent intent);
         void warn(String message, Throwable t);
         void collapsePanels();
         Looper getLooper();
@@ -328,7 +356,7 @@ public abstract class QSTile<TState extends State> implements Listenable {
     public static class ResourceIcon extends Icon {
         private static final SparseArray<Icon> ICONS = new SparseArray<Icon>();
 
-        private final int mResId;
+        protected final int mResId;
 
         private ResourceIcon(int resId) {
             mResId = resId;
@@ -345,7 +373,11 @@ public abstract class QSTile<TState extends State> implements Listenable {
 
         @Override
         public Drawable getDrawable(Context context) {
-            return context.getDrawable(mResId);
+            Drawable d = context.getDrawable(mResId);
+            if (d instanceof Animatable) {
+                ((Animatable) d).start();
+            }
+            return d;
         }
 
         @Override
@@ -373,7 +405,7 @@ public abstract class QSTile<TState extends State> implements Listenable {
         @Override
         public Drawable getDrawable(Context context) {
             // workaround: get a clean state for every new AVD
-            final AnimatedVectorDrawable d = (AnimatedVectorDrawable) super.getDrawable(context)
+            final AnimatedVectorDrawable d = (AnimatedVectorDrawable) context.getDrawable(mResId)
                     .getConstantState().newDrawable();
             d.start();
             if (mAllowAnimation) {

@@ -42,6 +42,10 @@
     <!-- Whether to use cheap, less good looking shadows for recents -->
     <bool name="config_recents_fake_shadows">false</bool>
 
+    <!-- Whether to clip notification contents with a rounded rectangle. Might be expensive on
+         certain GPU's and thus can be turned off with only minimal visual impact. -->
+    <bool name="config_notifications_round_rect_clipping">true</bool>
+
     <!-- The theme to use for RecentsActivity. -->
     <item type="style" name="config_recents_activity_theme">@style/RecentsTheme.Wallpaper</item>
 
@@ -68,9 +72,6 @@
 
     <!-- Show rotation lock toggle in System UI-->
     <bool name="config_showRotationLock">true</bool>
-
-    <!-- Amount of time to hold off before showing the search panel when the user presses home -->
-    <integer name="config_show_search_delay">200</integer>
 
     <!-- Vibration duration for GlowPadView used in SearchPanelView -->
     <integer translatable="false" name="config_vibration_duration">0</integer>
@@ -118,7 +119,7 @@
 
     <!-- The default tiles to display in QuickSettings -->
     <string name="quick_settings_tiles_default" translatable="false">
-        wifi,bt,inversion,cell,airplane,rotation,flashlight,location,cast,hotspot
+        wifi,bt,inversion,dnd,cell,airplane,rotation,flashlight,location,cast,hotspot
     </string>
 
     <!-- The tiles to display in QuickSettings -->
@@ -134,20 +135,21 @@
     <!-- The maximum number of items to be displayed in quick settings -->
     <integer name="quick_settings_detail_max_item_count">7</integer>
 
-    <integer name="blinds_pop_duration_ms">10</integer>
-
     <!-- Should "4G" be shown instead of "LTE" when the network is NETWORK_TYPE_LTE? -->
     <bool name="config_show4GForLTE">true</bool>
 
     <!-- milliseconds before the heads up notification auto-dismisses. -->
-    <integer name="heads_up_notification_decay">10000</integer>
+    <integer name="heads_up_notification_decay">5000</integer>
 
     <!-- milliseconds after a heads up notification is pushed back
      before the app can interrupt again. -->
     <integer name="heads_up_default_snooze_length_ms">60000</integer>
 
+    <!-- Minimum display time for a heads up notification, in milliseconds. -->
+    <integer name="heads_up_notification_minimum_time">2000</integer>
+
     <!-- milliseconds before the heads up notification accepts touches. -->
-    <integer name="heads_up_sensitivity_delay">700</integer>
+    <integer name="touch_acceptance_delay">700</integer>
 
     <!-- The duration in seconds to wait before the dismiss buttons are shown. -->
     <integer name="recents_task_bar_dismiss_delay_seconds">1</integer>
@@ -222,11 +224,6 @@
          be 'platform' or 'noisy' (i.e. for noisy touch screens). -->
     <string name="velocity_tracker_impl" translatable="false">platform</string>
 
-    <!-- Set to true to enable the classic notification ticker that scrolls
-         Notification.tickerText across the status bar for what seems like an
-         eternity. -->
-    <bool name="enable_ticker">false</bool>
-
     <!-- Set to true to enable the user switcher on the keyguard. -->
     <bool name="config_keyguardUserSwitcher">false</bool>
 
@@ -278,9 +275,6 @@
     <!-- Doze: alpha to apply to small icons when dozing -->
     <integer name="doze_small_icon_alpha">222</integer><!-- 87% of 0xff -->
 
-    <!-- Volume: time to delay dismissing the volume panel after a click is performed -->
-    <integer name="volume_panel_dismiss_delay">200</integer>
-
     <!-- Hotspot tile: number of days to show after feature is used. -->
     <integer name="days_to_show_hotspot_tile">30</integer>
 
@@ -295,5 +289,12 @@
 
     <!-- Enable the default volume dialog -->
     <bool name="enable_volume_ui">true</bool>
+
+    <!-- Duration of the full carrier network change icon animation. -->
+    <integer name="carrier_network_change_anim_time">3000</integer>
+
+    <!-- Duration of the expansion animation in the volume dialog -->
+    <item name="volume_expand_animation_duration" type="integer">300</item>
+
 </resources>
 

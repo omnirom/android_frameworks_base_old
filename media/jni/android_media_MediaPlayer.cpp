@@ -20,6 +20,7 @@
 #include "utils/Log.h"
 
 #include <media/mediaplayer.h>
+#include <media/AudioResamplerPublic.h>
 #include <media/IMediaHTTPService.h>
 #include <media/MediaPlayerInterface.h>
 #include <stdio.h>
@@ -36,6 +37,9 @@
 #include "utils/Errors.h"  // for status_t
 #include "utils/KeyedVector.h"
 #include "utils/String8.h"
+#include "android_media_MediaDataSource.h"
+#include "android_media_PlaybackParams.h"
+#include "android_media_SyncParams.h"
 #include "android_media_Utils.h"
 
 #include "android_os_Parcel.h"
@@ -64,6 +68,9 @@ struct fields_t {
     jmethodID   proxyConfigGetExclusionList;
 };
 static fields_t fields;
+
+static PlaybackParams::fields_t gPlaybackParamsFields;
+static SyncParams::fields_t gSyncParamsFields;
 
 static Mutex sLock;
 
@@ -167,6 +174,8 @@ static void process_media_player_call(JNIEnv *env, jobject thiz, status_t opStat
     } else {  // Throw exception!
         if ( opStatus == (status_t) INVALID_OPERATION ) {
             jniThrowException(env, "java/lang/IllegalStateException", NULL);
+        } else if ( opStatus == (status_t) BAD_VALUE ) {
+            jniThrowException(env, "java/lang/IllegalArgumentException", NULL);
         } else if ( opStatus == (status_t) PERMISSION_DENIED ) {
             jniThrowException(env, "java/lang/SecurityException", NULL);
         } else if ( opStatus != (status_t) OK ) {
@@ -249,6 +258,23 @@ android_media_MediaPlayer_setDataSourceFD(JNIEnv *env, jobject thiz, jobject fil
     int fd = jniGetFDFromFileDescriptor(env, fileDescriptor);
     ALOGV("setDataSourceFD: fd %d", fd);
     process_media_player_call( env, thiz, mp->setDataSource(fd, offset, length), "java/io/IOException", "setDataSourceFD failed." );
+}
+
+static void
+android_media_MediaPlayer_setDataSourceCallback(JNIEnv *env, jobject thiz, jobject dataSource)
+{
+    sp<MediaPlayer> mp = getMediaPlayer(env, thiz);
+    if (mp == NULL ) {
+        jniThrowException(env, "java/lang/IllegalStateException", NULL);
+        return;
+    }
+
+    if (dataSource == NULL) {
+        jniThrowException(env, "java/lang/IllegalArgumentException", NULL);
+        return;
+    }
+    sp<IDataSource> callbackDataSource = new JMediaDataSource(env, dataSource);
+    process_media_player_call(env, thiz, mp->setDataSource(callbackDataSource), "java/lang/RuntimeException", "setDataSourceCallback failed." );
 }
 
 static sp<IGraphicBufferProducer>
@@ -399,6 +425,155 @@ android_media_MediaPlayer_isPlaying(JNIEnv *env, jobject thiz)
 
     ALOGV("isPlaying: %d", is_playing);
     return is_playing;
+}
+
+static void
+android_media_MediaPlayer_setPlaybackParams(JNIEnv *env, jobject thiz, jobject params)
+{
+    sp<MediaPlayer> mp = getMediaPlayer(env, thiz);
+    if (mp == NULL) {
+        jniThrowException(env, "java/lang/IllegalStateException", NULL);
+        return;
+    }
+
+    PlaybackParams pbp;
+    pbp.fillFromJobject(env, gPlaybackParamsFields, params);
+    ALOGV("setPlaybackParams: %d:%f %d:%f %d:%u %d:%u",
+            pbp.speedSet, pbp.audioRate.mSpeed,
+            pbp.pitchSet, pbp.audioRate.mPitch,
+            pbp.audioFallbackModeSet, pbp.audioRate.mFallbackMode,
+            pbp.audioStretchModeSet, pbp.audioRate.mStretchMode);
+
+    AudioPlaybackRate rate;
+    status_t err = mp->getPlaybackSettings(&rate);
+    if (err == OK) {
+        bool updatedRate = false;
+        if (pbp.speedSet) {
+            rate.mSpeed = pbp.audioRate.mSpeed;
+            updatedRate = true;
+        }
+        if (pbp.pitchSet) {
+            rate.mPitch = pbp.audioRate.mPitch;
+            updatedRate = true;
+        }
+        if (pbp.audioFallbackModeSet) {
+            rate.mFallbackMode = pbp.audioRate.mFallbackMode;
+            updatedRate = true;
+        }
+        if (pbp.audioStretchModeSet) {
+            rate.mStretchMode = pbp.audioRate.mStretchMode;
+            updatedRate = true;
+        }
+        if (updatedRate) {
+            err = mp->setPlaybackSettings(rate);
+        }
+    }
+    process_media_player_call(
+            env, thiz, err,
+            "java/lang/IllegalStateException", "unexpected error");
+}
+
+static jobject
+android_media_MediaPlayer_getPlaybackParams(JNIEnv *env, jobject thiz)
+{
+    sp<MediaPlayer> mp = getMediaPlayer(env, thiz);
+    if (mp == NULL) {
+        jniThrowException(env, "java/lang/IllegalStateException", NULL);
+        return NULL;
+    }
+
+    PlaybackParams pbp;
+    AudioPlaybackRate &audioRate = pbp.audioRate;
+    process_media_player_call(
+            env, thiz, mp->getPlaybackSettings(&audioRate),
+            "java/lang/IllegalStateException", "unexpected error");
+    ALOGV("getPlaybackSettings: %f %f %d %d",
+            audioRate.mSpeed, audioRate.mPitch, audioRate.mFallbackMode, audioRate.mStretchMode);
+
+    pbp.speedSet = true;
+    pbp.pitchSet = true;
+    pbp.audioFallbackModeSet = true;
+    pbp.audioStretchModeSet = true;
+
+    return pbp.asJobject(env, gPlaybackParamsFields);
+}
+
+static void
+android_media_MediaPlayer_setSyncParams(JNIEnv *env, jobject thiz, jobject params)
+{
+    sp<MediaPlayer> mp = getMediaPlayer(env, thiz);
+    if (mp == NULL) {
+        jniThrowException(env, "java/lang/IllegalStateException", NULL);
+        return;
+    }
+
+    SyncParams scp;
+    scp.fillFromJobject(env, gSyncParamsFields, params);
+    ALOGV("setSyncParams: %d:%d %d:%d %d:%f %d:%f",
+          scp.syncSourceSet, scp.sync.mSource,
+          scp.audioAdjustModeSet, scp.sync.mAudioAdjustMode,
+          scp.toleranceSet, scp.sync.mTolerance,
+          scp.frameRateSet, scp.frameRate);
+
+    AVSyncSettings avsync;
+    float videoFrameRate;
+    status_t err = mp->getSyncSettings(&avsync, &videoFrameRate);
+    if (err == OK) {
+        bool updatedSync = scp.frameRateSet;
+        if (scp.syncSourceSet) {
+            avsync.mSource = scp.sync.mSource;
+            updatedSync = true;
+        }
+        if (scp.audioAdjustModeSet) {
+            avsync.mAudioAdjustMode = scp.sync.mAudioAdjustMode;
+            updatedSync = true;
+        }
+        if (scp.toleranceSet) {
+            avsync.mTolerance = scp.sync.mTolerance;
+            updatedSync = true;
+        }
+        if (updatedSync) {
+            err = mp->setSyncSettings(avsync, scp.frameRateSet ? scp.frameRate : -1.f);
+        }
+    }
+    process_media_player_call(
+            env, thiz, err,
+            "java/lang/IllegalStateException", "unexpected error");
+}
+
+static jobject
+android_media_MediaPlayer_getSyncParams(JNIEnv *env, jobject thiz)
+{
+    sp<MediaPlayer> mp = getMediaPlayer(env, thiz);
+    if (mp == NULL) {
+        jniThrowException(env, "java/lang/IllegalStateException", NULL);
+        return NULL;
+    }
+
+    SyncParams scp;
+    scp.frameRate = -1.f;
+    process_media_player_call(
+            env, thiz, mp->getSyncSettings(&scp.sync, &scp.frameRate),
+            "java/lang/IllegalStateException", "unexpected error");
+
+    ALOGV("getSyncSettings: %d %d %f %f",
+            scp.sync.mSource, scp.sync.mAudioAdjustMode, scp.sync.mTolerance, scp.frameRate);
+
+    // sanity check params
+    if (scp.sync.mSource >= AVSYNC_SOURCE_MAX
+            || scp.sync.mAudioAdjustMode >= AVSYNC_AUDIO_ADJUST_MODE_MAX
+            || scp.sync.mTolerance < 0.f
+            || scp.sync.mTolerance >= AVSYNC_TOLERANCE_MAX) {
+        jniThrowException(env,  "java/lang/IllegalStateException", NULL);
+        return NULL;
+    }
+
+    scp.syncSourceSet = true;
+    scp.audioAdjustModeSet = true;
+    scp.toleranceSet = true;
+    scp.frameRateSet = scp.frameRate >= 0.f;
+
+    return scp.asJobject(env, gSyncParamsFields);
 }
 
 static void
@@ -667,6 +842,8 @@ android_media_MediaPlayer_native_init(JNIEnv *env)
         return;
     }
 
+    env->DeleteLocalRef(clazz);
+
     clazz = env->FindClass("android/net/ProxyInfo");
     if (clazz == NULL) {
         return;
@@ -680,6 +857,11 @@ android_media_MediaPlayer_native_init(JNIEnv *env)
 
     fields.proxyConfigGetExclusionList =
         env->GetMethodID(clazz, "getExclusionListAsString", "()Ljava/lang/String;");
+
+    env->DeleteLocalRef(clazz);
+
+    gPlaybackParamsFields.init(env);
+    gSyncParamsFields.init(env);
 }
 
 static void
@@ -859,7 +1041,8 @@ static JNINativeMethod gMethods[] = {
         (void *)android_media_MediaPlayer_setDataSourceAndHeaders
     },
 
-    {"_setDataSource",       "(Ljava/io/FileDescriptor;JJ)V",    (void *)android_media_MediaPlayer_setDataSourceFD},
+    {"_setDataSource",      "(Ljava/io/FileDescriptor;JJ)V",    (void *)android_media_MediaPlayer_setDataSourceFD},
+    {"_setDataSource",      "(Landroid/media/MediaDataSource;)V",(void *)android_media_MediaPlayer_setDataSourceCallback },
     {"_setVideoSurface",    "(Landroid/view/Surface;)V",        (void *)android_media_MediaPlayer_setVideoSurface},
     {"_prepare",            "()V",                              (void *)android_media_MediaPlayer_prepare},
     {"prepareAsync",        "()V",                              (void *)android_media_MediaPlayer_prepareAsync},
@@ -867,6 +1050,10 @@ static JNINativeMethod gMethods[] = {
     {"_stop",               "()V",                              (void *)android_media_MediaPlayer_stop},
     {"getVideoWidth",       "()I",                              (void *)android_media_MediaPlayer_getVideoWidth},
     {"getVideoHeight",      "()I",                              (void *)android_media_MediaPlayer_getVideoHeight},
+    {"setPlaybackParams", "(Landroid/media/PlaybackParams;)V", (void *)android_media_MediaPlayer_setPlaybackParams},
+    {"getPlaybackParams", "()Landroid/media/PlaybackParams;", (void *)android_media_MediaPlayer_getPlaybackParams},
+    {"setSyncParams",     "(Landroid/media/SyncParams;)V",  (void *)android_media_MediaPlayer_setSyncParams},
+    {"getSyncParams",     "()Landroid/media/SyncParams;",   (void *)android_media_MediaPlayer_getSyncParams},
     {"seekTo",              "(I)V",                             (void *)android_media_MediaPlayer_seekTo},
     {"_pause",              "()V",                              (void *)android_media_MediaPlayer_pause},
     {"isPlaying",           "()Z",                              (void *)android_media_MediaPlayer_isPlaying},
@@ -895,16 +1082,14 @@ static JNINativeMethod gMethods[] = {
     {"setNextMediaPlayer",  "(Landroid/media/MediaPlayer;)V",   (void *)android_media_MediaPlayer_setNextMediaPlayer},
 };
 
-static const char* const kClassPathName = "android/media/MediaPlayer";
-
 // This function only registers the native methods
 static int register_android_media_MediaPlayer(JNIEnv *env)
 {
     return AndroidRuntime::registerNativeMethods(env,
                 "android/media/MediaPlayer", gMethods, NELEM(gMethods));
 }
-
 extern int register_android_media_ImageReader(JNIEnv *env);
+extern int register_android_media_ImageWriter(JNIEnv *env);
 extern int register_android_media_Crypto(JNIEnv *env);
 extern int register_android_media_Drm(JNIEnv *env);
 extern int register_android_media_MediaCodec(JNIEnv *env);
@@ -915,6 +1100,7 @@ extern int register_android_media_MediaMetadataRetriever(JNIEnv *env);
 extern int register_android_media_MediaMuxer(JNIEnv *env);
 extern int register_android_media_MediaRecorder(JNIEnv *env);
 extern int register_android_media_MediaScanner(JNIEnv *env);
+extern int register_android_media_MediaSync(JNIEnv *env);
 extern int register_android_media_ResampleInputStream(JNIEnv *env);
 extern int register_android_media_MediaProfiles(JNIEnv *env);
 extern int register_android_media_AmrInputStream(JNIEnv *env);
@@ -932,6 +1118,11 @@ jint JNI_OnLoad(JavaVM* vm, void* /* reserved */)
         goto bail;
     }
     assert(env != NULL);
+
+    if (register_android_media_ImageWriter(env) != JNI_OK) {
+        ALOGE("ERROR: ImageWriter native registration failed");
+        goto bail;
+    }
 
     if (register_android_media_ImageReader(env) < 0) {
         ALOGE("ERROR: ImageReader native registration failed");
@@ -990,6 +1181,11 @@ jint JNI_OnLoad(JavaVM* vm, void* /* reserved */)
 
     if (register_android_media_MediaCodec(env) < 0) {
         ALOGE("ERROR: MediaCodec native registration failed");
+        goto bail;
+    }
+
+    if (register_android_media_MediaSync(env) < 0) {
+        ALOGE("ERROR: MediaSync native registration failed");
         goto bail;
     }
 

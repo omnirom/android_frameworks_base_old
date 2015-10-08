@@ -41,6 +41,7 @@ import java.util.Iterator;
 public final class GeofenceHardwareImpl {
     private static final String TAG = "GeofenceHardwareImpl";
     private static final boolean DEBUG = Log.isLoggable(TAG, Log.DEBUG);
+    private static final int FIRST_VERSION_WITH_CAPABILITIES = 2;
 
     private final Context mContext;
     private static GeofenceHardwareImpl sInstance;
@@ -53,6 +54,8 @@ public final class GeofenceHardwareImpl {
 
     private IFusedGeofenceHardware mFusedService;
     private IGpsGeofenceHardware mGpsService;
+    private int mCapabilities;
+    private int mVersion = 1;
 
     private int[] mSupportedMonitorTypes = new int[GeofenceHardware.NUM_MONITORS];
 
@@ -88,6 +91,9 @@ public final class GeofenceHardwareImpl {
     private static final int RESOLUTION_LEVEL_NONE = 1;
     private static final int RESOLUTION_LEVEL_COARSE = 2;
     private static final int RESOLUTION_LEVEL_FINE = 3;
+
+    // Capability constant corresponding to fused_location.h entry when geofencing supports GNNS.
+    private static final int CAPABILITY_GNSS = 1;
 
     public synchronized static GeofenceHardwareImpl getInstance(Context context) {
         if (sInstance == null) {
@@ -141,7 +147,11 @@ public final class GeofenceHardwareImpl {
     private void updateFusedHardwareAvailability() {
         boolean fusedSupported;
         try {
-            fusedSupported = (mFusedService != null ? mFusedService.isSupported() : false);
+            final boolean hasGnnsCapabilities = (mVersion < FIRST_VERSION_WITH_CAPABILITIES)
+                    || (mCapabilities & CAPABILITY_GNSS) != 0;
+            fusedSupported = (mFusedService != null
+                    ? mFusedService.isSupported() && hasGnnsCapabilities
+                    : false);
         } catch (RemoteException e) {
             Log.e(TAG, "RemoteException calling LocationManagerService");
             fusedSupported = false;
@@ -164,6 +174,16 @@ public final class GeofenceHardwareImpl {
         } else {
             Log.e(TAG, "Error: GpsService being set again.");
         }
+    }
+
+    public void onCapabilities(int capabilities) {
+        mCapabilities = capabilities;
+        updateFusedHardwareAvailability();
+    }
+
+    public void setVersion(int version) {
+        mVersion = version;
+        updateFusedHardwareAvailability();
     }
 
     public void setFusedGeofenceHardware(IFusedGeofenceHardware service) {
@@ -210,6 +230,25 @@ public final class GeofenceHardwareImpl {
             }
             return mSupportedMonitorTypes[monitoringType];
         }
+    }
+
+    public int getCapabilitiesForMonitoringType(int monitoringType) {
+        switch (mSupportedMonitorTypes[monitoringType]) {
+            case GeofenceHardware.MONITOR_CURRENTLY_AVAILABLE:
+                switch (monitoringType) {
+                    case GeofenceHardware.MONITORING_TYPE_GPS_HARDWARE:
+                        return CAPABILITY_GNSS;
+                    case GeofenceHardware.MONITORING_TYPE_FUSED_HARDWARE:
+                        if (mVersion >= FIRST_VERSION_WITH_CAPABILITIES) {
+                            return mCapabilities;
+                        }
+                        // This was the implied capability on old FLP HAL versions that didn't
+                        // have the capability callback.
+                        return CAPABILITY_GNSS;
+                }
+                break;
+        }
+        return 0;
     }
 
     public boolean addCircularFence(
@@ -436,7 +475,7 @@ public final class GeofenceHardwareImpl {
             int monitoringType,
             int sourcesUsed) {
         if(location == null) {
-            Log.e(TAG, String.format("Invalid Geofence Transition: location=%p", location));
+            Log.e(TAG, String.format("Invalid Geofence Transition: location=null"));
             return;
         }
         if(DEBUG) {

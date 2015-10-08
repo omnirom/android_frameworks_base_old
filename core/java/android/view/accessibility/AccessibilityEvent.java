@@ -684,6 +684,16 @@ public final class AccessibilityEvent extends AccessibilityRecord implements Par
     public static final int TYPE_WINDOWS_CHANGED = 0x00400000;
 
     /**
+     * Represents the event of a context click on a {@link android.view.View}.
+     */
+    public static final int TYPE_VIEW_CONTEXT_CLICKED = 0x00800000;
+
+    /**
+     * Represents the event of the assistant currently reading the users screen context.
+     */
+    public static final int TYPE_ASSIST_READING_CONTEXT = 0x01000000;
+
+    /**
      * Change type for {@link #TYPE_WINDOW_CONTENT_CHANGED} event:
      * The type of change is not defined.
      */
@@ -731,6 +741,7 @@ public final class AccessibilityEvent extends AccessibilityRecord implements Par
      * @see #TYPE_TOUCH_INTERACTION_START
      * @see #TYPE_TOUCH_INTERACTION_END
      * @see #TYPE_WINDOWS_CHANGED
+     * @see #TYPE_VIEW_CONTEXT_CLICKED
      */
     public static final int TYPES_ALL_MASK = 0xFFFFFFFF;
 
@@ -1109,7 +1120,7 @@ public final class AccessibilityEvent extends AccessibilityRecord implements Par
         record.mParcelableData = parcel.readParcelable(null);
         parcel.readList(record.mText, null);
         record.mSourceWindowId = parcel.readInt();
-        record.mSourceNodeId = parcel.readLong();
+        record.mSourceNode = parcel.readParcelable(null);
         record.mSealed = (parcel.readInt() == 1);
     }
 
@@ -1161,7 +1172,10 @@ public final class AccessibilityEvent extends AccessibilityRecord implements Par
         parcel.writeParcelable(record.mParcelableData, flags);
         parcel.writeList(record.mText);
         parcel.writeInt(record.mSourceWindowId);
-        parcel.writeLong(record.mSourceNodeId);
+        // create copy of the node here because the node would be recycled just after it is written
+        // to parcel
+        parcel.writeParcelable(record.mSourceNode != null ?
+                AccessibilityNodeInfo.obtain(record.mSourceNode) : null, flags);
         parcel.writeInt(record.mSealed ? 1 : 0);
     }
 
@@ -1185,7 +1199,9 @@ public final class AccessibilityEvent extends AccessibilityRecord implements Par
             builder.append("\n");
             builder.append("; ContentChangeTypes: ").append(mContentChangeTypes);
             builder.append("; sourceWindowId: ").append(mSourceWindowId);
-            builder.append("; mSourceNodeId: ").append(mSourceNodeId);
+            if (mSourceNode != null) {
+                builder.append("; mSourceNodeId: ").append(mSourceNode.getSourceNodeId());
+            }
             for (int i = 0; i < getRecordCount(); i++) {
                 final AccessibilityRecord record = getRecord(i);
                 builder.append("  Record ");
@@ -1394,6 +1410,20 @@ public final class AccessibilityEvent extends AccessibilityRecord implements Par
                         builder.append(", ");
                     }
                     builder.append("TYPE_WINDOWS_CHANGED");
+                    eventTypeCount++;
+                } break;
+                case TYPE_VIEW_CONTEXT_CLICKED: {
+                    if (eventTypeCount > 0) {
+                        builder.append(", ");
+                    }
+                    builder.append("TYPE_VIEW_CONTEXT_CLICKED");
+                    eventTypeCount++;
+                } break;
+                case TYPE_ASSIST_READING_CONTEXT: {
+                    if (eventTypeCount > 0) {
+                        builder.append(", ");
+                    }
+                    builder.append("TYPE_ASSIST_READING_CONTEXT");
                     eventTypeCount++;
                 } break;
             }

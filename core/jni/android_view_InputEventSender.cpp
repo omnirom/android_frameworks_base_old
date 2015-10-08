@@ -18,10 +18,6 @@
 
 //#define LOG_NDEBUG 0
 
-// Log debug messages about the dispatch cycle.
-#define DEBUG_DISPATCH_CYCLE 0
-
-
 #include "JNIHelp.h"
 
 #include <android_runtime/AndroidRuntime.h>
@@ -37,7 +33,12 @@
 
 #include <ScopedLocalRef.h>
 
+#include "core_jni_helpers.h"
+
 namespace android {
+
+// Log debug messages about the dispatch cycle.
+static const bool kDebugDispatchCycle = false;
 
 static struct {
     jclass clazz;
@@ -82,9 +83,9 @@ NativeInputEventSender::NativeInputEventSender(JNIEnv* env,
         mSenderWeakGlobal(env->NewGlobalRef(senderWeak)),
         mInputPublisher(inputChannel), mMessageQueue(messageQueue),
         mNextPublishedSeq(1) {
-#if DEBUG_DISPATCH_CYCLE
-    ALOGD("channel '%s' ~ Initializing input event sender.", getInputChannelName());
-#endif
+    if (kDebugDispatchCycle) {
+        ALOGD("channel '%s' ~ Initializing input event sender.", getInputChannelName());
+    }
 }
 
 NativeInputEventSender::~NativeInputEventSender() {
@@ -99,17 +100,17 @@ status_t NativeInputEventSender::initialize() {
 }
 
 void NativeInputEventSender::dispose() {
-#if DEBUG_DISPATCH_CYCLE
-    ALOGD("channel '%s' ~ Disposing input event sender.", getInputChannelName());
-#endif
+    if (kDebugDispatchCycle) {
+        ALOGD("channel '%s' ~ Disposing input event sender.", getInputChannelName());
+    }
 
     mMessageQueue->getLooper()->removeFd(mInputPublisher.getChannel()->getFd());
 }
 
 status_t NativeInputEventSender::sendKeyEvent(uint32_t seq, const KeyEvent* event) {
-#if DEBUG_DISPATCH_CYCLE
-    ALOGD("channel '%s' ~ Sending key event, seq=%u.", getInputChannelName(), seq);
-#endif
+    if (kDebugDispatchCycle) {
+        ALOGD("channel '%s' ~ Sending key event, seq=%u.", getInputChannelName(), seq);
+    }
 
     uint32_t publishedSeq = mNextPublishedSeq++;
     status_t status = mInputPublisher.publishKeyEvent(publishedSeq,
@@ -126,15 +127,16 @@ status_t NativeInputEventSender::sendKeyEvent(uint32_t seq, const KeyEvent* even
 }
 
 status_t NativeInputEventSender::sendMotionEvent(uint32_t seq, const MotionEvent* event) {
-#if DEBUG_DISPATCH_CYCLE
-    ALOGD("channel '%s' ~ Sending motion event, seq=%u.", getInputChannelName(), seq);
-#endif
+    if (kDebugDispatchCycle) {
+        ALOGD("channel '%s' ~ Sending motion event, seq=%u.", getInputChannelName(), seq);
+    }
 
     uint32_t publishedSeq;
     for (size_t i = 0; i <= event->getHistorySize(); i++) {
         publishedSeq = mNextPublishedSeq++;
         status_t status = mInputPublisher.publishMotionEvent(publishedSeq,
-                event->getDeviceId(), event->getSource(), event->getAction(), event->getFlags(),
+                event->getDeviceId(), event->getSource(),
+                event->getAction(), event->getActionButton(), event->getFlags(),
                 event->getEdgeFlags(), event->getMetaState(), event->getButtonState(),
                 event->getXOffset(), event->getYOffset(),
                 event->getXPrecision(), event->getYPrecision(),
@@ -153,13 +155,14 @@ status_t NativeInputEventSender::sendMotionEvent(uint32_t seq, const MotionEvent
 
 int NativeInputEventSender::handleEvent(int receiveFd, int events, void* data) {
     if (events & (ALOOPER_EVENT_ERROR | ALOOPER_EVENT_HANGUP)) {
-#if DEBUG_DISPATCH_CYCLE
         // This error typically occurs when the consumer has closed the input channel
         // as part of finishing an IME session, in which case the publisher will
         // soon be disposed as well.
-        ALOGD("channel '%s' ~ Consumer closed input channel or an error occurred.  "
-                "events=0x%x", getInputChannelName(), events);
-#endif
+        if (kDebugDispatchCycle) {
+            ALOGD("channel '%s' ~ Consumer closed input channel or an error occurred.  "
+                    "events=0x%x", getInputChannelName(), events);
+        }
+
         return 0; // remove the callback
     }
 
@@ -176,9 +179,9 @@ int NativeInputEventSender::handleEvent(int receiveFd, int events, void* data) {
 }
 
 status_t NativeInputEventSender::receiveFinishedSignals(JNIEnv* env) {
-#if DEBUG_DISPATCH_CYCLE
-    ALOGD("channel '%s' ~ Receiving finished signals.", getInputChannelName());
-#endif
+    if (kDebugDispatchCycle) {
+        ALOGD("channel '%s' ~ Receiving finished signals.", getInputChannelName());
+    }
 
     ScopedLocalRef<jobject> senderObj(env, NULL);
     bool skipCallbacks = false;
@@ -200,12 +203,12 @@ status_t NativeInputEventSender::receiveFinishedSignals(JNIEnv* env) {
             uint32_t seq = mPublishedSeqMap.valueAt(index);
             mPublishedSeqMap.removeItemsAt(index);
 
-#if DEBUG_DISPATCH_CYCLE
-            ALOGD("channel '%s' ~ Received finished signal, seq=%u, handled=%s, "
-                    "pendingEvents=%u.",
-                    getInputChannelName(), seq, handled ? "true" : "false",
-                    mPublishedSeqMap.size());
-#endif
+            if (kDebugDispatchCycle) {
+                ALOGD("channel '%s' ~ Received finished signal, seq=%u, handled=%s, "
+                        "pendingEvents=%zu.",
+                        getInputChannelName(), seq, handled ? "true" : "false",
+                        mPublishedSeqMap.size());
+            }
 
             if (!skipCallbacks) {
                 if (!senderObj.get()) {
@@ -299,26 +302,16 @@ static JNINativeMethod gMethods[] = {
             (void*)nativeSendMotionEvent },
 };
 
-#define FIND_CLASS(var, className) \
-        var = env->FindClass(className); \
-        LOG_FATAL_IF(! var, "Unable to find class " className); \
-        var = jclass(env->NewGlobalRef(var));
-
-#define GET_METHOD_ID(var, clazz, methodName, methodDescriptor) \
-        var = env->GetMethodID(clazz, methodName, methodDescriptor); \
-        LOG_FATAL_IF(! var, "Unable to find method " methodName);
-
 int register_android_view_InputEventSender(JNIEnv* env) {
-    int res = jniRegisterNativeMethods(env, "android/view/InputEventSender",
-            gMethods, NELEM(gMethods));
-    LOG_FATAL_IF(res < 0, "Unable to register native methods.");
+    int res = RegisterMethodsOrDie(env, "android/view/InputEventSender", gMethods, NELEM(gMethods));
 
-    FIND_CLASS(gInputEventSenderClassInfo.clazz, "android/view/InputEventSender");
+    jclass clazz = FindClassOrDie(env, "android/view/InputEventSender");
+    gInputEventSenderClassInfo.clazz = MakeGlobalRefOrDie(env, clazz);
 
-    GET_METHOD_ID(gInputEventSenderClassInfo.dispatchInputEventFinished,
-            gInputEventSenderClassInfo.clazz,
-            "dispatchInputEventFinished", "(IZ)V");
-    return 0;
+    gInputEventSenderClassInfo.dispatchInputEventFinished = GetMethodIDOrDie(
+            env, gInputEventSenderClassInfo.clazz, "dispatchInputEventFinished", "(IZ)V");
+
+    return res;
 }
 
 } // namespace android

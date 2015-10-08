@@ -50,7 +50,6 @@ public class PowerNotificationWarnings implements PowerUI.WarningsUI {
     private static final boolean DEBUG = PowerUI.DEBUG;
 
     private static final String TAG_NOTIFICATION = "low_battery";
-    private static final int ID_NOTIFICATION = 100;
 
     private static final int SHOWING_NOTHING = 0;
     private static final int SHOWING_WARNING = 1;
@@ -145,7 +144,7 @@ public class PowerNotificationWarnings implements PowerUI.WarningsUI {
             showSaverNotification();
             mShowing = SHOWING_SAVER;
         } else {
-            mNoMan.cancelAsUser(TAG_NOTIFICATION, ID_NOTIFICATION, UserHandle.ALL);
+            mNoMan.cancelAsUser(TAG_NOTIFICATION, R.id.notification_power, UserHandle.ALL);
             mShowing = SHOWING_NOTHING;
         }
     }
@@ -160,13 +159,13 @@ public class PowerNotificationWarnings implements PowerUI.WarningsUI {
                 .setContentText(mContext.getString(R.string.invalid_charger_text))
                 .setPriority(Notification.PRIORITY_MAX)
                 .setVisibility(Notification.VISIBILITY_PUBLIC)
-                .setColor(mContext.getResources().getColor(
+                .setColor(mContext.getColor(
                         com.android.internal.R.color.system_notification_accent_color));
         final Notification n = nb.build();
         if (n.headsUpContentView != null) {
             n.headsUpContentView.setViewVisibility(com.android.internal.R.id.right_icon, View.GONE);
         }
-        mNoMan.notifyAsUser(TAG_NOTIFICATION, ID_NOTIFICATION, n, UserHandle.ALL);
+        mNoMan.notifyAsUser(TAG_NOTIFICATION, R.id.notification_power, n, UserHandle.ALL);
     }
 
     private void showWarningNotification() {
@@ -183,7 +182,7 @@ public class PowerNotificationWarnings implements PowerUI.WarningsUI {
                 .setOnlyAlertOnce(true)
                 .setPriority(Notification.PRIORITY_MAX)
                 .setVisibility(Notification.VISIBILITY_PUBLIC)
-                .setColor(mContext.getResources().getColor(
+                .setColor(mContext.getColor(
                         com.android.internal.R.color.battery_saver_mode_color));
         if (hasBatterySettings()) {
             nb.setContentIntent(pendingBroadcast(ACTION_SHOW_BATTERY_SETTINGS));
@@ -204,7 +203,7 @@ public class PowerNotificationWarnings implements PowerUI.WarningsUI {
         if (n.headsUpContentView != null) {
             n.headsUpContentView.setViewVisibility(com.android.internal.R.id.right_icon, View.GONE);
         }
-        mNoMan.notifyAsUser(TAG_NOTIFICATION, ID_NOTIFICATION, n, UserHandle.ALL);
+        mNoMan.notifyAsUser(TAG_NOTIFICATION, R.id.notification_power, n, UserHandle.ALL);
     }
 
     private void showSaverNotification() {
@@ -214,14 +213,14 @@ public class PowerNotificationWarnings implements PowerUI.WarningsUI {
                 .setContentText(mContext.getString(R.string.battery_saver_notification_text))
                 .setShowWhen(false)
                 .setVisibility(Notification.VISIBILITY_PUBLIC)
-                .setColor(mContext.getResources().getColor(
+                .setColor(mContext.getColor(
                         com.android.internal.R.color.battery_saver_mode_color));
         addStopSaverAction(nb);
         addDismissAction(nb);
         if (hasSaverSettings()) {
             nb.setContentIntent(pendingActivity(mOpenSaverSettings));
         }
-        mNoMan.notifyAsUser(TAG_NOTIFICATION, ID_NOTIFICATION, nb.build(), UserHandle.ALL);
+        mNoMan.notifyAsUser(TAG_NOTIFICATION, R.id.notification_power, nb.build(), UserHandle.ALL);
     }
 
     private void addStopSaverAction(Notification.Builder nb) {
@@ -383,7 +382,8 @@ public class PowerNotificationWarnings implements PowerUI.WarningsUI {
             filter.addAction(ACTION_START_SAVER);
             filter.addAction(ACTION_STOP_SAVER);
             filter.addAction(ACTION_DISMISSED_WARNING);
-            mContext.registerReceiverAsUser(this, UserHandle.ALL, filter, null, mHandler);
+            mContext.registerReceiverAsUser(this, UserHandle.ALL, filter,
+                    android.Manifest.permission.STATUS_BAR_SERVICE, mHandler);
         }
 
         @Override

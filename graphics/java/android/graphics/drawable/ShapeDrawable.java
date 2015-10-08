@@ -261,8 +261,7 @@ public class ShapeDrawable extends Drawable {
 
     @Override
     public int getChangingConfigurations() {
-        return super.getChangingConfigurations()
-                | mShapeState.mChangingConfigurations;
+        return super.getChangingConfigurations() | mShapeState.getChangingConfigurations();
     }
 
     /**
@@ -299,8 +298,8 @@ public class ShapeDrawable extends Drawable {
     }
 
     @Override
-    public void setColorFilter(ColorFilter cf) {
-        mShapeState.mPaint.setColorFilter(cf);
+    public void setColorFilter(ColorFilter colorFilter) {
+        mShapeState.mPaint.setColorFilter(colorFilter);
         invalidateSelf();
     }
 
@@ -402,7 +401,7 @@ public class ShapeDrawable extends Drawable {
         }
 
         // Update local properties.
-        initializeWithState(mShapeState, r);
+        updateLocalState(r);
     }
 
     @Override
@@ -410,16 +409,23 @@ public class ShapeDrawable extends Drawable {
         super.applyTheme(t);
 
         final ShapeState state = mShapeState;
-        if (state == null || state.mThemeAttrs == null) {
+        if (state == null) {
             return;
         }
 
-        final TypedArray a = t.resolveAttributes(state.mThemeAttrs, R.styleable.ShapeDrawable);
-        updateStateFromTypedArray(a);
-        a.recycle();
+        if (state.mThemeAttrs != null) {
+            final TypedArray a = t.resolveAttributes(state.mThemeAttrs, R.styleable.ShapeDrawable);
+            updateStateFromTypedArray(a);
+            a.recycle();
+        }
+
+        // Apply theme to contained color state list.
+        if (state.mTint != null && state.mTint.canApplyTheme()) {
+            state.mTint = state.mTint.obtainForTheme(t);
+        }
 
         // Update local properties.
-        initializeWithState(state, t.getResources());
+        updateLocalState(t.getResources());
     }
 
     private void updateStateFromTypedArray(TypedArray a) {
@@ -550,7 +556,8 @@ public class ShapeDrawable extends Drawable {
 
         @Override
         public boolean canApplyTheme() {
-            return mThemeAttrs != null;
+            return mThemeAttrs != null
+                    || (mTint != null && mTint.canApplyTheme());
         }
 
         @Override
@@ -565,7 +572,8 @@ public class ShapeDrawable extends Drawable {
 
         @Override
         public int getChangingConfigurations() {
-            return mChangingConfigurations;
+            return mChangingConfigurations
+                    | (mTint != null ? mTint.getChangingConfigurations() : 0);
         }
     }
 
@@ -576,7 +584,7 @@ public class ShapeDrawable extends Drawable {
     private ShapeDrawable(ShapeState state, Resources res) {
         mShapeState = state;
 
-        initializeWithState(state, res);
+        updateLocalState(res);
     }
 
     /**
@@ -584,8 +592,8 @@ public class ShapeDrawable extends Drawable {
      * after significant state changes, e.g. from the One True Constructor and
      * after inflating or applying a theme.
      */
-    private void initializeWithState(ShapeState state, Resources res) {
-        mTintFilter = updateTintFilter(mTintFilter, state.mTint, state.mTintMode);
+    private void updateLocalState(Resources res) {
+        mTintFilter = updateTintFilter(mTintFilter, mShapeState.mTint, mShapeState.mTintMode);
     }
 
     /**

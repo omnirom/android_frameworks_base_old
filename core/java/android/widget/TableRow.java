@@ -16,6 +16,7 @@
 
 package android.widget;
 
+import android.annotation.NonNull;
 import android.content.Context;
 import android.content.res.TypedArray;
 import android.util.AttributeSet;
@@ -24,9 +25,7 @@ import android.view.Gravity;
 import android.view.View;
 import android.view.ViewDebug;
 import android.view.ViewGroup;
-import android.view.accessibility.AccessibilityEvent;
-import android.view.accessibility.AccessibilityNodeInfo;
-
+import android.view.ViewHierarchyEncoder;
 
 /**
  * <p>A layout that arranges its children horizontally. A TableRow should
@@ -285,7 +284,7 @@ public class TableRow extends LinearLayout {
      *         column, in this row
      * {@hide}
      */
-    int[] getColumnsWidths(int widthMeasureSpec) {
+    int[] getColumnsWidths(int widthMeasureSpec, int heightMeasureSpec) {
         final int numColumns = getVirtualChildCount();
         if (mColumnWidths == null || numColumns != mColumnWidths.length) {
             mColumnWidths = new int[numColumns];
@@ -304,7 +303,9 @@ public class TableRow extends LinearLayout {
                             spec = getChildMeasureSpec(widthMeasureSpec, 0, LayoutParams.WRAP_CONTENT);
                             break;
                         case LayoutParams.MATCH_PARENT:
-                            spec = MeasureSpec.makeMeasureSpec(0, MeasureSpec.UNSPECIFIED);
+                            spec = MeasureSpec.makeSafeMeasureSpec(
+                                    MeasureSpec.getSize(heightMeasureSpec),
+                                    MeasureSpec.UNSPECIFIED);
                             break;
                         default:
                             spec = MeasureSpec.makeMeasureSpec(layoutParams.width, MeasureSpec.EXACTLY);
@@ -380,15 +381,8 @@ public class TableRow extends LinearLayout {
     }
 
     @Override
-    public void onInitializeAccessibilityEvent(AccessibilityEvent event) {
-        super.onInitializeAccessibilityEvent(event);
-        event.setClassName(TableRow.class.getName());
-    }
-
-    @Override
-    public void onInitializeAccessibilityNodeInfo(AccessibilityNodeInfo info) {
-        super.onInitializeAccessibilityNodeInfo(info);
-        info.setClassName(TableRow.class.getName());
+    public CharSequence getAccessibilityClassName() {
+        return TableRow.class.getName();
     }
 
     /**
@@ -515,6 +509,14 @@ public class TableRow extends LinearLayout {
             } else {
                 height = WRAP_CONTENT;
             }
+        }
+
+        /** @hide */
+        @Override
+        protected void encodeProperties(@NonNull ViewHierarchyEncoder encoder) {
+            super.encodeProperties(encoder);
+            encoder.addProperty("layout:column", column);
+            encoder.addProperty("layout:span", span);
         }
     }
 

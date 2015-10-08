@@ -17,6 +17,8 @@
 #ifndef ANDROID_HWUI_GRADIENT_CACHE_H
 #define ANDROID_HWUI_GRADIENT_CACHE_H
 
+#include <memory>
+
 #include <GLES3/gl3.h>
 
 #include <SkShader.h>
@@ -25,16 +27,16 @@
 #include <utils/Mutex.h>
 #include <utils/Vector.h>
 
-#include "Texture.h"
-
 namespace android {
 namespace uirenderer {
+
+class Texture;
 
 struct GradientCacheEntry {
     GradientCacheEntry() {
         count = 0;
-        colors = NULL;
-        positions = NULL;
+        colors = nullptr;
+        positions = nullptr;
     }
 
     GradientCacheEntry(uint32_t* colors, float* positions, uint32_t count) {
@@ -42,20 +44,12 @@ struct GradientCacheEntry {
     }
 
     GradientCacheEntry(const GradientCacheEntry& entry) {
-        copy(entry.colors, entry.positions, entry.count);
-    }
-
-    ~GradientCacheEntry() {
-        delete[] colors;
-        delete[] positions;
+        copy(entry.colors.get(), entry.positions.get(), entry.count);
     }
 
     GradientCacheEntry& operator=(const GradientCacheEntry& entry) {
         if (this != &entry) {
-            delete[] colors;
-            delete[] positions;
-
-            copy(entry.colors, entry.positions, entry.count);
+            copy(entry.colors.get(), entry.positions.get(), entry.count);
         }
 
         return *this;
@@ -73,18 +67,18 @@ struct GradientCacheEntry {
         return compare(*this, other) != 0;
     }
 
-    uint32_t* colors;
-    float* positions;
+    std::unique_ptr<uint32_t[]> colors;
+    std::unique_ptr<float[]> positions;
     uint32_t count;
 
 private:
     void copy(uint32_t* colors, float* positions, uint32_t count) {
         this->count = count;
-        this->colors = new uint32_t[count];
-        this->positions = new float[count];
+        this->colors.reset(new uint32_t[count]);
+        this->positions.reset(new float[count]);
 
-        memcpy(this->colors, colors, count * sizeof(uint32_t));
-        memcpy(this->positions, positions, count * sizeof(float));
+        memcpy(this->colors.get(), colors, count * sizeof(uint32_t));
+        memcpy(this->positions.get(), positions, count * sizeof(float));
     }
 
 }; // GradientCacheEntry
@@ -110,15 +104,14 @@ inline hash_t hash_type(const GradientCacheEntry& entry) {
  */
 class GradientCache: public OnEntryRemoved<GradientCacheEntry, Texture*> {
 public:
-    GradientCache();
-    GradientCache(uint32_t maxByteSize);
+    GradientCache(Extensions& extensions);
     ~GradientCache();
 
     /**
      * Used as a callback when an entry is removed from the cache.
      * Do not invoke directly.
      */
-    void operator()(GradientCacheEntry& shader, Texture*& texture);
+    void operator()(GradientCacheEntry& shader, Texture*& texture) override;
 
     /**
      * Returns the texture associated with the specified shader.

@@ -47,12 +47,6 @@ public interface ViewMediatorCallback {
     void setNeedsInput(boolean needsInput);
 
     /**
-     * Tell view mediator that the keyguard view's desired user activity timeout
-     * has changed and needs to be reapplied to the window.
-     */
-    void onUserActivityTimeoutChanged();
-
-    /**
      * Report that the keyguard is dismissable, pending the next keyguardDone call.
      */
     void keyguardDonePending();
@@ -68,6 +62,11 @@ public interface ViewMediatorCallback {
     void readyForKeyguardDone();
 
     /**
+     * Reset the keyguard and bouncer.
+     */
+    void resetKeyguard();
+
+    /**
      * Play the "device trusted" sound.
      */
     void playTrustedSound();
@@ -77,4 +76,17 @@ public interface ViewMediatorCallback {
      *         (legacy API)
      */
     boolean isInputRestricted();
+
+    /**
+     * @return true if the screen is on
+     */
+    boolean isScreenOn();
+
+    /**
+     * @return one of the reasons why the bouncer needs to be shown right now and the user can't use
+     *         his normal unlock method like fingerprint or trust agents. See
+     *         {@link KeyguardSecurityView#PROMPT_REASON_NONE}
+     *         and {@link KeyguardSecurityView#PROMPT_REASON_RESTART}.
+     */
+    int getBouncerPromptReason();
 }

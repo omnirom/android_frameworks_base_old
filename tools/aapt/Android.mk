@@ -36,7 +36,6 @@ aaptSources := \
     Images.cpp \
     Package.cpp \
     pseudolocalize.cpp \
-    qsort_r_compat.c \
     Resource.cpp \
     ResourceFilter.cpp \
     ResourceIdCache.cpp \
@@ -51,9 +50,12 @@ aaptSources := \
 aaptTests := \
     tests/AaptConfig_test.cpp \
     tests/AaptGroupEntry_test.cpp \
-    tests/ResourceFilter_test.cpp
+    tests/Pseudolocales_test.cpp \
+    tests/ResourceFilter_test.cpp \
+    tests/ResourceTable_test.cpp
 
 aaptCIncludes := \
+    system/core/base/include \
     external/libpng \
     external/zlib
 
@@ -65,9 +67,11 @@ aaptHostStaticLibs := \
     libutils \
     libcutils \
     libexpat \
-    libziparchive-host
+    libziparchive-host \
+    libbase
 
 aaptCFlags := -DAAPT_VERSION=\"$(BUILD_NUMBER)\"
+aaptCFlags += -Wall -Werror
 
 ifeq ($(HOST_OS),linux)
     aaptHostLdLibs += -lrt -ldl -lpthread
@@ -98,7 +102,6 @@ LOCAL_SRC_FILES := $(aaptSources)
 
 include $(BUILD_HOST_STATIC_LIBRARY)
 
-
 # ==========================================================
 # Build the host executable: aapt
 # ==========================================================
@@ -118,6 +121,7 @@ include $(BUILD_HOST_EXECUTABLE)
 # Build the host tests: libaapt_tests
 # ==========================================================
 include $(CLEAR_VARS)
+LOCAL_ADDITIONAL_DEPENDENCIES := $(LOCAL_PATH)/Android.mk
 
 LOCAL_MODULE := libaapt_tests
 LOCAL_CFLAGS += $(aaptCFlags)
@@ -129,33 +133,5 @@ LOCAL_STATIC_LIBRARIES += libaapt $(aaptHostStaticLibs)
 
 include $(BUILD_HOST_NATIVE_TEST)
 
-
-# ==========================================================
-# Build the device executable: aapt
-# ==========================================================
-ifneq ($(SDK_ONLY),true)
-include $(CLEAR_VARS)
-
-LOCAL_MODULE := aapt
-LOCAL_CFLAGS += $(aaptCFlags)
-LOCAL_SRC_FILES := $(aaptSources) $(aaptMain)
-LOCAL_C_INCLUDES += \
-    $(aaptCIncludes) \
-    bionic \
-    external/stlport/stlport
-LOCAL_SHARED_LIBRARIES := \
-    libandroidfw \
-    libutils \
-    libcutils \
-    libpng \
-    liblog \
-    libz
-LOCAL_STATIC_LIBRARIES := \
-    libstlport_static \
-    libexpat_static
-
-include $(BUILD_EXECUTABLE)
-
-endif # Not SDK_ONLY
 
 endif # No TARGET_BUILD_APPS or TARGET_BUILD_PDK

@@ -21,41 +21,11 @@ import android.graphics.Color;
 import android.graphics.Matrix;
 import android.graphics.Rect;
 import android.view.View;
-import com.android.systemui.recents.RecentsConfiguration;
 
-import java.lang.reflect.InvocationTargetException;
-import java.lang.reflect.Method;
 import java.util.ArrayList;
 
 /* Common code */
 public class Utilities {
-
-    // Reflection methods for altering shadows
-    private static Method sPropertyMethod;
-    static {
-        try {
-            Class<?> c = Class.forName("android.view.GLES20Canvas");
-            sPropertyMethod = c.getDeclaredMethod("setProperty", String.class, String.class);
-            if (!sPropertyMethod.isAccessible()) sPropertyMethod.setAccessible(true);
-        } catch (ClassNotFoundException e) {
-            e.printStackTrace();
-        } catch (NoSuchMethodException e) {
-            e.printStackTrace();
-        }
-    }
-
-    /**
-     * Calculates a consistent animation duration (ms) for all animations depending on the movement
-     * of the object being animated.
-     */
-    public static int calculateTranslationAnimationDuration(int distancePx) {
-        return calculateTranslationAnimationDuration(distancePx, 100);
-    }
-    public static int calculateTranslationAnimationDuration(int distancePx, int minDuration) {
-        RecentsConfiguration config = RecentsConfiguration.getInstance();
-        return Math.max(minDuration, (int) (1000f /* ms/s */ *
-                (Math.abs(distancePx) / config.animationPxMovementPerSecond)));
-    }
 
     /** Scales a rect about its centroid */
     public static void scaleRectAboutCenter(Rect r, float scale) {
@@ -175,12 +145,6 @@ public class Utilities {
                     (1f - overlayAlpha) * Color.green(overlayColor)),
             (int) (overlayAlpha * Color.blue(baseColor) +
                     (1f - overlayAlpha) * Color.blue(overlayColor)));
-    }
-
-    /** Sets some private shadow properties. */
-    public static void setShadowProperty(String property, String value)
-            throws IllegalAccessException, InvocationTargetException {
-        sPropertyMethod.invoke(null, property, value);
     }
 
     /**

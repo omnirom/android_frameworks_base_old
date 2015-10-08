@@ -22,10 +22,8 @@ import com.android.internal.location.GpsNetInitiatedHandler;
 import com.android.internal.location.GpsNetInitiatedHandler.GpsNiNotification;
 import com.android.internal.location.ProviderProperties;
 import com.android.internal.location.ProviderRequest;
-import com.android.internal.R;
 import com.android.internal.telephony.Phone;
 import com.android.internal.telephony.PhoneConstants;
-import com.android.internal.telephony.TelephonyIntents;
 
 import android.app.AlarmManager;
 import android.app.AppOpsManager;
@@ -72,7 +70,6 @@ import android.provider.Settings;
 import android.provider.Telephony.Carriers;
 import android.provider.Telephony.Sms.Intents;
 import android.telephony.SmsMessage;
-import android.telephony.SubscriptionInfo;
 import android.telephony.SubscriptionManager;
 import android.telephony.SubscriptionManager.OnSubscriptionsChangedListener;
 import android.telephony.TelephonyManager;
@@ -91,7 +88,6 @@ import java.io.StringReader;
 import java.net.InetAddress;
 import java.net.UnknownHostException;
 import java.util.Date;
-import java.util.List;
 import java.util.Map.Entry;
 import java.util.Properties;
 
@@ -216,6 +212,8 @@ public class GpsLocationProvider implements LocationProviderInterface {
     private static final int REMOVE_LISTENER = 9;
     private static final int INJECT_NTP_TIME_FINISHED = 10;
     private static final int DOWNLOAD_XTRA_DATA_FINISHED = 11;
+    private static final int SUBSCRIPTION_OR_SIM_CHANGED = 12;
+    private static final int INITIALIZE_HANDLER = 13;
 
     // Request setid
     private static final int AGPS_RIL_REQUEST_SETID_IMSI = 1;
@@ -298,8 +296,16 @@ public class GpsLocationProvider implements LocationProviderInterface {
     // current setting 24 hours
     private static final long NTP_INTERVAL = 24*60*60*1000;
     // how long to wait if we have a network error in NTP or XTRA downloading
+    // the initial value of the exponential backoff
     // current setting - 5 minutes
     private static final long RETRY_INTERVAL = 5*60*1000;
+    // how long to wait if we have a network error in NTP or XTRA downloading
+    // the max value of the exponential backoff
+    // current setting - 4 hours
+    private static final long MAX_RETRY_INTERVAL = 4*60*60*1000;
+
+    private BackOff mNtpBackOff = new BackOff(RETRY_INTERVAL, MAX_RETRY_INTERVAL);
+    private BackOff mXtraBackOff = new BackOff(RETRY_INTERVAL, MAX_RETRY_INTERVAL);
 
     // true if we are enabled, protected by this
     private boolean mEnabled;
@@ -357,8 +363,12 @@ public class GpsLocationProvider implements LocationProviderInterface {
     // True if gps should be disabled (used to support battery saver mode in settings).
     private boolean mDisableGps = false;
 
-    // properties loaded from PROPERTIES_FILE
+    /**
+     * Properties loaded from PROPERTIES_FILE.
+     * It must be accessed only inside {@link #mHandler}.
+     */
     private Properties mProperties;
+
     private String mSuplServerHost;
     private int mSuplServerPort = TCP_MIN_PORT;
     private String mC2KServerHost;
@@ -410,7 +420,7 @@ public class GpsLocationProvider implements LocationProviderInterface {
 
     private final IGpsStatusProvider mGpsStatusProvider = new IGpsStatusProvider.Stub() {
         @Override
-        public void addGpsStatusListener(IGpsStatusListener listener) throws RemoteException {
+        public void addGpsStatusListener(IGpsStatusListener listener) {
             mListenerHelper.addListener(listener);
         }
 
@@ -449,7 +459,7 @@ public class GpsLocationProvider implements LocationProviderInterface {
                 checkSmsSuplInit(intent);
             } else if (action.equals(Intents.WAP_PUSH_RECEIVED_ACTION)) {
                 checkWapSuplInit(intent);
-            } else if (action.equals(ConnectivityManager.CONNECTIVITY_ACTION_IMMEDIATE)) {
+            } else if (action.equals(ConnectivityManager.CONNECTIVITY_ACTION)) {
                 // retrieve NetworkInfo result for this UID
                 NetworkInfo info =
                         intent.getParcelableExtra(ConnectivityManager.EXTRA_NETWORK_INFO);
@@ -459,15 +469,15 @@ public class GpsLocationProvider implements LocationProviderInterface {
 
                 int networkState;
                 if (intent.getBooleanExtra(ConnectivityManager.EXTRA_NO_CONNECTIVITY, false) ||
-                    !info.isConnected()) {
+                        !info.isConnected()) {
                     networkState = LocationProvider.TEMPORARILY_UNAVAILABLE;
                 } else {
                     networkState = LocationProvider.AVAILABLE;
                 }
 
-
                 updateNetworkState(networkState, info);
             } else if (PowerManager.ACTION_POWER_SAVE_MODE_CHANGED.equals(action)
+                    || PowerManager.ACTION_DEVICE_IDLE_MODE_CHANGED.equals(action)
                     || Intent.ACTION_SCREEN_OFF.equals(action)
                     || Intent.ACTION_SCREEN_ON.equals(action)) {
                 updateLowPowerMode();
@@ -481,12 +491,12 @@ public class GpsLocationProvider implements LocationProviderInterface {
             new OnSubscriptionsChangedListener() {
         @Override
         public void onSubscriptionsChanged() {
-            subscriptionOrSimChanged(mContext);
+            sendMessage(SUBSCRIPTION_OR_SIM_CHANGED, 0, null);
         }
     };
 
     private void subscriptionOrSimChanged(Context context) {
-        Log.d(TAG, "received SIM realted action: ");
+        Log.d(TAG, "received SIM related action: ");
         TelephonyManager phone = (TelephonyManager)
                 mContext.getSystemService(Context.TELEPHONY_SERVICE);
         String mccMnc = phone.getSimOperator();
@@ -515,14 +525,14 @@ public class GpsLocationProvider implements LocationProviderInterface {
     }
 
     private void updateLowPowerMode() {
-        final boolean disableGps;
+        // Disable GPS if we are in device idle mode.
+        boolean disableGps = mPowerManager.isDeviceIdleMode();
         switch (Settings.Secure.getInt(mContext.getContentResolver(), BATTERY_SAVER_GPS_MODE,
                 BATTERY_SAVER_MODE_DISABLED_WHEN_SCREEN_OFF)) {
             case BATTERY_SAVER_MODE_DISABLED_WHEN_SCREEN_OFF:
-                disableGps = mPowerManager.isPowerSaveMode() && !mPowerManager.isInteractive();
+                // If we are in battery saver mode and the screen is off, disable GPS.
+                disableGps |= mPowerManager.isPowerSaveMode() && !mPowerManager.isInteractive();
                 break;
-            default:
-                disableGps = false;
         }
         if (disableGps != mDisableGps) {
             mDisableGps = disableGps;
@@ -563,14 +573,19 @@ public class GpsLocationProvider implements LocationProviderInterface {
             }
         }
 
-        try {
-            // Convert properties to string contents and send it to HAL.
-            ByteArrayOutputStream baos = new ByteArrayOutputStream(4096);
-            properties.store(baos, null);
-            native_configuration_update(baos.toString());
-            Log.d(TAG, "final config = " + baos.toString());
-        } catch (IOException ex) {
-            Log.w(TAG, "failed to dump properties contents");
+        if (native_is_gnss_configuration_supported()) {
+            try {
+                // Convert properties to string contents and send it to HAL.
+                ByteArrayOutputStream baos = new ByteArrayOutputStream(4096);
+                properties.store(baos, null);
+                native_configuration_update(baos.toString());
+                Log.d(TAG, "final config = " + baos.toString());
+            } catch (IOException ex) {
+                Log.w(TAG, "failed to dump properties contents");
+            }
+        } else if (DEBUG) {
+            Log.d(TAG, "Skipped configuration update because GNSS configuration in GPS HAL is not"
+                    + " supported");
         }
 
         // SUPL_ES configuration.
@@ -646,57 +661,26 @@ public class GpsLocationProvider implements LocationProviderInterface {
         mBatteryStats = IBatteryStats.Stub.asInterface(ServiceManager.getService(
                 BatteryStats.SERVICE_NAME));
 
-        // Load GPS configuration.
+        // Construct internal handler
+        mHandler = new ProviderHandler(looper);
+
+        // Load GPS configuration and register listeners in the background:
+        // some operations, such as opening files and registering broadcast receivers, can take a
+        // relative long time, so the ctor() is kept to create objects needed by this instance,
+        // while IO initialization and registration is delegated to our internal handler
+        // this approach is just fine because events are posted to our handler anyway
         mProperties = new Properties();
-        reloadGpsProperties(mContext, mProperties);
+        sendMessage(INITIALIZE_HANDLER, 0, null);
 
         // Create a GPS net-initiated handler.
         mNIHandler = new GpsNetInitiatedHandler(context,
                                                 mNetInitiatedListener,
                                                 mSuplEsEnabled);
 
-        // TODO: When this object "finishes" we should unregister by invoking
-        // SubscriptionManager.getInstance(mContext).unregister(mOnSubscriptionsChangedListener);
-        // This is not strictly necessary because it will be unregistered if the
-        // notification fails but it is good form.
-
-        // Register for SubscriptionInfo list changes which is guaranteed
-        // to invoke onSubscriptionsChanged the first time.
-        SubscriptionManager.from(mContext)
-            .addOnSubscriptionsChangedListener(mOnSubscriptionsChangedListener);
-
-        // construct handler, listen for events
-        mHandler = new ProviderHandler(looper);
-        listenForBroadcasts();
-
-        // also listen for PASSIVE_PROVIDER updates
-        mHandler.post(new Runnable() {
-            @Override
-            public void run() {
-                LocationManager locManager =
-                        (LocationManager) mContext.getSystemService(Context.LOCATION_SERVICE);
-                final long minTime = 0;
-                final float minDistance = 0;
-                final boolean oneShot = false;
-                LocationRequest request = LocationRequest.createFromDeprecatedProvider(
-                        LocationManager.PASSIVE_PROVIDER,
-                        minTime,
-                        minDistance,
-                        oneShot);
-                // Don't keep track of this request since it's done on behalf of other clients
-                // (which are kept track of separately).
-                request.setHideFromAppOps(true);
-                locManager.requestLocationUpdates(
-                        request,
-                        new NetworkLocationListener(),
-                        mHandler.getLooper());
-            }
-        });
-
         mListenerHelper = new GpsStatusListenerHelper(mHandler) {
             @Override
             protected boolean isAvailableInPlatform() {
-                return GpsLocationProvider.isSupported();
+                return isSupported();
             }
 
             @Override
@@ -750,33 +734,6 @@ public class GpsLocationProvider implements LocationProviderInterface {
         };
     }
 
-    private void listenForBroadcasts() {
-        IntentFilter intentFilter = new IntentFilter();
-        intentFilter.addAction(Intents.DATA_SMS_RECEIVED_ACTION);
-        intentFilter.addDataScheme("sms");
-        intentFilter.addDataAuthority("localhost","7275");
-        mContext.registerReceiver(mBroadcastReceiver, intentFilter, null, mHandler);
-
-        intentFilter = new IntentFilter();
-        intentFilter.addAction(Intents.WAP_PUSH_RECEIVED_ACTION);
-        try {
-            intentFilter.addDataType("application/vnd.omaloc-supl-init");
-        } catch (IntentFilter.MalformedMimeTypeException e) {
-            Log.w(TAG, "Malformed SUPL init mime type");
-        }
-        mContext.registerReceiver(mBroadcastReceiver, intentFilter, null, mHandler);
-
-        intentFilter = new IntentFilter();
-        intentFilter.addAction(ALARM_WAKEUP);
-        intentFilter.addAction(ALARM_TIMEOUT);
-        intentFilter.addAction(ConnectivityManager.CONNECTIVITY_ACTION_IMMEDIATE);
-        intentFilter.addAction(PowerManager.ACTION_POWER_SAVE_MODE_CHANGED);
-        intentFilter.addAction(Intent.ACTION_SCREEN_OFF);
-        intentFilter.addAction(Intent.ACTION_SCREEN_ON);
-        intentFilter.addAction(SIM_STATE_CHANGED);
-        mContext.registerReceiver(mBroadcastReceiver, intentFilter, null, mHandler);
-    }
-
     /**
      * Returns the name of this provider.
      */
@@ -803,16 +760,21 @@ public class GpsLocationProvider implements LocationProviderInterface {
         }
 
         if (info != null) {
-            boolean dataEnabled = TelephonyManager.getDefault().getDataEnabled();
-            boolean networkAvailable = info.isAvailable() && dataEnabled;
-            String defaultApn = getSelectedApn();
-            if (defaultApn == null) {
-                defaultApn = "dummy-apn";
-            }
+            if (native_is_agps_ril_supported()) {
+                boolean dataEnabled = TelephonyManager.getDefault().getDataEnabled();
+                boolean networkAvailable = info.isAvailable() && dataEnabled;
+                String defaultApn = getSelectedApn();
+                if (defaultApn == null) {
+                    defaultApn = "dummy-apn";
+                }
 
-            native_update_network_state(info.isConnected(), info.getType(),
-                                        info.isRoaming(), networkAvailable,
-                                        info.getExtraInfo(), defaultApn);
+                native_update_network_state(info.isConnected(), info.getType(),
+                        info.isRoaming(), networkAvailable,
+                        info.getExtraInfo(), defaultApn);
+            } else if (DEBUG) {
+                Log.d(TAG, "Skipped network state update because AGPS-RIL in GPS HAL is not"
+                        + " supported");
+            }
         }
 
         if (info != null && info.getType() == ConnectivityManager.TYPE_MOBILE_SUPL
@@ -893,9 +855,10 @@ public class GpsLocationProvider implements LocationProviderInterface {
 
                     native_inject_time(time, timeReference, (int) certainty);
                     delay = NTP_INTERVAL;
+                    mNtpBackOff.reset();
                 } else {
                     if (DEBUG) Log.d(TAG, "requestTime failed");
-                    delay = RETRY_INTERVAL;
+                    delay = mNtpBackOff.nextBackoffMillis();
                 }
 
                 sendMessage(INJECT_NTP_TIME_FINISHED, 0, null);
@@ -929,13 +892,14 @@ public class GpsLocationProvider implements LocationProviderInterface {
         AsyncTask.THREAD_POOL_EXECUTOR.execute(new Runnable() {
             @Override
             public void run() {
-                GpsXtraDownloader xtraDownloader = new GpsXtraDownloader(mContext, mProperties);
+                GpsXtraDownloader xtraDownloader = new GpsXtraDownloader(mProperties);
                 byte[] data = xtraDownloader.downloadXtraData();
                 if (data != null) {
                     if (DEBUG) {
                         Log.d(TAG, "calling native_inject_xtra_data");
                     }
                     native_inject_xtra_data(data, data.length);
+                    mXtraBackOff.reset();
                 }
 
                 sendMessage(DOWNLOAD_XTRA_DATA_FINISHED, 0, null);
@@ -943,7 +907,8 @@ public class GpsLocationProvider implements LocationProviderInterface {
                 if (data == null) {
                     // try again later
                     // since this is delayed and not urgent we do not hold a wake lock here
-                    mHandler.sendEmptyMessageDelayed(DOWNLOAD_XTRA_DATA, RETRY_INTERVAL);
+                    mHandler.sendEmptyMessageDelayed(DOWNLOAD_XTRA_DATA,
+                            mXtraBackOff.nextBackoffMillis());
                 }
 
                 // release wake lock held by task
@@ -1013,13 +978,18 @@ public class GpsLocationProvider implements LocationProviderInterface {
                     return GPS_POSITION_MODE_STANDALONE;
                 }
             }
+            // MS-Based is the preferred mode for Assisted-GPS position computation, so we favor
+            // such mode when it is available
+            if (hasCapability(GPS_CAPABILITY_MSB) && (suplMode & AGPS_SUPL_MODE_MSB) != 0) {
+                return GPS_POSITION_MODE_MS_BASED;
+            }
+            // for now, just as the legacy code did, we fallback to MS-Assisted if it is available,
+            // do fallback only for single-shot requests, because it is too expensive to do for
+            // periodic requests as well
             if (singleShot
                     && hasCapability(GPS_CAPABILITY_MSA)
                     && (suplMode & AGPS_SUPL_MODE_MSA) != 0) {
                 return GPS_POSITION_MODE_MS_ASSISTED;
-            } else if (hasCapability(GPS_CAPABILITY_MSB)
-                    && (suplMode & AGPS_SUPL_MODE_MSB) != 0) {
-                return GPS_POSITION_MODE_MS_BASED;
             }
         }
         return GPS_POSITION_MODE_STANDALONE;
@@ -1040,6 +1010,9 @@ public class GpsLocationProvider implements LocationProviderInterface {
             if (mC2KServerHost != null) {
                 native_set_agps_server(AGPS_TYPE_C2K, mC2KServerHost, mC2KServerPort);
             }
+
+            mGpsMeasurementsProvider.onGpsEnabledChanged();
+            mGpsNavigationMessageProvider.onGpsEnabledChanged();
         } else {
             synchronized (mLock) {
                 mEnabled = false;
@@ -1073,6 +1046,9 @@ public class GpsLocationProvider implements LocationProviderInterface {
 
         // do this before releasing wakelock
         native_cleanup();
+
+        mGpsMeasurementsProvider.onGpsEnabledChanged();
+        mGpsNavigationMessageProvider.onGpsEnabledChanged();
     }
 
     @Override
@@ -1507,9 +1483,7 @@ public class GpsLocationProvider implements LocationProviderInterface {
         }
 
         if (wasNavigating != mNavigating) {
-            mListenerHelper.onGpsEnabledChanged(mNavigating);
-            mGpsMeasurementsProvider.onGpsEnabledChanged(mNavigating);
-            mGpsNavigationMessageProvider.onGpsEnabledChanged(mNavigating);
+            mListenerHelper.onStatusChanged(mNavigating);
 
             // send an intent to notify that the GPS has been enabled or disabled
             Intent intent = new Intent(LocationManager.GPS_ENABLED_CHANGE_ACTION);
@@ -1834,7 +1808,7 @@ public class GpsLocationProvider implements LocationProviderInterface {
     // NI Client support
     //=============================================================
     private final INetInitiatedListener mNetInitiatedListener = new INetInitiatedListener.Stub() {
-        // Sends a response for an NI reqeust to HAL.
+        // Sends a response for an NI request to HAL.
         @Override
         public boolean sendNiResponse(int notificationId, int userResponse)
         {
@@ -1925,7 +1899,7 @@ public class GpsLocationProvider implements LocationProviderInterface {
     private void requestSetID(int flags) {
         TelephonyManager phone = (TelephonyManager)
                 mContext.getSystemService(Context.TELEPHONY_SERVICE);
-        int    type = AGPS_SETID_TYPE_NONE;
+        int type = AGPS_SETID_TYPE_NONE;
         String data = "";
 
         if ((flags & AGPS_RIL_REQUEST_SETID_IMSI) == AGPS_RIL_REQUEST_SETID_IMSI) {
@@ -2042,13 +2016,92 @@ public class GpsLocationProvider implements LocationProviderInterface {
                 case UPDATE_LOCATION:
                     handleUpdateLocation((Location)msg.obj);
                     break;
+                case SUBSCRIPTION_OR_SIM_CHANGED:
+                    subscriptionOrSimChanged(mContext);
+                    break;
+                case INITIALIZE_HANDLER:
+                    initialize();
+                    break;
             }
             if (msg.arg2 == 1) {
                 // wakelock was taken for this message, release it
                 mWakeLock.release();
             }
         }
-    };
+
+        /**
+         * This method is bound to {@link #GpsLocationProvider(Context, ILocationManager, Looper)}.
+         * It is in charge of loading properties and registering for events that will be posted to
+         * this handler.
+         */
+        private void initialize() {
+            // load default GPS configuration
+            // (this configuration might change in the future based on SIM changes)
+            reloadGpsProperties(mContext, mProperties);
+
+            // TODO: When this object "finishes" we should unregister by invoking
+            // SubscriptionManager.getInstance(mContext).unregister(mOnSubscriptionsChangedListener);
+            // This is not strictly necessary because it will be unregistered if the
+            // notification fails but it is good form.
+
+            // Register for SubscriptionInfo list changes which is guaranteed
+            // to invoke onSubscriptionsChanged the first time.
+            SubscriptionManager.from(mContext)
+                    .addOnSubscriptionsChangedListener(mOnSubscriptionsChangedListener);
+
+            // listen for events
+            IntentFilter intentFilter;
+            if (native_is_agps_ril_supported()) {
+                intentFilter = new IntentFilter();
+                intentFilter.addAction(Intents.DATA_SMS_RECEIVED_ACTION);
+                intentFilter.addDataScheme("sms");
+                intentFilter.addDataAuthority("localhost", "7275");
+                mContext.registerReceiver(mBroadcastReceiver, intentFilter, null, this);
+
+                intentFilter = new IntentFilter();
+                intentFilter.addAction(Intents.WAP_PUSH_RECEIVED_ACTION);
+                try {
+                    intentFilter.addDataType("application/vnd.omaloc-supl-init");
+                } catch (IntentFilter.MalformedMimeTypeException e) {
+                    Log.w(TAG, "Malformed SUPL init mime type");
+                }
+                mContext.registerReceiver(mBroadcastReceiver, intentFilter, null, this);
+            } else if (DEBUG) {
+                Log.d(TAG, "Skipped registration for SMS/WAP-PUSH messages because AGPS Ril in GPS"
+                        + " HAL is not supported");
+            }
+
+            intentFilter = new IntentFilter();
+            intentFilter.addAction(ALARM_WAKEUP);
+            intentFilter.addAction(ALARM_TIMEOUT);
+            intentFilter.addAction(ConnectivityManager.CONNECTIVITY_ACTION);
+            intentFilter.addAction(PowerManager.ACTION_POWER_SAVE_MODE_CHANGED);
+            intentFilter.addAction(PowerManager.ACTION_DEVICE_IDLE_MODE_CHANGED);
+            intentFilter.addAction(Intent.ACTION_SCREEN_OFF);
+            intentFilter.addAction(Intent.ACTION_SCREEN_ON);
+            intentFilter.addAction(SIM_STATE_CHANGED);
+            mContext.registerReceiver(mBroadcastReceiver, intentFilter, null, this);
+
+            // listen for PASSIVE_PROVIDER updates
+            LocationManager locManager =
+                    (LocationManager) mContext.getSystemService(Context.LOCATION_SERVICE);
+            long minTime = 0;
+            float minDistance = 0;
+            boolean oneShot = false;
+            LocationRequest request = LocationRequest.createFromDeprecatedProvider(
+                    LocationManager.PASSIVE_PROVIDER,
+                    minTime,
+                    minDistance,
+                    oneShot);
+            // Don't keep track of this request since it's done on behalf of other clients
+            // (which are kept track of separately).
+            request.setHideFromAppOps(true);
+            locManager.requestLocationUpdates(
+                    request,
+                    new NetworkLocationListener(),
+                    getLooper());
+        }
+    }
 
     private final class NetworkLocationListener implements LocationListener {
         @Override
@@ -2178,6 +2231,36 @@ public class GpsLocationProvider implements LocationProviderInterface {
         pw.append(s);
     }
 
+    /**
+     * A simple implementation of exponential backoff.
+     */
+    private static final class BackOff {
+        private static final int MULTIPLIER = 2;
+        private final long mInitIntervalMillis;
+        private final long mMaxIntervalMillis;
+        private long mCurrentIntervalMillis;
+
+        public BackOff(long initIntervalMillis, long maxIntervalMillis) {
+            mInitIntervalMillis = initIntervalMillis;
+            mMaxIntervalMillis = maxIntervalMillis;
+
+            mCurrentIntervalMillis = mInitIntervalMillis / MULTIPLIER;
+        }
+
+        public long nextBackoffMillis() {
+            if (mCurrentIntervalMillis > mMaxIntervalMillis) {
+                return mMaxIntervalMillis;
+            }
+
+            mCurrentIntervalMillis *= MULTIPLIER;
+            return mCurrentIntervalMillis;
+        }
+
+        public void reset() {
+            mCurrentIntervalMillis = mInitIntervalMillis / MULTIPLIER;
+        }
+    }
+
     // for GPS SV statistics
     private static final int MAX_SVS = 32;
     private static final int EPHEMERIS_MASK = 0;
@@ -2197,6 +2280,8 @@ public class GpsLocationProvider implements LocationProviderInterface {
     static { class_init_native(); }
     private static native void class_init_native();
     private static native boolean native_is_supported();
+    private static native boolean native_is_agps_ril_supported();
+    private static native boolean native_is_gnss_configuration_supported();
 
     private native boolean native_init();
     private native void native_cleanup();

@@ -44,7 +44,11 @@
 // For each RADIANS_DIVISOR, we would allocate one more vertex b/t the normals.
 #define SPOT_CORNER_RADIANS_DIVISOR (M_PI / SPOT_EXTRA_CORNER_VERTEX_PER_PI)
 
+// For performance, we use (1 - alpha) value for the shader input.
+#define TRANSFORMED_PENUMBRA_ALPHA 1.0f
+#define TRANSFORMED_UMBRA_ALPHA 0.0f
 
+#include <algorithm>
 #include <math.h>
 #include <stdlib.h>
 #include <utils/Log.h>
@@ -52,6 +56,7 @@
 #include "ShadowTessellator.h"
 #include "SpotShadow.h"
 #include "Vertex.h"
+#include "VertexBuffer.h"
 #include "utils/MathUtils.h"
 
 // TODO: After we settle down the new algorithm, we can remove the old one and
@@ -141,7 +146,10 @@ static float rayIntersectPoints(const Vector2& rayOrigin, float dx, float dy,
  * @param pointsLength the number of vertices of the polygon.
  */
 void SpotShadow::xsort(Vector2* points, int pointsLength) {
-    quicksortX(points, 0, pointsLength - 1);
+    auto cmp = [](const Vector2& a, const Vector2& b) -> bool {
+        return a.x < b.x;
+    };
+    std::sort(points, points + pointsLength, cmp);
 }
 
 /**
@@ -269,35 +277,6 @@ void SpotShadow::quicksortCirc(Vector2* points, int low, int high,
 }
 
 /**
- * Sort points by x axis
- *
- * @param points points to sort
- * @param low start index
- * @param high end index
- */
-void SpotShadow::quicksortX(Vector2* points, int low, int high) {
-    int i = low, j = high;
-    int p = low + (high - low) / 2;
-    float pivot = points[p].x;
-    while (i <= j) {
-        while (points[i].x < pivot) {
-            i++;
-        }
-        while (points[j].x > pivot) {
-            j--;
-        }
-
-        if (i <= j) {
-            swap(points, i, j);
-            i++;
-            j--;
-        }
-    }
-    if (low < j) quicksortX(points, low, j);
-    if (i < high) quicksortX(points, i, high);
-}
-
-/**
  * Test whether a point is inside the polygon.
  *
  * @param testPoint the point to test
@@ -331,7 +310,7 @@ bool SpotShadow::testPointInsidePolygon(const Vector2 testPoint,
  * @param len the number of points of the polygon
  */
 void SpotShadow::makeClockwise(Vector2* polygon, int len) {
-    if (polygon == 0  || len == 0) {
+    if (polygon == nullptr  || len == 0) {
         return;
     }
     if (!ShadowTessellator::isClockwise(polygon, len)) {
@@ -797,11 +776,15 @@ inline void genNewPenumbraAndPairWithUmbra(const Vector2* penumbra, int penumbra
                     previousPenumbra * weightForPreviousPenumbra;
 
                 int skippedUmbraIndex = (previousClosestUmbraIndex + k + 1) % umbraLength;
-                verticesPair[verticesPairIndex++] = {newPenumbraIndex, skippedUmbraIndex};
+                verticesPair[verticesPairIndex].outerIndex = newPenumbraIndex;
+                verticesPair[verticesPairIndex].innerIndex = skippedUmbraIndex;
+                verticesPairIndex++;
                 newPenumbra[newPenumbraIndex++] = interpolatedPenumbra;
             }
         }
-        verticesPair[verticesPairIndex++] = {newPenumbraIndex, currentClosestUmbraIndex};
+        verticesPair[verticesPairIndex].outerIndex = newPenumbraIndex;
+        verticesPair[verticesPairIndex].innerIndex = currentClosestUmbraIndex;
+        verticesPairIndex++;
         newPenumbra[newPenumbraIndex++] = currentPenumbraVertex;
 
         previousClosestUmbraIndex = currentClosestUmbraIndex;
@@ -959,11 +942,11 @@ void SpotShadow::generateTriangleStrip(bool isCasterOpaque, float shadowStrength
     // Fill the IB and VB for the penumbra area.
     for (int i = 0; i < newPenumbraLength; i++) {
         AlphaVertex::set(&shadowVertices[vertexBufferIndex++], newPenumbra[i].x,
-                newPenumbra[i].y, 0.0f);
+                newPenumbra[i].y, TRANSFORMED_PENUMBRA_ALPHA);
     }
     for (int i = 0; i < umbraLength; i++) {
         AlphaVertex::set(&shadowVertices[vertexBufferIndex++], umbra[i].x, umbra[i].y,
-                M_PI);
+                TRANSFORMED_UMBRA_ALPHA);
     }
 
     for (int i = 0; i < verticesPairIndex; i++) {
@@ -1003,14 +986,14 @@ void SpotShadow::generateTriangleStrip(bool isCasterOpaque, float shadowStrength
             indexBuffer[indexBufferIndex++] = newPenumbraLength + i;
             indexBuffer[indexBufferIndex++] = vertexBufferIndex;
             AlphaVertex::set(&shadowVertices[vertexBufferIndex++],
-                    closerVertex.x, closerVertex.y, M_PI);
+                    closerVertex.x, closerVertex.y, TRANSFORMED_UMBRA_ALPHA);
         }
     } else {
         // If there is no occluded umbra at all, then draw the triangle fan
         // starting from the centroid to all umbra vertices.
         int lastCentroidIndex = vertexBufferIndex;
         AlphaVertex::set(&shadowVertices[vertexBufferIndex++], centroid.x,
-                centroid.y, M_PI);
+                centroid.y, TRANSFORMED_UMBRA_ALPHA);
         for (int i = 0; i < umbraLength; i++) {
             indexBuffer[indexBufferIndex++] = newPenumbraLength + i;
             indexBuffer[indexBufferIndex++] = lastCentroidIndex;
@@ -1026,7 +1009,7 @@ void SpotShadow::generateTriangleStrip(bool isCasterOpaque, float shadowStrength
     ShadowTessellator::checkOverflow(vertexBufferIndex, totalVertexCount, "Spot Vertex Buffer");
     ShadowTessellator::checkOverflow(indexBufferIndex, totalIndexCount, "Spot Index Buffer");
 
-    shadowTriangleStrip.setMode(VertexBuffer::kIndices);
+    shadowTriangleStrip.setMeshFeatureFlags(VertexBuffer::kAlpha | VertexBuffer::kIndices);
     shadowTriangleStrip.computeBounds<AlphaVertex>();
 }
 

@@ -24,7 +24,7 @@
 #include <gui/GLConsumer.h>
 #include <gui/Surface.h>
 
-#include <android_runtime/AndroidRuntime.h>
+#include "core_jni_helpers.h"
 
 #include <utils/Log.h>
 #include <utils/misc.h>
@@ -48,6 +48,12 @@ struct fields_t {
     jmethodID postEvent;
 };
 static fields_t fields;
+
+// Get an ID that's unique within this process.
+static int32_t createProcessUniqueId() {
+    static volatile int32_t globalCounter = 0;
+    return android_atomic_inc(&globalCounter);
+}
 
 // ----------------------------------------------------------------------------
 
@@ -253,6 +259,11 @@ static void SurfaceTexture_init(JNIEnv* env, jobject thiz, jboolean isDetached,
                 "Unable to create native SurfaceTexture");
         return;
     }
+    surfaceTexture->setName(String8::format("SurfaceTexture-%d-%d-%d",
+            (isDetached ? 0 : texName),
+            getpid(),
+            createProcessUniqueId()));
+
     SurfaceTexture_setSurfaceTexture(env, thiz, surfaceTexture);
     SurfaceTexture_setProducer(env, thiz, producer);
 
@@ -341,6 +352,12 @@ static void SurfaceTexture_release(JNIEnv* env, jobject thiz)
     surfaceTexture->abandon();
 }
 
+static jboolean SurfaceTexture_isReleased(JNIEnv* env, jobject thiz)
+{
+    sp<GLConsumer> surfaceTexture(SurfaceTexture_getSurfaceTexture(env, thiz));
+    return surfaceTexture->isAbandoned();
+}
+
 // ----------------------------------------------------------------------------
 
 static JNINativeMethod gSurfaceTextureMethods[] = {
@@ -355,14 +372,13 @@ static JNINativeMethod gSurfaceTextureMethods[] = {
     {"nativeGetTransformMatrix",   "([F)V", (void*)SurfaceTexture_getTransformMatrix },
     {"nativeGetTimestamp",         "()J",   (void*)SurfaceTexture_getTimestamp },
     {"nativeRelease",              "()V",   (void*)SurfaceTexture_release },
+    {"nativeIsReleased",           "()Z",   (void*)SurfaceTexture_isReleased },
 };
 
 int register_android_graphics_SurfaceTexture(JNIEnv* env)
 {
-    int err = 0;
-    err = AndroidRuntime::registerNativeMethods(env, kSurfaceTextureClassPathName,
-            gSurfaceTextureMethods, NELEM(gSurfaceTextureMethods));
-    return err;
+    return RegisterMethodsOrDie(env, kSurfaceTextureClassPathName, gSurfaceTextureMethods,
+                                NELEM(gSurfaceTextureMethods));
 }
 
 } // namespace android

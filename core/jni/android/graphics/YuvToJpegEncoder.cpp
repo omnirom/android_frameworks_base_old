@@ -4,6 +4,8 @@
 #include <ui/PixelFormat.h>
 #include <hardware/hardware.h>
 
+#include "core_jni_helpers.h"
+
 #include <jni.h>
 
 YuvToJpegEncoder* YuvToJpegEncoder::create(int format, int* strides) {
@@ -236,21 +238,18 @@ static jboolean YuvImage_compressToJpeg(JNIEnv* env, jobject, jbyteArray inYuv,
     env->ReleaseByteArrayElements(inYuv, yuv, 0);
     env->ReleaseIntArrayElements(offsets, imgOffsets, 0);
     env->ReleaseIntArrayElements(strides, imgStrides, 0);
+    delete strm;
     return result;
 }
 ///////////////////////////////////////////////////////////////////////////////
-
-#include <android_runtime/AndroidRuntime.h>
 
 static JNINativeMethod gYuvImageMethods[] = {
     {   "nativeCompressToJpeg",  "([BIII[I[IILjava/io/OutputStream;[B)Z",
         (void*)YuvImage_compressToJpeg }
 };
 
-#define kClassPathName  "android/graphics/YuvImage"
-
 int register_android_graphics_YuvImage(JNIEnv* env)
 {
-    return android::AndroidRuntime::registerNativeMethods(env, kClassPathName,
-            gYuvImageMethods, SK_ARRAY_COUNT(gYuvImageMethods));
+    return android::RegisterMethodsOrDie(env, "android/graphics/YuvImage", gYuvImageMethods,
+                                         NELEM(gYuvImageMethods));
 }

@@ -61,15 +61,15 @@ public:
     int mClipSideFlags; // specifies which sides of the bounds are clipped, unclipped if cleared
     bool mClipped;
     mat4 mMatrix;
-    DrawModifiers mDrawModifiers;
     float mAlpha;
     const RoundRectClipState* mRoundRectClipState;
+    const ProjectionPathMask* mProjectionPathMask;
 };
 
 class OpStatePair {
 public:
     OpStatePair()
-            : op(NULL), state(NULL) {}
+            : op(nullptr), state(nullptr) {}
     OpStatePair(DrawOp* newOp, const DeferredDisplayState* newState)
             : op(newOp), state(newState) {}
     OpStatePair(const OpStatePair& other)
@@ -79,7 +79,7 @@ public:
 };
 
 class DeferredDisplayList {
-    friend class DeferStateStruct; // used to give access to allocator
+    friend struct DeferStateStruct; // used to give access to allocator
 public:
     DeferredDisplayList(const Rect& bounds, bool avoidOverdraw = true) :
             mBounds(bounds), mAvoidOverdraw(avoidOverdraw) {
@@ -106,7 +106,7 @@ public:
      * Plays back all of the draw ops recorded into batches to the renderer.
      * Adjusts the state of the renderer as necessary, and restores it when complete
      */
-    status_t flush(OpenGLRenderer& renderer, Rect& dirty);
+    void flush(OpenGLRenderer& renderer, Rect& dirty);
 
     void addClip(OpenGLRenderer& renderer, ClipOp* op);
     void addSaveLayer(OpenGLRenderer& renderer, SaveLayerOp* op, int newSaveCount);
@@ -127,7 +127,7 @@ private:
     }
 
     void tryRecycleState(DeferredDisplayState* state) {
-        mAllocator.rewindIfLastAlloc(state, sizeof(DeferredDisplayState));
+        mAllocator.rewindIfLastAlloc(state);
     }
 
     /**

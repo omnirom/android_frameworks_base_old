@@ -33,6 +33,7 @@ import android.os.IBinder;
 import android.os.Parcel;
 import android.os.Parcelable;
 import android.os.RemoteException;
+import android.os.ResultReceiver;
 import android.service.media.MediaBrowserService;
 import android.service.media.IMediaBrowserService;
 import android.service.media.IMediaBrowserServiceCallbacks;
@@ -291,15 +292,17 @@ public final class MediaBrowser {
      * the specified id and subscribes to receive updates when they change.
      * <p>
      * The list of subscriptions is maintained even when not connected and is
-     * restored after reconnection.  It is ok to subscribe while not connected
+     * restored after reconnection. It is ok to subscribe while not connected
      * but the results will not be returned until the connection completes.
-     * </p><p>
+     * </p>
+     * <p>
      * If the id is already subscribed with a different callback then the new
-     * callback will replace the previous one.
+     * callback will replace the previous one and the child data will be
+     * reloaded.
      * </p>
      *
      * @param parentId The id of the parent media item whose list of children
-     * will be subscribed.
+     *            will be subscribed.
      * @param callback The callback to receive the list of children.
      */
     public void subscribe(@NonNull String parentId, @NonNull SubscriptionCallback callback) {
@@ -322,7 +325,7 @@ public final class MediaBrowser {
 
         // If we are connected, tell the service that we are watching.  If we aren't
         // connected, the service will be told when we connect.
-        if (mState == CONNECT_STATE_CONNECTED && newSubscription) {
+        if (mState == CONNECT_STATE_CONNECTED) {
             try {
                 mServiceBinder.addSubscription(parentId, mServiceCallbacks);
             } catch (RemoteException ex) {
@@ -345,8 +348,8 @@ public final class MediaBrowser {
      */
     public void unsubscribe(@NonNull String parentId) {
         // Check arguments.
-        if (parentId == null) {
-            throw new IllegalArgumentException("parentId is null");
+        if (TextUtils.isEmpty(parentId)) {
+            throw new IllegalArgumentException("parentId is empty.");
         }
 
         // Remove from our list.
@@ -361,6 +364,60 @@ public final class MediaBrowser {
                 // automatically reregister. So nothing to do here.
                 Log.d(TAG, "removeSubscription failed with RemoteException parentId=" + parentId);
             }
+        }
+    }
+
+    /**
+     * Retrieves a specific {@link MediaItem} from the connected service. Not
+     * all services may support this, so falling back to subscribing to the
+     * parent's id should be used when unavailable.
+     *
+     * @param mediaId The id of the item to retrieve.
+     * @param cb The callback to receive the result on.
+     */
+    public void getItem(final @NonNull String mediaId, @NonNull final ItemCallback cb) {
+        if (TextUtils.isEmpty(mediaId)) {
+            throw new IllegalArgumentException("mediaId is empty.");
+        }
+        if (cb == null) {
+            throw new IllegalArgumentException("cb is null.");
+        }
+        if (mState != CONNECT_STATE_CONNECTED) {
+            Log.i(TAG, "Not connected, unable to retrieve the MediaItem.");
+            mHandler.post(new Runnable() {
+                @Override
+                public void run() {
+                    cb.onError(mediaId);
+                }
+            });
+            return;
+        }
+        ResultReceiver receiver = new ResultReceiver(mHandler) {
+            @Override
+            protected void onReceiveResult(int resultCode, Bundle resultData) {
+                if (resultCode != 0 || resultData == null
+                        || !resultData.containsKey(MediaBrowserService.KEY_MEDIA_ITEM)) {
+                    cb.onError(mediaId);
+                    return;
+                }
+                Parcelable item = resultData.getParcelable(MediaBrowserService.KEY_MEDIA_ITEM);
+                if (!(item instanceof MediaItem)) {
+                    cb.onError(mediaId);
+                    return;
+                }
+                cb.onItemLoaded((MediaItem)item);
+            }
+        };
+        try {
+            mServiceBinder.getMediaItem(mediaId, receiver);
+        } catch (RemoteException e) {
+            Log.i(TAG, "Remote error getting media item.");
+            mHandler.post(new Runnable() {
+                @Override
+                public void run() {
+                    cb.onError(mediaId);
+                }
+            });
         }
     }
 
@@ -671,6 +728,9 @@ public final class MediaBrowser {
     public static abstract class SubscriptionCallback {
         /**
          * Called when the list of children is loaded or updated.
+         *
+         * @param parentId The media id of the parent media item.
+         * @param children The children which were loaded.
          */
         public void onChildrenLoaded(@NonNull String parentId,
                                      @NonNull List<MediaItem> children) {
@@ -682,8 +742,32 @@ public final class MediaBrowser {
          * If this is called, the subscription remains until {@link MediaBrowser#unsubscribe}
          * called, because some errors may heal themselves.
          * </p>
+         *
+         * @param parentId The media id of the parent media item whose children could
+         * not be loaded.
          */
-        public void onError(@NonNull String id) {
+        public void onError(@NonNull String parentId) {
+        }
+    }
+
+    /**
+     * Callback for receiving the result of {@link #getItem}.
+     */
+    public static abstract class ItemCallback {
+        /**
+         * Called when the item has been returned by the browser service.
+         *
+         * @param item The item that was returned or null if it doesn't exist.
+         */
+        public void onItemLoaded(MediaItem item) {
+        }
+
+        /**
+         * Called when the item doesn't exist or there was an error retrieving it.
+         *
+         * @param itemId The media id of the media item which could not be loaded.
+         */
+        public void onError(@NonNull String itemId) {
         }
     }
 

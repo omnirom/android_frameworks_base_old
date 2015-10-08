@@ -16,7 +16,6 @@
 
 package com.android.internal.telecom;
 
-import android.telecom.CameraCapabilities;
 import android.telecom.VideoProfile;
 
  /**
@@ -39,7 +38,9 @@ oneway interface IVideoCallback {
 
     void changePeerDimensions(int width, int height);
 
-    void changeCallDataUsage(int dataUsage);
+    void changeCallDataUsage(long dataUsage);
 
-    void changeCameraCapabilities(in CameraCapabilities cameraCapabilities);
+    void changeCameraCapabilities(in VideoProfile.CameraCapabilities cameraCapabilities);
+
+    void changeVideoQuality(int videoQuality);
 }

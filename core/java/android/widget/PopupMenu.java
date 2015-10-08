@@ -22,6 +22,7 @@ import com.android.internal.view.menu.MenuPopupHelper;
 import com.android.internal.view.menu.MenuPresenter;
 import com.android.internal.view.menu.SubMenuBuilder;
 
+import android.annotation.MenuRes;
 import android.content.Context;
 import android.view.Gravity;
 import android.view.Menu;
@@ -115,6 +116,29 @@ public class PopupMenu implements MenuBuilder.Callback, MenuPresenter.Callback {
     }
 
     /**
+     * Sets the gravity used to align the popup window to its anchor view.
+     * <p>
+     * If the popup is showing, calling this method will take effect only
+     * the next time the popup is shown.
+     *
+     * @param gravity the gravity used to align the popup window
+     *
+     * @see #getGravity()
+     */
+    public void setGravity(int gravity) {
+        mPopup.setGravity(gravity);
+    }
+
+    /**
+     * @return the gravity used to align the popup window to its anchor view
+     *
+     * @see #setGravity(int)
+     */
+    public int getGravity() {
+        return mPopup.getGravity();
+    }
+
+    /**
      * Returns an {@link OnTouchListener} that can be added to the anchor view
      * to implement drag-to-open behavior.
      * <p>
@@ -182,7 +206,7 @@ public class PopupMenu implements MenuBuilder.Callback, MenuPresenter.Callback {
      * popupMenu.getMenuInflater().inflate(menuRes, popupMenu.getMenu()).
      * @param menuRes Menu resource to inflate
      */
-    public void inflate(int menuRes) {
+    public void inflate(@MenuRes int menuRes) {
         getMenuInflater().inflate(menuRes, mMenu);
     }
 

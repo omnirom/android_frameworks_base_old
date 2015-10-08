@@ -16,6 +16,11 @@
 
 #define LOG_TAG "SensorManager"
 
+#include <map>
+
+#include <ScopedUtfChars.h>
+#include <ScopedLocalRef.h>
+
 #include <utils/Log.h>
 #include <utils/Looper.h>
 
@@ -27,6 +32,8 @@
 #include "JNIHelp.h"
 #include "android_os_MessageQueue.h"
 #include <android_runtime/AndroidRuntime.h>
+
+#include "core_jni_helpers.h"
 
 static struct {
     jclass clazz;
@@ -42,7 +49,6 @@ struct SensorOffsets
     jfieldID    vendor;
     jfieldID    version;
     jfieldID    handle;
-    jfieldID    type;
     jfieldID    range;
     jfieldID    resolution;
     jfieldID    power;
@@ -53,6 +59,7 @@ struct SensorOffsets
     jfieldID    requiredPermission;
     jfieldID    maxDelay;
     jfieldID    flags;
+    jmethodID   setType;
 } gSensorOffsets;
 
 
@@ -69,7 +76,6 @@ nativeClassInit (JNIEnv *_env, jclass _this)
     sensorOffsets.vendor      = _env->GetFieldID(sensorClass, "mVendor",    "Ljava/lang/String;");
     sensorOffsets.version     = _env->GetFieldID(sensorClass, "mVersion",   "I");
     sensorOffsets.handle      = _env->GetFieldID(sensorClass, "mHandle",    "I");
-    sensorOffsets.type        = _env->GetFieldID(sensorClass, "mType",      "I");
     sensorOffsets.range       = _env->GetFieldID(sensorClass, "mMaxRange",  "F");
     sensorOffsets.resolution  = _env->GetFieldID(sensorClass, "mResolution","F");
     sensorOffsets.power       = _env->GetFieldID(sensorClass, "mPower",     "F");
@@ -82,29 +88,79 @@ nativeClassInit (JNIEnv *_env, jclass _this)
                                                         "Ljava/lang/String;");
     sensorOffsets.maxDelay    = _env->GetFieldID(sensorClass, "mMaxDelay",  "I");
     sensorOffsets.flags = _env->GetFieldID(sensorClass, "mFlags",  "I");
+    sensorOffsets.setType = _env->GetMethodID(sensorClass, "setType", "(I)Z");
 }
 
-static jint
-nativeGetNextSensor(JNIEnv *env, jclass clazz, jobject sensor, jint next)
+/**
+ * A key comparator predicate.
+ * It is used to intern strings associated with Sensor data.
+ * It defines a 'Strict weak ordering' for the interned strings.
+ */
+class InternedStringCompare {
+public:
+    bool operator()(const String8* string1, const String8* string2) const {
+        if (string1 == NULL) {
+            return string2 != NULL;
+        }
+        if (string2 == NULL) {
+            return false;
+        }
+        return string1->compare(*string2) < 0;
+    }
+};
+
+/**
+ * A localized interning mechanism for Sensor strings.
+ * We implement our own interning to avoid the overhead of using java.lang.String#intern().
+ * It is common that Vendor, StringType, and RequirePermission data is common between many of the
+ * Sensors, by interning the memory usage to represent Sensors is optimized.
+ */
+static jstring
+getInternedString(JNIEnv *env, const String8* string) {
+    static std::map<const String8*, jstring, InternedStringCompare> internedStrings;
+
+    jstring internedString;
+    std::map<const String8*, jstring>::iterator iterator = internedStrings.find(string);
+    if (iterator != internedStrings.end()) {
+        internedString = iterator->second;
+    } else {
+        jstring localString = env->NewStringUTF(string->string());
+        // we are implementing our own interning so expect these strings to be backed by global refs
+        internedString = (jstring) env->NewGlobalRef(localString);
+        internedStrings.insert(std::make_pair(string, internedString));
+        env->DeleteLocalRef(localString);
+    }
+    return internedString;
+}
+
+static jlong
+nativeCreate
+(JNIEnv *env, jclass clazz, jstring opPackageName)
 {
-    SensorManager& mgr(SensorManager::getInstance());
+    ScopedUtfChars opPackageNameUtf(env, opPackageName);
+    return (jlong) new SensorManager(String16(opPackageNameUtf.c_str()));
+}
+
+static jboolean
+nativeGetSensorAtIndex(JNIEnv *env, jclass clazz, jlong sensorManager, jobject sensor, jint index)
+{
+    SensorManager* mgr = reinterpret_cast<SensorManager*>(sensorManager);
 
     Sensor const* const* sensorList;
-    size_t count = mgr.getSensorList(&sensorList);
-    if (size_t(next) >= count)
-        return -1;
+    size_t count = mgr->getSensorList(&sensorList);
+    if (size_t(index) >= count) {
+        return false;
+    }
 
-    Sensor const* const list = sensorList[next];
+    Sensor const* const list = sensorList[index];
     const SensorOffsets& sensorOffsets(gSensorOffsets);
-    jstring name = env->NewStringUTF(list->getName().string());
-    jstring vendor = env->NewStringUTF(list->getVendor().string());
-    jstring stringType = env->NewStringUTF(list->getStringType().string());
-    jstring requiredPermission = env->NewStringUTF(list->getRequiredPermission().string());
+    jstring name = getInternedString(env, &list->getName());
+    jstring vendor = getInternedString(env, &list->getVendor());
+    jstring requiredPermission = getInternedString(env, &list->getRequiredPermission());
     env->SetObjectField(sensor, sensorOffsets.name,      name);
     env->SetObjectField(sensor, sensorOffsets.vendor,    vendor);
     env->SetIntField(sensor, sensorOffsets.version,      list->getVersion());
     env->SetIntField(sensor, sensorOffsets.handle,       list->getHandle());
-    env->SetIntField(sensor, sensorOffsets.type,         list->getType());
     env->SetFloatField(sensor, sensorOffsets.range,      list->getMaxValue());
     env->SetFloatField(sensor, sensorOffsets.resolution, list->getResolution());
     env->SetFloatField(sensor, sensorOffsets.power,      list->getPowerUsage());
@@ -113,13 +169,20 @@ nativeGetNextSensor(JNIEnv *env, jclass clazz, jobject sensor, jint next)
                      list->getFifoReservedEventCount());
     env->SetIntField(sensor, sensorOffsets.fifoMaxEventCount,
                      list->getFifoMaxEventCount());
-    env->SetObjectField(sensor, sensorOffsets.stringType, stringType);
     env->SetObjectField(sensor, sensorOffsets.requiredPermission,
                         requiredPermission);
     env->SetIntField(sensor, sensorOffsets.maxDelay, list->getMaxDelay());
     env->SetIntField(sensor, sensorOffsets.flags, list->getFlags());
-    next++;
-    return size_t(next) < count ? next : 0;
+    if (env->CallBooleanMethod(sensor, sensorOffsets.setType, list->getType()) == JNI_FALSE) {
+        jstring stringType = getInternedString(env, &list->getStringType());
+        env->SetObjectField(sensor, sensorOffsets.stringType, stringType);
+    }
+    return true;
+}
+
+static jboolean nativeIsDataInjectionEnabled(JNIEnv *_env, jclass _this, jlong sensorManager) {
+    SensorManager* mgr = reinterpret_cast<SensorManager*>(sensorManager);
+    return mgr->isDataInjectionEnabled();
 }
 
 //----------------------------------------------------------------------------
@@ -127,21 +190,21 @@ nativeGetNextSensor(JNIEnv *env, jclass clazz, jobject sensor, jint next)
 class Receiver : public LooperCallback {
     sp<SensorEventQueue> mSensorQueue;
     sp<MessageQueue> mMessageQueue;
-    jobject mReceiverObject;
+    jobject mReceiverWeakGlobal;
     jfloatArray mScratch;
 public:
     Receiver(const sp<SensorEventQueue>& sensorQueue,
             const sp<MessageQueue>& messageQueue,
-            jobject receiverObject, jfloatArray scratch) {
+            jobject receiverWeak, jfloatArray scratch) {
         JNIEnv* env = AndroidRuntime::getJNIEnv();
         mSensorQueue = sensorQueue;
         mMessageQueue = messageQueue;
-        mReceiverObject = env->NewGlobalRef(receiverObject);
+        mReceiverWeakGlobal = env->NewGlobalRef(receiverWeak);
         mScratch = (jfloatArray)env->NewGlobalRef(scratch);
     }
     ~Receiver() {
         JNIEnv* env = AndroidRuntime::getJNIEnv();
-        env->DeleteGlobalRef(mReceiverObject);
+        env->DeleteGlobalRef(mReceiverWeakGlobal);
         env->DeleteGlobalRef(mScratch);
     }
     sp<SensorEventQueue> getSensorEventQueue() const {
@@ -162,6 +225,8 @@ private:
     virtual int handleEvent(int fd, int events, void* data) {
         JNIEnv* env = AndroidRuntime::getJNIEnv();
         sp<SensorEventQueue> q = reinterpret_cast<SensorEventQueue *>(data);
+        ScopedLocalRef<jobject> receiverObj(env, jniGetReferent(env, mReceiverWeakGlobal));
+
         ssize_t n;
         ASensorEvent buffer[16];
         while ((n = q->read(buffer, 16)) > 0) {
@@ -177,9 +242,11 @@ private:
                 if (buffer[i].type == SENSOR_TYPE_META_DATA) {
                     // This is a flush complete sensor event. Call dispatchFlushCompleteEvent
                     // method.
-                    env->CallVoidMethod(mReceiverObject,
-                                        gBaseEventQueueClassInfo.dispatchFlushCompleteEvent,
-                                        buffer[i].meta_data.sensor);
+                    if (receiverObj.get()) {
+                        env->CallVoidMethod(receiverObj.get(),
+                                            gBaseEventQueueClassInfo.dispatchFlushCompleteEvent,
+                                            buffer[i].meta_data.sensor);
+                    }
                 } else {
                     int8_t status;
                     switch (buffer[i].type) {
@@ -187,6 +254,8 @@ private:
                     case SENSOR_TYPE_MAGNETIC_FIELD:
                     case SENSOR_TYPE_ACCELEROMETER:
                     case SENSOR_TYPE_GYROSCOPE:
+                    case SENSOR_TYPE_GRAVITY:
+                    case SENSOR_TYPE_LINEAR_ACCELERATION:
                         status = buffer[i].vector.status;
                         break;
                     case SENSOR_TYPE_HEART_RATE:
@@ -196,12 +265,14 @@ private:
                         status = SENSOR_STATUS_ACCURACY_HIGH;
                         break;
                     }
-                    env->CallVoidMethod(mReceiverObject,
-                                        gBaseEventQueueClassInfo.dispatchSensorEvent,
-                                        buffer[i].sensor,
-                                        mScratch,
-                                        status,
-                                        buffer[i].timestamp);
+                    if (receiverObj.get()) {
+                        env->CallVoidMethod(receiverObj.get(),
+                                            gBaseEventQueueClassInfo.dispatchSensorEvent,
+                                            buffer[i].sensor,
+                                            mScratch,
+                                            status,
+                                            buffer[i].timestamp);
+                    }
                 }
                 if (env->ExceptionCheck()) {
                     mSensorQueue->sendAck(buffer, n);
@@ -218,9 +289,12 @@ private:
     }
 };
 
-static jlong nativeInitSensorEventQueue(JNIEnv *env, jclass clazz, jobject eventQ, jobject msgQ, jfloatArray scratch) {
-    SensorManager& mgr(SensorManager::getInstance());
-    sp<SensorEventQueue> queue(mgr.createEventQueue());
+static jlong nativeInitSensorEventQueue(JNIEnv *env, jclass clazz, jlong sensorManager,
+        jobject eventQWeak, jobject msgQ, jfloatArray scratch, jstring packageName, jint mode) {
+    SensorManager* mgr = reinterpret_cast<SensorManager*>(sensorManager);
+    ScopedUtfChars packageUtf(env, packageName);
+    String8 clientName(packageUtf.c_str());
+    sp<SensorEventQueue> queue(mgr->createEventQueue(clientName, mode));
 
     sp<MessageQueue> messageQueue = android_os_MessageQueue_getMessageQueue(env, msgQ);
     if (messageQueue == NULL) {
@@ -228,16 +302,16 @@ static jlong nativeInitSensorEventQueue(JNIEnv *env, jclass clazz, jobject event
         return 0;
     }
 
-    sp<Receiver> receiver = new Receiver(queue, messageQueue, eventQ, scratch);
+    sp<Receiver> receiver = new Receiver(queue, messageQueue, eventQWeak, scratch);
     receiver->incStrong((void*)nativeInitSensorEventQueue);
     return jlong(receiver.get());
 }
 
 static jint nativeEnableSensor(JNIEnv *env, jclass clazz, jlong eventQ, jint handle, jint rate_us,
-                               jint maxBatchReportLatency, jint reservedFlags) {
+                               jint maxBatchReportLatency) {
     sp<Receiver> receiver(reinterpret_cast<Receiver *>(eventQ));
     return receiver->getSensorEventQueue()->enableSensor(handle, rate_us, maxBatchReportLatency,
-                                                         reservedFlags);
+                                                         0);
 }
 
 static jint nativeDisableSensor(JNIEnv *env, jclass clazz, jlong eventQ, jint handle) {
@@ -245,7 +319,7 @@ static jint nativeDisableSensor(JNIEnv *env, jclass clazz, jlong eventQ, jint ha
     return receiver->getSensorEventQueue()->disableSensor(handle);
 }
 
-static void nativeDestroySensorEventQueue(JNIEnv *env, jclass clazz, jlong eventQ, jint handle) {
+static void nativeDestroySensorEventQueue(JNIEnv *env, jclass clazz, jlong eventQ) {
     sp<Receiver> receiver(reinterpret_cast<Receiver *>(eventQ));
     receiver->destroy();
     receiver->decStrong((void*)nativeInitSensorEventQueue);
@@ -256,25 +330,43 @@ static jint nativeFlushSensor(JNIEnv *env, jclass clazz, jlong eventQ) {
     return receiver->getSensorEventQueue()->flush();
 }
 
+static jint nativeInjectSensorData(JNIEnv *env, jclass clazz, jlong eventQ, jint handle,
+        jfloatArray values, jint accuracy, jlong timestamp) {
+    sp<Receiver> receiver(reinterpret_cast<Receiver *>(eventQ));
+    // Create a sensor_event from the above data which can be injected into the HAL.
+    ASensorEvent sensor_event;
+    memset(&sensor_event, 0, sizeof(sensor_event));
+    sensor_event.sensor = handle;
+    sensor_event.timestamp = timestamp;
+    env->GetFloatArrayRegion(values, 0, env->GetArrayLength(values), sensor_event.data);
+    return receiver->getSensorEventQueue()->injectSensorEvent(sensor_event);
+}
 //----------------------------------------------------------------------------
 
 static JNINativeMethod gSystemSensorManagerMethods[] = {
     {"nativeClassInit",
             "()V",
             (void*)nativeClassInit },
+    {"nativeCreate",
+             "(Ljava/lang/String;)J",
+             (void*)nativeCreate },
 
-    {"nativeGetNextSensor",
-            "(Landroid/hardware/Sensor;I)I",
-            (void*)nativeGetNextSensor },
+    {"nativeGetSensorAtIndex",
+            "(JLandroid/hardware/Sensor;I)Z",
+            (void*)nativeGetSensorAtIndex },
+
+    {"nativeIsDataInjectionEnabled",
+            "(J)Z",
+            (void*)nativeIsDataInjectionEnabled},
 };
 
 static JNINativeMethod gBaseEventQueueMethods[] = {
     {"nativeInitBaseEventQueue",
-            "(Landroid/hardware/SystemSensorManager$BaseEventQueue;Landroid/os/MessageQueue;[F)J",
-            (void*)nativeInitSensorEventQueue },
+             "(JLjava/lang/ref/WeakReference;Landroid/os/MessageQueue;[FLjava/lang/String;ILjava/lang/String;)J",
+             (void*)nativeInitSensorEventQueue },
 
     {"nativeEnableSensor",
-            "(JIIII)I",
+            "(JIII)I",
             (void*)nativeEnableSensor },
 
     {"nativeDisableSensor",
@@ -288,38 +380,32 @@ static JNINativeMethod gBaseEventQueueMethods[] = {
     {"nativeFlushSensor",
             "(J)I",
             (void*)nativeFlushSensor },
+
+    {"nativeInjectSensorData",
+            "(JI[FIJ)I",
+            (void*)nativeInjectSensorData },
 };
 
 }; // namespace android
 
 using namespace android;
 
-#define FIND_CLASS(var, className) \
-        var = env->FindClass(className); \
-        LOG_FATAL_IF(! var, "Unable to find class " className); \
-        var = jclass(env->NewGlobalRef(var));
-
-#define GET_METHOD_ID(var, clazz, methodName, methodDescriptor) \
-        var = env->GetMethodID(clazz, methodName, methodDescriptor); \
-        LOG_FATAL_IF(! var, "Unable to find method " methodName);
-
 int register_android_hardware_SensorManager(JNIEnv *env)
 {
-    jniRegisterNativeMethods(env, "android/hardware/SystemSensorManager",
+    RegisterMethodsOrDie(env, "android/hardware/SystemSensorManager",
             gSystemSensorManagerMethods, NELEM(gSystemSensorManagerMethods));
 
-    jniRegisterNativeMethods(env, "android/hardware/SystemSensorManager$BaseEventQueue",
+    RegisterMethodsOrDie(env, "android/hardware/SystemSensorManager$BaseEventQueue",
             gBaseEventQueueMethods, NELEM(gBaseEventQueueMethods));
 
-    FIND_CLASS(gBaseEventQueueClassInfo.clazz, "android/hardware/SystemSensorManager$BaseEventQueue");
+    gBaseEventQueueClassInfo.clazz = FindClassOrDie(env,
+            "android/hardware/SystemSensorManager$BaseEventQueue");
 
-    GET_METHOD_ID(gBaseEventQueueClassInfo.dispatchSensorEvent,
-            gBaseEventQueueClassInfo.clazz,
-            "dispatchSensorEvent", "(I[FIJ)V");
+    gBaseEventQueueClassInfo.dispatchSensorEvent = GetMethodIDOrDie(env,
+            gBaseEventQueueClassInfo.clazz, "dispatchSensorEvent", "(I[FIJ)V");
 
-    GET_METHOD_ID(gBaseEventQueueClassInfo.dispatchFlushCompleteEvent,
-                  gBaseEventQueueClassInfo.clazz,
-                  "dispatchFlushCompleteEvent", "(I)V");
+    gBaseEventQueueClassInfo.dispatchFlushCompleteEvent = GetMethodIDOrDie(env,
+            gBaseEventQueueClassInfo.clazz, "dispatchFlushCompleteEvent", "(I)V");
 
     return 0;
 }

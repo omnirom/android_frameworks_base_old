@@ -16,6 +16,7 @@
 
 package android.widget;
 
+import android.annotation.ColorInt;
 import android.app.ActivityOptions;
 import android.app.ActivityThread;
 import android.app.Application;
@@ -34,6 +35,7 @@ import android.graphics.Bitmap;
 import android.graphics.PorterDuff;
 import android.graphics.Rect;
 import android.graphics.drawable.Drawable;
+import android.graphics.drawable.Icon;
 import android.net.Uri;
 import android.os.Build;
 import android.os.Bundle;
@@ -865,13 +867,13 @@ public class RemoteViews implements Parcelable, Filter {
             if (targetDrawable != null) {
                 // Perform modifications only if values are set correctly
                 if (alpha != -1) {
-                    targetDrawable.setAlpha(alpha);
+                    targetDrawable.mutate().setAlpha(alpha);
                 }
                 if (filterMode != null) {
-                    targetDrawable.setColorFilter(colorFilter, filterMode);
+                    targetDrawable.mutate().setColorFilter(colorFilter, filterMode);
                 }
                 if (level != -1) {
-                    targetDrawable.setLevel(level);
+                    targetDrawable.mutate().setLevel(level);
                 }
             }
         }
@@ -1071,6 +1073,7 @@ public class RemoteViews implements Parcelable, Filter {
         static final int BUNDLE = 13;
         static final int INTENT = 14;
         static final int COLOR_STATE_LIST = 15;
+        static final int ICON = 16;
 
         String methodName;
         int type;
@@ -1149,6 +1152,10 @@ public class RemoteViews implements Parcelable, Filter {
                         this.value = ColorStateList.CREATOR.createFromParcel(in);
                     }
                     break;
+                case ICON:
+                    if (in.readInt() != 0) {
+                        this.value = Icon.CREATOR.createFromParcel(in);
+                    }
                 default:
                     break;
             }
@@ -1224,6 +1231,13 @@ public class RemoteViews implements Parcelable, Filter {
                     if (this.value != null) {
                         ((ColorStateList)this.value).writeToParcel(out, flags);
                     }
+                    break;
+                case ICON:
+                    out.writeInt(this.value != null ? 1 : 0);
+                    if (this.value != null) {
+                        ((Icon)this.value).writeToParcel(out, flags);
+                    }
+                    break;
                 default:
                     break;
             }
@@ -1261,6 +1275,8 @@ public class RemoteViews implements Parcelable, Filter {
                     return Intent.class;
                 case COLOR_STATE_LIST:
                     return ColorStateList.class;
+                case ICON:
+                    return Icon.class;
                 default:
                     return null;
             }
@@ -1396,39 +1412,108 @@ public class RemoteViews implements Parcelable, Filter {
         public TextViewDrawableAction(int viewId, boolean isRelative, int d1, int d2, int d3, int d4) {
             this.viewId = viewId;
             this.isRelative = isRelative;
+            this.useIcons = false;
             this.d1 = d1;
             this.d2 = d2;
             this.d3 = d3;
             this.d4 = d4;
         }
 
+        public TextViewDrawableAction(int viewId, boolean isRelative,
+                Icon i1, Icon i2, Icon i3, Icon i4) {
+            this.viewId = viewId;
+            this.isRelative = isRelative;
+            this.useIcons = true;
+            this.i1 = i1;
+            this.i2 = i2;
+            this.i3 = i3;
+            this.i4 = i4;
+        }
+
         public TextViewDrawableAction(Parcel parcel) {
             viewId = parcel.readInt();
             isRelative = (parcel.readInt() != 0);
-            d1 = parcel.readInt();
-            d2 = parcel.readInt();
-            d3 = parcel.readInt();
-            d4 = parcel.readInt();
+            useIcons = (parcel.readInt() != 0);
+            if (useIcons) {
+                if (parcel.readInt() != 0) {
+                    i1 = Icon.CREATOR.createFromParcel(parcel);
+                }
+                if (parcel.readInt() != 0) {
+                    i2 = Icon.CREATOR.createFromParcel(parcel);
+                }
+                if (parcel.readInt() != 0) {
+                    i3 = Icon.CREATOR.createFromParcel(parcel);
+                }
+                if (parcel.readInt() != 0) {
+                    i4 = Icon.CREATOR.createFromParcel(parcel);
+                }
+            } else {
+                d1 = parcel.readInt();
+                d2 = parcel.readInt();
+                d3 = parcel.readInt();
+                d4 = parcel.readInt();
+            }
         }
 
         public void writeToParcel(Parcel dest, int flags) {
             dest.writeInt(TAG);
             dest.writeInt(viewId);
             dest.writeInt(isRelative ? 1 : 0);
-            dest.writeInt(d1);
-            dest.writeInt(d2);
-            dest.writeInt(d3);
-            dest.writeInt(d4);
+            dest.writeInt(useIcons ? 1 : 0);
+            if (useIcons) {
+                if (i1 != null) {
+                    dest.writeInt(1);
+                    i1.writeToParcel(dest, 0);
+                } else {
+                    dest.writeInt(0);
+                }
+                if (i2 != null) {
+                    dest.writeInt(1);
+                    i2.writeToParcel(dest, 0);
+                } else {
+                    dest.writeInt(0);
+                }
+                if (i3 != null) {
+                    dest.writeInt(1);
+                    i3.writeToParcel(dest, 0);
+                } else {
+                    dest.writeInt(0);
+                }
+                if (i4 != null) {
+                    dest.writeInt(1);
+                    i4.writeToParcel(dest, 0);
+                } else {
+                    dest.writeInt(0);
+                }
+            } else {
+                dest.writeInt(d1);
+                dest.writeInt(d2);
+                dest.writeInt(d3);
+                dest.writeInt(d4);
+            }
         }
 
         @Override
         public void apply(View root, ViewGroup rootParent, OnClickHandler handler) {
             final TextView target = (TextView) root.findViewById(viewId);
             if (target == null) return;
-            if (isRelative) {
-                target.setCompoundDrawablesRelativeWithIntrinsicBounds(d1, d2, d3, d4);
+            if (useIcons) {
+                final Context ctx = target.getContext();
+                final Drawable id1 = i1 == null ? null : i1.loadDrawable(ctx);
+                final Drawable id2 = i2 == null ? null : i2.loadDrawable(ctx);
+                final Drawable id3 = i3 == null ? null : i3.loadDrawable(ctx);
+                final Drawable id4 = i4 == null ? null : i4.loadDrawable(ctx);
+                if (isRelative) {
+                    target.setCompoundDrawablesRelativeWithIntrinsicBounds(id1, id2, id3, id4);
+                } else {
+                    target.setCompoundDrawablesWithIntrinsicBounds(id1, id2, id3, id4);
+                }
             } else {
-                target.setCompoundDrawablesWithIntrinsicBounds(d1, d2, d3, d4);
+                if (isRelative) {
+                    target.setCompoundDrawablesRelativeWithIntrinsicBounds(d1, d2, d3, d4);
+                } else {
+                    target.setCompoundDrawablesWithIntrinsicBounds(d1, d2, d3, d4);
+                }
             }
         }
 
@@ -1437,7 +1522,9 @@ public class RemoteViews implements Parcelable, Filter {
         }
 
         boolean isRelative = false;
+        boolean useIcons = false;
         int d1, d2, d3, d4;
+        Icon i1, i2, i3, i4;
 
         public final static int TAG = 11;
     }
@@ -2051,6 +2138,41 @@ public class RemoteViews implements Parcelable, Filter {
     }
 
     /**
+     * Equivalent to calling {@link
+     * TextView#setCompoundDrawablesWithIntrinsicBounds(Drawable, Drawable, Drawable, Drawable)}
+     * using the drawables yielded by {@link Icon#loadDrawable(Context)}.
+     *
+     * @param viewId The id of the view whose text should change
+     * @param left an Icon to place to the left of the text, or 0
+     * @param top an Icon to place above the text, or 0
+     * @param right an Icon to place to the right of the text, or 0
+     * @param bottom an Icon to place below the text, or 0
+     *
+     * @hide
+     */
+    public void setTextViewCompoundDrawables(int viewId, Icon left, Icon top, Icon right, Icon bottom) {
+        addAction(new TextViewDrawableAction(viewId, false, left, top, right, bottom));
+    }
+
+    /**
+     * Equivalent to calling {@link
+     * TextView#setCompoundDrawablesRelativeWithIntrinsicBounds(Drawable, Drawable, Drawable, Drawable)}
+     * using the drawables yielded by {@link Icon#loadDrawable(Context)}.
+     *
+     * @param viewId The id of the view whose text should change
+     * @param start an Icon to place before the text (relative to the
+     * layout direction), or 0
+     * @param top an Icon to place above the text, or 0
+     * @param end an Icon to place after the text, or 0
+     * @param bottom an Icon to place below the text, or 0
+     *
+     * @hide
+     */
+    public void setTextViewCompoundDrawablesRelative(int viewId, Icon start, Icon top, Icon end, Icon bottom) {
+        addAction(new TextViewDrawableAction(viewId, true, start, top, end, bottom));
+    }
+
+    /**
      * Equivalent to calling ImageView.setImageResource
      *
      * @param viewId The id of the view whose drawable should change
@@ -2078,6 +2200,16 @@ public class RemoteViews implements Parcelable, Filter {
      */
     public void setImageViewBitmap(int viewId, Bitmap bitmap) {
         setBitmap(viewId, "setImageBitmap", bitmap);
+    }
+
+    /**
+     * Equivalent to calling ImageView.setImageIcon
+     *
+     * @param viewId The id of the view whose bitmap should change
+     * @param icon The new Icon for the ImageView
+     */
+    public void setImageViewIcon(int viewId, Icon icon) {
+        setIcon(viewId, "setImageIcon", icon);
     }
 
     /**
@@ -2263,7 +2395,7 @@ public class RemoteViews implements Parcelable, Filter {
      * @param color Sets the text color for all the states (normal, selected,
      *            focused) to be this color.
      */
-    public void setTextColor(int viewId, int color) {
+    public void setTextColor(int viewId, @ColorInt int color) {
         setInt(viewId, "setTextColor", color);
     }
 
@@ -2518,6 +2650,17 @@ public class RemoteViews implements Parcelable, Filter {
     }
 
     /**
+     * Call a method taking one Icon on a view in the layout for this RemoteViews.
+     *
+     * @param viewId The id of the view on which to call the method.
+     * @param methodName The name of the method to call.
+     * @param value The {@link android.graphics.drawable.Icon} to pass the method.
+     */
+    public void setIcon(int viewId, String methodName, Icon value) {
+        addAction(new ReflectionAction(viewId, methodName, ReflectionAction.ICON, value));
+    }
+
+    /**
      * Equivalent to calling View.setContentDescription(CharSequence).
      *
      * @param viewId The id of the view whose content description should change.
@@ -2602,6 +2745,10 @@ public class RemoteViews implements Parcelable, Filter {
             @Override
             public Resources.Theme getTheme() {
                 return contextForResources.getTheme();
+            }
+            @Override
+            public String getPackageName() {
+                return contextForResources.getPackageName();
             }
         };
 

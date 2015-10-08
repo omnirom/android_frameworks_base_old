@@ -16,7 +16,7 @@
 
 #include "jni.h"
 #include "GraphicsJNI.h"
-#include <android_runtime/AndroidRuntime.h>
+#include "core_jni_helpers.h"
 #include <vector>
 
 #include "Canvas.h"
@@ -71,12 +71,7 @@ public:
         mCurrentPage = page;
 
         SkCanvas* canvas = page->mPictureRecorder->beginRecording(
-                contentRect.width(), contentRect.height(), NULL, 0);
-
-        // We pass this canvas to Java where it is used to construct
-        // a Java Canvas object which dereferences the pointer when it
-        // is destroyed, so we have to bump up the reference count.
-        canvas->ref();
+                SkRect::MakeWH(contentRect.width(), contentRect.height()));
 
         return canvas;
     }
@@ -164,10 +159,9 @@ static JNINativeMethod gPdfDocument_Methods[] = {
 };
 
 int register_android_graphics_pdf_PdfDocument(JNIEnv* env) {
-    int result = android::AndroidRuntime::registerNativeMethods(
+    return RegisterMethodsOrDie(
             env, "android/graphics/pdf/PdfDocument", gPdfDocument_Methods,
             NELEM(gPdfDocument_Methods));
-    return result;
 }
 
 };

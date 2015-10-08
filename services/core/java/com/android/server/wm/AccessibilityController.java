@@ -339,6 +339,7 @@ final class AccessibilityController {
                         case WindowManager.LayoutParams.TYPE_APPLICATION_PANEL:
                         case WindowManager.LayoutParams.TYPE_APPLICATION_MEDIA:
                         case WindowManager.LayoutParams.TYPE_APPLICATION_SUB_PANEL:
+                        case WindowManager.LayoutParams.TYPE_APPLICATION_ABOVE_SUB_PANEL:
                         case WindowManager.LayoutParams.TYPE_APPLICATION_ATTACHED_DIALOG:
                         case WindowManager.LayoutParams.TYPE_SEARCH_BAR:
                         case WindowManager.LayoutParams.TYPE_PHONE:
@@ -397,8 +398,6 @@ final class AccessibilityController {
 
         private final class MagnifiedViewport {
 
-            private static final int DEFAUTLT_BORDER_WIDTH_DIP = 5;
-
             private final SparseArray<WindowState> mTempWindowStates =
                     new SparseArray<WindowState>();
 
@@ -410,6 +409,8 @@ final class AccessibilityController {
 
             private final Region mMagnifiedBounds = new Region();
             private final Region mOldMagnifiedBounds = new Region();
+
+            private final Path mCircularPath;
 
             private final MagnificationSpec mMagnificationSpec = MagnificationSpec.obtain();
 
@@ -425,12 +426,21 @@ final class AccessibilityController {
 
             public MagnifiedViewport() {
                 mWindowManager = (WindowManager) mContext.getSystemService(Service.WINDOW_SERVICE);
-                mBorderWidth = TypedValue.applyDimension(
-                        TypedValue.COMPLEX_UNIT_DIP, DEFAUTLT_BORDER_WIDTH_DIP,
-                                mContext.getResources().getDisplayMetrics());
+                mBorderWidth = mContext.getResources().getDimension(
+                        com.android.internal.R.dimen.accessibility_magnification_indicator_width);
                 mHalfBorderWidth = (int) Math.ceil(mBorderWidth / 2);
                 mDrawBorderInset = (int) mBorderWidth / 2;
                 mWindow = new ViewportWindow(mContext);
+
+                if (mContext.getResources().getConfiguration().isScreenRound()) {
+                    mCircularPath = new Path();
+                    mWindowManager.getDefaultDisplay().getRealSize(mTempPoint);
+                    final int centerXY = mTempPoint.x / 2;
+                    mCircularPath.addCircle(centerXY, centerXY, centerXY, Path.Direction.CW);
+                } else {
+                    mCircularPath = null;
+                }
+
                 recomputeBoundsLocked();
             }
 
@@ -458,6 +468,10 @@ final class AccessibilityController {
 
                 Region availableBounds = mTempRegion1;
                 availableBounds.set(0, 0, screenWidth, screenHeight);
+
+                if (mCircularPath != null) {
+                    availableBounds.setPath(mCircularPath, availableBounds);
+                }
 
                 Region nonMagnifiedBounds = mTempRegion4;
                 nonMagnifiedBounds.set(0, 0, 0, 0);
@@ -606,9 +620,8 @@ final class AccessibilityController {
                 final int windowCount = windowList.size();
                 for (int i = 0; i < windowCount; i++) {
                     WindowState windowState = windowList.get(i);
-                    if ((windowState.isOnScreen() || windowState.mAttrs.type == WindowManager
-                            .LayoutParams.TYPE_UNIVERSE_BACKGROUND)
-                            && !windowState.mWinAnimator.mEnterAnimationPending) {
+                    if (windowState.isOnScreen() &&
+                            !windowState.mWinAnimator.mEnterAnimationPending) {
                         outWindows.put(windowState.mLayer, windowState);
                     }
                 }
@@ -656,7 +669,7 @@ final class AccessibilityController {
                     TypedValue typedValue = new TypedValue();
                     context.getTheme().resolveAttribute(R.attr.colorActivatedHighlight,
                             typedValue, true);
-                    final int borderColor = context.getResources().getColor(typedValue.resourceId);
+                    final int borderColor = context.getColor(typedValue.resourceId);
 
                     mPaint.setStyle(Paint.Style.STROKE);
                     mPaint.setStrokeWidth(mBorderWidth);
@@ -1235,9 +1248,8 @@ final class AccessibilityController {
                     && windowType != WindowManager.LayoutParams.TYPE_BOOT_PROGRESS
                     && windowType != WindowManager.LayoutParams.TYPE_DISPLAY_OVERLAY
                     && windowType != WindowManager.LayoutParams.TYPE_DRAG
-                    && windowType != WindowManager.LayoutParams.TYPE_HIDDEN_NAV_CONSUMER
+                    && windowType != WindowManager.LayoutParams.TYPE_INPUT_CONSUMER
                     && windowType != WindowManager.LayoutParams.TYPE_POINTER
-                    && windowType != WindowManager.LayoutParams.TYPE_UNIVERSE_BACKGROUND
                     && windowType != WindowManager.LayoutParams.TYPE_MAGNIFICATION_OVERLAY
                     && windowType != WindowManager.LayoutParams.TYPE_APPLICATION_MEDIA_OVERLAY
                     && windowType != WindowManager.LayoutParams.TYPE_SECURE_SYSTEM_OVERLAY

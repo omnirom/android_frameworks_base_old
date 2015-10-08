@@ -30,9 +30,6 @@
 namespace android {
 namespace filterfw {
 
-// VBO attachment keys
-static const int kDefaultVboKey = 1;
-
 static const char* s_default_vertex_shader_source_ =
   "attribute vec4 a_position;\n"
   "attribute vec2 a_texcoord;\n"
@@ -53,10 +50,6 @@ static void GetTileCoords(const float* b, float x, float y, float* xt, float* yt
 
   *xt = w0 * b[0] + w1 * b[2] + w2 * b[4] + w3 * b[6];
   *yt = w0 * b[1] + w1 * b[3] + w2 * b[5] + w3 * b[7];
-}
-
-static inline float AdjustRatio(float current, float next) {
-  return (current + next) / 2.0;
 }
 
 // VertexAttrib implementation /////////////////////////////////////////////////
@@ -318,15 +311,15 @@ GLuint ShaderProgram::CompileShader(GLenum shader_type, const char* source) {
       ALOGE("Problem compiling shader! Source:");
       ALOGE("%s", source);
       std::string src(source);
-      unsigned int cur_pos = 0;
-      unsigned int next_pos = 0;
-      int line_number = 1;
+      size_t cur_pos = 0;
+      size_t next_pos = 0;
+      size_t line_number = 1;
       while ( (next_pos = src.find_first_of('\n', cur_pos)) != std::string::npos) {
-        ALOGE("%03d : %s", line_number, src.substr(cur_pos, next_pos-cur_pos).c_str());
+        ALOGE("%03zd : %s", line_number, src.substr(cur_pos, next_pos-cur_pos).c_str());
         cur_pos = next_pos + 1;
         line_number++;
       }
-      ALOGE("%03d : %s", line_number, src.substr(cur_pos, next_pos-cur_pos).c_str());
+      ALOGE("%03zu : %s", line_number, src.substr(cur_pos, next_pos-cur_pos).c_str());
 
       GLint log_length = 0;
       glGetShaderiv(shader, GL_INFO_LOG_LENGTH, &log_length);
@@ -442,7 +435,7 @@ bool ShaderProgram::BindInputTextures(const std::vector<GLuint>& textures,
     if (tex_var >= 0) {
       glUniform1i(tex_var, i);
     } else {
-      ALOGE("ShaderProgram: Shader does not seem to support %d number of "
+      ALOGE("ShaderProgram: Shader does not seem to support %zd number of "
            "inputs! Missing uniform 'tex_sampler_%d'!", textures.size(), i);
       return false;
     }

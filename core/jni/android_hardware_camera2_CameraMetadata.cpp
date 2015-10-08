@@ -16,7 +16,6 @@
 */
 
 // #define LOG_NDEBUG 0
-// #define LOG_NNDEBUG 0
 #define LOG_TAG "CameraMetadata-JNI"
 #include <utils/Errors.h>
 #include <utils/Log.h>
@@ -24,12 +23,14 @@
 #include <utils/Vector.h>
 #include <utils/SortedVector.h>
 #include <utils/KeyedVector.h>
+#include <stdio.h>
 #include <string.h>
+#include <vector>
 
 #include "jni.h"
 #include "JNIHelp.h"
 #include "android_os_Parcel.h"
-#include "android_runtime/AndroidRuntime.h"
+#include "core_jni_helpers.h"
 #include "android_runtime/android_hardware_camera2_CameraMetadata.h"
 
 #include <binder/IServiceManager.h>
@@ -42,18 +43,33 @@
 #include <sys/types.h> // for socketpair
 #include <sys/socket.h> // for socketpair
 
-#if defined(LOG_NNDEBUG)
-#if !LOG_NNDEBUG
-#define ALOGVV ALOGV
-#endif
-#else
-#define ALOGVV(...)
-#endif
+static const bool kIsDebug = false;
 
 // fully-qualified class name
 #define CAMERA_METADATA_CLASS_NAME "android/hardware/camera2/impl/CameraMetadataNative"
+#define CHARACTERISTICS_KEY_CLASS_NAME "android/hardware/camera2/CameraCharacteristics$Key"
+#define REQUEST_KEY_CLASS_NAME "android/hardware/camera2/CaptureRequest$Key"
+#define RESULT_KEY_CLASS_NAME "android/hardware/camera2/CaptureResult$Key"
 
 using namespace android;
+
+static struct metadata_java_key_offsets_t {
+    jclass mCharacteristicsKey;
+    jclass mResultKey;
+    jclass mRequestKey;
+    jmethodID mCharacteristicsConstr;
+    jmethodID mResultConstr;
+    jmethodID mRequestConstr;
+    jclass mByteArray;
+    jclass mInt32Array;
+    jclass mFloatArray;
+    jclass mInt64Array;
+    jclass mDoubleArray;
+    jclass mRationalArray;
+    jclass mArrayList;
+    jmethodID mArrayListConstr;
+    jmethodID mArrayListAdd;
+} gMetadataOffsets;
 
 struct fields_t {
     jfieldID    metadata_ptr;
@@ -111,8 +127,8 @@ struct Helpers {
         size_t typeSize = getTypeSize(type);
 
         if (dataBytes % typeSize != 0) {
-            ALOGE("%s: Expected dataBytes (%ud) to be divisible by typeSize "
-                  "(%ud)", __FUNCTION__, dataBytes, typeSize);
+            ALOGE("%s: Expected dataBytes (%zu) to be divisible by typeSize "
+                  "(%zu)", __FUNCTION__, dataBytes, typeSize);
             return BAD_VALUE;
         }
 
@@ -148,6 +164,7 @@ struct Helpers {
 extern "C" {
 
 static void CameraMetadata_classInit(JNIEnv *env, jobject thiz);
+static jobject CameraMetadata_getAllVendorKeys(JNIEnv* env, jobject thiz, jclass keyType);
 static jint CameraMetadata_getTagFromKey(JNIEnv *env, jobject thiz, jstring keyName);
 static jint CameraMetadata_getTypeFromTag(JNIEnv *env, jobject thiz, jint tag);
 static jint CameraMetadata_setupGlobalVendorTagDescriptor(JNIEnv *env, jobject thiz);
@@ -219,7 +236,7 @@ static jboolean CameraMetadata_isEmpty(JNIEnv *env, jobject thiz) {
 
     jboolean empty = metadata->isEmpty();
 
-    ALOGV("%s: Empty returned %d, entry count was %d",
+    ALOGV("%s: Empty returned %d, entry count was %zu",
           __FUNCTION__, empty, metadata->entryCount());
 
     return empty;
@@ -315,7 +332,6 @@ static void CameraMetadata_writeValues(JNIEnv *env, jobject thiz, jint tag, jbyt
                              "Tag (%d) did not have a type", tag);
         return;
     }
-    size_t tagSize = Helpers::getTypeSize(tagType);
 
     status_t res;
 
@@ -518,6 +534,9 @@ static JNINativeMethod gCameraMetadataMethods[] = {
   { "nativeClassInit",
     "()V",
     (void *)CameraMetadata_classInit },
+  { "nativeGetAllVendorKeys",
+    "(Ljava/lang/Class;)Ljava/util/ArrayList;",
+    (void *)CameraMetadata_getAllVendorKeys},
   { "nativeGetTagFromKey",
     "(Ljava/lang/String;)I",
     (void *)CameraMetadata_getTagFromKey },
@@ -596,14 +615,53 @@ static int find_fields(JNIEnv *env, field *fields, int count)
 // Get all the required offsets in java class and register native functions
 int register_android_hardware_camera2_CameraMetadata(JNIEnv *env)
 {
+
+    // Store global references to Key-related classes and methods used natively
+    jclass characteristicsKeyClazz = FindClassOrDie(env, CHARACTERISTICS_KEY_CLASS_NAME);
+    jclass requestKeyClazz = FindClassOrDie(env, REQUEST_KEY_CLASS_NAME);
+    jclass resultKeyClazz = FindClassOrDie(env, RESULT_KEY_CLASS_NAME);
+    gMetadataOffsets.mCharacteristicsKey = MakeGlobalRefOrDie(env, characteristicsKeyClazz);
+    gMetadataOffsets.mRequestKey = MakeGlobalRefOrDie(env, requestKeyClazz);
+    gMetadataOffsets.mResultKey = MakeGlobalRefOrDie(env, resultKeyClazz);
+    gMetadataOffsets.mCharacteristicsConstr = GetMethodIDOrDie(env,
+            gMetadataOffsets.mCharacteristicsKey, "<init>",
+            "(Ljava/lang/String;Ljava/lang/Class;)V");
+    gMetadataOffsets.mRequestConstr = GetMethodIDOrDie(env,
+            gMetadataOffsets.mRequestKey, "<init>", "(Ljava/lang/String;Ljava/lang/Class;)V");
+    gMetadataOffsets.mResultConstr = GetMethodIDOrDie(env,
+            gMetadataOffsets.mResultKey, "<init>", "(Ljava/lang/String;Ljava/lang/Class;)V");
+
+    // Store global references for primitive array types used by Keys
+    jclass byteClazz = FindClassOrDie(env, "[B");
+    jclass int32Clazz = FindClassOrDie(env, "[I");
+    jclass floatClazz = FindClassOrDie(env, "[F");
+    jclass int64Clazz = FindClassOrDie(env, "[J");
+    jclass doubleClazz = FindClassOrDie(env, "[D");
+    jclass rationalClazz = FindClassOrDie(env, "[Landroid/util/Rational;");
+    gMetadataOffsets.mByteArray = MakeGlobalRefOrDie(env, byteClazz);
+    gMetadataOffsets.mInt32Array = MakeGlobalRefOrDie(env, int32Clazz);
+    gMetadataOffsets.mFloatArray = MakeGlobalRefOrDie(env, floatClazz);
+    gMetadataOffsets.mInt64Array = MakeGlobalRefOrDie(env, int64Clazz);
+    gMetadataOffsets.mDoubleArray = MakeGlobalRefOrDie(env, doubleClazz);
+    gMetadataOffsets.mRationalArray = MakeGlobalRefOrDie(env, rationalClazz);
+
+    // Store global references for ArrayList methods used
+    jclass arrayListClazz = FindClassOrDie(env, "java/util/ArrayList");
+    gMetadataOffsets.mArrayList = MakeGlobalRefOrDie(env, arrayListClazz);
+    gMetadataOffsets.mArrayListConstr = GetMethodIDOrDie(env, gMetadataOffsets.mArrayList,
+            "<init>", "(I)V");
+    gMetadataOffsets.mArrayListAdd = GetMethodIDOrDie(env, gMetadataOffsets.mArrayList,
+            "add", "(Ljava/lang/Object;)Z");
+
     // Register native functions
-    return AndroidRuntime::registerNativeMethods(env,
+    return RegisterMethodsOrDie(env,
             CAMERA_METADATA_CLASS_NAME,
             gCameraMetadataMethods,
             NELEM(gCameraMetadataMethods));
 }
 
 extern "C" {
+
 static void CameraMetadata_classInit(JNIEnv *env, jobject thiz) {
     // XX: Why do this separately instead of doing it in the register function?
     ALOGV("%s", __FUNCTION__);
@@ -617,7 +675,108 @@ static void CameraMetadata_classInit(JNIEnv *env, jobject thiz) {
     if (find_fields(env, fields_to_find, NELEM(fields_to_find)) < 0)
         return;
 
-    jclass clazz = env->FindClass(CAMERA_METADATA_CLASS_NAME);
+    env->FindClass(CAMERA_METADATA_CLASS_NAME);
+}
+
+static jobject CameraMetadata_getAllVendorKeys(JNIEnv* env, jobject thiz, jclass keyType) {
+
+    // Get all vendor tags
+    sp<VendorTagDescriptor> vTags = VendorTagDescriptor::getGlobalVendorTagDescriptor();
+    if (vTags.get() == nullptr) {
+        // No vendor tags.
+        return NULL;
+    }
+
+    int count = vTags->getTagCount();
+    if (count <= 0) {
+        // No vendor tags.
+        return NULL;
+    }
+
+    std::vector<uint32_t> tagIds(count, /*initializer value*/0);
+    vTags->getTagArray(&tagIds[0]);
+
+    // Which key class/constructor should we use?
+    jclass keyClazz;
+    jmethodID keyConstr;
+    if (env->IsSameObject(keyType, gMetadataOffsets.mCharacteristicsKey)) {
+        keyClazz = gMetadataOffsets.mCharacteristicsKey;
+        keyConstr = gMetadataOffsets.mCharacteristicsConstr;
+    } else if (env->IsSameObject(keyType, gMetadataOffsets.mResultKey)) {
+        keyClazz = gMetadataOffsets.mResultKey;
+        keyConstr = gMetadataOffsets.mResultConstr;
+    } else if (env->IsSameObject(keyType, gMetadataOffsets.mRequestKey)) {
+        keyClazz = gMetadataOffsets.mRequestKey;
+        keyConstr = gMetadataOffsets.mRequestConstr;
+    } else {
+        jniThrowException(env, "java/lang/IllegalArgumentException",
+                "Invalid key class given as argument.");
+        return NULL;
+    }
+
+    // Allocate arrayList to return
+    jobject arrayList = env->NewObject(gMetadataOffsets.mArrayList,
+            gMetadataOffsets.mArrayListConstr, static_cast<jint>(count));
+    if (env->ExceptionCheck()) {
+        return NULL;
+    }
+
+    for (uint32_t id : tagIds) {
+        const char* section = vTags->getSectionName(id);
+        const char* tag = vTags->getTagName(id);
+        int type = vTags->getTagType(id);
+
+        size_t totalLen = strlen(section) + strlen(tag) + 2;
+        std::vector<char> fullName(totalLen, 0);
+        snprintf(&fullName[0], totalLen, "%s.%s", section, tag);
+
+        jstring name = env->NewStringUTF(&fullName[0]);
+
+        if (env->ExceptionCheck()) {
+            return NULL;
+        }
+
+        jclass valueClazz;
+        switch (type) {
+            case TYPE_BYTE:
+                valueClazz = gMetadataOffsets.mByteArray;
+                break;
+            case TYPE_INT32:
+                valueClazz = gMetadataOffsets.mInt32Array;
+                break;
+            case TYPE_FLOAT:
+                valueClazz = gMetadataOffsets.mFloatArray;
+                break;
+            case TYPE_INT64:
+                valueClazz = gMetadataOffsets.mInt64Array;
+                break;
+            case TYPE_DOUBLE:
+                valueClazz = gMetadataOffsets.mDoubleArray;
+                break;
+            case TYPE_RATIONAL:
+                valueClazz = gMetadataOffsets.mRationalArray;
+                break;
+            default:
+                jniThrowExceptionFmt(env, "java/lang/IllegalStateException",
+                        "Invalid type %d given for key %s", type, &fullName[0]);
+                return NULL;
+        }
+
+        jobject key = env->NewObject(keyClazz, keyConstr, name, valueClazz);
+        if (env->ExceptionCheck()) {
+            return NULL;
+        }
+
+        env->CallBooleanMethod(arrayList, gMetadataOffsets.mArrayListAdd, key);
+        if (env->ExceptionCheck()) {
+            return NULL;
+        }
+
+        env->DeleteLocalRef(name);
+        env->DeleteLocalRef(key);
+    }
+
+    return arrayList;
 }
 
 static jint CameraMetadata_getTagFromKey(JNIEnv *env, jobject thiz, jstring keyName) {
@@ -651,12 +810,15 @@ static jint CameraMetadata_getTagFromKey(JNIEnv *env, jobject thiz, jstring keyN
 
         const char *str = (i < ANDROID_SECTION_COUNT) ? camera_metadata_section_names[i] :
                 vendorSections[i - ANDROID_SECTION_COUNT].string();
-        ALOGVV("%s: Trying to match against section '%s'",
-               __FUNCTION__, str);
+        if (kIsDebug) {
+            ALOGV("%s: Trying to match against section '%s'", __FUNCTION__, str);
+        }
         if (strstr(key, str) == key) { // key begins with the section name
             size_t strLength = strlen(str);
 
-            ALOGVV("%s: Key begins with section name", __FUNCTION__);
+            if (kIsDebug) {
+                ALOGV("%s: Key begins with section name", __FUNCTION__);
+            }
 
             // section name is the longest we've found so far
             if (section == NULL || sectionLength < strLength) {
@@ -664,7 +826,9 @@ static jint CameraMetadata_getTagFromKey(JNIEnv *env, jobject thiz, jstring keyN
                 sectionIndex = i;
                 sectionLength = strLength;
 
-                ALOGVV("%s: Found new best section (%s)", __FUNCTION__, section);
+                if (kIsDebug) {
+                    ALOGV("%s: Found new best section (%s)", __FUNCTION__, section);
+                }
             }
         }
     }
@@ -676,7 +840,7 @@ static jint CameraMetadata_getTagFromKey(JNIEnv *env, jobject thiz, jstring keyN
                              "Could not find section name for key '%s')", key);
         return 0;
     } else {
-        ALOGV("%s: Found matched section '%s' (%d)",
+        ALOGV("%s: Found matched section '%s' (%zu)",
               __FUNCTION__, section, sectionIndex);
     }
 

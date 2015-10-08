@@ -19,6 +19,7 @@ package android.app;
 import android.accessibilityservice.AccessibilityServiceInfo;
 import android.accessibilityservice.IAccessibilityServiceClient;
 import android.content.Context;
+import android.content.pm.IPackageManager;
 import android.graphics.Bitmap;
 import android.hardware.input.InputManager;
 import android.os.Binder;
@@ -59,6 +60,9 @@ public final class UiAutomationConnection extends IUiAutomationConnection.Stub {
 
     private final IAccessibilityManager mAccessibilityManager = IAccessibilityManager.Stub
             .asInterface(ServiceManager.getService(Service.ACCESSIBILITY_SERVICE));
+
+    private final IPackageManager mPackageManager = IPackageManager.Stub
+            .asInterface(ServiceManager.getService("package"));
 
     private final Object mLock = new Object();
 
@@ -227,7 +231,39 @@ public final class UiAutomationConnection extends IUiAutomationConnection.Stub {
     }
 
     @Override
-    public void executeShellCommand(String command, ParcelFileDescriptor sink)
+    public void grantRuntimePermission(String packageName, String permission, int userId)
+            throws RemoteException {
+        synchronized (mLock) {
+            throwIfCalledByNotTrustedUidLocked();
+            throwIfShutdownLocked();
+            throwIfNotConnectedLocked();
+        }
+        final long identity = Binder.clearCallingIdentity();
+        try {
+            mPackageManager.grantRuntimePermission(packageName, permission, userId);
+        } finally {
+            Binder.restoreCallingIdentity(identity);
+        }
+    }
+
+    @Override
+    public void revokeRuntimePermission(String packageName, String permission, int userId)
+            throws RemoteException {
+        synchronized (mLock) {
+            throwIfCalledByNotTrustedUidLocked();
+            throwIfShutdownLocked();
+            throwIfNotConnectedLocked();
+        }
+        final long identity = Binder.clearCallingIdentity();
+        try {
+            mPackageManager.revokeRuntimePermission(packageName, permission, userId);
+        } finally {
+            Binder.restoreCallingIdentity(identity);
+        }
+    }
+
+    @Override
+    public void executeShellCommand(final String command, final ParcelFileDescriptor sink)
             throws RemoteException {
         synchronized (mLock) {
             throwIfCalledByNotTrustedUidLocked();
@@ -235,30 +271,38 @@ public final class UiAutomationConnection extends IUiAutomationConnection.Stub {
             throwIfNotConnectedLocked();
         }
 
-        InputStream in = null;
-        OutputStream out = null;
+        Thread streamReader = new Thread() {
+            public void run() {
+                InputStream in = null;
+                OutputStream out = null;
+                java.lang.Process process = null;
 
-        try {
-            java.lang.Process process = Runtime.getRuntime().exec(command);
+                try {
+                    process = Runtime.getRuntime().exec(command);
 
-            in = process.getInputStream();
-            out = new FileOutputStream(sink.getFileDescriptor());
+                    in = process.getInputStream();
+                    out = new FileOutputStream(sink.getFileDescriptor());
 
-            final byte[] buffer = new byte[8192];
-            while (true) {
-                final int readByteCount = in.read(buffer);
-                if (readByteCount < 0) {
-                    break;
+                    final byte[] buffer = new byte[8192];
+                    while (true) {
+                        final int readByteCount = in.read(buffer);
+                        if (readByteCount < 0) {
+                            break;
+                        }
+                        out.write(buffer, 0, readByteCount);
+                    }
+                } catch (IOException ioe) {
+                    throw new RuntimeException("Error running shell command", ioe);
+                } finally {
+                    if (process != null) {
+                        process.destroy();
+                    }
+                    IoUtils.closeQuietly(out);
+                    IoUtils.closeQuietly(sink);
                 }
-                out.write(buffer, 0, readByteCount);
-            }
-        } catch (IOException ioe) {
-            throw new RuntimeException("Error running shell command", ioe);
-        } finally {
-            IoUtils.closeQuietly(in);
-            IoUtils.closeQuietly(out);
-            IoUtils.closeQuietly(sink);
-        }
+            };
+        };
+        streamReader.start();
     }
 
     @Override

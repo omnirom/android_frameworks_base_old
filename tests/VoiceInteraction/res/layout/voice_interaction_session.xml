@@ -15,51 +15,109 @@
 -->
 
 <FrameLayout xmlns:android="http://schemas.android.com/apk/res/android"
-    android:layout_width="fill_parent"
-    android:layout_height="match_parent"
-    android:fitsSystemWindows="true">
+    android:layout_width="match_parent"
+    android:layout_height="match_parent">
 
-    <FrameLayout android:layout_width="fill_parent"
+    <ImageView android:id="@+id/full_screenshot"
+        android:layout_width="match_parent"
         android:layout_height="match_parent"
-        android:padding="8dp">
+        android:visibility="invisible"/>
 
-        <LinearLayout android:id="@+id/content"
-            android:layout_width="fill_parent"
-            android:layout_height="match_parent"
+    <com.android.test.voiceinteraction.AssistVisualizer android:id="@+id/assist_visualizer"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent" />
+
+    <FrameLayout android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:fitsSystemWindows="true">
+
+        <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_gravity="top"
+                android:orientation="vertical"
+                android:background="#ffffffff"
+                android:elevation="8dp"
+                >
+            <LinearLayout android:id="@+id/top_content"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:orientation="horizontal"
+                >
+                <ImageView android:id="@+id/screenshot"
+                    android:layout_width="wrap_content"
+                    android:layout_height="46dp"
+                    android:adjustViewBounds="true" />
+                <View android:layout_width="0dp"
+                    android:layout_height="0dp"
+                    android:layout_weight="1" />
+                <CheckBox android:id="@+id/show_options"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content" />
+                <Button android:id="@+id/do_tree"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="@string/tree" />
+                <Button android:id="@+id/do_text"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="@string/text" />
+                <Button android:id="@+id/start"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="@string/start" />
+            </LinearLayout>
+            <LinearLayout android:id="@+id/options"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:orientation="vertical"
+                >
+                <CheckBox android:id="@+id/disallow_structure"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="Disallow context" />
+                <CheckBox android:id="@+id/disallow_screenshot"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="Disallow screenshot" />
+                <TextView android:id="@+id/options_text"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_marginTop="16dp"
+                    android:layout_marginBottom="16dp"
+                    android:textAppearance="?android:attr/textAppearanceMedium" />
+            </LinearLayout>
+        </LinearLayout>
+
+        <LinearLayout android:id="@+id/bottom_content"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_gravity="bottom"
             android:orientation="vertical"
             android:background="#ffffffff"
             android:elevation="8dp"
             >
 
             <TextView android:id="@+id/text"
-                android:layout_width="fill_parent"
+                android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:layout_marginBottom="16dp"
-                android:textAppearance="?android:attr/textAppearanceMedium"
-                />
+                android:textAppearance="?android:attr/textAppearanceMedium" />
 
             <LinearLayout android:layout_width="match_parent" android:layout_height="wrap_content"
                     android:orientation="horizontal">
-                <Button android:id="@+id/start"
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:text="@string/start"
-                    />
                 <Button android:id="@+id/confirm"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
-                    android:text="@string/confirm"
-                    />
+                    android:text="@string/confirm" />
                 <Button android:id="@+id/complete"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
-                    android:text="@string/complete"
-                    />
+                    android:text="@string/complete" />
                 <Button android:id="@+id/abort"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
-                    android:text="@string/abort"
-                    />
+                    android:text="@string/abort" />
             </LinearLayout>
 
         </LinearLayout>

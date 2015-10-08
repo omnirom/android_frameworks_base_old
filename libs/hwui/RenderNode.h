@@ -33,13 +33,10 @@
 #include <androidfw/ResourceTypes.h>
 
 #include "AnimatorManager.h"
-#include "DamageAccumulator.h"
 #include "Debug.h"
 #include "Matrix.h"
-#include "DeferredDisplayList.h"
 #include "DisplayList.h"
 #include "RenderProperties.h"
-#include "TreeInfo.h"
 
 class SkBitmap;
 class SkPaint;
@@ -50,7 +47,7 @@ namespace android {
 namespace uirenderer {
 
 class DisplayListOp;
-class DisplayListRenderer;
+class DisplayListCanvas;
 class OpenGLRenderer;
 class Rect;
 class Layer;
@@ -61,12 +58,13 @@ class SaveLayerOp;
 class SaveOp;
 class RestoreToCountOp;
 class DrawRenderNodeOp;
+class TreeInfo;
 
 /**
  * Primary class for storing recorded canvas commands, as well as per-View/ViewGroup display properties.
  *
  * Recording of canvas commands is somewhat similar to SkPicture, except the canvas-recording
- * functionality is split between DisplayListRenderer (which manages the recording), DisplayListData
+ * functionality is split between DisplayListCanvas (which manages the recording), DisplayListData
  * (which holds the actual data), and DisplayList (which holds properties and performs playback onto
  * a renderer).
  *
@@ -237,10 +235,10 @@ private:
         const char* mText;
     };
 
-    void prepareTreeImpl(TreeInfo& info);
+    void prepareTreeImpl(TreeInfo& info, bool functorsNeedLayer);
     void pushStagingPropertiesChanges(TreeInfo& info);
     void pushStagingDisplayListChanges(TreeInfo& info);
-    void prepareSubTree(TreeInfo& info, DisplayListData* subtree);
+    void prepareSubTree(TreeInfo& info, bool functorsNeedLayer, DisplayListData* subtree);
     void applyLayerPropertiesToLayer(TreeInfo& info);
     void prepareLayer(TreeInfo& info, uint32_t dirtyMask);
     void pushLayerUpdate(TreeInfo& info);

@@ -20,6 +20,14 @@ package com.android.systemui.recents;
  * Constants
  */
 public class Constants {
+
+    public static class Metrics {
+        // DO NOT MODIFY THE ORDER OF THESE METRICS
+        public static final int DismissSourceKeyboard = 0;
+        public static final int DismissSourceSwipeGesture = 1;
+        public static final int DismissSourceHeaderButton = 2;
+    }
+
     public static class DebugFlags {
         // Enable this with any other debug flag to see more info
         public static final boolean Verbose = false;
@@ -29,18 +37,16 @@ public class Constants {
             public static final boolean EnableTransitionThumbnailDebugMode = false;
             // Enables the filtering of tasks according to their grouping
             public static final boolean EnableTaskFiltering = false;
-            // Enables clipping of tasks against each other
-            public static final boolean EnableTaskStackClipping = true;
-            // Enables tapping on the TaskBar to launch the task
-            public static final boolean EnableTaskBarTouchEvents = true;
-            // Enables app-info pane on long-pressing the icon
-            public static final boolean EnableDevAppInfoOnLongPress = true;
+            // Enables dismiss-all
+            public static final boolean EnableDismissAll = false;
             // Enables debug mode
             public static final boolean EnableDebugMode = false;
             // Enables the search bar layout
             public static final boolean EnableSearchLayout = true;
             // Enables the thumbnail alpha on the front-most task
             public static final boolean EnableThumbnailAlphaOnFrontmost = false;
+            // Enables all system stacks to show up in the same recents stack
+            public static final boolean EnableMultiStackToSingleStack = true;
             // This disables the bitmap and icon caches
             public static final boolean DisableBackgroundCache = false;
             // Enables the simulated task affiliations
@@ -59,8 +65,6 @@ public class Constants {
     public static class Values {
         public static class App {
             public static int AppWidgetHostId = 1024;
-            public static String Key_SearchAppWidgetId = "searchAppWidgetId";
-            public static String Key_DebugModeEnabled = "debugModeEnabled";
             public static String DebugModeVersion = "A";
         }
 

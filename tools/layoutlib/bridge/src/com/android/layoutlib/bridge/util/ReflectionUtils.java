@@ -16,8 +16,8 @@
 
 package com.android.layoutlib.bridge.util;
 
-import com.android.annotations.NonNull;
-import com.android.annotations.Nullable;
+import android.annotation.NonNull;
+import android.annotation.Nullable;
 
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
@@ -27,7 +27,7 @@ import java.lang.reflect.Method;
  */
 public class ReflectionUtils {
 
-    @Nullable
+    @NonNull
     public static Method getMethod(@NonNull Class<?> clazz, @NonNull String name,
             @Nullable Class<?>... params) throws ReflectionException {
         try {
@@ -49,6 +49,28 @@ public class ReflectionUtils {
             ex = e;
         }
         throw new ReflectionException(ex);
+    }
+
+    /**
+     * Check if the object is an instance of a class named {@code className}. This doesn't work
+     * for interfaces.
+     */
+    public static boolean isInstanceOf(Object object, String className) {
+        Class superClass = object.getClass();
+        while (superClass != null) {
+            String name = superClass.getName();
+            if (name.equals(className)) {
+                return true;
+            }
+            superClass = superClass.getSuperclass();
+        }
+        return false;
+    }
+
+    @NonNull
+    public static Throwable getCause(@NonNull Throwable throwable) {
+        Throwable cause = throwable.getCause();
+        return cause == null ? throwable : cause;
     }
 
     /**

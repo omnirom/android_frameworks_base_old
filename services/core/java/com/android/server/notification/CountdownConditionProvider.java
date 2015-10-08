@@ -25,7 +25,6 @@ import android.content.Intent;
 import android.content.IntentFilter;
 import android.net.Uri;
 import android.service.notification.Condition;
-import android.service.notification.ConditionProviderService;
 import android.service.notification.IConditionProvider;
 import android.service.notification.ZenModeConfig;
 import android.text.format.DateUtils;
@@ -35,12 +34,11 @@ import android.util.Slog;
 import com.android.server.notification.NotificationManagerService.DumpFilter;
 
 import java.io.PrintWriter;
-import java.util.Date;
 
 /** Built-in zen condition provider for simple time-based conditions */
-public class CountdownConditionProvider extends ConditionProviderService {
-    private static final String TAG = "CountdownConditions";
-    private static final boolean DEBUG = Log.isLoggable(TAG, Log.DEBUG);
+public class CountdownConditionProvider extends SystemConditionProviderService {
+    private static final String TAG = "ConditionProviders.CCP";
+    private static final boolean DEBUG = Log.isLoggable("ConditionProviders", Log.DEBUG);
 
     public static final ComponentName COMPONENT =
             new ComponentName("android", CountdownConditionProvider.class.getName());
@@ -59,6 +57,32 @@ public class CountdownConditionProvider extends ConditionProviderService {
         if (DEBUG) Slog.d(TAG, "new CountdownConditionProvider()");
     }
 
+    @Override
+    public ComponentName getComponent() {
+        return COMPONENT;
+    }
+
+    @Override
+    public boolean isValidConditionId(Uri id) {
+        return ZenModeConfig.isValidCountdownConditionId(id);
+    }
+
+    @Override
+    public void attachBase(Context base) {
+        attachBaseContext(base);
+    }
+
+    @Override
+    public void onBootComplete() {
+        // noop
+    }
+
+    @Override
+    public IConditionProvider asInterface() {
+        return (IConditionProvider) onBind(null);
+    }
+
+    @Override
     public void dump(PrintWriter pw, DumpFilter filter) {
         pw.println("    CountdownConditionProvider:");
         pw.print("      mConnected="); pw.println(mConnected);
@@ -150,15 +174,4 @@ public class CountdownConditionProvider extends ConditionProviderService {
                 ts(time), time - now, span, ts(now));
     }
 
-    private static String ts(long time) {
-        return new Date(time) + " (" + time + ")";
-    }
-
-    public void attachBase(Context base) {
-        attachBaseContext(base);
-    }
-
-    public IConditionProvider asInterface() {
-        return (IConditionProvider) onBind(null);
-    }
 }

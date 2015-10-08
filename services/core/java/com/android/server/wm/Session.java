@@ -158,15 +158,15 @@ final class Session extends IWindowSession.Stub
             int viewVisibility, Rect outContentInsets, Rect outStableInsets,
             InputChannel outInputChannel) {
         return addToDisplay(window, seq, attrs, viewVisibility, Display.DEFAULT_DISPLAY,
-                outContentInsets, outStableInsets, outInputChannel);
+                outContentInsets, outStableInsets, null /* outOutsets */, outInputChannel);
     }
 
     @Override
     public int addToDisplay(IWindow window, int seq, WindowManager.LayoutParams attrs,
             int viewVisibility, int displayId, Rect outContentInsets, Rect outStableInsets,
-            InputChannel outInputChannel) {
+            Rect outOutsets, InputChannel outInputChannel) {
         return mService.addWindow(this, window, seq, attrs, viewVisibility, displayId,
-                outContentInsets, outStableInsets, outInputChannel);
+                outContentInsets, outStableInsets, outOutsets, outInputChannel);
     }
 
     @Override
@@ -180,7 +180,7 @@ final class Session extends IWindowSession.Stub
     public int addToDisplayWithoutInputChannel(IWindow window, int seq, WindowManager.LayoutParams attrs,
             int viewVisibility, int displayId, Rect outContentInsets, Rect outStableInsets) {
         return mService.addWindow(this, window, seq, attrs, viewVisibility, displayId,
-            outContentInsets, outStableInsets, null);
+            outContentInsets, outStableInsets, null /* outOutsets */, null);
     }
 
     public void remove(IWindow window) {
@@ -190,14 +190,15 @@ final class Session extends IWindowSession.Stub
     public int relayout(IWindow window, int seq, WindowManager.LayoutParams attrs,
             int requestedWidth, int requestedHeight, int viewFlags,
             int flags, Rect outFrame, Rect outOverscanInsets, Rect outContentInsets,
-            Rect outVisibleInsets, Rect outStableInsets, Configuration outConfig,
+            Rect outVisibleInsets, Rect outStableInsets, Rect outsets, Configuration
+                    outConfig,
             Surface outSurface) {
         if (false) Slog.d(WindowManagerService.TAG, ">>>>>> ENTERED relayout from "
                 + Binder.getCallingPid());
         int res = mService.relayoutWindow(this, window, seq, attrs,
                 requestedWidth, requestedHeight, viewFlags, flags,
                 outFrame, outOverscanInsets, outContentInsets, outVisibleInsets,
-                outStableInsets, outConfig, outSurface);
+                outStableInsets, outsets, outConfig, outSurface);
         if (false) Slog.d(WindowManagerService.TAG, "<<<<<< EXITING relayout to "
                 + Binder.getCallingPid());
         return res;
@@ -446,20 +447,6 @@ final class Session extends IWindowSession.Stub
         mService.wallpaperCommandComplete(window, result);
     }
 
-    public void setUniverseTransform(IBinder window, float alpha, float offx, float offy,
-            float dsdx, float dtdx, float dsdy, float dtdy) {
-        synchronized(mService.mWindowMap) {
-            long ident = Binder.clearCallingIdentity();
-            try {
-                mService.setUniverseTransformLocked(
-                        mService.windowForClientLocked(this, window, true),
-                        alpha, offx, offy, dsdx, dtdx, dsdy, dtdy);
-            } finally {
-                Binder.restoreCallingIdentity(ident);
-            }
-        }
-    }
-
     public void onRectangleOnScreenRequested(IBinder token, Rect rectangle) {
         synchronized(mService.mWindowMap) {
             final long identity = Binder.clearCallingIdentity();
@@ -473,6 +460,16 @@ final class Session extends IWindowSession.Stub
 
     public IWindowId getWindowId(IBinder window) {
         return mService.getWindowId(window);
+    }
+
+    @Override
+    public void pokeDrawLock(IBinder window) {
+        final long identity = Binder.clearCallingIdentity();
+        try {
+            mService.pokeDrawLock(this, window);
+        } finally {
+            Binder.restoreCallingIdentity(identity);
+        }
     }
 
     void windowAddedLocked() {

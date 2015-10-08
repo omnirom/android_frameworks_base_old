@@ -74,6 +74,11 @@ public abstract class KeyguardPinBasedInputView extends KeyguardAbsKeyInputView
     }
 
     @Override
+    protected void setPasswordEntryInputEnabled(boolean enabled) {
+        mPasswordEntry.setEnabled(enabled);
+    }
+
+    @Override
     public boolean onKeyDown(int keyCode, KeyEvent event) {
         if (KeyEvent.isConfirmKey(keyCode)) {
             performClick(mOkButton);
@@ -88,6 +93,16 @@ public abstract class KeyguardPinBasedInputView extends KeyguardAbsKeyInputView
             return true;
         }
         return super.onKeyDown(keyCode, event);
+    }
+
+    @Override
+    protected int getPromtReasonStringRes(int reason) {
+        switch (reason) {
+            case PROMPT_REASON_RESTART:
+                return R.string.kg_prompt_reason_restart_pin;
+            default:
+                return 0;
+        }
     }
 
     private void performClick(View view) {
@@ -147,10 +162,10 @@ public abstract class KeyguardPinBasedInputView extends KeyguardAbsKeyInputView
         // Set selected property on so the view can send accessibility events.
         mPasswordEntry.setSelected(true);
 
-        // Poke the wakelock any time the text is selected or modified
-        mPasswordEntry.setOnClickListener(new OnClickListener() {
-            public void onClick(View v) {
-                mCallback.userActivity();
+        mPasswordEntry.setUserActivityListener(new PasswordTextView.UserActivityListener() {
+            @Override
+            public void onUserActivity() {
+                onUserInput();
             }
         });
 

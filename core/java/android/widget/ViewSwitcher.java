@@ -20,8 +20,6 @@ import android.content.Context;
 import android.util.AttributeSet;
 import android.view.View;
 import android.view.ViewGroup;
-import android.view.accessibility.AccessibilityEvent;
-import android.view.accessibility.AccessibilityNodeInfo;
 
 /**
  * {@link ViewAnimator} that switches between two views, and has a factory
@@ -69,15 +67,8 @@ public class ViewSwitcher extends ViewAnimator {
     }
 
     @Override
-    public void onInitializeAccessibilityEvent(AccessibilityEvent event) {
-        super.onInitializeAccessibilityEvent(event);
-        event.setClassName(ViewSwitcher.class.getName());
-    }
-
-    @Override
-    public void onInitializeAccessibilityNodeInfo(AccessibilityNodeInfo info) {
-        super.onInitializeAccessibilityNodeInfo(info);
-        info.setClassName(ViewSwitcher.class.getName());
+    public CharSequence getAccessibilityClassName() {
+        return ViewSwitcher.class.getName();
     }
 
     /**

@@ -16,6 +16,7 @@
 
 package android.content;
 
+import android.annotation.SystemApi;
 import android.content.pm.ApplicationInfo;
 import android.content.pm.PackageManager;
 import android.content.res.AssetManager;
@@ -284,36 +285,43 @@ public class ContextWrapper extends Context {
     }
 
     @Override
+    @Deprecated
     public Drawable getWallpaper() {
         return mBase.getWallpaper();
     }
 
     @Override
+    @Deprecated
     public Drawable peekWallpaper() {
         return mBase.peekWallpaper();
     }
 
     @Override
+    @Deprecated
     public int getWallpaperDesiredMinimumWidth() {
         return mBase.getWallpaperDesiredMinimumWidth();
     }
 
     @Override
+    @Deprecated
     public int getWallpaperDesiredMinimumHeight() {
         return mBase.getWallpaperDesiredMinimumHeight();
     }
 
     @Override
+    @Deprecated
     public void setWallpaper(Bitmap bitmap) throws IOException {
         mBase.setWallpaper(bitmap);
     }
 
     @Override
+    @Deprecated
     public void setWallpaper(InputStream data) throws IOException {
         mBase.setWallpaper(data);
     }
 
     @Override
+    @Deprecated
     public void clearWallpaper() throws IOException {
         mBase.clearWallpaper();
     }
@@ -327,6 +335,17 @@ public class ContextWrapper extends Context {
     @Override
     public void startActivityAsUser(Intent intent, UserHandle user) {
         mBase.startActivityAsUser(intent, user);
+    }
+
+    /** @hide **/
+    public void startActivityForResult(
+            String who, Intent intent, int requestCode, Bundle options) {
+        mBase.startActivityForResult(who, intent, requestCode, options);
+    }
+
+    /** @hide **/
+    public boolean canStartActivityForResult() {
+        return mBase.canStartActivityForResult();
     }
 
     @Override
@@ -384,6 +403,19 @@ public class ContextWrapper extends Context {
 
     /** @hide */
     @Override
+    public void sendBroadcastMultiplePermissions(Intent intent, String[] receiverPermissions) {
+        mBase.sendBroadcastMultiplePermissions(intent, receiverPermissions);
+    }
+
+    /** @hide */
+    @SystemApi
+    @Override
+    public void sendBroadcast(Intent intent, String receiverPermission, Bundle options) {
+        mBase.sendBroadcast(intent, receiverPermission, options);
+    }
+
+    /** @hide */
+    @Override
     public void sendBroadcast(Intent intent, String receiverPermission, int appOp) {
         mBase.sendBroadcast(intent, receiverPermission, appOp);
     }
@@ -401,6 +433,18 @@ public class ContextWrapper extends Context {
         Bundle initialExtras) {
         mBase.sendOrderedBroadcast(intent, receiverPermission,
                 resultReceiver, scheduler, initialCode,
+                initialData, initialExtras);
+    }
+
+    /** @hide */
+    @SystemApi
+    @Override
+    public void sendOrderedBroadcast(
+            Intent intent, String receiverPermission, Bundle options, BroadcastReceiver resultReceiver,
+            Handler scheduler, int initialCode, String initialData,
+            Bundle initialExtras) {
+        mBase.sendOrderedBroadcast(intent, receiverPermission,
+                options, resultReceiver, scheduler, initialCode,
                 initialData, initialExtras);
     }
 
@@ -426,6 +470,13 @@ public class ContextWrapper extends Context {
         mBase.sendBroadcastAsUser(intent, user, receiverPermission);
     }
 
+    /** @hide */
+    @Override
+    public void sendBroadcastAsUser(Intent intent, UserHandle user,
+            String receiverPermission, int appOp) {
+        mBase.sendBroadcastAsUser(intent, user, receiverPermission, appOp);
+    }
+
     @Override
     public void sendOrderedBroadcastAsUser(Intent intent, UserHandle user,
             String receiverPermission, BroadcastReceiver resultReceiver, Handler scheduler,
@@ -438,18 +489,28 @@ public class ContextWrapper extends Context {
     @Override
     public void sendOrderedBroadcastAsUser(Intent intent, UserHandle user,
             String receiverPermission, int appOp, BroadcastReceiver resultReceiver,
-            Handler scheduler,
-            int initialCode, String initialData, Bundle initialExtras) {
+            Handler scheduler, int initialCode, String initialData, Bundle initialExtras) {
         mBase.sendOrderedBroadcastAsUser(intent, user, receiverPermission, appOp, resultReceiver,
                 scheduler, initialCode, initialData, initialExtras);
     }
 
+    /** @hide */
     @Override
+    public void sendOrderedBroadcastAsUser(Intent intent, UserHandle user,
+            String receiverPermission, int appOp, Bundle options, BroadcastReceiver resultReceiver,
+            Handler scheduler, int initialCode, String initialData, Bundle initialExtras) {
+        mBase.sendOrderedBroadcastAsUser(intent, user, receiverPermission, appOp, options,
+                resultReceiver, scheduler, initialCode, initialData, initialExtras);
+    }
+
+    @Override
+    @Deprecated
     public void sendStickyBroadcast(Intent intent) {
         mBase.sendStickyBroadcast(intent);
     }
 
     @Override
+    @Deprecated
     public void sendStickyOrderedBroadcast(
         Intent intent, BroadcastReceiver resultReceiver,
         Handler scheduler, int initialCode, String initialData,
@@ -460,16 +521,19 @@ public class ContextWrapper extends Context {
     }
 
     @Override
+    @Deprecated
     public void removeStickyBroadcast(Intent intent) {
         mBase.removeStickyBroadcast(intent);
     }
 
     @Override
+    @Deprecated
     public void sendStickyBroadcastAsUser(Intent intent, UserHandle user) {
         mBase.sendStickyBroadcastAsUser(intent, user);
     }
 
     @Override
+    @Deprecated
     public void sendStickyOrderedBroadcastAsUser(Intent intent,
             UserHandle user, BroadcastReceiver resultReceiver,
             Handler scheduler, int initialCode, String initialData,
@@ -479,6 +543,7 @@ public class ContextWrapper extends Context {
     }
 
     @Override
+    @Deprecated
     public void removeStickyBroadcastAsUser(Intent intent, UserHandle user) {
         mBase.removeStickyBroadcastAsUser(intent, user);
     }
@@ -563,6 +628,11 @@ public class ContextWrapper extends Context {
     }
 
     @Override
+    public String getSystemServiceName(Class<?> serviceClass) {
+        return mBase.getSystemServiceName(serviceClass);
+    }
+
+    @Override
     public int checkPermission(String permission, int pid, int uid) {
         return mBase.checkPermission(permission, pid, uid);
     }
@@ -581,6 +651,11 @@ public class ContextWrapper extends Context {
     @Override
     public int checkCallingOrSelfPermission(String permission) {
         return mBase.checkCallingOrSelfPermission(permission);
+    }
+
+    @Override
+    public int checkSelfPermission(String permission) {
+       return mBase.checkSelfPermission(permission);
     }
 
     @Override
@@ -679,6 +754,7 @@ public class ContextWrapper extends Context {
     }
 
     /** @hide */
+    @Override
     public Context createApplicationContext(ApplicationInfo application,
             int flags) throws PackageManager.NameNotFoundException {
         return mBase.createApplicationContext(application, flags);

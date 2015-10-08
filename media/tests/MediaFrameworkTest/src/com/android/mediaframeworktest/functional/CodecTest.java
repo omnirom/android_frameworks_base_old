@@ -60,6 +60,7 @@ public class CodecTest {
     private static boolean onPrepareSuccess = false;
     public static boolean onCompleteSuccess = false;
     public static boolean mPlaybackError = false;
+    public static boolean mFailedToCompleteWithNoError = true;
     public static int mMediaInfoUnknownCount = 0;
     public static int mMediaInfoVideoTrackLaggingCount = 0;
     public static int mMediaInfoBadInterleavingCount = 0;
@@ -801,6 +802,7 @@ public class CodecTest {
         mMediaInfoNotSeekableCount = 0;
         mMediaInfoMetdataUpdateCount = 0;
         mPlaybackError = false;
+        mFailedToCompleteWithNoError = true;
         String testResult;
 
         initializeMessageLooper();
@@ -823,19 +825,29 @@ public class CodecTest {
             duration = mMediaPlayer.getDuration();
             // start to play
             mMediaPlayer.start();
-            waittime = duration - mMediaPlayer.getCurrentPosition();
-            synchronized(onCompletion){
-                try {
-                    onCompletion.wait(waittime + buffertime);
-                }catch (Exception e) {
-                    Log.v(TAG, "playMediaSamples are interrupted");
-                    return false;
+            if (duration < 0) {
+                Log.w(TAG, filePath + " has unknown duration, waiting until playback completes");
+                while (mMediaPlayer.isPlaying()) {
+                    SystemClock.sleep(1000);
+                }
+            } else {
+                waittime = duration - mMediaPlayer.getCurrentPosition();
+                synchronized(onCompletion){
+                    try {
+                        onCompletion.wait(waittime + buffertime);
+                    } catch (Exception e) {
+                        Log.v(TAG, "playMediaSamples are interrupted");
+                        return false;
+                    }
                 }
             }
             terminateMessageLooper();
         } catch (Exception e) {
             Log.v(TAG, "playMediaSamples:" + e.getMessage());
         }
+        // Check if playback state is unknown (neither completed nor erroneous) unless
+        // it's not interrupted in the middle. If true, that is an exceptional case to investigate.
+        mFailedToCompleteWithNoError = !(onCompleteSuccess || mPlaybackError);
         return onCompleteSuccess;
     }
 }

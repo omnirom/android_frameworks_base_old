@@ -29,37 +29,15 @@
 #include "DamageAccumulator.h"
 #include "Debug.h"
 #include "DisplayListOp.h"
-#include "DisplayListLogBuffer.h"
 #include "LayerRenderer.h"
 #include "OpenGLRenderer.h"
+#include "TreeInfo.h"
 #include "utils/MathUtils.h"
 #include "utils/TraceUtils.h"
 #include "renderthread/CanvasContext.h"
 
 namespace android {
 namespace uirenderer {
-
-void RenderNode::outputLogBuffer(int fd) {
-    DisplayListLogBuffer& logBuffer = DisplayListLogBuffer::getInstance();
-    if (logBuffer.isEmpty()) {
-        return;
-    }
-
-    FILE *file = fdopen(fd, "a");
-
-    fprintf(file, "\nRecent DisplayList operations\n");
-    logBuffer.outputCommands(file);
-
-    if (Caches::hasInstance()) {
-        String8 cachesLog;
-        Caches::getInstance().dumpMemoryUsage(cachesLog);
-        fprintf(file, "\nCaches:\n%s\n", cachesLog.string());
-    } else {
-        fprintf(file, "\nNo caches instance.\n");
-    }
-
-    fflush(file);
-}
 
 void RenderNode::debugDumpLayers(const char* prefix) {
     if (mLayer) {
@@ -77,10 +55,10 @@ void RenderNode::debugDumpLayers(const char* prefix) {
 RenderNode::RenderNode()
         : mDirtyPropertyFields(0)
         , mNeedsDisplayListDataSync(false)
-        , mDisplayListData(0)
-        , mStagingDisplayListData(0)
+        , mDisplayListData(nullptr)
+        , mStagingDisplayListData(nullptr)
         , mAnimatorManager(*this)
-        , mLayer(0)
+        , mLayer(nullptr)
         , mParentCount(0) {
 }
 
@@ -90,7 +68,7 @@ RenderNode::~RenderNode() {
     if (mLayer) {
         ALOGW("Memory Warning: Layer %p missed its detachment, held on to for far too long!", mLayer);
         mLayer->postDecStrong();
-        mLayer = 0;
+        mLayer = nullptr;
     }
 }
 
@@ -105,11 +83,13 @@ void RenderNode::setStagingDisplayList(DisplayListData* data) {
  * display list. This function should remain in sync with the replay() function.
  */
 void RenderNode::output(uint32_t level) {
-    ALOGD("%*sStart display list (%p, %s%s%s%s)", (level - 1) * 2, "", this,
+    ALOGD("%*sStart display list (%p, %s%s%s%s%s%s)", (level - 1) * 2, "", this,
             getName(),
+            (MathUtils::isZero(properties().getAlpha()) ? ", zero alpha" : ""),
             (properties().hasShadow() ? ", casting shadow" : ""),
             (isRenderable() ? "" : ", empty"),
-            (mLayer != NULL ? ", on HW Layer" : ""));
+            (properties().getProjectBackwards() ? ", projected" : ""),
+            (mLayer != nullptr ? ", on HW Layer" : ""));
     ALOGD("%*s%s %d", level * 2, "", "Save",
             SkCanvas::kMatrix_SaveFlag | SkCanvas::kClip_SaveFlag);
 
@@ -140,7 +120,10 @@ void RenderNode::prepareTree(TreeInfo& info) {
     ATRACE_CALL();
     LOG_ALWAYS_FATAL_IF(!info.damageAccumulator, "DamageAccumulator missing");
 
-    prepareTreeImpl(info);
+    // Functors don't correctly handle stencil usage of overdraw debugging - shove 'em in a layer.
+    bool functorsNeedLayer = Properties::debugOverdraw;
+
+    prepareTreeImpl(info, functorsNeedLayer);
 }
 
 void RenderNode::addAnimator(const sp<BaseRenderNodeAnimator>& animator) {
@@ -160,8 +143,8 @@ void RenderNode::damageSelf(TreeInfo& info) {
 }
 
 void RenderNode::prepareLayer(TreeInfo& info, uint32_t dirtyMask) {
-    LayerType layerType = properties().layerProperties().type();
-    if (CC_UNLIKELY(layerType == kLayerTypeRenderLayer)) {
+    LayerType layerType = properties().effectiveLayerType();
+    if (CC_UNLIKELY(layerType == LayerType::RenderLayer)) {
         // Damage applied so far needs to affect our parent, but does not require
         // the layer to be updated. So we pop/push here to clear out the current
         // damage and get a clean state for display list or children updates to
@@ -175,13 +158,13 @@ void RenderNode::prepareLayer(TreeInfo& info, uint32_t dirtyMask) {
 }
 
 void RenderNode::pushLayerUpdate(TreeInfo& info) {
-    LayerType layerType = properties().layerProperties().type();
+    LayerType layerType = properties().effectiveLayerType();
     // If we are not a layer OR we cannot be rendered (eg, view was detached)
     // we need to destroy any Layers we may have had previously
-    if (CC_LIKELY(layerType != kLayerTypeRenderLayer) || CC_UNLIKELY(!isRenderable())) {
+    if (CC_LIKELY(layerType != LayerType::RenderLayer) || CC_UNLIKELY(!isRenderable())) {
         if (CC_UNLIKELY(mLayer)) {
             LayerRenderer::destroyLayer(mLayer);
-            mLayer = NULL;
+            mLayer = nullptr;
         }
         return;
     }
@@ -195,7 +178,7 @@ void RenderNode::pushLayerUpdate(TreeInfo& info) {
     } else if (mLayer->layer.getWidth() != getWidth() || mLayer->layer.getHeight() != getHeight()) {
         if (!LayerRenderer::resizeLayer(mLayer, getWidth(), getHeight())) {
             LayerRenderer::destroyLayer(mLayer);
-            mLayer = 0;
+            mLayer = nullptr;
         }
         damageSelf(info);
         transformUpdateNeeded = true;
@@ -222,7 +205,7 @@ void RenderNode::pushLayerUpdate(TreeInfo& info) {
     }
 
     if (dirty.intersect(0, 0, getWidth(), getHeight())) {
-        dirty.roundOut();
+        dirty.roundOut(&dirty);
         mLayer->updateDeferred(this, dirty.fLeft, dirty.fTop, dirty.fRight, dirty.fBottom);
     }
     // This is not inside the above if because we may have called
@@ -231,15 +214,23 @@ void RenderNode::pushLayerUpdate(TreeInfo& info) {
         info.renderer->pushLayerUpdate(mLayer);
     }
 
-    if (CC_UNLIKELY(info.canvasContext)) {
-        // If canvasContext is not null that means there are prefetched layers
-        // that need to be accounted for. That might be us, so tell CanvasContext
-        // that this layer is in the tree and should not be destroyed.
+    if (info.canvasContext) {
+        // There might be prefetched layers that need to be accounted for.
+        // That might be us, so tell CanvasContext that this layer is in the
+        // tree and should not be destroyed.
         info.canvasContext->markLayerInUse(this);
     }
 }
 
-void RenderNode::prepareTreeImpl(TreeInfo& info) {
+/**
+ * Traverse down the the draw tree to prepare for a frame.
+ *
+ * MODE_FULL = UI Thread-driven (thus properties must be synced), otherwise RT driven
+ *
+ * While traversing down the tree, functorsNeedLayer flag is set to true if anything that uses the
+ * stencil buffer may be needed. Views that use a functor to draw will be forced onto a layer.
+ */
+void RenderNode::prepareTreeImpl(TreeInfo& info, bool functorsNeedLayer) {
     info.damageAccumulator->pushTransform(this);
 
     if (info.mode == TreeInfo::MODE_FULL) {
@@ -249,11 +240,21 @@ void RenderNode::prepareTreeImpl(TreeInfo& info) {
     if (CC_LIKELY(info.runAnimations)) {
         animatorDirtyMask = mAnimatorManager.animate(info);
     }
+
+    bool willHaveFunctor = false;
+    if (info.mode == TreeInfo::MODE_FULL && mStagingDisplayListData) {
+        willHaveFunctor = !mStagingDisplayListData->functors.isEmpty();
+    } else if (mDisplayListData) {
+        willHaveFunctor = !mDisplayListData->functors.isEmpty();
+    }
+    bool childFunctorsNeedLayer = mProperties.prepareForFunctorPresence(
+            willHaveFunctor, functorsNeedLayer);
+
     prepareLayer(info, animatorDirtyMask);
     if (info.mode == TreeInfo::MODE_FULL) {
         pushStagingDisplayListChanges(info);
     }
-    prepareSubTree(info, mDisplayListData);
+    prepareSubTree(info, childFunctorsNeedLayer, mDisplayListData);
     pushLayerUpdate(info);
 
     info.damageAccumulator->popTransform();
@@ -310,10 +311,10 @@ void RenderNode::pushStagingDisplayListChanges(TreeInfo& info) {
             Caches::getInstance().registerFunctors(mStagingDisplayListData->functors.size());
         }
         mDisplayListData = mStagingDisplayListData;
-        mStagingDisplayListData = NULL;
+        mStagingDisplayListData = nullptr;
         if (mDisplayListData) {
             for (size_t i = 0; i < mDisplayListData->functors.size(); i++) {
-                (*mDisplayListData->functors[i])(DrawGlInfo::kModeSync, NULL);
+                (*mDisplayListData->functors[i])(DrawGlInfo::kModeSync, nullptr);
             }
         }
         damageSelf(info);
@@ -330,26 +331,25 @@ void RenderNode::deleteDisplayListData() {
         }
     }
     delete mDisplayListData;
-    mDisplayListData = NULL;
+    mDisplayListData = nullptr;
 }
 
-void RenderNode::prepareSubTree(TreeInfo& info, DisplayListData* subtree) {
+void RenderNode::prepareSubTree(TreeInfo& info, bool functorsNeedLayer, DisplayListData* subtree) {
     if (subtree) {
         TextureCache& cache = Caches::getInstance().textureCache;
         info.out.hasFunctors |= subtree->functors.size();
-        // TODO: Fix ownedBitmapResources to not require disabling prepareTextures
-        // and thus falling out of async drawing path.
-        if (subtree->ownedBitmapResources.size()) {
-            info.prepareTextures = false;
-        }
         for (size_t i = 0; info.prepareTextures && i < subtree->bitmapResources.size(); i++) {
-            info.prepareTextures = cache.prefetchAndMarkInUse(subtree->bitmapResources[i]);
+            info.prepareTextures = cache.prefetchAndMarkInUse(
+                    info.canvasContext, subtree->bitmapResources[i]);
         }
         for (size_t i = 0; i < subtree->children().size(); i++) {
             DrawRenderNodeOp* op = subtree->children()[i];
             RenderNode* childNode = op->mRenderNode;
             info.damageAccumulator->pushTransform(&op->mTransformFromParent);
-            childNode->prepareTreeImpl(info);
+            bool childFunctorsNeedLayer = functorsNeedLayer
+                    // Recorded with non-rect clip, or canvas-rotated by parent
+                    || op->mRecordedWithPotentialStencilClip;
+            childNode->prepareTreeImpl(info, childFunctorsNeedLayer);
             info.damageAccumulator->popTransform();
         }
     }
@@ -358,7 +358,7 @@ void RenderNode::prepareSubTree(TreeInfo& info, DisplayListData* subtree) {
 void RenderNode::destroyHardwareResources() {
     if (mLayer) {
         LayerRenderer::destroyLayer(mLayer);
-        mLayer = NULL;
+        mLayer = nullptr;
     }
     if (mDisplayListData) {
         for (size_t i = 0; i < mDisplayListData->children().size(); i++) {
@@ -411,32 +411,36 @@ void RenderNode::setViewProperties(OpenGLRenderer& renderer, T& handler) {
             renderer.concatMatrix(*properties().getTransformMatrix());
         }
     }
-    const bool isLayer = properties().layerProperties().type() != kLayerTypeNone;
+    const bool isLayer = properties().effectiveLayerType() != LayerType::None;
     int clipFlags = properties().getClippingFlags();
     if (properties().getAlpha() < 1) {
         if (isLayer) {
             clipFlags &= ~CLIP_TO_BOUNDS; // bounds clipping done by layer
-
-            renderer.setOverrideLayerAlpha(properties().getAlpha());
-        } else if (!properties().getHasOverlappingRendering()) {
+        }
+        if (CC_LIKELY(isLayer || !properties().getHasOverlappingRendering())) {
+            // simply scale rendering content's alpha
             renderer.scaleAlpha(properties().getAlpha());
         } else {
+            // savelayer needed to create an offscreen buffer
             Rect layerBounds(0, 0, getWidth(), getHeight());
-            int saveFlags = SkCanvas::kHasAlphaLayer_SaveFlag;
             if (clipFlags) {
-                saveFlags |= SkCanvas::kClipToLayer_SaveFlag;
                 properties().getClippingRectForFlags(clipFlags, &layerBounds);
-                clipFlags = 0; // all clipping done by saveLayer
+                clipFlags = 0; // all clipping done by savelayer
             }
-
-            ATRACE_FORMAT("%s alpha caused %ssaveLayer %dx%d",
-                    getName(), clipFlags ? "" : "unclipped ",
-                    (int)layerBounds.getWidth(), (int)layerBounds.getHeight());
-
             SaveLayerOp* op = new (handler.allocator()) SaveLayerOp(
-                    layerBounds.left, layerBounds.top, layerBounds.right, layerBounds.bottom,
-                    properties().getAlpha() * 255, saveFlags);
+                    layerBounds.left, layerBounds.top,
+                    layerBounds.right, layerBounds.bottom,
+                    (int) (properties().getAlpha() * 255),
+                    SkCanvas::kHasAlphaLayer_SaveFlag | SkCanvas::kClipToLayer_SaveFlag);
             handler(op, PROPERTY_SAVECOUNT, properties().getClipToBounds());
+        }
+
+        if (CC_UNLIKELY(ATRACE_ENABLED() && properties().promotedToLayer())) {
+            // pretend alpha always causes savelayer to warn about
+            // performance problem affecting old versions
+            ATRACE_FORMAT("%s alpha caused saveLayer %dx%d", getName(),
+                    static_cast<int>(getWidth()),
+                    static_cast<int>(getHeight()));
         }
     }
     if (clipFlags) {
@@ -516,7 +520,7 @@ void RenderNode::computeOrdering() {
 
     // TODO: create temporary DDLOp and call computeOrderingImpl on top DisplayList so that
     // transform properties are applied correctly to top level children
-    if (mDisplayListData == NULL) return;
+    if (mDisplayListData == nullptr) return;
     for (unsigned int i = 0; i < mDisplayListData->children().size(); i++) {
         DrawRenderNodeOp* childOp = mDisplayListData->children()[i];
         childOp->mRenderNode->computeOrderingImpl(childOp,
@@ -530,7 +534,7 @@ void RenderNode::computeOrderingImpl(
         Vector<DrawRenderNodeOp*>* compositedChildrenOfProjectionSurface,
         const mat4* transformFromProjectionSurface) {
     mProjectedNodes.clear();
-    if (mDisplayListData == NULL || mDisplayListData->isEmpty()) return;
+    if (mDisplayListData == nullptr || mDisplayListData->isEmpty()) return;
 
     // TODO: should avoid this calculation in most cases
     // TODO: just calculate single matrix, down to all leaf composited elements
@@ -554,14 +558,14 @@ void RenderNode::computeOrderingImpl(
             DrawRenderNodeOp* childOp = mDisplayListData->children()[i];
             RenderNode* child = childOp->mRenderNode;
 
-            const SkPath* projectionOutline = NULL;
-            Vector<DrawRenderNodeOp*>* projectionChildren = NULL;
-            const mat4* projectionTransform = NULL;
+            const SkPath* projectionOutline = nullptr;
+            Vector<DrawRenderNodeOp*>* projectionChildren = nullptr;
+            const mat4* projectionTransform = nullptr;
             if (isProjectionReceiver && !child->properties().getProjectBackwards()) {
-                // if receiving projections, collect projecting descendent
+                // if receiving projections, collect projecting descendant
 
-                // Note that if a direct descendent is projecting backwards, we pass it's
-                // grandparent projection collection, since it shouldn't project onto it's
+                // Note that if a direct descendant is projecting backwards, we pass its
+                // grandparent projection collection, since it shouldn't project onto its
                 // parent, where it will already be drawing.
                 projectionOutline = properties().getOutline().getPath();
                 projectionChildren = &mProjectedNodes;
@@ -682,7 +686,7 @@ void RenderNode::issueDrawShadowOperation(const Matrix4& transformFromParent, T&
 
 
     // holds temporary SkPath to store the result of intersections
-    SkPath* frameAllocatedPath = NULL;
+    SkPath* frameAllocatedPath = nullptr;
     const SkPath* outlinePath = casterOutlinePath;
 
     // intersect the outline with the reveal clip, if present
@@ -777,7 +781,6 @@ void RenderNode::issueOperationsOf3dChildren(ChildrenSelectMode mode,
         int restoreTo = renderer.save(SkCanvas::kMatrix_SaveFlag);
 
         DrawRenderNodeOp* childOp = zTranslatedNodes[drawIndex].value;
-        RenderNode* child = childOp->mRenderNode;
 
         renderer.concatMatrix(childOp->mTransformFromParent);
         childOp->mSkipInOrderDraw = false; // this is horrible, I'm so sorry everyone
@@ -808,31 +811,9 @@ void RenderNode::issueOperationsOfProjectedChildren(OpenGLRenderer& renderer, T&
     const RenderProperties& backgroundProps = backgroundOp->mRenderNode->properties();
     renderer.translate(backgroundProps.getTranslationX(), backgroundProps.getTranslationY());
 
-    // If the projection reciever has an outline, we mask each of the projected rendernodes to it
-    // Either with clipRect, or special saveLayer masking
-    if (projectionReceiverOutline != NULL) {
-        const SkRect& outlineBounds = projectionReceiverOutline->getBounds();
-        if (projectionReceiverOutline->isRect(NULL)) {
-            // mask to the rect outline simply with clipRect
-            ClipRectOp* clipOp = new (alloc) ClipRectOp(
-                    outlineBounds.left(), outlineBounds.top(),
-                    outlineBounds.right(), outlineBounds.bottom(), SkRegion::kIntersect_Op);
-            handler(clipOp, PROPERTY_SAVECOUNT, properties().getClipToBounds());
-        } else {
-            // wrap the projected RenderNodes with a SaveLayer that will mask to the outline
-            SaveLayerOp* op = new (alloc) SaveLayerOp(
-                    outlineBounds.left(), outlineBounds.top(),
-                    outlineBounds.right(), outlineBounds.bottom(),
-                    255, SkCanvas::kMatrix_SaveFlag | SkCanvas::kClip_SaveFlag | SkCanvas::kARGB_ClipLayer_SaveFlag);
-            op->setMask(projectionReceiverOutline);
-            handler(op, PROPERTY_SAVECOUNT, properties().getClipToBounds());
-
-            /* TODO: add optimizations here to take advantage of placement/size of projected
-             * children (which may shrink saveLayer area significantly). This is dependent on
-             * passing actual drawing/dirtying bounds of projected content down to native.
-             */
-        }
-    }
+    // If the projection reciever has an outline, we mask projected content to it
+    // (which we know, apriori, are all tessellated paths)
+    renderer.setProjectionPathMask(alloc, projectionReceiverOutline);
 
     // draw projected nodes
     for (size_t i = 0; i < mProjectedNodes.size(); i++) {
@@ -847,10 +828,8 @@ void RenderNode::issueOperationsOfProjectedChildren(OpenGLRenderer& renderer, T&
         renderer.restoreToCount(restoreTo);
     }
 
-    if (projectionReceiverOutline != NULL) {
-        handler(new (alloc) RestoreToCountOp(restoreTo),
-                PROPERTY_SAVECOUNT, properties().getClipToBounds());
-    }
+    handler(new (alloc) RestoreToCountOp(restoreTo),
+            PROPERTY_SAVECOUNT, properties().getClipToBounds());
 }
 
 /**
@@ -864,13 +843,13 @@ void RenderNode::issueOperationsOfProjectedChildren(OpenGLRenderer& renderer, T&
  */
 template <class T>
 void RenderNode::issueOperations(OpenGLRenderer& renderer, T& handler) {
-    const int level = handler.level();
     if (mDisplayListData->isEmpty()) {
-        DISPLAY_LIST_LOGD("%*sEmpty display list (%p, %s)", level * 2, "", this, getName());
+        DISPLAY_LIST_LOGD("%*sEmpty display list (%p, %s)", handler.level() * 2, "",
+                this, getName());
         return;
     }
 
-    const bool drawLayer = (mLayer && (&renderer != mLayer->renderer));
+    const bool drawLayer = (mLayer && (&renderer != mLayer->renderer.get()));
     // If we are updating the contents of mLayer, we don't want to apply any of
     // the RenderNode's properties to this issueOperations pass. Those will all
     // be applied when the layer is drawn, aka when this is true.
@@ -878,7 +857,8 @@ void RenderNode::issueOperations(OpenGLRenderer& renderer, T& handler) {
     if (useViewProperties) {
         const Outline& outline = properties().getOutline();
         if (properties().getAlpha() <= 0 || (outline.getShouldClip() && outline.isEmpty())) {
-            DISPLAY_LIST_LOGD("%*sRejected display list (%p, %s)", level * 2, "", this, getName());
+            DISPLAY_LIST_LOGD("%*sRejected display list (%p, %s)", handler.level() * 2, "",
+                    this, getName());
             return;
         }
     }
@@ -888,7 +868,7 @@ void RenderNode::issueOperations(OpenGLRenderer& renderer, T& handler) {
 #if DEBUG_DISPLAY_LIST
     const Rect& clipRect = renderer.getLocalClipBounds();
     DISPLAY_LIST_LOGD("%*sStart display list (%p, %s), localClipBounds: %.0f, %.0f, %.0f, %.0f",
-            level * 2, "", this, getName(),
+            handler.level() * 2, "", this, getName(),
             clipRect.left, clipRect.top, clipRect.right, clipRect.bottom);
 #endif
 
@@ -897,7 +877,7 @@ void RenderNode::issueOperations(OpenGLRenderer& renderer, T& handler) {
     handler(new (alloc) SaveOp(SkCanvas::kMatrix_SaveFlag | SkCanvas::kClip_SaveFlag),
             PROPERTY_SAVECOUNT, properties().getClipToBounds());
 
-    DISPLAY_LIST_LOGD("%*sSave %d %d", (level + 1) * 2, "",
+    DISPLAY_LIST_LOGD("%*sSave %d %d", (handler.level() + 1) * 2, "",
             SkCanvas::kMatrix_SaveFlag | SkCanvas::kClip_SaveFlag, restoreTo);
 
     if (useViewProperties) {
@@ -908,6 +888,7 @@ void RenderNode::issueOperations(OpenGLRenderer& renderer, T& handler) {
             && renderer.quickRejectConservative(0, 0, properties().getWidth(), properties().getHeight());
     if (!quickRejected) {
         Matrix4 initialTransform(*(renderer.currentTransform()));
+        renderer.setBaseTransform(initialTransform);
 
         if (drawLayer) {
             handler(new (alloc) DrawLayerOp(mLayer, 0, 0),
@@ -915,7 +896,6 @@ void RenderNode::issueOperations(OpenGLRenderer& renderer, T& handler) {
         } else {
             const int saveCountOffset = renderer.getSaveCount() - 1;
             const int projectionReceiveIndex = mDisplayListData->projectionReceiveIndex;
-            DisplayListLogBuffer& logBuffer = DisplayListLogBuffer::getInstance();
             for (size_t chunkIndex = 0; chunkIndex < mDisplayListData->getChunks().size(); chunkIndex++) {
                 const DisplayListData::Chunk& chunk = mDisplayListData->getChunks()[chunkIndex];
 
@@ -926,15 +906,15 @@ void RenderNode::issueOperations(OpenGLRenderer& renderer, T& handler) {
                         initialTransform, zTranslatedNodes, renderer, handler);
 
 
-                for (int opIndex = chunk.beginOpIndex; opIndex < chunk.endOpIndex; opIndex++) {
+                for (size_t opIndex = chunk.beginOpIndex; opIndex < chunk.endOpIndex; opIndex++) {
                     DisplayListOp *op = mDisplayListData->displayListOps[opIndex];
 #if DEBUG_DISPLAY_LIST
-                    op->output(level + 1);
+                    op->output(handler.level() + 1);
 #endif
-                    logBuffer.writeCommand(level, op->name());
                     handler(op, saveCountOffset, properties().getClipToBounds());
 
-                    if (CC_UNLIKELY(!mProjectedNodes.isEmpty() && opIndex == projectionReceiveIndex)) {
+                    if (CC_UNLIKELY(!mProjectedNodes.isEmpty() && projectionReceiveIndex >= 0 &&
+                        opIndex == static_cast<size_t>(projectionReceiveIndex))) {
                         issueOperationsOfProjectedChildren(renderer, handler);
                     }
                 }
@@ -945,12 +925,11 @@ void RenderNode::issueOperations(OpenGLRenderer& renderer, T& handler) {
         }
     }
 
-    DISPLAY_LIST_LOGD("%*sRestoreToCount %d", (level + 1) * 2, "", restoreTo);
+    DISPLAY_LIST_LOGD("%*sRestoreToCount %d", (handler.level() + 1) * 2, "", restoreTo);
     handler(new (alloc) RestoreToCountOp(restoreTo),
             PROPERTY_SAVECOUNT, properties().getClipToBounds());
-    renderer.setOverrideLayerAlpha(1.0f);
 
-    DISPLAY_LIST_LOGD("%*sDone (%p, %s)", level * 2, "", this, getName());
+    DISPLAY_LIST_LOGD("%*sDone (%p, %s)", handler.level() * 2, "", this, getName());
     handler.endMark();
 }
 

@@ -16,12 +16,15 @@
 
 package android.media.tv;
 
+import android.annotation.NonNull;
+import android.annotation.Nullable;
 import android.annotation.SystemApi;
 import android.content.Context;
 import android.graphics.Canvas;
 import android.graphics.PorterDuff;
 import android.graphics.Rect;
 import android.graphics.Region;
+import android.media.PlaybackParams;
 import android.media.tv.TvInputManager.Session;
 import android.media.tv.TvInputManager.Session.FinishedInputEventCallback;
 import android.media.tv.TvInputManager.SessionCallback;
@@ -31,6 +34,7 @@ import android.os.Handler;
 import android.text.TextUtils;
 import android.util.AttributeSet;
 import android.util.Log;
+import android.util.Pair;
 import android.view.InputEvent;
 import android.view.KeyEvent;
 import android.view.MotionEvent;
@@ -42,21 +46,22 @@ import android.view.ViewGroup;
 import android.view.ViewRootImpl;
 
 import java.lang.ref.WeakReference;
+import java.util.ArrayDeque;
 import java.util.List;
+import java.util.Queue;
 
 /**
  * Displays TV contents. The TvView class provides a high level interface for applications to show
  * TV programs from various TV sources that implement {@link TvInputService}. (Note that the list of
  * TV inputs available on the system can be obtained by calling
  * {@link TvInputManager#getTvInputList() TvInputManager.getTvInputList()}.)
- * <p>
- * Once the application supplies the URI for a specific TV channel to {@link #tune(String, Uri)}
+ *
+ * <p>Once the application supplies the URI for a specific TV channel to {@link #tune(String, Uri)}
  * method, it takes care of underlying service binding (and unbinding if the current TvView is
  * already bound to a service) and automatically allocates/deallocates resources needed. In addition
  * to a few essential methods to control how the contents are presented, it also provides a way to
  * dispatch input events to the connected TvInputService in order to enable custom key actions for
  * the TV input.
- * </p>
  */
 public class TvView extends ViewGroup {
     private static final String TAG = "TvView";
@@ -65,10 +70,6 @@ public class TvView extends ViewGroup {
     private static final int ZORDER_MEDIA = 0;
     private static final int ZORDER_MEDIA_OVERLAY = 1;
     private static final int ZORDER_ON_TOP = 2;
-
-    private static final int CAPTION_DEFAULT = 0;
-    private static final int CAPTION_ENABLED = 1;
-    private static final int CAPTION_DISABLED = 2;
 
     private static final WeakReference<TvView> NULL_TV_VIEW = new WeakReference<>(null);
 
@@ -85,11 +86,9 @@ public class TvView extends ViewGroup {
     private MySessionCallback mSessionCallback;
     private TvInputCallback mCallback;
     private OnUnhandledInputEventListener mOnUnhandledInputEventListener;
-    private boolean mHasStreamVolume;
-    private float mStreamVolume;
-    private int mCaptionEnabled;
-    private String mAppPrivateCommandAction;
-    private Bundle mAppPrivateCommandData;
+    private Float mStreamVolume;
+    private Boolean mCaptionEnabled;
+    private final Queue<Pair<String, Bundle>> mPendingAppPrivateCommands = new ArrayDeque<>();
 
     private boolean mSurfaceChanged;
     private int mSurfaceFormat;
@@ -103,6 +102,7 @@ public class TvView extends ViewGroup {
     private int mSurfaceViewRight;
     private int mSurfaceViewTop;
     private int mSurfaceViewBottom;
+    private TimeShiftPositionCallback mTimeShiftPositionCallback;
 
     private final SurfaceHolder.Callback mSurfaceHolderCallback = new SurfaceHolder.Callback() {
         @Override
@@ -173,27 +173,26 @@ public class TvView extends ViewGroup {
     /**
      * Sets the callback to be invoked when an event is dispatched to this TvView.
      *
-     * @param callback The callback to receive events. A value of {@code null} removes any existing
-     *            callbacks.
+     * @param callback The callback to receive events. A value of {@code null} removes the existing
+     *            callback.
      */
-    public void setCallback(TvInputCallback callback) {
+    public void setCallback(@Nullable TvInputCallback callback) {
         mCallback = callback;
     }
 
     /**
      * Sets this as the main {@link TvView}.
-     * <p>
-     * The main {@link TvView} is a {@link TvView} whose corresponding TV input determines the
+     *
+     * <p>The main {@link TvView} is a {@link TvView} whose corresponding TV input determines the
      * HDMI-CEC active source device. For an HDMI port input, one of source devices that is
      * connected to that HDMI port becomes the active source. For an HDMI-CEC logical device input,
      * the corresponding HDMI-CEC logical device becomes the active source. For any non-HDMI input
      * (including the tuner, composite, S-Video, etc.), the internal device (= TV itself) becomes
      * the active source.
-     * </p><p>
-     * First tuned {@link TvView} becomes main automatically, and keeps to be main until either
-     * {@link #reset} is called for the main {@link TvView} or {@link #setMain} is called for other
+     *
+     * <p>First tuned {@link TvView} becomes main automatically, and keeps to be main until either
+     * {@link #reset} is called for the main {@link TvView} or {@code setMain()} is called for other
      * {@link TvView}.
-     * </p>
      * @hide
      */
     @SystemApi
@@ -252,13 +251,16 @@ public class TvView extends ViewGroup {
      }
 
     /**
-     * Sets the relative stream volume of this session to handle a change of audio focus.
+     * Sets the relative stream volume of this TvView.
      *
-     * @param volume A volume value between 0.0f to 1.0f.
+     * <p>This method is primarily used to handle audio focus changes or mute a specific TvView when
+     * multiple views are displayed. If the method has not yet been called, the TvView assumes the
+     * default value of {@code 1.0f}.
+     *
+     * @param volume A volume value between {@code 0.0f} to {@code 1.0f}.
      */
     public void setStreamVolume(float volume) {
         if (DEBUG) Log.d(TAG, "setStreamVolume(" + volume + ")");
-        mHasStreamVolume = true;
         mStreamVolume = volume;
         if (mSession == null) {
             // Volume will be set once the connection has been made.
@@ -270,19 +272,19 @@ public class TvView extends ViewGroup {
     /**
      * Tunes to a given channel.
      *
-     * @param inputId The ID of TV input which will play the given channel.
+     * @param inputId The ID of the TV input for the given channel.
      * @param channelUri The URI of a channel.
      */
-    public void tune(String inputId, Uri channelUri) {
+    public void tune(@NonNull String inputId, Uri channelUri) {
         tune(inputId, channelUri, null);
     }
 
     /**
      * Tunes to a given channel.
      *
-     * @param inputId The ID of TV input which will play the given channel.
+     * @param inputId The ID of TV input for the given channel.
      * @param channelUri The URI of a channel.
-     * @param params Extra parameters which might be handled with the tune event.
+     * @param params Extra parameters.
      * @hide
      */
     @SystemApi
@@ -296,22 +298,26 @@ public class TvView extends ViewGroup {
                 sMainTvView = new WeakReference<>(this);
             }
         }
-        if (mSessionCallback != null && mSessionCallback.mInputId.equals(inputId)) {
+        if (mSessionCallback != null && TextUtils.equals(mSessionCallback.mInputId, inputId)) {
             if (mSession != null) {
                 mSession.tune(channelUri, params);
             } else {
-                // Session is not created yet. Replace the channel which will be set once the
-                // session is made.
+                // createSession() was called but the actual session for the given inputId has not
+                // yet been created. Just replace the existing tuning params in the callback with
+                // the new ones and tune later in onSessionCreated(). It is not necessary to create
+                // a new callback because this tuning request was made on the same inputId.
                 mSessionCallback.mChannelUri = channelUri;
                 mSessionCallback.mTuneParams = params;
             }
         } else {
             resetInternal();
-            // When createSession() is called multiple times before the callback is called,
-            // only the callback of the last createSession() call will be actually called back.
-            // The previous callbacks will be ignored. For the logic, mSessionCallback
-            // is newly assigned for every createSession request and compared with
-            // MySessionCreateCallback.this.
+            // In case createSession() is called multiple times across different inputId's before
+            // any session is created (e.g. when quickly tuning to a channel from input A and then
+            // to another channel from input B), only the callback for the last createSession()
+            // should be invoked. (The previous callbacks are simply ignored.) To do that, we create
+            // a new callback each time and keep mSessionCallback pointing to the last one. If
+            // MySessionCallback.this is different from mSessionCallback, we know that this callback
+            // is obsolete and should ignore it.
             mSessionCallback = new MySessionCallback(inputId, channelUri, params);
             if (mTvInputManager != null) {
                 mTvInputManager.createSession(inputId, mSessionCallback, mHandler);
@@ -321,8 +327,8 @@ public class TvView extends ViewGroup {
 
     /**
      * Resets this TvView.
-     * <p>
-     * This method is primarily used to un-tune the current TvView.
+     *
+     * <p>This method is primarily used to un-tune the current TvView.
      */
     public void reset() {
         if (DEBUG) Log.d(TAG, "reset()");
@@ -335,38 +341,60 @@ public class TvView extends ViewGroup {
     }
 
     private void resetInternal() {
+        mSessionCallback = null;
+        mPendingAppPrivateCommands.clear();
         if (mSession != null) {
-            release();
+            setSessionSurface(null);
+            removeSessionOverlayView();
+            mUseRequestedSurfaceLayout = false;
+            mSession.release();
+            mSession = null;
             resetSurfaceView();
         }
     }
 
     /**
      * Requests to unblock TV content according to the given rating.
-     * <p>
-     * This notifies TV input that blocked content is now OK to play.
-     * </p>
+     *
+     * <p>This notifies TV input that blocked content is now OK to play.
+     *
+     * @param unblockedRating A TvContentRating to unblock.
+     * @see TvInputService.Session#notifyContentBlocked(TvContentRating)
+     * @hide
+     * @deprecated Use {@link #unblockContent} instead.
+     */
+    @Deprecated
+    @SystemApi
+    public void requestUnblockContent(TvContentRating unblockedRating) {
+        unblockContent(unblockedRating);
+    }
+
+    /**
+     * Requests to unblock TV content according to the given rating.
+     *
+     * <p>This notifies TV input that blocked content is now OK to play.
      *
      * @param unblockedRating A TvContentRating to unblock.
      * @see TvInputService.Session#notifyContentBlocked(TvContentRating)
      * @hide
      */
     @SystemApi
-    public void requestUnblockContent(TvContentRating unblockedRating) {
+    public void unblockContent(TvContentRating unblockedRating) {
         if (mSession != null) {
-            mSession.requestUnblockContent(unblockedRating);
+            mSession.unblockContent(unblockedRating);
         }
     }
 
     /**
      * Enables or disables the caption in this TvView.
-     * <p>
-     * Note that this method does not take any effect unless the current TvView is tuned.
+     *
+     * <p>Note that this method does not take any effect unless the current TvView is tuned.
      *
      * @param enabled {@code true} to enable, {@code false} to disable.
      */
     public void setCaptionEnabled(boolean enabled) {
-        mCaptionEnabled = enabled ? CAPTION_ENABLED : CAPTION_DISABLED;
+        if (DEBUG) Log.d(TAG, "setCaptionEnabled(" + enabled + ")");
+        mCaptionEnabled = enabled;
         if (mSession != null) {
             mSession.setCaptionEnabled(enabled);
         }
@@ -420,6 +448,66 @@ public class TvView extends ViewGroup {
     }
 
     /**
+     * Pauses playback. No-op if it is already paused. Call {@link #timeShiftResume} to resume.
+     */
+    public void timeShiftPause() {
+        if (mSession != null) {
+            mSession.timeShiftPause();
+        }
+    }
+
+    /**
+     * Resumes playback. No-op if it is already resumed. Call {@link #timeShiftPause} to pause.
+     */
+    public void timeShiftResume() {
+        if (mSession != null) {
+            mSession.timeShiftResume();
+        }
+    }
+
+    /**
+     * Seeks to a specified time position. {@code timeMs} must be equal to or greater than the start
+     * position returned by {@link TimeShiftPositionCallback#onTimeShiftStartPositionChanged} and
+     * equal to or less than the current time.
+     *
+     * @param timeMs The time position to seek to, in milliseconds since the epoch.
+     */
+    public void timeShiftSeekTo(long timeMs) {
+        if (mSession != null) {
+            mSession.timeShiftSeekTo(timeMs);
+        }
+    }
+
+    /**
+     * Sets playback rate using {@link android.media.PlaybackParams}.
+     *
+     * @param params The playback params.
+     */
+    public void timeShiftSetPlaybackParams(@NonNull PlaybackParams params) {
+        if (mSession != null) {
+            mSession.timeShiftSetPlaybackParams(params);
+        }
+    }
+
+    /**
+     * Sets the callback to be invoked when the time shift position is changed.
+     *
+     * @param callback The callback to receive time shift position changes. A value of {@code null}
+     *            removes the existing callback.
+     */
+    public void setTimeShiftPositionCallback(@Nullable TimeShiftPositionCallback callback) {
+        mTimeShiftPositionCallback = callback;
+        ensurePositionTracking();
+    }
+
+    private void ensurePositionTracking() {
+        if (mSession == null) {
+            return;
+        }
+        mSession.timeShiftEnablePositionTracking(mTimeShiftPositionCallback != null);
+    }
+
+    /**
      * Calls {@link TvInputService.Session#appPrivateCommand(String, Bundle)
      * TvInputService.Session.appPrivateCommand()} on the current TvView.
      *
@@ -430,26 +518,23 @@ public class TvView extends ViewGroup {
      * @hide
      */
     @SystemApi
-    public void sendAppPrivateCommand(String action, Bundle data) {
+    public void sendAppPrivateCommand(@NonNull String action, Bundle data) {
         if (TextUtils.isEmpty(action)) {
             throw new IllegalArgumentException("action cannot be null or an empty string");
         }
         if (mSession != null) {
             mSession.sendAppPrivateCommand(action, data);
         } else {
-            Log.w(TAG, "sendAppPrivateCommand - session not created (action " + action + " cached)");
-            if (mAppPrivateCommandAction != null) {
-                Log.w(TAG, "previous cached action " + action + " removed");
-            }
-            mAppPrivateCommandAction = action;
-            mAppPrivateCommandData = data;
+            Log.w(TAG, "sendAppPrivateCommand - session not yet created (action \"" + action
+                    + "\" pending)");
+            mPendingAppPrivateCommands.add(Pair.create(action, data));
         }
     }
 
     /**
      * Dispatches an unhandled input event to the next receiver.
-     * <p>
-     * Except system keys, TvView always consumes input events in the normal flow. This is called
+     *
+     * <p>Except system keys, TvView always consumes input events in the normal flow. This is called
      * asynchronously from where the event is dispatched. It gives the host application a chance to
      * dispatch the unhandled input events.
      *
@@ -663,18 +748,6 @@ public class TvView extends ViewGroup {
         addView(mSurfaceView);
     }
 
-    private void release() {
-        mAppPrivateCommandAction = null;
-        mAppPrivateCommandData = null;
-
-        setSessionSurface(null);
-        removeSessionOverlayView();
-        mUseRequestedSurfaceLayout = false;
-        mSession.release();
-        mSession = null;
-        mSessionCallback = null;
-    }
-
     private void setSessionSurface(Surface surface) {
         if (mSession == null) {
             return;
@@ -726,6 +799,43 @@ public class TvView extends ViewGroup {
         getLocationOnScreen(location);
         return new Rect(location[0], location[1],
                 location[0] + getWidth(), location[1] + getHeight());
+    }
+
+    /**
+     * Callback used to receive time shift position changes.
+     */
+    public abstract static class TimeShiftPositionCallback {
+
+        /**
+         * This is called when the start playback position is changed.
+         *
+         * <p>The start playback position of the time shifted program can be adjusted by the TV
+         * input when it cannot retain the whole recorded program due to some reason (e.g.
+         * limitation on storage space). The application should not allow the user to seek to a
+         * position earlier than the start position.
+         *
+         * <p>Note that {@code timeMs} is not relative time in the program but wall-clock time,
+         * which is intended to avoid calling this method unnecessarily around program boundaries.
+         *
+         * @param inputId The ID of the TV input bound to this view.
+         * @param timeMs The start playback position of the time shifted program, in milliseconds
+         *            since the epoch.
+         */
+        public void onTimeShiftStartPositionChanged(String inputId, long timeMs) {
+        }
+
+        /**
+         * This is called when the current playback position is changed.
+         *
+         * <p>Note that {@code timeMs} is not relative time in the program but wall-clock time,
+         * which is intended to avoid calling this method unnecessarily around program boundaries.
+         *
+         * @param inputId The ID of the TV input bound to this view.
+         * @param timeMs The current playback position of the time shifted program, in milliseconds
+         *            since the epoch.
+         */
+        public void onTimeShiftCurrentPositionChanged(String inputId, long timeMs) {
+        }
     }
 
     /**
@@ -811,6 +921,7 @@ public class TvView extends ViewGroup {
          * <li>{@link TvInputManager#VIDEO_UNAVAILABLE_REASON_TUNING}
          * <li>{@link TvInputManager#VIDEO_UNAVAILABLE_REASON_WEAK_SIGNAL}
          * <li>{@link TvInputManager#VIDEO_UNAVAILABLE_REASON_BUFFERING}
+         * <li>{@link TvInputManager#VIDEO_UNAVAILABLE_REASON_AUDIO_ONLY}
          * </ul>
          */
         public void onVideoUnavailable(String inputId, int reason) {
@@ -838,12 +949,27 @@ public class TvView extends ViewGroup {
         /**
          * This is invoked when a custom event from the bound TV input is sent to this view.
          *
+         * @param inputId The ID of the TV input bound to this view.
          * @param eventType The type of the event.
          * @param eventArgs Optional arguments of the event.
          * @hide
          */
         @SystemApi
         public void onEvent(String inputId, String eventType, Bundle eventArgs) {
+        }
+
+        /**
+         * This is called when the time shift status is changed.
+         *
+         * @param inputId The ID of the TV input bound to this view.
+         * @param status The current time shift status. Should be one of the followings.
+         * <ul>
+         * <li>{@link TvInputManager#TIME_SHIFT_STATUS_UNSUPPORTED}
+         * <li>{@link TvInputManager#TIME_SHIFT_STATUS_UNAVAILABLE}
+         * <li>{@link TvInputManager#TIME_SHIFT_STATUS_AVAILABLE}
+         * </ul>
+         */
+        public void onTimeShiftStatusChanged(String inputId, int status) {
         }
     }
 
@@ -853,8 +979,8 @@ public class TvView extends ViewGroup {
     public interface OnUnhandledInputEventListener {
         /**
          * Called when an input event was not handled by the bound TV input.
-         * <p>
-         * This is called asynchronously from where the event is dispatched. It gives the host
+         *
+         * <p>This is called asynchronously from where the event is dispatched. It gives the host
          * application a chance to handle the unhandled input events.
          *
          * @param event The input event.
@@ -890,6 +1016,12 @@ public class TvView extends ViewGroup {
             }
             mSession = session;
             if (session != null) {
+                // Sends the pending app private commands first.
+                for (Pair<String, Bundle> command : mPendingAppPrivateCommands) {
+                    mSession.sendAppPrivateCommand(command.first, command.second);
+                }
+                mPendingAppPrivateCommands.clear();
+
                 synchronized (sMainTvViewLock) {
                     if (hasWindowFocus() && TvView.this == sMainTvView.get()) {
                         mSession.setMain();
@@ -905,19 +1037,14 @@ public class TvView extends ViewGroup {
                     }
                 }
                 createSessionOverlayView();
-                if (mCaptionEnabled != CAPTION_DEFAULT) {
-                    mSession.setCaptionEnabled(mCaptionEnabled == CAPTION_ENABLED);
-                }
-                mSession.tune(mChannelUri, mTuneParams);
-                if (mHasStreamVolume) {
+                if (mStreamVolume != null) {
                     mSession.setStreamVolume(mStreamVolume);
                 }
-                if (mAppPrivateCommandAction != null) {
-                    mSession.sendAppPrivateCommand(
-                            mAppPrivateCommandAction, mAppPrivateCommandData);
-                    mAppPrivateCommandAction = null;
-                    mAppPrivateCommandData = null;
+                if (mCaptionEnabled != null) {
+                    mSession.setCaptionEnabled(mCaptionEnabled);
                 }
+                mSession.tune(mChannelUri, mTuneParams);
+                ensurePositionTracking();
             } else {
                 mSessionCallback = null;
                 if (mCallback != null) {
@@ -1085,6 +1212,48 @@ public class TvView extends ViewGroup {
             }
             if (mCallback != null) {
                 mCallback.onEvent(mInputId, eventType, eventArgs);
+            }
+        }
+
+        @Override
+        public void onTimeShiftStatusChanged(Session session, int status) {
+            if (DEBUG) {
+                Log.d(TAG, "onTimeShiftStatusChanged()");
+            }
+            if (this != mSessionCallback) {
+                Log.w(TAG, "onTimeShiftStatusChanged - session not created");
+                return;
+            }
+            if (mCallback != null) {
+                mCallback.onTimeShiftStatusChanged(mInputId, status);
+            }
+        }
+
+        @Override
+        public void onTimeShiftStartPositionChanged(Session session, long timeMs) {
+            if (DEBUG) {
+                Log.d(TAG, "onTimeShiftStartPositionChanged()");
+            }
+            if (this != mSessionCallback) {
+                Log.w(TAG, "onTimeShiftStartPositionChanged - session not created");
+                return;
+            }
+            if (mTimeShiftPositionCallback != null) {
+                mTimeShiftPositionCallback.onTimeShiftStartPositionChanged(mInputId, timeMs);
+            }
+        }
+
+        @Override
+        public void onTimeShiftCurrentPositionChanged(Session session, long timeMs) {
+            if (DEBUG) {
+                Log.d(TAG, "onTimeShiftCurrentPositionChanged()");
+            }
+            if (this != mSessionCallback) {
+                Log.w(TAG, "onTimeShiftCurrentPositionChanged - session not created");
+                return;
+            }
+            if (mTimeShiftPositionCallback != null) {
+                mTimeShiftPositionCallback.onTimeShiftCurrentPositionChanged(mInputId, timeMs);
             }
         }
     }

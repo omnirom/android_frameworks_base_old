@@ -42,8 +42,13 @@ import android.util.Log;
  * {@hide}
  */
 public class FlpHardwareProvider {
+    private static final int FIRST_VERSION_WITH_FLUSH_LOCATIONS = 2;
     private GeofenceHardwareImpl mGeofenceHardwareSink = null;
     private IFusedLocationHardwareSink mLocationSink = null;
+    // Capabilities provided by FlpCallbacks
+    private boolean mHaveBatchingCapabilities;
+    private int mBatchingCapabilities;
+    private int mVersion = 1;
 
     private static FlpHardwareProvider sSingletonInstance = null;
 
@@ -118,6 +123,71 @@ public class FlpHardwareProvider {
         try {
             if (sink != null) {
                 sink.onLocationAvailable(locations);
+            }
+        } catch (RemoteException e) {
+            Log.e(TAG, "RemoteException calling onLocationAvailable");
+        }
+    }
+
+    private void onBatchingCapabilities(int capabilities) {
+        synchronized (mLocationSinkLock) {
+            mHaveBatchingCapabilities = true;
+            mBatchingCapabilities = capabilities;
+        }
+
+        maybeSendCapabilities();
+
+        if (mGeofenceHardwareSink != null) {
+            mGeofenceHardwareSink.setVersion(getVersion());
+        }
+    }
+
+    private void onBatchingStatus(int status) {
+        IFusedLocationHardwareSink sink;
+        synchronized (mLocationSinkLock) {
+            sink = mLocationSink;
+        }
+        try {
+            if (sink != null) {
+                sink.onStatusChanged(status);
+            }
+        } catch (RemoteException e) {
+            Log.e(TAG, "RemoteException calling onBatchingStatus");
+        }
+    }
+
+    // Returns the current version of the FLP HAL.  This depends both on the version of the
+    // structure returned by the hardware layer, and whether or not we've received the
+    // capabilities callback on initialization.  Assume original version until we get
+    // the new initialization callback.
+    private int getVersion() {
+        synchronized (mLocationSinkLock) {
+            if (mHaveBatchingCapabilities) {
+                return mVersion;
+            }
+        }
+        return 1;
+    }
+
+    private void setVersion(int version) {
+        mVersion = version;
+        if (mGeofenceHardwareSink != null) {
+            mGeofenceHardwareSink.setVersion(getVersion());
+        }
+    }
+
+    private void maybeSendCapabilities() {
+        IFusedLocationHardwareSink sink;
+        boolean haveBatchingCapabilities;
+        int batchingCapabilities;
+        synchronized (mLocationSinkLock) {
+            sink = mLocationSink;
+            haveBatchingCapabilities = mHaveBatchingCapabilities;
+            batchingCapabilities = mBatchingCapabilities;
+        }
+        try {
+            if (sink != null && haveBatchingCapabilities) {
+                sink.onCapabilities(batchingCapabilities);
             }
         } catch (RemoteException e) {
             Log.e(TAG, "RemoteException calling onLocationAvailable");
@@ -209,6 +279,10 @@ public class FlpHardwareProvider {
                 translateToGeofenceHardwareStatus(result));
     }
 
+    private void onGeofencingCapabilities(int capabilities) {
+        getGeofenceHardwareSink().onCapabilities(capabilities);
+    }
+
     /**
      * Private native methods accessing FLP HAL.
      */
@@ -225,6 +299,7 @@ public class FlpHardwareProvider {
     private native void nativeUpdateBatchingOptions(int requestId, FusedBatchOptions optionsObject);
     private native void nativeStopBatching(int id);
     private native void nativeRequestBatchedLocation(int lastNLocations);
+    private native void nativeFlushBatchedLocations();
     private native void nativeInjectLocation(Location location);
     // TODO [Fix] sort out the lifetime of the instance
     private native void nativeCleanup();
@@ -277,6 +352,7 @@ public class FlpHardwareProvider {
 
                 mLocationSink = eventSink;
             }
+            maybeSendCapabilities();
         }
 
         @Override
@@ -315,6 +391,16 @@ public class FlpHardwareProvider {
         }
 
         @Override
+        public void flushBatchedLocations() {
+            if (getVersion() >= FIRST_VERSION_WITH_FLUSH_LOCATIONS) {
+                nativeFlushBatchedLocations();
+            } else {
+                Log.wtf(TAG,
+                        "Tried to call flushBatchedLocations on an unsupported implementation");
+            }
+        }
+
+        @Override
         public boolean supportsDiagnosticDataInjection() {
             return nativeIsDiagnosticSupported();
         }
@@ -332,6 +418,11 @@ public class FlpHardwareProvider {
         @Override
         public void injectDeviceContext(int deviceEnabledContext) {
             nativeInjectDeviceContext(deviceEnabledContext);
+        }
+
+        @Override
+        public int getVersion() {
+            return FlpHardwareProvider.this.getVersion();
         }
     };
 
@@ -408,6 +499,7 @@ public class FlpHardwareProvider {
     private GeofenceHardwareImpl getGeofenceHardwareSink() {
         if (mGeofenceHardwareSink == null) {
             mGeofenceHardwareSink = GeofenceHardwareImpl.getInstance(mContext);
+            mGeofenceHardwareSink.setVersion(getVersion());
         }
 
         return mGeofenceHardwareSink;

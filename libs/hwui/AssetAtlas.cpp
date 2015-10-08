@@ -18,6 +18,7 @@
 
 #include "AssetAtlas.h"
 #include "Caches.h"
+#include "Image.h"
 
 #include <GLES2/gl2ext.h>
 
@@ -47,7 +48,7 @@ void AssetAtlas::init(sp<GraphicBuffer> buffer, int64_t* map, int count) {
     } else {
         ALOGW("Could not create atlas image");
         delete mImage;
-        mImage = NULL;
+        mImage = nullptr;
     }
 
     updateTextureId();
@@ -56,7 +57,7 @@ void AssetAtlas::init(sp<GraphicBuffer> buffer, int64_t* map, int count) {
 void AssetAtlas::terminate() {
     if (mImage) {
         delete mImage;
-        mImage = NULL;
+        mImage = nullptr;
         updateTextureId();
     }
 }
@@ -81,13 +82,13 @@ void AssetAtlas::updateTextureId() {
 ///////////////////////////////////////////////////////////////////////////////
 
 AssetAtlas::Entry* AssetAtlas::getEntry(const SkBitmap* bitmap) const {
-    ssize_t index = mEntries.indexOfKey(bitmap);
-    return index >= 0 ? mEntries.valueAt(index) : NULL;
+    ssize_t index = mEntries.indexOfKey(bitmap->pixelRef());
+    return index >= 0 ? mEntries.valueAt(index) : nullptr;
 }
 
 Texture* AssetAtlas::getEntryTexture(const SkBitmap* bitmap) const {
-    ssize_t index = mEntries.indexOfKey(bitmap);
-    return index >= 0 ? mEntries.valueAt(index)->texture : NULL;
+    ssize_t index = mEntries.indexOfKey(bitmap->pixelRef());
+    return index >= 0 ? mEntries.valueAt(index)->texture : nullptr;
 }
 
 /**
@@ -98,12 +99,12 @@ struct DelegateTexture: public Texture {
     DelegateTexture(Caches& caches, Texture* delegate): Texture(caches), mDelegate(delegate) { }
 
     virtual void setWrapST(GLenum wrapS, GLenum wrapT, bool bindTexture = false,
-            bool force = false, GLenum renderTarget = GL_TEXTURE_2D) {
+            bool force = false, GLenum renderTarget = GL_TEXTURE_2D) override {
         mDelegate->setWrapST(wrapS, wrapT, bindTexture, force, renderTarget);
     }
 
     virtual void setFilterMinMag(GLenum min, GLenum mag, bool bindTexture = false,
-            bool force = false, GLenum renderTarget = GL_TEXTURE_2D) {
+            bool force = false, GLenum renderTarget = GL_TEXTURE_2D) override {
         mDelegate->setFilterMinMag(min, mag, bindTexture, force, renderTarget);
     }
 
@@ -111,15 +112,12 @@ private:
     Texture* const mDelegate;
 }; // struct DelegateTexture
 
-/**
- * TODO: This method does not take the rotation flag into account
- */
 void AssetAtlas::createEntries(Caches& caches, int64_t* map, int count) {
     const float width = float(mTexture->width);
     const float height = float(mTexture->height);
 
     for (int i = 0; i < count; ) {
-        SkBitmap* bitmap = reinterpret_cast<SkBitmap*>(map[i++]);
+        SkPixelRef* pixelRef = reinterpret_cast<SkPixelRef*>(map[i++]);
         // NOTE: We're converting from 64 bit signed values to 32 bit
         // signed values. This is guaranteed to be safe because the "x"
         // and "y" coordinate values are guaranteed to be representable
@@ -127,24 +125,23 @@ void AssetAtlas::createEntries(Caches& caches, int64_t* map, int count) {
         // pointers on 64 bit architectures.
         const int x = static_cast<int>(map[i++]);
         const int y = static_cast<int>(map[i++]);
-        bool rotated = map[i++] > 0;
 
         // Bitmaps should never be null, we're just extra paranoid
-        if (!bitmap) continue;
+        if (!pixelRef) continue;
 
         const UvMapper mapper(
-                x / width, (x + bitmap->width()) / width,
-                y / height, (y + bitmap->height()) / height);
+                x / width, (x + pixelRef->info().width()) / width,
+                y / height, (y + pixelRef->info().height()) / height);
 
         Texture* texture = new DelegateTexture(caches, mTexture);
-        texture->blend = !bitmap->isOpaque();
-        texture->width = bitmap->width();
-        texture->height = bitmap->height();
+        texture->blend = !SkAlphaTypeIsOpaque(pixelRef->info().alphaType());
+        texture->width = pixelRef->info().width();
+        texture->height = pixelRef->info().height();
 
-        Entry* entry = new Entry(bitmap, x, y, rotated, texture, mapper, *this);
+        Entry* entry = new Entry(pixelRef, texture, mapper, *this);
         texture->uvMapper = &entry->uvMapper;
 
-        mEntries.add(entry->bitmap, entry);
+        mEntries.add(entry->pixelRef, entry);
     }
 }
 

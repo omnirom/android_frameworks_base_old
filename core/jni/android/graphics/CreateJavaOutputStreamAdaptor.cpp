@@ -24,7 +24,6 @@ public:
     }
 
     virtual size_t read(void* buffer, size_t size) {
-        JNIEnv* env = fEnv;
         if (NULL == buffer) {
             if (0 == size) {
                 return 0;
@@ -165,7 +164,7 @@ static SkMemoryStream* adaptor_to_mem_stream(SkStream* stream) {
 
 SkStreamRewindable* CopyJavaInputStream(JNIEnv* env, jobject stream,
                                         jbyteArray storage) {
-    SkAutoTUnref<SkStream> adaptor(CreateJavaInputStreamAdaptor(env, stream, storage));
+    SkAutoTDelete<SkStream> adaptor(CreateJavaInputStreamAdaptor(env, stream, storage));
     if (NULL == adaptor.get()) {
         return NULL;
     }

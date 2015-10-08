@@ -200,7 +200,7 @@
              together. -->
         <flag name="signatureOrSystem" value="3" />
         <!-- Additional flag from base permission type: this permission can also
-             be granted to any applications installed on the system image.
+             be granted to any applications installed as privileged apps on the system image.
              Please avoid using this option, as the
              signature protection level should be sufficient for most needs and
              works regardless of exactly where applications are installed.  This
@@ -208,6 +208,8 @@
              vendors have applications built in to a system image which need
              to share specific features explicitly because they are being built
              together. -->
+        <flag name="privileged" value="0x10" />
+        <!-- Old synonym for "privileged". -->
         <flag name="system" value="0x10" />
         <!-- Additional flag from base permission type: this permission can also
              (optionally) be granted to development applications. -->
@@ -215,6 +217,21 @@
         <!-- Additional flag from base permission type: this permission is closely
              associated with an app op for controlling access. -->
         <flag name="appop" value="0x40" />
+        <!-- Additional flag from base permission type: this permission can be automatically
+             granted to apps that target API levels below
+             {@link android.os.Build.VERSION_CODES#M} (before runtime permissions
+             were introduced). -->
+        <flag name="pre23" value="0x80" />
+        <!-- Additional flag from base permission type: this permission can be automatically
+            granted to system apps that install packages. -->
+        <flag name="installer" value="0x100" />
+        <!-- Additional flag from base permission type: this permission can be automatically
+            granted to system apps that verify packages. -->
+        <flag name="verifier" value="0x200" />
+        <!-- Additional flag from base permission type: this permission can be automatically
+            granted any application pre-installed on the system image (not just privileged
+            apps). -->
+        <flag name="preinstalled" value="0x400" />
     </attr>
 
     <!-- Flags indicating more context for a permission group. -->
@@ -231,6 +248,9 @@
              may cost the user money.  Such permissions may be highlighted
              when shown to the user with this additional information.  -->
         <flag name="costsMoney" value="0x0001" />
+        <!-- Additional flag from base permission type: this permission is hidden
+             and should not show in the UI. -->
+        <flag name="hidden" value="0x2" />
     </attr>
 
     <!-- Specified the name of a group that this permission is associated
@@ -389,6 +409,15 @@
          with the same {@link android.R.attr#taskAffinity} as it has. -->
     <attr name="allowTaskReparenting" format="boolean" />
 
+    <!-- Declare that this application may use cleartext traffic, such as HTTP rather than HTTPS;
+         WebSockets rather than WebSockets Secure; XMPP, IMAP, STMP without STARTTLS or TLS.
+         Defaults to true. If set to false {@code false}, the application declares that it does not
+         intend to use cleartext network traffic, in which case platform components (e.g. HTTP
+         stacks, {@code DownloadManager}, {@code MediaPlayer}) will refuse applications's requests
+         to use cleartext traffic. Third-party libraries are encouraged to honor this flag as well.
+         -->
+    <attr name="usesCleartextTraffic" format="boolean" />
+
     <!-- Declare that code from this application will need to be loaded into other
          applications' processes. On devices that support multiple instruction sets,
          this implies the code might be loaded into a process that's using any of the devices
@@ -493,8 +522,15 @@
     <attr name="excludeFromRecents" format="boolean" />
 
     <!-- Specify that an Activity should be shown over the lock screen and,
-         in a multiuser environment, across all users' windows -->
+         in a multiuser environment, across all users' windows.
+         @deprecated use {@link android.R.attr#showForAllUsers} instead. -->
     <attr name="showOnLockScreen" format="boolean" />
+
+    <!-- Specify that an Activity should be shown even if the current/foreground user
+         is different from the user of the Activity. This will also force the
+         <code>android.view.LayoutParams.FLAG_SHOW_WHEN_LOCKED</code> flag
+         to be set for all windows of this activity -->
+    <attr name="showForAllUsers" format="boolean" />
 
     <!-- Specify the authorities under which this content provider can be
          found.  Multiple authorities may be supplied by separating them
@@ -826,6 +862,11 @@
          via adb.  The default value of this attribute is <code>true</code>. -->
     <attr name="allowBackup" format="boolean" />
 
+    <!-- Applications will set this in their manifest to opt-in to or out of full app data back-up
+         and restore. Alternatively they can set it to an xml resource within their app that will
+         be parsed by the BackupAgent to selectively backup files indicated within that xml. -->
+    <attr name="fullBackupContent" format="reference|boolean" />
+
     <!-- Indicates that even though the application provides a <code>BackupAgent</code>,
          only full-data streaming backup operations are to be performed to save the app's
          data.  This lets the app rely on full-data backups while still participating in
@@ -899,10 +940,11 @@
          what gets persisted. -->
     <attr name="persistableMode">
         <!-- The default. If this activity forms the root of a task then that task will be
-             persisted across reboots but only the launching intent will be used. All
-             activities above this activity in the task will not be persisted. In addition
-             this activity will not be passed a PersistableBundle into which it could have
-             stored its state. -->
+             persisted across reboots but only the launching intent will be used. If the task
+             relinquishes its identity then the intent used is that of the topmost inherited
+             identity. All activities above this activity in the task will not be persisted.
+             In addition this activity will not be passed a PersistableBundle into which it
+             could have stored its state. -->
         <enum name="persistRootOnly" value="0" />
         <!-- If this activity forms the root of a task then that task will not be persisted
              across reboots -->
@@ -1012,6 +1054,85 @@
          <p>The default value of this attribute is <code>false</code>. -->
     <attr name="resumeWhilePausing" format="boolean" />
 
+    <!-- Indicates that it is okay for this activity to be resized to any dimension. Intended for a
+         multi-window device where there can be multiple activities of various sizes on the screen
+         at the same time.
+
+         <p>The default value is <code>false</code> for applications with
+         <code>targetSdkVersion</code> lesser than {@link android.os.Build.VERSION_CODES#M} and
+         <code>true</code> otherwise.
+
+         <p>NOTE: A task's root activity value is applied to all additional activities launched in
+         the task. That is if the root activity of a task is resizeable then the system will treat
+         all other activities in the task as resizeable and will not if the root activity isn't
+         resizeable.
+
+         <p>NOTE: The value of {@link android.R.attr#screenOrientation} will be ignored for
+         resizeable activities as the system doesn't support fixed orientation on a resizeable
+         activity.
+         @hide -->
+    <attr name="resizeableActivity" format="boolean" />
+
+    <!-- This value indicates how tasks rooted at this activity will behave in lockTask mode.
+         While in lockTask mode the system will not launch non-permitted tasks until
+         lockTask mode is disabled.
+         <p>While in lockTask mode with multiple permitted tasks running, each launched task is
+         permitted to finish, transitioning to the previous locked task, until there is only one
+         task remaining. At that point the last task running is not permitted to finish, unless it
+         uses the value always. -->
+    <attr name="lockTaskMode">
+        <!-- This is the default value. Tasks will not launch into lockTask mode but can be
+             placed there by calling {@link android.app.Activity#startLockTask}. If a task with
+             this mode has been whitelisted using {@link
+             android.app.admin.DevicePolicyManager#setLockTaskPackages} then calling
+             {@link android.app.Activity#startLockTask} will enter lockTask mode immediately,
+             otherwise the user will be presented with a dialog to approve entering pinned mode.
+             <p>If the system is already in lockTask mode when a new task rooted at this activity
+             is launched that task will or will not start depending on whether the package of this
+             activity has been whitelisted.
+             <p>Tasks rooted at this activity can only exit lockTask mode using
+             {@link android.app.Activity#stopLockTask}. -->
+        <enum name="normal" value="0"/>
+        <!-- Tasks will not launch into lockTask mode and cannot be placed there using
+             {@link android.app.Activity#startLockTask} or be pinned from the Overview screen.
+             If the system is already in lockTask mode when a new task rooted at this activity is
+             launched that task will not be started.
+             <p>Note: This mode is only available to system and privileged applications.
+             Non-privileged apps with this value will be treated as normal.
+             -->
+        <enum name="never" value="1"/>
+        <!-- Tasks rooted at this activity will always launch into lockTask mode. If the system is
+             already in lockTask mode when this task is launched then the new task will be launched
+             on top of the current task. Tasks launched in this mode are capable of exiting
+             lockTask mode using {@link android.app.Activity#finish()}.
+             <p>Note: This mode is only available to system and privileged applications.
+             Non-privileged apps with this value will be treated as normal.
+             -->
+        <enum name="always" value="2"/>
+        <!-- If the DevicePolicyManager (DPM) authorizes this package ({@link
+             android.app.admin.DevicePolicyManager#setLockTaskPackages}) then this mode is
+             identical to always, except that the activity needs to call
+             {@link android.app.Activity#stopLockTask} before being able to finish if it is the last
+             locked task.
+             If the DPM does not authorize this package then this mode is identical to normal. -->
+        <enum name="if_whitelisted" value="3"/>
+    </attr>
+    <!-- When set installer will extract native libraries. If set to false
+         libraries in the apk must be stored and page-aligned.  -->
+    <attr name="extractNativeLibs" format="boolean"/>
+
+    <!-- Specify whether an activity intent filter will need to be verified thru its set
+         of data URIs. This will only be used when the Intent's action is set to
+         {@link android.content.Intent#ACTION_VIEW Intent.ACTION_VIEW} and the Intent's category is
+         set to {@link android.content.Intent#CATEGORY_BROWSABLE Intent.CATEGORY_BROWSABLE} and the
+         intern filter data scheme is set to "http" or "https". When set to true, the intent filter
+         will need to use its data tag for getting the URIs to verify with.
+
+         For each URI, an HTTPS network request will be done to <code>/.well-known/statements.json</code>
+         host to verify that the web site is okay with the app intercepting the URI.
+         -->
+    <attr name="autoVerify" format="boolean" />
+
     <!-- The <code>manifest</code> tag is the root of an
          <code>AndroidManifest.xml</code> file,
          describing the contents of an Android package (.apk) file.  One
@@ -1020,7 +1141,7 @@
          to avoid name collisions.  For example, applications published
          by Google could have names of the form
          <code>com.google.app.<em>appname</em></code>
-         
+
          <p>Inside of the manifest tag, may appear the following tags
          in any order: {@link #AndroidManifestPermission permission},
          {@link #AndroidManifestPermissionGroup permission-group},
@@ -1039,7 +1160,7 @@
         <attr name="sharedUserLabel" />
         <attr name="installLocation" />
     </declare-styleable>
-    
+
     <!-- The <code>application</code> tag describes application-level components
          contained in the package, as well as general application
          attributes.  Many of the attributes you can supply here (such
@@ -1047,7 +1168,7 @@
          and allowTaskReparenting) serve
          as default values for the corresponding attributes of components
          declared inside of the application.
-         
+
          <p>Inside of this element you specify what the application contains,
          using the elements {@link #AndroidManifestProvider provider},
          {@link #AndroidManifestService service},
@@ -1096,6 +1217,7 @@
         <attr name="backupAgent" />
         <attr name="allowBackup" />
         <attr name="fullBackupOnly" />
+        <attr name="fullBackupContent" />
         <attr name="killAfterRestore" />
         <attr name="restoreNeedsApplication" />
         <attr name="restoreAnyVersion" />
@@ -1133,9 +1255,17 @@
              "com.google". -->
         <attr name="requiredAccountType" format="string"/>
         <attr name="isGame" />
+        <!-- Declare that this application may use cleartext traffic, such as HTTP rather than
+             HTTPS; WebSockets rather than WebSockets Secure; XMPP, IMAP, STMP without STARTTLS or
+             TLS). Defaults to true. If set to false {@code false}, the application declares that it
+             does not intend to use cleartext network traffic, in which case platform components
+             (e.g. HTTP stacks, {@code DownloadManager}, {@code MediaPlayer}) will refuse
+             applications's requests to use cleartext traffic. Third-party libraries are encouraged
+             to honor this flag as well. -->
+        <attr name="usesCleartextTraffic" />
         <attr name="multiArch" />
+        <attr name="extractNativeLibs" />
     </declare-styleable>
-    
     <!-- The <code>permission</code> tag declares a security permission that can be
          used to control access from other packages to specific components or
          features in your package (or other packages).  See the
@@ -1219,8 +1349,13 @@
     
     <!-- The <code>uses-permission</code> tag requests a
          {@link #AndroidManifestPermission &lt;permission&gt;} that the containing
-         package must be granted in order for it to operate correctly.
-         See the <a href="{@docRoot}guide/topics/security/security.html">Security and Permissions</a>
+         package must be granted in order for it to operate correctly. For runtime
+         permissions, i.e. ones with <code>dangerous</code> protection level, on a
+         platform that supports runtime permissions, the permission will not be
+         granted until the app explicitly requests it at runtime and the user approves
+         the grant. You cannot request at runtime permissions that are not declared
+         as used in the manifest. See the
+         <a href="{@docRoot}guide/topics/security/security.html">Security and Permissions</a>
          document for more information on permissions.  Also available is a
          {@link android.Manifest.permission list of permissions} included
          with the base platform.
@@ -1239,14 +1374,6 @@
              of Android higher than the number given here, the permission will not
              be requested.  -->
         <attr name="maxSdkVersion" format="integer" />
-        <!--  Specify whether this permission is required for the application.
-              The default is true, meaning the application requires the
-              permission, and it must always be granted when it is installed.
-              If you set this to false, then in some cases the application may
-              be installed with it being granted the permission, and it will
-              need to request the permission later if it needs it.
-        <attr name="required" format="boolean" />
-        -->
     </declare-styleable>
 
     <!-- The <code>uses-configuration</code> tag specifies
@@ -1637,7 +1764,7 @@
          {@link android.app.Activity} class that is available
          as part of the package's application components, implementing
          a part of the application's user interface.
-         
+
          <p>Zero or more {@link #AndroidManifestIntentFilter intent-filter}
          tags can be included inside of an activity, to specify the Intents
          that it can handle.  If none are specified, the activity can
@@ -1672,6 +1799,7 @@
         <attr name="alwaysRetainTaskState" />
         <attr name="stateNotNeeded" />
         <attr name="excludeFromRecents" />
+        <!-- @deprecated use {@link android.R.attr#showForAllUsers} instead. -->
         <attr name="showOnLockScreen" />
         <!-- Specify whether the activity is enabled or not (that is, can be instantiated by the system).
              It can also be specified for an application as a whole, in which case a value of "false"
@@ -1698,12 +1826,16 @@
         <attr name="autoRemoveFromRecents" />
         <attr name="relinquishTaskIdentity" />
         <attr name="resumeWhilePausing" />
+        <!-- @hide -->
+        <attr name="resizeableActivity" />
+        <attr name="lockTaskMode" />
+        <attr name="showForAllUsers" />
     </declare-styleable>
-    
+
     <!-- The <code>activity-alias</code> tag declares a new
          name for an existing {@link #AndroidManifestActivity activity}
          tag.
-         
+
          <p>Zero or more {@link #AndroidManifestIntentFilter intent-filter}
          tags can be included inside of an activity-alias, to specify the Intents
          that it can handle.  If none are specified, the activity can
@@ -1721,7 +1853,7 @@
              must be in the same manifest as the alias, and have been defined
              in that manifest before the alias here.  This must use a Java-style
              naming convention to ensure the name is unique, for example
-             "com.mycompany.MyName". -->  
+             "com.mycompany.MyName". -->
         <attr name="targetActivity" format="string" />
         <attr name="label" />
         <attr name="description" />
@@ -1737,7 +1869,7 @@
         <attr name="exported" />
         <attr name="parentActivityName" />
     </declare-styleable>
-    
+
     <!-- The <code>meta-data</code> tag is used to attach additional
          arbitrary data to an application component.  The data can later
          be retrieved programmatically from the
@@ -1801,6 +1933,7 @@
         <attr name="banner" />
         <attr name="logo" />
         <attr name="priority" />
+        <attr name="autoVerify" />
     </declare-styleable>
     
     <!-- Attributes that can be supplied in an AndroidManifest.xml

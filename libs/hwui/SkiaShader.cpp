@@ -16,15 +16,16 @@
 
 #define LOG_TAG "OpenGLRenderer"
 
-#include <utils/Log.h>
-
-#include <SkMatrix.h>
+#include "SkiaShader.h"
 
 #include "Caches.h"
+#include "Extensions.h"
 #include "Layer.h"
 #include "Matrix.h"
-#include "SkiaShader.h"
 #include "Texture.h"
+
+#include <SkMatrix.h>
+#include <utils/Log.h>
 
 namespace android {
 namespace uirenderer {
@@ -33,7 +34,7 @@ namespace uirenderer {
 // Support
 ///////////////////////////////////////////////////////////////////////////////
 
-static const GLint gTileModes[] = {
+static const GLenum gTileModes[] = {
         GL_CLAMP_TO_EDGE,   // == SkShader::kClamp_TileMode
         GL_REPEAT,          // == SkShader::kRepeat_Mode
         GL_MIRRORED_REPEAT  // == SkShader::kMirror_TileMode
@@ -46,17 +47,12 @@ static inline bool isPowerOfTwo(unsigned int n) {
     return !(n & (n - 1));
 }
 
-static inline void bindUniformColor(int slot, uint32_t color) {
-    const float a = ((color >> 24) & 0xff) / 255.0f;
-    glUniform4f(slot,
-            a * ((color >> 16) & 0xff) / 255.0f,
-            a * ((color >>  8) & 0xff) / 255.0f,
-            a * ((color      ) & 0xff) / 255.0f,
-            a);
+static inline void bindUniformColor(int slot, FloatColor color) {
+    glUniform4fv(slot, 1, reinterpret_cast<const float*>(&color));
 }
 
 static inline void bindTexture(Caches* caches, Texture* texture, GLenum wrapS, GLenum wrapT) {
-    caches->bindTexture(texture->id);
+    caches->textureState().bindTexture(texture->id);
     texture->setWrapST(wrapS, wrapT);
 }
 
@@ -78,229 +74,11 @@ static void computeScreenSpaceMatrix(mat4& screenSpace, const SkMatrix& unitMatr
     screenSpace.multiply(modelViewMatrix);
 }
 
-// Returns true if one is a bitmap and the other is a gradient
-static bool bitmapAndGradient(SkiaShaderType type1, SkiaShaderType type2) {
-    return (type1 == kBitmap_SkiaShaderType && type2 == kGradient_SkiaShaderType)
-            || (type2 == kBitmap_SkiaShaderType && type1 == kGradient_SkiaShaderType);
-}
-
-SkiaShaderType SkiaShader::getType(const SkShader& shader) {
-    // First check for a gradient shader.
-    switch (shader.asAGradient(NULL)) {
-        case SkShader::kNone_GradientType:
-            // Not a gradient shader. Fall through to check for other types.
-            break;
-        case SkShader::kLinear_GradientType:
-        case SkShader::kRadial_GradientType:
-        case SkShader::kSweep_GradientType:
-            return kGradient_SkiaShaderType;
-        default:
-            // This is a Skia gradient that has no SkiaShader equivalent. Return None to skip.
-            return kNone_SkiaShaderType;
-    }
-
-    // The shader is not a gradient. Check for a bitmap shader.
-    if (shader.asABitmap(NULL, NULL, NULL) == SkShader::kDefault_BitmapType) {
-        return kBitmap_SkiaShaderType;
-    }
-
-    // Check for a ComposeShader.
-    SkShader::ComposeRec rec;
-    if (shader.asACompose(&rec)) {
-        const SkiaShaderType shaderAType = getType(*rec.fShaderA);
-        const SkiaShaderType shaderBType = getType(*rec.fShaderB);
-
-        // Compose is only supported if one is a bitmap and the other is a
-        // gradient. Otherwise, return None to skip.
-        if (!bitmapAndGradient(shaderAType, shaderBType)) {
-            return kNone_SkiaShaderType;
-        }
-        return kCompose_SkiaShaderType;
-    }
-
-    if (shader.asACustomShader(NULL)) {
-        return kLayer_SkiaShaderType;
-    }
-
-    return kNone_SkiaShaderType;
-}
-
-typedef void (*describeProc)(Caches* caches, ProgramDescription& description,
-        const Extensions& extensions, const SkShader& shader);
-
-describeProc gDescribeProc[] = {
-    InvalidSkiaShader::describe,
-    SkiaBitmapShader::describe,
-    SkiaGradientShader::describe,
-    SkiaComposeShader::describe,
-    SkiaLayerShader::describe,
-};
-
-typedef void (*setupProgramProc)(Caches* caches, const mat4& modelViewMatrix,
-        GLuint* textureUnit, const Extensions& extensions, const SkShader& shader);
-
-setupProgramProc gSetupProgramProc[] = {
-    InvalidSkiaShader::setupProgram,
-    SkiaBitmapShader::setupProgram,
-    SkiaGradientShader::setupProgram,
-    SkiaComposeShader::setupProgram,
-    SkiaLayerShader::setupProgram,
-};
-
-void SkiaShader::describe(Caches* caches, ProgramDescription& description,
-        const Extensions& extensions, const SkShader& shader) {
-    gDescribeProc[getType(shader)](caches, description, extensions, shader);
-}
-
-void SkiaShader::setupProgram(Caches* caches, const mat4& modelViewMatrix,
-        GLuint* textureUnit, const Extensions& extensions, const SkShader& shader) {
-
-    gSetupProgramProc[getType(shader)](caches, modelViewMatrix, textureUnit, extensions, shader);
-}
-
 ///////////////////////////////////////////////////////////////////////////////
-// Layer shader
+// gradient shader matrix helpers
 ///////////////////////////////////////////////////////////////////////////////
 
-void SkiaLayerShader::describe(Caches*, ProgramDescription& description,
-        const Extensions&, const SkShader& shader) {
-    description.hasBitmap = true;
-}
-
-void SkiaLayerShader::setupProgram(Caches* caches, const mat4& modelViewMatrix,
-        GLuint* textureUnit, const Extensions&, const SkShader& shader) {
-    Layer* layer;
-    if (!shader.asACustomShader(reinterpret_cast<void**>(&layer))) {
-        LOG_ALWAYS_FATAL("SkiaLayerShader::setupProgram called on the wrong type of shader!");
-    }
-
-    GLuint textureSlot = (*textureUnit)++;
-    caches->activeTexture(textureSlot);
-
-    const float width = layer->getWidth();
-    const float height = layer->getHeight();
-
-    mat4 textureTransform;
-    computeScreenSpaceMatrix(textureTransform, SkMatrix::I(), shader.getLocalMatrix(),
-            modelViewMatrix);
-
-
-    // Uniforms
-    layer->bindTexture();
-    layer->setWrap(GL_CLAMP_TO_EDGE);
-    layer->setFilter(GL_LINEAR);
-
-    Program* program = caches->currentProgram;
-    glUniform1i(program->getUniform("bitmapSampler"), textureSlot);
-    glUniformMatrix4fv(program->getUniform("textureTransform"), 1,
-            GL_FALSE, &textureTransform.data[0]);
-    glUniform2f(program->getUniform("textureDimension"), 1.0f / width, 1.0f / height);
-}
-
-///////////////////////////////////////////////////////////////////////////////
-// Bitmap shader
-///////////////////////////////////////////////////////////////////////////////
-
-struct BitmapShaderInfo {
-    float width;
-    float height;
-    GLenum wrapS;
-    GLenum wrapT;
-    Texture* texture;
-};
-
-static bool bitmapShaderHelper(Caches* caches, ProgramDescription* description,
-        BitmapShaderInfo* shaderInfo,
-        const Extensions& extensions,
-        const SkBitmap& bitmap, SkShader::TileMode tileModes[2]) {
-    Texture* texture = caches->textureCache.get(&bitmap);
-    if (!texture) return false;
-
-    const float width = texture->width;
-    const float height = texture->height;
-    GLenum wrapS, wrapT;
-
-    if (description) {
-        description->hasBitmap = true;
-    }
-    // The driver does not support non-power of two mirrored/repeated
-    // textures, so do it ourselves
-    if (!extensions.hasNPot() && (!isPowerOfTwo(width) || !isPowerOfTwo(height)) &&
-            (tileModes[0] != SkShader::kClamp_TileMode ||
-             tileModes[1] != SkShader::kClamp_TileMode)) {
-        if (description) {
-            description->isBitmapNpot = true;
-            description->bitmapWrapS = gTileModes[tileModes[0]];
-            description->bitmapWrapT = gTileModes[tileModes[1]];
-        }
-        wrapS = GL_CLAMP_TO_EDGE;
-        wrapT = GL_CLAMP_TO_EDGE;
-    } else {
-        wrapS = gTileModes[tileModes[0]];
-        wrapT = gTileModes[tileModes[1]];
-    }
-
-    if (shaderInfo) {
-        shaderInfo->width = width;
-        shaderInfo->height = height;
-        shaderInfo->wrapS = wrapS;
-        shaderInfo->wrapT = wrapT;
-        shaderInfo->texture = texture;
-    }
-    return true;
-}
-
-void SkiaBitmapShader::describe(Caches* caches, ProgramDescription& description,
-        const Extensions& extensions, const SkShader& shader) {
-    SkBitmap bitmap;
-    SkShader::TileMode xy[2];
-    if (shader.asABitmap(&bitmap, NULL, xy) != SkShader::kDefault_BitmapType) {
-        LOG_ALWAYS_FATAL("SkiaBitmapShader::describe called with a different kind of shader!");
-    }
-    bitmapShaderHelper(caches, &description, NULL, extensions, bitmap, xy);
-}
-
-void SkiaBitmapShader::setupProgram(Caches* caches, const mat4& modelViewMatrix,
-        GLuint* textureUnit, const Extensions& extensions, const SkShader& shader) {
-    SkBitmap bitmap;
-    SkShader::TileMode xy[2];
-    if (shader.asABitmap(&bitmap, NULL, xy) != SkShader::kDefault_BitmapType) {
-        LOG_ALWAYS_FATAL("SkiaBitmapShader::setupProgram called with a different kind of shader!");
-    }
-
-    GLuint textureSlot = (*textureUnit)++;
-    Caches::getInstance().activeTexture(textureSlot);
-
-    BitmapShaderInfo shaderInfo;
-    if (!bitmapShaderHelper(caches, NULL, &shaderInfo, extensions, bitmap, xy)) {
-        return;
-    }
-
-    Program* program = caches->currentProgram;
-    Texture* texture = shaderInfo.texture;
-
-    const AutoTexture autoCleanup(texture);
-
-    mat4 textureTransform;
-    computeScreenSpaceMatrix(textureTransform, SkMatrix::I(), shader.getLocalMatrix(),
-            modelViewMatrix);
-
-    // Uniforms
-    bindTexture(caches, texture, shaderInfo.wrapS, shaderInfo.wrapT);
-    texture->setFilter(GL_LINEAR);
-
-    glUniform1i(program->getUniform("bitmapSampler"), textureSlot);
-    glUniformMatrix4fv(program->getUniform("textureTransform"), 1,
-            GL_FALSE, &textureTransform.data[0]);
-    glUniform2f(program->getUniform("textureDimension"), 1.0f / shaderInfo.width,
-            1.0f / shaderInfo.height);
-}
-
-///////////////////////////////////////////////////////////////////////////////
-// Linear gradient shader
-///////////////////////////////////////////////////////////////////////////////
-
-static void toUnitMatrix(const SkPoint pts[2], SkMatrix* matrix) {
+static void toLinearUnitMatrix(const SkPoint pts[2], SkMatrix* matrix) {
     SkVector vec = pts[1] - pts[0];
     const float mag = vec.length();
     const float inv = mag ? 1.0f / mag : 0;
@@ -311,20 +89,12 @@ static void toUnitMatrix(const SkPoint pts[2], SkMatrix* matrix) {
     matrix->postScale(inv, inv);
 }
 
-///////////////////////////////////////////////////////////////////////////////
-// Circular gradient shader
-///////////////////////////////////////////////////////////////////////////////
-
 static void toCircularUnitMatrix(const float x, const float y, const float radius,
         SkMatrix* matrix) {
     const float inv = 1.0f / radius;
     matrix->setTranslate(-x, -y);
     matrix->postScale(inv, inv);
 }
-
-///////////////////////////////////////////////////////////////////////////////
-// Sweep gradient shader
-///////////////////////////////////////////////////////////////////////////////
 
 static void toSweepUnitMatrix(const float x, const float y, SkMatrix* matrix) {
     matrix->setTranslate(-x, -y);
@@ -338,135 +108,294 @@ static bool isSimpleGradient(const SkShader::GradientInfo& gradInfo) {
     return gradInfo.fColorCount == 2 && gradInfo.fTileMode == SkShader::kClamp_TileMode;
 }
 
-void SkiaGradientShader::describe(Caches*, ProgramDescription& description,
-        const Extensions& extensions, const SkShader& shader) {
+///////////////////////////////////////////////////////////////////////////////
+// Store / apply
+///////////////////////////////////////////////////////////////////////////////
+
+bool tryStoreGradient(Caches& caches, const SkShader& shader, const Matrix4 modelViewMatrix,
+        GLuint* textureUnit, ProgramDescription* description,
+        SkiaShaderData::GradientShaderData* outData) {
     SkShader::GradientInfo gradInfo;
     gradInfo.fColorCount = 0;
-    gradInfo.fColors = NULL;
-    gradInfo.fColorOffsets = NULL;
-
-    switch (shader.asAGradient(&gradInfo)) {
-        case SkShader::kLinear_GradientType:
-            description.gradientType = ProgramDescription::kGradientLinear;
-            break;
-        case SkShader::kRadial_GradientType:
-            description.gradientType = ProgramDescription::kGradientCircular;
-            break;
-        case SkShader::kSweep_GradientType:
-            description.gradientType = ProgramDescription::kGradientSweep;
-            break;
-        default:
-            // Do nothing. This shader is unsupported.
-            return;
-    }
-    description.hasGradient = true;
-    description.isSimpleGradient = isSimpleGradient(gradInfo);
-}
-
-void SkiaGradientShader::setupProgram(Caches* caches, const mat4& modelViewMatrix,
-        GLuint* textureUnit, const Extensions&, const SkShader& shader) {
-    // SkShader::GradientInfo.fColorCount is an in/out parameter. As input, it tells asAGradient
-    // how much space has been allocated for fColors and fColorOffsets.  10 was chosen
-    // arbitrarily, but should be >= 2.
-    // As output, it tells the number of actual colors/offsets in the gradient.
-    const int COLOR_COUNT = 10;
-    SkAutoSTMalloc<COLOR_COUNT, SkColor> colorStorage(COLOR_COUNT);
-    SkAutoSTMalloc<COLOR_COUNT, SkScalar> positionStorage(COLOR_COUNT);
-
-    SkShader::GradientInfo gradInfo;
-    gradInfo.fColorCount = COLOR_COUNT;
-    gradInfo.fColors = colorStorage.get();
-    gradInfo.fColorOffsets = positionStorage.get();
-
-    SkShader::GradientType gradType = shader.asAGradient(&gradInfo);
-
-    Program* program = caches->currentProgram;
-    if (CC_UNLIKELY(!isSimpleGradient(gradInfo))) {
-        if (gradInfo.fColorCount > COLOR_COUNT) {
-            // There was not enough room in our arrays for all the colors and offsets. Try again,
-            // now that we know the true number of colors.
-            gradInfo.fColors = colorStorage.reset(gradInfo.fColorCount);
-            gradInfo.fColorOffsets = positionStorage.reset(gradInfo.fColorCount);
-
-            shader.asAGradient(&gradInfo);
-        }
-        GLuint textureSlot = (*textureUnit)++;
-        caches->activeTexture(textureSlot);
-
-#ifndef SK_SCALAR_IS_FLOAT
-    #error Need to convert gradInfo.fColorOffsets to float!
-#endif
-        Texture* texture = caches->gradientCache.get(gradInfo.fColors, gradInfo.fColorOffsets,
-                gradInfo.fColorCount);
-
-        // Uniforms
-        bindTexture(caches, texture, gTileModes[gradInfo.fTileMode], gTileModes[gradInfo.fTileMode]);
-        glUniform1i(program->getUniform("gradientSampler"), textureSlot);
-    } else {
-        bindUniformColor(program->getUniform("startColor"), gradInfo.fColors[0]);
-        bindUniformColor(program->getUniform("endColor"), gradInfo.fColors[1]);
-    }
-
-    caches->dither.setupProgram(program, textureUnit);
+    gradInfo.fColors = nullptr;
+    gradInfo.fColorOffsets = nullptr;
 
     SkMatrix unitMatrix;
-    switch (gradType) {
+    switch (shader.asAGradient(&gradInfo)) {
         case SkShader::kLinear_GradientType:
-            toUnitMatrix(gradInfo.fPoint, &unitMatrix);
+            description->gradientType = ProgramDescription::kGradientLinear;
+
+            toLinearUnitMatrix(gradInfo.fPoint, &unitMatrix);
             break;
         case SkShader::kRadial_GradientType:
+            description->gradientType = ProgramDescription::kGradientCircular;
+
             toCircularUnitMatrix(gradInfo.fPoint[0].fX, gradInfo.fPoint[0].fY,
                     gradInfo.fRadius[0], &unitMatrix);
             break;
         case SkShader::kSweep_GradientType:
+            description->gradientType = ProgramDescription::kGradientSweep;
+
             toSweepUnitMatrix(gradInfo.fPoint[0].fX, gradInfo.fPoint[0].fY, &unitMatrix);
             break;
         default:
-            LOG_ALWAYS_FATAL("Invalid SkShader gradient type %d", gradType);
+            // Do nothing. This shader is unsupported.
+            return false;
+    }
+    description->hasGradient = true;
+    description->isSimpleGradient = isSimpleGradient(gradInfo);
+
+    computeScreenSpaceMatrix(outData->screenSpace, unitMatrix,
+            shader.getLocalMatrix(), modelViewMatrix);
+
+    // re-query shader to get full color / offset data
+    std::unique_ptr<SkColor[]> colorStorage(new SkColor[gradInfo.fColorCount]);
+    std::unique_ptr<SkScalar[]> colorOffsets(new SkScalar[gradInfo.fColorCount]);
+    gradInfo.fColors = &colorStorage[0];
+    gradInfo.fColorOffsets = &colorOffsets[0];
+    shader.asAGradient(&gradInfo);
+
+    if (CC_UNLIKELY(!isSimpleGradient(gradInfo))) {
+        outData->gradientSampler = (*textureUnit)++;
+
+#ifndef SK_SCALAR_IS_FLOAT
+    #error Need to convert gradInfo.fColorOffsets to float!
+#endif
+        outData->gradientTexture = caches.gradientCache.get(
+                gradInfo.fColors, gradInfo.fColorOffsets, gradInfo.fColorCount);
+        outData->wrapST = gTileModes[gradInfo.fTileMode];
+    } else {
+        outData->gradientSampler = 0;
+        outData->gradientTexture = nullptr;
+
+        outData->startColor.set(gradInfo.fColors[0]);
+        outData->endColor.set(gradInfo.fColors[1]);
     }
 
-    mat4 screenSpace;
-    computeScreenSpaceMatrix(screenSpace, unitMatrix, shader.getLocalMatrix(), modelViewMatrix);
-    glUniformMatrix4fv(program->getUniform("screenSpace"), 1, GL_FALSE, &screenSpace.data[0]);
+    outData->ditherSampler = (*textureUnit)++;
+    return true;
 }
 
-///////////////////////////////////////////////////////////////////////////////
-// Compose shader
-///////////////////////////////////////////////////////////////////////////////
+void applyGradient(Caches& caches, const SkiaShaderData::GradientShaderData& data) {
+    if (CC_UNLIKELY(data.gradientTexture)) {
+        caches.textureState().activateTexture(data.gradientSampler);
+        bindTexture(&caches, data.gradientTexture, data.wrapST, data.wrapST);
+        glUniform1i(caches.program().getUniform("gradientSampler"), data.gradientSampler);
+    } else {
+        bindUniformColor(caches.program().getUniform("startColor"), data.startColor);
+        bindUniformColor(caches.program().getUniform("endColor"), data.endColor);
+    }
 
-void SkiaComposeShader::describe(Caches* caches, ProgramDescription& description,
-        const Extensions& extensions, const SkShader& shader) {
-    SkShader::ComposeRec rec;
-    if (!shader.asACompose(&rec)) {
-        LOG_ALWAYS_FATAL("SkiaComposeShader::describe called on the wrong shader type!");
-    }
-    SkiaShader::describe(caches, description, extensions, *rec.fShaderA);
-    SkiaShader::describe(caches, description, extensions, *rec.fShaderB);
-    if (SkiaShader::getType(*rec.fShaderA) == kBitmap_SkiaShaderType) {
-        description.isBitmapFirst = true;
-    }
-    if (!SkXfermode::AsMode(rec.fMode, &description.shadersMode)) {
-        // TODO: Support other modes.
-        description.shadersMode = SkXfermode::kSrcOver_Mode;
-    }
+    // TODO: remove sampler slot incrementing from dither.setupProgram,
+    // since this assignment of slots is done at store, not apply time
+    GLuint ditherSampler = data.ditherSampler;
+    caches.dither.setupProgram(caches.program(), &ditherSampler);
+    glUniformMatrix4fv(caches.program().getUniform("screenSpace"), 1,
+            GL_FALSE, &data.screenSpace.data[0]);
 }
 
-void SkiaComposeShader::setupProgram(Caches* caches, const mat4& modelViewMatrix,
-        GLuint* textureUnit, const Extensions& extensions, const SkShader& shader) {
-    SkShader::ComposeRec rec;
-    if (!shader.asACompose(&rec)) {
-        LOG_ALWAYS_FATAL("SkiaComposeShader::setupProgram called on the wrong shader type!");
+bool tryStoreBitmap(Caches& caches, const SkShader& shader, const Matrix4& modelViewMatrix,
+        GLuint* textureUnit, ProgramDescription* description,
+        SkiaShaderData::BitmapShaderData* outData) {
+    SkBitmap bitmap;
+    SkShader::TileMode xy[2];
+    if (shader.asABitmap(&bitmap, nullptr, xy) != SkShader::kDefault_BitmapType) {
+        return false;
     }
 
-    // Apply this compose shader's local transform and pass it down to
-    // the child shaders. They will in turn apply their local transform
-    // to this matrix.
+    /*
+     * Bypass the AssetAtlas, since those textures:
+     * 1) require UV mapping, which isn't implemented in matrix computation below
+     * 2) can't handle REPEAT simply
+     * 3) are safe to upload here (outside of sync stage), since they're static
+     */
+    outData->bitmapTexture = caches.textureCache.getAndBypassAtlas(&bitmap);
+    if (!outData->bitmapTexture) return false;
+
+    outData->bitmapSampler = (*textureUnit)++;
+
+    const float width = outData->bitmapTexture->width;
+    const float height = outData->bitmapTexture->height;
+
+    description->hasBitmap = true;
+    if (!caches.extensions().hasNPot()
+            && (!isPowerOfTwo(width) || !isPowerOfTwo(height))
+            && (xy[0] != SkShader::kClamp_TileMode || xy[1] != SkShader::kClamp_TileMode)) {
+        description->isBitmapNpot = true;
+        description->bitmapWrapS = gTileModes[xy[0]];
+        description->bitmapWrapT = gTileModes[xy[1]];
+
+        outData->wrapS = GL_CLAMP_TO_EDGE;
+        outData->wrapT = GL_CLAMP_TO_EDGE;
+    } else {
+        outData->wrapS = gTileModes[xy[0]];
+        outData->wrapT = gTileModes[xy[1]];
+    }
+
+    computeScreenSpaceMatrix(outData->textureTransform, SkMatrix::I(), shader.getLocalMatrix(),
+            modelViewMatrix);
+    outData->textureDimension[0] = 1.0f / width;
+    outData->textureDimension[1] = 1.0f / height;
+
+    return true;
+}
+
+void applyBitmap(Caches& caches, const SkiaShaderData::BitmapShaderData& data) {
+    caches.textureState().activateTexture(data.bitmapSampler);
+    bindTexture(&caches, data.bitmapTexture, data.wrapS, data.wrapT);
+    data.bitmapTexture->setFilter(GL_LINEAR);
+
+    glUniform1i(caches.program().getUniform("bitmapSampler"), data.bitmapSampler);
+    glUniformMatrix4fv(caches.program().getUniform("textureTransform"), 1, GL_FALSE,
+            &data.textureTransform.data[0]);
+    glUniform2fv(caches.program().getUniform("textureDimension"), 1, &data.textureDimension[0]);
+}
+
+SkiaShaderType getComposeSubType(const SkShader& shader) {
+    // First check for a gradient shader.
+    switch (shader.asAGradient(nullptr)) {
+        case SkShader::kNone_GradientType:
+            // Not a gradient shader. Fall through to check for other types.
+            break;
+        case SkShader::kLinear_GradientType:
+        case SkShader::kRadial_GradientType:
+        case SkShader::kSweep_GradientType:
+            return kGradient_SkiaShaderType;
+        default:
+            // This is a Skia gradient that has no SkiaShader equivalent. Return None to skip.
+            return kNone_SkiaShaderType;
+    }
+
+    // The shader is not a gradient. Check for a bitmap shader.
+    if (shader.asABitmap(nullptr, nullptr, nullptr) == SkShader::kDefault_BitmapType) {
+        return kBitmap_SkiaShaderType;
+    }
+    return kNone_SkiaShaderType;
+}
+
+void storeCompose(Caches& caches, const SkShader& bitmapShader, const SkShader& gradientShader,
+        const Matrix4& modelViewMatrix, GLuint* textureUnit,
+        ProgramDescription* description, SkiaShaderData* outData) {
+    LOG_ALWAYS_FATAL_IF(!tryStoreBitmap(caches, bitmapShader, modelViewMatrix,
+                textureUnit, description, &outData->bitmapData),
+            "failed storing bitmap shader data");
+    LOG_ALWAYS_FATAL_IF(!tryStoreGradient(caches, gradientShader, modelViewMatrix,
+                textureUnit, description, &outData->gradientData),
+            "failing storing gradient shader data");
+}
+
+bool tryStoreCompose(Caches& caches, const SkShader& shader, const Matrix4& modelViewMatrix,
+        GLuint* textureUnit, ProgramDescription* description,
+        SkiaShaderData* outData) {
+
+    SkShader::ComposeRec rec;
+    if (!shader.asACompose(&rec)) return false;
+
+    const SkiaShaderType shaderAType = getComposeSubType(*rec.fShaderA);
+    const SkiaShaderType shaderBType = getComposeSubType(*rec.fShaderB);
+
+    // check that type enum values are the 2 flags that compose the kCompose value
+    if ((shaderAType & shaderBType) != 0) return false;
+    if ((shaderAType | shaderBType) != kCompose_SkiaShaderType) return false;
+
     mat4 transform;
-    computeScreenSpaceMatrix(transform, SkMatrix::I(), shader.getLocalMatrix(),
+    computeScreenSpaceMatrix(transform, SkMatrix::I(), shader.getLocalMatrix(), modelViewMatrix);
+    if (shaderAType == kBitmap_SkiaShaderType) {
+        description->isBitmapFirst = true;
+        storeCompose(caches, *rec.fShaderA, *rec.fShaderB,
+                transform, textureUnit, description, outData);
+    } else {
+        description->isBitmapFirst = false;
+        storeCompose(caches, *rec.fShaderB, *rec.fShaderA,
+                transform, textureUnit, description, outData);
+    }
+    if (!SkXfermode::AsMode(rec.fMode, &description->shadersMode)) {
+        // TODO: Support other modes.
+        description->shadersMode = SkXfermode::kSrcOver_Mode;
+    }
+    return true;
+}
+
+bool tryStoreLayer(Caches& caches, const SkShader& shader, const Matrix4& modelViewMatrix,
+        GLuint* textureUnit, ProgramDescription* description,
+        SkiaShaderData::LayerShaderData* outData) {
+    Layer* layer;
+    if (!shader.asACustomShader(reinterpret_cast<void**>(&layer))) {
+        return false;
+    }
+
+    description->hasBitmap = true;
+    outData->layer = layer;
+    outData->bitmapSampler = (*textureUnit)++;
+
+    const float width = layer->getWidth();
+    const float height = layer->getHeight();
+
+    computeScreenSpaceMatrix(outData->textureTransform, SkMatrix::I(), shader.getLocalMatrix(),
             modelViewMatrix);
 
-    SkiaShader::setupProgram(caches, transform, textureUnit, extensions, *rec.fShaderA);
-    SkiaShader::setupProgram(caches, transform, textureUnit, extensions, *rec.fShaderB);
+    outData->textureDimension[0] = 1.0f / width;
+    outData->textureDimension[1] = 1.0f / height;
+    return true;
+}
+
+void applyLayer(Caches& caches, const SkiaShaderData::LayerShaderData& data) {
+    caches.textureState().activateTexture(data.bitmapSampler);
+
+    data.layer->bindTexture();
+    data.layer->setWrap(GL_CLAMP_TO_EDGE);
+    data.layer->setFilter(GL_LINEAR);
+
+    glUniform1i(caches.program().getUniform("bitmapSampler"), data.bitmapSampler);
+    glUniformMatrix4fv(caches.program().getUniform("textureTransform"), 1,
+            GL_FALSE, &data.textureTransform.data[0]);
+    glUniform2fv(caches.program().getUniform("textureDimension"), 1, &data.textureDimension[0]);
+}
+
+void SkiaShader::store(Caches& caches, const SkShader& shader, const Matrix4& modelViewMatrix,
+        GLuint* textureUnit, ProgramDescription* description,
+        SkiaShaderData* outData) {
+    if (tryStoreGradient(caches, shader, modelViewMatrix,
+            textureUnit, description, &outData->gradientData)) {
+        outData->skiaShaderType = kGradient_SkiaShaderType;
+        return;
+    }
+
+    if (tryStoreBitmap(caches, shader, modelViewMatrix,
+            textureUnit, description, &outData->bitmapData)) {
+        outData->skiaShaderType = kBitmap_SkiaShaderType;
+        return;
+    }
+
+    if (tryStoreCompose(caches, shader, modelViewMatrix,
+            textureUnit, description, outData)) {
+        outData->skiaShaderType = kCompose_SkiaShaderType;
+        return;
+    }
+
+    if (tryStoreLayer(caches, shader, modelViewMatrix,
+            textureUnit, description, &outData->layerData)) {
+        outData->skiaShaderType = kLayer_SkiaShaderType;
+        return;
+    }
+
+    // Unknown/unsupported type, so explicitly ignore shader
+    outData->skiaShaderType = kNone_SkiaShaderType;
+}
+
+void SkiaShader::apply(Caches& caches, const SkiaShaderData& data) {
+    if (!data.skiaShaderType) return;
+
+    if (data.skiaShaderType & kGradient_SkiaShaderType) {
+        applyGradient(caches, data.gradientData);
+    }
+    if (data.skiaShaderType & kBitmap_SkiaShaderType) {
+        applyBitmap(caches, data.bitmapData);
+    }
+
+    if (data.skiaShaderType == kLayer_SkiaShaderType) {
+        applyLayer(caches, data.layerData);
+    }
 }
 
 }; // namespace uirenderer

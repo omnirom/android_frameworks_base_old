@@ -13,4 +13,7 @@
      limitations under the License.
 -->
 <resources>
+    <style name="ColorTheme">
+        <item name="color1">@color/color1</item>
+    </style>
 </resources>

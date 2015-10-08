@@ -46,6 +46,7 @@ public final class SomeArgs {
     public Object arg4;
     public Object arg5;
     public Object arg6;
+    public Object arg7;
     public int argi1;
     public int argi2;
     public int argi3;
@@ -69,6 +70,16 @@ public final class SomeArgs {
             } else {
                 return new SomeArgs();
             }
+        }
+    }
+
+    public void complete() {
+        synchronized (this) {
+            if (mWaitState != WAIT_WAITING) {
+                throw new IllegalStateException("Not waiting");
+            }
+            mWaitState = WAIT_FINISHED;
+            notifyAll();
         }
     }
 
@@ -97,6 +108,7 @@ public final class SomeArgs {
         arg4 = null;
         arg5 = null;
         arg6 = null;
+        arg7 = null;
         argi1 = 0;
         argi2 = 0;
         argi3 = 0;

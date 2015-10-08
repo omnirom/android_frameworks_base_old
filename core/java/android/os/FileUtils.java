@@ -16,11 +16,16 @@
 
 package android.os;
 
+import android.annotation.NonNull;
+import android.provider.DocumentsContract.Document;
 import android.system.ErrnoException;
 import android.system.Os;
 import android.text.TextUtils;
 import android.util.Log;
 import android.util.Slog;
+import android.webkit.MimeTypeMap;
+
+import com.android.internal.annotations.VisibleForTesting;
 
 import java.io.BufferedInputStream;
 import java.io.ByteArrayOutputStream;
@@ -32,8 +37,10 @@ import java.io.FileOutputStream;
 import java.io.FileWriter;
 import java.io.IOException;
 import java.io.InputStream;
+import java.nio.charset.StandardCharsets;
 import java.util.Arrays;
 import java.util.Comparator;
+import java.util.Objects;
 import java.util.regex.Pattern;
 import java.util.zip.CRC32;
 import java.util.zip.CheckedInputStream;
@@ -62,6 +69,8 @@ public class FileUtils {
 
     /** Regular expression for safe filenames: no spaces or metacharacters */
     private static final Pattern SAFE_FILENAME_PATTERN = Pattern.compile("[\\w%+,./=_-]+");
+
+    private static final File[] EMPTY = new File[0];
 
     /**
      * Set owner and mode of of given {@link File}.
@@ -369,8 +378,25 @@ public class FileUtils {
      * {@link File#getCanonicalFile()} to avoid symlink or path traversal
      * attacks.
      */
+    public static boolean contains(File[] dirs, File file) {
+        for (File dir : dirs) {
+            if (contains(dir, file)) {
+                return true;
+            }
+        }
+        return false;
+    }
+
+    /**
+     * Test if a file lives under the given directory, either as a direct child
+     * or a distant grandchild.
+     * <p>
+     * Both files <em>must</em> have been resolved using
+     * {@link File#getCanonicalFile()} to avoid symlink or path traversal
+     * attacks.
+     */
     public static boolean contains(File dir, File file) {
-        if (file == null) return false;
+        if (dir == null || file == null) return false;
 
         String dirPath = dir.getAbsolutePath();
         String filePath = file.getAbsolutePath();
@@ -436,6 +462,7 @@ public class FileUtils {
                 res.append('_');
             }
         }
+        trimFilename(res, 255);
         return res.toString();
     }
 
@@ -484,7 +511,29 @@ public class FileUtils {
                 res.append('_');
             }
         }
+        // Even though vfat allows 255 UCS-2 chars, we might eventually write to
+        // ext4 through a FUSE layer, so use that limit.
+        trimFilename(res, 255);
         return res.toString();
+    }
+
+    @VisibleForTesting
+    public static String trimFilename(String str, int maxBytes) {
+        final StringBuilder res = new StringBuilder(str);
+        trimFilename(res, maxBytes);
+        return res.toString();
+    }
+
+    private static void trimFilename(StringBuilder res, int maxBytes) {
+        byte[] raw = res.toString().getBytes(StandardCharsets.UTF_8);
+        if (raw.length > maxBytes) {
+            maxBytes -= 3;
+            while (raw.length > maxBytes) {
+                res.deleteCharAt(res.length() / 2);
+                raw = res.toString().getBytes(StandardCharsets.UTF_8);
+            }
+            res.insert(res.length() / 2, "...");
+        }
     }
 
     public static String rewriteAfterRename(File beforeDir, File afterDir, String path) {
@@ -508,12 +557,93 @@ public class FileUtils {
      * {@code /after/foo/bar.txt}.
      */
     public static File rewriteAfterRename(File beforeDir, File afterDir, File file) {
-        if (file == null) return null;
+        if (file == null || beforeDir == null || afterDir == null) return null;
         if (contains(beforeDir, file)) {
             final String splice = file.getAbsolutePath().substring(
                     beforeDir.getAbsolutePath().length());
             return new File(afterDir, splice);
         }
         return null;
+    }
+
+    /**
+     * Generates a unique file name under the given parent directory. If the display name doesn't
+     * have an extension that matches the requested MIME type, the default extension for that MIME
+     * type is appended. If a file already exists, the name is appended with a numerical value to
+     * make it unique.
+     *
+     * For example, the display name 'example' with 'text/plain' MIME might produce
+     * 'example.txt' or 'example (1).txt', etc.
+     *
+     * @throws FileNotFoundException
+     */
+    public static File buildUniqueFile(File parent, String mimeType, String displayName)
+            throws FileNotFoundException {
+        String name;
+        String ext;
+
+        if (Document.MIME_TYPE_DIR.equals(mimeType)) {
+            name = displayName;
+            ext = null;
+        } else {
+            String mimeTypeFromExt;
+
+            // Extract requested extension from display name
+            final int lastDot = displayName.lastIndexOf('.');
+            if (lastDot >= 0) {
+                name = displayName.substring(0, lastDot);
+                ext = displayName.substring(lastDot + 1);
+                mimeTypeFromExt = MimeTypeMap.getSingleton().getMimeTypeFromExtension(
+                        ext.toLowerCase());
+            } else {
+                name = displayName;
+                ext = null;
+                mimeTypeFromExt = null;
+            }
+
+            if (mimeTypeFromExt == null) {
+                mimeTypeFromExt = "application/octet-stream";
+            }
+
+            final String extFromMimeType = MimeTypeMap.getSingleton().getExtensionFromMimeType(
+                    mimeType);
+            if (Objects.equals(mimeType, mimeTypeFromExt) || Objects.equals(ext, extFromMimeType)) {
+                // Extension maps back to requested MIME type; allow it
+            } else {
+                // No match; insist that create file matches requested MIME
+                name = displayName;
+                ext = extFromMimeType;
+            }
+        }
+
+        File file = buildFile(parent, name, ext);
+
+        // If conflicting file, try adding counter suffix
+        int n = 0;
+        while (file.exists()) {
+            if (n++ >= 32) {
+                throw new FileNotFoundException("Failed to create unique file");
+            }
+            file = buildFile(parent, name + " (" + n + ")", ext);
+        }
+
+        return file;
+    }
+
+    private static File buildFile(File parent, String name, String ext) {
+        if (TextUtils.isEmpty(ext)) {
+            return new File(parent, name);
+        } else {
+            return new File(parent, name + "." + ext);
+        }
+    }
+
+    public static @NonNull File[] listFilesOrEmpty(File dir) {
+        File[] res = dir.listFiles();
+        if (res != null) {
+            return res;
+        } else {
+            return EMPTY;
+        }
     }
 }

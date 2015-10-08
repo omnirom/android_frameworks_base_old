@@ -21,7 +21,7 @@ package android.os.storage;
  * 
  * @hide
  */
-public abstract class StorageEventListener {
+public class StorageEventListener {
     /**
      * Called when the detection state of a USB Mass Storage host has changed.
      * @param connected true if the USB mass storage is connected.
@@ -36,5 +36,20 @@ public abstract class StorageEventListener {
      * @param newState the old state as returned by {@link android.os.Environment#getExternalStorageState()}.
      */
     public void onStorageStateChanged(String path, String oldState, String newState) {
+    }
+
+    public void onVolumeStateChanged(VolumeInfo vol, int oldState, int newState) {
+    }
+
+    public void onVolumeRecordChanged(VolumeRecord rec) {
+    }
+
+    public void onVolumeForgotten(String fsUuid) {
+    }
+
+    public void onDiskScanned(DiskInfo disk, int volumeCount) {
+    }
+
+    public void onDiskDestroyed(DiskInfo disk) {
     }
 }

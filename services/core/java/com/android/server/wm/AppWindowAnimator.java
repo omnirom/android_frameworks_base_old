@@ -16,10 +16,15 @@
 
 package com.android.server.wm;
 
+import static com.android.server.wm.WindowManagerService.DEBUG_ANIM;
+import static com.android.server.wm.WindowManagerService.DEBUG_LAYERS;
+import static com.android.server.wm.WindowManagerService.SHOW_TRANSACTIONS;
+import static com.android.server.wm.WindowManagerService.TYPE_LAYER_OFFSET;
+
 import android.graphics.Matrix;
-import android.os.RemoteException;
 import android.util.Slog;
 import android.util.TimeUtils;
+import android.view.Choreographer;
 import android.view.Display;
 import android.view.SurfaceControl;
 import android.view.WindowManagerPolicy;
@@ -37,6 +42,7 @@ public class AppWindowAnimator {
     final WindowAnimator mAnimator;
 
     boolean animating;
+    boolean wasAnimating;
     Animation animation;
     boolean hasTransformation;
     final Transformation transformation = new Transformation();
@@ -78,7 +84,13 @@ public class AppWindowAnimator {
     boolean deferFinalFrameCleanup;
 
     /** WindowStateAnimator from mAppAnimator.allAppWindows as of last performLayout */
-    ArrayList<WindowStateAnimator> mAllAppWinAnimators = new ArrayList<WindowStateAnimator>();
+    ArrayList<WindowStateAnimator> mAllAppWinAnimators = new ArrayList<>();
+
+    /** True if the current animation was transferred from another AppWindowAnimator.
+     *  See {@link #transferCurrentAnimation}*/
+    boolean usingTransferredAnimation = false;
+
+    private boolean mSkipFirstFrame = false;
 
     static final Animation sDummyAnimation = new DummyAnimation();
 
@@ -88,7 +100,7 @@ public class AppWindowAnimator {
         mAnimator = atoken.mAnimator;
     }
 
-    public void setAnimation(Animation anim, int width, int height) {
+    public void setAnimation(Animation anim, int width, int height, boolean skipFirstFrame) {
         if (WindowManagerService.localLOGV) Slog.v(TAG, "Setting animation in " + mAppToken
                 + ": " + anim + " wxh=" + width + "x" + height
                 + " isVisible=" + mAppToken.isVisible());
@@ -102,9 +114,9 @@ public class AppWindowAnimator {
         int zorder = anim.getZAdjustment();
         int adj = 0;
         if (zorder == Animation.ZORDER_TOP) {
-            adj = WindowManagerService.TYPE_LAYER_OFFSET;
+            adj = TYPE_LAYER_OFFSET;
         } else if (zorder == Animation.ZORDER_BOTTOM) {
-            adj = -WindowManagerService.TYPE_LAYER_OFFSET;
+            adj = -TYPE_LAYER_OFFSET;
         }
 
         if (animLayerAdjustment != adj) {
@@ -115,6 +127,8 @@ public class AppWindowAnimator {
         transformation.clear();
         transformation.setAlpha(mAppToken.isVisible() ? 1 : 0);
         hasTransformation = true;
+
+        this.mSkipFirstFrame = skipFirstFrame;
 
         if (!mAppToken.appFullscreen) {
             anim.setBackgroundColor(0);
@@ -140,6 +154,11 @@ public class AppWindowAnimator {
             mAppToken.allDrawn = false;
             mAppToken.deferClearAllDrawn = false;
         }
+        usingTransferredAnimation = false;
+    }
+
+    public boolean isAnimating() {
+        return animation != null || mAppToken.inPendingTransaction;
     }
 
     public void clearThumbnail() {
@@ -150,19 +169,38 @@ public class AppWindowAnimator {
         deferThumbnailDestruction = false;
     }
 
+    void transferCurrentAnimation(
+            AppWindowAnimator toAppAnimator, WindowStateAnimator transferWinAnimator) {
+
+        if (animation != null) {
+            toAppAnimator.animation = animation;
+            animation = null;
+            toAppAnimator.animating = animating;
+            toAppAnimator.animLayerAdjustment = animLayerAdjustment;
+            animLayerAdjustment = 0;
+            toAppAnimator.updateLayers();
+            updateLayers();
+            toAppAnimator.usingTransferredAnimation = true;
+        }
+        if (transferWinAnimator != null) {
+            mAllAppWinAnimators.remove(transferWinAnimator);
+            toAppAnimator.mAllAppWinAnimators.add(transferWinAnimator);
+            transferWinAnimator.mAppAnimator = toAppAnimator;
+        }
+    }
+
     void updateLayers() {
-        final int N = mAppToken.allAppWindows.size();
+        final int windowCount = mAppToken.allAppWindows.size();
         final int adj = animLayerAdjustment;
         thumbnailLayer = -1;
-        for (int i=0; i<N; i++) {
+        for (int i = 0; i < windowCount; i++) {
             final WindowState w = mAppToken.allAppWindows.get(i);
             final WindowStateAnimator winAnimator = w.mWinAnimator;
             winAnimator.mAnimLayer = w.mLayer + adj;
             if (winAnimator.mAnimLayer > thumbnailLayer) {
                 thumbnailLayer = winAnimator.mAnimLayer;
             }
-            if (WindowManagerService.DEBUG_LAYERS) Slog.v(TAG, "Updating layer " + w + ": "
-                    + winAnimator.mAnimLayer);
+            if (DEBUG_LAYERS) Slog.v(TAG, "Updating layer " + w + ": " + winAnimator.mAnimLayer);
             if (w == mService.mInputMethodTarget && !mService.mInputMethodTargetWaitingAnim) {
                 mService.setInputMethodAnimLayerAdjustment(adj);
             }
@@ -187,11 +225,11 @@ public class AppWindowAnimator {
         // cache often used attributes locally
         final float tmpFloats[] = mService.mTmpFloats;
         thumbnailTransformation.getMatrix().getValues(tmpFloats);
-        if (WindowManagerService.SHOW_TRANSACTIONS) WindowManagerService.logSurface(thumbnail,
+        if (SHOW_TRANSACTIONS) WindowManagerService.logSurface(thumbnail,
                 "thumbnail", "POS " + tmpFloats[Matrix.MTRANS_X]
                 + ", " + tmpFloats[Matrix.MTRANS_Y], null);
         thumbnail.setPosition(tmpFloats[Matrix.MTRANS_X], tmpFloats[Matrix.MTRANS_Y]);
-        if (WindowManagerService.SHOW_TRANSACTIONS) WindowManagerService.logSurface(thumbnail,
+        if (SHOW_TRANSACTIONS) WindowManagerService.logSurface(thumbnail,
                 "thumbnail", "alpha=" + thumbnailTransformation.getAlpha()
                 + " layer=" + thumbnailLayer
                 + " matrix=[" + tmpFloats[Matrix.MSCALE_X]
@@ -224,22 +262,34 @@ public class AppWindowAnimator {
                 deferFinalFrameCleanup = true;
                 hasMoreFrames = true;
             } else {
-                if (false && WindowManagerService.DEBUG_ANIM) Slog.v(
-                        TAG, "Stepped animation in " + mAppToken + ": more=" + hasMoreFrames +
-                                ", xform=" + transformation);
+                if (false && DEBUG_ANIM) Slog.v(TAG,
+                        "Stepped animation in " + mAppToken + ": more=" + hasMoreFrames +
+                        ", xform=" + transformation);
                 deferFinalFrameCleanup = false;
                 animation = null;
                 clearThumbnail();
-                if (WindowManagerService.DEBUG_ANIM) Slog.v(
-                        TAG, "Finished animation in " + mAppToken + " @ " + currentTime);
+                if (DEBUG_ANIM) Slog.v(TAG,
+                        "Finished animation in " + mAppToken + " @ " + currentTime);
             }
         }
         hasTransformation = hasMoreFrames;
         return hasMoreFrames;
     }
 
+    private long getStartTimeCorrection() {
+        if (mSkipFirstFrame) {
+
+            // If the transition is an animation in which the first frame doesn't change the screen
+            // contents at all, we can just skip it and start at the second frame. So we shift the
+            // start time of the animation forward by minus the frame duration.
+            return -Choreographer.getInstance().getFrameIntervalNanos() / TimeUtils.NANOS_PER_MS;
+        } else {
+            return 0;
+        }
+    }
+
     // This must be called while inside a transaction.
-    boolean stepAnimationLocked(long currentTime) {
+    boolean stepAnimationLocked(long currentTime, final int displayId) {
         if (mService.okToDisplay()) {
             // We will run animations as long as the display isn't frozen.
 
@@ -254,17 +304,19 @@ public class AppWindowAnimator {
             if ((mAppToken.allDrawn || animating || mAppToken.startingDisplayed)
                     && animation != null) {
                 if (!animating) {
-                    if (WindowManagerService.DEBUG_ANIM) Slog.v(
-                        TAG, "Starting animation in " + mAppToken +
+                    if (DEBUG_ANIM) Slog.v(TAG,
+                        "Starting animation in " + mAppToken +
                         " @ " + currentTime + " scale="
                         + mService.getTransitionAnimationScaleLocked()
                         + " allDrawn=" + mAppToken.allDrawn + " animating=" + animating);
-                    animation.setStartTime(currentTime);
+                    long correction = getStartTimeCorrection();
+                    animation.setStartTime(currentTime + correction);
                     animating = true;
                     if (thumbnail != null) {
                         thumbnail.show();
-                        thumbnailAnimation.setStartTime(currentTime);
+                        thumbnailAnimation.setStartTime(currentTime + correction);
                     }
+                    mSkipFirstFrame = false;
                 }
                 if (stepAnimation(currentTime)) {
                     // animation isn't over, step any thumbnail and that's
@@ -289,7 +341,7 @@ public class AppWindowAnimator {
         }
 
         mAnimator.setAppLayoutChanges(this, WindowManagerPolicy.FINISH_LAYOUT_REDO_ANIM,
-                "AppWindowToken");
+                "AppWindowToken", displayId);
 
         clearAnimation();
         animating = false;
@@ -302,8 +354,8 @@ public class AppWindowAnimator {
             mService.moveInputMethodWindowsIfNeededLocked(true);
         }
 
-        if (WindowManagerService.DEBUG_ANIM) Slog.v(
-                TAG, "Animation done in " + mAppToken
+        if (DEBUG_ANIM) Slog.v(TAG,
+                "Animation done in " + mAppToken
                 + ": reportedVisible=" + mAppToken.reportedVisible);
 
         transformation.clear();
@@ -312,23 +364,7 @@ public class AppWindowAnimator {
         for (int i = 0; i < numAllAppWinAnimators; i++) {
             mAllAppWinAnimators.get(i).finishExit();
         }
-        if (mAppToken.mLaunchTaskBehind) {
-            try {
-                mService.mActivityManager.notifyLaunchTaskBehindComplete(mAppToken.token);
-            } catch (RemoteException e) {
-            }
-            mAppToken.mLaunchTaskBehind = false;
-        } else {
-            mAppToken.updateReportedVisibilityLocked();
-            if (mAppToken.mEnteringAnimation) {
-                mAppToken.mEnteringAnimation = false;
-                try {
-                    mService.mActivityManager.notifyEnterAnimationComplete(mAppToken.token);
-                } catch (RemoteException e) {
-                }
-            }
-        }
-
+        mService.mAppTransition.notifyAppTransitionFinishedLocked(mAppToken.token);
         return false;
     }
 

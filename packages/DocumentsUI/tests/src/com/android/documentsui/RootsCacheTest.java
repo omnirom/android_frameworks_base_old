@@ -19,7 +19,7 @@ package com.android.documentsui;
 import android.test.AndroidTestCase;
 import android.test.suitebuilder.annotation.SmallTest;
 
-import com.android.documentsui.DocumentsActivity.State;
+import com.android.documentsui.BaseActivity.State;
 import com.android.documentsui.model.RootInfo;
 import com.google.android.collect.Lists;
 
@@ -112,6 +112,31 @@ public class RootsCacheTest extends AndroidTestCase {
         assertContainsExactly(
                 Lists.newArrayList(mNull, mWild, mAudio, mImages),
                 RootsCache.getMatchingRoots(mRoots, mState));
+    }
+
+    public void testExcludedAuthorities() throws Exception {
+        final List<RootInfo> roots = Lists.newArrayList();
+
+        // Set up some roots
+        for (int i = 0; i < 5; ++i) {
+            RootInfo root = new RootInfo();
+            root.authority = "authority" + i;
+            roots.add(root);
+        }
+        // Make some allowed authorities
+        List<RootInfo> allowedRoots = Lists.newArrayList(
+            roots.get(0), roots.get(2), roots.get(4));
+        // Set up the excluded authority list
+        for (RootInfo root: roots) {
+            if (!allowedRoots.contains(root)) {
+                mState.excludedAuthorities.add(root.authority);
+            }
+        }
+        mState.acceptMimes = new String[] { "*/*" };
+
+        assertContainsExactly(
+            allowedRoots,
+            RootsCache.getMatchingRoots(roots, mState));
     }
 
     private static void assertContainsExactly(List<?> expected, List<?> actual) {

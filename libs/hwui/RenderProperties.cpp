@@ -33,19 +33,17 @@
 namespace android {
 namespace uirenderer {
 
-LayerProperties::LayerProperties()
-        : mType(kLayerTypeNone)
-        , mColorFilter(NULL) {
+LayerProperties::LayerProperties() {
     reset();
 }
 
 LayerProperties::~LayerProperties() {
-    setType(kLayerTypeNone);
+    setType(LayerType::None);
 }
 
 void LayerProperties::reset() {
     mOpaque = false;
-    setFromPaint(NULL);
+    setFromPaint(nullptr);
 }
 
 bool LayerProperties::setColorFilter(SkColorFilter* filter) {
@@ -61,7 +59,7 @@ bool LayerProperties::setFromPaint(const SkPaint* paint) {
     OpenGLRenderer::getAlphaAndModeDirect(paint, &alpha, &mode);
     changed |= setAlpha(static_cast<uint8_t>(alpha));
     changed |= setXferMode(mode);
-    changed |= setColorFilter(paint ? paint->getColorFilter() : NULL);
+    changed |= setColorFilter(paint ? paint->getColorFilter() : nullptr);
     return changed;
 }
 
@@ -92,7 +90,7 @@ RenderProperties::PrimitiveFields::PrimitiveFields()
 }
 
 RenderProperties::ComputedFields::ComputedFields()
-        : mTransformMatrix(NULL) {
+        : mTransformMatrix(nullptr) {
 }
 
 RenderProperties::ComputedFields::~ComputedFields() {
@@ -100,8 +98,8 @@ RenderProperties::ComputedFields::~ComputedFields() {
 }
 
 RenderProperties::RenderProperties()
-        : mStaticMatrix(NULL)
-        , mAnimationMatrix(NULL) {
+        : mStaticMatrix(nullptr)
+        , mAnimationMatrix(nullptr) {
 }
 
 RenderProperties::~RenderProperties() {
@@ -146,28 +144,32 @@ void RenderProperties::debugOutputProperties(const int level) const {
         }
     }
 
-    const bool isLayer = layerProperties().type() != kLayerTypeNone;
+    const bool isLayer = effectiveLayerType() != LayerType::None;
     int clipFlags = getClippingFlags();
-    if (mPrimitiveFields.mAlpha < 1) {
+    if (mPrimitiveFields.mAlpha < 1
+            && !MathUtils::isZero(mPrimitiveFields.mAlpha)) {
         if (isLayer) {
             clipFlags &= ~CLIP_TO_BOUNDS; // bounds clipping done by layer
+        }
 
-            ALOGD("%*sSetOverrideLayerAlpha %.2f", level * 2, "", mPrimitiveFields.mAlpha);
-        } else if (!mPrimitiveFields.mHasOverlappingRendering) {
+        if (CC_LIKELY(isLayer || !getHasOverlappingRendering())) {
+            // simply scale rendering content's alpha
             ALOGD("%*sScaleAlpha %.2f", level * 2, "", mPrimitiveFields.mAlpha);
         } else {
+            // savelayeralpha to create an offscreen buffer to apply alpha
             Rect layerBounds(0, 0, getWidth(), getHeight());
-            int saveFlags = SkCanvas::kHasAlphaLayer_SaveFlag;
             if (clipFlags) {
-                saveFlags |= SkCanvas::kClipToLayer_SaveFlag;
                 getClippingRectForFlags(clipFlags, &layerBounds);
-                clipFlags = 0; // all clipping done by saveLayer
+                clipFlags = 0; // all clipping done by savelayer
             }
-
             ALOGD("%*sSaveLayerAlpha %d, %d, %d, %d, %d, 0x%x", level * 2, "",
-                    (int)layerBounds.left, (int)layerBounds.top, (int)layerBounds.right, (int)layerBounds.bottom,
-                    (int)(mPrimitiveFields.mAlpha * 255), saveFlags);
+                    (int)layerBounds.left, (int)layerBounds.top,
+                    (int)layerBounds.right, (int)layerBounds.bottom,
+                    (int)(mPrimitiveFields.mAlpha * 255),
+                    SkCanvas::kHasAlphaLayer_SaveFlag | SkCanvas::kClipToLayer_SaveFlag);
         }
+
+
     }
     if (clipFlags) {
         Rect clipRect;

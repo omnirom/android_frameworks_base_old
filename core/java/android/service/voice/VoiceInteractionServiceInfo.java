@@ -43,6 +43,8 @@ public class VoiceInteractionServiceInfo {
     private String mSessionService;
     private String mRecognitionService;
     private String mSettingsActivity;
+    private boolean mSupportsAssist;
+    private boolean mSupportsLaunchFromKeyguard;
 
     public VoiceInteractionServiceInfo(PackageManager pm, ComponentName comp)
             throws PackageManager.NameNotFoundException {
@@ -94,16 +96,21 @@ public class VoiceInteractionServiceInfo {
                     com.android.internal.R.styleable.VoiceInteractionService_recognitionService);
             mSettingsActivity = array.getString(
                     com.android.internal.R.styleable.VoiceInteractionService_settingsActivity);
+            mSupportsAssist = array.getBoolean(
+                    com.android.internal.R.styleable.VoiceInteractionService_supportsAssist,
+                    false);
+            mSupportsLaunchFromKeyguard = array.getBoolean(com.android.internal.
+                    R.styleable.VoiceInteractionService_supportsLaunchVoiceAssistFromKeyguard,
+                    false);
             array.recycle();
             if (mSessionService == null) {
                 mParseError = "No sessionService specified";
                 return;
             }
-            /* Not yet time
             if (mRecognitionService == null) {
-                mParseError = "No recogitionService specified";
+                mParseError = "No recognitionService specified";
                 return;
-            } */
+            }
         } catch (XmlPullParserException e) {
             mParseError = "Error parsing voice interation service meta-data: " + e;
             Log.w(TAG, "error parsing voice interaction service meta-data", e);
@@ -140,5 +147,13 @@ public class VoiceInteractionServiceInfo {
 
     public String getSettingsActivity() {
         return mSettingsActivity;
+    }
+
+    public boolean getSupportsAssist() {
+        return mSupportsAssist;
+    }
+
+    public boolean getSupportsLaunchFromKeyguard() {
+        return mSupportsLaunchFromKeyguard;
     }
 }

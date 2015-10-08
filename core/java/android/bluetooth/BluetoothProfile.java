@@ -17,6 +17,9 @@
 
 package android.bluetooth;
 
+import android.Manifest;
+import android.annotation.RequiresPermission;
+
 import java.util.List;
 
 /**
@@ -103,17 +106,23 @@ public interface BluetoothProfile {
      */
     public static final int MAP = 9;
 
+    /*
+     * SAP Profile
+     * @hide
+     */
+    public static final int SAP = 10;
+
     /**
      * A2DP Sink Profile
      * @hide
      */
-    public static final int A2DP_SINK = 10;
+    public static final int A2DP_SINK = 11;
 
     /**
      * AVRCP Controller Profile
      * @hide
      */
-    public static final int AVRCP_CONTROLLER = 11;
+    public static final int AVRCP_CONTROLLER = 12;
 
     /**
      * Headset Client - HFP HF Role
@@ -157,6 +166,7 @@ public interface BluetoothProfile {
      *
      * @return List of devices. The list will be empty on error.
      */
+    @RequiresPermission(Manifest.permission.BLUETOOTH)
     public List<BluetoothDevice> getConnectedDevices();
 
     /**
@@ -173,6 +183,7 @@ public interface BluetoothProfile {
      *              {@link #STATE_DISCONNECTED}, {@link #STATE_DISCONNECTING},
      * @return List of devices. The list will be empty on error.
      */
+    @RequiresPermission(Manifest.permission.BLUETOOTH)
     public List<BluetoothDevice> getDevicesMatchingConnectionStates(int[] states);
 
     /**
@@ -185,6 +196,7 @@ public interface BluetoothProfile {
      *               {@link #STATE_CONNECTED}, {@link #STATE_CONNECTING},
      *               {@link #STATE_DISCONNECTED}, {@link #STATE_DISCONNECTING}
      */
+    @RequiresPermission(Manifest.permission.BLUETOOTH)
     public int getConnectionState(BluetoothDevice device);
 
     /**

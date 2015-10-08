@@ -22,7 +22,6 @@ import java.util.ArrayList;
 import android.app.AlarmManager;
 import android.app.PendingIntent;
 import android.content.BroadcastReceiver;
-import android.content.ComponentName;
 import android.content.Context;
 import android.content.Intent;
 import android.content.IntentFilter;
@@ -109,6 +108,7 @@ public class IdleController extends StateController {
         private AlarmManager mAlarm;
         private PendingIntent mIdleTriggerIntent;
         boolean mIdle;
+        boolean mScreenOn;
 
         public IdlenessTracker() {
             mAlarm = (AlarmManager) mContext.getSystemService(Context.ALARM_SERVICE);
@@ -121,6 +121,7 @@ public class IdleController extends StateController {
             // At boot we presume that the user has just "interacted" with the
             // device in some meaningful way.
             mIdle = false;
+            mScreenOn = true;
         }
 
         public boolean isIdle() {
@@ -150,12 +151,14 @@ public class IdleController extends StateController {
 
             if (action.equals(Intent.ACTION_SCREEN_ON)
                     || action.equals(Intent.ACTION_DREAMING_STOPPED)) {
-                // possible transition to not-idle
+                if (DEBUG) {
+                    Slog.v(TAG,"exiting idle : " + action);
+                }
+                mScreenOn = true;
+                //cancel the alarm
+                mAlarm.cancel(mIdleTriggerIntent);
                 if (mIdle) {
-                    if (DEBUG) {
-                        Slog.v(TAG, "exiting idle : " + action);
-                    }
-                    mAlarm.cancel(mIdleTriggerIntent);
+                // possible transition to not-idle
                     mIdle = false;
                     reportNewIdleState(mIdle);
                 }
@@ -170,11 +173,12 @@ public class IdleController extends StateController {
                     Slog.v(TAG, "Scheduling idle : " + action + " now:" + nowElapsed + " when="
                             + when);
                 }
+                mScreenOn = false;
                 mAlarm.setWindow(AlarmManager.ELAPSED_REALTIME_WAKEUP,
                         when, IDLE_WINDOW_SLOP, mIdleTriggerIntent);
             } else if (action.equals(ACTION_TRIGGER_IDLE)) {
-                // idle time starts now
-                if (!mIdle) {
+                // idle time starts now. Do not set mIdle if screen is on.
+                if (!mIdle && !mScreenOn) {
                     if (DEBUG) {
                         Slog.v(TAG, "Idle trigger fired @ " + SystemClock.elapsedRealtime());
                     }

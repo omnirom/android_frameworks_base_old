@@ -540,11 +540,6 @@ public class SearchManager
 
     private final Context mContext;
 
-    /**
-     * The package associated with this seach manager.
-     */
-    private String mAssociatedPackage;
-
     // package private since they are used by the inner class SearchManagerCallback
     /* package */ final Handler mHandler;
     /* package */ OnDismissListener mDismissListener = null;
@@ -742,10 +737,6 @@ public class SearchManager
     public void triggerSearch(String query,
                               ComponentName launchActivity,
                               Bundle appSearchData) {
-        if (!mAssociatedPackage.equals(launchActivity.getPackageName())) {
-            throw new IllegalArgumentException("invoking app search on a different package " +
-                    "not associated with this search manager");
-        }
         if (query == null || TextUtils.getTrimmedLength(query) == 0) {
             Log.w(TAG, "triggerSearch called with empty query, ignoring.");
             return;
@@ -955,30 +946,12 @@ public class SearchManager
      *
      * @hide
      */
-    public Intent getAssistIntent(Context context, boolean inclContext) {
-        return getAssistIntent(context, inclContext, UserHandle.myUserId());
-    }
-
-    /**
-     * Gets an intent for launching installed assistant activity, or null if not available.
-     * @return The assist intent.
-     *
-     * @hide
-     */
-    public Intent getAssistIntent(Context context, boolean inclContext, int userHandle) {
+    public Intent getAssistIntent(boolean inclContext) {
         try {
-            if (mService == null) {
-                return null;
-            }
-            ComponentName comp = mService.getAssistIntent(userHandle);
-            if (comp == null) {
-                return null;
-            }
             Intent intent = new Intent(Intent.ACTION_ASSIST);
-            intent.setComponent(comp);
             if (inclContext) {
                 IActivityManager am = ActivityManagerNative.getDefault();
-                Bundle extras = am.getAssistContextExtras(0);
+                Bundle extras = am.getAssistContextExtras(ActivityManager.ASSIST_CONTEXT_BASIC);
                 if (extras != null) {
                     intent.replaceExtras(extras);
                 }
@@ -991,17 +964,38 @@ public class SearchManager
     }
 
     /**
-     * Launch an assist action for the current top activity.
+     * Starts the assistant.
+     *
+     * @param args the args to pass to the assistant
+     *
      * @hide
      */
-    public boolean launchAssistAction(int requestType, String hint, int userHandle) {
+    public void launchAssist(Bundle args) {
+        try {
+            if (mService == null) {
+                return;
+            }
+            mService.launchAssist(args);
+        } catch (RemoteException re) {
+            Log.e(TAG, "launchAssist() failed: " + re);
+        }
+    }
+
+    /**
+     * Starts the legacy assistant (i.e. the {@link Intent#ACTION_ASSIST}).
+     *
+     * @param args the args to pass to the assistant
+     *
+     * @hide
+     */
+    public boolean launchLegacyAssist(String hint, int userHandle, Bundle args) {
         try {
             if (mService == null) {
                 return false;
             }
-            return mService.launchAssistAction(requestType, hint, userHandle);
+            return mService.launchLegacyAssist(hint, userHandle, args);
         } catch (RemoteException re) {
-            Log.e(TAG, "launchAssistAction() failed: " + re);
+            Log.e(TAG, "launchAssist() failed: " + re);
             return false;
         }
     }

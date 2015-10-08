@@ -92,7 +92,8 @@ public class RingtonePlayer extends SystemUI {
 
     private IRingtonePlayer mCallback = new IRingtonePlayer.Stub() {
         @Override
-        public void play(IBinder token, Uri uri, AudioAttributes aa) throws RemoteException {
+        public void play(IBinder token, Uri uri, AudioAttributes aa, float volume, boolean looping)
+                throws RemoteException {
             if (LOGD) {
                 Log.d(TAG, "play(token=" + token + ", uri=" + uri + ", uid="
                         + Binder.getCallingUid() + ")");
@@ -107,6 +108,8 @@ public class RingtonePlayer extends SystemUI {
                     mClients.put(token, client);
                 }
             }
+            client.mRingtone.setLooping(looping);
+            client.mRingtone.setVolume(volume);
             client.mRingtone.play();
         }
 
@@ -138,12 +141,27 @@ public class RingtonePlayer extends SystemUI {
         }
 
         @Override
+        public void setPlaybackProperties(IBinder token, float volume, boolean looping) {
+            Client client;
+            synchronized (mClients) {
+                client = mClients.get(token);
+            }
+            if (client != null) {
+                client.mRingtone.setVolume(volume);
+                client.mRingtone.setLooping(looping);
+            }
+            // else no client for token when setting playback properties but will be set at play()
+        }
+
+        @Override
         public void playAsync(Uri uri, UserHandle user, boolean looping, AudioAttributes aa) {
             if (LOGD) Log.d(TAG, "playAsync(uri=" + uri + ", user=" + user + ")");
             if (Binder.getCallingUid() != Process.SYSTEM_UID) {
                 throw new SecurityException("Async playback only available from system UID.");
             }
-
+            if (UserHandle.ALL.equals(user)) {
+                user = UserHandle.OWNER;
+            }
             mAsyncPlayer.play(getContextForUser(user), uri, looping, aa);
         }
 
@@ -154,6 +172,13 @@ public class RingtonePlayer extends SystemUI {
                 throw new SecurityException("Async playback only available from system UID.");
             }
             mAsyncPlayer.stop();
+        }
+
+        @Override
+        public String getTitle(Uri uri) {
+            final UserHandle user = Binder.getCallingUserHandle();
+            return Ringtone.getTitle(getContextForUser(user), uri,
+                    false /*followSettingsUri*/, false /*allowRemote*/);
         }
     };
 

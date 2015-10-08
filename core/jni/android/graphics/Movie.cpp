@@ -1,3 +1,4 @@
+#include "Canvas.h"
 #include "ScopedLocalRef.h"
 #include "SkFrontBufferedStream.h"
 #include "SkMovie.h"
@@ -13,11 +14,7 @@
 #include <androidfw/ResourceTypes.h>
 #include <netinet/in.h>
 
-#if 0
-    #define TRACE_BITMAP(code)  code
-#else
-    #define TRACE_BITMAP(code)
-#endif
+#include "core_jni_helpers.h"
 
 static jclass       gMovie_class;
 static jmethodID    gMovie_constructorMethodID;
@@ -67,16 +64,19 @@ static jboolean movie_setTime(JNIEnv* env, jobject movie, jint ms) {
     return J2Movie(env, movie)->setTime(ms) ? JNI_TRUE : JNI_FALSE;
 }
 
-static void movie_draw(JNIEnv* env, jobject movie, jobject canvas,
-                       jfloat fx, jfloat fy, jobject jpaint) {
+static void movie_draw(JNIEnv* env, jobject movie, jlong canvasHandle,
+                       jfloat fx, jfloat fy, jlong paintHandle) {
     NPE_CHECK_RETURN_VOID(env, movie);
-    NPE_CHECK_RETURN_VOID(env, canvas);
-    // its OK for paint to be null
+
+    android::Canvas* c = reinterpret_cast<android::Canvas*>(canvasHandle);
+    const android::Paint* p = reinterpret_cast<android::Paint*>(paintHandle);
+
+    // Canvas should never be NULL. However paint is an optional parameter and
+    // therefore may be NULL.
+    SkASSERT(c != NULL);
 
     SkMovie* m = J2Movie(env, movie);
-    SkCanvas* c = GraphicsJNI::getNativeCanvas(env, canvas);
     const SkBitmap& b = m->bitmap();
-    const SkPaint* p = jpaint ? GraphicsJNI::getNativePaint(env, jpaint) : NULL;
 
     c->drawBitmap(b, fx, fy, p);
 }
@@ -84,9 +84,7 @@ static void movie_draw(JNIEnv* env, jobject movie, jobject canvas,
 static jobject movie_decodeAsset(JNIEnv* env, jobject clazz, jlong native_asset) {
     android::Asset* asset = reinterpret_cast<android::Asset*>(native_asset);
     if (asset == NULL) return NULL;
-    SkAutoTUnref<SkStreamRewindable> stream (new android::AssetStreamAdaptor(asset,
-            android::AssetStreamAdaptor::kNo_OwnAsset,
-            android::AssetStreamAdaptor::kNo_HasMemoryBase));
+    SkAutoTDelete<SkStreamRewindable> stream(new android::AssetStreamAdaptor(asset));
     SkMovie* moov = SkMovie::DecodeStream(stream.get());
     return create_jmovie(env, moov);
 }
@@ -106,11 +104,11 @@ static jobject movie_decodeStream(JNIEnv* env, jobject clazz, jobject istream) {
     // trying to determine the stream's format. The only decoder for movies is GIF, which
     // will only read 6.
     // FIXME: Get this number from SkImageDecoder
-    SkAutoTUnref<SkStreamRewindable> bufferedStream(SkFrontBufferedStream::Create(strm, 6));
+    // bufferedStream takes ownership of strm
+    SkAutoTDelete<SkStreamRewindable> bufferedStream(SkFrontBufferedStream::Create(strm, 6));
     SkASSERT(bufferedStream.get() != NULL);
 
     SkMovie* moov = SkMovie::DecodeStream(bufferedStream);
-    strm->unref();
     return create_jmovie(env, moov);
 }
 
@@ -138,15 +136,13 @@ static void movie_destructor(JNIEnv* env, jobject, jlong movieHandle) {
 
 //////////////////////////////////////////////////////////////////////////////////////////////
 
-#include <android_runtime/AndroidRuntime.h>
-
 static JNINativeMethod gMethods[] = {
     {   "width",    "()I",  (void*)movie_width  },
     {   "height",   "()I",  (void*)movie_height  },
     {   "isOpaque", "()Z",  (void*)movie_isOpaque  },
     {   "duration", "()I",  (void*)movie_duration  },
     {   "setTime",  "(I)Z", (void*)movie_setTime  },
-    {   "draw",     "(Landroid/graphics/Canvas;FFLandroid/graphics/Paint;)V",
+    {   "nDraw",    "(JFFJ)V",
                             (void*)movie_draw  },
     { "nativeDecodeAsset", "(J)Landroid/graphics/Movie;",
                             (void*)movie_decodeAsset },
@@ -157,22 +153,14 @@ static JNINativeMethod gMethods[] = {
                             (void*)movie_decodeByteArray },
 };
 
-#define kClassPathName  "android/graphics/Movie"
-
-#define RETURN_ERR_IF_NULL(value)   do { if (!(value)) { assert(0); return -1; } } while (false)
-
 int register_android_graphics_Movie(JNIEnv* env)
 {
-    gMovie_class = env->FindClass(kClassPathName);
-    RETURN_ERR_IF_NULL(gMovie_class);
-    gMovie_class = (jclass)env->NewGlobalRef(gMovie_class);
+    gMovie_class = android::FindClassOrDie(env, "android/graphics/Movie");
+    gMovie_class = android::MakeGlobalRefOrDie(env, gMovie_class);
 
-    gMovie_constructorMethodID = env->GetMethodID(gMovie_class, "<init>", "(J)V");
-    RETURN_ERR_IF_NULL(gMovie_constructorMethodID);
+    gMovie_constructorMethodID = android::GetMethodIDOrDie(env, gMovie_class, "<init>", "(J)V");
 
-    gMovie_nativeInstanceID = env->GetFieldID(gMovie_class, "mNativeMovie", "J");
-    RETURN_ERR_IF_NULL(gMovie_nativeInstanceID);
+    gMovie_nativeInstanceID = android::GetFieldIDOrDie(env, gMovie_class, "mNativeMovie", "J");
 
-    return android::AndroidRuntime::registerNativeMethods(env, kClassPathName,
-                                                       gMethods, SK_ARRAY_COUNT(gMethods));
+    return android::RegisterMethodsOrDie(env, "android/graphics/Movie", gMethods, NELEM(gMethods));
 }

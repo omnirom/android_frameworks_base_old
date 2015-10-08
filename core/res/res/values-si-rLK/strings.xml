@@ -26,7 +26,7 @@
     <string name="gigabyteShort" msgid="3259882455212193214">"GB"</string>
     <string name="terabyteShort" msgid="231613018159186962">"TB"</string>
     <string name="petabyteShort" msgid="5637816680144990219">"PB"</string>
-    <string name="fileSizeSuffix" msgid="9164292791500531949">"<xliff:g id="NUMBER">%1$s</xliff:g><xliff:g id="UNIT">%2$s</xliff:g>"</string>
+    <string name="fileSizeSuffix" msgid="8897567456150907538">"<xliff:g id="NUMBER">%1$s</xliff:g> <xliff:g id="UNIT">%2$s</xliff:g>"</string>
     <string name="durationDays" msgid="6652371460511178259">"දින <xliff:g id="DAYS">%1$d</xliff:g>"</string>
     <string name="durationDayHours" msgid="2713107458736744435">"දින <xliff:g id="DAYS">%1$d</xliff:g> පැය <xliff:g id="HOURS">%2$d</xliff:g>"</string>
     <string name="durationDayHour" msgid="7293789639090958917">"දින <xliff:g id="DAYS">%1$d</xliff:g> පැය <xliff:g id="HOURS">%2$d</xliff:g>"</string>
@@ -61,10 +61,10 @@
     <string name="needPuk" msgid="919668385956251611">"ඔබගේ SIM පත පතට PUK අගුළු වැටී ඇත. එම අගුල ඇරීමට PUK කේතය ටයිප් කරන්න."</string>
     <string name="needPuk2" msgid="4526033371987193070">"SIM පතේ අගුළු ඇරීමට PUK2 ටයිප් කරන්න."</string>
     <string name="enablePin" msgid="209412020907207950">"අසාර්ථකයි, SIM/RUIM අඟුල සබල කරන්න."</string>
-  <plurals name="pinpuk_attempts">
-    <item quantity="one" msgid="6596245285809790142">"SIM කාඩ් පත අඟුළු වැටීමට පෙර ඔබ සතුව තවත් උත්සාහයන් <xliff:g id="NUMBER">%d</xliff:g> ක් ඉතිරිව ඇත."</item>
-    <item quantity="other" msgid="7530597808358774740">"SIM කාඩ් පත අඟුළු වැටීමට පෙර ඔබ සතුව තවත් උත්සාහයන් <xliff:g id="NUMBER">%d</xliff:g> ක් ඉතිරිව ඇත."</item>
-  </plurals>
+    <plurals name="pinpuk_attempts" formatted="false" msgid="1251012001539225582">
+      <item quantity="one">ඔබේ SIM කාඩ් පත අඟුළු වැටීමට පෙර තවත් උත්සාහයන් <xliff:g id="NUMBER_1">%d</xliff:g> ක් ඉතිරිව ඇත.</item>
+      <item quantity="other">ඔබේ SIM කාඩ් පත අඟුළු වැටීමට පෙර තවත් උත්සාහයන් <xliff:g id="NUMBER_1">%d</xliff:g> ක් ඉතිරිව ඇත.</item>
+    </plurals>
     <string name="imei" msgid="2625429890869005782">"IMEI"</string>
     <string name="meid" msgid="4841221237681254195">"MEID"</string>
     <string name="ClipMmi" msgid="6952821216480289285">"පැමිණෙන අමතන්නාගේ ID"</string>
@@ -129,8 +129,7 @@
   <string-array name="wfcOperatorErrorNotificationMessages">
   </string-array>
     <string name="wfcSpnFormat" msgid="8211621332478306568">"%s"</string>
-    <!-- no translation found for wfcDataSpnFormat (1118052028767666883) -->
-    <skip />
+    <string name="wfcDataSpnFormat" msgid="1118052028767666883">"%s"</string>
     <string name="wifi_calling_off_summary" msgid="8720659586041656098">"ක්‍රියාවිරහිතයි"</string>
     <string name="wfc_mode_wifi_preferred_summary" msgid="1994113411286935263">"Wi-Fi වඩා කැමතියි"</string>
     <string name="wfc_mode_cellular_preferred_summary" msgid="5920549484600758786">"සෙලියුලර් වඩා කැමතියි"</string>
@@ -173,6 +172,7 @@
     <string name="work_profile_deleted" msgid="5005572078641980632">"කාර්යාල පැතිකඩ මකා දමන ලදි"</string>
     <string name="work_profile_deleted_description" msgid="6305147513054341102">"පරිපාලක යෙදුමක් නොමැති වීමෙන් කාර්යාල පැතිකඩ මකා දමන ලදි."</string>
     <string name="work_profile_deleted_details" msgid="226615743462361248">"කාර්යාල පැතිකඩ පාලක යෙදුම නොමැති හෝ දූෂණය වී ඇත. ප්‍රතිඵලයක් ලෙස ඔබගේ කාර්යාල පැතිකඩ සහ අදාළ දත්ත මකා දමා ඇත. සහය සඳහා ඔබගේ පරිපාලකයා සම්බන්ධ කර ගන්න."</string>
+    <string name="work_profile_deleted_description_dpm_wipe" msgid="6019770344820507579">"ඔබේ කාර්යාල පැතිකඩ මෙම උපාංගය මත තවදුරටත් ලබා ගැනීමට නොහැකිය."</string>
     <string name="factory_reset_warning" msgid="5423253125642394387">"ඔබගේ උපාංගය මකා දැමෙනු ඇත"</string>
     <string name="factory_reset_message" msgid="4905025204141900666">"යෙදුමේ කොටස් නොමැති හෝ දූෂණය වී ඇති නිසා, භාවිතා කළ නොහැක. ඔබගේ උපාංගය දැන් මකා දැමෙනු ඇත. සහය සඳහා ඔබගේ පරිපාලකයා සම්බන්ධ කරගන්න."</string>
     <string name="me" msgid="6545696007631404292">"මම"</string>
@@ -187,6 +187,12 @@
     <string name="silent_mode_silent" msgid="319298163018473078">"හඬ නඟනය අක්‍රියයි"</string>
     <string name="silent_mode_vibrate" msgid="7072043388581551395">"හඬ නඟනය කම්පනය"</string>
     <string name="silent_mode_ring" msgid="8592241816194074353">"හඬ නඟනය සක්‍රීයයි"</string>
+    <string name="reboot_to_update_title" msgid="6212636802536823850">"Android පද්ධති යාවත්කාලීනය"</string>
+    <string name="reboot_to_update_prepare" msgid="6305853831955310890">"යාවත්කාලීන කිරීමට සූදානම් කරමින්..."</string>
+    <string name="reboot_to_update_package" msgid="3871302324500927291">"යාවත්කාලීන පැකේජය සකසමින්…"</string>
+    <string name="reboot_to_update_reboot" msgid="6428441000951565185">"යළි ආරම්භ කරමින්..."</string>
+    <string name="reboot_to_reset_title" msgid="4142355915340627490">"කර්මාන්ත ශාලා දත්ත යළි පිහිටුම"</string>
+    <string name="reboot_to_reset_message" msgid="2432077491101416345">"යළි ආරම්භ කරමින්..."</string>
     <string name="shutdown_progress" msgid="2281079257329981203">"වසා දමමින්…"</string>
     <string name="shutdown_confirm" product="tablet" msgid="3385745179555731470">"ඔබගේ ටැබ්ලටය වැසේ."</string>
     <string name="shutdown_confirm" product="tv" msgid="476672373995075359">"ඔබගේ රූපවාහිනිය වසා දැමෙනු ඇත."</string>
@@ -212,75 +218,32 @@
     <string name="global_actions_airplane_mode_on_status" msgid="2719557982608919750">"අහස්යානා ආකාරය සක්‍රීයයි."</string>
     <string name="global_actions_airplane_mode_off_status" msgid="5075070442854490296">"අහස්යානා අකාරය අක්‍රියයි"</string>
     <string name="global_action_settings" msgid="1756531602592545966">"සැකසීම්"</string>
+    <string name="global_action_assist" msgid="3892832961594295030">"සහාය දීම"</string>
+    <string name="global_action_voice_assist" msgid="7751191495200504480">"හඬ සහායක"</string>
     <string name="global_action_lockdown" msgid="8751542514724332873">"දැන් අගුළු දමන්න"</string>
     <string name="status_bar_notification_info_overflow" msgid="5301981741705354993">"999+"</string>
     <string name="safeMode" msgid="2788228061547930246">"ආරක්‍ෂිත ආකාරය"</string>
     <string name="android_system_label" msgid="6577375335728551336">"Android පද්ධතිය"</string>
-    <string name="user_owner_label" msgid="6465364741001216388">"පුද්ගලික යෙදුම්"</string>
+    <string name="user_owner_label" msgid="2804351898001038951">"පෞද්ගලික"</string>
     <string name="managed_profile_label" msgid="6260850669674791528">"කාර්යාලය"</string>
-    <string name="permgrouplab_costMoney" msgid="5429808217861460401">"ඔබගේ මුදල් වැයවන සේවාවන්"</string>
-    <string name="permgroupdesc_costMoney" msgid="3293301903409869495">"ඔබගෙන් මුදල් යන දේවල් කරන්න."</string>
-    <string name="permgrouplab_messages" msgid="7521249148445456662">"ඔබගේ පණිවිඩ"</string>
-    <string name="permgroupdesc_messages" msgid="7821999071003699236">"ඔබගේ SMS, ඊ-තැපැල්, සහ වෙනත් පණිවිඩ කියවන්න සහ ලියන්න."</string>
-    <string name="permgrouplab_personalInfo" msgid="3519163141070533474">"ඔබගේ පෞද්ගලික තොරතුරු"</string>
-    <string name="permgroupdesc_personalInfo" msgid="8426453129788861338">"ඔබගේ සම්බන්ධතා පතේ ආචයනය කරන ලද, ඔබ ගැන තොරතුරු වලට ඍජු ප්‍රවේශය."</string>
-    <string name="permgrouplab_socialInfo" msgid="5799096623412043791">"ඔබගේ සමාජයීය තොරතුරු"</string>
-    <string name="permgroupdesc_socialInfo" msgid="7129842457611643493">"ඔබගේ සම්බන්ධතා සහ සාමාජ සම්බන්ධයන් ගැන තොරතුරු වෙත ඍජු ප්‍රවේශය."</string>
-    <string name="permgrouplab_location" msgid="635149742436692049">"ඔබගේ ස්ථානය"</string>
-    <string name="permgroupdesc_location" msgid="5704679763124170100">"ඔබගේ භෞතික පිහිටුම නිරීක්ෂණය කරයි."</string>
-    <string name="permgrouplab_network" msgid="5808983377727109831">"ජාල සන්නිවේදනය"</string>
-    <string name="permgroupdesc_network" msgid="4478299413241861987">"විවිධ ජාල විශේෂාංග වෙත පිවිසෙන්න."</string>
-    <string name="permgrouplab_bluetoothNetwork" msgid="1585403544162128109">"බ්ලූටූත්"</string>
-    <string name="permgroupdesc_bluetoothNetwork" msgid="5625288577164282391">"බ්ලූටූත් ඔස්සේ උපාංග සහ ජාල වෙත පිවිසෙන්න."</string>
-    <string name="permgrouplab_audioSettings" msgid="8329261670151871235">"ශ්‍රව්‍ය සැකසීම්"</string>
-    <string name="permgroupdesc_audioSettings" msgid="2641515403347568130">"ශ්‍රව්‍ය සැකසීම් වෙනස් කරන්න."</string>
-    <string name="permgrouplab_affectsBattery" msgid="6209246653424798033">"බැටරිය වෙත බලපායි"</string>
-    <string name="permgroupdesc_affectsBattery" msgid="6441275320638916947">"බැටරියේ බලය ක්ෂණිකව අඩු වන විශේෂාංග භාවිත කරන්න."</string>
+    <string name="permgrouplab_contacts" msgid="3657758145679177612">"සම්බන්ධතා"</string>
+    <string name="permgroupdesc_contacts" msgid="6951499528303668046">"ඔබේ සම්බන්ධතාවලට පිවිසෙන්න"</string>
+    <string name="permgrouplab_location" msgid="7275582855722310164">"ස්ථානය"</string>
+    <string name="permgroupdesc_location" msgid="1346617465127855033">"මෙම උපාංගයේ ස්ථානය ප්‍රවේශ කිරීම"</string>
     <string name="permgrouplab_calendar" msgid="5863508437783683902">"දින දර්ශනය"</string>
-    <string name="permgroupdesc_calendar" msgid="5777534316982184416">"දින දර්ශන සිද්ධින්ට සෘජුව ප්‍රවේශ වීම."</string>
-    <string name="permgrouplab_dictionary" msgid="4148597128843641379">"පරිශීලක ශබ්ද කෝෂය කියවන්න"</string>
-    <string name="permgroupdesc_dictionary" msgid="7921166355964764490">"පරිශීලක ශබ්ද කෝෂයේ වචන කියවීම."</string>
-    <string name="permgrouplab_writeDictionary" msgid="8090237702432576788">"පරිශීලක ශබ්දකෝෂයට ලිවිම"</string>
-    <string name="permgroupdesc_writeDictionary" msgid="2711561994497361646">"පරිශීලක ශබ්දකෝෂයට වචන එකතු කරන්න."</string>
-    <string name="permgrouplab_bookmarks" msgid="1949519673103968229">"පිටුසන් සහ ඉතිහාසය"</string>
-    <string name="permgroupdesc_bookmarks" msgid="4169771606257963028">"පිටුසන් සහ බ්‍රව්සර ඉතිහාසය වෙත ඍජු ප්‍රවේශය."</string>
-    <string name="permgrouplab_deviceAlarms" msgid="6117704629728824101">"සීනුව"</string>
-    <string name="permgroupdesc_deviceAlarms" msgid="4769356362251641175">"සීනුව සකසන්න."</string>
-    <string name="permgrouplab_voicemail" msgid="4162237145027592133">"හඬ තැපෑල"</string>
-    <string name="permgroupdesc_voicemail" msgid="2498403969862951393">"හඬ තැපෑල වෙත ඍජු ප්‍රවේශය."</string>
-    <string name="permgrouplab_microphone" msgid="171539900250043464">"මයික්‍රොෆෝනය"</string>
-    <string name="permgroupdesc_microphone" msgid="7106618286905738408">"ශබ්දය පටිගත කිරීමට මයික්‍රොෆෝනය වෙත ඍජු ප්‍රවේශය."</string>
-    <string name="permgrouplab_camera" msgid="4820372495894586615">"කැමරාව"</string>
-    <string name="permgroupdesc_camera" msgid="2933667372289567714">"ඡායාරූප හෝ වීඩියෝ ග්‍රහණය සඳහා කැමරාව වෙත ඍජු ප්‍රවේශය."</string>
-    <string name="permgrouplab_screenlock" msgid="8275500173330718168">"අගුළු තිරය"</string>
-    <string name="permgroupdesc_screenlock" msgid="7067497128925499401">"ඔබගේ උපාංගයේ අගුළු තිරයේ ක්‍රියාකාරිත්වයට බලපාන හැකියාව."</string>
-    <string name="permgrouplab_appInfo" msgid="8028789762634147725">"ඔබගේ යෙදුම් වල තොරතුරු"</string>
-    <string name="permgroupdesc_appInfo" msgid="3950378538049625907">"ඔබගේ උපාංගයේ වෙනත් යෙදුම් වල ක්‍රියාකාරිත්වයට බලපෑම් කළ හැකි බව."</string>
-    <string name="permgrouplab_wallpaper" msgid="3850280158041175998">"බිතුපත"</string>
-    <string name="permgroupdesc_wallpaper" msgid="5630417854750540154">"උපාංග බිතුපතේ සැකසීම් වෙනස් කරන්න."</string>
-    <string name="permgrouplab_systemClock" msgid="406535759236612992">"ඔරලෝසුව"</string>
-    <string name="permgroupdesc_systemClock" msgid="3944359833624094992">"උපාංග කාල හෝ කාල කලාප වෙනස් කරන්න."</string>
-    <string name="permgrouplab_statusBar" msgid="2095862568113945398">"තත්ව තීරුව"</string>
-    <string name="permgroupdesc_statusBar" msgid="6242593432226807171">"උපාංග තත්ව තීරු සැකසීම් වෙනස් කරන්න."</string>
-    <string name="permgrouplab_syncSettings" msgid="3341990986147826541">"සමමුහුර්ත සැකසීම්"</string>
-    <string name="permgroupdesc_syncSettings" msgid="7603195265129031797">"සමමුහුර්ත සැකසීම් වෙත ප්‍රවේශය."</string>
-    <string name="permgrouplab_accounts" msgid="3359646291125325519">"ඔබගේ ගිණුම්"</string>
-    <string name="permgroupdesc_accounts" msgid="4948732641827091312">"ලබාගත හැකි ගිණුම් වලට ප්‍රවේශ වීම."</string>
-    <string name="permgrouplab_hardwareControls" msgid="7998214968791599326">"දෘඩාංග පාලක"</string>
-    <string name="permgroupdesc_hardwareControls" msgid="4357057861225462702">"හෑන්ඩ්සෙටයේ දෘඩාංග වලට සෘජුවම ප්‍රවේශ වන්න."</string>
-    <string name="permgrouplab_phoneCalls" msgid="9067173988325865923">"දුරකථන ඇමතුම්"</string>
-    <string name="permgroupdesc_phoneCalls" msgid="7489701620446183770">"දුරකථන ඇමතුම් නිරීක්ෂණය කරන්න, පටිගත කරන්න සහ ක්‍රියාත්මක කරන්න."</string>
-    <string name="permgrouplab_systemTools" msgid="4652191644082714048">"පද්ධති මෙවලම්"</string>
-    <string name="permgroupdesc_systemTools" msgid="8162102602190734305">"පද්ධතියේ පහල මට්ටම් ප්‍රවේශය සහ පාලනය."</string>
-    <string name="permgrouplab_developmentTools" msgid="3446164584710596513">"සංවර්ධක මෙවලම්"</string>
-    <string name="permgroupdesc_developmentTools" msgid="7058828032358142018">"යෙදුම් සංවර්ධකයන් සඳහා පමණක් අවශ්‍ය විශේෂාංග."</string>
-    <string name="permgrouplab_display" msgid="4279909676036402636">"වෙනත් යෙදුම් UI"</string>
-    <string name="permgroupdesc_display" msgid="6051002031933013714">"වෙනත් යෙදුම්වල UI සඳහා බලපායි."</string>
+    <string name="permgroupdesc_calendar" msgid="3889615280211184106">"ඔබේ දින දර්ශනයට පිවිසෙන්න"</string>
+    <string name="permgrouplab_sms" msgid="228308803364967808">"කෙටි පණිවිඩ"</string>
+    <string name="permgroupdesc_sms" msgid="4656988620100940350">"SMS පණිවිඩ යැවීම සහ බැලීම"</string>
     <string name="permgrouplab_storage" msgid="1971118770546336966">"ආචයනය"</string>
-    <string name="permgroupdesc_storage" product="nosdcard" msgid="7442318502446874999">"USB ආචයනය වෙත ප්‍රවේශය."</string>
-    <string name="permgroupdesc_storage" product="default" msgid="9203302214915355774">"SD පත වෙත ප්‍රවේශය."</string>
-    <string name="permgrouplab_accessibilityFeatures" msgid="7919025602283593907">"ප්‍රවේශ්‍යතා විශේෂාංග"</string>
-    <string name="permgroupdesc_accessibilityFeatures" msgid="4205196881678144335">"උපකාරීවන තාක්ෂණ ඉල්ලීම් කළ හැකි විශේෂාංග."</string>
+    <string name="permgroupdesc_storage" msgid="637758554581589203">"ඔබේ උපාංගයේ ඇති ඡායාරූප, මාධ්‍ය සහ ගොනුවලට පිවිසීම"</string>
+    <string name="permgrouplab_microphone" msgid="171539900250043464">"මයික්‍රොෆෝනය"</string>
+    <string name="permgroupdesc_microphone" msgid="4988812113943554584">"ශ්‍රව්‍ය පටිගත කරන්න"</string>
+    <string name="permgrouplab_camera" msgid="4820372495894586615">"කැමරාව"</string>
+    <string name="permgroupdesc_camera" msgid="3250611594678347720">"පින්තූර ගැනීම සහ වීඩියෝ පටිගත කිරීම"</string>
+    <string name="permgrouplab_phone" msgid="5229115638567440675">"දුරකථනය"</string>
+    <string name="permgroupdesc_phone" msgid="6234224354060641055">"දුරකථන ඇමතුම් සිදු කිරීම සහ කළමනාකරණය කිරීම"</string>
+    <string name="permgrouplab_sensors" msgid="416037179223226722">"ශරීර සංවේදක"</string>
+    <string name="permgroupdesc_sensors" msgid="7147968539346634043">"ඔබේ ජෛව ලක්ෂණ පිළිබඳ සංවේදක දත්ත වෙත පිවිසෙන්න"</string>
     <string name="capability_title_canRetrieveWindowContent" msgid="3901717936930170320">"කවුළු අන්න්තර්ගතය ලබාගන්න"</string>
     <string name="capability_desc_canRetrieveWindowContent" msgid="3772225008605310672">"ඔබ අන්තර්ක්‍රියාකාරී වන කවුළුවේ අන්තර්ගතය පරීක්ෂා කරන්න."</string>
     <string name="capability_title_canRequestTouchExploration" msgid="3108723364676667320">"ස්පර්ශයෙන් ගවේෂණය සක්‍රිය කරන්න"</string>
@@ -305,204 +268,38 @@
     <string name="permdesc_receiveSms" msgid="6424387754228766939">"SMS පණිවිඩ ලැබීමට සහ ක්‍රියාත්මක කිරීමට යෙදුමට අවසර දෙන්න. මෙහි තේරුම යෙදුමට ඔබගේ උපාංගයට ලැබෙන පණිවිඩ අධීක්ෂණය කිරීමට හැකිවීම වන අතර, ඒවා ඔබට නොපෙන්වා මකා දැමීමටද හැකි වීමයි."</string>
     <string name="permlab_receiveMms" msgid="1821317344668257098">"පෙළ පණිවුඩ ලබාගන්න (MMS)"</string>
     <string name="permdesc_receiveMms" msgid="533019437263212260">"MMS පණිවිඩ සොයා ලබාගැනීමට සහ ක්‍රියාත්මක කිරීමට යෙදුමට අවසර දෙන්න. යෙදුම නිරීක්ෂණය කරනු ලබන අතර ඔබට ලැබුන පණිවිඩ පෙන්වීමෙන් තොරවම මකා දැමිය හැකි බව මෙමඟින් අදහස් කරයි."</string>
-    <string name="permlab_receiveEmergencyBroadcast" msgid="1803477660846288089">"හදිසි විකාශන ලබා ගැනීම"</string>
-    <string name="permdesc_receiveEmergencyBroadcast" msgid="848524070262431974">"හදිසි විකාශ පණිවිඩ ලැබීමට සහ ක්‍රියාත්මක කිරීමට යෙදුමට අවසර දෙන්න. පද්ධති යෙදුම් වලට පමණක් මෙම අවසරය අදාළ වෙයි."</string>
     <string name="permlab_readCellBroadcasts" msgid="1598328843619646166">"සෙල් ප්‍රචාරණ පණිවිඩ කියවීම"</string>
     <string name="permdesc_readCellBroadcasts" msgid="6361972776080458979">"ඔබගේ උපාංගයට ලැබුණු සෙල් විකාශන පණිවිඩ කියවීමට යෙදුමට අවසර දෙන්න. ඔබට හදිසි අවස්ථාවන් පිළිබඳ අනතුරු ඇඟවීමට සෙල් විකාශන පණිවිඩ ඇතැම් ස්ථානවල සිට යවනු ලබයි. හදිසි සෙල් විකාශන ලැබෙන අවස්ථාවකදී, අනිෂ්ට යෙදුම් මඟින් ඔබගේ උපාංගයට කාර්ය සාධනයට හෝ ක්‍රියකරණයට බාධා සිදුවිය හැක."</string>
-    <string name="permlab_sendSms" msgid="5600830612147671529">"SMS පණිවිඩ යැවීම"</string>
+    <string name="permlab_subscribedFeedsRead" msgid="4756609637053353318">"දායක වූ සංග්‍රහ කියවීම"</string>
+    <string name="permdesc_subscribedFeedsRead" msgid="5557058907906144505">"වර්තමාන සමමුහුර්ත සංග්‍රහ ගැන විස්තර ලැබීමට යෙදුමට අවසර දෙන්න."</string>
+    <string name="permlab_sendSms" msgid="7544599214260982981">"SMS පණිවිඩ යැවීම සහ බැලීම"</string>
     <string name="permdesc_sendSms" msgid="7094729298204937667">"SMS පණිවිඩ යැවීමට යෙදුමට අවසර දෙන්න. මෙමඟින් බලාපොරොත්තු නොවූ ප්‍රතිඵල අත් විය හැක. අනිෂ්ට යෙදුම් ඔබගේ තහවුරුවකින් තොරව පණිවිඩ යැවීම මඟින් ඔබගේ මුදල් වැය කල හැක."</string>
-    <string name="permlab_sendRespondViaMessageRequest" msgid="8713889105305943200">"පණිවිඩ සිදුවීම හරහා ප්‍රතිචාර යැවීම"</string>
-    <string name="permdesc_sendRespondViaMessageRequest" msgid="7107648548468778734">"පැමිණෙන ඇමතුම් සඳහා පණිවිඩ ඔස්සේ ප්‍රතිචාර සිදුවීම් හසුරුවීමට වෙනත් පණිවිඩ යෙදුම් සඳහා ඉල්ලීම් යැවීමට, යෙදුමට අවසර දෙන්න."</string>
     <string name="permlab_readSms" msgid="8745086572213270480">"ඔබගේ පෙළ පණිවුඩ කියවන්න (SMS හෝ MMS)"</string>
     <string name="permdesc_readSms" product="tablet" msgid="2467981548684735522">"ඔබගේ ටැබ්ලටයේ හෝ SIM පතේ ආචයනය කර ඇති SMS පණිවිඩ කියවීමට යෙදුමට අවසර දෙන්න. අන්තර්ගතය හෝ විශවාසදයි බවින් තොරවම සියලු SMS පණිවිඩ කියවීමට මෙමගින් යෙදුමට අවසර දෙයි."</string>
     <string name="permdesc_readSms" product="tv" msgid="5102425513647038535">"ඔබගේ රූපවාහිනියේ හෝ SIM කාඩ්පතේ ගබඩා කර ඇති SMS පණිවිඩ කියවීමට යෙදුම ඉඩ දෙන්න. නොසලකන හෝ රහසිගත සියළුම SMS පණිවිඩ, කියවීමට යෙදුමට මෙයින් අවසර ලැබේ."</string>
     <string name="permdesc_readSms" product="default" msgid="3695967533457240550">"ඔබගේ දුරකථනයේ හෝ SIM පතේ ආචයනය කරන ලද SMS පණිවිඩ කියවීමට යෙදුමට අවසර දෙන්න. අන්තර්ගතය හෝ විශ්වාසදායී බවින් තොරවම සියලු SMS පණිවිඩ කියවීමට මෙමගින් යෙදුමට අවසර දෙයි."</string>
-    <string name="permlab_writeSms" msgid="3216950472636214774">"ඔබගේ කෙටි පණිවිඩ සංස්කරණය කිරීම (SMS හෝ MMS)"</string>
-    <string name="permdesc_writeSms" product="tablet" msgid="5160413947794501538">"ඔබගේ ටැබ්ලටයේ හෝ SIM පතේ ගබඩා කර ඇති SMS පණිවිඩ වෙත ලිවීමට යෙදුමට අවසර දෙන්න. අනිෂ්ට යෙදුම් ඔබගේ පණිවිඩ මකා දැමිය හැක."</string>
-    <string name="permdesc_writeSms" product="tv" msgid="955871498983538187">"යෙදුමට ඔබගේ රූපවාහිනියේ හෝ SIM කාඩ්පතෙහි ගබඩා කර ඇති SMS පණිවිඩ වෙත ලිවීමට අවසර දෙයි. අශිෂ්ට යෙදුම් ඔබගේ පණිවිඩ මකා දමනු ඇත."</string>
-    <string name="permdesc_writeSms" product="default" msgid="7268668709052328567">"ඔබගේ ටැබ්ලටයේ හෝ SIM පතේ ආචයනය කරන ලද SMS පණිවිඩ ලිවීමට යෙදුමට අවසර දෙන්න. අනිෂ්ට යෙදුම් ඔබගේ පණිවිඩ මකා දැමිය හැක."</string>
     <string name="permlab_receiveWapPush" msgid="5991398711936590410">"පෙළ පණිවිඩ ලබාගැනීම (WAP)"</string>
     <string name="permdesc_receiveWapPush" msgid="748232190220583385">"WAP පණිවිඩ ලැබීමට සහ ක්‍රියාවලි කිරීමට යෙදුමට අවසර දෙන්න. මෙම අවසරයෙහි ඔබව ඒවාට පෙන්වීමකින් තොරව ඔබට පණිවිඩ නිරීක්ෂණයට හෝ මැකීමට හැකියාව ඇතුළත් වේ."</string>
-    <string name="permlab_receiveBluetoothMap" msgid="7593811487142360528">"එවන ලද බ්ලූටූත් පණිවිඩ (MAP)"</string>
-    <string name="permdesc_receiveBluetoothMap" msgid="8656755936919466345">"බ්ලූටූත් MAP පණිවිඩ සොයා ලබාගැනීමට සහ ක්‍රියාත්මක කිරීමට යෙදුමට අවසර දෙන්න. යෙදුම නිරීක්ෂණය කරනු ලබන අතර ඔබට ලැබුන පණිවිඩ පෙන්වීමෙන් තොරවම මකා දැමිය හැකි බව මෙමඟින් අදහස් කරයි."</string>
     <string name="permlab_getTasks" msgid="6466095396623933906">"ධාවනය වන යෙදුම් ලබාගැනීම"</string>
     <string name="permdesc_getTasks" msgid="7454215995847658102">"දැනට සහ මෑත ක්‍රියාත්මක කාර්යයන් පිළිබඳ විස්තරාත්මක තොරතුරු සොයා ලබාගැනීමට යෙදුමට ඉඩ දෙන්න. මෙය කුමන යෙදුම් උපාංගයේ භාවිතා කරන්නේද යන තොරතුරු යෙදුම්වලට සොයා ගැනීමට ඉඩ දිය හැක."</string>
-    <string name="permlab_startTasksFromRecents" msgid="8990073877885690623">"මෑත ක්‍රියා වෙතින් ක්‍රියා ආරම්භ කරන්න"</string>
-    <string name="permdesc_startTasksFromRecents" msgid="7382133554871222235">"ActivityManager.getRecentTaskList() වෙතින් ආපසු එවන අභාවයට ගිය කාර්යය දියත් කිරීමට ActivityManager.RecentTaskInfo වස්තුව භාවිතා කිරීමට යෙදුමට ඉඩ දෙන්න."</string>
-    <string name="permlab_interactAcrossUsers" msgid="7114255281944211682">"පරිශීලකයන් අතර අන්තර්ක්‍රියාකාරී වන්න"</string>
-    <string name="permdesc_interactAcrossUsers" msgid="364670963623385786">"උපාංගයේ විවිධ පරිශීලකයන් හරහා ක්‍රියාවන් දැක්වීමට යෙදුමට අවසර දෙන්න. පරිශීලකයන් අතර ආරක්ෂාව කඩකිරීමට අනිෂ්ට යෙදුම් විසින් මෙය භාවිතා කිරීමට ඉඩ ඇත."</string>
-    <string name="permlab_interactAcrossUsersFull" msgid="2567734285545074105">"පරිශීලකයන් අතර අන්තර් ක්‍රියාකාරී වීමට සම්පූර්ණ බලපත්‍රය"</string>
-    <string name="permdesc_interactAcrossUsersFull" msgid="376841368395502366">"පරිශීලකයන් හරහා සිදු කළ හැකි සියලු අන්තර් ක්‍රියා වලට අවසර දෙන්න."</string>
-    <string name="permlab_manageUsers" msgid="1676150911672282428">"පරිශීලකයන් කළමනාකරණය කරන්න"</string>
-    <string name="permdesc_manageUsers" msgid="8409306667645355638">"විස්තර ලබා ගැනීම, නිර්මාණකරණය, මකාදැමීම ඇතුළු පරිශීලකයන් කළමනාකරණයට යෙදුම්වලට අවසර දෙන්න."</string>
-    <string name="permlab_getDetailedTasks" msgid="6229468674753529501">"ධාවනය වන යෙදුම් වල තොරතුරු සොයා ලබාගැනීම"</string>
-    <string name="permdesc_getDetailedTasks" msgid="153824741440717599">"දැනට සහ මෑතක ක්‍රියාත්මක කාර්යයන් පිළිබඳ විස්තරාත්මක තොරතුරු ලබාගැනීමට යෙදුමට අවසර දෙන්න අනිෂ්ට යෙදුම් අනෙකුත් යෙදුම් පිළිබඳ පුද්ගලික තොරතුරු සොයා ගැනීමට ඉඩ තිබේ."</string>
+    <string name="permlab_manageProfileAndDeviceOwners" msgid="5979288447973722097">"පැතිකඩ සහ උපාංග හිමිකරුවන් කළමනාකරණය කරන්න"</string>
+    <string name="permdesc_manageProfileAndDeviceOwners" msgid="106894851498657169">"යෙදුම්වලට පැතිකඩ හිමියන් සහ උපාංග හිමිකරු සැකසීමට ඉඩ දෙයි."</string>
     <string name="permlab_reorderTasks" msgid="2018575526934422779">"ධාවනය වන යෙදුම් නැවත අනුපිළිවෙලට සැකසීම"</string>
     <string name="permdesc_reorderTasks" msgid="7734217754877439351">"පෙරබිමට හෝ පසුබිමට සිදුවීම් ගෙනයාමට යෙදුමට අවසර දෙන්න. ඔබගේ ආදානයකින් තොරව යෙදුම මෙය සිදුකරයි."</string>
-    <string name="permlab_removeTasks" msgid="6821513401870377403">"යෙදුම් ධාවනය නවත්වන්න"</string>
-    <string name="permdesc_removeTasks" msgid="1394714352062635493">"කාර්යයන් ඉවත් කිරීමට සහ ඒවායෙහි යෙදුම් නැති කිරීමට යෙදුමට අවසර දෙන්න. අනෙක් යෙදුම් හැසිරීම බාධා කිරීමට අනිෂ්ට යෙදුම්වලට අවසර දෙන්න."</string>
-    <string name="permlab_manageActivityStacks" msgid="7391191384027303065">"ක්‍රියාකාරකම් අට්ටි කළමනාකරණය කරන්න"</string>
-    <string name="permdesc_manageActivityStacks" msgid="1615881933034084440">"වෙනත් යෙදුම් ධාවනය වන ක්‍රියාකාරකම් අට්ටි වලට එකතු කිරීමට, ඉවත් කිරීමට, සහ වෙනස් කිරීමට යෙදුමට අවසර දෙන්න. වෙනත් යෙදුම්වල හැසිරීම අනිෂ්ට යෙදුම් මගින් බාධා විය හැක."</string>
-    <string name="permlab_startAnyActivity" msgid="2918768238045206456">"ඕනෑම ක්‍රියාවක් අරඹන්න"</string>
-    <string name="permdesc_startAnyActivity" msgid="997823695343584001">"අවසර ආරක්ෂාව හෝ යැවුම් තත්වයෙන් තොරවම ඕනෑම ක්‍රියාවක් ආරම්භ කිරීමට යෙදුමට අවසර දේ."</string>
-    <string name="permlab_setScreenCompatibility" msgid="6975387118861842061">"තිර ගැළපුම සැකසීම"</string>
-    <string name="permdesc_setScreenCompatibility" msgid="692043618693917374">"වෙනත් යෙදුම්වල තිර ගැලපුම් මාදිලිය පාලනයට යෙදුමට අවසර දෙන්න. වෙනත් යෙදුම්වල හැසිරීම අනිෂ්ට යෙදුම් කැඩිය හැක."</string>
-    <string name="permlab_setDebugApp" msgid="3022107198686584052">"යෙදුම් නිදොස්කරණය සබල කිරීම"</string>
-    <string name="permdesc_setDebugApp" msgid="4474512416299013256">"වෙනත් යෙදුමක් සඳහා නිදොස්කරණය සක්‍රිය කිරීමට යෙදුමට අවසර දෙන්න. වෙනත් යෙදුම් විනාශ කිරීමට අනිෂ්ට යෙදුම් මෙය භාවිත කළ හැක."</string>
-    <string name="permlab_changeConfiguration" msgid="4162092185124234480">"පද්ධති සංදර්ශක සැකසීම් වෙනස් කරන්න"</string>
-    <string name="permdesc_changeConfiguration" msgid="4372223873154296076">"පෙදෙසිය හෝ සම්පූර්ණ අකුරු ප්‍රමාණය වැනි පවතින වින්‍යාසය වෙනස් කිරීමට යෙදුමට අවසර දෙන්න."</string>
     <string name="permlab_enableCarMode" msgid="5684504058192921098">"මෝටර් රථ ආකාරය ක්‍රියාත්මක කරන්න"</string>
     <string name="permdesc_enableCarMode" msgid="4853187425751419467">"කාර් ආකාරය සබල කිරීමට යෙදුමට අවසර දෙන්න."</string>
     <string name="permlab_killBackgroundProcesses" msgid="3914026687420177202">"වෙනත් යෙදුම් වැසීම"</string>
     <string name="permdesc_killBackgroundProcesses" msgid="4593353235959733119">"අනෙක් යෙදුම්වල පසුබිම් ක්‍රියාවලි අවසන් කිරීමට යෙදුමට අවසර දෙන්න. අනෙක් යෙදුම් ධාවනය නැවතීමට මෙය හේතුවක් වේ."</string>
-    <string name="permlab_forceStopPackages" msgid="2329627428832067700">"වෙනත් යෙදුම් බලෙන් නවත්වන්න"</string>
-    <string name="permdesc_forceStopPackages" msgid="5253157296183940812">"යෙදුමට බලෙන් අනෙක් යෙදුම් නැවතීමට අවසර දෙන්න."</string>
-    <string name="permlab_forceBack" msgid="652935204072584616">"යෙදුම වැසීමට බල කිරීම"</string>
-    <string name="permdesc_forceBack" msgid="3892295830419513623">"නැවතීමට පෙරබිමේ ඇති ඕනෑම ක්‍රියාවක් බලෙන් නැවතීමට සහ පිටුපසට යාමට යෙදුමට අවසර දෙන්න. සාමාන්‍ය යෙදුම් සඳහා කිසිදා අවශ්‍ය නොවේ."</string>
-    <string name="permlab_dump" msgid="1681799862438954752">"පද්ධති අභ්‍යන්තර තත්වය සොයා ලබා ගන්න"</string>
-    <string name="permdesc_dump" msgid="1778299088692290329">"පද්ධතියේ අභ්‍යන්තර තත්වය ලැබීමට යෙදුමට අවසර දෙන්න. ඔවුන් සාමාන්‍යයෙන් භාවිත නොකරන විවිධත්වයකින් යුත් පුද්ගලික සහ ආරක්‍ෂිත තොරතුරු අනිෂ්ට යෙදුම් සොයා ලබා ගත හැක."</string>
-    <string name="permlab_retrieve_window_content" msgid="8022588608994589938">"තිර අන්තර්ගතය සොයා ලබාගැනීම"</string>
-    <string name="permdesc_retrieve_window_content" msgid="3193269069469700265">"ක්‍රියාකාරී කවුළුවක අන්තර්ගතය ලබාගැනීමට යෙදුමට අවසර දෙන්න. අනිෂ්ට යෙදුම් විසින් සම්පූර්ණ කවුළු අන්තර්ගතය ලබාගැනීම සහ මුරපදය හැර ඒවායෙහි පෙළ පරික්ෂා කිරීම සිදුකරයි."</string>
-    <string name="permlab_temporary_enable_accessibility" msgid="2312612135127310254">"ප්‍රවේශ්‍යතාවය තාවකාලිකව සබල කිරීම"</string>
-    <string name="permdesc_temporary_enable_accessibility" msgid="8079456293182975464">"උපාංගය වෙත ප‍්‍රවේශ්‍යතාව තාවකාලිකව සක්‍රිය කිරීමට යෙදුමට අවසර දෙන්න. පරිශීලක අවධානයකින් තොරව අනිෂ්ට යෙදුම් ප‍්‍රවේශ්‍යතාව සක්‍රිය කළ හැක."</string>
-    <string name="permlab_retrieveWindowToken" msgid="7154762602367758602">"කවුළු ටෝකනය ලබාගැනීම"</string>
-    <string name="permdesc_retrieveWindowToken" msgid="668173747687795074">"කවුළු ටෝකන යෙදුම වෙතින් ලබාගැනීමට ඉඩ දෙන්න. ඇතැම් විට පද්ධතිය සමාරෝපණය කිරීමෙන් යෙදුමේ කවුළුව සමඟ ද්වේෂසහගත යෙදුම් අනුමැතිය නොමැති අන්තර්ක්‍රියාවන් සිදු කරයි."</string>
-    <string name="permlab_frameStats" msgid="7056374987314361639">"කවුළු රාමුවේ සංඛ්‍යානයන්"</string>
-    <string name="permdesc_frameStats" msgid="4758001089491284919">"රාමු සංඛ්‍යානයන් එකතු කිරීමට යෙදුමට ඉඩ දෙන්න. ඇතැම් විට වෙනත් යෙදුම් වෙතින් කවුළු වල රාමු සංඛ්‍යානයන් ද්වේෂසහගත යෙදුම් වලින් බැලිය හැක."</string>
-    <string name="permlab_filter_events" msgid="8675535648807427389">"සිදුවීම් පෙරන්න"</string>
-    <string name="permdesc_filter_events" msgid="8006236315888347680">"පිටත් කිරීමට පෙර සියලු පරිශීලක සිදුවීම්වල ප්‍රවාහයක් පෙරීමට යොදා ගන්නා ආදාන පෙරීමක් ලියාපදිංචි කිරීමට යෙදුමට අවසර දෙන්න. පරිශීලක මැදිහත් වීමකින් තොරව පද්ධති UI අනිෂ්ට යෙදුම් පාලනය කරයි."</string>
-    <string name="permlab_shutdown" msgid="7185747824038909016">"අඩ වශයෙන් වැහීම"</string>
-    <string name="permdesc_shutdown" msgid="7046500838746291775">"ක්‍රියාකාරකම් කළමනාකරු වැහීමේ තත්වයට දමන්න. සම්පූර්ණ වැහීමකට පත් නොකරන්න."</string>
-    <string name="permlab_stopAppSwitches" msgid="4138608610717425573">"යෙදුම් මාරු වීම වැළක්වීම"</string>
-    <string name="permdesc_stopAppSwitches" msgid="8262195802582255021">"වෙනත් යෙදුමක් වෙත පරිශීලකයාව මාරු වීම වළක්වයි."</string>
-    <string name="permlab_getTopActivityInfo" msgid="2537922311411546016">"පවතින යෙදුමේ තොරතුරු ලබාගැනීම"</string>
-    <string name="permdesc_getTopActivityInfo" msgid="2512448855496067131">"තිරයේ පෙරබිම තුළ තිබෙන දැන් පවත්නා යෙදුමේ පෞද්ගලික තොරතුරු ලබාගැනීමට දරන්නාට අවසර දෙන්න."</string>
-    <string name="permlab_runSetActivityWatcher" msgid="892239094867182656">"සියලු යෙදුම් දියත් කිරීම් නිරීක්ෂණය සහ පාලනය කිරීම"</string>
-    <string name="permdesc_runSetActivityWatcher" msgid="6003603162578577406">"පද්ධතිය ක්‍රියාකාරකම් දියත් කරන්නේ කෙසේදැයි නිරීක්ෂණයට සහ පාලනයට යෙදුමට අවසර දෙන්න. අනිෂ්ට යෙදුම් මගින් පද්ධතිය සම්පූර්ණයෙන්ම සම්මුතියකට එළඹිය හැක. වර්ධනය සඳහා පමණක් මෙම අවසරය අවශ්‍ය වෙයි, සාමාන්‍ය භාවිතය සඳහා කිසි විටෙකත් අවශ්‍ය නොවෙයි."</string>
-    <string name="permlab_broadcastPackageRemoved" msgid="2576333434893532475">"පැකේජ ඉවත් කිරීමේ ප්‍රචාරණයක් යවන්න"</string>
-    <string name="permdesc_broadcastPackageRemoved" msgid="6621901216207931089">"යෙදුම් පැකේජයක් ඉවත්කොට ඇති බවට දැනුම්දීමක් විකාශනයට යෙදුමට අවසර දෙයි. ධාවනය වන අනෙකුත් යෙදුමක් නැති කිරීමට අනිෂ්ට යෙදුම් විසින් මෙය භාවිත කළ හැක."</string>
-    <string name="permlab_broadcastSmsReceived" msgid="5689095009030336593">"SMS-ලැබීම විකාශන යැවීම"</string>
-    <string name="permdesc_broadcastSmsReceived" msgid="4152037720034365492">"SMS පණිවිඩයක් හරහා ලැබුණු දැනුම්දීමක් ප්‍රචාරණයට යෙදුමට අවසර දෙන්න. පැමිණෙන SMS පණිවිඩ වංචා කිරීමට අනිෂ්ට යෙදුම් මෙය භාවිත කළ හැක."</string>
-    <string name="permlab_broadcastWapPush" msgid="3145347413028582371">"WAP-PUSH-ලැබීම විකාශන යැවීම"</string>
-    <string name="permdesc_broadcastWapPush" msgid="4783402525039442729">"WAP PUSH පණිවුඩයක් ලැබී ඇති බවට දැනුම්දීමක් විකාශනය කිරීමට යෙදුමට අවසර දෙන්න. වංචාකාරී MMS පණිවුඩ ලැබීම් හෝ නිහඬව ඕනෑම වෙබ් පිටුවක අන්තර්ගතය අනිෂ්ට විචල්‍යවලින් ඉවත් කිරීමට, අනිෂ්ට යෙදුම් විසින් මෙය භාවිතා කිරීමට ඉඩ ඇත."</string>
-    <string name="permlab_setProcessLimit" msgid="2451873664363662666">"ධාවන ක්‍රියාවලි ගණන සීමා කිරීම"</string>
-    <string name="permdesc_setProcessLimit" msgid="7318061314040879542">"ධාවනය වන උපරිම ක්‍රියාවලි ගණන පාලනය කිරීමට යෙදුමට අවසර දෙන්න. සාමාන්‍ය යෙදුම් සඳහා කිසිදා අවශ්‍ය නොවේ."</string>
-    <string name="permlab_setAlwaysFinish" msgid="550958507798796965">"පසුබිම් යෙදුම් වලට වැසීමට බලකරන්න"</string>
-    <string name="permdesc_setAlwaysFinish" msgid="7471310652868841499">"පසුබිමට පිවිසෙනවාත් සමඟම ක්‍රියාකාරකම් නැවතීම පාලනයට යෙදුමට අවසර දෙන්න. සාමාන්‍ය යෙදුම්වලට කිසිසේත් අවශ්‍ය නොවෙයි."</string>
-    <string name="permlab_batteryStats" msgid="2789610673514103364">"බැටරි සංඛ්‍යාන කියවීම"</string>
-    <string name="permdesc_batteryStats" msgid="5897346582882915114">"වර්තමාන පහළ මට්ටමේ බැටරිය භාවිතා දත්ත කියවීමට යෙදුමට අවසර දෙන්න. ඔබ භාවිත කරන යෙදුම් මොනවා දැයි ගැන විස්තරාත්මක තොරතුරු ගැන දැන ගැනීමට යෙදුමට අවසර දෙන්න."</string>
-    <string name="permlab_updateBatteryStats" msgid="3719689764536379557">"බැටරි සංඛ්‍යාන වෙනස් කිරීම"</string>
-    <string name="permdesc_updateBatteryStats" msgid="6862817857178025002">"එකතු කරගන්නා ලද බැටරි සංඛ්‍යාන වෙනස් කිරීමට යෙදුමට අවසර දෙන්න. සාමාන්‍ය යෙදුම් වල භාවිතයට නොවේ."</string>
-    <string name="permlab_getAppOpsStats" msgid="1508779687436585744">"යෙදුමේ විකල්ප සංඛ්‍යාංක සොයා ලබාගැනීම"</string>
-    <string name="permdesc_getAppOpsStats" msgid="6243887041577912877">"එකතු කරගත් යෙදුම් ක්‍රියාකාරිත්ව සංඛ්‍යා ලේඛන වෙනස් කිරීමට උපාංගයට ඉඩ දෙන්න. සාමාන්‍ය උපාංග භාවිතය සඳහා නොවේ."</string>
-    <string name="permlab_updateAppOpsStats" msgid="8829097373851521505">"යෙදුම් විකල්ප සංඛ්‍යාංක වෙනස් කිරීම"</string>
-    <string name="permdesc_updateAppOpsStats" msgid="50784596594403483">"එකතු කරගත් යෙදුම් ක්‍රියාකාරිත්ව සංඛ්‍යා ලේඛන වෙනස් කිරීමට යෙදුමට ඉඩ දෙන්න. සාමාන්‍ය යෙදුම් භාවිතය සඳහා නොවේ."</string>
-    <string name="permlab_backup" msgid="470013022865453920">"පද්ධති උපස්ථ පාලනය කරන්න සහ නැවත පිහිටුවන්න"</string>
-    <string name="permdesc_backup" msgid="6912230525140589891">"පද්ධතියේ උපස්ථය සහ උපක්‍රම නැවත පිහිටුවීම පාලනයට යෙදුමට අවසර දෙන්න. සාමාන්‍ය යෙදුම් වල භාවිතය සඳහා නොවේ."</string>
-    <string name="permlab_confirm_full_backup" msgid="5557071325804469102">"සම්පූර්ණ උපස්ථය හෝ මෙහෙයුම් නැවත පිහිටුවීම සනාථ කිරීම"</string>
-    <string name="permdesc_confirm_full_backup" msgid="1748762171637699562">"පූර්ණ උපස්ථ තහවුරුකිරීම් UI පුරන්නට උපකරණයට ඉඩ දෙන්න. කිසිම යෙදුමක් භාවිතා නොකරනු ඇත."</string>
-    <string name="permlab_internalSystemWindow" msgid="2148563628140193231">"අවසර නොලත් කවුළුව දර්ශනය කරන්න"</string>
-    <string name="permdesc_internalSystemWindow" msgid="7458387759461466397">"අභ්‍යන්තර පද්ධති පරිශීලක අතුරුමුහුණත් විසින් භාවිතා කිරීමට බලාපොරොත්තු වන කවුළු නිර්මාණය කිරීමට යෙදුමට අවසර දෙන්න. සාමාන්‍ය යෙදුම්වල භාවිතය සඳහා නොවේ."</string>
     <string name="permlab_systemAlertWindow" msgid="3543347980839518613">"වෙනත් යෙදුම් උඩින් අඳින්න"</string>
     <string name="permdesc_systemAlertWindow" msgid="8584678381972820118">"අනෙක් යෙදුම් මත හෝ පරිශීලක අතුරු මුහුණත් කොටස්වල ඇඳීමට යෙදුමට ඉඩ දෙන්න. එය ඔබේ භාවිතයේ ඇති ඕනෑම යෙදුමක මුහුණත සමග සම්බන්ධ වීමට හෝ අනෙක් යෙදුම් ගැන ඔබට පෙනෙන ආකාරය වෙනස් කිරීමට ඉඩ ඇත."</string>
-    <string name="permlab_setAnimationScale" msgid="2805103241153907174">"ගෝලීය සජීවන වේගය වෙනස් කරන්න"</string>
-    <string name="permdesc_setAnimationScale" msgid="7690063428924343571">"ඕනෑම වෙලාවක පොදු සජීවීකරණ වේගය (වේගවත් හෝ මන්දගාමී සජීවීකරණ) වෙනස් කිරීමට යෙදුමට අවසර දෙන්න."</string>
-    <string name="permlab_manageAppTokens" msgid="1286505717050121370">"යෙදුම් ටෝකන කළමනාකරණය කිරීම"</string>
-    <string name="permdesc_manageAppTokens" msgid="8043431713014395671">"සාමාන්‍ය Z පටිපාටිය මඟහැරයමින් යෙදුම්වලට අයිති ටෝකන් පත් නිර්මාණයට සහ කළමනාකරණයට යෙදුම්වලට අවසර දෙන්න. සාමාන්‍ය යෙදුම්වලට කිසිසේත් අවශ්‍ය නොවේ."</string>
-    <string name="permlab_freezeScreen" msgid="4708181184441880175">"තිරය නිශ්චල කරන්න"</string>
-    <string name="permdesc_freezeScreen" msgid="8558923789222670064">"සම්පූර්ණ තිර සංක්‍රමණය සඳහා තිරය තාවකාලිකව මුදවිමට යෙදුමට අවසර දෙන්න."</string>
-    <string name="permlab_injectEvents" msgid="1378746584023586600">"යතුරු සහ පාලන බොත්තම් ඔබන්න"</string>
-    <string name="permdesc_injectEvents" product="tablet" msgid="206352565599968632">"තමන්ගේ ආදාන සිදුවීම් (යතුරු එබිම් , ආදී ) අනෙකුත් යෙදුම්වලට භාරදීමට යෙදුමට ඉඩ දෙන්න. අනිෂ්ට යෙදුම් මෙය ටැබ්ලටය ලබා ගැනීමට භාවිතා කිරීමට ඉඩ ඇත."</string>
-    <string name="permdesc_injectEvents" product="tv" msgid="4681361983270791611">"යෙදුමක අදාන සිදුවීම් (යතුරු එබිම්, ආදී.) වෙනත් යෙදුමක් වෙත යැවීමට යෙදුමට ඉඩදෙන්න.  අනිෂ්ට යෙදුම් මෙය භාවිතා කර රූපවාහිනියේ බලය ලබාගනී."</string>
-    <string name="permdesc_injectEvents" product="default" msgid="653128057572326253">"වෙනත් යෙදුම්වලට එහි ආදාන සිදුවීම් (යතුරු එබීම්, යනාදිය.) ආදිය යැවීමට යෙදුමට අවසර දෙන්න. දුරකථනය අත්කර ගැනීම අනිෂ්ට යෙදුම් මෙය භාවිත කරයි."</string>
-    <string name="permlab_readInputState" msgid="469428900041249234">"ඔබ ටයිප් කරන දෙය සහ ඔබ ගන්නා ක්‍රියාවන් පටිගත කරන්න"</string>
-    <string name="permdesc_readInputState" msgid="8387754901688728043">"මුරපදය ටයිප් කිරීම වැනි අනෙකුත් යෙදුම් සමඟ අන්තර්ක්‍රියාකාරී වනවිට යනාදී ඔබ ඔබන යතුරු දැකීමට යෙදුමට අවසර දෙන්න. සාමාන්‍ය යෙදුම් සඳහා කිසිසේත් අදාළ නොවේ."</string>
-    <string name="permlab_bindInputMethod" msgid="3360064620230515776">"ආදාන ක්‍රමයක් වෙත බඳින්න"</string>
-    <string name="permdesc_bindInputMethod" msgid="3250440322807286331">"ආදාන ක්‍රමය ඉහල මට්ටමේ අතුරු මුහුණතක් වෙත සම්බන්ධ කිරීමට ධාරකයාට අවසර දෙන්න. සාමාන්‍ය යෙදුම්වලට කිසි විටෙක අවශ්‍ය නොවෙයි."</string>
-    <string name="permlab_bindAccessibilityService" msgid="5357733942556031593">"ප‍්‍රවේශ්‍යතා සේවාවක් වෙත බදින්න"</string>
-    <string name="permdesc_bindAccessibilityService" msgid="7034615928609331368">"ප‍්‍රවේශ්‍යතා සේවාවේ ඉහළ මට්ටමේ අතුරුමුහුණතට බැඳීමට දරන්නාට අවසර දේ. සාමාන්‍ය යෙදුම් සඳහා කිසිවිටක අවශ්‍ය නොවේ."</string>
-    <string name="permlab_bindPrintService" msgid="8462815179572748761">"මුද්‍රණ සේවාවකට බද්ධ වී ඇත"</string>
-    <string name="permdesc_bindPrintService" msgid="7960067623209111135">"මුද්‍රණ සේවාව ඉහල මට්ටමේ අතුරු මුහුණතක් වෙත සම්බන්ධ කිරීමට ධාරකයාට අවසර දෙන්න. සාමාන්‍ය යෙදුම්වලට කිසි විටෙක අවශ්‍ය නොවෙයි."</string>
-    <string name="permlab_bindPrintSpoolerService" msgid="6807762783744125954">"මුද්‍රණ සේවාවකට බද්ධ වී ඇත"</string>
-    <string name="permdesc_bindPrintSpoolerService" msgid="3680552285933318372">"මුද්‍රණ සේවාව ඉහල මට්ටමේ අතුරු මුහුණතක් වෙත සම්බන්ධ කිරීමට ධාරකයාට අවසර දෙන්න. සාමාන්‍ය යෙදුම්වලට කිසි විටෙක අවශ්‍ය නොවෙයි."</string>
-    <string name="permlab_bindNfcService" msgid="2752731300419410724">"NFC සේවාව වෙත බැඳෙන්න"</string>
-    <string name="permdesc_bindNfcService" msgid="6120647629174066862">"NFC කාඩ් පත් ආදර්ශනය කරන යෙදුම් රඳවනයට සම්බන්ධ වීමට ඉඩ දෙන්න. සාමාන්‍ය යෙදුම් සඳහා කිසිදා අවශ්‍ය නොවෙයි."</string>
-    <string name="permlab_bindTextService" msgid="7358378401915287938">"පෙළ සේවාවකට බඳින්න"</string>
-    <string name="permdesc_bindTextService" msgid="8151968910973998670">"කෙටි පණිවිඩ සේවාවක (උදා. SpellCheckerService) ඉහල මට්ටමේ අතුරු මුහුණතක් වෙත සම්බන්ධ කිරීමට ධාරකයාට අවසර දෙන්න. සාමාන්‍ය යෙදුම්වලට කිසි විටෙක අවශ්‍ය නොවෙයි."</string>
-    <string name="permlab_bindVpnService" msgid="4708596021161473255">"VPN සේවාවකට බැඳීම"</string>
-    <string name="permdesc_bindVpnService" msgid="2067845564581693905">"VPN සේවාව ඉහල මට්ටමේ අතුරු මුහුණතක් වෙත සම්බන්ධ කිරීමට ධාරකයාට අවසර දෙන්න. සාමාන්‍ය යෙදුම්වලට කිසි විටෙක අවශ්‍ය නොවෙයි."</string>
-    <string name="permlab_bindWallpaper" msgid="8716400279937856462">"බිතුපත වෙත බඳින්න"</string>
-    <string name="permdesc_bindWallpaper" msgid="7108428692595491668">"බිතුපත ඉහල මට්ටමේ අතුරු මුහුණතක් වෙත සම්බන්ධ කිරීමට ධාරකයාට අවසර දෙන්න. සාමාන්‍ය යෙදුම්වලට කිසි විටෙක අවශ්‍ය නොවෙයි."</string>
-    <string name="permlab_bindVoiceInteraction" msgid="5334852580713715068">"හඬ අන්තර් ක්‍රියාවේ සේවාවට බඳින්න"</string>
-    <string name="permdesc_bindVoiceInteraction" msgid="2345721766501778101">"හඬ අන්තර් ක්‍රියාවේ සේවාවට ඉහළ-මට්ටමේ අතුරු මුහුණතක් බැඳිමට ධාරකයාට අවසර දෙන්න. සාමාන්‍ය යෙදුම් සඳහා කවදාවත් අවශ්‍යය නොවෙයි."</string>
-    <string name="permlab_manageVoiceKeyphrases" msgid="1252285102392793548">"හඬ යතුරුඛණ්ඩය කළමනාකරණය කිරීම"</string>
-    <string name="permdesc_manageVoiceKeyphrases" msgid="8476560722907530008">"හඬ අණවදන හදුනා ගැනීම සඳහා යතුරුඛණ්ඩය හිමිකරුට පාලනය කිරීමට ඉඩ දෙන්න. සාමාන්‍ය යෙදුම සඳහා කිසිදිනක අවශ්‍ය නොවේ."</string>
-    <string name="permlab_bindRemoteDisplay" msgid="1782923938029941960">"දූරස්ථ දර්ශනයකට බඳින්න"</string>
-    <string name="permdesc_bindRemoteDisplay" msgid="1261242718727295981">"දූරස්ථ දර්ශනය ඉහල මට්ටමේ අතුරු මුහුණතක් වෙත සම්බන්ධ කිරීමට ධාරකයාට අවසර දෙන්න. සාමාන්‍ය යෙදුම්වලට කිසි විටෙක අවශ්‍ය නොවෙයි."</string>
-    <string name="permlab_bindRemoteViews" msgid="5697987759897367099">"විජට සේවාවකට බඳින්න"</string>
-    <string name="permdesc_bindRemoteViews" msgid="4717987810137692572">"විජට් සේවාව ඉහල මට්ටමේ අතුරු මුහුණතක් වෙත සම්බන්ධ කිරීමට ධාරකයාට අවසර දෙන්න. සාමාන්‍ය යෙදුම්වලට කිසි විටෙක අවශ්‍ය නොවෙයි."</string>
-    <string name="permlab_bindDeviceAdmin" msgid="8704986163711455010">"උපාංග පරිපාලක සමඟ අන්තර්ක්‍රියාකාරී වීම"</string>
-    <string name="permdesc_bindDeviceAdmin" msgid="569715419543907930">"උපාංග පාලකයා වෙතට අභිප්‍රායයන් යැවීමට ධාරකයාට අවසර දෙන්න. සාමාන්‍ය යෙදුම්වලට කිසි විටෙක අවශ්‍ය නොවෙයි."</string>
-    <string name="permlab_bindTvInput" msgid="5601264742478168987">"TV ආදානයක් වෙතට බඳින්න"</string>
-    <string name="permdesc_bindTvInput" msgid="2371008331852001924">"TV ආදානයක ඉහල මට්ටමේ අතුරු මුහුණතක් වෙත සම්බන්ධ කිරීමට ධාරකයාට අවසර දෙන්න. සාමාන්‍ය යෙදුම්වලට කිසි විටෙක අවශ්‍ය නොවෙයි."</string>
-    <string name="permlab_modifyParentalControls" msgid="4611318225997592242">"ප්‍රධාන පාලකයන් වෙනස් කරන්න"</string>
-    <string name="permdesc_modifyParentalControls" msgid="7438482894162282039">"පද්ධතියේ ප්‍රධාන පාලක දත්ත වෙනස් කිරීමට ධාරකයාට ඉඩ දේ. සාමාන්‍ය යෙදුම් වලට කිසිදා අවශ්‍ය නොවේ."</string>
-    <string name="permlab_manageDeviceAdmins" msgid="4248828900045808722">"උපාංග පරිපාලකයෙක් එක් කිරීම හෝ ඉවත් කිරීම"</string>
-    <string name="permdesc_manageDeviceAdmins" msgid="5025608167709942485">"දරන්නාට උපාංග පරිපාලකයින් එක් කිරීමට හෝ ඉවත් කිරීමට අවසර දේ. සාමාන්‍ය යෙදුම් වලට කිසිදා අවශ්‍ය නොවේ."</string>
-    <string name="permlab_setOrientation" msgid="3365947717163866844">"තිර දිශානතිය වෙනස් කිරීම"</string>
-    <string name="permdesc_setOrientation" msgid="3046126619316671476">"තිරයේ භ්‍රමණය ඕනෑම වේලාවක වෙනස් කිරීමට යෙදුමට අවසර දෙන්න. සාමාන්‍ය යෙදුම් සඳහා කිසිදා අවශ්‍ය නොවනු ඇත."</string>
-    <string name="permlab_setPointerSpeed" msgid="9175371613322562934">"දර්ශකයේ වේගය වෙනස් කිරීම"</string>
-    <string name="permdesc_setPointerSpeed" msgid="6866563234274104233">"මූසිකයේ හෝ ට්‍රැක්පෑඩයේ වේගය ඕනෑම මොහොතක වෙනස් කිරීමට උපාංගයට ඉඩ දෙන්න. සාමාන්‍ය උපාංගයන් සඳහා කිසිදා අවශ්‍ය නොවනු ඇත."</string>
-    <string name="permlab_setKeyboardLayout" msgid="4778731703600909340">"යතුරු පුවරු පිරිසැලැස්ම වෙනස් කිරීම"</string>
-    <string name="permdesc_setKeyboardLayout" msgid="8480016771134175879">"යතුරුපුවරු මුහුණත වෙනස් කිරීමට යෙදුමට අවසර දෙන්න. සාමාන්‍ය යෙදුම් සඳහා කිසිදා අවශ්‍ය නොවෙයි."</string>
-    <string name="permlab_signalPersistentProcesses" msgid="4539002991947376659">"යෙදුම් වෙත Linux සංඥා යැවීම"</string>
-    <string name="permdesc_signalPersistentProcesses" msgid="4896992079182649141">"පවතින සියලු ක්‍රියාවලි වෙත සැපයුම් සංඥා ඉල්ලවිමට යෙදුමට අවසර දේ."</string>
     <string name="permlab_persistentActivity" msgid="8841113627955563938">"යෙදුම සැමවිටම ධාවනය කරන්න"</string>
     <string name="permdesc_persistentActivity" product="tablet" msgid="8525189272329086137">"මතකයේ පවතින එහි කොටස් නොනැසී පැවතීමට යෙදුමට අවසර දෙන්න. වෙනත් යෙදුම් වලට මතකය සීමා කිරීමෙන් ටැබ්ලටය පමා කිරීම මගින්  මෙමගින් කළ හැක."</string>
     <string name="permdesc_persistentActivity" product="tv" msgid="5086862529499103587">"යෙදුමේ කොටසක් මතකය තුළ එයට ස්ථාවර තබාගැනීමට යෙදුමට ඉඩ දෙන්න. මෙය වෙනත් යෙදුම් වලට තිබෙන මතකය සීමා කරයි සහ රූපවාහිනිය මන්දගාමී කරයි."</string>
     <string name="permdesc_persistentActivity" product="default" msgid="4384760047508278272">"යෙදුමට තම කොටස් මතකය තුල නොබිඳීව රඳා පවත්වාගෙන යාමට අවසර දෙන්න. මෙය දුරකථනය මන්දගාමී කරමින් අනෙකුත් උපාංගයන් සඳහා ඉතිරි මතකය සීමා කිරීමට හැක."</string>
-    <string name="permlab_deletePackages" msgid="184385129537705938">"යෙදුම් මකන්න"</string>
-    <string name="permdesc_deletePackages" msgid="7411480275167205081">"Android පැකේජ මැකීමට යෙදුමට අවසර දෙන්න. වැදගත් යෙදුම් මැකීමට අනිෂ්ට යෙදුම් විසින් මෙය භාවිතා කිරීමට ඉඩ ඇත."</string>
-    <string name="permlab_clearAppUserData" msgid="274109191845842756">"යෙදුමේ වෙනත් දත්ත මකන්න"</string>
-    <string name="permdesc_clearAppUserData" msgid="4625323684125459488">"පරිශීලක දත්ත හිස් කිරීමට යෙදුමකට ඉඩ දේ."</string>
-    <string name="permlab_deleteCacheFiles" msgid="3128665571837408675">"අනෙක් යෙදුම්වල හැඹිලි මකන්න"</string>
-    <string name="permdesc_deleteCacheFiles" msgid="3812998599006730196">"හැඹිලි ගොනු මැකීමට අවසර යෙදුමට අවසර දෙන්න."</string>
     <string name="permlab_getPackageSize" msgid="7472921768357981986">"යෙදුම් ආචයනයේ ඉඩ ප්‍රමාණය මැනීම"</string>
     <string name="permdesc_getPackageSize" msgid="3921068154420738296">"යෙදුමකට එහි කේතය, දත්ත සහ හැඹිලි ප්‍රමාණ ලබාගැනීමට අවසර දෙන්න."</string>
-    <string name="permlab_installPackages" msgid="2199128482820306924">"යෙදුම් කෙළින්ම ස්ථාපනය කිරීම"</string>
-    <string name="permdesc_installPackages" msgid="5628530972548071284">"නව හෝ යාවත්කාලින කරන ලද Android පැකේජයන් ස්ථාපනය කිරීමට ඉඩ දෙන්න. බලසහිත අවසර තීන්දු සමග නව යෙදුම් එකතු කිරීමට අනිෂ්ට යෙදුම්වලට මෙය භාවිතා කිරීමට ඉඩ තිබේ."</string>
-    <string name="permlab_clearAppCache" msgid="7487279391723526815">"යෙදුමේ සියලුම හැඹිලි දත්ත මකන්න"</string>
-    <string name="permdesc_clearAppCache" product="tablet" msgid="8974640871945434565">"අනෙක් යෙදුම්වල හැඹිලි නාමාවලි තුළ ඇති ගොනු මැකීමෙන් යෙදුමට ටැබ්ලට ආචයනය නිදහස් කිරීමට අවසර දෙන්න. මෙමගින් අනෙක් යෙදුම්වලට ඒවායේ දත්ත නැවත ලබා ගැනීමට අවශ්‍ය වන නිසා, ඒවායේ ආරම්භය තවත් සෙමින් සිදුවීමට ඉඩ ඇත."</string>
-    <string name="permdesc_clearAppCache" product="tv" msgid="244647416303997022">"වෙනත් යෙදුම් වල කැස් ඩිරෙක්ටරිය තුළ ගොනු මැකීම මඟින් නිදහස් රූපවාහිනි යෙදුම වෙත ඉඩ දෙන්න. වෙනත් යෙදුම් වලට වඩාත් හෙමින් ආරම්භ කිරීමට මෙය හේතුවේ මන්ද ඔවුන්ගේ දත්ත නැවත-ලබාගන්න ඔවුන්ට අවශ්‍යය."</string>
-    <string name="permdesc_clearAppCache" product="default" msgid="2459441021956436779">"අනෙක් යෙදුම්වල හැඹිලි නාමාවලි තුළ ඇති ගොනු මැකීමෙන් යෙදුමට දුරකථන ආචයනය නිදහස් කිරීමට අවසර දෙන්න. මෙමඟින් අනෙක් යෙදුම්වලට ඒවායේ දත්ත නැවත ලබා ගැනීමට අවශ්‍ය වන නිසා, ඒවායේ ආරම්භය තවත් සෙමින් සිදුවීමට ඉඩ ඇත."</string>
-    <string name="permlab_movePackage" msgid="3289890271645921411">"යෙදුම් සම්පත් ගෙන යාම"</string>
-    <string name="permdesc_movePackage" msgid="319562217778244524">"අභ්‍යන්තර සහ බාහිර මාධ්‍යයන්ගෙන් යෙදුමේ සම්පත් ගෙනයාමට සහ යෙදුමේ සම්පත් වලින් අභ්‍යන්තර සහ බාහිර මාධ්‍යයන්ට යෙදුමේ සම්පත් ගෙනයාමට යෙදුමට අවසර දෙන්න."</string>
-    <string name="permlab_readLogs" msgid="6615778543198967614">"සංවේදී ලොග් දත්ත කියවීම"</string>
-    <string name="permdesc_readLogs" product="tablet" msgid="82061313293455151">"පද්ධතියේ විවිධ ලොග් ගොනු කියවීමට යෙදුමට අවසර දෙන්න. පුද්ගලික සහ පෞද්ගලික තොරතුරු ඇතුළත්ව ඔබ ටැබ්ලටයෙන් කුමක් කරන්නෙහිද යනාදී සාමාන්‍ය තොරතුරු සෙවීමට මෙයට අවසර දෙන්න."</string>
-    <string name="permdesc_readLogs" product="tv" msgid="9023899974809538988">"පද්ධතියේ විවිධ ලොග් ගොනු කියවීමට යෙදුමට අවසර දෙන්න. පුද්ගලික සහ පෞද්ගලික තොරතුරු ඇතුළත්ව ඔබ උපාංගයෙන් කුමක් කරන්නෙහිද යනාදී සාමාන්‍ය තොරතුරු සෙවීමට මෙයට අවසර දෙන්න."</string>
-    <string name="permdesc_readLogs" product="default" msgid="2063438140241560443">"පද්ධතියේ විවිධ ලොග් ගොනු කියවීමට යෙදුමට අවසර දෙන්න. පුද්ගලික සහ පෞද්ගලික තොරතුරු ඇතුළත්ව ඔබ දුරකථනයෙන් කුමක් කරන්නෙහිද යනාදී සාමාන්‍ය තොරතුරු සෙවීමට මෙයට අවසර දෙන්න."</string>
-    <string name="permlab_anyCodecForPlayback" msgid="715805555823881818">"නැවත ධාවනය සඳහා ඕනෑම මාධ්‍ය විකේතකයක් හාවිතා කරන්න"</string>
-    <string name="permdesc_anyCodecForPlayback" msgid="8283912488433189010">"නැවත ධාවනය සඳහා විකේතනය කිරීමට ඕනෑම ස්ථාපිත මාධ්‍ය විකේතකයක් භාවිතයට යෙදුමට අවසර දෙන්න."</string>
-    <string name="permlab_manageCaCertificates" msgid="1678391896786882014">"විශ්වාසදායී අක්තපත්‍ර කළමනාකරණය"</string>
-    <string name="permdesc_manageCaCertificates" msgid="4015644047196937014">"යෙදුමට CA සහතික විශ්වාසදායී අක්තපත්‍ර ලෙස ස්ථාපනය සහ අස්ථාපනය කිරීමට ඉඩ දෙන්න."</string>
-    <string name="permlab_bindJobService" msgid="3637568367978271086">"යෙදුමේ කාර්ය සටහන් කළ පසුබිම වැඩ ධාවනය කරන්න"</string>
-    <string name="permdesc_bindJobService" msgid="3473288460524119838">"මෙම අවසරයට අවශ්‍ය විට පසුබිම තුළ යෙදුම් ධාවනය කිරීමට Android පද්ධතිය ඉඩ ලැබේ."</string>
-    <string name="permlab_diagnostic" msgid="8076743953908000342">"Diag විසින් හිමිකාරත්වය දරණ සම්පත්වලට කියවීම/ ලිවිම"</string>
-    <string name="permdesc_diagnostic" msgid="6608295692002452283">"Diag කණ්ඩායමට අයිති ඕනෑම සම්පතක් කියවීමට සහ ලිවීමට යෙදුමට අවසර දෙන්න. උදාහරණයක් ලෙස /dev තුල ඇති ගොනු. මෙයට පද්ධති ස්ථායිතාවට සහ ආරක්ෂාවට බලපෑම් කිරීමට හැකියාවක් ඇත. නිෂ්පාදක හෝ ක්‍රියාකරු විසින් දෘඩාංග-විශේෂිත දෝෂ නිර්ණය සඳහා පමණක් මෙය යොදාගත යුතුය."</string>
-    <string name="permlab_changeComponentState" msgid="6335576775711095931">"යෙදුම් අංග සබල හෝ අබල කිරීම"</string>
-    <string name="permdesc_changeComponentState" product="tablet" msgid="8887435740982237294">"වෙනත් යෙදුමක අංගයක් සබල ද නැද්ද යන්න වෙනස් කිරීමට යෙදුමට අවසර දෙන්න. වැදගත් ටැබ්ලට් අවශ්‍යතා අබල කිරීමට අනිෂ්ට යෙදුම් මෙය භාවිත කළ හැක. මෙම අවසරය සැලකිල්ලෙන් භාවිතා කළ යුතුය, භාවිත නොකරන, අස්ථිර හෝ අස්ථායි තත්වයට යෙදුම පත් කිරීමට එයට හැකිය."</string>
-    <string name="permdesc_changeComponentState" product="tv" msgid="9151634188264231389">"වෙනත් යෙදුම් අංග සබල කර තිබේ දැයි හෝ නැද්ද වෙනස් කිරීමට යෙදුමට ඉඩදෙන්න. රූපවාහිනියේ වැදගත් හැකියාවන් අබල කිරීමට අනිෂ්ට යෙදුම් ඇතැම් විට මේවා භාවිතා කළ හැක. මෙම අවසර සමඟ භාරගැනීම භාවිතා කිරීමට අවශ්‍ය වේ, එයට යෙදුම් කොටස් භාවිතා නොකරන, අස්ථිර හෝ අස්ථායි තත්ත්ව වලට ගෙන යෑමට හැකියාවක් තිබේ."</string>
-    <string name="permdesc_changeComponentState" product="default" msgid="1827232484416505615">"වෙනත් යෙදුමක අංගයක් සබල ද නැද්ද යන්න වෙනස් කිරීමට යෙදුමට අවසර දෙන්න. වැදගත් දුරකථන අවශ්‍යතා අක්‍රිය කිරීමට අනිෂ්ට යෙදුම් මෙය භාවිත කළ හැක. මෙම අවසරය සැලකිල්ලෙන් භාවිත කළ යුතුය, භාවිත නොකරන, අස්ථිර හෝ අස්ථායි තත්වයට යෙදුම පත් කිරීමට එයට හැකිය."</string>
-    <string name="permlab_grantRevokePermissions" msgid="4627315351093508795">"අවසර ප්‍රදානය කිරීම හෝ අහෝසි කිරීම"</string>
-    <string name="permdesc_grantRevokePermissions" msgid="4088642654085850662">"යෙදුමකට එයට හෝ අනෙක් යෙදුම් වලට විශේෂිත අවසර ප්‍රදානයට හෝ අහෝසි කිරීමට අවසර දෙන්න. අනිෂ්ට යෙදුම්, ඒවාට අවසර ප්‍රදානය නොකළ ගුණාංග වලට ප්‍රවේශ වීමට මෙය භාවිතා කළ හැක."</string>
-    <string name="permlab_setPreferredApplications" msgid="8463181628695396391">"අභිරුචි යෙදුම් සකසන්න"</string>
-    <string name="permdesc_setPreferredApplications" msgid="4973986762241783712">"ඔබගේ අභිරුචි යෙදුම් වෙනස් කිරීමට යෙදුමට අවසර දෙන්න. ඔබගේ ධාවනය වන යෙදුම් වෙනස් කිරීම, පවතින යෙදුම් වලින් දත්ත එකතු කිරීම, ප්‍රෝඩා කිරීම වැනි දේ අනිෂ්ට යෙදුම් නිශ්ශබදවම සිදු කරයි."</string>
     <string name="permlab_writeSettings" msgid="2226195290955224730">"පද්ධති සැකසීම් වෙනස් කිරීම"</string>
     <string name="permdesc_writeSettings" msgid="7775723441558907181">"පද්ධති සැකසීම් දත්ත වෙනස් කිරීමට යෙදුමට අවසර දෙන්න. අනිෂ්ට යෙදුම් ඔබගේ පද්ධති වින්‍යාස දෝෂ ගැන්විය හැක."</string>
-    <string name="permlab_writeSecureSettings" msgid="204676251876718288">"ආරක්‍ෂිත පද්ධති සැකසීම් වෙනස් කරන්න"</string>
-    <string name="permdesc_writeSecureSettings" msgid="8159535613020137391">"පද්ධතියේ ආරක්‍ෂිත දත්ත වෙනස් කිරීමට උපාංගයට අවසර දෙන්න. සාමාන්‍ය උපාංග සඳහා භාවිතයට නොවේ."</string>
-    <string name="permlab_writeGservices" msgid="2149426664226152185">"Google සේවා සිතියම වෙනස් කරන්න"</string>
-    <string name="permdesc_writeGservices" msgid="1287309437638380229">"Google සේවා සිතියම වෙනස් කිරීමට යෙදුමට අවසර දෙන්න. සාමාන්‍ය යෙදුම් සඳහා භාවිතයට නොවෙයි."</string>
     <string name="permlab_receiveBootCompleted" msgid="5312965565987800025">"ආරම්භයේදී ධාවනය කිරීම"</string>
     <string name="permdesc_receiveBootCompleted" product="tablet" msgid="7390304664116880704">"පද්ධතිය ඇරඹුම අවසන් වූ වහාම යෙදුම ආරම්භ වීමට යෙදුමට අවසර දෙන්න. ටැබ්ලටය ආරම්භ කිරීමට මෙමඟින් පමා කළ හැකි අතර සැමවිටම ධාවනය වන නිසා සම්පූර්ණ ටැබ්ලටයම ප්‍රමාද කිරීමට යෙදුමට අවසර දෙයි."</string>
     <string name="permdesc_receiveBootCompleted" product="tv" msgid="4525890122209673621">"පද්ධතිය ආරම්භය(බුට් වීම) අවසන් වූ විගසම යෙදුමට එය විසින් ආරම්භ වීමට ඉඩ දෙන්න. රූපවාහිනිය ආරම්භ වීමට මෙය ටික වේලාවක් ගනී සහ සැමවිටම ධාවනය වීම මඟින් සමස්ත ටැබ්ලටයම මන්දගාමී කිරීමට ඉඩ දෙයි."</string>
@@ -527,16 +324,8 @@
     <string name="permdesc_writeCallLog" product="tablet" msgid="6661806062274119245">"ලැබෙන ඇමතුම් සහ පිටවන ඇමතුම් දත්ත ඇතුළත්ව ඔබගේ ටැබ්ලටයේ ඇමතුම් ලොගය වෙනස් කිරීමට යෙදුමට අවසර දෙන්න. ඔබගේ ඇමතුම් ලොගය මැකීමට හෝ වෙනස් කිරීමට අනිෂ්ට යෙදුම් මෙය භාවිතා කෙරේ."</string>
     <string name="permdesc_writeCallLog" product="tv" msgid="4225034892248398019">"ලැබෙන ඇමතුම් සහ පිටවන ඇමතුම් දත්ත ඇතුළත්ව ඔබගේ ටැබ්ලටයේ ඇමතුම් ලොගය වෙනස් කිරීමට යෙදුමට අවසර දෙන්න. ඔබගේ ඇමතුම් ලොගය මැකීමට හෝ වෙනස් කිරීමට අනිෂ්ට යෙදුම් මෙය භාවිතා කෙරේ."</string>
     <string name="permdesc_writeCallLog" product="default" msgid="683941736352787842">"පැමිණෙන සහ පිටවෙන ඇමතුම් දත්ත ඇතුළුව ඔබගේ දුරකථනයේ ඇමතුම් ලොගය වෙනස් කිරීමට යෙදුමට අවසර දෙන්න. ඔබගේ ඇමතුම් ලොගය මැකීමට හෝ වෙනස් කිරීමට අනිෂ්ට යෙදුම් මෙය භාවිත කල හැක."</string>
-    <string name="permlab_readProfile" msgid="4701889852612716678">"ඔබගේ සම්බන්ධතා පත කියවන්න"</string>
-    <string name="permdesc_readProfile" product="default" msgid="5462475151849888848">"ඔබගේ නම සම්බන්ධතා තොරතුරු ආදී ඔබගේ උපාංගයේ ගබඩා වී ඇති පුද්ගලික පැතිකඩ තොරතුරු කියවීමට යෙදුමට අවසර දෙන්න. මෙහි තේරුම යෙදුමට ඔබව හඳුනා ගැනීමට හැකි වන බව සහ ඔබගේ පුද්ගලික තොරතුරු අනෙක් අයට යැවීමට ද හැකි වීමයි."</string>
-    <string name="permlab_writeProfile" msgid="907793628777397643">"ඔබගේ සම්බන්ධතා පත වෙනස් කිරීම"</string>
-    <string name="permdesc_writeProfile" product="default" msgid="5552084294598465899">"ඔබගේ නම සහ සම්බන්ධතා තොරතුරු වැනි ඔබගේ උපාංගයේ ආචයනය කරන ලද පුද්ගලික පැතිකඩ තොරතුරු වෙනස් කිරීමට හෝ එකතු කිරීමට යෙදුමට අවසර දෙන්න. මෙමගින් යෙදුමට ඔබව හඳුනා ගත හැකි අතර අනෙක් අයට ඔබගේ පැතිකඩ තොරතුරු යැවිය හැකි බව කියවෙයි."</string>
     <string name="permlab_bodySensors" msgid="4871091374767171066">"සිරුර සංවේදකයන් (හෘද ස්පන්දන වේගය නිරීක්ෂණය කිරීම වැනි)"</string>
     <string name="permdesc_bodySensors" product="default" msgid="4380015021754180431">"හෘද ස්පන්දන වේගය වැනි ඔබගේ ශාරීරික තත්ත්වය නිරීක්ෂණය කරන සංවේදක වලින් දත්ත ලබාගැනීමට යෙදුමට ඉඩ දෙන්න."</string>
-    <string name="permlab_readSocialStream" product="default" msgid="1268920956152419170">"ඔබගේ සමාජ ප්‍රවාහය කියවන්න"</string>
-    <string name="permdesc_readSocialStream" product="default" msgid="4255706027172050872">"ඔබගේ සහ ඔබගේ යහළුවන්ගේ සමාජ යාවත්කාලීනයන් වෙත පිවිසීමට හෝ සමමුහුර්ත කිරීමට යෙදුමට අවසර දෙන්න. තොරතුරු බෙදා ගැනීමේ දී සැලකිලිමත් වන්න -- විශ්වාසයකින් තොරව සමාජ ජාලවල ඔබගේ සහ ඔබගේ යහළුවන් අතර සන්නිවේදන කියවීමට මෙමගින් යෙදුමට අවසර දෙයි. සටහන: සියලු සමාජ ජාලවල මෙම අවසරය බල නොකරයි."</string>
-    <string name="permlab_writeSocialStream" product="default" msgid="3504179222493235645">"ඔබගේ සමාජ ප්‍රවාහය වෙත ලිවීම"</string>
-    <string name="permdesc_writeSocialStream" product="default" msgid="3086557552204114849">"ඔබගේ යහළුවන්ගේ සමාජ යාවත්කාලීනයන් පෙන්වීමට යෙදුමට අවසර දෙන්න. තොරතුරු බෙදා ගැනීමේදී සැලකිලිමත් වන්න -- යහළුවෙක්ගෙන් පැමිණෙන ලෙස පණිවිඩ නිපදවීමට මෙමඟින් යෙදුමට අවසර දෙන්න. සටහන : සියලු සමාජ ජාල සඳහා මෙම අවසරය බල නොදෙයි."</string>
     <string name="permlab_readCalendar" msgid="5972727560257612398">"දින දර්ශනයේ සිදුවීම් සහ රහසිගත තොරතුරු කියවීම"</string>
     <string name="permdesc_readCalendar" product="tablet" msgid="4216462049057658723">"ඔබගේ ටැබ්ලටය තුල ගබඩා  කර ඇති මිතුරන්ගේ සහ එක්ව ක්‍රියාකරන්නන්ගේ ද ඇතුළුව සියලුම දින දර්ශන සිද්ධි කියවීමට යෙදුමට අවසර දෙන්න. මෙය රහස්‍යභාවය හෝ සංවේදීතාවය නොසලකා ඔබගේ දින දර්ශන දත්ත බෙදා ගැනීමට හෝ සුරැකීමට යෙදුමට අවසර දෙන්න."</string>
     <string name="permdesc_readCalendar" product="tv" msgid="3191352452242394196">"ඔබගේ රූපවාහිනියේ ගබඩා කර ඇති මිතුරන්ගේ සහ එකට වැඩ කරන්නන්ගේ  සියළුම දින දර්ශනය සිදුවීම් කියවීමට යෙදුම ඉඩ දෙන්න. නොසලකන හෝ රහසිගත සියළුම දින දර්ශන දත්ත බෙදාගැනීමට හෝ සුරැකීමට යෙදුමට මෙයින් අවසර ලැබේ."</string>
@@ -545,40 +334,12 @@
     <string name="permdesc_writeCalendar" product="tablet" msgid="6679035520113668528">"යහළුවන් හෝ එකට-වැඩකරන්නන් ඇතුළත්ව ඔබට ටැබ්ලටයේ වෙනස් කළ හැකි සිද්ධි එකතු කිරීමට, ඉවත් කිරීමට, වෙනස් කිරීමට යෙදුමට අවසර දෙන්න. මෙමඟින් දින දර්ශන හිමිකරුවන්ගෙන් පණිවිඩ යවන පරිදි මෙන් මවාපෑමට හෝ හිමිකරුගේ අනුදැනුමකින් තොරව සිද්ධි වෙනස් කිරීමට යෙදුමට අවසර ලැබේ."</string>
     <string name="permdesc_writeCalendar" product="tv" msgid="1273290605500902507">"මිතුරන්ගේ හෝ එක්ව කටයුතු කරන්නන්ගේද ඇතුළුව උපාංගය මත ඔබට වෙනස් කිරීමට හැකි සිද්ධි එකතු කිරීමට, ඉවත් කිරීමට සහ වෙනස් කිරීමට යෙදුමට අවසර දේ. මෙමඟින් යෙදුම හට දින දසුන් හිමිකරු ලෙස පෙනී සිටිමින් පණිවිඩ යැවීම, හිමිකරුගේ අනුදැනුම නොමැතිව සිද්ධි වෙනස් කිරීම කළ හැක."</string>
     <string name="permdesc_writeCalendar" product="default" msgid="2324469496327249376">"ඔබගේ යහළුවන් හෝ සමකාලීනයන් ඇතුළත් ඔබගේ දුරකථනයේ ඔබට වෙනස් කළ හැකි සිදු වීම් එකතු කිරීමට, ඉවත් කිරීමට, වෙනස් කිරීමට යෙදුමට අවසර දෙන්න. මෙමගින් දින දර්ශන හිමිකරුවන්ගෙන් පැමිණෙන සේ පෙනෙන පණිවිඩ යැවීමට හෝ හිමිකරුගේ දැනුමකින් තොරව සිදුවීම් වෙනස් කිරීමට යෙදුමට අවසර දෙයි."</string>
-    <string name="permlab_accessMockLocation" msgid="8688334974036823330">"පරීක්ෂණ සඳහා ආදර්ශ ස්ථාන මූලාශ්‍ර"</string>
-    <string name="permdesc_accessMockLocation" msgid="5808711039482051824">"පරීක්ෂණයට ව්‍යාජ ස්ථාන මූලාශ්‍ර සාදන්න හෝ නව ස්ථාන සැපයුම්කරුවෙකු ස්ථාපනය කරන්න. GPS හෝ ස්ථාන සැපයුම්කරුවන් ආදී වෙනත් ස්ථාන මූලාශ්‍ර විසින් ලබා දෙන ස්ථානය සහ/හෝ තත්වය ප්‍රතිස්ථාපනය කිරීමට යෙදුමට මෙය අවසර දෙයි."</string>
     <string name="permlab_accessLocationExtraCommands" msgid="2836308076720553837">"අමතර ස්ථාන සැපයුම්කරු විධාන වෙත ප්‍රවේශ වීම"</string>
     <string name="permdesc_accessLocationExtraCommands" msgid="6078307221056649927">"ස්ථානය සපයන අමතර අණ වලට ප්‍රවේශය කිරීමට යෙදුමට අවසර දෙන්න. GPS ක්‍රියාවන් හෝ වෙනත් ස්ථාන මූලාශ්‍ර සමඟ මැදිහත් වීමට මෙයින් යෙදුමට ඉඩ ලැබේ."</string>
-    <string name="permlab_installLocationProvider" msgid="6578101199825193873">"ස්ථාන සැපයුම්කරුවෙකු ස්ථාපනයට අවසරය දෙන්න"</string>
-    <string name="permdesc_installLocationProvider" msgid="9066146120470591509">"පරීක්ෂණයට ව්‍යාජ ස්ථාන මූලාශ්‍ර සාදන්න හෝ නව ස්ථාන සැපයුම්කරුවෙකු ස්ථාපනය කරන්න. GPS හෝ ස්ථාන සැපයුම්කරුවන් ආදී වෙනත් ස්ථාන මූලාශ්‍ර විසින් ලබා දෙන ස්ථානය සහ/හෝ තත්ත්වය ප්‍රතිස්ථාපනය කිරීමට යෙදුමට මෙය අවසර දෙයි."</string>
     <string name="permlab_accessFineLocation" msgid="1191898061965273372">"නිවැරදි ස්ථානය (GPS සහ ජාලය පදනම් කරගත්)"</string>
     <string name="permdesc_accessFineLocation" msgid="5295047563564981250">"ගෝලීය ස්ථානීය පද්ධතිය (GPS) හෝ සෙල් කුළුණු සහ Wi-Fi වැනි ජාල ස්ථානීය ප්‍රභව භාවිතයෙන් ඔබගේ නිවැරදි ස්ථානය ලබාගැනීමට යෙදුම අවසර දෙන්න. යෙදුම් වලට ස්ථානීය සේවා භාවිතා කිරීමට  ඒවා සක්‍රිය විය යුතු වේ. ඔබව සොයා ගැනීමට යෙදුම් මෙය භාවිතා කරන අතර අමතර බැටරි බලයක්ද පරිභෝජනය කරයි."</string>
     <string name="permlab_accessCoarseLocation" msgid="4887895362354239628">"ආසන්නතම ස්ථානය (ජාලය-පාදක වූ)"</string>
     <string name="permdesc_accessCoarseLocation" msgid="2538200184373302295">"ඔබගේ දළ ස්ථානය ලබාගැනීමට යෙදුමට අවසර දෙන්න. සන්නේවේදන කුළුණු සහ Wi-Fi ආදී ජාල ස්ථාන මූලාශ්‍ර භාවිත කරන ස්ථාන සේවා විසින් මෙම ස්ථානය ව්‍යුත්පන්න කර ඇත. යෙදුමට භාවිතය සඳහා මෙම ස්ථාන සේවා සක්‍රිය කළ යුතු අතර ඔබගේ උපාංගය සඳහා පැවතිය යුතුය. ඔබ සිටින තැන දළව හඳුනා ගැනීමට යෙදුම් වලට මෙය භාවිත කළ හැකිය."</string>
-    <string name="permlab_accessSurfaceFlinger" msgid="2363969641792388947">"SurfaceFlinger වෙත ප්‍රවේශය"</string>
-    <string name="permdesc_accessSurfaceFlinger" msgid="1041619516733293551">"SurfaceFlinger පහල මට්ටමේ විශේෂාංග භාවිතයට යෙදුමට අවසර දෙයි."</string>
-    <string name="permlab_readFrameBuffer" msgid="6690504248178498136">"රාමු අන්තරාචය කියවීම"</string>
-    <string name="permdesc_readFrameBuffer" msgid="4937405521809454680">"රාමු අන්තරාචයනයෙන් අන්තර්ගතයන් කියවීමට යෙදුමට අවසර දෙන්න."</string>
-    <string name="permlab_accessInputFlinger" msgid="5348635270689553857">"InputFlinger වෙත පිවිසෙන්න"</string>
-    <string name="permdesc_accessInputFlinger" msgid="2104864941201226616">"InputFlinger පහල මට්ටමේ විශේෂාංග භාවිතයට යෙදුමට අවසර දෙයි."</string>
-    <string name="permlab_configureWifiDisplay" msgid="5595661694746742168">"Wifi සංදර්ශක වින්‍යාස කරන්න"</string>
-    <string name="permdesc_configureWifiDisplay" msgid="7916815158690218065">"වින්‍යාස කිරීමට සහ Wifi සංදර්ශක වෙත සම්බන්ධ වීමට යෙදුමට අවසර දෙන්න."</string>
-    <string name="permlab_controlWifiDisplay" msgid="393641276723695496">"Wifi සංදර්ශක පාලනය"</string>
-    <string name="permdesc_controlWifiDisplay" msgid="4543912292681826986">"Wifi සංදර්ශකයේ පහළ මට්ටමේ විශේෂාංග පාලනයට යෙදුමට අවසර දෙන්න."</string>
-    <string name="permlab_controlVpn" msgid="2618442789397588200">"අතථ්‍ය පුද්ගලික ජාල පාලනය කරන්න"</string>
-    <string name="permdesc_controlVpn" msgid="762852603315861214">"යෙදුමට අතථ්‍ය පුද්ගලික ජාලවල පහළ-මට්ටම් විශේෂාංග පාලනය කිරීමට ඉඩ දෙයි."</string>
-    <string name="permlab_captureAudioOutput" msgid="6857134498402346708">"ශබ්ද ප්‍රතිදානය ග්‍රහණය"</string>
-    <string name="permdesc_captureAudioOutput" msgid="6210597754212208853">"යෙදුමට ශබ්ද ප්‍රතිදානය ග්‍රහණය කර හරවා යැවීමට ඉඩ දේ."</string>
-    <string name="permlab_captureAudioHotword" msgid="1890553935650349808">"Hotword හදුනා ගැනීම"</string>
-    <string name="permdesc_captureAudioHotword" msgid="9151807958153056810">"Hotword හදුනා ගැනීම සඳහා ශබ්ද ග්‍රහණය කිරීමට යෙදුමට ඉඩ දෙන්න. පසුබිමේදී ග්‍රහණය සිදුවන අතර වෙනත් ශබ්ද ග්‍රහණයන් වළක්වන්නේ නැත (උ.දා. වීඩියෝ කැමරා)."</string>
-    <string name="permlab_modifyAudioRouting" msgid="7738060354490807723">"ශ්‍රව්‍ය මාර්ගගත කිරීම"</string>
-    <string name="permdesc_modifyAudioRouting" msgid="7205731074267199735">"ශ්‍රව්‍ය මාර්ගගත කිරීම කෙළින්ම පාලනය කිරීමට සහ ශ්‍රව්‍ය ප්‍රතිපත්ති තීරණ මත ලිවීමට අවසර දෙන්න."</string>
-    <string name="permlab_captureVideoOutput" msgid="2246828773589094023">"වීඩියෝ ප්‍රතිදානය"</string>
-    <string name="permdesc_captureVideoOutput" msgid="359481658034149860">"යෙදුමට වීඩියෝ ප්‍රතිදානය ග්‍රහණය කර හරවා යැවීමට ඉඩ දේ."</string>
-    <string name="permlab_captureSecureVideoOutput" msgid="7815398969303382016">"ආරක්‍ෂිත වීඩියෝ ප්‍රතිදානය"</string>
-    <string name="permdesc_captureSecureVideoOutput" msgid="2779793064709350289">"යෙදුමට ආරක්‍ෂිත වීඩියෝ ප්‍රතිදානය ග්‍රහණය කර හරවා යැවීමට ඉඩ දේ."</string>
-    <string name="permlab_mediaContentControl" msgid="8749790560720562511">"මාධ්‍ය නැවත ධාවනය සහ පාර දත්ත පිවිසුම පාලනය කරන්න"</string>
-    <string name="permdesc_mediaContentControl" msgid="1637478200272062">"මාධ්‍ය නැවත ධාවනය සහ මාධ්‍ය තොරතුරු (මාතෘකාව, කතෘ ...) වෙත පිවිසීම පාලනයට යෙදුමට අවසර දෙන්න."</string>
     <string name="permlab_modifyAudioSettings" msgid="6095859937069146086">"ඔබගේ ශ්‍රව්‍ය සැකසීම් වෙනස් කරන්න"</string>
     <string name="permdesc_modifyAudioSettings" msgid="3522565366806248517">"ශබ්දය ආදී ගෝලීය ශබ්ද සැකසීම් වෙනස් කිරීමට සහ ප්‍රතිදානය සඳහා භාවිත කරන්නේ කුමන නාදකය දැයි තේරීමට යෙදුමට අවසර දෙන්න."</string>
     <string name="permlab_recordAudio" msgid="3876049771427466323">"ශබ්ද පටිගත කරන්න"</string>
@@ -587,68 +348,16 @@
     <string name="permdesc_sim_communication" msgid="5725159654279639498">"SIM වෙත විධාන ගෙන යාමට යෙදුමට අවසර දෙයි. මෙය ඉතා භයානක වේ."</string>
     <string name="permlab_camera" msgid="3616391919559751192">"පින්තූර සහ වීඩියෝ ගන්න"</string>
     <string name="permdesc_camera" msgid="8497216524735535009">"කැමරාවෙන් පින්තූර ගැනීමට සහ වීඩියෝ කිරීමට යෙදුමට අවසර දෙන්න. මෙම අවසරය මඟින් ඔබගේ අනුදැනුමකින් තොරව ඕනෑම වේලාවකදී කැමරාව භාවිතා කිරීමට යෙදුමට අවසර දෙන්න."</string>
-    <string name="permlab_cameraDisableTransmitLed" msgid="2651072630501126222">"කැමරාව භාවිතයේදී LED දර්ශක සම්ප්‍රේෂණය අබල කරන්න"</string>
-    <string name="permdesc_cameraDisableTransmitLed" msgid="4764585465480295341">"කැමරා භාවිතය පිළිබඳ LED දර්ශකය අක්‍රිය කිරීමට, කලින් පිහිටුවා ඇති පද්ධති යෙදුමට අවසර දෙන්න."</string>
-    <string name="permlab_brick" product="tablet" msgid="2961292205764488304">"ටැබ්ලටය ස්ථිරවම අබල කිරීම"</string>
-    <string name="permlab_brick" product="tv" msgid="4912674222121249410">"රූපවාහිනිය ස්ථිරවම අබල කරන්න"</string>
-    <string name="permlab_brick" product="default" msgid="8337817093326370537">"දුරකථනය ස්ථිරව අබල කිරීම"</string>
-    <string name="permdesc_brick" product="tablet" msgid="4334818808001699530">"මුළු ටැබ්ලටයම ස්ථිරවම අක්‍රිය කිරීමට යෙදුමට අවසර දෙන්න. මෙය ඉතා භයානකයි."</string>
-    <string name="permdesc_brick" product="tv" msgid="7070924544316356349">"මුළු ටැබ්ලටයම ස්ථිරවම අක්‍රිය කිරීමට යෙදුමට අවසර දෙන්න. මෙය ඉතා භයානකයි."</string>
-    <string name="permdesc_brick" product="default" msgid="5788903297627283099">"මුළු දුරකථනයම ස්ථිරවම අක්‍රිය කිරීමට යෙදුමට අවසර දෙන්න. මෙය ඉතා භයානකයි."</string>
-    <string name="permlab_reboot" product="tablet" msgid="3436634972561795002">"ටැබ්ලට් නැවත පණ ගැන්වීමට බල කරන්න"</string>
-    <string name="permlab_reboot" product="tv" msgid="2112102119558886236">"රූපවාහිනිය නැවත ඇරඹීමට බල කරන්න"</string>
-    <string name="permlab_reboot" product="default" msgid="2898560872462638242">"දුරකථන නැවත පණ ගැන්වීමට බල කරන්න"</string>
-    <string name="permdesc_reboot" product="tablet" msgid="8172056180063700741">"ටැබ්ලටය නැවත බල ගැන්වීමට යෙදුමට අවසර දෙන්න."</string>
-    <string name="permdesc_reboot" product="tv" msgid="7116222694344401650">"රූපවාහිනියට නැවත පණ ගැන්වීමට යෙදුමට ඉඩ දෙන්න."</string>
-    <string name="permdesc_reboot" product="default" msgid="5326008124289989969">"ටැබ්ලටය නැවත ඇරඹීමට යෙදුමට අවසර දෙන්න."</string>
-    <string name="permlab_mount_unmount_filesystems" product="nosdcard" msgid="2927361537942591841">"USB ආචයනය ගොනු පද්ධතිය ප්‍රවේශ කිරීම"</string>
-    <string name="permlab_mount_unmount_filesystems" product="default" msgid="4402305049890953810">"SD පත් ගොනු පද්ධතිය ප්‍රවේශ කිරීම"</string>
-    <string name="permdesc_mount_unmount_filesystems" msgid="1829290701658992347">"ඉවත් කළ හැකි ආචයනය සඳහා ගොනු පද්ධති ඈඳීමට සහ ගැලවීමට යෙදුමට අවසර දෙන්න."</string>
-    <string name="permlab_mount_format_filesystems" product="nosdcard" msgid="6227819582624904972">"USB ආචයනය මකන්න"</string>
-    <string name="permlab_mount_format_filesystems" product="default" msgid="262582698639274056">"SD පත මකන්න"</string>
-    <string name="permdesc_mount_format_filesystems" msgid="8784268246779198627">"ඉවත් කළ හැකි ආචයන ෆෝමැට් කිරීමට යෙදුමට අවසර දෙන්න."</string>
-    <string name="permlab_asec_access" msgid="3411338632002193846">"අභ්‍යන්තර ආචයනය පිළිබඳ තොරතුරු ලබා ගැනීම"</string>
-    <string name="permdesc_asec_access" msgid="3094563844593878548">"අභ්‍යන්තර ආචයනයේ තොරතුරු ලබාගැනීමට යෙදුමට අවසර දෙන්න."</string>
-    <string name="permlab_asec_create" msgid="6414757234789336327">"අභ්‍යන්තර ආචයනය නිර්මාණය"</string>
-    <string name="permdesc_asec_create" msgid="4558869273585856876">"අභ්‍යන්තර ආචයනය සැදීමට යෙදුමට අවසර දෙන්න."</string>
-    <string name="permlab_asec_destroy" msgid="526928328301618022">"අභ්‍යන්තර ආචයනය විනාශ කිරීම"</string>
-    <string name="permdesc_asec_destroy" msgid="7218749286145526537">"අභ්‍යන්තර ආචයනය විනාශ කිරීමට යෙදුමට අවසර දෙන්න."</string>
-    <string name="permlab_asec_mount_unmount" msgid="8877998101944999386">"අභ්‍යන්තර ආචයනය නංවීම/ගැලවීම"</string>
-    <string name="permdesc_asec_mount_unmount" msgid="3451360114902490929">"අභ්‍යන්තර ආචයනය සවි කිරීමට/ගැලවීමට යෙදුමට අවසර දෙන්න."</string>
-    <string name="permlab_asec_rename" msgid="7496633954080472417">"අභ්‍යන්තර ආචයනය නැවත නම් කරන්න"</string>
-    <string name="permdesc_asec_rename" msgid="1794757588472127675">"අභ්‍යන්තර ආචයනය නැවත නම් කිරීමට යෙදුමට අවසර දෙන්න."</string>
     <string name="permlab_vibrate" msgid="7696427026057705834">"කම්පනය පාලනය කිරීම"</string>
     <string name="permdesc_vibrate" msgid="6284989245902300945">"කම්පකය පාලනයට යෙදුමට අවසර දෙන්න."</string>
     <string name="permlab_flashlight" msgid="2155920810121984215">"සැණෙළි ආලෝකය පාලනය කරන්න"</string>
     <string name="permdesc_flashlight" msgid="6522284794568368310">"සැණෙළිය පාලනයට යෙදුමට අවසර දෙන්න."</string>
-    <string name="permlab_manageUsb" msgid="1113453430645402723">"USB උපාංග සඳහා කැමැත්ත සහ අවසර කළමනාකරණය කිරීම"</string>
-    <string name="permdesc_manageUsb" msgid="7776155430218239833">"USB උපාංග සඳහා අභිරුචි සහ අවසර කළමනාකරණයට යෙදුමට අවසර දෙන්න."</string>
-    <string name="permlab_accessMtp" msgid="4953468676795917042">"MTP ප්‍රොටොකෝලය ක්‍රියාත්මක කිරීම"</string>
-    <string name="permdesc_accessMtp" msgid="6532961200486791570">"MTP USB ප්‍රොටෝකෝලය ක්‍රියාත්මක කිරීමට කර්නල MTP ධාවකයට ප්‍රවේශ වීමට අවසර දෙන්න."</string>
-    <string name="permlab_hardware_test" msgid="4148290860400659146">"දෘඩාංග පරීක්ෂණය කරන්න"</string>
-    <string name="permdesc_hardware_test" msgid="6597964191208016605">"දෘඩාංග පරීක්ෂා කිරීමේ අරමුණ සඳහා යෙදුමට විවිධ පර්යන්ත පාලනය කිරීමට ඉඩ දෙන්න."</string>
-    <string name="permlab_fm" msgid="8749504526866832">"FM රේඩියෝ ප්‍රවේශය"</string>
-    <string name="permdesc_fm" msgid="4145699441237962818">"වැඩසටහන් වලට සවන් දීමට යෙදුමට FM රේඩියෝ වලට ප්‍රවේශයට අවසර දෙන්න."</string>
     <string name="permlab_callPhone" msgid="3925836347681847954">"දුරකථන අංක වෙත ඍජුවම අමතන්න"</string>
     <string name="permdesc_callPhone" msgid="3740797576113760827">"ඔබගේ මැදිහත් වීමක් නොමැතිව දුරකථන අංක ඇමතීමට යෙදුමට අවසර දෙන්න. මෙහි ප්‍රතිඑලය වන්නේ අනපේක්ෂිත අයකිරීම් හෝ ඇමතුම් ඇතිවීමයි. මෙයන් හදිසි අංක වලට ඇමතුම් ගැනීමට යෙදුමට අවසර නොදෙන බවට සටහන් කරගන්න. ඔබගේ අනුදැනුමක් නොමැතිව ඇමතුම් ගැනීමෙන් අනිෂ්ට යෙදුම් ඔබගේ මුදල් නිකරුණේ වැය කරයි."</string>
-    <string name="permlab_callPrivileged" msgid="4198349211108497879">"ඕනෑම දුරකථන අංකයකට ඍජුවම අමතන්න"</string>
-    <string name="permdesc_callPrivileged" msgid="1689024901509996810">"ඔබගේ මැදිහත්වීමකින් තොරව හදිසි අංක ඇතුළත්ව ඕනෑම දුරකථන අංකයකට ඇමතීමට යෙදුමට අවසර දෙන්න. හදිසි සේවා වෙත අනවශ්‍ය සහ නීතිමය නොවන ඇමතුම ලැබීමට අනිෂ්ට යෙදුම සිදු කළ හැක."</string>
-    <string name="permlab_performCdmaProvisioning" product="tablet" msgid="4842576994144604821">"CDMA ටැබ්ලට පිහිටුම සෘජුව ඇරඹීම"</string>
-    <string name="permlab_performCdmaProvisioning" product="tv" msgid="3485391974208100809">"කෙළින්ම CDMA රුපවාහිනී ස්ථාපනය ආරම්භ කරන්න"</string>
-    <string name="permlab_performCdmaProvisioning" product="default" msgid="5604848095315421425">"CDMA දුරකථන පිහිටුම සෘජුව ඇරඹීම"</string>
-    <string name="permdesc_performCdmaProvisioning" msgid="1994193538802314186">"යෙදුමට CDMA ප්‍රතිපාදන ආරම්භ කිරීමට ඉඩදෙන්න. අනිෂ්ට යෙදුම් අනවශ්‍ය ලෙස CDMA ප්‍රතිපාදන ආරම්භ කළ හැක."</string>
-    <string name="permlab_locationUpdates" msgid="7785408253364335740">"ස්ථාන යාවත්කාලීන දැනුම්දීම් පාලනය කරන්න"</string>
-    <string name="permdesc_locationUpdates" msgid="1120741557891438876">"ස්ථානීය යාවත්කාලින දැනුම්දීම් රේඩියෝවෙන් සබල/අබල කිරීමට යෙදුමට අවසර දෙන්න. සාමාන්‍ය යෙදුම්වල භාවිතය සඳහා නොවේ."</string>
-    <string name="permlab_checkinProperties" msgid="7855259461268734914">"පිරික්සුම් ගුණාංග වෙත ප්‍රවේශය"</string>
-    <string name="permdesc_checkinProperties" msgid="4024526968630194128">"පිරික්සුම් සේවාව මගින් උත්ශ්‍රේණි කළ ගුණාංග වෙත කියවීම්/ලිවීම් පිවිසුම සඳහා යෙදුමට අවසර දෙන්න. සාමාන්‍ය යෙදුම් වල භාවිතයට නොවේ."</string>
-    <string name="permlab_bindGadget" msgid="776905339015863471">"විජට් තෝරන්න"</string>
-    <string name="permdesc_bindGadget" msgid="8261326938599049290">"කුමන විජටය කුමන යෙදුමෙන් භාවිතා කල හැකිද යන්න පද්ධතියට පැවසීමට යෙදුමට අවසර දෙන්න. මෙම අවසරය ඇති යෙදුමකට අනෙක් යෙදුම්වලට පුද්ගලික දත්ත වලට ප්‍රවේශය ලබා දිය හැක. සාමාන්‍ය යෙදුම් වල භාවිතයට නොවේ."</string>
-    <string name="permlab_modifyPhoneState" msgid="8423923777659292228">"දුරකථනයේ තත්වය වෙනස් කිරීම"</string>
-    <string name="permdesc_modifyPhoneState" msgid="1029877529007686732">"උපාංගයේ දුරකථන විශේෂාංග පාලනයට යෙදුමට අවසර දෙන්න. මෙම අවසරය ඇති යෙදුමට ඔබට නිවේදනයෙන් තොරව ජාල මාරු කිරීම, දුරකථන රේඩියෝව සක්‍රිය සහ අක්‍රිය කිරීම කළ හැක."</string>
+    <string name="permlab_accessImsCallService" msgid="3574943847181793918">"IMS ඇමතුම් සේවාවට පිවිසෙන්න"</string>
+    <string name="permdesc_accessImsCallService" msgid="8992884015198298775">"ඔබේ මැදිහත්වීමකින් තොරව ඇමතුම් සිදු කිරීමට  IMS සේවාව භාවිතයට යෙදුමට ඉඩ දෙන්න."</string>
     <string name="permlab_readPhoneState" msgid="9178228524507610486">"දුරකථනයේ තත්වය සහ අනන්‍යතාවය කියවීම"</string>
     <string name="permdesc_readPhoneState" msgid="1639212771826125528">"උපාංගයේ දුරකථන විශේෂාංග වෙත පිවිසීමට යෙදුමට අවසර දෙන්න. ඇමතුම සක්‍රිය වුවත් සහ ඇමතුමකින් දුරස්ථ අංකය සම්බන්ධ වුවත් දුරකථන අංකය සහ උපාංග ID හඳුනා ගැනීමට මෙම අවසරය යෙදුමට අවසර දෙයි."</string>
-    <string name="permlab_readPrecisePhoneState" msgid="5476483020282007597">"නිරවද්‍ය දුරකථන තත්ව කියවන්න"</string>
-    <string name="permdesc_readPrecisePhoneState" msgid="6648009074263855418">"යෙදුමට නිරවද්‍ය දුරකථන තත්ව ප්‍රවේශයට ඉඩ ලබා දෙන්න. මෙම අවසරය මගින් යෙදුමට, නියම ඇමතුම් තත්ත්ව, අමතුමක් සක්‍රියද නැතහොත් පසුතලයෙහි පවතියි ද, ඇමතුම් අසාර්ථක වීම්, නිරවද්‍ය දත්ත සම්බන්ධතා තත්ත්ව, සහ දත්ත සම්බන්ධතා අසාර්ථක වීම් තීරණය කිරීමට ඉඩ ලබා දෙයි."</string>
     <string name="permlab_wakeLock" product="tablet" msgid="1531731435011495015">"ටැබ්ලටය නින්දෙන් වැළක්වීම"</string>
     <string name="permlab_wakeLock" product="tv" msgid="2601193288949154131">"රූපවාහිනිය නින්දට යාමෙන් නවත්වන්න"</string>
     <string name="permlab_wakeLock" product="default" msgid="573480187941496130">"දුරකථනය නින්දට යාමෙන් වළකන්න"</string>
@@ -659,56 +368,26 @@
     <string name="permdesc_transmitIr" product="tablet" msgid="5358308854306529170">"ටැබ්ලටයේ අධෝරක්ත සම්ප්‍රේෂකය භාවිතයට යෙදුමට ඉඩ දෙන්න."</string>
     <string name="permdesc_transmitIr" product="tv" msgid="3926790828514867101">"යෙදුමට රූපවාහිනියේ අධෝරක්ත සම්ප්‍රේෂකය භාවිතා කිරීමට අවසර දෙයි."</string>
     <string name="permdesc_transmitIr" product="default" msgid="7957763745020300725">"දුරකථනයේ අධෝරක්ත සම්ප්‍රේෂකය භාවිතයට යෙදුමට ඉඩ දෙන්න."</string>
-    <string name="permlab_devicePower" product="tablet" msgid="2787034722616350417">"ටැබ්ලටය සක්‍රිය හෝ අක්‍රිය කරන්න"</string>
-    <string name="permlab_devicePower" product="tv" msgid="7579718349658943416">"රූපවාහිනිය සක්‍රිය හෝ අක්‍රිය කරන්න"</string>
-    <string name="permlab_devicePower" product="default" msgid="4928622470980943206">"දුරකථනය බල ගැන්වීම හෝ වැසීම"</string>
-    <string name="permdesc_devicePower" product="tablet" msgid="6689862878984631831">"ටැබ්ලටය සක්‍රිය හෝ අක්‍රිය කිරීමට යෙදුමට අවසර දේ."</string>
-    <string name="permdesc_devicePower" product="tv" msgid="1334908641773273512">"දුරකථනය සක්‍රිය සහ අක්‍රිය කිරීමට යෙදුමට අවසර දෙන්න."</string>
-    <string name="permdesc_devicePower" product="default" msgid="6037057348463131032">"දුරකථනය සක්‍රිය සහ අක්‍රිය කිරීමට යෙදුමට අවසර දෙන්න."</string>
-    <string name="permlab_userActivity" msgid="1677844893921729548">"කල් ඉකුත්වීම දර්ශනය යළි පිහිටුවන්න"</string>
-    <string name="permdesc_userActivity" msgid="651746160252248024">"කල් ඉකුත්වීම දර්ශනය යළි පිහිටුවන්න යෙදුමට ඉඩ දෙන්න."</string>
-    <string name="permlab_factoryTest" msgid="3715225492696416187">"කර්මාන්තශාලා පරීක්ෂණ ආකාරය තුළ ධාවනය කරන්න"</string>
-    <string name="permdesc_factoryTest" product="tablet" msgid="3952059318359653091">"ටැබ්ලටයේ දෘඩාංග වෙත සම්පූර්ණ පිවිසුම සඳහා අවසර දීමෙන් පහළ මට්ටමේ නිපැවුම්කරු පරීක්ෂණයක් ලෙස ධාවනය කරන්න. නිපැවුම්කරු පරීක්ෂණ ආකාරයෙන් ටැබ්ලටයේ ධාවනය වන විට පමණි."</string>
-    <string name="permdesc_factoryTest" product="tv" msgid="2105643629211155695">"අඩු-මට්ටමේ නිෂ්පාදන පරීක්ෂණයක් ලෙස ධාවනය කිරීමෙන්, රූපවාහිනි දෘඨාංග වෙත සම්පුර්ණ ප්‍රවේශය ඉඩ දෙයි. නිෂ්පාදන පරීක්ෂණ ආකාර තුළ රූපවාහිනිය ධාවන වන විට පමණක් තිබේ."</string>
-    <string name="permdesc_factoryTest" product="default" msgid="8136644990319244802">"දුරකථනයේ දෘඩාංග වෙත සම්පූර්ණ පිවිසුම සඳහා අවසර දීමෙන් පහළ මට්ටමේ නිපැවුම්කරු පරීක්ෂණයක් ලෙස ධාවනය කරන්න. නිපැවුම්කරු පරීක්ෂණ ආකාරයෙන් දුරකථනයේ ධාවනය වන විට පමණි."</string>
-    <string name="permlab_setWallpaper" msgid="6627192333373465143">"බිතුපත සැකසීම"</string>
+    <string name="permlab_setWallpaper" msgid="6627192333373465143">"වෝල්පේපරය සැකසීම"</string>
     <string name="permdesc_setWallpaper" msgid="7373447920977624745">"පද්ධති බිතුපත සැකසීමට යෙදුමට අවසර දෙන්න."</string>
     <string name="permlab_setWallpaperHints" msgid="3278608165977736538">"ඔබගේ බිතුපතේ ප්‍රමාණය සැකසීම"</string>
     <string name="permdesc_setWallpaperHints" msgid="8235784384223730091">"පද්ධති බිතුපතේ ප්‍රමාණ ඉඟි සකස් කිරීමට යෙදුමට අවසර දෙන්න."</string>
-    <string name="permlab_masterClear" msgid="2315750423139697397">"කර්මාන්තශාලා සුපුරුද්දට පද්ධතිය නැවත සකස් කිරීම"</string>
-    <string name="permdesc_masterClear" msgid="3665380492633910226">"සියලු දත්ත මැකීමෙන්, වින්‍යාස කිරීමෙන් සහ යෙදුම් ස්ථාපනයෙන් එහි කර්මාන්ත ශාලා සැකසීම් වෙත පද්ධතිය නැවත සැකසීමට යෙදුමට අවසර දෙන්න."</string>
-    <string name="permlab_setTime" msgid="2021614829591775646">"වේලාව සැකසීම"</string>
-    <string name="permdesc_setTime" product="tablet" msgid="1896341438151152881">"ටැබ්ලට ඔරලෝසුවේ වේලාව වෙනස් කිරීමට යෙදුමට ඉඩ දෙන්න."</string>
-    <string name="permdesc_setTime" product="tv" msgid="1826398919861882682">"යෙදුමට රූපවාහිනියේ ඔරලෝසු වේලාව වෙනස් කිරීමට අවසර දෙයි."</string>
-    <string name="permdesc_setTime" product="default" msgid="1855702730738020">"දුරකථන ඔරලෝසුවේ වේලාව වෙනස් කිරීමට යෙදුමකට ඉඩ දෙන්න."</string>
     <string name="permlab_setTimeZone" msgid="2945079801013077340">"වේලා කලාපය සැකසීම"</string>
     <string name="permdesc_setTimeZone" product="tablet" msgid="1676983712315827645">"ටැබ්ලටයේ කාල කලාපය වෙනස් කිරීමට යෙදුමට අවසර දෙන්න."</string>
     <string name="permdesc_setTimeZone" product="tv" msgid="888864653946175955">"උපාංගයේ වේලා කලාපය වෙනස් කිරීමට උපාංගයට අවසර දෙන්න."</string>
     <string name="permdesc_setTimeZone" product="default" msgid="4499943488436633398">"දුරකථනයේ වේලා කලාපය වෙනස් කිරීමට උපාංගයට අවසර දෙන්න."</string>
-    <string name="permlab_accountManagerService" msgid="4829262349691386986">"AccountManagerService ලෙස පෙනී සිටින්න"</string>
-    <string name="permdesc_accountManagerService" msgid="1948455552333615954">"AccountAuthenticators වෙත ඇමතුම් ගැනීමට යෙදුමට අවසර දෙන්න."</string>
     <string name="permlab_getAccounts" msgid="1086795467760122114">"උපාංගයේ ඇති ගිණුම් සොයන්න"</string>
     <string name="permdesc_getAccounts" product="tablet" msgid="2741496534769660027">"ටැබ්ලටය විසින් දන්නා ගිණුම් ලැයිස්තුවක් ලබාගැනීමට යෙදුමට අවසර දෙන්න. ඔබ ස්ථාපනය කොට ඇති යෙදුම් විසින් සාදා ඇති ගිණුම් මීට ඇතුළත් වේ."</string>
     <string name="permdesc_getAccounts" product="tv" msgid="4190633395633907543">"රූපවාහිනිය විසින් දන්නා ගිණුම් ලැයිස්තුව ලබාගැනීමට යෙදුමට ඉඩ දෙන්න. ඔබ ස්ථාපනය කළ යෙදුම් මඟින් සාදන ලද ඕනෑම ගිණුමක් මෙහි ඇතුළත් වේ."</string>
     <string name="permdesc_getAccounts" product="default" msgid="3448316822451807382">"දුරකථනය විසින් දන්නා ගිණුම් ලැයිස්තුවක් ලබාගැනීමට යෙදුමට අවසර දෙන්න. ඔබ ස්ථාපනය කොට ඇති යෙදුම් විසින් සාදා ඇති ගිණුම් මීට ඇතුළත් වේ."</string>
-    <string name="permlab_authenticateAccounts" msgid="5265908481172736933">"ගිණුම් සාදන්න සහ මුරපද සකසන්න"</string>
-    <string name="permdesc_authenticateAccounts" msgid="5472124296908977260">"ගිණුම් සැදීමට සහ රහස් පද ලබාගැනීම සහ සැකසීම් කිරීම ඇතුළත්ව AccountManager ගේ ගිණුම් සත්‍යාපන හැකියාවන් භාවිතා කිරීමට යෙදුමකට අවසර දෙන්න."</string>
-    <string name="permlab_manageAccounts" msgid="4983126304757177305">"ගිණුම් එකතු කරන්න හෝ ඉවත් කරන්න"</string>
-    <string name="permdesc_manageAccounts" msgid="8698295625488292506">"ගිණුම් එකතු කිරීම, සහ ඉවත් කිරීම සහ ඔවුන්ගේ මුරපද මැකීම ආදී ක්‍රියාවලි සිදු කිරීමට යෙදුමට අවසර දෙන්න."</string>
-    <string name="permlab_useCredentials" msgid="235481396163877642">"උපාංගයේ ඇති ගිණුම් භාවිතා කිරීම"</string>
-    <string name="permdesc_useCredentials" msgid="7984227147403346422">"සත්‍යාපන ටෝකන ඉල්ලීම සඳහා යෙදුමට අවසර දෙන්න."</string>
     <string name="permlab_accessNetworkState" msgid="4951027964348974773">"ජාල සම්බන්ධතාවයන් බැලීම"</string>
     <string name="permdesc_accessNetworkState" msgid="8318964424675960975">"කුමන ජාල පවතින්නේ ද සහ සම්බන්ධිත ද ආදී ජාල සබඳතා ගැන තොරතුරු බැලීමට යෙදුමට අවසර දෙයි."</string>
     <string name="permlab_createNetworkSockets" msgid="8018758136404323658">"සම්පූර්ණ ජාල ප්‍රවේශය"</string>
     <string name="permdesc_createNetworkSockets" msgid="3403062187779724185">"උපකරණයට ජාල කෙවනියන් සැදීමට සහ ජාල ප්‍රොටෝකෝල අභිරුචි භාවිතා කිරීමට උපකරණයට ඉඩ දෙන්න. අන්තර්ජාලයට දත්ත යැවීමට විධියන් බ්‍රව්සරය සහ අනෙකුත් යෙදුම් සපයයි, එනිසා මෙම අවසරය දත්ත අන්තර්ජාලයට යැවීමට අවශ්‍ය නොවේ."</string>
-    <string name="permlab_writeApnSettings" msgid="505660159675751896">"ජාලයේ සැකසීම් සහ ගමනාගමන වෙනස් කරන්න/අල්ලා ගැනීම"</string>
-    <string name="permdesc_writeApnSettings" msgid="5333798886412714193">"ඕනෑම APN එකක නියුතුව සහ තොට වෙනස් කිරීම වැනි ජාල සැකසීම් වෙනස් කිරීමට සහ සියලුම ජාල අතුරු ඇරීමට සහ සෝදිසි කිරීමට යෙදුමට අවසර දෙන්න. ඇතැම්විට ඔබගේ අනුදැනුමකින් තොරව අනිෂ්ට උපාංග ජාල පැකැට්ටු අධීක්ෂණය,ආපසු දිශාගත කිරීම හෝ වෙනස්කිරීම සිදු කිරීමට ඉඩ තිබේ."</string>
     <string name="permlab_changeNetworkState" msgid="958884291454327309">"ජාල සම්බන්ධතාව වෙනස් කිරීම"</string>
     <string name="permdesc_changeNetworkState" msgid="6789123912476416214">"ජාල සම්බන්ධතාවයේ තත්වය වෙනස් කිරීමට යෙදුමට අවසර දෙන්න."</string>
     <string name="permlab_changeTetherState" msgid="5952584964373017960">"ටෙදර් කරන ලද සම්බන්ධතා වෙනස් කිරීම"</string>
     <string name="permdesc_changeTetherState" msgid="1524441344412319780">"ටෙදර් කළ ජාල සම්බන්ධතාවයේ තත්වය වෙනස් කිරීමට යෙදුමට අවසර දෙන්න."</string>
-    <string name="permlab_changeBackgroundDataSetting" msgid="1400666012671648741">"පසුබිම් දත්ත භාවිත සැකසීම් වෙනස් කිරීම"</string>
-    <string name="permdesc_changeBackgroundDataSetting" msgid="5347729578468744379">"පසුබිම් දත්ත භාවිතා සැකසීම වෙනස් කිරීමට යෙදුමට අවසර දෙන්න."</string>
     <string name="permlab_accessWifiState" msgid="5202012949247040011">"Wi-Fi සම්බන්ධතාවන් බැලීම"</string>
     <string name="permdesc_accessWifiState" msgid="5002798077387803726">"Wi-Fi සබල බව සහ සම්බන්ධිත Wi-Fi උපාංග වල නම් ආදී Wi-Fi ජාලකරණයේ තොරතුරු බැලීමට යෙදුමට අවසර දෙයි."</string>
     <string name="permlab_changeWifiState" msgid="6550641188749128035">"Wi-Fi වලට සම්බන්ධ විම සහ විසන්ධි කිරීම"</string>
@@ -721,24 +400,12 @@
     <string name="permdesc_bluetoothAdmin" product="tablet" msgid="6921177471748882137">"ස්ථානීය බ්ලූටූත් ටැබ්ලට්යක් සැකසීමට සහ වින්‍යාස කිරීමට සහ දුරස්ථ උපාංග සමග යුගළ කිරීමට යෙදුමට අවසර දෙන්න."</string>
     <string name="permdesc_bluetoothAdmin" product="tv" msgid="3373125682645601429">"යෙදුමට පෙදෙසි බ්ලූටූත් රූපවාහිනිය වින්‍යාස කිරීමට සහ, දුරස්ථ උපාංග සෙවීමට හා ඒ සමග යුගල වීමට අවසර දෙයි."</string>
     <string name="permdesc_bluetoothAdmin" product="default" msgid="8931682159331542137">"දුරකථනයේ පෙදෙසි බ්ලූටූත් වින්‍යාස කිරීමට, සහ දුරස්ථ උපාංග ගවේෂණයට සහ යුගල වීමට යෙදුමට අවසර දෙයි."</string>
-    <string name="permlab_bluetoothPriv" msgid="4009494246009513828">"යෙදුම මගින් බ්ලූටූත් යුගල කිරීම ඉඩ දෙන්න"</string>
-    <string name="permdesc_bluetoothPriv" product="tablet" msgid="8045735193417468857">"පරිශීලක අන්තර්ක්‍රියාවෙන් තොරව දුරස්ථ උපාංග සමග යුගල වීමට උපාංගයට ඉඩ දෙයි."</string>
-    <string name="permdesc_bluetoothPriv" product="tv" msgid="8045735193417468857">"පරිශීලක අන්තර්ක්‍රියාවෙන් තොරව දුරස්ථ උපාංග සමග යුගල වීමට උපාංගයට ඉඩ දෙයි."</string>
-    <string name="permdesc_bluetoothPriv" product="default" msgid="8045735193417468857">"පරිශීලක අන්තර්ක්‍රියාවෙන් තොරව දුරස්ථ උපාංග සමග යුගල වීමට උපාංගයට ඉඩ දෙයි."</string>
-    <string name="permlab_bluetoothMap" msgid="6372198338939197349">"බ්ලූටූත් MAP දත්ත ප්‍රවේශ කරන්න"</string>
-    <string name="permdesc_bluetoothMap" product="tablet" msgid="5784090105926959958">"බ්ලූටූත් MAP දත්ත ප්‍රවේශ කිරීමට යෙදුමට ඉඩ දෙන්න."</string>
-    <string name="permdesc_bluetoothMap" product="tv" msgid="5784090105926959958">"බ්ලූටූත් MAP දත්ත ප්‍රවේශ කිරීමට යෙදුමට ඉඩ දෙන්න."</string>
-    <string name="permdesc_bluetoothMap" product="default" msgid="5784090105926959958">"බ්ලූටූත් MAP දත්ත ප්‍රවේශ කිරීමට යෙදුමට ඉඩ දෙන්න."</string>
     <string name="permlab_accessWimaxState" msgid="4195907010610205703">"WiMAX වෙතට සම්බන්ධ කරන්න හෝ විසන්ධි කරන්න"</string>
     <string name="permdesc_accessWimaxState" msgid="6360102877261978887">"WiMAX සබල බව සහ සම්බන්ධිත ඕනෑම WiMAX ජාලයක තොරතුරු නිශ්චය කිරීමට යෙදුමට අවසර දෙයි."</string>
     <string name="permlab_changeWimaxState" msgid="2405042267131496579">"WiMAX තත්වය වෙනස් කරන්න"</string>
     <string name="permdesc_changeWimaxState" product="tablet" msgid="3156456504084201805">"ටැබ්ලටය WiMAX ජාල වෙත සම්බන්ධ කිරීමට සහ විසන්ධි කිරීමට යෙදුමට අවසර දෙන්න."</string>
     <string name="permdesc_changeWimaxState" product="tv" msgid="6022307083934827718">"WiMAX ජාල වෙතින් රූපවාහිනිය සම්බන්ධ කරන්න සහ රූපවාහිනිය විසන්ධි කරන්න යෙදුමට ඉඩ දෙන්න."</string>
     <string name="permdesc_changeWimaxState" product="default" msgid="697025043004923798">"WiMAX ජාලයන්ට දුරකථනය සම්බන්ධ කිරීමට සහ විසන්ධි කිරීමට යෙදුමට අවසර දෙන්න."</string>
-    <string name="permlab_scoreNetworks" msgid="6445777779383587181">"ලකුණු ජාල"</string>
-    <string name="permdesc_scoreNetworks" product="tablet" msgid="1304304745850215556">"ජාල ශ්‍රේණි ගත කිරීමට යෙදුමට ඉඩ දෙන්න සහ ටැබ්ලට් වලට වඩා සුදුසු කුමන ජාල දැයි බලපෑම."</string>
-    <string name="permdesc_scoreNetworks" product="tv" msgid="5444434643862417649">"ජාල ශ්‍රේණි ගත කිරීමට යෙදුමට ඉඩ දෙන්න සහ දුරකථන වලට වඩා සුදුසු කුමන ජාල දැයි බලපෑම."</string>
-    <string name="permdesc_scoreNetworks" product="default" msgid="1831501848178651379">"ජාල ශ්‍රේණි ගත කිරීමට යෙදුමට ඉඩ දෙන්න සහ දුරකථන වලට වඩා සුදුසු කුමන ජාල දැයි බලපෑම."</string>
     <string name="permlab_bluetooth" msgid="6127769336339276828">"බ්ලූටූත් උපාංග සමඟ යුගල කිරීම"</string>
     <string name="permdesc_bluetooth" product="tablet" msgid="3480722181852438628">"ටැබ්ලටයේ බ්ලූටූත් වින්‍යාසය බැලිමට, සැකසීමට සහ යුගල කළ උපාංග සමඟ සම්බන්ධතාවන් පිළිගැනීමට යෙදුමට අවසර දෙන්න."</string>
     <string name="permdesc_bluetooth" product="tv" msgid="3974124940101104206">"යෙදුමට රූපවාහිනියේ බ්ලූටූත් හි වින්‍යාස බැලීමට සහ යුගල කළ උපාංග සමග සම්බන්ධතා පිළිගැනීමට අවසර දෙයි."</string>
@@ -747,20 +414,33 @@
     <string name="permdesc_nfc" msgid="7120611819401789907">"ආසන්න ක්ෂේත්‍ර සන්නිවේදන (NFC) ටැග්, පත්, සහ කියවන්නන් සමඟ සන්නිවේදනය කිරීමට යෙදුමට අවසර දෙන්න."</string>
     <string name="permlab_disableKeyguard" msgid="3598496301486439258">"ඔබගේ තිරයේ අගුල අබල කරන්න"</string>
     <string name="permdesc_disableKeyguard" msgid="6034203065077122992">"යතුරු අගුල සහ ඕනෑම සම්බන්ධිත මුරපද ආරක්ෂාවක් අබල කිරීමට යෙදුමට අවසර දෙන්න. මෙහි උදාහරණයක් වන්නේ පැමිණෙන ඇමතුමක් ලැබෙද්දී, දුරකථනය අක්‍රිය වන අතර ඇමතුම අවසාන වන විට යතුරු අගුල නැවත සක්‍රිය වෙයි."</string>
+    <string name="permlab_manageFingerprint" msgid="5640858826254575638">"ඇඟිලි සලකුණු දෘඩාංග කළමනාකරණය කිරීම."</string>
+    <string name="permdesc_manageFingerprint" msgid="178208705828055464">"ඇඟිලි සලකුණු සැකිලි එකතු කිරීමට සහ ඉවත් කිරීමට අදාළ විධික්‍රම භාවිතය සඳහා මෙම යෙදුමට අවසර දෙයි."</string>
+    <string name="permlab_useFingerprint" msgid="3150478619915124905">"ඇඟිලි සලකුණු දෘඩාංග භාවිතා කරන්න."</string>
+    <string name="permdesc_useFingerprint" msgid="9165097460730684114">"අනන්‍යතාවය තහවුරු කරගැනීමට ඇඟිලි සලකුණු දෘඩාංග භාවිතා කිරීමට මෙම යෙදුමට ඉඩ දෙන්න."</string>
+    <string name="fingerprint_acquired_partial" msgid="735082772341716043">"ඇඟිලි සලකුණ අඩ වශයෙන් අනාවරණය කර ගැනිණි. කරුණාකර නැවත උත්සාහ කරන්න."</string>
+    <string name="fingerprint_acquired_insufficient" msgid="4596546021310923214">"ඇඟිලි සලකුණ පිරිසැකසීමට නොහැකි විය. කරුණාකර නැවත උත්සාහ කරන්න."</string>
+    <string name="fingerprint_acquired_imager_dirty" msgid="1087209702421076105">"ඇඟිලි සලකුණු සංවේදකය අපිරිසිදුයි. කරුණාකර පිරිසිදු කර නැවත උත්සාහ කරන්න."</string>
+    <string name="fingerprint_acquired_too_fast" msgid="6470642383109155969">"ඇඟිල්ල ඉතා වේගයෙන් ගෙන යන ලදී. කරුණාකර නැවත උත්සාහ කරන්න."</string>
+    <string name="fingerprint_acquired_too_slow" msgid="59250885689661653">"ඇඟිල්ල වඩා සෙමෙන් ගෙන යන ලදි. කරුණාකර නැවත උත්සාහ කරන්න."</string>
+  <string-array name="fingerprint_acquired_vendor">
+  </string-array>
+    <string name="fingerprint_error_hw_not_available" msgid="7955921658939936596">"ඇඟිලි සලකුණු දෘඪාංගය ලද නොහැකිය."</string>
+    <string name="fingerprint_error_no_space" msgid="1055819001126053318">"ඇඟිලි සලකුණ ගබඩා කළ නොහැක. දැනට පවතින ඇඟිලි සලකුණක් ඉවත් කරන්න."</string>
+    <string name="fingerprint_error_timeout" msgid="3927186043737732875">"ඇඟිලි සලකුණු කාල නිමාව ළඟා විය. නැවත උත්සාහ කරන්න."</string>
+    <string name="fingerprint_error_canceled" msgid="4402024612660774395">"ඇඟිලි සලකුණු මෙහෙයුම අවලංගු කරන ලදී."</string>
+    <string name="fingerprint_error_lockout" msgid="5536934748136933450">"උත්සාහයන් ඉතා වැඩි ගණනකි. කරුණාකර පසුව නැවත උත්සාහ කරන්න."</string>
+    <string name="fingerprint_error_unable_to_process" msgid="6107816084103552441">"නැවත උත්සාහ කරන්න."</string>
+    <string name="fingerprint_name_template" msgid="5870957565512716938">"ඇඟිලි <xliff:g id="FINGERID">%d</xliff:g>"</string>
+  <string-array name="fingerprint_error_vendor">
+  </string-array>
+    <string name="fingerprint_icon_content_description" msgid="2340202869968465936">"ඇඟිලි සලකුණු නිරූපකය"</string>
     <string name="permlab_readSyncSettings" msgid="6201810008230503052">"සමමුහුර්ත සැකසීම් කියවන්න"</string>
     <string name="permdesc_readSyncSettings" msgid="2706745674569678644">"ගිණුම සඳහා සමමුහුර්ත සැකසීම් කියවීමට යෙදුමට අවසර දෙන්න. උදාහරණයක් ලෙස, ගිණුමක් සමඟ පුද්ගල යෙදුම සමමුහුර්ත දැයි මෙයට හඳුනා ගත හැක."</string>
     <string name="permlab_writeSyncSettings" msgid="5408694875793945314">"සමමුහුර්ත කිරීම සක්‍රිය කරන්න සහ අක්‍රිය කරන්න"</string>
     <string name="permdesc_writeSyncSettings" msgid="8956262591306369868">"ගිණුම සඳහා සමමුහුර්ත සැකසීම් වෙනස් කිරීමට යෙදුමට අවසර දෙන්න. උදාහරණයක් ලෙස, ගිණුම සමඟ පුද්ගල යෙදුම සමමුහුර්ත කිරීම සක්‍රිය කිරීමට භාවිත කල හැක."</string>
     <string name="permlab_readSyncStats" msgid="7396577451360202448">"සමමුහුර්ත කිරීමේ සංඛ්‍යාන කියවීම"</string>
     <string name="permdesc_readSyncStats" msgid="1510143761757606156">"සමමුහුර්ත කිරීමේ සිදුවීම් ඉතිහාසය සහ කෙතරම් දත්ත සමමුහුර්ත වී ඇතිදැයි ඇතුලත් ගිණුම සඳහා සමමුහුර්ත කිරීමේ සංඛ්‍යාන කියවීමට යෙදුමට අවසර දෙන්න."</string>
-    <string name="permlab_subscribedFeedsRead" msgid="4756609637053353318">"දායක වූ සංග්‍රහ කියවීම"</string>
-    <string name="permdesc_subscribedFeedsRead" msgid="5557058907906144505">"වර්තමාන සමමුහුර්ත සංග්‍රහ ගැන විස්තර ලැබීමට යෙදුමට අවසර දෙන්න."</string>
-    <string name="permlab_subscribedFeedsWrite" msgid="9015246325408209296">"දායක වූ සංග්‍රහ ලිවීම"</string>
-    <string name="permdesc_subscribedFeedsWrite" msgid="6928930188826089413">"ඔබගේ වර්තමාන සමමුහුර්ත සංග්‍රහ වෙනස් කිරීමට යෙදුමට අවසර දෙන්න. ඔබගේ සමමුහුර්ත සංග්‍රහ අනිෂ්ට යෙදුම්වලින් වෙනස් කල හැක."</string>
-    <string name="permlab_readDictionary" msgid="4107101525746035718">"ඔබ විසින් ශබ්දකෝෂයට ඇතුළත්කොට ඇති කොන්දේසි කියවීම"</string>
-    <string name="permdesc_readDictionary" msgid="659614600338904243">"පරිශීලක ශබ්ද කෝෂයේ පරිශීලකයන් විසින් ගබඩා කර තිබිය හැකි වචන, නම්, වාක්‍යංශ කියවීමට යෙදුමට අවසර දෙන්න."</string>
-    <string name="permlab_writeDictionary" msgid="2183110402314441106">"පරිශීලකයින් අර්ථ දැක්වූ ශබ්ද කෝෂයට වචන එකතු කිරීම"</string>
-    <string name="permdesc_writeDictionary" msgid="8185385716255065291">"පරිශීලක ශබ්දකෝෂය තුළට අලුත් වචන ලිවීමට යෙදුමට ඉඩ දෙන්න."</string>
     <string name="permlab_sdcardRead" product="nosdcard" msgid="367275095159405468">"ඔබගේ USB ආචයනය හි අන්තර්ගතය කියවන්න"</string>
     <string name="permlab_sdcardRead" product="default" msgid="2188156462934977940">"ඔබගේ SD කාඩ් පතෙහි අන්තර්ගතය කියවන්න"</string>
     <string name="permdesc_sdcardRead" product="nosdcard" msgid="3446988712598386079">"යෙදුමට ඔබගේ USB ආචයනය අන්තර්ගතය කියවීමට අවසර දෙන්න."</string>
@@ -769,14 +449,6 @@
     <string name="permlab_sdcardWrite" product="default" msgid="8805693630050458763">"ඔබගේ SD පතේ අන්තර්ගත වෙනස් කිරීම හෝ මැකීම"</string>
     <string name="permdesc_sdcardWrite" product="nosdcard" msgid="6175406299445710888">"USB ආචයනය වෙත ලිවීමට යෙදුමට අවසර දෙන්න."</string>
     <string name="permdesc_sdcardWrite" product="default" msgid="4337417790936632090">"SD පත වෙත ලිවීමට යෙදුමට අවසර දෙන්න."</string>
-    <string name="permlab_mediaStorageWrite" product="default" msgid="6859839199706879015">"අභ්‍යන්තර මාධ්‍ය ආචයනය අන්තර්ගත වෙනස් කරන්න/ මකන්න"</string>
-    <string name="permdesc_mediaStorageWrite" product="default" msgid="8189160597698529185">"අභ්‍යන්තර මාධ්‍ය ආචයනයේ අන්තර්ගතය වෙනස් කිරීමට උපාංගයට අවසර දෙන්න."</string>
-    <string name="permlab_manageDocs" product="default" msgid="5778318598448849829">"ලේඛන ආචයනය කළමනාකරණය කරන්න"</string>
-    <string name="permdesc_manageDocs" product="default" msgid="8704323176914121484">"ලේඛන ආචයනය කළමනාකරණය කිරීමට යෙදුමට අවසර දෙන්න."</string>
-    <string name="permlab_sdcardAccessAll" msgid="8150613823900460576">"සියලුම පරිශීලකයන්ගේ බාහිර ආචයන වෙත පිවිසෙන්න"</string>
-    <string name="permdesc_sdcardAccessAll" msgid="3215208357415891320">"සියලු පරිශීලකයන් සඳහා බාහිර ආචයනය වෙත පිවිසීමට යෙදුමට අවසර දෙන්න."</string>
-    <string name="permlab_cache_filesystem" msgid="5656487264819669824">"හැඹිලි ගොනු පද්ධතියට ප්‍රවේශ වීම"</string>
-    <string name="permdesc_cache_filesystem" msgid="5578967642265550955">"හැඹිලි ගොනු පද්ධති කියවීමට සහ ලිවීමට යෙදුමට අවසර දෙන්න."</string>
     <string name="permlab_use_sip" msgid="2052499390128979920">"SIP ඇමතුම් සිදුකිරීමට/ලබාගැනීමට"</string>
     <string name="permdesc_use_sip" msgid="2297804849860225257">"SIP ඇමතුම් සිදුකිරීමට සහ ලබාගැනීමට යෙදුමට ඉඩ දෙන්න."</string>
     <string name="permlab_register_sim_subscription" msgid="3166535485877549177">"අලුත් විදුලි සංදේශ SIM සම්බන්ධතාවක් ලියාපදිංචි කරන්න"</string>
@@ -819,30 +491,41 @@
     <string name="permdesc_removeDrmCertificates" msgid="7272999075113400993">"යෙදුමකට DRM  සහතික ඉවත් කිරීමට ඉඩ දේ. සාමාන්‍ය යෙදුම් වලට කිසිදා අවශ්‍ය නොවේ."</string>
     <string name="permlab_bindCarrierMessagingService" msgid="1490229371796969158">"වාහක පණිවිඩ යැවීමේ සේවාවට බදින්න"</string>
     <string name="permdesc_bindCarrierMessagingService" msgid="2762882888502113944">"වාහක සේවාව ඉහල මට්ටමේ අතුරු මුහුණතක් වෙත සම්බන්ධ කිරීමට ධාරකයාට අවසර දෙන්න. සාමාන්‍ය යෙදුම්වලට කිසි විටෙක අවශ්‍ය නොවෙයි."</string>
+    <string name="permlab_bindCarrierServices" msgid="3233108656245526783">"වාහක සේවා වෙත බඳින්න"</string>
+    <string name="permdesc_bindCarrierServices" msgid="1391552602551084192">"වාහක සේවා වෙත සම්බන්ධ කිරීමට ධාරකයාට අවසර දේ. සාමාන්‍ය යෙදුම් සඳහා කිසිදා අවශ්‍ය නොවිය යුතුය."</string>
+    <string name="permlab_access_notification_policy" msgid="4247510821662059671">"බාධා නොකරන්න ප්‍රවේශ වන්න"</string>
+    <string name="permdesc_access_notification_policy" msgid="3296832375218749580">"බාධා නොකරන්න වින්‍යාස කිරීම කියවීමට සහ ලිවීමට යෙදුමට ඉඩ දෙයි."</string>
     <string name="policylab_limitPassword" msgid="4497420728857585791">"මුරපද නීති සකස් කිරීම"</string>
-    <string name="policydesc_limitPassword" msgid="3252114203919510394">"තිරය අගුළු ඇරීමේ මුරපදයට අනුමත අකුරු සහ දිග පාලනය කරන්න."</string>
+    <string name="policydesc_limitPassword" msgid="2502021457917874968">"තිර අගුලු මුරපද සහ PIN තුළ ඉඩ දෙන දිග සහ අනුලකුණු පාලනය කිරීම."</string>
     <string name="policylab_watchLogin" msgid="914130646942199503">"තිරය අගුළු ඇරීමේ උත්සාහයන් නිරීක්ෂණය කරන්න"</string>
     <string name="policydesc_watchLogin" product="tablet" msgid="3215729294215070072">"තිරය අගුළු හැරීමේදී වැරදියට ටයිප් කළ මුරපද ගණන නිරීක්ෂණය කරන්න සහ ටැබ්ලටය අගුළු දමන්න හෝ වැරදි මුරපද බොහෝ ගණනක් ටයිප් කර ඇති නම් ටැබ්ලටයේ සියලු දත්ත මකන්න."</string>
     <string name="policydesc_watchLogin" product="TV" msgid="2707817988309890256">"තීරය අගුළු අරින විට වැරදියට මුරපදය ටයිප් කළ වාර ගණන නිර්ක්ෂණය කරන්න, සහ බොහෝ විටක් වැරදි මුරපද ටයිප් කළේ නම් රුපවාහිනීය අගුළු දමන්න හෝ සියළුම රුපවාහිනී දත්ත මකන්න."</string>
     <string name="policydesc_watchLogin" product="default" msgid="5712323091846761073">"තිරය අගුළු හැරීමේදී වැරදියට ටයිප් කළ මුරපද ගණන නිරීක්ෂණය කරන්න සහ දුරකථනය අගුළු දමන්න හෝ වැරදි මුරපද බොහෝ ගණනක් ටයිප් කර ඇති නම් දුරකථනයේ සියලු දත්ත මකන්න."</string>
-    <string name="policylab_resetPassword" msgid="2620077191242688955">"තිරය අගුළු ඇරීමේ මුරපදය වෙනස් කිරීම"</string>
-    <string name="policydesc_resetPassword" msgid="605963962301904458">"තිරය අගුළු ඇරීමේ මුරපදය වෙනස් කරන්න."</string>
+    <string name="policydesc_watchLogin_secondaryUser" product="tablet" msgid="4280246270601044505">"තිරය අගුලු හරින විට වැරදියට මුරපදය ටයිප් කළ වාර ගණන නිරීක්ෂණය කර, ඉතා වැඩි වාර ගණනක් වැරදි මුරපද ටයිප් කළේ නම් ටැබ්ලටය අගුලු දමන්න නැතහොත් මෙම පරිශීලකයාගේ සියලු දත්ත මකන්න."</string>
+    <string name="policydesc_watchLogin_secondaryUser" product="TV" msgid="3484832653564483250">"තිරය අගුලු හරින විට වැරදියට මුරපදය ටයිප් කළ වාර ගණන නිරීක්ෂණය කර, ඉතා වැඩි වාර ගණනක් වැරදි මුරපද ටයිප් කළේ නම් TV අගුලු දමන්න නැතහොත් මෙම පරිශීලකයාගේ සියලු දත්ත මකන්න."</string>
+    <string name="policydesc_watchLogin_secondaryUser" product="default" msgid="2185480427217127147">"තිරය අගුලු හරින විට වැරදියට මුරපදය ටයිප් කළ වාර ගණන නිරීක්ෂණය කර, ඉතා වැඩි වාර ගණනක් වැරදි මුරපද ටයිප් කළේ නම් දුරකථනය අගුලු දමන්න නැතහොත් මෙම පරිශීලකයාගේ සියලු දත්ත මකන්න."</string>
+    <string name="policylab_resetPassword" msgid="4934707632423915395">"තිර අගුල වෙනස් කරන්න"</string>
+    <string name="policydesc_resetPassword" msgid="1278323891710619128">"තිර අගුල වෙනස් කරන්න."</string>
     <string name="policylab_forceLock" msgid="2274085384704248431">"තිරය අගුළු දැමීම"</string>
     <string name="policydesc_forceLock" msgid="1141797588403827138">"තිරයට අගුළු වැටීම සිදුවන්නේ කෙසේද සහ කවදාද යන්න පාලනය කරන්න."</string>
     <string name="policylab_wipeData" msgid="3910545446758639713">"සියලු දත්ත මකන්න"</string>
     <string name="policydesc_wipeData" product="tablet" msgid="4306184096067756876">"කර්මාන්ත ශාලා දත්ත යළි පිහිටුවීමෙන් පසුව අනතුරු ඇඟවිමකින් තොරවම ටැබ්ලට් දත්ත මකා දමයි."</string>
     <string name="policydesc_wipeData" product="tv" msgid="5816221315214527028">"අනතුරු ඇඟවීමකින් තොරව කර්මාන්ත ශාලා දත්ත නැවත සැකසීමක් කිරීමෙන් රූපවාහිනියේ දත්ත මකා දමයි."</string>
     <string name="policydesc_wipeData" product="default" msgid="5096895604574188391">"කර්මාන්ත ශාලා දත්ත යළි පිහිටුවීමෙන් පසුව අනතුරු ඇඟවිමකින් තොරවම දුරකථන දත්ත මකා දමයි."</string>
+    <string name="policylab_wipeData_secondaryUser" msgid="8362863289455531813">"පරිශීලක දත්ත මකන්න"</string>
+    <string name="policydesc_wipeData_secondaryUser" product="tablet" msgid="6336255514635308054">"අනතුරු ඇඟවීමකින් තොරව මෙම ටැබ්ලටයෙහි මෙම පරිශීලකයාගේ දත්ත මැකීම."</string>
+    <string name="policydesc_wipeData_secondaryUser" product="tv" msgid="2086473496848351810">"අනතුරු ඇඟවීමකින් තොරව මෙම TV හි මෙම පරිශීලකයාගේ දත්ත මැකීම."</string>
+    <string name="policydesc_wipeData_secondaryUser" product="default" msgid="6787904546711590238">"අනතුරු ඇඟවීමකින් තොරව මෙම දුරකථනයෙහි මෙම පරිශීලකයාගේ දත්ත මැකීම."</string>
     <string name="policylab_setGlobalProxy" msgid="2784828293747791446">"උපාංග ගෝලීය නියුතුව සකස් කිරීම"</string>
-    <string name="policydesc_setGlobalProxy" msgid="6387497466660154931">"කොන්දේසි සක්‍රිය විට පොදු නියුතු එකක් භාවිත කරන ලෙස උපාංගය සකසන්න. පළමු උපාංග පරිපාලකයා පමණක් ඵලදායි පොදු නියුතුව සකසයි."</string>
-    <string name="policylab_expirePassword" msgid="885279151847254056">"තිරය අගුළු දැමීමේ මුරපදය කල් ඉකුත්වීම සකසන්න"</string>
-    <string name="policydesc_expirePassword" msgid="1729725226314691591">"තිර-අගුළේ මුරපදය වෙනස්වීම කොපමණ කාල පරාසයකින් සිදුවිය යුතුද යන්න පාලනය කිරීම."</string>
+    <string name="policydesc_setGlobalProxy" msgid="8459859731153370499">"ප්‍රතිපත්තිය සක්‍රිය අතරතුර ගෝලීය ප්‍රොක්සි භාවිත කිරීමට උපාංගය සකසන්න. උපාංග හිමිකරුට පමණක් ගෝලීය ප්‍රොක්සි සැකසිය හැකිය."</string>
+    <string name="policylab_expirePassword" msgid="5610055012328825874">"තිර අගුලු මුරපදය කල් ඉකුත්වීම සකසන්න"</string>
+    <string name="policydesc_expirePassword" msgid="5367525762204416046">"තිර අගුලු මුරපදය, PIN, හෝ රටාව කොපමණ කාල පරාසයකින් වෙනස් කළ යුතුද යන්න වෙනස් කිරීම."</string>
     <string name="policylab_encryptedStorage" msgid="8901326199909132915">"ආචයනයේ සංකේතනය සකස් කිරීම"</string>
     <string name="policydesc_encryptedStorage" msgid="2637732115325316992">"ආචයනය කළ යෙදුම් දත්ත සංකේතනය කිරීමට අවශ්‍යය."</string>
     <string name="policylab_disableCamera" msgid="6395301023152297826">"කැමරා අබල කිරීම"</string>
     <string name="policydesc_disableCamera" msgid="2306349042834754597">"සියලු උපාංග කැමරාවල භාවිතය වලක්වන්න."</string>
-    <string name="policylab_disableKeyguardFeatures" msgid="266329104542638802">"යතුරු ආරක්ෂාවේ විශේෂාංග අබල කරන්න"</string>
-    <string name="policydesc_disableKeyguardFeatures" msgid="3467082272186534614">"යතුරු ආරක්ෂාව හි සමහර විශේෂාංග භාවිතය වළක්වයි."</string>
+    <string name="policylab_disableKeyguardFeatures" msgid="8552277871075367771">"සමහර තිර අගුලු විශේෂාංග අබල කරන්න"</string>
+    <string name="policydesc_disableKeyguardFeatures" msgid="2044755691354158439">"සමහර තිර අගුලු විශේෂාංග භාවිතය වළක්වන්න."</string>
   <string-array name="phoneTypes">
     <item msgid="8901098336658710359">"නිවස"</item>
     <item msgid="869923650527136615">"ජංගම"</item>
@@ -972,7 +655,7 @@
     <string name="lockscreen_instructions_when_pattern_enabled" msgid="46154051614126049">"අගුළු හැරීමට මෙනුව ඔබන්න හෝ හදිසි ඇමතුම ලබාගන්න."</string>
     <string name="lockscreen_instructions_when_pattern_disabled" msgid="686260028797158364">"අගුළු හැරීමට මෙනු ඔබන්න."</string>
     <string name="lockscreen_pattern_instructions" msgid="7478703254964810302">"අගුළු ඇරීමට රටාව අඳින්න"</string>
-    <string name="lockscreen_emergency_call" msgid="5347633784401285225">"හදිසි ඇමතුම්"</string>
+    <string name="lockscreen_emergency_call" msgid="5298642613417801888">"හදිසි"</string>
     <string name="lockscreen_return_to_call" msgid="5244259785500040021">"ඇමතුම වෙත නැවත යන්න"</string>
     <string name="lockscreen_pattern_correct" msgid="9039008650362261237">"නිවැරදියි!"</string>
     <string name="lockscreen_pattern_wrong" msgid="4317955014948108794">"නැවත උත්සාහ කරන්න"</string>
@@ -1028,7 +711,9 @@
     <string name="lockscreen_access_pattern_start" msgid="3941045502933142847">"රටාව අරඹන ලදි"</string>
     <string name="lockscreen_access_pattern_cleared" msgid="5583479721001639579">"රටාව හිස් කරන ලදි"</string>
     <string name="lockscreen_access_pattern_cell_added" msgid="6756031208359292487">"කොටුවක් එකතු කරන ලදි"</string>
+    <string name="lockscreen_access_pattern_cell_added_verbose" msgid="7264580781744026939">"<xliff:g id="CELL_INDEX">%1$s</xliff:g> කොටුව එකතු කරන ලදි"</string>
     <string name="lockscreen_access_pattern_detected" msgid="4988730895554057058">"රටාව සම්පූර්ණයි"</string>
+    <string name="lockscreen_access_pattern_area" msgid="400813207572953209">"රටා ප්‍රදේශය."</string>
     <!-- String.format failed for translation -->
     <!-- no translation found for keyguard_accessibility_widget_changed (5678624624681400191) -->
     <skip />
@@ -1099,24 +784,10 @@
     <string name="permdesc_writeHistoryBookmarks" product="default" msgid="8497389531014185509">"ඔබගේ දුරකථනයේ ආචයනය කරන ලද බ්‍රව්සර ඉතිහාසය හෝ පිටුසන වෙනස් කිරීමට යෙදුමට අවසර දෙන්න. ඔබගේ බ්‍රව්සර දත්ත මැකීමට හෝ වෙනස් කිරීමට අනිෂ්ට යෙදුම් මෙය භාවිත කරයි. සටහන: වෙබ් බ්‍රව්සර අවශ්‍යතාවය සමග තෙවෙනි පාර්ශව බ්‍රව්සර හෝ වෙනත් යෙදුම් විසින් මෙම අවසරය බල ගැන්විය හැක."</string>
     <string name="permlab_setAlarm" msgid="1379294556362091814">"සීනුවක් සැකසීම"</string>
     <string name="permdesc_setAlarm" msgid="316392039157473848">"ස්ථාපනය කරන ලද සීනු ඔරලෝසු යෙදුමේ සීනුව සකස් කරන්නට යෙදුමට ඉඩ දෙන්න. ඇතැම් සීනු ඔරලෝසු යෙදුම් මෙම අංගය ක්‍රියාවට නංවා නොතිබීමට ඉඩ තිබේ."</string>
-    <string name="permlab_writeVoicemail" msgid="7309899891683938100">"හඬ තැපෑල් ලියන්න"</string>
-    <string name="permdesc_writeVoicemail" msgid="6592572839715924830">"ඔබගේ හඬ තැපෑලේ එන ලිපි වෙත එන පණිවිඩ ඉවත් කිරීමට යෙදුමට අවසර දෙන්න."</string>
     <string name="permlab_addVoicemail" msgid="5525660026090959044">"හඬ තැපෑල එක් කිරීම"</string>
     <string name="permdesc_addVoicemail" msgid="6604508651428252437">"ඔබගේ හඬ තැපෑලේ එන ලිපි වෙත එන පණිවිඩ එකතු කිරීමට යෙදුමට අවසර දෙන්න."</string>
-    <string name="permlab_readVoicemail" msgid="8415201752589140137">"හඬ තැපෑල් කියන්න"</string>
-    <string name="permdesc_readVoicemail" msgid="8926534735321616550">"ඔබගේ හඬ තැපැල් කියවීමට යෙදුමට අවසර දේ."</string>
     <string name="permlab_writeGeolocationPermissions" msgid="5962224158955273932">"බ්‍රව්සරයේ භූ අවසර වෙනස් කිරීම"</string>
     <string name="permdesc_writeGeolocationPermissions" msgid="1083743234522638747">"බ්‍රවුසරයේ භූ ස්ථානීය අවසර වෙනස් කිරීමට යෙදුමට අවසර දෙන්න. අභිමත වෙබ් අඩවි වලට ස්ථානීය තොරතුරු යැවීමට අනිෂ්ට යෙදුම් මෙය භාවිතා කෙරේ."</string>
-    <string name="permlab_packageVerificationAgent" msgid="5568139100645829117">"පැකේජ සත්‍යාපනය කරන්න"</string>
-    <string name="permdesc_packageVerificationAgent" msgid="8437590190990843381">"ස්ථාපිත කොට ඇති පැකේජයක් සත්‍යාපනයට යෙදුමට අවසර දෙන්න."</string>
-    <string name="permlab_bindPackageVerifier" msgid="4187786793360326654">"පැකේජ සත්‍යාපකයක් වෙත බඳින්න"</string>
-    <string name="permdesc_bindPackageVerifier" msgid="3180741773233862126">"පැකේජ සත්‍යාපක ඉල්ලීම් වලට දරන්නාට ඉඩ ලබා දේ. සාමාන්‍ය යෙදුම් සඳහා කිසිසේත් අවශ්‍ය නොවේ."</string>
-    <string name="permlab_serialPort" msgid="546083327654631076">"ශ්‍රේණිගත පොට ප්‍රවේශ කිරීම"</string>
-    <string name="permdesc_serialPort" msgid="2991639985224598193">"SerialManager API භාවිතයෙන් අනුක්‍රම තොට වෙත ප්‍රවේශ වීමට රඳවනයට අවසර දෙන්න."</string>
-    <string name="permlab_accessContentProvidersExternally" msgid="5077774297943409285">"බාහිර අන්තර්ගත සැපයුම්කරුවන් වෙත ප්‍රවේශය"</string>
-    <string name="permdesc_accessContentProvidersExternally" msgid="4544346486697853685">"අන්තර්ගත සපයන්නන්ට ප්‍රවේශ වීමට දරන්නන්ට ෂෙල් එකේ සිට ප්‍රවේශ වීමට අවසර දෙන්න. සාමාන්‍ය යෙදුම් සඳහා කිසිසේත් අදාළ නොවේ."</string>
-    <string name="permlab_updateLock" msgid="3527558366616680889">"ස්වයංක්‍රීය උපාංග යවත්කාල කිරීම් පසුබට කරන්න"</string>
-    <string name="permdesc_updateLock" msgid="1655625832166778492">"උපාංගය උත්ශ්‍රේණිකරණයට අන්තර්ක්‍රියාකාරී නොවන යළි ඇරඹීමක් සඳහා සුදුසු වෙලාව කුමක්ද යන්න ගැන පද්ධතියට තොරතුරු ලබාදීමට දරන්නාට අවසර දෙන්න."</string>
     <string name="save_password_message" msgid="767344687139195790">"බ්‍රව්සරයට මෙම මුරපදය මතක තබා ගැනීමට ඔබට අවශ්‍යද?"</string>
     <string name="save_password_notnow" msgid="6389675316706699758">"දැන් නොවේ"</string>
     <string name="save_password_remember" msgid="6491879678996749466">"මතක තබා ගන්න"</string>
@@ -1140,75 +811,12 @@
     <string name="enable_explore_by_touch_warning_message" product="default" msgid="2708199672852373195">"ස්පර්ශය වෙතින් ගවේෂණය සක්‍රිය කිරීමට <xliff:g id="ACCESSIBILITY_SERVICE_NAME">%1$s</xliff:g> ට අවශ්‍යයි. ස්පර්ශය වෙතින් ගවේෂණය සක්‍රිය විට, ඔබගේ ඇඟිලිවලට පහළ විස්තර ඇසිය හෝ බැලිය හැක හෝ දුරකථනය සමග අන්තර් ක්‍රියාකාරී වීමට ඉංගිති සිදු කළ හැක."</string>
     <string name="oneMonthDurationPast" msgid="7396384508953779925">"මාස 1 කට පෙර"</string>
     <string name="beforeOneMonthDurationPast" msgid="909134546836499826">"මාස 1 කට පෙර"</string>
-  <plurals name="num_seconds_ago">
-    <item quantity="one" msgid="4869870056547896011">"තත්පර 1 කට පෙර"</item>
-    <item quantity="other" msgid="3903706804349556379">"තත්පර <xliff:g id="COUNT">%d</xliff:g> ට පෙර"</item>
-  </plurals>
-  <plurals name="num_minutes_ago">
-    <item quantity="one" msgid="3306787433088810191">"මිනිත්තු 1 ට පෙර"</item>
-    <item quantity="other" msgid="2176942008915455116">"මිනිත්තු <xliff:g id="COUNT">%d</xliff:g> කට පෙර"</item>
-  </plurals>
-  <plurals name="num_hours_ago">
-    <item quantity="one" msgid="9150797944610821849">"පැය 1 කට පෙර"</item>
-    <item quantity="other" msgid="2467273239587587569">"පැය <xliff:g id="COUNT">%d</xliff:g> කට පෙර"</item>
-  </plurals>
-  <plurals name="last_num_days">
-    <item quantity="other" msgid="3069992808164318268">"අන්තිම දවස් <xliff:g id="COUNT">%d</xliff:g>"</item>
-  </plurals>
+    <plurals name="last_num_days" formatted="false" msgid="5104533550723932025">
+      <item quantity="one">අවසන් දින <xliff:g id="COUNT_1">%d</xliff:g></item>
+      <item quantity="other">අවසන් දින <xliff:g id="COUNT_1">%d</xliff:g></item>
+    </plurals>
     <string name="last_month" msgid="3959346739979055432">"අවසාන මාසය"</string>
     <string name="older" msgid="5211975022815554840">"පරණ"</string>
-  <plurals name="num_days_ago">
-    <item quantity="one" msgid="861358534398115820">"ඊයේ"</item>
-    <item quantity="other" msgid="2479586466153314633">"දින <xliff:g id="COUNT">%d</xliff:g> කට පෙර"</item>
-  </plurals>
-  <plurals name="in_num_seconds">
-    <item quantity="one" msgid="2729745560954905102">"තත්පර 1 කින්"</item>
-    <item quantity="other" msgid="1241926116443974687">"තත්පර <xliff:g id="COUNT">%d</xliff:g> කදී"</item>
-  </plurals>
-  <plurals name="in_num_minutes">
-    <item quantity="one" msgid="8793095251325200395">"මිනිත්තු 1 කදී"</item>
-    <item quantity="other" msgid="3330713936399448749">"මිනිත්තු <xliff:g id="COUNT">%d</xliff:g> ක් තුළ"</item>
-  </plurals>
-  <plurals name="in_num_hours">
-    <item quantity="one" msgid="7164353342477769999">"පැය 1 ක් තුළ"</item>
-    <item quantity="other" msgid="547290677353727389">"පැය <xliff:g id="COUNT">%d</xliff:g> ක් තුළ"</item>
-  </plurals>
-  <plurals name="in_num_days">
-    <item quantity="one" msgid="5413088743009839518">"හෙට"</item>
-    <item quantity="other" msgid="5109449375100953247">"දින <xliff:g id="COUNT">%d</xliff:g> ක් තුළ"</item>
-  </plurals>
-  <plurals name="abbrev_num_seconds_ago">
-    <item quantity="one" msgid="1849036840200069118">"තත්පර 1 කට පෙර"</item>
-    <item quantity="other" msgid="3699169366650930415">"තත්පර <xliff:g id="COUNT">%d</xliff:g> කට පෙර"</item>
-  </plurals>
-  <plurals name="abbrev_num_minutes_ago">
-    <item quantity="one" msgid="6361490147113871545">"මිනිත්තු 1 කට පෙර"</item>
-    <item quantity="other" msgid="851164968597150710">"මිනිත්තු <xliff:g id="COUNT">%d</xliff:g> ට පෙර"</item>
-  </plurals>
-  <plurals name="abbrev_num_hours_ago">
-    <item quantity="one" msgid="4796212039724722116">"පැය 1 කට පෙර"</item>
-    <item quantity="other" msgid="6889970745748538901">"පැය <xliff:g id="COUNT">%d</xliff:g> ට පෙර"</item>
-  </plurals>
-  <plurals name="abbrev_num_days_ago">
-    <item quantity="one" msgid="8463161711492680309">"ඊයේ"</item>
-    <item quantity="other" msgid="3453342639616481191">"දින <xliff:g id="COUNT">%d</xliff:g> ට පෙර"</item>
-  </plurals>
-  <plurals name="abbrev_in_num_seconds">
-    <item quantity="one" msgid="5842225370795066299">"තත්පර 1 ක් තුළ"</item>
-    <item quantity="other" msgid="5495880108825805108">"තත්පර <xliff:g id="COUNT">%d</xliff:g> ක් තුළ"</item>
-  </plurals>
-  <plurals name="abbrev_in_num_minutes">
-    <item quantity="one" msgid="562786149928284878">"මිනිත්තු 1 ක් තුළ"</item>
-    <item quantity="other" msgid="4216113292706568726">"මිනිත්තු <xliff:g id="COUNT">%d</xliff:g> ක් තුළ"</item>
-  </plurals>
-  <plurals name="abbrev_in_num_hours">
-    <item quantity="one" msgid="3274708118124045246">"පැය 1 ක් තුළ"</item>
-    <item quantity="other" msgid="3705373766798013406">"පැය <xliff:g id="COUNT">%d</xliff:g> ක් තුළ"</item>
-  </plurals>
-  <plurals name="abbrev_in_num_days">
-    <item quantity="one" msgid="2178576254385739855">"හෙට"</item>
-    <item quantity="other" msgid="2973062968038355991">"දින <xliff:g id="COUNT">%d</xliff:g> ක් තුළ"</item>
-  </plurals>
     <string name="preposition_for_date" msgid="9093949757757445117">"<xliff:g id="DATE">%s</xliff:g> වන දා"</string>
     <string name="preposition_for_time" msgid="5506831244263083793">"<xliff:g id="TIME">%s</xliff:g> ට"</string>
     <string name="preposition_for_year" msgid="5040395640711867177">"<xliff:g id="YEAR">%s</xliff:g> තුළ"</string>
@@ -1224,18 +832,18 @@
     <string name="weeks" msgid="6509623834583944518">"සති"</string>
     <string name="year" msgid="4001118221013892076">"අවුරුද්ද"</string>
     <string name="years" msgid="6881577717993213522">"අවුරුදු"</string>
-  <plurals name="duration_seconds">
-    <item quantity="one" msgid="6962015528372969481">"තත්පර 1"</item>
-    <item quantity="other" msgid="1886107766577166786">"තත්පර <xliff:g id="COUNT">%d</xliff:g>"</item>
-  </plurals>
-  <plurals name="duration_minutes">
-    <item quantity="one" msgid="4915414002546085617">"මිනිත්තු 1"</item>
-    <item quantity="other" msgid="3165187169224908775">"මිනිත්තු <xliff:g id="COUNT">%d</xliff:g>"</item>
-  </plurals>
-  <plurals name="duration_hours">
-    <item quantity="one" msgid="8917467491248809972">"පැය 1"</item>
-    <item quantity="other" msgid="3863962854246773930">"පැය <xliff:g id="COUNT">%d</xliff:g> ක්"</item>
-  </plurals>
+    <plurals name="duration_seconds" formatted="false" msgid="4527986939729687805">
+      <item quantity="one">තත්පර <xliff:g id="COUNT">%d</xliff:g> යි</item>
+      <item quantity="other">තත්පර <xliff:g id="COUNT">%d</xliff:g> යි</item>
+    </plurals>
+    <plurals name="duration_minutes" formatted="false" msgid="643786953939956125">
+      <item quantity="one">මිනිත්තු <xliff:g id="COUNT">%d</xliff:g> යි</item>
+      <item quantity="other">මිනිත්තු <xliff:g id="COUNT">%d</xliff:g> යි</item>
+    </plurals>
+    <plurals name="duration_hours" formatted="false" msgid="6826233369186668274">
+      <item quantity="one">පැය <xliff:g id="COUNT">%d</xliff:g></item>
+      <item quantity="other">පැය <xliff:g id="COUNT">%d</xliff:g></item>
+    </plurals>
     <string name="VideoView_error_title" msgid="3534509135438353077">"වීඩියෝ ගැටලුව"</string>
     <string name="VideoView_error_text_invalid_progressive_playback" msgid="3186670335938670444">"මේ වීඩියෝව මෙම උපාංගයට ප්‍රවාහනය සඳහා වලංගු නැත."</string>
     <string name="VideoView_error_text_unknown" msgid="3450439155187810085">"මෙම වීඩියෝව ධාවනය කළ නොහැක."</string>
@@ -1313,6 +921,7 @@
     <string name="android_start_title" msgid="8418054686415318207">"Android ආරම්භ කරමින්…"</string>
     <string name="android_upgrading_fstrim" msgid="8036718871534640010">"ආචයනය ප්‍රශස්තිකරණය කිරීම."</string>
     <string name="android_upgrading_apk" msgid="7904042682111526169">"<xliff:g id="NUMBER_1">%2$d</xliff:g> කින් <xliff:g id="NUMBER_0">%1$d</xliff:g> වැනි යෙදුම ප්‍රශස්ත කරමින්."</string>
+    <string name="android_preparing_apk" msgid="8162599310274079154">"<xliff:g id="APPNAME">%1$s</xliff:g> සූදානම් කරමින්."</string>
     <string name="android_upgrading_starting_apps" msgid="451464516346926713">"යෙදුම් ආරම්භ කරමින්."</string>
     <string name="android_upgrading_complete" msgid="1405954754112999229">"ඇරඹුම අවසාන කරමින්."</string>
     <string name="heavy_weight_notification" msgid="9087063985776626166">"<xliff:g id="APP">%1$s</xliff:g> ධාවනය වෙමින්"</string>
@@ -1323,6 +932,10 @@
     <string name="old_app_description" msgid="2082094275580358049">"නව යෙදුම ආරම්භ නොකරන්න."</string>
     <string name="new_app_action" msgid="5472756926945440706">"<xliff:g id="OLD_APP">%1$s</xliff:g> අරඹන්න"</string>
     <string name="new_app_description" msgid="1932143598371537340">"සුරැකීමකින් තොරව පරණ යෙදුම නවත්වන්න."</string>
+    <string name="dump_heap_notification" msgid="2618183274836056542">"<xliff:g id="PROC">%1$s</xliff:g> මතකයේ සීමාව ඉක්මවා ඇත"</string>
+    <string name="dump_heap_notification_detail" msgid="2075673362317481664">"සංච හැලීම් සම්මුච්චිය වී ඇත; බෙදාගැනීමට ස්පර්ශ කරන්න"</string>
+    <string name="dump_heap_title" msgid="5864292264307651673">"සංච නික්ෂේපය බෙදාගන්න ද?"</string>
+    <string name="dump_heap_text" msgid="4809417337240334941">"<xliff:g id="PROC">%1$s</xliff:g> ක්‍රියාවලිය එහි ක්‍රියාවලියේ <xliff:g id="SIZE">%2$s</xliff:g> මතකය ඉක්මවා ඇත. ඔබට එහි වර්ධකයන් සමග බෙදාගැනීමට සංච නික්ෂේපයක් ඇත. ප්‍රවේසම් වන්න: මෙම යෙදුම පිවිසිය හැකි ඔබගේ පෞද්ගලික තොරතුරු මෙම සංච නික්ෂේපයෙහි අඩංගු වී තිබිය හැකිය."</string>
     <string name="sendText" msgid="5209874571959469142">"පෙළ සඳහා ක්‍රියාව තෝරන්න"</string>
     <string name="volume_ringtone" msgid="6885421406845734650">"හඬ නඟනයේ ශබ්දය"</string>
     <string name="volume_music" msgid="5421651157138628171">"මාධ්‍ය ශබ්දය"</string>
@@ -1343,20 +956,25 @@
     <string name="ringtone_silent" msgid="7937634392408977062">"කිසිවක් නැත"</string>
     <string name="ringtone_picker_title" msgid="3515143939175119094">"රිගින්ටෝන"</string>
     <string name="ringtone_unknown" msgid="5477919988701784788">"නොදන්නා රින්ටෝනය"</string>
-  <plurals name="wifi_available">
-    <item quantity="one" msgid="6654123987418168693">"Wi-Fi ජාලයක් තිබේ"</item>
-    <item quantity="other" msgid="4192424489168397386">"Wi-Fi ජාල ඇත"</item>
-  </plurals>
-  <plurals name="wifi_available_detailed">
-    <item quantity="one" msgid="1634101450343277345">"විවෘත Wi-Fi ජාලය ලබාගත හැක"</item>
-    <item quantity="other" msgid="7915895323644292768">"විවෘත Wi-Fi ජාල තිබේ"</item>
-  </plurals>
-    <string name="wifi_available_sign_in" msgid="4029489716605255386">"Wi-Fi ජලයට පුරනය වන්න"</string>
-    <string name="network_available_sign_in" msgid="8495155593358054676">"ජාලයට පුරනය වන්න"</string>
+    <plurals name="wifi_available" formatted="false" msgid="7900333017752027322">
+      <item quantity="one">Wi-Fi ජාල තිබේ</item>
+      <item quantity="other">Wi-Fi ජාල තිබේ</item>
+    </plurals>
+    <plurals name="wifi_available_detailed" formatted="false" msgid="1140699367193975606">
+      <item quantity="one">විවෘත Wi-Fi ජාල තිබේ</item>
+      <item quantity="other">විවෘත Wi-Fi ජාල තිබේ</item>
+    </plurals>
+    <string name="wifi_available_sign_in" msgid="9157196203958866662">"Wi-Fi ජාලයට පුරනය වන්න"</string>
+    <string name="network_available_sign_in" msgid="1848877297365446605">"ජාලයට පුරනය වන්න"</string>
     <!-- no translation found for network_available_sign_in_detailed (8000081941447976118) -->
     <skip />
+    <string name="wifi_no_internet" msgid="8451173622563841546">"Wi-Fi හට අන්තර්ජාල ප්‍රවේශය නැත"</string>
+    <string name="wifi_no_internet_detailed" msgid="7593858887662270131">"විකල්ප සඳහා ස්පර්ශ කරන්න"</string>
     <string name="wifi_watchdog_network_disabled" msgid="7904214231651546347">"Wi-Fi වෙත සම්බන්ධ විය නොහැක"</string>
     <string name="wifi_watchdog_network_disabled_detailed" msgid="5548780776418332675">" දුබල අන්තර්ජාල සම්බන්ධතාවයක් ඇත."</string>
+    <string name="wifi_connect_alert_title" msgid="8455846016001810172">"සම්බන්ධතාවයට ඉඩ දෙන්නද?"</string>
+    <string name="wifi_connect_alert_message" msgid="6451273376815958922">"යෙදුම් %1$s ක් WiFi ජාලය %2$s වෙත සම්බන්ධ කිරීමට කැමතියි"</string>
+    <string name="wifi_connect_default_application" msgid="7143109390475484319">"යෙදුම"</string>
     <string name="wifi_p2p_dialog_title" msgid="97611782659324517">"ඍජු Wi-Fi"</string>
     <string name="wifi_p2p_turnon_message" msgid="2909250942299627244">"ඍජු Wi-Fi ආරම්භ කරන්න. මෙය Wi-Fi සේවාදායක/හොට්ස්පොට් එක අක්‍රිය කරනු ඇත."</string>
     <string name="wifi_p2p_failed_message" msgid="3763669677935623084">"ඍජු Wi-Fi ආරම්භ කළ නොහැක."</string>
@@ -1421,16 +1039,12 @@
     <string name="dlg_confirm_kill_storage_users_text" msgid="5100428757107469454">"ඔබ USB ආචයනය සක්‍රිය නම්, ඔබ භාවිතා කරන සමහර යෙදුම් නැවතීම සහ ඔබ USB ආචයනය අක්‍රිය කරන තුරු නොතිබේවී."</string>
     <string name="dlg_error_title" msgid="7323658469626514207">"USB ක්‍රියාවලිය අසාර්ථකයි"</string>
     <string name="dlg_ok" msgid="7376953167039865701">"හරි"</string>
-    <string name="usb_mtp_notification_title" msgid="3699913097391550394">"මාධ්‍ය උපාංගයක් ලෙස සම්බන්ධිතයි"</string>
-    <string name="usb_ptp_notification_title" msgid="1960817192216064833">"කැමරාවක් ලෙස සම්බන්ධ කර ඇත"</string>
-    <string name="usb_cd_installer_notification_title" msgid="6774712827892090754">"ස්ථාපිතයක් ලෙස සම්බන්ධයි"</string>
+    <string name="usb_charging_notification_title" msgid="4004114449249406402">"ආරෝපණය කිරීම සඳහා USB"</string>
+    <string name="usb_mtp_notification_title" msgid="8396264943589760855">"ගොනු හුවමාරුව සඳහා USB"</string>
+    <string name="usb_ptp_notification_title" msgid="1347328437083192112">"ඡායාරූප හුවමාරුව සඳහා USB"</string>
+    <string name="usb_midi_notification_title" msgid="4850904915889144654">"MIDI සඳහා USB"</string>
     <string name="usb_accessory_notification_title" msgid="7848236974087653666">"USB මෙවලමකට සම්බන්ධිතයි"</string>
-    <string name="usb_notification_message" msgid="2290859399983720271">"අනෙක් USB විකල්පය සඳහා ස්පර්ශ කරන්න."</string>
-    <string name="extmedia_format_title" product="nosdcard" msgid="9020092196061007262">"USB ආචයනය ෆෝමැට් කරන්නද?"</string>
-    <string name="extmedia_format_title" product="default" msgid="3648415921526526069">"SD පත ෆෝමැට් කරන්නද?"</string>
-    <string name="extmedia_format_message" product="nosdcard" msgid="3934016853425761078">"ඔබගේ USB ආචයනයේ ඇති සියලුම ගොනු මැකී යනු ඇත. මෙම ක්‍රියාව ආපසු හැරවිය නොහැක!"</string>
-    <string name="extmedia_format_message" product="default" msgid="14131895027543830">"ඔබගේ පතේ සියලු දත්ත නැති වනු ඇත."</string>
-    <string name="extmedia_format_button_format" msgid="4131064560127478695">"ෆෝමැට්"</string>
+    <string name="usb_notification_message" msgid="7347368030849048437">"වඩා වැඩි විකල්ප සඳහා ස්පර්ශ කරන්න."</string>
     <string name="adb_active_notification_title" msgid="6729044778949189918">"USB නිදොස්කරණය සම්බන්ධිතයි"</string>
     <string name="adb_active_notification_message" msgid="1016654627626476142">"USB නිදොස්කරණය අබල කිරීමට ස්පර්ශ කරන්න."</string>
     <string name="select_input_method" msgid="8547250819326693584">"යතුරු පුවරු වෙනස් කිරීම"</string>
@@ -1442,54 +1056,49 @@
     <string name="fast_scroll_alphabet" msgid="5433275485499039199">" ABCDEFGHIJKLMNOPQRSTUVWXYZ"</string>
     <string name="fast_scroll_numeric_alphabet" msgid="4030170524595123610">" 0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZ"</string>
     <string name="candidates_style" msgid="4333913089637062257"><u>"අපේක්ෂකයන්"</u></string>
-    <string name="ext_media_checking_notification_title" product="nosdcard" msgid="3449816005351468560">"USB ආචයනය සකසමින්"</string>
-    <string name="ext_media_checking_notification_title" product="default" msgid="5457603418970994050">"SD පත සුදානම් කරමින්"</string>
-    <string name="ext_media_checking_notification_message" msgid="8287319882926737053">"වැරදි සඳහා පරීක්ෂා කරමින්."</string>
-    <string name="ext_media_nofs_notification_title" product="nosdcard" msgid="7788040745686229307">"හිස් USB ආචයනය"</string>
-    <string name="ext_media_nofs_notification_title" product="default" msgid="780477838241212997">"හිස් SD පත"</string>
-    <string name="ext_media_nofs_notification_message" product="nosdcard" msgid="7840121067427269500">"SD පත හිස් හෝ සහාය නොදක්වන ගොනු පද්ධතියක් ඇත."</string>
-    <string name="ext_media_nofs_notification_message" product="default" msgid="8641065641786923604">"SD පත හිස් හෝ සහය නොදක්වන ගොනු පද්ධතියක් ඇත"</string>
-    <string name="ext_media_unmountable_notification_title" product="nosdcard" msgid="2090046769532713563">"හානි වූ USB ආචයනය"</string>
-    <string name="ext_media_unmountable_notification_title" product="default" msgid="6410723906019100189">"හානි වූ SD පත"</string>
-    <string name="ext_media_unmountable_notification_message" product="nosdcard" msgid="1795917578395333280">"USB ආචයනයට හානි වී ඇත. එය නැවත ෆෝමැට් ගැන්වීමට උත්සහ කරන්න."</string>
-    <string name="ext_media_unmountable_notification_message" product="default" msgid="1753898567525568253">"SD පතට හානි වී ඇත. එය නැවත ෆෝමැට් ගැන්වීමට උත්සහ කරන්න."</string>
-    <string name="ext_media_badremoval_notification_title" product="nosdcard" msgid="1661683031330951073">"බලාපොරොත්තු නොවූ ලෙස USB ආචයනය ඉවත් කෙරිණි"</string>
-    <string name="ext_media_badremoval_notification_title" product="default" msgid="6872152882604407837">"SD පත බලාපොරොත්තු රහිතව ඉවත් කරන ලදි"</string>
-    <string name="ext_media_badremoval_notification_message" product="nosdcard" msgid="4329848819865594241">"දත්ත නැතිවීම වැළක්වීමට USB ආචයනය ඉවත්කිරීමට පෙර ගලවන්න."</string>
-    <string name="ext_media_badremoval_notification_message" product="default" msgid="7260183293747448241">"දත්ත නැතිවීම වැළක්වීමට ගැලවීමට කලින් SD පත ඉවත් කරන්න."</string>
-    <string name="ext_media_safe_unmount_notification_title" product="nosdcard" msgid="3967973893270360230">"ඉවත් කිරීමට USB ආචයනය ආරක්ෂිතයි"</string>
-    <string name="ext_media_safe_unmount_notification_title" product="default" msgid="6729801130790616200">"SD පත ඉවත් කිරීමට සුරක්ෂිතයි"</string>
-    <string name="ext_media_safe_unmount_notification_message" product="nosdcard" msgid="6142195361606493530">"ඔබට USB ආචයනය ආරක්ෂිතව ඉවත් කිරීමට පුළුවනි."</string>
-    <string name="ext_media_safe_unmount_notification_message" product="default" msgid="568841278138377604">"ඔබට ආරක්ෂිතව SD පත ඉවත් කළ හැක"</string>
-    <string name="ext_media_nomedia_notification_title" product="nosdcard" msgid="4486377230140227651">"USB ආචයනය ඉවත් කරන ලදි"</string>
-    <string name="ext_media_nomedia_notification_title" product="default" msgid="8902518030404381318">"SD පත ඉවත් කර ඇත"</string>
-    <string name="ext_media_nomedia_notification_message" product="nosdcard" msgid="6921126162580574143">"USB ආචයනය ඉවත්කොට ඇත. අලුත් මාධ්‍යයක් ඇතුළත් කරන්න."</string>
-    <string name="ext_media_nomedia_notification_message" product="default" msgid="3870120652983659641">"SD පත ඉවත් කරන ලදි. අලුත් එකක් ඇතුළත් කරන්න."</string>
+    <string name="ext_media_checking_notification_title" msgid="5734005953288045806">"<xliff:g id="NAME">%s</xliff:g> සූදානම් කරමින්"</string>
+    <string name="ext_media_checking_notification_message" msgid="4747432538578886744">"වැරදි සඳහා පරීක්ෂා කරමින්"</string>
+    <string name="ext_media_new_notification_message" msgid="7589986898808506239">"නව <xliff:g id="NAME">%s</xliff:g> අනාවරණය කරන ලදි"</string>
+    <string name="ext_media_ready_notification_message" msgid="4083398150380114462">"ඡායාරූප සහ මාධ්‍ය හුවමාරු කිරීම සඳහා"</string>
+    <string name="ext_media_unmountable_notification_title" msgid="8295123366236989588">"දූෂිත <xliff:g id="NAME">%s</xliff:g>"</string>
+    <string name="ext_media_unmountable_notification_message" msgid="1586311304430052169">"<xliff:g id="NAME">%s</xliff:g> දූෂිතයි. නිවැරදි කිරීමට ස්පර්ශ කරන්න."</string>
+    <string name="ext_media_unsupported_notification_title" msgid="3797642322958803257">"සහාය නොදක්වන <xliff:g id="NAME">%s</xliff:g>"</string>
+    <string name="ext_media_unsupported_notification_message" msgid="8789610369456474891">"මෙම උපාංගය මෙම <xliff:g id="NAME">%s</xliff:g> සඳහා සහාය නොදක්වයි. සහාය දක්වන ආකෘතියකින් පිහිටුවීමට ස්පර්ශ කරන්න."</string>
+    <string name="ext_media_badremoval_notification_title" msgid="3206248947375505416">"<xliff:g id="NAME">%s</xliff:g> අනපේක්ෂිතව ඉවත් කරන ලදි"</string>
+    <string name="ext_media_badremoval_notification_message" msgid="380176703346946313">"දත්ත නැතිවීම වැළක්වීමට <xliff:g id="NAME">%s</xliff:g> ආචයනය ඉවත්කිරීමට පෙර ගලවන්න."</string>
+    <string name="ext_media_nomedia_notification_title" msgid="1704840188641749091">"<xliff:g id="NAME">%s</xliff:g> ඉවත් කරන ලදි"</string>
+    <string name="ext_media_nomedia_notification_message" msgid="6471542972147056586">"<xliff:g id="NAME">%s</xliff:g> ඉවත් කරන ලදි; අලුත් එකක් ඇතුළත් කරන්න"</string>
+    <string name="ext_media_unmounting_notification_title" msgid="640674168454809372">"<xliff:g id="NAME">%s</xliff:g> තවමත් ගලවමින්…"</string>
+    <string name="ext_media_unmounting_notification_message" msgid="4182843895023357756">"ඉවත් නොකරන්න"</string>
+    <string name="ext_media_init_action" msgid="7952885510091978278">"පිහිටුවන්න"</string>
+    <string name="ext_media_unmount_action" msgid="1121883233103278199">"ගැලවීම"</string>
+    <string name="ext_media_browse_action" msgid="8322172381028546087">"ගවේෂණය කරන්න"</string>
+    <string name="ext_media_missing_title" msgid="620980315821543904">"<xliff:g id="NAME">%s</xliff:g> අස්ථානගතයි"</string>
+    <string name="ext_media_missing_message" msgid="5761133583368750174">"මෙම උපාංගය යළි ඇතුළු කරන්න"</string>
+    <string name="ext_media_move_specific_title" msgid="1471100343872375842">"<xliff:g id="NAME">%s</xliff:g> ගෙන යමින්"</string>
+    <string name="ext_media_move_title" msgid="1022809140035962662">"දත්ත ගෙන යමින්"</string>
+    <string name="ext_media_move_success_title" msgid="8575300932957954671">"ගෙන යාම සම්පූර්ණ කරන්න"</string>
+    <string name="ext_media_move_success_message" msgid="4199002148206265426">"දත්ත <xliff:g id="NAME">%s</xliff:g> වෙත ගෙන යන ලදී"</string>
+    <string name="ext_media_move_failure_title" msgid="7613189040358789908">"දත්ත ගෙන යාමට නොහැකි විය"</string>
+    <string name="ext_media_move_failure_message" msgid="1978096440816403360">"මුල් ස්ථානයෙහි ඉතිරි දත්ත"</string>
+    <string name="ext_media_status_removed" msgid="6576172423185918739">"ඉවත් කරන ලදී"</string>
+    <string name="ext_media_status_unmounted" msgid="2551560878416417752">"ඉවත් කරන ලදී"</string>
+    <string name="ext_media_status_checking" msgid="6193921557423194949">"පරික්ෂා කරමින්..."</string>
+    <string name="ext_media_status_mounted" msgid="7253821726503179202">"සූදානම්"</string>
+    <string name="ext_media_status_mounted_ro" msgid="8020978752406021015">"කියවීමට-පමණි"</string>
+    <string name="ext_media_status_bad_removal" msgid="8395398567890329422">"අනාරක්ෂිතව ඉවත් කරන ලදී"</string>
+    <string name="ext_media_status_unmountable" msgid="805594039236667894">"දූෂිතයි"</string>
+    <string name="ext_media_status_unsupported" msgid="4691436711745681828">"සහාය නොදක්වන"</string>
+    <string name="ext_media_status_ejecting" msgid="5463887263101234174">"ඉවතට ගනිමින්..."</string>
+    <string name="ext_media_status_formatting" msgid="1085079556538644861">"ෆෝමැට් කරමින්…"</string>
+    <string name="ext_media_status_missing" msgid="5638633895221670766">"ඇතුළු කර නැත"</string>
     <string name="activity_list_empty" msgid="1675388330786841066">"ගැලපෙන ක්‍රියාකාරකම් හමු නොවුණි."</string>
-    <string name="permlab_pkgUsageStats" msgid="8787352074326748892">"සංරචකය භාවිත කිරීමේ සංඛ්‍යාන යාවත්කාලීන කරන්න"</string>
-    <string name="permdesc_pkgUsageStats" msgid="1106612424254277630">"එකතු කරන ලද සංරචකය භාවිතා සංඛ්‍යාන වෙනස් කිරීමට යෙදුමට අවසර දෙන්න. සාමාන්‍ය යෙදුම් සඳහා නොවේ."</string>
-    <string name="permlab_copyProtectedData" msgid="4341036311211406692">"අන්තර්ගතය පිටපත් කරන්න"</string>
-    <string name="permdesc_copyProtectedData" msgid="4390697124288317831">"අන්තර්ගතය පිටපත් කිරීමට සුපුරුදු අන්තර්ගත සේවාව ඉල්වා සිටීමට යෙදුමට අවසර දෙන්න. සාමාන්‍ය යෙදුම්වල භාවිතය සඳහා නොවේ."</string>
     <string name="permlab_route_media_output" msgid="1642024455750414694">"මාධ්‍ය ප්‍රතිදානයේ මාර්ගගත කිරීම"</string>
     <string name="permdesc_route_media_output" msgid="4932818749547244346">"වෙනත් බාහිර උපාංග වෙත මාධ්‍ය ප්‍රතිදානය යැවීමට යෙදුමට අවසර දෙන්න."</string>
-    <string name="permlab_access_keyguard_secure_storage" msgid="7565552237977815047">"යතුරු පාලක ආරක්‍ෂිත ආචයනය වෙත ප්‍රවේශය"</string>
-    <string name="permdesc_access_keyguard_secure_storage" msgid="5866245484303285762">"යතුරු ආරක්ෂක ආචයනයට ප්‍රවේශ වීමට යෙදුමට දෙයි."</string>
-    <string name="permlab_control_keyguard" msgid="172195184207828387">"පෙන්වීමේ හා සැඟවීමේ යතුරු ආරක්ෂකය පාලනය කරන්න"</string>
-    <string name="permdesc_control_keyguard" msgid="3043732290518629061">"යතුරු ආරක්ෂකය පාලනයට යෙදුමකට අවසර දෙන්න."</string>
-    <string name="permlab_trust_listener" msgid="1765718054003704476">"විශ්වාසනීය තත්වයේ වෙනස්කම් වලට ඇහුම්කන් දීම."</string>
-    <string name="permdesc_trust_listener" msgid="8233895334214716864">"යෙදුමකට විශ්වාසනීය තත්වයේ වෙනස්කම් වලට ඇහුම්කන් දීමට අවසර දේ."</string>
-    <string name="permlab_provide_trust_agent" msgid="5465587586091358316">"විශ්වාසවන්ත නියෝජිතයෙක් සපයන්න."</string>
-    <string name="permdesc_provide_trust_agent" msgid="3865702641053068148">"විශ්වාසවන්ත නියෝජිතයෙක් සැපයීමට අවසර දෙන්න."</string>
-    <string name="permlab_launch_trust_agent_settings" msgid="5859430082240410200">"විශ්වාසනීය නියෝජිතයාගේ සැකසීම් මෙනුව දියත් කරන්න."</string>
-    <string name="permdesc_launch_trust_agent_settings" msgid="8185142708644913381">"විශ්වාසනීය නියෝජිතයාගේ හැසිරීම වෙනස් කරන ක්‍රියාකරමක් දියත් කිරීමට යෙදුමට ඉඩ දෙන්න."</string>
-    <string name="permlab_bind_trust_agent_service" msgid="8242093169457695334">"විශ්වාසවන්ත නියෝජිත සේවාවකට බැඳීම"</string>
-    <string name="permdesc_bind_trust_agent_service" msgid="7041930026024507515">"යෙදුමකට විශ්වාසනීය ඒජන්ත සේවාවකට බැඳීමට අවසර දේ."</string>
-    <string name="permlab_recovery" msgid="3157024487744125846">"ප්‍රතිසාධන පද්ධතිය සහ යාවත්කාලීන සමඟ කටයුතු කරන්න"</string>
-    <string name="permdesc_recovery" msgid="8511774533266359571">"යෙදුමකට ප්‍රතිසාධන පද්ධතිය සහ පද්ධති යාවත්කාලීන සමඟ කටයුතු කිරීමට ඉඩ දෙන්න."</string>
-    <string name="permlab_manageMediaProjection" msgid="1120495449419929218">"මාධ්‍ය ප්‍රක්ෂේපන සැසියන් කළමනාකරණය කරන්න"</string>
-    <string name="permdesc_manageMediaProjection" msgid="8053759147529492856">"මාධ්‍ය ප්‍රක්ෂේපන සැසියන් කළමනාකරණ යෙදුමට ඉඩ දෙන්න. ශ්‍රව්‍ය අන්තර්ගතයන් සහ දර්ශන ලබා ගැනීමට හැකියාව යෙදුම් වලට මෙම සැසියන් ලබාගත හැක. සමාන්‍ය යෙදුම් සඳහා කවදාවත් අවශ්‍ය නොවේ."</string>
     <string name="permlab_readInstallSessions" msgid="6165432407628065939">"ස්ථාපන සැසියන් කියවන්න"</string>
     <string name="permdesc_readInstallSessions" msgid="2049771699626019849">"ස්ථාපන සැසිය කියවීමට යෙදුමට ඉඩ දෙන්න. සක්‍රිය පැකේජ ස්ථාපනය පිළිබඳ විස්තර බැලීමට එයට මෙයින් ඉඩ දෙයි."</string>
+    <string name="permlab_requestInstallPackages" msgid="1772330282283082214">"ස්ථාපන පැකේජ ඉල්ලීම"</string>
+    <string name="permdesc_requestInstallPackages" msgid="5740101072486783082">"ස්ථාපන පැකේජ ඉල්ලීමට යෙදුමකට අවසර දීම."</string>
     <string name="tutorial_double_tap_to_zoom_message_short" msgid="4070433208160063538">"විශාලන පාලනය සඳහා දෙවරක් ස්පර්ශ කරන්න"</string>
     <string name="gadget_host_error_inflating" msgid="4882004314906466162">"විජටය එකතු කිරීමට නොහැකි විය."</string>
     <string name="ime_action_go" msgid="8320845651737369027">"යන්න"</string>
@@ -1538,24 +1147,13 @@
     <string name="skip_button_label" msgid="1275362299471631819">"මඟ හරින්න"</string>
     <string name="no_matches" msgid="8129421908915840737">"ගැලපීම් නැත"</string>
     <string name="find_on_page" msgid="1946799233822820384">"පිටුවෙහි සෙවීම"</string>
-  <plurals name="matches_found">
-    <item quantity="one" msgid="8167147081136579439">"ගැළපීම් 1 යි"</item>
-    <item quantity="other" msgid="4641872797067609177">"<xliff:g id="TOTAL">%d</xliff:g> කින් <xliff:g id="INDEX">%d</xliff:g>"</item>
-  </plurals>
+    <plurals name="matches_found" formatted="false" msgid="1210884353962081884">
+      <item quantity="one"><xliff:g id="TOTAL">%d</xliff:g> න් <xliff:g id="INDEX">%d</xliff:g> යි</item>
+      <item quantity="other"><xliff:g id="TOTAL">%d</xliff:g> න් <xliff:g id="INDEX">%d</xliff:g> යි</item>
+    </plurals>
     <string name="action_mode_done" msgid="7217581640461922289">"හරි"</string>
-    <string name="progress_unmounting" product="nosdcard" msgid="3923810448507612746">"USB ආචයනය ගැලවීම..."</string>
-    <string name="progress_unmounting" product="default" msgid="1327894998409537190">"SD පත ගලවමින්..."</string>
     <string name="progress_erasing" product="nosdcard" msgid="4521573321524340058">"USB ආචයනය මකමින්..."</string>
     <string name="progress_erasing" product="default" msgid="6596988875507043042">"SD පත මකමින්..."</string>
-    <string name="format_error" product="nosdcard" msgid="6299769563624776948">"USB ආචයනය මැකිය නොහැක."</string>
-    <string name="format_error" product="default" msgid="7315248696644510935">"SD පත මැකීමට නොහැකි විය."</string>
-    <string name="media_bad_removal" msgid="7960864061016603281">"ගැලවීමට පෙර SD පත ඉවත්කර ඇත."</string>
-    <string name="media_checking" product="nosdcard" msgid="418188720009569693">"USB ආචයනය මේ වනවිට පරීක්ෂා කරමින් පවතී."</string>
-    <string name="media_checking" product="default" msgid="7334762503904827481">"SD පත දැන් පරීක්ෂා කරමින් පවතී."</string>
-    <string name="media_removed" msgid="7001526905057952097">"SD පත ඉවත් කර ඇත."</string>
-    <string name="media_shared" product="nosdcard" msgid="5830814349250834225">"පරිගණකයක් විසින් දැන් USB ආචයනය භාවිතා කරයි."</string>
-    <string name="media_shared" product="default" msgid="5706130568133540435">"SD පත දැනට පරිගණකයකින් පාවිච්චි කරයි."</string>
-    <string name="media_unknown_state" msgid="729192782197290385">"බාහිර මාධ්‍යය නොදන්නා අවස්ථාවේ පවතියි."</string>
     <string name="share" msgid="1778686618230011964">"බෙදාගන්න"</string>
     <string name="find" msgid="4808270900322985960">"සොයන්න"</string>
     <string name="websearch" msgid="4337157977400211589">"වෙබ් සෙවුම"</string>
@@ -1590,6 +1188,8 @@
     <string name="date_picker_decrement_day_button" msgid="4131881521818750031">"දවස අඩු කරන්න"</string>
     <string name="date_picker_increment_year_button" msgid="6318697384310808899">"වසර වැඩි කරන්න"</string>
     <string name="date_picker_decrement_year_button" msgid="4482021813491121717">"වසර අඩු කරන්න"</string>
+    <string name="date_picker_prev_month_button" msgid="2858244643992056505">"පෙර මාසය"</string>
+    <string name="date_picker_next_month_button" msgid="5559507736887605055">"ඊළඟ මාසය"</string>
     <string name="keyboardview_keycode_alt" msgid="4856868820040051939">"Alt"</string>
     <string name="keyboardview_keycode_cancel" msgid="1203984017245783244">"අවලංගු කරන්න"</string>
     <string name="keyboardview_keycode_delete" msgid="3337914833206635744">"මකන්න"</string>
@@ -1612,8 +1212,10 @@
     <string name="action_bar_home_subtitle_description_format" msgid="6985546530471780727">"%1$s, %2$s, %3$s"</string>
     <string name="storage_internal" msgid="4891916833657929263">"අභ්‍යන්තර ආචයනය"</string>
     <string name="storage_sd_card" msgid="3282948861378286745">"SD පත"</string>
+    <string name="storage_sd_card_label" msgid="6347111320774379257">"<xliff:g id="MANUFACTURER">%s</xliff:g> SD කාඩ්පත"</string>
+    <string name="storage_usb_drive" msgid="6261899683292244209">"USB ධාවකය"</string>
+    <string name="storage_usb_drive_label" msgid="4501418548927759953">"<xliff:g id="MANUFACTURER">%s</xliff:g> USB ධාවකය"</string>
     <string name="storage_usb" msgid="3017954059538517278">"USB ආචයනය"</string>
-    <string name="extract_edit_menu_button" msgid="8940478730496610137">"සංස්කරණය කරන්න"</string>
     <string name="data_usage_warning_title" msgid="1955638862122232342">"දත්ත භාවිතා අවවාදය"</string>
     <string name="data_usage_warning_body" msgid="2814673551471969954">"භාවිතය සහ සැකසීම් බැලීමට ස්පර්ශ කරන්න."</string>
     <string name="data_usage_3g_limit_title" msgid="4361523876818447683">"2G-3G දත්ත සීමාවට ළඟාවී ඇත"</string>
@@ -1677,7 +1279,6 @@
     <string name="display_manager_overlay_display_name" msgid="5142365982271620716">"උඩැතිරිය #<xliff:g id="ID">%1$d</xliff:g>"</string>
     <string name="display_manager_overlay_display_title" msgid="652124517672257172">"<xliff:g id="NAME">%1$s</xliff:g>: <xliff:g id="WIDTH">%2$d</xliff:g>x<xliff:g id="HEIGHT">%3$d</xliff:g>, <xliff:g id="DPI">%4$d</xliff:g> dpi"</string>
     <string name="display_manager_overlay_display_secure_suffix" msgid="6022119702628572080">", ආරක්‍ෂිත"</string>
-    <string name="kg_emergency_call_label" msgid="684946192523830531">"හදිසි ඇමතුම"</string>
     <string name="kg_forgot_pattern_button_text" msgid="8852021467868220608">"රටාව අමතකයි"</string>
     <string name="kg_wrong_pattern" msgid="1850806070801358830">"වැරදි රටාවකි"</string>
     <string name="kg_wrong_password" msgid="2333281762128113157">"වැරදි මුරපදය"</string>
@@ -1827,56 +1428,77 @@
     <string name="restr_pin_create_pin" msgid="8017600000263450337">"සිමා වැඩිදියුණු කිරීමට PIN සාදන්න"</string>
     <string name="restr_pin_error_doesnt_match" msgid="2224214190906994548">"PIN නොගැළපෙයි. නැවත උත්සහ කරන්න."</string>
     <string name="restr_pin_error_too_short" msgid="8173982756265777792">"PIN කුඩා වැඩිය. ඉලක්කම් 4 වත් විය යුතුය."</string>
-  <plurals name="restr_pin_countdown">
-    <item quantity="one" msgid="311050995198548675">"තවත් තත්පර 1 කින් යළි උත්සාහ කරන්න"</item>
-    <item quantity="other" msgid="4730868920742952817">"තත්පර <xliff:g id="COUNT">%d</xliff:g> කින් නැවත උත්සහ කරන්න"</item>
-  </plurals>
+    <plurals name="restr_pin_countdown" formatted="false" msgid="9061246974881224688">
+      <item quantity="one">තත්පර <xliff:g id="COUNT">%d</xliff:g> කින් නැවත උත්සාහ කරන්න</item>
+      <item quantity="other">තත්පර <xliff:g id="COUNT">%d</xliff:g> කින් නැවත උත්සාහ කරන්න</item>
+    </plurals>
     <string name="restr_pin_try_later" msgid="973144472490532377">"පසුව නැවත උත්සාහ කරන්න"</string>
-    <string name="immersive_mode_confirmation" msgid="7227416894979047467">"උඩ සිට පහළට ස්වයිප් කර පූර්ණ තිරයෙන් ඉවත්වන්න."</string>
+    <string name="immersive_cling_title" msgid="8394201622932303336">"මුළු තිරය බලමින්"</string>
+    <string name="immersive_cling_description" msgid="3482371193207536040">"ඉවත් වීමට, ඉහළ සිට පහළට ස්වයිප් කරන්න"</string>
+    <string name="immersive_cling_positive" msgid="5016839404568297683">"වැටහුණි"</string>
     <string name="done_label" msgid="2093726099505892398">"අවසන්"</string>
     <string name="hour_picker_description" msgid="6698199186859736512">"පැය කවාකාර සර්පනය"</string>
     <string name="minute_picker_description" msgid="8606010966873791190">"මිනිත්තු කවාකාර සර්පනය"</string>
     <string name="select_hours" msgid="6043079511766008245">"පැය තෝරන්න"</string>
     <string name="select_minutes" msgid="3974345615920336087">"මිනිත්තු තෝරන්න"</string>
-    <string name="day_picker_description" msgid="8990847925961297968">"දින ජාලයකින් මාසය"</string>
-    <string name="year_picker_description" msgid="5524331207436052403">"වසර ලැයිස්තුව"</string>
     <string name="select_day" msgid="7774759604701773332">"මාසය සහ දිනය තෝරන්න"</string>
     <string name="select_year" msgid="7952052866994196170">"වසර තෝරන්න"</string>
-    <string name="item_is_selected" msgid="949687401682476608">"<xliff:g id="ITEM">%1$s</xliff:g> තෝරාගෙන ඇත"</string>
     <string name="deleted_key" msgid="7659477886625566590">"<xliff:g id="KEY">%1$s</xliff:g> මකා දමන ලදි"</string>
     <string name="managed_profile_label_badge" msgid="2355652472854327647">"වැඩ <xliff:g id="LABEL">%1$s</xliff:g>"</string>
     <string name="lock_to_app_toast" msgid="7570091317001980053">"මෙම තීරයේ ඇමුණුම ඉවත් කිරීමට, ආපසු සහ දළ විශ්ලේෂණය එකම වේලාවේ ස්පර්ශ කර අල්ලා සිටින්න."</string>
     <string name="lock_to_app_toast_accessible" msgid="8239120109365070664">"මෙම තීරයේ ඇමුණුම ඉවත් කිරීමට, දළ විශ්ලේෂණය ස්පර්ශ කර අල්ලා සිටින්න."</string>
-    <string name="lock_to_app_toast_locked" msgid="8739004135132606329">"තිරය අගුළු දමා ඇත. ඔබගේ සංවිධානය විසින් අගුළු ඇරීමට ඉඩ නොදෙයි."</string>
+    <string name="lock_to_app_toast_locked" msgid="9125176335701699164">"යෙදුම අමුණා ඇත: ගැලවීමට මෙම උපාංගය මත ඉඩ දිය නොහැකිය.‍"</string>
     <string name="lock_to_app_start" msgid="6643342070839862795">"තිරය අගුළු දමා ඇත"</string>
     <string name="lock_to_app_exit" msgid="8598219838213787430">"තිරයේ අගුළු ඇර ඇත"</string>
     <string name="lock_to_app_unlock_pin" msgid="2552556656504331634">"ගැලවීමට පෙර PIN විමසන්න"</string>
     <string name="lock_to_app_unlock_pattern" msgid="4182192144797225137">"ගැලවීමට පෙර අගුළු අරින රටාව සඳහා අසන්න"</string>
     <string name="lock_to_app_unlock_password" msgid="6380979775916974414">"ගැලවීමට පෙර මුරපදය විමසන්න"</string>
+    <string name="package_installed_device_owner" msgid="8420696545959087545">"ඔබගේ පරිපාලක විසින් ස්ථාපනය කරන ලද"</string>
+    <string name="package_updated_device_owner" msgid="8856631322440187071">"ඔබගේ පරිපාලක විසින් යාවත්කාලීන කරන ලදී"</string>
+    <string name="package_deleted_device_owner" msgid="7650577387493101353">"ඔබගේ පරිපාලක විසින් මකන ලද"</string>
     <string name="battery_saver_description" msgid="1960431123816253034">"බැටරි ආයු කාලය වැඩිදියුණු කිරීමට උදවු කිරීමට, බැටරි සුරැකුම ඔබේ උපාංගයේ ක්‍රියාකාරීත්වය අඩුකරන අතර කම්පනය, පිහිටීම් සේවා, සහ බොහෝමයක් පසුබිම් දත්ත සීමා කරයි. ඔබ ඒවා විවෘත නොකරන්නේ නම් මිස ඊමේල්, පණිවිඩකරණය, සහ සමමුහුර්ත කිරීම මත රඳා පවතින වෙනත් යෙදුම් යාවත්කාලීන නොවිය හැකිය.\n\nඔබේ උපාංගය ආරෝපණය වන විට බැටරි සුරැකුම ස්වයංක්‍රියව අක්‍රිය වේ."</string>
-    <string name="downtime_condition_summary" msgid="8761776337475705749">"ඔබගේ බිඳවැටුම් වේලාව <xliff:g id="FORMATTEDTIME">%1$s</xliff:g> දී අවසන්වන තුරු"</string>
-    <string name="downtime_condition_line_one" msgid="8762708714645352010">"ඔබගේ බිදවැටුම් කාලය අවසන් වන තෙක්"</string>
-  <plurals name="zen_mode_duration_minutes_summary">
-    <item quantity="one" msgid="3177683545388923234">"මිනිත්තු එකක් සඳහා (<xliff:g id="FORMATTEDTIME">%2$s</xliff:g> තෙක්)"</item>
-    <item quantity="other" msgid="2787867221129368935">"මිනිත්තු %1$d සඳහා (<xliff:g id="FORMATTEDTIME">%2$s</xliff:g> තෙක්)"</item>
-  </plurals>
-  <plurals name="zen_mode_duration_hours_summary">
-    <item quantity="one" msgid="597194865053253679">"පැය එකක් සඳහා (<xliff:g id="FORMATTEDTIME">%2$s</xliff:g> තෙක්)"</item>
-    <item quantity="other" msgid="2827214920627669898">"පැය %1$d සඳහා (<xliff:g id="FORMATTEDTIME">%2$s</xliff:g> තෙක්)"</item>
-  </plurals>
-  <plurals name="zen_mode_duration_minutes">
-    <item quantity="one" msgid="9040808414992812341">"විනාඩි එකක් සඳහා"</item>
-    <item quantity="other" msgid="6924190729213550991">"විනාඩි %d සඳහා"</item>
-  </plurals>
-  <plurals name="zen_mode_duration_hours">
-    <item quantity="one" msgid="3480040795582254384">"පැයක් සඳහා"</item>
-    <item quantity="other" msgid="5408537517529822157">"පැය %d ක් සඳහා"</item>
-  </plurals>
+    <plurals name="zen_mode_duration_minutes_summary" formatted="false" msgid="4367877408072000848">
+      <item quantity="one">මිනිත්තු %1$d ක් සඳහා (<xliff:g id="FORMATTEDTIME_1">%2$s</xliff:g> තෙක්)</item>
+      <item quantity="other">මිනිත්තු %1$d ක් සඳහා (<xliff:g id="FORMATTEDTIME_1">%2$s</xliff:g> තෙක්)</item>
+    </plurals>
+    <plurals name="zen_mode_duration_minutes_summary_short" formatted="false" msgid="6830154222366042597">
+      <item quantity="one">විනාඩි %1$d ක් සඳහා (<xliff:g id="FORMATTEDTIME_1">%2$s</xliff:g> තෙක්)</item>
+      <item quantity="other">විනාඩි %1$d ක් සඳහා (<xliff:g id="FORMATTEDTIME_1">%2$s</xliff:g> තෙක්)</item>
+    </plurals>
+    <plurals name="zen_mode_duration_hours_summary" formatted="false" msgid="8152974162096743862">
+      <item quantity="one">පැය %1$d ක් සඳහා (<xliff:g id="FORMATTEDTIME_1">%2$s</xliff:g> තෙක්)</item>
+      <item quantity="other">පැය %1$d ක් සඳහා (<xliff:g id="FORMATTEDTIME_1">%2$s</xliff:g> තෙක්)</item>
+    </plurals>
+    <plurals name="zen_mode_duration_hours_summary_short" formatted="false" msgid="4787552595253082371">
+      <item quantity="one">පැය %1$d ක් සඳහා (<xliff:g id="FORMATTEDTIME_1">%2$s</xliff:g> තෙක්)</item>
+      <item quantity="other">පැය %1$d ක් සඳහා (<xliff:g id="FORMATTEDTIME_1">%2$s</xliff:g> තෙක්)</item>
+    </plurals>
+    <plurals name="zen_mode_duration_minutes" formatted="false" msgid="5127407202506485571">
+      <item quantity="one">මිනිත්තු %d ක් සඳහා</item>
+      <item quantity="other">මිනිත්තු %d ක් සඳහා</item>
+    </plurals>
+    <plurals name="zen_mode_duration_minutes_short" formatted="false" msgid="2199350154433426128">
+      <item quantity="one">විනාඩි %d ක් සඳහා</item>
+      <item quantity="other">විනාඩි %d ක් සඳහා</item>
+    </plurals>
+    <plurals name="zen_mode_duration_hours" formatted="false" msgid="3938821308277433854">
+      <item quantity="one">පැය %d ක් සඳහා</item>
+      <item quantity="other">පැය %d ක් සඳහා</item>
+    </plurals>
+    <plurals name="zen_mode_duration_hours_short" formatted="false" msgid="6748277774662434217">
+      <item quantity="one">පැය %d ක් සඳහා</item>
+      <item quantity="other">පැය %d ක් සඳහා</item>
+    </plurals>
     <string name="zen_mode_until" msgid="7336308492289875088">"<xliff:g id="FORMATTEDTIME">%1$s</xliff:g> තෙක්"</string>
-    <string name="zen_mode_forever" msgid="4316804956488785559">"අනියත ආකාරයට"</string>
+    <string name="zen_mode_forever" msgid="7420011936770086993">"ඔබ මෙය අක්‍රිය කරන තුරු"</string>
+    <string name="zen_mode_forever_dnd" msgid="3792132696572189081">"බාධා නොකරන්න ඔබ අක්‍රිය කරන තුරු"</string>
+    <string name="zen_mode_rule_name_combination" msgid="191109939968076477">"<xliff:g id="FIRST">%1$s</xliff:g> / <xliff:g id="REST">%2$s</xliff:g>"</string>
     <string name="toolbar_collapse_description" msgid="2821479483960330739">"හකුළන්න"</string>
-    <string name="zen_mode_next_alarm_summary" msgid="5915140424683747372">"<xliff:g id="FORMATTEDTIME">%1$s</xliff:g> හි ඊළඟ සීනුව තෙක්"</string>
-    <string name="zen_mode_next_alarm_line_one" msgid="5537042951553420916">"ඊළඟ සීනුව තෙක්"</string>
+    <string name="zen_mode_feature_name" msgid="5254089399895895004">"බාධා නොකරන්න"</string>
+    <string name="zen_mode_downtime_feature_name" msgid="2626974636779860146">"බිඳවැටුම් කාලය"</string>
+    <string name="zen_mode_default_weeknights_name" msgid="3081318299464998143">"Weeknight"</string>
+    <string name="zen_mode_default_weekends_name" msgid="2786495801019345244">"සති අන්තය"</string>
+    <string name="zen_mode_default_events_name" msgid="8158334939013085363">"සිදුවීම"</string>
     <string name="muted_by" msgid="6147073845094180001">"<xliff:g id="THIRD_PARTY">%1$s</xliff:g> විසින් නිශ්ශබ්ද කරන ලදි"</string>
     <string name="system_error_wipe_data" msgid="6608165524785354962">"ඔබේ උපාංගය සමගින් ගැටලුවක් ඇති අතර, ඔබේ කර්මාන්තශාලා දත්ත යළි සකසන තෙක් එය අස්ථායි විය හැකිය."</string>
     <string name="system_error_manufacturer" msgid="8086872414744210668">"ඔබේ උපාංගය සමගින් අභ්‍යන්තර ගැටලුවක් ඇත. විස්තර සඳහා ඔබේ නිෂ්පාදක අමතන්න."</string>
@@ -1886,4 +1508,14 @@
     <string name="stk_cc_ss_to_dial" msgid="2151304435775557162">"SS ඉල්ලීම DIAL ඉල්ලීම වෙත විකරණය කරන ලදී."</string>
     <string name="stk_cc_ss_to_ussd" msgid="3951862188105305589">"SS ඉල්ලීම USSD ඉල්ලීම වෙත විකරණය කරන ලදී."</string>
     <string name="stk_cc_ss_to_ss" msgid="5470768854991452695">"SS ඉල්ලීම නව DIAL ඉල්ලීම වෙත විකරණය කරන ලදී."</string>
+    <string name="notification_work_profile_content_description" msgid="4600554564103770764">"කාර්යාල පැතිකඩ"</string>
+    <string name="usb_midi_peripheral_name" msgid="7221113987741003817">"Android USB පර්යන්ත තොට"</string>
+    <string name="usb_midi_peripheral_manufacturer_name" msgid="7176526170008970168">"Android"</string>
+    <string name="usb_midi_peripheral_product_name" msgid="4971827859165280403">"USB පර්යන්ත තොට"</string>
+    <string name="floating_toolbar_open_overflow_description" msgid="4797287862999444631">"තවත් විකල්ප"</string>
+    <string name="floating_toolbar_close_overflow_description" msgid="559796923090723804">"ඉතිරී යාම වසන්න"</string>
+    <plurals name="selected_count" formatted="false" msgid="7187339492915744615">
+      <item quantity="one"><xliff:g id="COUNT_1">%1$d</xliff:g> ක් තෝරන ලදි</item>
+      <item quantity="other"><xliff:g id="COUNT_1">%1$d</xliff:g> ක් තෝරන ලදි</item>
+    </plurals>
 </resources>

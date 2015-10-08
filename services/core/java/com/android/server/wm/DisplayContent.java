@@ -66,6 +66,7 @@ class DisplayContent {
     int mBaseDisplayWidth = 0;
     int mBaseDisplayHeight = 0;
     int mBaseDisplayDensity = 0;
+    boolean mDisplayScalingDisabled;
     private final DisplayInfo mDisplayInfo = new DisplayInfo();
     private final Display mDisplay;
 
@@ -202,7 +203,9 @@ class DisplayContent {
     }
 
     void moveStack(TaskStack stack, boolean toTop) {
-        mStacks.remove(stack);
+        if (!mStacks.remove(stack)) {
+            Slog.wtf(TAG, "moving stack that was not added: " + stack, new Throwable());
+        }
         mStacks.add(toTop ? mStacks.size() : 0, stack);
     }
 
@@ -237,26 +240,29 @@ class DisplayContent {
             final TaskStack stack = win.getStack();
             if (win.isVisibleLw() && stack != null && stack != focusedStack) {
                 mTmpRect.set(win.mVisibleFrame);
+                // If no intersection, we need mTmpRect to be unmodified.
                 mTmpRect.intersect(win.mVisibleInsets);
                 mTouchExcludeRegion.op(mTmpRect, Region.Op.DIFFERENCE);
             }
         }
+        if (mTapDetector != null) {
+            mTapDetector.setTouchExcludeRegion(mTouchExcludeRegion);
+        }
     }
 
-    void switchUserStacks(int newUserId) {
+    void switchUserStacks() {
         final WindowList windows = getWindowList();
         for (int i = 0; i < windows.size(); i++) {
             final WindowState win = windows.get(i);
             if (win.isHiddenFromUserLocked()) {
-                if (DEBUG_VISIBILITY) Slog.w(TAG, "user changing " + newUserId + " hiding "
-                        + win + ", attrs=" + win.mAttrs.type + ", belonging to "
-                        + win.mOwnerUid);
+                if (DEBUG_VISIBILITY) Slog.w(TAG, "user changing, hiding " + win
+                        + ", attrs=" + win.mAttrs.type + ", belonging to " + win.mOwnerUid);
                 win.hideLw(false);
             }
         }
 
         for (int stackNdx = mStacks.size() - 1; stackNdx >= 0; --stackNdx) {
-            mStacks.get(stackNdx).switchUser(newUserId);
+            mStacks.get(stackNdx).switchUser();
         }
     }
 
@@ -327,15 +333,9 @@ class DisplayContent {
                     AppTokenList tokens = task.mAppTokens;
                     for (int tokenNdx = tokens.size() - 1; tokenNdx >= 0; --tokenNdx) {
                         AppWindowToken wtoken = tokens.get(tokenNdx);
-                        if (wtoken.mDeferRemoval) {
-                            stack.mExitingAppTokens.remove(wtoken);
-                            wtoken.mDeferRemoval = false;
-                            mService.removeAppFromTaskLocked(wtoken);
+                        if (wtoken.mIsExiting) {
+                            wtoken.removeAppFromTaskLocked();
                         }
-                    }
-                    if (task.mDeferRemoval) {
-                        task.mDeferRemoval = false;
-                        mService.removeTaskLocked(task);
                     }
                 }
             }
@@ -343,6 +343,12 @@ class DisplayContent {
         if (!animating && mDeferredRemoval) {
             mService.onDisplayRemoved(mDisplayId);
         }
+    }
+
+    static int deltaRotation(int oldRotation, int newRotation) {
+        int delta = newRotation - oldRotation;
+        if (delta < 0) delta += 4;
+        return delta;
     }
 
     public void dump(String prefix, PrintWriter pw) {
@@ -357,6 +363,9 @@ class DisplayContent {
                 pw.print(" base=");
                 pw.print(mBaseDisplayWidth); pw.print("x"); pw.print(mBaseDisplayHeight);
                 pw.print(" "); pw.print(mBaseDisplayDensity); pw.print("dpi");
+            }
+            if (mDisplayScalingDisabled) {
+                pw.println(" noscale");
             }
             pw.print(" cur=");
             pw.print(mDisplayInfo.logicalWidth);
@@ -384,7 +393,7 @@ class DisplayContent {
             ArrayList<Task> tasks = stack.getTasks();
             for (int taskNdx = tasks.size() - 1; taskNdx >= 0; --taskNdx) {
                 final Task task = tasks.get(taskNdx);
-                pw.print("    mTaskId="); pw.println(task.taskId);
+                pw.print("    mTaskId="); pw.println(task.mTaskId);
                 AppTokenList tokens = task.mAppTokens;
                 for (int tokenNdx = tokens.size() - 1; tokenNdx >= 0; --tokenNdx, ++ndx) {
                     final AppWindowToken wtoken = tokens.get(tokenNdx);

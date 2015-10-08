@@ -21,6 +21,7 @@ import android.content.res.Resources;
 import android.graphics.drawable.Drawable;
 import android.os.Parcel;
 import android.os.Parcelable;
+import android.text.TextUtils;
 import android.util.Printer;
 
 import com.android.internal.util.ArrayUtils;
@@ -93,6 +94,23 @@ public class ApplicationInfo extends PackageItemInfo implements Parcelable {
      * <p>If android:allowBackup is set to false, this attribute is ignored.
      */
     public String backupAgentName;
+
+    /**
+     * An optional attribute that indicates the app supports automatic backup of app data.
+     * <p>0 is the default and means the app's entire data folder + managed external storage will
+     * be backed up;
+     * Any negative value indicates the app does not support full-data backup, though it may still
+     * want to participate via the traditional key/value backup API;
+     * A positive number specifies an xml resource in which the application has defined its backup
+     * include/exclude criteria.
+     * <p>If android:allowBackup is set to false, this attribute is ignored.
+     *
+     * @see {@link android.content.Context#getNoBackupFilesDir}
+     * @see {@link #FLAG_ALLOW_BACKUP}
+     *
+     * @hide
+     */
+    public int fullBackupContent = 0;
 
     /**
      * The default extra UI options for activities in this application.
@@ -334,42 +352,31 @@ public class ApplicationInfo extends PackageItemInfo implements Parcelable {
     public static final int FLAG_FULL_BACKUP_ONLY = 1<<26;
 
     /**
-     * Value for {@link #flags}: true if the application is hidden via restrictions and for
-     * most purposes is considered as not installed.
-     * {@hide}
+     * Value for {@link #flags}: {@code true} if the application may use cleartext network traffic
+     * (e.g., HTTP rather than HTTPS; WebSockets rather than WebSockets Secure; XMPP, IMAP, STMP
+     * without STARTTLS or TLS). If {@code false}, the app declares that it does not intend to use
+     * cleartext network traffic, in which case platform components (e.g., HTTP stacks,
+     * {@code DownloadManager}, {@code MediaPlayer}) will refuse app's requests to use cleartext
+     * traffic. Third-party libraries are encouraged to honor this flag as well.
+     *
+     * <p>NOTE: {@code WebView} does not honor this flag.
+     *
+     * <p>This flag comes from
+     * {@link android.R.styleable#AndroidManifestApplication_usesCleartextTraffic
+     * android:usesCleartextTraffic} of the &lt;application&gt; tag.
      */
-    public static final int FLAG_HIDDEN = 1<<27;
+    public static final int FLAG_USES_CLEARTEXT_TRAFFIC = 1<<27;
 
     /**
-     * Value for {@link #flags}: set to <code>true</code> if the application
-     * has reported that it is heavy-weight, and thus can not participate in
-     * the normal application lifecycle.
-     *
-     * <p>Comes from the
-     * android.R.styleable#AndroidManifestApplication_cantSaveState
-     * attribute of the &lt;application&gt; tag.
-     *
-     * {@hide}
+     * When set installer extracts native libs from .apk files.
      */
-    public static final int FLAG_CANT_SAVE_STATE = 1<<28;
+    public static final int FLAG_EXTRACT_NATIVE_LIBS = 1<<28;
 
     /**
-     * Value for {@link #flags}: Set to true if the application has been
-     * installed using the forward lock option.
-     *
-     * NOTE: DO NOT CHANGE THIS VALUE!  It is saved in packages.xml.
-     * 
-     * {@hide}
+     * Value for {@link #flags}: {@code true} when the application's rendering
+     * should be hardware accelerated.
      */
-    public static final int FLAG_FORWARD_LOCK = 1<<29;
-
-    /**
-     * Value for {@link #flags}: set to {@code true} if the application
-     * is permitted to hold privileged permissions.
-     *
-     * {@hide}
-     */
-    public static final int FLAG_PRIVILEGED = 1<<30;
+    public static final int FLAG_HARDWARE_ACCELERATED = 1<<29;
 
     /**
      * Value for {@link #flags}: true if code from this application will need to be
@@ -395,9 +402,67 @@ public class ApplicationInfo extends PackageItemInfo implements Parcelable {
      * {@link #FLAG_SUPPORTS_LARGE_SCREENS}, {@link #FLAG_SUPPORTS_XLARGE_SCREENS},
      * {@link #FLAG_RESIZEABLE_FOR_SCREENS},
      * {@link #FLAG_SUPPORTS_SCREEN_DENSITIES}, {@link #FLAG_VM_SAFE_MODE},
-     * {@link #FLAG_INSTALLED}, {@link #FLAG_IS_GAME}.
+     * {@link #FLAG_ALLOW_BACKUP}, {@link #FLAG_KILL_AFTER_RESTORE},
+     * {@link #FLAG_RESTORE_ANY_VERSION}, {@link #FLAG_EXTERNAL_STORAGE},
+     * {@link #FLAG_LARGE_HEAP}, {@link #FLAG_STOPPED},
+     * {@link #FLAG_SUPPORTS_RTL}, {@link #FLAG_INSTALLED},
+     * {@link #FLAG_IS_DATA_ONLY}, {@link #FLAG_IS_GAME},
+     * {@link #FLAG_FULL_BACKUP_ONLY}, {@link #FLAG_USES_CLEARTEXT_TRAFFIC},
+     * {@link #FLAG_MULTIARCH}.
      */
     public int flags = 0;
+
+    /**
+     * Value for {@link #privateFlags}: true if the application is hidden via restrictions and for
+     * most purposes is considered as not installed.
+     * {@hide}
+     */
+    public static final int PRIVATE_FLAG_HIDDEN = 1<<0;
+
+    /**
+     * Value for {@link #privateFlags}: set to <code>true</code> if the application
+     * has reported that it is heavy-weight, and thus can not participate in
+     * the normal application lifecycle.
+     *
+     * <p>Comes from the
+     * android.R.styleable#AndroidManifestApplication_cantSaveState
+     * attribute of the &lt;application&gt; tag.
+     *
+     * {@hide}
+     */
+    public static final int PRIVATE_FLAG_CANT_SAVE_STATE = 1<<1;
+
+    /**
+     * Value for {@link #privateFlags}: Set to true if the application has been
+     * installed using the forward lock option.
+     *
+     * NOTE: DO NOT CHANGE THIS VALUE!  It is saved in packages.xml.
+     *
+     * {@hide}
+     */
+    public static final int PRIVATE_FLAG_FORWARD_LOCK = 1<<2;
+
+    /**
+     * Value for {@link #privateFlags}: set to {@code true} if the application
+     * is permitted to hold privileged permissions.
+     *
+     * {@hide}
+     */
+    public static final int PRIVATE_FLAG_PRIVILEGED = 1<<3;
+
+    /**
+     * Value for {@link #flags}: {@code true} if the application has any IntentFiler with some
+     * data URI using HTTP or HTTPS with an associated VIEW action.
+     *
+     * {@hide}
+     */
+    public static final int PRIVATE_FLAG_HAS_DOMAIN_URLS = 1<<4;
+
+    /**
+     * Private/hidden flags. See {@code PRIVATE_FLAG_...} constants.
+     * {@hide}
+     */
+    public int privateFlags;
 
     /**
      * The required smallest screen width the application can run on.  If 0,
@@ -423,6 +488,8 @@ public class ApplicationInfo extends PackageItemInfo implements Parcelable {
      */
     public int largestWidthLimitDp = 0;
 
+    /** {@hide} */
+    public String volumeUuid;
     /** {@hide} */
     public String scanSourceDir;
     /** {@hide} */
@@ -598,6 +665,7 @@ public class ApplicationInfo extends PackageItemInfo implements Parcelable {
         pw.println(prefix + "processName=" + processName);
         pw.println(prefix + "taskAffinity=" + taskAffinity);
         pw.println(prefix + "uid=" + uid + " flags=0x" + Integer.toHexString(flags)
+                + " privateFlags=0x" + Integer.toHexString(privateFlags)
                 + " theme=0x" + Integer.toHexString(theme));
         pw.println(prefix + "requiresSmallestWidthDp=" + requiresSmallestWidthDp
                 + " compatibleWidthLimitDp=" + compatibleWidthLimitDp
@@ -621,7 +689,7 @@ public class ApplicationInfo extends PackageItemInfo implements Parcelable {
         }
         pw.println(prefix + "dataDir=" + dataDir);
         if (sharedLibraryFiles != null) {
-            pw.println(prefix + "sharedLibraryFiles=" + sharedLibraryFiles);
+            pw.println(prefix + "sharedLibraryFiles=" + Arrays.toString(sharedLibraryFiles));
         }
         pw.println(prefix + "enabled=" + enabled + " targetSdkVersion=" + targetSdkVersion
                 + " versionCode=" + versionCode);
@@ -635,6 +703,11 @@ public class ApplicationInfo extends PackageItemInfo implements Parcelable {
             pw.println(prefix + "uiOptions=0x" + Integer.toHexString(uiOptions));
         }
         pw.println(prefix + "supportsRtl=" + (hasRtlSupport() ? "true" : "false"));
+        if (fullBackupContent > 0) {
+            pw.println(prefix + "fullBackupContent=@xml/" + fullBackupContent);
+        } else {
+            pw.println(prefix + "fullBackupContent=" + (fullBackupContent < 0 ? "false" : "true"));
+        }
         super.dumpBack(pw, prefix);
     }
 
@@ -680,9 +753,11 @@ public class ApplicationInfo extends PackageItemInfo implements Parcelable {
         className = orig.className;
         theme = orig.theme;
         flags = orig.flags;
+        privateFlags = orig.privateFlags;
         requiresSmallestWidthDp = orig.requiresSmallestWidthDp;
         compatibleWidthLimitDp = orig.compatibleWidthLimitDp;
         largestWidthLimitDp = orig.largestWidthLimitDp;
+        volumeUuid = orig.volumeUuid;
         scanSourceDir = orig.scanSourceDir;
         scanPublicSourceDir = orig.scanPublicSourceDir;
         sourceDir = orig.sourceDir;
@@ -709,6 +784,7 @@ public class ApplicationInfo extends PackageItemInfo implements Parcelable {
         descriptionRes = orig.descriptionRes;
         uiOptions = orig.uiOptions;
         backupAgentName = orig.backupAgentName;
+        fullBackupContent = orig.fullBackupContent;
     }
 
 
@@ -730,9 +806,11 @@ public class ApplicationInfo extends PackageItemInfo implements Parcelable {
         dest.writeString(className);
         dest.writeInt(theme);
         dest.writeInt(flags);
+        dest.writeInt(privateFlags);
         dest.writeInt(requiresSmallestWidthDp);
         dest.writeInt(compatibleWidthLimitDp);
         dest.writeInt(largestWidthLimitDp);
+        dest.writeString(volumeUuid);
         dest.writeString(scanSourceDir);
         dest.writeString(scanPublicSourceDir);
         dest.writeString(sourceDir);
@@ -759,6 +837,7 @@ public class ApplicationInfo extends PackageItemInfo implements Parcelable {
         dest.writeString(backupAgentName);
         dest.writeInt(descriptionRes);
         dest.writeInt(uiOptions);
+        dest.writeInt(fullBackupContent);
     }
 
     public static final Parcelable.Creator<ApplicationInfo> CREATOR
@@ -779,9 +858,11 @@ public class ApplicationInfo extends PackageItemInfo implements Parcelable {
         className = source.readString();
         theme = source.readInt();
         flags = source.readInt();
+        privateFlags = source.readInt();
         requiresSmallestWidthDp = source.readInt();
         compatibleWidthLimitDp = source.readInt();
         largestWidthLimitDp = source.readInt();
+        volumeUuid = source.readString();
         scanSourceDir = source.readString();
         scanPublicSourceDir = source.readString();
         sourceDir = source.readString();
@@ -808,6 +889,7 @@ public class ApplicationInfo extends PackageItemInfo implements Parcelable {
         backupAgentName = source.readString();
         descriptionRes = source.readInt();
         uiOptions = source.readInt();
+        fullBackupContent = source.readInt();
     }
 
     /**
@@ -861,6 +943,45 @@ public class ApplicationInfo extends PackageItemInfo implements Parcelable {
         } catch (NameNotFoundException ex) {
             return true;
         }
+    }
+
+    /**
+     * @hide
+     */
+    public boolean isForwardLocked() {
+        return (privateFlags & ApplicationInfo.PRIVATE_FLAG_FORWARD_LOCK) != 0;
+    }
+
+    /**
+     * @hide
+     */
+    public boolean isSystemApp() {
+        return (flags & ApplicationInfo.FLAG_SYSTEM) != 0;
+    }
+
+    /**
+     * @hide
+     */
+    public boolean isPrivilegedApp() {
+        return (privateFlags & ApplicationInfo.PRIVATE_FLAG_PRIVILEGED) != 0;
+    }
+
+    /**
+     * @hide
+     */
+    public boolean isUpdatedSystemApp() {
+        return (flags & ApplicationInfo.FLAG_UPDATED_SYSTEM_APP) != 0;
+    }
+
+    /** @hide */
+    public boolean isInternal() {
+        return (flags & ApplicationInfo.FLAG_EXTERNAL_STORAGE) == 0;
+    }
+
+    /** @hide */
+    public boolean isExternalAsec() {
+        return TextUtils.isEmpty(volumeUuid)
+                && (flags & ApplicationInfo.FLAG_EXTERNAL_STORAGE) != 0;
     }
 
     /**

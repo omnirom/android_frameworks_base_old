@@ -16,8 +16,8 @@
 
 package android.view;
 
-import com.android.ide.common.rendering.api.LayoutlibCallback;
 import com.android.ide.common.rendering.api.LayoutLog;
+import com.android.ide.common.rendering.api.LayoutlibCallback;
 import com.android.ide.common.rendering.api.MergeCookie;
 import com.android.ide.common.rendering.api.ResourceReference;
 import com.android.ide.common.rendering.api.ResourceValue;
@@ -25,19 +25,22 @@ import com.android.layoutlib.bridge.Bridge;
 import com.android.layoutlib.bridge.BridgeConstants;
 import com.android.layoutlib.bridge.android.BridgeContext;
 import com.android.layoutlib.bridge.android.BridgeXmlBlockParser;
+import com.android.layoutlib.bridge.android.support.DrawerLayoutUtil;
 import com.android.layoutlib.bridge.android.support.RecyclerViewUtil;
-import com.android.layoutlib.bridge.android.support.RecyclerViewUtil.LayoutManagerType;
 import com.android.layoutlib.bridge.impl.ParserFactory;
-import com.android.layoutlib.bridge.impl.RenderSessionImpl;
+import com.android.layoutlib.bridge.util.ReflectionUtils;
 import com.android.resources.ResourceType;
 import com.android.util.Pair;
 
 import org.xmlpull.v1.XmlPullParser;
 
+import android.annotation.NonNull;
 import android.content.Context;
 import android.util.AttributeSet;
 
 import java.io.File;
+import java.util.HashMap;
+import java.util.Map;
 
 import static com.android.layoutlib.bridge.android.BridgeContext.getBaseContext;
 
@@ -49,6 +52,7 @@ public final class BridgeInflater extends LayoutInflater {
     private final LayoutlibCallback mLayoutlibCallback;
     private boolean mIsInMerge = false;
     private ResourceReference mResourceReference;
+    private Map<View, String> mOpenDrawerLayouts;
 
     /**
      * List of class prefixes which are tried first by default.
@@ -57,8 +61,13 @@ public final class BridgeInflater extends LayoutInflater {
      */
     private static final String[] sClassPrefixList = {
         "android.widget.",
-        "android.webkit."
+        "android.webkit.",
+        "android.app."
     };
+
+    public static String[] getClassPrefixList() {
+        return sClassPrefixList;
+    }
 
     protected BridgeInflater(LayoutInflater original, Context newContext) {
         super(original, newContext);
@@ -110,14 +119,8 @@ public final class BridgeInflater extends LayoutInflater {
             }
 
             // Finally try again using the custom view loader
-            try {
-                if (view == null) {
-                    view = loadCustomView(name, attrs);
-                }
-            } catch (ClassNotFoundException e) {
-                // If the class was not found, we throw the exception directly, because this
-                // method is already expected to throw it.
-                throw e;
+            if (view == null) {
+                view = loadCustomView(name, attrs);
             }
         } catch (Exception e) {
             // Wrap the real exception in a ClassNotFoundException, so that the calling method
@@ -131,11 +134,11 @@ public final class BridgeInflater extends LayoutInflater {
     }
 
     @Override
-    public View createViewFromTag(View parent, String name, AttributeSet attrs,
-            boolean inheritContext) {
+    public View createViewFromTag(View parent, String name, Context context, AttributeSet attrs,
+            boolean ignoreThemeAttrs) {
         View view;
         try {
-            view = super.createViewFromTag(parent, name, attrs, inheritContext);
+            view = super.createViewFromTag(parent, name, context, attrs, ignoreThemeAttrs);
         } catch (InflateException e) {
             // try to load the class from using the custom view loader
             try {
@@ -233,22 +236,39 @@ public final class BridgeInflater extends LayoutInflater {
             if (viewKey != null) {
                 bc.addViewKey(view, viewKey);
             }
-            if (RenderSessionImpl.isInstanceOf(view, RecyclerViewUtil.CN_RECYCLER_VIEW)) {
-                String type = attrs.getAttributeValue(BridgeConstants.NS_RESOURCES,
-                                BridgeConstants.ATTR_LAYOUT_MANAGER_TYPE);
-                if (type != null) {
-                    LayoutManagerType layoutManagerType = LayoutManagerType.getByLogicalName(type);
-                    if (layoutManagerType == null) {
-                        layoutManagerType = LayoutManagerType.getByClassName(type);
-                    }
-                    if (layoutManagerType == null) {
-                        // add the classname itself.
-                        bc.addCookie(view, type);
-                    } else {
-                        bc.addCookie(view, layoutManagerType);
-                    }
+            String scrollPos = attrs.getAttributeValue(BridgeConstants.NS_RESOURCES, "scrollY");
+            if (scrollPos != null) {
+                if (scrollPos.endsWith("px")) {
+                    int value = Integer.parseInt(scrollPos.substring(0, scrollPos.length() - 2));
+                    bc.setScrollYPos(view, value);
                 }
             }
+            if (ReflectionUtils.isInstanceOf(view, RecyclerViewUtil.CN_RECYCLER_VIEW)) {
+                Integer resourceId = null;
+                String attrVal = attrs.getAttributeValue(BridgeConstants.NS_TOOLS_URI,
+                        BridgeConstants.ATTR_LIST_ITEM);
+                if (attrVal != null && !attrVal.isEmpty()) {
+                    ResourceValue resValue = bc.getRenderResources().findResValue(attrVal, false);
+                    if (resValue.isFramework()) {
+                        resourceId = Bridge.getResourceId(resValue.getResourceType(),
+                                resValue.getName());
+                    } else {
+                        resourceId = mLayoutlibCallback.getResourceId(resValue.getResourceType(),
+                                resValue.getName());
+                    }
+                }
+                if (resourceId == null) {
+                    resourceId = 0;
+                }
+                RecyclerViewUtil.setAdapter(view, bc, mLayoutlibCallback, resourceId);
+            } else if (ReflectionUtils.isInstanceOf(view, DrawerLayoutUtil.CN_DRAWER_LAYOUT)) {
+                String attrVal = attrs.getAttributeValue(BridgeConstants.NS_TOOLS_URI,
+                        BridgeConstants.ATTR_OPEN_DRAWER);
+                if (attrVal != null) {
+                    getDrawerLayoutMap().put(view, attrVal);
+                }
+            }
+
         }
     }
 
@@ -303,5 +323,29 @@ public final class BridgeInflater extends LayoutInflater {
         }
 
         return viewKey;
+    }
+
+    public void postInflateProcess(View view) {
+        if (mOpenDrawerLayouts != null) {
+            String gravity = mOpenDrawerLayouts.get(view);
+            if (gravity != null) {
+                DrawerLayoutUtil.openDrawer(view, gravity);
+            }
+            mOpenDrawerLayouts.remove(view);
+        }
+    }
+
+    @NonNull
+    private Map<View, String> getDrawerLayoutMap() {
+        if (mOpenDrawerLayouts == null) {
+            mOpenDrawerLayouts = new HashMap<View, String>(4);
+        }
+        return mOpenDrawerLayouts;
+    }
+
+    public void onDoneInflation() {
+        if (mOpenDrawerLayouts != null) {
+            mOpenDrawerLayouts.clear();
+        }
     }
 }

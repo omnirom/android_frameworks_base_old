@@ -18,8 +18,7 @@ package com.android.server.storage;
 
 import com.android.server.EventLogTags;
 import com.android.server.SystemService;
-import com.android.server.pm.PackageManagerService;
-
+import com.android.server.pm.InstructionSets;
 import android.app.Notification;
 import android.app.NotificationManager;
 import android.app.PendingIntent;
@@ -74,6 +73,8 @@ import dalvik.system.VMRuntime;
  */
 public class DeviceStorageMonitorService extends SystemService {
     static final String TAG = "DeviceStorageMonitorService";
+
+    // TODO: extend to watch and manage caches on all private volumes
 
     static final boolean DEBUG = false;
     static final boolean localLOGV = false;
@@ -221,7 +222,7 @@ public class DeviceStorageMonitorService extends SystemService {
         try {
             if (localLOGV) Slog.i(TAG, "Clearing cache");
             IPackageManager.Stub.asInterface(ServiceManager.getService("package")).
-                    freeStorageAndNotify(mMemCacheTrimToThreshold, mClearCacheObserver);
+                    freeStorageAndNotify(null, mMemCacheTrimToThreshold, mClearCacheObserver);
         } catch (RemoteException e) {
             Slog.w(TAG, "Failed to get handle for PackageManger Exception: "+e);
             mClearingCache = false;
@@ -341,7 +342,7 @@ public class DeviceStorageMonitorService extends SystemService {
     }
 
     private static boolean isBootImageOnDisk() {
-        for (String instructionSet : PackageManagerService.getAllDexCodeInstructionSets()) {
+        for (String instructionSet : InstructionSets.getAllDexCodeInstructionSets()) {
             if (!VMRuntime.isBootClassPathOnDisk(instructionSet)) {
                 return false;
             }
@@ -472,7 +473,7 @@ public class DeviceStorageMonitorService extends SystemService {
         Notification notification = new Notification.Builder(context)
                 .setSmallIcon(com.android.internal.R.drawable.stat_notify_disk_full)
                 .setTicker(title)
-                .setColor(context.getResources().getColor(
+                .setColor(context.getColor(
                     com.android.internal.R.color.system_notification_accent_color))
                 .setContentTitle(title)
                 .setContentText(details)

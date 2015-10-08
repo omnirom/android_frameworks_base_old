@@ -23,26 +23,37 @@
 #include <utils/Log.h>
 #include "android_os_MessageQueue.h"
 
+#include "core_jni_helpers.h"
+
 namespace android {
 
 static struct {
     jfieldID mPtr;   // native object attached to the DVM MessageQueue
+    jmethodID dispatchEvents;
 } gMessageQueueClassInfo;
 
+// Must be kept in sync with the constants in Looper.FileDescriptorCallback
+static const int CALLBACK_EVENT_INPUT = 1 << 0;
+static const int CALLBACK_EVENT_OUTPUT = 1 << 1;
+static const int CALLBACK_EVENT_ERROR = 1 << 2;
 
-class NativeMessageQueue : public MessageQueue {
+
+class NativeMessageQueue : public MessageQueue, public LooperCallback {
 public:
     NativeMessageQueue();
     virtual ~NativeMessageQueue();
 
     virtual void raiseException(JNIEnv* env, const char* msg, jthrowable exceptionObj);
 
-    void pollOnce(JNIEnv* env, int timeoutMillis);
-
+    void pollOnce(JNIEnv* env, jobject obj, int timeoutMillis);
     void wake();
+    void setFileDescriptorEvents(int fd, int events);
+
+    virtual int handleEvent(int fd, int events, void* data);
 
 private:
-    bool mInCallback;
+    JNIEnv* mPollEnv;
+    jobject mPollObj;
     jthrowable mExceptionObj;
 };
 
@@ -54,8 +65,8 @@ MessageQueue::~MessageQueue() {
 }
 
 bool MessageQueue::raiseAndClearException(JNIEnv* env, const char* msg) {
-    jthrowable exceptionObj = env->ExceptionOccurred();
-    if (exceptionObj) {
+    if (env->ExceptionCheck()) {
+        jthrowable exceptionObj = env->ExceptionOccurred();
         env->ExceptionClear();
         raiseException(env, msg, exceptionObj);
         env->DeleteLocalRef(exceptionObj);
@@ -64,7 +75,8 @@ bool MessageQueue::raiseAndClearException(JNIEnv* env, const char* msg) {
     return false;
 }
 
-NativeMessageQueue::NativeMessageQueue() : mInCallback(false), mExceptionObj(NULL) {
+NativeMessageQueue::NativeMessageQueue() :
+        mPollEnv(NULL), mPollObj(NULL), mExceptionObj(NULL) {
     mLooper = Looper::getForThread();
     if (mLooper == NULL) {
         mLooper = new Looper(false);
@@ -77,7 +89,7 @@ NativeMessageQueue::~NativeMessageQueue() {
 
 void NativeMessageQueue::raiseException(JNIEnv* env, const char* msg, jthrowable exceptionObj) {
     if (exceptionObj) {
-        if (mInCallback) {
+        if (mPollEnv == env) {
             if (mExceptionObj) {
                 env->DeleteLocalRef(mExceptionObj);
             }
@@ -92,10 +104,13 @@ void NativeMessageQueue::raiseException(JNIEnv* env, const char* msg, jthrowable
     }
 }
 
-void NativeMessageQueue::pollOnce(JNIEnv* env, int timeoutMillis) {
-    mInCallback = true;
+void NativeMessageQueue::pollOnce(JNIEnv* env, jobject pollObj, int timeoutMillis) {
+    mPollEnv = env;
+    mPollObj = pollObj;
     mLooper->pollOnce(timeoutMillis);
-    mInCallback = false;
+    mPollObj = NULL;
+    mPollEnv = NULL;
+
     if (mExceptionObj) {
         env->Throw(mExceptionObj);
         env->DeleteLocalRef(mExceptionObj);
@@ -106,6 +121,46 @@ void NativeMessageQueue::pollOnce(JNIEnv* env, int timeoutMillis) {
 void NativeMessageQueue::wake() {
     mLooper->wake();
 }
+
+void NativeMessageQueue::setFileDescriptorEvents(int fd, int events) {
+    if (events) {
+        int looperEvents = 0;
+        if (events & CALLBACK_EVENT_INPUT) {
+            looperEvents |= Looper::EVENT_INPUT;
+        }
+        if (events & CALLBACK_EVENT_OUTPUT) {
+            looperEvents |= Looper::EVENT_OUTPUT;
+        }
+        mLooper->addFd(fd, Looper::POLL_CALLBACK, looperEvents, this,
+                reinterpret_cast<void*>(events));
+    } else {
+        mLooper->removeFd(fd);
+    }
+}
+
+int NativeMessageQueue::handleEvent(int fd, int looperEvents, void* data) {
+    int events = 0;
+    if (looperEvents & Looper::EVENT_INPUT) {
+        events |= CALLBACK_EVENT_INPUT;
+    }
+    if (looperEvents & Looper::EVENT_OUTPUT) {
+        events |= CALLBACK_EVENT_OUTPUT;
+    }
+    if (looperEvents & (Looper::EVENT_ERROR | Looper::EVENT_HANGUP | Looper::EVENT_INVALID)) {
+        events |= CALLBACK_EVENT_ERROR;
+    }
+    int oldWatchedEvents = reinterpret_cast<intptr_t>(data);
+    int newWatchedEvents = mPollEnv->CallIntMethod(mPollObj,
+            gMessageQueueClassInfo.dispatchEvents, fd, events);
+    if (!newWatchedEvents) {
+        return 0; // unregister the fd
+    }
+    if (newWatchedEvents != oldWatchedEvents) {
+        setFileDescriptorEvents(fd, newWatchedEvents);
+    }
+    return 1;
+}
+
 
 // ----------------------------------------------------------------------------
 
@@ -130,20 +185,26 @@ static void android_os_MessageQueue_nativeDestroy(JNIEnv* env, jclass clazz, jlo
     nativeMessageQueue->decStrong(env);
 }
 
-static void android_os_MessageQueue_nativePollOnce(JNIEnv* env, jclass clazz,
+static void android_os_MessageQueue_nativePollOnce(JNIEnv* env, jobject obj,
         jlong ptr, jint timeoutMillis) {
     NativeMessageQueue* nativeMessageQueue = reinterpret_cast<NativeMessageQueue*>(ptr);
-    nativeMessageQueue->pollOnce(env, timeoutMillis);
+    nativeMessageQueue->pollOnce(env, obj, timeoutMillis);
 }
 
 static void android_os_MessageQueue_nativeWake(JNIEnv* env, jclass clazz, jlong ptr) {
     NativeMessageQueue* nativeMessageQueue = reinterpret_cast<NativeMessageQueue*>(ptr);
-    return nativeMessageQueue->wake();
+    nativeMessageQueue->wake();
 }
 
-static jboolean android_os_MessageQueue_nativeIsIdling(JNIEnv* env, jclass clazz, jlong ptr) {
+static jboolean android_os_MessageQueue_nativeIsPolling(JNIEnv* env, jclass clazz, jlong ptr) {
     NativeMessageQueue* nativeMessageQueue = reinterpret_cast<NativeMessageQueue*>(ptr);
-    return nativeMessageQueue->getLooper()->isIdling();
+    return nativeMessageQueue->getLooper()->isPolling();
+}
+
+static void android_os_MessageQueue_nativeSetFileDescriptorEvents(JNIEnv* env, jclass clazz,
+        jlong ptr, jint fd, jint events) {
+    NativeMessageQueue* nativeMessageQueue = reinterpret_cast<NativeMessageQueue*>(ptr);
+    nativeMessageQueue->setFileDescriptorEvents(fd, events);
 }
 
 // ----------------------------------------------------------------------------
@@ -154,29 +215,21 @@ static JNINativeMethod gMessageQueueMethods[] = {
     { "nativeDestroy", "(J)V", (void*)android_os_MessageQueue_nativeDestroy },
     { "nativePollOnce", "(JI)V", (void*)android_os_MessageQueue_nativePollOnce },
     { "nativeWake", "(J)V", (void*)android_os_MessageQueue_nativeWake },
-    { "nativeIsIdling", "(J)Z", (void*)android_os_MessageQueue_nativeIsIdling }
+    { "nativeIsPolling", "(J)Z", (void*)android_os_MessageQueue_nativeIsPolling },
+    { "nativeSetFileDescriptorEvents", "(JII)V",
+            (void*)android_os_MessageQueue_nativeSetFileDescriptorEvents },
 };
 
-#define FIND_CLASS(var, className) \
-        var = env->FindClass(className); \
-        LOG_FATAL_IF(! var, "Unable to find class " className);
-
-#define GET_FIELD_ID(var, clazz, fieldName, fieldDescriptor) \
-        var = env->GetFieldID(clazz, fieldName, fieldDescriptor); \
-        LOG_FATAL_IF(! var, "Unable to find field " fieldName);
-
 int register_android_os_MessageQueue(JNIEnv* env) {
-    int res = jniRegisterNativeMethods(env, "android/os/MessageQueue",
-            gMessageQueueMethods, NELEM(gMessageQueueMethods));
-    LOG_FATAL_IF(res < 0, "Unable to register native methods.");
+    int res = RegisterMethodsOrDie(env, "android/os/MessageQueue", gMessageQueueMethods,
+                                   NELEM(gMessageQueueMethods));
 
-    jclass clazz;
-    FIND_CLASS(clazz, "android/os/MessageQueue");
+    jclass clazz = FindClassOrDie(env, "android/os/MessageQueue");
+    gMessageQueueClassInfo.mPtr = GetFieldIDOrDie(env, clazz, "mPtr", "J");
+    gMessageQueueClassInfo.dispatchEvents = GetMethodIDOrDie(env, clazz,
+            "dispatchEvents", "(II)I");
 
-    GET_FIELD_ID(gMessageQueueClassInfo.mPtr, clazz,
-            "mPtr", "J");
-    
-    return 0;
+    return res;
 }
 
 } // namespace android

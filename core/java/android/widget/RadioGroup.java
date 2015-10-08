@@ -18,13 +18,12 @@ package android.widget;
 
 import com.android.internal.R;
 
+import android.annotation.IdRes;
 import android.content.Context;
 import android.content.res.TypedArray;
 import android.util.AttributeSet;
 import android.view.View;
 import android.view.ViewGroup;
-import android.view.accessibility.AccessibilityEvent;
-import android.view.accessibility.AccessibilityNodeInfo;
 
 
 /**
@@ -151,7 +150,7 @@ public class RadioGroup extends LinearLayout {
      * @see #getCheckedRadioButtonId()
      * @see #clearCheck()
      */
-    public void check(int id) {
+    public void check(@IdRes int id) {
         // don't even bother
         if (id != -1 && (id == mCheckedId)) {
             return;
@@ -168,7 +167,7 @@ public class RadioGroup extends LinearLayout {
         setCheckedId(id);
     }
 
-    private void setCheckedId(int id) {
+    private void setCheckedId(@IdRes int id) {
         mCheckedId = id;
         if (mOnCheckedChangeListener != null) {
             mOnCheckedChangeListener.onCheckedChanged(this, mCheckedId);
@@ -193,6 +192,7 @@ public class RadioGroup extends LinearLayout {
      *
      * @attr ref android.R.styleable#RadioGroup_checkedButton
      */
+    @IdRes
     public int getCheckedRadioButtonId() {
         return mCheckedId;
     }
@@ -241,15 +241,8 @@ public class RadioGroup extends LinearLayout {
     }
 
     @Override
-    public void onInitializeAccessibilityEvent(AccessibilityEvent event) {
-        super.onInitializeAccessibilityEvent(event);
-        event.setClassName(RadioGroup.class.getName());
-    }
-
-    @Override
-    public void onInitializeAccessibilityNodeInfo(AccessibilityNodeInfo info) {
-        super.onInitializeAccessibilityNodeInfo(info);
-        info.setClassName(RadioGroup.class.getName());
+    public CharSequence getAccessibilityClassName() {
+        return RadioGroup.class.getName();
     }
 
     /**
@@ -338,7 +331,7 @@ public class RadioGroup extends LinearLayout {
          * @param group the group in which the checked radio button has changed
          * @param checkedId the unique identifier of the newly checked radio button
          */
-        public void onCheckedChanged(RadioGroup group, int checkedId);
+        public void onCheckedChanged(RadioGroup group, @IdRes int checkedId);
     }
 
     private class CheckedStateTracker implements CompoundButton.OnCheckedChangeListener {

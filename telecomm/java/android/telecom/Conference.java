@@ -16,27 +16,29 @@
 
 package android.telecom;
 
+import android.annotation.Nullable;
 import android.annotation.SystemApi;
+import android.os.Bundle;
+import android.telecom.Connection.VideoProvider;
 
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
+import java.util.Locale;
 import java.util.Set;
 import java.util.concurrent.CopyOnWriteArrayList;
 import java.util.concurrent.CopyOnWriteArraySet;
 
 /**
  * Represents a conference call which can contain any number of {@link Connection} objects.
- * @hide
  */
-@SystemApi
-public abstract class Conference implements IConferenceable {
+public abstract class Conference extends Conferenceable {
 
     /**
      * Used to indicate that the conference connection time is not specified.  If not specified,
      * Telecom will set the connect time.
      */
-    public static long CONNECT_TIME_NOT_SPECIFIED = 0;
+    public static final long CONNECT_TIME_NOT_SPECIFIED = 0;
 
     /** @hide */
     public abstract static class Listener {
@@ -49,7 +51,10 @@ public abstract class Conference implements IConferenceable {
         public void onDestroyed(Conference conference) {}
         public void onConnectionCapabilitiesChanged(
                 Conference conference, int connectionCapabilities) {}
+        public void onVideoStateChanged(Conference c, int videoState) { }
+        public void onVideoProviderChanged(Conference c, Connection.VideoProvider videoProvider) {}
         public void onStatusHintsChanged(Conference conference, StatusHints statusHints) {}
+        public void onExtrasChanged(Conference conference, Bundle extras) {}
     }
 
     private final Set<Listener> mListeners = new CopyOnWriteArraySet<>();
@@ -60,14 +65,15 @@ public abstract class Conference implements IConferenceable {
     private final List<Connection> mUnmodifiableConferenceableConnections =
             Collections.unmodifiableList(mConferenceableConnections);
 
-    protected PhoneAccountHandle mPhoneAccount;
-    private AudioState mAudioState;
+    private PhoneAccountHandle mPhoneAccount;
+    private CallAudioState mCallAudioState;
     private int mState = Connection.STATE_NEW;
     private DisconnectCause mDisconnectCause;
     private int mConnectionCapabilities;
     private String mDisconnectMessage;
     private long mConnectTimeMillis = CONNECT_TIME_NOT_SPECIFIED;
     private StatusHints mStatusHints;
+    private Bundle mExtras;
 
     private final Connection.Listener mConnectionDeathListener = new Connection.Listener() {
         @Override
@@ -114,13 +120,8 @@ public abstract class Conference implements IConferenceable {
         return mState;
     }
 
-    /** @hide */
-    @Deprecated public final int getCapabilities() {
-        return getConnectionCapabilities();
-    }
-
     /**
-     * Returns the capabilities of a conference. See {@code CAPABILITY_*} constants in class
+     * Returns the capabilities of the conference. See {@code CAPABILITY_*} constants in class
      * {@link Connection} for valid values.
      *
      * @return A bitmask of the capabilities of the conference call.
@@ -176,9 +177,36 @@ public abstract class Conference implements IConferenceable {
      * @return The audio state of the conference, describing how its audio is currently
      *         being routed by the system. This is {@code null} if this Conference
      *         does not directly know about its audio state.
+     * @deprecated Use {@link #getCallAudioState()} instead.
+     * @hide
      */
+    @Deprecated
+    @SystemApi
     public final AudioState getAudioState() {
-        return mAudioState;
+        return new AudioState(mCallAudioState);
+    }
+
+    /**
+     * @return The audio state of the conference, describing how its audio is currently
+     *         being routed by the system. This is {@code null} if this Conference
+     *         does not directly know about its audio state.
+     */
+    public final CallAudioState getCallAudioState() {
+        return mCallAudioState;
+    }
+
+    /**
+     * Returns VideoProvider of the primary call. This can be null.
+     */
+    public VideoProvider getVideoProvider() {
+        return null;
+    }
+
+    /**
+     * Returns video state of the primary call.
+     */
+    public int getVideoState() {
+        return VideoProfile.STATE_AUDIO_ONLY;
     }
 
     /**
@@ -238,8 +266,19 @@ public abstract class Conference implements IConferenceable {
      * Notifies this conference that the {@link #getAudioState()} property has a new value.
      *
      * @param state The new call audio state.
+     * @deprecated Use {@link #onCallAudioStateChanged(CallAudioState)} instead.
+     * @hide
      */
+    @SystemApi
+    @Deprecated
     public void onAudioStateChanged(AudioState state) {}
+
+    /**
+     * Notifies this conference that the {@link #getCallAudioState()} property has a new value.
+     *
+     * @param state The new call audio state.
+     */
+    public void onCallAudioStateChanged(CallAudioState state) {}
 
     /**
      * Notifies this conference that a connection has been added to it.
@@ -253,6 +292,13 @@ public abstract class Conference implements IConferenceable {
      */
     public final void setOnHold() {
         setState(Connection.STATE_HOLDING);
+    }
+
+    /**
+     * Sets state to be dialing.
+     */
+    public final void setDialing() {
+        setState(Connection.STATE_DIALING);
     }
 
     /**
@@ -283,11 +329,6 @@ public abstract class Conference implements IConferenceable {
         return mDisconnectCause;
     }
 
-    /** @hide */
-    @Deprecated public final void setCapabilities(int connectionCapabilities) {
-        setConnectionCapabilities(connectionCapabilities);
-    }
-
     /**
      * Sets the capabilities of a conference. See {@code CAPABILITY_*} constants of class
      * {@link Connection} for valid values.
@@ -311,6 +352,7 @@ public abstract class Conference implements IConferenceable {
      * @return True if the connection was successfully added.
      */
     public final boolean addConnection(Connection connection) {
+        Log.d(this, "Connection=%s, connection=", connection);
         if (connection != null && !mChildConnections.contains(connection)) {
             if (connection.setConference(this)) {
                 mChildConnections.add(connection);
@@ -355,6 +397,36 @@ public abstract class Conference implements IConferenceable {
             }
         }
         fireOnConferenceableConnectionsChanged();
+    }
+
+    /**
+     * Set the video state for the conference.
+     * Valid values: {@link VideoProfile#STATE_AUDIO_ONLY},
+     * {@link VideoProfile#STATE_BIDIRECTIONAL},
+     * {@link VideoProfile#STATE_TX_ENABLED},
+     * {@link VideoProfile#STATE_RX_ENABLED}.
+     *
+     * @param videoState The new video state.
+     */
+    public final void setVideoState(Connection c, int videoState) {
+        Log.d(this, "setVideoState Conference: %s Connection: %s VideoState: %s",
+                this, c, videoState);
+        for (Listener l : mListeners) {
+            l.onVideoStateChanged(this, videoState);
+        }
+    }
+
+    /**
+     * Sets the video connection provider.
+     *
+     * @param videoProvider The video provider.
+     */
+    public final void setVideoProvider(Connection c, Connection.VideoProvider videoProvider) {
+        Log.d(this, "setVideoProvider Conference: %s Connection: %s VideoState: %s",
+                this, c, videoProvider);
+        for (Listener l : mListeners) {
+            l.onVideoProviderChanged(this, videoProvider);
+        }
     }
 
     private final void fireOnConferenceableConnectionsChanged() {
@@ -422,7 +494,9 @@ public abstract class Conference implements IConferenceable {
      * the connection from which the conference will retrieve its current state.
      *
      * @return The primary connection.
+     * @hide
      */
+    @SystemApi
     public Connection getPrimaryConnection() {
         if (mUnmodifiableChildConnections == null || mUnmodifiableChildConnections.isEmpty()) {
             return null;
@@ -431,22 +505,42 @@ public abstract class Conference implements IConferenceable {
     }
 
     /**
-     * Sets the connect time of the {@code Conference}.
-     *
-     * @param connectTimeMillis The connection time, in milliseconds.
+     * @hide
+     * @deprecated Use {@link #setConnectionTime}.
      */
-    public void setConnectTimeMillis(long connectTimeMillis) {
-        mConnectTimeMillis = connectTimeMillis;
+    @Deprecated
+    @SystemApi
+    public final void setConnectTimeMillis(long connectTimeMillis) {
+        setConnectionTime(connectTimeMillis);
     }
 
     /**
-     * Retrieves the connect time of the {@code Conference}, if specified.  A value of
+     * Sets the connection start time of the {@code Conference}.
+     *
+     * @param connectionTimeMillis The connection time, in milliseconds.
+     */
+    public final void setConnectionTime(long connectionTimeMillis) {
+        mConnectTimeMillis = connectionTimeMillis;
+    }
+
+    /**
+     * @hide
+     * @deprecated Use {@link #getConnectionTime}.
+     */
+    @Deprecated
+    @SystemApi
+    public final long getConnectTimeMillis() {
+        return getConnectionTime();
+    }
+
+    /**
+     * Retrieves the connection start time of the {@code Conference}, if specified.  A value of
      * {@link #CONNECT_TIME_NOT_SPECIFIED} indicates that Telecom should determine the start time
      * of the conference.
      *
-     * @return The time the {@code Conference} has been connected.
+     * @return The time at which the {@code Conference} was connected.
      */
-    public long getConnectTimeMillis() {
+    public final long getConnectionTime() {
         return mConnectTimeMillis;
     }
 
@@ -456,10 +550,11 @@ public abstract class Conference implements IConferenceable {
      * @param state The new audio state.
      * @hide
      */
-    final void setAudioState(AudioState state) {
-        Log.d(this, "setAudioState %s", state);
-        mAudioState = state;
-        onAudioStateChanged(state);
+    final void setCallAudioState(CallAudioState state) {
+        Log.d(this, "setCallAudioState %s", state);
+        mCallAudioState = state;
+        onAudioStateChanged(getAudioState());
+        onCallAudioStateChanged(state);
     }
 
     private void setState(int newState) {
@@ -487,6 +582,17 @@ public abstract class Conference implements IConferenceable {
         mConferenceableConnections.clear();
     }
 
+    @Override
+    public String toString() {
+        return String.format(Locale.US,
+                "[State: %s,Capabilites: %s, VideoState: %s, VideoProvider: %s, ThisObject %s]",
+                Connection.stateToString(mState),
+                Call.Details.capabilitiesToString(mConnectionCapabilities),
+                getVideoState(),
+                getVideoProvider(),
+                super.toString());
+    }
+
     /**
      * Sets the label and icon status to display in the InCall UI.
      *
@@ -504,5 +610,26 @@ public abstract class Conference implements IConferenceable {
      */
     public final StatusHints getStatusHints() {
         return mStatusHints;
+    }
+
+    /**
+     * Set some extras that can be associated with this {@code Conference}. No assumptions should
+     * be made as to how an In-Call UI or service will handle these extras.
+     * Keys should be fully qualified (e.g., com.example.MY_EXTRA) to avoid conflicts.
+     *
+     * @param extras The extras associated with this {@code Connection}.
+     */
+    public final void setExtras(@Nullable Bundle extras) {
+        mExtras = extras;
+        for (Listener l : mListeners) {
+            l.onExtrasChanged(this, extras);
+        }
+    }
+
+    /**
+     * @return The extras associated with this conference.
+     */
+    public final Bundle getExtras() {
+        return mExtras;
     }
 }

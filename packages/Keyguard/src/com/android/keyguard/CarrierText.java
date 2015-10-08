@@ -18,14 +18,16 @@ package com.android.keyguard;
 
 import java.util.List;
 import java.util.Locale;
+import java.util.Objects;
 
 import android.content.Context;
 import android.content.Intent;
 import android.content.IntentFilter;
 import android.content.res.TypedArray;
 import android.net.ConnectivityManager;
+import android.net.wifi.WifiManager;
+import android.telephony.ServiceState;
 import android.telephony.SubscriptionInfo;
-import android.telephony.SubscriptionManager;
 import android.text.TextUtils;
 import android.text.method.SingleLineTransformationMethod;
 import android.util.AttributeSet;
@@ -36,7 +38,7 @@ import android.widget.TextView;
 import com.android.internal.telephony.IccCardConstants;
 import com.android.internal.telephony.IccCardConstants.State;
 import com.android.internal.telephony.TelephonyIntents;
-import com.android.internal.widget.LockPatternUtils;
+import com.android.settingslib.WirelessUtils;
 
 public class CarrierText extends TextView {
     private static final boolean DEBUG = KeyguardConstants.DEBUG;
@@ -44,8 +46,11 @@ public class CarrierText extends TextView {
 
     private static CharSequence mSeparator;
 
-    private LockPatternUtils mLockPatternUtils;
+    private final boolean mIsEmergencyCallCapable;
+
     private KeyguardUpdateMonitor mKeyguardUpdateMonitor;
+
+    private WifiManager mWifiManager;
 
     private KeyguardUpdateMonitorCallback mCallback = new KeyguardUpdateMonitorCallback() {
         @Override
@@ -53,11 +58,11 @@ public class CarrierText extends TextView {
             updateCarrierText();
         }
 
-        public void onScreenTurnedOff(int why) {
+        public void onFinishedGoingToSleep(int why) {
             setSelected(false);
         };
 
-        public void onScreenTurnedOn() {
+        public void onStartedWakingUp() {
             setSelected(true);
         };
     };
@@ -81,7 +86,8 @@ public class CarrierText extends TextView {
 
     public CarrierText(Context context, AttributeSet attrs) {
         super(context, attrs);
-        mLockPatternUtils = new LockPatternUtils(mContext);
+        mIsEmergencyCallCapable = context.getResources().getBoolean(
+                com.android.internal.R.bool.config_voice_capable);
         boolean useAllCaps;
         TypedArray a = context.getTheme().obtainStyledAttributes(
                 attrs, R.styleable.CarrierText, 0, 0);
@@ -91,23 +97,45 @@ public class CarrierText extends TextView {
             a.recycle();
         }
         setTransformationMethod(new CarrierTextTransformationMethod(mContext, useAllCaps));
+
+        mWifiManager = (WifiManager) context.getSystemService(Context.WIFI_SERVICE);
     }
 
     protected void updateCarrierText() {
         boolean allSimsMissing = true;
+        boolean anySimReadyAndInService = false;
         CharSequence displayText = null;
 
         List<SubscriptionInfo> subs = mKeyguardUpdateMonitor.getSubscriptionInfo(false);
         final int N = subs.size();
         if (DEBUG) Log.d(TAG, "updateCarrierText(): " + N);
         for (int i = 0; i < N; i++) {
-            State simState = mKeyguardUpdateMonitor.getSimState(subs.get(i).getSubscriptionId());
+            int subId = subs.get(i).getSubscriptionId();
+            State simState = mKeyguardUpdateMonitor.getSimState(subId);
             CharSequence carrierName = subs.get(i).getCarrierName();
             CharSequence carrierTextForSimState = getCarrierTextForSimState(simState, carrierName);
-            if (DEBUG) Log.d(TAG, "Handling " + simState + " " + carrierName);
+            if (DEBUG) {
+                Log.d(TAG, "Handling (subId=" + subId + "): " + simState + " " + carrierName);
+            }
             if (carrierTextForSimState != null) {
                 allSimsMissing = false;
                 displayText = concatenate(displayText, carrierTextForSimState);
+            }
+            if (simState == IccCardConstants.State.READY) {
+                ServiceState ss = mKeyguardUpdateMonitor.mServiceStates.get(subId);
+                if (ss != null && ss.getDataRegState() == ServiceState.STATE_IN_SERVICE) {
+                    // hack for WFC (IWLAN) not turning off immediately once
+                    // Wi-Fi is disassociated or disabled
+                    if (ss.getRilDataRadioTechnology() != ServiceState.RIL_RADIO_TECHNOLOGY_IWLAN
+                            || (mWifiManager.isWifiEnabled()
+                                    && mWifiManager.getConnectionInfo() != null
+                                    && mWifiManager.getConnectionInfo().getBSSID() != null)) {
+                        if (DEBUG) {
+                            Log.d(TAG, "SIM ready and in service: subId=" + subId + ", ss=" + ss);
+                        }
+                        anySimReadyAndInService = true;
+                    }
+                }
             }
         }
         if (allSimsMissing) {
@@ -140,11 +168,21 @@ public class CarrierText extends TextView {
                         plmn = i.getStringExtra(TelephonyIntents.EXTRA_PLMN);
                     }
                     if (DEBUG) Log.d(TAG, "Getting plmn/spn sticky brdcst " + plmn + "/" + spn);
-                    text = concatenate(plmn, spn);
+                    if (Objects.equals(plmn, spn)) {
+                        text = plmn;
+                    } else {
+                        text = concatenate(plmn, spn);
+                    }
                 }
                 displayText =  makeCarrierStringOnEmergencyCapable(
                         getContext().getText(R.string.keyguard_missing_sim_message_short), text);
             }
+        }
+
+        // APM (airplane mode) != no carrier state. There are carrier services
+        // (e.g. WFC = Wi-Fi calling) which may operate in APM.
+        if (!anySimReadyAndInService && WirelessUtils.isAirplaneModeOn(mContext)) {
+            displayText = getContext().getString(R.string.airplane_mode);
         }
         setText(displayText);
     }
@@ -154,8 +192,8 @@ public class CarrierText extends TextView {
         super.onFinishInflate();
         mSeparator = getResources().getString(
                 com.android.internal.R.string.kg_text_message_separator);
-        final boolean screenOn = KeyguardUpdateMonitor.getInstance(mContext).isScreenOn();
-        setSelected(screenOn); // Allow marquee to work.
+        boolean shouldMarquee = KeyguardUpdateMonitor.getInstance(mContext).isDeviceInteractive();
+        setSelected(shouldMarquee); // Allow marquee to work.
     }
 
     @Override
@@ -242,7 +280,7 @@ public class CarrierText extends TextView {
      */
     private CharSequence makeCarrierStringOnEmergencyCapable(
             CharSequence simMessage, CharSequence emergencyCallMessage) {
-        if (mLockPatternUtils.isEmergencyCallCapable()) {
+        if (mIsEmergencyCallCapable) {
             return concatenate(simMessage, emergencyCallMessage);
         }
         return simMessage;
@@ -289,11 +327,7 @@ public class CarrierText extends TextView {
         final boolean plmnValid = !TextUtils.isEmpty(plmn);
         final boolean spnValid = !TextUtils.isEmpty(spn);
         if (plmnValid && spnValid) {
-            if (plmn.equals(spn)) {
-                return plmn;
-            } else {
-                return new StringBuilder().append(plmn).append(mSeparator).append(spn).toString();
-            }
+            return new StringBuilder().append(plmn).append(mSeparator).append(spn).toString();
         } else if (plmnValid) {
             return plmn;
         } else if (spnValid) {

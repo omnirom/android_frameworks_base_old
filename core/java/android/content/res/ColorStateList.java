@@ -16,8 +16,13 @@
 
 package android.content.res;
 
+import android.annotation.ColorInt;
+import android.annotation.NonNull;
+import android.annotation.Nullable;
+import android.content.res.Resources.Theme;
 import android.graphics.Color;
 
+import com.android.internal.R;
 import com.android.internal.util.ArrayUtils;
 import com.android.internal.util.GrowingArrayUtils;
 
@@ -25,6 +30,7 @@ import org.xmlpull.v1.XmlPullParser;
 import org.xmlpull.v1.XmlPullParserException;
 
 import android.util.AttributeSet;
+import android.util.Log;
 import android.util.MathUtils;
 import android.util.SparseArray;
 import android.util.StateSet;
@@ -64,71 +70,135 @@ import java.util.Arrays;
  * List Resource</a>.</p>
  */
 public class ColorStateList implements Parcelable {
-    private int[][] mStateSpecs; // must be parallel to mColors
-    private int[] mColors;      // must be parallel to mStateSpecs
-    private int mDefaultColor = 0xffff0000;
+    private static final String TAG = "ColorStateList";
 
+    private static final int DEFAULT_COLOR = Color.RED;
     private static final int[][] EMPTY = new int[][] { new int[0] };
-    private static final SparseArray<WeakReference<ColorStateList>> sCache =
-                            new SparseArray<WeakReference<ColorStateList>>();
 
-    private ColorStateList() { }
+    /** Thread-safe cache of single-color ColorStateLists. */
+    private static final SparseArray<WeakReference<ColorStateList>> sCache = new SparseArray<>();
+
+    /** Lazily-created factory for this color state list. */
+    private ColorStateListFactory mFactory;
+
+    private int[][] mThemeAttrs;
+    private int mChangingConfigurations;
+
+    private int[][] mStateSpecs;
+    private int[] mColors;
+    private int mDefaultColor;
+    private boolean mIsOpaque;
+
+    private ColorStateList() {
+        // Not publicly instantiable.
+    }
 
     /**
      * Creates a ColorStateList that returns the specified mapping from
      * states to colors.
      */
-    public ColorStateList(int[][] states, int[] colors) {
+    public ColorStateList(int[][] states, @ColorInt int[] colors) {
         mStateSpecs = states;
         mColors = colors;
 
-        if (states.length > 0) {
-            mDefaultColor = colors[0];
-
-            for (int i = 0; i < states.length; i++) {
-                if (states[i].length == 0) {
-                    mDefaultColor = colors[i];
-                }
-            }
-        }
+        onColorsChanged();
     }
 
     /**
-     * Creates or retrieves a ColorStateList that always returns a single color.
+     * @return A ColorStateList containing a single color.
      */
-    public static ColorStateList valueOf(int color) {
-        // TODO: should we collect these eventually?
+    @NonNull
+    public static ColorStateList valueOf(@ColorInt int color) {
         synchronized (sCache) {
-            final WeakReference<ColorStateList> ref = sCache.get(color);
+            final int index = sCache.indexOfKey(color);
+            if (index >= 0) {
+                final ColorStateList cached = sCache.valueAt(index).get();
+                if (cached != null) {
+                    return cached;
+                }
 
-            ColorStateList csl = ref != null ? ref.get() : null;
-            if (csl != null) {
-                return csl;
+                // Prune missing entry.
+                sCache.removeAt(index);
             }
 
-            csl = new ColorStateList(EMPTY, new int[] { color });
-            sCache.put(color, new WeakReference<ColorStateList>(csl));
+            // Prune the cache before adding new items.
+            final int N = sCache.size();
+            for (int i = N - 1; i >= 0; i--) {
+                if (sCache.valueAt(i).get() == null) {
+                    sCache.removeAt(i);
+                }
+            }
+
+            final ColorStateList csl = new ColorStateList(EMPTY, new int[] { color });
+            sCache.put(color, new WeakReference<>(csl));
             return csl;
         }
     }
 
     /**
-     * Create a ColorStateList from an XML document, given a set of {@link Resources}.
+     * Creates a ColorStateList with the same properties as another
+     * ColorStateList.
+     * <p>
+     * The properties of the new ColorStateList can be modified without
+     * affecting the source ColorStateList.
+     *
+     * @param orig the source color state list
      */
+    private ColorStateList(ColorStateList orig) {
+        if (orig != null) {
+            mChangingConfigurations = orig.mChangingConfigurations;
+            mStateSpecs = orig.mStateSpecs;
+            mDefaultColor = orig.mDefaultColor;
+            mIsOpaque = orig.mIsOpaque;
+
+            // Deep copy, these may change due to applyTheme().
+            mThemeAttrs = orig.mThemeAttrs.clone();
+            mColors = orig.mColors.clone();
+        }
+    }
+
+    /**
+     * Creates a ColorStateList from an XML document.
+     *
+     * @param r Resources against which the ColorStateList should be inflated.
+     * @param parser Parser for the XML document defining the ColorStateList.
+     * @return A new color state list.
+     *
+     * @deprecated Use #createFromXml(Resources, XmlPullParser parser, Theme)
+     */
+    @NonNull
+    @Deprecated
     public static ColorStateList createFromXml(Resources r, XmlPullParser parser)
             throws XmlPullParserException, IOException {
+        return createFromXml(r, parser, null);
+    }
+
+    /**
+     * Creates a ColorStateList from an XML document using given a set of
+     * {@link Resources} and a {@link Theme}.
+     *
+     * @param r Resources against which the ColorStateList should be inflated.
+     * @param parser Parser for the XML document defining the ColorStateList.
+     * @param theme Optional theme to apply to the color state list, may be
+     *              {@code null}.
+     * @return A new color state list.
+     */
+    @NonNull
+    public static ColorStateList createFromXml(@NonNull Resources r, @NonNull XmlPullParser parser,
+            @Nullable Theme theme) throws XmlPullParserException, IOException {
         final AttributeSet attrs = Xml.asAttributeSet(parser);
 
         int type;
-        while ((type=parser.next()) != XmlPullParser.START_TAG
+        while ((type = parser.next()) != XmlPullParser.START_TAG
                    && type != XmlPullParser.END_DOCUMENT) {
+            // Seek parser to start tag.
         }
 
         if (type != XmlPullParser.START_TAG) {
             throw new XmlPullParserException("No start tag found");
         }
 
-        return createFromXmlInner(r, parser, attrs);
+        return createFromXmlInner(r, parser, attrs, theme);
     }
 
     /**
@@ -136,28 +206,31 @@ public class ColorStateList implements Parcelable {
      * tag in an XML document, tries to create a ColorStateList from that tag.
      *
      * @throws XmlPullParserException if the current tag is not &lt;selector>
-     * @return A color state list for the current tag.
+     * @return A new color state list for the current tag.
      */
-    private static ColorStateList createFromXmlInner(Resources r, XmlPullParser parser,
-            AttributeSet attrs) throws XmlPullParserException, IOException {
-        final ColorStateList colorStateList;
+    @NonNull
+    private static ColorStateList createFromXmlInner(@NonNull Resources r,
+            @NonNull XmlPullParser parser, @NonNull AttributeSet attrs, @Nullable Theme theme)
+            throws XmlPullParserException, IOException {
         final String name = parser.getName();
-        if (name.equals("selector")) {
-            colorStateList = new ColorStateList();
-        } else {
+        if (!name.equals("selector")) {
             throw new XmlPullParserException(
-                    parser.getPositionDescription() + ": invalid drawable tag " + name);
+                    parser.getPositionDescription() + ": invalid color state list tag " + name);
         }
 
-        colorStateList.inflate(r, parser, attrs);
+        final ColorStateList colorStateList = new ColorStateList();
+        colorStateList.inflate(r, parser, attrs, theme);
         return colorStateList;
     }
 
     /**
-     * Creates a new ColorStateList that has the same states and
-     * colors as this one but where each color has the specified alpha value
-     * (0-255).
+     * Creates a new ColorStateList that has the same states and colors as this
+     * one but where each color has the specified alpha value (0-255).
+     *
+     * @param alpha The new alpha channel value (0-255).
+     * @return A new color state list.
      */
+    @NonNull
     public ColorStateList withAlpha(int alpha) {
         final int[] colors = new int[mColors.length];
         final int len = colors.length;
@@ -171,88 +244,212 @@ public class ColorStateList implements Parcelable {
     /**
      * Fill in this object based on the contents of an XML "selector" element.
      */
-    private void inflate(Resources r, XmlPullParser parser, AttributeSet attrs)
+    private void inflate(@NonNull Resources r, @NonNull XmlPullParser parser,
+            @NonNull AttributeSet attrs, @Nullable Theme theme)
             throws XmlPullParserException, IOException {
-        int type;
-
         final int innerDepth = parser.getDepth()+1;
         int depth;
+        int type;
+
+        int changingConfigurations = 0;
+        int defaultColor = DEFAULT_COLOR;
+
+        boolean hasUnresolvedAttrs = false;
 
         int[][] stateSpecList = ArrayUtils.newUnpaddedArray(int[].class, 20);
+        int[][] themeAttrsList = new int[stateSpecList.length][];
         int[] colorList = new int[stateSpecList.length];
         int listSize = 0;
 
-        while ((type=parser.next()) != XmlPullParser.END_DOCUMENT
-               && ((depth=parser.getDepth()) >= innerDepth
-                   || type != XmlPullParser.END_TAG)) {
-            if (type != XmlPullParser.START_TAG) {
+        while ((type = parser.next()) != XmlPullParser.END_DOCUMENT
+               && ((depth = parser.getDepth()) >= innerDepth || type != XmlPullParser.END_TAG)) {
+            if (type != XmlPullParser.START_TAG || depth > innerDepth
+                    || !parser.getName().equals("item")) {
                 continue;
             }
 
-            if (depth > innerDepth || !parser.getName().equals("item")) {
-                continue;
-            }
+            final TypedArray a = Resources.obtainAttributes(r, theme, attrs,
+                    R.styleable.ColorStateListItem);
+            final int[] themeAttrs = a.extractThemeAttrs();
+            final int baseColor = a.getColor(R.styleable.ColorStateListItem_color, Color.MAGENTA);
+            final float alphaMod = a.getFloat(R.styleable.ColorStateListItem_alpha, 1.0f);
 
-            int alphaRes = 0;
-            float alpha = 1.0f;
-            int colorRes = 0;
-            int color = 0xffff0000;
-            boolean haveColor = false;
+            changingConfigurations |= a.getChangingConfigurations();
 
-            int i;
+            a.recycle();
+
+            // Parse all unrecognized attributes as state specifiers.
             int j = 0;
             final int numAttrs = attrs.getAttributeCount();
             int[] stateSpec = new int[numAttrs];
-            for (i = 0; i < numAttrs; i++) {
+            for (int i = 0; i < numAttrs; i++) {
                 final int stateResId = attrs.getAttributeNameResource(i);
-                if (stateResId == 0) break;
-                if (stateResId == com.android.internal.R.attr.alpha) {
-                    alphaRes = attrs.getAttributeResourceValue(i, 0);
-                    if (alphaRes == 0) {
-                        alpha = attrs.getAttributeFloatValue(i, 1.0f);
-                    }
-                } else if (stateResId == com.android.internal.R.attr.color) {
-                    colorRes = attrs.getAttributeResourceValue(i, 0);
-                    if (colorRes == 0) {
-                        color = attrs.getAttributeIntValue(i, color);
-                        haveColor = true;
-                    }
-                } else {
-                    stateSpec[j++] = attrs.getAttributeBooleanValue(i, false)
-                            ? stateResId : -stateResId;
+                switch (stateResId) {
+                    case R.attr.color:
+                    case R.attr.alpha:
+                        // Recognized attribute, ignore.
+                        break;
+                    default:
+                        stateSpec[j++] = attrs.getAttributeBooleanValue(i, false)
+                                ? stateResId : -stateResId;
                 }
             }
             stateSpec = StateSet.trimStateSet(stateSpec, j);
 
-            if (colorRes != 0) {
-                color = r.getColor(colorRes);
-            } else if (!haveColor) {
-                throw new XmlPullParserException(
-                        parser.getPositionDescription()
-                        + ": <item> tag requires a 'android:color' attribute.");
-            }
-
-            if (alphaRes != 0) {
-                alpha = r.getFloat(alphaRes);
-            }
-
-            // Apply alpha modulation.
-            final int alphaMod = MathUtils.constrain((int) (Color.alpha(color) * alpha), 0, 255);
-            color = (color & 0xFFFFFF) | (alphaMod << 24);
-
+            // Apply alpha modulation. If we couldn't resolve the color or
+            // alpha yet, the default values leave us enough information to
+            // modulate again during applyTheme().
+            final int color = modulateColorAlpha(baseColor, alphaMod);
             if (listSize == 0 || stateSpec.length == 0) {
-                mDefaultColor = color;
+                defaultColor = color;
+            }
+
+            if (themeAttrs != null) {
+                hasUnresolvedAttrs = true;
             }
 
             colorList = GrowingArrayUtils.append(colorList, listSize, color);
+            themeAttrsList = GrowingArrayUtils.append(themeAttrsList, listSize, themeAttrs);
             stateSpecList = GrowingArrayUtils.append(stateSpecList, listSize, stateSpec);
             listSize++;
+        }
+
+        mChangingConfigurations = changingConfigurations;
+        mDefaultColor = defaultColor;
+
+        if (hasUnresolvedAttrs) {
+            mThemeAttrs = new int[listSize][];
+            System.arraycopy(themeAttrsList, 0, mThemeAttrs, 0, listSize);
+        } else {
+            mThemeAttrs = null;
         }
 
         mColors = new int[listSize];
         mStateSpecs = new int[listSize][];
         System.arraycopy(colorList, 0, mColors, 0, listSize);
         System.arraycopy(stateSpecList, 0, mStateSpecs, 0, listSize);
+
+        onColorsChanged();
+    }
+
+    /**
+     * Returns whether a theme can be applied to this color state list, which
+     * usually indicates that the color state list has unresolved theme
+     * attributes.
+     *
+     * @return whether a theme can be applied to this color state list
+     * @hide only for resource preloading
+     */
+    public boolean canApplyTheme() {
+        return mThemeAttrs != null;
+    }
+
+    /**
+     * Applies a theme to this color state list.
+     * <p>
+     * <strong>Note:</strong> Applying a theme may affect the changing
+     * configuration parameters of this color state list. After calling this
+     * method, any dependent configurations must be updated by obtaining the
+     * new configuration mask from {@link #getChangingConfigurations()}.
+     *
+     * @param t the theme to apply
+     */
+    private void applyTheme(Theme t) {
+        if (mThemeAttrs == null) {
+            return;
+        }
+
+        boolean hasUnresolvedAttrs = false;
+
+        final int[][] themeAttrsList = mThemeAttrs;
+        final int N = themeAttrsList.length;
+        for (int i = 0; i < N; i++) {
+            if (themeAttrsList[i] != null) {
+                final TypedArray a = t.resolveAttributes(themeAttrsList[i],
+                        R.styleable.ColorStateListItem);
+
+                final float defaultAlphaMod;
+                if (themeAttrsList[i][R.styleable.ColorStateListItem_color] != 0) {
+                    // If the base color hasn't been resolved yet, the current
+                    // color's alpha channel is either full-opacity (if we
+                    // haven't resolved the alpha modulation yet) or
+                    // pre-modulated. Either is okay as a default value.
+                    defaultAlphaMod = Color.alpha(mColors[i]) / 255.0f;
+                } else {
+                    // Otherwise, the only correct default value is 1. Even if
+                    // nothing is resolved during this call, we can apply this
+                    // multiple times without losing of information.
+                    defaultAlphaMod = 1.0f;
+                }
+
+                // Extract the theme attributes, if any, before attempting to
+                // read from the typed array. This prevents a crash if we have
+                // unresolved attrs.
+                themeAttrsList[i] = a.extractThemeAttrs(themeAttrsList[i]);
+                if (themeAttrsList[i] != null) {
+                    hasUnresolvedAttrs = true;
+                }
+
+                final int baseColor = a.getColor(
+                        R.styleable.ColorStateListItem_color, mColors[i]);
+                final float alphaMod = a.getFloat(
+                        R.styleable.ColorStateListItem_alpha, defaultAlphaMod);
+                mColors[i] = modulateColorAlpha(baseColor, alphaMod);
+
+                // Account for any configuration changes.
+                mChangingConfigurations |= a.getChangingConfigurations();
+
+                a.recycle();
+            }
+        }
+
+        if (!hasUnresolvedAttrs) {
+            mThemeAttrs = null;
+        }
+
+        onColorsChanged();
+    }
+
+    /**
+     * Returns an appropriately themed color state list.
+     *
+     * @param t the theme to apply
+     * @return a copy of the color state list with the theme applied, or the
+     *         color state list itself if there were no unresolved theme
+     *         attributes
+     * @hide only for resource preloading
+     */
+    public ColorStateList obtainForTheme(Theme t) {
+        if (t == null || !canApplyTheme()) {
+            return this;
+        }
+
+        final ColorStateList clone = new ColorStateList(this);
+        clone.applyTheme(t);
+        return clone;
+    }
+
+    /**
+     * Returns a mask of the configuration parameters for which this color
+     * state list may change, requiring that it be re-created.
+     *
+     * @return a mask of the changing configuration parameters, as defined by
+     *         {@link android.content.pm.ActivityInfo}
+     *
+     * @see android.content.pm.ActivityInfo
+     */
+    public int getChangingConfigurations() {
+        return mChangingConfigurations;
+    }
+
+    private int modulateColorAlpha(int baseColor, float alphaMod) {
+        if (alphaMod == 1.0f) {
+            return baseColor;
+        }
+
+        final int baseAlpha = Color.alpha(baseColor);
+        final int alpha = MathUtils.constrain((int) (baseAlpha * alphaMod + 0.5f), 0, 255);
+        return (baseColor & 0xFFFFFF) | (alpha << 24);
     }
 
     /**
@@ -275,28 +472,24 @@ public class ColorStateList implements Parcelable {
      * @return True if this color state list is opaque.
      */
     public boolean isOpaque() {
-        final int n = mColors.length;
-        for (int i = 0; i < n; i++) {
-            if (Color.alpha(mColors[i]) != 0xFF) {
-                return false;
-            }
-        }
-        return true;
+        return mIsOpaque;
     }
 
     /**
-     * Return the color associated with the given set of {@link android.view.View} states.
+     * Return the color associated with the given set of
+     * {@link android.view.View} states.
      *
      * @param stateSet an array of {@link android.view.View} states
-     * @param defaultColor the color to return if there's not state spec in this
-     * {@link ColorStateList} that matches the stateSet.
+     * @param defaultColor the color to return if there's no matching state
+     *                     spec in this {@link ColorStateList} that matches the
+     *                     stateSet.
      *
      * @return the color associated with that set of states in this {@link ColorStateList}.
      */
-    public int getColorForState(int[] stateSet, int defaultColor) {
+    public int getColorForState(@Nullable int[] stateSet, int defaultColor) {
         final int setLength = mStateSpecs.length;
         for (int i = 0; i < setLength; i++) {
-            int[] stateSpec = mStateSpecs[i];
+            final int[] stateSpec = mStateSpecs[i];
             if (StateSet.stateSetMatches(stateSpec, stateSet)) {
                 return mColors[i];
             }
@@ -309,12 +502,15 @@ public class ColorStateList implements Parcelable {
      *
      * @return the default color in this {@link ColorStateList}.
      */
+    @ColorInt
     public int getDefaultColor() {
         return mDefaultColor;
     }
 
     /**
-     * Return the states in this {@link ColorStateList}.
+     * Return the states in this {@link ColorStateList}. The returned array
+     * should not be modified.
+     *
      * @return the states in this {@link ColorStateList}
      * @hide
      */
@@ -323,7 +519,9 @@ public class ColorStateList implements Parcelable {
     }
 
     /**
-     * Return the colors in this {@link ColorStateList}.
+     * Return the colors in this {@link ColorStateList}. The returned array
+     * should not be modified.
+     *
      * @return the colors in this {@link ColorStateList}
      * @hide
      */
@@ -332,51 +530,106 @@ public class ColorStateList implements Parcelable {
     }
 
     /**
-     * If the color state list does not already have an entry matching the
-     * specified state, prepends a state set and color pair to a color state
-     * list.
+     * Returns whether the specified state is referenced in any of the state
+     * specs contained within this ColorStateList.
      * <p>
-     * This is a workaround used in TimePicker and DatePicker until we can
-     * add support for theme attributes in ColorStateList.
+     * Any reference, either positive or negative {ex. ~R.attr.state_enabled},
+     * will cause this method to return {@code true}. Wildcards are not counted
+     * as references.
      *
-     * @param colorStateList the source color state list
-     * @param state the state to prepend
-     * @param color the color to use for the given state
-     * @return a new color state list, or the source color state list if there
-     *         was already a matching state set
-     *
-     * @hide Remove when we can support theme attributes.
+     * @param state the state to search for
+     * @return {@code true} if the state if referenced, {@code false} otherwise
+     * @hide Use only as directed. For internal use only.
      */
-    public static ColorStateList addFirstIfMissing(
-            ColorStateList colorStateList, int state, int color) {
-        final int[][] inputStates = colorStateList.getStates();
-        for (int i = 0; i < inputStates.length; i++) {
-            final int[] inputState = inputStates[i];
-            for (int j = 0; j < inputState.length; j++) {
-                if (inputState[j] == state) {
-                    return colorStateList;
+    public boolean hasState(int state) {
+        final int[][] stateSpecs = mStateSpecs;
+        final int specCount = stateSpecs.length;
+        for (int specIndex = 0; specIndex < specCount; specIndex++) {
+            final int[] states = stateSpecs[specIndex];
+            final int stateCount = states.length;
+            for (int stateIndex = 0; stateIndex < stateCount; stateIndex++) {
+                if (states[stateIndex] == state || states[stateIndex] == ~state) {
+                    return true;
                 }
             }
         }
-
-        final int[][] outputStates = new int[inputStates.length + 1][];
-        System.arraycopy(inputStates, 0, outputStates, 1, inputStates.length);
-        outputStates[0] = new int[] { state };
-
-        final int[] inputColors = colorStateList.getColors();
-        final int[] outputColors = new int[inputColors.length + 1];
-        System.arraycopy(inputColors, 0, outputColors, 1, inputColors.length);
-        outputColors[0] = color;
-
-        return new ColorStateList(outputStates, outputColors);
+        return false;
     }
 
     @Override
     public String toString() {
         return "ColorStateList{" +
+               "mThemeAttrs=" + Arrays.deepToString(mThemeAttrs) +
+               "mChangingConfigurations=" + mChangingConfigurations +
                "mStateSpecs=" + Arrays.deepToString(mStateSpecs) +
                "mColors=" + Arrays.toString(mColors) +
                "mDefaultColor=" + mDefaultColor + '}';
+    }
+
+    /**
+     * Updates the default color and opacity.
+     */
+    private void onColorsChanged() {
+        int defaultColor = DEFAULT_COLOR;
+        boolean isOpaque = true;
+
+        final int[][] states = mStateSpecs;
+        final int[] colors = mColors;
+        final int N = states.length;
+        if (N > 0) {
+            defaultColor = colors[0];
+
+            for (int i = N - 1; i > 0; i--) {
+                if (states[i].length == 0) {
+                    defaultColor = colors[i];
+                    break;
+                }
+            }
+
+            for (int i = 0; i < N; i++) {
+                if (Color.alpha(colors[i]) != 0xFF) {
+                    isOpaque = false;
+                    break;
+                }
+            }
+        }
+
+        mDefaultColor = defaultColor;
+        mIsOpaque = isOpaque;
+    }
+
+    /**
+     * @return a factory that can create new instances of this ColorStateList
+     * @hide only for resource preloading
+     */
+    public ConstantState<ColorStateList> getConstantState() {
+        if (mFactory == null) {
+            mFactory = new ColorStateListFactory(this);
+        }
+        return mFactory;
+    }
+
+    private static class ColorStateListFactory extends ConstantState<ColorStateList> {
+        private final ColorStateList mSrc;
+
+        public ColorStateListFactory(ColorStateList src) {
+            mSrc = src;
+        }
+
+        @Override
+        public int getChangingConfigurations() {
+            return mSrc.mChangingConfigurations;
+        }
+
+        @Override
+        public ColorStateList newInstance() {
+            return mSrc;
+        }
+
+        @Override
+        public ColorStateList newInstance(Resources res, Theme theme) {
+            return mSrc.obtainForTheme(theme);
+        }
     }
 
     @Override
@@ -386,6 +639,9 @@ public class ColorStateList implements Parcelable {
 
     @Override
     public void writeToParcel(Parcel dest, int flags) {
+        if (canApplyTheme()) {
+            Log.w(TAG, "Wrote partially-resolved ColorStateList to parcel!");
+        }
         final int N = mStateSpecs.length;
         dest.writeInt(N);
         for (int i = 0; i < N; i++) {

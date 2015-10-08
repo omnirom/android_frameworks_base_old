@@ -19,11 +19,15 @@
 
 #include <cutils/properties.h>
 #include <stdlib.h>
+#include <utils/Singleton.h>
 
 /**
  * This file contains the list of system properties used to configure
  * the OpenGLRenderer.
  */
+
+namespace android {
+namespace uirenderer {
 
 ///////////////////////////////////////////////////////////////////////////////
 // Compile-time properties
@@ -105,20 +109,6 @@ enum DebugLevel {
 #define PROPERTY_PROFILE_VISUALIZE_BARS "visual_bars"
 
 /**
- * System property used to specify the number of frames to be used
- * when doing hardware rendering profiling.
- * The default value of this property is #PROFILE_MAX_FRAMES.
- *
- * When profiling is enabled, the adb shell dumpsys gfxinfo command will
- * output extra information about the time taken to execute by the last
- * frames.
- *
- * Possible values:
- * "60", to set the limit of frames to 60
- */
-#define PROPERTY_PROFILE_MAXFRAMES "debug.hwui.profile.maxframes"
-
-/**
  * Used to enable/disable non-rectangular clipping debugging.
  *
  * The accepted values are:
@@ -153,6 +143,21 @@ enum DebugLevel {
  * Has no effect if PROPERTY_DISABLE_DRAW_DEFER is set to "true"
  */
 #define PROPERTY_DISABLE_DRAW_REORDER "debug.hwui.disable_draw_reorder"
+
+/**
+ * Setting this property will enable or disable the dropping of frames with
+ * empty damage. Default is "true".
+ */
+#define PROPERTY_SKIP_EMPTY_DAMAGE "debug.hwui.skip_empty_damage"
+
+/**
+ * Setting this property will enable usage of EGL_KHR_swap_buffers_with_damage
+ * See: https://www.khronos.org/registry/egl/extensions/KHR/EGL_KHR_swap_buffers_with_damage.txt
+ * Default is "false" temporarily
+ * TODO: Change to "true", make sure to remove the log in EglManager::swapBuffers
+ * before changing this to default to true!
+ */
+#define PROPERTY_SWAP_WITH_DAMAGE "debug.hwui.swap_with_damage"
 
 ///////////////////////////////////////////////////////////////////////////////
 // Runtime configuration properties
@@ -231,7 +236,7 @@ enum DebugLevel {
 #define DEFAULT_TEXTURE_CACHE_SIZE 24.0f
 #define DEFAULT_LAYER_CACHE_SIZE 16.0f
 #define DEFAULT_RENDER_BUFFER_CACHE_SIZE 2.0f
-#define DEFAULT_PATH_CACHE_SIZE 10.0f
+#define DEFAULT_PATH_CACHE_SIZE 4.0f
 #define DEFAULT_VERTEX_CACHE_SIZE 1.0f
 #define DEFAULT_PATCH_CACHE_SIZE 128 // in kB
 #define DEFAULT_GRADIENT_CACHE_SIZE 0.5f
@@ -253,12 +258,65 @@ enum DebugLevel {
 // Converts a number of kilo-bytes into bytes
 #define KB(s) s * 1024
 
-static DebugLevel readDebugLevel() {
-    char property[PROPERTY_VALUE_MAX];
-    if (property_get(PROPERTY_DEBUG, property, NULL) > 0) {
-        return (DebugLevel) atoi(property);
-    }
-    return kDebugDisabled;
-}
+enum class ProfileType {
+    None,
+    Console,
+    Bars
+};
+
+enum class OverdrawColorSet {
+    Default = 0,
+    Deuteranomaly
+};
+
+enum class StencilClipDebug {
+    Hide,
+    ShowHighlight,
+    ShowRegion
+};
+
+/**
+ * Renderthread-only singleton which manages several static rendering properties. Most of these
+ * are driven by system properties which are queried once at initialization, and again if init()
+ * is called.
+ */
+class Properties {
+public:
+    static bool load();
+
+    static bool drawDeferDisabled;
+    static bool drawReorderDisabled;
+    static bool debugLayersUpdates;
+    static bool debugOverdraw;
+    static bool showDirtyRegions;
+    // TODO: Remove after stabilization period
+    static bool skipEmptyFrames;
+    // TODO: Remove after stabilization period
+    static bool swapBuffersWithDamage;
+
+    static DebugLevel debugLevel;
+    static OverdrawColorSet overdrawColorSet;
+    static StencilClipDebug debugStencilClip;
+
+    // Override the value for a subset of properties in this class
+    static void overrideProperty(const char* name, const char* value);
+
+    static float overrideLightRadius;
+    static float overrideLightPosY;
+    static float overrideLightPosZ;
+    static float overrideAmbientRatio;
+    static int overrideAmbientShadowStrength;
+    static int overrideSpotShadowStrength;
+
+    static ProfileType getProfileType();
+
+private:
+    static ProfileType sProfileType;
+    static bool sDisableProfileBars;
+
+}; // class Caches
+
+}; // namespace uirenderer
+}; // namespace android
 
 #endif // ANDROID_HWUI_PROPERTIES_H

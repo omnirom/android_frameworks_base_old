@@ -16,9 +16,12 @@
 
 package android.app;
 
+import android.annotation.DrawableRes;
 import android.annotation.IntDef;
+import android.annotation.LayoutRes;
 import android.annotation.NonNull;
 import android.annotation.Nullable;
+import android.annotation.StringRes;
 import android.content.Context;
 import android.content.res.Configuration;
 import android.content.res.TypedArray;
@@ -30,14 +33,11 @@ import android.view.KeyEvent;
 import android.view.View;
 import android.view.ViewDebug;
 import android.view.ViewGroup;
-import android.view.ViewGroup.MarginLayoutParams;
+import android.view.ViewHierarchyEncoder;
 import android.view.Window;
 import android.widget.SpinnerAdapter;
-import android.widget.Toolbar;
-
 import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
-import java.util.Map;
 
 /**
  * A primary toolbar within the activity that may display the activity title, application-level
@@ -256,7 +256,7 @@ public abstract class ActionBar {
      *
      * @see #setDisplayOptions(int, int)
      */
-    public abstract void setCustomView(int resId);
+    public abstract void setCustomView(@LayoutRes int resId);
 
     /**
      * Set the icon to display in the 'home' section of the action bar.
@@ -271,7 +271,7 @@ public abstract class ActionBar {
      * @see #setDisplayUseLogoEnabled(boolean)
      * @see #setDisplayShowHomeEnabled(boolean)
      */
-    public abstract void setIcon(int resId);
+    public abstract void setIcon(@DrawableRes int resId);
 
     /**
      * Set the icon to display in the 'home' section of the action bar.
@@ -301,7 +301,7 @@ public abstract class ActionBar {
      * @see #setDisplayUseLogoEnabled(boolean)
      * @see #setDisplayShowHomeEnabled(boolean)
      */
-    public abstract void setLogo(int resId);
+    public abstract void setLogo(@DrawableRes int resId);
 
     /**
      * Set the logo to display in the 'home' section of the action bar.
@@ -397,7 +397,7 @@ public abstract class ActionBar {
      * @see #setTitle(CharSequence)
      * @see #setDisplayOptions(int, int)
      */
-    public abstract void setTitle(int resId);
+    public abstract void setTitle(@StringRes int resId);
 
     /**
      * Set the action bar's subtitle. This will only be displayed if
@@ -420,7 +420,7 @@ public abstract class ActionBar {
      * @see #setSubtitle(CharSequence)
      * @see #setDisplayOptions(int, int)
      */
-    public abstract void setSubtitle(int resId);
+    public abstract void setSubtitle(@StringRes int resId);
 
     /**
      * Set display options. This changes all display option bits at once. To change
@@ -892,7 +892,7 @@ public abstract class ActionBar {
      * @see #setDisplayHomeAsUpEnabled(boolean)
      * @see #setHomeActionContentDescription(int)
      */
-    public void setHomeAsUpIndicator(int resId) { }
+    public void setHomeAsUpIndicator(@DrawableRes int resId) { }
 
     /**
      * Set an alternate description for the Home/Up action, when enabled.
@@ -931,7 +931,7 @@ public abstract class ActionBar {
      * @see #setHomeAsUpIndicator(int)
      * @see #setHomeAsUpIndicator(android.graphics.drawable.Drawable)
      */
-    public void setHomeActionContentDescription(int resId) { }
+    public void setHomeActionContentDescription(@StringRes int resId) { }
 
     /**
      * Enable hiding the action bar on content scroll.
@@ -1057,6 +1057,11 @@ public abstract class ActionBar {
     }
 
     /** @hide */
+    public boolean onKeyShortcut(int keyCode, KeyEvent event) {
+        return false;
+    }
+
+    /** @hide */
     public boolean collapseActionView() {
         return false;
     }
@@ -1154,7 +1159,7 @@ public abstract class ActionBar {
          * @param resId Resource ID referring to the drawable to use as an icon
          * @return The current instance for call chaining
          */
-        public abstract Tab setIcon(int resId);
+        public abstract Tab setIcon(@DrawableRes int resId);
 
         /**
          * Set the text displayed on this tab. Text may be truncated if there is not
@@ -1172,7 +1177,7 @@ public abstract class ActionBar {
          * @param resId A resource ID referring to the text that should be displayed
          * @return The current instance for call chaining
          */
-        public abstract Tab setText(int resId);
+        public abstract Tab setText(@StringRes int resId);
 
         /**
          * Set a custom view to be used for this tab. This overrides values set by
@@ -1190,7 +1195,7 @@ public abstract class ActionBar {
          * @param layoutResId A layout resource to inflate and use as a custom tab view
          * @return The current instance for call chaining
          */
-        public abstract Tab setCustomView(int layoutResId);
+        public abstract Tab setCustomView(@LayoutRes int layoutResId);
 
         /**
          * Retrieve a previously set custom view for this tab.
@@ -1235,7 +1240,7 @@ public abstract class ActionBar {
          * @see #setContentDescription(CharSequence)
          * @see #getContentDescription()
          */
-        public abstract Tab setContentDescription(int resId);
+        public abstract Tab setContentDescription(@StringRes int resId);
 
         /**
          * Set a description of this tab's content for use in accessibility support.
@@ -1374,5 +1379,13 @@ public abstract class ActionBar {
          * version of the SDK an app can end up statically linking to the new MarginLayoutParams
          * overload, causing a crash when running on older platform versions with no other changes.
          */
+
+        /** @hide */
+        @Override
+        protected void encodeProperties(@NonNull ViewHierarchyEncoder encoder) {
+            super.encodeProperties(encoder);
+
+            encoder.addProperty("gravity", gravity);
+        }
     }
 }

@@ -22,4 +22,5 @@
     <string name="bugreport_finished_text" product="default" msgid="3559904746859400732">"የሳንካ ሪፖርትዎን ለማጋራት ይንክኩ"</string>
     <string name="bugreport_confirm" msgid="5130698467795669780">"የሳንካ ሪፖርቶች የግል መረጃን ጨምሮ ከበርካታ የስርዓቱ ምዝግብ ማስታወሻዎች የመጣ ውሂብን ይዟል። የሳንካ ሪፖርቶች ለሚያምኗቸው መተግበሪያዎችን እና ሰዎችን ብቻ ያጋሩ።"</string>
     <string name="bugreport_confirm_repeat" msgid="4926842460688645058">"ይህን መልዕክት በሚቀጥለው ጊዜ አሳይ"</string>
+    <string name="bugreport_storage_title" msgid="5332488144740527109">"የሳንካ ሪፖርቶች"</string>
 </resources>

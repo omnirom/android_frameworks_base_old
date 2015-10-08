@@ -19,6 +19,8 @@ package android.widget;
 import com.android.internal.R;
 
 import android.annotation.IntDef;
+import android.annotation.NonNull;
+import android.annotation.Nullable;
 import android.content.Context;
 import android.content.res.TypedArray;
 import android.graphics.Canvas;
@@ -28,8 +30,7 @@ import android.view.Gravity;
 import android.view.View;
 import android.view.ViewDebug;
 import android.view.ViewGroup;
-import android.view.accessibility.AccessibilityEvent;
-import android.view.accessibility.AccessibilityNodeInfo;
+import android.view.ViewHierarchyEncoder;
 import android.widget.RemoteViews.RemoteView;
 
 import java.lang.annotation.Retention;
@@ -184,15 +185,17 @@ public class LinearLayout extends ViewGroup {
     private int mShowDividers;
     private int mDividerPadding;
 
+    private int mLayoutDirection = View.LAYOUT_DIRECTION_UNDEFINED;
+
     public LinearLayout(Context context) {
         this(context, null);
     }
 
-    public LinearLayout(Context context, AttributeSet attrs) {
+    public LinearLayout(Context context, @Nullable AttributeSet attrs) {
         this(context, attrs, 0);
     }
     
-    public LinearLayout(Context context, AttributeSet attrs, int defStyleAttr) {
+    public LinearLayout(Context context, @Nullable AttributeSet attrs, int defStyleAttr) {
         this(context, attrs, defStyleAttr, 0);
     }
 
@@ -356,7 +359,7 @@ public class LinearLayout extends ViewGroup {
         }
 
         if (hasDividerBeforeChildAt(count)) {
-            final View child = getVirtualChildAt(count - 1);
+            final View child = getLastNonGoneChild();
             int bottom = 0;
             if (child == null) {
                 bottom = getHeight() - getPaddingBottom() - mDividerHeight;
@@ -366,6 +369,20 @@ public class LinearLayout extends ViewGroup {
             }
             drawHorizontalDivider(canvas, bottom);
         }
+    }
+
+    /**
+     * Finds the last child that is not gone. The last child will be used as the reference for
+     * where the end divider should be drawn.
+     */
+    private View getLastNonGoneChild() {
+        for (int i = getVirtualChildCount() - 1; i >= 0; i--) {
+            View child = getVirtualChildAt(i);
+            if (child != null && child.getVisibility() != GONE) {
+                return child;
+            }
+        }
+        return null;
     }
 
     void drawDividersHorizontal(Canvas canvas) {
@@ -389,7 +406,7 @@ public class LinearLayout extends ViewGroup {
         }
 
         if (hasDividerBeforeChildAt(count)) {
-            final View child = getVirtualChildAt(count - 1);
+            final View child = getLastNonGoneChild();
             int position;
             if (child == null) {
                 if (isLayoutRtl) {
@@ -624,21 +641,30 @@ public class LinearLayout extends ViewGroup {
      * @hide Pending API consideration. Currently only used internally by the system.
      */
     protected boolean hasDividerBeforeChildAt(int childIndex) {
-        if (childIndex == 0) {
-            return (mShowDividers & SHOW_DIVIDER_BEGINNING) != 0;
-        } else if (childIndex == getChildCount()) {
+        if (childIndex == getVirtualChildCount()) {
+            // Check whether the end divider should draw.
             return (mShowDividers & SHOW_DIVIDER_END) != 0;
-        } else if ((mShowDividers & SHOW_DIVIDER_MIDDLE) != 0) {
-            boolean hasVisibleViewBefore = false;
-            for (int i = childIndex - 1; i >= 0; i--) {
-                if (getChildAt(i).getVisibility() != GONE) {
-                    hasVisibleViewBefore = true;
-                    break;
-                }
-            }
-            return hasVisibleViewBefore;
         }
-        return false;
+        boolean allViewsAreGoneBefore = allViewsAreGoneBefore(childIndex);
+        if (allViewsAreGoneBefore) {
+            // This is the first view that's not gone, check if beginning divider is enabled.
+            return (mShowDividers & SHOW_DIVIDER_BEGINNING) != 0;
+        } else {
+            return (mShowDividers & SHOW_DIVIDER_MIDDLE) != 0;
+        }
+    }
+
+    /**
+     * Checks whether all (virtual) child views before the given index are gone.
+     */
+    private boolean allViewsAreGoneBefore(int childIndex) {
+        for (int i = childIndex - 1; i >= 0; i--) {
+            View child = getVirtualChildAt(i);
+            if (child != null && child.getVisibility() != GONE) {
+                return false;
+            }
+        }
+        return true;
     }
 
     /**
@@ -1059,8 +1085,11 @@ public class LinearLayout extends ViewGroup {
                 // use as much space as it wants because we can shrink things
                 // later (and re-measure).
                 if (baselineAligned) {
-                    final int freeSpec = MeasureSpec.makeMeasureSpec(0, MeasureSpec.UNSPECIFIED);
-                    child.measure(freeSpec, freeSpec);
+                    final int freeWidthSpec = MeasureSpec.makeSafeMeasureSpec(
+                            MeasureSpec.getSize(widthMeasureSpec), MeasureSpec.UNSPECIFIED);
+                    final int freeHeightSpec = MeasureSpec.makeSafeMeasureSpec(
+                            MeasureSpec.getSize(heightMeasureSpec), MeasureSpec.UNSPECIFIED);
+                    child.measure(freeWidthSpec, freeHeightSpec);
                 } else {
                     skippedMeasure = true;
                 }
@@ -1563,6 +1592,17 @@ public class LinearLayout extends ViewGroup {
         }
     }
 
+    @Override
+    public void onRtlPropertiesChanged(@ResolvedLayoutDir int layoutDirection) {
+        super.onRtlPropertiesChanged(layoutDirection);
+        if (layoutDirection != mLayoutDirection) {
+            mLayoutDirection = layoutDirection;
+            if (mOrientation == HORIZONTAL) {
+                requestLayout();
+            }
+        }
+    }
+
     /**
      * Position the children during a layout pass if the orientation of this
      * LinearLayout is set to {@link #HORIZONTAL}.
@@ -1807,15 +1847,22 @@ public class LinearLayout extends ViewGroup {
     }
 
     @Override
-    public void onInitializeAccessibilityEvent(AccessibilityEvent event) {
-        super.onInitializeAccessibilityEvent(event);
-        event.setClassName(LinearLayout.class.getName());
+    public CharSequence getAccessibilityClassName() {
+        return LinearLayout.class.getName();
     }
 
+    /** @hide */
     @Override
-    public void onInitializeAccessibilityNodeInfo(AccessibilityNodeInfo info) {
-        super.onInitializeAccessibilityNodeInfo(info);
-        info.setClassName(LinearLayout.class.getName());
+    protected void encodeProperties(@NonNull ViewHierarchyEncoder encoder) {
+        super.encodeProperties(encoder);
+        encoder.addProperty("layout:baselineAligned", mBaselineAligned);
+        encoder.addProperty("layout:baselineAlignedChildIndex", mBaselineAlignedChildIndex);
+        encoder.addProperty("measurement:baselineChildTop", mBaselineChildTop);
+        encoder.addProperty("measurement:orientation", mOrientation);
+        encoder.addProperty("measurement:gravity", mGravity);
+        encoder.addProperty("measurement:totalLength", mTotalLength);
+        encoder.addProperty("layout:totalLength", mTotalLength);
+        encoder.addProperty("layout:useLargestChild", mUseLargestChild);
     }
 
     /**
@@ -1925,6 +1972,15 @@ public class LinearLayout extends ViewGroup {
         public String debug(String output) {
             return output + "LinearLayout.LayoutParams={width=" + sizeToString(width) +
                     ", height=" + sizeToString(height) + " weight=" + weight +  "}";
+        }
+
+        /** @hide */
+        @Override
+        protected void encodeProperties(@NonNull ViewHierarchyEncoder encoder) {
+            super.encodeProperties(encoder);
+
+            encoder.addProperty("layout:weight", weight);
+            encoder.addProperty("layout:gravity", gravity);
         }
     }
 }

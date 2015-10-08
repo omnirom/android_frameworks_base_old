@@ -16,6 +16,7 @@
 
 package com.android.systemui.statusbar.phone;
 
+import android.graphics.drawable.Icon;
 import android.os.Bundle;
 import android.os.UserHandle;
 import android.view.Gravity;
@@ -90,23 +91,11 @@ public class DemoStatusIcons extends LinearLayout implements DemoMode {
                         : 0;
                 updateSlot("alarm_clock", null, iconId);
             }
-            String sync = args.getString("sync");
-            if (sync != null) {
-                int iconId = sync.equals("show") ? R.drawable.stat_sys_sync
-                        : 0;
-                updateSlot("sync_active", null, iconId);
-            }
             String tty = args.getString("tty");
             if (tty != null) {
                 int iconId = tty.equals("show") ? R.drawable.stat_sys_tty_mode
                         : 0;
                 updateSlot("tty", null, iconId);
-            }
-            String eri = args.getString("eri");
-            if (eri != null) {
-                int iconId = eri.equals("show") ? R.drawable.stat_sys_roaming_cdma_0
-                        : 0;
-                updateSlot("cdma_eri", null, iconId);
             }
             String mute = args.getString("mute");
             if (mute != null) {
@@ -135,6 +124,9 @@ public class DemoStatusIcons extends LinearLayout implements DemoMode {
 
     private void updateSlot(String slot, String iconPkg, int iconId) {
         if (!mDemoMode) return;
+        if (iconPkg == null) {
+            iconPkg = mContext.getPackageName();
+        }
         int removeIndex = -1;
         for (int i = 0; i < getChildCount(); i++) {
             StatusBarIconView v = (StatusBarIconView) getChildAt(i);
@@ -144,8 +136,7 @@ public class DemoStatusIcons extends LinearLayout implements DemoMode {
                     break;
                 } else {
                     StatusBarIcon icon = v.getStatusBarIcon();
-                    icon.iconPackage = iconPkg;
-                    icon.iconId = iconId;
+                    icon.icon = Icon.createWithResource(icon.icon.getResPackage(), iconId);
                     v.set(icon);
                     v.updateDrawable();
                     return;
@@ -155,10 +146,10 @@ public class DemoStatusIcons extends LinearLayout implements DemoMode {
         if (iconId == 0) {
             if (removeIndex != -1) {
                 removeViewAt(removeIndex);
-                return;
             }
+            return;
         }
-        StatusBarIcon icon = new StatusBarIcon(iconPkg, UserHandle.CURRENT, iconId, 0, 0, "Demo");
+        StatusBarIcon icon = new StatusBarIcon(iconPkg, UserHandle.OWNER, iconId, 0, 0, "Demo");
         StatusBarIconView v = new StatusBarIconView(getContext(), null, null);
         v.setTag(slot);
         v.set(icon);

@@ -23,7 +23,7 @@
 #include "android_util_Binder.h"
 
 #include <jni.h>
-#include <android_runtime/AndroidRuntime.h>
+#include <core_jni_helpers.h>
 
 namespace android {
 
@@ -206,15 +206,24 @@ static jstring Region_toString(JNIEnv* env, jobject clazz, jlong regionHandle) {
 
 static jlong Region_createFromParcel(JNIEnv* env, jobject clazz, jobject parcel)
 {
-    if (parcel == NULL) {
-        return NULL;
+    if (parcel == nullptr) {
+        return 0;
     }
 
     android::Parcel* p = android::parcelForJavaObject(env, parcel);
 
+    const size_t size = p->readInt32();
+    const void* regionData = p->readInplace(size);
+    if (regionData == nullptr) {
+        return 0;
+    }
+
     SkRegion* region = new SkRegion;
-    size_t size = p->readInt32();
-    region->readFromMemory(p->readInplace(size), size);
+    size_t actualSize = region->readFromMemory(regionData, size);
+    if (size != actualSize) {
+        delete region;
+        return 0;
+    }
 
     return reinterpret_cast<jlong>(region);
 }
@@ -222,15 +231,24 @@ static jlong Region_createFromParcel(JNIEnv* env, jobject clazz, jobject parcel)
 static jboolean Region_writeToParcel(JNIEnv* env, jobject clazz, jlong regionHandle, jobject parcel)
 {
     const SkRegion* region = reinterpret_cast<SkRegion*>(regionHandle);
-    if (parcel == NULL) {
+    if (parcel == nullptr) {
         return JNI_FALSE;
     }
 
     android::Parcel* p = android::parcelForJavaObject(env, parcel);
 
-    size_t size = region->writeToMemory(NULL);
+    const size_t size = region->writeToMemory(nullptr);
     p->writeInt32(size);
-    region->writeToMemory(p->writeInplace(size));
+    void* dst = p->writeInplace(size);
+    if (dst == nullptr) {
+        ALOGE("Region.writeToParcel could not write %zi bytes", size);
+        return JNI_FALSE;
+    }
+    const size_t sizeWritten = region->writeToMemory(dst);
+    if (sizeWritten != size) {
+        ALOGE("SkRegion::writeToMemory should have written %zi bytes but wrote %zi",
+                size, sizeWritten);
+    }
 
     return JNI_TRUE;
 }
@@ -325,19 +343,13 @@ static JNINativeMethod gRegionMethods[] = {
 
 int register_android_graphics_Region(JNIEnv* env)
 {
-    jclass clazz = env->FindClass("android/graphics/Region");
-    SkASSERT(clazz);
+    jclass clazz = FindClassOrDie(env, "android/graphics/Region");
 
-    gRegion_nativeInstanceFieldID = env->GetFieldID(clazz, "mNativeRegion", "J");
-    SkASSERT(gRegion_nativeInstanceFieldID);
+    gRegion_nativeInstanceFieldID = GetFieldIDOrDie(env, clazz, "mNativeRegion", "J");
 
-    int result = android::AndroidRuntime::registerNativeMethods(env, "android/graphics/Region",
-                                                             gRegionMethods, SK_ARRAY_COUNT(gRegionMethods));
-    if (result < 0)
-        return result;
-
-    return android::AndroidRuntime::registerNativeMethods(env, "android/graphics/RegionIterator",
-                                                       gRegionIterMethods, SK_ARRAY_COUNT(gRegionIterMethods));
+    RegisterMethodsOrDie(env, "android/graphics/Region", gRegionMethods, NELEM(gRegionMethods));
+    return RegisterMethodsOrDie(env, "android/graphics/RegionIterator", gRegionIterMethods,
+                                NELEM(gRegionIterMethods));
 }
 
 SkRegion* android_graphics_Region_getSkRegion(JNIEnv* env, jobject regionObj) {

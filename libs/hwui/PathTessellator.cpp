@@ -37,6 +37,8 @@
 
 #include <SkPath.h>
 #include <SkPaint.h>
+#include <SkPoint.h>
+#include <SkGeometry.h> // WARNING: Internal Skia Header
 
 #include <stdlib.h>
 #include <stdint.h>
@@ -54,7 +56,7 @@
 namespace android {
 namespace uirenderer {
 
-#define OUTLINE_REFINE_THRESHOLD_SQUARED (0.5f * 0.5f)
+#define OUTLINE_REFINE_THRESHOLD 0.5f
 #define ROUND_CAP_THRESH 0.25f
 #define PI 3.1415926535897932f
 #define MAX_DEPTH 15
@@ -150,13 +152,11 @@ public:
      */
     inline int capExtraDivisions() const {
         if (cap == SkPaint::kRound_Cap) {
+            // always use 2 points for hairline
             if (halfStrokeWidth == 0.0f) return 2;
 
-            // ROUND_CAP_THRESH is the maximum error for polygonal approximation of the round cap
-            const float errConst = (-ROUND_CAP_THRESH / halfStrokeWidth + 1);
-            const float targetCosVal = 2 * errConst * errConst - 1;
-            int neededDivisions = (int)(ceilf(PI / acos(targetCosVal)/2)) * 2;
-            return neededDivisions;
+            float threshold = MathUtils::min(inverseScaleX, inverseScaleY) * ROUND_CAP_THRESH;
+            return MathUtils::divisionsNeededToApproximateArc(halfStrokeWidth, PI, threshold);
         }
         return 0;
     }
@@ -229,7 +229,6 @@ void getStrokeVerticesFromPerimeter(const PaintInfo& paintInfo, const Vector<Ver
                 current->x - totalOffset.x,
                 current->y - totalOffset.y);
 
-        last = current;
         current = next;
         lastNormal = nextNormal;
     }
@@ -279,7 +278,6 @@ void getStrokeVerticesFromUnclosedVertices(const PaintInfo& paintInfo,
                     - (vertices[lastIndex].x - vertices[lastIndex - 1].x),
                     vertices[lastIndex].y - vertices[lastIndex - 1].y);
         const float dTheta = PI / (extra + 1);
-        const float radialScale = 2.0f / (1 + cos(dTheta));
 
         int capOffset;
         for (int i = 0; i < extra; i++) {
@@ -290,14 +288,14 @@ void getStrokeVerticesFromUnclosedVertices(const PaintInfo& paintInfo,
             }
 
             beginTheta += dTheta;
-            Vector2 beginRadialOffset = {cos(beginTheta), sin(beginTheta)};
+            Vector2 beginRadialOffset = {cosf(beginTheta), sinf(beginTheta)};
             paintInfo.scaleOffsetForStrokeWidth(beginRadialOffset);
             Vertex::set(&buffer[capOffset],
                     vertices[0].x + beginRadialOffset.x,
                     vertices[0].y + beginRadialOffset.y);
 
             endTheta += dTheta;
-            Vector2 endRadialOffset = {cos(endTheta), sin(endTheta)};
+            Vector2 endRadialOffset = {cosf(endTheta), sinf(endTheta)};
             paintInfo.scaleOffsetForStrokeWidth(endRadialOffset);
             Vertex::set(&buffer[allocSize - 1 - capOffset],
                     vertices[lastIndex].x + endRadialOffset.x,
@@ -373,7 +371,6 @@ void getFillVerticesFromPerimeterAA(const PaintInfo& paintInfo, const Vector<Ver
                 current->y - totalOffset.y,
                 maxAlpha);
 
-        last = current;
         current = next;
         lastNormal = nextNormal;
     }
@@ -468,7 +465,7 @@ inline static void storeCapAA(const PaintInfo& paintInfo, const Vector<Vertex>& 
         for (int i = 0; i < extra; i++) {
             theta += dTheta;
 
-            Vector2 radialOffset = {cos(theta), sin(theta)};
+            Vector2 radialOffset = {cosf(theta), sinf(theta)};
 
             // scale to compensate for pinching at sharp angles, see totalOffsetFromNormals()
             radialOffset *= radialScale;
@@ -701,7 +698,6 @@ void getStrokeVerticesFromPerimeterAA(const PaintInfo& paintInfo, const Vector<V
                 current->y - outerOffset.y,
                 0.0f);
 
-        last = current;
         current = next;
         lastNormal = nextNormal;
     }
@@ -743,9 +739,10 @@ void PathTessellator::tessellatePath(const SkPath &path, const SkPaint* paint,
 
     // force close if we're filling the path, since fill path expects closed perimeter.
     bool forceClose = paintInfo.style != SkPaint::kStroke_Style;
+    PathApproximationInfo approximationInfo(threshInvScaleX, threshInvScaleY,
+            OUTLINE_REFINE_THRESHOLD);
     bool wasClosed = approximatePathOutlineVertices(path, forceClose,
-            threshInvScaleX * threshInvScaleX, threshInvScaleY * threshInvScaleY,
-            OUTLINE_REFINE_THRESHOLD_SQUARED, tempVertices);
+            approximationInfo, tempVertices);
 
     if (!tempVertices.size()) {
         // path was empty, return without allocating vertex buffer
@@ -787,6 +784,7 @@ void PathTessellator::tessellatePath(const SkPath &path, const SkPaint* paint,
     Rect bounds(path.getBounds());
     paintInfo.expandBoundsForStroke(&bounds);
     vertexBuffer.setBounds(bounds);
+    vertexBuffer.setMeshFeatureFlags(paintInfo.isAA ? VertexBuffer::kAlpha : VertexBuffer::kNone);
 }
 
 template <class TYPE>
@@ -822,16 +820,14 @@ void PathTessellator::tessellatePoints(const float* points, int count, const SkP
 
     // calculate outline
     Vector<Vertex> outlineVertices;
-    approximatePathOutlineVertices(path, true,
-            paintInfo.inverseScaleX * paintInfo.inverseScaleX,
-            paintInfo.inverseScaleY * paintInfo.inverseScaleY,
-            OUTLINE_REFINE_THRESHOLD_SQUARED, outlineVertices);
+    PathApproximationInfo approximationInfo(paintInfo.inverseScaleX, paintInfo.inverseScaleY,
+            OUTLINE_REFINE_THRESHOLD);
+    approximatePathOutlineVertices(path, true, approximationInfo, outlineVertices);
 
     if (!outlineVertices.size()) return;
 
     Rect bounds;
     // tessellate, then duplicate outline across points
-    int numPoints = count / 2;
     VertexBuffer tempBuffer;
     if (!paintInfo.isAA) {
         getFillVerticesFromPerimeter(outlineVertices, tempBuffer);
@@ -845,6 +841,7 @@ void PathTessellator::tessellatePoints(const float* points, int count, const SkP
     // expand bounds from vertex coords to pixel data
     paintInfo.expandBoundsForStroke(&bounds);
     vertexBuffer.setBounds(bounds);
+    vertexBuffer.setMeshFeatureFlags(paintInfo.isAA ? VertexBuffer::kAlpha : VertexBuffer::kNone);
 }
 
 void PathTessellator::tessellateLines(const float* points, int count, const SkPaint* paint,
@@ -895,15 +892,17 @@ void PathTessellator::tessellateLines(const float* points, int count, const SkPa
     // expand bounds from vertex coords to pixel data
     paintInfo.expandBoundsForStroke(&bounds);
     vertexBuffer.setBounds(bounds);
+    vertexBuffer.setMeshFeatureFlags(paintInfo.isAA ? VertexBuffer::kAlpha : VertexBuffer::kNone);
 }
 
 ///////////////////////////////////////////////////////////////////////////////
 // Simple path line approximation
 ///////////////////////////////////////////////////////////////////////////////
 
-bool PathTessellator::approximatePathOutlineVertices(const SkPath& path, float thresholdSquared,
+bool PathTessellator::approximatePathOutlineVertices(const SkPath& path, float threshold,
         Vector<Vertex>& outputVertices) {
-    return approximatePathOutlineVertices(path, true, 1.0f, 1.0f, thresholdSquared, outputVertices);
+    PathApproximationInfo approximationInfo(1.0f, 1.0f, threshold);
+    return approximatePathOutlineVertices(path, true, approximationInfo, outputVertices);
 }
 
 void pushToVector(Vector<Vertex>& vertices, float x, float y) {
@@ -913,9 +912,42 @@ void pushToVector(Vector<Vertex>& vertices, float x, float y) {
     Vertex::set(newVertex, x, y);
 }
 
+class ClockwiseEnforcer {
+public:
+    void addPoint(const SkPoint& point) {
+        double x = point.x();
+        double y = point.y();
+
+        if (initialized) {
+            sum += (x + lastX) * (y - lastY);
+        } else {
+            initialized = true;
+        }
+
+        lastX = x;
+        lastY = y;
+    }
+    void reverseVectorIfNotClockwise(Vector<Vertex>& vertices) {
+        if (sum < 0) {
+            // negative sum implies CounterClockwise
+            const int size = vertices.size();
+            for (int i = 0; i < size / 2; i++) {
+                Vertex tmp = vertices[i];
+                int k = size - 1 - i;
+                vertices.replaceAt(vertices[k], i);
+                vertices.replaceAt(tmp, k);
+            }
+        }
+    }
+private:
+    bool initialized = false;
+    double lastX = 0;
+    double lastY = 0;
+    double sum = 0;
+};
+
 bool PathTessellator::approximatePathOutlineVertices(const SkPath& path, bool forceClose,
-        float sqrInvScaleX, float sqrInvScaleY, float thresholdSquared,
-        Vector<Vertex>& outputVertices) {
+        const PathApproximationInfo& approximationInfo, Vector<Vertex>& outputVertices) {
     ATRACE_CALL();
 
     // TODO: to support joins other than sharp miter, join vertices should be labelled in the
@@ -923,18 +955,22 @@ bool PathTessellator::approximatePathOutlineVertices(const SkPath& path, bool fo
     SkPath::Iter iter(path, forceClose);
     SkPoint pts[4];
     SkPath::Verb v;
+    ClockwiseEnforcer clockwiseEnforcer;
     while (SkPath::kDone_Verb != (v = iter.next(pts))) {
             switch (v) {
             case SkPath::kMove_Verb:
                 pushToVector(outputVertices, pts[0].x(), pts[0].y());
                 ALOGV("Move to pos %f %f", pts[0].x(), pts[0].y());
+                clockwiseEnforcer.addPoint(pts[0]);
                 break;
             case SkPath::kClose_Verb:
                 ALOGV("Close at pos %f %f", pts[0].x(), pts[0].y());
+                clockwiseEnforcer.addPoint(pts[0]);
                 break;
             case SkPath::kLine_Verb:
                 ALOGV("kLine_Verb %f %f -> %f %f", pts[0].x(), pts[0].y(), pts[1].x(), pts[1].y());
                 pushToVector(outputVertices, pts[1].x(), pts[1].y());
+                clockwiseEnforcer.addPoint(pts[1]);
                 break;
             case SkPath::kQuad_Verb:
                 ALOGV("kQuad_Verb");
@@ -942,7 +978,9 @@ bool PathTessellator::approximatePathOutlineVertices(const SkPath& path, bool fo
                         pts[0].x(), pts[0].y(),
                         pts[2].x(), pts[2].y(),
                         pts[1].x(), pts[1].y(),
-                        sqrInvScaleX, sqrInvScaleY, thresholdSquared, outputVertices);
+                        approximationInfo, outputVertices);
+                clockwiseEnforcer.addPoint(pts[1]);
+                clockwiseEnforcer.addPoint(pts[2]);
                 break;
             case SkPath::kCubic_Verb:
                 ALOGV("kCubic_Verb");
@@ -951,30 +989,65 @@ bool PathTessellator::approximatePathOutlineVertices(const SkPath& path, bool fo
                         pts[1].x(), pts[1].y(),
                         pts[3].x(), pts[3].y(),
                         pts[2].x(), pts[2].y(),
-                        sqrInvScaleX, sqrInvScaleY, thresholdSquared, outputVertices);
+                        approximationInfo, outputVertices);
+                clockwiseEnforcer.addPoint(pts[1]);
+                clockwiseEnforcer.addPoint(pts[2]);
+                clockwiseEnforcer.addPoint(pts[3]);
                 break;
+            case SkPath::kConic_Verb: {
+                ALOGV("kConic_Verb");
+                SkAutoConicToQuads converter;
+                const SkPoint* quads = converter.computeQuads(pts, iter.conicWeight(),
+                        approximationInfo.thresholdForConicQuads);
+                for (int i = 0; i < converter.countQuads(); ++i) {
+                    const int offset = 2 * i;
+                    recursiveQuadraticBezierVertices(
+                            quads[offset].x(), quads[offset].y(),
+                            quads[offset+2].x(), quads[offset+2].y(),
+                            quads[offset+1].x(), quads[offset+1].y(),
+                            approximationInfo, outputVertices);
+                }
+                clockwiseEnforcer.addPoint(pts[1]);
+                clockwiseEnforcer.addPoint(pts[2]);
+                break;
+            }
             default:
                 break;
             }
     }
 
+    bool wasClosed = false;
     int size = outputVertices.size();
     if (size >= 2 && outputVertices[0].x == outputVertices[size - 1].x &&
             outputVertices[0].y == outputVertices[size - 1].y) {
         outputVertices.pop();
-        return true;
+        wasClosed = true;
     }
-    return false;
+
+    // ensure output vector is clockwise
+    clockwiseEnforcer.reverseVectorIfNotClockwise(outputVertices);
+    return wasClosed;
 }
 
 ///////////////////////////////////////////////////////////////////////////////
 // Bezier approximation
+//
+// All the inputs and outputs here are in path coordinates.
+// We convert the error threshold from screen coordinates into path coordinates.
 ///////////////////////////////////////////////////////////////////////////////
+
+// Get a threshold in path coordinates, by scaling the thresholdSquared from screen coordinates.
+// TODO: Document the math behind this algorithm.
+static inline float getThreshold(const PathApproximationInfo& info, float dx, float dy) {
+    // multiplying by sqrInvScaleY/X equivalent to multiplying in dimensional scale factors
+    float scale = (dx * dx * info.sqrInvScaleY + dy * dy * info.sqrInvScaleX);
+    return info.thresholdSquared * scale;
+}
 
 void PathTessellator::recursiveCubicBezierVertices(
         float p1x, float p1y, float c1x, float c1y,
         float p2x, float p2y, float c2x, float c2y,
-        float sqrInvScaleX, float sqrInvScaleY, float thresholdSquared,
+        const PathApproximationInfo& approximationInfo,
         Vector<Vertex>& outputVertices, int depth) {
     float dx = p2x - p1x;
     float dy = p2y - p1y;
@@ -982,9 +1055,8 @@ void PathTessellator::recursiveCubicBezierVertices(
     float d2 = fabs((c2x - p2x) * dy - (c2y - p2y) * dx);
     float d = d1 + d2;
 
-    // multiplying by sqrInvScaleY/X equivalent to multiplying in dimensional scale factors
     if (depth >= MAX_DEPTH
-            || d * d <= thresholdSquared * (dx * dx * sqrInvScaleY + dy * dy * sqrInvScaleX)) {
+            || d * d <= getThreshold(approximationInfo, dx, dy)) {
         // below thresh, draw line by adding endpoint
         pushToVector(outputVertices, p2x, p2y);
     } else {
@@ -1008,11 +1080,11 @@ void PathTessellator::recursiveCubicBezierVertices(
         recursiveCubicBezierVertices(
                 p1x, p1y, p1c1x, p1c1y,
                 mx, my, p1c1c2x, p1c1c2y,
-                sqrInvScaleX, sqrInvScaleY, thresholdSquared, outputVertices, depth + 1);
+                approximationInfo, outputVertices, depth + 1);
         recursiveCubicBezierVertices(
                 mx, my, p2c1c2x, p2c1c2y,
                 p2x, p2y, p2c2x, p2c2y,
-                sqrInvScaleX, sqrInvScaleY, thresholdSquared, outputVertices, depth + 1);
+                approximationInfo, outputVertices, depth + 1);
     }
 }
 
@@ -1020,15 +1092,15 @@ void PathTessellator::recursiveQuadraticBezierVertices(
         float ax, float ay,
         float bx, float by,
         float cx, float cy,
-        float sqrInvScaleX, float sqrInvScaleY, float thresholdSquared,
+        const PathApproximationInfo& approximationInfo,
         Vector<Vertex>& outputVertices, int depth) {
     float dx = bx - ax;
     float dy = by - ay;
+    // d is the cross product of vector (B-A) and (C-B).
     float d = (cx - bx) * dy - (cy - by) * dx;
 
-    // multiplying by sqrInvScaleY/X equivalent to multiplying in dimensional scale factors
     if (depth >= MAX_DEPTH
-            || d * d <= thresholdSquared * (dx * dx * sqrInvScaleY + dy * dy * sqrInvScaleX)) {
+            || d * d <= getThreshold(approximationInfo, dx, dy)) {
         // below thresh, draw line by adding endpoint
         pushToVector(outputVertices, bx, by);
     } else {
@@ -1042,9 +1114,9 @@ void PathTessellator::recursiveQuadraticBezierVertices(
         float my = (acy + bcy) * 0.5f;
 
         recursiveQuadraticBezierVertices(ax, ay, mx, my, acx, acy,
-                sqrInvScaleX, sqrInvScaleY, thresholdSquared, outputVertices, depth + 1);
+                approximationInfo, outputVertices, depth + 1);
         recursiveQuadraticBezierVertices(mx, my, bx, by, bcx, bcy,
-                sqrInvScaleX, sqrInvScaleY, thresholdSquared, outputVertices, depth + 1);
+                approximationInfo, outputVertices, depth + 1);
     }
 }
 

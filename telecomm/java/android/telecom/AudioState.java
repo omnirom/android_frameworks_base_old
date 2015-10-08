@@ -25,10 +25,12 @@ import java.util.Locale;
 /**
  *  Encapsulates the telecom audio state, including the current audio routing, supported audio
  *  routing and mute.
+ *  @deprecated - use {@link CallAudioState} instead.
  *  @hide
  */
+@Deprecated
 @SystemApi
-public final class AudioState implements Parcelable {
+public class AudioState implements Parcelable {
     /** Direct the audio stream through the device's earpiece. */
     public static final int ROUTE_EARPIECE      = 0x00000001;
 
@@ -47,21 +49,13 @@ public final class AudioState implements Parcelable {
      */
     public static final int ROUTE_WIRED_OR_EARPIECE = ROUTE_EARPIECE | ROUTE_WIRED_HEADSET;
 
-    /** Bit mask of all possible audio routes.
-     *
-     * @hide
-     */
-    public static final int ROUTE_ALL = ROUTE_EARPIECE | ROUTE_BLUETOOTH | ROUTE_WIRED_HEADSET |
+    /** Bit mask of all possible audio routes. */
+    private static final int ROUTE_ALL = ROUTE_EARPIECE | ROUTE_BLUETOOTH | ROUTE_WIRED_HEADSET |
             ROUTE_SPEAKER;
 
-    /** Note: Deprecated, please do not use if possible. */
-    @SystemApi public final boolean isMuted;
-
-    /** Note: Deprecated, please do not use if possible. */
-    @SystemApi public final int route;
-
-    /** Note: Deprecated, please do not use if possible. */
-    @SystemApi public final int supportedRouteMask;
+    private final boolean isMuted;
+    private final int route;
+    private final int supportedRouteMask;
 
     public AudioState(boolean muted, int route, int supportedRouteMask) {
         this.isMuted = muted;
@@ -70,6 +64,12 @@ public final class AudioState implements Parcelable {
     }
 
     public AudioState(AudioState state) {
+        isMuted = state.isMuted();
+        route = state.getRoute();
+        supportedRouteMask = state.getSupportedRouteMask();
+    }
+
+    public AudioState(CallAudioState state) {
         isMuted = state.isMuted();
         route = state.getRoute();
         supportedRouteMask = state.getSupportedRouteMask();
@@ -97,7 +97,6 @@ public final class AudioState implements Parcelable {
                 audioRouteToString(supportedRouteMask));
     }
 
-    /** @hide */
     public static String audioRouteToString(int route) {
         if (route == 0 || (route & ~ROUTE_ALL) != 0x0) {
             return "UNKNOWN";

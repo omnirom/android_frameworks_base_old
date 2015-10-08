@@ -16,9 +16,11 @@
 
 package android.graphics;
 
+import android.annotation.ColorInt;
 import android.annotation.IntDef;
 import android.annotation.NonNull;
 import android.annotation.Nullable;
+import android.annotation.Size;
 import android.text.GraphicsOperations;
 import android.text.SpannableString;
 import android.text.SpannedString;
@@ -43,9 +45,15 @@ import javax.microedition.khronos.opengles.GL;
  * Canvas and Drawables</a> developer guide.</p></div>
  */
 public class Canvas {
+    /** @hide */
+    public static boolean sCompatibilityRestore = false;
 
-    // assigned in constructors or setBitmap, freed in finalizer
-    private long mNativeCanvasWrapper;
+    /**
+     * Should only be assigned in constructors (or setBitmap if software canvas),
+     * freed in finalizer.
+     * @hide
+     */
+    protected long mNativeCanvasWrapper;
 
     /** @hide */
     public long getNativeCanvasWrapper() {
@@ -72,22 +80,6 @@ public class Canvas {
      * @hide
      */
     protected int mScreenDensity = Bitmap.DENSITY_NONE;
-
-    // Used by native code
-    @SuppressWarnings("UnusedDeclaration")
-    private int mSurfaceFormat;
-
-    /**
-     * Flag for drawTextRun indicating left-to-right run direction.
-     * @hide
-     */
-    public static final int DIRECTION_LTR = 0;
-
-    /**
-     * Flag for drawTextRun indicating right-to-left run direction.
-     * @hide
-     */
-    public static final int DIRECTION_RTL = 1;
 
     // Maximum bitmap size as defined in Skia's native code
     // (see SkCanvas.cpp, SkDraw.cpp)
@@ -129,7 +121,7 @@ public class Canvas {
     public Canvas() {
         if (!isHardwareAccelerated()) {
             // 0 means no native bitmap
-            mNativeCanvasWrapper = initRaster(0);
+            mNativeCanvasWrapper = initRaster(null);
             mFinalizer = new CanvasFinalizer(mNativeCanvasWrapper);
         } else {
             mFinalizer = null;
@@ -150,7 +142,7 @@ public class Canvas {
             throw new IllegalStateException("Immutable bitmap passed to Canvas constructor");
         }
         throwIfCannotDraw(bitmap);
-        mNativeCanvasWrapper = initRaster(bitmap.ni());
+        mNativeCanvasWrapper = initRaster(bitmap);
         mFinalizer = new CanvasFinalizer(mNativeCanvasWrapper);
         mBitmap = bitmap;
         mDensity = bitmap.mDensity;
@@ -207,7 +199,7 @@ public class Canvas {
         }
 
         if (bitmap == null) {
-            native_setBitmap(mNativeCanvasWrapper, 0, false);
+            native_setBitmap(mNativeCanvasWrapper, null);
             mDensity = Bitmap.DENSITY_NONE;
         } else {
             if (!bitmap.isMutable()) {
@@ -215,18 +207,11 @@ public class Canvas {
             }
             throwIfCannotDraw(bitmap);
 
-            native_setBitmap(mNativeCanvasWrapper, bitmap.ni(), true);
+            native_setBitmap(mNativeCanvasWrapper, bitmap);
             mDensity = bitmap.mDensity;
         }
 
         mBitmap = bitmap;
-    }
-
-    /**
-     * setBitmap() variant for native callers with a raw bitmap handle.
-     */
-    private void setNativeBitmap(long bitmapHandle) {
-        native_setBitmap(mNativeCanvasWrapper, bitmapHandle, false);
     }
 
     /**
@@ -475,7 +460,7 @@ public class Canvas {
     public int saveLayer(float left, float top, float right, float bottom, @Nullable Paint paint,
             @Saveflags int saveFlags) {
         return native_saveLayer(mNativeCanvasWrapper, left, top, right, bottom,
-                paint != null ? paint.mNativePaint : 0,
+                paint != null ? paint.getNativeInstance() : 0,
                 saveFlags);
     }
 
@@ -551,7 +536,8 @@ public class Canvas {
      * an error to call restore() more times than save() was called.
      */
     public void restore() {
-        native_restore(mNativeCanvasWrapper);
+        boolean throwOnUnderflow = !sCompatibilityRestore || !isHardwareAccelerated();
+        native_restore(mNativeCanvasWrapper, throwOnUnderflow);
     }
 
     /**
@@ -576,7 +562,8 @@ public class Canvas {
      * @param saveCount The save level to restore to.
      */
     public void restoreToCount(int saveCount) {
-        native_restoreToCount(mNativeCanvasWrapper, saveCount);
+        boolean throwOnUnderflow = !sCompatibilityRestore || !isHardwareAccelerated();
+        native_restoreToCount(mNativeCanvasWrapper, saveCount, throwOnUnderflow);
     }
 
     /**
@@ -1008,7 +995,7 @@ public class Canvas {
      *
      * @param color the color to draw onto the canvas
      */
-    public void drawColor(int color) {
+    public void drawColor(@ColorInt int color) {
         native_drawColor(mNativeCanvasWrapper, color, PorterDuff.Mode.SRC_OVER.nativeInt);
     }
 
@@ -1019,7 +1006,7 @@ public class Canvas {
      * @param color the color to draw with
      * @param mode  the porter-duff mode to apply to the color
      */
-    public void drawColor(int color, @NonNull PorterDuff.Mode mode) {
+    public void drawColor(@ColorInt int color, @NonNull PorterDuff.Mode mode) {
         native_drawColor(mNativeCanvasWrapper, color, mode.nativeInt);
     }
 
@@ -1031,7 +1018,7 @@ public class Canvas {
      * @param paint The paint used to draw onto the canvas
      */
     public void drawPaint(@NonNull Paint paint) {
-        native_drawPaint(mNativeCanvasWrapper, paint.mNativePaint);
+        native_drawPaint(mNativeCanvasWrapper, paint.getNativeInstance());
     }
 
     /**
@@ -1050,14 +1037,15 @@ public class Canvas {
      *                 "points" that are drawn is really (count >> 1).
      * @param paint    The paint used to draw the points
      */
-    public void drawPoints(float[] pts, int offset, int count, @NonNull Paint paint) {
-        native_drawPoints(mNativeCanvasWrapper, pts, offset, count, paint.mNativePaint);
+    public void drawPoints(@Size(multiple=2) float[] pts, int offset, int count,
+            @NonNull Paint paint) {
+        native_drawPoints(mNativeCanvasWrapper, pts, offset, count, paint.getNativeInstance());
     }
 
     /**
      * Helper for drawPoints() that assumes you want to draw the entire array
      */
-    public void drawPoints(@NonNull float[] pts, @NonNull Paint paint) {
+    public void drawPoints(@Size(multiple=2) @NonNull float[] pts, @NonNull Paint paint) {
         drawPoints(pts, 0, pts.length, paint);
     }
 
@@ -1065,7 +1053,7 @@ public class Canvas {
      * Helper for drawPoints() for drawing a single point.
      */
     public void drawPoint(float x, float y, @NonNull Paint paint) {
-        native_drawPoint(mNativeCanvasWrapper, x, y, paint.mNativePaint);
+        native_drawPoint(mNativeCanvasWrapper, x, y, paint.getNativeInstance());
     }
 
     /**
@@ -1082,7 +1070,7 @@ public class Canvas {
      */
     public void drawLine(float startX, float startY, float stopX, float stopY,
             @NonNull Paint paint) {
-        native_drawLine(mNativeCanvasWrapper, startX, startY, stopX, stopY, paint.mNativePaint);
+        native_drawLine(mNativeCanvasWrapper, startX, startY, stopX, stopY, paint.getNativeInstance());
     }
 
     /**
@@ -1100,11 +1088,11 @@ public class Canvas {
      *                 (count >> 2).
      * @param paint    The paint used to draw the points
      */
-    public void drawLines(float[] pts, int offset, int count, Paint paint) {
-        native_drawLines(mNativeCanvasWrapper, pts, offset, count, paint.mNativePaint);
+    public void drawLines(@Size(min=4,multiple=2) float[] pts, int offset, int count, Paint paint) {
+        native_drawLines(mNativeCanvasWrapper, pts, offset, count, paint.getNativeInstance());
     }
 
-    public void drawLines(@NonNull float[] pts, @NonNull Paint paint) {
+    public void drawLines(@Size(min=4,multiple=2) @NonNull float[] pts, @NonNull Paint paint) {
         drawLines(pts, 0, pts.length, paint);
     }
 
@@ -1117,7 +1105,7 @@ public class Canvas {
      */
     public void drawRect(@NonNull RectF rect, @NonNull Paint paint) {
         native_drawRect(mNativeCanvasWrapper,
-                rect.left, rect.top, rect.right, rect.bottom, paint.mNativePaint);
+                rect.left, rect.top, rect.right, rect.bottom, paint.getNativeInstance());
     }
 
     /**
@@ -1143,7 +1131,7 @@ public class Canvas {
      * @param paint  The paint used to draw the rect
      */
     public void drawRect(float left, float top, float right, float bottom, @NonNull Paint paint) {
-        native_drawRect(mNativeCanvasWrapper, left, top, right, bottom, paint.mNativePaint);
+        native_drawRect(mNativeCanvasWrapper, left, top, right, bottom, paint.getNativeInstance());
     }
 
     /**
@@ -1164,7 +1152,7 @@ public class Canvas {
      * filled or framed based on the Style in the paint.
      */
     public void drawOval(float left, float top, float right, float bottom, @NonNull Paint paint) {
-        native_drawOval(mNativeCanvasWrapper, left, top, right, bottom, paint.mNativePaint);
+        native_drawOval(mNativeCanvasWrapper, left, top, right, bottom, paint.getNativeInstance());
     }
 
     /**
@@ -1178,7 +1166,7 @@ public class Canvas {
      * @param paint  The paint used to draw the circle
      */
     public void drawCircle(float cx, float cy, float radius, @NonNull Paint paint) {
-        native_drawCircle(mNativeCanvasWrapper, cx, cy, radius, paint.mNativePaint);
+        native_drawCircle(mNativeCanvasWrapper, cx, cy, radius, paint.getNativeInstance());
     }
 
     /**
@@ -1234,7 +1222,7 @@ public class Canvas {
     public void drawArc(float left, float top, float right, float bottom, float startAngle,
             float sweepAngle, boolean useCenter, @NonNull Paint paint) {
         native_drawArc(mNativeCanvasWrapper, left, top, right, bottom, startAngle, sweepAngle,
-                useCenter, paint.mNativePaint);
+                useCenter, paint.getNativeInstance());
     }
 
     /**
@@ -1260,7 +1248,7 @@ public class Canvas {
      */
     public void drawRoundRect(float left, float top, float right, float bottom, float rx, float ry,
             @NonNull Paint paint) {
-        native_drawRoundRect(mNativeCanvasWrapper, left, top, right, bottom, rx, ry, paint.mNativePaint);
+        native_drawRoundRect(mNativeCanvasWrapper, left, top, right, bottom, rx, ry, paint.getNativeInstance());
     }
 
     /**
@@ -1271,7 +1259,7 @@ public class Canvas {
      * @param paint The paint used to draw the path
      */
     public void drawPath(@NonNull Path path, @NonNull Paint paint) {
-        native_drawPath(mNativeCanvasWrapper, path.ni(), paint.mNativePaint);
+        native_drawPath(mNativeCanvasWrapper, path.ni(), paint.getNativeInstance());
     }
 
     /**
@@ -1335,8 +1323,8 @@ public class Canvas {
      */
     public void drawBitmap(@NonNull Bitmap bitmap, float left, float top, @Nullable Paint paint) {
         throwIfCannotDraw(bitmap);
-        native_drawBitmap(mNativeCanvasWrapper, bitmap.ni(), left, top,
-                paint != null ? paint.mNativePaint : 0, mDensity, mScreenDensity, bitmap.mDensity);
+        native_drawBitmap(mNativeCanvasWrapper, bitmap, left, top,
+                paint != null ? paint.getNativeInstance() : 0, mDensity, mScreenDensity, bitmap.mDensity);
     }
 
     /**
@@ -1367,7 +1355,7 @@ public class Canvas {
           throw new NullPointerException();
       }
       throwIfCannotDraw(bitmap);
-      final long nativePaint = paint == null ? 0 : paint.mNativePaint;
+      final long nativePaint = paint == null ? 0 : paint.getNativeInstance();
 
       float left, top, right, bottom;
       if (src == null) {
@@ -1381,7 +1369,7 @@ public class Canvas {
           bottom = src.bottom;
       }
 
-      native_drawBitmap(mNativeCanvasWrapper, bitmap.ni(), left, top, right, bottom,
+      native_drawBitmap(mNativeCanvasWrapper, bitmap, left, top, right, bottom,
               dst.left, dst.top, dst.right, dst.bottom, nativePaint, mScreenDensity,
               bitmap.mDensity);
   }
@@ -1414,7 +1402,7 @@ public class Canvas {
             throw new NullPointerException();
         }
         throwIfCannotDraw(bitmap);
-        final long nativePaint = paint == null ? 0 : paint.mNativePaint;
+        final long nativePaint = paint == null ? 0 : paint.getNativeInstance();
 
         int left, top, right, bottom;
         if (src == null) {
@@ -1428,7 +1416,7 @@ public class Canvas {
             bottom = src.bottom;
         }
 
-        native_drawBitmap(mNativeCanvasWrapper, bitmap.ni(), left, top, right, bottom,
+        native_drawBitmap(mNativeCanvasWrapper, bitmap, left, top, right, bottom,
             dst.left, dst.top, dst.right, dst.bottom, nativePaint, mScreenDensity,
             bitmap.mDensity);
     }
@@ -1482,7 +1470,7 @@ public class Canvas {
         }
         // punch down to native for the actual draw
         native_drawBitmap(mNativeCanvasWrapper, colors, offset, stride, x, y, width, height, hasAlpha,
-                paint != null ? paint.mNativePaint : 0);
+                paint != null ? paint.getNativeInstance() : 0);
     }
 
     /**
@@ -1509,8 +1497,8 @@ public class Canvas {
      * @param paint  May be null. The paint used to draw the bitmap
      */
     public void drawBitmap(@NonNull Bitmap bitmap, @NonNull Matrix matrix, @Nullable Paint paint) {
-        nativeDrawBitmapMatrix(mNativeCanvasWrapper, bitmap.ni(), matrix.ni(),
-                paint != null ? paint.mNativePaint : 0);
+        nativeDrawBitmapMatrix(mNativeCanvasWrapper, bitmap, matrix.ni(),
+                paint != null ? paint.getNativeInstance() : 0);
     }
 
     /**
@@ -1564,9 +1552,9 @@ public class Canvas {
             // no mul by 2, since we need only 1 color per vertex
             checkRange(colors.length, colorOffset, count);
         }
-        nativeDrawBitmapMesh(mNativeCanvasWrapper, bitmap.ni(), meshWidth, meshHeight,
+        nativeDrawBitmapMesh(mNativeCanvasWrapper, bitmap, meshWidth, meshHeight,
                 verts, vertOffset, colors, colorOffset,
-                paint != null ? paint.mNativePaint : 0);
+                paint != null ? paint.getNativeInstance() : 0);
     }
 
     public enum VertexMode {
@@ -1619,6 +1607,9 @@ public class Canvas {
             int colorOffset, @Nullable short[] indices, int indexOffset, int indexCount,
             @NonNull Paint paint) {
         checkRange(verts.length, vertOffset, vertexCount);
+        if (isHardwareAccelerated()) {
+            return;
+        }
         if (texs != null) {
             checkRange(texs.length, texOffset, vertexCount);
         }
@@ -1630,7 +1621,7 @@ public class Canvas {
         }
         nativeDrawVertices(mNativeCanvasWrapper, mode.nativeInt, vertexCount, verts,
                 vertOffset, texs, texOffset, colors, colorOffset,
-                indices, indexOffset, indexCount, paint.mNativePaint);
+                indices, indexOffset, indexCount, paint.getNativeInstance());
     }
 
     /**
@@ -1639,7 +1630,7 @@ public class Canvas {
      *
      * @param text  The text to be drawn
      * @param x     The x-coordinate of the origin of the text being drawn
-     * @param y     The y-coordinate of the origin of the text being drawn
+     * @param y     The y-coordinate of the baseline of the text being drawn
      * @param paint The paint used for the text (e.g. color, size, style)
      */
     public void drawText(@NonNull char[] text, int index, int count, float x, float y,
@@ -1649,7 +1640,7 @@ public class Canvas {
             throw new IndexOutOfBoundsException();
         }
         native_drawText(mNativeCanvasWrapper, text, index, count, x, y, paint.mBidiFlags,
-                paint.mNativePaint, paint.mNativeTypeface);
+                paint.getNativeInstance(), paint.mNativeTypeface);
     }
 
     /**
@@ -1658,12 +1649,12 @@ public class Canvas {
      *
      * @param text  The text to be drawn
      * @param x     The x-coordinate of the origin of the text being drawn
-     * @param y     The y-coordinate of the origin of the text being drawn
+     * @param y     The y-coordinate of the baseline of the text being drawn
      * @param paint The paint used for the text (e.g. color, size, style)
      */
     public void drawText(@NonNull String text, float x, float y, @NonNull Paint paint) {
         native_drawText(mNativeCanvasWrapper, text, 0, text.length(), x, y, paint.mBidiFlags,
-                paint.mNativePaint, paint.mNativeTypeface);
+                paint.getNativeInstance(), paint.mNativeTypeface);
     }
 
     /**
@@ -1674,7 +1665,7 @@ public class Canvas {
      * @param start The index of the first character in text to draw
      * @param end   (end - 1) is the index of the last character in text to draw
      * @param x     The x-coordinate of the origin of the text being drawn
-     * @param y     The y-coordinate of the origin of the text being drawn
+     * @param y     The y-coordinate of the baseline of the text being drawn
      * @param paint The paint used for the text (e.g. color, size, style)
      */
     public void drawText(@NonNull String text, int start, int end, float x, float y,
@@ -1683,7 +1674,7 @@ public class Canvas {
             throw new IndexOutOfBoundsException();
         }
         native_drawText(mNativeCanvasWrapper, text, start, end, x, y, paint.mBidiFlags,
-                paint.mNativePaint, paint.mNativeTypeface);
+                paint.getNativeInstance(), paint.mNativeTypeface);
     }
 
     /**
@@ -1707,7 +1698,7 @@ public class Canvas {
         if (text instanceof String || text instanceof SpannedString ||
             text instanceof SpannableString) {
             native_drawText(mNativeCanvasWrapper, text.toString(), start, end, x, y,
-                    paint.mBidiFlags, paint.mNativePaint, paint.mNativeTypeface);
+                    paint.mBidiFlags, paint.getNativeInstance(), paint.mNativeTypeface);
         } else if (text instanceof GraphicsOperations) {
             ((GraphicsOperations) text).drawText(this, start, end, x, y,
                     paint);
@@ -1715,16 +1706,21 @@ public class Canvas {
             char[] buf = TemporaryBuffer.obtain(end - start);
             TextUtils.getChars(text, start, end, buf, 0);
             native_drawText(mNativeCanvasWrapper, buf, 0, end - start, x, y,
-                    paint.mBidiFlags, paint.mNativePaint, paint.mNativeTypeface);
+                    paint.mBidiFlags, paint.getNativeInstance(), paint.mNativeTypeface);
             TemporaryBuffer.recycle(buf);
         }
     }
 
     /**
-     * Render a run of all LTR or all RTL text, with shaping. This does not run
-     * bidi on the provided text, but renders it as a uniform right-to-left or
-     * left-to-right run, as indicated by dir. Alignment of the text is as
-     * determined by the Paint's TextAlign value.
+     * Draw a run of text, all in a single direction, with optional context for complex text
+     * shaping.
+     *
+     * <p>See {@link #drawTextRun(CharSequence, int, int, int, int, float, float, boolean, Paint)}
+     * for more details. This method uses a character array rather than CharSequence to
+     * represent the string. Also, to be consistent with the pattern established in
+     * {@link #drawText}, in this method {@code count} and {@code contextCount} are used rather
+     * than offsets of the end position; {@code count = end - start, contextCount = contextEnd -
+     * contextStart}.
      *
      * @param text the text to render
      * @param index the start of the text to render
@@ -1732,13 +1728,11 @@ public class Canvas {
      * @param contextIndex the start of the context for shaping.  Must be
      *         no greater than index.
      * @param contextCount the number of characters in the context for shaping.
-     *         ContexIndex + contextCount must be no less than index
-     *         + count.
+     *         contexIndex + contextCount must be no less than index + count.
      * @param x the x position at which to draw the text
      * @param y the y position at which to draw the text
      * @param isRtl whether the run is in RTL direction
      * @param paint the paint
-     * @hide
      */
     public void drawTextRun(@NonNull char[] text, int index, int count, int contextIndex,
             int contextCount, float x, float y, boolean isRtl, @NonNull Paint paint) {
@@ -1749,30 +1743,50 @@ public class Canvas {
         if (paint == null) {
             throw new NullPointerException("paint is null");
         }
-        if ((index | count | text.length - index - count) < 0) {
+        if ((index | count | contextIndex | contextCount | index - contextIndex
+                | (contextIndex + contextCount) - (index + count)
+                | text.length - (contextIndex + contextCount)) < 0) {
             throw new IndexOutOfBoundsException();
         }
 
-        native_drawTextRun(mNativeCanvasWrapper, text, index, count,
-                contextIndex, contextCount, x, y, isRtl, paint.mNativePaint, paint.mNativeTypeface);
+        native_drawTextRun(mNativeCanvasWrapper, text, index, count, contextIndex, contextCount,
+                x, y, isRtl, paint.getNativeInstance(), paint.mNativeTypeface);
     }
 
     /**
-     * Render a run of all LTR or all RTL text, with shaping. This does not run
-     * bidi on the provided text, but renders it as a uniform right-to-left or
-     * left-to-right run, as indicated by dir. Alignment of the text is as
-     * determined by the Paint's TextAlign value.
+     * Draw a run of text, all in a single direction, with optional context for complex text
+     * shaping.
+     *
+     * <p>The run of text includes the characters from {@code start} to {@code end} in the text. In
+     * addition, the range {@code contextStart} to {@code contextEnd} is used as context for the
+     * purpose of complex text shaping, such as Arabic text potentially shaped differently based on
+     * the text next to it.
+     *
+     * <p>All text outside the range {@code contextStart..contextEnd} is ignored. The text between
+     * {@code start} and {@code end} will be laid out and drawn.
+     *
+     * <p>The direction of the run is explicitly specified by {@code isRtl}. Thus, this method is
+     * suitable only for runs of a single direction. Alignment of the text is as determined by the
+     * Paint's TextAlign value. Further, {@code 0 <= contextStart <= start <= end <= contextEnd
+     * <= text.length} must hold on entry.
+     *
+     * <p>Also see {@link android.graphics.Paint#getRunAdvance} for a corresponding method to
+     * measure the text; the advance width of the text drawn matches the value obtained from that
+     * method.
      *
      * @param text the text to render
      * @param start the start of the text to render. Data before this position
      *            can be used for shaping context.
      * @param end the end of the text to render. Data at or after this
      *            position can be used for shaping context.
+     * @param contextStart the index of the start of the shaping context
+     * @param contextEnd the index of the end of the shaping context
      * @param x the x position at which to draw the text
      * @param y the y position at which to draw the text
      * @param isRtl whether the run is in RTL direction
      * @param paint the paint
-     * @hide
+     *
+     * @see #drawTextRun(char[], int, int, int, int, float, float, boolean, Paint)
      */
     public void drawTextRun(@NonNull CharSequence text, int start, int end, int contextStart,
             int contextEnd, float x, float y, boolean isRtl, @NonNull Paint paint) {
@@ -1783,14 +1797,15 @@ public class Canvas {
         if (paint == null) {
             throw new NullPointerException("paint is null");
         }
-        if ((start | end | end - start | text.length() - end) < 0) {
+        if ((start | end | contextStart | contextEnd | start - contextStart | end - start
+                | contextEnd - end | text.length() - contextEnd) < 0) {
             throw new IndexOutOfBoundsException();
         }
 
         if (text instanceof String || text instanceof SpannedString ||
                 text instanceof SpannableString) {
-            native_drawTextRun(mNativeCanvasWrapper, text.toString(), start, end,
-                    contextStart, contextEnd, x, y, isRtl, paint.mNativePaint, paint.mNativeTypeface);
+            native_drawTextRun(mNativeCanvasWrapper, text.toString(), start, end, contextStart,
+                    contextEnd, x, y, isRtl, paint.getNativeInstance(), paint.mNativeTypeface);
         } else if (text instanceof GraphicsOperations) {
             ((GraphicsOperations) text).drawTextRun(this, start, end,
                     contextStart, contextEnd, x, y, isRtl, paint);
@@ -1800,7 +1815,7 @@ public class Canvas {
             char[] buf = TemporaryBuffer.obtain(contextLen);
             TextUtils.getChars(text, contextStart, contextEnd, buf, 0);
             native_drawTextRun(mNativeCanvasWrapper, buf, start - contextStart, len,
-                    0, contextLen, x, y, isRtl, paint.mNativePaint, paint.mNativeTypeface);
+                    0, contextLen, x, y, isRtl, paint.getNativeInstance(), paint.mNativeTypeface);
             TemporaryBuffer.recycle(buf);
         }
     }
@@ -1821,7 +1836,8 @@ public class Canvas {
      * @param paint    The paint used for the text (e.g. color, size, style)
      */
     @Deprecated
-    public void drawPosText(@NonNull char[] text, int index, int count, @NonNull float[] pos,
+    public void drawPosText(@NonNull char[] text, int index, int count,
+            @NonNull @Size(multiple=2) float[] pos,
             @NonNull Paint paint) {
         if (index < 0 || index + count > text.length || count*2 > pos.length) {
             throw new IndexOutOfBoundsException();
@@ -1844,7 +1860,8 @@ public class Canvas {
      * @param paint The paint used for the text (e.g. color, size, style)
      */
     @Deprecated
-    public void drawPosText(@NonNull String text, @NonNull float[] pos, @NonNull Paint paint) {
+    public void drawPosText(@NonNull String text, @NonNull @Size(multiple=2) float[] pos,
+            @NonNull Paint paint) {
         drawPosText(text.toCharArray(), 0, text.length(), pos, paint);
     }
 
@@ -1868,7 +1885,7 @@ public class Canvas {
         }
         native_drawTextOnPath(mNativeCanvasWrapper, text, index, count,
                 path.ni(), hOffset, vOffset,
-                paint.mBidiFlags, paint.mNativePaint, paint.mNativeTypeface);
+                paint.mBidiFlags, paint.getNativeInstance(), paint.mNativeTypeface);
     }
 
     /**
@@ -1888,7 +1905,7 @@ public class Canvas {
             float vOffset, @NonNull Paint paint) {
         if (text.length() > 0) {
             native_drawTextOnPath(mNativeCanvasWrapper, text, path.ni(), hOffset, vOffset,
-                    paint.mBidiFlags, paint.mNativePaint, paint.mNativeTypeface);
+                    paint.mBidiFlags, paint.getNativeInstance(), paint.mNativeTypeface);
         }
     }
 
@@ -1960,10 +1977,9 @@ public class Canvas {
      */
     public static native void freeTextLayoutCaches();
 
-    private static native long initRaster(long nativeBitmapOrZero);
+    private static native long initRaster(Bitmap bitmap);
     private static native void native_setBitmap(long canvasHandle,
-                                                long bitmapHandle,
-                                                boolean copyState);
+                                                Bitmap bitmap);
     private static native boolean native_isOpaque(long canvasHandle);
     private static native int native_getWidth(long canvasHandle);
     private static native int native_getHeight(long canvasHandle);
@@ -1976,9 +1992,10 @@ public class Canvas {
     private static native int native_saveLayerAlpha(long nativeCanvas, float l,
                                                     float t, float r, float b,
                                                     int alpha, int layerFlags);
-    private static native void native_restore(long canvasHandle);
+    private static native void native_restore(long canvasHandle, boolean tolerateUnderflow);
     private static native void native_restoreToCount(long canvasHandle,
-                                                     int saveCount);
+                                                     int saveCount,
+                                                     boolean tolerateUnderflow);
     private static native int native_getSaveCount(long canvasHandle);
 
     private static native void native_translate(long canvasHandle,
@@ -2047,13 +2064,13 @@ public class Canvas {
     private static native void native_drawPath(long nativeCanvas,
                                                long nativePath,
                                                long nativePaint);
-    private native void native_drawBitmap(long nativeCanvas, long nativeBitmap,
+    private native void native_drawBitmap(long nativeCanvas, Bitmap bitmap,
                                                  float left, float top,
                                                  long nativePaintOrZero,
                                                  int canvasDensity,
                                                  int screenDensity,
                                                  int bitmapDensity);
-    private native void native_drawBitmap(long nativeCanvas, long nativeBitmap,
+    private native void native_drawBitmap(long nativeCanvas, Bitmap bitmap,
             float srcLeft, float srcTop, float srcRight, float srcBottom,
             float dstLeft, float dstTop, float dstRight, float dstBottom,
             long nativePaintOrZero, int screenDensity, int bitmapDensity);
@@ -2063,11 +2080,11 @@ public class Canvas {
                                                  boolean hasAlpha,
                                                  long nativePaintOrZero);
     private static native void nativeDrawBitmapMatrix(long nativeCanvas,
-                                                      long nativeBitmap,
+                                                      Bitmap bitmap,
                                                       long nativeMatrix,
                                                       long nativePaint);
     private static native void nativeDrawBitmapMesh(long nativeCanvas,
-                                                    long nativeBitmap,
+                                                    Bitmap bitmap,
                                                     int meshWidth, int meshHeight,
                                                     float[] verts, int vertOffset,
                                                     int[] colors, int colorOffset,

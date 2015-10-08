@@ -17,6 +17,9 @@
 package android.view;
 
 
+import android.annotation.StringRes;
+import android.graphics.Rect;
+
 /**
  * Represents a contextual mode of the user interface. Action modes can be used to provide
  * alternative interaction modes and replace parts of the normal UI until finished.
@@ -29,8 +32,27 @@ package android.view;
  * </div>
  */
 public abstract class ActionMode {
+
+    /**
+     * The action mode is treated as a Primary mode. This is the default.
+     * Use with {@link #setType}.
+     */
+    public static final int TYPE_PRIMARY = 0;
+    /**
+     * The action mode is treated as a Floating Toolbar.
+     * Use with {@link #setType}.
+     */
+    public static final int TYPE_FLOATING = 1;
+
+    /**
+     * Default value to hide the action mode for
+     * {@link ViewConfiguration#getDefaultActionModeHideDuration()}.
+     */
+    public static final int DEFAULT_HIDE_DURATION = -1;
+
     private Object mTag;
     private boolean mTitleOptionalHint;
+    private int mType = TYPE_PRIMARY;
 
     /**
      * Set a tag object associated with this ActionMode.
@@ -80,7 +102,7 @@ public abstract class ActionMode {
      * @see #setTitle(CharSequence)
      * @see #setCustomView(View)
      */
-    public abstract void setTitle(int resId);
+    public abstract void setTitle(@StringRes int resId);
 
     /**
      * Set the subtitle of the action mode. This method will have no visible effect if
@@ -102,7 +124,7 @@ public abstract class ActionMode {
      * @see #setSubtitle(CharSequence)
      * @see #setCustomView(View)
      */
-    public abstract void setSubtitle(int resId);
+    public abstract void setSubtitle(@StringRes int resId);
 
     /**
      * Set whether or not the title/subtitle display for this action mode
@@ -154,6 +176,25 @@ public abstract class ActionMode {
     public abstract void setCustomView(View view);
 
     /**
+     * Set a type for this action mode. This will affect how the system renders the action mode if
+     * it has to.
+     *
+     * @param type One of {@link #TYPE_PRIMARY} or {@link #TYPE_FLOATING}.
+     */
+    public void setType(int type) {
+        mType = type;
+    }
+
+    /**
+     * Returns the type for this action mode.
+     *
+     * @return One of {@link #TYPE_PRIMARY} or {@link #TYPE_FLOATING}.
+     */
+    public int getType() {
+        return mType;
+    }
+
+    /**
      * Invalidate the action mode and refresh menu content. The mode's
      * {@link ActionMode.Callback} will have its
      * {@link Callback#onPrepareActionMode(ActionMode, Menu)} method called.
@@ -161,6 +202,28 @@ public abstract class ActionMode {
      * will be reflected to the user.
      */
     public abstract void invalidate();
+
+    /**
+     * Invalidate the content rect associated to this ActionMode. This only makes sense for
+     * action modes that support dynamic positioning on the screen, and provides a more efficient
+     * way to reposition it without invalidating the whole action mode.
+     *
+     * @see Callback2#onGetContentRect(ActionMode, View, Rect) .
+     */
+    public void invalidateContentRect() {}
+
+    /**
+     * Hide the action mode view from obstructing the content below for a short duration.
+     * This only makes sense for action modes that support dynamic positioning on the screen.
+     * If this method is called again before the hide duration expires, the later hide call will
+     * cancel the former and then take effect.
+     * NOTE that there is an internal limit to how long the mode can be hidden for. It's typically
+     * about a few seconds.
+     *
+     * @param duration The number of milliseconds to hide for.
+     * @see #DEFAULT_HIDE_DURATION
+     */
+    public void hide(long duration) {}
 
     /**
      * Finish and close this action mode. The action mode's {@link ActionMode.Callback} will
@@ -196,6 +259,16 @@ public abstract class ActionMode {
      * Returns a {@link MenuInflater} with the ActionMode's context.
      */
     public abstract MenuInflater getMenuInflater();
+
+    /**
+     * Called when the window containing the view that started this action mode gains or loses
+     * focus.
+     *
+     * @param hasWindowFocus True if the window containing the view that started this action mode
+     *        now has focus, false otherwise.
+     *
+     */
+    public void onWindowFocusChanged(boolean hasWindowFocus) {}
 
     /**
      * Returns whether the UI presenting this action mode can take focus or not.
@@ -263,5 +336,34 @@ public abstract class ActionMode {
          * @param mode The current ActionMode being destroyed
          */
         public void onDestroyActionMode(ActionMode mode);
+    }
+
+    /**
+     * Extension of {@link ActionMode.Callback} to provide content rect information. This is
+     * required for ActionModes with dynamic positioning such as the ones with type
+     * {@link ActionMode#TYPE_FLOATING} to ensure the positioning doesn't obscure app content. If
+     * an app fails to provide a subclass of this class, a default implementation will be used.
+     */
+    public static abstract class Callback2 implements ActionMode.Callback {
+
+        /**
+         * Called when an ActionMode needs to be positioned on screen, potentially occluding view
+         * content. Note this may be called on a per-frame basis.
+         *
+         * @param mode The ActionMode that requires positioning.
+         * @param view The View that originated the ActionMode, in whose coordinates the Rect should
+         *          be provided.
+         * @param outRect The Rect to be populated with the content position. Use this to specify
+         *          where the content in your app lives within the given view. This will be used
+         *          to avoid occluding the given content Rect with the created ActionMode.
+         */
+        public void onGetContentRect(ActionMode mode, View view, Rect outRect) {
+            if (view != null) {
+                outRect.set(0, 0, view.getWidth(), view.getHeight());
+            } else {
+                outRect.set(0, 0, 0, 0);
+            }
+        }
+
     }
 }

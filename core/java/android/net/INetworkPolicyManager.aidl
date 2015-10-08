@@ -38,14 +38,12 @@ interface INetworkPolicyManager {
 
     boolean isUidForeground(int uid);
 
-    int[] getPowerSaveAppIdWhitelist();
-
     void registerListener(INetworkPolicyListener listener);
     void unregisterListener(INetworkPolicyListener listener);
 
     /** Control network policies atomically. */
     void setNetworkPolicies(in NetworkPolicy[] policies);
-    NetworkPolicy[] getNetworkPolicies();
+    NetworkPolicy[] getNetworkPolicies(String callingPackage);
 
     /** Snooze limit on policy matching given template. */
     void snoozeLimit(in NetworkTemplate template);
@@ -54,7 +52,10 @@ interface INetworkPolicyManager {
     void setRestrictBackground(boolean restrictBackground);
     boolean getRestrictBackground();
 
+    void setDeviceIdleMode(boolean enabled);
+
     NetworkQuotaInfo getNetworkQuotaInfo(in NetworkState state);
     boolean isNetworkMetered(in NetworkState state);
 
+    void factoryReset(String subscriber);
 }

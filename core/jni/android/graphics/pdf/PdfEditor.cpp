@@ -16,14 +16,19 @@
 
 #include "jni.h"
 #include "JNIHelp.h"
+
+#pragma GCC diagnostic push
+#pragma GCC diagnostic ignored "-Wdelete-non-virtual-dtor"
 #include "fpdfview.h"
-#include "fpdfedit.h"
-#include "fpdfsave.h"
+#include "fpdf_edit.h"
+#include "fpdf_save.h"
 #include "fsdk_rendercontext.h"
 #include "fpdf_transformpage.h"
+#pragma GCC diagnostic pop
+
 #include "SkMatrix.h"
 
-#include <android_runtime/AndroidRuntime.h>
+#include <core_jni_helpers.h>
 #include <vector>
 #include <utils/Log.h>
 #include <unistd.h>
@@ -53,7 +58,7 @@ static int sUnmatchedInitRequestCount = 0;
 static void initializeLibraryIfNeeded() {
     Mutex::Autolock _l(sLock);
     if (sUnmatchedInitRequestCount == 0) {
-        FPDF_InitLibrary(NULL);
+        FPDF_InitLibrary();
     }
     sUnmatchedInitRequestCount++;
 }
@@ -92,12 +97,12 @@ static jlong nativeOpen(JNIEnv* env, jclass thiz, jint fd, jlong size) {
         switch (error) {
             case FPDF_ERR_PASSWORD:
             case FPDF_ERR_SECURITY: {
-                jniThrowException(env, "java/lang/SecurityException",
-                        "cannot create document. Error:" + error);
+                jniThrowExceptionFmt(env, "java/lang/SecurityException",
+                        "cannot create document. Error: %ld", error);
             } break;
             default: {
-                jniThrowException(env, "java/io/IOException",
-                        "cannot create document. Error:" + error);
+                jniThrowExceptionFmt(env, "java/io/IOException",
+                        "cannot create document. Error: %ld", error);
             } break;
         }
         destroyLibraryIfNeeded();
@@ -150,7 +155,7 @@ static bool writeAllBytes(const int fd, const void* buffer, const size_t byteCou
 static int writeBlock(FPDF_FILEWRITE* owner, const void* buffer, unsigned long size) {
     const PdfToFdWriter* writer = reinterpret_cast<PdfToFdWriter*>(owner);
     const bool success = writeAllBytes(writer->dstFd, buffer, size);
-    if (success < 0) {
+    if (!success) {
         ALOGE("Cannot write to file descriptor. Error:%d", errno);
         return 0;
     }
@@ -164,8 +169,8 @@ static void nativeWrite(JNIEnv* env, jclass thiz, jlong documentPtr, jint fd) {
     writer.WriteBlock = &writeBlock;
     const bool success = FPDF_SaveAsCopy(document, &writer, FPDF_NO_INCREMENTAL);
     if (!success) {
-        jniThrowException(env, "java/io/IOException",
-                "cannot write to fd. Error:" + errno);
+        jniThrowExceptionFmt(env, "java/io/IOException",
+                "cannot write to fd. Error: %d", errno);
         destroyLibraryIfNeeded();
     }
 }
@@ -196,7 +201,11 @@ static void nativeSetTransformAndClip(JNIEnv* env, jclass thiz, jlong documentPt
     SkMatrix* skTransform = reinterpret_cast<SkMatrix*>(transformPtr);
 
     SkScalar transformValues[6];
-    skTransform->asAffine(transformValues);
+    if (!skTransform->asAffine(transformValues)) {
+        jniThrowException(env, "java/lang/IllegalArgumentException",
+                "transform matrix has perspective. Only affine matrices are allowed.");
+        return;
+    }
 
     // PDF's coordinate system origin is left-bottom while in graphics it
     // is the top-left. So, translate the PDF coordinates to ours.
@@ -350,19 +359,19 @@ static JNINativeMethod gPdfEditor_Methods[] = {
 };
 
 int register_android_graphics_pdf_PdfEditor(JNIEnv* env) {
-    const int result = android::AndroidRuntime::registerNativeMethods(
+    const int result = RegisterMethodsOrDie(
             env, "android/graphics/pdf/PdfEditor", gPdfEditor_Methods,
             NELEM(gPdfEditor_Methods));
 
-    jclass pointClass = env->FindClass("android/graphics/Point");
-    gPointClassInfo.x = env->GetFieldID(pointClass, "x", "I");
-    gPointClassInfo.y = env->GetFieldID(pointClass, "y", "I");
+    jclass pointClass = FindClassOrDie(env, "android/graphics/Point");
+    gPointClassInfo.x = GetFieldIDOrDie(env, pointClass, "x", "I");
+    gPointClassInfo.y = GetFieldIDOrDie(env, pointClass, "y", "I");
 
-    jclass rectClass = env->FindClass("android/graphics/Rect");
-    gRectClassInfo.left = env->GetFieldID(rectClass, "left", "I");
-    gRectClassInfo.top = env->GetFieldID(rectClass, "top", "I");
-    gRectClassInfo.right = env->GetFieldID(rectClass, "right", "I");
-    gRectClassInfo.bottom = env->GetFieldID(rectClass, "bottom", "I");
+    jclass rectClass = FindClassOrDie(env, "android/graphics/Rect");
+    gRectClassInfo.left = GetFieldIDOrDie(env, rectClass, "left", "I");
+    gRectClassInfo.top = GetFieldIDOrDie(env, rectClass, "top", "I");
+    gRectClassInfo.right = GetFieldIDOrDie(env, rectClass, "right", "I");
+    gRectClassInfo.bottom = GetFieldIDOrDie(env, rectClass, "bottom", "I");
 
     return result;
 };

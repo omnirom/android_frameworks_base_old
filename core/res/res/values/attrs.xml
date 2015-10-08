@@ -27,12 +27,17 @@
         <!-- ============== -->
         <eat-comment />
 
+        <!-- Specifies that a theme has a light background with dark text on top.  -->
+        <attr name="isLightTheme" format="boolean" />
+
         <!-- Default color of foreground imagery. -->
         <attr name="colorForeground" format="color" />
         <!-- Default color of foreground imagery on an inverted background. -->
         <attr name="colorForegroundInverse" format="color" />
-        <!-- Color that matches (as closely as possible) the window background. -->
+        <!-- Default color of background imagery, ex. full-screen windows. -->
         <attr name="colorBackground" format="color" />
+        <!-- Default color of background imagery for floating components, ex. dialogs, popups, and cards. -->
+        <attr name="colorBackgroundFloating" format="color" />
         <!-- This is a hint for a solid color that can be used for caching
              rendered views.  This should be the color of the background when
              there is a solid background color; it should be null when the
@@ -329,7 +334,9 @@
         <attr name="windowOverscan" format="boolean" />
         <!-- Flag indicating whether this is a floating window. -->
         <attr name="windowIsFloating" format="boolean" />
-        <!-- Flag indicating whether this is a translucent window. -->
+        <!-- Flag indicating whether this is a translucent window. If this attribute is unset (but
+             not if set to false), the window might still be considered translucent, if
+             windowSwipeToDismiss is set to true. -->
         <attr name="windowIsTranslucent" format="boolean" />
         <!-- Flag indicating that this window's background should be the
              user's current wallpaper.  Corresponds
@@ -455,7 +462,9 @@
         <attr name="windowTranslucentNavigation" format="boolean" />
 
         <!-- Flag to indicate that a window can be swiped away to be dismissed.
-             Corresponds to {@link android.view.Window#FEATURE_SWIPE_TO_DISMISS} -->
+             Corresponds to {@link android.view.Window#FEATURE_SWIPE_TO_DISMISS}. It will also
+             dynamically change translucency of the window, if the windowIsTranslucent is not set.
+             If windowIsTranslucent is set (to either true or false) it will obey that setting. -->
         <attr name="windowSwipeToDismiss" format="boolean" />
 
         <!-- Flag indicating whether this window requests that content changes be performed
@@ -544,6 +553,17 @@
         <attr name="windowTransitionBackgroundFadeDuration" format="integer"/>
 
         <!-- ============ -->
+        <!-- Floating toolbar styles -->
+        <!-- ============ -->
+       <eat-comment />
+       <attr name="floatingToolbarCloseDrawable" format="reference" />
+       <attr name="floatingToolbarForegroundColor" format="reference|color" />
+       <attr name="floatingToolbarItemBackgroundBorderlessDrawable" format="reference" />
+       <attr name="floatingToolbarItemBackgroundDrawable" format="reference" />
+       <attr name="floatingToolbarOpenDrawable" format="reference" />
+       <attr name="floatingToolbarPopupBackgroundDrawable" format="reference" />
+
+        <!-- ============ -->
         <!-- Alert Dialog styles -->
         <!-- ============ -->
         <eat-comment />
@@ -555,12 +575,18 @@
         <!-- Image elements -->
         <!-- ============== -->
         <eat-comment />
-
+i
         <!-- Background that can be used behind parts of a UI that provide
              details on data the user is selecting.  For example, this is
              the background element of PreferenceActivity's embedded
              preference fragment. -->
         <attr name="detailsElementBackground" format="reference" />
+
+        <!-- Icon that should be used to indicate that an app is waiting for a fingerprint scan.
+             This should be used whenever an app is requesting the user to place a finger on the
+             fingerprint sensor. It can be combined with other drawables such as colored circles, so
+             the appearance matches the branding of the app requesting the fingerprint scan.-->
+        <attr name="fingerprintAuthDrawable" format="reference" />
 
         <!-- ============ -->
         <!-- Panel styles -->
@@ -859,6 +885,8 @@
         <attr name="dialogPreferenceStyle" format="reference" />
         <!-- Default style for EditTextPreference. -->
         <attr name="editTextPreferenceStyle" format="reference" />
+        <!-- @hide Default style for SeekBarDialogPreference. -->
+        <attr name="seekBarDialogPreferenceStyle" format="reference" />
         <!-- Default style for RingtonePreference. -->
         <attr name="ringtonePreferenceStyle" format="reference" />
         <!-- The preference layout that has the child/tabbed effect. -->
@@ -1774,6 +1802,14 @@
         <enum name="KEYCODE_TV_MEDIA_CONTEXT_MENU" value="257" />
         <enum name="KEYCODE_TV_TIMER_PROGRAMMING" value="258" />
         <enum name="KEYCODE_HELP" value="259" />
+        <enum name="KEYCODE_NAVIGATE_PREVIOUS" value="260" />
+        <enum name="KEYCODE_NAVIGATE_NEXT" value="261" />
+        <enum name="KEYCODE_NAVIGATE_IN" value="262" />
+        <enum name="KEYCODE_NAVIGATE_OUT" value="263" />
+        <enum name="KEYCODE_MEDIA_SKIP_FORWARD" value="272" />
+        <enum name="KEYCODE_MEDIA_SKIP_BACKWARD" value="273" />
+        <enum name="KEYCODE_MEDIA_STEP_FORWARD" value="274" />
+        <enum name="KEYCODE_MEDIA_STEP_BACKWARD" value="275" />
     </attr>
 
     <!-- ***************************************************************** -->
@@ -1949,6 +1985,16 @@
 
         <!-- Whether to clip window content to the outline of the window background. -->
         <attr name="windowClipToOutline" format="boolean" />
+
+        <!-- If set, the status bar will be drawn such that it is compatible with a light
+             status bar background.
+             <p>For this to take effect, the window must be drawing the system bar backgrounds with
+             {@link android.R.attr#windowDrawsSystemBarBackgrounds} and the status bar must not
+             have been requested to be translucent with
+             {@link android.R.attr#windowTranslucentStatus}.
+             Corresponds to setting {@link android.view.View#SYSTEM_UI_FLAG_LIGHT_STATUS_BAR} on
+             the decor view. -->
+        <attr name="windowLightStatusBar" format="boolean" />
     </declare-styleable>
 
     <!-- The set of attributes that describe a AlertDialog's theme. -->
@@ -1973,6 +2019,13 @@
         <attr name="horizontalProgressLayout" format="reference" />
         <!-- @hide Whether fullDark, etc. should use default values if null. -->
         <attr name="needsDefaultBackgrounds" format="boolean" />
+    </declare-styleable>
+
+    <!-- @hide -->
+    <declare-styleable name="ButtonBarLayout">
+        <!-- Whether to automatically stack the buttons when there is not
+             enough space to lay them out side-by-side. -->
+        <attr name="allowStacking" format="boolean" />
     </declare-styleable>
 
     <!-- Fragment animation class attributes. -->
@@ -2206,7 +2259,7 @@
             <enum name="outsideInset" value="0x03000000" />
         </attr>
 
-        <!-- Set this if the view will serve as a scrolling container, meaing
+        <!-- Set this if the view will serve as a scrolling container, meaning
              that it can be resized to shrink its overall window so that there
              will be space for an input method.  If not set, the default
              value will be true if "scrollbars" has the vertical scrollbar
@@ -2306,7 +2359,10 @@
         <!-- Defines whether this view reacts to long click events. -->
         <attr name="longClickable" format="boolean" />
 
-        <!-- If unset, no state will be saved for this view when it is being
+        <!--  Defines whether this view reacts to context click events. -->
+        <attr name="contextClickable" format="boolean" />
+
+        <!-- If false, no state will be saved for this view when it is being
              frozen. The default is true, allowing the view to be saved
              (however it also must have an ID assigned to it for its
              state to be saved).  Setting this to false only disables the
@@ -2501,6 +2557,12 @@
             <enum name="rtl" value="4" />
             <!-- The paragraph direction is coming from the system Locale. -->
             <enum name="locale" value="5" />
+            <!-- The first strong directional character determines the paragraph direction. If
+                 there is no strong directional character, the paragraph direction is LTR. -->
+            <enum name="firstStrongLtr" value="6" />
+            <!-- The first strong directional character determines the paragraph direction. If
+                 there is no strong directional character, the paragraph direction is RTL. -->
+            <enum name="firstStrongRtl" value="7" />
         </attr>
 
         <!-- Defines the alignment of the text. A heuristic is used to determine the resolved
@@ -2614,6 +2676,92 @@
             <enum name="paddedBounds" value="3" />
         </attr>
 
+        <!-- Defines the drawable to draw over the content. This can be used as an overlay.
+             The foreground drawable participates in the padding of the content if the gravity
+             is set to fill. -->
+        <attr name="foreground" format="reference|color" />
+        <!-- Defines the gravity to apply to the foreground drawable. The gravity defaults
+             to fill. -->
+        <attr name="foregroundGravity">
+            <!-- Push object to the top of its container, not changing its size. -->
+            <flag name="top" value="0x30" />
+            <!-- Push object to the bottom of its container, not changing its size. -->
+            <flag name="bottom" value="0x50" />
+            <!-- Push object to the left of its container, not changing its size. -->
+            <flag name="left" value="0x03" />
+            <!-- Push object to the right of its container, not changing its size. -->
+            <flag name="right" value="0x05" />
+            <!-- Place object in the vertical center of its container, not changing its size. -->
+            <flag name="center_vertical" value="0x10" />
+            <!-- Grow the vertical size of the object if needed so it completely fills its container. -->
+            <flag name="fill_vertical" value="0x70" />
+            <!-- Place object in the horizontal center of its container, not changing its size. -->
+            <flag name="center_horizontal" value="0x01" />
+            <!-- Grow the horizontal size of the object if needed so it completely fills its container. -->
+            <flag name="fill_horizontal" value="0x07" />
+            <!-- Place the object in the center of its container in both the vertical and horizontal axis, not changing its size. -->
+            <flag name="center" value="0x11" />
+            <!-- Grow the horizontal and vertical size of the object if needed so it completely fills its container. -->
+            <flag name="fill" value="0x77" />
+            <!-- Additional option that can be set to have the top and/or bottom edges of
+                 the child clipped to its container's bounds.
+                 The clip will be based on the vertical gravity: a top gravity will clip the bottom
+                 edge, a bottom gravity will clip the top edge, and neither will clip both edges. -->
+            <flag name="clip_vertical" value="0x80" />
+            <!-- Additional option that can be set to have the left and/or right edges of
+                 the child clipped to its container's bounds.
+                 The clip will be based on the horizontal gravity: a left gravity will clip the right
+                 edge, a right gravity will clip the left edge, and neither will clip both edges. -->
+            <flag name="clip_horizontal" value="0x08" />
+        </attr>
+        <!-- Defines whether the foreground drawable should be drawn inside the padding.
+             This property is turned on by default. -->
+        <attr name="foregroundInsidePadding" format="boolean" />
+        <!-- Tint to apply to the foreground. -->
+        <attr name="foregroundTint" format="color" />
+        <!-- Blending mode used to apply the foreground tint. -->
+        <attr name="foregroundTintMode">
+            <!-- The tint is drawn on top of the drawable.
+                 [Sa + (1 - Sa)*Da, Rc = Sc + (1 - Sa)*Dc] -->
+            <enum name="src_over" value="3" />
+            <!-- The tint is masked by the alpha channel of the drawable. The drawable’s
+                 color channels are thrown out. [Sa * Da, Sc * Da] -->
+            <enum name="src_in" value="5" />
+            <!-- The tint is drawn above the drawable, but with the drawable’s alpha
+                 channel masking the result. [Da, Sc * Da + (1 - Sa) * Dc] -->
+            <enum name="src_atop" value="9" />
+            <!-- Multiplies the color and alpha channels of the drawable with those of
+                 the tint. [Sa * Da, Sc * Dc] -->
+            <enum name="multiply" value="14" />
+            <!-- [Sa + Da - Sa * Da, Sc + Dc - Sc * Dc] -->
+            <enum name="screen" value="15" />
+            <!-- Combines the tint and drawable color and alpha channels, clamping the
+                 result to valid color values. Saturate(S + D) -->
+            <enum name="add" value="16" />
+        </attr>
+
+        <!-- Defines which scroll indicators should be displayed when the view
+             can be scrolled. Multiple values may be combined using logical OR,
+             for example "top|bottom". -->
+        <attr name="scrollIndicators">
+            <!-- No scroll indicators are displayed. -->
+            <flag name="none" value="0x00" />
+            <!-- Displays top scroll indicator when view can be scrolled up. -->
+            <flag name="top" value="0x01" />
+            <!-- Displays bottom scroll indicator when vew can be scrolled down. -->
+            <flag name="bottom" value="0x02" />
+            <!-- Displays left scroll indicator when vew can be scrolled left. -->
+            <flag name="left" value="0x04" />
+            <!-- Displays right scroll indicator when vew can be scrolled right. -->
+            <flag name="right" value="0x08" />
+            <!-- Displays right scroll indicator when vew can be scrolled in the
+                 start direction. -->
+            <flag name="start" value="0x10" />
+            <!-- Displays right scroll indicator when vew can be scrolled in the
+                 end direction. -->
+            <flag name="end" value="0x20" />
+        </attr>
+
     </declare-styleable>
 
     <!-- Attributes that can be assigned to a tag for a particular View. -->
@@ -2622,6 +2770,13 @@
         <attr name="id" />
         <!-- Specifies the value with which to tag the view. -->
         <attr name="value" />
+    </declare-styleable>
+
+    <!-- Attributes that can be assigned to an &lt;include&gt; tag.
+         @hide -->
+    <declare-styleable name="Include">
+        <attr name="id" />
+        <attr name="visibility" />
     </declare-styleable>
 
     <!-- Attributes that can be used with a {@link android.view.ViewGroup} or any
@@ -2639,8 +2794,9 @@
              to allow the children to draw outside of their bounds. The default value of
              this property is true. -->
         <attr name="clipChildren" format="boolean" />
-        <!-- Defines whether the ViewGroup will clip its children to its padding, if
-             padding is not zero. This property is set to true by default. -->
+        <!-- Defines whether the ViewGroup will clip its children and resize (but not clip) any
+             EdgeEffect to its padding, if padding is not zero. This property is set to true by
+             default. -->
         <attr name="clipToPadding" format="boolean" />
         <!-- Defines the layout animation to use the first time the ViewGroup is laid out.
              Layout animations can also be started manually after the first layout. -->
@@ -2722,6 +2878,8 @@
     <!-- A {@link android.view.ViewStub} lets you lazily include other XML layouts
          inside your application at runtime. -->
     <declare-styleable name="ViewStub">
+        <!-- Supply an identifier name for this view. -->
+        <attr name="id" />
         <!-- Supply an identifier for the layout resource to inflate when the ViewStub
              becomes visible or when forced to do so. The layout resource must be a
              valid reference to a layout. -->
@@ -2950,6 +3108,28 @@
             <flag name="typeViewScrolled" value="0x000001000" />
             <!-- Receives {@link android.view.accessibility.AccessibilityEvent#TYPE_VIEW_TEXT_SELECTION_CHANGED} events. -->
             <flag name="typeViewTextSelectionChanged" value="0x000002000" />
+            <!-- Receives {@link android.view.accessibility.AccessibilityEvent#TYPE_ANNOUNCEMENT} events. -->
+            <flag name="typeAnnouncement" value="0x00004000" />
+            <!-- Receives {@link android.view.accessibility.AccessibilityEvent#TYPE_VIEW_ACCESSIBILITY_FOCUSED} events. -->
+            <flag name="typeViewAccessibilityFocused" value="0x00008000" />
+            <!-- Receives {@link android.view.accessibility.AccessibilityEvent#TYPE_VIEW_ACCESSIBILITY_FOCUS_CLEARED} events. -->
+            <flag name="typeViewAccessibilityFocusCleared" value="0x00010000" />
+            <!-- Receives {@link android.view.accessibility.AccessibilityEvent#TYPE_VIEW_TEXT_TRAVERSED_AT_MOVEMENT_GRANULARITY} events. -->
+            <flag name="typeViewTextTraversedAtMovementGranularity" value="0x00020000" />
+            <!-- Receives {@link android.view.accessibility.AccessibilityEvent#TYPE_GESTURE_DETECTION_START} events. -->
+            <flag name="typeGestureDetectionStart" value="0x00040000" />
+            <!-- Receives {@link android.view.accessibility.AccessibilityEvent#TYPE_GESTURE_DETECTION_END} events. -->
+            <flag name="typeGestureDetectionEnd" value="0x00080000" />
+            <!-- Receives {@link android.view.accessibility.AccessibilityEvent#TYPE_TOUCH_INTERACTION_START} events. -->
+            <flag name="typeTouchInteractionStart" value="0x00100000" />
+            <!-- Receives {@link android.view.accessibility.AccessibilityEvent#TYPE_TOUCH_INTERACTION_END} events. -->
+            <flag name="typeTouchInteractionEnd" value="0x00200000" />
+            <!-- Receives {@link android.view.accessibility.AccessibilityEvent#TYPE_WINDOWS_CHANGED} events. -->
+            <flag name="typeWindowsChanged" value="0x00400000" />
+            <!-- Receives {@link android.view.accessibility.AccessibilityEvent#TYPE_VIEW_CONTEXT_CLICKED} events. -->
+            <flag name="typeContextClicked" value="0x00800000" />
+            <!-- Receives {@link android.view.accessibility.AccessibilityEvent#TYPE_ASSIST_READING_CONTEXT} events. -->
+            <flag name="typeAssistReadingContext" value="0x01000000" />
             <!-- Receives {@link android.view.accessibility.AccessibilityEvent#TYPES_ALL_MASK} i.e. all events. -->
             <flag name="typeAllMask" value="0xffffffff" />
         </attr>
@@ -3070,6 +3250,9 @@
         <!-- A drawable that can be rendered in Android's system UI for representing
              the service. -->
         <attr name="apduServiceBanner" format="reference"/>
+        <!-- Component name of an activity that allows the user to modify
+             the settings for this service. -->
+        <attr name="settingsActivity"/>
     </declare-styleable>
 
     <!-- Use <code>offhost-apdu-service</code> as the root tag of the XML resource that
@@ -3083,6 +3266,9 @@
         <!-- A drawable that can be rendered in Android's system UI for representing
              the service. -->
         <attr name="apduServiceBanner"/>
+        <!-- Component name of an activity that allows the user to modify
+             the settings for this service. -->
+        <attr name="settingsActivity"/>
     </declare-styleable>
 
     <!-- Specify one or more <code>aid-group</code> elements inside a
@@ -3303,9 +3489,9 @@
         <attr name="position">
             <!-- Floating at the top of the content. -->
             <enum name="floating" value="0" />
-            <!-- Pinned alongside the thumb. -->
+            <!-- Pinned to the thumb, vertically centered with the middle of the thumb. -->
             <enum name="atThumb" value="1" />
-            <!-- Pinned above the thumb. -->
+            <!-- Pinned to the thumb, vertically centered with the top edge of the thumb. -->
             <enum name="aboveThumb" value="2" />
         </attr>
         <attr name="textAppearance" />
@@ -3317,74 +3503,21 @@
         <attr name="minHeight" />
         <!-- Padding for the section header preview. -->
         <attr name="padding" />
+        <!-- Position of thumb in relation to the track. -->
+        <attr name="thumbPosition">
+            <!-- The thumb's midpoint is anchored to the track. At its
+                 extremes, the thumb will extend half-way outside the
+                 track. -->
+            <enum name="midpoint" value="0" />
+            <!-- The thumb is entirely inside the track. At its extremes,
+                 the thumb will be contained entirely within the track. -->
+            <enum name="inside" value="1" />
+        </attr>
     </declare-styleable>
     <declare-styleable name="FrameLayout">
-        <!-- Defines the drawable to draw over the content. This can be used as an overlay.
-             The foreground drawable participates in the padding of the content if the gravity
-             is set to fill. -->
-        <attr name="foreground" format="reference|color" />
-        <!-- Defines the gravity to apply to the foreground drawable. The gravity defaults
-             to fill. -->
-        <attr name="foregroundGravity">
-            <!-- Push object to the top of its container, not changing its size. -->
-            <flag name="top" value="0x30" />
-            <!-- Push object to the bottom of its container, not changing its size. -->
-            <flag name="bottom" value="0x50" />
-            <!-- Push object to the left of its container, not changing its size. -->
-            <flag name="left" value="0x03" />
-            <!-- Push object to the right of its container, not changing its size. -->
-            <flag name="right" value="0x05" />
-            <!-- Place object in the vertical center of its container, not changing its size. -->
-            <flag name="center_vertical" value="0x10" />
-            <!-- Grow the vertical size of the object if needed so it completely fills its container. -->
-            <flag name="fill_vertical" value="0x70" />
-            <!-- Place object in the horizontal center of its container, not changing its size. -->
-            <flag name="center_horizontal" value="0x01" />
-            <!-- Grow the horizontal size of the object if needed so it completely fills its container. -->
-            <flag name="fill_horizontal" value="0x07" />
-            <!-- Place the object in the center of its container in both the vertical and horizontal axis, not changing its size. -->
-            <flag name="center" value="0x11" />
-            <!-- Grow the horizontal and vertical size of the object if needed so it completely fills its container. -->
-            <flag name="fill" value="0x77" />
-            <!-- Additional option that can be set to have the top and/or bottom edges of
-                 the child clipped to its container's bounds.
-                 The clip will be based on the vertical gravity: a top gravity will clip the bottom
-                 edge, a bottom gravity will clip the top edge, and neither will clip both edges. -->
-            <flag name="clip_vertical" value="0x80" />
-            <!-- Additional option that can be set to have the left and/or right edges of
-                 the child clipped to its container's bounds.
-                 The clip will be based on the horizontal gravity: a left gravity will clip the right
-                 edge, a right gravity will clip the left edge, and neither will clip both edges. -->
-            <flag name="clip_horizontal" value="0x08" />
-        </attr>
-        <!-- Defines whether the foreground drawable should be drawn inside the padding.
-             This property is turned on by default. -->
-        <attr name="foregroundInsidePadding" format="boolean" />
         <!-- Determines whether to measure all children or just those in
              the VISIBLE or INVISIBLE state when measuring. Defaults to false. -->
         <attr name="measureAllChildren" format="boolean" />
-        <!-- Tint to apply to the foreground. -->
-        <attr name="foregroundTint" format="color" />
-        <!-- Blending mode used to apply the foreground tint. -->
-        <attr name="foregroundTintMode">
-            <!-- The tint is drawn on top of the drawable.
-                 [Sa + (1 - Sa)*Da, Rc = Sc + (1 - Sa)*Dc] -->
-            <enum name="src_over" value="3" />
-            <!-- The tint is masked by the alpha channel of the drawable. The drawable’s
-                 color channels are thrown out. [Sa * Da, Sc * Da] -->
-            <enum name="src_in" value="5" />
-            <!-- The tint is drawn above the drawable, but with the drawable’s alpha
-                 channel masking the result. [Da, Sc * Da + (1 - Sa) * Dc] -->
-            <enum name="src_atop" value="9" />
-            <!-- Multiplies the color and alpha channels of the drawable with those of
-                 the tint. [Sa * Da, Sc * Dc] -->
-            <enum name="multiply" value="14" />
-            <!-- [Sa + Da - Sa * Da, Sc + Dc - Sc * Dc] -->
-            <enum name="screen" value="15" />
-            <!-- Combines the tint and drawable color and alpha channels, clamping the
-                 result to valid color values. Saturate(S + D) -->
-            <enum name="add" value="16" />
-        </attr>
     </declare-styleable>
     <declare-styleable name="ExpandableListView">
         <!-- Indicator shown beside the group View. This can be a stateful Drawable. -->
@@ -3457,15 +3590,29 @@
         <!-- Sets a drawable as the content of this ImageView. -->
         <attr name="src" format="reference|color" />
         <!-- Controls how the image should be resized or moved to match the size
-             of this ImageView. -->
+             of this ImageView.  See {@link android.widget.ImageView.ScaleType} -->
         <attr name="scaleType">
+            <!-- Scale using the image matrix when drawing. See  
+                 {@link android.widget.ImageView#setImageMatrix(Matrix)}. -->
             <enum name="matrix" value="0" />
+            <!-- Scale the image using {@link android.graphics.Matrix.ScaleToFit#FILL}. -->
             <enum name="fitXY" value="1" />
+            <!-- Scale the image using {@link android.graphics.Matrix.ScaleToFit#START}. -->
             <enum name="fitStart" value="2" />
+            <!-- Scale the image using {@link android.graphics.Matrix.ScaleToFit#CENTER}. -->
             <enum name="fitCenter" value="3" />
+            <!-- Scale the image using {@link android.graphics.Matrix.ScaleToFit#END}. -->
             <enum name="fitEnd" value="4" />
+            <!-- Center the image in the view, but perform no scaling. -->
             <enum name="center" value="5" />
+            <!-- Scale the image uniformly (maintain the image's aspect ratio) so both dimensions 
+                 (width and height) of the image will be equal to or larger than the corresponding
+                 dimension of the view (minus padding). The image is then centered in the view. -->
             <enum name="centerCrop" value="6" />
+            <!-- Scale the image uniformly (maintain the image's aspect ratio) so that both
+                 dimensions (width and height) of the image will be equal to or less than the
+                 corresponding dimension of the view (minus padding). The image is then centered in
+                 the view. -->
             <enum name="centerInside" value="7" />
         </attr>
         <!-- Set this to true if you want the ImageView to adjust its bounds
@@ -3783,6 +3930,11 @@
         <attr name="thumbOffset" format="dimension" />
         <!-- Whether to split the track and leave a gap for the thumb drawable. -->
         <attr name="splitTrack" format="boolean" />
+        <!-- Whether to force the track's alpha to ?android:attr/disabledAlpha
+             when disabled. This is required for Holo and Gingerbread, but
+             should always be false for Material and  beyond.
+             @hide Developers shouldn't need to change this. -->
+        <attr name="useDisabledAlpha" format="boolean" />
         <!-- Tint to apply to the button graphic. -->
         <attr name="thumbTint" format="color" />
         <!-- Blending mode used to apply the button graphic tint. -->
@@ -4137,6 +4289,28 @@
         <attr name="drawableEnd" format="reference|color" />
         <!-- The padding between the drawables and the text. -->
         <attr name="drawablePadding" format="dimension" />
+        <!-- Tint to apply to the compound (left, top, etc.) drawables. -->
+        <attr name="drawableTint" format="color" />
+        <!-- Blending mode used to apply the compound (left, top, etc.) drawables tint. -->
+        <attr name="drawableTintMode">
+            <!-- The tint is drawn on top of the drawable.
+                 [Sa + (1 - Sa)*Da, Rc = Sc + (1 - Sa)*Dc] -->
+            <enum name="src_over" value="3" />
+            <!-- The tint is masked by the alpha channel of the drawable. The drawable’s
+                 color channels are thrown out. [Sa * Da, Sc * Da] -->
+            <enum name="src_in" value="5" />
+            <!-- The tint is drawn above the drawable, but with the drawable’s alpha
+                 channel masking the result. [Da, Sc * Da + (1 - Sa) * Dc] -->
+            <enum name="src_atop" value="9" />
+            <!-- Multiplies the color and alpha channels of the drawable with those of
+                 the tint. [Sa * Da, Sc * Dc] -->
+            <enum name="multiply" value="14" />
+            <!-- [Sa + Da - Sa * Da, Sc + Dc - Sc * Dc] -->
+            <enum name="screen" value="15" />
+            <!-- Combines the tint and drawable color and alpha channels, clamping the
+                 result to valid color values. Saturate(S + D) -->
+            <enum name="add" value="16" />
+        </attr>
         <!-- Extra spacing between lines of text. -->
         <attr name="lineSpacingExtra" format="dimension" />
         <!-- Extra spacing between lines of text, as a multiplier. -->
@@ -4148,6 +4322,8 @@
             <enum name="marquee_forever" value="-1" />
         </attr>
         <attr name="inputType" />
+        <!-- Whether undo should be allowed for editable text. Defaults to true. -->
+        <attr name="allowUndo" format="boolean" />
         <attr name="imeOptions" />
         <!-- An addition content type description to supply to the input
              method attached to the text view, which is private to the
@@ -4211,6 +4387,30 @@
         <attr name="letterSpacing" />
         <!-- Font feature settings. -->
         <attr name="fontFeatureSettings" />
+        <!-- Break strategy (control over paragraph layout). -->
+        <attr name="breakStrategy">
+            <!-- Line breaking uses simple strategy. -->
+            <enum name="simple" value="0" />
+            <!-- Line breaking uses high-quality strategy, including hyphenation. -->
+            <enum name="high_quality" value="1" />
+            <!-- Line breaking strategy balances line lengths. -->
+            <enum name="balanced" value="2" />
+        </attr>
+        <!-- Frequency of automatic hyphenation. -->
+        <attr name="hyphenationFrequency">
+            <!-- No hyphenation. -->
+            <enum name="none" value="0" />
+            <!-- Less frequent hyphenation, useful for informal use cases, such
+            as chat messages. -->
+            <enum name="normal" value="1" />
+            <!-- Standard amount of hyphenation, useful for running text and for
+            screens with limited space for text. -->
+            <enum name="full" value="2" />
+        </attr>
+        <!-- Placeholder for a deleted attribute. This should be removed before M release. -->
+        <attr name="__removeBeforeMRelease_leftIndents" format="reference" />
+        <!-- Placeholder for a deleted attribute. This should be removed before M release. -->
+        <attr name="__removeBeforeMRelease_rightIndents" format="reference" />
     </declare-styleable>
     <declare-styleable name="TextViewAppearance">
         <!-- Base text color, typeface, size, and style. -->
@@ -4287,6 +4487,10 @@
         <attr name="popupAnimationStyle" format="reference" />
         <!-- Whether the popup window should overlap its anchor view. -->
         <attr name="overlapAnchor" format="boolean" />
+        <!-- Transition used to move views into the popup window. -->
+        <attr name="popupEnterTransition" format="reference" />
+        <!-- Transition used to move views out of the popup window. -->
+        <attr name="popupExitTransition" format="reference" />
     </declare-styleable>
     <declare-styleable name="ListPopupWindow">
         <!-- Amount of pixels by which the drop down should be offset vertically. -->
@@ -4348,6 +4552,8 @@
         </attr>
         <!-- List selector to use for spinnerMode="dropdown" display. -->
         <attr name="dropDownSelector" />
+        <!-- Theme to use for the drop-down or dialog popup window. -->
+        <attr name="popupTheme" />
         <!-- Background drawable to use for the dropdown in spinnerMode="dropdown". -->
         <attr name="popupBackground" />
         <!-- Window elevation to use for the dropdown in spinnerMode="dropdown". -->
@@ -4366,52 +4572,39 @@
     </declare-styleable>
 
     <declare-styleable name="DatePicker">
-        <!-- The first year (inclusive), for example "1940".
-             {@deprecated Use minDate instead.} -->
-        <attr name="startYear" format="integer" />
-        <!-- The last year (inclusive), for example "2010".
-             {@deprecated Use maxDate instead.} -->
-        <attr name="endYear" format="integer" />
-        <!-- Whether the spinners are shown. -->
-        <attr name="spinnersShown" format="boolean" />
-        <!-- Whether the calendar view is shown. -->
-        <attr name="calendarViewShown" format="boolean" />
+        <!-- The first day of week according to {@link java.util.Calendar}. -->
+        <attr name="firstDayOfWeek" />
         <!-- The minimal date shown by this calendar view in mm/dd/yyyy format. -->
         <attr name="minDate" format="string" />
         <!-- The maximal date shown by this calendar view in mm/dd/yyyy format. -->
         <attr name="maxDate" format="string" />
-        <!-- The first day of week according to {@link java.util.Calendar}. -->
-        <attr name="firstDayOfWeek" />
+
+        <!-- Whether the spinners are shown. Only valid for "spinner" mode. -->
+        <attr name="spinnersShown" format="boolean" />
+        <!-- Whether the calendar view is shown. Only valid for "spinner" mode. -->
+        <attr name="calendarViewShown" format="boolean" />
+
         <!-- @hide The layout of the date picker. -->
         <attr name="internalLayout" format="reference"  />
         <!-- @hide The layout of the legacy DatePicker. -->
         <attr name="legacyLayout" />
-        <!-- The background color for the date selector 's day of week. -->
-        <attr name="dayOfWeekBackground" format="color|reference" />
-        <!-- The text color for the date selector's day of week. -->
-        <attr name="dayOfWeekTextAppearance" format="reference" />
-        <!-- The month's text appearance in the date selector. -->
-        <attr name="headerMonthTextAppearance" format="reference" />
-        <!-- The day of month's text appearance in the date selector. -->
-        <attr name="headerDayOfMonthTextAppearance" format="reference" />
-        <!-- The year's text appearance in the date selector. -->
-        <attr name="headerYearTextAppearance" format="reference" />
-        <!-- The background for the date selector. -->
+
+        <!-- The text color for the selected date header text, ex. "2014" or
+             "Tue, Mar 18". This should be a color state list where the
+             activated state will be used when the year picker or day picker is
+             active.-->
+        <attr name="headerTextColor" format="color" />
+        <!-- The background for the selected date header. -->
         <attr name="headerBackground" />
-        <!-- @hide The selected text color for the date selector. Used as a
-             backup if the text appearance does not explicitly have a color
-             set for the selected state. -->
-        <attr name="headerSelectedTextColor" />
-        <!-- The list year's text appearance in the list. -->
+
+        <!-- The list year's text appearance in the list.
+             {@deprecated Use yearListTextColor. }-->
         <attr name="yearListItemTextAppearance" format="reference" />
-        <!-- The list year's selected circle color in the list. -->
-        <attr name="yearListSelectorColor" format="color" />
+        <!-- @hide The list year's text appearance in the list when activated. -->
+        <attr name="yearListItemActivatedTextAppearance" format="reference" />
         <!-- The text color list of the calendar. -->
         <attr name="calendarTextColor" format="color" />
-        <!-- @hide The selected text color for the calendar. Used as a backup
-             if the text color does not explicitly have a color set for the
-             selected state. -->
-        <attr name="calendarSelectedTextColor" format="color" />
+
         <!-- Defines the look of the widget. Prior to the L release, the only choice was
              spinner. As of L, with the Material theme selected, the default layout is calendar,
              but this attribute can be used to force spinner to be used instead. -->
@@ -4421,6 +4614,31 @@
             <!-- Date picker with calendar to select the date. -->
             <enum name="calendar" value="2" />
         </attr>
+
+        <!-- The first year (inclusive), for example "1940".
+             {@deprecated Use minDate instead.} -->
+        <attr name="startYear" format="integer" />
+        <!-- The last year (inclusive), for example "2010".
+             {@deprecated Use maxDate instead.} -->
+        <attr name="endYear" format="integer" />
+        <!-- The text appearance for the month (ex. May) in the selected date header.
+             {@deprecated Use headerTextColor instead.} -->
+        <attr name="headerMonthTextAppearance" format="reference" />
+        <!-- The text appearance for the day of month (ex. 28) in the selected date header.
+             {@deprecated Use headerTextColor instead.} -->
+        <attr name="headerDayOfMonthTextAppearance" format="reference" />
+        <!-- The text appearance for the year (ex. 2014) in the selected date header.
+             {@deprecated Use headerTextColor instead.} -->
+        <attr name="headerYearTextAppearance" format="reference" />
+        <!-- The background color for the header's day of week.
+             {@deprecated No longer displayed.} -->
+        <attr name="dayOfWeekBackground" format="color" />
+        <!-- The text color for the header's day of week.
+             {@deprecated No longer displayed.} -->
+        <attr name="dayOfWeekTextAppearance" format="reference" />
+        <!-- The list year's selected circle color in the list.
+             {@deprecated No longer displayed.} -->
+        <attr name="yearListSelectorColor" format="color" />
     </declare-styleable>
 
     <declare-styleable name="TwoLineListItem">
@@ -4638,35 +4856,42 @@
     <declare-styleable name="CalendarView">
         <!-- The first day of week according to {@link java.util.Calendar}. -->
         <attr name="firstDayOfWeek" format="integer" />
-        <!-- Whether do show week numbers. -->
-        <attr name="showWeekNumber" format="boolean" />
         <!-- The minimal date shown by this calendar view in mm/dd/yyyy format. -->
         <attr name="minDate" />
         <!-- The minimal date shown by this calendar view in mm/dd/yyyy format. -->
         <attr name="maxDate" />
-        <!-- The number of weeks to be shown. -->
-        <attr name="shownWeekCount" format="integer"/>
-        <!-- The background color for the selected week. -->
-        <attr name="selectedWeekBackgroundColor" format="color|reference" />
-        <!-- The color for the dates of the focused month. -->
-        <attr name="focusedMonthDateColor" format="color|reference" />
-        <!-- The color for the dates of an unfocused month. -->
-        <attr name="unfocusedMonthDateColor" format="color|reference" />
-        <!-- The color for the week numbers. -->
-        <attr name="weekNumberColor" format="color|reference" />
-        <!-- The color for the separator line between weeks. -->
-        <attr name="weekSeparatorLineColor" format="color|reference" />
-        <!-- Drawable for the vertical bar shown at the beginning and at the end of the selected date. -->
-        <attr name="selectedDateVerticalBar" format="reference" />
-        <!-- The text appearance for the week day abbreviation of the calendar header. -->
+        <!-- The text appearance for the month and year in the calendar header. -->
+        <attr name="monthTextAppearance" format="reference" />
+        <!-- The text appearance for the week day abbreviation in the calendar header. -->
         <attr name="weekDayTextAppearance" format="reference" />
-        <!-- The text appearance for the calendar dates. -->
+        <!-- The text appearance for the day numbers in the calendar grid. -->
         <attr name="dateTextAppearance" format="reference" />
-        <!-- The number of weeks to be shown. -->
+        <!-- @hide The background color used for the day selection indicator. -->
+        <attr name="daySelectorColor" format="color" />
+        <!-- @hide The background color used for the day highlight indicator. -->
+        <attr name="dayHighlightColor" format="color" />
+        <!-- @hide Which style of calendar delegate to use. -->
         <attr name="calendarViewMode">
             <enum name="holo" value="0" />
             <enum name="material" value="1" />
         </attr>
+
+        <!-- @deprecated Whether do show week numbers. -->
+        <attr name="showWeekNumber" format="boolean" />
+        <!-- @deprecated The number of weeks to be shown. -->
+        <attr name="shownWeekCount" format="integer"/>
+        <!-- @deprecated The background color for the selected week. -->
+        <attr name="selectedWeekBackgroundColor" format="color|reference" />
+        <!-- @deprecated The color for the dates of the focused month. -->
+        <attr name="focusedMonthDateColor" format="color|reference" />
+        <!-- @deprecated The color for the dates of an unfocused month. -->
+        <attr name="unfocusedMonthDateColor" format="color|reference" />
+        <!-- @deprecated The color for the week numbers. -->
+        <attr name="weekNumberColor" format="color|reference" />
+        <!-- @deprecated The color for the separator line between weeks. -->
+        <attr name="weekSeparatorLineColor" format="color|reference" />
+        <!-- @deprecated Drawable for the vertical bar shown at the beginning and at the end of the selected date. -->
+        <attr name="selectedDateVerticalBar" format="reference" />
     </declare-styleable>
 
     <declare-styleable name="NumberPicker">
@@ -4699,30 +4924,27 @@
         <attr name="legacyLayout" format="reference" />
         <!-- @hide The layout of the time picker. -->
         <attr name="internalLayout" />
-        <!-- The text appearance for the AM/PM header. -->
-        <attr name="headerAmPmTextAppearance" format="reference" />
-        <!-- The text appearance for the time header. -->
-        <attr name="headerTimeTextAppearance" format="reference" />
-        <!-- @hide The text color for selected time header of the TimePicker.
-             This will override the value from the text appearance if it does
-             not explicitly have a color set for the selected state. -->
-        <attr name="headerSelectedTextColor" format="color" />
+
+        <!-- The text color for the selected time header text, ex. "12" or
+             "PM". This should be a color state list where the activated state
+             will be used when the minute picker or hour picker is active.-->
+        <attr name="headerTextColor" />
         <!-- The background for the header containing the currently selected time. -->
         <attr name="headerBackground" />
-        <!-- The color for the hours/minutes numbers. -->
+
+        <!-- The color for the hours/minutes numbers. This should be a color
+             state list where the activated state will be used when the number
+             is active.-->
         <attr name="numbersTextColor" format="color" />
+        <!-- The color for the inner hours numbers used in 24-hour mode. This
+             should be a color state list where the activated state will be
+             used when the number is active.-->
+        <attr name="numbersInnerTextColor" format="color" />
         <!-- The background color for the hours/minutes numbers. -->
         <attr name="numbersBackgroundColor" format="color" />
-        <!-- The color for the AM/PM selectors. -->
-        <attr name="amPmTextColor" format="color" />
-        <!-- The background color state list for the AM/PM selectors. -->
-        <attr name="amPmBackgroundColor" format="color" />
-        <!-- @hide The background color for the AM/PM selectors of the
-             TimePicker when selected. Used if the background color does not
-             explicitly have a color set for the selected state. -->
-        <attr name="amPmSelectedBackgroundColor" format="color" />
         <!-- The color for the hours/minutes selector. -->
         <attr name="numbersSelectorColor" format="color" />
+
         <!-- Defines the look of the widget. Prior to the L release, the only choice was
              spinner. As of L, with the Material theme selected, the default layout is clock,
              but this attribute can be used to force spinner to be used instead. -->
@@ -4732,6 +4954,19 @@
             <!-- Time picker with clock face to select the time. -->
             <enum name="clock" value="2" />
         </attr>
+
+        <!-- The text appearance for the AM/PM header.
+             @deprecated Use headerTextColor instead. -->
+        <attr name="headerAmPmTextAppearance" format="reference" />
+        <!-- The text appearance for the time header.
+             @deprecated Use headerTextColor instead. -->
+        <attr name="headerTimeTextAppearance" format="reference" />
+        <!-- The color for the AM/PM selectors.
+             {@deprecated Use headerTextColor instead.}-->
+        <attr name="amPmTextColor" format="color" />
+        <!-- The background color state list for the AM/PM selectors.
+             {@deprecated Use headerBackground instead.}-->
+        <attr name="amPmBackgroundColor" format="color" />
     </declare-styleable>
 
     <!-- ========================= -->
@@ -4864,6 +5099,14 @@
         <attr name="animation"/>
     </declare-styleable>
 
+    <!-- Attributes that can be assigned to a ColorStateList item. -->
+    <declare-styleable name="ColorStateListItem">
+        <!-- Base color for this state. -->
+        <attr name="color" />
+        <!-- Alpha multiplier applied to the base color. -->
+        <attr name="alpha" />
+    </declare-styleable>
+
     <!-- Drawable used to render a geometric shape, with a gradient or a solid color. -->
     <declare-styleable name="GradientDrawable">
         <!-- Indicates whether the drawable should intially be visible. -->
@@ -4901,6 +5144,18 @@
         <!-- When a tint color is set, specifies its Porter-Duff blending mode. The
              default value is src_in, which treats the drawable as an alpha mask. -->
         <attr name="tintMode" />
+        <!-- Left optical inset.
+             @hide Until optical insets are fully supported. -->
+        <attr name="opticalInsetLeft" />
+        <!-- Top optical inset.
+             @hide Until optical insets are fully supported. -->
+        <attr name="opticalInsetTop" />
+        <!-- Right optical inset.
+             @hide Until optical insets are fully supported. -->
+        <attr name="opticalInsetRight" />
+        <!-- Bottom optical inset.
+             @hide Until optical insets are fully supported. -->
+        <attr name="opticalInsetBottom" />
     </declare-styleable>
 
     <!-- Used to specify the size of the shape for GradientDrawable. -->
@@ -5011,18 +5266,49 @@
             <!-- Stack each layer directly atop the previous layer. -->
             <enum name="stack" value="1" />
         </attr>
+        <!-- Explicit top padding. Overrides child padding. -->
+        <attr name="paddingTop" />
+        <!-- Explicit bottom padding. Overrides child padding. -->
+        <attr name="paddingBottom" />
+        <!-- Explicit left padding. Overrides child padding. -->
+        <attr name="paddingLeft" />
+        <!-- Explicit right padding. Overrides child padding. -->
+        <attr name="paddingRight" />
+        <!-- Explicit start padding. Overrides child padding. Takes precedence
+             over absolute padding (e.g. left when layout direction is LTR). -->
+        <attr name="paddingStart" />
+        <!-- Explicit end padding. Overrides child padding. Takes precedence
+             over absolute padding (e.g. right when layout direction is LTR). -->
+        <attr name="paddingEnd" />
     </declare-styleable>
 
     <!-- Describes an item (or child) of a LayerDrawable. -->
     <declare-styleable name="LayerDrawableItem">
-        <!-- Left coordinate of the layer. -->
+        <!-- Left inset to apply to the layer. -->
         <attr name="left" />
-        <!-- Top coordinate of the layer. -->
+        <!-- Top inset to apply to the layer. -->
         <attr name="top" />
-        <!-- Right coordinate of the layer. -->
+        <!-- Right inset to apply to the layer. -->
         <attr name="right" />
-        <!-- Bottom coordinate of the layer. -->
+        <!-- Bottom inset to apply to the layer. -->
         <attr name="bottom" />
+        <!-- Start inset to apply to the layer. Overrides {@code left} or
+             {@code right} depending on layout direction. -->
+        <attr name="start" format="dimension" />
+        <!-- End inset to apply to the layer. Overrides {@code left} or
+             {@code right} depending on layout direction. -->
+        <attr name="end" format="dimension" />
+        <!-- Width of the layer. Defaults to the layer's intrinsic width. -->
+        <attr name="width" />
+        <!-- Height of the layer. Defaults to the layer's intrinsic height -->
+        <attr name="height" />
+        <!-- Gravity used to align the layer within its container. If no value
+             is specified, the default behavior depends on whether an explicit
+             width or height has been set, If no dimension is set, gravity in
+             that direction defaults to {@code fill_horizontal} or
+             {@code fill_vertical}; otherwise, it defaults to {@code left} or
+             {@code top}. -->
+        <attr name="gravity" />
         <!-- Drawable used to render the layer. -->
         <attr name="drawable" />
         <!-- Identifier of the layer. This can be used to retrieve the layer
@@ -5199,6 +5485,9 @@
     <declare-styleable name="RippleDrawable">
         <!-- The color to use for ripple effects. This attribute is required. -->
         <attr name="color" />
+        <!-- The radius of the ripple when fully expanded. By default, the
+             radius is computed based on the size of the ripple's container. -->
+        <attr name="radius" />
     </declare-styleable>
 
     <declare-styleable name="ScaleDrawable">
@@ -5328,6 +5617,18 @@
         <!-- The opacity of the whole vector drawable, as a value between 0
              (completely transparent) and 1 (completely opaque). -->
         <attr name="alpha" />
+        <!-- Left optical inset.
+             @hide Until optical insets are fully supported. -->
+        <attr name="opticalInsetLeft" format="dimension" />
+        <!-- Top optical inset.
+             @hide Until optical insets are fully supported. -->
+        <attr name="opticalInsetTop" format="dimension" />
+        <!-- Right optical inset.
+             @hide Until optical insets are fully supported. -->
+        <attr name="opticalInsetRight" format="dimension" />
+        <!-- Bottom optical inset.
+             @hide Until optical insets are fully supported. -->
+        <attr name="opticalInsetBottom" format="dimension" />
     </declare-styleable>
 
     <!-- Defines the group used in VectorDrawables. -->
@@ -5632,6 +5933,13 @@
         <attr name="matchOrder" format="string" />
     </declare-styleable>
 
+    <!-- @hide For internal use only. Use only as directed. -->
+    <declare-styleable name="EpicenterTranslateClipReveal">
+        <attr name="interpolatorX" format="reference" />
+        <attr name="interpolatorY" format="reference" />
+        <attr name="interpolatorZ" format="reference" />
+    </declare-styleable>
+
     <!-- Use <code>fade</code>as the root tag of the XML resource that
          describes a {@link android.transition.Fade Fade} transition.
          The attributes of the {@link android.R.styleable#Transition Transition}
@@ -5800,17 +6108,37 @@
         <attr name="valueTo" format="float|integer|color|dimension|string"/>
         <!-- The type of valueFrom and valueTo. -->
         <attr name="valueType">
-            <!-- valueFrom and valueTo are floats. This is the default value is valueType is
-                 unspecified. Note that if either valueFrom or valueTo represent colors
+            <!-- The given values are floats. This is the default value if valueType is
+                 unspecified. Note that if any value attribute has a color value
                  (beginning with "#"), then this attribute is ignored and the color values are
                  interpreted as integers. -->
             <enum name="floatType" value="0" />
-            <!-- valueFrom and valueTo are integers. -->
+            <!-- values are integers. -->
             <enum name="intType"   value="1" />
-            <!-- valueFrom and valueTo are paths defined as strings.
+            <!-- values are paths defined as strings.
                  This type is used for path morphing in AnimatedVectorDrawable. -->
             <enum name="pathType"   value="2" />
+            <!-- values are colors, which are integers starting with "#". -->
+            <enum name="colorType"   value="3" />
         </attr>
+        <!-- Placeholder for a deleted attribute. This should be removed before M release. -->
+        <attr name="removeBeforeMRelease" format="integer" />
+    </declare-styleable>
+
+    <declare-styleable name="PropertyValuesHolder">
+        <attr name="valueType" />
+        <attr name="propertyName" />
+        <attr name="valueFrom" />
+        <attr name="valueTo" />
+    </declare-styleable>
+
+    <declare-styleable name="Keyframe">
+        <attr name="valueType" />
+        <attr name="value" />
+        <attr name="fraction" format="float" />
+        <!-- Defines a per-interval interpolator for this keyframe. This interpolator will be used
+             to interpolate between this keyframe and the previous keyframe.-->
+        <attr name="interpolator" />
     </declare-styleable>
 
     <!-- ========================== -->
@@ -5889,11 +6217,11 @@
              set when a view is enabled. -->
         <attr name="state_enabled" format="boolean" />
         <!-- State identifier indicating that the object <var>may</var> display a check mark.
-             See {@link R.attr#state_checked} for the identifier that indicates whether it is
+             See {@link android.R.attr#state_checked} for the identifier that indicates whether it is
              actually checked. -->
         <attr name="state_checkable" format="boolean"/>
         <!-- State identifier indicating that the object is currently checked.  See
-             {@link R.attr#state_checkable} for an additional identifier that can indicate if
+             {@link android.R.attr#state_checkable} for an additional identifier that can indicate if
              any object may ever display a check, regardless of whether state_checked is
              currently set. -->
         <attr name="state_checked" format="boolean"/>
@@ -6960,73 +7288,14 @@
     <!-- =============================== -->
     <eat-comment />
     <declare-styleable name="GlowPadView">
-        <!-- Reference to an array resource that be shown as targets around a circle. -->
-        <attr name="targetDrawables" format="reference" />
-
-        <!-- Reference to an array resource that be used as description for the targets around the circle. -->
+        <!-- Reference to an array resource that be used as description for the targets around the circle.
+             {@deprecated Removed.} -->
         <attr name="targetDescriptions" format="reference" />
 
-        <!-- Reference to an array resource that be used to announce the directions with targets around the circle. -->
+        <!-- Reference to an array resource that be used to announce the directions with targets around the circle.
+             {@deprecated Removed.}-->
         <attr name="directionDescriptions" format="reference" />
-
-        <!-- Sets a drawable as the center. -->
-        <attr name="handleDrawable" format="reference" />
-
-        <!-- Drawable to use for wave ripple animation. -->
-        <attr name="outerRingDrawable" format="reference"/>
-
-        <!-- Drawble used for drawing points -->
-        <attr name="pointDrawable" format="reference" />
-
-        <!-- Inner radius of glow area. -->
-        <attr name="innerRadius"/>
-
-        <!-- Outer radius of glow area. Target icons will be drawn on this circle. -->
-        <attr name="outerRadius" format="dimension" />
-
-        <!-- Radius of glow under finger. -->
-        <attr name="glowRadius" format="dimension" />
-
-        <!-- Tactile feedback duration for actions. Set to '0' for no vibration. -->
-        <attr name="vibrationDuration" format="integer" />
-
-        <!-- How close we need to be before snapping to a target. -->
-        <attr name="snapMargin" format="dimension" />
-
-        <!-- Number of waves/chevrons to show in animation. -->
-        <attr name="feedbackCount" format="integer" />
-
-        <!-- Used when the handle shouldn't wait to be hit before following the finger -->
-        <attr name="alwaysTrackFinger" format="boolean" />
-
-        <!-- Location along the circle of the first item, in degrees.-->
-        <attr name="firstItemOffset" format="float" />
-
-        <!-- Causes targets to snap to the finger location on activation. -->
-        <attr name="magneticTargets" format="boolean" />
-
-        <attr name="gravity" />
-
-        <!-- Determine whether the glow pad is allowed to scale to fit the bounds indicated
-            by its parent. If this is set to false, no scaling will occur. If this is set to true
-            scaling will occur to fit for any axis in which gravity is set to center. -->
-        <attr name="allowScaling" format="boolean" />
     </declare-styleable>
-
-    <!-- =============================== -->
-    <!-- SizeAdaptiveLayout class attributes -->
-    <!-- =============================== -->
-    <eat-comment />
-    <declare-styleable name="SizeAdaptiveLayout_Layout">
-      <!-- The maximum valid height for this item. -->
-      <attr name="layout_maxHeight" format="dimension">
-        <!-- Indicates that the view may be resized arbitrarily large. -->
-        <enum name="unbounded" value="-1" />
-      </attr>
-      <!-- The minimum valid height for this item. -->
-      <attr name="layout_minHeight" format="dimension" />
-    </declare-styleable>
-    <declare-styleable name="SizeAdaptiveLayout" />
 
     <!-- =============================== -->
     <!-- Location package class attributes -->
@@ -7086,6 +7355,12 @@
              the component here for their recognition service. -->
         <attr name="recognitionService" format="string" />
         <attr name="settingsActivity" />
+        <!-- Flag indicating whether this voice interaction service is capable of handling the
+             assist action. -->
+        <attr name="supportsAssist" format="boolean" />
+        <!-- Flag indicating whether this voice interaction service is capable of being launched
+             from the keyguard. -->
+        <attr name="supportsLaunchVoiceAssistFromKeyguard" format="boolean" />
     </declare-styleable>
 
     <!-- Use <code>voice-enrollment-application</code>
@@ -7214,6 +7489,10 @@
         <attr name="maxWidth" />
         <!-- An optional query hint string to be displayed in the empty query field. -->
         <attr name="queryHint" format="string" />
+        <!-- Default query hint used when {@code queryHint} is undefined and
+             the search view's {@code SearchableInfo} does not provide a hint.
+             @hide -->
+        <attr name="defaultQueryHint" format="string" />
         <!-- The IME options to set on the query text field. -->
         <attr name="imeOptions" />
         <!-- The input type to set on the query text field. -->
@@ -7242,8 +7521,34 @@
     <declare-styleable name="Switch">
         <!-- Drawable to use as the "thumb" that switches back and forth. -->
         <attr name="thumb" />
+        <!-- Tint to apply to the thumb. -->
+        <attr name="thumbTint" />
+        <!-- Blending mode used to apply the thumb tint. -->
+        <attr name="thumbTintMode" />
         <!-- Drawable to use as the "track" that the switch thumb slides within. -->
         <attr name="track" format="reference" />
+        <!-- Tint to apply to the track. -->
+        <attr name="trackTint" format="color" />
+        <!-- Blending mode used to apply the track tint. -->
+        <attr name="trackTintMode">
+            <!-- The tint is drawn on top of the drawable.
+                 [Sa + (1 - Sa)*Da, Rc = Sc + (1 - Sa)*Dc] -->
+            <enum name="src_over" value="3" />
+            <!-- The tint is masked by the alpha channel of the drawable. The drawable’s
+                 color channels are thrown out. [Sa * Da, Sc * Da] -->
+            <enum name="src_in" value="5" />
+            <!-- The tint is drawn above the drawable, but with the drawable’s alpha
+                 channel masking the result. [Da, Sc * Da + (1 - Sa) * Dc] -->
+            <enum name="src_atop" value="9" />
+            <!-- Multiplies the color and alpha channels of the drawable with those of
+                 the tint. [Sa * Da, Sc * Dc] -->
+            <enum name="multiply" value="14" />
+            <!-- [Sa + Da - Sa * Da, Sc + Dc - Sc * Dc] -->
+            <enum name="screen" value="15" />
+            <!-- Combines the tint and drawable color and alpha channels, clamping the
+                 result to valid color values. Saturate(S + D) -->
+            <enum name="add" value="16" />
+        </attr>
         <!-- Text to use when the switch is in the checked/"on" state. -->
         <attr name="textOn" />
         <!-- Text to use when the switch is in the unchecked/"off" state. -->
@@ -7435,38 +7740,12 @@
         <enum name="pageDeleteDropTarget" value="7" />
     </attr>
 
-    <declare-styleable name="SlidingChallengeLayout_Layout">
-        <attr name="layout_childType" />
-        <attr name="layout_maxHeight" />
-    </declare-styleable>
-
     <!-- Attributes that can be used with <code>&lt;FragmentBreadCrumbs&gt;</code>
     tags. -->
     <declare-styleable name="FragmentBreadCrumbs">
         <attr name="gravity" />
         <attr name="itemLayout" format="reference" />
         <attr name="itemColor" format="color|reference" />
-    </declare-styleable>
-
-    <declare-styleable name="MultiPaneChallengeLayout">
-        <!-- Influences how layout_centerWithinArea behaves -->
-        <attr name="orientation" />
-    </declare-styleable>
-
-    <declare-styleable name="MultiPaneChallengeLayout_Layout">
-        <!-- Percentage of the screen this child should consume or center within.
-             If 0/default, the view will be measured by standard rules
-             as if this were a FrameLayout. -->
-        <attr name="layout_centerWithinArea" format="float" />
-        <attr name="layout_childType" />
-        <attr name="layout_gravity" />
-        <attr name="layout_maxWidth" format="dimension" />
-        <attr name="layout_maxHeight" />
-    </declare-styleable>
-
-    <declare-styleable name="KeyguardSecurityViewFlipper_Layout">
-        <attr name="layout_maxWidth" />
-        <attr name="layout_maxHeight" />
     </declare-styleable>
 
     <declare-styleable name="Toolbar">
@@ -7505,6 +7784,16 @@
         <!-- Text to set as the content description for the navigation button
              located at the start of the toolbar. -->
         <attr name="navigationContentDescription" format="string" />
+        <!-- Drawable to set as the logo that appears at the starting side of
+             the Toolbar, just after the navigation button. -->
+        <attr name="logo" />
+        <!-- A content description string to describe the appearance of the
+             associated logo image. -->
+        <attr name="logoDescription" format="string" />
+        <!-- A color to apply to the title string. -->
+        <attr name="titleTextColor" format="color" />
+        <!-- A color to apply to the subtitle string. -->
+        <attr name="subtitleTextColor" format="color" />
     </declare-styleable>
 
     <declare-styleable name="Toolbar_LayoutParams">
@@ -7595,6 +7884,8 @@
             <enum name="multi-select" value="4" />
             <enum name="integer" value="5" />
             <enum name="string" value="6" />
+            <enum name="bundle" value="7" />
+            <enum name="bundle_array" value="8" />
         </attr>
         <attr name="title" />
         <attr name="description" />

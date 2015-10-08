@@ -21,6 +21,7 @@ import android.content.res.Configuration;
 import android.content.res.Resources;
 import android.provider.Settings;
 
+import com.android.internal.logging.MetricsLogger;
 import com.android.systemui.R;
 import com.android.systemui.qs.QSTile;
 import com.android.systemui.statusbar.policy.RotationLockController;
@@ -63,6 +64,7 @@ public class RotationLockTile extends QSTile<QSTile.BooleanState> {
     @Override
     protected void handleClick() {
         if (mController == null) return;
+        MetricsLogger.action(mContext, getMetricsCategory(), !mState.value);
         final boolean newState = !mState.value;
         mController.setRotationLocked(newState);
         refreshState(newState ? UserBoolean.USER_TRUE : UserBoolean.USER_FALSE);
@@ -80,9 +82,12 @@ public class RotationLockTile extends QSTile<QSTile.BooleanState> {
                 : mController.isRotationLocked();
         final boolean userInitiated = arg != null ? ((UserBoolean) arg).userInitiated : false;
         state.visible = mController.isRotationLockAffordanceVisible();
+        if (state.value == rotationLocked && state.contentDescription != null) {
+            // No change and initialized, no need to update all the values.
+            return;
+        }
         state.value = rotationLocked;
-        final boolean portrait = mContext.getResources().getConfiguration().orientation
-                != Configuration.ORIENTATION_LANDSCAPE;
+        final boolean portrait = isCurrentOrientationLockPortrait();
         final AnimationIcon icon;
         if (rotationLocked) {
             final int label = portrait ? R.string.quick_settings_rotation_locked_portrait_label
@@ -101,6 +106,22 @@ public class RotationLockTile extends QSTile<QSTile.BooleanState> {
                 R.string.accessibility_rotation_lock_off);
     }
 
+    private boolean isCurrentOrientationLockPortrait() {
+        int lockOrientation = mController.getRotationLockOrientation();
+        if (lockOrientation == Configuration.ORIENTATION_UNDEFINED) {
+            // Freely rotating device; use current rotation
+            return mContext.getResources().getConfiguration().orientation
+                    != Configuration.ORIENTATION_LANDSCAPE;
+        } else {
+            return lockOrientation != Configuration.ORIENTATION_LANDSCAPE;
+        }
+    }
+
+    @Override
+    public int getMetricsCategory() {
+        return MetricsLogger.QS_ROTATIONLOCK;
+    }
+
     /**
      * Get the correct accessibility string based on the state
      *
@@ -114,9 +135,7 @@ public class RotationLockTile extends QSTile<QSTile.BooleanState> {
             int idWhenOff) {
         int stringID;
         if (locked) {
-            final boolean portrait = mContext.getResources().getConfiguration().orientation
-                    != Configuration.ORIENTATION_LANDSCAPE;
-            stringID = portrait ? idWhenPortrait: idWhenLandscape;
+            stringID = isCurrentOrientationLockPortrait() ? idWhenPortrait: idWhenLandscape;
         } else {
             stringID = idWhenOff;
         }

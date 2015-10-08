@@ -83,7 +83,9 @@ public class ToolbarActionBar extends ActionBar {
 
     @Override
     public void setCustomView(View view, LayoutParams layoutParams) {
-        view.setLayoutParams(layoutParams);
+        if (view != null) {
+            view.setLayoutParams(layoutParams);
+        }
         mDecorToolbar.setCustomView(view);
     }
 
@@ -458,6 +460,18 @@ public class ToolbarActionBar extends ActionBar {
         if (event.getAction() == KeyEvent.ACTION_UP) {
             openOptionsMenu();
         }
+        return true;
+    }
+
+    @Override
+    public boolean onKeyShortcut(int keyCode, KeyEvent event) {
+        Menu menu = mDecorToolbar.getMenu();
+        if (menu != null) {
+            menu.performShortcut(keyCode, event, 0);
+        }
+        // This action bar always returns true for handling keyboard shortcuts.
+        // This will block the window from preparing a temporary panel to handle
+        // keyboard shortcuts.
         return true;
     }
 

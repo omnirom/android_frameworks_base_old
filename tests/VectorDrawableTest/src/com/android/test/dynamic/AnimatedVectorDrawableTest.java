@@ -15,8 +15,11 @@
 package com.android.test.dynamic;
 
 import android.app.Activity;
+import android.graphics.drawable.Animatable2;
 import android.graphics.drawable.AnimatedVectorDrawable;
+import android.graphics.drawable.Drawable;
 import android.os.Bundle;
+import android.util.Log;
 import android.view.View;
 import android.widget.Button;
 import android.widget.GridLayout;
@@ -52,6 +55,19 @@ public class AnimatedVectorDrawableTest extends Activity implements View.OnClick
             button.setWidth(400);
             button.setHeight(400);
             button.setBackgroundResource(icon[i]);
+            AnimatedVectorDrawable d = (AnimatedVectorDrawable) button.getBackground();
+            d.registerAnimationCallback(new Animatable2.AnimationCallback() {
+                @Override
+                public void onAnimationStart(Drawable drawable) {
+                    Log.v(LOGCAT, "Animator start");
+                }
+
+                @Override
+                public void onAnimationEnd(Drawable drawable) {
+                        Log.v(LOGCAT, "Animator end");
+                }
+            });
+
             container.addView(button);
             button.setOnClickListener(this);
         }

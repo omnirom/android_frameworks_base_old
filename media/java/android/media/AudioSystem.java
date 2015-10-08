@@ -16,7 +16,11 @@
 
 package android.media;
 
+import android.content.Context;
+import android.content.pm.PackageManager;
 import android.media.audiopolicy.AudioMix;
+import android.util.Log;
+
 import java.util.ArrayList;
 
 /* IF YOU CHANGE ANY OF THE CONSTANTS IN THIS FILE, DO NOT FORGET
@@ -29,6 +33,7 @@ import java.util.ArrayList;
  */
 public class AudioSystem
 {
+    private static final String TAG = "AudioSystem";
     /* These values must be kept in sync with system/audio.h */
     /*
      * If these are modified, please also update Settings.System.VOLUME_SETTINGS
@@ -64,6 +69,19 @@ public class AudioSystem
     // Expose only the getter method publicly so we can change it in the future
     private static final int NUM_STREAM_TYPES = 10;
     public static final int getNumStreamTypes() { return NUM_STREAM_TYPES; }
+
+    public static final String[] STREAM_NAMES = new String[] {
+        "STREAM_VOICE_CALL",
+        "STREAM_SYSTEM",
+        "STREAM_RING",
+        "STREAM_MUSIC",
+        "STREAM_ALARM",
+        "STREAM_NOTIFICATION",
+        "STREAM_BLUETOOTH_SCO",
+        "STREAM_SYSTEM_ENFORCED",
+        "STREAM_DTMF",
+        "STREAM_TTS"
+    };
 
     /*
      * Sets the microphone mute on or off.
@@ -107,7 +125,7 @@ public class AudioSystem
     /** @deprecated */
     @Deprecated public static final int ROUTE_ALL               = 0xFFFFFFFF;
 
-    // Keep in sync with system/core/include/system/audio.h
+    // Keep in sync with system/media/audio/include/system/audio.h
     public static final int AUDIO_SESSION_ALLOCATE = 0;
 
     /*
@@ -208,6 +226,48 @@ public class AudioSystem
         }
     }
 
+    /**
+     * Handles events for the audio policy manager about dynamic audio policies
+     * @see android.media.audiopolicy.AudioPolicy
+     */
+    public interface DynamicPolicyCallback
+    {
+        void onDynamicPolicyMixStateUpdate(String regId, int state);
+    }
+
+    //keep in sync with include/media/AudioPolicy.h
+    private final static int DYNAMIC_POLICY_EVENT_MIX_STATE_UPDATE = 0;
+
+    private static DynamicPolicyCallback sDynPolicyCallback;
+
+    public static void setDynamicPolicyCallback(DynamicPolicyCallback cb)
+    {
+        synchronized (AudioSystem.class) {
+            sDynPolicyCallback = cb;
+            native_register_dynamic_policy_callback();
+        }
+    }
+
+    private static void dynamicPolicyCallbackFromNative(int event, String regId, int val)
+    {
+        DynamicPolicyCallback cb = null;
+        synchronized (AudioSystem.class) {
+            if (sDynPolicyCallback != null) {
+                cb = sDynPolicyCallback;
+            }
+        }
+        if (cb != null) {
+            switch(event) {
+                case DYNAMIC_POLICY_EVENT_MIX_STATE_UPDATE:
+                    cb.onDynamicPolicyMixStateUpdate(regId, val);
+                    break;
+                default:
+                    Log.e(TAG, "dynamicPolicyCallbackFromNative: unknown event " + event);
+            }
+        }
+    }
+
+
     /*
      * Error codes used by public APIs (AudioTrack, AudioRecord, AudioManager ...)
      * Must be kept in sync with frameworks/base/core/jni/android_media_AudioErrors.h
@@ -219,6 +279,7 @@ public class AudioSystem
     public static final int PERMISSION_DENIED  = -4;
     public static final int NO_INIT            = -5;
     public static final int DEAD_OBJECT        = -6;
+    public static final int WOULD_BLOCK        = -7;
 
     /*
      * AudioPolicyService methods
@@ -257,6 +318,7 @@ public class AudioSystem
     public static final int DEVICE_OUT_FM = 0x100000;
     public static final int DEVICE_OUT_AUX_LINE = 0x200000;
     public static final int DEVICE_OUT_SPEAKER_SAFE = 0x400000;
+    public static final int DEVICE_OUT_IP = 0x800000;
 
     public static final int DEVICE_OUT_DEFAULT = DEVICE_BIT_DEFAULT;
 
@@ -283,6 +345,7 @@ public class AudioSystem
                                               DEVICE_OUT_FM |
                                               DEVICE_OUT_AUX_LINE |
                                               DEVICE_OUT_SPEAKER_SAFE |
+                                              DEVICE_OUT_IP |
                                               DEVICE_OUT_DEFAULT);
     public static final int DEVICE_OUT_ALL_A2DP = (DEVICE_OUT_BLUETOOTH_A2DP |
                                                    DEVICE_OUT_BLUETOOTH_A2DP_HEADPHONES |
@@ -321,6 +384,7 @@ public class AudioSystem
     public static final int DEVICE_IN_SPDIF = DEVICE_BIT_IN | 0x10000;
     public static final int DEVICE_IN_BLUETOOTH_A2DP = DEVICE_BIT_IN | 0x20000;
     public static final int DEVICE_IN_LOOPBACK = DEVICE_BIT_IN | 0x40000;
+    public static final int DEVICE_IN_IP = DEVICE_BIT_IN | 0x80000;
     public static final int DEVICE_IN_DEFAULT = DEVICE_BIT_IN | DEVICE_BIT_DEFAULT;
 
     public static final int DEVICE_IN_ALL = (DEVICE_IN_COMMUNICATION |
@@ -342,6 +406,7 @@ public class AudioSystem
                                              DEVICE_IN_SPDIF |
                                              DEVICE_IN_BLUETOOTH_A2DP |
                                              DEVICE_IN_LOOPBACK |
+                                             DEVICE_IN_IP |
                                              DEVICE_IN_DEFAULT);
     public static final int DEVICE_IN_ALL_SCO = DEVICE_IN_BLUETOOTH_SCO_HEADSET;
     public static final int DEVICE_IN_ALL_USB = (DEVICE_IN_USB_ACCESSORY |
@@ -376,6 +441,7 @@ public class AudioSystem
     public static final String DEVICE_OUT_FM_NAME = "fm_transmitter";
     public static final String DEVICE_OUT_AUX_LINE_NAME = "aux_line";
     public static final String DEVICE_OUT_SPEAKER_SAFE_NAME = "speaker_safe";
+    public static final String DEVICE_OUT_IP_NAME = "ip";
 
     public static final String DEVICE_IN_COMMUNICATION_NAME = "communication";
     public static final String DEVICE_IN_AMBIENT_NAME = "ambient";
@@ -396,6 +462,7 @@ public class AudioSystem
     public static final String DEVICE_IN_SPDIF_NAME = "spdif";
     public static final String DEVICE_IN_BLUETOOTH_A2DP_NAME = "bt_a2dp";
     public static final String DEVICE_IN_LOOPBACK_NAME = "loopback";
+    public static final String DEVICE_IN_IP_NAME = "ip";
 
     public static String getOutputDeviceName(int device)
     {
@@ -446,6 +513,8 @@ public class AudioSystem
             return DEVICE_OUT_AUX_LINE_NAME;
         case DEVICE_OUT_SPEAKER_SAFE:
             return DEVICE_OUT_SPEAKER_SAFE_NAME;
+        case DEVICE_OUT_IP:
+            return DEVICE_OUT_IP_NAME;
         case DEVICE_OUT_DEFAULT:
         default:
             return Integer.toString(device);
@@ -493,6 +562,8 @@ public class AudioSystem
             return DEVICE_IN_BLUETOOTH_A2DP_NAME;
         case DEVICE_IN_LOOPBACK:
             return DEVICE_IN_LOOPBACK_NAME;
+        case DEVICE_IN_IP:
+            return DEVICE_IN_IP_NAME;
         case DEVICE_IN_DEFAULT:
         default:
             return Integer.toString(device);
@@ -534,7 +605,12 @@ public class AudioSystem
     public static final int SYNC_EVENT_NONE = 0;
     public static final int SYNC_EVENT_PRESENTATION_COMPLETE = 1;
 
-    public static native int setDeviceConnectionState(int device, int state, String device_address);
+    /**
+     * @return command completion status, one of {@link #AUDIO_STATUS_OK},
+     *     {@link #AUDIO_STATUS_ERROR} or {@link #AUDIO_STATUS_SERVER_DIED}
+     */
+    public static native int setDeviceConnectionState(int device, int state,
+                                                      String device_address, String device_name);
     public static native int getDeviceConnectionState(int device, String device_address);
     public static native int setPhoneState(int state);
     public static native int setForceUse(int usage, int config);
@@ -563,11 +639,109 @@ public class AudioSystem
     public static native int listAudioPatches(ArrayList<AudioPatch> patches, int[] generation);
     public static native int setAudioPortConfig(AudioPortConfig config);
 
+    // declare this instance as having a dynamic policy callback handler
+    private static native final void native_register_dynamic_policy_callback();
+
     // must be kept in sync with value in include/system/audio.h
     public static final int AUDIO_HW_SYNC_INVALID = 0;
 
     public static native int getAudioHwSyncForSession(int sessionId);
 
     public static native int registerPolicyMixes(ArrayList<AudioMix> mixes, boolean register);
+
+    public static native int systemReady();
+
+    // Items shared with audio service
+
+    /**
+     * The delay before playing a sound. This small period exists so the user
+     * can press another key (non-volume keys, too) to have it NOT be audible.
+     * <p>
+     * PhoneWindow will implement this part.
+     */
+    public static final int PLAY_SOUND_DELAY = 300;
+
+    /**
+     * Constant to identify a focus stack entry that is used to hold the focus while the phone
+     * is ringing or during a call. Used by com.android.internal.telephony.CallManager when
+     * entering and exiting calls.
+     */
+    public final static String IN_VOICE_COMM_FOCUS_ID = "AudioFocus_For_Phone_Ring_And_Calls";
+
+    /**
+     * @see AudioManager#setVibrateSetting(int, int)
+     */
+    public static int getValueForVibrateSetting(int existingValue, int vibrateType,
+            int vibrateSetting) {
+
+        // First clear the existing setting. Each vibrate type has two bits in
+        // the value. Note '3' is '11' in binary.
+        existingValue &= ~(3 << (vibrateType * 2));
+
+        // Set into the old value
+        existingValue |= (vibrateSetting & 3) << (vibrateType * 2);
+
+        return existingValue;
+    }
+
+    public static int getDefaultStreamVolume(int streamType) {
+        return DEFAULT_STREAM_VOLUME[streamType];
+    }
+
+    public static int[] DEFAULT_STREAM_VOLUME = new int[] {
+        4,  // STREAM_VOICE_CALL
+        7,  // STREAM_SYSTEM
+        5,  // STREAM_RING
+        11, // STREAM_MUSIC
+        6,  // STREAM_ALARM
+        5,  // STREAM_NOTIFICATION
+        7,  // STREAM_BLUETOOTH_SCO
+        7,  // STREAM_SYSTEM_ENFORCED
+        11, // STREAM_DTMF
+        11  // STREAM_TTS
+    };
+
+    public static String streamToString(int stream) {
+        if (stream >= 0 && stream < STREAM_NAMES.length) return STREAM_NAMES[stream];
+        if (stream == AudioManager.USE_DEFAULT_STREAM_TYPE) return "USE_DEFAULT_STREAM_TYPE";
+        return "UNKNOWN_STREAM_" + stream;
+    }
+
+    /** The platform has no specific capabilities */
+    public static final int PLATFORM_DEFAULT = 0;
+    /** The platform is voice call capable (a phone) */
+    public static final int PLATFORM_VOICE = 1;
+    /** The platform is a television or a set-top box */
+    public static final int PLATFORM_TELEVISION = 2;
+
+    /**
+     * Return the platform type that this is running on. One of:
+     * <ul>
+     * <li>{@link #PLATFORM_VOICE}</li>
+     * <li>{@link #PLATFORM_TELEVISION}</li>
+     * <li>{@link #PLATFORM_DEFAULT}</li>
+     * </ul>
+     */
+    public static int getPlatformType(Context context) {
+        if (context.getResources().getBoolean(com.android.internal.R.bool.config_voice_capable)) {
+            return PLATFORM_VOICE;
+        } else if (context.getPackageManager().hasSystemFeature(PackageManager.FEATURE_LEANBACK)) {
+            return PLATFORM_TELEVISION;
+        } else {
+            return PLATFORM_DEFAULT;
+        }
+    }
+
+    public static final int DEFAULT_MUTE_STREAMS_AFFECTED =
+            (1 << STREAM_MUSIC) |
+            (1 << STREAM_RING) |
+            (1 << STREAM_NOTIFICATION) |
+            (1 << STREAM_SYSTEM);
+
+    /**
+     * Event posted by AudioTrack and AudioRecord JNI (JNIDeviceCallback) when routing changes.
+     * Keep in sync with core/jni/android_media_DeviceCallback.h.
+     */
+    final static int NATIVE_EVENT_ROUTING_CHANGE = 1000;
 }
 

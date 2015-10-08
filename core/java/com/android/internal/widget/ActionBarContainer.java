@@ -23,7 +23,6 @@ import android.graphics.Canvas;
 import android.graphics.ColorFilter;
 import android.graphics.Outline;
 import android.graphics.PixelFormat;
-import android.graphics.RectF;
 import android.graphics.drawable.Drawable;
 import android.util.AttributeSet;
 import android.view.ActionMode;
@@ -31,8 +30,6 @@ import android.view.MotionEvent;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.FrameLayout;
-
-import java.util.List;
 
 /**
  * This class acts as a container for the action bar view and action mode context views.
@@ -254,8 +251,11 @@ public class ActionBarContainer extends FrameLayout {
     }
 
     @Override
-    public ActionMode startActionModeForChild(View child, ActionMode.Callback callback) {
-        // No starting an action mode for an action bar child! (Where would it go?)
+    public ActionMode startActionModeForChild(
+            View child, ActionMode.Callback callback, int type) {
+        if (type != ActionMode.TYPE_PRIMARY) {
+            return super.startActionModeForChild(child, callback, type);
+        }
         return null;
     }
 
@@ -387,7 +387,7 @@ public class ActionBarContainer extends FrameLayout {
         }
 
         @Override
-        public void setColorFilter(ColorFilter cf) {
+        public void setColorFilter(ColorFilter colorFilter) {
         }
 
         @Override

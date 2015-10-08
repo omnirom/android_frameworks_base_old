@@ -16,6 +16,7 @@
 
 package com.android.ims.internal;
 
+import android.net.Uri;
 import android.view.Surface;
 import android.telecom.VideoProfile;
 
@@ -52,7 +53,7 @@ oneway interface IImsVideoCallProvider {
 
     void setZoom(float value);
 
-    void sendSessionModifyRequest(in VideoProfile reqProfile);
+    void sendSessionModifyRequest(in VideoProfile fromProfile, in VideoProfile toProfile);
 
     void sendSessionModifyResponse(in VideoProfile responseProfile);
 
@@ -60,5 +61,5 @@ oneway interface IImsVideoCallProvider {
 
     void requestCallDataUsage();
 
-    void setPauseImage(String uri);
+    void setPauseImage(in Uri uri);
 }

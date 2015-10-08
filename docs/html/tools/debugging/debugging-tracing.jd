@@ -127,7 +127,7 @@ parent.link=index.html
   {@link android.os.Debug#startMethodTracing() startMethodTracing()} methods. In the call, you
   specify a base name for the trace files that the system generates. To stop tracing, call {@link
   android.os.Debug#stopMethodTracing() stopMethodTracing()}. These methods start and stop method
-  tracing across the entire virtual machine. For example, you could call 
+  tracing across the entire virtual machine. For example, you could call
   {@link android.os.Debug#startMethodTracing() startMethodTracing()} in
   your activity's {@link android.app.Activity#onCreate onCreate()} method, and call
   {@link android.os.Debug#stopMethodTracing() stopMethodTracing()} in that activity's
@@ -157,6 +157,13 @@ parent.link=index.html
   times are only useful in relation to other profile output, so you can see if changes have made
   the code faster or slower relative to a previous profiling run.</p>
 
+  <p>In Android 4.4 and later, you can use sample-based profiling to profile with less runtime
+  performance impact. To enable sample profiling, call {@link
+  android.os.Debug#startMethodTracingSampling(java.lang.String, int, int)
+  startMethodTracingSampling()} with a specified sampling interval. The system will then gather
+  samples periodically until tracing is stopped via {@link android.os.Debug#stopMethodTracing()
+  stopMethodTracing()}.</p>
+
   <h2 id="copyingfiles">Copying Trace Files to a Host Machine</h2>
 
   <p>After your application has run and the system has created your trace files
@@ -170,12 +177,15 @@ adb pull /sdcard/calc.trace /tmp
 
   <h2 id="runningtraceview">Viewing Trace Files in Traceview</h2>
 
-  <p>To run Traceview and view the trace files, enter <code>traceview
-  &lt;trace-base-name&gt;</code>. For example, to run Traceview on the example files copied in the
-  previous section, use:</p>
-  <pre>
-traceview /tmp/calc
-</pre>
+  <p>To run Traceview and view the trace files:</p>
+  <ul>
+    <li>start the
+    <a href="{@docRoot}tools/help/monitor.html">Android Device Monitor</a>. </li>
+    <li>In the Android Device Monitor tool bar, click <strong>DDMS</strong> and select a process. </li>
+    <li>Click the <strong>Start Method Profiling</strong> icon to start method profiling. </li>
+    <li>After the profiling is complete, click the <strong>Stop Method Profiling</strong> icon to
+    display the traceview. </li>
+   </ul> 
 
   <p class="note"><strong>Note:</strong> If you are trying to view the trace logs of an application 
   that is built with ProGuard enabled (release mode build), some method and member names might be obfuscated.
@@ -277,7 +287,8 @@ dmtracedump [-ho] [-s sortable] [-d trace-base-name] [-g outfile] &lt;trace-base
       Traceview logging does not handle threads well, resulting in these two problems:
 
       <ol>
-        <li>If a thread exits during profiling, the thread name is not emitted;</li>
+        <li>If a thread exits during profiling, the thread name is not emitted (fixed in Android 5.1
+	and later);</li>
 
         <li>The VM reuses thread IDs. If a thread stops and another starts, they may get the same
         ID.</li>

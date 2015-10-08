@@ -46,6 +46,7 @@ import android.util.Log;
 import android.util.Slog;
 import android.util.Xml;
 
+import com.android.internal.logging.MetricsLogger;
 import com.android.internal.os.HandlerCaller;
 import com.android.internal.util.FastXmlSerializer;
 import com.android.printspooler.R;
@@ -63,6 +64,7 @@ import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.PrintWriter;
+import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -492,6 +494,7 @@ public final class PrintSpoolerService extends Service {
                     Slog.i(LOG_TAG, "[STATE CHANGED] " + printJob);
                 }
 
+                MetricsLogger.histogram(this, "print_job_state", state);
                 switch (state) {
                     case PrintJobInfo.STATE_COMPLETED:
                     case PrintJobInfo.STATE_CANCELED:
@@ -695,6 +698,7 @@ public final class PrintSpoolerService extends Service {
         private static final String TAG_MARGINS = "margins";
 
         private static final String ATTR_COLOR_MODE = "colorMode";
+        private static final String ATTR_DUPLEX_MODE = "duplexMode";
 
         private static final String ATTR_LOCAL_ID = "localId";
         private static final String ATTR_SERVICE_NAME = "serviceName";
@@ -756,7 +760,7 @@ public final class PrintSpoolerService extends Service {
                 out = mStatePersistFile.startWrite();
 
                 XmlSerializer serializer = new FastXmlSerializer();
-                serializer.setOutput(out, "utf-8");
+                serializer.setOutput(out, StandardCharsets.UTF_8.name());
                 serializer.startDocument(null, true);
                 serializer.startTag(null, TAG_SPOOLER);
 
@@ -822,6 +826,10 @@ public final class PrintSpoolerService extends Service {
                         final int colorMode = attributes.getColorMode();
                         serializer.attribute(null, ATTR_COLOR_MODE,
                                 String.valueOf(colorMode));
+
+                        final int duplexMode = attributes.getDuplexMode();
+                        serializer.attribute(null, ATTR_DUPLEX_MODE,
+                                String.valueOf(duplexMode));
 
                         MediaSize mediaSize = attributes.getMediaSize();
                         if (mediaSize != null) {
@@ -947,7 +955,7 @@ public final class PrintSpoolerService extends Service {
             }
             try {
                 XmlPullParser parser = Xml.newPullParser();
-                parser.setInput(in, null);
+                parser.setInput(in, StandardCharsets.UTF_8.name());
                 parseState(parser);
             } catch (IllegalStateException ise) {
                 Slog.w(LOG_TAG, "Failed parsing ", ise);
@@ -1056,6 +1064,12 @@ public final class PrintSpoolerService extends Service {
 
                 String colorMode = parser.getAttributeValue(null, ATTR_COLOR_MODE);
                 builder.setColorMode(Integer.parseInt(colorMode));
+
+                String duplexMode = parser.getAttributeValue(null, ATTR_DUPLEX_MODE);
+                // Duplex mode was added later, so null check is needed.
+                if (duplexMode != null) {
+                    builder.setDuplexMode(Integer.parseInt(duplexMode));
+                }
 
                 parser.next();
 

@@ -16,7 +16,10 @@
 
 package android.security;
 
+import android.annotation.NonNull;
+import android.app.KeyguardManager;
 import android.content.Context;
+import android.security.keystore.KeyProtection;
 
 import java.security.KeyPairGenerator;
 import java.security.KeyStore.ProtectionParameter;
@@ -40,11 +43,15 @@ import java.security.KeyStore.ProtectionParameter;
  * self-signed X.509 certificate will be attached to generated entries, but that
  * may be replaced at a later time by a certificate signed by a real Certificate
  * Authority.
+ *
+ * @deprecated Use {@link KeyProtection} instead.
  */
+@Deprecated
 public final class KeyStoreParameter implements ProtectionParameter {
-    private int mFlags;
+    private final int mFlags;
 
-    private KeyStoreParameter(int flags) {
+    private KeyStoreParameter(
+            int flags) {
         mFlags = flags;
     }
 
@@ -56,8 +63,17 @@ public final class KeyStoreParameter implements ProtectionParameter {
     }
 
     /**
-     * Returns {@code true} if this parameter requires entries to be encrypted
-     * on the disk.
+     * Returns {@code true} if the {@link java.security.KeyStore} entry must be encrypted at rest.
+     * This will protect the entry with the secure lock screen credential (e.g., password, PIN, or
+     * pattern).
+     *
+     * <p>Note that encrypting the key at rest requires that the secure lock screen (e.g., password,
+     * PIN, pattern) is set up, otherwise key generation will fail. Moreover, this key will be
+     * deleted when the secure lock screen is disabled or reset (e.g., by the user or a Device
+     * Administrator). Finally, this key cannot be used until the user unlocks the secure lock
+     * screen after boot.
+     *
+     * @see KeyguardManager#isDeviceSecure()
      */
     public boolean isEncryptionRequired() {
         return (mFlags & KeyStore.FLAG_ENCRYPTED) != 0;
@@ -79,7 +95,10 @@ public final class KeyStoreParameter implements ProtectionParameter {
      *         .setEncryptionRequired()
      *         .build();
      * </pre>
+     *
+     *  @deprecated Use {@link KeyProtection.Builder} instead.
      */
+    @Deprecated
     public final static class Builder {
         private int mFlags;
 
@@ -89,20 +108,26 @@ public final class KeyStoreParameter implements ProtectionParameter {
          * some UI to ask the user to unlock or initialize the Android KeyStore
          * facility.
          */
-        public Builder(Context context) {
+        public Builder(@NonNull Context context) {
             if (context == null) {
                 throw new NullPointerException("context == null");
             }
-
-            // Context is currently not used, but will be in the future.
         }
 
         /**
-         * Indicates that this key must be encrypted at rest on storage. Note
-         * that enabling this will require that the user enable a strong lock
-         * screen (e.g., PIN, password) before creating or using the generated
-         * key is successful.
+         * Sets whether this {@link java.security.KeyStore} entry must be encrypted at rest.
+         * Encryption at rest will protect the entry with the secure lock screen credential (e.g.,
+         * password, PIN, or pattern).
+         *
+         * <p>Note that enabling this feature requires that the secure lock screen (e.g., password,
+         * PIN, pattern) is set up, otherwise setting the {@code KeyStore} entry will fail.
+         * Moreover, this entry will be deleted when the secure lock screen is disabled or reset
+         * (e.g., by the user or a Device Administrator). Finally, this entry cannot be used until
+         * the user unlocks the secure lock screen after boot.
+         *
+         * @see KeyguardManager#isDeviceSecure()
          */
+        @NonNull
         public Builder setEncryptionRequired(boolean required) {
             if (required) {
                 mFlags |= KeyStore.FLAG_ENCRYPTED;
@@ -113,13 +138,15 @@ public final class KeyStoreParameter implements ProtectionParameter {
         }
 
         /**
-         * Builds the instance of the {@code KeyPairGeneratorSpec}.
+         * Builds the instance of the {@code KeyStoreParameter}.
          *
          * @throws IllegalArgumentException if a required field is missing
-         * @return built instance of {@code KeyPairGeneratorSpec}
+         * @return built instance of {@code KeyStoreParameter}
          */
+        @NonNull
         public KeyStoreParameter build() {
-            return new KeyStoreParameter(mFlags);
+            return new KeyStoreParameter(
+                    mFlags);
         }
     }
 }

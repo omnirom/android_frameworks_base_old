@@ -22,8 +22,6 @@ import android.graphics.Rect;
 import android.graphics.RectF;
 import android.hardware.Camera;
 import android.hardware.Camera.Area;
-import android.hardware.camera2.legacy.ParameterUtils.MeteringData;
-import android.hardware.camera2.legacy.ParameterUtils.ZoomData;
 import android.hardware.camera2.params.Face;
 import android.hardware.camera2.params.MeteringRectangle;
 import android.hardware.camera2.utils.ListUtils;
@@ -62,6 +60,8 @@ public class ParameterUtils {
     /** Empty rectangle {@code 0x0+0,0} */
     public static final Rect RECTANGLE_EMPTY =
             new Rect(/*left*/0, /*top*/0, /*right*/0, /*bottom*/0);
+
+    private static final double ASPECT_RATIO_TOLERANCE = 0.05f;
 
     /**
      * Calculate effective/reported zoom data from a user-specified crop region.
@@ -225,7 +225,7 @@ public class ParameterUtils {
     }
 
     private static final String TAG = "ParameterUtils";
-    private static final boolean VERBOSE = Log.isLoggable(TAG, Log.VERBOSE);
+    private static final boolean DEBUG = false;
 
     /** getZoomRatios stores zoom ratios in 1/100 increments, e.x. a zoom of 3.2 is 320 */
     private static final int ZOOM_RATIO_MULTIPLIER = 100;
@@ -398,7 +398,7 @@ public class ParameterUtils {
         Rect cropRegionAsPreview =
                 shrinkToSameAspectRatioCentered(previewCrop, actualCrop);
 
-        if (VERBOSE) {
+        if (DEBUG) {
             Log.v(TAG, "getClosestAvailableZoomCrop - actualCrop = " + actualCrop);
             Log.v(TAG,
                     "getClosestAvailableZoomCrop - previewCrop = " + previewCrop);
@@ -418,7 +418,7 @@ public class ParameterUtils {
         List<Rect> availablePreviewCropRegions =
                 getAvailablePreviewZoomCropRectangles(params, activeArray, streamSize);
 
-        if (VERBOSE) {
+        if (DEBUG) {
             Log.v(TAG,
                     "getClosestAvailableZoomCrop - availableReportedCropRegions = " +
                             ListUtils.listToString(availableReportedCropRegions));
@@ -500,7 +500,10 @@ public class ParameterUtils {
         float aspectRatioPreview = previewSize.getWidth() * 1.0f / previewSize.getHeight();
 
         float cropH, cropW;
-        if (aspectRatioPreview < aspectRatioArray) {
+        if (Math.abs(aspectRatioPreview - aspectRatioArray) < ASPECT_RATIO_TOLERANCE) {
+            cropH = activeArray.height();
+            cropW = activeArray.width();
+        } else if (aspectRatioPreview < aspectRatioArray) {
             // The new width must be smaller than the height, so scale the width by AR
             cropH = activeArray.height();
             cropW = cropH * aspectRatioPreview;
@@ -755,7 +758,7 @@ public class ParameterUtils {
             userCropRegion = activeArraySizeOnly;
         }
 
-        if (VERBOSE) {
+        if (DEBUG) {
             Log.v(TAG, "convertScalerCropRegion - user crop region was " + userCropRegion);
         }
 
@@ -765,7 +768,7 @@ public class ParameterUtils {
                 previewSize, userCropRegion,
                 /*out*/reportedCropRegion, /*out*/previewCropRegion);
 
-        if (VERBOSE) {
+        if (DEBUG) {
             Log.v(TAG, "convertScalerCropRegion - zoom calculated to: " +
                     "zoomIndex = " + zoomIdx +
                     ", reported crop region = " + reportedCropRegion +
@@ -859,7 +862,7 @@ public class ParameterUtils {
             reportedMetering = reportedMeteringRect.rect;
         }
 
-        if (VERBOSE) {
+        if (DEBUG) {
             Log.v(TAG, String.format(
                     "convertMeteringRectangleToLegacy - activeArray = %s, meteringRect = %s, " +
                     "previewCrop = %s, meteringArea = %s, previewMetering = %s, " +

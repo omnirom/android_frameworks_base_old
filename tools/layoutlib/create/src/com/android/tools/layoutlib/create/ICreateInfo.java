@@ -16,6 +16,9 @@
 
 package com.android.tools.layoutlib.create;
 
+import org.objectweb.asm.ClassVisitor;
+
+import java.util.Map;
 import java.util.Set;
 
 /**
@@ -27,33 +30,33 @@ public interface ICreateInfo {
      * Returns the list of class from layoutlib_create to inject in layoutlib.
      * The list can be empty but must not be null.
      */
-    public abstract Class<?>[] getInjectedClasses();
+    Class<?>[] getInjectedClasses();
 
     /**
      * Returns the list of methods to rewrite as delegates.
      * The list can be empty but must not be null.
      */
-    public abstract String[] getDelegateMethods();
+    String[] getDelegateMethods();
 
     /**
      * Returns the list of classes on which to delegate all native methods.
      * The list can be empty but must not be null.
      */
-    public abstract String[] getDelegateClassNatives();
+    String[] getDelegateClassNatives();
 
     /**
      * Returns The list of methods to stub out. Each entry must be in the form
      * "package.package.OuterClass$InnerClass#MethodName".
      * The list can be empty but must not be null.
      */
-    public abstract String[] getOverriddenMethods();
+    String[] getOverriddenMethods();
 
     /**
      * Returns the list of classes to rename, must be an even list: the binary FQCN
      * of class to replace followed by the new FQCN.
      * The list can be empty but must not be null.
      */
-    public abstract String[] getRenamedClasses();
+    String[] getRenamedClasses();
 
     /**
      * Returns the list of classes for which the methods returning them should be deleted.
@@ -62,7 +65,7 @@ public interface ICreateInfo {
      * the methods to delete.
      * The list can be empty but must not be null.
      */
-    public abstract String[] getDeleteReturns();
+    String[] getDeleteReturns();
 
     /**
      * Returns the list of classes to refactor, must be an even list: the
@@ -70,7 +73,31 @@ public interface ICreateInfo {
      * to the old class should be updated to the new class.
      * The list can be empty but must not be null.
      */
-    public abstract String[] getJavaPkgClasses();
+    String[] getJavaPkgClasses();
 
-    public abstract Set<String> getExcludedClasses();
+    Set<String> getExcludedClasses();
+
+    /**
+     * Returns a list of fields which should be promoted to public visibility. The array values
+     * are in the form of the binary FQCN of the class containing the field and the field name
+     * separated by a '#'.
+     */
+    String[] getPromotedFields();
+
+    /**
+     * Returns a map from binary FQCN className to {@link InjectMethodRunnable} which will be
+     * called to inject methods into a class.
+     * Can be empty but must not be null.
+     */
+    Map<String, InjectMethodRunnable> getInjectedMethodsMap();
+
+    abstract class InjectMethodRunnable {
+        /**
+         * @param cv Must be {@link ClassVisitor}. However, the param type is object so that when
+         * loading the class, ClassVisitor is not loaded. This is because when injecting
+         * CreateInfo in LayoutLib (see {@link #getInjectedClasses()}, we don't want to inject
+         * asm classes also, but still keep CreateInfo loadable.
+         */
+        public abstract void generateMethods(Object cv);
+    }
 }

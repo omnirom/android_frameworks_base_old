@@ -212,6 +212,7 @@ public final class LocationRequest implements Parcelable {
                 switch (criteria.getPowerRequirement()) {
                     case Criteria.POWER_HIGH:
                         quality = POWER_HIGH;
+                        break;
                     default:
                         quality = POWER_LOW;
                 }
@@ -292,7 +293,7 @@ public final class LocationRequest implements Parcelable {
      * no location sources are available), or you may receive them
      * slower than requested. You may also receive them faster than
      * requested (if other applications are requesting location at a
-     * faster interval). The fastest rate that that you will receive
+     * faster interval). The fastest rate that you will receive
      * updates can be controlled with {@link #setFastestInterval}.
      *
      * <p>Applications with only the coarse location permission may have their

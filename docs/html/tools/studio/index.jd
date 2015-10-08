@@ -1,4 +1,7 @@
 page.title=Android Studio Overview
+page.image=images/cards/card-android-studio-overview_16x9_2x.jpg
+page.metaDescription=Learn about the official IDE for Android.
+page.tags=studio,sdk,tools,firstapp
 @jd:body
 
 <div id="qv-wrapper">
@@ -9,16 +12,13 @@ page.title=Android Studio Overview
       <li><a href="#project-structure">Project and File Structure</a></li>
       <li><a href="#build-system">Android Build System</a></li>
       <li><a href="#debug-perf">Debug and Performance</a></li>
-      <li><a href="#install-updates">Installation, Setup, and Update Management</a></li>
-      <li><a href="#proxy">HTTP Proxy Settings</a></li>
-      <li><a href="#other">Other Highlights</a></li>
 
 
     </ol>
 
   <h2>See also</h2>
   <ol>
-    <li><a href="http://confluence.jetbrains.com/display/IntelliJIDEA/FAQ+on+Migrating+to+IntelliJ+IDEA">IntelliJ FAQ on migrating to IntelliJ IDEA</a></li>
+    <li><a class="external-link" href="http://confluence.jetbrains.com/display/IntelliJIDEA/FAQ+on+Migrating+to+IntelliJ+IDEA">IntelliJ FAQ on migrating to IntelliJ IDEA</a></li>
   </ol>
 
 </div>
@@ -26,8 +26,7 @@ page.title=Android Studio Overview
 
 
 <p>Android Studio is the official IDE for Android application development,
-based on <a href="https://www.jetbrains.com/idea/" class="external-link"
-target="_blank">IntelliJ IDEA</a>.
+based on <a class="external-link" href="https://www.jetbrains.com/idea/" target="_blank">IntelliJ IDEA</a>.
 On top of the capabilities you expect from IntelliJ,
 Android Studio offers:</p>
 
@@ -38,14 +37,12 @@ Android Studio offers:</p>
   <li>Rich layout editor with support for drag and drop theme editing</li>
   <li>{@code lint} tools to catch performance, usability, version compatibility, and other problems</li>
   <li>ProGuard and app-signing capabilities</li>
-  <li>Built-in support for <a
-  href="http://developers.google.com/cloud/devtools/android_studio_templates/"
-  class="external-link">Google Cloud Platform</a>, making it easy to integrate Google Cloud
-  Messaging and App Engine</li>
+  <li>Built-in support for
+  <a href="http://developers.google.com/cloud/devtools/android_studio_templates/">Google Cloud Platform</a>,
+  making it easy to integrate Google Cloud Messaging and App Engine</li>
   <li>And much more</li>
 </ul>
 
-<p><b><a href="{@docRoot}sdk/index.html">Download Android Studio now</a></b>. </p>
 
 <p>If you're new to Android Studio or the IntelliJ IDEA interface, this
 page provides an introduction to some key Android
@@ -53,26 +50,27 @@ Studio features.</p>
 
 <p>For specific Android Studio how-to documentation, see the pages in the <a href=
 "{@docRoot}tools/workflow/index.html">Workflow</a> section, such as <a href=
-"{@docRoot}tools/projects/projects-studio.html">Managing Projects from Android Studio</a> and
+"{@docRoot}sdk/installing/create-project.html">Managing Projects from Android Studio</a> and
 <a href="{@docRoot}tools/building/building-studio.html">Building and Running from Android
-Studio</a>.</p>
+Studio</a>. For a summary of the latest changes to Android Studio, see the
+<a href="{@docRoot}tools/revisions/studio.html">Android Studio Release Notes</a>.</p>
 
 
 
 
 <h2 id="project-structure">Project and File Structure</h2>
 
-<h3 id="project-view"><em>Android</em> Project View</h3>
-<p>By default, Android Studio displays your profile files in the <em>Android</em> project view. This
+<h3 id="project-view"><em>Android</em> project view</h3>
+<p>By default, Android Studio displays your project files in the <em>Android</em> project view. This
 view shows a flattened version of your project's structure that provides quick access to the key
 source files of Android projects and helps you work with the
 <a href="{@docRoot}sdk/installing/studio-build.html">Gradle-based build system</a>.
-The Android project view:</p>
+The <em>Android</em> project view:</p>
 
 <ul>
-  <li>Groups the build files for all modules at the top level of the project hierarchy.</li>
   <li>Shows the most important source directories at the top level of the module hierarchy.</li>
-  <li>Groups all the manifest files for each module.</li>
+  <li>Groups the build files for all modules in a common folder.</li>
+  <li>Groups all the manifest files for each module in a common folder.</li>
   <li>Shows resource files from all Gradle source sets.</li>
   <li>Groups resource files for different locales, orientations, and screen types in a single
   group per resource type.</li>
@@ -81,62 +79,65 @@ The Android project view:</p>
      <img src="{@docRoot}images/tools/projectview01.png" />
      <p class="img-caption"><strong>Figure 1.</strong> Show the Android project view.</p>
      <img src="{@docRoot}images/tools/studio-projectview_scripts.png"  />
-     <p class="img-caption"><strong>Figure 2.</strong> Project Build Files.</p>
+     <p class="img-caption"><strong>Figure 2.</strong> Show project build files.</p>
 
 <p>The <em>Android</em> project view shows all the build files at the top level of the project
 hierarchy under <strong>Gradle Scripts</strong>. Each project module appears as a folder at the
-top level of the project hierarchy and contains these three elements at the top level:</p>
+top level of the project hierarchy and contains these four elements at the top level:</p>
 
 <ul>
   <li><code>java/</code> - Source files for the module.</li>
   <li><code>manifests/</code> - Manifest files for the module.</li>
   <li><code>res/</code> - Resource files for the module.</li>
+  <li><code>Gradle Scripts/</code> - Gradle build and property files.</li>
 </ul>
 
 <p>For example, <em>Android</em> project view groups all the instances of the
 <code>ic_launcher.png</code> resource for different screen densities under the same element.</p>
 
 <p class="note"><strong>Note:</strong> The project structure on disk differs from this flattened
-representation. To switch to back to the segregated project view, select <strong>Project</strong> from
-the <strong>Project</strong> drop-down. </p>
+representation. To switch to back to the segregated project view, select <strong>Project</strong>
+from the <strong>Project</strong> drop-down. </p>
 
 
 
-<h3>Android Studio Project and Directory Structure</h3>
-<p>When you use the <em>Project</em> view of a new project in Android Studio, you
+<h3 id="other-views">Other Android Studio views</h3>
+<p>When you use the <em>Project</em> view in Android Studio, you
 should notice that the project structure appears different than you may be used to in Eclipse. Each
 instance of Android Studio contains a project with one or more application modules. Each
 application module folder contains the complete source sets for that module, including
-{@code src/main} and {@code src/androidTest} directories, resources, build
+{@code src/main/} and {@code src/androidTest/} directories, resources, build
 file and the Android manifest. For the most part, you will need to modify the files under each
-module's {@code src/main} directory for source code updates, the gradle.build file for build
-specification and the files under {@code src/androidTest} directory for test case creation.
+module's {@code src/main/} directory for source code updates, the gradle.build file for build
+specification and the files under {@code src/androidTest/} directory for test case creation.
 
     <p>  <img src="{@docRoot}images/tools/studio-project-layout.png" alt="" /></p>
-    <p>  <class="img-caption"><strong>Figure 3.</strong> Android Studio project structure</p>
+    <p>  <class="img-caption"><strong>Figure 3.</strong> View Android Studio <em>Project</em>
+         structure.</p>
+
+<p>You can also customize the view of the project files to focus on specific aspects of your app
+development: </p>
+
+<ul>
+  <li><em>Packages</em> </li>
+  <li><em>Project Files</em> </li>
+  <li><em>Scratches</em> </li>
+  <li><em>Problems</em> </li>
+  <li><em>Production</em> </li>
+  <li><em>Tests</em> </li>
+</ul>
+
+<p>For example, selecting the <strong>Problems</strong> view of your project displays links to the
+source files containing any recognized coding and syntax errors, such as missing an XML element
+closing tag in a layout file.<p>
 
 <p>For more information, see
-<a href="http://confluence.jetbrains.com/display/IntelliJIDEA/Project+Organization"class="external-link">IntelliJ project organization</a> and
-<a href="{@docRoot}tools/projects/index.html">Managing Projects</a>.</p>
-
-
-
-<h3>Creating new files</h3>
-<p>You can quickly add new code and resource files by clicking the appropriate directory in the
-<strong>Project</strong> pane and pressing <code>ALT + INSERT</code> on Windows and Linux or
-<code>COMMAND + N</code> on Mac. Based on the type of directory selected, Android Studio
-offers to create the appropriate file type.</p>
-
-<p>For example, if you select a layout directory, press <code>ALT + INSERT</code> on Windows,
-and select <strong>Layout resource file</strong>, a dialog opens so you can name the file
-(you can exclude the {@code .xml} suffix) and choose a root view element. The editor then
-switches to the layout design editor so you can begin designing your layout.</p>
+<a class="external-link" href="http://confluence.jetbrains.com/display/IntelliJIDEA/Project+Organization">IntelliJ project organization</a>
+and <a href="{@docRoot}tools/projects/index.html">Managing Projects</a>.</p>
 
 
 
 <h2 id="build-system">Android Build System</h2>
-
-<h3>Android Build System</h3>
 <p>The Android build system is the toolkit you use to build, test, run and package
 your apps. This build system replaces the Ant system used with Eclipse ADT. It can run as an
 integrated tool from the Android Studio menu and independently from the command line. You can use
@@ -156,76 +157,11 @@ To configure custom build settings in an Android Studio project, see
 <a href="{@docRoot}tools/building/configuring-gradle.html">Configuring Gradle Builds</a>.</p>
 
 
-<h3>Application ID for Package Identification </h3>
-<p>With the Android build system, the <em>applicationId</em> attribute is used to
-uniquely identify application packages for publishing. The application ID is set in the
-<em>android</em> section of the <code>build.gradle</code> file.
-</p>
-
-    <pre>
-    apply plugin: 'com.android.application'
-
-    android {
-        compileSdkVersion 19
-        buildToolsVersion "19.1"
-
-    defaultConfig {
-        <strong>applicationId "com.example.my.app"</strong>
-        minSdkVersion 15
-        targetSdkVersion 19
-        versionCode 1
-        versionName "1.0"
-    }
-    ...
-    </pre>
-
-<p class="note"><strong>Note:</strong> The <em>applicationId</em> is specified only in your
-build.gradle file, and not in the AndroidManifest.xml file.</p>
-
-<p>When using build variants, the build system enables you to uniquely identify different
-packages for each product flavors and build types. The application ID in the build type is added as
-a suffix to those specified for the product flavors. </p>
-
-   <pre>
-   productFlavors {
-        pro {
-            applicationId = "com.example.my.pkg.pro"
-        }
-        free {
-            applicationId = "com.example.my.pkg.free"
-        }
-    }
-
-    buildTypes {
-        debug {
-            applicationIdSuffix ".debug"
-        }
-    }
-    ....
-   </pre>
-
-<p>The package name must still be specified in the manifest file. It is used in your source code
-to refer to your R class and to resolve any relative activity/service registrations. </p>
-
-   <pre>
-   <?xml version="1.0" encoding="utf-8"?>
-   <manifest xmlns:android="http://schemas.android.com/apk/res/android"
-   <strong>package="com.example.app"</strong>>
-   </pre>
-
-<p class="note"><strong>Note:</strong> If you have multiple manifests (for example, a product
-flavor specific manifest and a build type manifest), the package name is optional in those manifests.
-If it is specified in those manifests, the package name must be identical to the package name
-specified in the manifest in the <code>src/main/</code> folder. </p>
-
-<p>For more information about the build files and process, see
-<a href="{@docRoot}sdk/installing/studio-build.html">Build System Overview</a>.</p>
-
-
-
 
 <h2 id="debug-perf">Debug and Performance</h2>
-
+<p>Android Studio provides a number of improvements to assist you in debugging and improving the
+performance of your code, including an improved virtual device management, inline debugging, and
+performance analysis tools.</p>
 
 <h3>Android Virtual Device (AVD) Manager</h3>
 <p>AVD Manager has updated screens with links to help you select the most popular device
@@ -243,25 +179,96 @@ Manager (HAXM) emulator accelerator and creates a default emulator for quick app
 <p>For more information, see <a href="{@docRoot}tools/devices/managing-avds.html">Managing AVDs</a>.</p>
 
 
+<h3 id="inline-debug">Inline debugging</h3>
+<p>Use inline debugging to enhance your code walk-throughs in the debugger view
+with inline verification of references, expressions, and variable values. Inline debug information
+includes: </p>
+<ul>
+ <li>Inline variable values</li>
+ <li>Referring objects that reference a selected object </li>
+ <li>Method return values</li>
+ <li>Lambda and operator expressions</li>
+ <li>Tool tip values</li>
+</ul>
 
-<h3>Memory Monitor</h3>
-<p>Android Studio provides a memory monitor view so you can more easily monitor your
-app's memory usage to find deallocated objects, locate memory leaks and track the amount of
-memory the connected device is using. With your app running on a device or emulator, click the
-<strong>Memory Monitor</strong> tab in the lower right corner to launch the memory monitor. </p>
+<p>To enable inline debugging, in the <em>Debug</em> window click the Settings icon
+<img src="{@docRoot}images/tools/studio-debug-settings-icon.png"/> and select the
+check box for <strong>Show Values In Editor</strong>.</p>
 
-    <img src="{@docRoot}images/tools/studio-memory-monitor.png" />
-    <p class="img-caption"><strong>Figure 5.</strong> Memory Monitor</p>
+<h3 id="mem-cpu">Memory and CPU monitor</h3>
+<p>Android Studio provides a memory and CPU monitor view so you can more easily monitor your
+app's performance and memory usage to track CPU usage, find deallocated objects, locate memory
+leaks, and track the amount of memory the connected device is using. With your app running on a
+device or emulator, click the <strong>Android</strong> tab in the lower left corner of the
+runtime window to launch the Android runtime window. Click the <strong>Memory</strong> or
+<strong>CPU</strong> tab. </p>
+
+<img src="{@docRoot}images/tools/studio-memory-monitor.png" srcset="{@docRoot}images/tools/studio-memory-monitor_2x.png 2x" width"635" height="171" alt="" />
+    <p class="img-caption"><strong>Figure 4.</strong> Monitor memory and CPU usage.</p>
+
+<h4 id="heap-dump">Heap dump </h4>
+<p>When you're monitoring memory usage in Android Studio you can, at the same time, initiate
+garbage collection and dump the Java heap to a heap snapshot in an Android-specific HPROF binary
+format file. The HPROF viewer displays classes, instances of each class, and a reference tree to
+help you track memory usage and find memory leaks. </p>
+
+<img src="{@docRoot}images/tools/studio-hprof-viewer.png" alt="" />
+    <p class="img-caption"><strong>Figure 5.</strong> HPROF viewer with heap dump.</p>
+
+<p>To create a snapshot of the Android app heap memory, click the
+Dump Java Heap icon (<img src="{@docRoot}images/tools/studio-dump-heap-icon.png" style="vertical-align:bottom;margin:0;height:17px"/>)
+in the Memory Monitor. Android Studio creates the heap snapshot file with the filename
+<code>Snapshot-yyyy.mm.dd-hh.mm.ss.hprof</code>
+in the <em>Captures</em> tab. Double-click the heap snapshot file to open the HPROF viewer.</p>
+
+<p>To convert a heap dump to standard HPROF format in Android Studio, right-click a heap
+snapshot in the <em>Captures</em> view and select <strong>Export to standard .hprof</strong>. </p>
 
 
 
-<h3>Code Inspections</h3>
-<p>In Android Studio, the configured <a href="{@docRoot}tools/help/lint.html"><code>lint</code></a> and
-other IDE inspections run automatically whenever you compile your program. In addition to the
+<h4 id="alloc-tracker">Allocation tracker </h4>
+<p>Android Studio allows you to track memory allocation as it monitors memory use. Tracking memory
+allocation allows you to monitor where objects are being allocated when you perform certain actions.
+Knowing these allocations enables you to  adjust the method
+calls related to those actions to optimize your app's performance and memory use. </p>
+
+<img src="{@docRoot}images/tools/studio-allocation-tracker.png" alt="" />
+    <p class="img-caption"><strong>Figure 6.</strong> Allocation tracker.</p>
+
+<p>Perform the following steps to track and analyze allocations: </p>
+<ol>
+  <li>Click the Start/Stop Allocation Tracking icon
+    (<img src="{@docRoot}images/tools/studio-allocation-tracker-icon.png" style="vertical-align:bottom;margin:0;height:17px"/>) in the
+    <a href="#mem-cpu">Memory Monitor</a>. Android Studio starts tracking memory allocations.</li>
+  <li>Perform the tasks whose mallocs you want to track. </li> 
+  <li>Click the Start/Stop Allocation Tracking icon again. Android Studio stops tracking mallocs
+    and saves the data to a file named <code>Allocation-yyyy.mm.dd-hh.mm.ss.alloc</code>. The
+    resulting file appears in the <em>Captures</em> tab. </li>
+  <li>Double-click the file to open it in the allocation viewer.
+   <p>The allocation viewer allows you to view and analyze the allocations your app made while
+   running. </p> </li>
+</ol>
+
+
+<h3>Data file access</h3>
+<p>The Android SDK tools, such as <a href="{@docRoot}tools/help/systrace.html">Systrace</a>,
+<a href="{@docRoot}tools/help/logcat.html">logcat</a>, and
+<a href="{@docRoot}tools/help/traceview.html">Traceview</a>, generate performance and debugging
+data for detailed app analysis.</p>
+
+<p>To view the available generated data files, click <strong>Captures</strong> in the left
+corner of the runtime window. In the list of the generated files, double-click a file to view
+the data. Right-click any <code>.hprof</code> files to convert them to a standard
+<a href="{@docRoot}tools/help/hprof-conv.html"><code>.hprof</code> </a> file format.</p>
+
+
+<h3>Code inspections</h3>
+<p>In Android Studio, the configured <a href="{@docRoot}tools/help/lint.html"><code>lint</code></a>
+and other IDE inspections run automatically whenever you compile your program. In addition to the
 configured {@code lint} checks, additional
-<a href="https://www.jetbrains.com/idea/help/inspection-basics.html?search=inspection" class="external-link"
-target="_blank">IntelliJ code inspections</a>
-run to streamline code review.</p>
+<a class="external-link" href="https://www.jetbrains.com/idea/help/inspection-basics.html?search=inspection"
+target="_blank">IntelliJ code inspections</a> and annotation validation run to streamline code
+review.</p>
 
 
 <p>Android Studio enables several <code>lint</code> checks
@@ -269,10 +276,10 @@ to ensure:
 <ul>
   <li><code> Cipher.getInstance()</code> is used with safe values</li>
   <li>In custom Views, the associated declare-styleable for the custom view uses the same
-  base name as the class name.</li>
-  <li>Security check for fragment injection.</li>
-  <li>Where ever property assignment no longer works as expected.</li>
-  <li>Gradle plugin version is compatible with the SDK.</li>
+  base name as the class name</li>
+  <li>Security check for fragment injection</li>
+  <li>Where ever property assignment no longer works as expected</li>
+  <li>Gradle plugin version is compatible with the SDK</li>
   <li>Right to left validation </li>
   <li>Required API version</li>
   <li>many others</li>
@@ -302,13 +309,14 @@ android {
 
 
 <p>You can also manage inspection profiles and configure inspections within Android Studio.
-Choose <strong>File &gt; Settings &gt; Project Settings</strong>. The
-<em>Inspection Configuration</em> page appears with the supported inspections.</p>
+Choose <strong>File &gt; Settings &gt;</strong>, expand the <strong>Editor</strong> options,
+and select <strong>Inspections</strong>.
+The <em>Inspection Configuration</em> page appears with the supported inspections.</p>
 <p><img src="{@docRoot}images/tools/studio-inspections-config.png" alt="" /> </p>
-<p class="img-caption"><strong>Figure 5.</strong> Inspection Configuration</p> 
+<p class="img-caption"><strong>Figure 5.</strong> Configure inspections.</p>
 
-<p class="note"><strong>Note:</strong> If you wish to change the behavior of specific
-inspection notifications, you can change the inspection severity, for example from <em>warning</em>
+<p class="note"><strong>Note:</strong> To change the behavior of specific
+inspection notifications, change the inspection severity, for example from <em>warning</em>
 to <em>error</em>. </p>
 
 
@@ -317,7 +325,7 @@ The <em>Inspections Scope</em> dialog appears so you can specify the desired ins
 
 
 
-<h4>Running Inspections from the command line</h4>
+<h4>Running inspections from the command line</h4>
 <p>You can also run {@code lint} inspections from the command line in your SDK directory. </p>
 <pre>
 sdk$ lint [flags] <project directories>
@@ -328,25 +336,127 @@ flags can be used to display the available issues and explanations. </p>
 
 
 <p>For more information, see
-<a href="{@docRoot}tools/debugging/improving-w-lint.html">Improving Your Code with {@code lint}</a> and
-<a href="{@docRoot}tools/help/lint.html">lint tool</a>.</p>
+<a href="{@docRoot}tools/debugging/improving-w-lint.html">Improving Your Code with {@code lint}</a>
+and <a href="{@docRoot}tools/help/lint.html">lint tool</a>.</p>
+
+
+
+<h3 id="annotations">Annotations in Android Studio</h3>
+<p>Android Studio supports annotations for variables, parameters, and return values to help you
+catch bugs, such as null pointer exceptions and resource type conflicts. The
+<a href="{@docRoot}tools/help/sdk-manager.html">Android SDK Manager</a> packages
+the {@link android.support.annotation Support-Annotations} library
+in the Android Support Repository for use with Android
+Studio. Android Studio validates the configured annotations during code inspection. </p>
+
+<p>To add annotations to your code in Android Studio, first add a dependency for the
+{@link android.support.annotation Support-Annotations} library:</p>
+<ol>
+ <li>Select <strong>File &gt; Project Structure</strong>.</li>
+ <li>In the <em>Project Structure</em> dialog, select the desired module, click the
+ <strong>Dependencies</strong> tab. </li>
+ <li>Click the <img src="{@docRoot}images/tools/studio-add-icon.png"/> icon to include a
+ <strong>Library dependency</strong>.</li>
+ <li>In the <em>Choose Library Dependency</em> dialog, select <code>support-annotations</code> and
+ click <strong>Ok</strong>. </li>
+</ol> 
+
+<p>The <code>build.gradle</code> file is updated with the <code>support-annotations</code>
+dependency.</p>
+
+<p>You can also manually add this dependency to your <code>build.gradle</code> file, as shown in
+the following example.  </p>
+
+<pre>
+dependencies {
+    compile fileTree(dir: 'libs', include: ['*.jar'])
+    compile 'com.android.support:appcompat-v7:22.0.0'
+    <strong>compile 'com.android.support:support-annotations:22.0.0'</strong>
+}
+</pre>
+
+
+
+<h4>Inferring nullability</h4>
+<p>A nullability analysis scans the contracts throughout the method hierarchies in your code to
+detect:</p>
+<ul>
+ <li>Calling methods that can return null </li>
+ <li>Methods that should not return null </li>
+ <li>Variables, such as fields, local variables, and parameters, that can be null </li>
+ <li>Variables, such as fields, local variables, and parameters, that cannot hold a null value </li>
+</ul>
+
+<p>The analysis then automatically inserts the appropriate null annotations in the detected
+locations. </p>
+
+<p>To run a nullability analysis in Android Studio,
+select the <strong>Analyze &gt; Infer Nullity</strong>
+menu option. Android Studio inserts the Android
+{@link android.support.annotation.Nullable @Nullable} and
+{@link android.support.annotation.NonNull @NonNull} annotations in detected locations
+in your code. After running a null analysis, it's good practice to verify the injected
+annotations.</p>
+
+<p class="note"><strong>Note:</strong> The nullability analysis may insert the IntelliJ
+<a class="external-link" href="https://www.jetbrains.com/idea/help/-nullable-and-notnull-annotations.html?search=annotations">
+<code>&#64;Nullable</code></a> and
+<a class="external-link" href="https://www.jetbrains.com/idea/help/-nullable-and-notnull-annotations.html?search=annotations">
+<code>&#64;NotNull</code></a> annotations instead of the Android null annotations. When running
+a null analysis, manually search and replace any IntelliJ annotations or include
+<code>com.intellij:annotations:12.0</code> as a compile dependency in your
+<code>build.gradle</code> file. This example includes the IntelliJ annotations 12.0 library as a
+dependency in the <code>build.gradle</code> file:
+
+<pre>
+dependencies {
+    compile fileTree(dir: 'libs', include: ['*.jar'])
+    compile 'com.android.support:appcompat-v7:22.0.0'
+    compile 'com.android.support:support-annotations:22.0.0'
+    <strong>compile 'com.intellij:annotations:12.0'</strong>
+}
+</pre>
+
+</p>
+
+
+<h4>Validating annotations</h4>
+<p>You can also manually add nullability, resource, and enumerated annotations throughout your code
+to perform validations for a variety of reference values, such as
+<a href="{@docRoot}reference/android/R.string.html"><code>R.string</code></a> resources,
+<a href="{@docRoot}guide/topics/resources/drawable-resource.htm"><code>Drawable</code></a>
+resources,
+<a href="{@docRoot}reference/android/graphics/Color.html"><code>Color</code></a> resources,
+and enumerated constants. </p>
+
+<p>Run <strong>Analyze &gt; Inspect Code</strong> to validate the configured annotations. </p>
+
+<p>For a complete list of the supported annotations, either use the auto-complete feature to display
+the available options for the <code>import android.support.annotation.</code> statement or
+view the contents of the
+{@link android.support.annotation Support-Annotations}
+library. </p>
+
+<p>For more details about Android annotations, see
+<a href="{@docRoot}tools/debugging/annotations.html">Improving Code Inspection with Annotations</a>.
+
 
 
 <h3>Dynamic layout preview</h3>
 <p>Android Studio allows you to work with layouts in both a <em>Design View</em> </p>
 <p><img src="{@docRoot}images/tools/studio-helloworld-design.png" alt="" />
 </p>
-    <p class="img-caption"><strong>Figure 6.</strong> Hello World App with Design View</p>
+    <p class="img-caption"><strong>Figure 6.</strong> Hello World App with Design View.</p>
 
 <p>and a <em>Text View</em>. </p>
 
     <p><img src="{@docRoot}images/tools/studio-helloworld-text.png" alt="" />
-    <pclass="img-caption"><strong>Figure 7.</strong> Hello World App with Text View</p>
+    <pclass="img-caption"><strong>Figure 7.</strong> Hello World App with text view.</p>
 
 <p>Easily select and preview layout changes for different device images, display
 densities, UI modes, locales, and Android versions (multi-API version rendering).
     <p><img src="{@docRoot}images/tools/studio-api-version-rendering.png" /></p>
-    <p class="img-caption"><strong>Figure 8.</strong> API Version Rendering</p>
+    <p class="img-caption"><strong>Figure 8.</strong> Multi-API version rendering.</p>
 
 
 <p>From the Design View, you can drag and drop elements from the Palette to the Preview or
@@ -356,7 +466,7 @@ the device display. </p>
 
 <h3>Log messages</h3>
 <p>When you build and run your app with Android Studio, you can view adb and device log messages
-(logcat) in the DDMS pane by clicking <strong>Android</strong> at the bottom of the window.</p>
+(logcat) by clicking <strong>Android</strong> at the bottom of the window.</p>
 
 <p>If you want to debug your app with the
 <a href="{@docRoot}tools/help/monitor.html">Android Debug Monitor</a>, you can launch it by
@@ -369,213 +479,5 @@ controlling device behaviors, and more. It also includes the Hierarchy Viewer to
 
 
 
-
-<h2 id="install-updates">Installation, Setup, and Update Management</h2>
-
-<h3>Android Studio installation and setup wizards</h3>
-<p>An updated installation and setup wizards walk you through a step-by-step installation
-and setup process as the wizard checks for system requirements, such as the Java Development
-Kit (JDK) and available RAM, and then prompts for optional installation options, such as the
-Intel&#174; HAXM emulator accelerator.</p>
-
-<p>An updated setup wizard walks you through the setup processes as
-the wizard updates your system image and emulation requirements, such GPU, and then creates
-an optimized default Android Virtual Device (AVD) based on Android 5 (Lollipop) for speedy and
-reliable emulation. </p>
-<p><img src="{@docRoot}images/tools/studio-setup-wizard.png" /></p>
-<p class="img-caption"><strong>Figure 9.</strong> Setup Wizard</p>
-
-
-<h3>Expanded template and form factor support</h3>
-<p>Android Studio supports templates for Google Services and expands the available device
-types. </p>
-
-    <h4> Android Wear and TV support</h4>
-    <p>For easy cross-platform development, the Project Wizard provides new templates for
-    creating your apps for Android Wear and TV. </p>
-    <p><img src="{@docRoot}images/tools/studio-tvwearsupport.png"  />
-
-      <p class="img-caption"><strong>Figure 10.</strong> Supported Form Factors</p>
-    <p>During app creation, the Project Wizard also displays an API Level dialog to help you choose
-    the best <em>minSdkVersion</em> for your project.</p>
-
-
-    <h4> Google App Engine integration (Google Cloud Platform/Messaging)</h4>
-    <p>Quick cloud integration. Using Google App Engine to connect to the Google cloud
-    and create a cloud end-point is as easy as selecting <em>File > New Module > App Engine Java
-    Servlet Module</em> and specifying the module, package, and client names. </p>
-    <p><img src="{@docRoot}images/tools/studio-cloudmodule.png" /></p>
-    <p class="img-caption"><strong>Figure 11.</strong> Setup Wizard</p>
-
-
-
-<h3>Update channels</h3>
-<p>Android Studio provides four update channels to keep Android Studio up-to-date based on your
-code-level preference:
-<ul>
-  <li><strong>Canary channel</strong>: Canary builds provide bleeding edge releases, updated
-  about weekly. While these builds do get tested, they are still subject to bugs, as we want
-  people to see what's new as soon as possible. This is not recommended for production.</li>
-  <li><strong>Dev channel</strong>: Dev builds are hand-picked older canary builds that survived
-  the test of time. They are updated roughly bi-weekly or monthly.</li>
-  <li><strong>Beta channel</strong>: Beta builds are used for beta-quality releases before a
-  production release.</li>
-  <li><strong>Stable channel</strong>: Used for stable, production-ready versions.</li>
-</ul>
-</p>
-
-<p>By default, Android Studio uses the <em>Stable</em> channel. Use
-<strong>File > Settings > Updates</strong> to change your channel setting. </p>
-
-
-
-<h2 id="proxy">Proxy Settings</h2>
-<p>Proxies serve as intermediary connection points between HTTP clients and web servers that add
-security and privacy to internet connections.</p>
-
-<p>To support running Android Studio behind a firewall, set the proxy settings for the
-Android Studio IDE and the SDK Manager. Use the Android Studio IDE HTTP Proxy settings page to set
-the HTTP proxy settings for Android Studio. The SDK Manager has a separate HTTP Proxy settings
-page.</p>
-
-<p>When running the Android Plugin for Gradle from the command line or on machines where
-Android Studio is not installed, such as continuous integration servers, set the proxy settings
-in the Gradle build file.</p>
-
-<p class="note"><strong>Note:</strong> After the initial installation of the Android Studio bundle,
-Android Studio can run with internet access or off-line. However, Android Studio requires an
-internet connection for Setup Wizard synchronization, 3rd-party library access, access to remote
-repositories, Gradle initialization and synchronization, and Android Studio version updates.</p>
-
-
-<h3>Setting up the Android Studio Proxy</h3>
-<p>Android Studio supports HTTP proxy settings so you can run Android Studio behind a firewall or
-secure network. To set the HTTP proxy settings in Android Studio:</p>
-<ol>
- <li>From the main menu choose <strong>File &gt; Settings &gt; IDE Setting -- HTTP Proxy</strong>.
-
-<li>In Android Studio, open the IDE Settings dialog.
-  <ul>
-     <li>On Windows and Linux, choose 
-     <strong>File &gt; Settings &gt; IDE Setting -- HTTP Proxy</strong>. </li>
-     <li>On Mac, choose 
-     <strong>Android Studio &gt; Preferences &gt; IDE Setting -- HTTP Proxy</strong>. </li>
-   </ul>
- The HTTP Proxy page appears.</li>
- <li>Select <strong>auto-detection</strong> to use an auto-configuration URL to configure the
- proxy settings or <strong>manual</strong> to enter each of the settings. For a detailed explanation
- of these settings, see
- <a href="https://www.jetbrains.com/idea/help/http-proxy.html">HTTP Proxy</a>. </li>
- <li>Click <strong>Apply</strong> to enable the proxy settings. </li>
-</ol>
-
-<h3>Android Plugin for Gradle HTTP proxy settings</h3>
-When running the Android Plugin from the command line or on machines where Android Studio is not
-installed, set the Android Plugin for Gradle proxy settings in the Gradle build file.</p>
-
-<p>For application-specific HTTP proxy settings, set the proxy settings in the
-<strong>build.gradle</strong> file as required for each application module.</p>
-<pre>
-apply plugin: 'com.android.application'
-
-android {
-    ...
-
-    defaultConfig {
-        ...
-        systemProp.http.proxyHost=proxy.company.com
-        systemProp.http.proxyPort=443
-        systemProp.http.proxyUser=userid
-        systemProp.http.proxyPassword=password
-        systemProp.http.auth.ntlm.domain=domain
-    }
-    ...
-}
-</pre>
-
-
-
-<p>For project-wide HTTP proxy settings, set the proxy settings in the
-<code>gradle/gradle.properties</code> file. </p>
-
-<pre>
-# Project-wide Gradle settings.
-...
-
-systemProp.http.proxyHost=proxy.company.com
-systemProp.http.proxyPort=443
-systemProp.http.proxyUser=username
-systemProp.http.proxyPassword=password
-systemProp.http.auth.ntlm.domain=domain
-
-systemProp.https.proxyHost=proxy.company.com
-systemProp.https.proxyPort=443
-systemProp.https.proxyUser=username
-systemProp.https.proxyPassword=password
-systemProp.https.auth.ntlm.domain=domain
-
-...
-</pre>
-
-
-<p>For information about using Gradle properties for proxy settings, see the
- <a href="http://www.gradle.org/docs/current/userguide/build_environment.html">Gradle User Guide</a>.</p>
-
-<p class="note"><strong>Note:</strong> When using Android Studio, the settings in the Android
-Studio IDE HTTP proxy settings page override the HTTP proxy settings in the
-<strong>gradle.properties</strong> file.</p>
-
-
-
-<h3>SDK Manager HTTP Proxy Settings </h3>
-<p>SDK Manager proxy settings enable proxy internet access for Android package and library
-updates from SDK Manager packages. </p>
-
-<p>To set the SDK Manager settings for proxy internet access, start the SDK Manager and open the
-SDK Manager page. </p>
-
-<ul>
-   <li>On Windows, select <strong>Tools &gt; Options</strong> from the menu bar. </li>
-   <li>On Mac and Linux, choose <strong>Tools &gt; Options</strong> from the system menu bar. </li>
- </ul>
-
-<p>The Android SDK Manager page appears. Enter the settings and click <strong>Apply</strong>. </p>
-
-
-
-<h2 id="other">Other Highlights</h2>
-
-<h3> Translation Editor</h3>
-<p>Multi-language support is enhanced with the Translation Editor plugin so you can easily add
-locales to the app's translation file. Color codes indicate whether a locale is complete or
-still missing string translations. Also, you can use the plugin to export your strings to the
-Google Play Developer Console for translation, then download and import your translations back
-into your project. </p>
-
-<p>To access the Translation Editor, open a <code>strings.xml</code> file and click the
-<strong>Open Editor</strong> link.  </p>
-
-    <img src="{@docRoot}images/tools/studio-translationeditoropen.png" />
-    <p class="img-caption"><strong>Figure 12.</strong> Translation Editor</p>
-
-
-<h3> Editor support for the latest Android APIs</h3>
-<p>Android Studio supports the
-<a href="{@docRoot}design/material/index.html">Material Design</a></li> themes, widgets, and
-graphics, such as shadow layers and API version rendering (showing the layout across different
-UI versions). Also, the drawable XML tags and attributes, such as &lt;ripple&gt;
-and &lt;animated-selector&gt;, are supported.</p>
-
-
-<h3 id="git-samples"> Easy access to Android code samples on GitHub</h3>
-<p>Clicking <strong>Import Samples</strong> from the <strong>File</strong> menu or <em>Welcome</em> page
-
-provides seamless access to Google code samples on GitHub.</p>
-    <p><img src="{@docRoot}images/tools/studio-samples-githubaccess.png" /></p>
-    <p class="img-caption"><strong>Figure 13.</strong> Code Sample Access</p>
-
-
-    <p><img src="{@docRoot}images/tools/studio-sample-in-editor.png" /></p>
-    <p class="img-caption"><strong>Figure 14.</strong> Imported Code Sample</p>
 
 

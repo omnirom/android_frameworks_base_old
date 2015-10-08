@@ -10,6 +10,12 @@ page.title=Sending and Receiving Messages
   <li><a href="#SendMessage">Send a Message</a></li>
   <li><a href="#ReceiveMessage">Receive a Message</a></li>
 </ol>
+<h2>Try it out</h2>
+<ul>
+  <li>
+    <a href="https://github.com/googlesamples/android-FindMyPhone/" class="external-link">FindMyPhone</a>
+  </li>
+</ul>
 </div>
 </div>
 
@@ -28,7 +34,7 @@ such as sending a message to the wearable to start an activity.</p>
 
 <p>Multiple wearable devices can be connected to a user’s handheld device. Each connected device in
 the network is considered a <em>node</em>. With multiple connected devices, you must consider which
-nodes receive the messages. For example, In a voice transcription app that receives voice data on
+nodes receive the messages. For example, in a voice transcription app that receives voice data on
 the wearable device, you should send the message to a node with the processing power and battery
 capacity to handle the request, such as a handheld device.</p>
 
@@ -138,6 +144,19 @@ private void setupVoiceTranscription() {
 }
 </pre>
 
+<p class="note"><strong>Note:</strong>
+If you create a service that extends
+<a href="{@docRoot}reference/com/google/android/gms/wearable/WearableListenerService.html"><code>WearableListenerService</code></a>
+to detect capability changes, you may want to override the
+<a href="{@docRoot}reference/com/google/android/gms/wearable/WearableListenerService.html#onConnectedNodes(java.util.List<com.google.android.gms.wearable.Node>)"><code>onConnectedNodes()</code></a>
+method to listen to finer-grained connectivity details, such as when a wearable device switches
+from Wi-Fi to a Bluetooth connection to the handset. For an example implementation, see the
+<code>DisconnectListenerService</code> class in the
+<a href="https://github.com/googlesamples/android-FindMyPhone/" class="external-link">FindMyPhone</a>
+sample. For more information on how to listen for important events, see
+<a href="{@docRoot}training/wearables/data-layer/events.html#Listen">Listen for Data Layer Events</a>.
+</p>
+
 <p>After detecting the capable nodes, determine where to send the message. You should pick a node
 that is in close proximity to your wearable device to
 minimize message routing through multiple nodes. A nearby node is defined as one that is directly
@@ -177,7 +196,15 @@ class.</p>
 
 <p>The following example shows how to send a message to the transcription-capable node from a
 wearable device. Verify that the node is available before you attempt to send the message. This call
-is synchronous and blocks processing until the message is received or until the request times out.
+is synchronous and blocks processing until the system queues the message for delivery.
+</p>
+
+<p class="note"><strong>Note:</strong> A successful result code does not guarantee delivery of the
+message. If your app requires data reliability, use
+<a href="{@docRoot}reference/com/google/android/gms/wearable/DataItem.html"><code>DataItem</code></a>
+objects or the
+<a href="{@docRoot}reference/com/google/android/gms/wearable/ChannelApi.html"><code>ChannelApi</code></a>
+class to send data between devices.
 </p>
 
 <pre>

@@ -29,6 +29,8 @@
 #include "android_util_Binder.h"
 #include "android/graphics/Matrix.h"
 
+#include "core_jni_helpers.h"
+
 namespace android {
 
 // ----------------------------------------------------------------------------
@@ -296,7 +298,6 @@ static void pointerCoordsFromNative(JNIEnv* env, const PointerCoords* rawPointer
         jfloat* outValues = static_cast<jfloat*>(env->GetPrimitiveArrayCritical(
                 outValuesArray, NULL));
 
-        const float* values = rawPointerCoords->values;
         uint32_t index = 0;
         do {
             uint32_t axis = bits.clearFirstMarkedBit();
@@ -369,7 +370,7 @@ static jlong android_view_MotionEvent_nativeInitialize(JNIEnv* env, jclass clazz
         env->DeleteLocalRef(pointerCoordsObj);
     }
 
-    event->initialize(deviceId, source, action, flags, edgeFlags, metaState, buttonState,
+    event->initialize(deviceId, source, action, 0, flags, edgeFlags, metaState, buttonState,
             xOffset, yOffset, xPrecision, yPrecision,
             downTimeNanos, eventTimeNanos, pointerCount, pointerProperties, rawPointerCoords);
 
@@ -455,6 +456,18 @@ static void android_view_MotionEvent_nativeSetAction(JNIEnv* env, jclass clazz,
     event->setAction(action);
 }
 
+static int android_view_MotionEvent_nativeGetActionButton(JNIEnv* env, jclass clazz,
+        jlong nativePtr) {
+    MotionEvent* event = reinterpret_cast<MotionEvent*>(nativePtr);
+    return event->getActionButton();
+}
+
+static void android_view_MotionEvent_nativeSetActionButton(JNIEnv* env, jclass clazz,
+        jlong nativePtr, jint button) {
+    MotionEvent* event = reinterpret_cast<MotionEvent*>(nativePtr);
+    event->setActionButton(button);
+}
+
 static jboolean android_view_MotionEvent_nativeIsTouchEvent(JNIEnv* env, jclass clazz,
         jlong nativePtr) {
     MotionEvent* event = reinterpret_cast<MotionEvent*>(nativePtr);
@@ -495,6 +508,12 @@ static jint android_view_MotionEvent_nativeGetButtonState(JNIEnv* env, jclass cl
         jlong nativePtr) {
     MotionEvent* event = reinterpret_cast<MotionEvent*>(nativePtr);
     return event->getButtonState();
+}
+
+static void android_view_MotionEvent_nativeSetButtonState(JNIEnv* env, jclass clazz,
+        jlong nativePtr, jint buttonState) {
+    MotionEvent* event = reinterpret_cast<MotionEvent*>(nativePtr);
+    event->setButtonState(buttonState);
 }
 
 static void android_view_MotionEvent_nativeOffsetLocation(JNIEnv* env, jclass clazz,
@@ -763,6 +782,12 @@ static JNINativeMethod gMotionEventMethods[] = {
     { "nativeSetAction",
             "(JI)V",
             (void*)android_view_MotionEvent_nativeSetAction },
+    { "nativeGetActionButton",
+            "(J)I",
+            (void*)android_view_MotionEvent_nativeGetActionButton},
+    { "nativeSetActionButton",
+            "(JI)V",
+            (void*)android_view_MotionEvent_nativeSetActionButton},
     { "nativeIsTouchEvent",
             "(J)Z",
             (void*)android_view_MotionEvent_nativeIsTouchEvent },
@@ -784,6 +809,9 @@ static JNINativeMethod gMotionEventMethods[] = {
     { "nativeGetButtonState",
             "(J)I",
             (void*)android_view_MotionEvent_nativeGetButtonState },
+    { "nativeSetButtonState",
+            "(JI)V",
+            (void*)android_view_MotionEvent_nativeSetButtonState },
     { "nativeOffsetLocation",
             "(JFF)V",
             (void*)android_view_MotionEvent_nativeOffsetLocation },
@@ -853,71 +881,41 @@ static JNINativeMethod gMotionEventMethods[] = {
             (void*)android_view_MotionEvent_nativeAxisFromString },
 };
 
-#define FIND_CLASS(var, className) \
-        var = env->FindClass(className); \
-        LOG_FATAL_IF(! var, "Unable to find class " className);
-
-#define GET_STATIC_METHOD_ID(var, clazz, methodName, fieldDescriptor) \
-        var = env->GetStaticMethodID(clazz, methodName, fieldDescriptor); \
-        LOG_FATAL_IF(! var, "Unable to find static method" methodName);
-
-#define GET_METHOD_ID(var, clazz, methodName, fieldDescriptor) \
-        var = env->GetMethodID(clazz, methodName, fieldDescriptor); \
-        LOG_FATAL_IF(! var, "Unable to find method" methodName);
-
-#define GET_FIELD_ID(var, clazz, fieldName, fieldDescriptor) \
-        var = env->GetFieldID(clazz, fieldName, fieldDescriptor); \
-        LOG_FATAL_IF(! var, "Unable to find field " fieldName);
-
 int register_android_view_MotionEvent(JNIEnv* env) {
-    int res = jniRegisterNativeMethods(env, "android/view/MotionEvent",
-            gMotionEventMethods, NELEM(gMotionEventMethods));
-    LOG_FATAL_IF(res < 0, "Unable to register native methods.");
+    int res = RegisterMethodsOrDie(env, "android/view/MotionEvent", gMotionEventMethods,
+                                   NELEM(gMotionEventMethods));
 
-    FIND_CLASS(gMotionEventClassInfo.clazz, "android/view/MotionEvent");
-    gMotionEventClassInfo.clazz = jclass(env->NewGlobalRef(gMotionEventClassInfo.clazz));
+    gMotionEventClassInfo.clazz = FindClassOrDie(env, "android/view/MotionEvent");
+    gMotionEventClassInfo.clazz = MakeGlobalRefOrDie(env, gMotionEventClassInfo.clazz);
 
-    GET_STATIC_METHOD_ID(gMotionEventClassInfo.obtain, gMotionEventClassInfo.clazz,
+    gMotionEventClassInfo.obtain = GetStaticMethodIDOrDie(env, gMotionEventClassInfo.clazz,
             "obtain", "()Landroid/view/MotionEvent;");
-    GET_METHOD_ID(gMotionEventClassInfo.recycle, gMotionEventClassInfo.clazz,
+    gMotionEventClassInfo.recycle = GetMethodIDOrDie(env, gMotionEventClassInfo.clazz,
             "recycle", "()V");
-    GET_FIELD_ID(gMotionEventClassInfo.mNativePtr, gMotionEventClassInfo.clazz,
+    gMotionEventClassInfo.mNativePtr = GetFieldIDOrDie(env, gMotionEventClassInfo.clazz,
             "mNativePtr", "J");
 
-    jclass clazz;
-    FIND_CLASS(clazz, "android/view/MotionEvent$PointerCoords");
+    jclass clazz = FindClassOrDie(env, "android/view/MotionEvent$PointerCoords");
 
-    GET_FIELD_ID(gPointerCoordsClassInfo.mPackedAxisBits, clazz,
-            "mPackedAxisBits", "J");
-    GET_FIELD_ID(gPointerCoordsClassInfo.mPackedAxisValues, clazz,
-            "mPackedAxisValues", "[F");
-    GET_FIELD_ID(gPointerCoordsClassInfo.x, clazz,
-            "x", "F");
-    GET_FIELD_ID(gPointerCoordsClassInfo.y, clazz,
-            "y", "F");
-    GET_FIELD_ID(gPointerCoordsClassInfo.pressure, clazz,
-            "pressure", "F");
-    GET_FIELD_ID(gPointerCoordsClassInfo.size, clazz,
-            "size", "F");
-    GET_FIELD_ID(gPointerCoordsClassInfo.touchMajor, clazz,
-            "touchMajor", "F");
-    GET_FIELD_ID(gPointerCoordsClassInfo.touchMinor, clazz,
-            "touchMinor", "F");
-    GET_FIELD_ID(gPointerCoordsClassInfo.toolMajor, clazz,
-            "toolMajor", "F");
-    GET_FIELD_ID(gPointerCoordsClassInfo.toolMinor, clazz,
-            "toolMinor", "F");
-    GET_FIELD_ID(gPointerCoordsClassInfo.orientation, clazz,
-            "orientation", "F");
+    gPointerCoordsClassInfo.mPackedAxisBits = GetFieldIDOrDie(env, clazz, "mPackedAxisBits", "J");
+    gPointerCoordsClassInfo.mPackedAxisValues = GetFieldIDOrDie(env, clazz, "mPackedAxisValues",
+                                                                "[F");
+    gPointerCoordsClassInfo.x = GetFieldIDOrDie(env, clazz, "x", "F");
+    gPointerCoordsClassInfo.y = GetFieldIDOrDie(env, clazz, "y", "F");
+    gPointerCoordsClassInfo.pressure = GetFieldIDOrDie(env, clazz, "pressure", "F");
+    gPointerCoordsClassInfo.size = GetFieldIDOrDie(env, clazz, "size", "F");
+    gPointerCoordsClassInfo.touchMajor = GetFieldIDOrDie(env, clazz, "touchMajor", "F");
+    gPointerCoordsClassInfo.touchMinor = GetFieldIDOrDie(env, clazz, "touchMinor", "F");
+    gPointerCoordsClassInfo.toolMajor = GetFieldIDOrDie(env, clazz, "toolMajor", "F");
+    gPointerCoordsClassInfo.toolMinor = GetFieldIDOrDie(env, clazz, "toolMinor", "F");
+    gPointerCoordsClassInfo.orientation = GetFieldIDOrDie(env, clazz, "orientation", "F");
 
-    FIND_CLASS(clazz, "android/view/MotionEvent$PointerProperties");
+    clazz = FindClassOrDie(env, "android/view/MotionEvent$PointerProperties");
 
-    GET_FIELD_ID(gPointerPropertiesClassInfo.id, clazz,
-            "id", "I");
-    GET_FIELD_ID(gPointerPropertiesClassInfo.toolType, clazz,
-            "toolType", "I");
+    gPointerPropertiesClassInfo.id = GetFieldIDOrDie(env, clazz, "id", "I");
+    gPointerPropertiesClassInfo.toolType = GetFieldIDOrDie(env, clazz, "toolType", "I");
 
-    return 0;
+    return res;
 }
 
 } // namespace android

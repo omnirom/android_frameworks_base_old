@@ -16,14 +16,20 @@
 
 package android.app;
 
-import android.content.pm.ApplicationInfo;
-import com.android.internal.app.WindowDecorActionBar;
-import com.android.internal.policy.PolicyManager;
+import android.annotation.CallSuper;
+import android.annotation.DrawableRes;
+import android.annotation.IdRes;
+import android.annotation.LayoutRes;
+import android.annotation.NonNull;
+import android.annotation.StringRes;
 
+import android.annotation.Nullable;
+import android.annotation.StyleRes;
 import android.content.ComponentName;
 import android.content.Context;
 import android.content.ContextWrapper;
 import android.content.DialogInterface;
+import android.content.pm.ApplicationInfo;
 import android.graphics.drawable.Drawable;
 import android.net.Uri;
 import android.os.Bundle;
@@ -42,6 +48,8 @@ import android.view.LayoutInflater;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.MotionEvent;
+import com.android.internal.policy.PhoneWindow;
+import android.view.SearchEvent;
 import android.view.View;
 import android.view.View.OnCreateContextMenuListener;
 import android.view.ViewGroup;
@@ -49,6 +57,9 @@ import android.view.ViewGroup.LayoutParams;
 import android.view.Window;
 import android.view.WindowManager;
 import android.view.accessibility.AccessibilityEvent;
+
+import com.android.internal.R;
+import com.android.internal.app.WindowDecorActionBar;
 
 import java.lang.ref.WeakReference;
 
@@ -113,7 +124,11 @@ public class Dialog implements DialogInterface, Window.Callback,
 
     private Handler mListenersHandler;
 
+    private SearchEvent mSearchEvent;
+
     private ActionMode mActionMode;
+
+    private int mActionModeTypeStarting = ActionMode.TYPE_PRIMARY;
 
     private final Runnable mDismissAction = new Runnable() {
         public void run() {
@@ -122,52 +137,58 @@ public class Dialog implements DialogInterface, Window.Callback,
     };
 
     /**
-     * Create a Dialog window that uses the default dialog frame style.
-     * 
-     * @param context The Context the Dialog is to run it.  In particular, it
-     *                uses the window manager and theme in this context to
-     *                present its UI.
+     * Creates a dialog window that uses the default dialog theme.
+     * <p>
+     * The supplied {@code context} is used to obtain the window manager and
+     * base theme used to present the dialog.
+     *
+     * @param context the context in which the dialog should run
+     * @see android.R.styleable#Theme_dialogTheme
      */
-    public Dialog(Context context) {
+    public Dialog(@NonNull Context context) {
         this(context, 0, true);
     }
 
     /**
-     * Create a Dialog window that uses a custom dialog style.
-     * 
-     * @param context The Context in which the Dialog should run. In particular, it
-     *                uses the window manager and theme from this context to
-     *                present its UI.
-     * @param theme A style resource describing the theme to use for the 
-     * window. See <a href="{@docRoot}guide/topics/resources/available-resources.html#stylesandthemes">Style 
-     * and Theme Resources</a> for more information about defining and using 
-     * styles.  This theme is applied on top of the current theme in 
-     * <var>context</var>.  If 0, the default dialog theme will be used.
+     * Creates a dialog window that uses a custom dialog style.
+     * <p>
+     * The supplied {@code context} is used to obtain the window manager and
+     * base theme used to present the dialog.
+     * <p>
+     * The supplied {@code theme} is applied on top of the context's theme. See
+     * <a href="{@docRoot}guide/topics/resources/available-resources.html#stylesandthemes">
+     * Style and Theme Resources</a> for more information about defining and
+     * using styles.
+     *
+     * @param context the context in which the dialog should run
+     * @param themeResId a style resource describing the theme to use for the
+     *              window, or {@code 0} to use the default dialog theme
      */
-    public Dialog(Context context, int theme) {
-        this(context, theme, true);
+    public Dialog(@NonNull Context context, @StyleRes int themeResId) {
+        this(context, themeResId, true);
     }
 
-    Dialog(Context context, int theme, boolean createContextThemeWrapper) {
+    Dialog(@NonNull Context context, @StyleRes int themeResId, boolean createContextThemeWrapper) {
         if (createContextThemeWrapper) {
-            if (theme == 0) {
-                TypedValue outValue = new TypedValue();
-                context.getTheme().resolveAttribute(com.android.internal.R.attr.dialogTheme,
-                        outValue, true);
-                theme = outValue.resourceId;
+            if (themeResId == 0) {
+                final TypedValue outValue = new TypedValue();
+                context.getTheme().resolveAttribute(R.attr.dialogTheme, outValue, true);
+                themeResId = outValue.resourceId;
             }
-            mContext = new ContextThemeWrapper(context, theme);
+            mContext = new ContextThemeWrapper(context, themeResId);
         } else {
             mContext = context;
         }
 
-        mWindowManager = (WindowManager)context.getSystemService(Context.WINDOW_SERVICE);
-        Window w = PolicyManager.makeNewWindow(mContext);
+        mWindowManager = (WindowManager) context.getSystemService(Context.WINDOW_SERVICE);
+
+        final Window w = new PhoneWindow(mContext);
         mWindow = w;
         w.setCallback(this);
         w.setOnWindowDismissedCallback(this);
         w.setWindowManager(mWindowManager, null, null);
         w.setGravity(Gravity.CENTER);
+
         mListenersHandler = new ListenersHandler(this);
     }
 
@@ -176,14 +197,13 @@ public class Dialog implements DialogInterface, Window.Callback,
      * @hide
      */
     @Deprecated
-    protected Dialog(Context context, boolean cancelable,
-            Message cancelCallback) {
+    protected Dialog(@NonNull Context context, boolean cancelable, Message cancelCallback) {
         this(context);
         mCancelable = cancelable;
         mCancelMessage = cancelCallback;
     }
 
-    protected Dialog(Context context, boolean cancelable,
+    protected Dialog(@NonNull Context context, boolean cancelable,
             OnCancelListener cancelListener) {
         this(context);
         mCancelable = cancelable;
@@ -195,6 +215,7 @@ public class Dialog implements DialogInterface, Window.Callback,
      * 
      * @return Context The Context used by the Dialog.
      */
+    @NonNull
     public final Context getContext() {
         return mContext;
     }
@@ -476,7 +497,8 @@ public class Dialog implements DialogInterface, Window.Callback,
      * @param id the identifier of the view to find
      * @return The view with the given id or null.
      */
-    public View findViewById(int id) {
+    @Nullable
+    public View findViewById(@IdRes int id) {
         return mWindow.findViewById(id);
     }
 
@@ -486,7 +508,7 @@ public class Dialog implements DialogInterface, Window.Callback,
      * 
      * @param layoutResID Resource ID to be inflated.
      */
-    public void setContentView(int layoutResID) {
+    public void setContentView(@LayoutRes int layoutResID) {
         mWindow.setContentView(layoutResID);
     }
 
@@ -540,7 +562,7 @@ public class Dialog implements DialogInterface, Window.Callback,
      *
      * @param titleId the title's text resource identifier
      */
-    public void setTitle(int titleId) {
+    public void setTitle(@StringRes int titleId) {
         setTitle(mContext.getText(titleId));
     }
 
@@ -966,13 +988,21 @@ public class Dialog implements DialogInterface, Window.Callback,
     public boolean onContextItemSelected(MenuItem item) {
         return false;
     }
-    
+
     /**
      * @see Activity#onContextMenuClosed(Menu)
      */
     public void onContextMenuClosed(Menu menu) {
     }
-    
+
+    /**
+     * This hook is called when the user signals the desire to start a search.
+     */
+    public boolean onSearchRequested(SearchEvent searchEvent) {
+        mSearchEvent = searchEvent;
+        return onSearchRequested();
+    }
+
     /**
      * This hook is called when the user signals the desire to start a search.
      */
@@ -991,11 +1021,39 @@ public class Dialog implements DialogInterface, Window.Callback,
         }
     }
 
+    /**
+     * During the onSearchRequested() callbacks, this function will return the
+     * {@link SearchEvent} that triggered the callback, if it exists.
+     *
+     * @return SearchEvent The SearchEvent that triggered the {@link
+     *                    #onSearchRequested} callback.
+     */
+    public final SearchEvent getSearchEvent() {
+        return mSearchEvent;
+    }
+
+    /**
+     * {@inheritDoc}
+     */
+    @Override
     public ActionMode onWindowStartingActionMode(ActionMode.Callback callback) {
-        if (mActionBar != null) {
+        if (mActionBar != null && mActionModeTypeStarting == ActionMode.TYPE_PRIMARY) {
             return mActionBar.startActionMode(callback);
         }
         return null;
+    }
+
+    /**
+     * {@inheritDoc}
+     */
+    @Override
+    public ActionMode onWindowStartingActionMode(ActionMode.Callback callback, int type) {
+        try {
+            mActionModeTypeStarting = type;
+            return onWindowStartingActionMode(callback);
+        } finally {
+            mActionModeTypeStarting = ActionMode.TYPE_PRIMARY;
+        }
     }
 
     /**
@@ -1004,6 +1062,7 @@ public class Dialog implements DialogInterface, Window.Callback,
      * Note that if you override this method you should always call through
      * to the superclass implementation by calling super.onActionModeStarted(mode).
      */
+    @CallSuper
     public void onActionModeStarted(ActionMode mode) {
         mActionMode = mode;
     }
@@ -1014,6 +1073,7 @@ public class Dialog implements DialogInterface, Window.Callback,
      * Note that if you override this method you should always call through
      * to the superclass implementation by calling super.onActionModeFinished(mode).
      */
+    @CallSuper
     public void onActionModeFinished(ActionMode mode) {
         if (mode == mActionMode) {
             mActionMode = null;
@@ -1070,7 +1130,7 @@ public class Dialog implements DialogInterface, Window.Callback,
      * Convenience for calling
      * {@link android.view.Window#setFeatureDrawableResource}.
      */
-    public final void setFeatureDrawableResource(int featureId, int resId) {
+    public final void setFeatureDrawableResource(int featureId, @DrawableRes int resId) {
         getWindow().setFeatureDrawableResource(featureId, resId);
     }
 

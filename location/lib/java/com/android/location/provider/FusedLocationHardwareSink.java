@@ -20,11 +20,48 @@ import android.location.Location;
 
 /**
  * Base class for sinks to interact with FusedLocationHardware.
+ *
+ * <p>Default implementations allow new methods to be added without crashing
+ * clients compiled against an old library version.
  */
-public abstract class FusedLocationHardwareSink {
-    /*
-     * Methods to provide a facade for IFusedLocationHardware
+public class FusedLocationHardwareSink {
+    /**
+     * Called when one or more locations are available from the FLP
+     * HAL.
      */
-    public abstract void onLocationAvailable(Location[] locations);
-    public abstract void onDiagnosticDataAvailable(String data);
+    public void onLocationAvailable(Location[] locations) {
+        // default do nothing
+    }
+
+    /**
+     * Called when diagnostic data is available from the FLP HAL.
+     */
+    public void onDiagnosticDataAvailable(String data) {
+        // default do nothing
+    }
+
+    /**
+     * Called when capabilities are available from the FLP HAL.
+     * Should be called once right after initialization.
+     *
+     * @param capabilities A bitmask of capabilities defined in
+     *                     fused_location.h.
+     */
+    public void onCapabilities(int capabilities) {
+        // default do nothing
+    }
+
+    /**
+     * Called when the status changes in the underlying FLP HAL
+     * implementation (the ability to compute location).  This
+     * callback will only be made on version 2 or later
+     * (see {@link FusedLocationHardware#getVersion()}).
+     *
+     * @param status One of FLP_STATUS_LOCATION_AVAILABLE or
+     *               FLP_STATUS_LOCATION_UNAVAILABLE as defined in
+     *               fused_location.h.
+     */
+    public void onStatusChanged(int status) {
+        // default do nothing
+    }
 }

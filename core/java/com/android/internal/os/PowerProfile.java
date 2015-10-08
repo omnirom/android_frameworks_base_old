@@ -18,6 +18,7 @@ package com.android.internal.os;
 
 
 import android.content.Context;
+import android.content.res.Resources;
 import android.content.res.XmlResourceParser;
 
 import com.android.internal.util.XmlUtils;
@@ -75,6 +76,22 @@ public class PowerProfile {
      */
     public static final String POWER_WIFI_ACTIVE = "wifi.active";
 
+    //
+    // Updated power constants. These are not estimated, they are real world
+    // currents and voltages for the underlying bluetooth and wifi controllers.
+    //
+
+    public static final String POWER_WIFI_CONTROLLER_IDLE = "wifi.controller.idle";
+    public static final String POWER_WIFI_CONTROLLER_RX = "wifi.controller.rx";
+    public static final String POWER_WIFI_CONTROLLER_TX = "wifi.controller.tx";
+    public static final String POWER_WIFI_CONTROLLER_OPERATING_VOLTAGE = "wifi.controller.voltage";
+
+    public static final String POWER_BLUETOOTH_CONTROLLER_IDLE = "bluetooth.controller.idle";
+    public static final String POWER_BLUETOOTH_CONTROLLER_RX = "bluetooth.controller.rx";
+    public static final String POWER_BLUETOOTH_CONTROLLER_TX = "bluetooth.controller.tx";
+    public static final String POWER_BLUETOOTH_CONTROLLER_OPERATING_VOLTAGE =
+            "bluetooth.controller.voltage";
+
     /**
      * Power consumption when GPS is on.
      */
@@ -94,6 +111,7 @@ public class PowerProfile {
      * Power consumption when Bluetooth driver gets an AT command.
      */
     public static final String POWER_BLUETOOTH_AT_CMD = "bluetooth.at";
+
 
     /**
      * Power consumption when screen is on, not including the backlight power.
@@ -134,9 +152,16 @@ public class PowerProfile {
     public static final String POWER_VIDEO = "dsp.video";
 
     /**
-     * Power consumption when camera flashlight is on.
+     * Average power consumption when camera flashlight is on.
      */
     public static final String POWER_FLASHLIGHT = "camera.flashlight";
+
+    /**
+     * Average power consumption when the camera is on over all standard use cases.
+     *
+     * TODO: Add more fine-grained camera power metrics.
+     */
+    public static final String POWER_CAMERA = "camera.avg";
 
     public static final String POWER_CPU_SPEEDS = "cpu.speeds";
 
@@ -152,7 +177,7 @@ public class PowerProfile {
      */
     public static final String POWER_BATTERY_CAPACITY = "battery.capacity";
 
-    static final HashMap<String, Object> sPowerMap = new HashMap<String, Object>();
+    static final HashMap<String, Object> sPowerMap = new HashMap<>();
 
     private static final String TAG_DEVICE = "device";
     private static final String TAG_ITEM = "item";
@@ -170,7 +195,8 @@ public class PowerProfile {
 
     private void readPowerValuesFromXml(Context context) {
         int id = com.android.internal.R.xml.power_profile;
-        XmlResourceParser parser = context.getResources().getXml(id);
+        final Resources resources = context.getResources();
+        XmlResourceParser parser = resources.getXml(id);
         boolean parsingArray = false;
         ArrayList<Double> array = new ArrayList<Double>();
         String arrayName = null;
@@ -221,14 +247,46 @@ public class PowerProfile {
         } finally {
             parser.close();
         }
+
+        // Now collect other config variables.
+        int[] configResIds = new int[] {
+                com.android.internal.R.integer.config_bluetooth_idle_cur_ma,
+                com.android.internal.R.integer.config_bluetooth_rx_cur_ma,
+                com.android.internal.R.integer.config_bluetooth_tx_cur_ma,
+                com.android.internal.R.integer.config_bluetooth_operating_voltage_mv,
+                com.android.internal.R.integer.config_wifi_idle_receive_cur_ma,
+                com.android.internal.R.integer.config_wifi_active_rx_cur_ma,
+                com.android.internal.R.integer.config_wifi_tx_cur_ma,
+                com.android.internal.R.integer.config_wifi_operating_voltage_mv,
+        };
+
+        String[] configResIdKeys = new String[] {
+                POWER_BLUETOOTH_CONTROLLER_IDLE,
+                POWER_BLUETOOTH_CONTROLLER_RX,
+                POWER_BLUETOOTH_CONTROLLER_TX,
+                POWER_BLUETOOTH_CONTROLLER_OPERATING_VOLTAGE,
+                POWER_WIFI_CONTROLLER_IDLE,
+                POWER_WIFI_CONTROLLER_RX,
+                POWER_WIFI_CONTROLLER_TX,
+                POWER_WIFI_CONTROLLER_OPERATING_VOLTAGE,
+        };
+
+        for (int i = 0; i < configResIds.length; i++) {
+            int value = resources.getInteger(configResIds[i]);
+            if (value > 0) {
+                sPowerMap.put(configResIdKeys[i], (double) value);
+            }
+        }
     }
 
     /**
-     * Returns the average current in mA consumed by the subsystem 
+     * Returns the average current in mA consumed by the subsystem, or the given
+     * default value if the subsystem has no recorded value.
      * @param type the subsystem type
+     * @param defaultValue the value to return if the subsystem has no recorded value.
      * @return the average current in milliAmps.
      */
-    public double getAveragePower(String type) {
+    public double getAveragePowerOrDefault(String type, double defaultValue) {
         if (sPowerMap.containsKey(type)) {
             Object data = sPowerMap.get(type);
             if (data instanceof Double[]) {
@@ -237,8 +295,17 @@ public class PowerProfile {
                 return (Double) sPowerMap.get(type);
             }
         } else {
-            return 0;
+            return defaultValue;
         }
+    }
+
+    /**
+     * Returns the average current in mA consumed by the subsystem
+     * @param type the subsystem type
+     * @return the average current in milliAmps.
+     */
+    public double getAveragePower(String type) {
+        return getAveragePowerOrDefault(type, 0);
     }
     
     /**
@@ -256,7 +323,7 @@ public class PowerProfile {
                 final Double[] values = (Double[]) data;
                 if (values.length > level && level >= 0) {
                     return values[level];
-                } else if (level < 0) {
+                } else if (level < 0 || values.length == 0) {
                     return 0;
                 } else {
                     return values[values.length - 1];

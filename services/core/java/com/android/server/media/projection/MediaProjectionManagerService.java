@@ -33,9 +33,7 @@ import android.media.projection.MediaProjectionManager;
 import android.os.Binder;
 import android.os.Handler;
 import android.os.IBinder;
-import android.os.IBinder.DeathRecipient;
 import android.os.Looper;
-import android.os.Message;
 import android.os.RemoteException;
 import android.os.UserHandle;
 import android.util.ArrayMap;
@@ -45,9 +43,6 @@ import com.android.server.SystemService;
 
 import java.io.FileDescriptor;
 import java.io.PrintWriter;
-import java.util.ArrayList;
-import java.util.Collection;
-import java.util.List;
 import java.util.Map;
 
 /**
@@ -132,9 +127,7 @@ public final class MediaProjectionManagerService extends SystemService
         IBinder.DeathRecipient deathRecipient = new IBinder.DeathRecipient() {
             @Override
             public void binderDied() {
-                synchronized (mLock) {
-                    removeCallback(callback);
-                }
+                removeCallback(callback);
             }
         };
         synchronized (mLock) {
@@ -349,6 +342,7 @@ public final class MediaProjectionManagerService extends SystemService
         public final String packageName;
         public final UserHandle userHandle;
 
+        private IMediaProjectionCallback mCallback;
         private IBinder mToken;
         private IBinder.DeathRecipient mDeathEater;
         private int mType;
@@ -411,7 +405,8 @@ public final class MediaProjectionManagerService extends SystemService
                     throw new IllegalStateException(
                             "Cannot start already started MediaProjection");
                 }
-                registerCallback(callback);
+                mCallback = callback;
+                registerCallback(mCallback);
                 try {
                     mToken = callback.asBinder();
                     mDeathEater = new IBinder.DeathRecipient() {
@@ -440,8 +435,11 @@ public final class MediaProjectionManagerService extends SystemService
                             + "pid=" + Binder.getCallingPid() + ")");
                     return;
                 }
-                mToken.unlinkToDeath(mDeathEater, 0);
                 stopProjectionLocked(this);
+                mToken.unlinkToDeath(mDeathEater, 0);
+                mToken = null;
+                unregisterCallback(mCallback);
+                mCallback = null;
             }
         }
 

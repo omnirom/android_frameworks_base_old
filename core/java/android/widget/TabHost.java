@@ -33,9 +33,6 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.view.ViewTreeObserver;
 import android.view.Window;
-import android.view.accessibility.AccessibilityEvent;
-import android.view.accessibility.AccessibilityNodeInfo;
-
 import java.util.ArrayList;
 import java.util.List;
 
@@ -173,8 +170,9 @@ mTabHost.addTab(TAB_TAG_1, "Hello, world!", "Tab 1");
         }
     }
 
+    /** @hide */
     @Override
-    public void sendAccessibilityEvent(int eventType) {
+    public void sendAccessibilityEventInternal(int eventType) {
         /* avoid super class behavior - TabWidget sends the right events */
     }
 
@@ -190,32 +188,9 @@ mTabHost.addTab(TAB_TAG_1, "Hello, world!", "Tab 1");
         mLocalActivityManager = activityGroup;
     }
 
-
     @Override
-    protected void onAttachedToWindow() {
-        super.onAttachedToWindow();
-        final ViewTreeObserver treeObserver = getViewTreeObserver();
-        treeObserver.addOnTouchModeChangeListener(this);
-    }
-
-    @Override
-    protected void onDetachedFromWindow() {
-        super.onDetachedFromWindow();
-        final ViewTreeObserver treeObserver = getViewTreeObserver();
-        treeObserver.removeOnTouchModeChangeListener(this);
-    }
-
-    /**
-     * {@inheritDoc}
-     */
     public void onTouchModeChanged(boolean isInTouchMode) {
-        if (!isInTouchMode) {
-            // leaving touch mode.. if nothing has focus, let's give it to
-            // the indicator of the current tab
-            if (mCurrentView != null && (!mCurrentView.hasFocus() || mCurrentView.isFocused())) {
-                mTabWidget.getChildTabViewAt(mCurrentTab).requestFocus();
-            }
-        }
+        // No longer used, but kept to maintain API compatibility.
     }
 
     /**
@@ -384,15 +359,8 @@ mTabHost.addTab(TAB_TAG_1, "Hello, world!", "Tab 1");
     }
 
     @Override
-    public void onInitializeAccessibilityEvent(AccessibilityEvent event) {
-        super.onInitializeAccessibilityEvent(event);
-        event.setClassName(TabHost.class.getName());
-    }
-
-    @Override
-    public void onInitializeAccessibilityNodeInfo(AccessibilityNodeInfo info) {
-        super.onInitializeAccessibilityNodeInfo(info);
-        info.setClassName(TabHost.class.getName());
+    public CharSequence getAccessibilityClassName() {
+        return TabHost.class.getName();
     }
 
     public void setCurrentTab(int index) {
@@ -612,7 +580,7 @@ mTabHost.addTab(TAB_TAG_1, "Hello, world!", "Tab 1");
             if (context.getApplicationInfo().targetSdkVersion <= Build.VERSION_CODES.DONUT) {
                 // Donut apps get old color scheme
                 tabIndicator.setBackgroundResource(R.drawable.tab_indicator_v4);
-                tv.setTextColor(context.getResources().getColorStateList(R.color.tab_indicator_text_v4));
+                tv.setTextColor(context.getColorStateList(R.color.tab_indicator_text_v4));
             }
 
             return tabIndicator;
@@ -657,7 +625,7 @@ mTabHost.addTab(TAB_TAG_1, "Hello, world!", "Tab 1");
             if (context.getApplicationInfo().targetSdkVersion <= Build.VERSION_CODES.DONUT) {
                 // Donut apps get old color scheme
                 tabIndicator.setBackgroundResource(R.drawable.tab_indicator_v4);
-                tv.setTextColor(context.getResources().getColorStateList(R.color.tab_indicator_text_v4));
+                tv.setTextColor(context.getColorStateList(R.color.tab_indicator_text_v4));
             }
 
             return tabIndicator;

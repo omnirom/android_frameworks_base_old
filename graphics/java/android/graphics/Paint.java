@@ -16,6 +16,7 @@
 
 package android.graphics;
 
+import android.annotation.ColorInt;
 import android.text.GraphicsOperations;
 import android.text.SpannableString;
 import android.text.SpannedString;
@@ -29,10 +30,9 @@ import java.util.Locale;
  */
 public class Paint {
 
-    /**
-     * @hide
-     */
-    public long mNativePaint;
+    private long mNativePaint;
+    private long mNativeShader = 0;
+
     /**
      * @hide
      */
@@ -184,8 +184,8 @@ public class Paint {
     /** @hide bit mask for the flag enabling vertical rendering for text */
     public static final int VERTICAL_TEXT_FLAG = 0x1000;
 
-    // we use this when we first create a paint
-    static final int DEFAULT_PAINT_FLAGS = DEV_KERN_TEXT_FLAG | EMBEDDED_BITMAP_TEXT_FLAG;
+    // These flags are always set on a new/reset paint, even if flags 0 is passed.
+    static final int HIDDEN_DEFAULT_PAINT_FLAGS = DEV_KERN_TEXT_FLAG | EMBEDDED_BITMAP_TEXT_FLAG;
 
     /**
      * Font hinter option that disables font hinting.
@@ -428,7 +428,7 @@ public class Paint {
      */
     public Paint(int flags) {
         mNativePaint = native_init();
-        setFlags(flags | DEFAULT_PAINT_FLAGS);
+        setFlags(flags | HIDDEN_DEFAULT_PAINT_FLAGS);
         // TODO: Turning off hinting has undesirable side effects, we need to
         //       revisit hinting once we add support for subpixel positioning
         // setHinting(DisplayMetrics.DENSITY_DEVICE >= DisplayMetrics.DENSITY_TV
@@ -445,14 +445,14 @@ public class Paint {
      *              new paint.
      */
     public Paint(Paint paint) {
-        mNativePaint = native_initWithPaint(paint.mNativePaint);
+        mNativePaint = native_initWithPaint(paint.getNativeInstance());
         setClassVariablesFrom(paint);
     }
 
     /** Restores the paint to its default settings. */
     public void reset() {
         native_reset(mNativePaint);
-        setFlags(DEFAULT_PAINT_FLAGS);
+        setFlags(HIDDEN_DEFAULT_PAINT_FLAGS);
 
         // TODO: Turning off hinting has undesirable side effects, we need to
         //       revisit hinting once we add support for subpixel positioning
@@ -464,6 +464,7 @@ public class Paint {
         mPathEffect = null;
         mRasterizer = null;
         mShader = null;
+        mNativeShader = 0;
         mTypeface = null;
         mNativeTypeface = 0;
         mXfermode = null;
@@ -500,11 +501,8 @@ public class Paint {
         mMaskFilter = paint.mMaskFilter;
         mPathEffect = paint.mPathEffect;
         mRasterizer = paint.mRasterizer;
-        if (paint.mShader != null) {
-            mShader = paint.mShader.copy();
-        } else {
-            mShader = null;
-        }
+        mShader = paint.mShader;
+        mNativeShader = paint.mNativeShader;
         mTypeface = paint.mTypeface;
         mNativeTypeface = paint.mNativeTypeface;
         mXfermode = paint.mXfermode;
@@ -528,6 +526,21 @@ public class Paint {
             mCompatScaling = factor;
             mInvCompatScaling = 1.0f/factor;
         }
+    }
+
+    /**
+     * Return the pointer to the native object while ensuring that any
+     * mutable objects that are attached to the paint are also up-to-date.
+     *
+     * @hide
+     */
+    public long getNativeInstance() {
+        long newNativeShader = mShader == null ? 0 : mShader.getNativeInstance();
+        if (newNativeShader != mNativeShader) {
+            mNativeShader = newNativeShader;
+            native_setShader(mNativePaint, mNativeShader);
+        }
+        return mNativePaint;
     }
 
     /**
@@ -765,6 +778,7 @@ public class Paint {
      *
      * @return the paint's color (and alpha).
      */
+    @ColorInt
     public native int getColor();
 
     /**
@@ -775,7 +789,7 @@ public class Paint {
      *
      * @param color The new color (including alpha) to set in the paint.
      */
-    public native void setColor(int color);
+    public native void setColor(@ColorInt int color);
 
     /**
      * Helper to getColor() that just returns the color's alpha value. This is
@@ -920,10 +934,7 @@ public class Paint {
      * @return       shader
      */
     public Shader setShader(Shader shader) {
-        long shaderNative = 0;
-        if (shader != null)
-            shaderNative = shader.getNativeInstance();
-        native_setShader(mNativePaint, shaderNative);
+        // Defer setting the shader natively until getNativeInstance() is called
         mShader = shader;
         return shader;
     }
@@ -1317,6 +1328,29 @@ public class Paint {
         }
         mFontFeatureSettings = settings;
         native_setFontFeatureSettings(mNativePaint, settings);
+    }
+
+    /**
+     * Get the current value of hyphen edit.
+     *
+     * @return the current hyphen edit value
+     *
+     * @hide
+     */
+    public int getHyphenEdit() {
+        return native_getHyphenEdit(mNativePaint);
+    }
+
+    /**
+     * Set a hyphen edit on the paint (causes a hyphen to be added to text when
+     * measured or drawn).
+     *
+     * @param hyphen 0 for no edit, 1 for adding a hyphen (other values in future)
+     *
+     * @hide
+     */
+    public void setHyphenEdit(int hyphen) {
+        native_setHyphenEdit(mNativePaint, hyphen);
     }
 
     /**
@@ -1836,7 +1870,7 @@ public class Paint {
      * Convenience overload that takes a char array instead of a
      * String.
      *
-     * @see #getTextRunAdvances(String, int, int, int, int, int, float[], int)
+     * @see #getTextRunAdvances(String, int, int, int, int, boolean, float[], int)
      * @hide
      */
     public float getTextRunAdvances(char[] chars, int index, int count,
@@ -1881,7 +1915,7 @@ public class Paint {
      * Convenience overload that takes a CharSequence instead of a
      * String.
      *
-     * @see #getTextRunAdvances(String, int, int, int, int, int, float[], int)
+     * @see #getTextRunAdvances(String, int, int, int, int, boolean, float[], int)
      * @hide
      */
     public float getTextRunAdvances(CharSequence text, int start, int end,
@@ -2086,9 +2120,9 @@ public class Paint {
         int contextLen = contextEnd - contextStart;
         char[] buf = TemporaryBuffer.obtain(contextLen);
         TextUtils.getChars(text, contextStart, contextEnd, buf, 0);
-        int result = getTextRunCursor(buf, 0, contextLen, dir, offset - contextStart, cursorOpt);
+        int relPos = getTextRunCursor(buf, 0, contextLen, dir, offset - contextStart, cursorOpt);
         TemporaryBuffer.recycle(buf);
-        return result;
+        return (relPos == -1) ? -1 : relPos + contextStart;
     }
 
     /**
@@ -2215,6 +2249,188 @@ public class Paint {
             bounds);
     }
 
+    /**
+     * Determine whether the typeface set on the paint has a glyph supporting the string. The
+     * simplest case is when the string contains a single character, in which this method
+     * determines whether the font has the character. In the case of multiple characters, the
+     * method returns true if there is a single glyph representing the ligature. For example, if
+     * the input is a pair of regional indicator symbols, determine whether there is an emoji flag
+     * for the pair.
+     *
+     * <p>Finally, if the string contains a variation selector, the method only returns true if
+     * the fonts contains a glyph specific to that variation.
+     *
+     * <p>Checking is done on the entire fallback chain, not just the immediate font referenced.
+     *
+     * @param string the string to test whether there is glyph support
+     * @return true if the typeface has a glyph for the string
+     */
+    public boolean hasGlyph(String string) {
+        return native_hasGlyph(mNativePaint, mNativeTypeface, mBidiFlags, string);
+    }
+
+    /**
+     * Measure cursor position within a run of text.
+     *
+     * <p>The run of text includes the characters from {@code start} to {@code end} in the text. In
+     * addition, the range {@code contextStart} to {@code contextEnd} is used as context for the
+     * purpose of complex text shaping, such as Arabic text potentially shaped differently based on
+     * the text next to it.
+     *
+     * <p>All text outside the range {@code contextStart..contextEnd} is ignored. The text between
+     * {@code start} and {@code end} will be laid out to be measured.
+     *
+     * <p>The returned width measurement is the advance from {@code start} to {@code offset}. It is
+     * generally a positive value, no matter the direction of the run. If {@code offset == end},
+     * the return value is simply the width of the whole run from {@code start} to {@code end}.
+     *
+     * <p>Ligatures are formed for characters in the range {@code start..end} (but not for
+     * {@code start..contextStart} or {@code end..contextEnd}). If {@code offset} points to a
+     * character in the middle of such a formed ligature, but at a grapheme cluster boundary, the
+     * return value will also reflect an advance in the middle of the ligature. See
+     * {@link #getOffsetForAdvance} for more discussion of grapheme cluster boundaries.
+     *
+     * <p>The direction of the run is explicitly specified by {@code isRtl}. Thus, this method is
+     * suitable only for runs of a single direction.
+     *
+     * <p>All indices are relative to the start of {@code text}. Further, {@code 0 <= contextStart
+     * <= start <= offset <= end <= contextEnd <= text.length} must hold on entry.
+     *
+     * @param text the text to measure. Cannot be null.
+     * @param start the index of the start of the range to measure
+     * @param end the index + 1 of the end of the range to measure
+     * @param contextStart the index of the start of the shaping context
+     * @param contextEnd the index + 1 of the end of the shaping context
+     * @param isRtl whether the run is in RTL direction
+     * @param offset index of caret position
+     * @return width measurement between start and offset
+     */
+    public float getRunAdvance(char[] text, int start, int end, int contextStart, int contextEnd,
+            boolean isRtl, int offset) {
+        if (text == null) {
+            throw new IllegalArgumentException("text cannot be null");
+        }
+        if ((contextStart | start | offset | end | contextEnd
+                | start - contextStart | offset - start | end - offset
+                | contextEnd - end | text.length - contextEnd) < 0) {
+            throw new IndexOutOfBoundsException();
+        }
+        if (end == start) {
+            return 0.0f;
+        }
+        // TODO: take mCompatScaling into account (or eliminate compat scaling)?
+        return native_getRunAdvance(mNativePaint, mNativeTypeface, text, start, end,
+                contextStart, contextEnd, isRtl, offset);
+    }
+
+    /**
+     * @see #getRunAdvance(char[], int, int, int, int, boolean, int)
+     *
+     * @param text the text to measure. Cannot be null.
+     * @param start the index of the start of the range to measure
+     * @param end the index + 1 of the end of the range to measure
+     * @param contextStart the index of the start of the shaping context
+     * @param contextEnd the index + 1 of the end of the shaping context
+     * @param isRtl whether the run is in RTL direction
+     * @param offset index of caret position
+     * @return width measurement between start and offset
+     */
+    public float getRunAdvance(CharSequence text, int start, int end, int contextStart,
+            int contextEnd, boolean isRtl, int offset) {
+        if (text == null) {
+            throw new IllegalArgumentException("text cannot be null");
+        }
+        if ((contextStart | start | offset | end | contextEnd
+                | start - contextStart | offset - start | end - offset
+                | contextEnd - end | text.length() - contextEnd) < 0) {
+            throw new IndexOutOfBoundsException();
+        }
+        if (end == start) {
+            return 0.0f;
+        }
+        // TODO performance: specialized alternatives to avoid buffer copy, if win is significant
+        char[] buf = TemporaryBuffer.obtain(contextEnd - contextStart);
+        TextUtils.getChars(text, contextStart, contextEnd, buf, 0);
+        float result = getRunAdvance(buf, start - contextStart, end - contextStart, 0,
+                contextEnd - contextStart, isRtl, offset - contextStart);
+        TemporaryBuffer.recycle(buf);
+        return result;
+    }
+
+    /**
+     * Get the character offset within the string whose position is closest to the specified
+     * horizontal position.
+     *
+     * <p>The returned value is generally the value of {@code offset} for which
+     * {@link #getRunAdvance} yields a result most closely approximating {@code advance},
+     * and which is also on a grapheme cluster boundary. As such, it is the preferred method
+     * for positioning a cursor in response to a touch or pointer event. The grapheme cluster
+     * boundaries are based on
+     * <a href="http://unicode.org/reports/tr29/">Unicode Standard Annex #29</a> but with some
+     * tailoring for better user experience.
+     *
+     * <p>Note that {@code advance} is a (generally positive) width measurement relative to the start
+     * of the run. Thus, for RTL runs it the distance from the point to the right edge.
+     *
+     * <p>All indices are relative to the start of {@code text}. Further, {@code 0 <= contextStart
+     * <= start <= end <= contextEnd <= text.length} must hold on entry, and {@code start <= result
+     * <= end} will hold on return.
+     *
+     * @param text the text to measure. Cannot be null.
+     * @param start the index of the start of the range to measure
+     * @param end the index + 1 of the end of the range to measure
+     * @param contextStart the index of the start of the shaping context
+     * @param contextEnd the index + 1 of the end of the range to measure
+     * @param isRtl whether the run is in RTL direction
+     * @param advance width relative to start of run
+     * @return index of offset
+     */
+    public int getOffsetForAdvance(char[] text, int start, int end, int contextStart,
+            int contextEnd, boolean isRtl, float advance) {
+        if (text == null) {
+            throw new IllegalArgumentException("text cannot be null");
+        }
+        if ((contextStart | start | end | contextEnd
+                | start - contextStart | end - start | contextEnd - end
+                | text.length - contextEnd) < 0) {
+            throw new IndexOutOfBoundsException();
+        }
+        // TODO: take mCompatScaling into account (or eliminate compat scaling)?
+        return native_getOffsetForAdvance(mNativePaint, mNativeTypeface, text, start, end,
+                contextStart, contextEnd, isRtl, advance);
+    }
+
+    /**
+     * @see #getOffsetForAdvance(char[], int, int, int, int, boolean, float)
+     *
+     * @param text the text to measure. Cannot be null.
+     * @param start the index of the start of the range to measure
+     * @param end the index + 1 of the end of the range to measure
+     * @param contextStart the index of the start of the shaping context
+     * @param contextEnd the index + 1 of the end of the range to measure
+     * @param isRtl whether the run is in RTL direction
+     * @param advance width relative to start of run
+     * @return index of offset
+     */
+    public int getOffsetForAdvance(CharSequence text, int start, int end, int contextStart,
+            int contextEnd, boolean isRtl, float advance) {
+        if (text == null) {
+            throw new IllegalArgumentException("text cannot be null");
+        }
+        if ((contextStart | start | end | contextEnd
+                | start - contextStart | end - start | contextEnd - end
+                | text.length() - contextEnd) < 0) {
+            throw new IndexOutOfBoundsException();
+        }
+        // TODO performance: specialized alternatives to avoid buffer copy, if win is significant
+        char[] buf = TemporaryBuffer.obtain(contextEnd - contextStart);
+        TextUtils.getChars(text, contextStart, contextEnd, buf, 0);
+        int result = getOffsetForAdvance(buf, start - contextStart, end - contextStart, 0,
+                contextEnd - contextStart, isRtl, advance) + contextStart;
+        TemporaryBuffer.recycle(buf);
+        return result;
+    }
+
     @Override
     protected void finalize() throws Throwable {
         try {
@@ -2298,4 +2514,14 @@ public class Paint {
                                                        float letterSpacing);
     private static native void native_setFontFeatureSettings(long native_object,
                                                              String settings);
+    private static native int native_getHyphenEdit(long native_object);
+    private static native void native_setHyphenEdit(long native_object, int hyphen);
+    private static native boolean native_hasGlyph(long native_object, long native_typeface,
+            int bidiFlags, String string);
+    private static native float native_getRunAdvance(long native_object, long native_typeface,
+            char[] text, int start, int end, int contextStart, int contextEnd, boolean isRtl,
+            int offset);
+    private static native int native_getOffsetForAdvance(long native_object,
+            long native_typeface, char[] text, int start, int end, int contextStart, int contextEnd,
+            boolean isRtl, float advance);
 }

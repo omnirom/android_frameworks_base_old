@@ -143,6 +143,8 @@ public class ImsCallProfile implements Parcelable {
     public static final int OIR_DEFAULT = 0;    // "user subscription default value"
     public static final int OIR_PRESENTATION_RESTRICTED = 1;
     public static final int OIR_PRESENTATION_NOT_RESTRICTED = 2;
+    public static final int OIR_PRESENTATION_UNKNOWN = 3;
+    public static final int OIR_PRESENTATION_PAYPHONE = 4;
 
     /**
      * Values for EXTRA_DIALSTRING
@@ -270,7 +272,6 @@ public class ImsCallProfile implements Parcelable {
         return "{ serviceType=" + mServiceType +
                 ", callType=" + mCallType +
                 ", restrictCause=" + mRestrictCause +
-                //", callExtras=" + mCallExtras.toString() +
                 ", mediaProfile=" + mMediaProfile.toString() + " }";
     }
 
@@ -313,22 +314,31 @@ public class ImsCallProfile implements Parcelable {
      * @param callType The call type.
      * @return The video state.
      */
-    public static int getVideoStateFromCallType(int callType) {
-        switch (callType) {
-            case CALL_TYPE_VT_NODIR:
-                return VideoProfile.VideoState.PAUSED |
-                        VideoProfile.VideoState.BIDIRECTIONAL;
+    public static int getVideoStateFromImsCallProfile(ImsCallProfile callProfile) {
+        int videostate = VideoProfile.STATE_AUDIO_ONLY;
+        switch (callProfile.mCallType) {
             case CALL_TYPE_VT_TX:
-                return VideoProfile.VideoState.TX_ENABLED;
+                videostate = VideoProfile.STATE_TX_ENABLED;
+                break;
             case CALL_TYPE_VT_RX:
-                return VideoProfile.VideoState.RX_ENABLED;
+                videostate = VideoProfile.STATE_RX_ENABLED;
+                break;
             case CALL_TYPE_VT:
-                return VideoProfile.VideoState.BIDIRECTIONAL;
+                videostate = VideoProfile.STATE_BIDIRECTIONAL;
+                break;
             case CALL_TYPE_VOICE:
-                return VideoProfile.VideoState.AUDIO_ONLY;
+                videostate = VideoProfile.STATE_AUDIO_ONLY;
+                break;
             default:
-                return VideoProfile.VideoState.AUDIO_ONLY;
+                videostate = VideoProfile.STATE_AUDIO_ONLY;
+                break;
         }
+        if (callProfile.isVideoPaused() && !VideoProfile.isAudioOnly(videostate)) {
+            videostate |= VideoProfile.STATE_PAUSED;
+        } else {
+            videostate &= ~VideoProfile.STATE_PAUSED;
+        }
+        return videostate;
     }
 
     /**
@@ -339,9 +349,9 @@ public class ImsCallProfile implements Parcelable {
      * @return The call type.
      */
     public static int getCallTypeFromVideoState(int videoState) {
-        boolean videoTx = isVideoStateSet(videoState, VideoProfile.VideoState.TX_ENABLED);
-        boolean videoRx = isVideoStateSet(videoState, VideoProfile.VideoState.RX_ENABLED);
-        boolean isPaused = isVideoStateSet(videoState, VideoProfile.VideoState.PAUSED);
+        boolean videoTx = isVideoStateSet(videoState, VideoProfile.STATE_TX_ENABLED);
+        boolean videoRx = isVideoStateSet(videoState, VideoProfile.STATE_RX_ENABLED);
+        boolean isPaused = isVideoStateSet(videoState, VideoProfile.STATE_PAUSED);
         if (isPaused) {
             return ImsCallProfile.CALL_TYPE_VT_NODIR;
         } else if (videoTx && !videoRx) {
@@ -365,6 +375,10 @@ public class ImsCallProfile implements Parcelable {
                 return ImsCallProfile.OIR_PRESENTATION_RESTRICTED;
             case PhoneConstants.PRESENTATION_ALLOWED:
                 return ImsCallProfile.OIR_PRESENTATION_NOT_RESTRICTED;
+            case PhoneConstants.PRESENTATION_PAYPHONE:
+                return ImsCallProfile.OIR_PRESENTATION_PAYPHONE;
+            case PhoneConstants.PRESENTATION_UNKNOWN:
+                return ImsCallProfile.OIR_PRESENTATION_UNKNOWN;
             default:
                 return ImsCallProfile.OIR_DEFAULT;
         }
@@ -381,9 +395,21 @@ public class ImsCallProfile implements Parcelable {
                 return PhoneConstants.PRESENTATION_RESTRICTED;
             case ImsCallProfile.OIR_PRESENTATION_NOT_RESTRICTED:
                 return PhoneConstants.PRESENTATION_ALLOWED;
+            case ImsCallProfile.OIR_PRESENTATION_PAYPHONE:
+                return PhoneConstants.PRESENTATION_PAYPHONE;
+            case ImsCallProfile.OIR_PRESENTATION_UNKNOWN:
+                return PhoneConstants.PRESENTATION_UNKNOWN;
             default:
                 return PhoneConstants.PRESENTATION_UNKNOWN;
         }
+    }
+
+    /**
+     * Checks if video call is paused
+     * @return true if call is video paused
+     */
+    public boolean isVideoPaused() {
+        return mMediaProfile.mVideoDirection == ImsStreamMediaProfile.DIRECTION_INACTIVE;
     }
 
     /**

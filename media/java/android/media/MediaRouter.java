@@ -17,6 +17,8 @@
 package android.media;
 
 import android.Manifest;
+import android.annotation.DrawableRes;
+import android.annotation.NonNull;
 import android.app.ActivityThread;
 import android.content.BroadcastReceiver;
 import android.content.Context;
@@ -171,15 +173,15 @@ public class MediaRouter {
         }
 
         void updateAudioRoutes(AudioRoutesInfo newRoutes) {
-            if (newRoutes.mMainType != mCurAudioRoutesInfo.mMainType) {
-                mCurAudioRoutesInfo.mMainType = newRoutes.mMainType;
+            if (newRoutes.mainType != mCurAudioRoutesInfo.mainType) {
+                mCurAudioRoutesInfo.mainType = newRoutes.mainType;
                 int name;
-                if ((newRoutes.mMainType&AudioRoutesInfo.MAIN_HEADPHONES) != 0
-                        || (newRoutes.mMainType&AudioRoutesInfo.MAIN_HEADSET) != 0) {
+                if ((newRoutes.mainType&AudioRoutesInfo.MAIN_HEADPHONES) != 0
+                        || (newRoutes.mainType&AudioRoutesInfo.MAIN_HEADSET) != 0) {
                     name = com.android.internal.R.string.default_audio_route_name_headphones;
-                } else if ((newRoutes.mMainType&AudioRoutesInfo.MAIN_DOCK_SPEAKERS) != 0) {
+                } else if ((newRoutes.mainType&AudioRoutesInfo.MAIN_DOCK_SPEAKERS) != 0) {
                     name = com.android.internal.R.string.default_audio_route_name_dock_speakers;
-                } else if ((newRoutes.mMainType&AudioRoutesInfo.MAIN_HDMI) != 0) {
+                } else if ((newRoutes.mainType&AudioRoutesInfo.MAIN_HDMI) != 0) {
                     name = com.android.internal.R.string.default_media_route_name_hdmi;
                 } else {
                     name = com.android.internal.R.string.default_audio_route_name;
@@ -188,21 +190,21 @@ public class MediaRouter {
                 dispatchRouteChanged(sStatic.mDefaultAudioVideo);
             }
 
-            final int mainType = mCurAudioRoutesInfo.mMainType;
+            final int mainType = mCurAudioRoutesInfo.mainType;
 
-            if (!TextUtils.equals(newRoutes.mBluetoothName, mCurAudioRoutesInfo.mBluetoothName)) {
-                mCurAudioRoutesInfo.mBluetoothName = newRoutes.mBluetoothName;
-                if (mCurAudioRoutesInfo.mBluetoothName != null) {
+            if (!TextUtils.equals(newRoutes.bluetoothName, mCurAudioRoutesInfo.bluetoothName)) {
+                mCurAudioRoutesInfo.bluetoothName = newRoutes.bluetoothName;
+                if (mCurAudioRoutesInfo.bluetoothName != null) {
                     if (sStatic.mBluetoothA2dpRoute == null) {
                         final RouteInfo info = new RouteInfo(sStatic.mSystemCategory);
-                        info.mName = mCurAudioRoutesInfo.mBluetoothName;
+                        info.mName = mCurAudioRoutesInfo.bluetoothName;
                         info.mDescription = sStatic.mResources.getText(
                                 com.android.internal.R.string.bluetooth_a2dp_audio_route_name);
                         info.mSupportedTypes = ROUTE_TYPE_LIVE_AUDIO;
                         sStatic.mBluetoothA2dpRoute = info;
                         addRouteStatic(sStatic.mBluetoothA2dpRoute);
                     } else {
-                        sStatic.mBluetoothA2dpRoute.mName = mCurAudioRoutesInfo.mBluetoothName;
+                        sStatic.mBluetoothA2dpRoute.mName = mCurAudioRoutesInfo.bluetoothName;
                         dispatchRouteChanged(sStatic.mBluetoothA2dpRoute);
                     }
                 } else if (sStatic.mBluetoothA2dpRoute != null) {
@@ -881,8 +883,12 @@ public class MediaRouter {
      * @param types type flags indicating which types this route should be used for.
      *              The route must support at least a subset.
      * @param route Route to select
+     * @throws IllegalArgumentException if the given route is {@code null}
      */
-    public void selectRoute(int types, RouteInfo route) {
+    public void selectRoute(int types, @NonNull RouteInfo route) {
+        if (route == null) {
+            throw new IllegalArgumentException("Route cannot be null.");
+        }
         selectRouteStatic(types, route, true);
     }
 
@@ -893,7 +899,8 @@ public class MediaRouter {
         selectRouteStatic(types, route, explicit);
     }
 
-    static void selectRouteStatic(int types, RouteInfo route, boolean explicit) {
+    static void selectRouteStatic(int types, @NonNull RouteInfo route, boolean explicit) {
+        assert(route != null);
         final RouteInfo oldRoute = sStatic.mSelectedRoute;
         if (oldRoute == route) return;
         if (!route.matchesTypes(types)) {
@@ -916,7 +923,7 @@ public class MediaRouter {
         final WifiDisplay activeDisplay =
                 sStatic.mDisplayService.getWifiDisplayStatus().getActiveDisplay();
         final boolean oldRouteHasAddress = oldRoute != null && oldRoute.mDeviceAddress != null;
-        final boolean newRouteHasAddress = route != null && route.mDeviceAddress != null;
+        final boolean newRouteHasAddress = route.mDeviceAddress != null;
         if (activeDisplay != null || oldRouteHasAddress || newRouteHasAddress) {
             if (newRouteHasAddress && !matchesDeviceAddress(activeDisplay, route)) {
                 if (sStatic.mCanConfigureWifiDisplays) {
@@ -1499,18 +1506,18 @@ public class MediaRouter {
 
         /**
          * The default playback type, "local", indicating the presentation of the media is happening
-         * on the same device (e.g. a phone, a tablet) as where it is controlled from.
+         * on the same device (e&#46;g&#46; a phone, a tablet) as where it is controlled from.
          * @see #getPlaybackType()
          */
         public final static int PLAYBACK_TYPE_LOCAL = 0;
         /**
          * A playback type indicating the presentation of the media is happening on
-         * a different device (i.e. the remote device) than where it is controlled from.
+         * a different device (i&#46;e&#46; the remote device) than where it is controlled from.
          * @see #getPlaybackType()
          */
         public final static int PLAYBACK_TYPE_REMOTE = 1;
         /**
-         * Playback information indicating the playback volume is fixed, i.e. it cannot be
+         * Playback information indicating the playback volume is fixed, i&#46;e&#46; it cannot be
          * controlled from this object. An example of fixed playback volume is a remote player,
          * playing over HDMI where the user prefers to control the volume on the HDMI sink, rather
          * than attenuate at the source.
@@ -2083,7 +2090,7 @@ public class MediaRouter {
          *
          * @param resId Resource ID of an icon drawable to use to represent this route
          */
-        public void setIconResource(int resId) {
+        public void setIconResource(@DrawableRes int resId) {
             setIconDrawable(sStatic.mResources.getDrawable(resId));
         }
 
@@ -2393,7 +2400,7 @@ public class MediaRouter {
          *
          * @param resId Resource ID of an icon drawable to use to represent this group
          */
-        public void setIconResource(int resId) {
+        public void setIconResource(@DrawableRes int resId) {
             setIconDrawable(sStatic.mResources.getDrawable(resId));
         }
 

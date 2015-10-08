@@ -24,15 +24,16 @@ namespace uirenderer {
 // Lifecycle
 ///////////////////////////////////////////////////////////////////////////////
 
-Dither::Dither(): mCaches(NULL), mInitialized(false), mDitherTexture(0) {
+Dither::Dither(Caches& caches)
+        : mCaches(caches)
+        , mInitialized(false)
+        , mDitherTexture(0) {
 }
 
 void Dither::bindDitherTexture() {
     if (!mInitialized) {
-        bool useFloatTexture = Extensions::getInstance().hasFloatTextures();
-
         glGenTextures(1, &mDitherTexture);
-        mCaches->bindTexture(mDitherTexture);
+        mCaches.textureState().bindTexture(mDitherTexture);
 
         glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
         glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
@@ -40,7 +41,7 @@ void Dither::bindDitherTexture() {
         glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_REPEAT);
         glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_REPEAT);
 
-        if (useFloatTexture) {
+        if (mCaches.extensions().hasFloatTextures()) {
             // We use a R16F texture, let's remap the alpha channel to the
             // red channel to avoid changing the shader sampling code on GL ES 3.0+
             glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_SWIZZLE_A, GL_RED);
@@ -71,13 +72,13 @@ void Dither::bindDitherTexture() {
 
         mInitialized = true;
     } else {
-        mCaches->bindTexture(mDitherTexture);
+        mCaches.textureState().bindTexture(mDitherTexture);
     }
 }
 
 void Dither::clear() {
     if (mInitialized) {
-        mCaches->deleteTexture(mDitherTexture);
+        mCaches.textureState().deleteTexture(mDitherTexture);
         mInitialized = false;
     }
 }
@@ -86,15 +87,13 @@ void Dither::clear() {
 // Program management
 ///////////////////////////////////////////////////////////////////////////////
 
-void Dither::setupProgram(Program* program, GLuint* textureUnit) {
-    if (!mCaches) mCaches = &Caches::getInstance();
-
+void Dither::setupProgram(Program& program, GLuint* textureUnit) {
     GLuint textureSlot = (*textureUnit)++;
-    mCaches->activeTexture(textureSlot);
+    mCaches.textureState().activateTexture(textureSlot);
 
     bindDitherTexture();
 
-    glUniform1i(program->getUniform("ditherSampler"), textureSlot);
+    glUniform1i(program.getUniform("ditherSampler"), textureSlot);
 }
 
 }; // namespace uirenderer

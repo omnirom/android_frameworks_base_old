@@ -32,6 +32,7 @@ import java.net.HttpURLConnection;
 import java.net.MalformedURLException;
 import java.net.NoRouteToHostException;
 import java.net.ProtocolException;
+import java.net.UnknownServiceException;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -41,6 +42,9 @@ import static android.media.MediaPlayer.MEDIA_ERROR_UNSUPPORTED;
 public class MediaHTTPConnection extends IMediaHTTPConnection.Stub {
     private static final String TAG = "MediaHTTPConnection";
     private static final boolean VERBOSE = false;
+
+    // connection timeout - 30 sec
+    private static final int CONNECT_TIMEOUT_MS = 30 * 1000;
 
     private long mCurrentOffset = -1;
     private URL mURL = null;
@@ -181,6 +185,7 @@ public class MediaHTTPConnection extends IMediaHTTPConnection.Stub {
                 } else {
                     mConnection = (HttpURLConnection)url.openConnection();
                 }
+                mConnection.setConnectTimeout(CONNECT_TIMEOUT_MS);
 
                 // handle redirects ourselves if we do not allow cross-domain redirect
                 mConnection.setInstanceFollowRedirects(mAllowCrossDomainRedirect);
@@ -335,6 +340,9 @@ public class MediaHTTPConnection extends IMediaHTTPConnection.Stub {
             Log.w(TAG, "readAt " + offset + " / " + size + " => " + e);
             return MEDIA_ERROR_UNSUPPORTED;
         } catch (NoRouteToHostException e) {
+            Log.w(TAG, "readAt " + offset + " / " + size + " => " + e);
+            return MEDIA_ERROR_UNSUPPORTED;
+        } catch (UnknownServiceException e) {
             Log.w(TAG, "readAt " + offset + " / " + size + " => " + e);
             return MEDIA_ERROR_UNSUPPORTED;
         } catch (IOException e) {

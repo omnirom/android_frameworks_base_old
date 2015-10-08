@@ -25,7 +25,7 @@
     android:id="@+id/status_bar"
     android:background="@drawable/system_bar_background"
     android:orientation="vertical"
-    android:focusable="true"
+    android:focusable="false"
     android:descendantFocusability="afterDescendants"
     >
 
@@ -103,13 +103,5 @@
                 />
         </com.android.keyguard.AlphaOptimizedLinearLayout>
     </LinearLayout>
-
-    <ViewStub
-        android:id="@+id/ticker_stub"
-        android:inflatedId="@+id/ticker"
-        android:layout="@layout/status_bar_ticker"
-        android:layout_width="match_parent"
-        android:layout_height="match_parent"
-        />
 
 </com.android.systemui.statusbar.phone.PhoneStatusBarView>

@@ -26,8 +26,6 @@ import android.os.Message;
 import android.util.AttributeSet;
 import android.util.Log;
 import android.view.RemotableViewMethod;
-import android.view.accessibility.AccessibilityEvent;
-import android.view.accessibility.AccessibilityNodeInfo;
 import android.widget.RemoteViews.RemoteView;
 
 /**
@@ -305,14 +303,7 @@ public class AdapterViewFlipper extends AdapterViewAnimator {
     }
 
     @Override
-    public void onInitializeAccessibilityEvent(AccessibilityEvent event) {
-        super.onInitializeAccessibilityEvent(event);
-        event.setClassName(AdapterViewFlipper.class.getName());
-    }
-
-    @Override
-    public void onInitializeAccessibilityNodeInfo(AccessibilityNodeInfo info) {
-        super.onInitializeAccessibilityNodeInfo(info);
-        info.setClassName(AdapterViewFlipper.class.getName());
+    public CharSequence getAccessibilityClassName() {
+        return AdapterViewFlipper.class.getName();
     }
 }

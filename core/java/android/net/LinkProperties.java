@@ -88,6 +88,54 @@ public final class LinkProperties implements Parcelable {
     /**
      * @hide
      */
+    public enum ProvisioningChange {
+        STILL_NOT_PROVISIONED,
+        LOST_PROVISIONING,
+        GAINED_PROVISIONING,
+        STILL_PROVISIONED,
+    }
+
+    /**
+     * Compare the provisioning states of two LinkProperties instances.
+     *
+     * @hide
+     */
+    public static ProvisioningChange compareProvisioning(
+            LinkProperties before, LinkProperties after) {
+        if (before.isProvisioned() && after.isProvisioned()) {
+            // On dualstack networks, DHCPv4 renewals can occasionally fail.
+            // When this happens, IPv6-reachable services continue to function
+            // normally but IPv4-only services (naturally) fail.
+            //
+            // When an application using an IPv4-only service reports a bad
+            // network condition to the framework, attempts to re-validate
+            // the network succeed (since we support IPv6-only networks) and
+            // nothing is changed.
+            //
+            // For users, this is confusing and unexpected behaviour, and is
+            // not necessarily easy to diagnose.  Therefore, we treat changing
+            // from a dualstack network to an IPv6-only network equivalent to
+            // a total loss of provisioning.
+            //
+            // For one such example of this, see b/18867306.
+            //
+            // TODO: Remove this special case altogether.
+            if (before.isIPv4Provisioned() && !after.isIPv4Provisioned()) {
+                return ProvisioningChange.LOST_PROVISIONING;
+            }
+            return ProvisioningChange.STILL_PROVISIONED;
+        } else if (before.isProvisioned() && !after.isProvisioned()) {
+            return ProvisioningChange.LOST_PROVISIONING;
+        } else if (!before.isProvisioned() && after.isProvisioned()) {
+            return ProvisioningChange.GAINED_PROVISIONING;
+        } else {  // !before.isProvisioned() && !after.isProvisioned()
+            return ProvisioningChange.STILL_NOT_PROVISIONED;
+        }
+    }
+
+    /**
+     * @hide
+     */
     public LinkProperties() {
     }
 
@@ -287,6 +335,20 @@ public final class LinkProperties implements Parcelable {
     }
 
     /**
+     * Removes the given {@link InetAddress} from the list of DNS servers.
+     *
+     * @param dnsServer The {@link InetAddress} to remove from the list of DNS servers.
+     * @return true if the DNS server was removed, false if it did not exist.
+     * @hide
+     */
+    public boolean removeDnsServer(InetAddress dnsServer) {
+        if (dnsServer != null) {
+            return mDnses.remove(dnsServer);
+        }
+        return false;
+    }
+
+    /**
      * Replaces the DNS servers in this {@code LinkProperties} with
      * the given {@link Collection} of {@link InetAddress} objects.
      *
@@ -455,7 +517,7 @@ public final class LinkProperties implements Parcelable {
      * Note that Http Proxies are only a hint - the system recommends their use, but it does
      * not enforce it and applications may ignore them.
      *
-     * @param proxy A {@link ProxyInfo} defining the Http Proxy to use on this link.
+     * @param proxy A {@link ProxyInfo} defining the HTTP Proxy to use on this link.
      * @hide
      */
     public void setHttpProxy(ProxyInfo proxy) {
@@ -600,6 +662,17 @@ public final class LinkProperties implements Parcelable {
     }
 
     /**
+     * Returns true if this link or any of its stacked interfaces has an IPv4 address.
+     *
+     * @return {@code true} if there is an IPv4 address, {@code false} otherwise.
+     */
+    private boolean hasIPv4AddressOnInterface(String iface) {
+        return (mIfaceName.equals(iface) && hasIPv4Address()) ||
+                (iface != null && mStackedLinks.containsKey(iface) &&
+                        mStackedLinks.get(iface).hasIPv4Address());
+    }
+
+    /**
      * Returns true if this link has a global preferred IPv6 address.
      *
      * @return {@code true} if there is a global preferred IPv6 address, {@code false} otherwise.
@@ -679,8 +752,9 @@ public final class LinkProperties implements Parcelable {
      * This requires an IP address, default route, and DNS server.
      *
      * @return {@code true} if the link is provisioned, {@code false} otherwise.
+     * @hide
      */
-    private boolean hasIPv4() {
+    public boolean isIPv4Provisioned() {
         return (hasIPv4Address() &&
                 hasIPv4DefaultRoute() &&
                 hasIPv4DnsServer());
@@ -691,8 +765,9 @@ public final class LinkProperties implements Parcelable {
      * This requires an IP address, default route, and DNS server.
      *
      * @return {@code true} if the link is provisioned, {@code false} otherwise.
+     * @hide
      */
-    private boolean hasIPv6() {
+    public boolean isIPv6Provisioned() {
         return (hasGlobalIPv6Address() &&
                 hasIPv6DefaultRoute() &&
                 hasIPv6DnsServer());
@@ -706,7 +781,44 @@ public final class LinkProperties implements Parcelable {
      * @hide
      */
     public boolean isProvisioned() {
-        return (hasIPv4() || hasIPv6());
+        return (isIPv4Provisioned() || isIPv6Provisioned());
+    }
+
+    /**
+     * Evaluate whether the {@link InetAddress} is considered reachable.
+     *
+     * @return {@code true} if the given {@link InetAddress} is considered reachable,
+     *         {@code false} otherwise.
+     * @hide
+     */
+    public boolean isReachable(InetAddress ip) {
+        final List<RouteInfo> allRoutes = getAllRoutes();
+        // If we don't have a route to this IP address, it's not reachable.
+        final RouteInfo bestRoute = RouteInfo.selectBestRoute(allRoutes, ip);
+        if (bestRoute == null) {
+            return false;
+        }
+
+        // TODO: better source address evaluation for destination addresses.
+
+        if (ip instanceof Inet4Address) {
+            // For IPv4, it suffices for now to simply have any address.
+            return hasIPv4AddressOnInterface(bestRoute.getInterface());
+        } else if (ip instanceof Inet6Address) {
+            if (ip.isLinkLocalAddress()) {
+                // For now, just make sure link-local destinations have
+                // scopedIds set, since transmits will generally fail otherwise.
+                // TODO: verify it matches the ifindex of one of the interfaces.
+                return (((Inet6Address)ip).getScopeId() != 0);
+            }  else {
+                // For non-link-local destinations check that either the best route
+                // is directly connected or that some global preferred address exists.
+                // TODO: reconsider all cases (disconnected ULA networks, ...).
+                return (!bestRoute.hasGateway() || hasGlobalIPv6Address());
+            }
+        }
+
+        return false;
     }
 
     /**

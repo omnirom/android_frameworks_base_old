@@ -17,6 +17,7 @@
 package android.telecom;
 
 import android.net.Uri;
+import android.os.Bundle;
 import android.os.IBinder;
 import android.os.IBinder.DeathRecipient;
 import android.os.RemoteException;
@@ -60,11 +61,16 @@ final class RemoteConnectionService {
                 mPendingConnections.remove(connection);
                 // Unconditionally initialize the connection ...
                 connection.setConnectionCapabilities(parcel.getConnectionCapabilities());
-                connection.setAddress(
-                        parcel.getHandle(), parcel.getHandlePresentation());
-                connection.setCallerDisplayName(
-                        parcel.getCallerDisplayName(),
-                        parcel.getCallerDisplayNamePresentation());
+                if (parcel.getHandle() != null
+                    || parcel.getState() != Connection.STATE_DISCONNECTED) {
+                    connection.setAddress(parcel.getHandle(), parcel.getHandlePresentation());
+                }
+                if (parcel.getCallerDisplayName() != null
+                    || parcel.getState() != Connection.STATE_DISCONNECTED) {
+                    connection.setCallerDisplayName(
+                            parcel.getCallerDisplayName(),
+                            parcel.getCallerDisplayNamePresentation());
+                }
                 // Set state after handle so that the client can identify the connection.
                 if (parcel.getState() == Connection.STATE_DISCONNECTED) {
                     connection.setDisconnected(parcel.getDisconnectCause());
@@ -168,6 +174,13 @@ final class RemoteConnectionService {
                     }
                 }
             }
+        }
+
+        @Override
+        public void setConferenceMergeFailed(String callId) {
+            // Nothing to do here.
+            // The event has already been handled and there is no state to update
+            // in the underlying connection or conference objects
         }
 
         @Override
@@ -305,6 +318,17 @@ final class RemoteConnectionService {
                     mOutgoingConnectionServiceRpc, connection);
 
             mOurConnectionServiceImpl.addRemoteExistingConnection(remoteConnction);
+        }
+
+        @Override
+        public void setExtras(String callId, Bundle extras) {
+            if (mConnectionById.containsKey(callId)) {
+                findConnectionForAction(callId, "setExtras")
+                        .setExtras(extras);
+            } else {
+                findConferenceForAction(callId, "setExtras")
+                        .setExtras(extras);
+            }
         }
     };
 

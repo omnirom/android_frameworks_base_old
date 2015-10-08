@@ -106,9 +106,6 @@ public final class MediaFormat {
     public static final String MIMETYPE_AUDIO_FLAC = "audio/flac";
     public static final String MIMETYPE_AUDIO_MSGSM = "audio/gsm";
     public static final String MIMETYPE_AUDIO_AC3 = "audio/ac3";
-    /**
-     * @hide
-     */
     public static final String MIMETYPE_AUDIO_EAC3 = "audio/eac3";
 
     /**
@@ -232,11 +229,22 @@ public final class MediaFormat {
     public static final String KEY_TEMPORAL_LAYERING = "ts-schema";
 
     /**
-     * @hide
+     * A key describing the stride of the video bytebuffer layout.
+     * Stride (or row increment) is the difference between the index of a pixel
+     * and that of the pixel directly underneath. For YUV 420 formats, the
+     * stride corresponds to the Y plane; the stride of the U and V planes can
+     * be calculated based on the color format.
+     * The associated value is an integer, representing number of bytes.
      */
     public static final String KEY_STRIDE = "stride";
+
     /**
-     * @hide
+     * A key describing the plane height of a multi-planar (YUV) video bytebuffer layout.
+     * Slice height (or plane height) is the number of rows that must be skipped to get
+     * from the top of the Y plane to the top of the U plane in the bytebuffer. In essence
+     * the offset of the U plane is sliceHeight * stride. The height of the U/V planes
+     * can be calculated based on the color format.
+     * The associated value is an integer, representing number of rows.
      */
     public static final String KEY_SLICE_HEIGHT = "slice-height";
 
@@ -420,13 +428,72 @@ public final class MediaFormat {
     public static final String KEY_QUALITY = "quality";
 
     /**
+     * A key describing the desired codec priority.
+     * <p>
+     * The associated value is an integer. Higher value means lower priority.
+     * <p>
+     * Currently, only two levels are supported:<br>
+     * 0: realtime priority - meaning that the codec shall support the given
+     *    performance configuration (e.g. framerate) at realtime. This should
+     *    only be used by media playback, capture, and possibly by realtime
+     *    communication scenarios if best effort performance is not suitable.<br>
+     * 1: non-realtime priority (best effort).
+     * <p>
+     * This is a hint used at codec configuration and resource planning - to understand
+     * the realtime requirements of the application; however, due to the nature of
+     * media components, performance is not guaranteed.
+     *
+     */
+    public static final String KEY_PRIORITY = "priority";
+
+    /**
+     * A key describing the desired operating frame rate for video or sample rate for audio
+     * that the codec will need to operate at.
+     * <p>
+     * The associated value is an integer or a float representing frames-per-second or
+     * samples-per-second
+     * <p>
+     * This is used for cases like high-speed/slow-motion video capture, where the video encoder
+     * format contains the target playback rate (e.g. 30fps), but the component must be able to
+     * handle the high operating capture rate (e.g. 240fps).
+     * <p>
+     * This rate will be used by codec for resource planning and setting the operating points.
+     *
+     */
+    public static final String KEY_OPERATING_RATE = "operating-rate";
+
+    /**
      * A key describing the desired profile to be used by an encoder.
+     * The associated value is an integer.
      * Constants are declared in {@link MediaCodecInfo.CodecProfileLevel}.
-     * This key is only supported for codecs that specify a profile.
+     * This key is used as a hint, and is only supported for codecs
+     * that specify a profile.
      *
      * @see MediaCodecInfo.CodecCapabilities#profileLevels
      */
     public static final String KEY_PROFILE = "profile";
+
+    /**
+     * A key describing the desired profile to be used by an encoder.
+     * The associated value is an integer.
+     * Constants are declared in {@link MediaCodecInfo.CodecProfileLevel}.
+     * This key is used as a further hint when specifying a desired profile,
+     * and is only supported for codecs that specify a level.
+     * <p>
+     * This key is ignored if the {@link #KEY_PROFILE profile} is not specified.
+     *
+     * @see MediaCodecInfo.CodecCapabilities#profileLevels
+     */
+    public static final String KEY_LEVEL = "level";
+
+    /**
+     * A key describing the desired clockwise rotation on an output surface.
+     * This key is only used when the codec is configured using an output surface.
+     * The associated value is an integer, representing degrees.
+     *
+     * @see MediaCodecInfo.CodecCapabilities#profileLevels
+     */
+    public static final String KEY_ROTATION = "rotation-degrees";
 
     /**
      * A key describing the desired bitrate mode to be used by an encoder.
@@ -587,14 +654,14 @@ public final class MediaFormat {
      * Sets the value of an integer key.
      */
     public final void setInteger(String name, int value) {
-        mMap.put(name, new Integer(value));
+        mMap.put(name, Integer.valueOf(value));
     }
 
     /**
      * Sets the value of a long key.
      */
     public final void setLong(String name, long value) {
-        mMap.put(name, new Long(value));
+        mMap.put(name, Long.valueOf(value));
     }
 
     /**

@@ -20,6 +20,8 @@ import android.content.Intent;
 import android.provider.Settings;
 import android.provider.Settings.Secure;
 
+import com.android.internal.logging.MetricsLogger;
+import com.android.systemui.Prefs;
 import com.android.systemui.R;
 import com.android.systemui.qs.QSTile;
 import com.android.systemui.qs.SecureSetting;
@@ -53,7 +55,8 @@ public class ColorInversionTile extends QSTile<QSTile.BooleanState> {
                 }
             }
         };
-        mUsageTracker = new UsageTracker(host.getContext(), ColorInversionTile.class,
+        mUsageTracker = new UsageTracker(host.getContext(),
+                Prefs.Key.COLOR_INVERSION_TILE_LAST_USED, ColorInversionTile.class,
                 R.integer.days_to_show_color_inversion_tile);
         if (mSetting.getValue() != 0 && !mUsageTracker.isRecentlyUsed()) {
             mUsageTracker.trackUsage();
@@ -87,6 +90,7 @@ public class ColorInversionTile extends QSTile<QSTile.BooleanState> {
 
     @Override
     protected void handleClick() {
+        MetricsLogger.action(mContext, getMetricsCategory(), !mState.value);
         mSetting.setValue(mState.value ? 0 : 1);
         mEnable.setAllowAnimation(true);
         mDisable.setAllowAnimation(true);
@@ -114,6 +118,11 @@ public class ColorInversionTile extends QSTile<QSTile.BooleanState> {
         state.value = enabled;
         state.label = mContext.getString(R.string.quick_settings_inversion_label);
         state.icon = enabled ? mEnable : mDisable;
+    }
+
+    @Override
+    public int getMetricsCategory() {
+        return MetricsLogger.QS_COLORINVERSION;
     }
 
     @Override

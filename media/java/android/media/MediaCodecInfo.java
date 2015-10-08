@@ -16,6 +16,8 @@
 
 package android.media;
 
+import android.annotation.NonNull;
+import android.annotation.Nullable;
 import android.util.Log;
 import android.util.Pair;
 import android.util.Range;
@@ -24,15 +26,12 @@ import android.util.Size;
 
 import java.util.ArrayList;
 import java.util.Arrays;
-import java.util.Comparator;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Set;
 
 import static android.media.Utils.intersectSortedDistinctRanges;
 import static android.media.Utils.sortDistinctRanges;
-import static com.android.internal.util.Preconditions.checkArgumentPositive;
-import static com.android.internal.util.Preconditions.checkNotNull;
 
 /**
  * Provides information about a given media codec available on the device. You can
@@ -127,6 +126,8 @@ public final class MediaCodecInfo {
     private static final Range<Integer> SIZE_RANGE = Range.create(1, 32768);
     private static final Range<Integer> FRAME_RATE_RANGE = Range.create(0, 960);
     private static final Range<Integer> BITRATE_RANGE = Range.create(0, 500000000);
+    private static final int DEFAULT_MAX_SUPPORTED_INSTANCES = 32;
+    private static final int MAX_SUPPORTED_INSTANCES_LIMIT = 256;
 
     // found stuff that is not supported by framework (=> this should not happen)
     private static final int ERROR_UNRECOGNIZED   = (1 << 0);
@@ -150,6 +151,7 @@ public final class MediaCodecInfo {
 
         // CLASSIFICATION
         private String mMime;
+        private int mMaxSupportedInstances;
 
         // LEGACY FIELDS
 
@@ -160,56 +162,274 @@ public final class MediaCodecInfo {
         public CodecProfileLevel[] profileLevels;  // NOTE this array is modifiable by user
 
         // from OMX_COLOR_FORMATTYPE
+        /** @deprecated Use {@link #COLOR_Format24bitBGR888}. */
         public static final int COLOR_FormatMonochrome              = 1;
+        /** @deprecated Use {@link #COLOR_Format24bitBGR888}. */
         public static final int COLOR_Format8bitRGB332              = 2;
+        /** @deprecated Use {@link #COLOR_Format24bitBGR888}. */
         public static final int COLOR_Format12bitRGB444             = 3;
+        /** @deprecated Use {@link #COLOR_Format32bitABGR8888}. */
         public static final int COLOR_Format16bitARGB4444           = 4;
+        /** @deprecated Use {@link #COLOR_Format32bitABGR8888}. */
         public static final int COLOR_Format16bitARGB1555           = 5;
+
+        /**
+         * 16 bits per pixel RGB color format, with 5-bit red & blue and 6-bit green component.
+         * <p>
+         * Using 16-bit little-endian representation, colors stored as Red 15:11, Green 10:5, Blue 4:0.
+         * <pre>
+         *            byte                   byte
+         *  <--------- i --------> | <------ i + 1 ------>
+         * +--+--+--+--+--+--+--+--+--+--+--+--+--+--+--+--+
+         * |     BLUE     |      GREEN      |     RED      |
+         * +--+--+--+--+--+--+--+--+--+--+--+--+--+--+--+--+
+         *  0           4  5     7   0     2  3           7
+         * bit
+         * </pre>
+         *
+         * This format corresponds to {@link android.graphics.PixelFormat#RGB_565} and
+         * {@link android.graphics.ImageFormat#RGB_565}.
+         */
         public static final int COLOR_Format16bitRGB565             = 6;
+        /** @deprecated Use {@link #COLOR_Format16bitRGB565}. */
         public static final int COLOR_Format16bitBGR565             = 7;
+        /** @deprecated Use {@link #COLOR_Format24bitBGR888}. */
         public static final int COLOR_Format18bitRGB666             = 8;
+        /** @deprecated Use {@link #COLOR_Format32bitABGR8888}. */
         public static final int COLOR_Format18bitARGB1665           = 9;
+        /** @deprecated Use {@link #COLOR_Format32bitABGR8888}. */
         public static final int COLOR_Format19bitARGB1666           = 10;
+
+        /** @deprecated Use {@link #COLOR_Format24bitBGR888} or {@link #COLOR_FormatRGBFlexible}. */
         public static final int COLOR_Format24bitRGB888             = 11;
+
+        /**
+         * 24 bits per pixel RGB color format, with 8-bit red, green & blue components.
+         * <p>
+         * Using 24-bit little-endian representation, colors stored as Red 7:0, Green 15:8, Blue 23:16.
+         * <pre>
+         *         byte              byte             byte
+         *  <------ i -----> | <---- i+1 ----> | <---- i+2 ----->
+         * +-----------------+-----------------+-----------------+
+         * |       RED       |      GREEN      |       BLUE      |
+         * +-----------------+-----------------+-----------------+
+         * </pre>
+         *
+         * This format corresponds to {@link android.graphics.PixelFormat#RGB_888}, and can also be
+         * represented as a flexible format by {@link #COLOR_FormatRGBFlexible}.
+         */
         public static final int COLOR_Format24bitBGR888             = 12;
+        /** @deprecated Use {@link #COLOR_Format32bitABGR8888}. */
         public static final int COLOR_Format24bitARGB1887           = 13;
+        /** @deprecated Use {@link #COLOR_Format32bitABGR8888}. */
         public static final int COLOR_Format25bitARGB1888           = 14;
+
+        /**
+         * @deprecated Use {@link #COLOR_Format32bitABGR8888} Or {@link #COLOR_FormatRGBAFlexible}.
+         */
         public static final int COLOR_Format32bitBGRA8888           = 15;
+        /**
+         * @deprecated Use {@link #COLOR_Format32bitABGR8888} Or {@link #COLOR_FormatRGBAFlexible}.
+         */
         public static final int COLOR_Format32bitARGB8888           = 16;
+        /** @deprecated Use {@link #COLOR_FormatYUV420Flexible}. */
         public static final int COLOR_FormatYUV411Planar            = 17;
+        /** @deprecated Use {@link #COLOR_FormatYUV420Flexible}. */
         public static final int COLOR_FormatYUV411PackedPlanar      = 18;
+        /** @deprecated Use {@link #COLOR_FormatYUV420Flexible}. */
         public static final int COLOR_FormatYUV420Planar            = 19;
+        /** @deprecated Use {@link #COLOR_FormatYUV420Flexible}. */
         public static final int COLOR_FormatYUV420PackedPlanar      = 20;
+        /** @deprecated Use {@link #COLOR_FormatYUV420Flexible}. */
         public static final int COLOR_FormatYUV420SemiPlanar        = 21;
+
+        /** @deprecated Use {@link #COLOR_FormatYUV422Flexible}. */
         public static final int COLOR_FormatYUV422Planar            = 22;
+        /** @deprecated Use {@link #COLOR_FormatYUV422Flexible}. */
         public static final int COLOR_FormatYUV422PackedPlanar      = 23;
+        /** @deprecated Use {@link #COLOR_FormatYUV422Flexible}. */
         public static final int COLOR_FormatYUV422SemiPlanar        = 24;
+
+        /** @deprecated Use {@link #COLOR_FormatYUV422Flexible}. */
         public static final int COLOR_FormatYCbYCr                  = 25;
+        /** @deprecated Use {@link #COLOR_FormatYUV422Flexible}. */
         public static final int COLOR_FormatYCrYCb                  = 26;
+        /** @deprecated Use {@link #COLOR_FormatYUV422Flexible}. */
         public static final int COLOR_FormatCbYCrY                  = 27;
+        /** @deprecated Use {@link #COLOR_FormatYUV422Flexible}. */
         public static final int COLOR_FormatCrYCbY                  = 28;
+
+        /** @deprecated Use {@link #COLOR_FormatYUV444Flexible}. */
         public static final int COLOR_FormatYUV444Interleaved       = 29;
+
+        /**
+         * SMIA 8-bit Bayer format.
+         * Each byte represents the top 8-bits of a 10-bit signal.
+         */
         public static final int COLOR_FormatRawBayer8bit            = 30;
+        /**
+         * SMIA 10-bit Bayer format.
+         */
         public static final int COLOR_FormatRawBayer10bit           = 31;
+
+        /**
+         * SMIA 8-bit compressed Bayer format.
+         * Each byte represents a sample from the 10-bit signal that is compressed into 8-bits
+         * using DPCM/PCM compression, as defined by the SMIA Functional Specification.
+         */
         public static final int COLOR_FormatRawBayer8bitcompressed  = 32;
+
+        /** @deprecated Use {@link #COLOR_FormatL8}. */
         public static final int COLOR_FormatL2                      = 33;
+        /** @deprecated Use {@link #COLOR_FormatL8}. */
         public static final int COLOR_FormatL4                      = 34;
+
+        /**
+         * 8 bits per pixel Y color format.
+         * <p>
+         * Each byte contains a single pixel.
+         * This format corresponds to {@link android.graphics.PixelFormat#L_8}.
+         */
         public static final int COLOR_FormatL8                      = 35;
+
+        /**
+         * 16 bits per pixel, little-endian Y color format.
+         * <p>
+         * <pre>
+         *            byte                   byte
+         *  <--------- i --------> | <------ i + 1 ------>
+         * +--+--+--+--+--+--+--+--+--+--+--+--+--+--+--+--+
+         * |                       Y                       |
+         * +--+--+--+--+--+--+--+--+--+--+--+--+--+--+--+--+
+         *  0                    7   0                    7
+         * bit
+         * </pre>
+         */
         public static final int COLOR_FormatL16                     = 36;
+        /** @deprecated Use {@link #COLOR_FormatL16}. */
         public static final int COLOR_FormatL24                     = 37;
+
+        /**
+         * 32 bits per pixel, little-endian Y color format.
+         * <p>
+         * <pre>
+         *         byte              byte             byte              byte
+         *  <------ i -----> | <---- i+1 ----> | <---- i+2 ----> | <---- i+3 ----->
+         * +-----------------+-----------------+-----------------+-----------------+
+         * |                                   Y                                   |
+         * +-----------------+-----------------+-----------------+-----------------+
+         *  0               7 0               7 0               7 0               7
+         * bit
+         * </pre>
+         *
+         * @deprecated Use {@link #COLOR_FormatL16}.
+         */
         public static final int COLOR_FormatL32                     = 38;
+
+        /** @deprecated Use {@link #COLOR_FormatYUV420Flexible}. */
         public static final int COLOR_FormatYUV420PackedSemiPlanar  = 39;
+        /** @deprecated Use {@link #COLOR_FormatYUV422Flexible}. */
         public static final int COLOR_FormatYUV422PackedSemiPlanar  = 40;
+
+        /** @deprecated Use {@link #COLOR_Format24bitBGR888}. */
         public static final int COLOR_Format18BitBGR666             = 41;
+
+        /** @deprecated Use {@link #COLOR_Format32bitABGR8888}. */
         public static final int COLOR_Format24BitARGB6666           = 42;
+        /** @deprecated Use {@link #COLOR_Format32bitABGR8888}. */
         public static final int COLOR_Format24BitABGR6666           = 43;
 
+        /** @deprecated Use {@link #COLOR_FormatYUV420Flexible}. */
         public static final int COLOR_TI_FormatYUV420PackedSemiPlanar = 0x7f000100;
         // COLOR_FormatSurface indicates that the data will be a GraphicBuffer metadata reference.
         // In OMX this is called OMX_COLOR_FormatAndroidOpaque.
         public static final int COLOR_FormatSurface                   = 0x7F000789;
-        // This corresponds to YUV_420_888 format
+
+        /**
+         * 32 bits per pixel RGBA color format, with 8-bit red, green, blue, and alpha components.
+         * <p>
+         * Using 32-bit little-endian representation, colors stored as Red 7:0, Green 15:8,
+         * Blue 23:16, and Alpha 31:24.
+         * <pre>
+         *         byte              byte             byte              byte
+         *  <------ i -----> | <---- i+1 ----> | <---- i+2 ----> | <---- i+3 ----->
+         * +-----------------+-----------------+-----------------+-----------------+
+         * |       RED       |      GREEN      |       BLUE      |      ALPHA      |
+         * +-----------------+-----------------+-----------------+-----------------+
+         * </pre>
+         *
+         * This corresponds to {@link android.graphics.PixelFormat#RGBA_8888}.
+         */
+        public static final int COLOR_Format32bitABGR8888             = 0x7F00A000;
+
+        /**
+         * Flexible 12 bits per pixel, subsampled YUV color format with 8-bit chroma and luma
+         * components.
+         * <p>
+         * Chroma planes are subsampled by 2 both horizontally and vertically.
+         * Use this format with {@link Image}.
+         * This format corresponds to {@link android.graphics.ImageFormat#YUV_420_888},
+         * and can represent the {@link #COLOR_FormatYUV411Planar},
+         * {@link #COLOR_FormatYUV411PackedPlanar}, {@link #COLOR_FormatYUV420Planar},
+         * {@link #COLOR_FormatYUV420PackedPlanar}, {@link #COLOR_FormatYUV420SemiPlanar}
+         * and {@link #COLOR_FormatYUV420PackedSemiPlanar} formats.
+         *
+         * @see Image#getFormat
+         */
         public static final int COLOR_FormatYUV420Flexible            = 0x7F420888;
+
+        /**
+         * Flexible 16 bits per pixel, subsampled YUV color format with 8-bit chroma and luma
+         * components.
+         * <p>
+         * Chroma planes are horizontally subsampled by 2. Use this format with {@link Image}.
+         * This format corresponds to {@link android.graphics.ImageFormat#YUV_422_888},
+         * and can represent the {@link #COLOR_FormatYCbYCr}, {@link #COLOR_FormatYCrYCb},
+         * {@link #COLOR_FormatCbYCrY}, {@link #COLOR_FormatCrYCbY},
+         * {@link #COLOR_FormatYUV422Planar}, {@link #COLOR_FormatYUV422PackedPlanar},
+         * {@link #COLOR_FormatYUV422SemiPlanar} and {@link #COLOR_FormatYUV422PackedSemiPlanar}
+         * formats.
+         *
+         * @see Image#getFormat
+         */
+        public static final int COLOR_FormatYUV422Flexible            = 0x7F422888;
+
+        /**
+         * Flexible 24 bits per pixel YUV color format with 8-bit chroma and luma
+         * components.
+         * <p>
+         * Chroma planes are not subsampled. Use this format with {@link Image}.
+         * This format corresponds to {@link android.graphics.ImageFormat#YUV_444_888},
+         * and can represent the {@link #COLOR_FormatYUV444Interleaved} format.
+         * @see Image#getFormat
+         */
+        public static final int COLOR_FormatYUV444Flexible            = 0x7F444888;
+
+        /**
+         * Flexible 24 bits per pixel RGB color format with 8-bit red, green and blue
+         * components.
+         * <p>
+         * Use this format with {@link Image}. This format corresponds to
+         * {@link android.graphics.ImageFormat#FLEX_RGB_888}, and can represent
+         * {@link #COLOR_Format24bitBGR888} and {@link #COLOR_Format24bitRGB888} formats.
+         * @see Image#getFormat.
+         */
+        public static final int COLOR_FormatRGBFlexible               = 0x7F36B888;
+
+        /**
+         * Flexible 32 bits per pixel RGBA color format with 8-bit red, green, blue, and alpha
+         * components.
+         * <p>
+         * Use this format with {@link Image}. This format corresponds to
+         * {@link android.graphics.ImageFormat#FLEX_RGBA_8888}, and can represent
+         * {@link #COLOR_Format32bitBGRA8888}, {@link #COLOR_Format32bitABGR8888} and
+         * {@link #COLOR_Format32bitARGB8888} formats.
+         *
+         * @see Image#getFormat
+         */
+        public static final int COLOR_FormatRGBAFlexible              = 0x7F36A888;
+
+        /** @deprecated Use {@link #COLOR_FormatYUV420Flexible}. */
         public static final int COLOR_QCOM_FormatYUV420SemiPlanar     = 0x7fa30c00;
 
         /**
@@ -305,6 +525,14 @@ public final class MediaCodecInfo {
 
         /**
          * Query whether codec supports a given {@link MediaFormat}.
+         *
+         * <p class=note>
+         * <strong>Note:</strong> On {@link android.os.Build.VERSION_CODES#LOLLIPOP},
+         * {@code format} must not contain a {@linkplain MediaFormat#KEY_FRAME_RATE
+         * frame rate}. Use
+         * <code class=prettyprint>format.setString(MediaFormat.KEY_FRAME_RATE, null)</code>
+         * to clear any existing frame rate setting in the format.
+         *
          * @param format media format with optional feature directives.
          * @throws IllegalArgumentException if format is not a valid media format.
          * @return whether the codec capabilities support the given format
@@ -366,6 +594,18 @@ public final class MediaCodecInfo {
          */
         public String getMimeType() {
             return mMime;
+        }
+
+        /**
+         * Returns the max number of the supported concurrent codec instances.
+         * <p>
+         * This is a hint for an upper bound. Applications should not expect to successfully
+         * operate more instances than the returned value, but the actual number of
+         * concurrently operable instances may be less as it depends on the available
+         * resources at time of use.
+         */
+        public int getMaxSupportedInstances() {
+            return mMaxSupportedInstances;
         }
 
         private boolean isAudio() {
@@ -468,6 +708,15 @@ public final class MediaCodecInfo {
                 mEncoderCaps = EncoderCapabilities.create(info, this);
                 mEncoderCaps.setDefaultFormat(mDefaultFormat);
             }
+
+            final Map<String, Object> global = MediaCodecList.getGlobalSettings();
+            mMaxSupportedInstances = Utils.parseIntSafely(
+                    global.get("max-concurrent-instances"), DEFAULT_MAX_SUPPORTED_INSTANCES);
+
+            int maxInstances = Utils.parseIntSafely(
+                    map.get("max-concurrent-instances"), mMaxSupportedInstances);
+            mMaxSupportedInstances =
+                    Range.create(1, MAX_SUPPORTED_INSTANCES_LIMIT).clamp(maxInstances);
 
             for (Feature feat: getValidFeatures()) {
                 String key = MediaFormat.KEY_FEATURE_ + feat.mName;
@@ -764,6 +1013,7 @@ public final class MediaCodecInfo {
         private Range<Rational> mAspectRatioRange;
         private Range<Rational> mBlockAspectRatioRange;
         private Range<Long> mBlocksPerSecondRange;
+        private Map<Size, Range<Long>> mMeasuredFrameRates;
         private Range<Integer> mFrameRateRange;
 
         private int mBlockWidth;
@@ -880,8 +1130,8 @@ public final class MediaCodecInfo {
                         (int)(mAspectRatioRange.getUpper().doubleValue() * height));
                 return range;
             } catch (IllegalArgumentException e) {
-                // should not be here
-                Log.w(TAG, "could not get supported widths for " + height , e);
+                // height is not supported because there are no suitable widths
+                Log.v(TAG, "could not get supported widths for " + height);
                 throw new IllegalArgumentException("unsupported height");
             }
         }
@@ -924,8 +1174,8 @@ public final class MediaCodecInfo {
                         (int)(width / mAspectRatioRange.getLower().doubleValue()));
                 return range;
             } catch (IllegalArgumentException e) {
-                // should not be here
-                Log.w(TAG, "could not get supported heights for " + width , e);
+                // width is not supported because there are no suitable heights
+                Log.v(TAG, "could not get supported heights for " + width);
                 throw new IllegalArgumentException("unsupported width");
             }
         }
@@ -954,6 +1204,74 @@ public final class MediaCodecInfo {
                             (double) mFrameRateRange.getLower()),
                     Math.min(mBlocksPerSecondRange.getUpper() / (double) blockCount,
                             (double) mFrameRateRange.getUpper()));
+        }
+
+        private int getBlockCount(int width, int height) {
+            return Utils.divUp(width, mBlockWidth) * Utils.divUp(height, mBlockHeight);
+        }
+
+        @NonNull
+        private Size findClosestSize(int width, int height) {
+            int targetBlockCount = getBlockCount(width, height);
+            Size closestSize = null;
+            int minDiff = Integer.MAX_VALUE;
+            for (Size size : mMeasuredFrameRates.keySet()) {
+                int diff = Math.abs(targetBlockCount -
+                        getBlockCount(size.getWidth(), size.getHeight()));
+                if (diff < minDiff) {
+                    minDiff = diff;
+                    closestSize = size;
+                }
+            }
+            return closestSize;
+        }
+
+        private Range<Double> estimateFrameRatesFor(int width, int height) {
+            Size size = findClosestSize(width, height);
+            Range<Long> range = mMeasuredFrameRates.get(size);
+            Double ratio = (double)(size.getWidth() * size.getHeight()) / (width * height);
+            return Range.create(range.getLower() * ratio, range.getUpper() * ratio);
+        }
+
+        /**
+         * Returns the range of achievable video frame rates for a video size.
+         * May return {@code null}, if the codec did not publish any measurement
+         * data.
+         * <p>
+         * This is a performance estimate provided by the device manufacturer
+         * based on full-speed decoding and encoding measurements in various configurations
+         * of common video sizes supported by the codec. As such it should only be used to
+         * compare individual codecs on the device. The value is not suitable for comparing
+         * different devices or even different android releases for the same device.
+         * <p>
+         * The returned range corresponds to the fastest frame rates achieved in the tested
+         * configurations. It is interpolated from the nearest frame size(s) tested. Codec
+         * performance is severely impacted by other activity on the device, and can vary
+         * significantly.
+         * <p class=note>
+         * Use this method in cases where only codec performance matters, e.g. to evaluate if
+         * a codec has any chance of meeting a performance target. Codecs are listed
+         * in {@link MediaCodecList} in the preferred order as defined by the device
+         * manufacturer. As such, applications should use the first suitable codec in the
+         * list to achieve the best balance between power use and performance.
+         *
+         * @param width the width of the video
+         * @param height the height of the video
+         *
+         * @throws IllegalArgumentException if the video size is not supported.
+         */
+        @Nullable
+        public Range<Double> getAchievableFrameRatesFor(int width, int height) {
+            if (!supports(width, height, null)) {
+                throw new IllegalArgumentException("unsupported size");
+            }
+
+            if (mMeasuredFrameRates == null || mMeasuredFrameRates.size() <= 0) {
+                Log.w(TAG, "Codec did not publish any measurement data.");
+                return null;
+            }
+
+            return estimateFrameRatesFor(width, height);
         }
 
         /**
@@ -1086,6 +1404,34 @@ public final class MediaCodecInfo {
             mSmallerDimensionUpperLimit = SIZE_RANGE.getUpper();
         }
 
+        private Map<Size, Range<Long>> getMeasuredFrameRates(Map<String, Object> map) {
+            Map<Size, Range<Long>> ret = new HashMap<Size, Range<Long>>();
+            final String prefix = "measured-frame-rate-";
+            Set<String> keys = map.keySet();
+            for (String key : keys) {
+                // looking for: measured-frame-rate-WIDTHxHEIGHT-range
+                if (!key.startsWith(prefix)) {
+                    continue;
+                }
+                String subKey = key.substring(prefix.length());
+                String[] temp = key.split("-");
+                if (temp.length != 5) {
+                    continue;
+                }
+                String sizeStr = temp[3];
+                Size size = Utils.parseSize(sizeStr, null);
+                if (size == null || size.getWidth() * size.getHeight() <= 0) {
+                    continue;
+                }
+                Range<Long> range = Utils.parseLongRange(map.get(key), null);
+                if (range == null || range.getLower() < 0 || range.getUpper() < 0) {
+                    continue;
+                }
+                ret.put(size, range);
+            }
+            return ret;
+        }
+
         private void parseFromInfo(MediaFormat info) {
             final Map<String, Object> map = info.getMap();
             Size blockSize = new Size(mBlockWidth, mBlockHeight);
@@ -1100,6 +1446,7 @@ public final class MediaCodecInfo {
             counts = Utils.parseIntRange(map.get("block-count-range"), null);
             blockRates =
                 Utils.parseLongRange(map.get("blocks-per-second-range"), null);
+            mMeasuredFrameRates = getMeasuredFrameRates(map);
             {
                 Object o = map.get("size-range");
                 Pair<Size, Size> sizeRange = Utils.parseSizeRange(o);
@@ -1122,7 +1469,7 @@ public final class MediaCodecInfo {
             // upper limit.
             // for now we are keeping the profile specific "width/height
             // in macroblocks" limits.
-            if (Integer.valueOf(1).equals(map.get("feature-can-swap-width-height"))) {
+            if (map.containsKey("feature-can-swap-width-height")) {
                 if (widths != null) {
                     mSmallerDimensionUpperLimit =
                         Math.min(widths.getUpper(), heights.getUpper());
@@ -1473,6 +1820,72 @@ public final class MediaCodecInfo {
                         maxBlocks, maxBlocksPerSecond,
                         16 /* blockWidth */, 16 /* blockHeight */,
                         1 /* widthAlignment */, 1 /* heightAlignment */);
+            } else if (mime.equalsIgnoreCase(MediaFormat.MIMETYPE_VIDEO_MPEG2)) {
+                int maxWidth = 11, maxHeight = 9, maxRate = 15;
+                maxBlocks = 99;
+                maxBlocksPerSecond = 1485;
+                maxBps = 64000;
+                for (CodecProfileLevel profileLevel: profileLevels) {
+                    int MBPS = 0, FS = 0, BR = 0, FR = 0, W = 0, H = 0;
+                    boolean supported = true;
+                    switch (profileLevel.profile) {
+                        case CodecProfileLevel.MPEG2ProfileSimple:
+                            switch (profileLevel.level) {
+                                case CodecProfileLevel.MPEG2LevelML:
+                                    FR = 30; W = 45; H =  36; MBPS =  48600; FS =  1620; BR =  15000; break;
+                                default:
+                                    Log.w(TAG, "Unrecognized profile/level "
+                                            + profileLevel.profile + "/"
+                                            + profileLevel.level + " for " + mime);
+                                    errors |= ERROR_UNRECOGNIZED;
+                            }
+                            break;
+                        case CodecProfileLevel.MPEG2ProfileMain:
+                            switch (profileLevel.level) {
+                                case CodecProfileLevel.MPEG2LevelLL:
+                                    FR = 30; W = 22; H =  18; MBPS =  11880; FS =  396; BR =  4000; break;
+                                case CodecProfileLevel.MPEG2LevelML:
+                                    FR = 30; W = 45; H =  36; MBPS =  48600; FS =  1620; BR =  15000; break;
+                                case CodecProfileLevel.MPEG2LevelH14:
+                                    FR = 60; W = 90; H =  68; MBPS =  367200; FS =  6120; BR = 60000; break;
+                                case CodecProfileLevel.MPEG2LevelHL:
+                                    FR = 60; W = 120; H = 68; MBPS =  489600; FS =  8160; BR = 80000; break;
+                                default:
+                                    Log.w(TAG, "Unrecognized profile/level "
+                                            + profileLevel.profile + "/"
+                                            + profileLevel.level + " for " + mime);
+                                    errors |= ERROR_UNRECOGNIZED;
+                            }
+                            break;
+                        case CodecProfileLevel.MPEG2Profile422:
+                        case CodecProfileLevel.MPEG2ProfileSNR:
+                        case CodecProfileLevel.MPEG2ProfileSpatial:
+                        case CodecProfileLevel.MPEG2ProfileHigh:
+                            Log.i(TAG, "Unsupported profile "
+                                    + profileLevel.profile + " for " + mime);
+                            errors |= ERROR_UNSUPPORTED;
+                            supported = false;
+                            break;
+                        default:
+                            Log.w(TAG, "Unrecognized profile "
+                                    + profileLevel.profile + " for " + mime);
+                            errors |= ERROR_UNRECOGNIZED;
+                    }
+                    if (supported) {
+                        errors &= ~ERROR_NONE_SUPPORTED;
+                    }
+                    maxBlocksPerSecond = Math.max(MBPS, maxBlocksPerSecond);
+                    maxBlocks = Math.max(FS, maxBlocks);
+                    maxBps = Math.max(BR * 1000, maxBps);
+                    maxWidth = Math.max(W, maxWidth);
+                    maxHeight = Math.max(H, maxHeight);
+                    maxRate = Math.max(FR, maxRate);
+                }
+                applyMacroBlockLimits(maxWidth, maxHeight,
+                        maxBlocks, maxBlocksPerSecond,
+                        16 /* blockWidth */, 16 /* blockHeight */,
+                        1 /* widthAlignment */, 1 /* heightAlignment */);
+                mFrameRateRange = mFrameRateRange.intersect(12, maxRate);
             } else if (mime.equalsIgnoreCase(MediaFormat.MIMETYPE_VIDEO_MPEG4)) {
                 int maxWidth = 11, maxHeight = 9, maxRate = 15;
                 maxBlocks = 99;
@@ -1974,7 +2387,7 @@ public final class MediaCodecInfo {
                     (Integer)map.get(MediaFormat.KEY_FLAC_COMPRESSION_LEVEL);
                 if (complexity == null) {
                     complexity = flacComplexity;
-                } else if (flacComplexity != null && complexity != flacComplexity) {
+                } else if (flacComplexity != null && !complexity.equals(flacComplexity)) {
                     throw new IllegalArgumentException(
                             "conflicting values for complexity and " +
                             "flac-compression-level");
@@ -1987,7 +2400,7 @@ public final class MediaCodecInfo {
                 Integer aacProfile = (Integer)map.get(MediaFormat.KEY_AAC_PROFILE);
                 if (profile == null) {
                     profile = aacProfile;
-                } else if (aacProfile != null && aacProfile != profile) {
+                } else if (aacProfile != null && !aacProfile.equals(profile)) {
                     throw new IllegalArgumentException(
                             "conflicting values for profile and aac-profile");
                 }
@@ -2082,6 +2495,20 @@ public final class MediaCodecInfo {
         public static final int MPEG4Level4      = 0x20;
         public static final int MPEG4Level4a     = 0x40;
         public static final int MPEG4Level5      = 0x80;
+
+        // from OMX_VIDEO_MPEG2PROFILETYPE
+        public static final int MPEG2ProfileSimple              = 0x00;
+        public static final int MPEG2ProfileMain                = 0x01;
+        public static final int MPEG2Profile422                 = 0x02;
+        public static final int MPEG2ProfileSNR                 = 0x03;
+        public static final int MPEG2ProfileSpatial             = 0x04;
+        public static final int MPEG2ProfileHigh                = 0x05;
+
+        // from OMX_VIDEO_MPEG2LEVELTYPE
+        public static final int MPEG2LevelLL     = 0x00;
+        public static final int MPEG2LevelML     = 0x01;
+        public static final int MPEG2LevelH14    = 0x02;
+        public static final int MPEG2LevelHL     = 0x03;
 
         // from OMX_AUDIO_AACPROFILETYPE
         public static final int AACObjectMain       = 1;

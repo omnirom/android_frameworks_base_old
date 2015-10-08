@@ -40,6 +40,7 @@ import android.view.MotionEvent;
 import android.view.Surface;
 import android.view.View;
 import android.view.ViewGroup;
+import android.view.ViewRootImpl;
 import android.view.WindowManager;
 import android.view.inputmethod.InputMethodManager;
 import android.widget.FrameLayout;
@@ -47,8 +48,6 @@ import android.widget.ImageView;
 import android.widget.LinearLayout;
 
 import com.android.systemui.R;
-import com.android.systemui.statusbar.BaseStatusBar;
-import com.android.systemui.statusbar.DelegateViewHelper;
 import com.android.systemui.statusbar.policy.DeadZone;
 import com.android.systemui.statusbar.policy.KeyButtonView;
 
@@ -80,7 +79,6 @@ public class NavigationBarView extends LinearLayout {
     private Drawable mRecentLandIcon;
 
     private NavigationBarViewTaskSwitchHelper mTaskSwitchHelper;
-    private DelegateViewHelper mDelegateHelper;
     private DeadZone mDeadZone;
     private final NavigationBarTransitions mBarTransitions;
 
@@ -93,7 +91,7 @@ public class NavigationBarView extends LinearLayout {
 
     private OnVerticalChangedListener mOnVerticalChangedListener;
     private boolean mIsLayoutRtl;
-    private boolean mDelegateIntercepted;
+    private boolean mLayoutTransitionsEnabled;
 
     private class NavTransitionListener implements TransitionListener {
         private boolean mBackTransitioning;
@@ -144,7 +142,7 @@ public class NavigationBarView extends LinearLayout {
         @Override
         public void onClick(View view) {
             ((InputMethodManager) mContext.getSystemService(Context.INPUT_METHOD_SERVICE))
-                    .showInputMethodPicker();
+                    .showInputMethodPicker(true /* showAuxiliarySubtypes */);
         }
     };
 
@@ -181,7 +179,6 @@ public class NavigationBarView extends LinearLayout {
         mBarSize = res.getDimensionPixelSize(R.dimen.navigation_bar_size);
         mVertical = false;
         mShowMenu = false;
-        mDelegateHelper = new DelegateViewHelper(this);
         mTaskSwitchHelper = new NavigationBarViewTaskSwitchHelper(context);
 
         getIcons(res);
@@ -189,17 +186,21 @@ public class NavigationBarView extends LinearLayout {
         mBarTransitions = new NavigationBarTransitions(this);
     }
 
+    @Override
+    protected void onAttachedToWindow() {
+        super.onAttachedToWindow();
+        ViewRootImpl root = getViewRootImpl();
+        if (root != null) {
+            root.setDrawDuringWindowsAnimating(true);
+        }
+    }
+
     public BarTransitions getBarTransitions() {
         return mBarTransitions;
     }
 
-    public void setDelegateView(View view) {
-        mDelegateHelper.setDelegateView(view);
-    }
-
-    public void setBar(BaseStatusBar phoneStatusBar) {
+    public void setBar(PhoneStatusBar phoneStatusBar) {
         mTaskSwitchHelper.setBar(phoneStatusBar);
-        mDelegateHelper.setBar(phoneStatusBar);
     }
 
     public void setOnVerticalChangedListener(OnVerticalChangedListener onVerticalChangedListener) {
@@ -209,40 +210,22 @@ public class NavigationBarView extends LinearLayout {
 
     @Override
     public boolean onTouchEvent(MotionEvent event) {
-        initDownStates(event);
-        if (!mDelegateIntercepted && mTaskSwitchHelper.onTouchEvent(event)) {
+        if (mTaskSwitchHelper.onTouchEvent(event)) {
             return true;
         }
         if (mDeadZone != null && event.getAction() == MotionEvent.ACTION_OUTSIDE) {
             mDeadZone.poke(event);
         }
-        if (mDelegateHelper != null && mDelegateIntercepted) {
-            boolean ret = mDelegateHelper.onInterceptTouchEvent(event);
-            if (ret) return true;
-        }
         return super.onTouchEvent(event);
-    }
-
-    private void initDownStates(MotionEvent ev) {
-        if (ev.getAction() == MotionEvent.ACTION_DOWN) {
-            mDelegateIntercepted = false;
-        }
     }
 
     @Override
     public boolean onInterceptTouchEvent(MotionEvent event) {
-        initDownStates(event);
-        boolean intercept = mTaskSwitchHelper.onInterceptTouchEvent(event);
-        if (!intercept) {
-            mDelegateIntercepted = mDelegateHelper.onInterceptTouchEvent(event);
-            intercept = mDelegateIntercepted;
-        } else {
-            MotionEvent cancelEvent = MotionEvent.obtain(event);
-            cancelEvent.setAction(MotionEvent.ACTION_CANCEL);
-            mDelegateHelper.onInterceptTouchEvent(cancelEvent);
-            cancelEvent.recycle();
-        }
-        return intercept;
+        return mTaskSwitchHelper.onInterceptTouchEvent(event);
+    }
+
+    public void abortCurrentGesture() {
+        getHomeButton().abortCurrentGesture();
     }
 
     private H mHandler = new H();
@@ -263,8 +246,8 @@ public class NavigationBarView extends LinearLayout {
         return mCurrentView.findViewById(R.id.back);
     }
 
-    public View getHomeButton() {
-        return mCurrentView.findViewById(R.id.home);
+    public KeyButtonView getHomeButton() {
+        return (KeyButtonView) mCurrentView.findViewById(R.id.home);
     }
 
     public View getImeSwitchButton() {
@@ -275,7 +258,7 @@ public class NavigationBarView extends LinearLayout {
         mBackIcon = res.getDrawable(R.drawable.ic_sysbar_back);
         mBackLandIcon = res.getDrawable(R.drawable.ic_sysbar_back_land);
         mBackAltIcon = res.getDrawable(R.drawable.ic_sysbar_back_ime);
-        mBackAltLandIcon = res.getDrawable(R.drawable.ic_sysbar_back_ime);
+        mBackAltLandIcon = res.getDrawable(R.drawable.ic_sysbar_back_ime_land);
         mRecentIcon = res.getDrawable(R.drawable.ic_sysbar_recent);
         mRecentLandIcon = res.getDrawable(R.drawable.ic_sysbar_recent_land);
     }
@@ -351,13 +334,6 @@ public class NavigationBarView extends LinearLayout {
                 if (!lt.getTransitionListeners().contains(mTransitionListener)) {
                     lt.addTransitionListener(mTransitionListener);
                 }
-                if (!mScreenOn && mCurrentView != null) {
-                    lt.disableTransitionType(
-                            LayoutTransition.CHANGE_APPEARING |
-                            LayoutTransition.CHANGE_DISAPPEARING |
-                            LayoutTransition.APPEARING |
-                            LayoutTransition.DISAPPEARING);
-                }
             }
         }
         if (inLockTask() && disableRecent && !disableHome) {
@@ -369,8 +345,6 @@ public class NavigationBarView extends LinearLayout {
         getBackButton()   .setVisibility(disableBack       ? View.INVISIBLE : View.VISIBLE);
         getHomeButton()   .setVisibility(disableHome       ? View.INVISIBLE : View.VISIBLE);
         getRecentsButton().setVisibility(disableRecent     ? View.INVISIBLE : View.VISIBLE);
-
-        mBarTransitions.applyBackButtonQuiescentAlpha(mBarTransitions.getMode(), true /*animate*/);
     }
 
     private boolean inLockTask() {
@@ -384,6 +358,46 @@ public class NavigationBarView extends LinearLayout {
     private void setVisibleOrGone(View view, boolean visible) {
         if (view != null) {
             view.setVisibility(visible ? VISIBLE : GONE);
+        }
+    }
+
+    public void setWakeAndUnlocking(boolean wakeAndUnlocking) {
+        setUseFadingAnimations(wakeAndUnlocking);
+        setLayoutTransitionsEnabled(!wakeAndUnlocking);
+    }
+
+    private void setLayoutTransitionsEnabled(boolean enabled) {
+        mLayoutTransitionsEnabled = enabled;
+        ViewGroup navButtons = (ViewGroup) mCurrentView.findViewById(R.id.nav_buttons);
+        LayoutTransition lt = navButtons.getLayoutTransition();
+        if (lt != null) {
+            if (enabled) {
+                lt.enableTransitionType(LayoutTransition.APPEARING);
+                lt.enableTransitionType(LayoutTransition.DISAPPEARING);
+                lt.enableTransitionType(LayoutTransition.CHANGE_APPEARING);
+                lt.enableTransitionType(LayoutTransition.CHANGE_DISAPPEARING);
+            } else {
+                lt.disableTransitionType(LayoutTransition.APPEARING);
+                lt.disableTransitionType(LayoutTransition.DISAPPEARING);
+                lt.disableTransitionType(LayoutTransition.CHANGE_APPEARING);
+                lt.disableTransitionType(LayoutTransition.CHANGE_DISAPPEARING);
+            }
+        }
+    }
+
+    private void setUseFadingAnimations(boolean useFadingAnimations) {
+        WindowManager.LayoutParams lp = (WindowManager.LayoutParams) getLayoutParams();
+        if (lp != null) {
+            boolean old = lp.windowAnimations != 0;
+            if (!old && useFadingAnimations) {
+                lp.windowAnimations = R.style.Animation_NavigationBarFadeIn;
+            } else if (old && !useFadingAnimations) {
+                lp.windowAnimations = 0;
+            } else {
+                return;
+            }
+            WindowManager wm = (WindowManager)getContext().getSystemService(Context.WINDOW_SERVICE);
+            wm.updateViewLayout(this, lp);
         }
     }
 
@@ -445,13 +459,14 @@ public class NavigationBarView extends LinearLayout {
         }
         mCurrentView = mRotatedViews[rot];
         mCurrentView.setVisibility(View.VISIBLE);
+        setLayoutTransitionsEnabled(mLayoutTransitionsEnabled);
 
         getImeSwitchButton().setOnClickListener(mImeSwitcherClickListener);
 
         mDeadZone = (DeadZone) mCurrentView.findViewById(R.id.deadzone);
 
         // force the low profile & disabled states into compliance
-        mBarTransitions.init(mVertical);
+        mBarTransitions.init();
         setDisabledFlags(mDisabledFlags, true /* force */);
         setMenuVisibility(mShowMenu, true /* force */);
 
@@ -459,10 +474,6 @@ public class NavigationBarView extends LinearLayout {
             Log.d(TAG, "reorient(): rot=" + mDisplay.getRotation());
         }
 
-        // swap to x coordinate if orientation is not in vertical
-        if (mDelegateHelper != null) {
-            mDelegateHelper.setSwapXY(mVertical);
-        }
         updateTaskSwitchHelper();
 
         setNavigationIconHints(mNavigationIconHints, true);
@@ -471,12 +482,6 @@ public class NavigationBarView extends LinearLayout {
     private void updateTaskSwitchHelper() {
         boolean isRtl = (getLayoutDirection() == View.LAYOUT_DIRECTION_RTL);
         mTaskSwitchHelper.setBarState(mVertical, isRtl);
-    }
-
-    @Override
-    protected void onLayout(boolean changed, int l, int t, int r, int b) {
-        super.onLayout(changed, l, t, r, b);
-        mDelegateHelper.setInitialTouchRegion(getHomeButton(), getBackButton(), getRecentsButton());
     }
 
     @Override
@@ -662,10 +667,6 @@ public class NavigationBarView extends LinearLayout {
                     + " " + visibilityToString(button.getVisibility())
                     + " alpha=" + button.getAlpha()
                     );
-            if (button instanceof KeyButtonView) {
-                pw.print(" drawingAlpha=" + ((KeyButtonView)button).getDrawingAlpha());
-                pw.print(" quiescentAlpha=" + ((KeyButtonView)button).getQuiescentAlpha());
-            }
         }
         pw.println();
     }

@@ -16,8 +16,11 @@
 
 package android.widget;
 
+import android.annotation.NonNull;
+import android.view.ViewHierarchyEncoder;
 import com.android.internal.R;
 
+import android.annotation.DrawableRes;
 import android.annotation.Nullable;
 import android.content.Context;
 import android.content.res.ColorStateList;
@@ -32,12 +35,14 @@ import android.view.ViewDebug;
 import android.view.accessibility.AccessibilityEvent;
 import android.view.accessibility.AccessibilityNodeInfo;
 
-
 /**
- * An extension to TextView that supports the {@link android.widget.Checkable} interface.
- * This is useful when used in a {@link android.widget.ListView ListView} where the it's 
- * {@link android.widget.ListView#setChoiceMode(int) setChoiceMode} has been set to
- * something other than {@link android.widget.ListView#CHOICE_MODE_NONE CHOICE_MODE_NONE}.
+ * An extension to {@link TextView} that supports the {@link Checkable}
+ * interface and displays.
+ * <p>
+ * This is useful when used in a {@link android.widget.ListView ListView} where
+ * the {@link android.widget.ListView#setChoiceMode(int) setChoiceMode} has
+ * been set to something other than
+ * {@link android.widget.ListView#CHOICE_MODE_NONE CHOICE_MODE_NONE}.
  *
  * @attr ref android.R.styleable#CheckedTextView_checked
  * @attr ref android.R.styleable#CheckedTextView_checkMark
@@ -116,9 +121,10 @@ public class CheckedTextView extends TextView implements Checkable {
     }
 
     /**
-     * <p>Changes the checked state of this text view.</p>
+     * Sets the checked state of this view.
      *
-     * @param checked true to check the text, false to uncheck it
+     * @param checked {@code true} set the state to checked, {@code false} to
+     *                uncheck
      */
     public void setChecked(boolean checked) {
         if (mChecked != checked) {
@@ -129,24 +135,24 @@ public class CheckedTextView extends TextView implements Checkable {
         }
     }
 
-
     /**
-     * Set the checkmark to a given Drawable, identified by its resourece id. This will be drawn
-     * when {@link #isChecked()} is true.
+     * Sets the check mark to the drawable with the specified resource ID.
+     * <p>
+     * When this view is checked, the drawable's state set will include
+     * {@link android.R.attr#state_checked}.
      *
-     * @param resid The Drawable to use for the checkmark.
-     *
+     * @param resId the resource identifier of drawable to use as the check
+     *              mark
+     * @attr ref android.R.styleable#CheckedTextView_checkMark
      * @see #setCheckMarkDrawable(Drawable)
      * @see #getCheckMarkDrawable()
-     *
-     * @attr ref android.R.styleable#CheckedTextView_checkMark
      */
-    public void setCheckMarkDrawable(int resid) {
-        if (resid != 0 && resid == mCheckMarkResource) {
+    public void setCheckMarkDrawable(@DrawableRes int resId) {
+        if (resId != 0 && resId == mCheckMarkResource) {
             return;
         }
 
-        mCheckMarkResource = resid;
+        mCheckMarkResource = resId;
 
         Drawable d = null;
         if (mCheckMarkResource != 0) {
@@ -156,14 +162,15 @@ public class CheckedTextView extends TextView implements Checkable {
     }
 
     /**
-     * Set the checkmark to a given Drawable. This will be drawn when {@link #isChecked()} is true.
+     * Set the check mark to the specified drawable.
+     * <p>
+     * When this view is checked, the drawable's state set will include
+     * {@link android.R.attr#state_checked}.
      *
-     * @param d The Drawable to use for the checkmark.
-     *
+     * @param d the drawable to use for the check mark
+     * @attr ref android.R.styleable#CheckedTextView_checkMark
      * @see #setCheckMarkDrawable(int)
      * @see #getCheckMarkDrawable()
-     *
-     * @attr ref android.R.styleable#CheckedTextView_checkMark
      */
     public void setCheckMarkDrawable(Drawable d) {
         if (mCheckMarkDrawable != null) {
@@ -436,17 +443,29 @@ public class CheckedTextView extends TextView implements Checkable {
     }
 
     @Override
-    public void onInitializeAccessibilityEvent(AccessibilityEvent event) {
-        super.onInitializeAccessibilityEvent(event);
-        event.setClassName(CheckedTextView.class.getName());
+    public CharSequence getAccessibilityClassName() {
+        return CheckedTextView.class.getName();
+    }
+
+    /** @hide */
+    @Override
+    public void onInitializeAccessibilityEventInternal(AccessibilityEvent event) {
+        super.onInitializeAccessibilityEventInternal(event);
         event.setChecked(mChecked);
     }
 
+    /** @hide */
     @Override
-    public void onInitializeAccessibilityNodeInfo(AccessibilityNodeInfo info) {
-        super.onInitializeAccessibilityNodeInfo(info);
-        info.setClassName(CheckedTextView.class.getName());
+    public void onInitializeAccessibilityNodeInfoInternal(AccessibilityNodeInfo info) {
+        super.onInitializeAccessibilityNodeInfoInternal(info);
         info.setCheckable(true);
         info.setChecked(mChecked);
+    }
+
+    /** @hide */
+    @Override
+    protected void encodeProperties(@NonNull ViewHierarchyEncoder stream) {
+        super.encodeProperties(stream);
+        stream.addProperty("text:checked", isChecked());
     }
 }

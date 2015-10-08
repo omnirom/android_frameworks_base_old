@@ -30,12 +30,9 @@ import android.media.MediaMetadata;
 import android.media.MediaMetadataEditor;
 import android.media.MediaMetadataRetriever;
 import android.media.Rating;
-import android.media.RemoteControlClient;
-import android.media.RemoteControlClient.MetadataEditor;
 import android.os.Bundle;
 import android.os.Handler;
 import android.os.Looper;
-import android.os.RemoteException;
 import android.util.ArrayMap;
 import android.util.Log;
 import android.view.KeyEvent;
@@ -200,17 +197,17 @@ public class MediaSessionLegacyHelper {
                 break;
         }
         if (down || up) {
-            int flags;
+            int flags = AudioManager.FLAG_FROM_KEY;
             if (musicOnly) {
                 // This flag is used when the screen is off to only affect
                 // active media
-                flags = AudioManager.FLAG_ACTIVE_MEDIA_ONLY;
+                flags |= AudioManager.FLAG_ACTIVE_MEDIA_ONLY;
             } else {
                 // These flags are consistent with the home screen
                 if (up) {
-                    flags = AudioManager.FLAG_PLAY_SOUND | AudioManager.FLAG_VIBRATE;
+                    flags |= AudioManager.FLAG_PLAY_SOUND | AudioManager.FLAG_VIBRATE;
                 } else {
-                    flags = AudioManager.FLAG_SHOW_UI | AudioManager.FLAG_VIBRATE;
+                    flags |= AudioManager.FLAG_SHOW_UI | AudioManager.FLAG_VIBRATE;
                 }
             }
             if (direction != 0) {
@@ -221,14 +218,10 @@ public class MediaSessionLegacyHelper {
                 mSessionManager.dispatchAdjustVolume(AudioManager.USE_DEFAULT_STREAM_TYPE,
                         direction, flags);
             } else if (isMute) {
-                if (down) {
-                    // We need to send two volume events on down, one to mute
-                    // and one to show the UI
+                if (down && keyEvent.getRepeatCount() == 0) {
                     mSessionManager.dispatchAdjustVolume(AudioManager.USE_DEFAULT_STREAM_TYPE,
-                            MediaSessionManager.DIRECTION_MUTE, flags);
+                            AudioManager.ADJUST_TOGGLE_MUTE, flags);
                 }
-                mSessionManager.dispatchAdjustVolume(AudioManager.USE_DEFAULT_STREAM_TYPE,
-                        0 /* direction, causes UI to show on down */, flags);
             }
         }
     }

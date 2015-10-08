@@ -17,11 +17,11 @@
 package com.android.documentsui;
 
 import static com.android.documentsui.DocumentsActivity.TAG;
-import static com.android.documentsui.DocumentsActivity.State.MODE_UNKNOWN;
-import static com.android.documentsui.DocumentsActivity.State.SORT_ORDER_DISPLAY_NAME;
-import static com.android.documentsui.DocumentsActivity.State.SORT_ORDER_LAST_MODIFIED;
-import static com.android.documentsui.DocumentsActivity.State.SORT_ORDER_SIZE;
-import static com.android.documentsui.DocumentsActivity.State.SORT_ORDER_UNKNOWN;
+import static com.android.documentsui.BaseActivity.State.MODE_UNKNOWN;
+import static com.android.documentsui.BaseActivity.State.SORT_ORDER_DISPLAY_NAME;
+import static com.android.documentsui.BaseActivity.State.SORT_ORDER_LAST_MODIFIED;
+import static com.android.documentsui.BaseActivity.State.SORT_ORDER_SIZE;
+import static com.android.documentsui.BaseActivity.State.SORT_ORDER_UNKNOWN;
 import static com.android.documentsui.model.DocumentInfo.getCursorInt;
 
 import android.content.AsyncTaskLoader;
@@ -31,13 +31,15 @@ import android.content.Context;
 import android.database.Cursor;
 import android.net.Uri;
 import android.os.CancellationSignal;
+import android.os.Handler;
+import android.os.Looper;
 import android.os.OperationCanceledException;
 import android.os.RemoteException;
 import android.provider.DocumentsContract;
 import android.provider.DocumentsContract.Document;
 import android.util.Log;
 
-import com.android.documentsui.DocumentsActivity.State;
+import com.android.documentsui.BaseActivity.State;
 import com.android.documentsui.RecentsProvider.StateColumns;
 import com.android.documentsui.model.DocumentInfo;
 import com.android.documentsui.model.RootInfo;
@@ -177,6 +179,10 @@ public class DirectoryLoader extends AsyncTaskLoader<DirectoryResult> {
 
             cursor = client.query(
                     mUri, null, null, null, getQuerySortOrder(result.sortOrder), mSignal);
+            if (cursor == null) {
+                throw new RemoteException("Provider returned null");
+            }
+
             cursor.registerContentObserver(mObserver);
 
             cursor = new RootCursorWrapper(mUri.getAuthority(), mRoot.rootId, cursor, -1);

@@ -16,7 +16,6 @@
 
 package android.telecom;
 
-import android.annotation.SystemApi;
 import android.os.Parcel;
 import android.os.Parcelable;
 import android.media.ToneGenerator;
@@ -30,9 +29,7 @@ import java.util.Objects;
  * user. It is the responsibility of the {@link ConnectionService} to provide localized versions of
  * the label and description. It also may contain a reason for the disconnect, which is intended for
  * logging and not for display to the user.
- * @hide
  */
-@SystemApi
 public final class DisconnectCause implements Parcelable {
 
     /** Disconnected because of an unknown or unspecified reason. */
@@ -133,8 +130,10 @@ public final class DisconnectCause implements Parcelable {
 
     /**
      * Returns a short label which explains the reason for the disconnect cause and is for display
-     * in the user interface. The {@link ConnectionService } is responsible for providing and
-     * localizing this label. If there is no string provided, returns null.
+     * in the user interface. If not null, it is expected that the In-Call UI should display this
+     * text where it would normally display the call state ("Dialing", "Disconnected") and is
+     * therefore expected to be relatively small. The {@link ConnectionService } is responsible for
+     * providing and localizing this label. If there is no string provided, returns null.
      *
      * @return The disconnect label.
      */
@@ -144,8 +143,11 @@ public final class DisconnectCause implements Parcelable {
 
     /**
      * Returns a description which explains the reason for the disconnect cause and is for display
-     * in the user interface. The {@link ConnectionService } is responsible for providing and
-     * localizing this message. If there is no string provided, returns null.
+     * in the user interface. This optional text is generally a longer and more descriptive version
+     * of {@link #getLabel}, however it can exist even if {@link #getLabel} is empty. The In-Call UI
+     * should display this relatively prominently; the traditional implementation displays this as
+     * an alert dialog. The {@link ConnectionService} is responsible for providing and localizing
+     * this message. If there is no string provided, returns null.
      *
      * @return The disconnect description.
      */

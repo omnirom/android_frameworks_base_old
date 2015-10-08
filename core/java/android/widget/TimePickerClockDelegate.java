@@ -16,17 +16,22 @@
 
 package android.widget;
 
+import android.annotation.Nullable;
 import android.content.Context;
 import android.content.res.ColorStateList;
 import android.content.res.Configuration;
 import android.content.res.Resources;
 import android.content.res.TypedArray;
+import android.graphics.drawable.Drawable;
 import android.os.Parcel;
 import android.os.Parcelable;
+import android.text.SpannableStringBuilder;
 import android.text.format.DateFormat;
 import android.text.format.DateUtils;
+import android.text.style.TtsSpan;
 import android.util.AttributeSet;
 import android.util.Log;
+import android.util.StateSet;
 import android.util.TypedValue;
 import android.view.HapticFeedbackConstants;
 import android.view.KeyCharacterMap;
@@ -34,7 +39,6 @@ import android.view.KeyEvent;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.View.AccessibilityDelegate;
-import android.view.ViewGroup;
 import android.view.accessibility.AccessibilityEvent;
 import android.view.accessibility.AccessibilityNodeInfo;
 import android.view.accessibility.AccessibilityNodeInfo.AccessibilityAction;
@@ -50,7 +54,6 @@ import java.util.Locale;
  */
 class TimePickerClockDelegate extends TimePicker.AbstractTimePickerDelegate implements
         RadialTimePickerView.OnValueSelectedListener {
-
     private static final String TAG = "TimePickerClockDelegate";
 
     // Index used by RadialPickerLayout
@@ -63,13 +66,15 @@ class TimePickerClockDelegate extends TimePicker.AbstractTimePickerDelegate impl
     // Also NOT a real index, just used for keyboard mode.
     private static final int ENABLE_PICKER_INDEX = 3;
 
+    private static final int[] ATTRS_TEXT_COLOR = new int[] {
+            com.android.internal.R.attr.textColor};
+    private static final int[] ATTRS_DISABLED_ALPHA = new int[] {
+            com.android.internal.R.attr.disabledAlpha};
+
     // LayoutLib relies on these constants. Change TimePickerClockDelegate_Delegate if
     // modifying these.
     static final int AM = 0;
     static final int PM = 1;
-
-    private static final boolean DEFAULT_ENABLED_STATE = true;
-    private boolean mIsEnabled = DEFAULT_ENABLED_STATE;
 
     private static final int HOURS_IN_HALF_DAY = 12;
 
@@ -85,12 +90,12 @@ class TimePickerClockDelegate extends TimePicker.AbstractTimePickerDelegate impl
     private final String mAmText;
     private final String mPmText;
 
-    private final float mDisabledAlpha;
-
+    private boolean mIsEnabled = true;
     private boolean mAllowAutoAdvance;
     private int mInitialHourOfDay;
     private int mInitialMinute;
     private boolean mIs24HourView;
+    private boolean mIsAmPmAtStart;
 
     // For hardware IME input.
     private char mPlaceholderText;
@@ -131,67 +136,73 @@ class TimePickerClockDelegate extends TimePicker.AbstractTimePickerDelegate impl
         mPmText = amPmStrings[1];
 
         final int layoutResourceId = a.getResourceId(R.styleable.TimePicker_internalLayout,
-                R.layout.time_picker_holo);
+                R.layout.time_picker_material);
         final View mainView = inflater.inflate(layoutResourceId, delegator);
 
         mHeaderView = mainView.findViewById(R.id.time_header);
-        mHeaderView.setBackground(a.getDrawable(R.styleable.TimePicker_headerBackground));
 
         // Set up hour/minute labels.
-        mHourView = (TextView) mHeaderView.findViewById(R.id.hours);
+        mHourView = (TextView) mainView.findViewById(R.id.hours);
         mHourView.setOnClickListener(mClickListener);
         mHourView.setAccessibilityDelegate(
                 new ClickActionDelegate(context, R.string.select_hours));
-        mSeparatorView = (TextView) mHeaderView.findViewById(R.id.separator);
-        mMinuteView = (TextView) mHeaderView.findViewById(R.id.minutes);
+        mSeparatorView = (TextView) mainView.findViewById(R.id.separator);
+        mMinuteView = (TextView) mainView.findViewById(R.id.minutes);
         mMinuteView.setOnClickListener(mClickListener);
         mMinuteView.setAccessibilityDelegate(
                 new ClickActionDelegate(context, R.string.select_minutes));
-
-        final int headerTimeTextAppearance = a.getResourceId(
-                R.styleable.TimePicker_headerTimeTextAppearance, 0);
-        if (headerTimeTextAppearance != 0) {
-            mHourView.setTextAppearance(context, headerTimeTextAppearance);
-            mSeparatorView.setTextAppearance(context, headerTimeTextAppearance);
-            mMinuteView.setTextAppearance(context, headerTimeTextAppearance);
-        }
 
         // Now that we have text appearances out of the way, make sure the hour
         // and minute views are correctly sized.
         mHourView.setMinWidth(computeStableWidth(mHourView, 24));
         mMinuteView.setMinWidth(computeStableWidth(mMinuteView, 60));
 
-        // TODO: This can be removed once we support themed color state lists.
-        final int headerSelectedTextColor = a.getColor(
-                R.styleable.TimePicker_headerSelectedTextColor,
-                res.getColor(R.color.timepicker_default_selector_color_material));
-        mHourView.setTextColor(ColorStateList.addFirstIfMissing(mHourView.getTextColors(),
-                R.attr.state_selected, headerSelectedTextColor));
-        mMinuteView.setTextColor(ColorStateList.addFirstIfMissing(mMinuteView.getTextColors(),
-                R.attr.state_selected, headerSelectedTextColor));
+        final SpannableStringBuilder amLabel = new SpannableStringBuilder()
+                .append(amPmStrings[0], new TtsSpan.VerbatimBuilder(amPmStrings[0]).build(), 0);
 
         // Set up AM/PM labels.
-        mAmPmLayout = mHeaderView.findViewById(R.id.ampm_layout);
+        mAmPmLayout = mainView.findViewById(R.id.ampm_layout);
         mAmLabel = (CheckedTextView) mAmPmLayout.findViewById(R.id.am_label);
-        mAmLabel.setText(amPmStrings[0]);
+        mAmLabel.setText(obtainVerbatim(amPmStrings[0]));
         mAmLabel.setOnClickListener(mClickListener);
         mPmLabel = (CheckedTextView) mAmPmLayout.findViewById(R.id.pm_label);
-        mPmLabel.setText(amPmStrings[1]);
+        mPmLabel.setText(obtainVerbatim(amPmStrings[1]));
         mPmLabel.setOnClickListener(mClickListener);
 
-        final int headerAmPmTextAppearance = a.getResourceId(
-                R.styleable.TimePicker_headerAmPmTextAppearance, 0);
-        if (headerAmPmTextAppearance != 0) {
-            mAmLabel.setTextAppearance(context, headerAmPmTextAppearance);
-            mPmLabel.setTextAppearance(context, headerAmPmTextAppearance);
+        // For the sake of backwards compatibility, attempt to extract the text
+        // color from the header time text appearance. If it's set, we'll let
+        // that override the "real" header text color.
+        ColorStateList headerTextColor = null;
+
+        @SuppressWarnings("deprecation")
+        final int timeHeaderTextAppearance = a.getResourceId(
+                R.styleable.TimePicker_headerTimeTextAppearance, 0);
+        if (timeHeaderTextAppearance != 0) {
+            final TypedArray textAppearance = mContext.obtainStyledAttributes(null,
+                    ATTRS_TEXT_COLOR, 0, timeHeaderTextAppearance);
+            final ColorStateList legacyHeaderTextColor = textAppearance.getColorStateList(0);
+            headerTextColor = applyLegacyColorFixes(legacyHeaderTextColor);
+            textAppearance.recycle();
+        }
+
+        if (headerTextColor == null) {
+            headerTextColor = a.getColorStateList(R.styleable.TimePicker_headerTextColor);
+        }
+
+        if (headerTextColor != null) {
+            mHourView.setTextColor(headerTextColor);
+            mSeparatorView.setTextColor(headerTextColor);
+            mMinuteView.setTextColor(headerTextColor);
+            mAmLabel.setTextColor(headerTextColor);
+            mPmLabel.setTextColor(headerTextColor);
+        }
+
+        // Set up header background, if available.
+        if (a.hasValueOrEmpty(R.styleable.TimePicker_headerBackground)) {
+            mHeaderView.setBackground(a.getDrawable(R.styleable.TimePicker_headerBackground));
         }
 
         a.recycle();
-
-        // Pull disabled alpha from theme.
-        final TypedValue outValue = new TypedValue();
-        context.getTheme().resolveAttribute(android.R.attr.disabledAlpha, outValue, true);
-        mDisabledAlpha = outValue.getFloat();
 
         mRadialTimePickerView = (RadialTimePickerView) mainView.findViewById(
                 R.id.radial_picker);
@@ -212,6 +223,59 @@ class TimePickerClockDelegate extends TimePicker.AbstractTimePickerDelegate impl
         final int currentHour = calendar.get(Calendar.HOUR_OF_DAY);
         final int currentMinute = calendar.get(Calendar.MINUTE);
         initialize(currentHour, currentMinute, false /* 12h */, HOUR_INDEX);
+    }
+
+    private static final CharSequence obtainVerbatim(String text) {
+        return new SpannableStringBuilder().append(text,
+                new TtsSpan.VerbatimBuilder(text).build(), 0);
+    }
+
+    /**
+     * The legacy text color might have been poorly defined. Ensures that it
+     * has an appropriate activated state, using the selected state if one
+     * exists or modifying the default text color otherwise.
+     *
+     * @param color a legacy text color, or {@code null}
+     * @return a color state list with an appropriate activated state, or
+     *         {@code null} if a valid activated state could not be generated
+     */
+    @Nullable
+    private ColorStateList applyLegacyColorFixes(@Nullable ColorStateList color) {
+        if (color == null || color.hasState(R.attr.state_activated)) {
+            return color;
+        }
+
+        final int activatedColor;
+        final int defaultColor;
+        if (color.hasState(R.attr.state_selected)) {
+            activatedColor = color.getColorForState(StateSet.get(
+                    StateSet.VIEW_STATE_ENABLED | StateSet.VIEW_STATE_SELECTED), 0);
+            defaultColor = color.getColorForState(StateSet.get(
+                    StateSet.VIEW_STATE_ENABLED), 0);
+        } else {
+            activatedColor = color.getDefaultColor();
+
+            // Generate a non-activated color using the disabled alpha.
+            final TypedArray ta = mContext.obtainStyledAttributes(ATTRS_DISABLED_ALPHA);
+            final float disabledAlpha = ta.getFloat(0, 0.30f);
+            defaultColor = multiplyAlphaComponent(activatedColor, disabledAlpha);
+        }
+
+        if (activatedColor == 0 || defaultColor == 0) {
+            // We somehow failed to obtain the colors.
+            return null;
+        }
+
+        final int[][] stateSet = new int[][] {{ R.attr.state_activated }, {}};
+        final int[] colors = new int[] { activatedColor, defaultColor };
+        return new ColorStateList(stateSet, colors);
+    }
+
+    private int multiplyAlphaComponent(int color, float alphaMod) {
+        final int srcRgb = color & 0xFFFFFF;
+        final int srcAlpha = (color >> 24) & 0xFF;
+        final int dstAlpha = (int) (srcAlpha * alphaMod + 0.5f);
+        return srcRgb | (dstAlpha << 24);
     }
 
     private static class ClickActionDelegate extends AccessibilityDelegate {
@@ -284,21 +348,37 @@ class TimePickerClockDelegate extends TimePicker.AbstractTimePickerDelegate impl
     }
 
     private void updateHeaderAmPm() {
+
         if (mIs24HourView) {
             mAmPmLayout.setVisibility(View.GONE);
         } else {
             // Ensure that AM/PM layout is in the correct position.
             final String dateTimePattern = DateFormat.getBestDateTimePattern(mCurrentLocale, "hm");
-            final boolean amPmAtStart = dateTimePattern.startsWith("a");
-            final ViewGroup parent = (ViewGroup) mAmPmLayout.getParent();
-            final int targetIndex = amPmAtStart ? 0 : parent.getChildCount() - 1;
-            final int currentIndex = parent.indexOfChild(mAmPmLayout);
-            if (targetIndex != currentIndex) {
-                parent.removeView(mAmPmLayout);
-                parent.addView(mAmPmLayout, targetIndex);
-            }
+            final boolean isAmPmAtStart = dateTimePattern.startsWith("a");
+            setAmPmAtStart(isAmPmAtStart);
 
             updateAmPmLabelStates(mInitialHourOfDay < 12 ? AM : PM);
+        }
+    }
+
+    private void setAmPmAtStart(boolean isAmPmAtStart) {
+        if (mIsAmPmAtStart != isAmPmAtStart) {
+            mIsAmPmAtStart = isAmPmAtStart;
+
+            final RelativeLayout.LayoutParams params =
+                    (RelativeLayout.LayoutParams) mAmPmLayout.getLayoutParams();
+            if (params.getRule(RelativeLayout.RIGHT_OF) != 0 ||
+                    params.getRule(RelativeLayout.LEFT_OF) != 0) {
+                if (isAmPmAtStart) {
+                    params.removeRule(RelativeLayout.RIGHT_OF);
+                    params.addRule(RelativeLayout.LEFT_OF, mHourView.getId());
+                } else {
+                    params.removeRule(RelativeLayout.LEFT_OF);
+                    params.addRule(RelativeLayout.RIGHT_OF, mMinuteView.getId());
+                }
+            }
+
+            mAmPmLayout.setLayoutParams(params);
         }
     }
 
@@ -306,7 +386,7 @@ class TimePickerClockDelegate extends TimePicker.AbstractTimePickerDelegate impl
      * Set the current hour.
      */
     @Override
-    public void setCurrentHour(Integer currentHour) {
+    public void setCurrentHour(int currentHour) {
         if (mInitialHourOfDay == currentHour) {
             return;
         }
@@ -323,7 +403,7 @@ class TimePickerClockDelegate extends TimePicker.AbstractTimePickerDelegate impl
      * @return The current hour in the range (0-23).
      */
     @Override
-    public Integer getCurrentHour() {
+    public int getCurrentHour() {
         int currentHour = mRadialTimePickerView.getCurrentHour();
         if (mIs24HourView) {
             return currentHour;
@@ -342,7 +422,7 @@ class TimePickerClockDelegate extends TimePicker.AbstractTimePickerDelegate impl
      * Set the current minute (0-59).
      */
     @Override
-    public void setCurrentMinute(Integer currentMinute) {
+    public void setCurrentMinute(int currentMinute) {
         if (mInitialMinute == currentMinute) {
             return;
         }
@@ -357,7 +437,7 @@ class TimePickerClockDelegate extends TimePicker.AbstractTimePickerDelegate impl
      * @return The current minute.
      */
     @Override
-    public Integer getCurrentMinute() {
+    public int getCurrentMinute() {
         return mRadialTimePickerView.getCurrentMinute();
     }
 
@@ -367,7 +447,7 @@ class TimePickerClockDelegate extends TimePicker.AbstractTimePickerDelegate impl
      * @param is24HourView True = 24 hour mode. False = AM/PM.
      */
     @Override
-    public void setIs24HourView(Boolean is24HourView) {
+    public void setIs24HourView(boolean is24HourView) {
         if (is24HourView == mIs24HourView) {
             return;
         }
@@ -464,16 +544,6 @@ class TimePickerClockDelegate extends TimePicker.AbstractTimePickerDelegate impl
         String selectedDate = DateUtils.formatDateTime(mContext,
                 mTempCalendar.getTimeInMillis(), flags);
         event.getText().add(selectedDate);
-    }
-
-    @Override
-    public void onInitializeAccessibilityEvent(AccessibilityEvent event) {
-        event.setClassName(TimePicker.class.getName());
-    }
-
-    @Override
-    public void onInitializeAccessibilityNodeInfo(AccessibilityNodeInfo info) {
-        info.setClassName(TimePicker.class.getName());
     }
 
     /**
@@ -608,12 +678,12 @@ class TimePickerClockDelegate extends TimePicker.AbstractTimePickerDelegate impl
 
     private void updateAmPmLabelStates(int amOrPm) {
         final boolean isAm = amOrPm == AM;
+        mAmLabel.setActivated(isAm);
         mAmLabel.setChecked(isAm);
-        mAmLabel.setAlpha(isAm ? 1 : mDisabledAlpha);
 
         final boolean isPm = amOrPm == PM;
+        mPmLabel.setActivated(isPm);
         mPmLabel.setChecked(isPm);
-        mPmLabel.setAlpha(isPm ? 1 : mDisabledAlpha);
     }
 
     /**
@@ -773,8 +843,8 @@ class TimePickerClockDelegate extends TimePicker.AbstractTimePickerDelegate impl
             }
         }
 
-        mHourView.setSelected(index == HOUR_INDEX);
-        mMinuteView.setSelected(index == MINUTE_INDEX);
+        mHourView.setActivated(index == HOUR_INDEX);
+        mMinuteView.setActivated(index == MINUTE_INDEX);
     }
 
     private void setAmOrPm(int amOrPm) {
@@ -964,9 +1034,9 @@ class TimePickerClockDelegate extends TimePicker.AbstractTimePickerDelegate impl
             String minuteStr = (values[1] == -1) ? mDoublePlaceholderText :
                     String.format(minuteFormat, values[1]).replace(' ', mPlaceholderText);
             mHourView.setText(hourStr);
-            mHourView.setSelected(false);
+            mHourView.setActivated(false);
             mMinuteView.setText(minuteStr);
-            mMinuteView.setSelected(false);
+            mMinuteView.setActivated(false);
             if (!mIs24HourView) {
                 updateAmPmLabelStates(values[2]);
             }

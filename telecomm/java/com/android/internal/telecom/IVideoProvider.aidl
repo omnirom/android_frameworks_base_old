@@ -16,6 +16,7 @@
 
 package com.android.internal.telecom;
 
+import android.net.Uri;
 import android.view.Surface;
 import android.telecom.VideoProfile;
 
@@ -25,7 +26,9 @@ import android.telecom.VideoProfile;
  * @hide
  */
 oneway interface IVideoProvider {
-    void setVideoCallback(IBinder videoCallbackBinder);
+    void addVideoCallback(IBinder videoCallbackBinder);
+
+    void removeVideoCallback(IBinder videoCallbackBinder);
 
     void setCamera(String cameraId);
 
@@ -37,7 +40,7 @@ oneway interface IVideoProvider {
 
     void setZoom(float value);
 
-    void sendSessionModifyRequest(in VideoProfile reqProfile);
+    void sendSessionModifyRequest(in VideoProfile fromProfile, in VideoProfile toProfile);
 
     void sendSessionModifyResponse(in VideoProfile responseProfile);
 
@@ -45,5 +48,5 @@ oneway interface IVideoProvider {
 
     void requestCallDataUsage();
 
-    void setPauseImage(String uri);
+    void setPauseImage(in Uri uri);
 }

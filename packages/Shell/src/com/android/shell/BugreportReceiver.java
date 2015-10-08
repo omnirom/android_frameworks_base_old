@@ -27,17 +27,30 @@ import android.app.PendingIntent;
 import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.Intent;
+import android.content.res.Configuration;
 import android.net.Uri;
 import android.os.AsyncTask;
 import android.os.FileUtils;
 import android.os.SystemProperties;
 import android.support.v4.content.FileProvider;
 import android.text.format.DateUtils;
+import android.util.Log;
 import android.util.Patterns;
 
 import com.google.android.collect.Lists;
+import libcore.io.Streams;
 
+import java.io.BufferedOutputStream;
+import java.io.ByteArrayOutputStream;
+import java.io.Closeable;
 import java.io.File;
+import java.io.FileInputStream;
+import java.io.FileOutputStream;
+import java.io.IOException;
+import java.io.InputStream;
+import java.io.OutputStream;
+import java.util.zip.ZipEntry;
+import java.util.zip.ZipOutputStream;
 import java.util.ArrayList;
 
 /**
@@ -65,38 +78,13 @@ public class BugreportReceiver extends BroadcastReceiver {
 
     @Override
     public void onReceive(Context context, Intent intent) {
+        final Configuration conf = context.getResources().getConfiguration();
         final File bugreportFile = getFileExtra(intent, EXTRA_BUGREPORT);
         final File screenshotFile = getFileExtra(intent, EXTRA_SCREENSHOT);
 
-        // Files are kept on private storage, so turn into Uris that we can
-        // grant temporary permissions for.
-        final Uri bugreportUri = FileProvider.getUriForFile(context, AUTHORITY, bugreportFile);
-        final Uri screenshotUri = FileProvider.getUriForFile(context, AUTHORITY, screenshotFile);
-
-        Intent sendIntent = buildSendIntent(context, bugreportUri, screenshotUri);
-        Intent notifIntent;
-
-        // Send through warning dialog by default
-        if (getWarningState(context, STATE_SHOW) == STATE_SHOW) {
-            notifIntent = buildWarningIntent(context, sendIntent);
-        } else {
-            notifIntent = sendIntent;
+        if ((conf.uiMode & Configuration.UI_MODE_TYPE_MASK) != Configuration.UI_MODE_TYPE_WATCH) {
+            triggerLocalNotification(context, bugreportFile, screenshotFile);
         }
-        notifIntent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
-
-        final Notification.Builder builder = new Notification.Builder(context)
-                .setSmallIcon(com.android.internal.R.drawable.stat_sys_adb)
-                .setContentTitle(context.getString(R.string.bugreport_finished_title))
-                .setTicker(context.getString(R.string.bugreport_finished_title))
-                .setContentText(context.getString(R.string.bugreport_finished_text))
-                .setContentIntent(PendingIntent.getActivity(
-                        context, 0, notifIntent, PendingIntent.FLAG_CANCEL_CURRENT))
-                .setAutoCancel(true)
-                .setLocalOnly(true)
-                .setColor(context.getResources().getColor(
-                        com.android.internal.R.color.system_notification_accent_color));
-
-        NotificationManager.from(context).notify(TAG, 0, builder.build());
 
         // Clean up older bugreports in background
         final PendingResult result = goAsync();
@@ -109,6 +97,29 @@ public class BugreportReceiver extends BroadcastReceiver {
                 return null;
             }
         }.execute();
+    }
+
+    /**
+     * Responsible for triggering a notification that allows the user to start a
+     * "share" intent with the bug report. On watches we have other methods to allow the user to
+     * start this intent (usually by triggering it on another connected device); we don't need to
+     * display the notification in this case.
+     */
+    private void triggerLocalNotification(final Context context, final File bugreportFile,
+            final File screenshotFile) {
+        // Files are kept on private storage, so turn into Uris that we can
+        // grant temporary permissions for.
+        final Uri bugreportUri = FileProvider.getUriForFile(context, AUTHORITY, bugreportFile);
+        final Uri screenshotUri = FileProvider.getUriForFile(context, AUTHORITY, screenshotFile);
+
+        boolean isPlainText = bugreportFile.getName().toLowerCase().endsWith(".txt");
+        if (!isPlainText) {
+            // Already zipped, send it right away.
+            sendBugreportNotification(context, bugreportFile, screenshotFile);
+        } else {
+            // Asynchronously zip the file first, then send it.
+            sendZippedBugreportNotification(context, bugreportFile, screenshotFile);
+        }
     }
 
     private static Intent buildWarningIntent(Context context, Intent sendIntent) {
@@ -138,6 +149,89 @@ public class BugreportReceiver extends BroadcastReceiver {
         }
 
         return intent;
+    }
+
+    /**
+     * Sends a bugreport notitication.
+     */
+    private static void sendBugreportNotification(Context context, File bugreportFile,
+            File screenshotFile) {
+        // Files are kept on private storage, so turn into Uris that we can
+        // grant temporary permissions for.
+        final Uri bugreportUri = FileProvider.getUriForFile(context, AUTHORITY, bugreportFile);
+        final Uri screenshotUri = FileProvider.getUriForFile(context, AUTHORITY, screenshotFile);
+
+        Intent sendIntent = buildSendIntent(context, bugreportUri, screenshotUri);
+        Intent notifIntent;
+
+        // Send through warning dialog by default
+        if (getWarningState(context, STATE_SHOW) == STATE_SHOW) {
+            notifIntent = buildWarningIntent(context, sendIntent);
+        } else {
+            notifIntent = sendIntent;
+        }
+        notifIntent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
+
+        final Notification.Builder builder = new Notification.Builder(context)
+                .setSmallIcon(com.android.internal.R.drawable.stat_sys_adb)
+                .setContentTitle(context.getString(R.string.bugreport_finished_title))
+                .setTicker(context.getString(R.string.bugreport_finished_title))
+                .setContentText(context.getString(R.string.bugreport_finished_text))
+                .setContentIntent(PendingIntent.getActivity(
+                        context, 0, notifIntent, PendingIntent.FLAG_CANCEL_CURRENT))
+                .setAutoCancel(true)
+                .setLocalOnly(true)
+                .setColor(context.getColor(
+                        com.android.internal.R.color.system_notification_accent_color));
+
+        NotificationManager.from(context).notify(TAG, 0, builder.build());
+    }
+
+    /**
+     * Sends a zipped bugreport notification.
+     */
+    private static void sendZippedBugreportNotification(final Context context,
+            final File bugreportFile, final File screenshotFile) {
+        new AsyncTask<Void, Void, Void>() {
+            @Override
+            protected Void doInBackground(Void... params) {
+                File zippedFile = zipBugreport(bugreportFile);
+                sendBugreportNotification(context, zippedFile, screenshotFile);
+                return null;
+            }
+        }.execute();
+    }
+
+    /**
+     * Zips a bugreport file, returning the path to the new file (or to the
+     * original in case of failure).
+     */
+    private static File zipBugreport(File bugreportFile) {
+        String bugreportPath = bugreportFile.getAbsolutePath();
+        String zippedPath = bugreportPath.replace(".txt", ".zip");
+        Log.v(TAG, "zipping " + bugreportPath + " as " + zippedPath);
+        File bugreportZippedFile = new File(zippedPath);
+        try (InputStream is = new FileInputStream(bugreportFile);
+            ZipOutputStream zos = new ZipOutputStream(
+                new BufferedOutputStream(new FileOutputStream(bugreportZippedFile)))) {
+            ZipEntry entry = new ZipEntry(bugreportFile.getName());
+            entry.setTime(bugreportFile.lastModified());
+            zos.putNextEntry(entry);
+            int totalBytes = Streams.copy(is, zos);
+            Log.v(TAG, "size of original bugreport: " + totalBytes + " bytes");
+            zos.closeEntry();
+            // Delete old file;
+            boolean deleted = bugreportFile.delete();
+            if (deleted) {
+                Log.v(TAG, "deleted original bugreport (" + bugreportPath + ")");
+            } else {
+                Log.e(TAG, "could not delete original bugreport (" + bugreportPath + ")");
+            }
+            return bugreportZippedFile;
+        } catch (IOException e) {
+          Log.e(TAG, "exception zipping file " + zippedPath, e);
+          return bugreportFile;  // Return original.
+        }
     }
 
     /**

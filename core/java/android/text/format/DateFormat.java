@@ -23,8 +23,6 @@ import android.text.SpannableStringBuilder;
 import android.text.Spanned;
 import android.text.SpannedString;
 
-import com.android.internal.R;
-
 import java.util.Calendar;
 import java.util.Date;
 import java.util.GregorianCalendar;
@@ -278,73 +276,18 @@ public class DateFormat {
      */
     public static String getTimeFormatString(Context context, int userHandle) {
         LocaleData d = LocaleData.get(context.getResources().getConfiguration().locale);
-        return is24HourFormat(context, userHandle) ? d.timeFormat24 : d.timeFormat12;
+        return is24HourFormat(context, userHandle) ? d.timeFormat_Hm : d.timeFormat_hm;
     }
 
     /**
      * Returns a {@link java.text.DateFormat} object that can format the date
-     * in short form (such as 12/31/1999) according
-     * to the current locale and the user's date-order preference.
+     * in short form according to the current locale.
+     *
      * @param context the application context
      * @return the {@link java.text.DateFormat} object that properly formats the date.
      */
     public static java.text.DateFormat getDateFormat(Context context) {
-        String value = Settings.System.getString(context.getContentResolver(),
-                Settings.System.DATE_FORMAT);
-
-        return getDateFormatForSetting(context, value);
-    }
-
-    /**
-     * Returns a {@link java.text.DateFormat} object to format the date
-     * as if the date format setting were set to <code>value</code>,
-     * including null to use the locale's default format.
-     * @param context the application context
-     * @param value the date format setting string to interpret for
-     *              the current locale
-     * @hide
-     */
-    public static java.text.DateFormat getDateFormatForSetting(Context context,
-                                                               String value) {
-        String format = getDateFormatStringForSetting(context, value);
-        return new java.text.SimpleDateFormat(format);
-    }
-
-    private static String getDateFormatStringForSetting(Context context, String value) {
-        if (value != null) {
-            int month = value.indexOf('M');
-            int day = value.indexOf('d');
-            int year = value.indexOf('y');
-
-            if (month >= 0 && day >= 0 && year >= 0) {
-                String template = context.getString(R.string.numeric_date_template);
-                if (year < month && year < day) {
-                    if (month < day) {
-                        value = String.format(template, "yyyy", "MM", "dd");
-                    } else {
-                        value = String.format(template, "yyyy", "dd", "MM");
-                    }
-                } else if (month < day) {
-                    if (day < year) {
-                        value = String.format(template, "MM", "dd", "yyyy");
-                    } else { // unlikely
-                        value = String.format(template, "MM", "yyyy", "dd");
-                    }
-                } else { // day < month
-                    if (month < year) {
-                        value = String.format(template, "dd", "MM", "yyyy");
-                    } else { // unlikely
-                        value = String.format(template, "dd", "yyyy", "MM");
-                    }
-                }
-
-                return value;
-            }
-        }
-
-        // The setting is not set; use the locale's default.
-        LocaleData d = LocaleData.get(context.getResources().getConfiguration().locale);
-        return d.shortDateFormat4;
+        return java.text.DateFormat.getDateInstance(java.text.DateFormat.SHORT);
     }
 
     /**
@@ -377,14 +320,16 @@ public class DateFormat {
      * order returned here.
      */
     public static char[] getDateFormatOrder(Context context) {
-        return ICU.getDateFormatOrder(getDateFormatString(context));
+        return ICU.getDateFormatOrder(getDateFormatString());
     }
 
-    private static String getDateFormatString(Context context) {
-        String value = Settings.System.getString(context.getContentResolver(),
-                Settings.System.DATE_FORMAT);
+    private static String getDateFormatString() {
+        java.text.DateFormat df = java.text.DateFormat.getDateInstance(java.text.DateFormat.SHORT);
+        if (df instanceof SimpleDateFormat) {
+            return ((SimpleDateFormat) df).toPattern();
+        }
 
-        return getDateFormatStringForSetting(context, value);
+        throw new AssertionError("!(df instanceof SimpleDateFormat)");
     }
 
     /**

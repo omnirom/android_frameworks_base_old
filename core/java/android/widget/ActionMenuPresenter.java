@@ -16,14 +16,17 @@
 
 package android.widget;
 
+import android.animation.Animator;
+import android.animation.AnimatorListenerAdapter;
+import android.animation.ObjectAnimator;
+import android.animation.PropertyValuesHolder;
 import android.content.Context;
 import android.content.res.Configuration;
 import android.content.res.Resources;
-import android.graphics.Matrix;
-import android.graphics.Rect;
 import android.graphics.drawable.Drawable;
 import android.os.Parcel;
 import android.os.Parcelable;
+import android.util.SparseArray;
 import android.util.SparseBooleanArray;
 import android.view.ActionProvider;
 import android.view.Gravity;
@@ -32,9 +35,9 @@ import android.view.SoundEffectConstants;
 import android.view.View;
 import android.view.View.MeasureSpec;
 import android.view.ViewGroup;
+import android.view.ViewTreeObserver;
 import android.view.accessibility.AccessibilityNodeInfo;
 import android.widget.ListPopupWindow.ForwardingListener;
-import com.android.internal.transition.ActionBarTransition;
 import com.android.internal.view.ActionBarPolicy;
 import com.android.internal.view.menu.ActionMenuItemView;
 import com.android.internal.view.menu.BaseMenuPresenter;
@@ -45,6 +48,7 @@ import com.android.internal.view.menu.MenuView;
 import com.android.internal.view.menu.SubMenuBuilder;
 
 import java.util.ArrayList;
+import java.util.List;
 
 /**
  * MenuPresenter for building action menus as seen in the action bar and action modes.
@@ -54,8 +58,12 @@ import java.util.ArrayList;
 public class ActionMenuPresenter extends BaseMenuPresenter
         implements ActionProvider.SubUiVisibilityListener {
     private static final String TAG = "ActionMenuPresenter";
+    private static final int ITEM_ANIMATION_DURATION = 150;
+    private static final boolean ACTIONBAR_ANIMATIONS_ENABLED = false;
 
-    private View mOverflowButton;
+    private OverflowMenuButton mOverflowButton;
+    private Drawable mPendingOverflowIcon;
+    private boolean mPendingOverflowIconSet;
     private boolean mReserveOverflow;
     private boolean mReserveOverflowSet;
     private int mWidthLimit;
@@ -71,8 +79,6 @@ public class ActionMenuPresenter extends BaseMenuPresenter
     // Group IDs that have been added as actions - used temporarily, allocated here for reuse.
     private final SparseBooleanArray mActionButtonGroups = new SparseBooleanArray();
 
-    private View mScrapActionButtonView;
-
     private OverflowPopup mOverflowPopup;
     private ActionButtonSubmenu mActionButtonPopup;
 
@@ -81,6 +87,41 @@ public class ActionMenuPresenter extends BaseMenuPresenter
 
     final PopupPresenterCallback mPopupPresenterCallback = new PopupPresenterCallback();
     int mOpenSubMenuId;
+
+    // These collections are used to store pre- and post-layout information for menu items,
+    // which is used to determine appropriate animations to run for changed items.
+    private SparseArray<MenuItemLayoutInfo> mPreLayoutItems =
+            new SparseArray<MenuItemLayoutInfo>();
+    private SparseArray<MenuItemLayoutInfo> mPostLayoutItems =
+            new SparseArray<MenuItemLayoutInfo>();
+
+    // The list of currently running animations on menu items.
+    private List<ItemAnimationInfo> mRunningItemAnimations = new ArrayList<ItemAnimationInfo>();
+    private ViewTreeObserver.OnPreDrawListener mItemAnimationPreDrawListener =
+            new ViewTreeObserver.OnPreDrawListener() {
+        @Override
+        public boolean onPreDraw() {
+            computeMenuItemAnimationInfo(false);
+            ((View) mMenuView).getViewTreeObserver().removeOnPreDrawListener(this);
+            runItemAnimations();
+            return true;
+        }
+    };
+    private View.OnAttachStateChangeListener mAttachStateChangeListener =
+            new View.OnAttachStateChangeListener() {
+        @Override
+        public void onViewAttachedToWindow(View v) {
+        }
+
+        @Override
+        public void onViewDetachedFromWindow(View v) {
+            ((View) mMenuView).getViewTreeObserver().removeOnPreDrawListener(
+                    mItemAnimationPreDrawListener);
+            mPreLayoutItems.clear();
+            mPostLayoutItems.clear();
+        }
+    };
+
 
     public ActionMenuPresenter(Context context) {
         super(context, com.android.internal.R.layout.action_menu_layout,
@@ -111,6 +152,11 @@ public class ActionMenuPresenter extends BaseMenuPresenter
         if (mReserveOverflow) {
             if (mOverflowButton == null) {
                 mOverflowButton = new OverflowMenuButton(mSystemContext);
+                if (mPendingOverflowIconSet) {
+                    mOverflowButton.setImageDrawable(mPendingOverflowIcon);
+                    mPendingOverflowIcon = null;
+                    mPendingOverflowIconSet = false;
+                }
                 final int spec = MeasureSpec.makeMeasureSpec(0, MeasureSpec.UNSPECIFIED);
                 mOverflowButton.measure(spec, spec);
             }
@@ -122,9 +168,6 @@ public class ActionMenuPresenter extends BaseMenuPresenter
         mActionItemWidthLimit = width;
 
         mMinCellSize = (int) (ActionMenuView.MIN_CELL_SIZE * res.getDisplayMetrics().density);
-
-        // Drop a scrap view as it may no longer reflect the proper context/config.
-        mScrapActionButtonView = null;
     }
 
     public void onConfigurationChanged(Configuration newConfig) {
@@ -157,10 +200,35 @@ public class ActionMenuPresenter extends BaseMenuPresenter
         mExpandedActionViewsExclusive = isExclusive;
     }
 
+    public void setOverflowIcon(Drawable icon) {
+        if (mOverflowButton != null) {
+            mOverflowButton.setImageDrawable(icon);
+        } else {
+            mPendingOverflowIconSet = true;
+            mPendingOverflowIcon = icon;
+        }
+    }
+
+    public Drawable getOverflowIcon() {
+        if (mOverflowButton != null) {
+            return mOverflowButton.getDrawable();
+        } else if (mPendingOverflowIconSet) {
+            return mPendingOverflowIcon;
+        }
+        return null;
+    }
+
     @Override
     public MenuView getMenuView(ViewGroup root) {
+        MenuView oldMenuView = mMenuView;
         MenuView result = super.getMenuView(root);
-        ((ActionMenuView) result).setPresenter(this);
+        if (oldMenuView != result) {
+            ((ActionMenuView) result).setPresenter(this);
+            if (oldMenuView != null) {
+                ((View) oldMenuView).removeOnAttachStateChangeListener(mAttachStateChangeListener);
+            }
+            ((View) result).addOnAttachStateChangeListener(mAttachStateChangeListener);
+        }
         return result;
     }
 
@@ -199,11 +267,176 @@ public class ActionMenuPresenter extends BaseMenuPresenter
         return item.isActionButton();
     }
 
+    /**
+     * Store layout information about current items in the menu. This is stored for
+     * both pre- and post-layout phases and compared in runItemAnimations() to determine
+     * the animations that need to be run on any item changes.
+     *
+     * @param preLayout Whether this is being called in the pre-layout phase. This is passed
+     * into the MenuItemLayoutInfo structure to store the appropriate position values.
+     */
+    private void computeMenuItemAnimationInfo(boolean preLayout) {
+        final ViewGroup menuView = (ViewGroup) mMenuView;
+        final int count = menuView.getChildCount();
+        SparseArray items = preLayout ? mPreLayoutItems : mPostLayoutItems;
+        for (int i = 0; i < count; ++i) {
+            View child = menuView.getChildAt(i);
+            final int id = child.getId();
+            if (id > 0 && child.getWidth() != 0 && child.getHeight() != 0) {
+                MenuItemLayoutInfo info = new MenuItemLayoutInfo(child, preLayout);
+                items.put(id, info);
+            }
+        }
+    }
+
+    /**
+     * This method is called once both the pre-layout and post-layout steps have
+     * happened. It figures out which views are new (didn't exist prior to layout),
+     * gone (existed pre-layout, but are now gone), or changed (exist in both,
+     * but in a different location) and runs appropriate animations on those views.
+     * Items are tracked by ids, since the underlying views that represent items
+     * pre- and post-layout may be different.
+     */
+    private void runItemAnimations() {
+        for (int i = 0; i < mPreLayoutItems.size(); ++i) {
+            int id = mPreLayoutItems.keyAt(i);
+            final MenuItemLayoutInfo menuItemLayoutInfoPre = mPreLayoutItems.get(id);
+            final int postLayoutIndex = mPostLayoutItems.indexOfKey(id);
+            if (postLayoutIndex >= 0) {
+                // item exists pre and post: see if it's changed
+                final MenuItemLayoutInfo menuItemLayoutInfoPost =
+                        mPostLayoutItems.valueAt(postLayoutIndex);
+                PropertyValuesHolder pvhX = null;
+                PropertyValuesHolder pvhY = null;
+                if (menuItemLayoutInfoPre.left != menuItemLayoutInfoPost.left) {
+                    pvhX = PropertyValuesHolder.ofFloat(View.TRANSLATION_X,
+                            (menuItemLayoutInfoPre.left - menuItemLayoutInfoPost.left), 0);
+                }
+                if (menuItemLayoutInfoPre.top != menuItemLayoutInfoPost.top) {
+                    pvhY = PropertyValuesHolder.ofFloat(View.TRANSLATION_Y,
+                            menuItemLayoutInfoPre.top - menuItemLayoutInfoPost.top, 0);
+                }
+                if (pvhX != null || pvhY != null) {
+                    for (int j = 0; j < mRunningItemAnimations.size(); ++j) {
+                        ItemAnimationInfo oldInfo = mRunningItemAnimations.get(j);
+                        if (oldInfo.id == id && oldInfo.animType == ItemAnimationInfo.MOVE) {
+                            oldInfo.animator.cancel();
+                        }
+                    }
+                    ObjectAnimator anim;
+                    if (pvhX != null) {
+                        if (pvhY != null) {
+                            anim = ObjectAnimator.ofPropertyValuesHolder(menuItemLayoutInfoPost.view,
+                                    pvhX, pvhY);
+                        } else {
+                            anim = ObjectAnimator.ofPropertyValuesHolder(menuItemLayoutInfoPost.view, pvhX);
+                        }
+                    } else {
+                        anim = ObjectAnimator.ofPropertyValuesHolder(menuItemLayoutInfoPost.view, pvhY);
+                    }
+                    anim.setDuration(ITEM_ANIMATION_DURATION);
+                    anim.start();
+                    ItemAnimationInfo info = new ItemAnimationInfo(id, menuItemLayoutInfoPost, anim,
+                            ItemAnimationInfo.MOVE);
+                    mRunningItemAnimations.add(info);
+                    anim.addListener(new AnimatorListenerAdapter() {
+                        @Override
+                        public void onAnimationEnd(Animator animation) {
+                            for (int j = 0; j < mRunningItemAnimations.size(); ++j) {
+                                if (mRunningItemAnimations.get(j).animator == animation) {
+                                    mRunningItemAnimations.remove(j);
+                                    break;
+                                }
+                            }
+                        }
+                    });
+                }
+                mPostLayoutItems.remove(id);
+            } else {
+                // item used to be there, is now gone
+                float oldAlpha = 1;
+                for (int j = 0; j < mRunningItemAnimations.size(); ++j) {
+                    ItemAnimationInfo oldInfo = mRunningItemAnimations.get(j);
+                    if (oldInfo.id == id && oldInfo.animType == ItemAnimationInfo.FADE_IN) {
+                        oldAlpha = oldInfo.menuItemLayoutInfo.view.getAlpha();
+                        oldInfo.animator.cancel();
+                    }
+                }
+                ObjectAnimator anim = ObjectAnimator.ofFloat(menuItemLayoutInfoPre.view, View.ALPHA,
+                        oldAlpha, 0);
+                // Re-using the view from pre-layout assumes no view recycling
+                ((ViewGroup) mMenuView).getOverlay().add(menuItemLayoutInfoPre.view);
+                anim.setDuration(ITEM_ANIMATION_DURATION);
+                anim.start();
+                ItemAnimationInfo info = new ItemAnimationInfo(id, menuItemLayoutInfoPre, anim, ItemAnimationInfo.FADE_OUT);
+                mRunningItemAnimations.add(info);
+                anim.addListener(new AnimatorListenerAdapter() {
+                    @Override
+                    public void onAnimationEnd(Animator animation) {
+                        for (int j = 0; j < mRunningItemAnimations.size(); ++j) {
+                            if (mRunningItemAnimations.get(j).animator == animation) {
+                                mRunningItemAnimations.remove(j);
+                                break;
+                            }
+                        }
+                        ((ViewGroup) mMenuView).getOverlay().remove(menuItemLayoutInfoPre.view);
+                    }
+                });
+            }
+        }
+        for (int i = 0; i < mPostLayoutItems.size(); ++i) {
+            int id = mPostLayoutItems.keyAt(i);
+            final int postLayoutIndex = mPostLayoutItems.indexOfKey(id);
+            if (postLayoutIndex >= 0) {
+                // item is new
+                final MenuItemLayoutInfo menuItemLayoutInfo =
+                        mPostLayoutItems.valueAt(postLayoutIndex);
+                float oldAlpha = 0;
+                for (int j = 0; j < mRunningItemAnimations.size(); ++j) {
+                    ItemAnimationInfo oldInfo = mRunningItemAnimations.get(j);
+                    if (oldInfo.id == id && oldInfo.animType == ItemAnimationInfo.FADE_OUT) {
+                        oldAlpha = oldInfo.menuItemLayoutInfo.view.getAlpha();
+                        oldInfo.animator.cancel();
+                    }
+                }
+                ObjectAnimator anim = ObjectAnimator.ofFloat(menuItemLayoutInfo.view, View.ALPHA,
+                        oldAlpha, 1);
+                anim.start();
+                anim.setDuration(ITEM_ANIMATION_DURATION);
+                ItemAnimationInfo info = new ItemAnimationInfo(id, menuItemLayoutInfo, anim, ItemAnimationInfo.FADE_IN);
+                mRunningItemAnimations.add(info);
+                anim.addListener(new AnimatorListenerAdapter() {
+                    @Override
+                    public void onAnimationEnd(Animator animation) {
+                        for (int j = 0; j < mRunningItemAnimations.size(); ++j) {
+                            if (mRunningItemAnimations.get(j).animator == animation) {
+                                mRunningItemAnimations.remove(j);
+                                break;
+                            }
+                        }
+                    }
+                });
+            }
+        }
+        mPreLayoutItems.clear();
+        mPostLayoutItems.clear();
+    }
+
+    /**
+     * Gets position/existence information on menu items before and after layout,
+     * which is then fed into runItemAnimations()
+     */
+    private void setupItemAnimations() {
+        computeMenuItemAnimationInfo(true);
+        ((View) mMenuView).getViewTreeObserver().
+                addOnPreDrawListener(mItemAnimationPreDrawListener);
+    }
+
     @Override
     public void updateMenuView(boolean cleared) {
         final ViewGroup menuViewParent = (ViewGroup) ((View) mMenuView).getParent();
-        if (menuViewParent != null) {
-            ActionBarTransition.beginDelayedTransition(menuViewParent);
+        if (menuViewParent != null && ACTIONBAR_ANIMATIONS_ENABLED) {
+            setupItemAnimations();
         }
         super.updateMenuView(cleared);
 
@@ -427,10 +660,7 @@ public class ActionMenuPresenter extends BaseMenuPresenter
             MenuItemImpl item = visibleItems.get(i);
 
             if (item.requiresActionButton()) {
-                View v = getItemView(item, mScrapActionButtonView, parent);
-                if (mScrapActionButtonView == null) {
-                    mScrapActionButtonView = v;
-                }
+                View v = getItemView(item, null, parent);
                 if (mStrictWidthLimit) {
                     cellsRemaining -= ActionMenuView.measureChildForCells(v,
                             cellSize, cellsRemaining, querySpec, 0);
@@ -456,10 +686,7 @@ public class ActionMenuPresenter extends BaseMenuPresenter
                         (!mStrictWidthLimit || cellsRemaining > 0);
 
                 if (isAction) {
-                    View v = getItemView(item, mScrapActionButtonView, parent);
-                    if (mScrapActionButtonView == null) {
-                        mScrapActionButtonView = v;
-                    }
+                    View v = getItemView(item, null, parent);
                     if (mStrictWidthLimit) {
                         final int cells = ActionMenuView.measureChildForCells(v,
                                 cellSize, cellsRemaining, querySpec, 0);
@@ -546,8 +773,14 @@ public class ActionMenuPresenter extends BaseMenuPresenter
     }
 
     public void setMenuView(ActionMenuView menuView) {
-        mMenuView = menuView;
-        menuView.initialize(mMenu);
+        if (menuView != mMenuView) {
+            if (mMenuView != null) {
+                ((View) mMenuView).removeOnAttachStateChangeListener(mAttachStateChangeListener);
+            }
+            mMenuView = menuView;
+            menuView.initialize(mMenu);
+            menuView.addOnAttachStateChangeListener(mAttachStateChangeListener);
+        }
     }
 
     private static class SavedState implements Parcelable {
@@ -645,9 +878,10 @@ public class ActionMenuPresenter extends BaseMenuPresenter
             return false;
         }
 
+    /** @hide */
         @Override
-        public void onInitializeAccessibilityNodeInfo(AccessibilityNodeInfo info) {
-            super.onInitializeAccessibilityNodeInfo(info);
+        public void onInitializeAccessibilityNodeInfoInternal(AccessibilityNodeInfo info) {
+            super.onInitializeAccessibilityNodeInfoInternal(info);
             info.setCanOpenPopup(true);
         }
 
@@ -771,6 +1005,54 @@ public class ActionMenuPresenter extends BaseMenuPresenter
         @Override
         public ListPopupWindow getPopup() {
             return mActionButtonPopup != null ? mActionButtonPopup.getPopup() : null;
+        }
+    }
+
+    /**
+     * This class holds layout information for a menu item. This is used to determine
+     * pre- and post-layout information about menu items, which will then be used to
+     * determine appropriate item animations.
+     */
+    private static class MenuItemLayoutInfo {
+        View view;
+        int left;
+        int top;
+
+        MenuItemLayoutInfo(View view, boolean preLayout) {
+            left = view.getLeft();
+            top = view.getTop();
+            if (preLayout) {
+                // We track translation for pre-layout because a view might be mid-animation
+                // and we need this information to know where to animate from
+                left += view.getTranslationX();
+                top += view.getTranslationY();
+            }
+            this.view = view;
+        }
+    }
+
+    /**
+     * This class is used to store information about currently-running item animations.
+     * This is used when new animations are scheduled to determine whether any existing
+     * animations need to be canceled, based on whether the running animations overlap
+     * with any new animations. For example, if an item is currently animating from
+     * location A to B and another change dictates that it be animated to C, then the current
+     * A-B animation will be canceled and a new animation to C will be started.
+     */
+    private static class ItemAnimationInfo {
+        int id;
+        MenuItemLayoutInfo menuItemLayoutInfo;
+        Animator animator;
+        int animType;
+        static final int MOVE = 0;
+        static final int FADE_IN = 1;
+        static final int FADE_OUT = 2;
+
+        ItemAnimationInfo(int id, MenuItemLayoutInfo info, Animator anim, int animType) {
+            this.id = id;
+            menuItemLayoutInfo = info;
+            animator = anim;
+            this.animType = animType;
         }
     }
 }

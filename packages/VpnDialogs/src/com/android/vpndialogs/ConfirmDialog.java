@@ -18,14 +18,10 @@ package com.android.vpndialogs;
 
 import android.content.Context;
 import android.content.DialogInterface;
-import android.content.Intent;
-import android.content.pm.ApplicationInfo;
-import android.content.pm.PackageManager;
-import android.content.pm.ResolveInfo;
 import android.graphics.drawable.Drawable;
 import android.net.IConnectivityManager;
-import android.net.VpnService;
 import android.os.ServiceManager;
+import android.os.UserHandle;
 import android.text.Html;
 import android.text.Html.ImageGetter;
 import android.util.Log;
@@ -35,8 +31,6 @@ import android.widget.TextView;
 
 import com.android.internal.app.AlertActivity;
 import com.android.internal.net.VpnConfig;
-
-import java.util.List;
 
 public class ConfirmDialog extends AlertActivity
         implements DialogInterface.OnClickListener, ImageGetter {
@@ -57,7 +51,7 @@ public class ConfirmDialog extends AlertActivity
             mService = IConnectivityManager.Stub.asInterface(
                     ServiceManager.getService(Context.CONNECTIVITY_SERVICE));
 
-            if (mService.prepareVpn(mPackage, null)) {
+            if (mService.prepareVpn(mPackage, null, UserHandle.myUserId())) {
                 setResult(RESULT_OK);
                 finish();
                 return;
@@ -101,10 +95,10 @@ public class ConfirmDialog extends AlertActivity
     @Override
     public void onClick(DialogInterface dialog, int which) {
         try {
-            if (mService.prepareVpn(null, mPackage)) {
+            if (mService.prepareVpn(null, mPackage, UserHandle.myUserId())) {
                 // Authorize this app to initiate VPN connections in the future without user
                 // intervention.
-                mService.setVpnPackageAuthorization(true);
+                mService.setVpnPackageAuthorization(mPackage, UserHandle.myUserId(), true);
                 setResult(RESULT_OK);
             }
         } catch (Exception e) {

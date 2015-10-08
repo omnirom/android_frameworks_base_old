@@ -25,7 +25,6 @@ import java.nio.ByteOrder;
 import java.nio.FloatBuffer;
 
 import android.content.Context;
-import android.content.res.Resources;
 import android.graphics.PixelFormat;
 import android.graphics.SurfaceTexture;
 import android.hardware.display.DisplayManagerInternal;
@@ -37,7 +36,6 @@ import android.opengl.EGLDisplay;
 import android.opengl.EGLSurface;
 import android.opengl.GLES20;
 import android.opengl.GLES11Ext;
-import android.util.FloatMath;
 import android.util.Slog;
 import android.view.DisplayInfo;
 import android.view.Surface.OutOfResourcesException;
@@ -48,7 +46,6 @@ import android.view.SurfaceSession;
 import libcore.io.Streams;
 
 import com.android.server.LocalServices;
-import com.android.internal.R;
 
 /**
  * <p>
@@ -372,13 +369,13 @@ final class ColorFade {
             GLES20.glClear(GLES20.GL_COLOR_BUFFER_BIT);
 
             // Draw the frame.
-            float one_minus_level = 1 - level;
-            float cos = FloatMath.cos((float)Math.PI * one_minus_level);
-            float sign = cos < 0 ? -1 : 1;
-            float opacity = -FloatMath.pow(one_minus_level, 2) + 1;
-            float saturation = FloatMath.pow(level, 4);
-            float scale = (-FloatMath.pow(one_minus_level, 2) + 1) * 0.1f + 0.9f;
-            float gamma = (0.5f * sign * FloatMath.pow(cos, 2) + 0.5f) * 0.9f + 0.1f;
+            double one_minus_level = 1 - level;
+            double cos = Math.cos(Math.PI * one_minus_level);
+            double sign = cos < 0 ? -1 : 1;
+            float opacity = (float) -Math.pow(one_minus_level, 2) + 1;
+            float saturation = (float) Math.pow(level, 4);
+            float scale = (float) ((-Math.pow(one_minus_level, 2) + 1) * 0.1d + 0.9d);
+            float gamma = (float) ((0.5d * sign * Math.pow(cos, 2) + 0.5d) * 0.9d + 0.1d);
             drawFaded(opacity, 1.f / gamma, saturation, scale);
             if (checkGlErrors("drawFrame")) {
                 return false;

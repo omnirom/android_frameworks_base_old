@@ -16,8 +16,13 @@
 
 package android.view;
 
+import android.annotation.ColorInt;
+import android.annotation.DrawableRes;
+import android.annotation.IdRes;
+import android.annotation.LayoutRes;
 import android.annotation.NonNull;
 import android.annotation.Nullable;
+import android.annotation.StyleRes;
 import android.annotation.SystemApi;
 import android.content.Context;
 import android.content.res.Configuration;
@@ -42,10 +47,8 @@ import android.view.accessibility.AccessibilityEvent;
  * area, default key processing, etc.
  *
  * <p>The only existing implementation of this abstract class is
- * android.policy.PhoneWindow, which you should instantiate when needing a
- * Window.  Eventually that class will be refactored and a factory method
- * added for creating Window instances without knowing about a particular
- * implementation.
+ * android.view.PhoneWindow, which you should instantiate when needing a
+ * Window.
  */
 public abstract class Window {
     /** Flag for the "options panel" feature.  This is enabled by default. */
@@ -411,16 +414,40 @@ public abstract class Window {
         public boolean onSearchRequested();
 
         /**
+         * Called when the user signals the desire to start a search.
+         *
+         * @param searchEvent A {@link SearchEvent} describing the signal to
+         *                   start a search.
+         * @return true if search launched, false if activity refuses (blocks)
+         */
+        public boolean onSearchRequested(SearchEvent searchEvent);
+
+        /**
          * Called when an action mode is being started for this window. Gives the
          * callback an opportunity to handle the action mode in its own unique and
          * beautiful way. If this method returns null the system can choose a way
-         * to present the mode or choose not to start the mode at all.
+         * to present the mode or choose not to start the mode at all. This is equivalent
+         * to {@link #onWindowStartingActionMode(android.view.ActionMode.Callback, int)}
+         * with type {@link ActionMode#TYPE_PRIMARY}.
          *
          * @param callback Callback to control the lifecycle of this action mode
          * @return The ActionMode that was started, or null if the system should present it
          */
         @Nullable
         public ActionMode onWindowStartingActionMode(ActionMode.Callback callback);
+
+        /**
+         * Called when an action mode is being started for this window. Gives the
+         * callback an opportunity to handle the action mode in its own unique and
+         * beautiful way. If this method returns null the system can choose a way
+         * to present the mode or choose not to start the mode at all.
+         *
+         * @param callback Callback to control the lifecycle of this action mode
+         * @param type One of {@link ActionMode#TYPE_PRIMARY} or {@link ActionMode#TYPE_FLOATING}.
+         * @return The ActionMode that was started, or null if the system should present it
+         */
+        @Nullable
+        public ActionMode onWindowStartingActionMode(ActionMode.Callback callback, int type);
 
         /**
          * Called when an action mode has been started. The appropriate mode callback
@@ -568,6 +595,8 @@ public abstract class Window {
                     title="Panel";
                 } else if (wp.type == WindowManager.LayoutParams.TYPE_APPLICATION_SUB_PANEL) {
                     title="SubPanel";
+                } else if (wp.type == WindowManager.LayoutParams.TYPE_APPLICATION_ABOVE_SUB_PANEL) {
+                    title="AboveSubPanel";
                 } else if (wp.type == WindowManager.LayoutParams.TYPE_APPLICATION_ATTACHED_DIALOG) {
                     title="AtchDlg";
                 } else {
@@ -736,7 +765,7 @@ public abstract class Window {
      * 0 here will override the animations the window would
      * normally retrieve from its theme.
      */
-    public void setWindowAnimations(int resId) {
+    public void setWindowAnimations(@StyleRes int resId) {
         final WindowManager.LayoutParams attrs = getAttributes();
         attrs.windowAnimations = resId;
         dispatchWindowAttributesChanged(attrs);
@@ -991,7 +1020,8 @@ public abstract class Window {
      *
      * @return The view if found or null otherwise.
      */
-    public View findViewById(int id) {
+    @Nullable
+    public View findViewById(@IdRes int id) {
         return getDecorView().findViewById(id);
     }
 
@@ -1004,7 +1034,7 @@ public abstract class Window {
      * @param layoutResID Resource ID to be inflated.
      * @see #setContentView(View, android.view.ViewGroup.LayoutParams)
      */
-    public abstract void setContentView(int layoutResID);
+    public abstract void setContentView(@LayoutRes int layoutResID);
 
     /**
      * Convenience for
@@ -1072,7 +1102,7 @@ public abstract class Window {
     public abstract void setTitle(CharSequence title);
 
     @Deprecated
-    public abstract void setTitleColor(int textColor);
+    public abstract void setTitleColor(@ColorInt int textColor);
 
     public abstract void openPanel(int featureId, KeyEvent event);
 
@@ -1134,7 +1164,7 @@ public abstract class Window {
      * @param resId The resource identifier of a drawable resource which will
      *              be installed as the new background.
      */
-    public void setBackgroundDrawableResource(int resId) {
+    public void setBackgroundDrawableResource(@DrawableRes int resId) {
         setBackgroundDrawable(mContext.getDrawable(resId));
     }
 
@@ -1150,7 +1180,7 @@ public abstract class Window {
 
     /**
      * Set the value for a drawable feature of this window, from a resource
-     * identifier.  You must have called requestFeauture(featureId) before
+     * identifier.  You must have called requestFeature(featureId) before
      * calling this function.
      *
      * @see android.content.res.Resources#getDrawable(int)
@@ -1159,7 +1189,7 @@ public abstract class Window {
      * constant by Window.
      * @param resId Resource identifier of the desired image.
      */
-    public abstract void setFeatureDrawableResource(int featureId, int resId);
+    public abstract void setFeatureDrawableResource(int featureId, @DrawableRes int resId);
 
     /**
      * Set the value for a drawable feature of this window, from a URI. You
@@ -1429,7 +1459,7 @@ public abstract class Window {
      *
      * @param resId resource ID of a drawable to set
      */
-    public void setIcon(int resId) { }
+    public void setIcon(@DrawableRes int resId) { }
 
     /**
      * Set the default icon for this window.
@@ -1438,7 +1468,7 @@ public abstract class Window {
      *
      * @hide
      */
-    public void setDefaultIcon(int resId) { }
+    public void setDefaultIcon(@DrawableRes int resId) { }
 
     /**
      * Set the logo for this window. A logo is often shown in place of an
@@ -1447,7 +1477,7 @@ public abstract class Window {
      *
      * @param resId resource ID of a drawable to set
      */
-    public void setLogo(int resId) { }
+    public void setLogo(@DrawableRes int resId) { }
 
     /**
      * Set the default logo for this window.
@@ -1456,7 +1486,7 @@ public abstract class Window {
      *
      * @hide
      */
-    public void setDefaultLogo(int resId) { }
+    public void setDefaultLogo(@DrawableRes int resId) { }
 
     /**
      * Set focus locally. The window should have the
@@ -1759,14 +1789,6 @@ public abstract class Window {
     public void setAllowReturnTransitionOverlap(boolean allow) {}
 
     /**
-     * TODO: remove this.
-     * @hide
-     */
-    public void setAllowExitTransitionOverlap(boolean allow) {
-        setAllowReturnTransitionOverlap(allow);
-    }
-
-    /**
      * Returns how the transition set in
      * {@link #setExitTransition(android.transition.Transition)} overlaps with the exit
      * transition of the called Activity when reentering after if finishes. When true,
@@ -1778,12 +1800,6 @@ public abstract class Window {
      * @attr ref android.R.styleable#Window_windowAllowReturnTransitionOverlap
      */
     public boolean getAllowReturnTransitionOverlap() { return true; }
-
-    /**
-     * TODO: remove this.
-     * @hide
-     */
-    public boolean getAllowExitTransitionOverlap() { return getAllowReturnTransitionOverlap(); }
 
     /**
      * Returns the duration, in milliseconds, of the window background fade
@@ -1838,28 +1854,30 @@ public abstract class Window {
     /**
      * @return the color of the status bar.
      */
+    @ColorInt
     public abstract int getStatusBarColor();
 
     /**
-     * Sets the color of the status bar to {@param color}.
+     * Sets the color of the status bar to {@code color}.
      *
      * For this to take effect,
      * the window must be drawing the system bar backgrounds with
      * {@link android.view.WindowManager.LayoutParams#FLAG_DRAWS_SYSTEM_BAR_BACKGROUNDS} and
      * {@link android.view.WindowManager.LayoutParams#FLAG_TRANSLUCENT_STATUS} must not be set.
      *
-     * If {@param color} is not opaque, consider setting
+     * If {@code color} is not opaque, consider setting
      * {@link android.view.View#SYSTEM_UI_FLAG_LAYOUT_STABLE} and
      * {@link android.view.View#SYSTEM_UI_FLAG_LAYOUT_FULLSCREEN}.
      * <p>
      * The transitionName for the view background will be "android:status:background".
      * </p>
      */
-    public abstract void setStatusBarColor(int color);
+    public abstract void setStatusBarColor(@ColorInt int color);
 
     /**
      * @return the color of the navigation bar.
      */
+    @ColorInt
     public abstract int getNavigationBarColor();
 
     /**
@@ -1877,7 +1895,7 @@ public abstract class Window {
      * The transitionName for the view background will be "android:navigation:background".
      * </p>
      */
-    public abstract void setNavigationBarColor(int color);
+    public abstract void setNavigationBarColor(@ColorInt int color);
 
 
 }

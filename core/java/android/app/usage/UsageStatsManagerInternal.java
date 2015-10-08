@@ -37,6 +37,16 @@ public abstract class UsageStatsManagerInternal {
     public abstract void reportEvent(ComponentName component, int userId, int eventType);
 
     /**
+     * Reports an event to the UsageStatsManager.
+     *
+     * @param packageName The package for which this event occurred.
+     * @param userId The user id to which the component belongs to.
+     * @param eventType The event that occurred. Valid values can be found at
+     * {@link UsageEvents}
+     */
+    public abstract void reportEvent(String packageName, int userId, int eventType);
+
+    /**
      * Reports a configuration change to the UsageStatsManager.
      *
      * @param config The new device configuration.
@@ -44,7 +54,58 @@ public abstract class UsageStatsManagerInternal {
     public abstract void reportConfigurationChange(Configuration config, int userId);
 
     /**
+     * Reports that a content provider has been accessed by a foreground app.
+     * @param name The authority of the content provider
+     * @param pkgName The package name of the content provider
+     * @param userId The user in which the content provider was accessed.
+     */
+    public abstract void reportContentProviderUsage(String name, String pkgName, int userId);
+
+    /**
      * Prepares the UsageStatsService for shutdown.
      */
     public abstract void prepareShutdown();
+
+    /**
+     * Returns true if the app has not been used for a certain amount of time. How much time?
+     * Could be hours, could be days, who knows?
+     *
+     * @param packageName
+     * @param userId
+     * @return
+     */
+    public abstract boolean isAppIdle(String packageName, int userId);
+
+    /**
+     * Returns all of the uids for a given user where all packages associating with that uid
+     * are in the app idle state -- there are no associated apps that are not idle.  This means
+     * all of the returned uids can be safely considered app idle.
+     */
+    public abstract int[] getIdleUidsForUser(int userId);
+
+    /**
+     * @return True if currently app idle parole mode is on.  This means all idle apps are allow to
+     * run for a short period of time.
+     */
+    public abstract boolean isAppIdleParoleOn();
+
+    /**
+     * Sets up a listener for changes to packages being accessed.
+     * @param listener A listener within the system process.
+     */
+    public abstract void addAppIdleStateChangeListener(
+            AppIdleStateChangeListener listener);
+
+    /**
+     * Removes a listener that was previously added for package usage state changes.
+     * @param listener The listener within the system process to remove.
+     */
+    public abstract void removeAppIdleStateChangeListener(
+            AppIdleStateChangeListener listener);
+
+    public static abstract class AppIdleStateChangeListener {
+        public abstract void onAppIdleStateChanged(String packageName, int userId, boolean idle);
+        public abstract void onParoleStateChanged(boolean isParoleOn);
+    }
+
 }

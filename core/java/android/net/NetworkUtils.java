@@ -16,9 +16,11 @@
 
 package android.net;
 
+import java.io.FileDescriptor;
 import java.net.InetAddress;
 import java.net.Inet4Address;
 import java.net.Inet6Address;
+import java.net.SocketException;
 import java.net.UnknownHostException;
 import java.util.Collection;
 import java.util.Locale;
@@ -56,6 +58,30 @@ public class NetworkUtils {
 
     /**
      * Start the DHCP client daemon, in order to have it request addresses
+     * for the named interface.  This returns {@code true} if the DHCPv4 daemon
+     * starts, {@code false} otherwise.  This call blocks until such time as a
+     * result is available or the default discovery timeout has been reached.
+     * Callers should check {@link #getDhcpResults} to determine whether DHCP
+     * succeeded or failed, and if it succeeded, to fetch the {@link DhcpResults}.
+     * @param interfaceName the name of the interface to configure
+     * @return {@code true} for success, {@code false} for failure
+     */
+    public native static boolean startDhcp(String interfaceName);
+
+    /**
+     * Initiate renewal on the DHCP client daemon for the named interface.  This
+     * returns {@code true} if the DHCPv4 daemon has been notified, {@code false}
+     * otherwise.  This call blocks until such time as a result is available or
+     * the default renew timeout has been reached.  Callers should check
+     * {@link #getDhcpResults} to determine whether DHCP succeeded or failed,
+     * and if it succeeded, to fetch the {@link DhcpResults}.
+     * @param interfaceName the name of the interface to configure
+     * @return {@code true} for success, {@code false} for failure
+     */
+    public native static boolean startDhcpRenew(String interfaceName);
+
+    /**
+     * Start the DHCP client daemon, in order to have it request addresses
      * for the named interface, and then configure the interface with those
      * addresses. This call blocks until it obtains a result (either success
      * or failure) from the daemon.
@@ -64,17 +90,31 @@ public class NetworkUtils {
      * the IP address information.
      * @return {@code true} for success, {@code false} for failure
      */
-    public native static boolean runDhcp(String interfaceName, DhcpResults dhcpResults);
+    public static boolean runDhcp(String interfaceName, DhcpResults dhcpResults) {
+        return startDhcp(interfaceName) && getDhcpResults(interfaceName, dhcpResults);
+    }
 
     /**
-     * Initiate renewal on the Dhcp client daemon. This call blocks until it obtains
+     * Initiate renewal on the DHCP client daemon. This call blocks until it obtains
      * a result (either success or failure) from the daemon.
      * @param interfaceName the name of the interface to configure
      * @param dhcpResults if the request succeeds, this object is filled in with
      * the IP address information.
      * @return {@code true} for success, {@code false} for failure
      */
-    public native static boolean runDhcpRenew(String interfaceName, DhcpResults dhcpResults);
+    public static boolean runDhcpRenew(String interfaceName, DhcpResults dhcpResults) {
+        return startDhcpRenew(interfaceName) && getDhcpResults(interfaceName, dhcpResults);
+    }
+
+    /**
+     * Fetch results from the DHCP client daemon. This call returns {@code true} if
+     * if there are results available to be read, {@code false} otherwise.
+     * @param interfaceName the name of the interface to configure
+     * @param dhcpResults if the request succeeds, this object is filled in with
+     * the IP address information.
+     * @return {@code true} for success, {@code false} for failure
+     */
+    public native static boolean getDhcpResults(String interfaceName, DhcpResults dhcpResults);
 
     /**
      * Shut down the DHCP client daemon.
@@ -101,6 +141,11 @@ public class NetworkUtils {
     public native static String getDhcpError();
 
     /**
+     * Attaches a socket filter that accepts DHCP packets to the given socket.
+     */
+    public native static void attachDhcpFilter(FileDescriptor fd) throws SocketException;
+
+    /**
      * Binds the current process to the network designated by {@code netId}.  All sockets created
      * in the future (and not explicitly bound via a bound {@link SocketFactory} (see
      * {@link Network#getSocketFactory}) will be bound to this network.  Note that if this
@@ -114,7 +159,7 @@ public class NetworkUtils {
      * Return the netId last passed to {@link #bindProcessToNetwork}, or NETID_UNSET if
      * {@link #unbindProcessToNetwork} has been called since {@link #bindProcessToNetwork}.
      */
-    public native static int getNetworkBoundToProcess();
+    public native static int getBoundNetworkForProcess();
 
     /**
      * Binds host resolutions performed by this process to the network designated by {@code netId}.
@@ -133,11 +178,26 @@ public class NetworkUtils {
     public native static int bindSocketToNetwork(int socketfd, int netId);
 
     /**
+     * Protect {@code fd} from VPN connections.  After protecting, data sent through
+     * this socket will go directly to the underlying network, so its traffic will not be
+     * forwarded through the VPN.
+     */
+    public static boolean protectFromVpn(FileDescriptor fd) {
+        return protectFromVpn(fd.getInt$());
+    }
+
+    /**
      * Protect {@code socketfd} from VPN connections.  After protecting, data sent through
      * this socket will go directly to the underlying network, so its traffic will not be
      * forwarded through the VPN.
      */
     public native static boolean protectFromVpn(int socketfd);
+
+    /**
+     * Determine if {@code uid} can access network designated by {@code netId}.
+     * @return {@code true} if {@code uid} can access network, {@code false} otherwise.
+     */
+    public native static boolean queryUserAccess(int uid, int netId);
 
     /**
      * Convert a IPv4 address from an integer to an InetAddress.
@@ -190,6 +250,25 @@ public class NetworkUtils {
     public static int netmaskIntToPrefixLength(int netmask) {
         return Integer.bitCount(netmask);
     }
+
+    /**
+     * Convert an IPv4 netmask to a prefix length, checking that the netmask is contiguous.
+     * @param netmask as a {@code Inet4Address}.
+     * @return the network prefix length
+     * @throws IllegalArgumentException the specified netmask was not contiguous.
+     * @hide
+     */
+    public static int netmaskToPrefixLength(Inet4Address netmask) {
+        // inetAddressToInt returns an int in *network* byte order.
+        int i = Integer.reverseBytes(inetAddressToInt(netmask));
+        int prefixLength = Integer.bitCount(i);
+        int trailingZeros = Integer.numberOfTrailingZeros(i);
+        if (trailingZeros != 32 - prefixLength) {
+            throw new IllegalArgumentException("Non-contiguous netmask: " + Integer.toHexString(i));
+        }
+        return prefixLength;
+    }
+
 
     /**
      * Create an InetAddress from a string where the string must be a standard
@@ -268,6 +347,22 @@ public class NetworkUtils {
             throw new RuntimeException("getNetworkPart error - " + e.toString());
         }
         return netPart;
+    }
+
+    /**
+     * Returns the implicit netmask of an IPv4 address, as was the custom before 1993.
+     */
+    public static int getImplicitNetmask(Inet4Address address) {
+        int firstByte = address.getAddress()[0] & 0xff;  // Convert to an unsigned value.
+        if (firstByte < 128) {
+            return 8;
+        } else if (firstByte < 192) {
+            return 16;
+        } else if (firstByte < 224) {
+            return 24;
+        } else {
+            return 32;  // Will likely not end well for other reasons.
+        }
     }
 
     /**

@@ -18,6 +18,7 @@ package android.media.tv;
 
 import android.content.Context;
 import android.graphics.Rect;
+import android.media.PlaybackParams;
 import android.net.Uri;
 import android.os.Bundle;
 import android.os.IBinder;
@@ -41,8 +42,9 @@ import com.android.internal.os.SomeArgs;
 public class ITvInputSessionWrapper extends ITvInputSession.Stub implements HandlerCaller.Callback {
     private static final String TAG = "TvInputSessionWrapper";
 
-    private static final int MESSAGE_HANDLING_DURATION_THRESHOLD_MILLIS = 50;
-    private static final int MESSAGE_TUNE_DURATION_THRESHOLD_MILLIS = 2000;
+    private static final int EXECUTE_MESSAGE_TIMEOUT_SHORT_MILLIS = 50;
+    private static final int EXECUTE_MESSAGE_TUNE_TIMEOUT_MILLIS = 2000;
+    private static final int EXECUTE_MESSAGE_TIMEOUT_LONG_MILLIS = 5 * 1000;
 
     private static final int DO_RELEASE = 1;
     private static final int DO_SET_MAIN = 2;
@@ -56,7 +58,12 @@ public class ITvInputSessionWrapper extends ITvInputSession.Stub implements Hand
     private static final int DO_CREATE_OVERLAY_VIEW = 10;
     private static final int DO_RELAYOUT_OVERLAY_VIEW = 11;
     private static final int DO_REMOVE_OVERLAY_VIEW = 12;
-    private static final int DO_REQUEST_UNBLOCK_CONTENT = 13;
+    private static final int DO_UNBLOCK_CONTENT = 13;
+    private static final int DO_TIME_SHIFT_PAUSE = 14;
+    private static final int DO_TIME_SHIFT_RESUME = 15;
+    private static final int DO_TIME_SHIFT_SEEK_TO = 16;
+    private static final int DO_TIME_SHIFT_SET_PLAYBACK_PARAMS = 17;
+    private static final int DO_TIME_SHIFT_ENABLE_POSITION_TRACKING = 18;
 
     private final HandlerCaller mCaller;
 
@@ -149,8 +156,28 @@ public class ITvInputSessionWrapper extends ITvInputSession.Stub implements Hand
                 mTvInputSessionImpl.removeOverlayView(true);
                 break;
             }
-            case DO_REQUEST_UNBLOCK_CONTENT: {
+            case DO_UNBLOCK_CONTENT: {
                 mTvInputSessionImpl.unblockContent((String) msg.obj);
+                break;
+            }
+            case DO_TIME_SHIFT_PAUSE: {
+                mTvInputSessionImpl.timeShiftPause();
+                break;
+            }
+            case DO_TIME_SHIFT_RESUME: {
+                mTvInputSessionImpl.timeShiftResume();
+                break;
+            }
+            case DO_TIME_SHIFT_SEEK_TO: {
+                mTvInputSessionImpl.timeShiftSeekTo((Long) msg.obj);
+                break;
+            }
+            case DO_TIME_SHIFT_SET_PLAYBACK_PARAMS: {
+                mTvInputSessionImpl.timeShiftSetPlaybackParams((PlaybackParams) msg.obj);
+                break;
+            }
+            case DO_TIME_SHIFT_ENABLE_POSITION_TRACKING: {
+                mTvInputSessionImpl.timeShiftEnablePositionTracking((Boolean) msg.obj);
                 break;
             }
             default: {
@@ -159,13 +186,17 @@ public class ITvInputSessionWrapper extends ITvInputSession.Stub implements Hand
             }
         }
         long duration = System.currentTimeMillis() - startTime;
-        if (duration > MESSAGE_HANDLING_DURATION_THRESHOLD_MILLIS) {
+        if (duration > EXECUTE_MESSAGE_TIMEOUT_SHORT_MILLIS) {
             Log.w(TAG, "Handling message (" + msg.what + ") took too long time (duration="
                     + duration + "ms)");
-            if (msg.what == DO_TUNE && duration > MESSAGE_TUNE_DURATION_THRESHOLD_MILLIS) {
+            if (msg.what == DO_TUNE && duration > EXECUTE_MESSAGE_TUNE_TIMEOUT_MILLIS) {
                 throw new RuntimeException("Too much time to handle tune request. (" + duration
-                        + "ms > " + MESSAGE_TUNE_DURATION_THRESHOLD_MILLIS + "ms) "
+                        + "ms > " + EXECUTE_MESSAGE_TUNE_TIMEOUT_MILLIS + "ms) "
                         + "Consider handling the tune request in a separate thread.");
+            }
+            if (duration > EXECUTE_MESSAGE_TIMEOUT_LONG_MILLIS) {
+                throw new RuntimeException("Too much time to handle a request. (type=" + msg.what +
+                        ", " + duration + "ms > " + EXECUTE_MESSAGE_TIMEOUT_LONG_MILLIS + "ms).");
             }
         }
     }
@@ -237,9 +268,36 @@ public class ITvInputSessionWrapper extends ITvInputSession.Stub implements Hand
     }
 
     @Override
-    public void requestUnblockContent(String unblockedRating) {
+    public void unblockContent(String unblockedRating) {
         mCaller.executeOrSendMessage(mCaller.obtainMessageO(
-                DO_REQUEST_UNBLOCK_CONTENT, unblockedRating));
+                DO_UNBLOCK_CONTENT, unblockedRating));
+    }
+
+    @Override
+    public void timeShiftPause() {
+        mCaller.executeOrSendMessage(mCaller.obtainMessage(DO_TIME_SHIFT_PAUSE));
+    }
+
+    @Override
+    public void timeShiftResume() {
+        mCaller.executeOrSendMessage(mCaller.obtainMessage(DO_TIME_SHIFT_RESUME));
+    }
+
+    @Override
+    public void timeShiftSeekTo(long timeMs) {
+        mCaller.executeOrSendMessage(mCaller.obtainMessageO(DO_TIME_SHIFT_SEEK_TO, timeMs));
+    }
+
+    @Override
+    public void timeShiftSetPlaybackParams(PlaybackParams params) {
+        mCaller.executeOrSendMessage(mCaller.obtainMessageO(DO_TIME_SHIFT_SET_PLAYBACK_PARAMS,
+                params));
+    }
+
+    @Override
+    public void timeShiftEnablePositionTracking(boolean enable) {
+        mCaller.executeOrSendMessage(mCaller.obtainMessageO(
+                DO_TIME_SHIFT_ENABLE_POSITION_TRACKING, enable));
     }
 
     private final class TvInputEventReceiver extends InputEventReceiver {

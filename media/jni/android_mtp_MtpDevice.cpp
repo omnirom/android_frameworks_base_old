@@ -91,14 +91,6 @@ MtpDevice* get_device_from_object(JNIEnv* env, jobject javaDevice)
     return (MtpDevice*)env->GetLongField(javaDevice, field_context);
 }
 
-static void checkAndClearExceptionFromCallback(JNIEnv* env, const char* methodName) {
-    if (env->ExceptionCheck()) {
-        ALOGE("An exception was thrown by callback '%s'.", methodName);
-        LOGE_EX(env);
-        env->ExceptionClear();
-    }
-}
-
 // ----------------------------------------------------------------------------
 
 static jboolean
@@ -424,8 +416,6 @@ static JNINativeMethod gMethods[] = {
     {"native_import_file",     "(ILjava/lang/String;)Z",
                                         (void *)android_mtp_MtpDevice_import_file},
 };
-
-static const char* const kClassPathName = "android/mtp/MtpDevice";
 
 int register_android_mtp_MtpDevice(JNIEnv *env)
 {

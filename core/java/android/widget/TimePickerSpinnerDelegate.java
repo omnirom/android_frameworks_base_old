@@ -28,12 +28,10 @@ import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.view.accessibility.AccessibilityEvent;
-import android.view.accessibility.AccessibilityNodeInfo;
 import android.view.inputmethod.EditorInfo;
 import android.view.inputmethod.InputMethodManager;
 import com.android.internal.R;
 
-import java.text.DateFormatSymbols;
 import java.util.Calendar;
 import java.util.Locale;
 
@@ -281,13 +279,13 @@ class TimePickerSpinnerDelegate extends TimePicker.AbstractTimePickerDelegate {
     }
 
     @Override
-    public void setCurrentHour(Integer currentHour) {
+    public void setCurrentHour(int currentHour) {
         setCurrentHour(currentHour, true);
     }
 
-    private void setCurrentHour(Integer currentHour, boolean notifyTimeChanged) {
+    private void setCurrentHour(int currentHour, boolean notifyTimeChanged) {
         // why was Integer used in the first place?
-        if (currentHour == null || currentHour == getCurrentHour()) {
+        if (currentHour == getCurrentHour()) {
             return;
         }
         if (!is24HourView()) {
@@ -312,7 +310,7 @@ class TimePickerSpinnerDelegate extends TimePicker.AbstractTimePickerDelegate {
     }
 
     @Override
-    public Integer getCurrentHour() {
+    public int getCurrentHour() {
         int currentHour = mHourSpinner.getValue();
         if (is24HourView()) {
             return currentHour;
@@ -324,7 +322,7 @@ class TimePickerSpinnerDelegate extends TimePicker.AbstractTimePickerDelegate {
     }
 
     @Override
-    public void setCurrentMinute(Integer currentMinute) {
+    public void setCurrentMinute(int currentMinute) {
         if (currentMinute == getCurrentMinute()) {
             return;
         }
@@ -333,12 +331,12 @@ class TimePickerSpinnerDelegate extends TimePicker.AbstractTimePickerDelegate {
     }
 
     @Override
-    public Integer getCurrentMinute() {
+    public int getCurrentMinute() {
         return mMinuteSpinner.getValue();
     }
 
     @Override
-    public void setIs24HourView(Boolean is24HourView) {
+    public void setIs24HourView(boolean is24HourView) {
         if (mIs24HourView == is24HourView) {
             return;
         }
@@ -425,16 +423,6 @@ class TimePickerSpinnerDelegate extends TimePicker.AbstractTimePickerDelegate {
         String selectedDateUtterance = DateUtils.formatDateTime(mContext,
                 mTempCalendar.getTimeInMillis(), flags);
         event.getText().add(selectedDateUtterance);
-    }
-
-    @Override
-    public void onInitializeAccessibilityEvent(AccessibilityEvent event) {
-        event.setClassName(TimePicker.class.getName());
-    }
-
-    @Override
-    public void onInitializeAccessibilityNodeInfo(AccessibilityNodeInfo info) {
-        info.setClassName(TimePicker.class.getName());
     }
 
     private void updateInputState() {
@@ -604,8 +592,8 @@ class TimePickerSpinnerDelegate extends TimePicker.AbstractTimePickerDelegate {
     public static String[] getAmPmStrings(Context context) {
         String[] result = new String[2];
         LocaleData d = LocaleData.get(context.getResources().getConfiguration().locale);
-        result[0] = d.amPm[0].length() > 2 ? d.narrowAm : d.amPm[0];
-        result[1] = d.amPm[1].length() > 2 ? d.narrowPm : d.amPm[1];
+        result[0] = d.amPm[0].length() > 4 ? d.narrowAm : d.amPm[0];
+        result[1] = d.amPm[1].length() > 4 ? d.narrowPm : d.amPm[1];
         return result;
     }
 }

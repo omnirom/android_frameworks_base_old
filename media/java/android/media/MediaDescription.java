@@ -1,22 +1,11 @@
 package android.media;
 
-import android.annotation.NonNull;
 import android.annotation.Nullable;
-import android.content.ContentResolver;
-import android.content.res.Resources;
 import android.graphics.Bitmap;
-import android.graphics.Canvas;
-import android.graphics.Paint;
-import android.graphics.Point;
-import android.graphics.RectF;
-import android.graphics.drawable.BitmapDrawable;
-import android.graphics.drawable.Drawable;
 import android.net.Uri;
 import android.os.Bundle;
-import android.os.CancellationSignal;
 import android.os.Parcel;
 import android.os.Parcelable;
-import android.util.Size;
 
 /**
  * A simple set of metadata for a media item suitable for display. This can be
@@ -52,9 +41,13 @@ public class MediaDescription implements Parcelable {
      * Extras for opaque use by apps/system.
      */
     private final Bundle mExtras;
+    /**
+     * A Uri to identify this content.
+     */
+    private final Uri mMediaUri;
 
     private MediaDescription(String mediaId, CharSequence title, CharSequence subtitle,
-            CharSequence description, Bitmap icon, Uri iconUri, Bundle extras) {
+            CharSequence description, Bitmap icon, Uri iconUri, Bundle extras, Uri mediaUri) {
         mMediaId = mediaId;
         mTitle = title;
         mSubtitle = subtitle;
@@ -62,6 +55,7 @@ public class MediaDescription implements Parcelable {
         mIcon = icon;
         mIconUri = iconUri;
         mExtras = extras;
+        mMediaUri = mediaUri;
     }
 
     private MediaDescription(Parcel in) {
@@ -72,6 +66,7 @@ public class MediaDescription implements Parcelable {
         mIcon = in.readParcelable(null);
         mIconUri = in.readParcelable(null);
         mExtras = in.readBundle();
+        mMediaUri = in.readParcelable(null);
     }
 
     /**
@@ -136,6 +131,15 @@ public class MediaDescription implements Parcelable {
         return mExtras;
     }
 
+    /**
+     * Returns a Uri representing this content or null.
+     *
+     * @return A media Uri or null.
+     */
+    public @Nullable Uri getMediaUri() {
+        return mMediaUri;
+    }
+
     @Override
     public int describeContents() {
         return 0;
@@ -150,6 +154,7 @@ public class MediaDescription implements Parcelable {
         dest.writeParcelable(mIcon, flags);
         dest.writeParcelable(mIconUri, flags);
         dest.writeBundle(mExtras);
+        dest.writeParcelable(mMediaUri, flags);
     }
 
     @Override
@@ -181,6 +186,7 @@ public class MediaDescription implements Parcelable {
         private Bitmap mIcon;
         private Uri mIconUri;
         private Bundle mExtras;
+        private Uri mMediaUri;
 
         /**
          * Creates an initially empty builder.
@@ -268,9 +274,20 @@ public class MediaDescription implements Parcelable {
             return this;
         }
 
+        /**
+         * Sets the media uri.
+         *
+         * @param mediaUri The content's {@link Uri} for the item or null.
+         * @return this
+         */
+        public Builder setMediaUri(@Nullable Uri mediaUri) {
+            mMediaUri = mediaUri;
+            return this;
+        }
+
         public MediaDescription build() {
             return new MediaDescription(mMediaId, mTitle, mSubtitle, mDescription, mIcon, mIconUri,
-                    mExtras);
+                    mExtras, mMediaUri);
         }
     }
 }

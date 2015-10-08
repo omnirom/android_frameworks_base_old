@@ -16,8 +16,6 @@
 
 package com.android.layoutlib.bridge.bars;
 
-import com.android.annotations.NonNull;
-import com.android.annotations.Nullable;
 import com.android.ide.common.rendering.api.RenderResources;
 import com.android.ide.common.rendering.api.ResourceValue;
 import com.android.ide.common.rendering.api.SessionParams;
@@ -26,12 +24,13 @@ import com.android.layoutlib.bridge.android.BridgeContext;
 import com.android.layoutlib.bridge.impl.ResourceHelper;
 import com.android.resources.ResourceType;
 
+import android.annotation.NonNull;
+import android.annotation.Nullable;
 import android.content.Context;
 import android.graphics.drawable.Drawable;
 import android.view.ContextThemeWrapper;
 import android.view.LayoutInflater;
 import android.view.View;
-import android.view.ViewGroup;
 import android.widget.FrameLayout;
 
 import java.lang.reflect.InvocationTargetException;
@@ -51,9 +50,8 @@ public class AppCompatActionBar extends BridgeActionBar {
     /**
      * Inflate the action bar and attach it to {@code parentView}
      */
-    public AppCompatActionBar(@NonNull BridgeContext context, @NonNull SessionParams params,
-            @NonNull ViewGroup parentView) {
-        super(context, params, parentView);
+    public AppCompatActionBar(@NonNull BridgeContext context, @NonNull SessionParams params) {
+        super(context, params);
         int contentRootId = context.getProjectResourceValue(ResourceType.ID,
                 "action_bar_activity_content", 0);
         View contentView = getDecorContent().findViewById(contentRootId);
@@ -64,7 +62,9 @@ public class AppCompatActionBar extends BridgeActionBar {
             // Something went wrong. Create a new FrameLayout in the enclosing layout.
             FrameLayout contentRoot = new FrameLayout(context);
             setMatchParent(contentRoot);
-            mEnclosingLayout.addView(contentRoot);
+            if (mEnclosingLayout != null) {
+                mEnclosingLayout.addView(contentRoot);
+            }
             setContentRoot(contentRoot);
         }
         try {
@@ -151,7 +151,7 @@ public class AppCompatActionBar extends BridgeActionBar {
 
     @Override
     public void createMenuPopup() {
-        // it's hard to addd menus to appcompat's actionbar, since it'll use a lot of reflection.
+        // it's hard to add menus to appcompat's actionbar, since it'll use a lot of reflection.
         // so we skip it for now.
     }
 

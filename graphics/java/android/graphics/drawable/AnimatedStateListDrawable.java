@@ -575,7 +575,7 @@ public class AnimatedStateListDrawable extends StateListDrawable {
             }
         }
 
-        private void mutate() {
+        void mutate() {
             mTransitions = mTransitions.clone();
             mStateIds = mStateIds.clone();
         }
@@ -594,7 +594,7 @@ public class AnimatedStateListDrawable extends StateListDrawable {
                 mTransitions.append(keyToFrom, pos | REVERSED_BIT | reversibleBit);
             }
 
-            return addChild(anim);
+            return pos;
         }
 
         int addStateSet(@NonNull int[] stateSet, @NonNull Drawable drawable, int id) {

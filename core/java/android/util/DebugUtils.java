@@ -16,8 +16,11 @@
 
 package android.util;
 
-import java.lang.reflect.Method;
+import java.io.PrintWriter;
+import java.lang.reflect.Field;
 import java.lang.reflect.InvocationTargetException;
+import java.lang.reflect.Method;
+import java.lang.reflect.Modifier;
 import java.util.Locale;
 
 /**
@@ -123,4 +126,136 @@ public class DebugUtils {
         }
     }
 
+    /** @hide */
+    public static void printSizeValue(PrintWriter pw, long number) {
+        float result = number;
+        String suffix = "";
+        if (result > 900) {
+            suffix = "KB";
+            result = result / 1024;
+        }
+        if (result > 900) {
+            suffix = "MB";
+            result = result / 1024;
+        }
+        if (result > 900) {
+            suffix = "GB";
+            result = result / 1024;
+        }
+        if (result > 900) {
+            suffix = "TB";
+            result = result / 1024;
+        }
+        if (result > 900) {
+            suffix = "PB";
+            result = result / 1024;
+        }
+        String value;
+        if (result < 1) {
+            value = String.format("%.2f", result);
+        } else if (result < 10) {
+            value = String.format("%.1f", result);
+        } else if (result < 100) {
+            value = String.format("%.0f", result);
+        } else {
+            value = String.format("%.0f", result);
+        }
+        pw.print(value);
+        pw.print(suffix);
+    }
+
+    /** @hide */
+    public static String sizeValueToString(long number, StringBuilder outBuilder) {
+        if (outBuilder == null) {
+            outBuilder = new StringBuilder(32);
+        }
+        float result = number;
+        String suffix = "";
+        if (result > 900) {
+            suffix = "KB";
+            result = result / 1024;
+        }
+        if (result > 900) {
+            suffix = "MB";
+            result = result / 1024;
+        }
+        if (result > 900) {
+            suffix = "GB";
+            result = result / 1024;
+        }
+        if (result > 900) {
+            suffix = "TB";
+            result = result / 1024;
+        }
+        if (result > 900) {
+            suffix = "PB";
+            result = result / 1024;
+        }
+        String value;
+        if (result < 1) {
+            value = String.format("%.2f", result);
+        } else if (result < 10) {
+            value = String.format("%.1f", result);
+        } else if (result < 100) {
+            value = String.format("%.0f", result);
+        } else {
+            value = String.format("%.0f", result);
+        }
+        outBuilder.append(value);
+        outBuilder.append(suffix);
+        return outBuilder.toString();
+    }
+
+    /**
+     * Use prefixed constants (static final values) on given class to turn value
+     * into human-readable string.
+     *
+     * @hide
+     */
+    public static String valueToString(Class<?> clazz, String prefix, int value) {
+        for (Field field : clazz.getDeclaredFields()) {
+            final int modifiers = field.getModifiers();
+            if (Modifier.isStatic(modifiers) && Modifier.isFinal(modifiers)
+                    && field.getType().equals(int.class) && field.getName().startsWith(prefix)) {
+                try {
+                    if (value == field.getInt(null)) {
+                        return field.getName().substring(prefix.length());
+                    }
+                } catch (IllegalAccessException ignored) {
+                }
+            }
+        }
+        return Integer.toString(value);
+    }
+
+    /**
+     * Use prefixed constants (static final values) on given class to turn flags
+     * into human-readable string.
+     *
+     * @hide
+     */
+    public static String flagsToString(Class<?> clazz, String prefix, int flags) {
+        final StringBuilder res = new StringBuilder();
+
+        for (Field field : clazz.getDeclaredFields()) {
+            final int modifiers = field.getModifiers();
+            if (Modifier.isStatic(modifiers) && Modifier.isFinal(modifiers)
+                    && field.getType().equals(int.class) && field.getName().startsWith(prefix)) {
+                try {
+                    final int value = field.getInt(null);
+                    if ((flags & value) != 0) {
+                        flags &= ~value;
+                        res.append(field.getName().substring(prefix.length())).append('|');
+                    }
+                } catch (IllegalAccessException ignored) {
+                }
+            }
+        }
+        if (flags != 0 || res.length() == 0) {
+            res.append(Integer.toHexString(flags));
+        } else {
+            res.deleteCharAt(res.length() - 1);
+        }
+        return res.toString();
+    }
 }

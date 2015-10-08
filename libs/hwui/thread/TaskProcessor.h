@@ -30,9 +30,6 @@ public:
     TaskProcessorBase() { }
     virtual ~TaskProcessorBase() { };
 
-private:
-    friend class TaskManager;
-
     virtual void process(const sp<TaskBase>& task) = 0;
 };
 
@@ -42,12 +39,19 @@ public:
     TaskProcessor(TaskManager* manager): mManager(manager) { }
     virtual ~TaskProcessor() { }
 
-    bool add(const sp<Task<T> >& task);
+    void add(const sp<Task<T> >& task) {
+        if (!addImpl(task)) {
+            // fall back to immediate execution
+            process(task);
+        }
+    }
 
     virtual void onProcess(const sp<Task<T> >& task) = 0;
 
 private:
-    virtual void process(const sp<TaskBase>& task) {
+    bool addImpl(const sp<Task<T> >& task);
+
+    virtual void process(const sp<TaskBase>& task) override {
         sp<Task<T> > realTask = static_cast<Task<T>* >(task.get());
         // This is the right way to do it but sp<> doesn't play nice
         // sp<Task<T> > realTask = static_cast<sp<Task<T> > >(task);
@@ -58,7 +62,7 @@ private:
 };
 
 template<typename T>
-bool TaskProcessor<T>::add(const sp<Task<T> >& task) {
+bool TaskProcessor<T>::addImpl(const sp<Task<T> >& task) {
     if (mManager) {
         sp<TaskProcessor<T> > self(this);
         return mManager->addTask(task, self);

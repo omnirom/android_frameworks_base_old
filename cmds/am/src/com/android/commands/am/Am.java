@@ -26,11 +26,13 @@ import android.app.IActivityController;
 import android.app.IActivityManager;
 import android.app.IInstrumentationWatcher;
 import android.app.Instrumentation;
+import android.app.IStopUserCallback;
 import android.app.ProfilerInfo;
 import android.app.UiAutomationConnection;
 import android.app.usage.ConfigurationStats;
 import android.app.usage.IUsageStatsManager;
 import android.app.usage.UsageStatsManager;
+import android.content.ComponentCallbacks2;
 import android.content.ComponentName;
 import android.content.Context;
 import android.content.IIntentReceiver;
@@ -44,7 +46,6 @@ import android.net.Uri;
 import android.os.Binder;
 import android.os.Build;
 import android.os.Bundle;
-import android.os.IBinder;
 import android.os.ParcelFileDescriptor;
 import android.os.RemoteException;
 import android.os.SELinux;
@@ -73,6 +74,8 @@ import java.util.HashSet;
 import java.util.List;
 
 public class Am extends BaseCommand {
+
+    private static final String SHELL_PACKAGE_NAME = "com.android.shell";
 
     private IActivityManager mAm;
 
@@ -113,30 +116,40 @@ public class Am extends BaseCommand {
                 "       am instrument [-r] [-e <NAME> <VALUE>] [-p <FILE>] [-w]\n" +
                 "               [--user <USER_ID> | current]\n" +
                 "               [--no-window-animation] [--abi <ABI>] <COMPONENT>\n" +
-                "       am profile start [--user <USER_ID> current] <PROCESS> <FILE>\n" +
+                "       am profile start [--user <USER_ID> current] [--sampling INTERVAL] <PROCESS> <FILE>\n" +
                 "       am profile stop [--user <USER_ID> current] [<PROCESS>]\n" +
                 "       am dumpheap [--user <USER_ID> current] [-n] <PROCESS> <FILE>\n" +
                 "       am set-debug-app [-w] [--persistent] <PACKAGE>\n" +
                 "       am clear-debug-app\n" +
+                "       am set-watch-heap <PROCESS> <MEM-LIMIT>\n" +
+                "       am clear-watch-heap\n" +
                 "       am monitor [--gdb <port>]\n" +
                 "       am hang [--allow-restart]\n" +
                 "       am restart\n" +
                 "       am idle-maintenance\n" +
                 "       am screen-compat [on|off] <PACKAGE>\n" +
+                "       am package-importance <PACKAGE>\n" +
                 "       am to-uri [INTENT]\n" +
                 "       am to-intent-uri [INTENT]\n" +
                 "       am to-app-uri [INTENT]\n" +
                 "       am switch-user <USER_ID>\n" +
                 "       am start-user <USER_ID>\n" +
-                "       am stop-user <USER_ID>\n" +
+                "       am stop-user [-w] <USER_ID>\n" +
                 "       am stack start <DISPLAY_ID> <INTENT>\n" +
                 "       am stack movetask <TASK_ID> <STACK_ID> [true|false]\n" +
                 "       am stack resize <STACK_ID> <LEFT,TOP,RIGHT,BOTTOM>\n" +
+                "       am stack split <STACK_ID> <v|h> [INTENT]\n" +
                 "       am stack list\n" +
                 "       am stack info <STACK_ID>\n" +
-                "       am lock-task <TASK_ID>\n" +
-                "       am lock-task stop\n" +
+                "       am task lock <TASK_ID>\n" +
+                "       am task lock stop\n" +
+                "       am task resizeable <TASK_ID> [true|false]\n" +
+                "       am task resize <TASK_ID> <LEFT,TOP,RIGHT,BOTTOM>\n" +
                 "       am get-config\n" +
+                "       am set-inactive [--user <USER_ID>] <PACKAGE> true|false\n" +
+                "       am get-inactive [--user <USER_ID>] <PACKAGE>\n" +
+                "       am send-trim-memory [--user <USER_ID>] <PROCESS>\n" +
+                "               [HIDDEN|RUNNING_MODERATE|BACKGROUND|RUNNING_LOW|MODERATE|RUNNING_CRITICAL|COMPLETE]\n" +
                 "\n" +
                 "am start: start an Activity.  Options are:\n" +
                 "    -D: enable debugging\n" +
@@ -209,6 +222,11 @@ public class Am extends BaseCommand {
                 "\n" +
                 "am clear-debug-app: clear the previously set-debug-app.\n" +
                 "\n" +
+                "am set-watch-heap: start monitoring pss size of <PROCESS>, if it is at or\n" +
+                "    above <HEAP-LIMIT> then a heap dump is collected for the user to report\n" +
+                "\n" +
+                "am clear-watch-heap: clear the previously set-watch-heap.\n" +
+                "\n" +
                 "am bug-report: request bug report generation; will launch UI\n" +
                 "    when done to select where it should be delivered.\n" +
                 "\n" +
@@ -224,6 +242,8 @@ public class Am extends BaseCommand {
                 "\n" +
                 "am screen-compat: control screen compatibility mode of <PACKAGE>.\n" +
                 "\n" +
+                "am package-importance: print current importance of <PACKAGE>.\n" +
+                "\n" +
                 "am to-uri: print the given Intent specification as a URI.\n" +
                 "\n" +
                 "am to-intent-uri: print the given Intent specification as an intent: URI.\n" +
@@ -238,22 +258,44 @@ public class Am extends BaseCommand {
                 "\n" +
                 "am stop-user: stop execution of USER_ID, not allowing it to run any\n" +
                 "  code until a later explicit start or switch to it.\n" +
+                "  -w: wait for stop-user to complete.\n" +
                 "\n" +
                 "am stack start: start a new activity on <DISPLAY_ID> using <INTENT>.\n" +
                 "\n" +
                 "am stack movetask: move <TASK_ID> from its current stack to the top (true) or" +
                 "   bottom (false) of <STACK_ID>.\n" +
                 "\n" +
-                "am stack resize: change <STACK_ID> size and position to <LEFT,TOP,RIGHT,BOTTOM>.\n" +
+                "am stack resize: change <STACK_ID> size and position to <LEFT,TOP,RIGHT,BOTTOM>" +
+                ".\n" +
+                "\n" +
+                "am stack split: split <STACK_ID> into 2 stacks <v>ertically or <h>orizontally\n" +
+                "   starting the new stack with [INTENT] if specified. If [INTENT] isn't\n" +
+                "   specified and the current stack has more than one task, then the top task\n" +
+                "   of the current task will be moved to the new stack. Command will also force\n" +
+                "   all current tasks in both stacks to be resizeable.\n" +
                 "\n" +
                 "am stack list: list all of the activity stacks and their sizes.\n" +
                 "\n" +
                 "am stack info: display the information about activity stack <STACK_ID>.\n" +
                 "\n" +
-                "am lock-task: bring <TASK_ID> to the front and don't allow other tasks to run\n" +
+                "am task lock: bring <TASK_ID> to the front and don't allow other tasks to run.\n" +
+                "\n" +
+                "am task lock stop: end the current task lock.\n" +
+                "\n" +
+                "am task resizeable: change if <TASK_ID> is resizeable (true) or not (false).\n" +
+                "\n" +
+                "am task resize: makes sure <TASK_ID> is in a stack with the specified bounds.\n" +
+                "   Forces the task to be resizeable and creates a stack if no existing stack\n" +
+                "   has the specified bounds.\n" +
                 "\n" +
                 "am get-config: retrieve the configuration and any recent configurations\n" +
-                "  of the device\n" +
+                "  of the device.\n" +
+                "\n" +
+                "am set-inactive: sets the inactive state of an app.\n" +
+                "\n" +
+                "am get-inactive: returns the inactive state of an app.\n" +
+                "\n" +
+                "am send-trim-memory: Send a memory trim event to a <PROCESS>.\n" +
                 "\n" +
                 "<INTENT> specifications include these flags and arguments:\n" +
                 "    [-a <ACTION>] [-d <DATA_URI>] [-t <MIME_TYPE>]\n" +
@@ -267,11 +309,23 @@ public class Am extends BaseCommand {
                 "    [--eu <EXTRA_KEY> <EXTRA_URI_VALUE> ...]\n" +
                 "    [--ecn <EXTRA_KEY> <EXTRA_COMPONENT_NAME_VALUE>]\n" +
                 "    [--eia <EXTRA_KEY> <EXTRA_INT_VALUE>[,<EXTRA_INT_VALUE...]]\n" +
+                "        (mutiple extras passed as Integer[])\n" +
+                "    [--eial <EXTRA_KEY> <EXTRA_INT_VALUE>[,<EXTRA_INT_VALUE...]]\n" +
+                "        (mutiple extras passed as List<Integer>)\n" +
                 "    [--ela <EXTRA_KEY> <EXTRA_LONG_VALUE>[,<EXTRA_LONG_VALUE...]]\n" +
+                "        (mutiple extras passed as Long[])\n" +
+                "    [--elal <EXTRA_KEY> <EXTRA_LONG_VALUE>[,<EXTRA_LONG_VALUE...]]\n" +
+                "        (mutiple extras passed as List<Long>)\n" +
                 "    [--efa <EXTRA_KEY> <EXTRA_FLOAT_VALUE>[,<EXTRA_FLOAT_VALUE...]]\n" +
+                "        (mutiple extras passed as Float[])\n" +
+                "    [--efal <EXTRA_KEY> <EXTRA_FLOAT_VALUE>[,<EXTRA_FLOAT_VALUE...]]\n" +
+                "        (mutiple extras passed as List<Float>)\n" +
                 "    [--esa <EXTRA_KEY> <EXTRA_STRING_VALUE>[,<EXTRA_STRING_VALUE...]]\n" +
-                "        (to embed a comma into a string escape it using \"\\,\")\n" +
-                "    [-n <COMPONENT>] [-p <PACKAGE>] [-f <FLAGS>]\n" +
+                "        (mutiple extras passed as String[]; to embed a comma into a string,\n" +
+                "         escape it using \"\\,\")\n" +
+                "    [--esal <EXTRA_KEY> <EXTRA_STRING_VALUE>[,<EXTRA_STRING_VALUE...]]\n" +
+                "        (mutiple extras passed as List<String>; to embed a comma into a string,\n" +
+                "         escape it using \"\\,\")\n" +
                 "    [--grant-read-uri-permission] [--grant-write-uri-permission]\n" +
                 "    [--grant-persistable-uri-permission] [--grant-prefix-uri-permission]\n" +
                 "    [--debug-log-resolution] [--exclude-stopped-packages]\n" +
@@ -325,6 +379,10 @@ public class Am extends BaseCommand {
             runSetDebugApp();
         } else if (op.equals("clear-debug-app")) {
             runClearDebugApp();
+        } else if (op.equals("set-watch-heap")) {
+            runSetWatchHeap();
+        } else if (op.equals("clear-watch-heap")) {
+            runClearWatchHeap();
         } else if (op.equals("bug-report")) {
             runBugReport();
         } else if (op.equals("monitor")) {
@@ -337,6 +395,8 @@ public class Am extends BaseCommand {
             runIdleMaintenance();
         } else if (op.equals("screen-compat")) {
             runScreenCompat();
+        } else if (op.equals("package-importance")) {
+            runPackageImportance();
         } else if (op.equals("to-uri")) {
             runToUri(0);
         } else if (op.equals("to-intent-uri")) {
@@ -351,10 +411,16 @@ public class Am extends BaseCommand {
             runStopUser();
         } else if (op.equals("stack")) {
             runStack();
-        } else if (op.equals("lock-task")) {
-            runLockTask();
+        } else if (op.equals("task")) {
+            runTask();
         } else if (op.equals("get-config")) {
             runGetConfig();
+        } else if (op.equals("set-inactive")) {
+            runSetInactive();
+        } else if (op.equals("get-inactive")) {
+            runGetInactive();
+        } else if (op.equals("send-trim-memory")) {
+            runSendTrimMemory();
         } else {
             showError("Error: unknown command '" + op + "'");
         }
@@ -440,6 +506,15 @@ public class Am extends BaseCommand {
                     list[i] = Integer.decode(strings[i]);
                 }
                 intent.putExtra(key, list);
+            } else if (opt.equals("--eial")) {
+                String key = nextArgRequired();
+                String value = nextArgRequired();
+                String[] strings = value.split(",");
+                ArrayList<Integer> list = new ArrayList<>(strings.length);
+                for (int i = 0; i < strings.length; i++) {
+                    list.add(Integer.decode(strings[i]));
+                }
+                intent.putExtra(key, list);
             } else if (opt.equals("--el")) {
                 String key = nextArgRequired();
                 String value = nextArgRequired();
@@ -451,6 +526,16 @@ public class Am extends BaseCommand {
                 long[] list = new long[strings.length];
                 for (int i = 0; i < strings.length; i++) {
                     list[i] = Long.valueOf(strings[i]);
+                }
+                intent.putExtra(key, list);
+                hasIntentInfo = true;
+            } else if (opt.equals("--elal")) {
+                String key = nextArgRequired();
+                String value = nextArgRequired();
+                String[] strings = value.split(",");
+                ArrayList<Long> list = new ArrayList<>(strings.length);
+                for (int i = 0; i < strings.length; i++) {
+                    list.add(Long.valueOf(strings[i]));
                 }
                 intent.putExtra(key, list);
                 hasIntentInfo = true;
@@ -469,6 +554,16 @@ public class Am extends BaseCommand {
                 }
                 intent.putExtra(key, list);
                 hasIntentInfo = true;
+            } else if (opt.equals("--efal")) {
+                String key = nextArgRequired();
+                String value = nextArgRequired();
+                String[] strings = value.split(",");
+                ArrayList<Float> list = new ArrayList<>(strings.length);
+                for (int i = 0; i < strings.length; i++) {
+                    list.add(Float.valueOf(strings[i]));
+                }
+                intent.putExtra(key, list);
+                hasIntentInfo = true;
             } else if (opt.equals("--esa")) {
                 String key = nextArgRequired();
                 String value = nextArgRequired();
@@ -477,6 +572,19 @@ public class Am extends BaseCommand {
                 // again for the regex, thus four escape characters become one.
                 String[] strings = value.split("(?<!\\\\),");
                 intent.putExtra(key, strings);
+                hasIntentInfo = true;
+            } else if (opt.equals("--esal")) {
+                String key = nextArgRequired();
+                String value = nextArgRequired();
+                // Split on commas unless they are preceeded by an escape.
+                // The escape character must be escaped for the string and
+                // again for the regex, thus four escape characters become one.
+                String[] strings = value.split("(?<!\\\\),");
+                ArrayList<String> list = new ArrayList<>(strings.length);
+                for (int i = 0; i < strings.length; i++) {
+                    list.add(strings[i]);
+                }
+                intent.putExtra(key, list);
                 hasIntentInfo = true;
             } else if (opt.equals("--ez")) {
                 String key = nextArgRequired();
@@ -663,7 +771,8 @@ public class Am extends BaseCommand {
             return;
         }
         System.out.println("Starting service: " + intent);
-        ComponentName cn = mAm.startService(null, intent, intent.getType(), mUserId);
+        ComponentName cn = mAm.startService(null, intent, intent.getType(),
+                SHELL_PACKAGE_NAME, mUserId);
         if (cn == null) {
             System.err.println("Error: Not found; no service started.");
         } else if (cn.getPackageName().equals("!")) {
@@ -824,6 +933,11 @@ public class Am extends BaseCommand {
                             "Error: Activity not started, voice control not allowed for: "
                                     + intent);
                     break;
+                case ActivityManager.START_NOT_CURRENT_USER_ACTIVITY:
+                    out.println(
+                            "Error: Not allowed to start background user activity"
+                            + " that shouldn't be displayed for all users.");
+                    break;
                 default:
                     out.println(
                             "Error: Activity not started, unknown error code " + res);
@@ -891,9 +1005,11 @@ public class Am extends BaseCommand {
     private void sendBroadcast() throws Exception {
         Intent intent = makeIntent(UserHandle.USER_CURRENT);
         IntentReceiver receiver = new IntentReceiver();
+        String[] requiredPermissions = mReceiverPermission == null ? null
+                : new String[] {mReceiverPermission};
         System.out.println("Broadcasting: " + intent);
-        mAm.broadcastIntent(null, intent, null, receiver, 0, null, null, mReceiverPermission,
-                android.app.AppOpsManager.OP_NONE, true, false, mUserId);
+        mAm.broadcastIntent(null, intent, null, receiver, 0, null, null, requiredPermissions,
+                android.app.AppOpsManager.OP_NONE, null, true, false, mUserId);
         receiver.waitForFinish();
     }
 
@@ -1003,6 +1119,7 @@ public class Am extends BaseCommand {
         boolean wall = false;
         int userId = UserHandle.USER_CURRENT;
         int profileType = 0;
+        mSamplingInterval = 0;
 
         String process = null;
 
@@ -1016,6 +1133,8 @@ public class Am extends BaseCommand {
                     userId = parseUserArg(nextArgRequired());
                 } else if (opt.equals("--wall")) {
                     wall = true;
+                } else if (opt.equals("--sampling")) {
+                    mSamplingInterval = Integer.parseInt(nextArgRequired());
                 } else {
                     System.err.println("Error: Unknown option: " + opt);
                     return;
@@ -1065,7 +1184,7 @@ public class Am extends BaseCommand {
                 System.err.println("Consider using a file under /data/local/tmp/");
                 return;
             }
-            profilerInfo = new ProfilerInfo(profileFile, fd, 0, false);
+            profilerInfo = new ProfilerInfo(profileFile, fd, mSamplingInterval, false);
         }
 
         try {
@@ -1155,6 +1274,17 @@ public class Am extends BaseCommand {
         mAm.setDebugApp(null, false, true);
     }
 
+    private void runSetWatchHeap() throws Exception {
+        String proc = nextArgRequired();
+        String limit = nextArgRequired();
+        mAm.setDumpHeapDebugLimit(proc, 0, Long.parseLong(limit), null);
+    }
+
+    private void runClearWatchHeap() throws Exception {
+        String proc = nextArgRequired();
+        mAm.setDumpHeapDebugLimit(proc, 0, -1, null);
+    }
+
     private void runBugReport() throws Exception {
         mAm.requestBugReport();
         System.out.println("Your lovely bug report is being created; please be patient.");
@@ -1175,9 +1305,45 @@ public class Am extends BaseCommand {
         }
     }
 
+    private static class StopUserCallback extends IStopUserCallback.Stub {
+        private boolean mFinished = false;
+
+        public synchronized void waitForFinish() {
+            try {
+                while (!mFinished) wait();
+            } catch (InterruptedException e) {
+                throw new IllegalStateException(e);
+            }
+        }
+
+        @Override
+        public synchronized void userStopped(int userId) {
+            mFinished = true;
+            notifyAll();
+        }
+
+        @Override
+        public synchronized void userStopAborted(int userId) {
+            mFinished = true;
+            notifyAll();
+        }
+    }
+
     private void runStopUser() throws Exception {
-        String user = nextArgRequired();
-        int res = mAm.stopUser(Integer.parseInt(user), null);
+        boolean wait = false;
+        String opt = null;
+        while ((opt = nextOption()) != null) {
+            if ("-w".equals(opt)) {
+                wait = true;
+            } else {
+                System.err.println("Error: unknown option: " + opt);
+                return;
+            }
+        }
+        int user = Integer.parseInt(nextArgRequired());
+        StopUserCallback callback = wait ? new StopUserCallback() : null;
+
+        int res = mAm.stopUser(user, callback);
         if (res != ActivityManager.USER_OP_SUCCESS) {
             String txt = "";
             switch (res) {
@@ -1189,6 +1355,8 @@ public class Am extends BaseCommand {
                     break;
             }
             System.err.println("Switch failed: " + res + txt);
+        } else if (callback != null) {
+            callback.waitForFinish();
         }
     }
 
@@ -1535,7 +1703,7 @@ public class Am extends BaseCommand {
         Intent intent = new Intent(
                 "com.android.server.task.controllers.IdleController.ACTION_TRIGGER_IDLE");
         mAm.broadcastIntent(null, intent, null, null, 0, null, null, null,
-                android.app.AppOpsManager.OP_NONE, true, false, UserHandle.USER_ALL);
+                android.app.AppOpsManager.OP_NONE, null, true, false, UserHandle.USER_ALL);
     }
 
     private void runScreenCompat() throws Exception {
@@ -1560,6 +1728,16 @@ public class Am extends BaseCommand {
             }
             packageName = nextArg();
         } while (packageName != null);
+    }
+
+    private void runPackageImportance() throws Exception {
+        String packageName = nextArgRequired();
+        try {
+            int procState = mAm.getPackageProcessState(packageName, "com.android.shell");
+            System.out.println(
+                    ActivityManager.RunningAppProcessInfo.procStateToImportance(procState));
+        } catch (RemoteException e) {
+        }
     }
 
     private void runToUri(int flags) throws Exception {
@@ -1682,6 +1860,8 @@ public class Am extends BaseCommand {
             runStackList();
         } else if (op.equals("info")) {
             runStackInfo();
+        } else if (op.equals("split")) {
+            runStackSplit();
         } else {
             showError("Error: unknown command '" + op + "'");
             return;
@@ -1694,10 +1874,10 @@ public class Am extends BaseCommand {
         Intent intent = makeIntent(UserHandle.USER_CURRENT);
 
         try {
-            IBinder homeActivityToken = mAm.getHomeActivityToken();
-            IActivityContainer container = mAm.createActivityContainer(homeActivityToken, null);
-            container.attachToDisplay(displayId);
-            container.startActivity(intent);
+            IActivityContainer container = mAm.createStackOnDisplay(displayId);
+            if (container != null) {
+                container.startActivity(intent);
+            }
         } catch (RemoteException e) {
         }
     }
@@ -1727,17 +1907,14 @@ public class Am extends BaseCommand {
     private void runStackResize() throws Exception {
         String stackIdStr = nextArgRequired();
         int stackId = Integer.valueOf(stackIdStr);
-        String leftStr = nextArgRequired();
-        int left = Integer.valueOf(leftStr);
-        String topStr = nextArgRequired();
-        int top = Integer.valueOf(topStr);
-        String rightStr = nextArgRequired();
-        int right = Integer.valueOf(rightStr);
-        String bottomStr = nextArgRequired();
-        int bottom = Integer.valueOf(bottomStr);
+        final Rect bounds = getBounds();
+        if (bounds == null) {
+            System.err.println("Error: invalid input bounds");
+            return;
+        }
 
         try {
-            mAm.resizeStack(stackId, new Rect(left, top, right, bottom));
+            mAm.resizeStack(stackId, bounds);
         } catch (RemoteException e) {
         }
     }
@@ -1762,7 +1939,79 @@ public class Am extends BaseCommand {
         }
     }
 
-    private void runLockTask() throws Exception {
+    private void runStackSplit() throws Exception {
+        final int stackId = Integer.valueOf(nextArgRequired());
+        final String splitDirection = nextArgRequired();
+        Intent intent = null;
+        try {
+            intent = makeIntent(UserHandle.USER_CURRENT);
+        } catch (IllegalArgumentException e) {
+            // no intent supplied.
+        }
+
+        try {
+            final StackInfo currentStackInfo = mAm.getStackInfo(stackId);
+            // Calculate bounds for new and current stack.
+            final Rect currentStackBounds = new Rect(currentStackInfo.bounds);
+            final Rect newStackBounds = new Rect(currentStackInfo.bounds);
+            if ("v".equals(splitDirection)) {
+                currentStackBounds.right = newStackBounds.left = currentStackInfo.bounds.centerX();
+            } else if ("h".equals(splitDirection)) {
+                currentStackBounds.bottom = newStackBounds.top = currentStackInfo.bounds.centerY();
+            } else {
+                showError("Error: unknown split direction '" + splitDirection + "'");
+                return;
+            }
+
+            // Create new stack
+            IActivityContainer container = mAm.createStackOnDisplay(currentStackInfo.displayId);
+            if (container == null) {
+                showError("Error: Unable to create new stack...");
+            }
+
+            final int newStackId = container.getStackId();
+
+            if (intent != null) {
+                container.startActivity(intent);
+            } else if (currentStackInfo.taskIds != null && currentStackInfo.taskIds.length > 1) {
+                // Move top task over to new stack
+                mAm.moveTaskToStack(currentStackInfo.taskIds[currentStackInfo.taskIds.length - 1],
+                        newStackId, true);
+            }
+
+            final StackInfo newStackInfo = mAm.getStackInfo(newStackId);
+
+            // Make all tasks in the stacks resizeable.
+            for (int taskId : currentStackInfo.taskIds) {
+                mAm.setTaskResizeable(taskId, true);
+            }
+
+            for (int taskId : newStackInfo.taskIds) {
+                mAm.setTaskResizeable(taskId, true);
+            }
+
+            // Resize stacks
+            mAm.resizeStack(currentStackInfo.stackId, currentStackBounds);
+            mAm.resizeStack(newStackInfo.stackId, newStackBounds);
+        } catch (RemoteException e) {
+        }
+    }
+
+    private void runTask() throws Exception {
+        String op = nextArgRequired();
+        if (op.equals("lock")) {
+            runTaskLock();
+        } else if (op.equals("resizeable")) {
+            runTaskResizeable();
+        } else if (op.equals("resize")) {
+            runTaskResize();
+        } else {
+            showError("Error: unknown command '" + op + "'");
+            return;
+        }
+    }
+
+    private void runTaskLock() throws Exception {
         String taskIdStr = nextArgRequired();
         try {
             if (taskIdStr.equals("stop")) {
@@ -1773,6 +2022,32 @@ public class Am extends BaseCommand {
             }
             System.err.println("Activity manager is " + (mAm.isInLockTaskMode() ? "" : "not ") +
                     "in lockTaskMode");
+        } catch (RemoteException e) {
+        }
+    }
+
+    private void runTaskResizeable() throws Exception {
+        final String taskIdStr = nextArgRequired();
+        final int taskId = Integer.valueOf(taskIdStr);
+        final String resizeableStr = nextArgRequired();
+        final boolean resizeable = Boolean.valueOf(resizeableStr);
+
+        try {
+            mAm.setTaskResizeable(taskId, resizeable);
+        } catch (RemoteException e) {
+        }
+    }
+
+    private void runTaskResize() throws Exception {
+        final String taskIdStr = nextArgRequired();
+        final int taskId = Integer.valueOf(taskIdStr);
+        final Rect bounds = getBounds();
+        if (bounds == null) {
+            System.err.println("Error: invalid input bounds");
+            return;
+        }
+        try {
+            mAm.resizeTask(taskId, bounds);
         } catch (RemoteException e) {
         }
     }
@@ -1860,6 +2135,97 @@ public class Am extends BaseCommand {
         }
     }
 
+    private void runSetInactive() throws Exception {
+        int userId = UserHandle.USER_OWNER;
+
+        String opt;
+        while ((opt=nextOption()) != null) {
+            if (opt.equals("--user")) {
+                userId = parseUserArg(nextArgRequired());
+            } else {
+                System.err.println("Error: Unknown option: " + opt);
+                return;
+            }
+        }
+        String packageName = nextArgRequired();
+        String value = nextArgRequired();
+
+        IUsageStatsManager usm = IUsageStatsManager.Stub.asInterface(ServiceManager.getService(
+                Context.USAGE_STATS_SERVICE));
+        usm.setAppInactive(packageName, Boolean.parseBoolean(value), userId);
+    }
+
+    private void runGetInactive() throws Exception {
+        int userId = UserHandle.USER_OWNER;
+
+        String opt;
+        while ((opt=nextOption()) != null) {
+            if (opt.equals("--user")) {
+                userId = parseUserArg(nextArgRequired());
+            } else {
+                System.err.println("Error: Unknown option: " + opt);
+                return;
+            }
+        }
+        String packageName = nextArgRequired();
+
+        IUsageStatsManager usm = IUsageStatsManager.Stub.asInterface(ServiceManager.getService(
+                Context.USAGE_STATS_SERVICE));
+        boolean isIdle = usm.isAppInactive(packageName, userId);
+        System.out.println("Idle=" + isIdle);
+    }
+
+    private void runSendTrimMemory() throws Exception {
+        int userId = UserHandle.USER_CURRENT;
+        String opt;
+        while ((opt = nextOption()) != null) {
+            if (opt.equals("--user")) {
+                userId = parseUserArg(nextArgRequired());
+                if (userId == UserHandle.USER_ALL) {
+                    System.err.println("Error: Can't use user 'all'");
+                    return;
+                }
+            } else {
+                System.err.println("Error: Unknown option: " + opt);
+                return;
+            }
+        }
+
+        String proc = nextArgRequired();
+        String levelArg = nextArgRequired();
+        int level;
+        switch (levelArg) {
+            case "HIDDEN":
+                level = ComponentCallbacks2.TRIM_MEMORY_UI_HIDDEN;
+                break;
+            case "RUNNING_MODERATE":
+                level = ComponentCallbacks2.TRIM_MEMORY_RUNNING_MODERATE;
+                break;
+            case "BACKGROUND":
+                level = ComponentCallbacks2.TRIM_MEMORY_BACKGROUND;
+                break;
+            case "RUNNING_LOW":
+                level = ComponentCallbacks2.TRIM_MEMORY_RUNNING_LOW;
+                break;
+            case "MODERATE":
+                level = ComponentCallbacks2.TRIM_MEMORY_MODERATE;
+                break;
+            case "RUNNING_CRITICAL":
+                level = ComponentCallbacks2.TRIM_MEMORY_RUNNING_CRITICAL;
+                break;
+            case "COMPLETE":
+                level = ComponentCallbacks2.TRIM_MEMORY_COMPLETE;
+                break;
+            default:
+                System.err.println("Error: Unknown level option: " + levelArg);
+                return;
+        }
+        if (!mAm.setProcessMemoryTrimLevel(proc, userId, level)) {
+            System.err.println("Error: Failure to set the level - probably Unknown Process: " +
+                               proc);
+        }
+    }
+
     /**
      * Open the given file for sending into the system process. This verifies
      * with SELinux that the system will have access to the file.
@@ -1872,5 +2238,33 @@ public class Am extends BaseCommand {
             throw new FileNotFoundException("System server has no access to file context " + tcon);
         }
         return fd;
+    }
+
+    private Rect getBounds() {
+        String leftStr = nextArgRequired();
+        int left = Integer.valueOf(leftStr);
+        String topStr = nextArgRequired();
+        int top = Integer.valueOf(topStr);
+        String rightStr = nextArgRequired();
+        int right = Integer.valueOf(rightStr);
+        String bottomStr = nextArgRequired();
+        int bottom = Integer.valueOf(bottomStr);
+        if (left < 0) {
+            System.err.println("Error: bad left arg: " + leftStr);
+            return null;
+        }
+        if (top < 0) {
+            System.err.println("Error: bad top arg: " + topStr);
+            return null;
+        }
+        if (right <= 0) {
+            System.err.println("Error: bad right arg: " + rightStr);
+            return null;
+        }
+        if (bottom <= 0) {
+            System.err.println("Error: bad bottom arg: " + bottomStr);
+            return null;
+        }
+        return new Rect(left, top, right, bottom);
     }
 }

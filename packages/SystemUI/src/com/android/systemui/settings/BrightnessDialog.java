@@ -17,17 +17,14 @@
 package com.android.systemui.settings;
 
 import android.app.Activity;
-import android.app.Dialog;
-import android.content.Context;
-import android.content.res.Resources;
 import android.os.Bundle;
-import android.os.Handler;
 import android.view.Gravity;
 import android.view.KeyEvent;
 import android.view.Window;
 import android.view.WindowManager;
 import android.widget.ImageView;
 
+import com.android.internal.logging.MetricsLogger;
 import com.android.systemui.R;
 
 /** A dialog that provides controls for adjusting the screen brightness. */
@@ -56,11 +53,13 @@ public class BrightnessDialog extends Activity {
     protected void onStart() {
         super.onStart();
         mBrightnessController.registerCallbacks();
+        MetricsLogger.visible(this, MetricsLogger.BRIGHTNESS_DIALOG);
     }
 
     @Override
     protected void onStop() {
         super.onStop();
+        MetricsLogger.hidden(this, MetricsLogger.BRIGHTNESS_DIALOG);
         mBrightnessController.unregisterCallbacks();
     }
 

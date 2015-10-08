@@ -22,12 +22,12 @@
 
 #include "jni.h"
 #include "GraphicsJNI.h"
-#include <android_runtime/AndroidRuntime.h>
+#include "core_jni_helpers.h"
 
 #include "SkPath.h"
 #include "SkPathOps.h"
 
-#include <ResourceCache.h>
+#include <Caches.h>
 #include <vector>
 #include <map>
 
@@ -38,12 +38,10 @@ public:
 
     static void finalizer(JNIEnv* env, jobject clazz, jlong objHandle) {
         SkPath* obj = reinterpret_cast<SkPath*>(objHandle);
-#ifdef USE_OPENGL_RENDERER
-        if (android::uirenderer::ResourceCache::hasInstance()) {
-            android::uirenderer::ResourceCache::getInstance().destructor(obj);
-            return;
+        // Purge entries from the HWUI path cache if this path's data is unique
+        if (obj->unique() && android::uirenderer::Caches::hasInstance()) {
+            android::uirenderer::Caches::getInstance().pathCache.removeDeferred(obj);
         }
-#endif
         delete obj;
     }
 
@@ -520,9 +518,7 @@ static JNINativeMethod methods[] = {
 };
 
 int register_android_graphics_Path(JNIEnv* env) {
-    int result = AndroidRuntime::registerNativeMethods(env, "android/graphics/Path", methods,
-        sizeof(methods) / sizeof(methods[0]));
-    return result;
+    return RegisterMethodsOrDie(env, "android/graphics/Path", methods, NELEM(methods));
 }
 
 }

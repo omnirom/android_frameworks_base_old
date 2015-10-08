@@ -26,7 +26,9 @@ import com.android.tools.layoutlib.java.System_Delegate;
 import com.android.tools.layoutlib.java.UnsafeByteSequence;
 
 import java.util.Arrays;
+import java.util.HashMap;
 import java.util.HashSet;
+import java.util.Map;
 import java.util.Set;
 
 /**
@@ -105,6 +107,7 @@ public final class CreateInfo implements ICreateInfo {
       return JAVA_PKG_CLASSES;
     }
 
+    @Override
     public Set<String> getExcludedClasses() {
         String[] refactoredClasses = getJavaPkgClasses();
         int count = refactoredClasses.length / 2 + EXCLUDED_CLASSES.length;
@@ -115,6 +118,17 @@ public final class CreateInfo implements ICreateInfo {
         excludedClasses.addAll(Arrays.asList(EXCLUDED_CLASSES));
         return excludedClasses;
     }
+
+    @Override
+    public String[] getPromotedFields() {
+        return PROMOTED_FIELDS;
+    }
+
+    @Override
+    public Map<String, InjectMethodRunnable> getInjectedMethodsMap() {
+        return INJECTED_METHODS;
+    }
+
     //-----
 
     /**
@@ -127,6 +141,8 @@ public final class CreateInfo implements ICreateInfo {
             ICreateInfo.class,
             CreateInfo.class,
             LayoutlibDelegate.class,
+            InjectMethodRunnable.class,
+            InjectMethodRunnables.class,
             /* Java package classes */
             AutoCloseable.class,
             Objects.class,
@@ -156,12 +172,14 @@ public final class CreateInfo implements ICreateInfo {
         "android.os.HandlerThread#run",
         "android.preference.Preference#getView",
         "android.text.format.DateFormat#is24HourFormat",
+        "android.text.Hyphenator#getSystemHyphenatorLocation",
         "android.util.Xml#newPullParser",
         "android.view.Choreographer#getRefreshRate",
         "android.view.Display#updateDisplayInfoLocked",
         "android.view.Display#getWindowManager",
         "android.view.LayoutInflater#rInflate",
         "android.view.LayoutInflater#parseInclude",
+        "android.view.View#getWindowToken",
         "android.view.View#isInEditMode",
         "android.view.ViewRootImpl#isInTouchMode",
         "android.view.WindowManagerGlobal#getWindowManagerService",
@@ -172,6 +190,8 @@ public final class CreateInfo implements ICreateInfo {
         "android.view.RenderNode#nSetElevation",
         "android.view.RenderNode#nGetElevation",
         "android.view.ViewGroup#drawChild",
+        "android.widget.SimpleMonthView#getTitle",
+        "android.widget.SimpleMonthView#getDayOfWeekLabel",
         "android.widget.TimePickerClockDelegate#getAmOrPmKeyCode",
         "com.android.internal.view.menu.MenuBuilder#createNewMenuItem",
         "com.android.internal.util.XmlUtils#convertValueToInt",
@@ -230,9 +250,7 @@ public final class CreateInfo implements ICreateInfo {
         "android.os.SystemProperties",
         "android.text.AndroidBidi",
         "android.text.StaticLayout",
-        "android.util.FloatMath",
         "android.view.Display",
-        "libcore.icu.DateIntervalFormat",
         "libcore.icu.ICU",
     };
 
@@ -255,7 +273,6 @@ public final class CreateInfo implements ICreateInfo {
             "android.view.SurfaceView",                        "android.view._Original_SurfaceView",
             "android.view.accessibility.AccessibilityManager", "android.view.accessibility._Original_AccessibilityManager",
             "android.webkit.WebView",                          "android.webkit._Original_WebView",
-            "com.android.internal.policy.PolicyManager",       "com.android.internal.policy._Original_PolicyManager",
         };
 
     /**
@@ -279,6 +296,12 @@ public final class CreateInfo implements ICreateInfo {
             "org.kxml2.io.KXmlParser"
         };
 
+    private final static String[] PROMOTED_FIELDS = new String[] {
+        "android.widget.SimpleMonthView#mTitle",
+        "android.widget.SimpleMonthView#mCalendar",
+        "android.widget.SimpleMonthView#mDayOfWeekLabelCalendar"
+    };
+
     /**
      * List of classes for which the methods returning them should be deleted.
      * The array contains a list of null terminated section starting with the name of the class
@@ -288,5 +311,10 @@ public final class CreateInfo implements ICreateInfo {
     private final static String[] DELETE_RETURNS =
         new String[] {
             null };                         // separator, for next class/methods list.
-}
 
+    private final static Map<String, InjectMethodRunnable> INJECTED_METHODS =
+            new HashMap<String, InjectMethodRunnable>(1) {{
+                put("android.content.Context",
+                        InjectMethodRunnables.CONTEXT_GET_FRAMEWORK_CLASS_LOADER);
+            }};
+}

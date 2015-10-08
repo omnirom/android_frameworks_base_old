@@ -18,8 +18,10 @@ package com.android.server.usage;
 
 import android.app.usage.TimeSparseArray;
 import android.app.usage.UsageStatsManager;
+import android.os.Build;
 import android.util.AtomicFile;
 import android.util.Slog;
+import android.util.TimeUtils;
 
 import java.io.BufferedReader;
 import java.io.BufferedWriter;
@@ -35,7 +37,7 @@ import java.util.List;
  * Provides an interface to query for UsageStat data from an XML database.
  */
 class UsageStatsDatabase {
-    private static final int CURRENT_VERSION = 2;
+    private static final int CURRENT_VERSION = 3;
 
     private static final String TAG = "UsageStatsDatabase";
     private static final boolean DEBUG = UsageStatsService.DEBUG;
@@ -47,6 +49,8 @@ class UsageStatsDatabase {
     private final TimeSparseArray<AtomicFile>[] mSortedStatFiles;
     private final UnixCalendar mCal;
     private final File mVersionFile;
+    private boolean mFirstUpdate;
+    private boolean mNewUpdate;
 
     public UsageStatsDatabase(File dir) {
         mIntervalDirs = new File[] {
@@ -73,7 +77,7 @@ class UsageStatsDatabase {
                 }
             }
 
-            checkVersionLocked();
+            checkVersionAndBuildLocked();
             indexFilesLocked();
 
             // Delete files that are in the future.
@@ -188,16 +192,45 @@ class UsageStatsDatabase {
 
                 for (File f : files) {
                     final AtomicFile af = new AtomicFile(f);
-                    mSortedStatFiles[i].put(UsageStatsXml.parseBeginTime(af), af);
+                    try {
+                        mSortedStatFiles[i].put(UsageStatsXml.parseBeginTime(af), af);
+                    } catch (IOException e) {
+                        Slog.e(TAG, "failed to index file: " + f, e);
+                    }
                 }
             }
         }
     }
 
-    private void checkVersionLocked() {
+    /**
+     * Is this the first update to the system from L to M?
+     */
+    boolean isFirstUpdate() {
+        return mFirstUpdate;
+    }
+
+    /**
+     * Is this a system update since we started tracking build fingerprint in the version file?
+     */
+    boolean isNewUpdate() {
+        return mNewUpdate;
+    }
+
+    private void checkVersionAndBuildLocked() {
         int version;
+        String buildFingerprint;
+        String currentFingerprint = getBuildFingerprint();
+        mFirstUpdate = true;
+        mNewUpdate = true;
         try (BufferedReader reader = new BufferedReader(new FileReader(mVersionFile))) {
             version = Integer.parseInt(reader.readLine());
+            buildFingerprint = reader.readLine();
+            if (buildFingerprint != null) {
+                mFirstUpdate = false;
+            }
+            if (currentFingerprint.equals(buildFingerprint)) {
+                mNewUpdate = false;
+            }
         } catch (NumberFormatException | IOException e) {
             version = 0;
         }
@@ -205,14 +238,26 @@ class UsageStatsDatabase {
         if (version != CURRENT_VERSION) {
             Slog.i(TAG, "Upgrading from version " + version + " to " + CURRENT_VERSION);
             doUpgradeLocked(version);
+        }
 
+        if (version != CURRENT_VERSION || mNewUpdate) {
             try (BufferedWriter writer = new BufferedWriter(new FileWriter(mVersionFile))) {
                 writer.write(Integer.toString(CURRENT_VERSION));
+                writer.write("\n");
+                writer.write(currentFingerprint);
+                writer.write("\n");
+                writer.flush();
             } catch (IOException e) {
                 Slog.e(TAG, "Failed to write new version");
                 throw new RuntimeException(e);
             }
         }
+    }
+
+    private String getBuildFingerprint() {
+        return Build.VERSION.RELEASE + ";"
+                + Build.VERSION.CODENAME + ";"
+                + Build.VERSION.INCREMENTAL;
     }
 
     private void doUpgradeLocked(int thisVersion) {
@@ -233,14 +278,21 @@ class UsageStatsDatabase {
 
     public void onTimeChanged(long timeDiffMillis) {
         synchronized (mLock) {
+            StringBuilder logBuilder = new StringBuilder();
+            logBuilder.append("Time changed by ");
+            TimeUtils.formatDuration(timeDiffMillis, logBuilder);
+            logBuilder.append(".");
+
+            int filesDeleted = 0;
+            int filesMoved = 0;
+
             for (TimeSparseArray<AtomicFile> files : mSortedStatFiles) {
                 final int fileCount = files.size();
                 for (int i = 0; i < fileCount; i++) {
                     final AtomicFile file = files.valueAt(i);
                     final long newTime = files.keyAt(i) + timeDiffMillis;
                     if (newTime < 0) {
-                        Slog.i(TAG, "Deleting file " + file.getBaseFile().getAbsolutePath()
-                                + " for it is in the future now.");
+                        filesDeleted++;
                         file.delete();
                     } else {
                         try {
@@ -255,13 +307,16 @@ class UsageStatsDatabase {
                         }
 
                         final File newFile = new File(file.getBaseFile().getParentFile(), newName);
-                        Slog.i(TAG, "Moving file " + file.getBaseFile().getAbsolutePath() + " to "
-                                + newFile.getAbsolutePath());
+                        filesMoved++;
                         file.getBaseFile().renameTo(newFile);
                     }
                 }
                 files.clear();
             }
+
+            logBuilder.append(" files deleted: ").append(filesDeleted);
+            logBuilder.append(" files moved: ").append(filesMoved);
+            Slog.i(TAG, logBuilder.toString());
 
             // Now re-index the new files.
             indexFilesLocked();
@@ -378,26 +433,27 @@ class UsageStatsDatabase {
                 }
             }
 
-            try {
-                IntervalStats stats = new IntervalStats();
-                ArrayList<T> results = new ArrayList<>();
-                for (int i = startIndex; i <= endIndex; i++) {
-                    final AtomicFile f = intervalStats.valueAt(i);
+            final IntervalStats stats = new IntervalStats();
+            final ArrayList<T> results = new ArrayList<>();
+            for (int i = startIndex; i <= endIndex; i++) {
+                final AtomicFile f = intervalStats.valueAt(i);
 
-                    if (DEBUG) {
-                        Slog.d(TAG, "Reading stat file " + f.getBaseFile().getAbsolutePath());
-                    }
+                if (DEBUG) {
+                    Slog.d(TAG, "Reading stat file " + f.getBaseFile().getAbsolutePath());
+                }
 
+                try {
                     UsageStatsXml.read(f, stats);
                     if (beginTime < stats.endTime) {
                         combiner.combine(stats, false, results);
                     }
+                } catch (IOException e) {
+                    Slog.e(TAG, "Failed to read usage stats file", e);
+                    // We continue so that we return results that are not
+                    // corrupt.
                 }
-                return results;
-            } catch (IOException e) {
-                Slog.e(TAG, "Failed to read usage stats file", e);
-                return null;
             }
+            return results;
         }
     }
 
@@ -450,6 +506,10 @@ class UsageStatsDatabase {
             mCal.addDays(-7);
             pruneFilesOlderThan(mIntervalDirs[UsageStatsManager.INTERVAL_DAILY],
                     mCal.getTimeInMillis());
+
+            // We must re-index our file list or we will be trying to read
+            // deleted files.
+            indexFilesLocked();
         }
     }
 
@@ -461,7 +521,14 @@ class UsageStatsDatabase {
                 if (path.endsWith(BAK_SUFFIX)) {
                     f = new File(path.substring(0, path.length() - BAK_SUFFIX.length()));
                 }
-                long beginTime = UsageStatsXml.parseBeginTime(f);
+
+                long beginTime;
+                try {
+                    beginTime = UsageStatsXml.parseBeginTime(f);
+                } catch (IOException e) {
+                    beginTime = 0;
+                }
+
                 if (beginTime < expiryTime) {
                     new AtomicFile(f).delete();
                 }

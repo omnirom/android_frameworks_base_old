@@ -25,11 +25,12 @@
 
 #include "AssetAtlas.h"
 #include "Debug.h"
-#include "Patch.h"
 #include "utils/Pair.h"
 
 namespace android {
 namespace uirenderer {
+
+class Patch;
 
 ///////////////////////////////////////////////////////////////////////////////
 // Defines
@@ -50,9 +51,9 @@ class Caches;
 
 class PatchCache {
 public:
-    PatchCache();
+    PatchCache(RenderState& renderState);
     ~PatchCache();
-    void init(Caches& caches);
+    void init();
 
     const Patch* get(const AssetAtlas::Entry* entry,
             const uint32_t bitmapWidth, const uint32_t bitmapHeight,
@@ -90,7 +91,7 @@ public:
 
 private:
     struct PatchDescription {
-        PatchDescription(): mPatch(NULL), mBitmapWidth(0), mBitmapHeight(0),
+        PatchDescription(): mPatch(nullptr), mBitmapWidth(0), mBitmapHeight(0),
                 mPixelWidth(0), mPixelHeight(0) {
         }
 
@@ -145,7 +146,7 @@ private:
      * to track available regions of memory in the VBO.
      */
     struct BufferBlock {
-        BufferBlock(uint32_t offset, uint32_t size): offset(offset), size(size), next(NULL) {
+        BufferBlock(uint32_t offset, uint32_t size): offset(offset), size(size), next(nullptr) {
         }
 
         uint32_t offset;
@@ -159,7 +160,7 @@ private:
     void clearCache();
     void createVertexBuffer();
 
-    void setupMesh(Patch* newMesh, TextureVertex* vertices);
+    void setupMesh(Patch* newMesh);
 
     void remove(Vector<patch_pair_t>& patchesToRemove, Res_png_9patch* patch);
 
@@ -167,6 +168,7 @@ private:
     void dumpFreeBlocks(const char* prefix);
 #endif
 
+    RenderState& mRenderState;
     uint32_t mMaxSize;
     uint32_t mSize;
 

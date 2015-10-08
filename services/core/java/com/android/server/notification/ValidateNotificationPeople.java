@@ -50,7 +50,7 @@ import java.util.concurrent.TimeUnit;
 public class ValidateNotificationPeople implements NotificationSignalExtractor {
     // Using a shorter log tag since setprop has a limit of 32chars on variable name.
     private static final String TAG = "ValidateNoPeople";
-    private static final boolean INFO = true;
+    private static final boolean VERBOSE = Log.isLoggable(TAG, Log.VERBOSE);;
     private static final boolean DEBUG = Log.isLoggable(TAG, Log.DEBUG);
 
     private static final boolean ENABLE_PEOPLE_VALIDATOR = true;
@@ -84,11 +84,13 @@ public class ValidateNotificationPeople implements NotificationSignalExtractor {
     private Handler mHandler;
     private ContentObserver mObserver;
     private int mEvictionCount;
+    private NotificationUsageStats mUsageStats;
 
-    public void initialize(Context context) {
+    public void initialize(Context context, NotificationUsageStats usageStats) {
         if (DEBUG) Slog.d(TAG, "Initializing  " + getClass().getSimpleName() + ".");
         mUserToContextMap = new ArrayMap<>();
         mBaseContext = context;
+        mUsageStats = usageStats;
         mPeopleCache = new LruCache<String, LookupResult>(PEOPLE_CACHE_SIZE);
         mEnabled = ENABLE_PEOPLE_VALIDATOR && 1 == Settings.Global.getInt(
                 mBaseContext.getContentResolver(), SETTING_ENABLE_PEOPLE_VALIDATOR, 1);
@@ -99,7 +101,7 @@ public class ValidateNotificationPeople implements NotificationSignalExtractor {
                 public void onChange(boolean selfChange, Uri uri, int userId) {
                     super.onChange(selfChange, uri, userId);
                     if (DEBUG || mEvictionCount % 100 == 0) {
-                        if (INFO) Slog.i(TAG, "mEvictionCount: " + mEvictionCount);
+                        if (VERBOSE) Slog.i(TAG, "mEvictionCount: " + mEvictionCount);
                     }
                     mPeopleCache.evictAll();
                     mEvictionCount++;
@@ -112,20 +114,20 @@ public class ValidateNotificationPeople implements NotificationSignalExtractor {
 
     public RankingReconsideration process(NotificationRecord record) {
         if (!mEnabled) {
-            if (INFO) Slog.i(TAG, "disabled");
+            if (VERBOSE) Slog.i(TAG, "disabled");
             return null;
         }
         if (record == null || record.getNotification() == null) {
-            if (INFO) Slog.i(TAG, "skipping empty notification");
+            if (VERBOSE) Slog.i(TAG, "skipping empty notification");
             return null;
         }
         if (record.getUserId() == UserHandle.USER_ALL) {
-            if (INFO) Slog.i(TAG, "skipping global notification");
+            if (VERBOSE) Slog.i(TAG, "skipping global notification");
             return null;
         }
         Context context = getContextAsUser(record.getUser());
         if (context == null) {
-            if (INFO) Slog.i(TAG, "skipping notification that lacks a context");
+            if (VERBOSE) Slog.i(TAG, "skipping notification that lacks a context");
             return null;
         }
         return validatePeople(context, record);
@@ -202,8 +204,15 @@ public class ValidateNotificationPeople implements NotificationSignalExtractor {
         final String key = record.getKey();
         final Bundle extras = record.getNotification().extras;
         final float[] affinityOut = new float[1];
-        final RankingReconsideration rr = validatePeople(context, key, extras, affinityOut);
-        record.setContactAffinity(affinityOut[0]);
+        final PeopleRankingReconsideration rr = validatePeople(context, key, extras, affinityOut);
+        final float affinity = affinityOut[0];
+        record.setContactAffinity(affinity);
+        if (rr == null) {
+            mUsageStats.registerPeopleAffinity(record, affinity > NONE, affinity == STARRED_CONTACT,
+                    true /* cached */);
+        } else {
+            rr.setRecord(record);
+        }
         return rr;
     }
 
@@ -219,7 +228,7 @@ public class ValidateNotificationPeople implements NotificationSignalExtractor {
             return null;
         }
 
-        if (INFO) Slog.i(TAG, "Validating: " + key);
+        if (VERBOSE) Slog.i(TAG, "Validating: " + key + " for " + context.getUserId());
         final LinkedList<String> pendingLookups = new LinkedList<String>();
         for (int personIdx = 0; personIdx < people.length && personIdx < MAX_PEOPLE; personIdx++) {
             final String handle = people[personIdx];
@@ -243,7 +252,7 @@ public class ValidateNotificationPeople implements NotificationSignalExtractor {
         affinityOut[0] = affinity;
 
         if (pendingLookups.isEmpty()) {
-            if (INFO) Slog.i(TAG, "final affinity: " + affinity);
+            if (VERBOSE) Slog.i(TAG, "final affinity: " + affinity);
             return null;
         }
 
@@ -411,6 +420,7 @@ public class ValidateNotificationPeople implements NotificationSignalExtractor {
         private final Context mContext;
 
         private float mContactAffinity = NONE;
+        private NotificationRecord mRecord;
 
         private PeopleRankingReconsideration(Context context, String key, LinkedList<String> pendingLookups) {
             super(key);
@@ -420,7 +430,7 @@ public class ValidateNotificationPeople implements NotificationSignalExtractor {
 
         @Override
         public void work() {
-            if (INFO) Slog.i(TAG, "Executing: validation for: " + mKey);
+            if (VERBOSE) Slog.i(TAG, "Executing: validation for: " + mKey);
             long timeStartMs = System.currentTimeMillis();
             for (final String handle: mPendingLookups) {
                 LookupResult lookupResult = null;
@@ -443,12 +453,20 @@ public class ValidateNotificationPeople implements NotificationSignalExtractor {
                         final String cacheKey = getCacheKey(mContext.getUserId(), handle);
                         mPeopleCache.put(cacheKey, lookupResult);
                     }
+                    if (DEBUG) Slog.d(TAG, "lookup contactAffinity is " + lookupResult.getAffinity());
                     mContactAffinity = Math.max(mContactAffinity, lookupResult.getAffinity());
+                } else {
+                    if (DEBUG) Slog.d(TAG, "lookupResult is null");
                 }
             }
             if (DEBUG) {
                 Slog.d(TAG, "Validation finished in " + (System.currentTimeMillis() - timeStartMs) +
                         "ms");
+            }
+
+            if (mRecord != null) {
+                mUsageStats.registerPeopleAffinity(mRecord, mContactAffinity > NONE,
+                        mContactAffinity == STARRED_CONTACT, false /* cached */);
             }
         }
 
@@ -456,11 +474,15 @@ public class ValidateNotificationPeople implements NotificationSignalExtractor {
         public void applyChangesLocked(NotificationRecord operand) {
             float affinityBound = operand.getContactAffinity();
             operand.setContactAffinity(Math.max(mContactAffinity, affinityBound));
-            if (INFO) Slog.i(TAG, "final affinity: " + operand.getContactAffinity());
+            if (VERBOSE) Slog.i(TAG, "final affinity: " + operand.getContactAffinity());
         }
 
         public float getContactAffinity() {
             return mContactAffinity;
+        }
+
+        public void setRecord(NotificationRecord record) {
+            mRecord = record;
         }
     }
 }

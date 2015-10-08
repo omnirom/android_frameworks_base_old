@@ -37,7 +37,7 @@ please see styles_device_defaults.xml.
     </style>
 
     <style name="PreferenceFragment.Material">
-        <item name="layout">@android:layout/preference_list_fragment_material</item>
+        <item name="layout">@layout/preference_list_fragment_material</item>
         <item name="paddingStart">@dimen/preference_fragment_padding_side_material</item>
         <item name="paddingEnd">@dimen/preference_fragment_padding_side_material</item>
     </style>
@@ -72,7 +72,7 @@ please see styles_device_defaults.xml.
     </style>
 
     <style name="Preference.Material.SeekBarPreference">
-        <item name="layout">@android:layout/preference_widget_seekbar_material</item>
+        <item name="layout">@layout/preference_widget_seekbar_material</item>
     </style>
 
     <style name="Preference.Material.PreferenceScreen"/>
@@ -85,6 +85,10 @@ please see styles_device_defaults.xml.
     <style name="Preference.Material.DialogPreference.YesNoPreference">
         <item name="positiveButtonText">@string/yes</item>
         <item name="negativeButtonText">@string/no</item>
+    </style>
+
+    <style name="Preference.Material.DialogPreference.SeekBarPreference">
+        <item name="dialogLayout">@layout/preference_dialog_seekbar_material</item>
     </style>
 
     <style name="Preference.Material.DialogPreference.EditTextPreference">
@@ -194,7 +198,7 @@ please see styles_device_defaults.xml.
     </style>
 
     <style name="TextAppearance.Material.Subhead.Inverse">
-        <item name="textColor">?attr/textColorSecondaryInverse</item>
+        <item name="textColor">?attr/textColorPrimaryInverse</item>
         <item name="textColorHint">?attr/textColorHintInverse</item>
         <item name="textColorHighlight">?attr/textColorHighlightInverse</item>
         <item name="textColorLink">?attr/textColorLinkInverse</item>
@@ -289,6 +293,10 @@ please see styles_device_defaults.xml.
     <style name="TextAppearance.Material.Widget"/>
     <style name="TextAppearance.Material.Widget.Button" parent="TextAppearance.Material.Button" />
 
+    <style name="TextAppearance.Material.Widget.Button.Inverse">
+        <item name="textColor">?attr/textColorPrimaryInverse</item>
+    </style>
+
     <style name="TextAppearance.Material.Widget.EditText">
         <item name="textColor">?attr/textColorPrimaryInverse</item>
         <item name="textColorHint">?attr/textColorHintInverse</item>
@@ -306,7 +314,9 @@ please see styles_device_defaults.xml.
         <item name="textColor">?attr/textColorPrimary</item>
     </style>
 
-    <style name="TextAppearance.Material.Widget.TabWidget" parent="TextAppearance.Material.Button" />
+    <style name="TextAppearance.Material.Widget.TabWidget" parent="TextAppearance.Material.Button">
+        <item name="textColor">@color/tab_indicator_text_material</item>
+    </style>
 
     <style name="TextAppearance.Material.Widget.TextView">
         <item name="textColor">?attr/textColorPrimaryDisableOnly</item>
@@ -342,12 +352,12 @@ please see styles_device_defaults.xml.
     </style>
 
     <style name="TextAppearance.Material.Widget.ActionBar.Menu"
-           parent="TextAppearance.Material.Menu">
+           parent="TextAppearance.Material.Widget.Button">
         <item name="textColor">?attr/actionMenuTextColor</item>
         <item name="textAllCaps">@bool/config_actionMenuItemAllCaps</item>
     </style>
     <style name="TextAppearance.Material.Widget.ActionBar.Menu.Inverse"
-           parent="TextAppearance.Material.Menu.Inverse">
+           parent="TextAppearance.Material.Widget.Button.Inverse">
         <item name="textColor">?attr/actionMenuTextColor</item>
         <item name="textAllCaps">@bool/config_actionMenuItemAllCaps</item>
     </style>
@@ -370,50 +380,45 @@ please see styles_device_defaults.xml.
     <style name="TextAppearance.Material.WindowTitle" parent="TextAppearance.Material.Title" />
     <style name="TextAppearance.Material.DialogWindowTitle" parent="TextAppearance.Material.Title" />
 
-    <style name="TextAppearance.Material.CalendarViewWeekDayView" parent="TextAppearance.Material.Small">
-        <item name="textStyle">bold</item>
-        <item name="textColor">#505050</item>
+    <style name="TextAppearance.Material.Widget.Calendar.Day" parent="TextAppearance.Material.Caption">
+        <item name="textColor">?attr/textColorPrimaryActivated</item>
     </style>
+
+    <style name="TextAppearance.Material.Widget.Calendar.DayOfWeek" parent="TextAppearance.Material.Caption" />
+    <style name="TextAppearance.Material.Widget.Calendar.Month" parent="TextAppearance.Material.Body2" />
 
     <style name="TextAppearance.Material.TimePicker.TimeLabel" parent="TextAppearance.Material">
         <item name="textSize">@dimen/timepicker_time_label_size</item>
-        <item name="textColor">?attr/textColorSecondaryInverse</item>
+        <item name="textColor">@color/primary_text_secondary_when_activated_material_inverse</item>
     </style>
 
-    <style name="TextAppearance.Material.TimePicker.AmPmLabel" parent="TextAppearance.Material">
+    <style name="TextAppearance.Material.TimePicker.AmPmLabel" parent="TextAppearance.Material.Button">
         <item name="textSize">@dimen/timepicker_ampm_label_size</item>
-        <item name="textAllCaps">true</item>
-        <item name="textColor">?attr/textColorSecondaryInverse</item>
-        <item name="textStyle">bold</item>
-    </style>
-
-    <style name="TextAppearance.Material.DatePicker.DayOfWeekLabel" parent="TextAppearance.Material">
-        <item name="includeFontPadding">false</item>
-        <item name="textColor">?attr/textColorPrimaryInverse</item>
-        <item name="textSize">@dimen/datepicker_header_text_size</item>
-    </style>
-
-    <style name="TextAppearance.Material.DatePicker.MonthLabel" parent="TextAppearance.Material">
-        <item name="includeFontPadding">false</item>
-        <item name="textColor">?attr/textColorSecondaryInverse</item> <!-- selected should be accent -->
-        <item name="textSize">@dimen/datepicker_selected_date_month_size</item>
-    </style>
-
-    <style name="TextAppearance.Material.DatePicker.DayOfMonthLabel" parent="TextAppearance.Material">
-        <item name="includeFontPadding">false</item>
-        <item name="textColor">?attr/textColorSecondaryInverse</item> <!-- selected should be accent -->
-        <item name="textSize">@dimen/datepicker_selected_date_day_size</item>
+        <item name="textColor">@color/primary_text_secondary_when_activated_material_inverse</item>
     </style>
 
     <style name="TextAppearance.Material.DatePicker.YearLabel" parent="TextAppearance.Material">
-        <item name="includeFontPadding">false</item>
-        <item name="textColor">?attr/textColorSecondaryInverse</item> <!-- selected should be accent -->
-        <item name="textSize">@dimen/datepicker_selected_date_year_size</item>
+        <item name="textColor">@color/primary_text_secondary_when_activated_material_inverse</item>
+        <item name="textSize">@dimen/date_picker_year_label_size</item>
+        <item name="fontFamily">sans-serif-medium</item>
+    </style>
+
+    <style name="TextAppearance.Material.DatePicker.DateLabel" parent="TextAppearance.Material">
+        <item name="textColor">@color/primary_text_secondary_when_activated_material_inverse</item>
+        <item name="textSize">@dimen/date_picker_date_label_size</item>
+        <item name="fontFamily">sans-serif-medium</item>
     </style>
 
     <style name="TextAppearance.Material.DatePicker.List.YearLabel" parent="TextAppearance.Material">
-        <item name="textColor">?attr/textColorSecondary</item> <!-- selected should be accent -->
-        <item name="textSize">@dimen/datepicker_year_label_text_size</item>
+        <item name="textColor">?attr/textColorPrimary</item>
+        <item name="textSize">@dimen/datepicker_list_year_label_size</item>
+        <item name="fontFamily">sans-serif</item>
+    </style>
+
+    <style name="TextAppearance.Material.DatePicker.List.YearLabel.Activated">
+        <item name="textColor">?attr/colorControlActivated</item>
+        <item name="textSize">@dimen/datepicker_list_year_activated_label_size</item>
+        <item name="fontFamily">sans-serif-medium</item>
     </style>
 
     <style name="TextAppearance.Material.Notification">
@@ -462,6 +467,12 @@ please see styles_device_defaults.xml.
         <item name="gravity">center_vertical|center_horizontal</item>
     </style>
 
+    <!-- Colored bordered ink button -->
+    <style name="Widget.Material.Button.Colored">
+        <item name="background">@drawable/btn_colored_material</item>
+        <item name="textAppearance">@style/TextAppearance.Material.Widget.Button.Inverse</item>
+    </style>
+
     <!-- Small bordered ink button -->
     <style name="Widget.Material.Button.Small">
         <item name="minHeight">48dip</item>
@@ -476,14 +487,12 @@ please see styles_device_defaults.xml.
 
     <!-- Colored borderless ink button -->
     <style name="Widget.Material.Button.Borderless.Colored">
-        <item name="textColor">?attr/colorAccent</item>
-        <item name="stateListAnimator">@anim/disabled_anim_material</item>
+        <item name="textColor">@color/btn_colored_text_material</item>
     </style>
 
     <!-- Alert dialog button bar button -->
     <style name="Widget.Material.Button.ButtonBar.AlertDialog" parent="Widget.Material.Button.Borderless.Colored">
         <item name="minWidth">64dp</item>
-        <item name="maxLines">2</item>
         <item name="minHeight">@dimen/alert_dialog_button_bar_height</item>
     </style>
 
@@ -507,9 +516,7 @@ please see styles_device_defaults.xml.
         <item name="background">@null</item>
     </style>
 
-    <style name="Widget.Material.ButtonBar.AlertDialog">
-        <item name="background">@null</item>
-    </style>
+    <style name="Widget.Material.ButtonBar.AlertDialog" />
 
     <style name="Widget.Material.SearchView">
         <item name="layout">@layout/search_view</item>
@@ -528,7 +535,7 @@ please see styles_device_defaults.xml.
         <item name="queryBackground">@empty</item>
         <item name="submitBackground">@empty</item>
         <item name="searchHintIcon">@empty</item>
-        <item name="queryHint">@string/search_hint</item>
+        <item name="defaultQueryHint">@string/search_hint</item>
     </style>
 
     <style name="Widget.Material.SegmentedButton" parent="SegmentedButton">
@@ -536,8 +543,8 @@ please see styles_device_defaults.xml.
     </style>
 
     <style name="Widget.Material.StackView">
-        <item name="resOutColor">@color/holo_blue_light</item>
-        <item name="clickColor">@color/holo_blue_light</item>
+        <item name="resOutColor">?attr/colorPrimary</item>
+        <item name="clickColor">?attr/colorPrimary</item>
     </style>
 
     <style name="Widget.Material.TextView" parent="Widget.TextView"/>
@@ -567,16 +574,16 @@ please see styles_device_defaults.xml.
     <style name="Widget.Material.CompoundButton" parent="Widget.CompoundButton"/>
 
     <style name="Widget.Material.CompoundButton.CheckBox" parent="Widget.CompoundButton.CheckBox">
-        <item name="background">?attr/selectableItemBackgroundBorderless</item>
+        <item name="background">@drawable/control_background_40dp_material</item>
     </style>
 
     <style name="Widget.Material.CompoundButton.RadioButton" parent="Widget.CompoundButton.RadioButton">
-        <item name="background">?attr/selectableItemBackgroundBorderless</item>
+        <item name="background">@drawable/control_background_40dp_material</item>
     </style>
 
     <style name="Widget.Material.CompoundButton.Star" parent="Widget.CompoundButton.Star">
         <item name="button">@drawable/btn_star_material</item>
-        <item name="background">?attr/selectableItemBackgroundBorderless</item>
+        <item name="background">@drawable/control_background_40dp_material</item>
     </style>
 
     <style name="Widget.Material.CompoundButton.Switch">
@@ -585,7 +592,7 @@ please see styles_device_defaults.xml.
         <item name="switchTextAppearance">@style/TextAppearance.Material.Widget.Switch</item>
         <item name="textOn">@string/capital_on</item>
         <item name="textOff">@string/capital_off</item>
-        <item name="background">?attr/selectableItemBackgroundBorderless</item>
+        <item name="background">@drawable/control_background_40dp_material</item>
         <item name="showText">false</item>
     </style>
 
@@ -609,18 +616,17 @@ please see styles_device_defaults.xml.
     <style name="Widget.Material.GestureOverlayView" parent="Widget.GestureOverlayView"/>
 
     <style name="Widget.Material.GridView" parent="Widget.GridView">
-        <item name="listSelector">?attr/selectableItemBackground</item>
+        <item name="listSelector">?attr/listChoiceBackgroundIndicator</item>
     </style>
 
     <style name="Widget.Material.CalendarView" parent="Widget.CalendarView">
-        <item name="selectedWeekBackgroundColor">#330099FF</item>
-        <item name="focusedMonthDateColor">#FFFFFFFF</item>
-        <item name="unfocusedMonthDateColor">#66FFFFFF</item>
-        <item name="weekNumberColor">#33FFFFFF</item>
-        <item name="weekSeparatorLineColor">#19FFFFFF</item>
-        <item name="selectedDateVerticalBar">@drawable/day_picker_week_view_dayline_holo</item>
-        <item name="weekDayTextAppearance">@style/TextAppearance.Material.CalendarViewWeekDayView</item>
         <item name="calendarViewMode">material</item>
+
+        <item name="monthTextAppearance">@style/TextAppearance.Material.Widget.Calendar.Month</item>
+        <item name="weekDayTextAppearance">@style/TextAppearance.Material.Widget.Calendar.DayOfWeek</item>
+        <item name="dateTextAppearance">@style/TextAppearance.Material.Widget.Calendar.Day</item>
+        <item name="daySelectorColor">?attr/colorControlActivated</item>
+        <item name="dayHighlightColor">?attr/colorControlHighlight</item>
     </style>
 
     <style name="Widget.Material.ImageButton" parent="Widget.ImageButton">
@@ -628,50 +634,38 @@ please see styles_device_defaults.xml.
     </style>
 
     <style name="Widget.Material.NumberPicker" parent="Widget.NumberPicker">
-        <item name="internalLayout">@layout/number_picker_with_selector_wheel</item>
+        <item name="internalLayout">@layout/number_picker_material</item>
         <item name="solidColor">@color/transparent</item>
-        <item name="selectionDivider">@drawable/numberpicker_selection_divider</item>
-        <item name="selectionDividerHeight">2dip</item>
-        <item name="selectionDividersDistance">48dip</item>
-        <item name="internalMinWidth">64dip</item>
-        <item name="internalMaxHeight">180dip</item>
+        <item name="selectionDivider">@drawable/number_picker_divider_material</item>
+        <item name="selectionDividerHeight">2dp</item>
+        <item name="selectionDividersDistance">48dp</item>
+        <item name="internalMinWidth">64dp</item>
+        <item name="internalMaxHeight">180dp</item>
         <item name="virtualButtonPressedDrawable">?attr/selectableItemBackground</item>
     </style>
 
-    <style name="Widget.Material.TimePicker" parent="Widget.TimePicker">
+    <style name="Widget.Material.TimePicker">
         <item name="timePickerMode">clock</item>
-        <item name="legacyLayout">@layout/time_picker_legacy_holo</item>
+        <item name="legacyLayout">@layout/time_picker_legacy_material</item>
         <!-- Attributes for new-style TimePicker. -->
-        <item name="internalLayout">@layout/time_picker_holo</item>
-        <item name="headerTimeTextAppearance">@style/TextAppearance.Material.TimePicker.TimeLabel</item>
-        <item name="headerAmPmTextAppearance">@style/TextAppearance.Material.TimePicker.AmPmLabel</item>
-        <item name="headerSelectedTextColor">?attr/textColorPrimaryInverse</item>
-        <item name="headerBackground">@drawable/time_picker_header_material</item>
-        <item name="numbersTextColor">?attr/textColorSecondary</item>
-        <item name="numbersBackgroundColor">#10ffffff</item>
-        <item name="amPmTextColor">?attr/textColorSecondary</item>
-        <item name="amPmBackgroundColor">@color/transparent</item>
-        <item name="amPmSelectedBackgroundColor">?attr/colorControlActivated</item>
+        <item name="internalLayout">@layout/time_picker_material</item>
+        <item name="headerTextColor">@color/primary_text_secondary_when_activated_material</item>
+        <item name="headerBackground">#ff555555</item>
+        <item name="numbersTextColor">?attr/textColorPrimaryActivated</item>
+        <item name="numbersInnerTextColor">?attr/textColorSecondaryActivated</item>
         <item name="numbersSelectorColor">?attr/colorControlActivated</item>
+        <item name="numbersBackgroundColor">#ff555555</item>
+        <item name="amPmTextColor">?attr/textColorSecondary</item>
     </style>
 
-    <style name="Widget.Material.DatePicker" parent="Widget.DatePicker">
+    <style name="Widget.Material.DatePicker">
         <item name="datePickerMode">calendar</item>
         <item name="legacyLayout">@layout/date_picker_legacy_holo</item>
-        <!-- Attributes for new-style DatePicker. -->
-        <item name="internalLayout">@layout/date_picker_holo</item>
         <item name="calendarViewShown">true</item>
-        <item name="dayOfWeekBackground">#10000000</item>
-        <item name="dayOfWeekTextAppearance">@style/TextAppearance.Material.DatePicker.DayOfWeekLabel</item>
-        <item name="headerMonthTextAppearance">@style/TextAppearance.Material.DatePicker.MonthLabel</item>
-        <item name="headerDayOfMonthTextAppearance">@style/TextAppearance.Material.DatePicker.DayOfMonthLabel</item>
-        <item name="headerYearTextAppearance">@style/TextAppearance.Material.DatePicker.YearLabel</item>
-        <item name="headerSelectedTextColor">?attr/textColorPrimaryInverse</item>
-        <item name="headerBackground">?attr/colorAccent</item>
-        <item name="yearListItemTextAppearance">@style/TextAppearance.Material.DatePicker.List.YearLabel</item>
-        <item name="yearListSelectorColor">?attr/colorControlActivated</item>
-        <item name="calendarTextColor">?attr/textColorSecondary</item>
-        <item name="calendarSelectedTextColor">?attr/colorControlActivated</item>
+        <!-- Attributes for new-style DatePicker. -->
+        <item name="internalLayout">@layout/date_picker_material</item>
+        <item name="headerTextColor">@color/primary_text_secondary_when_activated_material</item>
+        <item name="headerBackground">#ff555555</item>
     </style>
 
     <style name="Widget.Material.ActivityChooserView" parent="Widget.ActivityChooserView">
@@ -727,34 +721,35 @@ please see styles_device_defaults.xml.
 
     <style name="Widget.Material.SeekBar">
         <item name="indeterminateOnly">false</item>
-        <item name="progressDrawable">@drawable/scrubber_progress_horizontal_material</item>
-        <item name="indeterminateDrawable">@drawable/scrubber_progress_horizontal_material</item>
-        <item name="thumb">@drawable/scrubber_control_material_anim</item>
+        <item name="progressDrawable">@drawable/seekbar_track_material</item>
+        <item name="indeterminateDrawable">@drawable/seekbar_track_material</item>
+        <item name="thumb">@drawable/seekbar_thumb_material_anim</item>
         <item name="splitTrack">true</item>
+        <item name="useDisabledAlpha">false</item>
         <item name="focusable">true</item>
         <item name="paddingStart">16dip</item>
         <item name="paddingEnd">16dip</item>
         <item name="mirrorForRtl">true</item>
-        <item name="background">?attr/selectableItemBackgroundBorderless</item>
+        <item name="background">@drawable/control_background_32dp_material</item>
     </style>
 
     <style name="Widget.Material.RatingBar" parent="Widget.RatingBar">
-        <item name="progressDrawable">@drawable/ratingbar_full_material</item>
-        <item name="indeterminateDrawable">@drawable/ratingbar_full_material</item>
+        <item name="progressDrawable">@drawable/ratingbar_material</item>
+        <item name="indeterminateDrawable">@drawable/ratingbar_material</item>
     </style>
 
     <style name="Widget.Material.RatingBar.Indicator" parent="Widget.RatingBar.Indicator">
-        <item name="progressDrawable">@drawable/ratingbar_holo_dark</item>
-        <item name="indeterminateDrawable">@drawable/ratingbar_holo_dark</item>
-        <item name="minHeight">35dip</item>
-        <item name="maxHeight">35dip</item>
+        <item name="progressDrawable">@drawable/ratingbar_indicator_material</item>
+        <item name="indeterminateDrawable">@drawable/ratingbar_indicator_material</item>
+        <item name="minHeight">36dp</item>
+        <item name="maxHeight">36dp</item>
     </style>
 
     <style name="Widget.Material.RatingBar.Small" parent="Widget.RatingBar.Small">
-        <item name="progressDrawable">@drawable/ratingbar_small_holo_dark</item>
-        <item name="indeterminateDrawable">@drawable/ratingbar_small_holo_dark</item>
-        <item name="minHeight">16dip</item>
-        <item name="maxHeight">16dip</item>
+        <item name="progressDrawable">@drawable/ratingbar_small_material</item>
+        <item name="indeterminateDrawable">@drawable/ratingbar_small_material</item>
+        <item name="minHeight">16dp</item>
+        <item name="maxHeight">16dp</item>
     </style>
 
     <style name="Widget.Material.ScrollView" parent="Widget.ScrollView"/>
@@ -765,6 +760,9 @@ please see styles_device_defaults.xml.
         <item name="dropDownSelector">?attr/listChoiceBackgroundIndicator</item>
         <item name="popupBackground">@drawable/popup_background_material</item>
         <item name="popupElevation">@dimen/floating_window_z</item>
+        <item name="popupAnimationStyle">@empty</item>
+        <item name="popupEnterTransition">@transition/popup_window_enter</item>
+        <item name="popupExitTransition">@transition/popup_window_exit</item>
         <item name="dropDownVerticalOffset">0dip</item>
         <item name="dropDownHorizontalOffset">0dip</item>
         <item name="overlapAnchor">true</item>
@@ -775,22 +773,22 @@ please see styles_device_defaults.xml.
     </style>
 
     <style name="Widget.Material.Spinner.DropDown"/>
-
-    <style name="Widget.Material.Spinner.DropDown.ActionBar">
-        <item name="background">@drawable/spinner_background_material</item>
-        <item name="overlapAnchor">true</item>
-    </style>
+    <style name="Widget.Material.Spinner.DropDown.ActionBar" />
 
     <style name="Widget.Material.Spinner.Underlined">
         <item name="background">@drawable/spinner_textfield_background_material</item>
     </style>
 
-    <style name="Widget.Material.TabWidget" parent="Widget.TabWidget">
-        <item name="tabStripLeft">@null</item>
-        <item name="tabStripRight">@null</item>
+    <style name="Widget.Material.TabWidget">
+        <item name="textAppearance">@style/TextAppearance.Material.Widget.TabWidget</item>
+        <item name="ellipsize">marquee</item>
+        <item name="singleLine">true</item>
+        <item name="tabStripLeft">@empty</item>
+        <item name="tabStripRight">@empty</item>
         <item name="tabStripEnabled">false</item>
         <item name="divider">?attr/dividerVertical</item>
-        <item name="showDividers">middle</item>
+        <item name="gravity">fill_horizontal|center_vertical</item>
+        <item name="showDividers">none</item>
         <item name="dividerPadding">8dip</item>
         <item name="measureWithLargestChild">true</item>
         <item name="tabLayout">@layout/tab_indicator_material</item>
@@ -811,21 +809,24 @@ please see styles_device_defaults.xml.
         <item name="navigationButtonStyle">@style/Widget.Material.Toolbar.Button.Navigation</item>
         <item name="titleTextAppearance">@style/TextAppearance.Material.Widget.Toolbar.Title</item>
         <item name="subtitleTextAppearance">@style/TextAppearance.Material.Widget.Toolbar.Subtitle</item>
+        <item name="paddingStart">@dimen/action_bar_default_padding_start_material</item>
+        <item name="paddingEnd">@dimen/action_bar_default_padding_end_material</item>
     </style>
 
-    <style name="Widget.Material.Toolbar.Button.Navigation" parent="Widget.Toolbar.Button.Navigation">
-        <item name="background">?attr/selectableItemBackgroundBorderless</item>
-        <item name="paddingStart">@dimen/action_bar_navigation_padding_start_material</item>
+    <style name="Widget.Material.Toolbar.Button.Navigation" parent="Widget.Material">
+        <item name="background">@drawable/control_background_40dp_material</item>
+        <item name="minWidth">56dp</item>
+        <item name="scaleType">center</item>
     </style>
 
     <style name="Widget.Material.WebTextView" parent="Widget.WebTextView"/>
-
     <style name="Widget.Material.WebView" parent="Widget.WebView"/>
 
-    <style name="Widget.Material.DropDownItem" parent="Widget.DropDownItem">
+    <style name="Widget.Material.DropDownItem">
         <item name="textAppearance">@style/TextAppearance.Material.Widget.DropDownItem</item>
         <item name="paddingStart">8dp</item>
         <item name="paddingEnd">8dp</item>
+        <item name="gravity">center_vertical</item>
     </style>
 
     <style name="Widget.Material.DropDownItem.Spinner"/>
@@ -838,11 +839,13 @@ please see styles_device_defaults.xml.
     <style name="Widget.Material.QuickContactBadgeSmall.WindowMedium" parent="Widget.QuickContactBadgeSmall.WindowMedium"/>
     <style name="Widget.Material.QuickContactBadgeSmall.WindowLarge" parent="Widget.QuickContactBadgeSmall.WindowLarge"/>
 
-    <style name="Widget.Material.ListPopupWindow" parent="Widget.ListPopupWindow">
+    <style name="Widget.Material.ListPopupWindow">
         <item name="dropDownSelector">?attr/listChoiceBackgroundIndicator</item>
         <item name="popupBackground">@drawable/popup_background_material</item>
         <item name="popupElevation">@dimen/floating_window_z</item>
-        <item name="popupAnimationStyle">@style/Animation.Material.Popup</item>
+        <item name="popupAnimationStyle">@empty</item>
+        <item name="popupEnterTransition">@transition/popup_window_enter</item>
+        <item name="popupExitTransition">@transition/popup_window_exit</item>
         <item name="dropDownVerticalOffset">0dip</item>
         <item name="dropDownHorizontalOffset">0dip</item>
         <item name="dropDownWidth">wrap_content</item>
@@ -855,18 +858,21 @@ please see styles_device_defaults.xml.
         <item name="dropDownHorizontalOffset">-4dip</item>
     </style>
 
-    <style name="Widget.Material.ActionButton" parent="Widget.ActionButton">
+    <style name="Widget.Material.ActionButton">
+        <item name="background">?attr/actionBarItemBackground</item>
+        <item name="paddingStart">12dp</item>
+        <item name="paddingEnd">12dp</item>
         <item name="minWidth">@dimen/action_button_min_width_material</item>
         <item name="minHeight">@dimen/action_button_min_height_material</item>
         <item name="gravity">center</item>
         <item name="scaleType">center</item>
         <item name="maxLines">2</item>
-        <item name="paddingStart">12dp</item>
-        <item name="paddingEnd">12dp</item>
     </style>
 
     <style name="Widget.Material.ActionButton.CloseMode">
-        <item name="background">?attr/selectableItemBackgroundBorderless</item>
+        <item name="background">@drawable/control_background_40dp_material</item>
+        <!-- Should match Widget.Material.Toolbar.Button.Navigation minWidth. -->
+        <item name="minWidth">56dp</item>
     </style>
 
     <style name="Widget.Material.ActionButton.Overflow">
@@ -879,34 +885,36 @@ please see styles_device_defaults.xml.
         <item name="paddingEnd">@dimen/action_bar_overflow_padding_end_material</item>
     </style>
 
-    <style name="Widget.Material.ActionBar.TabView" parent="Widget.ActionBar.TabView">
+    <style name="Widget.Material.ActionBar.TabView" parent="Widget.Material">
+        <item name="gravity">center_horizontal</item>
         <item name="background">@drawable/tab_indicator_material</item>
         <item name="paddingStart">16dip</item>
         <item name="paddingEnd">16dip</item>
     </style>
 
-    <style name="Widget.Material.ActionBar.TabBar" parent="Widget.ActionBar.TabBar">
+    <style name="Widget.Material.ActionBar.TabBar" parent="Widget.Material">
         <item name="divider">?attr/actionBarDivider</item>
         <item name="showDividers">middle</item>
         <item name="dividerPadding">12dip</item>
     </style>
 
-    <style name="Widget.Material.ActionBar.TabText" parent="Widget.ActionBar.TabText">
-        <item name="textAppearance">@style/TextAppearance.Material.Medium</item>
-        <item name="textColor">?attr/textColorPrimary</item>
-        <item name="textSize">12sp</item>
-        <item name="textStyle">bold</item>
-        <item name="textAllCaps">true</item>
+    <style name="Widget.Material.ActionBar.TabText">
+        <item name="textAppearance">@style/TextAppearance.Material.Widget.TabWidget</item>
         <item name="ellipsize">marquee</item>
         <item name="maxLines">2</item>
     </style>
 
-    <style name="Widget.Material.ActionBar" parent="Widget.ActionBar">
+    <style name="Widget.Material.ActionBar">
         <item name="background">@null</item>
         <item name="backgroundStacked">@null</item>
         <item name="backgroundSplit">@null</item>
         <item name="displayOptions">showTitle</item>
         <item name="divider">?attr/dividerVertical</item>
+        <item name="height">?attr/actionBarSize</item>
+        <item name="paddingStart">0dip</item>
+        <item name="paddingTop">0dip</item>
+        <item name="paddingEnd">0dip</item>
+        <item name="paddingBottom">0dip</item>
         <item name="titleTextStyle">@style/TextAppearance.Material.Widget.ActionBar.Title</item>
         <item name="subtitleTextStyle">@style/TextAppearance.Material.Widget.ActionBar.Subtitle</item>
         <item name="progressBarStyle">?attr/progressBarStyleHorizontal</item>
@@ -927,19 +935,29 @@ please see styles_device_defaults.xml.
         <item name="backgroundSplit">?attr/colorPrimary</item>
     </style>
 
-    <style name="Widget.Material.ActionMode" parent="Widget.ActionMode">
+    <style name="Widget.Material.ActionMode">
+        <item name="background">?attr/actionModeBackground</item>
+        <item name="backgroundSplit">?attr/actionModeSplitBackground</item>
+        <item name="height">?attr/actionBarSize</item>
         <item name="titleTextStyle">@style/TextAppearance.Material.Widget.ActionMode.Title</item>
         <item name="subtitleTextStyle">@style/TextAppearance.Material.Widget.ActionMode.Subtitle</item>
         <item name="closeItemLayout">@layout/action_mode_close_item_material</item>
     </style>
 
-    <style name="Widget.Material.FastScroll" parent="Widget.FastScroll">
+    <style name="Widget.Material.FastScroll">
+        <item name="thumbDrawable">?attr/fastScrollThumbDrawable</item>
+        <item name="trackDrawable">?attr/fastScrollTrackDrawable</item>
+        <item name="backgroundLeft">?attr/fastScrollPreviewBackgroundLeft</item>
+        <item name="backgroundRight">?attr/fastScrollPreviewBackgroundRight</item>
+        <item name="position">?attr/fastScrollOverlayPosition</item>
+        <item name="textColor">?attr/fastScrollTextColor</item>
         <item name="thumbMinWidth">0dp</item>
         <item name="thumbMinHeight">0dp</item>
-        <item name="minWidth">88dp</item>
+        <item name="textSize">45sp</item>
+        <item name="minWidth">104dp</item>
         <item name="minHeight">88dp</item>
         <item name="padding">0dp</item>
-        <item name="textSize">45sp</item>
+        <item name="thumbPosition">inside</item>
     </style>
 
     <style name="Widget.Material.PreferenceFrameLayout">
@@ -950,7 +968,7 @@ please see styles_device_defaults.xml.
     </style>
 
     <style name="Widget.Material.MediaRouteButton">
-        <item name="background">?attr/selectableItemBackgroundBorderless</item>
+        <item name="background">@drawable/control_background_40dp_material</item>
         <item name="externalRouteEnabledDrawable">@drawable/ic_media_route_material</item>
         <item name="minWidth">56dp</item>
         <item name="minHeight">48dp</item>
@@ -1003,24 +1021,20 @@ please see styles_device_defaults.xml.
     <style name="Widget.Material.Light.GestureOverlayView" parent="Widget.Material.GestureOverlayView"/>
     <style name="Widget.Material.Light.GridView" parent="Widget.Material.GridView"/>
     <style name="Widget.Material.Light.ImageButton" parent="Widget.Material.ImageButton"/>
-
-    <style name="Widget.Material.Light.CalendarView" parent="Widget.CalendarView">
-        <item name="selectedWeekBackgroundColor">#330066ff</item>
-        <item name="focusedMonthDateColor">#FF000000</item>
-        <item name="unfocusedMonthDateColor">#7F08002B</item>
-        <item name="weekNumberColor">#7F080021</item>
-        <item name="weekSeparatorLineColor">#7F08002A</item>
-        <item name="weekDayTextAppearance">@style/TextAppearance.Material.CalendarViewWeekDayView</item>
-        <item name="calendarViewMode">material</item>
-    </style>
-
+    <style name="Widget.Material.Light.CalendarView" parent="Widget.Material.CalendarView" />
     <style name="Widget.Material.Light.NumberPicker" parent="Widget.Material.NumberPicker"/>
 
     <style name="Widget.Material.Light.TimePicker" parent="Widget.Material.TimePicker">
-        <item name="numbersBackgroundColor">#10000000</item>
+        <item name="headerTextColor">@color/primary_text_secondary_when_activated_material_inverse</item>
+        <item name="headerBackground">?attr/colorAccent</item>
+        <item name="numbersBackgroundColor">#ffeeeeee</item>
     </style>
 
-    <style name="Widget.Material.Light.DatePicker" parent="Widget.Material.DatePicker" />
+    <style name="Widget.Material.Light.DatePicker" parent="Widget.Material.DatePicker">
+        <item name="headerTextColor">@color/primary_text_secondary_when_activated_material_inverse</item>
+        <item name="headerBackground">?attr/colorAccent</item>
+    </style>
+
     <style name="Widget.Material.Light.ActivityChooserView" parent="Widget.Material.ActivityChooserView" />
     <style name="Widget.Material.Light.ImageWell" parent="Widget.Material.ImageWell"/>
     <style name="Widget.Material.Light.ListView" parent="Widget.Material.ListView"/>
@@ -1036,22 +1050,9 @@ please see styles_device_defaults.xml.
     <style name="Widget.Material.Light.ProgressBar.Small.Inverse" parent="Widget.Material.ProgressBar.Small.Inverse"/>
     <style name="Widget.Material.Light.ProgressBar.Large.Inverse" parent="Widget.Material.ProgressBar.Large.Inverse"/>
     <style name="Widget.Material.Light.SeekBar" parent="Widget.Material.SeekBar"/>
-    <style name="Widget.Material.Light.RatingBar" parent="Widget.Material.RatingBar" />
-
-    <style name="Widget.Material.Light.RatingBar.Indicator" parent="Widget.RatingBar.Indicator">
-        <item name="progressDrawable">@drawable/ratingbar_holo_light</item>
-        <item name="indeterminateDrawable">@drawable/ratingbar_holo_light</item>
-        <item name="minHeight">35dip</item>
-        <item name="maxHeight">35dip</item>
-    </style>
-
-    <style name="Widget.Material.Light.RatingBar.Small" parent="Widget.RatingBar.Small">
-        <item name="progressDrawable">@drawable/ratingbar_small_holo_light</item>
-        <item name="indeterminateDrawable">@drawable/ratingbar_small_holo_light</item>
-        <item name="minHeight">16dip</item>
-        <item name="maxHeight">16dip</item>
-    </style>
-
+    <style name="Widget.Material.Light.RatingBar" parent="Widget.Material.RatingBar"/>
+    <style name="Widget.Material.Light.RatingBar.Indicator" parent="Widget.Material.RatingBar.Indicator"/>
+    <style name="Widget.Material.Light.RatingBar.Small" parent="Widget.Material.RatingBar.Small"/>
     <style name="Widget.Material.Light.ScrollView" parent="Widget.Material.ScrollView"/>
     <style name="Widget.Material.Light.HorizontalScrollView" parent="Widget.Material.HorizontalScrollView"/>
     <style name="Widget.Material.Light.Spinner" parent="Widget.Material.Spinner" />

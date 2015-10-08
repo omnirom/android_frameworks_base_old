@@ -16,13 +16,18 @@
 
 package android.telecom;
 
+import com.android.internal.os.SomeArgs;
 import com.android.internal.telecom.IVideoCallback;
 import com.android.internal.telecom.IVideoProvider;
 
+import android.annotation.Nullable;
 import android.annotation.SystemApi;
+import android.hardware.camera2.CameraManager;
 import android.net.Uri;
+import android.os.Bundle;
 import android.os.Handler;
 import android.os.IBinder;
+import android.os.Looper;
 import android.os.Message;
 import android.os.RemoteException;
 import android.view.Surface;
@@ -34,7 +39,8 @@ import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
 
 /**
- * Represents a connection to a remote endpoint that carries voice traffic.
+ * Represents a phone call or connection to a remote endpoint that carries voice and/or video
+ * traffic.
  * <p>
  * Implementations create a custom subclass of {@code Connection} and return it to the framework
  * as the return value of
@@ -44,26 +50,55 @@ import java.util.concurrent.ConcurrentHashMap;
  * Implementations are then responsible for updating the state of the {@code Connection}, and
  * must call {@link #destroy()} to signal to the framework that the {@code Connection} is no
  * longer used and associated resources may be recovered.
- * @hide
  */
-@SystemApi
-public abstract class Connection implements IConferenceable {
+public abstract class Connection extends Conferenceable {
 
+    /**
+     * The connection is initializing. This is generally the first state for a {@code Connection}
+     * returned by a {@link ConnectionService}.
+     */
     public static final int STATE_INITIALIZING = 0;
 
+    /**
+     * The connection is new and not connected.
+     */
     public static final int STATE_NEW = 1;
 
+    /**
+     * An incoming connection is in the ringing state. During this state, the user's ringer or
+     * vibration feature will be activated.
+     */
     public static final int STATE_RINGING = 2;
 
+    /**
+     * An outgoing connection is in the dialing state. In this state the other party has not yet
+     * answered the call and the user traditionally hears a ringback tone.
+     */
     public static final int STATE_DIALING = 3;
 
+    /**
+     * A connection is active. Both parties are connected to the call and can actively communicate.
+     */
     public static final int STATE_ACTIVE = 4;
 
+    /**
+     * A connection is on hold.
+     */
     public static final int STATE_HOLDING = 5;
 
+    /**
+     * A connection has been disconnected. This is the final state once the user has been
+     * disconnected from a call either locally, remotely or by an error in the service.
+     */
     public static final int STATE_DISCONNECTED = 6;
 
-    /** Connection can currently be put on hold or unheld. */
+    /**
+     * Connection can currently be put on hold or unheld. This is distinct from
+     * {@link #CAPABILITY_SUPPORT_HOLD} in that although a connection may support 'hold' most times,
+     * it does not at the moment support the function. This can be true while the call is in the
+     * state {@link #STATE_DIALING}, for example. During this condition, an in-call UI may
+     * display a disabled 'hold' button.
+     */
     public static final int CAPABILITY_HOLD = 0x00000001;
 
     /** Connection supports the hold feature. */
@@ -106,28 +141,36 @@ public abstract class Connection implements IConferenceable {
     public static final int CAPABILITY_MANAGE_CONFERENCE = 0x00000080;
 
     /**
-     * Local device supports video telephony.
-     * @hide
+     * Local device supports receiving video.
      */
-    public static final int CAPABILITY_SUPPORTS_VT_LOCAL = 0x00000100;
+    public static final int CAPABILITY_SUPPORTS_VT_LOCAL_RX = 0x00000100;
 
     /**
-     * Remote device supports video telephony.
-     * @hide
+     * Local device supports transmitting video.
      */
-    public static final int CAPABILITY_SUPPORTS_VT_REMOTE = 0x00000200;
+    public static final int CAPABILITY_SUPPORTS_VT_LOCAL_TX = 0x00000200;
 
     /**
-     * Connection is using high definition audio.
-     * @hide
+     * Local device supports bidirectional video calling.
      */
-    public static final int CAPABILITY_HIGH_DEF_AUDIO = 0x00000400;
+    public static final int CAPABILITY_SUPPORTS_VT_LOCAL_BIDIRECTIONAL =
+            CAPABILITY_SUPPORTS_VT_LOCAL_RX | CAPABILITY_SUPPORTS_VT_LOCAL_TX;
 
     /**
-     * Connection is using WIFI.
-     * @hide
+     * Remote device supports receiving video.
      */
-    public static final int CAPABILITY_WIFI = 0x00000800;
+    public static final int CAPABILITY_SUPPORTS_VT_REMOTE_RX = 0x00000400;
+
+    /**
+     * Remote device supports transmitting video.
+     */
+    public static final int CAPABILITY_SUPPORTS_VT_REMOTE_TX = 0x00000800;
+
+    /**
+     * Remote device supports bidirectional video calling.
+     */
+    public static final int CAPABILITY_SUPPORTS_VT_REMOTE_BIDIRECTIONAL =
+            CAPABILITY_SUPPORTS_VT_REMOTE_RX | CAPABILITY_SUPPORTS_VT_REMOTE_TX;
 
     /**
      * Connection is able to be separated from its parent {@code Conference}, if any.
@@ -148,10 +191,89 @@ public abstract class Connection implements IConferenceable {
     public static final int CAPABILITY_GENERIC_CONFERENCE = 0x00004000;
 
     /**
+     * Connection is using high definition audio.
+     * @hide
+     */
+    public static final int CAPABILITY_HIGH_DEF_AUDIO = 0x00008000;
+
+    /**
+     * Connection is using WIFI.
+     * @hide
+     */
+    public static final int CAPABILITY_WIFI = 0x00010000;
+
+    /**
+     * Indicates that the current device callback number should be shown.
+     *
+     * @hide
+     */
+    public static final int CAPABILITY_SHOW_CALLBACK_NUMBER = 0x00020000;
+
+    /**
      * Speed up audio setup for MT call.
      * @hide
-    */
-    public static final int CAPABILITY_SPEED_UP_MT_AUDIO = 0x00008000;
+     */
+    public static final int CAPABILITY_SPEED_UP_MT_AUDIO = 0x00040000;
+
+    /**
+     * Call can be upgraded to a video call.
+     */
+    public static final int CAPABILITY_CAN_UPGRADE_TO_VIDEO = 0x00080000;
+
+    /**
+     * For video calls, indicates whether the outgoing video for the call can be paused using
+     * the {@link android.telecom.VideoProfile#STATE_PAUSED} VideoState.
+     */
+    public static final int CAPABILITY_CAN_PAUSE_VIDEO = 0x00100000;
+
+    /**
+     * For a conference, indicates the conference will not have child connections.
+     * <p>
+     * An example of a conference with child connections is a GSM conference call, where the radio
+     * retains connections to the individual participants of the conference.  Another example is an
+     * IMS conference call where conference event package functionality is supported; in this case
+     * the conference server ensures the radio is aware of the participants in the conference, which
+     * are represented by child connections.
+     * <p>
+     * An example of a conference with no child connections is an IMS conference call with no
+     * conference event package support.  Such a conference is represented by the radio as a single
+     * connection to the IMS conference server.
+     * <p>
+     * Indicating whether a conference has children or not is important to help user interfaces
+     * visually represent a conference.  A conference with no children, for example, will have the
+     * conference connection shown in the list of calls on a Bluetooth device, where if the
+     * conference has children, only the children will be shown in the list of calls on a Bluetooth
+     * device.
+     * @hide
+     */
+    public static final int CAPABILITY_CONFERENCE_HAS_NO_CHILDREN = 0x00200000;
+
+    //**********************************************************************************************
+    // Next CAPABILITY value: 0x00400000
+    //**********************************************************************************************
+
+    /**
+     * Connection extra key used to store the last forwarded number associated with the current
+     * connection.  Used to communicate to the user interface that the connection was forwarded via
+     * the specified number.
+     */
+    public static final String EXTRA_LAST_FORWARDED_NUMBER =
+            "android.telecom.extra.LAST_FORWARDED_NUMBER";
+
+    /**
+     * Connection extra key used to store a child number associated with the current connection.
+     * Used to communicate to the user interface that the connection was received via
+     * a child address (i.e. phone number) associated with the {@link PhoneAccount}'s primary
+     * address.
+     */
+    public static final String EXTRA_CHILD_ADDRESS = "android.telecom.extra.CHILD_ADDRESS";
+
+    /**
+     * Connection extra key used to store the subject for an incoming call.  The user interface can
+     * query this extra and display its contents for incoming calls.  Will only be used if the
+     * {@link PhoneAccount} supports the capability {@link PhoneAccount#CAPABILITY_CALL_SUBJECT}.
+     */
+    public static final String EXTRA_CALL_SUBJECT = "android.telecom.extra.CALL_SUBJECT";
 
     // Flag controlling whether PII is emitted into the logs
     private static final boolean PII_DEBUG = Log.isLoggable(android.util.Log.DEBUG);
@@ -224,11 +346,23 @@ public abstract class Connection implements IConferenceable {
         if (can(capabilities, CAPABILITY_MANAGE_CONFERENCE)) {
             builder.append(" CAPABILITY_MANAGE_CONFERENCE");
         }
-        if (can(capabilities, CAPABILITY_SUPPORTS_VT_LOCAL)) {
-            builder.append(" CAPABILITY_SUPPORTS_VT_LOCAL");
+        if (can(capabilities, CAPABILITY_SUPPORTS_VT_LOCAL_RX)) {
+            builder.append(" CAPABILITY_SUPPORTS_VT_LOCAL_RX");
         }
-        if (can(capabilities, CAPABILITY_SUPPORTS_VT_REMOTE)) {
-            builder.append(" CAPABILITY_SUPPORTS_VT_REMOTE");
+        if (can(capabilities, CAPABILITY_SUPPORTS_VT_LOCAL_TX)) {
+            builder.append(" CAPABILITY_SUPPORTS_VT_LOCAL_TX");
+        }
+        if (can(capabilities, CAPABILITY_SUPPORTS_VT_LOCAL_BIDIRECTIONAL)) {
+            builder.append(" CAPABILITY_SUPPORTS_VT_LOCAL_BIDIRECTIONAL");
+        }
+        if (can(capabilities, CAPABILITY_SUPPORTS_VT_REMOTE_RX)) {
+            builder.append(" CAPABILITY_SUPPORTS_VT_REMOTE_RX");
+        }
+        if (can(capabilities, CAPABILITY_SUPPORTS_VT_REMOTE_TX)) {
+            builder.append(" CAPABILITY_SUPPORTS_VT_REMOTE_TX");
+        }
+        if (can(capabilities, CAPABILITY_SUPPORTS_VT_REMOTE_BIDIRECTIONAL)) {
+            builder.append(" CAPABILITY_SUPPORTS_VT_REMOTE_BIDIRECTIONAL");
         }
         if (can(capabilities, CAPABILITY_HIGH_DEF_AUDIO)) {
             builder.append(" CAPABILITY_HIGH_DEF_AUDIO");
@@ -239,8 +373,20 @@ public abstract class Connection implements IConferenceable {
         if (can(capabilities, CAPABILITY_GENERIC_CONFERENCE)) {
             builder.append(" CAPABILITY_GENERIC_CONFERENCE");
         }
+        if (can(capabilities, CAPABILITY_SHOW_CALLBACK_NUMBER)) {
+            builder.append(" CAPABILITY_SHOW_CALLBACK_NUMBER");
+        }
         if (can(capabilities, CAPABILITY_SPEED_UP_MT_AUDIO)) {
-            builder.append(" CAPABILITY_SPEED_UP_IMS_MT_AUDIO");
+            builder.append(" CAPABILITY_SPEED_UP_MT_AUDIO");
+        }
+        if (can(capabilities, CAPABILITY_CAN_UPGRADE_TO_VIDEO)) {
+            builder.append(" CAPABILITY_CAN_UPGRADE_TO_VIDEO");
+        }
+        if (can(capabilities, CAPABILITY_CAN_PAUSE_VIDEO)) {
+            builder.append(" CAPABILITY_CAN_PAUSE_VIDEO");
+        }
+        if (can(capabilities, CAPABILITY_CONFERENCE_HAS_NO_CHILDREN)) {
+            builder.append(" CAPABILITY_SINGLE_PARTY_CONFERENCE");
         }
         builder.append("]");
         return builder.toString();
@@ -264,68 +410,106 @@ public abstract class Connection implements IConferenceable {
         public void onAudioModeIsVoipChanged(Connection c, boolean isVoip) {}
         public void onStatusHintsChanged(Connection c, StatusHints statusHints) {}
         public void onConferenceablesChanged(
-                Connection c, List<IConferenceable> conferenceables) {}
+                Connection c, List<Conferenceable> conferenceables) {}
         public void onConferenceChanged(Connection c, Conference conference) {}
         /** @hide */
         public void onConferenceParticipantsChanged(Connection c,
                 List<ConferenceParticipant> participants) {}
         public void onConferenceStarted() {}
+        public void onConferenceMergeFailed(Connection c) {}
+        public void onExtrasChanged(Connection c, Bundle extras) {}
     }
 
-    /** @hide */
+    /**
+     * Provides a means of controlling the video session associated with a {@link Connection}.
+     * <p>
+     * Implementations create a custom subclass of {@link VideoProvider} and the
+     * {@link ConnectionService} creates an instance sets it on the {@link Connection} using
+     * {@link Connection#setVideoProvider(VideoProvider)}.  Any connection which supports video
+     * should set the {@link VideoProvider}.
+     * <p>
+     * The {@link VideoProvider} serves two primary purposes: it provides a means for Telecom and
+     * {@link InCallService} implementations to issue requests related to the video session;
+     * it provides a means for the {@link ConnectionService} to report events and information
+     * related to the video session to Telecom and the {@link InCallService} implementations.
+     * <p>
+     * {@link InCallService} implementations interact with the {@link VideoProvider} via
+     * {@link android.telecom.InCallService.VideoCall}.
+     */
     public static abstract class VideoProvider {
 
         /**
          * Video is not being received (no protocol pause was issued).
+         * @see #handleCallSessionEvent(int)
          */
         public static final int SESSION_EVENT_RX_PAUSE = 1;
 
         /**
-         * Video reception has resumed after a SESSION_EVENT_RX_PAUSE.
+         * Video reception has resumed after a {@link #SESSION_EVENT_RX_PAUSE}.
+         * @see #handleCallSessionEvent(int)
          */
         public static final int SESSION_EVENT_RX_RESUME = 2;
 
         /**
          * Video transmission has begun. This occurs after a negotiated start of video transmission
          * when the underlying protocol has actually begun transmitting video to the remote party.
+         * @see #handleCallSessionEvent(int)
          */
         public static final int SESSION_EVENT_TX_START = 3;
 
         /**
          * Video transmission has stopped. This occurs after a negotiated stop of video transmission
          * when the underlying protocol has actually stopped transmitting video to the remote party.
+         * @see #handleCallSessionEvent(int)
          */
         public static final int SESSION_EVENT_TX_STOP = 4;
 
         /**
-         * A camera failure has occurred for the selected camera.  The In-Call UI can use this as a
-         * cue to inform the user the camera is not available.
+         * A camera failure has occurred for the selected camera.  The {@link InCallService} can use
+         * this as a cue to inform the user the camera is not available.
+         * @see #handleCallSessionEvent(int)
          */
         public static final int SESSION_EVENT_CAMERA_FAILURE = 5;
 
         /**
-         * Issued after {@code SESSION_EVENT_CAMERA_FAILURE} when the camera is once again ready for
-         * operation.  The In-Call UI can use this as a cue to inform the user that the camera has
-         * become available again.
+         * Issued after {@link #SESSION_EVENT_CAMERA_FAILURE} when the camera is once again ready
+         * for operation.  The {@link InCallService} can use this as a cue to inform the user that
+         * the camera has become available again.
+         * @see #handleCallSessionEvent(int)
          */
         public static final int SESSION_EVENT_CAMERA_READY = 6;
 
         /**
          * Session modify request was successful.
+         * @see #receiveSessionModifyResponse(int, VideoProfile, VideoProfile)
          */
         public static final int SESSION_MODIFY_REQUEST_SUCCESS = 1;
 
         /**
          * Session modify request failed.
+         * @see #receiveSessionModifyResponse(int, VideoProfile, VideoProfile)
          */
         public static final int SESSION_MODIFY_REQUEST_FAIL = 2;
 
         /**
          * Session modify request ignored due to invalid parameters.
+         * @see #receiveSessionModifyResponse(int, VideoProfile, VideoProfile)
          */
         public static final int SESSION_MODIFY_REQUEST_INVALID = 3;
 
-        private static final int MSG_SET_VIDEO_CALLBACK = 1;
+        /**
+         * Session modify request timed out.
+         * @see #receiveSessionModifyResponse(int, VideoProfile, VideoProfile)
+         */
+        public static final int SESSION_MODIFY_REQUEST_TIMED_OUT = 4;
+
+        /**
+         * Session modify request rejected by remote user.
+         * @see #receiveSessionModifyResponse(int, VideoProfile, VideoProfile)
+         */
+        public static final int SESSION_MODIFY_REQUEST_REJECTED_BY_REMOTE = 5;
+
+        private static final int MSG_ADD_VIDEO_CALLBACK = 1;
         private static final int MSG_SET_CAMERA = 2;
         private static final int MSG_SET_PREVIEW_SURFACE = 3;
         private static final int MSG_SET_DISPLAY_SURFACE = 4;
@@ -336,22 +520,63 @@ public abstract class Connection implements IConferenceable {
         private static final int MSG_REQUEST_CAMERA_CAPABILITIES = 9;
         private static final int MSG_REQUEST_CONNECTION_DATA_USAGE = 10;
         private static final int MSG_SET_PAUSE_IMAGE = 11;
+        private static final int MSG_REMOVE_VIDEO_CALLBACK = 12;
 
-        private final VideoProvider.VideoProviderHandler
-                mMessageHandler = new VideoProvider.VideoProviderHandler();
+        private VideoProvider.VideoProviderHandler mMessageHandler;
         private final VideoProvider.VideoProviderBinder mBinder;
-        private IVideoCallback mVideoCallback;
+
+        /**
+         * Stores a list of the video callbacks, keyed by IBinder.
+         *
+         * ConcurrentHashMap constructor params: 8 is initial table size, 0.9f is
+         * load factor before resizing, 1 means we only expect a single thread to
+         * access the map so make only a single shard
+         */
+        private ConcurrentHashMap<IBinder, IVideoCallback> mVideoCallbacks =
+                new ConcurrentHashMap<IBinder, IVideoCallback>(8, 0.9f, 1);
 
         /**
          * Default handler used to consolidate binder method calls onto a single thread.
          */
         private final class VideoProviderHandler extends Handler {
+            public VideoProviderHandler() {
+                super();
+            }
+
+            public VideoProviderHandler(Looper looper) {
+                super(looper);
+            }
+
             @Override
             public void handleMessage(Message msg) {
                 switch (msg.what) {
-                    case MSG_SET_VIDEO_CALLBACK:
-                        mVideoCallback = IVideoCallback.Stub.asInterface((IBinder) msg.obj);
+                    case MSG_ADD_VIDEO_CALLBACK: {
+                        IBinder binder = (IBinder) msg.obj;
+                        IVideoCallback callback = IVideoCallback.Stub
+                                .asInterface((IBinder) msg.obj);
+                        if (callback == null) {
+                            Log.w(this, "addVideoProvider - skipped; callback is null.");
+                            break;
+                        }
+
+                        if (mVideoCallbacks.containsKey(binder)) {
+                            Log.i(this, "addVideoProvider - skipped; already present.");
+                            break;
+                        }
+                        mVideoCallbacks.put(binder, callback);
                         break;
+                    }
+                    case MSG_REMOVE_VIDEO_CALLBACK: {
+                        IBinder binder = (IBinder) msg.obj;
+                        IVideoCallback callback = IVideoCallback.Stub
+                                .asInterface((IBinder) msg.obj);
+                        if (!mVideoCallbacks.containsKey(binder)) {
+                            Log.i(this, "removeVideoProvider - skipped; not present.");
+                            break;
+                        }
+                        mVideoCallbacks.remove(binder);
+                        break;
+                    }
                     case MSG_SET_CAMERA:
                         onSetCamera((String) msg.obj);
                         break;
@@ -367,9 +592,16 @@ public abstract class Connection implements IConferenceable {
                     case MSG_SET_ZOOM:
                         onSetZoom((Float) msg.obj);
                         break;
-                    case MSG_SEND_SESSION_MODIFY_REQUEST:
-                        onSendSessionModifyRequest((VideoProfile) msg.obj);
+                    case MSG_SEND_SESSION_MODIFY_REQUEST: {
+                        SomeArgs args = (SomeArgs) msg.obj;
+                        try {
+                            onSendSessionModifyRequest((VideoProfile) args.arg1,
+                                    (VideoProfile) args.arg2);
+                        } finally {
+                            args.recycle();
+                        }
                         break;
+                    }
                     case MSG_SEND_SESSION_MODIFY_RESPONSE:
                         onSendSessionModifyResponse((VideoProfile) msg.obj);
                         break;
@@ -380,7 +612,7 @@ public abstract class Connection implements IConferenceable {
                         onRequestConnectionDataUsage();
                         break;
                     case MSG_SET_PAUSE_IMAGE:
-                        onSetPauseImage((String) msg.obj);
+                        onSetPauseImage((Uri) msg.obj);
                         break;
                     default:
                         break;
@@ -392,9 +624,14 @@ public abstract class Connection implements IConferenceable {
          * IVideoProvider stub implementation.
          */
         private final class VideoProviderBinder extends IVideoProvider.Stub {
-            public void setVideoCallback(IBinder videoCallbackBinder) {
+            public void addVideoCallback(IBinder videoCallbackBinder) {
                 mMessageHandler.obtainMessage(
-                        MSG_SET_VIDEO_CALLBACK, videoCallbackBinder).sendToTarget();
+                        MSG_ADD_VIDEO_CALLBACK, videoCallbackBinder).sendToTarget();
+            }
+
+            public void removeVideoCallback(IBinder videoCallbackBinder) {
+                mMessageHandler.obtainMessage(
+                        MSG_REMOVE_VIDEO_CALLBACK, videoCallbackBinder).sendToTarget();
             }
 
             public void setCamera(String cameraId) {
@@ -410,16 +647,19 @@ public abstract class Connection implements IConferenceable {
             }
 
             public void setDeviceOrientation(int rotation) {
-                mMessageHandler.obtainMessage(MSG_SET_DEVICE_ORIENTATION, rotation).sendToTarget();
+                mMessageHandler.obtainMessage(
+                        MSG_SET_DEVICE_ORIENTATION, rotation, 0).sendToTarget();
             }
 
             public void setZoom(float value) {
                 mMessageHandler.obtainMessage(MSG_SET_ZOOM, value).sendToTarget();
             }
 
-            public void sendSessionModifyRequest(VideoProfile requestProfile) {
-                mMessageHandler.obtainMessage(
-                        MSG_SEND_SESSION_MODIFY_REQUEST, requestProfile).sendToTarget();
+            public void sendSessionModifyRequest(VideoProfile fromProfile, VideoProfile toProfile) {
+                SomeArgs args = SomeArgs.obtain();
+                args.arg1 = fromProfile;
+                args.arg2 = toProfile;
+                mMessageHandler.obtainMessage(MSG_SEND_SESSION_MODIFY_REQUEST, args).sendToTarget();
             }
 
             public void sendSessionModifyResponse(VideoProfile responseProfile) {
@@ -435,13 +675,25 @@ public abstract class Connection implements IConferenceable {
                 mMessageHandler.obtainMessage(MSG_REQUEST_CONNECTION_DATA_USAGE).sendToTarget();
             }
 
-            public void setPauseImage(String uri) {
+            public void setPauseImage(Uri uri) {
                 mMessageHandler.obtainMessage(MSG_SET_PAUSE_IMAGE, uri).sendToTarget();
             }
         }
 
         public VideoProvider() {
             mBinder = new VideoProvider.VideoProviderBinder();
+            mMessageHandler = new VideoProvider.VideoProviderHandler(Looper.getMainLooper());
+        }
+
+        /**
+         * Creates an instance of the {@link VideoProvider}, specifying the looper to use.
+         *
+         * @param looper The looper.
+         * @hide
+         */
+        public VideoProvider(Looper looper) {
+            mBinder = new VideoProvider.VideoProviderBinder();
+            mMessageHandler = new VideoProvider.VideoProviderHandler(looper);
         }
 
         /**
@@ -453,9 +705,17 @@ public abstract class Connection implements IConferenceable {
         }
 
         /**
-         * Sets the camera to be used for video recording in a video connection.
+         * Sets the camera to be used for the outgoing video.
+         * <p>
+         * The {@link VideoProvider} should respond by communicating the capabilities of the chosen
+         * camera via
+         * {@link VideoProvider#changeCameraCapabilities(VideoProfile.CameraCapabilities)}.
+         * <p>
+         * Sent from the {@link InCallService} via
+         * {@link InCallService.VideoCall#setCamera(String)}.
          *
-         * @param cameraId The id of the camera.
+         * @param cameraId The id of the camera (use ids as reported by
+         * {@link CameraManager#getCameraIdList()}).
          */
         public abstract void onSetCamera(String cameraId);
 
@@ -463,21 +723,30 @@ public abstract class Connection implements IConferenceable {
          * Sets the surface to be used for displaying a preview of what the user's camera is
          * currently capturing.  When video transmission is enabled, this is the video signal which
          * is sent to the remote device.
+         * <p>
+         * Sent from the {@link InCallService} via
+         * {@link InCallService.VideoCall#setPreviewSurface(Surface)}.
          *
-         * @param surface The surface.
+         * @param surface The {@link Surface}.
          */
         public abstract void onSetPreviewSurface(Surface surface);
 
         /**
          * Sets the surface to be used for displaying the video received from the remote device.
+         * <p>
+         * Sent from the {@link InCallService} via
+         * {@link InCallService.VideoCall#setDisplaySurface(Surface)}.
          *
-         * @param surface The surface.
+         * @param surface The {@link Surface}.
          */
         public abstract void onSetDisplaySurface(Surface surface);
 
         /**
          * Sets the device orientation, in degrees.  Assumes that a standard portrait orientation of
          * the device is 0 degrees.
+         * <p>
+         * Sent from the {@link InCallService} via
+         * {@link InCallService.VideoCall#setDeviceOrientation(int)}.
          *
          * @param rotation The device orientation, in degrees.
          */
@@ -485,144 +754,281 @@ public abstract class Connection implements IConferenceable {
 
         /**
          * Sets camera zoom ratio.
+         * <p>
+         * Sent from the {@link InCallService} via {@link InCallService.VideoCall#setZoom(float)}.
          *
          * @param value The camera zoom ratio.
          */
         public abstract void onSetZoom(float value);
 
         /**
-         * Issues a request to modify the properties of the current session.  The request is
-         * sent to the remote device where it it handled by the In-Call UI.
-         * Some examples of session modification requests: upgrade connection from audio to video,
-         * downgrade connection from video to audio, pause video.
+         * Issues a request to modify the properties of the current video session.
+         * <p>
+         * Example scenarios include: requesting an audio-only call to be upgraded to a
+         * bi-directional video call, turning on or off the user's camera, sending a pause signal
+         * when the {@link InCallService} is no longer the foreground application.
+         * <p>
+         * If the {@link VideoProvider} determines a request to be invalid, it should call
+         * {@link #receiveSessionModifyResponse(int, VideoProfile, VideoProfile)} to report the
+         * invalid request back to the {@link InCallService}.
+         * <p>
+         * Where a request requires confirmation from the user of the peer device, the
+         * {@link VideoProvider} must communicate the request to the peer device and handle the
+         * user's response.  {@link #receiveSessionModifyResponse(int, VideoProfile, VideoProfile)}
+         * is used to inform the {@link InCallService} of the result of the request.
+         * <p>
+         * Sent from the {@link InCallService} via
+         * {@link InCallService.VideoCall#sendSessionModifyRequest(VideoProfile)}.
          *
-         * @param requestProfile The requested connection video properties.
+         * @param fromProfile The video profile prior to the request.
+         * @param toProfile The video profile with the requested changes made.
          */
-        public abstract void onSendSessionModifyRequest(VideoProfile requestProfile);
+        public abstract void onSendSessionModifyRequest(VideoProfile fromProfile,
+                VideoProfile toProfile);
 
-        /**te
-         * Provides a response to a request to change the current connection session video
-         * properties.
-         * This is in response to a request the InCall UI has received via the InCall UI.
+        /**
+         * Provides a response to a request to change the current video session properties.
+         * <p>
+         * For example, if the peer requests and upgrade from an audio-only call to a bi-directional
+         * video call, could decline the request and keep the call as audio-only.
+         * In such a scenario, the {@code responseProfile} would have a video state of
+         * {@link VideoProfile#STATE_AUDIO_ONLY}.  If the user had decided to accept the request,
+         * the video state would be {@link VideoProfile#STATE_BIDIRECTIONAL}.
+         * <p>
+         * Sent from the {@link InCallService} via
+         * {@link InCallService.VideoCall#sendSessionModifyResponse(VideoProfile)} in response to
+         * a {@link InCallService.VideoCall.Callback#onSessionModifyRequestReceived(VideoProfile)}
+         * callback.
          *
-         * @param responseProfile The response connection video properties.
+         * @param responseProfile The response video profile.
          */
         public abstract void onSendSessionModifyResponse(VideoProfile responseProfile);
 
         /**
-         * Issues a request to the video provider to retrieve the camera capabilities.
-         * Camera capabilities are reported back to the caller via the In-Call UI.
+         * Issues a request to the {@link VideoProvider} to retrieve the camera capabilities.
+         * <p>
+         * The {@link VideoProvider} should respond by communicating the capabilities of the chosen
+         * camera via
+         * {@link VideoProvider#changeCameraCapabilities(VideoProfile.CameraCapabilities)}.
+         * <p>
+         * Sent from the {@link InCallService} via
+         * {@link InCallService.VideoCall#requestCameraCapabilities()}.
          */
         public abstract void onRequestCameraCapabilities();
 
         /**
-         * Issues a request to the video telephony framework to retrieve the cumulative data usage
-         * for the current connection.  Data usage is reported back to the caller via the
-         * InCall UI.
+         * Issues a request to the {@link VideoProvider} to retrieve the current data usage for the
+         * video component of the current {@link Connection}.
+         * <p>
+         * The {@link VideoProvider} should respond by communicating current data usage, in bytes,
+         * via {@link VideoProvider#setCallDataUsage(long)}.
+         * <p>
+         * Sent from the {@link InCallService} via
+         * {@link InCallService.VideoCall#requestCallDataUsage()}.
          */
         public abstract void onRequestConnectionDataUsage();
 
         /**
-         * Provides the video telephony framework with the URI of an image to be displayed to remote
-         * devices when the video signal is paused.
+         * Provides the {@link VideoProvider} with the {@link Uri} of an image to be displayed to
+         * the peer device when the video signal is paused.
+         * <p>
+         * Sent from the {@link InCallService} via
+         * {@link InCallService.VideoCall#setPauseImage(Uri)}.
          *
          * @param uri URI of image to display.
          */
-        public abstract void onSetPauseImage(String uri);
+        public abstract void onSetPauseImage(Uri uri);
 
         /**
-         * Invokes callback method defined in In-Call UI.
+         * Used to inform listening {@link InCallService} implementations when the
+         * {@link VideoProvider} receives a session modification request.
+         * <p>
+         * Received by the {@link InCallService} via
+         * {@link InCallService.VideoCall.Callback#onSessionModifyRequestReceived(VideoProfile)},
          *
-         * @param videoProfile The requested video connection profile.
+         * @param videoProfile The requested video profile.
+         * @see #onSendSessionModifyRequest(VideoProfile, VideoProfile)
          */
         public void receiveSessionModifyRequest(VideoProfile videoProfile) {
-            if (mVideoCallback != null) {
-                try {
-                    mVideoCallback.receiveSessionModifyRequest(videoProfile);
-                } catch (RemoteException ignored) {
+            if (mVideoCallbacks != null) {
+                for (IVideoCallback callback : mVideoCallbacks.values()) {
+                    try {
+                        callback.receiveSessionModifyRequest(videoProfile);
+                    } catch (RemoteException ignored) {
+                        Log.w(this, "receiveSessionModifyRequest callback failed", ignored);
+                    }
                 }
             }
         }
 
         /**
-         * Invokes callback method defined in In-Call UI.
+         * Used to inform listening {@link InCallService} implementations when the
+         * {@link VideoProvider} receives a response to a session modification request.
+         * <p>
+         * Received by the {@link InCallService} via
+         * {@link InCallService.VideoCall.Callback#onSessionModifyResponseReceived(int,
+         * VideoProfile, VideoProfile)}.
          *
          * @param status Status of the session modify request.  Valid values are
          *               {@link VideoProvider#SESSION_MODIFY_REQUEST_SUCCESS},
          *               {@link VideoProvider#SESSION_MODIFY_REQUEST_FAIL},
-         *               {@link VideoProvider#SESSION_MODIFY_REQUEST_INVALID}
-         * @param requestedProfile The original request which was sent to the remote device.
-         * @param responseProfile The actual profile changes made by the remote device.
+         *               {@link VideoProvider#SESSION_MODIFY_REQUEST_INVALID},
+         *               {@link VideoProvider#SESSION_MODIFY_REQUEST_TIMED_OUT},
+         *               {@link VideoProvider#SESSION_MODIFY_REQUEST_REJECTED_BY_REMOTE}
+         * @param requestedProfile The original request which was sent to the peer device.
+         * @param responseProfile The actual profile changes agreed to by the peer device.
+         * @see #onSendSessionModifyRequest(VideoProfile, VideoProfile)
          */
         public void receiveSessionModifyResponse(int status,
                 VideoProfile requestedProfile, VideoProfile responseProfile) {
-            if (mVideoCallback != null) {
-                try {
-                    mVideoCallback.receiveSessionModifyResponse(
-                            status, requestedProfile, responseProfile);
-                } catch (RemoteException ignored) {
+            if (mVideoCallbacks != null) {
+                for (IVideoCallback callback : mVideoCallbacks.values()) {
+                    try {
+                        callback.receiveSessionModifyResponse(status, requestedProfile,
+                                responseProfile);
+                    } catch (RemoteException ignored) {
+                        Log.w(this, "receiveSessionModifyResponse callback failed", ignored);
+                    }
                 }
             }
         }
 
         /**
-         * Invokes callback method defined in In-Call UI.
+         * Used to inform listening {@link InCallService} implementations when the
+         * {@link VideoProvider} reports a call session event.
+         * <p>
+         * Received by the {@link InCallService} via
+         * {@link InCallService.VideoCall.Callback#onCallSessionEvent(int)}.
          *
-         * Valid values are: {@link VideoProvider#SESSION_EVENT_RX_PAUSE},
-         * {@link VideoProvider#SESSION_EVENT_RX_RESUME},
-         * {@link VideoProvider#SESSION_EVENT_TX_START},
-         * {@link VideoProvider#SESSION_EVENT_TX_STOP}
-         *
-         * @param event The event.
+         * @param event The event.  Valid values are: {@link VideoProvider#SESSION_EVENT_RX_PAUSE},
+         *      {@link VideoProvider#SESSION_EVENT_RX_RESUME},
+         *      {@link VideoProvider#SESSION_EVENT_TX_START},
+         *      {@link VideoProvider#SESSION_EVENT_TX_STOP},
+         *      {@link VideoProvider#SESSION_EVENT_CAMERA_FAILURE},
+         *      {@link VideoProvider#SESSION_EVENT_CAMERA_READY}.
          */
         public void handleCallSessionEvent(int event) {
-            if (mVideoCallback != null) {
-                try {
-                    mVideoCallback.handleCallSessionEvent(event);
-                } catch (RemoteException ignored) {
+            if (mVideoCallbacks != null) {
+                for (IVideoCallback callback : mVideoCallbacks.values()) {
+                    try {
+                        callback.handleCallSessionEvent(event);
+                    } catch (RemoteException ignored) {
+                        Log.w(this, "handleCallSessionEvent callback failed", ignored);
+                    }
                 }
             }
         }
 
         /**
-         * Invokes callback method defined in In-Call UI.
+         * Used to inform listening {@link InCallService} implementations when the dimensions of the
+         * peer's video have changed.
+         * <p>
+         * This could occur if, for example, the peer rotates their device, changing the aspect
+         * ratio of the video, or if the user switches between the back and front cameras.
+         * <p>
+         * Received by the {@link InCallService} via
+         * {@link InCallService.VideoCall.Callback#onPeerDimensionsChanged(int, int)}.
          *
          * @param width  The updated peer video width.
          * @param height The updated peer video height.
          */
         public void changePeerDimensions(int width, int height) {
-            if (mVideoCallback != null) {
-                try {
-                    mVideoCallback.changePeerDimensions(width, height);
-                } catch (RemoteException ignored) {
+            if (mVideoCallbacks != null) {
+                for (IVideoCallback callback : mVideoCallbacks.values()) {
+                    try {
+                        callback.changePeerDimensions(width, height);
+                    } catch (RemoteException ignored) {
+                        Log.w(this, "changePeerDimensions callback failed", ignored);
+                    }
                 }
             }
         }
 
         /**
-         * Invokes callback method defined in In-Call UI.
+         * Used to inform listening {@link InCallService} implementations when the data usage of the
+         * video associated with the current {@link Connection} has changed.
+         * <p>
+         * This could be in response to a preview request via
+         * {@link #onRequestConnectionDataUsage()}, or as a periodic update by the
+         * {@link VideoProvider}.  Where periodic updates of data usage are provided, they should be
+         * provided at most for every 1 MB of data transferred and no more than once every 10 sec.
+         * <p>
+         * Received by the {@link InCallService} via
+         * {@link InCallService.VideoCall.Callback#onCallDataUsageChanged(long)}.
          *
-         * @param dataUsage The updated data usage.
+         * @param dataUsage The updated data usage (in bytes).  Reported as the cumulative bytes
+         *                  used since the start of the call.
          */
-        public void changeCallDataUsage(int dataUsage) {
-            if (mVideoCallback != null) {
-                try {
-                    mVideoCallback.changeCallDataUsage(dataUsage);
-                } catch (RemoteException ignored) {
+        public void setCallDataUsage(long dataUsage) {
+            if (mVideoCallbacks != null) {
+                for (IVideoCallback callback : mVideoCallbacks.values()) {
+                    try {
+                        callback.changeCallDataUsage(dataUsage);
+                    } catch (RemoteException ignored) {
+                        Log.w(this, "setCallDataUsage callback failed", ignored);
+                    }
                 }
             }
         }
 
         /**
-         * Invokes callback method defined in In-Call UI.
+         * @see #setCallDataUsage(long)
          *
-         * @param cameraCapabilities The changed camera capabilities.
+         * @param dataUsage The updated data usage (in byes).
+         * @deprecated - Use {@link #setCallDataUsage(long)} instead.
+         * @hide
          */
-        public void changeCameraCapabilities(CameraCapabilities cameraCapabilities) {
-            if (mVideoCallback != null) {
-                try {
-                    mVideoCallback.changeCameraCapabilities(cameraCapabilities);
-                } catch (RemoteException ignored) {
+        public void changeCallDataUsage(long dataUsage) {
+            setCallDataUsage(dataUsage);
+        }
+
+        /**
+         * Used to inform listening {@link InCallService} implementations when the capabilities of
+         * the current camera have changed.
+         * <p>
+         * The {@link VideoProvider} should call this in response to
+         * {@link VideoProvider#onRequestCameraCapabilities()}, or when the current camera is
+         * changed via {@link VideoProvider#onSetCamera(String)}.
+         * <p>
+         * Received by the {@link InCallService} via
+         * {@link InCallService.VideoCall.Callback#onCameraCapabilitiesChanged(
+         * VideoProfile.CameraCapabilities)}.
+         *
+         * @param cameraCapabilities The new camera capabilities.
+         */
+        public void changeCameraCapabilities(VideoProfile.CameraCapabilities cameraCapabilities) {
+            if (mVideoCallbacks != null) {
+                for (IVideoCallback callback : mVideoCallbacks.values()) {
+                    try {
+                        callback.changeCameraCapabilities(cameraCapabilities);
+                    } catch (RemoteException ignored) {
+                        Log.w(this, "changeCameraCapabilities callback failed", ignored);
+                    }
+                }
+            }
+        }
+
+        /**
+         * Used to inform listening {@link InCallService} implementations when the video quality
+         * of the call has changed.
+         * <p>
+         * Received by the {@link InCallService} via
+         * {@link InCallService.VideoCall.Callback#onVideoQualityChanged(int)}.
+         *
+         * @param videoQuality The updated video quality.  Valid values:
+         *      {@link VideoProfile#QUALITY_HIGH},
+         *      {@link VideoProfile#QUALITY_MEDIUM},
+         *      {@link VideoProfile#QUALITY_LOW},
+         *      {@link VideoProfile#QUALITY_DEFAULT}.
+         */
+        public void changeVideoQuality(int videoQuality) {
+            if (mVideoCallbacks != null) {
+                for (IVideoCallback callback : mVideoCallbacks.values()) {
+                    try {
+                        callback.changeVideoQuality(videoQuality);
+                    } catch (RemoteException ignored) {
+                        Log.w(this, "changeVideoQuality callback failed", ignored);
+                    }
                 }
             }
         }
@@ -653,12 +1059,12 @@ public abstract class Connection implements IConferenceable {
      */
     private final Set<Listener> mListeners = Collections.newSetFromMap(
             new ConcurrentHashMap<Listener, Boolean>(8, 0.9f, 1));
-    private final List<IConferenceable> mConferenceables = new ArrayList<>();
-    private final List<IConferenceable> mUnmodifiableConferenceables =
+    private final List<Conferenceable> mConferenceables = new ArrayList<>();
+    private final List<Conferenceable> mUnmodifiableConferenceables =
             Collections.unmodifiableList(mConferenceables);
 
     private int mState = STATE_NEW;
-    private AudioState mAudioState;
+    private CallAudioState mCallAudioState;
     private Uri mAddress;
     private int mAddressPresentation;
     private String mCallerDisplayName;
@@ -667,11 +1073,13 @@ public abstract class Connection implements IConferenceable {
     private int mConnectionCapabilities;
     private VideoProvider mVideoProvider;
     private boolean mAudioModeIsVoip;
+    private long mConnectTimeMillis = Conference.CONNECT_TIME_NOT_SPECIFIED;
     private StatusHints mStatusHints;
     private int mVideoState;
     private DisconnectCause mDisconnectCause;
     private Conference mConference;
     private ConnectionService mConnectionService;
+    private Bundle mExtras;
 
     /**
      * Create a new Connection.
@@ -717,10 +1125,10 @@ public abstract class Connection implements IConferenceable {
 
     /**
      * Returns the video state of the connection.
-     * Valid values: {@link VideoProfile.VideoState#AUDIO_ONLY},
-     * {@link VideoProfile.VideoState#BIDIRECTIONAL},
-     * {@link VideoProfile.VideoState#TX_ENABLED},
-     * {@link VideoProfile.VideoState#RX_ENABLED}.
+     * Valid values: {@link VideoProfile#STATE_AUDIO_ONLY},
+     * {@link VideoProfile#STATE_BIDIRECTIONAL},
+     * {@link VideoProfile#STATE_TX_ENABLED},
+     * {@link VideoProfile#STATE_RX_ENABLED}.
      *
      * @return The video state of the connection.
      * @hide
@@ -733,9 +1141,25 @@ public abstract class Connection implements IConferenceable {
      * @return The audio state of the connection, describing how its audio is currently
      *         being routed by the system. This is {@code null} if this Connection
      *         does not directly know about its audio state.
+     * @deprecated Use {@link #getCallAudioState()} instead.
+     * @hide
      */
+    @SystemApi
+    @Deprecated
     public final AudioState getAudioState() {
-        return mAudioState;
+        if (mCallAudioState == null) {
+          return null;
+        }
+        return new AudioState(mCallAudioState);
+    }
+
+    /**
+     * @return The audio state of the connection, describing how its audio is currently
+     *         being routed by the system. This is {@code null} if this Connection
+     *         does not directly know about its audio state.
+     */
+    public final CallAudioState getCallAudioState() {
+        return mCallAudioState;
     }
 
     /**
@@ -762,10 +1186,30 @@ public abstract class Connection implements IConferenceable {
     }
 
     /**
+     * Retrieves the connection start time of the {@code Connnection}, if specified.  A value of
+     * {@link Conference#CONNECT_TIME_NOT_SPECIFIED} indicates that Telecom should determine the
+     * start time of the conference.
+     *
+     * @return The time at which the {@code Connnection} was connected.
+     *
+     * @hide
+     */
+    public final long getConnectTimeMillis() {
+        return mConnectTimeMillis;
+    }
+
+    /**
      * @return The status hints for this connection.
      */
     public final StatusHints getStatusHints() {
         return mStatusHints;
+    }
+
+    /**
+     * @return The extras associated with this connection.
+     */
+    public final Bundle getExtras() {
+        return mExtras;
     }
 
     /**
@@ -809,11 +1253,12 @@ public abstract class Connection implements IConferenceable {
      * @param state The new audio state.
      * @hide
      */
-    final void setAudioState(AudioState state) {
+    final void setCallAudioState(CallAudioState state) {
         checkImmutable();
         Log.d(this, "setAudioState %s", state);
-        mAudioState = state;
-        onAudioStateChanged(state);
+        mCallAudioState = state;
+        onAudioStateChanged(getAudioState());
+        onCallAudioStateChanged(state);
     }
 
     /**
@@ -823,17 +1268,17 @@ public abstract class Connection implements IConferenceable {
     public static String stateToString(int state) {
         switch (state) {
             case STATE_INITIALIZING:
-                return "STATE_INITIALIZING";
+                return "INITIALIZING";
             case STATE_NEW:
-                return "STATE_NEW";
+                return "NEW";
             case STATE_RINGING:
-                return "STATE_RINGING";
+                return "RINGING";
             case STATE_DIALING:
-                return "STATE_DIALING";
+                return "DIALING";
             case STATE_ACTIVE:
-                return "STATE_ACTIVE";
+                return "ACTIVE";
             case STATE_HOLDING:
-                return "STATE_HOLDING";
+                return "HOLDING";
             case STATE_DISCONNECTED:
                 return "DISCONNECTED";
             default:
@@ -847,11 +1292,6 @@ public abstract class Connection implements IConferenceable {
      */
     public final int getConnectionCapabilities() {
         return mConnectionCapabilities;
-    }
-
-    /** @hide */
-    @SystemApi @Deprecated public final int getCallCapabilities() {
-        return getConnectionCapabilities();
     }
 
     /**
@@ -890,13 +1330,12 @@ public abstract class Connection implements IConferenceable {
 
     /**
      * Set the video state for the connection.
-     * Valid values: {@link VideoProfile.VideoState#AUDIO_ONLY},
-     * {@link VideoProfile.VideoState#BIDIRECTIONAL},
-     * {@link VideoProfile.VideoState#TX_ENABLED},
-     * {@link VideoProfile.VideoState#RX_ENABLED}.
+     * Valid values: {@link VideoProfile#STATE_AUDIO_ONLY},
+     * {@link VideoProfile#STATE_BIDIRECTIONAL},
+     * {@link VideoProfile#STATE_TX_ENABLED},
+     * {@link VideoProfile#STATE_RX_ENABLED}.
      *
      * @param videoState The new video state.
-     * @hide
      */
     public final void setVideoState(int videoState) {
         checkImmutable();
@@ -960,7 +1399,6 @@ public abstract class Connection implements IConferenceable {
     /**
      * Sets the video connection provider.
      * @param videoProvider The video provider.
-     * @hide
      */
     public final void setVideoProvider(VideoProvider videoProvider) {
         checkImmutable();
@@ -970,7 +1408,6 @@ public abstract class Connection implements IConferenceable {
         }
     }
 
-    /** @hide */
     public final VideoProvider getVideoProvider() {
         return mVideoProvider;
     }
@@ -1011,14 +1448,11 @@ public abstract class Connection implements IConferenceable {
     /**
      * Informs listeners that this {@code Connection} has processed a character in the post-dial
      * started state. This is done when (a) the {@code Connection} is issuing a DTMF sequence;
-     * (b) it has encountered a "wait" character; and (c) it wishes to signal Telecom to play
-     * the corresponding DTMF tone locally.
+     * and (b) it wishes to signal Telecom to play the corresponding DTMF tone locally.
      *
      * @param nextChar The DTMF character that was just processed by the {@code Connection}.
-     *
-     * @hide
      */
-    public final void setNextPostDialWaitChar(char nextChar) {
+    public final void setNextPostDialChar(char nextChar) {
         checkImmutable();
         for (Listener l : mListeners) {
             l.onPostDialChar(this, nextChar);
@@ -1039,11 +1473,6 @@ public abstract class Connection implements IConferenceable {
                 l.onRingbackRequested(this, ringback);
             }
         }
-    }
-
-    /** @hide */
-    @SystemApi @Deprecated public final void setCallCapabilities(int connectionCapabilities) {
-        setConnectionCapabilities(connectionCapabilities);
     }
 
     /**
@@ -1084,6 +1513,18 @@ public abstract class Connection implements IConferenceable {
     }
 
     /**
+     * Sets the time at which a call became active on this Connection. This is set only
+     * when a conference call becomes active on this connection.
+     *
+     * @param connectionTimeMillis The connection time, in milliseconds.
+     *
+     * @hide
+     */
+    public final void setConnectTimeMillis(long connectTimeMillis) {
+        mConnectTimeMillis = connectTimeMillis;
+    }
+
+    /**
      * Sets the label and icon status to display in the in-call UI.
      *
      * @param statusHints The status label and icon to set.
@@ -1121,9 +1562,9 @@ public abstract class Connection implements IConferenceable {
      *
      * @param conferenceables The conferenceables.
      */
-    public final void setConferenceables(List<IConferenceable> conferenceables) {
+    public final void setConferenceables(List<Conferenceable> conferenceables) {
         clearConferenceableList();
-        for (IConferenceable c : conferenceables) {
+        for (Conferenceable c : conferenceables) {
             // If statement checks for duplicates in input. It makes it N^2 but we're dealing with a
             // small amount of items here.
             if (!mConferenceables.contains(c)) {
@@ -1143,11 +1584,11 @@ public abstract class Connection implements IConferenceable {
     /**
      * Returns the connections or conferences with which this connection can be conferenced.
      */
-    public final List<IConferenceable> getConferenceables() {
+    public final List<Conferenceable> getConferenceables() {
         return mUnmodifiableConferenceables;
     }
 
-    /*
+    /**
      * @hide
      */
     public final void setConnectionService(ConnectionService connectionService) {
@@ -1213,11 +1654,37 @@ public abstract class Connection implements IConferenceable {
     }
 
     /**
+     * Set some extras that can be associated with this {@code Connection}. No assumptions should
+     * be made as to how an In-Call UI or service will handle these extras.
+     * Keys should be fully qualified (e.g., com.example.MY_EXTRA) to avoid conflicts.
+     *
+     * @param extras The extras associated with this {@code Connection}.
+     */
+    public final void setExtras(@Nullable Bundle extras) {
+        checkImmutable();
+        mExtras = extras;
+        for (Listener l : mListeners) {
+            l.onExtrasChanged(this, extras);
+        }
+    }
+
+    /**
      * Notifies this Connection that the {@link #getAudioState()} property has a new value.
      *
      * @param state The new connection audio state.
+     * @deprecated Use {@link #onCallAudioStateChanged(CallAudioState)} instead.
+     * @hide
      */
+    @SystemApi
+    @Deprecated
     public void onAudioStateChanged(AudioState state) {}
+
+    /**
+     * Notifies this Connection that the {@link #getCallAudioState()} property has a new value.
+     *
+     * @param state The new connection audio state.
+     */
+    public void onCallAudioStateChanged(CallAudioState state) {}
 
     /**
      * Notifies this Connection of an internal state change. This method is called after the
@@ -1278,7 +1745,6 @@ public abstract class Connection implements IConferenceable {
      * a request to accept.
      *
      * @param videoState The video state in which to answer the connection.
-     * @hide
      */
     public void onAnswer(int videoState) {}
 
@@ -1287,7 +1753,7 @@ public abstract class Connection implements IConferenceable {
      * a request to accept.
      */
     public void onAnswer() {
-        onAnswer(VideoProfile.VideoState.AUDIO_ONLY);
+        onAnswer(VideoProfile.STATE_AUDIO_ONLY);
     }
 
     /**
@@ -1408,7 +1874,7 @@ public abstract class Connection implements IConferenceable {
     }
 
     private final void clearConferenceableList() {
-        for (IConferenceable c : mConferenceables) {
+        for (Conferenceable c : mConferenceables) {
             if (c instanceof Connection) {
                 Connection connection = (Connection) c;
                 connection.removeConnectionListener(mConnectionDeathListener);
@@ -1418,6 +1884,17 @@ public abstract class Connection implements IConferenceable {
             }
         }
         mConferenceables.clear();
+    }
+
+    /**
+     * Notifies listeners that the merge request failed.
+     *
+     * @hide
+     */
+    protected final void notifyConferenceMergeFailed() {
+        for (Listener l : mListeners) {
+            l.onConferenceMergeFailed(this);
+        }
     }
 
     /**
@@ -1435,6 +1912,7 @@ public abstract class Connection implements IConferenceable {
 
     /**
      * Notifies listeners that a conference call has been started.
+     * @hide
      */
     protected void notifyConferenceStarted() {
         for (Listener l : mListeners) {

@@ -17,6 +17,7 @@
 package android.telecom;
 
 import android.net.Uri;
+import android.os.Bundle;
 import android.os.IBinder.DeathRecipient;
 import android.os.RemoteException;
 
@@ -47,6 +48,12 @@ final class ConnectionServiceAdapter implements DeathRecipient {
     }
 
     void addAdapter(IConnectionServiceAdapter adapter) {
+        for (IConnectionServiceAdapter it : mAdapters) {
+            if (it.asBinder() == adapter.asBinder()) {
+                Log.w(this, "Ignoring duplicate adapter addition.");
+                return;
+            }
+        }
         if (mAdapters.add(adapter)) {
             try {
                 adapter.asBinder().linkToDeath(this, 0);
@@ -57,8 +64,13 @@ final class ConnectionServiceAdapter implements DeathRecipient {
     }
 
     void removeAdapter(IConnectionServiceAdapter adapter) {
-        if (adapter != null && mAdapters.remove(adapter)) {
-            adapter.asBinder().unlinkToDeath(this, 0);
+        if (adapter != null) {
+            for (IConnectionServiceAdapter it : mAdapters) {
+                if (it.asBinder() == adapter.asBinder() && mAdapters.remove(it)) {
+                    adapter.asBinder().unlinkToDeath(this, 0);
+                    break;
+                }
+            }
         }
     }
 
@@ -203,6 +215,21 @@ final class ConnectionServiceAdapter implements DeathRecipient {
     }
 
     /**
+     * Indicates that the merge request on this call has failed.
+     *
+     * @param callId The unique ID of the call being conferenced.
+     */
+    void onConferenceMergeFailed(String callId) {
+        for (IConnectionServiceAdapter adapter : mAdapters) {
+            try {
+                Log.d(this, "merge failed for call %s", callId);
+                adapter.setConferenceMergeFailed(callId);
+            } catch (RemoteException ignored) {
+            }
+        }
+    }
+
+    /**
      * Indicates that the call no longer exists. Can be used with either a call or a conference
      * call.
      *
@@ -326,10 +353,10 @@ final class ConnectionServiceAdapter implements DeathRecipient {
     /**
      * Sets the video state associated with a call.
      *
-     * Valid values: {@link VideoProfile.VideoState#AUDIO_ONLY},
-     * {@link VideoProfile.VideoState#BIDIRECTIONAL},
-     * {@link VideoProfile.VideoState#TX_ENABLED},
-     * {@link VideoProfile.VideoState#RX_ENABLED}.
+     * Valid values: {@link VideoProfile#STATE_BIDIRECTIONAL},
+     * {@link VideoProfile#STATE_AUDIO_ONLY},
+     * {@link VideoProfile#STATE_TX_ENABLED},
+     * {@link VideoProfile#STATE_RX_ENABLED}.
      *
      * @param callId The unique ID of the call to set the video state for.
      * @param videoState The video state.
@@ -365,6 +392,22 @@ final class ConnectionServiceAdapter implements DeathRecipient {
         for (IConnectionServiceAdapter adapter : mAdapters) {
             try {
                 adapter.addExistingConnection(callId, connection);
+            } catch (RemoteException ignored) {
+            }
+        }
+    }
+
+    /**
+     * Sets extras associated with a connection.
+     *
+     * @param callId The unique ID of the call.
+     * @param extras The extras to associate with this call.
+     */
+    void setExtras(String callId, Bundle extras) {
+        Log.v(this, "setExtras: %s", extras);
+        for (IConnectionServiceAdapter adapter : mAdapters) {
+            try {
+                adapter.setExtras(callId, extras);
             } catch (RemoteException ignored) {
             }
         }

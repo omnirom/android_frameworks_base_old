@@ -17,7 +17,7 @@
 #include <fcntl.h>
 
 #include "JNIHelp.h"
-#include "android_runtime/AndroidRuntime.h"
+#include "core_jni_helpers.h"
 #include "jni.h"
 #include "log/logger.h"
 
@@ -39,6 +39,9 @@ static jfieldID gIntegerValueID;
 
 static jclass gLongClass;
 static jfieldID gLongValueID;
+
+static jclass gFloatClass;
+static jfieldID gFloatValueID;
 
 static jclass gStringClass;
 
@@ -62,6 +65,17 @@ static jint android_util_EventLog_writeEvent_Long(JNIEnv* env UNUSED,
                                                   jint tag, jlong value)
 {
     return android_btWriteLog(tag, EVENT_TYPE_LONG, &value, sizeof(value));
+}
+
+/*
+ * In class android.util.EventLog:
+ *  static native int writeEvent(long tag, float value)
+ */
+static jint android_util_EventLog_writeEvent_Float(JNIEnv* env UNUSED,
+                                                  jobject clazz UNUSED,
+                                                  jint tag, jfloat value)
+{
+    return android_btWriteLog(tag, EVENT_TYPE_FLOAT, &value, sizeof(value));
 }
 
 /*
@@ -128,6 +142,12 @@ static jint android_util_EventLog_writeEvent_Array(JNIEnv* env, jobject clazz,
             buf[pos++] = EVENT_TYPE_LONG;
             memcpy(&buf[pos], &longVal, sizeof(longVal));
             pos += sizeof(longVal);
+        } else if (env->IsInstanceOf(item, gFloatClass)) {
+            jfloat floatVal = env->GetFloatField(item, gFloatValueID);
+            if (pos + 1 + sizeof(floatVal) > max) break;
+            buf[pos++] = EVENT_TYPE_FLOAT;
+            memcpy(&buf[pos], &floatVal, sizeof(floatVal));
+            pos += sizeof(floatVal);
         } else {
             jniThrowException(env,
                     "java/lang/IllegalArgumentException",
@@ -159,7 +179,7 @@ static void android_util_EventLog_readEvents(JNIEnv* env, jobject clazz UNUSED,
     }
 
     struct logger_list *logger_list = android_logger_list_open(
-        LOG_ID_EVENTS, O_RDONLY | O_NONBLOCK, 0, 0);
+        LOG_ID_EVENTS, ANDROID_LOG_RDONLY | ANDROID_LOG_NONBLOCK, 0, 0);
 
     if (!logger_list) {
         jniThrowIOException(env, errno);
@@ -186,6 +206,10 @@ static void android_util_EventLog_readEvents(JNIEnv* env, jobject clazz UNUSED,
                 jniThrowIOException(env, -ret);  // Will throw on return
             }
             break;
+        }
+
+        if (log_msg.id() != LOG_ID_EVENTS) {
+            continue;
         }
 
         int32_t tag = * (int32_t *) log_msg.msg();
@@ -229,6 +253,7 @@ static JNINativeMethod gRegisterMethods[] = {
     /* name, signature, funcPtr */
     { "writeEvent", "(II)I", (void*) android_util_EventLog_writeEvent_Integer },
     { "writeEvent", "(IJ)I", (void*) android_util_EventLog_writeEvent_Long },
+    { "writeEvent", "(IF)I", (void*) android_util_EventLog_writeEvent_Float },
     { "writeEvent",
       "(ILjava/lang/String;)I",
       (void*) android_util_EventLog_writeEvent_String
@@ -247,6 +272,7 @@ static struct { const char *name; jclass *clazz; } gClasses[] = {
     { "android/util/EventLog$Event", &gEventClass },
     { "java/lang/Integer", &gIntegerClass },
     { "java/lang/Long", &gLongClass },
+    { "java/lang/Float", &gFloatClass },
     { "java/lang/String", &gStringClass },
     { "java/util/Collection", &gCollectionClass },
 };
@@ -254,6 +280,7 @@ static struct { const char *name; jclass *clazz; } gClasses[] = {
 static struct { jclass *c; const char *name, *ft; jfieldID *id; } gFields[] = {
     { &gIntegerClass, "value", "I", &gIntegerValueID },
     { &gLongClass, "value", "J", &gLongValueID },
+    { &gFloatClass, "value", "F", &gFloatValueID },
 };
 
 static struct { jclass *c; const char *name, *mt; jmethodID *id; } gMethods[] = {
@@ -263,33 +290,21 @@ static struct { jclass *c; const char *name, *mt; jmethodID *id; } gMethods[] = 
 
 int register_android_util_EventLog(JNIEnv* env) {
     for (int i = 0; i < NELEM(gClasses); ++i) {
-        jclass clazz = env->FindClass(gClasses[i].name);
-        if (clazz == NULL) {
-            ALOGE("Can't find class: %s\n", gClasses[i].name);
-            return -1;
-        }
-        *gClasses[i].clazz = (jclass) env->NewGlobalRef(clazz);
+        jclass clazz = FindClassOrDie(env, gClasses[i].name);
+        *gClasses[i].clazz = MakeGlobalRefOrDie(env, clazz);
     }
 
     for (int i = 0; i < NELEM(gFields); ++i) {
-        *gFields[i].id = env->GetFieldID(
+        *gFields[i].id = GetFieldIDOrDie(env,
                 *gFields[i].c, gFields[i].name, gFields[i].ft);
-        if (*gFields[i].id == NULL) {
-            ALOGE("Can't find field: %s\n", gFields[i].name);
-            return -1;
-        }
     }
 
     for (int i = 0; i < NELEM(gMethods); ++i) {
-        *gMethods[i].id = env->GetMethodID(
+        *gMethods[i].id = GetMethodIDOrDie(env,
                 *gMethods[i].c, gMethods[i].name, gMethods[i].mt);
-        if (*gMethods[i].id == NULL) {
-            ALOGE("Can't find method: %s\n", gMethods[i].name);
-            return -1;
-        }
     }
 
-    return AndroidRuntime::registerNativeMethods(
+    return RegisterMethodsOrDie(
             env,
             "android/util/EventLog",
             gRegisterMethods, NELEM(gRegisterMethods));

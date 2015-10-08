@@ -16,7 +16,9 @@
 
 package android.graphics.drawable;
 
+import android.annotation.ColorInt;
 import android.annotation.NonNull;
+import android.annotation.Nullable;
 import android.content.res.ColorStateList;
 import android.content.res.Resources;
 import android.content.res.Resources.Theme;
@@ -267,19 +269,34 @@ public abstract class Drawable {
     }
 
     /**
-     * Set to true to have the drawable dither its colors when drawn to a device
-     * with fewer than 8-bits per color component. This can improve the look on
-     * those devices, but can also slow down the drawing a little.
+     * Set to true to have the drawable dither its colors when drawn to a
+     * device with fewer than 8-bits per color component.
+     *
+     * @see android.graphics.Paint#setDither(boolean);
+     * @deprecated This property is ignored.
      */
+    @Deprecated
     public void setDither(boolean dither) {}
 
     /**
-     * Set to true to have the drawable filter its bitmap when scaled or rotated
-     * (for drawables that use bitmaps). If the drawable does not use bitmaps,
-     * this call is ignored. This can improve the look when scaled or rotated,
-     * but also slows down the drawing.
+     * Set to true to have the drawable filter its bitmaps with bilinear
+     * sampling when they are scaled or rotated.
+     *
+     * <p>This can improve appearance when bitmaps are rotated. If the drawable
+     * does not use bitmaps, this call is ignored.</p>
+     *
+     * @see #isFilterBitmap()
+     * @see android.graphics.Paint#setFilterBitmap(boolean);
      */
     public void setFilterBitmap(boolean filter) {}
+
+    /**
+     * @return whether this drawable filters its bitmaps
+     * @see #setFilterBitmap(boolean)
+     */
+    public boolean isFilterBitmap() {
+        return false;
+    }
 
     /**
      * Implement this interface if you want to create an animated drawable that
@@ -406,27 +423,41 @@ public abstract class Drawable {
      * Returns the resolved layout direction for this Drawable.
      *
      * @return One of {@link android.view.View#LAYOUT_DIRECTION_LTR},
-     *   {@link android.view.View#LAYOUT_DIRECTION_RTL}
-     *
-     * @hide
+     *         {@link android.view.View#LAYOUT_DIRECTION_RTL}
+     * @see #setLayoutDirection(int)
      */
     public int getLayoutDirection() {
         return mLayoutDirection;
     }
 
     /**
-     * Set the layout direction for this drawable. Should be a resolved direction as the
-     * Drawable as no capacity to do the resolution on his own.
+     * Set the layout direction for this drawable. Should be a resolved
+     * layout direction, as the Drawable has no capacity to do the resolution on
+     * its own.
      *
-     * @param layoutDirection One of {@link android.view.View#LAYOUT_DIRECTION_LTR},
-     *   {@link android.view.View#LAYOUT_DIRECTION_RTL}
-     *
-     * @hide
+     * @param layoutDirection the resolved layout direction for the drawable,
+     *                        either {@link android.view.View#LAYOUT_DIRECTION_LTR}
+     *                        or {@link android.view.View#LAYOUT_DIRECTION_RTL}
+     * @see #getLayoutDirection()
      */
-    public void setLayoutDirection(@View.ResolvedLayoutDir int layoutDirection) {
-        if (getLayoutDirection() != layoutDirection) {
+    public final boolean setLayoutDirection(@View.ResolvedLayoutDir int layoutDirection) {
+        if (mLayoutDirection != layoutDirection) {
             mLayoutDirection = layoutDirection;
+            return onLayoutDirectionChanged(layoutDirection);
         }
+        return false;
+    }
+
+    /**
+     * Called when the drawable's resolved layout direction changes.
+     *
+     * @param layoutDirection the new resolved layout direction
+     * @return true if the layout direction change has caused the appearance of
+     *         the drawable to change and it needs to be re-drawn
+     * @see #setLayoutDirection(int)
+     */
+    public boolean onLayoutDirectionChanged(@View.ResolvedLayoutDir int layoutDirection) {
+        return false;
     }
 
     /**
@@ -447,67 +478,111 @@ public abstract class Drawable {
     }
 
     /**
-     * @hide Consider for future API inclusion
+     * @hide
+     *
+     * Internal-only method for setting xfermode on certain supported drawables.
+     *
+     * Should not be made public since the layers and drawing area with which
+     * Drawables draw is private implementation detail, and not something apps
+     * should rely upon.
      */
     public void setXfermode(Xfermode mode) {
         // Base implementation drops it on the floor for compatibility. Whee!
-        // TODO: For this to be included in the API proper, all framework drawables need impls.
-        // For right now only BitmapDrawable has it.
     }
 
     /**
-     * Specify an optional color filter for the drawable. Pass {@code null} to
-     * remove any existing color filter.
+     * Specify an optional color filter for the drawable.
+     * <p>
+     * If a Drawable has a ColorFilter, each output pixel of the Drawable's
+     * drawing contents will be modified by the color filter before it is
+     * blended onto the render target of a Canvas.
+     * </p>
+     * <p>
+     * Pass {@code null} to remove any existing color filter.
+     * </p>
+     * <p class="note"><strong>Note:</strong> Setting a non-{@code null} color
+     * filter disables {@link #setTintList(ColorStateList) tint}.
+     * </p>
      *
-     * @param cf the color filter to apply, or {@code null} to remove the
+     * @param colorFilter The color filter to apply, or {@code null} to remove the
      *            existing color filter
      */
-    public abstract void setColorFilter(ColorFilter cf);
+    public abstract void setColorFilter(@Nullable ColorFilter colorFilter);
 
     /**
      * Specify a color and Porter-Duff mode to be the color filter for this
      * drawable.
+     * <p>
+     * Convenience for {@link #setColorFilter(ColorFilter)} which constructs a
+     * {@link PorterDuffColorFilter}.
+     * </p>
+     * <p class="note"><strong>Note:</strong> Setting a color filter disables
+     * {@link #setTintList(ColorStateList) tint}.
+     * </p>
      */
-    public void setColorFilter(int color, PorterDuff.Mode mode) {
+    public void setColorFilter(@ColorInt int color, @NonNull PorterDuff.Mode mode) {
         setColorFilter(new PorterDuffColorFilter(color, mode));
     }
 
     /**
-     * Specifies a tint for this drawable.
+     * Specifies tint color for this drawable.
      * <p>
-     * Setting a color filter via {@link #setColorFilter(ColorFilter)} overrides
-     * tint.
+     * A Drawable's drawing content will be blended together with its tint
+     * before it is drawn to the screen. This functions similarly to
+     * {@link #setColorFilter(int, PorterDuff.Mode)}.
+     * </p>
+     * <p>
+     * To clear the tint, pass {@code null} to
+     * {@link #setTintList(ColorStateList)}.
+     * </p>
+     * <p class="note"><strong>Note:</strong> Setting a color filter via
+     * {@link #setColorFilter(ColorFilter)} or
+     * {@link #setColorFilter(int, PorterDuff.Mode)} overrides tint.
+     * </p>
      *
-     * @param tint Color to use for tinting this drawable
+     * @param tintColor Color to use for tinting this drawable
+     * @see #setTintList(ColorStateList)
      * @see #setTintMode(PorterDuff.Mode)
      */
-    public void setTint(int tint) {
-        setTintList(ColorStateList.valueOf(tint));
+    public void setTint(@ColorInt int tintColor) {
+        setTintList(ColorStateList.valueOf(tintColor));
     }
 
     /**
-     * Specifies a tint for this drawable as a color state list.
+     * Specifies tint color for this drawable as a color state list.
      * <p>
-     * Setting a color filter via {@link #setColorFilter(ColorFilter)} overrides
-     * tint.
+     * A Drawable's drawing content will be blended together with its tint
+     * before it is drawn to the screen. This functions similarly to
+     * {@link #setColorFilter(int, PorterDuff.Mode)}.
+     * </p>
+     * <p class="note"><strong>Note:</strong> Setting a color filter via
+     * {@link #setColorFilter(ColorFilter)} or
+     * {@link #setColorFilter(int, PorterDuff.Mode)} overrides tint.
+     * </p>
      *
-     * @param tint Color state list to use for tinting this drawable, or null to
-     *            clear the tint
+     * @param tint Color state list to use for tinting this drawable, or
+     *            {@code null} to clear the tint
+     * @see #setTint(int)
      * @see #setTintMode(PorterDuff.Mode)
      */
-    public void setTintList(ColorStateList tint) {}
+    public void setTintList(@Nullable ColorStateList tint) {}
 
     /**
      * Specifies a tint blending mode for this drawable.
      * <p>
-     * Setting a color filter via {@link #setColorFilter(ColorFilter)} overrides
-     * tint.
+     * Defines how this drawable's tint color should be blended into the drawable
+     * before it is drawn to screen. Default tint mode is {@link PorterDuff.Mode#SRC_IN}.
+     * </p>
+     * <p class="note"><strong>Note:</strong> Setting a color filter via
+     * {@link #setColorFilter(ColorFilter)} or
+     * {@link #setColorFilter(int, PorterDuff.Mode)} overrides tint.
+     * </p>
      *
-     * @param tintMode Color state list to use for tinting this drawable, or null to
-     *            clear the tint
      * @param tintMode A Porter-Duff blending mode
+     * @see #setTint(int)
+     * @see #setTintList(ColorStateList)
      */
-    public void setTintMode(PorterDuff.Mode tintMode) {}
+    public void setTintMode(@NonNull PorterDuff.Mode tintMode) {}
 
     /**
      * Returns the current color filter, or {@code null} if none set.
@@ -537,14 +612,20 @@ public abstract class Drawable {
      * Sets the bounds to which the hotspot is constrained, if they should be
      * different from the drawable bounds.
      *
-     * @param left
-     * @param top
-     * @param right
-     * @param bottom
+     * @param left position in pixels of the left bound
+     * @param top position in pixels of the top bound
+     * @param right position in pixels of the right bound
+     * @param bottom position in pixels of the bottom bound
+     * @see #getHotspotBounds(android.graphics.Rect)
      */
     public void setHotspotBounds(int left, int top, int right, int bottom) {}
 
-    /** @hide For internal use only. Individual results may vary. */
+    /**
+     * Populates {@code outRect} with the hotspot bounds.
+     *
+     * @param outRect the rect to populate with the hotspot bounds
+     * @see #setHotspotBounds(int, int, int, int)
+     */
     public void getHotspotBounds(Rect outRect) {
         outRect.set(getBounds());
     }
@@ -727,6 +808,14 @@ public abstract class Drawable {
      * {@link android.graphics.PixelFormat#TRANSPARENT}, or
      * {@link android.graphics.PixelFormat#OPAQUE}.
      *
+     * <p>An OPAQUE drawable is one that draws all all content within its bounds, completely
+     * covering anything behind the drawable. A TRANSPARENT drawable is one that draws nothing
+     * within its bounds, allowing everything behind it to show through. A TRANSLUCENT drawable
+     * is a drawable in any other state, where the drawable will draw some, but not all,
+     * of the content within its bounds and at least some content behind the drawable will
+     * be visible. If the visibility of the drawable's contents cannot be determined, the
+     * safest/best return value is TRANSLUCENT.
+     *
      * <p>Generally a Drawable should be as conservative as possible with the
      * value it returns.  For example, if it contains multiple child drawables
      * and only shows one of them at a time, if only one of the children is
@@ -734,9 +823,12 @@ public abstract class Drawable {
      * returned.  You can use the method {@link #resolveOpacity} to perform a
      * standard reduction of two opacities to the appropriate single output.
      *
-     * <p>Note that the returned value does <em>not</em> take into account a
+     * <p>Note that the returned value does not necessarily take into account a
      * custom alpha or color filter that has been applied by the client through
-     * the {@link #setAlpha} or {@link #setColorFilter} methods.
+     * the {@link #setAlpha} or {@link #setColorFilter} methods. Some subclasses,
+     * such as {@link BitmapDrawable}, {@link ColorDrawable}, and {@link GradientDrawable},
+     * do account for the value of {@link #setAlpha}, but the general behavior is dependent
+     * upon the implementation of the subclass.
      *
      * @return int The opacity class of the Drawable.
      *
@@ -1054,6 +1146,7 @@ public abstract class Drawable {
      * document, tries to create a Drawable from that tag. Returns {@code null}
      * if the tag is not a valid drawable.
      */
+    @SuppressWarnings("deprecation")
     public static Drawable createFromXmlInner(Resources r, XmlPullParser parser, AttributeSet attrs,
             Theme theme) throws XmlPullParserException, IOException {
         final Drawable drawable;
@@ -1109,16 +1202,10 @@ public abstract class Drawable {
                 drawable = new InsetDrawable();
                 break;
             case "bitmap":
-                drawable = new BitmapDrawable(r);
-                if (r != null) {
-                    ((BitmapDrawable) drawable).setTargetDensity(r.getDisplayMetrics());
-                }
+                drawable = new BitmapDrawable();
                 break;
             case "nine-patch":
                 drawable = new NinePatchDrawable();
-                if (r != null) {
-                    ((NinePatchDrawable) drawable).setTargetDensity(r.getDisplayMetrics());
-                }
                 break;
             default:
                 throw new XmlPullParserException(parser.getPositionDescription() +

@@ -30,11 +30,15 @@ interface IAppOpsService {
     void startWatchingMode(int op, String packageName, IAppOpsCallback callback);
     void stopWatchingMode(IAppOpsCallback callback);
     IBinder getToken(IBinder clientToken);
+    int permissionToOpCode(String permission);
+    int noteProxyOperation(int code, String proxyPackageName,
+                int callingUid, String callingPackageName);
 
     // Remaining methods are only used in Java.
     int checkPackage(int uid, String packageName);
     List<AppOpsManager.PackageOps> getPackagesForOps(in int[] ops);
     List<AppOpsManager.PackageOps> getOpsForPackage(int uid, String packageName, in int[] ops);
+    void setUidMode(int code, int uid, int mode);
     void setMode(int code, int uid, String packageName, int mode);
     void resetAllModes(int reqUserId, String reqPackageName);
     int checkAudioOperation(int code, int usage, int uid, String packageName);
@@ -42,5 +46,4 @@ interface IAppOpsService {
 
     void setUserRestrictions(in Bundle restrictions, int userHandle);
     void removeUser(int userHandle);
-    boolean isControlAllowed(int code, String packageName);
 }

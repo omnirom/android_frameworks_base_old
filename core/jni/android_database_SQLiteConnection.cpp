@@ -37,6 +37,8 @@
 
 #include "android_database_SQLiteCommon.h"
 
+#include "core_jni_helpers.h"
+
 // Set to 1 to use UTF16 storage for localized indexes.
 #define UTF16_STORAGE 0
 
@@ -325,7 +327,6 @@ static void nativeFinalizeStatement(JNIEnv* env, jclass clazz, jlong connectionP
 
 static jint nativeGetParameterCount(JNIEnv* env, jclass clazz, jlong connectionPtr,
         jlong statementPtr) {
-    SQLiteConnection* connection = reinterpret_cast<SQLiteConnection*>(connectionPtr);
     sqlite3_stmt* statement = reinterpret_cast<sqlite3_stmt*>(statementPtr);
 
     return sqlite3_bind_parameter_count(statement);
@@ -333,7 +334,6 @@ static jint nativeGetParameterCount(JNIEnv* env, jclass clazz, jlong connectionP
 
 static jboolean nativeIsReadOnly(JNIEnv* env, jclass clazz, jlong connectionPtr,
         jlong statementPtr) {
-    SQLiteConnection* connection = reinterpret_cast<SQLiteConnection*>(connectionPtr);
     sqlite3_stmt* statement = reinterpret_cast<sqlite3_stmt*>(statementPtr);
 
     return sqlite3_stmt_readonly(statement) != 0;
@@ -341,7 +341,6 @@ static jboolean nativeIsReadOnly(JNIEnv* env, jclass clazz, jlong connectionPtr,
 
 static jint nativeGetColumnCount(JNIEnv* env, jclass clazz, jlong connectionPtr,
         jlong statementPtr) {
-    SQLiteConnection* connection = reinterpret_cast<SQLiteConnection*>(connectionPtr);
     sqlite3_stmt* statement = reinterpret_cast<sqlite3_stmt*>(statementPtr);
 
     return sqlite3_column_count(statement);
@@ -349,7 +348,6 @@ static jint nativeGetColumnCount(JNIEnv* env, jclass clazz, jlong connectionPtr,
 
 static jstring nativeGetColumnName(JNIEnv* env, jclass clazz, jlong connectionPtr,
         jlong statementPtr, jint index) {
-    SQLiteConnection* connection = reinterpret_cast<SQLiteConnection*>(connectionPtr);
     sqlite3_stmt* statement = reinterpret_cast<sqlite3_stmt*>(statementPtr);
 
     const jchar* name = static_cast<const jchar*>(sqlite3_column_name16(statement, index));
@@ -845,35 +843,20 @@ static JNINativeMethod sMethods[] =
             (void*)nativeResetCancel },
 };
 
-#define FIND_CLASS(var, className) \
-        var = env->FindClass(className); \
-        LOG_FATAL_IF(! var, "Unable to find class " className);
-
-#define GET_METHOD_ID(var, clazz, methodName, fieldDescriptor) \
-        var = env->GetMethodID(clazz, methodName, fieldDescriptor); \
-        LOG_FATAL_IF(! var, "Unable to find method" methodName);
-
-#define GET_FIELD_ID(var, clazz, fieldName, fieldDescriptor) \
-        var = env->GetFieldID(clazz, fieldName, fieldDescriptor); \
-        LOG_FATAL_IF(! var, "Unable to find field " fieldName);
-
 int register_android_database_SQLiteConnection(JNIEnv *env)
 {
-    jclass clazz;
-    FIND_CLASS(clazz, "android/database/sqlite/SQLiteCustomFunction");
+    jclass clazz = FindClassOrDie(env, "android/database/sqlite/SQLiteCustomFunction");
 
-    GET_FIELD_ID(gSQLiteCustomFunctionClassInfo.name, clazz,
-            "name", "Ljava/lang/String;");
-    GET_FIELD_ID(gSQLiteCustomFunctionClassInfo.numArgs, clazz,
-            "numArgs", "I");
-    GET_METHOD_ID(gSQLiteCustomFunctionClassInfo.dispatchCallback,
-            clazz, "dispatchCallback", "([Ljava/lang/String;)V");
+    gSQLiteCustomFunctionClassInfo.name = GetFieldIDOrDie(env, clazz, "name", "Ljava/lang/String;");
+    gSQLiteCustomFunctionClassInfo.numArgs = GetFieldIDOrDie(env, clazz, "numArgs", "I");
+    gSQLiteCustomFunctionClassInfo.dispatchCallback = GetMethodIDOrDie(env, clazz,
+            "dispatchCallback", "([Ljava/lang/String;)V");
 
-    FIND_CLASS(clazz, "java/lang/String");
-    gStringClassInfo.clazz = jclass(env->NewGlobalRef(clazz));
+    clazz = FindClassOrDie(env, "java/lang/String");
+    gStringClassInfo.clazz = MakeGlobalRefOrDie(env, clazz);
 
-    return AndroidRuntime::registerNativeMethods(env, "android/database/sqlite/SQLiteConnection",
-            sMethods, NELEM(sMethods));
+    return RegisterMethodsOrDie(env, "android/database/sqlite/SQLiteConnection", sMethods,
+                                NELEM(sMethods));
 }
 
 } // namespace android

@@ -16,8 +16,12 @@
 
 package android.preference;
 
+import android.annotation.CallSuper;
 import com.android.internal.util.CharSequences;
 
+import android.annotation.DrawableRes;
+import android.annotation.LayoutRes;
+import android.annotation.StringRes;
 import android.content.Context;
 import android.content.Intent;
 import android.content.SharedPreferences;
@@ -424,7 +428,7 @@ public class Preference implements Comparable<Preference> {
      *            a {@link View}.
      * @see #setWidgetLayoutResource(int)
      */
-    public void setLayoutResource(int layoutResId) {
+    public void setLayoutResource(@LayoutRes int layoutResId) {
         if (layoutResId != mLayoutResId) {
             // Layout changed
             mCanRecycleLayout = false;
@@ -438,6 +442,7 @@ public class Preference implements Comparable<Preference> {
      * 
      * @return The layout resource ID.
      */
+    @LayoutRes
     public int getLayoutResource() {
         return mLayoutResId;
     }
@@ -452,7 +457,7 @@ public class Preference implements Comparable<Preference> {
      *            main layout.
      * @see #setLayoutResource(int)
      */
-    public void setWidgetLayoutResource(int widgetLayoutResId) {
+    public void setWidgetLayoutResource(@LayoutRes int widgetLayoutResId) {
         if (widgetLayoutResId != mWidgetLayoutResId) {
             // Layout changed
             mCanRecycleLayout = false;
@@ -465,6 +470,7 @@ public class Preference implements Comparable<Preference> {
      * 
      * @return The layout resource ID.
      */
+    @LayoutRes
     public int getWidgetLayoutResource() {
         return mWidgetLayoutResId;
     }
@@ -503,6 +509,7 @@ public class Preference implements Comparable<Preference> {
      * @return The View that displays this Preference.
      * @see #onBindView(View)
      */
+    @CallSuper
     protected View onCreateView(ViewGroup parent) {
         final LayoutInflater layoutInflater =
             (LayoutInflater) mContext.getSystemService(Context.LAYOUT_INFLATER_SERVICE);
@@ -532,6 +539,7 @@ public class Preference implements Comparable<Preference> {
      * @param view The View that shows this Preference.
      * @see #onCreateView(ViewGroup)
      */
+    @CallSuper
     protected void onBindView(View view) {
         final TextView titleView = (TextView) view.findViewById(com.android.internal.R.id.title);
         if (titleView != null) {
@@ -648,7 +656,7 @@ public class Preference implements Comparable<Preference> {
      * @see #setTitle(CharSequence)
      * @param titleResId The title as a resource ID.
      */
-    public void setTitle(int titleResId) {
+    public void setTitle(@StringRes int titleResId) {
         setTitle(mContext.getString(titleResId));
         mTitleRes = titleResId;
     }
@@ -660,6 +668,7 @@ public class Preference implements Comparable<Preference> {
      * @return The title resource.
      * @see #setTitle(int)
      */
+    @StringRes
     public int getTitleRes() {
         return mTitleRes;
     }
@@ -696,9 +705,11 @@ public class Preference implements Comparable<Preference> {
      * @see #setIcon(Drawable)
      * @param iconResId The icon as a resource ID.
      */
-    public void setIcon(int iconResId) {
-        mIconResId = iconResId;
-        setIcon(mContext.getDrawable(iconResId));
+    public void setIcon(@DrawableRes int iconResId) {
+        if (mIconResId != iconResId) {
+            mIconResId = iconResId;
+            setIcon(mContext.getDrawable(iconResId));
+        }
     }
 
     /**
@@ -739,7 +750,7 @@ public class Preference implements Comparable<Preference> {
      * @see #setSummary(CharSequence)
      * @param summaryResId The summary as a resource.
      */
-    public void setSummary(int summaryResId) {
+    public void setSummary(@StringRes int summaryResId) {
         setSummary(mContext.getString(summaryResId));
     }
     
@@ -1350,6 +1361,7 @@ public class Preference implements Comparable<Preference> {
      * should remove any references to this Preference that you know about. Make
      * sure to call through to the superclass implementation.
      */
+    @CallSuper
     protected void onPrepareForRemoval() {
         unregisterDependency();
     }
@@ -1434,7 +1446,7 @@ public class Preference implements Comparable<Preference> {
     protected boolean persistString(String value) {
         if (shouldPersist()) {
             // Shouldn't store null
-            if (value == getPersistedString(null)) {
+            if (TextUtils.equals(value, getPersistedString(null))) {
                 // It's already there, so the same as persisting
                 return true;
             }

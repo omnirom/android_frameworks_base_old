@@ -16,9 +16,12 @@
 
 package android.media.tv;
 
+import android.annotation.NonNull;
 import android.os.Bundle;
 import android.os.Parcel;
 import android.os.Parcelable;
+
+import com.android.internal.util.Preconditions;
 
 /**
  * Encapsulates the format of tracks played in {@link TvInputService}.
@@ -42,24 +45,28 @@ public final class TvTrackInfo implements Parcelable {
     private final int mType;
     private final String mId;
     private final String mLanguage;
+    private final CharSequence mDescription;
     private final int mAudioChannelCount;
     private final int mAudioSampleRate;
     private final int mVideoWidth;
     private final int mVideoHeight;
     private final float mVideoFrameRate;
+    private final float mVideoPixelAspectRatio;
     private final Bundle mExtra;
 
-    private TvTrackInfo(int type, String id, String language, int audioChannelCount,
-            int audioSampleRate, int videoWidth, int videoHeight, float videoFrameRate,
-            Bundle extra) {
+    private TvTrackInfo(int type, String id, String language, CharSequence description,
+            int audioChannelCount, int audioSampleRate, int videoWidth, int videoHeight,
+            float videoFrameRate, float videoPixelAspectRatio, Bundle extra) {
         mType = type;
         mId = id;
         mLanguage = language;
+        mDescription = description;
         mAudioChannelCount = audioChannelCount;
         mAudioSampleRate = audioSampleRate;
         mVideoWidth = videoWidth;
         mVideoHeight = videoHeight;
         mVideoFrameRate = videoFrameRate;
+        mVideoPixelAspectRatio = videoPixelAspectRatio;
         mExtra = extra;
     }
 
@@ -67,11 +74,13 @@ public final class TvTrackInfo implements Parcelable {
         mType = in.readInt();
         mId = in.readString();
         mLanguage = in.readString();
+        mDescription = in.readString();
         mAudioChannelCount = in.readInt();
         mAudioSampleRate = in.readInt();
         mVideoWidth = in.readInt();
         mVideoHeight = in.readInt();
         mVideoFrameRate = in.readFloat();
+        mVideoPixelAspectRatio = in.readFloat();
         mExtra = in.readBundle();
     }
 
@@ -96,6 +105,13 @@ public final class TvTrackInfo implements Parcelable {
      */
     public final String getLanguage() {
         return mLanguage;
+    }
+
+    /**
+     * Returns a user readable description for the current track.
+     */
+    public final CharSequence getDescription() {
+        return mDescription;
     }
 
     /**
@@ -152,6 +168,17 @@ public final class TvTrackInfo implements Parcelable {
     }
 
     /**
+     * Returns the pixel aspect ratio (the ratio of a pixel's width to its height) of the video.
+     * Valid only for {@link #TYPE_VIDEO} tracks.
+     */
+    public final float getVideoPixelAspectRatio() {
+        if (mType != TYPE_VIDEO) {
+            throw new IllegalStateException("Not a video track");
+        }
+        return mVideoPixelAspectRatio;
+    }
+
+    /**
      * Returns the extra information about the current track.
      */
     public final Bundle getExtra() {
@@ -174,11 +201,13 @@ public final class TvTrackInfo implements Parcelable {
         dest.writeInt(mType);
         dest.writeString(mId);
         dest.writeString(mLanguage);
+        dest.writeString(mDescription != null ? mDescription.toString() : null);
         dest.writeInt(mAudioChannelCount);
         dest.writeInt(mAudioSampleRate);
         dest.writeInt(mVideoWidth);
         dest.writeInt(mVideoHeight);
         dest.writeFloat(mVideoFrameRate);
+        dest.writeFloat(mVideoPixelAspectRatio);
         dest.writeBundle(mExtra);
     }
 
@@ -202,11 +231,13 @@ public final class TvTrackInfo implements Parcelable {
         private final String mId;
         private final int mType;
         private String mLanguage;
+        private CharSequence mDescription;
         private int mAudioChannelCount;
         private int mAudioSampleRate;
         private int mVideoWidth;
         private int mVideoHeight;
         private float mVideoFrameRate;
+        private float mVideoPixelAspectRatio = 1.0f;
         private Bundle mExtra;
 
         /**
@@ -217,15 +248,13 @@ public final class TvTrackInfo implements Parcelable {
          * @param id The ID of the track that uniquely identifies the current track among all the
          *            other tracks in the same TV program.
          */
-        public Builder(int type, String id) {
+        public Builder(int type, @NonNull String id) {
             if (type != TYPE_AUDIO
                     && type != TYPE_VIDEO
                     && type != TYPE_SUBTITLE) {
                 throw new IllegalArgumentException("Unknown type: " + type);
             }
-            if (id == null) {
-                throw new IllegalArgumentException("id cannot be null");
-            }
+            Preconditions.checkNotNull(id);
             mType = type;
             mId = id;
         }
@@ -237,6 +266,16 @@ public final class TvTrackInfo implements Parcelable {
          */
         public final Builder setLanguage(String language) {
             mLanguage = language;
+            return this;
+        }
+
+        /**
+         * Sets a user readable description for the current track.
+         *
+         * @param description The user readable description.
+         */
+        public final Builder setDescription(CharSequence description) {
+            mDescription = description;
             return this;
         }
 
@@ -310,6 +349,25 @@ public final class TvTrackInfo implements Parcelable {
         }
 
         /**
+         * Sets the pixel aspect ratio (the ratio of a pixel's width to its height) of the video.
+         * Valid only for {@link #TYPE_VIDEO} tracks.
+         *
+         * <p>This is needed for applications to be able to scale the video properly for some video
+         * formats such as 720x576 4:3 and 720x576 16:9 where pixels are not square. By default,
+         * applications assume the value of 1.0 (square pixels), so it is not necessary to set the
+         * pixel aspect ratio for most video formats.
+         *
+         * @param videoPixelAspectRatio The pixel aspect ratio of the video.
+         */
+        public final Builder setVideoPixelAspectRatio(float videoPixelAspectRatio) {
+            if (mType != TYPE_VIDEO) {
+                throw new IllegalStateException("Not a video track");
+            }
+            mVideoPixelAspectRatio = videoPixelAspectRatio;
+            return this;
+        }
+
+        /**
          * Sets the extra information about the current track.
          *
          * @param extra The extra information.
@@ -325,8 +383,9 @@ public final class TvTrackInfo implements Parcelable {
          * @return The new {@link TvTrackInfo} instance
          */
         public TvTrackInfo build() {
-            return new TvTrackInfo(mType, mId, mLanguage, mAudioChannelCount, mAudioSampleRate,
-                    mVideoWidth, mVideoHeight, mVideoFrameRate, mExtra);
+            return new TvTrackInfo(mType, mId, mLanguage, mDescription, mAudioChannelCount,
+                    mAudioSampleRate, mVideoWidth, mVideoHeight, mVideoFrameRate,
+                    mVideoPixelAspectRatio, mExtra);
         }
     }
 }

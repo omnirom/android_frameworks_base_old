@@ -122,6 +122,11 @@ public class WindowCallbackWrapper implements Window.Callback {
     }
 
     @Override
+    public boolean onSearchRequested(SearchEvent searchEvent) {
+        return mWrapped.onSearchRequested(searchEvent);
+    }
+
+    @Override
     public boolean onSearchRequested() {
         return mWrapped.onSearchRequested();
     }
@@ -129,6 +134,11 @@ public class WindowCallbackWrapper implements Window.Callback {
     @Override
     public ActionMode onWindowStartingActionMode(ActionMode.Callback callback) {
         return mWrapped.onWindowStartingActionMode(callback);
+    }
+
+    @Override
+    public ActionMode onWindowStartingActionMode(ActionMode.Callback callback, int type) {
+        return mWrapped.onWindowStartingActionMode(callback, type);
     }
 
     @Override

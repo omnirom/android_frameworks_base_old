@@ -26,6 +26,7 @@
 
 #include <SkRegion.h>
 
+#include "ClipArea.h"
 #include "Layer.h"
 #include "Matrix.h"
 #include "Outline.h"
@@ -60,6 +61,17 @@ public:
     Rect dangerRects[4];
     Rect innerRect;
     float radius;
+};
+
+class ProjectionPathMask {
+public:
+    /** static void* operator new(size_t size); PURPOSELY OMITTED, allocator only **/
+    static void* operator new(size_t size, LinearAllocator& allocator) {
+        return allocator.alloc(size);
+    }
+
+    const SkPath* projectionMask;
+    Matrix4 projectionMaskTransform;
 };
 
 /**
@@ -129,6 +141,11 @@ public:
     bool clipRegionTransformed(const SkRegion& region, SkRegion::Op op);
 
     /**
+     * Modifies the current clip with the specified path and operation.
+     */
+    bool clipPath(const SkPath& path, SkRegion::Op op);
+
+    /**
      * Sets the current clip.
      */
     void setClip(float left, float top, float right, float bottom);
@@ -142,7 +159,16 @@ public:
     /**
      * Returns the current clip in render target coordinates.
      */
-    const Rect& getRenderTargetClip() { return *clipRect; }
+    const Rect& getRenderTargetClip() { return mClipArea->getClipRect(); }
+
+    /*
+     * Accessor functions so that the clip area can stay private
+     */
+    bool clipIsEmpty() const { return mClipArea->isEmpty(); }
+    const Rect& getClipRect() const { return mClipArea->getClipRect(); }
+    const SkRegion& getClipRegion() const { return mClipArea->getClipRegion(); }
+    bool clipIsSimple() const { return mClipArea->isSimple(); }
+    const ClipArea& getClipArea() const { return *mClipArea; }
 
     /**
      * Resets the clip to the specified rect.
@@ -156,6 +182,7 @@ public:
 
     void initializeViewport(int width, int height) {
         mViewportData.initialize(width, height);
+        mClipAreaRoot.setViewportDimensions(width, height);
     }
 
     int getViewportWidth() const { return mViewportData.mWidth; }
@@ -174,8 +201,13 @@ public:
             float radius, bool highPriority);
 
     /**
+     * Sets (and replaces) the current projection mask
+     */
+    void setProjectionPathMask(LinearAllocator& allocator, const SkPath* path);
+
+    /**
      * Indicates whether this snapshot should be ignored. A snapshot
-     * is typicalled ignored if its layer is invisible or empty.
+     * is typically ignored if its layer is invisible or empty.
      */
     bool isIgnored() const;
 
@@ -183,6 +215,12 @@ public:
      * Indicates whether the current transform has perspective components.
      */
     bool hasPerspectiveTransform() const;
+
+    /**
+     * Fills outTransform with the current, total transform to screen space,
+     * across layer boundaries.
+     */
+    void buildScreenSpaceTransform(Matrix4* outTransform) const;
 
     /**
      * Dirty flags.
@@ -230,24 +268,6 @@ public:
     mat4* transform;
 
     /**
-     * Current clip rect. The clip is stored in canvas-space coordinates,
-     * (screen-space coordinates in the regular case.)
-     *
-     * This is a reference to a rect owned by this snapshot or another
-     * snapshot. This pointer must not be freed. See ::mClipRectRoot.
-     */
-    Rect* clipRect;
-
-    /**
-     * Current clip region. The clip is stored in canvas-space coordinates,
-     * (screen-space coordinates in the regular case.)
-     *
-     * This is a reference to a region owned by this snapshot or another
-     * snapshot. This pointer must not be freed. See ::mClipRegionRoot.
-     */
-    SkRegion* clipRegion;
-
-    /**
      * The ancestor layer's dirty region.
      *
      * This is a reference to a region owned by a layer. This pointer must
@@ -260,7 +280,7 @@ public:
      * has translucent rendering in a non-overlapping View. This value will be used by
      * the renderer to set the alpha in the current color being used for ensuing drawing
      * operations. The value is inherited by child snapshots because the same value should
-     * be applied to descendents of the current DisplayList (for example, a TextView contains
+     * be applied to descendants of the current DisplayList (for example, a TextView contains
      * the base alpha value which should be applied to the child DisplayLists used for drawing
      * the actual text).
      */
@@ -273,6 +293,11 @@ public:
      * never modified.
      */
     const RoundRectClipState* roundRectClipState;
+
+    /**
+     * Current projection masking path - used exclusively to mask tessellated circles.
+     */
+    const ProjectionPathMask* projectionPathMask;
 
     void dump() const;
 
@@ -298,16 +323,12 @@ private:
         mat4 mOrthoMatrix;
     };
 
-    void ensureClipRegion();
-    void copyClipRectFromRegion();
-
-    bool clipRegionOp(float left, float top, float right, float bottom, SkRegion::Op op);
-
     mat4 mTransformRoot;
-    Rect mClipRectRoot;
-    Rect mLocalClip; // don't use directly, call getLocalClip() which initializes this
 
-    SkRegion mClipRegionRoot;
+    ClipArea mClipAreaRoot;
+    ClipArea* mClipArea;
+    Rect mLocalClip;
+
     ViewportData mViewportData;
     Vector3 mRelativeLightCenter;
 

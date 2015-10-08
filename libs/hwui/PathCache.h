@@ -17,22 +17,22 @@
 #ifndef ANDROID_HWUI_PATH_CACHE_H
 #define ANDROID_HWUI_PATH_CACHE_H
 
-#include <GLES2/gl2.h>
+#include "Debug.h"
+#include "Texture.h"
+#include "thread/Task.h"
+#include "thread/TaskProcessor.h"
+#include "utils/Macros.h"
+#include "utils/Pair.h"
 
+#include <GLES2/gl2.h>
+#include <SkPath.h>
 #include <utils/LruCache.h>
 #include <utils/Mutex.h>
 #include <utils/Vector.h>
 
-#include "Debug.h"
-#include "Properties.h"
-#include "Texture.h"
-#include "utils/Macros.h"
-#include "utils/Pair.h"
-
 class SkBitmap;
 class SkCanvas;
 class SkPaint;
-class SkPath;
 struct SkRect;
 
 namespace android {
@@ -59,7 +59,19 @@ class Caches;
  * Alpha texture used to represent a path.
  */
 struct PathTexture: public Texture {
-    PathTexture(Caches& caches): Texture(caches) {
+    PathTexture(Caches& caches, float left, float top,
+            float offset, int width, int height, int generation)
+            : Texture(caches)
+            , left(left)
+            , top(top)
+            , offset(offset) {
+        this->width = width;
+        this->height = height;
+        this->generation = generation;
+    }
+    PathTexture(Caches& caches, int generation)
+        : Texture(caches) {
+        this->generation = generation;
     }
 
     ~PathTexture() {
@@ -69,15 +81,15 @@ struct PathTexture: public Texture {
     /**
      * Left coordinate of the path bounds.
      */
-    float left;
+    float left = 0;
     /**
      * Top coordinate of the path bounds.
      */
-    float top;
+    float top = 0;
     /**
      * Offset to draw the path at the correct origin.
      */
-    float offset;
+    float offset = 0;
 
     sp<Task<SkBitmap*> > task() const {
         return mTask;
@@ -88,7 +100,7 @@ struct PathTexture: public Texture {
     }
 
     void clearTask() {
-        if (mTask != NULL) {
+        if (mTask != nullptr) {
             mTask.clear();
         }
     }
@@ -118,7 +130,7 @@ struct PathDescription {
     SkPathEffect* pathEffect;
     union Shape {
         struct Path {
-            const SkPath* mPath;
+            uint32_t mGenerationID;
         } path;
         struct RoundRect {
             float mWidth;
@@ -166,17 +178,13 @@ public:
      * Used as a callback when an entry is removed from the cache.
      * Do not invoke directly.
      */
-    void operator()(PathDescription& path, PathTexture*& texture);
+    void operator()(PathDescription& path, PathTexture*& texture) override;
 
     /**
      * Clears the cache. This causes all textures to be deleted.
      */
     void clear();
 
-    /**
-     * Sets the maximum size of the cache in bytes.
-     */
-    void setMaxSize(uint32_t maxSize);
     /**
      * Returns the maximum size of the cache in bytes.
      */
@@ -198,7 +206,7 @@ public:
      * Removes the specified path. This is meant to be called from threads
      * that are not the EGL context thread.
      */
-    void removeDeferred(SkPath* path);
+    ANDROID_API void removeDeferred(const SkPath* path);
     /**
      * Process deferred removals.
      */
@@ -227,8 +235,6 @@ public:
             float& left, float& top, float& offset, uint32_t& width, uint32_t& height);
 
 private:
-    typedef Pair<SkPath*, SkPath*> path_pair_t;
-
     PathTexture* addTexture(const PathDescription& entry,
             const SkPath *path, const SkPaint* paint);
     PathTexture* addTexture(const PathDescription& entry, SkBitmap* bitmap);
@@ -243,12 +249,6 @@ private:
     PathTexture* get(const PathDescription& entry) {
         return mCache.get(entry);
     }
-
-    /**
-     * Removes an entry.
-     * The pair must define first=path, second=sourcePath
-     */
-    void remove(Vector<PathDescription>& pathsToRemove, const path_pair_t& pair);
 
     /**
      * Ensures there is enough space in the cache for a texture of the specified
@@ -279,8 +279,7 @@ private:
             delete future()->get();
         }
 
-        // copied, since input path not refcounted / guaranteed to survive for duration of task
-        // TODO: avoid deep copy with refcounting
+        // copied, since input path not guaranteed to survive for duration of task
         const SkPath path;
 
         // copied, since input paint may not be immutable
@@ -293,7 +292,7 @@ private:
         PathProcessor(Caches& caches);
         ~PathProcessor() { }
 
-        virtual void onProcess(const sp<Task<SkBitmap*> >& task);
+        virtual void onProcess(const sp<Task<SkBitmap*> >& task) override;
 
     private:
         uint32_t mMaxTextureSize;
@@ -308,7 +307,7 @@ private:
 
     sp<PathProcessor> mProcessor;
 
-    Vector<path_pair_t> mGarbage;
+    Vector<uint32_t> mGarbage;
     mutable Mutex mLock;
 }; // class PathCache
 

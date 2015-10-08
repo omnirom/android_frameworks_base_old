@@ -19,6 +19,7 @@ package android.app;
 
 import android.app.ITransientNotification;
 import android.app.Notification;
+import android.app.NotificationManager;
 import android.content.ComponentName;
 import android.content.Intent;
 import android.content.pm.ParceledListSlice;
@@ -48,6 +49,9 @@ interface INotificationManager
     void setPackagePriority(String pkg, int uid, int priority);
     int getPackagePriority(String pkg, int uid);
 
+    void setPackagePeekable(String pkg, int uid, boolean peekable);
+    boolean getPackagePeekable(String pkg, int uid);
+
     void setPackageVisibilityOverride(String pkg, int uid, int visibility);
     int getPackageVisibilityOverride(String pkg, int uid);
 
@@ -62,22 +66,35 @@ interface INotificationManager
     void cancelNotificationFromListener(in INotificationListener token, String pkg, String tag, int id);
     void cancelNotificationsFromListener(in INotificationListener token, in String[] keys);
 
+    void setNotificationsShownFromListener(in INotificationListener token, in String[] keys);
+
     ParceledListSlice getActiveNotificationsFromListener(in INotificationListener token, in String[] keys, int trim);
     void requestHintsFromListener(in INotificationListener token, int hints);
     int getHintsFromListener(in INotificationListener token);
     void requestInterruptionFilterFromListener(in INotificationListener token, int interruptionFilter);
     int getInterruptionFilterFromListener(in INotificationListener token);
     void setOnNotificationPostedTrimFromListener(in INotificationListener token, int trim);
+    void setInterruptionFilter(String pkg, int interruptionFilter);
 
     ComponentName getEffectsSuppressor();
     boolean matchesCallFilter(in Bundle extras);
     boolean isSystemConditionProviderEnabled(String path);
 
+    int getZenMode();
     ZenModeConfig getZenModeConfig();
-    boolean setZenModeConfig(in ZenModeConfig config);
+    boolean setZenModeConfig(in ZenModeConfig config, String reason);
+    oneway void setZenMode(int mode, in Uri conditionId, String reason);
     oneway void notifyConditions(String pkg, in IConditionProvider provider, in Condition[] conditions);
     oneway void requestZenModeConditions(in IConditionListener callback, int relevance);
-    oneway void setZenModeCondition(in Condition condition);
-    oneway void setAutomaticZenModeConditions(in Uri[] conditionIds);
-    Condition[] getAutomaticZenModeConditions();
+    boolean isNotificationPolicyAccessGranted(String pkg);
+    NotificationManager.Policy getNotificationPolicy(String pkg);
+    void setNotificationPolicy(String pkg, in NotificationManager.Policy policy);
+    String[] getPackagesRequestingNotificationPolicyAccess();
+    boolean isNotificationPolicyAccessGrantedForPackage(String pkg);
+    void setNotificationPolicyAccessGranted(String pkg, boolean granted);
+
+    byte[] getBackupPayload(int user);
+    void applyRestore(in byte[] payload, int user);
+
+    ParceledListSlice getAppActiveNotifications(String callingPkg, int userId);
 }

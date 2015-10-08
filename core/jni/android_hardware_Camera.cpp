@@ -21,7 +21,7 @@
 
 #include "jni.h"
 #include "JNIHelp.h"
-#include "android_runtime/AndroidRuntime.h"
+#include "core_jni_helpers.h"
 #include <android_runtime/android_graphics_SurfaceTexture.h>
 #include <android_runtime/android_view_Surface.h>
 
@@ -222,7 +222,7 @@ jbyteArray JNICameraContext::getCallbackBuffer(
 
     // Vector access should be protected by lock in postData()
     if (!buffers->isEmpty()) {
-        ALOGV("Using callback buffer from queue of length %d", buffers->size());
+        ALOGV("Using callback buffer from queue of length %zu", buffers->size());
         jbyteArray globalBuffer = buffers->itemAt(0);
         buffers->removeAt(0);
 
@@ -232,7 +232,7 @@ jbyteArray JNICameraContext::getCallbackBuffer(
         if (obj != NULL) {
             jsize bufferLength = env->GetArrayLength(obj);
             if ((int)bufferLength < (int)bufferSize) {
-                ALOGE("Callback buffer was too small! Expected %d bytes, but got %d bytes!",
+                ALOGE("Callback buffer was too small! Expected %zu bytes, but got %d bytes!",
                     bufferSize, bufferLength);
                 env->DeleteLocalRef(obj);
                 return NULL;
@@ -501,7 +501,7 @@ void JNICameraContext::addCallbackBuffer(
                 jbyteArray callbackBuffer = (jbyteArray)env->NewGlobalRef(cbb);
                 mCallbackBuffers.push(callbackBuffer);
 
-                ALOGV("Adding callback buffer to queue, %d total",
+                ALOGV("Adding callback buffer to queue, %zu total",
                         mCallbackBuffers.size());
 
                 // We want to make sure the camera knows we're ready for the
@@ -537,7 +537,7 @@ void JNICameraContext::clearCallbackBuffers_l(JNIEnv *env)
 }
 
 void JNICameraContext::clearCallbackBuffers_l(JNIEnv *env, Vector<jbyteArray> *buffers) {
-    ALOGV("Clearing callback buffers, %d remained", buffers->size());
+    ALOGV("Clearing callback buffers, %zu remained", buffers->size());
     while (!buffers->isEmpty()) {
         env->DeleteGlobalRef(buffers->top());
         buffers->pop();
@@ -553,6 +553,12 @@ static void android_hardware_Camera_getCameraInfo(JNIEnv *env, jobject thiz,
     jint cameraId, jobject info_obj)
 {
     CameraInfo cameraInfo;
+    if (cameraId >= Camera::getNumberOfCameras() || cameraId < 0) {
+        ALOGE("%s: Unknown camera ID %d", __FUNCTION__, cameraId);
+        jniThrowRuntimeException(env, "Unknown camera ID");
+        return;
+    }
+
     status_t rc = Camera::getCameraInfo(cameraId, &cameraInfo);
     if (rc != NO_ERROR) {
         jniThrowRuntimeException(env, "Fail to get camera info");
@@ -573,10 +579,12 @@ static jint android_hardware_Camera_native_setup(JNIEnv *env, jobject thiz,
     jobject weak_this, jint cameraId, jint halVersion, jstring clientPackageName)
 {
     // Convert jstring to String16
-    const char16_t *rawClientName = env->GetStringChars(clientPackageName, NULL);
+    const char16_t *rawClientName = reinterpret_cast<const char16_t*>(
+        env->GetStringChars(clientPackageName, NULL));
     jsize rawClientNameLen = env->GetStringLength(clientPackageName);
     String16 clientName(rawClientName, rawClientNameLen);
-    env->ReleaseStringChars(clientPackageName, rawClientName);
+    env->ReleaseStringChars(clientPackageName,
+                            reinterpret_cast<const jchar*>(rawClientName));
 
     sp<Camera> camera;
     if (halVersion == CAMERA_HAL_API_VERSION_NORMAL_CONNECT) {
@@ -857,7 +865,8 @@ static void android_hardware_Camera_setParameters(JNIEnv *env, jobject thiz, jst
     const jchar* str = env->GetStringCritical(params, 0);
     String8 params8;
     if (params) {
-        params8 = String8(str, env->GetStringLength(params));
+        params8 = String8(reinterpret_cast<const char16_t*>(str),
+                          env->GetStringLength(params));
         env->ReleaseStringCritical(params, str);
     }
     if (camera->setParameters(params8) != NO_ERROR) {
@@ -1135,26 +1144,14 @@ struct field {
     jfieldID   *jfield;
 };
 
-static int find_fields(JNIEnv *env, field *fields, int count)
+static void find_fields(JNIEnv *env, field *fields, int count)
 {
     for (int i = 0; i < count; i++) {
         field *f = &fields[i];
-        jclass clazz = env->FindClass(f->class_name);
-        if (clazz == NULL) {
-            ALOGE("Can't find %s", f->class_name);
-            return -1;
-        }
-
-        jfieldID field = env->GetFieldID(clazz, f->field_name, f->field_type);
-        if (field == NULL) {
-            ALOGE("Can't find %s.%s", f->class_name, f->field_name);
-            return -1;
-        }
-
+        jclass clazz = FindClassOrDie(env, f->class_name);
+        jfieldID field = GetFieldIDOrDie(env, clazz, f->field_name, f->field_type);
         *(f->jfield) = field;
     }
-
-    return 0;
 }
 
 // Get all the required offsets in java class and register native functions
@@ -1180,30 +1177,17 @@ int register_android_hardware_Camera(JNIEnv *env)
         { "android/graphics/Point", "y", "I", &fields.point_y},
     };
 
-    if (find_fields(env, fields_to_find, NELEM(fields_to_find)) < 0)
-        return -1;
+    find_fields(env, fields_to_find, NELEM(fields_to_find));
 
-    jclass clazz = env->FindClass("android/hardware/Camera");
-    fields.post_event = env->GetStaticMethodID(clazz, "postEventFromNative",
+    jclass clazz = FindClassOrDie(env, "android/hardware/Camera");
+    fields.post_event = GetStaticMethodIDOrDie(env, clazz, "postEventFromNative",
                                                "(Ljava/lang/Object;IIILjava/lang/Object;)V");
-    if (fields.post_event == NULL) {
-        ALOGE("Can't find android/hardware/Camera.postEventFromNative");
-        return -1;
-    }
 
-    clazz = env->FindClass("android/graphics/Rect");
-    fields.rect_constructor = env->GetMethodID(clazz, "<init>", "()V");
-    if (fields.rect_constructor == NULL) {
-        ALOGE("Can't find android/graphics/Rect.Rect()");
-        return -1;
-    }
+    clazz = FindClassOrDie(env, "android/graphics/Rect");
+    fields.rect_constructor = GetMethodIDOrDie(env, clazz, "<init>", "()V");
 
-    clazz = env->FindClass("android/hardware/Camera$Face");
-    fields.face_constructor = env->GetMethodID(clazz, "<init>", "()V");
-    if (fields.face_constructor == NULL) {
-        ALOGE("Can't find android/hardware/Camera$Face.Face()");
-        return -1;
-    }
+    clazz = FindClassOrDie(env, "android/hardware/Camera$Face");
+    fields.face_constructor = GetMethodIDOrDie(env, clazz, "<init>", "()V");
 
     clazz = env->FindClass("android/graphics/Point");
     fields.point_constructor = env->GetMethodID(clazz, "<init>", "()V");
@@ -1213,6 +1197,5 @@ int register_android_hardware_Camera(JNIEnv *env)
     }
 
     // Register native functions
-    return AndroidRuntime::registerNativeMethods(env, "android/hardware/Camera",
-                                              camMethods, NELEM(camMethods));
+    return RegisterMethodsOrDie(env, "android/hardware/Camera", camMethods, NELEM(camMethods));
 }

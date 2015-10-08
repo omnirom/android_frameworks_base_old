@@ -136,8 +136,7 @@ static void SetMapInt32(
     jstring keyObj = env->NewStringUTF(key);
     jobject valueObj = makeIntegerObject(env, value);
 
-    jobject res = env->CallObjectMethod(
-            hashMapObj, hashMapPutID, keyObj, valueObj);
+    env->CallObjectMethod(hashMapObj, hashMapPutID, keyObj, valueObj);
 
     env->DeleteLocalRef(valueObj); valueObj = NULL;
     env->DeleteLocalRef(keyObj); keyObj = NULL;
@@ -233,28 +232,28 @@ status_t ConvertMessageToMap(
                         env,
                         hashMap,
                         hashMapPutID,
-                        StringPrintf("%s-left", key).c_str(),
+                        AStringPrintf("%s-left", key).c_str(),
                         left);
 
                 SetMapInt32(
                         env,
                         hashMap,
                         hashMapPutID,
-                        StringPrintf("%s-top", key).c_str(),
+                        AStringPrintf("%s-top", key).c_str(),
                         top);
 
                 SetMapInt32(
                         env,
                         hashMap,
                         hashMapPutID,
-                        StringPrintf("%s-right", key).c_str(),
+                        AStringPrintf("%s-right", key).c_str(),
                         right);
 
                 SetMapInt32(
                         env,
                         hashMap,
                         hashMapPutID,
-                        StringPrintf("%s-bottom", key).c_str(),
+                        AStringPrintf("%s-bottom", key).c_str(),
                         bottom);
                 break;
             }
@@ -266,8 +265,7 @@ status_t ConvertMessageToMap(
         if (valueObj != NULL) {
             jstring keyObj = env->NewStringUTF(key);
 
-            jobject res = env->CallObjectMethod(
-                    hashMap, hashMapPutID, keyObj, valueObj);
+            env->CallObjectMethod(hashMap, hashMapPutID, keyObj, valueObj);
 
             env->DeleteLocalRef(keyObj); keyObj = NULL;
             env->DeleteLocalRef(valueObj); valueObj = NULL;

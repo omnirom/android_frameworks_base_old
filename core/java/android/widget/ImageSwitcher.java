@@ -16,13 +16,11 @@
 
 package android.widget;
 
+import android.annotation.DrawableRes;
 import android.content.Context;
 import android.graphics.drawable.Drawable;
 import android.net.Uri;
 import android.util.AttributeSet;
-import android.view.accessibility.AccessibilityEvent;
-import android.view.accessibility.AccessibilityNodeInfo;
-
 
 public class ImageSwitcher extends ViewSwitcher
 {
@@ -35,7 +33,7 @@ public class ImageSwitcher extends ViewSwitcher
         super(context, attrs);
     }
 
-    public void setImageResource(int resid)
+    public void setImageResource(@DrawableRes int resid)
     {
         ImageView image = (ImageView)this.getNextView();
         image.setImageResource(resid);
@@ -57,14 +55,7 @@ public class ImageSwitcher extends ViewSwitcher
     }
 
     @Override
-    public void onInitializeAccessibilityEvent(AccessibilityEvent event) {
-        super.onInitializeAccessibilityEvent(event);
-        event.setClassName(ImageSwitcher.class.getName());
-    }
-
-    @Override
-    public void onInitializeAccessibilityNodeInfo(AccessibilityNodeInfo info) {
-        super.onInitializeAccessibilityNodeInfo(info);
-        info.setClassName(ImageSwitcher.class.getName());
+    public CharSequence getAccessibilityClassName() {
+        return ImageSwitcher.class.getName();
     }
 }

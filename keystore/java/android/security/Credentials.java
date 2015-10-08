@@ -61,6 +61,9 @@ public class Credentials {
     /** Key prefix for user private keys. */
     public static final String USER_PRIVATE_KEY = "USRPKEY_";
 
+    /** Key prefix for user secret keys. */
+    public static final String USER_SECRET_KEY = "USRSKEY_";
+
     /** Key prefix for VPN. */
     public static final String VPN = "VPN_";
 
@@ -213,12 +216,13 @@ public class Credentials {
      * particular {@code alias}. All three can exist for any given alias.
      * Returns {@code true} if there was at least one of those types.
      */
-    static boolean deleteAllTypesForAlias(KeyStore keystore, String alias) {
+    public static boolean deleteAllTypesForAlias(KeyStore keystore, String alias) {
         /*
          * Make sure every type is deleted. There can be all three types, so
          * don't use a conditional here.
          */
-        return keystore.delKey(Credentials.USER_PRIVATE_KEY + alias)
+        return keystore.delete(Credentials.USER_PRIVATE_KEY + alias)
+                | keystore.delete(Credentials.USER_SECRET_KEY + alias)
                 | deleteCertificateTypesForAlias(keystore, alias);
     }
 
@@ -227,12 +231,28 @@ public class Credentials {
      * particular {@code alias}. All three can exist for any given alias.
      * Returns {@code true} if there was at least one of those types.
      */
-    static boolean deleteCertificateTypesForAlias(KeyStore keystore, String alias) {
+    public static boolean deleteCertificateTypesForAlias(KeyStore keystore, String alias) {
         /*
          * Make sure every certificate type is deleted. There can be two types,
          * so don't use a conditional here.
          */
         return keystore.delete(Credentials.USER_CERTIFICATE + alias)
                 | keystore.delete(Credentials.CA_CERTIFICATE + alias);
+    }
+
+    /**
+     * Delete private key for a particular {@code alias}.
+     * Returns {@code true} if an entry was was deleted.
+     */
+    static boolean deletePrivateKeyTypeForAlias(KeyStore keystore, String alias) {
+        return keystore.delete(Credentials.USER_PRIVATE_KEY + alias);
+    }
+
+    /**
+     * Delete secret key for a particular {@code alias}.
+     * Returns {@code true} if an entry was was deleted.
+     */
+    public static boolean deleteSecretKeyTypeForAlias(KeyStore keystore, String alias) {
+        return keystore.delete(Credentials.USER_SECRET_KEY + alias);
     }
 }

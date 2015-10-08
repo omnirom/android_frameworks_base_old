@@ -23,10 +23,11 @@
 
 #include "android_os_Parcel.h"
 #include "android_util_Binder.h"
+#include "android/graphics/Bitmap.h"
 #include "android/graphics/GraphicsJNI.h"
 #include "android/graphics/Region.h"
 
-#include <android_runtime/AndroidRuntime.h>
+#include "core_jni_helpers.h"
 #include <android_runtime/android_view_Surface.h>
 #include <android_runtime/android_view_SurfaceSession.h>
 
@@ -134,7 +135,7 @@ static jobject nativeScreenshotBitmap(JNIEnv* env, jclass clazz,
     status_t res;
     if (allLayers) {
         minLayer = 0;
-        maxLayer = -1UL;
+        maxLayer = -1;
     }
 
     res = screenshot->update(displayToken, sourceCrop, width, height,
@@ -150,7 +151,7 @@ static jobject nativeScreenshotBitmap(JNIEnv* env, jclass clazz,
     switch (screenshot->getFormat()) {
         case PIXEL_FORMAT_RGBX_8888: {
             screenshotInfo.fColorType = kRGBA_8888_SkColorType;
-            screenshotInfo.fAlphaType = kIgnore_SkAlphaType;
+            screenshotInfo.fAlphaType = kOpaque_SkAlphaType;
             break;
         }
         case PIXEL_FORMAT_RGBA_8888: {
@@ -160,7 +161,7 @@ static jobject nativeScreenshotBitmap(JNIEnv* env, jclass clazz,
         }
         case PIXEL_FORMAT_RGB_565: {
             screenshotInfo.fColorType = kRGB_565_SkColorType;
-            screenshotInfo.fAlphaType = kIgnore_SkAlphaType;
+            screenshotInfo.fAlphaType = kOpaque_SkAlphaType;
             break;
         }
         default: {
@@ -168,21 +169,18 @@ static jobject nativeScreenshotBitmap(JNIEnv* env, jclass clazz,
         }
     }
 
-    const ssize_t rowBytes =
+    const size_t rowBytes =
             screenshot->getStride() * android::bytesPerPixel(screenshot->getFormat());
 
-    SkBitmap* bitmap = new SkBitmap();
-    bitmap->setInfo(screenshotInfo, (size_t)rowBytes);
-    if (screenshotInfo.fWidth > 0 && screenshotInfo.fHeight > 0) {
-        // takes ownership of ScreenshotClient
-        SkMallocPixelRef* pixels = SkMallocPixelRef::NewWithProc(screenshotInfo,
-                (size_t) rowBytes, NULL, (void*) screenshot->getPixels(), &DeleteScreenshot,
-                (void*) (screenshot.get()));
-        screenshot.detach();
-        pixels->setImmutable();
-        bitmap->setPixelRef(pixels)->unref();
-        bitmap->lockPixels();
+    if (!screenshotInfo.fWidth || !screenshotInfo.fHeight) {
+        return NULL;
     }
+
+    Bitmap* bitmap = new Bitmap(
+            (void*) screenshot->getPixels(), (void*) screenshot.get(), DeleteScreenshot,
+            screenshotInfo, rowBytes, nullptr);
+    screenshot.detach();
+    bitmap->peekAtPixelRef()->setImmutable();
 
     return GraphicsJNI::createBitmap(env, bitmap,
             GraphicsJNI::kBitmapCreateFlag_Premultiplied, NULL);
@@ -647,41 +645,44 @@ static JNINativeMethod sSurfaceControlMethods[] = {
 
 int register_android_view_SurfaceControl(JNIEnv* env)
 {
-    int err = AndroidRuntime::registerNativeMethods(env, "android/view/SurfaceControl",
+    int err = RegisterMethodsOrDie(env, "android/view/SurfaceControl",
             sSurfaceControlMethods, NELEM(sSurfaceControlMethods));
 
-    jclass clazz = env->FindClass("android/view/SurfaceControl$PhysicalDisplayInfo");
-    gPhysicalDisplayInfoClassInfo.clazz = static_cast<jclass>(env->NewGlobalRef(clazz));
-    gPhysicalDisplayInfoClassInfo.ctor = env->GetMethodID(gPhysicalDisplayInfoClassInfo.clazz,
-            "<init>", "()V");
-    gPhysicalDisplayInfoClassInfo.width = env->GetFieldID(clazz, "width", "I");
-    gPhysicalDisplayInfoClassInfo.height = env->GetFieldID(clazz, "height", "I");
-    gPhysicalDisplayInfoClassInfo.refreshRate = env->GetFieldID(clazz, "refreshRate", "F");
-    gPhysicalDisplayInfoClassInfo.density = env->GetFieldID(clazz, "density", "F");
-    gPhysicalDisplayInfoClassInfo.xDpi = env->GetFieldID(clazz, "xDpi", "F");
-    gPhysicalDisplayInfoClassInfo.yDpi = env->GetFieldID(clazz, "yDpi", "F");
-    gPhysicalDisplayInfoClassInfo.secure = env->GetFieldID(clazz, "secure", "Z");
-    gPhysicalDisplayInfoClassInfo.appVsyncOffsetNanos = env->GetFieldID(clazz,
-            "appVsyncOffsetNanos", "J");
-    gPhysicalDisplayInfoClassInfo.presentationDeadlineNanos = env->GetFieldID(clazz,
-            "presentationDeadlineNanos", "J");
+    jclass clazz = FindClassOrDie(env, "android/view/SurfaceControl$PhysicalDisplayInfo");
+    gPhysicalDisplayInfoClassInfo.clazz = MakeGlobalRefOrDie(env, clazz);
+    gPhysicalDisplayInfoClassInfo.ctor = GetMethodIDOrDie(env,
+            gPhysicalDisplayInfoClassInfo.clazz, "<init>", "()V");
+    gPhysicalDisplayInfoClassInfo.width =       GetFieldIDOrDie(env, clazz, "width", "I");
+    gPhysicalDisplayInfoClassInfo.height =      GetFieldIDOrDie(env, clazz, "height", "I");
+    gPhysicalDisplayInfoClassInfo.refreshRate = GetFieldIDOrDie(env, clazz, "refreshRate", "F");
+    gPhysicalDisplayInfoClassInfo.density =     GetFieldIDOrDie(env, clazz, "density", "F");
+    gPhysicalDisplayInfoClassInfo.xDpi =        GetFieldIDOrDie(env, clazz, "xDpi", "F");
+    gPhysicalDisplayInfoClassInfo.yDpi =        GetFieldIDOrDie(env, clazz, "yDpi", "F");
+    gPhysicalDisplayInfoClassInfo.secure =      GetFieldIDOrDie(env, clazz, "secure", "Z");
+    gPhysicalDisplayInfoClassInfo.appVsyncOffsetNanos = GetFieldIDOrDie(env,
+            clazz, "appVsyncOffsetNanos", "J");
+    gPhysicalDisplayInfoClassInfo.presentationDeadlineNanos = GetFieldIDOrDie(env,
+            clazz, "presentationDeadlineNanos", "J");
 
-    jclass rectClazz = env->FindClass("android/graphics/Rect");
-    gRectClassInfo.bottom = env->GetFieldID(rectClazz, "bottom", "I");
-    gRectClassInfo.left = env->GetFieldID(rectClazz, "left", "I");
-    gRectClassInfo.right = env->GetFieldID(rectClazz, "right", "I");
-    gRectClassInfo.top = env->GetFieldID(rectClazz, "top", "I");
+    jclass rectClazz = FindClassOrDie(env, "android/graphics/Rect");
+    gRectClassInfo.bottom = GetFieldIDOrDie(env, rectClazz, "bottom", "I");
+    gRectClassInfo.left =   GetFieldIDOrDie(env, rectClazz, "left", "I");
+    gRectClassInfo.right =  GetFieldIDOrDie(env, rectClazz, "right", "I");
+    gRectClassInfo.top =    GetFieldIDOrDie(env, rectClazz, "top", "I");
 
-    jclass frameStatsClazz = env->FindClass("android/view/FrameStats");
-    jfieldID undefined_time_nano_field =  env->GetStaticFieldID(frameStatsClazz, "UNDEFINED_TIME_NANO", "J");
+    jclass frameStatsClazz = FindClassOrDie(env, "android/view/FrameStats");
+    jfieldID undefined_time_nano_field = GetStaticFieldIDOrDie(env,
+            frameStatsClazz, "UNDEFINED_TIME_NANO", "J");
     nsecs_t undefined_time_nano = env->GetStaticLongField(frameStatsClazz, undefined_time_nano_field);
 
-    jclass contFrameStatsClazz = env->FindClass("android/view/WindowContentFrameStats");
-    gWindowContentFrameStatsClassInfo.init =  env->GetMethodID(contFrameStatsClazz, "init", "(J[J[J[J)V");
+    jclass contFrameStatsClazz = FindClassOrDie(env, "android/view/WindowContentFrameStats");
+    gWindowContentFrameStatsClassInfo.init = GetMethodIDOrDie(env,
+            contFrameStatsClazz, "init", "(J[J[J[J)V");
     gWindowContentFrameStatsClassInfo.UNDEFINED_TIME_NANO = undefined_time_nano;
 
-    jclass animFrameStatsClazz = env->FindClass("android/view/WindowAnimationFrameStats");
-    gWindowAnimationFrameStatsClassInfo.init =  env->GetMethodID(animFrameStatsClazz, "init", "(J[J)V");
+    jclass animFrameStatsClazz = FindClassOrDie(env, "android/view/WindowAnimationFrameStats");
+    gWindowAnimationFrameStatsClassInfo.init =  GetMethodIDOrDie(env,
+            animFrameStatsClazz, "init", "(J[J)V");
     gWindowAnimationFrameStatsClassInfo.UNDEFINED_TIME_NANO = undefined_time_nano;
 
     return err;

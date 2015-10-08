@@ -88,9 +88,10 @@ public class ChooseTypeAndAccountActivity extends Activity
     public static final String EXTRA_SELECTED_ACCOUNT = "selectedAccount";
 
     /**
-     * If true then display the account selection list even if there is just
-     * one account to choose from. boolean.
+     * Deprecated. Providing this extra to {@link ChooseTypeAndAccountActivity}
+     * will have no effect.
      */
+    @Deprecated
     public static final String EXTRA_ALWAYS_PROMPT_FOR_ACCOUNT =
             "alwaysPromptForAccount";
 
@@ -117,7 +118,6 @@ public class ChooseTypeAndAccountActivity extends Activity
     private Set<String> mSetOfRelevantAccountTypes;
     private String mSelectedAccountName = null;
     private boolean mSelectedAddNewAccount = false;
-    private boolean mAlwaysPromptForAccount = false;
     private String mDescriptionOverride;
 
     private ArrayList<Account> mAccounts;
@@ -132,7 +132,6 @@ public class ChooseTypeAndAccountActivity extends Activity
 
     @Override
     public void onCreate(Bundle savedInstanceState) {
-        super.onCreate(savedInstanceState);
         if (Log.isLoggable(TAG, Log.VERBOSE)) {
             Log.v(TAG, "ChooseTypeAndAccountActivity.onCreate(savedInstanceState="
                     + savedInstanceState + ")");
@@ -189,10 +188,8 @@ public class ChooseTypeAndAccountActivity extends Activity
 
         mSetOfAllowableAccounts = getAllowableAccountSet(intent);
         mSetOfRelevantAccountTypes = getReleventAccountTypes(intent);
-        mAlwaysPromptForAccount = intent.getBooleanExtra(EXTRA_ALWAYS_PROMPT_FOR_ACCOUNT, false);
         mDescriptionOverride = intent.getStringExtra(EXTRA_DESCRIPTION_TEXT_OVERRIDE);
 
-        // Need to do this once here to request the window feature. Can't do it in onResume
         mAccounts = getAcceptableAccountChoices(AccountManager.get(this));
         if (mAccounts.isEmpty()
                 && mDisallowAddAccounts) {
@@ -200,17 +197,11 @@ public class ChooseTypeAndAccountActivity extends Activity
             setContentView(R.layout.app_not_authorized);
             mDontShowPicker = true;
         }
-    }
 
-    @Override
-    protected void onResume() {
-        super.onResume();
-
-        if (mDontShowPicker) return;
-
-        final AccountManager accountManager = AccountManager.get(this);
-
-        mAccounts = getAcceptableAccountChoices(accountManager);
+        if (mDontShowPicker) {
+            super.onCreate(savedInstanceState);
+            return;
+        }
 
         // In cases where the activity does not need to show an account picker, cut the chase
         // and return the result directly. Eg:
@@ -220,19 +211,12 @@ public class ChooseTypeAndAccountActivity extends Activity
             // If there are no relevant accounts and only one relevant account type go directly to
             // add account. Otherwise let the user choose.
             if (mAccounts.isEmpty()) {
+                setNonLabelThemeAndCallSuperCreate(savedInstanceState);
                 if (mSetOfRelevantAccountTypes.size() == 1) {
                     runAddAccountForAuthenticator(mSetOfRelevantAccountTypes.iterator().next());
                 } else {
                     startChooseAccountTypeActivity();
                 }
-                return;
-            }
-
-            // if there is only one allowable account return it
-            if (!mAlwaysPromptForAccount && mAccounts.size() == 1) {
-                Account account = mAccounts.get(0);
-                setResultAndFinish(account.name, account.type);
-                return;
             }
         }
 
@@ -240,8 +224,7 @@ public class ChooseTypeAndAccountActivity extends Activity
         mSelectedItemIndex = getItemIndexToSelect(
             mAccounts, mSelectedAccountName, mSelectedAddNewAccount);
 
-        // Cannot set content view until we know that mPendingRequest is not null, otherwise
-        // would cause screen flicker.
+        super.onCreate(savedInstanceState);
         setContentView(R.layout.choose_type_and_account);
         overrideDescriptionIfSupplied(mDescriptionOverride);
         populateUIAccountList(listItems);
@@ -409,6 +392,17 @@ public class ChooseTypeAndAccountActivity extends Activity
         finish();
     }
 
+    /**
+     * The default activity theme shows label at the top. Set a theme which does
+     * not show label, which effectively makes the activity invisible. Note that
+     * no content is being set. If something gets set, using this theme may be
+     * useless.
+     */
+    private void setNonLabelThemeAndCallSuperCreate(Bundle savedInstanceState) {
+        setTheme(R.style.Theme_Material_Light_Dialog_NoActionBar);
+        super.onCreate(savedInstanceState);
+    }
+
     private void onAccountSelected(Account account) {
       Log.d(TAG, "selected account " + account);
       setResultAndFinish(account.name, account.type);
@@ -489,8 +483,7 @@ public class ChooseTypeAndAccountActivity extends Activity
               mCallingUid);
       ArrayList<Account> accountsToPopulate = new ArrayList<Account>(accounts.length);
       for (Account account : accounts) {
-          if (mSetOfAllowableAccounts != null
-                  && !mSetOfAllowableAccounts.contains(account)) {
+          if (mSetOfAllowableAccounts != null && !mSetOfAllowableAccounts.contains(account)) {
               continue;
           }
           if (mSetOfRelevantAccountTypes != null
@@ -503,7 +496,7 @@ public class ChooseTypeAndAccountActivity extends Activity
     }
 
     /**
-     * Return a set of account types speficied by the intent as well as supported by the
+     * Return a set of account types specified by the intent as well as supported by the
      * AccountManager.
      */
     private Set<String> getReleventAccountTypes(final Intent intent) {
@@ -512,14 +505,16 @@ public class ChooseTypeAndAccountActivity extends Activity
       Set<String> setOfRelevantAccountTypes = null;
       final String[] allowedAccountTypes =
               intent.getStringArrayExtra(EXTRA_ALLOWABLE_ACCOUNT_TYPES_STRING_ARRAY);
-      if (allowedAccountTypes != null) {
-          setOfRelevantAccountTypes = Sets.newHashSet(allowedAccountTypes);
-          AuthenticatorDescription[] descs = AccountManager.get(this).getAuthenticatorTypes();
-          Set<String> supportedAccountTypes = new HashSet<String>(descs.length);
-          for (AuthenticatorDescription desc : descs) {
-              supportedAccountTypes.add(desc.type);
-          }
-          setOfRelevantAccountTypes.retainAll(supportedAccountTypes);
+        AuthenticatorDescription[] descs = AccountManager.get(this).getAuthenticatorTypes();
+        Set<String> supportedAccountTypes = new HashSet<String>(descs.length);
+        for (AuthenticatorDescription desc : descs) {
+            supportedAccountTypes.add(desc.type);
+        }
+        if (allowedAccountTypes != null) {
+            setOfRelevantAccountTypes = Sets.newHashSet(allowedAccountTypes);
+            setOfRelevantAccountTypes.retainAll(supportedAccountTypes);
+        } else {
+            setOfRelevantAccountTypes = supportedAccountTypes;
       }
       return setOfRelevantAccountTypes;
     }

@@ -20,6 +20,7 @@
 
 #include "Caches.h"
 #include "Debug.h"
+#include "FontRenderer.h"
 #include "TextDropShadowCache.h"
 #include "Properties.h"
 
@@ -40,7 +41,8 @@ hash_t ShadowText::hash() const {
     hash = JenkinsHashMix(hash, android::hash_type(italicStyle));
     hash = JenkinsHashMix(hash, android::hash_type(scaleX));
     if (text) {
-        hash = JenkinsHashMixShorts(hash, text, charCount);
+        hash = JenkinsHashMixShorts(
+            hash, reinterpret_cast<const uint16_t*>(text), charCount);
     }
     if (positions) {
         for (uint32_t i = 0; i < charCount * 2; i++) {
@@ -98,7 +100,7 @@ TextDropShadowCache::TextDropShadowCache():
         mCache(LruCache<ShadowText, ShadowTexture*>::kUnlimitedCapacity),
         mSize(0), mMaxSize(MB(DEFAULT_DROP_SHADOW_CACHE_SIZE)) {
     char property[PROPERTY_VALUE_MAX];
-    if (property_get(PROPERTY_DROP_SHADOW_CACHE_SIZE, property, NULL) > 0) {
+    if (property_get(PROPERTY_DROP_SHADOW_CACHE_SIZE, property, nullptr) > 0) {
         INIT_LOGD("  Setting drop shadow cache size to %sMB", property);
         setMaxSize(MB(atof(property)));
     } else {
@@ -121,7 +123,7 @@ TextDropShadowCache::~TextDropShadowCache() {
 
 void TextDropShadowCache::init() {
     mCache.setOnEntryRemovedListener(this);
-    mDebugEnabled = readDebugLevel() & kDebugMoreCaches;
+    mDebugEnabled = Properties::debugLevel & kDebugMoreCaches;
 }
 
 ///////////////////////////////////////////////////////////////////////////////
@@ -180,7 +182,7 @@ ShadowTexture* TextDropShadowCache::get(const SkPaint* paint, const char* text, 
                 len, numGlyphs, radius, positions);
 
         if (!shadow.image) {
-            return NULL;
+            return nullptr;
         }
 
         Caches& caches = Caches::getInstance();
@@ -205,7 +207,7 @@ ShadowTexture* TextDropShadowCache::get(const SkPaint* paint, const char* text, 
 
         glGenTextures(1, &texture->id);
 
-        caches.bindTexture(texture->id);
+        caches.textureState().bindTexture(texture->id);
         // Textures are Alpha8
         glPixelStorei(GL_UNPACK_ALIGNMENT, 1);
 

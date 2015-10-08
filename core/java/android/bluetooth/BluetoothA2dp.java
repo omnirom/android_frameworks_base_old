@@ -16,12 +16,15 @@
 
 package android.bluetooth;
 
+import android.Manifest;
+import android.annotation.RequiresPermission;
 import android.annotation.SdkConstant;
 import android.annotation.SdkConstant.SdkConstantType;
 import android.content.ComponentName;
 import android.content.Context;
 import android.content.Intent;
 import android.content.ServiceConnection;
+import android.media.AudioManager;
 import android.os.IBinder;
 import android.os.ParcelUuid;
 import android.os.RemoteException;
@@ -199,7 +202,8 @@ public final class BluetoothA2dp implements BluetoothProfile {
     }
 
     public void finalize() {
-        close();
+        // The empty finalize needs to be kept or the
+        // cts signature tests would fail.
     }
     /**
      * Initiate connection to a profile of the remote bluetooth device.
@@ -378,6 +382,7 @@ public final class BluetoothA2dp implements BluetoothProfile {
      * @return priority of the device
      * @hide
      */
+    @RequiresPermission(Manifest.permission.BLUETOOTH)
     public int getPriority(BluetoothDevice device) {
         if (VDBG) log("getPriority(" + device + ")");
         if (mService != null && isEnabled()
@@ -414,9 +419,16 @@ public final class BluetoothA2dp implements BluetoothProfile {
     }
 
     /**
-     * Tells remote device to adjust volume. Only if absolute volume is supported.
+     * Tells remote device to adjust volume. Only if absolute volume is
+     * supported. Uses the following values:
+     * <ul>
+     * <li>{@link AudioManager#ADJUST_LOWER}</li>
+     * <li>{@link AudioManager#ADJUST_RAISE}</li>
+     * <li>{@link AudioManager#ADJUST_MUTE}</li>
+     * <li>{@link AudioManager#ADJUST_UNMUTE}</li>
+     * </ul>
      *
-     * @param direction 1 to increase volume, or -1 to decrease volume
+     * @param direction One of the supported adjust values.
      * @hide
      */
     public void adjustAvrcpAbsoluteVolume(int direction) {

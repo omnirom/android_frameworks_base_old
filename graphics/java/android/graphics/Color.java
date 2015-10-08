@@ -16,6 +16,8 @@
 
 package android.graphics;
 
+import android.annotation.ColorInt;
+import android.annotation.Size;
 import android.util.MathUtils;
 import com.android.internal.util.XmlUtils;
 
@@ -35,23 +37,24 @@ import java.util.Locale;
  * 0xFFFFFFFF
  */
 public class Color {
-    public static final int BLACK       = 0xFF000000;
-    public static final int DKGRAY      = 0xFF444444;
-    public static final int GRAY        = 0xFF888888;
-    public static final int LTGRAY      = 0xFFCCCCCC;
-    public static final int WHITE       = 0xFFFFFFFF;
-    public static final int RED         = 0xFFFF0000;
-    public static final int GREEN       = 0xFF00FF00;
-    public static final int BLUE        = 0xFF0000FF;
-    public static final int YELLOW      = 0xFFFFFF00;
-    public static final int CYAN        = 0xFF00FFFF;
-    public static final int MAGENTA     = 0xFFFF00FF;
-    public static final int TRANSPARENT = 0;
+    @ColorInt public static final int BLACK       = 0xFF000000;
+    @ColorInt public static final int DKGRAY      = 0xFF444444;
+    @ColorInt public static final int GRAY        = 0xFF888888;
+    @ColorInt public static final int LTGRAY      = 0xFFCCCCCC;
+    @ColorInt public static final int WHITE       = 0xFFFFFFFF;
+    @ColorInt public static final int RED         = 0xFFFF0000;
+    @ColorInt public static final int GREEN       = 0xFF00FF00;
+    @ColorInt public static final int BLUE        = 0xFF0000FF;
+    @ColorInt public static final int YELLOW      = 0xFFFFFF00;
+    @ColorInt public static final int CYAN        = 0xFF00FFFF;
+    @ColorInt public static final int MAGENTA     = 0xFFFF00FF;
+    @ColorInt public static final int TRANSPARENT = 0;
 
     /**
      * Return the alpha component of a color int. This is the same as saying
      * color >>> 24
      */
+    @ColorInt
     public static int alpha(int color) {
         return color >>> 24;
     }
@@ -60,6 +63,7 @@ public class Color {
      * Return the red component of a color int. This is the same as saying
      * (color >> 16) & 0xFF
      */
+    @ColorInt
     public static int red(int color) {
         return (color >> 16) & 0xFF;
     }
@@ -68,6 +72,7 @@ public class Color {
      * Return the green component of a color int. This is the same as saying
      * (color >> 8) & 0xFF
      */
+    @ColorInt
     public static int green(int color) {
         return (color >> 8) & 0xFF;
     }
@@ -76,6 +81,7 @@ public class Color {
      * Return the blue component of a color int. This is the same as saying
      * color & 0xFF
      */
+    @ColorInt
     public static int blue(int color) {
         return color & 0xFF;
     }
@@ -90,6 +96,7 @@ public class Color {
      * @param green Green component [0..255] of the color
      * @param blue  Blue component [0..255] of the color
      */
+    @ColorInt
     public static int rgb(int red, int green, int blue) {
         return (0xFF << 24) | (red << 16) | (green << 8) | blue;
     }
@@ -104,6 +111,7 @@ public class Color {
      * @param green Green component [0..255] of the color
      * @param blue  Blue component [0..255] of the color
      */
+    @ColorInt
     public static int argb(int alpha, int red, int green, int blue) {
         return (alpha << 24) | (red << 16) | (green << 8) | blue;
     }
@@ -115,7 +123,7 @@ public class Color {
      * 
      * @hide Pending API council
      */
-    public static float hue(int color) {
+    public static float hue(@ColorInt int color) {
         int r = (color >> 16) & 0xFF;
         int g = (color >> 8) & 0xFF;
         int b = color & 0xFF;
@@ -157,7 +165,7 @@ public class Color {
      * 
      * @hide Pending API council
      */
-    public static float saturation(int color) {
+    public static float saturation(@ColorInt int color) {
         int r = (color >> 16) & 0xFF;
         int g = (color >> 8) & 0xFF;
         int b = color & 0xFF;
@@ -184,7 +192,7 @@ public class Color {
      *
      * @hide Pending API council
      */
-    public static float brightness(int color) {
+    public static float brightness(@ColorInt int color) {
         int r = (color >> 16) & 0xFF;
         int g = (color >> 8) & 0xFF;
         int b = color & 0xFF;
@@ -200,12 +208,14 @@ public class Color {
      * exception. Supported formats are:
      * #RRGGBB
      * #AARRGGBB
+     * or one of the following names:
      * 'red', 'blue', 'green', 'black', 'white', 'gray', 'cyan', 'magenta',
      * 'yellow', 'lightgray', 'darkgray', 'grey', 'lightgrey', 'darkgrey',
-     * 'aqua', 'fuschia', 'lime', 'maroon', 'navy', 'olive', 'purple',
-     * 'silver', 'teal'
+     * 'aqua', 'fuchsia', 'lime', 'maroon', 'navy', 'olive', 'purple',
+     * 'silver', 'teal'.
      */
-    public static int parseColor(String colorString) {
+    @ColorInt
+    public static int parseColor(@Size(min=1) String colorString) {
         if (colorString.charAt(0) == '#') {
             // Use a long to avoid rollovers on #ffXXXXXX
             long color = Long.parseLong(colorString.substring(1), 16);
@@ -236,7 +246,8 @@ public class Color {
      * 
      * @hide Pending API council
      */
-    public static int HSBtoColor(float[] hsb) {
+    @ColorInt
+    public static int HSBtoColor(@Size(3) float[] hsb) {
         return HSBtoColor(hsb[0], hsb[1], hsb[2]);
     }
     
@@ -253,6 +264,7 @@ public class Color {
      * 
      * @hide Pending API council
      */
+    @ColorInt
     public static int HSBtoColor(float h, float s, float b) {
         h = MathUtils.constrain(h, 0.0f, 1.0f);
         s = MathUtils.constrain(s, 0.0f, 1.0f);
@@ -316,7 +328,7 @@ public class Color {
      * @param blue  blue component value [0..255]
      * @param hsv  3 element array which holds the resulting HSV components.
      */
-    public static void RGBToHSV(int red, int green, int blue, float hsv[]) {
+    public static void RGBToHSV(int red, int green, int blue, @Size(3) float hsv[]) {
         if (hsv.length < 3) {
             throw new RuntimeException("3 components required for hsv");
         }
@@ -331,7 +343,7 @@ public class Color {
      * @param color the argb color to convert. The alpha component is ignored.
      * @param hsv  3 element array which holds the resulting HSV components.
      */
-    public static void colorToHSV(int color, float hsv[]) {
+    public static void colorToHSV(@ColorInt int color, @Size(3) float hsv[]) {
         RGBToHSV((color >> 16) & 0xFF, (color >> 8) & 0xFF, color & 0xFF, hsv);
     }
 
@@ -344,7 +356,7 @@ public class Color {
      * @param hsv  3 element array which holds the input HSV components.
      * @return the resulting argb color
     */
-    public static int HSVToColor(float hsv[]) {
+    public static int HSVToColor(@Size(3) float hsv[]) {
         return HSVToColor(0xFF, hsv);
     }
 
@@ -359,7 +371,7 @@ public class Color {
      * @param hsv  3 element array which holds the input HSV components.
      * @return the resulting argb color
     */
-    public static int HSVToColor(int alpha, float hsv[]) {
+    public static int HSVToColor(int alpha, @Size(3) float hsv[]) {
         if (hsv.length < 3) {
             throw new RuntimeException("3 components required for hsv");
         }
@@ -378,6 +390,7 @@ public class Color {
      *
      * @hide
      */
+    @ColorInt
     public static int getHtmlColor(String color) {
         Integer i = sColorNameMap.get(color.toLowerCase(Locale.ROOT));
         if (i != null) {

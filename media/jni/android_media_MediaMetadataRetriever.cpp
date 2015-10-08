@@ -30,16 +30,17 @@
 #include "jni.h"
 #include "JNIHelp.h"
 #include "android_runtime/AndroidRuntime.h"
+#include "android_media_MediaDataSource.h"
 #include "android_media_Utils.h"
 #include "android_util_Binder.h"
 
+#include "android/graphics/GraphicsJNI.h"
 
 using namespace android;
 
 struct fields_t {
     jfieldID context;
     jclass bitmapClazz;  // Must be a global ref
-    jfieldID nativeBitmap;
     jmethodID createBitmapMethod;
     jmethodID createScaledBitmapMethod;
     jclass configClazz;  // Must be a global ref
@@ -77,7 +78,6 @@ static MediaMetadataRetriever* getRetriever(JNIEnv* env, jobject thiz)
 static void setRetriever(JNIEnv* env, jobject thiz, MediaMetadataRetriever* retriever)
 {
     // No lock is needed, since it is called internally by other methods that are protected
-    MediaMetadataRetriever *old = (MediaMetadataRetriever*) env->GetLongField(thiz, fields.context);
     env->SetLongField(thiz, fields.context, (jlong) retriever);
 }
 
@@ -172,6 +172,23 @@ static void android_media_MediaMetadataRetriever_setDataSourceFD(JNIEnv *env, jo
     process_media_retriever_call(env, retriever->setDataSource(fd, offset, length), "java/lang/RuntimeException", "setDataSource failed");
 }
 
+static void android_media_MediaMetadataRetriever_setDataSourceCallback(JNIEnv *env, jobject thiz, jobject dataSource)
+{
+    ALOGV("setDataSourceCallback");
+    MediaMetadataRetriever* retriever = getRetriever(env, thiz);
+    if (retriever == 0) {
+        jniThrowException(env, "java/lang/IllegalStateException", "No retriever available");
+        return;
+    }
+    if (dataSource == NULL) {
+        jniThrowException(env, "java/lang/IllegalArgumentException", NULL);
+        return;
+    }
+
+    sp<IDataSource> callbackDataSource = new JMediaDataSource(env, dataSource);
+    process_media_retriever_call(env, retriever->setDataSource(callbackDataSource), "java/lang/RuntimeException", "setDataSourceCallback failed");
+}
+
 template<typename T>
 static void rotate0(T* dst, const T* src, size_t width, size_t height)
 {
@@ -229,7 +246,7 @@ static void rotate(T *dst, const T *src, size_t width, size_t height, int angle)
 
 static jobject android_media_MediaMetadataRetriever_getFrameAtTime(JNIEnv *env, jobject thiz, jlong timeUs, jint option)
 {
-    ALOGV("getFrameAtTime: %lld us option: %d", timeUs, option);
+    ALOGV("getFrameAtTime: %lld us option: %d", (long long)timeUs, option);
     MediaMetadataRetriever* retriever = getRetriever(env, thiz);
     if (retriever == 0) {
         jniThrowException(env, "java/lang/IllegalStateException", "No retriever available");
@@ -255,7 +272,7 @@ static jobject android_media_MediaMetadataRetriever_getFrameAtTime(JNIEnv *env, 
     jobject config = env->CallStaticObjectMethod(
                         fields.configClazz,
                         fields.createConfigMethod,
-                        SkBitmap::kRGB_565_Config);
+                        GraphicsJNI::colorTypeToLegacyBitmapConfig(kRGB_565_SkColorType));
 
     uint32_t width, height;
     bool swapWidthAndHeight = false;
@@ -282,16 +299,16 @@ static jobject android_media_MediaMetadataRetriever_getFrameAtTime(JNIEnv *env, 
         return NULL;
     }
 
-    SkBitmap *bitmap =
-            (SkBitmap *) env->GetLongField(jBitmap, fields.nativeBitmap);
+    SkBitmap bitmap;
+    GraphicsJNI::getSkBitmap(env, jBitmap, &bitmap);
 
-    bitmap->lockPixels();
-    rotate((uint16_t*)bitmap->getPixels(),
+    bitmap.lockPixels();
+    rotate((uint16_t*)bitmap.getPixels(),
            (uint16_t*)((char*)videoFrame + sizeof(VideoFrame)),
            videoFrame->mWidth,
            videoFrame->mHeight,
            videoFrame->mRotationAngle);
-    bitmap->unlockPixels();
+    bitmap.unlockPixels();
 
     if (videoFrame->mDisplayWidth  != videoFrame->mWidth ||
         videoFrame->mDisplayHeight != videoFrame->mHeight) {
@@ -421,10 +438,6 @@ static void android_media_MediaMetadataRetriever_native_init(JNIEnv *env)
     if (fields.createScaledBitmapMethod == NULL) {
         return;
     }
-    fields.nativeBitmap = env->GetFieldID(fields.bitmapClazz, "mNativeBitmap", "J");
-    if (fields.nativeBitmap == NULL) {
-        return;
-    }
 
     jclass configClazz = env->FindClass("android/graphics/Bitmap$Config");
     if (configClazz == NULL) {
@@ -462,6 +475,7 @@ static JNINativeMethod nativeMethods[] = {
         },
 
         {"setDataSource",   "(Ljava/io/FileDescriptor;JJ)V", (void *)android_media_MediaMetadataRetriever_setDataSourceFD},
+        {"_setDataSource",   "(Landroid/media/MediaDataSource;)V", (void *)android_media_MediaMetadataRetriever_setDataSourceCallback},
         {"_getFrameAtTime", "(JI)Landroid/graphics/Bitmap;", (void *)android_media_MediaMetadataRetriever_getFrameAtTime},
         {"extractMetadata", "(I)Ljava/lang/String;", (void *)android_media_MediaMetadataRetriever_extractMetadata},
         {"getEmbeddedPicture", "(I)[B", (void *)android_media_MediaMetadataRetriever_getEmbeddedPicture},

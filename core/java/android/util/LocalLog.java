@@ -16,8 +16,6 @@
 
 package android.util;
 
-import android.text.format.Time;
-
 import java.io.FileDescriptor;
 import java.io.PrintWriter;
 import java.util.Calendar;
@@ -55,5 +53,25 @@ public final class LocalLog {
         while (itr.hasNext()) {
             pw.println(itr.next());
         }
+    }
+
+    public synchronized void reverseDump(FileDescriptor fd, PrintWriter pw, String[] args) {
+        for (int i = mLog.size() - 1; i >= 0; i--) {
+            pw.println(mLog.get(i));
+        }
+    }
+
+    public static class ReadOnlyLocalLog {
+        private final LocalLog mLog;
+        ReadOnlyLocalLog(LocalLog log) {
+            mLog = log;
+        }
+        public void dump(FileDescriptor fd, PrintWriter pw, String[] args) {
+            mLog.dump(fd, pw, args);
+        }
+    }
+
+    public ReadOnlyLocalLog readOnlyLocalLog() {
+        return new ReadOnlyLocalLog(this);
     }
 }

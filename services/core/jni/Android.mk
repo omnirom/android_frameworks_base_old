@@ -2,7 +2,7 @@
 # files
 LOCAL_REL_DIR := core/jni
 
-LOCAL_CFLAGS += -Wno-unused-parameter
+LOCAL_CFLAGS += -Wall -Werror -Wno-unused-parameter
 
 ifeq ($(BOARD_USES_QC_TIME_SERVICES),true)
 LOCAL_CFLAGS += -DHAVE_QC_TIME_SERVICES
@@ -29,23 +29,24 @@ LOCAL_SRC_FILES += \
     $(LOCAL_REL_DIR)/com_android_server_SystemServer.cpp \
     $(LOCAL_REL_DIR)/com_android_server_tv_TvInputHal.cpp \
     $(LOCAL_REL_DIR)/com_android_server_UsbDeviceManager.cpp \
+    $(LOCAL_REL_DIR)/com_android_server_UsbMidiDevice.cpp \
     $(LOCAL_REL_DIR)/com_android_server_UsbHostManager.cpp \
     $(LOCAL_REL_DIR)/com_android_server_VibratorService.cpp \
     $(LOCAL_REL_DIR)/com_android_server_PersistentDataBlockService.cpp \
     $(LOCAL_REL_DIR)/onload.cpp
 
-include external/stlport/libstlport.mk
-
 LOCAL_C_INCLUDES += \
     $(JNI_H_INCLUDE) \
     frameworks/base/services \
     frameworks/base/libs \
+    frameworks/base/libs/hwui \
     frameworks/base/core/jni \
     frameworks/native/services \
     libcore/include \
     libcore/include/libsuspend \
-	$(call include-path-for, libhardware)/hardware \
-	$(call include-path-for, libhardware_legacy)/hardware_legacy \
+    system/security/keystore/include \
+    $(call include-path-for, libhardware)/hardware \
+    $(call include-path-for, libhardware_legacy)/hardware_legacy \
 
 LOCAL_SHARED_LIBRARIES += \
     libandroid_runtime \
@@ -55,6 +56,7 @@ LOCAL_SHARED_LIBRARIES += \
     liblog \
     libhardware \
     libhardware_legacy \
+    libkeystore_binder \
     libnativehelper \
     libutils \
     libui \

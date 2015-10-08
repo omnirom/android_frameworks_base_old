@@ -27,7 +27,6 @@
 
 #include <SkBitmap.h>
 
-#include "Image.h"
 #include "Texture.h"
 #include "UvMapper.h"
 
@@ -35,6 +34,7 @@ namespace android {
 namespace uirenderer {
 
 class Caches;
+class Image;
 
 /**
  * An asset atlas holds a collection of framework bitmaps in a single OpenGL
@@ -45,27 +45,11 @@ class Caches;
 class AssetAtlas {
 public:
     /**
-     * Entry representing the position and rotation of a
-     * bitmap inside the atlas.
+     * Entry representing the texture and uvMapper of a PixelRef in the
+     * atlas
      */
-    struct Entry {
-        /**
-         * The bitmap that generated this atlas entry.
-         */
-        SkBitmap* bitmap;
-
-        /**
-         * Location of the bitmap inside the atlas, in pixels.
-         */
-        int x;
-        int y;
-
-        /**
-         * If set, the bitmap is rotated 90 degrees (clockwise)
-         * inside the atlas.
-         */
-        bool rotated;
-
+    class Entry {
+    public:
         /*
          * A "virtual texture" object that represents the texture
          * this entry belongs to. This texture should never be
@@ -80,11 +64,6 @@ public:
         const UvMapper uvMapper;
 
         /**
-         * Atlas this entry belongs to.
-         */
-        const AssetAtlas& atlas;
-
-        /**
          * Unique identifier used to merge bitmaps and 9-patches stored
          * in the atlas.
          */
@@ -93,10 +72,22 @@ public:
         }
 
     private:
-        Entry(SkBitmap* bitmap, int x, int y, bool rotated,
-                Texture* texture, const UvMapper& mapper, const AssetAtlas& atlas):
-                bitmap(bitmap), x(x), y(y), rotated(rotated),
-                texture(texture), uvMapper(mapper), atlas(atlas) {
+        /**
+         * The pixel ref that generated this atlas entry.
+         */
+        SkPixelRef* pixelRef;
+
+        /**
+         * Atlas this entry belongs to.
+         */
+        const AssetAtlas& atlas;
+
+        Entry(SkPixelRef* pixelRef, Texture* texture, const UvMapper& mapper,
+                    const AssetAtlas& atlas)
+                : texture(texture)
+                , uvMapper(mapper)
+                , pixelRef(pixelRef)
+                , atlas(atlas) {
         }
 
         ~Entry() {
@@ -106,7 +97,7 @@ public:
         friend class AssetAtlas;
     };
 
-    AssetAtlas(): mTexture(NULL), mImage(NULL),
+    AssetAtlas(): mTexture(nullptr), mImage(nullptr),
             mBlendKey(true), mOpaqueKey(false) { }
     ~AssetAtlas() { terminate(); }
 
@@ -114,8 +105,7 @@ public:
      * Initializes the atlas with the specified buffer and
      * map. The buffer is a gralloc'd texture that will be
      * used as an EGLImage. The map is a list of SkBitmap*
-     * and their (x, y) positions as well as their rotation
-     * flags.
+     * and their (x, y) positions
      *
      * This method returns immediately if the atlas is already
      * initialized. To re-initialize the atlas, you must
@@ -178,7 +168,7 @@ private:
     const bool mBlendKey;
     const bool mOpaqueKey;
 
-    KeyedVector<const SkBitmap*, Entry*> mEntries;
+    KeyedVector<const SkPixelRef*, Entry*> mEntries;
 }; // class AssetAtlas
 
 }; // namespace uirenderer

@@ -25,7 +25,6 @@ import android.text.TextUtils;
 import android.text.method.ArrowKeyMovementMethod;
 import android.text.method.MovementMethod;
 import android.util.AttributeSet;
-import android.view.accessibility.AccessibilityEvent;
 import android.view.accessibility.AccessibilityNodeInfo;
 
 
@@ -123,19 +122,13 @@ public class EditText extends TextView {
     }
 
     @Override
-    public void onInitializeAccessibilityEvent(AccessibilityEvent event) {
-        super.onInitializeAccessibilityEvent(event);
-        event.setClassName(EditText.class.getName());
+    public CharSequence getAccessibilityClassName() {
+        return EditText.class.getName();
     }
 
+    /** @hide */
     @Override
-    public void onInitializeAccessibilityNodeInfo(AccessibilityNodeInfo info) {
-        super.onInitializeAccessibilityNodeInfo(info);
-        info.setClassName(EditText.class.getName());
-    }
-
-    @Override
-    public boolean performAccessibilityAction(int action, Bundle arguments) {
+    public boolean performAccessibilityActionInternal(int action, Bundle arguments) {
         switch (action) {
             case AccessibilityNodeInfo.ACTION_SET_TEXT: {
                 CharSequence text = (arguments != null) ? arguments.getCharSequence(
@@ -147,7 +140,7 @@ public class EditText extends TextView {
                 return true;
             }
             default: {
-                return super.performAccessibilityAction(action, arguments);
+                return super.performAccessibilityActionInternal(action, arguments);
             }
         }
     }

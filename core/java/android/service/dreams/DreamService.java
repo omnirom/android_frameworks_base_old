@@ -18,6 +18,9 @@ package android.service.dreams;
 import java.io.FileDescriptor;
 import java.io.PrintWriter;
 
+import android.annotation.IdRes;
+import android.annotation.LayoutRes;
+import android.annotation.Nullable;
 import android.annotation.SdkConstant;
 import android.annotation.SdkConstant.SdkConstantType;
 import android.app.AlarmManager;
@@ -37,6 +40,8 @@ import android.view.KeyEvent;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.MotionEvent;
+import com.android.internal.policy.PhoneWindow;
+import android.view.SearchEvent;
 import android.view.View;
 import android.view.ViewGroup;
 import android.view.Window;
@@ -46,7 +51,6 @@ import android.view.WindowManager.LayoutParams;
 import android.view.accessibility.AccessibilityEvent;
 import android.util.MathUtils;
 
-import com.android.internal.policy.PolicyManager;
 import com.android.internal.util.DumpUtils;
 import com.android.internal.util.DumpUtils.Dump;
 
@@ -329,6 +333,12 @@ public class DreamService extends Service implements Window.Callback {
 
     /** {@inheritDoc} */
     @Override
+    public boolean onSearchRequested(SearchEvent event) {
+        return onSearchRequested();
+    }
+
+    /** {@inheritDoc} */
+    @Override
     public boolean onSearchRequested() {
         return false;
     }
@@ -336,6 +346,13 @@ public class DreamService extends Service implements Window.Callback {
     /** {@inheritDoc} */
     @Override
     public ActionMode onWindowStartingActionMode(android.view.ActionMode.Callback callback) {
+        return null;
+    }
+
+    /** {@inheritDoc} */
+    @Override
+    public ActionMode onWindowStartingActionMode(
+            android.view.ActionMode.Callback callback, int type) {
         return null;
     }
 
@@ -382,7 +399,7 @@ public class DreamService extends Service implements Window.Callback {
      * @see #setContentView(android.view.View)
      * @see #setContentView(android.view.View, android.view.ViewGroup.LayoutParams)
      */
-    public void setContentView(int layoutResID) {
+    public void setContentView(@LayoutRes int layoutResID) {
         getWindow().setContentView(layoutResID);
     }
 
@@ -442,7 +459,8 @@ public class DreamService extends Service implements Window.Callback {
      *
      * @return The view if found or null otherwise.
      */
-    public View findViewById(int id) {
+    @Nullable
+    public View findViewById(@IdRes int id) {
         return getWindow().findViewById(id);
     }
 
@@ -945,7 +963,7 @@ public class DreamService extends Service implements Window.Callback {
             throw new IllegalStateException("Only doze dreams can be windowless");
         }
         if (!mWindowless) {
-            mWindow = PolicyManager.makeNewWindow(this);
+            mWindow = new PhoneWindow(this);
             mWindow.setCallback(this);
             mWindow.requestFeature(Window.FEATURE_NO_TITLE);
             mWindow.setBackgroundDrawable(new ColorDrawable(0xFF000000));
@@ -1037,10 +1055,10 @@ public class DreamService extends Service implements Window.Callback {
     protected void dump(final FileDescriptor fd, PrintWriter pw, final String[] args) {
         DumpUtils.dumpAsync(mHandler, new Dump() {
             @Override
-            public void dump(PrintWriter pw) {
+            public void dump(PrintWriter pw, String prefix) {
                 dumpOnHandler(fd, pw, args);
             }
-        }, pw, 1000);
+        }, pw, "", 1000);
     }
 
     /** @hide */

@@ -16,6 +16,9 @@
 
 package android.app;
 
+import android.annotation.NonNull;
+import android.content.ComponentName;
+
 /**
  * Activity manager local system service interface.
  *
@@ -27,4 +30,29 @@ public abstract class ActivityManagerInternal {
 
     public abstract int startIsolatedProcess(String entryPoint, String[] mainArgs,
             String processName, String abiOverride, int uid, Runnable crashHandler);
+
+    /**
+     * Acquires a sleep token with the specified tag.
+     *
+     * @param tag A string identifying the purpose of the token (eg. "Dream").
+     */
+    public abstract SleepToken acquireSleepToken(@NonNull String tag);
+
+    /**
+     * Sleep tokens cause the activity manager to put the top activity to sleep.
+     * They are used by components such as dreams that may hide and block interaction
+     * with underlying activities.
+     */
+    public static abstract class SleepToken {
+        /**
+         * Releases the sleep token.
+         */
+        public abstract void release();
+    }
+
+    /**
+     * Returns home activity for the specified user.
+     * @param userId ID of the user or {@link android.os.UserHandle#USER_ALL}
+     */
+    public abstract ComponentName getHomeActivityForUser(int userId);
 }

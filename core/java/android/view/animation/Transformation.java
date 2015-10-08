@@ -16,6 +16,7 @@
 
 package android.view.animation;
 
+import android.annotation.FloatRange;
 import android.graphics.Matrix;
 import android.graphics.Rect;
 
@@ -122,7 +123,13 @@ public class Transformation {
         mAlpha *= t.getAlpha();
         mMatrix.preConcat(t.getMatrix());
         if (t.mHasClipRect) {
-            setClipRect(t.getClipRect());
+            Rect bounds = t.getClipRect();
+            if (mHasClipRect) {
+                setClipRect(mClipRect.left + bounds.left, mClipRect.top + bounds.top,
+                        mClipRect.right + bounds.right, mClipRect.bottom + bounds.bottom);
+            } else {
+                setClipRect(bounds);
+            }
         }
     }
     
@@ -135,7 +142,13 @@ public class Transformation {
         mAlpha *= t.getAlpha();
         mMatrix.postConcat(t.getMatrix());
         if (t.mHasClipRect) {
-            setClipRect(t.getClipRect());
+            Rect bounds = t.getClipRect();
+            if (mHasClipRect) {
+                setClipRect(mClipRect.left + bounds.left, mClipRect.top + bounds.top,
+                        mClipRect.right + bounds.right, mClipRect.bottom + bounds.bottom);
+            } else {
+                setClipRect(bounds);
+            }
         }
     }
 
@@ -151,7 +164,7 @@ public class Transformation {
      * Sets the degree of transparency
      * @param alpha 1.0 means fully opaqe and 0.0 means fully transparent
      */
-    public void setAlpha(float alpha) {
+    public void setAlpha(@FloatRange(from=0.0, to=1.0) float alpha) {
         mAlpha = alpha;
     }
 

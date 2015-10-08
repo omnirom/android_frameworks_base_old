@@ -33,7 +33,6 @@ import android.view.SoundEffectConstants;
 import android.view.View;
 import android.view.ViewConfiguration;
 import android.view.ViewGroup;
-import android.view.accessibility.AccessibilityEvent;
 import android.view.accessibility.AccessibilityNodeInfo;
 import android.view.animation.Transformation;
 
@@ -1210,13 +1209,13 @@ public class Gallery extends AbsSpinner implements GestureDetector.OnGestureList
         switch (keyCode) {
             
         case KeyEvent.KEYCODE_DPAD_LEFT:
-            if (movePrevious()) {
+            if (moveDirection(-1)) {
                 playSoundEffect(SoundEffectConstants.NAVIGATION_LEFT);
                 return true;
             }
             break;
         case KeyEvent.KEYCODE_DPAD_RIGHT:
-            if (moveNext()) {
+            if (moveDirection(1)) {
                 playSoundEffect(SoundEffectConstants.NAVIGATION_RIGHT);
                 return true;
             }
@@ -1256,18 +1255,12 @@ public class Gallery extends AbsSpinner implements GestureDetector.OnGestureList
         return super.onKeyUp(keyCode, event);
     }
     
-    boolean movePrevious() {
-        if (mItemCount > 0 && mSelectedPosition > 0) {
-            scrollToChild(mSelectedPosition - mFirstPosition - 1);
-            return true;
-        } else {
-            return false;
-        }
-    }
+    boolean moveDirection(int direction) {
+        direction = isLayoutRtl() ? -direction : direction;
+        int targetPosition = mSelectedPosition + direction;
 
-    boolean moveNext() {
-        if (mItemCount > 0 && mSelectedPosition < mItemCount - 1) {
-            scrollToChild(mSelectedPosition - mFirstPosition + 1);
+        if (mItemCount > 0 && targetPosition >= 0 && targetPosition < mItemCount) {
+            scrollToChild(targetPosition - mFirstPosition);
             return true;
         } else {
             return false;
@@ -1374,15 +1367,14 @@ public class Gallery extends AbsSpinner implements GestureDetector.OnGestureList
     }
 
     @Override
-    public void onInitializeAccessibilityEvent(AccessibilityEvent event) {
-        super.onInitializeAccessibilityEvent(event);
-        event.setClassName(Gallery.class.getName());
+    public CharSequence getAccessibilityClassName() {
+        return Gallery.class.getName();
     }
 
+    /** @hide */
     @Override
-    public void onInitializeAccessibilityNodeInfo(AccessibilityNodeInfo info) {
-        super.onInitializeAccessibilityNodeInfo(info);
-        info.setClassName(Gallery.class.getName());
+    public void onInitializeAccessibilityNodeInfoInternal(AccessibilityNodeInfo info) {
+        super.onInitializeAccessibilityNodeInfoInternal(info);
         info.setScrollable(mItemCount > 1);
         if (isEnabled()) {
             if (mItemCount > 0 && mSelectedPosition < mItemCount - 1) {
@@ -1394,9 +1386,10 @@ public class Gallery extends AbsSpinner implements GestureDetector.OnGestureList
         }
     }
 
+    /** @hide */
     @Override
-    public boolean performAccessibilityAction(int action, Bundle arguments) {
-        if (super.performAccessibilityAction(action, arguments)) {
+    public boolean performAccessibilityActionInternal(int action, Bundle arguments) {
+        if (super.performAccessibilityActionInternal(action, arguments)) {
             return true;
         }
         switch (action) {

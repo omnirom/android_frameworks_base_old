@@ -24,20 +24,14 @@
 #include <android_runtime/AndroidRuntime.h>
 
 #include <Animator.h>
-#include <DisplayListRenderer.h>
 #include <RenderNode.h>
 #include <Paint.h>
+
+#include "core_jni_helpers.h"
 
 namespace android {
 
 using namespace uirenderer;
-
-/**
- * Note: OpenGLRenderer JNI layer is generated and compiled only on supported
- *       devices. This means all the logic must be compiled only when the
- *       preprocessor variable USE_OPENGL_RENDERER is defined.
- */
-#ifdef USE_OPENGL_RENDERER
 
 #define SET_AND_DIRTY(prop, val, dirtyFlag) \
     (reinterpret_cast<RenderNode*>(renderNodePtr)->mutateStagingProperties().prop(val) \
@@ -467,8 +461,6 @@ static void android_view_RenderNode_endAllAnimators(JNIEnv* env, jobject clazz,
     renderNode->animators().endAllStagingAnimators();
 }
 
-#endif // USE_OPENGL_RENDERER
-
 // ----------------------------------------------------------------------------
 // JNI Glue
 // ----------------------------------------------------------------------------
@@ -476,7 +468,6 @@ static void android_view_RenderNode_endAllAnimators(JNIEnv* env, jobject clazz,
 const char* const kClassPathName = "android/view/RenderNode";
 
 static JNINativeMethod gMethods[] = {
-#ifdef USE_OPENGL_RENDERER
     { "nCreate",               "(Ljava/lang/String;)J",    (void*) android_view_RenderNode_create },
     { "nDestroyRenderNode",   "(J)V",   (void*) android_view_RenderNode_destroyRenderNode },
     { "nSetDisplayListData",   "(JJ)V", (void*) android_view_RenderNode_setDisplayListData },
@@ -548,24 +539,10 @@ static JNINativeMethod gMethods[] = {
 
     { "nAddAnimator",              "(JJ)V", (void*) android_view_RenderNode_addAnimator },
     { "nEndAllAnimators",          "(J)V", (void*) android_view_RenderNode_endAllAnimators },
-#endif
 };
 
-#ifdef USE_OPENGL_RENDERER
-    #define FIND_CLASS(var, className) \
-            var = env->FindClass(className); \
-            LOG_FATAL_IF(! var, "Unable to find class " className);
-
-    #define GET_METHOD_ID(var, clazz, methodName, methodDescriptor) \
-            var = env->GetMethodID(clazz, methodName, methodDescriptor); \
-            LOG_FATAL_IF(! var, "Unable to find method " methodName);
-#else
-    #define FIND_CLASS(var, className)
-    #define GET_METHOD_ID(var, clazz, methodName, methodDescriptor)
-#endif
-
 int register_android_view_RenderNode(JNIEnv* env) {
-    return AndroidRuntime::registerNativeMethods(env, kClassPathName, gMethods, NELEM(gMethods));
+    return RegisterMethodsOrDie(env, kClassPathName, gMethods, NELEM(gMethods));
 }
 
 };

@@ -16,9 +16,10 @@
 
 package android.animation;
 
+import android.util.ArrayMap;
+
 import java.util.ArrayList;
 import java.util.Collection;
-import java.util.HashMap;
 import java.util.List;
 
 /**
@@ -68,7 +69,7 @@ public final class AnimatorSet extends Animator {
      * to a single node representing that Animator, not create a new Node
      * if one already exists.
      */
-    private HashMap<Animator, Node> mNodeMap = new HashMap<Animator, Node>();
+    private ArrayMap<Animator, Node> mNodeMap = new ArrayMap<Animator, Node>();
 
     /**
      * Set of all nodes created for this AnimatorSet. This list is used upon
@@ -646,7 +647,7 @@ public final class AnimatorSet extends Animator {
         anim.mTerminated = false;
         anim.mStarted = false;
         anim.mPlayingSet = new ArrayList<Animator>();
-        anim.mNodeMap = new HashMap<Animator, Node>();
+        anim.mNodeMap = new ArrayMap<Animator, Node>();
         anim.mNodes = new ArrayList<Node>(nodeCount);
         anim.mSortedNodes = new ArrayList<Node>(nodeCount);
         anim.mReversible = mReversible;
@@ -972,6 +973,18 @@ public final class AnimatorSet extends Animator {
         }
     }
 
+    @Override
+    public String toString() {
+        String returnVal = "AnimatorSet@" + Integer.toHexString(hashCode()) + "{";
+        boolean prevNeedsSort = mNeedsSort;
+        sortNodes();
+        mNeedsSort = prevNeedsSort;
+        for (Node node : mSortedNodes) {
+            returnVal += "\n    " + node.animation.toString();
+        }
+        return returnVal + "\n}";
+    }
+
     /**
      * Dependency holds information about the node that some other node is
      * dependent upon and the nature of that dependency.
@@ -1082,7 +1095,8 @@ public final class AnimatorSet extends Animator {
         public Node clone() {
             try {
                 Node node = (Node) super.clone();
-                node.animation = (Animator) animation.clone();
+                node.animation = animation.clone();
+                node.done = false;
                 return node;
             } catch (CloneNotSupportedException e) {
                throw new AssertionError();

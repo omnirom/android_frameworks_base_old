@@ -23,8 +23,12 @@ import android.view.VelocityTracker;
 import android.view.View;
 import android.view.ViewConfiguration;
 import android.view.ViewParent;
+import com.android.internal.logging.MetricsLogger;
 import com.android.systemui.recents.Constants;
+import com.android.systemui.recents.Recents;
 import com.android.systemui.recents.RecentsConfiguration;
+
+import java.util.List;
 
 /* Handles touch events for a TaskStackView. */
 class TaskStackViewTouchHandler implements SwipeHelper.Callback {
@@ -51,6 +55,8 @@ class TaskStackViewTouchHandler implements SwipeHelper.Callback {
     int mScrollTouchSlop;
     // The page touch slop is used to calculate when we start swiping
     float mPagingTouchSlop;
+    // Used to calculate when a tap is outside a task view rectangle.
+    final int mWindowTouchSlop;
 
     SwipeHelper mSwipeHelper;
     boolean mInterceptedBySwipeHelper;
@@ -62,6 +68,7 @@ class TaskStackViewTouchHandler implements SwipeHelper.Callback {
         mMaximumVelocity = configuration.getScaledMaximumFlingVelocity();
         mScrollTouchSlop = configuration.getScaledTouchSlop();
         mPagingTouchSlop = configuration.getScaledPagingTouchSlop();
+        mWindowTouchSlop = configuration.getScaledWindowTouchSlop();
         mSv = sv;
         mScroller = scroller;
         mConfig = config;
@@ -93,9 +100,10 @@ class TaskStackViewTouchHandler implements SwipeHelper.Callback {
 
     /** Returns the view at the specified coordinates */
     TaskView findViewAtPoint(int x, int y) {
-        int childCount = mSv.getChildCount();
-        for (int i = childCount - 1; i >= 0; i--) {
-            TaskView tv = (TaskView) mSv.getChildAt(i);
+        List<TaskView> taskViews = mSv.getTaskViews();
+        int taskViewCount = taskViews.size();
+        for (int i = taskViewCount - 1; i >= 0; i--) {
+            TaskView tv = taskViews.get(i);
             if (tv.getVisibility() == View.VISIBLE) {
                 if (mSv.isTransformedTouchPointInView(x, y, tv)) {
                     return tv;
@@ -115,9 +123,19 @@ class TaskStackViewTouchHandler implements SwipeHelper.Callback {
     /** Touch preprocessing for handling below */
     public boolean onInterceptTouchEvent(MotionEvent ev) {
         // Return early if we have no children
-        boolean hasChildren = (mSv.getChildCount() > 0);
-        if (!hasChildren) {
+        boolean hasTaskViews = (mSv.getTaskViews().size() > 0);
+        if (!hasTaskViews) {
             return false;
+        }
+
+        int action = ev.getAction();
+        if (mConfig.multiStackEnabled) {
+            // Check if we are within the bounds of the stack view contents
+            if ((action & MotionEvent.ACTION_MASK) == MotionEvent.ACTION_DOWN) {
+                if (!mSv.getTouchableRegion().contains((int) ev.getX(), (int) ev.getY())) {
+                    return false;
+                }
+            }
         }
 
         // Pass through to swipe helper if we are swiping
@@ -128,7 +146,6 @@ class TaskStackViewTouchHandler implements SwipeHelper.Callback {
 
         boolean wasScrolling = mScroller.isScrolling() ||
                 (mScroller.mScrollAnimator != null && mScroller.mScrollAnimator.isRunning());
-        int action = ev.getAction();
         switch (action & MotionEvent.ACTION_MASK) {
             case MotionEvent.ACTION_DOWN: {
                 // Save the touch down info
@@ -190,9 +207,19 @@ class TaskStackViewTouchHandler implements SwipeHelper.Callback {
     /** Handles touch events once we have intercepted them */
     public boolean onTouchEvent(MotionEvent ev) {
         // Short circuit if we have no children
-        boolean hasChildren = (mSv.getChildCount() > 0);
-        if (!hasChildren) {
+        boolean hasTaskViews = (mSv.getTaskViews().size() > 0);
+        if (!hasTaskViews) {
             return false;
+        }
+
+        int action = ev.getAction();
+        if (mConfig.multiStackEnabled) {
+            // Check if we are within the bounds of the stack view contents
+            if ((action & MotionEvent.ACTION_MASK) == MotionEvent.ACTION_DOWN) {
+                if (!mSv.getTouchableRegion().contains((int) ev.getX(), (int) ev.getY())) {
+                    return false;
+                }
+            }
         }
 
         // Pass through to swipe helper if we are swiping
@@ -203,7 +230,6 @@ class TaskStackViewTouchHandler implements SwipeHelper.Callback {
         // Update the velocity tracker
         initVelocityTrackerIfNotExists();
 
-        int action = ev.getAction();
         switch (action & MotionEvent.ACTION_MASK) {
             case MotionEvent.ACTION_DOWN: {
                 // Save the touch down info
@@ -279,7 +305,7 @@ class TaskStackViewTouchHandler implements SwipeHelper.Callback {
                     float overscrollRangePct = Math.abs((float) velocity / mMaximumVelocity);
                     int overscrollRange = (int) (Math.min(1f, overscrollRangePct) *
                             (Constants.Values.TaskStackView.TaskStackMaxOverscrollRange -
-                            Constants.Values.TaskStackView.TaskStackMinOverscrollRange));
+                                    Constants.Values.TaskStackView.TaskStackMinOverscrollRange));
                     mScroller.mScroller.fling(0,
                             mScroller.progressToScrollRange(mScroller.getStackScroll()),
                             0, velocity,
@@ -290,9 +316,12 @@ class TaskStackViewTouchHandler implements SwipeHelper.Callback {
                                     overscrollRange);
                     // Invalidate to kick off computeScroll
                     mSv.invalidate();
-                } else if (mScroller.isScrollOutOfBounds()) {
+                } else if (mIsScrolling && mScroller.isScrollOutOfBounds()) {
                     // Animate the scroll back into bounds
                     mScroller.animateBoundScroll();
+                } else if (mActiveTaskView == null) {
+                    // This tap didn't start on a task.
+                    maybeHideRecentsFromBackgroundTap((int) ev.getX(), (int) ev.getY());
                 }
 
                 mActivePointerId = INACTIVE_POINTER_ID;
@@ -330,6 +359,34 @@ class TaskStackViewTouchHandler implements SwipeHelper.Callback {
         return true;
     }
 
+    /** Hides recents if the up event at (x, y) is a tap on the background area. */
+    void maybeHideRecentsFromBackgroundTap(int x, int y) {
+        // Ignore the up event if it's too far from its start position. The user might have been
+        // trying to scroll or swipe.
+        int dx = Math.abs(mInitialMotionX - x);
+        int dy = Math.abs(mInitialMotionY - y);
+        if (dx > mScrollTouchSlop || dy > mScrollTouchSlop) {
+            return;
+        }
+
+        // Shift the tap position toward the center of the task stack and check to see if it would
+        // have hit a view. The user might have tried to tap on a task and missed slightly.
+        int shiftedX = x;
+        if (x > mSv.getTouchableRegion().centerX()) {
+            shiftedX -= mWindowTouchSlop;
+        } else {
+            shiftedX += mWindowTouchSlop;
+        }
+        if (findViewAtPoint(shiftedX, y) != null) {
+            return;
+        }
+
+        // The user intentionally tapped on the background, which is like a tap on the "desktop".
+        // Hide recents and transition to the launcher.
+        Recents recents = Recents.getInstanceAndStartIfNeeded(mSv.getContext());
+        recents.hideRecents(false /* altTab */, true /* homeKey */);
+    }
+
     /** Handles generic motion events */
     public boolean onGenericMotionEvent(MotionEvent ev) {
         if ((ev.getSource() & InputDevice.SOURCE_CLASS_POINTER) ==
@@ -340,11 +397,11 @@ class TaskStackViewTouchHandler implements SwipeHelper.Callback {
                     // Find the front most task and scroll the next task to the front
                     float vScroll = ev.getAxisValue(MotionEvent.AXIS_VSCROLL);
                     if (vScroll > 0) {
-                        if (mSv.ensureFocusedTask()) {
+                        if (mSv.ensureFocusedTask(true)) {
                             mSv.focusNextTask(true, false);
                         }
                     } else {
-                        if (mSv.ensureFocusedTask()) {
+                        if (mSv.ensureFocusedTask(true)) {
                             mSv.focusNextTask(false, false);
                         }
                     }
@@ -378,6 +435,8 @@ class TaskStackViewTouchHandler implements SwipeHelper.Callback {
         if (parent != null) {
             parent.requestDisallowInterceptTouchEvent(true);
         }
+        // Fade out the dismiss button
+        mSv.hideDismissAllButton(null);
     }
 
     @Override
@@ -394,6 +453,9 @@ class TaskStackViewTouchHandler implements SwipeHelper.Callback {
         tv.setTouchEnabled(true);
         // Remove the task view from the stack
         mSv.onTaskViewDismissed(tv);
+        // Keep track of deletions by keyboard
+        MetricsLogger.histogram(tv.getContext(), "overview_task_dismissed_source",
+                Constants.Metrics.DismissSourceSwipeGesture);
     }
 
     @Override
@@ -403,6 +465,8 @@ class TaskStackViewTouchHandler implements SwipeHelper.Callback {
         tv.setClipViewInStack(true);
         // Re-enable touch events from this task view
         tv.setTouchEnabled(true);
+        // Restore the dismiss button
+        mSv.showDismissAllButton();
     }
 
     @Override

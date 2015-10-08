@@ -16,13 +16,11 @@
 
 package android.hardware.camera2.legacy;
 
-import android.graphics.ImageFormat;
 import android.graphics.SurfaceTexture;
 import android.hardware.Camera;
 import android.hardware.camera2.CameraCharacteristics;
 import android.hardware.camera2.CaptureRequest;
 import android.hardware.camera2.impl.CameraDeviceImpl;
-import android.hardware.camera2.params.StreamConfigurationMap;
 import android.hardware.camera2.utils.LongParcelable;
 import android.hardware.camera2.utils.SizeAreaComparator;
 import android.hardware.camera2.impl.CameraMetadataNative;
@@ -38,7 +36,6 @@ import android.view.Surface;
 
 import java.io.IOException;
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.Iterator;
@@ -65,10 +62,9 @@ public class RequestThreadManager {
     private final int mCameraId;
     private final RequestHandlerThread mRequestThread;
 
-    private static final boolean DEBUG = Log.isLoggable(LegacyCameraDevice.DEBUG_PROP, Log.DEBUG);
+    private static final boolean DEBUG = false;
     // For slightly more spammy messages that will get repeated every frame
-    private static final boolean VERBOSE =
-            Log.isLoggable(LegacyCameraDevice.DEBUG_PROP, Log.VERBOSE);
+    private static final boolean VERBOSE = false;
     private Camera mCamera;
     private final CameraCharacteristics mCharacteristics;
 
@@ -85,7 +81,7 @@ public class RequestThreadManager {
 
     private static final int PREVIEW_FRAME_TIMEOUT = 1000; // ms
     private static final int JPEG_FRAME_TIMEOUT = 4000; // ms (same as CTS for API2)
-    private static final int REQUEST_COMPLETE_TIMEOUT = JPEG_FRAME_TIMEOUT; // ms (same as JPEG timeout)
+    private static final int REQUEST_COMPLETE_TIMEOUT = JPEG_FRAME_TIMEOUT;
 
     private static final float ASPECT_RATIO_TOLERANCE = 0.01f;
     private boolean mPreviewRunning = false;
@@ -191,8 +187,18 @@ public class RequestThreadManager {
     private final Camera.ErrorCallback mErrorCallback = new Camera.ErrorCallback() {
         @Override
         public void onError(int i, Camera camera) {
-            Log.e(TAG, "Received error " + i + " from the Camera1 ErrorCallback");
-            mDeviceState.setError(CameraDeviceImpl.CameraDeviceCallbacks.ERROR_CAMERA_DEVICE);
+            switch(i) {
+                case Camera.CAMERA_ERROR_EVICTED: {
+                    flush();
+                    mDeviceState.setError(
+                            CameraDeviceImpl.CameraDeviceCallbacks.ERROR_CAMERA_DISCONNECTED);
+                } break;
+                default:  {
+                    Log.e(TAG, "Received error " + i + " from the Camera1 ErrorCallback");
+                    mDeviceState.setError(
+                            CameraDeviceImpl.CameraDeviceCallbacks.ERROR_CAMERA_DEVICE);
+                } break;
+            }
         }
     };
 
@@ -388,6 +394,8 @@ public class RequestThreadManager {
                             callbackOutputSizes.add(outSize);
                             break;
                         default:
+                            LegacyCameraDevice.setScalingMode(s, LegacyCameraDevice.
+                                    NATIVE_WINDOW_SCALING_MODE_SCALE_TO_WINDOW);
                             mPreviewOutputs.add(s);
                             previewOutputSizes.add(outSize);
                             break;
@@ -416,12 +424,18 @@ public class RequestThreadManager {
         mParams.setPreviewFpsRange(bestRange[Camera.Parameters.PREVIEW_FPS_MIN_INDEX],
                 bestRange[Camera.Parameters.PREVIEW_FPS_MAX_INDEX]);
 
+        Size smallestSupportedJpegSize = calculatePictureSize(mCallbackOutputs,
+                callbackOutputSizes, mParams);
+
         if (previewOutputSizes.size() > 0) {
 
             Size largestOutput = SizeAreaComparator.findLargestByArea(previewOutputSizes);
 
             // Find largest jpeg dimension - assume to have the same aspect ratio as sensor.
             Size largestJpegDimen = ParameterUtils.getLargestSupportedJpegSizeByArea(mParams);
+
+            Size chosenJpegDimen = (smallestSupportedJpegSize != null) ? smallestSupportedJpegSize
+                    : largestJpegDimen;
 
             List<Size> supportedPreviewSizes = ParameterUtils.convertSizeList(
                     mParams.getSupportedPreviewSizes());
@@ -434,7 +448,7 @@ public class RequestThreadManager {
             for (Size s : supportedPreviewSizes) {
                 long currArea = s.getWidth() * s.getHeight();
                 long bestArea = bestPreviewDimen.getWidth() * bestPreviewDimen.getHeight();
-                if (checkAspectRatiosMatch(largestJpegDimen, s) && (currArea < bestArea &&
+                if (checkAspectRatiosMatch(chosenJpegDimen, s) && (currArea < bestArea &&
                         currArea >= largestOutputArea)) {
                     bestPreviewDimen = s;
                 }
@@ -455,8 +469,6 @@ public class RequestThreadManager {
             }
         }
 
-        Size smallestSupportedJpegSize = calculatePictureSize(mCallbackOutputs,
-                callbackOutputSizes, mParams);
         if (smallestSupportedJpegSize != null) {
             /*
              * Set takePicture size to the smallest supported JPEG size large enough
@@ -501,6 +513,10 @@ public class RequestThreadManager {
             return;
         }
         for(Surface s : surfaces) {
+            if (s == null || !s.isValid()) {
+                Log.w(TAG, "Jpeg surface is invalid, skipping...");
+                continue;
+            }
             try {
                 LegacyCameraDevice.setSurfaceFormat(s, LegacyMetadataMapper.HAL_PIXEL_FORMAT_BLOB);
             } catch (LegacyExceptionUtils.BufferQueueAbandonedException e) {

@@ -16,6 +16,7 @@
 
 package android.provider;
 
+import android.annotation.SystemApi;
 import android.content.ContentResolver;
 
 /**
@@ -23,6 +24,7 @@ import android.content.ContentResolver;
  *
  * @hide
  */
+@SystemApi
 public class SearchIndexablesContract {
 
     /**
@@ -234,7 +236,7 @@ public class SearchIndexablesContract {
     /**
      * The base columns.
      */
-    private static class BaseColumns {
+    public static class BaseColumns {
         private BaseColumns() {
         }
 

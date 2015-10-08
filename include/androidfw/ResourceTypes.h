@@ -112,7 +112,7 @@ struct __assertChar16Size {
  *
  * The PNG chunk type is "npTc".
  */
-struct Res_png_9patch
+struct alignas(uintptr_t) Res_png_9patch
 {
     Res_png_9patch() : wasDeserialized(false), xDivsOffset(0),
                        yDivsOffset(0), colorsOffset(0) { }
@@ -247,8 +247,8 @@ enum {
 #define Res_MAKEINTERNAL(entry) (0x01000000 | (entry&0xFFFF))
 #define Res_MAKEARRAY(entry) (0x02000000 | (entry&0xFFFF))
 
-#define Res_MAXPACKAGE 255
-#define Res_MAXTYPE 255
+static const size_t Res_MAXPACKAGE = 255;
+static const size_t Res_MAXTYPE = 255;
 
 /**
  * Representation of a value in a resource, supplying type
@@ -372,7 +372,8 @@ struct Res_value
     };
 
     // The data for this item, as interpreted according to dataType.
-    uint32_t data;
+    typedef uint32_t data_type;
+    data_type data;
 
     void copyFrom_dtoh(const Res_value& src);
 };
@@ -1131,6 +1132,24 @@ struct ResTable_config
     // chars. Interpreted in conjunction with the locale field.
     char localeVariant[8];
 
+    enum {
+        // screenLayout2 bits for round/notround.
+        MASK_SCREENROUND = 0x03,
+        SCREENROUND_ANY = ACONFIGURATION_SCREENROUND_ANY,
+        SCREENROUND_NO = ACONFIGURATION_SCREENROUND_NO,
+        SCREENROUND_YES = ACONFIGURATION_SCREENROUND_YES,
+    };
+
+    // An extension of screenConfig.
+    union {
+        struct {
+            uint8_t screenLayout2;      // Contains round/notround qualifier.
+            uint8_t screenConfigPad1;   // Reserved padding.
+            uint16_t screenConfigPad2;  // Reserved padding.
+        };
+        uint32_t screenConfig2;
+    };
+
     void copyFromDeviceNoSwap(const ResTable_config& o);
     
     void copyFromDtoH(const ResTable_config& o);
@@ -1159,6 +1178,7 @@ struct ResTable_config
         CONFIG_SCREEN_LAYOUT = ACONFIGURATION_SCREEN_LAYOUT,
         CONFIG_UI_MODE = ACONFIGURATION_UI_MODE,
         CONFIG_LAYOUTDIR = ACONFIGURATION_LAYOUTDIR,
+        CONFIG_SCREEN_ROUND = ACONFIGURATION_SCREEN_ROUND,
     };
     
     // Compare two configuration, returning CONFIG_* flags set for each value
@@ -1194,6 +1214,12 @@ struct ResTable_config
     //
     // Example: en-US, en-Latn-US, en-POSIX.
     void getBcp47Locale(char* out) const;
+
+    // Append to str the resource-qualifer string representation of the
+    // locale component of this Config. If the locale is only country
+    // and language, it will look like en-rUS. If it has scripts and
+    // variants, it will be a modified bcp47 tag: b+en+Latn+US.
+    void appendDirLocale(String8& str) const;
 
     // Sets the values of language, region, script and variant to the
     // well formed BCP-47 locale contained in |in|. The input locale is
@@ -1327,7 +1353,11 @@ struct ResTable_entry
         FLAG_COMPLEX = 0x0001,
         // If set, this resource has been declared public, so libraries
         // are allowed to reference it.
-        FLAG_PUBLIC = 0x0002
+        FLAG_PUBLIC = 0x0002,
+        // If set, this is a weak resource and may be overriden by strong
+        // resources of the same name/type. This is only useful during
+        // linking with other resource tables.
+        FLAG_WEAK = 0x0004
     };
     uint16_t flags;
     
@@ -1502,6 +1532,8 @@ private:
     KeyedVector<String16, uint8_t>  mEntries;
 };
 
+bool U16StringToInt(const char16_t* s, size_t len, Res_value* outValue);
+
 /**
  * Convenience class for accessing data in a ResTable resource.
  */
@@ -1618,6 +1650,7 @@ public:
 
         status_t applyStyle(uint32_t resID, bool force=false);
         status_t setTo(const Theme& other);
+        status_t clear();
 
         /**
          * Retrieve a value in the theme.  If the theme defines this
@@ -1649,6 +1682,12 @@ public:
                 uint32_t* inoutTypeSpecFlags = NULL,
                 ResTable_config* inoutConfig = NULL) const;
 
+        /**
+         * Returns a bit mask of configuration changes that will impact this
+         * theme (and thus require completely reloading it).
+         */
+        uint32_t getChangingConfigurations() const;
+
         void dumpToLog() const;
         
     private:
@@ -1675,6 +1714,7 @@ public:
 
         const ResTable& mTable;
         package_info*   mPackages[Res_MAXPACKAGE];
+        uint32_t        mTypeSpecFlags;
     };
 
     void setParameters(const ResTable_config* params);
@@ -1793,9 +1833,7 @@ public:
             const char* targetPath, const char* overlayPath,
             void** outData, size_t* outSize) const;
 
-    enum {
-        IDMAP_HEADER_SIZE_BYTES = 4 * sizeof(uint32_t) + 2 * 256,
-    };
+    static const size_t IDMAP_HEADER_SIZE_BYTES = 4 * sizeof(uint32_t) + 2 * 256;
 
     // Retrieve idmap meta-data.
     //

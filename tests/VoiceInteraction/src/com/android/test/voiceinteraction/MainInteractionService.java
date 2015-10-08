@@ -16,12 +16,14 @@
 
 package com.android.test.voiceinteraction;
 
+import android.content.ComponentName;
 import android.content.Intent;
 import android.os.Bundle;
 import android.service.voice.AlwaysOnHotwordDetector;
 import android.service.voice.AlwaysOnHotwordDetector.Callback;
 import android.service.voice.AlwaysOnHotwordDetector.EventPayload;
 import android.service.voice.VoiceInteractionService;
+import android.service.voice.VoiceInteractionSession;
 import android.util.Log;
 
 import java.util.Arrays;
@@ -70,15 +72,6 @@ public class MainInteractionService extends VoiceInteractionService {
 
         mHotwordDetector = createAlwaysOnHotwordDetector(
                 "Hello There", Locale.forLanguageTag("en-US"), mHotwordCallback);
-    }
-
-    @Override
-    public int onStartCommand(Intent intent, int flags, int startId) {
-        Bundle args = new Bundle();
-        args.putParcelable("intent", new Intent(this, TestInteractionActivity.class));
-        startSession(args);
-        stopSelf(startId);
-        return START_NOT_STICKY;
     }
 
     private void hotwordAvailabilityChangeHelper(int availability) {

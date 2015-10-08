@@ -17,7 +17,7 @@
 package com.android.keyguard;
 
 import android.content.Context;
-import android.graphics.drawable.Drawable;
+import android.os.AsyncTask;
 import android.os.CountDownTimer;
 import android.os.SystemClock;
 import android.util.AttributeSet;
@@ -26,18 +26,19 @@ import android.view.KeyEvent;
 import android.view.View;
 import android.widget.LinearLayout;
 
+import com.android.internal.widget.LockPatternChecker;
 import com.android.internal.widget.LockPatternUtils;
 
 /**
  * Base class for PIN and password unlock screens.
  */
 public abstract class KeyguardAbsKeyInputView extends LinearLayout
-        implements KeyguardSecurityView {
+        implements KeyguardSecurityView, EmergencyButton.EmergencyButtonCallback {
     protected KeyguardSecurityCallback mCallback;
     protected LockPatternUtils mLockPatternUtils;
+    protected AsyncTask<?, ?, ?> mPendingLockCheck;
     protected SecurityMessageDisplay mSecurityMessageDisplay;
     protected View mEcaView;
-    private Drawable mBouncerFrame;
     protected boolean mEnableHaptics;
 
     // To avoid accidental lockout due to events while the device in in the pocket, ignore
@@ -52,20 +53,24 @@ public abstract class KeyguardAbsKeyInputView extends LinearLayout
         super(context, attrs);
     }
 
+    @Override
     public void setKeyguardCallback(KeyguardSecurityCallback callback) {
         mCallback = callback;
     }
 
+    @Override
     public void setLockPatternUtils(LockPatternUtils utils) {
         mLockPatternUtils = utils;
         mEnableHaptics = mLockPatternUtils.isTactileFeedbackEnabled();
     }
 
+    @Override
     public void reset() {
         // start fresh
         resetPasswordText(false /* animate */);
         // if the user is currently locked out, enforce it.
-        long deadline = mLockPatternUtils.getLockoutAttemptDeadline();
+        long deadline = mLockPatternUtils.getLockoutAttemptDeadline(
+                KeyguardUpdateMonitor.getCurrentUser());
         if (shouldLockout(deadline)) {
             handleAttemptLockout(deadline);
         } else {
@@ -84,12 +89,18 @@ public abstract class KeyguardAbsKeyInputView extends LinearLayout
     @Override
     protected void onFinishInflate() {
         mLockPatternUtils = new LockPatternUtils(mContext);
-        mSecurityMessageDisplay = new KeyguardMessageArea.Helper(this);
+        mSecurityMessageDisplay = KeyguardMessageArea.findSecurityMessageDisplay(this);
         mEcaView = findViewById(R.id.keyguard_selector_fade_container);
-        View bouncerFrameView = findViewById(R.id.keyguard_bouncer_frame);
-        if (bouncerFrameView != null) {
-            mBouncerFrame = bouncerFrameView.getBackground();
+
+        EmergencyButton button = (EmergencyButton) findViewById(R.id.emergency_call_button);
+        if (button != null) {
+            button.setCallback(this);
         }
+    }
+
+    @Override
+    public void onEmergencyButtonClickedWhenInCall() {
+        mCallback.reset();
     }
 
     /*
@@ -102,22 +113,50 @@ public abstract class KeyguardAbsKeyInputView extends LinearLayout
     }
 
     protected void verifyPasswordAndUnlock() {
-        String entry = getPasswordText();
-        if (mLockPatternUtils.checkPassword(entry)) {
-            mCallback.reportUnlockAttempt(true);
+        final String entry = getPasswordText();
+        setPasswordEntryInputEnabled(false);
+        if (mPendingLockCheck != null) {
+            mPendingLockCheck.cancel(false);
+        }
+
+        if (entry.length() <= MINIMUM_PASSWORD_LENGTH_BEFORE_REPORT) {
+            // to avoid accidental lockout, only count attempts that are long enough to be a
+            // real password. This may require some tweaking.
+            setPasswordEntryInputEnabled(true);
+            onPasswordChecked(false /* matched */, 0, false /* not valid - too short */);
+            return;
+        }
+
+        mPendingLockCheck = LockPatternChecker.checkPassword(
+                mLockPatternUtils,
+                entry,
+                KeyguardUpdateMonitor.getCurrentUser(),
+                new LockPatternChecker.OnCheckCallback() {
+                    @Override
+                    public void onChecked(boolean matched, int timeoutMs) {
+                        setPasswordEntryInputEnabled(true);
+                        mPendingLockCheck = null;
+                        onPasswordChecked(matched, timeoutMs, true /* isValidPassword */);
+                    }
+                });
+    }
+
+    private void onPasswordChecked(boolean matched, int timeoutMs, boolean isValidPassword) {
+        if (matched) {
+            mCallback.reportUnlockAttempt(true, 0);
             mCallback.dismiss(true);
         } else {
-            if (entry.length() > MINIMUM_PASSWORD_LENGTH_BEFORE_REPORT ) {
-                // to avoid accidental lockout, only count attempts that are long enough to be a
-                // real password. This may require some tweaking.
-                mCallback.reportUnlockAttempt(false);
-                int attempts = KeyguardUpdateMonitor.getInstance(mContext).getFailedUnlockAttempts();
-                if (0 == (attempts % LockPatternUtils.FAILED_ATTEMPTS_BEFORE_TIMEOUT)) {
-                    long deadline = mLockPatternUtils.setLockoutAttemptDeadline();
+            if (isValidPassword) {
+                mCallback.reportUnlockAttempt(false, timeoutMs);
+                if (timeoutMs > 0) {
+                    long deadline = mLockPatternUtils.setLockoutAttemptDeadline(
+                            KeyguardUpdateMonitor.getCurrentUser(), timeoutMs);
                     handleAttemptLockout(deadline);
                 }
             }
-            mSecurityMessageDisplay.setMessage(getWrongPasswordStringId(), true);
+            if (timeoutMs == 0) {
+                mSecurityMessageDisplay.setMessage(getWrongPasswordStringId(), true);
+            }
         }
         resetPasswordText(true /* animate */);
     }
@@ -135,6 +174,7 @@ public abstract class KeyguardAbsKeyInputView extends LinearLayout
     protected abstract void resetPasswordText(boolean animate);
     protected abstract String getPasswordText();
     protected abstract void setPasswordEntryEnabled(boolean enabled);
+    protected abstract void setPasswordEntryInputEnabled(boolean enabled);
 
     // Prevent user from using the PIN/Password entry until scheduled deadline.
     protected void handleAttemptLockout(long elapsedRealtimeDeadline) {
@@ -157,9 +197,16 @@ public abstract class KeyguardAbsKeyInputView extends LinearLayout
         }.start();
     }
 
+    protected void onUserInput() {
+        if (mCallback != null) {
+            mCallback.userActivity();
+        }
+        mSecurityMessageDisplay.setMessage("", false);
+    }
+
     @Override
     public boolean onKeyDown(int keyCode, KeyEvent event) {
-        mCallback.userActivity();
+        onUserInput();
         return false;
     }
 
@@ -170,7 +217,10 @@ public abstract class KeyguardAbsKeyInputView extends LinearLayout
 
     @Override
     public void onPause() {
-
+        if (mPendingLockCheck != null) {
+            mPendingLockCheck.cancel(false);
+            mPendingLockCheck = null;
+        }
     }
 
     @Override
@@ -183,6 +233,19 @@ public abstract class KeyguardAbsKeyInputView extends LinearLayout
         return mCallback;
     }
 
+    @Override
+    public void showPromptReason(int reason) {
+        if (reason != PROMPT_REASON_NONE) {
+            int promtReasonStringRes = getPromtReasonStringRes(reason);
+            if (promtReasonStringRes != 0) {
+                mSecurityMessageDisplay.setMessage(promtReasonStringRes,
+                        true /* important */);
+            }
+        }
+    }
+
+    protected abstract int getPromtReasonStringRes(int reason);
+
     // Cause a VIRTUAL_KEY vibration
     public void doHapticKeyClick() {
         if (mEnableHaptics) {
@@ -190,18 +253,6 @@ public abstract class KeyguardAbsKeyInputView extends LinearLayout
                     HapticFeedbackConstants.FLAG_IGNORE_VIEW_SETTING
                     | HapticFeedbackConstants.FLAG_IGNORE_GLOBAL_SETTING);
         }
-    }
-
-    @Override
-    public void showBouncer(int duration) {
-        KeyguardSecurityViewHelper.
-                showBouncer(mSecurityMessageDisplay, mEcaView, mBouncerFrame, duration);
-    }
-
-    @Override
-    public void hideBouncer(int duration) {
-        KeyguardSecurityViewHelper.
-                hideBouncer(mSecurityMessageDisplay, mEcaView, mBouncerFrame, duration);
     }
 
     @Override

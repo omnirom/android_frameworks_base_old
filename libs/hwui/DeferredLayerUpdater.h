@@ -24,7 +24,6 @@
 
 #include "Layer.h"
 #include "Rect.h"
-#include "RenderNode.h"
 #include "renderthread/RenderThread.h"
 
 namespace android {
@@ -39,7 +38,7 @@ public:
     ANDROID_API DeferredLayerUpdater(renderthread::RenderThread& thread, Layer* layer);
     ANDROID_API ~DeferredLayerUpdater();
 
-    ANDROID_API bool setSize(uint32_t width, uint32_t height) {
+    ANDROID_API bool setSize(int width, int height) {
         if (mWidth != width || mHeight != height) {
             mWidth = width;
             mHeight = height;
@@ -60,6 +59,10 @@ public:
         if (texture.get() != mSurfaceTexture.get()) {
             mNeedsGLContextAttach = needsAttach;
             mSurfaceTexture = texture;
+
+            GLenum target = texture->getCurrentTextureTarget();
+            LOG_ALWAYS_FATAL_IF(target != GL_TEXTURE_2D && target != GL_TEXTURE_EXTERNAL_OES,
+                    "set unsupported GLConsumer with target %x", target);
         }
     }
 
@@ -69,7 +72,7 @@ public:
 
     ANDROID_API void setTransform(const SkMatrix* matrix) {
         delete mTransform;
-        mTransform = matrix ? new SkMatrix(*matrix) : 0;
+        mTransform = matrix ? new SkMatrix(*matrix) : nullptr;
     }
 
     ANDROID_API void setPaint(const SkPaint* paint);
@@ -84,8 +87,8 @@ public:
 
 private:
     // Generic properties
-    uint32_t mWidth;
-    uint32_t mHeight;
+    int mWidth;
+    int mHeight;
     bool mBlend;
     SkColorFilter* mColorFilter;
     int mAlpha;

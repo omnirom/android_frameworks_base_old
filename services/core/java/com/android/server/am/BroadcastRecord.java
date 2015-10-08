@@ -17,6 +17,7 @@
 package com.android.server.am;
 
 import android.app.AppOpsManager;
+import android.app.BroadcastOptions;
 import android.content.IIntentReceiver;
 import android.content.ComponentName;
 import android.content.Intent;
@@ -26,12 +27,15 @@ import android.os.Binder;
 import android.os.Bundle;
 import android.os.IBinder;
 import android.os.SystemClock;
+import android.os.UserHandle;
 import android.util.PrintWriterPrinter;
 import android.util.TimeUtils;
 
 import java.io.PrintWriter;
+import java.util.Arrays;
 import java.util.Date;
 import java.util.List;
+import java.util.Set;
 
 /**
  * An active intent broadcast.
@@ -48,10 +52,12 @@ final class BroadcastRecord extends Binder {
     final boolean initialSticky; // initial broadcast from register to sticky?
     final int userId;       // user id this broadcast was for
     final String resolvedType; // the resolved data type
-    final String requiredPermission; // a permission the caller has required
+    final String[] requiredPermissions; // permissions the caller has required
     final int appOp;        // an app op that is associated with this broadcast
+    final BroadcastOptions options; // BroadcastOptions supplied by caller
     final List receivers;   // contains BroadcastFilter and ResolveInfo
     IIntentReceiver resultTo; // who receives final result if non-null
+    long enqueueClockTime;  // the clock time the broadcast was enqueued
     long dispatchTime;      // when dispatch started on this set of receivers
     long dispatchClockTime; // the clock time the dispatch started
     long receiverTime;      // when current receiver started for timeouts.
@@ -98,11 +104,18 @@ final class BroadcastRecord extends Binder {
                 pw.print(callerApp != null ? callerApp.toShortString() : "null");
                 pw.print(" pid="); pw.print(callingPid);
                 pw.print(" uid="); pw.println(callingUid);
-        if (requiredPermission != null || appOp != AppOpsManager.OP_NONE) {
-            pw.print(prefix); pw.print("requiredPermission="); pw.print(requiredPermission);
-                    pw.print("  appOp="); pw.println(appOp);
+        if ((requiredPermissions != null && requiredPermissions.length > 0)
+                || appOp != AppOpsManager.OP_NONE) {
+            pw.print(prefix); pw.print("requiredPermissions=");
+            pw.print(Arrays.toString(requiredPermissions));
+            pw.print("  appOp="); pw.println(appOp);
         }
-        pw.print(prefix); pw.print("dispatchClockTime=");
+        if (options != null) {
+            pw.print(prefix); pw.print("options="); pw.println(options.toBundle());
+        }
+        pw.print(prefix); pw.print("enqueueClockTime=");
+                pw.print(new Date(enqueueClockTime));
+                pw.print(" dispatchClockTime=");
                 pw.println(new Date(dispatchClockTime));
         pw.print(prefix); pw.print("dispatchTime=");
                 TimeUtils.formatDuration(dispatchTime, now, pw);
@@ -161,7 +174,7 @@ final class BroadcastRecord extends Binder {
         final int N = receivers != null ? receivers.size() : 0;
         String p2 = prefix + "  ";
         PrintWriterPrinter printer = new PrintWriterPrinter(pw);
-        for (int i=0; i<N; i++) {
+        for (int i = 0; i < N; i++) {
             Object o = receivers.get(i);
             pw.print(prefix); pw.print("Receiver #"); pw.print(i);
                     pw.print(": "); pw.println(o);
@@ -174,9 +187,9 @@ final class BroadcastRecord extends Binder {
 
     BroadcastRecord(BroadcastQueue _queue,
             Intent _intent, ProcessRecord _callerApp, String _callerPackage,
-            int _callingPid, int _callingUid, String _resolvedType, String _requiredPermission,
-            int _appOp, List _receivers, IIntentReceiver _resultTo, int _resultCode,
-            String _resultData, Bundle _resultExtras, boolean _serialized,
+            int _callingPid, int _callingUid, String _resolvedType, String[] _requiredPermissions,
+            int _appOp, BroadcastOptions _options, List _receivers, IIntentReceiver _resultTo,
+            int _resultCode, String _resultData, Bundle _resultExtras, boolean _serialized,
             boolean _sticky, boolean _initialSticky,
             int _userId) {
         queue = _queue;
@@ -187,8 +200,9 @@ final class BroadcastRecord extends Binder {
         callingPid = _callingPid;
         callingUid = _callingUid;
         resolvedType = _resolvedType;
-        requiredPermission = _requiredPermission;
+        requiredPermissions = _requiredPermissions;
         appOp = _appOp;
+        options = _options;
         receivers = _receivers;
         resultTo = _resultTo;
         resultCode = _resultCode;
@@ -200,6 +214,40 @@ final class BroadcastRecord extends Binder {
         userId = _userId;
         nextReceiver = 0;
         state = IDLE;
+    }
+
+    boolean cleanupDisabledPackageReceiversLocked(
+            String packageName, Set<String> filterByClasses, int userId, boolean doit) {
+        if ((userId != UserHandle.USER_ALL && this.userId != userId) || receivers == null) {
+            return false;
+        }
+
+        boolean didSomething = false;
+        Object o;
+        for (int i = receivers.size() - 1; i >= 0; i--) {
+            o = receivers.get(i);
+            if (!(o instanceof ResolveInfo)) {
+                continue;
+            }
+            ActivityInfo info = ((ResolveInfo)o).activityInfo;
+
+            final boolean sameComponent = packageName == null
+                    || (info.applicationInfo.packageName.equals(packageName)
+                    && (filterByClasses == null || filterByClasses.contains(info.name)));
+            if (sameComponent) {
+                if (!doit) {
+                    return true;
+                }
+                didSomething = true;
+                receivers.remove(i);
+                if (i < nextReceiver) {
+                    nextReceiver--;
+                }
+            }
+        }
+        nextReceiver = Math.min(nextReceiver, receivers.size());
+
+        return didSomething;
     }
 
     public String toString() {

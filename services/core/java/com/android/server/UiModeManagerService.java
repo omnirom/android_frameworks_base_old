@@ -31,6 +31,7 @@ import android.content.Intent;
 import android.content.IntentFilter;
 import android.content.pm.PackageManager;
 import android.content.res.Configuration;
+import android.content.res.Resources;
 import android.os.BatteryManager;
 import android.os.Binder;
 import android.os.Handler;
@@ -63,7 +64,7 @@ final class UiModeManagerService extends SystemService {
     private int mDockState = Intent.EXTRA_DOCK_STATE_UNDOCKED;
 
     private int mLastBroadcastState = Intent.EXTRA_DOCK_STATE_UNDOCKED;
-    int mNightMode = UiModeManager.MODE_NIGHT_NO;
+    private int mNightMode = UiModeManager.MODE_NIGHT_NO;
 
     private boolean mCarModeEnabled = false;
     private boolean mCharging = false;
@@ -156,7 +157,7 @@ final class UiModeManagerService extends SystemService {
     @Override
     public void onStart() {
         final Context context = getContext();
-        mTwilightManager = getLocalService(TwilightManager.class);
+
         final PowerManager powerManager =
                 (PowerManager) context.getSystemService(Context.POWER_SERVICE);
         mWakeLock = powerManager.newWakeLock(PowerManager.FULL_WAKE_LOCK, TAG);
@@ -168,22 +169,29 @@ final class UiModeManagerService extends SystemService {
 
         mConfiguration.setToDefaults();
 
-        mDefaultUiModeType = context.getResources().getInteger(
+        final Resources res = context.getResources();
+        mDefaultUiModeType = res.getInteger(
                 com.android.internal.R.integer.config_defaultUiModeType);
-        mCarModeKeepsScreenOn = (context.getResources().getInteger(
+        mCarModeKeepsScreenOn = (res.getInteger(
                 com.android.internal.R.integer.config_carDockKeepsScreenOn) == 1);
-        mDeskModeKeepsScreenOn = (context.getResources().getInteger(
+        mDeskModeKeepsScreenOn = (res.getInteger(
                 com.android.internal.R.integer.config_deskDockKeepsScreenOn) == 1);
-        mTelevision = context.getPackageManager().hasSystemFeature(
-                PackageManager.FEATURE_TELEVISION) ||
-            context.getPackageManager().hasSystemFeature(
-                    PackageManager.FEATURE_LEANBACK);
-        mWatch = context.getPackageManager().hasSystemFeature(PackageManager.FEATURE_WATCH);
 
+        final PackageManager pm = context.getPackageManager();
+        mTelevision = pm.hasSystemFeature(PackageManager.FEATURE_TELEVISION)
+                || pm.hasSystemFeature(PackageManager.FEATURE_LEANBACK);
+        mWatch = pm.hasSystemFeature(PackageManager.FEATURE_WATCH);
+
+        final int defaultNightMode = res.getInteger(
+                com.android.internal.R.integer.config_defaultNightMode);
         mNightMode = Settings.Secure.getInt(context.getContentResolver(),
-                Settings.Secure.UI_NIGHT_MODE, UiModeManager.MODE_NIGHT_AUTO);
+                Settings.Secure.UI_NIGHT_MODE, defaultNightMode);
 
-        mTwilightManager.registerListener(mTwilightListener, mHandler);
+        // Update the initial, static configurations.
+        synchronized (this) {
+            updateConfigurationLocked();
+            sendConfigurationLocked();
+        }
 
         publishBinderService(Context.UI_MODE_SERVICE, mService);
     }
@@ -245,7 +253,7 @@ final class UiModeManagerService extends SystemService {
             final long ident = Binder.clearCallingIdentity();
             try {
                 synchronized (mLock) {
-                    if (isDoingNightModeLocked() && mNightMode != mode) {
+                    if (mNightMode != mode) {
                         Settings.Secure.putInt(getContext().getContentResolver(),
                                 Settings.Secure.UI_NIGHT_MODE, mode);
                         mNightMode = mode;
@@ -292,8 +300,11 @@ final class UiModeManagerService extends SystemService {
                     pw.print(" mSetUiMode=0x"); pw.println(Integer.toHexString(mSetUiMode));
             pw.print("  mHoldingConfiguration="); pw.print(mHoldingConfiguration);
                     pw.print(" mSystemReady="); pw.println(mSystemReady);
-            pw.print("  mTwilightService.getCurrentState()=");
-                    pw.println(mTwilightManager.getCurrentState());
+            if (mTwilightManager != null) {
+                // We may not have a TwilightManager.
+                pw.print("  mTwilightService.getCurrentState()=");
+                pw.println(mTwilightManager.getCurrentState());
+            }
         }
     }
 
@@ -301,16 +312,16 @@ final class UiModeManagerService extends SystemService {
     public void onBootPhase(int phase) {
         if (phase == SystemService.PHASE_SYSTEM_SERVICES_READY) {
             synchronized (mLock) {
+                mTwilightManager = getLocalService(TwilightManager.class);
+                if (mTwilightManager != null) {
+                    mTwilightManager.registerListener(mTwilightListener, mHandler);
+                }
                 mSystemReady = true;
                 mCarModeEnabled = mDockState == Intent.EXTRA_DOCK_STATE_CAR;
                 updateComputedNightModeLocked();
                 updateLocked(0, 0);
             }
         }
-    }
-
-    boolean isDoingNightModeLocked() {
-        return mCarModeEnabled || mDockState != Intent.EXTRA_DOCK_STATE_UNDOCKED;
     }
 
     void setCarModeLocked(boolean enabled, int flags) {
@@ -354,17 +365,13 @@ final class UiModeManagerService extends SystemService {
         } else if (isDeskDockState(mDockState)) {
             uiMode = Configuration.UI_MODE_TYPE_DESK;
         }
-        if (mCarModeEnabled) {
-            if (mNightMode == UiModeManager.MODE_NIGHT_AUTO) {
-                updateComputedNightModeLocked();
-                uiMode |= mComputedNightMode ? Configuration.UI_MODE_NIGHT_YES
-                        : Configuration.UI_MODE_NIGHT_NO;
-            } else {
-                uiMode |= mNightMode << 4;
-            }
+
+        if (mNightMode == UiModeManager.MODE_NIGHT_AUTO) {
+            updateComputedNightModeLocked();
+            uiMode |= mComputedNightMode ? Configuration.UI_MODE_NIGHT_YES
+                    : Configuration.UI_MODE_NIGHT_NO;
         } else {
-            // Disabling the car mode clears the night mode.
-            uiMode = (uiMode & ~Configuration.UI_MODE_NIGHT_MASK) | Configuration.UI_MODE_NIGHT_NO;
+            uiMode |= mNightMode << 4;
         }
 
         if (LOG) {
@@ -594,21 +601,22 @@ final class UiModeManagerService extends SystemService {
             if (mCarModeEnabled) {
                 Intent carModeOffIntent = new Intent(context, DisableCarModeActivity.class);
 
-                Notification n = new Notification();
-                n.icon = R.drawable.stat_notify_car_mode;
-                n.defaults = Notification.DEFAULT_LIGHTS;
-                n.flags = Notification.FLAG_ONGOING_EVENT;
-                n.when = 0;
-                n.color = context.getResources().getColor(
-                        com.android.internal.R.color.system_notification_accent_color);
-                n.setLatestEventInfo(
-                        context,
-                        context.getString(R.string.car_mode_disable_notification_title),
-                        context.getString(R.string.car_mode_disable_notification_message),
-                        PendingIntent.getActivityAsUser(context, 0, carModeOffIntent, 0,
-                                null, UserHandle.CURRENT));
+                Notification.Builder n = new Notification.Builder(context)
+                        .setSmallIcon(R.drawable.stat_notify_car_mode)
+                        .setDefaults(Notification.DEFAULT_LIGHTS)
+                        .setOngoing(true)
+                        .setWhen(0)
+                        .setColor(context.getColor(
+                                com.android.internal.R.color.system_notification_accent_color))
+                        .setContentTitle(
+                                context.getString(R.string.car_mode_disable_notification_title))
+                        .setContentText(
+                                context.getString(R.string.car_mode_disable_notification_message))
+                        .setContentIntent(
+                                PendingIntent.getActivityAsUser(context, 0, carModeOffIntent, 0,
+                                        null, UserHandle.CURRENT));
                 mNotificationManager.notifyAsUser(null,
-                        R.string.car_mode_disable_notification_title, n, UserHandle.ALL);
+                        R.string.car_mode_disable_notification_title, n.build(), UserHandle.ALL);
             } else {
                 mNotificationManager.cancelAsUser(null,
                         R.string.car_mode_disable_notification_title, UserHandle.ALL);
@@ -618,7 +626,7 @@ final class UiModeManagerService extends SystemService {
 
     void updateTwilight() {
         synchronized (mLock) {
-            if (isDoingNightModeLocked() && mNightMode == UiModeManager.MODE_NIGHT_AUTO) {
+            if (mNightMode == UiModeManager.MODE_NIGHT_AUTO) {
                 updateComputedNightModeLocked();
                 updateLocked(0, 0);
             }
@@ -626,9 +634,11 @@ final class UiModeManagerService extends SystemService {
     }
 
     private void updateComputedNightModeLocked() {
-        TwilightState state = mTwilightManager.getCurrentState();
-        if (state != null) {
-            mComputedNightMode = state.isNight();
+        if (mTwilightManager != null) {
+            TwilightState state = mTwilightManager.getCurrentState();
+            if (state != null) {
+                mComputedNightMode = state.isNight();
+            }
         }
     }
 

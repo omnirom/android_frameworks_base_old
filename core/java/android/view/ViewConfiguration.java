@@ -213,6 +213,11 @@ public class ViewConfiguration {
     private static final int OVERFLING_DISTANCE = 6;
 
     /**
+     * Default duration to hide an action mode for.
+     */
+    private static final long ACTION_MODE_HIDE_DURATION_DEFAULT = 2000;
+
+    /**
      * Configuration values for overriding {@link #hasPermanentMenuKey()} behavior.
      * These constants must match the definition in res/values/config.xml.
      */
@@ -729,6 +734,13 @@ public class ViewConfiguration {
      */
     public static float getScrollFriction() {
         return SCROLL_FRICTION;
+    }
+
+    /**
+     * @return the default duration in milliseconds for {@link ActionMode#hide(long)}.
+     */
+    public static long getDefaultActionModeHideDuration() {
+        return ACTION_MODE_HIDE_DURATION_DEFAULT;
     }
 
     /**

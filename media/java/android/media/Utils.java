@@ -26,8 +26,6 @@ import java.util.Arrays;
 import java.util.Comparator;
 import java.util.Vector;
 
-import static com.android.internal.util.Preconditions.checkNotNull;
-
 // package private
 class Utils {
     private static final String TAG = "Utils";
@@ -211,6 +209,9 @@ class Utils {
     }
 
     static int parseIntSafely(Object o, int fallback) {
+        if (o == null) {
+            return fallback;
+        }
         try {
             String s = (String)o;
             return Integer.parseInt(s);

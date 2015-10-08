@@ -16,6 +16,12 @@
 
 package com.android.commands.pm;
 
+import static android.content.pm.PackageManager.INTENT_FILTER_DOMAIN_VERIFICATION_STATUS_UNDEFINED;
+import static android.content.pm.PackageManager.INTENT_FILTER_DOMAIN_VERIFICATION_STATUS_ASK;
+import static android.content.pm.PackageManager.INTENT_FILTER_DOMAIN_VERIFICATION_STATUS_ALWAYS;
+import static android.content.pm.PackageManager.INTENT_FILTER_DOMAIN_VERIFICATION_STATUS_ALWAYS_ASK;
+import static android.content.pm.PackageManager.INTENT_FILTER_DOMAIN_VERIFICATION_STATUS_NEVER;
+
 import android.app.ActivityManager;
 import android.app.ActivityManagerNative;
 import android.app.IActivityManager;
@@ -48,19 +54,20 @@ import android.net.Uri;
 import android.os.Build;
 import android.os.Bundle;
 import android.os.IUserManager;
-import android.os.Process;
 import android.os.RemoteException;
 import android.os.ServiceManager;
+import android.os.SystemClock;
 import android.os.UserHandle;
 import android.os.UserManager;
 import android.text.TextUtils;
+import android.text.format.DateUtils;
 import android.util.Log;
+
+import libcore.io.IoUtils;
 
 import com.android.internal.content.PackageHelper;
 import com.android.internal.util.ArrayUtils;
 import com.android.internal.util.SizedInputStream;
-
-import libcore.io.IoUtils;
 
 import java.io.File;
 import java.io.FileDescriptor;
@@ -203,8 +210,20 @@ public final class Pm {
             return runGrantRevokePermission(false);
         }
 
+        if ("reset-permissions".equals(op)) {
+            return runResetPermissions();
+        }
+
         if ("set-permission-enforced".equals(op)) {
             return runSetPermissionEnforced();
+        }
+
+        if ("set-app-link".equals(op)) {
+            return runSetAppLink();
+        }
+
+        if ("get-app-link".equals(op)) {
+            return runGetAppLink();
         }
 
         if ("set-install-location".equals(op)) {
@@ -233,6 +252,14 @@ public final class Pm {
 
         if ("force-dex-opt".equals(op)) {
             return runForceDexOpt();
+        }
+
+        if ("move-package".equals(op)) {
+            return runMovePackage();
+        }
+
+        if ("move-primary-storage".equals(op)) {
+            return runMovePrimaryStorage();
         }
 
         try {
@@ -549,7 +576,10 @@ public final class Pm {
         if (res != 0) {
             Resources r = getResources(pii);
             if (r != null) {
-                return r.getString(res);
+                try {
+                    return r.getString(res);
+                } catch (Resources.NotFoundException e) {
+                }
             }
         }
         return null;
@@ -811,6 +841,153 @@ public final class Pm {
         return Integer.toString(result);
     }
 
+    // pm set-app-link [--user USER_ID] PACKAGE {always|ask|always-ask|never|undefined}
+    private int runSetAppLink() {
+        int userId = UserHandle.USER_OWNER;
+
+        String opt;
+        while ((opt = nextOption()) != null) {
+            if (opt.equals("--user")) {
+                userId = Integer.parseInt(nextOptionData());
+                if (userId < 0) {
+                    System.err.println("Error: user must be >= 0");
+                    return 1;
+                }
+            } else {
+                System.err.println("Error: unknown option: " + opt);
+                showUsage();
+                return 1;
+            }
+        }
+
+        // Package name to act on; required
+        final String pkg = nextArg();
+        if (pkg == null) {
+            System.err.println("Error: no package specified.");
+            showUsage();
+            return 1;
+        }
+
+        // State to apply; {always|ask|never|undefined}, required
+        final String modeString = nextArg();
+        if (modeString == null) {
+            System.err.println("Error: no app link state specified.");
+            showUsage();
+            return 1;
+        }
+
+        final int newMode;
+        switch (modeString.toLowerCase()) {
+            case "undefined":
+                newMode = INTENT_FILTER_DOMAIN_VERIFICATION_STATUS_UNDEFINED;
+                break;
+
+            case "always":
+                newMode = INTENT_FILTER_DOMAIN_VERIFICATION_STATUS_ALWAYS;
+                break;
+
+            case "ask":
+                newMode = INTENT_FILTER_DOMAIN_VERIFICATION_STATUS_ASK;
+                break;
+
+            case "always-ask":
+                newMode = INTENT_FILTER_DOMAIN_VERIFICATION_STATUS_ALWAYS_ASK;
+                break;
+
+            case "never":
+                newMode = INTENT_FILTER_DOMAIN_VERIFICATION_STATUS_NEVER;
+                break;
+
+            default:
+                System.err.println("Error: unknown app link state '" + modeString + "'");
+                return 1;
+        }
+
+        try {
+            final PackageInfo info = mPm.getPackageInfo(pkg, 0, userId);
+            if (info == null) {
+                System.err.println("Error: package " + pkg + " not found.");
+                return 1;
+            }
+
+            if ((info.applicationInfo.privateFlags & ApplicationInfo.PRIVATE_FLAG_HAS_DOMAIN_URLS) == 0) {
+                System.err.println("Error: package " + pkg + " does not handle web links.");
+                return 1;
+            }
+
+            if (!mPm.updateIntentVerificationStatus(pkg, newMode, userId)) {
+                System.err.println("Error: unable to update app link status for " + pkg);
+                return 1;
+            }
+        } catch (Exception e) {
+            System.err.println(e.toString());
+            System.err.println(PM_NOT_RUNNING_ERR);
+            return 1;
+        }
+
+        return 0;
+    }
+
+    // pm get-app-link [--user USER_ID] PACKAGE
+    private int runGetAppLink() {
+        int userId = UserHandle.USER_OWNER;
+
+        String opt;
+        while ((opt = nextOption()) != null) {
+            if (opt.equals("--user")) {
+                userId = Integer.parseInt(nextOptionData());
+                if (userId < 0) {
+                    System.err.println("Error: user must be >= 0");
+                    return 1;
+                }
+            } else {
+                System.err.println("Error: unknown option: " + opt);
+                showUsage();
+                return 1;
+            }
+        }
+
+        // Package name to act on; required
+        final String pkg = nextArg();
+        if (pkg == null) {
+            System.err.println("Error: no package specified.");
+            showUsage();
+            return 1;
+        }
+
+        try {
+            final PackageInfo info = mPm.getPackageInfo(pkg, 0, userId);
+            if (info == null) {
+                System.err.println("Error: package " + pkg + " not found.");
+                return 1;
+            }
+
+            if ((info.applicationInfo.privateFlags & ApplicationInfo.PRIVATE_FLAG_HAS_DOMAIN_URLS) == 0) {
+                System.err.println("Error: package " + pkg + " does not handle web links.");
+                return 1;
+            }
+
+            System.out.println(linkStateToString(mPm.getIntentVerificationStatus(pkg, userId)));
+        } catch (Exception e) {
+            System.err.println(e.toString());
+            System.err.println(PM_NOT_RUNNING_ERR);
+            return 1;
+        }
+
+        return 0;
+    }
+
+    private String linkStateToString(int state) {
+        switch (state) {
+            case INTENT_FILTER_DOMAIN_VERIFICATION_STATUS_UNDEFINED: return "undefined";
+            case INTENT_FILTER_DOMAIN_VERIFICATION_STATUS_ASK: return "ask";
+            case INTENT_FILTER_DOMAIN_VERIFICATION_STATUS_ALWAYS: return "always";
+            case INTENT_FILTER_DOMAIN_VERIFICATION_STATUS_NEVER: return "never";
+            case INTENT_FILTER_DOMAIN_VERIFICATION_STATUS_ALWAYS_ASK : return "always ask";
+        }
+        return "Unknown link state: " + state;
+    }
+
     private int runSetInstallLocation() {
         int loc;
 
@@ -890,6 +1067,8 @@ public final class Pm {
                 installFlags |= PackageManager.INSTALL_INTERNAL;
             } else if (opt.equals("-d")) {
                 installFlags |= PackageManager.INSTALL_ALLOW_DOWNGRADE;
+            } else if (opt.equals("-g")) {
+                installFlags |= PackageManager.INSTALL_GRANT_RUNTIME_PERMISSIONS;
             } else if (opt.equals("--originating-uri")) {
                 originatingUriString = nextOptionData();
                 if (originatingUriString == null) {
@@ -1007,6 +1186,8 @@ public final class Pm {
                 params.installFlags |= PackageManager.INSTALL_INTERNAL;
             } else if (opt.equals("-d")) {
                 params.installFlags |= PackageManager.INSTALL_ALLOW_DOWNGRADE;
+            } else if (opt.equals("-g")) {
+                params.installFlags |= PackageManager.INSTALL_GRANT_RUNTIME_PERMISSIONS;
             } else if (opt.equals("--originating-uri")) {
                 params.originatingUri = Uri.parse(nextOptionData());
             } else if (opt.equals("--referrer")) {
@@ -1023,6 +1204,14 @@ public final class Pm {
                 params.abiOverride = checkAbiArgument(nextOptionData());
             } else if (opt.equals("--user")) {
                 userId = Integer.parseInt(nextOptionData());
+            } else if (opt.equals("--install-location")) {
+                params.installLocation = Integer.parseInt(nextOptionData());
+            } else if (opt.equals("--force-uuid")) {
+                params.installFlags |= PackageManager.INSTALL_FORCE_VOLUME_UUID;
+                params.volumeUuid = nextOptionData();
+                if ("internal".equals(params.volumeUuid)) {
+                    params.volumeUuid = null;
+                }
             } else {
                 throw new IllegalArgumentException("Unknown option " + opt);
             }
@@ -1274,6 +1463,61 @@ public final class Pm {
         }
     }
 
+    public int runMovePackage() {
+        final String packageName = nextArg();
+        String volumeUuid = nextArg();
+        if ("internal".equals(volumeUuid)) {
+            volumeUuid = null;
+        }
+
+        try {
+            final int moveId = mPm.movePackage(packageName, volumeUuid);
+
+            int status = mPm.getMoveStatus(moveId);
+            while (!PackageManager.isMoveStatusFinished(status)) {
+                SystemClock.sleep(DateUtils.SECOND_IN_MILLIS);
+                status = mPm.getMoveStatus(moveId);
+            }
+
+            if (status == PackageManager.MOVE_SUCCEEDED) {
+                System.out.println("Success");
+                return 0;
+            } else {
+                System.err.println("Failure [" + status + "]");
+                return 1;
+            }
+        } catch (RemoteException e) {
+            throw e.rethrowAsRuntimeException();
+        }
+    }
+
+    public int runMovePrimaryStorage() {
+        String volumeUuid = nextArg();
+        if ("internal".equals(volumeUuid)) {
+            volumeUuid = null;
+        }
+
+        try {
+            final int moveId = mPm.movePrimaryStorage(volumeUuid);
+
+            int status = mPm.getMoveStatus(moveId);
+            while (!PackageManager.isMoveStatusFinished(status)) {
+                SystemClock.sleep(DateUtils.SECOND_IN_MILLIS);
+                status = mPm.getMoveStatus(moveId);
+            }
+
+            if (status == PackageManager.MOVE_SUCCEEDED) {
+                System.out.println("Success");
+                return 0;
+            } else {
+                System.err.println("Failure [" + status + "]");
+                return 1;
+            }
+        } catch (RemoteException e) {
+            throw e.rethrowAsRuntimeException();
+        }
+    }
+
     private int runUninstall() throws RemoteException {
         int flags = 0;
         int userId = UserHandle.USER_ALL;
@@ -1331,7 +1575,8 @@ public final class Pm {
         }
 
         final LocalIntentReceiver receiver = new LocalIntentReceiver();
-        mInstaller.uninstall(pkg, flags, receiver.getIntentSender(), userId);
+        mInstaller.uninstall(pkg, null /* callerPackageName */, flags,
+                receiver.getIntentSender(), userId);
 
         final Intent result = receiver.getResult();
         final int status = result.getIntExtra(PackageInstaller.EXTRA_STATUS,
@@ -1515,6 +1760,15 @@ public final class Pm {
     }
 
     private int runGrantRevokePermission(boolean grant) {
+        int userId = UserHandle.USER_OWNER;
+
+        String opt = null;
+        while ((opt = nextOption()) != null) {
+            if (opt.equals("--user")) {
+                userId = Integer.parseInt(nextArg());
+            }
+        }
+
         String pkg = nextArg();
         if (pkg == null) {
             System.err.println("Error: no package specified");
@@ -1527,12 +1781,31 @@ public final class Pm {
             showUsage();
             return 1;
         }
+
         try {
             if (grant) {
-                mPm.grantPermission(pkg, perm);
+                mPm.grantRuntimePermission(pkg, perm, userId);
             } else {
-                mPm.revokePermission(pkg, perm);
+                mPm.revokeRuntimePermission(pkg, perm, userId);
             }
+            return 0;
+        } catch (RemoteException e) {
+            System.err.println(e.toString());
+            System.err.println(PM_NOT_RUNNING_ERR);
+            return 1;
+        } catch (IllegalArgumentException e) {
+            System.err.println("Bad argument: " + e.toString());
+            showUsage();
+            return 1;
+        } catch (SecurityException e) {
+            System.err.println("Operation not allowed: " + e.toString());
+            return 1;
+        }
+    }
+
+    private int runResetPermissions() {
+        try {
+            mPm.resetRuntimePermissions();
             return 0;
         } catch (RemoteException e) {
             System.err.println(e.toString());
@@ -1626,9 +1899,13 @@ public final class Pm {
             showUsage();
             return 1;
         }
+        String volumeUuid = nextArg();
+        if ("internal".equals(volumeUuid)) {
+            volumeUuid = null;
+        }
         ClearDataObserver obs = new ClearDataObserver();
         try {
-            mPm.freeStorageAndNotify(sizeVal, obs);
+            mPm.freeStorageAndNotify(volumeUuid, sizeVal, obs);
             synchronized (obs) {
                 while (!obs.finished) {
                     try {
@@ -1720,7 +1997,7 @@ public final class Pm {
         private IIntentSender.Stub mLocalSender = new IIntentSender.Stub() {
             @Override
             public int send(int code, Intent intent, String resolvedType,
-                    IIntentReceiver finishedReceiver, String requiredPermission) {
+                    IIntentReceiver finishedReceiver, String requiredPermission, Bundle options) {
                 try {
                     mResult.offer(intent, 5, TimeUnit.SECONDS);
                 } catch (InterruptedException e) {
@@ -1799,13 +2076,17 @@ public final class Pm {
         System.err.println("       pm list users");
         System.err.println("       pm path PACKAGE");
         System.err.println("       pm dump PACKAGE");
-        System.err.println("       pm install [-lrtsfd] [-i PACKAGE] [PATH]");
+        System.err.println("       pm install [-lrtsfd] [-i PACKAGE] [--user USER_ID] [PATH]");
         System.err.println("       pm install-create [-lrtsfdp] [-i PACKAGE] [-S BYTES]");
+        System.err.println("               [--install-location 0/1/2]");
+        System.err.println("               [--force-uuid internal|UUID]");
         System.err.println("       pm install-write [-S BYTES] SESSION_ID SPLIT_NAME [PATH]");
         System.err.println("       pm install-commit SESSION_ID");
         System.err.println("       pm install-abandon SESSION_ID");
         System.err.println("       pm uninstall [-k] [--user USER_ID] PACKAGE");
         System.err.println("       pm set-installer PACKAGE INSTALLER");
+        System.err.println("       pm move-package PACKAGE [internal|UUID]");
+        System.err.println("       pm move-primary-storage [internal|UUID]");
         System.err.println("       pm clear [--user USER_ID] PACKAGE");
         System.err.println("       pm enable [--user USER_ID] PACKAGE_OR_COMPONENT");
         System.err.println("       pm disable [--user USER_ID] PACKAGE_OR_COMPONENT");
@@ -1813,12 +2094,15 @@ public final class Pm {
         System.err.println("       pm disable-until-used [--user USER_ID] PACKAGE_OR_COMPONENT");
         System.err.println("       pm hide [--user USER_ID] PACKAGE_OR_COMPONENT");
         System.err.println("       pm unhide [--user USER_ID] PACKAGE_OR_COMPONENT");
-        System.err.println("       pm grant PACKAGE PERMISSION");
-        System.err.println("       pm revoke PACKAGE PERMISSION");
+        System.err.println("       pm grant [--user USER_ID] PACKAGE PERMISSION");
+        System.err.println("       pm revoke [--user USER_ID] PACKAGE PERMISSION");
+        System.err.println("       pm reset-permissions");
+        System.err.println("       pm set-app-link [--user USER_ID] PACKAGE {always|ask|never|undefined}");
+        System.err.println("       pm get-app-link [--user USER_ID] PACKAGE");
         System.err.println("       pm set-install-location [0/auto] [1/internal] [2/external]");
         System.err.println("       pm get-install-location");
         System.err.println("       pm set-permission-enforced PERMISSION [true|false]");
-        System.err.println("       pm trim-caches DESIRED_FREE_SPACE");
+        System.err.println("       pm trim-caches DESIRED_FREE_SPACE [internal|UUID]");
         System.err.println("       pm create-user [--profileOf USER_ID] [--managed] USER_NAME");
         System.err.println("       pm remove-user USER_ID");
         System.err.println("       pm get-max-users");
@@ -1866,6 +2150,7 @@ public final class Pm {
         System.err.println("    -f: install application on internal flash");
         System.err.println("    -d: allow version code downgrade");
         System.err.println("    -p: partial application install");
+        System.err.println("    -g: grant all runtime permissions");
         System.err.println("    -S: size in bytes of entire session");
         System.err.println("");
         System.err.println("pm install-write: write a package into existing session; path may");
@@ -1887,8 +2172,11 @@ public final class Pm {
         System.err.println("  as \"package/class\").");
         System.err.println("");
         System.err.println("pm grant, revoke: these commands either grant or revoke permissions");
-        System.err.println("  to applications.  Only optional permissions the application has");
-        System.err.println("  declared can be granted or revoked.");
+        System.err.println("    to apps. The permissions must be declared as used in the app's");
+        System.err.println("    manifest, be runtime permissions (protection level dangerous),");
+        System.err.println("    and the app targeting SDK greater than Lollipop MR1.");
+        System.err.println("");
+        System.err.println("pm reset-permissions: revert all runtime permissions to their default state.");
         System.err.println("");
         System.err.println("pm get-install-location: returns the current install location.");
         System.err.println("    0 [auto]: Let system decide the best location");

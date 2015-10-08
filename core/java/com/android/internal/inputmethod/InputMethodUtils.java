@@ -22,9 +22,10 @@ import android.app.AppOpsManager;
 import android.content.ContentResolver;
 import android.content.Context;
 import android.content.pm.ApplicationInfo;
+import android.content.pm.IPackageManager;
 import android.content.pm.PackageManager;
-import android.content.pm.PackageManager.NameNotFoundException;
 import android.content.res.Resources;
+import android.os.RemoteException;
 import android.provider.Settings;
 import android.provider.Settings.SettingNotFoundException;
 import android.text.TextUtils;
@@ -34,6 +35,8 @@ import android.view.inputmethod.InputMethodInfo;
 import android.view.inputmethod.InputMethodSubtype;
 import android.view.textservice.SpellCheckerInfo;
 import android.view.textservice.TextServicesManager;
+
+import com.android.internal.annotations.VisibleForTesting;
 
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -118,19 +121,7 @@ public class InputMethodUtils {
                 & ApplicationInfo.FLAG_SYSTEM) != 0;
     }
 
-    /**
-     * @deprecated Use {@link #isSystemImeThatHasSubtypeOf(InputMethodInfo, Context, boolean,
-     * Locale, boolean, String)} instead.
-     */
-    @Deprecated
-    public static boolean isSystemImeThatHasEnglishKeyboardSubtype(InputMethodInfo imi) {
-        if (!isSystemIme(imi)) {
-            return false;
-        }
-        return containsSubtypeOf(imi, ENGLISH_LOCALE.getLanguage(), SUBTYPE_MODE_KEYBOARD);
-    }
-
-    private static boolean isSystemImeThatHasSubtypeOf(final InputMethodInfo imi,
+    public static boolean isSystemImeThatHasSubtypeOf(final InputMethodInfo imi,
             final Context context, final boolean checkDefaultAttribute,
             @Nullable final Locale requiredLocale, final boolean checkCountry,
             final String requiredSubtypeMode) {
@@ -380,33 +371,30 @@ public class InputMethodUtils {
                 .build();
     }
 
-    /**
-     * @deprecated Use {@link #isSystemImeThatHasSubtypeOf(InputMethodInfo, Context, boolean,
-     * Locale, boolean, String)} instead.
-     */
-    @Deprecated
-    public static boolean isValidSystemDefaultIme(
-            boolean isSystemReady, InputMethodInfo imi, Context context) {
-        if (!isSystemReady) {
-            return false;
+    public static Locale constructLocaleFromString(String localeStr) {
+        if (TextUtils.isEmpty(localeStr)) {
+            return null;
         }
-        if (!isSystemIme(imi)) {
-            return false;
-        }
-        if (imi.getIsDefaultResourceId() != 0) {
-            try {
-                if (imi.isDefault(context) && containsSubtypeOf(
-                        imi, context.getResources().getConfiguration().locale.getLanguage(),
-                        SUBTYPE_MODE_ANY)) {
-                    return true;
-                }
-            } catch (Resources.NotFoundException ex) {
+        // TODO: Use {@link Locale#toLanguageTag()} and {@link Locale#forLanguageTag(languageTag)}.
+        String[] localeParams = localeStr.split("_", 3);
+        // The length of localeStr is guaranteed to always return a 1 <= value <= 3
+        // because localeStr is not empty.
+        if (localeParams.length == 1) {
+            if (localeParams.length >= 1 && "tl".equals(localeParams[0])) {
+                // Convert a locale whose language is "tl" to one whose language is "fil".
+                // For example, "tl_PH" will get converted to "fil_PH".
+                // Versions of Android earlier than Lollipop did not support three letter language
+                // codes, and used "tl" (Tagalog) as the language string for "fil" (Filipino).
+                // On Lollipop and above, the current three letter version must be used.
+                localeParams[0] = "fil";
             }
+            return new Locale(localeParams[0]);
+        } else if (localeParams.length == 2) {
+            return new Locale(localeParams[0], localeParams[1]);
+        } else if (localeParams.length == 3) {
+            return new Locale(localeParams[0], localeParams[1], localeParams[2]);
         }
-        if (imi.getSubtypeCount() == 0) {
-            Slog.w(TAG, "Found no subtypes in a system IME: " + imi.getPackageName());
-        }
-        return false;
+        return null;
     }
 
     public static boolean containsSubtypeOf(final InputMethodInfo imi,
@@ -418,36 +406,18 @@ public class InputMethodUtils {
         for (int i = 0; i < N; ++i) {
             final InputMethodSubtype subtype = imi.getSubtypeAt(i);
             if (checkCountry) {
-                // TODO: Use {@link Locale#toLanguageTag()} and
-                // {@link Locale#forLanguageTag(languageTag)} instead.
-                if (!TextUtils.equals(subtype.getLocale(), locale.toString())) {
+                final Locale subtypeLocale = subtype.getLocaleObject();
+                if (subtypeLocale == null ||
+                        !TextUtils.equals(subtypeLocale.getLanguage(), locale.getLanguage()) ||
+                        !TextUtils.equals(subtypeLocale.getCountry(), locale.getCountry())) {
                     continue;
                 }
             } else {
                 final Locale subtypeLocale = new Locale(getLanguageFromLocaleString(
                         subtype.getLocale()));
-                if (!subtypeLocale.getLanguage().equals(locale.getLanguage())) {
+                if (!TextUtils.equals(subtypeLocale.getLanguage(), locale.getLanguage())) {
                     continue;
                 }
-            }
-            if (mode == SUBTYPE_MODE_ANY || TextUtils.isEmpty(mode) ||
-                    mode.equalsIgnoreCase(subtype.getMode())) {
-                return true;
-            }
-        }
-        return false;
-    }
-
-    /**
-     * @deprecated Use {@link #containsSubtypeOf(InputMethodInfo, Locale, boolean, String)} instead.
-     */
-    @Deprecated
-    public static boolean containsSubtypeOf(InputMethodInfo imi, String language, String mode) {
-        final int N = imi.getSubtypeCount();
-        for (int i = 0; i < N; ++i) {
-            final InputMethodSubtype subtype = imi.getSubtypeAt(i);
-            if (!subtype.getLocale().startsWith(language)) {
-                continue;
             }
             if (mode == SUBTYPE_MODE_ANY || TextUtils.isEmpty(mode) ||
                     mode.equalsIgnoreCase(subtype.getMode())) {
@@ -489,12 +459,15 @@ public class InputMethodUtils {
         while (i > 0) {
             i--;
             final InputMethodInfo imi = enabledImes.get(i);
-            if (InputMethodUtils.isSystemImeThatHasEnglishKeyboardSubtype(imi)
-                    && !imi.isAuxiliaryIme()) {
+            if (imi.isAuxiliaryIme()) {
+                continue;
+            }
+            if (InputMethodUtils.isSystemIme(imi)
+                    && containsSubtypeOf(imi, ENGLISH_LOCALE, false /* checkCountry */,
+                            SUBTYPE_MODE_KEYBOARD)) {
                 return imi;
             }
-            if (firstFoundSystemIme < 0 && InputMethodUtils.isSystemIme(imi)
-                    && !imi.isAuxiliaryIme()) {
+            if (firstFoundSystemIme < 0 && InputMethodUtils.isSystemIme(imi)) {
                 firstFoundSystemIme = i;
             }
         }
@@ -518,7 +491,8 @@ public class InputMethodUtils {
         return NOT_A_SUBTYPE_ID;
     }
 
-    private static ArrayList<InputMethodSubtype> getImplicitlyApplicableSubtypesLocked(
+    @VisibleForTesting
+    public static ArrayList<InputMethodSubtype> getImplicitlyApplicableSubtypesLocked(
             Resources res, InputMethodInfo imi) {
         final List<InputMethodSubtype> subtypes = InputMethodUtils.getSubtypes(imi);
         final String systemLocale = res.getConfiguration().locale.toString();
@@ -673,7 +647,8 @@ public class InputMethodUtils {
     }
 
     public static void setNonSelectedSystemImesDisabledUntilUsed(
-            PackageManager packageManager, List<InputMethodInfo> enabledImis) {
+            IPackageManager packageManager, List<InputMethodInfo> enabledImis,
+            int userId, String callingPackage) {
         if (DEBUG) {
             Slog.d(TAG, "setNonSelectedSystemImesDisabledUntilUsed");
         }
@@ -712,9 +687,11 @@ public class InputMethodUtils {
             ApplicationInfo ai = null;
             try {
                 ai = packageManager.getApplicationInfo(packageName,
-                        PackageManager.GET_DISABLED_UNTIL_USED_COMPONENTS);
-            } catch (NameNotFoundException e) {
-                Slog.w(TAG, "NameNotFoundException: " + packageName, e);
+                        PackageManager.GET_DISABLED_UNTIL_USED_COMPONENTS, userId);
+            } catch (RemoteException e) {
+                Slog.w(TAG, "getApplicationInfo failed. packageName=" + packageName
+                        + " userId=" + userId, e);
+                continue;
             }
             if (ai == null) {
                 // No app found for packageName
@@ -724,19 +701,34 @@ public class InputMethodUtils {
             if (!isSystemPackage) {
                 continue;
             }
-            setDisabledUntilUsed(packageManager, packageName);
+            setDisabledUntilUsed(packageManager, packageName, userId, callingPackage);
         }
     }
 
-    private static void setDisabledUntilUsed(PackageManager packageManager, String packageName) {
-        final int state = packageManager.getApplicationEnabledSetting(packageName);
+    private static void setDisabledUntilUsed(IPackageManager packageManager, String packageName,
+            int userId, String callingPackage) {
+        final int state;
+        try {
+            state = packageManager.getApplicationEnabledSetting(packageName, userId);
+        } catch (RemoteException e) {
+            Slog.w(TAG, "getApplicationEnabledSetting failed. packageName=" + packageName
+                    + " userId=" + userId, e);
+            return;
+        }
         if (state == PackageManager.COMPONENT_ENABLED_STATE_DEFAULT
                 || state == PackageManager.COMPONENT_ENABLED_STATE_ENABLED) {
             if (DEBUG) {
                 Slog.d(TAG, "Update state(" + packageName + "): DISABLED_UNTIL_USED");
             }
-            packageManager.setApplicationEnabledSetting(packageName,
-                    PackageManager.COMPONENT_ENABLED_STATE_DISABLED_UNTIL_USED, 0);
+            try {
+                packageManager.setApplicationEnabledSetting(packageName,
+                        PackageManager.COMPONENT_ENABLED_STATE_DISABLED_UNTIL_USED,
+                        0 /* newState */, userId, callingPackage);
+            } catch (RemoteException e) {
+                Slog.w(TAG, "setApplicationEnabledSetting failed. packageName=" + packageName
+                        + " userId=" + userId + " callingPackage=" + callingPackage, e);
+                return;
+            }
         } else {
             if (DEBUG) {
                 Slog.d(TAG, packageName + " is already DISABLED_UNTIL_USED");
@@ -799,15 +791,53 @@ public class InputMethodUtils {
         private int[] mCurrentProfileIds = new int[0];
 
         private static void buildEnabledInputMethodsSettingString(
-                StringBuilder builder, Pair<String, ArrayList<String>> pair) {
-            String id = pair.first;
-            ArrayList<String> subtypes = pair.second;
-            builder.append(id);
+                StringBuilder builder, Pair<String, ArrayList<String>> ime) {
+            builder.append(ime.first);
             // Inputmethod and subtypes are saved in the settings as follows:
             // ime0;subtype0;subtype1:ime1;subtype0:ime2:ime3;subtype0;subtype1
-            for (String subtypeId: subtypes) {
+            for (String subtypeId: ime.second) {
                 builder.append(INPUT_METHOD_SUBTYPE_SEPARATER).append(subtypeId);
             }
+        }
+
+        public static String buildInputMethodsSettingString(
+                List<Pair<String, ArrayList<String>>> allImeSettingsMap) {
+            final StringBuilder b = new StringBuilder();
+            boolean needsSeparator = false;
+            for (Pair<String, ArrayList<String>> ime : allImeSettingsMap) {
+                if (needsSeparator) {
+                    b.append(INPUT_METHOD_SEPARATER);
+                }
+                buildEnabledInputMethodsSettingString(b, ime);
+                needsSeparator = true;
+            }
+            return b.toString();
+        }
+
+        public static List<Pair<String, ArrayList<String>>> buildInputMethodsAndSubtypeList(
+                String enabledInputMethodsStr,
+                TextUtils.SimpleStringSplitter inputMethodSplitter,
+                TextUtils.SimpleStringSplitter subtypeSplitter) {
+            ArrayList<Pair<String, ArrayList<String>>> imsList =
+                    new ArrayList<Pair<String, ArrayList<String>>>();
+            if (TextUtils.isEmpty(enabledInputMethodsStr)) {
+                return imsList;
+            }
+            inputMethodSplitter.setString(enabledInputMethodsStr);
+            while (inputMethodSplitter.hasNext()) {
+                String nextImsStr = inputMethodSplitter.next();
+                subtypeSplitter.setString(nextImsStr);
+                if (subtypeSplitter.hasNext()) {
+                    ArrayList<String> subtypeHashes = new ArrayList<String>();
+                    // The first element is ime id.
+                    String imeId = subtypeSplitter.next();
+                    while (subtypeSplitter.hasNext()) {
+                        subtypeHashes.add(subtypeSplitter.next());
+                    }
+                    imsList.add(new Pair<String, ArrayList<String>>(imeId, subtypeHashes));
+                }
+            }
+            return imsList;
         }
 
         public InputMethodSettings(
@@ -910,27 +940,9 @@ public class InputMethodUtils {
         }
 
         public List<Pair<String, ArrayList<String>>> getEnabledInputMethodsAndSubtypeListLocked() {
-            ArrayList<Pair<String, ArrayList<String>>> imsList
-                    = new ArrayList<Pair<String, ArrayList<String>>>();
-            final String enabledInputMethodsStr = getEnabledInputMethodsStr();
-            if (TextUtils.isEmpty(enabledInputMethodsStr)) {
-                return imsList;
-            }
-            mInputMethodSplitter.setString(enabledInputMethodsStr);
-            while (mInputMethodSplitter.hasNext()) {
-                String nextImsStr = mInputMethodSplitter.next();
-                mSubtypeSplitter.setString(nextImsStr);
-                if (mSubtypeSplitter.hasNext()) {
-                    ArrayList<String> subtypeHashes = new ArrayList<String>();
-                    // The first element is ime id.
-                    String imeId = mSubtypeSplitter.next();
-                    while (mSubtypeSplitter.hasNext()) {
-                        subtypeHashes.add(mSubtypeSplitter.next());
-                    }
-                    imsList.add(new Pair<String, ArrayList<String>>(imeId, subtypeHashes));
-                }
-            }
-            return imsList;
+            return buildInputMethodsAndSubtypeList(getEnabledInputMethodsStr(),
+                    mInputMethodSplitter,
+                    mSubtypeSplitter);
         }
 
         public void appendAndPutEnabledInputMethodLocked(String id, boolean reloadInputMethodStr) {
@@ -1289,5 +1301,132 @@ public class InputMethodUtils {
             }
             return enabledInputMethodAndSubtypes;
         }
+    }
+
+    // For spell checker service manager.
+    // TODO: Should we have TextServicesUtils.java?
+    private static final Locale LOCALE_EN_US = new Locale("en", "US");
+    private static final Locale LOCALE_EN_GB = new Locale("en", "GB");
+
+    /**
+     * Returns a list of {@link Locale} in the order of appropriateness for the default spell
+     * checker service.
+     *
+     * <p>If the system language is English, and the region is also explicitly specified in the
+     * system locale, the following fallback order will be applied.</p>
+     * <ul>
+     * <li>(system-locale-language, system-locale-region, system-locale-variant) (if exists)</li>
+     * <li>(system-locale-language, system-locale-region)</li>
+     * <li>("en", "US")</li>
+     * <li>("en", "GB")</li>
+     * <li>("en")</li>
+     * </ul>
+     *
+     * <p>If the system language is English, but no region is specified in the system locale,
+     * the following fallback order will be applied.</p>
+     * <ul>
+     * <li>("en")</li>
+     * <li>("en", "US")</li>
+     * <li>("en", "GB")</li>
+     * </ul>
+     *
+     * <p>If the system language is not English, the following fallback order will be applied.</p>
+     * <ul>
+     * <li>(system-locale-language, system-locale-region, system-locale-variant) (if exists)</li>
+     * <li>(system-locale-language, system-locale-region) (if exists)</li>
+     * <li>(system-locale-language) (if exists)</li>
+     * <li>("en", "US")</li>
+     * <li>("en", "GB")</li>
+     * <li>("en")</li>
+     * </ul>
+     *
+     * @param systemLocale the current system locale to be taken into consideration.
+     * @return a list of {@link Locale}. The first one is considered to be most appropriate.
+     */
+    @VisibleForTesting
+    public static ArrayList<Locale> getSuitableLocalesForSpellChecker(
+            @Nullable final Locale systemLocale) {
+        final Locale systemLocaleLanguageCountryVariant;
+        final Locale systemLocaleLanguageCountry;
+        final Locale systemLocaleLanguage;
+        if (systemLocale != null) {
+            final String language = systemLocale.getLanguage();
+            final boolean hasLanguage = !TextUtils.isEmpty(language);
+            final String country = systemLocale.getCountry();
+            final boolean hasCountry = !TextUtils.isEmpty(country);
+            final String variant = systemLocale.getVariant();
+            final boolean hasVariant = !TextUtils.isEmpty(variant);
+            if (hasLanguage && hasCountry && hasVariant) {
+                systemLocaleLanguageCountryVariant = new Locale(language, country, variant);
+            } else {
+                systemLocaleLanguageCountryVariant = null;
+            }
+            if (hasLanguage && hasCountry) {
+                systemLocaleLanguageCountry = new Locale(language, country);
+            } else {
+                systemLocaleLanguageCountry = null;
+            }
+            if (hasLanguage) {
+                systemLocaleLanguage = new Locale(language);
+            } else {
+                systemLocaleLanguage = null;
+            }
+        } else {
+            systemLocaleLanguageCountryVariant = null;
+            systemLocaleLanguageCountry = null;
+            systemLocaleLanguage = null;
+        }
+
+        final ArrayList<Locale> locales = new ArrayList<>();
+        if (systemLocaleLanguageCountryVariant != null) {
+            locales.add(systemLocaleLanguageCountryVariant);
+        }
+
+        if (Locale.ENGLISH.equals(systemLocaleLanguage)) {
+            if (systemLocaleLanguageCountry != null) {
+                // If the system language is English, and the region is also explicitly specified,
+                // following fallback order will be applied.
+                // - systemLocaleLanguageCountry [if systemLocaleLanguageCountry is non-null]
+                // - en_US [if systemLocaleLanguageCountry is non-null and not en_US]
+                // - en_GB [if systemLocaleLanguageCountry is non-null and not en_GB]
+                // - en
+                if (systemLocaleLanguageCountry != null) {
+                    locales.add(systemLocaleLanguageCountry);
+                }
+                if (!LOCALE_EN_US.equals(systemLocaleLanguageCountry)) {
+                    locales.add(LOCALE_EN_US);
+                }
+                if (!LOCALE_EN_GB.equals(systemLocaleLanguageCountry)) {
+                    locales.add(LOCALE_EN_GB);
+                }
+                locales.add(Locale.ENGLISH);
+            } else {
+                // If the system language is English, but no region is specified, following
+                // fallback order will be applied.
+                // - en
+                // - en_US
+                // - en_GB
+                locales.add(Locale.ENGLISH);
+                locales.add(LOCALE_EN_US);
+                locales.add(LOCALE_EN_GB);
+            }
+        } else {
+            // If the system language is not English, the fallback order will be
+            // - systemLocaleLanguageCountry  [if non-null]
+            // - systemLocaleLanguage  [if non-null]
+            // - en_US
+            // - en_GB
+            // - en
+            if (systemLocaleLanguageCountry != null) {
+                locales.add(systemLocaleLanguageCountry);
+            }
+            if (systemLocaleLanguage != null) {
+                locales.add(systemLocaleLanguage);
+            }
+            locales.add(LOCALE_EN_US);
+            locales.add(LOCALE_EN_GB);
+            locales.add(Locale.ENGLISH);
+        }
+        return locales;
     }
 }

@@ -19,12 +19,15 @@ package android.app.admin;
 import android.accounts.AccountManager;
 import android.annotation.SdkConstant;
 import android.annotation.SdkConstant.SdkConstantType;
+import android.annotation.SystemApi;
 import android.app.Service;
 import android.content.BroadcastReceiver;
 import android.content.ComponentName;
 import android.content.Context;
 import android.content.Intent;
+import android.net.Uri;
 import android.os.Bundle;
+import android.security.KeyChain;
 
 /**
  * Base class for implementing a device administration component.  This
@@ -167,8 +170,8 @@ public class DeviceAdminReceiver extends BroadcastReceiver {
 
     /**
      * Action sent to a device administrator to notify that the device is entering
-     * lock task mode from an authorized package.  The extra {@link #EXTRA_LOCK_TASK_PACKAGE}
-     * will describe the authorized package using lock task mode.
+     * lock task mode.  The extra {@link #EXTRA_LOCK_TASK_PACKAGE}
+     * will describe the package using lock task mode.
      *
      * <p>The calling device admin must be the device owner or profile
      * owner to receive this broadcast.
@@ -181,7 +184,7 @@ public class DeviceAdminReceiver extends BroadcastReceiver {
 
     /**
      * Action sent to a device administrator to notify that the device is exiting
-     * lock task mode from an authorized package.
+     * lock task mode.
      *
      * <p>The calling device admin must be the device owner or profile
      * owner to receive this broadcast.
@@ -214,7 +217,8 @@ public class DeviceAdminReceiver extends BroadcastReceiver {
      * <p>A device admin application which listens to this intent can find out if the device was
      * provisioned for the device owner or profile owner case by calling respectively
      * {@link android.app.admin.DevicePolicyManager#isDeviceOwnerApp} and
-     * {@link android.app.admin.DevicePolicyManager#isProfileOwnerApp}.
+     * {@link android.app.admin.DevicePolicyManager#isProfileOwnerApp}. You will generally handle
+     * this in {@link DeviceAdminReceiver#onProfileProvisioningComplete}.
      *
      * <p>Input: Nothing.</p>
      * <p>Output: Nothing</p>
@@ -222,6 +226,53 @@ public class DeviceAdminReceiver extends BroadcastReceiver {
     @SdkConstant(SdkConstantType.BROADCAST_INTENT_ACTION)
     public static final String ACTION_PROFILE_PROVISIONING_COMPLETE =
             "android.app.action.PROFILE_PROVISIONING_COMPLETE";
+
+    /**
+     * @hide
+     * Broadcast Action: This broadcast is sent to indicate that the system is ready for the device
+     * initializer to perform user setup tasks. This is only applicable to devices managed by a
+     * device owner app.
+     *
+     * <p>The broadcast will be limited to the {@link DeviceAdminReceiver} component specified in
+     * the device initializer field of the original intent or NFC bump that started the provisioning
+     * process. You will generally handle this in
+     * {@link DeviceAdminReceiver#onReadyForUserInitialization}.
+     *
+     * <p>Input: Nothing.</p>
+     * <p>Output: Nothing</p>
+     */
+    @SdkConstant(SdkConstantType.BROADCAST_INTENT_ACTION)
+    public static final String ACTION_READY_FOR_USER_INITIALIZATION =
+            "android.app.action.READY_FOR_USER_INITIALIZATION";
+
+    /** @hide */
+    public static final String ACTION_CHOOSE_PRIVATE_KEY_ALIAS = "android.app.action.CHOOSE_PRIVATE_KEY_ALIAS";
+
+    /** @hide */
+    public static final String EXTRA_CHOOSE_PRIVATE_KEY_SENDER_UID = "android.app.extra.CHOOSE_PRIVATE_KEY_SENDER_UID";
+
+    /** @hide */
+    public static final String EXTRA_CHOOSE_PRIVATE_KEY_URI = "android.app.extra.CHOOSE_PRIVATE_KEY_URI";
+
+    /** @hide */
+    public static final String EXTRA_CHOOSE_PRIVATE_KEY_ALIAS = "android.app.extra.CHOOSE_PRIVATE_KEY_ALIAS";
+
+    /** @hide */
+    public static final String EXTRA_CHOOSE_PRIVATE_KEY_RESPONSE = "android.app.extra.CHOOSE_PRIVATE_KEY_RESPONSE";
+
+    /**
+     * Broadcast action: notify device owner that there is a pending system update.
+     * @hide
+     */
+    @SdkConstant(SdkConstantType.BROADCAST_INTENT_ACTION)
+    public static final String ACTION_NOTIFY_PENDING_SYSTEM_UPDATE = "android.app.action.NOTIFY_PENDING_SYSTEM_UPDATE";
+
+    /**
+     * A long type extra for {@link #onSystemUpdatePending} recording the system time as given by
+     * {@link System#currentTimeMillis()} when the current pending system update is first available.
+     * @hide
+     */
+    public static final String EXTRA_SYSTEM_UPDATE_RECEIVED_TIME = "android.app.extra.SYSTEM_UPDATE_RECEIVED_TIME";
 
     /**
      * Name under which a DevicePolicy component publishes information
@@ -360,20 +411,20 @@ public class DeviceAdminReceiver extends BroadcastReceiver {
     /**
      * Called when provisioning of a managed profile or managed device has completed successfully.
      *
-     * <p> As a prerequisit for the execution of this callback the (@link DeviceAdminReceiver} has
+     * <p> As a prerequisite for the execution of this callback the {@link DeviceAdminReceiver} has
      * to declare an intent filter for {@link #ACTION_PROFILE_PROVISIONING_COMPLETE}.
      * Its component must also be specified in the {@link DevicePolicyManager#EXTRA_DEVICE_ADMIN}
      * of the {@link DevicePolicyManager#ACTION_PROVISION_MANAGED_PROFILE} intent that started the
      * managed provisioning.
      *
-     * <p>When provisioning is complete, the managed profile is hidden until the profile owner
-     * calls {DevicePolicyManager#setProfileEnabled(ComponentName admin)}. Typically a profile
-     * owner will enable the profile when it has finished any additional setup such as adding an
-     * account by using the {@link AccountManager} and calling apis to bring the profile into the
-     * desired state.
+     * <p>When provisioning of a managed profile is complete, the managed profile is hidden until
+     * the profile owner calls {DevicePolicyManager#setProfileEnabled(ComponentName admin)}.
+     * Typically a profile owner will enable the profile when it has finished any additional setup
+     * such as adding an account by using the {@link AccountManager} and calling apis to bring the
+     * profile into the desired state.
      *
      * <p> Note that provisioning completes without waiting for any server interactions, so the
-     * profile owner needs to wait for data to be available if required (e.g android device ids or
+     * profile owner needs to wait for data to be available if required (e.g. android device ids or
      * other data that is set as a result of server interactions).
      *
      * @param context The running context as per {@link #onReceive}.
@@ -383,8 +434,30 @@ public class DeviceAdminReceiver extends BroadcastReceiver {
     }
 
     /**
-     * Called when a device is entering lock task mode by a package authorized
-     * by {@link DevicePolicyManager#isLockTaskPermitted(String)}
+     * Called during provisioning of a managed device to allow the device initializer to perform
+     * user setup steps. Only device initializers should override this method.
+     *
+     * <p> Called when the DeviceAdminReceiver receives an
+     * android.app.action.ACTION_READY_FOR_USER_INITIALIZATION broadcast. As a prerequisite for the
+     * execution of this callback the {@link DeviceAdminReceiver} has
+     * to declare an intent filter for android.app.action.ACTION_READY_FOR_USER_INITIALIZATION. Only
+     * the component specified in the device initializer component name field of the
+     * original intent or NFC bump that started the provisioning process will receive this callback.
+     *
+     * <p>It is not assumed that the device initializer is finished when it returns from
+     * this call, as it may do additional setup asynchronously. The device initializer must enable
+     * the current user when it has finished any additional setup (such as adding an account by
+     * using the {@link AccountManager}) in order for the user to be functional.
+     *
+     * @param context The running context as per {@link #onReceive}.
+     * @param intent The received intent as per {@link #onReceive}.
+     */
+    @SystemApi
+    public void onReadyForUserInitialization(Context context, Intent intent) {
+    }
+
+    /**
+     * Called when a device is entering lock task mode.
      *
      * @param context The running context as per {@link #onReceive}.
      * @param intent The received intent as per {@link #onReceive}.
@@ -394,13 +467,46 @@ public class DeviceAdminReceiver extends BroadcastReceiver {
     }
 
     /**
-     * Called when a device is exiting lock task mode by a package authorized
-     * by {@link DevicePolicyManager#isLockTaskPermitted(String)}
+     * Called when a device is exiting lock task mode.
      *
      * @param context The running context as per {@link #onReceive}.
      * @param intent The received intent as per {@link #onReceive}.
      */
     public void onLockTaskModeExiting(Context context, Intent intent) {
+    }
+
+    /**
+     * Allows this receiver to select the alias for a private key and certificate pair for
+     * authentication. If this method returns null, the default {@link android.app.Activity} will be
+     * shown that lets the user pick a private key and certificate pair.
+     *
+     * @param context The running context as per {@link #onReceive}.
+     * @param intent The received intent as per {@link #onReceive}.
+     * @param uid The uid asking for the private key and certificate pair.
+     * @param uri The URI to authenticate, may be null.
+     * @param alias The alias preselected by the client, or null.
+     * @return The private key alias to return and grant access to.
+     * @see KeyChain#choosePrivateKeyAlias
+     */
+    public String onChoosePrivateKeyAlias(Context context, Intent intent, int uid, Uri uri,
+            String alias) {
+        return null;
+    }
+
+    /**
+     * Allows the receiver to be notified when information about a pending system update is
+     * available from the system update service. The same pending system update can trigger multiple
+     * calls to this method, so it is necessary to examine the incoming parameters for details about
+     * the update.
+     * <p>
+     * This callback is only applicable to device owners.
+     *
+     * @param context The running context as per {@link #onReceive}.
+     * @param intent The received intent as per {@link #onReceive}.
+     * @param receivedTime The time as given by {@link System#currentTimeMillis()} indicating when
+     *        the current pending update was first available. -1 if no pending update is available.
+     */
+    public void onSystemUpdatePending(Context context, Intent intent, long receivedTime) {
     }
 
     /**
@@ -432,11 +538,22 @@ public class DeviceAdminReceiver extends BroadcastReceiver {
             onPasswordExpiring(context, intent);
         } else if (ACTION_PROFILE_PROVISIONING_COMPLETE.equals(action)) {
             onProfileProvisioningComplete(context, intent);
+        } else if (ACTION_CHOOSE_PRIVATE_KEY_ALIAS.equals(action)) {
+            int uid = intent.getIntExtra(EXTRA_CHOOSE_PRIVATE_KEY_SENDER_UID, -1);
+            Uri uri = intent.getParcelableExtra(EXTRA_CHOOSE_PRIVATE_KEY_URI);
+            String alias = intent.getStringExtra(EXTRA_CHOOSE_PRIVATE_KEY_ALIAS);
+            String chosenAlias = onChoosePrivateKeyAlias(context, intent, uid, uri, alias);
+            setResultData(chosenAlias);
         } else if (ACTION_LOCK_TASK_ENTERING.equals(action)) {
             String pkg = intent.getStringExtra(EXTRA_LOCK_TASK_PACKAGE);
             onLockTaskModeEntering(context, intent, pkg);
         } else if (ACTION_LOCK_TASK_EXITING.equals(action)) {
             onLockTaskModeExiting(context, intent);
+        } else if (ACTION_READY_FOR_USER_INITIALIZATION.equals(action)) {
+            onReadyForUserInitialization(context, intent);
+        } else if (ACTION_NOTIFY_PENDING_SYSTEM_UPDATE.equals(action)) {
+            long receivedTime = intent.getLongExtra(EXTRA_SYSTEM_UPDATE_RECEIVED_TIME, -1);
+            onSystemUpdatePending(context, intent, receivedTime);
         }
     }
 }

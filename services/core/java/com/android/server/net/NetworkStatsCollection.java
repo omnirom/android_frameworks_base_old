@@ -22,6 +22,7 @@ import static android.net.NetworkStats.SET_DEFAULT;
 import static android.net.NetworkStats.TAG_NONE;
 import static android.net.NetworkStats.UID_ALL;
 import static android.net.TrafficStats.UID_REMOVED;
+import static android.net.TrafficStats.UID_TETHERING;
 import static android.text.format.DateUtils.SECOND_IN_MILLIS;
 import static android.text.format.DateUtils.WEEK_IN_MILLIS;
 
@@ -31,14 +32,18 @@ import android.net.NetworkStats;
 import android.net.NetworkStatsHistory;
 import android.net.NetworkTemplate;
 import android.net.TrafficStats;
+import android.os.Binder;
+import android.os.UserHandle;
 import android.util.ArrayMap;
 import android.util.AtomicFile;
+import android.util.IntArray;
 
 import libcore.io.IoUtils;
 
 import com.android.internal.util.ArrayUtils;
 import com.android.internal.util.FileRotator;
 import com.android.internal.util.IndentingPrintWriter;
+
 import com.google.android.collect.Lists;
 import com.google.android.collect.Maps;
 
@@ -131,6 +136,23 @@ public class NetworkStatsCollection implements FileRotator.Reader {
         return mStartMillis == Long.MAX_VALUE && mEndMillis == Long.MIN_VALUE;
     }
 
+    public int[] getRelevantUids() {
+        final int callerUid = Binder.getCallingUid();
+        IntArray uids = new IntArray();
+        for (int i = 0; i < mStats.size(); i++) {
+            final Key key = mStats.keyAt(i);
+            if (isAccessibleToUser(key.uid, callerUid)) {
+                int j = uids.binarySearch(key.uid);
+
+                if (j < 0) {
+                    j = ~j;
+                    uids.add(j, key.uid);
+                }
+            }
+        }
+        return uids.toArray();
+    }
+
     /**
      * Combine all {@link NetworkStatsHistory} in this collection which match
      * the requested parameters.
@@ -146,12 +168,21 @@ public class NetworkStatsCollection implements FileRotator.Reader {
      */
     public NetworkStatsHistory getHistory(
             NetworkTemplate template, int uid, int set, int tag, int fields, long start, long end) {
+        final int callerUid = Binder.getCallingUid();
+        if (!isAccessibleToUser(uid, callerUid)) {
+            throw new SecurityException("Network stats history of uid " + uid
+                    + " is forbidden for caller " + callerUid);
+        }
+
         final NetworkStatsHistory combined = new NetworkStatsHistory(
-                mBucketDuration, estimateBuckets(), fields);
+                mBucketDuration, start == end ? 1 : estimateBuckets(), fields);
+
+        // shortcut when we know stats will be empty
+        if (start == end) return combined;
+
         for (int i = 0; i < mStats.size(); i++) {
             final Key key = mStats.keyAt(i);
-            final boolean setMatches = set == SET_ALL || key.set == set;
-            if (key.uid == uid && setMatches && key.tag == tag
+            if (key.uid == uid && NetworkStats.setMatches(set, key.set) && key.tag == tag
                     && templateMatches(template, key.ident)) {
                 final NetworkStatsHistory value = mStats.valueAt(i);
                 combined.recordHistory(value, start, end);
@@ -168,15 +199,17 @@ public class NetworkStatsCollection implements FileRotator.Reader {
         final long now = System.currentTimeMillis();
 
         final NetworkStats stats = new NetworkStats(end - start, 24);
-        final NetworkStats.Entry entry = new NetworkStats.Entry();
-        NetworkStatsHistory.Entry historyEntry = null;
-
         // shortcut when we know stats will be empty
         if (start == end) return stats;
 
+        final NetworkStats.Entry entry = new NetworkStats.Entry();
+        NetworkStatsHistory.Entry historyEntry = null;
+
+        final int callerUid = Binder.getCallingUid();
         for (int i = 0; i < mStats.size(); i++) {
             final Key key = mStats.keyAt(i);
-            if (templateMatches(template, key.ident)) {
+            if (templateMatches(template, key.ident) && isAccessibleToUser(key.uid, callerUid)
+                    && key.set < NetworkStats.SET_DEBUG_START) {
                 final NetworkStatsHistory value = mStats.valueAt(i);
                 historyEntry = value.getValues(start, end, now, historyEntry);
 
@@ -509,6 +542,7 @@ public class NetworkStatsCollection implements FileRotator.Reader {
             final NetworkStatsHistory value = mStats.valueAt(i);
 
             if (!templateMatches(groupTemplate, key.ident)) continue;
+            if (key.set >= NetworkStats.SET_DEBUG_START) continue;
 
             final Key groupKey = new Key(null, key.uid, key.set, key.tag);
             NetworkStatsHistory groupHistory = grouped.get(groupKey);
@@ -534,6 +568,12 @@ public class NetworkStatsCollection implements FileRotator.Reader {
 
             value.dumpCheckin(pw);
         }
+    }
+
+    private static boolean isAccessibleToUser(int uid, int callerUid) {
+        return UserHandle.getAppId(callerUid) == android.os.Process.SYSTEM_UID ||
+                uid == android.os.Process.SYSTEM_UID || uid == UID_REMOVED || uid == UID_TETHERING
+                || UserHandle.getUserId(uid) == UserHandle.getUserId(callerUid);
     }
 
     /**

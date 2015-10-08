@@ -39,11 +39,10 @@ import android.util.Log;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.util.ArrayList;
-import java.util.Collections;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Locale;
-import java.util.Map;
 import java.util.MissingResourceException;
 import java.util.Set;
 
@@ -249,7 +248,7 @@ public abstract class TextToSpeechService extends Service {
      * @return A list of features supported for the given language.
      */
     protected Set<String> onGetFeaturesForLanguage(String lang, String country, String variant) {
-        return null;
+        return new HashSet<String>();
     }
 
     private int getExpectedLanguageAvailableStatus(Locale locale) {
@@ -295,7 +294,9 @@ public abstract class TextToSpeechService extends Service {
             }
             Set<String> features = onGetFeaturesForLanguage(locale.getISO3Language(),
                     locale.getISO3Country(), locale.getVariant());
-            voices.add(new Voice(locale.toLanguageTag(), locale, Voice.QUALITY_NORMAL,
+            String voiceName = onGetDefaultVoiceNameFor(locale.getISO3Language(),
+                    locale.getISO3Country(), locale.getVariant());
+            voices.add(new Voice(voiceName, locale, Voice.QUALITY_NORMAL,
                     Voice.LATENCY_NORMAL, false, features));
         }
         return voices;
@@ -455,8 +456,35 @@ public abstract class TextToSpeechService extends Service {
     private class SynthHandler extends Handler {
         private SpeechItem mCurrentSpeechItem = null;
 
+        private ArrayList<Object> mFlushedObjects = new ArrayList<Object>();
+        private boolean mFlushAll;
+
         public SynthHandler(Looper looper) {
             super(looper);
+        }
+
+        private void startFlushingSpeechItems(Object callerIdentity) {
+            synchronized (mFlushedObjects) {
+                if (callerIdentity == null) {
+                    mFlushAll = true;
+                } else {
+                    mFlushedObjects.add(callerIdentity);
+                }
+            }
+        }
+        private void endFlushingSpeechItems(Object callerIdentity) {
+            synchronized (mFlushedObjects) {
+                if (callerIdentity == null) {
+                    mFlushAll = false;
+                } else {
+                    mFlushedObjects.remove(callerIdentity);
+                }
+            }
+        }
+        private boolean isFlushed(SpeechItem speechItem) {
+            synchronized (mFlushedObjects) {
+                return mFlushAll || mFlushedObjects.contains(speechItem.getCallerIdentity());
+            }
         }
 
         private synchronized SpeechItem getCurrentSpeechItem() {
@@ -522,9 +550,13 @@ public abstract class TextToSpeechService extends Service {
             Runnable runnable = new Runnable() {
                 @Override
                 public void run() {
-                    setCurrentSpeechItem(speechItem);
-                    speechItem.play();
-                    setCurrentSpeechItem(null);
+                    if (isFlushed(speechItem)) {
+                        speechItem.stop();
+                    } else {
+                        setCurrentSpeechItem(speechItem);
+                        speechItem.play();
+                        setCurrentSpeechItem(null);
+                    }
                 }
             };
             Message msg = Message.obtain(this, runnable);
@@ -552,12 +584,14 @@ public abstract class TextToSpeechService extends Service {
          *
          * Called on a service binder thread.
          */
-        public int stopForApp(Object callerIdentity) {
+        public int stopForApp(final Object callerIdentity) {
             if (callerIdentity == null) {
                 return TextToSpeech.ERROR;
             }
 
-            removeCallbacksAndMessages(callerIdentity);
+            // Flush pending messages from callerIdentity
+            startFlushingSpeechItems(callerIdentity);
+
             // This stops writing data to the file / or publishing
             // items to the audio playback handler.
             //
@@ -573,19 +607,38 @@ public abstract class TextToSpeechService extends Service {
             // Remove any enqueued audio too.
             mAudioPlaybackHandler.stopForApp(callerIdentity);
 
+            // Stop flushing pending messages
+            Runnable runnable = new Runnable() {
+                @Override
+                public void run() {
+                    endFlushingSpeechItems(callerIdentity);
+                }
+            };
+            sendMessage(Message.obtain(this, runnable));
             return TextToSpeech.SUCCESS;
         }
 
         public int stopAll() {
+            // Order to flush pending messages
+            startFlushingSpeechItems(null);
+
             // Stop the current speech item unconditionally .
             SpeechItem current = setCurrentSpeechItem(null);
             if (current != null) {
                 current.stop();
             }
-            // Remove all other items from the queue.
-            removeCallbacksAndMessages(null);
             // Remove all pending playback as well.
             mAudioPlaybackHandler.stop();
+
+            // Message to stop flushing pending messages
+            Runnable runnable = new Runnable() {
+                @Override
+                public void run() {
+                    endFlushingSpeechItems(null);
+                }
+            };
+            sendMessage(Message.obtain(this, runnable));
+
 
             return TextToSpeech.SUCCESS;
         }
@@ -698,7 +751,6 @@ public abstract class TextToSpeechService extends Service {
             return mCallerIdentity;
         }
 
-
         public int getCallerUid() {
             return mCallerUid;
         }
@@ -752,6 +804,10 @@ public abstract class TextToSpeechService extends Service {
         protected synchronized boolean isStopped() {
              return mStopped;
         }
+
+        protected synchronized boolean isStarted() {
+            return mStarted;
+       }
     }
 
     /**
@@ -777,7 +833,7 @@ public abstract class TextToSpeechService extends Service {
         public void dispatchOnStop() {
             final String utteranceId = getUtteranceId();
             if (utteranceId != null) {
-                mCallbacks.dispatchOnStop(getCallerIdentity(), utteranceId);
+                mCallbacks.dispatchOnStop(getCallerIdentity(), utteranceId, isStarted());
             }
         }
 
@@ -940,6 +996,8 @@ public abstract class TextToSpeechService extends Service {
                 // turn implies that synthesis would not have started.
                 synthesisCallback.stop();
                 TextToSpeechService.this.onStop();
+            } else {
+                dispatchOnStop();
             }
         }
 
@@ -1345,11 +1403,11 @@ public abstract class TextToSpeechService extends Service {
             }
         }
 
-        public void dispatchOnStop(Object callerIdentity, String utteranceId) {
+        public void dispatchOnStop(Object callerIdentity, String utteranceId, boolean started) {
             ITextToSpeechCallback cb = getCallbackFor(callerIdentity);
             if (cb == null) return;
             try {
-                cb.onStop(utteranceId);
+                cb.onStop(utteranceId, started);
             } catch (RemoteException e) {
                 Log.e(TAG, "Callback onStop failed: " + e);
             }

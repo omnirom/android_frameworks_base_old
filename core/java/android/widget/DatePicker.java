@@ -33,7 +33,6 @@ import android.util.SparseArray;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.accessibility.AccessibilityEvent;
-import android.view.accessibility.AccessibilityNodeInfo;
 import android.view.inputmethod.EditorInfo;
 import android.view.inputmethod.InputMethodManager;
 import android.widget.NumberPicker.OnValueChangeListener;
@@ -99,7 +98,7 @@ public class DatePicker extends FrameLayout {
     private final DatePickerDelegate mDelegate;
 
     /**
-     * The callback used to indicate the user changes\d the date.
+     * The callback used to indicate the user changed the date.
      */
     public interface OnDateChangedListener {
 
@@ -283,27 +282,22 @@ public class DatePicker extends FrameLayout {
         return mDelegate.isEnabled();
     }
 
+    /** @hide */
     @Override
-    public boolean dispatchPopulateAccessibilityEvent(AccessibilityEvent event) {
+    public boolean dispatchPopulateAccessibilityEventInternal(AccessibilityEvent event) {
         return mDelegate.dispatchPopulateAccessibilityEvent(event);
     }
 
+    /** @hide */
     @Override
-    public void onPopulateAccessibilityEvent(AccessibilityEvent event) {
-        super.onPopulateAccessibilityEvent(event);
+    public void onPopulateAccessibilityEventInternal(AccessibilityEvent event) {
+        super.onPopulateAccessibilityEventInternal(event);
         mDelegate.onPopulateAccessibilityEvent(event);
     }
 
     @Override
-    public void onInitializeAccessibilityEvent(AccessibilityEvent event) {
-        super.onInitializeAccessibilityEvent(event);
-        mDelegate.onInitializeAccessibilityEvent(event);
-    }
-
-    @Override
-    public void onInitializeAccessibilityNodeInfo(AccessibilityNodeInfo info) {
-        super.onInitializeAccessibilityNodeInfo(info);
-        mDelegate.onInitializeAccessibilityNodeInfo(info);
+    public CharSequence getAccessibilityClassName() {
+        return DatePicker.class.getName();
     }
 
     @Override
@@ -354,9 +348,13 @@ public class DatePicker extends FrameLayout {
     }
 
     /**
-     * Gets whether the {@link CalendarView} is shown.
+     * Returns whether the {@link CalendarView} is shown.
+     * <p>
+     * <strong>Note:</strong> This method returns {@code false} when the
+     * {@link android.R.styleable#DatePicker_datePickerMode} attribute is set
+     * to {@code calendar}.
      *
-     * @return True if the calendar view is shown.
+     * @return {@code true} if the calendar view is shown
      * @see #getCalendarView()
      */
     public boolean getCalendarViewShown() {
@@ -364,13 +362,13 @@ public class DatePicker extends FrameLayout {
     }
 
     /**
-     * Gets the {@link CalendarView}.
+     * Returns the {@link CalendarView} used by this picker.
      * <p>
-     * This method returns {@code null} when the
+     * <strong>Note:</strong> This method returns {@code null} when the
      * {@link android.R.styleable#DatePicker_datePickerMode} attribute is set
      * to {@code calendar}.
      *
-     * @return The calendar view.
+     * @return the calendar view
      * @see #getCalendarViewShown()
      */
     public CalendarView getCalendarView() {
@@ -380,20 +378,25 @@ public class DatePicker extends FrameLayout {
     /**
      * Sets whether the {@link CalendarView} is shown.
      * <p>
-     * Calling this method has no effect when the
+     * <strong>Note:</strong> Calling this method has no effect when the
      * {@link android.R.styleable#DatePicker_datePickerMode} attribute is set
      * to {@code calendar}.
      *
-     * @param shown True if the calendar view is to be shown.
+     * @param shown {@code true} to show the calendar view, {@code false} to
+     *              hide it
      */
     public void setCalendarViewShown(boolean shown) {
         mDelegate.setCalendarViewShown(shown);
     }
 
     /**
-     * Gets whether the spinners are shown.
+     * Returns whether the spinners are shown.
+     * <p>
+     * <strong>Note:</strong> his method returns {@code false} when the
+     * {@link android.R.styleable#DatePicker_datePickerMode} attribute is set
+     * to {@code calendar}.
      *
-     * @return True if the spinners are shown.
+     * @return {@code true} if the spinners are shown
      */
     public boolean getSpinnersShown() {
         return mDelegate.getSpinnersShown();
@@ -401,8 +404,13 @@ public class DatePicker extends FrameLayout {
 
     /**
      * Sets whether the spinners are shown.
+     * <p>
+     * Calling this method has no effect when the
+     * {@link android.R.styleable#DatePicker_datePickerMode} attribute is set
+     * to {@code calendar}.
      *
-     * @param shown True if the spinners are to be shown.
+     * @param shown {@code true} to show the spinners, {@code false} to hide
+     *              them
      */
     public void setSpinnersShown(boolean shown) {
         mDelegate.setSpinnersShown(shown);
@@ -472,8 +480,6 @@ public class DatePicker extends FrameLayout {
 
         boolean dispatchPopulateAccessibilityEvent(AccessibilityEvent event);
         void onPopulateAccessibilityEvent(AccessibilityEvent event);
-        void onInitializeAccessibilityEvent(AccessibilityEvent event);
-        void onInitializeAccessibilityNodeInfo(AccessibilityNodeInfo info);
     }
 
     /**
@@ -497,15 +503,14 @@ public class DatePicker extends FrameLayout {
             mDelegator = delegator;
             mContext = context;
 
-            // initialization based on locale
             setCurrentLocale(Locale.getDefault());
         }
 
         protected void setCurrentLocale(Locale locale) {
-            if (locale.equals(mCurrentLocale)) {
-                return;
+            if (!locale.equals(mCurrentLocale)) {
+                mCurrentLocale = locale;
+                onLocaleChanged(locale);
             }
-            mCurrentLocale = locale;
         }
 
         @Override
@@ -517,6 +522,10 @@ public class DatePicker extends FrameLayout {
             if (mValidationCallback != null) {
                 mValidationCallback.onValidationChanged(valid);
             }
+        }
+
+        protected void onLocaleChanged(Locale locale) {
+            // Stub.
         }
     }
 
@@ -886,16 +895,6 @@ public class DatePicker extends FrameLayout {
             String selectedDateUtterance = DateUtils.formatDateTime(mContext,
                     mCurrentDate.getTimeInMillis(), flags);
             event.getText().add(selectedDateUtterance);
-        }
-
-        @Override
-        public void onInitializeAccessibilityEvent(AccessibilityEvent event) {
-            event.setClassName(DatePicker.class.getName());
-        }
-
-        @Override
-        public void onInitializeAccessibilityNodeInfo(AccessibilityNodeInfo info) {
-            info.setClassName(DatePicker.class.getName());
         }
 
         /**

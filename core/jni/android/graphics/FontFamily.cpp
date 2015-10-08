@@ -17,8 +17,10 @@
 #define LOG_TAG "Minikin"
 
 #include "JNIHelp.h"
-#include <android_runtime/AndroidRuntime.h>
+#include <core_jni_helpers.h>
 
+#include "SkData.h"
+#include "SkRefCnt.h"
 #include "SkTypeface.h"
 #include "GraphicsJNI.h"
 #include <ScopedPrimitiveArray.h>
@@ -82,6 +84,10 @@ static jboolean FontFamily_addFontWeightStyle(JNIEnv* env, jobject clazz, jlong 
     return true;
 }
 
+static void releaseAsset(const void* ptr, size_t length, void* context) {
+    delete static_cast<Asset*>(context);
+}
+
 static jboolean FontFamily_addFontFromAsset(JNIEnv* env, jobject, jlong familyPtr,
         jobject jassetMgr, jstring jpath) {
     NPE_CHECK_RETURN_ZERO(env, jassetMgr);
@@ -98,12 +104,16 @@ static jboolean FontFamily_addFontFromAsset(JNIEnv* env, jobject, jlong familyPt
         return false;
     }
 
-    SkStream* stream = new AssetStreamAdaptor(asset,
-                                              AssetStreamAdaptor::kYes_OwnAsset,
-                                              AssetStreamAdaptor::kYes_HasMemoryBase);
+    const void* buf = asset->getBuffer(false);
+    if (NULL == buf) {
+        delete asset;
+        return false;
+    }
+
+    SkAutoTUnref<SkData> data(SkData::NewWithProc(buf, asset->getLength(), releaseAsset, asset));
+    SkMemoryStream* stream = new SkMemoryStream(data);
+    // CreateFromStream takes ownership of stream.
     SkTypeface* face = SkTypeface::CreateFromStream(stream);
-    // Note: SkTypeface::CreateFromStream holds its own reference to the stream
-    stream->unref();
     if (face == NULL) {
         ALOGE("addFontFromAsset failed to create font %s", str.c_str());
         return false;
@@ -125,9 +135,8 @@ static JNINativeMethod gFontFamilyMethods[] = {
 
 int register_android_graphics_FontFamily(JNIEnv* env)
 {
-    return android::AndroidRuntime::registerNativeMethods(env,
-        "android/graphics/FontFamily",
-        gFontFamilyMethods, NELEM(gFontFamilyMethods));
+    return RegisterMethodsOrDie(env, "android/graphics/FontFamily", gFontFamilyMethods,
+                                NELEM(gFontFamilyMethods));
 }
 
 }

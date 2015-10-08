@@ -36,6 +36,6 @@ LOCAL_SHARED_LIBRARIES := \
 LOCAL_MODULE := libjni_pacprocessor
 LOCAL_MODULE_TAGS := optional
 
-include external/stlport/libstlport.mk
+LOCAL_CFLAGS += -Wall -Werror -Wunused -Wunreachable-code
 
 include $(BUILD_SHARED_LIBRARY)

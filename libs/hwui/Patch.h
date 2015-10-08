@@ -27,10 +27,11 @@
 
 #include "Rect.h"
 #include "UvMapper.h"
-#include "Vertex.h"
 
 namespace android {
 namespace uirenderer {
+
+struct TextureVertex;
 
 ///////////////////////////////////////////////////////////////////////////////
 // 9-patch structures
@@ -38,27 +39,23 @@ namespace uirenderer {
 
 class Patch {
 public:
-    Patch();
-    ~Patch();
+    Patch(const float bitmapWidth, const float bitmapHeight,
+            float width, float height,
+            const UvMapper& mapper, const Res_png_9patch* patch);
 
     /**
      * Returns the size of this patch's mesh in bytes.
      */
     uint32_t getSize() const;
 
-    TextureVertex* vertices;
-    uint32_t verticesCount;
-    uint32_t indexCount;
-    bool hasEmptyQuads;
+    std::unique_ptr<TextureVertex[]> vertices;
+    uint32_t verticesCount = 0;
+    uint32_t indexCount = 0;
+    bool hasEmptyQuads = false;
     Vector<Rect> quads;
 
-    GLintptr offset;
-    GLintptr textureOffset;
-
-    TextureVertex* createMesh(const float bitmapWidth, const float bitmapHeight,
-            float width, float height, const Res_png_9patch* patch);
-    TextureVertex* createMesh(const float bitmapWidth, const float bitmapHeight,
-            float width, float height, const UvMapper& mapper, const Res_png_9patch* patch);
+    GLintptr positionOffset = 0;
+    GLintptr textureOffset = 0;
 
 private:
     void generateRow(const int32_t* xDivs, uint32_t xCount, TextureVertex*& vertex,

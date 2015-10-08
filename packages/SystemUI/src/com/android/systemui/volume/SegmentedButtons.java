@@ -17,6 +17,7 @@
 package com.android.systemui.volume;
 
 import android.content.Context;
+import android.graphics.Typeface;
 import android.util.AttributeSet;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -30,9 +31,12 @@ import java.util.Objects;
 
 public class SegmentedButtons extends LinearLayout {
     private static final int LABEL_RES_KEY = R.id.label;
+    private static final Typeface REGULAR = Typeface.create("sans-serif", Typeface.NORMAL);
+    private static final Typeface MEDIUM = Typeface.create("sans-serif-medium", Typeface.NORMAL);
 
     private final Context mContext;
     private final LayoutInflater mInflater;
+    private final SpTexts mSpTexts;
 
     private Callback mCallback;
     private Object mSelectedValue;
@@ -42,6 +46,7 @@ public class SegmentedButtons extends LinearLayout {
         mContext = context;
         mInflater = LayoutInflater.from(mContext);
         setOrientation(HORIZONTAL);
+        mSpTexts = new SpTexts(mContext);
     }
 
     public void setCallback(Callback callback) {
@@ -52,7 +57,7 @@ public class SegmentedButtons extends LinearLayout {
         return mSelectedValue;
     }
 
-    public void setSelectedValue(Object value) {
+    public void setSelectedValue(Object value, boolean fromClick) {
         if (Objects.equals(value, mSelectedValue)) return;
         mSelectedValue = value;
         for (int i = 0; i < getChildCount(); i++) {
@@ -60,17 +65,16 @@ public class SegmentedButtons extends LinearLayout {
             final Object tag = c.getTag();
             final boolean selected = Objects.equals(mSelectedValue, tag);
             c.setSelected(selected);
-            c.getCompoundDrawables()[1].setTint(mContext.getResources().getColor(selected
-                    ? R.color.segmented_button_selected : R.color.segmented_button_unselected));
+            c.setTypeface(selected ? MEDIUM : REGULAR);
         }
-        fireOnSelected();
+        fireOnSelected(fromClick);
     }
 
-    public void addButton(int labelResId, int iconResId, Object value) {
+    public void addButton(int labelResId, int contentDescriptionResId, Object value) {
         final Button b = (Button) mInflater.inflate(R.layout.segmented_button, this, false);
         b.setTag(LABEL_RES_KEY, labelResId);
         b.setText(labelResId);
-        b.setCompoundDrawablesWithIntrinsicBounds(0, iconResId, 0, 0);
+        b.setContentDescription(getResources().getString(contentDescriptionResId));
         final LayoutParams lp = (LayoutParams) b.getLayoutParams();
         if (getChildCount() == 0) {
             lp.leftMargin = lp.rightMargin = 0; // first button has no margin
@@ -85,6 +89,7 @@ public class SegmentedButtons extends LinearLayout {
                 fireInteraction();
             }
         });
+        mSpTexts.add(b);
     }
 
     public void updateLocale() {
@@ -95,9 +100,9 @@ public class SegmentedButtons extends LinearLayout {
         }
     }
 
-    private void fireOnSelected() {
+    private void fireOnSelected(boolean fromClick) {
         if (mCallback != null) {
-            mCallback.onSelected(mSelectedValue);
+            mCallback.onSelected(mSelectedValue, fromClick);
         }
     }
 
@@ -110,11 +115,11 @@ public class SegmentedButtons extends LinearLayout {
     private final View.OnClickListener mClick = new View.OnClickListener() {
         @Override
         public void onClick(View v) {
-            setSelectedValue(v.getTag());
+            setSelectedValue(v.getTag(), true /* fromClick */);
         }
     };
 
     public interface Callback extends Interaction.Callback {
-        void onSelected(Object value);
+        void onSelected(Object value, boolean fromClick);
     }
 }

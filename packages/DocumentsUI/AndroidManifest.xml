@@ -46,12 +46,17 @@
                 <category android:name="android.intent.category.DEFAULT" />
                 <data android:mimeType="vnd.android.document/root" />
             </intent-filter>
+            <intent-filter>
+                <action android:name="android.provider.action.BROWSE_DOCUMENT_ROOT" />
+                <category android:name="android.intent.category.DEFAULT" />
+                <data android:mimeType="vnd.android.document/root" />
+            </intent-filter>
         </activity>
 
         <provider
             android:name=".RecentsProvider"
             android:authorities="com.android.documentsui.recents"
-            android:exported="false" />
+            android:exported="false"/>
 
         <receiver android:name=".PackageReceiver">
             <intent-filter>
@@ -60,5 +65,10 @@
                 <data android:scheme="package" />
             </intent-filter>
         </receiver>
+
+        <service
+            android:name=".CopyService"
+            android:exported="false">
+        </service>
     </application>
 </manifest>

@@ -29,6 +29,7 @@ import android.media.IRemoteVolumeObserver;
 import android.media.IRingtonePlayer;
 import android.media.IVolumeController;
 import android.media.Rating;
+import android.media.VolumePolicy;
 import android.media.audiopolicy.AudioPolicyConfig;
 import android.media.audiopolicy.IAudioPolicyCallback;
 import android.net.Uri;
@@ -39,44 +40,32 @@ import android.view.KeyEvent;
  */
 interface IAudioService {
 
-    void adjustSuggestedStreamVolume(int direction, int suggestedStreamType, int flags,
-            String callingPackage);
+    oneway void adjustSuggestedStreamVolume(int direction, int suggestedStreamType, int flags,
+            String callingPackage, String caller);
 
     void adjustStreamVolume(int streamType, int direction, int flags, String callingPackage);
-
-    void adjustMasterVolume(int direction, int flags, String callingPackage);
 
     void setStreamVolume(int streamType, int index, int flags, String callingPackage);
 
     oneway void setRemoteStreamVolume(int index);
 
-    void setMasterVolume(int index, int flags, String callingPackage);
-
-    void setStreamSolo(int streamType, boolean state, IBinder cb);
-
-    void setStreamMute(int streamType, boolean state, IBinder cb);
-
     boolean isStreamMute(int streamType);
 
     void forceRemoteSubmixFullVolume(boolean startForcing, IBinder cb);
 
-    void setMasterMute(boolean state, int flags, String callingPackage, IBinder cb);
-
     boolean isMasterMute();
+
+    void setMasterMute(boolean mute, int flags, String callingPackage, int userId);
 
     int getStreamVolume(int streamType);
 
-    int getMasterVolume();
+    int getStreamMinVolume(int streamType);
 
     int getStreamMaxVolume(int streamType);
 
-    int getMasterMaxVolume();
-
     int getLastAudibleStreamVolume(int streamType);
 
-    int getLastAudibleMasterVolume();
-
-    void setMicrophoneMute(boolean on, String callingPackage);
+    void setMicrophoneMute(boolean on, String callingPackage, int userId);
 
     void setRingerModeExternal(int ringerMode, String caller);
 
@@ -94,7 +83,7 @@ interface IAudioService {
 
     boolean shouldVibrate(int vibrateType);
 
-    void setMode(int mode, IBinder cb);
+    void setMode(int mode, IBinder cb, String callingPackage);
 
     int getMode();
 
@@ -193,9 +182,11 @@ interface IAudioService {
 
     void setRingtonePlayer(IRingtonePlayer player);
     IRingtonePlayer getRingtonePlayer();
-    int getMasterStreamType();
+    int getUiSoundsStreamType();
 
-    void setWiredDeviceConnectionState(int device, int state, String name);
+    void setWiredDeviceConnectionState(int type, int state, String address, String name,
+            String caller);
+
     int setBluetoothA2dpDeviceConnectionState(in BluetoothDevice device, int state, int profile);
 
     AudioRoutesInfo startWatchingRoutes(in IAudioRoutesObserver observer);
@@ -208,15 +199,20 @@ interface IAudioService {
 
     boolean isStreamAffectedByRingerMode(int streamType);
 
-    void disableSafeMediaVolume();
+    boolean isStreamAffectedByMute(int streamType);
+
+    void disableSafeMediaVolume(String callingPackage);
 
     int setHdmiSystemAudioSupported(boolean on);
 
     boolean isHdmiSystemAudioSupported();
 
-           String registerAudioPolicy(in AudioPolicyConfig policyConfig,
-                    in IAudioPolicyCallback pcb, boolean hasFocusListener);
+    String registerAudioPolicy(in AudioPolicyConfig policyConfig,
+            in IAudioPolicyCallback pcb, boolean hasFocusListener);
+
     oneway void unregisterAudioPolicyAsync(in IAudioPolicyCallback pcb);
 
-           int setFocusPropertiesForPolicy(int duckingBehavior, in IAudioPolicyCallback pcb);
+    int setFocusPropertiesForPolicy(int duckingBehavior, in IAudioPolicyCallback pcb);
+
+    void setVolumePolicy(in VolumePolicy policy);
 }

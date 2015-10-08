@@ -22,42 +22,48 @@ import com.android.internal.telephony.ISubscriptionListener;
 
 interface ISub {
     /**
+     * @param callingPackage The package maing the call.
      * @return a list of all subscriptions in the database, this includes
      * all subscriptions that have been seen.
      */
-    List<SubscriptionInfo> getAllSubInfoList();
+    List<SubscriptionInfo> getAllSubInfoList(String callingPackage);
 
     /**
+     * @param callingPackage The package maing the call.
      * @return the count of all subscriptions in the database, this includes
      * all subscriptions that have been seen.
      */
-    int getAllSubInfoCount();
+    int getAllSubInfoCount(String callingPackage);
 
     /**
      * Get the active SubscriptionInfo with the subId key
      * @param subId The unique SubscriptionInfo key in database
+     * @param callingPackage The package maing the call.
      * @return SubscriptionInfo, maybe null if its not active
      */
-    SubscriptionInfo getActiveSubscriptionInfo(int subId);
+    SubscriptionInfo getActiveSubscriptionInfo(int subId, String callingPackage);
 
     /**
      * Get the active SubscriptionInfo associated with the iccId
      * @param iccId the IccId of SIM card
+     * @param callingPackage The package maing the call.
      * @return SubscriptionInfo, maybe null if its not active
      */
-    SubscriptionInfo getActiveSubscriptionInfoForIccId(String iccId);
+    SubscriptionInfo getActiveSubscriptionInfoForIccId(String iccId, String callingPackage);
 
     /**
      * Get the active SubscriptionInfo associated with the slotIdx
      * @param slotIdx the slot which the subscription is inserted
+     * @param callingPackage The package maing the call.
      * @return SubscriptionInfo, maybe null if its not active
      */
-    SubscriptionInfo getActiveSubscriptionInfoForSimSlotIndex(int slotIdx);
+    SubscriptionInfo getActiveSubscriptionInfoForSimSlotIndex(int slotIdx, String callingPackage);
 
     /**
      * Get the SubscriptionInfo(s) of the active subscriptions. The records will be sorted
      * by {@link SubscriptionInfo#getSimSlotIndex} then by {@link SubscriptionInfo#getSubscriptionId}.
      *
+     * @param callingPackage The package maing the call.
      * @return Sorted list of the currently {@link SubscriptionInfo} records available on the device.
      * <ul>
      * <li>
@@ -74,12 +80,13 @@ interface ISub {
      * </li>
      * </ul>
      */
-    List<SubscriptionInfo> getActiveSubscriptionInfoList();
+    List<SubscriptionInfo> getActiveSubscriptionInfoList(String callingPackage);
 
     /**
+     * @param callingPackage The package making the call.
      * @return the number of active subscriptions
      */
-    int getActiveSubInfoCount();
+    int getActiveSubInfoCount(String callingPackage);
 
     /**
      * @return the maximum number of subscriptions this device will support at any one time.
@@ -165,10 +172,15 @@ interface ISub {
 
     int[] getActiveSubIdList();
 
+    void setSubscriptionProperty(int subId, String propKey, String propValue);
+
+    String getSubscriptionProperty(int subId, String propKey, String callingPackage);
+
     /**
-     * Get the SIM state for the subscriber
+     * Get the SIM state for the slot idx
      * @return SIM state as the ordinal of IccCardConstants.State
      */
-    int getSimStateForSubscriber(int subId);
+    int getSimStateForSlotIdx(int slotIdx);
 
+    boolean isActiveSubId(int subId);
 }

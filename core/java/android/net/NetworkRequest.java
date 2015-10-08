@@ -19,8 +19,6 @@ package android.net;
 import android.os.Parcel;
 import android.os.Parcelable;
 
-import java.util.concurrent.atomic.AtomicInteger;
-
 /**
  * Defines a request for a network, made through {@link NetworkRequest.Builder} and used
  * to request a network via {@link ConnectivityManager#requestNetwork} or listen for changes
@@ -85,7 +83,13 @@ public class NetworkRequest implements Parcelable {
          * Build {@link NetworkRequest} give the current set of capabilities.
          */
         public NetworkRequest build() {
-            return new NetworkRequest(mNetworkCapabilities, ConnectivityManager.TYPE_NONE,
+            // Make a copy of mNetworkCapabilities so we don't inadvertently remove NOT_RESTRICTED
+            // when later an unrestricted capability could be added to mNetworkCapabilities, in
+            // which case NOT_RESTRICTED should be returned to mNetworkCapabilities, which
+            // maybeMarkCapabilitiesRestricted() doesn't add back.
+            final NetworkCapabilities nc = new NetworkCapabilities(mNetworkCapabilities);
+            nc.maybeMarkCapabilitiesRestricted();
+            return new NetworkRequest(nc, ConnectivityManager.TYPE_NONE,
                     ConnectivityManager.REQUEST_ID_UNSET);
         }
 
@@ -113,6 +117,18 @@ public class NetworkRequest implements Parcelable {
          */
         public Builder removeCapability(int capability) {
             mNetworkCapabilities.removeCapability(capability);
+            return this;
+        }
+
+        /**
+         * Completely clears all the {@code NetworkCapabilities} from this builder instance,
+         * removing even the capabilities that are set by default when the object is constructed.
+         *
+         * @return The builder to facilitate chaining.
+         * @hide
+         */
+        public Builder clearCapabilities() {
+            mNetworkCapabilities.clearAll();
             return this;
         }
 

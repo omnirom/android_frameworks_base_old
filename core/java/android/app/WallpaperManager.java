@@ -16,6 +16,7 @@
 
 package android.app;
 
+import android.annotation.RawRes;
 import android.annotation.SystemApi;
 import android.content.ComponentName;
 import android.content.ContentResolver;
@@ -64,7 +65,10 @@ import java.util.List;
  * Provides access to the system wallpaper. With WallpaperManager, you can
  * get the current wallpaper, get the desired dimensions for the wallpaper, set
  * the wallpaper, and more. Get an instance of WallpaperManager with
- * {@link #getInstance(android.content.Context) getInstance()}. 
+ * {@link #getInstance(android.content.Context) getInstance()}.
+ *
+ * <p> An app can check whether wallpapers are supported for the current user, by calling
+ * {@link #isWallpaperSupported()}.
  */
 public class WallpaperManager {
     private static String TAG = "WallpaperManager";
@@ -188,7 +192,7 @@ public class WallpaperManager {
         }
 
         @Override
-        public void setColorFilter(ColorFilter cf) {
+        public void setColorFilter(ColorFilter colorFilter) {
             throw new UnsupportedOperationException("Not supported with this drawable");
         }
 
@@ -256,6 +260,15 @@ public class WallpaperManager {
 
         public Bitmap peekWallpaperBitmap(Context context, boolean returnDefault) {
             synchronized (this) {
+                if (mService != null) {
+                    try {
+                        if (!mService.isWallpaperSupported(context.getOpPackageName())) {
+                            return null;
+                        }
+                    } catch (RemoteException e) {
+                        // Ignore
+                    }
+                }
                 if (mWallpaper != null) {
                     return mWallpaper;
                 }
@@ -696,7 +709,9 @@ public class WallpaperManager {
      * wallpaper will require reloading it again from disk.
      */
     public void forgetLoadedWallpaper() {
-        sGlobals.forgetLoadedWallpaper();
+        if (isWallpaperSupported()) {
+            sGlobals.forgetLoadedWallpaper();
+        }
     }
 
     /**
@@ -786,7 +801,7 @@ public class WallpaperManager {
      * @throws IOException If an error occurs reverting to the built-in
      * wallpaper.
      */
-    public void setResource(int resid) throws IOException {
+    public void setResource(@RawRes int resid) throws IOException {
         if (sGlobals.mService == null) {
             Log.w(TAG, "WallpaperService not running");
             return;
@@ -795,7 +810,7 @@ public class WallpaperManager {
             Resources resources = mContext.getResources();
             /* Set the wallpaper to the default values */
             ParcelFileDescriptor fd = sGlobals.mService.setWallpaper(
-                    "res:" + resources.getResourceName(resid));
+                    "res:" + resources.getResourceName(resid), mContext.getOpPackageName());
             if (fd != null) {
                 FileOutputStream fos = null;
                 try {
@@ -831,7 +846,8 @@ public class WallpaperManager {
             return;
         }
         try {
-            ParcelFileDescriptor fd = sGlobals.mService.setWallpaper(null);
+            ParcelFileDescriptor fd = sGlobals.mService.setWallpaper(null,
+                    mContext.getOpPackageName());
             if (fd == null) {
                 return;
             }
@@ -899,7 +915,8 @@ public class WallpaperManager {
             return;
         }
         try {
-            ParcelFileDescriptor fd = sGlobals.mService.setWallpaper(null);
+            ParcelFileDescriptor fd = sGlobals.mService.setWallpaper(null,
+                    mContext.getOpPackageName());
             if (fd == null) {
                 return;
             }
@@ -958,7 +975,7 @@ public class WallpaperManager {
      * with the given resource ID.  That is, their wallpaper has been
      * set through {@link #setResource(int)} with the same resource id.
      */
-    public boolean hasResourceWallpaper(int resid) {
+    public boolean hasResourceWallpaper(@RawRes int resid) {
         if (sGlobals.mService == null) {
             Log.w(TAG, "WallpaperService not running");
             return false;
@@ -1079,7 +1096,8 @@ public class WallpaperManager {
             if (sGlobals.mService == null) {
                 Log.w(TAG, "WallpaperService not running");
             } else {
-                sGlobals.mService.setDimensionHints(minimumWidth, minimumHeight);
+                sGlobals.mService.setDimensionHints(minimumWidth, minimumHeight,
+                        mContext.getOpPackageName());
             }
         } catch (RemoteException e) {
             // Ignore
@@ -1100,7 +1118,7 @@ public class WallpaperManager {
             if (sGlobals.mService == null) {
                 Log.w(TAG, "WallpaperService not running");
             } else {
-                sGlobals.mService.setDisplayPadding(padding);
+                sGlobals.mService.setDisplayPadding(padding, mContext.getOpPackageName());
             }
         } catch (RemoteException e) {
             // Ignore
@@ -1126,6 +1144,47 @@ public class WallpaperManager {
         } catch (RemoteException e) {
             // Ignore.
         }
+    }
+
+    /**
+     * Clear the wallpaper.
+     *
+     * @hide
+     */
+    @SystemApi
+    public void clearWallpaper() {
+        if (sGlobals.mService == null) {
+            Log.w(TAG, "WallpaperService not running");
+            return;
+        }
+        try {
+            sGlobals.mService.clearWallpaper(mContext.getOpPackageName());
+        } catch (RemoteException e) {
+            // Ignore
+        }
+    }
+
+    /**
+     * Set the live wallpaper.
+     *
+     * This can only be called by packages with android.permission.SET_WALLPAPER_COMPONENT
+     * permission.
+     *
+     * @hide
+     */
+    @SystemApi
+    public boolean setWallpaperComponent(ComponentName name) {
+        if (sGlobals.mService == null) {
+            Log.w(TAG, "WallpaperService not running");
+            return false;
+        }
+        try {
+            sGlobals.mService.setWallpaperComponentChecked(name, mContext.getOpPackageName());
+            return true;
+        } catch (RemoteException e) {
+            // Ignore
+        }
+        return false;
     }
 
     /**
@@ -1189,7 +1248,24 @@ public class WallpaperManager {
             // Ignore.
         }
     }
-    
+
+    /**
+     * Returns whether wallpapers are supported for the calling user. If this function returns
+     * false, any attempts to changing the wallpaper will have no effect.
+     */
+    public boolean isWallpaperSupported() {
+        if (sGlobals.mService == null) {
+            Log.w(TAG, "WallpaperService not running");
+        } else {
+            try {
+                return sGlobals.mService.isWallpaperSupported(mContext.getOpPackageName());
+            } catch (RemoteException e) {
+                // Ignore
+            }
+        }
+        return false;
+    }
+
     /**
      * Clear the offsets previously associated with this window through
      * {@link #setWallpaperOffsets(IBinder, float, float)}.  This reverts

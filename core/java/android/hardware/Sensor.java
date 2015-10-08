@@ -18,6 +18,7 @@
 package android.hardware;
 
 import android.os.Build;
+import android.annotation.SystemApi;
 
 /**
  * Class representing a sensor. Use {@link SensorManager#getSensorList} to get
@@ -511,6 +512,27 @@ public final class Sensor {
      */
     public static final String STRING_TYPE_PICK_UP_GESTURE = "android.sensor.pick_up_gesture";
 
+     /**
+     * A constant describing a wrist tilt gesture sensor.
+     *
+     * A sensor of this type triggers when the device face is tilted towards the user.
+     * The only allowed return value is 1.0.
+     * This sensor remains active until disabled.
+     *
+     * @hide This sensor is expected to only be used by the system ui
+     */
+    @SystemApi
+    public static final int TYPE_WRIST_TILT_GESTURE = 26;
+
+    /**
+     * A constant string describing a wrist tilt gesture sensor.
+     *
+     * @hide This sensor is expected to only be used by the system ui
+     * @see #TYPE_WRIST_TILT_GESTURE
+     */
+    @SystemApi
+    public static final String STRING_TYPE_WRIST_TILT_GESTURE = "android.sensor.wrist_tilt_gesture";
+
     /**
      * A constant describing all sensor types.
      */
@@ -558,6 +580,10 @@ public final class Sensor {
     private static final int REPORTING_MODE_MASK = 0xE;
     private static final int REPORTING_MODE_SHIFT = 1;
 
+    // MASK for LSB fifth bit. Used to know whether the sensor supports data injection or not.
+    private static final int DATA_INJECTION_MASK = 0x10;
+    private static final int DATA_INJECTION_SHIFT = 4;
+
     // TODO(): The following arrays are fragile and error-prone. This needs to be refactored.
 
     // Note: This needs to be updated, whenever a new sensor is added.
@@ -591,6 +617,7 @@ public final class Sensor {
             1, // SENSOR_TYPE_WAKE_GESTURE
             1, // SENSOR_TYPE_GLANCE_GESTURE
             1, // SENSOR_TYPE_PICK_UP_GESTURE
+            1, // SENSOR_TYPE_WRIST_TILT_GESTURE
     };
 
     /**
@@ -799,6 +826,20 @@ public final class Sensor {
         return (mFlags & SENSOR_FLAG_WAKE_UP_SENSOR) != 0;
     }
 
+    /**
+     * Returns true if the sensor supports data injection when the
+     * HAL is set to data injection mode.
+     *
+     * @return <code>true</code> if the sensor supports data
+     *         injection when the HAL is set in injection mode,
+     *         false otherwise.
+     * @hide
+     */
+    @SystemApi
+    public boolean isDataInjectionSupported() {
+        return (((mFlags & DATA_INJECTION_MASK) >> DATA_INJECTION_SHIFT)) != 0;
+    }
+
     void setRange(float max, float res) {
         mMaxRange = max;
         mResolution = res;
@@ -809,5 +850,97 @@ public final class Sensor {
         return "{Sensor name=\"" + mName + "\", vendor=\"" + mVendor + "\", version=" + mVersion
                 + ", type=" + mType + ", maxRange=" + mMaxRange + ", resolution=" + mResolution
                 + ", power=" + mPower + ", minDelay=" + mMinDelay + "}";
+    }
+
+    /**
+     * Sets the Type associated with the sensor.
+     * NOTE: to be used only by native bindings in SensorManager.
+     *
+     * This allows interned static strings to be used across all representations of the Sensor. If
+     * a sensor type is not referenced here, it will still be interned by the native SensorManager.
+     *
+     * @return {@code true} if the StringType was successfully set, {@code false} otherwise.
+     */
+    private boolean setType(int value) {
+        mType = value;
+        switch (mType) {
+            case TYPE_ACCELEROMETER:
+                mStringType = STRING_TYPE_ACCELEROMETER;
+                return true;
+            case TYPE_AMBIENT_TEMPERATURE:
+                mStringType = STRING_TYPE_AMBIENT_TEMPERATURE;
+                return true;
+            case TYPE_GAME_ROTATION_VECTOR:
+                mStringType = STRING_TYPE_GAME_ROTATION_VECTOR;
+                return true;
+            case TYPE_GEOMAGNETIC_ROTATION_VECTOR:
+                mStringType = STRING_TYPE_GEOMAGNETIC_ROTATION_VECTOR;
+                return true;
+            case TYPE_GLANCE_GESTURE:
+                mStringType = STRING_TYPE_GLANCE_GESTURE;
+                return true;
+            case TYPE_GRAVITY:
+                mStringType = STRING_TYPE_GRAVITY;
+                return true;
+            case TYPE_GYROSCOPE:
+                mStringType = STRING_TYPE_GYROSCOPE;
+                return true;
+            case TYPE_GYROSCOPE_UNCALIBRATED:
+                mStringType = STRING_TYPE_GYROSCOPE_UNCALIBRATED;
+                return true;
+            case TYPE_HEART_RATE:
+                mStringType = STRING_TYPE_HEART_RATE;
+                return true;
+            case TYPE_LIGHT:
+                mStringType = STRING_TYPE_LIGHT;
+                return true;
+            case TYPE_LINEAR_ACCELERATION:
+                mStringType = STRING_TYPE_LINEAR_ACCELERATION;
+                return true;
+            case TYPE_MAGNETIC_FIELD:
+                mStringType = STRING_TYPE_MAGNETIC_FIELD;
+                return true;
+            case TYPE_MAGNETIC_FIELD_UNCALIBRATED:
+                mStringType = STRING_TYPE_MAGNETIC_FIELD_UNCALIBRATED;
+                return true;
+            case TYPE_PICK_UP_GESTURE:
+                mStringType = STRING_TYPE_PICK_UP_GESTURE;
+                return true;
+            case TYPE_PRESSURE:
+                mStringType = STRING_TYPE_PRESSURE;
+                return true;
+            case TYPE_PROXIMITY:
+                mStringType = STRING_TYPE_PROXIMITY;
+                return true;
+            case TYPE_RELATIVE_HUMIDITY:
+                mStringType = STRING_TYPE_RELATIVE_HUMIDITY;
+                return true;
+            case TYPE_ROTATION_VECTOR:
+                mStringType = STRING_TYPE_ROTATION_VECTOR;
+                return true;
+            case TYPE_SIGNIFICANT_MOTION:
+                mStringType = STRING_TYPE_SIGNIFICANT_MOTION;
+                return true;
+            case TYPE_STEP_COUNTER:
+                mStringType = STRING_TYPE_STEP_COUNTER;
+                return true;
+            case TYPE_STEP_DETECTOR:
+                mStringType = STRING_TYPE_STEP_DETECTOR;
+                return true;
+            case TYPE_TILT_DETECTOR:
+                mStringType = SENSOR_STRING_TYPE_TILT_DETECTOR;
+                return true;
+            case TYPE_WAKE_GESTURE:
+                mStringType = STRING_TYPE_WAKE_GESTURE;
+                return true;
+            case TYPE_ORIENTATION:
+                mStringType = STRING_TYPE_ORIENTATION;
+                return true;
+            case TYPE_TEMPERATURE:
+                mStringType = STRING_TYPE_TEMPERATURE;
+                return true;
+            default:
+                return false;
+        }
     }
 }

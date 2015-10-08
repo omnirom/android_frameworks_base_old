@@ -16,7 +16,6 @@
 
 package com.android.layoutlib.bridge.intensive;
 
-import com.android.annotations.NonNull;
 import com.android.ide.common.rendering.api.LayoutLog;
 import com.android.ide.common.rendering.api.RenderSession;
 import com.android.ide.common.rendering.api.Result;
@@ -32,10 +31,16 @@ import com.android.layoutlib.bridge.Bridge;
 import com.android.layoutlib.bridge.intensive.setup.ConfigGenerator;
 import com.android.layoutlib.bridge.intensive.setup.LayoutLibTestCallback;
 import com.android.layoutlib.bridge.intensive.setup.LayoutPullParser;
+import com.android.resources.Density;
+import com.android.resources.Navigation;
 import com.android.utils.ILogger;
 
-import org.junit.Before;
+import org.junit.AfterClass;
+import org.junit.BeforeClass;
 import org.junit.Test;
+
+import android.annotation.NonNull;
+import android.annotation.Nullable;
 
 import java.io.File;
 import java.io.FileFilter;
@@ -81,11 +86,11 @@ public class Main {
     /** Location of the app's res dir inside {@link #TEST_RES_DIR}*/
     private static final String APP_TEST_RES = APP_TEST_DIR + "/src/main/res";
 
-    private LayoutLog mLayoutLibLog;
-    private FrameworkResources mFrameworkRepo;
-    private ResourceRepository mProjectResources;
-    private ILogger mLogger;
-    private Bridge mBridge;
+    private static LayoutLog sLayoutLibLog;
+    private static FrameworkResources sFrameworkRepo;
+    private static ResourceRepository sProjectResources;
+    private static  ILogger sLogger;
+    private static Bridge sBridge;
 
     static {
         // Test that System Properties are properly set.
@@ -122,9 +127,14 @@ public class Main {
         if (platformDir != null) {
             return platformDir;
         }
-        // Test if workingDir is  platform/frameworks/base/tools/layoutlib. That is, root should be
-        // workingDir/../../../../  (4 levels up)
+
+        // Test if workingDir is platform/frameworks/base/tools/layoutlib/bridge.
         File currentDir = workingDir;
+        if (currentDir.getName().equalsIgnoreCase("bridge")) {
+            currentDir = currentDir.getParentFile();
+        }
+        // Test if currentDir is  platform/frameworks/base/tools/layoutlib. That is, root should be
+        // workingDir/../../../../  (4 levels up)
         for (int i = 0; i < 4; i++) {
             if (currentDir != null) {
                 currentDir = currentDir.getParentFile();
@@ -249,47 +259,105 @@ public class Main {
     /**
      * Initialize the bridge and the resource maps.
      */
-    @Before
-    public void setUp() {
+    @BeforeClass
+    public static void setUp() {
         File data_dir = new File(PLATFORM_DIR, "data");
         File res = new File(data_dir, "res");
-        mFrameworkRepo = new FrameworkResources(new FolderWrapper(res));
-        mFrameworkRepo.loadResources();
-        mFrameworkRepo.loadPublicResources(getLogger());
+        sFrameworkRepo = new FrameworkResources(new FolderWrapper(res));
+        sFrameworkRepo.loadResources();
+        sFrameworkRepo.loadPublicResources(getLogger());
 
-        mProjectResources =
+        sProjectResources =
                 new ResourceRepository(new FolderWrapper(TEST_RES_DIR + APP_TEST_RES), false) {
             @NonNull
             @Override
-            protected ResourceItem createResourceItem(String name) {
+            protected ResourceItem createResourceItem(@NonNull String name) {
                 return new ResourceItem(name);
             }
         };
-        mProjectResources.loadResources();
+        sProjectResources.loadResources();
 
         File fontLocation = new File(data_dir, "fonts");
         File buildProp = new File(PLATFORM_DIR, "build.prop");
         File attrs = new File(res, "values" + File.separator + "attrs.xml");
-        mBridge = new Bridge();
-        mBridge.init(ConfigGenerator.loadProperties(buildProp), fontLocation,
+        sBridge = new Bridge();
+        sBridge.init(ConfigGenerator.loadProperties(buildProp), fontLocation,
                 ConfigGenerator.getEnumMap(attrs), getLayoutLog());
     }
 
-    /**
-     * Create a new rendering session and test that rendering /layout/activity.xml on nexus 5
-     * doesn't throw any exceptions.
-     */
+    /** Test activity.xml */
     @Test
-    public void testRendering() throws ClassNotFoundException {
+    public void testActivity() throws ClassNotFoundException {
+        renderAndVerify("activity.xml", "activity.png");
+
+    }
+
+    /** Test allwidgets.xml */
+    @Test
+    public void testAllWidgets() throws ClassNotFoundException {
+        renderAndVerify("allwidgets.xml", "allwidgets.png");
+    }
+
+    @Test
+    public void testArrayCheck() throws ClassNotFoundException {
+        renderAndVerify("array_check.xml", "array_check.png");
+    }
+
+    @AfterClass
+    public static void tearDown() {
+        sLayoutLibLog = null;
+        sFrameworkRepo = null;
+        sProjectResources = null;
+        sLogger = null;
+        sBridge = null;
+    }
+
+    /** Test expand_layout.xml */
+    @Test
+    public void testExpand() throws ClassNotFoundException {
         // Create the layout pull parser.
-        LayoutPullParser parser = new LayoutPullParser(APP_TEST_RES + "/layout/activity.xml");
+        LayoutPullParser parser = new LayoutPullParser(APP_TEST_RES + "/layout/" +
+                "expand_vert_layout.xml");
         // Create LayoutLibCallback.
         LayoutLibTestCallback layoutLibCallback = new LayoutLibTestCallback(getLogger());
         layoutLibCallback.initResources();
+
+        ConfigGenerator customConfigGenerator = new ConfigGenerator()
+                .setScreenWidth(300)
+                .setScreenHeight(20)
+                .setDensity(Density.XHIGH)
+                .setNavigation(Navigation.NONAV);
+
+        SessionParams params = getSessionParams(parser, customConfigGenerator,
+                layoutLibCallback, "Theme.Material.NoActionBar.Fullscreen", false,
+                RenderingMode.V_SCROLL, 22);
+
+        renderAndVerify(params, "expand_vert_layout.png");
+
+        customConfigGenerator = new ConfigGenerator()
+                .setScreenWidth(20)
+                .setScreenHeight(300)
+                .setDensity(Density.XHIGH)
+                .setNavigation(Navigation.NONAV);
+        parser = new LayoutPullParser(APP_TEST_RES + "/layout/" +
+                "expand_horz_layout.xml");
+        params = getSessionParams(parser, customConfigGenerator,
+                layoutLibCallback, "Theme.Material.NoActionBar.Fullscreen", false,
+                RenderingMode.H_SCROLL, 22);
+
+        renderAndVerify(params, "expand_horz_layout.png");
+    }
+
+    /**
+     * Create a new rendering session and test that rendering given layout on nexus 5
+     * doesn't throw any exceptions and matches the provided image.
+     */
+    private void renderAndVerify(SessionParams params, String goldenFileName)
+            throws ClassNotFoundException {
         // TODO: Set up action bar handler properly to test menu rendering.
         // Create session params.
-        SessionParams params = getSessionParams(parser, ConfigGenerator.NEXUS_5, layoutLibCallback);
-        RenderSession session = mBridge.createSession(params);
+        RenderSession session = sBridge.createSession(params);
+
         if (!session.getResult().isSuccess()) {
             getLogger().error(session.getResult().getException(),
                     session.getResult().getErrorMessage());
@@ -301,7 +369,7 @@ public class Main {
                     session.getResult().getErrorMessage());
         }
         try {
-            String goldenImagePath = APP_TEST_DIR + "/golden/activity.png";
+            String goldenImagePath = APP_TEST_DIR + "/golden/" + goldenFileName;
             ImageUtils.requireSimilar(goldenImagePath, session.getImage());
         } catch (IOException e) {
             getLogger().error(e, e.getMessage());
@@ -309,31 +377,50 @@ public class Main {
     }
 
     /**
-     * Uses Theme.Material and Target sdk version as 21.
+     * Create a new rendering session and test that rendering given layout on nexus 5
+     * doesn't throw any exceptions and matches the provided image.
+     */
+    private void renderAndVerify(String layoutFileName, String goldenFileName)
+            throws ClassNotFoundException {
+        // Create the layout pull parser.
+        LayoutPullParser parser = new LayoutPullParser(APP_TEST_RES + "/layout/" + layoutFileName);
+        // Create LayoutLibCallback.
+        LayoutLibTestCallback layoutLibCallback = new LayoutLibTestCallback(getLogger());
+        layoutLibCallback.initResources();
+        // TODO: Set up action bar handler properly to test menu rendering.
+        // Create session params.
+        SessionParams params = getSessionParams(parser, ConfigGenerator.NEXUS_5,
+                layoutLibCallback, "AppTheme", true, RenderingMode.NORMAL, 22);
+        renderAndVerify(params, goldenFileName);
+    }
+
+    /**
+     * Uses Theme.Material and Target sdk version as 22.
      */
     private SessionParams getSessionParams(LayoutPullParser layoutParser,
-            ConfigGenerator configGenerator, LayoutLibTestCallback layoutLibCallback) {
+            ConfigGenerator configGenerator, LayoutLibTestCallback layoutLibCallback,
+            String themeName, boolean isProjectTheme, RenderingMode renderingMode, int targetSdk) {
         FolderConfiguration config = configGenerator.getFolderConfig();
         ResourceResolver resourceResolver =
-                ResourceResolver.create(mProjectResources.getConfiguredResources(config),
-                        mFrameworkRepo.getConfiguredResources(config),
-                        "Theme.Material.Light.DarkActionBar", false);
+                ResourceResolver.create(sProjectResources.getConfiguredResources(config),
+                        sFrameworkRepo.getConfiguredResources(config),
+                        themeName, isProjectTheme);
 
         return new SessionParams(
                 layoutParser,
-                RenderingMode.NORMAL,
+                renderingMode,
                 null /*used for caching*/,
                 configGenerator.getHardwareConfig(),
                 resourceResolver,
                 layoutLibCallback,
                 0,
-                21, // TODO: Make it more configurable to run tests for various versions.
+                targetSdk,
                 getLayoutLog());
     }
 
-    private LayoutLog getLayoutLog() {
-        if (mLayoutLibLog == null) {
-            mLayoutLibLog = new LayoutLog() {
+    private static LayoutLog getLayoutLog() {
+        if (sLayoutLibLog == null) {
+            sLayoutLibLog = new LayoutLog() {
                 @Override
                 public void warning(String tag, String message, Object data) {
                     System.out.println("Warning " + tag + ": " + message);
@@ -341,13 +428,14 @@ public class Main {
                 }
 
                 @Override
-                public void fidelityWarning(String tag, String message, Throwable throwable,
-                        Object data) {
+                public void fidelityWarning(@Nullable String tag, String message,
+                        Throwable throwable, Object data) {
+
                     System.out.println("FidelityWarning " + tag + ": " + message);
                     if (throwable != null) {
                         throwable.printStackTrace();
                     }
-                    failWithMsg(message);
+                    failWithMsg(message == null ? "" : message);
                 }
 
                 @Override
@@ -366,40 +454,40 @@ public class Main {
                 }
             };
         }
-        return mLayoutLibLog;
+        return sLayoutLibLog;
     }
 
-    private ILogger getLogger() {
-        if (mLogger == null) {
-            mLogger = new ILogger() {
+    private static ILogger getLogger() {
+        if (sLogger == null) {
+            sLogger = new ILogger() {
                 @Override
-                public void error(Throwable t, String msgFormat, Object... args) {
+                public void error(Throwable t, @Nullable String msgFormat, Object... args) {
                     if (t != null) {
                         t.printStackTrace();
                     }
+                    failWithMsg(msgFormat == null ? "" : msgFormat, args);
+                }
+
+                @Override
+                public void warning(@NonNull String msgFormat, Object... args) {
                     failWithMsg(msgFormat, args);
                 }
 
                 @Override
-                public void warning(String msgFormat, Object... args) {
-                    failWithMsg(msgFormat, args);
-                }
-
-                @Override
-                public void info(String msgFormat, Object... args) {
+                public void info(@NonNull String msgFormat, Object... args) {
                     // pass.
                 }
 
                 @Override
-                public void verbose(String msgFormat, Object... args) {
+                public void verbose(@NonNull String msgFormat, Object... args) {
                     // pass.
                 }
             };
         }
-        return mLogger;
+        return sLogger;
     }
 
-    private static void failWithMsg(String msgFormat, Object... args) {
-        fail(msgFormat == null || args == null ? "" : String.format(msgFormat, args));
+    private static void failWithMsg(@NonNull String msgFormat, Object... args) {
+        fail(args == null ? "" : String.format(msgFormat, args));
     }
 }

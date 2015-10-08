@@ -61,7 +61,7 @@ public class Html {
      */
     public static interface ImageGetter {
         /**
-         * This methos is called when the HTML parser encounters an
+         * This method is called when the HTML parser encounters an
          * &lt;img&gt; tag.  The <code>source</code> argument is the
          * string from the "src" attribute; the return value should be
          * a Drawable representation of the image or <code>null</code>
@@ -137,7 +137,12 @@ public class Html {
     }
 
     /**
-     * Returns an HTML representation of the provided Spanned text.
+     * Returns an HTML representation of the provided Spanned text. A best effort is
+     * made to add HTML tags corresponding to spans. Also note that HTML metacharacters
+     * (such as "&lt;" and "&amp;") within the input text are escaped.
+     *
+     * @param text input text to convert
+     * @return string containing input converted to HTML
      */
     public static String toHtml(Spanned text) {
         StringBuilder out = new StringBuilder();
@@ -244,13 +249,18 @@ public class Html {
                 next++;
             }
 
-            withinParagraph(out, text, i, next - nl, nl, next == end);
+            if (withinParagraph(out, text, i, next - nl, nl, next == end)) {
+                /* Paragraph should be closed */
+                out.append("</p>\n");
+                out.append(getOpenParaTagWithDirection(text, next, end));
+            }
         }
 
         out.append("</p>\n");
     }
 
-    private static void withinParagraph(StringBuilder out, Spanned text,
+    /* Returns true if the caller should close and reopen the paragraph. */
+    private static boolean withinParagraph(StringBuilder out, Spanned text,
                                         int start, int end, int nl,
                                         boolean last) {
         int next;
@@ -273,7 +283,7 @@ public class Html {
                 if (style[j] instanceof TypefaceSpan) {
                     String s = ((TypefaceSpan) style[j]).getFamily();
 
-                    if (s.equals("monospace")) {
+                    if ("monospace".equals(s)) {
                         out.append("<tt>");
                     }
                 }
@@ -363,17 +373,14 @@ public class Html {
             }
         }
 
-        String p = last ? "" : "</p>\n" + getOpenParaTagWithDirection(text, start, end);
-
         if (nl == 1) {
             out.append("<br>\n");
-        } else if (nl == 2) {
-            out.append(p);
+            return false;
         } else {
             for (int i = 2; i < nl; i++) {
                 out.append("<br>");
             }
-            out.append(p);
+            return !last;
         }
     }
 
@@ -672,7 +679,7 @@ class HtmlToSpannedConverter implements ContentHandler {
                     String name = f.mColor.substring(1);
                     int colorRes = res.getIdentifier(name, "color", "android");
                     if (colorRes != 0) {
-                        ColorStateList colors = res.getColorStateList(colorRes);
+                        ColorStateList colors = res.getColorStateList(colorRes, null);
                         text.setSpan(new TextAppearanceSpan(null, 0, 0, colors, null),
                                 where, len,
                                 Spannable.SPAN_EXCLUSIVE_EXCLUSIVE);

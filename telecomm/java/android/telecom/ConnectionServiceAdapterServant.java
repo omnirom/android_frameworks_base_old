@@ -17,6 +17,7 @@
 package android.telecom;
 
 import android.net.Uri;
+import android.os.Bundle;
 import android.os.Handler;
 import android.os.Message;
 import android.os.RemoteException;
@@ -59,6 +60,8 @@ final class ConnectionServiceAdapterServant {
     private static final int MSG_SET_CONFERENCEABLE_CONNECTIONS = 20;
     private static final int MSG_ADD_EXISTING_CONNECTION = 21;
     private static final int MSG_ON_POST_DIAL_CHAR = 22;
+    private static final int MSG_SET_CONFERENCE_MERGE_FAILED = 23;
+    private static final int MSG_SET_EXTRAS = 24;
 
     private final IConnectionServiceAdapter mDelegate;
 
@@ -220,6 +223,23 @@ final class ConnectionServiceAdapterServant {
                     }
                     break;
                 }
+                case MSG_SET_CONFERENCE_MERGE_FAILED: {
+                    SomeArgs args = (SomeArgs) msg.obj;
+                    try {
+                        mDelegate.setConferenceMergeFailed((String) args.arg1);
+                    } finally {
+                        args.recycle();
+                    }
+                    break;
+                }
+                case MSG_SET_EXTRAS: {
+                    SomeArgs args = (SomeArgs) msg.obj;
+                    try {
+                        mDelegate.setExtras((String) args.arg1, (Bundle) args.arg2);
+                    } finally {
+                        args.recycle();
+                    }
+                }
             }
         }
     };
@@ -277,6 +297,13 @@ final class ConnectionServiceAdapterServant {
             mHandler.obtainMessage(
                     MSG_SET_CONNECTION_CAPABILITIES, connectionCapabilities, 0, connectionId)
                     .sendToTarget();
+        }
+
+        @Override
+        public void setConferenceMergeFailed(String callId) {
+            SomeArgs args = SomeArgs.obtain();
+            args.arg1 = callId;
+            mHandler.obtainMessage(MSG_SET_CONFERENCE_MERGE_FAILED, args).sendToTarget();
         }
 
         @Override
@@ -383,6 +410,14 @@ final class ConnectionServiceAdapterServant {
             args.arg1 = connectionId;
             args.arg2 = connection;
             mHandler.obtainMessage(MSG_ADD_EXISTING_CONNECTION, args).sendToTarget();
+        }
+
+        @Override
+        public final void setExtras(String connectionId, Bundle extras) {
+            SomeArgs args = SomeArgs.obtain();
+            args.arg1 = connectionId;
+            args.arg2 = extras;
+            mHandler.obtainMessage(MSG_SET_EXTRAS, args).sendToTarget();
         }
     };
 

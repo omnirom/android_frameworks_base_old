@@ -230,6 +230,15 @@ public class DialogFragment extends Fragment
         ft.commit();
     }
 
+    /** {@hide} */
+    public void showAllowingStateLoss(FragmentManager manager, String tag) {
+        mDismissed = false;
+        mShownByMe = true;
+        FragmentTransaction ft = manager.beginTransaction();
+        ft.add(this, tag);
+        ft.commitAllowingStateLoss();
+    }
+
     /**
      * Display the dialog, adding the fragment using an existing transaction
      * and then committing the transaction.
@@ -410,7 +419,7 @@ public class DialogFragment extends Fragment
             return (LayoutInflater)mDialog.getContext().getSystemService(
                     Context.LAYOUT_INFLATER_SERVICE);
         }
-        return (LayoutInflater)mActivity.getSystemService(
+        return (LayoutInflater) mHost.getContext().getSystemService(
                 Context.LAYOUT_INFLATER_SERVICE);
     }
     

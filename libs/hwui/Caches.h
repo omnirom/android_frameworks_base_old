@@ -21,7 +21,28 @@
     #define LOG_TAG "OpenGLRenderer"
 #endif
 
+
+#include "AssetAtlas.h"
+#include "Dither.h"
+#include "Extensions.h"
+#include "FboCache.h"
+#include "GradientCache.h"
+#include "LayerCache.h"
+#include "PatchCache.h"
+#include "ProgramCache.h"
+#include "PathCache.h"
+#include "RenderBufferCache.h"
+#include "renderstate/PixelBufferState.h"
+#include "renderstate/TextureState.h"
+#include "ResourceCache.h"
+#include "TessellationCache.h"
+#include "TextDropShadowCache.h"
+#include "TextureCache.h"
+#include "thread/TaskProcessor.h"
+#include "thread/TaskManager.h"
+
 #include <vector>
+#include <memory>
 
 #include <GLES3/gl3.h>
 
@@ -31,76 +52,12 @@
 
 #include <cutils/compiler.h>
 
-#include "thread/TaskProcessor.h"
-#include "thread/TaskManager.h"
-
-#include "AssetAtlas.h"
-#include "Extensions.h"
-#include "FontRenderer.h"
-#include "GammaFontRenderer.h"
-#include "TextureCache.h"
-#include "LayerCache.h"
-#include "RenderBufferCache.h"
-#include "GradientCache.h"
-#include "PatchCache.h"
-#include "ProgramCache.h"
-#include "PathCache.h"
-#include "TessellationCache.h"
-#include "TextDropShadowCache.h"
-#include "FboCache.h"
-#include "ResourceCache.h"
-#include "Stencil.h"
-#include "Dither.h"
+#include <SkPath.h>
 
 namespace android {
 namespace uirenderer {
 
-///////////////////////////////////////////////////////////////////////////////
-// Globals
-///////////////////////////////////////////////////////////////////////////////
-
-// GL ES 2.0 defines that at least 16 texture units must be supported
-#define REQUIRED_TEXTURE_UNITS_COUNT 3
-
-// Maximum number of quads that pre-allocated meshes can draw
-static const uint32_t gMaxNumberOfQuads = 2048;
-
-// Generates simple and textured vertices
-#define FV(x, y, u, v) { x, y, u, v }
-
-// This array is never used directly but used as a memcpy source in the
-// OpenGLRenderer constructor
-static const TextureVertex gMeshVertices[] = {
-        FV(0.0f, 0.0f, 0.0f, 0.0f),
-        FV(1.0f, 0.0f, 1.0f, 0.0f),
-        FV(0.0f, 1.0f, 0.0f, 1.0f),
-        FV(1.0f, 1.0f, 1.0f, 1.0f)
-};
-static const GLsizei gMeshStride = sizeof(TextureVertex);
-static const GLsizei gVertexStride = sizeof(Vertex);
-static const GLsizei gAlphaVertexStride = sizeof(AlphaVertex);
-static const GLsizei gMeshTextureOffset = 2 * sizeof(float);
-static const GLsizei gVertexAlphaOffset = 2 * sizeof(float);
-static const GLsizei gVertexAAWidthOffset = 2 * sizeof(float);
-static const GLsizei gVertexAALengthOffset = 3 * sizeof(float);
-static const GLsizei gMeshCount = 4;
-
-// Must define as many texture units as specified by REQUIRED_TEXTURE_UNITS_COUNT
-static const GLenum gTextureUnits[] = {
-    GL_TEXTURE0,
-    GL_TEXTURE1,
-    GL_TEXTURE2
-};
-
-///////////////////////////////////////////////////////////////////////////////
-// Debug
-///////////////////////////////////////////////////////////////////////////////
-
-struct CacheLogger {
-    CacheLogger() {
-        INIT_LOGD("Creating OpenGL renderer caches");
-    }
-}; // struct CacheLogger
+class GammaFontRenderer;
 
 ///////////////////////////////////////////////////////////////////////////////
 // Caches
@@ -109,12 +66,25 @@ struct CacheLogger {
 class RenderNode;
 class RenderState;
 
-class ANDROID_API Caches: public Singleton<Caches> {
-    Caches();
+class ANDROID_API Caches {
+public:
+    static Caches& createInstance(RenderState& renderState) {
+        LOG_ALWAYS_FATAL_IF(sInstance, "double create of Caches attempted");
+        sInstance = new Caches(renderState);
+        return *sInstance;
+    }
 
-    friend class Singleton<Caches>;
+    static Caches& getInstance() {
+        LOG_ALWAYS_FATAL_IF(!sInstance, "instance not yet created");
+        return *sInstance;
+    }
 
-    CacheLogger mLogger;
+    static bool hasInstance() {
+        return sInstance != nullptr;
+    }
+private:
+    Caches(RenderState& renderState);
+    static Caches* sInstance;
 
 public:
     enum FlushMode {
@@ -129,13 +99,6 @@ public:
     bool init();
 
     /**
-     * Initialize global system properties.
-     */
-    bool initProperties();
-
-    void setRenderState(RenderState* renderState) { mRenderState = renderState; }
-
-    /**
      * Flush the cache.
      *
      * @param mode Indicates how much of the cache should be flushed
@@ -147,14 +110,6 @@ public:
      * be called after a flush(kFlushMode_Full).
      */
     void terminate();
-
-    /**
-     * Indicates whether the renderer is in debug mode.
-     * This debug mode provides limited information to app developers.
-     */
-    DebugLevel getDebugLevel() const {
-        return mDebugLevel;
-    }
 
     /**
      * Returns a non-premultiplied ARGB color for the specified
@@ -173,116 +128,6 @@ public:
      */
     void deleteLayerDeferred(Layer* layer);
 
-    /**
-     * Binds the VBO used to render simple textured quads.
-     */
-    bool bindMeshBuffer();
-
-    /**
-     * Binds the specified VBO if needed.
-     */
-    bool bindMeshBuffer(const GLuint buffer);
-
-    /**
-     * Unbinds the VBO used to render simple textured quads.
-     */
-    bool unbindMeshBuffer();
-
-    /**
-     * Binds a global indices buffer that can draw up to
-     * gMaxNumberOfQuads quads.
-     */
-    bool bindQuadIndicesBuffer();
-    bool bindShadowIndicesBuffer();
-    bool unbindIndicesBuffer();
-
-    /**
-     * Binds the specified buffer as the current GL unpack pixel buffer.
-     */
-    bool bindPixelBuffer(const GLuint buffer);
-
-    /**
-     * Resets the current unpack pixel buffer to 0 (default value.)
-     */
-    bool unbindPixelBuffer();
-
-    /**
-     * Binds an attrib to the specified float vertex pointer.
-     * Assumes a stride of gMeshStride and a size of 2.
-     */
-    void bindPositionVertexPointer(bool force, const GLvoid* vertices, GLsizei stride = gMeshStride);
-
-    /**
-     * Binds an attrib to the specified float vertex pointer.
-     * Assumes a stride of gMeshStride and a size of 2.
-     */
-    void bindTexCoordsVertexPointer(bool force, const GLvoid* vertices, GLsizei stride = gMeshStride);
-
-    /**
-     * Resets the vertex pointers.
-     */
-    void resetVertexPointers();
-    void resetTexCoordsVertexPointer();
-
-    void enableTexCoordsVertexArray();
-    void disableTexCoordsVertexArray();
-
-    /**
-     * Activate the specified texture unit. The texture unit must
-     * be specified using an integer number (0 for GL_TEXTURE0 etc.)
-     */
-    void activeTexture(GLuint textureUnit);
-
-    /**
-     * Invalidate the cached value of the active texture unit.
-     */
-    void resetActiveTexture();
-
-    /**
-     * Binds the specified texture as a GL_TEXTURE_2D texture.
-     * All texture bindings must be performed with this method or
-     * bindTexture(GLenum, GLuint).
-     */
-    void bindTexture(GLuint texture);
-
-    /**
-     * Binds the specified texture with the specified render target.
-     * All texture bindings must be performed with this method or
-     * bindTexture(GLuint).
-     */
-    void bindTexture(GLenum target, GLuint texture);
-
-    /**
-     * Deletes the specified texture and clears it from the cache
-     * of bound textures.
-     * All textures must be deleted using this method.
-     */
-    void deleteTexture(GLuint texture);
-
-    /**
-     * Signals that the cache of bound textures should be cleared.
-     * Other users of the context may have altered which textures are bound.
-     */
-    void resetBoundTextures();
-
-    /**
-     * Clear the cache of bound textures.
-     */
-    void unbindTexture(GLuint texture);
-
-    /**
-     * Sets the scissor for the current surface.
-     */
-    bool setScissor(GLint x, GLint y, GLint width, GLint height);
-
-    /**
-     * Resets the scissor state.
-     */
-    void resetScissor();
-
-    bool enableScissor();
-    bool disableScissor();
-    void setScissorEnabled(bool enabled);
 
     void startTiling(GLuint x, GLuint y, GLuint width, GLuint height, bool discard);
     void endTiling();
@@ -304,39 +149,21 @@ public:
     void registerFunctors(uint32_t functorCount);
     void unregisterFunctors(uint32_t functorCount);
 
-    bool blend;
-    GLenum lastSrcMode;
-    GLenum lastDstMode;
-    Program* currentProgram;
-    bool scissorEnabled;
-
-    bool drawDeferDisabled;
-    bool drawReorderDisabled;
-
-    // VBO to draw with
-    GLuint meshBuffer;
-
     // Misc
     GLint maxTextureSize;
 
-    // Debugging
-    bool debugLayersUpdates;
-    bool debugOverdraw;
-
-    enum StencilClipDebug {
-        kStencilHide,
-        kStencilShowHighlight,
-        kStencilShowRegion
-    };
-    StencilClipDebug debugStencilClip;
-
+private:
+    // Declared before gradientCache and programCache which need this to initialize.
+    // TODO: cleanup / move elsewhere
+    Extensions mExtensions;
+public:
     TextureCache textureCache;
     LayerCache layerCache;
     RenderBufferCache renderBufferCache;
     GradientCache gradientCache;
-    ProgramCache programCache;
-    PathCache pathCache;
     PatchCache patchCache;
+    PathCache pathCache;
+    ProgramCache programCache;
     TessellationCache tessellationCache;
     TextDropShadowCache dropShadowCache;
     FboCache fboCache;
@@ -346,7 +173,6 @@ public:
     TaskManager tasks;
 
     Dither dither;
-    Stencil stencil;
 
     bool gpuPixelBuffersEnabled;
 
@@ -355,85 +181,42 @@ public:
     PFNGLPUSHGROUPMARKEREXTPROC startMark;
     PFNGLPOPGROUPMARKEREXTPROC endMark;
 
-    PFNGLLABELOBJECTEXTPROC setLabel;
-    PFNGLGETOBJECTLABELEXTPROC getLabel;
+    void setProgram(const ProgramDescription& description);
+    void setProgram(Program* program);
 
-    // TEMPORARY properties
-    void initTempProperties();
-    void setTempProperty(const char* name, const char* value);
-
-    float propertyLightDiameter;
-    float propertyLightPosY;
-    float propertyLightPosZ;
-    float propertyAmbientRatio;
-    int propertyAmbientShadowStrength;
-    int propertySpotShadowStrength;
+    Extensions& extensions() { return mExtensions; }
+    Program& program() { return *mProgram; }
+    PixelBufferState& pixelBufferState() { return *mPixelBufferState; }
+    TextureState& textureState() { return *mTextureState; }
 
 private:
-    enum OverdrawColorSet {
-        kColorSet_Default = 0,
-        kColorSet_Deuteranomaly
-    };
 
     void initFont();
     void initExtensions();
     void initConstraints();
     void initStaticProperties();
 
-    bool bindIndicesBufferInternal(const GLuint buffer);
-
     static void eventMarkNull(GLsizei length, const GLchar* marker) { }
     static void startMarkNull(GLsizei length, const GLchar* marker) { }
     static void endMarkNull() { }
 
-    static void setLabelNull(GLenum type, uint object, GLsizei length,
-            const char* label) { }
-    static void getLabelNull(GLenum type, uint object, GLsizei bufferSize,
-            GLsizei* length, char* label) {
-        if (length) *length = 0;
-        if (label) *label = '\0';
-    }
-
-    GLuint mCurrentBuffer;
-    GLuint mCurrentIndicesBuffer;
-    GLuint mCurrentPixelBuffer;
-    const void* mCurrentPositionPointer;
-    GLsizei mCurrentPositionStride;
-    const void* mCurrentTexCoordsPointer;
-    GLsizei mCurrentTexCoordsStride;
-
-    bool mTexCoordsArrayEnabled;
-
-    GLuint mTextureUnit;
-
-    GLint mScissorX;
-    GLint mScissorY;
-    GLint mScissorWidth;
-    GLint mScissorHeight;
-
-    Extensions& mExtensions;
+    RenderState* mRenderState;
 
     // Used to render layers
-    TextureVertex* mRegionMesh;
-
-    // Global index buffer
-    GLuint mMeshIndices;
-    GLuint mShadowStripsIndices;
+    std::unique_ptr<TextureVertex[]> mRegionMesh;
 
     mutable Mutex mGarbageLock;
     Vector<Layer*> mLayerGarbage;
 
-    DebugLevel mDebugLevel;
     bool mInitialized;
 
     uint32_t mFunctorsCount;
 
-    // Caches texture bindings for the GL_TEXTURE_2D target
-    GLuint mBoundTextures[REQUIRED_TEXTURE_UNITS_COUNT];
+    // TODO: move below to RenderState
+    PixelBufferState* mPixelBufferState = nullptr;
+    TextureState* mTextureState = nullptr;
+    Program* mProgram = nullptr; // note: object owned by ProgramCache
 
-    OverdrawColorSet mOverdrawDebugColorSet;
-
-    RenderState* mRenderState;
 }; // class Caches
 
 }; // namespace uirenderer

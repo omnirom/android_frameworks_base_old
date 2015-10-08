@@ -24,10 +24,16 @@ import android.annotation.SdkConstant.SdkConstantType;
 import android.annotation.SystemApi;
 import android.app.AppOpsManager;
 import android.content.Context;
+import android.net.ConnectivityManager;
+import android.net.ConnectivityManager.NetworkCallback;
 import android.net.DhcpInfo;
+import android.net.Network;
+import android.net.NetworkCapabilities;
+import android.net.NetworkRequest;
 import android.net.wifi.ScanSettings;
 import android.net.wifi.WifiChannel;
 import android.os.Binder;
+import android.os.Build;
 import android.os.IBinder;
 import android.os.Handler;
 import android.os.HandlerThread;
@@ -42,6 +48,7 @@ import android.util.SparseArray;
 import java.net.InetAddress;
 import java.util.concurrent.CountDownLatch;
 
+import com.android.internal.annotations.GuardedBy;
 import com.android.internal.util.AsyncChannel;
 import com.android.internal.util.Protocol;
 
@@ -88,6 +95,28 @@ public class WifiManager {
      * @hide
      */
     public static final String EXTRA_SCAN_AVAILABLE = "scan_enabled";
+
+    /**
+     * Broadcast intent action indicating that the credential of a Wi-Fi network
+     * has been changed. One extra provides the ssid of the network. Another
+     * extra provides the event type, whether the credential is saved or forgot.
+     * @hide
+     */
+    @SystemApi
+    public static final String WIFI_CREDENTIAL_CHANGED_ACTION =
+            "android.net.wifi.WIFI_CREDENTIAL_CHANGED";
+    /** @hide */
+    @SystemApi
+    public static final String EXTRA_WIFI_CREDENTIAL_EVENT_TYPE = "et";
+    /** @hide */
+    @SystemApi
+    public static final String EXTRA_WIFI_CREDENTIAL_SSID = "ssid";
+    /** @hide */
+    @SystemApi
+    public static final int WIFI_CREDENTIAL_SAVED = 0;
+    /** @hide */
+    @SystemApi
+    public static final int WIFI_CREDENTIAL_FORGOT = 1;
 
     /**
      * Broadcast intent action indicating that Wi-Fi has been enabled, disabled,
@@ -181,6 +210,16 @@ public class WifiManager {
      * @hide
      */
     public static final String EXTRA_WIFI_AP_STATE = "wifi_state";
+
+    /**
+     * The look up key for an int that indicates why softAP started failed
+     * currently support general and no_channel
+     * @see #SAP_START_FAILURE_GENERAL
+     * @see #SAP_START_FAILURE_NO_CHANNEL
+     *
+     * @hide
+     */
+    public static final String EXTRA_WIFI_AP_FAILURE_REASON = "wifi_ap_error_code";
     /**
      * The previous Wi-Fi state.
      *
@@ -238,6 +277,20 @@ public class WifiManager {
      */
     public static final int WIFI_AP_STATE_FAILED = 14;
 
+    /**
+     *  If WIFI AP start failed, this reason code means there is no legal channel exists on
+     *  user selected band by regulatory
+     *
+     *  @hide
+     */
+    public static final int SAP_START_FAILURE_GENERAL= 0;
+
+    /**
+     *  All other reason for AP start failed besides SAP_START_FAILURE_GENERAL
+     *
+     *  @hide
+     */
+    public static final int SAP_START_FAILURE_NO_CHANNEL = 1;
     /**
      * Broadcast intent action indicating that a connection to the supplicant has
      * been established (and it is now possible
@@ -374,10 +427,20 @@ public class WifiManager {
     public static final int CHANGE_REASON_CONFIG_CHANGE = 2;
     /**
      * An access point scan has completed, and results are available from the supplicant.
-     * Call {@link #getScanResults()} to obtain the results.
+     * Call {@link #getScanResults()} to obtain the results. {@link #EXTRA_RESULTS_UPDATED}
+     * indicates if the scan was completed successfully.
      */
     @SdkConstant(SdkConstantType.BROADCAST_INTENT_ACTION)
     public static final String SCAN_RESULTS_AVAILABLE_ACTION = "android.net.wifi.SCAN_RESULTS";
+
+    /**
+     * Lookup key for a {@code boolean} representing the result of previous {@link #startScan}
+     * operation, reported with {@link #SCAN_RESULTS_AVAILABLE_ACTION}.
+     * @return true scan was successful, results are updated
+     * @return false scan was not successful, results haven't been updated since previous scan
+     */
+    public static final String EXTRA_RESULTS_UPDATED = "resultsUpdated";
+
     /**
      * A batch of access point scans has been completed and the results areavailable.
      * Call {@link #getBatchedScanResults()} to obtain the results.
@@ -550,6 +613,7 @@ public class WifiManager {
 
     private Context mContext;
     IWifiManager mService;
+    private final int mTargetSdkVersion;
 
     private static final int INVALID_KEY = 0;
     private static int sListenerKey = 1;
@@ -558,11 +622,17 @@ public class WifiManager {
 
     private static AsyncChannel sAsyncChannel;
     private static CountDownLatch sConnected;
+    private static ConnectivityManager sCM;
 
     private static final Object sThreadRefLock = new Object();
     private static int sThreadRefCount;
     private static HandlerThread sHandlerThread;
     private final AppOpsManager mAppOps;
+
+    @GuardedBy("sCM")
+    // TODO: Introduce refcounting and make this a per-process static callback, instead of a
+    // per-WifiManager callback.
+    private PinningNetworkCallback mNetworkCallback;
 
     /**
      * Create a new WifiManager instance.
@@ -577,6 +647,7 @@ public class WifiManager {
     public WifiManager(Context context, IWifiManager service) {
         mContext = context;
         mService = service;
+        mTargetSdkVersion = context.getApplicationInfo().targetSdkVersion;
         init();
         mAppOps = (AppOpsManager)context.getSystemService(Context.APP_OPS_SERVICE);
     }
@@ -604,6 +675,7 @@ public class WifiManager {
         try {
             return mService.getConfiguredNetworks();
         } catch (RemoteException e) {
+            Log.w(TAG, "Caught RemoteException trying to get configured networks: " + e);
             return null;
         }
     }
@@ -623,6 +695,20 @@ public class WifiManager {
     public WifiConnectionStatistics getConnectionStatistics() {
         try {
             return mService.getConnectionStatistics();
+        } catch (RemoteException e) {
+            return null;
+        }
+    }
+
+    /**
+     * Returns a WifiConfiguration matching this ScanResult
+     * @param scanResult scanResult that represents the BSSID
+     * @return {@link WifiConfiguration} that matches this BSSID or null
+     * @hide
+     */
+    public WifiConfiguration getMatchingWifiConfig(ScanResult scanResult) {
+        try {
+            return mService.getMatchingWifiConfig(scanResult);
         } catch (RemoteException e) {
             return null;
         }
@@ -710,6 +796,20 @@ public class WifiManager {
      * networks are disabled, and an attempt to connect to the selected
      * network is initiated. This may result in the asynchronous delivery
      * of state change events.
+     * <p>
+     * <b>Note:</b> If an application's target SDK version is
+     * {@link android.os.Build.VERSION_CODES#LOLLIPOP} or newer, network
+     * communication may not use Wi-Fi even if Wi-Fi is connected; traffic may
+     * instead be sent through another network, such as cellular data,
+     * Bluetooth tethering, or Ethernet. For example, traffic will never use a
+     * Wi-Fi network that does not provide Internet access (e.g. a wireless
+     * printer), if another network that does offer Internet access (e.g.
+     * cellular data) is available. Applications that need to ensure that their
+     * network traffic uses Wi-Fi should use APIs such as
+     * {@link Network#bindSocket(java.net.Socket)},
+     * {@link Network#openConnection(java.net.URL)}, or
+     * {@link ConnectivityManager#bindProcessToNetwork} to do so.
+     *
      * @param netId the ID of the network in the list of configured networks
      * @param disableOthers if true, disable all other networks. The way to
      * select a particular network to connect to is specify {@code true}
@@ -717,11 +817,23 @@ public class WifiManager {
      * @return {@code true} if the operation succeeded
      */
     public boolean enableNetwork(int netId, boolean disableOthers) {
-        try {
-            return mService.enableNetwork(netId, disableOthers);
-        } catch (RemoteException e) {
-            return false;
+        final boolean pin = disableOthers && mTargetSdkVersion < Build.VERSION_CODES.LOLLIPOP;
+        if (pin) {
+            registerPinningNetworkCallback();
         }
+
+        boolean success;
+        try {
+            success = mService.enableNetwork(netId, disableOthers);
+        } catch (RemoteException e) {
+            success = false;
+        }
+
+        if (pin && !success) {
+            unregisterPinningNetworkCallback();
+        }
+
+        return success;
     }
 
     /**
@@ -845,6 +957,14 @@ public class WifiManager {
     public static final int WIFI_FEATURE_TDLS_OFFCHANNEL  = 0x2000;  // Support for TDLS off channel
     /** @hide */
     public static final int WIFI_FEATURE_EPR              = 0x4000;  // Enhanced power reporting
+    /** @hide */
+    public static final int WIFI_FEATURE_AP_STA            = 0x8000;  // Support for AP STA Concurrency
+    /** @hide */
+    public static final int WIFI_FEATURE_LINK_LAYER_STATS  = 0x10000; // Link layer stats collection
+    /** @hide */
+    public static final int WIFI_FEATURE_LOGGER            = 0x20000; // WiFi Logger
+    /** @hide */
+    public static final int WIFI_FEATURE_HAL_EPNO          = 0x40000; // WiFi PNO enhanced
 
     private int getSupportedFeatures() {
         try {
@@ -956,7 +1076,7 @@ public class WifiManager {
      * @return true if this adapter supports advanced power/performance counters
      */
     public boolean isEnhancedPowerReportingSupported() {
-        return isFeatureSupported(WIFI_FEATURE_EPR);
+        return isFeatureSupported(WIFI_FEATURE_LINK_LAYER_STATS);
     }
 
     /**
@@ -978,7 +1098,7 @@ public class WifiManager {
             }
             synchronized(this) {
                 record = mService.reportActivityInfo();
-                if (record.isValid()) {
+                if (record != null && record.isValid()) {
                     return record;
                 } else {
                     return null;
@@ -1187,7 +1307,10 @@ public class WifiManager {
 
     /**
      * Return the results of the latest access point scan.
-     * @return the list of access points found in the most recent scan.
+     * @return the list of access points found in the most recent scan. An app must hold
+     * {@link android.Manifest.permission#ACCESS_COARSE_LOCATION ACCESS_COARSE_LOCATION} or
+     * {@link android.Manifest.permission#ACCESS_FINE_LOCATION ACCESS_FINE_LOCATION} permission
+     * in order to get valid results.
      */
     public List<ScanResult> getScanResults() {
         try {
@@ -1244,15 +1367,18 @@ public class WifiManager {
     }
 
     /**
-     * Get the operational country code.
-     * @hide
-     */
+    * get the country code.
+    * @return the country code in ISO 3166 format.
+    *
+    * @hide
+    */
     public String getCountryCode() {
-        try {
-            return mService.getCountryCode();
-        } catch (RemoteException e) {
-            return null;
-        }
+       try {
+           String country = mService.getCountryCode();
+           return(country);
+       } catch (RemoteException e) {
+           return null;
+       }
     }
 
     /**
@@ -1459,6 +1585,21 @@ public class WifiManager {
         try {
             return mService.getWifiApConfiguration();
         } catch (RemoteException e) {
+            return null;
+        }
+    }
+
+    /**
+     * Builds a WifiConfiguration from Hotspot 2.0 MIME file.
+     * @return AP details in WifiConfiguration
+     *
+     * @hide Dont open yet
+     */
+    public WifiConfiguration buildWifiConfig(String uriString, String mimeType, byte[] data) {
+        try {
+            return mService.buildWifiConfig(uriString, mimeType, data);
+        } catch (RemoteException e) {
+            Log.w(TAG, "Caught RemoteException trying to build wifi config: " + e);
             return null;
         }
     }
@@ -1897,6 +2038,100 @@ public class WifiManager {
     private void validateChannel() {
         if (sAsyncChannel == null) throw new IllegalStateException(
                 "No permission to access and change wifi or a bad initialization");
+    }
+
+    private void initConnectivityManager() {
+        // TODO: what happens if an app calls a WifiManager API before ConnectivityManager is
+        // registered? Can we fix this by starting ConnectivityService before WifiService?
+        if (sCM == null) {
+            sCM = (ConnectivityManager) mContext.getSystemService(Context.CONNECTIVITY_SERVICE);
+            if (sCM == null) {
+                throw new IllegalStateException("Bad luck, ConnectivityService not started.");
+            }
+        }
+    }
+
+    /**
+     * A NetworkCallback that pins the process to the first wifi network to connect.
+     *
+     * We use this to maintain compatibility with pre-M apps that call WifiManager.enableNetwork()
+     * to connect to a Wi-Fi network that has no Internet access, and then assume that they will be
+     * able to use that network because it's the system default.
+     *
+     * In order to maintain compatibility with apps that call setProcessDefaultNetwork themselves,
+     * we try not to set the default network unless they have already done so, and we try not to
+     * clear the default network unless we set it ourselves.
+     *
+     * This should maintain behaviour that's compatible with L, which would pin the whole system to
+     * any wifi network that was created via enableNetwork(..., true) until that network
+     * disconnected.
+     *
+     * Note that while this hack allows network traffic to flow, it is quite limited. For example:
+     *
+     * 1. setProcessDefaultNetwork only affects this process, so:
+     *    - Any subprocesses spawned by this process will not be pinned to Wi-Fi.
+     *    - If this app relies on any other apps on the device also being on Wi-Fi, that won't work
+     *      either, because other apps on the device will not be pinned.
+     * 2. The behaviour of other APIs is not modified. For example:
+     *    - getActiveNetworkInfo will return the system default network, not Wi-Fi.
+     *    - There will be no CONNECTIVITY_ACTION broadcasts about TYPE_WIFI.
+     *    - getProcessDefaultNetwork will not return null, so if any apps are relying on that, they
+     *      will be surprised as well.
+     */
+    private class PinningNetworkCallback extends NetworkCallback {
+        private Network mPinnedNetwork;
+
+        @Override
+        public void onPreCheck(Network network) {
+            if (sCM.getProcessDefaultNetwork() == null && mPinnedNetwork == null) {
+                sCM.setProcessDefaultNetwork(network);
+                mPinnedNetwork = network;
+                Log.d(TAG, "Wifi alternate reality enabled on network " + network);
+            }
+        }
+
+        @Override
+        public void onLost(Network network) {
+            if (network.equals(mPinnedNetwork) && network.equals(sCM.getProcessDefaultNetwork())) {
+                sCM.setProcessDefaultNetwork(null);
+                Log.d(TAG, "Wifi alternate reality disabled on network " + network);
+                mPinnedNetwork = null;
+                unregisterPinningNetworkCallback();
+            }
+        }
+    }
+
+    private void registerPinningNetworkCallback() {
+        initConnectivityManager();
+        synchronized (sCM) {
+            if (mNetworkCallback == null) {
+                // TODO: clear all capabilities.
+                NetworkRequest request = new NetworkRequest.Builder()
+                        .addTransportType(NetworkCapabilities.TRANSPORT_WIFI)
+                        .removeCapability(NetworkCapabilities.NET_CAPABILITY_INTERNET)
+                        .build();
+                mNetworkCallback = new PinningNetworkCallback();
+                try {
+                    sCM.registerNetworkCallback(request, mNetworkCallback);
+                } catch (SecurityException e) {
+                    Log.d(TAG, "Failed to register network callback", e);
+                }
+            }
+        }
+    }
+
+    private void unregisterPinningNetworkCallback() {
+        initConnectivityManager();
+        synchronized (sCM) {
+            if (mNetworkCallback != null) {
+                try {
+                    sCM.unregisterNetworkCallback(mNetworkCallback);
+                } catch (SecurityException e) {
+                    Log.d(TAG, "Failed to unregister network callback", e);
+                }
+                mNetworkCallback = null;
+            }
+        }
     }
 
     /**
@@ -2583,26 +2818,76 @@ public class WifiManager {
     }
 
     /**
-     * Set setting for allowing Scans when infrastructure is associated
+     * Resets all wifi manager settings back to factory defaults.
+     *
      * @hide
      */
-    public void setAllowScansWhileAssociated(boolean enabled) {
+    public void factoryReset() {
         try {
-            mService.setAllowScansWhileAssociated(enabled);
+            mService.factoryReset();
+        } catch (RemoteException e) {
+        }
+    }
+
+    /**
+     * Get Network object of current wifi network
+     * @return Get Network object of current wifi network
+     * @hide
+     */
+    public Network getCurrentNetwork() {
+        try {
+            return mService.getCurrentNetwork();
+        } catch (RemoteException e) {
+            return null;
+        }
+    }
+
+    /**
+     * Framework layer autojoin enable/disable when device is associated
+     * this will enable/disable autojoin scan and switch network when connected
+     * @return true -- if set successful false -- if set failed
+     * @hide
+     */
+    public boolean enableAutoJoinWhenAssociated(boolean enabled) {
+        try {
+            return mService.enableAutoJoinWhenAssociated(enabled);
+        } catch (RemoteException e) {
+            return false;
+        }
+    }
+
+    /**
+     * Get setting for Framework layer autojoin enable status
+     * @hide
+     */
+    public boolean getEnableAutoJoinWhenAssociated() {
+        try {
+            return mService.getEnableAutoJoinWhenAssociated();
+        } catch (RemoteException e) {
+            return false;
+        }
+    }
+    /**
+     * Set setting for enabling autojoin Offload thru Wifi HAL layer
+     * @hide
+     */
+    public void setHalBasedAutojoinOffload(int enabled) {
+        try {
+            mService.setHalBasedAutojoinOffload(enabled);
         } catch (RemoteException e) {
 
         }
     }
 
     /**
-     * Get setting for allowing Scans when infrastructure is associated
+     * Get setting for enabling autojoin Offload thru Wifi HAL layer
      * @hide
      */
-    public boolean getAllowScansWhileAssociated() {
+    public int getHalBasedAutojoinOffload() {
         try {
-            return mService.getAllowScansWhileAssociated();
+            return mService.getHalBasedAutojoinOffload();
         } catch (RemoteException e) {
         }
-        return false;
+        return 0;
     }
 }

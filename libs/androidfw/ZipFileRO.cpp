@@ -34,14 +34,6 @@
 #include <assert.h>
 #include <unistd.h>
 
-/*
- * We must open binary files using open(path, ... | O_BINARY) under Windows.
- * Otherwise strange read errors will happen.
- */
-#ifndef O_BINARY
-#  define O_BINARY  0
-#endif
-
 using namespace android;
 
 class _ZipEntryRO {
@@ -50,7 +42,10 @@ public:
     ZipEntryName name;
     void *cookie;
 
-    _ZipEntryRO() : cookie(NULL) {
+    _ZipEntryRO() : cookie(NULL) {}
+
+    ~_ZipEntryRO() {
+      EndIteration(cookie);
     }
 
 private:
@@ -73,6 +68,7 @@ ZipFileRO::~ZipFileRO() {
     const int32_t error = OpenArchive(zipFileName, &handle);
     if (error) {
         ALOGW("Error opening archive %s: %s", zipFileName, ErrorCodeString(error));
+        CloseArchive(handle);
         return NULL;
     }
 
@@ -83,14 +79,14 @@ ZipFileRO::~ZipFileRO() {
 ZipEntryRO ZipFileRO::findEntryByName(const char* entryName) const
 {
     _ZipEntryRO* data = new _ZipEntryRO;
-    const int32_t error = FindEntry(mHandle, entryName, &(data->entry));
+
+    data->name = ZipEntryName(entryName);
+
+    const int32_t error = FindEntry(mHandle, data->name, &(data->entry));
     if (error) {
         delete data;
         return NULL;
     }
-
-    data->name.name = entryName;
-    data->name.name_length = strlen(entryName);
 
     return (ZipEntryRO) data;
 }
@@ -101,8 +97,9 @@ ZipEntryRO ZipFileRO::findEntryByName(const char* entryName) const
  * Returns "false" if the offsets to the fields or the contents of the fields
  * appear to be bogus.
  */
-bool ZipFileRO::getEntryInfo(ZipEntryRO entry, int* pMethod, size_t* pUncompLen,
-    size_t* pCompLen, off64_t* pOffset, long* pModWhen, long* pCrc32) const
+bool ZipFileRO::getEntryInfo(ZipEntryRO entry, uint16_t* pMethod,
+    uint32_t* pUncompLen, uint32_t* pCompLen, off64_t* pOffset,
+    uint32_t* pModWhen, uint32_t* pCrc32) const
 {
     const _ZipEntryRO* zipEntry = reinterpret_cast<_ZipEntryRO*>(entry);
     const ZipEntry& ze = zipEntry->entry;
@@ -129,10 +126,18 @@ bool ZipFileRO::getEntryInfo(ZipEntryRO entry, int* pMethod, size_t* pUncompLen,
     return true;
 }
 
-bool ZipFileRO::startIteration(void** cookie)
+bool ZipFileRO::startIteration(void** cookie) {
+  return startIteration(cookie, NULL, NULL);
+}
+
+bool ZipFileRO::startIteration(void** cookie, const char* prefix, const char* suffix)
 {
     _ZipEntryRO* ze = new _ZipEntryRO;
-    int32_t error = StartIteration(mHandle, &(ze->cookie), NULL /* prefix */);
+    ZipEntryName pe(prefix ? prefix : "");
+    ZipEntryName se(suffix ? suffix : "");
+    int32_t error = StartIteration(mHandle, &(ze->cookie),
+                                   prefix ? &pe : NULL,
+                                   suffix ? &se : NULL);
     if (error) {
         ALOGW("Could not start iteration over %s: %s", mFileName, ErrorCodeString(error));
         delete ze;
@@ -170,7 +175,7 @@ void ZipFileRO::releaseEntry(ZipEntryRO entry) const
 /*
  * Copy the entry's filename to the buffer.
  */
-int ZipFileRO::getEntryFileName(ZipEntryRO entry, char* buffer, int bufLen)
+int ZipFileRO::getEntryFileName(ZipEntryRO entry, char* buffer, size_t bufLen)
     const
 {
     const _ZipEntryRO* zipEntry = reinterpret_cast<_ZipEntryRO*>(entry);
@@ -205,7 +210,7 @@ FileMap* ZipFileRO::createEntryFileMap(ZipEntryRO entry) const
 
     FileMap* newMap = new FileMap();
     if (!newMap->create(mFileName, fd, ze.offset, actualLen, true)) {
-        newMap->release();
+        delete newMap;
         return NULL;
     }
 

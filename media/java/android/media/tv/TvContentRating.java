@@ -16,8 +16,11 @@
 
 package android.media.tv;
 
+import android.annotation.NonNull;
 import android.annotation.SystemApi;
 import android.text.TextUtils;
+
+import com.android.internal.util.Preconditions;
 
 import java.util.Arrays;
 import java.util.Collections;
@@ -32,11 +35,11 @@ import java.util.Objects;
  * To create a {@code TvContentRating} object, use the
  * {@link #createRating TvContentRating.createRating} method with valid rating system string
  * constants.
- * <p>
- * It is possible for an application to define its own content rating system by supplying a content
- * rating system definition XML resource (see example below) and declaring a broadcast receiver that
- * filters {@link TvInputManager#ACTION_QUERY_CONTENT_RATING_SYSTEMS} in its manifest.
- * </p>
+ *
+ * <p>It is possible for an application to define its own content rating system by supplying a
+ * content rating system definition XML resource (see example below) and declaring a broadcast
+ * receiver that filters {@link TvInputManager#ACTION_QUERY_CONTENT_RATING_SYSTEMS} in its manifest.
+ *
  * <h3> Example: Rating system definition for the TV Parental Guidelines</h3>
  * The following XML example shows how the TV Parental Guidelines in the United States can be
  * defined:
@@ -120,15 +123,16 @@ import java.util.Objects;
  *             <rating android:name="US_TV_MA" />
  *         </rating-order>
  *     </rating-system-definition>
- * </rating-system-definitions>}</pre></p>
+ * </rating-system-definitions>}</pre>
  *
  * <h3>System defined rating strings</h3>
  * The following strings are defined by the system to provide a standard way to create
  * {@code TvContentRating} objects.
+ *
  * <p>For example, to create an object that represents TV-PG rating with suggestive dialogue and
  * coarse language from the TV Parental Guidelines in the United States, one can use the following
  * code snippet:
- * </p>
+ *
  * <pre>
  * TvContentRating rating = TvContentRating.createRating(
  *         "com.android.tv",
@@ -167,6 +171,14 @@ import java.util.Objects;
  *         <td>TV content rating system for Brazil</td>
  *     </tr>
  *     <tr>
+ *         <td>CA_TV_EN</td>
+ *         <td>TV content rating system for Canada (English)</td>
+ *     </tr>
+ *     <tr>
+ *         <td>CA_TV_FR</td>
+ *         <td>TV content rating system for Canada (French)</td>
+ *     </tr>
+ *     <tr>
  *         <td>DVB</td>
  *         <td>DVB content rating system</td>
  *     </tr>
@@ -189,6 +201,10 @@ import java.util.Objects;
  *     <tr>
  *         <td>SG_TV</td>
  *         <td>TV content rating system for Singapore</td>
+ *     </tr>
+ *     <tr>
+ *         <td>US_MV</td>
+ *         <td>Movie content rating system for the United States</td>
  *     </tr>
  *     <tr>
  *         <td>US_TV</td>
@@ -284,6 +300,60 @@ import java.util.Objects;
  *     <tr>
  *         <td>BR_TV_18</td>
  *         <td>Content suitable for viewers over the age of 18</td>
+ *     </tr>
+ *     <tr>
+ *         <td valign="top" rowspan="7">CA_TV_EN</td>
+ *         <td>CA_TV_EN_EXEMPT</td>
+ *         <td>Exempt from ratings</td>
+ *     </tr>
+ *     <tr>
+ *         <td>CA_TV_EN_C</td>
+ *         <td>Suitable for children ages 2&#8211;7</td>
+ *     </tr>
+ *     <tr>
+ *         <td>CA_TV_EN_C8</td>
+ *         <td>Suitable for children ages 8 and older</td>
+ *     </tr>
+ *     <tr>
+ *         <td>CA_TV_EN_G</td>
+ *         <td>Suitable for the entire family</td>
+ *     </tr>
+ *     <tr>
+ *         <td>CA_TV_EN_PG</td>
+ *         <td>May contain moderate violence, profanity, nudity, and sexual references</td>
+ *     </tr>
+ *     <tr>
+ *         <td>CA_TV_EN_14</td>
+ *         <td>Intended for viewers ages 14 and older</td>
+ *     </tr>
+ *     <tr>
+ *         <td>CA_TV_EN_18</td>
+ *         <td>Intended for viewers ages 18 and older</td>
+ *     </tr>
+ *     <tr>
+ *         <td valign="top" rowspan="6">CA_TV_FR</td>
+ *         <td>CA_TV_FR_E</td>
+ *         <td>Exempt from ratings</td>
+ *     </tr>
+ *     <tr>
+ *         <td>CA_TV_FR_G</td>
+ *         <td>Appropriate for all ages</td>
+ *     </tr>
+ *     <tr>
+ *         <td>CA_TV_FR_8</td>
+ *         <td>Appropriate for children 8</td>
+ *     </tr>
+ *     <tr>
+ *         <td>CA_TV_FR_13</td>
+ *         <td>Suitable for children 13</td>
+ *     </tr>
+ *     <tr>
+ *         <td>CA_TV_FR_16</td>
+ *         <td>Recommended for children over the age of 16</td>
+ *     </tr>
+ *     <tr>
+ *         <td>CA_TV_FR_18</td>
+ *         <td>Only to be viewed by adults</td>
  *     </tr>
  *     <tr>
  *         <td valign="top" rowspan="15">DVB</td>
@@ -604,6 +674,27 @@ import java.util.Objects;
  *         <td>Suitable for adults aged 21 and above</td>
  *     </tr>
  *     <tr>
+ *         <td valign="top" rowspan="5">US_MV</td>
+ *         <td>US_MV_G</td>
+ *         <td>General audiences</td>
+ *     </tr>
+ *     <tr>
+ *         <td>US_MV_PG</td>
+ *         <td>Parental guidance suggested</td>
+ *     </tr>
+ *     <tr>
+ *         <td>US_MV_PG13</td>
+ *         <td>Parents strongly cautioned</td>
+ *     </tr>
+ *     <tr>
+ *         <td>US_MV_R</td>
+ *         <td>Restricted, under 17 requires accompanying parent or adult guardian</td>
+ *     </tr>
+ *     <tr>
+ *         <td>US_MV_NC17</td>
+ *         <td>No one 17 and under admitted</td>
+ *     </tr>
+ *     <tr>
  *         <td valign="top" rowspan="6">US_TV</td>
  *         <td>US_TV_Y</td>
  *         <td>This program is designed to be appropriate for all children</td>
@@ -690,6 +781,17 @@ public final class TvContentRating {
     private final String mRating;
     private final String[] mSubRatings;
     private final int mHashCode;
+
+    /**
+     * Rating constant denoting unrated content. Used to handle the case where the content rating
+     * information is missing.
+     *
+     * <p>TV input services can call {@link TvInputManager#isRatingBlocked} with this constant to
+     * determine whether they should block unrated content. The subsequent call to
+     * {@link TvInputService.Session#notifyContentBlocked} with the same constant notifies
+     * applications that the current program content is blocked by parental controls.
+     */
+    public static final TvContentRating UNRATED = new TvContentRating("null", "null", "null", null);
 
     /**
      * Creates a {@code TvContentRating} object with predefined content rating strings.
@@ -823,20 +925,17 @@ public final class TvContentRating {
     /**
      * Returns {@code true} if this rating has the same main rating as the specified rating and when
      * this rating's sub-ratings contain the other's.
-     * <p>
-     * For example, a {@code TvContentRating} object that represents TV-PG with S(Sexual content)
-     * and V(Violence) contains TV-PG, TV-PG/S, TV-PG/V and itself.
-     * </p>
+     *
+     * <p>For example, a {@code TvContentRating} object that represents TV-PG with
+     * S(Sexual content) and V(Violence) contains TV-PG, TV-PG/S, TV-PG/V and itself.
      *
      * @param rating The {@link TvContentRating} to check.
      * @return {@code true} if this object contains {@code rating}, {@code false} otherwise.
      * @hide
      */
     @SystemApi
-    public final boolean contains(TvContentRating rating) {
-        if (rating == null) {
-            throw new IllegalArgumentException("rating cannot be null");
-        }
+    public final boolean contains(@NonNull TvContentRating rating) {
+        Preconditions.checkNotNull(rating);
         if (!rating.getMainRating().equals(mRating)) {
             return false;
         }

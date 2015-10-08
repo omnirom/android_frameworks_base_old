@@ -16,6 +16,10 @@
 
 // This source file is automatically generated
 
+#pragma GCC diagnostic ignored "-Wunused-variable"
+#pragma GCC diagnostic ignored "-Wunused-but-set-variable"
+#pragma GCC diagnostic ignored "-Wunused-function"
+
 #include "jni.h"
 #include "JNIHelp.h"
 #include <android_runtime/AndroidRuntime.h>
@@ -156,7 +160,8 @@ static jobject
 android_eglGetDisplayInt
   (JNIEnv *_env, jobject _this, jint display_id) {
 
-    if ((EGLNativeDisplayType)display_id != EGL_DEFAULT_DISPLAY) {
+    if (static_cast<uintptr_t>(display_id) !=
+        reinterpret_cast<uintptr_t>(EGL_DEFAULT_DISPLAY)) {
         jniThrowException(_env, "java/lang/UnsupportedOperationException", "eglGetDisplay");
         return 0;
     }
@@ -199,7 +204,7 @@ android_eglInitialize
         goto exit;
     }
     major_base = (EGLint *)
-        _env->GetPrimitiveArrayCritical(major_ref, (jboolean *)0);
+        _env->GetIntArrayElements(major_ref, (jboolean *)0);
     major = major_base + majorOffset;
 
     if (!minor_ref) {
@@ -222,7 +227,7 @@ android_eglInitialize
         goto exit;
     }
     minor_base = (EGLint *)
-        _env->GetPrimitiveArrayCritical(minor_ref, (jboolean *)0);
+        _env->GetIntArrayElements(minor_ref, (jboolean *)0);
     minor = minor_base + minorOffset;
 
     _returnValue = eglInitialize(
@@ -233,11 +238,11 @@ android_eglInitialize
 
 exit:
     if (minor_base) {
-        _env->ReleasePrimitiveArrayCritical(minor_ref, minor_base,
+        _env->ReleaseIntArrayElements(minor_ref, (jint*)minor_base,
             _exception ? JNI_ABORT: 0);
     }
     if (major_base) {
-        _env->ReleasePrimitiveArrayCritical(major_ref, major_base,
+        _env->ReleaseIntArrayElements(major_ref, (jint*)major_base,
             _exception ? JNI_ABORT: 0);
     }
     if (_exception) {
@@ -319,7 +324,7 @@ android_eglGetConfigs
     }
     _num_configRemaining = _env->GetArrayLength(num_config_ref) - num_configOffset;
     num_config_base = (EGLint *)
-        _env->GetPrimitiveArrayCritical(num_config_ref, (jboolean *)0);
+        _env->GetIntArrayElements(num_config_ref, (jboolean *)0);
     num_config = num_config_base + num_configOffset;
 
     _returnValue = eglGetConfigs(
@@ -331,7 +336,7 @@ android_eglGetConfigs
 
 exit:
     if (num_config_base) {
-        _env->ReleasePrimitiveArrayCritical(num_config_ref, num_config_base,
+        _env->ReleaseIntArrayElements(num_config_ref, (jint*)num_config_base,
             _exception ? JNI_ABORT: 0);
     }
     if (configs) {
@@ -380,7 +385,7 @@ android_eglChooseConfig
     }
     _attrib_listRemaining = _env->GetArrayLength(attrib_list_ref) - attrib_listOffset;
     attrib_list_base = (EGLint *)
-        _env->GetPrimitiveArrayCritical(attrib_list_ref, (jboolean *)0);
+        _env->GetIntArrayElements(attrib_list_ref, (jboolean *)0);
     attrib_list = attrib_list_base + attrib_listOffset;
     attrib_list_sentinel = false;
     for (int i = _attrib_listRemaining - 1; i >= 0; i--)  {
@@ -437,7 +442,7 @@ android_eglChooseConfig
         goto exit;
     }
     num_config_base = (EGLint *)
-        _env->GetPrimitiveArrayCritical(num_config_ref, (jboolean *)0);
+        _env->GetIntArrayElements(num_config_ref, (jboolean *)0);
     num_config = num_config_base + num_configOffset;
 
     _returnValue = eglChooseConfig(
@@ -450,11 +455,11 @@ android_eglChooseConfig
 
 exit:
     if (num_config_base) {
-        _env->ReleasePrimitiveArrayCritical(num_config_ref, num_config_base,
+        _env->ReleaseIntArrayElements(num_config_ref, (jint*)num_config_base,
             _exception ? JNI_ABORT: 0);
     }
     if (attrib_list_base) {
-        _env->ReleasePrimitiveArrayCritical(attrib_list_ref, attrib_list_base,
+        _env->ReleaseIntArrayElements(attrib_list_ref, (jint*)attrib_list_base,
             JNI_ABORT);
     }
     if (configs) {
@@ -504,7 +509,7 @@ android_eglGetConfigAttrib
         goto exit;
     }
     value_base = (EGLint *)
-        _env->GetPrimitiveArrayCritical(value_ref, (jboolean *)0);
+        _env->GetIntArrayElements(value_ref, (jboolean *)0);
     value = value_base + offset;
 
     _returnValue = eglGetConfigAttrib(
@@ -516,7 +521,7 @@ android_eglGetConfigAttrib
 
 exit:
     if (value_base) {
-        _env->ReleasePrimitiveArrayCritical(value_ref, value_base,
+        _env->ReleaseIntArrayElements(value_ref, (jint*)value_base,
             _exception ? JNI_ABORT: 0);
     }
     if (_exception) {
@@ -568,7 +573,7 @@ not_valid_surface:
 
     _remaining = _env->GetArrayLength(attrib_list_ref) - offset;
     attrib_list_base = (EGLint *)
-        _env->GetPrimitiveArrayCritical(attrib_list_ref, (jboolean *)0);
+        _env->GetIntArrayElements(attrib_list_ref, (jboolean *)0);
     attrib_list = attrib_list_base + offset;
     attrib_list_sentinel = 0;
     for (int i = _remaining - 1; i >= 0; i--)  {
@@ -593,7 +598,7 @@ not_valid_surface:
 
 exit:
     if (attrib_list_base) {
-        _env->ReleasePrimitiveArrayCritical(attrib_list_ref, attrib_list_base,
+        _env->ReleaseIntArrayElements(attrib_list_ref, attrib_list_base,
             JNI_ABORT);
     }
     if (_exception) {
@@ -650,7 +655,7 @@ not_valid_surface:
 
     _remaining = _env->GetArrayLength(attrib_list_ref) - offset;
     attrib_list_base = (EGLint *)
-        _env->GetPrimitiveArrayCritical(attrib_list_ref, (jboolean *)0);
+        _env->GetIntArrayElements(attrib_list_ref, (jboolean *)0);
     attrib_list = attrib_list_base + offset;
     attrib_list_sentinel = 0;
     for (int i = _remaining - 1; i >= 0; i--)  {
@@ -675,7 +680,7 @@ not_valid_surface:
 
 exit:
     if (attrib_list_base) {
-        _env->ReleasePrimitiveArrayCritical(attrib_list_ref, attrib_list_base,
+        _env->ReleaseIntArrayElements(attrib_list_ref, attrib_list_base,
             JNI_ABORT);
     }
     if (_exception) {
@@ -712,7 +717,7 @@ android_eglCreatePbufferSurface
     }
     _remaining = _env->GetArrayLength(attrib_list_ref) - offset;
     attrib_list_base = (EGLint *)
-        _env->GetPrimitiveArrayCritical(attrib_list_ref, (jboolean *)0);
+        _env->GetIntArrayElements(attrib_list_ref, (jboolean *)0);
     attrib_list = attrib_list_base + offset;
     attrib_list_sentinel = false;
     for (int i = _remaining - 1; i >= 0; i--)  {
@@ -736,7 +741,7 @@ android_eglCreatePbufferSurface
 
 exit:
     if (attrib_list_base) {
-        _env->ReleasePrimitiveArrayCritical(attrib_list_ref, attrib_list_base,
+        _env->ReleaseIntArrayElements(attrib_list_ref, (jint*)attrib_list_base,
             JNI_ABORT);
     }
     if (_exception) {
@@ -803,7 +808,7 @@ android_eglQuerySurface
         goto exit;
     }
     value_base = (EGLint *)
-        _env->GetPrimitiveArrayCritical(value_ref, (jboolean *)0);
+        _env->GetIntArrayElements(value_ref, (jboolean *)0);
     value = value_base + offset;
 
     _returnValue = eglQuerySurface(
@@ -815,7 +820,7 @@ android_eglQuerySurface
 
 exit:
     if (value_base) {
-        _env->ReleasePrimitiveArrayCritical(value_ref, value_base,
+        _env->ReleaseIntArrayElements(value_ref, (jint*)value_base,
             _exception ? JNI_ABORT: 0);
     }
     if (_exception) {
@@ -891,7 +896,7 @@ android_eglCreatePbufferFromClientBuffer
     }
     _remaining = _env->GetArrayLength(attrib_list_ref) - offset;
     attrib_list_base = (EGLint *)
-        _env->GetPrimitiveArrayCritical(attrib_list_ref, (jboolean *)0);
+        _env->GetIntArrayElements(attrib_list_ref, (jboolean *)0);
     attrib_list = attrib_list_base + offset;
     attrib_list_sentinel = false;
     for (int i = _remaining - 1; i >= 0; i--)  {
@@ -917,7 +922,7 @@ android_eglCreatePbufferFromClientBuffer
 
 exit:
     if (attrib_list_base) {
-        _env->ReleasePrimitiveArrayCritical(attrib_list_ref, attrib_list_base,
+        _env->ReleaseIntArrayElements(attrib_list_ref, attrib_list_base,
             JNI_ABORT);
     }
     if (_exception) {
@@ -935,7 +940,6 @@ android_eglCreatePbufferFromClientBufferInt
     }
     return android_eglCreatePbufferFromClientBuffer(_env, _this, dpy, buftype, buffer, config, attrib_list_ref, offset);
 }
-
 /* EGLBoolean eglSurfaceAttrib ( EGLDisplay dpy, EGLSurface surface, EGLint attribute, EGLint value ) */
 static jboolean
 android_eglSurfaceAttrib
@@ -1029,7 +1033,7 @@ android_eglCreateContext
     }
     _remaining = _env->GetArrayLength(attrib_list_ref) - offset;
     attrib_list_base = (EGLint *)
-        _env->GetPrimitiveArrayCritical(attrib_list_ref, (jboolean *)0);
+        _env->GetIntArrayElements(attrib_list_ref, (jboolean *)0);
     attrib_list = attrib_list_base + offset;
     attrib_list_sentinel = false;
     for (int i = _remaining - 1; i >= 0; i--)  {
@@ -1054,7 +1058,7 @@ android_eglCreateContext
 
 exit:
     if (attrib_list_base) {
-        _env->ReleasePrimitiveArrayCritical(attrib_list_ref, attrib_list_base,
+        _env->ReleaseIntArrayElements(attrib_list_ref, (jint*)attrib_list_base,
             JNI_ABORT);
     }
     if (_exception) {
@@ -1160,7 +1164,7 @@ android_eglQueryContext
         goto exit;
     }
     value_base = (EGLint *)
-        _env->GetPrimitiveArrayCritical(value_ref, (jboolean *)0);
+        _env->GetIntArrayElements(value_ref, (jboolean *)0);
     value = value_base + offset;
 
     _returnValue = eglQueryContext(
@@ -1172,7 +1176,7 @@ android_eglQueryContext
 
 exit:
     if (value_base) {
-        _env->ReleasePrimitiveArrayCritical(value_ref, value_base,
+        _env->ReleaseIntArrayElements(value_ref, (jint*)value_base,
             _exception ? JNI_ABORT: 0);
     }
     if (_exception) {

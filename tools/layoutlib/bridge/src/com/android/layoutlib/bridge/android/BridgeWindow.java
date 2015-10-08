@@ -47,8 +47,8 @@ public final class BridgeWindow implements IWindow {
     }
 
     @Override
-    public void resized(Rect rect, Rect rect2, Rect rect3, Rect rect4, Rect rect5, boolean b,
-            Configuration configuration) throws RemoteException {
+    public void resized(Rect rect, Rect rect2, Rect rect3, Rect rect4, Rect rect5, Rect rect6,
+            boolean b, Configuration configuration) throws RemoteException {
         // pass for now.
     }
 
@@ -91,7 +91,11 @@ public final class BridgeWindow implements IWindow {
     }
 
     @Override
-    public void doneAnimating() {
+    public void onAnimationStarted(int remainingFrameCount) {
+    }
+
+    @Override
+    public void onAnimationStopped() {
     }
 
     @Override

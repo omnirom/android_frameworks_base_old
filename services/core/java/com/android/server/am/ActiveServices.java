@@ -16,6 +16,8 @@
 
 package com.android.server.am;
 
+import static com.android.server.am.ActivityManagerDebugConfig.*;
+
 import java.io.FileDescriptor;
 import java.io.IOException;
 import java.io.PrintWriter;
@@ -24,15 +26,19 @@ import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.Iterator;
 import java.util.List;
+import java.util.Set;
 
 import android.app.ActivityThread;
+import android.app.AppOpsManager;
 import android.os.Build;
 import android.os.DeadObjectException;
 import android.os.Handler;
 import android.os.Looper;
 import android.os.SystemProperties;
+import android.os.TransactionTooLargeException;
 import android.util.ArrayMap;
 import android.util.ArraySet;
+
 import com.android.internal.app.ProcessStats;
 import com.android.internal.os.BatteryStatsImpl;
 import com.android.internal.os.TransferPipe;
@@ -67,14 +73,15 @@ import android.util.SparseArray;
 import android.util.TimeUtils;
 
 public final class ActiveServices {
-    static final boolean DEBUG_SERVICE = ActivityManagerService.DEBUG_SERVICE;
-    static final boolean DEBUG_SERVICE_EXECUTING = ActivityManagerService.DEBUG_SERVICE_EXECUTING;
-    static final boolean DEBUG_DELAYED_SERVICE = ActivityManagerService.DEBUG_SERVICE;
-    static final boolean DEBUG_DELAYED_STARTS = DEBUG_DELAYED_SERVICE;
-    static final boolean DEBUG_MU = ActivityManagerService.DEBUG_MU;
-    static final boolean LOG_SERVICE_START_STOP = false;
-    static final String TAG = ActivityManagerService.TAG;
-    static final String TAG_MU = ActivityManagerService.TAG_MU;
+    private static final String TAG = TAG_WITH_CLASS_NAME ? "ActiveServices" : TAG_AM;
+    private static final String TAG_MU = TAG + POSTFIX_MU;
+    private static final String TAG_SERVICE = TAG + POSTFIX_SERVICE;
+    private static final String TAG_SERVICE_EXECUTING = TAG + POSTFIX_SERVICE_EXECUTING;
+
+    private static final boolean DEBUG_DELAYED_SERVICE = DEBUG_SERVICE;
+    private static final boolean DEBUG_DELAYED_STARTS = DEBUG_DELAYED_SERVICE;
+
+    private static final boolean LOG_SERVICE_START_STOP = false;
 
     // How long we wait for a service to finish executing.
     static final int SERVICE_TIMEOUT = 20*1000;
@@ -114,14 +121,13 @@ public final class ActiveServices {
     // at the same time.
     final int mMaxStartingBackground;
 
-    final SparseArray<ServiceMap> mServiceMap = new SparseArray<ServiceMap>();
+    final SparseArray<ServiceMap> mServiceMap = new SparseArray<>();
 
     /**
      * All currently bound service connections.  Keys are the IBinder of
      * the client's IServiceConnection.
      */
-    final ArrayMap<IBinder, ArrayList<ConnectionRecord>> mServiceConnections
-            = new ArrayMap<IBinder, ArrayList<ConnectionRecord>>();
+    final ArrayMap<IBinder, ArrayList<ConnectionRecord>> mServiceConnections = new ArrayMap<>();
 
     /**
      * List of services that we have been asked to start,
@@ -129,20 +135,20 @@ public final class ActiveServices {
      * while waiting for their corresponding application thread to get
      * going.
      */
-    final ArrayList<ServiceRecord> mPendingServices
-            = new ArrayList<ServiceRecord>();
+    final ArrayList<ServiceRecord> mPendingServices = new ArrayList<>();
 
     /**
      * List of services that are scheduled to restart following a crash.
      */
-    final ArrayList<ServiceRecord> mRestartingServices
-            = new ArrayList<ServiceRecord>();
+    final ArrayList<ServiceRecord> mRestartingServices = new ArrayList<>();
 
     /**
      * List of services that are in the process of being destroyed.
      */
-    final ArrayList<ServiceRecord> mDestroyingServices
-            = new ArrayList<ServiceRecord>();
+    final ArrayList<ServiceRecord> mDestroyingServices = new ArrayList<>();
+
+    /** Temporary list for holding the results of calls to {@link #collectPackageServicesLocked} */
+    private ArrayList<ServiceRecord> mTmpCollectionResults = null;
 
     /** Amount of time to allow a last ANR message to exist before freeing the memory. */
     static final int LAST_ANR_LIFETIME_DURATION_MSECS = 2 * 60 * 60 * 1000; // Two hours
@@ -156,10 +162,6 @@ public final class ActiveServices {
             }
         }
     };
-
-    static final class DelayingProcess extends ArrayList<ServiceRecord> {
-        long timeoout;
-    }
 
     /**
      * Information about services for a single user.
@@ -206,11 +208,12 @@ public final class ActiveServices {
 
         void ensureNotStartingBackground(ServiceRecord r) {
             if (mStartingBackground.remove(r)) {
-                if (DEBUG_DELAYED_STARTS) Slog.v(TAG, "No longer background starting: " + r);
+                if (DEBUG_DELAYED_STARTS) Slog.v(TAG_SERVICE,
+                        "No longer background starting: " + r);
                 rescheduleDelayedStarts();
             }
             if (mDelayedStartList.remove(r)) {
-                if (DEBUG_DELAYED_STARTS) Slog.v(TAG, "No longer delaying start: " + r);
+                if (DEBUG_DELAYED_STARTS) Slog.v(TAG_SERVICE, "No longer delaying start: " + r);
             }
         }
 
@@ -229,26 +232,31 @@ public final class ActiveServices {
             while (mDelayedStartList.size() > 0
                     && mStartingBackground.size() < mMaxStartingBackground) {
                 ServiceRecord r = mDelayedStartList.remove(0);
-                if (DEBUG_DELAYED_STARTS) Slog.v(TAG, "REM FR DELAY LIST (exec next): " + r);
+                if (DEBUG_DELAYED_STARTS) Slog.v(TAG_SERVICE,
+                        "REM FR DELAY LIST (exec next): " + r);
                 if (r.pendingStarts.size() <= 0) {
                     Slog.w(TAG, "**** NO PENDING STARTS! " + r + " startReq=" + r.startRequested
                             + " delayedStop=" + r.delayedStop);
                 }
                 if (DEBUG_DELAYED_SERVICE) {
                     if (mDelayedStartList.size() > 0) {
-                        Slog.v(TAG, "Remaining delayed list:");
+                        Slog.v(TAG_SERVICE, "Remaining delayed list:");
                         for (int i=0; i<mDelayedStartList.size(); i++) {
-                            Slog.v(TAG, "  #" + i + ": " + mDelayedStartList.get(i));
+                            Slog.v(TAG_SERVICE, "  #" + i + ": " + mDelayedStartList.get(i));
                         }
                     }
                 }
                 r.delayed = false;
-                startServiceInnerLocked(this, r.pendingStarts.get(0).intent, r, false, true);
+                try {
+                    startServiceInnerLocked(this, r.pendingStarts.get(0).intent, r, false, true);
+                } catch (TransactionTooLargeException e) {
+                    // Ignore, nobody upstack cares.
+                }
             }
             if (mStartingBackground.size() > 0) {
                 ServiceRecord next = mStartingBackground.get(0);
                 long when = next.startingBgTimeout > now ? next.startingBgTimeout : now;
-                if (DEBUG_DELAYED_SERVICE) Slog.v(TAG, "Top bg start is " + next
+                if (DEBUG_DELAYED_SERVICE) Slog.v(TAG_SERVICE, "Top bg start is " + next
                         + ", can delay others up to " + when);
                 Message msg = obtainMessage(MSG_BG_START_TIMEOUT);
                 sendMessageAtTime(msg, when);
@@ -295,10 +303,10 @@ public final class ActiveServices {
         return getServiceMap(callingUser).mServicesByName;
     }
 
-    ComponentName startServiceLocked(IApplicationThread caller,
-            Intent service, String resolvedType,
-            int callingPid, int callingUid, int userId) {
-        if (DEBUG_DELAYED_STARTS) Slog.v(TAG, "startService: " + service
+    ComponentName startServiceLocked(IApplicationThread caller, Intent service, String resolvedType,
+            int callingPid, int callingUid, String callingPackage, int userId)
+            throws TransactionTooLargeException {
+        if (DEBUG_DELAYED_STARTS) Slog.v(TAG_SERVICE, "startService: " + service
                 + " type=" + resolvedType + " args=" + service.getExtras());
 
         final boolean callerFg;
@@ -317,7 +325,7 @@ public final class ActiveServices {
 
 
         ServiceLookupResult res =
-            retrieveServiceLocked(service, resolvedType,
+            retrieveServiceLocked(service, resolvedType, callingPackage,
                     callingPid, callingUid, userId, true, callerFg);
         if (res == null) {
             return null;
@@ -337,7 +345,7 @@ public final class ActiveServices {
         NeededUriGrants neededGrants = mAm.checkGrantUriPermissionFromIntentLocked(
                 callingUid, r.packageName, service, service.getFlags(), null, r.userId);
         if (unscheduleServiceRestartLocked(r, callingUid, false)) {
-            if (DEBUG_SERVICE) Slog.v(TAG, "START SERVICE WHILE RESTART PENDING: " + r);
+            if (DEBUG_SERVICE) Slog.v(TAG_SERVICE, "START SERVICE WHILE RESTART PENDING: " + r);
         }
         r.lastActivity = SystemClock.uptimeMillis();
         r.startRequested = true;
@@ -360,29 +368,30 @@ public final class ActiveServices {
                 // service is started.  This is especially the case for receivers, which
                 // may start a service in onReceive() to do some additional work and have
                 // initialized some global state as part of that.
-                if (DEBUG_DELAYED_SERVICE) Slog.v(TAG, "Potential start delay of " + r + " in "
-                        + proc);
+                if (DEBUG_DELAYED_SERVICE) Slog.v(TAG_SERVICE, "Potential start delay of "
+                        + r + " in " + proc);
                 if (r.delayed) {
                     // This service is already scheduled for a delayed start; just leave
                     // it still waiting.
-                    if (DEBUG_DELAYED_STARTS) Slog.v(TAG, "Continuing to delay: " + r);
+                    if (DEBUG_DELAYED_STARTS) Slog.v(TAG_SERVICE, "Continuing to delay: " + r);
                     return r.name;
                 }
                 if (smap.mStartingBackground.size() >= mMaxStartingBackground) {
                     // Something else is starting, delay!
-                    Slog.i(TAG, "Delaying start of: " + r);
+                    Slog.i(TAG_SERVICE, "Delaying start of: " + r);
                     smap.mDelayedStartList.add(r);
                     r.delayed = true;
                     return r.name;
                 }
-                if (DEBUG_DELAYED_STARTS) Slog.v(TAG, "Not delaying: " + r);
+                if (DEBUG_DELAYED_STARTS) Slog.v(TAG_SERVICE, "Not delaying: " + r);
                 addToStarting = true;
             } else if (proc.curProcState >= ActivityManager.PROCESS_STATE_SERVICE) {
                 // We slightly loosen when we will enqueue this new service as a background
                 // starting service we are waiting for, to also include processes that are
                 // currently running other services or receivers.
                 addToStarting = true;
-                if (DEBUG_DELAYED_STARTS) Slog.v(TAG, "Not delaying, but counting as bg: " + r);
+                if (DEBUG_DELAYED_STARTS) Slog.v(TAG_SERVICE,
+                        "Not delaying, but counting as bg: " + r);
             } else if (DEBUG_DELAYED_STARTS) {
                 StringBuilder sb = new StringBuilder(128);
                 sb.append("Not potential delay (state=").append(proc.curProcState)
@@ -394,24 +403,25 @@ public final class ActiveServices {
                 }
                 sb.append("): ");
                 sb.append(r.toString());
-                Slog.v(TAG, sb.toString());
+                Slog.v(TAG_SERVICE, sb.toString());
             }
         } else if (DEBUG_DELAYED_STARTS) {
             if (callerFg) {
-                Slog.v(TAG, "Not potential delay (callerFg=" + callerFg + " uid="
+                Slog.v(TAG_SERVICE, "Not potential delay (callerFg=" + callerFg + " uid="
                         + callingUid + " pid=" + callingPid + "): " + r);
             } else if (r.app != null) {
-                Slog.v(TAG, "Not potential delay (cur app=" + r.app + "): " + r);
+                Slog.v(TAG_SERVICE, "Not potential delay (cur app=" + r.app + "): " + r);
             } else {
-                Slog.v(TAG, "Not potential delay (user " + r.userId + " not started): " + r);
+                Slog.v(TAG_SERVICE,
+                        "Not potential delay (user " + r.userId + " not started): " + r);
             }
         }
 
         return startServiceInnerLocked(smap, service, r, callerFg, addToStarting);
     }
 
-    ComponentName startServiceInnerLocked(ServiceMap smap, Intent service,
-            ServiceRecord r, boolean callerFg, boolean addToStarting) {
+    ComponentName startServiceInnerLocked(ServiceMap smap, Intent service, ServiceRecord r,
+            boolean callerFg, boolean addToStarting) throws TransactionTooLargeException {
         ProcessStats.ServiceState stracker = r.getTracker();
         if (stracker != null) {
             stracker.setStarted(true, mAm.mProcessStats.getMemFactorLocked(), r.lastActivity);
@@ -432,9 +442,9 @@ public final class ActiveServices {
             if (DEBUG_DELAYED_SERVICE) {
                 RuntimeException here = new RuntimeException("here");
                 here.fillInStackTrace();
-                Slog.v(TAG, "Starting background (first=" + first + "): " + r, here);
+                Slog.v(TAG_SERVICE, "Starting background (first=" + first + "): " + r, here);
             } else if (DEBUG_DELAYED_STARTS) {
-                Slog.v(TAG, "Starting background (first=" + first + "): " + r);
+                Slog.v(TAG_SERVICE, "Starting background (first=" + first + "): " + r);
             }
             if (first) {
                 smap.rescheduleDelayedStarts();
@@ -451,7 +461,7 @@ public final class ActiveServices {
             // If service isn't actually running, but is is being held in the
             // delayed list, then we need to keep it started but note that it
             // should be stopped once no longer delayed.
-            if (DEBUG_DELAYED_STARTS) Slog.v(TAG, "Delaying stop of pending: " + service);
+            if (DEBUG_DELAYED_STARTS) Slog.v(TAG_SERVICE, "Delaying stop of pending: " + service);
             service.delayedStop = true;
             return;
         }
@@ -469,7 +479,7 @@ public final class ActiveServices {
 
     int stopServiceLocked(IApplicationThread caller, Intent service,
             String resolvedType, int userId) {
-        if (DEBUG_SERVICE) Slog.v(TAG, "stopService: " + service
+        if (DEBUG_SERVICE) Slog.v(TAG_SERVICE, "stopService: " + service
                 + " type=" + resolvedType);
 
         final ProcessRecord callerApp = mAm.getRecordForAppLocked(caller);
@@ -481,7 +491,7 @@ public final class ActiveServices {
         }
 
         // If this service is active, make sure it is stopped.
-        ServiceLookupResult r = retrieveServiceLocked(service, resolvedType,
+        ServiceLookupResult r = retrieveServiceLocked(service, resolvedType, null,
                 Binder.getCallingPid(), Binder.getCallingUid(), userId, false, false);
         if (r != null) {
             if (r.record != null) {
@@ -499,8 +509,8 @@ public final class ActiveServices {
         return 0;
     }
 
-    IBinder peekServiceLocked(Intent service, String resolvedType) {
-        ServiceLookupResult r = retrieveServiceLocked(service, resolvedType,
+    IBinder peekServiceLocked(Intent service, String resolvedType, String callingPackage) {
+        ServiceLookupResult r = retrieveServiceLocked(service, resolvedType, callingPackage,
                 Binder.getCallingPid(), Binder.getCallingUid(),
                 UserHandle.getCallingUserId(), false, false);
 
@@ -509,7 +519,7 @@ public final class ActiveServices {
             // r.record is null if findServiceLocked() failed the caller permission check
             if (r.record == null) {
                 throw new SecurityException(
-                        "Permission Denial: Accessing service " + r.record.name
+                        "Permission Denial: Accessing service"
                         + " from pid=" + Binder.getCallingPid()
                         + ", uid=" + Binder.getCallingUid()
                         + " requires " + r.permission);
@@ -525,7 +535,7 @@ public final class ActiveServices {
 
     boolean stopServiceTokenLocked(ComponentName className, IBinder token,
             int startId) {
-        if (DEBUG_SERVICE) Slog.v(TAG, "stopServiceToken: " + className
+        if (DEBUG_SERVICE) Slog.v(TAG_SERVICE, "stopServiceToken: " + className
                 + " " + token + " startId=" + startId);
         ServiceRecord r = findServiceLocked(className, token, UserHandle.getCallingUserId());
         if (r != null) {
@@ -684,10 +694,10 @@ public final class ActiveServices {
         return false;
     }
 
-    int bindServiceLocked(IApplicationThread caller, IBinder token,
-            Intent service, String resolvedType,
-            IServiceConnection connection, int flags, int userId) {
-        if (DEBUG_SERVICE) Slog.v(TAG, "bindService: " + service
+    int bindServiceLocked(IApplicationThread caller, IBinder token, Intent service,
+            String resolvedType, IServiceConnection connection, int flags,
+            String callingPackage, int userId) throws TransactionTooLargeException {
+        if (DEBUG_SERVICE) Slog.v(TAG_SERVICE, "bindService: " + service
                 + " type=" + resolvedType + " conn=" + connection.asBinder()
                 + " flags=0x" + Integer.toHexString(flags));
         final ProcessRecord callerApp = mAm.getRecordForAppLocked(caller);
@@ -737,7 +747,7 @@ public final class ActiveServices {
         final boolean callerFg = callerApp.setSchedGroup != Process.THREAD_GROUP_BG_NONINTERACTIVE;
 
         ServiceLookupResult res =
-            retrieveServiceLocked(service, resolvedType,
+            retrieveServiceLocked(service, resolvedType, callingPackage,
                     Binder.getCallingPid(), Binder.getCallingUid(), userId, true, callerFg);
         if (res == null) {
             return 0;
@@ -751,7 +761,7 @@ public final class ActiveServices {
 
         try {
             if (unscheduleServiceRestartLocked(s, callerApp.info.uid, false)) {
-                if (DEBUG_SERVICE) Slog.v(TAG, "BIND SERVICE WHILE RESTART PENDING: "
+                if (DEBUG_SERVICE) Slog.v(TAG_SERVICE, "BIND SERVICE WHILE RESTART PENDING: "
                         + s);
             }
 
@@ -819,7 +829,7 @@ public final class ActiveServices {
                 mAm.updateOomAdjLocked(s.app);
             }
 
-            if (DEBUG_SERVICE) Slog.v(TAG, "Bind " + s + " with " + b
+            if (DEBUG_SERVICE) Slog.v(TAG_SERVICE, "Bind " + s + " with " + b
                     + ": received=" + b.intent.received
                     + " apps=" + b.intent.apps.size()
                     + " doRebind=" + b.intent.doRebind);
@@ -857,7 +867,7 @@ public final class ActiveServices {
     void publishServiceLocked(ServiceRecord r, Intent intent, IBinder service) {
         final long origId = Binder.clearCallingIdentity();
         try {
-            if (DEBUG_SERVICE) Slog.v(TAG, "PUBLISHING " + r
+            if (DEBUG_SERVICE) Slog.v(TAG_SERVICE, "PUBLISHING " + r
                     + " " + intent + ": " + service);
             if (r != null) {
                 Intent.FilterComparison filter
@@ -873,14 +883,14 @@ public final class ActiveServices {
                             ConnectionRecord c = clist.get(i);
                             if (!filter.equals(c.binding.intent.intent)) {
                                 if (DEBUG_SERVICE) Slog.v(
-                                        TAG, "Not publishing to: " + c);
+                                        TAG_SERVICE, "Not publishing to: " + c);
                                 if (DEBUG_SERVICE) Slog.v(
-                                        TAG, "Bound intent: " + c.binding.intent.intent);
+                                        TAG_SERVICE, "Bound intent: " + c.binding.intent.intent);
                                 if (DEBUG_SERVICE) Slog.v(
-                                        TAG, "Published intent: " + intent);
+                                        TAG_SERVICE, "Published intent: " + intent);
                                 continue;
                             }
-                            if (DEBUG_SERVICE) Slog.v(TAG, "Publishing to: " + c);
+                            if (DEBUG_SERVICE) Slog.v(TAG_SERVICE, "Publishing to: " + c);
                             try {
                                 c.conn.connected(r.name, service);
                             } catch (Exception e) {
@@ -901,7 +911,7 @@ public final class ActiveServices {
 
     boolean unbindServiceLocked(IServiceConnection connection) {
         IBinder binder = connection.asBinder();
-        if (DEBUG_SERVICE) Slog.v(TAG, "unbindService: conn=" + binder);
+        if (DEBUG_SERVICE) Slog.v(TAG_SERVICE, "unbindService: conn=" + binder);
         ArrayList<ConnectionRecord> clist = mServiceConnections.get(binder);
         if (clist == null) {
             Slog.w(TAG, "Unbind failed: could not find connection for "
@@ -945,7 +955,7 @@ public final class ActiveServices {
                 Intent.FilterComparison filter
                         = new Intent.FilterComparison(intent);
                 IntentBindRecord b = r.bindings.get(filter);
-                if (DEBUG_SERVICE) Slog.v(TAG, "unbindFinished in " + r
+                if (DEBUG_SERVICE) Slog.v(TAG_SERVICE, "unbindFinished in " + r
                         + " at " + b + ": apps="
                         + (b != null ? b.apps.size() : 0));
 
@@ -963,7 +973,11 @@ public final class ActiveServices {
                                 break;
                             }
                         }
-                        requestServiceBindingLocked(r, b, inFg, true);
+                        try {
+                            requestServiceBindingLocked(r, b, inFg, true);
+                        } catch (TransactionTooLargeException e) {
+                            // Don't pass this back to ActivityThread, it's unrelated.
+                        }
                     } else {
                         // Note to tell the service the next time there is
                         // a new client.
@@ -1009,10 +1023,10 @@ public final class ActiveServices {
     }
 
     private ServiceLookupResult retrieveServiceLocked(Intent service,
-            String resolvedType, int callingPid, int callingUid, int userId,
+            String resolvedType, String callingPackage, int callingPid, int callingUid, int userId,
             boolean createIfNeeded, boolean callingFromFg) {
         ServiceRecord r = null;
-        if (DEBUG_SERVICE) Slog.v(TAG, "retrieveServiceLocked: " + service
+        if (DEBUG_SERVICE) Slog.v(TAG_SERVICE, "retrieveServiceLocked: " + service
                 + " type=" + resolvedType + " callingUid=" + callingUid);
 
         userId = mAm.handleIncomingUser(callingPid, callingUid, userId,
@@ -1036,7 +1050,7 @@ public final class ActiveServices {
                 ServiceInfo sInfo =
                     rInfo != null ? rInfo.serviceInfo : null;
                 if (sInfo == null) {
-                    Slog.w(TAG, "Unable to start service " + service + " U=" + userId +
+                    Slog.w(TAG_SERVICE, "Unable to start service " + service + " U=" + userId +
                           ": not found");
                     return null;
                 }
@@ -1099,7 +1113,18 @@ public final class ActiveServices {
                         + ", uid=" + callingUid
                         + " requires " + r.permission);
                 return new ServiceLookupResult(null, r.permission);
+            } else if (r.permission != null && callingPackage != null) {
+                final int opCode = AppOpsManager.permissionToOpCode(r.permission);
+                if (opCode != AppOpsManager.OP_NONE && mAm.mAppOpsService.noteOperation(
+                        opCode, callingUid, callingPackage) != AppOpsManager.MODE_ALLOWED) {
+                    Slog.w(TAG, "Appop Denial: Accessing service " + r.name
+                            + " from pid=" + callingPid
+                            + ", uid=" + callingUid
+                            + " requires appop " + AppOpsManager.opToName(opCode));
+                    return null;
+                }
             }
+
             if (!mAm.mIntentFirewall.checkService(r.name, service, callingUid, callingPid,
                     resolvedType, r.appInfo)) {
                 return null;
@@ -1110,9 +1135,9 @@ public final class ActiveServices {
     }
 
     private final void bumpServiceExecutingLocked(ServiceRecord r, boolean fg, String why) {
-        if (DEBUG_SERVICE) Slog.v(TAG, ">>> EXECUTING "
+        if (DEBUG_SERVICE) Slog.v(TAG_SERVICE, ">>> EXECUTING "
                 + why + " of " + r + " in app " + r.app);
-        else if (DEBUG_SERVICE_EXECUTING) Slog.v(TAG, ">>> EXECUTING "
+        else if (DEBUG_SERVICE_EXECUTING) Slog.v(TAG_SERVICE_EXECUTING, ">>> EXECUTING "
                 + why + " of " + r.shortName);
         long now = SystemClock.uptimeMillis();
         if (r.executeNesting == 0) {
@@ -1137,8 +1162,8 @@ public final class ActiveServices {
         r.executingStart = now;
     }
 
-    private final boolean requestServiceBindingLocked(ServiceRecord r,
-            IntentBindRecord i, boolean execInFg, boolean rebind) {
+    private final boolean requestServiceBindingLocked(ServiceRecord r, IntentBindRecord i,
+            boolean execInFg, boolean rebind) throws TransactionTooLargeException {
         if (r.app == null || r.app.thread == null) {
             // If service is not currently running, can't yet bind.
             return false;
@@ -1154,8 +1179,17 @@ public final class ActiveServices {
                 }
                 i.hasBound = true;
                 i.doRebind = false;
+            } catch (TransactionTooLargeException e) {
+                // Keep the executeNesting count accurate.
+                if (DEBUG_SERVICE) Slog.v(TAG_SERVICE, "Crashed while binding " + r, e);
+                final boolean inDestroying = mDestroyingServices.contains(r);
+                serviceDoneExecutingLocked(r, inDestroying, inDestroying);
+                throw e;
             } catch (RemoteException e) {
-                if (DEBUG_SERVICE) Slog.v(TAG, "Crashed while binding " + r);
+                if (DEBUG_SERVICE) Slog.v(TAG_SERVICE, "Crashed while binding " + r);
+                // Keep the executeNesting count accurate.
+                final boolean inDestroying = mDestroyingServices.contains(r);
+                serviceDoneExecutingLocked(r, inDestroying, inDestroying);
                 return false;
             }
         }
@@ -1280,7 +1314,11 @@ public final class ActiveServices {
         if (!mRestartingServices.contains(r)) {
             return;
         }
-        bringUpServiceLocked(r, r.intent.getIntent().getFlags(), r.createdFromFg, true);
+        try {
+            bringUpServiceLocked(r, r.intent.getIntent().getFlags(), r.createdFromFg, true);
+        } catch (TransactionTooLargeException e) {
+            // Ignore, it's been logged and nothing upstack cares.
+        }
     }
 
     private final boolean unscheduleServiceRestartLocked(ServiceRecord r, int callingUid,
@@ -1321,8 +1359,8 @@ public final class ActiveServices {
         }
     }
 
-    private final String bringUpServiceLocked(ServiceRecord r,
-            int intentFlags, boolean execInFg, boolean whileRestarting) {
+    private final String bringUpServiceLocked(ServiceRecord r, int intentFlags, boolean execInFg,
+            boolean whileRestarting) throws TransactionTooLargeException {
         //Slog.i(TAG, "Bring up service:");
         //r.dump("  ");
 
@@ -1336,17 +1374,18 @@ public final class ActiveServices {
             return null;
         }
 
-        if (DEBUG_SERVICE) Slog.v(TAG, "Bringing up " + r + " " + r.intent);
+        if (DEBUG_SERVICE) Slog.v(TAG_SERVICE, "Bringing up " + r + " " + r.intent);
 
         // We are now bringing the service up, so no longer in the
         // restarting state.
         if (mRestartingServices.remove(r)) {
+            r.resetRestartCounter();
             clearRestartingIfNeededLocked(r);
         }
 
         // Make sure this service is no longer considered delayed, we are starting it now.
         if (r.delayed) {
-            if (DEBUG_DELAYED_STARTS) Slog.v(TAG, "REM FR DELAY LIST (bring up): " + r);
+            if (DEBUG_DELAYED_STARTS) Slog.v(TAG_SERVICE, "REM FR DELAY LIST (bring up): " + r);
             getServiceMap(r.userId).mDelayedStartList.remove(r);
             r.delayed = false;
         }
@@ -1386,6 +1425,8 @@ public final class ActiveServices {
                     app.addPackage(r.appInfo.packageName, r.appInfo.versionCode, mAm.mProcessStats);
                     realStartServiceLocked(r, app, execInFg);
                     return null;
+                } catch (TransactionTooLargeException e) {
+                    throw e;
                 } catch (RemoteException e) {
                     Slog.w(TAG, "Exception when starting service " + r.shortName, e);
                 }
@@ -1429,7 +1470,8 @@ public final class ActiveServices {
             // Oh and hey we've already been asked to stop!
             r.delayedStop = false;
             if (r.startRequested) {
-                if (DEBUG_DELAYED_STARTS) Slog.v(TAG, "Applying delayed stop (in bring up): " + r);
+                if (DEBUG_DELAYED_STARTS) Slog.v(TAG_SERVICE,
+                        "Applying delayed stop (in bring up): " + r);
                 stopServiceLocked(r);
             }
         }
@@ -1437,7 +1479,8 @@ public final class ActiveServices {
         return null;
     }
 
-    private final void requestServiceBindingsLocked(ServiceRecord r, boolean execInFg) {
+    private final void requestServiceBindingsLocked(ServiceRecord r, boolean execInFg)
+            throws TransactionTooLargeException {
         for (int i=r.bindings.size()-1; i>=0; i--) {
             IntentBindRecord ibr = r.bindings.valueAt(i);
             if (!requestServiceBindingLocked(r, ibr, execInFg, false)) {
@@ -1457,7 +1500,7 @@ public final class ActiveServices {
         r.app = app;
         r.restartTime = r.lastActivity = SystemClock.uptimeMillis();
 
-        app.services.add(r);
+        final boolean newService = app.services.add(r);
         bumpServiceExecutingLocked(r, execInFg, "create");
         mAm.updateLruProcessLocked(app, false, null);
         mAm.updateOomAdjLocked();
@@ -1484,12 +1527,23 @@ public final class ActiveServices {
         } catch (DeadObjectException e) {
             Slog.w(TAG, "Application dead when creating service " + r);
             mAm.appDiedLocked(app);
+            throw e;
         } finally {
             if (!created) {
-                app.services.remove(r);
-                r.app = null;
-                scheduleServiceRestartLocked(r, false);
-                return;
+                // Keep the executeNesting count accurate.
+                final boolean inDestroying = mDestroyingServices.contains(r);
+                serviceDoneExecutingLocked(r, inDestroying, inDestroying);
+
+                // Cleanup.
+                if (newService) {
+                    app.services.remove(r);
+                    r.app = null;
+                }
+
+                // Retry.
+                if (!inDestroying) {
+                    scheduleServiceRestartLocked(r, false);
+                }
             }
         }
 
@@ -1508,7 +1562,7 @@ public final class ActiveServices {
         sendServiceArgsLocked(r, execInFg, true);
 
         if (r.delayed) {
-            if (DEBUG_DELAYED_STARTS) Slog.v(TAG, "REM FR DELAY LIST (new proc): " + r);
+            if (DEBUG_DELAYED_STARTS) Slog.v(TAG_SERVICE, "REM FR DELAY LIST (new proc): " + r);
             getServiceMap(r.userId).mDelayedStartList.remove(r);
             r.delayed = false;
         }
@@ -1517,23 +1571,26 @@ public final class ActiveServices {
             // Oh and hey we've already been asked to stop!
             r.delayedStop = false;
             if (r.startRequested) {
-                if (DEBUG_DELAYED_STARTS) Slog.v(TAG, "Applying delayed stop (from start): " + r);
+                if (DEBUG_DELAYED_STARTS) Slog.v(TAG_SERVICE,
+                        "Applying delayed stop (from start): " + r);
                 stopServiceLocked(r);
             }
         }
     }
 
     private final void sendServiceArgsLocked(ServiceRecord r, boolean execInFg,
-            boolean oomAdjusted) {
+            boolean oomAdjusted) throws TransactionTooLargeException {
         final int N = r.pendingStarts.size();
         if (N == 0) {
             return;
         }
 
         while (r.pendingStarts.size() > 0) {
+            Exception caughtException = null;
+            ServiceRecord.StartItem si;
             try {
-                ServiceRecord.StartItem si = r.pendingStarts.remove(0);
-                if (DEBUG_SERVICE) Slog.v(TAG, "Sending arguments to: "
+                si = r.pendingStarts.remove(0);
+                if (DEBUG_SERVICE) Slog.v(TAG_SERVICE, "Sending arguments to: "
                         + r + " " + r.intent + " args=" + si.intent);
                 if (si.intent == null && N > 1) {
                     // If somehow we got a dummy null intent in the middle,
@@ -1562,13 +1619,26 @@ public final class ActiveServices {
                     flags |= Service.START_FLAG_REDELIVERY;
                 }
                 r.app.thread.scheduleServiceArgs(r, si.taskRemoved, si.id, flags, si.intent);
+            } catch (TransactionTooLargeException e) {
+                if (DEBUG_SERVICE) Slog.v(TAG_SERVICE, "Transaction too large: intent="
+                        + si.intent);
+                caughtException = e;
             } catch (RemoteException e) {
-                // Remote process gone...  we'll let the normal cleanup take
-                // care of this.
-                if (DEBUG_SERVICE) Slog.v(TAG, "Crashed while scheduling start: " + r);
-                break;
+                // Remote process gone...  we'll let the normal cleanup take care of this.
+                if (DEBUG_SERVICE) Slog.v(TAG_SERVICE, "Crashed while sending args: " + r);
+                caughtException = e;
             } catch (Exception e) {
                 Slog.w(TAG, "Unexpected exception", e);
+                caughtException = e;
+            }
+
+            if (caughtException != null) {
+                // Keep nesting count correct
+                final boolean inDestroying = mDestroyingServices.contains(r);
+                serviceDoneExecutingLocked(r, inDestroying, inDestroying);
+                if (caughtException instanceof TransactionTooLargeException) {
+                    throw (TransactionTooLargeException)caughtException;
+                }
                 break;
             }
         }
@@ -1635,7 +1705,7 @@ public final class ActiveServices {
         if (r.app != null && r.app.thread != null) {
             for (int i=r.bindings.size()-1; i>=0; i--) {
                 IntentBindRecord ibr = r.bindings.valueAt(i);
-                if (DEBUG_SERVICE) Slog.v(TAG, "Bringing down binding " + ibr
+                if (DEBUG_SERVICE) Slog.v(TAG_SERVICE, "Bringing down binding " + ibr
                         + ": hasBound=" + ibr.hasBound);
                 if (ibr.hasBound) {
                     try {
@@ -1653,7 +1723,7 @@ public final class ActiveServices {
             }
         }
 
-        if (DEBUG_SERVICE) Slog.v(TAG, "Bringing down " + r + " " + r.intent);
+        if (DEBUG_SERVICE) Slog.v(TAG_SERVICE, "Bringing down " + r + " " + r.intent);
         r.destroyTime = SystemClock.uptimeMillis();
         if (LOG_SERVICE_START_STOP) {
             EventLogTags.writeAmDestroyService(
@@ -1670,7 +1740,7 @@ public final class ActiveServices {
         for (int i=mPendingServices.size()-1; i>=0; i--) {
             if (mPendingServices.get(i) == r) {
                 mPendingServices.remove(i);
-                if (DEBUG_SERVICE) Slog.v(TAG, "Removed pending: " + r);
+                if (DEBUG_SERVICE) Slog.v(TAG_SERVICE, "Removed pending: " + r);
             }
         }
 
@@ -1703,11 +1773,11 @@ public final class ActiveServices {
                 }
             } else {
                 if (DEBUG_SERVICE) Slog.v(
-                    TAG, "Removed service that has no process: " + r);
+                    TAG_SERVICE, "Removed service that has no process: " + r);
             }
         } else {
             if (DEBUG_SERVICE) Slog.v(
-                TAG, "Removed service that is not running: " + r);
+                TAG_SERVICE, "Removed service that is not running: " + r);
         }
 
         if (r.bindings.size() > 0) {
@@ -1774,7 +1844,7 @@ public final class ActiveServices {
         }
 
         if (!c.serviceDead) {
-            if (DEBUG_SERVICE) Slog.v(TAG, "Disconnecting binding " + b.intent
+            if (DEBUG_SERVICE) Slog.v(TAG_SERVICE, "Disconnecting binding " + b.intent
                     + ": shouldUnbind=" + b.intent.hasBound);
             if (s.app != null && s.app.thread != null && b.intent.apps.size() == 0
                     && b.intent.hasBound) {
@@ -1876,6 +1946,7 @@ public final class ActiveServices {
                 } else if (r.executeNesting != 1) {
                     Slog.wtfStack(TAG, "Service done with onDestroy, but executeNesting="
                             + r.executeNesting + ": " + r);
+                    // Fake it to keep from ANR due to orphaned entry.
                     r.executeNesting = 1;
                 }
             }
@@ -1901,19 +1972,20 @@ public final class ActiveServices {
 
     private void serviceDoneExecutingLocked(ServiceRecord r, boolean inDestroying,
             boolean finishing) {
-        if (DEBUG_SERVICE) Slog.v(TAG, "<<< DONE EXECUTING " + r
+        if (DEBUG_SERVICE) Slog.v(TAG_SERVICE, "<<< DONE EXECUTING " + r
                 + ": nesting=" + r.executeNesting
                 + ", inDestroying=" + inDestroying + ", app=" + r.app);
-        else if (DEBUG_SERVICE_EXECUTING) Slog.v(TAG, "<<< DONE EXECUTING " + r.shortName);
+        else if (DEBUG_SERVICE_EXECUTING) Slog.v(TAG_SERVICE_EXECUTING,
+                "<<< DONE EXECUTING " + r.shortName);
         r.executeNesting--;
         if (r.executeNesting <= 0) {
             if (r.app != null) {
-                if (DEBUG_SERVICE) Slog.v(TAG,
+                if (DEBUG_SERVICE) Slog.v(TAG_SERVICE,
                         "Nesting at 0 of " + r.shortName);
                 r.app.execServicesFg = false;
                 r.app.executingServices.remove(r);
                 if (r.app.executingServices.size() == 0) {
-                    if (DEBUG_SERVICE || DEBUG_SERVICE_EXECUTING) Slog.v(TAG,
+                    if (DEBUG_SERVICE || DEBUG_SERVICE_EXECUTING) Slog.v(TAG_SERVICE_EXECUTING,
                             "No more executingServices of " + r.shortName);
                     mAm.mHandler.removeMessages(ActivityManagerService.SERVICE_TIMEOUT_MSG, r.app);
                 } else if (r.executeFg) {
@@ -1926,7 +1998,7 @@ public final class ActiveServices {
                     }
                 }
                 if (inDestroying) {
-                    if (DEBUG_SERVICE) Slog.v(TAG,
+                    if (DEBUG_SERVICE) Slog.v(TAG_SERVICE,
                             "doneExecuting remove destroying " + r);
                     mDestroyingServices.remove(r);
                     r.bindings.clear();
@@ -2012,14 +2084,17 @@ public final class ActiveServices {
         }
     }
 
-    private boolean collectForceStopServicesLocked(String name, int userId,
-            boolean evenPersistent, boolean doit,
-            ArrayMap<ComponentName, ServiceRecord> services,
-            ArrayList<ServiceRecord> result) {
+    private boolean collectPackageServicesLocked(String packageName, Set<String> filterByClasses,
+            boolean evenPersistent, boolean doit, boolean killProcess,
+            ArrayMap<ComponentName, ServiceRecord> services) {
         boolean didSomething = false;
-        for (int i=0; i<services.size(); i++) {
+        for (int i = services.size() - 1; i >= 0; i--) {
             ServiceRecord service = services.valueAt(i);
-            if ((name == null || service.packageName.equals(name))
+            final boolean sameComponent = packageName == null
+                    || (service.packageName.equals(packageName)
+                        && (filterByClasses == null
+                            || filterByClasses.contains(service.name.getClassName())));
+            if (sameComponent
                     && (service.app == null || evenPersistent || !service.app.persistent)) {
                 if (!doit) {
                     return true;
@@ -2027,26 +2102,34 @@ public final class ActiveServices {
                 didSomething = true;
                 Slog.i(TAG, "  Force stopping service " + service);
                 if (service.app != null) {
-                    service.app.removed = true;
+                    service.app.removed = killProcess;
                     if (!service.app.persistent) {
                         service.app.services.remove(service);
                     }
                 }
                 service.app = null;
                 service.isolatedProc = null;
-                result.add(service);
+                if (mTmpCollectionResults == null) {
+                    mTmpCollectionResults = new ArrayList<>();
+                }
+                mTmpCollectionResults.add(service);
             }
         }
         return didSomething;
     }
 
-    boolean forceStopLocked(String name, int userId, boolean evenPersistent, boolean doit) {
+    boolean bringDownDisabledPackageServicesLocked(String packageName, Set<String> filterByClasses,
+            int userId, boolean evenPersistent, boolean killProcess, boolean doit) {
         boolean didSomething = false;
-        ArrayList<ServiceRecord> services = new ArrayList<ServiceRecord>();
+
+        if (mTmpCollectionResults != null) {
+            mTmpCollectionResults.clear();
+        }
+
         if (userId == UserHandle.USER_ALL) {
-            for (int i=0; i<mServiceMap.size(); i++) {
-                didSomething |= collectForceStopServicesLocked(name, userId, evenPersistent,
-                        doit, mServiceMap.valueAt(i).mServicesByName, services);
+            for (int i = mServiceMap.size() - 1; i >= 0; i--) {
+                didSomething |= collectPackageServicesLocked(packageName, filterByClasses,
+                        evenPersistent, doit, killProcess, mServiceMap.valueAt(i).mServicesByName);
                 if (!doit && didSomething) {
                     return true;
                 }
@@ -2055,22 +2138,24 @@ public final class ActiveServices {
             ServiceMap smap = mServiceMap.get(userId);
             if (smap != null) {
                 ArrayMap<ComponentName, ServiceRecord> items = smap.mServicesByName;
-                didSomething = collectForceStopServicesLocked(name, userId, evenPersistent,
-                        doit, items, services);
+                didSomething = collectPackageServicesLocked(packageName, filterByClasses,
+                        evenPersistent, doit, killProcess, items);
             }
         }
 
-        int N = services.size();
-        for (int i=0; i<N; i++) {
-            bringDownServiceLocked(services.get(i));
+        if (mTmpCollectionResults != null) {
+            for (int i = mTmpCollectionResults.size() - 1; i >= 0; i--) {
+                bringDownServiceLocked(mTmpCollectionResults.get(i));
+            }
+            mTmpCollectionResults.clear();
         }
         return didSomething;
     }
 
     void cleanUpRemovedTaskLocked(TaskRecord tr, ComponentName component, Intent baseIntent) {
-        ArrayList<ServiceRecord> services = new ArrayList<ServiceRecord>();
+        ArrayList<ServiceRecord> services = new ArrayList<>();
         ArrayMap<ComponentName, ServiceRecord> alls = getServices(tr.userId);
-        for (int i=0; i<alls.size(); i++) {
+        for (int i = alls.size() - 1; i >= 0; i--) {
             ServiceRecord sr = alls.valueAt(i);
             if (sr.packageName.equals(component.getPackageName())) {
                 services.add(sr);
@@ -2078,7 +2163,7 @@ public final class ActiveServices {
         }
 
         // Take care of any running services associated with the app.
-        for (int i=0; i<services.size(); i++) {
+        for (int i = services.size() - 1; i >= 0; i--) {
             ServiceRecord sr = services.get(i);
             if (sr.startRequested) {
                 if ((sr.serviceInfo.flags&ServiceInfo.FLAG_STOP_WITH_TASK) != 0) {
@@ -2090,7 +2175,11 @@ public final class ActiveServices {
                     if (sr.app != null && sr.app.thread != null) {
                         // We always run in the foreground, since this is called as
                         // part of the "remove task" UI operation.
-                        sendServiceArgsLocked(sr, true, false);
+                        try {
+                            sendServiceArgsLocked(sr, true, false);
+                        } catch (TransactionTooLargeException e) {
+                            // Ignore, keep going.
+                        }
                     }
                 }
             }
@@ -2126,8 +2215,16 @@ public final class ActiveServices {
             }
         }
 
-        // First clear app state from services.
-        for (int i=app.services.size()-1; i>=0; i--) {
+        // Clean up any connections this application has to other services.
+        for (int i = app.connections.size() - 1; i >= 0; i--) {
+            ConnectionRecord r = app.connections.valueAt(i);
+            removeConnectionLocked(r, app, null);
+        }
+        updateServiceConnectionActivitiesLocked(app);
+        app.connections.clear();
+
+        // Clear app state from services.
+        for (int i = app.services.size() - 1; i >= 0; i--) {
             ServiceRecord sr = app.services.valueAt(i);
             synchronized (sr.stats.getBatteryStats()) {
                 sr.stats.stopLaunchedLocked();
@@ -2140,13 +2237,13 @@ public final class ActiveServices {
             sr.executeNesting = 0;
             sr.forceClearTracker();
             if (mDestroyingServices.remove(sr)) {
-                if (DEBUG_SERVICE) Slog.v(TAG, "killServices remove destroying " + sr);
+                if (DEBUG_SERVICE) Slog.v(TAG_SERVICE, "killServices remove destroying " + sr);
             }
 
             final int numClients = sr.bindings.size();
             for (int bindingi=numClients-1; bindingi>=0; bindingi--) {
                 IntentBindRecord b = sr.bindings.valueAt(bindingi);
-                if (DEBUG_SERVICE) Slog.v(TAG, "Killing binding " + b
+                if (DEBUG_SERVICE) Slog.v(TAG_SERVICE, "Killing binding " + b
                         + ": shouldUnbind=" + b.hasBound);
                 b.binder = null;
                 b.requested = b.received = b.hasBound = false;
@@ -2187,14 +2284,6 @@ public final class ActiveServices {
             }
         }
 
-        // Clean up any connections this application has to other services.
-        for (int i=app.connections.size()-1; i>=0; i--) {
-            ConnectionRecord r = app.connections.valueAt(i);
-            removeConnectionLocked(r, app, null);
-        }
-        updateServiceConnectionActivitiesLocked(app);
-        app.connections.clear();
-
         ServiceMap smap = getServiceMap(app.userId);
 
         // Now do remaining service cleanup.
@@ -2227,7 +2316,7 @@ public final class ActiveServices {
                 EventLog.writeEvent(EventLogTags.AM_SERVICE_CRASHED_TOO_MUCH,
                         sr.userId, sr.crashCount, sr.shortName, app.pid);
                 bringDownServiceLocked(sr);
-            } else if (!allowRestart) {
+            } else if (!allowRestart || !mAm.isUserRunningLocked(sr.userId, false)) {
                 bringDownServiceLocked(sr);
             } else {
                 boolean canceled = scheduleServiceRestartLocked(sr, true);
@@ -2280,7 +2369,7 @@ public final class ActiveServices {
             if (sr.app == app) {
                 sr.forceClearTracker();
                 mDestroyingServices.remove(i);
-                if (DEBUG_SERVICE) Slog.v(TAG, "killServices remove destroying " + sr);
+                if (DEBUG_SERVICE) Slog.v(TAG_SERVICE, "killServices remove destroying " + sr);
             }
         }
 

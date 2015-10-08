@@ -150,7 +150,7 @@ public class DozeService extends DreamService implements ProximitySensorManager.
             mShakeSensorManager = new ShakeSensorManager(mContext, this);
         }
         mPowerManager = (PowerManager) mContext.getSystemService(Context.POWER_SERVICE);
-        mWakeLock = mPowerManager.newWakeLock(PowerManager.PARTIAL_WAKE_LOCK, mTag);
+        mWakeLock = mPowerManager.newWakeLock(PowerManager.PARTIAL_WAKE_LOCK, TAG);
         mWakeLock.setReferenceCounted(true);
         mAlarmManager = (AlarmManager) mContext.getSystemService(Context.ALARM_SERVICE);
         mDisplayStateSupported = mDozeParameters.getDisplayStateSupported();
@@ -322,7 +322,7 @@ public class DozeService extends DreamService implements ProximitySensorManager.
                     final boolean isNear = result == RESULT_NEAR;
                     final boolean isAccSensor = mUseAccelerometer && mDozeParameters.getShakeMode();
                     final long end = SystemClock.uptimeMillis();
-                    DozeLog.traceProximityResult(isNear, end - start, reason);
+                    DozeLog.traceProximityResult(mContext, isNear, end - start, reason);
                     if (nonBlocking) {
                         // we already continued
                         return;

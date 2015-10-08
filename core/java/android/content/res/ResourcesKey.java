@@ -16,33 +16,32 @@
 
 package android.content.res;
 
-import android.os.IBinder;
+import android.annotation.NonNull;
+
+import java.util.Objects;
 
 /** @hide */
 public final class ResourcesKey {
-    final String mResDir;
-    final float mScale;
+    private final String mResDir;
+    private final float mScale;
     private final int mHash;
-    private final IBinder mToken;
 
     public final int mDisplayId;
-    public final Configuration mOverrideConfiguration = new Configuration();
+    @NonNull
+    public final Configuration mOverrideConfiguration;
 
     public ResourcesKey(String resDir, int displayId, Configuration overrideConfiguration,
-            float scale, IBinder token) {
+            float scale) {
         mResDir = resDir;
         mDisplayId = displayId;
-        if (overrideConfiguration != null) {
-            mOverrideConfiguration.setTo(overrideConfiguration);
-        }
+        mOverrideConfiguration = overrideConfiguration != null
+                ? overrideConfiguration : Configuration.EMPTY;
         mScale = scale;
-        mToken = token;
 
         int hash = 17;
         hash = 31 * hash + (mResDir == null ? 0 : mResDir.hashCode());
         hash = 31 * hash + mDisplayId;
-        hash = 31 * hash + (mOverrideConfiguration != null
-                ? mOverrideConfiguration.hashCode() : 0);
+        hash = 31 * hash + mOverrideConfiguration.hashCode();
         hash = 31 * hash + Float.floatToIntBits(mScale);
         mHash = hash;
     }
@@ -63,27 +62,14 @@ public final class ResourcesKey {
         }
         ResourcesKey peer = (ResourcesKey) obj;
 
-        if ((mResDir == null) && (peer.mResDir != null)) {
+        if (!Objects.equals(mResDir, peer.mResDir)) {
             return false;
-        }
-        if ((mResDir != null) && (peer.mResDir == null)) {
-            return false;
-        }
-        if ((mResDir != null) && (peer.mResDir != null)) {
-            if (!mResDir.equals(peer.mResDir)) {
-                return false;
-            }
         }
         if (mDisplayId != peer.mDisplayId) {
             return false;
         }
-        if (mOverrideConfiguration != peer.mOverrideConfiguration) {
-            if (mOverrideConfiguration == null || peer.mOverrideConfiguration == null) {
-                return false;
-            }
-            if (!mOverrideConfiguration.equals(peer.mOverrideConfiguration)) {
-                return false;
-            }
+        if (!mOverrideConfiguration.equals(peer.mOverrideConfiguration)) {
+            return false;
         }
         if (mScale != peer.mScale) {
             return false;

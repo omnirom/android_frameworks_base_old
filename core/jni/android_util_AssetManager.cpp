@@ -17,37 +17,38 @@
 
 #define LOG_TAG "asset"
 
-#define DEBUG_STYLES(x) //x
-#define THROW_ON_BAD_ID 0
-
 #include <android_runtime/android_util_AssetManager.h>
 
-#include "jni.h"
-#include "JNIHelp.h"
-#include "ScopedStringChars.h"
-#include "ScopedUtfChars.h"
-#include "android_util_Binder.h"
-#include <utils/misc.h>
-#include <android_runtime/AndroidRuntime.h>
-#include <utils/Log.h>
-
-#include <androidfw/Asset.h>
-#include <androidfw/AssetManager.h>
-#include <androidfw/AttributeFinder.h>
-#include <androidfw/ResourceTypes.h>
-
-#include <private/android_filesystem_config.h> // for AID_SYSTEM
-
+#include <inttypes.h>
+#include <linux/capability.h>
 #include <stdio.h>
 #include <sys/types.h>
 #include <sys/wait.h>
 
-#include <linux/capability.h>
+#include <private/android_filesystem_config.h> // for AID_SYSTEM
+
+#include "androidfw/Asset.h"
+#include "androidfw/AssetManager.h"
+#include "androidfw/AttributeFinder.h"
+#include "androidfw/ResourceTypes.h"
+#include "android_runtime/AndroidRuntime.h"
+#include "android_util_Binder.h"
+#include "core_jni_helpers.h"
+#include "jni.h"
+#include "JNIHelp.h"
+#include "ScopedStringChars.h"
+#include "ScopedUtfChars.h"
+#include "utils/Log.h"
+#include "utils/misc.h"
+
 extern "C" int capget(cap_user_header_t hdrp, cap_user_data_t datap);
 extern "C" int capset(cap_user_header_t hdrp, const cap_user_data_t datap);
 
 
 namespace android {
+
+static const bool kThrowOnBadId = false;
+static const bool kDebugStyles = false;
 
 // ----------------------------------------------------------------------------
 
@@ -614,6 +615,10 @@ static void android_content_AssetManager_setConfiguration(JNIEnv* env, jobject c
 
     const char* locale8 = locale != NULL ? env->GetStringUTFChars(locale, NULL) : NULL;
 
+    // Constants duplicated from Java class android.content.res.Configuration.
+    static const jint kScreenLayoutRoundMask = 0x300;
+    static const jint kScreenLayoutRoundShift = 8;
+
     config.mcc = (uint16_t)mcc;
     config.mnc = (uint16_t)mnc;
     config.orientation = (uint8_t)orientation;
@@ -631,6 +636,13 @@ static void android_content_AssetManager_setConfiguration(JNIEnv* env, jobject c
     config.uiMode = (uint8_t)uiMode;
     config.sdkVersion = (uint16_t)sdkVersion;
     config.minorVersion = 0;
+
+    // In Java, we use a 32bit integer for screenLayout, while we only use an 8bit integer
+    // in C++. We must extract the round qualifier out of the Java screenLayout and put it
+    // into screenLayout2.
+    config.screenLayout2 =
+            (uint8_t)((screenLayout & kScreenLayoutRoundMask) >> kScreenLayoutRoundShift);
+
     am->setConfiguration(config, locale8);
 
     if (locale != NULL) env->ReleaseStringUTFChars(locale, locale8);
@@ -651,23 +663,29 @@ static jint android_content_AssetManager_getResourceIdentifier(JNIEnv* env, jobj
         return 0;
     }
 
-    const char16_t* defType16 = defType
-        ? env->GetStringChars(defType, NULL) : NULL;
+    const char16_t* defType16 = reinterpret_cast<const char16_t*>(defType)
+        ? reinterpret_cast<const char16_t*>(env->GetStringChars(defType, NULL))
+        : NULL;
     jsize defTypeLen = defType
         ? env->GetStringLength(defType) : 0;
-    const char16_t* defPackage16 = defPackage
-        ? env->GetStringChars(defPackage, NULL) : NULL;
+    const char16_t* defPackage16 = reinterpret_cast<const char16_t*>(defPackage)
+        ? reinterpret_cast<const char16_t*>(env->GetStringChars(defPackage,
+                                                                NULL))
+        : NULL;
     jsize defPackageLen = defPackage
         ? env->GetStringLength(defPackage) : 0;
 
     jint ident = am->getResources().identifierForName(
-        name16.get(), name16.size(), defType16, defTypeLen, defPackage16, defPackageLen);
+        reinterpret_cast<const char16_t*>(name16.get()), name16.size(),
+        defType16, defTypeLen, defPackage16, defPackageLen);
 
     if (defPackage16) {
-        env->ReleaseStringChars(defPackage, defPackage16);
+        env->ReleaseStringChars(defPackage,
+                                reinterpret_cast<const jchar*>(defPackage16));
     }
     if (defType16) {
-        env->ReleaseStringChars(defType, defType16);
+        env->ReleaseStringChars(defType,
+                                reinterpret_cast<const jchar*>(defType16));
     }
 
     return ident;
@@ -804,21 +822,21 @@ static jint android_content_AssetManager_loadResourceValue(JNIEnv* env, jobject 
     ResTable_config config;
     uint32_t typeSpecFlags;
     ssize_t block = res.getResource(ident, &value, false, density, &typeSpecFlags, &config);
-#if THROW_ON_BAD_ID
-    if (block == BAD_INDEX) {
-        jniThrowException(env, "java/lang/IllegalStateException", "Bad resource!");
-        return 0;
-    }
-#endif
-    uint32_t ref = ident;
-    if (resolve) {
-        block = res.resolveReference(&value, block, &ref, &typeSpecFlags, &config);
-#if THROW_ON_BAD_ID
+    if (kThrowOnBadId) {
         if (block == BAD_INDEX) {
             jniThrowException(env, "java/lang/IllegalStateException", "Bad resource!");
             return 0;
         }
-#endif
+    }
+    uint32_t ref = ident;
+    if (resolve) {
+        block = res.resolveReference(&value, block, &ref, &typeSpecFlags, &config);
+        if (kThrowOnBadId) {
+            if (block == BAD_INDEX) {
+                jniThrowException(env, "java/lang/IllegalStateException", "Bad resource!");
+                return 0;
+            }
+        }
     }
     if (block >= 0) {
         return copyValue(env, outValue, &res, value, ref, block, typeSpecFlags, &config);
@@ -864,12 +882,12 @@ static jint android_content_AssetManager_loadResourceBagValue(JNIEnv* env, jobje
     uint32_t ref = ident;
     if (resolve) {
         block = res.resolveReference(&value, block, &ref, &typeSpecFlags);
-#if THROW_ON_BAD_ID
-        if (block == BAD_INDEX) {
-            jniThrowException(env, "java/lang/IllegalStateException", "Bad resource!");
-            return 0;
+        if (kThrowOnBadId) {
+            if (block == BAD_INDEX) {
+                jniThrowException(env, "java/lang/IllegalStateException", "Bad resource!");
+                return 0;
+            }
         }
-#endif
     }
     if (block >= 0) {
         return copyValue(env, outValue, &res, value, ref, block, typeSpecFlags);
@@ -927,8 +945,11 @@ static jobject android_content_AssetManager_getAssignedPackageIdentifiers(JNIEnv
     const size_t N = res.getBasePackageCount();
     for (size_t i = 0; i < N; i++) {
         const String16 name = res.getBasePackageName(i);
-        env->CallVoidMethod(sparseArray, gSparseArrayOffsets.put, (jint) res.getBasePackageId(i),
-                env->NewString(name, name.size()));
+        env->CallVoidMethod(
+            sparseArray, gSparseArrayOffsets.put,
+            static_cast<jint>(res.getBasePackageId(i)),
+            env->NewString(reinterpret_cast<const jchar*>(name.string()),
+                           name.size()));
     }
     return sparseArray;
 }
@@ -966,6 +987,12 @@ static void android_content_AssetManager_copyTheme(JNIEnv* env, jobject clazz,
     dest->setTo(*src);
 }
 
+static void android_content_AssetManager_clearTheme(JNIEnv* env, jobject clazz, jlong themeHandle)
+{
+    ResTable::Theme* theme = reinterpret_cast<ResTable::Theme*>(themeHandle);
+    theme->clear();
+}
+
 static jint android_content_AssetManager_loadThemeAttributeValue(
     JNIEnv* env, jobject clazz, jlong themeHandle, jint ident, jobject outValue, jboolean resolve)
 {
@@ -979,14 +1006,21 @@ static jint android_content_AssetManager_loadThemeAttributeValue(
     uint32_t ref = 0;
     if (resolve) {
         block = res.resolveReference(&value, block, &ref, &typeSpecFlags);
-#if THROW_ON_BAD_ID
-        if (block == BAD_INDEX) {
-            jniThrowException(env, "java/lang/IllegalStateException", "Bad resource!");
-            return 0;
+        if (kThrowOnBadId) {
+            if (block == BAD_INDEX) {
+                jniThrowException(env, "java/lang/IllegalStateException", "Bad resource!");
+                return 0;
+            }
         }
-#endif
     }
     return block >= 0 ? copyValue(env, outValue, &res, value, ref, block, typeSpecFlags) : block;
+}
+
+static jint android_content_AssetManager_getThemeChangingConfigurations(JNIEnv* env, jobject clazz,
+                                                                        jlong themeHandle)
+{
+    ResTable::Theme* theme = reinterpret_cast<ResTable::Theme*>(themeHandle);
+    return theme->getChangingConfigurations();
 }
 
 static void android_content_AssetManager_dumpTheme(JNIEnv* env, jobject clazz,
@@ -995,6 +1029,7 @@ static void android_content_AssetManager_dumpTheme(JNIEnv* env, jobject clazz,
 {
     ResTable::Theme* theme = reinterpret_cast<ResTable::Theme*>(themeHandle);
     const ResTable& res(theme->getResTable());
+    (void)res;
 
     // XXX Need to use params.
     theme->dumpToLog();
@@ -1046,8 +1081,10 @@ static jboolean android_content_AssetManager_resolveAttrs(JNIEnv* env, jobject c
         return JNI_FALSE;
     }
 
-    DEBUG_STYLES(ALOGI("APPLY STYLE: theme=0x%x defStyleAttr=0x%x defStyleRes=0x%x",
-        themeToken, defStyleAttr, defStyleRes));
+    if (kDebugStyles) {
+        ALOGI("APPLY STYLE: theme=0x%" PRIx64 " defStyleAttr=0x%x "
+              "defStyleRes=0x%x", themeToken, defStyleAttr, defStyleRes);
+    }
 
     ResTable::Theme* theme = reinterpret_cast<ResTable::Theme*>(themeToken);
     const ResTable& res = theme->getResTable();
@@ -1114,7 +1151,9 @@ static jboolean android_content_AssetManager_resolveAttrs(JNIEnv* env, jobject c
     for (jsize ii=0; ii<NI; ii++) {
         const uint32_t curIdent = (uint32_t)src[ii];
 
-        DEBUG_STYLES(ALOGI("RETRIEVING ATTR 0x%08x...", curIdent));
+        if (kDebugStyles) {
+            ALOGI("RETRIEVING ATTR 0x%08x...", curIdent);
+        }
 
         // Try to find a value for this attribute...  we prioritize values
         // coming from, first XML attributes, then XML style, then default
@@ -1129,8 +1168,9 @@ static jboolean android_content_AssetManager_resolveAttrs(JNIEnv* env, jobject c
             block = -1;
             value.dataType = Res_value::TYPE_ATTRIBUTE;
             value.data = srcValues[ii];
-            DEBUG_STYLES(ALOGI("-> From values: type=0x%x, data=0x%08x",
-                    value.dataType, value.data));
+            if (kDebugStyles) {
+                ALOGI("-> From values: type=0x%x, data=0x%08x", value.dataType, value.data);
+            }
         }
 
         if (value.dataType == Res_value::TYPE_NULL) {
@@ -1139,8 +1179,9 @@ static jboolean android_content_AssetManager_resolveAttrs(JNIEnv* env, jobject c
                 block = defStyleEntry->stringBlock;
                 typeSetFlags = defStyleTypeSetFlags;
                 value = defStyleEntry->map.value;
-                DEBUG_STYLES(ALOGI("-> From def style: type=0x%x, data=0x%08x",
-                        value.dataType, value.data));
+                if (kDebugStyles) {
+                    ALOGI("-> From def style: type=0x%x, data=0x%08x", value.dataType, value.data);
+                }
             }
         }
 
@@ -1150,39 +1191,46 @@ static jboolean android_content_AssetManager_resolveAttrs(JNIEnv* env, jobject c
             ssize_t newBlock = theme->resolveAttributeReference(&value, block,
                     &resid, &typeSetFlags, &config);
             if (newBlock >= 0) block = newBlock;
-            DEBUG_STYLES(ALOGI("-> Resolved attr: type=0x%x, data=0x%08x",
-                    value.dataType, value.data));
+            if (kDebugStyles) {
+                ALOGI("-> Resolved attr: type=0x%x, data=0x%08x", value.dataType, value.data);
+            }
         } else {
             // If we still don't have a value for this attribute, try to find
             // it in the theme!
             ssize_t newBlock = theme->getAttribute(curIdent, &value, &typeSetFlags);
             if (newBlock >= 0) {
-                DEBUG_STYLES(ALOGI("-> From theme: type=0x%x, data=0x%08x",
-                        value.dataType, value.data));
+                if (kDebugStyles) {
+                    ALOGI("-> From theme: type=0x%x, data=0x%08x", value.dataType, value.data);
+                }
                 newBlock = res.resolveReference(&value, block, &resid,
                         &typeSetFlags, &config);
-#if THROW_ON_BAD_ID
-                if (newBlock == BAD_INDEX) {
-                    jniThrowException(env, "java/lang/IllegalStateException", "Bad resource!");
-                    return JNI_FALSE;
+                if (kThrowOnBadId) {
+                    if (newBlock == BAD_INDEX) {
+                        jniThrowException(env, "java/lang/IllegalStateException", "Bad resource!");
+                        return JNI_FALSE;
+                    }
                 }
-#endif
                 if (newBlock >= 0) block = newBlock;
-                DEBUG_STYLES(ALOGI("-> Resolved theme: type=0x%x, data=0x%08x",
-                        value.dataType, value.data));
+                if (kDebugStyles) {
+                    ALOGI("-> Resolved theme: type=0x%x, data=0x%08x", value.dataType, value.data);
+                }
             }
         }
 
         // Deal with the special @null value -- it turns back to TYPE_NULL.
         if (value.dataType == Res_value::TYPE_REFERENCE && value.data == 0) {
-            DEBUG_STYLES(ALOGI("-> Setting to @null!"));
+            if (kDebugStyles) {
+                ALOGI("-> Setting to @null!");
+            }
             value.dataType = Res_value::TYPE_NULL;
             value.data = Res_value::DATA_NULL_UNDEFINED;
             block = -1;
         }
 
-        DEBUG_STYLES(ALOGI("Attribute 0x%08x: type=0x%x, data=0x%08x",
-                curIdent, value.dataType, value.data));
+        if (kDebugStyles) {
+            ALOGI("Attribute 0x%08x: type=0x%x, data=0x%08x", curIdent, value.dataType,
+                  value.data);
+        }
 
         // Write the final value back to Java.
         dest[STYLE_TYPE] = value.dataType;
@@ -1236,8 +1284,11 @@ static jboolean android_content_AssetManager_applyStyle(JNIEnv* env, jobject cla
         return JNI_FALSE;
     }
 
-    DEBUG_STYLES(ALOGI("APPLY STYLE: theme=0x%x defStyleAttr=0x%x defStyleRes=0x%x xml=0x%x",
-        themeToken, defStyleAttr, defStyleRes, xmlParserToken));
+    if (kDebugStyles) {
+    ALOGI("APPLY STYLE: theme=0x%" PRIx64 " defStyleAttr=0x%x defStyleRes=0x%x "
+          "xml=0x%" PRIx64, themeToken, defStyleAttr, defStyleRes,
+          xmlParserToken);
+    }
 
     ResTable::Theme* theme = reinterpret_cast<ResTable::Theme*>(themeToken);
     const ResTable& res = theme->getResTable();
@@ -1332,7 +1383,9 @@ static jboolean android_content_AssetManager_applyStyle(JNIEnv* env, jobject cla
     for (jsize ii = 0; ii < NI; ii++) {
         const uint32_t curIdent = (uint32_t)src[ii];
 
-        DEBUG_STYLES(ALOGI("RETRIEVING ATTR 0x%08x...", curIdent));
+        if (kDebugStyles) {
+            ALOGI("RETRIEVING ATTR 0x%08x...", curIdent);
+        }
 
         // Try to find a value for this attribute...  we prioritize values
         // coming from, first XML attributes, then XML style, then default
@@ -1348,8 +1401,9 @@ static jboolean android_content_AssetManager_applyStyle(JNIEnv* env, jobject cla
             // We found the attribute we were looking for.
             block = kXmlBlock;
             xmlParser->getAttributeValue(xmlAttrIdx, &value);
-            DEBUG_STYLES(ALOGI("-> From XML: type=0x%x, data=0x%08x",
-                    value.dataType, value.data));
+            if (kDebugStyles) {
+                ALOGI("-> From XML: type=0x%x, data=0x%08x", value.dataType, value.data);
+            }
         }
 
         if (value.dataType == Res_value::TYPE_NULL) {
@@ -1360,8 +1414,9 @@ static jboolean android_content_AssetManager_applyStyle(JNIEnv* env, jobject cla
                 block = styleAttrEntry->stringBlock;
                 typeSetFlags = styleTypeSetFlags;
                 value = styleAttrEntry->map.value;
-                DEBUG_STYLES(ALOGI("-> From style: type=0x%x, data=0x%08x",
-                        value.dataType, value.data));
+                if (kDebugStyles) {
+                    ALOGI("-> From style: type=0x%x, data=0x%08x", value.dataType, value.data);
+                }
             }
         }
 
@@ -1373,8 +1428,9 @@ static jboolean android_content_AssetManager_applyStyle(JNIEnv* env, jobject cla
                 block = defStyleAttrEntry->stringBlock;
                 typeSetFlags = styleTypeSetFlags;
                 value = defStyleAttrEntry->map.value;
-                DEBUG_STYLES(ALOGI("-> From def style: type=0x%x, data=0x%08x",
-                        value.dataType, value.data));
+                if (kDebugStyles) {
+                    ALOGI("-> From def style: type=0x%x, data=0x%08x", value.dataType, value.data);
+                }
             }
         }
 
@@ -1386,41 +1442,50 @@ static jboolean android_content_AssetManager_applyStyle(JNIEnv* env, jobject cla
             if (newBlock >= 0) {
                 block = newBlock;
             }
-            DEBUG_STYLES(ALOGI("-> Resolved attr: type=0x%x, data=0x%08x",
-                    value.dataType, value.data));
+
+            if (kDebugStyles) {
+                ALOGI("-> Resolved attr: type=0x%x, data=0x%08x", value.dataType, value.data);
+            }
         } else {
             // If we still don't have a value for this attribute, try to find
             // it in the theme!
             ssize_t newBlock = theme->getAttribute(curIdent, &value, &typeSetFlags);
             if (newBlock >= 0) {
-                DEBUG_STYLES(ALOGI("-> From theme: type=0x%x, data=0x%08x",
-                        value.dataType, value.data));
+                if (kDebugStyles) {
+                    ALOGI("-> From theme: type=0x%x, data=0x%08x", value.dataType, value.data);
+                }
                 newBlock = res.resolveReference(&value, block, &resid,
                         &typeSetFlags, &config);
-#if THROW_ON_BAD_ID
-                if (newBlock == BAD_INDEX) {
-                    jniThrowException(env, "java/lang/IllegalStateException", "Bad resource!");
-                    return JNI_FALSE;
+                if (kThrowOnBadId) {
+                    if (newBlock == BAD_INDEX) {
+                        jniThrowException(env, "java/lang/IllegalStateException", "Bad resource!");
+                        return JNI_FALSE;
+                    }
                 }
-#endif
+
                 if (newBlock >= 0) {
                     block = newBlock;
                 }
-                DEBUG_STYLES(ALOGI("-> Resolved theme: type=0x%x, data=0x%08x",
-                        value.dataType, value.data));
+
+                if (kDebugStyles) {
+                    ALOGI("-> Resolved theme: type=0x%x, data=0x%08x", value.dataType, value.data);
+                }
             }
         }
 
         // Deal with the special @null value -- it turns back to TYPE_NULL.
         if (value.dataType == Res_value::TYPE_REFERENCE && value.data == 0) {
-            DEBUG_STYLES(ALOGI("-> Setting to @null!"));
+            if (kDebugStyles) {
+                ALOGI("-> Setting to @null!");
+            }
             value.dataType = Res_value::TYPE_NULL;
             value.data = Res_value::DATA_NULL_UNDEFINED;
             block = kXmlBlock;
         }
 
-        DEBUG_STYLES(ALOGI("Attribute 0x%08x: type=0x%x, data=0x%08x",
-                curIdent, value.dataType, value.data));
+        if (kDebugStyles) {
+            ALOGI("Attribute 0x%08x: type=0x%x, data=0x%08x", curIdent, value.dataType, value.data);
+        }
 
         // Write the final value back to Java.
         dest[STYLE_TYPE] = value.dataType;
@@ -1549,12 +1614,12 @@ static jboolean android_content_AssetManager_retrieveAttributes(JNIEnv* env, job
             //printf("Resolving attribute reference\n");
             ssize_t newBlock = res.resolveReference(&value, block, &resid,
                     &typeSetFlags, &config);
-#if THROW_ON_BAD_ID
-            if (newBlock == BAD_INDEX) {
-                jniThrowException(env, "java/lang/IllegalStateException", "Bad resource!");
-                return JNI_FALSE;
+            if (kThrowOnBadId) {
+                if (newBlock == BAD_INDEX) {
+                    jniThrowException(env, "java/lang/IllegalStateException", "Bad resource!");
+                    return JNI_FALSE;
+                }
             }
-#endif
             if (newBlock >= 0) block = newBlock;
         }
 
@@ -1663,12 +1728,12 @@ static jint android_content_AssetManager_retrieveArray(JNIEnv* env, jobject claz
             //printf("Resolving attribute reference\n");
             ssize_t newBlock = res.resolveReference(&value, block, &resid,
                     &typeSetFlags, &config);
-#if THROW_ON_BAD_ID
-            if (newBlock == BAD_INDEX) {
-                jniThrowException(env, "java/lang/IllegalStateException", "Bad resource!");
-                return JNI_FALSE;
+            if (kThrowOnBadId) {
+                if (newBlock == BAD_INDEX) {
+                    jniThrowException(env, "java/lang/IllegalStateException", "Bad resource!");
+                    return JNI_FALSE;
+                }
             }
-#endif
             if (newBlock >= 0) block = newBlock;
         }
 
@@ -1776,12 +1841,12 @@ static jintArray android_content_AssetManager_getArrayStringInfo(JNIEnv* env, jo
             stringIndex = value.data;
         }
 
-#if THROW_ON_BAD_ID
-        if (stringBlock == BAD_INDEX) {
-            jniThrowException(env, "java/lang/IllegalStateException", "Bad resource!");
-            return array;
+        if (kThrowOnBadId) {
+            if (stringBlock == BAD_INDEX) {
+                jniThrowException(env, "java/lang/IllegalStateException", "Bad resource!");
+                return array;
+            }
         }
-#endif
 
         //todo: It might be faster to allocate a C array to contain
         //      the blocknums and indices, put them in there and then
@@ -1824,12 +1889,12 @@ static jobjectArray android_content_AssetManager_getArrayStringResource(JNIEnv* 
 
         // Take care of resolving the found resource to its final value.
         ssize_t block = res.resolveReference(&value, bag->stringBlock, NULL);
-#if THROW_ON_BAD_ID
-        if (block == BAD_INDEX) {
-            jniThrowException(env, "java/lang/IllegalStateException", "Bad resource!");
-            return array;
+        if (kThrowOnBadId) {
+            if (block == BAD_INDEX) {
+                jniThrowException(env, "java/lang/IllegalStateException", "Bad resource!");
+                return array;
+            }
         }
-#endif
         if (value.dataType == Res_value::TYPE_STRING) {
             const ResStringPool* pool = res.getTableStringBlock(block);
             const char* str8 = pool->string8At(value.data, &strLen);
@@ -1837,7 +1902,8 @@ static jobjectArray android_content_AssetManager_getArrayStringResource(JNIEnv* 
                 str = env->NewStringUTF(str8);
             } else {
                 const char16_t* str16 = pool->stringAt(value.data, &strLen);
-                str = env->NewString(str16, strLen);
+                str = env->NewString(reinterpret_cast<const jchar*>(str16),
+                                     strLen);
             }
 
             // If one of our NewString{UTF} calls failed due to memory, an
@@ -1887,12 +1953,12 @@ static jintArray android_content_AssetManager_getArrayIntResource(JNIEnv* env, j
 
         // Take care of resolving the found resource to its final value.
         ssize_t block = res.resolveReference(&value, bag->stringBlock, NULL);
-#if THROW_ON_BAD_ID
-        if (block == BAD_INDEX) {
-            jniThrowException(env, "java/lang/IllegalStateException", "Bad resource!");
-            return array;
+        if (kThrowOnBadId) {
+            if (block == BAD_INDEX) {
+                jniThrowException(env, "java/lang/IllegalStateException", "Bad resource!");
+                return array;
+            }
         }
-#endif
         if (value.dataType >= Res_value::TYPE_FIRST_INT
                 && value.dataType <= Res_value::TYPE_LAST_INT) {
             int intVal = value.data;
@@ -1924,7 +1990,6 @@ static jintArray android_content_AssetManager_getStyleAttributes(JNIEnv* env, jo
         return NULL;
     }
 
-    Res_value value;
     const ResTable::bag_entry* bag = startOfBag;
     for (size_t i=0; ((ssize_t)i)<N; i++, bag++) {
         int resourceId = bag->map.name.ident;
@@ -2060,8 +2125,12 @@ static JNINativeMethod gAssetManagerMethods[] = {
         (void*) android_content_AssetManager_applyThemeStyle },
     { "copyTheme", "(JJ)V",
         (void*) android_content_AssetManager_copyTheme },
+    { "clearTheme", "(J)V",
+        (void*) android_content_AssetManager_clearTheme },
     { "loadThemeAttributeValue", "(JILandroid/util/TypedValue;Z)I",
         (void*) android_content_AssetManager_loadThemeAttributeValue },
+    { "getThemeChangingConfigurations", "(J)I",
+        (void*) android_content_AssetManager_getThemeChangingConfigurations },
     { "dumpTheme", "(JILjava/lang/String;Ljava/lang/String;)V",
         (void*) android_content_AssetManager_dumpTheme },
     { "applyStyle","(JIIJ[I[I[I)Z",
@@ -2099,69 +2168,43 @@ static JNINativeMethod gAssetManagerMethods[] = {
     { "getAssetAllocations", "()Ljava/lang/String;",
         (void*) android_content_AssetManager_getAssetAllocations },
     { "getGlobalAssetManagerCount", "()I",
-        (void*) android_content_AssetManager_getGlobalAssetCount },
+        (void*) android_content_AssetManager_getGlobalAssetManagerCount },
 };
 
 int register_android_content_AssetManager(JNIEnv* env)
 {
-    jclass typedValue = env->FindClass("android/util/TypedValue");
-    LOG_FATAL_IF(typedValue == NULL, "Unable to find class android/util/TypedValue");
-    gTypedValueOffsets.mType
-        = env->GetFieldID(typedValue, "type", "I");
-    LOG_FATAL_IF(gTypedValueOffsets.mType == NULL, "Unable to find TypedValue.type");
-    gTypedValueOffsets.mData
-        = env->GetFieldID(typedValue, "data", "I");
-    LOG_FATAL_IF(gTypedValueOffsets.mData == NULL, "Unable to find TypedValue.data");
-    gTypedValueOffsets.mString
-        = env->GetFieldID(typedValue, "string", "Ljava/lang/CharSequence;");
-    LOG_FATAL_IF(gTypedValueOffsets.mString == NULL, "Unable to find TypedValue.string");
-    gTypedValueOffsets.mAssetCookie
-        = env->GetFieldID(typedValue, "assetCookie", "I");
-    LOG_FATAL_IF(gTypedValueOffsets.mAssetCookie == NULL, "Unable to find TypedValue.assetCookie");
-    gTypedValueOffsets.mResourceId
-        = env->GetFieldID(typedValue, "resourceId", "I");
-    LOG_FATAL_IF(gTypedValueOffsets.mResourceId == NULL, "Unable to find TypedValue.resourceId");
-    gTypedValueOffsets.mChangingConfigurations
-        = env->GetFieldID(typedValue, "changingConfigurations", "I");
-    LOG_FATAL_IF(gTypedValueOffsets.mChangingConfigurations == NULL, "Unable to find TypedValue.changingConfigurations");
-    gTypedValueOffsets.mDensity = env->GetFieldID(typedValue, "density", "I");
-    LOG_FATAL_IF(gTypedValueOffsets.mDensity == NULL, "Unable to find TypedValue.density");
+    jclass typedValue = FindClassOrDie(env, "android/util/TypedValue");
+    gTypedValueOffsets.mType = GetFieldIDOrDie(env, typedValue, "type", "I");
+    gTypedValueOffsets.mData = GetFieldIDOrDie(env, typedValue, "data", "I");
+    gTypedValueOffsets.mString = GetFieldIDOrDie(env, typedValue, "string",
+                                                 "Ljava/lang/CharSequence;");
+    gTypedValueOffsets.mAssetCookie = GetFieldIDOrDie(env, typedValue, "assetCookie", "I");
+    gTypedValueOffsets.mResourceId = GetFieldIDOrDie(env, typedValue, "resourceId", "I");
+    gTypedValueOffsets.mChangingConfigurations = GetFieldIDOrDie(env, typedValue,
+                                                                 "changingConfigurations", "I");
+    gTypedValueOffsets.mDensity = GetFieldIDOrDie(env, typedValue, "density", "I");
 
-    jclass assetFd = env->FindClass("android/content/res/AssetFileDescriptor");
-    LOG_FATAL_IF(assetFd == NULL, "Unable to find class android/content/res/AssetFileDescriptor");
-    gAssetFileDescriptorOffsets.mFd
-        = env->GetFieldID(assetFd, "mFd", "Landroid/os/ParcelFileDescriptor;");
-    LOG_FATAL_IF(gAssetFileDescriptorOffsets.mFd == NULL, "Unable to find AssetFileDescriptor.mFd");
-    gAssetFileDescriptorOffsets.mStartOffset
-        = env->GetFieldID(assetFd, "mStartOffset", "J");
-    LOG_FATAL_IF(gAssetFileDescriptorOffsets.mStartOffset == NULL, "Unable to find AssetFileDescriptor.mStartOffset");
-    gAssetFileDescriptorOffsets.mLength
-        = env->GetFieldID(assetFd, "mLength", "J");
-    LOG_FATAL_IF(gAssetFileDescriptorOffsets.mLength == NULL, "Unable to find AssetFileDescriptor.mLength");
+    jclass assetFd = FindClassOrDie(env, "android/content/res/AssetFileDescriptor");
+    gAssetFileDescriptorOffsets.mFd = GetFieldIDOrDie(env, assetFd, "mFd",
+                                                      "Landroid/os/ParcelFileDescriptor;");
+    gAssetFileDescriptorOffsets.mStartOffset = GetFieldIDOrDie(env, assetFd, "mStartOffset", "J");
+    gAssetFileDescriptorOffsets.mLength = GetFieldIDOrDie(env, assetFd, "mLength", "J");
 
-    jclass assetManager = env->FindClass("android/content/res/AssetManager");
-    LOG_FATAL_IF(assetManager == NULL, "Unable to find class android/content/res/AssetManager");
-    gAssetManagerOffsets.mObject
-        = env->GetFieldID(assetManager, "mObject", "J");
-    LOG_FATAL_IF(gAssetManagerOffsets.mObject == NULL, "Unable to find AssetManager.mObject");
+    jclass assetManager = FindClassOrDie(env, "android/content/res/AssetManager");
+    gAssetManagerOffsets.mObject = GetFieldIDOrDie(env, assetManager, "mObject", "J");
 
-    jclass stringClass = env->FindClass("java/lang/String");
-    LOG_FATAL_IF(stringClass == NULL, "Unable to find class java/lang/String");
-    g_stringClass = (jclass)env->NewGlobalRef(stringClass);
-    LOG_FATAL_IF(g_stringClass == NULL, "Unable to create global reference for class java/lang/String");
+    jclass stringClass = FindClassOrDie(env, "java/lang/String");
+    g_stringClass = MakeGlobalRefOrDie(env, stringClass);
 
-    jclass sparseArrayClass = env->FindClass("android/util/SparseArray");
-    LOG_FATAL_IF(sparseArrayClass == NULL, "Unable to find class android/util/SparseArray");
-    gSparseArrayOffsets.classObject = (jclass) env->NewGlobalRef(sparseArrayClass);
-    gSparseArrayOffsets.constructor =
-            env->GetMethodID(gSparseArrayOffsets.classObject, "<init>", "()V");
-    LOG_FATAL_IF(gSparseArrayOffsets.constructor == NULL, "Unable to find SparseArray.<init>()");
-    gSparseArrayOffsets.put =
-            env->GetMethodID(gSparseArrayOffsets.classObject, "put", "(ILjava/lang/Object;)V");
-    LOG_FATAL_IF(gSparseArrayOffsets.put == NULL, "Unable to find SparseArray.put(int, V)");
+    jclass sparseArrayClass = FindClassOrDie(env, "android/util/SparseArray");
+    gSparseArrayOffsets.classObject = MakeGlobalRefOrDie(env, sparseArrayClass);
+    gSparseArrayOffsets.constructor = GetMethodIDOrDie(env, gSparseArrayOffsets.classObject,
+                                                       "<init>", "()V");
+    gSparseArrayOffsets.put = GetMethodIDOrDie(env, gSparseArrayOffsets.classObject, "put",
+                                               "(ILjava/lang/Object;)V");
 
-    return AndroidRuntime::registerNativeMethods(env,
-            "android/content/res/AssetManager", gAssetManagerMethods, NELEM(gAssetManagerMethods));
+    return RegisterMethodsOrDie(env, "android/content/res/AssetManager", gAssetManagerMethods,
+                                NELEM(gAssetManagerMethods));
 }
 
 }; // namespace android

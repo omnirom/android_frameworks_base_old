@@ -26,6 +26,7 @@ import android.hardware.camera2.ICameraDeviceUser;
 import android.hardware.camera2.utils.LongParcelable;
 import android.hardware.camera2.impl.CameraMetadataNative;
 import android.hardware.camera2.impl.CaptureResultExtras;
+import android.hardware.camera2.params.OutputConfiguration;
 import android.hardware.camera2.utils.CameraBinderDecorator;
 import android.hardware.camera2.utils.CameraRuntimeException;
 import android.os.ConditionVariable;
@@ -60,7 +61,7 @@ import java.util.List;
 public class CameraDeviceUserShim implements ICameraDeviceUser {
     private static final String TAG = "CameraDeviceUserShim";
 
-    private static final boolean DEBUG = Log.isLoggable(LegacyCameraDevice.DEBUG_PROP, Log.DEBUG);
+    private static final boolean DEBUG = false;
     private static final int OPEN_CAMERA_TIMEOUT_MS = 5000; // 5 sec (same as api1 cts timeout)
 
     private final LegacyCameraDevice mLegacyDevice;
@@ -85,15 +86,6 @@ public class CameraDeviceUserShim implements ICameraDeviceUser {
         mCameraCallbacks = cameraCallbacks;
 
         mSurfaceIdCounter = 0;
-    }
-
-    private static int translateErrorsFromCamera1(int errorCode) {
-        switch (errorCode) {
-            case CameraBinderDecorator.EACCES:
-                return CameraBinderDecorator.PERMISSION_DENIED;
-            default:
-                return errorCode;
-        }
     }
 
     /**
@@ -139,7 +131,7 @@ public class CameraDeviceUserShim implements ICameraDeviceUser {
             // Save the looper so that we can terminate this thread
             // after we are done with it.
             mLooper = Looper.myLooper();
-            mInitErrors = translateErrorsFromCamera1(mCamera.cameraInitUnspecified(mCameraId));
+            mInitErrors = mCamera.cameraInitUnspecified(mCameraId);
             mStartDone.open();
             Looper.loop();  // Blocks forever until #close is called.
         }
@@ -201,6 +193,7 @@ public class CameraDeviceUserShim implements ICameraDeviceUser {
         private static final int CAMERA_IDLE = 1;
         private static final int CAPTURE_STARTED = 2;
         private static final int RESULT_RECEIVED = 3;
+        private static final int PREPARED = 4;
 
         private final HandlerThread mHandlerThread;
         private Handler mHandler;
@@ -251,6 +244,13 @@ public class CameraDeviceUserShim implements ICameraDeviceUser {
         }
 
         @Override
+        public void onPrepared(int streamId) {
+            Message msg = getHandler().obtainMessage(PREPARED,
+                    /*arg1*/ streamId, /*arg2*/ 0);
+            getHandler().sendMessage(msg);
+        }
+
+        @Override
         public IBinder asBinder() {
             // This is solely intended to be used for in-process binding.
             return null;
@@ -293,6 +293,11 @@ public class CameraDeviceUserShim implements ICameraDeviceUser {
                             CameraMetadataNative result = (CameraMetadataNative) resultArray[0];
                             CaptureResultExtras resultExtras = (CaptureResultExtras) resultArray[1];
                             mCallbacks.onResultReceived(result, resultExtras);
+                            break;
+                        }
+                        case PREPARED: {
+                            int streamId = msg.arg1;
+                            mCallbacks.onPrepared(streamId);
                             break;
                         }
                         default:
@@ -451,7 +456,7 @@ public class CameraDeviceUserShim implements ICameraDeviceUser {
     }
 
     @Override
-    public int endConfigure() {
+    public int endConfigure(boolean isConstrainedHighSpeed) {
         if (DEBUG) {
             Log.d(TAG, "endConfigure called.");
         }
@@ -504,7 +509,7 @@ public class CameraDeviceUserShim implements ICameraDeviceUser {
     }
 
     @Override
-    public int createStream(int width, int height, int format, Surface surface) {
+    public int createStream(OutputConfiguration outputConfiguration) {
         if (DEBUG) {
             Log.d(TAG, "createStream called.");
         }
@@ -518,10 +523,26 @@ public class CameraDeviceUserShim implements ICameraDeviceUser {
                 Log.e(TAG, "Cannot create stream, beginConfigure hasn't been called yet.");
                 return CameraBinderDecorator.INVALID_OPERATION;
             }
+            if (outputConfiguration.getRotation() != OutputConfiguration.ROTATION_0) {
+                Log.e(TAG, "Cannot create stream, stream rotation is not supported.");
+                return CameraBinderDecorator.INVALID_OPERATION;
+            }
             int id = ++mSurfaceIdCounter;
-            mSurfaces.put(id, surface);
+            mSurfaces.put(id, outputConfiguration.getSurface());
             return id;
         }
+    }
+
+    @Override
+    public int createInputStream(int width, int height, int format) {
+        Log.e(TAG, "creating input stream is not supported on legacy devices");
+        return CameraBinderDecorator.INVALID_OPERATION;
+    }
+
+    @Override
+    public int getInputSurface(/*out*/ Surface surface) {
+        Log.e(TAG, "getting input surface is not supported on legacy devices");
+        return CameraBinderDecorator.INVALID_OPERATION;
     }
 
     @Override
@@ -597,6 +618,35 @@ public class CameraDeviceUserShim implements ICameraDeviceUser {
         if (lastFrameNumber != null) {
             lastFrameNumber.setNumber(lastFrame);
         }
+        return CameraBinderDecorator.NO_ERROR;
+    }
+
+    public int prepare(int streamId) {
+        if (DEBUG) {
+            Log.d(TAG, "prepare called.");
+        }
+        if (mLegacyDevice.isClosed()) {
+            Log.e(TAG, "Cannot prepare stream, device has been closed.");
+            return CameraBinderDecorator.ENODEV;
+        }
+
+        // LEGACY doesn't support actual prepare, just signal success right away
+        mCameraCallbacks.onPrepared(streamId);
+
+        return CameraBinderDecorator.NO_ERROR;
+    }
+
+    public int tearDown(int streamId) {
+        if (DEBUG) {
+            Log.d(TAG, "tearDown called.");
+        }
+        if (mLegacyDevice.isClosed()) {
+            Log.e(TAG, "Cannot tear down stream, device has been closed.");
+            return CameraBinderDecorator.ENODEV;
+        }
+
+        // LEGACY doesn't support actual teardown, so just a no-op
+
         return CameraBinderDecorator.NO_ERROR;
     }
 

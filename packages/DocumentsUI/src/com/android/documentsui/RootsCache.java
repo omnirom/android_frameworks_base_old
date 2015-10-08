@@ -37,7 +37,7 @@ import android.provider.DocumentsContract;
 import android.provider.DocumentsContract.Root;
 import android.util.Log;
 
-import com.android.documentsui.DocumentsActivity.State;
+import com.android.documentsui.BaseActivity.State;
 import com.android.documentsui.model.RootInfo;
 import com.android.internal.annotations.GuardedBy;
 import com.android.internal.annotations.VisibleForTesting;
@@ -367,20 +367,32 @@ public class RootsCache {
 
             // Exclude read-only devices when creating
             if (state.action == State.ACTION_CREATE && !supportsCreate) continue;
+            if (state.action == State.ACTION_OPEN_COPY_DESTINATION && !supportsCreate) continue;
             // Exclude roots that don't support directory picking
             if (state.action == State.ACTION_OPEN_TREE && !supportsIsChild) continue;
             // Exclude advanced devices when not requested
             if (!state.showAdvanced && advanced) continue;
             // Exclude non-local devices when local only
             if (state.localOnly && !localOnly) continue;
+            // Exclude downloads roots that don't support directory creation
+            // TODO: Add flag to check the root supports directory creation or not.
+            if (state.directoryCopy && root.isDownloads()) continue;
             // Only show empty roots when creating
-            if (state.action != State.ACTION_CREATE && empty) continue;
+            if ((state.action != State.ACTION_CREATE ||
+                 state.action != State.ACTION_OPEN_TREE ||
+                 state.action != State.ACTION_OPEN_COPY_DESTINATION) && empty) continue;
 
             // Only include roots that serve requested content
             final boolean overlap =
                     MimePredicate.mimeMatches(root.derivedMimeTypes, state.acceptMimes) ||
                     MimePredicate.mimeMatches(state.acceptMimes, root.derivedMimeTypes);
             if (!overlap) {
+                continue;
+            }
+
+            // Exclude roots from the calling package.
+            if (state.excludedAuthorities.contains(root.authority)) {
+                if (LOGD) Log.d(TAG, "Excluding root " + root.authority + " from calling package.");
                 continue;
             }
 

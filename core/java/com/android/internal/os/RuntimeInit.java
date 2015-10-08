@@ -24,6 +24,7 @@ import android.os.Debug;
 import android.os.IBinder;
 import android.os.Process;
 import android.os.SystemProperties;
+import android.os.Trace;
 import android.util.Log;
 import android.util.Slog;
 import com.android.internal.logging.AndroidConfig;
@@ -233,6 +234,7 @@ public class RuntimeInit {
     }
 
     public static final void main(String[] argv) {
+        enableDdms();
         if (argv.length == 2 && argv[1].equals("application")) {
             if (DEBUG) Slog.d(TAG, "RuntimeInit: Starting application");
             redirectLogStreams();
@@ -268,11 +270,11 @@ public class RuntimeInit {
             throws ZygoteInit.MethodAndArgsCaller {
         if (DEBUG) Slog.d(TAG, "RuntimeInit: Starting application from zygote");
 
+        Trace.traceBegin(Trace.TRACE_TAG_ACTIVITY_MANAGER, "RuntimeInit");
         redirectLogStreams();
 
         commonInit();
         nativeZygoteInit();
-
         applicationInit(targetSdkVersion, argv, classLoader);
     }
 
@@ -316,6 +318,9 @@ public class RuntimeInit {
             // let the process exit
             return;
         }
+
+        // The end of of the RuntimeInit event (see #zygoteInit).
+        Trace.traceEnd(Trace.TRACE_TAG_ACTIVITY_MANAGER);
 
         // Remaining arguments are passed to the start class's static main
         invokeStaticMain(args.startClass, args.startArgs, classLoader);
@@ -365,9 +370,9 @@ public class RuntimeInit {
     }
 
     /**
-     * Enable debugging features.
+     * Enable DDMS.
      */
-    static {
+    static final void enableDdms() {
         // Register handlers for DDM messages.
         android.ddm.DdmRegister.registerHandlers();
     }

@@ -739,16 +739,14 @@ class TextLine {
 
         float ret = 0;
 
-        int contextLen = contextEnd - contextStart;
         if (needWidth || (c != null && (wp.bgColor != 0 || wp.underlineColor != 0 || runIsRtl))) {
             if (mCharsValid) {
-                ret = wp.getTextRunAdvances(mChars, start, runLen,
-                        contextStart, contextLen, runIsRtl, null, 0);
+                ret = wp.getRunAdvance(mChars, start, end, contextStart, contextEnd,
+                        runIsRtl, end);
             } else {
                 int delta = mStart;
-                ret = wp.getTextRunAdvances(mText, delta + start,
-                        delta + end, delta + contextStart, delta + contextEnd,
-                        runIsRtl, null, 0);
+                ret = wp.getRunAdvance(mText, delta + start, delta + end,
+                        delta + contextStart, delta + contextEnd, runIsRtl, delta + end);
             }
         }
 
@@ -955,6 +953,10 @@ class TextLine {
                     span.updateDrawState(wp);
                 }
 
+                // Only draw hyphen on last run in line
+                if (jnext < mLen) {
+                    wp.setHyphenEdit(0);
+                }
                 x += handleText(wp, j, jnext, i, inext, runIsRtl, c, x,
                         top, y, bottom, fmi, needWidth || jnext < measureLimit);
             }

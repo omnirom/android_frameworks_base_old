@@ -62,19 +62,20 @@ public:
     ANDROID_API RenderProxy(bool translucent, RenderNode* rootNode, IContextFactory* contextFactory);
     ANDROID_API virtual ~RenderProxy();
 
-    ANDROID_API void setFrameInterval(nsecs_t frameIntervalNanos);
     // Won't take effect until next EGLSurface creation
     ANDROID_API void setSwapBehavior(SwapBehavior swapBehavior);
     ANDROID_API bool loadSystemProperties();
+    ANDROID_API void setName(const char* name);
 
     ANDROID_API bool initialize(const sp<ANativeWindow>& window);
     ANDROID_API void updateSurface(const sp<ANativeWindow>& window);
     ANDROID_API bool pauseSurface(const sp<ANativeWindow>& window);
-    ANDROID_API void setup(int width, int height, const Vector3& lightCenter, float lightRadius,
+    ANDROID_API void setup(int width, int height, float lightRadius,
             uint8_t ambientShadowAlpha, uint8_t spotShadowAlpha);
+    ANDROID_API void setLightCenter(const Vector3& lightCenter);
     ANDROID_API void setOpaque(bool opaque);
-    ANDROID_API int syncAndDrawFrame(nsecs_t frameTimeNanos, nsecs_t recordDurationNanos,
-            float density);
+    ANDROID_API int64_t* frameInfo();
+    ANDROID_API int syncAndDrawFrame();
     ANDROID_API void destroy();
 
     ANDROID_API static void invokeFunctor(Functor* functor, bool waitForCompletion);
@@ -83,22 +84,26 @@ public:
 
     ANDROID_API DeferredLayerUpdater* createTextureLayer();
     ANDROID_API void buildLayer(RenderNode* node);
-    ANDROID_API bool copyLayerInto(DeferredLayerUpdater* layer, SkBitmap* bitmap);
+    ANDROID_API bool copyLayerInto(DeferredLayerUpdater* layer, SkBitmap& bitmap);
     ANDROID_API void pushLayerUpdate(DeferredLayerUpdater* layer);
     ANDROID_API void cancelLayerUpdate(DeferredLayerUpdater* layer);
     ANDROID_API void detachSurfaceTexture(DeferredLayerUpdater* layer);
 
     ANDROID_API void destroyHardwareResources();
     ANDROID_API static void trimMemory(int level);
+    ANDROID_API static void overrideProperty(const char* name, const char* value);
 
     ANDROID_API void fence();
     ANDROID_API void stopDrawing();
     ANDROID_API void notifyFramePending();
 
-    ANDROID_API void dumpProfileInfo(int fd);
-    ANDROID_API static void outputLogBuffer(int fd);
+    ANDROID_API void dumpProfileInfo(int fd, int dumpFlags);
+    // Not exported, only used for testing
+    void resetProfileInfo();
+    ANDROID_API static void dumpGraphicsMemory(int fd);
 
     ANDROID_API void setTextureAtlas(const sp<GraphicBuffer>& buffer, int64_t* map, size_t size);
+    ANDROID_API void setProcessStatsBuffer(int fd);
 
 private:
     RenderThread& mRenderThread;

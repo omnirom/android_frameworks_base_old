@@ -20,6 +20,7 @@
 #include <set>
 
 #include "AnimationContext.h"
+#include "Interpolator.h"
 #include "RenderNode.h"
 #include "RenderProperties.h"
 
@@ -31,11 +32,10 @@ namespace uirenderer {
  ************************************************************/
 
 BaseRenderNodeAnimator::BaseRenderNodeAnimator(float finalValue)
-        : mTarget(NULL)
+        : mTarget(nullptr)
         , mFinalValue(finalValue)
         , mDeltaValue(0)
         , mFromValue(0)
-        , mInterpolator(0)
         , mStagingPlayState(NOT_STARTED)
         , mPlayState(NOT_STARTED)
         , mHasStartValue(false)
@@ -46,7 +46,6 @@ BaseRenderNodeAnimator::BaseRenderNodeAnimator(float finalValue)
 }
 
 BaseRenderNodeAnimator::~BaseRenderNodeAnimator() {
-    delete mInterpolator;
 }
 
 void BaseRenderNodeAnimator::checkMutable() {
@@ -57,8 +56,7 @@ void BaseRenderNodeAnimator::checkMutable() {
 
 void BaseRenderNodeAnimator::setInterpolator(Interpolator* interpolator) {
     checkMutable();
-    delete mInterpolator;
-    mInterpolator = interpolator;
+    mInterpolator.reset(interpolator);
 }
 
 void BaseRenderNodeAnimator::setStartValue(float value) {
@@ -118,7 +116,7 @@ void BaseRenderNodeAnimator::transitionToRunning(AnimationContext& context) {
     }
     // No interpolator was set, use the default
     if (!mInterpolator) {
-        mInterpolator = Interpolator::createDefaultInterpolator();
+        mInterpolator.reset(Interpolator::createDefaultInterpolator());
     }
     if (mDuration < 0 || mDuration > 50000) {
         ALOGW("Your duration is strange and confusing: %" PRId64, mDuration);

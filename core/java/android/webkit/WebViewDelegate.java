@@ -22,11 +22,10 @@ import android.app.Application;
 import android.content.Context;
 import android.content.res.Resources;
 import android.graphics.Canvas;
-import android.net.http.ErrorStrings;
 import android.os.SystemProperties;
 import android.os.Trace;
 import android.util.SparseArray;
-import android.view.HardwareCanvas;
+import android.view.DisplayListCanvas;
 import android.view.View;
 import android.view.ViewRootImpl;
 
@@ -102,12 +101,12 @@ public final class WebViewDelegate {
      * @throws IllegalArgumentException if the canvas is not hardware accelerated
      */
     public void callDrawGlFunction(Canvas canvas, long nativeDrawGLFunctor) {
-        if (!(canvas instanceof HardwareCanvas)) {
+        if (!(canvas instanceof DisplayListCanvas)) {
             // Canvas#isHardwareAccelerated() is only true for subclasses of HardwareCanvas.
             throw new IllegalArgumentException(canvas.getClass().getName()
-                    + " is not hardware accelerated");
+                    + " is not a DisplayList canvas");
         }
-        ((HardwareCanvas) canvas).callDrawGLFunction2(nativeDrawGLFunctor);
+        ((DisplayListCanvas) canvas).callDrawGLFunction2(nativeDrawGLFunctor);
     }
 
     /**
@@ -150,11 +149,11 @@ public final class WebViewDelegate {
      * Returns the error string for the given {@code errorCode}.
      */
     public String getErrorString(Context context, int errorCode) {
-        return ErrorStrings.getString(errorCode, context);
+        return LegacyErrorStrings.getString(errorCode, context);
     }
 
     /**
-     * Adds the WebView asset path to {@link AssetManager}.
+     * Adds the WebView asset path to {@link android.content.res.AssetManager}.
      */
     public void addWebViewAssetPath(Context context) {
         context.getAssets().addAssetPath(

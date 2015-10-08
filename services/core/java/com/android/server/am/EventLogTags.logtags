@@ -95,3 +95,11 @@ option java_package com.android.server.am
 
 # Home Stack brought to front or rear
 30044 am_home_stack_moved (User|1|5),(To Front|1|5),(Top Stack Id|1|5),(Focused Stack Id|1|5),(Reason|3)
+
+# Running pre boot receiver
+30045 am_pre_boot (User|1|5),(Package|3)
+
+# Report collection of global memory state
+30046 am_meminfo (CachedKb|2|2),(FreeKb|2|2),(ZramKb|2|2),(KernelKb|2|2),(NativeKb|2|2)
+# Report collection of memory used by a process
+30047 am_pss (Pid|1|5),(UID|1|5),(Process Name|3),(PssKb|2|2),(UssKb|2|2)

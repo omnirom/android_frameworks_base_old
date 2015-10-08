@@ -1759,7 +1759,9 @@
   <public type="attr" name="actionModeSplitBackground" id="0x0101039d" />
   <public type="attr" name="textAppearanceListItem" id="0x0101039e" />
   <public type="attr" name="textAppearanceListItemSmall" id="0x0101039f" />
+  <!-- @deprecated Removed. -->
   <public type="attr" name="targetDescriptions" id="0x010103a0" />
+  <!-- @deprecated Removed. -->
   <public type="attr" name="directionDescriptions" id="0x010103a1" />
   <public type="attr" name="overridesImplicitlyEnabledSubtype" id="0x010103a2" />
   <public type="attr" name="listPreferredItemPaddingLeft" id="0x010103a3" />
@@ -2594,8 +2596,62 @@
     <public type="attr" name="dialogPreferredPadding" id="0x010104d3" />
     <public type="attr" name="searchHintIcon" id="0x010104d4" />
     <public type="attr" name="revisionCode" />
+    <public type="attr" name="drawableTint" />
+    <public type="attr" name="drawableTintMode" />
+    <public type="attr" name="fraction" />
 
     <public type="style" name="Theme.DeviceDefault.Dialog.Alert" />
     <public type="style" name="Theme.DeviceDefault.Light.Dialog.Alert" />
 
+  <!-- ===============================================================
+       Resources added in version M of the platform
+       =============================================================== -->
+    <eat-comment />
+
+    <public type="attr" name="trackTint" id="0x010104d9" />
+    <public type="attr" name="trackTintMode" id="0x010104da" />
+    <public type="attr" name="start" id="0x010104db" />
+    <public type="attr" name="end" id="0x010104dc" />
+    <public type="attr" name="breakStrategy" id="0x010104dd" />
+    <public type="attr" name="hyphenationFrequency" id="0x010104de" />
+    <public type="attr" name="allowUndo" id="0x010104df" />
+    <public type="attr" name="windowLightStatusBar" id="0x010104e0" />
+    <public type="attr" name="numbersInnerTextColor" id="0x010104e1" />
+    <public type="attr" name="colorBackgroundFloating" id="0x010104e2" />
+    <public type="attr" name="titleTextColor" id="0x010104e3" />
+    <public type="attr" name="subtitleTextColor" id="0x010104e4" />
+    <public type="attr" name="thumbPosition" id="0x010104e5" />
+    <public type="attr" name="scrollIndicators" id="0x010104e6" />
+    <public type="attr" name="contextClickable" id="0x010104e7" />
+    <public type="attr" name="fingerprintAuthDrawable" id="0x010104e8" />
+    <public type="attr" name="logoDescription" id="0x010104e9" />
+    <public type="attr" name="extractNativeLibs" id="0x010104ea" />
+    <public type="attr" name="fullBackupContent" id="0x010104eb" />
+    <public type="attr" name="usesCleartextTraffic" id="0x010104ec" />
+    <public type="attr" name="lockTaskMode" id="0x010104ed" />
+    <public type="attr" name="autoVerify" id="0x010104ee" />
+    <public type="attr" name="showForAllUsers" id="0x010104ef" />
+    <public type="attr" name="supportsAssist" id="0x010104f0" />
+    <public type="attr" name="supportsLaunchVoiceAssistFromKeyguard" id="0x010104f1" />
+
+    <public type="style" name="Widget.Material.Button.Colored" id="0x010302d3" />
+    <public type="style" name="TextAppearance.Material.Widget.Button.Inverse" id="0x010302d4" />
+    <public type="style" name="Theme.Material.Light.LightStatusBar" id="0x010302d5" />
+    <public type="style" name="ThemeOverlay.Material.Dialog" id="0x010302d6" />
+    <public type="style" name="ThemeOverlay.Material.Dialog.Alert" id="0x010302d7" />
+
+    <public type="id" name="pasteAsPlainText" id="0x01020031" />
+    <public type="id" name="undo" id="0x01020032" />
+    <public type="id" name="redo" id="0x01020033" />
+    <public type="id" name="replaceText" id="0x01020034" />
+    <public type="id" name="shareText" id="0x01020035" />
+    <public type="id" name="accessibilityActionShowOnScreen" id="0x01020036" />
+    <public type="id" name="accessibilityActionScrollToPosition" id="0x01020037" />
+    <public type="id" name="accessibilityActionScrollUp" id="0x01020038" />
+    <public type="id" name="accessibilityActionScrollLeft" id="0x01020039" />
+    <public type="id" name="accessibilityActionScrollDown" id="0x0102003a" />
+    <public type="id" name="accessibilityActionScrollRight" id="0x0102003b" />
+    <public type="id" name="accessibilityActionContextClick" id="0x0102003c" />
+
+    <public type="string" name="fingerprint_icon_content_description" />
 </resources>

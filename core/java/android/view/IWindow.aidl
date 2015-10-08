@@ -46,7 +46,7 @@ oneway interface IWindow {
     void executeCommand(String command, String parameters, in ParcelFileDescriptor descriptor);
 
     void resized(in Rect frame, in Rect overscanInsets, in Rect contentInsets,
-            in Rect visibleInsets, in Rect stableInsets, boolean reportDraw,
+            in Rect visibleInsets, in Rect stableInsets, in Rect outsets, boolean reportDraw,
             in Configuration newConfig);
     void moved(int newX, int newY);
     void dispatchAppVisibility(boolean visible);
@@ -80,11 +80,18 @@ oneway interface IWindow {
             int localValue, int localChanges);
 
     /**
-     * If the window manager returned RELAYOUT_RES_ANIMATING
-     * from relayout(), this method will be called when the animation
-     * is done.
+     * The window is beginning to animate. The application should stop drawing frames until the
+     * window is not animating anymore, indicated by being called {@link #windowEndAnimating}.
+     *
+     * @param remainingFrameCount how many frames the app might still draw before stopping drawing;
+     *                            pass -1 to let it continue drawing
      */
-    void doneAnimating();
+    void onAnimationStarted(int remainingFrameCount);
+
+    /**
+     * The window has ended animating. See {@link #onAnimationStarted}.
+     */
+    void onAnimationStopped();
 
     /**
      * Called for non-application windows when the enter animation has completed.

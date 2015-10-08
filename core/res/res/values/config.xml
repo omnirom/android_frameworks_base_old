@@ -23,6 +23,7 @@
     <!-- Do not translate. Defines the slots for the right-hand side icons.  That is to say, the
          icons in the status bar that are not notifications. -->
     <string-array name="config_statusBarIcons">
+       <item><xliff:g id="id">managed_profile</xliff:g></item>
        <item><xliff:g id="id">ime</xliff:g></item>
        <item><xliff:g id="id">sync_failing</xliff:g></item>
        <item><xliff:g id="id">sync_active</xliff:g></item>
@@ -64,25 +65,10 @@
          As of Honeycomb, blurring is not supported anymore. -->
     <bool name="config_sf_slowBlur">true</bool>
 
-    <!-- Flag indicating that the media framework should allow changing
-         master volume stream and nothing else . -->
-    <bool name="config_useMasterVolume">false</bool>
-
     <!-- Flag indicating that the media framework should support playing of sounds on volume
          key usage.  This adds noticeable additional overhead to volume key processing, so
          is disableable for products for which it is irrelevant. -->
     <bool name="config_useVolumeKeySounds">true</bool>
-
-    <!-- Array of integer pairs controlling the rate at which the master volume changes
-         in response to volume up and down key events.
-         The first integer of each pair is compared against the current master volume
-         (in range 0 to 100).
-         The last pair with first integer <= the current volume is chosen,
-         and the second integer of the pair indicates the amount to increase the master volume
-         when volume up is pressed. -->
-    <integer-array name="config_masterVolumeRamp">
-        <item>0</item>  <item>5</item>  <!-- default: always increase volume by 5% -->
-    </integer-array>
 
     <!-- The attenuation in dB applied to the sound effects played
          through AudioManager.playSoundEffect() when no volume is specified. -->
@@ -170,6 +156,15 @@
          waiting on disk I/O or lowmemorykiller.  Directly added to the default value chosen by
          ActivityManager based on screen size. -->
     <integer name="config_extraFreeKbytesAdjust">0</integer>
+
+    <!-- Set this to true to enable the platform's auto-power-save modes like doze and
+         app standby.  These are not enabled by default because they require a standard
+         cloud-to-device messaging service for apps to interact correctly with the modes
+         (such as to be able to deliver an instant message to the device even when it is
+         dozing).  This should be enabled if you have such services and expect apps to
+         correctly use them when installed on your device.  Otherwise, keep this disabled
+         so that applications can still use their own mechanisms. -->
+    <bool name="config_enableAutoPowerModes">false</bool>
 
     <!-- The duration (in milliseconds) that the radio will scan for a signal
          when there's no network connection. If the scan doesn't timeout, use zero -->
@@ -373,6 +368,9 @@
     <!-- Boolean indicating whether the wifi chipset has dual frequency band support -->
     <bool translatable="false" name="config_wifi_dual_band_support">false</bool>
 
+    <!-- Boolean indicating whether Hotspot 2.0/Passpoint and ANQP queries is enabled -->
+    <bool translatable="false" name="config_wifi_hotspot2_enabled">false</bool>
+
     <!-- Device type information conforming to Annex B format in WiFi Direct specification.
          The default represents a dual-mode smartphone -->
     <string translatable="false" name="config_wifi_p2p_device_type">10-0050F204-5</string>
@@ -410,6 +408,7 @@
     <integer translatable="false" name="config_wifi_framework_wifi_score_good_link_speed_24">24</integer>
     <integer translatable="false" name="config_wifi_framework_wifi_score_good_link_speed_5">36</integer>
     <string  translatable="false" name="config_wifi_random_mac_oui">DA-A1-19</string>
+    <string  translatable="false" name="config_wifi_framework_sap_2G_channel_list">1,6,11</string>
 
     <bool translatable="false" name="config_wifi_framework_cellular_handover_enable_user_triggered_adjustment">true</bool>
 
@@ -437,8 +436,20 @@
          point on the move. A value of 0 means no periodic scans will be used in the framework. -->
     <integer translatable="false" name="config_wifi_framework_scan_interval">300000</integer>
 
-    <!-- Integer indicating associated partial scan interval in milliseconds -->
-    <integer translatable="false" name="config_wifi_framework_associated_scan_interval">20000</integer>
+    <!-- Integer indicating the framework no networks periodic scan interval in milliseconds. -->
+    <integer translatable="false" name="config_wifi_no_network_periodic_scan_interval">300000</integer>
+
+    <!-- Integer indicating disconnect mode short scan interval in milliseconds -->
+    <integer translatable="false" name="config_wifi_disconnected_short_scan_interval">15000</integer>
+
+    <!-- Integer indicating disconnect mode long scan interval in milliseconds -->
+    <integer translatable="false" name="config_wifi_disconnected_long_scan_interval">120000</integer>
+
+    <!-- Integer indicating associated partial scan short interval in milliseconds -->
+    <integer translatable="false" name="config_wifi_associated_short_scan_interval">20000</integer>
+
+    <!-- Integer indicating associated partial scan long interval in milliseconds -->
+    <integer translatable="false" name="config_wifi_associated_long_scan_interval">180000</integer>
 
     <!-- Integer indicating associated full scan backoff, representing a fraction: xx/8 -->
     <integer translatable="false" name="config_wifi_framework_associated_full_scan_backoff">12</integer>
@@ -470,9 +481,6 @@
     <!-- Integer indicating how to handle beacons with uninitialized RSSI value of 0 -->
     <integer translatable="false" name="config_wifi_framework_scan_result_rssi_level_patchup_value">-85</integer>
 
-    <!-- Boolean indicating associated scan are allowed -->
-    <bool translatable="false" name="config_wifi_framework_enable_associated_autojoin_scan">true</bool>
-
     <!-- Boolean indicating associated network selection is allowed -->
     <bool translatable="false" name="config_wifi_framework_enable_associated_network_selection">true</bool>
 
@@ -485,6 +493,24 @@
 
     <!-- Wifi driver supports batched scan -->
     <bool translatable="false" name="config_wifi_batched_scan_supported">false</bool>
+
+    <!-- Wifi HAL supported PNO -->
+    <bool translatable="false" name="config_wifi_hal_pno_enable">false</bool>
+
+    <!-- Wifi SSID white list (can't be enabled if config_wifi_hal_pno_enable is not) -->
+    <bool translatable="false" name="config_wifi_ssid_white_list_enable">true</bool>
+
+    <!-- Idle Receive current for wifi radio. 0 by default-->
+    <integer translatable="false" name="config_wifi_idle_receive_cur_ma">0</integer>
+
+    <!-- Rx current for wifi radio. 0 by default-->
+    <integer translatable="false" name="config_wifi_active_rx_cur_ma">0</integer>
+
+    <!-- Tx current for wifi radio. 0 by default-->
+    <integer translatable="false" name="config_wifi_tx_cur_ma">0</integer>
+
+    <!-- Operating volatage for wifi radio. 0 by default-->
+    <integer translatable="false" name="config_wifi_operating_voltage_mv">0</integer>
 
     <!-- Flag indicating whether the we should enable the automatic brightness in Settings.
          Software implementation will be used if config_hardware_auto_brightness_available is not set -->
@@ -530,6 +556,8 @@
     <bool name="config_allowTheaterModeWakeFromWindowLayout">false</bool>
     <!-- If this is true, go to sleep when theater mode is enabled from button press -->
     <bool name="config_goToSleepOnButtonPressTheaterMode">true</bool>
+    <!-- If this is true, long press on power button will be available from the non-interactive state -->
+    <bool name="config_supportLongPressPowerWhenNonInteractive">false</bool>
 
     <!-- Auto-rotation behavior -->
 
@@ -553,6 +581,43 @@
          app requesting portrait will cause a counter-clockwise rotation.  Setting
          true here reverses that logic. -->
     <bool name="config_reverseDefaultRotation">false</bool>
+
+    <!-- Sets the minimum and maximum tilt tolerance for each possible rotation.
+         This array consists of 4 pairs of values which specify the minimum and maximum
+         tilt angle at which the device will transition into each rotation.
+
+         The tilt angle represents the direction in which the plane of the screen is facing;
+         it is also known as the angle of elevation.
+
+           -90 degree tilt means that the screen is facing straight down
+                           (the device is being held overhead upside-down)
+             0 degree tilt means that the screen is facing outwards
+                           (the device is being held vertically)
+            90 degree tilt means that the screen is facing straight up
+                           (the device is resting on a flat table)
+
+        The default tolerances are set conservatively such that the device is more
+        likely to remain in its natural orientation than rotate into a counterclockwise,
+        clockwise, or reversed posture (with an especially strong bias against the latter)
+        to prevent accidental rotation while carrying the device in hand.
+
+        These thresholds may need to be tuned when the device is intended to be
+        mounted into a dock with a particularly shallow profile wherein rotation
+        would ordinarily have been suppressed.
+
+        It is helpful to consider the desired behavior both when the device is being
+        held at a positive tilt (typical case) vs. a negative tilt (reading overhead in
+        bed) since they are quite different.  In the overhead case, we typically want
+        the device to more strongly prefer to retain its current configuration (in absence
+        of a clear indication that a rotation is desired) since the user's head and neck may
+        be held at an unusual angle.
+    -->
+    <integer-array name="config_autoRotationTiltTolerance">
+        <!-- rotation:   0 (natural)    --> <item>-25</item> <item>70</item>
+        <!-- rotation:  90 (rotate CCW) --> <item>-25</item> <item>65</item>
+        <!-- rotation: 180 (reverse)    --> <item>-25</item> <item>60</item>
+        <!-- rotation: 270 (rotate CW)  --> <item>-25</item> <item>65</item>
+    </integer-array>
 
     <!-- Lid switch behavior -->
 
@@ -632,6 +697,14 @@
          Any other values will have surprising consequences. -->
     <integer name="config_defaultUiModeType">1</integer>
 
+    <!-- Control the default night mode to use when there is no other mode override set.
+         One of the following values (see UiModeManager.java):
+             0 - MODE_NIGHT_AUTO
+             1 - MODE_NIGHT_NO
+             2 - MODE_NIGHT_YES
+    -->
+    <integer name="config_defaultNightMode">1</integer>
+
     <!-- Indicate whether to allow the device to suspend when the screen is off
          due to the proximity sensor.  This resource should only be set to true
          if the sensor HAL correctly handles the proximity sensor as a wake-up source.
@@ -669,11 +742,17 @@
     -->
     <integer name="config_triplePressOnPowerBehavior">0</integer>
 
+    <!-- Control the behavior when the user presses the sleep button.
+            0 - Go to sleep (doze)
+            1 - Go to sleep (doze) and go home
+    -->
+    <integer name="config_shortPressOnSleepBehavior">0</integer>
+
     <!-- Package name for default keyguard appwidget [DO NOT TRANSLATE] -->
-    <string name="widget_default_package_name"></string>
+    <string name="widget_default_package_name" translatable="false"></string>
 
     <!-- Class name for default keyguard appwidget [DO NOT TRANSLATE] -->
-    <string name="widget_default_class_name"></string>
+    <string name="widget_default_class_name" translatable="false"></string>
 
     <!-- Indicate whether the SD card is accessible without removing the battery. -->
     <bool name="config_batterySdCardAccessibility">false</bool>
@@ -749,6 +828,14 @@
         <item>15</item>
         <item>10</item>
         <item>10</item>
+    </integer-array>
+
+    <!-- Vibrator pattern for feedback about a context click -->
+    <integer-array name="config_contextClickVibePattern">
+        <item>0</item>
+        <item>1</item>
+        <item>20</item>
+        <item>21</item>
     </integer-array>
 
     <bool name="config_use_strict_phone_number_comparation">false</bool>
@@ -861,9 +948,33 @@
     <!-- Allow automatic adjusting of the screen brightness while dozing in low power state. -->
     <bool name="config_allowAutoBrightnessWhileDozing">false</bool>
 
+    <!-- Stability requirements in milliseconds for accepting a new brightness level.  This is used
+         for debouncing the light sensor.  Different constants are used to debounce the light sensor
+         when adapting to brighter or darker environments.  This parameter controls how quickly
+         brightness changes occur in response to an observed change in light level that exceeds the
+         hysteresis threshold. -->
+    <integer name="config_autoBrightnessBrighteningLightDebounce">4000</integer>
+    <integer name="config_autoBrightnessDarkeningLightDebounce">8000</integer>
+
+    <!-- Light sensor event rate in milliseconds for automatic brightness control. -->
+    <integer name="config_autoBrightnessLightSensorRate">250</integer>
+
     <!-- If we allow automatic adjustment of screen brightness while dozing, how many times we want
          to reduce it to preserve the battery. Value of 100% means no scaling. -->
     <fraction name="config_screenAutoBrightnessDozeScaleFactor">100%</fraction>
+
+    <!-- When the screen is turned on, the previous estimate of the ambient light level at the time
+         the screen was turned off is restored and is used to determine the initial screen
+         brightness.
+
+         If this flag is true, then the ambient light level estimate will be promptly recomputed
+         after the warm-up interface and the screen brightness will be adjusted immediately.
+
+         If this flag is false, then the ambient light level estimate will be adjusted more
+         gradually in the same manner that normally happens when the screen is on according to the
+         brightening or dimming debounce thresholds.  As a result, it may take somewhat longer to
+         adapt to the environment.  This mode may be better suited for watches. -->
+    <bool name="config_autoBrightnessResetAmbientLuxAfterWarmUp">true</bool>
 
     <!-- Screen brightness used to dim the screen when the user activity
          timeout expires.  May be less than the minimum allowed brightness setting
@@ -1087,6 +1198,18 @@
          device does not support multiple advertisement-->
     <integer translatable="false" name="config_bluetooth_max_advertisers">0</integer>
 
+    <!-- Idle current for bluetooth controller. 0 by default-->
+    <integer translatable="false" name="config_bluetooth_idle_cur_ma">1</integer>
+
+    <!-- Rx current for bluetooth controller. 0 by default-->
+    <integer translatable="false" name="config_bluetooth_rx_cur_ma">2</integer>
+
+    <!-- Tx current for bluetooth controller. 0 by default-->
+    <integer translatable="false" name="config_bluetooth_tx_cur_ma">3</integer>
+
+    <!-- Operating volatage for bluetooth controller. 0 by default-->
+    <integer translatable="false" name="config_bluetooth_operating_voltage_mv">4</integer>
+
     <!-- The default data-use polling period. -->
     <integer name="config_datause_polling_period_sec">600</integer>
 
@@ -1137,11 +1260,22 @@
     <bool name="config_sms_capable">true</bool>
 
     <!-- Default SMS Application. This will be the default SMS application when
-         the phone first boots. The user can then change the default app to oe
+         the phone first boots. The user can then change the default app to one
          of their choosing.
          This can be overridden for devices where a different default SMS
-         application is desired. -->
-    <string name="default_sms_application" translatable="false">com.android.mms</string>
+         application is desired.
+
+         If this string is empty or the specified package does not exist, then
+         the platform will search for an SMS app and use that (if there is one)-->
+    <string name="default_sms_application" translatable="false">com.android.messaging</string>
+
+    <!-- Default web browser.  This is the package name of the application that will
+         be the default browser when the device first boots.  Afterwards the user
+         can select whatever browser app they wish to use as the default.
+
+         If this string is empty or the specified package does not exist, then
+         the behavior will be as though no app was named as an explicit default. -->
+    <string name="default_browser" translatable="false"></string>
 
     <!-- Enable/disable default bluetooth profiles:
         HSP_AG, ObexObjectPush, Audio, NAP -->
@@ -1157,11 +1291,6 @@
     <!-- The default mobile provisioning url. Empty by default, maybe overridden by
          an mcc/mnc specific config.xml -->
     <string name="mobile_provisioning_url" translatable="false"></string>
-
-    <!-- This url is used as the default url when redirection is detected. Any
-         should work as all url's get redirected. But maybe overridden by
-         if needed. -->
-    <string name="mobile_redirected_provisioning_url" translatable="false">http://google.com</string>
 
     <!-- The default character set for GsmAlphabet -->
     <!-- Empty string means MBCS is not considered -->
@@ -1186,7 +1315,7 @@
          PERSIST may improve performance by reducing how often journal blocks are
          reallocated (compared to truncation) resulting in better data block locality
          and less churn of the storage media. -->
-    <string name="db_default_journal_mode">PERSIST</string>
+    <string name="db_default_journal_mode" translatable="false">PERSIST</string>
 
     <!-- Maximum size of the persistent journal file in bytes.
          If the journal file grows to be larger than this amount then SQLite will
@@ -1198,7 +1327,7 @@
          NORMAL also preserves durability in non-WAL modes and uses checksums to ensure
          integrity although there is a small chance that an error might go unnoticed.
          Choices are: FULL, NORMAL, OFF. -->
-    <string name="db_default_sync_mode">FULL</string>
+    <string name="db_default_sync_mode" translatable="false">FULL</string>
 
     <!-- The database synchronization mode when using Write-Ahead Logging.
          FULL is safest and preserves durability at the cost of extra fsyncs.
@@ -1206,7 +1335,7 @@
          and after checkpoint operations.  If checkpoints are infrequent and power loss
          occurs, then committed transactions could be lost and applications might break.
          Choices are: FULL, NORMAL, OFF. -->
-    <string name="db_wal_sync_mode">FULL</string>
+    <string name="db_wal_sync_mode" translatable="false">FULL</string>
 
     <!-- The Write-Ahead Log auto-checkpoint interval in database pages (typically 1 to 4KB).
          The log is checkpointed automatically whenever it exceeds this many pages.
@@ -1346,7 +1475,7 @@
     <!-- Remote server that can provide NTP responses. -->
     <string translatable="false" name="config_ntpServer">2.android.pool.ntp.org</string>
     <!-- Normal polling frequency in milliseconds -->
-    <integer name="config_ntpPollingInterval">864000000</integer>
+    <integer name="config_ntpPollingInterval">86400000</integer>
     <!-- Try-again polling interval in milliseconds, in case the network request failed -->
     <integer name="config_ntpPollingIntervalShorter">60000</integer>
     <!-- Number of times to try again with the shorter interval, before backing
@@ -1391,7 +1520,7 @@
     <!-- If supported and enabled, are dreams activated when asleep and charging? (by default) -->
     <bool name="config_dreamsActivatedOnSleepByDefault">false</bool>
     <!-- ComponentName of the default dream (Settings.Secure.DEFAULT_SCREENSAVER_COMPONENT) -->
-    <string name="config_dreamsDefaultComponent">com.google.android.deskclock/com.android.deskclock.Screensaver</string>
+    <string name="config_dreamsDefaultComponent" translatable="false">com.google.android.deskclock/com.android.deskclock.Screensaver</string>
 
     <!-- Are we allowed to dream while not plugged in? -->
     <bool name="config_dreamsEnabledOnBattery">false</bool>
@@ -1415,7 +1544,7 @@
 
          Note that doze dreams are not subject to the same start conditions as ordinary dreams.
          Doze dreams will run whenever the power manager is in a dozing state. -->
-    <string name="config_dozeComponent"></string>
+    <string name="config_dozeComponent" translatable="false"></string>
 
     <!-- If true, the doze component is not started until after the screen has been
          turned off and the screen off animation has been performed. -->
@@ -1672,17 +1801,17 @@
 
     <!-- Class name of the framework account picker activity.
          Can be customized for other product types -->
-    <string name="config_chooseAccountActivity"
+    <string name="config_chooseAccountActivity" translatable="false"
             >android/android.accounts.ChooseAccountActivity</string>
     <!-- Class name of the account type and account picker activity.
          Can be customized for other product types -->
-    <string name="config_chooseTypeAndAccountActivity"
+    <string name="config_chooseTypeAndAccountActivity" translatable="false"
             >android/android.accounts.ChooseTypeAndAccountActivity</string>
 
     <!-- Component name of a custom ResolverActivity (Intent resolver) to be used instead of
          the default framework version. If left empty, then the framework version will be used.
          Example: com.google.android.myapp/.resolver.MyResolverActivity  -->
-    <string name="config_customResolverActivity"></string>
+    <string name="config_customResolverActivity" translatable="false"></string>
 
     <!-- Name of the activity or service that prompts the user to reject, accept, or whitelist
          an adb host's public key, when an unwhitelisted host connects to the local adbd.
@@ -1690,12 +1819,18 @@
     <string name="config_customAdbPublicKeyConfirmationComponent"
             >com.android.systemui/com.android.systemui.usb.UsbDebuggingActivity</string>
 
+    <!-- Name of the activity that prompts the secondary user to acknowledge she/he needs to
+         switch to the primary user to enable USB debugging.
+         Can be customized for other product types -->
+    <string name="config_customAdbPublicKeyConfirmationSecondaryUserComponent"
+            >com.android.systemui/com.android.systemui.usb.UsbDebuggingSecondaryUserActivity</string>
+
     <!-- Name of the CustomDialog that is used for VPN -->
     <string name="config_customVpnConfirmDialogComponent"
             >com.android.vpndialogs/com.android.vpndialogs.ConfirmDialog</string>
 
     <!-- Apps that are authorized to access shared accounts, overridden by product overlays -->
-    <string name="config_appsAuthorizedForSharedAccounts">;com.android.settings;</string>
+    <string name="config_appsAuthorizedForSharedAccounts" translatable="false">;com.android.settings;</string>
 
     <!-- Flag indicating that the media framework should not allow changes or mute on any
          stream or master volumes. -->
@@ -1716,6 +1851,19 @@
     <string-array name="config_disabledUntilUsedPreinstalledImes" translatable="false">
         <item>com.android.inputmethod.latin</item>
     </string-array>
+
+    <!-- The list of carrier applications which should be disabled until used.
+         This function suppresses update notifications for these pre-installed apps.
+         In SubscriptionInfoUpdater, the listed applications are disabled until used when all of the
+         following conditions are met.
+         1. Not currently carrier-privileged according to the inserted SIM
+         2. Pre-installed
+         3. In the default state (enabled but not explicitly)
+         And SubscriptionInfoUpdater undoes this and marks the app enabled when a SIM is inserted
+         that marks the app as carrier privileged. It also grants the app default permissions
+         for Phone and Location. As such, apps MUST only ever be added to this list if they
+         obtain user consent to access their location through other means. -->
+    <string-array name="config_disabledUntilUsedPreinstalledCarrierApps" translatable="false" />
 
     <!-- The list of classes that should be added to the notification ranking pipline.
      See {@link com.android.server.notification.NotificationSignalExtractor} -->
@@ -1791,6 +1939,11 @@
     <!-- default window inset isRound property -->
     <bool name="config_windowIsRound">false</bool>
 
+    <!-- Override this value if the device has a chin, i.e. area that is not actual part of the
+         screen but you would like to be treated as a real display. The value is the height of the
+         chin. -->
+    <integer name="config_windowOutsetBottom">0</integer>
+
     <!-- Package name for default network scorer app; overridden by product overlays. -->
     <string name="config_defaultNetworkScorerPackageName"></string>
 
@@ -1822,6 +1975,12 @@
         <item>bugreport</item>
         <item>users</item>
     </string-array>
+
+    <!-- Number of milliseconds to hold a wake lock to ensure that drawing is fully
+         flushed to the display while dozing.  This value needs to be large enough
+         to account for processing and rendering time plus a frame or two of latency
+         in the display pipeline plus some slack just to be sure. -->
+    <integer name="config_drawLockTimeoutMillis">120</integer>
 
     <!-- default telephony hardware configuration for this platform.
     -->
@@ -1996,8 +2155,8 @@
     <!-- Enabled built-in zen mode condition providers -->
     <string-array translatable="false" name="config_system_condition_providers">
         <item>countdown</item>
-        <item>downtime</item>
-        <item>next_alarm</item>
+        <item>schedule</item>
+        <item>event</item>
     </string-array>
 
     <!-- Show the next-alarm as a zen exit condition if it occurs in the next n hours. -->
@@ -2005,6 +2164,9 @@
 
     <!-- Show downtime as a zen exit condition if it starts in the next n hours. -->
     <integer name="config_downtime_condition_lookahead_threshold_hrs">12</integer>
+
+    <!-- Priority repeat caller threshold, in minutes -->
+    <integer name="config_zen_repeat_callers_threshold">15</integer>
 
     <!-- Flags enabling default window features. See Window.java -->
     <bool name="config_defaultWindowFeatureOptionsPanel">true</bool>
@@ -2043,4 +2205,82 @@
 
     <!-- Whether to start in touch mode -->
     <bool name="config_defaultInTouchMode">true</bool>
+
+    <!-- Time adjustment, in milliseconds, applied to the default double tap threshold
+         used for gesture detection by the screen magnifier. -->
+    <integer name="config_screen_magnification_multi_tap_adjustment">-50</integer>
+
+    <!-- Scale factor threshold used by the screen magnifier to determine when to switch from
+         panning to scaling the magnification viewport. -->
+    <item name="config_screen_magnification_scaling_threshold" format="float" type="dimen">0.3</item>
+
+    <!-- If true, the display will be shifted around in ambient mode. -->
+    <bool name="config_enableBurnInProtection">false</bool>
+
+    <!-- Specifies the maximum burn-in offset displacement from the center. If -1, no maximum value
+         will be used. -->
+    <integer name="config_burnInProtectionMaxRadius">-1</integer>
+
+    <!-- Specifies the minimum burn-in offset horizontally. -->
+    <integer name="config_burnInProtectionMinHorizontalOffset">0</integer>
+
+    <!-- Specifies the maximum burn-in offset horizontally. -->
+    <integer name="config_burnInProtectionMaxHorizontalOffset">0</integer>
+
+    <!-- Specifies the minimum burn-in offset vertically. -->
+    <integer name="config_burnInProtectionMinVerticalOffset">0</integer>
+
+    <!-- Specifies the maximum burn-in offset vertically. -->
+    <integer name="config_burnInProtectionMaxVerticalOffset">0</integer>
+
+    <!-- Keyguard component -->
+    <string name="config_keyguardComponent" translatable="false">com.android.systemui/com.android.systemui.keyguard.KeyguardService</string>
+
+    <!-- For performance and storage reasons, limit the number of fingerprints per user -->
+    <integer name="config_fingerprintMaxTemplatesPerUser">5</integer>
+
+    <!-- This config is used to force VoiceInteractionService to start on certain low ram devices.
+         It declares the package name of VoiceInteractionService that should be started. -->
+    <string translatable="false" name="config_forceVoiceInteractionServicePackage"></string>
+
+    <!-- This config is ued to determine whether animations are allowed in low power mode. -->
+    <bool name="config_allowAnimationsInLowPowerMode">false</bool>
+
+    <!-- Whether device supports double tap to wake -->
+    <bool name="config_supportDoubleTapWake">false</bool>
+
+    <!-- The RadioAccessFamilies supported by the device.
+         Empty is viewed as "all".  Only used on devices which
+         don't support RIL_REQUEST_GET_RADIO_CAPABILITY
+         format is UMTS|LTE|... -->
+    <string translatable="false" name="config_radio_access_family"></string>
+
+    <!-- Whether the main built-in display is round. This will affect
+         Configuration.screenLayout's SCREENLAYOUT_ROUND_MASK flags for Configurations on the
+         main built-in display. Change this in device-specific overlays.
+         Defaults to the older, deprecated config_windowIsRound already used in
+         some existing device-specific resource overlays. -->
+    <bool name="config_mainBuiltInDisplayIsRound">@bool/config_windowIsRound</bool>
+
+    <!-- Ultrasound support for Mic/speaker path -->
+    <!-- Whether the default microphone audio source supports near-ultrasound frequencies
+         (range of 18 - 21 kHz). -->
+    <bool name="config_supportMicNearUltrasound">true</bool>
+    <!-- Whether the default speaker audio output path supports near-ultrasound frequencies
+         (range of 18 - 21 kHz). -->
+    <bool name="config_supportSpeakerNearUltrasound">true</bool>
+
+    <!-- Flag indicating device support for EAP SIM, AKA, AKA' -->
+    <bool name="config_eap_sim_based_auth_supported">true</bool>
+ 
+    <!-- How long history of previous vibrations should be kept for the dumpsys. -->
+    <integer name="config_previousVibrationsDumpLimit">20</integer>
+
+    <!-- Number of retries Cell Data should attempt for a given error code before
+         restarting the modem.
+         Error codes not listed will not lead to modem restarts.
+         Array of "code#,retry#"  -->
+    <string-array name="config_cell_retries_per_error_code">
+    </string-array>
+
 </resources>

@@ -18,13 +18,15 @@
 #ifndef ANDROID_HWUI_SHADOW_TESSELLATOR_H
 #define ANDROID_HWUI_SHADOW_TESSELLATOR_H
 
+#include <SkPath.h>
+
 #include "Debug.h"
 #include "Matrix.h"
-#include "OpenGLRenderer.h"
-#include "VertexBuffer.h"
 
 namespace android {
 namespace uirenderer {
+
+class VertexBuffer;
 
 // All SHADOW_* are used to define all the geometry property of shadows.
 // Use a simplified example to illustrate the geometry setup here.
@@ -76,30 +78,11 @@ public:
             const mat4& receiverTransform, const Vector3& lightCenter, int lightRadius,
             const Rect& casterBounds, const Rect& localClip, VertexBuffer& shadowVertexBuffer);
 
-    static void generateShadowIndices(uint16_t*  shadowIndices);
-
     static Vector2 centroid2d(const Vector2* poly, int polyLength);
 
     static bool isClockwise(const Vector2* polygon, int len);
 
     static Vector2 calculateNormal(const Vector2& p1, const Vector2& p2);
-    /**
-     * Determine whether the path is clockwise, using the control points.
-     *
-     * TODO: Given the skia is using inverted Y coordinate, shadow system needs
-     * to convert to the same coordinate to avoid the extra reverse.
-     *
-     * @param path The path to be examined.
-     */
-    static bool isClockwisePath(const SkPath &path);
-
-    /**
-     * Reverse the vertex array.
-     *
-     * @param polygon The vertex array to be reversed.
-     * @param len The length of the vertex array.
-     */
-    static void reverseVertexArray(Vertex* polygon, int len);
 
     static int getExtraVertexNumber(const Vector2& vector1, const Vector2& vector2,
             float divisor);

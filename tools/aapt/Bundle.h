@@ -54,13 +54,14 @@ public:
           mWantUTF16(false), mValues(false), mIncludeMetaData(false),
           mCompressionMethod(0), mJunkPath(false), mOutputAPKFile(NULL),
           mManifestPackageNameOverride(NULL), mInstrumentationPackageNameOverride(NULL),
-          mAutoAddOverlay(false), mGenDependencies(false),
+          mAutoAddOverlay(false), mGenDependencies(false), mNoVersionVectors(false),
           mCrunchedOutputDir(NULL), mProguardFile(NULL),
           mAndroidManifestFile(NULL), mPublicOutputFile(NULL),
           mRClassDir(NULL), mResourceIntermediatesDir(NULL), mManifestMinSdkVersion(NULL),
           mMinSdkVersion(NULL), mTargetSdkVersion(NULL), mMaxSdkVersion(NULL),
           mVersionCode(NULL), mVersionName(NULL), mReplaceVersion(false), mCustomPackage(NULL),
           mExtraPackages(NULL), mMaxResVersion(NULL), mDebugMode(false), mNonConstantId(false),
+          mSkipSymbolsWithoutDefaultLocalization(false),
           mProduct(NULL), mUseCrunchCache(false), mErrorOnFailedInsert(false),
           mErrorOnMissingConfigEntry(false), mOutputTextSymbols(NULL),
           mSingleCrunchInputFile(NULL), mSingleCrunchOutputFile(NULL),
@@ -191,6 +192,8 @@ public:
     void setDebugMode(bool val) { mDebugMode = val; }
     bool getNonConstantId() const { return mNonConstantId; }
     void setNonConstantId(bool val) { mNonConstantId = val; }
+    bool getSkipSymbolsWithoutDefaultLocalization() const { return mSkipSymbolsWithoutDefaultLocalization; }
+    void setSkipSymbolsWithoutDefaultLocalization(bool val) { mSkipSymbolsWithoutDefaultLocalization = val; }
     const char* getProduct() const { return mProduct; }
     void setProduct(const char * val) { mProduct = val; }
     void setUseCrunchCache(bool val) { mUseCrunchCache = val; }
@@ -203,6 +206,8 @@ public:
     void setSingleCrunchOutputFile(const char* val) { mSingleCrunchOutputFile = val; }
     bool getBuildSharedLibrary() const { return mBuildSharedLibrary; }
     void setBuildSharedLibrary(bool val) { mBuildSharedLibrary = val; }
+    void setNoVersionVectors(bool val) { mNoVersionVectors = val; }
+    bool getNoVersionVectors() const { return mNoVersionVectors; }
 
     /*
      * Set and get the file specification.
@@ -282,6 +287,7 @@ private:
     const char* mInstrumentationPackageNameOverride;
     bool        mAutoAddOverlay;
     bool        mGenDependencies;
+    bool        mNoVersionVectors;
     const char* mCrunchedOutputDir;
     const char* mProguardFile;
     const char* mAndroidManifestFile;
@@ -312,6 +318,7 @@ private:
     const char* mMaxResVersion;
     bool        mDebugMode;
     bool        mNonConstantId;
+    bool        mSkipSymbolsWithoutDefaultLocalization;
     const char* mProduct;
     bool        mUseCrunchCache;
     bool        mErrorOnFailedInsert;

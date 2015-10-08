@@ -17,51 +17,59 @@
 package com.android.systemui.statusbar;
 
 import android.content.Context;
-import android.graphics.ColorFilter;
-import android.graphics.ColorMatrix;
-import android.graphics.ColorMatrixColorFilter;
+import android.graphics.Outline;
 import android.graphics.Paint;
 import android.graphics.PorterDuff;
 import android.graphics.PorterDuffXfermode;
 import android.graphics.Rect;
-import android.graphics.drawable.Drawable;
 import android.util.AttributeSet;
 import android.view.View;
+import android.view.ViewGroup;
+import android.view.ViewOutlineProvider;
 import android.view.ViewTreeObserver;
 import android.view.animation.Interpolator;
 import android.view.animation.LinearInterpolator;
 import android.widget.FrameLayout;
-import android.widget.ImageView;
+
 import com.android.systemui.R;
 
 /**
- * A frame layout containing the actual payload of the notification, including the contracted and
- * expanded layout. This class is responsible for clipping the content and and switching between the
- * expanded and contracted view depending on its clipped size.
+ * A frame layout containing the actual payload of the notification, including the contracted,
+ * expanded and heads up layout. This class is responsible for clipping the content and and
+ * switching between the expanded, contracted and the heads up view depending on its clipped size.
  */
 public class NotificationContentView extends FrameLayout {
 
     private static final long ANIMATION_DURATION_LENGTH = 170;
+    private static final int VISIBLE_TYPE_CONTRACTED = 0;
+    private static final int VISIBLE_TYPE_EXPANDED = 1;
+    private static final int VISIBLE_TYPE_HEADSUP = 2;
 
     private final Rect mClipBounds = new Rect();
+    private final int mSmallHeight;
+    private final int mHeadsUpHeight;
+    private final int mRoundRectRadius;
+    private final Interpolator mLinearInterpolator = new LinearInterpolator();
+    private final boolean mRoundRectClippingEnabled;
 
     private View mContractedChild;
     private View mExpandedChild;
+    private View mHeadsUpChild;
 
     private NotificationViewWrapper mContractedWrapper;
-
-    private int mSmallHeight;
+    private NotificationViewWrapper mExpandedWrapper;
+    private NotificationViewWrapper mHeadsUpWrapper;
     private int mClipTopAmount;
-    private int mActualHeight;
-
-    private final Interpolator mLinearInterpolator = new LinearInterpolator();
-
-    private boolean mContractedVisible = true;
+    private int mContentHeight;
+    private int mUnrestrictedContentHeight;
+    private int mVisibleType = VISIBLE_TYPE_CONTRACTED;
     private boolean mDark;
-
     private final Paint mFadePaint = new Paint();
     private boolean mAnimate;
-    private ViewTreeObserver.OnPreDrawListener mEnableAnimationPredrawListener
+    private boolean mIsHeadsUp;
+    private boolean mShowingLegacyBackground;
+
+    private final ViewTreeObserver.OnPreDrawListener mEnableAnimationPredrawListener
             = new ViewTreeObserver.OnPreDrawListener() {
         @Override
         public boolean onPreDraw() {
@@ -71,16 +79,77 @@ public class NotificationContentView extends FrameLayout {
         }
     };
 
+    private final ViewOutlineProvider mOutlineProvider = new ViewOutlineProvider() {
+        @Override
+        public void getOutline(View view, Outline outline) {
+            outline.setRoundRect(0, 0, view.getWidth(), mUnrestrictedContentHeight,
+                    mRoundRectRadius);
+        }
+    };
+
     public NotificationContentView(Context context, AttributeSet attrs) {
         super(context, attrs);
         mFadePaint.setXfermode(new PorterDuffXfermode(PorterDuff.Mode.ADD));
+        mSmallHeight = getResources().getDimensionPixelSize(R.dimen.notification_min_height);
+        mHeadsUpHeight = getResources().getDimensionPixelSize(R.dimen.notification_mid_height);
+        mRoundRectRadius = getResources().getDimensionPixelSize(
+                R.dimen.notification_material_rounded_rect_radius);
+        mRoundRectClippingEnabled = getResources().getBoolean(
+                R.bool.config_notifications_round_rect_clipping);
         reset(true);
+        setOutlineProvider(mOutlineProvider);
+    }
+
+    @Override
+    protected void onMeasure(int widthMeasureSpec, int heightMeasureSpec) {
+        int heightMode = MeasureSpec.getMode(heightMeasureSpec);
+        boolean hasFixedHeight = heightMode == MeasureSpec.EXACTLY;
+        boolean isHeightLimited = heightMode == MeasureSpec.AT_MOST;
+        int maxSize = Integer.MAX_VALUE;
+        if (hasFixedHeight || isHeightLimited) {
+            maxSize = MeasureSpec.getSize(heightMeasureSpec);
+        }
+        int maxChildHeight = 0;
+        if (mContractedChild != null) {
+            int size = Math.min(maxSize, mSmallHeight);
+            mContractedChild.measure(widthMeasureSpec,
+                    MeasureSpec.makeMeasureSpec(size, MeasureSpec.EXACTLY));
+            maxChildHeight = Math.max(maxChildHeight, mContractedChild.getMeasuredHeight());
+        }
+        if (mExpandedChild != null) {
+            int size = maxSize;
+            ViewGroup.LayoutParams layoutParams = mExpandedChild.getLayoutParams();
+            if (layoutParams.height >= 0) {
+                // An actual height is set
+                size = Math.min(maxSize, layoutParams.height);
+            }
+            int spec = size == Integer.MAX_VALUE
+                    ? MeasureSpec.makeMeasureSpec(0, MeasureSpec.UNSPECIFIED)
+                    : MeasureSpec.makeMeasureSpec(size, MeasureSpec.AT_MOST);
+            mExpandedChild.measure(widthMeasureSpec, spec);
+            maxChildHeight = Math.max(maxChildHeight, mExpandedChild.getMeasuredHeight());
+        }
+        if (mHeadsUpChild != null) {
+            int size = Math.min(maxSize, mHeadsUpHeight);
+            ViewGroup.LayoutParams layoutParams = mHeadsUpChild.getLayoutParams();
+            if (layoutParams.height >= 0) {
+                // An actual height is set
+                size = Math.min(maxSize, layoutParams.height);
+            }
+            mHeadsUpChild.measure(widthMeasureSpec,
+                    MeasureSpec.makeMeasureSpec(size, MeasureSpec.AT_MOST));
+            maxChildHeight = Math.max(maxChildHeight, mHeadsUpChild.getMeasuredHeight());
+        }
+        int ownHeight = Math.min(maxChildHeight, maxSize);
+        int width = MeasureSpec.getSize(widthMeasureSpec);
+        setMeasuredDimension(width, ownHeight);
     }
 
     @Override
     protected void onLayout(boolean changed, int left, int top, int right, int bottom) {
         super.onLayout(changed, left, top, right, bottom);
         updateClipping();
+        invalidateOutline();
     }
 
     @Override
@@ -96,13 +165,16 @@ public class NotificationContentView extends FrameLayout {
         if (mExpandedChild != null) {
             mExpandedChild.animate().cancel();
         }
+        if (mHeadsUpChild != null) {
+            mHeadsUpChild.animate().cancel();
+        }
         removeAllViews();
         mContractedChild = null;
         mExpandedChild = null;
-        mSmallHeight = getResources().getDimensionPixelSize(R.dimen.notification_min_height);
-        mContractedVisible = true;
+        mHeadsUpChild = null;
+        mVisibleType = VISIBLE_TYPE_CONTRACTED;
         if (resetActualHeight) {
-            mActualHeight = mSmallHeight;
+            mContentHeight = mSmallHeight;
         }
     }
 
@@ -114,17 +186,21 @@ public class NotificationContentView extends FrameLayout {
         return mExpandedChild;
     }
 
+    public View getHeadsUpChild() {
+        return mHeadsUpChild;
+    }
+
     public void setContractedChild(View child) {
         if (mContractedChild != null) {
             mContractedChild.animate().cancel();
             removeView(mContractedChild);
         }
-        sanitizeContractedLayoutParams(child);
         addView(child);
         mContractedChild = child;
         mContractedWrapper = NotificationViewWrapper.wrap(getContext(), child);
         selectLayout(false /* animate */, true /* force */);
         mContractedWrapper.setDark(mDark, false /* animate */, 0 /* delay */);
+        updateRoundRectClipping();
     }
 
     public void setExpandedChild(View child) {
@@ -134,7 +210,21 @@ public class NotificationContentView extends FrameLayout {
         }
         addView(child);
         mExpandedChild = child;
+        mExpandedWrapper = NotificationViewWrapper.wrap(getContext(), child);
         selectLayout(false /* animate */, true /* force */);
+        updateRoundRectClipping();
+    }
+
+    public void setHeadsUpChild(View child) {
+        if (mHeadsUpChild != null) {
+            mHeadsUpChild.animate().cancel();
+            removeView(mHeadsUpChild);
+        }
+        addView(child);
+        mHeadsUpChild = child;
+        mHeadsUpWrapper = NotificationViewWrapper.wrap(getContext(), child);
+        selectLayout(false /* animate */, true /* force */);
+        updateRoundRectClipping();
     }
 
     @Override
@@ -159,16 +249,25 @@ public class NotificationContentView extends FrameLayout {
         }
     }
 
-    public void setActualHeight(int actualHeight) {
-        mActualHeight = actualHeight;
+    public void setContentHeight(int contentHeight) {
+        mContentHeight = Math.max(Math.min(contentHeight, getHeight()), getMinHeight());;
+        mUnrestrictedContentHeight = Math.max(contentHeight, getMinHeight());
         selectLayout(mAnimate /* animate */, false /* force */);
         updateClipping();
+        invalidateOutline();
+    }
+
+    public int getContentHeight() {
+        return mContentHeight;
     }
 
     public int getMaxHeight() {
-
-        // The maximum height is just the laid out height.
-        return getHeight();
+        if (mIsHeadsUp && mHeadsUpChild != null) {
+            return mHeadsUpChild.getHeight();
+        } else if (mExpandedChild != null) {
+            return mExpandedChild.getHeight();
+        }
+        return mSmallHeight;
     }
 
     public int getMinHeight() {
@@ -180,67 +279,129 @@ public class NotificationContentView extends FrameLayout {
         updateClipping();
     }
 
-    private void updateClipping() {
-        mClipBounds.set(0, mClipTopAmount, getWidth(), mActualHeight);
-        setClipBounds(mClipBounds);
+    private void updateRoundRectClipping() {
+        boolean enabled = needsRoundRectClipping();
+        setClipToOutline(enabled);
     }
 
-    private void sanitizeContractedLayoutParams(View contractedChild) {
-        LayoutParams lp = (LayoutParams) contractedChild.getLayoutParams();
-        lp.height = mSmallHeight;
-        contractedChild.setLayoutParams(lp);
+    private boolean needsRoundRectClipping() {
+        if (!mRoundRectClippingEnabled) {
+            return false;
+        }
+        boolean needsForContracted = mContractedChild != null
+                && mContractedChild.getVisibility() == View.VISIBLE
+                && mContractedWrapper.needsRoundRectClipping();
+        boolean needsForExpanded = mExpandedChild != null
+                && mExpandedChild.getVisibility() == View.VISIBLE
+                && mExpandedWrapper.needsRoundRectClipping();
+        boolean needsForHeadsUp = mExpandedChild != null
+                && mExpandedChild.getVisibility() == View.VISIBLE
+                && mExpandedWrapper.needsRoundRectClipping();
+        return needsForContracted || needsForExpanded || needsForHeadsUp;
+    }
+
+    private void updateClipping() {
+        mClipBounds.set(0, mClipTopAmount, getWidth(), mContentHeight);
+        setClipBounds(mClipBounds);
     }
 
     private void selectLayout(boolean animate, boolean force) {
         if (mContractedChild == null) {
             return;
         }
-        boolean showContractedChild = showContractedChild();
-        if (showContractedChild != mContractedVisible || force) {
-            if (animate && mExpandedChild != null) {
-                runSwitchAnimation(showContractedChild);
-            } else if (mExpandedChild != null) {
-                mContractedChild.setVisibility(showContractedChild ? View.VISIBLE : View.INVISIBLE);
-                mContractedChild.setAlpha(showContractedChild ? 1f : 0f);
-                mExpandedChild.setVisibility(showContractedChild ? View.INVISIBLE : View.VISIBLE);
-                mExpandedChild.setAlpha(showContractedChild ? 0f : 1f);
+        int visibleType = calculateVisibleType();
+        if (visibleType != mVisibleType || force) {
+            if (animate && ((visibleType == VISIBLE_TYPE_EXPANDED && mExpandedChild != null)
+                    || (visibleType == VISIBLE_TYPE_HEADSUP && mHeadsUpChild != null)
+                    || visibleType == VISIBLE_TYPE_CONTRACTED)) {
+                runSwitchAnimation(visibleType);
+            } else {
+                updateViewVisibilities(visibleType);
             }
+            mVisibleType = visibleType;
         }
-        mContractedVisible = showContractedChild;
     }
 
-    private void runSwitchAnimation(final boolean showContractedChild) {
-        mContractedChild.setVisibility(View.VISIBLE);
-        mExpandedChild.setVisibility(View.VISIBLE);
-        mContractedChild.setLayerType(LAYER_TYPE_HARDWARE, mFadePaint);
-        mExpandedChild.setLayerType(LAYER_TYPE_HARDWARE, mFadePaint);
+    private void updateViewVisibilities(int visibleType) {
+        boolean contractedVisible = visibleType == VISIBLE_TYPE_CONTRACTED;
+        mContractedChild.setVisibility(contractedVisible ? View.VISIBLE : View.INVISIBLE);
+        mContractedChild.setAlpha(contractedVisible ? 1f : 0f);
+        mContractedChild.setLayerType(LAYER_TYPE_NONE, null);
+        if (mExpandedChild != null) {
+            boolean expandedVisible = visibleType == VISIBLE_TYPE_EXPANDED;
+            mExpandedChild.setVisibility(expandedVisible ? View.VISIBLE : View.INVISIBLE);
+            mExpandedChild.setAlpha(expandedVisible ? 1f : 0f);
+            mExpandedChild.setLayerType(LAYER_TYPE_NONE, null);
+        }
+        if (mHeadsUpChild != null) {
+            boolean headsUpVisible = visibleType == VISIBLE_TYPE_HEADSUP;
+            mHeadsUpChild.setVisibility(headsUpVisible ? View.VISIBLE : View.INVISIBLE);
+            mHeadsUpChild.setAlpha(headsUpVisible ? 1f : 0f);
+            mHeadsUpChild.setLayerType(LAYER_TYPE_NONE, null);
+        }
+        setLayerType(LAYER_TYPE_NONE, null);
+        updateRoundRectClipping();
+    }
+
+    private void runSwitchAnimation(int visibleType) {
+        View shownView = getViewForVisibleType(visibleType);
+        View hiddenView = getViewForVisibleType(mVisibleType);
+        shownView.setVisibility(View.VISIBLE);
+        hiddenView.setVisibility(View.VISIBLE);
+        shownView.setLayerType(LAYER_TYPE_HARDWARE, mFadePaint);
+        hiddenView.setLayerType(LAYER_TYPE_HARDWARE, mFadePaint);
         setLayerType(LAYER_TYPE_HARDWARE, null);
-        mContractedChild.animate()
-                .alpha(showContractedChild ? 1f : 0f)
+        hiddenView.animate()
+                .alpha(0f)
                 .setDuration(ANIMATION_DURATION_LENGTH)
-                .setInterpolator(mLinearInterpolator);
-        mExpandedChild.animate()
-                .alpha(showContractedChild ? 0f : 1f)
+                .setInterpolator(mLinearInterpolator)
+                .withEndAction(null); // In case we have multiple changes in one frame.
+        shownView.animate()
+                .alpha(1f)
                 .setDuration(ANIMATION_DURATION_LENGTH)
                 .setInterpolator(mLinearInterpolator)
                 .withEndAction(new Runnable() {
                     @Override
                     public void run() {
-                        mContractedChild.setLayerType(LAYER_TYPE_NONE, null);
-                        mExpandedChild.setLayerType(LAYER_TYPE_NONE, null);
-                        setLayerType(LAYER_TYPE_NONE, null);
-                        mContractedChild.setVisibility(showContractedChild
-                                ? View.VISIBLE
-                                : View.INVISIBLE);
-                        mExpandedChild.setVisibility(showContractedChild
-                                ? View.INVISIBLE
-                                : View.VISIBLE);
+                        updateViewVisibilities(mVisibleType);
                     }
                 });
+        updateRoundRectClipping();
     }
 
-    private boolean showContractedChild() {
-        return mActualHeight <= mSmallHeight || mExpandedChild == null;
+    /**
+     * @param visibleType one of the static enum types in this view
+     * @return the corresponding view according to the given visible type
+     */
+    private View getViewForVisibleType(int visibleType) {
+        switch (visibleType) {
+            case VISIBLE_TYPE_EXPANDED:
+                return mExpandedChild;
+            case VISIBLE_TYPE_HEADSUP:
+                return mHeadsUpChild;
+            default:
+                return mContractedChild;
+        }
+    }
+
+    /**
+     * @return one of the static enum types in this view, calculated form the current state
+     */
+    private int calculateVisibleType() {
+        boolean noExpandedChild = mExpandedChild == null;
+        if (mIsHeadsUp && mHeadsUpChild != null) {
+            if (mContentHeight <= mHeadsUpChild.getHeight() || noExpandedChild) {
+                return VISIBLE_TYPE_HEADSUP;
+            } else {
+                return VISIBLE_TYPE_EXPANDED;
+            }
+        } else {
+            if (mContentHeight <= mSmallHeight || noExpandedChild) {
+                return VISIBLE_TYPE_CONTRACTED;
+            } else {
+                return VISIBLE_TYPE_EXPANDED;
+            }
+        }
     }
 
     public void notifyContentUpdated() {
@@ -249,6 +410,10 @@ public class NotificationContentView extends FrameLayout {
             mContractedWrapper.notifyContentUpdated();
             mContractedWrapper.setDark(mDark, false /* animate */, 0 /* delay */);
         }
+        if (mExpandedChild != null) {
+            mExpandedWrapper.notifyContentUpdated();
+        }
+        updateRoundRectClipping();
     }
 
     public boolean isContentExpandable() {
@@ -258,7 +423,12 @@ public class NotificationContentView extends FrameLayout {
     public void setDark(boolean dark, boolean fade, long delay) {
         if (mDark == dark || mContractedChild == null) return;
         mDark = dark;
-        mContractedWrapper.setDark(dark, fade, delay);
+        mContractedWrapper.setDark(dark && !mShowingLegacyBackground, fade, delay);
+    }
+
+    public void setHeadsUp(boolean headsUp) {
+        mIsHeadsUp = headsUp;
+        selectLayout(false /* animate */, true /* force */);
     }
 
     @Override
@@ -267,5 +437,9 @@ public class NotificationContentView extends FrameLayout {
         // This is not really true, but good enough when fading from the contracted to the expanded
         // layout, and saves us some layers.
         return false;
+    }
+
+    public void setShowingLegacyBackground(boolean showing) {
+        mShowingLegacyBackground = showing;
     }
 }

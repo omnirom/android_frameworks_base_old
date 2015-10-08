@@ -209,7 +209,7 @@ final class WifiDisplayController implements DumpUtils.Dump {
     }
 
     @Override
-    public void dump(PrintWriter pw) {
+    public void dump(PrintWriter pw, String prefix) {
         pw.println("mWifiDisplayOnSetting=" + mWifiDisplayOnSetting);
         pw.println("mWifiP2pEnabled=" + mWifiP2pEnabled);
         pw.println("mWfdEnabled=" + mWfdEnabled);
@@ -775,7 +775,7 @@ final class WifiDisplayController implements DumpUtils.Dump {
                         handleConnectionFailure(false);
                     }
                 }
-            }, mHandler);
+            }, mHandler, mContext.getOpPackageName());
 
             // Use extended timeout value for certification, as some tests require user inputs
             int rtspTimeout = mWifiDisplayCertMode ?

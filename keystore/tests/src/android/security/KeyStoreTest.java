@@ -17,16 +17,24 @@
 package android.security;
 
 import android.app.Activity;
+import android.os.Binder;
+import android.os.IBinder;
 import android.os.Process;
-import android.security.KeyStore;
+import android.security.keymaster.ExportResult;
+import android.security.keymaster.KeyCharacteristics;
+import android.security.keymaster.KeymasterArguments;
+import android.security.keymaster.KeymasterBlob;
+import android.security.keymaster.KeymasterDefs;
+import android.security.keymaster.OperationResult;
 import android.test.ActivityUnitTestCase;
 import android.test.AssertionFailedError;
+import android.test.MoreAsserts;
 import android.test.suitebuilder.annotation.MediumTest;
-import com.android.org.conscrypt.NativeCrypto;
+import com.android.org.conscrypt.NativeConstants;
 import java.nio.charset.StandardCharsets;
 import java.util.Arrays;
-import java.util.Date;
 import java.util.HashSet;
+import java.security.spec.RSAKeyGenParameterSpec;
 
 /**
  * Junit / Instrumentation test case for KeyStore class
@@ -103,6 +111,8 @@ public class KeyStoreTest extends ActivityUnitTestCase<Activity> {
             "286BDA73F629296F5FA9146D8976357D3C751E75148696A40B74685C82CE30902D639D72" +
             "4FF24D5E2E9407EE34EDED2E3B4DF65AA9BCFEB6DF28D07BA6903F165768");
 
+    private static final byte[] AES256_BYTES = hexToBytes(
+            "0CC175B9C0F1B6A831C399E269772661CEC520EA51EA0A47E87295FA3245A605");
 
     private static byte[] hexToBytes(String s) {
         int len = s.length();
@@ -136,13 +146,13 @@ public class KeyStoreTest extends ActivityUnitTestCase<Activity> {
     }
 
     public void testPassword() throws Exception {
-        assertTrue(mKeyStore.password(TEST_PASSWD));
+        assertTrue(mKeyStore.onUserPasswordChanged(TEST_PASSWD));
         assertEquals(KeyStore.State.UNLOCKED, mKeyStore.state());
     }
 
     public void testGet() throws Exception {
         assertNull(mKeyStore.get(TEST_KEYNAME));
-        mKeyStore.password(TEST_PASSWD);
+        mKeyStore.onUserPasswordChanged(TEST_PASSWD);
         assertNull(mKeyStore.get(TEST_KEYNAME));
         assertTrue(mKeyStore.put(TEST_KEYNAME, TEST_KEYVALUE, KeyStore.UID_SELF,
                 KeyStore.FLAG_ENCRYPTED));
@@ -154,7 +164,7 @@ public class KeyStoreTest extends ActivityUnitTestCase<Activity> {
         assertFalse(mKeyStore.put(TEST_KEYNAME, TEST_KEYVALUE, KeyStore.UID_SELF,
                 KeyStore.FLAG_ENCRYPTED));
         assertFalse(mKeyStore.contains(TEST_KEYNAME));
-        mKeyStore.password(TEST_PASSWD);
+        mKeyStore.onUserPasswordChanged(TEST_PASSWD);
         assertTrue(mKeyStore.put(TEST_KEYNAME, TEST_KEYVALUE, KeyStore.UID_SELF,
                 KeyStore.FLAG_ENCRYPTED));
         assertTrue(Arrays.equals(TEST_KEYVALUE, mKeyStore.get(TEST_KEYNAME)));
@@ -165,7 +175,7 @@ public class KeyStoreTest extends ActivityUnitTestCase<Activity> {
         assertFalse(mKeyStore.put(TEST_KEYNAME, TEST_KEYVALUE, Process.WIFI_UID,
                 KeyStore.FLAG_ENCRYPTED));
         assertFalse(mKeyStore.contains(TEST_KEYNAME, Process.WIFI_UID));
-        mKeyStore.password(TEST_PASSWD);
+        mKeyStore.onUserPasswordChanged(TEST_PASSWD);
         assertTrue(mKeyStore.put(TEST_KEYNAME, TEST_KEYVALUE, Process.WIFI_UID,
                 KeyStore.FLAG_ENCRYPTED));
         assertTrue(mKeyStore.contains(TEST_KEYNAME, Process.WIFI_UID));
@@ -176,7 +186,7 @@ public class KeyStoreTest extends ActivityUnitTestCase<Activity> {
         assertFalse(mKeyStore.put(TEST_KEYNAME, TEST_KEYVALUE, Process.BLUETOOTH_UID,
                 KeyStore.FLAG_ENCRYPTED));
         assertFalse(mKeyStore.contains(TEST_KEYNAME, Process.BLUETOOTH_UID));
-        mKeyStore.password(TEST_PASSWD);
+        mKeyStore.onUserPasswordChanged(TEST_PASSWD);
         assertFalse(mKeyStore.put(TEST_KEYNAME, TEST_KEYVALUE, Process.BLUETOOTH_UID,
                 KeyStore.FLAG_ENCRYPTED));
         assertFalse(mKeyStore.contains(TEST_KEYNAME, Process.BLUETOOTH_UID));
@@ -186,7 +196,7 @@ public class KeyStoreTest extends ActivityUnitTestCase<Activity> {
         assertFalse(mKeyStore.put(TEST_I18N_KEY, TEST_I18N_VALUE, KeyStore.UID_SELF,
                 KeyStore.FLAG_ENCRYPTED));
         assertFalse(mKeyStore.contains(TEST_I18N_KEY));
-        mKeyStore.password(TEST_I18N_KEY);
+        mKeyStore.onUserPasswordChanged(TEST_I18N_KEY);
         assertTrue(mKeyStore.put(TEST_I18N_KEY, TEST_I18N_VALUE, KeyStore.UID_SELF,
                 KeyStore.FLAG_ENCRYPTED));
         assertTrue(mKeyStore.contains(TEST_I18N_KEY));
@@ -194,7 +204,7 @@ public class KeyStoreTest extends ActivityUnitTestCase<Activity> {
 
     public void testDelete() throws Exception {
         assertFalse(mKeyStore.delete(TEST_KEYNAME));
-        mKeyStore.password(TEST_PASSWD);
+        mKeyStore.onUserPasswordChanged(TEST_PASSWD);
         assertFalse(mKeyStore.delete(TEST_KEYNAME));
 
         assertTrue(mKeyStore.put(TEST_KEYNAME, TEST_KEYVALUE, KeyStore.UID_SELF,
@@ -206,7 +216,7 @@ public class KeyStoreTest extends ActivityUnitTestCase<Activity> {
 
     public void testDelete_grantedUid_Wifi() throws Exception {
         assertFalse(mKeyStore.delete(TEST_KEYNAME, Process.WIFI_UID));
-        mKeyStore.password(TEST_PASSWD);
+        mKeyStore.onUserPasswordChanged(TEST_PASSWD);
         assertFalse(mKeyStore.delete(TEST_KEYNAME, Process.WIFI_UID));
 
         assertTrue(mKeyStore.put(TEST_KEYNAME, TEST_KEYVALUE, Process.WIFI_UID,
@@ -218,7 +228,7 @@ public class KeyStoreTest extends ActivityUnitTestCase<Activity> {
 
     public void testDelete_ungrantedUid_Bluetooth() throws Exception {
         assertFalse(mKeyStore.delete(TEST_KEYNAME, Process.BLUETOOTH_UID));
-        mKeyStore.password(TEST_PASSWD);
+        mKeyStore.onUserPasswordChanged(TEST_PASSWD);
         assertFalse(mKeyStore.delete(TEST_KEYNAME, Process.BLUETOOTH_UID));
 
         assertFalse(mKeyStore.put(TEST_KEYNAME, TEST_KEYVALUE, Process.BLUETOOTH_UID,
@@ -231,7 +241,7 @@ public class KeyStoreTest extends ActivityUnitTestCase<Activity> {
     public void testContains() throws Exception {
         assertFalse(mKeyStore.contains(TEST_KEYNAME));
 
-        assertTrue(mKeyStore.password(TEST_PASSWD));
+        assertTrue(mKeyStore.onUserPasswordChanged(TEST_PASSWD));
         assertFalse(mKeyStore.contains(TEST_KEYNAME));
 
         assertTrue(mKeyStore.put(TEST_KEYNAME, TEST_KEYVALUE, KeyStore.UID_SELF,
@@ -242,7 +252,7 @@ public class KeyStoreTest extends ActivityUnitTestCase<Activity> {
     public void testContains_grantedUid_Wifi() throws Exception {
         assertFalse(mKeyStore.contains(TEST_KEYNAME, Process.WIFI_UID));
 
-        assertTrue(mKeyStore.password(TEST_PASSWD));
+        assertTrue(mKeyStore.onUserPasswordChanged(TEST_PASSWD));
         assertFalse(mKeyStore.contains(TEST_KEYNAME, Process.WIFI_UID));
 
         assertTrue(mKeyStore.put(TEST_KEYNAME, TEST_KEYVALUE, Process.WIFI_UID,
@@ -253,7 +263,7 @@ public class KeyStoreTest extends ActivityUnitTestCase<Activity> {
     public void testContains_grantedUid_Bluetooth() throws Exception {
         assertFalse(mKeyStore.contains(TEST_KEYNAME, Process.BLUETOOTH_UID));
 
-        assertTrue(mKeyStore.password(TEST_PASSWD));
+        assertTrue(mKeyStore.onUserPasswordChanged(TEST_PASSWD));
         assertFalse(mKeyStore.contains(TEST_KEYNAME, Process.BLUETOOTH_UID));
 
         assertFalse(mKeyStore.put(TEST_KEYNAME, TEST_KEYVALUE, Process.BLUETOOTH_UID,
@@ -261,58 +271,58 @@ public class KeyStoreTest extends ActivityUnitTestCase<Activity> {
         assertFalse(mKeyStore.contains(TEST_KEYNAME, Process.BLUETOOTH_UID));
     }
 
-    public void testSaw() throws Exception {
-        String[] emptyResult = mKeyStore.saw(TEST_KEYNAME);
+    public void testList() throws Exception {
+        String[] emptyResult = mKeyStore.list(TEST_KEYNAME);
         assertNotNull(emptyResult);
         assertEquals(0, emptyResult.length);
 
-        mKeyStore.password(TEST_PASSWD);
+        mKeyStore.onUserPasswordChanged(TEST_PASSWD);
         mKeyStore.put(TEST_KEYNAME1, TEST_KEYVALUE, KeyStore.UID_SELF, KeyStore.FLAG_ENCRYPTED);
         mKeyStore.put(TEST_KEYNAME2, TEST_KEYVALUE, KeyStore.UID_SELF, KeyStore.FLAG_ENCRYPTED);
 
-        String[] results = mKeyStore.saw(TEST_KEYNAME);
+        String[] results = mKeyStore.list(TEST_KEYNAME);
         assertEquals(new HashSet(Arrays.asList(TEST_KEYNAME1.substring(TEST_KEYNAME.length()),
                                                TEST_KEYNAME2.substring(TEST_KEYNAME.length()))),
                      new HashSet(Arrays.asList(results)));
     }
 
-    public void testSaw_ungrantedUid_Bluetooth() throws Exception {
-        String[] results1 = mKeyStore.saw(TEST_KEYNAME, Process.BLUETOOTH_UID);
-        assertNull(results1);
+    public void testList_ungrantedUid_Bluetooth() throws Exception {
+        String[] results1 = mKeyStore.list(TEST_KEYNAME, Process.BLUETOOTH_UID);
+        assertEquals(0, results1.length);
 
-        mKeyStore.password(TEST_PASSWD);
+        mKeyStore.onUserPasswordChanged(TEST_PASSWD);
         mKeyStore.put(TEST_KEYNAME1, TEST_KEYVALUE, KeyStore.UID_SELF, KeyStore.FLAG_ENCRYPTED);
         mKeyStore.put(TEST_KEYNAME2, TEST_KEYVALUE, KeyStore.UID_SELF, KeyStore.FLAG_ENCRYPTED);
 
-        String[] results2 = mKeyStore.saw(TEST_KEYNAME, Process.BLUETOOTH_UID);
-        assertNull(results2);
+        String[] results2 = mKeyStore.list(TEST_KEYNAME, Process.BLUETOOTH_UID);
+        assertEquals(0, results2.length);
     }
 
-    public void testSaw_grantedUid_Wifi() throws Exception {
-        String[] results1 = mKeyStore.saw(TEST_KEYNAME, Process.WIFI_UID);
+    public void testList_grantedUid_Wifi() throws Exception {
+        String[] results1 = mKeyStore.list(TEST_KEYNAME, Process.WIFI_UID);
         assertNotNull(results1);
         assertEquals(0, results1.length);
 
-        mKeyStore.password(TEST_PASSWD);
+        mKeyStore.onUserPasswordChanged(TEST_PASSWD);
         mKeyStore.put(TEST_KEYNAME1, TEST_KEYVALUE, Process.WIFI_UID, KeyStore.FLAG_ENCRYPTED);
         mKeyStore.put(TEST_KEYNAME2, TEST_KEYVALUE, Process.WIFI_UID, KeyStore.FLAG_ENCRYPTED);
 
-        String[] results2 = mKeyStore.saw(TEST_KEYNAME, Process.WIFI_UID);
+        String[] results2 = mKeyStore.list(TEST_KEYNAME, Process.WIFI_UID);
         assertEquals(new HashSet(Arrays.asList(TEST_KEYNAME1.substring(TEST_KEYNAME.length()),
                                                TEST_KEYNAME2.substring(TEST_KEYNAME.length()))),
                      new HashSet(Arrays.asList(results2)));
     }
 
-    public void testSaw_grantedUid_Vpn() throws Exception {
-        String[] results1 = mKeyStore.saw(TEST_KEYNAME, Process.VPN_UID);
+    public void testList_grantedUid_Vpn() throws Exception {
+        String[] results1 = mKeyStore.list(TEST_KEYNAME, Process.VPN_UID);
         assertNotNull(results1);
         assertEquals(0, results1.length);
 
-        mKeyStore.password(TEST_PASSWD);
+        mKeyStore.onUserPasswordChanged(TEST_PASSWD);
         mKeyStore.put(TEST_KEYNAME1, TEST_KEYVALUE, Process.VPN_UID, KeyStore.FLAG_ENCRYPTED);
         mKeyStore.put(TEST_KEYNAME2, TEST_KEYVALUE, Process.VPN_UID, KeyStore.FLAG_ENCRYPTED);
 
-        String[] results2 = mKeyStore.saw(TEST_KEYNAME, Process.VPN_UID);
+        String[] results2 = mKeyStore.list(TEST_KEYNAME, Process.VPN_UID);
         assertEquals(new HashSet(Arrays.asList(TEST_KEYNAME1.substring(TEST_KEYNAME.length()),
                                                TEST_KEYNAME2.substring(TEST_KEYNAME.length()))),
                      new HashSet(Arrays.asList(results2)));
@@ -321,7 +331,7 @@ public class KeyStoreTest extends ActivityUnitTestCase<Activity> {
     public void testLock() throws Exception {
         assertFalse(mKeyStore.lock());
 
-        mKeyStore.password(TEST_PASSWD);
+        mKeyStore.onUserPasswordChanged(TEST_PASSWD);
         assertEquals(KeyStore.State.UNLOCKED, mKeyStore.state());
 
         assertTrue(mKeyStore.lock());
@@ -329,7 +339,7 @@ public class KeyStoreTest extends ActivityUnitTestCase<Activity> {
     }
 
     public void testUnlock() throws Exception {
-        mKeyStore.password(TEST_PASSWD);
+        mKeyStore.onUserPasswordChanged(TEST_PASSWD);
         assertEquals(KeyStore.State.UNLOCKED, mKeyStore.state());
         mKeyStore.lock();
 
@@ -339,7 +349,7 @@ public class KeyStoreTest extends ActivityUnitTestCase<Activity> {
 
     public void testIsEmpty() throws Exception {
         assertTrue(mKeyStore.isEmpty());
-        mKeyStore.password(TEST_PASSWD);
+        mKeyStore.onUserPasswordChanged(TEST_PASSWD);
         assertTrue(mKeyStore.isEmpty());
         mKeyStore.put(TEST_KEYNAME, TEST_KEYVALUE, KeyStore.UID_SELF, KeyStore.FLAG_ENCRYPTED);
         assertFalse(mKeyStore.isEmpty());
@@ -349,50 +359,50 @@ public class KeyStoreTest extends ActivityUnitTestCase<Activity> {
 
     public void testGenerate_NotInitialized_Fail() throws Exception {
         assertFalse("Should fail when keystore is not initialized",
-                mKeyStore.generate(TEST_KEYNAME, KeyStore.UID_SELF, NativeCrypto.EVP_PKEY_RSA,
+                mKeyStore.generate(TEST_KEYNAME, KeyStore.UID_SELF, NativeConstants.EVP_PKEY_RSA,
                         RSA_KEY_SIZE, KeyStore.FLAG_ENCRYPTED, null));
     }
 
     public void testGenerate_Locked_Fail() throws Exception {
-        mKeyStore.password(TEST_PASSWD);
+        mKeyStore.onUserPasswordChanged(TEST_PASSWD);
         mKeyStore.lock();
         assertFalse("Should fail when keystore is locked",
-                mKeyStore.generate(TEST_KEYNAME, KeyStore.UID_SELF, NativeCrypto.EVP_PKEY_RSA,
+                mKeyStore.generate(TEST_KEYNAME, KeyStore.UID_SELF, NativeConstants.EVP_PKEY_RSA,
                         RSA_KEY_SIZE, KeyStore.FLAG_ENCRYPTED, null));
     }
 
     public void testGenerate_Success() throws Exception {
-        assertTrue(mKeyStore.password(TEST_PASSWD));
+        assertTrue(mKeyStore.onUserPasswordChanged(TEST_PASSWD));
 
         assertTrue("Should be able to generate key when unlocked",
-                mKeyStore.generate(TEST_KEYNAME, KeyStore.UID_SELF, NativeCrypto.EVP_PKEY_RSA,
+                mKeyStore.generate(TEST_KEYNAME, KeyStore.UID_SELF, NativeConstants.EVP_PKEY_RSA,
                         RSA_KEY_SIZE, KeyStore.FLAG_ENCRYPTED, null));
         assertTrue(mKeyStore.contains(TEST_KEYNAME));
         assertFalse(mKeyStore.contains(TEST_KEYNAME, Process.WIFI_UID));
     }
 
     public void testGenerate_grantedUid_Wifi_Success() throws Exception {
-        assertTrue(mKeyStore.password(TEST_PASSWD));
+        assertTrue(mKeyStore.onUserPasswordChanged(TEST_PASSWD));
 
         assertTrue("Should be able to generate key when unlocked",
-                mKeyStore.generate(TEST_KEYNAME, Process.WIFI_UID, NativeCrypto.EVP_PKEY_RSA,
+                mKeyStore.generate(TEST_KEYNAME, Process.WIFI_UID, NativeConstants.EVP_PKEY_RSA,
                         RSA_KEY_SIZE, KeyStore.FLAG_ENCRYPTED, null));
         assertTrue(mKeyStore.contains(TEST_KEYNAME, Process.WIFI_UID));
         assertFalse(mKeyStore.contains(TEST_KEYNAME));
     }
 
     public void testGenerate_ungrantedUid_Bluetooth_Failure() throws Exception {
-        assertTrue(mKeyStore.password(TEST_PASSWD));
+        assertTrue(mKeyStore.onUserPasswordChanged(TEST_PASSWD));
 
         assertFalse(mKeyStore.generate(TEST_KEYNAME, Process.BLUETOOTH_UID,
-                    NativeCrypto.EVP_PKEY_RSA, RSA_KEY_SIZE, KeyStore.FLAG_ENCRYPTED, null));
+                    NativeConstants.EVP_PKEY_RSA, RSA_KEY_SIZE, KeyStore.FLAG_ENCRYPTED, null));
         assertFalse(mKeyStore.contains(TEST_KEYNAME, Process.BLUETOOTH_UID));
         assertFalse(mKeyStore.contains(TEST_KEYNAME, Process.WIFI_UID));
         assertFalse(mKeyStore.contains(TEST_KEYNAME));
     }
 
     public void testImport_Success() throws Exception {
-        assertTrue(mKeyStore.password(TEST_PASSWD));
+        assertTrue(mKeyStore.onUserPasswordChanged(TEST_PASSWD));
 
         assertTrue("Should be able to import key when unlocked", mKeyStore.importKey(TEST_KEYNAME,
                 PRIVKEY_BYTES, KeyStore.UID_SELF, KeyStore.FLAG_ENCRYPTED));
@@ -401,7 +411,7 @@ public class KeyStoreTest extends ActivityUnitTestCase<Activity> {
     }
 
     public void testImport_grantedUid_Wifi_Success() throws Exception {
-        assertTrue(mKeyStore.password(TEST_PASSWD));
+        assertTrue(mKeyStore.onUserPasswordChanged(TEST_PASSWD));
 
         assertTrue("Should be able to import key when unlocked", mKeyStore.importKey(TEST_KEYNAME,
                 PRIVKEY_BYTES, Process.WIFI_UID, KeyStore.FLAG_ENCRYPTED));
@@ -410,7 +420,7 @@ public class KeyStoreTest extends ActivityUnitTestCase<Activity> {
     }
 
     public void testImport_ungrantedUid_Bluetooth_Failure() throws Exception {
-        assertTrue(mKeyStore.password(TEST_PASSWD));
+        assertTrue(mKeyStore.onUserPasswordChanged(TEST_PASSWD));
 
         assertFalse(mKeyStore.importKey(TEST_KEYNAME, PRIVKEY_BYTES, Process.BLUETOOTH_UID,
                 KeyStore.FLAG_ENCRYPTED));
@@ -420,7 +430,7 @@ public class KeyStoreTest extends ActivityUnitTestCase<Activity> {
     }
 
     public void testImport_Failure_BadEncoding() throws Exception {
-        mKeyStore.password(TEST_PASSWD);
+        mKeyStore.onUserPasswordChanged(TEST_PASSWD);
 
         assertFalse("Invalid DER-encoded key should not be imported", mKeyStore.importKey(
                 TEST_KEYNAME, TEST_DATA, KeyStore.UID_SELF, KeyStore.FLAG_ENCRYPTED));
@@ -429,9 +439,9 @@ public class KeyStoreTest extends ActivityUnitTestCase<Activity> {
     }
 
     public void testSign_Success() throws Exception {
-        mKeyStore.password(TEST_PASSWD);
+        mKeyStore.onUserPasswordChanged(TEST_PASSWD);
 
-        assertTrue(mKeyStore.generate(TEST_KEYNAME, KeyStore.UID_SELF, NativeCrypto.EVP_PKEY_RSA,
+        assertTrue(mKeyStore.generate(TEST_KEYNAME, KeyStore.UID_SELF, NativeConstants.EVP_PKEY_RSA,
                     RSA_KEY_SIZE, KeyStore.FLAG_ENCRYPTED, null));
         assertTrue(mKeyStore.contains(TEST_KEYNAME));
         final byte[] signature = mKeyStore.sign(TEST_KEYNAME, TEST_DATA);
@@ -440,9 +450,9 @@ public class KeyStoreTest extends ActivityUnitTestCase<Activity> {
     }
 
     public void testVerify_Success() throws Exception {
-        mKeyStore.password(TEST_PASSWD);
+        mKeyStore.onUserPasswordChanged(TEST_PASSWD);
 
-        assertTrue(mKeyStore.generate(TEST_KEYNAME, KeyStore.UID_SELF, NativeCrypto.EVP_PKEY_RSA,
+        assertTrue(mKeyStore.generate(TEST_KEYNAME, KeyStore.UID_SELF, NativeConstants.EVP_PKEY_RSA,
                     RSA_KEY_SIZE, KeyStore.FLAG_ENCRYPTED, null));
         assertTrue(mKeyStore.contains(TEST_KEYNAME));
         final byte[] signature = mKeyStore.sign(TEST_KEYNAME, TEST_DATA);
@@ -459,7 +469,7 @@ public class KeyStoreTest extends ActivityUnitTestCase<Activity> {
     }
 
     public void testSign_NotGenerated_Failure() throws Exception {
-        mKeyStore.password(TEST_PASSWD);
+        mKeyStore.onUserPasswordChanged(TEST_PASSWD);
 
         assertNull("Should not be able to sign without first generating keys",
                 mKeyStore.sign(TEST_KEYNAME, TEST_DATA));
@@ -467,10 +477,10 @@ public class KeyStoreTest extends ActivityUnitTestCase<Activity> {
 
     public void testGrant_Generated_Success() throws Exception {
         assertTrue("Password should work for keystore",
-                mKeyStore.password(TEST_PASSWD));
+                mKeyStore.onUserPasswordChanged(TEST_PASSWD));
 
         assertTrue("Should be able to generate key for testcase",
-                mKeyStore.generate(TEST_KEYNAME, KeyStore.UID_SELF, NativeCrypto.EVP_PKEY_RSA,
+                mKeyStore.generate(TEST_KEYNAME, KeyStore.UID_SELF, NativeConstants.EVP_PKEY_RSA,
                         RSA_KEY_SIZE, KeyStore.FLAG_ENCRYPTED, null));
 
         assertTrue("Should be able to grant key to other user",
@@ -478,7 +488,7 @@ public class KeyStoreTest extends ActivityUnitTestCase<Activity> {
     }
 
     public void testGrant_Imported_Success() throws Exception {
-        assertTrue("Password should work for keystore", mKeyStore.password(TEST_PASSWD));
+        assertTrue("Password should work for keystore", mKeyStore.onUserPasswordChanged(TEST_PASSWD));
 
         assertTrue("Should be able to import key for testcase", mKeyStore.importKey(TEST_KEYNAME,
                 PRIVKEY_BYTES, KeyStore.UID_SELF, KeyStore.FLAG_ENCRYPTED));
@@ -488,7 +498,7 @@ public class KeyStoreTest extends ActivityUnitTestCase<Activity> {
 
     public void testGrant_NoKey_Failure() throws Exception {
         assertTrue("Should be able to unlock keystore for test",
-                mKeyStore.password(TEST_PASSWD));
+                mKeyStore.onUserPasswordChanged(TEST_PASSWD));
 
         assertFalse("Should not be able to grant without first initializing the keystore",
                 mKeyStore.grant(TEST_KEYNAME, 0));
@@ -501,10 +511,10 @@ public class KeyStoreTest extends ActivityUnitTestCase<Activity> {
 
     public void testUngrant_Generated_Success() throws Exception {
         assertTrue("Password should work for keystore",
-                mKeyStore.password(TEST_PASSWD));
+                mKeyStore.onUserPasswordChanged(TEST_PASSWD));
 
         assertTrue("Should be able to generate key for testcase",
-                mKeyStore.generate(TEST_KEYNAME, KeyStore.UID_SELF, NativeCrypto.EVP_PKEY_RSA,
+                mKeyStore.generate(TEST_KEYNAME, KeyStore.UID_SELF, NativeConstants.EVP_PKEY_RSA,
                         RSA_KEY_SIZE, KeyStore.FLAG_ENCRYPTED, null));
 
         assertTrue("Should be able to grant key to other user",
@@ -516,7 +526,7 @@ public class KeyStoreTest extends ActivityUnitTestCase<Activity> {
 
     public void testUngrant_Imported_Success() throws Exception {
         assertTrue("Password should work for keystore",
-                mKeyStore.password(TEST_PASSWD));
+                mKeyStore.onUserPasswordChanged(TEST_PASSWD));
 
         assertTrue("Should be able to import key for testcase", mKeyStore.importKey(TEST_KEYNAME,
                 PRIVKEY_BYTES, KeyStore.UID_SELF, KeyStore.FLAG_ENCRYPTED));
@@ -535,10 +545,10 @@ public class KeyStoreTest extends ActivityUnitTestCase<Activity> {
 
     public void testUngrant_NoGrant_Failure() throws Exception {
         assertTrue("Password should work for keystore",
-                mKeyStore.password(TEST_PASSWD));
+                mKeyStore.onUserPasswordChanged(TEST_PASSWD));
 
         assertTrue("Should be able to generate key for testcase",
-                mKeyStore.generate(TEST_KEYNAME, KeyStore.UID_SELF, NativeCrypto.EVP_PKEY_RSA,
+                mKeyStore.generate(TEST_KEYNAME, KeyStore.UID_SELF, NativeConstants.EVP_PKEY_RSA,
                         RSA_KEY_SIZE, KeyStore.FLAG_ENCRYPTED, null));
 
         assertFalse("Should not be able to revoke not existent grant",
@@ -547,10 +557,10 @@ public class KeyStoreTest extends ActivityUnitTestCase<Activity> {
 
     public void testUngrant_DoubleUngrant_Failure() throws Exception {
         assertTrue("Password should work for keystore",
-                mKeyStore.password(TEST_PASSWD));
+                mKeyStore.onUserPasswordChanged(TEST_PASSWD));
 
         assertTrue("Should be able to generate key for testcase",
-                mKeyStore.generate(TEST_KEYNAME, KeyStore.UID_SELF, NativeCrypto.EVP_PKEY_RSA,
+                mKeyStore.generate(TEST_KEYNAME, KeyStore.UID_SELF, NativeConstants.EVP_PKEY_RSA,
                         RSA_KEY_SIZE, KeyStore.FLAG_ENCRYPTED, null));
 
         assertTrue("Should be able to grant key to other user",
@@ -565,10 +575,10 @@ public class KeyStoreTest extends ActivityUnitTestCase<Activity> {
 
     public void testUngrant_DoubleGrantUngrant_Failure() throws Exception {
         assertTrue("Password should work for keystore",
-                mKeyStore.password(TEST_PASSWD));
+                mKeyStore.onUserPasswordChanged(TEST_PASSWD));
 
         assertTrue("Should be able to generate key for testcase",
-                mKeyStore.generate(TEST_KEYNAME, KeyStore.UID_SELF, NativeCrypto.EVP_PKEY_RSA,
+                mKeyStore.generate(TEST_KEYNAME, KeyStore.UID_SELF, NativeConstants.EVP_PKEY_RSA,
                         RSA_KEY_SIZE, KeyStore.FLAG_ENCRYPTED, null));
 
         assertTrue("Should be able to grant key to other user",
@@ -585,11 +595,11 @@ public class KeyStoreTest extends ActivityUnitTestCase<Activity> {
     }
 
     public void testDuplicate_grantedUid_Wifi_Success() throws Exception {
-        assertTrue(mKeyStore.password(TEST_PASSWD));
+        assertTrue(mKeyStore.onUserPasswordChanged(TEST_PASSWD));
 
         assertFalse(mKeyStore.contains(TEST_KEYNAME));
 
-        assertTrue(mKeyStore.generate(TEST_KEYNAME, KeyStore.UID_SELF, NativeCrypto.EVP_PKEY_RSA,
+        assertTrue(mKeyStore.generate(TEST_KEYNAME, KeyStore.UID_SELF, NativeConstants.EVP_PKEY_RSA,
                     RSA_KEY_SIZE, KeyStore.FLAG_ENCRYPTED, null));
 
         assertTrue(mKeyStore.contains(TEST_KEYNAME));
@@ -624,11 +634,11 @@ public class KeyStoreTest extends ActivityUnitTestCase<Activity> {
     }
 
     public void testDuplicate_ungrantedUid_Bluetooth_Failure() throws Exception {
-        assertTrue(mKeyStore.password(TEST_PASSWD));
+        assertTrue(mKeyStore.onUserPasswordChanged(TEST_PASSWD));
 
         assertFalse(mKeyStore.contains(TEST_KEYNAME));
 
-        assertTrue(mKeyStore.generate(TEST_KEYNAME, KeyStore.UID_SELF, NativeCrypto.EVP_PKEY_RSA,
+        assertTrue(mKeyStore.generate(TEST_KEYNAME, KeyStore.UID_SELF, NativeConstants.EVP_PKEY_RSA,
                     RSA_KEY_SIZE, KeyStore.FLAG_ENCRYPTED, null));
 
         assertTrue(mKeyStore.contains(TEST_KEYNAME));
@@ -650,7 +660,7 @@ public class KeyStoreTest extends ActivityUnitTestCase<Activity> {
 
     public void testGetmtime_Success() throws Exception {
         assertTrue("Password should work for keystore",
-                mKeyStore.password(TEST_PASSWD));
+                mKeyStore.onUserPasswordChanged(TEST_PASSWD));
 
         assertTrue("Should be able to import key when unlocked", mKeyStore.importKey(TEST_KEYNAME,
                 PRIVKEY_BYTES, KeyStore.UID_SELF, KeyStore.FLAG_ENCRYPTED));
@@ -681,12 +691,284 @@ public class KeyStoreTest extends ActivityUnitTestCase<Activity> {
 
     public void testGetmtime_NonExist_Failure() throws Exception {
         assertTrue("Password should work for keystore",
-                mKeyStore.password(TEST_PASSWD));
+                mKeyStore.onUserPasswordChanged(TEST_PASSWD));
 
         assertTrue("Should be able to import key when unlocked", mKeyStore.importKey(TEST_KEYNAME,
                 PRIVKEY_BYTES, KeyStore.UID_SELF, KeyStore.FLAG_ENCRYPTED));
 
         assertEquals("-1 should be returned for non-existent key",
                 -1L, mKeyStore.getmtime(TEST_KEYNAME2));
+    }
+
+    private KeyCharacteristics generateRsaKey(String name) throws Exception {
+        KeymasterArguments args = new KeymasterArguments();
+        args.addEnum(KeymasterDefs.KM_TAG_PURPOSE, KeymasterDefs.KM_PURPOSE_ENCRYPT);
+        args.addEnum(KeymasterDefs.KM_TAG_PURPOSE, KeymasterDefs.KM_PURPOSE_DECRYPT);
+        args.addEnum(KeymasterDefs.KM_TAG_ALGORITHM, KeymasterDefs.KM_ALGORITHM_RSA);
+        args.addEnum(KeymasterDefs.KM_TAG_PADDING, KeymasterDefs.KM_PAD_NONE);
+        args.addBoolean(KeymasterDefs.KM_TAG_NO_AUTH_REQUIRED);
+        args.addUnsignedInt(KeymasterDefs.KM_TAG_KEY_SIZE, 2048);
+        args.addUnsignedLong(KeymasterDefs.KM_TAG_RSA_PUBLIC_EXPONENT, RSAKeyGenParameterSpec.F4);
+
+        KeyCharacteristics outCharacteristics = new KeyCharacteristics();
+        int result = mKeyStore.generateKey(name, args, null, 0, outCharacteristics);
+        assertEquals("generateRsaKey should succeed", KeyStore.NO_ERROR, result);
+        return outCharacteristics;
+    }
+
+    public void testGenerateKey() throws Exception {
+        generateRsaKey("test");
+        mKeyStore.delete("test");
+    }
+
+    public void testGenerateRsaWithEntropy() throws Exception {
+        byte[] entropy = new byte[] {1,2,3,4,5};
+        String name = "test";
+        KeymasterArguments args = new KeymasterArguments();
+        args.addEnum(KeymasterDefs.KM_TAG_PURPOSE, KeymasterDefs.KM_PURPOSE_ENCRYPT);
+        args.addEnum(KeymasterDefs.KM_TAG_PURPOSE, KeymasterDefs.KM_PURPOSE_DECRYPT);
+        args.addEnum(KeymasterDefs.KM_TAG_ALGORITHM, KeymasterDefs.KM_ALGORITHM_RSA);
+        args.addEnum(KeymasterDefs.KM_TAG_PADDING, KeymasterDefs.KM_PAD_NONE);
+        args.addBoolean(KeymasterDefs.KM_TAG_NO_AUTH_REQUIRED);
+        args.addUnsignedInt(KeymasterDefs.KM_TAG_KEY_SIZE, 2048);
+        args.addUnsignedLong(KeymasterDefs.KM_TAG_RSA_PUBLIC_EXPONENT, RSAKeyGenParameterSpec.F4);
+
+        KeyCharacteristics outCharacteristics = new KeyCharacteristics();
+        int result = mKeyStore.generateKey(name, args, entropy, 0, outCharacteristics);
+        assertEquals("generateKey should succeed", KeyStore.NO_ERROR, result);
+    }
+
+    public void testGenerateAndDelete() throws Exception {
+        generateRsaKey("test");
+        assertTrue("delete should succeed", mKeyStore.delete("test"));
+    }
+
+    public void testGetKeyCharacteristicsSuccess() throws Exception {
+        mKeyStore.onUserPasswordChanged(TEST_PASSWD);
+        String name = "test";
+        KeyCharacteristics gen = generateRsaKey(name);
+        KeyCharacteristics call = new KeyCharacteristics();
+        int result = mKeyStore.getKeyCharacteristics(name, null, null, call);
+        assertEquals("getKeyCharacteristics should succeed", KeyStore.NO_ERROR, result);
+        mKeyStore.delete("test");
+    }
+
+    public void testAppId() throws Exception {
+        String name = "test";
+        byte[] id = new byte[] {0x01, 0x02, 0x03};
+        KeymasterArguments args = new KeymasterArguments();
+        args.addEnum(KeymasterDefs.KM_TAG_PURPOSE, KeymasterDefs.KM_PURPOSE_ENCRYPT);
+        args.addEnum(KeymasterDefs.KM_TAG_PURPOSE, KeymasterDefs.KM_PURPOSE_DECRYPT);
+        args.addEnum(KeymasterDefs.KM_TAG_ALGORITHM, KeymasterDefs.KM_ALGORITHM_RSA);
+        args.addEnum(KeymasterDefs.KM_TAG_PADDING, KeymasterDefs.KM_PAD_NONE);
+        args.addUnsignedInt(KeymasterDefs.KM_TAG_KEY_SIZE, 2048);
+        args.addEnum(KeymasterDefs.KM_TAG_BLOCK_MODE, KeymasterDefs.KM_MODE_ECB);
+        args.addBoolean(KeymasterDefs.KM_TAG_NO_AUTH_REQUIRED);
+        args.addBytes(KeymasterDefs.KM_TAG_APPLICATION_ID, id);
+        args.addUnsignedLong(KeymasterDefs.KM_TAG_RSA_PUBLIC_EXPONENT, RSAKeyGenParameterSpec.F4);
+
+        KeyCharacteristics outCharacteristics = new KeyCharacteristics();
+        int result = mKeyStore.generateKey(name, args, null, 0, outCharacteristics);
+        assertEquals("generateRsaKey should succeed", KeyStore.NO_ERROR, result);
+        assertEquals("getKeyCharacteristics should fail without application ID",
+                KeymasterDefs.KM_ERROR_INVALID_KEY_BLOB,
+                mKeyStore.getKeyCharacteristics(name, null, null, outCharacteristics));
+        assertEquals("getKeyCharacteristics should succeed with application ID",
+                KeyStore.NO_ERROR,
+                mKeyStore.getKeyCharacteristics(name, new KeymasterBlob(id), null,
+                    outCharacteristics));
+    }
+
+
+    public void testExportRsa() throws Exception {
+        String name = "test";
+        generateRsaKey(name);
+        ExportResult result = mKeyStore.exportKey(name, KeymasterDefs.KM_KEY_FORMAT_X509, null,
+                null);
+        assertEquals("Export success", KeyStore.NO_ERROR, result.resultCode);
+        // TODO: Verify we have an RSA public key that's well formed.
+    }
+
+    public void testAesGcmEncryptSuccess() throws Exception {
+        String name = "test";
+        KeymasterArguments args = new KeymasterArguments();
+        args.addEnum(KeymasterDefs.KM_TAG_PURPOSE, KeymasterDefs.KM_PURPOSE_ENCRYPT);
+        args.addEnum(KeymasterDefs.KM_TAG_PURPOSE, KeymasterDefs.KM_PURPOSE_DECRYPT);
+        args.addEnum(KeymasterDefs.KM_TAG_ALGORITHM, KeymasterDefs.KM_ALGORITHM_AES);
+        args.addEnum(KeymasterDefs.KM_TAG_PADDING, KeymasterDefs.KM_PAD_NONE);
+        args.addUnsignedInt(KeymasterDefs.KM_TAG_KEY_SIZE, 256);
+        args.addEnum(KeymasterDefs.KM_TAG_BLOCK_MODE, KeymasterDefs.KM_MODE_GCM);
+        args.addBoolean(KeymasterDefs.KM_TAG_NO_AUTH_REQUIRED);
+
+        KeyCharacteristics outCharacteristics = new KeyCharacteristics();
+        int rc = mKeyStore.generateKey(name, args, null, 0, outCharacteristics);
+        assertEquals("Generate should succeed", KeyStore.NO_ERROR, rc);
+
+        args = new KeymasterArguments();
+        args.addEnum(KeymasterDefs.KM_TAG_ALGORITHM, KeymasterDefs.KM_ALGORITHM_AES);
+        args.addEnum(KeymasterDefs.KM_TAG_BLOCK_MODE, KeymasterDefs.KM_MODE_GCM);
+        args.addEnum(KeymasterDefs.KM_TAG_PADDING, KeymasterDefs.KM_PAD_NONE);
+        args.addUnsignedInt(KeymasterDefs.KM_TAG_MAC_LENGTH, 128);
+        OperationResult result = mKeyStore.begin(name, KeymasterDefs.KM_PURPOSE_ENCRYPT,
+                true, args, null);
+        IBinder token = result.token;
+        assertEquals("Begin should succeed", KeyStore.NO_ERROR, result.resultCode);
+        result = mKeyStore.update(token, null, new byte[] {0x01, 0x02, 0x03, 0x04});
+        assertEquals("Update should succeed", KeyStore.NO_ERROR, result.resultCode);
+        assertEquals("Finish should succeed", KeyStore.NO_ERROR,
+                mKeyStore.finish(token, null, null).resultCode);
+        // TODO: Assert that an AEAD tag was returned by finish
+    }
+
+    public void testBadToken() throws Exception {
+        IBinder token = new Binder();
+        OperationResult result = mKeyStore.update(token, null, new byte[] {0x01});
+        assertEquals("Update with invalid token should fail",
+                KeymasterDefs.KM_ERROR_INVALID_OPERATION_HANDLE, result.resultCode);
+    }
+
+    private int importAesKey(String name, byte[] key, int size, int mode) {
+        KeymasterArguments args = new KeymasterArguments();
+        args.addEnum(KeymasterDefs.KM_TAG_PURPOSE, KeymasterDefs.KM_PURPOSE_ENCRYPT);
+        args.addEnum(KeymasterDefs.KM_TAG_PURPOSE, KeymasterDefs.KM_PURPOSE_DECRYPT);
+        args.addEnum(KeymasterDefs.KM_TAG_ALGORITHM, KeymasterDefs.KM_ALGORITHM_AES);
+        args.addEnum(KeymasterDefs.KM_TAG_PADDING, KeymasterDefs.KM_PAD_NONE);
+        args.addEnum(KeymasterDefs.KM_TAG_BLOCK_MODE, mode);
+        args.addUnsignedInt(KeymasterDefs.KM_TAG_KEY_SIZE, size);
+        args.addBoolean(KeymasterDefs.KM_TAG_NO_AUTH_REQUIRED);
+        return mKeyStore.importKey(name, args, KeymasterDefs.KM_KEY_FORMAT_RAW, key, 0,
+                new KeyCharacteristics());
+    }
+    private byte[] doOperation(String name, int purpose, byte[] in, KeymasterArguments beginArgs) {
+        OperationResult result = mKeyStore.begin(name, purpose,
+                true, beginArgs, null);
+        assertEquals("Begin should succeed", KeyStore.NO_ERROR, result.resultCode);
+        IBinder token = result.token;
+        result = mKeyStore.update(token, null, in);
+        assertEquals("Update should succeed", KeyStore.NO_ERROR, result.resultCode);
+        assertEquals("All data should be consumed", in.length, result.inputConsumed);
+        assertEquals("Finish should succeed", KeyStore.NO_ERROR,
+                mKeyStore.finish(token, null, null).resultCode);
+        return result.output;
+    }
+
+    public void testImportAes() throws Exception {
+        int result = importAesKey("aes", AES256_BYTES, 256, KeymasterDefs.KM_MODE_ECB);
+        assertEquals("import should succeed", KeyStore.NO_ERROR, result);
+        mKeyStore.delete("aes");
+    }
+
+    public void testAes256Ecb() throws Exception {
+        byte[] key =
+                hexToBytes("603deb1015ca71be2b73aef0857d77811f352c073b6108d72d9810a30914dff4");
+        String name = "aes";
+        assertEquals(KeyStore.NO_ERROR, importAesKey(name, key, 256, KeymasterDefs.KM_MODE_ECB));
+        byte[][] testVectors = new byte[][] {
+            hexToBytes("6bc1bee22e409f96e93d7e117393172a"),
+            hexToBytes("ae2d8a571e03ac9c9eb76fac45af8e51"),
+            hexToBytes("30c81c46a35ce411e5fbc1191a0a52ef"),
+            hexToBytes("f69f2445df4f9b17ad2b417be66c3710")};
+        byte[][] cipherVectors = new byte[][] {
+            hexToBytes("f3eed1bdb5d2a03c064b5a7e3db181f8"),
+            hexToBytes("591ccb10d410ed26dc5ba74a31362870"),
+            hexToBytes("b6ed21b99ca6f4f9f153e7b1beafed1d"),
+            hexToBytes("23304b7a39f9f3ff067d8d8f9e24ecc7")};
+        KeymasterArguments beginArgs = new KeymasterArguments();
+        beginArgs.addEnum(KeymasterDefs.KM_TAG_ALGORITHM, KeymasterDefs.KM_ALGORITHM_AES);
+        beginArgs.addEnum(KeymasterDefs.KM_TAG_BLOCK_MODE, KeymasterDefs.KM_MODE_ECB);
+        beginArgs.addEnum(KeymasterDefs.KM_TAG_PADDING, KeymasterDefs.KM_PAD_NONE);
+        for (int i = 0; i < testVectors.length; i++) {
+            byte[] cipherText = doOperation(name, KeymasterDefs.KM_PURPOSE_ENCRYPT, testVectors[i],
+                    beginArgs);
+            MoreAsserts.assertEquals(cipherVectors[i], cipherText);
+        }
+        for (int i = 0; i < testVectors.length; i++) {
+            byte[] plainText = doOperation(name, KeymasterDefs.KM_PURPOSE_DECRYPT,
+                    cipherVectors[i], beginArgs);
+            MoreAsserts.assertEquals(testVectors[i], plainText);
+        }
+    }
+
+    // This is a very implementation specific test and should be thrown out eventually, however it
+    // is nice for now to test that keystore is properly pruning operations.
+    public void testOperationPruning() throws Exception {
+        String name = "test";
+        KeymasterArguments args = new KeymasterArguments();
+        args.addEnum(KeymasterDefs.KM_TAG_PURPOSE, KeymasterDefs.KM_PURPOSE_ENCRYPT);
+        args.addEnum(KeymasterDefs.KM_TAG_PURPOSE, KeymasterDefs.KM_PURPOSE_DECRYPT);
+        args.addEnum(KeymasterDefs.KM_TAG_ALGORITHM, KeymasterDefs.KM_ALGORITHM_AES);
+        args.addEnum(KeymasterDefs.KM_TAG_PADDING, KeymasterDefs.KM_PAD_NONE);
+        args.addUnsignedInt(KeymasterDefs.KM_TAG_KEY_SIZE, 256);
+        args.addEnum(KeymasterDefs.KM_TAG_BLOCK_MODE, KeymasterDefs.KM_MODE_CTR);
+        args.addBoolean(KeymasterDefs.KM_TAG_NO_AUTH_REQUIRED);
+
+        KeyCharacteristics outCharacteristics = new KeyCharacteristics();
+        int rc = mKeyStore.generateKey(name, args, null, 0, outCharacteristics);
+        assertEquals("Generate should succeed", KeyStore.NO_ERROR, rc);
+
+        args = new KeymasterArguments();
+        args.addEnum(KeymasterDefs.KM_TAG_ALGORITHM, KeymasterDefs.KM_ALGORITHM_AES);
+        args.addEnum(KeymasterDefs.KM_TAG_BLOCK_MODE, KeymasterDefs.KM_MODE_CTR);
+        args.addEnum(KeymasterDefs.KM_TAG_PADDING, KeymasterDefs.KM_PAD_NONE);
+        OperationResult result = mKeyStore.begin(name, KeymasterDefs.KM_PURPOSE_ENCRYPT,
+                true, args, null);
+        assertEquals("Begin should succeed", KeyStore.NO_ERROR, result.resultCode);
+        IBinder first = result.token;
+        // Implementation detail: softkeymaster supports 16 concurrent operations
+        for (int i = 0; i < 16; i++) {
+            result = mKeyStore.begin(name, KeymasterDefs.KM_PURPOSE_ENCRYPT, true, args, null);
+            assertEquals("Begin should succeed", KeyStore.NO_ERROR, result.resultCode);
+        }
+        // At this point the first operation should be pruned.
+        assertEquals("Operation should be pruned", KeymasterDefs.KM_ERROR_INVALID_OPERATION_HANDLE,
+                mKeyStore.update(first, null, new byte[] {0x01}).resultCode);
+    }
+
+    public void testAuthNeeded() throws Exception {
+        String name = "test";
+        KeymasterArguments args = new KeymasterArguments();
+        args.addEnum(KeymasterDefs.KM_TAG_PURPOSE, KeymasterDefs.KM_PURPOSE_ENCRYPT);
+        args.addEnum(KeymasterDefs.KM_TAG_PURPOSE, KeymasterDefs.KM_PURPOSE_DECRYPT);
+        args.addEnum(KeymasterDefs.KM_TAG_ALGORITHM, KeymasterDefs.KM_ALGORITHM_AES);
+        args.addEnum(KeymasterDefs.KM_TAG_PADDING, KeymasterDefs.KM_PAD_PKCS7);
+        args.addUnsignedInt(KeymasterDefs.KM_TAG_KEY_SIZE, 256);
+        args.addEnum(KeymasterDefs.KM_TAG_BLOCK_MODE, KeymasterDefs.KM_MODE_ECB);
+        args.addEnum(KeymasterDefs.KM_TAG_USER_AUTH_TYPE, 1);
+
+        KeyCharacteristics outCharacteristics = new KeyCharacteristics();
+        int rc = mKeyStore.generateKey(name, args, null, 0, outCharacteristics);
+        assertEquals("Generate should succeed", KeyStore.NO_ERROR, rc);
+        OperationResult result = mKeyStore.begin(name, KeymasterDefs.KM_PURPOSE_ENCRYPT,
+                true, args, null);
+        assertEquals("Begin should expect authorization", KeyStore.OP_AUTH_NEEDED,
+                result.resultCode);
+        IBinder token = result.token;
+        result = mKeyStore.update(token, null, new byte[] {0x01, 0x02, 0x03, 0x04});
+        assertEquals("Update should require authorization",
+                KeymasterDefs.KM_ERROR_KEY_USER_NOT_AUTHENTICATED, result.resultCode);
+    }
+
+    public void testPasswordRemovalEncryptedEntry() throws Exception {
+        mKeyStore.onUserPasswordChanged("test");
+        assertTrue(mKeyStore.put(TEST_KEYNAME, TEST_KEYVALUE, KeyStore.UID_SELF,
+                KeyStore.FLAG_ENCRYPTED));
+        assertTrue(mKeyStore.contains(TEST_KEYNAME));
+        assertTrue(Arrays.equals(TEST_KEYVALUE, mKeyStore.get(TEST_KEYNAME)));
+        mKeyStore.onUserPasswordChanged("");
+        // Removing the password should have deleted all entries using FLAG_ENCRYPTED
+        assertNull(mKeyStore.get(TEST_KEYNAME));
+        assertFalse(mKeyStore.contains(TEST_KEYNAME));
+    }
+
+    public void testPasswordRemovalUnencryptedEntry() throws Exception {
+        mKeyStore.onUserPasswordChanged("test");
+        assertTrue(mKeyStore.put(TEST_KEYNAME, TEST_KEYVALUE, KeyStore.UID_SELF,
+                KeyStore.FLAG_NONE));
+        assertTrue(mKeyStore.contains(TEST_KEYNAME));
+        assertTrue(Arrays.equals(TEST_KEYVALUE, mKeyStore.get(TEST_KEYNAME)));
+        mKeyStore.onUserPasswordChanged("");
+        // Removing the password should not delete unencrypted entries.
+        assertTrue(mKeyStore.contains(TEST_KEYNAME));
+        assertTrue(Arrays.equals(TEST_KEYVALUE, mKeyStore.get(TEST_KEYNAME)));
     }
 }

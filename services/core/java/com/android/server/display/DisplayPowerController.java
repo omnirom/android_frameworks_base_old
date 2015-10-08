@@ -19,7 +19,6 @@ package com.android.server.display;
 import com.android.internal.app.IBatteryStats;
 import com.android.server.LocalServices;
 import com.android.server.am.BatteryStatsService;
-import com.android.server.lights.LightsManager;
 
 import android.animation.Animator;
 import android.animation.ObjectAnimator;
@@ -71,11 +70,10 @@ import java.io.PrintWriter;
  */
 final class DisplayPowerController implements AutomaticBrightnessController.Callbacks {
     private static final String TAG = "DisplayPowerController";
+    private static final String SCREEN_ON_BLOCKED_TRACE_NAME = "Screen on blocked";
 
     private static boolean DEBUG = false;
     private static final boolean DEBUG_PRETEND_PROXIMITY_SENSOR_ABSENT = false;
-
-    private static final String SCREEN_ON_BLOCKED_TRACE_NAME = "Screen on blocked";
 
     // If true, uses the color fade on animation.
     // We might want to turn this off if we cannot get a guarantee that the screen
@@ -108,6 +106,10 @@ final class DisplayPowerController implements AutomaticBrightnessController.Call
     private static final int BRIGHTNESS_RAMP_RATE_FAST = 200;
     private static final int BRIGHTNESS_RAMP_RATE_SLOW = 40;
 
+    private static final int REPORTED_TO_POLICY_SCREEN_OFF = 0;
+    private static final int REPORTED_TO_POLICY_SCREEN_TURNING_ON = 1;
+    private static final int REPORTED_TO_POLICY_SCREEN_ON = 2;
+
     private final Object mLock = new Object();
 
     private final Context mContext;
@@ -121,9 +123,6 @@ final class DisplayPowerController implements AutomaticBrightnessController.Call
 
     // Battery stats.
     private final IBatteryStats mBatteryStats;
-
-    // The lights service.
-    private final LightsManager mLights;
 
     // The sensor manager.
     private final SensorManager mSensorManager;
@@ -236,6 +235,9 @@ final class DisplayPowerController implements AutomaticBrightnessController.Call
     // The elapsed real time when the screen on was blocked.
     private long mScreenOnBlockStartRealTime;
 
+    // Screen state we reported to policy. Must be one of REPORTED_TO_POLICY_SCREEN_* fields.
+    private int mReportedScreenStateToPolicy;
+
     // Remembers whether certain kinds of brightness adjustments
     // were recently applied so that we can decide how to transition.
     private boolean mAppliedAutoBrightness;
@@ -260,7 +262,6 @@ final class DisplayPowerController implements AutomaticBrightnessController.Call
         mCallbacks = callbacks;
 
         mBatteryStats = BatteryStatsService.getService();
-        mLights = LocalServices.getService(LightsManager.class);
         mSensorManager = sensorManager;
         mWindowManagerPolicy = LocalServices.getService(WindowManagerPolicy.class);
         mBlanker = blanker;
@@ -302,6 +303,15 @@ final class DisplayPowerController implements AutomaticBrightnessController.Call
         mAllowAutoBrightnessWhileDozingConfig = resources.getBoolean(
                 com.android.internal.R.bool.config_allowAutoBrightnessWhileDozing);
 
+        int lightSensorRate = resources.getInteger(
+                com.android.internal.R.integer.config_autoBrightnessLightSensorRate);
+        long brighteningLightDebounce = resources.getInteger(
+                com.android.internal.R.integer.config_autoBrightnessBrighteningLightDebounce);
+        long darkeningLightDebounce = resources.getInteger(
+                com.android.internal.R.integer.config_autoBrightnessDarkeningLightDebounce);
+        boolean autoBrightnessResetAmbientLuxAfterWarmUp = resources.getBoolean(
+                com.android.internal.R.bool.config_autoBrightnessResetAmbientLuxAfterWarmUp);
+
         if (mUseSoftwareAutoBrightnessConfig) {
             int[] lux = resources.getIntArray(
                     com.android.internal.R.array.config_autoBrightnessLevels);
@@ -336,7 +346,9 @@ final class DisplayPowerController implements AutomaticBrightnessController.Call
                 mAutomaticBrightnessController = new AutomaticBrightnessController(this,
                         handler.getLooper(), sensorManager, screenAutoBrightnessSpline,
                         lightSensorWarmUpTimeConfig, screenBrightnessRangeMinimum,
-                        mScreenBrightnessRangeMaximum, dozeScaleFactor);
+                        mScreenBrightnessRangeMaximum, dozeScaleFactor, lightSensorRate,
+                        brighteningLightDebounce, darkeningLightDebounce,
+                        autoBrightnessResetAmbientLuxAfterWarmUp);
             }
         }
 
@@ -432,7 +444,6 @@ final class DisplayPowerController implements AutomaticBrightnessController.Call
         // Initialize the power state object for the default display.
         // In the future, we might manage multiple displays independently.
         mPowerState = new DisplayPowerState(mBlanker,
-                mLights.getLight(LightsManager.LIGHT_ID_BACKLIGHT),
                 new ColorFade(Display.DEFAULT_DISPLAY));
 
         mColorFadeOnAnimator = ObjectAnimator.ofFloat(
@@ -594,8 +605,11 @@ final class DisplayPowerController implements AutomaticBrightnessController.Call
             autoBrightnessEnabled = mPowerRequest.useAutoBrightness
                     && (state == Display.STATE_ON || autoBrightnessEnabledInDoze)
                     && brightness < 0;
+            final boolean userInitiatedChange = autoBrightnessAdjustmentChanged
+                    && mPowerRequest.brightnessSetByUser;
             mAutomaticBrightnessController.configure(autoBrightnessEnabled,
-                    mPowerRequest.screenAutoBrightnessAdjustment, state != Display.STATE_ON);
+                    mPowerRequest.screenAutoBrightnessAdjustment, state != Display.STATE_ON,
+                    userInitiatedChange);
         }
 
         // Apply brightness boost.
@@ -691,6 +705,13 @@ final class DisplayPowerController implements AutomaticBrightnessController.Call
         final boolean finished = ready
                 && !mScreenBrightnessRampAnimator.isAnimating();
 
+        // Notify policy about screen turned on.
+        if (ready && state != Display.STATE_OFF
+                && mReportedScreenStateToPolicy == REPORTED_TO_POLICY_SCREEN_TURNING_ON) {
+            mReportedScreenStateToPolicy = REPORTED_TO_POLICY_SCREEN_ON;
+            mWindowManagerPolicy.screenTurnedOn();
+        }
+
         // Grab a wake lock if we have unfinished business.
         if (!finished && !mUnfinishedBusiness) {
             if (DEBUG) {
@@ -759,24 +780,31 @@ final class DisplayPowerController implements AutomaticBrightnessController.Call
             } catch (RemoteException ex) {
                 // same process
             }
-
-            // Tell the window manager what's happening.
-            // Temporarily block turning the screen on until the window manager is ready
-            // by leaving a black surface covering the screen.  This surface is essentially
-            // the final state of the color fade animation.
-            boolean isOn = (state != Display.STATE_OFF);
-            if (wasOn && !isOn) {
-                unblockScreenOn();
-                mWindowManagerPolicy.screenTurnedOff();
-            } else if (!wasOn && isOn) {
-                if (mPowerState.getColorFadeLevel() == 0.0f) {
-                    blockScreenOn();
-                } else {
-                    unblockScreenOn();
-                }
-                mWindowManagerPolicy.screenTurningOn(mPendingScreenOnUnblocker);
-            }
         }
+
+        // Tell the window manager policy when the screen is turned off or on unless it's due
+        // to the proximity sensor.  We temporarily block turning the screen on until the
+        // window manager is ready by leaving a black surface covering the screen.
+        // This surface is essentially the final state of the color fade animation and
+        // it is only removed once the window manager tells us that the activity has
+        // finished drawing underneath.
+        final boolean isOff = (state == Display.STATE_OFF);
+        if (isOff && mReportedScreenStateToPolicy != REPORTED_TO_POLICY_SCREEN_OFF
+                && !mScreenOffBecauseOfProximity) {
+            mReportedScreenStateToPolicy = REPORTED_TO_POLICY_SCREEN_OFF;
+            unblockScreenOn();
+            mWindowManagerPolicy.screenTurnedOff();
+        } else if (!isOff && mReportedScreenStateToPolicy == REPORTED_TO_POLICY_SCREEN_OFF) {
+            mReportedScreenStateToPolicy = REPORTED_TO_POLICY_SCREEN_TURNING_ON;
+            if (mPowerState.getColorFadeLevel() == 0.0f) {
+                blockScreenOn();
+            } else {
+                unblockScreenOn();
+            }
+            mWindowManagerPolicy.screenTurningOn(mPendingScreenOnUnblocker);
+        }
+
+        // Return true if the screen isn't blocked.
         return mPendingScreenOnUnblocker == null;
     }
 
@@ -1081,6 +1109,7 @@ final class DisplayPowerController implements AutomaticBrightnessController.Call
         pw.println("  mAppliedLowPower=" + mAppliedLowPower);
         pw.println("  mPendingScreenOnUnblocker=" + mPendingScreenOnUnblocker);
         pw.println("  mPendingScreenOff=" + mPendingScreenOff);
+        pw.println("  mReportedToPolicy=" + reportedToPolicyToString(mReportedScreenStateToPolicy));
 
         pw.println("  mScreenBrightnessRampAnimator.isAnimating()=" +
                 mScreenBrightnessRampAnimator.isAnimating());
@@ -1112,6 +1141,19 @@ final class DisplayPowerController implements AutomaticBrightnessController.Call
                 return "Negative";
             case PROXIMITY_POSITIVE:
                 return "Positive";
+            default:
+                return Integer.toString(state);
+        }
+    }
+
+    private static String reportedToPolicyToString(int state) {
+        switch (state) {
+            case REPORTED_TO_POLICY_SCREEN_OFF:
+                return "REPORTED_TO_POLICY_SCREEN_OFF";
+            case REPORTED_TO_POLICY_SCREEN_TURNING_ON:
+                return "REPORTED_TO_POLICY_SCREEN_TURNING_ON";
+            case REPORTED_TO_POLICY_SCREEN_ON:
+                return "REPORTED_TO_POLICY_SCREEN_ON";
             default:
                 return Integer.toString(state);
         }

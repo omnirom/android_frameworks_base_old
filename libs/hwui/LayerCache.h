@@ -30,7 +30,6 @@ class RenderState;
 // Defines
 ///////////////////////////////////////////////////////////////////////////////
 
-// Debug
 #if DEBUG_LAYERS
     #define LAYER_LOGD(...) ALOGD(__VA_ARGS__)
 #else
@@ -97,10 +96,10 @@ public:
 private:
     struct LayerEntry {
         LayerEntry():
-            mLayer(NULL), mWidth(0), mHeight(0) {
+            mLayer(nullptr), mWidth(0), mHeight(0) {
         }
 
-        LayerEntry(const uint32_t layerWidth, const uint32_t layerHeight): mLayer(NULL) {
+        LayerEntry(const uint32_t layerWidth, const uint32_t layerHeight): mLayer(nullptr) {
             mWidth = Layer::computeIdealWidth(layerWidth);
             mHeight = Layer::computeIdealHeight(layerHeight);
         }

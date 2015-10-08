@@ -19,18 +19,15 @@ package com.android.server.usb;
 import android.app.Notification;
 import android.app.NotificationManager;
 import android.app.PendingIntent;
-import android.content.BroadcastReceiver;
 import android.content.ComponentName;
 import android.content.ContentResolver;
 import android.content.Context;
 import android.content.Intent;
-import android.content.IntentFilter;
 import android.content.pm.PackageManager;
 import android.content.res.Resources;
 import android.database.ContentObserver;
 import android.hardware.usb.UsbAccessory;
 import android.hardware.usb.UsbManager;
-import android.media.AudioManager;
 import android.os.FileUtils;
 import android.os.Handler;
 import android.os.Looper;
@@ -48,14 +45,12 @@ import android.util.Pair;
 import android.util.Slog;
 
 import com.android.internal.annotations.GuardedBy;
+import com.android.internal.util.IndentingPrintWriter;
 import com.android.server.FgThread;
 
 import java.io.File;
-import java.io.FileDescriptor;
 import java.io.FileNotFoundException;
 import java.io.IOException;
-import java.io.PrintWriter;
-import java.util.Arrays;
 import java.util.HashMap;
 import java.util.LinkedList;
 import java.util.List;
@@ -68,8 +63,24 @@ import java.util.Scanner;
  */
 public class UsbDeviceManager {
 
-    private static final String TAG = UsbDeviceManager.class.getSimpleName();
+    private static final String TAG = "UsbDeviceManager";
     private static final boolean DEBUG = false;
+
+    /**
+     * The persistent property which stores whether adb is enabled or not.
+     * May also contain vendor-specific default functions for testing purposes.
+     */
+    private static final String USB_PERSISTENT_CONFIG_PROPERTY = "persist.sys.usb.config";
+
+    /**
+     * The non-persistent property which stores the current USB settings.
+     */
+    private static final String USB_CONFIG_PROPERTY = "sys.usb.config";
+
+    /**
+     * The non-persistent property which stores the current USB actual state.
+     */
+    private static final String USB_STATE_PROPERTY = "sys.usb.state";
 
     private static final String USB_STATE_MATCH =
             "DEVPATH=/devices/virtual/android_usb/android0";
@@ -79,12 +90,12 @@ public class UsbDeviceManager {
             "/sys/class/android_usb/android0/functions";
     private static final String STATE_PATH =
             "/sys/class/android_usb/android0/state";
-    private static final String MASS_STORAGE_FILE_PATH =
-            "/sys/class/android_usb/android0/f_mass_storage/lun/file";
     private static final String RNDIS_ETH_ADDR_PATH =
             "/sys/class/android_usb/android0/f_rndis/ethaddr";
     private static final String AUDIO_SOURCE_PCM_PATH =
             "/sys/class/android_usb/android0/f_audio_source/pcm";
+    private static final String MIDI_ALSA_PATH =
+            "/sys/class/android_usb/android0/f_midi/alsa";
 
     private static final int MSG_UPDATE_STATE = 0;
     private static final int MSG_ENABLE_ADB = 1;
@@ -92,8 +103,9 @@ public class UsbDeviceManager {
     private static final int MSG_SYSTEM_READY = 3;
     private static final int MSG_BOOT_COMPLETED = 4;
     private static final int MSG_USER_SWITCHED = 5;
+    private static final int MSG_SET_USB_DATA_UNLOCKED = 6;
+    private static final int MSG_UPDATE_USER_RESTRICTIONS = 7;
 
-    private static final int AUDIO_MODE_NONE = 0;
     private static final int AUDIO_MODE_SOURCE = 1;
 
     // Delay for debouncing USB disconnects.
@@ -124,9 +136,13 @@ public class UsbDeviceManager {
     private boolean mUseUsbNotification;
     private boolean mAdbEnabled;
     private boolean mAudioSourceEnabled;
+    private boolean mMidiEnabled;
+    private int mMidiCard;
+    private int mMidiDevice;
     private Map<String, List<Pair<String, String>>> mOemModeMap;
     private String[] mAccessoryStrings;
     private UsbDebuggingManager mDebuggingManager;
+    private final UsbAlsaManager mUsbAlsaManager;
 
     private class AdbSettingsObserver extends ContentObserver {
         public AdbSettingsObserver() {
@@ -159,8 +175,9 @@ public class UsbDeviceManager {
         }
     };
 
-    public UsbDeviceManager(Context context) {
+    public UsbDeviceManager(Context context, UsbAlsaManager alsaManager) {
         mContext = context;
+        mUsbAlsaManager = alsaManager;
         mContentResolver = context.getContentResolver();
         PackageManager pm = mContext.getPackageManager();
         mHasUsbAccessory = pm.hasSystemFeature(PackageManager.FEATURE_USB_ACCESSORY);
@@ -179,12 +196,6 @@ public class UsbDeviceManager {
         boolean dataEncrypted = "1".equals(SystemProperties.get("vold.decrypt"));
         if (secureAdbEnabled && !dataEncrypted) {
             mDebuggingManager = new UsbDebuggingManager(context);
-        }
-    }
-
-    public void setCurrentSettings(UsbSettingsManager settings) {
-        synchronized (mLock) {
-            mCurrentSettings = settings;
         }
     }
 
@@ -219,6 +230,22 @@ public class UsbDeviceManager {
         mHandler.sendEmptyMessage(MSG_SYSTEM_READY);
     }
 
+    public void bootCompleted() {
+        if (DEBUG) Slog.d(TAG, "boot completed");
+        mHandler.sendEmptyMessage(MSG_BOOT_COMPLETED);
+    }
+
+    public void setCurrentUser(int userId, UsbSettingsManager settings) {
+        synchronized (mLock) {
+            mCurrentSettings = settings;
+            mHandler.obtainMessage(MSG_USER_SWITCHED, userId, 0).sendToTarget();
+        }
+    }
+
+    public void updateUserRestrictions() {
+        mHandler.sendEmptyMessage(MSG_UPDATE_USER_RESTRICTIONS);
+    }
+
     private void startAccessoryMode() {
         if (!mHasUsbAccessory) return;
 
@@ -241,7 +268,7 @@ public class UsbDeviceManager {
 
         if (functions != null) {
             mAccessoryModeRequestTime = SystemClock.elapsedRealtime();
-            setCurrentFunctions(functions, false);
+            setCurrentFunctions(functions);
         }
     }
 
@@ -268,108 +295,36 @@ public class UsbDeviceManager {
         }
     }
 
-     private static String addFunction(String functions, String function) {
-         if ("none".equals(functions)) {
-             return function;
-         }
-        if (!containsFunction(functions, function)) {
-            if (functions.length() > 0) {
-                functions += ",";
-            }
-            functions += function;
-        }
-        return functions;
-    }
-
-    private static String removeFunction(String functions, String function) {
-        String[] split = functions.split(",");
-        for (int i = 0; i < split.length; i++) {
-            if (function.equals(split[i])) {
-                split[i] = null;
-            }
-        }
-        if (split.length == 1 && split[0] == null) {
-            return "none";
-        }
-        StringBuilder builder = new StringBuilder();
-         for (int i = 0; i < split.length; i++) {
-            String s = split[i];
-            if (s != null) {
-                if (builder.length() > 0) {
-                    builder.append(",");
-                }
-                builder.append(s);
-            }
-        }
-        return builder.toString();
-    }
-
-    private static boolean containsFunction(String functions, String function) {
-        return Arrays.asList(functions.split(",")).contains(function);
-    }
-
     private final class UsbHandler extends Handler {
 
         // current USB state
         private boolean mConnected;
         private boolean mConfigured;
+        private boolean mUsbDataUnlocked;
         private String mCurrentFunctions;
-        private String mDefaultFunctions;
+        private boolean mCurrentFunctionsApplied;
         private UsbAccessory mCurrentAccessory;
         private int mUsbNotificationId;
         private boolean mAdbNotificationShown;
         private int mCurrentUser = UserHandle.USER_NULL;
 
-        private final BroadcastReceiver mBootCompletedReceiver = new BroadcastReceiver() {
-            @Override
-            public void onReceive(Context context, Intent intent) {
-                if (DEBUG) Slog.d(TAG, "boot completed");
-                mHandler.sendEmptyMessage(MSG_BOOT_COMPLETED);
-            }
-        };
-
-        private final BroadcastReceiver mUserSwitchedReceiver = new BroadcastReceiver() {
-            @Override
-            public void onReceive(Context context, Intent intent) {
-                final int userId = intent.getIntExtra(Intent.EXTRA_USER_HANDLE, -1);
-                mHandler.obtainMessage(MSG_USER_SWITCHED, userId, 0).sendToTarget();
-            }
-        };
-
         public UsbHandler(Looper looper) {
             super(looper);
             try {
-                // persist.sys.usb.config should never be unset.  But if it is, set it to "adb"
-                // so we have a chance of debugging what happened.
-                mDefaultFunctions = SystemProperties.get("persist.sys.usb.config", "adb");
-
-                // Check if USB mode needs to be overridden depending on OEM specific bootmode.
-                mDefaultFunctions = processOemUsbOverride(mDefaultFunctions);
-
-                // sanity check the sys.usb.config system property
-                // this may be necessary if we crashed while switching USB configurations
-                String config = SystemProperties.get("sys.usb.config", "none");
-                if (!config.equals(mDefaultFunctions)) {
-                    Slog.w(TAG, "resetting config to persistent property: " + mDefaultFunctions);
-                    SystemProperties.set("sys.usb.config", mDefaultFunctions);
+                // Restore default functions.
+                mCurrentFunctions = SystemProperties.get(USB_CONFIG_PROPERTY,
+                        UsbManager.USB_FUNCTION_NONE);
+                if (UsbManager.USB_FUNCTION_NONE.equals(mCurrentFunctions)) {
+                    mCurrentFunctions = UsbManager.USB_FUNCTION_MTP;
                 }
+                mCurrentFunctionsApplied = mCurrentFunctions.equals(
+                        SystemProperties.get(USB_STATE_PROPERTY));
+                mAdbEnabled = UsbManager.containsFunction(getDefaultFunctions(),
+                        UsbManager.USB_FUNCTION_ADB);
+                setEnabledFunctions(null, false);
 
-                mCurrentFunctions = getDefaultFunctions();
                 String state = FileUtils.readTextFile(new File(STATE_PATH), 0, null).trim();
                 updateState(state);
-                mAdbEnabled = containsFunction(mCurrentFunctions, UsbManager.USB_FUNCTION_ADB);
-
-                // Upgrade step for previous versions that used persist.service.adb.enable
-                String value = SystemProperties.get("persist.service.adb.enable", "");
-                if (value.length() > 0) {
-                    char enable = value.charAt(0);
-                    if (enable == '1') {
-                        setAdbEnabled(true);
-                    } else if (enable == '0') {
-                        setAdbEnabled(false);
-                    }
-                    SystemProperties.set("persist.service.adb.enable", "");
-                }
 
                 // register observer to listen for settings changes
                 mContentResolver.registerContentObserver(
@@ -387,12 +342,6 @@ public class UsbDeviceManager {
                 // Watch for USB configuration changes
                 mUEventObserver.startObserving(USB_STATE_MATCH);
                 mUEventObserver.startObserving(ACCESSORY_START_MATCH);
-
-                IntentFilter filter = new IntentFilter(Intent.ACTION_BOOT_COMPLETED);
-                filter.setPriority(IntentFilter.SYSTEM_HIGH_PRIORITY);
-                mContext.registerReceiver(mBootCompletedReceiver, filter);
-                mContext.registerReceiver(
-                        mUserSwitchedReceiver, new IntentFilter(Intent.ACTION_USER_SWITCHED));
             } catch (Exception e) {
                 Slog.e(TAG, "Error initializing UsbHandler", e);
             }
@@ -409,14 +358,6 @@ public class UsbDeviceManager {
             removeMessages(what);
             Message m = Message.obtain(this, what);
             m.obj = arg;
-            sendMessage(m);
-        }
-
-        public void sendMessage(int what, Object arg0, boolean arg1) {
-            removeMessages(what);
-            Message m = Message.obtain(this, what);
-            m.obj = arg0;
-            m.arg1 = (arg1 ? 1 : 0);
             sendMessage(m);
         }
 
@@ -447,99 +388,139 @@ public class UsbDeviceManager {
         private boolean waitForState(String state) {
             // wait for the transition to complete.
             // give up after 1 second.
+            String value = null;
             for (int i = 0; i < 20; i++) {
                 // State transition is done when sys.usb.state is set to the new configuration
-                if (state.equals(SystemProperties.get("sys.usb.state"))) return true;
+                value = SystemProperties.get(USB_STATE_PROPERTY);
+                if (state.equals(value)) return true;
                 SystemClock.sleep(50);
             }
-            Slog.e(TAG, "waitForState(" + state + ") FAILED");
+            Slog.e(TAG, "waitForState(" + state + ") FAILED: got " + value);
             return false;
         }
 
         private boolean setUsbConfig(String config) {
             if (DEBUG) Slog.d(TAG, "setUsbConfig(" + config + ")");
             // set the new configuration
-            SystemProperties.set("sys.usb.config", config);
+            String oldConfig = SystemProperties.get(USB_CONFIG_PROPERTY);
+            if (!config.equals(oldConfig)) {
+                SystemProperties.set(USB_CONFIG_PROPERTY, config);
+            }
             return waitForState(config);
+        }
+
+        private void setUsbDataUnlocked(boolean enable) {
+            if (DEBUG) Slog.d(TAG, "setUsbDataUnlocked: " + enable);
+            mUsbDataUnlocked = enable;
+            updateUsbNotification();
+            updateUsbStateBroadcast();
+            setEnabledFunctions(mCurrentFunctions, true);
         }
 
         private void setAdbEnabled(boolean enable) {
             if (DEBUG) Slog.d(TAG, "setAdbEnabled: " + enable);
             if (enable != mAdbEnabled) {
                 mAdbEnabled = enable;
+
                 // Due to the persist.sys.usb.config property trigger, changing adb state requires
                 // persisting default function
-                setEnabledFunctions(mDefaultFunctions, true);
+                String oldFunctions = getDefaultFunctions();
+                String newFunctions = applyAdbFunction(oldFunctions);
+                if (!oldFunctions.equals(newFunctions)) {
+                    SystemProperties.set(USB_PERSISTENT_CONFIG_PROPERTY, newFunctions);
+                }
+
                 // After persisting them use the lock-down aware function set
-                setEnabledFunctions(getDefaultFunctions(), false);
+                setEnabledFunctions(mCurrentFunctions, false);
                 updateAdbNotification();
             }
+
             if (mDebuggingManager != null) {
                 mDebuggingManager.setAdbEnabled(mAdbEnabled);
             }
         }
 
-        private void setEnabledFunctions(String functions, boolean makeDefault) {
-            if (DEBUG) Slog.d(TAG, "setEnabledFunctions " + functions
-                    + " makeDefault: " + makeDefault);
+        /**
+         * Evaluates USB function policies and applies the change accordingly.
+         */
+        private void setEnabledFunctions(String functions, boolean forceRestart) {
+            if (DEBUG) Slog.d(TAG, "setEnabledFunctions functions=" + functions + ", "
+                    + "forceRestart=" + forceRestart);
 
-            // Do not update persystent.sys.usb.config if the device is booted up
-            // with OEM specific mode.
-            if (functions != null && makeDefault && !needsOemUsbOverride()) {
+            // Try to set the enabled functions.
+            final String oldFunctions = mCurrentFunctions;
+            final boolean oldFunctionsApplied = mCurrentFunctionsApplied;
+            if (trySetEnabledFunctions(functions, forceRestart)) {
+                return;
+            }
 
-                if (mAdbEnabled) {
-                    functions = addFunction(functions, UsbManager.USB_FUNCTION_ADB);
-                } else {
-                    functions = removeFunction(functions, UsbManager.USB_FUNCTION_ADB);
-                }
-                if (!mDefaultFunctions.equals(functions)) {
-                    if (!setUsbConfig("none")) {
-                        Slog.e(TAG, "Failed to disable USB");
-                        // revert to previous configuration if we fail
-                        setUsbConfig(mCurrentFunctions);
-                        return;
-                    }
-                    // setting this property will also change the current USB state
-                    // via a property trigger
-                    SystemProperties.set("persist.sys.usb.config", functions);
-                    if (waitForState(functions)) {
-                        mCurrentFunctions = functions;
-                        mDefaultFunctions = functions;
-                    } else {
-                        Slog.e(TAG, "Failed to switch persistent USB config to " + functions);
-                        // revert to previous configuration if we fail
-                        SystemProperties.set("persist.sys.usb.config", mDefaultFunctions);
-                    }
-                }
-            } else {
-                if (functions == null) {
-                    functions = mDefaultFunctions;
-                }
-
-                // Override with bootmode specific usb mode if needed
-                functions = processOemUsbOverride(functions);
-
-                if (mAdbEnabled) {
-                    functions = addFunction(functions, UsbManager.USB_FUNCTION_ADB);
-                } else {
-                    functions = removeFunction(functions, UsbManager.USB_FUNCTION_ADB);
-                }
-                if (!mCurrentFunctions.equals(functions)) {
-                    if (!setUsbConfig("none")) {
-                        Slog.e(TAG, "Failed to disable USB");
-                        // revert to previous configuration if we fail
-                        setUsbConfig(mCurrentFunctions);
-                        return;
-                    }
-                    if (setUsbConfig(functions)) {
-                        mCurrentFunctions = functions;
-                    } else {
-                        Slog.e(TAG, "Failed to switch USB config to " + functions);
-                        // revert to previous configuration if we fail
-                        setUsbConfig(mCurrentFunctions);
-                    }
+            // Didn't work.  Try to revert changes.
+            // We always reapply the policy in case certain constraints changed such as
+            // user restrictions independently of any other new functions we were
+            // trying to activate.
+            if (oldFunctionsApplied && !oldFunctions.equals(functions)) {
+                Slog.e(TAG, "Failsafe 1: Restoring previous USB functions.");
+                if (trySetEnabledFunctions(oldFunctions, false)) {
+                    return;
                 }
             }
+
+            // Still didn't work.  Try to restore the default functions.
+            Slog.e(TAG, "Failsafe 2: Restoring default USB functions.");
+            if (trySetEnabledFunctions(null, false)) {
+                return;
+            }
+
+            // Now we're desperate.  Ignore the default functions.
+            // Try to get ADB working if enabled.
+            Slog.e(TAG, "Failsafe 3: Restoring empty function list (with ADB if enabled).");
+            if (trySetEnabledFunctions(UsbManager.USB_FUNCTION_NONE, false)) {
+                return;
+            }
+
+            // Ouch.
+            Slog.e(TAG, "Unable to set any USB functions!");
+        }
+
+        private boolean trySetEnabledFunctions(String functions, boolean forceRestart) {
+            if (functions == null) {
+                functions = getDefaultFunctions();
+            }
+            functions = applyAdbFunction(functions);
+            functions = applyOemOverrideFunction(functions);
+
+            if (!mCurrentFunctions.equals(functions) || !mCurrentFunctionsApplied
+                    || forceRestart) {
+                Slog.i(TAG, "Setting USB config to " + functions);
+                mCurrentFunctions = functions;
+                mCurrentFunctionsApplied = false;
+
+                // Kick the USB stack to close existing connections.
+                setUsbConfig(UsbManager.USB_FUNCTION_NONE);
+
+                // Set the new USB configuration.
+                if (!setUsbConfig(functions)) {
+                    Slog.e(TAG, "Failed to switch USB config to " + functions);
+                    return false;
+                }
+
+                mCurrentFunctionsApplied = true;
+            }
+            return true;
+        }
+
+        private String applyAdbFunction(String functions) {
+            if (mAdbEnabled) {
+                functions = UsbManager.addFunction(functions, UsbManager.USB_FUNCTION_ADB);
+            } else {
+                functions = UsbManager.removeFunction(functions, UsbManager.USB_FUNCTION_ADB);
+            }
+            return functions;
+        }
+
+        private boolean isUsbTransferAllowed() {
+            UserManager userManager = (UserManager) mContext.getSystemService(Context.USER_SERVICE);
+            return !userManager.hasUserRestriction(UserManager.DISALLOW_USB_FILE_TRANSFER);
         }
 
         private void updateCurrentAccessory() {
@@ -559,7 +540,7 @@ public class UsbDeviceManager {
                     // defer accessoryAttached if system is not ready
                     if (mBootCompleted) {
                         getCurrentSettings().accessoryAttached(mCurrentAccessory);
-                    } // else handle in mBootCompletedReceiver
+                    } // else handle in boot completed
                 } else {
                     Slog.e(TAG, "nativeGetAccessoryStrings failed");
                 }
@@ -567,7 +548,7 @@ public class UsbDeviceManager {
                 // make sure accessory mode is off
                 // and restore default functions
                 Slog.d(TAG, "exited USB accessory mode");
-                setEnabledFunctions(getDefaultFunctions(), false);
+                setEnabledFunctions(null, false);
 
                 if (mCurrentAccessory != null) {
                     if (mBootCompleted) {
@@ -579,12 +560,14 @@ public class UsbDeviceManager {
             }
         }
 
-        private void updateUsbState() {
+        private void updateUsbStateBroadcast() {
             // send a sticky broadcast containing current USB state
             Intent intent = new Intent(UsbManager.ACTION_USB_STATE);
-            intent.addFlags(Intent.FLAG_RECEIVER_REPLACE_PENDING);
+            intent.addFlags(Intent.FLAG_RECEIVER_REPLACE_PENDING
+                    | Intent.FLAG_RECEIVER_FOREGROUND);
             intent.putExtra(UsbManager.USB_CONNECTED, mConnected);
             intent.putExtra(UsbManager.USB_CONFIGURED, mConfigured);
+            intent.putExtra(UsbManager.USB_DATA_UNLOCKED, isUsbTransferAllowed() && mUsbDataUnlocked);
 
             if (mCurrentFunctions != null) {
                 String[] functions = mCurrentFunctions.split(",");
@@ -598,23 +581,24 @@ public class UsbDeviceManager {
             mContext.sendStickyBroadcastAsUser(intent, UserHandle.ALL);
         }
 
+        private void updateUsbFunctions() {
+            updateAudioSourceFunction();
+            updateMidiFunction();
+        }
+
         private void updateAudioSourceFunction() {
-            boolean enabled = containsFunction(mCurrentFunctions,
+            boolean enabled = UsbManager.containsFunction(mCurrentFunctions,
                     UsbManager.USB_FUNCTION_AUDIO_SOURCE);
             if (enabled != mAudioSourceEnabled) {
-                // send a sticky broadcast containing current USB state
-                Intent intent = new Intent(AudioManager.ACTION_USB_AUDIO_ACCESSORY_PLUG);
-                intent.addFlags(Intent.FLAG_RECEIVER_REPLACE_PENDING);
-                intent.addFlags(Intent.FLAG_RECEIVER_REGISTERED_ONLY);
-                intent.putExtra("state", (enabled ? 1 : 0));
+                int card = -1;
+                int device = -1;
+
                 if (enabled) {
                     Scanner scanner = null;
                     try {
                         scanner = new Scanner(new File(AUDIO_SOURCE_PCM_PATH));
-                        int card = scanner.nextInt();
-                        int device = scanner.nextInt();
-                        intent.putExtra("card", card);
-                        intent.putExtra("device", device);
+                        card = scanner.nextInt();
+                        device = scanner.nextInt();
                     } catch (FileNotFoundException e) {
                         Slog.e(TAG, "could not open audio source PCM file", e);
                     } finally {
@@ -623,9 +607,33 @@ public class UsbDeviceManager {
                         }
                     }
                 }
-                mContext.sendStickyBroadcastAsUser(intent, UserHandle.ALL);
+                mUsbAlsaManager.setAccessoryAudioState(enabled, card, device);
                 mAudioSourceEnabled = enabled;
             }
+        }
+
+        private void updateMidiFunction() {
+            boolean enabled = UsbManager.containsFunction(mCurrentFunctions,
+                    UsbManager.USB_FUNCTION_MIDI);
+            if (enabled != mMidiEnabled) {
+                if (enabled) {
+                    Scanner scanner = null;
+                    try {
+                        scanner = new Scanner(new File(MIDI_ALSA_PATH));
+                        mMidiCard = scanner.nextInt();
+                        mMidiDevice = scanner.nextInt();
+                    } catch (FileNotFoundException e) {
+                        Slog.e(TAG, "could not open MIDI PCM file", e);
+                        enabled = false;
+                    } finally {
+                        if (scanner != null) {
+                            scanner.close();
+                        }
+                    }
+                }
+                mMidiEnabled = enabled;
+            }
+            mUsbAlsaManager.setPeripheralMidiState(mMidiEnabled && mConfigured, mMidiCard, mMidiDevice);
         }
 
         @Override
@@ -634,18 +642,22 @@ public class UsbDeviceManager {
                 case MSG_UPDATE_STATE:
                     mConnected = (msg.arg1 == 1);
                     mConfigured = (msg.arg2 == 1);
+                    if (!mConnected) {
+                        // When a disconnect occurs, relock access to sensitive user data
+                        mUsbDataUnlocked = false;
+                    }
                     updateUsbNotification();
                     updateAdbNotification();
-                    if (containsFunction(mCurrentFunctions,
+                    if (UsbManager.containsFunction(mCurrentFunctions,
                             UsbManager.USB_FUNCTION_ACCESSORY)) {
                         updateCurrentAccessory();
                     } else if (!mConnected) {
                         // restore defaults when USB is disconnected
-                        setEnabledFunctions(getDefaultFunctions(), false);
+                        setEnabledFunctions(null, false);
                     }
                     if (mBootCompleted) {
-                        updateUsbState();
-                        updateAudioSourceFunction();
+                        updateUsbStateBroadcast();
+                        updateUsbFunctions();
                     }
                     break;
                 case MSG_ENABLE_ADB:
@@ -653,14 +665,19 @@ public class UsbDeviceManager {
                     break;
                 case MSG_SET_CURRENT_FUNCTIONS:
                     String functions = (String)msg.obj;
-                    boolean makeDefault = (msg.arg1 == 1);
-                    setEnabledFunctions(functions, makeDefault);
+                    setEnabledFunctions(functions, false);
+                    break;
+                case MSG_UPDATE_USER_RESTRICTIONS:
+                    setEnabledFunctions(mCurrentFunctions, false);
+                    break;
+                case MSG_SET_USB_DATA_UNLOCKED:
+                    setUsbDataUnlocked(msg.arg1 == 1);
                     break;
                 case MSG_SYSTEM_READY:
                     updateUsbNotification();
                     updateAdbNotification();
-                    updateUsbState();
-                    updateAudioSourceFunction();
+                    updateUsbStateBroadcast();
+                    updateUsbFunctions();
                     break;
                 case MSG_BOOT_COMPLETED:
                     mBootCompleted = true;
@@ -672,27 +689,19 @@ public class UsbDeviceManager {
                     }
                     break;
                 case MSG_USER_SWITCHED: {
-                    UserManager userManager =
-                            (UserManager) mContext.getSystemService(Context.USER_SERVICE);
-                    UserHandle userHandle = new UserHandle(msg.arg1);
-                    if (userManager.hasUserRestriction(UserManager.DISALLOW_USB_FILE_TRANSFER,
-                            userHandle)) {
-                        Slog.v(TAG, "Switched to user " + msg.arg1 +
-                                " with DISALLOW_USB_FILE_TRANSFER restriction; disabling USB.");
-                        setUsbConfig("none");
+                    if (mCurrentUser != msg.arg1) {
+                        // Restart the USB stack and re-apply user restrictions for MTP or PTP.
+                        final boolean active = UsbManager.containsFunction(mCurrentFunctions,
+                                        UsbManager.USB_FUNCTION_MTP)
+                                || UsbManager.containsFunction(mCurrentFunctions,
+                                        UsbManager.USB_FUNCTION_PTP);
+                        if (active && mCurrentUser != UserHandle.USER_NULL) {
+                            Slog.v(TAG, "Current user switched to " + mCurrentUser
+                                    + "; resetting USB host stack for MTP or PTP");
+                            setEnabledFunctions(mCurrentFunctions, true);
+                        }
                         mCurrentUser = msg.arg1;
-                        break;
                     }
-
-                    final boolean mtpActive =
-                            containsFunction(mCurrentFunctions, UsbManager.USB_FUNCTION_MTP)
-                            || containsFunction(mCurrentFunctions, UsbManager.USB_FUNCTION_PTP);
-                    if (mtpActive && mCurrentUser != UserHandle.USER_NULL) {
-                        Slog.v(TAG, "Current user switched; resetting USB host stack for MTP");
-                        setUsbConfig("none");
-                        setUsbConfig(mCurrentFunctions);
-                    }
-                    mCurrentUser = msg.arg1;
                     break;
                 }
             }
@@ -707,20 +716,22 @@ public class UsbDeviceManager {
             int id = 0;
             Resources r = mContext.getResources();
             if (mConnected) {
-                if (containsFunction(mCurrentFunctions, UsbManager.USB_FUNCTION_MTP)) {
+                if (!mUsbDataUnlocked) {
+                    id = com.android.internal.R.string.usb_charging_notification_title;
+                } else if (UsbManager.containsFunction(mCurrentFunctions,
+                        UsbManager.USB_FUNCTION_MTP)) {
                     id = com.android.internal.R.string.usb_mtp_notification_title;
-                } else if (containsFunction(mCurrentFunctions, UsbManager.USB_FUNCTION_PTP)) {
+                } else if (UsbManager.containsFunction(mCurrentFunctions,
+                        UsbManager.USB_FUNCTION_PTP)) {
                     id = com.android.internal.R.string.usb_ptp_notification_title;
-                } else if (containsFunction(mCurrentFunctions,
-                        UsbManager.USB_FUNCTION_MASS_STORAGE)) {
-                    id = com.android.internal.R.string.usb_cd_installer_notification_title;
-                } else if (containsFunction(mCurrentFunctions, UsbManager.USB_FUNCTION_ACCESSORY)) {
+                } else if (UsbManager.containsFunction(mCurrentFunctions,
+                        UsbManager.USB_FUNCTION_MIDI)) {
+                    id = com.android.internal.R.string.usb_midi_notification_title;
+                } else if (UsbManager.containsFunction(mCurrentFunctions,
+                        UsbManager.USB_FUNCTION_ACCESSORY)) {
                     id = com.android.internal.R.string.usb_accessory_notification_title;
                 } else {
-                    // There is a different notification for USB tethering so we don't need one here
-                    //if (!containsFunction(mCurrentFunctions, UsbManager.USB_FUNCTION_RNDIS)) {
-                    //    Slog.e(TAG, "No known USB function in updateUsbNotification");
-                    //}
+                    id = com.android.internal.R.string.usb_charging_notification_title;
                 }
             }
             if (id != mUsbNotificationId) {
@@ -735,25 +746,26 @@ public class UsbDeviceManager {
                             com.android.internal.R.string.usb_notification_message);
                     CharSequence title = r.getText(id);
 
-                    Notification notification = new Notification();
-                    notification.icon = com.android.internal.R.drawable.stat_sys_data_usb;
-                    notification.when = 0;
-                    notification.flags = Notification.FLAG_ONGOING_EVENT;
-                    notification.tickerText = title;
-                    notification.defaults = 0; // please be quiet
-                    notification.sound = null;
-                    notification.vibrate = null;
-                    notification.priority = Notification.PRIORITY_MIN;
-
                     Intent intent = Intent.makeRestartActivityTask(
                             new ComponentName("com.android.settings",
-                                    "com.android.settings.UsbSettings"));
+                                    "com.android.settings.deviceinfo.UsbModeChooserActivity"));
                     PendingIntent pi = PendingIntent.getActivityAsUser(mContext, 0,
                             intent, 0, null, UserHandle.CURRENT);
-                    notification.color = mContext.getResources().getColor(
-                            com.android.internal.R.color.system_notification_accent_color);
-                    notification.setLatestEventInfo(mContext, title, message, pi);
-                    notification.visibility = Notification.VISIBILITY_PUBLIC;
+
+                    Notification notification = new Notification.Builder(mContext)
+                            .setSmallIcon(com.android.internal.R.drawable.stat_sys_adb)
+                            .setWhen(0)
+                            .setOngoing(true)
+                            .setTicker(title)
+                            .setDefaults(0)  // please be quiet
+                            .setPriority(Notification.PRIORITY_MIN)
+                            .setColor(mContext.getColor(
+                                    com.android.internal.R.color.system_notification_accent_color))
+                            .setContentTitle(title)
+                            .setContentText(message)
+                            .setContentIntent(pi)
+                            .setVisibility(Notification.VISIBILITY_PUBLIC)
+                            .build();
                     mNotificationManager.notifyAsUser(null, id, notification,
                             UserHandle.ALL);
                     mUsbNotificationId = id;
@@ -781,25 +793,26 @@ public class UsbDeviceManager {
                     CharSequence message = r.getText(
                             com.android.internal.R.string.adb_active_notification_message);
 
-                    Notification notification = new Notification();
-                    notification.icon = com.android.internal.R.drawable.stat_sys_adb;
-                    notification.when = 0;
-                    notification.flags = Notification.FLAG_ONGOING_EVENT;
-                    notification.tickerText = title;
-                    notification.defaults = 0; // please be quiet
-                    notification.sound = null;
-                    notification.vibrate = null;
-                    notification.priority = Notification.PRIORITY_LOW;
-
                     Intent intent = Intent.makeRestartActivityTask(
                             new ComponentName("com.android.settings",
                                     "com.android.settings.DevelopmentSettings"));
                     PendingIntent pi = PendingIntent.getActivityAsUser(mContext, 0,
                             intent, 0, null, UserHandle.CURRENT);
-                    notification.color = mContext.getResources().getColor(
-                            com.android.internal.R.color.system_notification_accent_color);
-                    notification.setLatestEventInfo(mContext, title, message, pi);
-                    notification.visibility = Notification.VISIBILITY_PUBLIC;
+
+                    Notification notification = new Notification.Builder(mContext)
+                            .setSmallIcon(com.android.internal.R.drawable.stat_sys_adb)
+                            .setWhen(0)
+                            .setOngoing(true)
+                            .setTicker(title)
+                            .setDefaults(0)  // please be quiet
+                            .setPriority(Notification.PRIORITY_LOW)
+                            .setColor(mContext.getColor(
+                                    com.android.internal.R.color.system_notification_accent_color))
+                            .setContentTitle(title)
+                            .setContentText(message)
+                            .setContentIntent(pi)
+                            .setVisibility(Notification.VISIBILITY_PUBLIC)
+                            .build();
                     mAdbNotificationShown = true;
                     mNotificationManager.notifyAsUser(null, id, notification,
                             UserHandle.ALL);
@@ -811,28 +824,27 @@ public class UsbDeviceManager {
         }
 
         private String getDefaultFunctions() {
-            UserManager userManager = (UserManager) mContext.getSystemService(Context.USER_SERVICE);
-            if (userManager.hasUserRestriction(UserManager.DISALLOW_USB_FILE_TRANSFER,
-                    new UserHandle(mCurrentUser))) {
-                return "none";
+            String func = SystemProperties.get(USB_PERSISTENT_CONFIG_PROPERTY,
+                    UsbManager.USB_FUNCTION_NONE);
+            if (UsbManager.USB_FUNCTION_NONE.equals(func)) {
+                func = UsbManager.USB_FUNCTION_MTP;
             }
-            return mDefaultFunctions;
+            return func;
         }
 
-        public void dump(FileDescriptor fd, PrintWriter pw) {
-            pw.println("  USB Device State:");
-            pw.println("    Current Functions: " + mCurrentFunctions);
-            pw.println("    Default Functions: " + mDefaultFunctions);
-            pw.println("    mConnected: " + mConnected);
-            pw.println("    mConfigured: " + mConfigured);
-            pw.println("    mCurrentAccessory: " + mCurrentAccessory);
+        public void dump(IndentingPrintWriter pw) {
+            pw.println("USB Device State:");
+            pw.println("  mCurrentFunctions: " + mCurrentFunctions);
+            pw.println("  mCurrentFunctionsApplied: " + mCurrentFunctionsApplied);
+            pw.println("  mConnected: " + mConnected);
+            pw.println("  mConfigured: " + mConfigured);
+            pw.println("  mUsbDataUnlocked: " + mUsbDataUnlocked);
+            pw.println("  mCurrentAccessory: " + mCurrentAccessory);
             try {
-                pw.println("    Kernel state: "
+                pw.println("  Kernel state: "
                         + FileUtils.readTextFile(new File(STATE_PATH), 0, null).trim());
-                pw.println("    Kernel function list: "
+                pw.println("  Kernel function list: "
                         + FileUtils.readTextFile(new File(FUNCTIONS_PATH), 0, null).trim());
-                pw.println("    Mass storage backing file: "
-                        + FileUtils.readTextFile(new File(MASS_STORAGE_FILE_PATH), 0, null).trim());
             } catch (IOException e) {
                 pw.println("IOException: " + e);
             }
@@ -860,18 +872,18 @@ public class UsbDeviceManager {
         return nativeOpenAccessory();
     }
 
-    public void setCurrentFunctions(String functions, boolean makeDefault) {
-        if (DEBUG) Slog.d(TAG, "setCurrentFunctions(" + functions + ") default: " + makeDefault);
-        mHandler.sendMessage(MSG_SET_CURRENT_FUNCTIONS, functions, makeDefault);
+    public boolean isFunctionEnabled(String function) {
+        return UsbManager.containsFunction(SystemProperties.get(USB_CONFIG_PROPERTY), function);
     }
 
-    public void setMassStorageBackingFile(String path) {
-        if (path == null) path = "";
-        try {
-            FileUtils.stringToFile(MASS_STORAGE_FILE_PATH, path);
-        } catch (IOException e) {
-           Slog.e(TAG, "failed to write to " + MASS_STORAGE_FILE_PATH);
-        }
+    public void setCurrentFunctions(String functions) {
+        if (DEBUG) Slog.d(TAG, "setCurrentFunctions(" + functions + ")");
+        mHandler.sendMessage(MSG_SET_CURRENT_FUNCTIONS, functions);
+    }
+
+    public void setUsbDataUnlocked(boolean unlocked) {
+        if (DEBUG) Slog.d(TAG, "setUsbDataUnlocked(" + unlocked + ")");
+        mHandler.sendMessage(MSG_SET_USB_DATA_UNLOCKED, unlocked);
     }
 
     private void readOemUsbOverrideConfig() {
@@ -896,14 +908,7 @@ public class UsbDeviceManager {
         }
     }
 
-    private boolean needsOemUsbOverride() {
-        if (mOemModeMap == null) return false;
-
-        String bootMode = SystemProperties.get(BOOT_MODE_PROPERTY, "unknown");
-        return (mOemModeMap.get(bootMode) != null) ? true : false;
-    }
-
-    private String processOemUsbOverride(String usbFunctions) {
+    private String applyOemOverrideFunction(String usbFunctions) {
         if ((usbFunctions == null) || (mOemModeMap == null)) return usbFunctions;
 
         String bootMode = SystemProperties.get(BOOT_MODE_PROPERTY, "unknown");
@@ -942,12 +947,12 @@ public class UsbDeviceManager {
         }
     }
 
-    public void dump(FileDescriptor fd, PrintWriter pw) {
+    public void dump(IndentingPrintWriter pw) {
         if (mHandler != null) {
-            mHandler.dump(fd, pw);
+            mHandler.dump(pw);
         }
         if (mDebuggingManager != null) {
-            mDebuggingManager.dump(fd, pw);
+            mDebuggingManager.dump(pw);
         }
     }
 

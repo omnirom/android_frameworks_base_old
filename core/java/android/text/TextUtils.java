@@ -16,6 +16,7 @@
 
 package android.text;
 
+import android.annotation.Nullable;
 import android.content.res.Resources;
 import android.os.Parcel;
 import android.os.Parcelable;
@@ -457,11 +458,16 @@ public class TextUtils {
      * @param str the string to be examined
      * @return true if str is null or zero length
      */
-    public static boolean isEmpty(CharSequence str) {
+    public static boolean isEmpty(@Nullable CharSequence str) {
         if (str == null || str.length() == 0)
             return true;
         else
             return false;
+    }
+
+    /** {@hide} */
+    public static String nullIfEmpty(@Nullable String str) {
+        return isEmpty(str) ? null : str;
     }
 
     /**
@@ -621,8 +627,7 @@ public class TextUtils {
      * Flatten a CharSequence and whatever styles can be copied across processes
      * into the parcel.
      */
-    public static void writeToParcel(CharSequence cs, Parcel p,
-            int parcelableFlags) {
+    public static void writeToParcel(CharSequence cs, Parcel p, int parcelableFlags) {
         if (cs instanceof Spanned) {
             p.writeInt(0);
             p.writeString(cs.toString());
@@ -644,15 +649,15 @@ public class TextUtils {
                 }
 
                 if (prop instanceof ParcelableSpan) {
-                    ParcelableSpan ps = (ParcelableSpan)prop;
-                    int spanTypeId = ps.getSpanTypeId();
+                    final ParcelableSpan ps = (ParcelableSpan) prop;
+                    final int spanTypeId = ps.getSpanTypeIdInternal();
                     if (spanTypeId < FIRST_SPAN || spanTypeId > LAST_SPAN) {
-                        Log.e(TAG, "external class \"" + ps.getClass().getSimpleName()
+                        Log.e(TAG, "External class \"" + ps.getClass().getSimpleName()
                                 + "\" is attempting to use the frameworks-only ParcelableSpan"
                                 + " interface");
                     } else {
                         p.writeInt(spanTypeId);
-                        ps.writeToParcel(p, parcelableFlags);
+                        ps.writeToParcelInternal(p, parcelableFlags);
                         writeWhere(p, sp, o);
                     }
                 }
@@ -1258,7 +1263,7 @@ public class TextUtils {
                     }
 
                     // XXX this is probably ok, but need to look at it more
-                    tempMt.setPara(format, 0, format.length(), textDir);
+                    tempMt.setPara(format, 0, format.length(), textDir, null);
                     float moreWid = tempMt.addStyleRun(p, tempMt.mLen, null);
 
                     if (w + moreWid <= avail) {
@@ -1280,7 +1285,7 @@ public class TextUtils {
     private static float setPara(MeasuredText mt, TextPaint paint,
             CharSequence text, int start, int end, TextDirectionHeuristic textDir) {
 
-        mt.setPara(text, start, end, textDir);
+        mt.setPara(text, start, end, textDir, null);
 
         float width;
         Spanned sp = text instanceof Spanned ? (Spanned) text : null;
@@ -1788,6 +1793,15 @@ public class TextUtils {
             default:
                 return View.LAYOUT_DIRECTION_LTR;
         }
+    }
+
+    /**
+     * Return localized string representing the given number of selected items.
+     *
+     * @hide
+     */
+    public static CharSequence formatSelectedCount(int count) {
+        return Resources.getSystem().getQuantityString(R.plurals.selected_count, count, count);
     }
 
     private static Object sLock = new Object();

@@ -35,12 +35,17 @@ public class Movie {
     public native boolean isOpaque();
     public native int duration();
 
-    public native boolean setTime(int relativeMilliseconds);    
+    public native boolean setTime(int relativeMilliseconds);
 
-    public native void draw(Canvas canvas, float x, float y, Paint paint);
-    
+    private native void nDraw(long nativeCanvas, float x, float y, long paintHandle);
+
+    public void draw(Canvas canvas, float x, float y, Paint paint) {
+        nDraw(canvas.getNativeCanvasWrapper(), x, y,
+                paint != null ? paint.getNativeInstance() : 0);
+    }
+
     public void draw(Canvas canvas, float x, float y) {
-        draw(canvas, x, y, null);
+        nDraw(canvas.getNativeCanvasWrapper(), x, y, 0);
     }
 
     public static Movie decodeStream(InputStream is) {

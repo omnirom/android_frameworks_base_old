@@ -16,22 +16,26 @@
 
 package android.view;
 
-import android.graphics.Canvas;
-import android.os.Handler;
-import android.os.Message;
-import android.os.Trace;
-import android.widget.FrameLayout;
+import com.android.internal.R;
 
 import org.xmlpull.v1.XmlPullParser;
 import org.xmlpull.v1.XmlPullParserException;
 
+import android.annotation.LayoutRes;
+import android.annotation.Nullable;
 import android.content.Context;
 import android.content.res.Resources;
 import android.content.res.TypedArray;
 import android.content.res.XmlResourceParser;
+import android.graphics.Canvas;
+import android.os.Handler;
+import android.os.Message;
+import android.os.Trace;
 import android.util.AttributeSet;
 import android.util.Log;
+import android.util.TypedValue;
 import android.util.Xml;
+import android.widget.FrameLayout;
 
 import java.io.IOException;
 import java.lang.reflect.Constructor;
@@ -64,6 +68,7 @@ import java.util.HashMap;
  * @see Context#getSystemService
  */
 public abstract class LayoutInflater {
+
     private static final String TAG = LayoutInflater.class.getSimpleName();
     private static final boolean DEBUG = false;
 
@@ -90,11 +95,15 @@ public abstract class LayoutInflater {
     
     private HashMap<String, Boolean> mFilterMap;
 
+    private TypedValue mTempValue;
+
     private static final String TAG_MERGE = "merge";
     private static final String TAG_INCLUDE = "include";
     private static final String TAG_1995 = "blink";
     private static final String TAG_REQUEST_FOCUS = "requestFocus";
     private static final String TAG_TAG = "tag";
+
+    private static final String ATTR_LAYOUT = "layout";
 
     private static final int[] ATTRS_THEME = new int[] {
             com.android.internal.R.attr.theme };
@@ -361,7 +370,7 @@ public abstract class LayoutInflater {
      *         this is the root View; otherwise it is the root of the inflated
      *         XML file.
      */
-    public View inflate(int resource, ViewGroup root) {
+    public View inflate(@LayoutRes int resource, @Nullable ViewGroup root) {
         return inflate(resource, root, root != null);
     }
 
@@ -381,7 +390,7 @@ public abstract class LayoutInflater {
      *         this is the root View; otherwise it is the root of the inflated
      *         XML file.
      */
-    public View inflate(XmlPullParser parser, ViewGroup root) {
+    public View inflate(XmlPullParser parser, @Nullable ViewGroup root) {
         return inflate(parser, root, root != null);
     }
 
@@ -402,7 +411,7 @@ public abstract class LayoutInflater {
      *         attachToRoot is true, this is root; otherwise it is the root of
      *         the inflated XML file.
      */
-    public View inflate(int resource, ViewGroup root, boolean attachToRoot) {
+    public View inflate(@LayoutRes int resource, @Nullable ViewGroup root, boolean attachToRoot) {
         final Resources res = getContext().getResources();
         if (DEBUG) {
             Log.d(TAG, "INFLATING from resource: \"" + res.getResourceName(resource) + "\" ("
@@ -439,13 +448,14 @@ public abstract class LayoutInflater {
      *         attachToRoot is true, this is root; otherwise it is the root of
      *         the inflated XML file.
      */
-    public View inflate(XmlPullParser parser, ViewGroup root, boolean attachToRoot) {
+    public View inflate(XmlPullParser parser, @Nullable ViewGroup root, boolean attachToRoot) {
         synchronized (mConstructorArgs) {
             Trace.traceBegin(Trace.TRACE_TAG_VIEW, "inflate");
 
+            final Context inflaterContext = mContext;
             final AttributeSet attrs = Xml.asAttributeSet(parser);
-            Context lastContext = (Context)mConstructorArgs[0];
-            mConstructorArgs[0] = mContext;
+            Context lastContext = (Context) mConstructorArgs[0];
+            mConstructorArgs[0] = inflaterContext;
             View result = root;
 
             try {
@@ -476,10 +486,10 @@ public abstract class LayoutInflater {
                                 + "ViewGroup root and attachToRoot=true");
                     }
 
-                    rInflate(parser, root, attrs, false, false);
+                    rInflate(parser, root, inflaterContext, attrs, false);
                 } else {
                     // Temp is the root view that was found in the xml
-                    final View temp = createViewFromTag(root, name, attrs, false);
+                    final View temp = createViewFromTag(root, name, inflaterContext, attrs);
 
                     ViewGroup.LayoutParams params = null;
 
@@ -500,8 +510,10 @@ public abstract class LayoutInflater {
                     if (DEBUG) {
                         System.out.println("-----> start inflating children");
                     }
-                    // Inflate all children under temp
-                    rInflate(parser, temp, attrs, true, true);
+
+                    // Inflate all children under temp against its context.
+                    rInflateChildren(parser, temp, attrs, true);
+
                     if (DEBUG) {
                         System.out.println("-----> done inflating children");
                     }
@@ -523,10 +535,10 @@ public abstract class LayoutInflater {
                 InflateException ex = new InflateException(e.getMessage());
                 ex.initCause(e);
                 throw ex;
-            } catch (IOException e) {
+            } catch (Exception e) {
                 InflateException ex = new InflateException(
                         parser.getPositionDescription()
-                        + ": " + e.getMessage());
+                                + ": " + e.getMessage());
                 ex.initCause(e);
                 throw ex;
             } finally {
@@ -578,6 +590,7 @@ public abstract class LayoutInflater {
                     }
                 }
                 constructor = clazz.getConstructor(mConstructorSignature);
+                constructor.setAccessible(true);
                 sConstructorMap.put(name, constructor);
             } else {
                 // If we have a filter, apply it to cached constructor
@@ -603,7 +616,6 @@ public abstract class LayoutInflater {
             Object[] args = mConstructorArgs;
             args[1] = attrs;
 
-            constructor.setAccessible(true);
             final View view = constructor.newInstance(args);
             if (view instanceof ViewStub) {
                 // Use the same context when inflating ViewStub later.
@@ -683,59 +695,68 @@ public abstract class LayoutInflater {
     }
 
     /**
+     * Convenience method for calling through to the five-arg createViewFromTag
+     * method. This method passes {@code false} for the {@code ignoreThemeAttr}
+     * argument and should be used for everything except {@code &gt;include>}
+     * tag parsing.
+     */
+    private View createViewFromTag(View parent, String name, Context context, AttributeSet attrs) {
+        return createViewFromTag(parent, name, context, attrs, false);
+    }
+
+    /**
      * Creates a view from a tag name using the supplied attribute set.
      * <p>
-     * If {@code inheritContext} is true and the parent is non-null, the view
-     * will be inflated in parent view's context. If the view specifies a
-     * &lt;theme&gt; attribute, the inflation context will be wrapped with the
-     * specified theme.
-     * <p>
-     * Note: Default visibility so the BridgeInflater can override it.
+     * <strong>Note:</strong> Default visibility so the BridgeInflater can
+     * override it.
+     *
+     * @param parent the parent view, used to inflate layout params
+     * @param name the name of the XML tag used to define the view
+     * @param context the inflation context for the view, typically the
+     *                {@code parent} or base layout inflater context
+     * @param attrs the attribute set for the XML tag used to define the view
+     * @param ignoreThemeAttr {@code true} to ignore the {@code android:theme}
+     *                        attribute (if set) for the view being inflated,
+     *                        {@code false} otherwise
      */
-    View createViewFromTag(View parent, String name, AttributeSet attrs, boolean inheritContext) {
+    View createViewFromTag(View parent, String name, Context context, AttributeSet attrs,
+            boolean ignoreThemeAttr) {
         if (name.equals("view")) {
             name = attrs.getAttributeValue(null, "class");
         }
 
-        Context viewContext;
-        if (parent != null && inheritContext) {
-            viewContext = parent.getContext();
-        } else {
-            viewContext = mContext;
+        // Apply a theme wrapper, if allowed and one is specified.
+        if (!ignoreThemeAttr) {
+            final TypedArray ta = context.obtainStyledAttributes(attrs, ATTRS_THEME);
+            final int themeResId = ta.getResourceId(0, 0);
+            if (themeResId != 0) {
+                context = new ContextThemeWrapper(context, themeResId);
+            }
+            ta.recycle();
         }
-
-        // Apply a theme wrapper, if requested.
-        final TypedArray ta = viewContext.obtainStyledAttributes(attrs, ATTRS_THEME);
-        final int themeResId = ta.getResourceId(0, 0);
-        if (themeResId != 0) {
-            viewContext = new ContextThemeWrapper(viewContext, themeResId);
-        }
-        ta.recycle();
 
         if (name.equals(TAG_1995)) {
             // Let's party like it's 1995!
-            return new BlinkLayout(viewContext, attrs);
+            return new BlinkLayout(context, attrs);
         }
-
-        if (DEBUG) System.out.println("******** Creating view: " + name);
 
         try {
             View view;
             if (mFactory2 != null) {
-                view = mFactory2.onCreateView(parent, name, viewContext, attrs);
+                view = mFactory2.onCreateView(parent, name, context, attrs);
             } else if (mFactory != null) {
-                view = mFactory.onCreateView(name, viewContext, attrs);
+                view = mFactory.onCreateView(name, context, attrs);
             } else {
                 view = null;
             }
 
             if (view == null && mPrivateFactory != null) {
-                view = mPrivateFactory.onCreateView(parent, name, viewContext, attrs);
+                view = mPrivateFactory.onCreateView(parent, name, context, attrs);
             }
 
             if (view == null) {
                 final Object lastContext = mConstructorArgs[0];
-                mConstructorArgs[0] = viewContext;
+                mConstructorArgs[0] = context;
                 try {
                     if (-1 == name.indexOf('.')) {
                         view = onCreateView(parent, name, attrs);
@@ -747,20 +768,18 @@ public abstract class LayoutInflater {
                 }
             }
 
-            if (DEBUG) System.out.println("Created view is: " + view);
             return view;
-
         } catch (InflateException e) {
             throw e;
 
         } catch (ClassNotFoundException e) {
-            InflateException ie = new InflateException(attrs.getPositionDescription()
+            final InflateException ie = new InflateException(attrs.getPositionDescription()
                     + ": Error inflating class " + name);
             ie.initCause(e);
             throw ie;
 
         } catch (Exception e) {
-            InflateException ie = new InflateException(attrs.getPositionDescription()
+            final InflateException ie = new InflateException(attrs.getPositionDescription()
                     + ": Error inflating class " + name);
             ie.initCause(e);
             throw ie;
@@ -768,16 +787,26 @@ public abstract class LayoutInflater {
     }
 
     /**
+     * Recursive method used to inflate internal (non-root) children. This
+     * method calls through to {@link #rInflate} using the parent context as
+     * the inflation context.
+     * <strong>Note:</strong> Default visibility so the BridgeInflater can
+     * call it.
+     */
+    final void rInflateChildren(XmlPullParser parser, View parent, AttributeSet attrs,
+            boolean finishInflate) throws XmlPullParserException, IOException {
+        rInflate(parser, parent, parent.getContext(), attrs, finishInflate);
+    }
+
+    /**
      * Recursive method used to descend down the xml hierarchy and instantiate
      * views, instantiate their children, and then call onFinishInflate().
-     *
-     * @param inheritContext Whether the root view should be inflated in its
-     *            parent's context. This should be true when called inflating
-     *            child views recursively, or false otherwise.
+     * <p>
+     * <strong>Note:</strong> Default visibility so the BridgeInflater can
+     * override it.
      */
-    void rInflate(XmlPullParser parser, View parent, final AttributeSet attrs,
-            boolean finishInflate, boolean inheritContext) throws XmlPullParserException,
-            IOException {
+    void rInflate(XmlPullParser parser, View parent, Context context,
+            AttributeSet attrs, boolean finishInflate) throws XmlPullParserException, IOException {
 
         final int depth = parser.getDepth();
         int type;
@@ -799,19 +828,21 @@ public abstract class LayoutInflater {
                 if (parser.getDepth() == 0) {
                     throw new InflateException("<include /> cannot be the root element");
                 }
-                parseInclude(parser, parent, attrs, inheritContext);
+                parseInclude(parser, context, parent, attrs);
             } else if (TAG_MERGE.equals(name)) {
                 throw new InflateException("<merge /> must be the root element");
             } else {
-                final View view = createViewFromTag(parent, name, attrs, inheritContext);
+                final View view = createViewFromTag(parent, name, context, attrs);
                 final ViewGroup viewGroup = (ViewGroup) parent;
                 final ViewGroup.LayoutParams params = viewGroup.generateLayoutParams(attrs);
-                rInflate(parser, view, attrs, true, true);
+                rInflateChildren(parser, view, attrs, true);
                 viewGroup.addView(view, params);
             }
         }
 
-        if (finishInflate) parent.onFinishInflate();
+        if (finishInflate) {
+            parent.onFinishInflate();
+        }
     }
 
     /**
@@ -820,13 +851,9 @@ public abstract class LayoutInflater {
      */
     private void parseRequestFocus(XmlPullParser parser, View view)
             throws XmlPullParserException, IOException {
-        int type;
         view.requestFocus();
-        final int currentDepth = parser.getDepth();
-        while (((type = parser.next()) != XmlPullParser.END_TAG ||
-                parser.getDepth() > currentDepth) && type != XmlPullParser.END_DOCUMENT) {
-            // Empty
-        }
+
+        consumeChildElements(parser);
     }
 
     /**
@@ -835,40 +862,61 @@ public abstract class LayoutInflater {
      */
     private void parseViewTag(XmlPullParser parser, View view, AttributeSet attrs)
             throws XmlPullParserException, IOException {
-        int type;
-
-        final TypedArray ta = mContext.obtainStyledAttributes(
-                attrs, com.android.internal.R.styleable.ViewTag);
-        final int key = ta.getResourceId(com.android.internal.R.styleable.ViewTag_id, 0);
-        final CharSequence value = ta.getText(com.android.internal.R.styleable.ViewTag_value);
+        final Context context = view.getContext();
+        final TypedArray ta = context.obtainStyledAttributes(attrs, R.styleable.ViewTag);
+        final int key = ta.getResourceId(R.styleable.ViewTag_id, 0);
+        final CharSequence value = ta.getText(R.styleable.ViewTag_value);
         view.setTag(key, value);
         ta.recycle();
 
-        final int currentDepth = parser.getDepth();
-        while (((type = parser.next()) != XmlPullParser.END_TAG ||
-                parser.getDepth() > currentDepth) && type != XmlPullParser.END_DOCUMENT) {
-            // Empty
-        }
+        consumeChildElements(parser);
     }
 
-    private void parseInclude(XmlPullParser parser, View parent, AttributeSet attrs,
-            boolean inheritContext) throws XmlPullParserException, IOException {
+    private void parseInclude(XmlPullParser parser, Context context, View parent,
+            AttributeSet attrs) throws XmlPullParserException, IOException {
         int type;
 
         if (parent instanceof ViewGroup) {
-            final int layout = attrs.getAttributeResourceValue(null, "layout", 0);
+            // Apply a theme wrapper, if requested. This is sort of a weird
+            // edge case, since developers think the <include> overwrites
+            // values in the AttributeSet of the included View. So, if the
+            // included View has a theme attribute, we'll need to ignore it.
+            final TypedArray ta = context.obtainStyledAttributes(attrs, ATTRS_THEME);
+            final int themeResId = ta.getResourceId(0, 0);
+            final boolean hasThemeOverride = themeResId != 0;
+            if (hasThemeOverride) {
+                context = new ContextThemeWrapper(context, themeResId);
+            }
+            ta.recycle();
+
+            // If the layout is pointing to a theme attribute, we have to
+            // massage the value to get a resource identifier out of it.
+            int layout = attrs.getAttributeResourceValue(null, ATTR_LAYOUT, 0);
             if (layout == 0) {
-                final String value = attrs.getAttributeValue(null, "layout");
-                if (value == null) {
-                    throw new InflateException("You must specifiy a layout in the"
+                final String value = attrs.getAttributeValue(null, ATTR_LAYOUT);
+                if (value == null || value.length() <= 0) {
+                    throw new InflateException("You must specify a layout in the"
                             + " include tag: <include layout=\"@layout/layoutID\" />");
-                } else {
-                    throw new InflateException("You must specifiy a valid layout "
-                            + "reference. The layout ID " + value + " is not valid.");
                 }
+
+                // Attempt to resolve the "?attr/name" string to an identifier.
+                layout = context.getResources().getIdentifier(value.substring(1), null, null);
+            }
+
+            // The layout might be referencing a theme attribute.
+            if (mTempValue == null) {
+                mTempValue = new TypedValue();
+            }
+            if (layout != 0 && context.getTheme().resolveAttribute(layout, mTempValue, true)) {
+                layout = mTempValue.resourceId;
+            }
+
+            if (layout == 0) {
+                final String value = attrs.getAttributeValue(null, ATTR_LAYOUT);
+                throw new InflateException("You must specify a valid layout "
+                        + "reference. The layout ID " + value + " is not valid.");
             } else {
-                final XmlResourceParser childParser =
-                        getContext().getResources().getLayout(layout);
+                final XmlResourceParser childParser = context.getResources().getLayout(layout);
 
                 try {
                     final AttributeSet childAttrs = Xml.asAttributeSet(childParser);
@@ -886,43 +934,41 @@ public abstract class LayoutInflater {
                     final String childName = childParser.getName();
 
                     if (TAG_MERGE.equals(childName)) {
-                        // Inflate all children.
-                        rInflate(childParser, parent, childAttrs, false, inheritContext);
+                        // The <merge> tag doesn't support android:theme, so
+                        // nothing special to do here.
+                        rInflate(childParser, parent, context, childAttrs, false);
                     } else {
-                        final View view = createViewFromTag(parent, childName, childAttrs,
-                                inheritContext);
+                        final View view = createViewFromTag(parent, childName,
+                                context, childAttrs, hasThemeOverride);
                         final ViewGroup group = (ViewGroup) parent;
 
-                        // We try to load the layout params set in the <include /> tag. If
-                        // they don't exist, we will rely on the layout params set in the
-                        // included XML file.
-                        // During a layoutparams generation, a runtime exception is thrown
-                        // if either layout_width or layout_height is missing. We catch
-                        // this exception and set localParams accordingly: true means we
-                        // successfully loaded layout params from the <include /> tag,
-                        // false means we need to rely on the included layout params.
+                        final TypedArray a = context.obtainStyledAttributes(
+                                attrs, R.styleable.Include);
+                        final int id = a.getResourceId(R.styleable.Include_id, View.NO_ID);
+                        final int visibility = a.getInt(R.styleable.Include_visibility, -1);
+                        a.recycle();
+
+                        // We try to load the layout params set in the <include /> tag.
+                        // If the parent can't generate layout params (ex. missing width
+                        // or height for the framework ViewGroups, though this is not
+                        // necessarily true of all ViewGroups) then we expect it to throw
+                        // a runtime exception.
+                        // We catch this exception and set localParams accordingly: true
+                        // means we successfully loaded layout params from the <include>
+                        // tag, false means we need to rely on the included layout params.
                         ViewGroup.LayoutParams params = null;
                         try {
                             params = group.generateLayoutParams(attrs);
                         } catch (RuntimeException e) {
-                            params = group.generateLayoutParams(childAttrs);
-                        } finally {
-                            if (params != null) {
-                                view.setLayoutParams(params);
-                            }
+                            // Ignore, just fail over to child attrs.
                         }
+                        if (params == null) {
+                            params = group.generateLayoutParams(childAttrs);
+                        }
+                        view.setLayoutParams(params);
 
                         // Inflate all children.
-                        rInflate(childParser, view, childAttrs, true, true);
-
-                        // Attempt to override the included layout's android:id with the
-                        // one set on the <include /> tag itself.
-                        TypedArray a = mContext.obtainStyledAttributes(attrs,
-                            com.android.internal.R.styleable.View, 0, 0);
-                        int id = a.getResourceId(com.android.internal.R.styleable.View_id, View.NO_ID);
-                        // While we're at it, let's try to override android:visibility.
-                        int visibility = a.getInt(com.android.internal.R.styleable.View_visibility, -1);
-                        a.recycle();
+                        rInflateChildren(childParser, view, childAttrs, true);
 
                         if (id != View.NO_ID) {
                             view.setId(id);
@@ -950,6 +996,16 @@ public abstract class LayoutInflater {
             throw new InflateException("<include /> can only be used inside of a ViewGroup");
         }
 
+        LayoutInflater.consumeChildElements(parser);
+    }
+
+    /**
+     * <strong>Note:</strong> default visibility so that
+     * LayoutInflater_Delegate can call it.
+     */
+    final static void consumeChildElements(XmlPullParser parser)
+            throws XmlPullParserException, IOException {
+        int type;
         final int currentDepth = parser.getDepth();
         while (((type = parser.next()) != XmlPullParser.END_TAG ||
                 parser.getDepth() > currentDepth) && type != XmlPullParser.END_DOCUMENT) {

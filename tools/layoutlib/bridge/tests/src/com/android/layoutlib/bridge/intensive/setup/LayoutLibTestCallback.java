@@ -21,12 +21,20 @@ import com.android.ide.common.rendering.api.ActionBarCallback;
 import com.android.ide.common.rendering.api.AdapterBinding;
 import com.android.ide.common.rendering.api.ILayoutPullParser;
 import com.android.ide.common.rendering.api.LayoutlibCallback;
+import com.android.ide.common.rendering.api.ParserFactory;
 import com.android.ide.common.rendering.api.ResourceReference;
 import com.android.ide.common.rendering.api.ResourceValue;
-import com.android.resources.ResourceType;
 import com.android.ide.common.resources.IntArrayWrapper;
+import com.android.resources.ResourceType;
 import com.android.util.Pair;
 import com.android.utils.ILogger;
+
+import org.kxml2.io.KXmlParser;
+import org.xmlpull.v1.XmlPullParser;
+import org.xmlpull.v1.XmlPullParserException;
+
+import android.annotation.NonNull;
+import android.annotation.Nullable;
 
 import java.io.File;
 import java.lang.reflect.Constructor;
@@ -35,6 +43,8 @@ import java.lang.reflect.Modifier;
 import java.util.Map;
 
 import com.google.android.collect.Maps;
+
+import static org.junit.Assert.fail;
 
 @SuppressWarnings("deprecation") // For Pair
 public class LayoutLibTestCallback extends LayoutlibCallback {
@@ -121,7 +131,7 @@ public class LayoutLibTestCallback extends LayoutlibCallback {
 
     @Override
     public ILayoutPullParser getParser(String layoutName) {
-        org.junit.Assert.fail("This method shouldn't be called by this version of LayoutLib.");
+        fail("This method shouldn't be called by this version of LayoutLib.");
         return null;
     }
 
@@ -152,5 +162,18 @@ public class LayoutLibTestCallback extends LayoutlibCallback {
     @Override
     public boolean supports(int ideFeature) {
         return false;
+    }
+
+    @NonNull
+    @Override
+    public ParserFactory getParserFactory() {
+        return new ParserFactory() {
+            @NonNull
+            @Override
+            public XmlPullParser createParser(@Nullable String debugName)
+                    throws XmlPullParserException {
+                return new KXmlParser();
+            }
+        };
     }
 }

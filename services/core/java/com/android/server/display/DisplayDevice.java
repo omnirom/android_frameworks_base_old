@@ -19,6 +19,7 @@ package com.android.server.display;
 import android.graphics.Rect;
 import android.hardware.display.DisplayViewport;
 import android.os.IBinder;
+import android.view.Display;
 import android.view.Surface;
 import android.view.SurfaceControl;
 
@@ -46,6 +47,10 @@ abstract class DisplayDevice {
     // The display device owns its surface, but it should only set it
     // within a transaction from performTraversalInTransactionLocked.
     private Surface mCurrentSurface;
+
+    // DEBUG STATE: Last device info which was written to the log, or null if none.
+    // Do not use for any other purpose.
+    DisplayDeviceInfo mDebugLastLoggedDeviceInfo;
 
     public DisplayDevice(DisplayAdapter displayAdapter, IBinder displayToken, String uniqueId) {
         mDisplayAdapter = displayAdapter;
@@ -118,17 +123,19 @@ abstract class DisplayDevice {
     /**
      * Sets the display state, if supported.
      *
+     * @param state The new display state.
+     * @param brightness The new display brightness.
      * @return A runnable containing work to be deferred until after we have
      * exited the critical section, or null if none.
      */
-    public Runnable requestDisplayStateLocked(int state) {
+    public Runnable requestDisplayStateLocked(int state, int brightness) {
         return null;
     }
 
     /**
-     * Sets the refresh rate, if supported.
+     * Sets the mode, if supported.
      */
-    public void requestRefreshRateLocked(float refreshRate) {
+    public void requestModeInTransactionLocked(int id) {
     }
 
     /**

@@ -117,7 +117,7 @@ public abstract class PowerManagerInternal {
     /**
      * Used by the dream manager to override certain properties while dozing.
      *
-     * @param screenState The overridden screen state, or {@link Display.STATE_UNKNOWN}
+     * @param screenState The overridden screen state, or {@link Display#STATE_UNKNOWN}
      * to disable the override.
      * @param screenBrightness The overridden screen brightness, or
      * {@link PowerManager#BRIGHTNESS_DEFAULT} to disable the override.
@@ -132,4 +132,14 @@ public abstract class PowerManagerInternal {
     public interface LowPowerModeListener {
         public void onLowPowerModeChanged(boolean enabled);
     }
+
+    public abstract void setDeviceIdleMode(boolean enabled);
+
+    public abstract void setDeviceIdleWhitelist(int[] appids);
+
+    public abstract void setDeviceIdleTempWhitelist(int[] appids);
+
+    public abstract void updateUidProcState(int uid, int procState);
+
+    public abstract void uidGone(int uid);
 }

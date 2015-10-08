@@ -16,6 +16,7 @@
 
 package android.text;
 
+import android.annotation.IntDef;
 import android.emoji.EmojiFactory;
 import android.graphics.Canvas;
 import android.graphics.Paint;
@@ -33,6 +34,8 @@ import android.text.style.TabStopSpan;
 import com.android.internal.util.ArrayUtils;
 import com.android.internal.util.GrowingArrayUtils;
 
+import java.lang.annotation.Retention;
+import java.lang.annotation.RetentionPolicy;
 import java.util.Arrays;
 
 /**
@@ -43,6 +46,60 @@ import java.util.Arrays;
  * For text that will not change, use a {@link StaticLayout}.
  */
 public abstract class Layout {
+    /** @hide */
+    @IntDef({BREAK_STRATEGY_SIMPLE, BREAK_STRATEGY_HIGH_QUALITY, BREAK_STRATEGY_BALANCED})
+    @Retention(RetentionPolicy.SOURCE)
+    public @interface BreakStrategy {}
+
+    /**
+     * Value for break strategy indicating simple line breaking. Automatic hyphens are not added
+     * (though soft hyphens are respected), and modifying text generally doesn't affect the layout
+     * before it (which yields a more consistent user experience when editing), but layout may not
+     * be the highest quality.
+     */
+    public static final int BREAK_STRATEGY_SIMPLE = 0;
+
+    /**
+     * Value for break strategy indicating high quality line breaking, including automatic
+     * hyphenation and doing whole-paragraph optimization of line breaks.
+     */
+    public static final int BREAK_STRATEGY_HIGH_QUALITY = 1;
+
+    /**
+     * Value for break strategy indicating balanced line breaking. The breaks are chosen to
+     * make all lines as close to the same length as possible, including automatic hyphenation.
+     */
+    public static final int BREAK_STRATEGY_BALANCED = 2;
+
+    /** @hide */
+    @IntDef({HYPHENATION_FREQUENCY_NORMAL, HYPHENATION_FREQUENCY_FULL,
+             HYPHENATION_FREQUENCY_NONE})
+    @Retention(RetentionPolicy.SOURCE)
+    public @interface HyphenationFrequency {}
+
+    /**
+     * Value for hyphenation frequency indicating no automatic hyphenation. Useful
+     * for backward compatibility, and for cases where the automatic hyphenation algorithm results
+     * in incorrect hyphenation. Mid-word breaks may still happen when a word is wider than the
+     * layout and there is otherwise no valid break. Soft hyphens are ignored and will not be used
+     * as suggestions for potential line breaks.
+     */
+    public static final int HYPHENATION_FREQUENCY_NONE = 0;
+
+    /**
+     * Value for hyphenation frequency indicating a light amount of automatic hyphenation, which
+     * is a conservative default. Useful for informal cases, such as short sentences or chat
+     * messages.
+     */
+    public static final int HYPHENATION_FREQUENCY_NORMAL = 1;
+
+    /**
+     * Value for hyphenation frequency indicating the full amount of automatic hyphenation, typical
+     * in typography. Useful for running text and where it's important to put the maximum amount of
+     * text in a screen with limited space.
+     */
+    public static final int HYPHENATION_FREQUENCY_FULL = 2;
+
     private static final ParagraphStyle[] NO_PARA_SPANS =
         ArrayUtils.emptyArray(ParagraphStyle.class);
 
@@ -149,7 +206,6 @@ public abstract class Layout {
 
         mText = text;
         mPaint = paint;
-        mWorkPaint = new TextPaint();
         mWidth = width;
         mAlignment = align;
         mSpacingMult = spacingMult;
@@ -225,17 +281,17 @@ public abstract class Layout {
 
         // Draw the lines, one at a time.
         // The baseline is the top of the following line minus the current line's descent.
-        for (int i = firstLine; i <= lastLine; i++) {
+        for (int lineNum = firstLine; lineNum <= lastLine; lineNum++) {
             int start = previousLineEnd;
-            previousLineEnd = getLineStart(i + 1);
-            int end = getLineVisibleEnd(i, start, previousLineEnd);
+            previousLineEnd = getLineStart(lineNum + 1);
+            int end = getLineVisibleEnd(lineNum, start, previousLineEnd);
 
             int ltop = previousLineBottom;
-            int lbottom = getLineTop(i+1);
+            int lbottom = getLineTop(lineNum + 1);
             previousLineBottom = lbottom;
-            int lbaseline = lbottom - getLineDescent(i);
+            int lbaseline = lbottom - getLineDescent(lineNum);
 
-            int dir = getParagraphDirection(i);
+            int dir = getParagraphDirection(lineNum);
             int left = 0;
             int right = mWidth;
 
@@ -254,7 +310,7 @@ public abstract class Layout {
                 // just collect the ones present at the start of the paragraph.
                 // If spanEnd is before the end of the paragraph, that's not
                 // our problem.
-                if (start >= spanEnd && (i == firstLine || isFirstParaLine)) {
+                if (start >= spanEnd && (lineNum == firstLine || isFirstParaLine)) {
                     spanEnd = sp.nextSpanTransition(start, textLength,
                                                     ParagraphStyle.class);
                     spans = getParagraphSpans(sp, start, spanEnd, ParagraphStyle.class);
@@ -280,7 +336,7 @@ public abstract class Layout {
                         int startLine = getLineForOffset(sp.getSpanStart(spans[n]));
                         // if there is more than one LeadingMarginSpan2, use
                         // the count that is greatest
-                        if (i < startLine + count) {
+                        if (lineNum < startLine + count) {
                             useFirstLineMargin = true;
                             break;
                         }
@@ -304,7 +360,7 @@ public abstract class Layout {
                 }
             }
 
-            boolean hasTabOrEmoji = getLineContainsTab(i);
+            boolean hasTabOrEmoji = getLineContainsTab(lineNum);
             // Can't tell if we have tabs for sure, currently
             if (hasTabOrEmoji && !tabStopsIsInitialized) {
                 if (tabStops == null) {
@@ -328,25 +384,27 @@ public abstract class Layout {
             int x;
             if (align == Alignment.ALIGN_NORMAL) {
                 if (dir == DIR_LEFT_TO_RIGHT) {
-                    x = left;
+                    x = left + getIndentAdjust(lineNum, Alignment.ALIGN_LEFT);
                 } else {
-                    x = right;
+                    x = right + getIndentAdjust(lineNum, Alignment.ALIGN_RIGHT);
                 }
             } else {
-                int max = (int)getLineExtent(i, tabStops, false);
+                int max = (int)getLineExtent(lineNum, tabStops, false);
                 if (align == Alignment.ALIGN_OPPOSITE) {
                     if (dir == DIR_LEFT_TO_RIGHT) {
-                        x = right - max;
+                        x = right - max + getIndentAdjust(lineNum, Alignment.ALIGN_RIGHT);
                     } else {
-                        x = left - max;
+                        x = left - max + getIndentAdjust(lineNum, Alignment.ALIGN_LEFT);
                     }
                 } else { // Alignment.ALIGN_CENTER
                     max = max & ~1;
-                    x = (right + left - max) >> 1;
+                    x = ((right + left - max) >> 1) +
+                            getIndentAdjust(lineNum, Alignment.ALIGN_CENTER);
                 }
             }
 
-            Directions directions = getLineDirections(i);
+            paint.setHyphenEdit(getHyphen(lineNum));
+            Directions directions = getLineDirections(lineNum);
             if (directions == DIRS_ALL_LEFT_TO_RIGHT && !mSpannedText && !hasTabOrEmoji) {
                 // XXX: assumes there's nothing additional to be done
                 canvas.drawText(buf, start, end, x, lbaseline, paint);
@@ -354,6 +412,7 @@ public abstract class Layout {
                 tl.set(paint, buf, start, end, dir, directions, hasTabOrEmoji, tabStops);
                 tl.draw(canvas, x, ltop, lbaseline, lbottom);
             }
+            paint.setHyphenEdit(0);
         }
 
         TextLine.recycle(tl);
@@ -486,9 +545,9 @@ public abstract class Layout {
         int x;
         if (align == Alignment.ALIGN_NORMAL) {
             if (dir == DIR_LEFT_TO_RIGHT) {
-                x = left;
+                x = left + getIndentAdjust(line, Alignment.ALIGN_LEFT);
             } else {
-                x = right;
+                x = right + getIndentAdjust(line, Alignment.ALIGN_RIGHT);
             }
         } else {
             TabStops tabStops = null;
@@ -506,14 +565,14 @@ public abstract class Layout {
             int max = (int)getLineExtent(line, tabStops, false);
             if (align == Alignment.ALIGN_OPPOSITE) {
                 if (dir == DIR_LEFT_TO_RIGHT) {
-                    x = right - max;
+                    x = right - max + getIndentAdjust(line, Alignment.ALIGN_RIGHT);
                 } else {
                     // max is negative here
-                    x = left - max;
+                    x = left - max + getIndentAdjust(line, Alignment.ALIGN_LEFT);
                 }
             } else { // Alignment.ALIGN_CENTER
                 max = max & ~1;
-                x = (left + right - max) >> 1;
+                x = (left + right - max) >> 1 + getIndentAdjust(line, Alignment.ALIGN_CENTER);
             }
         }
         return x;
@@ -677,6 +736,23 @@ public abstract class Layout {
      */
     public abstract int getBottomPadding();
 
+    /**
+     * Returns the hyphen edit for a line.
+     *
+     * @hide
+     */
+    public int getHyphen(int line) {
+        return 0;
+    }
+
+    /**
+     * Returns the left indent for a line.
+     *
+     * @hide
+     */
+    public int getIndentAdjust(int line, Alignment alignment) {
+        return 0;
+    }
 
     /**
      * Returns true if the character at offset and the preceding character
@@ -1053,6 +1129,7 @@ public abstract class Layout {
      * closest to the specified horizontal position.
      */
     public int getOffsetForHorizontal(int line, float horiz) {
+        // TODO: use Paint.getOffsetForAdvance to avoid binary search
         int max = getLineEnd(line) - 1;
         int min = getLineStart(line);
         Directions dirs = getLineDirections(line);
@@ -1153,7 +1230,10 @@ public abstract class Layout {
                 return end - 1;
             }
 
-            if (ch != ' ' && ch != '\t') {
+            // Note: keep this in sync with Minikin LineBreaker::isLineEndSpace()
+            if (!(ch == ' ' || ch == '\t' || ch == 0x1680 ||
+                    (0x2000 <= ch && ch <= 0x200A && ch != 0x2007) ||
+                    ch == 0x205F || ch == 0x3000)) {
                 break;
             }
 
@@ -1564,7 +1644,7 @@ public abstract class Layout {
         MeasuredText mt = MeasuredText.obtain();
         TextLine tl = TextLine.obtain();
         try {
-            mt.setPara(text, start, end, TextDirectionHeuristics.LTR);
+            mt.setPara(text, start, end, TextDirectionHeuristics.LTR, null);
             Directions directions;
             int dir;
             if (mt.mEasy) {
@@ -1912,7 +1992,6 @@ public abstract class Layout {
 
     private CharSequence mText;
     private TextPaint mPaint;
-    /* package */ TextPaint mWorkPaint;
     private int mWidth;
     private Alignment mAlignment = Alignment.ALIGN_NORMAL;
     private float mSpacingMult;

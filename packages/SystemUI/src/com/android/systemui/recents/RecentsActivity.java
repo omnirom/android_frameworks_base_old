@@ -19,42 +19,38 @@ package com.android.systemui.recents;
 import android.app.Activity;
 import android.app.ActivityOptions;
 import android.app.SearchManager;
-import android.appwidget.AppWidgetHostView;
 import android.appwidget.AppWidgetManager;
 import android.appwidget.AppWidgetProviderInfo;
 import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.Intent;
 import android.content.IntentFilter;
-import android.content.SharedPreferences;
 import android.os.Bundle;
 import android.os.SystemClock;
 import android.os.UserHandle;
-import android.util.Pair;
 import android.view.KeyEvent;
 import android.view.View;
 import android.view.ViewStub;
 import android.widget.Toast;
 
+import com.android.internal.logging.MetricsConstants;
+import com.android.internal.logging.MetricsLogger;
+import com.android.systemui.Prefs;
 import com.android.systemui.R;
+import com.android.systemui.recents.misc.Console;
 import com.android.systemui.recents.misc.DebugTrigger;
 import com.android.systemui.recents.misc.ReferenceCountedTrigger;
 import com.android.systemui.recents.misc.SystemServicesProxy;
-import com.android.systemui.recents.misc.Utilities;
 import com.android.systemui.recents.model.RecentsTaskLoadPlan;
 import com.android.systemui.recents.model.RecentsTaskLoader;
-import com.android.systemui.recents.model.SpaceNode;
 import com.android.systemui.recents.model.Task;
 import com.android.systemui.recents.model.TaskStack;
 import com.android.systemui.recents.views.DebugOverlayView;
 import com.android.systemui.recents.views.RecentsView;
 import com.android.systemui.recents.views.SystemBarScrimViews;
 import com.android.systemui.recents.views.ViewAnimation;
-import com.android.systemui.statusbar.phone.PhoneStatusBar;
-import com.android.systemui.SystemUIApplication;
 
 import java.lang.ref.WeakReference;
-import java.lang.reflect.InvocationTargetException;
 import java.util.ArrayList;
 
 /**
@@ -75,15 +71,19 @@ public class RecentsActivity extends Activity implements RecentsView.RecentsView
     View mEmptyView;
     DebugOverlayView mDebugOverlay;
 
+    // Resize task debug
+    RecentsResizeTaskDialog mResizeTaskDebugDialog;
+
     // Search AppWidget
+    AppWidgetProviderInfo mSearchWidgetInfo;
     RecentsAppWidgetHost mAppWidgetHost;
-    AppWidgetProviderInfo mSearchAppWidgetInfo;
-    AppWidgetHostView mSearchAppWidgetHostView;
+    RecentsAppWidgetHostView mSearchWidgetHostView;
 
     // Runnables to finish the Recents activity
     FinishRecentsRunnable mFinishLaunchHomeRunnable;
 
-    private PhoneStatusBar mStatusBar;
+    // Runnable to be executed after we paused ourselves
+    Runnable mAfterPauseRunnable;
 
     /**
      * A common Runnable to finish Recents either by calling finish() (with a custom animation) or
@@ -109,10 +109,15 @@ public class RecentsActivity extends Activity implements RecentsView.RecentsView
         public void run() {
             // Finish Recents
             if (mLaunchIntent != null) {
-                if (mLaunchOpts != null) {
-                    startActivityAsUser(mLaunchIntent, mLaunchOpts.toBundle(), UserHandle.CURRENT);
-                } else {
-                    startActivityAsUser(mLaunchIntent, UserHandle.CURRENT);
+                try {
+                    if (mLaunchOpts != null) {
+                        startActivityAsUser(mLaunchIntent, mLaunchOpts.toBundle(), UserHandle.CURRENT);
+                    } else {
+                        startActivityAsUser(mLaunchIntent, UserHandle.CURRENT);
+                    }
+                } catch (Exception e) {
+                    Console.logError(RecentsActivity.this,
+                            getString(R.string.recents_launch_error_message, "Home"));
                 }
             } else {
                 finish();
@@ -129,20 +134,20 @@ public class RecentsActivity extends Activity implements RecentsView.RecentsView
         @Override
         public void onReceive(Context context, Intent intent) {
             String action = intent.getAction();
-            if (action.equals(AlternateRecentsComponent.ACTION_HIDE_RECENTS_ACTIVITY)) {
-                if (intent.getBooleanExtra(AlternateRecentsComponent.EXTRA_TRIGGERED_FROM_ALT_TAB, false)) {
+            if (action.equals(Recents.ACTION_HIDE_RECENTS_ACTIVITY)) {
+                if (intent.getBooleanExtra(Recents.EXTRA_TRIGGERED_FROM_ALT_TAB, false)) {
                     // If we are hiding from releasing Alt-Tab, dismiss Recents to the focused app
                     dismissRecentsToFocusedTaskOrHome(false);
-                } else if (intent.getBooleanExtra(AlternateRecentsComponent.EXTRA_TRIGGERED_FROM_HOME_KEY, false)) {
+                } else if (intent.getBooleanExtra(Recents.EXTRA_TRIGGERED_FROM_HOME_KEY, false)) {
                     // Otherwise, dismiss Recents to Home
-                    dismissRecentsToHome(true);
+                    dismissRecentsToHomeRaw(true);
                 } else {
-                    // Do nothing, another activity is being launched on top of Recents
+                    // Do nothing
                 }
-            } else if (action.equals(AlternateRecentsComponent.ACTION_TOGGLE_RECENTS_ACTIVITY)) {
+            } else if (action.equals(Recents.ACTION_TOGGLE_RECENTS_ACTIVITY)) {
                 // If we are toggling Recents, then first unfilter any filtered stacks first
                 dismissRecentsToFocusedTaskOrHome(true);
-            } else if (action.equals(AlternateRecentsComponent.ACTION_START_ENTER_ANIMATION)) {
+            } else if (action.equals(Recents.ACTION_START_ENTER_ANIMATION)) {
                 // Trigger the enter animation
                 onEnterAnimationTriggered();
                 // Notify the fallback receiver that we have successfully got the broadcast
@@ -163,8 +168,10 @@ public class RecentsActivity extends Activity implements RecentsView.RecentsView
                 // When the screen turns off, dismiss Recents to Home
                 dismissRecentsToHome(false);
             } else if (action.equals(SearchManager.INTENT_GLOBAL_SEARCH_ACTIVITY_CHANGED)) {
-                // When the search activity changes, update the Search widget
-                refreshSearchWidget();
+                // When the search activity changes, update the search widget view
+                SystemServicesProxy ssp = RecentsTaskLoader.getInstance().getSystemServicesProxy();
+                mSearchWidgetInfo = ssp.getOrBindSearchAppWidget(context, mAppWidgetHost);
+                refreshSearchWidgetView();
             }
         }
     };
@@ -180,17 +187,17 @@ public class RecentsActivity extends Activity implements RecentsView.RecentsView
     });
 
     /** Updates the set of recent tasks */
-    void updateRecentsTasks(Intent launchIntent) {
+    void updateRecentsTasks() {
         // If AlternateRecentsComponent has preloaded a load plan, then use that to prevent
         // reconstructing the task stack
         RecentsTaskLoader loader = RecentsTaskLoader.getInstance();
-        RecentsTaskLoadPlan plan = AlternateRecentsComponent.consumeInstanceLoadPlan();
+        RecentsTaskLoadPlan plan = Recents.consumeInstanceLoadPlan();
         if (plan == null) {
             plan = loader.createLoadPlan(this);
         }
 
         // Start loading tasks according to the load plan
-        if (plan.getTaskStack() == null) {
+        if (!plan.hasTasks()) {
             loader.preloadTasks(plan, mConfig.launchedFromHome);
         }
         RecentsTaskLoadPlan.Options loadOpts = new RecentsTaskLoadPlan.Options();
@@ -199,13 +206,11 @@ public class RecentsActivity extends Activity implements RecentsView.RecentsView
         loadOpts.numVisibleTaskThumbnails = mConfig.launchedNumVisibleThumbnails;
         loader.loadTasks(this, plan, loadOpts);
 
-        SpaceNode root = plan.getSpaceNode();
-        ArrayList<TaskStack> stacks = root.getStacks();
-        boolean hasTasks = root.hasTasks();
-        if (hasTasks) {
+        ArrayList<TaskStack> stacks = plan.getAllTaskStacks();
+        mConfig.launchedWithNoRecentTasks = !plan.hasTasks();
+        if (!mConfig.launchedWithNoRecentTasks) {
             mRecentsView.setTaskStacks(stacks);
         }
-        mConfig.launchedWithNoRecentTasks = !hasTasks;
 
         // Create the home intent runnable
         Intent homeIntent = new Intent(Intent.ACTION_MAIN, null);
@@ -221,6 +226,7 @@ public class RecentsActivity extends Activity implements RecentsView.RecentsView
 
         // Mark the task that is the launch target
         int taskStackCount = stacks.size();
+        int launchTaskIndexInStack = 0;
         if (mConfig.launchedToTaskId != -1) {
             for (int i = 0; i < taskStackCount; i++) {
                 TaskStack stack = stacks.get(i);
@@ -230,6 +236,7 @@ public class RecentsActivity extends Activity implements RecentsView.RecentsView
                     Task t = tasks.get(j);
                     if (t.key.id == mConfig.launchedToTaskId) {
                         t.isLaunchTarget = true;
+                        launchTaskIndexInStack = tasks.size() - j - 1;
                         break;
                     }
                 }
@@ -247,71 +254,37 @@ public class RecentsActivity extends Activity implements RecentsView.RecentsView
             if (mEmptyView != null) {
                 mEmptyView.setVisibility(View.GONE);
             }
-            if (mRecentsView.hasSearchBar()) {
+            if (mRecentsView.hasValidSearchBar()) {
                 mRecentsView.setSearchBarVisibility(View.VISIBLE);
             } else {
-                addSearchBarAppWidgetView();
+                refreshSearchWidgetView();
             }
         }
 
         // Animate the SystemUI scrims into view
         mScrimViews.prepareEnterRecentsAnimation();
-    }
 
-    /** Attempts to allocate and bind the search bar app widget */
-    void bindSearchBarAppWidget() {
-        if (Constants.DebugFlags.App.EnableSearchLayout) {
-            SystemServicesProxy ssp = RecentsTaskLoader.getInstance().getSystemServicesProxy();
-
-            // Reset the host view and widget info
-            mSearchAppWidgetHostView = null;
-            mSearchAppWidgetInfo = null;
-
-            // Try and load the app widget id from the settings
-            int appWidgetId = mConfig.searchBarAppWidgetId;
-            if (appWidgetId >= 0) {
-                mSearchAppWidgetInfo = ssp.getAppWidgetInfo(appWidgetId);
-                if (mSearchAppWidgetInfo == null) {
-                    // If there is no actual widget associated with that id, then delete it and
-                    // prepare to bind another app widget in its place
-                    ssp.unbindSearchAppWidget(mAppWidgetHost, appWidgetId);
-                    appWidgetId = -1;
-                }
-            }
-
-            // If there is no id, then bind a new search app widget
-            if (appWidgetId < 0) {
-                Pair<Integer, AppWidgetProviderInfo> widgetInfo =
-                        ssp.bindSearchAppWidget(mAppWidgetHost);
-                if (widgetInfo != null) {
-                    // Save the app widget id into the settings
-                    mConfig.updateSearchBarAppWidgetId(this, widgetInfo.first);
-                    mSearchAppWidgetInfo = widgetInfo.second;
-                } else {
-                    mConfig.updateSearchBarAppWidgetId(this, -1);
-                }
-            }
+        // Keep track of whether we launched from the nav bar button or via alt-tab
+        if (mConfig.launchedWithAltTab) {
+            MetricsLogger.count(this, "overview_trigger_alttab", 1);
+        } else {
+            MetricsLogger.count(this, "overview_trigger_nav_btn", 1);
         }
-    }
-
-    /** Creates the search bar app widget view */
-    void addSearchBarAppWidgetView() {
-        if (Constants.DebugFlags.App.EnableSearchLayout) {
-            int appWidgetId = mConfig.searchBarAppWidgetId;
-            if (appWidgetId >= 0) {
-                mSearchAppWidgetHostView = mAppWidgetHost.createView(this, appWidgetId,
-                        mSearchAppWidgetInfo);
-                Bundle opts = new Bundle();
-                opts.putInt(AppWidgetManager.OPTION_APPWIDGET_HOST_CATEGORY,
-                        AppWidgetProviderInfo.WIDGET_CATEGORY_SEARCHBOX);
-                mSearchAppWidgetHostView.updateAppWidgetOptions(opts);
-                // Set the padding to 0 for this search widget
-                mSearchAppWidgetHostView.setPadding(0, 0, 0, 0);
-                mRecentsView.setSearchBar(mSearchAppWidgetHostView);
-            } else {
-                mRecentsView.setSearchBar(null);
-            }
+        // Keep track of whether we launched from an app or from home
+        if (mConfig.launchedFromAppWithThumbnail) {
+            MetricsLogger.count(this, "overview_source_app", 1);
+            // If from an app, track the stack index of the app in the stack (for affiliated tasks)
+            MetricsLogger.histogram(this, "overview_source_app_index", launchTaskIndexInStack);
+        } else {
+            MetricsLogger.count(this, "overview_source_home", 1);
         }
+        // Keep track of the total stack task count
+        int taskCount = 0;
+        for (int i = 0; i < stacks.size(); i++) {
+            TaskStack stack = stacks.get(i);
+            taskCount += stack.getTaskCount();
+        }
+        MetricsLogger.histogram(this, "overview_task_count", taskCount);
     }
 
     /** Dismisses recents if we are already visible and the intent is to toggle the recents view */
@@ -349,6 +322,12 @@ public class RecentsActivity extends Activity implements RecentsView.RecentsView
         }
     }
 
+    /** Dismisses Recents directly to Home without transition animation. */
+    void dismissRecentsToHomeWithoutTransitionAnimation() {
+        finish();
+        overridePendingTransition(0, 0);
+    }
+
     /** Dismisses Recents directly to Home if we currently aren't transitioning. */
     boolean dismissRecentsToHome(boolean animated) {
         SystemServicesProxy ssp = RecentsTaskLoader.getInstance().getSystemServicesProxy();
@@ -383,27 +362,16 @@ public class RecentsActivity extends Activity implements RecentsView.RecentsView
         mEmptyViewStub = (ViewStub) findViewById(R.id.empty_view_stub);
         mDebugOverlayStub = (ViewStub) findViewById(R.id.debug_overlay_stub);
         mScrimViews = new SystemBarScrimViews(this, mConfig);
-        mStatusBar = ((SystemUIApplication) getApplication())
-                .getComponent(PhoneStatusBar.class);
         inflateDebugOverlay();
 
         // Bind the search app widget when we first start up
-        bindSearchBarAppWidget();
+        mSearchWidgetInfo = ssp.getOrBindSearchAppWidget(this, mAppWidgetHost);
 
         // Register the broadcast receiver to handle messages when the screen is turned off
         IntentFilter filter = new IntentFilter();
         filter.addAction(Intent.ACTION_SCREEN_OFF);
         filter.addAction(SearchManager.INTENT_GLOBAL_SEARCH_ACTIVITY_CHANGED);
         registerReceiver(mSystemBroadcastReceiver, filter);
-
-        // Private API calls to make the shadows look better
-        try {
-            Utilities.setShadowProperty("ambientRatio", String.valueOf(1.5f));
-        } catch (IllegalAccessException e) {
-            e.printStackTrace();
-        } catch (InvocationTargetException e) {
-            e.printStackTrace();
-        }
     }
 
     /** Inflates the debug overlay if debug mode is enabled. */
@@ -432,36 +400,53 @@ public class RecentsActivity extends Activity implements RecentsView.RecentsView
     @Override
     protected void onStart() {
         super.onStart();
+        MetricsLogger.visible(this, MetricsLogger.OVERVIEW_ACTIVITY);
         RecentsTaskLoader loader = RecentsTaskLoader.getInstance();
         SystemServicesProxy ssp = loader.getSystemServicesProxy();
-        AlternateRecentsComponent.notifyVisibilityChanged(this, ssp, true);
+        Recents.notifyVisibilityChanged(this, ssp, true);
 
         // Register the broadcast receiver to handle messages from our service
         IntentFilter filter = new IntentFilter();
-        filter.addAction(AlternateRecentsComponent.ACTION_HIDE_RECENTS_ACTIVITY);
-        filter.addAction(AlternateRecentsComponent.ACTION_TOGGLE_RECENTS_ACTIVITY);
-        filter.addAction(AlternateRecentsComponent.ACTION_START_ENTER_ANIMATION);
+        filter.addAction(Recents.ACTION_HIDE_RECENTS_ACTIVITY);
+        filter.addAction(Recents.ACTION_TOGGLE_RECENTS_ACTIVITY);
+        filter.addAction(Recents.ACTION_START_ENTER_ANIMATION);
         registerReceiver(mServiceBroadcastReceiver, filter);
 
         // Register any broadcast receivers for the task loader
         loader.registerReceivers(this, mRecentsView);
 
         // Update the recent tasks
-        updateRecentsTasks(getIntent());
+        updateRecentsTasks();
 
         // If this is a new instance from a configuration change, then we have to manually trigger
-        // the enter animation state
-        if (mConfig.launchedHasConfigurationChanged) {
+        // the enter animation state, or if recents was relaunched by AM, without going through
+        // the normal mechanisms
+        boolean wasLaunchedByAm = !mConfig.launchedFromHome && !mConfig.launchedFromAppWithThumbnail;
+        if (mConfig.launchedHasConfigurationChanged || wasLaunchedByAm) {
             onEnterAnimationTriggered();
+        }
+
+        if (!mConfig.launchedHasConfigurationChanged) {
+            mRecentsView.disableLayersForOneFrame();
+        }
+    }
+
+    @Override
+    protected void onPause() {
+        super.onPause();
+        if (mAfterPauseRunnable != null) {
+            mRecentsView.post(mAfterPauseRunnable);
+            mAfterPauseRunnable = null;
         }
     }
 
     @Override
     protected void onStop() {
         super.onStop();
+        MetricsLogger.hidden(this, MetricsLogger.OVERVIEW_ACTIVITY);
         RecentsTaskLoader loader = RecentsTaskLoader.getInstance();
         SystemServicesProxy ssp = loader.getSystemServicesProxy();
-        AlternateRecentsComponent.notifyVisibilityChanged(this, ssp, false);
+        Recents.notifyVisibilityChanged(this, ssp, false);
 
         // Notify the views that we are no longer visible
         mRecentsView.onRecentsHidden();
@@ -471,6 +456,16 @@ public class RecentsActivity extends Activity implements RecentsView.RecentsView
 
         // Unregister any broadcast receivers for the task loader
         loader.unregisterReceivers();
+
+        // Workaround for b/22542869, if the RecentsActivity is started again, but without going
+        // through SystemUI, we need to reset the config launch flags to ensure that we do not
+        // wait on the system to send a signal that was never queued.
+        mConfig.launchedFromHome = false;
+        mConfig.launchedFromSearchHome = false;
+        mConfig.launchedFromAppWithThumbnail = false;
+        mConfig.launchedToTaskId = -1;
+        mConfig.launchedWithAltTab = false;
+        mConfig.launchedHasConfigurationChanged = false;
     }
 
     @Override
@@ -489,7 +484,8 @@ public class RecentsActivity extends Activity implements RecentsView.RecentsView
         ReferenceCountedTrigger t = new ReferenceCountedTrigger(this, null, null, null);
         ViewAnimation.TaskViewEnterContext ctx = new ViewAnimation.TaskViewEnterContext(t);
         mRecentsView.startEnterRecentsAnimation(ctx);
-        if (mConfig.searchBarAppWidgetId >= 0) {
+
+        if (mSearchWidgetInfo != null) {
             final WeakReference<RecentsAppWidgetHost.RecentsAppWidgetHostCallbacks> cbRef =
                     new WeakReference<RecentsAppWidgetHost.RecentsAppWidgetHostCallbacks>(
                             RecentsActivity.this);
@@ -542,6 +538,9 @@ public class RecentsActivity extends Activity implements RecentsView.RecentsView
             case KeyEvent.KEYCODE_DEL:
             case KeyEvent.KEYCODE_FORWARD_DEL: {
                 mRecentsView.dismissFocusedTask();
+                // Keep track of deletions by keyboard
+                MetricsLogger.histogram(this, "overview_task_dismissed_source",
+                        Constants.Metrics.DismissSourceKeyboard);
                 return true;
             }
             default:
@@ -569,10 +568,9 @@ public class RecentsActivity extends Activity implements RecentsView.RecentsView
     /** Called when debug mode is triggered */
     public void onDebugModeTriggered() {
         if (mConfig.developerOptionsEnabled) {
-            SharedPreferences settings = getSharedPreferences(getPackageName(), 0);
-            if (settings.getBoolean(Constants.Values.App.Key_DebugModeEnabled, false)) {
+            if (Prefs.getBoolean(this, Prefs.Key.DEBUG_MODE_ENABLED, false /* boolean */)) {
                 // Disable the debug mode
-                settings.edit().remove(Constants.Values.App.Key_DebugModeEnabled).apply();
+                Prefs.remove(this, Prefs.Key.DEBUG_MODE_ENABLED);
                 mConfig.debugModeEnabled = false;
                 inflateDebugOverlay();
                 if (mDebugOverlay != null) {
@@ -580,7 +578,7 @@ public class RecentsActivity extends Activity implements RecentsView.RecentsView
                 }
             } else {
                 // Enable the debug mode
-                settings.edit().putBoolean(Constants.Values.App.Key_DebugModeEnabled, true).apply();
+                Prefs.putBoolean(this, Prefs.Key.DEBUG_MODE_ENABLED, true);
                 mConfig.debugModeEnabled = true;
                 inflateDebugOverlay();
                 if (mDebugOverlay != null) {
@@ -591,6 +589,21 @@ public class RecentsActivity extends Activity implements RecentsView.RecentsView
                 (mConfig.debugModeEnabled ? "Enabled" : "Disabled") + ", please restart Recents now",
                 Toast.LENGTH_SHORT).show();
         }
+    }
+
+
+    /**** RecentsResizeTaskDialog ****/
+
+    private RecentsResizeTaskDialog getResizeTaskDebugDialog() {
+        if (mResizeTaskDebugDialog == null) {
+            mResizeTaskDebugDialog = new RecentsResizeTaskDialog(getFragmentManager(), this);
+        }
+        return mResizeTaskDebugDialog;
+    }
+
+    @Override
+    public void onTaskResize(Task t) {
+        getResizeTaskDebugDialog().showResizeTaskDialog(t, mRecentsView);
     }
 
     /**** RecentsView.RecentsViewCallbacks Implementation ****/
@@ -618,17 +631,37 @@ public class RecentsActivity extends Activity implements RecentsView.RecentsView
 
     @Override
     public void onScreenPinningRequest() {
-        if (mStatusBar != null) {
-            mStatusBar.showScreenPinningRequest(false);
-        }
+        RecentsTaskLoader loader = RecentsTaskLoader.getInstance();
+        SystemServicesProxy ssp = loader.getSystemServicesProxy();
+        Recents.startScreenPinning(this, ssp);
+
+        MetricsLogger.count(this, "overview_screen_pinned", 1);
+    }
+
+    @Override
+    public void runAfterPause(Runnable r) {
+        mAfterPauseRunnable = r;
     }
 
     /**** RecentsAppWidgetHost.RecentsAppWidgetHostCallbacks Implementation ****/
 
     @Override
-    public void refreshSearchWidget() {
-        bindSearchBarAppWidget();
-        addSearchBarAppWidgetView();
+    public void refreshSearchWidgetView() {
+        if (mSearchWidgetInfo != null) {
+            SystemServicesProxy ssp = RecentsTaskLoader.getInstance().getSystemServicesProxy();
+            int searchWidgetId = ssp.getSearchAppWidgetId(this);
+            mSearchWidgetHostView = (RecentsAppWidgetHostView) mAppWidgetHost.createView(
+                    this, searchWidgetId, mSearchWidgetInfo);
+            Bundle opts = new Bundle();
+            opts.putInt(AppWidgetManager.OPTION_APPWIDGET_HOST_CATEGORY,
+                    AppWidgetProviderInfo.WIDGET_CATEGORY_SEARCHBOX);
+            mSearchWidgetHostView.updateAppWidgetOptions(opts);
+            // Set the padding to 0 for this search widget
+            mSearchWidgetHostView.setPadding(0, 0, 0, 0);
+            mRecentsView.setSearchBar(mSearchWidgetHostView);
+        } else {
+            mRecentsView.setSearchBar(null);
+        }
     }
 
     /**** DebugOverlayView.DebugOverlayViewCallbacks ****/

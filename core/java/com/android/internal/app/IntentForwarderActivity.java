@@ -28,7 +28,6 @@ import android.content.Intent;
 import android.content.pm.IPackageManager;
 import android.content.pm.UserInfo;
 import android.os.Bundle;
-import android.os.Process;
 import android.os.RemoteException;
 import android.os.UserHandle;
 import android.os.UserManager;
@@ -88,9 +87,9 @@ public class IntentForwarderActivity extends Activity  {
         if (canForward(newIntent, targetUserId)) {
             if (newIntent.getAction().equals(Intent.ACTION_CHOOSER)) {
                 Intent innerIntent = (Intent) newIntent.getParcelableExtra(Intent.EXTRA_INTENT);
-                innerIntent.setContentUserHint(callingUserId);
+                innerIntent.prepareToLeaveUser(callingUserId);
             } else {
-                newIntent.setContentUserHint(callingUserId);
+                newIntent.prepareToLeaveUser(callingUserId);
             }
 
             final android.content.pm.ResolveInfo ri = getPackageManager().resolveActivityAsUser(
@@ -104,7 +103,7 @@ public class IntentForwarderActivity extends Activity  {
                     || ChooserActivity.class.getName().equals(ri.activityInfo.name));
 
             try {
-                startActivityAsCaller(newIntent, null, targetUserId);
+                startActivityAsCaller(newIntent, null, false, targetUserId);
             } catch (RuntimeException e) {
                 int launchedFromUid = -1;
                 String launchedFromPackage = "?";

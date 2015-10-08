@@ -33,12 +33,12 @@ interface ITelecomService {
      *
      * @param showDialpad if true, make the dialpad visible initially.
      */
-    void showInCallScreen(boolean showDialpad);
+    void showInCallScreen(boolean showDialpad, String callingPackage);
 
     /**
      * @see TelecomServiceImpl#getDefaultOutgoingPhoneAccount
      */
-    PhoneAccountHandle getDefaultOutgoingPhoneAccount(in String uriScheme);
+    PhoneAccountHandle getDefaultOutgoingPhoneAccount(in String uriScheme, String callingPackage);
 
     /**
      * @see TelecomServiceImpl#getUserSelectedOutgoingPhoneAccount
@@ -53,12 +53,14 @@ interface ITelecomService {
     /**
      * @see TelecomServiceImpl#getCallCapablePhoneAccounts
      */
-    List<PhoneAccountHandle> getCallCapablePhoneAccounts();
+    List<PhoneAccountHandle> getCallCapablePhoneAccounts(
+            boolean includeDisabledAccounts, String callingPackage);
 
     /**
      * @see TelecomManager#getPhoneAccountsSupportingScheme
      */
-    List<PhoneAccountHandle> getPhoneAccountsSupportingScheme(in String uriScheme);
+    List<PhoneAccountHandle> getPhoneAccountsSupportingScheme(in String uriScheme,
+            String callingPackage);
 
     /**
      * @see TelecomManager#getPhoneAccountsForPackage
@@ -91,14 +93,9 @@ interface ITelecomService {
     PhoneAccountHandle getSimCallManager();
 
     /**
-     * @see TelecomServiceImpl#setSimCallManager
+     * @see TelecomServiceImpl#getSimCallManagerForUser
      */
-    void setSimCallManager(in PhoneAccountHandle account);
-
-    /**
-     * @see TelecomServiceImpl#getSimCallManagers
-     */
-    List<PhoneAccountHandle> getSimCallManagers();
+    PhoneAccountHandle getSimCallManagerForUser(int userId);
 
     /**
      * @see TelecomServiceImpl#registerPhoneAccount
@@ -118,22 +115,33 @@ interface ITelecomService {
     /**
      * @see TelecomServiceImpl#isVoiceMailNumber
      */
-    boolean isVoiceMailNumber(in PhoneAccountHandle accountHandle, String number);
+    boolean isVoiceMailNumber(in PhoneAccountHandle accountHandle, String number,
+            String callingPackage);
 
     /**
-     * @see TelecomServiceImpl#hasVoiceMailNumber
+     * @see TelecomServiceImpl#getVoiceMailNumber
      */
-    boolean hasVoiceMailNumber(in PhoneAccountHandle accountHandle);
+    String getVoiceMailNumber(in PhoneAccountHandle accountHandle, String callingPackage);
 
     /**
      * @see TelecomServiceImpl#getLine1Number
      */
-    String getLine1Number(in PhoneAccountHandle accountHandle);
+    String getLine1Number(in PhoneAccountHandle accountHandle, String callingPackage);
 
     /**
      * @see TelecomServiceImpl#getDefaultPhoneApp
      */
     ComponentName getDefaultPhoneApp();
+
+    /**
+     * @see TelecomServiceImpl#getDefaultDialerPackage
+     */
+    String getDefaultDialerPackage();
+
+    /**
+     * @see TelecomServiceImpl#getSystemDialerPackage
+     */
+    String getSystemDialerPackage();
 
     //
     // Internal system apis relating to call management.
@@ -142,17 +150,17 @@ interface ITelecomService {
     /**
      * @see TelecomServiceImpl#silenceRinger
      */
-    void silenceRinger();
+    void silenceRinger(String callingPackage);
 
     /**
      * @see TelecomServiceImpl#isInCall
      */
-    boolean isInCall();
+    boolean isInCall(String callingPackage);
 
     /**
      * @see TelecomServiceImpl#isRinging
      */
-    boolean isRinging();
+    boolean isRinging(String callingPackage);
 
     /**
      * @see TelecomServiceImpl#getCallState
@@ -172,32 +180,33 @@ interface ITelecomService {
     /**
      * @see TelecomServiceImpl#cancelMissedCallsNotification
      */
-    void cancelMissedCallsNotification();
+    void cancelMissedCallsNotification(String callingPackage);
 
     /**
      * @see TelecomServiceImpl#handleMmi
      */
-    boolean handlePinMmi(String dialString);
+    boolean handlePinMmi(String dialString, String callingPackage);
 
     /**
      * @see TelecomServiceImpl#handleMmi
      */
-    boolean handlePinMmiForPhoneAccount(in PhoneAccountHandle accountHandle, String dialString);
+    boolean handlePinMmiForPhoneAccount(in PhoneAccountHandle accountHandle, String dialString,
+            String callingPackage);
 
     /**
      * @see TelecomServiceImpl#getAdnUriForPhoneAccount
      */
-    Uri getAdnUriForPhoneAccount(in PhoneAccountHandle accountHandle);
+    Uri getAdnUriForPhoneAccount(in PhoneAccountHandle accountHandle, String callingPackage);
 
     /**
      * @see TelecomServiceImpl#isTtySupported
      */
-    boolean isTtySupported();
+    boolean isTtySupported(String callingPackage);
 
     /**
      * @see TelecomServiceImpl#getCurrentTtyMode
      */
-    int getCurrentTtyMode();
+    int getCurrentTtyMode(String callingPackage);
 
     /**
      * @see TelecomServiceImpl#addNewIncomingCall
@@ -208,4 +217,19 @@ interface ITelecomService {
      * @see TelecomServiceImpl#addNewUnknownCall
      */
     void addNewUnknownCall(in PhoneAccountHandle phoneAccount, in Bundle extras);
+
+    /**
+     * @see TelecomServiceImpl#placeCall
+     */
+    void placeCall(in Uri handle, in Bundle extras, String callingPackage);
+
+    /**
+     * @see TelecomServiceImpl#enablePhoneAccount
+     */
+    boolean enablePhoneAccount(in PhoneAccountHandle accountHandle, boolean isEnabled);
+
+    /**
+     * @see TelecomServiceImpl#setDefaultDialer
+     */
+    boolean setDefaultDialer(in String packageName);
 }

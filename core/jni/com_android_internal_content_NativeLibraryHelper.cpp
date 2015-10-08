@@ -17,7 +17,7 @@
 #define LOG_TAG "NativeLibraryHelper"
 //#define LOG_NDEBUG 0
 
-#include <android_runtime/AndroidRuntime.h>
+#include "core_jni_helpers.h"
 
 #include <ScopedUtfChars.h>
 #include <UniquePtr.h>
@@ -33,6 +33,7 @@
 #include <string.h>
 #include <time.h>
 #include <unistd.h>
+#include <inttypes.h>
 #include <sys/stat.h>
 #include <sys/types.h>
 
@@ -47,7 +48,6 @@
 #define LIB_SUFFIX_LEN (sizeof(LIB_SUFFIX) - 1)
 
 #define RS_BITCODE_SUFFIX ".bc"
-#define RS_BITCODE_SUFFIX_LEN (sizeof(RS_BITCODE_SUFFIX) -1)
 
 #define GDBSERVER "gdbserver"
 #define GDBSERVER_LEN (sizeof(GDBSERVER) - 1)
@@ -104,8 +104,8 @@ isFilenameSafe(const char* filename)
 }
 
 static bool
-isFileDifferent(const char* filePath, size_t fileSize, time_t modifiedTime,
-        long zipCrc, struct stat64* st)
+isFileDifferent(const char* filePath, uint32_t fileSize, time_t modifiedTime,
+        uint32_t zipCrc, struct stat64* st)
 {
     if (lstat64(filePath, st) < 0) {
         // File is not found or cannot be read.
@@ -117,7 +117,7 @@ isFileDifferent(const char* filePath, size_t fileSize, time_t modifiedTime,
         return true;
     }
 
-    if (st->st_size != fileSize) {
+    if (static_cast<uint64_t>(st->st_size) != static_cast<uint64_t>(fileSize)) {
         return true;
     }
 
@@ -133,7 +133,9 @@ isFileDifferent(const char* filePath, size_t fileSize, time_t modifiedTime,
         return true;
     }
 
-    long crc = crc32(0L, Z_NULL, 0);
+    // uLong comes from zlib.h. It's a bit of a wart that they're
+    // potentially using a 64-bit type for a 32-bit CRC.
+    uLong crc = crc32(0L, Z_NULL, 0);
     unsigned char crcBuffer[16384];
     ssize_t numBytes;
     while ((numBytes = TEMP_FAILURE_RETRY(read(fd, crcBuffer, sizeof(crcBuffer)))) > 0) {
@@ -141,9 +143,9 @@ isFileDifferent(const char* filePath, size_t fileSize, time_t modifiedTime,
     }
     close(fd);
 
-    ALOGV("%s: crc = %lx, zipCrc = %lx\n", filePath, crc, zipCrc);
+    ALOGV("%s: crc = %lx, zipCrc = %" PRIu32 "\n", filePath, crc, zipCrc);
 
-    if (crc != zipCrc) {
+    if (crc != static_cast<uLong>(zipCrc)) {
         return true;
     }
 
@@ -154,13 +156,13 @@ static install_status_t
 sumFiles(JNIEnv*, void* arg, ZipFileRO* zipFile, ZipEntryRO zipEntry, const char*)
 {
     size_t* total = (size_t*) arg;
-    size_t uncompLen;
+    uint32_t uncompLen;
 
     if (!zipFile->getEntryInfo(zipEntry, NULL, &uncompLen, NULL, NULL, NULL, NULL)) {
         return INSTALL_FAILED_INVALID_APK;
     }
 
-    *total += uncompLen;
+    *total += static_cast<size_t>(uncompLen);
 
     return INSTALL_SUCCEEDED;
 }
@@ -173,21 +175,42 @@ sumFiles(JNIEnv*, void* arg, ZipFileRO* zipFile, ZipEntryRO zipEntry, const char
 static install_status_t
 copyFileIfChanged(JNIEnv *env, void* arg, ZipFileRO* zipFile, ZipEntryRO zipEntry, const char* fileName)
 {
-    jstring* javaNativeLibPath = (jstring*) arg;
+    void** args = reinterpret_cast<void**>(arg);
+    jstring* javaNativeLibPath = (jstring*) args[0];
+    jboolean extractNativeLibs = *(jboolean*) args[1];
+    jboolean hasNativeBridge = *(jboolean*) args[2];
+
     ScopedUtfChars nativeLibPath(env, *javaNativeLibPath);
 
-    size_t uncompLen;
-    long when;
-    long crc;
-    time_t modTime;
+    uint32_t uncompLen;
+    uint32_t when;
+    uint32_t crc;
 
-    if (!zipFile->getEntryInfo(zipEntry, NULL, &uncompLen, NULL, NULL, &when, &crc)) {
+    uint16_t method;
+    off64_t offset;
+
+    if (!zipFile->getEntryInfo(zipEntry, &method, &uncompLen, NULL, &offset, &when, &crc)) {
         ALOGD("Couldn't read zip entry info\n");
         return INSTALL_FAILED_INVALID_APK;
-    } else {
-        struct tm t;
-        ZipUtils::zipTimeToTimespec(when, &t);
-        modTime = mktime(&t);
+    }
+
+    if (!extractNativeLibs) {
+        // check if library is uncompressed and page-aligned
+        if (method != ZipFileRO::kCompressStored) {
+            ALOGD("Library '%s' is compressed - will not be able to open it directly from apk.\n",
+                fileName);
+            return INSTALL_FAILED_INVALID_APK;
+        }
+
+        if (offset % PAGE_SIZE != 0) {
+            ALOGD("Library '%s' is not page-aligned - will not be able to open it directly from"
+                " apk.\n", fileName);
+            return INSTALL_FAILED_INVALID_APK;
+        }
+
+        if (!hasNativeBridge) {
+          return INSTALL_SUCCEEDED;
+        }
     }
 
     // Build local file path
@@ -208,6 +231,9 @@ copyFileIfChanged(JNIEnv *env, void* arg, ZipFileRO* zipFile, ZipEntryRO zipEntr
     }
 
     // Only copy out the native file if it's different.
+    struct tm t;
+    ZipUtils::zipTimeToTimespec(when, &t);
+    const time_t modTime = mktime(&t);
     struct stat64 st;
     if (!isFileDifferent(localFileName, uncompLen, modTime, crc, &st)) {
         return INSTALL_SUCCEEDED;
@@ -295,7 +321,8 @@ private:
 public:
     static NativeLibrariesIterator* create(ZipFileRO* zipFile) {
         void* cookie = NULL;
-        if (!zipFile->startIteration(&cookie)) {
+        // Do not specify a suffix to find both .so files and gdbserver.
+        if (!zipFile->startIteration(&cookie, APK_LIB, NULL /* suffix */)) {
             return NULL;
         }
 
@@ -307,11 +334,6 @@ public:
         while ((next = mZipFile->nextEntry(mCookie)) != NULL) {
             // Make sure this entry has a filename.
             if (mZipFile->getEntryFileName(next, fileName, sizeof(fileName))) {
-                continue;
-            }
-
-            // Make sure we're in the lib directory of the ZIP.
-            if (strncmp(fileName, APK_LIB, APK_LIB_LEN)) {
                 continue;
             }
 
@@ -430,7 +452,6 @@ static int findSupportedAbi(JNIEnv *env, jlong apkHandle, jobjectArray supported
     }
 
     ZipEntryRO entry = NULL;
-    char fileName[PATH_MAX];
     int status = NO_NATIVE_LIBRARIES;
     while ((entry = it->next()) != NULL) {
         // We're currently in the lib/ directory of the APK, so it does have some native
@@ -466,10 +487,12 @@ static int findSupportedAbi(JNIEnv *env, jlong apkHandle, jobjectArray supported
 
 static jint
 com_android_internal_content_NativeLibraryHelper_copyNativeBinaries(JNIEnv *env, jclass clazz,
-        jlong apkHandle, jstring javaNativeLibPath, jstring javaCpuAbi)
+        jlong apkHandle, jstring javaNativeLibPath, jstring javaCpuAbi,
+        jboolean extractNativeLibs, jboolean hasNativeBridge)
 {
+    void* args[] = { &javaNativeLibPath, &extractNativeLibs, &hasNativeBridge };
     return (jint) iterateOverNativeFiles(env, apkHandle, javaCpuAbi,
-            copyFileIfChanged, &javaNativeLibPath);
+            copyFileIfChanged, reinterpret_cast<void*>(args));
 }
 
 static jlong
@@ -501,7 +524,7 @@ com_android_internal_content_NativeLibraryHelper_hasRenderscriptBitcode(JNIEnv *
         jlong apkHandle) {
     ZipFileRO* zipFile = reinterpret_cast<ZipFileRO*>(apkHandle);
     void* cookie = NULL;
-    if (!zipFile->startIteration(&cookie)) {
+    if (!zipFile->startIteration(&cookie, NULL /* prefix */, RS_BITCODE_SUFFIX)) {
         return APK_SCAN_ERROR;
     }
 
@@ -511,12 +534,9 @@ com_android_internal_content_NativeLibraryHelper_hasRenderscriptBitcode(JNIEnv *
         if (zipFile->getEntryFileName(next, fileName, sizeof(fileName))) {
             continue;
         }
-
-        const size_t fileNameLen = strlen(fileName);
         const char* lastSlash = strrchr(fileName, '/');
         const char* baseName = (lastSlash == NULL) ? fileName : fileName + 1;
-        if (!strncmp(fileName + fileNameLen - RS_BITCODE_SUFFIX_LEN, RS_BITCODE_SUFFIX,
-                     RS_BITCODE_SUFFIX_LEN) && isFilenameSafe(baseName)) {
+        if (isFilenameSafe(baseName)) {
             zipFile->endIteration(cookie);
             return BITCODE_PRESENT;
         }
@@ -549,7 +569,7 @@ static JNINativeMethod gMethods[] = {
             "(J)V",
             (void *)com_android_internal_content_NativeLibraryHelper_close},
     {"nativeCopyNativeBinaries",
-            "(JLjava/lang/String;Ljava/lang/String;)I",
+            "(JLjava/lang/String;Ljava/lang/String;ZZ)I",
             (void *)com_android_internal_content_NativeLibraryHelper_copyNativeBinaries},
     {"nativeSumNativeBinaries",
             "(JLjava/lang/String;)J",
@@ -564,8 +584,8 @@ static JNINativeMethod gMethods[] = {
 
 int register_com_android_internal_content_NativeLibraryHelper(JNIEnv *env)
 {
-    return AndroidRuntime::registerNativeMethods(env,
-                "com/android/internal/content/NativeLibraryHelper", gMethods, NELEM(gMethods));
+    return RegisterMethodsOrDie(env,
+            "com/android/internal/content/NativeLibraryHelper", gMethods, NELEM(gMethods));
 }
 
 };

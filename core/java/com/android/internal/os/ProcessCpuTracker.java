@@ -22,11 +22,13 @@ import android.os.FileUtils;
 import android.os.Process;
 import android.os.StrictMode;
 import android.os.SystemClock;
+import android.system.OsConstants;
 import android.util.Slog;
 
 import com.android.internal.util.FastPrintWriter;
 
 import libcore.io.IoUtils;
+import libcore.io.Libcore;
 
 import java.io.File;
 import java.io.FileInputStream;
@@ -130,10 +132,15 @@ public class ProcessCpuTracker {
 
     private final boolean mIncludeThreads;
 
+    // How long a CPU jiffy is in milliseconds.
+    private final long mJiffyMillis;
+
     private float mLoad1 = 0;
     private float mLoad5 = 0;
     private float mLoad15 = 0;
 
+    // All times are in milliseconds. They are converted from jiffies to milliseconds
+    // when extracted from the kernel.
     private long mCurrentSampleTime;
     private long mLastSampleTime;
 
@@ -152,6 +159,7 @@ public class ProcessCpuTracker {
     private int mRelIrqTime;
     private int mRelSoftIrqTime;
     private int mRelIdleTime;
+    private boolean mRelStatsAreGood;
 
     private int[] mCurPids;
     private int[] mCurThreadPids;
@@ -163,21 +171,6 @@ public class ProcessCpuTracker {
     private boolean mFirst = true;
 
     private byte[] mBuffer = new byte[4096];
-
-    /**
-     * The time in microseconds that the CPU has been running at each speed.
-     */
-    private long[] mCpuSpeedTimes;
-
-    /**
-     * The relative time in microseconds that the CPU has been running at each speed.
-     */
-    private long[] mRelCpuSpeedTimes;
-
-    /**
-     * The different speeds that the CPU can be running at.
-     */
-    private long[] mCpuSpeeds;
 
     public static class Stats {
         public final int pid;
@@ -200,12 +193,34 @@ public class ProcessCpuTracker {
         // filter out kernel processes.
         public long vsize;
 
+        /**
+         * Time in milliseconds.
+         */
         public long base_uptime;
+
+        /**
+         * Time in milliseconds.
+         */
         public long rel_uptime;
 
+        /**
+         * Time in milliseconds.
+         */
         public long base_utime;
+
+        /**
+         * Time in milliseconds.
+         */
         public long base_stime;
+
+        /**
+         * Time in milliseconds.
+         */
         public int rel_utime;
+
+        /**
+         * Time in milliseconds.
+         */
         public int rel_stime;
 
         public long base_minfaults;
@@ -268,6 +283,8 @@ public class ProcessCpuTracker {
 
     public ProcessCpuTracker(boolean includeThreads) {
         mIncludeThreads = includeThreads;
+        long jiffyHz = Libcore.os.sysconf(OsConstants._SC_CLK_TCK);
+        mJiffyMillis = 1000/jiffyHz;
     }
 
     public void onLoadChanged(float load1, float load5, float load15) {
@@ -285,48 +302,71 @@ public class ProcessCpuTracker {
 
     public void update() {
         if (DEBUG) Slog.v(TAG, "Update: " + this);
-        mLastSampleTime = mCurrentSampleTime;
-        mCurrentSampleTime = SystemClock.uptimeMillis();
-        mLastSampleRealTime = mCurrentSampleRealTime;
-        mCurrentSampleRealTime = SystemClock.elapsedRealtime();
+
+        final long nowUptime = SystemClock.uptimeMillis();
+        final long nowRealtime = SystemClock.elapsedRealtime();
 
         final long[] sysCpu = mSystemCpuData;
         if (Process.readProcFile("/proc/stat", SYSTEM_CPU_FORMAT,
                 null, sysCpu, null)) {
             // Total user time is user + nice time.
-            final long usertime = sysCpu[0]+sysCpu[1];
+            final long usertime = (sysCpu[0]+sysCpu[1]) * mJiffyMillis;
             // Total system time is simply system time.
-            final long systemtime = sysCpu[2];
+            final long systemtime = sysCpu[2] * mJiffyMillis;
             // Total idle time is simply idle time.
-            final long idletime = sysCpu[3];
+            final long idletime = sysCpu[3] * mJiffyMillis;
             // Total irq time is iowait + irq + softirq time.
-            final long iowaittime = sysCpu[4];
-            final long irqtime = sysCpu[5];
-            final long softirqtime = sysCpu[6];
+            final long iowaittime = sysCpu[4] * mJiffyMillis;
+            final long irqtime = sysCpu[5] * mJiffyMillis;
+            final long softirqtime = sysCpu[6] * mJiffyMillis;
 
-            mRelUserTime = (int)(usertime - mBaseUserTime);
-            mRelSystemTime = (int)(systemtime - mBaseSystemTime);
-            mRelIoWaitTime = (int)(iowaittime - mBaseIoWaitTime);
-            mRelIrqTime = (int)(irqtime - mBaseIrqTime);
-            mRelSoftIrqTime = (int)(softirqtime - mBaseSoftIrqTime);
-            mRelIdleTime = (int)(idletime - mBaseIdleTime);
+            // This code is trying to avoid issues with idle time going backwards,
+            // but currently it gets into situations where it triggers most of the time. :(
+            if (true || (usertime >= mBaseUserTime && systemtime >= mBaseSystemTime
+                    && iowaittime >= mBaseIoWaitTime && irqtime >= mBaseIrqTime
+                    && softirqtime >= mBaseSoftIrqTime && idletime >= mBaseIdleTime)) {
+                mRelUserTime = (int)(usertime - mBaseUserTime);
+                mRelSystemTime = (int)(systemtime - mBaseSystemTime);
+                mRelIoWaitTime = (int)(iowaittime - mBaseIoWaitTime);
+                mRelIrqTime = (int)(irqtime - mBaseIrqTime);
+                mRelSoftIrqTime = (int)(softirqtime - mBaseSoftIrqTime);
+                mRelIdleTime = (int)(idletime - mBaseIdleTime);
+                mRelStatsAreGood = true;
 
-            if (DEBUG) {
-                Slog.i("Load", "Total U:" + sysCpu[0] + " N:" + sysCpu[1]
-                      + " S:" + sysCpu[2] + " I:" + sysCpu[3]
-                      + " W:" + sysCpu[4] + " Q:" + sysCpu[5]
-                      + " O:" + sysCpu[6]);
-                Slog.i("Load", "Rel U:" + mRelUserTime + " S:" + mRelSystemTime
-                      + " I:" + mRelIdleTime + " Q:" + mRelIrqTime);
+                if (DEBUG) {
+                    Slog.i("Load", "Total U:" + (sysCpu[0]*mJiffyMillis)
+                          + " N:" + (sysCpu[1]*mJiffyMillis)
+                          + " S:" + (sysCpu[2]*mJiffyMillis) + " I:" + (sysCpu[3]*mJiffyMillis)
+                          + " W:" + (sysCpu[4]*mJiffyMillis) + " Q:" + (sysCpu[5]*mJiffyMillis)
+                          + " O:" + (sysCpu[6]*mJiffyMillis));
+                    Slog.i("Load", "Rel U:" + mRelUserTime + " S:" + mRelSystemTime
+                          + " I:" + mRelIdleTime + " Q:" + mRelIrqTime);
+                }
+
+                mBaseUserTime = usertime;
+                mBaseSystemTime = systemtime;
+                mBaseIoWaitTime = iowaittime;
+                mBaseIrqTime = irqtime;
+                mBaseSoftIrqTime = softirqtime;
+                mBaseIdleTime = idletime;
+
+            } else {
+                mRelUserTime = 0;
+                mRelSystemTime = 0;
+                mRelIoWaitTime = 0;
+                mRelIrqTime = 0;
+                mRelSoftIrqTime = 0;
+                mRelIdleTime = 0;
+                mRelStatsAreGood = false;
+                Slog.w(TAG, "/proc/stats has gone backwards; skipping CPU update");
+                return;
             }
-
-            mBaseUserTime = usertime;
-            mBaseSystemTime = systemtime;
-            mBaseIoWaitTime = iowaittime;
-            mBaseIrqTime = irqtime;
-            mBaseSoftIrqTime = softirqtime;
-            mBaseIdleTime = idletime;
         }
+
+        mLastSampleTime = mCurrentSampleTime;
+        mCurrentSampleTime = nowUptime;
+        mLastSampleRealTime = mCurrentSampleRealTime;
+        mCurrentSampleRealTime = nowRealtime;
 
         final StrictMode.ThreadPolicy savedPolicy = StrictMode.allowThreadDiskReads();
         try {
@@ -391,8 +431,8 @@ public class ProcessCpuTracker {
 
                     final long minfaults = procStats[PROCESS_STAT_MINOR_FAULTS];
                     final long majfaults = procStats[PROCESS_STAT_MAJOR_FAULTS];
-                    final long utime = procStats[PROCESS_STAT_UTIME];
-                    final long stime = procStats[PROCESS_STAT_STIME];
+                    final long utime = procStats[PROCESS_STAT_UTIME] * mJiffyMillis;
+                    final long stime = procStats[PROCESS_STAT_STIME] * mJiffyMillis;
 
                     if (utime == st.base_utime && stime == st.base_stime) {
                         st.rel_utime = 0;
@@ -466,8 +506,8 @@ public class ProcessCpuTracker {
                         st.baseName = procStatsString[0];
                         st.base_minfaults = procStats[PROCESS_FULL_STAT_MINOR_FAULTS];
                         st.base_majfaults = procStats[PROCESS_FULL_STAT_MAJOR_FAULTS];
-                        st.base_utime = procStats[PROCESS_FULL_STAT_UTIME];
-                        st.base_stime = procStats[PROCESS_FULL_STAT_STIME];
+                        st.base_utime = procStats[PROCESS_FULL_STAT_UTIME] * mJiffyMillis;
+                        st.base_stime = procStats[PROCESS_FULL_STAT_STIME] * mJiffyMillis;
                     } else {
                         Slog.i(TAG, "Skipping kernel process pid " + pid
                                 + " name " + procStatsString[0]);
@@ -542,7 +582,7 @@ public class ProcessCpuTracker {
     }
 
     /**
-     * Returns the total time (in clock ticks, or 1/100 sec) spent executing in
+     * Returns the total time (in milliseconds) spent executing in
      * both user and system code.  Safe to call without lock held.
      */
     public long getCpuTimeForPid(int pid) {
@@ -553,98 +593,56 @@ public class ProcessCpuTracker {
                     null, statsData, null)) {
                 long time = statsData[PROCESS_STAT_UTIME]
                         + statsData[PROCESS_STAT_STIME];
-                return time;
+                return time * mJiffyMillis;
             }
             return 0;
         }
     }
 
     /**
-     * Returns the delta time (in clock ticks, or 1/100 sec) spent at each CPU
-     * speed, since the last call to this method. If this is the first call, it
-     * will return 1 for each value.
+     * @return time in milliseconds.
      */
-    public long[] getLastCpuSpeedTimes() {
-        if (mCpuSpeedTimes == null) {
-            mCpuSpeedTimes = getCpuSpeedTimes(null);
-            mRelCpuSpeedTimes = new long[mCpuSpeedTimes.length];
-            for (int i = 0; i < mCpuSpeedTimes.length; i++) {
-                mRelCpuSpeedTimes[i] = 1; // Initialize
-            }
-        } else {
-            getCpuSpeedTimes(mRelCpuSpeedTimes);
-            for (int i = 0; i < mCpuSpeedTimes.length; i++) {
-                long temp = mRelCpuSpeedTimes[i];
-                mRelCpuSpeedTimes[i] -= mCpuSpeedTimes[i];
-                mCpuSpeedTimes[i] = temp;
-            }
-        }
-        return mRelCpuSpeedTimes;
-    }
-
-    private long[] getCpuSpeedTimes(long[] out) {
-        long[] tempTimes = out;
-        long[] tempSpeeds = mCpuSpeeds;
-        final int MAX_SPEEDS = 60;
-        if (out == null) {
-            tempTimes = new long[MAX_SPEEDS]; // Hopefully no more than that
-            tempSpeeds = new long[MAX_SPEEDS];
-        }
-        int speed = 0;
-        String file = readFile("/sys/devices/system/cpu/cpu0/cpufreq/stats/time_in_state", '\0');
-        // Note: file may be null on kernels without cpufreq (i.e. the emulator's)
-        if (file != null) {
-            StringTokenizer st = new StringTokenizer(file, "\n ");
-            while (st.hasMoreElements()) {
-                String token = st.nextToken();
-                try {
-                    long val = Long.parseLong(token);
-                    tempSpeeds[speed] = val;
-                    token = st.nextToken();
-                    val = Long.parseLong(token);
-                    tempTimes[speed] = val;
-                    speed++;
-                    if (speed == MAX_SPEEDS) break; // No more
-                    if (localLOGV && out == null) {
-                        Slog.v(TAG, "First time : Speed/Time = " + tempSpeeds[speed - 1]
-                              + "\t" + tempTimes[speed - 1]);
-                    }
-                } catch (NumberFormatException nfe) {
-                    Slog.i(TAG, "Unable to parse time_in_state");
-                }
-            }
-        }
-        if (out == null) {
-            out = new long[speed];
-            mCpuSpeeds = new long[speed];
-            System.arraycopy(tempSpeeds, 0, mCpuSpeeds, 0, speed);
-            System.arraycopy(tempTimes, 0, out, 0, speed);
-        }
-        return out;
-    }
-
     final public int getLastUserTime() {
         return mRelUserTime;
     }
 
+    /**
+     * @return time in milliseconds.
+     */
     final public int getLastSystemTime() {
         return mRelSystemTime;
     }
 
+    /**
+     * @return time in milliseconds.
+     */
     final public int getLastIoWaitTime() {
         return mRelIoWaitTime;
     }
 
+    /**
+     * @return time in milliseconds.
+     */
     final public int getLastIrqTime() {
         return mRelIrqTime;
     }
 
+    /**
+     * @return time in milliseconds.
+     */
     final public int getLastSoftIrqTime() {
         return mRelSoftIrqTime;
     }
 
+    /**
+     * @return time in milliseconds.
+     */
     final public int getLastIdleTime() {
         return mRelIdleTime;
+    }
+
+    final public boolean hasGoodLastStats() {
+        return mRelStatsAreGood;
     }
 
     final public float getTotalCpuPercent() {
@@ -750,7 +748,7 @@ public class ProcessCpuTracker {
         for (int i=0; i<N; i++) {
             Stats st = mWorkingProcs.get(i);
             printProcessCPU(pw, st.added ? " +" : (st.removed ? " -": "  "),
-                    st.pid, st.name, (int)(st.rel_uptime+5)/10,
+                    st.pid, st.name, (int)st.rel_uptime,
                     st.rel_utime, st.rel_stime, 0, 0, 0, st.rel_minfaults, st.rel_majfaults);
             if (!st.removed && st.workingThreads != null) {
                 int M = st.workingThreads.size();
@@ -758,7 +756,7 @@ public class ProcessCpuTracker {
                     Stats tst = st.workingThreads.get(j);
                     printProcessCPU(pw,
                             tst.added ? "   +" : (tst.removed ? "   -": "    "),
-                            tst.pid, tst.name, (int)(st.rel_uptime+5)/10,
+                            tst.pid, tst.name, (int)st.rel_uptime,
                             tst.rel_utime, tst.rel_stime, 0, 0, 0, 0, 0);
                 }
             }

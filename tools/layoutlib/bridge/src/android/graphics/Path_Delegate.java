@@ -21,6 +21,7 @@ import com.android.layoutlib.bridge.Bridge;
 import com.android.layoutlib.bridge.impl.DelegateManager;
 import com.android.tools.layoutlib.annotations.LayoutlibDelegate;
 
+import android.annotation.NonNull;
 import android.graphics.Path.Direction;
 import android.graphics.Path.FillType;
 
@@ -30,6 +31,7 @@ import java.awt.geom.Arc2D;
 import java.awt.geom.Area;
 import java.awt.geom.Ellipse2D;
 import java.awt.geom.GeneralPath;
+import java.awt.geom.Path2D;
 import java.awt.geom.PathIterator;
 import java.awt.geom.Point2D;
 import java.awt.geom.Rectangle2D;
@@ -56,7 +58,7 @@ public final class Path_Delegate {
 
     // ---- delegate data ----
     private FillType mFillType = FillType.WINDING;
-    private GeneralPath mPath = new GeneralPath();
+    private Path2D mPath = new Path2D.Double();
 
     private float mLastX = 0;
     private float mLastY = 0;
@@ -486,8 +488,54 @@ public final class Path_Delegate {
 
     @LayoutlibDelegate
     /*package*/ static float[] native_approximate(long nPath, float error) {
-        Bridge.getLog().error(LayoutLog.TAG_UNSUPPORTED, "Path.approximate() not supported", null);
-        return new float[0];
+        Bridge.getLog().warning(LayoutLog.TAG_UNSUPPORTED, "Path.approximate() not fully supported",
+                null);
+        Path_Delegate pathDelegate = sManager.getDelegate(nPath);
+        if (pathDelegate == null) {
+            return null;
+        }
+        PathIterator pathIterator = pathDelegate.mPath.getPathIterator(null);
+        float[] tmp = new float[6];
+        float[] coords = new float[6];
+        boolean isFirstPoint = true;
+        while (!pathIterator.isDone()) {
+            int type = pathIterator.currentSegment(tmp);
+            switch (type) {
+                case PathIterator.SEG_MOVETO:
+                case PathIterator.SEG_LINETO:
+                    store(tmp, coords, 1, isFirstPoint);
+                    break;
+                case PathIterator.SEG_QUADTO:
+                    store(tmp, coords, 2, isFirstPoint);
+                    break;
+                case PathIterator.SEG_CUBICTO:
+                    store(tmp, coords, 3, isFirstPoint);
+                    break;
+                case PathIterator.SEG_CLOSE:
+                    // No points returned.
+            }
+            isFirstPoint = false;
+            pathIterator.next();
+        }
+        if (isFirstPoint) {
+            // No points found
+            return new float[0];
+        } else {
+            return coords;
+        }
+    }
+
+    private static void store(float[] src, float[] dst, int count, boolean isFirst) {
+        if (isFirst) {
+            dst[0] = 0;       // fraction
+            dst[1] = src[0];  // abscissa
+            dst[2] = src[1];  // ordinate
+        }
+        if (count > 1 || !isFirst) {
+            dst[3] = 1;
+            dst[4] = src[2 * count - 2];
+            dst[5] = src[2 * count - 1];
+        }
     }
 
     // ---- Private helper methods ----
@@ -522,6 +570,7 @@ public final class Path_Delegate {
         throw new IllegalArgumentException();
     }
 
+    @NonNull
     private static Direction getDirection(int direction) {
         for (Direction d : Direction.values()) {
             if (direction == d.nativeInt) {

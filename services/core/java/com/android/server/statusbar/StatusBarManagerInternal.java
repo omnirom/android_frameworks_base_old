@@ -16,6 +16,8 @@
 
 package com.android.server.statusbar;
 
+import android.os.Bundle;
+
 import com.android.server.notification.NotificationDelegate;
 
 public interface StatusBarManagerInternal {
@@ -24,4 +26,6 @@ public interface StatusBarManagerInternal {
     void notificationLightPulse(int argb, int onMillis, int offMillis);
     void notificationLightOff();
     void showScreenPinningRequest();
+    void showAssistDisclosure();
+    void startAssist(Bundle args);
 }

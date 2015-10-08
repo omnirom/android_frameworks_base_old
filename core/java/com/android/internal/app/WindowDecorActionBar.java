@@ -20,6 +20,7 @@ import android.animation.ValueAnimator;
 import android.content.res.TypedArray;
 import android.view.ViewParent;
 import android.widget.Toolbar;
+
 import com.android.internal.R;
 import com.android.internal.view.ActionBarPolicy;
 import com.android.internal.view.menu.MenuBuilder;
@@ -88,21 +89,25 @@ public class WindowDecorActionBar extends ActionBar implements
 
     private TabImpl mSelectedTab;
     private int mSavedTabPosition = INVALID_POSITION;
-    
+
     private boolean mDisplayHomeAsUpSet;
 
-    ActionModeImpl mActionMode;
+    ActionMode mActionMode;
     ActionMode mDeferredDestroyActionMode;
     ActionMode.Callback mDeferredModeDestroyCallback;
-    
+
     private boolean mLastMenuVisibility;
     private ArrayList<OnMenuVisibilityListener> mMenuVisibilityListeners =
             new ArrayList<OnMenuVisibilityListener>();
 
     private static final int CONTEXT_DISPLAY_NORMAL = 0;
     private static final int CONTEXT_DISPLAY_SPLIT = 1;
-    
+
     private static final int INVALID_POSITION = -1;
+
+    // The fade duration for toolbar and action bar when entering/exiting action mode.
+    private static final long FADE_OUT_DURATION_MS = 100;
+    private static final long FADE_IN_DURATION_MS = 200;
 
     private int mContextDisplayMode;
     private boolean mHasEmbeddedTabs;
@@ -864,8 +869,21 @@ public class WindowDecorActionBar extends ActionBar implements
             hideForActionMode();
         }
 
-        mDecorToolbar.animateToVisibility(toActionMode ? View.GONE : View.VISIBLE);
-        mContextView.animateToVisibility(toActionMode ? View.VISIBLE : View.GONE);
+        Animator fadeIn, fadeOut;
+        if (toActionMode) {
+            fadeOut = mDecorToolbar.setupAnimatorToVisibility(View.GONE,
+                    FADE_OUT_DURATION_MS);
+            fadeIn = mContextView.setupAnimatorToVisibility(View.VISIBLE,
+                    FADE_IN_DURATION_MS);
+        } else {
+            fadeIn = mDecorToolbar.setupAnimatorToVisibility(View.VISIBLE,
+                    FADE_IN_DURATION_MS);
+            fadeOut = mContextView.setupAnimatorToVisibility(View.GONE,
+                    FADE_OUT_DURATION_MS);
+        }
+        AnimatorSet set = new AnimatorSet();
+        set.playSequentially(fadeOut, fadeIn);
+        set.start();
         // mTabScrollView's visibility is not affected by action mode.
     }
 
@@ -942,11 +960,12 @@ public class WindowDecorActionBar extends ActionBar implements
         private ActionMode.Callback mCallback;
         private WeakReference<View> mCustomView;
 
-        public ActionModeImpl(Context context, ActionMode.Callback callback) {
+        public ActionModeImpl(
+                Context context, ActionMode.Callback callback) {
             mActionModeContext = context;
             mCallback = callback;
             mMenu = new MenuBuilder(context)
-                    .setDefaultShowAsAction(MenuItem.SHOW_AS_ACTION_IF_ROOM);
+                        .setDefaultShowAsAction(MenuItem.SHOW_AS_ACTION_IF_ROOM);
             mMenu.setCallback(this);
         }
 

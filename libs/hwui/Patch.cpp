@@ -24,20 +24,10 @@
 #include "Patch.h"
 #include "Properties.h"
 #include "UvMapper.h"
+#include "utils/MathUtils.h"
 
 namespace android {
 namespace uirenderer {
-
-///////////////////////////////////////////////////////////////////////////////
-// Constructors/destructor
-///////////////////////////////////////////////////////////////////////////////
-
-Patch::Patch(): vertices(NULL), verticesCount(0), indexCount(0), hasEmptyQuads(false) {
-}
-
-Patch::~Patch() {
-    delete[] vertices;
-}
 
 ///////////////////////////////////////////////////////////////////////////////
 // Vertices management
@@ -47,19 +37,11 @@ uint32_t Patch::getSize() const {
     return verticesCount * sizeof(TextureVertex);
 }
 
-TextureVertex* Patch::createMesh(const float bitmapWidth, const float bitmapHeight,
-        float width, float height, const Res_png_9patch* patch) {
-    UvMapper mapper;
-    return createMesh(bitmapWidth, bitmapHeight, width, height, mapper, patch);
-}
-
-TextureVertex* Patch::createMesh(const float bitmapWidth, const float bitmapHeight,
-        float width, float height, const UvMapper& mapper, const Res_png_9patch* patch) {
-    if (vertices) return vertices;
+Patch::Patch(const float bitmapWidth, const float bitmapHeight,
+        float width, float height, const UvMapper& mapper, const Res_png_9patch* patch)
+        : mColors(patch->getColors()) {
 
     int8_t emptyQuads = 0;
-    mColors = patch->getColors();
-
     const int8_t numColors = patch->numColors;
     if (uint8_t(numColors) < sizeof(uint32_t) * 4) {
         for (int8_t i = 0; i < numColors; i++) {
@@ -75,10 +57,10 @@ TextureVertex* Patch::createMesh(const float bitmapWidth, const float bitmapHeig
     uint32_t yCount = patch->numYDivs;
 
     uint32_t maxVertices = ((xCount + 1) * (yCount + 1) - emptyQuads) * 4;
-    if (maxVertices == 0) return NULL;
+    if (maxVertices == 0) return;
 
-    TextureVertex* tempVertices = new TextureVertex[maxVertices];
-    TextureVertex* vertex = tempVertices;
+    vertices.reset(new TextureVertex[maxVertices]);
+    TextureVertex* vertex = vertices.get();
 
     const int32_t* xDivs = patch->getXDivs();
     const int32_t* yDivs = patch->getYDivs();
@@ -99,9 +81,9 @@ TextureVertex* Patch::createMesh(const float bitmapWidth, const float bitmapHeig
         }
         const float xStretchTex = stretchSize;
         const float fixed = bitmapWidth - stretchSize;
-        const float xStretch = fmaxf(width - fixed, 0.0f);
+        const float xStretch = std::max(width - fixed, 0.0f);
         stretchX = xStretch / xStretchTex;
-        rescaleX = fixed == 0.0f ? 0.0f : fminf(fmaxf(width, 0.0f) / fixed, 1.0f);
+        rescaleX = fixed == 0.0f ? 0.0f : std::min(std::max(width, 0.0f) / fixed, 1.0f);
     }
 
     if (yStretchCount > 0) {
@@ -111,9 +93,9 @@ TextureVertex* Patch::createMesh(const float bitmapWidth, const float bitmapHeig
         }
         const float yStretchTex = stretchSize;
         const float fixed = bitmapHeight - stretchSize;
-        const float yStretch = fmaxf(height - fixed, 0.0f);
+        const float yStretch = std::max(height - fixed, 0.0f);
         stretchY = yStretch / yStretchTex;
-        rescaleY = fixed == 0.0f ? 0.0f : fminf(fmaxf(height, 0.0f) / fixed, 1.0f);
+        rescaleY = fixed == 0.0f ? 0.0f : std::min(std::max(height, 0.0f) / fixed, 1.0f);
     }
 
     uint32_t quadCount = 0;
@@ -137,7 +119,7 @@ TextureVertex* Patch::createMesh(const float bitmapWidth, const float bitmapHeig
         }
 
         float vOffset = y1 == y2 ? 0.0f : 0.5 - (0.5 * segment / (y2 - y1));
-        float v2 = fmax(0.0f, stepY - vOffset) / bitmapHeight;
+        float v2 = std::max(0.0f, stepY - vOffset) / bitmapHeight;
         v1 += vOffset / bitmapHeight;
 
         if (stepY > 0.0f) {
@@ -157,15 +139,11 @@ TextureVertex* Patch::createMesh(const float bitmapWidth, const float bitmapHeig
                 width, bitmapWidth, quadCount);
     }
 
-    if (verticesCount == maxVertices) {
-        vertices = tempVertices;
-    } else {
-        vertices = new TextureVertex[verticesCount];
-        memcpy(vertices, tempVertices, verticesCount * sizeof(TextureVertex));
-        delete[] tempVertices;
+    if (verticesCount != maxVertices) {
+        std::unique_ptr<TextureVertex[]> reducedVertices(new TextureVertex[verticesCount]);
+        memcpy(reducedVertices.get(), vertices.get(), verticesCount * sizeof(TextureVertex));
+        vertices = std::move(reducedVertices);
     }
-
-    return vertices;
 }
 
 void Patch::generateRow(const int32_t* xDivs, uint32_t xCount, TextureVertex*& vertex,
@@ -189,7 +167,7 @@ void Patch::generateRow(const int32_t* xDivs, uint32_t xCount, TextureVertex*& v
         }
 
         float uOffset = x1 == x2 ? 0.0f : 0.5 - (0.5 * segment / (x2 - x1));
-        float u2 = fmax(0.0f, stepX - uOffset) / bitmapWidth;
+        float u2 = std::max(0.0f, stepX - uOffset) / bitmapWidth;
         u1 += uOffset / bitmapWidth;
 
         if (stepX > 0.0f) {
@@ -213,10 +191,10 @@ void Patch::generateQuad(TextureVertex*& vertex, float x1, float y1, float x2, f
     const uint32_t oldQuadCount = quadCount;
     quadCount++;
 
-    if (x1 < 0.0f) x1 = 0.0f;
-    if (x2 < 0.0f) x2 = 0.0f;
-    if (y1 < 0.0f) y1 = 0.0f;
-    if (y2 < 0.0f) y2 = 0.0f;
+    x1 = MathUtils::max(x1, 0.0f);
+    x2 = MathUtils::max(x2, 0.0f);
+    y1 = MathUtils::max(y1, 0.0f);
+    y2 = MathUtils::max(y2, 0.0f);
 
     // Skip degenerate and transparent (empty) quads
     if ((mColors[oldQuadCount] == 0) || x1 >= x2 || y1 >= y2) {

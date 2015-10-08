@@ -23,6 +23,8 @@ import com.android.tools.layoutlib.annotations.LayoutlibDelegate;
 
 import android.graphics.Shader.TileMode;
 
+import java.awt.image.ColorModel;
+
 /**
  * Delegate implementing the native methods of android.graphics.RadialGradient
  *
@@ -146,7 +148,7 @@ public class RadialGradient_Delegate extends Gradient_Delegate {
                     java.awt.image.ColorModel colorModel) {
                 mCanvasMatrix = canvasMatrix;
                 mLocalMatrix = localMatrix;
-                mColorModel = colorModel;
+                mColorModel = colorModel.hasAlpha() ? colorModel : ColorModel.getRGBdefault();
             }
 
             @Override
@@ -160,8 +162,9 @@ public class RadialGradient_Delegate extends Gradient_Delegate {
 
             @Override
             public java.awt.image.Raster getRaster(int x, int y, int w, int h) {
-                java.awt.image.BufferedImage image = new java.awt.image.BufferedImage(w, h,
-                        java.awt.image.BufferedImage.TYPE_INT_ARGB);
+                java.awt.image.BufferedImage image = new java.awt.image.BufferedImage(
+                    mColorModel, mColorModel.createCompatibleWritableRaster(w, h),
+                    mColorModel.isAlphaPremultiplied(), null);
 
                 int[] data = new int[w*h];
 
@@ -184,7 +187,7 @@ public class RadialGradient_Delegate extends Gradient_Delegate {
 
                         float _x = pt2[0];
                         float _y = pt2[1];
-                        float distance = (float) Math.sqrt(_x * _x + _y * _y);
+                        float distance = (float) Math.hypot(_x, _y);
 
                         data[index++] = getGradientColor(distance / mRadius);
                     }

@@ -16,7 +16,12 @@
 
 package android.hardware.camera2;
 
+import android.annotation.NonNull;
+import android.annotation.IntDef;
 import android.util.AndroidException;
+
+import java.lang.annotation.Retention;
+import java.lang.annotation.RetentionPolicy;
 
 /**
  * <p><code>CameraAccessException</code> is thrown if a camera device could not
@@ -28,16 +33,14 @@ import android.util.AndroidException;
  */
 public class CameraAccessException extends AndroidException {
     /**
-     * The camera device is in use already
-     * @hide
+     * The camera device is in use already.
      */
     public static final int CAMERA_IN_USE = 4;
 
     /**
-     * The system-wide limit for number of open cameras has been reached,
-     * and more camera devices cannot be opened until previous instances are
-     * closed.
-     * @hide
+     * The system-wide limit for number of open cameras or camera resources has
+     * been reached, and more camera devices cannot be opened or torch mode
+     * cannot be turned on until previous instances are closed.
      */
     public static final int MAX_CAMERAS_IN_USE = 5;
 
@@ -78,6 +81,16 @@ public class CameraAccessException extends AndroidException {
      */
     public static final int CAMERA_DEPRECATED_HAL = 1000;
 
+     /** @hide */
+     @Retention(RetentionPolicy.SOURCE)
+     @IntDef(
+         {CAMERA_IN_USE,
+          MAX_CAMERAS_IN_USE,
+          CAMERA_DISABLED,
+          CAMERA_DISCONNECTED,
+          CAMERA_ERROR})
+     public @interface AccessError {};
+
     // Make the eclipse warning about serializable exceptions go away
     private static final long serialVersionUID = 5630338637471475675L; // randomly generated
 
@@ -90,26 +103,27 @@ public class CameraAccessException extends AndroidException {
      * @see #CAMERA_DISCONNECTED
      * @see #CAMERA_ERROR
      */
+    @AccessError
     public final int getReason() {
         return mReason;
     }
 
-    public CameraAccessException(int problem) {
+    public CameraAccessException(@AccessError int problem) {
         super(getDefaultMessage(problem));
         mReason = problem;
     }
 
-    public CameraAccessException(int problem, String message) {
+    public CameraAccessException(@AccessError int problem, String message) {
         super(message);
         mReason = problem;
     }
 
-    public CameraAccessException(int problem, String message, Throwable cause) {
+    public CameraAccessException(@AccessError int problem, String message, Throwable cause) {
         super(message, cause);
         mReason = problem;
     }
 
-    public CameraAccessException(int problem, Throwable cause) {
+    public CameraAccessException(@AccessError int problem, Throwable cause) {
         super(getDefaultMessage(problem), cause);
         mReason = problem;
     }
@@ -117,7 +131,7 @@ public class CameraAccessException extends AndroidException {
     /**
      * @hide
      */
-    public static String getDefaultMessage(int problem) {
+    public static String getDefaultMessage(@AccessError int problem) {
         switch (problem) {
             case CAMERA_IN_USE:
                 return "The camera device is in use already";

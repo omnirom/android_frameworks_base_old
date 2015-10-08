@@ -16,7 +16,10 @@
 
 package android.net;
 
+import android.net.IpPrefix;
+import android.net.LinkAddress;
 import android.net.LinkProperties;
+import android.net.LinkProperties.ProvisioningChange;
 import android.net.RouteInfo;
 import android.system.OsConstants;
 import android.test.suitebuilder.annotation.SmallTest;
@@ -24,6 +27,7 @@ import junit.framework.TestCase;
 
 import java.net.InetAddress;
 import java.util.ArrayList;
+
 
 public class LinkPropertiesTest extends TestCase {
     private static InetAddress ADDRV4 = NetworkUtils.numericToInetAddress("75.208.6.1");
@@ -34,7 +38,8 @@ public class LinkPropertiesTest extends TestCase {
     private static InetAddress DNS6 = NetworkUtils.numericToInetAddress("2001:4860:4860::8888");
     private static InetAddress GATEWAY1 = NetworkUtils.numericToInetAddress("75.208.8.1");
     private static InetAddress GATEWAY2 = NetworkUtils.numericToInetAddress("69.78.8.1");
-    private static InetAddress GATEWAY6 = NetworkUtils.numericToInetAddress("fe80::6:0000:613");
+    private static InetAddress GATEWAY61 = NetworkUtils.numericToInetAddress("fe80::6:0000:613");
+    private static InetAddress GATEWAY62 = NetworkUtils.numericToInetAddress("fe80::6:2222");
     private static String NAME = "qmi0";
     private static int MTU = 1500;
 
@@ -466,6 +471,8 @@ public class LinkPropertiesTest extends TestCase {
         assertFalse("v4only:addr+dns", lp4.isProvisioned());
         lp4.addRoute(new RouteInfo(GATEWAY1));
         assertTrue("v4only:addr+dns+route", lp4.isProvisioned());
+        assertTrue("v4only:addr+dns+route", lp4.isIPv4Provisioned());
+        assertFalse("v4only:addr+dns+route", lp4.isIPv6Provisioned());
 
         LinkProperties lp6 = new LinkProperties();
         assertFalse("v6only:empty", lp6.isProvisioned());
@@ -473,11 +480,14 @@ public class LinkPropertiesTest extends TestCase {
         assertFalse("v6only:fe80-only", lp6.isProvisioned());
         lp6.addDnsServer(DNS6);
         assertFalse("v6only:fe80+dns", lp6.isProvisioned());
-        lp6.addRoute(new RouteInfo(GATEWAY6));
+        lp6.addRoute(new RouteInfo(GATEWAY61));
         assertFalse("v6only:fe80+dns+route", lp6.isProvisioned());
         lp6.addLinkAddress(LINKADDRV6);
+        assertTrue("v6only:fe80+global+dns+route", lp6.isIPv6Provisioned());
         assertTrue("v6only:fe80+global+dns+route", lp6.isProvisioned());
         lp6.removeLinkAddress(LINKADDRV6LINKLOCAL);
+        assertFalse("v6only:global+dns+route", lp6.isIPv4Provisioned());
+        assertTrue("v6only:global+dns+route", lp6.isIPv6Provisioned());
         assertTrue("v6only:global+dns+route", lp6.isProvisioned());
 
         LinkProperties lp46 = new LinkProperties();
@@ -487,15 +497,153 @@ public class LinkPropertiesTest extends TestCase {
         lp46.addDnsServer(DNS6);
         assertFalse("dualstack:missing-routes", lp46.isProvisioned());
         lp46.addRoute(new RouteInfo(GATEWAY1));
+        assertTrue("dualstack:v4-provisioned", lp46.isIPv4Provisioned());
+        assertFalse("dualstack:v4-provisioned", lp46.isIPv6Provisioned());
         assertTrue("dualstack:v4-provisioned", lp46.isProvisioned());
-        lp6.addRoute(new RouteInfo(GATEWAY6));
+        lp46.addRoute(new RouteInfo(GATEWAY61));
+        assertTrue("dualstack:both-provisioned", lp46.isIPv4Provisioned());
+        assertTrue("dualstack:both-provisioned", lp46.isIPv6Provisioned());
         assertTrue("dualstack:both-provisioned", lp46.isProvisioned());
 
         // A link with an IPv6 address and default route, but IPv4 DNS server.
         LinkProperties mixed = new LinkProperties();
         mixed.addLinkAddress(LINKADDRV6);
         mixed.addDnsServer(DNS1);
-        mixed.addRoute(new RouteInfo(GATEWAY6));
+        mixed.addRoute(new RouteInfo(GATEWAY61));
+        assertFalse("mixed:addr6+route6+dns4", mixed.isIPv4Provisioned());
+        assertFalse("mixed:addr6+route6+dns4", mixed.isIPv6Provisioned());
         assertFalse("mixed:addr6+route6+dns4", mixed.isProvisioned());
+    }
+
+    @SmallTest
+    public void testCompareProvisioning() {
+        LinkProperties v4lp = new LinkProperties();
+        v4lp.addLinkAddress(LINKADDRV4);
+        v4lp.addRoute(new RouteInfo(GATEWAY1));
+        v4lp.addDnsServer(DNS1);
+        assertTrue(v4lp.isProvisioned());
+
+        LinkProperties v4r = new LinkProperties(v4lp);
+        v4r.removeDnsServer(DNS1);
+        assertFalse(v4r.isProvisioned());
+
+        assertEquals(ProvisioningChange.STILL_NOT_PROVISIONED,
+                LinkProperties.compareProvisioning(v4r, v4r));
+        assertEquals(ProvisioningChange.LOST_PROVISIONING,
+                LinkProperties.compareProvisioning(v4lp, v4r));
+        assertEquals(ProvisioningChange.GAINED_PROVISIONING,
+                LinkProperties.compareProvisioning(v4r, v4lp));
+        assertEquals(ProvisioningChange.STILL_PROVISIONED,
+                LinkProperties.compareProvisioning(v4lp, v4lp));
+
+        // Check that losing IPv4 provisioning on a dualstack network is
+        // seen as a total loss of provisioning.
+        LinkProperties v6lp = new LinkProperties();
+        v6lp.addLinkAddress(LINKADDRV6);
+        v6lp.addRoute(new RouteInfo(GATEWAY61));
+        v6lp.addDnsServer(DNS6);
+        assertFalse(v6lp.isIPv4Provisioned());
+        assertTrue(v6lp.isIPv6Provisioned());
+        assertTrue(v6lp.isProvisioned());
+
+        LinkProperties v46lp = new LinkProperties(v6lp);
+        v46lp.addLinkAddress(LINKADDRV4);
+        v46lp.addRoute(new RouteInfo(GATEWAY1));
+        v46lp.addDnsServer(DNS1);
+        assertTrue(v46lp.isIPv4Provisioned());
+        assertTrue(v46lp.isIPv6Provisioned());
+        assertTrue(v46lp.isProvisioned());
+
+        assertEquals(ProvisioningChange.STILL_PROVISIONED,
+                LinkProperties.compareProvisioning(v6lp, v46lp));
+        assertEquals(ProvisioningChange.LOST_PROVISIONING,
+                LinkProperties.compareProvisioning(v46lp, v6lp));
+
+        // Check that losing and gaining a secondary router does not change
+        // the provisioning status.
+        LinkProperties v6lp2 = new LinkProperties(v6lp);
+        v6lp2.addRoute(new RouteInfo(GATEWAY62));
+        assertTrue(v6lp2.isProvisioned());
+
+        assertEquals(ProvisioningChange.STILL_PROVISIONED,
+                LinkProperties.compareProvisioning(v6lp2, v6lp));
+        assertEquals(ProvisioningChange.STILL_PROVISIONED,
+                LinkProperties.compareProvisioning(v6lp, v6lp2));
+    }
+
+    @SmallTest
+    public void testIsReachable() {
+        final LinkProperties v4lp = new LinkProperties();
+        assertFalse(v4lp.isReachable(DNS1));
+        assertFalse(v4lp.isReachable(DNS2));
+
+        // Add an on-link route, making the on-link DNS server reachable,
+        // but there is still no IPv4 address.
+        assertTrue(v4lp.addRoute(new RouteInfo(
+                new IpPrefix(NetworkUtils.numericToInetAddress("75.208.0.0"), 16))));
+        assertFalse(v4lp.isReachable(DNS1));
+        assertFalse(v4lp.isReachable(DNS2));
+
+        // Adding an IPv4 address (right now, any IPv4 address) means we use
+        // the routes to compute likely reachability.
+        assertTrue(v4lp.addLinkAddress(new LinkAddress(ADDRV4, 16)));
+        assertTrue(v4lp.isReachable(DNS1));
+        assertFalse(v4lp.isReachable(DNS2));
+
+        // Adding a default route makes the off-link DNS server reachable.
+        assertTrue(v4lp.addRoute(new RouteInfo(GATEWAY1)));
+        assertTrue(v4lp.isReachable(DNS1));
+        assertTrue(v4lp.isReachable(DNS2));
+
+        final LinkProperties v6lp = new LinkProperties();
+        final InetAddress kLinkLocalDns = NetworkUtils.numericToInetAddress("fe80::6:1");
+        final InetAddress kLinkLocalDnsWithScope = NetworkUtils.numericToInetAddress("fe80::6:2%43");
+        final InetAddress kOnLinkDns = NetworkUtils.numericToInetAddress("2001:db8:85a3::53");
+        assertFalse(v6lp.isReachable(kLinkLocalDns));
+        assertFalse(v6lp.isReachable(kLinkLocalDnsWithScope));
+        assertFalse(v6lp.isReachable(kOnLinkDns));
+        assertFalse(v6lp.isReachable(DNS6));
+
+        // Add a link-local route, making the link-local DNS servers reachable. Because
+        // we assume the presence of an IPv6 link-local address, link-local DNS servers
+        // are considered reachable, but only those with a non-zero scope identifier.
+        assertTrue(v6lp.addRoute(new RouteInfo(
+                new IpPrefix(NetworkUtils.numericToInetAddress("fe80::"), 64))));
+        assertFalse(v6lp.isReachable(kLinkLocalDns));
+        assertTrue(v6lp.isReachable(kLinkLocalDnsWithScope));
+        assertFalse(v6lp.isReachable(kOnLinkDns));
+        assertFalse(v6lp.isReachable(DNS6));
+
+        // Add a link-local address--nothing changes.
+        assertTrue(v6lp.addLinkAddress(LINKADDRV6LINKLOCAL));
+        assertFalse(v6lp.isReachable(kLinkLocalDns));
+        assertTrue(v6lp.isReachable(kLinkLocalDnsWithScope));
+        assertFalse(v6lp.isReachable(kOnLinkDns));
+        assertFalse(v6lp.isReachable(DNS6));
+
+        // Add a global route on link, but no global address yet. DNS servers reachable
+        // via a route that doesn't require a gateway: give them the benefit of the
+        // doubt and hope the link-local source address suffices for communication.
+        assertTrue(v6lp.addRoute(new RouteInfo(
+                new IpPrefix(NetworkUtils.numericToInetAddress("2001:db8:85a3::"), 64))));
+        assertFalse(v6lp.isReachable(kLinkLocalDns));
+        assertTrue(v6lp.isReachable(kLinkLocalDnsWithScope));
+        assertTrue(v6lp.isReachable(kOnLinkDns));
+        assertFalse(v6lp.isReachable(DNS6));
+
+        // Add a global address; the on-link global address DNS server is (still)
+        // presumed reachable.
+        assertTrue(v6lp.addLinkAddress(new LinkAddress(ADDRV6, 64)));
+        assertFalse(v6lp.isReachable(kLinkLocalDns));
+        assertTrue(v6lp.isReachable(kLinkLocalDnsWithScope));
+        assertTrue(v6lp.isReachable(kOnLinkDns));
+        assertFalse(v6lp.isReachable(DNS6));
+
+        // Adding a default route makes the off-link DNS server reachable.
+        assertTrue(v6lp.addRoute(new RouteInfo(GATEWAY62)));
+        assertFalse(v6lp.isReachable(kLinkLocalDns));
+        assertTrue(v6lp.isReachable(kLinkLocalDnsWithScope));
+        assertTrue(v6lp.isReachable(kOnLinkDns));
+        assertTrue(v6lp.isReachable(DNS6));
     }
 }

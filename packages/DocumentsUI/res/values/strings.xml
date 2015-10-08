@@ -44,8 +44,10 @@
     <string name="menu_share">Share</string>
     <!-- Menu item title that deletes the selected documents [CHAR LIMIT=24] -->
     <string name="menu_delete">Delete</string>
-    <!-- Menu item title that selects the current directory [CHAR LIMIT=48] -->
-    <string name="menu_select">Select \"<xliff:g id="directory" example="My Directory">^1</xliff:g>\"</string>
+    <!-- Menu item title that selects all documents in the current directory [CHAR LIMIT=24] -->
+    <string name="menu_select_all">Select all</string>
+    <!-- Menu item title that copies the selected documents [CHAR LIMIT=24] -->
+    <string name="menu_copy">Copy to\u2026</string>
 
     <!-- Menu item that reveals internal storage built into the device [CHAR LIMIT=24] -->
     <string name="menu_advanced_show" product="nosdcard">Show internal storage</string>
@@ -61,8 +63,10 @@
     <!-- Menu item that hides the sizes of displayed files [CHAR LIMIT=24] -->
     <string name="menu_file_size_hide">Hide file size</string>
 
-    <!-- Action mode title summarizing the number of documents selected [CHAR LIMIT=32] -->
-    <string name="mode_selected_count"><xliff:g id="count" example="3">%1$d</xliff:g> selected</string>
+    <!-- Button label that select the current directory [CHAR LIMIT=24] -->
+    <string name="button_select">Select</string>
+    <!-- Button label that copies files to the current directory [CHAR LIMIT=24] -->
+    <string name="button_copy">Copy</string>
 
     <!-- Mode that sorts documents by their display name alphabetically [CHAR LIMIT=24] -->
     <string name="sort_name">By name</string>
@@ -108,4 +112,26 @@
     <!-- Title of dialog when prompting user to select an app to share documents with [CHAR LIMIT=32] -->
     <string name="share_via">Share via</string>
 
+    <!-- Title of the copy notification [CHAR LIMIT=24] -->
+    <string name="copy_notification_title">Copying files</string>
+    <!-- Text shown on the copy notification to indicate remaining time, in minutes [CHAR LIMIT=24] -->
+    <string name="copy_remaining"><xliff:g id="duration" example="3 minutes">%s</xliff:g> left</string>
+    <!-- Toast shown when a file copy is kicked off -->
+    <plurals name="copy_begin">
+        <item quantity="one">Copying <xliff:g id="count" example="1">%1$d</xliff:g> file.</item>
+        <item quantity="other">Copying <xliff:g id="count" example="3">%1$d</xliff:g> files.</item>
+    </plurals>
+    <!-- Text shown on the copy notification while DocumentsUI performs setup in preparation for copying files [CHAR LIMIT=32] -->
+    <string name="copy_preparing">Preparing for copy\u2026</string>
+    <!-- Title of the copy error notification [CHAR LIMIT=48] -->
+    <plurals name="copy_error_notification_title">
+        <item quantity="one">Couldn\'t copy <xliff:g id="count" example="1">%1$d</xliff:g> file</item>
+        <item quantity="other">Couldn\'t copy <xliff:g id="count" example="2">%1$d</xliff:g> files</item>
+    </plurals>
+    <!-- Second line for notifications saying that more information will be shown after touching [CHAR LIMIT=48] -->
+    <string name="notification_touch_for_details">Touch to view details</string>
+    <!-- Label of a dialog button for retrying a failed operation [CHAR LIMIT=24] -->
+    <string name="retry">Retry</string>
+    <!-- Contents of the copying failure alert dialog. [CHAR LIMIT=48] -->
+    <string name="copy_failure_alert_content">These files weren\'t copied: <xliff:g id="list">%1$s</xliff:g></string>
 </resources>

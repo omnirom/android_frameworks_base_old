@@ -17,12 +17,13 @@
 
 package android.hardware.usb;
 
+import com.android.internal.util.Preconditions;
+
 import android.app.PendingIntent;
 import android.content.Context;
 import android.os.Bundle;
 import android.os.ParcelFileDescriptor;
 import android.os.RemoteException;
-import android.os.SystemProperties;
 import android.util.Log;
 
 import java.util.HashMap;
@@ -54,8 +55,6 @@ public class UsbManager {
      * <li> {@link #USB_CONNECTED} boolean indicating whether USB is connected or disconnected.
      * <li> {@link #USB_CONFIGURED} boolean indicating whether USB is configured.
      * currently zero if not configured, one for configured.
-     * <li> {@link #USB_FUNCTION_MASS_STORAGE} boolean extra indicating whether the
-     * mass storage function is enabled
      * <li> {@link #USB_FUNCTION_ADB} boolean extra indicating whether the
      * adb function is enabled
      * <li> {@link #USB_FUNCTION_RNDIS} boolean extra indicating whether the
@@ -68,12 +67,30 @@ public class UsbManager {
      * accessory function is enabled
      * <li> {@link #USB_FUNCTION_AUDIO_SOURCE} boolean extra indicating whether the
      * audio source function is enabled
+     * <li> {@link #USB_FUNCTION_MIDI} boolean extra indicating whether the
+     * MIDI function is enabled
      * </ul>
      *
      * {@hide}
      */
     public static final String ACTION_USB_STATE =
             "android.hardware.usb.action.USB_STATE";
+
+    /**
+     * Broadcast Action: A broadcast for USB port changes.
+     *
+     * This intent is sent when a USB port is added, removed, or changes state.
+     * <ul>
+     * <li> {@link #EXTRA_PORT} containing the {@link android.hardware.usb.UsbPort}
+     * for the port.
+     * <li> {@link #EXTRA_PORT_STATUS} containing the {@link android.hardware.usb.UsbPortStatus}
+     * for the port, or null if the port has been removed
+     * </ul>
+     *
+     * @hide
+     */
+    public static final String ACTION_USB_PORT_CHANGED =
+            "android.hardware.usb.action.USB_PORT_CHANGED";
 
    /**
      * Broadcast Action:  A broadcast for USB device attached event.
@@ -140,12 +157,23 @@ public class UsbManager {
     public static final String USB_CONFIGURED = "configured";
 
     /**
-     * Name of the USB mass storage USB function.
-     * Used in extras for the {@link #ACTION_USB_STATE} broadcast
+     * Boolean extra indicating whether confidential user data, such as photos, should be
+     * made available on the USB connection. This variable will only be set when the user
+     * has explicitly asked for this data to be unlocked.
+     * Used in extras for the {@link #ACTION_USB_STATE} broadcast.
      *
      * {@hide}
      */
-    public static final String USB_FUNCTION_MASS_STORAGE = "mass_storage";
+    public static final String USB_DATA_UNLOCKED = "unlocked";
+
+    /**
+     * A placeholder indicating that no USB function is being specified.
+     * Used to distinguish between selecting no function vs. the default function in
+     * {@link #setCurrentFunction(String)}.
+     *
+     * {@hide}
+     */
+    public static final String USB_FUNCTION_NONE = "none";
 
     /**
      * Name of the adb USB function.
@@ -188,6 +216,14 @@ public class UsbManager {
     public static final String USB_FUNCTION_AUDIO_SOURCE = "audio_source";
 
     /**
+     * Name of the MIDI USB function.
+     * Used in extras for the {@link #ACTION_USB_STATE} broadcast
+     *
+     * {@hide}
+     */
+    public static final String USB_FUNCTION_MIDI = "midi";
+
+    /**
      * Name of the Accessory USB function.
      * Used in extras for the {@link #ACTION_USB_STATE} broadcast
      *
@@ -196,17 +232,33 @@ public class UsbManager {
     public static final String USB_FUNCTION_ACCESSORY = "accessory";
 
     /**
+     * Name of extra for {@link #ACTION_USB_PORT_CHANGED}
+     * containing the {@link UsbPort} object for the port.
+     *
+     * @hide
+     */
+    public static final String EXTRA_PORT = "port";
+
+    /**
+     * Name of extra for {@link #ACTION_USB_PORT_CHANGED}
+     * containing the {@link UsbPortStatus} object for the port, or null if the port
+     * was removed.
+     *
+     * @hide
+     */
+    public static final String EXTRA_PORT_STATUS = "portStatus";
+
+    /**
      * Name of extra for {@link #ACTION_USB_DEVICE_ATTACHED} and
      * {@link #ACTION_USB_DEVICE_DETACHED} broadcasts
-     * containing the UsbDevice object for the device.
+     * containing the {@link UsbDevice} object for the device.
      */
-
     public static final String EXTRA_DEVICE = "device";
 
     /**
      * Name of extra for {@link #ACTION_USB_ACCESSORY_ATTACHED} and
      * {@link #ACTION_USB_ACCESSORY_DETACHED} broadcasts
-     * containing the UsbAccessory object for the accessory.
+     * containing the {@link UsbAccessory} object for the accessory.
      */
     public static final String EXTRA_ACCESSORY = "accessory";
 
@@ -400,74 +452,189 @@ public class UsbManager {
         }
     }
 
-    private static boolean propertyContainsFunction(String property, String function) {
-        String functions = SystemProperties.get(property, "");
-        int index = functions.indexOf(function);
-        if (index < 0) return false;
-        if (index > 0 && functions.charAt(index - 1) != ',') return false;
-        int charAfter = index + function.length();
-        if (charAfter < functions.length() && functions.charAt(charAfter) != ',') return false;
-        return true;
-    }
-
     /**
-     * Returns true if the specified USB function is currently enabled.
+     * Returns true if the specified USB function is currently enabled when in device mode.
+     * <p>
+     * USB functions represent interfaces which are published to the host to access
+     * services offered by the device.
+     * </p>
      *
      * @param function name of the USB function
-     * @return true if the USB function is enabled.
+     * @return true if the USB function is enabled
      *
      * {@hide}
      */
     public boolean isFunctionEnabled(String function) {
-        return propertyContainsFunction("sys.usb.config", function);
-    }
-
-    /**
-     * Returns the current default USB function.
-     *
-     * @return name of the default function.
-     *
-     * {@hide}
-     */
-    public String getDefaultFunction() {
-        String functions = SystemProperties.get("persist.sys.usb.config", "");
-        int commaIndex = functions.indexOf(',');
-        if (commaIndex > 0) {
-            return functions.substring(0, commaIndex);
-        } else {
-            return functions;
+        try {
+            return mService.isFunctionEnabled(function);
+        } catch (RemoteException e) {
+            Log.e(TAG, "RemoteException in setCurrentFunction", e);
+            return false;
         }
     }
 
     /**
-     * Sets the current USB function.
-     * If function is null, then the current function is set to the default function.
+     * Sets the current USB function when in device mode.
+     * <p>
+     * USB functions represent interfaces which are published to the host to access
+     * services offered by the device.
+     * </p><p>
+     * This method is intended to select among primary USB functions.  The system may
+     * automatically activate additional functions such as {@link #USB_FUNCTION_ADB}
+     * or {@link #USB_FUNCTION_ACCESSORY} based on other settings and states.
+     * </p><p>
+     * The allowed values are: {@link #USB_FUNCTION_NONE}, {@link #USB_FUNCTION_AUDIO_SOURCE},
+     * {@link #USB_FUNCTION_MIDI}, {@link #USB_FUNCTION_MTP}, {@link #USB_FUNCTION_PTP},
+     * or {@link #USB_FUNCTION_RNDIS}.
+     * </p><p>
+     * Note: This function is asynchronous and may fail silently without applying
+     * the requested changes.
+     * </p>
      *
      * @param function name of the USB function, or null to restore the default function
-     * @param makeDefault true if the function should be set as the new default function
      *
      * {@hide}
      */
-    public void setCurrentFunction(String function, boolean makeDefault) {
+    public void setCurrentFunction(String function) {
         try {
-            mService.setCurrentFunction(function, makeDefault);
+            mService.setCurrentFunction(function);
         } catch (RemoteException e) {
             Log.e(TAG, "RemoteException in setCurrentFunction", e);
         }
     }
 
     /**
-     * Sets the file path for USB mass storage backing file.
-     *
-     * @param path backing file path
+     * Sets whether USB data (for example, MTP exposed pictures) should be made available
+     * on the USB connection when in device mode. Unlocking usb data should only be done with
+     * user involvement, since exposing pictures or other data could leak sensitive
+     * user information.
      *
      * {@hide}
      */
-    public void setMassStorageBackingFile(String path) {
+    public void setUsbDataUnlocked(boolean unlocked) {
         try {
-            mService.setMassStorageBackingFile(path);
+            mService.setUsbDataUnlocked(unlocked);
         } catch (RemoteException e) {
-            Log.e(TAG, "RemoteException in setDefaultFunction", e);
+            Log.e(TAG, "RemoteException in setUsbDataUnlocked", e);
         }
+    }
+
+    /**
+     * Returns a list of physical USB ports on the device.
+     * <p>
+     * This list is guaranteed to contain all dual-role USB Type C ports but it might
+     * be missing other ports depending on whether the kernel USB drivers have been
+     * updated to publish all of the device's ports through the new "dual_role_usb"
+     * device class (which supports all types of ports despite its name).
+     * </p>
+     *
+     * @return The list of USB ports, or null if none.
+     *
+     * @hide
+     */
+    public UsbPort[] getPorts() {
+        try {
+            return mService.getPorts();
+        } catch (RemoteException e) {
+            Log.e(TAG, "RemoteException in getPorts", e);
+        }
+        return null;
+    }
+
+    /**
+     * Gets the status of the specified USB port.
+     *
+     * @param port The port to query.
+     * @return The status of the specified USB port, or null if unknown.
+     *
+     * @hide
+     */
+    public UsbPortStatus getPortStatus(UsbPort port) {
+        Preconditions.checkNotNull(port, "port must not be null");
+
+        try {
+            return mService.getPortStatus(port.getId());
+        } catch (RemoteException e) {
+            Log.e(TAG, "RemoteException in getPortStatus", e);
+        }
+        return null;
+    }
+
+    /**
+     * Sets the desired role combination of the port.
+     * <p>
+     * The supported role combinations depend on what is connected to the port and may be
+     * determined by consulting
+     * {@link UsbPortStatus#isRoleCombinationSupported UsbPortStatus.isRoleCombinationSupported}.
+     * </p><p>
+     * Note: This function is asynchronous and may fail silently without applying
+     * the requested changes.  If this function does cause a status change to occur then
+     * a {@link #ACTION_USB_PORT_CHANGED} broadcast will be sent.
+     * </p>
+     *
+     * @param powerRole The desired power role: {@link UsbPort#POWER_ROLE_SOURCE}
+     * or {@link UsbPort#POWER_ROLE_SINK}, or 0 if no power role.
+     * @param dataRole The desired data role: {@link UsbPort#DATA_ROLE_HOST}
+     * or {@link UsbPort#DATA_ROLE_DEVICE}, or 0 if no data role.
+     *
+     * @hide
+     */
+    public void setPortRoles(UsbPort port, int powerRole, int dataRole) {
+        Preconditions.checkNotNull(port, "port must not be null");
+        UsbPort.checkRoles(powerRole, dataRole);
+
+        try {
+            mService.setPortRoles(port.getId(), powerRole, dataRole);
+        } catch (RemoteException e) {
+            Log.e(TAG, "RemoteException in setPortRole", e);
+        }
+    }
+
+    /** @hide */
+    public static String addFunction(String functions, String function) {
+        if ("none".equals(functions)) {
+            return function;
+        }
+        if (!containsFunction(functions, function)) {
+            if (functions.length() > 0) {
+                functions += ",";
+            }
+            functions += function;
+        }
+        return functions;
+    }
+
+    /** @hide */
+    public static String removeFunction(String functions, String function) {
+        String[] split = functions.split(",");
+        for (int i = 0; i < split.length; i++) {
+            if (function.equals(split[i])) {
+                split[i] = null;
+            }
+        }
+        if (split.length == 1 && split[0] == null) {
+            return "none";
+        }
+        StringBuilder builder = new StringBuilder();
+        for (int i = 0; i < split.length; i++) {
+            String s = split[i];
+            if (s != null) {
+                if (builder.length() > 0) {
+                    builder.append(",");
+                }
+                builder.append(s);
+            }
+        }
+        return builder.toString();
+    }
+
+    /** @hide */
+    public static boolean containsFunction(String functions, String function) {
+        int index = functions.indexOf(function);
+        if (index < 0) return false;
+        if (index > 0 && functions.charAt(index - 1) != ',') return false;
+        int charAfter = index + function.length();
+        if (charAfter < functions.length() && functions.charAt(charAfter) != ',') return false;
+        return true;
     }
 }

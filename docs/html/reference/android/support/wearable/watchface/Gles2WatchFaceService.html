@@ -95,15 +95,13 @@
 
 
 
-
-
-
 <html>
 <head>
 
 
 <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
-<meta name="viewport" content="width=device-width" />
+<meta name="viewport" content="width=device-width,initial-scale=1.0,minimum-scale=1.0,maximum-scale=1.0,user-scalable=no" />
+<meta content="IE=edge" http-equiv="X-UA-Compatible">
 
 <link rel="shortcut icon" type="image/x-icon" href="../../../../../favicon.ico" />
 <title>Gles2WatchFaceService | Android Developers</title>
@@ -113,7 +111,8 @@
 href="http://fonts.googleapis.com/css?family=Roboto+Condensed">
 <link rel="stylesheet" href="http://fonts.googleapis.com/css?family=Roboto:light,regular,medium,thin,italic,mediumitalic,bold"
   title="roboto">
-<link href="../../../../../assets/css/default.css?v=4" rel="stylesheet" type="text/css">
+
+<link href="../../../../../assets/css/default.css?v=7" rel="stylesheet" type="text/css">
 
 
 <!-- FULLSCREEN STYLESHEET -->
@@ -129,7 +128,7 @@ type="text/css">
   var metaTags = [];
   var devsite = false;
 </script>
-<script src="../../../../../assets/js/docs.js?v=3" type="text/javascript"></script>
+<script src="../../../../../assets/js/docs.js?v=6" type="text/javascript"></script>
 
 
 
@@ -152,10 +151,9 @@ type="text/css">
   <div id="doc-api-level" class="" style="display:none"></div>
   <a name="top"></a>
 
-
 <a name="top"></a>
 
-<!-- dialog to prompt lang pref change when loaded from hardcoded URL 
+<!-- dialog to prompt lang pref change when loaded from hardcoded URL
 <div id="langMessage" style="display:none">
   <div>
     <div class="lang en">
@@ -203,108 +201,52 @@ type="text/css">
 
   <!-- Header -->
   <div id="header-wrapper">
-    <div id="header">
-
-    
+    <div class="dac-header" id="header">
 
 
-      <div class="wrap" id="header-wrap">
-        <div class="col-3 logo">
-          <a href="../../../../../index.html">
-            <img src="../../../../../assets/images/dac_logo.png"
-                srcset="../../../../../assets/images/dac_logo@2x.png 2x"
-                width="123" height="25" alt="Android Developers" />
+
+
+      <div class="dac-header-inner">
+        <a class="dac-nav-toggle" data-dac-toggle-nav href="javascript:;" title="Open navigation">
+          <span class="dac-nav-hamburger">
+            <span class="dac-nav-hamburger-top"></span>
+            <span class="dac-nav-hamburger-mid"></span>
+            <span class="dac-nav-hamburger-bot"></span>
+          </span>
+        </a>
+        <a class="dac-header-logo" href="../../../../../index.html">
+          <img class="dac-header-logo-image" src="../../../../../assets/images/android_logo.png"
+              srcset="../../../../../assets/images/android_logo@2x.png 2x"
+              width="32" height="36" alt="Android" /> Developers
           </a>
-          <div class="btn-quicknav" id="btn-quicknav">
-            <a href="#" class="arrow-inactive">Quicknav</a>
-            <a href="#" class="arrow-active">Quicknav</a>
-          </div>
-        </div>
-        <ul class="nav-x col-9">
-            <li class="design">
-              <a href="../../../../../design/index.html"
-              zh-tw-lang="設計"
-              zh-cn-lang="设计"
-              ru-lang="Проектирование"
-              ko-lang="디자인"
-              ja-lang="設計"
-              es-lang="Diseñar"
-              >Design</a></li>
-            <li class="develop"><a href="../../../../../develop/index.html"
-              zh-tw-lang="開發"
-              zh-cn-lang="开发"
-              ru-lang="Разработка"
-              ko-lang="개발"
-              ja-lang="開発"
-              es-lang="Desarrollar"
-              >Develop</a></li>
-            <li class="distribute last"><a href="../../../../../distribute/googleplay/index.html"
-              zh-tw-lang="發佈"
-              zh-cn-lang="分发"
-              ru-lang="Распространение"
-              ko-lang="배포"
-              ja-lang="配布"
-              es-lang="Distribuir"
-              >Distribute</a></li>
+
+        <ul class="dac-header-crumbs">
+          
+          <li class="dac-header-crumbs-item"><span class="dac-header-crumbs-link current ">Gles2WatchFaceService</a></li>
         </ul>
 
-
         
         
-<div class="menu-container">
-  <div class="moremenu">
-    <div id="more-btn"></div>
-  </div>
-  <div class="morehover" id="moremenu">
-    <div class="top"></div>
-    <div class="mid">
-      <div class="header">Links</div>
-      <ul>
-        <li><a href="https://play.google.com/apps/publish/" target="_googleplay">Google Play Developer Console</a></li>
-        <li><a href="http://android-developers.blogspot.com/">Android Developers Blog</a></li>
-        <li><a href="../../../../../about/index.html">About Android</a></li>
-      </ul>
-      <div class="header">Android Sites</div>
-      <ul>
-        <li><a href="http://www.android.com">Android.com</a></li>
-        <li class="active"><a>Android Developers</a></li>
-        <li><a href="http://source.android.com">Android Open Source Project</a></li>
-      </ul>
-
-      
-      
-      
-      <br class="clearfix" />
-    </div><!-- end 'mid' -->
-    <div class="bottom"></div>
-  </div><!-- end 'moremenu' -->
-
-  <div class="search" id="search-container">
-    <div class="search-inner">
-      <div id="search-btn"></div>
-      <div class="left"></div>
-      <form onsubmit="return submit_search()">
+        
+  <div class="dac-header-search" id="search-container">
+    <div class="dac-header-search-inner">
+      <div class="dac-sprite dac-search dac-header-search-btn" id="search-btn"></div>
+      <form class="dac-header-search-form" onsubmit="return submit_search()">
         <input id="search_autocomplete" type="text" value="" autocomplete="off" name="q"
           onfocus="search_focus_changed(this, true)" onblur="search_focus_changed(this, false)"
           onkeydown="return search_changed(event, true, '../../../../../')"
-          onkeyup="return search_changed(event, false, '../../../../../')" />
+          onkeyup="return search_changed(event, false, '../../../../../')"
+          class="dac-header-search-input" placeholder="Search" />
+          <a class="dac-header-search-close hide" id="search-close">close</a>
       </form>
-      <div class="right"></div>
-      <a class="close hide">close</a>
-      <div class="left"></div>
-      <div class="right"></div>
-    </div><!-- end search-inner -->
-  </div><!-- end search-container -->
+    </div><!-- end dac-header-search-inner -->
+  </div><!-- end dac-header-search -->
 
-  <div class="search_filtered_wrapper reference">
+  <div class="search_filtered_wrapper">
     <div class="suggest-card reference no-display">
       <ul class="search_filtered">
       </ul>
     </div>
-  </div>
-
-  <div class="search_filtered_wrapper docs">
-    <div class="suggest-card dummy no-display">&nbsp;</div>
     <div class="suggest-card develop no-display">
       <ul class="search_filtered">
       </ul>
@@ -324,153 +266,17 @@ type="text/css">
       </ul>
     </div>
   </div>
-</div><!-- end menu-container (search and menu widget) -->
 
+        
 
+        <a class="dac-header-console-btn" href="https://play.google.com/apps/publish/">
+          <span class="dac-sprite dac-google-play"></span>
+          <span class="dac-visible-desktop-inline">Developer</span>
+          Console
+        </a>
 
-        <!-- Expanded quicknav -->
-        <div id="quicknav" class="col-13">
-          <ul>
-            <li class="about">
-              <ul>
-                <li><a href="../../../../../about/index.html">About</a></li>
-                <li><a href="../../../../../wear/index.html">Wear</a></li>
-                <li><a href="../../../../../tv/index.html">TV</a></li>
-                <li><a href="../../../../../auto/index.html">Auto</a></li>
-              </ul>
-            </li>
-            <li class="design">
-              <ul>
-                <li><a href="../../../../../design/index.html">Get Started</a></li>
-                <li><a href="../../../../../design/devices.html">Devices</a></li>
-                <li><a href="../../../../../design/style/index.html">Style</a></li>
-                <li><a href="../../../../../design/patterns/index.html">Patterns</a></li>
-                <li><a href="../../../../../design/building-blocks/index.html">Building Blocks</a></li>
-                <li><a href="../../../../../design/downloads/index.html">Downloads</a></li>
-                <li><a href="../../../../../design/videos/index.html">Videos</a></li>
-              </ul>
-            </li>
-            <li class="develop">
-              <ul>
-                <li><a href="../../../../../training/index.html"
-                  zh-tw-lang="訓練課程"
-                  zh-cn-lang="培训"
-                  ru-lang="Курсы"
-                  ko-lang="교육"
-                  ja-lang="トレーニング"
-                  es-lang="Capacitación"
-                  >Training</a></li>
-                <li><a href="../../../../../guide/index.html"
-                  zh-tw-lang="API 指南"
-                  zh-cn-lang="API 指南"
-                  ru-lang="Руководства по API"
-                  ko-lang="API 가이드"
-                  ja-lang="API ガイド"
-                  es-lang="Guías de la API"
-                  >API Guides</a></li>
-                <li><a href="../../../../../reference/packages.html"
-                  zh-tw-lang="參考資源"
-                  zh-cn-lang="参考"
-                  ru-lang="Справочник"
-                  ko-lang="참조문서"
-                  ja-lang="リファレンス"
-                  es-lang="Referencia"
-                  >Reference</a></li>
-                <li><a href="../../../../../sdk/index.html"
-                  zh-tw-lang="相關工具"
-                  zh-cn-lang="工具"
-                  ru-lang="Инструменты"
-                  ko-lang="도구"
-                  ja-lang="ツール"
-                  es-lang="Herramientas"
-                  >Tools</a>
-                </li>
-                <li><a href="../../../../../google/index.html">Google Services</a>
-                </li>
-                
-              </ul>
-            </li>
-            <li class="distribute last">
-              <ul>
-                <li><a href="../../../../../distribute/googleplay/index.html">Google Play</a></li>
-                <li><a href="../../../../../distribute/essentials/index.html">Essentials</a></li>
-                <li><a href="../../../../../distribute/users/index.html">Get Users</a></li>
-                <li><a href="../../../../../distribute/engage/index.html">Engage &amp; Retain</a></li>
-                <li><a href="../../../../../distribute/monetize/index.html">Monetize</a></li>
-                <li><a href="../../../../../distribute/tools/index.html">Tools &amp; Reference</a></li>
-                <li><a href="../../../../../distribute/stories/index.html">Developer Stories</a></li>
-              </ul>
-            </li>
-          </ul>
-        </div><!-- /Expanded quicknav -->
       </div><!-- end header-wrap.wrap -->
     </div><!-- end header -->
-
-  
-    <!-- Secondary x-nav -->
-    <div id="nav-x">
-        <div class="wrap" style="position:relative;z-index:1">
-
-        
-        
-            <a id="helpoutsLink" class="resource resource-card resource-card-6x2x3 resource-card-6x2 helpouts-card" 
-              href="http://helpouts.google.com/partner/landing/provider/googledevelopers?utm_source=dac&utm_medium=banner&utm_campaign=android_provider_banner3" target="_blank">
-              <div class="card-bg helpouts-card-bg"></div>
-              <div class="card-info">
-                <div class="helpouts-description">
-                  <div class="text">Help Android Wear and TV developers<br/>
-                    <span id="helpoutsLinkText" class="link-color" 
-                    style="display:block;padding-top:5px;text-align:right">Learn more</span>
-                  </div>
-                </div>
-              </div>
-            </a>
-        
-        
-
-            <ul class="nav-x col-9 develop" style="width:100%">
-                <li class="training"><a href="../../../../../training/index.html"
-                  zh-tw-lang="訓練課程"
-                  zh-cn-lang="培训"
-                  ru-lang="Курсы"
-                  ko-lang="교육"
-                  ja-lang="トレーニング"
-                  es-lang="Capacitación"
-                  >Training</a></li>
-                <li class="guide"><a href="../../../../../guide/index.html"
-                  zh-tw-lang="API 指南"
-                  zh-cn-lang="API 指南"
-                  ru-lang="Руководства по API"
-                  ko-lang="API 가이드"
-                  ja-lang="API ガイド"
-                  es-lang="Guías de la API"
-                  >API Guides</a></li>
-                <li class="reference"><a href="../../../../../reference/packages.html"
-                  zh-tw-lang="參考資源"
-                  zh-cn-lang="参考"
-                  ru-lang="Справочник"
-                  ko-lang="참조문서"
-                  ja-lang="リファレンス"
-                  es-lang="Referencia"
-                  >Reference</a></li>
-                <li class="tools"><a href="../../../../../sdk/index.html"
-                  zh-tw-lang="相關工具"
-                  zh-cn-lang="工具"
-                  ru-lang="Инструменты"
-                  ko-lang="도구"
-                  ja-lang="ツール"
-                  es-lang="Herramientas"
-                  >Tools</a></li>
-                <li class="google"><a href="../../../../../google/index.html"
-                  >Google Services</a>
-                </li>
-                
-            </ul>
-        </div>
-    </div>
-    <!-- /Sendondary x-nav DEVELOP -->
-
-  
 
     <div id="searchResults" class="wrap" style="display:none;">
       <h2 id="searchTitle">Results</h2>
@@ -478,23 +284,137 @@ type="text/css">
     </div>
   </div> <!--end header-wrapper -->
 
-  <div id="sticky-header">
-    <div>
-      <a class="logo" href="#top"></a>
-      <a class="top" href="#top"></a>
-      <ul class="breadcrumb">
-        
-        <li class="current">Gles2WatchFaceService</li>
-      </ul>
-    </div>
-  </div>
+  
+  <!-- Navigation-->
+  <nav class="dac-nav">
+    <div class="dac-nav-dimmer" data-dac-toggle-nav></div>
+
+    <ul class="dac-nav-list" data-dac-nav>
+      <li class="dac-nav-item dac-nav-head">
+        <a class="dac-nav-link dac-nav-logo" data-dac-toggle-nav href="javascript:;" title="Close navigation">
+          <img class="dac-logo-image" src="../../../../../assets/images/android_logo.png"
+               srcset="../../../../../assets/images/android_logo@2x.png 2x"
+               width="32" height="36" alt="Android" /> Developers
+        </a>
+      </li>
+      <li class="dac-nav-item home">
+        <a class="dac-nav-link dac-visible-mobile-block" href="../../../../../index.html">Home</a>
+        <ul class="dac-nav-secondary about">
+          <li class="dac-nav-item about">
+            <a class="dac-nav-link" href="../../../../../about/index.html">Android</a>
+          </li>
+          <li class="dac-nav-item wear">
+            <a class="dac-nav-link" href="../../../../../wear/index.html">Wear</a>
+          </li>
+          <li class="dac-nav-item tv">
+            <a class="dac-nav-link" href="../../../../../tv/index.html">TV</a>
+          </li>
+          <li class="dac-nav-item auto">
+            <a class="dac-nav-link" href="../../../../../auto/index.html">Auto</a>
+          </li>
+        </ul>
+      </li>
+      <li class="dac-nav-item design">
+        <a class="dac-nav-link" href="../../../../../design/index.html"
+           zh-tw-lang="設計"
+           zh-cn-lang="设计"
+           ru-lang="Проектирование"
+           ko-lang="디자인"
+           ja-lang="設計"
+           es-lang="Diseñar">Design</a>
+      </li>
+      <li class="dac-nav-item develop">
+        <a class="dac-nav-link" href="../../../../../develop/index.html"
+           zh-tw-lang="開發"
+           zh-cn-lang="开发"
+           ru-lang="Разработка"
+           ko-lang="개발"
+           ja-lang="開発"
+           es-lang="Desarrollar">Develop</a>
+        <ul class="dac-nav-secondary develop">
+          <li class="dac-nav-item training">
+            <a class="dac-nav-link" href="../../../../../training/index.html"
+               zh-tw-lang="訓練課程"
+               zh-cn-lang="培训"
+               ru-lang="Курсы"
+               ko-lang="교육"
+               ja-lang="トレーニング"
+               es-lang="Capacitación">Training</a>
+          </li>
+          <li class="dac-nav-item guide">
+            <a class="dac-nav-link" href="../../../../../guide/index.html"
+               zh-tw-lang="API 指南"
+               zh-cn-lang="API 指南"
+               ru-lang="Руководства по API"
+               ko-lang="API 가이드"
+               ja-lang="API ガイド"
+               es-lang="Guías de la API">API Guides</a>
+          </li>
+          <li class="dac-nav-item reference">
+            <a class="dac-nav-link" href="../../../../../reference/packages.html"
+               zh-tw-lang="參考資源"
+               zh-cn-lang="参考"
+               ru-lang="Справочник"
+               ko-lang="참조문서"
+               ja-lang="リファレンス"
+               es-lang="Referencia">Reference</a>
+          </li>
+          <li class="dac-nav-item tools">
+            <a class="dac-nav-link" href="../../../../../sdk/index.html"
+               zh-tw-lang="相關工具"
+               zh-cn-lang="工具"
+               ru-lang="Инструменты"
+               ko-lang="도구"
+               ja-lang="ツール"
+               es-lang="Herramientas">Tools</a></li>
+          <li class="dac-nav-item google">
+            <a class="dac-nav-link" href="../../../../../google/index.html">Google Services</a>
+          </li>
+          
+          <li class="dac-nav-item preview">
+            <a class="dac-nav-link" href="../../../../../preview/index.html">Preview</a>
+          </li>
+        </ul>
+      </li>
+      <li class="dac-nav-item distribute">
+        <a class="dac-nav-link" href="../../../../../distribute/googleplay/index.html"
+           zh-tw-lang="發佈"
+           zh-cn-lang="分发"
+           ru-lang="Распространение"
+           ko-lang="배포"
+           ja-lang="配布"
+           es-lang="Distribuir">Distribute</a>
+        <ul class="dac-nav-secondary distribute">
+          <li class="dac-nav-item googleplay">
+            <a class="dac-nav-link" href="../../../../../distribute/googleplay/index.html">Google Play</a></li>
+          <li class="dac-nav-item essentials">
+            <a class="dac-nav-link" href="../../../../../distribute/essentials/index.html">Essentials</a></li>
+          <li class="dac-nav-item users">
+            <a class="dac-nav-link" href="../../../../../distribute/users/index.html">Get Users</a></li>
+          <li class="dac-nav-item engage">
+            <a class="dac-nav-link" href="../../../../../distribute/engage/index.html">Engage &amp; Retain</a></li>
+          <li class="dac-nav-item monetize">
+            <a class="dac-nav-link" href="../../../../../distribute/monetize/index.html">Earn</a>
+          </li>
+          <li class="dac-nav-item analyze">
+            <a class="dac-nav-link" href="../../../../../distribute/analyze/index.html">Analyze</a>
+          </li>
+          <li class="dac-nav-item stories">
+            <a class="dac-nav-link" href="../../../../../distribute/stories/index.html">Stories</a>
+          </li>
+        </ul>
+      </li>
+    </ul>
+  </nav>
+  <!-- end navigation-->
+  
 
 
 
 
 
-  <div class="wrap clearfix" id="body-content">
-    <div class="col-4" id="side-nav" itemscope itemtype="http://schema.org/SiteNavigationElement">
+  <div class="wrap clearfix" id="body-content"><div class="cols">
+    <div class="col-4 dac-hidden-mobile" id="side-nav" itemscope itemtype="http://schema.org/SiteNavigationElement">
       <div id="devdoc-nav">
       <div id="api-nav-header">
         <div id="api-level-toggle">
@@ -512,7 +432,7 @@ type="text/css">
         var SINCE_DATA = [  ];
         buildApiLevelSelector();
       </script>
-                  
+
       <div id="swapper">
         <div id="nav-panels">
           <div id="resize-packages-nav">
@@ -526,6 +446,10 @@ type="text/css">
   <a href="../../../../../reference/android/support/wearable/activity/package-summary.html">android.support.wearable.activity</a></li>
     <li class="api apilevel-">
   <a href="../../../../../reference/android/support/wearable/companion/package-summary.html">android.support.wearable.companion</a></li>
+    <li class="api apilevel-">
+  <a href="../../../../../reference/android/support/wearable/input/package-summary.html">android.support.wearable.input</a></li>
+    <li class="api apilevel-">
+  <a href="../../../../../reference/android/support/wearable/media/package-summary.html">android.support.wearable.media</a></li>
     <li class="api apilevel-">
   <a href="../../../../../reference/android/support/wearable/provider/package-summary.html">android.support.wearable.provider</a></li>
     <li class="api apilevel-">
@@ -542,6 +466,11 @@ type="text/css">
 
             <ul>
               
+    <li><h2>Annotations</h2>
+      <ul>
+          <li class="api apilevel-"><a href="../../../../../reference/android/support/wearable/watchface/WatchFaceService.TapType.html">WatchFaceService.TapType</a></li>
+      </ul>
+    </li>
               
               
     <li><h2>Classes</h2>
@@ -560,7 +489,7 @@ type="text/css">
               
               
             </ul><br/>
-        
+
 
           </div><!-- end classes -->
         </div><!-- end nav-panels -->
@@ -770,7 +699,7 @@ Summary:
 
 <div id="naMessage"></div>
 
-<div id="jd-content" class="api apilevel-"><p style="border:2px solid #99ccff;padding:12px;margin-top:20px"><strong>Note:</strong> The Wearable Support Library classes under the <code>android.support.wearable</code> package are subject to change. For the full Android API reference, see <a href="/reference/">Reference</a>.</p>
+<div id="jd-content" class="api apilevel-">
 <table class="jd-inheritance-table">
 
 
@@ -1024,6 +953,44 @@ Summary:
         <td class="jd-descrcol" width="100%">
           Property in bundle passed to <code><a href="../../../../../reference/android/support/wearable/watchface/WatchFaceService.Engine.html#onPropertiesChanged(android.os.Bundle)">onPropertiesChanged(Bundle)</a></code> to indicate whether the device
  has low-bit ambient mode.
+          
+    
+
+        </td>
+    </tr>
+    
+    
+    <tr class=" api apilevel-" >
+        <td class="jd-typecol">int</td>
+        <td class="jd-linkcol"><a href="../../../../../reference/android/support/wearable/watchface/WatchFaceService.html#TAP_TYPE_TAP">TAP_TYPE_TAP</a></td>
+        <td class="jd-descrcol" width="100%">
+          Used in onTapCommaned to indicate that an "up" event on the watch face has occurred that
+ has not been consumed by another activity.
+          
+    
+
+        </td>
+    </tr>
+    
+    
+    <tr class="alt-color api apilevel-" >
+        <td class="jd-typecol">int</td>
+        <td class="jd-linkcol"><a href="../../../../../reference/android/support/wearable/watchface/WatchFaceService.html#TAP_TYPE_TOUCH">TAP_TYPE_TOUCH</a></td>
+        <td class="jd-descrcol" width="100%">
+          Used in onTapCommand to indicate a "down" touch event on the watch face.
+          
+    
+
+        </td>
+    </tr>
+    
+    
+    <tr class=" api apilevel-" >
+        <td class="jd-typecol">int</td>
+        <td class="jd-linkcol"><a href="../../../../../reference/android/support/wearable/watchface/WatchFaceService.html#TAP_TYPE_TOUCH_CANCEL">TAP_TYPE_TOUCH_CANCEL</a></td>
+        <td class="jd-descrcol" width="100%">
+          Used in onTapCaommand to indicate that a previous TAP_TYPE_TOUCH touch event has been
+ canceled.
           
     
 
@@ -1299,18 +1266,6 @@ android.content.Context
     
     <tr class=" api apilevel-" >
         <td class="jd-typecol">String</td>
-        <td class="jd-linkcol">BACKUP_SERVICE</td>
-        <td class="jd-descrcol" width="100%">
-          
-          
-    
-
-        </td>
-    </tr>
-    
-    
-    <tr class="alt-color api apilevel-" >
-        <td class="jd-typecol">String</td>
         <td class="jd-linkcol">BATTERY_SERVICE</td>
         <td class="jd-descrcol" width="100%">
           
@@ -1321,7 +1276,7 @@ android.content.Context
     </tr>
     
     
-    <tr class=" api apilevel-" >
+    <tr class="alt-color api apilevel-" >
         <td class="jd-typecol">int</td>
         <td class="jd-linkcol">BIND_ABOVE_CLIENT</td>
         <td class="jd-descrcol" width="100%">
@@ -1333,7 +1288,7 @@ android.content.Context
     </tr>
     
     
-    <tr class="alt-color api apilevel-" >
+    <tr class=" api apilevel-" >
         <td class="jd-typecol">int</td>
         <td class="jd-linkcol">BIND_ADJUST_WITH_ACTIVITY</td>
         <td class="jd-descrcol" width="100%">
@@ -1345,7 +1300,7 @@ android.content.Context
     </tr>
     
     
-    <tr class=" api apilevel-" >
+    <tr class="alt-color api apilevel-" >
         <td class="jd-typecol">int</td>
         <td class="jd-linkcol">BIND_ALLOW_OOM_MANAGEMENT</td>
         <td class="jd-descrcol" width="100%">
@@ -1357,7 +1312,7 @@ android.content.Context
     </tr>
     
     
-    <tr class="alt-color api apilevel-" >
+    <tr class=" api apilevel-" >
         <td class="jd-typecol">int</td>
         <td class="jd-linkcol">BIND_AUTO_CREATE</td>
         <td class="jd-descrcol" width="100%">
@@ -1369,7 +1324,7 @@ android.content.Context
     </tr>
     
     
-    <tr class=" api apilevel-" >
+    <tr class="alt-color api apilevel-" >
         <td class="jd-typecol">int</td>
         <td class="jd-linkcol">BIND_DEBUG_UNBIND</td>
         <td class="jd-descrcol" width="100%">
@@ -1381,7 +1336,7 @@ android.content.Context
     </tr>
     
     
-    <tr class="alt-color api apilevel-" >
+    <tr class=" api apilevel-" >
         <td class="jd-typecol">int</td>
         <td class="jd-linkcol">BIND_IMPORTANT</td>
         <td class="jd-descrcol" width="100%">
@@ -1393,7 +1348,7 @@ android.content.Context
     </tr>
     
     
-    <tr class=" api apilevel-" >
+    <tr class="alt-color api apilevel-" >
         <td class="jd-typecol">int</td>
         <td class="jd-linkcol">BIND_NOT_FOREGROUND</td>
         <td class="jd-descrcol" width="100%">
@@ -1405,7 +1360,7 @@ android.content.Context
     </tr>
     
     
-    <tr class="alt-color api apilevel-" >
+    <tr class=" api apilevel-" >
         <td class="jd-typecol">int</td>
         <td class="jd-linkcol">BIND_WAIVE_PRIORITY</td>
         <td class="jd-descrcol" width="100%">
@@ -1417,7 +1372,7 @@ android.content.Context
     </tr>
     
     
-    <tr class=" api apilevel-" >
+    <tr class="alt-color api apilevel-" >
         <td class="jd-typecol">String</td>
         <td class="jd-linkcol">BLUETOOTH_SERVICE</td>
         <td class="jd-descrcol" width="100%">
@@ -1429,7 +1384,7 @@ android.content.Context
     </tr>
     
     
-    <tr class="alt-color api apilevel-" >
+    <tr class=" api apilevel-" >
         <td class="jd-typecol">String</td>
         <td class="jd-linkcol">CAMERA_SERVICE</td>
         <td class="jd-descrcol" width="100%">
@@ -1441,7 +1396,7 @@ android.content.Context
     </tr>
     
     
-    <tr class=" api apilevel-" >
+    <tr class="alt-color api apilevel-" >
         <td class="jd-typecol">String</td>
         <td class="jd-linkcol">CAPTIONING_SERVICE</td>
         <td class="jd-descrcol" width="100%">
@@ -1453,7 +1408,7 @@ android.content.Context
     </tr>
     
     
-    <tr class="alt-color api apilevel-" >
+    <tr class=" api apilevel-" >
         <td class="jd-typecol">String</td>
         <td class="jd-linkcol">CLIPBOARD_SERVICE</td>
         <td class="jd-descrcol" width="100%">
@@ -1465,7 +1420,7 @@ android.content.Context
     </tr>
     
     
-    <tr class=" api apilevel-" >
+    <tr class="alt-color api apilevel-" >
         <td class="jd-typecol">String</td>
         <td class="jd-linkcol">CONNECTIVITY_SERVICE</td>
         <td class="jd-descrcol" width="100%">
@@ -1477,7 +1432,7 @@ android.content.Context
     </tr>
     
     
-    <tr class="alt-color api apilevel-" >
+    <tr class=" api apilevel-" >
         <td class="jd-typecol">String</td>
         <td class="jd-linkcol">CONSUMER_IR_SERVICE</td>
         <td class="jd-descrcol" width="100%">
@@ -1489,7 +1444,7 @@ android.content.Context
     </tr>
     
     
-    <tr class=" api apilevel-" >
+    <tr class="alt-color api apilevel-" >
         <td class="jd-typecol">int</td>
         <td class="jd-linkcol">CONTEXT_IGNORE_SECURITY</td>
         <td class="jd-descrcol" width="100%">
@@ -1501,7 +1456,7 @@ android.content.Context
     </tr>
     
     
-    <tr class="alt-color api apilevel-" >
+    <tr class=" api apilevel-" >
         <td class="jd-typecol">int</td>
         <td class="jd-linkcol">CONTEXT_INCLUDE_CODE</td>
         <td class="jd-descrcol" width="100%">
@@ -1513,7 +1468,7 @@ android.content.Context
     </tr>
     
     
-    <tr class=" api apilevel-" >
+    <tr class="alt-color api apilevel-" >
         <td class="jd-typecol">int</td>
         <td class="jd-linkcol">CONTEXT_RESTRICTED</td>
         <td class="jd-descrcol" width="100%">
@@ -1525,7 +1480,7 @@ android.content.Context
     </tr>
     
     
-    <tr class="alt-color api apilevel-" >
+    <tr class=" api apilevel-" >
         <td class="jd-typecol">String</td>
         <td class="jd-linkcol">DEVICE_POLICY_SERVICE</td>
         <td class="jd-descrcol" width="100%">
@@ -1537,7 +1492,7 @@ android.content.Context
     </tr>
     
     
-    <tr class=" api apilevel-" >
+    <tr class="alt-color api apilevel-" >
         <td class="jd-typecol">String</td>
         <td class="jd-linkcol">DISPLAY_SERVICE</td>
         <td class="jd-descrcol" width="100%">
@@ -1549,7 +1504,7 @@ android.content.Context
     </tr>
     
     
-    <tr class="alt-color api apilevel-" >
+    <tr class=" api apilevel-" >
         <td class="jd-typecol">String</td>
         <td class="jd-linkcol">DOWNLOAD_SERVICE</td>
         <td class="jd-descrcol" width="100%">
@@ -1561,21 +1516,9 @@ android.content.Context
     </tr>
     
     
-    <tr class=" api apilevel-" >
-        <td class="jd-typecol">String</td>
-        <td class="jd-linkcol">DROPBOX_SERVICE</td>
-        <td class="jd-descrcol" width="100%">
-          
-          
-    
-
-        </td>
-    </tr>
-    
-    
     <tr class="alt-color api apilevel-" >
         <td class="jd-typecol">String</td>
-        <td class="jd-linkcol">HDMI_CONTROL_SERVICE</td>
+        <td class="jd-linkcol">DROPBOX_SERVICE</td>
         <td class="jd-descrcol" width="100%">
           
           
@@ -1779,18 +1722,6 @@ android.content.Context
     
     <tr class=" api apilevel-" >
         <td class="jd-typecol">String</td>
-        <td class="jd-linkcol">NETWORK_SCORE_SERVICE</td>
-        <td class="jd-descrcol" width="100%">
-          
-          
-    
-
-        </td>
-    </tr>
-    
-    
-    <tr class="alt-color api apilevel-" >
-        <td class="jd-typecol">String</td>
         <td class="jd-linkcol">NFC_SERVICE</td>
         <td class="jd-descrcol" width="100%">
           
@@ -1801,7 +1732,7 @@ android.content.Context
     </tr>
     
     
-    <tr class=" api apilevel-" >
+    <tr class="alt-color api apilevel-" >
         <td class="jd-typecol">String</td>
         <td class="jd-linkcol">NOTIFICATION_SERVICE</td>
         <td class="jd-descrcol" width="100%">
@@ -1813,21 +1744,9 @@ android.content.Context
     </tr>
     
     
-    <tr class="alt-color api apilevel-" >
-        <td class="jd-typecol">String</td>
-        <td class="jd-linkcol">NSD_SERVICE</td>
-        <td class="jd-descrcol" width="100%">
-          
-          
-    
-
-        </td>
-    </tr>
-    
-    
     <tr class=" api apilevel-" >
         <td class="jd-typecol">String</td>
-        <td class="jd-linkcol">PERSISTENT_DATA_BLOCK_SERVICE</td>
+        <td class="jd-linkcol">NSD_SERVICE</td>
         <td class="jd-descrcol" width="100%">
           
           
@@ -1935,7 +1854,7 @@ android.content.Context
     
     <tr class="alt-color api apilevel-" >
         <td class="jd-typecol">String</td>
-        <td class="jd-linkcol">TEXT_SERVICES_MANAGER_SERVICE</td>
+        <td class="jd-linkcol">TELEPHONY_SUBSCRIPTION_SERVICE</td>
         <td class="jd-descrcol" width="100%">
           
           
@@ -1947,7 +1866,7 @@ android.content.Context
     
     <tr class=" api apilevel-" >
         <td class="jd-typecol">String</td>
-        <td class="jd-linkcol">TV_INPUT_SERVICE</td>
+        <td class="jd-linkcol">TEXT_SERVICES_MANAGER_SERVICE</td>
         <td class="jd-descrcol" width="100%">
           
           
@@ -1959,7 +1878,31 @@ android.content.Context
     
     <tr class="alt-color api apilevel-" >
         <td class="jd-typecol">String</td>
+        <td class="jd-linkcol">TV_INPUT_SERVICE</td>
+        <td class="jd-descrcol" width="100%">
+          
+          
+    
+
+        </td>
+    </tr>
+    
+    
+    <tr class=" api apilevel-" >
+        <td class="jd-typecol">String</td>
         <td class="jd-linkcol">UI_MODE_SERVICE</td>
+        <td class="jd-descrcol" width="100%">
+          
+          
+    
+
+        </td>
+    </tr>
+    
+    
+    <tr class="alt-color api apilevel-" >
+        <td class="jd-typecol">String</td>
+        <td class="jd-linkcol">USAGE_STATS_SERVICE</td>
         <td class="jd-descrcol" width="100%">
           
           
@@ -2020,30 +1963,6 @@ android.content.Context
     <tr class=" api apilevel-" >
         <td class="jd-typecol">String</td>
         <td class="jd-linkcol">WIFI_P2P_SERVICE</td>
-        <td class="jd-descrcol" width="100%">
-          
-          
-    
-
-        </td>
-    </tr>
-    
-    
-    <tr class="alt-color api apilevel-" >
-        <td class="jd-typecol">String</td>
-        <td class="jd-linkcol">WIFI_RTT_SERVICE</td>
-        <td class="jd-descrcol" width="100%">
-          
-          
-    
-
-        </td>
-    </tr>
-    
-    
-    <tr class=" api apilevel-" >
-        <td class="jd-typecol">String</td>
-        <td class="jd-linkcol">WIFI_SCANNING_SERVICE</td>
         <td class="jd-descrcol" width="100%">
           
           
@@ -4284,22 +4203,6 @@ From class
 	 
     <tr class=" api apilevel-" >
         <td class="jd-typecol"><nobr>
-            
-            
-            
-            
-            
-            boolean</nobr>
-        </td>
-        <td class="jd-linkcol" width="100%"><nobr>
-        <span class="sympad">bindServiceAsUser</span>(Intent arg0, ServiceConnection arg1, int arg2, UserHandle arg3)</nobr>
-        
-  </td></tr>
-
-
-	 
-    <tr class="alt-color api apilevel-" >
-        <td class="jd-typecol"><nobr>
             abstract
             
             
@@ -4314,7 +4217,7 @@ From class
 
 
 	 
-    <tr class=" api apilevel-" >
+    <tr class="alt-color api apilevel-" >
         <td class="jd-typecol"><nobr>
             abstract
             
@@ -4330,7 +4233,7 @@ From class
 
 
 	 
-    <tr class="alt-color api apilevel-" >
+    <tr class=" api apilevel-" >
         <td class="jd-typecol"><nobr>
             abstract
             
@@ -4346,7 +4249,7 @@ From class
 
 
 	 
-    <tr class=" api apilevel-" >
+    <tr class="alt-color api apilevel-" >
         <td class="jd-typecol"><nobr>
             abstract
             
@@ -4362,7 +4265,7 @@ From class
 
 
 	 
-    <tr class="alt-color api apilevel-" >
+    <tr class=" api apilevel-" >
         <td class="jd-typecol"><nobr>
             abstract
             
@@ -4378,7 +4281,7 @@ From class
 
 
 	 
-    <tr class=" api apilevel-" >
+    <tr class="alt-color api apilevel-" >
         <td class="jd-typecol"><nobr>
             abstract
             
@@ -4394,7 +4297,7 @@ From class
 
 
 	 
-    <tr class="alt-color api apilevel-" >
+    <tr class=" api apilevel-" >
         <td class="jd-typecol"><nobr>
             abstract
             
@@ -4410,7 +4313,7 @@ From class
 
 
 	 
-    <tr class=" api apilevel-" >
+    <tr class="alt-color api apilevel-" >
         <td class="jd-typecol"><nobr>
             abstract
             
@@ -4426,7 +4329,7 @@ From class
 
 
 	 
-    <tr class="alt-color api apilevel-" >
+    <tr class=" api apilevel-" >
         <td class="jd-typecol"><nobr>
             abstract
             
@@ -4442,7 +4345,7 @@ From class
 
 
 	 
-    <tr class=" api apilevel-" >
+    <tr class="alt-color api apilevel-" >
         <td class="jd-typecol"><nobr>
             abstract
             
@@ -4458,7 +4361,7 @@ From class
 
 
 	 
-    <tr class="alt-color api apilevel-" >
+    <tr class=" api apilevel-" >
         <td class="jd-typecol"><nobr>
             abstract
             
@@ -4474,7 +4377,7 @@ From class
 
 
 	 
-    <tr class=" api apilevel-" >
+    <tr class="alt-color api apilevel-" >
         <td class="jd-typecol"><nobr>
             abstract
             
@@ -4490,7 +4393,7 @@ From class
 
 
 	 
-    <tr class="alt-color api apilevel-" >
+    <tr class=" api apilevel-" >
         <td class="jd-typecol"><nobr>
             abstract
             
@@ -4506,7 +4409,7 @@ From class
 
 
 	 
-    <tr class=" api apilevel-" >
+    <tr class="alt-color api apilevel-" >
         <td class="jd-typecol"><nobr>
             abstract
             
@@ -4522,7 +4425,7 @@ From class
 
 
 	 
-    <tr class="alt-color api apilevel-" >
+    <tr class=" api apilevel-" >
         <td class="jd-typecol"><nobr>
             abstract
             
@@ -4538,7 +4441,7 @@ From class
 
 
 	 
-    <tr class=" api apilevel-" >
+    <tr class="alt-color api apilevel-" >
         <td class="jd-typecol"><nobr>
             abstract
             
@@ -4554,7 +4457,7 @@ From class
 
 
 	 
-    <tr class="alt-color api apilevel-" >
+    <tr class=" api apilevel-" >
         <td class="jd-typecol"><nobr>
             abstract
             
@@ -4570,7 +4473,7 @@ From class
 
 
 	 
-    <tr class=" api apilevel-" >
+    <tr class="alt-color api apilevel-" >
         <td class="jd-typecol"><nobr>
             abstract
             
@@ -4586,7 +4489,7 @@ From class
 
 
 	 
-    <tr class="alt-color api apilevel-" >
+    <tr class=" api apilevel-" >
         <td class="jd-typecol"><nobr>
             abstract
             
@@ -4602,7 +4505,7 @@ From class
 
 
 	 
-    <tr class=" api apilevel-" >
+    <tr class="alt-color api apilevel-" >
         <td class="jd-typecol"><nobr>
             abstract
             
@@ -4618,7 +4521,7 @@ From class
 
 
 	 
-    <tr class="alt-color api apilevel-" >
+    <tr class=" api apilevel-" >
         <td class="jd-typecol"><nobr>
             abstract
             
@@ -4634,7 +4537,7 @@ From class
 
 
 	 
-    <tr class=" api apilevel-" >
+    <tr class="alt-color api apilevel-" >
         <td class="jd-typecol"><nobr>
             abstract
             
@@ -4650,7 +4553,7 @@ From class
 
 
 	 
-    <tr class="alt-color api apilevel-" >
+    <tr class=" api apilevel-" >
         <td class="jd-typecol"><nobr>
             abstract
             
@@ -4666,7 +4569,7 @@ From class
 
 
 	 
-    <tr class=" api apilevel-" >
+    <tr class="alt-color api apilevel-" >
         <td class="jd-typecol"><nobr>
             abstract
             
@@ -4682,7 +4585,7 @@ From class
 
 
 	 
-    <tr class="alt-color api apilevel-" >
+    <tr class=" api apilevel-" >
         <td class="jd-typecol"><nobr>
             abstract
             
@@ -4698,7 +4601,7 @@ From class
 
 
 	 
-    <tr class=" api apilevel-" >
+    <tr class="alt-color api apilevel-" >
         <td class="jd-typecol"><nobr>
             abstract
             
@@ -4714,7 +4617,7 @@ From class
 
 
 	 
-    <tr class="alt-color api apilevel-" >
+    <tr class=" api apilevel-" >
         <td class="jd-typecol"><nobr>
             abstract
             
@@ -4730,7 +4633,7 @@ From class
 
 
 	 
-    <tr class=" api apilevel-" >
+    <tr class="alt-color api apilevel-" >
         <td class="jd-typecol"><nobr>
             abstract
             
@@ -4746,7 +4649,7 @@ From class
 
 
 	 
-    <tr class="alt-color api apilevel-" >
+    <tr class=" api apilevel-" >
         <td class="jd-typecol"><nobr>
             abstract
             
@@ -4762,7 +4665,7 @@ From class
 
 
 	 
-    <tr class=" api apilevel-" >
+    <tr class="alt-color api apilevel-" >
         <td class="jd-typecol"><nobr>
             abstract
             
@@ -4778,7 +4681,7 @@ From class
 
 
 	 
-    <tr class="alt-color api apilevel-" >
+    <tr class=" api apilevel-" >
         <td class="jd-typecol"><nobr>
             abstract
             
@@ -4794,7 +4697,7 @@ From class
 
 
 	 
-    <tr class=" api apilevel-" >
+    <tr class="alt-color api apilevel-" >
         <td class="jd-typecol"><nobr>
             
             
@@ -4810,7 +4713,7 @@ From class
 
 
 	 
-    <tr class="alt-color api apilevel-" >
+    <tr class=" api apilevel-" >
         <td class="jd-typecol"><nobr>
             abstract
             
@@ -4826,7 +4729,7 @@ From class
 
 
 	 
-    <tr class=" api apilevel-" >
+    <tr class="alt-color api apilevel-" >
         <td class="jd-typecol"><nobr>
             abstract
             
@@ -4842,7 +4745,7 @@ From class
 
 
 	 
-    <tr class="alt-color api apilevel-" >
+    <tr class=" api apilevel-" >
         <td class="jd-typecol"><nobr>
             abstract
             
@@ -4858,7 +4761,7 @@ From class
 
 
 	 
-    <tr class=" api apilevel-" >
+    <tr class="alt-color api apilevel-" >
         <td class="jd-typecol"><nobr>
             abstract
             
@@ -4874,7 +4777,7 @@ From class
 
 
 	 
-    <tr class="alt-color api apilevel-" >
+    <tr class=" api apilevel-" >
         <td class="jd-typecol"><nobr>
             abstract
             
@@ -4890,7 +4793,7 @@ From class
 
 
 	 
-    <tr class=" api apilevel-" >
+    <tr class="alt-color api apilevel-" >
         <td class="jd-typecol"><nobr>
             abstract
             
@@ -4906,7 +4809,7 @@ From class
 
 
 	 
-    <tr class="alt-color api apilevel-" >
+    <tr class=" api apilevel-" >
         <td class="jd-typecol"><nobr>
             abstract
             
@@ -4922,7 +4825,7 @@ From class
 
 
 	 
-    <tr class=" api apilevel-" >
+    <tr class="alt-color api apilevel-" >
         <td class="jd-typecol"><nobr>
             abstract
             
@@ -4938,7 +4841,7 @@ From class
 
 
 	 
-    <tr class="alt-color api apilevel-" >
+    <tr class=" api apilevel-" >
         <td class="jd-typecol"><nobr>
             abstract
             
@@ -4954,7 +4857,7 @@ From class
 
 
 	 
-    <tr class=" api apilevel-" >
+    <tr class="alt-color api apilevel-" >
         <td class="jd-typecol"><nobr>
             abstract
             
@@ -4970,7 +4873,7 @@ From class
 
 
 	 
-    <tr class="alt-color api apilevel-" >
+    <tr class=" api apilevel-" >
         <td class="jd-typecol"><nobr>
             abstract
             
@@ -4986,7 +4889,7 @@ From class
 
 
 	 
-    <tr class=" api apilevel-" >
+    <tr class="alt-color api apilevel-" >
         <td class="jd-typecol"><nobr>
             abstract
             
@@ -5002,7 +4905,7 @@ From class
 
 
 	 
-    <tr class="alt-color api apilevel-" >
+    <tr class=" api apilevel-" >
         <td class="jd-typecol"><nobr>
             abstract
             
@@ -5018,7 +4921,7 @@ From class
 
 
 	 
-    <tr class=" api apilevel-" >
+    <tr class="alt-color api apilevel-" >
         <td class="jd-typecol"><nobr>
             abstract
             
@@ -5034,7 +4937,7 @@ From class
 
 
 	 
-    <tr class="alt-color api apilevel-" >
+    <tr class=" api apilevel-" >
         <td class="jd-typecol"><nobr>
             abstract
             
@@ -5050,7 +4953,7 @@ From class
 
 
 	 
-    <tr class=" api apilevel-" >
+    <tr class="alt-color api apilevel-" >
         <td class="jd-typecol"><nobr>
             abstract
             
@@ -5066,7 +4969,7 @@ From class
 
 
 	 
-    <tr class="alt-color api apilevel-" >
+    <tr class=" api apilevel-" >
         <td class="jd-typecol"><nobr>
             abstract
             
@@ -5082,7 +4985,7 @@ From class
 
 
 	 
-    <tr class=" api apilevel-" >
+    <tr class="alt-color api apilevel-" >
         <td class="jd-typecol"><nobr>
             
             
@@ -5098,7 +5001,7 @@ From class
 
 
 	 
-    <tr class="alt-color api apilevel-" >
+    <tr class=" api apilevel-" >
         <td class="jd-typecol"><nobr>
             
             
@@ -5114,7 +5017,7 @@ From class
 
 
 	 
-    <tr class=" api apilevel-" >
+    <tr class="alt-color api apilevel-" >
         <td class="jd-typecol"><nobr>
             abstract
             
@@ -5130,7 +5033,7 @@ From class
 
 
 	 
-    <tr class="alt-color api apilevel-" >
+    <tr class=" api apilevel-" >
         <td class="jd-typecol"><nobr>
             
             
@@ -5146,7 +5049,7 @@ From class
 
 
 	 
-    <tr class=" api apilevel-" >
+    <tr class="alt-color api apilevel-" >
         <td class="jd-typecol"><nobr>
             abstract
             
@@ -5162,7 +5065,7 @@ From class
 
 
 	 
-    <tr class="alt-color api apilevel-" >
+    <tr class=" api apilevel-" >
         <td class="jd-typecol"><nobr>
             abstract
             
@@ -5178,7 +5081,7 @@ From class
 
 
 	 
-    <tr class=" api apilevel-" >
+    <tr class="alt-color api apilevel-" >
         <td class="jd-typecol"><nobr>
             abstract
             
@@ -5194,7 +5097,7 @@ From class
 
 
 	 
-    <tr class="alt-color api apilevel-" >
+    <tr class=" api apilevel-" >
         <td class="jd-typecol"><nobr>
             abstract
             
@@ -5210,7 +5113,7 @@ From class
 
 
 	 
-    <tr class=" api apilevel-" >
+    <tr class="alt-color api apilevel-" >
         <td class="jd-typecol"><nobr>
             abstract
             
@@ -5226,7 +5129,7 @@ From class
 
 
 	 
-    <tr class="alt-color api apilevel-" >
+    <tr class=" api apilevel-" >
         <td class="jd-typecol"><nobr>
             
             
@@ -5242,7 +5145,7 @@ From class
 
 
 	 
-    <tr class=" api apilevel-" >
+    <tr class="alt-color api apilevel-" >
         <td class="jd-typecol"><nobr>
             
             
@@ -5258,7 +5161,7 @@ From class
 
 
 	 
-    <tr class="alt-color api apilevel-" >
+    <tr class=" api apilevel-" >
         <td class="jd-typecol"><nobr>
             
             
@@ -5274,7 +5177,7 @@ From class
 
 
 	 
-    <tr class=" api apilevel-" >
+    <tr class="alt-color api apilevel-" >
         <td class="jd-typecol"><nobr>
             
             
@@ -5290,7 +5193,7 @@ From class
 
 
 	 
-    <tr class="alt-color api apilevel-" >
+    <tr class=" api apilevel-" >
         <td class="jd-typecol"><nobr>
             
             
@@ -5306,7 +5209,7 @@ From class
 
 
 	 
-    <tr class=" api apilevel-" >
+    <tr class="alt-color api apilevel-" >
         <td class="jd-typecol"><nobr>
             abstract
             
@@ -5322,7 +5225,7 @@ From class
 
 
 	 
-    <tr class="alt-color api apilevel-" >
+    <tr class=" api apilevel-" >
         <td class="jd-typecol"><nobr>
             abstract
             
@@ -5338,7 +5241,7 @@ From class
 
 
 	 
-    <tr class=" api apilevel-" >
+    <tr class="alt-color api apilevel-" >
         <td class="jd-typecol"><nobr>
             abstract
             
@@ -5354,7 +5257,7 @@ From class
 
 
 	 
-    <tr class="alt-color api apilevel-" >
+    <tr class=" api apilevel-" >
         <td class="jd-typecol"><nobr>
             abstract
             
@@ -5370,7 +5273,7 @@ From class
 
 
 	 
-    <tr class=" api apilevel-" >
+    <tr class="alt-color api apilevel-" >
         <td class="jd-typecol"><nobr>
             abstract
             
@@ -5386,7 +5289,7 @@ From class
 
 
 	 
-    <tr class="alt-color api apilevel-" >
+    <tr class=" api apilevel-" >
         <td class="jd-typecol"><nobr>
             
             
@@ -5402,7 +5305,7 @@ From class
 
 
 	 
-    <tr class=" api apilevel-" >
+    <tr class="alt-color api apilevel-" >
         <td class="jd-typecol"><nobr>
             abstract
             
@@ -5418,7 +5321,7 @@ From class
 
 
 	 
-    <tr class="alt-color api apilevel-" >
+    <tr class=" api apilevel-" >
         <td class="jd-typecol"><nobr>
             abstract
             
@@ -5434,7 +5337,7 @@ From class
 
 
 	 
-    <tr class=" api apilevel-" >
+    <tr class="alt-color api apilevel-" >
         <td class="jd-typecol"><nobr>
             abstract
             
@@ -5450,7 +5353,7 @@ From class
 
 
 	 
-    <tr class="alt-color api apilevel-" >
+    <tr class=" api apilevel-" >
         <td class="jd-typecol"><nobr>
             abstract
             
@@ -5466,7 +5369,7 @@ From class
 
 
 	 
-    <tr class=" api apilevel-" >
+    <tr class="alt-color api apilevel-" >
         <td class="jd-typecol"><nobr>
             abstract
             
@@ -5482,7 +5385,7 @@ From class
 
 
 	 
-    <tr class="alt-color api apilevel-" >
+    <tr class=" api apilevel-" >
         <td class="jd-typecol"><nobr>
             abstract
             
@@ -5498,7 +5401,7 @@ From class
 
 
 	 
-    <tr class=" api apilevel-" >
+    <tr class="alt-color api apilevel-" >
         <td class="jd-typecol"><nobr>
             abstract
             
@@ -5514,7 +5417,7 @@ From class
 
 
 	 
-    <tr class="alt-color api apilevel-" >
+    <tr class=" api apilevel-" >
         <td class="jd-typecol"><nobr>
             abstract
             
@@ -5530,7 +5433,7 @@ From class
 
 
 	 
-    <tr class=" api apilevel-" >
+    <tr class="alt-color api apilevel-" >
         <td class="jd-typecol"><nobr>
             abstract
             
@@ -5546,7 +5449,7 @@ From class
 
 
 	 
-    <tr class="alt-color api apilevel-" >
+    <tr class=" api apilevel-" >
         <td class="jd-typecol"><nobr>
             abstract
             
@@ -5562,7 +5465,7 @@ From class
 
 
 	 
-    <tr class=" api apilevel-" >
+    <tr class="alt-color api apilevel-" >
         <td class="jd-typecol"><nobr>
             abstract
             
@@ -5578,7 +5481,7 @@ From class
 
 
 	 
-    <tr class="alt-color api apilevel-" >
+    <tr class=" api apilevel-" >
         <td class="jd-typecol"><nobr>
             abstract
             
@@ -5594,7 +5497,7 @@ From class
 
 
 	 
-    <tr class=" api apilevel-" >
+    <tr class="alt-color api apilevel-" >
         <td class="jd-typecol"><nobr>
             abstract
             
@@ -5610,7 +5513,7 @@ From class
 
 
 	 
-    <tr class="alt-color api apilevel-" >
+    <tr class=" api apilevel-" >
         <td class="jd-typecol"><nobr>
             abstract
             
@@ -5626,7 +5529,7 @@ From class
 
 
 	 
-    <tr class=" api apilevel-" >
+    <tr class="alt-color api apilevel-" >
         <td class="jd-typecol"><nobr>
             abstract
             
@@ -5642,7 +5545,7 @@ From class
 
 
 	 
-    <tr class="alt-color api apilevel-" >
+    <tr class=" api apilevel-" >
         <td class="jd-typecol"><nobr>
             abstract
             
@@ -5658,7 +5561,7 @@ From class
 
 
 	 
-    <tr class=" api apilevel-" >
+    <tr class="alt-color api apilevel-" >
         <td class="jd-typecol"><nobr>
             abstract
             
@@ -5674,7 +5577,7 @@ From class
 
 
 	 
-    <tr class="alt-color api apilevel-" >
+    <tr class=" api apilevel-" >
         <td class="jd-typecol"><nobr>
             abstract
             
@@ -5690,7 +5593,7 @@ From class
 
 
 	 
-    <tr class=" api apilevel-" >
+    <tr class="alt-color api apilevel-" >
         <td class="jd-typecol"><nobr>
             abstract
             
@@ -5706,7 +5609,7 @@ From class
 
 
 	 
-    <tr class="alt-color api apilevel-" >
+    <tr class=" api apilevel-" >
         <td class="jd-typecol"><nobr>
             abstract
             
@@ -5722,7 +5625,7 @@ From class
 
 
 	 
-    <tr class=" api apilevel-" >
+    <tr class="alt-color api apilevel-" >
         <td class="jd-typecol"><nobr>
             abstract
             
@@ -5738,7 +5641,7 @@ From class
 
 
 	 
-    <tr class="alt-color api apilevel-" >
+    <tr class=" api apilevel-" >
         <td class="jd-typecol"><nobr>
             abstract
             
@@ -5754,7 +5657,7 @@ From class
 
 
 	 
-    <tr class=" api apilevel-" >
+    <tr class="alt-color api apilevel-" >
         <td class="jd-typecol"><nobr>
             abstract
             
@@ -5770,7 +5673,7 @@ From class
 
 
 	 
-    <tr class="alt-color api apilevel-" >
+    <tr class=" api apilevel-" >
         <td class="jd-typecol"><nobr>
             abstract
             
@@ -5786,7 +5689,7 @@ From class
 
 
 	 
-    <tr class=" api apilevel-" >
+    <tr class="alt-color api apilevel-" >
         <td class="jd-typecol"><nobr>
             abstract
             
@@ -5802,7 +5705,7 @@ From class
 
 
 	 
-    <tr class="alt-color api apilevel-" >
+    <tr class=" api apilevel-" >
         <td class="jd-typecol"><nobr>
             abstract
             
@@ -5818,7 +5721,7 @@ From class
 
 
 	 
-    <tr class=" api apilevel-" >
+    <tr class="alt-color api apilevel-" >
         <td class="jd-typecol"><nobr>
             abstract
             
@@ -5834,7 +5737,7 @@ From class
 
 
 	 
-    <tr class="alt-color api apilevel-" >
+    <tr class=" api apilevel-" >
         <td class="jd-typecol"><nobr>
             abstract
             
@@ -5850,7 +5753,7 @@ From class
 
 
 	 
-    <tr class=" api apilevel-" >
+    <tr class="alt-color api apilevel-" >
         <td class="jd-typecol"><nobr>
             abstract
             
@@ -5866,7 +5769,7 @@ From class
 
 
 	 
-    <tr class="alt-color api apilevel-" >
+    <tr class=" api apilevel-" >
         <td class="jd-typecol"><nobr>
             
             
@@ -5882,7 +5785,7 @@ From class
 
 
 	 
-    <tr class=" api apilevel-" >
+    <tr class="alt-color api apilevel-" >
         <td class="jd-typecol"><nobr>
             abstract
             
@@ -6327,40 +6230,188 @@ From interface
 
 <!-- ========= END OF CLASS DATA ========= -->
 <A NAME="navbar_top"></A>
+</div> <!-- jd-content -->
 
-<div id="footer" class="wrap" >
-        
+<div class="wrap">
+  <div class="dac-footer">
+    <div class="cols dac-footer-main">
+      <div class="col-1of2">
+        <a class="dac-footer-getnews" data-modal-toggle="newsletter" href="javascript:;">Get news &amp; tips <span
+          class="dac-fab dac-primary"><i class="dac-sprite dac-mail"></i></span></a>
+      </div>
+      <div class="col-1of2 dac-footer-reachout">
+        <div class="dac-footer-contact">
+          <a class="dac-footer-contact-link" href="http://android-developers.blogspot.com/">Blog</a>
+          <a class="dac-footer-contact-link" href="/support.html">Support</a>
+        </div>
+        <div class="dac-footer-social">
+          <a class="dac-fab dac-footer-social-link" href="https://www.youtube.com/user/androiddevelopers"><i class="dac-sprite dac-youtube"></i></a>
+          <a class="dac-fab dac-footer-social-link" href="https://plus.google.com/+AndroidDevelopers"><i class="dac-sprite dac-gplus"></i></a>
+          <a class="dac-fab dac-footer-social-link" href="https://twitter.com/AndroidDev"><i class="dac-sprite dac-twitter"></i></a>
+        </div>
+      </div>
+    </div>
 
-  <div id="copyright">
+    <hr class="dac-footer-separator"/>
+
     
+      <p class="dac-footer-copyright">
+        
   Except as noted, this content is licensed under <a
-  href="http://www.apache.org/licenses/LICENSE-2.0">Apache 2.0</a>. 
+  href="http://www.apache.org/licenses/LICENSE-2.0">Apache 2.0</a>.
   For details and restrictions, see the <a href="../../../../../license.html">
   Content License</a>.
-  </div>
-  <div id="build_info">
-    
+      </p>
+      <p class="dac-footer-build">
+        
     Android Wearable Support&nbsp;r &mdash; 
 <script src="../../../../../timestamp.js" type="text/javascript"></script>
 <script>document.write(BUILD_TIMESTAMP)</script>
 
-  </div>
-
-
-  <div id="footerlinks">
+      </p>
     
-  <p>
-    <a href="../../../../../about/index.html">About Android</a>&nbsp;&nbsp;|&nbsp;
-    <a href="../../../../../legal.html">Legal</a>&nbsp;&nbsp;|&nbsp;
-    <a href="../../../../../support.html">Support</a>
-  </p>
-  </div>
 
+    <p class="dac-footer-links">
+      <a href="/about/index.html">About Android</a>
+      <a href="/auto/index.html">Auto</a>
+      <a href="/tv/index.html">TV</a>
+      <a href="/wear/index.html">Wear</a>
+      <a href="/legal.html">Legal</a>
+
+      <span id="language" class="locales">
+        <select name="language" onchange="changeLangPref(this.value, true)">
+          <option value="en" selected="selected">English</option>
+          <option value="es">Español</option>
+          <option value="ja">日本語</option>
+          <option value="ko">한국어</option>
+          <option value="pt-br">Português Brasileiro</option>
+          <option value="ru">Русский</option>
+          <option value="zh-cn">中文（简体)</option>
+          <option value="zh-tw">中文（繁體)</option>
+        </select>
+      </span>
+    </p>
+  </div>
 </div> <!-- end footer -->
-</div> <!-- jd-content -->
+
+<div data-modal="newsletter" data-newsletter data-swap class="dac-modal newsletter">
+  <div class="dac-modal-container">
+    <div class="dac-modal-window">
+      <header class="dac-modal-header">
+        <button class="dac-modal-header-close" data-modal-toggle><i class="dac-sprite dac-close"></i></button>
+        <div class="dac-swap" data-swap-container>
+          <section class="dac-swap-section dac-active dac-down">
+            <h2 class="norule dac-modal-header-title">Get the latest Android developer news and tips that will help you find success on Google Play.</h2>
+            <p class="dac-modal-header-subtitle">&#42; Required Fields</p>
+          </section>
+          <section class="dac-swap-section dac-up">
+            <h2 class="norule dac-modal-header-title">Hooray!</h2>
+          </section>
+        </div>
+      </header>
+      <div class="dac-swap" data-swap-container>
+        <section class="dac-swap-section dac-active dac-left">
+          <form action="https://docs.google.com/forms/d/1QgnkzbEJIDu9lMEea0mxqWrXUJu0oBCLD7ar23V0Yys/formResponse" class="dac-form" method="post" target="dac-newsletter-iframe">
+            <section class="dac-modal-content">
+              <fieldset class="dac-form-fieldset">
+                <div class="cols">
+                  <div class="col-1of2 newsletter-leftCol">
+                    <div class="dac-form-input-group">
+                      <label for="newsletter-full-name" class="dac-form-floatlabel">Full name</label>
+                      <input type="text" class="dac-form-input" name="entry.1357890476" id="newsletter-full-name" required>
+                      <span class="dac-form-required">*</span>
+                    </div>
+                    <div class="dac-form-input-group">
+                      <label for="newsletter-email" class="dac-form-floatlabel">Email address</label>
+                      <input type="email" class="dac-form-input" name="entry.472100832" id="newsletter-email" required>
+                      <span class="dac-form-required">*</span>
+                    </div>
+                  </div>
+                  <div class="col-1of2 newsletter-rightCol">
+                    <div class="dac-form-input-group">
+                      <label for="newsletter-company" class="dac-form-floatlabel">Company / developer name</label>
+                      <input type="text" class="dac-form-input" name="entry.1664780309" id="newsletter-company">
+                    </div>
+                    <div class="dac-form-input-group">
+                      <label for="newsletter-play-store" class="dac-form-floatlabel">One of your Play Store app URLs</label>
+                      <input type="url" class="dac-form-input" name="entry.47013838" id="newsletter-play-store" required>
+                      <span class="dac-form-required">*</span>
+                    </div>
+                  </div>
+                </div>
+              </fieldset>
+              <fieldset class="dac-form-fieldset">
+                <div class="cols">
+                  <div class="col-1of2 newsletter-leftCol">
+                    <legend class="dac-form-legend">Which best describes your business:<span class="dac-form-required">*</span>
+                    </legend>
+                    <div class="dac-form-radio-group">
+                      <input type="radio" value="Apps" class="dac-form-radio" name="entry.1796324055" id="newsletter-business-type-app" required>
+                      <label for="newsletter-business-type-app" class="dac-form-radio-button"></label>
+                      <label for="newsletter-business-type-app" class="dac-form-label">Apps</label>
+                    </div>
+                    <div class="dac-form-radio-group">
+                      <input type="radio" value="Games" class="dac-form-radio" name="entry.1796324055" id="newsletter-business-type-games" required>
+                      <label for="newsletter-business-type-games" class="dac-form-radio-button"></label>
+                      <label for="newsletter-business-type-games" class="dac-form-label">Games</label>
+                    </div>
+                    <div class="dac-form-radio-group">
+                      <input type="radio" value="Apps and Games" class="dac-form-radio" name="entry.1796324055" id="newsletter-business-type-appsgames" required>
+                      <label for="newsletter-business-type-appsgames" class="dac-form-radio-button"></label>
+                      <label for="newsletter-business-type-appsgames" class="dac-form-label">Apps &amp; Games</label>
+                    </div>
+                  </div>
+                  <div class="col-1of2 newsletter-rightCol newsletter-checkboxes">
+                    <div class="dac-form-radio-group">
+                      <div class="dac-media">
+                        <div class="dac-media-figure">
+                          <input type="checkbox" class="dac-form-checkbox" name="entry.732309842" id="newsletter-add" required value="Add me to the mailing list for the monthly newsletter and occasional emails about development and Google Play opportunities.">
+                          <label for="newsletter-add" class="dac-form-checkbox-button"></label>
+                        </div>
+                        <div class="dac-media-body">
+                          <label for="newsletter-add" class="dac-form-label dac-form-aside">Add me to the mailing list for the monthly newsletter and occasional emails about development and Google Play opportunities.<span class="dac-form-required">*</span></label>
+                        </div>
+                      </div>
+                    </div>
+                    <div class="dac-form-radio-group">
+                      <div class="dac-media">
+                        <div class="dac-media-figure">
+                          <input type="checkbox" class="dac-form-checkbox" name="entry.2045036090" id="newsletter-terms" required value="I acknowledge that the information provided in this form will be subject to Google's privacy policy (https://www.google.com/policies/privacy/).">
+                          <label for="newsletter-terms" class="dac-form-checkbox-button"></label>
+                        </div>
+                        <div class="dac-media-body">
+                          <label for="newsletter-terms" class="dac-form-label dac-form-aside">I acknowledge that the information provided in this form will be subject to <a href="https://www.google.com/policies/privacy/">Google's privacy policy</a>.<span class="dac-form-required">*</span></label>
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              </fieldset>
+            </section>
+            <footer class="dac-modal-footer">
+              <div class="cols">
+                <div class="col-2of5">
+                </div>
+              </div>
+              <button type="submit" value="Submit" class="dac-fab dac-primary dac-large dac-modal-action"><i class="dac-sprite dac-arrow-right"></i></button>
+            </footer>
+          </form>
+        </section>
+        <section class="dac-swap-section dac-right">
+          <div class="dac-modal-content">
+            <p class="newsletter-success-message">
+              You have successfully signed up for the latest Android developer news and tips.
+            </p>
+          </div>
+        </section>
+      </div>
+    </div>
+  </div>
+</div> <!-- end footer -->
 
 </div><!-- end doc-content -->
 
+</div> <!-- end .cols --> 
 </div> <!-- end body-content --> 
 
 

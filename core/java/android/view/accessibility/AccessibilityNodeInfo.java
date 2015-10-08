@@ -29,6 +29,8 @@ import android.util.LongArray;
 import android.util.Pools.SynchronizedPool;
 import android.view.View;
 
+import com.android.internal.R;
+
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
@@ -264,7 +266,8 @@ public class AccessibilityNodeInfo implements Parcelable {
      * Action to set the selection. Performing this action with no arguments
      * clears the selection.
      * <p>
-     * <strong>Arguments:</strong> {@link #ACTION_ARGUMENT_SELECTION_START_INT},
+     * <strong>Arguments:</strong>
+     * {@link #ACTION_ARGUMENT_SELECTION_START_INT},
      * {@link #ACTION_ARGUMENT_SELECTION_END_INT}<br>
      * <strong>Example:</strong>
      * <code><pre><p>
@@ -300,7 +303,8 @@ public class AccessibilityNodeInfo implements Parcelable {
      * null</code> or empty {@link CharSequence} will clear the text. This action will also put the
      * cursor at the end of text.
      * <p>
-     * <strong>Arguments:</strong> {@link #ACTION_ARGUMENT_SET_TEXT_CHARSEQUENCE}<br>
+     * <strong>Arguments:</strong>
+     * {@link #ACTION_ARGUMENT_SET_TEXT_CHARSEQUENCE}<br>
      * <strong>Example:</strong>
      * <code><pre><p>
      *   Bundle arguments = new Bundle();
@@ -324,12 +328,15 @@ public class AccessibilityNodeInfo implements Parcelable {
      * Argument for which movement granularity to be used when traversing the node text.
      * <p>
      * <strong>Type:</strong> int<br>
-     * <strong>Actions:</strong> {@link #ACTION_NEXT_AT_MOVEMENT_GRANULARITY},
-     * {@link #ACTION_PREVIOUS_AT_MOVEMENT_GRANULARITY}
+     * <strong>Actions:</strong>
+     * <ul>
+     *     <li>{@link AccessibilityAction#ACTION_NEXT_AT_MOVEMENT_GRANULARITY}</li>
+     *     <li>{@link AccessibilityAction#ACTION_PREVIOUS_AT_MOVEMENT_GRANULARITY}</li>
+     * </ul>
      * </p>
      *
-     * @see #ACTION_NEXT_AT_MOVEMENT_GRANULARITY
-     * @see #ACTION_PREVIOUS_AT_MOVEMENT_GRANULARITY
+     * @see AccessibilityAction#ACTION_NEXT_AT_MOVEMENT_GRANULARITY
+     * @see AccessibilityAction#ACTION_PREVIOUS_AT_MOVEMENT_GRANULARITY
      */
     public static final String ACTION_ARGUMENT_MOVEMENT_GRANULARITY_INT =
             "ACTION_ARGUMENT_MOVEMENT_GRANULARITY_INT";
@@ -338,12 +345,15 @@ public class AccessibilityNodeInfo implements Parcelable {
      * Argument for which HTML element to get moving to the next/previous HTML element.
      * <p>
      * <strong>Type:</strong> String<br>
-     * <strong>Actions:</strong> {@link #ACTION_NEXT_HTML_ELEMENT},
-     *         {@link #ACTION_PREVIOUS_HTML_ELEMENT}
+     * <strong>Actions:</strong>
+     * <ul>
+     *     <li>{@link AccessibilityAction#ACTION_NEXT_HTML_ELEMENT}</li>
+     *     <li>{@link AccessibilityAction#ACTION_PREVIOUS_HTML_ELEMENT}</li>
+     * </ul>
      * </p>
      *
-     * @see #ACTION_NEXT_HTML_ELEMENT
-     * @see #ACTION_PREVIOUS_HTML_ELEMENT
+     * @see AccessibilityAction#ACTION_NEXT_HTML_ELEMENT
+     * @see AccessibilityAction#ACTION_PREVIOUS_HTML_ELEMENT
      */
     public static final String ACTION_ARGUMENT_HTML_ELEMENT_STRING =
             "ACTION_ARGUMENT_HTML_ELEMENT_STRING";
@@ -353,12 +363,14 @@ public class AccessibilityNodeInfo implements Parcelable {
      * or to move it otherwise.
      * <p>
      * <strong>Type:</strong> boolean<br>
-     * <strong>Actions:</strong> {@link #ACTION_NEXT_AT_MOVEMENT_GRANULARITY},
-     * {@link #ACTION_PREVIOUS_AT_MOVEMENT_GRANULARITY}
-     * </p>
+     * <strong>Actions:</strong>
+     * <ul>
+     *     <li>{@link AccessibilityAction#ACTION_NEXT_AT_MOVEMENT_GRANULARITY}</li>
+     *     <li>{@link AccessibilityAction#ACTION_PREVIOUS_AT_MOVEMENT_GRANULARITY}</li>
+     * </ul>
      *
-     * @see #ACTION_NEXT_AT_MOVEMENT_GRANULARITY
-     * @see #ACTION_PREVIOUS_AT_MOVEMENT_GRANULARITY
+     * @see AccessibilityAction#ACTION_NEXT_AT_MOVEMENT_GRANULARITY
+     * @see AccessibilityAction#ACTION_PREVIOUS_AT_MOVEMENT_GRANULARITY
      */
     public static final String ACTION_ARGUMENT_EXTEND_SELECTION_BOOLEAN =
             "ACTION_ARGUMENT_EXTEND_SELECTION_BOOLEAN";
@@ -367,10 +379,12 @@ public class AccessibilityNodeInfo implements Parcelable {
      * Argument for specifying the selection start.
      * <p>
      * <strong>Type:</strong> int<br>
-     * <strong>Actions:</strong> {@link #ACTION_SET_SELECTION}
-     * </p>
+     * <strong>Actions:</strong>
+     * <ul>
+     *     <li>{@link AccessibilityAction#ACTION_SET_SELECTION}</li>
+     * </ul>
      *
-     * @see #ACTION_SET_SELECTION
+     * @see AccessibilityAction#ACTION_SET_SELECTION
      */
     public static final String ACTION_ARGUMENT_SELECTION_START_INT =
             "ACTION_ARGUMENT_SELECTION_START_INT";
@@ -379,25 +393,57 @@ public class AccessibilityNodeInfo implements Parcelable {
      * Argument for specifying the selection end.
      * <p>
      * <strong>Type:</strong> int<br>
-     * <strong>Actions:</strong> {@link #ACTION_SET_SELECTION}
-     * </p>
+     * <strong>Actions:</strong>
+     * <ul>
+     *     <li>{@link AccessibilityAction#ACTION_SET_SELECTION}</li>
+     * </ul>
      *
-     * @see #ACTION_SET_SELECTION
+     * @see AccessibilityAction#ACTION_SET_SELECTION
      */
     public static final String ACTION_ARGUMENT_SELECTION_END_INT =
             "ACTION_ARGUMENT_SELECTION_END_INT";
 
     /**
-     * Argument for specifying the text content to set
+     * Argument for specifying the text content to set.
      * <p>
      * <strong>Type:</strong> CharSequence<br>
-     * <strong>Actions:</strong> {@link #ACTION_SET_TEXT}
-     * </p>
+     * <strong>Actions:</strong>
+     * <ul>
+     *     <li>{@link AccessibilityAction#ACTION_SET_TEXT}</li>
+     * </ul>
      *
-     * @see #ACTION_SET_TEXT
+     * @see AccessibilityAction#ACTION_SET_TEXT
      */
     public static final String ACTION_ARGUMENT_SET_TEXT_CHARSEQUENCE =
             "ACTION_ARGUMENT_SET_TEXT_CHARSEQUENCE";
+
+    /**
+     * Argument for specifying the collection row to make visible on screen.
+     * <p>
+     * <strong>Type:</strong> int<br>
+     * <strong>Actions:</strong>
+     * <ul>
+     *     <li>{@link AccessibilityAction#ACTION_SCROLL_TO_POSITION}</li>
+     * </ul>
+     *
+     * @see AccessibilityAction#ACTION_SCROLL_TO_POSITION
+     */
+    public static final String ACTION_ARGUMENT_ROW_INT =
+            "android.view.accessibility.action.ARGUMENT_ROW_INT";
+
+    /**
+     * Argument for specifying the collection column to make visible on screen.
+     * <p>
+     * <strong>Type:</strong> int<br>
+     * <strong>Actions:</strong>
+     * <ul>
+     *     <li>{@link AccessibilityAction#ACTION_SCROLL_TO_POSITION}</li>
+     * </ul>
+     *
+     * @see AccessibilityAction#ACTION_SCROLL_TO_POSITION
+     */
+    public static final String ACTION_ARGUMENT_COLUMN_INT =
+            "android.view.accessibility.action.ARGUMENT_COLUMN_INT";
 
     // Focus types
 
@@ -474,6 +520,8 @@ public class AccessibilityNodeInfo implements Parcelable {
 
     private static final int BOOLEAN_PROPERTY_CONTENT_INVALID = 0x00010000;
 
+    private static final int BOOLEAN_PROPERTY_CONTEXT_CLICKABLE = 0x00020000;
+
     /**
      * Bits that provide the id of a virtual descendant of a view.
      */
@@ -537,7 +585,7 @@ public class AccessibilityNodeInfo implements Parcelable {
     // Housekeeping.
     private static final int MAX_POOL_SIZE = 50;
     private static final SynchronizedPool<AccessibilityNodeInfo> sPool =
-            new SynchronizedPool<AccessibilityNodeInfo>(MAX_POOL_SIZE);
+            new SynchronizedPool<>(MAX_POOL_SIZE);
 
     private boolean mSealed;
 
@@ -963,12 +1011,16 @@ public class AccessibilityNodeInfo implements Parcelable {
     public void addAction(AccessibilityAction action) {
         enforceNotSealed();
 
+        addActionUnchecked(action);
+    }
+
+    private void addActionUnchecked(AccessibilityAction action) {
         if (action == null) {
             return;
         }
 
         if (mActions == null) {
-            mActions = new ArrayList<AccessibilityAction>();
+            mActions = new ArrayList<>();
         }
 
         mActions.remove(action);
@@ -1443,6 +1495,15 @@ public class AccessibilityNodeInfo implements Parcelable {
     }
 
     /**
+     * Returns the actual rect containing the node bounds in screen coordinates.
+     *
+     * @hide Not safe to expose outside the framework.
+     */
+    public Rect getBoundsInScreen() {
+        return mBoundsInScreen;
+    }
+
+    /**
      * Sets the node bounds in screen coordinates.
      * <p>
      *   <strong>Note:</strong> Cannot be called from an
@@ -1560,7 +1621,7 @@ public class AccessibilityNodeInfo implements Parcelable {
     }
 
     /**
-     * Sets whether this node is visible to the user.
+     * Gets whether this node is visible to the user.
      *
      * @return Whether the node is visible to the user.
      */
@@ -1881,6 +1942,30 @@ public class AccessibilityNodeInfo implements Parcelable {
      */
     public void setContentInvalid(boolean contentInvalid) {
         setBooleanProperty(BOOLEAN_PROPERTY_CONTENT_INVALID, contentInvalid);
+    }
+
+    /**
+     * Gets whether this node is context clickable.
+     *
+     * @return True if the node is context clickable.
+     */
+    public boolean isContextClickable() {
+        return getBooleanProperty(BOOLEAN_PROPERTY_CONTEXT_CLICKABLE);
+    }
+
+    /**
+     * Sets whether this node is context clickable.
+     * <p>
+     * <strong>Note:</strong> Cannot be called from an
+     * {@link android.accessibilityservice.AccessibilityService}. This class is made immutable
+     * before being delivered to an AccessibilityService.
+     * </p>
+     *
+     * @param contextClickable True if the node is context clickable.
+     * @throws IllegalStateException If called from an AccessibilityService.
+     */
+    public void setContextClickable(boolean contextClickable) {
+        setBooleanProperty(BOOLEAN_PROPERTY_CONTEXT_CLICKABLE, contextClickable);
     }
 
     /**
@@ -2652,10 +2737,10 @@ public class AccessibilityNodeInfo implements Parcelable {
 
         if (mCollectionItemInfo != null) {
             parcel.writeInt(1);
-            parcel.writeInt(mCollectionItemInfo.getColumnIndex());
-            parcel.writeInt(mCollectionItemInfo.getColumnSpan());
             parcel.writeInt(mCollectionItemInfo.getRowIndex());
             parcel.writeInt(mCollectionItemInfo.getRowSpan());
+            parcel.writeInt(mCollectionItemInfo.getColumnIndex());
+            parcel.writeInt(mCollectionItemInfo.getColumnSpan());
             parcel.writeInt(mCollectionItemInfo.isHeading() ? 1 : 0);
             parcel.writeInt(mCollectionItemInfo.isSelected() ? 1 : 0);
         } else {
@@ -2736,7 +2821,7 @@ public class AccessibilityNodeInfo implements Parcelable {
      * @param parcel A parcel containing the state of a {@link AccessibilityNodeInfo}.
      */
     private void initFromParcel(Parcel parcel) {
-        mSealed = (parcel.readInt()  == 1);
+        final boolean sealed = (parcel.readInt()  == 1);
         mSourceNodeId = parcel.readLong();
         mWindowId = parcel.readInt();
         mParentNodeId = parcel.readLong();
@@ -2774,9 +2859,9 @@ public class AccessibilityNodeInfo implements Parcelable {
             addLegacyStandardActions(legacyStandardActions);
             final int nonLegacyActionCount = actionCount - Integer.bitCount(legacyStandardActions);
             for (int i = 0; i < nonLegacyActionCount; i++) {
-                AccessibilityAction action = new AccessibilityAction(
+                final AccessibilityAction action = new AccessibilityAction(
                         parcel.readInt(), parcel.readCharSequence());
-                addAction(action);
+                addActionUnchecked(action);
             }
         }
 
@@ -2826,6 +2911,8 @@ public class AccessibilityNodeInfo implements Parcelable {
                     parcel.readInt() == 1,
                     parcel.readInt() == 1);
         }
+
+        mSealed = sealed;
     }
 
     /**
@@ -3071,6 +3158,7 @@ public class AccessibilityNodeInfo implements Parcelable {
         builder.append("; selected: ").append(isSelected());
         builder.append("; clickable: ").append(isClickable());
         builder.append("; longClickable: ").append(isLongClickable());
+        builder.append("; contextClickable: ").append(isContextClickable());
         builder.append("; enabled: ").append(isEnabled());
         builder.append("; password: ").append(isPassword());
         builder.append("; scrollable: ").append(isScrollable());
@@ -3402,7 +3490,61 @@ public class AccessibilityNodeInfo implements Parcelable {
                 new AccessibilityAction(
                         AccessibilityNodeInfo.ACTION_SET_TEXT, null);
 
-        private static final ArraySet<AccessibilityAction> sStandardActions = new ArraySet<AccessibilityAction>();
+        /**
+         * Action that requests the node make its bounding rectangle visible
+         * on the screen, scrolling if necessary just enough.
+         *
+         * @see View#requestRectangleOnScreen(Rect)
+         */
+        public static final AccessibilityAction ACTION_SHOW_ON_SCREEN =
+                new AccessibilityAction(R.id.accessibilityActionShowOnScreen, null);
+
+        /**
+         * Action that scrolls the node to make the specified collection
+         * position visible on screen.
+         * <p>
+         * <strong>Arguments:</strong>
+         * <ul>
+         *     <li>{@link AccessibilityNodeInfo#ACTION_ARGUMENT_ROW_INT}</li>
+         *     <li>{@link AccessibilityNodeInfo#ACTION_ARGUMENT_COLUMN_INT}</li>
+         * <ul>
+         *
+         * @see AccessibilityNodeInfo#getCollectionInfo()
+         */
+        public static final AccessibilityAction ACTION_SCROLL_TO_POSITION =
+                new AccessibilityAction(R.id.accessibilityActionScrollToPosition, null);
+
+        /**
+         * Action to scroll the node content up.
+         */
+        public static final AccessibilityAction ACTION_SCROLL_UP =
+                new AccessibilityAction(R.id.accessibilityActionScrollUp, null);
+
+        /**
+         * Action to scroll the node content left.
+         */
+        public static final AccessibilityAction ACTION_SCROLL_LEFT =
+                new AccessibilityAction(R.id.accessibilityActionScrollLeft, null);
+
+        /**
+         * Action to scroll the node content down.
+         */
+        public static final AccessibilityAction ACTION_SCROLL_DOWN =
+                new AccessibilityAction(R.id.accessibilityActionScrollDown, null);
+
+        /**
+         * Action to scroll the node content right.
+         */
+         public static final AccessibilityAction ACTION_SCROLL_RIGHT =
+                new AccessibilityAction(R.id.accessibilityActionScrollRight, null);
+
+        /**
+         * Action that context clicks the node.
+         */
+        public static final AccessibilityAction ACTION_CONTEXT_CLICK =
+                new AccessibilityAction(R.id.accessibilityActionContextClick, null);
+
+        private static final ArraySet<AccessibilityAction> sStandardActions = new ArraySet<>();
         static {
             sStandardActions.add(ACTION_FOCUS);
             sStandardActions.add(ACTION_CLEAR_FOCUS);
@@ -3426,6 +3568,13 @@ public class AccessibilityNodeInfo implements Parcelable {
             sStandardActions.add(ACTION_COLLAPSE);
             sStandardActions.add(ACTION_DISMISS);
             sStandardActions.add(ACTION_SET_TEXT);
+            sStandardActions.add(ACTION_SHOW_ON_SCREEN);
+            sStandardActions.add(ACTION_SCROLL_TO_POSITION);
+            sStandardActions.add(ACTION_SCROLL_UP);
+            sStandardActions.add(ACTION_SCROLL_LEFT);
+            sStandardActions.add(ACTION_SCROLL_DOWN);
+            sStandardActions.add(ACTION_SCROLL_RIGHT);
+            sStandardActions.add(ACTION_CONTEXT_CLICK);
         }
 
         private final int mActionId;
@@ -3646,7 +3795,7 @@ public class AccessibilityNodeInfo implements Parcelable {
         private static final int MAX_POOL_SIZE = 20;
 
         private static final SynchronizedPool<CollectionInfo> sPool =
-                new SynchronizedPool<CollectionInfo>(MAX_POOL_SIZE);
+                new SynchronizedPool<>(MAX_POOL_SIZE);
 
         private int mRowCount;
         private int mColumnCount;
@@ -3792,7 +3941,7 @@ public class AccessibilityNodeInfo implements Parcelable {
         private static final int MAX_POOL_SIZE = 20;
 
         private static final SynchronizedPool<CollectionItemInfo> sPool =
-                new SynchronizedPool<CollectionItemInfo>(MAX_POOL_SIZE);
+                new SynchronizedPool<>(MAX_POOL_SIZE);
 
         /**
          * Obtains a pooled instance that is a clone of another one.

@@ -17,6 +17,11 @@
 
 LOCAL_PATH := $(call my-dir)
 
+# Use full Noto Sans Japanese font on non-smaller footprints
+ifneq ($(SMALLER_FONT_FOOTPRINT),true)
+FONT_NOTOSANS_JP_FULL := true
+endif
+
 ##########################################
 # create symlink for given font
 # $(1): new font $(2): link target
@@ -33,7 +38,7 @@ ALL_MODULES.$(1).INSTALLED := \
 endef
 
 ##########################################
-# The following fonts are distributed as symlink only.
+# The following fonts are just symlinks, for backward compatibility.
 ##########################################
 $(eval $(call create-font-symlink,DroidSans.ttf,Roboto-Regular.ttf))
 $(eval $(call create-font-symlink,DroidSans-Bold.ttf,Roboto-Bold.ttf))
@@ -49,6 +54,8 @@ extra_font_files := \
 ################################
 # Do not include Motoya on space-constrained devices
 ifneq ($(SMALLER_FONT_FOOTPRINT),true)
+# Do not include Motoya if we are including Noto Sans Japanese
+ifneq ($(FONT_NOTOSANS_JP_FULL),true)
 
 include $(CLEAR_VARS)
 LOCAL_MODULE := MTLmr3m.ttf
@@ -59,6 +66,7 @@ LOCAL_MODULE_PATH := $(TARGET_OUT)/fonts
 include $(BUILD_PREBUILT)
 extra_font_files += MTLmr3m.ttf
 
+endif  # !FONT_NOTOSANS_JP_FULL
 endif  # !SMALLER_FONT_FOOTPRINT
 
 ################################
@@ -74,26 +82,19 @@ include $(BUILD_PREBUILT)
 extra_font_files :=
 
 ################################
-# Include DroidSansFallback only on non-EXTENDED_FONT_FOOTPRINT builds
-ifneq ($(EXTENDED_FONT_FOOTPRINT),true)
-
-# Include a subset of DroidSansFallback on SMALLER_FONT_FOOTPRINT build
+# Include the DroidSansFallback subset on SMALLER_FONT_FOOTPRINT build
 ifeq ($(SMALLER_FONT_FOOTPRINT),true)
-droidsans_fallback_src := DroidSansFallback.ttf
-else  # !SMALLER_FONT_FOOTPRINT
-droidsans_fallback_src := DroidSansFallbackFull.ttf
-endif  # SMALLER_FONT_FOOTPRINT
 
 include $(CLEAR_VARS)
 LOCAL_MODULE := DroidSansFallback.ttf
-LOCAL_SRC_FILES := $(droidsans_fallback_src)
+LOCAL_SRC_FILES := $(LOCAL_MODULE)
 LOCAL_MODULE_CLASS := ETC
 LOCAL_MODULE_TAGS := optional
 LOCAL_MODULE_PATH := $(TARGET_OUT)/fonts
 include $(BUILD_PREBUILT)
 droidsans_fallback_src :=
 
-endif  # !EXTENDED_FONT_FOOTPRINT
+endif  # SMALLER_FONT_FOOTPRINT
 
 ################################
 # Build the rest of font files as prebuilt.
@@ -111,48 +112,10 @@ $(eval include $(BUILD_PREBUILT))
 endef
 
 font_src_files := \
-    Roboto-Regular.ttf \
-    Roboto-Bold.ttf \
-    Roboto-Italic.ttf \
-    Roboto-BoldItalic.ttf \
     Clockopia.ttf \
     AndroidClock.ttf \
     AndroidClock_Highlight.ttf \
     AndroidClock_Solid.ttf
-
-ifeq ($(MINIMAL_FONT_FOOTPRINT),true)
-
-$(eval $(call create-font-symlink,Roboto-Black.ttf,Roboto-Bold.ttf))
-$(eval $(call create-font-symlink,Roboto-BlackItalic.ttf,Roboto-BoldItalic.ttf))
-$(eval $(call create-font-symlink,Roboto-Light.ttf,Roboto-Regular.ttf))
-$(eval $(call create-font-symlink,Roboto-LightItalic.ttf,Roboto-Italic.ttf))
-$(eval $(call create-font-symlink,Roboto-Medium.ttf,Roboto-Regular.ttf))
-$(eval $(call create-font-symlink,Roboto-MediumItalic.ttf,Roboto-Italic.ttf))
-$(eval $(call create-font-symlink,Roboto-Thin.ttf,Roboto-Regular.ttf))
-$(eval $(call create-font-symlink,Roboto-ThinItalic.ttf,Roboto-Italic.ttf))
-$(eval $(call create-font-symlink,RobotoCondensed-Regular.ttf,Roboto-Regular.ttf))
-$(eval $(call create-font-symlink,RobotoCondensed-Bold.ttf,Roboto-Bold.ttf))
-$(eval $(call create-font-symlink,RobotoCondensed-Italic.ttf,Roboto-Italic.ttf))
-$(eval $(call create-font-symlink,RobotoCondensed-BoldItalic.ttf,Roboto-BoldItalic.ttf))
-
-else # !MINIMAL_FONT
-font_src_files += \
-    Roboto-Black.ttf \
-    Roboto-BlackItalic.ttf \
-    Roboto-Light.ttf \
-    Roboto-LightItalic.ttf \
-    Roboto-Medium.ttf \
-    Roboto-MediumItalic.ttf \
-    Roboto-Thin.ttf \
-    Roboto-ThinItalic.ttf \
-    RobotoCondensed-Regular.ttf \
-    RobotoCondensed-Bold.ttf \
-    RobotoCondensed-Italic.ttf \
-    RobotoCondensed-BoldItalic.ttf \
-    RobotoCondensed-Light.ttf \
-    RobotoCondensed-LightItalic.ttf
-
-endif # !MINIMAL_FONT
 
 $(foreach f, $(font_src_files), $(call build-one-font-module, $(f)))
 

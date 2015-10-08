@@ -57,6 +57,21 @@ public class ExifInterface {
     public static final String TAG_APERTURE = "FNumber";
     /** Type is String. */
     public static final String TAG_ISO = "ISOSpeedRatings";
+    /** Type is String. */
+    public static final String TAG_DATETIME_DIGITIZED = "DateTimeDigitized";
+    /** Type is int. */
+    public static final String TAG_SUBSEC_TIME = "SubSecTime";
+    /** Type is int. */
+    public static final String TAG_SUBSEC_TIME_ORIG = "SubSecTimeOriginal";
+    /** Type is int. */
+    public static final String TAG_SUBSEC_TIME_DIG = "SubSecTimeDigitized";
+
+
+
+    /**
+     * @hide
+     */
+    public static final String TAG_SUBSECTIME = "SubSecTime";
 
     /**
      * The altitude (in meters) based on the reference in TAG_GPS_ALTITUDE_REF.
@@ -346,7 +361,7 @@ public class ExifInterface {
     }
 
     /**
-     * Returns number of milliseconds since Jan. 1, 1970, midnight.
+     * Returns number of milliseconds since Jan. 1, 1970, midnight local time.
      * Returns -1 if the date time information if not available.
      * @hide
      */
@@ -356,9 +371,24 @@ public class ExifInterface {
 
         ParsePosition pos = new ParsePosition(0);
         try {
+            // The exif field is in local time. Parsing it as if it is UTC will yield time
+            // since 1/1/1970 local time
             Date datetime = sFormatter.parse(dateTimeString, pos);
             if (datetime == null) return -1;
-            return datetime.getTime();
+            long msecs = datetime.getTime();
+
+            String subSecs = mAttributes.get(TAG_SUBSECTIME);
+            if (subSecs != null) {
+                try {
+                    long sub = Long.valueOf(subSecs);
+                    while (sub > 1000) {
+                        sub /= 10;
+                    }
+                    msecs += sub;
+                } catch (NumberFormatException e) {
+                }
+            }
+            return msecs;
         } catch (IllegalArgumentException ex) {
             return -1;
         }
@@ -375,7 +405,6 @@ public class ExifInterface {
         if (date == null || time == null) return -1;
 
         String dateTimeString = date + ' ' + time;
-        if (dateTimeString == null) return -1;
 
         ParsePosition pos = new ParsePosition(0);
         try {

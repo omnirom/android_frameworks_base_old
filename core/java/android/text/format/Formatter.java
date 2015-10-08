@@ -16,8 +16,17 @@
 
 package android.text.format;
 
+import android.annotation.NonNull;
+import android.annotation.Nullable;
 import android.content.Context;
+import android.content.res.Resources;
+import android.text.BidiFormatter;
+import android.text.TextUtils;
+import android.view.View;
 import android.net.NetworkUtils;
+import android.net.TrafficStats;
+
+import java.util.Locale;
 
 /**
  * Utility class to aid in formatting common values that are not covered
@@ -25,73 +34,137 @@ import android.net.NetworkUtils;
  */
 public final class Formatter {
 
+    /** {@hide} */
+    public static final int FLAG_SHORTER = 1 << 0;
+    /** {@hide} */
+    public static final int FLAG_CALCULATE_ROUNDED = 1 << 1;
+
+    /** {@hide} */
+    public static class BytesResult {
+        public final String value;
+        public final String units;
+        public final long roundedBytes;
+
+        public BytesResult(String value, String units, long roundedBytes) {
+            this.value = value;
+            this.units = units;
+            this.roundedBytes = roundedBytes;
+        }
+    }
+
+    /* Wraps the source string in bidi formatting characters in RTL locales */
+    private static String bidiWrap(@NonNull Context context, String source) {
+        final Locale locale = context.getResources().getConfiguration().locale;
+        if (TextUtils.getLayoutDirectionFromLocale(locale) == View.LAYOUT_DIRECTION_RTL) {
+            return BidiFormatter.getInstance(true /* RTL*/).unicodeWrap(source);
+        } else {
+            return source;
+        }
+    }
+
     /**
-     * Formats a content size to be in the form of bytes, kilobytes, megabytes, etc
+     * Formats a content size to be in the form of bytes, kilobytes, megabytes, etc.
+     *
+     * If the context has a right-to-left locale, the returned string is wrapped in bidi formatting
+     * characters to make sure it's displayed correctly if inserted inside a right-to-left string.
+     * (This is useful in cases where the unit strings, like "MB", are left-to-right, but the
+     * locale is right-to-left.)
      *
      * @param context Context to use to load the localized units
-     * @param number size value to be formatted
+     * @param sizeBytes size value to be formatted, in bytes
      * @return formatted string with the number
      */
-    public static String formatFileSize(Context context, long number) {
-        return formatFileSize(context, number, false);
+    public static String formatFileSize(@Nullable Context context, long sizeBytes) {
+        if (context == null) {
+            return "";
+        }
+        final BytesResult res = formatBytes(context.getResources(), sizeBytes, 0);
+        return bidiWrap(context, context.getString(com.android.internal.R.string.fileSizeSuffix,
+                res.value, res.units));
     }
 
     /**
      * Like {@link #formatFileSize}, but trying to generate shorter numbers
      * (showing fewer digits of precision).
      */
-    public static String formatShortFileSize(Context context, long number) {
-        return formatFileSize(context, number, true);
-    }
-
-    private static String formatFileSize(Context context, long number, boolean shorter) {
+    public static String formatShortFileSize(@Nullable Context context, long sizeBytes) {
         if (context == null) {
             return "";
         }
+        final BytesResult res = formatBytes(context.getResources(), sizeBytes, FLAG_SHORTER);
+        return bidiWrap(context, context.getString(com.android.internal.R.string.fileSizeSuffix,
+                res.value, res.units));
+    }
 
-        float result = number;
+    /** {@hide} */
+    public static BytesResult formatBytes(Resources res, long sizeBytes, int flags) {
+        float result = sizeBytes;
         int suffix = com.android.internal.R.string.byteShort;
+        long mult = 1;
         if (result > 900) {
             suffix = com.android.internal.R.string.kilobyteShort;
+            mult = TrafficStats.KB_IN_BYTES;
             result = result / 1024;
         }
         if (result > 900) {
             suffix = com.android.internal.R.string.megabyteShort;
+            mult = TrafficStats.MB_IN_BYTES;
             result = result / 1024;
         }
         if (result > 900) {
             suffix = com.android.internal.R.string.gigabyteShort;
+            mult = TrafficStats.GB_IN_BYTES;
             result = result / 1024;
         }
         if (result > 900) {
             suffix = com.android.internal.R.string.terabyteShort;
+            mult = TrafficStats.TB_IN_BYTES;
             result = result / 1024;
         }
         if (result > 900) {
             suffix = com.android.internal.R.string.petabyteShort;
+            mult = TrafficStats.PB_IN_BYTES;
             result = result / 1024;
         }
-        String value;
+        // Note we calculate the rounded long by ourselves, but still let String.format()
+        // compute the rounded value. String.format("%f", 0.1) might not return "0.1" due to
+        // floating point errors.
+        final int roundFactor;
+        final String roundFormat;
         if (result < 1) {
-            value = String.format("%.2f", result);
+            roundFactor = 100;
+            roundFormat = "%.2f";
         } else if (result < 10) {
-            if (shorter) {
-                value = String.format("%.1f", result);
+            if ((flags & FLAG_SHORTER) != 0) {
+                roundFactor = 10;
+                roundFormat = "%.1f";
             } else {
-                value = String.format("%.2f", result);
+                roundFactor = 100;
+                roundFormat = "%.2f";
             }
         } else if (result < 100) {
-            if (shorter) {
-                value = String.format("%.0f", result);
+            if ((flags & FLAG_SHORTER) != 0) {
+                roundFactor = 1;
+                roundFormat = "%.0f";
             } else {
-                value = String.format("%.2f", result);
+                roundFactor = 100;
+                roundFormat = "%.2f";
             }
         } else {
-            value = String.format("%.0f", result);
+            roundFactor = 1;
+            roundFormat = "%.0f";
         }
-        return context.getResources().
-            getString(com.android.internal.R.string.fileSizeSuffix,
-                      value, context.getString(suffix));
+        final String roundedString = String.format(roundFormat, result);
+
+        // Note this might overflow if result >= Long.MAX_VALUE / 100, but that's like 80PB so
+        // it's okay (for now)...
+        final long roundedBytes =
+                (flags & FLAG_CALCULATE_ROUNDED) == 0 ? 0
+                : (((long) Math.round(result * roundFactor)) * mult / roundFactor);
+
+        final String units = res.getString(suffix);
+
+        return new BytesResult(roundedString, units, roundedBytes);
     }
 
     /**

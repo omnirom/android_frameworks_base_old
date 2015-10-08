@@ -16,6 +16,7 @@
 
 package com.android.server;
 
+import android.content.pm.PackageManagerInternal;
 import com.android.internal.content.PackageMonitor;
 import com.android.internal.location.ProviderProperties;
 import com.android.internal.location.ProviderRequest;
@@ -60,8 +61,7 @@ import android.location.Address;
 import android.location.Criteria;
 import android.location.GeocoderParams;
 import android.location.Geofence;
-import android.location.GpsMeasurementsEvent;
-import android.location.GpsNavigationMessageEvent;
+import android.location.IGpsGeofenceHardware;
 import android.location.IGpsMeasurementsListener;
 import android.location.IGpsNavigationMessageListener;
 import android.location.IGpsStatusListener;
@@ -164,6 +164,7 @@ public class LocationManagerService extends ILocationManager.Stub {
     private LocationBlacklist mBlacklist;
     private GpsMeasurementsProvider mGpsMeasurementsProvider;
     private GpsNavigationMessageProvider mGpsNavigationMessageProvider;
+    private IGpsGeofenceHardware mGpsGeofenceProxy;
 
     // --- fields below are protected by mLock ---
     // Set of providers that are explicitly enabled
@@ -218,6 +219,19 @@ public class LocationManagerService extends ILocationManager.Stub {
         mContext = context;
         mAppOps = (AppOpsManager)context.getSystemService(Context.APP_OPS_SERVICE);
 
+        // Let the package manager query which are the default location
+        // providers as they get certain permissions granted by default.
+        PackageManagerInternal packageManagerInternal = LocalServices.getService(
+                PackageManagerInternal.class);
+        packageManagerInternal.setLocationPackagesProvider(
+                new PackageManagerInternal.PackagesProvider() {
+                    @Override
+                    public String[] getPackages(int userId) {
+                        return mContext.getResources().getStringArray(
+                                com.android.internal.R.array.config_locationProviderPackageNames);
+                    }
+                });
+
         if (D) Log.d(TAG, "Constructed");
 
         // most startup is deferred until systemReady()
@@ -255,6 +269,17 @@ public class LocationManagerService extends ILocationManager.Stub {
                 }
             };
             mAppOps.startWatchingMode(AppOpsManager.OP_COARSE_LOCATION, null, callback);
+
+            PackageManager.OnPermissionsChangedListener permissionListener
+                    = new PackageManager.OnPermissionsChangedListener() {
+                @Override
+                public void onPermissionsChanged(final int uid) {
+                    synchronized (mLock) {
+                        applyAllProviderRequirementsLocked();
+                    }
+                }
+            };
+            mPackageManager.addOnPermissionsChangeListener(permissionListener);
 
             mUserManager = (UserManager) mContext.getSystemService(Context.USER_SERVICE);
             updateUserProfiles(mCurrentUserId);
@@ -403,18 +428,19 @@ public class LocationManagerService extends ILocationManager.Stub {
         addProviderLocked(passiveProvider);
         mEnabledProviders.add(passiveProvider.getName());
         mPassiveProvider = passiveProvider;
-        // Create a gps location provider
-        GpsLocationProvider gpsProvider = new GpsLocationProvider(mContext, this,
-                mLocationHandler.getLooper());
 
         if (GpsLocationProvider.isSupported()) {
+            // Create a gps location provider
+            GpsLocationProvider gpsProvider = new GpsLocationProvider(mContext, this,
+                    mLocationHandler.getLooper());
             mGpsStatusProvider = gpsProvider.getGpsStatusProvider();
             mNetInitiatedListener = gpsProvider.getNetInitiatedListener();
             addProviderLocked(gpsProvider);
             mRealProviders.put(LocationManager.GPS_PROVIDER, gpsProvider);
+            mGpsMeasurementsProvider = gpsProvider.getGpsMeasurementsProvider();
+            mGpsNavigationMessageProvider = gpsProvider.getGpsNavigationMessageProvider();
+            mGpsGeofenceProxy = gpsProvider.getGpsGeofenceProxy();
         }
-        mGpsMeasurementsProvider = gpsProvider.getGpsMeasurementsProvider();
-        mGpsNavigationMessageProvider = gpsProvider.getGpsNavigationMessageProvider();
 
         /*
         Load package name(s) containing location provider support.
@@ -510,7 +536,7 @@ public class LocationManagerService extends ILocationManager.Stub {
                 com.android.internal.R.string.config_geofenceProviderPackageName,
                 com.android.internal.R.array.config_locationProviderPackageNames,
                 mLocationHandler,
-                gpsProvider.getGpsGeofenceProxy(),
+                mGpsGeofenceProxy,
                 flpHardwareProvider != null ? flpHardwareProvider.getGeofenceHardware() : null);
         if (provider == null) {
             Slog.e(TAG,  "Unable to bind FLP Geofence proxy.");
@@ -1118,23 +1144,34 @@ public class LocationManagerService extends ILocationManager.Stub {
         return -1;
     }
 
-    boolean reportLocationAccessNoThrow(int uid, String packageName, int allowedResolutionLevel) {
+    boolean reportLocationAccessNoThrow(
+            int pid, int uid, String packageName, int allowedResolutionLevel) {
         int op = resolutionLevelToOp(allowedResolutionLevel);
         if (op >= 0) {
             if (mAppOps.noteOpNoThrow(op, uid, packageName) != AppOpsManager.MODE_ALLOWED) {
                 return false;
             }
         }
+
+        if (getAllowedResolutionLevel(pid, uid) < allowedResolutionLevel) {
+            return false;
+        }
+
         return true;
     }
 
-    boolean checkLocationAccess(int uid, String packageName, int allowedResolutionLevel) {
+    boolean checkLocationAccess(int pid, int uid, String packageName, int allowedResolutionLevel) {
         int op = resolutionLevelToOp(allowedResolutionLevel);
         if (op >= 0) {
             if (mAppOps.checkOp(op, uid, packageName) != AppOpsManager.MODE_ALLOWED) {
                 return false;
             }
         }
+
+        if (getAllowedResolutionLevel(pid, uid) < allowedResolutionLevel) {
+            return false;
+        }
+
         return true;
     }
 
@@ -1332,7 +1369,10 @@ public class LocationManagerService extends ILocationManager.Stub {
         if (records != null) {
             for (UpdateRecord record : records) {
                 if (isCurrentProfile(UserHandle.getUserId(record.mReceiver.mUid))) {
-                    if (checkLocationAccess(record.mReceiver.mUid, record.mReceiver.mPackageName,
+                    if (checkLocationAccess(
+                            record.mReceiver.mPid,
+                            record.mReceiver.mUid,
+                            record.mReceiver.mPackageName,
                             record.mReceiver.mAllowedResolutionLevel)) {
                         LocationRequest locationRequest = record.mRequest;
                         providerRequest.locationRequests.add(locationRequest);
@@ -1452,14 +1492,13 @@ public class LocationManagerService extends ILocationManager.Stub {
         if (receiver == null) {
             receiver = new Receiver(listener, null, pid, uid, packageName, workSource,
                     hideFromAppOps);
-            mReceivers.put(binder, receiver);
-
             try {
                 receiver.getListener().asBinder().linkToDeath(receiver, 0);
             } catch (RemoteException e) {
                 Slog.e(TAG, "linkToDeath failed:", e);
                 return null;
             }
+            mReceivers.put(binder, receiver);
         }
         return receiver;
     }
@@ -1569,7 +1608,7 @@ public class LocationManagerService extends ILocationManager.Stub {
         try {
             // We don't check for MODE_IGNORED here; we will do that when we go to deliver
             // a location.
-            checkLocationAccess(uid, packageName, allowedResolutionLevel);
+            checkLocationAccess(pid, uid, packageName, allowedResolutionLevel);
 
             synchronized (mLock) {
                 Receiver recevier = checkListenerOrIntentLocked(listener, intent, pid, uid,
@@ -1697,6 +1736,7 @@ public class LocationManagerService extends ILocationManager.Stub {
                 request.getProvider());
         // no need to sanitize this request, as only the provider name is used
 
+        final int pid = Binder.getCallingPid();
         final int uid = Binder.getCallingUid();
         final long identity = Binder.clearCallingIdentity();
         try {
@@ -1706,7 +1746,7 @@ public class LocationManagerService extends ILocationManager.Stub {
                 return null;
             }
 
-            if (!reportLocationAccessNoThrow(uid, packageName, allowedResolutionLevel)) {
+            if (!reportLocationAccessNoThrow(pid, uid, packageName, allowedResolutionLevel)) {
                 if (D) Log.d(TAG, "not returning last loc for no op app: " +
                         packageName);
                 return null;
@@ -1780,7 +1820,6 @@ public class LocationManagerService extends ILocationManager.Stub {
 
     @Override
     public void removeGeofence(Geofence geofence, PendingIntent intent, String packageName) {
-        checkResolutionLevelIsSufficientForGeofenceUse(getCallerAllowedResolutionLevel());
         checkPendingIntent(intent);
         checkPackageName(packageName);
 
@@ -1802,10 +1841,11 @@ public class LocationManagerService extends ILocationManager.Stub {
         checkResolutionLevelIsSufficientForProviderUse(allowedResolutionLevel,
                 LocationManager.GPS_PROVIDER);
 
+        final int pid = Binder.getCallingPid();
         final int uid = Binder.getCallingUid();
         final long ident = Binder.clearCallingIdentity();
         try {
-            if (!checkLocationAccess(uid, packageName, allowedResolutionLevel)) {
+            if (!checkLocationAccess(pid, uid, packageName, allowedResolutionLevel)) {
                 return false;
             }
         } finally {
@@ -1845,16 +1885,17 @@ public class LocationManagerService extends ILocationManager.Stub {
                 allowedResolutionLevel,
                 LocationManager.GPS_PROVIDER);
 
+        int pid = Binder.getCallingPid();
         int uid = Binder.getCallingUid();
         long identity = Binder.clearCallingIdentity();
         boolean hasLocationAccess;
         try {
-            hasLocationAccess = checkLocationAccess(uid, packageName, allowedResolutionLevel);
+            hasLocationAccess = checkLocationAccess(pid, uid, packageName, allowedResolutionLevel);
         } finally {
             Binder.restoreCallingIdentity(identity);
         }
 
-        if (!hasLocationAccess) {
+        if (!hasLocationAccess || mGpsMeasurementsProvider == null) {
             return false;
         }
         return mGpsMeasurementsProvider.addListener(listener);
@@ -1862,7 +1903,9 @@ public class LocationManagerService extends ILocationManager.Stub {
 
     @Override
     public void removeGpsMeasurementsListener(IGpsMeasurementsListener listener) {
-        mGpsMeasurementsProvider.removeListener(listener);
+        if (mGpsMeasurementsProvider != null) {
+            mGpsMeasurementsProvider.removeListener(listener);
+        }
     }
 
     @Override
@@ -1874,16 +1917,17 @@ public class LocationManagerService extends ILocationManager.Stub {
                 allowedResolutionLevel,
                 LocationManager.GPS_PROVIDER);
 
+        int pid = Binder.getCallingPid();
         int uid = Binder.getCallingUid();
         long identity = Binder.clearCallingIdentity();
         boolean hasLocationAccess;
         try {
-            hasLocationAccess = checkLocationAccess(uid, packageName, allowedResolutionLevel);
+            hasLocationAccess = checkLocationAccess(pid, uid, packageName, allowedResolutionLevel);
         } finally {
             Binder.restoreCallingIdentity(identity);
         }
 
-        if (!hasLocationAccess) {
+        if (!hasLocationAccess || mGpsNavigationMessageProvider == null) {
             return false;
         }
         return mGpsNavigationMessageProvider.addListener(listener);
@@ -1891,7 +1935,9 @@ public class LocationManagerService extends ILocationManager.Stub {
 
     @Override
     public void removeGpsNavigationMessageListener(IGpsNavigationMessageListener listener) {
-        mGpsNavigationMessageProvider.removeListener(listener);
+        if (mGpsNavigationMessageProvider != null) {
+            mGpsNavigationMessageProvider.removeListener(listener);
+        }
     }
 
     @Override
@@ -1952,6 +1998,27 @@ public class LocationManagerService extends ILocationManager.Stub {
 
         if (p == null) return null;
         return p.getProperties();
+    }
+
+    /**
+     * @return null if the provider does not exist
+     * @throws SecurityException if the provider is not allowed to be
+     * accessed by the caller
+     */
+    @Override
+    public String getNetworkProviderPackage() {
+        LocationProviderInterface p;
+        synchronized (mLock) {
+            if (mProvidersByName.get(LocationManager.NETWORK_PROVIDER) == null) {
+                return null;
+            }
+            p = mProvidersByName.get(LocationManager.NETWORK_PROVIDER);
+        }
+
+        if (p instanceof LocationProviderProxy) {
+            return ((LocationProviderProxy) p).getConnectedPackageName();
+        }
+        return null;
     }
 
     @Override
@@ -2170,7 +2237,7 @@ public class LocationManagerService extends ILocationManager.Stub {
                 continue;
             }
 
-            if (!reportLocationAccessNoThrow(receiver.mUid, receiver.mPackageName,
+            if (!reportLocationAccessNoThrow(receiver.mPid, receiver.mUid, receiver.mPackageName,
                     receiver.mAllowedResolutionLevel)) {
                 if (D) Log.d(TAG, "skipping loc update for no op app: " +
                         receiver.mPackageName);
@@ -2348,22 +2415,16 @@ public class LocationManagerService extends ILocationManager.Stub {
 
     // Mock Providers
 
-    private void checkMockPermissionsSafe() {
-        boolean allowMocks = Settings.Secure.getInt(mContext.getContentResolver(),
-                Settings.Secure.ALLOW_MOCK_LOCATION, 0) == 1;
-        if (!allowMocks) {
-            throw new SecurityException("Requires ACCESS_MOCK_LOCATION secure setting");
-        }
-
-        if (mContext.checkCallingPermission(ACCESS_MOCK_LOCATION) !=
-                PackageManager.PERMISSION_GRANTED) {
-            throw new SecurityException("Requires ACCESS_MOCK_LOCATION permission");
-        }
+    private boolean canCallerAccessMockLocation(String opPackageName) {
+        return mAppOps.noteOp(AppOpsManager.OP_MOCK_LOCATION, Binder.getCallingUid(),
+                opPackageName) == AppOpsManager.MODE_ALLOWED;
     }
 
     @Override
-    public void addTestProvider(String name, ProviderProperties properties) {
-        checkMockPermissionsSafe();
+    public void addTestProvider(String name, ProviderProperties properties, String opPackageName) {
+        if (!canCallerAccessMockLocation(opPackageName)) {
+            return;
+        }
 
         if (LocationManager.PASSIVE_PROVIDER.equals(name)) {
             throw new IllegalArgumentException("Cannot mock the passive location provider");
@@ -2398,15 +2459,18 @@ public class LocationManagerService extends ILocationManager.Stub {
     }
 
     @Override
-    public void removeTestProvider(String provider) {
-        checkMockPermissionsSafe();
+    public void removeTestProvider(String provider, String opPackageName) {
+        if (!canCallerAccessMockLocation(opPackageName)) {
+            return;
+        }
+
         synchronized (mLock) {
 
             // These methods can't be called after removing the test provider, so first make sure
             // we don't leave anything dangling.
-            clearTestProviderEnabled(provider);
-            clearTestProviderLocation(provider);
-            clearTestProviderStatus(provider);
+            clearTestProviderEnabled(provider, opPackageName);
+            clearTestProviderLocation(provider, opPackageName);
+            clearTestProviderStatus(provider, opPackageName);
 
             MockProvider mockProvider = mMockProviders.remove(provider);
             if (mockProvider == null) {
@@ -2428,8 +2492,11 @@ public class LocationManagerService extends ILocationManager.Stub {
     }
 
     @Override
-    public void setTestProviderLocation(String provider, Location loc) {
-        checkMockPermissionsSafe();
+    public void setTestProviderLocation(String provider, Location loc, String opPackageName) {
+        if (!canCallerAccessMockLocation(opPackageName)) {
+            return;
+        }
+
         synchronized (mLock) {
             MockProvider mockProvider = mMockProviders.get(provider);
             if (mockProvider == null) {
@@ -2443,8 +2510,11 @@ public class LocationManagerService extends ILocationManager.Stub {
     }
 
     @Override
-    public void clearTestProviderLocation(String provider) {
-        checkMockPermissionsSafe();
+    public void clearTestProviderLocation(String provider, String opPackageName) {
+        if (!canCallerAccessMockLocation(opPackageName)) {
+            return;
+        }
+
         synchronized (mLock) {
             MockProvider mockProvider = mMockProviders.get(provider);
             if (mockProvider == null) {
@@ -2455,8 +2525,11 @@ public class LocationManagerService extends ILocationManager.Stub {
     }
 
     @Override
-    public void setTestProviderEnabled(String provider, boolean enabled) {
-        checkMockPermissionsSafe();
+    public void setTestProviderEnabled(String provider, boolean enabled, String opPackageName) {
+        if (!canCallerAccessMockLocation(opPackageName)) {
+            return;
+        }
+
         synchronized (mLock) {
             MockProvider mockProvider = mMockProviders.get(provider);
             if (mockProvider == null) {
@@ -2478,8 +2551,11 @@ public class LocationManagerService extends ILocationManager.Stub {
     }
 
     @Override
-    public void clearTestProviderEnabled(String provider) {
-        checkMockPermissionsSafe();
+    public void clearTestProviderEnabled(String provider, String opPackageName) {
+        if (!canCallerAccessMockLocation(opPackageName)) {
+            return;
+        }
+
         synchronized (mLock) {
             MockProvider mockProvider = mMockProviders.get(provider);
             if (mockProvider == null) {
@@ -2494,8 +2570,12 @@ public class LocationManagerService extends ILocationManager.Stub {
     }
 
     @Override
-    public void setTestProviderStatus(String provider, int status, Bundle extras, long updateTime) {
-        checkMockPermissionsSafe();
+    public void setTestProviderStatus(String provider, int status, Bundle extras, long updateTime,
+            String opPackageName) {
+        if (!canCallerAccessMockLocation(opPackageName)) {
+            return;
+        }
+
         synchronized (mLock) {
             MockProvider mockProvider = mMockProviders.get(provider);
             if (mockProvider == null) {
@@ -2506,8 +2586,11 @@ public class LocationManagerService extends ILocationManager.Stub {
     }
 
     @Override
-    public void clearTestProviderStatus(String provider) {
-        checkMockPermissionsSafe();
+    public void clearTestProviderStatus(String provider, String opPackageName) {
+        if (!canCallerAccessMockLocation(opPackageName)) {
+            return;
+        }
+
         synchronized (mLock) {
             MockProvider mockProvider = mMockProviders.get(provider);
             if (mockProvider == null) {

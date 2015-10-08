@@ -17,6 +17,7 @@
 package android.nfc.cardemulation;
 
 import android.content.ComponentName;
+import android.content.Context;
 import android.content.pm.PackageManager;
 import android.content.pm.ResolveInfo;
 import android.content.pm.ServiceInfo;
@@ -28,6 +29,7 @@ import android.content.res.XmlResourceParser;
 import android.graphics.drawable.Drawable;
 import android.os.Parcel;
 import android.os.Parcelable;
+import android.os.ResultReceiver;
 import android.util.AttributeSet;
 import android.util.Log;
 import android.util.Xml;
@@ -40,6 +42,7 @@ import java.io.IOException;
 import java.io.PrintWriter;
 import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 
 /**
@@ -87,12 +90,19 @@ public final class ApduServiceInfo implements Parcelable {
      * The uid of the package the service belongs to
      */
     final int mUid;
+
+    /**
+     * Settings Activity for this service
+     */
+    final String mSettingsActivityName;
+
     /**
      * @hide
      */
     public ApduServiceInfo(ResolveInfo info, boolean onHost, String description,
             ArrayList<AidGroup> staticAidGroups, ArrayList<AidGroup> dynamicAidGroups,
-            boolean requiresUnlock, int bannerResource, int uid) {
+            boolean requiresUnlock, int bannerResource, int uid,
+            String settingsActivityName) {
         this.mService = info;
         this.mDescription = description;
         this.mStaticAidGroups = new HashMap<String, AidGroup>();
@@ -107,6 +117,7 @@ public final class ApduServiceInfo implements Parcelable {
         }
         this.mBannerResourceId = bannerResource;
         this.mUid = uid;
+        this.mSettingsActivityName = settingsActivityName;
     }
 
     public ApduServiceInfo(PackageManager pm, ResolveInfo info, boolean onHost) throws
@@ -155,6 +166,8 @@ public final class ApduServiceInfo implements Parcelable {
                         false);
                 mBannerResourceId = sa.getResourceId(
                         com.android.internal.R.styleable.HostApduService_apduServiceBanner, -1);
+                mSettingsActivityName = sa.getString(
+                        com.android.internal.R.styleable.HostApduService_settingsActivity);
                 sa.recycle();
             } else {
                 TypedArray sa = res.obtainAttributes(attrs,
@@ -165,6 +178,8 @@ public final class ApduServiceInfo implements Parcelable {
                 mRequiresDeviceUnlock = false;
                 mBannerResourceId = sa.getResourceId(
                         com.android.internal.R.styleable.OffHostApduService_apduServiceBanner, -1);
+                mSettingsActivityName = sa.getString(
+                        com.android.internal.R.styleable.HostApduService_settingsActivity);
                 sa.recycle();
             }
 
@@ -262,12 +277,24 @@ public final class ApduServiceInfo implements Parcelable {
      * for that category.
      * @return List of AIDs registered by the service
      */
-    public ArrayList<String> getAids() {
+    public List<String> getAids() {
         final ArrayList<String> aids = new ArrayList<String>();
         for (AidGroup group : getAidGroups()) {
             aids.addAll(group.aids);
         }
         return aids;
+    }
+
+    public List<String> getPrefixAids() {
+        final ArrayList<String> prefixAids = new ArrayList<String>();
+        for (AidGroup group : getAidGroups()) {
+            for (String aid : group.aids) {
+                if (aid.endsWith("*")) {
+                    prefixAids.add(aid);
+                }
+            }
+        }
+        return prefixAids;
     }
 
     /**
@@ -346,6 +373,15 @@ public final class ApduServiceInfo implements Parcelable {
         return mService.loadLabel(pm);
     }
 
+    public CharSequence loadAppLabel(PackageManager pm) {
+        try {
+            return pm.getApplicationLabel(pm.getApplicationInfo(
+                    mService.resolvePackageName, PackageManager.GET_META_DATA));
+        } catch (PackageManager.NameNotFoundException e) {
+            return null;
+        }
+    }
+
     public Drawable loadIcon(PackageManager pm) {
         return mService.loadIcon(pm);
     }
@@ -364,6 +400,8 @@ public final class ApduServiceInfo implements Parcelable {
             return null;
         }
     }
+
+    public String getSettingsActivityName() { return mSettingsActivityName; }
 
     @Override
     public String toString() {
@@ -417,6 +455,7 @@ public final class ApduServiceInfo implements Parcelable {
         dest.writeInt(mRequiresDeviceUnlock ? 1 : 0);
         dest.writeInt(mBannerResourceId);
         dest.writeInt(mUid);
+        dest.writeString(mSettingsActivityName);
     };
 
     public static final Parcelable.Creator<ApduServiceInfo> CREATOR =
@@ -439,8 +478,10 @@ public final class ApduServiceInfo implements Parcelable {
             boolean requiresUnlock = source.readInt() != 0;
             int bannerResource = source.readInt();
             int uid = source.readInt();
+            String settingsActivityName = source.readString();
             return new ApduServiceInfo(info, onHost, description, staticAidGroups,
-                    dynamicAidGroups, requiresUnlock, bannerResource, uid);
+                    dynamicAidGroups, requiresUnlock, bannerResource, uid,
+                    settingsActivityName);
         }
 
         @Override
@@ -466,5 +507,6 @@ public final class ApduServiceInfo implements Parcelable {
                 pw.println("            AID: " + aid);
             }
         }
+        pw.println("    Settings Activity: " + mSettingsActivityName);
     }
 }

@@ -305,12 +305,6 @@ class ScreenRotationAnimation {
         return mSurfaceControl != null;
     }
 
-    static int deltaRotation(int oldRotation, int newRotation) {
-        int delta = newRotation - oldRotation;
-        if (delta < 0) delta += 4;
-        return delta;
-    }
-
     private void setSnapshotTransformInTransaction(Matrix matrix, float alpha) {
         if (mSurfaceControl != null) {
             matrix.getValues(mTmpFloats);
@@ -366,7 +360,7 @@ class ScreenRotationAnimation {
         // Compute the transformation matrix that must be applied
         // to the snapshot to make it stay in the same original position
         // with the current screen rotation.
-        int delta = deltaRotation(rotation, mSnapshotRotation);
+        int delta = DisplayContent.deltaRotation(rotation, Surface.ROTATION_0);
         createRotationMatrix(delta, mWidth, mHeight, mSnapshotInitialMatrix);
 
         if (DEBUG_STATE) Slog.v(TAG, "**** ROTATION: " + delta);
@@ -405,7 +399,7 @@ class ScreenRotationAnimation {
         boolean firstStart = false;
 
         // Figure out how the screen has moved from the original rotation.
-        int delta = deltaRotation(mCurRotation, mOriginalRotation);
+        int delta = DisplayContent.deltaRotation(mCurRotation, mOriginalRotation);
 
         if (TWO_PHASE_ANIMATION && mFinishExitAnimation == null
                 && (!dismissing || delta != Surface.ROTATION_0)) {

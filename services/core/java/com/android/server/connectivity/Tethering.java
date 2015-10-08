@@ -40,9 +40,7 @@ import android.os.Binder;
 import android.os.INetworkManagementService;
 import android.os.Looper;
 import android.os.Message;
-import android.os.RemoteException;
 import android.os.UserHandle;
-import android.provider.Settings;
 import android.telephony.TelephonyManager;
 import android.util.Log;
 
@@ -50,6 +48,7 @@ import com.android.internal.telephony.IccCardConstants;
 import com.android.internal.telephony.Phone;
 import com.android.internal.telephony.PhoneConstants;
 import com.android.internal.telephony.TelephonyIntents;
+import com.android.internal.util.IndentingPrintWriter;
 import com.android.internal.util.IState;
 import com.android.internal.util.State;
 import com.android.internal.util.StateMachine;
@@ -131,7 +130,8 @@ public class Tethering extends BaseNetworkObserver {
 
     private StateMachine mTetherMasterSM;
 
-    private Notification mTetheredNotification;
+    private Notification.Builder mTetheredNotificationBuilder;
+    private int mLastNotificationId;
 
     private boolean mRndisEnabled;       // track the RNDIS function enabled state
     private boolean mUsbTetherRequested; // true if USB tethering should be started
@@ -451,12 +451,13 @@ public class Tethering extends BaseNetworkObserver {
             return;
         }
 
-        if (mTetheredNotification != null) {
-            if (mTetheredNotification.icon == icon) {
+        if (mLastNotificationId != 0) {
+            if (mLastNotificationId == icon) {
                 return;
             }
-            notificationManager.cancelAsUser(null, mTetheredNotification.icon,
+            notificationManager.cancelAsUser(null, mLastNotificationId,
                     UserHandle.ALL);
+            mLastNotificationId = 0;
         }
 
         Intent intent = new Intent();
@@ -471,31 +472,32 @@ public class Tethering extends BaseNetworkObserver {
         CharSequence message = r.getText(com.android.internal.R.string.
                 tethered_notification_message);
 
-        if (mTetheredNotification == null) {
-            mTetheredNotification = new Notification();
-            mTetheredNotification.when = 0;
+        if (mTetheredNotificationBuilder == null) {
+            mTetheredNotificationBuilder = new Notification.Builder(mContext);
+            mTetheredNotificationBuilder.setWhen(0)
+                    .setOngoing(true)
+                    .setColor(mContext.getColor(
+                            com.android.internal.R.color.system_notification_accent_color))
+                    .setVisibility(Notification.VISIBILITY_PUBLIC)
+                    .setCategory(Notification.CATEGORY_STATUS);
         }
-        mTetheredNotification.icon = icon;
-        mTetheredNotification.defaults &= ~Notification.DEFAULT_SOUND;
-        mTetheredNotification.flags = Notification.FLAG_ONGOING_EVENT;
-        mTetheredNotification.tickerText = title;
-        mTetheredNotification.visibility = Notification.VISIBILITY_PUBLIC;
-        mTetheredNotification.color = mContext.getResources().getColor(
-                com.android.internal.R.color.system_notification_accent_color);
-        mTetheredNotification.setLatestEventInfo(mContext, title, message, pi);
-        mTetheredNotification.category = Notification.CATEGORY_STATUS;
+        mTetheredNotificationBuilder.setSmallIcon(icon)
+                .setContentTitle(title)
+                .setContentText(message)
+                .setContentIntent(pi);
+        mLastNotificationId = icon;
 
-        notificationManager.notifyAsUser(null, mTetheredNotification.icon,
-                mTetheredNotification, UserHandle.ALL);
+        notificationManager.notifyAsUser(null, mLastNotificationId,
+                mTetheredNotificationBuilder.build(), UserHandle.ALL);
     }
 
     private void clearTetheredNotification() {
         NotificationManager notificationManager =
             (NotificationManager)mContext.getSystemService(Context.NOTIFICATION_SERVICE);
-        if (notificationManager != null && mTetheredNotification != null) {
-            notificationManager.cancelAsUser(null, mTetheredNotification.icon,
+        if (notificationManager != null && mLastNotificationId != 0) {
+            notificationManager.cancelAsUser(null, mLastNotificationId,
                     UserHandle.ALL);
-            mTetheredNotification = null;
+            mLastNotificationId = 0;
         }
     }
 
@@ -610,12 +612,12 @@ public class Tethering extends BaseNetworkObserver {
                     tetherUsb(true);
                 } else {
                     mUsbTetherRequested = true;
-                    usbManager.setCurrentFunction(UsbManager.USB_FUNCTION_RNDIS, false);
+                    usbManager.setCurrentFunction(UsbManager.USB_FUNCTION_RNDIS);
                 }
             } else {
                 tetherUsb(false);
                 if (mRndisEnabled) {
-                    usbManager.setCurrentFunction(null, false);
+                    usbManager.setCurrentFunction(null);
                 }
                 mUsbTetherRequested = false;
             }
@@ -1686,7 +1688,9 @@ public class Tethering extends BaseNetworkObserver {
         }
     }
 
-    public void dump(FileDescriptor fd, PrintWriter pw, String[] args) {
+    public void dump(FileDescriptor fd, PrintWriter writer, String[] args) {
+        final IndentingPrintWriter pw = new IndentingPrintWriter(writer, "  ");
+
         if (mContext.checkCallingOrSelfPermission(
                 android.Manifest.permission.DUMP) != PackageManager.PERMISSION_GRANTED) {
             pw.println("Permission Denial: can't dump ConnectivityService.Tether " +
@@ -1695,19 +1699,23 @@ public class Tethering extends BaseNetworkObserver {
                     return;
         }
 
+        pw.println("Tethering:");
+        pw.increaseIndent();
+        pw.print("mUpstreamIfaceTypes:");
         synchronized (mPublicSync) {
-            pw.println("mUpstreamIfaceTypes: ");
             for (Integer netType : mUpstreamIfaceTypes) {
-                pw.println(" " + netType);
+                pw.print(" " + ConnectivityManager.getNetworkTypeName(netType));
             }
-
             pw.println();
+
             pw.println("Tether state:");
+            pw.increaseIndent();
             for (Object o : mIfaces.values()) {
-                pw.println(" " + o);
+                pw.println(o);
             }
+            pw.decreaseIndent();
         }
-        pw.println();
+        pw.decreaseIndent();
         return;
     }
 }

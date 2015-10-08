@@ -16,7 +16,9 @@
 
 package android.widget;
 
+import android.annotation.NonNull;
 import android.os.Build;
+import android.os.Build.VERSION_CODES;
 import android.os.Parcel;
 import android.os.Parcelable;
 import com.android.internal.R;
@@ -38,6 +40,7 @@ import android.view.View;
 import android.view.ViewConfiguration;
 import android.view.ViewDebug;
 import android.view.ViewGroup;
+import android.view.ViewHierarchyEncoder;
 import android.view.ViewParent;
 import android.view.accessibility.AccessibilityEvent;
 import android.view.accessibility.AccessibilityNodeInfo;
@@ -347,17 +350,24 @@ public class ScrollView extends FrameLayout {
 
         if (getChildCount() > 0) {
             final View child = getChildAt(0);
-            int height = getMeasuredHeight();
+            final int height = getMeasuredHeight();
             if (child.getMeasuredHeight() < height) {
+                final int widthPadding;
+                final int heightPadding;
                 final FrameLayout.LayoutParams lp = (LayoutParams) child.getLayoutParams();
+                final int targetSdkVersion = getContext().getApplicationInfo().targetSdkVersion;
+                if (targetSdkVersion >= VERSION_CODES.M) {
+                    widthPadding = mPaddingLeft + mPaddingRight + lp.leftMargin + lp.rightMargin;
+                    heightPadding = mPaddingTop + mPaddingBottom + lp.topMargin + lp.bottomMargin;
+                } else {
+                    widthPadding = mPaddingLeft + mPaddingRight;
+                    heightPadding = mPaddingTop + mPaddingBottom;
+                }
 
-                int childWidthMeasureSpec = getChildMeasureSpec(widthMeasureSpec,
-                        mPaddingLeft + mPaddingRight, lp.width);
-                height -= mPaddingTop;
-                height -= mPaddingBottom;
-                int childHeightMeasureSpec =
-                        MeasureSpec.makeMeasureSpec(height, MeasureSpec.EXACTLY);
-
+                final int childWidthMeasureSpec = getChildMeasureSpec(
+                        widthMeasureSpec, widthPadding, lp.width);
+                final int childHeightMeasureSpec = MeasureSpec.makeMeasureSpec(
+                        height - heightPadding, MeasureSpec.EXACTLY);
                 child.measure(childWidthMeasureSpec, childHeightMeasureSpec);
             }
         }
@@ -809,16 +819,18 @@ public class ScrollView extends FrameLayout {
         awakenScrollBars();
     }
 
+    /** @hide */
     @Override
-    public boolean performAccessibilityAction(int action, Bundle arguments) {
-        if (super.performAccessibilityAction(action, arguments)) {
+    public boolean performAccessibilityActionInternal(int action, Bundle arguments) {
+        if (super.performAccessibilityActionInternal(action, arguments)) {
             return true;
         }
         if (!isEnabled()) {
             return false;
         }
         switch (action) {
-            case AccessibilityNodeInfo.ACTION_SCROLL_FORWARD: {
+            case AccessibilityNodeInfo.ACTION_SCROLL_FORWARD:
+            case R.id.accessibilityActionScrollDown: {
                 final int viewportHeight = getHeight() - mPaddingBottom - mPaddingTop;
                 final int targetScrollY = Math.min(mScrollY + viewportHeight, getScrollRange());
                 if (targetScrollY != mScrollY) {
@@ -826,7 +838,8 @@ public class ScrollView extends FrameLayout {
                     return true;
                 }
             } return false;
-            case AccessibilityNodeInfo.ACTION_SCROLL_BACKWARD: {
+            case AccessibilityNodeInfo.ACTION_SCROLL_BACKWARD:
+            case R.id.accessibilityActionScrollUp: {
                 final int viewportHeight = getHeight() - mPaddingBottom - mPaddingTop;
                 final int targetScrollY = Math.max(mScrollY - viewportHeight, 0);
                 if (targetScrollY != mScrollY) {
@@ -839,27 +852,35 @@ public class ScrollView extends FrameLayout {
     }
 
     @Override
-    public void onInitializeAccessibilityNodeInfo(AccessibilityNodeInfo info) {
-        super.onInitializeAccessibilityNodeInfo(info);
-        info.setClassName(ScrollView.class.getName());
+    public CharSequence getAccessibilityClassName() {
+        return ScrollView.class.getName();
+    }
+
+    /** @hide */
+    @Override
+    public void onInitializeAccessibilityNodeInfoInternal(AccessibilityNodeInfo info) {
+        super.onInitializeAccessibilityNodeInfoInternal(info);
         if (isEnabled()) {
             final int scrollRange = getScrollRange();
             if (scrollRange > 0) {
                 info.setScrollable(true);
                 if (mScrollY > 0) {
-                    info.addAction(AccessibilityNodeInfo.ACTION_SCROLL_BACKWARD);
+                    info.addAction(
+                            AccessibilityNodeInfo.AccessibilityAction.ACTION_SCROLL_BACKWARD);
+                    info.addAction(AccessibilityNodeInfo.AccessibilityAction.ACTION_SCROLL_UP);
                 }
                 if (mScrollY < scrollRange) {
-                    info.addAction(AccessibilityNodeInfo.ACTION_SCROLL_FORWARD);
+                    info.addAction(AccessibilityNodeInfo.AccessibilityAction.ACTION_SCROLL_FORWARD);
+                    info.addAction(AccessibilityNodeInfo.AccessibilityAction.ACTION_SCROLL_DOWN);
                 }
             }
         }
     }
 
+    /** @hide */
     @Override
-    public void onInitializeAccessibilityEvent(AccessibilityEvent event) {
-        super.onInitializeAccessibilityEvent(event);
-        event.setClassName(ScrollView.class.getName());
+    public void onInitializeAccessibilityEventInternal(AccessibilityEvent event) {
+        super.onInitializeAccessibilityEventInternal(event);
         final boolean scrollable = getScrollRange() > 0;
         event.setScrollable(scrollable);
         event.setScrollX(mScrollX);
@@ -1232,7 +1253,8 @@ public class ScrollView extends FrameLayout {
     }
 
     @Override
-    protected void measureChild(View child, int parentWidthMeasureSpec, int parentHeightMeasureSpec) {
+    protected void measureChild(View child, int parentWidthMeasureSpec,
+            int parentHeightMeasureSpec) {
         ViewGroup.LayoutParams lp = child.getLayoutParams();
 
         int childWidthMeasureSpec;
@@ -1241,7 +1263,8 @@ public class ScrollView extends FrameLayout {
         childWidthMeasureSpec = getChildMeasureSpec(parentWidthMeasureSpec, mPaddingLeft
                 + mPaddingRight, lp.width);
 
-        childHeightMeasureSpec = MeasureSpec.makeMeasureSpec(0, MeasureSpec.UNSPECIFIED);
+        childHeightMeasureSpec = MeasureSpec.makeSafeMeasureSpec(
+                MeasureSpec.getSize(parentHeightMeasureSpec), MeasureSpec.UNSPECIFIED);
 
         child.measure(childWidthMeasureSpec, childHeightMeasureSpec);
     }
@@ -1254,8 +1277,8 @@ public class ScrollView extends FrameLayout {
         final int childWidthMeasureSpec = getChildMeasureSpec(parentWidthMeasureSpec,
                 mPaddingLeft + mPaddingRight + lp.leftMargin + lp.rightMargin
                         + widthUsed, lp.width);
-        final int childHeightMeasureSpec = MeasureSpec.makeMeasureSpec(
-                lp.topMargin + lp.bottomMargin, MeasureSpec.UNSPECIFIED);
+        final int childHeightMeasureSpec = MeasureSpec.makeSafeMeasureSpec(
+                MeasureSpec.getSize(parentHeightMeasureSpec), MeasureSpec.UNSPECIFIED);
 
         child.measure(childWidthMeasureSpec, childHeightMeasureSpec);
     }
@@ -1689,12 +1712,26 @@ public class ScrollView extends FrameLayout {
         super.draw(canvas);
         if (mEdgeGlowTop != null) {
             final int scrollY = mScrollY;
+            final boolean clipToPadding = getClipToPadding();
             if (!mEdgeGlowTop.isFinished()) {
                 final int restoreCount = canvas.save();
-                final int width = getWidth() - mPaddingLeft - mPaddingRight;
-
-                canvas.translate(mPaddingLeft, Math.min(0, scrollY));
-                mEdgeGlowTop.setSize(width, getHeight());
+                final int width;
+                final int height;
+                final float translateX;
+                final float translateY;
+                if (clipToPadding) {
+                    width = getWidth() - mPaddingLeft - mPaddingRight;
+                    height = getHeight() - mPaddingTop - mPaddingBottom;
+                    translateX = mPaddingLeft;
+                    translateY = mPaddingTop;
+                } else {
+                    width = getWidth();
+                    height = getHeight();
+                    translateX = 0;
+                    translateY = 0;
+                }
+                canvas.translate(translateX, Math.min(0, scrollY) + translateY);
+                mEdgeGlowTop.setSize(width, height);
                 if (mEdgeGlowTop.draw(canvas)) {
                     postInvalidateOnAnimation();
                 }
@@ -1702,11 +1739,23 @@ public class ScrollView extends FrameLayout {
             }
             if (!mEdgeGlowBottom.isFinished()) {
                 final int restoreCount = canvas.save();
-                final int width = getWidth() - mPaddingLeft - mPaddingRight;
-                final int height = getHeight();
-
-                canvas.translate(-width + mPaddingLeft,
-                        Math.max(getScrollRange(), scrollY) + height);
+                final int width;
+                final int height;
+                final float translateX;
+                final float translateY;
+                if (clipToPadding) {
+                    width = getWidth() - mPaddingLeft - mPaddingRight;
+                    height = getHeight() - mPaddingTop - mPaddingBottom;
+                    translateX = mPaddingLeft;
+                    translateY = mPaddingTop;
+                } else {
+                    width = getWidth();
+                    height = getHeight();
+                    translateX = 0;
+                    translateY = 0;
+                }
+                canvas.translate(-width + translateX,
+                            Math.max(getScrollRange(), scrollY) + height + translateY);
                 canvas.rotate(180, width, 0);
                 mEdgeGlowBottom.setSize(width, height);
                 if (mEdgeGlowBottom.draw(canvas)) {
@@ -1772,6 +1821,13 @@ public class ScrollView extends FrameLayout {
         SavedState ss = new SavedState(superState);
         ss.scrollPosition = mScrollY;
         return ss;
+    }
+
+    /** @hide */
+    @Override
+    protected void encodeProperties(@NonNull ViewHierarchyEncoder encoder) {
+        super.encodeProperties(encoder);
+        encoder.addProperty("fillViewport", mFillViewport);
     }
 
     static class SavedState extends BaseSavedState {

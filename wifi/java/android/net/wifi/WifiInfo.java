@@ -42,6 +42,14 @@ public class WifiInfo implements Parcelable {
     private static final EnumMap<SupplicantState, DetailedState> stateMap =
             new EnumMap<SupplicantState, DetailedState>(SupplicantState.class);
 
+    /**
+     * Default MAC address reported to a client that does not have the
+     * android.permission.LOCAL_MAC_ADDRESS permission.
+     *
+     * @hide
+     */
+    public static final String DEFAULT_MAC_ADDRESS = "02:00:00:00:00:00";
+
     static {
         stateMap.put(SupplicantState.DISCONNECTED, DetailedState.DISCONNECTED);
         stateMap.put(SupplicantState.INTERFACE_DISABLED, DetailedState.DISCONNECTED);
@@ -91,7 +99,9 @@ public class WifiInfo implements Parcelable {
     private int mFrequency;
 
     private InetAddress mIpAddress;
-    private String mMacAddress;
+    private String mMacAddress = DEFAULT_MAC_ADDRESS;
+
+    private boolean mEphemeral;
 
     /**
      * @hide
@@ -159,15 +169,24 @@ public class WifiInfo implements Parcelable {
             long txbad = stats.lostmpdu_be + stats.lostmpdu_bk
                     + stats.lostmpdu_vi + stats.lostmpdu_vo;
 
-            txBadRate = (txBadRate * 0.5)
-                + ((double) (txbad - txBad) * 0.5);
-            txSuccessRate = (txSuccessRate * 0.5)
-                + ((double) (txgood - txSuccess) * 0.5);
-            rxSuccessRate = (rxSuccessRate * 0.5)
-                + ((double) (rxgood - rxSuccess) * 0.5);
-            txRetriesRate = (txRetriesRate * 0.5)
-                + ((double) (txretries - txRetries) * 0.5);
-
+            if (txBad <= txbad
+                    && txSuccess <= txgood
+                    && rxSuccess <= rxgood
+                    && txRetries <= txretries) {
+                txBadRate = (txBadRate * 0.5)
+                        + ((double) (txbad - txBad) * 0.5);
+                txSuccessRate = (txSuccessRate * 0.5)
+                        + ((double) (txgood - txSuccess) * 0.5);
+                rxSuccessRate = (rxSuccessRate * 0.5)
+                        + ((double) (rxgood - rxSuccess) * 0.5);
+                txRetriesRate = (txRetriesRate * 0.5)
+                        + ((double) (txretries - txRetries) * 0.5);
+            } else {
+                txBadRate = 0;
+                txSuccessRate = 0;
+                rxSuccessRate = 0;
+                txRetriesRate = 0;
+            }
             txBad = txbad;
             txSuccess = txgood;
             rxSuccess = rxgood;
@@ -196,11 +215,15 @@ public class WifiInfo implements Parcelable {
         txRetries = 0;
         txBadRate = 0;
         txRetriesRate = 0;
-
-        txSuccessRate = (txSuccessRate * 0.5)
-                + ((double) (txPackets - txSuccess) * 0.5);
-        rxSuccessRate = (rxSuccessRate * 0.5)
-                + ((double) (rxPackets - rxSuccess) * 0.5);
+        if (txSuccess <= txPackets && rxSuccess <= rxPackets) {
+            txSuccessRate = (txSuccessRate * 0.5)
+                    + ((double) (txPackets - txSuccess) * 0.5);
+            rxSuccessRate = (rxSuccessRate * 0.5)
+                    + ((double) (rxPackets - rxSuccess) * 0.5);
+        } else {
+            txBadRate = 0;
+            txRetriesRate = 0;
+        }
         txSuccess = txPackets;
         rxSuccess = rxPackets;
     }
@@ -232,6 +255,7 @@ public class WifiInfo implements Parcelable {
         setLinkSpeed(-1);
         setFrequency(-1);
         setMeteredHint(false);
+        setEphemeral(false);
         txBad = 0;
         txSuccess = 0;
         rxSuccess = 0;
@@ -262,6 +286,7 @@ public class WifiInfo implements Parcelable {
             mIpAddress = source.mIpAddress;
             mMacAddress = source.mMacAddress;
             mMeteredHint = source.mMeteredHint;
+            mEphemeral = source.mEphemeral;
             txBad = source.txBad;
             txRetries = source.txRetries;
             txSuccess = source.txSuccess;
@@ -409,6 +434,16 @@ public class WifiInfo implements Parcelable {
         return mMeteredHint;
     }
 
+    /** {@hide} */
+    public void setEphemeral(boolean ephemeral) {
+        mEphemeral = ephemeral;
+    }
+
+    /** {@hide} */
+    public boolean isEphemeral() {
+        return mEphemeral;
+    }
+
     /** @hide */
     public void setNetworkId(int id) {
         mNetworkId = id;
@@ -546,6 +581,7 @@ public class WifiInfo implements Parcelable {
         dest.writeString(mBSSID);
         dest.writeString(mMacAddress);
         dest.writeInt(mMeteredHint ? 1 : 0);
+        dest.writeInt(mEphemeral ? 1 : 0);
         dest.writeInt(score);
         dest.writeDouble(txSuccessRate);
         dest.writeDouble(txRetriesRate);
@@ -576,6 +612,7 @@ public class WifiInfo implements Parcelable {
                 info.mBSSID = in.readString();
                 info.mMacAddress = in.readString();
                 info.mMeteredHint = in.readInt() != 0;
+                info.mEphemeral = in.readInt() != 0;
                 info.score = in.readInt();
                 info.txSuccessRate = in.readDouble();
                 info.txRetriesRate = in.readDouble();

@@ -215,14 +215,15 @@ int doList(Bundle* bundle)
             goto bail;
         }
 
+#ifdef HAVE_ANDROID_OS
+        static const bool kHaveAndroidOs = true;
+#else
+        static const bool kHaveAndroidOs = false;
+#endif
         const ResTable& res = assets.getResources(false);
-        if (&res == NULL) {
-            printf("\nNo resource table found.\n");
-        } else {
-#ifndef HAVE_ANDROID_OS
+        if (!kHaveAndroidOs) {
             printf("\nResource table:\n");
             res.print(false);
-#endif
         }
 
         Asset* manifestAsset = assets.openNonAsset("AndroidManifest.xml",
@@ -620,10 +621,7 @@ int doDump(Bundle* bundle)
     assets.setConfiguration(config);
 
     const ResTable& res = assets.getResources(false);
-    if (&res == NULL) {
-        fprintf(stderr, "ERROR: dump failed because no resource table was found\n");
-        return 1;
-    } else if (res.getError() != NO_ERROR) {
+    if (res.getError() != NO_ERROR) {
         fprintf(stderr, "ERROR: dump failed because the resource table is invalid/corrupt.\n");
         return 1;
     }

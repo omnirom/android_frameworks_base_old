@@ -30,7 +30,7 @@
 #include "Utils.h"
 #include "JNIHelp.h"
 
-#include <android_runtime/AndroidRuntime.h>
+#include "core_jni_helpers.h"
 #include "android_util_Binder.h"
 #include "android_nio_utils.h"
 #include "CreateJavaOutputStreamAdaptor.h"
@@ -39,12 +39,6 @@
 #include <jni.h>
 #include <androidfw/Asset.h>
 #include <sys/stat.h>
-
-#if 0
-    #define TRACE_BITMAP(code)  code
-#else
-    #define TRACE_BITMAP(code)
-#endif
 
 using namespace android;
 
@@ -75,10 +69,13 @@ private:
     int fHeight;
 };
 
+// Takes ownership of the SkStreamRewindable. For consistency, deletes stream even
+// when returning null.
 static jobject createBitmapRegionDecoder(JNIEnv* env, SkStreamRewindable* stream) {
     SkImageDecoder* decoder = SkImageDecoder::Factory(stream);
     int width, height;
     if (NULL == decoder) {
+        SkDELETE(stream);
         doThrowIOE(env, "Image format not supported");
         return nullObjectReturn("SkImageDecoder::Factory returned null");
     }
@@ -87,6 +84,7 @@ static jobject createBitmapRegionDecoder(JNIEnv* env, SkStreamRewindable* stream
     decoder->setAllocator(javaAllocator);
     javaAllocator->unref();
 
+    // This call passes ownership of stream to the decoder, or deletes on failure.
     if (!decoder->buildTileIndex(stream, &width, &height)) {
         char msg[100];
         snprintf(msg, sizeof(msg), "Image failed to decode using %s decoder",
@@ -109,8 +107,8 @@ static jobject nativeNewInstanceFromByteArray(JNIEnv* env, jobject, jbyteArray b
     AutoJavaByteArray ar(env, byteArray);
     SkMemoryStream* stream = new SkMemoryStream(ar.ptr() + offset, length, true);
 
+    // the decoder owns the stream.
     jobject brd = createBitmapRegionDecoder(env, stream);
-    SkSafeUnref(stream); // the decoder now holds a reference
     return brd;
 }
 
@@ -129,8 +127,8 @@ static jobject nativeNewInstanceFromFileDescriptor(JNIEnv* env, jobject clazz,
     SkAutoTUnref<SkData> data(SkData::NewFromFD(descriptor));
     SkMemoryStream* stream = new SkMemoryStream(data);
 
+    // the decoder owns the stream.
     jobject brd = createBitmapRegionDecoder(env, stream);
-    SkSafeUnref(stream); // the decoder now holds a reference
     return brd;
 }
 
@@ -143,8 +141,8 @@ static jobject nativeNewInstanceFromStream(JNIEnv* env, jobject clazz,
     SkStreamRewindable* stream = CopyJavaInputStream(env, is, storage);
 
     if (stream) {
+        // the decoder owns the stream.
         brd = createBitmapRegionDecoder(env, stream);
-        stream->unref(); // the decoder now holds a reference
     }
     return brd;
 }
@@ -153,13 +151,13 @@ static jobject nativeNewInstanceFromAsset(JNIEnv* env, jobject clazz,
                                  jlong native_asset, // Asset
                                  jboolean isShareable) {
     Asset* asset = reinterpret_cast<Asset*>(native_asset);
-    SkAutoTUnref<SkMemoryStream> stream(CopyAssetToStream(asset));
-    if (NULL == stream.get()) {
+    SkMemoryStream* stream = CopyAssetToStream(asset);
+    if (NULL == stream) {
         return NULL;
     }
 
-    jobject brd = createBitmapRegionDecoder(env, stream.get());
-    // The decoder now holds a reference to stream.
+    // the decoder owns the stream.
+    jobject brd = createBitmapRegionDecoder(env, stream);
     return brd;
 }
 
@@ -214,26 +212,21 @@ static jobject nativeDecodeRegion(JNIEnv* env, jobject, jlong brdHandle,
     region.fTop = start_y;
     region.fRight = start_x + width;
     region.fBottom = start_y + height;
-    SkBitmap* bitmap = NULL;
-    SkAutoTDelete<SkBitmap> adb;
+    SkBitmap bitmap;
 
     if (tileBitmap != NULL) {
         // Re-use bitmap.
-        bitmap = GraphicsJNI::getNativeBitmap(env, tileBitmap);
-    }
-    if (bitmap == NULL) {
-        bitmap = new SkBitmap;
-        adb.reset(bitmap);
+        GraphicsJNI::getSkBitmap(env, tileBitmap, &bitmap);
     }
 
-    if (!brd->decodeRegion(bitmap, region, prefColorType, sampleSize)) {
+    if (!brd->decodeRegion(&bitmap, region, prefColorType, sampleSize)) {
         return nullObjectReturn("decoder->decodeRegion returned false");
     }
 
     // update options (if any)
     if (NULL != options) {
-        env->SetIntField(options, gOptions_widthFieldID, bitmap->width());
-        env->SetIntField(options, gOptions_heightFieldID, bitmap->height());
+        env->SetIntField(options, gOptions_widthFieldID, bitmap.width());
+        env->SetIntField(options, gOptions_heightFieldID, bitmap.height());
         // TODO: set the mimeType field with the data from the codec.
         // but how to reuse a set of strings, rather than allocating new one
         // each time?
@@ -242,19 +235,16 @@ static jobject nativeDecodeRegion(JNIEnv* env, jobject, jlong brdHandle,
     }
 
     if (tileBitmap != NULL) {
-        bitmap->notifyPixelsChanged();
+        bitmap.notifyPixelsChanged();
         return tileBitmap;
     }
 
-    // detach bitmap from its autodeleter, since we want to own it now
-    adb.detach();
-
     JavaPixelAllocator* allocator = (JavaPixelAllocator*) decoder->getAllocator();
-    jbyteArray buff = allocator->getStorageObjAndReset();
 
     int bitmapCreateFlags = 0;
     if (!requireUnpremultiplied) bitmapCreateFlags |= GraphicsJNI::kBitmapCreateFlag_Premultiplied;
-    return GraphicsJNI::createBitmap(env, bitmap, buff, bitmapCreateFlags, NULL, NULL, -1);
+    return GraphicsJNI::createBitmap(env, allocator->getStorageObjAndReset(),
+            bitmapCreateFlags);
 }
 
 static jint nativeGetHeight(JNIEnv* env, jobject, jlong brdHandle) {
@@ -273,8 +263,6 @@ static void nativeClean(JNIEnv* env, jobject, jlong brdHandle) {
 }
 
 ///////////////////////////////////////////////////////////////////////////////
-
-#include <android_runtime/AndroidRuntime.h>
 
 static JNINativeMethod gBitmapRegionDecoderMethods[] = {
     {   "nativeDecodeRegion",
@@ -308,10 +296,8 @@ static JNINativeMethod gBitmapRegionDecoderMethods[] = {
     },
 };
 
-#define kClassPathName  "android/graphics/BitmapRegionDecoder"
-
 int register_android_graphics_BitmapRegionDecoder(JNIEnv* env)
 {
-    return android::AndroidRuntime::registerNativeMethods(env, kClassPathName,
-            gBitmapRegionDecoderMethods, SK_ARRAY_COUNT(gBitmapRegionDecoderMethods));
+    return android::RegisterMethodsOrDie(env, "android/graphics/BitmapRegionDecoder",
+            gBitmapRegionDecoderMethods, NELEM(gBitmapRegionDecoderMethods));
 }

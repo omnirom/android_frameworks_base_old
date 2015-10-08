@@ -17,8 +17,8 @@
 package com.android.systemui.qs.tiles;
 
 import android.app.ActivityManager;
-import android.os.SystemClock;
 
+import com.android.internal.logging.MetricsLogger;
 import com.android.systemui.R;
 import com.android.systemui.qs.QSTile;
 import com.android.systemui.statusbar.policy.FlashlightController;
@@ -27,16 +27,11 @@ import com.android.systemui.statusbar.policy.FlashlightController;
 public class FlashlightTile extends QSTile<QSTile.BooleanState> implements
         FlashlightController.FlashlightListener {
 
-    /** Grace period for which we consider the flashlight
-     * still available because it was recently on. */
-    private static final long RECENTLY_ON_DURATION_MILLIS = 500;
-
     private final AnimationIcon mEnable
             = new AnimationIcon(R.drawable.ic_signal_flashlight_enable_animation);
     private final AnimationIcon mDisable
             = new AnimationIcon(R.drawable.ic_signal_flashlight_disable_animation);
     private final FlashlightController mFlashlightController;
-    private long mWasLastOn;
 
     public FlashlightTile(Host host) {
         super(host);
@@ -68,34 +63,25 @@ public class FlashlightTile extends QSTile<QSTile.BooleanState> implements
         if (ActivityManager.isUserAMonkey()) {
             return;
         }
+        MetricsLogger.action(mContext, getMetricsCategory(), !mState.value);
         boolean newState = !mState.value;
-        mFlashlightController.setFlashlight(newState);
         refreshState(newState ? UserBoolean.USER_TRUE : UserBoolean.USER_FALSE);
+        mFlashlightController.setFlashlight(newState);
     }
 
     @Override
     protected void handleUpdateState(BooleanState state, Object arg) {
-        if (state.value) {
-            mWasLastOn = SystemClock.uptimeMillis();
-        }
-
-        if (arg instanceof UserBoolean) {
-            state.value = ((UserBoolean) arg).value;
-        }
-
-        if (!state.value && mWasLastOn != 0) {
-            if (SystemClock.uptimeMillis() > mWasLastOn + RECENTLY_ON_DURATION_MILLIS) {
-                mWasLastOn = 0;
-            } else {
-                mHandler.removeCallbacks(mRecentlyOnTimeout);
-                mHandler.postAtTime(mRecentlyOnTimeout, mWasLastOn + RECENTLY_ON_DURATION_MILLIS);
-            }
-        }
-
-        // Always show the tile when the flashlight is or was recently on. This is needed because
-        // the camera is not available while it is being used for the flashlight.
-        state.visible = mWasLastOn != 0 || mFlashlightController.isAvailable();
+        state.visible = mFlashlightController.isAvailable();
         state.label = mHost.getContext().getString(R.string.quick_settings_flashlight_label);
+        if (arg instanceof UserBoolean) {
+            boolean value = ((UserBoolean) arg).value;
+            if (value == state.value) {
+                return;
+            }
+            state.value = value;
+        } else {
+            state.value = mFlashlightController.isEnabled();
+        }
         final AnimationIcon icon = state.value ? mEnable : mDisable;
         icon.setAllowAnimation(arg instanceof UserBoolean && ((UserBoolean) arg).userInitiated);
         state.icon = icon;
@@ -103,6 +89,11 @@ public class FlashlightTile extends QSTile<QSTile.BooleanState> implements
                 ? R.string.accessibility_quick_settings_flashlight_on
                 : R.string.accessibility_quick_settings_flashlight_off;
         state.contentDescription = mContext.getString(onOrOffId);
+    }
+
+    @Override
+    public int getMetricsCategory() {
+        return MetricsLogger.QS_FLASHLIGHT;
     }
 
     @Override
@@ -115,8 +106,8 @@ public class FlashlightTile extends QSTile<QSTile.BooleanState> implements
     }
 
     @Override
-    public void onFlashlightOff() {
-        refreshState(UserBoolean.BACKGROUND_FALSE);
+    public void onFlashlightChanged(boolean enabled) {
+        refreshState(enabled ? UserBoolean.BACKGROUND_TRUE : UserBoolean.BACKGROUND_FALSE);
     }
 
     @Override
@@ -128,11 +119,4 @@ public class FlashlightTile extends QSTile<QSTile.BooleanState> implements
     public void onFlashlightAvailabilityChanged(boolean available) {
         refreshState();
     }
-
-    private Runnable mRecentlyOnTimeout = new Runnable() {
-        @Override
-        public void run() {
-            refreshState();
-        }
-    };
 }

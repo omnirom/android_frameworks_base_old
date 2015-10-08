@@ -16,17 +16,23 @@
 
 package com.android.systemui.statusbar.phone;
 
+import android.app.ActivityManagerNative;
 import android.app.AlarmManager;
+import android.app.AlarmManager.AlarmClockInfo;
+import android.app.IUserSwitchObserver;
 import android.app.StatusBarManager;
-import android.bluetooth.BluetoothAdapter;
 import android.content.BroadcastReceiver;
+import android.content.ContentResolver;
 import android.content.Context;
 import android.content.Intent;
 import android.content.IntentFilter;
-import android.content.ContentResolver;
+import android.content.pm.UserInfo;
 import android.media.AudioManager;
 import android.os.Handler;
+import android.os.IRemoteCallback;
+import android.os.RemoteException;
 import android.os.UserHandle;
+import android.os.UserManager;
 import android.provider.Settings;
 import android.provider.Settings.Global;
 import android.telecom.TelecomManager;
@@ -35,36 +41,39 @@ import android.util.Log;
 import com.android.internal.telephony.IccCardConstants;
 import com.android.internal.telephony.TelephonyIntents;
 import com.android.systemui.R;
+import com.android.systemui.qs.tiles.DndTile;
+import com.android.systemui.statusbar.policy.BluetoothController;
+import com.android.systemui.statusbar.policy.BluetoothController.Callback;
 import com.android.systemui.statusbar.policy.CastController;
 import com.android.systemui.statusbar.policy.CastController.CastDevice;
 import com.android.systemui.statusbar.policy.HotspotController;
+import com.android.systemui.statusbar.policy.UserInfoController;
 
 /**
  * This class contains all of the policy about which icons are installed in the status
  * bar at boot time.  It goes through the normal API for icons, even though it probably
  * strictly doesn't need to.
  */
-public class PhoneStatusBarPolicy {
+public class PhoneStatusBarPolicy implements Callback {
     private static final String TAG = "PhoneStatusBarPolicy";
     private static final boolean DEBUG = Log.isLoggable(TAG, Log.DEBUG);
 
-    private static final boolean SHOW_SYNC_ICON = false;
-
-    private static final String SLOT_SYNC_ACTIVE = "sync_active";
     private static final String SLOT_CAST = "cast";
     private static final String SLOT_HOTSPOT = "hotspot";
     private static final String SLOT_BLUETOOTH = "bluetooth";
     private static final String SLOT_TTY = "tty";
     private static final String SLOT_ZEN = "zen";
     private static final String SLOT_VOLUME = "volume";
-    private static final String SLOT_CDMA_ERI = "cdma_eri";
     private static final String SLOT_ALARM_CLOCK = "alarm_clock";
+    private static final String SLOT_MANAGED_PROFILE = "managed_profile";
 
     private final Context mContext;
     private final StatusBarManager mService;
     private final Handler mHandler = new Handler();
     private final CastController mCast;
     private final HotspotController mHotspot;
+    private final AlarmManager mAlarmManager;
+    private final UserInfoController mUserInfoController;
 
     // Assume it's all good unless we hear otherwise.  We don't always seem
     // to get broadcasts that it *is* there.
@@ -72,11 +81,15 @@ public class PhoneStatusBarPolicy {
 
     private boolean mZenVisible;
     private boolean mVolumeVisible;
+    private boolean mCurrentUserSetup;
 
     private int mZen;
 
-    private boolean mBluetoothEnabled = false;
+    private boolean mManagedProfileFocused = false;
+    private boolean mManagedProfileIconVisible = true;
 
+    private boolean mKeyguardVisible = true;
+    private BluetoothController mBluetooth;
 
     private BroadcastReceiver mIntentReceiver = new BroadcastReceiver() {
         @Override
@@ -84,13 +97,6 @@ public class PhoneStatusBarPolicy {
             String action = intent.getAction();
             if (action.equals(AlarmManager.ACTION_NEXT_ALARM_CLOCK_CHANGED)) {
                 updateAlarm();
-            }
-            else if (action.equals(Intent.ACTION_SYNC_STATE_CHANGED)) {
-                updateSyncState(intent);
-            }
-            else if (action.equals(BluetoothAdapter.ACTION_STATE_CHANGED) ||
-                    action.equals(BluetoothAdapter.ACTION_CONNECTION_STATE_CHANGED)) {
-                updateBluetooth();
             }
             else if (action.equals(AudioManager.RINGER_MODE_CHANGED_ACTION) ||
                     action.equals(AudioManager.INTERNAL_RINGER_MODE_CHANGED_ACTION)) {
@@ -102,38 +108,39 @@ public class PhoneStatusBarPolicy {
             else if (action.equals(TelecomManager.ACTION_CURRENT_TTY_MODE_CHANGED)) {
                 updateTTY(intent);
             }
-            else if (action.equals(Intent.ACTION_USER_SWITCHED)) {
-                updateAlarm();
-            }
         }
     };
 
-    public PhoneStatusBarPolicy(Context context, CastController cast, HotspotController hotspot) {
+    public PhoneStatusBarPolicy(Context context, CastController cast, HotspotController hotspot,
+            UserInfoController userInfoController, BluetoothController bluetooth) {
         mContext = context;
         mCast = cast;
         mHotspot = hotspot;
-        mService = (StatusBarManager)context.getSystemService(Context.STATUS_BAR_SERVICE);
+        mBluetooth = bluetooth;
+        mBluetooth.addStateChangedCallback(this);
+        mService = (StatusBarManager) context.getSystemService(Context.STATUS_BAR_SERVICE);
+        mAlarmManager = (AlarmManager) context.getSystemService(Context.ALARM_SERVICE);
+        mUserInfoController = userInfoController;
 
         // listen for broadcasts
         IntentFilter filter = new IntentFilter();
         filter.addAction(AlarmManager.ACTION_NEXT_ALARM_CLOCK_CHANGED);
-        filter.addAction(Intent.ACTION_SYNC_STATE_CHANGED);
         filter.addAction(AudioManager.RINGER_MODE_CHANGED_ACTION);
         filter.addAction(AudioManager.INTERNAL_RINGER_MODE_CHANGED_ACTION);
-        filter.addAction(BluetoothAdapter.ACTION_STATE_CHANGED);
-        filter.addAction(BluetoothAdapter.ACTION_CONNECTION_STATE_CHANGED);
         filter.addAction(TelephonyIntents.ACTION_SIM_STATE_CHANGED);
         filter.addAction(TelecomManager.ACTION_CURRENT_TTY_MODE_CHANGED);
-        filter.addAction(Intent.ACTION_USER_SWITCHED);
         mContext.registerReceiver(mIntentReceiver, filter, null, mHandler);
+
+        // listen for user / profile change.
+        try {
+            ActivityManagerNative.getDefault().registerUserSwitchObserver(mUserSwitchListener);
+        } catch (RemoteException e) {
+            // Ignore
+        }
 
         // TTY status
         mService.setIcon(SLOT_TTY,  R.drawable.stat_sys_tty_mode, 0, null);
         mService.setIconVisibility(SLOT_TTY, false);
-
-        // Cdma Roaming Indicator, ERI
-        mService.setIcon(SLOT_CDMA_ERI, R.drawable.stat_sys_roaming_cdma_0, 0, null);
-        mService.setIconVisibility(SLOT_CDMA_ERI, false);
 
         // bluetooth status
         updateBluetooth();
@@ -141,11 +148,6 @@ public class PhoneStatusBarPolicy {
         // Alarm clock
         mService.setIcon(SLOT_ALARM_CLOCK, R.drawable.stat_sys_alarm, 0, null);
         mService.setIconVisibility(SLOT_ALARM_CLOCK, false);
-
-        // Sync state
-        mService.setIcon(SLOT_SYNC_ACTIVE, R.drawable.stat_sys_sync, 0, null);
-        mService.setIconVisibility(SLOT_SYNC_ACTIVE, false);
-        // "sync_failing" is obsolete: b/1297963
 
         // zen
         mService.setIcon(SLOT_ZEN, R.drawable.stat_sys_zen_important, 0, null);
@@ -162,9 +164,15 @@ public class PhoneStatusBarPolicy {
         mCast.addCallback(mCastCallback);
 
         // hotspot
-        mService.setIcon(SLOT_HOTSPOT, R.drawable.stat_sys_hotspot, 0, null);
+        mService.setIcon(SLOT_HOTSPOT, R.drawable.stat_sys_hotspot, 0,
+                mContext.getString(R.string.accessibility_status_bar_hotspot));
         mService.setIconVisibility(SLOT_HOTSPOT, mHotspot.isHotspotEnabled());
         mHotspot.addCallback(mHotspotCallback);
+
+        // managed profile
+        mService.setIcon(SLOT_MANAGED_PROFILE, R.drawable.stat_sys_managed_profile_status, 0,
+                mContext.getString(R.string.accessibility_managed_profile));
+        mService.setIconVisibility(SLOT_MANAGED_PROFILE, false);
     }
 
     public void setZenMode(int zen) {
@@ -173,18 +181,12 @@ public class PhoneStatusBarPolicy {
     }
 
     private void updateAlarm() {
-        AlarmManager alarmManager = (AlarmManager) mContext.getSystemService(Context.ALARM_SERVICE);
-        boolean alarmSet = alarmManager.getNextAlarmClock(UserHandle.USER_CURRENT) != null;
-        boolean alarmVisible = Settings.System.getIntForUser(mContext.getContentResolver(),
-                Settings.System.STATUSBAR_SHOW_ALARM_ICON, 1, UserHandle.USER_CURRENT) == 1;
-        if (DEBUG) Log.v(TAG, "updateAlarm " + alarmSet + " "  + alarmVisible);
-        mService.setIconVisibility(SLOT_ALARM_CLOCK, alarmVisible && alarmSet);
-    }
-
-    private final void updateSyncState(Intent intent) {
-        if (!SHOW_SYNC_ICON) return;
-        boolean isActive = intent.getBooleanExtra("active", false);
-        mService.setIconVisibility(SLOT_SYNC_ACTIVE, isActive);
+        final AlarmClockInfo alarm = mAlarmManager.getNextAlarmClock(UserHandle.USER_CURRENT);
+        final boolean hasAlarm = alarm != null && alarm.getTriggerTime() > 0;
+        final boolean zenNone = mZen == Global.ZEN_MODE_NO_INTERRUPTIONS;
+        mService.setIcon(SLOT_ALARM_CLOCK, zenNone ? R.drawable.stat_sys_alarm_dim
+                : R.drawable.stat_sys_alarm, 0, null);
+        mService.setIconVisibility(SLOT_ALARM_CLOCK, mCurrentUserSetup && hasAlarm);
     }
 
     private final void updateSimState(Intent intent) {
@@ -227,18 +229,29 @@ public class PhoneStatusBarPolicy {
         int volumeIconId = 0;
         String volumeDescription = null;
 
-        if (mZen == Global.ZEN_MODE_NO_INTERRUPTIONS) {
+        if (DndTile.isVisible(mContext) || DndTile.isCombinedIcon(mContext)) {
+            zenVisible = mZen != Global.ZEN_MODE_OFF;
+            zenIconId = mZen == Global.ZEN_MODE_NO_INTERRUPTIONS
+                    ? R.drawable.stat_sys_dnd_total_silence : R.drawable.stat_sys_dnd;
+            zenDescription = mContext.getString(R.string.quick_settings_dnd_label);
+        } else if (mZen == Global.ZEN_MODE_NO_INTERRUPTIONS) {
             zenVisible = true;
             zenModeNoInterruptions = true;
             zenIconId = R.drawable.stat_sys_zen_none;
-            zenDescription = mContext.getString(R.string.zen_no_interruptions);
+            zenDescription = mContext.getString(R.string.interruption_level_none);
         } else if (mZen == Global.ZEN_MODE_IMPORTANT_INTERRUPTIONS) {
             zenVisible = true;
             zenIconId = R.drawable.stat_sys_zen_important;
-            zenDescription = mContext.getString(R.string.zen_important_interruptions);
+            zenDescription = mContext.getString(R.string.interruption_level_priority);
         }
 
-        if (audioManager.getRingerModeInternal() == AudioManager.RINGER_MODE_VIBRATE) {
+        if (DndTile.isVisible(mContext) && !DndTile.isCombinedIcon(mContext)
+                && audioManager.getRingerModeInternal() == AudioManager.RINGER_MODE_SILENT) {
+            volumeVisible = true;
+            volumeIconId = R.drawable.stat_sys_ringer_silent;
+            volumeDescription = mContext.getString(R.string.accessibility_ringer_silent);
+        } else if (mZen != Global.ZEN_MODE_NO_INTERRUPTIONS && mZen != Global.ZEN_MODE_ALARMS &&
+                audioManager.getRingerModeInternal() == AudioManager.RINGER_MODE_VIBRATE) {
             volumeVisible = true;
             volumeIconId = R.drawable.stat_sys_ringer_vibrate;
             volumeDescription = mContext.getString(R.string.accessibility_ringer_vibrate);
@@ -269,25 +282,34 @@ public class PhoneStatusBarPolicy {
             mService.setIconVisibility(SLOT_VOLUME, volumeVisible);
             mVolumeVisible = volumeVisible;
         }
+        updateAlarm();
+    }
+
+    @Override
+    public void onBluetoothDevicesChanged() {
+        updateBluetooth();
+    }
+
+    @Override
+    public void onBluetoothStateChange(boolean enabled) {
+        updateBluetooth();
     }
 
     private final void updateBluetooth() {
-        BluetoothAdapter adapter = BluetoothAdapter.getDefaultAdapter();
         int iconId = R.drawable.stat_sys_data_bluetooth;
         String contentDescription =
-                mContext.getString(R.string.accessibility_bluetooth_disconnected);
-        if (adapter != null) {
-            mBluetoothEnabled = (adapter.getState() == BluetoothAdapter.STATE_ON);
-            if (adapter.getConnectionState() == BluetoothAdapter.STATE_CONNECTED) {
+                mContext.getString(R.string.accessibility_quick_settings_bluetooth_on);
+        boolean bluetoothEnabled = false;
+        if (mBluetooth != null) {
+            bluetoothEnabled = mBluetooth.isBluetoothEnabled();
+            if (mBluetooth.isBluetoothConnected()) {
                 iconId = R.drawable.stat_sys_data_bluetooth_connected;
                 contentDescription = mContext.getString(R.string.accessibility_bluetooth_connected);
             }
-        } else {
-            mBluetoothEnabled = false;
         }
 
         mService.setIcon(SLOT_BLUETOOTH, iconId, 0, contentDescription);
-        mService.setIconVisibility(SLOT_BLUETOOTH, mBluetoothEnabled);
+        mService.setIconVisibility(SLOT_BLUETOOTH, bluetoothEnabled);
     }
 
     private final void updateTTY(Intent intent) {
@@ -327,6 +349,54 @@ public class PhoneStatusBarPolicy {
         mService.setIconVisibility(SLOT_CAST, isCasting);
     }
 
+    private void profileChanged(int userId) {
+        UserManager userManager = (UserManager) mContext.getSystemService(Context.USER_SERVICE);
+        UserInfo user = null;
+        if (userId == UserHandle.USER_CURRENT) {
+            try {
+                user = ActivityManagerNative.getDefault().getCurrentUser();
+            } catch (RemoteException e) {
+                // Ignore
+            }
+        } else {
+            user = userManager.getUserInfo(userId);
+        }
+
+        mManagedProfileFocused = user != null && user.isManagedProfile();
+        if (DEBUG) Log.v(TAG, "profileChanged: mManagedProfileFocused: " + mManagedProfileFocused);
+        // Actually update the icon later when transition starts.
+    }
+
+    private void updateManagedProfile() {
+        if (DEBUG) Log.v(TAG, "updateManagedProfile: mManagedProfileFocused: "
+                + mManagedProfileFocused
+                + " mKeyguardVisible: " + mKeyguardVisible);
+        boolean showIcon = mManagedProfileFocused && !mKeyguardVisible;
+        if (mManagedProfileIconVisible != showIcon) {
+            mService.setIconVisibility(SLOT_MANAGED_PROFILE, showIcon);
+            mManagedProfileIconVisible = showIcon;
+        }
+    }
+
+    private final IUserSwitchObserver.Stub mUserSwitchListener =
+            new IUserSwitchObserver.Stub() {
+                @Override
+                public void onUserSwitching(int newUserId, IRemoteCallback reply) {
+                    mUserInfoController.reloadUserInfo();
+                }
+
+                @Override
+                public void onUserSwitchComplete(int newUserId) throws RemoteException {
+                    updateAlarm();
+                    profileChanged(newUserId);
+                }
+
+                @Override
+                public void onForegroundProfileSwitch(int newProfileId) {
+                    profileChanged(newProfileId);
+                }
+            };
+
     private final HotspotController.Callback mHotspotCallback = new HotspotController.Callback() {
         @Override
         public void onHotspotChanged(boolean enabled) {
@@ -340,4 +410,19 @@ public class PhoneStatusBarPolicy {
             updateCast();
         }
     };
+
+    public void appTransitionStarting(long startTime, long duration) {
+        updateManagedProfile();
+    }
+
+    public void setKeyguardShowing(boolean visible) {
+        mKeyguardVisible = visible;
+        updateManagedProfile();
+    }
+
+    public void setCurrentUserSetup(boolean userSetup) {
+        if (mCurrentUserSetup == userSetup) return;
+        mCurrentUserSetup = userSetup;
+        updateAlarm();
+    }
 }

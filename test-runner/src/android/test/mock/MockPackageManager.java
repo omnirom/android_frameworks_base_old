@@ -28,9 +28,9 @@ import android.content.pm.FeatureInfo;
 import android.content.pm.IPackageDataObserver;
 import android.content.pm.IPackageDeleteObserver;
 import android.content.pm.IPackageInstallObserver;
-import android.content.pm.IPackageMoveObserver;
 import android.content.pm.IPackageStatsObserver;
 import android.content.pm.InstrumentationInfo;
+import android.content.pm.IntentFilterVerificationInfo;
 import android.content.pm.KeySet;
 import android.content.pm.ManifestDigest;
 import android.content.pm.PackageInfo;
@@ -49,7 +49,9 @@ import android.content.res.XmlResourceParser;
 import android.graphics.Rect;
 import android.graphics.drawable.Drawable;
 import android.net.Uri;
+import android.os.Handler;
 import android.os.UserHandle;
+import android.os.storage.VolumeInfo;
 
 import java.util.List;
 
@@ -175,6 +177,17 @@ public class MockPackageManager extends PackageManager {
     }
 
     @Override
+    public boolean isPermissionRevokedByPolicy(String permName, String pkgName) {
+        throw new UnsupportedOperationException();
+    }
+
+    /** @hide */
+    @Override
+    public String getPermissionControllerPackageName() {
+        throw new UnsupportedOperationException();
+    }
+
+    @Override
     public boolean addPermission(PermissionInfo info) {
         throw new UnsupportedOperationException();
     }
@@ -191,13 +204,46 @@ public class MockPackageManager extends PackageManager {
 
     /** @hide */
     @Override
-    public void grantPermission(String packageName, String permissionName) {
+    public void grantRuntimePermission(String packageName, String permissionName,
+            UserHandle user) {
         throw new UnsupportedOperationException();
     }
 
     /** @hide */
     @Override
-    public void revokePermission(String packageName, String permissionName) {
+    public void revokeRuntimePermission(String packageName, String permissionName,
+            UserHandle user) {
+        throw new UnsupportedOperationException();
+    }
+
+    /** @hide */
+    @Override
+    public int getPermissionFlags(String permissionName, String packageName, UserHandle user) {
+        throw new UnsupportedOperationException();
+    }
+
+    /** @hide */
+    @Override
+    public void updatePermissionFlags(String permissionName, String packageName,
+            int flagMask, int flagValues, UserHandle user) {
+        throw new UnsupportedOperationException();
+    }
+
+    /** @hide */
+    @Override
+    public boolean shouldShowRequestPermissionRationale(String permission) {
+        throw new UnsupportedOperationException();
+    }
+
+    /** @hide */
+    @Override
+    public void addOnPermissionsChangeListener(OnPermissionsChangedListener listener) {
+        throw new UnsupportedOperationException();
+    }
+
+    /** @hide */
+    @Override
+    public void removeOnPermissionsChangeListener(OnPermissionsChangedListener listener) {
         throw new UnsupportedOperationException();
     }
 
@@ -484,16 +530,62 @@ public class MockPackageManager extends PackageManager {
         throw new UnsupportedOperationException();
     }
 
-    /**
-     * @hide - to match hiding in superclass
-     */
     @Override
-    public void movePackage(String packageName, IPackageMoveObserver observer, int flags) {
+    public String getInstallerPackageName(String packageName) {
         throw new UnsupportedOperationException();
     }
 
+    /** {@hide} */
     @Override
-    public String getInstallerPackageName(String packageName) {
+    public int getMoveStatus(int moveId) {
+        throw new UnsupportedOperationException();
+    }
+
+    /** {@hide} */
+    @Override
+    public void registerMoveCallback(MoveCallback callback, Handler handler) {
+        throw new UnsupportedOperationException();
+    }
+
+    /** {@hide} */
+    @Override
+    public void unregisterMoveCallback(MoveCallback callback) {
+        throw new UnsupportedOperationException();
+    }
+
+    /** {@hide} */
+    @Override
+    public int movePackage(String packageName, VolumeInfo vol) {
+        throw new UnsupportedOperationException();
+    }
+
+    /** {@hide} */
+    @Override
+    public VolumeInfo getPackageCurrentVolume(ApplicationInfo app) {
+        throw new UnsupportedOperationException();
+    }
+
+    /** {@hide} */
+    @Override
+    public List<VolumeInfo> getPackageCandidateVolumes(ApplicationInfo app) {
+        throw new UnsupportedOperationException();
+    }
+
+    /** {@hide} */
+    @Override
+    public int movePrimaryStorage(VolumeInfo vol) {
+        throw new UnsupportedOperationException();
+    }
+
+    /** {@hide} */
+    @Override
+    public VolumeInfo getPrimaryStorageCurrentVolume() {
+        throw new UnsupportedOperationException();
+    }
+
+    /** {@hide} */
+    @Override
+    public List<VolumeInfo> getPrimaryStorageCandidateVolumes() {
         throw new UnsupportedOperationException();
     }
 
@@ -515,21 +607,16 @@ public class MockPackageManager extends PackageManager {
         throw new UnsupportedOperationException();
     }
 
-    /**
-     * @hide - to match hiding in superclass
-     */
+    /** {@hide} */
     @Override
-    public void freeStorageAndNotify(
-            long idealStorageSize, IPackageDataObserver observer) {
+    public void freeStorageAndNotify(String volumeUuid, long idealStorageSize,
+            IPackageDataObserver observer) {
         throw new UnsupportedOperationException();
     }
 
-    /**
-     * @hide - to match hiding in superclass
-     */
+    /** {@hide} */
     @Override
-    public void freeStorage(
-            long idealStorageSize, IntentSender pi) {
+    public void freeStorage(String volumeUuid, long idealStorageSize, IntentSender pi) {
         throw new UnsupportedOperationException();
     }
 
@@ -718,6 +805,53 @@ public class MockPackageManager extends PackageManager {
     @Override
     public void extendVerificationTimeout(int id, int verificationCodeAtTimeout,
             long millisecondsToDelay) {
+        throw new UnsupportedOperationException();
+    }
+
+    /**
+     * @hide
+     */
+    @Override
+    public void verifyIntentFilter(int id, int verificationCode, List<String> outFailedDomains) {
+        throw new UnsupportedOperationException();
+    }
+
+    /**
+     * @hide
+     */
+    @Override
+    public int getIntentVerificationStatus(String packageName, int userId) {
+        throw new UnsupportedOperationException();
+    }
+
+    /**
+     * @hide
+     */
+    @Override
+    public boolean updateIntentVerificationStatus(String packageName, int status, int userId) {
+        throw new UnsupportedOperationException();
+    }
+
+    /**
+     * @hide
+     */
+    @Override
+    public List<IntentFilterVerificationInfo> getIntentFilterVerifications(String packageName) {
+        throw new UnsupportedOperationException();
+    }
+
+    @Override
+    public List<IntentFilter> getAllIntentFilters(String packageName) {
+        throw new UnsupportedOperationException();
+    }
+
+    @Override
+    public String getDefaultBrowserPackageName(int userId) {
+        throw new UnsupportedOperationException();
+    }
+
+    @Override
+    public boolean setDefaultBrowserPackageName(String packageName, int userId) {
         throw new UnsupportedOperationException();
     }
 

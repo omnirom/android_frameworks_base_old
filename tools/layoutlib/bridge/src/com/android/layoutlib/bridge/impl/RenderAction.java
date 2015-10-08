@@ -27,6 +27,7 @@ import com.android.layoutlib.bridge.android.BridgeContext;
 import com.android.resources.Density;
 import com.android.resources.ResourceType;
 import com.android.resources.ScreenOrientation;
+import com.android.resources.ScreenRound;
 import com.android.resources.ScreenSize;
 
 import android.content.res.Configuration;
@@ -35,7 +36,9 @@ import android.util.DisplayMetrics;
 import android.view.ViewConfiguration_Accessor;
 import android.view.inputmethod.InputMethodManager;
 import android.view.inputmethod.InputMethodManager_Accessor;
+import android.widget.SimpleMonthView_Delegate;
 
+import java.util.Locale;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.locks.ReentrantLock;
 
@@ -227,6 +230,9 @@ public abstract class RenderAction<T extends RenderParams> extends FrameworkReso
      * The counterpart is {@link #tearDown()}.
      */
     private void setUp() {
+        // setup the ParserFactory
+        ParserFactory.setParserFactory(mParams.getLayoutlibCallback().getParserFactory());
+
         // make sure the Resources object references the context (and other objects) for this
         // scene
         mContext.initResources();
@@ -271,7 +277,8 @@ public abstract class RenderAction<T extends RenderParams> extends FrameworkReso
             mContext.getRenderResources().setFrameworkResourceIdProvider(null);
             mContext.getRenderResources().setLogger(null);
         }
-
+        ParserFactory.setParserFactory(null);
+        SimpleMonthView_Delegate.clearCache();
     }
 
     public static BridgeContext getCurrentContext() {
@@ -374,6 +381,27 @@ public abstract class RenderAction<T extends RenderParams> extends FrameworkReso
         } else {
             config.orientation = Configuration.ORIENTATION_UNDEFINED;
         }
+
+        try {
+            ScreenRound roundness = hardwareConfig.getScreenRoundness();
+            if (roundness != null) {
+                switch (roundness) {
+                    case ROUND:
+                        config.screenLayout |= Configuration.SCREENLAYOUT_ROUND_YES;
+                        break;
+                    case NOTROUND:
+                        config.screenLayout |= Configuration.SCREENLAYOUT_ROUND_NO;
+                }
+            } else {
+                config.screenLayout |= Configuration.SCREENLAYOUT_ROUND_UNDEFINED;
+            }
+        } catch (NoSuchMethodError ignored) {
+            // getScreenRoundness was added in later stages of API 15. So, it's not present on some
+            // preview releases of API 15.
+            // TODO: Remove the try catch around Oct 2015.
+        }
+        String locale = getParams().getLocale();
+        if (locale != null && !locale.isEmpty()) config.locale = new Locale(locale);
 
         // TODO: fill in more config info.
 

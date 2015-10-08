@@ -16,15 +16,12 @@
 
 package com.android.server.backup;
 
-
-import android.app.ActivityManagerNative;
 import android.app.IWallpaperManager;
 import android.app.backup.BackupDataInput;
 import android.app.backup.BackupDataOutput;
 import android.app.backup.BackupAgentHelper;
 import android.app.backup.FullBackup;
 import android.app.backup.FullBackupDataOutput;
-import android.app.backup.RecentsBackupHelper;
 import android.app.backup.WallpaperBackupHelper;
 import android.content.Context;
 import android.os.Environment;
@@ -42,6 +39,13 @@ import java.io.IOException;
  */
 public class SystemBackupAgent extends BackupAgentHelper {
     private static final String TAG = "SystemBackupAgent";
+
+    // Names of the helper tags within the dataset.  Changing one of these names will
+    // break the ability to restore from datasets that predate the change.
+    private static final String WALLPAPER_HELPER = "wallpaper";
+    private static final String SYNC_SETTINGS_HELPER = "account_sync_settings";
+    private static final String PREFERRED_HELPER = "preferred_activities";
+    private static final String NOTIFICATION_HELPER = "notifications";
 
     // These paths must match what the WallpaperManagerService uses.  The leaf *_FILENAME
     // are also used in the full-backup file format, so must not change unless steps are
@@ -84,8 +88,10 @@ public class SystemBackupAgent extends BackupAgentHelper {
                 Slog.e(TAG, "Couldn't get wallpaper name\n" + re);
             }
         }
-        addHelper("wallpaper", new WallpaperBackupHelper(SystemBackupAgent.this, files, keys));
-        addHelper("recents", new RecentsBackupHelper(SystemBackupAgent.this));
+        addHelper(WALLPAPER_HELPER, new WallpaperBackupHelper(this, files, keys));
+        addHelper(SYNC_SETTINGS_HELPER, new AccountSyncSettingsBackupHelper(this));
+        addHelper(PREFERRED_HELPER, new PreferredActivityBackupHelper());
+        addHelper(NOTIFICATION_HELPER, new NotificationBackupHelper(this));
 
         super.onBackup(oldState, data, newState);
     }
@@ -102,22 +108,24 @@ public class SystemBackupAgent extends BackupAgentHelper {
         // steps during restore; the restore will happen properly when the individual
         // files are restored piecemeal.
         FullBackup.backupToTar(getPackageName(), FullBackup.ROOT_TREE_TOKEN, null,
-                WALLPAPER_INFO_DIR, WALLPAPER_INFO, output.getData());
+                WALLPAPER_INFO_DIR, WALLPAPER_INFO, output);
         FullBackup.backupToTar(getPackageName(), FullBackup.ROOT_TREE_TOKEN, null,
-                WALLPAPER_IMAGE_DIR, WALLPAPER_IMAGE, output.getData());
+                WALLPAPER_IMAGE_DIR, WALLPAPER_IMAGE, output);
     }
 
     @Override
     public void onRestore(BackupDataInput data, int appVersionCode, ParcelFileDescriptor newState)
             throws IOException {
         // On restore, we also support a previous data schema "system_files"
-        addHelper("wallpaper", new WallpaperBackupHelper(SystemBackupAgent.this,
+        addHelper(WALLPAPER_HELPER, new WallpaperBackupHelper(this,
                 new String[] { WALLPAPER_IMAGE, WALLPAPER_INFO },
                 new String[] { WALLPAPER_IMAGE_KEY, WALLPAPER_INFO_KEY} ));
-        addHelper("system_files", new WallpaperBackupHelper(SystemBackupAgent.this,
+        addHelper("system_files", new WallpaperBackupHelper(this,
                 new String[] { WALLPAPER_IMAGE },
                 new String[] { WALLPAPER_IMAGE_KEY} ));
-        addHelper("recents", new RecentsBackupHelper(SystemBackupAgent.this));
+        addHelper(SYNC_SETTINGS_HELPER, new AccountSyncSettingsBackupHelper(this));
+        addHelper(PREFERRED_HELPER, new PreferredActivityBackupHelper());
+        addHelper(NOTIFICATION_HELPER, new NotificationBackupHelper(this));
 
         try {
             super.onRestore(data, appVersionCode, newState);
@@ -185,15 +193,6 @@ public class SystemBackupAgent extends BackupAgentHelper {
                 (new File(WALLPAPER_IMAGE)).delete();
                 (new File(WALLPAPER_INFO)).delete();
             }
-        }
-    }
-
-    @Override
-    public void onRestoreFinished() {
-        try {
-            ActivityManagerNative.getDefault().systemBackupRestored();
-        } catch (RemoteException e) {
-            // Not possible since this code is running in the system process.
         }
     }
 }

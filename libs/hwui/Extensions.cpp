@@ -16,17 +16,15 @@
 
 #define LOG_TAG "OpenGLRenderer"
 
-#include <GLES2/gl2.h>
-#include <GLES2/gl2ext.h>
+#include "Extensions.h"
+
+#include "Debug.h"
+#include "Properties.h"
 
 #include <EGL/egl.h>
 #include <EGL/eglext.h>
-
+#include <GLES2/gl2ext.h>
 #include <utils/Log.h>
-
-#include "Debug.h"
-#include "Extensions.h"
-#include "Properties.h"
 
 namespace android {
 
@@ -50,14 +48,13 @@ namespace uirenderer {
 // Constructors
 ///////////////////////////////////////////////////////////////////////////////
 
-Extensions::Extensions(): Singleton<Extensions>() {
+Extensions::Extensions() {
     // Query GL extensions
     findExtensions((const char*) glGetString(GL_EXTENSIONS), mGlExtensionList);
     mHasNPot = hasGlExtension("GL_OES_texture_npot");
     mHasFramebufferFetch = hasGlExtension("GL_NV_shader_framebuffer_fetch");
     mHasDiscardFramebuffer = hasGlExtension("GL_EXT_discard_framebuffer");
     mHasDebugMarker = hasGlExtension("GL_EXT_debug_marker");
-    mHasDebugLabel = hasGlExtension("GL_EXT_debug_label");
     mHasTiledRendering = hasGlExtension("GL_QCOM_tiled_rendering");
     mHas1BitStencil = hasGlExtension("GL_OES_stencil1");
     mHas4BitStencil = hasGlExtension("GL_OES_stencil4");
@@ -66,7 +63,7 @@ Extensions::Extensions(): Singleton<Extensions>() {
     findExtensions(eglQueryString(eglGetCurrentDisplay(), EGL_EXTENSIONS), mEglExtensionList);
 
     char property[PROPERTY_VALUE_MAX];
-    if (property_get(PROPERTY_DEBUG_NV_PROFILING, property, NULL) > 0) {
+    if (property_get(PROPERTY_DEBUG_NV_PROFILING, property, nullptr) > 0) {
         mHasNvSystemTime = !strcmp(property, "true") && hasEglExtension("EGL_NV_system_time");
     } else {
         mHasNvSystemTime = false;
@@ -91,9 +88,6 @@ Extensions::Extensions(): Singleton<Extensions>() {
         mVersionMajor = 2;
         mVersionMinor = 0;
     }
-}
-
-Extensions::~Extensions() {
 }
 
 ///////////////////////////////////////////////////////////////////////////////

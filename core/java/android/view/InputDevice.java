@@ -56,6 +56,7 @@ public final class InputDevice implements Parcelable {
     private final int mKeyboardType;
     private final KeyCharacterMap mKeyCharacterMap;
     private final boolean mHasVibrator;
+    private final boolean mHasMicrophone;
     private final boolean mHasButtonUnderPad;
     private final ArrayList<MotionRange> mMotionRanges = new ArrayList<MotionRange>();
 
@@ -198,6 +199,35 @@ public final class InputDevice implements Parcelable {
      * @see #SOURCE_CLASS_POINTER
      */
     public static final int SOURCE_STYLUS = 0x00004000 | SOURCE_CLASS_POINTER;
+
+    /**
+     * The input device is a Bluetooth stylus.
+     * <p>
+     * Note that this bit merely indicates that an input device is capable of
+     * obtaining input from a Bluetooth stylus.  To determine whether a given
+     * touch event was produced by a stylus, examine the tool type returned by
+     * {@link MotionEvent#getToolType(int)} for each individual pointer.
+     * </p><p>
+     * A single touch event may multiple pointers with different tool types,
+     * such as an event that has one pointer with tool type
+     * {@link MotionEvent#TOOL_TYPE_FINGER} and another pointer with tool type
+     * {@link MotionEvent#TOOL_TYPE_STYLUS}.  So it is important to examine
+     * the tool type of each pointer, regardless of the source reported
+     * by {@link MotionEvent#getSource()}.
+     * </p><p>
+     * A bluetooth stylus generally receives its pressure and button state
+     * information from the stylus itself, and derives the rest from another
+     * source. For example, a Bluetooth stylus used in conjunction with a
+     * touchscreen would derive its contact position and pointer size from the
+     * touchscreen and may not be any more accurate than other tools such as
+     * fingers.
+     * </p>
+     *
+     * @see #SOURCE_STYLUS
+     * @see #SOURCE_CLASS_POINTER
+     */
+    public static final int SOURCE_BLUETOOTH_STYLUS =
+            0x00008000 | SOURCE_STYLUS;
 
     /**
      * The input source is a trackball.
@@ -357,7 +387,8 @@ public final class InputDevice implements Parcelable {
     // Called by native code.
     private InputDevice(int id, int generation, int controllerNumber, String name, int vendorId,
             int productId, String descriptor, boolean isExternal, int sources, int keyboardType,
-            KeyCharacterMap keyCharacterMap, boolean hasVibrator, boolean hasButtonUnderPad) {
+            KeyCharacterMap keyCharacterMap, boolean hasVibrator, boolean hasMicrophone,
+            boolean hasButtonUnderPad) {
         mId = id;
         mGeneration = generation;
         mControllerNumber = controllerNumber;
@@ -370,6 +401,7 @@ public final class InputDevice implements Parcelable {
         mKeyboardType = keyboardType;
         mKeyCharacterMap = keyCharacterMap;
         mHasVibrator = hasVibrator;
+        mHasMicrophone = hasMicrophone;
         mHasButtonUnderPad = hasButtonUnderPad;
         mIdentifier = new InputDeviceIdentifier(descriptor, vendorId, productId);
     }
@@ -387,6 +419,7 @@ public final class InputDevice implements Parcelable {
         mKeyboardType = in.readInt();
         mKeyCharacterMap = KeyCharacterMap.CREATOR.createFromParcel(in);
         mHasVibrator = in.readInt() != 0;
+        mHasMicrophone = in.readInt() != 0;
         mHasButtonUnderPad = in.readInt() != 0;
         mIdentifier = new InputDeviceIdentifier(mDescriptor, mVendorId, mProductId);
 
@@ -716,6 +749,14 @@ public final class InputDevice implements Parcelable {
     }
 
     /**
+     * Reports whether the device has a built-in microphone.
+     * @return Whether the device has a built-in microphone.
+     */
+    public boolean hasMicrophone() {
+        return mHasMicrophone;
+    }
+
+    /**
      * Reports whether the device has a button under its touchpad
      * @return Whether the device has a button under its touchpad
      * @hide
@@ -849,6 +890,7 @@ public final class InputDevice implements Parcelable {
         out.writeInt(mKeyboardType);
         mKeyCharacterMap.writeToParcel(out, flags);
         out.writeInt(mHasVibrator ? 1 : 0);
+        out.writeInt(mHasMicrophone ? 1 : 0);
         out.writeInt(mHasButtonUnderPad ? 1 : 0);
 
         final int numRanges = mMotionRanges.size();
@@ -893,6 +935,8 @@ public final class InputDevice implements Parcelable {
         description.append("\n");
 
         description.append("  Has Vibrator: ").append(mHasVibrator).append("\n");
+
+        description.append("  Has mic: ").append(mHasMicrophone).append("\n");
 
         description.append("  Sources: 0x").append(Integer.toHexString(mSources)).append(" (");
         appendSourceDescriptionIfApplicable(description, SOURCE_KEYBOARD, "keyboard");

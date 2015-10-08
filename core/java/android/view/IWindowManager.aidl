@@ -16,6 +16,7 @@
 
 package android.view;
 
+import com.android.internal.app.IAssistScreenshotReceiver;
 import com.android.internal.view.IInputContext;
 import com.android.internal.view.IInputMethodClient;
 
@@ -69,6 +70,7 @@ interface IWindowManager
     int getBaseDisplayDensity(int displayId);
     void setForcedDisplayDensity(int displayId, int density);
     void clearForcedDisplayDensity(int displayId);
+    void setForcedDisplayScalingMode(int displayId, int mode); // 0 = auto, 1 = disable
 
     void setOverscan(int displayId, int left, int top, int right, int bottom);
 
@@ -81,7 +83,7 @@ interface IWindowManager
     void addAppToken(int addPos, IApplicationToken token, int groupId, int stackId,
             int requestedOrientation, boolean fullscreen, boolean showWhenLocked, int userId,
             int configChanges, boolean voiceInteraction, boolean launchTaskBehind);
-    void setAppGroupId(IBinder token, int groupId);
+    void setAppTask(IBinder token, int taskId);
     void setAppOrientation(IApplicationToken token, int requestedOrientation);
     int getAppOrientation(IApplicationToken token);
     void setFocusedApp(IBinder token, boolean moveFocusNow);
@@ -91,6 +93,8 @@ interface IWindowManager
             IRemoteCallback startedCallback);
     void overridePendingAppTransitionScaleUp(int startX, int startY, int startWidth,
             int startHeight);
+    void overridePendingAppTransitionClipReveal(int startX, int startY,
+            int startWidth, int startHeight);
     void overridePendingAppTransitionThumb(in Bitmap srcThumb, int startX, int startY,
             IRemoteCallback startedCallback, boolean scaleUp);
     void overridePendingAppTransitionAspectScaledThumb(in Bitmap srcThumb, int startX,
@@ -218,10 +222,14 @@ interface IWindowManager
     boolean isRotationFrozen();
 
     /**
+     * Used only for assist -- request a screenshot of the current application.
+     */
+    boolean requestAssistScreenshot(IAssistScreenshotReceiver receiver);
+
+    /**
      * Create a screenshot of the applications currently displayed.
      */
-    Bitmap screenshotApplications(IBinder appToken, int displayId, int maxWidth,
-            int maxHeight, boolean force565);
+    Bitmap screenshotApplications(IBinder appToken, int displayId, int maxWidth, int maxHeight);
 
     /**
      * Called by the status bar to notify Views of changes to System UI visiblity.

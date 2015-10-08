@@ -32,11 +32,10 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.view.Window;
 import android.view.WindowManager;
-import android.view.accessibility.AccessibilityEvent;
-import android.view.accessibility.AccessibilityNodeInfo;
+import android.view.accessibility.AccessibilityManager;
 import android.widget.SeekBar.OnSeekBarChangeListener;
 
-import com.android.internal.policy.PolicyManager;
+import com.android.internal.policy.PhoneWindow;
 
 import java.util.Formatter;
 import java.util.Locale;
@@ -47,7 +46,7 @@ import java.util.Locale;
  * slider. It takes care of synchronizing the controls with the state
  * of the MediaPlayer.
  * <p>
- * The way to use this class is to instantiate it programatically.
+ * The way to use this class is to instantiate it programmatically.
  * The MediaController will create a default set of controls
  * and put them in a window floating above your application. Specifically,
  * the controls will float above the view specified with setAnchorView().
@@ -72,7 +71,7 @@ import java.util.Locale;
 public class MediaController extends FrameLayout {
 
     private MediaPlayerControl mPlayer;
-    private Context mContext;
+    private final Context mContext;
     private View mAnchor;
     private View mRoot;
     private WindowManager mWindowManager;
@@ -86,7 +85,7 @@ public class MediaController extends FrameLayout {
     private static final int sDefaultTimeout = 3000;
     private static final int FADE_OUT = 1;
     private static final int SHOW_PROGRESS = 2;
-    private boolean mUseFastForward;
+    private final boolean mUseFastForward;
     private boolean mFromXml;
     private boolean mListenersSet;
     private View.OnClickListener mNextListener, mPrevListener;
@@ -99,6 +98,7 @@ public class MediaController extends FrameLayout {
     private ImageButton mPrevButton;
     private CharSequence mPlayDescription;
     private CharSequence mPauseDescription;
+    private final AccessibilityManager mAccessibilityManager;
 
     public MediaController(Context context, AttributeSet attrs) {
         super(context, attrs);
@@ -106,6 +106,7 @@ public class MediaController extends FrameLayout {
         mContext = context;
         mUseFastForward = true;
         mFromXml = true;
+        mAccessibilityManager = AccessibilityManager.getInstance(context);
     }
 
     @Override
@@ -120,6 +121,7 @@ public class MediaController extends FrameLayout {
         mUseFastForward = useFastForward;
         initFloatingWindowLayout();
         initFloatingWindow();
+        mAccessibilityManager = AccessibilityManager.getInstance(context);
     }
 
     public MediaController(Context context) {
@@ -128,7 +130,7 @@ public class MediaController extends FrameLayout {
 
     private void initFloatingWindow() {
         mWindowManager = (WindowManager)mContext.getSystemService(Context.WINDOW_SERVICE);
-        mWindow = PolicyManager.makeNewWindow(mContext);
+        mWindow = new PhoneWindow(mContext);
         mWindow.setWindowManager(mWindowManager, null, null);
         mWindow.requestFeature(Window.FEATURE_NO_TITLE);
         mDecor = mWindow.getDecorView();
@@ -182,8 +184,9 @@ public class MediaController extends FrameLayout {
     }
 
     // This is called whenever mAnchor's layout bound changes
-    private OnLayoutChangeListener mLayoutChangeListener =
+    private final OnLayoutChangeListener mLayoutChangeListener =
             new OnLayoutChangeListener() {
+        @Override
         public void onLayoutChange(View v, int left, int top, int right,
                 int bottom, int oldLeft, int oldTop, int oldRight,
                 int oldBottom) {
@@ -194,7 +197,8 @@ public class MediaController extends FrameLayout {
         }
     };
 
-    private OnTouchListener mTouchListener = new OnTouchListener() {
+    private final OnTouchListener mTouchListener = new OnTouchListener() {
+        @Override
         public boolean onTouch(View v, MotionEvent event) {
             if (event.getAction() == MotionEvent.ACTION_DOWN) {
                 if (mShowing) {
@@ -329,6 +333,16 @@ public class MediaController extends FrameLayout {
             if (mFfwdButton != null && !mPlayer.canSeekForward()) {
                 mFfwdButton.setEnabled(false);
             }
+            // TODO What we really should do is add a canSeek to the MediaPlayerControl interface;
+            // this scheme can break the case when applications want to allow seek through the
+            // progress bar but disable forward/backward buttons.
+            //
+            // However, currently the flags SEEK_BACKWARD_AVAILABLE, SEEK_FORWARD_AVAILABLE,
+            // and SEEK_AVAILABLE are all (un)set together; as such the aforementioned issue
+            // shouldn't arise in existing applications.
+            if (mProgress != null && !mPlayer.canSeekBackward() && !mPlayer.canSeekForward()) {
+                mProgress.setEnabled(false);
+            }
         } catch (IncompatibleClassChangeError ex) {
             // We were given an old version of the interface, that doesn't have
             // the canPause/canSeekXYZ methods. This is OK, it just means we
@@ -361,9 +375,9 @@ public class MediaController extends FrameLayout {
         // paused with the progress bar showing the user hits play.
         mHandler.sendEmptyMessage(SHOW_PROGRESS);
 
-        Message msg = mHandler.obtainMessage(FADE_OUT);
-        if (timeout != 0) {
+        if (timeout != 0 && !mAccessibilityManager.isTouchExplorationEnabled()) {
             mHandler.removeMessages(FADE_OUT);
+            Message msg = mHandler.obtainMessage(FADE_OUT);
             mHandler.sendMessageDelayed(msg, timeout);
         }
     }
@@ -390,7 +404,7 @@ public class MediaController extends FrameLayout {
         }
     }
 
-    private Handler mHandler = new Handler() {
+    private final Handler mHandler = new Handler() {
         @Override
         public void handleMessage(Message msg) {
             int pos;
@@ -520,7 +534,8 @@ public class MediaController extends FrameLayout {
         return super.dispatchKeyEvent(event);
     }
 
-    private View.OnClickListener mPauseListener = new View.OnClickListener() {
+    private final View.OnClickListener mPauseListener = new View.OnClickListener() {
+        @Override
         public void onClick(View v) {
             doPauseResume();
             show(sDefaultTimeout);
@@ -560,7 +575,8 @@ public class MediaController extends FrameLayout {
     // The second scenario involves the user operating the scroll ball, in this
     // case there WON'T BE onStartTrackingTouch/onStopTrackingTouch notifications,
     // we will simply apply the updated position without suspending regular updates.
-    private OnSeekBarChangeListener mSeekListener = new OnSeekBarChangeListener() {
+    private final OnSeekBarChangeListener mSeekListener = new OnSeekBarChangeListener() {
+        @Override
         public void onStartTrackingTouch(SeekBar bar) {
             show(3600000);
 
@@ -574,6 +590,7 @@ public class MediaController extends FrameLayout {
             mHandler.removeMessages(SHOW_PROGRESS);
         }
 
+        @Override
         public void onProgressChanged(SeekBar bar, int progress, boolean fromuser) {
             if (!fromuser) {
                 // We're not interested in programmatically generated changes to
@@ -588,6 +605,7 @@ public class MediaController extends FrameLayout {
                 mCurrentTime.setText(stringForTime( (int) newposition));
         }
 
+        @Override
         public void onStopTrackingTouch(SeekBar bar) {
             mDragging = false;
             setProgress();
@@ -626,18 +644,12 @@ public class MediaController extends FrameLayout {
     }
 
     @Override
-    public void onInitializeAccessibilityEvent(AccessibilityEvent event) {
-        super.onInitializeAccessibilityEvent(event);
-        event.setClassName(MediaController.class.getName());
+    public CharSequence getAccessibilityClassName() {
+        return MediaController.class.getName();
     }
 
-    @Override
-    public void onInitializeAccessibilityNodeInfo(AccessibilityNodeInfo info) {
-        super.onInitializeAccessibilityNodeInfo(info);
-        info.setClassName(MediaController.class.getName());
-    }
-
-    private View.OnClickListener mRewListener = new View.OnClickListener() {
+    private final View.OnClickListener mRewListener = new View.OnClickListener() {
+        @Override
         public void onClick(View v) {
             int pos = mPlayer.getCurrentPosition();
             pos -= 5000; // milliseconds
@@ -648,7 +660,8 @@ public class MediaController extends FrameLayout {
         }
     };
 
-    private View.OnClickListener mFfwdListener = new View.OnClickListener() {
+    private final View.OnClickListener mFfwdListener = new View.OnClickListener() {
+        @Override
         public void onClick(View v) {
             int pos = mPlayer.getCurrentPosition();
             pos += 15000; // milliseconds

@@ -425,7 +425,7 @@ public class PackageManagerTests extends AndroidTestCase {
             if (rLoc == INSTALL_LOC_INT) {
                 if ((flags & PackageManager.INSTALL_FORWARD_LOCK) != 0) {
                     assertTrue("The application should be installed forward locked",
-                            (info.flags & ApplicationInfo.FLAG_FORWARD_LOCK) != 0);
+                            (info.privateFlags & ApplicationInfo.PRIVATE_FLAG_FORWARD_LOCK) != 0);
                     assertStartsWith("The APK path should point to the ASEC",
                             SECURE_CONTAINERS_PREFIX, srcPath);
                     assertStartsWith("The public APK path should point to the ASEC",
@@ -441,7 +441,8 @@ public class PackageManagerTests extends AndroidTestCase {
                         fail("compat check: Can't read " + info.dataDir + "/lib");
                     }
                 } else {
-                    assertFalse((info.flags & ApplicationInfo.FLAG_FORWARD_LOCK) != 0);
+                    assertFalse(
+                            (info.privateFlags & ApplicationInfo.PRIVATE_FLAG_FORWARD_LOCK) != 0);
                     assertEquals(appInstallPath, srcPath);
                     assertEquals(appInstallPath, publicSrcPath);
                     assertStartsWith("Native library should point to shared lib directory",
@@ -467,16 +468,16 @@ public class PackageManagerTests extends AndroidTestCase {
             } else if (rLoc == INSTALL_LOC_SD) {
                 if ((flags & PackageManager.INSTALL_FORWARD_LOCK) != 0) {
                     assertTrue("The application should be installed forward locked",
-                            (info.flags & ApplicationInfo.FLAG_FORWARD_LOCK) != 0);
+                            (info.privateFlags & ApplicationInfo.PRIVATE_FLAG_FORWARD_LOCK) != 0);
                 } else {
                     assertFalse("The application should not be installed forward locked",
-                            (info.flags & ApplicationInfo.FLAG_FORWARD_LOCK) != 0);
+                            (info.privateFlags & ApplicationInfo.PRIVATE_FLAG_FORWARD_LOCK) != 0);
                 }
                 assertTrue("Application flags (" + info.flags
                         + ") should contain FLAG_EXTERNAL_STORAGE",
                         (info.flags & ApplicationInfo.FLAG_EXTERNAL_STORAGE) != 0);
                 // Might need to check:
-                // ((info.flags & ApplicationInfo.FLAG_FORWARD_LOCK) != 0)
+                // ((info.privateFlags & ApplicationInfo.PRIVATE_FLAG_FORWARD_LOCK) != 0)
                 assertStartsWith("The APK path should point to the ASEC",
                         SECURE_CONTAINERS_PREFIX, srcPath);
                 assertStartsWith("The public APK path should point to the ASEC",
@@ -574,14 +575,6 @@ public class PackageManagerTests extends AndroidTestCase {
             ApplicationInfo info = getPm().getApplicationInfo(pkgName, 0);
             fail(pkgName + " shouldnt be installed");
         } catch (NameNotFoundException e) {
-        }
-
-        UserManager um = (UserManager) mContext.getSystemService(Context.USER_SERVICE);
-        List<UserInfo> users = um.getUsers();
-        for (UserInfo user : users) {
-            String dataDir = PackageManager.getDataDirForUser(user.id, pkgName);
-            assertFalse("Application data directory should not exist: " + dataDir,
-                    new File(dataDir).exists());
         }
     }
 
@@ -1594,91 +1587,13 @@ public class PackageManagerTests extends AndroidTestCase {
         }
     }
 
-    private class PackageMoveObserver extends IPackageMoveObserver.Stub {
-        public int returnCode;
-
-        private boolean doneFlag = false;
-
-        public String packageName;
-
-        public PackageMoveObserver(String pkgName) {
-            packageName = pkgName;
-        }
-
-        public void packageMoved(String packageName, int returnCode) {
-            Log.i("DEBUG_MOVE::", "pkg = " + packageName + ", " + "ret = " + returnCode);
-            if (!packageName.equals(this.packageName)) {
-                return;
-            }
-            synchronized (this) {
-                this.returnCode = returnCode;
-                doneFlag = true;
-                notifyAll();
-            }
-        }
-
-        public boolean isDone() {
-            return doneFlag;
-        }
-    }
-
     public boolean invokeMovePackage(String pkgName, int flags, GenericReceiver receiver)
             throws Exception {
-        PackageMoveObserver observer = new PackageMoveObserver(pkgName);
-        final boolean received = false;
-        mContext.registerReceiver(receiver, receiver.filter);
-        try {
-            // Wait on observer
-            synchronized (observer) {
-                synchronized (receiver) {
-                    getPm().movePackage(pkgName, observer, flags);
-                    long waitTime = 0;
-                    while ((!observer.isDone()) && (waitTime < MAX_WAIT_TIME)) {
-                        observer.wait(WAIT_TIME_INCR);
-                        waitTime += WAIT_TIME_INCR;
-                    }
-                    if (!observer.isDone()) {
-                        throw new Exception("Timed out waiting for pkgmove callback");
-                    }
-                    if (observer.returnCode != PackageManager.MOVE_SUCCEEDED) {
-                        return false;
-                    }
-                    // Verify we received the broadcast
-                    waitTime = 0;
-                    while ((!receiver.isDone()) && (waitTime < MAX_WAIT_TIME)) {
-                        receiver.wait(WAIT_TIME_INCR);
-                        waitTime += WAIT_TIME_INCR;
-                    }
-                    if (!receiver.isDone()) {
-                        throw new Exception("Timed out waiting for MOVE notifications");
-                    }
-                    return receiver.received;
-                }
-            }
-        } finally {
-            mContext.unregisterReceiver(receiver);
-        }
+        throw new UnsupportedOperationException();
     }
 
     private boolean invokeMovePackageFail(String pkgName, int flags, int errCode) throws Exception {
-        PackageMoveObserver observer = new PackageMoveObserver(pkgName);
-        try {
-            // Wait on observer
-            synchronized (observer) {
-                getPm().movePackage(pkgName, observer, flags);
-                long waitTime = 0;
-                while ((!observer.isDone()) && (waitTime < MAX_WAIT_TIME)) {
-                    observer.wait(WAIT_TIME_INCR);
-                    waitTime += WAIT_TIME_INCR;
-                }
-                if (!observer.isDone()) {
-                    throw new Exception("Timed out waiting for pkgmove callback");
-                }
-                assertEquals(errCode, observer.returnCode);
-            }
-        } finally {
-        }
-        return true;
+        throw new UnsupportedOperationException();
     }
 
     private int getDefaultInstallLoc() {

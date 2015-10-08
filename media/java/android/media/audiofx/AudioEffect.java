@@ -18,6 +18,7 @@ package android.media.audiofx;
 
 import android.annotation.SdkConstant;
 import android.annotation.SdkConstant.SdkConstantType;
+import android.app.ActivityThread;
 import android.os.Handler;
 import android.os.Looper;
 import android.os.Message;
@@ -401,7 +402,7 @@ public class AudioEffect {
         // native initialization
         int initResult = native_setup(new WeakReference<AudioEffect>(this),
                 type.toString(), uuid.toString(), priority, audioSession, id,
-                desc);
+                desc, ActivityThread.currentOpPackageName());
         if (initResult != SUCCESS && initResult != ALREADY_EXISTS) {
             Log.e(TAG, "Error code " + initResult
                     + " when initializing AudioEffect.");
@@ -1223,7 +1224,8 @@ public class AudioEffect {
     private static native final void native_init();
 
     private native final int native_setup(Object audioeffect_this, String type,
-            String uuid, int priority, int audioSession, int[] id, Object[] desc);
+            String uuid, int priority, int audioSession, int[] id, Object[] desc,
+            String opPackageName);
 
     private native final void native_finalize();
 

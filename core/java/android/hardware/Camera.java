@@ -44,7 +44,6 @@ import android.view.SurfaceHolder;
 import java.io.IOException;
 import java.lang.ref.WeakReference;
 import java.util.ArrayList;
-import java.util.HashMap;
 import java.util.LinkedHashMap;
 import java.util.List;
 
@@ -484,9 +483,8 @@ public class Camera {
             mEventHandler = null;
         }
 
-        String packageName = ActivityThread.currentPackageName();
-
-        return native_setup(new WeakReference<Camera>(this), cameraId, halVersion, packageName);
+        return native_setup(new WeakReference<Camera>(this), cameraId, halVersion,
+                ActivityThread.currentOpPackageName());
     }
 
     private int cameraInitNormal(int cameraId) {
@@ -1866,13 +1864,17 @@ public class Camera {
         public int faceRecognised = 0;
     }
 
-    // Error codes match the enum in include/ui/Camera.h
-
     /**
      * Unspecified camera error.
      * @see Camera.ErrorCallback
      */
     public static final int CAMERA_ERROR_UNKNOWN = 1;
+
+    /**
+     * Camera was disconnected due to use by higher priority user.
+     * @see Camera.ErrorCallback
+     */
+    public static final int CAMERA_ERROR_EVICTED = 2;
 
     /**
      * Media server died. In this case, the application must release the

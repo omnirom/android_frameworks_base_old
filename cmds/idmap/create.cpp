@@ -7,6 +7,7 @@
 #include <utils/String8.h>
 
 #include <fcntl.h>
+#include <sys/file.h>
 #include <sys/stat.h>
 
 using namespace android;
@@ -22,7 +23,7 @@ namespace {
         if (entry == NULL) {
             return -1;
         }
-        if (!zip->getEntryInfo(entry, NULL, NULL, NULL, NULL, NULL, (long*)crc)) {
+        if (!zip->getEntryInfo(entry, NULL, NULL, NULL, NULL, NULL, crc)) {
             return -1;
         }
         zip->releaseEntry(entry);
@@ -66,7 +67,7 @@ fail:
                 fprintf(stderr, "error: write: %s\n", strerror(errno));
                 return -1;
             }
-            bytesLeft -= w;
+            bytesLeft -= static_cast<size_t>(w);
         }
         return 0;
     }
@@ -78,13 +79,13 @@ fail:
         if (fstat(idmap_fd, &st) == -1) {
             return true;
         }
-        if (st.st_size < N) {
+        if (st.st_size < static_cast<off_t>(N)) {
             // file is empty or corrupt
             return true;
         }
 
         char buf[N];
-        ssize_t bytesLeft = N;
+        size_t bytesLeft = N;
         if (lseek(idmap_fd, SEEK_SET, 0) < 0) {
             return true;
         }
@@ -93,7 +94,7 @@ fail:
             if (r < 0) {
                 return true;
             }
-            bytesLeft -= r;
+            bytesLeft -= static_cast<size_t>(r);
             if (bytesLeft == 0) {
                 break;
             }

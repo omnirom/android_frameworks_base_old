@@ -16,7 +16,6 @@
 
 package android.content.res;
 
-import com.android.annotations.Nullable;
 import com.android.ide.common.rendering.api.ResourceReference;
 import com.android.ide.common.rendering.api.StyleResourceValue;
 import com.android.layoutlib.bridge.android.BridgeContext;
@@ -25,8 +24,10 @@ import com.android.layoutlib.bridge.impl.RenderSessionImpl;
 import com.android.resources.ResourceType;
 import com.android.tools.layoutlib.annotations.LayoutlibDelegate;
 
+import android.annotation.Nullable;
 import android.content.res.Resources.NotFoundException;
 import android.content.res.Resources.Theme;
+import android.content.res.Resources.ThemeKey;
 import android.util.AttributeSet;
 import android.util.TypedValue;
 
@@ -110,22 +111,16 @@ public class Resources_Theme_Delegate {
     private static boolean setupResources(Theme thisTheme) {
         // Key is a space-separated list of theme ids applied that have been merged into the
         // BridgeContext's theme to make thisTheme.
-        String[] appliedStyles = thisTheme.getKey().split(" ");
+        final ThemeKey key = thisTheme.getKey();
+        final int[] resId = key.mResId;
+        final boolean[] force = key.mForce;
+
         boolean changed = false;
-        for (String s : appliedStyles) {
-            if (s.isEmpty()) {
-                continue;
-            }
-            // See the definition of force parameter in Theme.applyStyle().
-            boolean force = false;
-            if (s.charAt(s.length() - 1) == '!') {
-                force = true;
-                s = s.substring(0, s.length() - 1);
-            }
-            int styleId = Integer.parseInt(s, 16);
-            StyleResourceValue style = resolveStyle(styleId);
+        for (int i = 0, N = key.mCount; i < N; i++) {
+            StyleResourceValue style = resolveStyle(resId[i]);
             if (style != null) {
-                RenderSessionImpl.getCurrentContext().getRenderResources().applyStyle(style, force);
+                RenderSessionImpl.getCurrentContext().getRenderResources().applyStyle(
+                        style, force[i]);
                 changed = true;
             }
 

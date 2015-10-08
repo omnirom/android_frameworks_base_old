@@ -16,12 +16,10 @@
   -->
 
 <FrameLayout xmlns:android="http://schemas.android.com/apk/res/android"
-    xmlns:internal="http://schemas.android.com/apk/prv/res/android"
     android:id="@+id/status_bar_latest_event_content"
     android:layout_width="match_parent"
     android:layout_height="wrap_content"
-    internal:layout_minHeight="65dp"
-    internal:layout_maxHeight="unbounded"
+    android:tag="inbox"
     >
     <include layout="@layout/notification_template_icon_group"
         android:layout_width="@dimen/notification_large_icon_width"
@@ -64,6 +62,7 @@
                 android:layout_marginStart="4dp"
                 android:scaleType="fitCenter"
                 android:visibility="gone"
+                android:contentDescription="@string/notification_work_profile_content_description"
                 />
         </LinearLayout>
         <TextView android:id="@+id/inbox_text1"
@@ -135,7 +134,7 @@
             android:ellipsize="end"
             android:visibility="gone"
             android:layout_weight="1"
-            android:text="@android:string/ellipsis"
+            android:text="@android:string/notification_inbox_ellipsis"
             />
         <FrameLayout
             android:id="@+id/inbox_end_pad"

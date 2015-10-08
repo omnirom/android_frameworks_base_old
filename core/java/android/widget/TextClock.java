@@ -16,6 +16,7 @@
 
 package android.widget;
 
+import android.annotation.NonNull;
 import android.app.ActivityManager;
 import android.content.BroadcastReceiver;
 import android.content.ContentResolver;
@@ -32,6 +33,7 @@ import android.provider.Settings;
 import android.text.format.DateFormat;
 import android.util.AttributeSet;
 import android.view.RemotableViewMethod;
+import android.view.ViewHierarchyEncoder;
 
 import com.android.internal.R;
 
@@ -118,11 +120,15 @@ public class TextClock extends TextView {
 
     private CharSequence mFormat12;
     private CharSequence mFormat24;
+    private CharSequence mDescFormat12;
+    private CharSequence mDescFormat24;
 
     @ExportedProperty
     private CharSequence mFormat;
     @ExportedProperty
     private boolean mHasSeconds;
+
+    private CharSequence mDescFormat;
 
     private boolean mAttached;
 
@@ -230,10 +236,10 @@ public class TextClock extends TextView {
         if (mFormat12 == null || mFormat24 == null) {
             LocaleData ld = LocaleData.get(getContext().getResources().getConfiguration().locale);
             if (mFormat12 == null) {
-                mFormat12 = ld.timeFormat12;
+                mFormat12 = ld.timeFormat_hm;
             }
             if (mFormat24 == null) {
-                mFormat24 = ld.timeFormat24;
+                mFormat24 = ld.timeFormat_Hm;
             }
         }
 
@@ -299,6 +305,17 @@ public class TextClock extends TextView {
     }
 
     /**
+     * Like setFormat12Hour, but for the content description.
+     * @hide
+     */
+    public void setContentDescriptionFormat12Hour(CharSequence format) {
+        mDescFormat12 = format;
+
+        chooseFormat();
+        onTimeChanged();
+    }
+
+    /**
      * Returns the formatting pattern used to display the date and/or time
      * in 24-hour mode. The formatting pattern syntax is described in
      * {@link DateFormat}.
@@ -340,6 +357,17 @@ public class TextClock extends TextView {
     @RemotableViewMethod
     public void setFormat24Hour(CharSequence format) {
         mFormat24 = format;
+
+        chooseFormat();
+        onTimeChanged();
+    }
+
+    /**
+     * Like setFormat24Hour, but for the content description.
+     * @hide
+     */
+    public void setContentDescriptionFormat24Hour(CharSequence format) {
+        mDescFormat24 = format;
 
         chooseFormat();
         onTimeChanged();
@@ -457,9 +485,11 @@ public class TextClock extends TextView {
         LocaleData ld = LocaleData.get(getContext().getResources().getConfiguration().locale);
 
         if (format24Requested) {
-            mFormat = abc(mFormat24, mFormat12, ld.timeFormat24);
+            mFormat = abc(mFormat24, mFormat12, ld.timeFormat_Hm);
+            mDescFormat = abc(mDescFormat24, mDescFormat12, mFormat);
         } else {
-            mFormat = abc(mFormat12, mFormat24, ld.timeFormat12);
+            mFormat = abc(mFormat12, mFormat24, ld.timeFormat_hm);
+            mDescFormat = abc(mDescFormat12, mDescFormat24, mFormat);
         }
 
         boolean hadSeconds = mHasSeconds;
@@ -545,5 +575,20 @@ public class TextClock extends TextView {
     private void onTimeChanged() {
         mTime.setTimeInMillis(System.currentTimeMillis());
         setText(DateFormat.format(mFormat, mTime));
+        setContentDescription(DateFormat.format(mDescFormat, mTime));
+    }
+
+    /** @hide */
+    @Override
+    protected void encodeProperties(@NonNull ViewHierarchyEncoder stream) {
+        super.encodeProperties(stream);
+
+        CharSequence s = getFormat12Hour();
+        stream.addProperty("format12Hour", s == null ? null : s.toString());
+
+        s = getFormat24Hour();
+        stream.addProperty("format24Hour", s == null ? null : s.toString());
+        stream.addProperty("format", mFormat == null ? null : mFormat.toString());
+        stream.addProperty("hasSeconds", mHasSeconds);
     }
 }

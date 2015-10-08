@@ -26,40 +26,40 @@
 
 namespace android {
 
-// Do an sprintf starting at offset n, abort on overflow
-static int snprintfcat(char* buf, int off, int size, const char* format, ...)
-        __attribute__((__format__(__printf__, 4, 5)));
-static int snprintfcat(char* buf, int off, int size, const char* format, ...) {
-    va_list args;
-    va_start(args, format);
-    int n = vsnprintf(buf + off, size - off, format, args);
-    LOG_ALWAYS_FATAL_IF(n >= size - off, "String overflow in setting layout properties");
-    va_end(args);
-    return off + n;
-}
-
-void MinikinUtils::doLayout(Layout* layout, const Paint* paint, int bidiFlags, TypefaceImpl* typeface,
-        const uint16_t* buf, size_t start, size_t count, size_t bufSize) {
-    TypefaceImpl* resolvedFace = TypefaceImpl_resolveDefault(typeface);
-    layout->setFontCollection(resolvedFace->fFontCollection);
+FontStyle MinikinUtils::prepareMinikinPaint(MinikinPaint* minikinPaint, FontCollection** pFont,
+        const Paint* paint, TypefaceImpl* typeface) {
+    const TypefaceImpl* resolvedFace = TypefaceImpl_resolveDefault(typeface);
+    *pFont = resolvedFace->fFontCollection;
     FontStyle resolved = resolvedFace->fStyle;
 
     /* Prepare minikin FontStyle */
-    std::string lang = paint->getTextLocale();
+    const std::string& lang = paint->getTextLocale();
     FontLanguage minikinLang(lang.c_str(), lang.size());
     FontVariant minikinVariant = (paint->getFontVariant() == VARIANT_ELEGANT) ? VARIANT_ELEGANT
             : VARIANT_COMPACT;
     FontStyle minikinStyle(minikinLang, minikinVariant, resolved.getWeight(), resolved.getItalic());
 
     /* Prepare minikin Paint */
-    MinikinPaint minikinPaint;
-    minikinPaint.size = (int)/*WHY?!*/paint->getTextSize();
-    minikinPaint.scaleX = paint->getTextScaleX();
-    minikinPaint.skewX = paint->getTextSkewX();
-    minikinPaint.letterSpacing = paint->getLetterSpacing();
-    minikinPaint.paintFlags = MinikinFontSkia::packPaintFlags(paint);
-    minikinPaint.fontFeatureSettings = paint->getFontFeatureSettings();
+    // Note: it would be nice to handle fractional size values (it would improve smooth zoom
+    // behavior), but historically size has been treated as an int.
+    // TODO: explore whether to enable fractional sizes, possibly when linear text flag is set.
+    minikinPaint->size = (int)paint->getTextSize();
+    minikinPaint->scaleX = paint->getTextScaleX();
+    minikinPaint->skewX = paint->getTextSkewX();
+    minikinPaint->letterSpacing = paint->getLetterSpacing();
+    minikinPaint->paintFlags = MinikinFontSkia::packPaintFlags(paint);
+    minikinPaint->fontFeatureSettings = paint->getFontFeatureSettings();
+    minikinPaint->hyphenEdit = HyphenEdit(paint->getHyphenEdit());
+    return minikinStyle;
+}
 
+void MinikinUtils::doLayout(Layout* layout, const Paint* paint, int bidiFlags,
+        TypefaceImpl* typeface, const uint16_t* buf, size_t start, size_t count,
+        size_t bufSize) {
+    FontCollection *font;
+    MinikinPaint minikinPaint;
+    FontStyle minikinStyle = prepareMinikinPaint(&minikinPaint, &font, paint, typeface);
+    layout->setFontCollection(font);
     layout->doLayout(buf, start, count, bufSize, bidiFlags, minikinStyle, minikinPaint);
 }
 

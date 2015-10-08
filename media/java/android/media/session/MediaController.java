@@ -504,8 +504,8 @@ public final class MediaController {
     }
 
     /**
-     * Callback for receiving updates on from the session. A Callback can be
-     * registered using {@link #registerCallback}
+     * Callback for receiving updates from the session. A Callback can be
+     * registered using {@link #registerCallback}.
      */
     public static abstract class Callback {
         /**
@@ -603,9 +603,9 @@ public final class MediaController {
         }
 
         /**
-         * Request that the player start playback for a specific {@link Uri}.
+         * Request that the player start playback for a specific media id.
          *
-         * @param mediaId The uri of the requested media.
+         * @param mediaId The id of the requested media.
          * @param extras Optional extras that can include extra information about the media item
          *               to be played.
          */
@@ -640,6 +640,25 @@ public final class MediaController {
                 mSessionBinder.playFromSearch(query, extras);
             } catch (RemoteException e) {
                 Log.wtf(TAG, "Error calling play(" + query + ").", e);
+            }
+        }
+
+        /**
+         * Request that the player start playback for a specific {@link Uri}.
+         *
+         * @param uri  The URI of the requested media.
+         * @param extras Optional extras that can include extra information about the media item
+         *               to be played.
+         */
+        public void playFromUri(Uri uri, Bundle extras) {
+            if (uri == null || Uri.EMPTY.equals(uri)) {
+                throw new IllegalArgumentException(
+                        "You must specify a non-empty Uri for playFromUri.");
+            }
+            try {
+                mSessionBinder.playFromUri(uri, extras);
+            } catch (RemoteException e) {
+                Log.wtf(TAG, "Error calling play(" + uri + ").", e);
             }
         }
 
@@ -999,7 +1018,9 @@ public final class MediaController {
         }
 
         public void post(int what, Object obj, Bundle data) {
-            obtainMessage(what, obj).sendToTarget();
+            Message msg = obtainMessage(what, obj);
+            msg.setData(data);
+            msg.sendToTarget();
         }
     }
 

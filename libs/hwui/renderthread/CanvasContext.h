@@ -17,22 +17,24 @@
 #ifndef CANVASCONTEXT_H_
 #define CANVASCONTEXT_H_
 
-#include <set>
+#include "DamageAccumulator.h"
+#include "IContextFactory.h"
+#include "FrameInfo.h"
+#include "FrameInfoVisualizer.h"
+#include "RenderNode.h"
+#include "utils/RingBuffer.h"
+#include "renderthread/RenderTask.h"
+#include "renderthread/RenderThread.h"
 
 #include <cutils/compiler.h>
 #include <EGL/egl.h>
 #include <SkBitmap.h>
+#include <SkRect.h>
 #include <utils/Functor.h>
 #include <utils/Vector.h>
 
-#include "../DamageAccumulator.h"
-#include "../DrawProfiler.h"
-#include "../IContextFactory.h"
-#include "../RenderNode.h"
-#include "RenderTask.h"
-#include "RenderThread.h"
-
-#define FUNCTOR_PROCESS_DELAY 4
+#include <set>
+#include <string>
 
 namespace android {
 namespace uirenderer {
@@ -70,17 +72,18 @@ public:
     bool pauseSurface(ANativeWindow* window);
     bool hasSurface() { return mNativeWindow.get(); }
 
-    void setup(int width, int height, const Vector3& lightCenter, float lightRadius,
+    void setup(int width, int height, float lightRadius,
             uint8_t ambientShadowAlpha, uint8_t spotShadowAlpha);
+    void setLightCenter(const Vector3& lightCenter);
     void setOpaque(bool opaque);
     void makeCurrent();
     void processLayerUpdate(DeferredLayerUpdater* layerUpdater);
-    void prepareTree(TreeInfo& info);
+    void prepareTree(TreeInfo& info, int64_t* uiFrameInfo, int64_t syncQueued);
     void draw();
     void destroy();
 
     // IFrameCallback, Chroreographer-driven frame callback entry point
-    virtual void doFrame();
+    virtual void doFrame() override;
 
     void buildLayer(RenderNode* node);
     bool copyLayerInto(DeferredLayerUpdater* layer, SkBitmap* bitmap);
@@ -101,7 +104,13 @@ public:
     void stopDrawing();
     void notifyFramePending();
 
-    DrawProfiler& profiler() { return mProfiler; }
+    FrameInfoVisualizer& profiler() { return mProfiler; }
+
+    void dumpFrames(int fd);
+    void resetFrameStats();
+
+    void setName(const std::string&& name) { mName = name; }
+    const std::string& name() { return mName; }
 
 private:
     friend class RegisterFrameCallbackTask;
@@ -110,29 +119,32 @@ private:
     friend class android::uirenderer::RenderState;
 
     void setSurface(ANativeWindow* window);
-    void swapBuffers();
+    void swapBuffers(const SkRect& dirty, EGLint width, EGLint height);
     void requireSurface();
-
-    void requireGlContext();
 
     void freePrefetechedLayers();
 
     RenderThread& mRenderThread;
     EglManager& mEglManager;
     sp<ANativeWindow> mNativeWindow;
-    EGLSurface mEglSurface;
-    bool mBufferPreserved;
-    SwapBehavior mSwapBehavior;
+    EGLSurface mEglSurface = EGL_NO_SURFACE;
+    bool mBufferPreserved = false;
+    SwapBehavior mSwapBehavior = kSwap_default;
 
     bool mOpaque;
-    OpenGLRenderer* mCanvas;
-    bool mHaveNewSurface;
+    OpenGLRenderer* mCanvas = nullptr;
+    bool mHaveNewSurface = false;
     DamageAccumulator mDamageAccumulator;
-    AnimationContext* mAnimationContext;
+    std::unique_ptr<AnimationContext> mAnimationContext;
 
     const sp<RenderNode> mRootRenderNode;
 
-    DrawProfiler mProfiler;
+    FrameInfo* mCurrentFrameInfo = nullptr;
+    // Ring buffer large enough for 2 seconds worth of frames
+    RingBuffer<FrameInfo, 120> mFrames;
+    std::string mName;
+    JankTracker mJankTracker;
+    FrameInfoVisualizer mProfiler;
 
     std::set<RenderNode*> mPrefetechedLayers;
 };

@@ -34,6 +34,8 @@ import java.lang.annotation.Target;
 import java.lang.annotation.ElementType;
 import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
+import java.util.HashMap;
+import java.util.Map;
 
 import org.apache.harmony.dalvik.ddmc.Chunk;
 import org.apache.harmony.dalvik.ddmc.ChunkHandler;
@@ -63,7 +65,10 @@ public final class Debug
      *
      * TRACE_COUNT_ALLOCS adds the results from startAllocCounting to the
      * trace key file.
+     *
+     * @deprecated Accurate counting is a burden on the runtime and may be removed.
      */
+    @Deprecated
     public static final int TRACE_COUNT_ALLOCS  = VMDebug.TRACE_COUNT_ALLOCS;
 
     /**
@@ -104,7 +109,7 @@ public final class Debug
 
     /**
      * This class is used to retrieved various statistics about the memory mappings for this
-     * process. The returns info broken down by dalvik, native, and other. All results are in kB.
+     * process. The returned info is broken down by dalvik, native, and other. All results are in kB.
      */
     public static class MemoryInfo implements Parcelable {
         /** The proportional set size for dalvik heap.  (Doesn't include other Dalvik overhead.) */
@@ -163,6 +168,65 @@ public final class Debug
         /** The dirty pages used by anyting else that have been swapped out. */
         /** @hide We may want to expose this, eventually. */
         public int otherSwappedOut;
+
+        /** @hide */
+        public static final int HEAP_UNKNOWN = 0;
+        /** @hide */
+        public static final int HEAP_DALVIK = 1;
+        /** @hide */
+        public static final int HEAP_NATIVE = 2;
+
+        /** @hide */
+        public static final int OTHER_DALVIK_OTHER = 0;
+        /** @hide */
+        public static final int OTHER_STACK = 1;
+        /** @hide */
+        public static final int OTHER_CURSOR = 2;
+        /** @hide */
+        public static final int OTHER_ASHMEM = 3;
+        /** @hide */
+        public static final int OTHER_GL_DEV = 4;
+        /** @hide */
+        public static final int OTHER_UNKNOWN_DEV = 5;
+        /** @hide */
+        public static final int OTHER_SO = 6;
+        /** @hide */
+        public static final int OTHER_JAR = 7;
+        /** @hide */
+        public static final int OTHER_APK = 8;
+        /** @hide */
+        public static final int OTHER_TTF = 9;
+        /** @hide */
+        public static final int OTHER_DEX = 10;
+        /** @hide */
+        public static final int OTHER_OAT = 11;
+        /** @hide */
+        public static final int OTHER_ART = 12;
+        /** @hide */
+        public static final int OTHER_UNKNOWN_MAP = 13;
+        /** @hide */
+        public static final int OTHER_GRAPHICS = 14;
+        /** @hide */
+        public static final int OTHER_GL = 15;
+        /** @hide */
+        public static final int OTHER_OTHER_MEMTRACK = 16;
+
+        /** @hide */
+        public static final int OTHER_DALVIK_NORMAL = 17;
+        /** @hide */
+        public static final int OTHER_DALVIK_LARGE = 18;
+        /** @hide */
+        public static final int OTHER_DALVIK_LINEARALLOC = 19;
+        /** @hide */
+        public static final int OTHER_DALVIK_ACCOUNTING = 20;
+        /** @hide */
+        public static final int OTHER_DALVIK_CODE_CACHE = 21;
+        /** @hide */
+        public static final int OTHER_DALVIK_ZYGOTE = 22;
+        /** @hide */
+        public static final int OTHER_DALVIK_NON_MOVING = 23;
+        /** @hide */
+        public static final int OTHER_DALVIK_INDIRECT_REFERENCE_TABLE = 24;
 
         /** @hide */
         public static final int NUM_OTHER_STATS = 17;
@@ -280,6 +344,11 @@ public final class Debug
         }
 
         /** @hide */
+        public int getOtherPrivate(int which) {
+          return getOtherPrivateClean(which) + getOtherPrivateDirty(which);
+        }
+
+        /** @hide */
         public int getOtherSharedClean(int which) {
             return otherStats[which*NUM_CATEGORIES + offsetSharedClean];
         }
@@ -292,33 +361,281 @@ public final class Debug
         /** @hide */
         public static String getOtherLabel(int which) {
             switch (which) {
-                case 0: return "Dalvik Other";
-                case 1: return "Stack";
-                case 2: return "Cursor";
-                case 3: return "Ashmem";
-                case 4: return "Gfx dev";
-                case 5: return "Other dev";
-                case 6: return ".so mmap";
-                case 7: return ".jar mmap";
-                case 8: return ".apk mmap";
-                case 9: return ".ttf mmap";
-                case 10: return ".dex mmap";
-                case 11: return ".oat mmap";
-                case 12: return ".art mmap";
-                case 13: return "Other mmap";
-                case 14: return "EGL mtrack";
-                case 15: return "GL mtrack";
-                case 16: return "Other mtrack";
-                case 17: return ".Heap";
-                case 18: return ".LOS";
-                case 19: return ".LinearAlloc";
-                case 20: return ".GC";
-                case 21: return ".JITCache";
-                case 22: return ".Zygote";
-                case 23: return ".NonMoving";
-                case 24: return ".IndirectRef";
+                case OTHER_DALVIK_OTHER: return "Dalvik Other";
+                case OTHER_STACK: return "Stack";
+                case OTHER_CURSOR: return "Cursor";
+                case OTHER_ASHMEM: return "Ashmem";
+                case OTHER_GL_DEV: return "Gfx dev";
+                case OTHER_UNKNOWN_DEV: return "Other dev";
+                case OTHER_SO: return ".so mmap";
+                case OTHER_JAR: return ".jar mmap";
+                case OTHER_APK: return ".apk mmap";
+                case OTHER_TTF: return ".ttf mmap";
+                case OTHER_DEX: return ".dex mmap";
+                case OTHER_OAT: return ".oat mmap";
+                case OTHER_ART: return ".art mmap";
+                case OTHER_UNKNOWN_MAP: return "Other mmap";
+                case OTHER_GRAPHICS: return "EGL mtrack";
+                case OTHER_GL: return "GL mtrack";
+                case OTHER_OTHER_MEMTRACK: return "Other mtrack";
+                case OTHER_DALVIK_NORMAL: return ".Heap";
+                case OTHER_DALVIK_LARGE: return ".LOS";
+                case OTHER_DALVIK_LINEARALLOC: return ".LinearAlloc";
+                case OTHER_DALVIK_ACCOUNTING: return ".GC";
+                case OTHER_DALVIK_CODE_CACHE: return ".JITCache";
+                case OTHER_DALVIK_ZYGOTE: return ".Zygote";
+                case OTHER_DALVIK_NON_MOVING: return ".NonMoving";
+                case OTHER_DALVIK_INDIRECT_REFERENCE_TABLE: return ".IndirectRef";
                 default: return "????";
             }
+        }
+
+      /**
+       * Returns the value of a particular memory statistic or {@code null} if no
+       * such memory statistic exists.
+       *
+       * <p>The following table lists the memory statistics that are supported.
+       * Note that memory statistics may be added or removed in a future API level.</p>
+       *
+       * <table>
+       *     <thead>
+       *         <tr>
+       *             <th>Memory statistic name</th>
+       *             <th>Meaning</th>
+       *             <th>Example</th>
+       *             <th>Supported (API Levels)</th>
+       *         </tr>
+       *     </thead>
+       *     <tbody>
+       *         <tr>
+       *             <td>summary.java-heap</td>
+       *             <td>The private Java Heap usage in kB. This corresponds to the Java Heap field
+       *                 in the App Summary section output by dumpsys meminfo.</td>
+       *             <td>{@code 1442}</td>
+       *             <td>23</td>
+       *         </tr>
+       *         <tr>
+       *             <td>summary.native-heap</td>
+       *             <td>The private Native Heap usage in kB. This corresponds to the Native Heap
+       *                 field in the App Summary section output by dumpsys meminfo.</td>
+       *             <td>{@code 1442}</td>
+       *             <td>23</td>
+       *         </tr>
+       *         <tr>
+       *             <td>summary.code</td>
+       *             <td>The memory usage for static code and resources in kB. This corresponds to
+       *                 the Code field in the App Summary section output by dumpsys meminfo.</td>
+       *             <td>{@code 1442}</td>
+       *             <td>23</td>
+       *         </tr>
+       *         <tr>
+       *             <td>summary.stack</td>
+       *             <td>The stack usage in kB. This corresponds to the Stack field in the
+       *                 App Summary section output by dumpsys meminfo.</td>
+       *             <td>{@code 1442}</td>
+       *             <td>23</td>
+       *         </tr>
+       *         <tr>
+       *             <td>summary.graphics</td>
+       *             <td>The graphics usage in kB. This corresponds to the Graphics field in the
+       *                 App Summary section output by dumpsys meminfo.</td>
+       *             <td>{@code 1442}</td>
+       *             <td>23</td>
+       *         </tr>
+       *         <tr>
+       *             <td>summary.private-other</td>
+       *             <td>Other private memory usage in kB. This corresponds to the Private Other
+       *                 field output in the App Summary section by dumpsys meminfo.</td>
+       *             <td>{@code 1442}</td>
+       *             <td>23</td>
+       *         </tr>
+       *         <tr>
+       *             <td>summary.system</td>
+       *             <td>Shared and system memory usage in kB. This corresponds to the System
+       *                 field output in the App Summary section by dumpsys meminfo.</td>
+       *             <td>{@code 1442}</td>
+       *             <td>23</td>
+       *         </tr>
+       *         <tr>
+       *             <td>summary.total-pss</td>
+       *             <td>Total PPS memory usage in kB.</td>
+       *             <td>{@code 1442}</td>
+       *             <td>23</td>
+       *         </tr>
+       *         <tr>
+       *             <td>summary.total-swap</td>
+       *             <td>Total swap usage in kB.</td>
+       *             <td>{@code 1442}</td>
+       *             <td>23</td>
+       *         </tr>
+       *     </tbody>
+       * </table>
+       */
+        public String getMemoryStat(String statName) {
+            switch(statName) {
+                case "summary.java-heap":
+                    return Integer.toString(getSummaryJavaHeap());
+                case "summary.native-heap":
+                    return Integer.toString(getSummaryNativeHeap());
+                case "summary.code":
+                    return Integer.toString(getSummaryCode());
+                case "summary.stack":
+                    return Integer.toString(getSummaryStack());
+                case "summary.graphics":
+                    return Integer.toString(getSummaryGraphics());
+                case "summary.private-other":
+                    return Integer.toString(getSummaryPrivateOther());
+                case "summary.system":
+                    return Integer.toString(getSummarySystem());
+                case "summary.total-pss":
+                    return Integer.toString(getSummaryTotalPss());
+                case "summary.total-swap":
+                    return Integer.toString(getSummaryTotalSwap());
+                default:
+                    return null;
+            }
+        }
+
+        /**
+         * Returns a map of the names/values of the memory statistics
+         * that {@link #getMemoryStat(String)} supports.
+         *
+         * @return a map of the names/values of the supported memory statistics.
+         */
+        public Map<String, String> getMemoryStats() {
+            Map<String, String> stats = new HashMap<String, String>();
+            stats.put("summary.java-heap", Integer.toString(getSummaryJavaHeap()));
+            stats.put("summary.native-heap", Integer.toString(getSummaryNativeHeap()));
+            stats.put("summary.code", Integer.toString(getSummaryCode()));
+            stats.put("summary.stack", Integer.toString(getSummaryStack()));
+            stats.put("summary.graphics", Integer.toString(getSummaryGraphics()));
+            stats.put("summary.private-other", Integer.toString(getSummaryPrivateOther()));
+            stats.put("summary.system", Integer.toString(getSummarySystem()));
+            stats.put("summary.total-pss", Integer.toString(getSummaryTotalPss()));
+            stats.put("summary.total-swap", Integer.toString(getSummaryTotalSwap()));
+            return stats;
+        }
+
+        /**
+         * Pss of Java Heap bytes in KB due to the application.
+         * Notes:
+         *  * OTHER_ART is the boot image. Anything private here is blamed on
+         *    the application, not the system.
+         *  * dalvikPrivateDirty includes private zygote, which means the
+         *    application dirtied something allocated by the zygote. We blame
+         *    the application for that memory, not the system.
+         *  * Does not include OTHER_DALVIK_OTHER, which is considered VM
+         *    Overhead and lumped into Private Other.
+         *  * We don't include dalvikPrivateClean, because there should be no
+         *    such thing as private clean for the Java Heap.
+         * @hide
+         */
+        public int getSummaryJavaHeap() {
+            return dalvikPrivateDirty + getOtherPrivate(OTHER_ART);
+        }
+
+        /**
+         * Pss of Native Heap bytes in KB due to the application.
+         * Notes:
+         *  * Includes private dirty malloc space.
+         *  * We don't include nativePrivateClean, because there should be no
+         *    such thing as private clean for the Native Heap.
+         * @hide
+         */
+        public int getSummaryNativeHeap() {
+            return nativePrivateDirty;
+        }
+
+        /**
+         * Pss of code and other static resource bytes in KB due to
+         * the application.
+         * @hide
+         */
+        public int getSummaryCode() {
+            return getOtherPrivate(OTHER_SO)
+              + getOtherPrivate(OTHER_JAR)
+              + getOtherPrivate(OTHER_APK)
+              + getOtherPrivate(OTHER_TTF)
+              + getOtherPrivate(OTHER_DEX)
+              + getOtherPrivate(OTHER_OAT);
+        }
+
+        /**
+         * Pss in KB of the stack due to the application.
+         * Notes:
+         *  * Includes private dirty stack, which includes both Java and Native
+         *    stack.
+         *  * Does not include private clean stack, because there should be no
+         *    such thing as private clean for the stack.
+         * @hide
+         */
+        public int getSummaryStack() {
+            return getOtherPrivateDirty(OTHER_STACK);
+        }
+
+        /**
+         * Pss in KB of graphics due to the application.
+         * Notes:
+         *  * Includes private Gfx, EGL, and GL.
+         *  * Warning: These numbers can be misreported by the graphics drivers.
+         *  * We don't include shared graphics. It may make sense to, because
+         *    shared graphics are likely buffers due to the application
+         *    anyway, but it's simpler to implement to just group all shared
+         *    memory into the System category.
+         * @hide
+         */
+        public int getSummaryGraphics() {
+            return getOtherPrivate(OTHER_GL_DEV)
+              + getOtherPrivate(OTHER_GRAPHICS)
+              + getOtherPrivate(OTHER_GL);
+        }
+
+        /**
+         * Pss in KB due to the application that haven't otherwise been
+         * accounted for.
+         * @hide
+         */
+        public int getSummaryPrivateOther() {
+            return getTotalPrivateClean()
+              + getTotalPrivateDirty()
+              - getSummaryJavaHeap()
+              - getSummaryNativeHeap()
+              - getSummaryCode()
+              - getSummaryStack()
+              - getSummaryGraphics();
+        }
+
+        /**
+         * Pss in KB due to the system.
+         * Notes:
+         *  * Includes all shared memory.
+         * @hide
+         */
+        public int getSummarySystem() {
+            return getTotalPss()
+              - getTotalPrivateClean()
+              - getTotalPrivateDirty();
+        }
+
+        /**
+         * Total Pss in KB.
+         * @hide
+         */
+        public int getSummaryTotalPss() {
+            return getTotalPss();
+        }
+
+        /**
+         * Total Swap in KB.
+         * Notes:
+         *  * Some of this memory belongs in other categories, but we don't
+         *    know if the Swap memory is shared or private, so we don't know
+         *    what to blame on the application and what on the system.
+         *    For now, just lump all the Swap in one place.
+         * @hide
+         */
+        public int getSummaryTotalSwap() {
+            return getTotalSwappedOut();
         }
 
         public int describeContents() {
@@ -760,7 +1077,7 @@ href="{@docRoot}guide/developing/tools/traceview.html">Traceview: A Graphical Lo
     /**
      * Stop counting the number and aggregate size of memory allocations.
      *
-     * @see #startAllocCounting()
+     * @deprecated Accurate counting is a burden on the runtime and may be removed.
      */
     @Deprecated
     public static void stopAllocCounting() {
@@ -770,7 +1087,10 @@ href="{@docRoot}guide/developing/tools/traceview.html">Traceview: A Graphical Lo
     /**
      * Returns the global count of objects allocated by the runtime between a
      * {@link #startAllocCounting() start} and {@link #stopAllocCounting() stop}.
+     *
+     * @deprecated Accurate counting is a burden on the runtime and may be removed.
      */
+    @Deprecated
     public static int getGlobalAllocCount() {
         return VMDebug.getAllocCount(VMDebug.KIND_GLOBAL_ALLOCATED_OBJECTS);
     }
@@ -778,7 +1098,10 @@ href="{@docRoot}guide/developing/tools/traceview.html">Traceview: A Graphical Lo
     /**
      * Clears the global count of objects allocated.
      * @see #getGlobalAllocCount()
+     *
+     * @deprecated Accurate counting is a burden on the runtime and may be removed.
      */
+    @Deprecated
     public static void resetGlobalAllocCount() {
         VMDebug.resetAllocCount(VMDebug.KIND_GLOBAL_ALLOCATED_OBJECTS);
     }
@@ -786,7 +1109,10 @@ href="{@docRoot}guide/developing/tools/traceview.html">Traceview: A Graphical Lo
     /**
      * Returns the global size, in bytes, of objects allocated by the runtime between a
      * {@link #startAllocCounting() start} and {@link #stopAllocCounting() stop}.
+     *
+     * @deprecated Accurate counting is a burden on the runtime and may be removed.
      */
+    @Deprecated
     public static int getGlobalAllocSize() {
         return VMDebug.getAllocCount(VMDebug.KIND_GLOBAL_ALLOCATED_BYTES);
     }
@@ -794,7 +1120,10 @@ href="{@docRoot}guide/developing/tools/traceview.html">Traceview: A Graphical Lo
     /**
      * Clears the global size of objects allocated.
      * @see #getGlobalAllocSize()
+     *
+     * @deprecated Accurate counting is a burden on the runtime and may be removed.
      */
+    @Deprecated
     public static void resetGlobalAllocSize() {
         VMDebug.resetAllocCount(VMDebug.KIND_GLOBAL_ALLOCATED_BYTES);
     }
@@ -802,7 +1131,10 @@ href="{@docRoot}guide/developing/tools/traceview.html">Traceview: A Graphical Lo
     /**
      * Returns the global count of objects freed by the runtime between a
      * {@link #startAllocCounting() start} and {@link #stopAllocCounting() stop}.
+     *
+     * @deprecated Accurate counting is a burden on the runtime and may be removed.
      */
+    @Deprecated
     public static int getGlobalFreedCount() {
         return VMDebug.getAllocCount(VMDebug.KIND_GLOBAL_FREED_OBJECTS);
     }
@@ -810,7 +1142,10 @@ href="{@docRoot}guide/developing/tools/traceview.html">Traceview: A Graphical Lo
     /**
      * Clears the global count of objects freed.
      * @see #getGlobalFreedCount()
+     *
+     * @deprecated Accurate counting is a burden on the runtime and may be removed.
      */
+    @Deprecated
     public static void resetGlobalFreedCount() {
         VMDebug.resetAllocCount(VMDebug.KIND_GLOBAL_FREED_OBJECTS);
     }
@@ -818,7 +1153,10 @@ href="{@docRoot}guide/developing/tools/traceview.html">Traceview: A Graphical Lo
     /**
      * Returns the global size, in bytes, of objects freed by the runtime between a
      * {@link #startAllocCounting() start} and {@link #stopAllocCounting() stop}.
+     *
+     * @deprecated Accurate counting is a burden on the runtime and may be removed.
      */
+    @Deprecated
     public static int getGlobalFreedSize() {
         return VMDebug.getAllocCount(VMDebug.KIND_GLOBAL_FREED_BYTES);
     }
@@ -826,7 +1164,10 @@ href="{@docRoot}guide/developing/tools/traceview.html">Traceview: A Graphical Lo
     /**
      * Clears the global size of objects freed.
      * @see #getGlobalFreedSize()
+     *
+     * @deprecated Accurate counting is a burden on the runtime and may be removed.
      */
+    @Deprecated
     public static void resetGlobalFreedSize() {
         VMDebug.resetAllocCount(VMDebug.KIND_GLOBAL_FREED_BYTES);
     }
@@ -834,7 +1175,10 @@ href="{@docRoot}guide/developing/tools/traceview.html">Traceview: A Graphical Lo
     /**
      * Returns the number of non-concurrent GC invocations between a
      * {@link #startAllocCounting() start} and {@link #stopAllocCounting() stop}.
+     *
+     * @deprecated Accurate counting is a burden on the runtime and may be removed.
      */
+    @Deprecated
     public static int getGlobalGcInvocationCount() {
         return VMDebug.getAllocCount(VMDebug.KIND_GLOBAL_GC_INVOCATIONS);
     }
@@ -842,7 +1186,10 @@ href="{@docRoot}guide/developing/tools/traceview.html">Traceview: A Graphical Lo
     /**
      * Clears the count of non-concurrent GC invocations.
      * @see #getGlobalGcInvocationCount()
+     *
+     * @deprecated Accurate counting is a burden on the runtime and may be removed.
      */
+    @Deprecated
     public static void resetGlobalGcInvocationCount() {
         VMDebug.resetAllocCount(VMDebug.KIND_GLOBAL_GC_INVOCATIONS);
     }
@@ -851,7 +1198,10 @@ href="{@docRoot}guide/developing/tools/traceview.html">Traceview: A Graphical Lo
      * Returns the number of classes successfully initialized (ie those that executed without
      * throwing an exception) between a {@link #startAllocCounting() start} and
      * {@link #stopAllocCounting() stop}.
+     *
+     * @deprecated Accurate counting is a burden on the runtime and may be removed.
      */
+    @Deprecated
     public static int getGlobalClassInitCount() {
         return VMDebug.getAllocCount(VMDebug.KIND_GLOBAL_CLASS_INIT_COUNT);
     }
@@ -859,7 +1209,10 @@ href="{@docRoot}guide/developing/tools/traceview.html">Traceview: A Graphical Lo
     /**
      * Clears the count of classes initialized.
      * @see #getGlobalClassInitCount()
+     *
+     * @deprecated Accurate counting is a burden on the runtime and may be removed.
      */
+    @Deprecated
     public static void resetGlobalClassInitCount() {
         VMDebug.resetAllocCount(VMDebug.KIND_GLOBAL_CLASS_INIT_COUNT);
     }
@@ -867,7 +1220,10 @@ href="{@docRoot}guide/developing/tools/traceview.html">Traceview: A Graphical Lo
     /**
      * Returns the time spent successfully initializing classes between a
      * {@link #startAllocCounting() start} and {@link #stopAllocCounting() stop}.
+     *
+     * @deprecated Accurate counting is a burden on the runtime and may be removed.
      */
+    @Deprecated
     public static int getGlobalClassInitTime() {
         /* cumulative elapsed time for class initialization, in usec */
         return VMDebug.getAllocCount(VMDebug.KIND_GLOBAL_CLASS_INIT_TIME);
@@ -876,7 +1232,10 @@ href="{@docRoot}guide/developing/tools/traceview.html">Traceview: A Graphical Lo
     /**
      * Clears the count of time spent initializing classes.
      * @see #getGlobalClassInitTime()
+     *
+     * @deprecated Accurate counting is a burden on the runtime and may be removed.
      */
+    @Deprecated
     public static void resetGlobalClassInitTime() {
         VMDebug.resetAllocCount(VMDebug.KIND_GLOBAL_CLASS_INIT_TIME);
     }
@@ -948,7 +1307,10 @@ href="{@docRoot}guide/developing/tools/traceview.html">Traceview: A Graphical Lo
     /**
      * Returns the thread-local count of objects allocated by the runtime between a
      * {@link #startAllocCounting() start} and {@link #stopAllocCounting() stop}.
+     *
+     * @deprecated Accurate counting is a burden on the runtime and may be removed.
      */
+    @Deprecated
     public static int getThreadAllocCount() {
         return VMDebug.getAllocCount(VMDebug.KIND_THREAD_ALLOCATED_OBJECTS);
     }
@@ -956,7 +1318,10 @@ href="{@docRoot}guide/developing/tools/traceview.html">Traceview: A Graphical Lo
     /**
      * Clears the thread-local count of objects allocated.
      * @see #getThreadAllocCount()
+     *
+     * @deprecated Accurate counting is a burden on the runtime and may be removed.
      */
+    @Deprecated
     public static void resetThreadAllocCount() {
         VMDebug.resetAllocCount(VMDebug.KIND_THREAD_ALLOCATED_OBJECTS);
     }
@@ -965,7 +1330,10 @@ href="{@docRoot}guide/developing/tools/traceview.html">Traceview: A Graphical Lo
      * Returns the thread-local size of objects allocated by the runtime between a
      * {@link #startAllocCounting() start} and {@link #stopAllocCounting() stop}.
      * @return The allocated size in bytes.
+     *
+     * @deprecated Accurate counting is a burden on the runtime and may be removed.
      */
+    @Deprecated
     public static int getThreadAllocSize() {
         return VMDebug.getAllocCount(VMDebug.KIND_THREAD_ALLOCATED_BYTES);
     }
@@ -973,7 +1341,10 @@ href="{@docRoot}guide/developing/tools/traceview.html">Traceview: A Graphical Lo
     /**
      * Clears the thread-local count of objects allocated.
      * @see #getThreadAllocSize()
+     *
+     * @deprecated Accurate counting is a burden on the runtime and may be removed.
      */
+    @Deprecated
     public static void resetThreadAllocSize() {
         VMDebug.resetAllocCount(VMDebug.KIND_THREAD_ALLOCATED_BYTES);
     }
@@ -1013,7 +1384,10 @@ href="{@docRoot}guide/developing/tools/traceview.html">Traceview: A Graphical Lo
     /**
      * Returns the number of thread-local non-concurrent GC invocations between a
      * {@link #startAllocCounting() start} and {@link #stopAllocCounting() stop}.
+     *
+     * @deprecated Accurate counting is a burden on the runtime and may be removed.
      */
+    @Deprecated
     public static int getThreadGcInvocationCount() {
         return VMDebug.getAllocCount(VMDebug.KIND_THREAD_GC_INVOCATIONS);
     }
@@ -1021,7 +1395,10 @@ href="{@docRoot}guide/developing/tools/traceview.html">Traceview: A Graphical Lo
     /**
      * Clears the thread-local count of non-concurrent GC invocations.
      * @see #getThreadGcInvocationCount()
+     *
+     * @deprecated Accurate counting is a burden on the runtime and may be removed.
      */
+    @Deprecated
     public static void resetThreadGcInvocationCount() {
         VMDebug.resetAllocCount(VMDebug.KIND_THREAD_GC_INVOCATIONS);
     }
@@ -1029,9 +1406,116 @@ href="{@docRoot}guide/developing/tools/traceview.html">Traceview: A Graphical Lo
     /**
      * Clears all the global and thread-local memory allocation counters.
      * @see #startAllocCounting()
+     *
+     * @deprecated Accurate counting is a burden on the runtime and may be removed.
      */
+    @Deprecated
     public static void resetAllCounts() {
         VMDebug.resetAllocCount(VMDebug.KIND_ALL_COUNTS);
+    }
+
+    /**
+     * Returns the value of a particular runtime statistic or {@code null} if no
+     * such runtime statistic exists.
+     *
+     * <p>The following table lists the runtime statistics that the runtime supports.
+     * Note runtime statistics may be added or removed in a future API level.</p>
+     *
+     * <table>
+     *     <thead>
+     *         <tr>
+     *             <th>Runtime statistic name</th>
+     *             <th>Meaning</th>
+     *             <th>Example</th>
+     *             <th>Supported (API Levels)</th>
+     *         </tr>
+     *     </thead>
+     *     <tbody>
+     *         <tr>
+     *             <td>art.gc.gc-count</td>
+     *             <td>The number of garbage collection runs.</td>
+     *             <td>{@code 164}</td>
+     *             <td>23</td>
+     *         </tr>
+     *         <tr>
+     *             <td>art.gc.gc-time</td>
+     *             <td>The total duration of garbage collection runs in ms.</td>
+     *             <td>{@code 62364}</td>
+     *             <td>23</td>
+     *         </tr>
+     *         <tr>
+     *             <td>art.gc.bytes-allocated</td>
+     *             <td>The total number of bytes that the application allocated.</td>
+     *             <td>{@code 1463948408}</td>
+     *             <td>23</td>
+     *         </tr>
+     *         <tr>
+     *             <td>art.gc.bytes-freed</td>
+     *             <td>The total number of bytes that garbage collection reclaimed.</td>
+     *             <td>{@code 1313493084}</td>
+     *             <td>23</td>
+     *         </tr>
+     *         <tr>
+     *             <td>art.gc.blocking-gc-count</td>
+     *             <td>The number of blocking garbage collection runs.</td>
+     *             <td>{@code 2}</td>
+     *             <td>23</td>
+     *         </tr>
+     *         <tr>
+     *             <td>art.gc.blocking-gc-time</td>
+     *             <td>The total duration of blocking garbage collection runs in ms.</td>
+     *             <td>{@code 804}</td>
+     *             <td>23</td>
+     *         </tr>
+     *         <tr>
+     *             <td>art.gc.gc-count-rate-histogram</td>
+     *             <td>Every 10 seconds, the gc-count-rate is computed as the number of garbage
+     *                 collection runs that have occurred over the last 10
+     *                 seconds. art.gc.gc-count-rate-histogram is a histogram of the gc-count-rate
+     *                 samples taken since the process began. The histogram can be used to identify
+     *                 instances of high rates of garbage collection runs. For example, a histogram
+     *                 of "0:34503,1:45350,2:11281,3:8088,4:43,5:8" shows that most of the time
+     *                 there are between 0 and 2 garbage collection runs every 10 seconds, but there
+     *                 were 8 distinct 10-second intervals in which 5 garbage collection runs
+     *                 occurred.</td>
+     *             <td>{@code 0:34503,1:45350,2:11281,3:8088,4:43,5:8}</td>
+     *             <td>23</td>
+     *         </tr>
+     *         <tr>
+     *             <td>art.gc.blocking-gc-count-rate-histogram</td>
+     *             <td>Every 10 seconds, the blocking-gc-count-rate is computed as the number of
+     *                 blocking garbage collection runs that have occurred over the last 10
+     *                 seconds. art.gc.blocking-gc-count-rate-histogram is a histogram of the
+     *                 blocking-gc-count-rate samples taken since the process began. The histogram
+     *                 can be used to identify instances of high rates of blocking garbage
+     *                 collection runs. For example, a histogram of "0:99269,1:1,2:1" shows that
+     *                 most of the time there are zero blocking garbage collection runs every 10
+     *                 seconds, but there was one 10-second interval in which one blocking garbage
+     *                 collection run occurred, and there was one interval in which two blocking
+     *                 garbage collection runs occurred.</td>
+     *             <td>{@code 0:99269,1:1,2:1}</td>
+     *             <td>23</td>
+     *         </tr>
+     *     </tbody>
+     * </table>
+     *
+     * @param statName
+     *            the name of the runtime statistic to look up.
+     * @return the value of the specified runtime statistic or {@code null} if the
+     *         runtime statistic doesn't exist.
+     */
+    public static String getRuntimeStat(String statName) {
+        return VMDebug.getRuntimeStat(statName);
+    }
+
+    /**
+     * Returns a map of the names/values of the runtime statistics
+     * that {@link #getRuntimeStat(String)} supports.
+     *
+     * @return a map of the names/values of the supported runtime statistics.
+     */
+    public static Map<String, String> getRuntimeStats() {
+        return VMDebug.getRuntimeStats();
     }
 
     /**
@@ -1286,7 +1770,10 @@ href="{@docRoot}guide/developing/tools/traceview.html">Traceview: A Graphical Lo
      *           + icount.globalMethodInvocations());
      *   }
      * </pre>
+     *
+     * @deprecated Instruction counting is no longer supported.
      */
+    @Deprecated
     public static class InstructionCount {
         private static final int NUM_INSTR =
             OpcodeInfo.MAXIMUM_PACKED_VALUE + 1;

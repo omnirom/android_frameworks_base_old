@@ -37,12 +37,13 @@ interface IPowerManager
     boolean isWakeLockLevelSupported(int level);
 
     void userActivity(long time, int event, int flags);
-    void wakeUp(long time);
+    void wakeUp(long time, String reason, String opPackageName);
     void goToSleep(long time, int reason, int flags);
     void nap(long time);
     boolean isInteractive();
     boolean isPowerSaveMode();
     boolean setPowerSaveMode(boolean mode);
+    boolean isDeviceIdleMode();
 
     void reboot(boolean confirm, String reason, boolean wait);
     void shutdown(boolean confirm, boolean wait);
@@ -50,6 +51,7 @@ interface IPowerManager
 
     void setStayOnSetting(int val);
     void boostScreenBrightness(long time);
+    boolean isScreenBrightnessBoosted();
 
     // temporarily overrides the screen brightness settings to allow the user to
     // see the effect of a settings change without applying it immediately

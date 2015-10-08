@@ -47,6 +47,7 @@ import libcore.util.ZoneInfoDB;
  *     before 1st Jan 1970 UTC).</li>
  *     <li>Much of the formatting / parsing assumes ASCII text and is therefore not suitable for
  *     use with non-ASCII scripts.</li>
+ *     <li>No support for pseudo-zones like "GMT-07:00".</li>
  * </ul>
  *
  * @deprecated Use {@link java.util.GregorianCalendar} instead.
@@ -215,13 +216,15 @@ public class Time {
      * <p>
      * If "ignoreDst" is true, then this method sets the "isDst" field to -1
      * (the "unknown" value) before normalizing.  It then computes the
-     * correct value for "isDst".
+     * time in milliseconds and sets the correct value for "isDst" if the
+     * fields resolve to a valid date / time.
      *
      * <p>
      * See {@link #toMillis(boolean)} for more information about when to
-     * use <tt>true</tt> or <tt>false</tt> for "ignoreDst".
+     * use <tt>true</tt> or <tt>false</tt> for "ignoreDst" and when {@code -1}
+     * might be returned.
      *
-     * @return the UTC milliseconds since the epoch
+     * @return the UTC milliseconds since the epoch, or {@code -1}
      */
     public long normalize(boolean ignoreDst) {
         calculator.copyFieldsFromTime(this);
@@ -316,6 +319,11 @@ public class Time {
      * Compare two {@code Time} objects and return a negative number if {@code
      * a} is less than {@code b}, a positive number if {@code a} is greater than
      * {@code b}, or 0 if they are equal.
+     *
+     * <p>
+     * This method can return an incorrect answer when the date / time fields of
+     * either {@code Time} have been set to a local time that contradicts the
+     * available timezone information.
      *
      * @param a first {@code Time} instance to compare
      * @param b second {@code Time} instance to compare
@@ -730,6 +738,14 @@ public class Time {
      * <p>
      * You should also use <tt>toMillis(false)</tt> if you want
      * to read back the same milliseconds that you set with {@link #set(long)}
+     *
+     * <p>
+     * This method can return {@code -1} when the date / time fields have been
+     * set to a local time that conflicts with available timezone information.
+     * For example, when daylight savings transitions cause an hour to be
+     * skipped: times within that hour will return {@code -1} if isDst =
+     * {@code -1}.
+     *
      * or {@link #set(Time)} or after parsing a date string.
      */
     public long toMillis(boolean ignoreDst) {
@@ -825,6 +841,10 @@ public class Time {
      * Returns true if the time represented by this Time object occurs before
      * the given time.
      *
+     * <p>
+     * Equivalent to {@code Time.compare(this, that) &lt; 0}. See
+     * {@link #compare(Time, Time)} for details.
+     *
      * @param that a given Time object to compare against
      * @return true if this time is less than the given time
      */
@@ -836,6 +856,10 @@ public class Time {
     /**
      * Returns true if the time represented by this Time object occurs after
      * the given time.
+     *
+     * <p>
+     * Equivalent to {@code Time.compare(this, that) &gt; 0}. See
+     * {@link #compare(Time, Time)} for details.
      *
      * @param that a given Time object to compare against
      * @return true if this time is greater than the given time
@@ -916,6 +940,10 @@ public class Time {
     /**
      * Returns true if the day of the given time is the epoch on the Julian Calendar
      * (January 1, 1970 on the Gregorian calendar).
+     *
+     * <p>
+     * This method can return an incorrect answer when the date / time fields have
+     * been set to a local time that contradicts the available timezone information.
      *
      * @param time the time to test
      * @return true if epoch.

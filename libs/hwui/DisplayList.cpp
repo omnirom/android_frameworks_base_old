@@ -24,7 +24,6 @@
 #include "Debug.h"
 #include "DisplayList.h"
 #include "DisplayListOp.h"
-#include "DisplayListLogBuffer.h"
 
 namespace android {
 namespace uirenderer {
@@ -42,45 +41,24 @@ void DisplayListData::cleanupResources() {
     ResourceCache& resourceCache = ResourceCache::getInstance();
     resourceCache.lock();
 
-    for (size_t i = 0; i < bitmapResources.size(); i++) {
-        resourceCache.decrementRefcountLocked(bitmapResources.itemAt(i));
-    }
-
-    for (size_t i = 0; i < ownedBitmapResources.size(); i++) {
-        const SkBitmap* bitmap = ownedBitmapResources.itemAt(i);
-        resourceCache.decrementRefcountLocked(bitmap);
-        resourceCache.destructorLocked(bitmap);
-    }
-
     for (size_t i = 0; i < patchResources.size(); i++) {
         resourceCache.decrementRefcountLocked(patchResources.itemAt(i));
     }
 
-    for (size_t i = 0; i < sourcePaths.size(); i++) {
-        resourceCache.decrementRefcountLocked(sourcePaths.itemAt(i));
-    }
-
     resourceCache.unlock();
 
-    for (size_t i = 0; i < paints.size(); i++) {
-        delete paints.itemAt(i);
+    for (size_t i = 0; i < pathResources.size(); i++) {
+        const SkPath* path = pathResources.itemAt(i);
+        if (path->unique() && Caches::hasInstance()) {
+            Caches::getInstance().pathCache.removeDeferred(path);
+        }
+        delete path;
     }
 
-    for (size_t i = 0; i < regions.size(); i++) {
-        delete regions.itemAt(i);
-    }
-
-    for (size_t i = 0; i < paths.size(); i++) {
-        delete paths.itemAt(i);
-    }
-
-    bitmapResources.clear();
-    ownedBitmapResources.clear();
     patchResources.clear();
-    sourcePaths.clear();
+    pathResources.clear();
     paints.clear();
     regions.clear();
-    paths.clear();
 }
 
 size_t DisplayListData::addChild(DrawRenderNodeOp* op) {

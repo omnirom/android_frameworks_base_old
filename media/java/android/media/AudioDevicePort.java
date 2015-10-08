@@ -36,12 +36,13 @@ public class AudioDevicePort extends AudioPort {
     private final int mType;
     private final String mAddress;
 
-    AudioDevicePort(AudioHandle handle, int[] samplingRates, int[] channelMasks,
+    AudioDevicePort(AudioHandle handle, String deviceName,
+            int[] samplingRates, int[] channelMasks, int[] channelIndexMasks,
             int[] formats, AudioGain[] gains, int type, String address) {
         super(handle,
              (AudioManager.isInputDevice(type) == true)  ?
                         AudioPort.ROLE_SOURCE : AudioPort.ROLE_SINK,
-             samplingRates, channelMasks, formats, gains);
+             deviceName, samplingRates, channelMasks, channelIndexMasks, formats, gains);
         mType = type;
         mAddress = address;
     }
@@ -80,6 +81,16 @@ public class AudioDevicePort extends AudioPort {
     @Override
     public boolean equals(Object o) {
         if (o == null || !(o instanceof AudioDevicePort)) {
+            return false;
+        }
+        AudioDevicePort other = (AudioDevicePort)o;
+        if (mType != other.type()) {
+            return false;
+        }
+        if (mAddress == null && other.address() != null) {
+            return false;
+        }
+        if (!mAddress.equals(other.address())) {
             return false;
         }
         return super.equals(o);

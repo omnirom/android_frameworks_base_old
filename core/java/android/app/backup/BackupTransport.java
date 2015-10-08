@@ -162,8 +162,17 @@ public class BackupTransport {
      * this is called, {@link #finishBackup} will be called to ensure the request
      * is sent and received successfully.
      *
+     * <p>If the transport returns anything other than TRANSPORT_OK from this method,
+     * the OS will halt the current initialize operation and schedule a retry in the
+     * near future.  Even if the transport is in a state such that attempting to
+     * "initialize" the backend storage is meaningless -- for example, if there is
+     * no current live dataset at all, or there is no authenticated account under which
+     * to store the data remotely -- the transport should return TRANSPORT_OK here
+     * and treat the initializeDevice() / finishBackup() pair as a graceful no-op.
+     *
      * @return One of {@link BackupTransport#TRANSPORT_OK} (OK so far) or
-     *   {@link BackupTransport#TRANSPORT_ERROR} (on network error or other failure).
+     *   {@link BackupTransport#TRANSPORT_ERROR} (to retry following network error
+     *   or other failure).
      */
     public int initializeDevice() {
         return BackupTransport.TRANSPORT_ERROR;
@@ -393,6 +402,33 @@ public class BackupTransport {
     }
 
     /**
+     * Called after {@link #performFullBackup} to make sure that the transport is willing to
+     * handle a full-data backup operation of the specified size on the current package.
+     * If the transport returns anything other than TRANSPORT_OK, the package's backup
+     * operation will be skipped (and {@link #finishBackup() invoked} with no data for that
+     * package being passed to {@link #sendBackupData}.
+     *
+     * <p class="note">The platform does no size-based rejection of full backup attempts on
+     * its own: it is always the responsibility of the transport to implement its own policy.
+     * In particular, even if the preflighted payload size is zero, the platform will still call
+     * this method and will proceed to back up an archive metadata header with no file content
+     * if this method returns TRANSPORT_OK.  To avoid storing such payloads the transport
+     * must recognize this case and return TRANSPORT_PACKAGE_REJECTED.
+     *
+     * Added in {@link android.os.Build.VERSION_CODES#M}.
+     *
+     * @param size The estimated size of the full-data payload for this app.  This includes
+     *         manifest and archive format overhead, but is not guaranteed to be precise.
+     * @return TRANSPORT_OK if the platform is to proceed with the full-data backup,
+     *         TRANSPORT_PACKAGE_REJECTED if the proposed payload size is too large for
+     *         the transport to handle, or TRANSPORT_ERROR to indicate a fatal error
+     *         condition that means the platform cannot perform a backup at this time.
+     */
+    public int checkFullBackupSize(long size) {
+        return BackupTransport.TRANSPORT_OK;
+    }
+
+    /**
      * Tells the transport to read {@code numBytes} bytes of data from the socket file
      * descriptor provided in the {@link #performFullBackup(PackageInfo, ParcelFileDescriptor)}
      * call, and deliver those bytes to the datastore.
@@ -444,7 +480,7 @@ public class BackupTransport {
      * transport level).
      *
      * <p>After this method returns zero, the system will then call
-     * {@link #getNextFullRestorePackage()} to begin the restore process for the next
+     * {@link #nextRestorePackage()} to begin the restore process for the next
      * application, and the sequence begins again.
      *
      * <p>The transport should always close this socket when returning from this method.
@@ -585,6 +621,11 @@ public class BackupTransport {
         @Override
         public int performFullBackup(PackageInfo targetPackage, ParcelFileDescriptor socket) throws RemoteException {
             return BackupTransport.this.performFullBackup(targetPackage, socket);
+        }
+
+        @Override
+        public int checkFullBackupSize(long size) {
+            return BackupTransport.this.checkFullBackupSize(size);
         }
 
         @Override

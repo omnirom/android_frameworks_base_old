@@ -29,13 +29,18 @@ interface IWallpaperManager {
     /**
      * Set the wallpaper.
      */
-    ParcelFileDescriptor setWallpaper(String name);
+    ParcelFileDescriptor setWallpaper(String name, in String callingPackage);
 
     /**
      * Set the keyguard wallpaper.
      * @hide
      */
     ParcelFileDescriptor setKeyguardWallpaper(String name);
+
+    /**
+     * Set the live wallpaper.
+     */
+    void setWallpaperComponentChecked(in ComponentName name, in String callingPackage);
 
     /**
      * Set the live wallpaper.
@@ -63,7 +68,7 @@ interface IWallpaperManager {
     /**
      * Clear the wallpaper.
      */
-    void clearWallpaper();
+    void clearWallpaper(in String callingPackage);
 
     /*
      * Clear the keyguard wallpaper.
@@ -80,7 +85,7 @@ interface IWallpaperManager {
      * Sets the dimension hint for the wallpaper. These hints indicate the desired
      * minimum width and height for the wallpaper.
      */
-    void setDimensionHints(in int width, in int height);
+    void setDimensionHints(in int width, in int height, in String callingPackage);
 
     /**
      * Returns the desired minimum width for the wallpaper.
@@ -95,7 +100,7 @@ interface IWallpaperManager {
     /**
      * Sets extra padding that we would like the wallpaper to have outside of the display.
      */
-    void setDisplayPadding(in Rect padding);
+    void setDisplayPadding(in Rect padding, in String callingPackage);
 
     /**
      * Returns the name of the wallpaper. Private API.
@@ -106,4 +111,9 @@ interface IWallpaperManager {
      * Informs the service that wallpaper settings have been restored. Private API.
      */
     void settingsRestored();
+
+    /**
+     * Check whether wallpapers are supported for the calling user.
+     */
+    boolean isWallpaperSupported(in String callingPackage);
 }

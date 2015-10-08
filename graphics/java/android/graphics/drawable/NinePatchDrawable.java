@@ -266,7 +266,7 @@ public class NinePatchDrawable extends Drawable {
 
     @Override
     public int getChangingConfigurations() {
-        return super.getChangingConfigurations() | mNinePatchState.mChangingConfigurations;
+        return super.getChangingConfigurations() | mNinePatchState.getChangingConfigurations();
     }
 
     @Override
@@ -338,12 +338,12 @@ public class NinePatchDrawable extends Drawable {
     }
 
     @Override
-    public void setColorFilter(ColorFilter cf) {
-        if (mPaint == null && cf == null) {
+    public void setColorFilter(ColorFilter colorFilter) {
+        if (mPaint == null && colorFilter == null) {
             // Fast common case -- leave at no color filter.
             return;
         }
-        getPaint().setColorFilter(cf);
+        getPaint().setColorFilter(colorFilter);
         invalidateSelf();
     }
 
@@ -394,6 +394,14 @@ public class NinePatchDrawable extends Drawable {
     }
 
     @Override
+    public boolean isFilterBitmap() {
+        if (mPaint == null) {
+            return false;
+        }
+        return getPaint().isFilterBitmap();
+    }
+
+    @Override
     public void inflate(Resources r, XmlPullParser parser, AttributeSet attrs, Theme theme)
             throws XmlPullParserException, IOException {
         super.inflate(r, parser, attrs, theme);
@@ -401,6 +409,8 @@ public class NinePatchDrawable extends Drawable {
         final TypedArray a = obtainAttributes(r, theme, attrs, R.styleable.NinePatchDrawable);
         updateStateFromTypedArray(a);
         a.recycle();
+
+        updateLocalState(r);
     }
 
     /**
@@ -468,11 +478,8 @@ public class NinePatchDrawable extends Drawable {
             state.mTint = tint;
         }
 
-        // Update local properties.
-        initializeWithState(state, r);
-
-        // Push density applied by setNinePatchState into state.
-        state.mTargetDensity = mTargetDensity;
+        final int densityDpi = r.getDisplayMetrics().densityDpi;
+        state.mTargetDensity = densityDpi == 0 ? DisplayMetrics.DENSITY_DEFAULT : densityDpi;
     }
 
     @Override
@@ -480,23 +487,32 @@ public class NinePatchDrawable extends Drawable {
         super.applyTheme(t);
 
         final NinePatchState state = mNinePatchState;
-        if (state == null || state.mThemeAttrs == null) {
+        if (state == null) {
             return;
         }
 
-        final TypedArray a = t.resolveAttributes(state.mThemeAttrs, R.styleable.NinePatchDrawable);
-        try {
-            updateStateFromTypedArray(a);
-        } catch (XmlPullParserException e) {
-            throw new RuntimeException(e);
-        } finally {
-            a.recycle();
+        if (state.mThemeAttrs != null) {
+            final TypedArray a = t.resolveAttributes(
+                    state.mThemeAttrs, R.styleable.NinePatchDrawable);
+            try {
+                updateStateFromTypedArray(a);
+            } catch (XmlPullParserException e) {
+                throw new RuntimeException(e);
+            } finally {
+                a.recycle();
+            }
         }
+
+        if (state.mTint != null && state.mTint.canApplyTheme()) {
+            state.mTint = state.mTint.obtainForTheme(t);
+        }
+
+        updateLocalState(t.getResources());
     }
 
     @Override
     public boolean canApplyTheme() {
-        return mNinePatchState != null && mNinePatchState.mThemeAttrs != null;
+        return mNinePatchState != null && mNinePatchState.canApplyTheme();
     }
 
     public Paint getPaint() {
@@ -645,7 +661,8 @@ public class NinePatchDrawable extends Drawable {
 
         @Override
         public boolean canApplyTheme() {
-            return mThemeAttrs != null;
+            return mThemeAttrs != null
+                    || (mTint != null && mTint.canApplyTheme());
         }
 
         @Override
@@ -669,7 +686,8 @@ public class NinePatchDrawable extends Drawable {
 
         @Override
         public int getChangingConfigurations() {
-            return mChangingConfigurations;
+            return mChangingConfigurations
+                    | (mTint != null ? mTint.getChangingConfigurations() : 0);
         }
     }
 
@@ -680,18 +698,25 @@ public class NinePatchDrawable extends Drawable {
     private NinePatchDrawable(NinePatchState state, Resources res) {
         mNinePatchState = state;
 
-        initializeWithState(mNinePatchState, res);
+        updateLocalState(res);
+
+        // Push density applied by setNinePatchState into state.
+        mNinePatchState.mTargetDensity = mTargetDensity;
     }
 
     /**
      * Initializes local dynamic properties from state.
      */
-    private void initializeWithState(NinePatchState state, Resources res) {
+    private void updateLocalState(Resources res) {
+        final NinePatchState state = mNinePatchState;
+
         if (res != null) {
-            mTargetDensity = res.getDisplayMetrics().densityDpi;
+            final int densityDpi = res.getDisplayMetrics().densityDpi;
+            mTargetDensity = densityDpi == 0 ? DisplayMetrics.DENSITY_DEFAULT : densityDpi;
         } else {
             mTargetDensity = state.mTargetDensity;
         }
+
 
         // If we can, avoid calling any methods that initialize Paint.
         if (state.mDither != DEFAULT_DITHER) {

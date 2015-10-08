@@ -16,6 +16,8 @@
 
 package com.android.server.dreams;
 
+import com.android.internal.logging.MetricsLogger;
+
 import android.content.ComponentName;
 import android.content.Context;
 import android.content.Intent;
@@ -25,6 +27,7 @@ import android.os.Handler;
 import android.os.IBinder;
 import android.os.RemoteException;
 import android.os.IBinder.DeathRecipient;
+import android.os.SystemClock;
 import android.os.Trace;
 import android.os.UserHandle;
 import android.service.dreams.DreamService;
@@ -55,13 +58,14 @@ final class DreamController {
     private final Handler mHandler;
     private final Listener mListener;
     private final IWindowManager mIWindowManager;
+    private long mDreamStartTime;
 
     private final Intent mDreamingStartedIntent = new Intent(Intent.ACTION_DREAMING_STARTED)
             .addFlags(Intent.FLAG_RECEIVER_REGISTERED_ONLY);
     private final Intent mDreamingStoppedIntent = new Intent(Intent.ACTION_DREAMING_STOPPED)
             .addFlags(Intent.FLAG_RECEIVER_REGISTERED_ONLY);
 
-    private final Intent mCloseNotificationShadeIntent = new Intent(Intent.ACTION_CLOSE_SYSTEM_DIALOGS);
+    private final Intent mCloseNotificationShadeIntent;
 
     private DreamRecord mCurrentDream;
 
@@ -88,6 +92,8 @@ final class DreamController {
         mHandler = handler;
         mListener = listener;
         mIWindowManager = WindowManagerGlobal.getWindowManagerService();
+        mCloseNotificationShadeIntent = new Intent(Intent.ACTION_CLOSE_SYSTEM_DIALOGS);
+        mCloseNotificationShadeIntent.putExtra("reason", "dream");
     }
 
     public void dump(PrintWriter pw) {
@@ -123,6 +129,10 @@ final class DreamController {
 
             mCurrentDream = new DreamRecord(token, name, isTest, canDoze, userId);
 
+            mDreamStartTime = SystemClock.elapsedRealtime();
+            MetricsLogger.visible(mContext,
+                    mCurrentDream.mCanDoze ? MetricsLogger.DOZING : MetricsLogger.DREAMING);
+
             try {
                 mIWindowManager.addWindowToken(token, WindowManager.LayoutParams.TYPE_DREAM);
             } catch (RemoteException ex) {
@@ -136,7 +146,8 @@ final class DreamController {
             intent.addFlags(Intent.FLAG_ACTIVITY_EXCLUDE_FROM_RECENTS);
             try {
                 if (!mContext.bindServiceAsUser(intent, mCurrentDream,
-                        Context.BIND_AUTO_CREATE, new UserHandle(userId))) {
+                        Context.BIND_AUTO_CREATE | Context.BIND_FOREGROUND_SERVICE,
+                        new UserHandle(userId))) {
                     Slog.e(TAG, "Unable to bind dream service: " + intent);
                     stopDream(true /*immediate*/);
                     return;
@@ -184,6 +195,11 @@ final class DreamController {
             Slog.i(TAG, "Stopping dream: name=" + oldDream.mName
                     + ", isTest=" + oldDream.mIsTest + ", canDoze=" + oldDream.mCanDoze
                     + ", userId=" + oldDream.mUserId);
+            MetricsLogger.hidden(mContext,
+                    oldDream.mCanDoze ? MetricsLogger.DOZING : MetricsLogger.DREAMING);
+            MetricsLogger.histogram(mContext,
+                    oldDream.mCanDoze ? "dozing_minutes" : "dreaming_minutes" ,
+                    (int) ((SystemClock.elapsedRealtime() - mDreamStartTime) / (1000L * 60L)));
 
             mHandler.removeCallbacks(mStopUnconnectedDreamRunnable);
             mHandler.removeCallbacks(mStopStubbornDreamRunnable);

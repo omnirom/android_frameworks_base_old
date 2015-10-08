@@ -69,6 +69,14 @@ public interface RILConstants {
     int SS_MODIFIED_TO_USSD = 25;             /* SS request modified to USSD */
     int SUBSCRIPTION_NOT_SUPPORTED = 26;      /* Subscription not supported */
     int SS_MODIFIED_TO_SS = 27;               /* SS request modified to different SS request */
+    int SIM_ALREADY_POWERED_OFF = 29;         /* SAP: 0x03, Error card aleready powered off */
+    int SIM_ALREADY_POWERED_ON = 30;          /* SAP: 0x05, Error card already powered on */
+    int SIM_DATA_NOT_AVAILABLE = 31;          /* SAP: 0x06, Error data not available */
+    int SIM_SAP_CONNECT_FAILURE = 32;
+    int SIM_SAP_MSG_SIZE_TOO_LARGE = 33;
+    int SIM_SAP_MSG_SIZE_TOO_SMALL = 34;
+    int SIM_SAP_CONNECT_OK_CALL_ONGOING = 35;
+    int LCE_NOT_SUPPORTED = 36;               /* Link Capacity Estimation (LCE) not supported */
 
 
     /* NETWORK_MODE_* See ril.h RIL_REQUEST_SET_PREFERRED_NETWORK_TYPE */
@@ -134,6 +142,11 @@ public interface RILConstants {
     int NV_CONFIG_RELOAD_RESET = 1;
     int NV_CONFIG_ERASE_RESET = 2;
     int NV_CONFIG_FACTORY_RESET = 3;
+
+    /* LCE service related constants. */
+    int LCE_NOT_AVAILABLE = -1;
+    int LCE_STOPPED = 0;
+    int LCE_ACTIVE = 1;
 
 /*
 cat include/telephony/ril.h | \
@@ -307,6 +320,10 @@ cat include/telephony/ril.h | \
     int RIL_REQUEST_SHUTDOWN = 129;
     int RIL_REQUEST_GET_RADIO_CAPABILITY = 130;
     int RIL_REQUEST_SET_RADIO_CAPABILITY = 131;
+    int RIL_REQUEST_START_LCE = 132;
+    int RIL_REQUEST_STOP_LCE = 133;
+    int RIL_REQUEST_PULL_LCEDATA = 134;
+    int RIL_REQUEST_GET_ACTIVITY_INFO = 135;
 
     int RIL_UNSOL_RESPONSE_BASE = 1000;
     int RIL_UNSOL_RESPONSE_RADIO_STATE_CHANGED = 1000;
@@ -354,5 +371,6 @@ cat include/telephony/ril.h | \
     int RIL_UNSOL_RADIO_CAPABILITY = 1042;
     int RIL_UNSOL_ON_SS = 1043;
     int RIL_UNSOL_STK_CC_ALPHA_NOTIFY = 1044;
+    int RIL_UNSOL_LCEDATA_RECV = 1045;
     int RIL_UNSOL_STK_SEND_SMS_RESULT = 11002; /* Samsung STK */
 }

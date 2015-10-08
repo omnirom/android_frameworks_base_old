@@ -23,10 +23,13 @@ import android.os.Looper;
 import android.os.Message;
 import android.view.Surface;
 
+import dalvik.system.VMRuntime;
+
 import java.lang.ref.WeakReference;
 import java.nio.ByteBuffer;
 import java.nio.ByteOrder;
 import java.nio.NioUtils;
+import java.util.concurrent.atomic.AtomicBoolean;
 
 /**
  * <p>The ImageReader class allows direct application access to image data
@@ -34,7 +37,7 @@ import java.nio.NioUtils;
  *
  * <p>Several Android media API classes accept Surface objects as targets to
  * render to, including {@link MediaPlayer}, {@link MediaCodec},
- * {@link android.hardware.camera2.CameraDevice}, and
+ * {@link android.hardware.camera2.CameraDevice}, {@link ImageWriter} and
  * {@link android.renderscript.Allocation RenderScript Allocations}. The image
  * sizes and formats that can be used with each source vary, and should be
  * checked in the documentation for the specific API.</p>
@@ -67,33 +70,52 @@ public class ImageReader implements AutoCloseable {
     private static final int ACQUIRE_MAX_IMAGES = 2;
 
     /**
-     * <p>Create a new reader for images of the desired size and format.</p>
+     * <p>
+     * Create a new reader for images of the desired size and format.
+     * </p>
+     * <p>
+     * The {@code maxImages} parameter determines the maximum number of
+     * {@link Image} objects that can be be acquired from the
+     * {@code ImageReader} simultaneously. Requesting more buffers will use up
+     * more memory, so it is important to use only the minimum number necessary
+     * for the use case.
+     * </p>
+     * <p>
+     * The valid sizes and formats depend on the source of the image data.
+     * </p>
+     * <p>
+     * If the {@code format} is {@link ImageFormat#PRIVATE PRIVATE}, the created
+     * {@link ImageReader} will produce images that are not directly accessible
+     * by the application. The application can still acquire images from this
+     * {@link ImageReader}, and send them to the
+     * {@link android.hardware.camera2.CameraDevice camera} for reprocessing via
+     * {@link ImageWriter} interface. However, the {@link Image#getPlanes()
+     * getPlanes()} will return an empty array for {@link ImageFormat#PRIVATE
+     * PRIVATE} format images. The application can check if an existing reader's
+     * format by calling {@link #getImageFormat()}.
+     * </p>
+     * <p>
+     * {@link ImageFormat#PRIVATE PRIVATE} format {@link ImageReader
+     * ImageReaders} are more efficient to use when application access to image
+     * data is not necessary, compared to ImageReaders using other format such
+     * as {@link ImageFormat#YUV_420_888 YUV_420_888}.
+     * </p>
      *
-     * <p>The {@code maxImages} parameter determines the maximum number of {@link Image}
-     * objects that can be be acquired from the {@code ImageReader}
-     * simultaneously. Requesting more buffers will use up more memory, so it is
-     * important to use only the minimum number necessary for the use case.</p>
-     *
-     * <p>The valid sizes and formats depend on the source of the image
-     * data.</p>
-     *
-     * @param width
-     *            The default width in pixels of the Images that this reader will produce.
-     * @param height
-     *            The default height in pixels of the Images that this reader will produce.
-     * @param format
-     *            The format of the Image that this reader will produce. This
+     * @param width The default width in pixels of the Images that this reader
+     *            will produce.
+     * @param height The default height in pixels of the Images that this reader
+     *            will produce.
+     * @param format The format of the Image that this reader will produce. This
      *            must be one of the {@link android.graphics.ImageFormat} or
-     *            {@link android.graphics.PixelFormat} constants. Note that
-     *            not all formats is supported, like ImageFormat.NV21.
-     * @param maxImages
-     *            The maximum number of images the user will want to
-     *            access simultaneously. This should be as small as possible to limit
-     *            memory use. Once maxImages Images are obtained by the user, one of them
-     *            has to be released before a new Image will become available for access
-     *            through {@link #acquireLatestImage()} or {@link #acquireNextImage()}.
+     *            {@link android.graphics.PixelFormat} constants. Note that not
+     *            all formats are supported, like ImageFormat.NV21.
+     * @param maxImages The maximum number of images the user will want to
+     *            access simultaneously. This should be as small as possible to
+     *            limit memory use. Once maxImages Images are obtained by the
+     *            user, one of them has to be released before a new Image will
+     *            become available for access through
+     *            {@link #acquireLatestImage()} or {@link #acquireNextImage()}.
      *            Must be greater than 0.
-     *
      * @see Image
      */
     public static ImageReader newInstance(int width, int height, int format, int maxImages) {
@@ -128,6 +150,13 @@ public class ImageReader implements AutoCloseable {
         nativeInit(new WeakReference<ImageReader>(this), width, height, format, maxImages);
 
         mSurface = nativeGetSurface();
+
+        // Estimate the native buffer allocation size and register it so it gets accounted for
+        // during GC. Note that this doesn't include the buffers required by the buffer queue
+        // itself and the buffers requested by the producer.
+        mEstimatedNativeAllocBytes = ImageUtils.getEstimatedNativeAllocBytes(width, height, format,
+                maxImages);
+        VMRuntime.getRuntime().registerNativeAllocation(mEstimatedNativeAllocBytes);
     }
 
     /**
@@ -275,7 +304,7 @@ public class ImageReader implements AutoCloseable {
      * @hide
      */
     public Image acquireNextImageNoThrowISE() {
-        SurfaceImage si = new SurfaceImage();
+        SurfaceImage si = new SurfaceImage(mFormat);
         return acquireNextSurfaceImage(si) == ACQUIRE_SUCCESS ? si : null;
     }
 
@@ -300,7 +329,7 @@ public class ImageReader implements AutoCloseable {
         switch (status) {
             case ACQUIRE_SUCCESS:
                 si.createSurfacePlanes();
-                si.setImageValid(true);
+                si.mIsImageValid = true;
             case ACQUIRE_NO_BUFS:
             case ACQUIRE_MAX_IMAGES:
                 break;
@@ -340,7 +369,9 @@ public class ImageReader implements AutoCloseable {
      * @see #acquireLatestImage
      */
     public Image acquireNextImage() {
-        SurfaceImage si = new SurfaceImage();
+        // Initialize with reader format, but can be overwritten by native if the image
+        // format is different from the reader format.
+        SurfaceImage si = new SurfaceImage(mFormat);
         int status = acquireNextSurfaceImage(si);
 
         switch (status) {
@@ -374,7 +405,7 @@ public class ImageReader implements AutoCloseable {
 
         si.clearSurfacePlanes();
         nativeReleaseImage(i);
-        si.setImageValid(false);
+        si.mIsImageValid = false;
     }
 
     /**
@@ -443,7 +474,12 @@ public class ImageReader implements AutoCloseable {
     @Override
     public void close() {
         setOnImageAvailableListener(null, null);
+        if (mSurface != null) mSurface.release();
         nativeClose();
+        if (mEstimatedNativeAllocBytes > 0) {
+            VMRuntime.getRuntime().registerNativeFree(mEstimatedNativeAllocBytes);
+            mEstimatedNativeAllocBytes = 0;
+        }
     }
 
     @Override
@@ -454,6 +490,57 @@ public class ImageReader implements AutoCloseable {
             super.finalize();
         }
     }
+
+    /**
+     * <p>
+     * Remove the ownership of this image from the ImageReader.
+     * </p>
+     * <p>
+     * After this call, the ImageReader no longer owns this image, and the image
+     * ownership can be transfered to another entity like {@link ImageWriter}
+     * via {@link ImageWriter#queueInputImage}. It's up to the new owner to
+     * release the resources held by this image. For example, if the ownership
+     * of this image is transfered to an {@link ImageWriter}, the image will be
+     * freed by the ImageWriter after the image data consumption is done.
+     * </p>
+     * <p>
+     * This method can be used to achieve zero buffer copy for use cases like
+     * {@link android.hardware.camera2.CameraDevice Camera2 API} PRIVATE and YUV
+     * reprocessing, where the application can select an output image from
+     * {@link ImageReader} and transfer this image directly to
+     * {@link ImageWriter}, where this image can be consumed by camera directly.
+     * For PRIVATE reprocessing, this is the only way to send input buffers to
+     * the {@link android.hardware.camera2.CameraDevice camera} for
+     * reprocessing.
+     * </p>
+     * <p>
+     * This is a package private method that is only used internally.
+     * </p>
+     *
+     * @param image The image to be detached from this ImageReader.
+     * @throws IllegalStateException If the ImageReader or image have been
+     *             closed, or the has been detached, or has not yet been
+     *             acquired.
+     */
+     void detachImage(Image image) {
+       if (image == null) {
+           throw new IllegalArgumentException("input image must not be null");
+       }
+       if (!isImageOwnedbyMe(image)) {
+           throw new IllegalArgumentException("Trying to detach an image that is not owned by"
+                   + " this ImageReader");
+       }
+
+        SurfaceImage si = (SurfaceImage) image;
+        si.throwISEIfImageIsInvalid();
+
+        if (si.isAttachable()) {
+            throw new IllegalStateException("Image was already detached from this ImageReader");
+        }
+
+        nativeDetachImage(image);
+        si.setDetached(true);
+   }
 
     /**
      * Only a subset of the formats defined in
@@ -483,11 +570,23 @@ public class ImageReader implements AutoCloseable {
             case ImageFormat.Y16:
             case ImageFormat.RAW_SENSOR:
             case ImageFormat.RAW10:
+            case ImageFormat.DEPTH16:
+            case ImageFormat.DEPTH_POINT_CLOUD:
                 return 1;
+            case ImageFormat.PRIVATE:
+                return 0;
             default:
                 throw new UnsupportedOperationException(
                         String.format("Invalid format specified %d", mFormat));
         }
+    }
+
+    private boolean isImageOwnedbyMe(Image image) {
+        if (!(image instanceof SurfaceImage)) {
+            return false;
+        }
+        SurfaceImage si = (SurfaceImage) image;
+        return si.getReader() == this;
     }
 
     /**
@@ -520,6 +619,7 @@ public class ImageReader implements AutoCloseable {
     private final int mMaxImages;
     private final int mNumPlanes;
     private final Surface mSurface;
+    private int mEstimatedNativeAllocBytes;
 
     private final Object mListenerLock = new Object();
     private OnImageAvailableListener mListener;
@@ -551,8 +651,8 @@ public class ImageReader implements AutoCloseable {
     }
 
     private class SurfaceImage extends android.media.Image {
-        public SurfaceImage() {
-            mIsImageValid = false;
+        public SurfaceImage(int format) {
+            mFormat = format;
         }
 
         @Override
@@ -568,56 +668,61 @@ public class ImageReader implements AutoCloseable {
 
         @Override
         public int getFormat() {
-            if (mIsImageValid) {
-                return ImageReader.this.mFormat;
-            } else {
-                throw new IllegalStateException("Image is already released");
-            }
+            throwISEIfImageIsInvalid();
+            int readerFormat = ImageReader.this.getImageFormat();
+            // Assume opaque reader always produce opaque images.
+            mFormat = (readerFormat == ImageFormat.PRIVATE) ? readerFormat :
+                nativeGetFormat(readerFormat);
+            return mFormat;
         }
 
         @Override
         public int getWidth() {
-            if (mIsImageValid) {
-                if (mWidth == -1) {
-                    mWidth = (getFormat() == ImageFormat.JPEG) ? ImageReader.this.getWidth() :
-                            nativeGetWidth();
-                }
-                return mWidth;
-            } else {
-                throw new IllegalStateException("Image is already released");
+            throwISEIfImageIsInvalid();
+            int width;
+            switch(getFormat()) {
+                case ImageFormat.JPEG:
+                case ImageFormat.DEPTH_POINT_CLOUD:
+                    width = ImageReader.this.getWidth();
+                    break;
+                default:
+                    width = nativeGetWidth(mFormat);
             }
+            return width;
         }
 
         @Override
         public int getHeight() {
-            if (mIsImageValid) {
-                if (mHeight == -1) {
-                    mHeight = (getFormat() == ImageFormat.JPEG) ? ImageReader.this.getHeight() :
-                            nativeGetHeight();
-                }
-                return mHeight;
-            } else {
-                throw new IllegalStateException("Image is already released");
+            throwISEIfImageIsInvalid();
+            int height;
+            switch(getFormat()) {
+                case ImageFormat.JPEG:
+                case ImageFormat.DEPTH_POINT_CLOUD:
+                    height = ImageReader.this.getHeight();
+                    break;
+                default:
+                    height = nativeGetHeight(mFormat);
             }
+            return height;
         }
 
         @Override
         public long getTimestamp() {
-            if (mIsImageValid) {
-                return mTimestamp;
-            } else {
-                throw new IllegalStateException("Image is already released");
-            }
+            throwISEIfImageIsInvalid();
+            return mTimestamp;
+        }
+
+        @Override
+        public void setTimestamp(long timestampNs) {
+            throwISEIfImageIsInvalid();
+            mTimestamp = timestampNs;
         }
 
         @Override
         public Plane[] getPlanes() {
-            if (mIsImageValid) {
-                // Shallow copy is fine.
-                return mPlanes.clone();
-            } else {
-                throw new IllegalStateException("Image is already released");
-            }
+            throwISEIfImageIsInvalid();
+            // Shallow copy is fine.
+            return mPlanes.clone();
         }
 
         @Override
@@ -629,12 +734,27 @@ public class ImageReader implements AutoCloseable {
             }
         }
 
-        private void setImageValid(boolean isValid) {
-            mIsImageValid = isValid;
+        @Override
+        boolean isAttachable() {
+            throwISEIfImageIsInvalid();
+            return mIsDetached.get();
         }
 
-        private boolean isImageValid() {
-            return mIsImageValid;
+        @Override
+        ImageReader getOwner() {
+            throwISEIfImageIsInvalid();
+            return ImageReader.this;
+        }
+
+        @Override
+        long getNativeContext() {
+            throwISEIfImageIsInvalid();
+            return mNativeBuffer;
+        }
+
+        private void setDetached(boolean detached) {
+            throwISEIfImageIsInvalid();
+            mIsDetached.getAndSet(detached);
         }
 
         private void clearSurfacePlanes() {
@@ -664,9 +784,7 @@ public class ImageReader implements AutoCloseable {
 
             @Override
             public ByteBuffer getBuffer() {
-                if (SurfaceImage.this.isImageValid() == false) {
-                    throw new IllegalStateException("Image is already released");
-                }
+                SurfaceImage.this.throwISEIfImageIsInvalid();
                 if (mBuffer != null) {
                     return mBuffer;
                 } else {
@@ -680,20 +798,14 @@ public class ImageReader implements AutoCloseable {
 
             @Override
             public int getPixelStride() {
-                if (SurfaceImage.this.isImageValid()) {
-                    return mPixelStride;
-                } else {
-                    throw new IllegalStateException("Image is already released");
-                }
+                SurfaceImage.this.throwISEIfImageIsInvalid();
+                return mPixelStride;
             }
 
             @Override
             public int getRowStride() {
-                if (SurfaceImage.this.isImageValid()) {
-                    return mRowStride;
-                } else {
-                    throw new IllegalStateException("Image is already released");
-                }
+                SurfaceImage.this.throwISEIfImageIsInvalid();
+                return mRowStride;
             }
 
             private void clearBuffer() {
@@ -720,7 +832,7 @@ public class ImageReader implements AutoCloseable {
          * This field is used to keep track of native object and used by native code only.
          * Don't modify.
          */
-        private long mLockedBuffer;
+        private long mNativeBuffer;
 
         /**
          * This field is set by native code during nativeImageSetup().
@@ -728,14 +840,15 @@ public class ImageReader implements AutoCloseable {
         private long mTimestamp;
 
         private SurfacePlane[] mPlanes;
-        private boolean mIsImageValid;
-        private int mHeight = -1;
-        private int mWidth = -1;
+        private int mFormat = ImageFormat.UNKNOWN;
+        // If this image is detached from the ImageReader.
+        private AtomicBoolean mIsDetached = new AtomicBoolean(false);
 
         private synchronized native ByteBuffer nativeImageGetBuffer(int idx, int readerFormat);
         private synchronized native SurfacePlane nativeCreatePlane(int idx, int readerFormat);
-        private synchronized native int nativeGetWidth();
-        private synchronized native int nativeGetHeight();
+        private synchronized native int nativeGetWidth(int format);
+        private synchronized native int nativeGetHeight(int format);
+        private synchronized native int nativeGetFormat(int readerFormat);
     }
 
     private synchronized native void nativeInit(Object weakSelf, int w, int h,
@@ -743,6 +856,7 @@ public class ImageReader implements AutoCloseable {
     private synchronized native void nativeClose();
     private synchronized native void nativeReleaseImage(Image i);
     private synchronized native Surface nativeGetSurface();
+    private synchronized native int nativeDetachImage(Image i);
 
     /**
      * @return A return code {@code ACQUIRE_*}

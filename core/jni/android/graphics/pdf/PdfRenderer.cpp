@@ -20,9 +20,13 @@
 #include "SkBitmap.h"
 #include "SkMatrix.h"
 #include "fpdfview.h"
-#include "fsdk_rendercontext.h"
 
-#include <android_runtime/AndroidRuntime.h>
+#pragma GCC diagnostic push
+#pragma GCC diagnostic ignored "-Wdelete-non-virtual-dtor"
+#include "fsdk_rendercontext.h"
+#pragma GCC diagnostic pop
+
+#include "core_jni_helpers.h"
 #include <vector>
 #include <utils/Log.h>
 #include <unistd.h>
@@ -46,7 +50,7 @@ static int sUnmatchedInitRequestCount = 0;
 static void initializeLibraryIfNeeded() {
     Mutex::Autolock _l(sLock);
     if (sUnmatchedInitRequestCount == 0) {
-        FPDF_InitLibrary(NULL);
+        FPDF_InitLibrary();
     }
     sUnmatchedInitRequestCount++;
 }
@@ -85,12 +89,12 @@ static jlong nativeCreate(JNIEnv* env, jclass thiz, jint fd, jlong size) {
         switch (error) {
             case FPDF_ERR_PASSWORD:
             case FPDF_ERR_SECURITY: {
-                jniThrowException(env, "java/lang/SecurityException",
-                        "cannot create document. Error:" + error);
+                jniThrowExceptionFmt(env, "java/lang/SecurityException",
+                        "cannot create document. Error: %ld", error);
             } break;
             default: {
-                jniThrowException(env, "java/io/IOException",
-                        "cannot create document. Error:" + error);
+                jniThrowExceptionFmt(env, "java/io/IOException",
+                        "cannot create document. Error: %ld", error);
             } break;
         }
         destroyLibraryIfNeeded();
@@ -161,12 +165,12 @@ static void renderPageBitmap(FPDF_BITMAP bitmap, FPDF_PAGE page, int destLeft, i
     // and FPDF_ANNOT flags. To add support for that refer to FPDF_RenderPage_Retail
     // in fpdfview.cpp
 
-    CRenderContext* pContext = FX_NEW CRenderContext;
+    CRenderContext* pContext = new CRenderContext;
 
     CPDF_Page* pPage = (CPDF_Page*) page;
     pPage->SetPrivateData((void*) 1, pContext, DropContext);
 
-    CFX_FxgeDevice* fxgeDevice = FX_NEW CFX_FxgeDevice;
+    CFX_FxgeDevice* fxgeDevice = new CFX_FxgeDevice;
     pContext->m_pDevice = fxgeDevice;
 
     // Reverse the bytes (last argument TRUE) since the Android
@@ -176,7 +180,7 @@ static void renderPageBitmap(FPDF_BITMAP bitmap, FPDF_PAGE page, int destLeft, i
     CPDF_RenderOptions* renderOptions = pContext->m_pOptions;
 
     if (!renderOptions) {
-        renderOptions = FX_NEW CPDF_RenderOptions;
+        renderOptions = new CPDF_RenderOptions;
         pContext->m_pOptions = renderOptions;
     }
 
@@ -201,7 +205,7 @@ static void renderPageBitmap(FPDF_BITMAP bitmap, FPDF_PAGE page, int destLeft, i
     clip.bottom = destBottom;
     fxgeDevice->SetClip_Rect(&clip);
 
-    CPDF_RenderContext* pageContext = FX_NEW CPDF_RenderContext;
+    CPDF_RenderContext* pageContext = new CPDF_RenderContext;
     pContext->m_pContext = pageContext;
     pageContext->Create(pPage);
 
@@ -215,15 +219,20 @@ static void renderPageBitmap(FPDF_BITMAP bitmap, FPDF_PAGE page, int destLeft, i
         matrix.Set(1, 0, 0, -1, 0, pPage->GetPageHeight());
 
         SkScalar transformValues[6];
-        transform->asAffine(transformValues);
+        if (transform->asAffine(transformValues)) {
+            matrix.Concat(transformValues[SkMatrix::kAScaleX], transformValues[SkMatrix::kASkewY],
+                    transformValues[SkMatrix::kASkewX], transformValues[SkMatrix::kAScaleY],
+                    transformValues[SkMatrix::kATransX], transformValues[SkMatrix::kATransY]);
+        } else {
+            // Already checked for a return value of false in the caller, so this should never
+            // happen.
+            ALOGE("Error rendering page!");
+        }
 
-        matrix.Concat(transformValues[SkMatrix::kAScaleX], transformValues[SkMatrix::kASkewY],
-                transformValues[SkMatrix::kASkewX], transformValues[SkMatrix::kAScaleY],
-                transformValues[SkMatrix::kATransX], transformValues[SkMatrix::kATransY]);
     }
     pageContext->AppendObjectList(pPage, &matrix);
 
-    pContext->m_pRenderer = FX_NEW CPDF_ProgressiveRenderer;
+    pContext->m_pRenderer = new CPDF_ProgressiveRenderer;
     pContext->m_pRenderer->Start(pageContext, fxgeDevice, renderOptions, NULL);
 
     fxgeDevice->RestoreState();
@@ -234,20 +243,21 @@ static void renderPageBitmap(FPDF_BITMAP bitmap, FPDF_PAGE page, int destLeft, i
 }
 
 static void nativeRenderPage(JNIEnv* env, jclass thiz, jlong documentPtr, jlong pagePtr,
-        jlong bitmapPtr, jint destLeft, jint destTop, jint destRight, jint destBottom,
+        jobject jbitmap, jint destLeft, jint destTop, jint destRight, jint destBottom,
         jlong matrixPtr, jint renderMode) {
 
-    FPDF_DOCUMENT document = reinterpret_cast<FPDF_DOCUMENT>(documentPtr);
     FPDF_PAGE page = reinterpret_cast<FPDF_PAGE>(pagePtr);
-    SkBitmap* skBitmap = reinterpret_cast<SkBitmap*>(bitmapPtr);
     SkMatrix* skMatrix = reinterpret_cast<SkMatrix*>(matrixPtr);
 
-    skBitmap->lockPixels();
+    SkBitmap skBitmap;
+    GraphicsJNI::getSkBitmap(env, jbitmap, &skBitmap);
 
-    const int stride = skBitmap->width() * 4;
+    SkAutoLockPixels alp(skBitmap);
 
-    FPDF_BITMAP bitmap = FPDFBitmap_CreateEx(skBitmap->width(), skBitmap->height(),
-            FPDFBitmap_BGRA, skBitmap->getPixels(), stride);
+    const int stride = skBitmap.width() * 4;
+
+    FPDF_BITMAP bitmap = FPDFBitmap_CreateEx(skBitmap.width(), skBitmap.height(),
+            FPDFBitmap_BGRA, skBitmap.getPixels(), stride);
 
     if (!bitmap) {
         ALOGE("Erorr creating bitmap");
@@ -261,11 +271,16 @@ static void nativeRenderPage(JNIEnv* env, jclass thiz, jlong documentPtr, jlong 
         renderFlags |= FPDF_PRINTING;
     }
 
+    if (skMatrix && !skMatrix->asAffine(NULL)) {
+        jniThrowException(env, "java/lang/IllegalArgumentException",
+                "transform matrix has perspective. Only affine matrices are allowed.");
+        return;
+    }
+
     renderPageBitmap(bitmap, page, destLeft, destTop, destRight,
             destBottom, skMatrix, renderFlags);
 
-    skBitmap->notifyPixelsChanged();
-    skBitmap->unlockPixels();
+    skBitmap.notifyPixelsChanged();
 }
 
 static JNINativeMethod gPdfRenderer_Methods[] = {
@@ -273,19 +288,19 @@ static JNINativeMethod gPdfRenderer_Methods[] = {
     {"nativeClose", "(J)V", (void*) nativeClose},
     {"nativeGetPageCount", "(J)I", (void*) nativeGetPageCount},
     {"nativeScaleForPrinting", "(J)Z", (void*) nativeScaleForPrinting},
-    {"nativeRenderPage", "(JJJIIIIJI)V", (void*) nativeRenderPage},
+    {"nativeRenderPage", "(JJLandroid/graphics/Bitmap;IIIIJI)V", (void*) nativeRenderPage},
     {"nativeOpenPageAndGetSize", "(JILandroid/graphics/Point;)J", (void*) nativeOpenPageAndGetSize},
     {"nativeClosePage", "(J)V", (void*) nativeClosePage}
 };
 
 int register_android_graphics_pdf_PdfRenderer(JNIEnv* env) {
-    int result = android::AndroidRuntime::registerNativeMethods(
+    int result = RegisterMethodsOrDie(
             env, "android/graphics/pdf/PdfRenderer", gPdfRenderer_Methods,
             NELEM(gPdfRenderer_Methods));
 
-    jclass clazz = env->FindClass("android/graphics/Point");
-    gPointClassInfo.x = env->GetFieldID(clazz, "x", "I");
-    gPointClassInfo.y = env->GetFieldID(clazz, "y", "I");
+    jclass clazz = FindClassOrDie(env, "android/graphics/Point");
+    gPointClassInfo.x = GetFieldIDOrDie(env, clazz, "x", "I");
+    gPointClassInfo.y = GetFieldIDOrDie(env, clazz, "y", "I");
 
     return result;
 };

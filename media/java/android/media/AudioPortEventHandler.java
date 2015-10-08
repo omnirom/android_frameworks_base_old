@@ -19,8 +19,6 @@ package android.media;
 import android.os.Handler;
 import android.os.Looper;
 import android.os.Message;
-import android.util.Log;
-
 import java.util.ArrayList;
 import java.lang.ref.WeakReference;
 
@@ -41,6 +39,12 @@ class AudioPortEventHandler {
     private static final int AUDIOPORT_EVENT_PATCH_LIST_UPDATED = 2;
     private static final int AUDIOPORT_EVENT_SERVICE_DIED = 3;
     private static final int AUDIOPORT_EVENT_NEW_LISTENER = 4;
+
+    /**
+     * Accessed by native methods: JNI Callback context.
+     */
+    @SuppressWarnings("unused")
+    private long mJniCallback;
 
     void init() {
         synchronized (this) {
@@ -65,9 +69,6 @@ class AudioPortEventHandler {
                                 listeners = mListeners;
                             }
                         }
-                        if (listeners.isEmpty()) {
-                            return;
-                        }
                         // reset audio port cache if the event corresponds to a change coming
                         // from audio policy service or if mediaserver process died.
                         if (msg.what == AUDIOPORT_EVENT_PORT_LIST_UPDATED ||
@@ -75,10 +76,15 @@ class AudioPortEventHandler {
                                 msg.what == AUDIOPORT_EVENT_SERVICE_DIED) {
                             AudioManager.resetAudioPortGeneration();
                         }
+
+                        if (listeners.isEmpty()) {
+                            return;
+                        }
+
                         ArrayList<AudioPort> ports = new ArrayList<AudioPort>();
                         ArrayList<AudioPatch> patches = new ArrayList<AudioPatch>();
                         if (msg.what != AUDIOPORT_EVENT_SERVICE_DIED) {
-                            int status = AudioManager.updateAudioPortCache(ports, patches);
+                            int status = AudioManager.updateAudioPortCache(ports, patches, null);
                             if (status != AudioManager.SUCCESS) {
                                 return;
                             }

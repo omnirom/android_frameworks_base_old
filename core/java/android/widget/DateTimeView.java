@@ -16,22 +16,19 @@
 
 package android.widget;
 
+import android.app.ActivityThread;
 import android.content.Context;
 import android.content.Intent;
 import android.content.IntentFilter;
 import android.content.BroadcastReceiver;
 import android.database.ContentObserver;
-import android.net.Uri;
 import android.os.Handler;
 import android.text.format.Time;
 import android.util.AttributeSet;
 import android.util.Log;
-import android.provider.Settings;
-import android.widget.TextView;
 import android.widget.RemoteViews.RemoteView;
 
 import java.text.DateFormat;
-import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Date;
 
@@ -156,7 +153,7 @@ public class DateTimeView extends TextView {
                     format = getTimeFormat();
                     break;
                 case SHOW_MONTH_DAY_YEAR:
-                    format = getDateFormat();
+                    format = DateFormat.getDateInstance(DateFormat.SHORT);
                     break;
                 default:
                     throw new RuntimeException("unknown display value: " + display);
@@ -196,21 +193,6 @@ public class DateTimeView extends TextView {
         return android.text.format.DateFormat.getTimeFormat(getContext());
     }
 
-    private DateFormat getDateFormat() {
-        String format = Settings.System.getString(getContext().getContentResolver(),
-                Settings.System.DATE_FORMAT);
-        if (format == null || "".equals(format)) {
-            return DateFormat.getDateInstance(DateFormat.SHORT);
-        } else {
-            try {
-                return new SimpleDateFormat(format);
-            } catch (IllegalArgumentException e) {
-                // If we tried to use a bad format string, fall back to a default.
-                return DateFormat.getDateInstance(DateFormat.SHORT);
-            }
-        }
-    }
-
     void clearFormatAndUpdate() {
         mLastFormat = null;
         update();
@@ -246,14 +228,14 @@ public class DateTimeView extends TextView {
             final boolean register = mAttachedViews.isEmpty();
             mAttachedViews.add(v);
             if (register) {
-                register(v.getContext().getApplicationContext());
+                register(getApplicationContextIfAvailable(v.getContext()));
             }
         }
 
         public void removeView(DateTimeView v) {
             mAttachedViews.remove(v);
             if (mAttachedViews.isEmpty()) {
-                unregister(v.getContext().getApplicationContext());
+                unregister(getApplicationContextIfAvailable(v.getContext()));
             }
         }
 
@@ -276,6 +258,11 @@ public class DateTimeView extends TextView {
             return result;
         }
 
+        static final Context getApplicationContextIfAvailable(Context context) {
+            final Context ac = context.getApplicationContext();
+            return ac != null ? ac : ActivityThread.currentApplication().getApplicationContext();
+        }
+
         void register(Context context) {
             final IntentFilter filter = new IntentFilter();
             filter.addAction(Intent.ACTION_TIME_TICK);
@@ -283,14 +270,10 @@ public class DateTimeView extends TextView {
             filter.addAction(Intent.ACTION_CONFIGURATION_CHANGED);
             filter.addAction(Intent.ACTION_TIMEZONE_CHANGED);
             context.registerReceiver(mReceiver, filter);
-
-            final Uri uri = Settings.System.getUriFor(Settings.System.DATE_FORMAT);
-            context.getContentResolver().registerContentObserver(uri, true, mObserver);
         }
 
         void unregister(Context context) {
             context.unregisterReceiver(mReceiver);
-            context.getContentResolver().unregisterContentObserver(mObserver);
         }
     }
 }

@@ -34,6 +34,7 @@ import java.io.ObjectOutputStream;
 import java.io.ObjectStreamClass;
 import java.io.Serializable;
 import java.lang.reflect.Field;
+import java.lang.reflect.Modifier;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashMap;
@@ -114,15 +115,15 @@ import java.util.Set;
  * later reading.</p>
  * 
  * <p>There are also some methods that provide a more efficient way to work
- * with Parcelables: {@link #writeTypedArray},
- * {@link #writeTypedList(List)},
- * {@link #readTypedArray} and {@link #readTypedList}.  These methods
+ * with Parcelables: {@link #writeTypedObject}, {@link #writeTypedArray},
+ * {@link #writeTypedList}, {@link #readTypedObject},
+ * {@link #createTypedArray} and {@link #createTypedArrayList}.  These methods
  * do not write the class information of the original object: instead, the
  * caller of the read function must know what type to expect and pass in the
  * appropriate {@link Parcelable.Creator Parcelable.Creator} instead to
  * properly construct the new object and read its data.  (To more efficient
- * write and read a single Parceable object, you can directly call
- * {@link Parcelable#writeToParcel Parcelable.writeToParcel} and
+ * write and read a single Parceable object that is not null, you can directly
+ * call {@link Parcelable#writeToParcel Parcelable.writeToParcel} and
  * {@link Parcelable.Creator#createFromParcel Parcelable.Creator.createFromParcel}
  * yourself.)</p>
  * 
@@ -282,6 +283,8 @@ public final class Parcel {
     private static native boolean nativeHasFileDescriptors(long nativePtr);
     private static native void nativeWriteInterfaceToken(long nativePtr, String interfaceName);
     private static native void nativeEnforceInterface(long nativePtr, String interfaceName);
+
+    private static native long nativeGetBlobAshmemSize(long nativePtr);
 
     public final static Parcelable.Creator<String> STRING_CREATOR
              = new Parcelable.Creator<String>() {
@@ -499,7 +502,25 @@ public final class Parcel {
      * {@SystemApi}
      */
     public final void writeBlob(byte[] b) {
-        nativeWriteBlob(mNativePtr, b, 0, (b != null) ? b.length : 0);
+        writeBlob(b, 0, (b != null) ? b.length : 0);
+    }
+
+    /**
+     * Write a blob of data into the parcel at the current {@link #dataPosition},
+     * growing {@link #dataCapacity} if needed.
+     * @param b Bytes to place into the parcel.
+     * @param offset Index of first byte to be written.
+     * @param len Number of bytes to write.
+     * {@hide}
+     * {@SystemApi}
+     */
+    public final void writeBlob(byte[] b, int offset, int len) {
+        if (b == null) {
+            writeInt(-1);
+            return;
+        }
+        Arrays.checkOffsetAndCount(b.length, offset, len);
+        nativeWriteBlob(mNativePtr, b, offset, len);
     }
 
     /**
@@ -1059,6 +1080,21 @@ public final class Parcel {
         }
     }
 
+    /**
+     * @hide
+     */
+    public final void writeCharSequenceList(ArrayList<CharSequence> val) {
+        if (val != null) {
+            int N = val.size();
+            writeInt(N);
+            for (int i=0; i<N; i++) {
+                writeCharSequence(val.get(i));
+            }
+        } else {
+            writeInt(-1);
+        }
+    }
+
     public final IBinder[] createBinderArray() {
         int N = readInt();
         if (N >= 0) {
@@ -1201,6 +1237,24 @@ public final class Parcel {
             }
         } else {
             writeInt(-1);
+        }
+    }
+
+    /**
+     * Flatten the Parcelable object into the parcel.
+     *
+     * @param val The Parcelable object to be written.
+     * @param parcelableFlags Contextual flags as per
+     * {@link Parcelable#writeToParcel(Parcel, int) Parcelable.writeToParcel()}.
+     *
+     * @see #readTypedObject
+     */
+    public final <T extends Parcelable> void writeTypedObject(T val, int parcelableFlags) {
+        if (val != null) {
+            writeInt(1);
+            val.writeToParcel(this, parcelableFlags);
+        } else {
+            writeInt(0);
         }
     }
 
@@ -1358,8 +1412,7 @@ public final class Parcel {
             writeString(null);
             return;
         }
-        String name = p.getClass().getName();
-        writeString(name);
+        writeParcelableCreator(p);
         p.writeToParcel(this, parcelableFlags);
     }
 
@@ -1828,6 +1881,25 @@ public final class Parcel {
     }
 
     /**
+     * Read and return an ArrayList&lt;CharSequence&gt; object from the parcel.
+     * {@hide}
+     */
+    public final ArrayList<CharSequence> readCharSequenceList() {
+        ArrayList<CharSequence> array = null;
+
+        int length = readInt();
+        if (length >= 0) {
+            array = new ArrayList<CharSequence>(length);
+
+            for (int i = 0 ; i < length ; i++) {
+                array.add(readCharSequence());
+            }
+        }
+
+        return array;
+    }
+
+    /**
      * Read and return a new ArrayList object from the parcel at the current
      * dataPosition().  Returns null if the previously written list object was
      * null.  The given class loader will be used to load any enclosed
@@ -2102,6 +2174,25 @@ public final class Parcel {
     }
 
     /**
+     * Read and return a typed Parcelable object from a parcel.
+     * Returns null if the previous written object was null.
+     * The object <em>must</em> have previous been written via
+     * {@link #writeTypedObject} with the same object type.
+     *
+     * @return A newly created object of the type that was previously
+     *         written.
+     *
+     * @see #writeTypedObject
+     */
+    public final <T> T readTypedObject(Parcelable.Creator<T> c) {
+        if (readInt() != 0) {
+            return c.createFromParcel(this);
+        } else {
+            return null;
+        }
+    }
+
+    /**
      * Write a heterogeneous array of Parcelable objects into the Parcel.
      * Each object in the array is written along with its class name, so
      * that the correct class can later be instantiated.  As a result, this
@@ -2241,78 +2332,94 @@ public final class Parcel {
      * @throws BadParcelableException Throws BadParcelableException if there
      * was an error trying to instantiate the Parcelable.
      */
+    @SuppressWarnings("unchecked")
     public final <T extends Parcelable> T readParcelable(ClassLoader loader) {
-        Parcelable.Creator<T> creator = readParcelableCreator(loader);
+        Parcelable.Creator<?> creator = readParcelableCreator(loader);
         if (creator == null) {
             return null;
         }
         if (creator instanceof Parcelable.ClassLoaderCreator<?>) {
-            return ((Parcelable.ClassLoaderCreator<T>)creator).createFromParcel(this, loader);
+          Parcelable.ClassLoaderCreator<?> classLoaderCreator =
+              (Parcelable.ClassLoaderCreator<?>) creator;
+          return (T) classLoaderCreator.createFromParcel(this, loader);
         }
-        return creator.createFromParcel(this);
+        return (T) creator.createFromParcel(this);
     }
 
     /** @hide */
-    public final <T extends Parcelable> T readCreator(Parcelable.Creator<T> creator,
+    @SuppressWarnings("unchecked")
+    public final <T extends Parcelable> T readCreator(Parcelable.Creator<?> creator,
             ClassLoader loader) {
         if (creator instanceof Parcelable.ClassLoaderCreator<?>) {
-            return ((Parcelable.ClassLoaderCreator<T>)creator).createFromParcel(this, loader);
+          Parcelable.ClassLoaderCreator<?> classLoaderCreator =
+              (Parcelable.ClassLoaderCreator<?>) creator;
+          return (T) classLoaderCreator.createFromParcel(this, loader);
         }
-        return creator.createFromParcel(this);
+        return (T) creator.createFromParcel(this);
     }
 
     /** @hide */
-    public final <T extends Parcelable> Parcelable.Creator<T> readParcelableCreator(
-            ClassLoader loader) {
+    public final Parcelable.Creator<?> readParcelableCreator(ClassLoader loader) {
         String name = readString();
         if (name == null) {
             return null;
         }
-        Parcelable.Creator<T> creator;
+        Parcelable.Creator<?> creator;
         synchronized (mCreators) {
-            HashMap<String,Parcelable.Creator> map = mCreators.get(loader);
+            HashMap<String,Parcelable.Creator<?>> map = mCreators.get(loader);
             if (map == null) {
-                map = new HashMap<String,Parcelable.Creator>();
+                map = new HashMap<>();
                 mCreators.put(loader, map);
             }
             creator = map.get(name);
             if (creator == null) {
                 try {
-                    Class c = loader == null ?
-                        Class.forName(name) : Class.forName(name, true, loader);
-                    Field f = c.getField("CREATOR");
-                    creator = (Parcelable.Creator)f.get(null);
+                    // If loader == null, explicitly emulate Class.forName(String) "caller
+                    // classloader" behavior.
+                    ClassLoader parcelableClassLoader =
+                            (loader == null ? getClass().getClassLoader() : loader);
+                    // Avoid initializing the Parcelable class until we know it implements
+                    // Parcelable and has the necessary CREATOR field. http://b/1171613.
+                    Class<?> parcelableClass = Class.forName(name, false /* initialize */,
+                            parcelableClassLoader);
+                    if (!Parcelable.class.isAssignableFrom(parcelableClass)) {
+                        throw new BadParcelableException("Parcelable protocol requires that the "
+                                + "class implements Parcelable");
+                    }
+                    Field f = parcelableClass.getField("CREATOR");
+                    if ((f.getModifiers() & Modifier.STATIC) == 0) {
+                        throw new BadParcelableException("Parcelable protocol requires "
+                                + "the CREATOR object to be static on class " + name);
+                    }
+                    Class<?> creatorType = f.getType();
+                    if (!Parcelable.Creator.class.isAssignableFrom(creatorType)) {
+                        // Fail before calling Field.get(), not after, to avoid initializing
+                        // parcelableClass unnecessarily.
+                        throw new BadParcelableException("Parcelable protocol requires a "
+                                + "Parcelable.Creator object called "
+                                + "CREATOR on class " + name);
+                    }
+                    creator = (Parcelable.Creator<?>) f.get(null);
                 }
                 catch (IllegalAccessException e) {
-                    Log.e(TAG, "Illegal access when unmarshalling: "
-                                        + name, e);
+                    Log.e(TAG, "Illegal access when unmarshalling: " + name, e);
                     throw new BadParcelableException(
                             "IllegalAccessException when unmarshalling: " + name);
                 }
                 catch (ClassNotFoundException e) {
-                    Log.e(TAG, "Class not found when unmarshalling: "
-                                        + name, e);
+                    Log.e(TAG, "Class not found when unmarshalling: " + name, e);
                     throw new BadParcelableException(
                             "ClassNotFoundException when unmarshalling: " + name);
                 }
-                catch (ClassCastException e) {
-                    throw new BadParcelableException("Parcelable protocol requires a "
-                                        + "Parcelable.Creator object called "
-                                        + " CREATOR on class " + name);
-                }
                 catch (NoSuchFieldException e) {
                     throw new BadParcelableException("Parcelable protocol requires a "
-                                        + "Parcelable.Creator object called "
-                                        + " CREATOR on class " + name);
-                }
-                catch (NullPointerException e) {
-                    throw new BadParcelableException("Parcelable protocol requires "
-                            + "the CREATOR object to be static on class " + name);
+                            + "Parcelable.Creator object called "
+                            + "CREATOR on class " + name);
                 }
                 if (creator == null) {
                     throw new BadParcelableException("Parcelable protocol requires a "
-                                        + "Parcelable.Creator object called "
-                                        + " CREATOR on class " + name);
+                            + "non-null Parcelable.Creator object called "
+                            + "CREATOR on class " + name);
                 }
 
                 map.put(name, creator);
@@ -2335,7 +2442,7 @@ public final class Parcel {
         }
         Parcelable[] p = new Parcelable[N];
         for (int i = 0; i < N; i++) {
-            p[i] = (Parcelable) readParcelable(loader);
+            p[i] = readParcelable(loader);
         }
         return p;
     }
@@ -2390,8 +2497,8 @@ public final class Parcel {
     // Cache of previously looked up CREATOR.createFromParcel() methods for
     // particular classes.  Keys are the names of the classes, values are
     // Method objects.
-    private static final HashMap<ClassLoader,HashMap<String,Parcelable.Creator>>
-        mCreators = new HashMap<ClassLoader,HashMap<String,Parcelable.Creator>>();
+    private static final HashMap<ClassLoader,HashMap<String,Parcelable.Creator<?>>>
+        mCreators = new HashMap<>();
 
     /** @hide for internal use only. */
     static protected final Parcel obtain(int obj) {
@@ -2559,5 +2666,12 @@ public final class Parcel {
             outVal.append(key, value);
             N--;
         }
+    }
+
+    /**
+     * @hide For testing
+     */
+    public long getBlobAshmemSize() {
+        return nativeGetBlobAshmemSize(mNativePtr);
     }
 }

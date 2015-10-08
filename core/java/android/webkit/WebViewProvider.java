@@ -24,8 +24,8 @@ import android.graphics.Paint;
 import android.graphics.Picture;
 import android.graphics.Rect;
 import android.graphics.drawable.Drawable;
-import android.net.Uri;
 import android.net.http.SslCertificate;
+import android.net.Uri;
 import android.os.Bundle;
 import android.os.Message;
 import android.print.PrintDocumentAdapter;
@@ -40,6 +40,8 @@ import android.view.inputmethod.EditorInfo;
 import android.view.inputmethod.InputConnection;
 import android.webkit.WebView.HitTestResult;
 import android.webkit.WebView.PictureListener;
+import android.webkit.WebView.VisualStateCallback;
+
 
 import java.io.BufferedWriter;
 import java.io.File;
@@ -68,12 +70,16 @@ public interface WebViewProvider {
     public void init(Map<String, Object> javaScriptInterfaces,
             boolean privateBrowsing);
 
+    // Deprecated - should never be called
     public void setHorizontalScrollbarOverlay(boolean overlay);
 
+    // Deprecated - should never be called
     public void setVerticalScrollbarOverlay(boolean overlay);
 
+    // Deprecated - should never be called
     public boolean overlayHorizontalScrollbar();
 
+    // Deprecated - should never be called
     public boolean overlayVerticalScrollbar();
 
     public int getVisibleTitleHeight();
@@ -145,6 +151,8 @@ public interface WebViewProvider {
     public boolean pageUp(boolean top);
 
     public boolean pageDown(boolean bottom);
+
+    public void insertVisualStateCallback(long requestId, VisualStateCallback callback);
 
     public void clearView();
 
@@ -228,6 +236,10 @@ public interface WebViewProvider {
 
     public void removeJavascriptInterface(String interfaceName);
 
+    public WebMessagePort[] createWebMessageChannel();
+
+    public void postMessageToMainFrame(WebMessage message, Uri targetOrigin);
+
     public WebSettings getSettings();
 
     public void setMapTrackballToArrowKeys(boolean setMap);
@@ -289,6 +301,8 @@ public interface WebViewProvider {
     // the remainder on the methods below.
     interface ViewDelegate {
         public boolean shouldDelayChildPressedState();
+
+        public void onProvideVirtualStructure(android.view.ViewStructure structure);
 
         public AccessibilityNodeProvider getAccessibilityNodeProvider();
 

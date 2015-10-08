@@ -52,6 +52,11 @@ public class HapticFeedbackConstants {
     public static final int CALENDAR_DATE = 5;
 
     /**
+     * The user has performed a context click on an object.
+     */
+    public static final int CONTEXT_CLICK = 6;
+
+    /**
      * This is a private constant.  Feel free to renumber as desired.
      * @hide
      */

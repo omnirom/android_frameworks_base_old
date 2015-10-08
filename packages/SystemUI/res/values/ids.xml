@@ -36,5 +36,19 @@
     <item type="id" name="height_animator_start_value_tag"/>
     <item type="id" name="doze_saved_filter_tag"/>
     <item type="id" name="qs_icon_tag"/>
+    <item type="id" name="scrim"/>
+    <item type="id" name="hun_scrim_alpha_start"/>
+    <item type="id" name="hun_scrim_alpha_end"/>
+    <item type="id" name="notification_power"/>
+    <item type="id" name="notification_screenshot"/>
+    <item type="id" name="notification_hidden"/>
+    <item type="id" name="notification_volumeui"/>
+
+    <!-- Whether the icon is from a notification for which targetSdk < L -->
+    <item type="id" name="icon_is_pre_L"/>
+
+    <!-- For notification icons for which targetSdk < L, this caches whether the icon is grayscale -->
+    <item type="id" name="icon_is_grayscale" />
+    <item type="id" name="is_clicked_heads_up_tag" />
 </resources>
 

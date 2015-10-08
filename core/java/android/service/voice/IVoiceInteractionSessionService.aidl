@@ -24,5 +24,5 @@ import android.service.voice.IVoiceInteractionSession;
  * @hide
  */
 oneway interface IVoiceInteractionSessionService {
-    void newSession(IBinder token, in Bundle args);
+    void newSession(IBinder token, in Bundle args, int startFlags);
 }

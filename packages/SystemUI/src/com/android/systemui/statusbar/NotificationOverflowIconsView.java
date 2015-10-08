@@ -18,7 +18,6 @@ package com.android.systemui.statusbar;
 
 import android.app.Notification;
 import android.content.Context;
-import android.content.res.Configuration;
 import android.graphics.PorterDuff;
 import android.util.AttributeSet;
 import android.widget.ImageView;
@@ -46,7 +45,7 @@ public class NotificationOverflowIconsView extends IconMerger {
     protected void onFinishInflate() {
         super.onFinishInflate();
         mNotificationColorUtil = NotificationColorUtil.getInstance(getContext());
-        mTintColor = getResources().getColor(R.color.keyguard_overflow_content_color);
+        mTintColor = getContext().getColor(R.color.keyguard_overflow_content_color);
         mIconSize = getResources().getDimensionPixelSize(
                 com.android.internal.R.dimen.status_bar_icon_size);
     }

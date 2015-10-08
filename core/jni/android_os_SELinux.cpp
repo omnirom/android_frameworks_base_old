@@ -19,7 +19,7 @@
 
 #include "JNIHelp.h"
 #include "jni.h"
-#include "android_runtime/AndroidRuntime.h"
+#include "core_jni_helpers.h"
 #include "selinux/selinux.h"
 #include "selinux/android.h"
 #include <errno.h>
@@ -61,23 +61,6 @@ static jboolean isSELinuxEnforced(JNIEnv *env, jobject) {
 }
 
 /*
- * Function: setSELinuxEnforce
- * Purpose: set the SE Linux enforcing mode
- * Parameters: true (enforcing) or false (permissive)
- * Return value: true (success) or false (fail)
- * Exceptions: none
- */
-static jboolean setSELinuxEnforce(JNIEnv *env, jobject, jboolean value) {
-    if (isSELinuxDisabled) {
-        return false;
-    }
-
-    int enforce = value ? 1 : 0;
-
-    return (security_setenforce(enforce) != -1) ? true : false;
-}
-
-/*
  * Function: getPeerCon
  * Purpose: retrieves security context of peer socket
  * Parameters:
@@ -97,7 +80,7 @@ static jstring getPeerCon(JNIEnv *env, jobject, jobject fileDescriptor) {
     }
 
     int fd = jniGetFDFromFileDescriptor(env, fileDescriptor);
-    if (env->ExceptionOccurred() != NULL) {
+    if (env->ExceptionCheck()) {
         ALOGE("getPeerCon => getFD for %p failed", fileDescriptor);
         return NULL;
     }
@@ -265,92 +248,6 @@ static jstring getPidCon(JNIEnv *env, jobject, jint pid) {
 }
 
 /*
- * Function: getBooleanNames
- * Purpose: Gets a list of the SELinux boolean names.
- * Parameters: None
- * Returns: an array of strings  containing the SELinux boolean names.
- *          returns NULL string on error
- * Exceptions: None
- */
-static jobjectArray getBooleanNames(JNIEnv *env, JNIEnv) {
-    if (isSELinuxDisabled) {
-        return NULL;
-    }
-
-    char **list;
-    int len;
-    if (security_get_boolean_names(&list, &len) == -1) {
-        return NULL;
-    }
-
-    jclass stringClass = env->FindClass("java/lang/String");
-    jobjectArray stringArray = env->NewObjectArray(len, stringClass, NULL);
-    for (int i = 0; i < len; i++) {
-        ScopedLocalRef<jstring> obj(env, env->NewStringUTF(list[i]));
-        env->SetObjectArrayElement(stringArray, i, obj.get());
-        free(list[i]);
-    }
-    free(list);
-
-    return stringArray;
-}
-
-/*
- * Function: getBooleanValue
- * Purpose: Gets the value for the given SELinux boolean name.
- * Parameters:
- *            String: The name of the SELinux boolean.
- * Returns: a boolean: (true) boolean is set or (false) it is not.
- * Exceptions: None
- */
-static jboolean getBooleanValue(JNIEnv *env, jobject, jstring nameStr) {
-    if (isSELinuxDisabled) {
-        return false;
-    }
-
-    if (nameStr == NULL) {
-        return false;
-    }
-
-    ScopedUtfChars name(env, nameStr);
-    int ret = security_get_boolean_active(name.c_str());
-
-    ALOGV("getBooleanValue(%s) => %d", name.c_str(), ret);
-    return (ret == 1) ? true : false;
-}
-
-/*
- * Function: setBooleanNames
- * Purpose: Sets the value for the given SELinux boolean name.
- * Parameters:
- *            String: The name of the SELinux boolean.
- *            Boolean: The new value of the SELinux boolean.
- * Returns: a boolean indicating whether or not the operation succeeded.
- * Exceptions: None
- */
-static jboolean setBooleanValue(JNIEnv *env, jobject, jstring nameStr, jboolean value) {
-    if (isSELinuxDisabled) {
-        return false;
-    }
-
-    if (nameStr == NULL) {
-        return false;
-    }
-
-    ScopedUtfChars name(env, nameStr);
-    int ret = security_set_boolean(name.c_str(), value ? 1 : 0);
-    if (ret) {
-        return false;
-    }
-
-    if (security_commit_booleans() == -1) {
-        return false;
-    }
-
-    return true;
-}
-
-/*
  * Function: checkSELinuxAccess
  * Purpose: Check permissions between two security contexts.
  * Parameters: subjectContextStr: subject security context as a string
@@ -426,8 +323,6 @@ static jboolean native_restorecon(JNIEnv *env, jobject, jstring pathnameStr, jin
 static JNINativeMethod method_table[] = {
     /* name,                     signature,                    funcPtr */
     { "checkSELinuxAccess"       , "(Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;)Z" , (void*)checkSELinuxAccess },
-    { "getBooleanNames"          , "()[Ljava/lang/String;"                        , (void*)getBooleanNames  },
-    { "getBooleanValue"          , "(Ljava/lang/String;)Z"                        , (void*)getBooleanValue  },
     { "getContext"               , "()Ljava/lang/String;"                         , (void*)getCon           },
     { "getFileContext"           , "(Ljava/lang/String;)Ljava/lang/String;"       , (void*)getFileCon       },
     { "getPeerContext"           , "(Ljava/io/FileDescriptor;)Ljava/lang/String;" , (void*)getPeerCon       },
@@ -435,10 +330,8 @@ static JNINativeMethod method_table[] = {
     { "isSELinuxEnforced"        , "()Z"                                          , (void*)isSELinuxEnforced},
     { "isSELinuxEnabled"         , "()Z"                                          , (void*)isSELinuxEnabled },
     { "native_restorecon"        , "(Ljava/lang/String;I)Z"                       , (void*)native_restorecon},
-    { "setBooleanValue"          , "(Ljava/lang/String;Z)Z"                       , (void*)setBooleanValue  },
     { "setFileContext"           , "(Ljava/lang/String;Ljava/lang/String;)Z"      , (void*)setFileCon       },
     { "setFSCreateContext"       , "(Ljava/lang/String;)Z"                        , (void*)setFSCreateCon   },
-    { "setSELinuxEnforce"        , "(Z)Z"                                         , (void*)setSELinuxEnforce},
 };
 
 static int log_callback(int type, const char *fmt, ...) {
@@ -469,8 +362,7 @@ int register_android_os_SELinux(JNIEnv *env) {
 
     isSELinuxDisabled = (is_selinux_enabled() != 1) ? true : false;
 
-    return AndroidRuntime::registerNativeMethods(env, "android/os/SELinux", method_table,
-            NELEM(method_table));
+    return RegisterMethodsOrDie(env, "android/os/SELinux", method_table, NELEM(method_table));
 }
 
 }

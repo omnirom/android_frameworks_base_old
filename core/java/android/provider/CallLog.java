@@ -33,9 +33,12 @@ import android.provider.ContactsContract.CommonDataKinds.Callable;
 import android.provider.ContactsContract.CommonDataKinds.Phone;
 import android.provider.ContactsContract.Data;
 import android.provider.ContactsContract.DataUsageFeedback;
+import android.telecom.PhoneAccount;
 import android.telecom.PhoneAccountHandle;
+import android.telecom.TelecomManager;
 import android.telephony.PhoneNumberUtils;
 import android.text.TextUtils;
+import android.util.Log;
 
 import com.android.internal.telephony.CallerInfo;
 import com.android.internal.telephony.PhoneConstants;
@@ -46,6 +49,8 @@ import java.util.List;
  * The CallLog provider contains information about placed and received calls.
  */
 public class CallLog {
+    private static final String LOG_TAG = "CallLog";
+
     public static final String AUTHORITY = "call_log";
 
     /**
@@ -323,6 +328,14 @@ public class CallLog {
         public static final String CACHED_PHOTO_ID = "photo_id";
 
         /**
+         * The cached photo URI of the picture associated with the phone number, if it exists.
+         * This value may not be current if the contact information associated with this number
+         * has changed.
+         * <P>Type: TEXT (URI)</P>
+         */
+        public static final String CACHED_PHOTO_URI = "photo_uri";
+
+        /**
          * The cached phone number, formatted with formatting rules based on the country the
          * user was in when the call was made or received.
          * This value is not guaranteed to be present, and may not be current if the contact
@@ -336,22 +349,42 @@ public class CallLog {
         // that was encoded into call log databases.
 
         /**
-         * The component name of the account in string form.
+         * The component name of the account used to place or receive the call; in string form.
          * <P>Type: TEXT</P>
          */
         public static final String PHONE_ACCOUNT_COMPONENT_NAME = "subscription_component_name";
 
         /**
-         * The identifier of a account that is unique to a specified component.
+         * The identifier for the account used to place or receive the call.
          * <P>Type: TEXT</P>
          */
         public static final String PHONE_ACCOUNT_ID = "subscription_id";
 
         /**
-         * The identifier of a account that is unique to a specified component. Equivalent value
-         * to {@link #PHONE_ACCOUNT_ID}. For ContactsProvider internal use only.
+         * The address associated with the account used to place or receive the call; in string
+         * form. For SIM-based calls, this is the user's own phone number.
+         * <P>Type: TEXT</P>
+         *
+         * @hide
+         */
+        public static final String PHONE_ACCOUNT_ADDRESS = "phone_account_address";
+
+        /**
+         * Indicates that the entry will be hidden from all queries until the associated
+         * {@link android.telecom.PhoneAccount} is registered with the system.
          * <P>Type: INTEGER</P>
          *
+         * @hide
+         */
+        public static final String PHONE_ACCOUNT_HIDDEN = "phone_account_hidden";
+
+        /**
+         * The subscription ID used to place this call.  This is no longer used and has been
+         * replaced with PHONE_ACCOUNT_COMPONENT_NAME/PHONE_ACCOUNT_ID.
+         * For ContactsProvider internal use only.
+         * <P>Type: INTEGER</P>
+         *
+         * @Deprecated
          * @hide
          */
         public static final String SUB_ID = "sub_id";
@@ -388,7 +421,7 @@ public class CallLog {
                 int presentation, int callType, int features, PhoneAccountHandle accountHandle,
                 long start, int duration, Long dataUsage) {
             return addCall(ci, context, number, presentation, callType, features, accountHandle,
-                    start, duration, dataUsage, false);
+                    start, duration, dataUsage, false, false);
         }
 
 
@@ -417,10 +450,59 @@ public class CallLog {
          * {@hide}
          */
         public static Uri addCall(CallerInfo ci, Context context, String number,
+                                  int presentation, int callType, int features, PhoneAccountHandle accountHandle,
+                                  long start, int duration, Long dataUsage, boolean addForAllUsers) {
+            return addCall(ci, context, number, presentation, callType, features, accountHandle,
+                    start, duration, dataUsage, addForAllUsers, false);
+        }
+
+        /**
+         * Adds a call to the call log.
+         *
+         * @param ci the CallerInfo object to get the target contact from.  Can be null
+         * if the contact is unknown.
+         * @param context the context used to get the ContentResolver
+         * @param number the phone number to be added to the calls db
+         * @param presentation enum value from PhoneConstants.PRESENTATION_xxx, which
+         *        is set by the network and denotes the number presenting rules for
+         *        "allowed", "payphone", "restricted" or "unknown"
+         * @param callType enumerated values for "incoming", "outgoing", or "missed"
+         * @param features features of the call (e.g. Video).
+         * @param accountHandle The accountHandle object identifying the provider of the call
+         * @param start time stamp for the call in milliseconds
+         * @param duration call duration in seconds
+         * @param dataUsage data usage for the call in bytes, null if data usage was not tracked for
+         *                  the call.
+         * @param addForAllUsers If true, the call is added to the call log of all currently
+         *        running users. The caller must have the MANAGE_USERS permission if this is true.
+         * @param is_read Flag to show if the missed call log has been read by the user or not.
+         *                Used for call log restore of missed calls.
+         *
+         * @result The URI of the call log entry belonging to the user that made or received this
+         *        call.
+         * {@hide}
+         */
+        public static Uri addCall(CallerInfo ci, Context context, String number,
                 int presentation, int callType, int features, PhoneAccountHandle accountHandle,
-                long start, int duration, Long dataUsage, boolean addForAllUsers) {
+                long start, int duration, Long dataUsage, boolean addForAllUsers, boolean is_read) {
             final ContentResolver resolver = context.getContentResolver();
             int numberPresentation = PRESENTATION_ALLOWED;
+
+            TelecomManager tm = null;
+            try {
+                tm = TelecomManager.from(context);
+            } catch (UnsupportedOperationException e) {}
+
+            String accountAddress = null;
+            if (tm != null && accountHandle != null) {
+                PhoneAccount account = tm.getPhoneAccount(accountHandle);
+                if (account != null) {
+                    Uri address = account.getSubscriptionAddress();
+                    if (address != null) {
+                        accountAddress = address.getSchemeSpecificPart();
+                    }
+                }
+            }
 
             // Remap network specified number presentation types
             // PhoneConstants.PRESENTATION_xxx to calllog number presentation types
@@ -463,15 +545,11 @@ public class CallLog {
             }
             values.put(PHONE_ACCOUNT_COMPONENT_NAME, accountComponentString);
             values.put(PHONE_ACCOUNT_ID, accountId);
+            values.put(PHONE_ACCOUNT_ADDRESS, accountAddress);
             values.put(NEW, Integer.valueOf(1));
 
             if (callType == MISSED_TYPE) {
-                values.put(IS_READ, Integer.valueOf(0));
-            }
-            if (ci != null) {
-                values.put(CACHED_NAME, ci.name);
-                values.put(CACHED_NUMBER_TYPE, ci.numberType);
-                values.put(CACHED_NUMBER_LABEL, ci.numberLabel);
+                values.put(IS_READ, Integer.valueOf(is_read ? 1 : 0));
             }
 
             if ((ci != null) && (ci.contactIdOrZero > 0)) {

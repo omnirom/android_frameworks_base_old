@@ -21,8 +21,8 @@
 
  // TODO: does this really need to be separate from MinikinSkia?
 
-#ifndef ANDROID_MINIKIN_UTILS_H
-#define ANDROID_MINIKIN_UTILS_H
+#ifndef _ANDROID_GRAPHICS_MINIKIN_UTILS_H_
+#define _ANDROID_GRAPHICS_MINIKIN_UTILS_H_
 
 #include <minikin/Layout.h>
 #include "Paint.h"
@@ -31,22 +31,14 @@
 
 namespace android {
 
-// TODO: these should be defined in Minikin's Layout.h
-enum {
-    kBidi_LTR = 0,
-    kBidi_RTL = 1,
-    kBidi_Default_LTR = 2,
-    kBidi_Default_RTL = 3,
-    kBidi_Force_LTR = 4,
-    kBidi_Force_RTL = 5,
-
-    kBidi_Mask = 0x7
-};
-
 class MinikinUtils {
 public:
-    static void doLayout(Layout* layout, const Paint* paint, int bidiFlags, TypefaceImpl* typeface,
-            const uint16_t* buf, size_t start, size_t count, size_t bufSize);
+    static FontStyle prepareMinikinPaint(MinikinPaint* minikinPaint, FontCollection** pFont,
+            const Paint* paint, TypefaceImpl* typeface);
+
+    static void doLayout(Layout* layout, const Paint* paint, int bidiFlags,
+            TypefaceImpl* typeface, const uint16_t* buf, size_t start, size_t count,
+            size_t bufSize);
 
     static float xOffsetForTextAlign(Paint* paint, const Layout& layout);
 
@@ -81,4 +73,4 @@ public:
 
 }  // namespace android
 
-#endif  // ANDROID_MINIKIN_UTILS_H
+#endif  // _ANDROID_GRAPHICS_MINIKIN_UTILS_H_

@@ -23,9 +23,6 @@ import android.os.SystemClock;
 import android.provider.Settings;
 import android.text.format.DateFormat;
 import android.util.AttributeSet;
-import android.view.accessibility.AccessibilityEvent;
-import android.view.accessibility.AccessibilityNodeInfo;
-
 import java.util.Calendar;
 
 /**
@@ -116,16 +113,8 @@ public class DigitalClock extends TextView {
     }
 
     @Override
-    public void onInitializeAccessibilityEvent(AccessibilityEvent event) {
-        super.onInitializeAccessibilityEvent(event);
+    public CharSequence getAccessibilityClassName() {
         //noinspection deprecation
-        event.setClassName(DigitalClock.class.getName());
-    }
-
-    @Override
-    public void onInitializeAccessibilityNodeInfo(AccessibilityNodeInfo info) {
-        super.onInitializeAccessibilityNodeInfo(info);
-        //noinspection deprecation
-        info.setClassName(DigitalClock.class.getName());
+        return DigitalClock.class.getName();
     }
 }

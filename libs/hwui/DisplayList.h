@@ -38,8 +38,9 @@
 #include <androidfw/ResourceTypes.h>
 
 #include "Debug.h"
-#include "Matrix.h"
+#include "CanvasProperty.h"
 #include "DeferredDisplayList.h"
+#include "Matrix.h"
 #include "RenderProperties.h"
 
 class SkBitmap;
@@ -52,7 +53,7 @@ namespace uirenderer {
 
 class DeferredDisplayList;
 class DisplayListOp;
-class DisplayListRenderer;
+class DisplayListCanvas;
 class OpenGLRenderer;
 class Rect;
 class Layer;
@@ -66,7 +67,7 @@ class DrawRenderNodeOp;
 /**
  * Holds data used in the playback a tree of DisplayLists.
  */
-class PlaybackStateStruct {
+struct PlaybackStateStruct {
 protected:
     PlaybackStateStruct(OpenGLRenderer& renderer, int replayFlags, LinearAllocator* allocator)
             : mRenderer(renderer)
@@ -87,8 +88,7 @@ public:
     }
 };
 
-class DeferStateStruct : public PlaybackStateStruct {
-public:
+struct DeferStateStruct : public PlaybackStateStruct {
     DeferStateStruct(DeferredDisplayList& deferredList, OpenGLRenderer& renderer, int replayFlags)
             : PlaybackStateStruct(renderer, replayFlags, &(deferredList.mAllocator)),
             mDeferredList(deferredList) {}
@@ -96,14 +96,12 @@ public:
     DeferredDisplayList& mDeferredList;
 };
 
-class ReplayStateStruct : public PlaybackStateStruct {
-public:
+struct ReplayStateStruct : public PlaybackStateStruct {
     ReplayStateStruct(OpenGLRenderer& renderer, Rect& dirty, int replayFlags)
             : PlaybackStateStruct(renderer, replayFlags, &mReplayAllocator),
-            mDirty(dirty), mDrawGlStatus(DrawGlInfo::kStatusDone) {}
+            mDirty(dirty) {}
 
     Rect& mDirty;
-    status_t mDrawGlStatus;
     LinearAllocator mReplayAllocator;
 };
 
@@ -111,7 +109,7 @@ public:
  * Data structure that holds the list of commands used in display list stream
  */
 class DisplayListData {
-    friend class DisplayListRenderer;
+    friend class DisplayListCanvas;
 public:
     struct Chunk {
         // range of included ops in DLD::displayListOps
@@ -136,13 +134,11 @@ public:
     int projectionReceiveIndex;
 
     Vector<const SkBitmap*> bitmapResources;
-    Vector<const SkBitmap*> ownedBitmapResources;
+    Vector<const SkPath*> pathResources;
     Vector<const Res_png_9patch*> patchResources;
 
-    Vector<const SkPaint*> paints;
-    Vector<const SkPath*> paths;
-    SortedVector<const SkPath*> sourcePaths;
-    Vector<const SkRegion*> regions;
+    std::vector<std::unique_ptr<const SkPaint>> paints;
+    std::vector<std::unique_ptr<const SkRegion>> regions;
     Vector<Functor*> functors;
 
     const Vector<Chunk>& getChunks() const {

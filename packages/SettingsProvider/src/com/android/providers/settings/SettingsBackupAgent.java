@@ -32,14 +32,18 @@ import android.os.FileUtils;
 import android.os.Handler;
 import android.os.ParcelFileDescriptor;
 import android.os.Process;
+import android.os.UserHandle;
 import android.provider.Settings;
 import android.util.Log;
+
+import com.android.internal.widget.LockPatternUtils;
 
 import libcore.io.IoUtils;
 
 import java.io.BufferedOutputStream;
 import java.io.BufferedReader;
 import java.io.BufferedWriter;
+import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
 import java.io.CharArrayReader;
 import java.io.DataInputStream;
@@ -76,10 +80,11 @@ public class SettingsBackupAgent extends BackupAgentHelper {
     private static final String KEY_SECURE = "secure";
     private static final String KEY_GLOBAL = "global";
     private static final String KEY_LOCALE = "locale";
+    private static final String KEY_LOCK_SETTINGS = "lock_settings";
 
     // Versioning of the state file.  Increment this version
     // number any time the set of state items is altered.
-    private static final int STATE_VERSION = 3;
+    private static final int STATE_VERSION = 4;
 
     // Slots in the checksum array.  Never insert new items in the middle
     // of this array; new slots must be appended.
@@ -89,20 +94,23 @@ public class SettingsBackupAgent extends BackupAgentHelper {
     private static final int STATE_WIFI_SUPPLICANT = 3;
     private static final int STATE_WIFI_CONFIG     = 4;
     private static final int STATE_GLOBAL          = 5;
+    private static final int STATE_LOCK_SETTINGS   = 6;
 
-    private static final int STATE_SIZE            = 6; // The current number of state items
+    private static final int STATE_SIZE            = 7; // The current number of state items
 
     // Number of entries in the checksum array at various version numbers
     private static final int STATE_SIZES[] = {
         0,
         4,              // version 1
         5,              // version 2 added STATE_WIFI_CONFIG
-        STATE_SIZE      // version 3 added STATE_GLOBAL
+        6,              // version 3 added STATE_GLOBAL
+        STATE_SIZE      // version 4 added STATE_LOCK_SETTINGS
     };
 
     // Versioning of the 'full backup' format
-    private static final int FULL_BACKUP_VERSION = 2;
+    private static final int FULL_BACKUP_VERSION = 3;
     private static final int FULL_BACKUP_ADDED_GLOBAL = 2;  // added the "global" entry
+    private static final int FULL_BACKUP_ADDED_LOCK_SETTINGS = 3; // added the "lock_settings" entry
 
     private static final int INTEGER_BYTE_COUNT = Integer.SIZE / Byte.SIZE;
 
@@ -110,11 +118,7 @@ public class SettingsBackupAgent extends BackupAgentHelper {
 
     private static final String TAG = "SettingsBackupAgent";
 
-    private static final int COLUMN_NAME = 1;
-    private static final int COLUMN_VALUE = 2;
-
     private static final String[] PROJECTION = {
-        Settings.NameValueTable._ID,
         Settings.NameValueTable.NAME,
         Settings.NameValueTable.VALUE
     };
@@ -128,6 +132,10 @@ public class SettingsBackupAgent extends BackupAgentHelper {
     private static final String KEY_WIFI_SUPPLICANT = "\uffedWIFI";
     private static final String KEY_WIFI_CONFIG = "\uffedCONFIG_WIFI";
 
+    // Keys within the lock settings section
+    private static final String KEY_LOCK_SETTINGS_OWNER_INFO_ENABLED = "owner_info_enabled";
+    private static final String KEY_LOCK_SETTINGS_OWNER_INFO = "owner_info";
+
     // Name of the temporary file we use during full backup/restore.  This is
     // stored in the full-backup tarfile as well, so should not be changed.
     private static final String STAGE_FILE = "flattened-data";
@@ -140,7 +148,10 @@ public class SettingsBackupAgent extends BackupAgentHelper {
     private WifiManager mWfm;
     private static String mWifiConfigFile;
 
+    // Chain of asynchronous operations used when rewriting the wifi supplicant config file
+    WifiDisableRunnable mWifiDisable = null;
     WifiRestoreRunnable mWifiRestore = null;
+    int mRetainedWifiState; // used only during config file rewrite
 
     // Class for capturing a network definition from the wifi supplicant config file
     static class Network {
@@ -371,6 +382,7 @@ public class SettingsBackupAgent extends BackupAgentHelper {
         byte[] systemSettingsData = getSystemSettings();
         byte[] secureSettingsData = getSecureSettings();
         byte[] globalSettingsData = getGlobalSettings();
+        byte[] lockSettingsData   = getLockSettings();
         byte[] locale = mSettingsHelper.getLocaleData();
         byte[] wifiSupplicantData = getWifiSupplicant(FILE_WIFI_SUPPLICANT);
         byte[] wifiConfigData = getFileData(mWifiConfigFile);
@@ -391,13 +403,54 @@ public class SettingsBackupAgent extends BackupAgentHelper {
         stateChecksums[STATE_WIFI_CONFIG] =
             writeIfChanged(stateChecksums[STATE_WIFI_CONFIG], KEY_WIFI_CONFIG, wifiConfigData,
                     data);
+        stateChecksums[STATE_LOCK_SETTINGS] =
+            writeIfChanged(stateChecksums[STATE_LOCK_SETTINGS], KEY_LOCK_SETTINGS,
+                    lockSettingsData, data);
 
         writeNewChecksums(stateChecksums, newState);
+    }
+
+    class WifiDisableRunnable implements Runnable {
+        final WifiRestoreRunnable mNextPhase;
+
+        public WifiDisableRunnable(WifiRestoreRunnable next) {
+            mNextPhase = next;
+        }
+
+        @Override
+        public void run() {
+            if (DEBUG_BACKUP) {
+                Log.v(TAG, "Disabling wifi during restore");
+            }
+            final ContentResolver cr = getContentResolver();
+            final int scanAlways = Settings.Global.getInt(cr,
+                    Settings.Global.WIFI_SCAN_ALWAYS_AVAILABLE, 0);
+            final int retainedWifiState = enableWifi(false);
+            if (scanAlways != 0) {
+                Settings.Global.putInt(cr,
+                        Settings.Global.WIFI_SCAN_ALWAYS_AVAILABLE, 0);
+            }
+
+            // Tell the final stage how to clean up after itself
+            mNextPhase.setPriorState(retainedWifiState, scanAlways);
+
+            // And run it after a modest pause to give broadcasts and content
+            // observers time an opportunity to run on this looper thread, so
+            // that the wifi stack actually goes all the way down.
+            new Handler(getMainLooper()).postDelayed(mNextPhase, 2500);
+        }
     }
 
     class WifiRestoreRunnable implements Runnable {
         private byte[] restoredSupplicantData;
         private byte[] restoredWifiConfigFile;
+        private int retainedWifiState;  // provided by disable stage
+        private int scanAlways; // provided by disable stage
+
+        void setPriorState(int retainedState, int always) {
+            retainedWifiState = retainedState;
+            scanAlways = always;
+        }
 
         void incorporateWifiSupplicant(BackupDataInput data) {
             restoredSupplicantData = new byte[data.getDataSize()];
@@ -425,18 +478,8 @@ public class SettingsBackupAgent extends BackupAgentHelper {
         public void run() {
             if (restoredSupplicantData != null || restoredWifiConfigFile != null) {
                 if (DEBUG_BACKUP) {
-                    Log.v(TAG, "Starting deferred restore of wifi data");
+                    Log.v(TAG, "Applying restored wifi data");
                 }
-                final ContentResolver cr = getContentResolver();
-                final int scanAlways = Settings.Global.getInt(cr,
-                        Settings.Global.WIFI_SCAN_ALWAYS_AVAILABLE, 0);
-                final int retainedWifiState = enableWifi(false);
-                if (scanAlways != 0) {
-                    Settings.Global.putInt(cr,
-                            Settings.Global.WIFI_SCAN_ALWAYS_AVAILABLE, 0);
-                }
-                // !!! Give the wifi stack a moment to quiesce
-                try { Thread.sleep(1500); } catch (InterruptedException e) {}
                 if (restoredSupplicantData != null) {
                     restoreWifiSupplicant(FILE_WIFI_SUPPLICANT,
                             restoredSupplicantData, restoredSupplicantData.length);
@@ -451,7 +494,7 @@ public class SettingsBackupAgent extends BackupAgentHelper {
                 }
                 // restore the previous WIFI state.
                 if (scanAlways != 0) {
-                    Settings.Global.putInt(cr,
+                    Settings.Global.putInt(getContentResolver(),
                             Settings.Global.WIFI_SCAN_ALWAYS_AVAILABLE, scanAlways);
                 }
                 enableWifi(retainedWifiState == WifiManager.WIFI_STATE_ENABLED ||
@@ -465,6 +508,7 @@ public class SettingsBackupAgent extends BackupAgentHelper {
     void initWifiRestoreIfNecessary() {
         if (mWifiRestore == null) {
             mWifiRestore = new WifiRestoreRunnable();
+            mWifiDisable = new WifiDisableRunnable(mWifiRestore);
         }
     }
 
@@ -473,8 +517,8 @@ public class SettingsBackupAgent extends BackupAgentHelper {
             ParcelFileDescriptor newState) throws IOException {
 
         HashSet<String> movedToGlobal = new HashSet<String>();
-        Settings.System.getMovedKeys(movedToGlobal);
-        Settings.Secure.getMovedKeys(movedToGlobal);
+        Settings.System.getMovedToGlobalSettings(movedToGlobal);
+        Settings.Secure.getMovedToGlobalSettings(movedToGlobal);
 
         while (data.readNextHeader()) {
             final String key = data.getKey();
@@ -496,19 +540,24 @@ public class SettingsBackupAgent extends BackupAgentHelper {
             } else if (KEY_WIFI_CONFIG.equals(key)) {
                 initWifiRestoreIfNecessary();
                 mWifiRestore.incorporateWifiConfigFile(data);
+            } else if (KEY_LOCK_SETTINGS.equals(key)) {
+                restoreLockSettings(data);
              } else {
                 data.skipEntityData();
             }
         }
 
         // If we have wifi data to restore, post a runnable to perform the
-        // bounce-and-update operation a little ways in the future.
+        // bounce-and-update operation a little ways in the future.  The
+        // 'disable' runnable brings down the stack and remembers its state,
+        // and in turn schedules the 'restore' runnable to do the rewrite
+        // and cleanup operations.
         if (mWifiRestore != null) {
             long wifiBounceDelayMillis = Settings.Global.getLong(
                     getContentResolver(),
                     Settings.Global.WIFI_BOUNCE_DELAY_OVERRIDE_MS,
                     WIFI_BOUNCE_DELAY_MILLIS);
-            new Handler(getMainLooper()).postDelayed(mWifiRestore, wifiBounceDelayMillis);
+            new Handler(getMainLooper()).postDelayed(mWifiDisable, wifiBounceDelayMillis);
         }
     }
 
@@ -517,6 +566,7 @@ public class SettingsBackupAgent extends BackupAgentHelper {
         byte[] systemSettingsData = getSystemSettings();
         byte[] secureSettingsData = getSecureSettings();
         byte[] globalSettingsData = getGlobalSettings();
+        byte[] lockSettingsData   = getLockSettings();
         byte[] locale = mSettingsHelper.getLocaleData();
         byte[] wifiSupplicantData = getWifiSupplicant(FILE_WIFI_SUPPLICANT);
         byte[] wifiConfigData = getFileData(mWifiConfigFile);
@@ -551,6 +601,9 @@ public class SettingsBackupAgent extends BackupAgentHelper {
             if (DEBUG_BACKUP) Log.d(TAG, wifiConfigData.length + " bytes of wifi config data");
             out.writeInt(wifiConfigData.length);
             out.write(wifiConfigData);
+            if (DEBUG_BACKUP) Log.d(TAG, lockSettingsData.length + " bytes of lock settings data");
+            out.writeInt(lockSettingsData.length);
+            out.write(lockSettingsData);
 
             out.flush();    // also flushes downstream
 
@@ -577,8 +630,8 @@ public class SettingsBackupAgent extends BackupAgentHelper {
         if (version <= FULL_BACKUP_VERSION) {
             // Generate the moved-to-global lookup table
             HashSet<String> movedToGlobal = new HashSet<String>();
-            Settings.System.getMovedKeys(movedToGlobal);
-            Settings.Secure.getMovedKeys(movedToGlobal);
+            Settings.System.getMovedToGlobalSettings(movedToGlobal);
+            Settings.Secure.getMovedToGlobalSettings(movedToGlobal);
 
             // system settings data first
             int nBytes = in.readInt();
@@ -633,6 +686,16 @@ public class SettingsBackupAgent extends BackupAgentHelper {
             in.readFully(buffer, 0, nBytes);
             restoreFileData(mWifiConfigFile, buffer, nBytes);
 
+            if (version >= FULL_BACKUP_ADDED_LOCK_SETTINGS) {
+                nBytes = in.readInt();
+                if (DEBUG_BACKUP) Log.d(TAG, nBytes + " bytes of lock settings data");
+                if (nBytes > buffer.length) buffer = new byte[nBytes];
+                if (nBytes > 0) {
+                    in.readFully(buffer, 0, nBytes);
+                    restoreLockSettings(buffer, nBytes);
+                }
+            }
+
             if (DEBUG_BACKUP) Log.d(TAG, "Full restore complete.");
         } else {
             data.close();
@@ -662,7 +725,7 @@ public class SettingsBackupAgent extends BackupAgentHelper {
     private void writeNewChecksums(long[] checksums, ParcelFileDescriptor newState)
             throws IOException {
         DataOutputStream dataOutput = new DataOutputStream(
-                new FileOutputStream(newState.getFileDescriptor()));
+                new BufferedOutputStream(new FileOutputStream(newState.getFileDescriptor())));
 
         dataOutput.writeInt(STATE_VERSION);
         for (int i = 0; i < STATE_SIZE; i++) {
@@ -680,6 +743,9 @@ public class SettingsBackupAgent extends BackupAgentHelper {
             return oldChecksum;
         }
         try {
+            if (DEBUG_BACKUP) {
+                Log.v(TAG, "Writing entity " + key + " of size " + data.length);
+            }
             output.writeEntityHeader(key, data.length);
             output.writeEntityData(data, data.length);
         } catch (IOException ioe) {
@@ -718,6 +784,31 @@ public class SettingsBackupAgent extends BackupAgentHelper {
         }
     }
 
+    /**
+     * Serialize the owner info settings
+     */
+    private byte[] getLockSettings() {
+        final LockPatternUtils lockPatternUtils = new LockPatternUtils(this);
+        final boolean ownerInfoEnabled = lockPatternUtils.isOwnerInfoEnabled(UserHandle.myUserId());
+        final String ownerInfo = lockPatternUtils.getOwnerInfo(UserHandle.myUserId());
+
+        ByteArrayOutputStream baos = new ByteArrayOutputStream();
+        DataOutputStream out = new DataOutputStream(baos);
+        try {
+            out.writeUTF(KEY_LOCK_SETTINGS_OWNER_INFO_ENABLED);
+            out.writeUTF(ownerInfoEnabled ? "1" : "0");
+            if (ownerInfo != null) {
+                out.writeUTF(KEY_LOCK_SETTINGS_OWNER_INFO);
+                out.writeUTF(ownerInfo != null ? ownerInfo : "");
+            }
+            // End marker
+            out.writeUTF("");
+            out.flush();
+        } catch (IOException ioe) {
+        }
+        return baos.toByteArray();
+    }
+
     private void restoreSettings(BackupDataInput data, Uri contentUri,
             HashSet<String> movedToGlobal) {
         byte[] settings = new byte[data.getDataSize()];
@@ -737,7 +828,7 @@ public class SettingsBackupAgent extends BackupAgentHelper {
         }
 
         // Figure out the white list and redirects to the global table.
-        String[] whitelist = null;
+        final String[] whitelist;
         if (contentUri.equals(Settings.Secure.CONTENT_URI)) {
             whitelist = Settings.Secure.SETTINGS_TO_BACKUP;
         } else if (contentUri.equals(Settings.System.CONTENT_URI)) {
@@ -753,6 +844,7 @@ public class SettingsBackupAgent extends BackupAgentHelper {
         Map<String, String> cachedEntries = new HashMap<String, String>();
         ContentValues contentValues = new ContentValues(2);
         SettingsHelper settingsHelper = mSettingsHelper;
+        ContentResolver cr = getContentResolver();
 
         final int whiteListSize = whitelist.length;
         for (int i = 0; i < whiteListSize; i++) {
@@ -785,19 +877,57 @@ public class SettingsBackupAgent extends BackupAgentHelper {
             final Uri destination = (movedToGlobal != null && movedToGlobal.contains(key))
                     ? Settings.Global.CONTENT_URI
                     : contentUri;
-
-            // The helper doesn't care what namespace the keys are in
-            if (settingsHelper.restoreValue(key, value)) {
-                contentValues.clear();
-                contentValues.put(Settings.NameValueTable.NAME, key);
-                contentValues.put(Settings.NameValueTable.VALUE, value);
-                getContentResolver().insert(destination, contentValues);
-            }
+            settingsHelper.restoreValue(this, cr, contentValues, destination, key, value);
 
             if (DEBUG) {
                 Log.d(TAG, "Restored setting: " + destination + " : "+ key + "=" + value);
             }
         }
+    }
+
+    /**
+     * Restores the owner info enabled and owner info settings in LockSettings.
+     *
+     * @param buffer
+     * @param nBytes
+     */
+    private void restoreLockSettings(byte[] buffer, int nBytes) {
+        final LockPatternUtils lockPatternUtils = new LockPatternUtils(this);
+
+        ByteArrayInputStream bais = new ByteArrayInputStream(buffer, 0, nBytes);
+        DataInputStream in = new DataInputStream(bais);
+        try {
+            String key;
+            // Read until empty string marker
+            while ((key = in.readUTF()).length() > 0) {
+                final String value = in.readUTF();
+                if (DEBUG_BACKUP) {
+                    Log.v(TAG, "Restoring lock_settings " + key + " = " + value);
+                }
+                switch (key) {
+                    case KEY_LOCK_SETTINGS_OWNER_INFO_ENABLED:
+                        lockPatternUtils.setOwnerInfoEnabled("1".equals(value),
+                                UserHandle.myUserId());
+                        break;
+                    case KEY_LOCK_SETTINGS_OWNER_INFO:
+                        lockPatternUtils.setOwnerInfo(value, UserHandle.myUserId());
+                        break;
+                }
+            }
+            in.close();
+        } catch (IOException ioe) {
+        }
+    }
+
+    private void restoreLockSettings(BackupDataInput data) {
+        final byte[] settings = new byte[data.getDataSize()];
+        try {
+            data.readEntityData(settings, 0, settings.length);
+        } catch (IOException ioe) {
+            Log.e(TAG, "Couldn't read entity data");
+            return;
+        }
+        restoreLockSettings(settings, settings.length);
     }
 
     /**
@@ -824,11 +954,14 @@ public class SettingsBackupAgent extends BackupAgentHelper {
             String key = settings[i];
             String value = cachedEntries.remove(key);
 
+            final int nameColumnIndex = cursor.getColumnIndex(Settings.NameValueTable.NAME);
+            final int valueColumnIndex = cursor.getColumnIndex(Settings.NameValueTable.VALUE);
+
             // If the value not cached, let us look it up.
             if (value == null) {
                 while (!cursor.isAfterLast()) {
-                    String cursorKey = cursor.getString(COLUMN_NAME);
-                    String cursorValue = cursor.getString(COLUMN_VALUE);
+                    String cursorKey = cursor.getString(nameColumnIndex);
+                    String cursorValue = cursor.getString(valueColumnIndex);
                     cursor.moveToNext();
                     if (key.equals(cursorKey)) {
                         value = cursorValue;

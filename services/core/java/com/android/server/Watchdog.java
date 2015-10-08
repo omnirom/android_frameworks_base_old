@@ -46,7 +46,6 @@ import java.util.ArrayList;
 /** This class calls its monitor every minute. Killing this process if they don't return **/
 public class Watchdog extends Thread {
     static final String TAG = "Watchdog";
-    static final boolean localLOGV = false || false;
 
     // Set this to true to use debug default values.
     static final boolean DB = false;
@@ -73,7 +72,7 @@ public class Watchdog extends Thread {
     static Watchdog sWatchdog;
 
     /* This handler will be used to post message back onto the main thread */
-    final ArrayList<HandlerChecker> mHandlerCheckers = new ArrayList<HandlerChecker>();
+    final ArrayList<HandlerChecker> mHandlerCheckers = new ArrayList<>();
     final HandlerChecker mMonitorChecker;
     ContentResolver mResolver;
     ActivityManagerService mActivity;
@@ -106,8 +105,8 @@ public class Watchdog extends Thread {
         }
 
         public void scheduleCheckLocked() {
-            if (mMonitors.size() == 0 && mHandler.getLooper().isIdling()) {
-                // If the target looper is or just recently was idling, then
+            if (mMonitors.size() == 0 && mHandler.getLooper().getQueue().isPolling()) {
+                // If the target looper has recently been polling, then
                 // there is no reason to enqueue our checker on it since that
                 // is as good as it not being deadlocked.  This avoid having
                 // to do a context switch to check the thread.  Note that we
@@ -191,6 +190,17 @@ public class Watchdog extends Thread {
         }
     }
 
+    /** Monitor for checking the availability of binder threads. The monitor will block until
+     * there is a binder thread available to process in coming IPCs to make sure other processes
+     * can still communicate with the service.
+     */
+    private static final class BinderThreadMonitor implements Watchdog.Monitor {
+        @Override
+        public void monitor() {
+            Binder.blockUntilThreadAvailable();
+        }
+    }
+
     public interface Monitor {
         void monitor();
     }
@@ -228,6 +238,9 @@ public class Watchdog extends Thread {
         // And the display thread.
         mHandlerCheckers.add(new HandlerChecker(DisplayThread.getHandler(),
                 "display thread", DEFAULT_TIMEOUT));
+
+        // Initialize monitor for Binder threads.
+        addMonitor(new BinderThreadMonitor());
     }
 
     public void init(Context context, ActivityManagerService activity) {

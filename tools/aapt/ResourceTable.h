@@ -17,8 +17,6 @@
 #include "StringPool.h"
 #include "Symbol.h"
 
-using namespace std;
-
 class XMLNode;
 class ResourceTable;
 
@@ -29,7 +27,7 @@ enum {
     XML_COMPILE_STRIP_WHITESPACE = 1<<3,
     XML_COMPILE_STRIP_RAW_VALUES = 1<<4,
     XML_COMPILE_UTF8 = 1<<5,
-    
+
     XML_COMPILE_STANDARD_RESOURCE =
             XML_COMPILE_STRIP_COMMENTS | XML_COMPILE_ASSIGN_ATTRIBUTE_IDS
             | XML_COMPILE_STRIP_WHITESPACE | XML_COMPILE_STRIP_RAW_VALUES
@@ -101,6 +99,15 @@ public:
     class Package;
     class Type;
     class Entry;
+    class ConfigList;
+
+    /**
+     * Exposed for testing. Determines whether a versioned resource should be generated
+     * based on the other available configurations for that resource.
+     */
+    static bool shouldGenerateVersionedResource(const sp<ConfigList>& configList,
+                                                const ConfigDescription& sourceConfig,
+                                                const int sdkVersionToGenerate);
 
     ResourceTable(Bundle* bundle, const String16& assetsPackage, PackageType type);
 
@@ -116,7 +123,7 @@ public:
      * and would mess up iteration order for the existing
      * resources.
      */
-    queue<CompileResourceWorkItem>& getWorkQueue() {
+    std::queue<CompileResourceWorkItem>& getWorkQueue() {
         return mWorkQueue;
     }
 
@@ -237,8 +244,10 @@ public:
                        const ConfigDescription* config = NULL);
 
     status_t assignResourceIds();
-    status_t addSymbols(const sp<AaptSymbols>& outSymbols = NULL);
+    status_t addSymbols(const sp<AaptSymbols>& outSymbols = NULL,
+                        bool skipSymbolsWithoutDefaultLocalization = false);
     void addLocalization(const String16& name, const String8& locale, const SourcePos& src);
+    void addDefaultLocalization(const String16& name);
     status_t validateLocalizations(void);
 
     status_t flatten(Bundle* bundle, const sp<const ResourceFilter>& filter,
@@ -587,10 +596,12 @@ private:
     size_t mNumLocal;
     SourcePos mCurrentXmlPos;
     Bundle* mBundle;
-    
+
     // key = string resource name, value = set of locales in which that name is defined
-    map<String16, map<String8, SourcePos> > mLocalizations;
-    queue<CompileResourceWorkItem> mWorkQueue;
+    std::map<String16, std::map<String8, SourcePos>> mLocalizations;
+    // set of string resources names that have a default localization
+    std::set<String16> mHasDefaultLocalization;
+    std::queue<CompileResourceWorkItem> mWorkQueue;
 };
 
 #endif

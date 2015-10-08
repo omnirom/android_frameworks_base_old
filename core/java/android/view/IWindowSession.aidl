@@ -40,7 +40,7 @@ interface IWindowSession {
             out InputChannel outInputChannel);
     int addToDisplay(IWindow window, int seq, in WindowManager.LayoutParams attrs,
             in int viewVisibility, in int layerStackId, out Rect outContentInsets,
-            out Rect outStableInsets, out InputChannel outInputChannel);
+            out Rect outStableInsets, out Rect outOutsets, out InputChannel outInputChannel);
     int addWithoutInputChannel(IWindow window, int seq, in WindowManager.LayoutParams attrs,
             in int viewVisibility, out Rect outContentInsets, out Rect outStableInsets);
     int addToDisplayWithoutInputChannel(IWindow window, int seq, in WindowManager.LayoutParams attrs,
@@ -79,11 +79,13 @@ interface IWindowSession {
      * contents to make sure the user can see it.  This is different than
      * <var>outContentInsets</var> in that these insets change transiently,
      * so complex relayout of the window should not happen based on them.
+     * @param outOutsets Rect in which is placed the dead area of the screen that we would like to
+     * treat as real display. Example of such area is a chin in some models of wearable devices.
      * @param outConfiguration New configuration of window, if it is now
      * becoming visible and the global configuration has changed since it
      * was last displayed.
      * @param outSurface Object in which is placed the new display surface.
-     * 
+     *
      * @return int Result flags: {@link WindowManagerGlobal#RELAYOUT_SHOW_FOCUS},
      * {@link WindowManagerGlobal#RELAYOUT_FIRST_TIME}.
      */
@@ -91,7 +93,7 @@ interface IWindowSession {
             int requestedWidth, int requestedHeight, int viewVisibility,
             int flags, out Rect outFrame, out Rect outOverscanInsets,
             out Rect outContentInsets, out Rect outVisibleInsets, out Rect outStableInsets,
-            out Configuration outConfig, out Surface outSurface);
+            out Rect outOutsets, out Configuration outConfig, out Surface outSurface);
 
     /**
      * If a call to relayout() asked to have the surface destroy deferred,
@@ -188,13 +190,25 @@ interface IWindowSession {
 
     void wallpaperCommandComplete(IBinder window, in Bundle result);
 
-    void setUniverseTransform(IBinder window, float alpha, float offx, float offy,
-            float dsdx, float dtdx, float dsdy, float dtdy);
-
     /**
      * Notifies that a rectangle on the screen has been requested.
      */
     void onRectangleOnScreenRequested(IBinder token, in Rect rectangle);
 
     IWindowId getWindowId(IBinder window);
+
+    /**
+     * When the system is dozing in a low-power partially suspended state, pokes a short
+     * lived wake lock and ensures that the display is ready to accept the next frame
+     * of content drawn in the window.
+     *
+     * This mechanism is bound to the window rather than to the display manager or the
+     * power manager so that the system can ensure that the window is actually visible
+     * and prevent runaway applications from draining the battery.  This is similar to how
+     * FLAG_KEEP_SCREEN_ON works.
+     *
+     * This method is synchronous because it may need to acquire a wake lock before returning.
+     * The assumption is that this method will be called rather infrequently.
+     */
+    void pokeDrawLock(IBinder window);
 }

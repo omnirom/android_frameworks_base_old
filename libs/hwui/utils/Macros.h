@@ -16,10 +16,12 @@
 #ifndef MACROS_H
 #define MACROS_H
 
+#include <type_traits>
+
 #define PREVENT_COPY_AND_ASSIGN(Type) \
     private: \
-        Type(const Type&); \
-        void operator=(const Type&)
+        Type(const Type&) = delete; \
+        void operator=(const Type&) = delete
 
 #define DESCRIPTION_TYPE(Type) \
         int compare(const Type& rhs) const { return memcmp(this, &rhs, sizeof(Type));} \
@@ -28,5 +30,9 @@
         friend inline int strictly_order_type(const Type& lhs, const Type& rhs) { return lhs.compare(rhs) < 0; } \
         friend inline int compare_type(const Type& lhs, const Type& rhs) { return lhs.compare(rhs); } \
         friend inline hash_t hash_type(const Type& entry) { return entry.hash(); }
+
+#define REQUIRE_COMPATIBLE_LAYOUT(Type) \
+        static_assert(std::is_standard_layout<Type>::value, \
+        #Type " must have standard layout")
 
 #endif /* MACROS_H */

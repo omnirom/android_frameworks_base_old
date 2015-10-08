@@ -26,7 +26,7 @@
 #include <utils/Vector.h>
 #include <processgroup/processgroup.h>
 
-#include <android_runtime/AndroidRuntime.h>
+#include "core_jni_helpers.h"
 
 #include "android_util_Binder.h"
 #include "JNIHelp.h"
@@ -43,12 +43,12 @@
 #include <sys/types.h>
 #include <unistd.h>
 
-#define POLICY_DEBUG 0
 #define GUARD_THREAD_PRIORITY 0
 
-#define DEBUG_PROC(x) //x
-
 using namespace android;
+
+static const bool kDebugPolicy = false;
+static const bool kDebugProc = false;
 
 #if GUARD_THREAD_PRIORITY
 Mutex gKeyCreateMutex;
@@ -109,7 +109,8 @@ jint android_os_Process_getUidForName(JNIEnv* env, jobject clazz, jstring name)
     const jchar* str16 = env->GetStringCritical(name, 0);
     String8 name8;
     if (str16) {
-        name8 = String8(str16, env->GetStringLength(name));
+        name8 = String8(reinterpret_cast<const char16_t*>(str16),
+                        env->GetStringLength(name));
         env->ReleaseStringCritical(name, str16);
     }
 
@@ -140,7 +141,8 @@ jint android_os_Process_getGidForName(JNIEnv* env, jobject clazz, jstring name)
     const jchar* str16 = env->GetStringCritical(name, 0);
     String8 name8;
     if (str16) {
-        name8 = String8(str16, env->GetStringLength(name));
+        name8 = String8(reinterpret_cast<const char16_t*>(str16),
+                        env->GetStringLength(name));
         env->ReleaseStringCritical(name, str16);
     }
 
@@ -175,7 +177,6 @@ void android_os_Process_setProcessGroup(JNIEnv* env, jobject clazz, int pid, jin
 {
     ALOGV("%s pid=%d grp=%" PRId32, __func__, pid, grp);
     DIR *d;
-    FILE *fp;
     char proc_path[255];
     struct dirent *de;
 
@@ -191,26 +192,27 @@ void android_os_Process_setProcessGroup(JNIEnv* env, jobject clazz, int pid, jin
     }
     SchedPolicy sp = (SchedPolicy) grp;
 
-#if POLICY_DEBUG
-    char cmdline[32];
-    int fd;
+    if (kDebugPolicy) {
+        char cmdline[32];
+        int fd;
 
-    strcpy(cmdline, "unknown");
+        strcpy(cmdline, "unknown");
 
-    sprintf(proc_path, "/proc/%d/cmdline", pid);
-    fd = open(proc_path, O_RDONLY);
-    if (fd >= 0) {
-        int rc = read(fd, cmdline, sizeof(cmdline)-1);
-        cmdline[rc] = 0;
-        close(fd);
+        sprintf(proc_path, "/proc/%d/cmdline", pid);
+        fd = open(proc_path, O_RDONLY);
+        if (fd >= 0) {
+            int rc = read(fd, cmdline, sizeof(cmdline)-1);
+            cmdline[rc] = 0;
+            close(fd);
+        }
+
+        if (sp == SP_BACKGROUND) {
+            ALOGD("setProcessGroup: vvv pid %d (%s)", pid, cmdline);
+        } else {
+            ALOGD("setProcessGroup: ^^^ pid %d (%s)", pid, cmdline);
+        }
     }
 
-    if (sp == SP_BACKGROUND) {
-        ALOGD("setProcessGroup: vvv pid %d (%s)", pid, cmdline);
-    } else {
-        ALOGD("setProcessGroup: ^^^ pid %d (%s)", pid, cmdline);
-    }
-#endif
     sprintf(proc_path, "/proc/%d/task", pid);
     if (!(d = opendir(proc_path))) {
         // If the process exited on us, don't generate an exception
@@ -237,7 +239,8 @@ void android_os_Process_setProcessGroup(JNIEnv* env, jobject clazz, int pid, jin
         if (t_pri <= ANDROID_PRIORITY_AUDIO) {
             int scheduler = sched_getscheduler(t_pid);
             if ((scheduler == SCHED_FIFO) || (scheduler == SCHED_RR)) {
-                // This task wants to stay in it's current audio group so it can keep it's budget
+                // This task wants to stay in its current audio group so it can keep its budget
+                // don't update its cpuset or cgroup
                 continue;
             }
         }
@@ -245,15 +248,33 @@ void android_os_Process_setProcessGroup(JNIEnv* env, jobject clazz, int pid, jin
         if (isDefault) {
             if (t_pri >= ANDROID_PRIORITY_BACKGROUND) {
                 // This task wants to stay at background
+                // update its cpuset so it doesn't only run on bg core(s)
+#ifdef ENABLE_CPUSETS
+                int err = set_cpuset_policy(t_pid, sp);
+                if (err != NO_ERROR) {
+                    signalExceptionForGroupError(env, -err);
+                    break;
+                }
+#endif
                 continue;
             }
         }
-
-        int err = set_sched_policy(t_pid, sp);
+        int err;
+#ifdef ENABLE_CPUSETS
+        // set both cpuset and cgroup for general threads
+        err = set_cpuset_policy(t_pid, sp);
         if (err != NO_ERROR) {
             signalExceptionForGroupError(env, -err);
             break;
         }
+#endif
+
+        err = set_sched_policy(t_pid, sp);
+        if (err != NO_ERROR) {
+            signalExceptionForGroupError(env, -err);
+            break;
+        }
+
     }
     closedir(d);
 }
@@ -271,7 +292,7 @@ static void android_os_Process_setCanSelfBackground(JNIEnv* env, jobject clazz, 
     // Establishes the calling thread as illegal to put into the background.
     // Typically used only for the system process's main looper.
 #if GUARD_THREAD_PRIORITY
-    ALOGV("Process.setCanSelfBackground(%d) : tid=%d", bgOk, androidGetTid());
+    ALOGV("Process.setCanSelfBackground(%d) : tid=%d", bgOk, gettid());
     {
         Mutex::Autolock _l(gKeyCreateMutex);
         if (gBgKey == -1) {
@@ -287,7 +308,8 @@ static void android_os_Process_setCanSelfBackground(JNIEnv* env, jobject clazz, 
 void android_os_Process_setThreadScheduler(JNIEnv* env, jclass clazz,
                                               jint tid, jint policy, jint pri)
 {
-#ifdef HAVE_SCHED_SETSCHEDULER
+// linux has sched_setscheduler(), others don't.
+#if defined(__linux__)
     struct sched_param param;
     param.sched_priority = pri;
     int rc = sched_setscheduler(tid, policy, &param);
@@ -306,7 +328,7 @@ void android_os_Process_setThreadPriority(JNIEnv* env, jobject clazz,
     // if we're putting the current thread into the background, check the TLS
     // to make sure this thread isn't guarded.  If it is, raise an exception.
     if (pri >= ANDROID_PRIORITY_BACKGROUND) {
-        if (pid == androidGetTid()) {
+        if (pid == gettid()) {
             void* bgOk = pthread_getspecific(gBgKey);
             if (bgOk == ((void*)0xbaad)) {
                 ALOGE("Thread marked fg-only put self in background!");
@@ -333,7 +355,7 @@ void android_os_Process_setThreadPriority(JNIEnv* env, jobject clazz,
 void android_os_Process_setCallingThreadPriority(JNIEnv* env, jobject clazz,
                                                         jint pri)
 {
-    android_os_Process_setThreadPriority(env, clazz, androidGetTid(), pri);
+    android_os_Process_setThreadPriority(env, clazz, gettid(), pri);
 }
 
 jint android_os_Process_getThreadPriority(JNIEnv* env, jobject clazz,
@@ -384,7 +406,8 @@ void android_os_Process_setArgV0(JNIEnv* env, jobject clazz, jstring name)
     const jchar* str = env->GetStringCritical(name, 0);
     String8 name8;
     if (str) {
-        name8 = String8(str, env->GetStringLength(name));
+        name8 = String8(reinterpret_cast<const char16_t*>(str),
+                        env->GetStringLength(name));
         env->ReleaseStringCritical(name, str);
     }
 
@@ -718,7 +741,7 @@ jboolean android_os_Process_parseProcLineArray(JNIEnv* env, jobject clazz,
         jint mode = formatData[fi];
         if ((mode&PROC_PARENS) != 0) {
             i++;
-        } else if ((mode&PROC_QUOTES != 0)) {
+        } else if ((mode&PROC_QUOTES) != 0) {
             if (buffer[i] == '"') {
                 i++;
             } else {
@@ -728,7 +751,9 @@ jboolean android_os_Process_parseProcLineArray(JNIEnv* env, jobject clazz,
         const char term = (char)(mode&PROC_TERM_MASK);
         const jsize start = i;
         if (i >= endIndex) {
-            DEBUG_PROC(ALOGW("Ran off end of data @%d", i));
+            if (kDebugProc) {
+                ALOGW("Ran off end of data @%d", i);
+            }
             res = JNI_FALSE;
             break;
         }
@@ -828,7 +853,9 @@ jboolean android_os_Process_readProcFile(JNIEnv* env, jobject clazz,
     int fd = open(file8, O_RDONLY);
 
     if (fd < 0) {
-        DEBUG_PROC(ALOGW("Unable to open process file: %s\n", file8));
+        if (kDebugProc) {
+            ALOGW("Unable to open process file: %s\n", file8);
+        }
         env->ReleaseStringUTFChars(file, file8);
         return JNI_FALSE;
     }
@@ -839,7 +866,9 @@ jboolean android_os_Process_readProcFile(JNIEnv* env, jobject clazz,
     close(fd);
 
     if (len < 0) {
-        DEBUG_PROC(ALOGW("Unable to open process file: %s fd=%d\n", file8, fd));
+        if (kDebugProc) {
+            ALOGW("Unable to open process file: %s fd=%d\n", file8, fd);
+        }
         return JNI_FALSE;
     }
     buffer[len] = 0;
@@ -1044,11 +1073,7 @@ static const JNINativeMethod methods[] = {
     {"removeAllProcessGroups", "()V", (void*)android_os_Process_removeAllProcessGroups},
 };
 
-const char* const kProcessPathName = "android/os/Process";
-
 int register_android_os_Process(JNIEnv* env)
 {
-    return AndroidRuntime::registerNativeMethods(
-        env, kProcessPathName,
-        methods, NELEM(methods));
+    return RegisterMethodsOrDie(env, "android/os/Process", methods, NELEM(methods));
 }

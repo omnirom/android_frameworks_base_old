@@ -18,6 +18,7 @@ package android.app;
 import android.animation.Animator;
 import android.animation.AnimatorListenerAdapter;
 import android.animation.ObjectAnimator;
+import android.app.SharedElementCallback.OnSharedElementsReadyListener;
 import android.graphics.drawable.Drawable;
 import android.os.Bundle;
 import android.os.ResultReceiver;
@@ -54,8 +55,6 @@ class EnterTransitionCoordinator extends ActivityTransitionCoordinator {
     private boolean mWasOpaque;
     private boolean mAreViewsReady;
     private boolean mIsViewsTransitionStarted;
-    private boolean mIsViewsTransitionComplete;
-    private boolean mIsSharedElementTransitionComplete;
     private Transition mEnterViewsTransition;
 
     public EnterTransitionCoordinator(Activity activity, ResultReceiver resultReceiver,
@@ -140,13 +139,13 @@ class EnterTransitionCoordinator extends ActivityTransitionCoordinator {
         } else {
             decor.getViewTreeObserver()
                     .addOnPreDrawListener(new ViewTreeObserver.OnPreDrawListener() {
-                @Override
-                public boolean onPreDraw() {
-                    decor.getViewTreeObserver().removeOnPreDrawListener(this);
-                    viewsReady(sharedElements);
-                    return true;
-                }
-            });
+                        @Override
+                        public boolean onPreDraw() {
+                            decor.getViewTreeObserver().removeOnPreDrawListener(this);
+                            viewsReady(sharedElements);
+                            return true;
+                        }
+                    });
         }
     }
 
@@ -334,6 +333,7 @@ class EnterTransitionCoordinator extends ActivityTransitionCoordinator {
         boolean startSharedElementTransition = true;
         setGhostVisibility(View.INVISIBLE);
         scheduleGhostVisibilityChange(View.INVISIBLE);
+        pauseInput();
         Transition transition = beginTransition(decorView, startEnterTransition,
                 startSharedElementTransition);
         scheduleGhostVisibilityChange(View.VISIBLE);
@@ -383,23 +383,33 @@ class EnterTransitionCoordinator extends ActivityTransitionCoordinator {
         }
         final Bundle sharedElementState = mSharedElementsBundle;
         mSharedElementsBundle = null;
-        final View decorView = getDecor();
-        if (decorView != null) {
-            decorView.getViewTreeObserver()
-                    .addOnPreDrawListener(new ViewTreeObserver.OnPreDrawListener() {
-                        @Override
-                        public boolean onPreDraw() {
-                            decorView.getViewTreeObserver().removeOnPreDrawListener(this);
-                            startTransition(new Runnable() {
+        OnSharedElementsReadyListener listener = new OnSharedElementsReadyListener() {
+            @Override
+            public void onSharedElementsReady() {
+                final View decorView = getDecor();
+                if (decorView != null) {
+                    decorView.getViewTreeObserver()
+                            .addOnPreDrawListener(new ViewTreeObserver.OnPreDrawListener() {
                                 @Override
-                                public void run() {
-                                    startSharedElementTransition(sharedElementState);
+                                public boolean onPreDraw() {
+                                    decorView.getViewTreeObserver().removeOnPreDrawListener(this);
+                                    startTransition(new Runnable() {
+                                        @Override
+                                        public void run() {
+                                            startSharedElementTransition(sharedElementState);
+                                        }
+                                    });
+                                    return false;
                                 }
                             });
-                            return false;
-                        }
-                    });
-            decorView.invalidate();
+                    decorView.invalidate();
+                }
+            }
+        };
+        if (mListener == null) {
+            listener.onSharedElementsReady();
+        } else {
+            mListener.onSharedElementsArrived(mSharedElementNames, mSharedElements, listener);
         }
     }
 
@@ -445,7 +455,7 @@ class EnterTransitionCoordinator extends ActivityTransitionCoordinator {
                 }
             }
             if (viewsTransition == null) {
-                viewTransitionComplete();
+                viewsTransitionComplete();
             } else {
                 viewsTransition.forceVisibility(View.INVISIBLE, true);
                 final ArrayList<View> transitioningViews = mTransitioningViews;
@@ -463,7 +473,7 @@ class EnterTransitionCoordinator extends ActivityTransitionCoordinator {
                     public void onTransitionEnd(Transition transition) {
                         mEnterViewsTransition = null;
                         transition.removeListener(this);
-                        viewTransitionComplete();
+                        viewsTransitionComplete();
                         super.onTransitionEnd(transition);
                     }
                 });
@@ -486,18 +496,9 @@ class EnterTransitionCoordinator extends ActivityTransitionCoordinator {
         return transition;
     }
 
-    private void viewTransitionComplete() {
-        mIsViewsTransitionComplete = true;
-        if (mIsSharedElementTransitionComplete) {
-            moveSharedElementsFromOverlay();
-        }
-    }
-
-    private void sharedElementTransitionComplete() {
-        mIsSharedElementTransitionComplete = true;
-        if (mIsViewsTransitionComplete) {
-            moveSharedElementsFromOverlay();
-        }
+    @Override
+    protected void onTransitionsComplete() {
+        moveSharedElementsFromOverlay();
     }
 
     private void sharedElementTransitionStarted() {
@@ -593,7 +594,7 @@ class EnterTransitionCoordinator extends ActivityTransitionCoordinator {
     }
 
     private boolean allowOverlappingTransitions() {
-        return mIsReturning ? getWindow().getAllowExitTransitionOverlap()
+        return mIsReturning ? getWindow().getAllowReturnTransitionOverlap()
                 : getWindow().getAllowEnterTransitionOverlap();
     }
 

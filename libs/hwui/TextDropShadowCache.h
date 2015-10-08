@@ -24,17 +24,18 @@
 #include <utils/LruCache.h>
 #include <utils/String16.h>
 
-#include "FontRenderer.h"
+#include "font/Font.h"
 #include "Texture.h"
 
 namespace android {
 namespace uirenderer {
 
 class Caches;
+class FontRenderer;
 
 struct ShadowText {
-    ShadowText(): len(0), radius(0.0f), textSize(0.0f), typeface(NULL),
-            flags(0), italicStyle(0.0f), scaleX(0), text(NULL), positions(NULL) {
+    ShadowText(): len(0), radius(0.0f), textSize(0.0f), typeface(nullptr),
+            flags(0), italicStyle(0.0f), scaleX(0), text(nullptr), positions(nullptr) {
     }
 
     // len is the number of bytes in text
@@ -75,7 +76,7 @@ struct ShadowText {
         uint32_t charCount = len / sizeof(char16_t);
         str.setTo((const char16_t*) text, charCount);
         text = str.string();
-        if (positions != NULL) {
+        if (positions != nullptr) {
             positionsCopy.clear();
             positionsCopy.appendArray(positions, charCount * 2);
             positions = positionsCopy.array();
@@ -133,7 +134,7 @@ public:
      * Used as a callback when an entry is removed from the cache.
      * Do not invoke directly.
      */
-    void operator()(ShadowText& text, ShadowTexture*& texture);
+    void operator()(ShadowText& text, ShadowTexture*& texture) override;
 
     ShadowTexture* get(const SkPaint* paint, const char* text, uint32_t len,
             int numGlyphs, float radius, const float* positions);

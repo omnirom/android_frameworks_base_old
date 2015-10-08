@@ -25,6 +25,7 @@ import android.os.IRemoteCallback;
 import android.os.RemoteException;
 import android.os.ResultReceiver;
 import android.util.Pair;
+import android.util.Slog;
 import android.view.View;
 import android.view.Window;
 
@@ -39,70 +40,83 @@ public class ActivityOptions {
     private static final String TAG = "ActivityOptions";
 
     /**
+     * A long in the extras delivered by {@link #requestUsageTimeReport} that contains
+     * the total time (in ms) the user spent in the app flow.
+     */
+    public static final String EXTRA_USAGE_TIME_REPORT = "android.activity.usage_time";
+
+    /**
+     * A Bundle in the extras delivered by {@link #requestUsageTimeReport} that contains
+     * detailed information about the time spent in each package associated with the app;
+     * each key is a package name, whose value is a long containing the time (in ms).
+     */
+    public static final String EXTRA_USAGE_TIME_REPORT_PACKAGES = "android.usage_time_packages";
+
+    /**
      * The package name that created the options.
      * @hide
      */
-    public static final String KEY_PACKAGE_NAME = "android:packageName";
+    public static final String KEY_PACKAGE_NAME = "android:activity.packageName";
 
     /**
      * Type of animation that arguments specify.
      * @hide
      */
-    public static final String KEY_ANIM_TYPE = "android:animType";
+    public static final String KEY_ANIM_TYPE = "android:activity.animType";
 
     /**
      * Custom enter animation resource ID.
      * @hide
      */
-    public static final String KEY_ANIM_ENTER_RES_ID = "android:animEnterRes";
+    public static final String KEY_ANIM_ENTER_RES_ID = "android:activity.animEnterRes";
 
     /**
      * Custom exit animation resource ID.
      * @hide
      */
-    public static final String KEY_ANIM_EXIT_RES_ID = "android:animExitRes";
+    public static final String KEY_ANIM_EXIT_RES_ID = "android:activity.animExitRes";
 
     /**
      * Custom in-place animation resource ID.
      * @hide
      */
-    public static final String KEY_ANIM_IN_PLACE_RES_ID = "android:animInPlaceRes";
+    public static final String KEY_ANIM_IN_PLACE_RES_ID = "android:activity.animInPlaceRes";
 
     /**
      * Bitmap for thumbnail animation.
      * @hide
      */
-    public static final String KEY_ANIM_THUMBNAIL = "android:animThumbnail";
+    public static final String KEY_ANIM_THUMBNAIL = "android:activity.animThumbnail";
 
     /**
      * Start X position of thumbnail animation.
      * @hide
      */
-    public static final String KEY_ANIM_START_X = "android:animStartX";
+    public static final String KEY_ANIM_START_X = "android:activity.animStartX";
 
     /**
      * Start Y position of thumbnail animation.
      * @hide
      */
-    public static final String KEY_ANIM_START_Y = "android:animStartY";
+    public static final String KEY_ANIM_START_Y = "android:activity.animStartY";
 
     /**
      * Initial width of the animation.
      * @hide
      */
-    public static final String KEY_ANIM_WIDTH = "android:animWidth";
+    public static final String KEY_ANIM_WIDTH = "android:activity.animWidth";
 
     /**
      * Initial height of the animation.
      * @hide
      */
-    public static final String KEY_ANIM_HEIGHT = "android:animHeight";
+    public static final String KEY_ANIM_HEIGHT = "android:activity.animHeight";
 
     /**
      * Callback for when animation is started.
      * @hide
      */
-    public static final String KEY_ANIM_START_LISTENER = "android:animStartListener";
+    public static final String KEY_ANIM_START_LISTENER = "android:activity.animStartListener";
 
     /**
      * For Activity transitions, the calling Activity's TransitionListener used to
@@ -110,13 +124,18 @@ public class ActivityOptions {
      * complete.
      */
     private static final String KEY_TRANSITION_COMPLETE_LISTENER
-            = "android:transitionCompleteListener";
+            = "android:activity.transitionCompleteListener";
 
-    private static final String KEY_TRANSITION_IS_RETURNING = "android:transitionIsReturning";
-    private static final String KEY_TRANSITION_SHARED_ELEMENTS = "android:sharedElementNames";
-    private static final String KEY_RESULT_DATA = "android:resultData";
-    private static final String KEY_RESULT_CODE = "android:resultCode";
-    private static final String KEY_EXIT_COORDINATOR_INDEX = "android:exitCoordinatorIndex";
+    private static final String KEY_TRANSITION_IS_RETURNING
+            = "android:activity.transitionIsReturning";
+    private static final String KEY_TRANSITION_SHARED_ELEMENTS
+            = "android:activity.sharedElementNames";
+    private static final String KEY_RESULT_DATA = "android:activity.resultData";
+    private static final String KEY_RESULT_CODE = "android:activity.resultCode";
+    private static final String KEY_EXIT_COORDINATOR_INDEX
+            = "android:activity.exitCoordinatorIndex";
+
+    private static final String KEY_USAGE_TIME_REPORT = "android:activity.usageTimeReport";
 
     /** @hide */
     public static final int ANIM_NONE = 0;
@@ -140,6 +159,8 @@ public class ActivityOptions {
     public static final int ANIM_THUMBNAIL_ASPECT_SCALE_DOWN = 9;
     /** @hide */
     public static final int ANIM_CUSTOM_IN_PLACE = 10;
+    /** @hide */
+    public static final int ANIM_CLIP_REVEAL = 11;
 
     private String mPackageName;
     private int mAnimationType = ANIM_NONE;
@@ -158,6 +179,7 @@ public class ActivityOptions {
     private Intent mResultData;
     private int mResultCode;
     private int mExitCoordinatorIndex;
+    private PendingIntent mUsageTimeReport;
 
     /**
      * Create an ActivityOptions specifying a custom animation to run when
@@ -281,6 +303,33 @@ public class ActivityOptions {
         ActivityOptions opts = new ActivityOptions();
         opts.mPackageName = source.getContext().getPackageName();
         opts.mAnimationType = ANIM_SCALE_UP;
+        int[] pts = new int[2];
+        source.getLocationOnScreen(pts);
+        opts.mStartX = pts[0] + startX;
+        opts.mStartY = pts[1] + startY;
+        opts.mWidth = width;
+        opts.mHeight = height;
+        return opts;
+    }
+
+    /**
+     * Create an ActivityOptions specifying an animation where the new
+     * activity is revealed from a small originating area of the screen to
+     * its final full representation.
+     *
+     * @param source The View that the new activity is animating from.  This
+     * defines the coordinate space for <var>startX</var> and <var>startY</var>.
+     * @param startX The x starting location of the new activity, relative to <var>source</var>.
+     * @param startY The y starting location of the activity, relative to <var>source</var>.
+     * @param width The initial width of the new activity.
+     * @param height The initial height of the new activity.
+     * @return Returns a new ActivityOptions object that you can use to
+     * supply these options as the options Bundle when starting an activity.
+     */
+    public static ActivityOptions makeClipRevealAnimation(View source,
+            int startX, int startY, int width, int height) {
+        ActivityOptions opts = new ActivityOptions();
+        opts.mAnimationType = ANIM_CLIP_REVEAL;
         int[] pts = new int[2];
         source.getLocationOnScreen(pts);
         opts.mStartX = pts[0] + startX;
@@ -557,6 +606,15 @@ public class ActivityOptions {
         return opts;
     }
 
+    /**
+     * Create a basic ActivityOptions that has no special animation associated with it.
+     * Other options can still be set.
+     */
+    public static ActivityOptions makeBasic() {
+        final ActivityOptions opts = new ActivityOptions();
+        return opts;
+    }
+
     /** @hide */
     public boolean getLaunchTaskBehind() {
         return mAnimationType == ANIM_LAUNCH_TASK_BEHIND;
@@ -568,6 +626,11 @@ public class ActivityOptions {
     /** @hide */
     public ActivityOptions(Bundle opts) {
         mPackageName = opts.getString(KEY_PACKAGE_NAME);
+        try {
+            mUsageTimeReport = opts.getParcelable(KEY_USAGE_TIME_REPORT);
+        } catch (RuntimeException e) {
+            Slog.w(TAG, e);
+        }
         mAnimationType = opts.getInt(KEY_ANIM_TYPE);
         switch (mAnimationType) {
             case ANIM_CUSTOM:
@@ -582,6 +645,7 @@ public class ActivityOptions {
                 break;
 
             case ANIM_SCALE_UP:
+            case ANIM_CLIP_REVEAL:
                 mStartX = opts.getInt(KEY_ANIM_START_X, 0);
                 mStartY = opts.getInt(KEY_ANIM_START_Y, 0);
                 mWidth = opts.getInt(KEY_ANIM_WIDTH, 0);
@@ -700,6 +764,11 @@ public class ActivityOptions {
     public Intent getResultData() { return mResultData; }
 
     /** @hide */
+    public PendingIntent getUsageTimeReport() {
+        return mUsageTimeReport;
+    }
+
+    /** @hide */
     public static void abort(Bundle options) {
         if (options != null) {
             (new ActivityOptions(options)).abort();
@@ -715,6 +784,7 @@ public class ActivityOptions {
         if (otherOptions.mPackageName != null) {
             mPackageName = otherOptions.mPackageName;
         }
+        mUsageTimeReport = otherOptions.mUsageTimeReport;
         mTransitionReceiver = null;
         mSharedElementNames = null;
         mIsReturning = false;
@@ -798,6 +868,9 @@ public class ActivityOptions {
             b.putString(KEY_PACKAGE_NAME, mPackageName);
         }
         b.putInt(KEY_ANIM_TYPE, mAnimationType);
+        if (mUsageTimeReport != null) {
+            b.putParcelable(KEY_USAGE_TIME_REPORT, mUsageTimeReport);
+        }
         switch (mAnimationType) {
             case ANIM_CUSTOM:
                 b.putInt(KEY_ANIM_ENTER_RES_ID, mCustomEnterResId);
@@ -809,6 +882,7 @@ public class ActivityOptions {
                 b.putInt(KEY_ANIM_IN_PLACE_RES_ID, mCustomInPlaceResId);
                 break;
             case ANIM_SCALE_UP:
+            case ANIM_CLIP_REVEAL:
                 b.putInt(KEY_ANIM_START_X, mStartX);
                 b.putInt(KEY_ANIM_START_Y, mStartY);
                 b.putInt(KEY_ANIM_WIDTH, mWidth);
@@ -839,6 +913,34 @@ public class ActivityOptions {
         }
 
         return b;
+    }
+
+    /**
+     * Ask the the system track that time the user spends in the app being launched, and
+     * report it back once done.  The report will be sent to the given receiver, with
+     * the extras {@link #EXTRA_USAGE_TIME_REPORT} and {@link #EXTRA_USAGE_TIME_REPORT_PACKAGES}
+     * filled in.
+     *
+     * <p>The time interval tracked is from launching this activity until the user leaves
+     * that activity's flow.  They are considered to stay in the flow as long as
+     * new activities are being launched or returned to from the original flow,
+     * even if this crosses package or task boundaries.  For example, if the originator
+     * starts an activity to view an image, and while there the user selects to share,
+     * which launches their email app in a new task, and they complete the share, the
+     * time during that entire operation will be included until they finally hit back from
+     * the original image viewer activity.</p>
+     *
+     * <p>The user is considered to complete a flow once they switch to another
+     * activity that is not part of the tracked flow.  This may happen, for example, by
+     * using the notification shade, launcher, or recents to launch or switch to another
+     * app.  Simply going in to these navigation elements does not break the flow (although
+     * the launcher and recents stops time tracking of the session); it is the act of
+     * going somewhere else that completes the tracking.</p>
+     *
+     * @param receiver A broadcast receiver that willl receive the report.
+     */
+    public void requestUsageTimeReport(PendingIntent receiver) {
+        mUsageTimeReport = receiver;
     }
 
     /**

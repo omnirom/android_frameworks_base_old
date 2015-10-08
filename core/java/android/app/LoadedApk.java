@@ -18,7 +18,6 @@ package android.app;
 
 import android.text.TextUtils;
 import android.util.ArrayMap;
-
 import android.content.BroadcastReceiver;
 import android.content.ComponentName;
 import android.content.Context;
@@ -45,6 +44,8 @@ import android.util.Slog;
 import android.util.SparseArray;
 import android.view.DisplayAdjustments;
 import android.view.Display;
+import android.os.SystemProperties;
+
 import dalvik.system.VMRuntime;
 
 import java.io.File;
@@ -54,6 +55,7 @@ import java.lang.ref.WeakReference;
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 import java.net.URL;
+import java.util.List;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Enumeration;
@@ -135,10 +137,6 @@ public final class LoadedApk {
         mSplitAppDirs = aInfo.splitSourceDirs;
         mSplitResDirs = aInfo.uid == myUid ? aInfo.splitSourceDirs : aInfo.splitPublicSourceDirs;
         mOverlayDirs = aInfo.resourceDirs;
-        if (!UserHandle.isSameUser(aInfo.uid, myUid) && !Process.isIsolated()) {
-            aInfo.dataDir = PackageManager.getDataDirForUser(UserHandle.getUserId(myUid),
-                    mPackageName);
-        }
         mSharedLibraries = aInfo.sharedLibraryFiles;
         mDataDir = aInfo.dataDir;
         mDataDirFile = mDataDir != null ? new File(mDataDir) : null;
@@ -156,7 +154,12 @@ public final class LoadedApk {
         // depending on what the current runtime's instruction set is.
         if (info.primaryCpuAbi != null && info.secondaryCpuAbi != null) {
             final String runtimeIsa = VMRuntime.getRuntime().vmInstructionSet();
-            final String secondaryIsa = VMRuntime.getInstructionSet(info.secondaryCpuAbi);
+
+            // Get the instruction set that the libraries of secondary Abi is supported.
+            // In presence of a native bridge this might be different than the one secondary Abi used.
+            String secondaryIsa = VMRuntime.getInstructionSet(info.secondaryCpuAbi);
+            final String secondaryDexCodeIsa = SystemProperties.get("ro.dalvik.vm.isa." + secondaryIsa);
+            secondaryIsa = secondaryDexCodeIsa.isEmpty() ? secondaryIsa : secondaryDexCodeIsa;
 
             // If the runtimeIsa is the same as the primary isa, then we do nothing.
             // Everything will be set up correctly because info.nativeLibraryDir will
@@ -164,6 +167,7 @@ public final class LoadedApk {
             if (runtimeIsa.equals(secondaryIsa)) {
                 final ApplicationInfo modified = new ApplicationInfo(info);
                 modified.nativeLibraryDir = modified.secondaryNativeLibraryDir;
+                modified.primaryCpuAbi = modified.secondaryCpuAbi;
                 return modified;
             }
         }
@@ -270,8 +274,9 @@ public final class LoadedApk {
                     }
                 }
 
-                final ArrayList<String> zipPaths = new ArrayList<>();
-                final ArrayList<String> libPaths = new ArrayList<>();
+                final List<String> zipPaths = new ArrayList<>();
+                final List<String> apkPaths = new ArrayList<>();
+                final List<String> libPaths = new ArrayList<>();
 
                 if (mRegisterPackage) {
                     try {
@@ -327,6 +332,8 @@ public final class LoadedApk {
                     }
                 }
 
+                apkPaths.addAll(zipPaths);
+
                 if (mSharedLibraries != null) {
                     for (String lib : mSharedLibraries) {
                         if (!zipPaths.contains(lib)) {
@@ -344,6 +351,14 @@ public final class LoadedApk {
                 }
 
                 final String zip = TextUtils.join(File.pathSeparator, zipPaths);
+
+                // Add path to libraries in apk for current abi
+                if (mApplicationInfo.primaryCpuAbi != null) {
+                    for (String apk : apkPaths) {
+                      libPaths.add(apk + "!/lib/" + mApplicationInfo.primaryCpuAbi);
+                    }
+                }
+
                 final String lib = TextUtils.join(File.pathSeparator, libPaths);
 
                 /*
@@ -801,7 +816,7 @@ public final class LoadedApk {
                         if (extras != null) {
                             extras.setAllowFds(false);
                         }
-                        mgr.finishReceiver(this, resultCode, data, extras, false);
+                        mgr.finishReceiver(this, resultCode, data, extras, false, intent.getFlags());
                     } catch (RemoteException e) {
                         Slog.w(ActivityThread.TAG, "Couldn't finish broadcast to unregistered receiver");
                     }
@@ -826,8 +841,8 @@ public final class LoadedApk {
             public Args(Intent intent, int resultCode, String resultData, Bundle resultExtras,
                     boolean ordered, boolean sticky, int sendingUser) {
                 super(resultCode, resultData, resultExtras,
-                        mRegistered ? TYPE_REGISTERED : TYPE_UNREGISTERED,
-                        ordered, sticky, mIIntentReceiver.asBinder(), sendingUser);
+                        mRegistered ? TYPE_REGISTERED : TYPE_UNREGISTERED, ordered,
+                        sticky, mIIntentReceiver.asBinder(), sendingUser, intent.getFlags());
                 mCurIntent = intent;
                 mOrdered = ordered;
             }

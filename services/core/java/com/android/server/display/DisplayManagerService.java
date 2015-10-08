@@ -40,13 +40,14 @@ import android.os.IBinder;
 import android.os.IBinder.DeathRecipient;
 import android.os.Looper;
 import android.os.Message;
+import android.os.PowerManager;
 import android.os.Process;
 import android.os.RemoteException;
 import android.os.ServiceManager;
 import android.os.SystemClock;
 import android.os.SystemProperties;
+import android.os.Trace;
 import android.text.TextUtils;
-import android.util.Log;
 import android.util.Slog;
 import android.util.SparseArray;
 import android.view.Display;
@@ -180,7 +181,11 @@ public final class DisplayManagerService extends SystemService {
 
     // The overall display state, independent of changes that might influence one
     // display or another in particular.
-    private int mGlobalDisplayState = Display.STATE_UNKNOWN;
+    private int mGlobalDisplayState = Display.STATE_ON;
+
+    // The overall display brightness.
+    // For now, this only applies to the built-in display but we may split it up eventually.
+    private int mGlobalDisplayBrightness = PowerManager.BRIGHTNESS_DEFAULT;
 
     // Set to true when there are pending display changes that have yet to be applied
     // to the surface flinger state.
@@ -227,6 +232,9 @@ public final class DisplayManagerService extends SystemService {
         mUiHandler = UiThread.getHandler();
         mDisplayAdapterListener = new DisplayAdapterListener();
         mSingleDisplayDemoMode = SystemProperties.getBoolean("persist.demo.singledisplay", false);
+
+        PowerManager pm = (PowerManager) mContext.getSystemService(Context.POWER_SERVICE);
+        mGlobalDisplayBrightness = pm.getDefaultScreenBrightnessSetting();
     }
 
     @Override
@@ -323,16 +331,35 @@ public final class DisplayManagerService extends SystemService {
         }
     }
 
-    private void requestGlobalDisplayStateInternal(int state) {
+    private void requestGlobalDisplayStateInternal(int state, int brightness) {
+        if (state == Display.STATE_UNKNOWN) {
+            state = Display.STATE_ON;
+        }
+        if (state == Display.STATE_OFF) {
+            brightness = PowerManager.BRIGHTNESS_OFF;
+        } else if (brightness < 0) {
+            brightness = PowerManager.BRIGHTNESS_DEFAULT;
+        } else if (brightness > PowerManager.BRIGHTNESS_ON) {
+            brightness = PowerManager.BRIGHTNESS_ON;
+        }
+
         synchronized (mTempDisplayStateWorkQueue) {
             try {
                 // Update the display state within the lock.
+                // Note that we do not need to schedule traversals here although it
+                // may happen as a side-effect of displays changing state.
                 synchronized (mSyncRoot) {
-                    if (mGlobalDisplayState != state) {
-                        mGlobalDisplayState = state;
-                        updateGlobalDisplayStateLocked(mTempDisplayStateWorkQueue);
-                        scheduleTraversalLocked(false);
+                    if (mGlobalDisplayState == state
+                            && mGlobalDisplayBrightness == brightness) {
+                        return; // no change
                     }
+
+                    Trace.traceBegin(Trace.TRACE_TAG_POWER, "requestGlobalDisplayState("
+                            + Display.stateToString(state)
+                            + ", brightness=" + brightness + ")");
+                    mGlobalDisplayState = state;
+                    mGlobalDisplayBrightness = brightness;
+                    applyGlobalDisplayStateLocked(mTempDisplayStateWorkQueue);
                 }
 
                 // Setting the display power state can take hundreds of milliseconds
@@ -342,6 +369,7 @@ public final class DisplayManagerService extends SystemService {
                 for (int i = 0; i < mTempDisplayStateWorkQueue.size(); i++) {
                     mTempDisplayStateWorkQueue.get(i).run();
                 }
+                Trace.traceEnd(Trace.TRACE_TAG_POWER);
             } finally {
                 mTempDisplayStateWorkQueue.clear();
             }
@@ -641,13 +669,14 @@ public final class DisplayManagerService extends SystemService {
     }
 
     private void handleDisplayDeviceAddedLocked(DisplayDevice device) {
+        DisplayDeviceInfo info = device.getDisplayDeviceInfoLocked();
         if (mDisplayDevices.contains(device)) {
-            Slog.w(TAG, "Attempted to add already added display device: "
-                    + device.getDisplayDeviceInfoLocked());
+            Slog.w(TAG, "Attempted to add already added display device: " + info);
             return;
         }
 
-        Slog.i(TAG, "Display device added: " + device.getDisplayDeviceInfoLocked());
+        Slog.i(TAG, "Display device added: " + info);
+        device.mDebugLastLoggedDeviceInfo = info;
 
         mDisplayDevices.add(device);
         addLogicalDisplayLocked(device);
@@ -660,13 +689,20 @@ public final class DisplayManagerService extends SystemService {
 
     private void handleDisplayDeviceChanged(DisplayDevice device) {
         synchronized (mSyncRoot) {
+            DisplayDeviceInfo info = device.getDisplayDeviceInfoLocked();
             if (!mDisplayDevices.contains(device)) {
-                Slog.w(TAG, "Attempted to change non-existent display device: "
-                        + device.getDisplayDeviceInfoLocked());
+                Slog.w(TAG, "Attempted to change non-existent display device: " + info);
                 return;
             }
 
-            Slog.i(TAG, "Display device changed: " + device.getDisplayDeviceInfoLocked());
+            int diff = device.mDebugLastLoggedDeviceInfo.diff(info);
+            if (diff == DisplayDeviceInfo.DIFF_STATE) {
+                Slog.i(TAG, "Display device changed state: \"" + info.name
+                        + "\", " + Display.stateToString(info.state));
+            } else if (diff != 0) {
+                Slog.i(TAG, "Display device changed: " + info);
+            }
+            device.mDebugLastLoggedDeviceInfo = info;
 
             device.applyPendingDisplayDeviceInfoChangesLocked();
             if (updateLogicalDisplaysLocked()) {
@@ -680,20 +716,22 @@ public final class DisplayManagerService extends SystemService {
             handleDisplayDeviceRemovedLocked(device);
         }
     }
+
     private void handleDisplayDeviceRemovedLocked(DisplayDevice device) {
+        DisplayDeviceInfo info = device.getDisplayDeviceInfoLocked();
         if (!mDisplayDevices.remove(device)) {
-            Slog.w(TAG, "Attempted to remove non-existent display device: "
-                    + device.getDisplayDeviceInfoLocked());
+            Slog.w(TAG, "Attempted to remove non-existent display device: " + info);
             return;
         }
 
-        Slog.i(TAG, "Display device removed: " + device.getDisplayDeviceInfoLocked());
+        Slog.i(TAG, "Display device removed: " + info);
+        device.mDebugLastLoggedDeviceInfo = info;
 
         updateLogicalDisplaysLocked();
         scheduleTraversalLocked(false);
     }
 
-    private void updateGlobalDisplayStateLocked(List<Runnable> workQueue) {
+    private void applyGlobalDisplayStateLocked(List<Runnable> workQueue) {
         final int count = mDisplayDevices.size();
         for (int i = 0; i < count; i++) {
             DisplayDevice device = mDisplayDevices.get(i);
@@ -709,7 +747,7 @@ public final class DisplayManagerService extends SystemService {
         // by the display power controller (if known).
         DisplayDeviceInfo info = device.getDisplayDeviceInfoLocked();
         if ((info.flags & DisplayDeviceInfo.FLAG_NEVER_BLANK) == 0) {
-            return device.requestDisplayStateLocked(mGlobalDisplayState);
+            return device.requestDisplayStateLocked(mGlobalDisplayState, mGlobalDisplayBrightness);
         }
         return null;
     }
@@ -806,7 +844,7 @@ public final class DisplayManagerService extends SystemService {
     }
 
     private void setDisplayPropertiesInternal(int displayId, boolean hasContent,
-            float requestedRefreshRate, boolean inTraversal) {
+            float requestedRefreshRate, int requestedModeId, boolean inTraversal) {
         synchronized (mSyncRoot) {
             LogicalDisplay display = mLogicalDisplays.get(displayId);
             if (display == null) {
@@ -821,13 +859,36 @@ public final class DisplayManagerService extends SystemService {
                 display.setHasContentLocked(hasContent);
                 scheduleTraversalLocked(inTraversal);
             }
-            if (display.getRequestedRefreshRateLocked() != requestedRefreshRate) {
+            if (requestedModeId == 0 && requestedRefreshRate != 0) {
+                // Scan supported modes returned by display.getInfo() to find a mode with the same
+                // size as the default display mode but with the specified refresh rate instead.
+                requestedModeId = display.getDisplayInfoLocked().findDefaultModeByRefreshRate(
+                        requestedRefreshRate);
+            }
+            if (display.getRequestedModeIdLocked() != requestedModeId) {
                 if (DEBUG) {
-                    Slog.d(TAG, "Display " + displayId + " has requested a new refresh rate: "
-                            + requestedRefreshRate + "fps");
+                    Slog.d(TAG, "Display " + displayId + " switching to mode " + requestedModeId);
                 }
-                display.setRequestedRefreshRateLocked(requestedRefreshRate);
+                display.setRequestedModeIdLocked(requestedModeId);
                 scheduleTraversalLocked(inTraversal);
+            }
+        }
+    }
+
+    private void setDisplayOffsetsInternal(int displayId, int x, int y) {
+        synchronized (mSyncRoot) {
+            LogicalDisplay display = mLogicalDisplays.get(displayId);
+            if (display == null) {
+                return;
+            }
+            if (display.getDisplayOffsetXLocked() != x
+                    || display.getDisplayOffsetYLocked() != y) {
+                if (DEBUG) {
+                    Slog.d(TAG, "Display " + displayId + " burn-in offset set to ("
+                            + x + ", " + y + ")");
+                }
+                display.setDisplayOffsetsLocked(x, y);
+                scheduleTraversalLocked(false);
             }
         }
     }
@@ -1445,16 +1506,16 @@ public final class DisplayManagerService extends SystemService {
             synchronized (mSyncRoot) {
                 DisplayBlanker blanker = new DisplayBlanker() {
                     @Override
-                    public void requestDisplayState(int state) {
+                    public void requestDisplayState(int state, int brightness) {
                         // The order of operations is important for legacy reasons.
                         if (state == Display.STATE_OFF) {
-                            requestGlobalDisplayStateInternal(state);
+                            requestGlobalDisplayStateInternal(state, brightness);
                         }
 
                         callbacks.onDisplayStateChange(state);
 
                         if (state != Display.STATE_OFF) {
-                            requestGlobalDisplayStateInternal(state);
+                            requestGlobalDisplayStateInternal(state, brightness);
                         }
                     }
                 };
@@ -1510,8 +1571,14 @@ public final class DisplayManagerService extends SystemService {
 
         @Override
         public void setDisplayProperties(int displayId, boolean hasContent,
-                float requestedRefreshRate, boolean inTraversal) {
-            setDisplayPropertiesInternal(displayId, hasContent, requestedRefreshRate, inTraversal);
+                float requestedRefreshRate, int requestedMode, boolean inTraversal) {
+            setDisplayPropertiesInternal(displayId, hasContent, requestedRefreshRate,
+                    requestedMode, inTraversal);
+        }
+
+        @Override
+        public void setDisplayOffsets(int displayId, int x, int y) {
+            setDisplayOffsetsInternal(displayId, x, y);
         }
     }
 }

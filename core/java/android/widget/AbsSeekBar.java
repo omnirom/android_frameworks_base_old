@@ -31,7 +31,6 @@ import android.util.AttributeSet;
 import android.view.KeyEvent;
 import android.view.MotionEvent;
 import android.view.ViewConfiguration;
-import android.view.accessibility.AccessibilityEvent;
 import android.view.accessibility.AccessibilityNodeInfo;
 
 import com.android.internal.R;
@@ -87,10 +86,10 @@ public abstract class AbsSeekBar extends ProgressBar {
     public AbsSeekBar(Context context, AttributeSet attrs, int defStyleAttr, int defStyleRes) {
         super(context, attrs, defStyleAttr, defStyleRes);
 
-        TypedArray a = context.obtainStyledAttributes(
-                attrs, com.android.internal.R.styleable.SeekBar, defStyleAttr, defStyleRes);
+        final TypedArray a = context.obtainStyledAttributes(
+                attrs, R.styleable.SeekBar, defStyleAttr, defStyleRes);
 
-        final Drawable thumb = a.getDrawable(com.android.internal.R.styleable.SeekBar_thumb);
+        final Drawable thumb = a.getDrawable(R.styleable.SeekBar_thumb);
         setThumb(thumb);
 
         if (a.hasValue(R.styleable.SeekBar_thumbTintMode)) {
@@ -104,18 +103,22 @@ public abstract class AbsSeekBar extends ProgressBar {
             mHasThumbTint = true;
         }
 
+        mSplitTrack = a.getBoolean(R.styleable.SeekBar_splitTrack, false);
+
         // Guess thumb offset if thumb != null, but allow layout to override.
-        final int thumbOffset = a.getDimensionPixelOffset(
-                com.android.internal.R.styleable.SeekBar_thumbOffset, getThumbOffset());
+        final int thumbOffset = a.getDimensionPixelOffset(R.styleable.SeekBar_thumbOffset, getThumbOffset());
         setThumbOffset(thumbOffset);
 
-        mSplitTrack = a.getBoolean(com.android.internal.R.styleable.SeekBar_splitTrack, false);
+        final boolean useDisabledAlpha = a.getBoolean(R.styleable.SeekBar_useDisabledAlpha, true);
         a.recycle();
 
-        a = context.obtainStyledAttributes(attrs,
-                com.android.internal.R.styleable.Theme, 0, 0);
-        mDisabledAlpha = a.getFloat(com.android.internal.R.styleable.Theme_disabledAlpha, 0.5f);
-        a.recycle();
+        if (useDisabledAlpha) {
+            final TypedArray ta = context.obtainStyledAttributes(attrs, R.styleable.Theme, 0, 0);
+            mDisabledAlpha = ta.getFloat(R.styleable.Theme_disabledAlpha, 0.5f);
+            ta.recycle();
+        } else {
+            mDisabledAlpha = 1.0f;
+        }
 
         applyThumbTint();
 
@@ -361,7 +364,7 @@ public abstract class AbsSeekBar extends ProgressBar {
         super.drawableStateChanged();
 
         final Drawable progressDrawable = getProgressDrawable();
-        if (progressDrawable != null) {
+        if (progressDrawable != null && mDisabledAlpha < 1.0f) {
             progressDrawable.setAlpha(isEnabled() ? NO_ALPHA : (int) (NO_ALPHA * mDisabledAlpha));
         }
 
@@ -381,8 +384,8 @@ public abstract class AbsSeekBar extends ProgressBar {
     }
 
     @Override
-    void onProgressRefresh(float scale, boolean fromUser) {
-        super.onProgressRefresh(scale, fromUser);
+    void onProgressRefresh(float scale, boolean fromUser, int progress) {
+        super.onProgressRefresh(scale, fromUser, progress);
 
         final Drawable thumb = mThumb;
         if (thumb != null) {
@@ -403,28 +406,31 @@ public abstract class AbsSeekBar extends ProgressBar {
     }
 
     private void updateThumbAndTrackPos(int w, int h) {
+        final int paddedHeight = h - mPaddingTop - mPaddingBottom;
         final Drawable track = getCurrentDrawable();
         final Drawable thumb = mThumb;
 
         // The max height does not incorporate padding, whereas the height
         // parameter does.
-        final int trackHeight = Math.min(mMaxHeight, h - mPaddingTop - mPaddingBottom);
+        final int trackHeight = Math.min(mMaxHeight, paddedHeight);
         final int thumbHeight = thumb == null ? 0 : thumb.getIntrinsicHeight();
 
         // Apply offset to whichever item is taller.
         final int trackOffset;
         final int thumbOffset;
         if (thumbHeight > trackHeight) {
-            trackOffset = (thumbHeight - trackHeight) / 2;
-            thumbOffset = 0;
+            final int offsetHeight = (paddedHeight - thumbHeight) / 2;
+            trackOffset = offsetHeight + (thumbHeight - trackHeight) / 2;
+            thumbOffset = offsetHeight + 0;
         } else {
-            trackOffset = 0;
-            thumbOffset = (trackHeight - thumbHeight) / 2;
+            final int offsetHeight = (paddedHeight - trackHeight) / 2;
+            trackOffset = offsetHeight + 0;
+            thumbOffset = offsetHeight + (trackHeight - thumbHeight) / 2;
         }
 
         if (track != null) {
-            track.setBounds(0, trackOffset, w - mPaddingRight - mPaddingLeft,
-                    h - mPaddingBottom - trackOffset - mPaddingTop);
+            final int trackWidth = w - mPaddingRight - mPaddingLeft;
+            track.setBounds(0, trackOffset, trackWidth, trackOffset + trackHeight);
         }
 
         if (thumb != null) {
@@ -472,7 +478,6 @@ public abstract class AbsSeekBar extends ProgressBar {
 
         final Drawable background = getBackground();
         if (background != null) {
-            final Rect bounds = thumb.getBounds();
             final int offsetX = mPaddingLeft - mThumbOffset;
             final int offsetY = mPaddingTop;
             background.setHotspotBounds(left + offsetX, top + offsetY,
@@ -695,19 +700,20 @@ public abstract class AbsSeekBar extends ProgressBar {
     @Override
     public boolean onKeyDown(int keyCode, KeyEvent event) {
         if (isEnabled()) {
-            int progress = getProgress();
+            int increment = mKeyProgressIncrement;
             switch (keyCode) {
                 case KeyEvent.KEYCODE_DPAD_LEFT:
-                    if (progress <= 0) break;
-                    setProgress(progress - mKeyProgressIncrement, true);
-                    onKeyChange();
-                    return true;
-
+                    increment = -increment;
+                    // fallthrough
                 case KeyEvent.KEYCODE_DPAD_RIGHT:
-                    if (progress >= getMax()) break;
-                    setProgress(progress + mKeyProgressIncrement, true);
-                    onKeyChange();
-                    return true;
+                    increment = isLayoutRtl() ? -increment : increment;
+
+                    // Let progress bar handle clamping values.
+                    if (setProgress(getProgress() + increment, true)) {
+                        onKeyChange();
+                        return true;
+                    }
+                    break;
             }
         }
 
@@ -715,55 +721,52 @@ public abstract class AbsSeekBar extends ProgressBar {
     }
 
     @Override
-    public void onInitializeAccessibilityEvent(AccessibilityEvent event) {
-        super.onInitializeAccessibilityEvent(event);
-        event.setClassName(AbsSeekBar.class.getName());
+    public CharSequence getAccessibilityClassName() {
+        return AbsSeekBar.class.getName();
     }
 
+    /** @hide */
     @Override
-    public void onInitializeAccessibilityNodeInfo(AccessibilityNodeInfo info) {
-        super.onInitializeAccessibilityNodeInfo(info);
-        info.setClassName(AbsSeekBar.class.getName());
+    public void onInitializeAccessibilityNodeInfoInternal(AccessibilityNodeInfo info) {
+        super.onInitializeAccessibilityNodeInfoInternal(info);
 
         if (isEnabled()) {
             final int progress = getProgress();
             if (progress > 0) {
-                info.addAction(AccessibilityNodeInfo.ACTION_SCROLL_BACKWARD);
+                info.addAction(AccessibilityNodeInfo.AccessibilityAction.ACTION_SCROLL_BACKWARD);
             }
             if (progress < getMax()) {
-                info.addAction(AccessibilityNodeInfo.ACTION_SCROLL_FORWARD);
+                info.addAction(AccessibilityNodeInfo.AccessibilityAction.ACTION_SCROLL_FORWARD);
             }
         }
     }
 
+    /** @hide */
     @Override
-    public boolean performAccessibilityAction(int action, Bundle arguments) {
-        if (super.performAccessibilityAction(action, arguments)) {
+    public boolean performAccessibilityActionInternal(int action, Bundle arguments) {
+        if (super.performAccessibilityActionInternal(action, arguments)) {
             return true;
         }
+
         if (!isEnabled()) {
             return false;
         }
-        final int progress = getProgress();
-        final int increment = Math.max(1, Math.round((float) getMax() / 5));
-        switch (action) {
-            case AccessibilityNodeInfo.ACTION_SCROLL_BACKWARD: {
-                if (progress <= 0) {
-                    return false;
-                }
-                setProgress(progress - increment, true);
+
+        if (action == AccessibilityNodeInfo.ACTION_SCROLL_FORWARD
+                || action == AccessibilityNodeInfo.ACTION_SCROLL_BACKWARD) {
+            int increment = Math.max(1, Math.round((float) getMax() / 5));
+            if (action == AccessibilityNodeInfo.ACTION_SCROLL_BACKWARD) {
+                increment = -increment;
+            }
+
+            // Let progress bar handle clamping values.
+            if (setProgress(getProgress() + increment, true)) {
                 onKeyChange();
                 return true;
             }
-            case AccessibilityNodeInfo.ACTION_SCROLL_FORWARD: {
-                if (progress >= getMax()) {
-                    return false;
-                }
-                setProgress(progress + increment, true);
-                onKeyChange();
-                return true;
-            }
+            return false;
         }
+
         return false;
     }
 

@@ -52,21 +52,24 @@ int GradientCacheEntry::compare(const GradientCacheEntry& lhs, const GradientCac
     int deltaInt = int(lhs.count) - int(rhs.count);
     if (deltaInt != 0) return deltaInt;
 
-    deltaInt = memcmp(lhs.colors, rhs.colors, lhs.count * sizeof(uint32_t));
+    deltaInt = memcmp(lhs.colors.get(), rhs.colors.get(), lhs.count * sizeof(uint32_t));
     if (deltaInt != 0) return deltaInt;
 
-    return memcmp(lhs.positions, rhs.positions, lhs.count * sizeof(float));
+    return memcmp(lhs.positions.get(), rhs.positions.get(), lhs.count * sizeof(float));
 }
 
 ///////////////////////////////////////////////////////////////////////////////
 // Constructors/destructor
 ///////////////////////////////////////////////////////////////////////////////
 
-GradientCache::GradientCache():
-        mCache(LruCache<GradientCacheEntry, Texture*>::kUnlimitedCapacity),
-        mSize(0), mMaxSize(MB(DEFAULT_GRADIENT_CACHE_SIZE)) {
+GradientCache::GradientCache(Extensions& extensions)
+        : mCache(LruCache<GradientCacheEntry, Texture*>::kUnlimitedCapacity)
+        , mSize(0)
+        , mMaxSize(MB(DEFAULT_GRADIENT_CACHE_SIZE))
+        , mUseFloatTexture(extensions.hasFloatTextures())
+        , mHasNpot(extensions.hasNPot()){
     char property[PROPERTY_VALUE_MAX];
-    if (property_get(PROPERTY_GRADIENT_CACHE_SIZE, property, NULL) > 0) {
+    if (property_get(PROPERTY_GRADIENT_CACHE_SIZE, property, nullptr) > 0) {
         INIT_LOGD("  Setting gradient cache size to %sMB", property);
         setMaxSize(MB(atof(property)));
     } else {
@@ -75,16 +78,6 @@ GradientCache::GradientCache():
 
     glGetIntegerv(GL_MAX_TEXTURE_SIZE, &mMaxTextureSize);
 
-    mCache.setOnEntryRemovedListener(this);
-
-    const Extensions& extensions = Extensions::getInstance();
-    mUseFloatTexture = extensions.hasFloatTextures();
-    mHasNpot = extensions.hasNPot();
-}
-
-GradientCache::GradientCache(uint32_t maxByteSize):
-        mCache(LruCache<GradientCacheEntry, Texture*>::kUnlimitedCapacity),
-        mSize(0), mMaxSize(maxByteSize) {
     mCache.setOnEntryRemovedListener(this);
 }
 
@@ -173,7 +166,7 @@ Texture* GradientCache::addLinearGradient(GradientCacheEntry& gradient,
     GradientInfo info;
     getGradientInfo(colors, count, info);
 
-    Texture* texture = new Texture();
+    Texture* texture = new Texture(Caches::getInstance());
     texture->width = info.width;
     texture->height = 2;
     texture->blend = info.hasAlpha;
@@ -285,7 +278,7 @@ void GradientCache::generateTexture(uint32_t* colors, float* positions, Texture*
     memcpy(pixels + rowBytes, pixels, rowBytes);
 
     glGenTextures(1, &texture->id);
-    Caches::getInstance().bindTexture(texture->id);
+    Caches::getInstance().textureState().bindTexture(texture->id);
     glPixelStorei(GL_UNPACK_ALIGNMENT, 4);
 
     if (mUseFloatTexture) {

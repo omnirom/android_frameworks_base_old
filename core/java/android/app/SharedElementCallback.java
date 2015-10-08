@@ -51,9 +51,23 @@ public abstract class SharedElementCallback {
     };
 
     /**
-     * Called immediately after the start state is set for the shared element.
-     * The shared element will start at the size and position of the shared element
-     * in the launching Activity or Fragment.
+     * In Activity Transitions, onSharedElementStart is called immediately before
+     * capturing the start of the shared element state on enter and reenter transitions and
+     * immediately before capturing the end of the shared element state for exit and return
+     * transitions.
+     * <p>
+     * In Fragment Transitions, onSharedElementStart is called immediately before capturing the
+     * start state of all shared element transitions.
+     * <p>
+     * This call can be used to adjust the transition start state by modifying the shared
+     * element Views. Note that no layout step will be executed between onSharedElementStart
+     * and the transition state capture.
+     * <p>
+     * For Activity Transitions, any changes made in {@link #onSharedElementEnd(List, List, List)}
+     * that are not updated during by layout should be corrected in onSharedElementStart for exit and
+     * return transitions. For example, rotation or scale will not be affected by layout and
+     * if changed in {@link #onSharedElementEnd(List, List, List)}, it will also have to be reset
+     * in onSharedElementStart again to correct the end state.
      *
      * @param sharedElementNames The names of the shared elements that were accepted into
      *                           the View hierarchy.
@@ -68,17 +82,23 @@ public abstract class SharedElementCallback {
             List<View> sharedElements, List<View> sharedElementSnapshots) {}
 
     /**
-     * Called after the end state is set for the shared element, but before the end state
-     * is captured by the shared element transition.
+     * In Activity Transitions, onSharedElementEnd is called immediately before
+     * capturing the end of the shared element state on enter and reenter transitions and
+     * immediately before capturing the start of the shared element state for exit and return
+     * transitions.
      * <p>
-     *     Any customization done in
-     *     {@link #onSharedElementStart(java.util.List, java.util.List, java.util.List)}
-     *     may need to be modified to the final state of the shared element if it is not
-     *     automatically corrected by layout. For example, rotation or scale will not
-     *     be affected by layout and if changed in {@link #onSharedElementStart(java.util.List,
-     *     java.util.List, java.util.List)}, it will also have to be set here again to correct
-     *     the end state.
-     * </p>
+     * In Fragment Transitions, onSharedElementEnd is called immediately before capturing the
+     * end state of all shared element transitions.
+     * <p>
+     * This call can be used to adjust the transition end state by modifying the shared
+     * element Views. Note that no layout step will be executed between onSharedElementEnd
+     * and the transition state capture.
+     * <p>
+     * Any changes made in {@link #onSharedElementStart(List, List, List)} that are not updated
+     * during layout should be corrected in onSharedElementEnd. For example, rotation or scale
+     * will not be affected by layout and if changed in
+     * {@link #onSharedElementStart(List, List, List)}, it will also have to be reset in
+     * onSharedElementEnd again to correct the end state.
      *
      * @param sharedElementNames The names of the shared elements that were accepted into
      *                           the View hierarchy.
@@ -220,5 +240,43 @@ public abstract class SharedElementCallback {
             view.setBackground(new BitmapDrawable(resources, bitmap));
         }
         return view;
+    }
+
+    /**
+     * Called during an Activity Transition when the shared elements have arrived at the
+     * final location and are ready to be transferred. This method is called for both the
+     * source and destination Activities.
+     * <p>
+     * When the shared elements are ready to be transferred,
+     * {@link OnSharedElementsReadyListener#onSharedElementsReady()}
+     * must be called to trigger the transfer.
+     * <p>
+     * The default behavior is to trigger the transfer immediately.
+     *
+     * @param sharedElementNames The names of the shared elements that are being transferred..
+     * @param sharedElements The shared elements that are part of the View hierarchy.
+     * @param listener The listener to call when the shared elements are ready to be hidden
+     *                 in the source Activity or shown in the destination Activity.
+     */
+    public void onSharedElementsArrived(List<String> sharedElementNames,
+            List<View> sharedElements, OnSharedElementsReadyListener listener) {
+        listener.onSharedElementsReady();
+    }
+
+    /**
+     * Listener to be called after {@link
+     * SharedElementCallback#onSharedElementsArrived(List, List, OnSharedElementsReadyListener)}
+     * when the shared elements are ready to be hidden in the source Activity and shown in the
+     * destination Activity.
+     */
+    public interface OnSharedElementsReadyListener {
+
+        /**
+         * Call this method during or after the OnSharedElementsReadyListener has been received
+         * in {@link SharedElementCallback#onSharedElementsArrived(List, List,
+         * OnSharedElementsReadyListener)} to indicate that the shared elements are ready to be
+         * hidden in the source and shown in the destination Activity.
+         */
+        void onSharedElementsReady();
     }
 }

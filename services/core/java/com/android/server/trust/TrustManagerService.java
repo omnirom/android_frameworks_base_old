@@ -105,7 +105,7 @@ public class TrustManagerService extends SystemService {
     private final ArraySet<AgentInfo> mActiveAgents = new ArraySet<AgentInfo>();
     private final ArrayList<ITrustListener> mTrustListeners = new ArrayList<ITrustListener>();
     private final Receiver mReceiver = new Receiver();
-    private final SparseBooleanArray mUserHasAuthenticatedSinceBoot = new SparseBooleanArray();
+    private final SparseBooleanArray mUserHasAuthenticated = new SparseBooleanArray();
     /* package */ final TrustArchive mArchive = new TrustArchive();
     private final Context mContext;
     private final LockPatternUtils mLockPatternUtils;
@@ -117,6 +117,9 @@ public class TrustManagerService extends SystemService {
 
     @GuardedBy("mDeviceLockedForUser")
     private final SparseBooleanArray mDeviceLockedForUser = new SparseBooleanArray();
+
+    @GuardedBy("mUserHasAuthenticatedSinceBoot")
+    private final SparseBooleanArray mUserHasAuthenticatedSinceBoot = new SparseBooleanArray();
 
     private boolean mTrustAgentsCanRun = false;
     private int mCurrentUser = UserHandle.USER_OWNER;
@@ -179,11 +182,11 @@ public class TrustManagerService extends SystemService {
     private void updateTrustAll() {
         List<UserInfo> userInfos = mUserManager.getUsers(true /* excludeDying */);
         for (UserInfo userInfo : userInfos) {
-            updateTrust(userInfo.id, false);
+            updateTrust(userInfo.id, 0);
         }
     }
 
-    public void updateTrust(int userId, boolean initiatedByUser) {
+    public void updateTrust(int userId, int flags) {
         dispatchOnTrustManagedChanged(aggregateIsTrustManaged(userId), userId);
         boolean trusted = aggregateIsTrusted(userId);
         boolean changed;
@@ -191,7 +194,7 @@ public class TrustManagerService extends SystemService {
             changed = mUserIsTrusted.get(userId) != trusted;
             mUserIsTrusted.put(userId, trusted);
         }
-        dispatchOnTrustChanged(trusted, userId, initiatedByUser);
+        dispatchOnTrustChanged(trusted, userId, flags);
         if (changed) {
             refreshDeviceLockedForUser(userId);
         }
@@ -227,7 +230,7 @@ public class TrustManagerService extends SystemService {
             if (!userInfo.supportsSwitchTo()) continue;
             if (!mActivityManager.isUserRunning(userInfo.id)) continue;
             if (!lockPatternUtils.isSecure(userInfo.id)) continue;
-            if (!mUserHasAuthenticatedSinceBoot.get(userInfo.id)) continue;
+            if (!getUserHasAuthenticated(userInfo.id)) continue;
             DevicePolicyManager dpm = lockPatternUtils.getDevicePolicyManager();
             int disabledFeatures = dpm.getKeyguardDisabledFeatures(null, userInfo.id);
             final boolean disableTrustAgents =
@@ -281,7 +284,7 @@ public class TrustManagerService extends SystemService {
             if (userId == UserHandle.USER_ALL) {
                 updateTrustAll();
             } else {
-                updateTrust(userId, false /* initiatedByUser */);
+                updateTrust(userId, 0);
             }
         }
     }
@@ -394,7 +397,7 @@ public class TrustManagerService extends SystemService {
             }
         }
         if (trustMayHaveChanged) {
-            updateTrust(userId, false);
+            updateTrust(userId, 0);
         }
         refreshAgentList(userId);
     }
@@ -506,7 +509,7 @@ public class TrustManagerService extends SystemService {
     // Agent dispatch and aggregation
 
     private boolean aggregateIsTrusted(int userId) {
-        if (!mUserHasAuthenticatedSinceBoot.get(userId)) {
+        if (!getUserHasAuthenticated(userId)) {
             return false;
         }
         for (int i = 0; i < mActiveAgents.size(); i++) {
@@ -521,7 +524,7 @@ public class TrustManagerService extends SystemService {
     }
 
     private boolean aggregateIsTrustManaged(int userId) {
-        if (!mUserHasAuthenticatedSinceBoot.get(userId)) {
+        if (!getUserHasAuthenticated(userId)) {
             return false;
         }
         for (int i = 0; i < mActiveAgents.size(); i++) {
@@ -549,21 +552,47 @@ public class TrustManagerService extends SystemService {
     }
 
     private void updateUserHasAuthenticated(int userId) {
-        if (!mUserHasAuthenticatedSinceBoot.get(userId)) {
-            mUserHasAuthenticatedSinceBoot.put(userId, true);
+        boolean changed = setUserHasAuthenticated(userId);
+        if (changed) {
             refreshAgentList(userId);
         }
     }
 
+    private boolean getUserHasAuthenticated(int userId) {
+        return mUserHasAuthenticated.get(userId);
+    }
+
+    /**
+     * @return whether the value has changed
+     */
+    private boolean setUserHasAuthenticated(int userId) {
+        if (!mUserHasAuthenticated.get(userId)) {
+            mUserHasAuthenticated.put(userId, true);
+            synchronized (mUserHasAuthenticatedSinceBoot) {
+                mUserHasAuthenticatedSinceBoot.put(userId, true);
+            }
+            return true;
+        }
+        return false;
+    }
+
+    private void clearUserHasAuthenticated(int userId) {
+        if (userId == UserHandle.USER_ALL) {
+            mUserHasAuthenticated.clear();
+        } else {
+            mUserHasAuthenticated.put(userId, false);
+        }
+    }
+
+    private boolean getUserHasAuthenticatedSinceBoot(int userId) {
+        synchronized (mUserHasAuthenticatedSinceBoot) {
+            return mUserHasAuthenticatedSinceBoot.get(userId);
+        }
+    }
 
     private void requireCredentialEntry(int userId) {
-        if (userId == UserHandle.USER_ALL) {
-            mUserHasAuthenticatedSinceBoot.clear();
-            refreshAgentList(UserHandle.USER_ALL);
-        } else {
-            mUserHasAuthenticatedSinceBoot.put(userId, false);
-            refreshAgentList(userId);
-        }
+        clearUserHasAuthenticated(userId);
+        refreshAgentList(userId);
     }
 
     // Listeners
@@ -587,11 +616,11 @@ public class TrustManagerService extends SystemService {
         }
     }
 
-    private void dispatchOnTrustChanged(boolean enabled, int userId, boolean initiatedByUser) {
-        if (!enabled) initiatedByUser = false;
+    private void dispatchOnTrustChanged(boolean enabled, int userId, int flags) {
+        if (!enabled) flags = 0;
         for (int i = 0; i < mTrustListeners.size(); i++) {
             try {
-                mTrustListeners.get(i).onTrustChanged(enabled, userId, initiatedByUser);
+                mTrustListeners.get(i).onTrustChanged(enabled, userId, flags);
             } catch (DeadObjectException e) {
                 Slog.d(TAG, "Removing dead TrustListener.");
                 mTrustListeners.remove(i);
@@ -691,6 +720,32 @@ public class TrustManagerService extends SystemService {
             return isDeviceLockedInner(userId);
         }
 
+        @Override
+        public boolean isDeviceSecure(int userId) throws RemoteException {
+            userId = ActivityManager.handleIncomingUser(getCallingPid(), getCallingUid(), userId,
+                    false /* allowAll */, true /* requireFull */, "isDeviceSecure", null);
+            userId = resolveProfileParent(userId);
+
+            long token = Binder.clearCallingIdentity();
+            try {
+                return new LockPatternUtils(mContext).isSecure(userId);
+            } finally {
+                Binder.restoreCallingIdentity(token);
+            }
+        }
+
+        @Override
+        public boolean hasUserAuthenticatedSinceBoot(int userId) throws RemoteException {
+            mContext.enforceCallingOrSelfPermission(
+                    Manifest.permission.ACCESS_KEYGUARD_SECURE_STORAGE, null);
+            long token = Binder.clearCallingIdentity();
+            try {
+                return getUserHasAuthenticatedSinceBoot(userId);
+            } finally {
+                Binder.restoreCallingIdentity(token);
+            }
+        }
+
         private void enforceReportPermission() {
             mContext.enforceCallingOrSelfPermission(
                     Manifest.permission.ACCESS_KEYGUARD_SECURE_STORAGE, "reporting trust events");
@@ -739,6 +794,9 @@ public class TrustManagerService extends SystemService {
             fout.print(": trusted=" + dumpBool(aggregateIsTrusted(user.id)));
             fout.print(", trustManaged=" + dumpBool(aggregateIsTrustManaged(user.id)));
             fout.print(", deviceLocked=" + dumpBool(isDeviceLockedInner(user.id)));
+            fout.print(", hasAuthenticated=" + dumpBool(getUserHasAuthenticated(user.id)));
+            fout.print(", hasAuthenticatedSinceBoot="
+                    + dumpBool(getUserHasAuthenticatedSinceBoot(user.id)));
             fout.println();
             fout.println("   Enabled agents:");
             boolean duplicateSimpleNames = false;
@@ -860,7 +918,7 @@ public class TrustManagerService extends SystemService {
             } else if (Intent.ACTION_USER_REMOVED.equals(action)) {
                 int userId = getUserId(intent);
                 if (userId > 0) {
-                    mUserHasAuthenticatedSinceBoot.delete(userId);
+                    mUserHasAuthenticated.delete(userId);
                     synchronized (mUserIsTrusted) {
                         mUserIsTrusted.delete(userId);
                     }

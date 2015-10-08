@@ -48,17 +48,25 @@ public class PermissionInfo extends PackageItemInfo implements Parcelable {
     public static final int PROTECTION_SIGNATURE = 2;
 
     /**
-     * System-level value for {@link #protectionLevel}, corresponding
-     * to the <code>signatureOrSystem</code> value of
-     * {@link android.R.attr#protectionLevel}.
+     * @deprecated Use {@link #PROTECTION_SIGNATURE}|{@link #PROTECTION_FLAG_PRIVILEGED}
+     * instead.
      */
+    @Deprecated
     public static final int PROTECTION_SIGNATURE_OR_SYSTEM = 3;
 
     /**
      * Additional flag for {@link #protectionLevel}, corresponding
-     * to the <code>system</code> value of
+     * to the <code>privileged</code> value of
      * {@link android.R.attr#protectionLevel}.
      */
+    public static final int PROTECTION_FLAG_PRIVILEGED = 0x10;
+
+    /**
+     * @deprecated Old name for {@link #PROTECTION_FLAG_PRIVILEGED}, which
+     * is now very confusing because it only applies to privileged apps, not all
+     * apps on the system image.
+     */
+    @Deprecated
     public static final int PROTECTION_FLAG_SYSTEM = 0x10;
 
     /**
@@ -76,6 +84,34 @@ public class PermissionInfo extends PackageItemInfo implements Parcelable {
     public static final int PROTECTION_FLAG_APPOP = 0x40;
 
     /**
+     * Additional flag for {@link #protectionLevel}, corresponding
+     * to the <code>pre23</code> value of
+     * {@link android.R.attr#protectionLevel}.
+     */
+    public static final int PROTECTION_FLAG_PRE23 = 0x80;
+
+    /**
+     * Additional flag for {@link #protectionLevel}, corresponding
+     * to the <code>installer</code> value of
+     * {@link android.R.attr#protectionLevel}.
+     */
+    public static final int PROTECTION_FLAG_INSTALLER = 0x100;
+
+    /**
+     * Additional flag for {@link #protectionLevel}, corresponding
+     * to the <code>verifier</code> value of
+     * {@link android.R.attr#protectionLevel}.
+     */
+    public static final int PROTECTION_FLAG_VERIFIER = 0x200;
+
+    /**
+     * Additional flag for {@link #protectionLevel}, corresponding
+     * to the <code>preinstalled</code> value of
+     * {@link android.R.attr#protectionLevel}.
+     */
+    public static final int PROTECTION_FLAG_PREINSTALLED = 0x400;
+
+    /**
      * Mask for {@link #protectionLevel}: the basic protection type.
      */
     public static final int PROTECTION_MASK_BASE = 0xf;
@@ -83,7 +119,7 @@ public class PermissionInfo extends PackageItemInfo implements Parcelable {
     /**
      * Mask for {@link #protectionLevel}: additional flag bits.
      */
-    public static final int PROTECTION_MASK_FLAGS = 0xf0;
+    public static final int PROTECTION_MASK_FLAGS = 0xff0;
 
     /**
      * The level of access this permission is protecting, as per
@@ -109,6 +145,19 @@ public class PermissionInfo extends PackageItemInfo implements Parcelable {
     public static final int FLAG_COSTS_MONEY = 1<<0;
 
     /**
+     * Flag for {@link #flags}, corresponding to <code>hidden</code>
+     * value of {@link android.R.attr#permissionFlags}.
+     * @hide
+     */
+    public static final int FLAG_HIDDEN = 1<<1;
+
+    /**
+     * Flag for {@link #flags}, indicating that this permission has been
+     * installed into the system's globally defined permissions.
+     */
+    public static final int FLAG_INSTALLED = 1<<30;
+
+    /**
      * Additional flags about this permission as given by
      * {@link android.R.attr#permissionFlags}.
      */
@@ -132,7 +181,7 @@ public class PermissionInfo extends PackageItemInfo implements Parcelable {
     /** @hide */
     public static int fixProtectionLevel(int level) {
         if (level == PROTECTION_SIGNATURE_OR_SYSTEM) {
-            level = PROTECTION_SIGNATURE | PROTECTION_FLAG_SYSTEM;
+            level = PROTECTION_SIGNATURE | PROTECTION_FLAG_PRIVILEGED;
         }
         return level;
     }
@@ -154,14 +203,26 @@ public class PermissionInfo extends PackageItemInfo implements Parcelable {
                 protLevel = "signatureOrSystem";
                 break;
         }
-        if ((level&PermissionInfo.PROTECTION_FLAG_SYSTEM) != 0) {
-            protLevel += "|system";
+        if ((level&PermissionInfo.PROTECTION_FLAG_PRIVILEGED) != 0) {
+            protLevel += "|privileged";
         }
         if ((level&PermissionInfo.PROTECTION_FLAG_DEVELOPMENT) != 0) {
             protLevel += "|development";
         }
         if ((level&PermissionInfo.PROTECTION_FLAG_APPOP) != 0) {
             protLevel += "|appop";
+        }
+        if ((level&PermissionInfo.PROTECTION_FLAG_PRE23) != 0) {
+            protLevel += "|pre23";
+        }
+        if ((level&PermissionInfo.PROTECTION_FLAG_INSTALLER) != 0) {
+            protLevel += "|installer";
+        }
+        if ((level&PermissionInfo.PROTECTION_FLAG_VERIFIER) != 0) {
+            protLevel += "|verifier";
+        }
+        if ((level&PermissionInfo.PROTECTION_FLAG_PREINSTALLED) != 0) {
+            protLevel += "|preinstalled";
         }
         return protLevel;
     }

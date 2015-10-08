@@ -26,6 +26,7 @@
 
 #include "AssetAtlas.h"
 #include "Caches.h"
+#include "Texture.h"
 #include "TextureCache.h"
 #include "Properties.h"
 #include "utils/TraceUtils.h"
@@ -37,19 +38,21 @@ namespace uirenderer {
 // Constructors/destructor
 ///////////////////////////////////////////////////////////////////////////////
 
-TextureCache::TextureCache():
-        mCache(LruCache<uint32_t, Texture*>::kUnlimitedCapacity),
-        mSize(0), mMaxSize(MB(DEFAULT_TEXTURE_CACHE_SIZE)),
-        mFlushRate(DEFAULT_TEXTURE_CACHE_FLUSH_RATE), mAssetAtlas(0) {
+TextureCache::TextureCache()
+        : mCache(LruCache<uint32_t, Texture*>::kUnlimitedCapacity)
+        , mSize(0)
+        , mMaxSize(MB(DEFAULT_TEXTURE_CACHE_SIZE))
+        , mFlushRate(DEFAULT_TEXTURE_CACHE_FLUSH_RATE)
+        , mAssetAtlas(nullptr) {
     char property[PROPERTY_VALUE_MAX];
-    if (property_get(PROPERTY_TEXTURE_CACHE_SIZE, property, NULL) > 0) {
+    if (property_get(PROPERTY_TEXTURE_CACHE_SIZE, property, nullptr) > 0) {
         INIT_LOGD("  Setting texture cache size to %sMB", property);
         setMaxSize(MB(atof(property)));
     } else {
         INIT_LOGD("  Using default texture cache size of %.2fMB", DEFAULT_TEXTURE_CACHE_SIZE);
     }
 
-    if (property_get(PROPERTY_TEXTURE_CACHE_FLUSH_RATE, property, NULL) > 0) {
+    if (property_get(PROPERTY_TEXTURE_CACHE_FLUSH_RATE, property, nullptr) > 0) {
         float flushRate = atof(property);
         INIT_LOGD("  Setting texture cache flush rate to %.2f%%", flushRate * 100.0f);
         setFlushRate(flushRate);
@@ -58,26 +61,16 @@ TextureCache::TextureCache():
                 DEFAULT_TEXTURE_CACHE_FLUSH_RATE * 100.0f);
     }
 
-    init();
-}
-
-TextureCache::TextureCache(uint32_t maxByteSize):
-        mCache(LruCache<uint32_t, Texture*>::kUnlimitedCapacity),
-        mSize(0), mMaxSize(maxByteSize), mAssetAtlas(0) {
-    init();
-}
-
-TextureCache::~TextureCache() {
-    mCache.clear();
-}
-
-void TextureCache::init() {
     mCache.setOnEntryRemovedListener(this);
 
     glGetIntegerv(GL_MAX_TEXTURE_SIZE, &mMaxTextureSize);
     INIT_LOGD("    Maximum texture dimension is %d pixels", mMaxTextureSize);
 
-    mDebugEnabled = readDebugLevel() & kDebugCaches;
+    mDebugEnabled = Properties::debugLevel & kDebugCaches;
+}
+
+TextureCache::~TextureCache() {
+    mCache.clear();
 }
 
 ///////////////////////////////////////////////////////////////////////////////
@@ -100,7 +93,7 @@ void TextureCache::setMaxSize(uint32_t maxSize) {
 }
 
 void TextureCache::setFlushRate(float flushRate) {
-    mFlushRate = fmaxf(0.0f, fminf(1.0f, flushRate));
+    mFlushRate = std::max(0.0f, std::min(1.0f, flushRate));
 }
 
 ///////////////////////////////////////////////////////////////////////////////
@@ -129,10 +122,12 @@ void TextureCache::setAssetAtlas(AssetAtlas* assetAtlas) {
     mAssetAtlas = assetAtlas;
 }
 
-void TextureCache::resetMarkInUse() {
+void TextureCache::resetMarkInUse(void* ownerToken) {
     LruCache<uint32_t, Texture*>::Iterator iter(mCache);
     while (iter.next()) {
-        iter.value()->isInUse = false;
+        if (iter.value()->isInUse == ownerToken) {
+            iter.value()->isInUse = nullptr;
+        }
     }
 }
 
@@ -147,8 +142,8 @@ bool TextureCache::canMakeTextureFromBitmap(const SkBitmap* bitmap) {
 
 // Returns a prepared Texture* that either is already in the cache or can fit
 // in the cache (and is thus added to the cache)
-Texture* TextureCache::getCachedTexture(const SkBitmap* bitmap) {
-    if (CC_LIKELY(mAssetAtlas)) {
+Texture* TextureCache::getCachedTexture(const SkBitmap* bitmap, AtlasUsageType atlasUsageType) {
+    if (CC_LIKELY(mAssetAtlas != nullptr) && atlasUsageType == AtlasUsageType::Use) {
         AssetAtlas::Entry* entry = mAssetAtlas->getEntry(bitmap);
         if (CC_UNLIKELY(entry)) {
             return entry->texture;
@@ -159,7 +154,7 @@ Texture* TextureCache::getCachedTexture(const SkBitmap* bitmap) {
 
     if (!texture) {
         if (!canMakeTextureFromBitmap(bitmap)) {
-            return NULL;
+            return nullptr;
         }
 
         const uint32_t size = bitmap->rowBytes() * bitmap->height();
@@ -175,7 +170,7 @@ Texture* TextureCache::getCachedTexture(const SkBitmap* bitmap) {
         }
 
         if (canCache) {
-            texture = new Texture();
+            texture = new Texture(Caches::getInstance());
             texture->bitmapSize = size;
             generateTexture(bitmap, texture, false);
 
@@ -196,24 +191,24 @@ Texture* TextureCache::getCachedTexture(const SkBitmap* bitmap) {
     return texture;
 }
 
-bool TextureCache::prefetchAndMarkInUse(const SkBitmap* bitmap) {
-    Texture* texture = getCachedTexture(bitmap);
+bool TextureCache::prefetchAndMarkInUse(void* ownerToken, const SkBitmap* bitmap) {
+    Texture* texture = getCachedTexture(bitmap, AtlasUsageType::Use);
     if (texture) {
-        texture->isInUse = true;
+        texture->isInUse = ownerToken;
     }
     return texture;
 }
 
-Texture* TextureCache::get(const SkBitmap* bitmap) {
-    Texture* texture = getCachedTexture(bitmap);
+Texture* TextureCache::get(const SkBitmap* bitmap, AtlasUsageType atlasUsageType) {
+    Texture* texture = getCachedTexture(bitmap, atlasUsageType);
 
     if (!texture) {
         if (!canMakeTextureFromBitmap(bitmap)) {
-            return NULL;
+            return nullptr;
         }
 
         const uint32_t size = bitmap->rowBytes() * bitmap->height();
-        texture = new Texture();
+        texture = new Texture(Caches::getInstance());
         texture->bitmapSize = size;
         generateTexture(bitmap, texture, false);
         texture->cleanup = true;
@@ -222,21 +217,9 @@ Texture* TextureCache::get(const SkBitmap* bitmap) {
     return texture;
 }
 
-Texture* TextureCache::getTransient(const SkBitmap* bitmap) {
-    Texture* texture = new Texture();
-    texture->bitmapSize = bitmap->rowBytes() * bitmap->height();
-    texture->cleanup = true;
-
-    generateTexture(bitmap, texture, false);
-
-    return texture;
-}
-
-void TextureCache::releaseTexture(const SkBitmap* bitmap) {
-    if (!bitmap || !bitmap->pixelRef()) return;
-
+void TextureCache::releaseTexture(uint32_t pixelRefStableID) {
     Mutex::Autolock _l(mLock);
-    mGarbage.push(bitmap->pixelRef()->getStableID());
+    mGarbage.push(pixelRefStableID);
 }
 
 void TextureCache::clearGarbage() {
@@ -281,7 +264,7 @@ void TextureCache::generateTexture(const SkBitmap* bitmap, Texture* texture, boo
 
     // We could also enable mipmapping if both bitmap dimensions are powers
     // of 2 but we'd have to deal with size changes. Let's keep this simple
-    const bool canMipMap = Extensions::getInstance().hasNPot();
+    const bool canMipMap = Caches::getInstance().extensions().hasNPot();
 
     // If the texture had mipmap enabled but not anymore,
     // force a glTexImage2D to discard the mipmap levels
@@ -297,23 +280,20 @@ void TextureCache::generateTexture(const SkBitmap* bitmap, Texture* texture, boo
     texture->width = bitmap->width();
     texture->height = bitmap->height();
 
-    Caches::getInstance().bindTexture(texture->id);
+    Caches::getInstance().textureState().bindTexture(texture->id);
 
     switch (bitmap->colorType()) {
     case kAlpha_8_SkColorType:
-        glPixelStorei(GL_UNPACK_ALIGNMENT, 1);
         uploadToTexture(resize, GL_ALPHA, bitmap->rowBytesAsPixels(), bitmap->bytesPerPixel(),
                 texture->width, texture->height, GL_UNSIGNED_BYTE, bitmap->getPixels());
         texture->blend = true;
         break;
     case kRGB_565_SkColorType:
-        glPixelStorei(GL_UNPACK_ALIGNMENT, bitmap->bytesPerPixel());
         uploadToTexture(resize, GL_RGB, bitmap->rowBytesAsPixels(), bitmap->bytesPerPixel(),
                 texture->width, texture->height, GL_UNSIGNED_SHORT_5_6_5, bitmap->getPixels());
         texture->blend = false;
         break;
     case kN32_SkColorType:
-        glPixelStorei(GL_UNPACK_ALIGNMENT, bitmap->bytesPerPixel());
         uploadToTexture(resize, GL_RGBA, bitmap->rowBytesAsPixels(), bitmap->bytesPerPixel(),
                 texture->width, texture->height, GL_UNSIGNED_BYTE, bitmap->getPixels());
         // Do this after calling getPixels() to make sure Skia's deferred
@@ -322,7 +302,6 @@ void TextureCache::generateTexture(const SkBitmap* bitmap, Texture* texture, boo
         break;
     case kARGB_4444_SkColorType:
     case kIndex_8_SkColorType:
-        glPixelStorei(GL_UNPACK_ALIGNMENT, bitmap->bytesPerPixel());
         uploadLoFiTexture(resize, bitmap, texture->width, texture->height);
         texture->blend = !bitmap->isOpaque();
         break;
@@ -351,7 +330,7 @@ void TextureCache::uploadLoFiTexture(bool resize, const SkBitmap* bitmap,
     rgbaBitmap.eraseColor(0);
 
     SkCanvas canvas(rgbaBitmap);
-    canvas.drawBitmap(*bitmap, 0.0f, 0.0f, NULL);
+    canvas.drawBitmap(*bitmap, 0.0f, 0.0f, nullptr);
 
     uploadToTexture(resize, GL_RGBA, rgbaBitmap.rowBytesAsPixels(), rgbaBitmap.bytesPerPixel(),
             width, height, GL_UNSIGNED_BYTE, rgbaBitmap.getPixels());
@@ -359,7 +338,9 @@ void TextureCache::uploadLoFiTexture(bool resize, const SkBitmap* bitmap,
 
 void TextureCache::uploadToTexture(bool resize, GLenum format, GLsizei stride, GLsizei bpp,
         GLsizei width, GLsizei height, GLenum type, const GLvoid * data) {
-    const bool useStride = stride != width && Extensions::getInstance().hasUnpackRowLength();
+    glPixelStorei(GL_UNPACK_ALIGNMENT, bpp);
+    const bool useStride = stride != width
+            && Caches::getInstance().extensions().hasUnpackRowLength();
     if ((stride == width) || useStride) {
         if (useStride) {
             glPixelStorei(GL_UNPACK_ROW_LENGTH, stride);

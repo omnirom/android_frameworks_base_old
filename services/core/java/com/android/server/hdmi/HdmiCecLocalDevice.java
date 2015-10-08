@@ -71,6 +71,9 @@ abstract class HdmiCecLocalDevice {
             logicalAddress = logical;
             physicalAddress = physical;
         }
+        public static ActiveSource of(ActiveSource source) {
+            return new ActiveSource(source.logicalAddress, source.physicalAddress);
+        }
         public static ActiveSource of(int logical, int physical) {
             return new ActiveSource(logical, physical);
         }
@@ -102,10 +105,10 @@ abstract class HdmiCecLocalDevice {
             StringBuffer s = new StringBuffer();
             String logicalAddressString = (logicalAddress == Constants.ADDR_INVALID)
                     ? "invalid" : String.format("0x%02x", logicalAddress);
-            s.append("logical_address: ").append(logicalAddressString);
+            s.append("(").append(logicalAddressString);
             String physicalAddressString = (physicalAddress == Constants.INVALID_PHYSICAL_ADDRESS)
                     ? "invalid" : String.format("0x%04x", physicalAddress);
-            s.append(", physical_address: ").append(physicalAddressString);
+            s.append(", ").append(physicalAddressString).append(")");
             return s.toString();
         }
     }
@@ -173,6 +176,7 @@ abstract class HdmiCecLocalDevice {
     void init() {
         assertRunOnServiceThread();
         mPreferredAddress = getPreferredAddress();
+        mPendingActionClearedCallback = null;
     }
 
     /**
@@ -242,6 +246,8 @@ abstract class HdmiCecLocalDevice {
                 return handleRequestActiveSource(message);
             case Constants.MESSAGE_GET_MENU_LANGUAGE:
                 return handleGetMenuLanguage(message);
+            case Constants.MESSAGE_SET_MENU_LANGUAGE:
+                return handleSetMenuLanguage(message);
             case Constants.MESSAGE_GIVE_PHYSICAL_ADDRESS:
                 return handleGivePhysicalAddress();
             case Constants.MESSAGE_GIVE_OSD_NAME:
@@ -368,6 +374,14 @@ abstract class HdmiCecLocalDevice {
     protected boolean handleGetMenuLanguage(HdmiCecMessage message) {
         assertRunOnServiceThread();
         Slog.w(TAG, "Only TV can handle <Get Menu Language>:" + message.toString());
+        // 'return false' will cause to reply with <Feature Abort>.
+        return false;
+    }
+
+    @ServiceThreadOnly
+    protected boolean handleSetMenuLanguage(HdmiCecMessage message) {
+        assertRunOnServiceThread();
+        Slog.w(TAG, "Only Playback device can handle <Set Menu Language>:" + message.toString());
         // 'return false' will cause to reply with <Feature Abort>.
         return false;
     }
@@ -636,7 +650,7 @@ abstract class HdmiCecLocalDevice {
     void addAndStartAction(final HdmiCecFeatureAction action) {
         assertRunOnServiceThread();
         mActions.add(action);
-        if (mService.isPowerStandbyOrTransient()) {
+        if (mService.isPowerStandby()) {
             Slog.i(TAG, "Not ready to start action. Queued for deferred start:" + action);
             return;
         }
@@ -733,6 +747,9 @@ abstract class HdmiCecLocalDevice {
         }
     }
 
+    void setAutoDeviceOff(boolean enabled) {
+    }
+
     /**
      * Called when a hot-plug event issued.
      *
@@ -825,8 +842,11 @@ abstract class HdmiCecLocalDevice {
      *
      * @param initiatedByCec true if this power sequence is initiated
      *        by the reception the CEC messages like &lt;Standby&gt;
+     * @param standbyAction Intent action that drives the standby process,
+     *        either {@link HdmiControlService#STANDBY_SCREEN_OFF} or
+     *        {@link HdmiControlService#STANDBY_SHUTDOWN}
      */
-    protected void onStandby(boolean initiatedByCec) {}
+    protected void onStandby(boolean initiatedByCec, int standbyAction) {}
 
     /**
      * Disable device. {@code callback} is used to get notified when all pending
@@ -834,16 +854,16 @@ abstract class HdmiCecLocalDevice {
      *
      * @param initiatedByCec true if this sequence is initiated
      *        by the reception the CEC messages like &lt;Standby&gt;
-     * @param origialCallback callback interface to get notified when all pending actions are
+     * @param originalCallback callback interface to get notified when all pending actions are
      *        cleared
      */
     protected void disableDevice(boolean initiatedByCec,
-            final PendingActionClearedCallback origialCallback) {
+            final PendingActionClearedCallback originalCallback) {
         mPendingActionClearedCallback = new PendingActionClearedCallback() {
             @Override
             public void onCleared(HdmiCecLocalDevice device) {
                 mHandler.removeMessages(MSG_DISABLE_DEVICE_TIMEOUT);
-                origialCallback.onCleared(device);
+                originalCallback.onCleared(device);
             }
         };
         mHandler.sendMessageDelayed(Message.obtain(mHandler, MSG_DISABLE_DEVICE_TIMEOUT),
@@ -861,6 +881,9 @@ abstract class HdmiCecLocalDevice {
             HdmiCecFeatureAction action = iter.next();
             action.finish(false);
             iter.remove();
+        }
+        if (mPendingActionClearedCallback != null) {
+            mPendingActionClearedCallback.onCleared(this);
         }
     }
 

@@ -16,6 +16,8 @@
 
 package android.app;
 
+import android.Manifest;
+import android.annotation.RequiresPermission;
 import android.app.trust.ITrustManager;
 import android.content.Context;
 import android.content.Intent;
@@ -111,6 +113,7 @@ public class KeyguardManager {
          *
          * @see #reenableKeyguard()
          */
+        @RequiresPermission(Manifest.permission.DISABLE_KEYGUARD)
         public void disableKeyguard() {
             try {
                 mWM.disableKeyguard(mToken, mTag);
@@ -132,6 +135,7 @@ public class KeyguardManager {
          *
          * @see #disableKeyguard()
          */
+        @RequiresPermission(Manifest.permission.DISABLE_KEYGUARD)
         public void reenableKeyguard() {
             try {
                 mWM.reenableKeyguard(mToken);
@@ -195,9 +199,12 @@ public class KeyguardManager {
     }
 
     /**
-     * Return whether the keyguard requires a password to unlock.
+     * Return whether the keyguard is secured by a PIN, pattern or password or a SIM card
+     * is currently locked.
      *
-     * @return true if keyguard is secure.
+     * <p>See also {@link #isDeviceSecure()} which ignores SIM locked states.
+     *
+     * @return true if a PIN, pattern or password is set or a SIM card is locked.
      */
     public boolean isKeyguardSecure() {
         try {
@@ -236,17 +243,38 @@ public class KeyguardManager {
     }
 
     /**
-     * Returns whether the device is currently locked and requires a PIN, pattern or
-     * password to unlock.
+     * Per-user version of {@link #isDeviceLocked()}.
      *
-     * @param userId the user for which the locked state should be reported.
-     * @return true if unlocking the device currently requires a PIN, pattern or
-     * password.
      * @hide
      */
     public boolean isDeviceLocked(int userId) {
         try {
             return mTrustManager.isDeviceLocked(userId);
+        } catch (RemoteException e) {
+            return false;
+        }
+    }
+
+    /**
+     * Returns whether the device is secured with a PIN, pattern or
+     * password.
+     *
+     * <p>See also {@link #isKeyguardSecure} which treats SIM locked states as secure.
+     *
+     * @return true if a PIN, pattern or password was set.
+     */
+    public boolean isDeviceSecure() {
+        return isDeviceSecure(UserHandle.getCallingUserId());
+    }
+
+    /**
+     * Per-user version of {@link #isDeviceSecure()}.
+     *
+     * @hide
+     */
+    public boolean isDeviceSecure(int userId) {
+        try {
+            return mTrustManager.isDeviceSecure(userId);
         } catch (RemoteException e) {
             return false;
         }
@@ -276,6 +304,7 @@ public class KeyguardManager {
      *   once the user has gotten past the keyguard.
      */
     @Deprecated
+    @RequiresPermission(Manifest.permission.DISABLE_KEYGUARD)
     public void exitKeyguardSecurely(final OnKeyguardExitResult callback) {
         try {
             mWM.exitKeyguardSecurely(new IOnKeyguardExitResult.Stub() {

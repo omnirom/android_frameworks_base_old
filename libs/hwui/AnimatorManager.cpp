@@ -17,7 +17,9 @@
 
 #include <algorithm>
 
+#include "Animator.h"
 #include "AnimationContext.h"
+#include "DamageAccumulator.h"
 #include "RenderNode.h"
 
 namespace android {
@@ -27,12 +29,12 @@ using namespace std;
 
 static void unref(BaseRenderNodeAnimator* animator) {
     animator->detach();
-    animator->decStrong(0);
+    animator->decStrong(nullptr);
 }
 
 AnimatorManager::AnimatorManager(RenderNode& parent)
         : mParent(parent)
-        , mAnimationHandle(NULL) {
+        , mAnimationHandle(nullptr) {
 }
 
 AnimatorManager::~AnimatorManager() {
@@ -41,7 +43,7 @@ AnimatorManager::~AnimatorManager() {
 }
 
 void AnimatorManager::addAnimator(const sp<BaseRenderNodeAnimator>& animator) {
-    animator->incStrong(0);
+    animator->incStrong(nullptr);
     animator->attach(&mParent);
     mNewAnimators.push_back(animator.get());
 }
@@ -85,7 +87,7 @@ public:
         dirtyMask |= animator->dirtyMask();
         bool remove = animator->animate(mContext);
         if (remove) {
-            animator->decStrong(0);
+            animator->decStrong(nullptr);
         } else {
             if (animator->isRunning()) {
                 mInfo.out.hasAnimations = true;
@@ -115,7 +117,6 @@ uint32_t AnimatorManager::animate(TreeInfo& info) {
 
     uint32_t dirty = animateCommon(info);
 
-    mParent.mProperties.updateMatrix();
     info.damageAccumulator->pushTransform(&mParent);
     mParent.damageSelf(info);
 
@@ -134,6 +135,7 @@ uint32_t AnimatorManager::animateCommon(TreeInfo& info) {
     newEnd = std::remove_if(mAnimators.begin(), mAnimators.end(), functor);
     mAnimators.erase(newEnd, mAnimators.end());
     mAnimationHandle->notifyAnimationsRan();
+    mParent.mProperties.updateMatrix();
     return functor.dirtyMask;
 }
 
@@ -142,7 +144,7 @@ static void endStagingAnimator(BaseRenderNodeAnimator* animator) {
     if (animator->listener()) {
         animator->listener()->onAnimationFinished(animator);
     }
-    animator->decStrong(0);
+    animator->decStrong(nullptr);
 }
 
 void AnimatorManager::endAllStagingAnimators() {
@@ -159,7 +161,7 @@ public:
 
     void operator() (BaseRenderNodeAnimator* animator) {
         animator->forceEndNow(mContext);
-        animator->decStrong(0);
+        animator->decStrong(nullptr);
     }
 
 private:

@@ -21,12 +21,9 @@ import android.graphics.Canvas;
 import android.graphics.Rect;
 import android.graphics.drawable.AnimatedVectorDrawable;
 import android.graphics.drawable.Drawable;
-import android.os.SystemClock;
 import android.util.AttributeSet;
-import android.view.Choreographer;
 import android.view.View;
 import android.view.ViewGroup;
-import android.view.ViewRootImpl;
 import android.widget.Button;
 import com.android.systemui.R;
 import com.android.systemui.statusbar.stack.NotificationStackScrollLayout;
@@ -51,15 +48,14 @@ public class DismissViewButton extends Button {
     public DismissViewButton(Context context, AttributeSet attrs, int defStyleAttr,
             int defStyleRes) {
         super(context, attrs, defStyleAttr, defStyleRes);
-        mAnimatedDismissDrawable = (AnimatedVectorDrawable) getContext().getResources().getDrawable(
+        mAnimatedDismissDrawable = (AnimatedVectorDrawable) getContext().getDrawable(
                 R.drawable.dismiss_all_shape_animation).mutate();
         mAnimatedDismissDrawable.setCallback(this);
         mAnimatedDismissDrawable.setBounds(0,
                 0,
                 mAnimatedDismissDrawable.getIntrinsicWidth(),
                 mAnimatedDismissDrawable.getIntrinsicHeight());
-        mStaticDismissDrawable = getContext().getResources().getDrawable(
-                R.drawable.dismiss_all_shape);
+        mStaticDismissDrawable = getContext().getDrawable(R.drawable.dismiss_all_shape);
         mStaticDismissDrawable.setBounds(0,
                 0,
                 mStaticDismissDrawable.getIntrinsicWidth(),

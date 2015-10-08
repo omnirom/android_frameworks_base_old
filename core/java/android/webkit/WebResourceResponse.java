@@ -17,7 +17,10 @@
 package android.webkit;
 
 import java.io.InputStream;
+import java.io.StringBufferInputStream;
 import java.util.Map;
+
+import android.annotation.SystemApi;
 
 /**
  * Encapsulates a resource response. Applications can return an instance of this
@@ -25,6 +28,7 @@ import java.util.Map;
  * response when the WebView requests a particular resource.
  */
 public class WebResourceResponse {
+    private boolean mImmutable;
     private String mMimeType;
     private String mEncoding;
     private int mStatusCode;
@@ -40,13 +44,14 @@ public class WebResourceResponse {
      *
      * @param mimeType the resource response's MIME type, for example text/html
      * @param encoding the resource response's encoding
-     * @param data the input stream that provides the resource response's data
+     * @param data the input stream that provides the resource response's data. Must not be a
+     *             StringBufferInputStream.
      */
     public WebResourceResponse(String mimeType, String encoding,
             InputStream data) {
         mMimeType = mimeType;
         mEncoding = encoding;
-        mInputStream = data;
+        setData(data);
     }
 
     /**
@@ -62,7 +67,8 @@ public class WebResourceResponse {
      *                     and not empty.
      * @param responseHeaders the resource response's headers represented as a mapping of header
      *                        name -> header value.
-     * @param data the input stream that provides the resource response's data
+     * @param data the input stream that provides the resource response's data. Must not be a
+     *             StringBufferInputStream.
      */
     public WebResourceResponse(String mimeType, String encoding, int statusCode,
             String reasonPhrase, Map<String, String> responseHeaders, InputStream data) {
@@ -72,37 +78,39 @@ public class WebResourceResponse {
     }
 
     /**
-     * Sets the resource response's MIME type, for example text/html.
+     * Sets the resource response's MIME type, for example &quot;text/html&quot;.
      *
-     * @param mimeType the resource response's MIME type
+     * @param mimeType The resource response's MIME type
      */
     public void setMimeType(String mimeType) {
+        checkImmutable();
         mMimeType = mimeType;
     }
 
     /**
      * Gets the resource response's MIME type.
      *
-     * @return the resource response's MIME type
+     * @return The resource response's MIME type
      */
     public String getMimeType() {
         return mMimeType;
     }
 
     /**
-     * Sets the resource response's encoding, for example UTF-8. This is used
+     * Sets the resource response's encoding, for example &quot;UTF-8&quot;. This is used
      * to decode the data from the input stream.
      *
-     * @param encoding the resource response's encoding
+     * @param encoding The resource response's encoding
      */
     public void setEncoding(String encoding) {
+        checkImmutable();
         mEncoding = encoding;
     }
 
     /**
      * Gets the resource response's encoding.
      *
-     * @return the resource response's encoding
+     * @return The resource response's encoding
      */
     public String getEncoding() {
         return mEncoding;
@@ -117,6 +125,7 @@ public class WebResourceResponse {
      *                     and not empty.
      */
     public void setStatusCodeAndReasonPhrase(int statusCode, String reasonPhrase) {
+        checkImmutable();
         if (statusCode < 100)
             throw new IllegalArgumentException("statusCode can't be less than 100.");
         if (statusCode > 599)
@@ -141,7 +150,7 @@ public class WebResourceResponse {
     /**
      * Gets the resource response's status code.
      *
-     * @return the resource response's status code.
+     * @return The resource response's status code.
      */
     public int getStatusCode() {
         return mStatusCode;
@@ -150,7 +159,7 @@ public class WebResourceResponse {
     /**
      * Gets the description of the resource response's status code.
      *
-     * @return the description of the resource response's status code.
+     * @return The description of the resource response's status code.
      */
     public String getReasonPhrase() {
         return mReasonPhrase;
@@ -159,16 +168,17 @@ public class WebResourceResponse {
     /**
      * Sets the headers for the resource response.
      *
-     * @param headers mapping of header name -> header value.
+     * @param headers Mapping of header name -> header value.
      */
     public void setResponseHeaders(Map<String, String> headers) {
+        checkImmutable();
         mResponseHeaders = headers;
     }
 
     /**
      * Gets the headers for the resource response.
      *
-     * @return the headers for the resource response.
+     * @return The headers for the resource response.
      */
     public Map<String, String> getResponseHeaders() {
         return mResponseHeaders;
@@ -178,18 +188,46 @@ public class WebResourceResponse {
      * Sets the input stream that provides the resource response's data. Callers
      * must implement {@link InputStream#read(byte[]) InputStream.read(byte[])}.
      *
-     * @param data the input stream that provides the resource response's data
+     * @param data the input stream that provides the resource response's data. Must not be a
+     *             StringBufferInputStream.
      */
     public void setData(InputStream data) {
+        checkImmutable();
+        // If data is (or is a subclass of) StringBufferInputStream
+        if (data != null && StringBufferInputStream.class.isAssignableFrom(data.getClass())) {
+            throw new IllegalArgumentException("StringBufferInputStream is deprecated and must " +
+                "not be passed to a WebResourceResponse");
+        }
         mInputStream = data;
     }
 
     /**
      * Gets the input stream that provides the resource response's data.
      *
-     * @return the input stream that provides the resource response's data
+     * @return The input stream that provides the resource response's data
      */
     public InputStream getData() {
         return mInputStream;
+    }
+
+    /**
+     * The internal version of the constructor that doesn't perform arguments checks.
+     * @hide
+     */
+    @SystemApi
+    public WebResourceResponse(boolean immutable, String mimeType, String encoding, int statusCode,
+            String reasonPhrase, Map<String, String> responseHeaders, InputStream data) {
+        mImmutable = immutable;
+        mMimeType = mimeType;
+        mEncoding = encoding;
+        mStatusCode = statusCode;
+        mReasonPhrase = reasonPhrase;
+        mResponseHeaders = responseHeaders;
+        mInputStream = data;
+    }
+
+    private void checkImmutable() {
+        if (mImmutable)
+            throw new IllegalStateException("This WebResourceResponse instance is immutable");
     }
 }

@@ -168,7 +168,22 @@ public final class HdmiTvClient extends HdmiClient {
     }
 
     /**
-     * Sets system audio volume
+     * Sets system audio mode.
+     *
+     * @param enabled set to {@code true} to enable the mode; otherwise {@code false}
+     * @param callback callback to get the result with
+     * @throws {@link IllegalArgumentException} if the {@code callback} is null
+     */
+    public void setSystemAudioMode(boolean enabled, SelectCallback callback) {
+        try {
+            mService.setSystemAudioMode(enabled, getCallbackWrapper(callback));
+        } catch (RemoteException e) {
+            Log.e(TAG, "failed to set system audio mode:", e);
+        }
+    }
+
+    /**
+     * Sets system audio volume.
      *
      * @param oldIndex current volume index
      * @param newIndex volume index to be set
@@ -183,7 +198,7 @@ public final class HdmiTvClient extends HdmiClient {
     }
 
     /**
-     * Sets system audio mute status
+     * Sets system audio mute status.
      *
      * @param mute {@code true} if muted; otherwise, {@code false}
      */
@@ -196,7 +211,7 @@ public final class HdmiTvClient extends HdmiClient {
     }
 
     /**
-     * Sets record listener
+     * Sets record listener.
      *
      * @param listener
      */
@@ -208,6 +223,19 @@ public final class HdmiTvClient extends HdmiClient {
             mService.setHdmiRecordListener(getListenerWrapper(listener));
         } catch (RemoteException e) {
             Log.e(TAG, "failed to set record listener.", e);
+        }
+    }
+
+    /**
+     * Sends a &lt;Standby&gt; command to other device.
+     *
+     * @param deviceId device id to send the command to
+     */
+    public void sendStandby(int deviceId) {
+        try {
+            mService.sendStandby(getDeviceType(), deviceId);
+        } catch (RemoteException e) {
+            Log.e(TAG, "sendStandby threw exception ", e);
         }
     }
 

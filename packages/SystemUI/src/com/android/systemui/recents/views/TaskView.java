@@ -22,10 +22,12 @@ import android.animation.ValueAnimator;
 import android.content.Context;
 import android.graphics.*;
 import android.util.AttributeSet;
+import android.view.accessibility.AccessibilityManager;
 import android.view.View;
 import android.view.ViewOutlineProvider;
 import android.view.animation.AccelerateInterpolator;
 import android.widget.FrameLayout;
+import com.android.internal.logging.MetricsLogger;
 import com.android.systemui.R;
 import com.android.systemui.recents.Constants;
 import com.android.systemui.recents.RecentsConfiguration;
@@ -45,6 +47,8 @@ public class TaskView extends FrameLayout implements Task.TaskCallbacks,
         public void onTaskViewDismissed(TaskView tv);
         public void onTaskViewClipStateChanged(TaskView tv);
         public void onTaskViewFocusChanged(TaskView tv, boolean focused);
+
+        public void onTaskResize(TaskView tv);
     }
 
     RecentsConfiguration mConfig;
@@ -357,6 +361,18 @@ public class TaskView extends FrameLayout implements Task.TaskCallbacks,
         }, startDelay);
     }
 
+    public void fadeInActionButton(int delay, int duration) {
+        // Hide the action button
+        mActionButtonView.setAlpha(0f);
+
+        // Animate the action button in
+        mActionButtonView.animate().alpha(1f)
+                .setStartDelay(delay)
+                .setDuration(duration)
+                .setInterpolator(PhoneStatusBar.ALPHA_IN)
+                .start();
+    }
+
     /** Animates this task view as it leaves recents by pressing home. */
     void startExitToHomeAnimation(ViewAnimation.TaskViewExitContext ctx) {
         animate()
@@ -368,6 +384,11 @@ public class TaskView extends FrameLayout implements Task.TaskCallbacks,
                 .withEndAction(ctx.postAnimationTrigger.decrementAsRunnable())
                 .start();
         ctx.postAnimationTrigger.increment();
+    }
+
+    /** Animates this task view away when dismissing all tasks. */
+    void startDismissAllAnimation() {
+        dismissTask();
     }
 
     /** Animates this task view as it exits recents */
@@ -397,7 +418,6 @@ public class TaskView extends FrameLayout implements Task.TaskCallbacks,
                     .setStartDelay(0)
                     .setDuration(mConfig.taskViewExitToAppDuration)
                     .setInterpolator(mConfig.fastOutLinearInInterpolator)
-                    .withLayer()
                     .start();
         } else {
             // Hide the dismiss button
@@ -417,31 +437,33 @@ public class TaskView extends FrameLayout implements Task.TaskCallbacks,
     }
 
     /** Animates the deletion of this task view */
-    void startDeleteTaskAnimation(final Runnable r) {
+    void startDeleteTaskAnimation(final Runnable r, int delay) {
         // Disabling clipping with the stack while the view is animating away
         setClipViewInStack(false);
 
         animate().translationX(mConfig.taskViewRemoveAnimTranslationXPx)
             .alpha(0f)
-            .setStartDelay(0)
+            .setStartDelay(delay)
             .setUpdateListener(null)
             .setInterpolator(mConfig.fastOutSlowInInterpolator)
             .setDuration(mConfig.taskViewRemoveAnimDuration)
             .withEndAction(new Runnable() {
                 @Override
                 public void run() {
-                    // We just throw this into a runnable because starting a view property
-                    // animation using layers can cause inconsisten results if we try and
-                    // update the layers while the animation is running.  In some cases,
-                    // the runnabled passed in may start an animation which also uses layers
-                    // so we defer all this by posting this.
-                    r.run();
+                    if (r != null) {
+                        r.run();
+                    }
 
                     // Re-enable clipping with the stack (we will reuse this view)
                     setClipViewInStack(true);
                 }
             })
             .start();
+    }
+
+    /** Enables/disables handling touch on this task view. */
+    void setTouchEnabled(boolean enabled) {
+        setOnClickListener(enabled ? this : null);
     }
 
     /** Animates this task view if the user does not interact with the stack after a certain time. */
@@ -470,7 +492,7 @@ public class TaskView extends FrameLayout implements Task.TaskCallbacks,
                     mCb.onTaskViewDismissed(tv);
                 }
             }
-        });
+        }, 0);
     }
 
     /**
@@ -630,6 +652,10 @@ public class TaskView extends FrameLayout implements Task.TaskCallbacks,
         }
     }
 
+    public void disableLayersForOneFrame() {
+        mHeaderView.disableLayersForOneFrame();
+    }
+
     /**** TaskCallbacks Implementation ****/
 
     /** Binds this task view to the task */
@@ -650,14 +676,17 @@ public class TaskView extends FrameLayout implements Task.TaskCallbacks,
             mThumbnailView.rebindToTask(mTask);
             mHeaderView.rebindToTask(mTask);
             // Rebind any listeners
-            mHeaderView.mApplicationIcon.setOnClickListener(this);
-            mHeaderView.mDismissButton.setOnClickListener(this);
-            mActionButtonView.setOnClickListener(this);
-            if (Constants.DebugFlags.App.EnableDevAppInfoOnLongPress) {
-                if (mConfig.developerOptionsEnabled) {
-                    mHeaderView.mApplicationIcon.setOnLongClickListener(this);
-                }
+            AccessibilityManager am = (AccessibilityManager) getContext().
+                    getSystemService(Context.ACCESSIBILITY_SERVICE);
+            if (Constants.DebugFlags.App.EnableTaskFiltering || (am != null && am.isEnabled())) {
+                mHeaderView.mApplicationIcon.setOnClickListener(this);
             }
+            mHeaderView.mDismissButton.setOnClickListener(this);
+            if (mConfig.multiStackEnabled) {
+                mHeaderView.mMoveTaskButton.setOnClickListener(this);
+            }
+            mActionButtonView.setOnClickListener(this);
+            mHeaderView.mApplicationIcon.setOnLongClickListener(this);
         }
         mTaskDataLoaded = true;
     }
@@ -672,17 +701,18 @@ public class TaskView extends FrameLayout implements Task.TaskCallbacks,
             // Unbind any listeners
             mHeaderView.mApplicationIcon.setOnClickListener(null);
             mHeaderView.mDismissButton.setOnClickListener(null);
-            mActionButtonView.setOnClickListener(null);
-            if (Constants.DebugFlags.App.EnableDevAppInfoOnLongPress) {
-                mHeaderView.mApplicationIcon.setOnLongClickListener(null);
+            if (mConfig.multiStackEnabled) {
+                mHeaderView.mMoveTaskButton.setOnClickListener(null);
             }
+            mActionButtonView.setOnClickListener(null);
+            mHeaderView.mApplicationIcon.setOnLongClickListener(null);
         }
         mTaskDataLoaded = false;
     }
 
-    /** Enables/disables handling touch on this task view. */
-    void setTouchEnabled(boolean enabled) {
-        setOnClickListener(enabled ? this : null);
+    @Override
+    public void onMultiStackDebugTaskStackIdChanged() {
+        mHeaderView.rebindToTask(mTask);
     }
 
     /**** View.OnClickListener Implementation ****/
@@ -696,12 +726,29 @@ public class TaskView extends FrameLayout implements Task.TaskCallbacks,
             postDelayed(new Runnable() {
                 @Override
                 public void run() {
-                    if (Constants.DebugFlags.App.EnableTaskFiltering && v == mHeaderView.mApplicationIcon) {
-                        if (mCb != null) {
-                            mCb.onTaskViewAppIconClicked(tv);
+                    if (v == mHeaderView.mApplicationIcon) {
+                        if (Constants.DebugFlags.App.EnableTaskFiltering) {
+                            if (mCb != null) {
+                                mCb.onTaskViewAppIconClicked(tv);
+                            }
+                        } else {
+                            AccessibilityManager am = (AccessibilityManager) getContext().
+                                    getSystemService(Context.ACCESSIBILITY_SERVICE);
+                            if (am != null && am.isEnabled()) {
+                                if (mCb != null) {
+                                    mCb.onTaskViewAppInfoClicked(tv);
+                                }
+                            }
                         }
                     } else if (v == mHeaderView.mDismissButton) {
                         dismissTask();
+                        // Keep track of deletions by the dismiss button
+                        MetricsLogger.histogram(getContext(), "overview_task_dismissed_source",
+                                Constants.Metrics.DismissSourceHeaderButton);
+                    } else if (v == mHeaderView.mMoveTaskButton) {
+                        if (mCb != null) {
+                            mCb.onTaskResize(tv);
+                        }
                     }
                 }
             }, 125);

@@ -16,11 +16,13 @@
 
 package android.widget;
 
+import android.annotation.ColorInt;
+import android.annotation.DrawableRes;
+import android.annotation.NonNull;
 import android.content.Context;
 import android.content.Intent;
 import android.content.res.TypedArray;
 import android.graphics.Canvas;
-import android.graphics.PointF;
 import android.graphics.Rect;
 import android.graphics.drawable.Drawable;
 import android.graphics.drawable.TransitionDrawable;
@@ -55,11 +57,13 @@ import android.view.View;
 import android.view.ViewConfiguration;
 import android.view.ViewDebug;
 import android.view.ViewGroup;
+import android.view.ViewHierarchyEncoder;
 import android.view.ViewParent;
 import android.view.ViewTreeObserver;
 import android.view.accessibility.AccessibilityEvent;
 import android.view.accessibility.AccessibilityManager;
 import android.view.accessibility.AccessibilityNodeInfo;
+import android.view.accessibility.AccessibilityNodeInfo.AccessibilityAction;
 import android.view.accessibility.AccessibilityNodeInfo.CollectionInfo;
 import android.view.animation.Interpolator;
 import android.view.animation.LinearInterpolator;
@@ -578,6 +582,12 @@ public abstract class AbsListView extends AdapterView<ListAdapter> implements Te
     private boolean mIsChildViewEnabled;
 
     /**
+     * The cached drawable state for the selector. Accounts for child enabled
+     * state, but otherwise identical to the view's own drawable state.
+     */
+    private int[] mSelectorState;
+
+    /**
      * The last scroll state reported to clients through {@link OnScrollListener}.
      */
     private int mLastScrollState = OnScrollListener.SCROLL_STATE_IDLE;
@@ -683,9 +693,6 @@ public abstract class AbsListView extends AdapterView<ListAdapter> implements Te
      * the bottom correctly on resizes.
      */
     private boolean mForceTranscriptScroll;
-
-    private int mGlowPaddingLeft;
-    private int mGlowPaddingRight;
 
     /**
      * Used for interacting with list items from an accessibility service.
@@ -810,44 +817,36 @@ public abstract class AbsListView extends AdapterView<ListAdapter> implements Te
         mOwnerThread = Thread.currentThread();
 
         final TypedArray a = context.obtainStyledAttributes(
-                attrs, com.android.internal.R.styleable.AbsListView, defStyleAttr, defStyleRes);
+                attrs, R.styleable.AbsListView, defStyleAttr, defStyleRes);
 
-        Drawable d = a.getDrawable(com.android.internal.R.styleable.AbsListView_listSelector);
-        if (d != null) {
-            setSelector(d);
+        final Drawable selector = a.getDrawable(R.styleable.AbsListView_listSelector);
+        if (selector != null) {
+            setSelector(selector);
         }
 
-        mDrawSelectorOnTop = a.getBoolean(
-                com.android.internal.R.styleable.AbsListView_drawSelectorOnTop, false);
+        mDrawSelectorOnTop = a.getBoolean(R.styleable.AbsListView_drawSelectorOnTop, false);
 
-        boolean stackFromBottom = a.getBoolean(R.styleable.AbsListView_stackFromBottom, false);
-        setStackFromBottom(stackFromBottom);
+        setStackFromBottom(a.getBoolean(
+                R.styleable.AbsListView_stackFromBottom, false));
+        setScrollingCacheEnabled(a.getBoolean(
+                R.styleable.AbsListView_scrollingCache, true));
+        setTextFilterEnabled(a.getBoolean(
+                R.styleable.AbsListView_textFilterEnabled, false));
+        setTranscriptMode(a.getInt(
+                R.styleable.AbsListView_transcriptMode, TRANSCRIPT_MODE_DISABLED));
+        setCacheColorHint(a.getColor(
+                R.styleable.AbsListView_cacheColorHint, 0));
+        setSmoothScrollbarEnabled(a.getBoolean(
+                R.styleable.AbsListView_smoothScrollbar, true));
+        setChoiceMode(a.getInt(
+                R.styleable.AbsListView_choiceMode, CHOICE_MODE_NONE));
 
-        boolean scrollingCacheEnabled = a.getBoolean(R.styleable.AbsListView_scrollingCache, true);
-        setScrollingCacheEnabled(scrollingCacheEnabled);
-
-        boolean useTextFilter = a.getBoolean(R.styleable.AbsListView_textFilterEnabled, false);
-        setTextFilterEnabled(useTextFilter);
-
-        int transcriptMode = a.getInt(R.styleable.AbsListView_transcriptMode,
-                TRANSCRIPT_MODE_DISABLED);
-        setTranscriptMode(transcriptMode);
-
-        int color = a.getColor(R.styleable.AbsListView_cacheColorHint, 0);
-        setCacheColorHint(color);
-
-        boolean enableFastScroll = a.getBoolean(R.styleable.AbsListView_fastScrollEnabled, false);
-        setFastScrollEnabled(enableFastScroll);
-
-        int fastScrollStyle = a.getResourceId(R.styleable.AbsListView_fastScrollStyle, 0);
-        setFastScrollStyle(fastScrollStyle);
-
-        boolean smoothScrollbar = a.getBoolean(R.styleable.AbsListView_smoothScrollbar, true);
-        setSmoothScrollbarEnabled(smoothScrollbar);
-
-        setChoiceMode(a.getInt(R.styleable.AbsListView_choiceMode, CHOICE_MODE_NONE));
-        setFastScrollAlwaysVisible(
-                a.getBoolean(R.styleable.AbsListView_fastScrollAlwaysVisible, false));
+        setFastScrollEnabled(a.getBoolean(
+                R.styleable.AbsListView_fastScrollEnabled, false));
+        setFastScrollStyle(a.getResourceId(
+                R.styleable.AbsListView_fastScrollStyle, 0));
+        setFastScrollAlwaysVisible(a.getBoolean(
+                R.styleable.AbsListView_fastScrollAlwaysVisible, false));
 
         a.recycle();
     }
@@ -1466,8 +1465,9 @@ public abstract class AbsListView extends AdapterView<ListAdapter> implements Te
         onScrollChanged(0, 0, 0, 0); // dummy values, View's implementation does not use these.
     }
 
+    /** @hide */
     @Override
-    public void sendAccessibilityEvent(int eventType) {
+    public void sendAccessibilityEventInternal(int eventType) {
         // Since this class calls onScrollChanged even if the mFirstPosition and the
         // child count have not changed we will avoid sending duplicate accessibility
         // events.
@@ -1482,26 +1482,27 @@ public abstract class AbsListView extends AdapterView<ListAdapter> implements Te
                 mLastAccessibilityScrollEventToIndex = lastVisiblePosition;
             }
         }
-        super.sendAccessibilityEvent(eventType);
+        super.sendAccessibilityEventInternal(eventType);
     }
 
     @Override
-    public void onInitializeAccessibilityEvent(AccessibilityEvent event) {
-        super.onInitializeAccessibilityEvent(event);
-        event.setClassName(AbsListView.class.getName());
+    public CharSequence getAccessibilityClassName() {
+        return AbsListView.class.getName();
     }
 
+    /** @hide */
     @Override
-    public void onInitializeAccessibilityNodeInfo(AccessibilityNodeInfo info) {
-        super.onInitializeAccessibilityNodeInfo(info);
-        info.setClassName(AbsListView.class.getName());
+    public void onInitializeAccessibilityNodeInfoInternal(AccessibilityNodeInfo info) {
+        super.onInitializeAccessibilityNodeInfoInternal(info);
         if (isEnabled()) {
             if (canScrollUp()) {
-                info.addAction(AccessibilityNodeInfo.ACTION_SCROLL_BACKWARD);
+                info.addAction(AccessibilityAction.ACTION_SCROLL_BACKWARD);
+                info.addAction(AccessibilityAction.ACTION_SCROLL_UP);
                 info.setScrollable(true);
             }
             if (canScrollDown()) {
-                info.addAction(AccessibilityNodeInfo.ACTION_SCROLL_FORWARD);
+                info.addAction(AccessibilityAction.ACTION_SCROLL_FORWARD);
+                info.addAction(AccessibilityAction.ACTION_SCROLL_DOWN);
                 info.setScrollable(true);
             }
         }
@@ -1522,20 +1523,23 @@ public abstract class AbsListView extends AdapterView<ListAdapter> implements Te
         }
     }
 
+    /** @hide */
     @Override
-    public boolean performAccessibilityAction(int action, Bundle arguments) {
-        if (super.performAccessibilityAction(action, arguments)) {
+    public boolean performAccessibilityActionInternal(int action, Bundle arguments) {
+        if (super.performAccessibilityActionInternal(action, arguments)) {
             return true;
         }
         switch (action) {
-            case AccessibilityNodeInfo.ACTION_SCROLL_FORWARD: {
+            case AccessibilityNodeInfo.ACTION_SCROLL_FORWARD:
+            case R.id.accessibilityActionScrollDown: {
                 if (isEnabled() && getLastVisiblePosition() < getCount() - 1) {
                     final int viewportHeight = getHeight() - mListPadding.top - mListPadding.bottom;
                     smoothScrollBy(viewportHeight, PositionScroller.SCROLL_DURATION);
                     return true;
                 }
             } return false;
-            case AccessibilityNodeInfo.ACTION_SCROLL_BACKWARD: {
+            case AccessibilityNodeInfo.ACTION_SCROLL_BACKWARD:
+            case R.id.accessibilityActionScrollUp: {
                 if (isEnabled() && mFirstPosition > 0) {
                     final int viewportHeight = getHeight() - mListPadding.top - mListPadding.bottom;
                     smoothScrollBy(-viewportHeight, PositionScroller.SCROLL_DURATION);
@@ -1551,13 +1555,6 @@ public abstract class AbsListView extends AdapterView<ListAdapter> implements Te
     public View findViewByAccessibilityIdTraversal(int accessibilityId) {
         if (accessibilityId == getAccessibilityViewId()) {
             return this;
-        }
-        // If the data changed the children are invalid since the data model changed.
-        // Hence, we pretend they do not exist. After a layout the children will sync
-        // with the model at which point we notify that the accessibility state changed,
-        // so a service will be able to re-fetch the views.
-        if (mDataChanged) {
-            return null;
         }
         return super.findViewByAccessibilityIdTraversal(accessibilityId);
     }
@@ -2338,8 +2335,10 @@ public abstract class AbsListView extends AdapterView<ListAdapter> implements Te
                 }
             }
 
-            // Scrap view implies temporary detachment.
             isScrap[0] = true;
+
+            // Finish the temporary detach started in addScrapView().
+            transientView.dispatchFinishTemporaryDetach();
             return transientView;
         }
 
@@ -2352,6 +2351,7 @@ public abstract class AbsListView extends AdapterView<ListAdapter> implements Te
             } else {
                 isScrap[0] = true;
 
+                // Finish the temporary detach started in addScrapView().
                 child.dispatchFinishTemporaryDetach();
             }
         }
@@ -2395,22 +2395,12 @@ public abstract class AbsListView extends AdapterView<ListAdapter> implements Te
             lp.itemId = mAdapter.getItemId(position);
         }
         lp.viewType = mAdapter.getItemViewType(position);
-        child.setLayoutParams(lp);
+        if (lp != vlp) {
+          child.setLayoutParams(lp);
+        }
     }
 
     class ListItemAccessibilityDelegate extends AccessibilityDelegate {
-        @Override
-        public AccessibilityNodeInfo createAccessibilityNodeInfo(View host) {
-            // If the data changed the children are invalid since the data model changed.
-            // Hence, we pretend they do not exist. After a layout the children will sync
-            // with the model at which point we notify that the accessibility state changed,
-            // so a service will be able to re-fetch the views.
-            if (mDataChanged) {
-                return null;
-            }
-            return super.createAccessibilityNodeInfo(host);
-        }
-
         @Override
         public void onInitializeAccessibilityNodeInfo(View host, AccessibilityNodeInfo info) {
             super.onInitializeAccessibilityNodeInfo(host, info);
@@ -2492,18 +2482,18 @@ public abstract class AbsListView extends AdapterView<ListAdapter> implements Te
 
         if (position == getSelectedItemPosition()) {
             info.setSelected(true);
-            info.addAction(AccessibilityNodeInfo.ACTION_CLEAR_SELECTION);
+            info.addAction(AccessibilityAction.ACTION_CLEAR_SELECTION);
         } else {
-            info.addAction(AccessibilityNodeInfo.ACTION_SELECT);
+            info.addAction(AccessibilityAction.ACTION_SELECT);
         }
 
         if (isClickable()) {
-            info.addAction(AccessibilityNodeInfo.ACTION_CLICK);
+            info.addAction(AccessibilityAction.ACTION_CLICK);
             info.setClickable(true);
         }
 
         if (isLongClickable()) {
-            info.addAction(AccessibilityNodeInfo.ACTION_LONG_CLICK);
+            info.addAction(AccessibilityAction.ACTION_LONG_CLICK);
             info.setLongClickable(true);
         }
     }
@@ -2551,7 +2541,13 @@ public abstract class AbsListView extends AdapterView<ListAdapter> implements Te
         selectorRect.right += mSelectionRightPadding;
         selectorRect.bottom += mSelectionBottomPadding;
 
-        // Update the selector drawable.
+        // Update the child enabled state prior to updating the selector.
+        final boolean isChildViewEnabled = sel.isEnabled();
+        if (mIsChildViewEnabled != isChildViewEnabled) {
+            mIsChildViewEnabled = isChildViewEnabled;
+        }
+
+        // Update the selector drawable's state and position.
         final Drawable selector = mSelector;
         if (selector != null) {
             if (positionChanged) {
@@ -2569,14 +2565,6 @@ public abstract class AbsListView extends AdapterView<ListAdapter> implements Te
             }
             if (manageHotspot) {
                 selector.setHotspot(x, y);
-            }
-        }
-
-        final boolean isChildViewEnabled = mIsChildViewEnabled;
-        if (sel.isEnabled() != isChildViewEnabled) {
-            mIsChildViewEnabled = !isChildViewEnabled;
-            if (getSelectedItemPosition() != INVALID_POSITION) {
-                refreshDrawableState();
             }
         }
     }
@@ -2703,7 +2691,7 @@ public abstract class AbsListView extends AdapterView<ListAdapter> implements Te
      *
      * @attr ref android.R.styleable#AbsListView_listSelector
      */
-    public void setSelector(int resID) {
+    public void setSelector(@DrawableRes int resID) {
         setSelector(getContext().getDrawable(resID));
     }
 
@@ -2783,7 +2771,7 @@ public abstract class AbsListView extends AdapterView<ListAdapter> implements Te
     void updateSelectorState() {
         if (mSelector != null) {
             if (shouldShowSelector()) {
-                mSelector.setState(getDrawableState());
+                mSelector.setState(getDrawableStateForSelector());
             } else {
                 mSelector.setState(StateSet.NOTHING);
             }
@@ -2796,12 +2784,11 @@ public abstract class AbsListView extends AdapterView<ListAdapter> implements Te
         updateSelectorState();
     }
 
-    @Override
-    protected int[] onCreateDrawableState(int extraSpace) {
+    private int[] getDrawableStateForSelector() {
         // If the child view is enabled then do the default behavior.
         if (mIsChildViewEnabled) {
             // Common case
-            return super.onCreateDrawableState(extraSpace);
+            return super.getDrawableState();
         }
 
         // The selector uses this View's drawable state. The selected child view
@@ -2809,10 +2796,12 @@ public abstract class AbsListView extends AdapterView<ListAdapter> implements Te
         // states.
         final int enabledState = ENABLED_STATE_SET[0];
 
-        // If we don't have any extra space, it will return one of the static state arrays,
-        // and clearing the enabled state on those arrays is a bad thing!  If we specify
-        // we need extra space, it will create+copy into a new array that safely mutable.
-        int[] state = super.onCreateDrawableState(extraSpace + 1);
+        // If we don't have any extra space, it will return one of the static
+        // state arrays, and clearing the enabled state on those arrays is a
+        // bad thing! If we specify we need extra space, it will create+copy
+        // into a new array that is safely mutable.
+        final int[] state = onCreateDrawableState(1);
+
         int enabledPos = -1;
         for (int i = state.length - 1; i >= 0; i--) {
             if (state[i] == enabledState) {
@@ -3102,6 +3091,23 @@ public abstract class AbsListView extends AdapterView<ListAdapter> implements Te
                 }
             }
         }
+    }
+
+    private boolean performStylusButtonPressAction(MotionEvent ev) {
+        if (mChoiceMode == CHOICE_MODE_MULTIPLE_MODAL && mChoiceActionMode == null) {
+            final View child = getChildAt(mMotionPosition - mFirstPosition);
+            if (child != null) {
+                final int longPressPosition = mMotionPosition;
+                final long longPressId = mAdapter.getItemId(mMotionPosition);
+                if (performLongPress(child, longPressPosition, longPressId)) {
+                    mTouchMode = TOUCH_MODE_REST;
+                    setPressed(false);
+                    child.setPressed(false);
+                    return true;
+                }
+            }
+        }
+        return false;
     }
 
     boolean performLongPress(final View child,
@@ -3459,17 +3465,14 @@ public abstract class AbsListView extends AdapterView<ListAdapter> implements Te
                                     if (!mEdgeGlowBottom.isFinished()) {
                                         mEdgeGlowBottom.onRelease();
                                     }
-                                    invalidate(0, 0, getWidth(),
-                                            mEdgeGlowTop.getMaxHeight() + getPaddingTop());
+                                    invalidateTopGlow();
                                 } else if (incrementalDeltaY < 0) {
                                     mEdgeGlowBottom.onPull((float) overscroll / getHeight(),
                                             1.f - (float) x / getWidth());
                                     if (!mEdgeGlowTop.isFinished()) {
                                         mEdgeGlowTop.onRelease();
                                     }
-                                    invalidate(0, getHeight() - getPaddingBottom() -
-                                            mEdgeGlowBottom.getMaxHeight(), getWidth(),
-                                            getHeight());
+                                    invalidateBottomGlow();
                                 }
                             }
                         }
@@ -3509,17 +3512,14 @@ public abstract class AbsListView extends AdapterView<ListAdapter> implements Te
                             if (!mEdgeGlowBottom.isFinished()) {
                                 mEdgeGlowBottom.onRelease();
                             }
-                            invalidate(0, 0, getWidth(),
-                                    mEdgeGlowTop.getMaxHeight() + getPaddingTop());
+                            invalidateTopGlow();
                         } else if (rawDeltaY < 0) {
                             mEdgeGlowBottom.onPull((float) overScrollDistance / getHeight(),
                                     1.f - (float) x / getWidth());
                             if (!mEdgeGlowTop.isFinished()) {
                                 mEdgeGlowTop.onRelease();
                             }
-                            invalidate(0, getHeight() - getPaddingBottom() -
-                                    mEdgeGlowBottom.getMaxHeight(), getWidth(),
-                                    getHeight());
+                            invalidateBottomGlow();
                         }
                     }
                 }
@@ -3549,6 +3549,28 @@ public abstract class AbsListView extends AdapterView<ListAdapter> implements Te
                 mDirection = newDirection;
             }
         }
+    }
+
+    private void invalidateTopGlow() {
+        if (mEdgeGlowTop == null) {
+            return;
+        }
+        final boolean clipToPadding = getClipToPadding();
+        final int top = clipToPadding ? mPaddingTop : 0;
+        final int left = clipToPadding ? mPaddingLeft : 0;
+        final int right = clipToPadding ? getWidth() - mPaddingRight : getWidth();
+        invalidate(left, top, right, top + mEdgeGlowTop.getMaxHeight());
+    }
+
+    private void invalidateBottomGlow() {
+        if (mEdgeGlowBottom == null) {
+            return;
+        }
+        final boolean clipToPadding = getClipToPadding();
+        final int bottom = clipToPadding ? getHeight() - mPaddingBottom : getHeight();
+        final int left = clipToPadding ? mPaddingLeft : 0;
+        final int right = clipToPadding ? getWidth() - mPaddingRight : getWidth();
+        invalidate(left, bottom - mEdgeGlowBottom.getMaxHeight(), right, bottom);
     }
 
     @Override
@@ -3607,11 +3629,8 @@ public abstract class AbsListView extends AdapterView<ListAdapter> implements Te
 
         startNestedScroll(SCROLL_AXIS_VERTICAL);
 
-        if (mFastScroll != null) {
-            boolean intercepted = mFastScroll.onTouchEvent(ev);
-            if (intercepted) {
-                return true;
-            }
+        if (mFastScroll != null && mFastScroll.onTouchEvent(ev)) {
+            return true;
         }
 
         initVelocityTrackerIfNotExists();
@@ -3746,7 +3765,7 @@ public abstract class AbsListView extends AdapterView<ListAdapter> implements Te
 
         if (mTouchMode == TOUCH_MODE_DOWN && mMotionPosition != INVALID_POSITION
                 && performButtonActionOnTouchDown(ev)) {
-            removeCallbacks(mPendingCheckForTap);
+                removeCallbacks(mPendingCheckForTap);
         }
     }
 
@@ -4027,7 +4046,7 @@ public abstract class AbsListView extends AdapterView<ListAdapter> implements Te
     public boolean onGenericMotionEvent(MotionEvent event) {
         if ((event.getSource() & InputDevice.SOURCE_CLASS_POINTER) != 0) {
             switch (event.getAction()) {
-                case MotionEvent.ACTION_SCROLL: {
+                case MotionEvent.ACTION_SCROLL:
                     if (mTouchMode == TOUCH_MODE_REST) {
                         final float vscroll = event.getAxisValue(MotionEvent.AXIS_VSCROLL);
                         if (vscroll != 0) {
@@ -4037,9 +4056,22 @@ public abstract class AbsListView extends AdapterView<ListAdapter> implements Te
                             }
                         }
                     }
-                }
+                    break;
+
+                case MotionEvent.ACTION_BUTTON_PRESS:
+                    int actionButton = event.getActionButton();
+                    if ((actionButton == MotionEvent.BUTTON_STYLUS_PRIMARY
+                            || actionButton == MotionEvent.BUTTON_SECONDARY)
+                            && (mTouchMode == TOUCH_MODE_DOWN || mTouchMode == TOUCH_MODE_TAP)) {
+                        if (performStylusButtonPressAction(event)) {
+                            removeCallbacks(mPendingCheckForLongPress);
+                            removeCallbacks(mPendingCheckForTap);
+                        }
+                    }
+                    break;
             }
         }
+
         return super.onGenericMotionEvent(event);
     }
 
@@ -4110,45 +4142,51 @@ public abstract class AbsListView extends AdapterView<ListAdapter> implements Te
         super.draw(canvas);
         if (mEdgeGlowTop != null) {
             final int scrollY = mScrollY;
+            final boolean clipToPadding = getClipToPadding();
+            final int width;
+            final int height;
+            final int translateX;
+            final int translateY;
+
+            if (clipToPadding) {
+                width = getWidth() - mPaddingLeft - mPaddingRight;
+                height = getHeight() - mPaddingTop - mPaddingBottom;
+                translateX = mPaddingLeft;
+                translateY = mPaddingTop;
+            } else {
+                width = getWidth();
+                height = getHeight();
+                translateX = 0;
+                translateY = 0;
+            }
             if (!mEdgeGlowTop.isFinished()) {
                 final int restoreCount = canvas.save();
-                final int width = getWidth();
-
-                int edgeY = Math.min(0, scrollY + mFirstPositionDistanceGuess);
-                canvas.translate(0, edgeY);
-                mEdgeGlowTop.setSize(width, getHeight());
+                canvas.clipRect(translateX, translateY,
+                         translateX + width ,translateY + mEdgeGlowTop.getMaxHeight());
+                final int edgeY = Math.min(0, scrollY + mFirstPositionDistanceGuess) + translateY;
+                canvas.translate(translateX, edgeY);
+                mEdgeGlowTop.setSize(width, height);
                 if (mEdgeGlowTop.draw(canvas)) {
-                    invalidate(0, 0, getWidth(),
-                            mEdgeGlowTop.getMaxHeight() + getPaddingTop());
+                    invalidateTopGlow();
                 }
                 canvas.restoreToCount(restoreCount);
             }
             if (!mEdgeGlowBottom.isFinished()) {
                 final int restoreCount = canvas.save();
-                final int width = getWidth();
-                final int height = getHeight();
-
-                int edgeX = -width;
-                int edgeY = Math.max(height, scrollY + mLastPositionDistanceGuess);
+                canvas.clipRect(translateX, translateY + height - mEdgeGlowBottom.getMaxHeight(),
+                        translateX + width, translateY + height);
+                final int edgeX = -width + translateX;
+                final int edgeY = Math.max(getHeight(), scrollY + mLastPositionDistanceGuess)
+                        - (clipToPadding ? mPaddingBottom : 0);
                 canvas.translate(edgeX, edgeY);
                 canvas.rotate(180, width, 0);
                 mEdgeGlowBottom.setSize(width, height);
                 if (mEdgeGlowBottom.draw(canvas)) {
-                    invalidate(0, getHeight() - getPaddingBottom() -
-                            mEdgeGlowBottom.getMaxHeight(), getWidth(),
-                            getHeight());
+                    invalidateBottomGlow();
                 }
                 canvas.restoreToCount(restoreCount);
             }
         }
-    }
-
-    /**
-     * @hide
-     */
-    public void setOverScrollEffectPadding(int leftPadding, int rightPadding) {
-        mGlowPaddingLeft = leftPadding;
-        mGlowPaddingRight = rightPadding;
     }
 
     private void initOrResetVelocityTracker() {
@@ -5972,7 +6010,7 @@ public abstract class AbsListView extends AdapterView<ListAdapter> implements Te
      *
      * @param color The background color
      */
-    public void setCacheColorHint(int color) {
+    public void setCacheColorHint(@ColorInt int color) {
         if (color != mCacheColorHint) {
             mCacheColorHint = color;
             int count = getChildCount();
@@ -5990,6 +6028,7 @@ public abstract class AbsListView extends AdapterView<ListAdapter> implements Te
      * @return The cache color hint
      */
     @ViewDebug.ExportedProperty(category = "drawing")
+    @ColorInt
     public int getCacheColorHint() {
         return mCacheColorHint;
     }
@@ -6292,6 +6331,16 @@ public abstract class AbsListView extends AdapterView<ListAdapter> implements Te
         public LayoutParams(ViewGroup.LayoutParams source) {
             super(source);
         }
+
+        /** @hide */
+        @Override
+        protected void encodeProperties(@NonNull ViewHierarchyEncoder encoder) {
+            super.encodeProperties(encoder);
+
+            encoder.addProperty("list:viewType", viewType);
+            encoder.addProperty("list:recycledHeaderFooter", recycledHeaderFooter);
+            encoder.addProperty("list:forceAdd", forceAdd);
+        }
     }
 
     /**
@@ -6513,13 +6562,14 @@ public abstract class AbsListView extends AdapterView<ListAdapter> implements Te
          * @return A view from the ScrapViews collection. These are unordered.
          */
         View getScrapView(int position) {
+            final int whichScrap = mAdapter.getItemViewType(position);
+            if (whichScrap < 0) {
+                return null;
+            }
             if (mViewTypeCount == 1) {
                 return retrieveFromScrap(mCurrentScrap, position);
-            } else {
-                final int whichScrap = mAdapter.getItemViewType(position);
-                if (whichScrap >= 0 && whichScrap < mScrapViews.length) {
-                    return retrieveFromScrap(mScrapViews[whichScrap], position);
-                }
+            } else if (whichScrap < mScrapViews.length) {
+                return retrieveFromScrap(mScrapViews[whichScrap], position);
             }
             return null;
         }
@@ -6536,6 +6586,8 @@ public abstract class AbsListView extends AdapterView<ListAdapter> implements Te
         void addScrapView(View scrap, int position) {
             final AbsListView.LayoutParams lp = (AbsListView.LayoutParams) scrap.getLayoutParams();
             if (lp == null) {
+                // Can't recycle, but we don't know anything about the view.
+                // Ignore it completely.
                 return;
             }
 
@@ -6545,6 +6597,12 @@ public abstract class AbsListView extends AdapterView<ListAdapter> implements Te
             // should otherwise not be recycled.
             final int viewType = lp.viewType;
             if (!shouldRecycleViewType(viewType)) {
+                // Can't recycle. If it's not a header or footer, which have
+                // special handling and should be ignored, then skip the scrap
+                // heap and we'll fully detach the view later.
+                if (viewType != ITEM_VIEW_TYPE_HEADER_OR_FOOTER) {
+                    getSkippedScrap().add(scrap);
+                }
                 return;
             }
 
@@ -6564,22 +6622,19 @@ public abstract class AbsListView extends AdapterView<ListAdapter> implements Te
                     // If the adapter has stable IDs, we can reuse the view for
                     // the same data.
                     if (mTransientStateViewsById == null) {
-                        mTransientStateViewsById = new LongSparseArray<View>();
+                        mTransientStateViewsById = new LongSparseArray<>();
                     }
                     mTransientStateViewsById.put(lp.itemId, scrap);
                 } else if (!mDataChanged) {
                     // If the data hasn't changed, we can reuse the views at
                     // their old positions.
                     if (mTransientStateViews == null) {
-                        mTransientStateViews = new SparseArray<View>();
+                        mTransientStateViews = new SparseArray<>();
                     }
                     mTransientStateViews.put(position, scrap);
                 } else {
                     // Otherwise, we'll have to remove the view and start over.
-                    if (mSkippedScrap == null) {
-                        mSkippedScrap = new ArrayList<View>();
-                    }
-                    mSkippedScrap.add(scrap);
+                    getSkippedScrap().add(scrap);
                 }
             } else {
                 if (mViewTypeCount == 1) {
@@ -6592,6 +6647,13 @@ public abstract class AbsListView extends AdapterView<ListAdapter> implements Te
                     mRecyclerListener.onMovedToScrapHeap(scrap);
                 }
             }
+        }
+
+        private ArrayList<View> getSkippedScrap() {
+            if (mSkippedScrap == null) {
+                mSkippedScrap = new ArrayList<>();
+            }
+            return mSkippedScrap;
         }
 
         /**
@@ -6871,6 +6933,25 @@ public abstract class AbsListView extends AdapterView<ListAdapter> implements Te
                 mPositionScroller.stop();
             }
             requestLayout();
+        }
+    }
+
+    /** @hide */
+    @Override
+    protected void encodeProperties(@NonNull ViewHierarchyEncoder encoder) {
+        super.encodeProperties(encoder);
+
+        encoder.addProperty("drawing:cacheColorHint", getCacheColorHint());
+        encoder.addProperty("list:fastScrollEnabled", isFastScrollEnabled());
+        encoder.addProperty("list:scrollingCacheEnabled", isScrollingCacheEnabled());
+        encoder.addProperty("list:smoothScrollbarEnabled", isSmoothScrollbarEnabled());
+        encoder.addProperty("list:stackFromBottom", isStackFromBottom());
+        encoder.addProperty("list:textFilterEnabled", isTextFilterEnabled());
+
+        View selectedView = getSelectedView();
+        if (selectedView != null) {
+            encoder.addPropertyKey("selectedView");
+            selectedView.encode(encoder);
         }
     }
 

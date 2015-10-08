@@ -16,9 +16,11 @@
 
 package android.app.usage;
 
+import android.annotation.SystemApi;
 import android.content.Context;
 import android.content.pm.ParceledListSlice;
 import android.os.RemoteException;
+import android.os.UserHandle;
 import android.util.ArrayMap;
 
 import java.util.Collections;
@@ -216,5 +218,53 @@ public final class UsageStatsManager {
             }
         }
         return aggregatedStats;
+    }
+
+    /**
+     * Returns whether the specified app is currently considered inactive. This will be true if the
+     * app hasn't been used directly or indirectly for a period of time defined by the system. This
+     * could be of the order of several hours or days.
+     * @param packageName The package name of the app to query
+     * @return whether the app is currently considered inactive
+     */
+    public boolean isAppInactive(String packageName) {
+        try {
+            return mService.isAppInactive(packageName, UserHandle.myUserId());
+        } catch (RemoteException e) {
+            // fall through and return default
+        }
+        return false;
+    }
+
+    /**
+     * @hide
+     */
+    public void setAppInactive(String packageName, boolean inactive) {
+        try {
+            mService.setAppInactive(packageName, inactive, UserHandle.myUserId());
+        } catch (RemoteException e) {
+            // fall through
+        }
+    }
+
+    /**
+     * {@hide}
+     * Temporarily whitelist the specified app for a short duration. This is to allow an app
+     * receiving a high priority message to be able to access the network and acquire wakelocks
+     * even if the device is in power-save mode or the app is currently considered inactive.
+     * The caller must hold the CHANGE_DEVICE_IDLE_TEMP_WHITELIST permission.
+     * @param packageName The package name of the app to whitelist.
+     * @param duration Duration to whitelist the app for, in milliseconds. It is recommended that
+     * this be limited to 10s of seconds. Requested duration will be clamped to a few minutes.
+     * @param user The user for whom the package should be whitelisted. Passing in a user that is
+     * not the same as the caller's process will require the INTERACT_ACROSS_USERS permission.
+     * @see #isAppInactive(String)
+     */
+    @SystemApi
+    public void whitelistAppTemporarily(String packageName, long duration, UserHandle user) {
+        try {
+            mService.whitelistAppTemporarily(packageName, duration, user.getIdentifier());
+        } catch (RemoteException re) {
+        }
     }
 }

@@ -16,7 +16,10 @@
 
 package android.bluetooth.le;
 
+import android.Manifest;
+import android.annotation.RequiresPermission;
 import android.annotation.SystemApi;
+import android.app.ActivityThread;
 import android.bluetooth.BluetoothAdapter;
 import android.bluetooth.BluetoothGatt;
 import android.bluetooth.BluetoothGattCallbackWrapper;
@@ -36,7 +39,7 @@ import java.util.UUID;
 
 /**
  * This class provides methods to perform scan related operations for Bluetooth LE devices. An
- * application can scan for a particular type of Bluetotoh LE devices using {@link ScanFilter}. It
+ * application can scan for a particular type of Bluetooth LE devices using {@link ScanFilter}. It
  * can also request different types of callbacks for delivering the result.
  * <p>
  * Use {@link BluetoothAdapter#getBluetoothLeScanner()} to get an instance of
@@ -76,10 +79,15 @@ public final class BluetoothLeScanner {
      * delivered through {@code callback}.
      * <p>
      * Requires {@link android.Manifest.permission#BLUETOOTH_ADMIN} permission.
+     * An app must hold
+     * {@link android.Manifest.permission#ACCESS_COARSE_LOCATION ACCESS_COARSE_LOCATION} or
+     * {@link android.Manifest.permission#ACCESS_FINE_LOCATION ACCESS_FINE_LOCATION} permission
+     * in order to get results.
      *
      * @param callback Callback used to deliver scan results.
      * @throws IllegalArgumentException If {@code callback} is null.
      */
+    @RequiresPermission(Manifest.permission.BLUETOOTH_ADMIN)
     public void startScan(final ScanCallback callback) {
         if (callback == null) {
             throw new IllegalArgumentException("callback is null");
@@ -91,12 +99,17 @@ public final class BluetoothLeScanner {
      * Start Bluetooth LE scan. The scan results will be delivered through {@code callback}.
      * <p>
      * Requires {@link android.Manifest.permission#BLUETOOTH_ADMIN} permission.
+     * An app must hold
+     * {@link android.Manifest.permission#ACCESS_COARSE_LOCATION ACCESS_COARSE_LOCATION} or
+     * {@link android.Manifest.permission#ACCESS_FINE_LOCATION ACCESS_FINE_LOCATION} permission
+     * in order to get results.
      *
      * @param filters {@link ScanFilter}s for finding exact BLE devices.
      * @param settings Settings for the scan.
      * @param callback Callback used to deliver scan results.
      * @throws IllegalArgumentException If {@code settings} or {@code callback} is null.
      */
+    @RequiresPermission(Manifest.permission.BLUETOOTH_ADMIN)
     public void startScan(List<ScanFilter> filters, ScanSettings settings,
             final ScanCallback callback) {
         startScan(filters, settings, callback, null);
@@ -128,6 +141,16 @@ public final class BluetoothLeScanner {
                         ScanCallback.SCAN_FAILED_FEATURE_UNSUPPORTED);
                 return;
             }
+            if (!isHardwareResourcesAvailableForScan(settings)) {
+                postCallbackError(callback,
+                        ScanCallback.SCAN_FAILED_OUT_OF_HARDWARE_RESOURCES);
+                return;
+            }
+            if (!isSettingsAndFilterComboAllowed(settings, filters)) {
+                postCallbackError(callback,
+                        ScanCallback.SCAN_FAILED_FEATURE_UNSUPPORTED);
+                return;
+            }
             BleScanCallbackWrapper wrapper = new BleScanCallbackWrapper(gatt, filters,
                     settings, callback, resultStorages);
             wrapper.startRegisteration();
@@ -141,6 +164,7 @@ public final class BluetoothLeScanner {
      *
      * @param callback
      */
+    @RequiresPermission(Manifest.permission.BLUETOOTH_ADMIN)
     public void stopScan(ScanCallback callback) {
         BluetoothLeUtils.checkAdapterStateOn(mBluetoothAdapter);
         synchronized (mLeScanClients) {
@@ -298,7 +322,7 @@ public final class BluetoothLeScanner {
                     mClientIf = clientIf;
                     try {
                         mBluetoothGatt.startScan(mClientIf, false, mSettings, mFilters,
-                                mResultStorages);
+                                mResultStorages, ActivityThread.currentOpPackageName());
                     } catch (RemoteException e) {
                         Log.e(TAG, "fail to start le scan: " + e);
                         mClientIf = -1;
@@ -371,6 +395,18 @@ public final class BluetoothLeScanner {
                 }
             });
         }
+
+        @Override
+        public void onScanManagerErrorCallback(final int errorCode) {
+            if (VDBG) {
+                Log.d(TAG, "onScanManagerErrorCallback() - errorCode = " + errorCode);
+            }
+            synchronized (this) {
+                if (mClientIf <= 0)
+                    return;
+            }
+            postCallbackError(mScanCallback, errorCode);
+        }
     }
 
     private void postCallbackError(final ScanCallback callback, final int errorCode) {
@@ -393,5 +429,34 @@ public final class BluetoothLeScanner {
             return true;
         }
         return false;
+    }
+
+    private boolean isSettingsAndFilterComboAllowed(ScanSettings settings,
+                        List <ScanFilter> filterList) {
+        final int callbackType = settings.getCallbackType();
+        // If onlost/onfound is requested, a non-empty filter is expected
+        if ((callbackType & (ScanSettings.CALLBACK_TYPE_FIRST_MATCH
+                        | ScanSettings.CALLBACK_TYPE_MATCH_LOST)) != 0) {
+            if (filterList == null) {
+                return false;
+            }
+            for (ScanFilter filter : filterList) {
+                if (filter.isAllFieldsEmpty()) {
+                    return false;
+                }
+            }
+        }
+        return true;
+    }
+
+    private boolean isHardwareResourcesAvailableForScan(ScanSettings settings) {
+        final int callbackType = settings.getCallbackType();
+        if ((callbackType & ScanSettings.CALLBACK_TYPE_FIRST_MATCH) != 0
+                || (callbackType & ScanSettings.CALLBACK_TYPE_MATCH_LOST) != 0) {
+            // For onlost/onfound, we required hw support be available
+            return (mBluetoothAdapter.isOffloadedFilteringSupported() &&
+                    mBluetoothAdapter.isHardwareTrackingFiltersAvailable());
+        }
+        return true;
     }
 }

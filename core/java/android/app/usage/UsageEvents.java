@@ -68,6 +68,17 @@ public final class UsageEvents implements Parcelable {
         public static final int CONFIGURATION_CHANGE = 5;
 
         /**
+         * An event type denoting that a package was interacted with in some way by the system.
+         * @hide
+         */
+        public static final int SYSTEM_INTERACTION = 6;
+
+        /**
+         * An event type denoting that a package was interacted with in some way by the user.
+         */
+        public static final int USER_INTERACTION = 7;
+
+        /**
          * {@hide}
          */
         public String mPackage;
@@ -361,13 +372,4 @@ public final class UsageEvents implements Parcelable {
             return new UsageEvents[size];
         }
     };
-
-    @Override
-    protected void finalize() throws Throwable {
-        super.finalize();
-        if (mParcel != null) {
-            mParcel.recycle();
-            mParcel = null;
-        }
-    }
 }

@@ -18,7 +18,7 @@ package android.graphics;
 
 public class PorterDuff {
 
-    // these value must match their native equivalents. See SkPorterDuff.h
+    // these value must match their native equivalents. See SkXfermode.h
     public enum Mode {
         /** [0, 0] */
         CLEAR       (0),
@@ -46,17 +46,17 @@ public class PorterDuff {
         XOR         (11),
         /** [Sa + Da - Sa*Da,
              Sc*(1 - Da) + Dc*(1 - Sa) + min(Sc, Dc)] */
-        DARKEN      (12),
+        DARKEN      (16),
         /** [Sa + Da - Sa*Da,
              Sc*(1 - Da) + Dc*(1 - Sa) + max(Sc, Dc)] */
-        LIGHTEN     (13),
+        LIGHTEN     (17),
         /** [Sa * Da, Sc * Dc] */
-        MULTIPLY    (14),
+        MULTIPLY    (13),
         /** [Sa + Da - Sa * Da, Sc + Dc - Sc * Dc] */
-        SCREEN      (15),
+        SCREEN      (14),
         /** Saturate(S + D) */
-        ADD         (16),
-        OVERLAY     (17);
+        ADD         (12),
+        OVERLAY     (15);
 
         Mode(int nativeInt) {
             this.nativeInt = nativeInt;
@@ -66,5 +66,39 @@ public class PorterDuff {
          * @hide
          */
         public final int nativeInt;
+    }
+
+    /**
+     * @hide
+     */
+    public static final int modeToInt(Mode mode) {
+        return mode.nativeInt;
+    }
+
+    /**
+     * @hide
+     */
+    public static final Mode intToMode(int val) {
+        switch (val) {
+            default:
+            case  0: return Mode.CLEAR;
+            case  1: return Mode.SRC;
+            case  2: return Mode.DST;
+            case  3: return Mode.SRC_OVER;
+            case  4: return Mode.DST_OVER;
+            case  5: return Mode.SRC_IN;
+            case  6: return Mode.DST_IN;
+            case  7: return Mode.SRC_OUT;
+            case  8: return Mode.DST_OUT;
+            case  9: return Mode.SRC_ATOP;
+            case 10: return Mode.DST_ATOP;
+            case 11: return Mode.XOR;
+            case 16: return Mode.DARKEN;
+            case 17: return Mode.LIGHTEN;
+            case 13: return Mode.MULTIPLY;
+            case 14: return Mode.SCREEN;
+            case 12: return Mode.ADD;
+            case 15: return Mode.OVERLAY;
+        }
     }
 }

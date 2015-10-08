@@ -26,8 +26,9 @@
 #include <SkCamera.h>
 #include <SkMatrix.h>
 #include <SkRegion.h>
+#include <SkXfermode.h>
 
-#include "Animator.h"
+#include "Caches.h"
 #include "Rect.h"
 #include "RevealClip.h"
 #include "Outline.h"
@@ -49,12 +50,12 @@ class RenderProperties;
 #define RP_SET_AND_DIRTY(a, b) RP_SET(a, b, mPrimitiveFields.mMatrixOrPivotDirty = true)
 
 // Keep in sync with View.java:LAYER_TYPE_*
-enum LayerType {
-    kLayerTypeNone = 0,
+enum class LayerType {
+    None = 0,
     // Although we cannot build the software layer directly (must be done at
     // record time), this information is used when applying alpha.
-    kLayerTypeSoftware = 1,
-    kLayerTypeRenderLayer = 2,
+    Software = 1,
+    RenderLayer = 2,
     // TODO: LayerTypeSurfaceTexture? Maybe?
 };
 
@@ -71,10 +72,6 @@ public:
             return true;
         }
         return false;
-    }
-
-    LayerType type() const {
-        return mType;
     }
 
     bool setOpaque(bool opaque) {
@@ -122,14 +119,19 @@ private:
     ~LayerProperties();
     void reset();
 
+    // Private since external users should go through properties().effectiveLayerType()
+    LayerType type() const {
+        return mType;
+    }
+
     friend class RenderProperties;
 
-    LayerType mType;
+    LayerType mType = LayerType::None;
     // Whether or not that Layer's content is opaque, doesn't include alpha
     bool mOpaque;
     uint8_t mAlpha;
     SkXfermode::Mode mMode;
-    SkColorFilter* mColorFilter;
+    SkColorFilter* mColorFilter = nullptr;
 };
 
 /*
@@ -154,6 +156,32 @@ public:
             }
             return false;
         }
+    }
+
+    /**
+     * Set internal layer state based on whether this layer
+     *
+     * Additionally, returns true if child RenderNodes with functors will need to use a layer
+     * to support clipping.
+     */
+    bool prepareForFunctorPresence(bool willHaveFunctor, bool ancestorDictatesFunctorsNeedLayer) {
+        // parent may have already dictated that a descendant layer is needed
+        bool functorsNeedLayer = ancestorDictatesFunctorsNeedLayer
+
+                // Round rect clipping forces layer for functors
+                || CC_UNLIKELY(getOutline().willRoundRectClip())
+                || CC_UNLIKELY(getRevealClip().willClip())
+
+                // Complex matrices forces layer, due to stencil clipping
+                || CC_UNLIKELY(getTransformMatrix() && !getTransformMatrix()->isScaleTranslate())
+                || CC_UNLIKELY(getAnimationMatrix() && !getAnimationMatrix()->isScaleTranslate())
+                || CC_UNLIKELY(getStaticMatrix() && !getStaticMatrix()->isScaleTranslate());
+
+        mComputedFields.mNeedLayerForFunctors = (willHaveFunctor && functorsNeedLayer);
+
+        // If on a layer, will have consumed the need for isolating functors from stencil.
+        // Thus, it's safe to reset the flag until some descendent sets it.
+        return CC_LIKELY(effectiveLayerType() == LayerType::None) && functorsNeedLayer;
     }
 
     RenderProperties& operator=(const RenderProperties& other);
@@ -188,7 +216,7 @@ public:
         if (matrix) {
             mStaticMatrix = new SkMatrix(*matrix);
         } else {
-            mStaticMatrix = NULL;
+            mStaticMatrix = nullptr;
         }
         return true;
     }
@@ -203,7 +231,7 @@ public:
         if (matrix) {
             mAnimationMatrix = new SkMatrix(*matrix);
         } else {
-            mAnimationMatrix = NULL;
+            mAnimationMatrix = nullptr;
         }
         return true;
     }
@@ -571,8 +599,23 @@ public:
 
     bool hasShadow() const {
         return getZ() > 0.0f
-                && getOutline().getPath() != NULL
+                && getOutline().getPath() != nullptr
                 && getOutline().getAlpha() != 0.0f;
+    }
+
+    bool promotedToLayer() const {
+        const int maxTextureSize = Caches::getInstance().maxTextureSize;
+        return mLayerProperties.mType == LayerType::None
+                && mPrimitiveFields.mWidth <= maxTextureSize
+                && mPrimitiveFields.mHeight <= maxTextureSize
+                && (mComputedFields.mNeedLayerForFunctors
+                        || (!MathUtils::isZero(mPrimitiveFields.mAlpha)
+                                && mPrimitiveFields.mAlpha < 1
+                                && mPrimitiveFields.mHasOverlappingRendering));
+    }
+
+    LayerType effectiveLayerType() const {
+        return CC_UNLIKELY(promotedToLayer()) ? LayerType::RenderLayer : mLayerProperties.mType;
     }
 
 private:
@@ -620,6 +663,9 @@ private:
         SkMatrix* mTransformMatrix;
 
         Sk3DView mTransformCamera;
+
+        // Force layer on for functors to enable render features they don't yet support (clipping)
+        bool mNeedLayerForFunctors = false;
     } mComputedFields;
 };
 

@@ -35,34 +35,38 @@ public abstract class AbstractCursor implements CrossProcessCursor {
     private static final String TAG = "Cursor";
 
     /**
-     * @deprecated This is never updated by this class and should not be used
+     * @removed This field should not be used.
      */
-    @Deprecated
     protected HashMap<Long, Map<String, Object>> mUpdatedRows;
 
-    protected int mPos;
-
     /**
-     * This must be set to the index of the row ID column by any
-     * subclass that wishes to support updates.
-     *
-     * @deprecated This field should not be used.
+     * @removed This field should not be used.
      */
-    @Deprecated
     protected int mRowIdColumnIndex;
 
     /**
-     * If {@link #mRowIdColumnIndex} is not -1 this contains contains the value of
-     * the column at {@link #mRowIdColumnIndex} for the current row this cursor is
-     * pointing at.
-     *
-     * @deprecated This field should not be used.
+     * @removed This field should not be used.
      */
-    @Deprecated
     protected Long mCurrentRowID;
 
+    /**
+     * @deprecated Use {@link #getPosition()} instead.
+     */
+    @Deprecated
+    protected int mPos;
+
+    /**
+     * @deprecated Use {@link #isClosed()} instead.
+     */
+    @Deprecated
     protected boolean mClosed;
+
+    /**
+     * @deprecated Do not use.
+     */
+    @Deprecated
     protected ContentResolver mContentResolver;
+
     private Uri mNotifyUri;
 
     private final Object mSelfObserverLock = new Object();
@@ -76,18 +80,28 @@ public abstract class AbstractCursor implements CrossProcessCursor {
 
     /* -------------------------------------------------------- */
     /* These need to be implemented by subclasses */
+    @Override
     abstract public int getCount();
 
+    @Override
     abstract public String[] getColumnNames();
 
+    @Override
     abstract public String getString(int column);
+    @Override
     abstract public short getShort(int column);
+    @Override
     abstract public int getInt(int column);
+    @Override
     abstract public long getLong(int column);
+    @Override
     abstract public float getFloat(int column);
+    @Override
     abstract public double getDouble(int column);
+    @Override
     abstract public boolean isNull(int column);
 
+    @Override
     public int getType(int column) {
         // Reflects the assumption that all commonly used field types (meaning everything
         // but blobs) are convertible to strings so it should be safe to call
@@ -96,6 +110,7 @@ public abstract class AbstractCursor implements CrossProcessCursor {
     }
 
     // TODO implement getBlob in all cursor types
+    @Override
     public byte[] getBlob(int column) {
         throw new UnsupportedOperationException("getBlob is not supported");
     }
@@ -108,14 +123,17 @@ public abstract class AbstractCursor implements CrossProcessCursor {
      *
      * @return The pre-filled window that backs this cursor, or null if none.
      */
+    @Override
     public CursorWindow getWindow() {
         return null;
     }
 
+    @Override
     public int getColumnCount() {
         return getColumnNames().length;
     }
 
+    @Override
     public void deactivate() {
         onDeactivateOrClose();
     }
@@ -129,6 +147,7 @@ public abstract class AbstractCursor implements CrossProcessCursor {
         mDataSetObservable.notifyInvalidated();
     }
 
+    @Override
     public boolean requery() {
         if (mSelfObserver != null && mSelfObserverRegistered == false) {
             mContentResolver.registerContentObserver(mNotifyUri, true, mSelfObserver);
@@ -138,10 +157,12 @@ public abstract class AbstractCursor implements CrossProcessCursor {
         return true;
     }
 
+    @Override
     public boolean isClosed() {
         return mClosed;
     }
 
+    @Override
     public void close() {
         mClosed = true;
         mContentObservable.unregisterAll();
@@ -158,11 +179,13 @@ public abstract class AbstractCursor implements CrossProcessCursor {
      * @param newPosition the position that we're moving to
      * @return true if the move is successful, false otherwise
      */
+    @Override
     public boolean onMove(int oldPosition, int newPosition) {
         return true;
     }
 
 
+    @Override
     public void copyStringToBuffer(int columnIndex, CharArrayBuffer buffer) {
         // Default implementation, uses getString
         String result = getString(columnIndex);
@@ -183,15 +206,14 @@ public abstract class AbstractCursor implements CrossProcessCursor {
     /* Implementation */
     public AbstractCursor() {
         mPos = -1;
-        mRowIdColumnIndex = -1;
-        mCurrentRowID = null;
-        mUpdatedRows = new HashMap<Long, Map<String, Object>>();
     }
 
+    @Override
     public final int getPosition() {
         return mPos;
     }
 
+    @Override
     public final boolean moveToPosition(int position) {
         // Make sure position isn't past the end of the cursor
         final int count = getCount();
@@ -216,9 +238,6 @@ public abstract class AbstractCursor implements CrossProcessCursor {
             mPos = -1;
         } else {
             mPos = position;
-            if (mRowIdColumnIndex != -1) {
-                mCurrentRowID = Long.valueOf(getLong(mRowIdColumnIndex));
-            }
         }
 
         return result;
@@ -229,35 +248,43 @@ public abstract class AbstractCursor implements CrossProcessCursor {
         DatabaseUtils.cursorFillWindow(this, position, window);
     }
 
+    @Override
     public final boolean move(int offset) {
         return moveToPosition(mPos + offset);
     }
 
+    @Override
     public final boolean moveToFirst() {
         return moveToPosition(0);
     }
 
+    @Override
     public final boolean moveToLast() {
         return moveToPosition(getCount() - 1);
     }
 
+    @Override
     public final boolean moveToNext() {
         return moveToPosition(mPos + 1);
     }
 
+    @Override
     public final boolean moveToPrevious() {
         return moveToPosition(mPos - 1);
     }
 
+    @Override
     public final boolean isFirst() {
         return mPos == 0 && getCount() != 0;
     }
 
+    @Override
     public final boolean isLast() {
         int cnt = getCount();
         return mPos == (cnt - 1) && cnt != 0;
     }
 
+    @Override
     public final boolean isBeforeFirst() {
         if (getCount() == 0) {
             return true;
@@ -265,6 +292,7 @@ public abstract class AbstractCursor implements CrossProcessCursor {
         return mPos == -1;
     }
 
+    @Override
     public final boolean isAfterLast() {
         if (getCount() == 0) {
             return true;
@@ -272,6 +300,7 @@ public abstract class AbstractCursor implements CrossProcessCursor {
         return mPos == getCount();
     }
 
+    @Override
     public int getColumnIndex(String columnName) {
         // Hack according to bug 903852
         final int periodIndex = columnName.lastIndexOf('.');
@@ -297,6 +326,7 @@ public abstract class AbstractCursor implements CrossProcessCursor {
         return -1;
     }
 
+    @Override
     public int getColumnIndexOrThrow(String columnName) {
         final int index = getColumnIndex(columnName);
         if (index < 0) {
@@ -305,14 +335,17 @@ public abstract class AbstractCursor implements CrossProcessCursor {
         return index;
     }
 
+    @Override
     public String getColumnName(int columnIndex) {
         return getColumnNames()[columnIndex];
     }
 
+    @Override
     public void registerContentObserver(ContentObserver observer) {
         mContentObservable.registerObserver(observer);
     }
 
+    @Override
     public void unregisterContentObserver(ContentObserver observer) {
         // cursor will unregister all observers when it close
         if (!mClosed) {
@@ -320,10 +353,12 @@ public abstract class AbstractCursor implements CrossProcessCursor {
         }
     }
 
+    @Override
     public void registerDataSetObserver(DataSetObserver observer) {
         mDataSetObservable.registerObserver(observer);
     }
 
+    @Override
     public void unregisterDataSetObserver(DataSetObserver observer) {
         mDataSetObservable.unregisterObserver(observer);
     }
@@ -350,6 +385,7 @@ public abstract class AbstractCursor implements CrossProcessCursor {
      * @param notifyUri The URI to watch for changes. This can be a
      * specific row URI, or a base URI for a whole class of content.
      */
+    @Override
     public void setNotificationUri(ContentResolver cr, Uri notifyUri) {
         setNotificationUri(cr, notifyUri, UserHandle.myUserId());
     }
@@ -368,31 +404,29 @@ public abstract class AbstractCursor implements CrossProcessCursor {
         }
     }
 
+    @Override
     public Uri getNotificationUri() {
         synchronized (mSelfObserverLock) {
             return mNotifyUri;
         }
     }
 
+    @Override
     public boolean getWantsAllOnMoveCalls() {
         return false;
     }
 
-    /**
-     * Sets a {@link Bundle} that will be returned by {@link #getExtras()}.  <code>null</code> will
-     * be converted into {@link Bundle#EMPTY}.
-     *
-     * @param extras {@link Bundle} to set.
-     * @hide
-     */
+    @Override
     public void setExtras(Bundle extras) {
         mExtras = (extras == null) ? Bundle.EMPTY : extras;
     }
 
+    @Override
     public Bundle getExtras() {
         return mExtras;
     }
 
+    @Override
     public Bundle respond(Bundle extras) {
         return Bundle.EMPTY;
     }

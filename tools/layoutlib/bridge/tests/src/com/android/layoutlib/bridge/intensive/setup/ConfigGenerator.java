@@ -21,12 +21,11 @@ import com.android.ide.common.resources.configuration.CountryCodeQualifier;
 import com.android.ide.common.resources.configuration.DensityQualifier;
 import com.android.ide.common.resources.configuration.FolderConfiguration;
 import com.android.ide.common.resources.configuration.KeyboardStateQualifier;
-import com.android.ide.common.resources.configuration.LanguageQualifier;
 import com.android.ide.common.resources.configuration.LayoutDirectionQualifier;
+import com.android.ide.common.resources.configuration.LocaleQualifier;
 import com.android.ide.common.resources.configuration.NavigationMethodQualifier;
 import com.android.ide.common.resources.configuration.NetworkCodeQualifier;
 import com.android.ide.common.resources.configuration.NightModeQualifier;
-import com.android.ide.common.resources.configuration.RegionQualifier;
 import com.android.ide.common.resources.configuration.ScreenDimensionQualifier;
 import com.android.ide.common.resources.configuration.ScreenOrientationQualifier;
 import com.android.ide.common.resources.configuration.ScreenRatioQualifier;
@@ -112,6 +111,21 @@ public class ConfigGenerator {
                                                         .setSoftButtons(true)
                                                         .setNavigation(Navigation.NONAV);
 
+    public static final ConfigGenerator NEXUS_5_LAND = new ConfigGenerator()
+                                                        .setScreenHeight(1080)
+                                                        .setScreenWidth(1920)
+                                                        .setXdpi(445)
+                                                        .setYdpi(445)
+                                                        .setOrientation(ScreenOrientation.LANDSCAPE)
+                                                        .setDensity(Density.XXHIGH)
+                                                        .setRatio(ScreenRatio.NOTLONG)
+                                                        .setSize(ScreenSize.NORMAL)
+                                                        .setKeyboard(Keyboard.NOKEY)
+                                                        .setTouchScreen(TouchScreen.FINGER)
+                                                        .setKeyboardState(KeyboardState.SOFT)
+                                                        .setSoftButtons(true)
+                                                        .setNavigation(Navigation.NONAV);
+
     private static final String TAG_ATTR = "attr";
     private static final String TAG_ENUM = "enum";
     private static final String TAG_FLAG = "flag";
@@ -158,17 +172,16 @@ public class ConfigGenerator {
         config.setUiModeQualifier(new UiModeQualifier(UiMode.NORMAL));
         config.setNightModeQualifier(new NightModeQualifier(NightMode.NOTNIGHT));
         config.setCountryCodeQualifier(new CountryCodeQualifier());
-        config.setLanguageQualifier(new LanguageQualifier());
         config.setLayoutDirectionQualifier(new LayoutDirectionQualifier());
         config.setNetworkCodeQualifier(new NetworkCodeQualifier());
-        config.setRegionQualifier(new RegionQualifier());
+        config.setLocaleQualifier(new LocaleQualifier());
         config.setVersionQualifier(new VersionQualifier());
         return config;
     }
 
     public HardwareConfig getHardwareConfig() {
         return new HardwareConfig(mScreenWidth, mScreenHeight, mDensity, mXdpi, mYdpi, mSize,
-                mOrientation, mSoftButtons);
+                mOrientation, null, mSoftButtons);
     }
 
     public static Map<String, String> loadProperties(File path) {

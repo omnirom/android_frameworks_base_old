@@ -32,14 +32,17 @@ import android.util.Slog;
 import android.view.IWindowManager;
 
 import com.android.internal.os.RuntimeInit;
-
 import com.android.internal.util.FastPrintWriter;
+import com.android.internal.util.HexDump;
+
 import dalvik.system.BlockGuard;
 import dalvik.system.CloseGuard;
 import dalvik.system.VMDebug;
 
 import java.io.PrintWriter;
 import java.io.StringWriter;
+import java.net.InetAddress;
+import java.net.UnknownHostException;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashMap;
@@ -137,6 +140,13 @@ public final class StrictMode {
      */
     public static final String VISUAL_PROPERTY = "persist.sys.strictmode.visual";
 
+    /**
+     * Temporary property used to include {@link #DETECT_VM_CLEARTEXT_NETWORK}
+     * in {@link VmPolicy.Builder#detectAll()}. Apps can still always opt-into
+     * detection using {@link VmPolicy.Builder#detectCleartextNetwork()}.
+     */
+    private static final String CLEARTEXT_PROPERTY = "persist.sys.strictmode.clear";
+
     // Only log a duplicate stack trace to the logs every second.
     private static final long MIN_LOG_INTERVAL_MS = 1000;
 
@@ -150,7 +160,7 @@ public final class StrictMode {
     // of the Looper.
     private static final int MAX_OFFENSES_PER_LOOP = 10;
 
-    // Thread-policy:
+    // Byte 1: Thread-policy
 
     /**
      * @hide
@@ -174,86 +184,102 @@ public final class StrictMode {
      */
     public static final int DETECT_CUSTOM = 0x08;  // for ThreadPolicy
 
+    /**
+     * For StrictMode.noteResourceMismatch()
+     *
+     * @hide
+     */
+    public static final int DETECT_RESOURCE_MISMATCH = 0x10;  // for ThreadPolicy
+
     private static final int ALL_THREAD_DETECT_BITS =
-            DETECT_DISK_WRITE | DETECT_DISK_READ | DETECT_NETWORK | DETECT_CUSTOM;
+            DETECT_DISK_WRITE | DETECT_DISK_READ | DETECT_NETWORK | DETECT_CUSTOM |
+            DETECT_RESOURCE_MISMATCH;
 
-    // Process-policy:
-
-    /**
-     * Note, a "VM_" bit, not thread.
-     * @hide
-     */
-    public static final int DETECT_VM_CURSOR_LEAKS = 0x200;  // for VmPolicy
+    // Byte 2: Process-policy
 
     /**
      * Note, a "VM_" bit, not thread.
      * @hide
      */
-    public static final int DETECT_VM_CLOSABLE_LEAKS = 0x400;  // for VmPolicy
+    public static final int DETECT_VM_CURSOR_LEAKS = 0x01 << 8;  // for VmPolicy
 
     /**
      * Note, a "VM_" bit, not thread.
      * @hide
      */
-    public static final int DETECT_VM_ACTIVITY_LEAKS = 0x800;  // for VmPolicy
+    public static final int DETECT_VM_CLOSABLE_LEAKS = 0x02 << 8;  // for VmPolicy
+
+    /**
+     * Note, a "VM_" bit, not thread.
+     * @hide
+     */
+    public static final int DETECT_VM_ACTIVITY_LEAKS = 0x04 << 8;  // for VmPolicy
 
     /**
      * @hide
      */
-    private static final int DETECT_VM_INSTANCE_LEAKS = 0x1000;  // for VmPolicy
+    private static final int DETECT_VM_INSTANCE_LEAKS = 0x08 << 8;  // for VmPolicy
 
     /**
      * @hide
      */
-    public static final int DETECT_VM_REGISTRATION_LEAKS = 0x2000;  // for VmPolicy
+    public static final int DETECT_VM_REGISTRATION_LEAKS = 0x10 << 8;  // for VmPolicy
 
     /**
      * @hide
      */
-    private static final int DETECT_VM_FILE_URI_EXPOSURE = 0x4000;  // for VmPolicy
+    private static final int DETECT_VM_FILE_URI_EXPOSURE = 0x20 << 8;  // for VmPolicy
+
+    /**
+     * @hide
+     */
+    private static final int DETECT_VM_CLEARTEXT_NETWORK = 0x40 << 8;  // for VmPolicy
 
     private static final int ALL_VM_DETECT_BITS =
             DETECT_VM_CURSOR_LEAKS | DETECT_VM_CLOSABLE_LEAKS |
             DETECT_VM_ACTIVITY_LEAKS | DETECT_VM_INSTANCE_LEAKS |
-            DETECT_VM_REGISTRATION_LEAKS | DETECT_VM_FILE_URI_EXPOSURE;
+            DETECT_VM_REGISTRATION_LEAKS | DETECT_VM_FILE_URI_EXPOSURE |
+            DETECT_VM_CLEARTEXT_NETWORK;
+
+    // Byte 3: Penalty
 
     /**
      * @hide
      */
-    public static final int PENALTY_LOG = 0x10;  // normal android.util.Log
+    public static final int PENALTY_LOG = 0x01 << 16;  // normal android.util.Log
 
     // Used for both process and thread policy:
 
     /**
      * @hide
      */
-    public static final int PENALTY_DIALOG = 0x20;
+    public static final int PENALTY_DIALOG = 0x02 << 16;
 
     /**
      * Death on any detected violation.
      *
      * @hide
      */
-    public static final int PENALTY_DEATH = 0x40;
+    public static final int PENALTY_DEATH = 0x04 << 16;
 
     /**
      * Death just for detected network usage.
      *
      * @hide
      */
-    public static final int PENALTY_DEATH_ON_NETWORK = 0x200;
+    public static final int PENALTY_DEATH_ON_NETWORK = 0x08 << 16;
 
     /**
      * Flash the screen during violations.
      *
      * @hide
      */
-    public static final int PENALTY_FLASH = 0x800;
+    public static final int PENALTY_FLASH = 0x10 << 16;
 
     /**
      * @hide
      */
-    public static final int PENALTY_DROPBOX = 0x80;
+    public static final int PENALTY_DROPBOX = 0x20 << 16;
 
     /**
      * Non-public penalty mode which overrides all the other penalty
@@ -266,7 +292,14 @@ public final class StrictMode {
      *
      * @hide
      */
-    public static final int PENALTY_GATHER = 0x100;
+    public static final int PENALTY_GATHER = 0x40 << 16;
+
+    /**
+     * Death when cleartext network traffic is detected.
+     *
+     * @hide
+     */
+    public static final int PENALTY_DEATH_ON_CLEARTEXT_NETWORK = 0x80 << 16;
 
     /**
      * Mask of all the penalty bits valid for thread policies.
@@ -275,13 +308,18 @@ public final class StrictMode {
             PENALTY_LOG | PENALTY_DIALOG | PENALTY_DEATH | PENALTY_DROPBOX | PENALTY_GATHER |
             PENALTY_DEATH_ON_NETWORK | PENALTY_FLASH;
 
-
     /**
      * Mask of all the penalty bits valid for VM policies.
      */
-    private static final int VM_PENALTY_MASK =
-            PENALTY_LOG | PENALTY_DEATH | PENALTY_DROPBOX;
+    private static final int VM_PENALTY_MASK = PENALTY_LOG | PENALTY_DEATH | PENALTY_DROPBOX
+            | PENALTY_DEATH_ON_CLEARTEXT_NETWORK;
 
+    /** {@hide} */
+    public static final int NETWORK_POLICY_ACCEPT = 0;
+    /** {@hide} */
+    public static final int NETWORK_POLICY_LOG = 1;
+    /** {@hide} */
+    public static final int NETWORK_POLICY_REJECT = 2;
 
     // TODO: wrap in some ImmutableHashMap thing.
     // Note: must be before static initialization of sVmPolicy.
@@ -427,6 +465,32 @@ public final class StrictMode {
              */
             public Builder permitCustomSlowCalls() {
                 return disable(DETECT_CUSTOM);
+            }
+
+            /**
+             * Disable detection of mismatches between defined resource types
+             * and getter calls.
+             */
+            public Builder permitResourceMismatches() {
+                return disable(DETECT_RESOURCE_MISMATCH);
+            }
+
+            /**
+             * Enables detection of mismatches between defined resource types
+             * and getter calls.
+             * <p>
+             * This helps detect accidental type mismatches and potentially
+             * expensive type conversions when obtaining typed resources.
+             * <p>
+             * For example, a strict mode violation would be thrown when
+             * calling {@link android.content.res.TypedArray#getInt(int, int)}
+             * on an index that contains a String-type resource. If the string
+             * value can be parsed as an integer, this method call will return
+             * a value without crashing; however, the developer should format
+             * the resource as an integer to avoid unnecessary type conversion.
+             */
+            public Builder detectResourceMismatches() {
+                return enable(DETECT_RESOURCE_MISMATCH);
             }
 
             /**
@@ -636,9 +700,17 @@ public final class StrictMode {
              * but will likely expand in future releases.
              */
             public Builder detectAll() {
-                return enable(DETECT_VM_ACTIVITY_LEAKS | DETECT_VM_CURSOR_LEAKS
+                int flags = DETECT_VM_ACTIVITY_LEAKS | DETECT_VM_CURSOR_LEAKS
                         | DETECT_VM_CLOSABLE_LEAKS | DETECT_VM_REGISTRATION_LEAKS
-                        | DETECT_VM_FILE_URI_EXPOSURE);
+                        | DETECT_VM_FILE_URI_EXPOSURE;
+
+                // TODO: always add DETECT_VM_CLEARTEXT_NETWORK once we have facility
+                // for apps to mark sockets that should be ignored
+                if (SystemProperties.getBoolean(CLEARTEXT_PROPERTY, false)) {
+                    flags |= DETECT_VM_CLEARTEXT_NETWORK;
+                }
+
+                return enable(flags);
             }
 
             /**
@@ -686,12 +758,43 @@ public final class StrictMode {
             }
 
             /**
-             * Crashes the whole process on violation.  This penalty runs at
-             * the end of all enabled penalties so yo you'll still get
-             * your logging or other violations before the process dies.
+             * Detect any network traffic from the calling app which is not
+             * wrapped in SSL/TLS. This can help you detect places that your app
+             * is inadvertently sending cleartext data across the network.
+             * <p>
+             * Using {@link #penaltyDeath()} or
+             * {@link #penaltyDeathOnCleartextNetwork()} will block further
+             * traffic on that socket to prevent accidental data leakage, in
+             * addition to crashing your process.
+             * <p>
+             * Using {@link #penaltyDropBox()} will log the raw contents of the
+             * packet that triggered the violation.
+             * <p>
+             * This inspects both IPv4/IPv6 and TCP/UDP network traffic, but it
+             * may be subject to false positives, such as when STARTTLS
+             * protocols or HTTP proxies are used.
+             */
+            public Builder detectCleartextNetwork() {
+                return enable(DETECT_VM_CLEARTEXT_NETWORK);
+            }
+
+            /**
+             * Crashes the whole process on violation. This penalty runs at the
+             * end of all enabled penalties so you'll still get your logging or
+             * other violations before the process dies.
              */
             public Builder penaltyDeath() {
                 return enable(PENALTY_DEATH);
+            }
+
+            /**
+             * Crashes the whole process when cleartext network traffic is
+             * detected.
+             *
+             * @see #detectCleartextNetwork()
+             */
+            public Builder penaltyDeathOnCleartextNetwork() {
+                return enable(PENALTY_DEATH_ON_CLEARTEXT_NETWORK);
             }
 
             /**
@@ -847,6 +950,15 @@ public final class StrictMode {
     private static class StrictModeCustomViolation extends StrictModeViolation {
         public StrictModeCustomViolation(int policyMask, String name) {
             super(policyMask, DETECT_CUSTOM, name);
+        }
+    }
+
+    /**
+     * @hide
+     */
+    private static class StrictModeResourceMismatchViolation extends StrictModeViolation {
+        public StrictModeResourceMismatchViolation(int policyMask, Object tag) {
+            super(policyMask, DETECT_RESOURCE_MISMATCH, tag != null ? tag.toString() : null);
         }
     }
 
@@ -1121,6 +1233,20 @@ public final class StrictMode {
                 return;
             }
             BlockGuard.BlockGuardPolicyException e = new StrictModeCustomViolation(mPolicyMask, name);
+            e.fillInStackTrace();
+            startHandlingViolationException(e);
+        }
+
+        // Not part of BlockGuard.Policy; just part of StrictMode:
+        void onResourceMismatch(Object tag) {
+            if ((mPolicyMask & DETECT_RESOURCE_MISMATCH) == 0) {
+                return;
+            }
+            if (tooManyViolationsThisLoop()) {
+                return;
+            }
+            BlockGuard.BlockGuardPolicyException e =
+                    new StrictModeResourceMismatchViolation(mPolicyMask, tag);
             e.fillInStackTrace();
             startHandlingViolationException(e);
         }
@@ -1422,7 +1548,7 @@ public final class StrictMode {
     }
 
     private static class AndroidCloseGuardReporter implements CloseGuard.Reporter {
-        public void report (String message, Throwable allocationSite) {
+        public void report(String message, Throwable allocationSite) {
             onVmPolicyViolation(message, allocationSite);
         }
     }
@@ -1508,6 +1634,27 @@ public final class StrictMode {
                     sIsIdlerRegistered = true;
                 }
             }
+
+            int networkPolicy = NETWORK_POLICY_ACCEPT;
+            if ((sVmPolicyMask & DETECT_VM_CLEARTEXT_NETWORK) != 0) {
+                if ((sVmPolicyMask & PENALTY_DEATH) != 0
+                        || (sVmPolicyMask & PENALTY_DEATH_ON_CLEARTEXT_NETWORK) != 0) {
+                    networkPolicy = NETWORK_POLICY_REJECT;
+                } else {
+                    networkPolicy = NETWORK_POLICY_LOG;
+                }
+            }
+
+            final INetworkManagementService netd = INetworkManagementService.Stub.asInterface(
+                    ServiceManager.getService(Context.NETWORKMANAGEMENT_SERVICE));
+            if (netd != null) {
+                try {
+                    netd.setUidCleartextNetworkPolicy(android.os.Process.myUid(), networkPolicy);
+                } catch (RemoteException ignored) {
+                }
+            } else if (networkPolicy != NETWORK_POLICY_ACCEPT) {
+                Log.w(TAG, "Dropping requested network policy due to missing service!");
+            }
         }
     }
 
@@ -1570,6 +1717,13 @@ public final class StrictMode {
     /**
      * @hide
      */
+    public static boolean vmCleartextNetworkEnabled() {
+        return (sVmPolicyMask & DETECT_VM_CLEARTEXT_NETWORK) != 0;
+    }
+
+    /**
+     * @hide
+     */
     public static void onSqliteObjectLeaked(String message, Throwable originStack) {
         onVmPolicyViolation(message, originStack);
     }
@@ -1600,7 +1754,39 @@ public final class StrictMode {
      */
     public static void onFileUriExposed(String location) {
         final String message = "file:// Uri exposed through " + location;
-        onVmPolicyViolation(message, new Throwable(message));
+        onVmPolicyViolation(null, new Throwable(message));
+    }
+
+    /**
+     * @hide
+     */
+    public static void onCleartextNetworkDetected(byte[] firstPacket) {
+        byte[] rawAddr = null;
+        if (firstPacket != null) {
+            if (firstPacket.length >= 20 && (firstPacket[0] & 0xf0) == 0x40) {
+                // IPv4
+                rawAddr = new byte[4];
+                System.arraycopy(firstPacket, 16, rawAddr, 0, 4);
+            } else if (firstPacket.length >= 40 && (firstPacket[0] & 0xf0) == 0x60) {
+                // IPv6
+                rawAddr = new byte[16];
+                System.arraycopy(firstPacket, 24, rawAddr, 0, 16);
+            }
+        }
+
+        final int uid = android.os.Process.myUid();
+        String msg = "Detected cleartext network traffic from UID " + uid;
+        if (rawAddr != null) {
+            try {
+                msg = "Detected cleartext network traffic from UID " + uid + " to "
+                        + InetAddress.getByAddress(rawAddr);
+            } catch (UnknownHostException ignored) {
+            }
+        }
+
+        final boolean forceDeath = (sVmPolicyMask & PENALTY_DEATH_ON_CLEARTEXT_NETWORK) != 0;
+        onVmPolicyViolation(HexDump.dumpHexString(firstPacket).trim(), new Throwable(msg),
+                forceDeath);
     }
 
     // Map from VM violation fingerprint to uptime millis.
@@ -1610,10 +1796,18 @@ public final class StrictMode {
      * @hide
      */
     public static void onVmPolicyViolation(String message, Throwable originStack) {
+        onVmPolicyViolation(message, originStack, false);
+    }
+
+    /**
+     * @hide
+     */
+    public static void onVmPolicyViolation(String message, Throwable originStack,
+            boolean forceDeath) {
         final boolean penaltyDropbox = (sVmPolicyMask & PENALTY_DROPBOX) != 0;
-        final boolean penaltyDeath = (sVmPolicyMask & PENALTY_DEATH) != 0;
+        final boolean penaltyDeath = ((sVmPolicyMask & PENALTY_DEATH) != 0) || forceDeath;
         final boolean penaltyLog = (sVmPolicyMask & PENALTY_LOG) != 0;
-        final ViolationInfo info = new ViolationInfo(originStack, sVmPolicyMask);
+        final ViolationInfo info = new ViolationInfo(message, originStack, sVmPolicyMask);
 
         // Erase stuff not relevant for process-wide violations
         info.numAnimationsRunning = 0;
@@ -1725,9 +1919,9 @@ public final class StrictMode {
         for (int i = 0; i < numViolations; ++i) {
             if (LOG_V) Log.d(TAG, "strict mode violation stacks read from binder call.  i=" + i);
             ViolationInfo info = new ViolationInfo(p, !currentlyGathering);
-            if (info.crashInfo.stackTrace != null && info.crashInfo.stackTrace.length() > 10000) {
+            if (info.crashInfo.stackTrace != null && info.crashInfo.stackTrace.length() > 30000) {
                 String front = info.crashInfo.stackTrace.substring(256);
-                // 10000 characters is way too large for this to be any sane kind of
+                // 30000 characters is way too large for this to be any sane kind of
                 // strict mode collection of stacks.  We've had a problem where we leave
                 // strict mode violations associated with the thread, and it keeps tacking
                 // more and more stacks on to the violations.  Looks like we're in this casse,
@@ -1943,6 +2137,26 @@ public final class StrictMode {
     }
 
     /**
+     * For code to note that a resource was obtained using a type other than
+     * its defined type. This is a no-op unless the current thread's
+     * {@link android.os.StrictMode.ThreadPolicy} has
+     * {@link android.os.StrictMode.ThreadPolicy.Builder#detectResourceMismatches()}
+     * enabled.
+     *
+     * @param tag an object for the exception stack trace that's
+     *            built if when this fires.
+     * @hide
+     */
+    public static void noteResourceMismatch(Object tag) {
+        BlockGuard.Policy policy = BlockGuard.getThreadPolicy();
+        if (!(policy instanceof AndroidBlockGuardPolicy)) {
+            // StrictMode not enabled.
+            return;
+        }
+        ((AndroidBlockGuardPolicy) policy).onResourceMismatch(tag);
+    }
+
+    /**
      * @hide
      */
     public static void noteDiskRead() {
@@ -2057,6 +2271,8 @@ public final class StrictMode {
      * @hide
      */
     public static class ViolationInfo {
+        public String message;
+
         /**
          * Stack and other stuff info.
          */
@@ -2118,10 +2334,15 @@ public final class StrictMode {
             policy = 0;
         }
 
+        public ViolationInfo(Throwable tr, int policy) {
+            this(null, tr, policy);
+        }
+
         /**
          * Create an instance of ViolationInfo initialized from an exception.
          */
-        public ViolationInfo(Throwable tr, int policy) {
+        public ViolationInfo(String message, Throwable tr, int policy) {
+            this.message = message;
             crashInfo = new ApplicationErrorReport.CrashInfo(tr);
             violationUptimeMillis = SystemClock.uptimeMillis();
             this.policy = policy;
@@ -2184,6 +2405,7 @@ public final class StrictMode {
          *   and the gathering penalty should be removed.
          */
         public ViolationInfo(Parcel in, boolean unsetGatheringBit) {
+            message = in.readString();
             crashInfo = new ApplicationErrorReport.CrashInfo(in);
             int rawPolicy = in.readInt();
             if (unsetGatheringBit) {
@@ -2204,6 +2426,7 @@ public final class StrictMode {
          * Save a ViolationInfo instance to a parcel.
          */
         public void writeToParcel(Parcel dest, int flags) {
+            dest.writeString(message);
             crashInfo.writeToParcel(dest, flags);
             int start = dest.dataPosition();
             dest.writeInt(policy);

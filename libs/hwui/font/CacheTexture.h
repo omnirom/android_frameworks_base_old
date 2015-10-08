@@ -17,16 +17,15 @@
 #ifndef ANDROID_HWUI_CACHE_TEXTURE_H
 #define ANDROID_HWUI_CACHE_TEXTURE_H
 
+#include "PixelBuffer.h"
+#include "Rect.h"
+#include "Texture.h"
+#include "Vertex.h"
+
 #include <GLES3/gl3.h>
-
 #include <SkScalerContext.h>
-
 #include <utils/Log.h>
 
-#include "FontUtil.h"
-#include "../PixelBuffer.h"
-#include "../Rect.h"
-#include "../Vertex.h"
 
 namespace android {
 namespace uirenderer {
@@ -55,7 +54,7 @@ struct CacheBlock {
     CacheBlock* mPrev;
 
     CacheBlock(uint16_t x, uint16_t y, uint16_t width, uint16_t height):
-            mX(x), mY(y), mWidth(width), mHeight(height), mNext(NULL), mPrev(NULL) {
+            mX(x), mY(y), mWidth(width), mHeight(height), mNext(nullptr), mPrev(nullptr) {
     }
 
     static CacheBlock* insertBlock(CacheBlock* head, CacheBlock* newBlock);
@@ -81,9 +80,9 @@ public:
     void init();
 
     void releaseMesh();
-    void releaseTexture();
+    void releasePixelBuffer();
 
-    void allocateTexture();
+    void allocatePixelBuffer();
     void allocateMesh();
 
     // Returns true if glPixelStorei(GL_UNPACK_ROW_LENGTH) must be reset
@@ -93,11 +92,11 @@ public:
     bool fitBitmap(const SkGlyph& glyph, uint32_t* retOriginX, uint32_t* retOriginY);
 
     inline uint16_t getWidth() const {
-        return mWidth;
+        return mTexture.width;
     }
 
     inline uint16_t getHeight() const {
-        return mHeight;
+        return mTexture.height;
     }
 
     inline GLenum getFormat() const {
@@ -105,7 +104,7 @@ public:
     }
 
     inline uint32_t getOffset(uint16_t x, uint16_t y) const {
-        return (y * mWidth + x) * PixelBuffer::formatSize(mFormat);
+        return (y * getWidth() + x) * PixelBuffer::formatSize(mFormat);
     }
 
     inline const Rect* getDirtyRect() const {
@@ -113,12 +112,17 @@ public:
     }
 
     inline PixelBuffer* getPixelBuffer() const {
+        return mPixelBuffer;
+    }
+
+    Texture& getTexture() {
+        allocatePixelBuffer();
         return mTexture;
     }
 
     GLuint getTextureId() {
-        allocateTexture();
-        return mTextureId;
+        allocatePixelBuffer();
+        return mTexture.id;
     }
 
     inline bool isDirty() const {
@@ -132,7 +136,7 @@ public:
     /**
      * This method assumes that the proper texture unit is active.
      */
-    void setLinearFiltering(bool linearFiltering, bool bind = true);
+    void setLinearFiltering(bool linearFiltering);
 
     inline uint16_t getGlyphCount() const {
         return mNumGlyphs;
@@ -147,7 +151,7 @@ public:
     }
 
     uint16_t* indices() const {
-        return (uint16_t*) 0;
+        return (uint16_t*) nullptr;
     }
 
     void resetMesh() {
@@ -177,16 +181,14 @@ public:
 private:
     void setDirty(bool dirty);
 
-    PixelBuffer* mTexture;
-    GLuint mTextureId;
-    uint16_t mWidth;
-    uint16_t mHeight;
+    PixelBuffer* mPixelBuffer = nullptr;
+    Texture mTexture;
     GLenum mFormat;
-    bool mLinearFiltering;
-    bool mDirty;
-    uint16_t mNumGlyphs;
-    TextureVertex* mMesh;
-    uint32_t mCurrentQuad;
+    bool mLinearFiltering = false;
+    bool mDirty = false;
+    uint16_t mNumGlyphs = 0;
+    TextureVertex* mMesh = nullptr;
+    uint32_t mCurrentQuad = 0;
     uint32_t mMaxQuadCount;
     Caches& mCaches;
     CacheBlock* mCacheBlocks;

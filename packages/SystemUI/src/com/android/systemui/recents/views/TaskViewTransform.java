@@ -21,7 +21,6 @@ import android.graphics.Rect;
 import android.view.View;
 import android.view.ViewPropertyAnimator;
 import android.view.animation.Interpolator;
-import com.android.systemui.recents.Constants;
 
 
 /* The transform state for a task view */
@@ -133,6 +132,8 @@ public class TaskViewTransform {
 
     /** Reset the transform on a view. */
     public static void reset(View v) {
+        // Cancel any running animations
+        v.animate().cancel();
         v.setTranslationX(0f);
         v.setTranslationY(0f);
         v.setTranslationZ(0f);

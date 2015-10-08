@@ -16,6 +16,7 @@
 
 package android.view;
 
+import android.annotation.NonNull;
 import android.content.Context;
 import android.content.res.Resources;
 import android.graphics.Bitmap;
@@ -800,6 +801,7 @@ public class ViewDebug {
 
     /**
      * Dumps the view hierarchy starting from the given view.
+     * @deprecated See {@link #dumpv2(View, ByteArrayOutputStream)} below.
      * @hide
      */
     public static void dump(View root, boolean skipChildren, boolean includeProperties,
@@ -822,6 +824,28 @@ public class ViewDebug {
                 out.close();
             }
         }
+    }
+
+    /**
+     * Dumps the view hierarchy starting from the given view.
+     * Rather than using reflection, it uses View's encode method to obtain all the properties.
+     * @hide
+     */
+    public static void dumpv2(@NonNull final View view, @NonNull ByteArrayOutputStream out)
+            throws InterruptedException {
+        final ViewHierarchyEncoder encoder = new ViewHierarchyEncoder(out);
+        final CountDownLatch latch = new CountDownLatch(1);
+
+        view.post(new Runnable() {
+            @Override
+            public void run() {
+                view.encode(encoder);
+                latch.countDown();
+            }
+        });
+
+        latch.await(2, TimeUnit.SECONDS);
+        encoder.endStream();
     }
 
     /**
@@ -1005,30 +1029,22 @@ public class ViewDebug {
             return fields;
         }
 
-        final ArrayList<Field> declaredFields = new ArrayList();
-        klass.getDeclaredFieldsUnchecked(false, declaredFields);
-
-        final ArrayList<Field> foundFields = new ArrayList<Field>();
-        final int count = declaredFields.size();
-        for (int i = 0; i < count; i++) {
-            final Field field = declaredFields.get(i);
-
-            // Ensure the field type can be resolved.
-            try {
-                field.getType();
-            } catch (NoClassDefFoundError e) {
-                continue;
+        try {
+            final Field[] declaredFields = klass.getDeclaredFieldsUnchecked(false);
+            final ArrayList<Field> foundFields = new ArrayList<Field>();
+            for (final Field field : declaredFields) {
+              // Fields which can't be resolved have a null type.
+              if (field.getType() != null && field.isAnnotationPresent(ExportedProperty.class)) {
+                  field.setAccessible(true);
+                  foundFields.add(field);
+                  sAnnotations.put(field, field.getAnnotation(ExportedProperty.class));
+              }
             }
-
-            if (field.isAnnotationPresent(ExportedProperty.class)) {
-                field.setAccessible(true);
-                foundFields.add(field);
-                sAnnotations.put(field, field.getAnnotation(ExportedProperty.class));
-            }
+            fields = foundFields.toArray(new Field[foundFields.size()]);
+            map.put(klass, fields);
+        } catch (NoClassDefFoundError e) {
+            throw new AssertionError(e);
         }
-
-        fields = foundFields.toArray(new Field[foundFields.size()]);
-        map.put(klass, fields);
 
         return fields;
     }
@@ -1048,14 +1064,10 @@ public class ViewDebug {
             return methods;
         }
 
-        final ArrayList<Method> declaredMethods = new ArrayList();
-        klass.getDeclaredMethodsUnchecked(false, declaredMethods);
+        methods = klass.getDeclaredMethodsUnchecked(false);
 
         final ArrayList<Method> foundMethods = new ArrayList<Method>();
-        final int count = declaredMethods.size();
-        for (int i = 0; i < count; i++) {
-            final Method method = declaredMethods.get(i);
-
+        for (final Method method : methods) {
             // Ensure the method return and parameter types can be resolved.
             try {
                 method.getReturnType();

@@ -19,7 +19,6 @@ package android.location;
 import android.annotation.SystemApi;
 import android.os.Parcel;
 import android.os.Parcelable;
-import android.util.Log;
 
 /**
  * A class representing a GPS satellite measurement, containing raw and computed information.
@@ -28,8 +27,6 @@ import android.util.Log;
  */
 @SystemApi
 public class GpsMeasurement implements Parcelable {
-    private static final String TAG = "GpsMeasurement";
-
     private int mFlags;
     private byte mPrn;
     private double mTimeOffsetInNs;
@@ -83,6 +80,8 @@ public class GpsMeasurement implements Parcelable {
     private static final int HAS_TIME_FROM_LAST_BIT = (1<<14);
     private static final int HAS_DOPPLER_SHIFT = (1<<15);
     private static final int HAS_DOPPLER_SHIFT_UNCERTAINTY = (1<<16);
+    private static final int HAS_USED_IN_FIX = (1<<17);
+    private static final int GPS_MEASUREMENT_HAS_UNCORRECTED_PSEUDORANGE_RATE = (1<<18);
 
     /**
      * The indicator is not available or it is unknown.
@@ -140,6 +139,17 @@ public class GpsMeasurement implements Parcelable {
     public static final short STATE_TOW_DECODED = (1<<3);
 
     /**
+     * The state of the GPS receiver contains millisecond ambiguity.
+     */
+    public static final short STATE_MSEC_AMBIGUOUS = (1<<4);
+
+    /**
+     * All the GPS receiver state flags.
+     */
+    private static final short STATE_ALL = STATE_CODE_LOCK | STATE_BIT_SYNC | STATE_SUBFRAME_SYNC
+            | STATE_TOW_DECODED | STATE_MSEC_AMBIGUOUS;
+
+    /**
      * The state of the 'Accumulated Delta Range' is invalid or unknown.
      */
     public static final short ADR_STATE_UNKNOWN = 0;
@@ -158,6 +168,11 @@ public class GpsMeasurement implements Parcelable {
      * The state of the 'Accumulated Delta Range' has a cycle slip detected.
      */
     public static final short ADR_STATE_CYCLE_SLIP = (1<<2);
+
+    /**
+     * All the 'Accumulated Delta Range' flags.
+     */
+    private static final short ADR_ALL = ADR_STATE_VALID | ADR_STATE_RESET | ADR_STATE_CYCLE_SLIP;
 
     // End enumerations in sync with gps.h
 
@@ -263,19 +278,7 @@ public class GpsMeasurement implements Parcelable {
      * Sets the sync state.
      */
     public void setState(short value) {
-        switch (value) {
-            case STATE_UNKNOWN:
-            case STATE_BIT_SYNC:
-            case STATE_CODE_LOCK:
-            case STATE_SUBFRAME_SYNC:
-            case STATE_TOW_DECODED:
-                mState = value;
-                break;
-            default:
-                Log.d(TAG, "Sanitizing invalid 'sync state': " + value);
-                mState = STATE_UNKNOWN;
-                break;
-        }
+        mState = value;
     }
 
     /**
@@ -283,20 +286,33 @@ public class GpsMeasurement implements Parcelable {
      * For internal and logging use only.
      */
     private String getStateString() {
-        switch (mState) {
-            case STATE_UNKNOWN:
-                return "Unknown";
-            case STATE_BIT_SYNC:
-                return "BitSync";
-            case STATE_CODE_LOCK:
-                return "CodeLock";
-            case STATE_SUBFRAME_SYNC:
-                return "SubframeSync";
-            case STATE_TOW_DECODED:
-                return "TowDecoded";
-            default:
-                return "<Invalid>";
+        if (mState == STATE_UNKNOWN) {
+            return "Unknown";
         }
+        StringBuilder builder = new StringBuilder();
+        if ((mState & STATE_CODE_LOCK) == STATE_CODE_LOCK) {
+            builder.append("CodeLock|");
+        }
+        if ((mState & STATE_BIT_SYNC) == STATE_BIT_SYNC) {
+            builder.append("BitSync|");
+        }
+        if ((mState & STATE_SUBFRAME_SYNC) == STATE_SUBFRAME_SYNC) {
+            builder.append("SubframeSync|");
+        }
+        if ((mState & STATE_TOW_DECODED) == STATE_TOW_DECODED) {
+            builder.append("TowDecoded|");
+        }
+        if ((mState & STATE_MSEC_AMBIGUOUS) == STATE_MSEC_AMBIGUOUS) {
+            builder.append("MsecAmbiguous");
+        }
+        int remainingStates = mState & ~STATE_ALL;
+        if (remainingStates > 0) {
+            builder.append("Other(");
+            builder.append(Integer.toBinaryString(remainingStates));
+            builder.append(")|");
+        }
+        builder.deleteCharAt(builder.length() - 1);
+        return builder.toString();
     }
 
     /**
@@ -355,6 +371,15 @@ public class GpsMeasurement implements Parcelable {
     /**
      * Gets the Pseudorange rate at the timestamp in m/s.
      * The reported value includes {@link #getPseudorangeRateUncertaintyInMetersPerSec()}.
+     *
+     * The correction of a given Pseudorange Rate value includes corrections from receiver and
+     * satellite clock frequency errors.
+     * {@link #isPseudorangeRateCorrected()} identifies the type of value reported.
+     *
+     * A positive 'uncorrected' value indicates that the SV is moving away from the receiver.
+     * The sign of the 'uncorrected' Pseudorange Rate and its relation to the sign of
+     * {@link #getDopplerShiftInHz()} is given by the equation:
+     *      pseudorange rate = -k * doppler shift   (where k is a constant)
      */
     public double getPseudorangeRateInMetersPerSec() {
         return mPseudorangeRateInMetersPerSec;
@@ -365,6 +390,16 @@ public class GpsMeasurement implements Parcelable {
      */
     public void setPseudorangeRateInMetersPerSec(double value) {
         mPseudorangeRateInMetersPerSec = value;
+    }
+
+    /**
+     * See {@link #getPseudorangeRateInMetersPerSec()} for more details.
+     *
+     * @return {@code true} if {@link #getPseudorangeRateInMetersPerSec()} contains a corrected
+     *         value, {@code false} if it contains an uncorrected value.
+     */
+    public boolean isPseudorangeRateCorrected() {
+        return !isFlagSet(GPS_MEASUREMENT_HAS_UNCORRECTED_PSEUDORANGE_RATE);
     }
 
     /**
@@ -395,18 +430,7 @@ public class GpsMeasurement implements Parcelable {
      * Sets the 'Accumulated Delta Range' state.
      */
     public void setAccumulatedDeltaRangeState(short value) {
-        switch (value) {
-            case ADR_STATE_UNKNOWN:
-            case ADR_STATE_VALID:
-            case ADR_STATE_RESET:
-            case ADR_STATE_CYCLE_SLIP:
-                mAccumulatedDeltaRangeState = value;
-                break;
-            default:
-                Log.d(TAG, "Sanitizing invalid 'Accumulated Delta Range state': " + value);
-                mAccumulatedDeltaRangeState = ADR_STATE_UNKNOWN;
-                break;
-        }
+        mAccumulatedDeltaRangeState = value;
     }
 
     /**
@@ -414,18 +438,27 @@ public class GpsMeasurement implements Parcelable {
      * For internal and logging use only.
      */
     private String getAccumulatedDeltaRangeStateString() {
-        switch (mAccumulatedDeltaRangeState) {
-            case ADR_STATE_UNKNOWN:
-                return "Unknown";
-            case ADR_STATE_VALID:
-                return "Valid";
-            case ADR_STATE_RESET:
-                return "Reset";
-            case ADR_STATE_CYCLE_SLIP:
-                return "CycleSlip";
-            default:
-                return "<Invalid>";
+        if (mAccumulatedDeltaRangeState == ADR_STATE_UNKNOWN) {
+            return "Unknown";
         }
+        StringBuilder builder = new StringBuilder();
+        if ((mAccumulatedDeltaRangeState & ADR_STATE_VALID) == ADR_STATE_VALID) {
+            builder.append("Valid|");
+        }
+        if ((mAccumulatedDeltaRangeState & ADR_STATE_RESET) == ADR_STATE_RESET) {
+            builder.append("Reset|");
+        }
+        if ((mAccumulatedDeltaRangeState & ADR_STATE_CYCLE_SLIP) == ADR_STATE_CYCLE_SLIP) {
+            builder.append("CycleSlip|");
+        }
+        int remainingStates = mAccumulatedDeltaRangeState & ~ADR_ALL;
+        if (remainingStates > 0) {
+            builder.append("Other(");
+            builder.append(Integer.toBinaryString(remainingStates));
+            builder.append(")|");
+        }
+        builder.deleteCharAt(builder.length() - 1);
+        return builder.toString();
     }
 
     /**
@@ -433,6 +466,11 @@ public class GpsMeasurement implements Parcelable {
      * The reported value includes {@link #getAccumulatedDeltaRangeUncertaintyInMeters()}.
      *
      * The availability of the value is represented by {@link #getAccumulatedDeltaRangeState()}.
+     *
+     * A positive value indicates that the SV is moving away from the receiver.
+     * The sign of {@link #getAccumulatedDeltaRangeInMeters()} and its relation to the sign of
+     * {@link #getCarrierPhase()} is given by the equation:
+     *          accumulated delta range = -k * carrier phase    (where k is a constant)
      */
     public double getAccumulatedDeltaRangeInMeters() {
         return mAccumulatedDeltaRangeInMeters;
@@ -448,6 +486,8 @@ public class GpsMeasurement implements Parcelable {
     /**
      * Gets the accumulated delta range's uncertainty (1-Sigma) in meters.
      * The uncertainty is represented as an absolute (single sided) value.
+     *
+     * The status of the value is represented by {@link #getAccumulatedDeltaRangeState()}.
      */
     public double getAccumulatedDeltaRangeUncertaintyInMeters() {
         return mAccumulatedDeltaRangeUncertaintyInMeters;
@@ -456,7 +496,7 @@ public class GpsMeasurement implements Parcelable {
     /**
      * Sets the accumulated delta range's uncertainty (1-sigma) in meters.
      *
-     * The availability of the value is represented by {@link #getAccumulatedDeltaRangeState()}.
+     * The status of the value is represented by {@link #getAccumulatedDeltaRangeState()}.
      */
     public void setAccumulatedDeltaRangeUncertaintyInMeters(double value) {
         mAccumulatedDeltaRangeUncertaintyInMeters = value;
@@ -744,17 +784,7 @@ public class GpsMeasurement implements Parcelable {
      * Sets the 'loss of lock' status.
      */
     public void setLossOfLock(byte value) {
-        switch (value) {
-            case LOSS_OF_LOCK_UNKNOWN:
-            case LOSS_OF_LOCK_OK:
-            case LOSS_OF_LOCK_CYCLE_SLIP:
-                mLossOfLock = value;
-                break;
-            default:
-                Log.d(TAG, "Sanitizing invalid 'loss of lock': " + value);
-                mLossOfLock = LOSS_OF_LOCK_UNKNOWN;
-                break;
-        }
+        mLossOfLock = value;
     }
 
     /**
@@ -770,7 +800,7 @@ public class GpsMeasurement implements Parcelable {
             case LOSS_OF_LOCK_CYCLE_SLIP:
                 return "CycleSlip";
             default:
-                return "<Invalid>";
+                return "<Invalid:" + mLossOfLock + ">";
         }
     }
 
@@ -919,17 +949,7 @@ public class GpsMeasurement implements Parcelable {
      * Sets the 'multi-path' indicator.
      */
     public void setMultipathIndicator(byte value) {
-        switch (value) {
-            case MULTIPATH_INDICATOR_UNKNOWN:
-            case MULTIPATH_INDICATOR_DETECTED:
-            case MULTIPATH_INDICATOR_NOT_USED:
-                mMultipathIndicator = value;
-                break;
-            default:
-                Log.d(TAG, "Sanitizing invalid 'muti-path indicator': " + value);
-                mMultipathIndicator = MULTIPATH_INDICATOR_UNKNOWN;
-                break;
-        }
+        mMultipathIndicator = value;
     }
 
     /**
@@ -945,7 +965,7 @@ public class GpsMeasurement implements Parcelable {
             case MULTIPATH_INDICATOR_NOT_USED:
                 return "NotUsed";
             default:
-                return "<Invalid>";
+                return "<Invalid:" + mMultipathIndicator + ">";
         }
     }
 
@@ -1251,6 +1271,10 @@ public class GpsMeasurement implements Parcelable {
                 mPseudorangeRateInMetersPerSec,
                 "PseudorangeRateUncertaintyInMetersPerSec",
                 mPseudorangeRateUncertaintyInMetersPerSec));
+        builder.append(String.format(
+                format,
+                "PseudorangeRateIsCorrected",
+                isPseudorangeRateCorrected()));
 
         builder.append(String.format(
                 format,

@@ -16,7 +16,6 @@
 
 package android.printservice;
 
-import android.R;
 import android.app.Service;
 import android.content.ComponentName;
 import android.content.Context;
@@ -192,7 +191,7 @@ public abstract class PrintService extends Service {
 
     /**
      * If you declared an optional activity with advanced print options via the
-     * {@link R.attr#advancedPrintOptionsActivity advancedPrintOptionsActivity}
+     * {@link android.R.attr#advancedPrintOptionsActivity advancedPrintOptionsActivity}
      * attribute, this extra is used to pass in the currently constructed {@link
      * PrintJobInfo} to your activity allowing you to modify it. After you are
      * done, you must return the modified {@link PrintJobInfo} via the same extra.
@@ -224,13 +223,26 @@ public abstract class PrintService extends Service {
 
     /**
      * If you declared an optional activity with advanced print options via the
-     * {@link R.attr#advancedPrintOptionsActivity advancedPrintOptionsActivity}
+     * {@link android.R.attr#advancedPrintOptionsActivity advancedPrintOptionsActivity}
      * attribute, this extra is used to pass in the currently selected printer's
      * {@link android.print.PrinterInfo} to your activity allowing you to inspect it.
      *
      * @see #EXTRA_PRINT_JOB_INFO
      */
     public static final String EXTRA_PRINTER_INFO = "android.intent.extra.print.EXTRA_PRINTER_INFO";
+
+    /**
+     * If you declared an optional activity with advanced print options via the
+     * {@link android.R.attr#advancedPrintOptionsActivity advancedPrintOptionsActivity}
+     * attribute, this extra is used to pass in the meta-data for the currently printed
+     * document as a {@link android.print.PrintDocumentInfo} to your activity allowing
+     * you to inspect it.
+     *
+     * @see #EXTRA_PRINT_JOB_INFO
+     * @see #EXTRA_PRINTER_INFO
+     */
+    public static final String EXTRA_PRINT_DOCUMENT_INFO =
+            "android.printservice.extra.PRINT_DOCUMENT_INFO";
 
     private Handler mHandler;
 
@@ -386,7 +398,7 @@ public abstract class PrintService extends Service {
 
             @Override
             public void setClient(IPrintServiceClient client) {
-                mHandler.obtainMessage(ServiceHandler.MSG_SET_CLEINT, client)
+                mHandler.obtainMessage(ServiceHandler.MSG_SET_CLIENT, client)
                         .sendToTarget();
             }
 
@@ -414,7 +426,7 @@ public abstract class PrintService extends Service {
         public static final int MSG_STOP_PRINTER_STATE_TRACKING = 7;
         public static final int MSG_ON_PRINTJOB_QUEUED = 8;
         public static final int MSG_ON_REQUEST_CANCEL_PRINTJOB = 9;
-        public static final int MSG_SET_CLEINT = 10;
+        public static final int MSG_SET_CLIENT = 10;
 
         public ServiceHandler(Looper looper) {
             super(looper, null, true);
@@ -528,9 +540,9 @@ public abstract class PrintService extends Service {
                     onPrintJobQueued(new PrintJob(printJobInfo, mClient));
                 } break;
 
-                case MSG_SET_CLEINT: {
+                case MSG_SET_CLIENT: {
                     if (DEBUG) {
-                        Log.i(LOG_TAG, "MSG_SET_CLEINT "
+                        Log.i(LOG_TAG, "MSG_SET_CLIENT "
                                 + getPackageName());
                     }
                     mClient = (IPrintServiceClient) message.obj;

@@ -14,8 +14,6 @@
  * limitations under the License.
  */
 
-#define LOG_TAG "OpenGLRenderer"
-
 #include "Debug.h"
 #include "GammaFontRenderer.h"
 #include "Properties.h"
@@ -61,7 +59,7 @@ GammaFontRenderer::GammaFontRenderer() {
 
     // Get the gamma
     mGamma = DEFAULT_TEXT_GAMMA;
-    if (property_get(PROPERTY_TEXT_GAMMA, property, NULL) > 0) {
+    if (property_get(PROPERTY_TEXT_GAMMA, property, nullptr) > 0) {
         INIT_LOGD("  Setting text gamma to %s", property);
         mGamma = atof(property);
     } else {
@@ -70,7 +68,7 @@ GammaFontRenderer::GammaFontRenderer() {
 
     // Get the black gamma threshold
     mBlackThreshold = DEFAULT_TEXT_BLACK_GAMMA_THRESHOLD;
-    if (property_get(PROPERTY_TEXT_BLACK_GAMMA_THRESHOLD, property, NULL) > 0) {
+    if (property_get(PROPERTY_TEXT_BLACK_GAMMA_THRESHOLD, property, nullptr) > 0) {
         INIT_LOGD("  Setting text black gamma threshold to %s", property);
         mBlackThreshold = atoi(property);
     } else {
@@ -80,7 +78,7 @@ GammaFontRenderer::GammaFontRenderer() {
 
     // Get the white gamma threshold
     mWhiteThreshold = DEFAULT_TEXT_WHITE_GAMMA_THRESHOLD;
-    if (property_get(PROPERTY_TEXT_WHITE_GAMMA_THRESHOLD, property, NULL) > 0) {
+    if (property_get(PROPERTY_TEXT_WHITE_GAMMA_THRESHOLD, property, nullptr) > 0) {
         INIT_LOGD("  Setting text white gamma threshold to %s", property);
         mWhiteThreshold = atoi(property);
     } else {
@@ -96,15 +94,16 @@ GammaFontRenderer::~GammaFontRenderer() {
 // Shader-based renderer
 ///////////////////////////////////////////////////////////////////////////////
 
-ShaderGammaFontRenderer::ShaderGammaFontRenderer(bool multiGamma): GammaFontRenderer() {
+ShaderGammaFontRenderer::ShaderGammaFontRenderer(bool multiGamma)
+        : GammaFontRenderer() {
     INIT_LOGD("Creating shader gamma font renderer");
-    mRenderer = NULL;
+    mRenderer = nullptr;
     mMultiGamma = multiGamma;
 }
 
 void ShaderGammaFontRenderer::describe(ProgramDescription& description,
         const SkPaint* paint) const {
-    if (paint->getShader() == NULL) {
+    if (paint->getShader() == nullptr) {
         if (mMultiGamma) {
             const int l = luminance(paint);
 
@@ -123,9 +122,9 @@ void ShaderGammaFontRenderer::describe(ProgramDescription& description,
 }
 
 void ShaderGammaFontRenderer::setupProgram(ProgramDescription& description,
-        Program* program) const {
+        Program& program) const {
     if (description.hasGammaCorrection) {
-        glUniform1f(program->getUniform("gamma"), description.gamma);
+        glUniform1f(program.getUniform("gamma"), description.gamma);
     }
 }
 
@@ -139,7 +138,8 @@ void ShaderGammaFontRenderer::endPrecaching() {
 // Lookup-based renderer
 ///////////////////////////////////////////////////////////////////////////////
 
-LookupGammaFontRenderer::LookupGammaFontRenderer(): GammaFontRenderer() {
+LookupGammaFontRenderer::LookupGammaFontRenderer()
+        : GammaFontRenderer() {
     INIT_LOGD("Creating lookup gamma font renderer");
 
     // Compute the gamma tables
@@ -149,7 +149,7 @@ LookupGammaFontRenderer::LookupGammaFontRenderer(): GammaFontRenderer() {
         mGammaTable[i] = uint8_t((float)::floor(pow(i / 255.0f, gamma) * 255.0f + 0.5f));
     }
 
-    mRenderer = NULL;
+    mRenderer = nullptr;
 }
 
 void LookupGammaFontRenderer::endPrecaching() {
@@ -162,7 +162,8 @@ void LookupGammaFontRenderer::endPrecaching() {
 // Lookup-based renderer, using 3 different correction tables
 ///////////////////////////////////////////////////////////////////////////////
 
-Lookup3GammaFontRenderer::Lookup3GammaFontRenderer(): GammaFontRenderer() {
+Lookup3GammaFontRenderer::Lookup3GammaFontRenderer()
+        : GammaFontRenderer() {
     INIT_LOGD("Creating lookup3 gamma font renderer");
 
     // Compute the gamma tables
@@ -183,12 +184,6 @@ Lookup3GammaFontRenderer::Lookup3GammaFontRenderer(): GammaFontRenderer() {
     memset(mRenderersUsageCount, 0, sizeof(uint32_t) * kGammaCount);
 }
 
-Lookup3GammaFontRenderer::~Lookup3GammaFontRenderer() {
-    for (int i = 0; i < kGammaCount; i++) {
-        delete mRenderers[i];
-    }
-}
-
 void Lookup3GammaFontRenderer::endPrecaching() {
     for (int i = 0; i < kGammaCount; i++) {
         if (mRenderers[i]) {
@@ -199,8 +194,7 @@ void Lookup3GammaFontRenderer::endPrecaching() {
 
 void Lookup3GammaFontRenderer::clear() {
     for (int i = 0; i < kGammaCount; i++) {
-        delete mRenderers[i];
-        mRenderers[i] = NULL;
+        mRenderers[i].release();
     }
 }
 
@@ -221,8 +215,7 @@ void Lookup3GammaFontRenderer::flush() {
 
     if (count <= 1 || min < 0) return;
 
-    delete mRenderers[min];
-    mRenderers[min] = NULL;
+    mRenderers[min].release();
 
     // Also eliminate the caches for large glyphs, as they consume significant memory
     for (int i = 0; i < kGammaCount; ++i) {
@@ -233,18 +226,16 @@ void Lookup3GammaFontRenderer::flush() {
 }
 
 FontRenderer* Lookup3GammaFontRenderer::getRenderer(Gamma gamma) {
-    FontRenderer* renderer = mRenderers[gamma];
-    if (!renderer) {
-        renderer = new FontRenderer();
-        mRenderers[gamma] = renderer;
-        renderer->setGammaTable(&mGammaTable[gamma * 256]);
+    if (!mRenderers[gamma]) {
+        mRenderers[gamma].reset(new FontRenderer());
+        mRenderers[gamma]->setGammaTable(&mGammaTable[gamma * 256]);
     }
     mRenderersUsageCount[gamma]++;
-    return renderer;
+    return mRenderers[gamma].get();
 }
 
 FontRenderer& Lookup3GammaFontRenderer::getFontRenderer(const SkPaint* paint) {
-    if (paint->getShader() == NULL) {
+    if (paint->getShader() == nullptr) {
         const int l = luminance(paint);
 
         if (l <= mBlackThreshold) {

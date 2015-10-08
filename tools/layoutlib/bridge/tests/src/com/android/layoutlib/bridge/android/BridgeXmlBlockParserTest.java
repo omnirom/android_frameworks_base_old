@@ -18,12 +18,26 @@ package com.android.layoutlib.bridge.android;
 
 import com.android.layoutlib.bridge.impl.ParserFactory;
 
+import org.junit.AfterClass;
+import org.junit.BeforeClass;
+import org.junit.Test;
+import org.kxml2.io.KXmlParser;
 import org.w3c.dom.Node;
 import org.xmlpull.v1.XmlPullParser;
+import org.xmlpull.v1.XmlPullParserException;
 
-import junit.framework.TestCase;
+import android.annotation.NonNull;
 
-public class BridgeXmlBlockParserTest extends TestCase {
+import static org.junit.Assert.assertEquals;
+
+public class BridgeXmlBlockParserTest {
+
+    @BeforeClass
+    public static void setUp() {
+        ParserFactory.setParserFactory(new ParserFactoryImpl());
+    }
+
+    @Test
     public void testXmlBlockParser() throws Exception {
 
         XmlPullParser parser = ParserFactory.create(
@@ -65,7 +79,7 @@ public class BridgeXmlBlockParserTest extends TestCase {
     //------------
 
     /**
-     * Quick'n'dirty debug helper that dumps an XML structure to stdout.
+     * Quick 'n' dirty debug helper that dumps an XML structure to stdout.
      */
     @SuppressWarnings("unused")
     private void dump(Node node, String prefix) {
@@ -104,7 +118,20 @@ public class BridgeXmlBlockParserTest extends TestCase {
         if (n != null) {
             dump(n, prefix);
         }
-
     }
 
+    @AfterClass
+    public static void tearDown() {
+        ParserFactory.setParserFactory(null);
+    }
+
+    private static class ParserFactoryImpl
+            extends com.android.ide.common.rendering.api.ParserFactory {
+
+        @NonNull
+        @Override
+        public XmlPullParser createParser(String displayName) throws XmlPullParserException {
+            return new KXmlParser();
+        }
+    }
 }

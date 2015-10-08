@@ -16,9 +16,11 @@
 
 package com.android.layoutlib.bridge.android;
 
-import java.util.Locale;
+import com.android.layoutlib.bridge.impl.RenderAction;
 
-import com.ibm.icu.util.ULocale;
+import android.icu.util.ULocale;
+
+import java.util.Locale;
 
 /**
  * This class provides an alternate implementation for {@code java.util.Locale#toLanguageTag}
@@ -55,5 +57,16 @@ public class AndroidLocale {
 
     public static String getScript(Locale locale) {
         return ULocale.forLocale(locale).getScript();
+    }
+
+    public static Locale getDefault() {
+        BridgeContext context = RenderAction.getCurrentContext();
+        if (context != null) {
+            Locale locale = context.getConfiguration().locale;
+            if (locale != null) {
+                return locale;
+            }
+        }
+        return Locale.getDefault();
     }
 }

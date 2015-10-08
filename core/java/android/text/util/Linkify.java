@@ -78,7 +78,10 @@ public class Linkify {
 
     /**
      *  Bit field indicating that street addresses should be matched in methods that
-     *  take an options mask
+     *  take an options mask. Note that this uses the
+     *  {@link android.webkit.WebView#findAddress(String) findAddress()} method in
+     *  {@link android.webkit.WebView} for finding addresses, which has various
+     *  limitations.
      */
     public static final int MAP_ADDRESSES = 0x08;
 
@@ -521,10 +524,6 @@ public class Linkify {
                 }
 
                 return 0;
-            }
-
-            public final boolean equals(Object o) {
-                return false;
             }
         };
 

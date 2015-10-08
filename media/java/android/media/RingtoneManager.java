@@ -23,9 +23,11 @@ import android.annotation.SdkConstant.SdkConstantType;
 import android.app.Activity;
 import android.content.ContentUris;
 import android.content.Context;
+import android.content.pm.PackageManager;
 import android.database.Cursor;
 import android.net.Uri;
 import android.os.Environment;
+import android.os.Process;
 import android.provider.MediaStore;
 import android.provider.Settings;
 import android.provider.Settings.System;
@@ -158,7 +160,16 @@ public class RingtoneManager {
      * in most cases.
      */
     public static final String EXTRA_RINGTONE_TITLE = "android.intent.extra.ringtone.TITLE";
-    
+
+    /**
+     * @hide
+     * Given to the ringtone picker as an int. Additional AudioAttributes flags to use
+     * when playing the ringtone in the picker.
+     * @see #ACTION_RINGTONE_PICKER
+     */
+    public static final String EXTRA_RINGTONE_AUDIO_ATTRIBUTES_FLAGS =
+            "android.intent.extra.ringtone.AUDIO_ATTRIBUTES_FLAGS";
+
     /**
      * Returned from the ringtone picker as a {@link Uri}.
      * <p>
@@ -221,7 +232,7 @@ public class RingtoneManager {
     
     private boolean mStopPreviousRingtone = true;
     private Ringtone mPreviousRingtone;
-    
+
     /**
      * Constructs a RingtoneManager. This constructor is recommended as its
      * constructed instance manages cursor(s).
@@ -283,7 +294,7 @@ public class RingtoneManager {
                 return AudioManager.STREAM_RING;
         }
     }
-    
+
     /**
      * Whether retrieving another {@link Ringtone} will stop playing the
      * previously retrieved {@link Ringtone}.
@@ -350,7 +361,10 @@ public class RingtoneManager {
      * If {@link RingtoneManager#RingtoneManager(Activity)} was not used, the
      * caller should manage the returned cursor through its activity's life
      * cycle to prevent leaking the cursor.
-     * 
+     * <p>
+     * Note that the list of ringtones available will differ depending on whether the caller
+     * has the {@link android.Manifest.permission#READ_EXTERNAL_STORAGE} permission.
+     *
      * @return A {@link Cursor} of all the ringtones available.
      * @see #ID_COLUMN_INDEX
      * @see #TITLE_COLUMN_INDEX
@@ -446,8 +460,10 @@ public class RingtoneManager {
 
     /**
      * Returns a valid ringtone URI. No guarantees on which it returns. If it
-     * cannot find one, returns null.
-     * 
+     * cannot find one, returns null. If it can only find one on external storage and the caller
+     * doesn't have the {@link android.Manifest.permission#READ_EXTERNAL_STORAGE} permission,
+     * returns null.
+     *
      * @param context The context to use for querying.
      * @return A ringtone URI, or null if one cannot be found.
      */
@@ -486,6 +502,12 @@ public class RingtoneManager {
     }
 
     private Cursor getMediaRingtones() {
+        if (PackageManager.PERMISSION_GRANTED != mContext.checkPermission(
+                android.Manifest.permission.READ_EXTERNAL_STORAGE,
+                Process.myPid(), Process.myUid())) {
+            Log.w(TAG, "No READ_EXTERNAL_STORAGE permission, ignoring ringtones on ext storage");
+            return null;
+        }
          // Get the external media cursor. First check to see if it is mounted.
         final String status = Environment.getExternalStorageState();
         

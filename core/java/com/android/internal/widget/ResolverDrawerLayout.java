@@ -34,6 +34,7 @@ import android.view.ViewParent;
 import android.view.ViewTreeObserver;
 import android.view.accessibility.AccessibilityEvent;
 import android.view.accessibility.AccessibilityNodeInfo;
+import android.view.accessibility.AccessibilityNodeInfo.AccessibilityAction;
 import android.view.animation.AnimationUtils;
 import android.widget.AbsListView;
 import android.widget.OverScroller;
@@ -127,6 +128,8 @@ public class ResolverDrawerLayout extends ViewGroup {
         final ViewConfiguration vc = ViewConfiguration.get(context);
         mTouchSlop = vc.getScaledTouchSlop();
         mMinFlingVelocity = vc.getScaledMinimumFlingVelocity();
+
+        setImportantForAccessibility(View.IMPORTANT_FOR_ACCESSIBILITY_YES);
     }
 
     public void setSmallCollapsed(boolean smallCollapsed) {
@@ -140,6 +143,14 @@ public class ResolverDrawerLayout extends ViewGroup {
 
     public boolean isCollapsed() {
         return mCollapseOffset > 0;
+    }
+
+    public void setCollapsed(boolean collapsed) {
+        if (!isLaidOut()) {
+            mOpenOnLayout = collapsed;
+        } else {
+            smoothScrollTo(collapsed ? mCollapsibleHeight : 0, 0);
+        }
     }
 
     private boolean isMoving() {
@@ -221,7 +232,7 @@ public class ResolverDrawerLayout extends ViewGroup {
                 mInitialTouchY = mLastTouchY = y;
                 mActivePointerId = ev.getPointerId(0);
                 final boolean hitView = findChildUnder(mInitialTouchX, mInitialTouchY) != null;
-                handled = (!hitView && mOnDismissedListener != null) || mCollapsibleHeight > 0;
+                handled = mOnDismissedListener != null || mCollapsibleHeight > 0;
                 mIsDragging = hitView && handled;
                 abortAnimation();
             }
@@ -573,7 +584,13 @@ public class ResolverDrawerLayout extends ViewGroup {
     @Override
     public boolean onNestedFling(View target, float velocityX, float velocityY, boolean consumed) {
         if (!consumed && Math.abs(velocityY) > mMinFlingVelocity) {
-            smoothScrollTo(velocityY > 0 ? 0 : mCollapsibleHeight, velocityY);
+            if (mOnDismissedListener != null
+                    && velocityY < 0 && mCollapseOffset > mCollapsibleHeight) {
+                smoothScrollTo(mCollapsibleHeight + mUncollapsibleHeight, velocityY);
+                mDismissOnScrollerFinished = true;
+            } else {
+                smoothScrollTo(velocityY > 0 ? 0 : mCollapsibleHeight, velocityY);
+            }
             return true;
         }
         return false;
@@ -593,26 +610,37 @@ public class ResolverDrawerLayout extends ViewGroup {
     }
 
     @Override
-    public void onInitializeAccessibilityEvent(AccessibilityEvent event) {
-        super.onInitializeAccessibilityEvent(event);
-        event.setClassName(ResolverDrawerLayout.class.getName());
+    public CharSequence getAccessibilityClassName() {
+        // Since we support scrolling, make this ViewGroup look like a
+        // ScrollView. This is kind of a hack until we have support for
+        // specifying auto-scroll behavior.
+        return android.widget.ScrollView.class.getName();
     }
 
     @Override
-    public void onInitializeAccessibilityNodeInfo(AccessibilityNodeInfo info) {
-        super.onInitializeAccessibilityNodeInfo(info);
-        info.setClassName(ResolverDrawerLayout.class.getName());
+    public void onInitializeAccessibilityNodeInfoInternal(AccessibilityNodeInfo info) {
+        super.onInitializeAccessibilityNodeInfoInternal(info);
+
         if (isEnabled()) {
             if (mCollapseOffset != 0) {
                 info.addAction(AccessibilityNodeInfo.ACTION_SCROLL_FORWARD);
                 info.setScrollable(true);
             }
         }
+
+        // This view should never get accessibility focus, but it's interactive
+        // via nested scrolling, so we can't hide it completely.
+        info.removeAction(AccessibilityAction.ACTION_ACCESSIBILITY_FOCUS);
     }
 
     @Override
-    public boolean performAccessibilityAction(int action, Bundle arguments) {
-        if (super.performAccessibilityAction(action, arguments)) {
+    public boolean performAccessibilityActionInternal(int action, Bundle arguments) {
+        if (action == AccessibilityAction.ACTION_ACCESSIBILITY_FOCUS.getId()) {
+            // This view should never get accessibility focus.
+            return false;
+        }
+
+        if (super.performAccessibilityActionInternal(action, arguments)) {
             return true;
         }
 
@@ -620,6 +648,7 @@ public class ResolverDrawerLayout extends ViewGroup {
             smoothScrollTo(0, 0);
             return true;
         }
+
         return false;
     }
 
@@ -663,13 +692,20 @@ public class ResolverDrawerLayout extends ViewGroup {
             }
         }
 
+        final int oldCollapsibleHeight = mCollapsibleHeight;
         mCollapsibleHeight = Math.max(0,
                 heightUsed - alwaysShowHeight - getMaxCollapsedHeight());
         mUncollapsibleHeight = heightUsed - mCollapsibleHeight;
 
         if (isLaidOut()) {
             final boolean isCollapsedOld = mCollapseOffset != 0;
-            mCollapseOffset = Math.min(mCollapseOffset, mCollapsibleHeight);
+            if (oldCollapsibleHeight < mCollapsibleHeight
+                    && mCollapseOffset == oldCollapsibleHeight) {
+                // Stay closed even at the new height.
+                mCollapseOffset = mCollapsibleHeight;
+            } else {
+                mCollapseOffset = Math.min(mCollapseOffset, mCollapsibleHeight);
+            }
             final boolean isCollapsedNew = mCollapseOffset != 0;
             if (isCollapsedOld != isCollapsedNew) {
                 notifyViewAccessibilityStateChangedIfNeeded(

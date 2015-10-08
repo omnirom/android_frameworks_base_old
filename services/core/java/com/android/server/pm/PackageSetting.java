@@ -32,10 +32,10 @@ final class PackageSetting extends PackageSettingBase {
     PackageSetting(String name, String realName, File codePath, File resourcePath,
             String legacyNativeLibraryPathString, String primaryCpuAbiString,
             String secondaryCpuAbiString, String cpuAbiOverrideString,
-            int pVersionCode, int pkgFlags) {
+            int pVersionCode, int pkgFlags, int privateFlags) {
         super(name, realName, codePath, resourcePath, legacyNativeLibraryPathString,
                 primaryCpuAbiString, secondaryCpuAbiString, cpuAbiOverrideString,
-                pVersionCode, pkgFlags);
+                pVersionCode, pkgFlags, privateFlags);
     }
 
     /**
@@ -57,11 +57,25 @@ final class PackageSetting extends PackageSettingBase {
             + " " + name + "/" + appId + "}";
     }
 
-    public int[] getGids() {
-        return sharedUser != null ? sharedUser.gids : gids;
+    public PermissionsState getPermissionsState() {
+        return (sharedUser != null)
+                ? sharedUser.getPermissionsState()
+                : super.getPermissionsState();
     }
 
     public boolean isPrivileged() {
-        return (pkgFlags & ApplicationInfo.FLAG_PRIVILEGED) != 0;
+        return (pkgPrivateFlags & ApplicationInfo.PRIVATE_FLAG_PRIVILEGED) != 0;
+    }
+
+    public boolean isForwardLocked() {
+        return (pkgPrivateFlags & ApplicationInfo.PRIVATE_FLAG_FORWARD_LOCK) != 0;
+    }
+
+    public boolean isSystem() {
+        return (pkgFlags & ApplicationInfo.FLAG_SYSTEM) != 0;
+    }
+
+    public boolean isSharedUser() {
+        return sharedUser != null;
     }
 }

@@ -17,7 +17,7 @@
 #include "jni.h"
 #include "GraphicsJNI.h"
 #include "Paint.h"
-#include <android_runtime/AndroidRuntime.h>
+#include <core_jni_helpers.h>
 
 #include <utils/RefBase.h>
 #include <CanvasProperty.h>
@@ -25,8 +25,6 @@
 namespace android {
 
 using namespace uirenderer;
-
-#ifdef USE_OPENGL_RENDERER
 
 static jlong createFloat(JNIEnv* env, jobject clazz, jfloat initialValue) {
     return reinterpret_cast<jlong>(new CanvasPropertyPrimitive(initialValue));
@@ -37,23 +35,18 @@ static jlong createPaint(JNIEnv* env, jobject clazz, jlong paintPtr) {
     return reinterpret_cast<jlong>(new CanvasPropertyPaint(*paint));
 }
 
-#endif
-
 // ----------------------------------------------------------------------------
 // JNI Glue
 // ----------------------------------------------------------------------------
 
-const char* const kClassPathName = "android/graphics/CanvasProperty";
-
 static JNINativeMethod gMethods[] = {
-#ifdef USE_OPENGL_RENDERER
     { "nCreateFloat", "(F)J", (void*) createFloat },
     { "nCreatePaint", "(J)J", (void*) createPaint },
-#endif
 };
 
 int register_android_graphics_CanvasProperty(JNIEnv* env) {
-    return AndroidRuntime::registerNativeMethods(env, kClassPathName, gMethods, NELEM(gMethods));
+    return RegisterMethodsOrDie(env, "android/graphics/CanvasProperty", gMethods,
+                                NELEM(gMethods));
 }
 
 }; // namespace android

@@ -19,12 +19,12 @@
 
 #include <GLES3/gl3.h>
 
-#include "Program.h"
-
 namespace android {
 namespace uirenderer {
 
 class Caches;
+class Extensions;
+class Program;
 
 // Must be a power of two
 #define DITHER_KERNEL_SIZE 4
@@ -37,15 +37,15 @@ class Caches;
  */
 class Dither {
 public:
-    Dither();
+    Dither(Caches& caches);
 
     void clear();
-    void setupProgram(Program* program, GLuint* textureUnit);
+    void setupProgram(Program& program, GLuint* textureUnit);
 
 private:
     void bindDitherTexture();
 
-    Caches* mCaches;
+    Caches& mCaches;
     bool mInitialized;
     GLuint mDitherTexture;
 };

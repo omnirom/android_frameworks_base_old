@@ -16,9 +16,12 @@
 
 package com.android.server.am;
 
+import static com.android.server.am.ActivityManagerDebugConfig.*;
+
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileOutputStream;
+import java.nio.charset.StandardCharsets;
 import java.util.HashMap;
 import java.util.Iterator;
 import java.util.Map;
@@ -43,8 +46,8 @@ import android.util.Slog;
 import android.util.Xml;
 
 public final class CompatModePackages {
-    private final String TAG = ActivityManagerService.TAG;
-    private final boolean DEBUG_CONFIGURATION = ActivityManagerService.DEBUG_CONFIGURATION;
+    private static final String TAG = TAG_WITH_CLASS_NAME ? "CompatModePackages" : TAG_AM;
+    private static final String TAG_CONFIGURATION = TAG + POSTFIX_CONFIGURATION;
 
     private final ActivityManagerService mService;
     private final AtomicFile mFile;
@@ -84,7 +87,7 @@ public final class CompatModePackages {
         try {
             fis = mFile.openRead();
             XmlPullParser parser = Xml.newPullParser();
-            parser.setInput(fis, null);
+            parser.setInput(fis, StandardCharsets.UTF_8.name());
             int eventType = parser.getEventType();
             while (eventType != XmlPullParser.START_TAG &&
                     eventType != XmlPullParser.END_DOCUMENT) {
@@ -332,7 +335,7 @@ public final class CompatModePackages {
                 }
                 try {
                     if (app.thread != null) {
-                        if (DEBUG_CONFIGURATION) Slog.v(TAG, "Sending to proc "
+                        if (DEBUG_CONFIGURATION) Slog.v(TAG_CONFIGURATION, "Sending to proc "
                                 + app.processName + " new compat " + ci);
                         app.thread.updatePackageCompatibilityInfo(packageName, ci);
                     }
@@ -360,7 +363,7 @@ public final class CompatModePackages {
         try {
             fos = mFile.startWrite();
             XmlSerializer out = new FastXmlSerializer();
-            out.setOutput(fos, "utf-8");
+            out.setOutput(fos, StandardCharsets.UTF_8.name());
             out.startDocument(null, true);
             out.setFeature("http://xmlpull.org/v1/doc/features.html#indent-output", true);
             out.startTag(null, "compat-packages");

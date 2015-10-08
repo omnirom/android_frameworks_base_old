@@ -22,8 +22,6 @@ import java.security.cert.CertificateException;
 import java.security.cert.X509Certificate;
 import java.util.List;
 
-import javax.net.ssl.SSLParameters;
-import javax.net.ssl.SSLSocket;
 import javax.net.ssl.X509TrustManager;
 
 /**
@@ -36,7 +34,7 @@ import javax.net.ssl.X509TrustManager;
  */
 public class X509TrustManagerExtensions {
 
-    TrustManagerImpl mDelegate;
+    final TrustManagerImpl mDelegate;
 
     /**
      * Constructs a new X509TrustManagerExtensions wrapper.
@@ -48,6 +46,7 @@ public class X509TrustManagerExtensions {
         if (tm instanceof TrustManagerImpl) {
             mDelegate = (TrustManagerImpl) tm;
         } else {
+            mDelegate = null;
             throw new IllegalArgumentException("tm is an instance of " + tm.getClass().getName() +
                     " which is not a supported type of X509TrustManager");
         }

@@ -31,14 +31,18 @@ static jobject sCallbacksObj = NULL;
 static JNIEnv *sCallbackEnv = NULL;
 static hw_device_t* sHardwareDevice = NULL;
 
+static jmethodID sSetVersion = NULL;
 static jmethodID sOnLocationReport = NULL;
 static jmethodID sOnDataReport = NULL;
+static jmethodID sOnBatchingCapabilities = NULL;
+static jmethodID sOnBatchingStatus = NULL;
 static jmethodID sOnGeofenceTransition = NULL;
 static jmethodID sOnGeofenceMonitorStatus = NULL;
 static jmethodID sOnGeofenceAdd = NULL;
 static jmethodID sOnGeofenceRemove = NULL;
 static jmethodID sOnGeofencePause = NULL;
 static jmethodID sOnGeofenceResume = NULL;
+static jmethodID sOnGeofencingCapabilities = NULL;
 
 static const FlpLocationInterface* sFlpInterface = NULL;
 static const FlpDiagnosticInterface* sFlpDiagnosticInterface = NULL;
@@ -85,6 +89,32 @@ static bool IsValidCallbackThread() {
   return true;
 }
 
+static void BatchingCapabilitiesCallback(int32_t capabilities) {
+  if(!IsValidCallbackThread()) {
+    return;
+  }
+
+  sCallbackEnv->CallVoidMethod(
+      sCallbacksObj,
+      sOnBatchingCapabilities,
+      capabilities
+      );
+  CheckExceptions(sCallbackEnv, __FUNCTION__);
+}
+
+static void BatchingStatusCallback(int32_t status) {
+  if(!IsValidCallbackThread()) {
+    return;
+  }
+
+  sCallbackEnv->CallVoidMethod(
+      sCallbacksObj,
+      sOnBatchingStatus,
+      status
+      );
+  CheckExceptions(sCallbackEnv, __FUNCTION__);
+}
+
 static int SetThreadEvent(ThreadEvent event) {
   JavaVM* javaVm = AndroidRuntime::getJavaVM();
 
@@ -112,6 +142,14 @@ static int SetThreadEvent(ThreadEvent event) {
       }
 
       ALOGV("Callback thread attached: %p", sCallbackEnv);
+
+      // Send the version to the upper layer.
+      sCallbackEnv->CallVoidMethod(
+            sCallbacksObj,
+            sSetVersion,
+            sFlpInterface->size == sizeof(FlpLocationInterface) ? 2 : 1
+            );
+      CheckExceptions(sCallbackEnv, __FUNCTION__);
       break;
     }
     case DISASSOCIATE_JVM:
@@ -147,6 +185,10 @@ static void ClassInit(JNIEnv* env, jclass clazz) {
   sFlpInterface = NULL;
 
   // get references to the Java provider methods
+  sSetVersion = env->GetMethodID(
+        clazz,
+        "setVersion",
+        "(I)V");
   sOnLocationReport = env->GetMethodID(
       clazz,
       "onLocationReport",
@@ -156,6 +198,18 @@ static void ClassInit(JNIEnv* env, jclass clazz) {
       "onDataReport",
       "(Ljava/lang/String;)V"
       );
+    sOnBatchingCapabilities = env->GetMethodID(
+        clazz,
+        "onBatchingCapabilities",
+        "(I)V");
+    sOnBatchingStatus = env->GetMethodID(
+            clazz,
+            "onBatchingStatus",
+            "(I)V");
+    sOnGeofencingCapabilities = env->GetMethodID(
+            clazz,
+            "onGeofencingCapabilities",
+            "(I)V");
   sOnGeofenceTransition = env->GetMethodID(
       clazz,
       "onGeofenceTransition",
@@ -296,6 +350,14 @@ static void TranslateFromObject(
       batchOptionsObject,
       getSourcesToUse
       );
+
+  jmethodID getSmallestDisplacementMeters = env->GetMethodID(
+      batchOptionsClass,
+      "getSmallestDisplacementMeters",
+      "()F"
+      );
+  batchOptions.smallest_displacement_meters
+      = env->CallFloatMethod(batchOptionsObject, getSmallestDisplacementMeters);
 
   jmethodID getFlags = env->GetMethodID(batchOptionsClass, "getFlags", "()I");
   batchOptions.flags = env->CallIntMethod(batchOptionsObject, getFlags);
@@ -526,7 +588,9 @@ FlpCallbacks sFlpCallbacks = {
   LocationCallback,
   AcquireWakelock,
   ReleaseWakelock,
-  SetThreadEvent
+  SetThreadEvent,
+  BatchingCapabilitiesCallback,
+  BatchingStatusCallback
 };
 
 static void ReportData(char* data, int length) {
@@ -662,6 +726,19 @@ static void GeofenceResumeCallback(int32_t geofenceId, int32_t result) {
   CheckExceptions(sCallbackEnv, __FUNCTION__);
 }
 
+static void GeofencingCapabilitiesCallback(int32_t capabilities) {
+  if(!IsValidCallbackThread()) {
+    return;
+  }
+
+  sCallbackEnv->CallVoidMethod(
+      sCallbacksObj,
+      sOnGeofencingCapabilities,
+      capabilities
+      );
+  CheckExceptions(sCallbackEnv, __FUNCTION__);
+}
+
 FlpGeofenceCallbacks sFlpGeofenceCallbacks = {
   sizeof(FlpGeofenceCallbacks),
   GeofenceTransitionCallback,
@@ -670,7 +747,8 @@ FlpGeofenceCallbacks sFlpGeofenceCallbacks = {
   GeofenceRemoveCallback,
   GeofencePauseCallback,
   GeofenceResumeCallback,
-  SetThreadEvent
+  SetThreadEvent,
+  GeofencingCapabilitiesCallback
 };
 
 /*
@@ -698,14 +776,14 @@ static void Init(JNIEnv* env, jobject obj) {
   // TODO: inject any device context if when needed
 }
 
-static jboolean IsSupported(JNIEnv* env, jclass clazz) {
+static jboolean IsSupported(JNIEnv* /* env */, jclass /* clazz */) {
   if (sFlpInterface == NULL) {
     return JNI_FALSE;
   }
   return JNI_TRUE;
 }
 
-static jint GetBatchSize(JNIEnv* env, jobject object) {
+static jint GetBatchSize(JNIEnv* env, jobject /* object */) {
   if(sFlpInterface == NULL) {
     ThrowOnError(env, FLP_RESULT_ERROR, __FUNCTION__);
   }
@@ -715,7 +793,7 @@ static jint GetBatchSize(JNIEnv* env, jobject object) {
 
 static void StartBatching(
     JNIEnv* env,
-    jobject object,
+    jobject /* object */,
     jint id,
     jobject optionsObject) {
   if(sFlpInterface == NULL || optionsObject == NULL) {
@@ -730,7 +808,7 @@ static void StartBatching(
 
 static void UpdateBatchingOptions(
     JNIEnv* env,
-    jobject object,
+    jobject /* object */,
     jint id,
     jobject optionsObject) {
   if(sFlpInterface == NULL || optionsObject == NULL) {
@@ -743,7 +821,7 @@ static void UpdateBatchingOptions(
   ThrowOnError(env, result, __FUNCTION__);
 }
 
-static void StopBatching(JNIEnv* env, jobject object, jint id) {
+static void StopBatching(JNIEnv* env, jobject /* object */, jint id) {
   if(sFlpInterface == NULL) {
     ThrowOnError(env, FLP_RESULT_ERROR, __FUNCTION__);
   }
@@ -751,7 +829,7 @@ static void StopBatching(JNIEnv* env, jobject object, jint id) {
   sFlpInterface->stop_batching(id);
 }
 
-static void Cleanup(JNIEnv* env, jobject object) {
+static void Cleanup(JNIEnv* env, jobject /* object */) {
   if(sFlpInterface == NULL) {
     ThrowOnError(env, FLP_RESULT_ERROR, __FUNCTION__);
   }
@@ -774,7 +852,7 @@ static void Cleanup(JNIEnv* env, jobject object) {
   }
 }
 
-static void GetBatchedLocation(JNIEnv* env, jobject object, jint lastNLocations) {
+static void GetBatchedLocation(JNIEnv* env, jobject /* object */, jint lastNLocations) {
   if(sFlpInterface == NULL) {
     ThrowOnError(env, FLP_RESULT_ERROR, __FUNCTION__);
   }
@@ -782,7 +860,15 @@ static void GetBatchedLocation(JNIEnv* env, jobject object, jint lastNLocations)
   sFlpInterface->get_batched_location(lastNLocations);
 }
 
-static void InjectLocation(JNIEnv* env, jobject object, jobject locationObject) {
+static void FlushBatchedLocations(JNIEnv* env, jobject /* object */) {
+  if(sFlpInterface == NULL) {
+    ThrowOnError(env, FLP_RESULT_ERROR, __FUNCTION__);
+  }
+
+  sFlpInterface->flush_batched_locations();
+}
+
+static void InjectLocation(JNIEnv* env, jobject /* object */, jobject locationObject) {
   if(locationObject == NULL) {
     ALOGE("Invalid location for injection: %p", locationObject);
     ThrowOnError(env, FLP_RESULT_ERROR, __FUNCTION__);
@@ -806,7 +892,7 @@ static jboolean IsDiagnosticSupported() {
   return sFlpDiagnosticInterface != NULL;
 }
 
-static void InjectDiagnosticData(JNIEnv* env, jobject object, jstring stringData) {
+static void InjectDiagnosticData(JNIEnv* env, jobject /* object */, jstring stringData) {
   if(stringData == NULL) {
     ALOGE("Invalid diagnostic data for injection: %p", stringData);
     ThrowOnError(env, FLP_RESULT_ERROR, __FUNCTION__);
@@ -830,7 +916,7 @@ static jboolean IsDeviceContextSupported() {
   return sFlpDeviceContextInterface != NULL;
 }
 
-static void InjectDeviceContext(JNIEnv* env, jobject object, jint enabledMask) {
+static void InjectDeviceContext(JNIEnv* env, jobject /* object */, jint enabledMask) {
   if(sFlpDeviceContextInterface == NULL) {
     ThrowOnError(env, FLP_RESULT_ERROR, __FUNCTION__);
   }
@@ -845,7 +931,7 @@ static jboolean IsGeofencingSupported() {
 
 static void AddGeofences(
     JNIEnv* env,
-    jobject object,
+    jobject /* object */,
     jobjectArray geofenceRequestsArray) {
   if(geofenceRequestsArray == NULL) {
     ALOGE("Invalid Geofences to add: %p", geofenceRequestsArray);
@@ -885,7 +971,7 @@ static void AddGeofences(
   }
 }
 
-static void PauseGeofence(JNIEnv* env, jobject object, jint geofenceId) {
+static void PauseGeofence(JNIEnv* env, jobject /* object */, jint geofenceId) {
   if(sFlpGeofencingInterface == NULL) {
     ThrowOnError(env, FLP_RESULT_ERROR, __FUNCTION__);
   }
@@ -895,7 +981,7 @@ static void PauseGeofence(JNIEnv* env, jobject object, jint geofenceId) {
 
 static void ResumeGeofence(
     JNIEnv* env,
-    jobject object,
+    jobject /* object */,
     jint geofenceId,
     jint monitorTransitions) {
   if(sFlpGeofencingInterface == NULL) {
@@ -907,7 +993,7 @@ static void ResumeGeofence(
 
 static void ModifyGeofenceOption(
     JNIEnv* env,
-    jobject object,
+    jobject /* object */,
     jint geofenceId,
     jint lastTransition,
     jint monitorTransitions,
@@ -931,7 +1017,7 @@ static void ModifyGeofenceOption(
 
 static void RemoveGeofences(
     JNIEnv* env,
-    jobject object,
+    jobject /* object */,
     jintArray geofenceIdsArray) {
   if(sFlpGeofencingInterface == NULL) {
     ThrowOnError(env, FLP_RESULT_ERROR, __FUNCTION__);
@@ -964,6 +1050,9 @@ static JNINativeMethod sMethods[] = {
   {"nativeRequestBatchedLocation",
         "(I)V",
         reinterpret_cast<void*>(GetBatchedLocation)},
+  {"nativeFlushBatchedLocations",
+          "()V",
+          reinterpret_cast<void*>(FlushBatchedLocations)},
   {"nativeInjectLocation",
         "(Landroid/location/Location;)V",
         reinterpret_cast<void*>(InjectLocation)},

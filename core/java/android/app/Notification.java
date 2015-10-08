@@ -16,6 +16,8 @@
 
 package android.app;
 
+import android.annotation.ColorInt;
+import android.annotation.DrawableRes;
 import android.annotation.IntDef;
 import android.annotation.SdkConstant;
 import android.annotation.SdkConstant.SdkConstantType;
@@ -28,6 +30,7 @@ import android.graphics.Bitmap;
 import android.graphics.Canvas;
 import android.graphics.PorterDuff;
 import android.graphics.drawable.Drawable;
+import android.graphics.drawable.Icon;
 import android.media.AudioAttributes;
 import android.media.AudioManager;
 import android.media.session.MediaSession;
@@ -163,8 +166,11 @@ public class Notification implements Parcelable
 
     /**
      * The resource id of a drawable to use as the icon in the status bar.
-     * This is required; notifications with an invalid icon resource will not be shown.
+     *
+     * @deprecated Use {@link Builder#setSmallIcon(Icon)} instead.
      */
+    @Deprecated
+    @DrawableRes
     public int icon;
 
     /**
@@ -265,8 +271,11 @@ public class Notification implements Parcelable
     public RemoteViews headsUpContentView;
 
     /**
-     * The bitmap that may escape the bounds of the panel and bar.
+     * A large bitmap to be shown in the notification content area.
+     *
+     * @deprecated Use {@link Builder#setLargeIcon(Icon)} instead.
      */
+    @Deprecated
     public Bitmap largeIcon;
 
     /**
@@ -336,6 +345,7 @@ public class Notification implements Parcelable
      * @see #FLAG_SHOW_LIGHTS
      * @see #flags
      */
+    @ColorInt
     public int ledARGB;
 
     /**
@@ -413,7 +423,6 @@ public class Notification implements Parcelable
      * Bit to be bitwise-ored into the {@link #flags} field that should be
      * set if the notification should be canceled when it is clicked by the
      * user.
-
      */
     public static final int FLAG_AUTO_CANCEL        = 0x00000010;
 
@@ -518,12 +527,14 @@ public class Notification implements Parcelable
      * {@link #icon} image (stenciled in white) atop a field of this color. Alpha components are
      * ignored.
      */
+    @ColorInt
     public int color = COLOR_DEFAULT;
 
     /**
      * Special value of {@link #color} telling the system not to decorate this notification with
      * any special color but instead use default colors when presenting this notification.
      */
+    @ColorInt
     public static final int COLOR_DEFAULT = 0; // AKA Color.TRANSPARENT
 
     /**
@@ -639,6 +650,11 @@ public class Notification implements Parcelable
      * Notification category: ongoing information about device or contextual status.
      */
     public static final String CATEGORY_STATUS = "status";
+
+    /**
+     * Notification category: user-scheduled reminder.
+     */
+    public static final String CATEGORY_REMINDER = "reminder";
 
     /**
      * One of the predefined notification categories (see the <code>CATEGORY_*</code> constants)
@@ -875,6 +891,9 @@ public class Notification implements Parcelable
      */
     public static final int HEADS_UP_REQUESTED = 2;
 
+    private Icon mSmallIcon;
+    private Icon mLargeIcon;
+
     /**
      * Structure to encapsulate a named action that can be shown as part of this notification.
      * It must include an icon, a label, and a {@link PendingIntent} to be fired when the action is
@@ -886,11 +905,15 @@ public class Notification implements Parcelable
      */
     public static class Action implements Parcelable {
         private final Bundle mExtras;
+        private Icon mIcon;
         private final RemoteInput[] mRemoteInputs;
 
         /**
          * Small icon representing the action.
+         *
+         * @deprecated Use {@link Action#getIcon()} instead.
          */
+        @Deprecated
         public int icon;
 
         /**
@@ -905,7 +928,12 @@ public class Notification implements Parcelable
         public PendingIntent actionIntent;
 
         private Action(Parcel in) {
-            icon = in.readInt();
+            if (in.readInt() != 0) {
+                mIcon = Icon.CREATOR.createFromParcel(in);
+                if (mIcon.getType() == Icon.TYPE_RESOURCE) {
+                    icon = mIcon.getResId();
+                }
+            }
             title = TextUtils.CHAR_SEQUENCE_CREATOR.createFromParcel(in);
             if (in.readInt() == 1) {
                 actionIntent = PendingIntent.CREATOR.createFromParcel(in);
@@ -915,19 +943,31 @@ public class Notification implements Parcelable
         }
 
         /**
-         * Use {@link Notification.Builder#addAction(int, CharSequence, PendingIntent)}.
+         * @deprecated Use {@link android.app.Notification.Action.Builder}.
          */
+        @Deprecated
         public Action(int icon, CharSequence title, PendingIntent intent) {
-            this(icon, title, intent, new Bundle(), null);
+            this(Icon.createWithResource("", icon), title, intent, new Bundle(), null);
         }
 
-        private Action(int icon, CharSequence title, PendingIntent intent, Bundle extras,
+        private Action(Icon icon, CharSequence title, PendingIntent intent, Bundle extras,
                 RemoteInput[] remoteInputs) {
-            this.icon = icon;
+            this.mIcon = icon;
             this.title = title;
             this.actionIntent = intent;
             this.mExtras = extras != null ? extras : new Bundle();
             this.mRemoteInputs = remoteInputs;
+        }
+
+        /**
+         * Return an icon representing the action.
+         */
+        public Icon getIcon() {
+            if (mIcon == null && icon != 0) {
+                // you snuck an icon in here without using the builder; let's try to keep it
+                mIcon = Icon.createWithResource("", icon);
+            }
+            return mIcon;
         }
 
         /**
@@ -949,7 +989,7 @@ public class Notification implements Parcelable
          * Builder class for {@link Action} objects.
          */
         public static final class Builder {
-            private final int mIcon;
+            private final Icon mIcon;
             private final CharSequence mTitle;
             private final PendingIntent mIntent;
             private final Bundle mExtras;
@@ -961,7 +1001,18 @@ public class Notification implements Parcelable
              * @param title the title of the action
              * @param intent the {@link PendingIntent} to fire when users trigger this action
              */
+            @Deprecated
             public Builder(int icon, CharSequence title, PendingIntent intent) {
+                this(Icon.createWithResource("", icon), title, intent, new Bundle(), null);
+            }
+
+            /**
+             * Construct a new builder for {@link Action} object.
+             * @param icon icon to show for this action
+             * @param title the title of the action
+             * @param intent the {@link PendingIntent} to fire when users trigger this action
+             */
+            public Builder(Icon icon, CharSequence title, PendingIntent intent) {
                 this(icon, title, intent, new Bundle(), null);
             }
 
@@ -971,11 +1022,11 @@ public class Notification implements Parcelable
              * @param action the action to read fields from.
              */
             public Builder(Action action) {
-                this(action.icon, action.title, action.actionIntent, new Bundle(action.mExtras),
+                this(action.getIcon(), action.title, action.actionIntent, new Bundle(action.mExtras),
                         action.getRemoteInputs());
             }
 
-            private Builder(int icon, CharSequence title, PendingIntent intent, Bundle extras,
+            private Builder(Icon icon, CharSequence title, PendingIntent intent, Bundle extras,
                     RemoteInput[] remoteInputs) {
                 mIcon = icon;
                 mTitle = title;
@@ -1049,7 +1100,7 @@ public class Notification implements Parcelable
         @Override
         public Action clone() {
             return new Action(
-                    icon,
+                    getIcon(),
                     title,
                     actionIntent, // safe to alias
                     new Bundle(mExtras),
@@ -1061,7 +1112,13 @@ public class Notification implements Parcelable
         }
         @Override
         public void writeToParcel(Parcel out, int flags) {
-            out.writeInt(icon);
+            final Icon ic = getIcon();
+            if (ic != null) {
+                out.writeInt(1);
+                ic.writeToParcel(out, 0);
+            } else {
+                out.writeInt(0);
+            }
             TextUtils.writeToParcel(title, out, flags);
             if (actionIntent != null) {
                 out.writeInt(1);
@@ -1317,11 +1374,14 @@ public class Notification implements Parcelable
     public Notification(Context context, int icon, CharSequence tickerText, long when,
             CharSequence contentTitle, CharSequence contentText, Intent contentIntent)
     {
-        this.when = when;
-        this.icon = icon;
-        this.tickerText = tickerText;
-        setLatestEventInfo(context, contentTitle, contentText,
-                PendingIntent.getActivity(context, 0, contentIntent, 0));
+        new Builder(context)
+                .setWhen(when)
+                .setSmallIcon(icon)
+                .setTicker(tickerText)
+                .setContentTitle(contentTitle)
+                .setContentText(contentText)
+                .setContentIntent(PendingIntent.getActivity(context, 0, contentIntent, 0))
+                .buildInto(this);
     }
 
     /**
@@ -1352,7 +1412,12 @@ public class Notification implements Parcelable
         int version = parcel.readInt();
 
         when = parcel.readLong();
-        icon = parcel.readInt();
+        if (parcel.readInt() != 0) {
+            mSmallIcon = Icon.CREATOR.createFromParcel(parcel);
+            if (mSmallIcon.getType() == Icon.TYPE_RESOURCE) {
+                icon = mSmallIcon.getResId();
+            }
+        }
         number = parcel.readInt();
         if (parcel.readInt() != 0) {
             contentIntent = PendingIntent.CREATOR.createFromParcel(parcel);
@@ -1370,7 +1435,7 @@ public class Notification implements Parcelable
             contentView = RemoteViews.CREATOR.createFromParcel(parcel);
         }
         if (parcel.readInt() != 0) {
-            largeIcon = Bitmap.CREATOR.createFromParcel(parcel);
+            mLargeIcon = Icon.CREATOR.createFromParcel(parcel);
         }
         defaults = parcel.readInt();
         flags = parcel.readInt();
@@ -1435,7 +1500,7 @@ public class Notification implements Parcelable
      */
     public void cloneInto(Notification that, boolean heavy) {
         that.when = this.when;
-        that.icon = this.icon;
+        that.mSmallIcon = this.mSmallIcon;
         that.number = this.number;
 
         // PendingIntents are global, so there's no reason (or way) to clone them.
@@ -1452,8 +1517,8 @@ public class Notification implements Parcelable
         if (heavy && this.contentView != null) {
             that.contentView = this.contentView.clone();
         }
-        if (heavy && this.largeIcon != null) {
-            that.largeIcon = Bitmap.createBitmap(this.largeIcon);
+        if (heavy && this.mLargeIcon != null) {
+            that.mLargeIcon = this.mLargeIcon;
         }
         that.iconLevel = this.iconLevel;
         that.sound = this.sound; // android.net.Uri is immutable
@@ -1534,7 +1599,7 @@ public class Notification implements Parcelable
         contentView = null;
         bigContentView = null;
         headsUpContentView = null;
-        largeIcon = null;
+        mLargeIcon = null;
         if (extras != null) {
             extras.remove(Notification.EXTRA_LARGE_ICON);
             extras.remove(Notification.EXTRA_LARGE_ICON_BIG);
@@ -1569,14 +1634,23 @@ public class Notification implements Parcelable
     }
 
     /**
-     * Flatten this notification from a parcel.
+     * Flatten this notification into a parcel.
      */
     public void writeToParcel(Parcel parcel, int flags)
     {
         parcel.writeInt(1);
 
         parcel.writeLong(when);
-        parcel.writeInt(icon);
+        if (mSmallIcon == null && icon != 0) {
+            // you snuck an icon in here without using the builder; let's try to keep it
+            mSmallIcon = Icon.createWithResource("", icon);
+        }
+        if (mSmallIcon != null) {
+            parcel.writeInt(1);
+            mSmallIcon.writeToParcel(parcel, 0);
+        } else {
+            parcel.writeInt(0);
+        }
         parcel.writeInt(number);
         if (contentIntent != null) {
             parcel.writeInt(1);
@@ -1608,9 +1682,9 @@ public class Notification implements Parcelable
         } else {
             parcel.writeInt(0);
         }
-        if (largeIcon != null) {
+        if (mLargeIcon != null) {
             parcel.writeInt(1);
-            largeIcon.writeToParcel(parcel, 0);
+            mLargeIcon.writeToParcel(parcel, 0);
         } else {
             parcel.writeInt(0);
         }
@@ -1718,6 +1792,7 @@ public class Notification implements Parcelable
      * Stack</a> document.
      *
      * @deprecated Use {@link Builder} instead.
+     * @removed
      */
     @Deprecated
     public void setLatestEventInfo(Context context,
@@ -1736,6 +1811,7 @@ public class Notification implements Parcelable
         builder.setSound(this.sound, this.audioStreamType);
         builder.setDefaults(this.defaults);
         builder.setVibrate(this.vibrate);
+        builder.setDeleteIntent(this.deleteIntent);
 
         // now apply the latestEventInfo fields
         if (contentTitle != null) {
@@ -1786,6 +1862,9 @@ public class Notification implements Parcelable
         } else {
             sb.append("null");
         }
+        if (this.tickerText != null) {
+            sb.append(" tick");
+        }
         sb.append(" defaults=0x");
         sb.append(Integer.toHexString(this.defaults));
         sb.append(" flags=0x");
@@ -1831,6 +1910,55 @@ public class Notification implements Parcelable
             default:
                 return "UNKNOWN(" + String.valueOf(vis) + ")";
         }
+    }
+
+    /**
+     * {@hide}
+     */
+    public static String priorityToString(@Priority int pri) {
+        switch (pri) {
+            case PRIORITY_MIN:
+                return "MIN";
+            case PRIORITY_LOW:
+                return "LOW";
+            case PRIORITY_DEFAULT:
+                return "DEFAULT";
+            case PRIORITY_HIGH:
+                return "HIGH";
+            case PRIORITY_MAX:
+                return "MAX";
+            default:
+                return "UNKNOWN(" + String.valueOf(pri) + ")";
+        }
+    }
+
+    /**
+     * The small icon representing this notification in the status bar and content view.
+     *
+     * @return the small icon representing this notification.
+     *
+     * @see Builder#getSmallIcon()
+     * @see Builder#setSmallIcon(Icon)
+     */
+    public Icon getSmallIcon() {
+        return mSmallIcon;
+    }
+
+    /**
+     * Used when notifying to clean up legacy small icons.
+     * @hide
+     */
+    public void setSmallIcon(Icon icon) {
+        mSmallIcon = icon;
+    }
+
+    /**
+     * The large icon shown in this notification's content view.
+     * @see Builder#getLargeIcon()
+     * @see Builder#setLargeIcon(Icon)
+     */
+    public Icon getLargeIcon() {
+        return mLargeIcon;
     }
 
     /**
@@ -1935,7 +2063,7 @@ public class Notification implements Parcelable
         private Context mContext;
 
         private long mWhen;
-        private int mSmallIcon;
+        private Icon mSmallIcon, mLargeIcon;
         private int mSmallIconLevel;
         private int mNumber;
         private CharSequence mContentTitle;
@@ -1948,7 +2076,6 @@ public class Notification implements Parcelable
         private PendingIntent mFullScreenIntent;
         private CharSequence mTickerText;
         private RemoteViews mTickerView;
-        private Bitmap mLargeIcon;
         private Uri mSound;
         private int mAudioStreamType;
         private AudioAttributes mAudioAttributes;
@@ -2064,6 +2191,7 @@ public class Notification implements Parcelable
 
                 try {
                     Constructor<? extends Style> constructor = styleClass.getConstructor();
+                    constructor.setAccessible(true);
                     style = constructor.newInstance();
                     style.restoreFromExtras(extras);
                 } catch (Throwable t) {
@@ -2127,9 +2255,10 @@ public class Notification implements Parcelable
          *            A resource ID in the application's package of the drawable to use.
          * @see Notification#icon
          */
-        public Builder setSmallIcon(int icon) {
-            mSmallIcon = icon;
-            return this;
+        public Builder setSmallIcon(@DrawableRes int icon) {
+            return setSmallIcon(icon != 0
+                    ? Icon.createWithResource(mContext, icon)
+                    : null);
         }
 
         /**
@@ -2143,9 +2272,21 @@ public class Notification implements Parcelable
          * @see Notification#icon
          * @see Notification#iconLevel
          */
-        public Builder setSmallIcon(int icon, int level) {
-            mSmallIcon = icon;
+        public Builder setSmallIcon(@DrawableRes int icon, int level) {
             mSmallIconLevel = level;
+            return setSmallIcon(icon);
+        }
+
+        /**
+         * Set the small icon, which will be used to represent the notification in the
+         * status bar and content view (unless overriden there by a
+         * {@link #setLargeIcon(Bitmap) large icon}).
+         *
+         * @param icon An Icon object to use.
+         * @see Notification#icon
+         */
+        public Builder setSmallIcon(Icon icon) {
+            mSmallIcon = icon;
             return this;
         }
 
@@ -2292,14 +2433,24 @@ public class Notification implements Parcelable
         }
 
         /**
-         * Add a large icon to the notification (and the ticker on some devices).
+         * Add a large icon to the notification content view.
          *
          * In the platform template, this image will be shown on the left of the notification view
-         * in place of the {@link #setSmallIcon(int) small icon} (which will move to the right side).
-         *
-         * @see Notification#largeIcon
+         * in place of the {@link #setSmallIcon(Icon) small icon} (which will be placed in a small
+         * badge atop the large icon).
          */
-        public Builder setLargeIcon(Bitmap icon) {
+        public Builder setLargeIcon(Bitmap b) {
+            return setLargeIcon(b != null ? Icon.createWithBitmap(b) : null);
+        }
+
+        /**
+         * Add a large icon to the notification content view.
+         *
+         * In the platform template, this image will be shown on the left of the notification view
+         * in place of the {@link #setSmallIcon(Icon) small icon} (which will be placed in a small
+         * badge atop the large icon).
+         */
+        public Builder setLargeIcon(Icon icon) {
             mLargeIcon = icon;
             return this;
         }
@@ -2385,7 +2536,7 @@ public class Notification implements Parcelable
          * @see Notification#ledOnMS
          * @see Notification#ledOffMS
          */
-        public Builder setLights(int argb, int onMs, int offMs) {
+        public Builder setLights(@ColorInt int argb, int onMs, int offMs) {
             mLedArgb = argb;
             mLedOnMs = onMs;
             mLedOffMs = offMs;
@@ -2620,7 +2771,10 @@ public class Notification implements Parcelable
          * @param icon Resource ID of a drawable that represents the action.
          * @param title Text describing the action.
          * @param intent PendingIntent to be fired when the action is invoked.
+         *
+         * @deprecated Use {@link #addAction(Action)} instead.
          */
+        @Deprecated
         public Builder addAction(int icon, CharSequence title, PendingIntent intent) {
             mActions.add(new Action(icon, safeCharSequence(title), intent));
             return this;
@@ -2694,7 +2848,10 @@ public class Notification implements Parcelable
             return this;
         }
 
-        private void setFlag(int mask, boolean value) {
+        /**
+         * @hide
+         */
+        public void setFlag(int mask, boolean value) {
             if (value) {
                 mFlags |= mask;
             } else {
@@ -2709,7 +2866,7 @@ public class Notification implements Parcelable
          *
          * @return The same Builder.
          */
-        public Builder setColor(int argb) {
+        public Builder setColor(@ColorInt int argb) {
             mColor = argb;
             return this;
         }
@@ -2808,13 +2965,13 @@ public class Notification implements Parcelable
             boolean contentTextInLine2 = false;
 
             if (mLargeIcon != null) {
-                contentView.setImageViewBitmap(R.id.icon, mLargeIcon);
+                contentView.setImageViewIcon(R.id.icon, mLargeIcon);
                 processLargeLegacyIcon(mLargeIcon, contentView);
-                contentView.setImageViewResource(R.id.right_icon, mSmallIcon);
+                contentView.setImageViewIcon(R.id.right_icon, mSmallIcon);
                 contentView.setViewVisibility(R.id.right_icon, View.VISIBLE);
                 processSmallRightIcon(mSmallIcon, contentView);
             } else { // small icon at left
-                contentView.setImageViewResource(R.id.icon, mSmallIcon);
+                contentView.setImageViewIcon(R.id.icon, mSmallIcon);
                 contentView.setViewVisibility(R.id.icon, View.VISIBLE);
                 processSmallIconAsLarge(mSmallIcon, contentView);
             }
@@ -2864,7 +3021,7 @@ public class Notification implements Parcelable
                     contentView.setProgressBar(
                             R.id.progress, mProgressMax, mProgress, mProgressIndeterminate);
                     contentView.setProgressBackgroundTintList(
-                            R.id.progress, ColorStateList.valueOf(mContext.getResources().getColor(
+                            R.id.progress, ColorStateList.valueOf(mContext.getColor(
                                     R.color.notification_progress_background_color)));
                     if (mColor != COLOR_DEFAULT) {
                         ColorStateList colorStateList = ColorStateList.valueOf(mColor);
@@ -3014,10 +3171,11 @@ public class Notification implements Parcelable
 
         private RemoteViews generateActionButton(Action action) {
             final boolean tombstone = (action.actionIntent == null);
-            RemoteViews button = new RemoteViews(mContext.getPackageName(),
+            RemoteViews button = new BuilderRemoteViews(mContext.getApplicationInfo(),
                     tombstone ? getActionTombstoneLayoutResource()
                               : getActionLayoutResource());
-            button.setTextViewCompoundDrawablesRelative(R.id.action0, action.icon, 0, 0, 0);
+            final Icon ai = action.getIcon();
+            button.setTextViewCompoundDrawablesRelative(R.id.action0, ai, null, null, null);
             button.setTextViewText(R.id.action0, processLegacyText(action.title));
             if (!tombstone) {
                 button.setOnClickPendingIntent(R.id.action0, action.actionIntent);
@@ -3036,9 +3194,9 @@ public class Notification implements Parcelable
         }
 
         private void processLegacyAction(Action action, RemoteViews button) {
-            if (!isLegacy() || mColorUtil.isGrayscaleIcon(mContext, action.icon)) {
+            if (!isLegacy() || mColorUtil.isGrayscaleIcon(mContext, action.getIcon())) {
                 button.setTextViewCompoundDrawablesRelativeColorFilter(R.id.action0, 0,
-                        mContext.getResources().getColor(R.color.notification_action_color_filter),
+                        mContext.getColor(R.color.notification_action_color_filter),
                         PorterDuff.Mode.MULTIPLY);
             }
         }
@@ -3054,14 +3212,16 @@ public class Notification implements Parcelable
         /**
          * Apply any necessary background to smallIcons being used in the largeIcon spot.
          */
-        private void processSmallIconAsLarge(int largeIconId, RemoteViews contentView) {
+        private void processSmallIconAsLarge(Icon largeIcon, RemoteViews contentView) {
             if (!isLegacy()) {
                 contentView.setDrawableParameters(R.id.icon, false, -1,
                         0xFFFFFFFF,
                         PorterDuff.Mode.SRC_ATOP, -1);
-            }
-            if (!isLegacy() || mColorUtil.isGrayscaleIcon(mContext, largeIconId)) {
                 applyLargeIconBackground(contentView);
+            } else {
+                if (mColorUtil.isGrayscaleIcon(mContext, largeIcon)) {
+                    applyLargeIconBackground(contentView);
+                }
             }
         }
 
@@ -3070,8 +3230,9 @@ public class Notification implements Parcelable
          * if it's grayscale).
          */
         // TODO: also check bounds, transparency, that sort of thing.
-        private void processLargeLegacyIcon(Bitmap largeIcon, RemoteViews contentView) {
-            if (isLegacy() && mColorUtil.isGrayscaleIcon(largeIcon)) {
+        private void processLargeLegacyIcon(Icon largeIcon, RemoteViews contentView) {
+            if (largeIcon != null && isLegacy()
+                    && mColorUtil.isGrayscaleIcon(mContext, largeIcon)) {
                 applyLargeIconBackground(contentView);
             } else {
                 removeLargeIconBackground(contentView);
@@ -3105,14 +3266,16 @@ public class Notification implements Parcelable
         /**
          * Recolor small icons when used in the R.id.right_icon slot.
          */
-        private void processSmallRightIcon(int smallIconDrawableId,
-                RemoteViews contentView) {
+        private void processSmallRightIcon(Icon smallIcon, RemoteViews contentView) {
             if (!isLegacy()) {
                 contentView.setDrawableParameters(R.id.right_icon, false, -1,
                         0xFFFFFFFF,
                         PorterDuff.Mode.SRC_ATOP, -1);
             }
-            if (!isLegacy() || mColorUtil.isGrayscaleIcon(mContext, smallIconDrawableId)) {
+            final boolean gray = isLegacy()
+                    && smallIcon.getType() == Icon.TYPE_RESOURCE
+                    && mColorUtil.isGrayscaleIcon(mContext, smallIcon.getResId());
+            if (!isLegacy() || gray) {
                 contentView.setInt(R.id.right_icon,
                         "setBackgroundResource",
                         R.drawable.notification_icon_legacy_bg);
@@ -3136,7 +3299,7 @@ public class Notification implements Parcelable
 
         private int resolveColor() {
             if (mColor == COLOR_DEFAULT) {
-                return mContext.getResources().getColor(R.color.notification_icon_bg_color);
+                return mContext.getColor(R.color.notification_icon_bg_color);
             }
             return mColor;
         }
@@ -3148,7 +3311,10 @@ public class Notification implements Parcelable
         public Notification buildUnstyled() {
             Notification n = new Notification();
             n.when = mWhen;
-            n.icon = mSmallIcon;
+            n.mSmallIcon = mSmallIcon;
+            if (mSmallIcon != null && mSmallIcon.getType() == Icon.TYPE_RESOURCE) {
+                n.icon = mSmallIcon.getResId();
+            }
             n.iconLevel = mSmallIconLevel;
             n.number = mNumber;
 
@@ -3160,7 +3326,10 @@ public class Notification implements Parcelable
             n.fullScreenIntent = mFullScreenIntent;
             n.tickerText = mTickerText;
             n.tickerView = makeTickerView();
-            n.largeIcon = mLargeIcon;
+            n.mLargeIcon = mLargeIcon;
+            if (mLargeIcon != null && mLargeIcon.getType() == Icon.TYPE_BITMAP) {
+                n.largeIcon = mLargeIcon.getBitmap();
+            }
             n.sound = mSound;
             n.audioStreamType = mAudioStreamType;
             n.audioAttributes = mAudioAttributes;
@@ -3210,7 +3379,7 @@ public class Notification implements Parcelable
             extras.putCharSequence(EXTRA_TEXT, mContentText);
             extras.putCharSequence(EXTRA_SUB_TEXT, mSubText);
             extras.putCharSequence(EXTRA_INFO_TEXT, mContentInfo);
-            extras.putInt(EXTRA_SMALL_ICON, mSmallIcon);
+            extras.putParcelable(EXTRA_SMALL_ICON, mSmallIcon);
             extras.putInt(EXTRA_PROGRESS, mProgress);
             extras.putInt(EXTRA_PROGRESS_MAX, mProgressMax);
             extras.putBoolean(EXTRA_PROGRESS_INDETERMINATE, mProgressIndeterminate);
@@ -3398,7 +3567,7 @@ public class Notification implements Parcelable
 
             // Notification fields.
             mWhen = n.when;
-            mSmallIcon = n.icon;
+            mSmallIcon = n.mSmallIcon;
             mSmallIconLevel = n.iconLevel;
             mNumber = n.number;
 
@@ -3409,7 +3578,7 @@ public class Notification implements Parcelable
             mFullScreenIntent = n.fullScreenIntent;
             mTickerText = n.tickerText;
             mTickerView = n.tickerView;
-            mLargeIcon = n.largeIcon;
+            mLargeIcon = n.mLargeIcon;
             mSound = n.sound;
             mAudioStreamType = n.audioStreamType;
             mAudioAttributes = n.audioAttributes;
@@ -3440,7 +3609,6 @@ public class Notification implements Parcelable
             mContentText = extras.getCharSequence(EXTRA_TEXT);
             mSubText = extras.getCharSequence(EXTRA_SUB_TEXT);
             mContentInfo = extras.getCharSequence(EXTRA_INFO_TEXT);
-            mSmallIcon = extras.getInt(EXTRA_SMALL_ICON);
             mProgress = extras.getInt(EXTRA_PROGRESS);
             mProgressMax = extras.getInt(EXTRA_PROGRESS_MAX);
             mProgressIndeterminate = extras.getBoolean(EXTRA_PROGRESS_INDETERMINATE);
@@ -3468,12 +3636,19 @@ public class Notification implements Parcelable
          * object.
          */
         public Notification build() {
+            if (mSmallIcon != null) {
+                mSmallIcon.convertToAshmem();
+            }
+            if (mLargeIcon != null) {
+                mLargeIcon.convertToAshmem();
+            }
             mOriginatingUserId = mContext.getUserId();
             mHasThreeLines = hasThreeLines();
 
             Notification n = buildUnstyled();
 
             if (mStyle != null) {
+                mStyle.purgeResources();
                 n = mStyle.buildStyled(n);
             }
 
@@ -3672,6 +3847,11 @@ public class Notification implements Parcelable
             return wip;
         }
 
+        /**
+         * @hide
+         */
+        public void purgeResources() {}
+
         // The following methods are split out so we can re-create notification partially.
         /**
          * @hide
@@ -3732,7 +3912,7 @@ public class Notification implements Parcelable
      */
     public static class BigPictureStyle extends Style {
         private Bitmap mPicture;
-        private Bitmap mBigLargeIcon;
+        private Icon mBigLargeIcon;
         private boolean mBigLargeIconSet = false;
 
         public BigPictureStyle() {
@@ -3771,19 +3951,39 @@ public class Notification implements Parcelable
          * Override the large icon when the big notification is shown.
          */
         public BigPictureStyle bigLargeIcon(Bitmap b) {
+            return bigLargeIcon(b != null ? Icon.createWithBitmap(b) : null);
+        }
+
+        /**
+         * Override the large icon when the big notification is shown.
+         */
+        public BigPictureStyle bigLargeIcon(Icon icon) {
             mBigLargeIconSet = true;
-            mBigLargeIcon = b;
+            mBigLargeIcon = icon;
             return this;
         }
 
-        private RemoteViews makeBigContentView() {
+        /**
+         * @hide
+         */
+        @Override
+        public void purgeResources() {
+            super.purgeResources();
+            if (mPicture != null && mPicture.isMutable()) {
+                mPicture = mPicture.createAshmemBitmap();
+            }
+            if (mBigLargeIcon != null) {
+                mBigLargeIcon.convertToAshmem();
+            }
+        }
 
+        private RemoteViews makeBigContentView() {
             // Replace mLargeIcon with mBigLargeIcon if mBigLargeIconSet
             // This covers the following cases:
             //   1. mBigLargeIconSet -> mBigLargeIcon (null or non-null) applies, overrides
             //          mLargeIcon
             //   2. !mBigLargeIconSet -> mLargeIcon applies
-            Bitmap oldLargeIcon = null;
+            Icon oldLargeIcon = null;
             if (mBigLargeIconSet) {
                 oldLargeIcon = mBuilder.mLargeIcon;
                 mBuilder.mLargeIcon = mBigLargeIcon;
@@ -4114,7 +4314,7 @@ public class Notification implements Parcelable
      *
      * In the expanded form, {@link Notification#bigContentView}, up to 5
      * {@link Notification.Action}s specified with
-     * {@link Notification.Builder#addAction(int, CharSequence, PendingIntent) addAction} will be
+     * {@link Notification.Builder#addAction(Action) addAction} will be
      * shown as icon-only pushbuttons, suitable for transport controls. The Bitmap given to
      * {@link Notification.Builder#setLargeIcon(android.graphics.Bitmap) setLargeIcon()} will be
      * treated as album artwork.
@@ -4240,9 +4440,9 @@ public class Notification implements Parcelable
 
         private RemoteViews generateMediaActionButton(Action action) {
             final boolean tombstone = (action.actionIntent == null);
-            RemoteViews button = new RemoteViews(mBuilder.mContext.getPackageName(),
+            RemoteViews button = new BuilderRemoteViews(mBuilder.mContext.getApplicationInfo(),
                     R.layout.notification_material_media_action);
-            button.setImageViewResource(R.id.action0, action.icon);
+            button.setImageViewIcon(R.id.action0, action.getIcon());
             button.setDrawableParameters(R.id.action0, false, -1,
                     0xFFFFFFFF,
                     PorterDuff.Mode.SRC_ATOP, -1);
@@ -4315,9 +4515,9 @@ public class Notification implements Parcelable
          * Applies the special text colors for media notifications to all text views.
          */
         private void styleText(RemoteViews contentView) {
-            int primaryColor = mBuilder.mContext.getResources().getColor(
+            int primaryColor = mBuilder.mContext.getColor(
                     R.color.notification_media_primary_color);
-            int secondaryColor = mBuilder.mContext.getResources().getColor(
+            int secondaryColor = mBuilder.mContext.getColor(
                     R.color.notification_media_secondary_color);
             contentView.setTextColor(R.id.title, primaryColor);
             if (mBuilder.showsTimeOrChronometer()) {
@@ -5059,6 +5259,404 @@ public class Notification implements Parcelable
                 mFlags |= mask;
             } else {
                 mFlags &= ~mask;
+            }
+        }
+    }
+
+    /**
+     * <p>Helper class to add Android Auto extensions to notifications. To create a notification
+     * with car extensions:
+     *
+     * <ol>
+     *  <li>Create an {@link Notification.Builder}, setting any desired
+     *  properties.
+     *  <li>Create a {@link CarExtender}.
+     *  <li>Set car-specific properties using the {@code add} and {@code set} methods of
+     *  {@link CarExtender}.
+     *  <li>Call {@link Notification.Builder#extend(Notification.Extender)}
+     *  to apply the extensions to a notification.
+     * </ol>
+     *
+     * <pre class="prettyprint">
+     * Notification notification = new Notification.Builder(context)
+     *         ...
+     *         .extend(new CarExtender()
+     *                 .set*(...))
+     *         .build();
+     * </pre>
+     *
+     * <p>Car extensions can be accessed on an existing notification by using the
+     * {@code CarExtender(Notification)} constructor, and then using the {@code get} methods
+     * to access values.
+     */
+    public static final class CarExtender implements Extender {
+        private static final String TAG = "CarExtender";
+
+        private static final String EXTRA_CAR_EXTENDER = "android.car.EXTENSIONS";
+        private static final String EXTRA_LARGE_ICON = "large_icon";
+        private static final String EXTRA_CONVERSATION = "car_conversation";
+        private static final String EXTRA_COLOR = "app_color";
+
+        private Bitmap mLargeIcon;
+        private UnreadConversation mUnreadConversation;
+        private int mColor = Notification.COLOR_DEFAULT;
+
+        /**
+         * Create a {@link CarExtender} with default options.
+         */
+        public CarExtender() {
+        }
+
+        /**
+         * Create a {@link CarExtender} from the CarExtender options of an existing Notification.
+         *
+         * @param notif The notification from which to copy options.
+         */
+        public CarExtender(Notification notif) {
+            Bundle carBundle = notif.extras == null ?
+                    null : notif.extras.getBundle(EXTRA_CAR_EXTENDER);
+            if (carBundle != null) {
+                mLargeIcon = carBundle.getParcelable(EXTRA_LARGE_ICON);
+                mColor = carBundle.getInt(EXTRA_COLOR, Notification.COLOR_DEFAULT);
+
+                Bundle b = carBundle.getBundle(EXTRA_CONVERSATION);
+                mUnreadConversation = UnreadConversation.getUnreadConversationFromBundle(b);
+            }
+        }
+
+        /**
+         * Apply car extensions to a notification that is being built. This is typically called by
+         * the {@link Notification.Builder#extend(Notification.Extender)}
+         * method of {@link Notification.Builder}.
+         */
+        @Override
+        public Notification.Builder extend(Notification.Builder builder) {
+            Bundle carExtensions = new Bundle();
+
+            if (mLargeIcon != null) {
+                carExtensions.putParcelable(EXTRA_LARGE_ICON, mLargeIcon);
+            }
+            if (mColor != Notification.COLOR_DEFAULT) {
+                carExtensions.putInt(EXTRA_COLOR, mColor);
+            }
+
+            if (mUnreadConversation != null) {
+                Bundle b = mUnreadConversation.getBundleForUnreadConversation();
+                carExtensions.putBundle(EXTRA_CONVERSATION, b);
+            }
+
+            builder.getExtras().putBundle(EXTRA_CAR_EXTENDER, carExtensions);
+            return builder;
+        }
+
+        /**
+         * Sets the accent color to use when Android Auto presents the notification.
+         *
+         * Android Auto uses the color set with {@link Notification.Builder#setColor(int)}
+         * to accent the displayed notification. However, not all colors are acceptable in an
+         * automotive setting. This method can be used to override the color provided in the
+         * notification in such a situation.
+         */
+        public CarExtender setColor(@ColorInt int color) {
+            mColor = color;
+            return this;
+        }
+
+        /**
+         * Gets the accent color.
+         *
+         * @see setColor
+         */
+        @ColorInt
+        public int getColor() {
+            return mColor;
+        }
+
+        /**
+         * Sets the large icon of the car notification.
+         *
+         * If no large icon is set in the extender, Android Auto will display the icon
+         * specified by {@link Notification.Builder#setLargeIcon(android.graphics.Bitmap)}
+         *
+         * @param largeIcon The large icon to use in the car notification.
+         * @return This object for method chaining.
+         */
+        public CarExtender setLargeIcon(Bitmap largeIcon) {
+            mLargeIcon = largeIcon;
+            return this;
+        }
+
+        /**
+         * Gets the large icon used in this car notification, or null if no icon has been set.
+         *
+         * @return The large icon for the car notification.
+         * @see CarExtender#setLargeIcon
+         */
+        public Bitmap getLargeIcon() {
+            return mLargeIcon;
+        }
+
+        /**
+         * Sets the unread conversation in a message notification.
+         *
+         * @param unreadConversation The unread part of the conversation this notification conveys.
+         * @return This object for method chaining.
+         */
+        public CarExtender setUnreadConversation(UnreadConversation unreadConversation) {
+            mUnreadConversation = unreadConversation;
+            return this;
+        }
+
+        /**
+         * Returns the unread conversation conveyed by this notification.
+         * @see #setUnreadConversation(UnreadConversation)
+         */
+        public UnreadConversation getUnreadConversation() {
+            return mUnreadConversation;
+        }
+
+        /**
+         * A class which holds the unread messages from a conversation.
+         */
+        public static class UnreadConversation {
+            private static final String KEY_AUTHOR = "author";
+            private static final String KEY_TEXT = "text";
+            private static final String KEY_MESSAGES = "messages";
+            private static final String KEY_REMOTE_INPUT = "remote_input";
+            private static final String KEY_ON_REPLY = "on_reply";
+            private static final String KEY_ON_READ = "on_read";
+            private static final String KEY_PARTICIPANTS = "participants";
+            private static final String KEY_TIMESTAMP = "timestamp";
+
+            private final String[] mMessages;
+            private final RemoteInput mRemoteInput;
+            private final PendingIntent mReplyPendingIntent;
+            private final PendingIntent mReadPendingIntent;
+            private final String[] mParticipants;
+            private final long mLatestTimestamp;
+
+            UnreadConversation(String[] messages, RemoteInput remoteInput,
+                    PendingIntent replyPendingIntent, PendingIntent readPendingIntent,
+                    String[] participants, long latestTimestamp) {
+                mMessages = messages;
+                mRemoteInput = remoteInput;
+                mReadPendingIntent = readPendingIntent;
+                mReplyPendingIntent = replyPendingIntent;
+                mParticipants = participants;
+                mLatestTimestamp = latestTimestamp;
+            }
+
+            /**
+             * Gets the list of messages conveyed by this notification.
+             */
+            public String[] getMessages() {
+                return mMessages;
+            }
+
+            /**
+             * Gets the remote input that will be used to convey the response to a message list, or
+             * null if no such remote input exists.
+             */
+            public RemoteInput getRemoteInput() {
+                return mRemoteInput;
+            }
+
+            /**
+             * Gets the pending intent that will be triggered when the user replies to this
+             * notification.
+             */
+            public PendingIntent getReplyPendingIntent() {
+                return mReplyPendingIntent;
+            }
+
+            /**
+             * Gets the pending intent that Android Auto will send after it reads aloud all messages
+             * in this object's message list.
+             */
+            public PendingIntent getReadPendingIntent() {
+                return mReadPendingIntent;
+            }
+
+            /**
+             * Gets the participants in the conversation.
+             */
+            public String[] getParticipants() {
+                return mParticipants;
+            }
+
+            /**
+             * Gets the firs participant in the conversation.
+             */
+            public String getParticipant() {
+                return mParticipants.length > 0 ? mParticipants[0] : null;
+            }
+
+            /**
+             * Gets the timestamp of the conversation.
+             */
+            public long getLatestTimestamp() {
+                return mLatestTimestamp;
+            }
+
+            Bundle getBundleForUnreadConversation() {
+                Bundle b = new Bundle();
+                String author = null;
+                if (mParticipants != null && mParticipants.length > 1) {
+                    author = mParticipants[0];
+                }
+                Parcelable[] messages = new Parcelable[mMessages.length];
+                for (int i = 0; i < messages.length; i++) {
+                    Bundle m = new Bundle();
+                    m.putString(KEY_TEXT, mMessages[i]);
+                    m.putString(KEY_AUTHOR, author);
+                    messages[i] = m;
+                }
+                b.putParcelableArray(KEY_MESSAGES, messages);
+                if (mRemoteInput != null) {
+                    b.putParcelable(KEY_REMOTE_INPUT, mRemoteInput);
+                }
+                b.putParcelable(KEY_ON_REPLY, mReplyPendingIntent);
+                b.putParcelable(KEY_ON_READ, mReadPendingIntent);
+                b.putStringArray(KEY_PARTICIPANTS, mParticipants);
+                b.putLong(KEY_TIMESTAMP, mLatestTimestamp);
+                return b;
+            }
+
+            static UnreadConversation getUnreadConversationFromBundle(Bundle b) {
+                if (b == null) {
+                    return null;
+                }
+                Parcelable[] parcelableMessages = b.getParcelableArray(KEY_MESSAGES);
+                String[] messages = null;
+                if (parcelableMessages != null) {
+                    String[] tmp = new String[parcelableMessages.length];
+                    boolean success = true;
+                    for (int i = 0; i < tmp.length; i++) {
+                        if (!(parcelableMessages[i] instanceof Bundle)) {
+                            success = false;
+                            break;
+                        }
+                        tmp[i] = ((Bundle) parcelableMessages[i]).getString(KEY_TEXT);
+                        if (tmp[i] == null) {
+                            success = false;
+                            break;
+                        }
+                    }
+                    if (success) {
+                        messages = tmp;
+                    } else {
+                        return null;
+                    }
+                }
+
+                PendingIntent onRead = b.getParcelable(KEY_ON_READ);
+                PendingIntent onReply = b.getParcelable(KEY_ON_REPLY);
+
+                RemoteInput remoteInput = b.getParcelable(KEY_REMOTE_INPUT);
+
+                String[] participants = b.getStringArray(KEY_PARTICIPANTS);
+                if (participants == null || participants.length != 1) {
+                    return null;
+                }
+
+                return new UnreadConversation(messages,
+                        remoteInput,
+                        onReply,
+                        onRead,
+                        participants, b.getLong(KEY_TIMESTAMP));
+            }
+        };
+
+        /**
+         * Builder class for {@link CarExtender.UnreadConversation} objects.
+         */
+        public static class Builder {
+            private final List<String> mMessages = new ArrayList<String>();
+            private final String mParticipant;
+            private RemoteInput mRemoteInput;
+            private PendingIntent mReadPendingIntent;
+            private PendingIntent mReplyPendingIntent;
+            private long mLatestTimestamp;
+
+            /**
+             * Constructs a new builder for {@link CarExtender.UnreadConversation}.
+             *
+             * @param name The name of the other participant in the conversation.
+             */
+            public Builder(String name) {
+                mParticipant = name;
+            }
+
+            /**
+             * Appends a new unread message to the list of messages for this conversation.
+             *
+             * The messages should be added from oldest to newest.
+             *
+             * @param message The text of the new unread message.
+             * @return This object for method chaining.
+             */
+            public Builder addMessage(String message) {
+                mMessages.add(message);
+                return this;
+            }
+
+            /**
+             * Sets the pending intent and remote input which will convey the reply to this
+             * notification.
+             *
+             * @param pendingIntent The pending intent which will be triggered on a reply.
+             * @param remoteInput The remote input parcelable which will carry the reply.
+             * @return This object for method chaining.
+             *
+             * @see CarExtender.UnreadConversation#getRemoteInput
+             * @see CarExtender.UnreadConversation#getReplyPendingIntent
+             */
+            public Builder setReplyAction(
+                    PendingIntent pendingIntent, RemoteInput remoteInput) {
+                mRemoteInput = remoteInput;
+                mReplyPendingIntent = pendingIntent;
+
+                return this;
+            }
+
+            /**
+             * Sets the pending intent that will be sent once the messages in this notification
+             * are read.
+             *
+             * @param pendingIntent The pending intent to use.
+             * @return This object for method chaining.
+             */
+            public Builder setReadPendingIntent(PendingIntent pendingIntent) {
+                mReadPendingIntent = pendingIntent;
+                return this;
+            }
+
+            /**
+             * Sets the timestamp of the most recent message in an unread conversation.
+             *
+             * If a messaging notification has been posted by your application and has not
+             * yet been cancelled, posting a later notification with the same id and tag
+             * but without a newer timestamp may result in Android Auto not displaying a
+             * heads up notification for the later notification.
+             *
+             * @param timestamp The timestamp of the most recent message in the conversation.
+             * @return This object for method chaining.
+             */
+            public Builder setLatestTimestamp(long timestamp) {
+                mLatestTimestamp = timestamp;
+                return this;
+            }
+
+            /**
+             * Builds a new unread conversation object.
+             *
+             * @return The new unread conversation object.
+             */
+            public UnreadConversation build() {
+                String[] messages = mMessages.toArray(new String[mMessages.size()]);
+                String[] participants = { mParticipant };
+                return new UnreadConversation(messages, mRemoteInput, mReplyPendingIntent,
+                        mReadPendingIntent, participants, mLatestTimestamp);
             }
         }
     }

@@ -47,7 +47,7 @@ public final class BridgeWindowSession implements IWindowSession {
 
     @Override
     public int addToDisplay(IWindow arg0, int seq, LayoutParams arg1, int arg2, int displayId,
-                            Rect arg3, Rect arg4, InputChannel outInputchannel)
+                            Rect arg3, Rect arg4, Rect arg5, InputChannel outInputchannel)
             throws RemoteException {
         // pass for now.
         return 0;
@@ -89,7 +89,7 @@ public final class BridgeWindowSession implements IWindowSession {
     @Override
     public int relayout(IWindow iWindow, int i, LayoutParams layoutParams, int i2,
             int i3, int i4, int i5, Rect rect, Rect rect2, Rect rect3, Rect rect4, Rect rect5,
-            Configuration configuration, Surface surface) throws RemoteException {
+            Rect rect6, Configuration configuration, Surface surface) throws RemoteException {
         // pass for now.
         return 0;
     }
@@ -191,12 +191,6 @@ public final class BridgeWindowSession implements IWindowSession {
     }
 
     @Override
-    public void setUniverseTransform(IBinder window, float alpha, float offx, float offy,
-            float dsdx, float dtdx, float dsdy, float dtdy) {
-        // pass for now.
-    }
-
-    @Override
     public IBinder asBinder() {
         // pass for now.
         return null;
@@ -211,5 +205,10 @@ public final class BridgeWindowSession implements IWindowSession {
     public IWindowId getWindowId(IBinder window) throws RemoteException {
         // pass for now.
         return null;
+    }
+
+    @Override
+    public void pokeDrawLock(IBinder window) {
+        // pass for now.
     }
 }

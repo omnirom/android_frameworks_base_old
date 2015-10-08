@@ -16,8 +16,6 @@
 
 package com.android.server.pm;
 
-import static android.text.format.DateUtils.MINUTE_IN_MILLIS;
-
 import android.app.Activity;
 import android.app.ActivityManager;
 import android.app.ActivityManagerNative;
@@ -30,19 +28,25 @@ import android.content.pm.PackageManager;
 import android.content.pm.PackageManager.NameNotFoundException;
 import android.content.pm.UserInfo;
 import android.graphics.Bitmap;
-import android.graphics.BitmapFactory;
 import android.os.Binder;
 import android.os.Bundle;
-import android.os.Debug;
 import android.os.Environment;
 import android.os.FileUtils;
 import android.os.Handler;
 import android.os.IUserManager;
+import android.os.Message;
+import android.os.ParcelFileDescriptor;
+import android.os.Parcelable;
 import android.os.Process;
 import android.os.RemoteException;
 import android.os.ServiceManager;
 import android.os.UserHandle;
 import android.os.UserManager;
+import android.os.storage.StorageManager;
+import android.os.storage.VolumeInfo;
+import android.system.ErrnoException;
+import android.system.Os;
+import android.system.OsConstants;
 import android.util.AtomicFile;
 import android.util.Log;
 import android.util.Slog;
@@ -51,9 +55,13 @@ import android.util.SparseBooleanArray;
 import android.util.TimeUtils;
 import android.util.Xml;
 
+import com.google.android.collect.Sets;
+
+import com.android.internal.annotations.VisibleForTesting;
 import com.android.internal.app.IAppOpsService;
 import com.android.internal.util.ArrayUtils;
 import com.android.internal.util.FastXmlSerializer;
+import com.android.internal.util.XmlUtils;
 
 import org.xmlpull.v1.XmlPullParser;
 import org.xmlpull.v1.XmlPullParserException;
@@ -67,11 +75,12 @@ import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.PrintWriter;
-import java.security.MessageDigest;
-import java.security.NoSuchAlgorithmException;
-import java.security.SecureRandom;
+import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Set;
+
+import libcore.io.IoUtils;
 
 public class UserManagerService extends IUserManager.Stub {
 
@@ -85,10 +94,6 @@ public class UserManagerService extends IUserManager.Stub {
     private static final String ATTR_ID = "id";
     private static final String ATTR_CREATION_TIME = "created";
     private static final String ATTR_LAST_LOGGED_IN_TIME = "lastLoggedIn";
-    private static final String ATTR_SALT = "salt";
-    private static final String ATTR_PIN_HASH = "pinHash";
-    private static final String ATTR_FAILED_ATTEMPTS = "failedAttempts";
-    private static final String ATTR_LAST_RETRY_MS = "lastAttemptMs";
     private static final String ATTR_SERIAL_NO = "serialNumber";
     private static final String ATTR_NEXT_SERIAL_NO = "nextSerialNumber";
     private static final String ATTR_PARTIAL = "partial";
@@ -109,10 +114,13 @@ public class UserManagerService extends IUserManager.Stub {
     private static final String ATTR_TYPE_STRING = "s";
     private static final String ATTR_TYPE_BOOLEAN = "b";
     private static final String ATTR_TYPE_INTEGER = "i";
+    private static final String ATTR_TYPE_BUNDLE = "B";
+    private static final String ATTR_TYPE_BUNDLE_ARRAY = "BA";
 
     private static final String USER_INFO_DIR = "system" + File.separator + "users";
     private static final String USER_LIST_FILENAME = "userlist.xml";
     private static final String USER_PHOTO_FILENAME = "photo.png";
+    private static final String USER_PHOTO_FILENAME_TMP = USER_PHOTO_FILENAME + ".tmp";
 
     private static final String RESTRICTIONS_FILE_PREFIX = "res_";
     private static final String XML_SUFFIX = ".xml";
@@ -123,17 +131,23 @@ public class UserManagerService extends IUserManager.Stub {
 
     private static final long EPOCH_PLUS_30_YEARS = 30L * 365 * 24 * 60 * 60 * 1000L; // ms
 
-    // Number of attempts before jumping to the next BACKOFF_TIMES slot
-    private static final int BACKOFF_INC_INTERVAL = 5;
-
     // Maximum number of managed profiles permitted is 1. This cannot be increased
     // without first making sure that the rest of the framework is prepared for it.
     private static final int MAX_MANAGED_PROFILES = 1;
 
-    // Amount of time to force the user to wait before entering the PIN again, after failing
-    // BACKOFF_INC_INTERVAL times.
-    private static final int[] BACKOFF_TIMES = { 0, 30*1000, 60*1000, 5*60*1000, 30*60*1000 };
+    /**
+     * Flag indicating whether device credentials are shared among same-user profiles.
+     */
+    private static final boolean CONFIG_PROFILES_SHARE_CREDENTIAL = true;
 
+    // Set of user restrictions, which can only be enforced by the system
+    private static final Set<String> SYSTEM_CONTROLLED_RESTRICTIONS = Sets.newArraySet(
+            UserManager.DISALLOW_RECORD_AUDIO);
+
+    static final int WRITE_USER_MSG = 1;
+    static final int WRITE_USER_DELAY = 2*1000;  // 2 seconds
+
+    private static final String XATTR_SERIAL = "user.serial";
 
     private final Context mContext;
     private final PackageManagerService mPm;
@@ -144,21 +158,10 @@ public class UserManagerService extends IUserManager.Stub {
 
     private final File mUsersDir;
     private final File mUserListFile;
-    private final File mBaseUserPath;
 
     private final SparseArray<UserInfo> mUsers = new SparseArray<UserInfo>();
     private final SparseArray<Bundle> mUserRestrictions = new SparseArray<Bundle>();
     private final Bundle mGuestRestrictions = new Bundle();
-
-    class RestrictionsPinState {
-        long salt;
-        String pinHash;
-        int failedAttempts;
-        long lastAttemptTime;
-    }
-
-    private final SparseArray<RestrictionsPinState> mRestrictionsPinStates =
-            new SparseArray<RestrictionsPinState>();
 
     /**
      * Set of user IDs being actively removed. Removed IDs linger in this set
@@ -210,7 +213,7 @@ public class UserManagerService extends IUserManager.Stub {
         mPm = pm;
         mInstallLock = installLock;
         mPackagesLock = packagesLock;
-        mHandler = new Handler();
+        mHandler = new MainHandler();
         synchronized (mInstallLock) {
             synchronized (mPackagesLock) {
                 mUsersDir = new File(dataDir, USER_INFO_DIR);
@@ -218,7 +221,6 @@ public class UserManagerService extends IUserManager.Stub {
                 // Make zeroth user directory, for services to migrate their files to that location
                 File userZeroDir = new File(mUsersDir, "0");
                 userZeroDir.mkdirs();
-                mBaseUserPath = baseUserPath;
                 FileUtils.setPermissions(mUsersDir.toString(),
                         FileUtils.S_IRWXU|FileUtils.S_IRWXG
                         |FileUtils.S_IROTH|FileUtils.S_IXOTH,
@@ -226,6 +228,14 @@ public class UserManagerService extends IUserManager.Stub {
                 mUserListFile = new File(mUsersDir, USER_LIST_FILENAME);
                 initDefaultGuestRestrictions();
                 readUserListLocked();
+                sInstance = this;
+            }
+        }
+    }
+
+    void systemReady() {
+        synchronized (mInstallLock) {
+            synchronized (mPackagesLock) {
                 // Prune out any partially created/partially removed users.
                 ArrayList<UserInfo> partials = new ArrayList<UserInfo>();
                 for (int i = 0; i < mUsers.size(); i++) {
@@ -236,17 +246,13 @@ public class UserManagerService extends IUserManager.Stub {
                 }
                 for (int i = 0; i < partials.size(); i++) {
                     UserInfo ui = partials.get(i);
-                    Slog.w(LOG_TAG, "Removing partially created user #" + i
+                    Slog.w(LOG_TAG, "Removing partially created user " + ui.id
                             + " (name=" + ui.name + ")");
                     removeUserStateLocked(ui.id);
                 }
-                sInstance = this;
             }
         }
-    }
-
-    void systemReady() {
-        userForeground(UserHandle.USER_OWNER);
+        onUserForeground(UserHandle.USER_OWNER);
         mAppOpsService = IAppOpsService.Stub.asInterface(
                 ServiceManager.getService(Context.APP_OPS_SERVICE));
         for (int i = 0; i < mUserIds.length; ++i) {
@@ -316,19 +322,38 @@ public class UserManagerService extends IUserManager.Stub {
     }
 
     @Override
+    public int getCredentialOwnerProfile(int userHandle) {
+        checkManageUsersPermission("get the credential owner");
+        if (CONFIG_PROFILES_SHARE_CREDENTIAL) {
+            synchronized (mPackagesLock) {
+                UserInfo profileParent = getProfileParentLocked(userHandle);
+                if (profileParent != null) {
+                    return profileParent.id;
+                }
+            }
+        }
+
+        return userHandle;
+    }
+
+    @Override
     public UserInfo getProfileParent(int userHandle) {
         checkManageUsersPermission("get the profile parent");
         synchronized (mPackagesLock) {
-            UserInfo profile = getUserInfoLocked(userHandle);
-            if (profile == null) {
-                return null;
-            }
-            int parentUserId = profile.profileGroupId;
-            if (parentUserId == UserInfo.NO_PROFILE_GROUP_ID) {
-                return null;
-            } else {
-                return getUserInfoLocked(parentUserId);
-            }
+            return getProfileParentLocked(userHandle);
+        }
+    }
+
+    private UserInfo getProfileParentLocked(int userHandle) {
+        UserInfo profile = getUserInfoLocked(userHandle);
+        if (profile == null) {
+            return null;
+        }
+        int parentUserId = profile.profileGroupId;
+        if (parentUserId == UserInfo.NO_PROFILE_GROUP_ID) {
+            return null;
+        } else {
+            return getUserInfoLocked(parentUserId);
         }
     }
 
@@ -378,9 +403,10 @@ public class UserManagerService extends IUserManager.Stub {
         return ui;
     }
 
+    /** Called by PackageManagerService */
     public boolean exists(int userId) {
         synchronized (mPackagesLock) {
-            return ArrayUtils.contains(mUserIds, userId);
+            return mUsers.get(userId) != null;
         }
     }
 
@@ -433,7 +459,8 @@ public class UserManagerService extends IUserManager.Stub {
     }
 
     @Override
-    public Bitmap getUserIcon(int userId) {
+    public ParcelFileDescriptor getUserIcon(int userId) {
+        String iconPath;
         synchronized (mPackagesLock) {
             UserInfo info = mUsers.get(userId);
             if (info == null || info.partial) {
@@ -448,8 +475,16 @@ public class UserManagerService extends IUserManager.Stub {
             if (info.iconPath == null) {
                 return null;
             }
-            return BitmapFactory.decodeFile(info.iconPath);
+            iconPath = info.iconPath;
         }
+
+        try {
+            return ParcelFileDescriptor.open(
+                    new File(iconPath), ParcelFileDescriptor.MODE_READ_ONLY);
+        } catch (FileNotFoundException e) {
+            Log.e(LOG_TAG, "Couldn't find icon file", e);
+        }
+        return null;
     }
 
     public void makeInitialized(int userId) {
@@ -461,7 +496,7 @@ public class UserManagerService extends IUserManager.Stub {
             }
             if ((info.flags&UserInfo.FLAG_INITIALIZED) == 0) {
                 info.flags |= UserInfo.FLAG_INITIALIZED;
-                writeUserLocked(info);
+                scheduleWriteUserLocked(info);
             }
         }
     }
@@ -499,7 +534,7 @@ public class UserManagerService extends IUserManager.Stub {
     public boolean hasUserRestriction(String restrictionKey, int userId) {
         synchronized (mPackagesLock) {
             Bundle restrictions = mUserRestrictions.get(userId);
-            return restrictions != null ? restrictions.getBoolean(restrictionKey) : false;
+            return restrictions != null && restrictions.getBoolean(restrictionKey);
         }
     }
 
@@ -514,29 +549,90 @@ public class UserManagerService extends IUserManager.Stub {
     }
 
     @Override
+    public void setUserRestriction(String key, boolean value, int userId) {
+        checkManageUsersPermission("setUserRestriction");
+        synchronized (mPackagesLock) {
+            if (!SYSTEM_CONTROLLED_RESTRICTIONS.contains(key)) {
+                Bundle restrictions = getUserRestrictions(userId);
+                restrictions.putBoolean(key, value);
+                setUserRestrictionsInternalLocked(restrictions, userId);
+            }
+        }
+    }
+
+    @Override
+    public void setSystemControlledUserRestriction(String key, boolean value, int userId) {
+        checkSystemOrRoot("setSystemControlledUserRestriction");
+        synchronized (mPackagesLock) {
+            Bundle restrictions = getUserRestrictions(userId);
+            restrictions.putBoolean(key, value);
+            setUserRestrictionsInternalLocked(restrictions, userId);
+        }
+    }
+
+    @Override
     public void setUserRestrictions(Bundle restrictions, int userId) {
         checkManageUsersPermission("setUserRestrictions");
         if (restrictions == null) return;
 
         synchronized (mPackagesLock) {
-            mUserRestrictions.get(userId).clear();
-            mUserRestrictions.get(userId).putAll(restrictions);
-            long token = Binder.clearCallingIdentity();
-            try {
-                mAppOpsService.setUserRestrictions(mUserRestrictions.get(userId), userId);
-            } catch (RemoteException e) {
-                Log.w(LOG_TAG, "Unable to notify AppOpsService of UserRestrictions");
-            } finally {
-                Binder.restoreCallingIdentity(token);
+            final Bundle oldUserRestrictions = mUserRestrictions.get(userId);
+            // Restore the original state of system controlled restrictions from oldUserRestrictions
+            for (String key : SYSTEM_CONTROLLED_RESTRICTIONS) {
+                restrictions.remove(key);
+                if (oldUserRestrictions.containsKey(key)) {
+                    restrictions.putBoolean(key, oldUserRestrictions.getBoolean(key));
+                }
             }
-            writeUserLocked(mUsers.get(userId));
+            setUserRestrictionsInternalLocked(restrictions, userId);
         }
+    }
+
+    private void setUserRestrictionsInternalLocked(Bundle restrictions, int userId) {
+        final Bundle userRestrictions = mUserRestrictions.get(userId);
+        userRestrictions.clear();
+        userRestrictions.putAll(restrictions);
+        long token = Binder.clearCallingIdentity();
+        try {
+        mAppOpsService.setUserRestrictions(userRestrictions, userId);
+        } catch (RemoteException e) {
+            Log.w(LOG_TAG, "Unable to notify AppOpsService of UserRestrictions");
+        } finally {
+            Binder.restoreCallingIdentity(token);
+        }
+        scheduleWriteUserLocked(mUsers.get(userId));
     }
 
     /**
      * Check if we've hit the limit of how many users can be created.
      */
     private boolean isUserLimitReachedLocked() {
+        return getAliveUsersExcludingGuestsCountLocked() >= UserManager.getMaxSupportedUsers();
+    }
+
+    @Override
+    public boolean canAddMoreManagedProfiles() {
+        checkManageUsersPermission("check if more managed profiles can be added.");
+        if (ActivityManager.isLowRamDeviceStatic()) {
+            return false;
+        }
+        if (!mContext.getPackageManager().hasSystemFeature(
+                PackageManager.FEATURE_MANAGED_USERS)) {
+            return false;
+        }
+        synchronized(mPackagesLock) {
+            // Limit number of managed profiles that can be created
+            if (numberOfUsersOfTypeLocked(UserInfo.FLAG_MANAGED_PROFILE, true)
+                    >= MAX_MANAGED_PROFILES) {
+                return false;
+            }
+            int usersCount = getAliveUsersExcludingGuestsCountLocked();
+            // We allow creating a managed profile in the special case where there is only one user.
+            return usersCount == 1 || usersCount < UserManager.getMaxSupportedUsers();
+        }
+    }
+
+    private int getAliveUsersExcludingGuestsCountLocked() {
         int aliveUserCount = 0;
         final int totalUserCount = mUsers.size();
         // Skip over users being removed
@@ -547,7 +643,7 @@ public class UserManagerService extends IUserManager.Stub {
                 aliveUserCount++;
             }
         }
-        return aliveUserCount >= UserManager.getMaxSupportedUsers();
+        return aliveUserCount;
     }
 
     /**
@@ -568,10 +664,18 @@ public class UserManagerService extends IUserManager.Stub {
         }
     }
 
+    private static void checkSystemOrRoot(String message) {
+        final int uid = Binder.getCallingUid();
+        if (uid != Process.SYSTEM_UID && uid != 0) {
+            throw new SecurityException("Only system may call: " + message);
+        }
+    }
+
     private void writeBitmapLocked(UserInfo info, Bitmap bitmap) {
         try {
             File dir = new File(mUsersDir, Integer.toString(info.id));
             File file = new File(dir, USER_PHOTO_FILENAME);
+            File tmp = new File(dir, USER_PHOTO_FILENAME_TMP);
             if (!dir.exists()) {
                 dir.mkdir();
                 FileUtils.setPermissions(
@@ -580,7 +684,8 @@ public class UserManagerService extends IUserManager.Stub {
                         -1, -1);
             }
             FileOutputStream os;
-            if (bitmap.compress(Bitmap.CompressFormat.PNG, 100, os = new FileOutputStream(file))) {
+            if (bitmap.compress(Bitmap.CompressFormat.PNG, 100, os = new FileOutputStream(tmp))
+                    && tmp.renameTo(file)) {
                 info.iconPath = file.getAbsolutePath();
             }
             try {
@@ -588,6 +693,7 @@ public class UserManagerService extends IUserManager.Stub {
             } catch (IOException ioe) {
                 // What the ... !
             }
+            tmp.delete();
         } catch (FileNotFoundException e) {
             Slog.w(LOG_TAG, "Error setting photo for user ", e);
         }
@@ -618,7 +724,7 @@ public class UserManagerService extends IUserManager.Stub {
         try {
             fis = userListFile.openRead();
             XmlPullParser parser = Xml.newPullParser();
-            parser.setInput(fis, null);
+            parser.setInput(fis, StandardCharsets.UTF_8.name());
             int type;
             while ((type = parser.next()) != XmlPullParser.START_TAG
                     && type != XmlPullParser.END_DOCUMENT) {
@@ -695,7 +801,7 @@ public class UserManagerService extends IUserManager.Stub {
             UserInfo user = mUsers.get(UserHandle.USER_OWNER);
             if ("Primary".equals(user.name)) {
                 user.name = mContext.getResources().getString(com.android.internal.R.string.owner_name);
-                writeUserLocked(user);
+                scheduleWriteUserLocked(user);
             }
             userVersion = 1;
         }
@@ -705,7 +811,7 @@ public class UserManagerService extends IUserManager.Stub {
             UserInfo user = mUsers.get(UserHandle.USER_OWNER);
             if ((user.flags & UserInfo.FLAG_INITIALIZED) == 0) {
                 user.flags |= UserInfo.FLAG_INITIALIZED;
-                writeUserLocked(user);
+                scheduleWriteUserLocked(user);
             }
             userVersion = 2;
         }
@@ -748,6 +854,13 @@ public class UserManagerService extends IUserManager.Stub {
         writeUserLocked(primary);
     }
 
+    private void scheduleWriteUserLocked(UserInfo userInfo) {
+        if (!mHandler.hasMessages(WRITE_USER_MSG, userInfo)) {
+            Message msg = mHandler.obtainMessage(WRITE_USER_MSG, userInfo);
+            mHandler.sendMessageDelayed(msg, WRITE_USER_DELAY);
+        }
+    }
+
     /*
      * Writes the user file in this format:
      *
@@ -764,7 +877,7 @@ public class UserManagerService extends IUserManager.Stub {
 
             // XmlSerializer serializer = XmlUtils.serializerInstance();
             final XmlSerializer serializer = new FastXmlSerializer();
-            serializer.setOutput(bos, "utf-8");
+            serializer.setOutput(bos, StandardCharsets.UTF_8.name());
             serializer.startDocument(null, true);
             serializer.setFeature("http://xmlpull.org/v1/doc/features.html#indent-output", true);
 
@@ -775,21 +888,6 @@ public class UserManagerService extends IUserManager.Stub {
             serializer.attribute(null, ATTR_CREATION_TIME, Long.toString(userInfo.creationTime));
             serializer.attribute(null, ATTR_LAST_LOGGED_IN_TIME,
                     Long.toString(userInfo.lastLoggedInTime));
-            RestrictionsPinState pinState = mRestrictionsPinStates.get(userInfo.id);
-            if (pinState != null) {
-                if (pinState.salt != 0) {
-                    serializer.attribute(null, ATTR_SALT, Long.toString(pinState.salt));
-                }
-                if (pinState.pinHash != null) {
-                    serializer.attribute(null, ATTR_PIN_HASH, pinState.pinHash);
-                }
-                if (pinState.failedAttempts != 0) {
-                    serializer.attribute(null, ATTR_FAILED_ATTEMPTS,
-                            Integer.toString(pinState.failedAttempts));
-                    serializer.attribute(null, ATTR_LAST_RETRY_MS,
-                            Long.toString(pinState.lastAttemptTime));
-                }
-            }
             if (userInfo.iconPath != null) {
                 serializer.attribute(null,  ATTR_ICON_PATH, userInfo.iconPath);
             }
@@ -838,7 +936,7 @@ public class UserManagerService extends IUserManager.Stub {
 
             // XmlSerializer serializer = XmlUtils.serializerInstance();
             final XmlSerializer serializer = new FastXmlSerializer();
-            serializer.setOutput(bos, "utf-8");
+            serializer.setOutput(bos, StandardCharsets.UTF_8.name());
             serializer.startDocument(null, true);
             serializer.setFeature("http://xmlpull.org/v1/doc/features.html#indent-output", true);
 
@@ -866,7 +964,7 @@ public class UserManagerService extends IUserManager.Stub {
         }
     }
 
-    private void writeRestrictionsLocked(XmlSerializer serializer, Bundle restrictions) 
+    private void writeRestrictionsLocked(XmlSerializer serializer, Bundle restrictions)
             throws IOException {
         serializer.startTag(null, TAG_RESTRICTIONS);
         writeBoolean(serializer, restrictions, UserManager.DISALLOW_CONFIG_WIFI);
@@ -883,6 +981,7 @@ public class UserManagerService extends IUserManager.Stub {
         writeBoolean(serializer, restrictions, UserManager.DISALLOW_DEBUGGING_FEATURES);
         writeBoolean(serializer, restrictions, UserManager.DISALLOW_CONFIG_VPN);
         writeBoolean(serializer, restrictions, UserManager.DISALLOW_CONFIG_TETHERING);
+        writeBoolean(serializer, restrictions, UserManager.DISALLOW_NETWORK_RESET);
         writeBoolean(serializer, restrictions, UserManager.DISALLOW_FACTORY_RESET);
         writeBoolean(serializer, restrictions, UserManager.DISALLOW_ADD_USER);
         writeBoolean(serializer, restrictions, UserManager.ENSURE_VERIFY_APPS);
@@ -894,9 +993,13 @@ public class UserManagerService extends IUserManager.Stub {
         writeBoolean(serializer, restrictions, UserManager.DISALLOW_ADJUST_VOLUME);
         writeBoolean(serializer, restrictions, UserManager.DISALLOW_OUTGOING_CALLS);
         writeBoolean(serializer, restrictions, UserManager.DISALLOW_SMS);
+        writeBoolean(serializer, restrictions, UserManager.DISALLOW_FUN);
         writeBoolean(serializer, restrictions, UserManager.DISALLOW_CREATE_WINDOWS);
         writeBoolean(serializer, restrictions, UserManager.DISALLOW_CROSS_PROFILE_COPY_PASTE);
         writeBoolean(serializer, restrictions, UserManager.DISALLOW_OUTGOING_BEAM);
+        writeBoolean(serializer, restrictions, UserManager.DISALLOW_WALLPAPER);
+        writeBoolean(serializer, restrictions, UserManager.DISALLOW_SAFE_BOOT);
+        writeBoolean(serializer, restrictions, UserManager.ALLOW_PARENT_PROFILE_APP_LINKING);
         serializer.endTag(null, TAG_RESTRICTIONS);
     }
 
@@ -907,11 +1010,7 @@ public class UserManagerService extends IUserManager.Stub {
         String iconPath = null;
         long creationTime = 0L;
         long lastLoggedInTime = 0L;
-        long salt = 0L;
-        String pinHash = null;
-        int failedAttempts = 0;
         int profileGroupId = UserInfo.NO_PROFILE_GROUP_ID;
-        long lastAttemptTime = 0L;
         boolean partial = false;
         boolean guestToRemove = false;
         Bundle restrictions = new Bundle();
@@ -922,7 +1021,7 @@ public class UserManagerService extends IUserManager.Stub {
                     new AtomicFile(new File(mUsersDir, Integer.toString(id) + XML_SUFFIX));
             fis = userFile.openRead();
             XmlPullParser parser = Xml.newPullParser();
-            parser.setInput(fis, null);
+            parser.setInput(fis, StandardCharsets.UTF_8.name());
             int type;
             while ((type = parser.next()) != XmlPullParser.START_TAG
                     && type != XmlPullParser.END_DOCUMENT) {
@@ -945,18 +1044,8 @@ public class UserManagerService extends IUserManager.Stub {
                 iconPath = parser.getAttributeValue(null, ATTR_ICON_PATH);
                 creationTime = readLongAttribute(parser, ATTR_CREATION_TIME, 0);
                 lastLoggedInTime = readLongAttribute(parser, ATTR_LAST_LOGGED_IN_TIME, 0);
-                salt = readLongAttribute(parser, ATTR_SALT, 0L);
-                pinHash = parser.getAttributeValue(null, ATTR_PIN_HASH);
-                failedAttempts = readIntAttribute(parser, ATTR_FAILED_ATTEMPTS, 0);
-                lastAttemptTime = readLongAttribute(parser, ATTR_LAST_RETRY_MS, 0L);
                 profileGroupId = readIntAttribute(parser, ATTR_PROFILE_GROUP_ID,
                         UserInfo.NO_PROFILE_GROUP_ID);
-                if (profileGroupId == UserInfo.NO_PROFILE_GROUP_ID) {
-                    // This attribute was added and renamed during development of L.
-                    // TODO Remove upgrade path by 1st May 2014
-                    profileGroupId = readIntAttribute(parser, "relatedGroupId",
-                            UserInfo.NO_PROFILE_GROUP_ID);
-                }
                 String valueString = parser.getAttributeValue(null, ATTR_PARTIAL);
                 if ("true".equals(valueString)) {
                     partial = true;
@@ -992,17 +1081,6 @@ public class UserManagerService extends IUserManager.Stub {
             userInfo.guestToRemove = guestToRemove;
             userInfo.profileGroupId = profileGroupId;
             mUserRestrictions.append(id, restrictions);
-            if (salt != 0L) {
-                RestrictionsPinState pinState = mRestrictionsPinStates.get(id);
-                if (pinState == null) {
-                    pinState = new RestrictionsPinState();
-                    mRestrictionsPinStates.put(id, pinState);
-                }
-                pinState.salt = salt;
-                pinState.pinHash = pinHash;
-                pinState.failedAttempts = failedAttempts;
-                pinState.lastAttemptTime = lastAttemptTime;
-            }
             return userInfo;
 
         } catch (IOException ioe) {
@@ -1034,6 +1112,7 @@ public class UserManagerService extends IUserManager.Stub {
         readBoolean(parser, restrictions, UserManager.DISALLOW_DEBUGGING_FEATURES);
         readBoolean(parser, restrictions, UserManager.DISALLOW_CONFIG_VPN);
         readBoolean(parser, restrictions, UserManager.DISALLOW_CONFIG_TETHERING);
+        readBoolean(parser, restrictions, UserManager.DISALLOW_NETWORK_RESET);
         readBoolean(parser, restrictions, UserManager.DISALLOW_FACTORY_RESET);
         readBoolean(parser, restrictions, UserManager.DISALLOW_ADD_USER);
         readBoolean(parser, restrictions, UserManager.ENSURE_VERIFY_APPS);
@@ -1046,9 +1125,13 @@ public class UserManagerService extends IUserManager.Stub {
         readBoolean(parser, restrictions, UserManager.DISALLOW_ADJUST_VOLUME);
         readBoolean(parser, restrictions, UserManager.DISALLOW_OUTGOING_CALLS);
         readBoolean(parser, restrictions, UserManager.DISALLOW_SMS);
+        readBoolean(parser, restrictions, UserManager.DISALLOW_FUN);
         readBoolean(parser, restrictions, UserManager.DISALLOW_CREATE_WINDOWS);
         readBoolean(parser, restrictions, UserManager.DISALLOW_CROSS_PROFILE_COPY_PASTE);
         readBoolean(parser, restrictions, UserManager.DISALLOW_OUTGOING_BEAM);
+        readBoolean(parser, restrictions, UserManager.DISALLOW_WALLPAPER);
+        readBoolean(parser, restrictions, UserManager.DISALLOW_SAFE_BOOT);
+        readBoolean(parser, restrictions, UserManager.ALLOW_PARENT_PROFILE_APP_LINKING);
     }
 
     private void readBoolean(XmlPullParser parser, Bundle restrictions,
@@ -1152,9 +1235,14 @@ public class UserManagerService extends IUserManager.Stub {
             Log.w(LOG_TAG, "Cannot add user. DISALLOW_ADD_USER is enabled.");
             return null;
         }
+        if (ActivityManager.isLowRamDeviceStatic()) {
+            return null;
+        }
         final boolean isGuest = (flags & UserInfo.FLAG_GUEST) != 0;
+        final boolean isManagedProfile = (flags & UserInfo.FLAG_MANAGED_PROFILE) != 0;
         final long ident = Binder.clearCallingIdentity();
         UserInfo userInfo = null;
+        final int userId;
         try {
             synchronized (mInstallLock) {
                 synchronized (mPackagesLock) {
@@ -1163,24 +1251,20 @@ public class UserManagerService extends IUserManager.Stub {
                         parent = getUserInfoLocked(parentId);
                         if (parent == null) return null;
                     }
-                    // If we're not adding a guest user and the limit has been reached,
-                    // cannot add a user.
-                    if (!isGuest && isUserLimitReachedLocked()) {
+                    if (isManagedProfile && !canAddMoreManagedProfiles()) {
+                        return null;
+                    }
+                    if (!isGuest && !isManagedProfile && isUserLimitReachedLocked()) {
+                        // If we're not adding a guest user or a managed profile and the limit has
+                        // been reached, cannot add a user.
                         return null;
                     }
                     // If we're adding a guest and there already exists one, bail.
                     if (isGuest && findCurrentGuestUserLocked() != null) {
                         return null;
                     }
-                    // Limit number of managed profiles that can be created
-                    if ((flags & UserInfo.FLAG_MANAGED_PROFILE) != 0
-                            && numberOfUsersOfTypeLocked(UserInfo.FLAG_MANAGED_PROFILE, true)
-                                >= MAX_MANAGED_PROFILES) {
-                        return null;
-                    }
-                    int userId = getNextAvailableIdLocked();
+                    userId = getNextAvailableIdLocked();
                     userInfo = new UserInfo(userId, name, null, flags);
-                    File userPath = new File(mBaseUserPath, Integer.toString(userId));
                     userInfo.serialNumber = mNextSerialNumber++;
                     long now = System.currentTimeMillis();
                     userInfo.creationTime = (now > EPOCH_PLUS_30_YEARS) ? now : 0;
@@ -1191,19 +1275,31 @@ public class UserManagerService extends IUserManager.Stub {
                     if (parent != null) {
                         if (parent.profileGroupId == UserInfo.NO_PROFILE_GROUP_ID) {
                             parent.profileGroupId = parent.id;
-                            writeUserLocked(parent);
+                            scheduleWriteUserLocked(parent);
                         }
                         userInfo.profileGroupId = parent.profileGroupId;
                     }
-                    writeUserLocked(userInfo);
-                    mPm.createNewUserLILPw(userId, userPath);
+                    final StorageManager storage = mContext.getSystemService(StorageManager.class);
+                    for (VolumeInfo vol : storage.getWritablePrivateVolumes()) {
+                        final String volumeUuid = vol.getFsUuid();
+                        try {
+                            final File userDir = Environment.getDataUserDirectory(volumeUuid,
+                                    userId);
+                            prepareUserDirectory(userDir);
+                            enforceSerialNumber(userDir, userInfo.serialNumber);
+                        } catch (IOException e) {
+                            Log.wtf(LOG_TAG, "Failed to create user directory on " + volumeUuid, e);
+                        }
+                    }
+                    mPm.createNewUserLILPw(userId);
                     userInfo.partial = false;
-                    writeUserLocked(userInfo);
+                    scheduleWriteUserLocked(userInfo);
                     updateUserIdsLocked();
                     Bundle restrictions = new Bundle();
                     mUserRestrictions.append(userId, restrictions);
                 }
             }
+            mPm.newUserCreated(userId);
             if (userInfo != null) {
                 Intent addedIntent = new Intent(Intent.ACTION_USER_ADDED);
                 addedIntent.putExtra(Intent.EXTRA_USER_HANDLE, userInfo.id);
@@ -1402,8 +1498,6 @@ public class UserManagerService extends IUserManager.Stub {
 
         // Remove this user from the list
         mUsers.remove(userHandle);
-
-        mRestrictionsPinStates.remove(userHandle);
         // Remove user file
         AtomicFile userFile = new AtomicFile(new File(mUsersDir, userHandle + XML_SUFFIX));
         userFile.delete();
@@ -1475,92 +1569,6 @@ public class UserManagerService extends IUserManager.Stub {
     }
 
     @Override
-    public boolean setRestrictionsChallenge(String newPin) {
-        checkManageUsersPermission("Only system can modify the restrictions pin");
-        int userId = UserHandle.getCallingUserId();
-        synchronized (mPackagesLock) {
-            RestrictionsPinState pinState = mRestrictionsPinStates.get(userId);
-            if (pinState == null) {
-                pinState = new RestrictionsPinState();
-            }
-            if (newPin == null) {
-                pinState.salt = 0;
-                pinState.pinHash = null;
-            } else {
-                try {
-                    pinState.salt = SecureRandom.getInstance("SHA1PRNG").nextLong();
-                } catch (NoSuchAlgorithmException e) {
-                    pinState.salt = (long) (Math.random() * Long.MAX_VALUE);
-                }
-                pinState.pinHash = passwordToHash(newPin, pinState.salt);
-                pinState.failedAttempts = 0;
-            }
-            mRestrictionsPinStates.put(userId, pinState);
-            writeUserLocked(mUsers.get(userId));
-        }
-        return true;
-    }
-
-    @Override
-    public int checkRestrictionsChallenge(String pin) {
-        checkManageUsersPermission("Only system can verify the restrictions pin");
-        int userId = UserHandle.getCallingUserId();
-        synchronized (mPackagesLock) {
-            RestrictionsPinState pinState = mRestrictionsPinStates.get(userId);
-            // If there's no pin set, return error code
-            if (pinState == null || pinState.salt == 0 || pinState.pinHash == null) {
-                return UserManager.PIN_VERIFICATION_FAILED_NOT_SET;
-            } else if (pin == null) {
-                // If just checking if user can be prompted, return remaining time
-                int waitTime = getRemainingTimeForPinAttempt(pinState);
-                Slog.d(LOG_TAG, "Remaining waittime peek=" + waitTime);
-                return waitTime;
-            } else {
-                int waitTime = getRemainingTimeForPinAttempt(pinState);
-                Slog.d(LOG_TAG, "Remaining waittime=" + waitTime);
-                if (waitTime > 0) {
-                    return waitTime;
-                }
-                if (passwordToHash(pin, pinState.salt).equals(pinState.pinHash)) {
-                    pinState.failedAttempts = 0;
-                    writeUserLocked(mUsers.get(userId));
-                    return UserManager.PIN_VERIFICATION_SUCCESS;
-                } else {
-                    pinState.failedAttempts++;
-                    pinState.lastAttemptTime = System.currentTimeMillis();
-                    writeUserLocked(mUsers.get(userId));
-                    return waitTime;
-                }
-            }
-        }
-    }
-
-    private int getRemainingTimeForPinAttempt(RestrictionsPinState pinState) {
-        int backoffIndex = Math.min(pinState.failedAttempts / BACKOFF_INC_INTERVAL,
-                BACKOFF_TIMES.length - 1);
-        int backoffTime = (pinState.failedAttempts % BACKOFF_INC_INTERVAL) == 0 ?
-                BACKOFF_TIMES[backoffIndex] : 0;
-        return (int) Math.max(backoffTime + pinState.lastAttemptTime - System.currentTimeMillis(),
-                0);
-    }
-
-    @Override
-    public boolean hasRestrictionsChallenge() {
-        int userId = UserHandle.getCallingUserId();
-        synchronized (mPackagesLock) {
-            return hasRestrictionsPinLocked(userId);
-        }
-    }
-
-    private boolean hasRestrictionsPinLocked(int userId) {
-        RestrictionsPinState pinState = mRestrictionsPinStates.get(userId);
-        if (pinState == null || pinState.salt == 0 || pinState.pinHash == null) {
-            return false;
-        }
-        return true;
-    }
-
-    @Override
     public void removeRestrictions() {
         checkManageUsersPermission("Only system can remove restrictions");
         final int userHandle = UserHandle.getCallingUserId();
@@ -1571,8 +1579,6 @@ public class UserManagerService extends IUserManager.Stub {
         synchronized (mPackagesLock) {
             // Remove all user restrictions
             setUserRestrictions(new Bundle(), userHandle);
-            // Remove restrictions pin
-            setRestrictionsChallenge(null);
             // Remove any app restrictions
             cleanAppRestrictions(userHandle);
         }
@@ -1592,7 +1598,8 @@ public class UserManagerService extends IUserManager.Stub {
                 try {
                     for (ApplicationInfo appInfo : apps) {
                         if ((appInfo.flags & ApplicationInfo.FLAG_INSTALLED) != 0
-                                && (appInfo.flags & ApplicationInfo.FLAG_HIDDEN) != 0) {
+                                && (appInfo.privateFlags & ApplicationInfo.PRIVATE_FLAG_HIDDEN)
+                                        != 0) {
                             mPm.setApplicationHiddenSettingAsUser(appInfo.packageName, false,
                                     userHandle);
                         }
@@ -1603,42 +1610,6 @@ public class UserManagerService extends IUserManager.Stub {
             }
         });
     }
-
-    /*
-     * Generate a hash for the given password. To avoid brute force attacks, we use a salted hash.
-     * Not the most secure, but it is at least a second level of protection. First level is that
-     * the file is in a location only readable by the system process.
-     * @param password the password.
-     * @param salt the randomly generated salt
-     * @return the hash of the pattern in a String.
-     */
-    private String passwordToHash(String password, long salt) {
-        if (password == null) {
-            return null;
-        }
-        String algo = null;
-        String hashed = salt + password;
-        try {
-            byte[] saltedPassword = (password + salt).getBytes();
-            byte[] sha1 = MessageDigest.getInstance(algo = "SHA-1").digest(saltedPassword);
-            byte[] md5 = MessageDigest.getInstance(algo = "MD5").digest(saltedPassword);
-            hashed = toHex(sha1) + toHex(md5);
-        } catch (NoSuchAlgorithmException e) {
-            Log.w(LOG_TAG, "Failed to encode string because of missing algorithm: " + algo);
-        }
-        return hashed;
-    }
-
-    private static String toHex(byte[] ary) {
-        final String hex = "0123456789ABCDEF";
-        String ret = "";
-        for (int i = 0; i < ary.length; i++) {
-            ret += hex.charAt((ary[i] >> 4) & 0xf);
-            ret += hex.charAt(ary[i] & 0xf);
-        }
-        return ret;
-    }
-
     private int getUidForPackage(String packageName) {
         long ident = Binder.clearCallingIdentity();
         try {
@@ -1653,124 +1624,171 @@ public class UserManagerService extends IUserManager.Stub {
 
     private Bundle readApplicationRestrictionsLocked(String packageName,
             int userId) {
+        AtomicFile restrictionsFile =
+                new AtomicFile(new File(Environment.getUserSystemDirectory(userId),
+                        packageToRestrictionsFileName(packageName)));
+        return readApplicationRestrictionsLocked(restrictionsFile);
+    }
+
+    @VisibleForTesting
+    static Bundle readApplicationRestrictionsLocked(AtomicFile restrictionsFile) {
         final Bundle restrictions = new Bundle();
-        final ArrayList<String> values = new ArrayList<String>();
+        final ArrayList<String> values = new ArrayList<>();
+        if (!restrictionsFile.getBaseFile().exists()) {
+            return restrictions;
+        }
 
         FileInputStream fis = null;
         try {
-            AtomicFile restrictionsFile =
-                    new AtomicFile(new File(Environment.getUserSystemDirectory(userId),
-                            packageToRestrictionsFileName(packageName)));
             fis = restrictionsFile.openRead();
             XmlPullParser parser = Xml.newPullParser();
-            parser.setInput(fis, null);
-            int type;
-            while ((type = parser.next()) != XmlPullParser.START_TAG
-                    && type != XmlPullParser.END_DOCUMENT) {
-                ;
-            }
-
-            if (type != XmlPullParser.START_TAG) {
+            parser.setInput(fis, StandardCharsets.UTF_8.name());
+            XmlUtils.nextElement(parser);
+            if (parser.getEventType() != XmlPullParser.START_TAG) {
                 Slog.e(LOG_TAG, "Unable to read restrictions file "
                         + restrictionsFile.getBaseFile());
                 return restrictions;
             }
-
-            while ((type = parser.next()) != XmlPullParser.END_DOCUMENT) {
-                if (type == XmlPullParser.START_TAG && parser.getName().equals(TAG_ENTRY)) {
-                    String key = parser.getAttributeValue(null, ATTR_KEY);
-                    String valType = parser.getAttributeValue(null, ATTR_VALUE_TYPE);
-                    String multiple = parser.getAttributeValue(null, ATTR_MULTIPLE);
-                    if (multiple != null) {
-                        values.clear();
-                        int count = Integer.parseInt(multiple);
-                        while (count > 0 && (type = parser.next()) != XmlPullParser.END_DOCUMENT) {
-                            if (type == XmlPullParser.START_TAG
-                                    && parser.getName().equals(TAG_VALUE)) {
-                                values.add(parser.nextText().trim());
-                                count--;
-                            }
-                        }
-                        String [] valueStrings = new String[values.size()];
-                        values.toArray(valueStrings);
-                        restrictions.putStringArray(key, valueStrings);
-                    } else {
-                        String value = parser.nextText().trim();
-                        if (ATTR_TYPE_BOOLEAN.equals(valType)) {
-                            restrictions.putBoolean(key, Boolean.parseBoolean(value));
-                        } else if (ATTR_TYPE_INTEGER.equals(valType)) {
-                            restrictions.putInt(key, Integer.parseInt(value));
-                        } else {
-                            restrictions.putString(key, value);
-                        }
-                    }
-                }
+            while (parser.next() != XmlPullParser.END_DOCUMENT) {
+                readEntry(restrictions, values, parser);
             }
-        } catch (IOException ioe) {
-        } catch (XmlPullParserException pe) {
+        } catch (IOException|XmlPullParserException e) {
+            Log.w(LOG_TAG, "Error parsing " + restrictionsFile.getBaseFile(), e);
         } finally {
-            if (fis != null) {
-                try {
-                    fis.close();
-                } catch (IOException e) {
-                }
-            }
+            IoUtils.closeQuietly(fis);
         }
         return restrictions;
     }
 
+    private static void readEntry(Bundle restrictions, ArrayList<String> values,
+            XmlPullParser parser) throws XmlPullParserException, IOException {
+        int type = parser.getEventType();
+        if (type == XmlPullParser.START_TAG && parser.getName().equals(TAG_ENTRY)) {
+            String key = parser.getAttributeValue(null, ATTR_KEY);
+            String valType = parser.getAttributeValue(null, ATTR_VALUE_TYPE);
+            String multiple = parser.getAttributeValue(null, ATTR_MULTIPLE);
+            if (multiple != null) {
+                values.clear();
+                int count = Integer.parseInt(multiple);
+                while (count > 0 && (type = parser.next()) != XmlPullParser.END_DOCUMENT) {
+                    if (type == XmlPullParser.START_TAG
+                            && parser.getName().equals(TAG_VALUE)) {
+                        values.add(parser.nextText().trim());
+                        count--;
+                    }
+                }
+                String [] valueStrings = new String[values.size()];
+                values.toArray(valueStrings);
+                restrictions.putStringArray(key, valueStrings);
+            } else if (ATTR_TYPE_BUNDLE.equals(valType)) {
+                restrictions.putBundle(key, readBundleEntry(parser, values));
+            } else if (ATTR_TYPE_BUNDLE_ARRAY.equals(valType)) {
+                final int outerDepth = parser.getDepth();
+                ArrayList<Bundle> bundleList = new ArrayList<>();
+                while (XmlUtils.nextElementWithin(parser, outerDepth)) {
+                    Bundle childBundle = readBundleEntry(parser, values);
+                    bundleList.add(childBundle);
+                }
+                restrictions.putParcelableArray(key,
+                        bundleList.toArray(new Bundle[bundleList.size()]));
+            } else {
+                String value = parser.nextText().trim();
+                if (ATTR_TYPE_BOOLEAN.equals(valType)) {
+                    restrictions.putBoolean(key, Boolean.parseBoolean(value));
+                } else if (ATTR_TYPE_INTEGER.equals(valType)) {
+                    restrictions.putInt(key, Integer.parseInt(value));
+                } else {
+                    restrictions.putString(key, value);
+                }
+            }
+        }
+    }
+
+    private static Bundle readBundleEntry(XmlPullParser parser, ArrayList<String> values)
+            throws IOException, XmlPullParserException {
+        Bundle childBundle = new Bundle();
+        final int outerDepth = parser.getDepth();
+        while (XmlUtils.nextElementWithin(parser, outerDepth)) {
+            readEntry(childBundle, values, parser);
+        }
+        return childBundle;
+    }
+
     private void writeApplicationRestrictionsLocked(String packageName,
             Bundle restrictions, int userId) {
-        FileOutputStream fos = null;
         AtomicFile restrictionsFile = new AtomicFile(
                 new File(Environment.getUserSystemDirectory(userId),
                         packageToRestrictionsFileName(packageName)));
+        writeApplicationRestrictionsLocked(restrictions, restrictionsFile);
+    }
+
+    @VisibleForTesting
+    static void writeApplicationRestrictionsLocked(Bundle restrictions,
+            AtomicFile restrictionsFile) {
+        FileOutputStream fos = null;
         try {
             fos = restrictionsFile.startWrite();
             final BufferedOutputStream bos = new BufferedOutputStream(fos);
 
-            // XmlSerializer serializer = XmlUtils.serializerInstance();
             final XmlSerializer serializer = new FastXmlSerializer();
-            serializer.setOutput(bos, "utf-8");
+            serializer.setOutput(bos, StandardCharsets.UTF_8.name());
             serializer.startDocument(null, true);
             serializer.setFeature("http://xmlpull.org/v1/doc/features.html#indent-output", true);
 
             serializer.startTag(null, TAG_RESTRICTIONS);
-
-            for (String key : restrictions.keySet()) {
-                Object value = restrictions.get(key);
-                serializer.startTag(null, TAG_ENTRY);
-                serializer.attribute(null, ATTR_KEY, key);
-
-                if (value instanceof Boolean) {
-                    serializer.attribute(null, ATTR_VALUE_TYPE, ATTR_TYPE_BOOLEAN);
-                    serializer.text(value.toString());
-                } else if (value instanceof Integer) {
-                    serializer.attribute(null, ATTR_VALUE_TYPE, ATTR_TYPE_INTEGER);
-                    serializer.text(value.toString());
-                } else if (value == null || value instanceof String) {
-                    serializer.attribute(null, ATTR_VALUE_TYPE, ATTR_TYPE_STRING);
-                    serializer.text(value != null ? (String) value : "");
-                } else {
-                    serializer.attribute(null, ATTR_VALUE_TYPE, ATTR_TYPE_STRING_ARRAY);
-                    String[] values = (String[]) value;
-                    serializer.attribute(null, ATTR_MULTIPLE, Integer.toString(values.length));
-                    for (String choice : values) {
-                        serializer.startTag(null, TAG_VALUE);
-                        serializer.text(choice != null ? choice : "");
-                        serializer.endTag(null, TAG_VALUE);
-                    }
-                }
-                serializer.endTag(null, TAG_ENTRY);
-            }
-
+            writeBundle(restrictions, serializer);
             serializer.endTag(null, TAG_RESTRICTIONS);
 
             serializer.endDocument();
             restrictionsFile.finishWrite(fos);
         } catch (Exception e) {
             restrictionsFile.failWrite(fos);
-            Slog.e(LOG_TAG, "Error writing application restrictions list");
+            Slog.e(LOG_TAG, "Error writing application restrictions list", e);
+        }
+    }
+
+    private static void writeBundle(Bundle restrictions, XmlSerializer serializer)
+            throws IOException {
+        for (String key : restrictions.keySet()) {
+            Object value = restrictions.get(key);
+            serializer.startTag(null, TAG_ENTRY);
+            serializer.attribute(null, ATTR_KEY, key);
+
+            if (value instanceof Boolean) {
+                serializer.attribute(null, ATTR_VALUE_TYPE, ATTR_TYPE_BOOLEAN);
+                serializer.text(value.toString());
+            } else if (value instanceof Integer) {
+                serializer.attribute(null, ATTR_VALUE_TYPE, ATTR_TYPE_INTEGER);
+                serializer.text(value.toString());
+            } else if (value == null || value instanceof String) {
+                serializer.attribute(null, ATTR_VALUE_TYPE, ATTR_TYPE_STRING);
+                serializer.text(value != null ? (String) value : "");
+            } else if (value instanceof Bundle) {
+                serializer.attribute(null, ATTR_VALUE_TYPE, ATTR_TYPE_BUNDLE);
+                writeBundle((Bundle) value, serializer);
+            } else if (value instanceof Parcelable[]) {
+                serializer.attribute(null, ATTR_VALUE_TYPE, ATTR_TYPE_BUNDLE_ARRAY);
+                Parcelable[] array = (Parcelable[]) value;
+                for (Parcelable parcelable : array) {
+                    if (!(parcelable instanceof Bundle)) {
+                        throw new IllegalArgumentException("bundle-array can only hold Bundles");
+                    }
+                    serializer.startTag(null, TAG_ENTRY);
+                    serializer.attribute(null, ATTR_VALUE_TYPE, ATTR_TYPE_BUNDLE);
+                    writeBundle((Bundle) parcelable, serializer);
+                    serializer.endTag(null, TAG_ENTRY);
+                }
+            } else {
+                serializer.attribute(null, ATTR_VALUE_TYPE, ATTR_TYPE_STRING_ARRAY);
+                String[] values = (String[]) value;
+                serializer.attribute(null, ATTR_MULTIPLE, Integer.toString(values.length));
+                for (String choice : values) {
+                    serializer.startTag(null, TAG_VALUE);
+                    serializer.text(choice != null ? choice : "");
+                    serializer.endTag(null, TAG_VALUE);
+                }
+            }
+            serializer.endTag(null, TAG_ENTRY);
         }
     }
 
@@ -1786,11 +1804,33 @@ public class UserManagerService extends IUserManager.Stub {
     public int getUserHandle(int userSerialNumber) {
         synchronized (mPackagesLock) {
             for (int userId : mUserIds) {
-                if (getUserInfoLocked(userId).serialNumber == userSerialNumber) return userId;
+                UserInfo info = getUserInfoLocked(userId);
+                if (info != null && info.serialNumber == userSerialNumber) return userId;
             }
             // Not found
             return -1;
         }
+    }
+
+    @Override
+    public long getUserCreationTime(int userHandle) {
+        int callingUserId = UserHandle.getCallingUserId();
+        UserInfo userInfo = null;
+        synchronized (mPackagesLock) {
+            if (callingUserId == userHandle) {
+                userInfo = getUserInfoLocked(userHandle);
+            } else {
+                UserInfo parent = getProfileParentLocked(userHandle);
+                if (parent != null && parent.id == callingUserId) {
+                    userInfo = getUserInfoLocked(userHandle);
+                }
+            }
+        }
+        if (userInfo == null) {
+            throw new SecurityException("userHandle can only be the calling user or a managed "
+                    + "profile associated with this user");
+        }
+        return userInfo.creationTime;
     }
 
     /**
@@ -1817,7 +1857,7 @@ public class UserManagerService extends IUserManager.Stub {
      * Make a note of the last started time of a user and do some cleanup.
      * @param userId the user that was just foregrounded
      */
-    public void userForeground(int userId) {
+    public void onUserForeground(int userId) {
         synchronized (mPackagesLock) {
             UserInfo user = mUsers.get(userId);
             long now = System.currentTimeMillis();
@@ -1827,7 +1867,7 @@ public class UserManagerService extends IUserManager.Stub {
             }
             if (now > EPOCH_PLUS_30_YEARS) {
                 user.lastLoggedInTime = now;
-                writeUserLocked(user);
+                scheduleWriteUserLocked(user);
             }
         }
     }
@@ -1855,9 +1895,85 @@ public class UserManagerService extends IUserManager.Stub {
         return RESTRICTIONS_FILE_PREFIX + packageName + XML_SUFFIX;
     }
 
-    private String restrictionsFileNameToPackage(String fileName) {
-        return fileName.substring(RESTRICTIONS_FILE_PREFIX.length(),
-                (int) (fileName.length() - XML_SUFFIX.length()));
+    /**
+     * Create new {@code /data/user/[id]} directory and sets default
+     * permissions.
+     */
+    public static void prepareUserDirectory(File file) throws IOException {
+        if (!file.exists()) {
+            if (!file.mkdir()) {
+                throw new IOException("Failed to create " + file);
+            }
+        }
+        if (FileUtils.setPermissions(file.getAbsolutePath(), 0771, Process.SYSTEM_UID,
+                Process.SYSTEM_UID) != 0) {
+            throw new IOException("Failed to prepare " + file);
+        }
+    }
+
+    /**
+     * Enforce that serial number stored in user directory inode matches the
+     * given expected value. Gracefully sets the serial number if currently
+     * undefined.
+     *
+     * @throws IOException when problem extracting serial number, or serial
+     *             number is mismatched.
+     */
+    public static void enforceSerialNumber(File file, int serialNumber) throws IOException {
+        final int foundSerial = getSerialNumber(file);
+        Slog.v(LOG_TAG, "Found " + file + " with serial number " + foundSerial);
+
+        if (foundSerial == -1) {
+            Slog.d(LOG_TAG, "Serial number missing on " + file + "; assuming current is valid");
+            try {
+                setSerialNumber(file, serialNumber);
+            } catch (IOException e) {
+                Slog.w(LOG_TAG, "Failed to set serial number on " + file, e);
+            }
+
+        } else if (foundSerial != serialNumber) {
+            throw new IOException("Found serial number " + foundSerial
+                    + " doesn't match expected " + serialNumber);
+        }
+    }
+
+    /**
+     * Set serial number stored in user directory inode.
+     *
+     * @throws IOException if serial number was already set
+     */
+    private static void setSerialNumber(File file, int serialNumber)
+            throws IOException {
+        try {
+            final byte[] buf = Integer.toString(serialNumber).getBytes(StandardCharsets.UTF_8);
+            Os.setxattr(file.getAbsolutePath(), XATTR_SERIAL, buf, OsConstants.XATTR_CREATE);
+        } catch (ErrnoException e) {
+            throw e.rethrowAsIOException();
+        }
+    }
+
+    /**
+     * Return serial number stored in user directory inode.
+     *
+     * @return parsed serial number, or -1 if not set
+     */
+    private static int getSerialNumber(File file) throws IOException {
+        try {
+            final byte[] buf = new byte[256];
+            final int len = Os.getxattr(file.getAbsolutePath(), XATTR_SERIAL, buf);
+            final String serial = new String(buf, 0, len);
+            try {
+                return Integer.parseInt(serial);
+            } catch (NumberFormatException e) {
+                throw new IOException("Bad serial number: " + serial);
+            }
+        } catch (ErrnoException e) {
+            if (e.errno == OsConstants.ENODATA) {
+                return -1;
+            } else {
+                throw e.rethrowAsIOException();
+            }
+        }
     }
 
     @Override
@@ -1903,5 +2019,31 @@ public class UserManagerService extends IUserManager.Stub {
                 }
             }
         }
+    }
+
+    final class MainHandler extends Handler {
+
+        @Override
+        public void handleMessage(Message msg) {
+            switch (msg.what) {
+                case WRITE_USER_MSG:
+                    removeMessages(WRITE_USER_MSG, msg.obj);
+                    synchronized (mPackagesLock) {
+                        int userId = ((UserInfo) msg.obj).id;
+                        UserInfo userInfo = mUsers.get(userId);
+                        if (userInfo != null) {
+                            writeUserLocked(userInfo);
+                        }
+                    }
+            }
+        }
+    }
+
+    /**
+     * @param userId
+     * @return whether the user has been initialized yet
+     */
+    boolean isInitialized(int userId) {
+        return (getUserInfo(userId).flags & UserInfo.FLAG_INITIALIZED) != 0;
     }
 }

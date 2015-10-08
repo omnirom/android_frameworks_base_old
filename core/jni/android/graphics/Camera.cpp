@@ -1,5 +1,5 @@
 #include "jni.h"
-#include <android_runtime/AndroidRuntime.h>
+#include "core_jni_helpers.h"
 
 #include "SkCamera.h"
 
@@ -96,7 +96,7 @@ static void Camera_getMatrix(JNIEnv* env, jobject obj, jlong matrixHandle) {
 }
 
 static void Camera_applyToCanvas(JNIEnv* env, jobject obj, jlong canvasHandle) {
-    SkCanvas* canvas = reinterpret_cast<android::Canvas*>(canvasHandle)->getSkCanvas();
+    SkCanvas* canvas = reinterpret_cast<android::Canvas*>(canvasHandle)->asSkCanvas();
     jlong viewHandle = env->GetLongField(obj, gNativeInstanceFieldID);
     Sk3DView* v = reinterpret_cast<Sk3DView*>(viewHandle);
     v->applyToCanvas(canvas);
@@ -137,16 +137,8 @@ static JNINativeMethod gCameraMethods[] = {
 };
 
 int register_android_graphics_Camera(JNIEnv* env) {
-    jclass clazz = env->FindClass("android/graphics/Camera");
-    if (clazz == 0) {
-        return -1;
-    }
-    gNativeInstanceFieldID = env->GetFieldID(clazz, "native_instance", "J");
-    if (gNativeInstanceFieldID == 0) {
-        return -1;
-    }
-    return android::AndroidRuntime::registerNativeMethods(env,
-                                               "android/graphics/Camera",
-                                               gCameraMethods,
-                                               SK_ARRAY_COUNT(gCameraMethods));
+    jclass clazz = android::FindClassOrDie(env, "android/graphics/Camera");
+    gNativeInstanceFieldID = android::GetFieldIDOrDie(env, clazz, "native_instance", "J");
+    return android::RegisterMethodsOrDie(env, "android/graphics/Camera", gCameraMethods,
+                                         NELEM(gCameraMethods));
 }

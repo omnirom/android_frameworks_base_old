@@ -21,7 +21,6 @@ import android.content.res.Resources;
 import android.os.Build;
 import android.os.Handler;
 import android.os.SystemClock;
-import android.util.FloatMath;
 
 /**
  * Detects scaling transformation gestures using the supplied {@link MotionEvent}s.
@@ -131,6 +130,7 @@ public class ScaleGestureDetector {
     private float mFocusY;
 
     private boolean mQuickScaleEnabled;
+    private boolean mStylusScaleEnabled;
 
     private float mCurrSpan;
     private float mPrevSpan;
@@ -152,14 +152,17 @@ public class ScaleGestureDetector {
     private int mTouchHistoryDirection;
     private long mTouchHistoryLastAcceptedTime;
     private int mTouchMinMajor;
-    private MotionEvent mDoubleTapEvent;
-    private int mDoubleTapMode = DOUBLE_TAP_MODE_NONE;
     private final Handler mHandler;
 
+    private float mAnchoredScaleStartX;
+    private float mAnchoredScaleStartY;
+    private int mAnchoredScaleMode = ANCHORED_SCALE_MODE_NONE;
+
     private static final long TOUCH_STABILIZE_TIME = 128; // ms
-    private static final int DOUBLE_TAP_MODE_NONE = 0;
-    private static final int DOUBLE_TAP_MODE_IN_PROGRESS = 1;
     private static final float SCALE_FACTOR = .5f;
+    private static final int ANCHORED_SCALE_MODE_NONE = 0;
+    private static final int ANCHORED_SCALE_MODE_DOUBLE_TAP = 1;
+    private static final int ANCHORED_SCALE_MODE_STYLUS = 2;
 
 
     /**
@@ -209,8 +212,13 @@ public class ScaleGestureDetector {
         mMinSpan = res.getDimensionPixelSize(com.android.internal.R.dimen.config_minScalingSpan);
         mHandler = handler;
         // Quick scale is enabled by default after JB_MR2
-        if (context.getApplicationInfo().targetSdkVersion > Build.VERSION_CODES.JELLY_BEAN_MR2) {
+        final int targetSdkVersion = context.getApplicationInfo().targetSdkVersion;
+        if (targetSdkVersion > Build.VERSION_CODES.JELLY_BEAN_MR2) {
             setQuickScaleEnabled(true);
+        }
+        // Stylus scale is enabled by default after LOLLIPOP_MR1
+        if (targetSdkVersion > Build.VERSION_CODES.LOLLIPOP_MR1) {
+            setStylusScaleEnabled(true);
         }
     }
 
@@ -311,8 +319,14 @@ public class ScaleGestureDetector {
             mGestureDetector.onTouchEvent(event);
         }
 
+        final int count = event.getPointerCount();
+        final boolean isStylusButtonDown =
+                (event.getButtonState() & MotionEvent.BUTTON_STYLUS_PRIMARY) != 0;
+
+        final boolean anchoredScaleCancelled =
+                mAnchoredScaleMode == ANCHORED_SCALE_MODE_STYLUS && !isStylusButtonDown;
         final boolean streamComplete = action == MotionEvent.ACTION_UP ||
-                action == MotionEvent.ACTION_CANCEL;
+                action == MotionEvent.ACTION_CANCEL || anchoredScaleCancelled;
 
         if (action == MotionEvent.ACTION_DOWN || streamComplete) {
             // Reset any scale in progress with the listener.
@@ -322,11 +336,11 @@ public class ScaleGestureDetector {
                 mListener.onScaleEnd(this);
                 mInProgress = false;
                 mInitialSpan = 0;
-                mDoubleTapMode = DOUBLE_TAP_MODE_NONE;
-            } else if (mDoubleTapMode == DOUBLE_TAP_MODE_IN_PROGRESS && streamComplete) {
+                mAnchoredScaleMode = ANCHORED_SCALE_MODE_NONE;
+            } else if (inAnchoredScaleMode() && streamComplete) {
                 mInProgress = false;
                 mInitialSpan = 0;
-                mDoubleTapMode = DOUBLE_TAP_MODE_NONE;
+                mAnchoredScaleMode = ANCHORED_SCALE_MODE_NONE;
             }
 
             if (streamComplete) {
@@ -335,25 +349,32 @@ public class ScaleGestureDetector {
             }
         }
 
+        if (!mInProgress && mStylusScaleEnabled && !inAnchoredScaleMode()
+                && !streamComplete && isStylusButtonDown) {
+            // Start of a button scale gesture
+            mAnchoredScaleStartX = event.getX();
+            mAnchoredScaleStartY = event.getY();
+            mAnchoredScaleMode = ANCHORED_SCALE_MODE_STYLUS;
+            mInitialSpan = 0;
+        }
+
         final boolean configChanged = action == MotionEvent.ACTION_DOWN ||
                 action == MotionEvent.ACTION_POINTER_UP ||
-                action == MotionEvent.ACTION_POINTER_DOWN;
-
+                action == MotionEvent.ACTION_POINTER_DOWN || anchoredScaleCancelled;
 
         final boolean pointerUp = action == MotionEvent.ACTION_POINTER_UP;
         final int skipIndex = pointerUp ? event.getActionIndex() : -1;
 
         // Determine focal point
         float sumX = 0, sumY = 0;
-        final int count = event.getPointerCount();
         final int div = pointerUp ? count - 1 : count;
         final float focusX;
         final float focusY;
-        if (mDoubleTapMode == DOUBLE_TAP_MODE_IN_PROGRESS) {
-            // In double tap mode, the focal pt is always where the double tap
-            // gesture started
-            focusX = mDoubleTapEvent.getX();
-            focusY = mDoubleTapEvent.getY();
+        if (inAnchoredScaleMode()) {
+            // In anchored scale mode, the focal pt is always where the double tap
+            // or button down gesture started
+            focusX = mAnchoredScaleStartX;
+            focusY = mAnchoredScaleStartY;
             if (event.getY() < focusY) {
                 mEventBeforeOrAboveStartingGestureEvent = true;
             } else {
@@ -391,10 +412,10 @@ public class ScaleGestureDetector {
         final float spanX = devX * 2;
         final float spanY = devY * 2;
         final float span;
-        if (inDoubleTapMode()) {
+        if (inAnchoredScaleMode()) {
             span = spanY;
         } else {
-            span = FloatMath.sqrt(spanX * spanX + spanY * spanY);
+            span = (float) Math.hypot(spanX, spanY);
         }
 
         // Dispatch begin/end events as needed.
@@ -403,11 +424,10 @@ public class ScaleGestureDetector {
         final boolean wasInProgress = mInProgress;
         mFocusX = focusX;
         mFocusY = focusY;
-        if (!inDoubleTapMode() && mInProgress && (span < mMinSpan || configChanged)) {
+        if (!inAnchoredScaleMode() && mInProgress && (span < mMinSpan || configChanged)) {
             mListener.onScaleEnd(this);
             mInProgress = false;
             mInitialSpan = span;
-            mDoubleTapMode = DOUBLE_TAP_MODE_NONE;
         }
         if (configChanged) {
             mPrevSpanX = mCurrSpanX = spanX;
@@ -415,7 +435,7 @@ public class ScaleGestureDetector {
             mInitialSpan = mPrevSpan = mCurrSpan = span;
         }
 
-        final int minSpan = inDoubleTapMode() ? mSpanSlop : mMinSpan;
+        final int minSpan = inAnchoredScaleMode() ? mSpanSlop : mMinSpan;
         if (!mInProgress && span >=  minSpan &&
                 (wasInProgress || Math.abs(span - mInitialSpan) > mSpanSlop)) {
             mPrevSpanX = mCurrSpanX = spanX;
@@ -448,9 +468,8 @@ public class ScaleGestureDetector {
         return true;
     }
 
-
-    private boolean inDoubleTapMode() {
-        return mDoubleTapMode == DOUBLE_TAP_MODE_IN_PROGRESS;
+    private boolean inAnchoredScaleMode() {
+        return mAnchoredScaleMode != ANCHORED_SCALE_MODE_NONE;
     }
 
     /**
@@ -467,8 +486,9 @@ public class ScaleGestureDetector {
                         @Override
                         public boolean onDoubleTap(MotionEvent e) {
                             // Double tap: start watching for a swipe
-                            mDoubleTapEvent = e;
-                            mDoubleTapMode = DOUBLE_TAP_MODE_IN_PROGRESS;
+                            mAnchoredScaleStartX = e.getX();
+                            mAnchoredScaleStartY = e.getY();
+                            mAnchoredScaleMode = ANCHORED_SCALE_MODE_DOUBLE_TAP;
                             return true;
                         }
                     };
@@ -482,6 +502,25 @@ public class ScaleGestureDetector {
    */
     public boolean isQuickScaleEnabled() {
         return mQuickScaleEnabled;
+    }
+
+    /**
+     * Sets whether the associates {@link OnScaleGestureListener} should receive
+     * onScale callbacks when the user uses a stylus and presses the button.
+     * Note that this is enabled by default if the app targets API 23 and newer.
+     *
+     * @param scales true to enable stylus scaling, false to disable.
+     */
+    public void setStylusScaleEnabled(boolean scales) {
+        mStylusScaleEnabled = scales;
+    }
+
+    /**
+     * Return whether the stylus scale gesture, in which the user uses a stylus and presses the
+     * button, should perform scaling. {@see #setStylusScaleEnabled(boolean)}
+     */
+    public boolean isStylusScaleEnabled() {
+        return mStylusScaleEnabled;
     }
 
     /**
@@ -587,7 +626,7 @@ public class ScaleGestureDetector {
      * @return The current scaling factor.
      */
     public float getScaleFactor() {
-        if (inDoubleTapMode()) {
+        if (inAnchoredScaleMode()) {
             // Drag is moving up; the further away from the gesture
             // start, the smaller the span should be, the closer,
             // the larger the span, and therefore the larger the scale

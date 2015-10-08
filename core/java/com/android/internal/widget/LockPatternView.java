@@ -16,31 +16,44 @@
 
 package com.android.internal.widget;
 
-
 import android.animation.Animator;
 import android.animation.AnimatorListenerAdapter;
 import android.animation.ValueAnimator;
 import android.content.Context;
+import android.content.res.Resources;
 import android.content.res.TypedArray;
 import android.graphics.Canvas;
+import android.graphics.CanvasProperty;
 import android.graphics.Paint;
 import android.graphics.Path;
 import android.graphics.Rect;
+import android.media.AudioManager;
+import android.os.Bundle;
 import android.os.Debug;
 import android.os.Parcel;
 import android.os.Parcelable;
 import android.os.SystemClock;
+import android.os.UserHandle;
+import android.provider.Settings;
 import android.util.AttributeSet;
+import android.util.IntArray;
+import android.util.Log;
+import android.view.DisplayListCanvas;
 import android.view.HapticFeedbackConstants;
 import android.view.MotionEvent;
+import android.view.RenderNodeAnimator;
 import android.view.View;
+import android.view.accessibility.AccessibilityEvent;
 import android.view.accessibility.AccessibilityManager;
+import android.view.accessibility.AccessibilityNodeInfo;
+import android.view.accessibility.AccessibilityNodeInfo.AccessibilityAction;
 import android.view.animation.AnimationUtils;
 import android.view.animation.Interpolator;
 
 import com.android.internal.R;
 
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
 
 /**
@@ -65,8 +78,8 @@ public class LockPatternView extends View {
 
     private boolean mDrawingProfilingStarted = false;
 
-    private Paint mPaint = new Paint();
-    private Paint mPathPaint = new Paint();
+    private final Paint mPaint = new Paint();
+    private final Paint mPathPaint = new Paint();
 
     /**
      * How many milliseconds we spend animating each circle of a lock pattern
@@ -80,9 +93,12 @@ public class LockPatternView extends View {
      * It didn't seem to have much impact on the devices tested, so currently set to 0.
      */
     private static final float DRAG_THRESHHOLD = 0.0f;
+    public static final int VIRTUAL_BASE_VIEW_ID = 1;
+    public static final boolean DEBUG_A11Y = false;
+    private static final String TAG = "LockPatternView";
 
     private OnPatternListener mOnPatternListener;
-    private ArrayList<Cell> mPattern = new ArrayList<Cell>(9);
+    private final ArrayList<Cell> mPattern = new ArrayList<Cell>(9);
 
     /**
      * Lookup table for the circles of the pattern we are currently drawing.
@@ -90,7 +106,7 @@ public class LockPatternView extends View {
      * in which case we use this to hold the cells we are drawing for the in
      * progress animation.
      */
-    private boolean[][] mPatternDrawLookup = new boolean[3][3];
+    private final boolean[][] mPatternDrawLookup = new boolean[3][3];
 
     /**
      * the in progress point:
@@ -122,24 +138,29 @@ public class LockPatternView extends View {
     private int mErrorColor;
     private int mSuccessColor;
 
-    private Interpolator mFastOutSlowInInterpolator;
-    private Interpolator mLinearOutSlowInInterpolator;
+    private final Interpolator mFastOutSlowInInterpolator;
+    private final Interpolator mLinearOutSlowInInterpolator;
+    private PatternExploreByTouchHelper mExploreByTouchHelper;
+    private AudioManager mAudioManager;
 
     /**
      * Represents a cell in the 3 X 3 matrix of the unlock pattern view.
      */
-    public static class Cell {
-        int row;
-        int column;
+    public static final class Cell {
+        final int row;
+        final int column;
 
         // keep # objects limited to 9
-        static Cell[][] sCells = new Cell[3][3];
-        static {
+        private static final Cell[][] sCells = createCells();
+
+        private static Cell[][] createCells() {
+            Cell[][] res = new Cell[3][3];
             for (int i = 0; i < 3; i++) {
                 for (int j = 0; j < 3; j++) {
-                    sCells[i][j] = new Cell(i, j);
+                    res[i][j] = new Cell(i, j);
                 }
             }
+            return res;
         }
 
         /**
@@ -160,11 +181,7 @@ public class LockPatternView extends View {
             return column;
         }
 
-        /**
-         * @param row The row of the cell.
-         * @param column The column of the cell.
-         */
-        public static synchronized Cell of(int row, int column) {
+        public static Cell of(int row, int column) {
             checkRange(row, column);
             return sCells[row][column];
         }
@@ -178,16 +195,23 @@ public class LockPatternView extends View {
             }
         }
 
+        @Override
         public String toString() {
             return "(row=" + row + ",clmn=" + column + ")";
         }
     }
 
     public static class CellState {
-        public float scale = 1.0f;
-        public float translateY = 0.0f;
-        public float alpha = 1.0f;
-        public float size;
+        int row;
+        int col;
+        boolean hwAnimating;
+        CanvasProperty<Float> hwRadius;
+        CanvasProperty<Float> hwCenterX;
+        CanvasProperty<Float> hwCenterY;
+        CanvasProperty<Paint> hwPaint;
+        float radius;
+        float translationY;
+        float alpha = 1f;
         public float lineEndX = Float.MIN_VALUE;
         public float lineEndY = Float.MIN_VALUE;
         public ValueAnimator lineAnimator;
@@ -269,9 +293,9 @@ public class LockPatternView extends View {
         mPathPaint.setAntiAlias(true);
         mPathPaint.setDither(true);
 
-        mRegularColor = getResources().getColor(R.color.lock_pattern_view_regular_color);
-        mErrorColor = getResources().getColor(R.color.lock_pattern_view_error_color);
-        mSuccessColor = getResources().getColor(R.color.lock_pattern_view_success_color);
+        mRegularColor = context.getColor(R.color.lock_pattern_view_regular_color);
+        mErrorColor = context.getColor(R.color.lock_pattern_view_error_color);
+        mSuccessColor = context.getColor(R.color.lock_pattern_view_success_color);
         mRegularColor = a.getColor(R.styleable.LockPatternView_regularColor, mRegularColor);
         mErrorColor = a.getColor(R.styleable.LockPatternView_errorColor, mErrorColor);
         mSuccessColor = a.getColor(R.styleable.LockPatternView_successColor, mSuccessColor);
@@ -297,7 +321,9 @@ public class LockPatternView extends View {
         for (int i = 0; i < 3; i++) {
             for (int j = 0; j < 3; j++) {
                 mCellStates[i][j] = new CellState();
-                mCellStates[i][j].size = mDotSize;
+                mCellStates[i][j].radius = mDotSize/2;
+                mCellStates[i][j].row = i;
+                mCellStates[i][j].col = j;
             }
         }
 
@@ -305,6 +331,9 @@ public class LockPatternView extends View {
                 AnimationUtils.loadInterpolator(context, android.R.interpolator.fast_out_slow_in);
         mLinearOutSlowInInterpolator =
                 AnimationUtils.loadInterpolator(context, android.R.interpolator.linear_out_slow_in);
+        mExploreByTouchHelper = new PatternExploreByTouchHelper(this);
+        setAccessibilityDelegate(mExploreByTouchHelper);
+        mAudioManager = (AudioManager) mContext.getSystemService(Context.AUDIO_SERVICE);
     }
 
     public CellState[][] getCellStates() {
@@ -393,11 +422,120 @@ public class LockPatternView extends View {
         invalidate();
     }
 
+    public void startCellStateAnimation(CellState cellState, float startAlpha, float endAlpha,
+            float startTranslationY, float endTranslationY, float startScale, float endScale,
+            long delay, long duration,
+            Interpolator interpolator, Runnable finishRunnable) {
+        if (isHardwareAccelerated()) {
+            startCellStateAnimationHw(cellState, startAlpha, endAlpha, startTranslationY,
+                    endTranslationY, startScale, endScale, delay, duration, interpolator,
+                    finishRunnable);
+        } else {
+            startCellStateAnimationSw(cellState, startAlpha, endAlpha, startTranslationY,
+                    endTranslationY, startScale, endScale, delay, duration, interpolator,
+                    finishRunnable);
+        }
+    }
+
+    private void startCellStateAnimationSw(final CellState cellState,
+            final float startAlpha, final float endAlpha,
+            final float startTranslationY, final float endTranslationY,
+            final float startScale, final float endScale,
+            long delay, long duration, Interpolator interpolator, final Runnable finishRunnable) {
+        cellState.alpha = startAlpha;
+        cellState.translationY = startTranslationY;
+        cellState.radius = mDotSize/2 * startScale;
+        ValueAnimator animator = ValueAnimator.ofFloat(0f, 1f);
+        animator.setDuration(duration);
+        animator.setStartDelay(delay);
+        animator.setInterpolator(interpolator);
+        animator.addUpdateListener(new ValueAnimator.AnimatorUpdateListener() {
+            @Override
+            public void onAnimationUpdate(ValueAnimator animation) {
+                float t = (float) animation.getAnimatedValue();
+                cellState.alpha = (1 - t) * startAlpha + t * endAlpha;
+                cellState.translationY = (1 - t) * startTranslationY + t * endTranslationY;
+                cellState.radius = mDotSize/2 * ((1 - t) * startScale + t * endScale);
+                invalidate();
+            }
+        });
+        animator.addListener(new AnimatorListenerAdapter() {
+            @Override
+            public void onAnimationEnd(Animator animation) {
+                if (finishRunnable != null) {
+                    finishRunnable.run();
+                }
+            }
+        });
+        animator.start();
+    }
+
+    private void startCellStateAnimationHw(final CellState cellState,
+            float startAlpha, float endAlpha,
+            float startTranslationY, float endTranslationY,
+            float startScale, float endScale,
+            long delay, long duration, Interpolator interpolator, final Runnable finishRunnable) {
+        cellState.alpha = endAlpha;
+        cellState.translationY = endTranslationY;
+        cellState.radius = mDotSize/2 * endScale;
+        cellState.hwAnimating = true;
+        cellState.hwCenterY = CanvasProperty.createFloat(
+                getCenterYForRow(cellState.row) + startTranslationY);
+        cellState.hwCenterX = CanvasProperty.createFloat(getCenterXForColumn(cellState.col));
+        cellState.hwRadius = CanvasProperty.createFloat(mDotSize/2 * startScale);
+        mPaint.setColor(getCurrentColor(false));
+        mPaint.setAlpha((int) (startAlpha * 255));
+        cellState.hwPaint = CanvasProperty.createPaint(new Paint(mPaint));
+
+        startRtFloatAnimation(cellState.hwCenterY,
+                getCenterYForRow(cellState.row) + endTranslationY, delay, duration, interpolator);
+        startRtFloatAnimation(cellState.hwRadius, mDotSize/2 * endScale, delay, duration,
+                interpolator);
+        startRtAlphaAnimation(cellState, endAlpha, delay, duration, interpolator,
+                new AnimatorListenerAdapter() {
+                    @Override
+                    public void onAnimationEnd(Animator animation) {
+                        cellState.hwAnimating = false;
+                        if (finishRunnable != null) {
+                            finishRunnable.run();
+                        }
+                    }
+                });
+
+        invalidate();
+    }
+
+    private void startRtAlphaAnimation(CellState cellState, float endAlpha,
+            long delay, long duration, Interpolator interpolator,
+            Animator.AnimatorListener listener) {
+        RenderNodeAnimator animator = new RenderNodeAnimator(cellState.hwPaint,
+                RenderNodeAnimator.PAINT_ALPHA, (int) (endAlpha * 255));
+        animator.setDuration(duration);
+        animator.setStartDelay(delay);
+        animator.setInterpolator(interpolator);
+        animator.setTarget(this);
+        animator.addListener(listener);
+        animator.start();
+    }
+
+    private void startRtFloatAnimation(CanvasProperty<Float> property, float endValue,
+            long delay, long duration, Interpolator interpolator) {
+        RenderNodeAnimator animator = new RenderNodeAnimator(property, endValue);
+        animator.setDuration(duration);
+        animator.setStartDelay(delay);
+        animator.setInterpolator(interpolator);
+        animator.setTarget(this);
+        animator.start();
+    }
+
     private void notifyCellAdded() {
-        sendAccessEvent(R.string.lockscreen_access_pattern_cell_added);
+        // sendAccessEvent(R.string.lockscreen_access_pattern_cell_added);
         if (mOnPatternListener != null) {
             mOnPatternListener.onPatternCellAdded(mPattern);
         }
+        // Disable used cells for accessibility as they get added
+        if (DEBUG_A11Y) Log.v(TAG, "ivnalidating root because cell was added.");
+        mExploreByTouchHelper.invalidateRoot();
     }
 
     private void notifyPatternStarted() {
@@ -426,6 +564,15 @@ public class LockPatternView extends View {
      */
     public void clearPattern() {
         resetPattern();
+    }
+
+    @Override
+    protected boolean dispatchHoverEvent(MotionEvent event) {
+        // Dispatch to onHoverEvent first so mPatternInProgress is up to date when the
+        // helper gets the event.
+        boolean handled = super.dispatchHoverEvent(event);
+        handled |= mExploreByTouchHelper.dispatchHoverEvent(event);
+        return handled;
     }
 
     /**
@@ -469,8 +616,10 @@ public class LockPatternView extends View {
         final int width = w - mPaddingLeft - mPaddingRight;
         mSquareWidth = width / 3.0f;
 
+        if (DEBUG_A11Y) Log.v(TAG, "onSizeChanged(" + w + "," + h + ")");
         final int height = h - mPaddingTop - mPaddingBottom;
         mSquareHeight = height / 3.0f;
+        mExploreByTouchHelper.invalidateRoot();
     }
 
     private int resolveMeasured(int measureSpec, int desired)
@@ -572,14 +721,15 @@ public class LockPatternView extends View {
 
     private void startCellActivatedAnimation(Cell cell) {
         final CellState cellState = mCellStates[cell.row][cell.column];
-        startSizeAnimation(mDotSize, mDotSizeActivated, 96, mLinearOutSlowInInterpolator,
+        startRadiusAnimation(mDotSize/2, mDotSizeActivated/2, 96, mLinearOutSlowInInterpolator,
                 cellState, new Runnable() {
-            @Override
-            public void run() {
-                startSizeAnimation(mDotSizeActivated, mDotSize, 192, mFastOutSlowInInterpolator,
-                        cellState, null);
-            }
-        });
+                    @Override
+                    public void run() {
+                        startRadiusAnimation(mDotSizeActivated/2, mDotSize/2, 192,
+                                mFastOutSlowInInterpolator,
+                                cellState, null);
+                    }
+                });
         startLineEndAnimation(cellState, mInProgressX, mInProgressY,
                 getCenterXForColumn(cell.column), getCenterYForRow(cell.row));
     }
@@ -608,13 +758,13 @@ public class LockPatternView extends View {
         state.lineAnimator = valueAnimator;
     }
 
-    private void startSizeAnimation(float start, float end, long duration, Interpolator interpolator,
-            final CellState state, final Runnable endRunnable) {
+    private void startRadiusAnimation(float start, float end, long duration,
+            Interpolator interpolator, final CellState state, final Runnable endRunnable) {
         ValueAnimator valueAnimator = ValueAnimator.ofFloat(start, end);
         valueAnimator.addUpdateListener(new ValueAnimator.AnimatorUpdateListener() {
             @Override
             public void onAnimationUpdate(ValueAnimator animation) {
-                state.size = (float) animation.getAnimatedValue();
+                state.radius = (float) animation.getAnimatedValue();
                 invalidate();
             }
         });
@@ -722,14 +872,14 @@ public class LockPatternView extends View {
                 handleActionDown(event);
                 return true;
             case MotionEvent.ACTION_UP:
-                handleActionUp(event);
+                handleActionUp();
                 return true;
             case MotionEvent.ACTION_MOVE:
                 handleActionMove(event);
                 return true;
             case MotionEvent.ACTION_CANCEL:
                 if (mPatternInProgress) {
-                    mPatternInProgress = false;
+                    setPatternInProgress(false);
                     resetPattern();
                     notifyPatternCleared();
                 }
@@ -742,6 +892,11 @@ public class LockPatternView extends View {
                 return true;
         }
         return false;
+    }
+
+    private void setPatternInProgress(boolean progress) {
+        mPatternInProgress = progress;
+        mExploreByTouchHelper.invalidateRoot();
     }
 
     private void handleActionMove(MotionEvent event) {
@@ -757,7 +912,7 @@ public class LockPatternView extends View {
             Cell hitCell = detectAndAddHit(x, y);
             final int patternSize = mPattern.size();
             if (hitCell != null && patternSize == 1) {
-                mPatternInProgress = true;
+                setPatternInProgress(true);
                 notifyPatternStarted();
             }
             // note current x and y for rubber banding of in progress patterns
@@ -812,10 +967,10 @@ public class LockPatternView extends View {
         announceForAccessibility(mContext.getString(resId));
     }
 
-    private void handleActionUp(MotionEvent event) {
+    private void handleActionUp() {
         // report pattern detected
         if (!mPattern.isEmpty()) {
-            mPatternInProgress = false;
+            setPatternInProgress(false);
             cancelLineAnimations();
             notifyPatternDetected();
             invalidate();
@@ -846,11 +1001,11 @@ public class LockPatternView extends View {
         final float y = event.getY();
         final Cell hitCell = detectAndAddHit(x, y);
         if (hitCell != null) {
-            mPatternInProgress = true;
+            setPatternInProgress(true);
             mPatternDisplayMode = DisplayMode.Correct;
             notifyPatternStarted();
         } else if (mPatternInProgress) {
-            mPatternInProgress = false;
+            setPatternInProgress(false);
             notifyPatternCleared();
         }
         if (hitCell != null) {
@@ -938,10 +1093,16 @@ public class LockPatternView extends View {
             for (int j = 0; j < 3; j++) {
                 CellState cellState = mCellStates[i][j];
                 float centerX = getCenterXForColumn(j);
-                float size = cellState.size * cellState.scale;
-                float translationY = cellState.translateY;
-                drawCircle(canvas, (int) centerX, (int) centerY + translationY,
-                        size, drawLookup[i][j], cellState.alpha);
+                float translationY = cellState.translationY;
+                if (isHardwareAccelerated() && cellState.hwAnimating) {
+                    DisplayListCanvas displayListCanvas = (DisplayListCanvas) canvas;
+                    displayListCanvas.drawCircle(cellState.hwCenterX, cellState.hwCenterY,
+                            cellState.hwRadius, cellState.hwPaint);
+                } else {
+                    drawCircle(canvas, (int) centerX, (int) centerY + translationY,
+                            cellState.radius, drawLookup[i][j], cellState.alpha);
+
+                }
             }
         }
 
@@ -1024,11 +1185,11 @@ public class LockPatternView extends View {
     /**
      * @param partOfPattern Whether this circle is part of the pattern.
      */
-    private void drawCircle(Canvas canvas, float centerX, float centerY, float size,
+    private void drawCircle(Canvas canvas, float centerX, float centerY, float radius,
             boolean partOfPattern, float alpha) {
         mPaint.setColor(getCurrentColor(partOfPattern));
         mPaint.setAlpha((int) (alpha * 255));
-        canvas.drawCircle(centerX, centerY, size/2, mPaint);
+        canvas.drawCircle(centerX, centerY, radius, mPaint);
     }
 
     @Override
@@ -1119,15 +1280,210 @@ public class LockPatternView extends View {
             dest.writeValue(mTactileFeedbackEnabled);
         }
 
+        @SuppressWarnings({ "unused", "hiding" }) // Found using reflection
         public static final Parcelable.Creator<SavedState> CREATOR =
                 new Creator<SavedState>() {
-                    public SavedState createFromParcel(Parcel in) {
-                        return new SavedState(in);
-                    }
+            @Override
+            public SavedState createFromParcel(Parcel in) {
+                return new SavedState(in);
+            }
 
-                    public SavedState[] newArray(int size) {
-                        return new SavedState[size];
-                    }
-                };
+            @Override
+            public SavedState[] newArray(int size) {
+                return new SavedState[size];
+            }
+        };
+    }
+
+    private final class PatternExploreByTouchHelper extends ExploreByTouchHelper {
+        private Rect mTempRect = new Rect();
+        private HashMap<Integer, VirtualViewContainer> mItems = new HashMap<Integer,
+                VirtualViewContainer>();
+
+        class VirtualViewContainer {
+            public VirtualViewContainer(CharSequence description) {
+                this.description = description;
+            }
+            CharSequence description;
+        };
+
+        public PatternExploreByTouchHelper(View forView) {
+            super(forView);
+        }
+
+        @Override
+        protected int getVirtualViewAt(float x, float y) {
+            // This must use the same hit logic for the screen to ensure consistency whether
+            // accessibility is on or off.
+            int id = getVirtualViewIdForHit(x, y);
+            return id;
+        }
+
+        @Override
+        protected void getVisibleVirtualViews(IntArray virtualViewIds) {
+            if (DEBUG_A11Y) Log.v(TAG, "getVisibleVirtualViews(len=" + virtualViewIds.size() + ")");
+            if (!mPatternInProgress) {
+                return;
+            }
+            for (int i = VIRTUAL_BASE_VIEW_ID; i < VIRTUAL_BASE_VIEW_ID + 9; i++) {
+                if (!mItems.containsKey(i)) {
+                    VirtualViewContainer item = new VirtualViewContainer(getTextForVirtualView(i));
+                    mItems.put(i, item);
+                }
+                // Add all views. As views are added to the pattern, we remove them
+                // from notification by making them non-clickable below.
+                virtualViewIds.add(i);
+            }
+        }
+
+        @Override
+        protected void onPopulateEventForVirtualView(int virtualViewId, AccessibilityEvent event) {
+            if (DEBUG_A11Y) Log.v(TAG, "onPopulateEventForVirtualView(" + virtualViewId + ")");
+            // Announce this view
+            if (mItems.containsKey(virtualViewId)) {
+                CharSequence contentDescription = mItems.get(virtualViewId).description;
+                event.getText().add(contentDescription);
+            }
+        }
+
+        @Override
+        public void onPopulateAccessibilityEvent(View host, AccessibilityEvent event) {
+            super.onPopulateAccessibilityEvent(host, event);
+            if (!mPatternInProgress) {
+                CharSequence contentDescription = getContext().getText(
+                        com.android.internal.R.string.lockscreen_access_pattern_area);
+                event.setContentDescription(contentDescription);
+            }
+        }
+
+        @Override
+        protected void onPopulateNodeForVirtualView(int virtualViewId, AccessibilityNodeInfo node) {
+            if (DEBUG_A11Y) Log.v(TAG, "onPopulateNodeForVirtualView(view=" + virtualViewId + ")");
+
+            // Node and event text and content descriptions are usually
+            // identical, so we'll use the exact same string as before.
+            node.setText(getTextForVirtualView(virtualViewId));
+            node.setContentDescription(getTextForVirtualView(virtualViewId));
+
+            if (mPatternInProgress) {
+                node.setFocusable(true);
+
+                if (isClickable(virtualViewId)) {
+                    // Mark this node of interest by making it clickable.
+                    node.addAction(AccessibilityAction.ACTION_CLICK);
+                    node.setClickable(isClickable(virtualViewId));
+                }
+            }
+
+            // Compute bounds for this object
+            final Rect bounds = getBoundsForVirtualView(virtualViewId);
+            if (DEBUG_A11Y) Log.v(TAG, "bounds:" + bounds.toString());
+            node.setBoundsInParent(bounds);
+        }
+
+        private boolean isClickable(int virtualViewId) {
+            // Dots are clickable if they're not part of the current pattern.
+            if (virtualViewId != ExploreByTouchHelper.INVALID_ID) {
+                int row = (virtualViewId - VIRTUAL_BASE_VIEW_ID) / 3;
+                int col = (virtualViewId - VIRTUAL_BASE_VIEW_ID) % 3;
+                return !mPatternDrawLookup[row][col];
+            }
+            return false;
+        }
+
+        @Override
+        protected boolean onPerformActionForVirtualView(int virtualViewId, int action,
+                Bundle arguments) {
+            if (DEBUG_A11Y) Log.v(TAG, "onPerformActionForVirtualView(id=" + virtualViewId
+                    + ", action=" + action);
+            switch (action) {
+                case AccessibilityNodeInfo.ACTION_CLICK:
+                    // Click handling should be consistent with
+                    // onTouchEvent(). This ensures that the view works the
+                    // same whether accessibility is turned on or off.
+                    return onItemClicked(virtualViewId);
+                default:
+                    if (DEBUG_A11Y) Log.v(TAG, "*** action not handled in "
+                            + "onPerformActionForVirtualView(viewId="
+                            + virtualViewId + "action=" + action + ")");
+            }
+            return false;
+        }
+
+        boolean onItemClicked(int index) {
+            if (DEBUG_A11Y) Log.v(TAG, "onItemClicked(" + index + ")");
+
+            // Since the item's checked state is exposed to accessibility
+            // services through its AccessibilityNodeInfo, we need to invalidate
+            // the item's virtual view. At some point in the future, the
+            // framework will obtain an updated version of the virtual view.
+            invalidateVirtualView(index);
+
+            // We need to let the framework know what type of event
+            // happened. Accessibility services may use this event to provide
+            // appropriate feedback to the user.
+            sendEventForVirtualView(index, AccessibilityEvent.TYPE_VIEW_CLICKED);
+
+            return true;
+        }
+
+        private Rect getBoundsForVirtualView(int virtualViewId) {
+            int ordinal = virtualViewId - VIRTUAL_BASE_VIEW_ID;
+            final Rect bounds = mTempRect;
+            final int row = ordinal / 3;
+            final int col = ordinal % 3;
+            final CellState cell = mCellStates[row][col];
+            float centerX = getCenterXForColumn(col);
+            float centerY = getCenterYForRow(row);
+            float cellheight = mSquareHeight * mHitFactor * 0.5f;
+            float cellwidth = mSquareWidth * mHitFactor * 0.5f;
+            bounds.left = (int) (centerX - cellwidth);
+            bounds.right = (int) (centerX + cellwidth);
+            bounds.top = (int) (centerY - cellheight);
+            bounds.bottom = (int) (centerY + cellheight);
+            return bounds;
+        }
+
+        private boolean shouldSpeakPassword() {
+            final boolean speakPassword = Settings.Secure.getIntForUser(
+                    mContext.getContentResolver(), Settings.Secure.ACCESSIBILITY_SPEAK_PASSWORD, 0,
+                    UserHandle.USER_CURRENT_OR_SELF) != 0;
+            final boolean hasHeadphones = mAudioManager != null ?
+                    (mAudioManager.isWiredHeadsetOn() || mAudioManager.isBluetoothA2dpOn())
+                    : false;
+            return speakPassword || hasHeadphones;
+        }
+
+        private CharSequence getTextForVirtualView(int virtualViewId) {
+            final Resources res = getResources();
+            return shouldSpeakPassword() ? res.getString(
+                R.string.lockscreen_access_pattern_cell_added_verbose, virtualViewId)
+                : res.getString(R.string.lockscreen_access_pattern_cell_added);
+        }
+
+        /**
+         * Helper method to find which cell a point maps to
+         *
+         * if there's no hit.
+         * @param x touch position x
+         * @param y touch position y
+         * @return VIRTUAL_BASE_VIEW_ID+id or 0 if no view was hit
+         */
+        private int getVirtualViewIdForHit(float x, float y) {
+            final int rowHit = getRowHit(y);
+            if (rowHit < 0) {
+                return ExploreByTouchHelper.INVALID_ID;
+            }
+            final int columnHit = getColumnHit(x);
+            if (columnHit < 0) {
+                return ExploreByTouchHelper.INVALID_ID;
+            }
+            boolean dotAvailable = mPatternDrawLookup[rowHit][columnHit];
+            int dotId = (rowHit * 3 + columnHit) + VIRTUAL_BASE_VIEW_ID;
+            int view = dotAvailable ? dotId : ExploreByTouchHelper.INVALID_ID;
+            if (DEBUG_A11Y) Log.v(TAG, "getVirtualViewIdForHit(" + x + "," + y + ") => "
+                    + view + "avail =" + dotAvailable);
+            return view;
+        }
     }
 }

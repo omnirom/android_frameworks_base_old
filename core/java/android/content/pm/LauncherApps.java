@@ -16,7 +16,6 @@
 
 package android.content.pm;
 
-import android.app.AppGlobals;
 import android.content.ComponentName;
 import android.content.Context;
 import android.content.Intent;
@@ -147,6 +146,7 @@ public class LauncherApps {
         try {
             activities = mService.getLauncherActivities(packageName, user);
         } catch (RemoteException re) {
+            throw new RuntimeException("Failed to call LauncherAppsService");
         }
         if (activities == null) {
             return Collections.EMPTY_LIST;
@@ -294,7 +294,7 @@ public class LauncherApps {
      */
     public void registerCallback(Callback callback, Handler handler) {
         synchronized (this) {
-            if (callback != null && !mCallbacks.contains(callback)) {
+            if (callback != null && findCallbackLocked(callback) < 0) {
                 boolean addedFirstCallback = mCallbacks.size() == 0;
                 addCallbackLocked(callback, handler);
                 if (addedFirstCallback) {
@@ -325,16 +325,24 @@ public class LauncherApps {
         }
     }
 
-    private void removeCallbackLocked(Callback callback) {
+    /** @return position in mCallbacks for callback or -1 if not present. */
+    private int findCallbackLocked(Callback callback) {
         if (callback == null) {
             throw new IllegalArgumentException("Callback cannot be null");
         }
         final int size = mCallbacks.size();
         for (int i = 0; i < size; ++i) {
             if (mCallbacks.get(i).mCallback == callback) {
-                mCallbacks.remove(i);
-                return;
+                return i;
             }
+        }
+        return -1;
+    }
+
+    private void removeCallbackLocked(Callback callback) {
+        int pos = findCallbackLocked(callback);
+        if (pos >= 0) {
+            mCallbacks.remove(pos);
         }
     }
 

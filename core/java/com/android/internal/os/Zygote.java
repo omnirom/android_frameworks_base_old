@@ -17,15 +17,13 @@
 package com.android.internal.os;
 
 
+import android.os.Trace;
 import dalvik.system.ZygoteHooks;
 import android.system.ErrnoException;
 import android.system.Os;
-import android.os.SystemClock;
-import android.util.Slog;
 
 /** @hide */
 public final class Zygote {
-    private static final String TAG = "Zygote";
     /*
     * Bit values for "debugFlags" argument.  The definitions are duplicated
     * in the native code.
@@ -37,19 +35,23 @@ public final class Zygote {
     public static final int DEBUG_ENABLE_CHECKJNI   = 1 << 1;
     /** enable Java programming language "assert" statements */
     public static final int DEBUG_ENABLE_ASSERT     = 1 << 2;
-    /** disable the JIT compiler */
+    /** disable the AOT compiler and JIT */
     public static final int DEBUG_ENABLE_SAFEMODE   = 1 << 3;
     /** Enable logging of third-party JNI activity. */
     public static final int DEBUG_ENABLE_JNI_LOGGING = 1 << 4;
+    /** enable the JIT compiler */
+    public static final int DEBUG_ENABLE_JIT         = 1 << 5;
+    /** Force generation of native debugging information. */
+    public static final int DEBUG_GENERATE_DEBUG_INFO = 1 << 6;
 
     /** No external storage should be mounted. */
     public static final int MOUNT_EXTERNAL_NONE = 0;
-    /** Single-user external storage should be mounted. */
-    public static final int MOUNT_EXTERNAL_SINGLEUSER = 1;
-    /** Multi-user external storage should be mounted. */
-    public static final int MOUNT_EXTERNAL_MULTIUSER = 2;
-    /** All multi-user external storage should be mounted. */
-    public static final int MOUNT_EXTERNAL_MULTIUSER_ALL = 3;
+    /** Default external storage should be mounted. */
+    public static final int MOUNT_EXTERNAL_DEFAULT = 1;
+    /** Read-only external storage should be mounted. */
+    public static final int MOUNT_EXTERNAL_READ = 2;
+    /** Read-write external storage should be mounted. */
+    public static final int MOUNT_EXTERNAL_WRITE = 3;
 
     private static final ZygoteHooks VM_HOOKS = new ZygoteHooks();
 
@@ -87,33 +89,24 @@ public final class Zygote {
     public static int forkAndSpecialize(int uid, int gid, int[] gids, int debugFlags,
           int[][] rlimits, int mountExternal, String seInfo, String niceName, int[] fdsToClose,
           String instructionSet, String appDataDir) {
-        long startTime = SystemClock.elapsedRealtime();
         VM_HOOKS.preFork();
-        checkTime(startTime, "Zygote.preFork");
         int pid = nativeForkAndSpecialize(
                   uid, gid, gids, debugFlags, rlimits, mountExternal, seInfo, niceName, fdsToClose,
                   instructionSet, appDataDir);
-        checkTime(startTime, "Zygote.nativeForkAndSpecialize");
+        // Enable tracing as soon as possible for the child process.
+        if (pid == 0) {
+            Trace.setTracingEnabled(true);
+
+            // Note that this event ends at the end of handleChildProc,
+            Trace.traceBegin(Trace.TRACE_TAG_ACTIVITY_MANAGER, "PostFork");
+        }
         VM_HOOKS.postForkCommon();
-        checkTime(startTime, "Zygote.postForkCommon");
         return pid;
     }
 
     native private static int nativeForkAndSpecialize(int uid, int gid, int[] gids,int debugFlags,
           int[][] rlimits, int mountExternal, String seInfo, String niceName, int[] fdsToClose,
           String instructionSet, String appDataDir);
-
-    /**
-     * Temporary hack: check time since start time and log if over a fixed threshold.
-     *
-     */
-    private static void checkTime(long startTime, String where) {
-        long now = SystemClock.elapsedRealtime();
-        if ((now-startTime) > 1000) {
-            // If we are taking more than a second, log about it.
-            Slog.w(TAG, "Slow operation: " + (now-startTime) + "ms so far, now at " + where);
-        }
-    }
 
     /**
      * Special method to start the system server process. In addition to the
@@ -143,6 +136,10 @@ public final class Zygote {
         VM_HOOKS.preFork();
         int pid = nativeForkSystemServer(
                 uid, gid, gids, debugFlags, rlimits, permittedCapabilities, effectiveCapabilities);
+        // Enable tracing as soon as we enter the system_server.
+        if (pid == 0) {
+            Trace.setTracingEnabled(true);
+        }
         VM_HOOKS.postForkCommon();
         return pid;
     }
@@ -151,9 +148,7 @@ public final class Zygote {
             int[][] rlimits, long permittedCapabilities, long effectiveCapabilities);
 
     private static void callPostForkChildHooks(int debugFlags, String instructionSet) {
-        long startTime = SystemClock.elapsedRealtime();
         VM_HOOKS.postForkChild(debugFlags, instructionSet);
-        checkTime(startTime, "Zygote.callPostForkChildHooks");
     }
 
 

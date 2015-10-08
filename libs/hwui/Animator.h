@@ -16,13 +16,12 @@
 #ifndef ANIMATOR_H
 #define ANIMATOR_H
 
+#include <memory>
 #include <cutils/compiler.h>
 #include <utils/RefBase.h>
 #include <utils/StrongPointer.h>
+#include <utils/Timers.h>
 
-#include "CanvasProperty.h"
-#include "Interpolator.h"
-#include "TreeInfo.h"
 #include "utils/Macros.h"
 
 namespace android {
@@ -30,6 +29,9 @@ namespace uirenderer {
 
 class AnimationContext;
 class BaseRenderNodeAnimator;
+class CanvasPropertyPrimitive;
+class CanvasPropertyPaint;
+class Interpolator;
 class RenderNode;
 class RenderProperties;
 
@@ -62,7 +64,7 @@ public:
 
     void attach(RenderNode* target);
     virtual void onAttached() {}
-    void detach() { mTarget = 0; }
+    void detach() { mTarget = nullptr; }
     void pushStaging(AnimationContext& context);
     bool animate(AnimationContext& context);
 
@@ -98,7 +100,7 @@ protected:
     float mDeltaValue;
     float mFromValue;
 
-    Interpolator* mInterpolator;
+    std::unique_ptr<Interpolator> mInterpolator;
     PlayState mStagingPlayState;
     PlayState mPlayState;
     bool mHasStartValue;
@@ -137,10 +139,10 @@ public:
     ANDROID_API virtual uint32_t dirtyMask();
 
 protected:
-    virtual float getValue(RenderNode* target) const;
-    virtual void setValue(RenderNode* target, float value);
-    virtual void onAttached();
-    virtual void onStagingPlayStateChanged();
+    virtual float getValue(RenderNode* target) const override;
+    virtual void setValue(RenderNode* target, float value) override;
+    virtual void onAttached() override;
+    virtual void onStagingPlayStateChanged() override;
 
 private:
     typedef bool (RenderProperties::*SetFloatProperty)(float value);
@@ -160,8 +162,8 @@ public:
     ANDROID_API virtual uint32_t dirtyMask();
 
 protected:
-    virtual float getValue(RenderNode* target) const;
-    virtual void setValue(RenderNode* target, float value);
+    virtual float getValue(RenderNode* target) const override;
+    virtual void setValue(RenderNode* target, float value) override;
 private:
     sp<CanvasPropertyPrimitive> mProperty;
 };
@@ -179,8 +181,8 @@ public:
     ANDROID_API virtual uint32_t dirtyMask();
 
 protected:
-    virtual float getValue(RenderNode* target) const;
-    virtual void setValue(RenderNode* target, float value);
+    virtual float getValue(RenderNode* target) const override;
+    virtual void setValue(RenderNode* target, float value) override;
 private:
     sp<CanvasPropertyPaint> mProperty;
     PaintField mField;
@@ -194,8 +196,8 @@ public:
     ANDROID_API virtual uint32_t dirtyMask();
 
 protected:
-    virtual float getValue(RenderNode* target) const;
-    virtual void setValue(RenderNode* target, float value);
+    virtual float getValue(RenderNode* target) const override;
+    virtual void setValue(RenderNode* target, float value) override;
 
 private:
     int mCenterX, mCenterY;

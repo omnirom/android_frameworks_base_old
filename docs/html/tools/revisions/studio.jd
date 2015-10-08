@@ -29,9 +29,9 @@ everything you need to begin developing Android apps:</p>
 <p>For an introduction to Android Studio, read the
 <a href="{@docRoot}tools/studio/index.html">Android Studio</a> guide.</p>
 
-<p>Periodic updates are pushed to Android Studio without requiring you to update. To
-manually check for updates, select <strong>Help > Check for updates</strong> (on Mac, select
-<strong>Android Studio > Check for updates</strong>).</p>
+<p>Periodic updates are pushed to Android Studio without requiring you to update your Android
+project. To manually check for updates, select <strong>Help > Check for update</strong> (on Mac,
+select <strong>Android Studio > Check for updates</strong>).</p>
 
 
 <h2 id="Revisions">Revisions</h2>
@@ -43,6 +43,182 @@ Android Studio, as denoted by revision number. </p>
 <div class="toggle-content opened">
   <p><a href="#" onclick="return toggleContent(this)">
     <img src="{@docRoot}assets/images/triangle-opened.png" class="toggle-content-img"
+      alt=""/>Android Studio v1.3.2</a> <em>(August 2015)</em>
+  </p>
+  <div class="toggle-content-toggleme">
+    <p>Fixes and enhancements:</p>
+    <ul>
+      <li>Added support for Android 6.0 (API level 23), including new icons and AVD Manager
+        support for creating devices with new screen densities.</li>
+      <li>Fixed an exception that was occuring during update checks.
+        <a href="http://b.android.com/183068">Issue: 183068</a></li>
+      <li>Fixed problem where unresolved view coordinates could cause the layout editor to crash.
+        <a href="http://b.android.com/178690">Issue: 178690</a></li>
+      <li>Fixed issue with invalid resource type warnings.
+        <a href="http://b.android.com/182433">Issue: 182433</a></li>
+      <li>Fixed lint check that was incorrectly flagging resources as private.
+        <a href="http://b.android.com/183120">Issue: 183120</a></li>
+    </ul>
+  </div>
+</div>
+
+
+<div class="toggle-content closed">
+  <p><a href="#" onclick="return toggleContent(this)">
+    <img src="{@docRoot}assets/images/triangle-closed.png" class="toggle-content-img"
+      alt=""/>Android Studio v1.3.1</a> <em>(August 2015)</em>
+  </p>
+  <div class="toggle-content-toggleme">
+    <p>Fixes and enhancements:</p>
+    <ul>
+      <li>Fixed support for creating an Android Wear Android Virtual Device (AVD) on Windows. </li>
+      <li>Updated the <em>Project Wizard</em> to use the entered project name.  </li>
+      <li>Added support to allow the Android SDK to be stored in a read-only directory.  </li>
+      <li>Updated Android Plugin for Gradle version to 1.3.0. </li>
+      <li>Fixed issues with launching a debug session from the Android Debug Bridge (adb) Unix
+        shell.  </li>
+      <li>Fixed the Java package renaming message to show the correct package name. </li>
+    </ul>
+  </div>
+</div>
+
+
+<div class="toggle-content closed">
+  <p><a href="#" onclick="return toggleContent(this)">
+    <img src="{@docRoot}assets/images/triangle-closed.png" class="toggle-content-img"
+      alt=""/>Android Studio v1.3.0</a> <em>(July 2015)</em>
+  </p>
+  <div class="toggle-content-toggleme">
+    <p>Fixes and enhancements:</p>
+    <ul>
+      <li>Added options to enable
+        <a href="{@docRoot}tools/studio/studio-features.html#dev-services">developer services</a>,
+        such as <a href="https://developers.google.com/admob/">AdMob</a> and
+        <a href="{@docRoot}distribute/analyze/start.html">Analytics</a>, in your app from within
+        Android Studio. </li>
+      <li>Added additional <a href="{@docRoot}tools/debugging/annotations.html">annotations</a>,
+        such as <code>@RequiresPermission</code>, <code>@CheckResults</code>, and
+        <code>@MainThread</code>. </li>
+      <li>Added the capability to generate Java heap dumps and analyze thread allocations from the
+        <a href="{@docRoot}tools/studio/index.html#mem-cpu">Memory Monitor</a>. You can also
+        convert Android-specific HPROF binary format files to standard HPROF format from within
+        Android Studio. </li>
+      <li>Integrated the <a href="{@docRoot}tools/help/sdk-manager.html">SDK Manager</a>
+        into Android Studio to simplify package and tools access and provide update notifications.
+        <p class="note"><strong>Note:</strong> The standalone SDK Manager is still available from
+        the command line, but is recommended for use with only Eclipse ADT and standalone SDK
+        installations. </p> </li>
+      <li>Added the <code>finger</code> command in the emulator console to simulate
+        <a href="{@docRoot}tools/studio/studio-features.html#finger-print">fingerprint</a>
+        authentication.  </li>
+      <li>Added a <code>&lt;public&gt;</code> resource declaration to designate library
+         resources as
+         <a href="{@docRoot}tools/studio/studio-features.html#private-res">public and private</a>
+         resources.
+         <p class="note"><strong>Note:</strong> Requires
+         <a href="{@docRoot}tools/building/plugin-for-gradle.html">Android Plugin for Gradle</a>
+         version 1.3 or higher. </p> </li>
+      <li>Added <a href="{@docRoot}tools/data-binding/guide.html">data binding</a> support to
+        create declarative layouts that bind your application logic to layout elements. </li>
+      <li>Added support for a separate
+        <a href="{@docRoot}tools/studio/studio-features.html#test-module">test APK module</a>
+        to build test APKs in Android Studio.  </li>
+      <li>Updated the <a href="{@docRoot}tools/help/avd-manager.html">AVD Manager</a> with HAXM
+        optimizations and improved notifications. </li>
+      <li>Added 64-bit ARM and MIPS emulator support for
+        <a class="external-link" href="http://wiki.qemu.org/Main_Page">QEMU</a> 2.1. </li>
+      <li>Simplified the resolution of <a href="{@docRoot}tools/help/lint.html">lint</a> warnings
+        by adding quick fixes, such as the automatic generation of
+        <a href="{@docRoot}reference/android/os/Parcelable.html">Parcelable</a>
+        implementation.</li>
+      <li>Added <a href="{@docRoot}sdk/installing/studio-tips.html#live-templates">live template</a>
+        support for quick insertion of code snippets. </li>
+    </ul>
+  </div>
+</div>
+
+
+
+
+<div class="toggle-content closed">
+  <p><a href="#" onclick="return toggleContent(this)">
+    <img src="{@docRoot}assets/images/triangle-closed.png" class="toggle-content-img"
+      alt=""/>Android Studio v1.2.2</a> <em>(June 2015)</em>
+  </p>
+  <div class="toggle-content-toggleme">
+    <p>Fixes and enhancements:</p>
+    <ul>
+      <li>Fixed build issues that were blocking builds from completing. </li>
+    </ul>
+  </div>
+</div>
+
+
+<div class="toggle-content closed">
+  <p><a href="#" onclick="return toggleContent(this)">
+    <img src="{@docRoot}assets/images/triangle-closed.png" class="toggle-content-img"
+      alt=""/>Android Studio v1.2.1</a> <em>(May 2015)</em>
+  </p>
+  <div class="toggle-content-toggleme">
+    <p>Fixes and enhancements:</p>
+    <ul>
+      <li>Fixed minor performance and feature issues. </li>
+    </ul>
+  </div>
+</div>
+
+
+
+<div class="toggle-content closed">
+  <p><a href="#" onclick="return toggleContent(this)">
+    <img src="{@docRoot}assets/images/triangle-closed.png" class="toggle-content-img"
+      alt=""/>Android Studio v1.2.0</a> <em>(April 2015)</em>
+  </p>
+
+  <div class="toggle-content-toggleme">
+    <p>Fixes and enhancements:</p>
+    <ul>
+      <li>Updated the Android runtime window to include the
+        <a href="{@docRoot}tools/studio/index.html#mem-cpu">Memory Monitor</a> tool
+        and added a tab for CPU performance monitoring.</li>
+      <li>Added a <em>Captures</em> tab in the left margin to display the captured memory and CPU
+        performance data files, such as CPU method tracking and memory heap snapshots.</li>
+      <li>Expanded <a href="{@docRoot}tools/debugging/annotations.html">annotation</a>
+          support with additional metadata annotations and inferred nullability. </li>
+      <li>Enhanced the Translations Editor with additional support for Best Current Practice
+          (BCP) 47, which uses 3-letter language and region codes.</li>
+      <li>Integrated IntelliJ 14 and 14.1 features for improved code analysis and performance:</li>
+         <ul>
+          <li>Enhanced debugging to show inline values for variables and referring objects,
+            as well as perform inline evaluation of lambda and operator expressions. </li>
+          <li>Added code style detection for tab and indent sizes. </li>
+          <li>Added scratch files for code experiments and prototyping without project files.</li>
+          <li>Added the simultaneous insertion of opening and closing tags in HTML and XML files.</li>
+          <li>Added a built-in Java class decompiler so you can look at what’s inside a library
+            for which the source code is not available. </li>
+         </ul>
+         <p>See
+         <a class="external-link" href="https://www.jetbrains.com/idea/whatsnew">What's New in IntelliJ</a>
+         for a complete description of the new features and enhancements.</p>
+       </li>
+      <li>Added additional <a href="{@docRoot}tools/studio/index.html#project-view">Project Views</a>
+        for <em>Scratches</em>, <em>Project Files</em>, <em>Problems</em>, <em>Production</em>,
+        and <em>Tests</em> to enhance project management and access. </li>
+      <li>Enhanced the <strong>File &gt; Settings</strong> menu and dialogs for improved settings
+          access and management. </li>
+      <li>Added support for high-density displays for Windows and Linux. </li>
+      <li>Added support for 280 dpi resources in the <code>res/drawable-280dpi/</code> folder.
+     </ul>
+    </ul>
+  </div>
+</div>
+
+
+
+
+<div class="toggle-content closed">
+  <p><a href="#" onclick="return toggleContent(this)">
+    <img src="{@docRoot}assets/images/triangle-closed.png" class="toggle-content-img"
       alt=""/>Android Studio v1.1.0</a> <em>(February 2015)</em>
   </p>
 
@@ -63,6 +239,7 @@ Android Studio, as denoted by revision number. </p>
       for region and language combinations, launcher icons, resource names, and other common
       code problems.</li>
       <li>Added support for Best Current Practice (BCP) language tag 47.  </li>
+    </ul>
   </div>
 </div>
 
@@ -85,6 +262,7 @@ Android Studio, as denoted by revision number. </p>
       updates, use <strong>File > Settings > Updates</strong> to change to the <strong>Stable</strong>
       update channel.
       </li>
+    </ul>
   </div>
 </div>
 

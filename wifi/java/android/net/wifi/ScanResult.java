@@ -18,6 +18,7 @@ package android.net.wifi;
 
 import android.os.Parcel;
 import android.os.Parcelable;
+import android.util.Log;
 
 /**
  * Describes information about a detected access point. In addition
@@ -53,10 +54,57 @@ public class ScanResult implements Parcelable {
      */
     public int level;
     /**
-     * The frequency in MHz of the channel over which the client is communicating
+     * The primary 20 MHz frequency (in MHz) of the channel over which the client is communicating
      * with the access point.
      */
     public int frequency;
+
+   /**
+    * AP Channel bandwidth is 20 MHZ
+    */
+    public static final int CHANNEL_WIDTH_20MHZ = 0;
+   /**
+    * AP Channel bandwidth is 40 MHZ
+    */
+    public static final int CHANNEL_WIDTH_40MHZ = 1;
+   /**
+    * AP Channel bandwidth is 80 MHZ
+    */
+    public static final int CHANNEL_WIDTH_80MHZ = 2;
+   /**
+    * AP Channel bandwidth is 160 MHZ
+    */
+    public static final int CHANNEL_WIDTH_160MHZ = 3;
+   /**
+    * AP Channel bandwidth is 160 MHZ, but 80MHZ + 80MHZ
+    */
+    public static final int CHANNEL_WIDTH_80MHZ_PLUS_MHZ = 4;
+
+   /**
+    * AP Channel bandwidth; one of {@link #CHANNEL_WIDTH_20MHZ}, {@link #CHANNEL_WIDTH_40MHZ},
+    * {@link #CHANNEL_WIDTH_80MHZ}, {@link #CHANNEL_WIDTH_160MHZ}
+    * or {@link #CHANNEL_WIDTH_80MHZ_PLUS_MHZ}.
+    */
+    public int channelWidth;
+
+    /**
+     * Not used if the AP bandwidth is 20 MHz
+     * If the AP use 40, 80 or 160 MHz, this is the center frequency (in MHz)
+     * if the AP use 80 + 80 MHz, this is the center frequency of the first segment (in MHz)
+     */
+    public int centerFreq0;
+
+    /**
+     * Only used if the AP bandwidth is 80 + 80 MHz
+     * if the AP use 80 + 80 MHz, this is the center frequency of the second segment (in MHz)
+     */
+    public int centerFreq1;
+
+    /**
+     * @deprecated use is80211mcResponder() instead
+     * @hide
+     */
+    public boolean is80211McRTTResponder;
 
     /**
      * timestamp in microseconds (since boot) when
@@ -79,7 +127,7 @@ public class ScanResult implements Parcelable {
     /**
      * @hide
      * Update RSSI of the scan result
-     * @param previousRSSI
+     * @param previousRssi
      * @param previousSeen
      * @param maxAge
      */
@@ -162,11 +210,60 @@ public class ScanResult implements Parcelable {
     public int distanceCm;
 
     /**
-     * The standard deviation of the distance to the AP, if available.
+     * The standard deviation of the distance to the access point, if available.
      * Else {@link UNSPECIFIED}.
      * {@hide}
      */
     public int distanceSdCm;
+
+    /** {@hide} */
+    public static final long FLAG_PASSPOINT_NETWORK               = 0x0000000000000001;
+
+    /** {@hide} */
+    public static final long FLAG_80211mc_RESPONDER               = 0x0000000000000002;
+
+    /**
+     * Defines flags; such as {@link #FLAG_PASSPOINT_NETWORK}.
+     * {@hide}
+     */
+    public long flags;
+
+    /**
+     * sets a flag in {@link #flags} field
+     * @param flag flag to set
+     * @hide
+     */
+    public void setFlag(long flag) {
+        flags |= flag;
+    }
+
+    /**
+     * clears a flag in {@link #flags} field
+     * @param flag flag to set
+     * @hide
+     */
+    public void clearFlag(long flag) {
+        flags &= ~flag;
+    }
+
+    public boolean is80211mcResponder() {
+        return (flags & FLAG_80211mc_RESPONDER) != 0;
+    }
+
+    public boolean isPasspointNetwork() {
+        return (flags & FLAG_PASSPOINT_NETWORK) != 0;
+    }
+
+    /**
+     * Indicates venue name (such as 'San Francisco Airport') published by access point; only
+     * available on passpoint network and if published by access point.
+     */
+    public CharSequence venueName;
+
+    /**
+     * Indicates passpoint operator name published by access point.
+     */
+    public CharSequence operatorFriendlyName;
 
     /**
      * {@hide}
@@ -202,7 +299,13 @@ public class ScanResult implements Parcelable {
         return freq > 4900 && freq < 5900;
     }
 
-    /** information element from beacon
+    /**
+     *  @hide
+     * storing the raw bytes of full result IEs
+     **/
+    public byte[] bytes;
+
+    /** information elements from beacon
      * @hide
      */
     public static class InformationElement {
@@ -235,6 +338,10 @@ public class ScanResult implements Parcelable {
         this.timestamp = tsf;
         this.distanceCm = UNSPECIFIED;
         this.distanceSdCm = UNSPECIFIED;
+        this.channelWidth = UNSPECIFIED;
+        this.centerFreq0 = UNSPECIFIED;
+        this.centerFreq1 = UNSPECIFIED;
+        this.flags = 0;
     }
 
     /** {@hide} */
@@ -249,6 +356,41 @@ public class ScanResult implements Parcelable {
         this.timestamp = tsf;
         this.distanceCm = distCm;
         this.distanceSdCm = distSdCm;
+        this.channelWidth = UNSPECIFIED;
+        this.centerFreq0 = UNSPECIFIED;
+        this.centerFreq1 = UNSPECIFIED;
+        this.flags = 0;
+    }
+
+    /** {@hide} */
+    public ScanResult(String Ssid, String BSSID, String caps, int level, int frequency,
+            long tsf, int distCm, int distSdCm, int channelWidth, int centerFreq0, int centerFreq1,
+            boolean is80211McRTTResponder) {
+        this.SSID = Ssid;
+        this.BSSID = BSSID;
+        this.capabilities = caps;
+        this.level = level;
+        this.frequency = frequency;
+        this.timestamp = tsf;
+        this.distanceCm = distCm;
+        this.distanceSdCm = distSdCm;
+        this.channelWidth = channelWidth;
+        this.centerFreq0 = centerFreq0;
+        this.centerFreq1 = centerFreq1;
+        if (is80211McRTTResponder) {
+            this.flags = FLAG_80211mc_RESPONDER;
+        } else {
+            this.flags = 0;
+        }
+    }
+
+    /** {@hide} */
+    public ScanResult(WifiSsid wifiSsid, String Ssid, String BSSID, String caps, int level,
+                  int frequency, long tsf, int distCm, int distSdCm, int channelWidth,
+                  int centerFreq0, int centerFreq1, boolean is80211McRTTResponder) {
+        this(Ssid, BSSID, caps,level, frequency, tsf, distCm, distSdCm, channelWidth, centerFreq0,
+                centerFreq1, is80211McRTTResponder);
+        this.wifiSsid = wifiSsid;
     }
 
     /** copy constructor {@hide} */
@@ -260,6 +402,9 @@ public class ScanResult implements Parcelable {
             capabilities = source.capabilities;
             level = source.level;
             frequency = source.frequency;
+            channelWidth = source.channelWidth;
+            centerFreq0 = source.centerFreq0;
+            centerFreq1 = source.centerFreq1;
             timestamp = source.timestamp;
             distanceCm = source.distanceCm;
             distanceSdCm = source.distanceSdCm;
@@ -270,6 +415,9 @@ public class ScanResult implements Parcelable {
             numUsage = source.numUsage;
             numIpConfigFailures = source.numIpConfigFailures;
             isAutoJoinCandidate = source.isAutoJoinCandidate;
+            venueName = source.venueName;
+            operatorFriendlyName = source.operatorFriendlyName;
+            flags = source.flags;
         }
     }
 
@@ -303,9 +451,16 @@ public class ScanResult implements Parcelable {
         sb.append(", distanceSd: ").append((distanceSdCm != UNSPECIFIED ? distanceSdCm : "?")).
                 append("(cm)");
 
+        sb.append(", passpoint: ");
+        sb.append(((flags & FLAG_PASSPOINT_NETWORK) != 0) ? "yes" : "no");
         if (autoJoinStatus != 0) {
             sb.append(", status: ").append(autoJoinStatus);
         }
+        sb.append(", ChannelBandwidth: ").append(channelWidth);
+        sb.append(", centerFreq0: ").append(centerFreq0);
+        sb.append(", centerFreq1: ").append(centerFreq1);
+        sb.append(", 80211mcResponder: ");
+        sb.append(((flags & FLAG_80211mc_RESPONDER) != 0) ? "is supported" : "is not supported");
         return sb.toString();
     }
 
@@ -322,6 +477,7 @@ public class ScanResult implements Parcelable {
         } else {
             dest.writeInt(0);
         }
+        dest.writeString(SSID);
         dest.writeString(BSSID);
         dest.writeString(capabilities);
         dest.writeInt(level);
@@ -329,6 +485,9 @@ public class ScanResult implements Parcelable {
         dest.writeLong(timestamp);
         dest.writeInt(distanceCm);
         dest.writeInt(distanceSdCm);
+        dest.writeInt(channelWidth);
+        dest.writeInt(centerFreq0);
+        dest.writeInt(centerFreq1);
         dest.writeLong(seen);
         dest.writeInt(autoJoinStatus);
         dest.writeInt(untrusted ? 1 : 0);
@@ -336,6 +495,10 @@ public class ScanResult implements Parcelable {
         dest.writeInt(numUsage);
         dest.writeInt(numIpConfigFailures);
         dest.writeInt(isAutoJoinCandidate);
+        dest.writeString((venueName != null) ? venueName.toString() : "");
+        dest.writeString((operatorFriendlyName != null) ? operatorFriendlyName.toString() : "");
+        dest.writeLong(this.flags);
+
         if (informationElements != null) {
             dest.writeInt(informationElements.length);
             for (int i = 0; i < informationElements.length; i++) {
@@ -358,14 +521,20 @@ public class ScanResult implements Parcelable {
                 }
                 ScanResult sr = new ScanResult(
                     wifiSsid,
-                    in.readString(),
-                    in.readString(),
-                    in.readInt(),
-                    in.readInt(),
-                    in.readLong(),
-                    in.readInt(),
-                    in.readInt()
+                    in.readString(),                    /* SSID  */
+                    in.readString(),                    /* BSSID */
+                    in.readString(),                    /* capabilities */
+                    in.readInt(),                       /* level */
+                    in.readInt(),                       /* frequency */
+                    in.readLong(),                      /* timestamp */
+                    in.readInt(),                       /* distanceCm */
+                    in.readInt(),                       /* distanceSdCm */
+                    in.readInt(),                       /* channelWidth */
+                    in.readInt(),                       /* centerFreq0 */
+                    in.readInt(),                       /* centerFreq1 */
+                    false                               /* rtt responder, fixed with flags below */
                 );
+
                 sr.seen = in.readLong();
                 sr.autoJoinStatus = in.readInt();
                 sr.untrusted = in.readInt() != 0;
@@ -373,6 +542,9 @@ public class ScanResult implements Parcelable {
                 sr.numUsage = in.readInt();
                 sr.numIpConfigFailures = in.readInt();
                 sr.isAutoJoinCandidate = in.readInt();
+                sr.venueName = in.readString();
+                sr.operatorFriendlyName = in.readString();
+                sr.flags = in.readLong();
                 int n = in.readInt();
                 if (n != 0) {
                     sr.informationElements = new InformationElement[n];

@@ -25,9 +25,6 @@ import java.lang.reflect.Array;
 import java.nio.ByteBuffer;
 import java.util.ArrayList;
 
-import static android.hardware.camera2.impl.CameraMetadataNative.*;
-import static android.hardware.camera2.marshal.MarshalHelpers.*;
-
 /**
  * Marshal any array {@code T}.
  *
@@ -42,7 +39,7 @@ import static android.hardware.camera2.marshal.MarshalHelpers.*;
 public class MarshalQueryableArray<T> implements MarshalQueryable<T> {
 
     private static final String TAG = MarshalQueryableArray.class.getSimpleName();
-    private static final boolean VERBOSE = Log.isLoggable(TAG, Log.VERBOSE);
+    private static final boolean DEBUG = false;
 
     private class MarshalerArray extends Marshaler<T> {
         private final Class<T> mClass;
@@ -84,7 +81,7 @@ public class MarshalQueryableArray<T> implements MarshalQueryable<T> {
                             + "; but there are " + (remaining % elementSize) + " left over bytes");
                 }
 
-                if (VERBOSE) {
+                if (DEBUG) {
                     Log.v(TAG, String.format(
                             "Attempting to unpack array (count = %d, element size = %d, bytes "
                             + "remaining = %d) for type %s",

@@ -19,18 +19,27 @@ import android.app.ActivityManager;
 import android.app.admin.DevicePolicyManager;
 import android.content.Context;
 import android.content.pm.PackageManager.NameNotFoundException;
+import android.content.pm.UserInfo;
 import android.net.ConnectivityManager;
 import android.net.ConnectivityManager.NetworkCallback;
 import android.net.IConnectivityManager;
 import android.net.Network;
 import android.net.NetworkCapabilities;
+import android.net.NetworkInfo;
 import android.net.NetworkRequest;
+import android.os.Process;
 import android.os.RemoteException;
 import android.os.ServiceManager;
+import android.os.UserHandle;
+import android.os.UserManager;
 import android.text.TextUtils;
 import android.util.Log;
+import android.util.SparseArray;
 
+import com.android.internal.net.LegacyVpnInfo;
 import com.android.internal.net.VpnConfig;
+import com.android.internal.net.VpnInfo;
+import com.android.systemui.R;
 
 import java.io.FileDescriptor;
 import java.io.PrintWriter;
@@ -50,16 +59,15 @@ public class SecurityControllerImpl implements SecurityController {
 
     private final Context mContext;
     private final ConnectivityManager mConnectivityManager;
-    private final IConnectivityManager mConnectivityService = IConnectivityManager.Stub.asInterface(
-                ServiceManager.getService(Context.CONNECTIVITY_SERVICE));
+    private final IConnectivityManager mConnectivityManagerService;
     private final DevicePolicyManager mDevicePolicyManager;
+    private final UserManager mUserManager;
     private final ArrayList<SecurityControllerCallback> mCallbacks
             = new ArrayList<SecurityControllerCallback>();
 
-    private VpnConfig mVpnConfig;
-    private String mVpnName;
-    private int mCurrentVpnNetworkId = NO_NETWORK;
+    private SparseArray<VpnConfig> mCurrentVpns = new SparseArray<>();
     private int mCurrentUserId;
+    private int mVpnUserId;
 
     public SecurityControllerImpl(Context context) {
         mContext = context;
@@ -67,17 +75,28 @@ public class SecurityControllerImpl implements SecurityController {
                 context.getSystemService(Context.DEVICE_POLICY_SERVICE);
         mConnectivityManager = (ConnectivityManager)
                 context.getSystemService(Context.CONNECTIVITY_SERVICE);
+        mConnectivityManagerService = IConnectivityManager.Stub.asInterface(
+                ServiceManager.getService(Context.CONNECTIVITY_SERVICE));
+        mUserManager = (UserManager)
+                context.getSystemService(Context.USER_SERVICE);
 
         // TODO: re-register network callback on user change.
         mConnectivityManager.registerNetworkCallback(REQUEST, mNetworkCallback);
-        mCurrentUserId = ActivityManager.getCurrentUser();
+        onUserSwitched(ActivityManager.getCurrentUser());
     }
 
     public void dump(FileDescriptor fd, PrintWriter pw, String[] args) {
         pw.println("SecurityController state:");
-        pw.print("  mCurrentVpnNetworkId="); pw.println(mCurrentVpnNetworkId);
-        pw.print("  mVpnConfig="); pw.println(mVpnConfig);
-        pw.print("  mVpnName="); pw.println(mVpnName);
+        pw.print("  mCurrentVpns={");
+        for (int i = 0 ; i < mCurrentVpns.size(); i++) {
+            if (i > 0) {
+                pw.print(", ");
+            }
+            pw.print(mCurrentVpns.keyAt(i));
+            pw.print('=');
+            pw.print(mCurrentVpns.valueAt(i).user);
+        }
+        pw.println("}");
     }
 
     @Override
@@ -86,56 +105,58 @@ public class SecurityControllerImpl implements SecurityController {
     }
 
     @Override
-    public boolean hasProfileOwner() {
-        return !TextUtils.isEmpty(mDevicePolicyManager.getProfileOwnerNameAsUser(mCurrentUserId));
-    }
-
-    @Override
     public String getDeviceOwnerName() {
         return mDevicePolicyManager.getDeviceOwnerName();
     }
 
     @Override
-    public String getProfileOwnerName() {
-        return mDevicePolicyManager.getProfileOwnerNameAsUser(mCurrentUserId);
+    public boolean hasProfileOwner() {
+        return mDevicePolicyManager.getProfileOwnerAsUser(mCurrentUserId) != null;
     }
 
+    @Override
+    public String getProfileOwnerName() {
+        for (UserInfo profile : mUserManager.getProfiles(mCurrentUserId)) {
+            String name = mDevicePolicyManager.getProfileOwnerNameAsUser(profile.id);
+            if (name != null) {
+                return name;
+            }
+        }
+        return null;
+    }
+
+    @Override
+    public String getPrimaryVpnName() {
+        VpnConfig cfg = mCurrentVpns.get(mVpnUserId);
+        if (cfg != null) {
+            return getNameForVpnConfig(cfg, new UserHandle(mVpnUserId));
+        } else {
+            return null;
+        }
+    }
+
+    @Override
+    public String getProfileVpnName() {
+        for (UserInfo profile : mUserManager.getProfiles(mVpnUserId)) {
+            if (profile.id == mVpnUserId) {
+                continue;
+            }
+            VpnConfig cfg = mCurrentVpns.get(profile.id);
+            if (cfg != null) {
+                return getNameForVpnConfig(cfg, profile.getUserHandle());
+            }
+        }
+        return null;
+    }
 
     @Override
     public boolean isVpnEnabled() {
-        return mCurrentVpnNetworkId != NO_NETWORK;
-    }
-
-    @Override
-    public boolean isLegacyVpn() {
-        return mVpnConfig.legacy;
-    }
-
-    @Override
-    public String getVpnApp() {
-        return mVpnName;
-    }
-
-    @Override
-    public String getLegacyVpnName() {
-        return mVpnConfig.session;
-    }
-
-    @Override
-    public void disconnectFromVpn() {
-        try {
-            if (isLegacyVpn()) {
-                mConnectivityService.prepareVpn(VpnConfig.LEGACY_VPN, VpnConfig.LEGACY_VPN);
-            } else {
-                // Prevent this app from initiating VPN connections in the future without user
-                // intervention.
-                mConnectivityService.setVpnPackageAuthorization(false);
-
-                mConnectivityService.prepareVpn(mVpnConfig.user, VpnConfig.LEGACY_VPN);
+        for (UserInfo profile : mUserManager.getProfiles(mVpnUserId)) {
+            if (mCurrentVpns.get(profile.id) != null) {
+                return true;
             }
-        } catch (Exception e) {
-            Log.e(TAG, "Unable to disconnect from VPN", e);
         }
+        return false;
     }
 
     @Override
@@ -155,14 +176,28 @@ public class SecurityControllerImpl implements SecurityController {
     @Override
     public void onUserSwitched(int newUserId) {
         mCurrentUserId = newUserId;
+        if (mUserManager.getUserInfo(newUserId).isRestricted()) {
+            // VPN for a restricted profile is routed through its owner user
+            mVpnUserId = UserHandle.USER_OWNER;
+        } else {
+            mVpnUserId = mCurrentUserId;
+        }
         fireCallbacks();
     }
 
-    private void setCurrentNetid(int netId) {
-        if (netId != mCurrentVpnNetworkId) {
-            mCurrentVpnNetworkId = netId;
-            updateState();
-            fireCallbacks();
+    private String getNameForVpnConfig(VpnConfig cfg, UserHandle user) {
+        if (cfg.legacy) {
+            return mContext.getString(R.string.legacy_vpn_name);
+        }
+        // The package name for an active VPN is stored in the 'user' field of its VpnConfig
+        final String vpnPackage = cfg.user;
+        try {
+            Context userContext = mContext.createPackageContextAsUser(mContext.getPackageName(),
+                    0 /* flags */, user);
+            return VpnConfig.getVpnLabel(userContext, vpnPackage).toString();
+        } catch (NameNotFoundException nnfe) {
+            Log.e(TAG, "Package " + vpnPackage + " is not present", nnfe);
+            return null;
         }
     }
 
@@ -173,26 +208,37 @@ public class SecurityControllerImpl implements SecurityController {
     }
 
     private void updateState() {
+        // Find all users with an active VPN
+        SparseArray<VpnConfig> vpns = new SparseArray<>();
         try {
-            mVpnConfig = mConnectivityService.getVpnConfig();
-
-            if (mVpnConfig != null && !mVpnConfig.legacy) {
-                mVpnName = VpnConfig.getVpnLabel(mContext, mVpnConfig.user).toString();
+            for (UserInfo user : mUserManager.getUsers()) {
+                VpnConfig cfg = mConnectivityManagerService.getVpnConfig(user.id);
+                if (cfg == null) {
+                    continue;
+                } else if (cfg.legacy) {
+                    // Legacy VPNs should do nothing if the network is disconnected. Third-party
+                    // VPN warnings need to continue as traffic can still go to the app.
+                    LegacyVpnInfo legacyVpn = mConnectivityManagerService.getLegacyVpnInfo(user.id);
+                    if (legacyVpn == null || legacyVpn.state != LegacyVpnInfo.STATE_CONNECTED) {
+                        continue;
+                    }
+                }
+                vpns.put(user.id, cfg);
             }
-        } catch (RemoteException | NameNotFoundException e) {
-            Log.w(TAG, "Unable to get current VPN", e);
+        } catch (RemoteException rme) {
+            // Roll back to previous state
+            Log.e(TAG, "Unable to list active VPNs", rme);
+            return;
         }
+        mCurrentVpns = vpns;
     }
 
     private final NetworkCallback mNetworkCallback = new NetworkCallback() {
         @Override
         public void onAvailable(Network network) {
-            NetworkCapabilities networkCapabilities =
-                    mConnectivityManager.getNetworkCapabilities(network);
-            if (DEBUG) Log.d(TAG, "onAvailable " + network.netId + " : " + networkCapabilities);
-            if (networkCapabilities.hasTransport(NetworkCapabilities.TRANSPORT_VPN)) {
-                setCurrentNetid(network.netId);
-            }
+            if (DEBUG) Log.d(TAG, "onAvailable " + network.netId);
+            updateState();
+            fireCallbacks();
         };
 
         // TODO Find another way to receive VPN lost.  This may be delayed depending on
@@ -200,10 +246,8 @@ public class SecurityControllerImpl implements SecurityController {
         @Override
         public void onLost(Network network) {
             if (DEBUG) Log.d(TAG, "onLost " + network.netId);
-            if (mCurrentVpnNetworkId == network.netId) {
-                setCurrentNetid(NO_NETWORK);
-            }
+            updateState();
+            fireCallbacks();
         };
     };
-
 }

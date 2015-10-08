@@ -33,7 +33,6 @@ import android.util.Size;
 import com.android.internal.util.ArrayUtils;
 
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.List;
 
 import static android.hardware.camera2.CaptureRequest.*;
@@ -45,7 +44,7 @@ import static com.android.internal.util.Preconditions.*;
 @SuppressWarnings("deprecation")
 public class LegacyFaceDetectMapper {
     private static String TAG = "LegacyFaceDetectMapper";
-    private static final boolean VERBOSE = Log.isLoggable(TAG, Log.VERBOSE);
+    private static final boolean DEBUG = false;
 
     private final Camera mCamera;
     /** Is the camera capable of face detection? */
@@ -98,7 +97,7 @@ public class LegacyFaceDetectMapper {
                 }
             }
 
-            if (VERBOSE) {
+            if (DEBUG) {
                 Log.v(TAG, "onFaceDetection - read " + lengthFaces + " faces");
             }
         }
@@ -171,13 +170,13 @@ public class LegacyFaceDetectMapper {
                 if (enableFaceDetect) {
                     mCamera.startFaceDetection();
 
-                    if (VERBOSE) {
+                    if (DEBUG) {
                         Log.v(TAG, "processFaceDetectMode - start face detection");
                     }
                 } else {
                     mCamera.stopFaceDetection();
 
-                    if (VERBOSE) {
+                    if (DEBUG) {
                         Log.v(TAG, "processFaceDetectMode - stop face detection");
                     }
 
@@ -249,7 +248,7 @@ public class LegacyFaceDetectMapper {
             }
         }
 
-        if (VERBOSE && previousFaces != faces) { // Log only in verbose and IF the faces changed
+        if (DEBUG && previousFaces != faces) { // Log only in verbose and IF the faces changed
             Log.v(TAG, "mapResultFaces - changed to " + ListUtils.listToString(convertedFaces));
         }
 

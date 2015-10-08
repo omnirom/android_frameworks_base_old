@@ -64,7 +64,7 @@ public:
     {
         Parcel data, reply;
         data.writeInterfaceToken(IMountService::getInterfaceDescriptor());
-        data.writeStrongBinder(listener->asBinder());
+        data.writeStrongBinder(IInterface::asBinder(listener));
         if (remote()->transact(TRANSACTION_registerListener, data, &reply) != NO_ERROR) {
             ALOGD("registerListener could not contact remote\n");
             return;
@@ -80,7 +80,7 @@ public:
     {
         Parcel data, reply;
         data.writeInterfaceToken(IMountService::getInterfaceDescriptor());
-        data.writeStrongBinder(listener->asBinder());
+        data.writeStrongBinder(IInterface::asBinder(listener));
         if (remote()->transact(TRANSACTION_unregisterListener, data, &reply) != NO_ERROR) {
             ALOGD("unregisterListener could not contact remote\n");
             return;
@@ -207,12 +207,19 @@ public:
             ALOGD("getStorageUsers caught exception %d\n", err);
             return err;
         }
-        const int32_t numUsers = reply.readInt32();
+        int32_t numUsersI = reply.readInt32();
+        uint32_t numUsers;
+        if (numUsersI < 0) {
+            ALOGW("Number of users is negative: %d\n", numUsersI);
+            numUsers = 0;
+        } else {
+            numUsers = static_cast<uint32_t>(numUsersI);
+        }
         *users = (int32_t*)malloc(sizeof(int32_t)*numUsers);
-        for (int i = 0; i < numUsers; i++) {
+        for (size_t i = 0; i < numUsers; i++) {
             **users++ = reply.readInt32();
         }
-        return numUsers;
+        return static_cast<int32_t>(numUsers);
     }
 
     int32_t getVolumeState(const String16& mountPoint)
@@ -406,7 +413,7 @@ public:
     {
         Parcel data, reply;
         data.writeInterfaceToken(IMountService::getInterfaceDescriptor());
-        data.writeStrongBinder(observer->asBinder());
+        data.writeStrongBinder(IInterface::asBinder(observer));
         if (remote()->transact(TRANSACTION_shutdown, data, &reply) != NO_ERROR) {
             ALOGD("shutdown could not contact remote\n");
             return;
@@ -443,7 +450,7 @@ public:
         data.writeString16(rawPath);
         data.writeString16(canonicalPath);
         data.writeString16(key);
-        data.writeStrongBinder(token->asBinder());
+        data.writeStrongBinder(IInterface::asBinder(token));
         data.writeInt32(nonce);
         if (remote()->transact(TRANSACTION_mountObb, data, &reply) != NO_ERROR) {
             ALOGD("mountObb could not contact remote\n");
@@ -463,7 +470,7 @@ public:
         data.writeInterfaceToken(IMountService::getInterfaceDescriptor());
         data.writeString16(filename);
         data.writeInt32(force ? 1 : 0);
-        data.writeStrongBinder(token->asBinder());
+        data.writeStrongBinder(IInterface::asBinder(token));
         data.writeInt32(nonce);
         if (remote()->transact(TRANSACTION_unmountObb, data, &reply) != NO_ERROR) {
             ALOGD("unmountObb could not contact remote\n");
@@ -546,8 +553,8 @@ public:
     }
 };
 
-IMPLEMENT_META_INTERFACE(MountService, "IMountService");
+IMPLEMENT_META_INTERFACE(MountService, "IMountService")
 
 // ----------------------------------------------------------------------
 
-};
+}

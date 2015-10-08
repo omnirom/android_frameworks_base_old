@@ -16,7 +16,6 @@
 
 package android.media;
 
-
 /**
  * An audio port is a node of the audio framework or hardware that can be connected to or
  * disconnect from another audio node to create a specific audio routing configuration.
@@ -37,6 +36,7 @@ package android.media;
  * @hide
  */
 public class AudioPort {
+    private static final String TAG = "AudioPort";
 
     /**
      * For use by the audio framework.
@@ -68,18 +68,24 @@ public class AudioPort {
 
     AudioHandle mHandle;
     protected final int mRole;
+    private final String mName;
     private final int[] mSamplingRates;
     private final int[] mChannelMasks;
+    private final int[] mChannelIndexMasks;
     private final int[] mFormats;
     private final AudioGain[] mGains;
     private AudioPortConfig mActiveConfig;
 
-    AudioPort(AudioHandle handle, int role, int[] samplingRates, int[] channelMasks,
+    AudioPort(AudioHandle handle, int role, String name,
+            int[] samplingRates, int[] channelMasks, int[] channelIndexMasks,
             int[] formats, AudioGain[] gains) {
+
         mHandle = handle;
         mRole = role;
+        mName = name;
         mSamplingRates = samplingRates;
         mChannelMasks = channelMasks;
+        mChannelIndexMasks = channelIndexMasks;
         mFormats = formats;
         mGains = gains;
     }
@@ -89,10 +95,26 @@ public class AudioPort {
     }
 
     /**
+     * Get the system unique device ID.
+     */
+    public int id() {
+        return mHandle.id();
+    }
+
+
+    /**
      * Get the audio port role
      */
     public int role() {
         return mRole;
+    }
+
+    /**
+     * Get the human-readable name of this port. Perhaps an internal
+     * designation or an physical device.
+     */
+    public String name() {
+        return mName;
     }
 
     /**
@@ -110,6 +132,15 @@ public class AudioPort {
      */
     public int[] channelMasks() {
         return mChannelMasks;
+    }
+
+    /**
+     * Get the list of supported channel index mask configurations
+     * (e.g 0x0003 means 2 channel, 0x000F means 4 channel....)
+     * Empty array if channel index mask is not relevant for this audio port
+     */
+    public int[] channelIndexMasks() {
+        return mChannelIndexMasks;
     }
 
     /**

@@ -18,15 +18,15 @@ package com.android.systemui.recents;
 
 import android.app.ActivityManager;
 import android.content.Context;
-import android.content.SharedPreferences;
 import android.content.res.Configuration;
 import android.content.res.Resources;
 import android.graphics.Rect;
 import android.provider.Settings;
 import android.util.DisplayMetrics;
-import android.util.TypedValue;
 import android.view.animation.AnimationUtils;
 import android.view.animation.Interpolator;
+
+import com.android.systemui.Prefs;
 import com.android.systemui.R;
 import com.android.systemui.recents.misc.Console;
 import com.android.systemui.recents.misc.SystemServicesProxy;
@@ -49,9 +49,6 @@ public class RecentsConfiguration {
     public static final int SVELTE_DISABLE_CACHE = 2;
     // Disable all thumbnail loading.
     public static final int SVELTE_DISABLE_LOADING = 3;
-
-    /** Animations */
-    public float animationPxMovementPerSecond;
 
     /** Interpolators */
     public Interpolator fastOutSlowInInterpolator;
@@ -76,13 +73,13 @@ public class RecentsConfiguration {
     public int maxNumTasksToLoad;
 
     /** Search bar */
-    int searchBarAppWidgetId = -1;
     public int searchBarSpaceHeightPx;
 
     /** Task stack */
     public int taskStackScrollDuration;
     public int taskStackMaxDim;
     public int taskStackTopPaddingPx;
+    public int dismissAllButtonSizePx;
     public float taskStackWidthPaddingPct;
     public float taskStackOverscrollPct;
 
@@ -137,6 +134,7 @@ public class RecentsConfiguration {
     public boolean fakeShadows;
 
     /** Dev options and global settings */
+    public boolean multiStackEnabled;
     public boolean lockToAppEnabled;
     public boolean developerOptionsEnabled;
     public boolean debugModeEnabled;
@@ -179,12 +177,12 @@ public class RecentsConfiguration {
 
     /** Updates the state, given the specified context */
     void update(Context context) {
-        SharedPreferences settings = context.getSharedPreferences(context.getPackageName(), 0);
         Resources res = context.getResources();
         DisplayMetrics dm = res.getDisplayMetrics();
 
         // Debug mode
-        debugModeEnabled = settings.getBoolean(Constants.Values.App.Key_DebugModeEnabled, false);
+        debugModeEnabled = Prefs.getBoolean(context, Prefs.Key.DEBUG_MODE_ENABLED,
+                false /* defaultValue */);
         if (debugModeEnabled) {
             Console.Enabled = true;
         }
@@ -197,10 +195,6 @@ public class RecentsConfiguration {
         // Insets
         displayRect.set(0, 0, dm.widthPixels, dm.heightPixels);
 
-        // Animations
-        animationPxMovementPerSecond =
-                res.getDimensionPixelSize(R.dimen.recents_animation_movement_in_dps_per_second);
-
         // Filtering
         filteringCurrentViewsAnimDuration =
                 res.getInteger(R.integer.recents_filter_animate_current_views_duration);
@@ -212,19 +206,15 @@ public class RecentsConfiguration {
 
         // Search Bar
         searchBarSpaceHeightPx = res.getDimensionPixelSize(R.dimen.recents_search_bar_space_height);
-        searchBarAppWidgetId = settings.getInt(Constants.Values.App.Key_SearchAppWidgetId, -1);
 
         // Task stack
         taskStackScrollDuration =
                 res.getInteger(R.integer.recents_animate_task_stack_scroll_duration);
-        TypedValue widthPaddingPctValue = new TypedValue();
-        res.getValue(R.dimen.recents_stack_width_padding_percentage, widthPaddingPctValue, true);
-        taskStackWidthPaddingPct = widthPaddingPctValue.getFloat();
-        TypedValue stackOverscrollPctValue = new TypedValue();
-        res.getValue(R.dimen.recents_stack_overscroll_percentage, stackOverscrollPctValue, true);
-        taskStackOverscrollPct = stackOverscrollPctValue.getFloat();
+        taskStackWidthPaddingPct = res.getFloat(R.dimen.recents_stack_width_padding_percentage);
+        taskStackOverscrollPct = res.getFloat(R.dimen.recents_stack_overscroll_percentage);
         taskStackMaxDim = res.getInteger(R.integer.recents_max_task_stack_view_dim);
         taskStackTopPaddingPx = res.getDimensionPixelSize(R.dimen.recents_stack_top_padding);
+        dismissAllButtonSizePx = res.getDimensionPixelSize(R.dimen.recents_dismiss_all_button_size);
 
         // Transition
         transitionEnterFromAppDelay =
@@ -254,22 +244,16 @@ public class RecentsConfiguration {
         taskViewTranslationZMaxPx = res.getDimensionPixelSize(R.dimen.recents_task_view_z_max);
         taskViewAffiliateGroupEnterOffsetPx =
                 res.getDimensionPixelSize(R.dimen.recents_task_view_affiliate_group_enter_offset);
-        TypedValue thumbnailAlphaValue = new TypedValue();
-        res.getValue(R.dimen.recents_task_view_thumbnail_alpha, thumbnailAlphaValue, true);
-        taskViewThumbnailAlpha = thumbnailAlphaValue.getFloat();
+        taskViewThumbnailAlpha = res.getFloat(R.dimen.recents_task_view_thumbnail_alpha);
 
         // Task bar colors
-        taskBarViewDefaultBackgroundColor =
-                res.getColor(R.color.recents_task_bar_default_background_color);
-        taskBarViewLightTextColor =
-                res.getColor(R.color.recents_task_bar_light_text_color);
-        taskBarViewDarkTextColor =
-                res.getColor(R.color.recents_task_bar_dark_text_color);
-        taskBarViewHighlightColor =
-                res.getColor(R.color.recents_task_bar_highlight_color);
-        TypedValue affMinAlphaPctValue = new TypedValue();
-        res.getValue(R.dimen.recents_task_affiliation_color_min_alpha_percentage, affMinAlphaPctValue, true);
-        taskBarViewAffiliationColorMinAlpha = affMinAlphaPctValue.getFloat();
+        taskBarViewDefaultBackgroundColor = context.getColor(
+                R.color.recents_task_bar_default_background_color);
+        taskBarViewLightTextColor = context.getColor(R.color.recents_task_bar_light_text_color);
+        taskBarViewDarkTextColor = context.getColor(R.color.recents_task_bar_dark_text_color);
+        taskBarViewHighlightColor = context.getColor(R.color.recents_task_bar_highlight_color);
+        taskBarViewAffiliationColorMinAlpha = res.getFloat(
+                R.dimen.recents_task_affiliation_color_min_alpha_percentage);
 
         // Task bar size & animations
         taskBarHeight = res.getDimensionPixelSize(R.dimen.recents_task_bar_height);
@@ -292,14 +276,6 @@ public class RecentsConfiguration {
         systemInsets.set(insets);
     }
 
-    /** Updates the search bar app widget */
-    public void updateSearchBarAppWidgetId(Context context, int appWidgetId) {
-        searchBarAppWidgetId = appWidgetId;
-        SharedPreferences settings = context.getSharedPreferences(context.getPackageName(), 0);
-        settings.edit().putInt(Constants.Values.App.Key_SearchAppWidgetId,
-                appWidgetId).apply();
-    }
-
     /** Updates the states that need to be re-read whenever we re-initialize. */
     void updateOnReinitialize(Context context, SystemServicesProxy ssp) {
         // Check if the developer options are enabled
@@ -307,6 +283,7 @@ public class RecentsConfiguration {
                 Settings.Global.DEVELOPMENT_SETTINGS_ENABLED) != 0;
         lockToAppEnabled = ssp.getSystemSetting(context,
                 Settings.System.LOCK_TO_APP_ENABLED) != 0;
+        multiStackEnabled = "true".equals(ssp.getSystemProperty("persist.sys.debug.multi_window"));
     }
 
     /** Called when the configuration has changed, and we want to reset any configuration specific
@@ -316,11 +293,6 @@ public class RecentsConfiguration {
         launchedReuseTaskStackViews = false;
         // Set this flag to indicate that the configuration has changed since Recents last launched
         launchedHasConfigurationChanged = true;
-    }
-
-    /** Returns whether the search bar app widget exists. */
-    public boolean hasSearchBarAppWidget() {
-        return searchBarAppWidgetId >= 0;
     }
 
     /** Returns whether the status bar scrim should be animated when shown for the first time. */
@@ -344,19 +316,12 @@ public class RecentsConfiguration {
         return !launchedWithNoRecentTasks && (!hasTransposedNavBar || !isLandscape);
     }
 
-    /** Returns whether the current layout is horizontal. */
-    public boolean hasHorizontalLayout() {
-        return isLandscape && hasTransposedSearchBar;
-    }
-
     /**
      * Returns the task stack bounds in the current orientation. These bounds do not account for
      * the system insets.
      */
-    public void getTaskStackBounds(int windowWidth, int windowHeight, int topInset, int rightInset,
-                                   Rect taskStackBounds) {
-        Rect searchBarBounds = new Rect();
-        getSearchBarBounds(windowWidth, windowHeight, topInset, searchBarBounds);
+    public void getAvailableTaskStackBounds(int windowWidth, int windowHeight, int topInset,
+            int rightInset, Rect searchBarBounds, Rect taskStackBounds) {
         if (isLandscape && hasTransposedSearchBar) {
             // In landscape, the search bar appears on the left, but we overlay it on top
             taskStackBounds.set(0, topInset, windowWidth - rightInset, windowHeight);
@@ -371,13 +336,9 @@ public class RecentsConfiguration {
      * the system insets.
      */
     public void getSearchBarBounds(int windowWidth, int windowHeight, int topInset,
-                                   Rect searchBarSpaceBounds) {
+            Rect searchBarSpaceBounds) {
         // Return empty rects if search is not enabled
         int searchBarSize = searchBarSpaceHeightPx;
-        if (!Constants.DebugFlags.App.EnableSearchLayout || !hasSearchBarAppWidget()) {
-            searchBarSize = 0;
-        }
-
         if (isLandscape && hasTransposedSearchBar) {
             // In landscape, the search bar appears on the left
             searchBarSpaceBounds.set(0, topInset, searchBarSize, windowHeight);

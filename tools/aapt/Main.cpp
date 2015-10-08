@@ -69,7 +69,7 @@ void usage(void)
         "        [-S resource-sources [-S resource-sources ...]] \\\n"
         "        [-F apk-file] [-J R-file-dir] \\\n"
         "        [--product product1,product2,...] \\\n"
-        "        [-c CONFIGS] [--preferred-configurations CONFIGS] \\\n"
+        "        [-c CONFIGS] [--preferred-density DENSITY] \\\n"
         "        [--split CONFIGS [--split CONFIGS]] \\\n"
         "        [--feature-of package [--feature-after package]] \\\n"
         "        [raw-files-dir [raw-files-dir] ...] \\\n"
@@ -211,7 +211,12 @@ void usage(void)
         "       specified folder.\n"
         "   --ignore-assets\n"
         "       Assets to be ignored. Default pattern is:\n"
-        "       %s\n",
+        "       %s\n"
+        "   --skip-symbols-without-default-localization\n"
+        "       Prevents symbols from being generated for strings that do not have a default\n"
+        "       localization\n"
+        "   --no-version-vectors\n"
+        "       Do not automatically generate versioned copies of vector XML resources.\n",
         gDefaultIgnoreAssets);
 }
 
@@ -657,6 +662,8 @@ int main(int argc, char* const argv[])
                     bundle.setProduct(argv[0]);
                 } else if (strcmp(cp, "-non-constant-id") == 0) {
                     bundle.setNonConstantId(true);
+                } else if (strcmp(cp, "-skip-symbols-without-default-localization") == 0) {
+                    bundle.setSkipSymbolsWithoutDefaultLocalization(true);
                 } else if (strcmp(cp, "-shared-lib") == 0) {
                     bundle.setNonConstantId(true);
                     bundle.setBuildSharedLibrary(true);
@@ -673,6 +680,8 @@ int main(int argc, char* const argv[])
                     gUserIgnoreAssets = argv[0];
                 } else if (strcmp(cp, "-pseudo-localize") == 0) {
                     bundle.setPseudolocalize(PSEUDO_ACCENTED | PSEUDO_BIDI);
+                } else if (strcmp(cp, "-no-version-vectors") == 0) {
+                    bundle.setNoVersionVectors(true);
                 } else {
                     fprintf(stderr, "ERROR: Unknown option '-%s'\n", cp);
                     wantUsage = true;

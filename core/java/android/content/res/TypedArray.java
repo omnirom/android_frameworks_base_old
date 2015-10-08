@@ -16,11 +16,13 @@
 
 package android.content.res;
 
+import android.annotation.AnyRes;
+import android.annotation.ColorInt;
 import android.annotation.Nullable;
 import android.graphics.drawable.Drawable;
+import android.os.StrictMode;
 import android.util.AttributeSet;
 import android.util.DisplayMetrics;
-import android.util.Log;
 import android.util.TypedValue;
 
 import com.android.internal.util.XmlUtils;
@@ -73,7 +75,9 @@ public class TypedArray {
     /*package*/ TypedValue mValue = new TypedValue();
 
     /**
-     * Return the number of values in this array.
+     * Returns the number of values in this array.
+     *
+     * @throws RuntimeException if the TypedArray has already been recycled.
      */
     public int length() {
         if (mRecycled) {
@@ -85,6 +89,8 @@ public class TypedArray {
 
     /**
      * Return the number of indices in the array that actually have data.
+     *
+     * @throws RuntimeException if the TypedArray has already been recycled.
      */
     public int getIndexCount() {
         if (mRecycled) {
@@ -95,13 +101,14 @@ public class TypedArray {
     }
 
     /**
-     * Return an index in the array that has data.
+     * Returns an index in the array that has data.
      *
      * @param at The index you would like to returned, ranging from 0 to
-     * {@link #getIndexCount()}.
+     *           {@link #getIndexCount()}.
      *
      * @return The index at the given offset, which can be used with
-     * {@link #getValue} and related APIs.
+     *         {@link #getValue} and related APIs.
+     * @throws RuntimeException if the TypedArray has already been recycled.
      */
     public int getIndex(int at) {
         if (mRecycled) {
@@ -112,7 +119,9 @@ public class TypedArray {
     }
 
     /**
-     * Return the Resources object this array was loaded from.
+     * Returns the Resources object this array was loaded from.
+     *
+     * @throws RuntimeException if the TypedArray has already been recycled.
      */
     public Resources getResources() {
         if (mRecycled) {
@@ -123,12 +132,17 @@ public class TypedArray {
     }
 
     /**
-     * Retrieve the styled string value for the attribute at <var>index</var>.
+     * Retrieves the styled string value for the attribute at <var>index</var>.
+     * <p>
+     * If the attribute is not a string, this method will attempt to coerce
+     * it to a string.
      *
      * @param index Index of attribute to retrieve.
      *
-     * @return CharSequence holding string data.  May be styled.  Returns
-     *         null if the attribute is not defined.
+     * @return CharSequence holding string data. May be styled. Returns
+     *         {@code null} if the attribute is not defined or could not be
+     *         coerced to a string.
+     * @throws RuntimeException if the TypedArray has already been recycled.
      */
     public CharSequence getText(int index) {
         if (mRecycled) {
@@ -144,24 +158,29 @@ public class TypedArray {
             return loadStringValueAt(index);
         }
 
-        TypedValue v = mValue;
+        final TypedValue v = mValue;
         if (getValueAt(index, v)) {
-            Log.w(Resources.TAG, "Converting to string: " + v);
             return v.coerceToString();
         }
-        Log.w(Resources.TAG, "getString of bad type: 0x"
-              + Integer.toHexString(type));
-        return null;
+
+        // We already checked for TYPE_NULL. This should never happen.
+        throw new RuntimeException("getText of bad type: 0x" + Integer.toHexString(type));
     }
 
     /**
-     * Retrieve the string value for the attribute at <var>index</var>.
+     * Retrieves the string value for the attribute at <var>index</var>.
+     * <p>
+     * If the attribute is not a string, this method will attempt to coerce
+     * it to a string.
      *
      * @param index Index of attribute to retrieve.
      *
-     * @return String holding string data.  Any styling information is
-     * removed.  Returns null if the attribute is not defined.
+     * @return String holding string data. Any styling information is removed.
+     *         Returns {@code null} if the attribute is not defined or could
+     *         not be coerced to a string.
+     * @throws RuntimeException if the TypedArray has already been recycled.
      */
+    @Nullable
     public String getString(int index) {
         if (mRecycled) {
             throw new RuntimeException("Cannot make calls to a recycled instance!");
@@ -176,19 +195,18 @@ public class TypedArray {
             return loadStringValueAt(index).toString();
         }
 
-        TypedValue v = mValue;
+        final TypedValue v = mValue;
         if (getValueAt(index, v)) {
-            Log.w(Resources.TAG, "Converting to string: " + v);
-            CharSequence cs = v.coerceToString();
+            final CharSequence cs = v.coerceToString();
             return cs != null ? cs.toString() : null;
         }
-        Log.w(Resources.TAG, "getString of bad type: 0x"
-              + Integer.toHexString(type));
-        return null;
+
+        // We already checked for TYPE_NULL. This should never happen.
+        throw new RuntimeException("getString of bad type: 0x" + Integer.toHexString(type));
     }
 
     /**
-     * Retrieve the string value for the attribute at <var>index</var>, but
+     * Retrieves the string value for the attribute at <var>index</var>, but
      * only if that string comes from an immediate value in an XML file.  That
      * is, this does not allow references to string resources, string
      * attributes, or conversions from other types.  As such, this method
@@ -197,9 +215,10 @@ public class TypedArray {
      *
      * @param index Index of attribute to retrieve.
      *
-     * @return String holding string data.  Any styling information is
-     * removed.  Returns null if the attribute is not defined or is not
-     * an immediate string value.
+     * @return String holding string data. Any styling information is removed.
+     *         Returns {@code null} if the attribute is not defined or is not
+     *         an immediate string value.
+     * @throws RuntimeException if the TypedArray has already been recycled.
      */
     public String getNonResourceString(int index) {
         if (mRecycled) {
@@ -220,16 +239,17 @@ public class TypedArray {
     }
 
     /**
-     * @hide
-     * Retrieve the string value for the attribute at <var>index</var> that is
+     * Retrieves the string value for the attribute at <var>index</var> that is
      * not allowed to change with the given configurations.
      *
      * @param index Index of attribute to retrieve.
      * @param allowedChangingConfigs Bit mask of configurations from
-     * {@link Configuration}.NATIVE_CONFIG_* that are allowed to change.
+     *        {@link Configuration}.NATIVE_CONFIG_* that are allowed to change.
      *
-     * @return String holding string data.  Any styling information is
-     * removed.  Returns null if the attribute is not defined.
+     * @return String holding string data. Any styling information is removed.
+     *         Returns {@code null} if the attribute is not defined.
+     * @throws RuntimeException if the TypedArray has already been recycled.
+     * @hide
      */
     public String getNonConfigurationString(int index, int allowedChangingConfigs) {
         if (mRecycled) {
@@ -248,24 +268,32 @@ public class TypedArray {
             return loadStringValueAt(index).toString();
         }
 
-        TypedValue v = mValue;
+        final TypedValue v = mValue;
         if (getValueAt(index, v)) {
-            Log.w(Resources.TAG, "Converting to string: " + v);
-            CharSequence cs = v.coerceToString();
+            final CharSequence cs = v.coerceToString();
             return cs != null ? cs.toString() : null;
         }
-        Log.w(Resources.TAG, "getString of bad type: 0x"
-              + Integer.toHexString(type));
-        return null;
+
+        // We already checked for TYPE_NULL. This should never happen.
+        throw new RuntimeException("getNonConfigurationString of bad type: 0x"
+                + Integer.toHexString(type));
     }
 
     /**
      * Retrieve the boolean value for the attribute at <var>index</var>.
+     * <p>
+     * If the attribute is an integer value, this method will return whether
+     * it is equal to zero. If the attribute is not a boolean or integer value,
+     * this method will attempt to coerce it to an integer using
+     * {@link Integer#decode(String)} and return whether it is equal to zero.
      *
      * @param index Index of attribute to retrieve.
-     * @param defValue Value to return if the attribute is not defined.
+     * @param defValue Value to return if the attribute is not defined or
+     *                 cannot be coerced to an integer.
      *
-     * @return Attribute boolean value, or defValue if not defined.
+     * @return Boolean value of the attribute, or defValue if the attribute was
+     *         not defined or could not be coerced to an integer.
+     * @throws RuntimeException if the TypedArray has already been recycled.
      */
     public boolean getBoolean(int index, boolean defValue) {
         if (mRecycled) {
@@ -278,28 +306,33 @@ public class TypedArray {
         if (type == TypedValue.TYPE_NULL) {
             return defValue;
         } else if (type >= TypedValue.TYPE_FIRST_INT
-            && type <= TypedValue.TYPE_LAST_INT) {
+                && type <= TypedValue.TYPE_LAST_INT) {
             return data[index+AssetManager.STYLE_DATA] != 0;
         }
 
-        TypedValue v = mValue;
+        final TypedValue v = mValue;
         if (getValueAt(index, v)) {
-            Log.w(Resources.TAG, "Converting to boolean: " + v);
-            return XmlUtils.convertValueToBoolean(
-                v.coerceToString(), defValue);
+            StrictMode.noteResourceMismatch(v);
+            return XmlUtils.convertValueToBoolean(v.coerceToString(), defValue);
         }
-        Log.w(Resources.TAG, "getBoolean of bad type: 0x"
-              + Integer.toHexString(type));
-        return defValue;
+
+        // We already checked for TYPE_NULL. This should never happen.
+        throw new RuntimeException("getBoolean of bad type: 0x" + Integer.toHexString(type));
     }
 
     /**
      * Retrieve the integer value for the attribute at <var>index</var>.
+     * <p>
+     * If the attribute is not an integer, this method will attempt to coerce
+     * it to an integer using {@link Integer#decode(String)}.
      *
      * @param index Index of attribute to retrieve.
-     * @param defValue Value to return if the attribute is not defined.
+     * @param defValue Value to return if the attribute is not defined or
+     *                 cannot be coerced to an integer.
      *
-     * @return Attribute int value, or defValue if not defined.
+     * @return Integer value of the attribute, or defValue if the attribute was
+     *         not defined or could not be coerced to an integer.
+     * @throws RuntimeException if the TypedArray has already been recycled.
      */
     public int getInt(int index, int defValue) {
         if (mRecycled) {
@@ -312,27 +345,31 @@ public class TypedArray {
         if (type == TypedValue.TYPE_NULL) {
             return defValue;
         } else if (type >= TypedValue.TYPE_FIRST_INT
-            && type <= TypedValue.TYPE_LAST_INT) {
+                && type <= TypedValue.TYPE_LAST_INT) {
             return data[index+AssetManager.STYLE_DATA];
         }
 
-        TypedValue v = mValue;
+        final TypedValue v = mValue;
         if (getValueAt(index, v)) {
-            Log.w(Resources.TAG, "Converting to int: " + v);
-            return XmlUtils.convertValueToInt(
-                v.coerceToString(), defValue);
+            StrictMode.noteResourceMismatch(v);
+            return XmlUtils.convertValueToInt(v.coerceToString(), defValue);
         }
-        Log.w(Resources.TAG, "getInt of bad type: 0x"
-              + Integer.toHexString(type));
-        return defValue;
+
+        // We already checked for TYPE_NULL. This should never happen.
+        throw new RuntimeException("getInt of bad type: 0x" + Integer.toHexString(type));
     }
 
     /**
      * Retrieve the float value for the attribute at <var>index</var>.
+     * <p>
+     * If the attribute is not a float or an integer, this method will attempt
+     * to coerce it to a float using {@link Float#parseFloat(String)}.
      *
      * @param index Index of attribute to retrieve.
      *
-     * @return Attribute float value, or defValue if not defined..
+     * @return Attribute float value, or defValue if the attribute was
+     *         not defined or could not be coerced to a float.
+     * @throws RuntimeException if the TypedArray has already been recycled.
      */
     public float getFloat(int index, float defValue) {
         if (mRecycled) {
@@ -347,21 +384,21 @@ public class TypedArray {
         } else if (type == TypedValue.TYPE_FLOAT) {
             return Float.intBitsToFloat(data[index+AssetManager.STYLE_DATA]);
         } else if (type >= TypedValue.TYPE_FIRST_INT
-            && type <= TypedValue.TYPE_LAST_INT) {
+                && type <= TypedValue.TYPE_LAST_INT) {
             return data[index+AssetManager.STYLE_DATA];
         }
 
-        TypedValue v = mValue;
+        final TypedValue v = mValue;
         if (getValueAt(index, v)) {
-            Log.w(Resources.TAG, "Converting to float: " + v);
-            CharSequence str = v.coerceToString();
+            final CharSequence str = v.coerceToString();
             if (str != null) {
+                StrictMode.noteResourceMismatch(v);
                 return Float.parseFloat(str.toString());
             }
         }
-        Log.w(Resources.TAG, "getFloat of bad type: 0x"
-              + Integer.toHexString(type));
-        return defValue;
+
+        // We already checked for TYPE_NULL. This should never happen.
+        throw new RuntimeException("getFloat of bad type: 0x" + Integer.toHexString(type));
     }
 
     /**
@@ -369,14 +406,21 @@ public class TypedArray {
      * the attribute references a color resource holding a complex
      * {@link android.content.res.ColorStateList}, then the default color from
      * the set is returned.
+     * <p>
+     * This method will throw an exception if the attribute is defined but is
+     * not an integer color or color state list.
      *
      * @param index Index of attribute to retrieve.
      * @param defValue Value to return if the attribute is not defined or
      *                 not a resource.
      *
      * @return Attribute color value, or defValue if not defined.
+     * @throws RuntimeException if the TypedArray has already been recycled.
+     * @throws UnsupportedOperationException if the attribute is defined but is
+     *         not an integer color or color state list.
      */
-    public int getColor(int index, int defValue) {
+    @ColorInt
+    public int getColor(int index, @ColorInt int defValue) {
         if (mRecycled) {
             throw new RuntimeException("Cannot make calls to a recycled instance!");
         }
@@ -387,18 +431,21 @@ public class TypedArray {
         if (type == TypedValue.TYPE_NULL) {
             return defValue;
         } else if (type >= TypedValue.TYPE_FIRST_INT
-            && type <= TypedValue.TYPE_LAST_INT) {
+                && type <= TypedValue.TYPE_LAST_INT) {
             return data[index+AssetManager.STYLE_DATA];
         } else if (type == TypedValue.TYPE_STRING) {
             final TypedValue value = mValue;
             if (getValueAt(index, value)) {
-                ColorStateList csl = mResources.loadColorStateList(
-                        value, value.resourceId);
+                final ColorStateList csl = mResources.loadColorStateList(
+                        value, value.resourceId, mTheme);
                 return csl.getDefaultColor();
             }
             return defValue;
         } else if (type == TypedValue.TYPE_ATTRIBUTE) {
-            throw new RuntimeException("Failed to resolve attribute at index " + index);
+            final TypedValue value = mValue;
+            getValueAt(index*AssetManager.STYLE_NUM_ENTRIES, value);
+            throw new UnsupportedOperationException(
+                    "Failed to resolve attribute at index " + index + ": " + value);
         }
 
         throw new UnsupportedOperationException("Can't convert to color: type=0x"
@@ -408,12 +455,22 @@ public class TypedArray {
     /**
      * Retrieve the ColorStateList for the attribute at <var>index</var>.
      * The value may be either a single solid color or a reference to
-     * a color or complex {@link android.content.res.ColorStateList} description.
+     * a color or complex {@link android.content.res.ColorStateList}
+     * description.
+     * <p>
+     * This method will return {@code null} if the attribute is not defined or
+     * is not an integer color or color state list.
      *
      * @param index Index of attribute to retrieve.
      *
-     * @return ColorStateList for the attribute, or null if not defined.
+     * @return ColorStateList for the attribute, or {@code null} if not
+     *         defined.
+     * @throws RuntimeException if the attribute if the TypedArray has already
+     *         been recycled.
+     * @throws UnsupportedOperationException if the attribute is defined but is
+     *         not an integer color or color state list.
      */
+    @Nullable
     public ColorStateList getColorStateList(int index) {
         if (mRecycled) {
             throw new RuntimeException("Cannot make calls to a recycled instance!");
@@ -422,21 +479,28 @@ public class TypedArray {
         final TypedValue value = mValue;
         if (getValueAt(index*AssetManager.STYLE_NUM_ENTRIES, value)) {
             if (value.type == TypedValue.TYPE_ATTRIBUTE) {
-                throw new RuntimeException("Failed to resolve attribute at index " + index);
+                throw new UnsupportedOperationException(
+                        "Failed to resolve attribute at index " + index + ": " + value);
             }
-            return mResources.loadColorStateList(value, value.resourceId);
+            return mResources.loadColorStateList(value, value.resourceId, mTheme);
         }
         return null;
     }
 
     /**
      * Retrieve the integer value for the attribute at <var>index</var>.
+     * <p>
+     * Unlike {@link #getInt(int, int)}, this method will throw an exception if
+     * the attribute is defined but is not an integer.
      *
      * @param index Index of attribute to retrieve.
      * @param defValue Value to return if the attribute is not defined or
      *                 not a resource.
      *
      * @return Attribute integer value, or defValue if not defined.
+     * @throws RuntimeException if the TypedArray has already been recycled.
+     * @throws UnsupportedOperationException if the attribute is defined but is
+     *         not an integer.
      */
     public int getInteger(int index, int defValue) {
         if (mRecycled) {
@@ -449,10 +513,13 @@ public class TypedArray {
         if (type == TypedValue.TYPE_NULL) {
             return defValue;
         } else if (type >= TypedValue.TYPE_FIRST_INT
-            && type <= TypedValue.TYPE_LAST_INT) {
+                && type <= TypedValue.TYPE_LAST_INT) {
             return data[index+AssetManager.STYLE_DATA];
         } else if (type == TypedValue.TYPE_ATTRIBUTE) {
-            throw new RuntimeException("Failed to resolve attribute at index " + index);
+            final TypedValue value = mValue;
+            getValueAt(index*AssetManager.STYLE_NUM_ENTRIES, value);
+            throw new UnsupportedOperationException(
+                    "Failed to resolve attribute at index " + index + ": " + value);
         }
 
         throw new UnsupportedOperationException("Can't convert to integer: type=0x"
@@ -460,17 +527,23 @@ public class TypedArray {
     }
 
     /**
-     * Retrieve a dimensional unit attribute at <var>index</var>.  Unit
+     * Retrieve a dimensional unit attribute at <var>index</var>. Unit
      * conversions are based on the current {@link DisplayMetrics}
      * associated with the resources this {@link TypedArray} object
      * came from.
+     * <p>
+     * This method will throw an exception if the attribute is defined but is
+     * not a dimension.
      *
      * @param index Index of attribute to retrieve.
      * @param defValue Value to return if the attribute is not defined or
      *                 not a resource.
      *
      * @return Attribute dimension value multiplied by the appropriate
-     * metric, or defValue if not defined.
+     *         metric, or defValue if not defined.
+     * @throws RuntimeException if the TypedArray has already been recycled.
+     * @throws UnsupportedOperationException if the attribute is defined but is
+     *         not an integer.
      *
      * @see #getDimensionPixelOffset
      * @see #getDimensionPixelSize
@@ -487,9 +560,12 @@ public class TypedArray {
             return defValue;
         } else if (type == TypedValue.TYPE_DIMENSION) {
             return TypedValue.complexToDimension(
-                data[index+AssetManager.STYLE_DATA], mMetrics);
+                    data[index + AssetManager.STYLE_DATA], mMetrics);
         } else if (type == TypedValue.TYPE_ATTRIBUTE) {
-            throw new RuntimeException("Failed to resolve attribute at index " + index);
+            final TypedValue value = mValue;
+            getValueAt(index*AssetManager.STYLE_NUM_ENTRIES, value);
+            throw new UnsupportedOperationException(
+                    "Failed to resolve attribute at index " + index + ": " + value);
         }
 
         throw new UnsupportedOperationException("Can't convert to dimension: type=0x"
@@ -502,13 +578,19 @@ public class TypedArray {
      * {@link #getDimension}, except the returned value is converted to
      * integer pixels for you.  An offset conversion involves simply
      * truncating the base value to an integer.
+     * <p>
+     * This method will throw an exception if the attribute is defined but is
+     * not a dimension.
      *
      * @param index Index of attribute to retrieve.
      * @param defValue Value to return if the attribute is not defined or
      *                 not a resource.
      *
      * @return Attribute dimension value multiplied by the appropriate
-     * metric and truncated to integer pixels, or defValue if not defined.
+     *         metric and truncated to integer pixels, or defValue if not defined.
+     * @throws RuntimeException if the TypedArray has already been recycled.
+     * @throws UnsupportedOperationException if the attribute is defined but is
+     *         not an integer.
      *
      * @see #getDimension
      * @see #getDimensionPixelSize
@@ -525,9 +607,12 @@ public class TypedArray {
             return defValue;
         } else if (type == TypedValue.TYPE_DIMENSION) {
             return TypedValue.complexToDimensionPixelOffset(
-                data[index+AssetManager.STYLE_DATA], mMetrics);
+                    data[index + AssetManager.STYLE_DATA], mMetrics);
         } else if (type == TypedValue.TYPE_ATTRIBUTE) {
-            throw new RuntimeException("Failed to resolve attribute at index " + index);
+            final TypedValue value = mValue;
+            getValueAt(index*AssetManager.STYLE_NUM_ENTRIES, value);
+            throw new UnsupportedOperationException(
+                    "Failed to resolve attribute at index " + index + ": " + value);
         }
 
         throw new UnsupportedOperationException("Can't convert to dimension: type=0x"
@@ -541,13 +626,19 @@ public class TypedArray {
      * integer pixels for use as a size.  A size conversion involves
      * rounding the base value, and ensuring that a non-zero base value
      * is at least one pixel in size.
+     * <p>
+     * This method will throw an exception if the attribute is defined but is
+     * not a dimension.
      *
      * @param index Index of attribute to retrieve.
      * @param defValue Value to return if the attribute is not defined or
      *                 not a resource.
      *
      * @return Attribute dimension value multiplied by the appropriate
-     * metric and truncated to integer pixels, or defValue if not defined.
+     *         metric and truncated to integer pixels, or defValue if not defined.
+     * @throws RuntimeException if the TypedArray has already been recycled.
+     * @throws UnsupportedOperationException if the attribute is defined but is
+     *         not a dimension.
      *
      * @see #getDimension
      * @see #getDimensionPixelOffset
@@ -566,7 +657,10 @@ public class TypedArray {
             return TypedValue.complexToDimensionPixelSize(
                 data[index+AssetManager.STYLE_DATA], mMetrics);
         } else if (type == TypedValue.TYPE_ATTRIBUTE) {
-            throw new RuntimeException("Failed to resolve attribute at index " + index);
+            final TypedValue value = mValue;
+            getValueAt(index*AssetManager.STYLE_NUM_ENTRIES, value);
+            throw new UnsupportedOperationException(
+                    "Failed to resolve attribute at index " + index + ": " + value);
         }
 
         throw new UnsupportedOperationException("Can't convert to dimension: type=0x"
@@ -578,12 +672,18 @@ public class TypedArray {
      * {@link android.view.ViewGroup}'s layout_width and layout_height
      * attributes.  This is only here for performance reasons; applications
      * should use {@link #getDimensionPixelSize}.
+     * <p>
+     * This method will throw an exception if the attribute is defined but is
+     * not a dimension or integer (enum).
      *
      * @param index Index of the attribute to retrieve.
      * @param name Textual name of attribute for error reporting.
      *
      * @return Attribute dimension value multiplied by the appropriate
-     * metric and truncated to integer pixels.
+     *         metric and truncated to integer pixels.
+     * @throws RuntimeException if the TypedArray has already been recycled.
+     * @throws UnsupportedOperationException if the attribute is defined but is
+     *         not a dimension or integer (enum).
      */
     public int getLayoutDimension(int index, String name) {
         if (mRecycled) {
@@ -600,10 +700,13 @@ public class TypedArray {
             return TypedValue.complexToDimensionPixelSize(
                 data[index+AssetManager.STYLE_DATA], mMetrics);
         } else if (type == TypedValue.TYPE_ATTRIBUTE) {
-            throw new RuntimeException("Failed to resolve attribute at index " + index);
+            final TypedValue value = mValue;
+            getValueAt(index*AssetManager.STYLE_NUM_ENTRIES, value);
+            throw new UnsupportedOperationException(
+                    "Failed to resolve attribute at index " + index + ": " + value);
         }
 
-        throw new RuntimeException(getPositionDescription()
+        throw new UnsupportedOperationException(getPositionDescription()
                 + ": You must supply a " + name + " attribute.");
     }
 
@@ -615,10 +718,11 @@ public class TypedArray {
      *
      * @param index Index of the attribute to retrieve.
      * @param defValue The default value to return if this attribute is not
-     * default or contains the wrong type of data.
+     *                 default or contains the wrong type of data.
      *
      * @return Attribute dimension value multiplied by the appropriate
-     * metric and truncated to integer pixels.
+     *         metric and truncated to integer pixels.
+     * @throws RuntimeException if the TypedArray has already been recycled.
      */
     public int getLayoutDimension(int index, int defValue) {
         if (mRecycled) {
@@ -633,14 +737,14 @@ public class TypedArray {
             return data[index+AssetManager.STYLE_DATA];
         } else if (type == TypedValue.TYPE_DIMENSION) {
             return TypedValue.complexToDimensionPixelSize(
-                data[index+AssetManager.STYLE_DATA], mMetrics);
+                    data[index + AssetManager.STYLE_DATA], mMetrics);
         }
 
         return defValue;
     }
 
     /**
-     * Retrieve a fractional unit attribute at <var>index</var>.
+     * Retrieves a fractional unit attribute at <var>index</var>.
      *
      * @param index Index of attribute to retrieve.
      * @param base The base value of this fraction.  In other words, a
@@ -652,7 +756,10 @@ public class TypedArray {
      *                 not a resource.
      *
      * @return Attribute fractional value multiplied by the appropriate
-     * base value, or defValue if not defined.
+     *         base value, or defValue if not defined.
+     * @throws RuntimeException if the TypedArray has already been recycled.
+     * @throws UnsupportedOperationException if the attribute is defined but is
+     *         not a fraction.
      */
     public float getFraction(int index, int base, int pbase, float defValue) {
         if (mRecycled) {
@@ -668,7 +775,10 @@ public class TypedArray {
             return TypedValue.complexToFraction(
                 data[index+AssetManager.STYLE_DATA], base, pbase);
         } else if (type == TypedValue.TYPE_ATTRIBUTE) {
-            throw new RuntimeException("Failed to resolve attribute at index " + index);
+            final TypedValue value = mValue;
+            getValueAt(index*AssetManager.STYLE_NUM_ENTRIES, value);
+            throw new UnsupportedOperationException(
+                    "Failed to resolve attribute at index " + index + ": " + value);
         }
 
         throw new UnsupportedOperationException("Can't convert to fraction: type=0x"
@@ -676,7 +786,7 @@ public class TypedArray {
     }
 
     /**
-     * Retrieve the resource identifier for the attribute at
+     * Retrieves the resource identifier for the attribute at
      * <var>index</var>.  Note that attribute resource as resolved when
      * the overall {@link TypedArray} object is retrieved.  As a
      * result, this function will return the resource identifier of the
@@ -688,7 +798,9 @@ public class TypedArray {
      *                 not a resource.
      *
      * @return Attribute resource identifier, or defValue if not defined.
+     * @throws RuntimeException if the TypedArray has already been recycled.
      */
+    @AnyRes
     public int getResourceId(int index, int defValue) {
         if (mRecycled) {
             throw new RuntimeException("Cannot make calls to a recycled instance!");
@@ -706,13 +818,15 @@ public class TypedArray {
     }
 
     /**
-     * Retrieve the theme attribute resource identifier for the attribute at
+     * Retrieves the theme attribute resource identifier for the attribute at
      * <var>index</var>.
      *
      * @param index Index of attribute to retrieve.
      * @param defValue Value to return if the attribute is not defined or not a
-     *            resource.
+     *                 resource.
+     *
      * @return Theme attribute resource identifier, or defValue if not defined.
+     * @throws RuntimeException if the TypedArray has already been recycled.
      * @hide
      */
     public int getThemeAttributeId(int index, int defValue) {
@@ -730,10 +844,16 @@ public class TypedArray {
 
     /**
      * Retrieve the Drawable for the attribute at <var>index</var>.
+     * <p>
+     * This method will throw an exception if the attribute is defined but is
+     * not a color or drawable resource.
      *
      * @param index Index of attribute to retrieve.
      *
-     * @return Drawable for the attribute, or null if not defined.
+     * @return Drawable for the attribute, or {@code null} if not defined.
+     * @throws RuntimeException if the TypedArray has already been recycled.
+     * @throws UnsupportedOperationException if the attribute is defined but is
+     *         not a color or drawable resource.
      */
     @Nullable
     public Drawable getDrawable(int index) {
@@ -744,7 +864,8 @@ public class TypedArray {
         final TypedValue value = mValue;
         if (getValueAt(index*AssetManager.STYLE_NUM_ENTRIES, value)) {
             if (value.type == TypedValue.TYPE_ATTRIBUTE) {
-                throw new RuntimeException("Failed to resolve attribute at index " + index);
+                throw new UnsupportedOperationException(
+                        "Failed to resolve attribute at index " + index + ": " + value);
             }
             return mResources.loadDrawable(value, value.resourceId, mTheme);
         }
@@ -756,10 +877,15 @@ public class TypedArray {
      * This gets the resource ID of the selected attribute, and uses
      * {@link Resources#getTextArray Resources.getTextArray} of the owning
      * Resources object to retrieve its String[].
+     * <p>
+     * This method will throw an exception if the attribute is defined but is
+     * not a text array resource.
      *
      * @param index Index of attribute to retrieve.
      *
-     * @return CharSequence[] for the attribute, or null if not defined.
+     * @return CharSequence[] for the attribute, or {@code null} if not
+     *         defined.
+     * @throws RuntimeException if the TypedArray has already been recycled.
      */
     public CharSequence[] getTextArray(int index) {
         if (mRecycled) {
@@ -780,7 +906,8 @@ public class TypedArray {
      * @param outValue TypedValue object in which to place the attribute's
      *                 data.
      *
-     * @return Returns true if the value was retrieved, else false.
+     * @return {@code true} if the value was retrieved, false otherwise.
+     * @throws RuntimeException if the TypedArray has already been recycled.
      */
     public boolean getValue(int index, TypedValue outValue) {
         if (mRecycled) {
@@ -794,7 +921,9 @@ public class TypedArray {
      * Returns the type of attribute at the specified index.
      *
      * @param index Index of attribute whose type to retrieve.
+     *
      * @return Attribute type.
+     * @throws RuntimeException if the TypedArray has already been recycled.
      */
     public int getType(int index) {
         if (mRecycled) {
@@ -814,6 +943,7 @@ public class TypedArray {
      * @param index Index of attribute to retrieve.
      *
      * @return True if the attribute has a value, false otherwise.
+     * @throws RuntimeException if the TypedArray has already been recycled.
      */
     public boolean hasValue(int index) {
         if (mRecycled) {
@@ -834,6 +964,7 @@ public class TypedArray {
      * @param index Index of attribute to retrieve.
      *
      * @return True if the attribute has a value or is empty, false otherwise.
+     * @throws RuntimeException if the TypedArray has already been recycled.
      */
     public boolean hasValueOrEmpty(int index) {
         if (mRecycled) {
@@ -857,6 +988,7 @@ public class TypedArray {
      * @return Returns a TypedValue object if the attribute is defined,
      *         containing its data; otherwise returns null.  (You will not
      *         receive a TypedValue whose type is TYPE_NULL.)
+     * @throws RuntimeException if the TypedArray has already been recycled.
      */
     public TypedValue peekValue(int index) {
         if (mRecycled) {
@@ -872,6 +1004,9 @@ public class TypedArray {
 
     /**
      * Returns a message about the parser state suitable for printing error messages.
+     *
+     * @return Human-readable description of current parser state.
+     * @throws RuntimeException if the TypedArray has already been recycled.
      */
     public String getPositionDescription() {
         if (mRecycled) {
@@ -882,8 +1017,10 @@ public class TypedArray {
     }
 
     /**
-     * Recycle the TypedArray, to be re-used by a later caller. After calling
+     * Recycles the TypedArray, to be re-used by a later caller. After calling
      * this function you must not ever touch the typed array again.
+     *
+     * @throws RuntimeException if the TypedArray has already been recycled.
      */
     public void recycle() {
         if (mRecycled) {
@@ -908,9 +1045,19 @@ public class TypedArray {
      * @return an array of length {@link #getIndexCount()} populated with theme
      *         attributes, or null if there are no theme attributes in the typed
      *         array
+     * @throws RuntimeException if the TypedArray has already been recycled.
      * @hide
      */
+    @Nullable
     public int[] extractThemeAttrs() {
+        return extractThemeAttrs(null);
+    }
+
+    /**
+     * @hide
+     */
+    @Nullable
+    public int[] extractThemeAttrs(@Nullable int[] scrap) {
         if (mRecycled) {
             throw new RuntimeException("Cannot make calls to a recycled instance!");
         }
@@ -922,6 +1069,7 @@ public class TypedArray {
         for (int i = 0; i < N; i++) {
             final int index = i * AssetManager.STYLE_NUM_ENTRIES;
             if (data[index + AssetManager.STYLE_TYPE] != TypedValue.TYPE_ATTRIBUTE) {
+                // Not an attribute, ignore.
                 continue;
             }
 
@@ -930,13 +1078,20 @@ public class TypedArray {
 
             final int attr = data[index + AssetManager.STYLE_DATA];
             if (attr == 0) {
-                // This attribute is useless!
+                // Useless data, ignore.
                 continue;
             }
 
+            // Ensure we have a usable attribute array.
             if (attrs == null) {
-                attrs = new int[N];
+                if (scrap != null && scrap.length == N) {
+                    attrs = scrap;
+                    Arrays.fill(attrs, 0);
+                } else {
+                    attrs = new int[N];
+                }
             }
+
             attrs[i] = attr;
         }
 
@@ -949,9 +1104,14 @@ public class TypedArray {
      *
      * @return Returns a mask of the changing configuration parameters, as
      *         defined by {@link android.content.pm.ActivityInfo}.
+     * @throws RuntimeException if the TypedArray has already been recycled.
      * @see android.content.pm.ActivityInfo
      */
     public int getChangingConfigurations() {
+        if (mRecycled) {
+            throw new RuntimeException("Cannot make calls to a recycled instance!");
+        }
+
         int changingConfig = 0;
 
         final int[] data = mData;

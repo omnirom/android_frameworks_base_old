@@ -15,6 +15,7 @@
  */
 package android.animation;
 
+import android.annotation.AnimatorRes;
 import android.content.Context;
 import android.content.res.ConfigurationBoundResourceCache;
 import android.content.res.ConstantState;
@@ -66,8 +67,8 @@ public class AnimatorInflater {
     private static final int VALUE_TYPE_FLOAT       = 0;
     private static final int VALUE_TYPE_INT         = 1;
     private static final int VALUE_TYPE_PATH        = 2;
-    private static final int VALUE_TYPE_COLOR       = 4;
-    private static final int VALUE_TYPE_CUSTOM      = 5;
+    private static final int VALUE_TYPE_COLOR       = 3;
+    private static final int VALUE_TYPE_UNDEFINED   = 4;
 
     private static final boolean DBG_ANIMATOR_INFLATER = false;
 
@@ -82,7 +83,7 @@ public class AnimatorInflater {
      * @return The animator object reference by the specified id
      * @throws android.content.res.Resources.NotFoundException when the animation cannot be loaded
      */
-    public static Animator loadAnimator(Context context, int id)
+    public static Animator loadAnimator(Context context, @AnimatorRes int id)
             throws NotFoundException {
         return loadAnimator(context.getResources(), context.getTheme(), id);
     }
@@ -107,7 +108,7 @@ public class AnimatorInflater {
             float pathErrorScale) throws NotFoundException {
         final ConfigurationBoundResourceCache<Animator> animatorCache = resources
                 .getAnimatorCache();
-        Animator animator = animatorCache.get(id, theme);
+        Animator animator = animatorCache.getInstance(id, theme);
         if (animator != null) {
             if (DBG_ANIMATOR_INFLATER) {
                 Log.d(TAG, "loaded animator from cache, " + resources.getResourceName(id));
@@ -156,7 +157,7 @@ public class AnimatorInflater {
         final ConfigurationBoundResourceCache<StateListAnimator> cache = resources
                 .getStateListAnimatorCache();
         final Theme theme = context.getTheme();
-        StateListAnimator animator = cache.get(id, theme);
+        StateListAnimator animator = cache.getInstance(id, theme);
         if (animator != null) {
             return animator;
         }
@@ -296,6 +297,136 @@ public class AnimatorInflater {
         }
     }
 
+    private static PropertyValuesHolder getPVH(TypedArray styledAttributes, int valueType,
+            int valueFromId, int valueToId, String propertyName) {
+
+        TypedValue tvFrom = styledAttributes.peekValue(valueFromId);
+        boolean hasFrom = (tvFrom != null);
+        int fromType = hasFrom ? tvFrom.type : 0;
+        TypedValue tvTo = styledAttributes.peekValue(valueToId);
+        boolean hasTo = (tvTo != null);
+        int toType = hasTo ? tvTo.type : 0;
+
+        if (valueType == VALUE_TYPE_UNDEFINED) {
+            // Check whether it's color type. If not, fall back to default type (i.e. float type)
+            if ((hasFrom && isColorType(fromType)) || (hasTo && isColorType(toType))) {
+                valueType = VALUE_TYPE_COLOR;
+            } else {
+                valueType = VALUE_TYPE_FLOAT;
+            }
+        }
+
+        boolean getFloats = (valueType == VALUE_TYPE_FLOAT);
+
+        PropertyValuesHolder returnValue = null;
+
+        if (valueType == VALUE_TYPE_PATH) {
+            String fromString = styledAttributes.getString(valueFromId);
+            String toString = styledAttributes.getString(valueToId);
+            PathParser.PathDataNode[] nodesFrom = PathParser.createNodesFromPathData(fromString);
+            PathParser.PathDataNode[] nodesTo = PathParser.createNodesFromPathData(toString);
+
+            if (nodesFrom != null || nodesTo != null) {
+                if (nodesFrom != null) {
+                    TypeEvaluator evaluator =
+                            new PathDataEvaluator(PathParser.deepCopyNodes(nodesFrom));
+                    if (nodesTo != null) {
+                        if (!PathParser.canMorph(nodesFrom, nodesTo)) {
+                            throw new InflateException(" Can't morph from " + fromString + " to " +
+                                    toString);
+                        }
+                        returnValue = PropertyValuesHolder.ofObject(propertyName, evaluator,
+                                nodesFrom, nodesTo);
+                    } else {
+                        returnValue = PropertyValuesHolder.ofObject(propertyName, evaluator,
+                                (Object) nodesFrom);
+                    }
+                } else if (nodesTo != null) {
+                    TypeEvaluator evaluator =
+                            new PathDataEvaluator(PathParser.deepCopyNodes(nodesTo));
+                    returnValue = PropertyValuesHolder.ofObject(propertyName, evaluator,
+                            (Object) nodesTo);
+                }
+            }
+        } else {
+            TypeEvaluator evaluator = null;
+            // Integer and float value types are handled here.
+            if (valueType == VALUE_TYPE_COLOR) {
+                // special case for colors: ignore valueType and get ints
+                evaluator = ArgbEvaluator.getInstance();
+            }
+            if (getFloats) {
+                float valueFrom;
+                float valueTo;
+                if (hasFrom) {
+                    if (fromType == TypedValue.TYPE_DIMENSION) {
+                        valueFrom = styledAttributes.getDimension(valueFromId, 0f);
+                    } else {
+                        valueFrom = styledAttributes.getFloat(valueFromId, 0f);
+                    }
+                    if (hasTo) {
+                        if (toType == TypedValue.TYPE_DIMENSION) {
+                            valueTo = styledAttributes.getDimension(valueToId, 0f);
+                        } else {
+                            valueTo = styledAttributes.getFloat(valueToId, 0f);
+                        }
+                        returnValue = PropertyValuesHolder.ofFloat(propertyName,
+                                valueFrom, valueTo);
+                    } else {
+                        returnValue = PropertyValuesHolder.ofFloat(propertyName, valueFrom);
+                    }
+                } else {
+                    if (toType == TypedValue.TYPE_DIMENSION) {
+                        valueTo = styledAttributes.getDimension(valueToId, 0f);
+                    } else {
+                        valueTo = styledAttributes.getFloat(valueToId, 0f);
+                    }
+                    returnValue = PropertyValuesHolder.ofFloat(propertyName, valueTo);
+                }
+            } else {
+                int valueFrom;
+                int valueTo;
+                if (hasFrom) {
+                    if (fromType == TypedValue.TYPE_DIMENSION) {
+                        valueFrom = (int) styledAttributes.getDimension(valueFromId, 0f);
+                    } else if (isColorType(fromType)) {
+                        valueFrom = styledAttributes.getColor(valueFromId, 0);
+                    } else {
+                        valueFrom = styledAttributes.getInt(valueFromId, 0);
+                    }
+                    if (hasTo) {
+                        if (toType == TypedValue.TYPE_DIMENSION) {
+                            valueTo = (int) styledAttributes.getDimension(valueToId, 0f);
+                        } else if (isColorType(toType)) {
+                            valueTo = styledAttributes.getColor(valueToId, 0);
+                        } else {
+                            valueTo = styledAttributes.getInt(valueToId, 0);
+                        }
+                        returnValue = PropertyValuesHolder.ofInt(propertyName, valueFrom, valueTo);
+                    } else {
+                        returnValue = PropertyValuesHolder.ofInt(propertyName, valueFrom);
+                    }
+                } else {
+                    if (hasTo) {
+                        if (toType == TypedValue.TYPE_DIMENSION) {
+                            valueTo = (int) styledAttributes.getDimension(valueToId, 0f);
+                        } else if (isColorType(toType)) {
+                            valueTo = styledAttributes.getColor(valueToId, 0);
+                        } else {
+                            valueTo = styledAttributes.getInt(valueToId, 0);
+                        }
+                        returnValue = PropertyValuesHolder.ofInt(propertyName, valueTo);
+                    }
+                }
+            }
+            if (returnValue != null && evaluator != null) {
+                returnValue.setEvaluator(evaluator);
+            }
+        }
+
+        return returnValue;
+    }
+
     /**
      * @param anim The animator, must not be null
      * @param arrayAnimator Incoming typed array for Animator's attributes.
@@ -310,35 +441,16 @@ public class AnimatorInflater {
 
         long startDelay = arrayAnimator.getInt(R.styleable.Animator_startOffset, 0);
 
-        int valueType = arrayAnimator.getInt(R.styleable.Animator_valueType,
-                VALUE_TYPE_FLOAT);
+        int valueType = arrayAnimator.getInt(R.styleable.Animator_valueType, VALUE_TYPE_UNDEFINED);
 
-        TypeEvaluator evaluator = null;
-
-        boolean getFloats = (valueType == VALUE_TYPE_FLOAT);
-
-        TypedValue tvFrom = arrayAnimator.peekValue(R.styleable.Animator_valueFrom);
-        boolean hasFrom = (tvFrom != null);
-        int fromType = hasFrom ? tvFrom.type : 0;
-        TypedValue tvTo = arrayAnimator.peekValue(R.styleable.Animator_valueTo);
-        boolean hasTo = (tvTo != null);
-        int toType = hasTo ? tvTo.type : 0;
-
-        // TODO: Further clean up this part of code into 4 types : path, color,
-        // integer and float.
-        if (valueType == VALUE_TYPE_PATH) {
-            evaluator = setupAnimatorForPath(anim, arrayAnimator);
-        } else {
-            // Integer and float value types are handled here.
-            if ((hasFrom && (fromType >= TypedValue.TYPE_FIRST_COLOR_INT) &&
-                    (fromType <= TypedValue.TYPE_LAST_COLOR_INT)) ||
-                    (hasTo && (toType >= TypedValue.TYPE_FIRST_COLOR_INT) &&
-                            (toType <= TypedValue.TYPE_LAST_COLOR_INT))) {
-                // special case for colors: ignore valueType and get ints
-                getFloats = false;
-                evaluator = ArgbEvaluator.getInstance();
-            }
-            setupValues(anim, arrayAnimator, getFloats, hasFrom, fromType, hasTo, toType);
+        if (valueType == VALUE_TYPE_UNDEFINED) {
+            valueType = inferValueTypeFromValues(arrayAnimator, R.styleable.Animator_valueFrom,
+                    R.styleable.Animator_valueTo);
+        }
+        PropertyValuesHolder pvh = getPVH(arrayAnimator, valueType,
+                R.styleable.Animator_valueFrom, R.styleable.Animator_valueTo, "");
+        if (pvh != null) {
+            anim.setValues(pvh);
         }
 
         anim.setDuration(duration);
@@ -353,12 +465,10 @@ public class AnimatorInflater {
                     arrayAnimator.getInt(R.styleable.Animator_repeatMode,
                             ValueAnimator.RESTART));
         }
-        if (evaluator != null) {
-            anim.setEvaluator(evaluator);
-        }
 
         if (arrayObjectAnimator != null) {
-            setupObjectAnimator(anim, arrayObjectAnimator, getFloats, pixelSize);
+            setupObjectAnimator(anim, arrayObjectAnimator, valueType == VALUE_TYPE_FLOAT,
+                    pixelSize);
         }
     }
 
@@ -414,8 +524,14 @@ public class AnimatorInflater {
         ObjectAnimator oa = (ObjectAnimator) anim;
         String pathData = arrayObjectAnimator.getString(R.styleable.PropertyAnimator_pathData);
 
-        // Note that if there is a pathData defined in the Object Animator,
-        // valueFrom / valueTo will be ignored.
+        // Path can be involved in an ObjectAnimator in the following 3 ways:
+        // 1) Path morphing: the property to be animated is pathData, and valueFrom and valueTo
+        //    are both of pathType. valueType = pathType needs to be explicitly defined.
+        // 2) A property in X or Y dimension can be animated along a path: the property needs to be
+        //    defined in propertyXName or propertyYName attribute, the path will be defined in the
+        //    pathData attribute. valueFrom and valueTo will not be necessary for this animation.
+        // 3) PathInterpolator can also define a path (in pathData) for its interpolation curve.
+        // Here we are dealing with case 2:
         if (pathData != null) {
             String propertyXName =
                     arrayObjectAnimator.getString(R.styleable.PropertyAnimator_propertyXName);
@@ -510,8 +626,7 @@ public class AnimatorInflater {
             if (hasFrom) {
                 if (fromType == TypedValue.TYPE_DIMENSION) {
                     valueFrom = (int) arrayAnimator.getDimension(valueFromIndex, 0f);
-                } else if ((fromType >= TypedValue.TYPE_FIRST_COLOR_INT) &&
-                        (fromType <= TypedValue.TYPE_LAST_COLOR_INT)) {
+                } else if (isColorType(fromType)) {
                     valueFrom = arrayAnimator.getColor(valueFromIndex, 0);
                 } else {
                     valueFrom = arrayAnimator.getInt(valueFromIndex, 0);
@@ -519,8 +634,7 @@ public class AnimatorInflater {
                 if (hasTo) {
                     if (toType == TypedValue.TYPE_DIMENSION) {
                         valueTo = (int) arrayAnimator.getDimension(valueToIndex, 0f);
-                    } else if ((toType >= TypedValue.TYPE_FIRST_COLOR_INT) &&
-                            (toType <= TypedValue.TYPE_LAST_COLOR_INT)) {
+                    } else if (isColorType(toType)) {
                         valueTo = arrayAnimator.getColor(valueToIndex, 0);
                     } else {
                         valueTo = arrayAnimator.getInt(valueToIndex, 0);
@@ -533,8 +647,7 @@ public class AnimatorInflater {
                 if (hasTo) {
                     if (toType == TypedValue.TYPE_DIMENSION) {
                         valueTo = (int) arrayAnimator.getDimension(valueToIndex, 0f);
-                    } else if ((toType >= TypedValue.TYPE_FIRST_COLOR_INT) &&
-                            (toType <= TypedValue.TYPE_LAST_COLOR_INT)) {
+                    } else if (isColorType(toType)) {
                         valueTo = arrayAnimator.getColor(valueToIndex, 0);
                     } else {
                         valueTo = arrayAnimator.getInt(valueToIndex, 0);
@@ -570,6 +683,7 @@ public class AnimatorInflater {
             }
 
             String name = parser.getName();
+            boolean gotValues = false;
 
             if (name.equals("objectAnimator")) {
                 anim = loadObjectAnimator(res, theme, attrs, pixelSize);
@@ -588,11 +702,18 @@ public class AnimatorInflater {
                 createAnimatorFromXml(res, theme, parser, attrs, (AnimatorSet) anim, ordering,
                         pixelSize);
                 a.recycle();
+            } else if (name.equals("propertyValuesHolder")) {
+                PropertyValuesHolder[] values = loadValues(res, theme, parser,
+                        Xml.asAttributeSet(parser));
+                if (values != null && anim != null && (anim instanceof ValueAnimator)) {
+                    ((ValueAnimator) anim).setValues(values);
+                }
+                gotValues = true;
             } else {
                 throw new RuntimeException("Unknown animator name: " + parser.getName());
             }
 
-            if (parent != null) {
+            if (parent != null && !gotValues) {
                 if (childAnims == null) {
                     childAnims = new ArrayList<Animator>();
                 }
@@ -612,7 +733,297 @@ public class AnimatorInflater {
             }
         }
         return anim;
+    }
 
+    private static PropertyValuesHolder[] loadValues(Resources res, Theme theme,
+            XmlPullParser parser, AttributeSet attrs) throws XmlPullParserException, IOException {
+        ArrayList<PropertyValuesHolder> values = null;
+
+        int type;
+        while ((type = parser.getEventType()) != XmlPullParser.END_TAG &&
+                type != XmlPullParser.END_DOCUMENT) {
+
+            if (type != XmlPullParser.START_TAG) {
+                parser.next();
+                continue;
+            }
+
+            String name = parser.getName();
+
+            if (name.equals("propertyValuesHolder")) {
+                TypedArray a;
+                if (theme != null) {
+                    a = theme.obtainStyledAttributes(attrs, R.styleable.PropertyValuesHolder, 0, 0);
+                } else {
+                    a = res.obtainAttributes(attrs, R.styleable.PropertyValuesHolder);
+                }
+                String propertyName = a.getString(R.styleable.PropertyValuesHolder_propertyName);
+                int valueType = a.getInt(R.styleable.PropertyValuesHolder_valueType,
+                        VALUE_TYPE_UNDEFINED);
+
+                PropertyValuesHolder pvh = loadPvh(res, theme, parser, propertyName, valueType);
+                if (pvh == null) {
+                    pvh = getPVH(a, valueType,
+                            R.styleable.PropertyValuesHolder_valueFrom,
+                            R.styleable.PropertyValuesHolder_valueTo, propertyName);
+                }
+                if (pvh != null) {
+                    if (values == null) {
+                        values = new ArrayList<PropertyValuesHolder>();
+                    }
+                    values.add(pvh);
+                }
+                a.recycle();
+            }
+
+            parser.next();
+        }
+
+        PropertyValuesHolder[] valuesArray = null;
+        if (values != null) {
+            int count = values.size();
+            valuesArray = new PropertyValuesHolder[count];
+            for (int i = 0; i < count; ++i) {
+                valuesArray[i] = values.get(i);
+            }
+        }
+        return valuesArray;
+    }
+
+    // When no value type is provided in keyframe, we need to infer the type from the value. i.e.
+    // if value is defined in the style of a color value, then the color type is returned.
+    // Otherwise, default float type is returned.
+    private static int inferValueTypeOfKeyframe(Resources res, Theme theme, AttributeSet attrs) {
+        int valueType;
+        TypedArray a;
+        if (theme != null) {
+            a = theme.obtainStyledAttributes(attrs, R.styleable.Keyframe, 0, 0);
+        } else {
+            a = res.obtainAttributes(attrs, R.styleable.Keyframe);
+        }
+
+        TypedValue keyframeValue = a.peekValue(R.styleable.Keyframe_value);
+        boolean hasValue = (keyframeValue != null);
+        // When no value type is provided, check whether it's a color type first.
+        // If not, fall back to default value type (i.e. float type).
+        if (hasValue && isColorType(keyframeValue.type)) {
+            valueType = VALUE_TYPE_COLOR;
+        } else {
+            valueType = VALUE_TYPE_FLOAT;
+        }
+        a.recycle();
+        return valueType;
+    }
+
+    private static int inferValueTypeFromValues(TypedArray styledAttributes, int valueFromId,
+            int valueToId) {
+        TypedValue tvFrom = styledAttributes.peekValue(valueFromId);
+        boolean hasFrom = (tvFrom != null);
+        int fromType = hasFrom ? tvFrom.type : 0;
+        TypedValue tvTo = styledAttributes.peekValue(valueToId);
+        boolean hasTo = (tvTo != null);
+        int toType = hasTo ? tvTo.type : 0;
+
+        int valueType;
+        // Check whether it's color type. If not, fall back to default type (i.e. float type)
+        if ((hasFrom && isColorType(fromType)) || (hasTo && isColorType(toType))) {
+            valueType = VALUE_TYPE_COLOR;
+        } else {
+            valueType = VALUE_TYPE_FLOAT;
+        }
+        return valueType;
+    }
+
+    private static void dumpKeyframes(Object[] keyframes, String header) {
+        if (keyframes == null || keyframes.length == 0) {
+            return;
+        }
+        Log.d(TAG, header);
+        int count = keyframes.length;
+        for (int i = 0; i < count; ++i) {
+            Keyframe keyframe = (Keyframe) keyframes[i];
+            Log.d(TAG, "Keyframe " + i + ": fraction " +
+                    (keyframe.getFraction() < 0 ? "null" : keyframe.getFraction()) + ", " +
+                    ", value : " + ((keyframe.hasValue()) ? keyframe.getValue() : "null"));
+        }
+    }
+
+    // Load property values holder if there are keyframes defined in it. Otherwise return null.
+    private static PropertyValuesHolder loadPvh(Resources res, Theme theme, XmlPullParser parser,
+            String propertyName, int valueType)
+            throws XmlPullParserException, IOException {
+
+        PropertyValuesHolder value = null;
+        ArrayList<Keyframe> keyframes = null;
+
+        int type;
+        while ((type = parser.next()) != XmlPullParser.END_TAG &&
+                type != XmlPullParser.END_DOCUMENT) {
+            String name = parser.getName();
+            if (name.equals("keyframe")) {
+                if (valueType == VALUE_TYPE_UNDEFINED) {
+                    valueType = inferValueTypeOfKeyframe(res, theme, Xml.asAttributeSet(parser));
+                }
+                Keyframe keyframe = loadKeyframe(res, theme, Xml.asAttributeSet(parser), valueType);
+                if (keyframe != null) {
+                    if (keyframes == null) {
+                        keyframes = new ArrayList<Keyframe>();
+                    }
+                    keyframes.add(keyframe);
+                }
+                parser.next();
+            }
+        }
+
+        int count;
+        if (keyframes != null && (count = keyframes.size()) > 0) {
+            // make sure we have keyframes at 0 and 1
+            // If we have keyframes with set fractions, add keyframes at start/end
+            // appropriately. If start/end have no set fractions:
+            // if there's only one keyframe, set its fraction to 1 and add one at 0
+            // if >1 keyframe, set the last fraction to 1, the first fraction to 0
+            Keyframe firstKeyframe = keyframes.get(0);
+            Keyframe lastKeyframe = keyframes.get(count - 1);
+            float endFraction = lastKeyframe.getFraction();
+            if (endFraction < 1) {
+                if (endFraction < 0) {
+                    lastKeyframe.setFraction(1);
+                } else {
+                    keyframes.add(keyframes.size(), createNewKeyframe(lastKeyframe, 1));
+                    ++count;
+                }
+            }
+            float startFraction = firstKeyframe.getFraction();
+            if (startFraction != 0) {
+                if (startFraction < 0) {
+                    firstKeyframe.setFraction(0);
+                } else {
+                    keyframes.add(0, createNewKeyframe(firstKeyframe, 0));
+                    ++count;
+                }
+            }
+            Keyframe[] keyframeArray = new Keyframe[count];
+            keyframes.toArray(keyframeArray);
+            for (int i = 0; i < count; ++i) {
+                Keyframe keyframe = keyframeArray[i];
+                if (keyframe.getFraction() < 0) {
+                    if (i == 0) {
+                        keyframe.setFraction(0);
+                    } else if (i == count - 1) {
+                        keyframe.setFraction(1);
+                    } else {
+                        // figure out the start/end parameters of the current gap
+                        // in fractions and distribute the gap among those keyframes
+                        int startIndex = i;
+                        int endIndex = i;
+                        for (int j = startIndex + 1; j < count - 1; ++j) {
+                            if (keyframeArray[j].getFraction() >= 0) {
+                                break;
+                            }
+                            endIndex = j;
+                        }
+                        float gap = keyframeArray[endIndex + 1].getFraction() -
+                                keyframeArray[startIndex - 1].getFraction();
+                        distributeKeyframes(keyframeArray, gap, startIndex, endIndex);
+                    }
+                }
+            }
+            value = PropertyValuesHolder.ofKeyframe(propertyName, keyframeArray);
+            if (valueType == VALUE_TYPE_COLOR) {
+                value.setEvaluator(ArgbEvaluator.getInstance());
+            }
+        }
+
+        return value;
+    }
+
+    private static Keyframe createNewKeyframe(Keyframe sampleKeyframe, float fraction) {
+        return sampleKeyframe.getType() == float.class ?
+                            Keyframe.ofFloat(fraction) :
+                            (sampleKeyframe.getType() == int.class) ?
+                                    Keyframe.ofInt(fraction) :
+                                    Keyframe.ofObject(fraction);
+    }
+
+    /**
+     * Utility function to set fractions on keyframes to cover a gap in which the
+     * fractions are not currently set. Keyframe fractions will be distributed evenly
+     * in this gap. For example, a gap of 1 keyframe in the range 0-1 will be at .5, a gap
+     * of .6 spread between two keyframes will be at .2 and .4 beyond the fraction at the
+     * keyframe before startIndex.
+     * Assumptions:
+     * - First and last keyframe fractions (bounding this spread) are already set. So,
+     * for example, if no fractions are set, we will already set first and last keyframe
+     * fraction values to 0 and 1.
+     * - startIndex must be >0 (which follows from first assumption).
+     * - endIndex must be >= startIndex.
+     *
+     * @param keyframes the array of keyframes
+     * @param gap The total gap we need to distribute
+     * @param startIndex The index of the first keyframe whose fraction must be set
+     * @param endIndex The index of the last keyframe whose fraction must be set
+     */
+    private static void distributeKeyframes(Keyframe[] keyframes, float gap,
+            int startIndex, int endIndex) {
+        int count = endIndex - startIndex + 2;
+        float increment = gap / count;
+        for (int i = startIndex; i <= endIndex; ++i) {
+            keyframes[i].setFraction(keyframes[i-1].getFraction() + increment);
+        }
+    }
+
+    private static Keyframe loadKeyframe(Resources res, Theme theme, AttributeSet attrs,
+            int valueType)
+            throws XmlPullParserException, IOException {
+
+        TypedArray a;
+        if (theme != null) {
+            a = theme.obtainStyledAttributes(attrs, R.styleable.Keyframe, 0, 0);
+        } else {
+            a = res.obtainAttributes(attrs, R.styleable.Keyframe);
+        }
+
+        Keyframe keyframe = null;
+
+        float fraction = a.getFloat(R.styleable.Keyframe_fraction, -1);
+
+        TypedValue keyframeValue = a.peekValue(R.styleable.Keyframe_value);
+        boolean hasValue = (keyframeValue != null);
+        if (valueType == VALUE_TYPE_UNDEFINED) {
+            // When no value type is provided, check whether it's a color type first.
+            // If not, fall back to default value type (i.e. float type).
+            if (hasValue && isColorType(keyframeValue.type)) {
+                valueType = VALUE_TYPE_COLOR;
+            } else {
+                valueType = VALUE_TYPE_FLOAT;
+            }
+        }
+
+        if (hasValue) {
+            switch (valueType) {
+                case VALUE_TYPE_FLOAT:
+                    float value = a.getFloat(R.styleable.Keyframe_value, 0);
+                    keyframe = Keyframe.ofFloat(fraction, value);
+                    break;
+                case VALUE_TYPE_COLOR:
+                case VALUE_TYPE_INT:
+                    int intValue = a.getInt(R.styleable.Keyframe_value, 0);
+                    keyframe = Keyframe.ofInt(fraction, intValue);
+                    break;
+            }
+        } else {
+            keyframe = (valueType == VALUE_TYPE_FLOAT) ? Keyframe.ofFloat(fraction) :
+                    Keyframe.ofInt(fraction);
+        }
+
+        final int resID = a.getResourceId(R.styleable.Keyframe_interpolator, 0);
+        if (resID > 0) {
+            final Interpolator interpolator = AnimationUtils.loadInterpolator(res, theme, resID);
+            keyframe.setInterpolator(interpolator);
+        }
+        a.recycle();
+
+        return keyframe;
     }
 
     private static ObjectAnimator loadObjectAnimator(Resources res, Theme theme, AttributeSet attrs,
@@ -685,5 +1096,9 @@ public class AnimatorInflater {
             resources.getValue(id, sTmpTypedValue, true);
             return sTmpTypedValue.changingConfigurations;
         }
+    }
+
+    private static boolean isColorType(int type) {
+       return (type >= TypedValue.TYPE_FIRST_COLOR_INT) && (type <= TypedValue.TYPE_LAST_COLOR_INT);
     }
 }

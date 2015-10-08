@@ -154,6 +154,7 @@ class CCParser {
 
     private int mMode = MODE_PAINT_ON;
     private int mRollUpSize = 4;
+    private int mPrevCtrlCode = INVALID;
 
     private CCMemory mDisplay = new CCMemory();
     private CCMemory mNonDisplay = new CCMemory();
@@ -260,6 +261,13 @@ class CCParser {
 
     private boolean handleCtrlCode(CCData ccData) {
         int ctrlCode = ccData.getCtrlCode();
+
+        if (mPrevCtrlCode != INVALID && mPrevCtrlCode == ctrlCode) {
+            // discard double ctrl codes (but if there's a 3rd one, we still take that)
+            mPrevCtrlCode = INVALID;
+            return true;
+        }
+
         switch(ctrlCode) {
         case RCL:
             // select pop-on style
@@ -325,9 +333,11 @@ class CCParser {
             break;
         case INVALID:
         default:
-            // not handled
+            mPrevCtrlCode = INVALID;
             return false;
         }
+
+        mPrevCtrlCode = ctrlCode;
 
         // handled
         return true;
@@ -1034,42 +1044,26 @@ class CCParser {
 }
 
 /**
+ * Mutable version of BackgroundSpan to facilitate text rendering with edge
+ * styles.
+ *
  * @hide
- *
- * MutableBackgroundColorSpan
- *
- * This is a mutable version of BackgroundSpan to facilitate text
- * rendering with edge styles.
- *
  */
-class MutableBackgroundColorSpan extends CharacterStyle
-        implements UpdateAppearance, ParcelableSpan {
+class MutableBackgroundColorSpan extends CharacterStyle implements UpdateAppearance {
     private int mColor;
 
     public MutableBackgroundColorSpan(int color) {
         mColor = color;
     }
-    public MutableBackgroundColorSpan(Parcel src) {
-        mColor = src.readInt();
-    }
+
     public void setBackgroundColor(int color) {
         mColor = color;
     }
+
     public int getBackgroundColor() {
         return mColor;
     }
-    @Override
-    public int getSpanTypeId() {
-        return TextUtils.BACKGROUND_COLOR_SPAN;
-    }
-    @Override
-    public int describeContents() {
-        return 0;
-    }
-    @Override
-    public void writeToParcel(Parcel dest, int flags) {
-        dest.writeInt(mColor);
-    }
+
     @Override
     public void updateDrawState(TextPaint ds) {
         ds.bgColor = mColor;

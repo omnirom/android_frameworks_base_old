@@ -31,6 +31,7 @@ import android.graphics.PorterDuff.Mode;
 import android.os.SystemClock;
 import android.util.LayoutDirection;
 import android.util.SparseArray;
+import android.view.View;
 
 import java.util.Collection;
 
@@ -87,8 +88,7 @@ public class DrawableContainer extends Drawable implements Drawable.Callback {
     @Override
     public int getChangingConfigurations() {
         return super.getChangingConfigurations()
-                | mDrawableContainerState.mChangingConfigurations
-                | mDrawableContainerState.mChildrenChangingConfigurations;
+                | mDrawableContainerState.getChangingConfigurations();
     }
 
     private boolean needsMirroring() {
@@ -167,14 +167,14 @@ public class DrawableContainer extends Drawable implements Drawable.Callback {
     }
 
     @Override
-    public void setColorFilter(ColorFilter cf) {
-        mDrawableContainerState.mHasColorFilter = (cf != null);
+    public void setColorFilter(ColorFilter colorFilter) {
+        mDrawableContainerState.mHasColorFilter = true;
 
-        if (mDrawableContainerState.mColorFilter != cf) {
-            mDrawableContainerState.mColorFilter = cf;
+        if (mDrawableContainerState.mColorFilter != colorFilter) {
+            mDrawableContainerState.mColorFilter = colorFilter;
 
             if (mCurrDrawable != null) {
-                mCurrDrawable.mutate().setColorFilter(cf);
+                mCurrDrawable.mutate().setColorFilter(colorFilter);
             }
         }
     }
@@ -291,9 +291,9 @@ public class DrawableContainer extends Drawable implements Drawable.Callback {
     @Override
     public void setHotspotBounds(int left, int top, int right, int bottom) {
         if (mHotspotBounds == null) {
-            mHotspotBounds = new Rect(left, top, bottom, right);
+            mHotspotBounds = new Rect(left, top, right, bottom);
         } else {
-            mHotspotBounds.set(left, top, bottom, right);
+            mHotspotBounds.set(left, top, right, bottom);
         }
 
         if (mCurrDrawable != null) {
@@ -301,7 +301,6 @@ public class DrawableContainer extends Drawable implements Drawable.Callback {
         }
     }
 
-    /** @hide */
     @Override
     public void getHotspotBounds(Rect outRect) {
         if (mHotspotBounds != null) {
@@ -331,6 +330,13 @@ public class DrawableContainer extends Drawable implements Drawable.Callback {
             return mCurrDrawable.setLevel(level);
         }
         return false;
+    }
+
+    @Override
+    public boolean onLayoutDirectionChanged(@View.ResolvedLayoutDir int layoutDirection) {
+        // Let the container handle setting its own layout direction. Otherwise,
+        // we're accessing potentially unused states.
+        return mDrawableContainerState.setLayoutDirection(layoutDirection, getCurrentIndex());
     }
 
     @Override
@@ -674,7 +680,7 @@ public class DrawableContainer extends Drawable implements Drawable.Callback {
         DrawableContainerState(DrawableContainerState orig, DrawableContainer owner,
                 Resources res) {
             mOwner = owner;
-            mRes = res;
+            mRes = res != null ? res : orig != null ? orig.mRes : null;
 
             if (orig != null) {
                 mChangingConfigurations = orig.mChangingConfigurations;
@@ -724,7 +730,7 @@ public class DrawableContainer extends Drawable implements Drawable.Callback {
                 if (origDf != null) {
                     mDrawableFutures = origDf.clone();
                 } else {
-                    mDrawableFutures = new SparseArray<ConstantStateFuture>(mNumChildren);
+                    mDrawableFutures = new SparseArray<>(mNumChildren);
                 }
 
                 // Create futures for drawables with constant states. If a
@@ -817,6 +823,9 @@ public class DrawableContainer extends Drawable implements Drawable.Callback {
                     final Drawable prepared = mDrawableFutures.valueAt(keyIndex).get(this);
                     mDrawables[index] = prepared;
                     mDrawableFutures.removeAt(keyIndex);
+                    if (mDrawableFutures.size() == 0) {
+                        mDrawableFutures = null;
+                    }
                     return prepared;
                 }
             }
@@ -824,18 +833,25 @@ public class DrawableContainer extends Drawable implements Drawable.Callback {
             return null;
         }
 
-        final void setLayoutDirection(int layoutDirection) {
+        final boolean setLayoutDirection(int layoutDirection, int currentIndex) {
+            boolean changed = false;
+
             // No need to call createAllFutures, since future drawables will
             // change layout direction when they are prepared.
             final int N = mNumChildren;
             final Drawable[] drawables = mDrawables;
             for (int i = 0; i < N; i++) {
                 if (drawables[i] != null) {
-                    drawables[i].setLayoutDirection(layoutDirection);
+                    final boolean childChanged = drawables[i].setLayoutDirection(layoutDirection);
+                    if (i == currentIndex) {
+                        changed = childChanged;
+                    }
                 }
             }
 
             mLayoutDirection = layoutDirection;
+
+            return changed;
         }
 
         final void applyTheme(Theme theme) {
@@ -847,6 +863,9 @@ public class DrawableContainer extends Drawable implements Drawable.Callback {
                 for (int i = 0; i < N; i++) {
                     if (drawables[i] != null && drawables[i].canApplyTheme()) {
                         drawables[i].applyTheme(theme);
+
+                        // Update cached mask of child changing configurations.
+                        mChildrenChangingConfigurations |= drawables[i].getChangingConfigurations();
                     }
                 }
             }

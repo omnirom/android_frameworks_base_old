@@ -28,6 +28,7 @@ import static android.provider.DocumentsContract.getSearchDocumentsQuery;
 import static android.provider.DocumentsContract.getTreeDocumentId;
 import static android.provider.DocumentsContract.isTreeUri;
 
+import android.annotation.CallSuper;
 import android.content.ContentProvider;
 import android.content.ContentResolver;
 import android.content.ContentValues;
@@ -355,7 +356,7 @@ public abstract class DocumentsProvider extends ContentProvider {
     }
 
     /**
-     * Return documents that that match the given query under the requested
+     * Return documents that match the given query under the requested
      * root. The returned documents should be sorted by relevance in descending
      * order. How documents are matched against the query string is an
      * implementation detail left to each provider, but it's suggested that at
@@ -541,6 +542,7 @@ public abstract class DocumentsProvider extends ContentProvider {
      *
      * @see DocumentsContract#buildDocumentUriUsingTree(Uri, String)
      */
+    @CallSuper
     @Override
     public Uri canonicalize(Uri uri) {
         final Context context = getContext();
@@ -616,6 +618,7 @@ public abstract class DocumentsProvider extends ContentProvider {
      * call the superclass. If the superclass returns {@code null}, the subclass
      * may implement custom behavior.
      */
+    @CallSuper
     @Override
     public Bundle call(String method, String arg, Bundle extras) {
         if (!method.startsWith("android:")) {
@@ -637,7 +640,7 @@ public abstract class DocumentsProvider extends ContentProvider {
         final Bundle out = new Bundle();
         try {
             if (METHOD_CREATE_DOCUMENT.equals(method)) {
-                enforceWritePermissionInner(documentUri, null);
+                enforceWritePermissionInner(documentUri, getCallingPackage(), null);
 
                 final String mimeType = extras.getString(Document.COLUMN_MIME_TYPE);
                 final String displayName = extras.getString(Document.COLUMN_DISPLAY_NAME);
@@ -651,7 +654,7 @@ public abstract class DocumentsProvider extends ContentProvider {
                 out.putParcelable(DocumentsContract.EXTRA_URI, newDocumentUri);
 
             } else if (METHOD_RENAME_DOCUMENT.equals(method)) {
-                enforceWritePermissionInner(documentUri, null);
+                enforceWritePermissionInner(documentUri, getCallingPackage(), null);
 
                 final String displayName = extras.getString(Document.COLUMN_DISPLAY_NAME);
                 final String newDocumentId = renameDocument(documentId, displayName);
@@ -675,7 +678,7 @@ public abstract class DocumentsProvider extends ContentProvider {
                 }
 
             } else if (METHOD_DELETE_DOCUMENT.equals(method)) {
-                enforceWritePermissionInner(documentUri, null);
+                enforceWritePermissionInner(documentUri, getCallingPackage(), null);
                 deleteDocument(documentId);
 
                 // Document no longer exists, clean up any grants

@@ -16,9 +16,11 @@
 
 package com.android.systemui.statusbar;
 
+import android.os.Bundle;
 import android.os.Handler;
 import android.os.IBinder;
 import android.os.Message;
+import android.util.Pair;
 
 import com.android.internal.statusbar.IStatusBar;
 import com.android.internal.statusbar.StatusBarIcon;
@@ -57,7 +59,12 @@ public class CommandQueue extends IStatusBar.Stub {
     private static final int MSG_NOTIFICATION_LIGHT_OFF     = 16 << MSG_SHIFT;
     private static final int MSG_NOTIFICATION_LIGHT_PULSE   = 17 << MSG_SHIFT;
     private static final int MSG_SHOW_SCREEN_PIN_REQUEST    = 18 << MSG_SHIFT;
-    private static final int MSG_HIDE_HEADS_UP              = 19 << MSG_SHIFT;
+    private static final int MSG_APP_TRANSITION_PENDING     = 19 << MSG_SHIFT;
+    private static final int MSG_APP_TRANSITION_CANCELLED   = 20 << MSG_SHIFT;
+    private static final int MSG_APP_TRANSITION_STARTING    = 21 << MSG_SHIFT;
+    private static final int MSG_ASSIST_DISCLOSURE          = 22 << MSG_SHIFT;
+    private static final int MSG_START_ASSIST               = 23 << MSG_SHIFT;
+    private static final int MSG_HIDE_HEADS_UP              = 24 << MSG_SHIFT;
 
     public static final int FLAG_EXCLUDE_NONE = 0;
     public static final int FLAG_EXCLUDE_SEARCH_PANEL = 1 << 0;
@@ -80,7 +87,7 @@ public class CommandQueue extends IStatusBar.Stub {
         public void updateIcon(String slot, int index, int viewIndex,
                 StatusBarIcon old, StatusBarIcon icon);
         public void removeIcon(String slot, int index, int viewIndex);
-        public void disable(int state, boolean animate);
+        public void disable(int state1, int state2, boolean animate);
         public void animateExpandNotificationsPanel();
         public void animateCollapsePanels(int flags);
         public void animateExpandSettingsPanel();
@@ -93,14 +100,17 @@ public class CommandQueue extends IStatusBar.Stub {
         public void toggleRecentApps();
         public void preloadRecentApps();
         public void cancelPreloadRecentApps();
-        public void showSearchPanel();
-        public void hideSearchPanel();
         public void setWindowState(int window, int state);
         public void buzzBeepBlinked();
         public void notificationLightOff();
         public void notificationLightPulse(int argb, int onMillis, int offMillis);
         public void scheduleHeadsUpClose();
         public void showScreenPinningRequest();
+        public void appTransitionPending();
+        public void appTransitionCancelled();
+        public void appTransitionStarting(long startTime, long duration);
+        public void showAssistDisclosure();
+        public void startAssist(Bundle args);
     }
 
     public CommandQueue(Callbacks callbacks, StatusBarIconList list) {
@@ -124,10 +134,10 @@ public class CommandQueue extends IStatusBar.Stub {
         }
     }
 
-    public void disable(int state) {
+    public void disable(int state1, int state2) {
         synchronized (mList) {
             mHandler.removeMessages(MSG_DISABLE);
-            mHandler.obtainMessage(MSG_DISABLE, state, 0, null).sendToTarget();
+            mHandler.obtainMessage(MSG_DISABLE, state1, state2, null).sendToTarget();
         }
     }
 
@@ -154,7 +164,8 @@ public class CommandQueue extends IStatusBar.Stub {
 
     public void setSystemUiVisibility(int vis, int mask) {
         synchronized (mList) {
-            mHandler.removeMessages(MSG_SET_SYSTEMUI_VISIBILITY);
+            // Don't coalesce these, since it might have one time flags set such as
+            // STATUS_BAR_UNHIDE which might get lost.
             mHandler.obtainMessage(MSG_SET_SYSTEMUI_VISIBILITY, vis, mask, null).sendToTarget();
         }
     }
@@ -255,6 +266,42 @@ public class CommandQueue extends IStatusBar.Stub {
         }
     }
 
+    public void appTransitionPending() {
+        synchronized (mList) {
+            mHandler.removeMessages(MSG_APP_TRANSITION_PENDING);
+            mHandler.sendEmptyMessage(MSG_APP_TRANSITION_PENDING);
+        }
+    }
+
+    public void appTransitionCancelled() {
+        synchronized (mList) {
+            mHandler.removeMessages(MSG_APP_TRANSITION_PENDING);
+            mHandler.sendEmptyMessage(MSG_APP_TRANSITION_PENDING);
+        }
+    }
+
+    public void appTransitionStarting(long startTime, long duration) {
+        synchronized (mList) {
+            mHandler.removeMessages(MSG_APP_TRANSITION_STARTING);
+            mHandler.obtainMessage(MSG_APP_TRANSITION_STARTING, Pair.create(startTime, duration))
+                    .sendToTarget();
+        }
+    }
+
+    public void showAssistDisclosure() {
+        synchronized (mList) {
+            mHandler.removeMessages(MSG_ASSIST_DISCLOSURE);
+            mHandler.obtainMessage(MSG_ASSIST_DISCLOSURE).sendToTarget();
+        }
+    }
+
+    public void startAssist(Bundle args) {
+        synchronized (mList) {
+            mHandler.removeMessages(MSG_START_ASSIST);
+            mHandler.obtainMessage(MSG_START_ASSIST, args).sendToTarget();
+        }
+    }
+
     private final class H extends Handler {
         public void handleMessage(Message msg) {
             final int what = msg.what & MSG_MASK;
@@ -286,7 +333,7 @@ public class CommandQueue extends IStatusBar.Stub {
                     break;
                 }
                 case MSG_DISABLE:
-                    mCallbacks.disable(msg.arg1, true /* animate */);
+                    mCallbacks.disable(msg.arg1, msg.arg2, true /* animate */);
                     break;
                 case MSG_EXPAND_NOTIFICATIONS:
                     mCallbacks.animateExpandNotificationsPanel();
@@ -339,6 +386,22 @@ public class CommandQueue extends IStatusBar.Stub {
                     break;
                 case MSG_SHOW_SCREEN_PIN_REQUEST:
                     mCallbacks.showScreenPinningRequest();
+                    break;
+                case MSG_APP_TRANSITION_PENDING:
+                    mCallbacks.appTransitionPending();
+                    break;
+                case MSG_APP_TRANSITION_CANCELLED:
+                    mCallbacks.appTransitionCancelled();
+                    break;
+                case MSG_APP_TRANSITION_STARTING:
+                    Pair<Long, Long> data = (Pair<Long, Long>) msg.obj;
+                    mCallbacks.appTransitionStarting(data.first, data.second);
+                    break;
+                case MSG_ASSIST_DISCLOSURE:
+                    mCallbacks.showAssistDisclosure();
+                    break;
+                case MSG_START_ASSIST:
+                    mCallbacks.startAssist((Bundle) msg.obj);
                     break;
             }
         }

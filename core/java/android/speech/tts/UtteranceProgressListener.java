@@ -60,6 +60,20 @@ public abstract class UtteranceProgressListener {
     }
 
     /**
+     * Called when an utterance has been stopped while in progress or flushed from the
+     * synthesis queue. This can happen if a client calls {@link TextToSpeech#stop()}
+     * or uses {@link TextToSpeech#QUEUE_FLUSH} as an argument with the
+     * {@link TextToSpeech#speak} or {@link TextToSpeech#synthesizeToFile} methods.
+     *
+     * @param utteranceId the utterance ID of the utterance.
+     * @param interrupted If true, then the utterance was interrupted while being synthesized
+     *        and its output is incomplete. If false, then the utterance was flushed
+     *        before the synthesis started.
+     */
+    public void onStop(String utteranceId, boolean interrupted) {
+    }
+
+    /**
      * Wraps an old deprecated OnUtteranceCompletedListener with a shiny new
      * progress listener.
      *
@@ -82,6 +96,11 @@ public abstract class UtteranceProgressListener {
             public void onStart(String utteranceId) {
                 // Left unimplemented, has no equivalent in the old
                 // API.
+            }
+
+            @Override
+            public void onStop(String utteranceId, boolean interrupted) {
+                listener.onUtteranceCompleted(utteranceId);
             }
         };
     }

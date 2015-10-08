@@ -19,7 +19,6 @@ package com.android.documentsui;
 import android.content.Context;
 import android.content.pm.PackageManager;
 import android.content.pm.ProviderInfo;
-import android.content.res.Resources;
 import android.graphics.drawable.Drawable;
 import android.provider.DocumentsContract.Document;
 import android.util.TypedValue;
@@ -269,7 +268,7 @@ public class IconUtils {
     public static Drawable applyTintColor(Context context, int drawableId, int tintColorId) {
         final Drawable icon = context.getDrawable(drawableId);
         icon.mutate();
-        icon.setTintList(context.getResources().getColorStateList(tintColorId));
+        icon.setTintList(context.getColorStateList(tintColorId));
         return icon;
     }
 

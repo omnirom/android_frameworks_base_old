@@ -32,6 +32,8 @@ import android.view.MotionEvent;
 import android.view.View;
 import android.widget.ImageView;
 
+import com.android.internal.logging.MetricsLogger;
+
 import java.util.ArrayList;
 
 public class BrightnessController implements ToggleSlider.Listener {
@@ -41,7 +43,7 @@ public class BrightnessController implements ToggleSlider.Listener {
      * {@link android.provider.Settings.System#SCREEN_AUTO_BRIGHTNESS_ADJ} uses the range [-1, 1].
      * Using this factor, it is converted to [0, BRIGHTNESS_ADJ_RESOLUTION] for the SeekBar.
      */
-    private static final float BRIGHTNESS_ADJ_RESOLUTION = 100;
+    private static final float BRIGHTNESS_ADJ_RESOLUTION = 2048;
 
     private final int mMinimumBacklight;
     private final int mMaximumBacklight;
@@ -209,13 +211,16 @@ public class BrightnessController implements ToggleSlider.Listener {
     }
 
     @Override
-    public void onChanged(ToggleSlider view, boolean tracking, boolean automatic, int value) {
-        // icon cannot change while tracking
-        //updateIcon(mAutomatic);
+    public void onChanged(ToggleSlider view, boolean tracking, boolean automatic, int value,
+            boolean stopTracking) {
+        updateIcon(mAutomatic);
         if (mExternalChange) return;
 
         if (!mAutomatic) {
             final int val = value + mMinimumBacklight;
+            if (stopTracking) {
+                MetricsLogger.action(mContext, MetricsLogger.ACTION_BRIGHTNESS, val);
+            }
             setBrightness(val);
             if (!tracking) {
                 AsyncTask.execute(new Runnable() {
@@ -228,6 +233,9 @@ public class BrightnessController implements ToggleSlider.Listener {
             }
         } else {
             final float adj = value / (BRIGHTNESS_ADJ_RESOLUTION / 2f) - 1;
+            if (stopTracking) {
+                MetricsLogger.action(mContext, MetricsLogger.ACTION_BRIGHTNESS_AUTO, value);
+            }
             setBrightnessAdj(adj);
             if (!tracking) {
                 AsyncTask.execute(new Runnable() {

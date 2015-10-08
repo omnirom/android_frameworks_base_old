@@ -240,8 +240,9 @@ const char* gFS_Main_ModulateColor =
 const char* gFS_Main_ApplyVertexAlphaLinearInterp =
         "    fragColor *= alpha;\n";
 const char* gFS_Main_ApplyVertexAlphaShadowInterp =
-        "    fragColor *= (1.0 - cos(alpha)) / 2.0;\n";
-
+        // Use a gaussian function for the shadow fall off. Note that alpha here
+        // is actually (1.0 - alpha) for saving computation.
+        "    fragColor *= exp(- alpha * alpha * 4.0) - 0.018;\n";
 const char* gFS_Main_FetchTexture[2] = {
         // Don't modulate
         "    fragColor = texture2D(baseSampler, outTexCoords);\n",
@@ -380,9 +381,9 @@ const char* gBlendOps[18] = {
         // Xor
         "return vec4(src.rgb * (1.0 - dst.a) + (1.0 - src.a) * dst.rgb, "
                 "src.a + dst.a - 2.0 * src.a * dst.a);\n",
-        // Add
+        // Plus
         "return min(src + dst, 1.0);\n",
-        // Multiply
+        // Modulate
         "return src * dst;\n",
         // Screen
         "return src + dst - src * dst;\n",
@@ -404,7 +405,8 @@ const char* gBlendOps[18] = {
 // Constructors/destructors
 ///////////////////////////////////////////////////////////////////////////////
 
-ProgramCache::ProgramCache(): mHasES3(Extensions::getInstance().getMajorGlVersion() >= 3) {
+ProgramCache::ProgramCache(Extensions& extensions)
+        : mHasES3(extensions.getMajorGlVersion() >= 3) {
 }
 
 ProgramCache::~ProgramCache() {
@@ -417,11 +419,6 @@ ProgramCache::~ProgramCache() {
 
 void ProgramCache::clear() {
     PROGRAM_LOGD("Clearing program cache");
-
-    size_t count = mCache.size();
-    for (size_t i = 0; i < count; i++) {
-        delete mCache.valueAt(i);
-    }
     mCache.clear();
 }
 
@@ -433,14 +430,14 @@ Program* ProgramCache::get(const ProgramDescription& description) {
         key = PROGRAM_KEY_TEXTURE;
     }
 
-    ssize_t index = mCache.indexOfKey(key);
-    Program* program = NULL;
-    if (index < 0) {
+    auto iter = mCache.find(key);
+    Program* program = nullptr;
+    if (iter == mCache.end()) {
         description.log("Could not find program");
         program = generateProgram(description, key);
-        mCache.add(key, program);
+        mCache[key] = std::unique_ptr<Program>(program);
     } else {
-        program = mCache.valueAt(index);
+        program = iter->second.get();
     }
     return program;
 }
@@ -834,7 +831,7 @@ void ProgramCache::printLongString(const String8& shader) const {
     while ((index = shader.find("\n", index)) > -1) {
         String8 line(str, index - lastIndex);
         if (line.length() == 0) line.append("\n");
-        PROGRAM_LOGD("%s", line.string());
+        ALOGD("%s", line.string());
         index++;
         str += (index - lastIndex);
         lastIndex = index;

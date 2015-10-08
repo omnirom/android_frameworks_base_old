@@ -54,6 +54,10 @@ public class WifiEnterpriseConfig implements Parcelable {
     /** @hide */
     public static final String SUBJECT_MATCH_KEY   = "subject_match";
     /** @hide */
+    public static final String ALTSUBJECT_MATCH_KEY = "altsubject_match";
+    /** @hide */
+    public static final String DOM_SUFFIX_MATCH_KEY = "domain_suffix_match";
+    /** @hide */
     public static final String OPP_KEY_CACHING     = "proactive_key_caching";
     /**
      * String representing the keystore OpenSSL ENGINE's ID.
@@ -93,6 +97,11 @@ public class WifiEnterpriseConfig implements Parcelable {
     public static final String ENGINE_ID_KEY       = "engine_id";
     /** @hide */
     public static final String PRIVATE_KEY_ID_KEY  = "key_id";
+    /** @hide */
+    public static final String REALM_KEY           = "realm";
+    /** @hide */
+    public static final String PLMN_KEY            = "plmn";
+
 
     private HashMap<String, String> mFields = new HashMap<String, String>();
     private X509Certificate mCaCert;
@@ -228,8 +237,10 @@ public class WifiEnterpriseConfig implements Parcelable {
         public static final int SIM     = 4;
         /** EAP-Authentication and Key Agreement */
         public static final int AKA     = 5;
+        /** EAP-Authentication and Key Agreement Prime */
+        public static final int AKA_PRIME = 6;
         /** @hide */
-        public static final String[] strings = { "PEAP", "TLS", "TTLS", "PWD", "SIM", "AKA" };
+        public static final String[] strings = { "PEAP", "TLS", "TTLS", "PWD", "SIM", "AKA", "AKA'" };
 
         /** Prevent initialization */
         private Eap() {}
@@ -279,6 +290,7 @@ public class WifiEnterpriseConfig implements Parcelable {
             case Eap.TTLS:
             case Eap.SIM:
             case Eap.AKA:
+            case Eap.AKA_PRIME:
                 mFields.put(EAP_KEY, Eap.strings[eapMethod]);
                 mFields.put(OPP_KEY_CACHING, "1");
                 break;
@@ -530,20 +542,104 @@ public class WifiEnterpriseConfig implements Parcelable {
     }
 
     /**
-     * Set subject match. This is the substring to be matched against the subject of the
-     * authentication server certificate.
+     * Set subject match (deprecated). This is the substring to be matched against the subject of
+     * the authentication server certificate.
      * @param subjectMatch substring to be matched
+     * @deprecated in favor of altSubjectMatch
      */
     public void setSubjectMatch(String subjectMatch) {
         setFieldValue(SUBJECT_MATCH_KEY, subjectMatch, "");
     }
 
     /**
-     * Get subject match
+     * Get subject match (deprecated)
      * @return the subject match string
+     * @deprecated in favor of altSubjectMatch
      */
     public String getSubjectMatch() {
         return getFieldValue(SUBJECT_MATCH_KEY, "");
+    }
+
+    /**
+     * Set alternate subject match. This is the substring to be matched against the
+     * alternate subject of the authentication server certificate.
+     * @param altSubjectMatch substring to be matched, for example
+     *                     DNS:server.example.com;EMAIL:server@example.com
+     */
+    public void setAltSubjectMatch(String altSubjectMatch) {
+        setFieldValue(ALTSUBJECT_MATCH_KEY, altSubjectMatch, "");
+    }
+
+    /**
+     * Get alternate subject match
+     * @return the alternate subject match string
+     */
+    public String getAltSubjectMatch() {
+        return getFieldValue(ALTSUBJECT_MATCH_KEY, "");
+    }
+
+    /**
+     * Set the domain_suffix_match directive on wpa_supplicant. This is the parameter to use
+     * for Hotspot 2.0 defined matching of AAA server certs per WFA HS2.0 spec, section 7.3.3.2,
+     * second paragraph.
+     *
+     * From wpa_supplicant documentation:
+     * Constraint for server domain name. If set, this FQDN is used as a suffix match requirement
+     * for the AAAserver certificate in SubjectAltName dNSName element(s). If a matching dNSName is
+     * found, this constraint is met. If no dNSName values are present, this constraint is matched
+     * against SubjectName CN using same suffix match comparison.
+     * Suffix match here means that the host/domain name is compared one label at a time starting
+     * from the top-level domain and all the labels in domain_suffix_match shall be included in the
+     * certificate. The certificate may include additional sub-level labels in addition to the
+     * required labels.
+     * For example, domain_suffix_match=example.com would match test.example.com but would not
+     * match test-example.com.
+     * @param domain The domain value
+     */
+    public void setDomainSuffixMatch(String domain) {
+        setFieldValue(DOM_SUFFIX_MATCH_KEY, domain);
+    }
+
+    /**
+     * Get the domain_suffix_match value. See setDomSuffixMatch.
+     * @return The domain value.
+     */
+    public String getDomainSuffixMatch() {
+        return getFieldValue(DOM_SUFFIX_MATCH_KEY, "");
+    }
+
+    /**
+     * Set realm for passpoint credential; realm identifies a set of networks where your
+     * passpoint credential can be used
+     * @param realm the realm
+     */
+    public void setRealm(String realm) {
+        setFieldValue(REALM_KEY, realm, "");
+    }
+
+    /**
+     * Get realm for passpoint credential; see {@link #setRealm(String)} for more information
+     * @return the realm
+     */
+    public String getRealm() {
+        return getFieldValue(REALM_KEY, "");
+    }
+
+    /**
+     * Set plmn (Public Land Mobile Network) of the provider of passpoint credential
+     * @param plmn the plmn value derived from mcc (mobile country code) & mnc (mobile network code)
+     */
+    public void setPlmn(String plmn) {
+        setFieldValue(PLMN_KEY, plmn, "");
+    }
+
+    /**
+     * Get plmn (Public Land Mobile Network) for passpoint credential; see {@link #setPlmn
+     * (String)} for more information
+     * @return the plmn
+     */
+    public String getPlmn() {
+        return getFieldValue(PLMN_KEY, "");
     }
 
     /** See {@link WifiConfiguration#getKeyIdForCredentials} @hide */

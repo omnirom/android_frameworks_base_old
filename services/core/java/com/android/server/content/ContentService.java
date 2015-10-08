@@ -23,13 +23,15 @@ import android.content.ComponentName;
 import android.content.ContentResolver;
 import android.content.Context;
 import android.content.IContentService;
+import android.content.Intent;
 import android.content.ISyncStatusObserver;
 import android.content.PeriodicSync;
-import android.content.pm.PackageManager;
 import android.content.SyncAdapterType;
 import android.content.SyncInfo;
 import android.content.SyncRequest;
 import android.content.SyncStatusInfo;
+import android.content.pm.PackageManager;
+import android.content.pm.PackageManagerInternal;
 import android.database.IContentObserver;
 import android.database.sqlite.SQLiteException;
 import android.net.Uri;
@@ -45,6 +47,7 @@ import android.text.TextUtils;
 import android.util.Log;
 import android.util.Slog;
 import android.util.SparseIntArray;
+import com.android.server.LocalServices;
 
 import java.io.FileDescriptor;
 import java.io.PrintWriter;
@@ -152,6 +155,18 @@ public final class ContentService extends IContentService.Stub {
     /*package*/ ContentService(Context context, boolean factoryTest) {
         mContext = context;
         mFactoryTest = factoryTest;
+
+        // Let the package manager query for the sync adapters for a given authority
+        // as we grant default permissions to sync adapters for specific authorities.
+        PackageManagerInternal packageManagerInternal = LocalServices.getService(
+                PackageManagerInternal.class);
+        packageManagerInternal.setSyncAdapterPackagesprovider(
+                new PackageManagerInternal.SyncAdapterPackagesProvider() {
+            @Override
+            public String[] getPackages(String authority, int userId) {
+                return getSyncAdapterPackagesForAuthorityAsUser(authority, userId);
+            }
+        });
     }
 
     public void systemReady() {
@@ -162,8 +177,9 @@ public final class ContentService extends IContentService.Stub {
      * Register a content observer tied to a specific user's view of the provider.
      * @param userHandle the user whose view of the provider is to be observed.  May be
      *     the calling user without requiring any permission, otherwise the caller needs to
-     *     hold the INTERACT_ACROSS_USERS_FULL permission.  Pseudousers USER_ALL and
-     *     USER_CURRENT are properly handled; all other pseudousers are forbidden.
+     *     hold the INTERACT_ACROSS_USERS_FULL permission or hold a read uri grant to the uri.
+     *     Pseudousers USER_ALL and USER_CURRENT are properly handled; all other pseudousers
+     *     are forbidden.
      */
     @Override
     public void registerContentObserver(Uri uri, boolean notifyForDescendants,
@@ -172,8 +188,17 @@ public final class ContentService extends IContentService.Stub {
             throw new IllegalArgumentException("You must pass a valid uri and observer");
         }
 
-        enforceCrossUserPermission(userHandle,
-                "no permission to observe other users' provider view");
+        final int uid = Binder.getCallingUid();
+        final int pid = Binder.getCallingPid();
+        final int callingUserHandle = UserHandle.getCallingUserId();
+        // Registering an observer for any user other than the calling user requires uri grant or
+        // cross user permission
+        if (callingUserHandle != userHandle &&
+                mContext.checkUriPermission(uri, pid, uid, Intent.FLAG_GRANT_READ_URI_PERMISSION)
+                        != PackageManager.PERMISSION_GRANTED) {
+            enforceCrossUserPermission(userHandle,
+                    "no permission to observe other users' provider view");
+        }
 
         if (userHandle < 0) {
             if (userHandle == UserHandle.USER_CURRENT) {
@@ -186,7 +211,7 @@ public final class ContentService extends IContentService.Stub {
 
         synchronized (mRootNode) {
             mRootNode.addObserverLocked(uri, observer, notifyForDescendants, mRootNode,
-                    Binder.getCallingUid(), Binder.getCallingPid(), userHandle);
+                    uid, pid, userHandle);
             if (false) Log.v(TAG, "Registered observer " + observer + " at " + uri +
                     " with notifyForDescendants " + notifyForDescendants);
         }
@@ -212,8 +237,9 @@ public final class ContentService extends IContentService.Stub {
      * Notify observers of a particular user's view of the provider.
      * @param userHandle the user whose view of the provider is to be notified.  May be
      *     the calling user without requiring any permission, otherwise the caller needs to
-     *     hold the INTERACT_ACROSS_USERS_FULL permission.  Pseudousers USER_ALL and
-     *     USER_CURRENT are properly interpreted; no other pseudousers are allowed.
+     *     hold the INTERACT_ACROSS_USERS_FULL permission or hold a write uri grant to the uri.
+     *     Pseudousers USER_ALL and USER_CURRENT are properly interpreted; no other pseudousers are
+     *     allowed.
      */
     @Override
     public void notifyChange(Uri uri, IContentObserver observer,
@@ -224,11 +250,14 @@ public final class ContentService extends IContentService.Stub {
                     + " from observer " + observer + ", syncToNetwork " + syncToNetwork);
         }
 
-        // Notify for any user other than the caller's own requires permission.
+        final int uid = Binder.getCallingUid();
+        final int pid = Binder.getCallingPid();
         final int callingUserHandle = UserHandle.getCallingUserId();
-        if (userHandle != callingUserHandle) {
-            mContext.enforceCallingOrSelfPermission(Manifest.permission.INTERACT_ACROSS_USERS,
-                    "no permission to notify other users");
+        // Notify for any user other than the caller requires uri grant or cross user permission
+        if (callingUserHandle != userHandle &&
+                mContext.checkUriPermission(uri, pid, uid, Intent.FLAG_GRANT_WRITE_URI_PERMISSION)
+                        != PackageManager.PERMISSION_GRANTED) {
+            enforceCrossUserPermission(userHandle, "no permission to notify other users");
         }
 
         // We passed the permission check; resolve pseudouser targets as appropriate
@@ -241,7 +270,6 @@ public final class ContentService extends IContentService.Stub {
             }
         }
 
-        final int uid = Binder.getCallingUid();
         // This makes it so that future permission checks will be in the context of this
         // process rather than the caller's process. We will restore this before returning.
         long identityToken = clearCallingIdentity();
@@ -501,6 +529,21 @@ public final class ContentService extends IContentService.Stub {
         try {
             SyncManager syncManager = getSyncManager();
             return syncManager.getSyncAdapterTypes(userId);
+        } finally {
+            restoreCallingIdentity(identityToken);
+        }
+    }
+
+    @Override
+    public String[] getSyncAdapterPackagesForAuthorityAsUser(String authority, int userId) {
+        enforceCrossUserPermission(userId,
+                "no permission to read sync settings for user " + userId);
+        // This makes it so that future permission checks will be in the context of this
+        // process rather than the caller's process. We will restore this before returning.
+        final long identityToken = clearCallingIdentity();
+        try {
+            SyncManager syncManager = getSyncManager();
+            return syncManager.getSyncAdapterPackagesForAuthorityAsUser(authority, userId);
         } finally {
             restoreCallingIdentity(identityToken);
         }

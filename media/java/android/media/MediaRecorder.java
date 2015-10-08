@@ -16,6 +16,8 @@
 
 package android.media;
 
+import android.annotation.NonNull;
+import android.annotation.SystemApi;
 import android.app.ActivityThread;
 import android.hardware.Camera;
 import android.os.Handler;
@@ -110,7 +112,8 @@ public class MediaRecorder
         /* Native setup requires a weak reference to our object.
          * It's easier to create it here than in C++.
          */
-        native_setup(new WeakReference<MediaRecorder>(this), packageName);
+        native_setup(new WeakReference<MediaRecorder>(this), packageName,
+                ActivityThread.currentOpPackageName());
     }
 
     /**
@@ -139,6 +142,30 @@ public class MediaRecorder
     public native Surface getSurface();
 
     /**
+     * Configures the recorder to use a persistent surface when using SURFACE video source.
+     * <p> May only be called before {@link #prepare}. If called, {@link #getSurface} should
+     * not be used and will throw IllegalStateException. Frames rendered to the Surface
+     * before {@link #start} will be discarded.</p>
+
+     * @param surface a persistent input surface created by
+     *           {@link MediaCodec#createPersistentInputSurface}
+     * @throws IllegalStateException if it is called after {@link #prepare} and before
+     * {@link #stop}.
+     * @throws IllegalArgumentException if the surface was not created by
+     *           {@link MediaCodec#createPersistentInputSurface}.
+     * @see MediaCodec#createPersistentInputSurface
+     * @see MediaRecorder.VideoSource
+     */
+    public void setInputSurface(@NonNull Surface surface) {
+        if (!(surface instanceof MediaCodec.PersistentSurface)) {
+            throw new IllegalArgumentException("not a PersistentSurface");
+        }
+        native_setInputSurface(surface);
+    }
+
+    private native final void native_setInputSurface(@NonNull Surface surface);
+
+    /**
      * Sets a Surface to show a preview of recorded media (video). Calls this
      * before prepare() to make sure that the desirable preview display is
      * set. If {@link #setCamera(Camera)} is used and the surface has been
@@ -156,8 +183,11 @@ public class MediaRecorder
     }
 
     /**
-     * Defines the audio source. These constants are used with
-     * {@link MediaRecorder#setAudioSource(int)}.
+     * Defines the audio source.
+     * An audio source defines both a default physical source of audio signal, and a recording
+     * configuration. These constants are for instance used
+     * in {@link MediaRecorder#setAudioSource(int)} or
+     * {@link AudioRecord.Builder#setAudioSource(int)}.
      */
     public final class AudioSource {
 
@@ -167,7 +197,7 @@ public class MediaRecorder
         public final static int AUDIO_SOURCE_INVALID = -1;
 
       /* Do not change these values without updating their counterparts
-       * in system/core/include/system/audio.h!
+       * in system/media/audio/include/system/audio.h!
        */
 
         /** Default audio source **/
@@ -222,12 +252,11 @@ public class MediaRecorder
         public static final int REMOTE_SUBMIX = 8;
 
         /**
-         * Audio source for FM, which is used to capture current FM tuner output by FMRadio app.
-         * There are two use cases, one is for record FM stream for later listening, another is
-         * for FM indirect mode(the routing except FM to headset(headphone) device routing).
+         * Audio source for capturing broadcast radio tuner output.
          * @hide
          */
-        public static final int FM_TUNER = 1998;
+        @SystemApi
+        public static final int RADIO_TUNER = 1998;
 
         /**
          * Audio source for preemptible, low-priority software hotword detection
@@ -240,7 +269,8 @@ public class MediaRecorder
          * This is a hidden audio source.
          * @hide
          */
-        protected static final int HOTWORD = 1999;
+        @SystemApi
+        public static final int HOTWORD = 1999;
     }
 
     /**
@@ -437,10 +467,7 @@ public class MediaRecorder
     public void setCaptureRate(double fps) {
         // Make sure that time lapse is enabled when this method is called.
         setParameter("time-lapse-enable=1");
-
-        double timeBetweenFrameCapture = 1 / fps;
-        long timeBetweenFrameCaptureUs = (long) (1000000 * timeBetweenFrameCapture);
-        setParameter("time-between-time-lapse-frame-capture=" + timeBetweenFrameCaptureUs);
+        setParameter("time-lapse-fps=" + fps);
     }
 
     /**
@@ -1061,7 +1088,7 @@ public class MediaRecorder
     private static native final void native_init();
 
     private native final void native_setup(Object mediarecorder_this,
-            String clientName) throws IllegalStateException;
+            String clientName, String opPackageName) throws IllegalStateException;
 
     private native final void native_finalize();
 

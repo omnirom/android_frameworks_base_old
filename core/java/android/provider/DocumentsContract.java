@@ -93,6 +93,12 @@ public final class DocumentsContract {
     public static final String EXTRA_SHOW_ADVANCED = "android.content.extra.SHOW_ADVANCED";
 
     /**
+     * Set this in a DocumentsUI intent to cause a package's own roots to be
+     * excluded from the roots list.
+     */
+    public static final String EXTRA_EXCLUDE_SELF = "android.provider.extra.EXCLUDE_SELF";
+
+    /**
      * Included in {@link AssetFileDescriptor#getExtras()} when returned
      * thumbnail should be rotated.
      *
@@ -101,10 +107,23 @@ public final class DocumentsContract {
      */
     public static final String EXTRA_ORIENTATION = "android.content.extra.ORIENTATION";
 
+    /**
+     * Overrides the default prompt text in DocumentsUI when set in an intent.
+     */
+    public static final String EXTRA_PROMPT = "android.provider.extra.PROMPT";
+
     /** {@hide} */
     public static final String ACTION_MANAGE_ROOT = "android.provider.action.MANAGE_ROOT";
     /** {@hide} */
     public static final String ACTION_MANAGE_DOCUMENT = "android.provider.action.MANAGE_DOCUMENT";
+
+    /** {@hide} */
+    public static final String
+            ACTION_BROWSE_DOCUMENT_ROOT = "android.provider.action.BROWSE_DOCUMENT_ROOT";
+
+    /** {@hide} */
+    public static final String
+            ACTION_DOCUMENT_ROOT_SETTINGS = "android.provider.action.DOCUMENT_ROOT_SETTINGS";
 
     /**
      * Buffer is large enough to rewind past any EXIF headers.
@@ -473,6 +492,15 @@ public final class DocumentsContract {
          * @hide
          */
         public static final int FLAG_ADVANCED = 1 << 17;
+
+        /**
+         * Flag indicating that this root has settings.
+         *
+         * @see #COLUMN_FLAGS
+         * @see DocumentsContract#ACTION_DOCUMENT_ROOT_SETTINGS
+         * @hide
+         */
+        public static final int FLAG_HAS_SETTINGS = 1 << 18;
     }
 
     /**

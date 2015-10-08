@@ -18,7 +18,6 @@ package android.webkit;
 
 import android.net.Uri;
 
-import java.io.InputStream;
 import java.util.Map;
 
 /**
@@ -42,6 +41,8 @@ public interface WebResourceRequest {
 
     /**
      * Gets whether a gesture (such as a click) was associated with the request.
+     * For security reasons in certain situations this method may return false even though the
+     * sequence of events which caused the request to be created was initiated by a user gesture.
      *
      * @return whether a gesture was associated with the request.
      */

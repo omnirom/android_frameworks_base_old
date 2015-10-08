@@ -35,6 +35,7 @@ import java.awt.AlphaComposite;
 import java.awt.Color;
 import java.awt.Composite;
 import java.awt.Graphics2D;
+import java.awt.Rectangle;
 import java.awt.RenderingHints;
 import java.awt.Shape;
 import java.awt.geom.AffineTransform;
@@ -615,8 +616,26 @@ public class GcSnapshot {
                 return;
             }
 
-            int width = layer.getImage().getWidth();
-            int height = layer.getImage().getHeight();
+            int x = 0;
+            int y = 0;
+            int width;
+            int height;
+            Rectangle clipBounds = originalGraphics.getClipBounds();
+            if (clipBounds != null) {
+                if (clipBounds.width == 0 || clipBounds.height == 0) {
+                    // Clip is 0 so no need to paint anything.
+                    return;
+                }
+                // If we have clipBounds available, use them as they will always be
+                // smaller than the full layer size.
+                x = clipBounds.x;
+                y = clipBounds.y;
+                width = clipBounds.width;
+                height = clipBounds.height;
+            } else {
+                width = layer.getImage().getWidth();
+                height = layer.getImage().getHeight();
+            }
 
             // Create a temporary image to which the color filter will be applied.
             BufferedImage image = new BufferedImage(width, height,
@@ -631,13 +650,20 @@ public class GcSnapshot {
                     true /*compositeOnly*/, forceMode);
             try {
                 // The main draw operation.
+                // We translate the operation to take into account that the rendering does not
+                // know about the clipping area.
+                imageGraphics.translate(-x, -y);
                 drawable.draw(imageGraphics, paint);
 
                 // Apply the color filter.
+                // Restore the original coordinates system and apply the filter only to the
+                // clipped area.
+                imageGraphics.translate(x, y);
                 filter.applyFilter(imageGraphics, width, height);
 
-                // Draw the tinted image on the main layer.
-                configuredGraphics.drawImage(image, 0, 0, null);
+                // Draw the tinted image on the main layer using as start point the clipping
+                // upper left coordinates.
+                configuredGraphics.drawImage(image, x, y, null);
                 layer.change();
             } finally {
                 // dispose Graphics2D objects

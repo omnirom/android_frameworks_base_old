@@ -156,7 +156,7 @@ public class VpnService extends Service {
      */
     public static Intent prepare(Context context) {
         try {
-            if (getService().prepareVpn(context.getPackageName(), null)) {
+            if (getService().prepareVpn(context.getPackageName(), null, UserHandle.myUserId())) {
                 return null;
             }
         } catch (RemoteException e) {
@@ -182,10 +182,11 @@ public class VpnService extends Service {
         String packageName = context.getPackageName();
         try {
             // Only prepare if we're not already prepared.
-            if (!cm.prepareVpn(packageName, null)) {
-                cm.prepareVpn(null, packageName);
+            int userId = UserHandle.myUserId();
+            if (!cm.prepareVpn(packageName, null, userId)) {
+                cm.prepareVpn(null, packageName, userId);
             }
-            cm.setVpnPackageAuthorization(true);
+            cm.setVpnPackageAuthorization(packageName, userId, true);
         } catch (RemoteException e) {
             // ignore
         }
@@ -679,7 +680,7 @@ public class VpnService extends Service {
          *
          * By default, all traffic from apps is forwarded through the VPN interface and it is not
          * possible for apps to side-step the VPN. If this method is called, apps may use methods
-         * such as {@link ConnectivityManager#setProcessDefaultNetwork} to instead send/receive
+         * such as {@link ConnectivityManager#bindProcessToNetwork} to instead send/receive
          * directly over the underlying network or any other network they have permissions for.
          *
          * @return this {@link Builder} object to facilitate chaining of method calls.

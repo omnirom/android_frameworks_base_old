@@ -28,8 +28,6 @@ import android.view.ViewGroup;
 import android.widget.BaseAdapter;
 import android.widget.TextView;
 
-import java.util.ArrayList;
-
 public class UsageLogActivity extends ListActivity implements Runnable {
     private static final long USAGE_STATS_PERIOD = 1000 * 60 * 60 * 24 * 14;
 
@@ -165,6 +163,9 @@ public class UsageLogActivity extends ListActivity implements Runnable {
 
                 case UsageEvents.Event.CONFIGURATION_CHANGE:
                     return "Config change";
+
+                case UsageEvents.Event.USER_INTERACTION:
+                    return "User Interaction";
 
                 default:
                     return "Unknown: " + eventType;

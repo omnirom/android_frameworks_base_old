@@ -25,6 +25,7 @@
 #include "RenderTask.h"
 
 #include "../Rect.h"
+#include "../FrameInfo.h"
 #include "../TreeInfo.h"
 
 namespace android {
@@ -61,10 +62,11 @@ public:
     void pushLayerUpdate(DeferredLayerUpdater* layer);
     void removeLayerUpdate(DeferredLayerUpdater* layer);
 
-    void setDensity(float density) { mDensity = density; }
-    int drawFrame(nsecs_t frameTimeNanos, nsecs_t recordDurationNanos);
+    int drawFrame();
 
-    virtual void run();
+    int64_t* frameInfo() { return mFrameInfo; }
+
+    virtual void run() override;
 
 private:
     void postAndWait();
@@ -80,12 +82,12 @@ private:
     /*********************************************
      *  Single frame data
      *********************************************/
-    nsecs_t mFrameTimeNanos;
-    nsecs_t mRecordDurationNanos;
-    float mDensity;
     std::vector< sp<DeferredLayerUpdater> > mLayers;
 
     int mSyncResult;
+    int64_t mSyncQueued;
+
+    int64_t mFrameInfo[UI_THREAD_FRAME_INFO_SIZE];
 };
 
 } /* namespace renderthread */

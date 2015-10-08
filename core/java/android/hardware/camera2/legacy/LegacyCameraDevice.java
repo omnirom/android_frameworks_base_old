@@ -59,10 +59,9 @@ import static com.android.internal.util.Preconditions.*;
  * </p>
  */
 public class LegacyCameraDevice implements AutoCloseable {
-    public static final String DEBUG_PROP = "HAL1ShimLogging";
     private final String TAG;
 
-    private static final boolean DEBUG = Log.isLoggable(LegacyCameraDevice.DEBUG_PROP, Log.DEBUG);
+    private static final boolean DEBUG = false;
     private final int mCameraId;
     private final CameraCharacteristics mStaticCharacteristics;
     private final ICameraDeviceCallbacks mDeviceCallbacks;
@@ -83,9 +82,13 @@ public class LegacyCameraDevice implements AutoCloseable {
     private static final int GRALLOC_USAGE_SW_READ_OFTEN = 0x00000003;
     private static final int GRALLOC_USAGE_HW_TEXTURE = 0x00000100;
     private static final int GRALLOC_USAGE_HW_COMPOSER = 0x00000800;
+    private static final int GRALLOC_USAGE_HW_RENDER = 0x00000200;
     private static final int GRALLOC_USAGE_HW_VIDEO_ENCODER = 0x00010000;
 
-    public static final int MAX_DIMEN_FOR_ROUNDING = 1080; // maximum allowed width for rounding
+    public static final int MAX_DIMEN_FOR_ROUNDING = 1920; // maximum allowed width for rounding
+
+    // Keep up to date with values in system/core/include/system/window.h
+    public static final int NATIVE_WINDOW_SCALING_MODE_SCALE_TO_WINDOW = 1;
 
     private CaptureResultExtras getExtrasFromRequest(RequestHolder holder) {
         if (holder == null) {
@@ -292,6 +295,10 @@ public class LegacyCameraDevice implements AutoCloseable {
                     Log.e(TAG, "configureOutputs - null outputs are not allowed");
                     return BAD_VALUE;
                 }
+                if (!output.isValid()) {
+                    Log.e(TAG, "configureOutputs - invalid output surfaces are not allowed");
+                    return BAD_VALUE;
+                }
                 StreamConfigurationMap streamConfigurations = mStaticCharacteristics.
                         get(CameraCharacteristics.SCALER_STREAM_CONFIGURATION_MAP);
 
@@ -331,6 +338,8 @@ public class LegacyCameraDevice implements AutoCloseable {
                     } else {
                         sizedSurfaces.add(new Pair<>(output, s));
                     }
+                    // Lock down the size before configuration
+                    setSurfaceDimens(output, s.getWidth(), s.getHeight());
                 } catch (BufferQueueAbandonedException e) {
                     Log.e(TAG, "Surface bufferqueue is abandoned, cannot configure as output: ", e);
                     return BAD_VALUE;
@@ -522,7 +531,7 @@ public class LegacyCameraDevice implements AutoCloseable {
      * @return the width and height of the surface
      *
      * @throws NullPointerException if the {@code surface} was {@code null}
-     * @throws IllegalStateException if the {@code surface} was invalid
+     * @throws BufferQueueAbandonedException if the {@code surface} was invalid
      */
     public static Size getSurfaceSize(Surface surface) throws BufferQueueAbandonedException {
         checkNotNull(surface);
@@ -546,6 +555,42 @@ public class LegacyCameraDevice implements AutoCloseable {
         return flexibleConsumer;
     }
 
+    public static boolean isPreviewConsumer(Surface output) {
+        int usageFlags = detectSurfaceUsageFlags(output);
+        int disallowedFlags = GRALLOC_USAGE_HW_VIDEO_ENCODER | GRALLOC_USAGE_RENDERSCRIPT |
+                GRALLOC_USAGE_SW_READ_OFTEN;
+        int allowedFlags = GRALLOC_USAGE_HW_TEXTURE | GRALLOC_USAGE_HW_COMPOSER |
+                GRALLOC_USAGE_HW_RENDER;
+        boolean previewConsumer = ((usageFlags & disallowedFlags) == 0 &&
+                (usageFlags & allowedFlags) != 0);
+        int surfaceFormat = ImageFormat.UNKNOWN;
+        try {
+            surfaceFormat = detectSurfaceType(output);
+        } catch(BufferQueueAbandonedException e) {
+            throw new IllegalArgumentException("Surface was abandoned", e);
+        }
+
+        return previewConsumer;
+    }
+
+    public static boolean isVideoEncoderConsumer(Surface output) {
+        int usageFlags = detectSurfaceUsageFlags(output);
+        int disallowedFlags = GRALLOC_USAGE_HW_TEXTURE | GRALLOC_USAGE_HW_COMPOSER |
+                GRALLOC_USAGE_RENDERSCRIPT | GRALLOC_USAGE_SW_READ_OFTEN;
+        int allowedFlags = GRALLOC_USAGE_HW_VIDEO_ENCODER;
+        boolean videoEncoderConsumer = ((usageFlags & disallowedFlags) == 0 &&
+                (usageFlags & allowedFlags) != 0);
+
+        int surfaceFormat = ImageFormat.UNKNOWN;
+        try {
+            surfaceFormat = detectSurfaceType(output);
+        } catch(BufferQueueAbandonedException e) {
+            throw new IllegalArgumentException("Surface was abandoned", e);
+        }
+
+        return videoEncoderConsumer;
+    }
+
     /**
      * Query the surface for its currently configured usage flags
      */
@@ -560,6 +605,14 @@ public class LegacyCameraDevice implements AutoCloseable {
     public static int detectSurfaceType(Surface surface) throws BufferQueueAbandonedException {
         checkNotNull(surface);
         return LegacyExceptionUtils.throwOnError(nativeDetectSurfaceType(surface));
+    }
+
+    /**
+     * Query the surface for its currently configured dataspace
+     */
+    public static int detectSurfaceDataspace(Surface surface) throws BufferQueueAbandonedException {
+        checkNotNull(surface);
+        return LegacyExceptionUtils.throwOnError(nativeDetectSurfaceDataspace(surface));
     }
 
     static void configureSurface(Surface surface, int width, int height,
@@ -650,7 +703,16 @@ public class LegacyCameraDevice implements AutoCloseable {
         LegacyExceptionUtils.throwOnError(nativeSetNextTimestamp(surface, timestamp));
     }
 
+    static void setScalingMode(Surface surface, int mode)
+            throws BufferQueueAbandonedException {
+        checkNotNull(surface);
+        LegacyExceptionUtils.throwOnError(nativeSetScalingMode(surface, mode));
+    }
+
+
     private static native int nativeDetectSurfaceType(Surface surface);
+
+    private static native int nativeDetectSurfaceDataspace(Surface surface);
 
     private static native int nativeDetectSurfaceDimens(Surface surface,
             /*out*/int[/*2*/] dimens);
@@ -676,6 +738,8 @@ public class LegacyCameraDevice implements AutoCloseable {
     private static native int nativeSetNextTimestamp(Surface surface, long timestamp);
 
     private static native int nativeDetectSurfaceUsageFlags(Surface surface);
+
+    private static native int nativeSetScalingMode(Surface surface, int scalingMode);
 
     static native int nativeGetJpegFooterSize();
 }

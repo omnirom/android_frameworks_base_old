@@ -14,11 +14,8 @@
  * limitations under the License.
  */
 
-#define LOG_TAG "RenderTask"
-
 #include "RenderTask.h"
 
-#include <utils/Log.h>
 #include <utils/Condition.h>
 #include <utils/Mutex.h>
 

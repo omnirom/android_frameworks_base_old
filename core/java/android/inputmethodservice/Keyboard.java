@@ -18,6 +18,7 @@ package android.inputmethodservice;
 
 import org.xmlpull.v1.XmlPullParserException;
 
+import android.annotation.XmlRes;
 import android.content.Context;
 import android.content.res.Resources;
 import android.content.res.TypedArray;
@@ -399,16 +400,27 @@ public class Keyboard {
         public void onPressed() {
             pressed = !pressed;
         }
-        
+
         /**
-         * Changes the pressed state of the key. If it is a sticky key, it will also change the
-         * toggled state of the key if the finger was release inside.
-         * @param inside whether the finger was released inside the key
+         * Changes the pressed state of the key.
+         *
+         * <p>Toggled state of the key will be flipped when all the following conditions are
+         * fulfilled:</p>
+         *
+         * <ul>
+         *     <li>This is a sticky key, that is, {@link #sticky} is {@code true}.
+         *     <li>The parameter {@code inside} is {@code true}.
+         *     <li>{@link android.os.Build.VERSION#SDK_INT} is greater than
+         *         {@link android.os.Build.VERSION_CODES#LOLLIPOP_MR1}.
+         * </ul>
+         *
+         * @param inside whether the finger was released inside the key. Works only on Android M and
+         * later. See the method document for details.
          * @see #onPressed()
          */
         public void onReleased(boolean inside) {
             pressed = !pressed;
-            if (sticky) {
+            if (sticky && inside) {
                 on = !on;
             }
         }
@@ -519,7 +531,8 @@ public class Keyboard {
      * @param width sets width of keyboard
      * @param height sets height of keyboard
      */
-    public Keyboard(Context context, int xmlLayoutResId, int modeId, int width, int height) {
+    public Keyboard(Context context, @XmlRes int xmlLayoutResId, int modeId, int width,
+            int height) {
         mDisplayWidth = width;
         mDisplayHeight = height;
 
@@ -540,7 +553,7 @@ public class Keyboard {
      * @param xmlLayoutResId the resource file that contains the keyboard layout and keys.
      * @param modeId keyboard mode identifier
      */
-    public Keyboard(Context context, int xmlLayoutResId, int modeId) {
+    public Keyboard(Context context, @XmlRes int xmlLayoutResId, int modeId) {
         DisplayMetrics dm = context.getResources().getDisplayMetrics();
         mDisplayWidth = dm.widthPixels;
         mDisplayHeight = dm.heightPixels;

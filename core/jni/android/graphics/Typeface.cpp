@@ -15,11 +15,10 @@
  */
 
 #include "jni.h"
-#include <android_runtime/AndroidRuntime.h>
+#include "core_jni_helpers.h"
 
 #include "GraphicsJNI.h"
-#include <ScopedPrimitiveArray.h>
-#include "SkStream.h"
+#include "ScopedPrimitiveArray.h"
 #include "SkTypeface.h"
 #include "TypefaceImpl.h"
 #include <android_runtime/android_util_AssetManager.h>
@@ -81,8 +80,6 @@ static JNINativeMethod gTypefaceMethods[] = {
 
 int register_android_graphics_Typeface(JNIEnv* env)
 {
-    return android::AndroidRuntime::registerNativeMethods(env,
-                                                       "android/graphics/Typeface",
-                                                       gTypefaceMethods,
-                                                       SK_ARRAY_COUNT(gTypefaceMethods));
+    return RegisterMethodsOrDie(env, "android/graphics/Typeface", gTypefaceMethods,
+                                NELEM(gTypefaceMethods));
 }

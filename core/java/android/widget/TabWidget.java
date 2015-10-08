@@ -17,8 +17,8 @@
 package android.widget;
 
 import android.R;
+import android.annotation.DrawableRes;
 import android.content.Context;
-import android.content.res.Resources;
 import android.content.res.TypedArray;
 import android.graphics.Canvas;
 import android.graphics.Rect;
@@ -29,7 +29,6 @@ import android.view.View;
 import android.view.View.OnFocusChangeListener;
 import android.view.ViewGroup;
 import android.view.accessibility.AccessibilityEvent;
-import android.view.accessibility.AccessibilityNodeInfo;
 
 /**
  *
@@ -174,11 +173,13 @@ public class TabWidget extends LinearLayout implements OnFocusChangeListener {
         }
 
         // First, measure with no constraint
-        final int unspecifiedWidth = MeasureSpec.makeMeasureSpec(0, MeasureSpec.UNSPECIFIED);
+        final int width = MeasureSpec.getSize(widthMeasureSpec);
+        final int unspecifiedWidth = MeasureSpec.makeSafeMeasureSpec(width,
+                MeasureSpec.UNSPECIFIED);
         mImposedTabsHeight = -1;
         super.measureHorizontal(unspecifiedWidth, heightMeasureSpec);
 
-        int extraWidth = getMeasuredWidth() - MeasureSpec.getSize(widthMeasureSpec);
+        int extraWidth = getMeasuredWidth() - width;
         if (extraWidth > 0) {
             final int count = getChildCount();
 
@@ -244,7 +245,7 @@ public class TabWidget extends LinearLayout implements OnFocusChangeListener {
      * @param resId the resource identifier of the drawable to use as a
      * divider.
      */
-    public void setDividerDrawable(int resId) {
+    public void setDividerDrawable(@DrawableRes int resId) {
         setDividerDrawable(mContext.getDrawable(resId));
     }
     
@@ -265,7 +266,7 @@ public class TabWidget extends LinearLayout implements OnFocusChangeListener {
      * @param resId the resource identifier of the drawable to use as the
      * left strip drawable
      */
-    public void setLeftStripDrawable(int resId) {
+    public void setLeftStripDrawable(@DrawableRes int resId) {
         setLeftStripDrawable(mContext.getDrawable(resId));
     }
 
@@ -286,7 +287,7 @@ public class TabWidget extends LinearLayout implements OnFocusChangeListener {
      * @param resId the resource identifier of the drawable to use as the
      * right strip drawable
      */
-    public void setRightStripDrawable(int resId) {
+    public void setRightStripDrawable(@DrawableRes int resId) {
         setRightStripDrawable(mContext.getDrawable(resId));
     }
 
@@ -401,8 +402,9 @@ public class TabWidget extends LinearLayout implements OnFocusChangeListener {
         }
     }
 
+    /** @hide */
     @Override
-    public boolean dispatchPopulateAccessibilityEvent(AccessibilityEvent event) {
+    public boolean dispatchPopulateAccessibilityEventInternal(AccessibilityEvent event) {
         onPopulateAccessibilityEvent(event);
         // Dispatch only to the selected tab.
         if (mSelectedTab != -1) {
@@ -415,28 +417,28 @@ public class TabWidget extends LinearLayout implements OnFocusChangeListener {
     }
 
     @Override
-    public void onInitializeAccessibilityEvent(AccessibilityEvent event) {
-        super.onInitializeAccessibilityEvent(event);
-        event.setClassName(TabWidget.class.getName());
+    public CharSequence getAccessibilityClassName() {
+        return TabWidget.class.getName();
+    }
+
+    /** @hide */
+    @Override
+    public void onInitializeAccessibilityEventInternal(AccessibilityEvent event) {
+        super.onInitializeAccessibilityEventInternal(event);
         event.setItemCount(getTabCount());
         event.setCurrentItemIndex(mSelectedTab);
     }
 
 
+    /** @hide */
     @Override
-    public void sendAccessibilityEventUnchecked(AccessibilityEvent event) {
+    public void sendAccessibilityEventUncheckedInternal(AccessibilityEvent event) {
         // this class fires events only when tabs are focused or selected
         if (event.getEventType() == AccessibilityEvent.TYPE_VIEW_FOCUSED && isFocused()) {
             event.recycle();
             return;
         }
-        super.sendAccessibilityEventUnchecked(event);
-    }
-
-    @Override
-    public void onInitializeAccessibilityNodeInfo(AccessibilityNodeInfo info) {
-        super.onInitializeAccessibilityNodeInfo(info);
-        info.setClassName(TabWidget.class.getName());
+        super.sendAccessibilityEventUncheckedInternal(event);
     }
 
     /**

@@ -166,8 +166,6 @@ public class AccessibilityManagerService extends IAccessibilityManager.Stub {
     private final List<AccessibilityServiceInfo> mEnabledServicesForFeedbackTempList =
             new ArrayList<>();
 
-    private final Region mTempRegion = new Region();
-
     private final Rect mTempRect = new Rect();
 
     private final Rect mTempRect1 = new Rect();
@@ -352,6 +350,7 @@ public class AccessibilityManagerService extends IAccessibilityManager.Stub {
         intentFilter.addAction(Intent.ACTION_USER_SWITCHED);
         intentFilter.addAction(Intent.ACTION_USER_REMOVED);
         intentFilter.addAction(Intent.ACTION_USER_PRESENT);
+        intentFilter.addAction(Intent.ACTION_SETTING_RESTORED);
 
         mContext.registerReceiverAsUser(new BroadcastReceiver() {
             @Override
@@ -367,6 +366,15 @@ public class AccessibilityManagerService extends IAccessibilityManager.Stub {
                     if (userState.mUiAutomationService == null) {
                         if (readConfigurationForUserStateLocked(userState)) {
                             onUserStateChangedLocked(userState);
+                        }
+                    }
+                } else if (Intent.ACTION_SETTING_RESTORED.equals(action)) {
+                    final String which = intent.getStringExtra(Intent.EXTRA_SETTING_NAME);
+                    if (Settings.Secure.ENABLED_ACCESSIBILITY_SERVICES.equals(which)) {
+                        synchronized (mLock) {
+                            restoreEnabledAccessibilityServicesLocked(
+                                    intent.getStringExtra(Intent.EXTRA_SETTING_PREVIOUS_VALUE),
+                                    intent.getStringExtra(Intent.EXTRA_SETTING_NEW_VALUE));
                         }
                     }
                 }
@@ -857,6 +865,21 @@ public class AccessibilityManagerService extends IAccessibilityManager.Stub {
         }
     }
 
+    // Called only during settings restore; currently supports only the owner user
+    void restoreEnabledAccessibilityServicesLocked(String oldSetting, String newSetting) {
+        readComponentNamesFromStringLocked(oldSetting, mTempComponentNameSet, false);
+        readComponentNamesFromStringLocked(newSetting, mTempComponentNameSet, true);
+
+        UserState userState = getUserStateLocked(UserHandle.USER_OWNER);
+        userState.mEnabledServices.clear();
+        userState.mEnabledServices.addAll(mTempComponentNameSet);
+        persistComponentNamesToSettingLocked(
+                Settings.Secure.ENABLED_ACCESSIBILITY_SERVICES,
+                userState.mEnabledServices,
+                UserHandle.USER_OWNER);
+        onUserStateChangedLocked(userState);
+    }
+
     private InteractionBridge getInteractionBridgeLocked() {
         if (mInteractionBridge == null) {
             mInteractionBridge = new InteractionBridge();
@@ -944,7 +967,9 @@ public class AccessibilityManagerService extends IAccessibilityManager.Stub {
 
         List<ResolveInfo> installedServices = mPackageManager.queryIntentServicesAsUser(
                 new Intent(AccessibilityService.SERVICE_INTERFACE),
-                PackageManager.GET_SERVICES | PackageManager.GET_META_DATA,
+                PackageManager.GET_SERVICES 
+                  | PackageManager.GET_META_DATA 
+                  | PackageManager.GET_DISABLED_UNTIL_USED_COMPONENTS,
                 mCurrentUserId);
 
         for (int i = 0, count = installedServices.size(); i < count; i++) {
@@ -1127,10 +1152,27 @@ public class AccessibilityManagerService extends IAccessibilityManager.Stub {
             Set<ComponentName> outComponentNames) {
         String settingValue = Settings.Secure.getStringForUser(mContext.getContentResolver(),
                 settingName, userId);
-        outComponentNames.clear();
-        if (settingValue != null) {
+        readComponentNamesFromStringLocked(settingValue, outComponentNames, false);
+    }
+
+    /**
+     * Populates a set with the {@link ComponentName}s contained in a colon-delimited string.
+     *
+     * @param names The colon-delimited string to parse.
+     * @param outComponentNames The set of component names to be populated based on
+     *    the contents of the <code>names</code> string.
+     * @param doMerge If true, the parsed component names will be merged into the output
+     *    set, rather than replacing the set's existing contents entirely.
+     */
+    private void readComponentNamesFromStringLocked(String names,
+            Set<ComponentName> outComponentNames,
+            boolean doMerge) {
+        if (!doMerge) {
+            outComponentNames.clear();
+        }
+        if (names != null) {
             TextUtils.SimpleStringSplitter splitter = mStringColonSplitter;
-            splitter.setString(settingValue);
+            splitter.setString(names);
             while (splitter.hasNext()) {
                 String str = splitter.next();
                 if (str == null || str.length() <= 0) {
@@ -2016,7 +2058,9 @@ public class AccessibilityManagerService extends IAccessibilityManager.Stub {
             UserState userState = getUserStateLocked(mUserId);
             if (!mIsAutomation) {
                 if (mService == null && mContext.bindServiceAsUser(
-                        mIntent, this, Context.BIND_AUTO_CREATE, new UserHandle(mUserId))) {
+                        mIntent, this,
+                        Context.BIND_AUTO_CREATE | Context.BIND_FOREGROUND_SERVICE_WHILE_AWAKE,
+                        new UserHandle(mUserId))) {
                     userState.mBindingServices.add(mComponentName);
                 }
             } else {
@@ -2195,7 +2239,7 @@ public class AccessibilityManagerService extends IAccessibilityManager.Stub {
                 throws RemoteException {
             final int resolvedWindowId;
             IAccessibilityInteractionConnection connection = null;
-            Region partialInteractiveRegion = mTempRegion;
+            Region partialInteractiveRegion = Region.obtain();
             synchronized (mLock) {
                 // We treat calls from a profile as if made by its parent as profiles
                 // share the accessibility state of the parent. The call below
@@ -2219,6 +2263,7 @@ public class AccessibilityManagerService extends IAccessibilityManager.Stub {
                 }
                 if (!mSecurityPolicy.computePartialInteractiveRegionForWindowLocked(
                         resolvedWindowId, partialInteractiveRegion)) {
+                    partialInteractiveRegion.recycle();
                     partialInteractiveRegion = null;
                 }
             }
@@ -2236,6 +2281,10 @@ public class AccessibilityManagerService extends IAccessibilityManager.Stub {
                 }
             } finally {
                 Binder.restoreCallingIdentity(identityToken);
+                // Recycle if passed to another process.
+                if (partialInteractiveRegion != null && Binder.isProxy(connection)) {
+                    partialInteractiveRegion.recycle();
+                }
             }
             return false;
         }
@@ -2247,7 +2296,7 @@ public class AccessibilityManagerService extends IAccessibilityManager.Stub {
                 throws RemoteException {
             final int resolvedWindowId;
             IAccessibilityInteractionConnection connection = null;
-            Region partialInteractiveRegion = mTempRegion;
+            Region partialInteractiveRegion = Region.obtain();
             synchronized (mLock) {
                 // We treat calls from a profile as if made by its parent as profiles
                 // share the accessibility state of the parent. The call below
@@ -2271,6 +2320,7 @@ public class AccessibilityManagerService extends IAccessibilityManager.Stub {
                 }
                 if (!mSecurityPolicy.computePartialInteractiveRegionForWindowLocked(
                         resolvedWindowId, partialInteractiveRegion)) {
+                    partialInteractiveRegion.recycle();
                     partialInteractiveRegion = null;
                 }
             }
@@ -2288,6 +2338,10 @@ public class AccessibilityManagerService extends IAccessibilityManager.Stub {
                 }
             } finally {
                 Binder.restoreCallingIdentity(identityToken);
+                // Recycle if passed to another process.
+                if (partialInteractiveRegion != null && Binder.isProxy(connection)) {
+                    partialInteractiveRegion.recycle();
+                }
             }
             return false;
         }
@@ -2299,7 +2353,7 @@ public class AccessibilityManagerService extends IAccessibilityManager.Stub {
                 long interrogatingTid) throws RemoteException {
             final int resolvedWindowId;
             IAccessibilityInteractionConnection connection = null;
-            Region partialInteractiveRegion = mTempRegion;
+            Region partialInteractiveRegion = Region.obtain();
             synchronized (mLock) {
                 // We treat calls from a profile as if made by its parent as profiles
                 // share the accessibility state of the parent. The call below
@@ -2323,6 +2377,7 @@ public class AccessibilityManagerService extends IAccessibilityManager.Stub {
                 }
                 if (!mSecurityPolicy.computePartialInteractiveRegionForWindowLocked(
                         resolvedWindowId, partialInteractiveRegion)) {
+                    partialInteractiveRegion.recycle();
                     partialInteractiveRegion = null;
                 }
             }
@@ -2340,6 +2395,10 @@ public class AccessibilityManagerService extends IAccessibilityManager.Stub {
                 }
             } finally {
                 Binder.restoreCallingIdentity(identityToken);
+                // Recycle if passed to another process.
+                if (partialInteractiveRegion != null && Binder.isProxy(connection)) {
+                    partialInteractiveRegion.recycle();
+                }
             }
             return false;
         }
@@ -2351,7 +2410,7 @@ public class AccessibilityManagerService extends IAccessibilityManager.Stub {
                 throws RemoteException {
             final int resolvedWindowId;
             IAccessibilityInteractionConnection connection = null;
-            Region partialInteractiveRegion = mTempRegion;
+            Region partialInteractiveRegion = Region.obtain();
             synchronized (mLock) {
                 // We treat calls from a profile as if made by its parent as profiles
                 // share the accessibility state of the parent. The call below
@@ -2376,6 +2435,7 @@ public class AccessibilityManagerService extends IAccessibilityManager.Stub {
                 }
                 if (!mSecurityPolicy.computePartialInteractiveRegionForWindowLocked(
                         resolvedWindowId, partialInteractiveRegion)) {
+                    partialInteractiveRegion.recycle();
                     partialInteractiveRegion = null;
                 }
             }
@@ -2393,6 +2453,10 @@ public class AccessibilityManagerService extends IAccessibilityManager.Stub {
                 }
             } finally {
                 Binder.restoreCallingIdentity(identityToken);
+                // Recycle if passed to another process.
+                if (partialInteractiveRegion != null && Binder.isProxy(connection)) {
+                    partialInteractiveRegion.recycle();
+                }
             }
             return false;
         }
@@ -2404,7 +2468,7 @@ public class AccessibilityManagerService extends IAccessibilityManager.Stub {
                 throws RemoteException {
             final int resolvedWindowId;
             IAccessibilityInteractionConnection connection = null;
-            Region partialInteractiveRegion = mTempRegion;
+            Region partialInteractiveRegion = Region.obtain();
             synchronized (mLock) {
                 // We treat calls from a profile as if made by its parent as profiles
                 // share the accessibility state of the parent. The call below
@@ -2428,6 +2492,7 @@ public class AccessibilityManagerService extends IAccessibilityManager.Stub {
                 }
                 if (!mSecurityPolicy.computePartialInteractiveRegionForWindowLocked(
                         resolvedWindowId, partialInteractiveRegion)) {
+                    partialInteractiveRegion.recycle();
                     partialInteractiveRegion = null;
                 }
             }
@@ -2445,6 +2510,10 @@ public class AccessibilityManagerService extends IAccessibilityManager.Stub {
                 }
             } finally {
                 Binder.restoreCallingIdentity(identityToken);
+                // Recycle if passed to another process.
+                if (partialInteractiveRegion != null && Binder.isProxy(connection)) {
+                    partialInteractiveRegion.recycle();
+                }
             }
             return false;
         }
@@ -3110,6 +3179,7 @@ public class AccessibilityManagerService extends IAccessibilityManager.Stub {
                 case WindowManager.LayoutParams.TYPE_APPLICATION_PANEL:
                 case WindowManager.LayoutParams.TYPE_APPLICATION_STARTING:
                 case WindowManager.LayoutParams.TYPE_APPLICATION_SUB_PANEL:
+                case WindowManager.LayoutParams.TYPE_APPLICATION_ABOVE_SUB_PANEL:
                 case WindowManager.LayoutParams.TYPE_BASE_APPLICATION:
                 case WindowManager.LayoutParams.TYPE_PHONE:
                 case WindowManager.LayoutParams.TYPE_PRIORITY_PHONE:
@@ -3193,8 +3263,7 @@ public class AccessibilityManagerService extends IAccessibilityManager.Stub {
                 // Clip to the window bounds.
                 Rect windowBounds = mTempRect1;
                 getWindowBounds(focus.getWindowId(), windowBounds);
-                boundsInScreen.intersect(windowBounds);
-                if (boundsInScreen.isEmpty()) {
+                if (!boundsInScreen.intersect(windowBounds)) {
                     return false;
                 }
 
@@ -3208,8 +3277,7 @@ public class AccessibilityManagerService extends IAccessibilityManager.Stub {
                 // Clip to the screen bounds.
                 Point screenSize = mTempPoint;
                 mDefaultDisplay.getRealSize(screenSize);
-                boundsInScreen.intersect(0, 0, screenSize.x, screenSize.y);
-                if (boundsInScreen.isEmpty()) {
+                if (!boundsInScreen.intersect(0, 0, screenSize.x, screenSize.y)) {
                     return false;
                 }
 
@@ -3283,6 +3351,8 @@ public class AccessibilityManagerService extends IAccessibilityManager.Stub {
                 case AccessibilityEvent.TYPE_TOUCH_INTERACTION_END:
                 case AccessibilityEvent.TYPE_VIEW_HOVER_ENTER:
                 case AccessibilityEvent.TYPE_VIEW_HOVER_EXIT:
+                // Also always dispatch the event that assist is reading context.
+                case AccessibilityEvent.TYPE_ASSIST_READING_CONTEXT:
                 // Also windows changing should always be anounced.
                 case AccessibilityEvent.TYPE_WINDOWS_CHANGED: {
                     return true;

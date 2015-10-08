@@ -71,6 +71,7 @@ static int usb_device_added(const char *devname, void* client_data) {
 
     char *manufacturer = usb_device_get_manufacturer_name(device);
     char *product = usb_device_get_product_name(device);
+    int version = usb_device_get_version(device);
     char *serial = usb_device_get_serial(device);
 
     jstring deviceName = env->NewStringUTF(devname);
@@ -81,7 +82,7 @@ static int usb_device_added(const char *devname, void* client_data) {
     jboolean result = env->CallBooleanMethod(thiz, method_beginUsbDeviceAdded,
             deviceName, usb_device_get_vendor_id(device), usb_device_get_product_id(device),
             deviceDesc->bDeviceClass, deviceDesc->bDeviceSubClass, deviceDesc->bDeviceProtocol,
-            manufacturerName, productName, serialNumber);
+            manufacturerName, productName, version, serialNumber);
 
     env->DeleteLocalRef(serialNumber);
     env->DeleteLocalRef(productName);
@@ -148,7 +149,7 @@ static int usb_device_removed(const char *devname, void* client_data) {
     return 0;
 }
 
-static void android_server_UsbHostManager_monitorUsbHostBus(JNIEnv *env, jobject thiz)
+static void android_server_UsbHostManager_monitorUsbHostBus(JNIEnv* /* env */, jobject thiz)
 {
     struct usb_host_context* context = usb_host_init();
     if (!context) {
@@ -159,7 +160,8 @@ static void android_server_UsbHostManager_monitorUsbHostBus(JNIEnv *env, jobject
     usb_host_run(context, usb_device_added, usb_device_removed, NULL, (void *)thiz);
 }
 
-static jobject android_server_UsbHostManager_openDevice(JNIEnv *env, jobject thiz, jstring deviceName)
+static jobject android_server_UsbHostManager_openDevice(JNIEnv *env, jobject /* thiz */,
+                                                        jstring deviceName)
 {
     const char *deviceNameStr = env->GetStringUTFChars(deviceName, NULL);
     struct usb_device* device = usb_device_open(deviceNameStr);
@@ -198,7 +200,7 @@ int register_android_server_UsbHostManager(JNIEnv *env)
         return -1;
     }
     method_beginUsbDeviceAdded = env->GetMethodID(clazz, "beginUsbDeviceAdded",
-            "(Ljava/lang/String;IIIIILjava/lang/String;Ljava/lang/String;Ljava/lang/String;)Z");
+            "(Ljava/lang/String;IIIIILjava/lang/String;Ljava/lang/String;ILjava/lang/String;)Z");
     if (method_beginUsbDeviceAdded == NULL) {
         ALOGE("Can't find beginUsbDeviceAdded");
         return -1;

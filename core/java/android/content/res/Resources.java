@@ -16,33 +16,52 @@
 
 package android.content.res;
 
-import android.animation.Animator;
-import android.animation.StateListAnimator;
-import android.annotation.NonNull;
-import android.util.Pools.SynchronizedPool;
-import android.view.ViewDebug;
+import android.annotation.AttrRes;
+import android.annotation.ColorInt;
+import android.annotation.StyleRes;
+import android.annotation.StyleableRes;
+import com.android.internal.util.GrowingArrayUtils;
 import com.android.internal.util.XmlUtils;
 
 import org.xmlpull.v1.XmlPullParser;
 import org.xmlpull.v1.XmlPullParserException;
 
+import android.animation.Animator;
+import android.animation.StateListAnimator;
+import android.annotation.AnimRes;
+import android.annotation.AnyRes;
+import android.annotation.ArrayRes;
+import android.annotation.BoolRes;
+import android.annotation.ColorRes;
+import android.annotation.DimenRes;
+import android.annotation.DrawableRes;
+import android.annotation.FractionRes;
+import android.annotation.IntegerRes;
+import android.annotation.LayoutRes;
+import android.annotation.NonNull;
 import android.annotation.Nullable;
+import android.annotation.PluralsRes;
+import android.annotation.RawRes;
+import android.annotation.StringRes;
+import android.annotation.XmlRes;
 import android.content.pm.ActivityInfo;
 import android.graphics.Movie;
-import android.graphics.drawable.Drawable;
 import android.graphics.drawable.ColorDrawable;
+import android.graphics.drawable.Drawable;
 import android.graphics.drawable.Drawable.ConstantState;
 import android.os.Build;
 import android.os.Bundle;
-import android.os.IBinder;
 import android.os.Trace;
 import android.util.ArrayMap;
 import android.util.AttributeSet;
 import android.util.DisplayMetrics;
 import android.util.Log;
+import android.util.LongSparseArray;
+import android.util.Pools.SynchronizedPool;
 import android.util.Slog;
 import android.util.TypedValue;
-import android.util.LongSparseArray;
+import android.view.ViewDebug;
+import android.view.ViewHierarchyEncoder;
 
 import java.io.IOException;
 import java.io.InputStream;
@@ -96,12 +115,15 @@ public class Resources {
     // single-threaded, and after that these are immutable.
     private static final LongSparseArray<ConstantState>[] sPreloadedDrawables;
     private static final LongSparseArray<ConstantState> sPreloadedColorDrawables
-            = new LongSparseArray<ConstantState>();
-    private static final LongSparseArray<ColorStateList> sPreloadedColorStateLists
-            = new LongSparseArray<ColorStateList>();
+            = new LongSparseArray<>();
+    private static final LongSparseArray<android.content.res.ConstantState<ColorStateList>>
+            sPreloadedColorStateLists = new LongSparseArray<>();
+
+    private static final String CACHE_NOT_THEMED = "";
+    private static final String CACHE_NULL_THEME = "null_theme";
 
     // Pool of TypedArrays targeted to this Resources object.
-    final SynchronizedPool<TypedArray> mTypedArrayPool = new SynchronizedPool<TypedArray>(5);
+    final SynchronizedPool<TypedArray> mTypedArrayPool = new SynchronizedPool<>(5);
 
     // Used by BridgeResources in layoutlib
     static Resources mSystem = null;
@@ -112,21 +134,17 @@ public class Resources {
     // These are protected by mAccessLock.
     private final Object mAccessLock = new Object();
     private final Configuration mTmpConfig = new Configuration();
-    private final ArrayMap<String, LongSparseArray<WeakReference<ConstantState>>> mDrawableCache =
-            new ArrayMap<String, LongSparseArray<WeakReference<ConstantState>>>();
-    private final ArrayMap<String, LongSparseArray<WeakReference<ConstantState>>> mColorDrawableCache =
-            new ArrayMap<String, LongSparseArray<WeakReference<ConstantState>>>();
-    private final LongSparseArray<WeakReference<ColorStateList>> mColorStateListCache =
-            new LongSparseArray<WeakReference<ColorStateList>>();
+    private final DrawableCache mDrawableCache = new DrawableCache(this);
+    private final DrawableCache mColorDrawableCache = new DrawableCache(this);
+    private final ConfigurationBoundResourceCache<ColorStateList> mColorStateListCache =
+            new ConfigurationBoundResourceCache<>(this);
     private final ConfigurationBoundResourceCache<Animator> mAnimatorCache =
-            new ConfigurationBoundResourceCache<Animator>(this);
+            new ConfigurationBoundResourceCache<>(this);
     private final ConfigurationBoundResourceCache<StateListAnimator> mStateListAnimatorCache =
-            new ConfigurationBoundResourceCache<StateListAnimator>(this);
+            new ConfigurationBoundResourceCache<>(this);
 
     private TypedValue mTmpValue = new TypedValue();
     private boolean mPreloading;
-
-    private TypedArray mCachedStyledAttributes = null;
 
     private int mLastCachedXmlBlockIndex = -1;
     private final int[] mCachedXmlBlockIds = { 0, 0, 0, 0 };
@@ -140,13 +158,10 @@ public class Resources {
 
     private CompatibilityInfo mCompatibilityInfo = CompatibilityInfo.DEFAULT_COMPATIBILITY_INFO;
 
-    @SuppressWarnings("unused")
-    private WeakReference<IBinder> mToken;
-
     static {
         sPreloadedDrawables = new LongSparseArray[2];
-        sPreloadedDrawables[0] = new LongSparseArray<ConstantState>();
-        sPreloadedDrawables[1] = new LongSparseArray<ConstantState>();
+        sPreloadedDrawables[0] = new LongSparseArray<>();
+        sPreloadedDrawables[1] = new LongSparseArray<>();
     }
 
     /**
@@ -223,46 +238,44 @@ public class Resources {
     /**
      * Create a new Resources object on top of an existing set of assets in an
      * AssetManager.
-     * 
-     * @param assets Previously created AssetManager. 
-     * @param metrics Current display metrics to consider when 
+     *
+     * @param assets Previously created AssetManager.
+     * @param metrics Current display metrics to consider when
      *                selecting/computing resource values.
-     * @param config Desired device configuration to consider when 
+     * @param config Desired device configuration to consider when
      *               selecting/computing resource values (optional).
      */
     public Resources(AssetManager assets, DisplayMetrics metrics, Configuration config) {
-        this(assets, metrics, config, CompatibilityInfo.DEFAULT_COMPATIBILITY_INFO, null);
+        this(assets, metrics, config, CompatibilityInfo.DEFAULT_COMPATIBILITY_INFO);
     }
 
     /**
      * Creates a new Resources object with CompatibilityInfo.
-     * 
-     * @param assets Previously created AssetManager. 
-     * @param metrics Current display metrics to consider when 
+     *
+     * @param assets Previously created AssetManager.
+     * @param metrics Current display metrics to consider when
      *                selecting/computing resource values.
-     * @param config Desired device configuration to consider when 
+     * @param config Desired device configuration to consider when
      *               selecting/computing resource values (optional).
      * @param compatInfo this resource's compatibility info. Must not be null.
-     * @param token The Activity token for determining stack affiliation. Usually null.
      * @hide
      */
     public Resources(AssetManager assets, DisplayMetrics metrics, Configuration config,
-            CompatibilityInfo compatInfo, IBinder token) {
+            CompatibilityInfo compatInfo) {
         mAssets = assets;
         mMetrics.setToDefaults();
         if (compatInfo != null) {
             mCompatibilityInfo = compatInfo;
         }
-        mToken = new WeakReference<IBinder>(token);
         updateConfiguration(config, metrics);
         assets.ensureStringBlocks();
     }
 
     /**
      * Return a global shared Resources object that provides access to only
-     * system resources (no application resources), and is not configured for 
-     * the current screen (can not use dimension units, does not change based 
-     * on orientation, etc). 
+     * system resources (no application resources), and is not configured for
+     * the current screen (can not use dimension units, does not change based
+     * on orientation, etc).
      */
     public static Resources getSystem() {
         synchronized (sSync) {
@@ -291,7 +304,7 @@ public class Resources {
      * @return CharSequence The string data associated with the resource, plus
      *         possibly styled text information.
      */
-    public CharSequence getText(int id) throws NotFoundException {
+    public CharSequence getText(@StringRes int id) throws NotFoundException {
         CharSequence res = mAssets.getResourceText(id);
         if (res != null) {
             return res;
@@ -320,7 +333,8 @@ public class Resources {
      * @return CharSequence The string data associated with the resource, plus
      *         possibly styled text information.
      */
-    public CharSequence getQuantityText(int id, int quantity) throws NotFoundException {
+    public CharSequence getQuantityText(@PluralsRes int id, int quantity)
+            throws NotFoundException {
         NativePluralRules rule = getPluralRule();
         CharSequence res = mAssets.getResourceBagText(id,
                 attrForQuantityCode(rule.quantityForInt(quantity)));
@@ -379,10 +393,11 @@ public class Resources {
      * @throws NotFoundException Throws NotFoundException if the given ID does not exist.
      *
      * @return String The string data associated with the resource,
-     * stripped of styled text information.
+     *         stripped of styled text information.
      */
-    public String getString(int id) throws NotFoundException {
-        CharSequence res = getText(id);
+    @NonNull
+    public String getString(@StringRes int id) throws NotFoundException {
+        final CharSequence res = getText(id);
         if (res != null) {
             return res.toString();
         }
@@ -407,10 +422,11 @@ public class Resources {
      * @throws NotFoundException Throws NotFoundException if the given ID does not exist.
      *
      * @return String The string data associated with the resource,
-     * stripped of styled text information.
+     *         stripped of styled text information.
      */
-    public String getString(int id, Object... formatArgs) throws NotFoundException {
-        String raw = getString(id);
+    @NonNull
+    public String getString(@StringRes int id, Object... formatArgs) throws NotFoundException {
+        final String raw = getString(id);
         return String.format(mConfiguration.locale, raw, formatArgs);
     }
 
@@ -439,7 +455,7 @@ public class Resources {
      * @return String The string data associated with the resource,
      * stripped of styled text information.
      */
-    public String getQuantityString(int id, int quantity, Object... formatArgs)
+    public String getQuantityString(@PluralsRes int id, int quantity, Object... formatArgs)
             throws NotFoundException {
         String raw = getQuantityText(id, quantity).toString();
         return String.format(mConfiguration.locale, raw, formatArgs);
@@ -465,7 +481,8 @@ public class Resources {
      * @return String The string data associated with the resource,
      * stripped of styled text information.
      */
-    public String getQuantityString(int id, int quantity) throws NotFoundException {
+    public String getQuantityString(@PluralsRes int id, int quantity)
+            throws NotFoundException {
         return getQuantityText(id, quantity).toString();
     }
 
@@ -483,7 +500,7 @@ public class Resources {
      * @return CharSequence The string data associated with the resource, plus
      *         possibly styled text information, or def if id is 0 or not found.
      */
-    public CharSequence getText(int id, CharSequence def) {
+    public CharSequence getText(@StringRes int id, CharSequence def) {
         CharSequence res = id != 0 ? mAssets.getResourceText(id) : null;
         return res != null ? res : def;
     }
@@ -499,7 +516,7 @@ public class Resources {
      *
      * @return The styled text array associated with the resource.
      */
-    public CharSequence[] getTextArray(int id) throws NotFoundException {
+    public CharSequence[] getTextArray(@ArrayRes int id) throws NotFoundException {
         CharSequence[] res = mAssets.getResourceTextArray(id);
         if (res != null) {
             return res;
@@ -519,7 +536,8 @@ public class Resources {
      *
      * @return The string array associated with the resource.
      */
-    public String[] getStringArray(int id) throws NotFoundException {
+    public String[] getStringArray(@ArrayRes int id)
+            throws NotFoundException {
         String[] res = mAssets.getResourceStringArray(id);
         if (res != null) {
             return res;
@@ -539,7 +557,7 @@ public class Resources {
      *
      * @return The int array associated with the resource.
      */
-    public int[] getIntArray(int id) throws NotFoundException {
+    public int[] getIntArray(@ArrayRes int id) throws NotFoundException {
         int[] res = mAssets.getArrayIntResource(id);
         if (res != null) {
             return res;
@@ -561,7 +579,8 @@ public class Resources {
      * Be sure to call {@link TypedArray#recycle() TypedArray.recycle()}
      * when done with it.
      */
-    public TypedArray obtainTypedArray(int id) throws NotFoundException {
+    public TypedArray obtainTypedArray(@ArrayRes int id)
+            throws NotFoundException {
         int len = mAssets.getArraySize(id);
         if (len < 0) {
             throw new NotFoundException("Array resource ID #0x"
@@ -592,7 +611,7 @@ public class Resources {
      * @see #getDimensionPixelOffset
      * @see #getDimensionPixelSize
      */
-    public float getDimension(int id) throws NotFoundException {
+    public float getDimension(@DimenRes int id) throws NotFoundException {
         synchronized (mAccessLock) {
             TypedValue value = mTmpValue;
             if (value == null) {
@@ -627,7 +646,7 @@ public class Resources {
      * @see #getDimension
      * @see #getDimensionPixelSize
      */
-    public int getDimensionPixelOffset(int id) throws NotFoundException {
+    public int getDimensionPixelOffset(@DimenRes int id) throws NotFoundException {
         synchronized (mAccessLock) {
             TypedValue value = mTmpValue;
             if (value == null) {
@@ -664,7 +683,7 @@ public class Resources {
      * @see #getDimension
      * @see #getDimensionPixelOffset
      */
-    public int getDimensionPixelSize(int id) throws NotFoundException {
+    public int getDimensionPixelSize(@DimenRes int id) throws NotFoundException {
         synchronized (mAccessLock) {
             TypedValue value = mTmpValue;
             if (value == null) {
@@ -698,7 +717,7 @@ public class Resources {
      *  
      * @throws NotFoundException Throws NotFoundException if the given ID does not exist.
      */
-    public float getFraction(int id, int base, int pbase) {
+    public float getFraction(@FractionRes int id, int base, int pbase) {
         synchronized (mAccessLock) {
             TypedValue value = mTmpValue;
             if (value == null) {
@@ -748,7 +767,7 @@ public class Resources {
      */
     @Deprecated
     @Nullable
-    public Drawable getDrawable(int id) throws NotFoundException {
+    public Drawable getDrawable(@DrawableRes int id) throws NotFoundException {
         final Drawable d = getDrawable(id, null);
         if (d != null && d.canApplyTheme()) {
             Log.w(TAG, "Drawable " + getResourceName(id) + " has unresolved theme "
@@ -773,7 +792,7 @@ public class Resources {
      *         not exist.
      */
     @Nullable
-    public Drawable getDrawable(int id, @Nullable Theme theme) throws NotFoundException {
+    public Drawable getDrawable(@DrawableRes int id, @Nullable Theme theme) throws NotFoundException {
         TypedValue value;
         synchronized (mAccessLock) {
             value = mTmpValue;
@@ -821,7 +840,7 @@ public class Resources {
      */
     @Deprecated
     @Nullable
-    public Drawable getDrawableForDensity(int id, int density) throws NotFoundException {
+    public Drawable getDrawableForDensity(@DrawableRes int id, int density) throws NotFoundException {
         return getDrawableForDensity(id, density, null);
     }
 
@@ -840,7 +859,7 @@ public class Resources {
      *             not exist.
      */
     @Nullable
-    public Drawable getDrawableForDensity(int id, int density, @Nullable Theme theme) {
+    public Drawable getDrawableForDensity(@DrawableRes int id, int density, @Nullable Theme theme) {
         TypedValue value;
         synchronized (mAccessLock) {
             value = mTmpValue;
@@ -884,7 +903,7 @@ public class Resources {
      * @throws NotFoundException Throws NotFoundException if the given ID does not exist.
      * 
      */
-    public Movie getMovie(int id) throws NotFoundException {
+    public Movie getMovie(@RawRes int id) throws NotFoundException {
         InputStream is = openRawResource(id);
         Movie movie = Movie.decodeStream(is);
         try {
@@ -897,20 +916,44 @@ public class Resources {
     }
 
     /**
-     * Return a color integer associated with a particular resource ID.
-     * If the resource holds a complex
-     * {@link android.content.res.ColorStateList}, then the default color from
-     * the set is returned.
+     * Returns a color integer associated with a particular resource ID. If the
+     * resource holds a complex {@link ColorStateList}, then the default color
+     * from the set is returned.
      *
      * @param id The desired resource identifier, as generated by the aapt
      *           tool. This integer encodes the package, type, and resource
      *           entry. The value 0 is an invalid identifier.
      *
-     * @throws NotFoundException Throws NotFoundException if the given ID does not exist.
+     * @throws NotFoundException Throws NotFoundException if the given ID does
+     *         not exist.
      *
-     * @return Returns a single color value in the form 0xAARRGGBB.
+     * @return A single color value in the form 0xAARRGGBB.
+     * @deprecated Use {@link #getColor(int, Theme)} instead.
      */
-    public int getColor(int id) throws NotFoundException {
+    @ColorInt
+    @Deprecated
+    public int getColor(@ColorRes int id) throws NotFoundException {
+        return getColor(id, null);
+    }
+
+    /**
+     * Returns a themed color integer associated with a particular resource ID.
+     * If the resource holds a complex {@link ColorStateList}, then the default
+     * color from the set is returned.
+     *
+     * @param id The desired resource identifier, as generated by the aapt
+     *           tool. This integer encodes the package, type, and resource
+     *           entry. The value 0 is an invalid identifier.
+     * @param theme The theme used to style the color attributes, may be
+     *              {@code null}.
+     *
+     * @throws NotFoundException Throws NotFoundException if the given ID does
+     *         not exist.
+     *
+     * @return A single color value in the form 0xAARRGGBB.
+     */
+    @ColorInt
+    public int getColor(@ColorRes int id, @Nullable Theme theme) throws NotFoundException {
         TypedValue value;
         synchronized (mAccessLock) {
             value = mTmpValue;
@@ -919,40 +962,78 @@ public class Resources {
             }
             getValue(id, value, true);
             if (value.type >= TypedValue.TYPE_FIRST_INT
-                && value.type <= TypedValue.TYPE_LAST_INT) {
+                    && value.type <= TypedValue.TYPE_LAST_INT) {
                 mTmpValue = value;
                 return value.data;
             } else if (value.type != TypedValue.TYPE_STRING) {
                 throw new NotFoundException(
-                    "Resource ID #0x" + Integer.toHexString(id) + " type #0x"
-                    + Integer.toHexString(value.type) + " is not valid");
+                        "Resource ID #0x" + Integer.toHexString(id) + " type #0x"
+                                + Integer.toHexString(value.type) + " is not valid");
             }
             mTmpValue = null;
         }
-        ColorStateList csl = loadColorStateList(value, id);
+
+        final ColorStateList csl = loadColorStateList(value, id, theme);
         synchronized (mAccessLock) {
             if (mTmpValue == null) {
                 mTmpValue = value;
             }
         }
+
         return csl.getDefaultColor();
     }
 
     /**
-     * Return a color state list associated with a particular resource ID.  The
-     * resource may contain either a single raw color value, or a complex
-     * {@link android.content.res.ColorStateList} holding multiple possible colors.
+     * Returns a color state list associated with a particular resource ID. The
+     * resource may contain either a single raw color value or a complex
+     * {@link ColorStateList} holding multiple possible colors.
      *
      * @param id The desired resource identifier of a {@link ColorStateList},
-     *        as generated by the aapt tool. This integer encodes the package, type, and resource
-     *        entry. The value 0 is an invalid identifier.
+     *           as generated by the aapt tool. This integer encodes the
+     *           package, type, and resource entry. The value 0 is an invalid
+     *           identifier.
      *
-     * @throws NotFoundException Throws NotFoundException if the given ID does not exist.
+     * @throws NotFoundException Throws NotFoundException if the given ID does
+     *         not exist.
      *
-     * @return Returns a ColorStateList object containing either a single
-     * solid color or multiple colors that can be selected based on a state.
+     * @return A ColorStateList object containing either a single solid color
+     *         or multiple colors that can be selected based on a state.
+     * @deprecated Use {@link #getColorStateList(int, Theme)} instead.
      */
-    public ColorStateList getColorStateList(int id) throws NotFoundException {
+    @Nullable
+    @Deprecated
+    public ColorStateList getColorStateList(@ColorRes int id) throws NotFoundException {
+        final ColorStateList csl = getColorStateList(id, null);
+        if (csl != null && csl.canApplyTheme()) {
+            Log.w(TAG, "ColorStateList " + getResourceName(id) + " has "
+                    + "unresolved theme attributes! Consider using "
+                    + "Resources.getColorStateList(int, Theme) or "
+                    + "Context.getColorStateList(int).", new RuntimeException());
+        }
+        return csl;
+    }
+
+    /**
+     * Returns a themed color state list associated with a particular resource
+     * ID. The resource may contain either a single raw color value or a
+     * complex {@link ColorStateList} holding multiple possible colors.
+     *
+     * @param id The desired resource identifier of a {@link ColorStateList},
+     *           as generated by the aapt tool. This integer encodes the
+     *           package, type, and resource entry. The value 0 is an invalid
+     *           identifier.
+     * @param theme The theme used to style the color attributes, may be
+     *              {@code null}.
+     *
+     * @throws NotFoundException Throws NotFoundException if the given ID does
+     *         not exist.
+     *
+     * @return A themed ColorStateList object containing either a single solid
+     *         color or multiple colors that can be selected based on a state.
+     */
+    @Nullable
+    public ColorStateList getColorStateList(@ColorRes int id, @Nullable Theme theme)
+            throws NotFoundException {
         TypedValue value;
         synchronized (mAccessLock) {
             value = mTmpValue;
@@ -963,12 +1044,14 @@ public class Resources {
             }
             getValue(id, value, true);
         }
-        ColorStateList res = loadColorStateList(value, id);
+
+        final ColorStateList res = loadColorStateList(value, id, theme);
         synchronized (mAccessLock) {
             if (mTmpValue == null) {
                 mTmpValue = value;
             }
         }
+
         return res;
     }
 
@@ -985,7 +1068,7 @@ public class Resources {
      *
      * @return Returns the boolean value contained in the resource.
      */
-    public boolean getBoolean(int id) throws NotFoundException {
+    public boolean getBoolean(@BoolRes int id) throws NotFoundException {
         synchronized (mAccessLock) {
             TypedValue value = mTmpValue;
             if (value == null) {
@@ -1013,7 +1096,7 @@ public class Resources {
      *
      * @return Returns the integer value contained in the resource.
      */
-    public int getInteger(int id) throws NotFoundException {
+    public int getInteger(@IntegerRes int id) throws NotFoundException {
         synchronized (mAccessLock) {
             TypedValue value = mTmpValue;
             if (value == null) {
@@ -1078,7 +1161,7 @@ public class Resources {
      *         
      * @see #getXml
      */
-    public XmlResourceParser getLayout(int id) throws NotFoundException {
+    public XmlResourceParser getLayout(@LayoutRes int id) throws NotFoundException {
         return loadXmlResourceParser(id, "layout");
     }
 
@@ -1102,7 +1185,7 @@ public class Resources {
      *         
      * @see #getXml
      */
-    public XmlResourceParser getAnimation(int id) throws NotFoundException {
+    public XmlResourceParser getAnimation(@AnimRes int id) throws NotFoundException {
         return loadXmlResourceParser(id, "anim");
     }
 
@@ -1127,7 +1210,7 @@ public class Resources {
      *         
      * @see android.util.AttributeSet
      */
-    public XmlResourceParser getXml(int id) throws NotFoundException {
+    public XmlResourceParser getXml(@XmlRes int id) throws NotFoundException {
         return loadXmlResourceParser(id, "xml");
     }
 
@@ -1145,7 +1228,7 @@ public class Resources {
      * @throws NotFoundException Throws NotFoundException if the given ID does not exist.
      * 
      */
-    public InputStream openRawResource(int id) throws NotFoundException {
+    public InputStream openRawResource(@RawRes int id) throws NotFoundException {
         TypedValue value;
         synchronized (mAccessLock) {
             value = mTmpValue;
@@ -1177,7 +1260,8 @@ public class Resources {
      *
      * @throws NotFoundException Throws NotFoundException if the given ID does not exist.
      */
-    public InputStream openRawResource(int id, TypedValue value) throws NotFoundException {
+    public InputStream openRawResource(@RawRes int id, TypedValue value)
+            throws NotFoundException {
         getValue(id, value, true);
 
         try {
@@ -1212,7 +1296,8 @@ public class Resources {
      * @throws NotFoundException Throws NotFoundException if the given ID does not exist.
      * 
      */
-    public AssetFileDescriptor openRawResourceFd(int id) throws NotFoundException {
+    public AssetFileDescriptor openRawResourceFd(@RawRes int id)
+            throws NotFoundException {
         TypedValue value;
         synchronized (mAccessLock) {
             value = mTmpValue;
@@ -1257,7 +1342,7 @@ public class Resources {
      * @throws NotFoundException Throws NotFoundException if the given ID does not exist.
      *
      */
-    public void getValue(int id, TypedValue outValue, boolean resolveRefs)
+    public void getValue(@AnyRes int id, TypedValue outValue, boolean resolveRefs)
             throws NotFoundException {
         boolean found = mAssets.getResourceValue(id, 0, outValue, resolveRefs);
         if (found) {
@@ -1280,8 +1365,8 @@ public class Resources {
      *             not exist.
      * @see #getValue(String, TypedValue, boolean)
      */
-    public void getValueForDensity(int id, int density, TypedValue outValue, boolean resolveRefs)
-            throws NotFoundException {
+    public void getValueForDensity(@AnyRes int id, int density, TypedValue outValue,
+            boolean resolveRefs) throws NotFoundException {
         boolean found = mAssets.getResourceValue(id, density, outValue, resolveRefs);
         if (found) {
             return;
@@ -1356,7 +1441,7 @@ public class Resources {
             AssetManager.applyThemeStyle(mTheme, resId, force);
 
             mThemeResId = resId;
-            mKey += Integer.toHexString(resId) + (force ? "! " : " ");
+            mKey.append(resId, force);
         }
 
         /**
@@ -1372,7 +1457,7 @@ public class Resources {
             AssetManager.copyTheme(mTheme, other.mTheme);
 
             mThemeResId = other.mThemeResId;
-            mKey = other.mKey;
+            mKey.setTo(other.getKey());
         }
 
         /**
@@ -1394,7 +1479,7 @@ public class Resources {
          * @see #obtainStyledAttributes(int, int[])
          * @see #obtainStyledAttributes(AttributeSet, int[], int, int)
          */
-        public TypedArray obtainStyledAttributes(int[] attrs) {
+        public TypedArray obtainStyledAttributes(@StyleableRes int[] attrs) {
             final int len = attrs.length;
             final TypedArray array = TypedArray.obtain(Resources.this, len);
             array.mTheme = this;
@@ -1422,7 +1507,8 @@ public class Resources {
          * @see #obtainStyledAttributes(int[])
          * @see #obtainStyledAttributes(AttributeSet, int[], int, int)
          */
-        public TypedArray obtainStyledAttributes(int resid, int[] attrs) throws NotFoundException {
+        public TypedArray obtainStyledAttributes(@StyleRes int resid, @StyleableRes int[] attrs)
+                throws NotFoundException {
             final int len = attrs.length;
             final TypedArray array = TypedArray.obtain(Resources.this, len);
             array.mTheme = this;
@@ -1505,7 +1591,7 @@ public class Resources {
          * @see #obtainStyledAttributes(int, int[])
          */
         public TypedArray obtainStyledAttributes(AttributeSet set,
-                int[] attrs, int defStyleAttr, int defStyleRes) {
+                @StyleableRes int[] attrs, @AttrRes int defStyleAttr, @StyleRes int defStyleRes) {
             final int len = attrs.length;
             final TypedArray array = TypedArray.obtain(Resources.this, len);
 
@@ -1640,8 +1726,21 @@ public class Resources {
          * @throws NotFoundException Throws NotFoundException if the given ID
          *         does not exist.
          */
-        public Drawable getDrawable(int id) throws NotFoundException {
+        public Drawable getDrawable(@DrawableRes int id) throws NotFoundException {
             return Resources.this.getDrawable(id, this);
+        }
+
+        /**
+         * Returns a bit mask of configuration changes that will impact this
+         * theme (and thus require completely reloading it).
+         *
+         * @return a bit mask of configuration changes, as defined by
+         *         {@link ActivityInfo}
+         * @see ActivityInfo
+         */
+        public int getChangingConfigurations() {
+            final int nativeChangingConfig = AssetManager.getThemeChangingConfigurations(mTheme);
+            return ActivityInfo.activityInfoConfigNativeToJava(nativeChangingConfig);
         }
 
         /**
@@ -1666,15 +1765,15 @@ public class Resources {
             mTheme = mAssets.createTheme();
         }
 
+        /** Unique key for the series of styles applied to this theme. */
+        private final ThemeKey mKey = new ThemeKey();
+
         @SuppressWarnings("hiding")
         private final AssetManager mAssets;
         private final long mTheme;
 
         /** Resource identifier for the theme. */
         private int mThemeResId = 0;
-
-        /** Unique key for the series of styles applied to this theme. */
-        private String mKey = "";
 
         // Needed by layoutlib.
         /*package*/ long getNativeTheme() {
@@ -1685,7 +1784,7 @@ public class Resources {
             return mThemeResId;
         }
 
-        /*package*/ String getKey() {
+        /*package*/ ThemeKey getKey() {
             return mKey;
         }
 
@@ -1694,28 +1793,133 @@ public class Resources {
         }
 
         /**
-         * Parses {@link #mKey} and returns a String array that holds pairs of adjacent Theme data:
-         * resource name followed by whether or not it was forced, as specified by
-         * {@link #applyStyle(int, boolean)}.
+         * Parses {@link #mKey} and returns a String array that holds pairs of
+         * adjacent Theme data: resource name followed by whether or not it was
+         * forced, as specified by {@link #applyStyle(int, boolean)}.
          *
          * @hide
          */
         @ViewDebug.ExportedProperty(category = "theme", hasAdjacentMapping = true)
         public String[] getTheme() {
-            String[] themeData = mKey.split(" ");
-            String[] themes = new String[themeData.length * 2];
-            String theme;
-            boolean forced;
-
-            for (int i = 0, j = themeData.length - 1; i < themes.length; i += 2, --j) {
-                theme = themeData[j];
-                forced = theme.endsWith("!");
-                themes[i] = forced ?
-                        getResourceNameFromHexString(theme.substring(0, theme.length() - 1)) :
-                        getResourceNameFromHexString(theme);
+            final int N = mKey.mCount;
+            final String[] themes = new String[N * 2];
+            for (int i = 0, j = N - 1; i < themes.length; i += 2, --j) {
+                final int resId = mKey.mResId[j];
+                final boolean forced = mKey.mForce[j];
+                try {
+                    themes[i] = getResourceName(resId);
+                } catch (NotFoundException e) {
+                    themes[i] = Integer.toHexString(i);
+                }
                 themes[i + 1] = forced ? "forced" : "not forced";
             }
             return themes;
+        }
+
+        /** @hide */
+        public void encode(@NonNull ViewHierarchyEncoder encoder) {
+            encoder.beginObject(this);
+            final String[] properties = getTheme();
+            for (int i = 0; i < properties.length; i += 2) {
+                encoder.addProperty(properties[i], properties[i+1]);
+            }
+            encoder.endObject();
+        }
+
+        /**
+         * Rebases the theme against the parent Resource object's current
+         * configuration by re-applying the styles passed to
+         * {@link #applyStyle(int, boolean)}.
+         *
+         * @hide
+         */
+        public void rebase() {
+            AssetManager.clearTheme(mTheme);
+
+            // Reapply the same styles in the same order.
+            for (int i = 0; i < mKey.mCount; i++) {
+                final int resId = mKey.mResId[i];
+                final boolean force = mKey.mForce[i];
+                AssetManager.applyThemeStyle(mTheme, resId, force);
+            }
+        }
+    }
+
+    static class ThemeKey implements Cloneable {
+        int[] mResId;
+        boolean[] mForce;
+        int mCount;
+
+        private int mHashCode = 0;
+
+        public void append(int resId, boolean force) {
+            if (mResId == null) {
+                mResId = new int[4];
+            }
+
+            if (mForce == null) {
+                mForce = new boolean[4];
+            }
+
+            mResId = GrowingArrayUtils.append(mResId, mCount, resId);
+            mForce = GrowingArrayUtils.append(mForce, mCount, force);
+            mCount++;
+
+            mHashCode = 31 * (31 * mHashCode + resId) + (force ? 1 : 0);
+        }
+
+        /**
+         * Sets up this key as a deep copy of another key.
+         *
+         * @param other the key to deep copy into this key
+         */
+        public void setTo(ThemeKey other) {
+            mResId = other.mResId == null ? null : other.mResId.clone();
+            mForce = other.mForce == null ? null : other.mForce.clone();
+            mCount = other.mCount;
+        }
+
+        @Override
+        public int hashCode() {
+            return mHashCode;
+        }
+
+        @Override
+        public boolean equals(Object o) {
+            if (this == o) {
+                return true;
+            }
+
+            if (o == null || getClass() != o.getClass() || hashCode() != o.hashCode()) {
+                return false;
+            }
+
+            final ThemeKey t = (ThemeKey) o;
+            if (mCount != t.mCount) {
+                return false;
+            }
+
+            final int N = mCount;
+            for (int i = 0; i < N; i++) {
+                if (mResId[i] != t.mResId[i] || mForce[i] != t.mForce[i]) {
+                    return false;
+                }
+            }
+
+            return true;
+        }
+
+        /**
+         * @return a shallow copy of this key
+         */
+        @Override
+        public ThemeKey clone() {
+            final ThemeKey other = new ThemeKey();
+            other.mResId = mResId;
+            other.mForce = mForce;
+            other.mCount = mCount;
+            other.mHashCode = mHashCode;
+            return other;
         }
     }
 
@@ -1795,7 +1999,7 @@ public class Resources {
             // the framework.
             mCompatibilityInfo.applyToDisplayMetrics(mMetrics);
 
-            int configChanges = calcConfigChanges(config);
+            final int configChanges = calcConfigChanges(config);
             if (mConfiguration.locale == null) {
                 mConfiguration.locale = Locale.getDefault();
                 mConfiguration.setLayoutDirection(mConfiguration.locale);
@@ -1810,7 +2014,8 @@ public class Resources {
             if (mConfiguration.locale != null) {
                 locale = adjustLanguageTag(mConfiguration.locale.toLanguageTag());
             }
-            int width, height;
+
+            final int width, height;
             if (mMetrics.widthPixels >= mMetrics.heightPixels) {
                 width = mMetrics.widthPixels;
                 height = mMetrics.heightPixels;
@@ -1820,12 +2025,15 @@ public class Resources {
                 //noinspection SuspiciousNameCombination
                 height = mMetrics.widthPixels;
             }
-            int keyboardHidden = mConfiguration.keyboardHidden;
-            if (keyboardHidden == Configuration.KEYBOARDHIDDEN_NO
-                    && mConfiguration.hardKeyboardHidden
-                            == Configuration.HARDKEYBOARDHIDDEN_YES) {
+
+            final int keyboardHidden;
+            if (mConfiguration.keyboardHidden == Configuration.KEYBOARDHIDDEN_NO
+                    && mConfiguration.hardKeyboardHidden == Configuration.HARDKEYBOARDHIDDEN_YES) {
                 keyboardHidden = Configuration.KEYBOARDHIDDEN_SOFT;
+            } else {
+                keyboardHidden = mConfiguration.keyboardHidden;
             }
+
             mAssets.setConfiguration(mConfiguration.mcc, mConfiguration.mnc,
                     locale, mConfiguration.orientation,
                     mConfiguration.touchscreen,
@@ -1841,12 +2049,11 @@ public class Resources {
                         + " final compat is " + mCompatibilityInfo);
             }
 
-            clearDrawableCachesLocked(mDrawableCache, configChanges);
-            clearDrawableCachesLocked(mColorDrawableCache, configChanges);
+            mDrawableCache.onConfigurationChange(configChanges);
+            mColorDrawableCache.onConfigurationChange(configChanges);
+            mColorStateListCache.onConfigurationChange(configChanges);
             mAnimatorCache.onConfigurationChange(configChanges);
             mStateListAnimatorCache.onConfigurationChange(configChanges);
-
-            mColorStateListCache.clear();
 
             flushLayoutCache();
         }
@@ -1879,48 +2086,6 @@ public class Resources {
             configChanges = ActivityInfo.activityInfoConfigToNative(configChanges);
         }
         return configChanges;
-    }
-
-    private void clearDrawableCachesLocked(
-            ArrayMap<String, LongSparseArray<WeakReference<ConstantState>>> caches,
-            int configChanges) {
-        final int N = caches.size();
-        for (int i = 0; i < N; i++) {
-            clearDrawableCacheLocked(caches.valueAt(i), configChanges);
-        }
-    }
-
-    private void clearDrawableCacheLocked(
-            LongSparseArray<WeakReference<ConstantState>> cache, int configChanges) {
-        if (DEBUG_CONFIG) {
-            Log.d(TAG, "Cleaning up drawables config changes: 0x"
-                    + Integer.toHexString(configChanges));
-        }
-        final int N = cache.size();
-        for (int i = 0; i < N; i++) {
-            final WeakReference<ConstantState> ref = cache.valueAt(i);
-            if (ref != null) {
-                final ConstantState cs = ref.get();
-                if (cs != null) {
-                    if (Configuration.needNewResources(
-                            configChanges, cs.getChangingConfigurations())) {
-                        if (DEBUG_CONFIG) {
-                            Log.d(TAG, "FLUSHING #0x"
-                                    + Long.toHexString(cache.keyAt(i))
-                                    + " / " + cs + " with changes: 0x"
-                                    + Integer.toHexString(cs.getChangingConfigurations()));
-                        }
-                        cache.setValueAt(i, null);
-                    } else if (DEBUG_CONFIG) {
-                        Log.d(TAG, "(Keeping #0x"
-                                + Long.toHexString(cache.keyAt(i))
-                                + " / " + cs + " with changes: 0x"
-                                + Integer.toHexString(cs.getChangingConfigurations())
-                                + ")");
-                    }
-                }
-            }
-        }
     }
 
     /**
@@ -2046,7 +2211,7 @@ public class Resources {
      *
      * @hide
      */
-    public static boolean resourceHasPackage(int resid) {
+    public static boolean resourceHasPackage(@AnyRes int resid) {
         return (resid >>> 24) != 0;
     }
 
@@ -2064,7 +2229,7 @@ public class Resources {
      * @see #getResourceTypeName
      * @see #getResourceEntryName
      */
-    public String getResourceName(int resid) throws NotFoundException {
+    public String getResourceName(@AnyRes int resid) throws NotFoundException {
         String str = mAssets.getResourceName(resid);
         if (str != null) return str;
         throw new NotFoundException("Unable to find resource ID #0x"
@@ -2083,7 +2248,7 @@ public class Resources {
      * 
      * @see #getResourceName
      */
-    public String getResourcePackageName(int resid) throws NotFoundException {
+    public String getResourcePackageName(@AnyRes int resid) throws NotFoundException {
         String str = mAssets.getResourcePackageName(resid);
         if (str != null) return str;
         throw new NotFoundException("Unable to find resource ID #0x"
@@ -2102,7 +2267,7 @@ public class Resources {
      * 
      * @see #getResourceName
      */
-    public String getResourceTypeName(int resid) throws NotFoundException {
+    public String getResourceTypeName(@AnyRes int resid) throws NotFoundException {
         String str = mAssets.getResourceTypeName(resid);
         if (str != null) return str;
         throw new NotFoundException("Unable to find resource ID #0x"
@@ -2121,7 +2286,7 @@ public class Resources {
      * 
      * @see #getResourceName
      */
-    public String getResourceEntryName(int resid) throws NotFoundException {
+    public String getResourceEntryName(@AnyRes int resid) throws NotFoundException {
         String str = mAssets.getResourceEntryName(resid);
         if (str != null) return str;
         throw new NotFoundException("Unable to find resource ID #0x"
@@ -2322,7 +2487,8 @@ public class Resources {
         return true;
     }
 
-    /*package*/ Drawable loadDrawable(TypedValue value, int id, Theme theme) throws NotFoundException {
+    @Nullable
+    Drawable loadDrawable(TypedValue value, int id, Theme theme) throws NotFoundException {
         if (TRACE_FOR_PRELOAD) {
             // Log only framework resources
             if ((id >>> 24) == 0x1) {
@@ -2334,7 +2500,7 @@ public class Resources {
         }
 
         final boolean isColorDrawable;
-        final ArrayMap<String, LongSparseArray<WeakReference<ConstantState>>> caches;
+        final DrawableCache caches;
         final long key;
         if (value.type >= TypedValue.TYPE_FIRST_COLOR_INT
                 && value.type <= TypedValue.TYPE_LAST_COLOR_INT) {
@@ -2350,14 +2516,14 @@ public class Resources {
         // First, check whether we have a cached version of this drawable
         // that was inflated against the specified theme.
         if (!mPreloading) {
-            final Drawable cachedDrawable = getCachedDrawable(caches, key, theme);
+            final Drawable cachedDrawable = caches.getInstance(key, theme);
             if (cachedDrawable != null) {
                 return cachedDrawable;
             }
         }
 
-        // Next, check preloaded drawables. These are unthemed but may have
-        // themeable attributes.
+        // Next, check preloaded drawables. These may contain unresolved theme
+        // attributes.
         final ConstantState cs;
         if (isColorDrawable) {
             cs = sPreloadedColorDrawables.get(key);
@@ -2365,42 +2531,43 @@ public class Resources {
             cs = sPreloadedDrawables[mConfiguration.getLayoutDirection()].get(key);
         }
 
-        final Drawable dr;
+        Drawable dr;
         if (cs != null) {
-            final Drawable clonedDr = cs.newDrawable(this);
-            if (theme != null) {
-                dr = clonedDr.mutate();
-                dr.applyTheme(theme);
-                dr.clearMutated();
-            } else {
-                dr = clonedDr;
-            }
+            dr = cs.newDrawable(this);
         } else if (isColorDrawable) {
             dr = new ColorDrawable(value.data);
         } else {
-            dr = loadDrawableForCookie(value, id, theme);
+            dr = loadDrawableForCookie(value, id, null);
+        }
+
+        // Determine if the drawable has unresolved theme attributes. If it
+        // does, we'll need to apply a theme and store it in a theme-specific
+        // cache.
+        final boolean canApplyTheme = dr != null && dr.canApplyTheme();
+        if (canApplyTheme && theme != null) {
+            dr = dr.mutate();
+            dr.applyTheme(theme);
+            dr.clearMutated();
         }
 
         // If we were able to obtain a drawable, store it in the appropriate
-        // cache (either preload or themed).
+        // cache: preload, not themed, null theme, or theme-specific.
         if (dr != null) {
             dr.setChangingConfigurations(value.changingConfigurations);
-            cacheDrawable(value, theme, isColorDrawable, caches, key, dr);
+            cacheDrawable(value, isColorDrawable, caches, theme, canApplyTheme, key, dr);
         }
 
         return dr;
     }
 
-    private void cacheDrawable(TypedValue value, Theme theme, boolean isColorDrawable,
-            ArrayMap<String, LongSparseArray<WeakReference<ConstantState>>> caches,
-            long key, Drawable dr) {
+    private void cacheDrawable(TypedValue value, boolean isColorDrawable, DrawableCache caches,
+            Theme theme, boolean usesTheme, long key, Drawable dr) {
         final ConstantState cs = dr.getConstantState();
         if (cs == null) {
             return;
         }
 
         if (mPreloading) {
-            // Preloaded drawables never have a theme, but may be themeable.
             final int changingConfigs = cs.getChangingConfigurations();
             if (isColorDrawable) {
                 if (verifyPreloadConfig(changingConfigs, 0, value.resourceId, "drawable")) {
@@ -2422,13 +2589,7 @@ public class Resources {
             }
         } else {
             synchronized (mAccessLock) {
-                final String themeKey = theme == null ? "" : theme.mKey;
-                LongSparseArray<WeakReference<ConstantState>> themedCache = caches.get(themeKey);
-                if (themedCache == null) {
-                    themedCache = new LongSparseArray<WeakReference<ConstantState>>(1);
-                    caches.put(themeKey, themedCache);
-                }
-                themedCache.put(key, new WeakReference<ConstantState>(cs));
+                caches.put(key, theme, cs, usesTheme);
             }
         }
     }
@@ -2439,7 +2600,7 @@ public class Resources {
     private Drawable loadDrawableForCookie(TypedValue value, int id, Theme theme) {
         if (value.string == null) {
             throw new NotFoundException("Resource \"" + getResourceName(id) + "\" ("
-                    + Integer.toHexString(id) + ")  is not a Drawable (color or path): " + value);
+                    + Integer.toHexString(id) + ") is not a Drawable (color or path): " + value);
         }
 
         final String file = value.string.toString();
@@ -2486,51 +2647,8 @@ public class Resources {
         return dr;
     }
 
-    private Drawable getCachedDrawable(
-            ArrayMap<String, LongSparseArray<WeakReference<ConstantState>>> caches,
-            long key, Theme theme) {
-        synchronized (mAccessLock) {
-            final String themeKey = theme != null ? theme.mKey : "";
-            final LongSparseArray<WeakReference<ConstantState>> themedCache = caches.get(themeKey);
-            if (themedCache != null) {
-                final Drawable themedDrawable = getCachedDrawableLocked(themedCache, key);
-                if (themedDrawable != null) {
-                    return themedDrawable;
-                }
-            }
-
-            // No cached drawable, we'll need to create a new one.
-            return null;
-        }
-    }
-
-    private ConstantState getConstantStateLocked(
-            LongSparseArray<WeakReference<ConstantState>> drawableCache, long key) {
-        final WeakReference<ConstantState> wr = drawableCache.get(key);
-        if (wr != null) {   // we have the key
-            final ConstantState entry = wr.get();
-            if (entry != null) {
-                //Log.i(TAG, "Returning cached drawable @ #" +
-                //        Integer.toHexString(((Integer)key).intValue())
-                //        + " in " + this + ": " + entry);
-                return entry;
-            } else {  // our entry has been purged
-                drawableCache.delete(key);
-            }
-        }
-        return null;
-    }
-
-    private Drawable getCachedDrawableLocked(
-            LongSparseArray<WeakReference<ConstantState>> drawableCache, long key) {
-        final ConstantState entry = getConstantStateLocked(drawableCache, key);
-        if (entry != null) {
-            return entry.newDrawable(this);
-        }
-        return null;
-    }
-
-    /*package*/ ColorStateList loadColorStateList(TypedValue value, int id)
+    @Nullable
+    ColorStateList loadColorStateList(TypedValue value, int id, Theme theme)
             throws NotFoundException {
         if (TRACE_FOR_PRELOAD) {
             // Log only framework resources
@@ -2544,99 +2662,106 @@ public class Resources {
 
         ColorStateList csl;
 
-        if (value.type >= TypedValue.TYPE_FIRST_COLOR_INT &&
-                value.type <= TypedValue.TYPE_LAST_COLOR_INT) {
-
-            csl = sPreloadedColorStateLists.get(key);
-            if (csl != null) {
-                return csl;
+        // Handle inline color definitions.
+        if (value.type >= TypedValue.TYPE_FIRST_COLOR_INT
+                && value.type <= TypedValue.TYPE_LAST_COLOR_INT) {
+            final android.content.res.ConstantState<ColorStateList> factory =
+                    sPreloadedColorStateLists.get(key);
+            if (factory != null) {
+                return factory.newInstance();
             }
 
             csl = ColorStateList.valueOf(value.data);
+
             if (mPreloading) {
                 if (verifyPreloadConfig(value.changingConfigurations, 0, value.resourceId,
                         "color")) {
-                    sPreloadedColorStateLists.put(key, csl);
+                    sPreloadedColorStateLists.put(key, csl.getConstantState());
                 }
             }
 
             return csl;
         }
 
-        csl = getCachedColorStateList(key);
+        final ConfigurationBoundResourceCache<ColorStateList> cache = mColorStateListCache;
+        csl = cache.getInstance(key, theme);
         if (csl != null) {
             return csl;
         }
 
-        csl = sPreloadedColorStateLists.get(key);
-        if (csl != null) {
-            return csl;
+        final android.content.res.ConstantState<ColorStateList> factory =
+                sPreloadedColorStateLists.get(key);
+        if (factory != null) {
+            csl = factory.newInstance(this, theme);
         }
 
-        if (value.string == null) {
-            throw new NotFoundException(
-                    "Resource is not a ColorStateList (color or path): " + value);
-        }
-        
-        final String file = value.string.toString();
-
-        if (file.endsWith(".xml")) {
-            Trace.traceBegin(Trace.TRACE_TAG_RESOURCES, file);
-            try {
-                final XmlResourceParser rp = loadXmlResourceParser(
-                        file, id, value.assetCookie, "colorstatelist"); 
-                csl = ColorStateList.createFromXml(this, rp);
-                rp.close();
-            } catch (Exception e) {
-                Trace.traceEnd(Trace.TRACE_TAG_RESOURCES);
-                NotFoundException rnf = new NotFoundException(
-                    "File " + file + " from color state list resource ID #0x"
-                    + Integer.toHexString(id));
-                rnf.initCause(e);
-                throw rnf;
-            }
-            Trace.traceEnd(Trace.TRACE_TAG_RESOURCES);
-        } else {
-            throw new NotFoundException(
-                    "File " + file + " from drawable resource ID #0x"
-                    + Integer.toHexString(id) + ": .xml extension required");
+        if (csl == null) {
+            csl = loadColorStateListForCookie(value, id, theme);
         }
 
         if (csl != null) {
             if (mPreloading) {
                 if (verifyPreloadConfig(value.changingConfigurations, 0, value.resourceId,
                         "color")) {
-                    sPreloadedColorStateLists.put(key, csl);
+                    sPreloadedColorStateLists.put(key, csl.getConstantState());
                 }
             } else {
-                synchronized (mAccessLock) {
-                    //Log.i(TAG, "Saving cached color state list @ #" +
-                    //        Integer.toHexString(key.intValue())
-                    //        + " in " + this + ": " + csl);
-                    mColorStateListCache.put(key, new WeakReference<ColorStateList>(csl));
-                }
+                cache.put(key, theme, csl.getConstantState());
             }
         }
 
         return csl;
     }
 
-    private ColorStateList getCachedColorStateList(long key) {
-        synchronized (mAccessLock) {
-            WeakReference<ColorStateList> wr = mColorStateListCache.get(key);
-            if (wr != null) {   // we have the key
-                ColorStateList entry = wr.get();
-                if (entry != null) {
-                    //Log.i(TAG, "Returning cached color state list @ #" +
-                    //        Integer.toHexString(((Integer)key).intValue())
-                    //        + " in " + this + ": " + entry);
-                    return entry;
-                } else {  // our entry has been purged
-                    mColorStateListCache.delete(key);
+    private ColorStateList loadColorStateListForCookie(TypedValue value, int id, Theme theme) {
+        if (value.string == null) {
+            throw new UnsupportedOperationException(
+                    "Can't convert to color state list: type=0x" + value.type);
+        }
+
+        final String file = value.string.toString();
+
+        if (TRACE_FOR_MISS_PRELOAD) {
+            // Log only framework resources
+            if ((id >>> 24) == 0x1) {
+                final String name = getResourceName(id);
+                if (name != null) {
+                    Log.d(TAG, "Loading framework color state list #" + Integer.toHexString(id)
+                            + ": " + name + " at " + file);
                 }
             }
         }
-        return null;
+
+        if (DEBUG_LOAD) {
+            Log.v(TAG, "Loading color state list for cookie " + value.assetCookie + ": " + file);
+        }
+
+        final ColorStateList csl;
+
+        Trace.traceBegin(Trace.TRACE_TAG_RESOURCES, file);
+        if (file.endsWith(".xml")) {
+            try {
+                final XmlResourceParser rp = loadXmlResourceParser(
+                        file, id, value.assetCookie, "colorstatelist");
+                csl = ColorStateList.createFromXml(this, rp, theme);
+                rp.close();
+            } catch (Exception e) {
+                Trace.traceEnd(Trace.TRACE_TAG_RESOURCES);
+                final NotFoundException rnf = new NotFoundException(
+                        "File " + file + " from color state list resource ID #0x"
+                                + Integer.toHexString(id));
+                rnf.initCause(e);
+                throw rnf;
+            }
+        } else {
+            Trace.traceEnd(Trace.TRACE_TAG_RESOURCES);
+            throw new NotFoundException(
+                    "File " + file + " from drawable resource ID #0x"
+                            + Integer.toHexString(id) + ": .xml extension required");
+        }
+        Trace.traceEnd(Trace.TRACE_TAG_RESOURCES);
+
+        return csl;
     }
 
     /*package*/ XmlResourceParser loadXmlResourceParser(int id, String type)
@@ -2706,13 +2831,18 @@ public class Resources {
                 + Integer.toHexString(id));
     }
 
-    /*package*/ void recycleCachedStyledAttributes(TypedArray attrs) {
-        synchronized (mAccessLock) {
-            final TypedArray cached = mCachedStyledAttributes;
-            if (cached == null || cached.mData.length < attrs.mData.length) {
-                mCachedStyledAttributes = attrs;
-            }
+    /**
+     * Obtains styled attributes from the theme, if available, or unstyled
+     * resources if the theme is null.
+     *
+     * @hide
+     */
+    public static TypedArray obtainAttributes(
+            Resources res, Theme theme, AttributeSet set, int[] attrs) {
+        if (theme == null) {
+            return res.obtainAttributes(set, attrs);
         }
+        return theme.obtainStyledAttributes(set, attrs, 0, 0);
     }
 
     private Resources() {

@@ -25,7 +25,7 @@ import java.util.Locale;
 /**
  * Utility class for formatting text for display in a potentially opposite-directionality context
  * without garbling. The directionality of the context is set at formatter creation and the
- * directionality of the text can be either estimated or passed in when known. 
+ * directionality of the text can be either estimated or passed in when known.
  *
  * <p>To support versions lower than {@link android.os.Build.VERSION_CODES#JELLY_BEAN_MR2},
  * you can use the support library's {@link android.support.v4.text.BidiFormatter} class.
@@ -173,7 +173,7 @@ public final class BidiFormatter {
 
         /**
          * Specifies whether the BidiFormatter to be built should also "reset" directionality before
-         * a string being bidi-wrapped, not just after it. The default is false.
+         * a string being bidi-wrapped, not just after it. The default is true.
          */
         public Builder stereoReset(boolean stereoReset) {
             if (stereoReset) {
@@ -363,12 +363,13 @@ public final class BidiFormatter {
      * If {@code isolate}, directionally isolates the string so that it does not garble its
      * surroundings. Currently, this is done by "resetting" the directionality after the string by
      * appending a trailing Unicode bidi mark matching the context directionality (LRM or RLM) when
-     * either the overall directionality or the exit directionality of the string is opposite to that
-     * of the context. If the formatter was built using {@link Builder#stereoReset(boolean)} and
-     * passing "true" as an argument, also prepends a Unicode bidi mark matching the context
-     * directionality when either the overall directionality or the entry directionality of the
-     * string is opposite to that of the context. Note that as opposed to the overall
-     * directionality, the entry and exit directionalities are determined from the string itself.
+     * either the overall directionality or the exit directionality of the string is opposite to
+     * that of the context. Unless the formatter was built using
+     * {@link Builder#stereoReset(boolean)} with a {@code false} argument, also prepends a Unicode
+     * bidi mark matching the context directionality when either the overall directionality or the
+     * entry directionality of the string is opposite to that of the context. Note that as opposed
+     * to the overall directionality, the entry and exit directionalities are determined from the
+     * string itself.
      * <p>
      * Does *not* do HTML-escaping.
      *
@@ -377,9 +378,11 @@ public final class BidiFormatter {
      *        See {@link TextDirectionHeuristics} for pre-defined heuristics.
      * @param isolate Whether to directionally isolate the string to prevent it from garbling the
      *     content around it
-     * @return Input string after applying the above processing.
+     * @return Input string after applying the above processing. {@code null} if {@code str} is
+     *     {@code null}.
      */
     public String unicodeWrap(String str, TextDirectionHeuristic heuristic, boolean isolate) {
+        if (str == null) return null;
         final boolean isRtl = heuristic.isRtl(str, 0, str.length());
         StringBuilder result = new StringBuilder();
         if (getStereoReset() && isolate) {

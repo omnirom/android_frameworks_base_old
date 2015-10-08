@@ -19,6 +19,7 @@
 
 #include "AaptConfig.h"
 #include "ConfigDescription.h"
+#include "SdkConstants.h"
 #include "TestHelper.h"
 
 using android::String8;
@@ -65,7 +66,7 @@ TEST(AaptConfigTest, ParseBasicQualifiers) {
 TEST(AaptConfigTest, ParseLocales) {
     ConfigDescription config;
     EXPECT_TRUE(TestParse("en-rUS", &config));
-    EXPECT_EQ(String8("en-US"), config.toString());
+    EXPECT_EQ(String8("en-rUS"), config.toString());
 }
 
 TEST(AaptConfigTest, ParseQualifierAddedInApi13) {
@@ -75,4 +76,25 @@ TEST(AaptConfigTest, ParseQualifierAddedInApi13) {
 
     EXPECT_TRUE(TestParse("sw600dp-v8", &config));
     EXPECT_EQ(String8("sw600dp-v13"), config.toString());
+}
+
+TEST(AaptConfigTest, TestParsingOfCarAttribute) {
+    ConfigDescription config;
+    EXPECT_TRUE(TestParse("car", &config));
+    EXPECT_EQ(android::ResTable_config::UI_MODE_TYPE_CAR, config.uiMode);
+}
+
+TEST(AaptConfigTest, TestParsingRoundQualifier) {
+    ConfigDescription config;
+    EXPECT_TRUE(TestParse("round", &config));
+    EXPECT_EQ(android::ResTable_config::SCREENROUND_YES,
+              config.screenLayout2 & android::ResTable_config::MASK_SCREENROUND);
+    EXPECT_EQ(SDK_MNC, config.sdkVersion);
+    EXPECT_EQ(String8("round-v23"), config.toString());
+
+    EXPECT_TRUE(TestParse("notround", &config));
+    EXPECT_EQ(android::ResTable_config::SCREENROUND_NO,
+              config.screenLayout2 & android::ResTable_config::MASK_SCREENROUND);
+    EXPECT_EQ(SDK_MNC, config.sdkVersion);
+    EXPECT_EQ(String8("notround-v23"), config.toString());
 }

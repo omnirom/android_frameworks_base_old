@@ -21,14 +21,17 @@ import android.content.Context;
 import android.content.res.AssetFileDescriptor;
 import android.content.res.Resources.NotFoundException;
 import android.database.Cursor;
+import android.media.MediaPlayer.OnCompletionListener;
 import android.net.Uri;
 import android.os.Binder;
 import android.os.RemoteException;
 import android.provider.MediaStore;
 import android.provider.Settings;
+import android.provider.MediaStore.MediaColumns;
 import android.util.Log;
 
 import java.io.IOException;
+import java.util.ArrayList;
 
 /**
  * Ringtone provides a quick method for playing a ringtone, notification, or
@@ -48,6 +51,12 @@ public class Ringtone {
         MediaStore.Audio.Media.DATA,
         MediaStore.Audio.Media.TITLE
     };
+    /** Selection that limits query results to just audio files */
+    private static final String MEDIA_SELECTION = MediaColumns.MIME_TYPE + " LIKE 'audio/%' OR "
+            + MediaColumns.MIME_TYPE + " IN ('application/ogg', 'application/x-flac')";
+
+    // keep references on active Ringtones until stopped or completion listener called.
+    private static final ArrayList<Ringtone> sActiveRingtones = new ArrayList<Ringtone>();
 
     private final Context mContext;
     private final AudioManager mAudioManager;
@@ -62,6 +71,7 @@ public class Ringtone {
     private final Binder mRemoteToken;
 
     private MediaPlayer mLocalPlayer;
+    private final MyOnCompletionListener mCompletionListener = new MyOnCompletionListener();
 
     private Uri mUri;
     private String mTitle;
@@ -70,6 +80,10 @@ public class Ringtone {
             .setUsage(AudioAttributes.USAGE_NOTIFICATION_RINGTONE)
             .setContentType(AudioAttributes.CONTENT_TYPE_SONIFICATION)
             .build();
+    // playback properties, use synchronized with mPlaybackSettingsLock
+    private boolean mIsLooping = false;
+    private float mVolume = 1.0f;
+    private final Object mPlaybackSettingsLock = new Object();
 
     /** {@hide} */
     public Ringtone(Context context, boolean allowRemote) {
@@ -130,6 +144,52 @@ public class Ringtone {
     }
 
     /**
+     * @hide
+     * Sets the player to be looping or non-looping.
+     * @param looping whether to loop or not
+     */
+    public void setLooping(boolean looping) {
+        synchronized (mPlaybackSettingsLock) {
+            mIsLooping = looping;
+            applyPlaybackProperties_sync();
+        }
+    }
+
+    /**
+     * @hide
+     * Sets the volume on this player.
+     * @param volume a raw scalar in range 0.0 to 1.0, where 0.0 mutes this player, and 1.0
+     *   corresponds to no attenuation being applied.
+     */
+    public void setVolume(float volume) {
+        synchronized (mPlaybackSettingsLock) {
+            if (volume < 0.0f) { volume = 0.0f; }
+            if (volume > 1.0f) { volume = 1.0f; }
+            mVolume = volume;
+            applyPlaybackProperties_sync();
+        }
+    }
+
+    /**
+     * Must be called synchronized on mPlaybackSettingsLock
+     */
+    private void applyPlaybackProperties_sync() {
+        if (mLocalPlayer != null) {
+            mLocalPlayer.setVolume(mVolume);
+            mLocalPlayer.setLooping(mIsLooping);
+        } else if (mAllowRemote && (mRemotePlayer != null)) {
+            try {
+                mRemotePlayer.setPlaybackProperties(mRemoteToken, mVolume, mIsLooping);
+            } catch (RemoteException e) {
+                Log.w(TAG, "Problem setting playback properties: ", e);
+            }
+        } else {
+            Log.w(TAG,
+                    "Neither local nor remote player available when applying playback properties");
+        }
+    }
+
+    /**
      * Returns a human-presentable title for ringtone. Looks in media
      * content provider. If not in either, uses the filename
      * 
@@ -137,11 +197,14 @@ public class Ringtone {
      */
     public String getTitle(Context context) {
         if (mTitle != null) return mTitle;
-        return mTitle = getTitle(context, mUri, true);
+        return mTitle = getTitle(context, mUri, true /*followSettingsUri*/, mAllowRemote);
     }
 
-    private static String getTitle(Context context, Uri uri, boolean followSettingsUri) {
-        Cursor cursor = null;
+    /**
+     * @hide
+     */
+    public static String getTitle(
+            Context context, Uri uri, boolean followSettingsUri, boolean allowRemote) {
         ContentResolver res = context.getContentResolver();
         
         String title = null;
@@ -153,31 +216,45 @@ public class Ringtone {
                 if (followSettingsUri) {
                     Uri actualUri = RingtoneManager.getActualDefaultRingtoneUri(context,
                             RingtoneManager.getDefaultType(uri));
-                    String actualTitle = getTitle(context, actualUri, false);
+                    String actualTitle = getTitle(
+                            context, actualUri, false /*followSettingsUri*/, allowRemote);
                     title = context
                             .getString(com.android.internal.R.string.ringtone_default_with_actual,
                                     actualTitle);
                 }
             } else {
+                Cursor cursor = null;
                 try {
                     if (MediaStore.AUTHORITY.equals(authority)) {
-                        cursor = res.query(uri, MEDIA_COLUMNS, null, null, null);
+                        final String mediaSelection = allowRemote ? null : MEDIA_SELECTION;
+                        cursor = res.query(uri, MEDIA_COLUMNS, mediaSelection, null, null);
+                        if (cursor != null && cursor.getCount() == 1) {
+                            cursor.moveToFirst();
+                            return cursor.getString(2);
+                        }
+                        // missing cursor is handled below
                     }
                 } catch (SecurityException e) {
-                    // missing cursor is handled below
-                }
-
-                try {
-                    if (cursor != null && cursor.getCount() == 1) {
-                        cursor.moveToFirst();
-                        return cursor.getString(2);
-                    } else {
-                        title = uri.getLastPathSegment();
+                    IRingtonePlayer mRemotePlayer = null;
+                    if (allowRemote) {
+                        AudioManager audioManager =
+                                (AudioManager) context.getSystemService(Context.AUDIO_SERVICE);
+                        mRemotePlayer = audioManager.getRingtonePlayer();
+                    }
+                    if (mRemotePlayer != null) {
+                        try {
+                            title = mRemotePlayer.getTitle(uri);
+                        } catch (RemoteException re) {
+                        }
                     }
                 } finally {
                     if (cursor != null) {
                         cursor.close();
                     }
+                    cursor = null;
+                }
+                if (title == null) {
+                    title = uri.getLastPathSegment();
                 }
             }
         }
@@ -215,6 +292,9 @@ public class Ringtone {
         try {
             mLocalPlayer.setDataSource(mContext, mUri);
             mLocalPlayer.setAudioAttributes(mAudioAttributes);
+            synchronized (mPlaybackSettingsLock) {
+                applyPlaybackProperties_sync();
+            }
             mLocalPlayer.prepare();
 
         } catch (SecurityException | IOException e) {
@@ -247,12 +327,18 @@ public class Ringtone {
             // (typically because ringer mode is silent).
             if (mAudioManager.getStreamVolume(
                     AudioAttributes.toLegacyStreamType(mAudioAttributes)) != 0) {
-                mLocalPlayer.start();
+                startLocalPlayer();
             }
         } else if (mAllowRemote && (mRemotePlayer != null)) {
             final Uri canonicalUri = mUri.getCanonicalUri();
+            final boolean looping;
+            final float volume;
+            synchronized (mPlaybackSettingsLock) {
+                looping = mIsLooping;
+                volume = mVolume;
+            }
             try {
-                mRemotePlayer.play(mRemoteToken, canonicalUri, mAudioAttributes);
+                mRemotePlayer.play(mRemoteToken, canonicalUri, mAudioAttributes, volume, looping);
             } catch (RemoteException e) {
                 if (!playFallbackRingtone()) {
                     Log.w(TAG, "Problem playing ringtone: " + e);
@@ -285,7 +371,21 @@ public class Ringtone {
             mLocalPlayer.reset();
             mLocalPlayer.release();
             mLocalPlayer = null;
+            synchronized (sActiveRingtones) {
+                sActiveRingtones.remove(this);
+            }
         }
+    }
+
+    private void startLocalPlayer() {
+        if (mLocalPlayer == null) {
+            return;
+        }
+        synchronized (sActiveRingtones) {
+            sActiveRingtones.add(this);
+        }
+        mLocalPlayer.setOnCompletionListener(mCompletionListener);
+        mLocalPlayer.start();
     }
 
     /**
@@ -329,8 +429,11 @@ public class Ringtone {
                                     afd.getDeclaredLength());
                         }
                         mLocalPlayer.setAudioAttributes(mAudioAttributes);
+                        synchronized (mPlaybackSettingsLock) {
+                            applyPlaybackProperties_sync();
+                        }
                         mLocalPlayer.prepare();
-                        mLocalPlayer.start();
+                        startLocalPlayer();
                         afd.close();
                         return true;
                     } else {
@@ -351,5 +454,21 @@ public class Ringtone {
 
     void setTitle(String title) {
         mTitle = title;
+    }
+
+    @Override
+    protected void finalize() {
+        if (mLocalPlayer != null) {
+            mLocalPlayer.release();
+        }
+    }
+
+    class MyOnCompletionListener implements MediaPlayer.OnCompletionListener {
+        public void onCompletion(MediaPlayer mp)
+        {
+            synchronized (sActiveRingtones) {
+                sActiveRingtones.remove(Ringtone.this);
+            }
+        }
     }
 }

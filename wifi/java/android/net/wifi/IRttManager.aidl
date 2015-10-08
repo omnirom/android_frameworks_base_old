@@ -15,8 +15,8 @@
  */
 
 package android.net.wifi;
-
 import android.os.Messenger;
+import android.net.wifi.RttManager;
 
 /**
  * {@hide}
@@ -24,4 +24,5 @@ import android.os.Messenger;
 interface IRttManager
 {
     Messenger getMessenger();
+    RttManager.RttCapabilities getRttCapabilities();
 }

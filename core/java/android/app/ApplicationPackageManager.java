@@ -16,6 +16,11 @@
 
 package android.app;
 
+import android.annotation.DrawableRes;
+import android.annotation.NonNull;
+import android.annotation.Nullable;
+import android.annotation.StringRes;
+import android.annotation.XmlRes;
 import android.content.ComponentName;
 import android.content.ContentResolver;
 import android.content.Intent;
@@ -26,6 +31,7 @@ import android.content.pm.ApplicationInfo;
 import android.content.pm.ComponentInfo;
 import android.content.pm.ContainerEncryptionParams;
 import android.content.pm.FeatureInfo;
+import android.content.pm.IOnPermissionsChangeListener;
 import android.content.pm.IPackageDataObserver;
 import android.content.pm.IPackageDeleteObserver;
 import android.content.pm.IPackageInstallObserver;
@@ -33,6 +39,7 @@ import android.content.pm.IPackageManager;
 import android.content.pm.IPackageMoveObserver;
 import android.content.pm.IPackageStatsObserver;
 import android.content.pm.InstrumentationInfo;
+import android.content.pm.IntentFilterVerificationInfo;
 import android.content.pm.KeySet;
 import android.content.pm.ManifestDigest;
 import android.content.pm.PackageInfo;
@@ -56,28 +63,38 @@ import android.graphics.Rect;
 import android.graphics.drawable.BitmapDrawable;
 import android.graphics.drawable.Drawable;
 import android.net.Uri;
+import android.os.Bundle;
+import android.os.Handler;
+import android.os.Looper;
+import android.os.Message;
 import android.os.Process;
 import android.os.RemoteException;
+import android.os.SystemProperties;
 import android.os.UserHandle;
 import android.os.UserManager;
+import android.os.storage.StorageManager;
+import android.os.storage.VolumeInfo;
 import android.util.ArrayMap;
 import android.util.Log;
 import android.view.Display;
 
+import dalvik.system.VMRuntime;
+
 import com.android.internal.annotations.GuardedBy;
+import com.android.internal.os.SomeArgs;
 import com.android.internal.util.Preconditions;
 import com.android.internal.util.UserIcons;
 
-import dalvik.system.VMRuntime;
-
 import java.lang.ref.WeakReference;
 import java.util.ArrayList;
+import java.util.Iterator;
 import java.util.List;
+import java.util.Map;
+import java.util.Objects;
 
 /*package*/
 final class ApplicationPackageManager extends PackageManager {
     private static final String TAG = "ApplicationPackageManager";
-    private final static boolean DEBUG = false;
     private final static boolean DEBUG_ICONS = false;
 
     // Default flags to use with PackageManager when no flags are given.
@@ -89,6 +106,12 @@ final class ApplicationPackageManager extends PackageManager {
     private UserManager mUserManager;
     @GuardedBy("mLock")
     private PackageInstaller mInstaller;
+
+    @GuardedBy("mDelegates")
+    private final ArrayList<MoveCallbackDelegate> mDelegates = new ArrayList<>();
+
+    @GuardedBy("mLock")
+    private String mPermissionsControllerPackageName;
 
     UserManager getUserManager() {
         synchronized (mLock) {
@@ -182,8 +205,8 @@ final class ApplicationPackageManager extends PackageManager {
     public int[] getPackageGids(String packageName)
             throws NameNotFoundException {
         try {
-            int[] gids = mPM.getPackageGids(packageName);
-            if (gids == null || gids.length > 0) {
+            int[] gids = mPM.getPackageGids(packageName, mContext.getUserId());
+            if (gids != null) {
                 return gids;
             }
         } catch (RemoteException e) {
@@ -287,7 +310,12 @@ final class ApplicationPackageManager extends PackageManager {
         // depending on what the current runtime's instruction set is.
         if (info.primaryCpuAbi != null && info.secondaryCpuAbi != null) {
             final String runtimeIsa = VMRuntime.getRuntime().vmInstructionSet();
-            final String secondaryIsa = VMRuntime.getInstructionSet(info.secondaryCpuAbi);
+
+            // Get the instruction set that the libraries of secondary Abi is supported.
+            // In presence of a native bridge this might be different than the one secondary Abi used.
+            String secondaryIsa = VMRuntime.getInstructionSet(info.secondaryCpuAbi);
+            final String secondaryDexCodeIsa = SystemProperties.get("ro.dalvik.vm.isa." + secondaryIsa);
+            secondaryIsa = secondaryDexCodeIsa.isEmpty() ? secondaryIsa : secondaryDexCodeIsa;
 
             // If the runtimeIsa is the same as the primary isa, then we do nothing.
             // Everything will be set up correctly because info.nativeLibraryDir will
@@ -389,9 +417,35 @@ final class ApplicationPackageManager extends PackageManager {
     @Override
     public int checkPermission(String permName, String pkgName) {
         try {
-            return mPM.checkPermission(permName, pkgName);
+            return mPM.checkPermission(permName, pkgName, mContext.getUserId());
         } catch (RemoteException e) {
             throw new RuntimeException("Package manager has died", e);
+        }
+    }
+
+    @Override
+    public boolean isPermissionRevokedByPolicy(String permName, String pkgName) {
+        try {
+            return mPM.isPermissionRevokedByPolicy(permName, pkgName, mContext.getUserId());
+        } catch (RemoteException e) {
+            throw new RuntimeException("Package manager has died", e);
+        }
+    }
+
+    /**
+     * @hide
+     */
+    @Override
+    public String getPermissionControllerPackageName() {
+        synchronized (mLock) {
+            if (mPermissionsControllerPackageName == null) {
+                try {
+                    mPermissionsControllerPackageName = mPM.getPermissionControllerPackageName();
+                } catch (RemoteException e) {
+                    throw new RuntimeException("Package manager has died", e);
+                }
+            }
+            return mPermissionsControllerPackageName;
         }
     }
 
@@ -423,18 +477,50 @@ final class ApplicationPackageManager extends PackageManager {
     }
 
     @Override
-    public void grantPermission(String packageName, String permissionName) {
+    public void grantRuntimePermission(String packageName, String permissionName,
+            UserHandle user) {
         try {
-            mPM.grantPermission(packageName, permissionName);
+            mPM.grantRuntimePermission(packageName, permissionName, user.getIdentifier());
         } catch (RemoteException e) {
             throw new RuntimeException("Package manager has died", e);
         }
     }
 
     @Override
-    public void revokePermission(String packageName, String permissionName) {
+    public void revokeRuntimePermission(String packageName, String permissionName,
+            UserHandle user) {
         try {
-            mPM.revokePermission(packageName, permissionName);
+            mPM.revokeRuntimePermission(packageName, permissionName, user.getIdentifier());
+        } catch (RemoteException e) {
+            throw new RuntimeException("Package manager has died", e);
+        }
+    }
+
+    @Override
+    public int getPermissionFlags(String permissionName, String packageName, UserHandle user) {
+        try {
+            return mPM.getPermissionFlags(permissionName, packageName, user.getIdentifier());
+        } catch (RemoteException e) {
+            throw new RuntimeException("Package manager has died", e);
+        }
+    }
+
+    @Override
+    public void updatePermissionFlags(String permissionName, String packageName,
+            int flagMask, int flagValues, UserHandle user) {
+        try {
+            mPM.updatePermissionFlags(permissionName, packageName, flagMask,
+                    flagValues, user.getIdentifier());
+        } catch (RemoteException e) {
+            throw new RuntimeException("Package manager has died", e);
+        }
+    }
+
+    @Override
+    public boolean shouldShowRequestPermissionRationale(String permission) {
+        try {
+            return mPM.shouldShowRequestPermissionRationale(permission,
+                    mContext.getPackageName(), mContext.getUserId());
         } catch (RemoteException e) {
             throw new RuntimeException("Package manager has died", e);
         }
@@ -691,7 +777,9 @@ final class ApplicationPackageManager extends PackageManager {
     public List<ProviderInfo> queryContentProviders(String processName,
                                                     int uid, int flags) {
         try {
-            return mPM.queryContentProviders(processName, uid, flags);
+            ParceledListSlice<ProviderInfo> slice
+                    = mPM.queryContentProviders(processName, uid, flags);
+            return slice != null ? slice.getList() : null;
         } catch (RemoteException e) {
             throw new RuntimeException("Package manager has died", e);
         }
@@ -724,13 +812,16 @@ final class ApplicationPackageManager extends PackageManager {
         }
     }
 
-    @Override public Drawable getDrawable(String packageName, int resid,
-                                          ApplicationInfo appInfo) {
-        ResourceName name = new ResourceName(packageName, resid);
-        Drawable dr = getCachedIcon(name);
-        if (dr != null) {
-            return dr;
+    @Nullable
+    @Override
+    public Drawable getDrawable(String packageName, @DrawableRes int resId,
+            @Nullable ApplicationInfo appInfo) {
+        final ResourceName name = new ResourceName(packageName, resId);
+        final Drawable cachedIcon = getCachedIcon(name);
+        if (cachedIcon != null) {
+            return cachedIcon;
         }
+
         if (appInfo == null) {
             try {
                 appInfo = getApplicationInfo(packageName, sDefaultFlags);
@@ -738,36 +829,46 @@ final class ApplicationPackageManager extends PackageManager {
                 return null;
             }
         }
-        try {
-            Resources r = getResourcesForApplication(appInfo);
-            dr = r.getDrawable(resid);
-            if (false) {
-                RuntimeException e = new RuntimeException("here");
-                e.fillInStackTrace();
-                Log.w(TAG, "Getting drawable 0x" + Integer.toHexString(resid)
-                      + " from package " + packageName
-                      + ": app scale=" + r.getCompatibilityInfo().applicationScale
-                      + ", caller scale=" + mContext.getResources().getCompatibilityInfo().applicationScale,
-                      e);
+
+        if (resId != 0) {
+            try {
+                final Resources r = getResourcesForApplication(appInfo);
+                final Drawable dr = r.getDrawable(resId, null);
+                if (dr != null) {
+                    putCachedIcon(name, dr);
+                }
+
+                if (false) {
+                    RuntimeException e = new RuntimeException("here");
+                    e.fillInStackTrace();
+                    Log.w(TAG, "Getting drawable 0x" + Integer.toHexString(resId)
+                                    + " from package " + packageName
+                                    + ": app scale=" + r.getCompatibilityInfo().applicationScale
+                                    + ", caller scale=" + mContext.getResources()
+                                    .getCompatibilityInfo().applicationScale,
+                            e);
+                }
+                if (DEBUG_ICONS) {
+                    Log.v(TAG, "Getting drawable 0x"
+                            + Integer.toHexString(resId) + " from " + r
+                            + ": " + dr);
+                }
+                return dr;
+            } catch (NameNotFoundException e) {
+                Log.w("PackageManager", "Failure retrieving resources for "
+                        + appInfo.packageName);
+            } catch (Resources.NotFoundException e) {
+                Log.w("PackageManager", "Failure retrieving resources for "
+                        + appInfo.packageName + ": " + e.getMessage());
+            } catch (Exception e) {
+                // If an exception was thrown, fall through to return
+                // default icon.
+                Log.w("PackageManager", "Failure retrieving icon 0x"
+                        + Integer.toHexString(resId) + " in package "
+                        + packageName, e);
             }
-            if (DEBUG_ICONS) Log.v(TAG, "Getting drawable 0x"
-                                   + Integer.toHexString(resid) + " from " + r
-                                   + ": " + dr);
-            putCachedIcon(name, dr);
-            return dr;
-        } catch (NameNotFoundException e) {
-            Log.w("PackageManager", "Failure retrieving resources for "
-                  + appInfo.packageName);
-        } catch (Resources.NotFoundException e) {
-            Log.w("PackageManager", "Failure retrieving resources for "
-                  + appInfo.packageName + ": " + e.getMessage());
-        } catch (RuntimeException e) {
-            // If an exception was thrown, fall through to return
-            // default icon.
-            Log.w("PackageManager", "Failure retrieving icon 0x"
-                  + Integer.toHexString(resid) + " in package "
-                  + packageName, e);
         }
+
         return null;
     }
 
@@ -914,19 +1015,21 @@ final class ApplicationPackageManager extends PackageManager {
         return label;
     }
 
-    @Override public Resources getResourcesForActivity(
-        ComponentName activityName) throws NameNotFoundException {
+    @Override
+    public Resources getResourcesForActivity(ComponentName activityName)
+            throws NameNotFoundException {
         return getResourcesForApplication(
             getActivityInfo(activityName, sDefaultFlags).applicationInfo);
     }
 
-    @Override public Resources getResourcesForApplication(
-        ApplicationInfo app) throws NameNotFoundException {
+    @Override
+    public Resources getResourcesForApplication(@NonNull ApplicationInfo app)
+            throws NameNotFoundException {
         if (app.packageName.equals("system")) {
             return mContext.mMainThread.getSystemContext().getResources();
         }
         final boolean sameUid = (app.uid == Process.myUid());
-        Resources r = mContext.mMainThread.getTopLevelResources(
+        final Resources r = mContext.mMainThread.getTopLevelResources(
                 sameUid ? app.sourceDir : app.publicSourceDir,
                 sameUid ? app.splitSourceDirs : app.splitPublicSourceDirs,
                 app.resourceDirs, app.sharedLibraryFiles, Display.DEFAULT_DISPLAY,
@@ -937,8 +1040,9 @@ final class ApplicationPackageManager extends PackageManager {
         throw new NameNotFoundException("Unable to open " + app.publicSourceDir);
     }
 
-    @Override public Resources getResourcesForApplication(
-        String appPackageName) throws NameNotFoundException {
+    @Override
+    public Resources getResourcesForApplication(String appPackageName)
+            throws NameNotFoundException {
         return getResourcesForApplication(
             getApplicationInfo(appPackageName, sDefaultFlags));
     }
@@ -977,6 +1081,38 @@ final class ApplicationPackageManager extends PackageManager {
         }
     }
 
+    @Override
+    public void addOnPermissionsChangeListener(OnPermissionsChangedListener listener) {
+        synchronized (mPermissionListeners) {
+            if (mPermissionListeners.get(listener) != null) {
+                return;
+            }
+            OnPermissionsChangeListenerDelegate delegate =
+                    new OnPermissionsChangeListenerDelegate(listener, Looper.getMainLooper());
+            try {
+                mPM.addOnPermissionsChangeListener(delegate);
+                mPermissionListeners.put(listener, delegate);
+            } catch (RemoteException e) {
+                throw new RuntimeException("Package manager has died", e);
+            }
+        }
+    }
+
+    @Override
+    public void removeOnPermissionsChangeListener(OnPermissionsChangedListener listener) {
+        synchronized (mPermissionListeners) {
+            IOnPermissionsChangeListener delegate = mPermissionListeners.get(listener);
+            if (delegate != null) {
+                try {
+                    mPM.removeOnPermissionsChangeListener(delegate);
+                    mPermissionListeners.remove(listener);
+                } catch (RemoteException e) {
+                    throw new RuntimeException("Package manager has died", e);
+                }
+            }
+        }
+    }
+
     static void configurationChanged() {
         synchronized (sSync) {
             sIconCache.clear();
@@ -990,13 +1126,14 @@ final class ApplicationPackageManager extends PackageManager {
         mPM = pm;
     }
 
-    private Drawable getCachedIcon(ResourceName name) {
+    @Nullable
+    private Drawable getCachedIcon(@NonNull ResourceName name) {
         synchronized (sSync) {
-            WeakReference<Drawable.ConstantState> wr = sIconCache.get(name);
+            final WeakReference<Drawable.ConstantState> wr = sIconCache.get(name);
             if (DEBUG_ICONS) Log.v(TAG, "Get cached weak drawable ref for "
                                    + name + ": " + wr);
             if (wr != null) {   // we have the activity
-                Drawable.ConstantState state = wr.get();
+                final Drawable.ConstantState state = wr.get();
                 if (state != null) {
                     if (DEBUG_ICONS) {
                         Log.v(TAG, "Get cached drawable state for " + name + ": " + state);
@@ -1016,9 +1153,9 @@ final class ApplicationPackageManager extends PackageManager {
         return null;
     }
 
-    private void putCachedIcon(ResourceName name, Drawable dr) {
+    private void putCachedIcon(@NonNull ResourceName name, @NonNull Drawable dr) {
         synchronized (sSync) {
-            sIconCache.put(name, new WeakReference<Drawable.ConstantState>(dr.getConstantState()));
+            sIconCache.put(name, new WeakReference<>(dr.getConstantState()));
             if (DEBUG_ICONS) Log.v(TAG, "Added cached drawable state for " + name + ": " + dr);
         }
     }
@@ -1131,7 +1268,7 @@ final class ApplicationPackageManager extends PackageManager {
     }
 
     @Override
-    public CharSequence getText(String packageName, int resid,
+    public CharSequence getText(String packageName, @StringRes int resid,
                                 ApplicationInfo appInfo) {
         ResourceName name = new ResourceName(packageName, resid);
         CharSequence text = getCachedString(name);
@@ -1164,7 +1301,7 @@ final class ApplicationPackageManager extends PackageManager {
     }
 
     @Override
-    public XmlResourceParser getXml(String packageName, int resid,
+    public XmlResourceParser getXml(String packageName, @XmlRes int resid,
                                     ApplicationInfo appInfo) {
         if (appInfo == null) {
             try {
@@ -1301,19 +1438,79 @@ final class ApplicationPackageManager extends PackageManager {
     }
 
     @Override
-    public void setInstallerPackageName(String targetPackage,
-            String installerPackageName) {
+    public void verifyIntentFilter(int id, int verificationCode, List<String> outFailedDomains) {
         try {
-            mPM.setInstallerPackageName(targetPackage, installerPackageName);
+            mPM.verifyIntentFilter(id, verificationCode, outFailedDomains);
         } catch (RemoteException e) {
             // Should never happen!
         }
     }
 
     @Override
-    public void movePackage(String packageName, IPackageMoveObserver observer, int flags) {
+    public int getIntentVerificationStatus(String packageName, int userId) {
         try {
-            mPM.movePackage(packageName, observer, flags);
+            return mPM.getIntentVerificationStatus(packageName, userId);
+        } catch (RemoteException e) {
+            // Should never happen!
+            return PackageManager.INTENT_FILTER_DOMAIN_VERIFICATION_STATUS_UNDEFINED;
+        }
+    }
+
+    @Override
+    public boolean updateIntentVerificationStatus(String packageName, int status, int userId) {
+        try {
+            return mPM.updateIntentVerificationStatus(packageName, status, userId);
+        } catch (RemoteException e) {
+            // Should never happen!
+            return false;
+        }
+    }
+
+    @Override
+    public List<IntentFilterVerificationInfo> getIntentFilterVerifications(String packageName) {
+        try {
+            return mPM.getIntentFilterVerifications(packageName);
+        } catch (RemoteException e) {
+            // Should never happen!
+            return null;
+        }
+    }
+
+    @Override
+    public List<IntentFilter> getAllIntentFilters(String packageName) {
+        try {
+            return mPM.getAllIntentFilters(packageName);
+        } catch (RemoteException e) {
+            // Should never happen!
+            return null;
+        }
+    }
+
+    @Override
+    public String getDefaultBrowserPackageName(int userId) {
+        try {
+            return mPM.getDefaultBrowserPackageName(userId);
+        } catch (RemoteException e) {
+            // Should never happen!
+            return null;
+        }
+    }
+
+    @Override
+    public boolean setDefaultBrowserPackageName(String packageName, int userId) {
+        try {
+            return mPM.setDefaultBrowserPackageName(packageName, userId);
+        } catch (RemoteException e) {
+            // Should never happen!
+            return false;
+        }
+    }
+
+    @Override
+    public void setInstallerPackageName(String targetPackage,
+            String installerPackageName) {
+        try {
+            mPM.setInstallerPackageName(targetPackage, installerPackageName);
         } catch (RemoteException e) {
             // Should never happen!
         }
@@ -1327,6 +1524,177 @@ final class ApplicationPackageManager extends PackageManager {
             // Should never happen!
         }
         return null;
+    }
+
+    @Override
+    public int getMoveStatus(int moveId) {
+        try {
+            return mPM.getMoveStatus(moveId);
+        } catch (RemoteException e) {
+            throw e.rethrowAsRuntimeException();
+        }
+    }
+
+    @Override
+    public void registerMoveCallback(MoveCallback callback, Handler handler) {
+        synchronized (mDelegates) {
+            final MoveCallbackDelegate delegate = new MoveCallbackDelegate(callback,
+                    handler.getLooper());
+            try {
+                mPM.registerMoveCallback(delegate);
+            } catch (RemoteException e) {
+                throw e.rethrowAsRuntimeException();
+            }
+            mDelegates.add(delegate);
+        }
+    }
+
+    @Override
+    public void unregisterMoveCallback(MoveCallback callback) {
+        synchronized (mDelegates) {
+            for (Iterator<MoveCallbackDelegate> i = mDelegates.iterator(); i.hasNext();) {
+                final MoveCallbackDelegate delegate = i.next();
+                if (delegate.mCallback == callback) {
+                    try {
+                        mPM.unregisterMoveCallback(delegate);
+                    } catch (RemoteException e) {
+                        throw e.rethrowAsRuntimeException();
+                    }
+                    i.remove();
+                }
+            }
+        }
+    }
+
+    @Override
+    public int movePackage(String packageName, VolumeInfo vol) {
+        try {
+            final String volumeUuid;
+            if (VolumeInfo.ID_PRIVATE_INTERNAL.equals(vol.id)) {
+                volumeUuid = StorageManager.UUID_PRIVATE_INTERNAL;
+            } else if (vol.isPrimaryPhysical()) {
+                volumeUuid = StorageManager.UUID_PRIMARY_PHYSICAL;
+            } else {
+                volumeUuid = Preconditions.checkNotNull(vol.fsUuid);
+            }
+
+            return mPM.movePackage(packageName, volumeUuid);
+        } catch (RemoteException e) {
+            throw e.rethrowAsRuntimeException();
+        }
+    }
+
+    @Override
+    public @Nullable VolumeInfo getPackageCurrentVolume(ApplicationInfo app) {
+        final StorageManager storage = mContext.getSystemService(StorageManager.class);
+        if (app.isInternal()) {
+            return storage.findVolumeById(VolumeInfo.ID_PRIVATE_INTERNAL);
+        } else if (app.isExternalAsec()) {
+            return storage.getPrimaryPhysicalVolume();
+        } else {
+            return storage.findVolumeByUuid(app.volumeUuid);
+        }
+    }
+
+    @Override
+    public @NonNull List<VolumeInfo> getPackageCandidateVolumes(ApplicationInfo app) {
+        final StorageManager storage = mContext.getSystemService(StorageManager.class);
+        final VolumeInfo currentVol = getPackageCurrentVolume(app);
+        final List<VolumeInfo> vols = storage.getVolumes();
+        final List<VolumeInfo> candidates = new ArrayList<>();
+        for (VolumeInfo vol : vols) {
+            if (Objects.equals(vol, currentVol) || isPackageCandidateVolume(app, vol)) {
+                candidates.add(vol);
+            }
+        }
+        return candidates;
+    }
+
+    private static boolean isPackageCandidateVolume(ApplicationInfo app, VolumeInfo vol) {
+        // Private internal is always an option
+        if (VolumeInfo.ID_PRIVATE_INTERNAL.equals(vol.getId())) {
+            return true;
+        }
+
+        // System apps and apps demanding internal storage can't be moved
+        // anywhere else
+        if (app.isSystemApp()
+                || app.installLocation == PackageInfo.INSTALL_LOCATION_INTERNAL_ONLY) {
+            return false;
+        }
+
+        // Gotta be able to write there
+        if (!vol.isMountedWritable()) {
+            return false;
+        }
+
+        // Moving into an ASEC on public primary is only option internal
+        if (vol.isPrimaryPhysical()) {
+            return app.isInternal();
+        }
+
+        // Otherwise we can move to any private volume
+        return (vol.getType() == VolumeInfo.TYPE_PRIVATE);
+    }
+
+    @Override
+    public int movePrimaryStorage(VolumeInfo vol) {
+        try {
+            final String volumeUuid;
+            if (VolumeInfo.ID_PRIVATE_INTERNAL.equals(vol.id)) {
+                volumeUuid = StorageManager.UUID_PRIVATE_INTERNAL;
+            } else if (vol.isPrimaryPhysical()) {
+                volumeUuid = StorageManager.UUID_PRIMARY_PHYSICAL;
+            } else {
+                volumeUuid = Preconditions.checkNotNull(vol.fsUuid);
+            }
+
+            return mPM.movePrimaryStorage(volumeUuid);
+        } catch (RemoteException e) {
+            throw e.rethrowAsRuntimeException();
+        }
+    }
+
+    @Override
+    public @Nullable VolumeInfo getPrimaryStorageCurrentVolume() {
+        final StorageManager storage = mContext.getSystemService(StorageManager.class);
+        final String volumeUuid = storage.getPrimaryStorageUuid();
+        return storage.findVolumeByQualifiedUuid(volumeUuid);
+    }
+
+    @Override
+    public @NonNull List<VolumeInfo> getPrimaryStorageCandidateVolumes() {
+        final StorageManager storage = mContext.getSystemService(StorageManager.class);
+        final VolumeInfo currentVol = getPrimaryStorageCurrentVolume();
+        final List<VolumeInfo> vols = storage.getVolumes();
+        final List<VolumeInfo> candidates = new ArrayList<>();
+        if (Objects.equals(StorageManager.UUID_PRIMARY_PHYSICAL,
+                storage.getPrimaryStorageUuid()) && currentVol != null) {
+            // TODO: support moving primary physical to emulated volume
+            candidates.add(currentVol);
+        } else {
+            for (VolumeInfo vol : vols) {
+                if (Objects.equals(vol, currentVol) || isPrimaryStorageCandidateVolume(vol)) {
+                    candidates.add(vol);
+                }
+            }
+        }
+        return candidates;
+    }
+
+    private static boolean isPrimaryStorageCandidateVolume(VolumeInfo vol) {
+        // Private internal is always an option
+        if (VolumeInfo.ID_PRIVATE_INTERNAL.equals(vol.getId())) {
+            return true;
+        }
+
+        // Gotta be able to write there
+        if (!vol.isMountedWritable()) {
+            return false;
+        }
+
+        // We can move to any private volume
+        return (vol.getType() == VolumeInfo.TYPE_PRIVATE);
     }
 
     @Override
@@ -1356,19 +1724,21 @@ final class ApplicationPackageManager extends PackageManager {
             // Should never happen!
         }
     }
+
     @Override
-    public void freeStorageAndNotify(long idealStorageSize, IPackageDataObserver observer) {
+    public void freeStorageAndNotify(String volumeUuid, long idealStorageSize,
+            IPackageDataObserver observer) {
         try {
-            mPM.freeStorageAndNotify(idealStorageSize, observer);
+            mPM.freeStorageAndNotify(volumeUuid, idealStorageSize, observer);
         } catch (RemoteException e) {
             // Should never happen!
         }
     }
 
     @Override
-    public void freeStorage(long freeStorageSize, IntentSender pi) {
+    public void freeStorage(String volumeUuid, long freeStorageSize, IntentSender pi) {
         try {
-            mPM.freeStorage(freeStorageSize, pi);
+            mPM.freeStorage(volumeUuid, freeStorageSize, pi);
         } catch (RemoteException e) {
             // Should never happen!
         }
@@ -1653,7 +2023,7 @@ final class ApplicationPackageManager extends PackageManager {
             int flags) {
         try {
             mPM.addCrossProfileIntentFilter(filter, mContext.getOpPackageName(),
-                    mContext.getUserId(), sourceUserId, targetUserId, flags);
+                    sourceUserId, targetUserId, flags);
         } catch (RemoteException e) {
             // Should never happen!
         }
@@ -1665,8 +2035,7 @@ final class ApplicationPackageManager extends PackageManager {
     @Override
     public void clearCrossProfileIntentFilters(int sourceUserId) {
         try {
-            mPM.clearCrossProfileIntentFilters(sourceUserId, mContext.getOpPackageName(),
-                    mContext.getUserId());
+            mPM.clearCrossProfileIntentFilters(sourceUserId, mContext.getOpPackageName());
         } catch (RemoteException e) {
             // Should never happen!
         }
@@ -1776,6 +2145,57 @@ final class ApplicationPackageManager extends PackageManager {
         return null;
     }
 
+    /** {@hide} */
+    private static class MoveCallbackDelegate extends IPackageMoveObserver.Stub implements
+            Handler.Callback {
+        private static final int MSG_CREATED = 1;
+        private static final int MSG_STATUS_CHANGED = 2;
+
+        final MoveCallback mCallback;
+        final Handler mHandler;
+
+        public MoveCallbackDelegate(MoveCallback callback, Looper looper) {
+            mCallback = callback;
+            mHandler = new Handler(looper, this);
+        }
+
+        @Override
+        public boolean handleMessage(Message msg) {
+            switch (msg.what) {
+                case MSG_CREATED: {
+                    final SomeArgs args = (SomeArgs) msg.obj;
+                    mCallback.onCreated(args.argi1, (Bundle) args.arg2);
+                    args.recycle();
+                    return true;
+                }
+                case MSG_STATUS_CHANGED: {
+                    final SomeArgs args = (SomeArgs) msg.obj;
+                    mCallback.onStatusChanged(args.argi1, args.argi2, (long) args.arg3);
+                    args.recycle();
+                    return true;
+                }
+            }
+            return false;
+        }
+
+        @Override
+        public void onCreated(int moveId, Bundle extras) {
+            final SomeArgs args = SomeArgs.obtain();
+            args.argi1 = moveId;
+            args.arg2 = extras;
+            mHandler.obtainMessage(MSG_CREATED, args).sendToTarget();
+        }
+
+        @Override
+        public void onStatusChanged(int moveId, int status, long estMillis) {
+            final SomeArgs args = SomeArgs.obtain();
+            args.argi1 = moveId;
+            args.argi2 = status;
+            args.arg3 = estMillis;
+            mHandler.obtainMessage(MSG_STATUS_CHANGED, args).sendToTarget();
+        }
+    }
+
     private final ContextImpl mContext;
     private final IPackageManager mPM;
 
@@ -1784,4 +2204,39 @@ final class ApplicationPackageManager extends PackageManager {
             = new ArrayMap<ResourceName, WeakReference<Drawable.ConstantState>>();
     private static ArrayMap<ResourceName, WeakReference<CharSequence>> sStringCache
             = new ArrayMap<ResourceName, WeakReference<CharSequence>>();
+
+    private final Map<OnPermissionsChangedListener, IOnPermissionsChangeListener>
+            mPermissionListeners = new ArrayMap<>();
+
+    public class OnPermissionsChangeListenerDelegate extends IOnPermissionsChangeListener.Stub
+            implements Handler.Callback{
+        private static final int MSG_PERMISSIONS_CHANGED = 1;
+
+        private final OnPermissionsChangedListener mListener;
+        private final Handler mHandler;
+
+
+        public OnPermissionsChangeListenerDelegate(OnPermissionsChangedListener listener,
+                Looper looper) {
+            mListener = listener;
+            mHandler = new Handler(looper, this);
+        }
+
+        @Override
+        public void onPermissionsChanged(int uid) {
+            mHandler.obtainMessage(MSG_PERMISSIONS_CHANGED, uid, 0).sendToTarget();
+        }
+
+        @Override
+        public boolean handleMessage(Message msg) {
+            switch (msg.what) {
+                case MSG_PERMISSIONS_CHANGED: {
+                    final int uid = msg.arg1;
+                    mListener.onPermissionsChanged(uid);
+                    return true;
+                }
+            }
+            return false;
+        }
+    }
 }

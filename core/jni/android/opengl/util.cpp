@@ -16,6 +16,7 @@
 
 #include "jni.h"
 #include "JNIHelp.h"
+#include "GraphicsJNI.h"
 
 #include <math.h>
 #include <stdio.h>
@@ -29,7 +30,7 @@
 
 #include <SkBitmap.h>
 
-#include "android_runtime/AndroidRuntime.h"
+#include "core_jni_helpers.h"
 
 #undef LOG_TAG
 #define LOG_TAG "OpenGLUtil"
@@ -149,11 +150,105 @@ int visibilityTest(float* pWS, float* pPositions, int positionsLength,
     return result;
 }
 
-static void doThrowIAE(JNIEnv* env, const char* msg) {
-    jniThrowException(env, "java/lang/IllegalArgumentException", msg);
-}
+class ByteArrayGetter {
+public:
+    static void* Get(JNIEnv* _env, jbyteArray array, jboolean* is_copy) {
+        return _env->GetByteArrayElements(array, is_copy);
+    }
+};
+class BooleanArrayGetter {
+public:
+    static void* Get(JNIEnv* _env, jbooleanArray array, jboolean* is_copy) {
+        return _env->GetBooleanArrayElements(array, is_copy);
+    }
+};
+class CharArrayGetter {
+public:
+    static void* Get(JNIEnv* _env, jcharArray array, jboolean* is_copy) {
+        return _env->GetCharArrayElements(array, is_copy);
+    }
+};
+class ShortArrayGetter {
+public:
+    static void* Get(JNIEnv* _env, jshortArray array, jboolean* is_copy) {
+        return _env->GetShortArrayElements(array, is_copy);
+    }
+};
+class IntArrayGetter {
+public:
+    static void* Get(JNIEnv* _env, jintArray array, jboolean* is_copy) {
+        return _env->GetIntArrayElements(array, is_copy);
+    }
+};
+class LongArrayGetter {
+public:
+    static void* Get(JNIEnv* _env, jlongArray array, jboolean* is_copy) {
+        return _env->GetLongArrayElements(array, is_copy);
+    }
+};
+class FloatArrayGetter {
+public:
+    static void* Get(JNIEnv* _env, jfloatArray array, jboolean* is_copy) {
+        return _env->GetFloatArrayElements(array, is_copy);
+    }
+};
+class DoubleArrayGetter {
+public:
+    static void* Get(JNIEnv* _env, jdoubleArray array, jboolean* is_copy) {
+        return _env->GetDoubleArrayElements(array, is_copy);
+    }
+};
 
-template<class JArray, class T>
+class ByteArrayReleaser {
+public:
+    static void Release(JNIEnv* _env, jbyteArray array, jbyte* data, jint mode) {
+        _env->ReleaseByteArrayElements(array, data, mode);
+    }
+};
+class BooleanArrayReleaser {
+public:
+    static void Release(JNIEnv* _env, jbooleanArray array, jboolean* data, jint mode) {
+        _env->ReleaseBooleanArrayElements(array, data, mode);
+    }
+};
+class CharArrayReleaser {
+public:
+    static void Release(JNIEnv* _env, jcharArray array, jchar* data, jint mode) {
+        _env->ReleaseCharArrayElements(array, data, mode);
+    }
+};
+class ShortArrayReleaser {
+public:
+    static void Release(JNIEnv* _env, jshortArray array, jshort* data, jint mode) {
+        _env->ReleaseShortArrayElements(array, data, mode);
+    }
+};
+class IntArrayReleaser {
+public:
+    static void Release(JNIEnv* _env, jintArray array, jint* data, jint mode) {
+        _env->ReleaseIntArrayElements(array, data, mode);
+    }
+};
+class LongArrayReleaser {
+public:
+    static void Release(JNIEnv* _env, jlongArray array, jlong* data, jint mode) {
+        _env->ReleaseLongArrayElements(array, data, mode);
+    }
+};
+class FloatArrayReleaser {
+public:
+    static void Release(JNIEnv* _env, jfloatArray array, jfloat* data, jint mode) {
+        _env->ReleaseFloatArrayElements(array, data, mode);
+    }
+};
+class DoubleArrayReleaser {
+public:
+    static void Release(JNIEnv* _env, jdoubleArray array, jdouble* data, jint mode) {
+        _env->ReleaseDoubleArrayElements(array, data, mode);
+    }
+};
+
+template<class JArray, class T, class ArrayGetter, class ArrayReleaser>
 class ArrayHelper {
 public:
     ArrayHelper(JNIEnv* env, JArray ref, jint offset, jint minSize) {
@@ -167,7 +262,7 @@ public:
 
     ~ArrayHelper() {
         if (mBase) {
-            mEnv->ReleasePrimitiveArrayCritical(mRef, mBase, mReleaseParam);
+            ArrayReleaser::Release(mEnv, mRef, mBase, mReleaseParam);
         }
     }
 
@@ -198,7 +293,7 @@ public:
     // Bind the array.
 
     void bind() {
-        mBase = (T*) mEnv->GetPrimitiveArrayCritical(mRef, (jboolean *) 0);
+        mBase = (T*) ArrayGetter::Get(mEnv, mRef, (jboolean *) 0);
         mData = mBase + mOffset;
     }
 
@@ -218,10 +313,10 @@ private:
     int mReleaseParam;
 };
 
-typedef ArrayHelper<jfloatArray, float> FloatArrayHelper;
-typedef ArrayHelper<jcharArray, unsigned short> UnsignedShortArrayHelper;
-typedef ArrayHelper<jintArray, int> IntArrayHelper;
-typedef ArrayHelper<jbyteArray, unsigned char> ByteArrayHelper;
+typedef ArrayHelper<jfloatArray, float, FloatArrayGetter, FloatArrayReleaser> FloatArrayHelper;
+typedef ArrayHelper<jcharArray, unsigned short, CharArrayGetter, CharArrayReleaser> UnsignedShortArrayHelper;
+typedef ArrayHelper<jintArray, int, IntArrayGetter, IntArrayReleaser> IntArrayHelper;
+typedef ArrayHelper<jbyteArray, unsigned char, ByteArrayGetter, ByteArrayReleaser> ByteArrayHelper;
 
 inline float distance2(float x, float y, float z) {
     return x * x + y * y + z * z;
@@ -471,13 +566,13 @@ static
 void multiplyMM(float* r, const float* lhs, const float* rhs)
 {
     for (int i=0 ; i<4 ; i++) {
-        register const float rhs_i0 = rhs[ I(i,0) ];
-        register float ri0 = lhs[ I(0,0) ] * rhs_i0;
-        register float ri1 = lhs[ I(0,1) ] * rhs_i0;
-        register float ri2 = lhs[ I(0,2) ] * rhs_i0;
-        register float ri3 = lhs[ I(0,3) ] * rhs_i0;
+        const float rhs_i0 = rhs[ I(i,0) ];
+        float ri0 = lhs[ I(0,0) ] * rhs_i0;
+        float ri1 = lhs[ I(0,1) ] * rhs_i0;
+        float ri2 = lhs[ I(0,2) ] * rhs_i0;
+        float ri3 = lhs[ I(0,3) ] * rhs_i0;
         for (int j=1 ; j<4 ; j++) {
-            register const float rhs_ij = rhs[ I(i,j) ];
+            const float rhs_ij = rhs[ I(i,j) ];
             ri0 += lhs[ I(j,0) ] * rhs_ij;
             ri1 += lhs[ I(j,1) ] * rhs_ij;
             ri2 += lhs[ I(j,2) ] * rhs_ij;
@@ -547,14 +642,6 @@ void util_multiplyMV(JNIEnv *env, jclass clazz,
 }
 
 // ---------------------------------------------------------------------------
-
-static jfieldID nativeBitmapID = 0;
-
-void nativeUtilsClassInit(JNIEnv *env, jclass clazz)
-{
-    jclass bitmapClass = env->FindClass("android/graphics/Bitmap");
-    nativeBitmapID = env->GetFieldID(bitmapClass, "mNativeBitmap", "J");
-}
 
 extern void setGLDebugLevel(int level);
 void setTracingLevel(JNIEnv *env, jclass clazz, jint level)
@@ -629,26 +716,25 @@ static int getType(SkColorType colorType)
 static jint util_getInternalFormat(JNIEnv *env, jclass clazz,
         jobject jbitmap)
 {
-    SkBitmap const * nativeBitmap =
-            (SkBitmap const *)env->GetLongField(jbitmap, nativeBitmapID);
-    return getInternalFormat(nativeBitmap->colorType());
+    SkBitmap nativeBitmap;
+    GraphicsJNI::getSkBitmap(env, jbitmap, &nativeBitmap);
+    return getInternalFormat(nativeBitmap.colorType());
 }
 
 static jint util_getType(JNIEnv *env, jclass clazz,
         jobject jbitmap)
 {
-    SkBitmap const * nativeBitmap =
-            (SkBitmap const *)env->GetLongField(jbitmap, nativeBitmapID);
-    return getType(nativeBitmap->colorType());
+    SkBitmap nativeBitmap;
+    GraphicsJNI::getSkBitmap(env, jbitmap, &nativeBitmap);
+    return getType(nativeBitmap.colorType());
 }
 
 static jint util_texImage2D(JNIEnv *env, jclass clazz,
         jint target, jint level, jint internalformat,
         jobject jbitmap, jint type, jint border)
 {
-    SkBitmap const * nativeBitmap =
-            (SkBitmap const *)env->GetLongField(jbitmap, nativeBitmapID);
-    const SkBitmap& bitmap(*nativeBitmap);
+    SkBitmap bitmap;
+    GraphicsJNI::getSkBitmap(env, jbitmap, &bitmap);
     SkColorType colorType = bitmap.colorType();
     if (internalformat < 0) {
         internalformat = getInternalFormat(colorType);
@@ -675,9 +761,8 @@ static jint util_texImage2D(JNIEnv *env, jclass clazz,
         if (data) {
             void* const pixels = (char*)data + palette_size;
             SkColorTable* ctable = bitmap.getColorTable();
-            memcpy(data, ctable->lockColors(), ctable->count() * sizeof(SkPMColor));
+            memcpy(data, ctable->readColors(), ctable->count() * sizeof(SkPMColor));
             memcpy(pixels, p, size);
-            ctable->unlockColors();
             glCompressedTexImage2D(target, level, internalformat, w, h, border, imageSize, data);
             free(data);
         } else {
@@ -695,9 +780,8 @@ static jint util_texSubImage2D(JNIEnv *env, jclass clazz,
         jint target, jint level, jint xoffset, jint yoffset,
         jobject jbitmap, jint format, jint type)
 {
-    SkBitmap const * nativeBitmap =
-            (SkBitmap const *)env->GetLongField(jbitmap, nativeBitmapID);
-    const SkBitmap& bitmap(*nativeBitmap);
+    SkBitmap bitmap;
+    GraphicsJNI::getSkBitmap(env, jbitmap, &bitmap);
     SkColorType colorType = bitmap.colorType();
     if (format < 0) {
         format = getInternalFormat(colorType);
@@ -732,24 +816,22 @@ static jfieldID elementSizeShiftID;
 /* Cache method IDs each time the class is loaded. */
 
 static void
-nativeClassInitBuffer(JNIEnv *_env)
+nativeClassInitBuffer(JNIEnv *env)
 {
-    jclass nioAccessClassLocal = _env->FindClass("java/nio/NIOAccess");
-    nioAccessClass = (jclass) _env->NewGlobalRef(nioAccessClassLocal);
-
-    jclass bufferClassLocal = _env->FindClass("java/nio/Buffer");
-    bufferClass = (jclass) _env->NewGlobalRef(bufferClassLocal);
-
-    getBasePointerID = _env->GetStaticMethodID(nioAccessClass,
+    jclass nioAccessClassLocal = FindClassOrDie(env, "java/nio/NIOAccess");
+    nioAccessClass = MakeGlobalRefOrDie(env, nioAccessClassLocal);
+    getBasePointerID = GetStaticMethodIDOrDie(env, nioAccessClass,
             "getBasePointer", "(Ljava/nio/Buffer;)J");
-    getBaseArrayID = _env->GetStaticMethodID(nioAccessClass,
+    getBaseArrayID = GetStaticMethodIDOrDie(env, nioAccessClass,
             "getBaseArray", "(Ljava/nio/Buffer;)Ljava/lang/Object;");
-    getBaseArrayOffsetID = _env->GetStaticMethodID(nioAccessClass,
+    getBaseArrayOffsetID = GetStaticMethodIDOrDie(env, nioAccessClass,
             "getBaseArrayOffset", "(Ljava/nio/Buffer;)I");
-    positionID = _env->GetFieldID(bufferClass, "position", "I");
-    limitID = _env->GetFieldID(bufferClass, "limit", "I");
-    elementSizeShiftID =
-        _env->GetFieldID(bufferClass, "_elementSizeShift", "I");
+
+    jclass bufferClassLocal = FindClassOrDie(env, "java/nio/Buffer");
+    bufferClass = MakeGlobalRefOrDie(env, bufferClassLocal);
+    positionID = GetFieldIDOrDie(env, bufferClass, "position", "I");
+    limitID = GetFieldIDOrDie(env, bufferClass, "limit", "I");
+    elementSizeShiftID = GetFieldIDOrDie(env, bufferClass, "_elementSizeShift", "I");
 }
 
 static void *
@@ -759,8 +841,6 @@ getPointer(JNIEnv *_env, jobject buffer, jint *remaining)
     jint limit;
     jint elementSizeShift;
     jlong pointer;
-    jint offset;
-    void *data;
 
     position = _env->GetIntField(buffer, positionID);
     limit = _env->GetIntField(buffer, limitID);
@@ -900,10 +980,8 @@ static void etc1_encodeImage(JNIEnv *env, jclass clazz,
         } else if (outB.remaining() < encodedImageSize) {
             doThrowIAE(env, "out's remaining data < encoded image size");
         } else {
-            int result = etc1_encode_image((etc1_byte*) inB.getData(),
-                    width, height, pixelSize,
-                    stride,
-                    (etc1_byte*) outB.getData());
+            etc1_encode_image((etc1_byte*) inB.getData(), width, height, pixelSize, stride,
+                              (etc1_byte*) outB.getData());
         }
     }
 }
@@ -933,10 +1011,8 @@ static void etc1_decodeImage(JNIEnv *env, jclass clazz,
         } else if (outB.remaining() < imageSize) {
             doThrowIAE(env, "out's remaining data < image size");
         } else {
-            int result = etc1_decode_image((etc1_byte*) inB.getData(),
-                    (etc1_byte*) outB.getData(),
-                    width, height, pixelSize,
-                    stride);
+            etc1_decode_image((etc1_byte*) inB.getData(), (etc1_byte*) outB.getData(),
+                              width, height, pixelSize, stride);
         }
     }
 }
@@ -1023,7 +1099,6 @@ static JNINativeMethod gVisibilityMethods[] = {
 };
 
 static JNINativeMethod gUtilsMethods[] = {
-    {"nativeClassInit", "()V",                          (void*)nativeUtilsClassInit },
     { "native_getInternalFormat", "(Landroid/graphics/Bitmap;)I", (void*) util_getInternalFormat },
     { "native_getType", "(Landroid/graphics/Bitmap;)I", (void*) util_getType },
     { "native_texImage2D", "(IIILandroid/graphics/Bitmap;II)I", (void*)util_texImage2D },
@@ -1062,12 +1137,7 @@ int register_android_opengl_classes(JNIEnv* env)
     int result = 0;
     for (int i = 0; i < NELEM(gClasses); i++) {
         ClassRegistrationInfo* cri = &gClasses[i];
-        result = AndroidRuntime::registerNativeMethods(env,
-                cri->classPath, cri->methods, cri->methodCount);
-        if (result < 0) {
-            ALOGE("Failed to register %s: %d", cri->classPath, result);
-            break;
-        }
+        result = RegisterMethodsOrDie(env, cri->classPath, cri->methods, cri->methodCount);
     }
     return result;
 }
