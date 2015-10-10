@@ -1631,8 +1631,6 @@ void OpenGLRenderer::drawBitmapMesh(const SkBitmap* bitmap, int meshWidth, int m
             right = std::max(right, std::max(vertices[ax], std::max(vertices[bx], vertices[cx])));
             bottom = std::max(bottom, std::max(vertices[ay], std::max(vertices[by], vertices[cy])));
         }
-        indices[index++] = upVertexRow * vertexCountWidth + meshWidth;
-        currVertexRow--;
     }
 
     if (quickRejectSetupScissor(left, top, right, bottom)) {
