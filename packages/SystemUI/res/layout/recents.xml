@@ -29,7 +29,7 @@
     <!-- Recents View -->
     <com.android.systemui.recents.views.RecentsView
         android:id="@+id/recents_view"
-        android:layout_width="match_parent" 
+        android:layout_width="match_parent"
         android:layout_height="match_parent"
         android:focusable="true" />
 
@@ -53,4 +53,6 @@
         android:layout_gravity="center_horizontal|bottom"
         android:scaleType="fitXY"
         android:src="@drawable/recents_lower_gradient" />
+
+    <include layout="@layout/floating_action_button" />
 </FrameLayout>
