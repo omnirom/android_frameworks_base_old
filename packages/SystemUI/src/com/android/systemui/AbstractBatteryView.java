@@ -23,6 +23,7 @@ import android.content.IntentFilter;
 import android.content.res.Resources;
 import android.content.res.TypedArray;
 import android.graphics.Canvas;
+import android.graphics.Color;
 import android.graphics.Paint;
 import android.graphics.Path;
 import android.graphics.RectF;
@@ -46,6 +47,14 @@ public abstract class AbstractBatteryView extends View implements DemoMode,
     protected BatteryTracker mDemoTracker = new BatteryTracker();
     protected BatteryTracker mTracker = new BatteryTracker();
     private boolean mAttached;
+    protected boolean mShowPercent;
+    protected boolean mPercentInside;
+    protected final int[] mColors;
+    protected final int mCriticalLevel;
+    protected int mFrameColor;
+    protected int mChargeColor;
+    protected final float[] mBoltPoints;
+    protected boolean mChargingImage;
 
     protected class BatteryTracker extends BroadcastReceiver {
         public static final int UNKNOWN_LEVEL = -1;
@@ -159,6 +168,28 @@ public abstract class AbstractBatteryView extends View implements DemoMode,
 
     public AbstractBatteryView(Context context, AttributeSet attrs, int defStyle) {
         super(context, attrs, defStyle);
+
+        TypedArray atts = context.obtainStyledAttributes(attrs, R.styleable.BatteryMeterView,
+                defStyle, 0);
+        mFrameColor = atts.getColor(R.styleable.BatteryMeterView_frameColor,
+                getResources().getColor(R.color.batterymeter_frame_color));
+        TypedArray levels = getResources().obtainTypedArray(R.array.batterymeter_color_levels);
+        TypedArray colors = getResources().obtainTypedArray(R.array.batterymeter_color_values);
+
+        final int N = levels.length();
+        mColors = new int[2*N];
+        for (int i=0; i<N; i++) {
+            mColors[2*i] = levels.getInt(i, 0);
+            mColors[2*i+1] = colors.getColor(i, 0);
+        }
+        levels.recycle();
+        colors.recycle();
+        atts.recycle();
+
+        mCriticalLevel = getResources().getInteger(
+                com.android.internal.R.integer.config_criticalBatteryWarningLevel);
+        mChargeColor = getResources().getColor(R.color.batterymeter_charge_color);
+        mBoltPoints = loadBoltPoints();
     }
 
     public void setBatteryController(BatteryController batteryController) {
@@ -203,7 +234,65 @@ public abstract class AbstractBatteryView extends View implements DemoMode,
         }
     }
 
-    public boolean isHidingPercentViews() {
+    public void setShowPercent(boolean showPercent) {
+        mShowPercent = showPercent;
+    }
+
+    public void setPercentInside(boolean percentInside) {
+        mPercentInside = percentInside;
+    }
+
+    public void setChargingImage(boolean chargingImage) {
+        mChargingImage = chargingImage;
+    }
+
+    public void setChargingColor(int chargingColor) {
+        mChargeColor = chargingColor;
+    }
+
+    protected boolean isWideDisplay() {
+        return mShowPercent && !mPercentInside;
+    }
+
+    protected boolean showChargingImage() {
+        BatteryTracker tracker = mDemoMode ? mDemoTracker : mTracker;
+        return tracker.plugged && mChargingImage;
+    }
+
+    protected int getColorForLevel(int percent) {
+        // If we are in power save mode, always use the normal color.
+        if (mPowerSaveEnabled) {
+            return mColors[mColors.length-1];
+        }
+        int thresh, color = 0;
+        for (int i=0; i<mColors.length; i+=2) {
+            thresh = mColors[i];
+            color = mColors[i+1];
+            if (percent <= thresh) return color;
+        }
+        return color;
+    }
+
+    @Override
+    public boolean hasOverlappingRendering() {
         return false;
+    }
+
+    protected float[] loadBoltPoints() {
+        final int[] pts = getResources().getIntArray(R.array.batterymeter_bolt_points);
+        int maxX = 0, maxY = 0;
+        for (int i = 0; i < pts.length; i += 2) {
+            maxX = Math.max(maxX, pts[i]);
+            maxY = Math.max(maxY, pts[i + 1]);
+        }
+        final float[] ptsF = new float[pts.length];
+        for (int i = 0; i < pts.length; i += 2) {
+            ptsF[i] = (float)pts[i] / maxX;
+            ptsF[i + 1] = (float)pts[i + 1] / maxY;
+        }
+        return ptsF;
+    }
+
+    protected void applyStyle() {
     }
 }

@@ -20,7 +20,6 @@ import android.app.Notification;
 import android.app.Notification.Action;
 import android.app.NotificationManager;
 import android.app.PendingIntent;
-import android.database.ContentObserver;
 import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.Intent;
@@ -42,14 +41,6 @@ import android.util.SparseArray;
 
 import com.android.internal.R;
 import com.android.systemui.SystemUI;
-import com.android.systemui.R;
-
-import java.io.File;
-import java.util.Arrays;
-import java.util.List;
-import java.util.ArrayList;
-import java.util.Iterator;
-import java.lang.Thread;
 
 import java.util.List;
 
@@ -216,9 +207,6 @@ public class StorageNotification extends SystemUI {
 
                 mNotificationManager.notifyAsUser(fsUuid, PRIVATE_ID, notif, UserHandle.ALL);
             }
-        }
-        if (entry != null) {
-            if (DEBUG) Log.i(TAG, "X: removed:" + entry.mRemoved + " mounted:" + entry.mMounted + " plugged:" + entry.mPlugged);
         }
     }
 
@@ -676,151 +664,5 @@ public class StorageNotification extends SystemUI {
         final int requestKey = disk.getId().hashCode();
         return PendingIntent.getActivityAsUser(mContext, requestKey, intent,
                 PendingIntent.FLAG_CANCEL_CURRENT, null, UserHandle.CURRENT);
-    }
-
-    private boolean showMeditMountedNotification(final String volumePath) {
-        String notificationConfig = android.provider.Settings.System.getString(mContext.getContentResolver(),
-                android.provider.Settings.System.STORAGE_MOUNT_NOTIFICATION);
-        if (notificationConfig != null && notificationConfig.length() != 0) {
-            String[] pathArray = notificationConfig.split("\\|\\|");
-            if (Arrays.asList(pathArray).contains(volumePath)) {
-                return true;
-            }
-        }
-        return false;
-    }
-
-    private synchronized void setMediaStorageMountNotification(boolean mounted, final String path, boolean remove,
-            int showProgressType) {
-
-        NotificationManager notificationManager = (NotificationManager) mContext
-                .getSystemService(Context.NOTIFICATION_SERVICE);
-
-        if (notificationManager == null) {
-            return;
-        }
-
-        final StorageVolume volume = Environment.getStorageVolume(new File(path));
-        if (volume == null) {
-            return;
-        }
-        final int notificationId = volume.getDescriptionId();
-
-        if (!remove) {
-            final Notification.Builder builder = new Notification.Builder(mContext);
-            final String volumeTitle = TextUtils.isEmpty(volume.getDescription(mContext)) ?
-                            volume.getUserLabel() : volume.getDescription(mContext);
-            final Resources r = Resources.getSystem();
-
-            CharSequence titleTail = null;
-            if (showProgressType != 0) {
-                if (showProgressType == 1) {
-                    titleTail = mContext.getResources().getString(
-                            R.string.ext_media_unmounting_notification_title);
-                } else if (showProgressType == 2) {
-                    titleTail = mContext.getResources().getString(
-                            R.string.ext_media_mounting_notification_title);
-                }
-            } else {
-                titleTail = mContext.getResources().getString(mounted ?
-                        R.string.ext_media_mounted_notification_title :
-                        R.string.ext_media_unmounted_notification_title);
-            }
-            CharSequence title = volumeTitle + " " + titleTail;
-            CharSequence message = null;
-            if (showProgressType == 0) {
-                message = mounted ?
-                        path :
-                        mContext.getResources().getString(R.string.ext_media_unmounted_notification_message);
-            }
-            builder.setDefaults(Notification.DEFAULT_LIGHTS);
-            builder.setWhen(0);
-
-            Intent intent = new Intent(Settings.ACTION_INTERNAL_STORAGE_SETTINGS);
-            PendingIntent pi = PendingIntent.getActivity(mContext, notificationId, intent, 0);
-            builder.setContentIntent(pi);
-
-            Intent umountIntent = new Intent();
-            umountIntent.putExtra("path", path);
-            umountIntent.setAction(mounted ? UNMOUNT_ACTION : MOUNT_ACTION);
-
-            PendingIntent umountPi = PendingIntent.getBroadcast(mContext, notificationId,
-                    umountIntent, PendingIntent.FLAG_UPDATE_CURRENT);
-
-            builder.addAction(mounted ?
-                        R.drawable.ic_notify_eject :
-                        R.drawable.ic_notify_start,
-                    mContext.getResources().getString(mounted ?
-                        R.string.ext_media_unmount_action :
-                        R.string.ext_media_mount_action),
-                    umountPi);
-
-            builder.setSmallIcon(com.android.internal.R.drawable.stat_notify_sdcard);
-            builder.setContentTitle(title);
-            if (showProgressType == 0) {
-                builder.setContentText(message);
-            }
-            builder.setCategory(Notification.CATEGORY_SYSTEM);
-            builder.setOngoing(true);
-            builder.setAutoCancel(false);
-            builder.setTicker(title);
-
-            if (showProgressType != 0) {
-                builder.setProgress(0, 0, true);
-            }
-            notificationManager.notifyAsUser(null, notificationId,
-                    builder.build(), UserHandle.ALL);
-        } else {
-            notificationManager.cancelAsUser(null, notificationId, UserHandle.ALL);
-        }
-    }
-
-    public StorageEntry findEntry(String path) {
-        StorageEntry search = new StorageEntry();
-        search.mPath = path;
-        int idx = mStorageList.indexOf(search);
-        if (idx != -1) {
-            return mStorageList.get(idx);
-        }
-        return null;
-    }
-
-    private IMountService getMountService() {
-        IBinder service = ServiceManager.getService("mount");
-        if (service != null) {
-            return IMountService.Stub.asInterface(service);
-        }
-        return null;
-    }
-
-    private void unmount(final String path) {
-        IMountService mountService = getMountService();
-        try {
-            if (mountService != null) {
-                mountService.unmountVolume(path, true, false);
-            } else {
-                Log.e(TAG, "Mount service is null, can't mount");
-            }
-        } catch (RemoteException e) {
-            // Not much can be done
-        }
-    }
-
-    private void mount(final String path) {
-        final IMountService mountService = getMountService();
-        if (mountService != null) {
-            new Thread(new Runnable() {
-                @Override
-                public void run() {
-                    try {
-                        mountService.mountVolume(path);
-                    } catch (RemoteException ex) {
-                        // Not much can be done
-                    }
-                }
-            }).start();
-        } else {
-            Log.e(TAG, "Mount service is null, can't mount");
-        }
     }
 }

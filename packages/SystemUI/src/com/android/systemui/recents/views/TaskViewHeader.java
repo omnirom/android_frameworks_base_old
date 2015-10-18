@@ -24,6 +24,7 @@ import android.animation.ObjectAnimator;
 import android.animation.ValueAnimator;
 import android.content.Context;
 import android.content.res.ColorStateList;
+import android.content.res.Resources;
 import android.graphics.Canvas;
 import android.graphics.Color;
 import android.graphics.drawable.ColorDrawable;
@@ -117,10 +118,11 @@ public class TaskViewHeader extends FrameLayout {
         });
 
         // Load the dismiss resources
-        mLightDismissDrawable = context.getDrawable(R.drawable.recents_dismiss_light);
-        mDarkDismissDrawable = context.getDrawable(R.drawable.recents_dismiss_dark);
+        Resources res = context.getResources();
+        mLightDismissDrawable = res.getDrawable(R.drawable.recents_dismiss_light);
+        mDarkDismissDrawable = res.getDrawable(R.drawable.recents_dismiss_dark);
         mDismissContentDescription =
-                context.getString(R.string.accessibility_recents_item_will_be_dismissed);
+                res.getString(R.string.accessibility_recents_item_will_be_dismissed);
 
         // Load the screen pinning resources
         mLightPinDrawable = res.getDrawable(R.drawable.ic_pin);
@@ -144,6 +146,7 @@ public class TaskViewHeader extends FrameLayout {
         mActivityDescription = (TextView) findViewById(R.id.activity_description);
         mDismissButton = (ImageView) findViewById(R.id.dismiss_task);
         mMoveTaskButton = (ImageView) findViewById(R.id.move_task);
+        mPinButton = (ImageView) findViewById(R.id.lock_to_app_fab);
 
         // Hide the backgrounds if they are ripple drawables
         if (!Constants.DebugFlags.App.EnableTaskFiltering) {
