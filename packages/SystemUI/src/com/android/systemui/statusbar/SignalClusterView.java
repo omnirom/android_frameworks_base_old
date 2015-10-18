@@ -190,7 +190,6 @@ public class SignalClusterView
         mEthernet       = null;
         mWifiGroup      = null;
         mWifi           = null;
-        mWifiActivity   = null;
         mAirplane       = null;
         mMobileSignalGroup.removeAllViews();
         mMobileSignalGroup = null;
@@ -349,19 +348,10 @@ public class SignalClusterView
             mLastWifiStrengthId = -1;
         }
 
-        if (mWifiActivity != null) {
-            mWifiActivity.setImageDrawable(null);
-        }
-
         for (PhoneState state : mPhoneStates) {
             if (state.mMobile != null) {
                 state.mMobile.setImageDrawable(null);
             }
-
-            if (state.mMobileActivity != null) {
-                state.mMobileActivity.setImageDrawable(null);
-            }
-
             if (state.mMobileType != null) {
                 state.mMobileType.setImageDrawable(null);
             }
@@ -417,9 +407,9 @@ public class SignalClusterView
         }
 
         if (DEBUG) Log.d(TAG,
-                String.format("wifi: %s sig=%d act=%d",
+                String.format("wifi: %s sig=%d",
                     (mWifiVisible ? "VISIBLE" : "GONE"),
-                    mWifiStrengthId, mWifiActivityId));
+                    mWifiStrengthId));
 
         boolean anyMobileVisible = false;
         int firstMobileTypeId = 0;
@@ -495,7 +485,6 @@ public class SignalClusterView
         private final int mSubId;
         private boolean mMobileVisible = false;
         private int mMobileStrengthId = 0, mMobileTypeId = 0;
-        private int mMobileActivityId = 0;
         private boolean mIsMobileTypeIconWide;
         private String mMobileDescription, mMobileTypeDescription;
 
@@ -514,7 +503,6 @@ public class SignalClusterView
             mMobile         = (ImageView) root.findViewById(R.id.mobile_signal);
             mMobileDark     = (ImageView) root.findViewById(R.id.mobile_signal_dark);
             mMobileType     = (ImageView) root.findViewById(R.id.mobile_type);
-            mMobileActivity = (ImageView) root.findViewById(R.id.mobile_inout);
         }
 
         public boolean apply(boolean isSecondaryIcon) {
@@ -541,7 +529,6 @@ public class SignalClusterView
                 mMobileGroup.setContentDescription(mMobileTypeDescription
                         + " " + mMobileDescription);
                 mMobileGroup.setVisibility(View.VISIBLE);
-                mMobileActivity.setImageResource(mMobileActivityId);
             } else {
                 mMobileGroup.setVisibility(View.GONE);
             }
