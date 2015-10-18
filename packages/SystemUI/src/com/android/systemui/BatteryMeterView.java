@@ -37,9 +37,11 @@ import android.os.Handler;
 import android.provider.Settings;
 import android.util.AttributeSet;
 import android.view.View;
-import android.util.Log;
 
-public class BatteryMeterView extends AbstractBatteryView {
+import com.android.systemui.statusbar.policy.BatteryController;
+
+public class BatteryMeterView extends View implements DemoMode,
+        BatteryController.BatteryStateChangeCallback {
     public static final String TAG = BatteryMeterView.class.getSimpleName();
     public static final String ACTION_LEVEL_TEST = "com.android.systemui.BATTERY_LEVEL_TEST";
     public static final String SHOW_PERCENT_SETTING = "status_bar_show_battery_percent";
@@ -187,6 +189,22 @@ public class BatteryMeterView extends AbstractBatteryView {
         getContext().unregisterReceiver(mTracker);
         mBatteryController.removeStateChangedCallback(this);
         getContext().getContentResolver().unregisterContentObserver(mSettingObserver);
+    }
+
+    public void setBatteryController(BatteryController batteryController) {
+        mBatteryController = batteryController;
+        mPowerSaveEnabled = mBatteryController.isPowerSave();
+    }
+
+    @Override
+    public void onBatteryLevelChanged(int level, boolean pluggedIn, boolean charging) {
+        // TODO: Use this callback instead of own broadcast receiver.
+    }
+
+    @Override
+    public void onPowerSaveChanged() {
+        mPowerSaveEnabled = mBatteryController.isPowerSave();
+        invalidate();
     }
 
     private static float[] loadBoltPoints(Resources res) {
