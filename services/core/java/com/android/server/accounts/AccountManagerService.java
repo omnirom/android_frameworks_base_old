@@ -125,7 +125,6 @@ public class AccountManagerService
     private final PackageManager mPackageManager;
     private final AppOpsManager mAppOpsManager;
     private UserManager mUserManager;
-    private AppOpsManager mAppOps;
 
     private final MessageHandler mMessageHandler;
 
@@ -4114,25 +4113,6 @@ public class AccountManagerService
     }
 
     /*
-     * Remove accounts by other applications if this app does not have the required AppOp
-     */
-    private Account[] filterOtherAccounts(Account[] accounts, int callingUid, String callingPackage) {
-        String[] names = mPackageManager.getPackagesForUid(callingUid);
-        if (names.length == 0 || mAppOps.noteOp(AppOpsManager.OP_OTHER_ACCOUNTS, callingUid, names[0])
-                == AppOpsManager.MODE_ALLOWED) {
-            return Arrays.copyOf(accounts, accounts.length);
-        }
-        ArrayList<Account> allowed = new ArrayList<>();
-        for (Account account : accounts) {
-            if (hasAuthenticatorUid(account.type, callingUid)) {
-                allowed.add(account);
-            }
-        }
-        return allowed.toArray(new Account[allowed.size()]);
-    }
-
-
-    /*
      * packageName can be null. If not null, it should be used to filter out restricted accounts
      * that the package is not allowed to access.
      */
@@ -4143,8 +4123,8 @@ public class AccountManagerService
             if (accounts == null) {
                 return EMPTY_ACCOUNT_ARRAY;
             } else {
-                return filterSharedAccounts(userAccounts, filterOtherAccounts(accounts, 
-                        callingUid, callingPackage), callingUid, callingPackage);
+                return filterSharedAccounts(userAccounts, Arrays.copyOf(accounts, accounts.length),
+                        callingUid, callingPackage);
             }
         } else {
             int totalLength = 0;
@@ -4161,8 +4141,7 @@ public class AccountManagerService
                         accountsOfType.length);
                 totalLength += accountsOfType.length;
             }
-            return filterSharedAccounts(userAccounts, filterOtherAccounts(accounts, callingUid,
-                    callingPackage), callingUid, callingPackage);
+            return filterSharedAccounts(userAccounts, accounts, callingUid, callingPackage);
         }
     }
 

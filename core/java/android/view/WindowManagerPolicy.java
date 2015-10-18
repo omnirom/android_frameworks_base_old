@@ -779,8 +779,7 @@ public interface WindowManagerPolicy {
      * Create and return an animation to let the wallpaper disappear after being shown on a force
      * hiding window.
      */
-    public Animation createForceHideWallpaperExitAnimation(boolean goingToNotificationShade,
-            boolean keyguardShowingMedia);
+    public Animation createForceHideWallpaperExitAnimation(boolean goingToNotificationShade);
 
     /**
      * Called from the input reader thread before a key is enqueued.

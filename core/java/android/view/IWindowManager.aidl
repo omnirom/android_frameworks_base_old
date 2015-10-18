@@ -130,7 +130,7 @@ interface IWindowManager
     boolean inKeyguardRestrictedInputMode();
     void dismissKeyguard();
     void keyguardGoingAway(boolean disableWindowAnimations,
-            boolean keyguardGoingToNotificationShade, boolean keyguardShowingMedia);
+            boolean keyguardGoingToNotificationShade);
 
     void closeSystemDialogs(String reason);
 

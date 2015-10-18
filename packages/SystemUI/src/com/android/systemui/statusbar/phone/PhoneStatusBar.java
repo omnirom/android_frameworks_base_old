@@ -110,7 +110,7 @@ import com.android.internal.util.omni.OmniSwitchConstants;
 import com.android.keyguard.KeyguardHostView.OnDismissAction;
 import com.android.keyguard.KeyguardUpdateMonitor;
 import com.android.keyguard.ViewMediatorCallback;
-import com.android.systemui.BatteryViewManager;
+import com.android.systemui.BatteryMeterView;
 import com.android.systemui.DemoMode;
 import com.android.systemui.EventLogConstants;
 import com.android.systemui.EventLogTags;
@@ -294,7 +294,6 @@ public class PhoneStatusBar extends BaseStatusBar implements DemoMode,
 
     StatusBarWindowView mStatusBarWindow;
     PhoneStatusBarView mStatusBarView;
-    BatteryViewManager mBatteryViewManager;
     private int mStatusBarWindowState = WINDOW_STATE_SHOWING;
     private StatusBarWindowManager mStatusBarWindowManager;
     private UnlockMethodCache mUnlockMethodCache;
@@ -329,7 +328,7 @@ public class PhoneStatusBar extends BaseStatusBar implements DemoMode,
     private long mKeyguardFadingAwayDuration;
 
     int mKeyguardMaxNotificationCount;
-
+    private int mStatusBarHeaderHeight;
     boolean mExpandedVisible;
 
     private int mNavigationBarWindowState = WINDOW_STATE_SHOWING;
@@ -488,12 +487,6 @@ public class PhoneStatusBar extends BaseStatusBar implements DemoMode,
                     Settings.System.SCREEN_BRIGHTNESS_MODE_MANUAL;
             mBrightnessControl = Settings.System.getIntForUser(
                     mContext.getContentResolver(), Settings.System.STATUS_BAR_BRIGHTNESS_CONTROL, 0, mCurrentUserId) == 1;
-
-            if (mNetworkController != null) {
-                boolean showIndicators = Settings.System.getIntForUser(
-                        mContext.getContentResolver(), Settings.System.STATUS_BAR_NETWORK_ACTIVITY, 0, mCurrentUserId) == 1;
-                mNetworkController.setShowIndicators(showIndicators);
-            }
         }
     }
     private OmniSettingsObserver mOmniSettingsObserver = new OmniSettingsObserver(mHandler);
@@ -1000,11 +993,8 @@ public class PhoneStatusBar extends BaseStatusBar implements DemoMode,
         mUserInfoController.reloadUserInfo();
 
         mHeader.setBatteryController(mBatteryController);
-
-        LinearLayout batteryContainer = (LinearLayout) mStatusBarView.findViewById(R.id.battery_container);
-        mBatteryViewManager = new BatteryViewManager(mContext, batteryContainer, mStatusBarView.getBarTransitions(), null);
-        mBatteryViewManager.setBatteryController(mBatteryController);
-
+        ((BatteryMeterView) mStatusBarView.findViewById(R.id.battery)).setBatteryController(
+                mBatteryController);
         mKeyguardStatusBar.setBatteryController(mBatteryController);
         mHeader.setNextAlarmController(mNextAlarmController);
 
@@ -2497,7 +2487,7 @@ public class PhoneStatusBar extends BaseStatusBar implements DemoMode,
 
         if (mBrightnessControl) {
             brightnessControl(event);
-            if ((mDisabled & StatusBarManager.DISABLE_EXPAND) != 0) {
+            if ((mDisabled2 & StatusBarManager.DISABLE_EXPAND) != 0) {
                 return true;
             }
         }
@@ -3221,28 +3211,6 @@ public class PhoneStatusBar extends BaseStatusBar implements DemoMode,
                 mUserSetupObserver, mCurrentUserId);
     }
 
-    private void setHeadsUpVisibility(boolean vis) {
-        if (!ENABLE_HEADS_UP) return;
-        if (DEBUG) Log.v(TAG, (vis ? "showing" : "hiding") + " heads up window");
-        EventLog.writeEvent(EventLogTags.SYSUI_HEADS_UP_STATUS,
-                vis ? mHeadsUpNotificationView.getKey() : "",
-                vis ? 1 : 0);
-        mHeadsUpNotificationView.setVisibility(vis ? View.VISIBLE : View.GONE);
-    }
-
-    public void onHeadsUpDismissed(boolean direction) {
-        // If direction == true we know that the notification
-        // was dismissed to the right. So we just hide it that
-        // the notification will stay in our notification
-        // drawer. Left swipe as usual dismisses the notification
-        // completely if the notification is clearable.
-        if (direction) {
-            scheduleHeadsUpClose();
-        } else {
-            mHeadsUpNotificationView.dismiss();
-        }
-     }
-
     /**
      * Reload some of our resources when the configuration changes.
      *
@@ -3272,6 +3240,7 @@ public class PhoneStatusBar extends BaseStatusBar implements DemoMode,
         mNaturalBarHeight = res.getDimensionPixelSize(
                 com.android.internal.R.dimen.status_bar_height);
 
+        mStatusBarHeaderHeight = res.getDimensionPixelSize(R.dimen.status_bar_header_height);
         mRowMinHeight =  res.getDimensionPixelSize(R.dimen.notification_min_height);
         mRowMaxHeight =  res.getDimensionPixelSize(R.dimen.notification_max_height);
 
@@ -3528,10 +3497,7 @@ public class PhoneStatusBar extends BaseStatusBar implements DemoMode,
             dispatchDemoCommandToView(command, args, R.id.clock);
         }
         if (modeChange || command.equals(COMMAND_BATTERY)) {
-            View battery = mBatteryViewManager.getCurrentBatteryView();
-            if (battery != null) {
-                dispatchDemoCommandToView(command, args, battery);
-            }
+            dispatchDemoCommandToView(command, args, R.id.battery);
         }
         if (modeChange || command.equals(COMMAND_STATUS)) {
             mIconController.dispatchDemoCommand(command, args);
@@ -4421,15 +4387,12 @@ public class PhoneStatusBar extends BaseStatusBar implements DemoMode,
                 mNavigationBarView =
                     (NavigationBarView) View.inflate(mContext, R.layout.navigation_bar, null);
 
-                mNavigationBarView.setDisabledFlags(mDisabled);
+                mNavigationBarView.setDisabledFlags(mDisabled1, true);
                 mNavigationBarView.setBar(this);
                 mNavigationBarView.setOnVerticalChangedListener(
                         new NavigationBarView.OnVerticalChangedListener() {
                     @Override
                     public void onVerticalChanged(boolean isVertical) {
-                        if (mSearchPanelView != null) {
-                            mSearchPanelView.setHorizontal(isVertical);
-                        }
                         mNotificationPanel.setQsScrimEnabled(!isVertical);
                     }
                 });

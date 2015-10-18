@@ -2573,7 +2573,6 @@ public class PhoneWindowManager implements WindowManagerPolicy {
         return set;
     }
 
-
     @Override
     public Animation createForceHideWallpaperExitAnimation(boolean goingToNotificationShade) {
         if (goingToNotificationShade) {
