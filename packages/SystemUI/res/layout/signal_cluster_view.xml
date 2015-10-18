@@ -75,12 +75,6 @@
             android:alpha="0.0"
             systemui:hasOverlappingRendering="false"
             />
-        <ImageView
-            android:id="@+id/wifi_inout"
-            android:layout_height="wrap_content"
-            android:layout_width="wrap_content"
-            android:layout_gravity="center_horizontal|bottom"
-            />
     </FrameLayout>
     <View
         android:id="@+id/wifi_signal_spacer"

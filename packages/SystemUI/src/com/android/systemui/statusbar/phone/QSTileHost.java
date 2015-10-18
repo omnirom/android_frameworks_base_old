@@ -134,6 +134,11 @@ public class QSTileHost implements QSTile.Host, Tunable {
     }
 
     @Override
+    public void startSettingsActivity(final Intent intent) {
+        mStatusBar.postStartActivityDismissingKeyguard(intent, 0);
+    }
+
+    @Override
     public void warn(String message, Throwable t) {
         // already logged
     }

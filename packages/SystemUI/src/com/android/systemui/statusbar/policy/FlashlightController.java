@@ -97,6 +97,11 @@ public class FlashlightController {
         return mFlashlightEnabled;
     }
 
+    public synchronized void toggleFlashlight() {
+        boolean flashlightEnabled = !mFlashlightEnabled;
+        setFlashlight(flashlightEnabled);
+    }
+
     public synchronized boolean isAvailable() {
         return mTorchAvailable;
     }

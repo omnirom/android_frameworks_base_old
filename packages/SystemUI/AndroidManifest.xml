@@ -163,9 +163,6 @@
             android:process=":screenshot"
             android:exported="false" />
 
-        <receiver android:name=".screenshot.TrashScreenshot"
-                android:exported="true" />
-
         <!-- started from PhoneWindowManager
              TODO: Should have an android:permission attribute -->
         <service android:name=".omni.screenrecord.TakeScreenrecordService"

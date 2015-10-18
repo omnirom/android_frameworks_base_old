@@ -59,7 +59,6 @@ import android.view.animation.Interpolator;
 import android.widget.ImageView;
 
 import com.android.systemui.R;
-import com.android.systemui.screenshot.TrashScreenshot;
 
 import java.io.File;
 import java.io.FileOutputStream;
