@@ -56,7 +56,6 @@ public class KeyButtonView extends ImageView {
                 // Log.d("KeyButtonView", "longpressed: " + this);
                 if (isLongClickable()) {
                     // Just an old-fashioned ImageView
-                    mPerformedLongClick = true;
                     performLongClick();
                 } else if (mSupportsLongpress) {
                     sendEvent(KeyEvent.ACTION_DOWN, KeyEvent.FLAG_LONG_PRESS);
@@ -85,7 +84,7 @@ public class KeyButtonView extends ImageView {
         setClickable(true);
         mTouchSlop = ViewConfiguration.get(context).getScaledTouchSlop();
         mAudioManager = (AudioManager) context.getSystemService(Context.AUDIO_SERVICE);
-        setBackground(mRipple = new KeyButtonRipple(context, this));
+        setBackground(new KeyButtonRipple(context, this));
     }
 
     @Override
@@ -158,9 +157,6 @@ public class KeyButtonView extends ImageView {
                 break;
             case MotionEvent.ACTION_CANCEL:
                 setPressed(false);
-                // hack to fix ripple getting stuck. exitHardware() starts an animation,
-                // but sometimes does not finish it.
-                mRipple.exitSoftware();
                 if (mCode != 0) {
                     sendEvent(KeyEvent.ACTION_UP, KeyEvent.FLAG_CANCELED);
                 }
@@ -179,7 +175,7 @@ public class KeyButtonView extends ImageView {
                     }
                 } else {
                     // no key code, just a regular ImageView
-                    if (doIt && !mPerformedLongClick) {
+                    if (doIt) {
                         performClick();
                     }
                 }

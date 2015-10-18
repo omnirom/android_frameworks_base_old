@@ -28,6 +28,7 @@ import android.widget.LinearLayout;
 
 import com.android.internal.widget.LockPatternChecker;
 import com.android.internal.widget.LockPatternUtils;
+import com.android.internal.widget.LockPatternUtils.RequestThrottledException;
 
 /**
  * Base class for PIN and password unlock screens.
@@ -165,9 +166,12 @@ public abstract class KeyguardAbsKeyInputView extends LinearLayout
         // Do not call resetPasswordText and do not reportUnlockAttempt
         // as this is called for every entered number.
         String entry = getPasswordText();
-        if (mLockPatternUtils.checkPassword(entry)) {
-            mCallback.reportUnlockAttempt(true);
-            mCallback.dismiss(true);
+        try {
+            if (mLockPatternUtils.checkPassword(entry, KeyguardUpdateMonitor.getCurrentUser())) {
+                mCallback.reportUnlockAttempt(true, KeyguardUpdateMonitor.getCurrentUser());
+                mCallback.dismiss(true);
+            }
+        } catch (RequestThrottledException ex) {
         }
     }
 

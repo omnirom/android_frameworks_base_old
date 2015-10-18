@@ -993,6 +993,31 @@ public final class PowerManager {
             = "android.os.action.SCREEN_BRIGHTNESS_BOOST_CHANGED";
 
     /**
+     * Get current active power profile if supported
+     *
+     * @hide
+     */
+    public String getCurrentPowerProfile() {
+        try {
+            return mService.getCurrentPowerProfile();
+        } catch (RemoteException e) {
+            return null;
+        }
+    }
+
+    /**
+     * Force set a profile overruling automatic profile selection
+     *
+     * @hide
+     */
+    void setPowerProfile(String profile) {
+        try {
+            mService.setPowerProfile(profile);
+        } catch (RemoteException e) {
+        }
+    }
+
+    /**
      * A wake lock is a mechanism to indicate that your application needs
      * to have the device stay on.
      * <p>
