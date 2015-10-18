@@ -1,7 +1,4 @@
 /*
- * Copyright (c) 2013-2014, The Linux Foundation. All rights reserved.
- * Not a Contribution.
- *
  * Copyright (C) 2012 The Android Open Source Project
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
@@ -30,7 +27,6 @@ import android.os.Parcel;
 import android.os.Parcelable;
 import android.os.Process;
 import android.os.RemoteException;
-import android.os.SystemProperties;
 import android.os.UserHandle;
 import android.os.UserManager;
 import android.util.ArrayMap;
@@ -107,18 +103,9 @@ public class AppOpsManager {
      */
     public static final int MODE_DEFAULT = 3;
 
-    /**
-     * @hide Result from {@link #checkOp}, {@link #noteOp}, {@link #startOp}:
-     * AppOps Service should show a dialog box on screen to get user
-     * permission.
-     */
-    public static final int MODE_ASK = 4;
-
     // when adding one of these:
     //  - increment _NUM_OP
-    //  - add rows to sOpToSwitch, sOpToString, sOpNames, sOpPerms, sOpDefaultMode, sOpDefaultStrictMode,
-    //    sOpToOpString, sOpStrictMode.
-    //  - add descriptive strings to frameworks/base/core/res/res/values/config.xml
+    //  - add rows to sOpToSwitch, sOpToString, sOpNames, sOpPerms, sOpDefaultMode
     //  - add descriptive strings to Settings/res/values/arrays.xml
     //  - add the op to the appropriate template in AppOpsState.OpsTemplate (settings app)
 
@@ -349,119 +336,6 @@ public class AppOpsManager {
     /** @hide Get device accounts. */
     public static final String OPSTR_GET_ACCOUNTS
             = "android:get_accounts";
-
-    private static final String OPSTR_GPS =
-            "android:gps";
-    private static final String OPSTR_VIBRATE =
-            "android:vibrate";
-    private static final String OPSTR_READ_CONTACTS =
-            "android:read_contacts";
-    private static final String OPSTR_WRITE_CONTACTS =
-            "android:write_contacts";
-    private static final String OPSTR_READ_CALL_LOG =
-            "android:read_call_log";
-    private static final String OPSTR_WRITE_CALL_LOG =
-            "android:write_call_log";
-    private static final String OPSTR_READ_CALENDAR =
-            "android:read_calendar";
-    private static final String OPSTR_WRITE_CALENDAR =
-            "android:write_calendar";
-    private static final String OPSTR_WIFI_SCAN =
-            "android:wifi_scan";
-    private static final String OPSTR_POST_NOTIFICATION =
-            "android:post_notification";
-    private static final String OPSTR_NEIGHBORING_CELLS =
-            "android:neighboring_cells";
-    private static final String OPSTR_CALL_PHONE =
-            "android:call_phone";
-    private static final String OPSTR_READ_SMS =
-            "android:read_sms";
-    private static final String OPSTR_WRITE_SMS =
-            "android:write_sms";
-    private static final String OPSTR_RECEIVE_SMS =
-            "android:receive_sms";
-    private static final String OPSTR_RECEIVE_EMERGECY_SMS =
-            "android:receive_emergecy_sms";
-    private static final String OPSTR_RECEIVE_MMS =
-            "android:receive_mms";
-    private static final String OPSTR_RECEIVE_WAP_PUSH =
-            "android:receive_wap_push";
-    private static final String OPSTR_SEND_SMS =
-            "android:send_sms";
-    private static final String OPSTR_READ_ICC_SMS =
-            "android:read_icc_sms";
-    private static final String OPSTR_WRITE_ICC_SMS =
-            "android:write_icc_sms";
-    private static final String OPSTR_WRITE_SETTINGS =
-            "android:write_settings";
-    private static final String OPSTR_SYSTEM_ALERT_WINDOW =
-            "android:system_alert_window";
-    private static final String OPSTR_ACCESS_NOTIFICATIONS =
-            "android:access_notifications";
-    private static final String OPSTR_CAMERA =
-            "android:camera";
-    private static final String OPSTR_RECORD_AUDIO =
-            "android:record_audio";
-    private static final String OPSTR_PLAY_AUDIO =
-            "android:play_audio";
-    private static final String OPSTR_READ_CLIPBOARD =
-            "android:read_clipboard";
-    private static final String OPSTR_WRITE_CLIPBOARD =
-            "android:write_clipboard";
-    private static final String OPSTR_TAKE_MEDIA_BUTTONS =
-            "android:take_media_buttons";
-    private static final String OPSTR_TAKE_AUDIO_FOCUS =
-            "android:take_audio_focus";
-    private static final String OPSTR_AUDIO_MASTER_VOLUME =
-            "android:audio_master_volume";
-    private static final String OPSTR_AUDIO_VOICE_VOLUME =
-            "android:audio_voice_volume";
-    private static final String OPSTR_AUDIO_RING_VOLUME =
-            "android:audio_ring_volume";
-    private static final String OPSTR_AUDIO_MEDIA_VOLUME =
-            "android:audio_media_volume";
-    private static final String OPSTR_AUDIO_ALARM_VOLUME =
-            "android:audio_alarm_volume";
-    private static final String OPSTR_AUDIO_NOTIFICATION_VOLUME =
-            "android:audio_notification_volume";
-    private static final String OPSTR_AUDIO_BLUETOOTH_VOLUME =
-            "android:audio_bluetooth_volume";
-    private static final String OPSTR_WAKE_LOCK =
-            "android:wake_lock";
-    private static final String OPSTR_MUTE_MICROPHONE =
-            "android:mute_microphone";
-    private static final String OPSTR_TOAST_WINDOW =
-            "android:toast_window";
-    private static final String OPSTR_PROJECT_MEDIA =
-            "android:project_media";
-    private static final String OPSTR_WIFI_CHANGE =
-            "android:wifi_change";
-    private static final String OPSTR_BLUETOOTH_CHANGE =
-            "android:bluetooth_change";
-    private static final String OPSTR_SEND_MMS =
-            "android:send_mms";
-    private static final String OPSTR_READ_MMS =
-            "android:read_mms";
-    private static final String OPSTR_WRITE_MMS =
-            "android:write_mms";
-    private static final String OPSTR_BOOT_COMPLETED =
-            "android:boot_completed";
-    private static final String OPSTR_NFC_CHANGE =
-            "android:nfc_change";
-    private static final String OPSTR_DELETE_SMS =
-            "android:delete_sms";
-    private static final String OPSTR_DELETE_MMS =
-            "android:delete_mms";
-    private static final String OPSTR_DELETE_CONTACTS =
-            "android:delete_contacts";
-    private static final String OPSTR_DELETE_CALL_LOG =
-            "android:delete_call_log";
-    private static final String OPSTR_DATA_CONNECT_CHANGE =
-            "android:data_connect_change";
-    private static final String OPSTR_OTHER_ACCOUNTS =
-            "android:other_accounts";
-    private static final String OPSTR_READ_PHONE_INFO =
-            "android:read_phone_info";
 
     /**
      * This maps each operation to the operation that serves as the
@@ -1049,10 +923,6 @@ public class AppOpsManager {
             throw new IllegalStateException("sOpToString length " + sOpToString.length
                     + " should be " + _NUM_OP);
         }
-        if (sOpToOpString.length != _NUM_OP) {
-            throw new IllegalStateException("sOpToOpString length " + sOpToOpString.length
-                    + " should be " + _NUM_OP);
-        }
         if (sOpNames.length != _NUM_OP) {
             throw new IllegalStateException("sOpNames length " + sOpNames.length
                     + " should be " + _NUM_OP);
@@ -1065,10 +935,6 @@ public class AppOpsManager {
             throw new IllegalStateException("sOpDefaultMode length " + sOpDefaultMode.length
                     + " should be " + _NUM_OP);
         }
-        if (sOpDefaultStrictMode.length != _NUM_OP) {
-            throw new IllegalStateException("sOpDefaultStrictMode length " + sOpDefaultStrictMode.length
-                    + " should be " + _NUM_OP);
-        }
         if (sOpDisableReset.length != _NUM_OP) {
             throw new IllegalStateException("sOpDisableReset length " + sOpDisableReset.length
                     + " should be " + _NUM_OP);
@@ -1078,19 +944,12 @@ public class AppOpsManager {
                     + " should be " + _NUM_OP);
         }
         if (sOpAllowSystemRestrictionBypass.length != _NUM_OP) {
-            throw new IllegalStateException("sOpAllowSystemRestrictionsBypass length "
-                    + sOpAllowSystemRestrictionBypass.length + " should be " + _NUM_OP);
-        }
-        if (sOpStrictMode.length != _NUM_OP) {
-            throw new IllegalStateException("sOpStrictMode length "
-                    + sOpStrictMode.length + " should be " + _NUM_OP);
+            throw new IllegalStateException("sOpAllowSYstemRestrictionsBypass length "
+                    + sOpRestrictions.length + " should be " + _NUM_OP);
         }
         for (int i=0; i<_NUM_OP; i++) {
             if (sOpToString[i] != null) {
                 sOpStrToOp.put(sOpToString[i], i);
-            }
-            if (sOpToOpString[i] != null) {
-                sOpStringToOp.put(sOpToOpString[i], i);
             }
         }
         for (int i=0; i<_NUM_OP; i++) {
@@ -1167,9 +1026,7 @@ public class AppOpsManager {
      * Retrieve the default mode for the operation.
      * @hide
      */
-    public static int opToDefaultMode(int op, boolean isStrict) {
-        if (isStrict)
-            return sOpDefaultStrictMode[op];
+    public static int opToDefaultMode(int op) {
         return sOpDefaultMode[op];
     }
 
@@ -1895,50 +1752,5 @@ public class AppOpsManager {
     /** @hide */
     public void finishOp(int op) {
         finishOp(op, Process.myUid(), mContext.getOpPackageName());
-    }
-
-    /** @hide */
-    public static boolean isStrictEnable() {
-        return SystemProperties.getBoolean("persist.sys.strict_op_enable", false);
-    }
-
-    /**
-     * Check if op in strict mode
-     * @hide
-     */
-    public static boolean isStrictOp(int code) {
-        return sOpStrictMode[code];
-    }
-
-
-    /** @hide */
-    public static int stringToMode(String permission) {
-        if ("allowed".equalsIgnoreCase(permission)) {
-            return AppOpsManager.MODE_ALLOWED;
-        } else if ("ignored".equalsIgnoreCase(permission)) {
-            return AppOpsManager.MODE_IGNORED;
-        } else if ("ask".equalsIgnoreCase(permission)) {
-            return AppOpsManager.MODE_ASK;
-        }
-        return AppOpsManager.MODE_ERRORED;
-    }
-
-    /** @hide */
-    public static int stringOpToOp (String op) {
-        Integer val = sOpStringToOp.get(op);
-        if (val == null) {
-            val = OP_NONE;
-        }
-        return val;
-    }
-
-    /** @hide */
-    public boolean isControlAllowed(int op, String packageName) {
-        boolean isShow = true;
-        try {
-            isShow = mService.isControlAllowed(op, packageName);
-        } catch (RemoteException e) {
-        }
-        return isShow;
     }
 }
