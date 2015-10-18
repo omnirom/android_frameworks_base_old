@@ -361,18 +361,6 @@ public class TaskView extends FrameLayout implements Task.TaskCallbacks,
         }, startDelay);
     }
 
-    public void fadeInActionButton(int delay, int duration) {
-        // Hide the action button
-        mActionButtonView.setAlpha(0f);
-
-        // Animate the action button in
-        mActionButtonView.animate().alpha(1f)
-                .setStartDelay(delay)
-                .setDuration(duration)
-                .setInterpolator(PhoneStatusBar.ALPHA_IN)
-                .start();
-    }
-
     /** Animates this task view as it leaves recents by pressing home. */
     void startExitToHomeAnimation(ViewAnimation.TaskViewExitContext ctx) {
         animate()

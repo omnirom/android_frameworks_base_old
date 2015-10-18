@@ -1435,4 +1435,14 @@ public class UserManager {
             return 0;
         }
     }
+
+    /**
+     * @hide
+     */
+    public boolean opensUserSwitcher() {
+        final boolean enableMultiUser = SystemProperties.getBoolean("fw.show_multiuserui",
+                Resources.getSystem().getBoolean(R.bool.config_enableMultiUserUI));
+
+        return enableMultiUser && (canAddMoreUsers() || isUserSwitcherEnabled());
+    }
 }
