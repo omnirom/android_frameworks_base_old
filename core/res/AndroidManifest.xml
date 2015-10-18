@@ -1484,6 +1484,13 @@
         android:description="@string/permdesc_setWallpaperHints"
         android:protectionLevel="normal" />
 
+    <!-- Allows applications to set the keyguard wallpaper
+         @hide -->
+    <permission android:name="android.permission.SET_KEYGUARD_WALLPAPER"
+        android:protectionLevel="normal"
+        android:label="@string/permlab_setKeyguardWallpaper"
+        android:description="@string/permdesc_setKeyguardWallpaper" />
+
     <!-- ============================================ -->
     <!-- Permissions for changing the system clock -->
     <!-- ============================================ -->

@@ -21,7 +21,6 @@ package com.android.server;
 
 import android.Manifest;
 import android.app.ActivityManager;
-import android.app.AppOpsManager;
 import android.bluetooth.BluetoothAdapter;
 import android.bluetooth.BluetoothDevice;
 import android.bluetooth.BluetoothProfile;
@@ -622,7 +621,8 @@ class BluetoothManagerService extends IBluetoothManager.Stub {
         return true;
 
     }
-    public boolean enable(String callingPackage) {
+
+    public boolean enable() {
         if ((Binder.getCallingUid() != Process.SYSTEM_UID) &&
             (!checkIfCallerIsForegroundUser())) {
             Log.w(TAG,"enable(): not allowed for non-active and non system user");
@@ -635,13 +635,6 @@ class BluetoothManagerService extends IBluetoothManager.Stub {
             Log.d(TAG,"enable():  mBluetooth =" + mBluetooth +
                     " mBinding = " + mBinding);
         }
-
-        AppOpsManager appOps = (AppOpsManager) mContext
-                .getSystemService(Context.APP_OPS_SERVICE);
-        int callingUid = Binder.getCallingUid();
-        if (appOps.noteOp(AppOpsManager.OP_BLUETOOTH_CHANGE, callingUid,
-                callingPackage) != AppOpsManager.MODE_ALLOWED)
-            return false;
 
         synchronized(mReceiver) {
             mQuietEnableExternal = false;

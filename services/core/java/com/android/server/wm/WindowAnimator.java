@@ -92,7 +92,6 @@ public class WindowAnimator {
     boolean mKeyguardGoingAway;
     boolean mKeyguardGoingAwayToNotificationShade;
     boolean mKeyguardGoingAwayDisableWindowAnimations;
-    boolean mKeyguardGoingAwayShowingMedia;
 
     /** Use one animation for all entering activities after keyguard is dismissed. */
     Animation mPostKeyguardExitAnimation;
@@ -487,7 +486,7 @@ public class WindowAnimator {
                     && !mKeyguardGoingAwayDisableWindowAnimations) {
                 if (DEBUG_KEYGUARD) Slog.d(TAG, "updateWindowsLocked: wallpaper animating away");
                 Animation a = mPolicy.createForceHideWallpaperExitAnimation(
-                        mKeyguardGoingAwayToNotificationShade, mKeyguardGoingAwayShowingMedia);
+                        mKeyguardGoingAwayToNotificationShade);
                 if (a != null) {
                     wallpaper.mWinAnimator.setAnimation(a);
                 }
