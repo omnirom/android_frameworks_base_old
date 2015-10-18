@@ -22,7 +22,6 @@ import android.annotation.IntDef;
 import android.annotation.RequiresPermission;
 import android.annotation.SdkConstant;
 import android.annotation.SdkConstant.SdkConstantType;
-import android.app.ActivityThread;
 import android.annotation.SystemApi;
 import android.bluetooth.le.BluetoothLeAdvertiser;
 import android.bluetooth.le.BluetoothLeScanner;
@@ -899,7 +898,7 @@ public final class BluetoothAdapter {
                 return true;
         }
         try {
-            return mManagerService.enable(ActivityThread.currentPackageName());
+            return mManagerService.enable();
         } catch (RemoteException e) {Log.e(TAG, "", e);}
         return false;
     }
