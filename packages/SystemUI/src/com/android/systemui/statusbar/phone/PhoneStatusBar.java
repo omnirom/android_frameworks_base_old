@@ -157,6 +157,11 @@ import com.android.systemui.statusbar.policy.KeyButtonView;
 import com.android.systemui.statusbar.policy.KeyguardMonitor;
 import com.android.systemui.statusbar.policy.KeyguardUserSwitcher;
 import com.android.systemui.statusbar.policy.LocationControllerImpl;
+<<<<<<< HEAD
+=======
+import com.android.systemui.statusbar.policy.NetworkController;
+import com.android.systemui.statusbar.policy.MinitBattery;
+>>>>>>> db49b0d... Add 3Minit battery mod
 import com.android.systemui.statusbar.policy.NetworkControllerImpl;
 import com.android.systemui.statusbar.policy.NextAlarmController;
 import com.android.systemui.statusbar.policy.PreviewInflater;
@@ -800,7 +805,20 @@ public class PhoneStatusBar extends BaseStatusBar implements DemoMode,
         mStatusBarView = (PhoneStatusBarView) mStatusBarWindow.findViewById(R.id.status_bar);
         mStatusBarView.setBar(this);
 
+<<<<<<< HEAD
         PanelHolder holder = (PanelHolder) mStatusBarWindow.findViewById(R.id.panel_holder);
+=======
+        if (mNavigationController == null) {
+            mNavigationController = new NavigationController(mContext, this, mAddNavigationBar,
+                    mRemoveNavigationBar);
+        }
+        mPackageMonitor = new DUPackageMonitor();
+        mPackageMonitor.register(mContext, mHandler);
+        mPackageMonitor.addListener(mNavigationController);
+
+        PanelHolder holder = (PanelHolder) mStatusBarWindowContent.findViewById(R.id.panel_holder);
+
+>>>>>>> db49b0d... Add 3Minit battery mod
         mStatusBarView.setPanelHolder(holder);
 
         mNotificationPanel = (NotificationPanelView) mStatusBarWindow.findViewById(
@@ -1036,6 +1054,12 @@ public class PhoneStatusBar extends BaseStatusBar implements DemoMode,
                 mBatteryController);
         mKeyguardStatusBar.setBatteryController(mBatteryController);
         mHeader.setNextAlarmController(mNextAlarmController);
+
+        MinitBattery mb = (MinitBattery) mStatusBarView.findViewById(R.id.minitBattery);
+        if (!mb.isSetup()) {
+            BatteryMeterView bmv = (BatteryMeterView) mStatusBarView.findViewById(R.id.battery);
+            bmv.setVisibility(View.VISIBLE);
+        }
 
         PowerManager pm = (PowerManager) mContext.getSystemService(Context.POWER_SERVICE);
         mBroadcastReceiver.onReceive(mContext,
