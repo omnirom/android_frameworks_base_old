@@ -1,0 +1,27 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "b8f5b13e_05825604",
+        "filename": "media/java/android/media/AudioManager.java",
+        "patchSetId": 3
+      },
+      "lineNbr": 726,
+      "author": {
+        "id": 1000174
+      },
+      "writtenOn": "2015-10-19T18:45:54Z",
+      "side": 1,
+      "message": "Is that really needed?",
+      "range": {
+        "startLine": 726,
+        "startChar": 47,
+        "endLine": 726,
+        "endChar": 48
+      },
+      "revId": "f54c7d6bd16992d1dca1cb0697f417315e2d2375",
+      "serverId": "56841c99-7c94-43d4-bf0b-cb4707e66d55",
+      "unresolved": false
+    }
+  ]
+}
