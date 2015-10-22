@@ -57,7 +57,6 @@ LOCAL_C_INCLUDES += \
     external/tremor/Tremor \
     frameworks/base/core/jni \
     frameworks/base/libs/hwui \
-    frameworks/native/include/media/openmax \
     $(call include-path-for, libhardware)/hardware \
     system/media/camera/include \
     $(PV_INCLUDES) \
@@ -70,7 +69,8 @@ LOCAL_C_INCLUDES += \
     frameworks/av-caf/media/libstagefright/codecs/amrnb/enc/src \
     frameworks/av-caf/media/libstagefright/codecs/amrnb/common \
     frameworks/av-caf/media/libstagefright/codecs/amrnb/common/include \
-    frameworks/av-caf/media/mtp
+    frameworks/av-caf/media/mtp \
+    frameworks/native-caf/include/media/openmax
 else
 LOCAL_C_INCLUDES += \
     frameworks/av/media/libmedia \
@@ -78,7 +78,8 @@ LOCAL_C_INCLUDES += \
     frameworks/av/media/libstagefright/codecs/amrnb/enc/src \
     frameworks/av/media/libstagefright/codecs/amrnb/common \
     frameworks/av/media/libstagefright/codecs/amrnb/common/include \
-    frameworks/av/media/mtp
+    frameworks/av/media/mtp \
+    frameworks/native/include/media/openmax
 endif
 
 LOCAL_CFLAGS += -Wall -Werror -Wno-error=deprecated-declarations -Wunused -Wunreachable-code

@@ -30,9 +30,13 @@ LOCAL_SHARED_LIBRARIES := \
     libinput \
     libinputflinger
 
-LOCAL_C_INCLUDES := \
+ifeq ($(BOARD_USES_QCOM_HARDWARE),true)
+LOCAL_C_INCLUDES += \
+    frameworks/native-caf/services
+else
+LOCAL_C_INCLUDES += \
     frameworks/native/services
-
+endif
 
 LOCAL_CFLAGS += -Wall -Werror -Wunused -Wunreachable-code
 
