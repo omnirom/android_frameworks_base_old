@@ -176,11 +176,9 @@ LOCAL_C_INCLUDES += \
     $(JNI_H_INCLUDE) \
     $(LOCAL_PATH)/android/graphics \
     $(LOCAL_PATH)/../../libs/hwui \
-    $(LOCAL_PATH)/../../../native/opengl/libs \
     $(call include-path-for, bluedroid) \
     $(call include-path-for, libhardware)/hardware \
     $(call include-path-for, libhardware_legacy)/hardware_legacy \
-    $(TOP)/frameworks/av/include \
     $(TOP)/frameworks/base/media/jni \
     $(TOP)/system/media/camera/include \
     $(TOP)/system/netd/include \
@@ -206,10 +204,12 @@ LOCAL_C_INCLUDES += \
 
 ifeq ($(BOARD_USES_QCOM_HARDWARE),true)
 LOCAL_C_INCLUDES += \
-        $(TOP)/frameworks/av-caf/include
+        $(TOP)/frameworks/av-caf/include \
+        $(LOCAL_PATH)/../../../native-caf/opengl/libs
 else
 LOCAL_C_INCLUDES += \
-        $(TOP)/frameworks/av/include
+        $(TOP)/frameworks/av/include \
+        $(LOCAL_PATH)/../../../native/opengl/libs
 endif
 
 LOCAL_SHARED_LIBRARIES := \
