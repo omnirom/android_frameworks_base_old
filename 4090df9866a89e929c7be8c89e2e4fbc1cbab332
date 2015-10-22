@@ -16,6 +16,24 @@
       "revId": "4090df9866a89e929c7be8c89e2e4fbc1cbab332",
       "serverId": "56841c99-7c94-43d4-bf0b-cb4707e66d55",
       "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "b8f5b13e_f399786e",
+        "filename": "media/java/android/media/AudioManager.java",
+        "patchSetId": 4
+      },
+      "lineNbr": 726,
+      "author": {
+        "id": 1000174
+      },
+      "writtenOn": "2015-10-22T18:02:30Z",
+      "side": 1,
+      "message": "I know, Guillaume added it. Will delete, give me a few seconds.",
+      "parentUuid": "b8f5b13e_3398006b",
+      "revId": "4090df9866a89e929c7be8c89e2e4fbc1cbab332",
+      "serverId": "56841c99-7c94-43d4-bf0b-cb4707e66d55",
+      "unresolved": false
     }
   ]
 }
