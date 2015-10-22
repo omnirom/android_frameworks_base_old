@@ -1,0 +1,21 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "b8f5b13e_3398006b",
+        "filename": "media/java/android/media/AudioManager.java",
+        "patchSetId": 4
+      },
+      "lineNbr": 726,
+      "author": {
+        "id": 1000124
+      },
+      "writtenOn": "2015-10-22T18:01:28Z",
+      "side": 1,
+      "message": "remove this, it doesn\u0027t have a closing bracket and it\u0027\ns breaking the switch.",
+      "revId": "4090df9866a89e929c7be8c89e2e4fbc1cbab332",
+      "serverId": "56841c99-7c94-43d4-bf0b-cb4707e66d55",
+      "unresolved": false
+    }
+  ]
+}
