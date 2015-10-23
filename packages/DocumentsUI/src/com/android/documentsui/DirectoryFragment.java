@@ -778,10 +778,6 @@ public class DirectoryFragment extends Fragment {
         return !hadTrouble;
     }
 
-    private void onCopyDocuments(final List<DocumentInfo> docs) {
-        ((DocumentsActivity) getActivity()).setClipboardDocuments(docs, true);
-    }
-
     private void onCutDocuments(final List<DocumentInfo> docs) {
         ((DocumentsActivity) getActivity()).setClipboardDocuments(docs, false);
     }

@@ -498,6 +498,7 @@ public class DocumentsActivity extends BaseActivity {
                 mRootsToolbar.setTitle(R.string.title_open);
             } else if (mState.action == ACTION_CREATE) {
                 mRootsToolbar.setTitle(R.string.title_save);
+            }
             final String prompt = getIntent().getStringExtra(DocumentsContract.EXTRA_PROMPT);
             if (prompt != null) {
                 mRootsToolbar.setTitle(prompt);
@@ -820,14 +821,6 @@ public class DocumentsActivity extends BaseActivity {
         mClipboardFiles = null;
     }
 
-    public void onSaveRequested(DocumentInfo replaceTarget) {
-        new ExistingFinishTask(replaceTarget.derivedUri).executeOnExecutor(getCurrentExecutor());
-    }
-
-    public void onSaveRequested(String mimeType, String displayName) {
-        new CreateFinishTask(mimeType, displayName).executeOnExecutor(getCurrentExecutor());
-    }
-
     public void onPickRequested(DocumentInfo pickTarget) {
         Uri result;
         if (mState.action == ACTION_OPEN_TREE) {
@@ -1097,48 +1090,5 @@ public class DocumentsActivity extends BaseActivity {
             // Hack to refresh the contents.
             DirectoryFragment.get(getFragmentManager()).onUserSortOrderChanged();
         }
-    }
-
-
-    private class ExistingFinishTask extends AsyncTask<Void, Void, Void> {
-        private final Uri[] mUris;
-
-        public ExistingFinishTask(Uri... uris) {
-            mUris = uris;
-        }
-
-        @Override
-        protected Void doInBackground(Void... params) {
-            saveStackBlocking();
-            return null;
-        }
-
-        @Override
-        protected void onPostExecute(Void result) {
-            onFinished(mUris);
-        }
-    }
-
-    private class PickFinishTask extends AsyncTask<Void, Void, Void> {
-        private final Uri mUri;
-
-        public PickFinishTask(Uri uri) {
-            mUri = uri;
-        }
-
-        @Override
-        protected Void doInBackground(Void... params) {
-            saveStackBlocking();
-            return null;
-        }
-
-        @Override
-        protected void onPostExecute(Void result) {
-            onFinished(mUri);
-        }
-    }
-
-    public static DocumentsActivity get(Fragment fragment) {
-        return (DocumentsActivity) fragment.getActivity();
     }
 }
