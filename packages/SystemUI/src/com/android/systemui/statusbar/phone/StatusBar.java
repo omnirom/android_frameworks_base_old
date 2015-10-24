@@ -779,6 +779,9 @@ public class StatusBar extends SystemUI implements DemoMode,
             mContext.getContentResolver().registerContentObserver(Settings.System.getUriFor(
                     Settings.System.NAVIGATION_BAR_SHOW),
                     false, this, UserHandle.USER_ALL);
+            mContext.getContentResolver().registerContentObserver(Settings.System.getUriFor(
+                    Settings.System.LOCKSCREEN_HIDE_MEDIA_METADATA),
+                    false, this, UserHandle.USER_ALL);
         }
 
         @Override
@@ -810,6 +813,8 @@ public class StatusBar extends SystemUI implements DemoMode,
             if (mStatusBarWindowManager != null) {
                 mStatusBarWindowManager.updateKeyguardScreenRotation();
             }
+            mLockscreenMediaMetadata = Settings.System.getIntForUser(mContext.getContentResolver(),
+                    Settings.System.LOCKSCREEN_HIDE_MEDIA_METADATA, 0, mCurrentUserId) == 0;
         }
     }
     private OmniSettingsObserver mOmniSettingsObserver = new OmniSettingsObserver(mHandler);
@@ -818,6 +823,7 @@ public class StatusBar extends SystemUI implements DemoMode,
     private int mLongPressOnAppSwitchBehavior;
     private boolean mShowNavBar;
     private StatusBarHeaderMachine mStatusBarHeaderMachine;
+    private boolean mLockscreenMediaMetadata = true;
 
     @Override
     public void start() {
@@ -2434,7 +2440,7 @@ public class StatusBar extends SystemUI implements DemoMode,
         }
 
         Drawable artworkDrawable = null;
-        if (mMediaMetadata != null) {
+        if (mMediaMetadata != null && mLockscreenMediaMetadata) {
             Bitmap artworkBitmap = null;
             artworkBitmap = mMediaMetadata.getBitmap(MediaMetadata.METADATA_KEY_ART);
             if (artworkBitmap == null) {
