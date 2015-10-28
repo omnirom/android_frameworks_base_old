@@ -371,6 +371,7 @@ public class PhoneStatusBar extends BaseStatusBar implements DemoMode,
     private boolean mRecentsConsumed;
     private boolean mBackConsumed;
     private boolean mDoubleTabSleep;
+    private boolean mDoubleTapSleepLockScreen;
 
     /**
      * {@link android.provider.Settings.System#SCREEN_AUTO_BRIGHTNESS_ADJ} uses the range [-1, 1].
@@ -487,7 +488,9 @@ public class PhoneStatusBar extends BaseStatusBar implements DemoMode,
             mContext.getContentResolver().registerContentObserver(Settings.System.getUriFor(
                     Settings.System.DOUBLE_TAP_SLEEP_GESTURE),
                     false, this, UserHandle.USER_ALL);
-
+            mContext.getContentResolver().registerContentObserver(Settings.System.getUriFor(
+                    Settings.System.DOUBLE_TAP_SLEEP_LOCK_SCREEN),
+                    false, this, UserHandle.USER_ALL);
             update();
         }
 
@@ -516,9 +519,12 @@ public class PhoneStatusBar extends BaseStatusBar implements DemoMode,
                     mContext.getContentResolver(), Settings.System.NAVIGATION_BAR_RECENTS, 0, mCurrentUserId) == 1;
             mDoubleTabSleep = Settings.System.getIntForUser(
                     mContext.getContentResolver(), Settings.System.DOUBLE_TAP_SLEEP_GESTURE, 0, mCurrentUserId) == 1;
+            mDoubleTabSleepLockScreen = Settings.System.getIntForUser(
+                    mContext.getContentResolver(), Settings.System.DOUBLE_TAP_SLEEP_LOCK_SCREEN), 0, mCurrentUserId) == 1;
 
             if (mStatusBarWindow != null) {
                 mStatusBarWindow.setDoubleTabSleep(mDoubleTabSleep);
+                mStatusBarWindow.setDoubleTapSleep(mDoubleTapSleepLockScreen);
             }
         }
     }
