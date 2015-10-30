@@ -3720,6 +3720,29 @@ public final class Settings {
         public static final String STATUS_BAR_NETWORK_ACTIVITY = "status_bar_network_activity";
 
         /**
+         * Status bar carrier label
+         * 0: Hide
+         * 1: Display on keyguard status bar
+         * 2: Display on Normal status bar
+         * 3: Enabled for both
+         * @hide
+         */
+        public static final String STATUS_BAR_SHOW_CARRIER = "status_bar_show_carrier";
+
+        /**
+         * custom carrier label. The value is
+         * String.
+         * @hide
+         */
+        public static final String CUSTOM_CARRIER_LABEL = "custom_carrier_label";
+
+        /**
+         * Carrier Label Custom Color
+         * @hide
+         */
+        public static final String STATUS_BAR_CARRIER_COLOR = "status_bar_carrier_color";
+
+        /**
          * Whether to display recents in full screen
          * @hide
          */
