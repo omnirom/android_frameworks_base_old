@@ -37,6 +37,7 @@ import static android.hardware.Sensor.TYPE_LIGHT;
 import static android.hardware.Sensor.TYPE_PROXIMITY;
 
 import java.util.List;
+import java.util.Locale;
 
 public class DeviceUtils {
 
@@ -162,4 +163,7 @@ public class DeviceUtils {
         return getScreenType(con) == DEVICE_TABLET;
     }
 
+    public static boolean isChineseLanguage() {
+       return Resources.getSystem().getConfiguration().locale.getLanguage().startsWith(Locale.CHINESE.getLanguage());
+    }
 }
