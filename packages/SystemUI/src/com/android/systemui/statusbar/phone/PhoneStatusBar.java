@@ -371,6 +371,7 @@ public class PhoneStatusBar extends BaseStatusBar implements DemoMode,
     private boolean mRecentsConsumed;
     private boolean mBackConsumed;
     private boolean mDoubleTabSleep;
+    private boolean mEnableTabletNavigation;
 
     /**
      * {@link android.provider.Settings.System#SCREEN_AUTO_BRIGHTNESS_ADJ} uses the range [-1, 1].
@@ -493,6 +494,9 @@ public class PhoneStatusBar extends BaseStatusBar implements DemoMode,
             mContext.getContentResolver().registerContentObserver(Settings.System.getUriFor(
                     Settings.System.STATUS_BAR_WEATHER_ICON_PACK),
                     false, this, UserHandle.USER_ALL);
+            mContext.getContentResolver().registerContentObserver(Settings.System.getUriFor(
+                    Settings.System.ENABLE_TABLET_NAVIGATION),
+                    false, this, UserHandle.USER_ALL);
 
             update();
         }
@@ -522,6 +526,8 @@ public class PhoneStatusBar extends BaseStatusBar implements DemoMode,
                     mContext.getContentResolver(), Settings.System.NAVIGATION_BAR_RECENTS, 0, mCurrentUserId) == 1;
             mDoubleTabSleep = Settings.System.getIntForUser(
                     mContext.getContentResolver(), Settings.System.DOUBLE_TAP_SLEEP_GESTURE, 0, mCurrentUserId) == 1;
+            mEnableTabletNavigation = Settings.System.getIntForUser(
+                    mContext.getContentResolver(), Settings.System.ENABLE_TABLET_NAVIGATION, 0, mCurrentUserId) == 1;
 
             if (mStatusBarWindow != null) {
                 mStatusBarWindow.setDoubleTabSleep(mDoubleTabSleep);
@@ -849,8 +855,15 @@ public class PhoneStatusBar extends BaseStatusBar implements DemoMode,
             mShowNavBar = mWindowManagerService.hasNavigationBar();
             if (DEBUG) Log.v(TAG, "hasNavigationBar=" + mShowNavBar);
             if (mShowNavBar) {
-                mNavigationBarView =
-                    (NavigationBarView) View.inflate(context, R.layout.navigation_bar, null);
+                if (mEnableTabletNavigation) {
+                    mNavigationBarView =
+                        (NavigationBarView) View.inflate(context, R.layout.navigation_bar_tablet, null);
+                    Log.d(TAG, "Showing Tablet Layout navigation");
+                } else {
+                    mNavigationBarView =
+                        (NavigationBarView) View.inflate(context, R.layout.navigation_bar, null);
+                    Log.d(TAG, "Showing Normal Layout navigation");
+                }
 
                 mNavigationBarView.setDisabledFlags(mDisabled1);
                 mNavigationBarView.setBar(this);
@@ -4666,8 +4679,15 @@ public class PhoneStatusBar extends BaseStatusBar implements DemoMode,
 
         if (mShowNavBar) {
             if (mNavigationBarView == null) {
-                mNavigationBarView =
-                    (NavigationBarView) View.inflate(mContext, R.layout.navigation_bar, null);
+                if (mEnableTabletNavigation) {
+                    mNavigationBarView =
+                        (NavigationBarView) View.inflate(mContext, R.layout.navigation_bar_tablet, null);
+                    Log.v(TAG, "Showing Tablet Layout navigationbar");
+                } else {
+                    mNavigationBarView =
+                        (NavigationBarView) View.inflate(mContext, R.layout.navigation_bar, null);
+                    Log.v(TAG, "Showing normal Layout navigationbar");
+                }
 
                 mNavigationBarView.setDisabledFlags(mDisabled1, true);
                 mNavigationBarView.setBar(this);
