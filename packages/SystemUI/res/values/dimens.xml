@@ -105,6 +105,9 @@
     <!-- The width of the view containing navigation buttons -->
     <dimen name="navigation_key_width">70dp</dimen>
 
+    <!-- The padding around the navigation buttons -->
+    <dimen name="navigation_key_padding">0dp</dimen>
+
     <!-- The width of the view containing the menu/ime navigation bar icons -->
     <dimen name="navigation_extra_key_width">36dp</dimen>
 
