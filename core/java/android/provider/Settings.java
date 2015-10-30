@@ -3756,6 +3756,12 @@ public final class Settings {
         public static final String STATUS_BAR_WEATHER_ICON_PACK = "status_bar_weather_icon_pack";
 
         /**
+         * Enable to use tablet style navigation bar
+         * @hide
+         */
+        public static final String ENABLE_TABLET_NAVIGATION = "enable_tablet_navigation";
+
+        /**
          * Settings to backup. This is here so that it's in the same place as the settings
          * keys and easy to update.
          *
