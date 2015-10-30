@@ -370,6 +370,9 @@ public class PhoneStatusBar extends BaseStatusBar implements DemoMode,
     private int mBackKillTimeout;
     private boolean mRecentsConsumed;
     private boolean mBackConsumed;
+    private int mShowCarrierLabel;
+    private int mCarrierLabelColor;
+    private int mCarrierLabelColorDefault;
 
     /**
      * {@link android.provider.Settings.System#SCREEN_AUTO_BRIGHTNESS_ADJ} uses the range [-1, 1].
@@ -483,6 +486,13 @@ public class PhoneStatusBar extends BaseStatusBar implements DemoMode,
             mContext.getContentResolver().registerContentObserver(Settings.System.getUriFor(
                     Settings.System.NAVIGATION_BAR_RECENTS),
                     false, this, UserHandle.USER_ALL);
+            mContext.getContentResolver().registerContentObserver(Settings.System.getUriFor(
+                    Settings.System.STATUS_BAR_SHOW_CARRIER),
+                    false, this, UserHandle.USER_ALL);
+            mContext.getContentResolver().registerContentObserver(Settings.System.getUriFor(
+                    Settings.System.STATUS_BAR_CARRIER_COLOR),
+                    false, this, UserHandle.USER_ALL);
+
             update();
         }
 
@@ -509,6 +519,17 @@ public class PhoneStatusBar extends BaseStatusBar implements DemoMode,
                     mContext.getContentResolver(), Settings.System.STATUS_BAR_BRIGHTNESS_CONTROL, 0, mCurrentUserId) == 1;
             mOmniSwitchRecents = Settings.System.getIntForUser(
                     mContext.getContentResolver(), Settings.System.NAVIGATION_BAR_RECENTS, 0, mCurrentUserId) == 1;
+            mShowCarrierLabel = Settings.System.getIntForUser(
+                    mContext.getContentResolver(), Settings.System.STATUS_BAR_SHOW_CARRIER, 1, mCurrentUserId);
+            mCarrierLabelColor = Settings.System.getIntForUser(
+                    mContext.getContentResolver(), Settings.System.STATUS_BAR_CARRIER_COLOR,
+                    mCarrierLabelColorDefault, mCurrentUserId);
+            if (mStatusBarView != null) {
+                mStatusBarView.updateCarrierLabel(mShowCarrierLabel, mCarrierLabelColor);
+            }
+            if (mKeyguardStatusBar != null) {
+                mKeyguardStatusBar.updateCarrierLabel(mShowCarrierLabel, mCarrierLabelColor);
+            }
         }
     }
     private OmniSettingsObserver mOmniSettingsObserver = new OmniSettingsObserver(mHandler);
@@ -722,6 +743,7 @@ public class PhoneStatusBar extends BaseStatusBar implements DemoMode,
                 R.bool.config_status_bar_scrim_behind_use_src);
         mBackKillTimeout = mContext.getResources().getInteger(
                 com.android.internal.R.integer.config_backKillTimeout);
+        mCarrierLabelColorDefault = mContext.getResources().getColor(R.color.status_bar_clock_color);
 
         super.start(); // calls createAndAddWindows()
 

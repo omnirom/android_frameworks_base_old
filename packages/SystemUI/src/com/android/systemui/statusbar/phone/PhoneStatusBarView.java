@@ -23,10 +23,12 @@ import android.util.EventLog;
 import android.view.MotionEvent;
 import android.view.View;
 import android.view.accessibility.AccessibilityEvent;
+import android.widget.TextView;
 
 import com.android.systemui.DejankUtils;
 import com.android.systemui.EventLogTags;
 import com.android.systemui.R;
+import com.android.systemui.statusbar.widget.CarrierLabel;
 
 public class PhoneStatusBarView extends PanelBar {
     private static final String TAG = "PhoneStatusBarView";
@@ -47,6 +49,10 @@ public class PhoneStatusBarView extends PanelBar {
             mBar.makeExpandedInvisible();
         }
     };
+
+    private int mShowCarrierLabel = 1;
+    private int mCarrierLabelColor;
+    private CarrierLabel mCarrierLabel;
 
     public PhoneStatusBarView(Context context, AttributeSet attrs) {
         super(context, attrs);
@@ -69,7 +75,23 @@ public class PhoneStatusBarView extends PanelBar {
 
     @Override
     public void onFinishInflate() {
+        mCarrierLabel = (CarrierLabel) findViewById(R.id.statusbar_carrier_text);
         mBarTransitions.init();
+    }
+
+    public void updateCarrierLabel(int value, int color) {
+        mShowCarrierLabel = value;
+        mCarrierLabelColor = color;
+        if (mCarrierLabel != null) {
+            mCarrierLabel.setTextColor(mCarrierLabelColor);
+            if (mShowCarrierLabel == 2) {
+                mCarrierLabel.setVisibility(View.VISIBLE);
+            } else if (mShowCarrierLabel == 3) {
+                mCarrierLabel.setVisibility(View.VISIBLE);
+            } else {
+                mCarrierLabel.setVisibility(View.GONE);
+            }
+        }
     }
 
     @Override
