@@ -42,6 +42,7 @@ import android.os.Build;
 import android.os.Bundle;
 import android.os.Handler;
 import android.os.Message;
+import android.os.PowerManager;
 import android.os.RemoteException;
 import android.os.ServiceManager;
 import android.os.SystemClock;
@@ -460,7 +461,7 @@ class GlobalActions implements DialogInterface.OnDismissListener, DialogInterfac
                 mAdapter.notifyDataSetChanged();
             } else {
                 mHandler.sendEmptyMessage(MESSAGE_DISMISS);
-                mWindowManagerFuncs.reboot(null, false);
+                mWindowManagerFuncs.rebootCustom(null, false);
             }
         }
     }
@@ -493,7 +494,7 @@ class GlobalActions implements DialogInterface.OnDismissListener, DialogInterfac
 
         @Override
         public void onPress() {
-            mWindowManagerFuncs.reboot("recovery", false);
+            mWindowManagerFuncs.rebootCustom(PowerManager.REBOOT_RECOVERY, false);
         }
     }
 
@@ -525,7 +526,7 @@ class GlobalActions implements DialogInterface.OnDismissListener, DialogInterfac
 
         @Override
         public void onPress() {
-            mWindowManagerFuncs.reboot("bootloader", false);
+            mWindowManagerFuncs.rebootCustom(PowerManager.REBOOT_BOOTLOADER, false);
         }
     }
 
