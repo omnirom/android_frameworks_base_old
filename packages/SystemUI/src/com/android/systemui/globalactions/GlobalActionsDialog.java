@@ -998,6 +998,7 @@ public class GlobalActionsDialog implements DialogInterface.OnDismissListener,
                 mDialog = createDialog();
                 mDialog.updateList();
             } else {
+                mDialog.dismiss();
                 doReboot();
             }
         }
