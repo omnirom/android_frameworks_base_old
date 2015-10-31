@@ -387,7 +387,19 @@ public final class PowerManager {
      * @hide
      */
     public static final String REBOOT_RECOVERY = "recovery";
-    
+
+    /**
+     * The value to pass as the 'reason' argument to reboot() to
+     * reboot into bootloader mode
+     * <p>
+     * Requires the {@link android.Manifest.permission#RECOVERY}
+     * permission (in addition to
+     * {@link android.Manifest.permission#REBOOT}).
+     * </p>
+     * @hide
+     */
+    public static final String REBOOT_BOOTLOADER = "bootloader";
+
     final Context mContext;
     final IPowerManager mService;
     final Handler mHandler;

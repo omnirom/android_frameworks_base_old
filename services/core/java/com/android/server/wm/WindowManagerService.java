@@ -5683,6 +5683,12 @@ public class WindowManagerService extends IWindowManager.Stub
         ShutdownThread.reboot(mContext, reason, confirm);
     }
 
+    // Called by window manager policy.  Not exposed externally.
+    @Override
+    public void rebootCustom(String reason, boolean confirm) {
+        ShutdownThread.rebootCustom(mContext, reason, confirm);
+    }
+
     public void setCurrentProfileIds(final int[] currentProfileIds) {
         synchronized (mWindowMap) {
             mCurrentProfileIds = currentProfileIds;

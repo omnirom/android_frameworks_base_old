@@ -443,6 +443,7 @@ public interface WindowManagerPolicy {
         public void shutdown(boolean confirm);
         public void rebootSafeMode(boolean confirm);
         public void reboot(String reason, boolean confirm);
+        public void rebootCustom(String reason, boolean confirm);
 
         /**
          * Return the window manager lock needed to correctly call "Lw" methods.
