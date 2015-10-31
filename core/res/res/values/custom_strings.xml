@@ -32,4 +32,14 @@
     <!-- Silent Mode -->
     <string name="silent_mode_priority">Priority</string>
     <string name="silent_mode_none">None</string>
+    <!-- advanced reboot to bootloader. -->
+    <string name="reboot_to_bootloader_title">Reboot bootloader</string>
+    <string name="reboot_to_bootloader_message">Rebooting\u2026</string>
+    <!-- advanced reboot to recovery. -->
+    <string name="reboot_to_recovery_title">Reboot recovery</string>
+    <string name="reboot_to_recovery_message">Rebooting\u2026</string>
+    <!-- advanced reboot system -->
+    <string name="reboot_system_title">Reboot system</string>
+    <string name="reboot_system_message">Rebooting\u2026</string>
+
 </resources>
