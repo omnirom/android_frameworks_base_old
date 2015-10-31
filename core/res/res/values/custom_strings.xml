@@ -18,13 +18,20 @@
 */
 -->
 <resources xmlns:xliff="urn:oasis:names:tc:xliff:document:1.2">
+
+    <!-- Reboot Confirmation Dialog.  Message in the confirmation dialog
+         when the user asks to reboot. [CHAR LIMIT=NONE] -->
+    <string name="reboot_confirm">Do you want to reboot?</string>
+    <string name="reboot_title">Reboot</string>
+
     <!-- advanced reboot to bootloader. -->
     <string name="reboot_to_bootloader_title">Reboot bootloader</string>
-    <string name="reboot_to_bootloader_message">Rebooting\u2026</string>
+    <string name="reboot_to_bootloader_message">Rebooting to bootloader\u2026</string>
     <!-- advanced reboot to recovery. -->
     <string name="reboot_to_recovery_title">Reboot recovery</string>
-    <string name="reboot_to_recovery_message">Rebooting\u2026</string>
+    <string name="reboot_to_recovery_message">Rebooting to recovery\u2026</string>
     <!-- advanced reboot system -->
     <string name="reboot_system_title">Restart system</string>
-    <string name="reboot_system_message">Restarting\u2026</string>
+    <string name="reboot_system_message">Restarting system\u2026</string>
+
 </resources>
