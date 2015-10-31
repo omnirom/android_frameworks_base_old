@@ -86,6 +86,7 @@ public final class ShutdownThread extends Thread {
     private static boolean mRebootSafeMode;
     private static boolean mRebootHasProgressBar;
     private static String mReason;
+    private static boolean mRebootCustom;
 
     // Provides shutdown assurance in case the system_server is killed
     public static final String SHUTDOWN_ACTION_PROPERTY = "sys.shutdown.requested";
@@ -130,6 +131,7 @@ public final class ShutdownThread extends Thread {
         mReboot = false;
         mRebootSafeMode = false;
         mReason = reason;
+        mRebootCustom = false;
         shutdownInner(context, confirm);
     }
 
@@ -219,6 +221,22 @@ public final class ShutdownThread extends Thread {
         mRebootSafeMode = false;
         mRebootHasProgressBar = false;
         mReason = reason;
+        mRebootCustom = false;
+        shutdownInner(context, confirm);
+    }
+
+    /**
+     * Request reboot system, reboot recovery or reboot bootloader
+     *
+     * @param context Context used to display the shutdown progress dialog.
+     * @param reason code to pass to the kernel (e.g. "recovery", "bootloader"), or null.
+     * @param confirm true if user confirmation is needed before rebooting.
+     */
+    public static void rebootCustom(final Context context, String reason, boolean confirm) {
+        mReboot = true;
+        mRebootSafeMode = false;
+        mReason = reason;
+        mRebootCustom = true;
         shutdownInner(context, confirm);
     }
 
@@ -240,6 +258,7 @@ public final class ShutdownThread extends Thread {
         mRebootSafeMode = true;
         mRebootHasProgressBar = false;
         mReason = null;
+        mRebootCustom = false;
         shutdownInner(context, confirm);
     }
 
@@ -298,10 +317,39 @@ public final class ShutdownThread extends Thread {
                             com.android.internal.R.string.reboot_to_update_reboot));
             }
         } else if (mReason != null && mReason.equals(PowerManager.REBOOT_RECOVERY)) {
-            // Factory reset path. Set the dialog message accordingly.
-            pd.setTitle(context.getText(com.android.internal.R.string.reboot_to_reset_title));
+            if (!mRebootCustom) {
+                mRebootHasProgressBar = RecoverySystem.UNCRYPT_PACKAGE_FILE.exists();
+                if (mRebootHasProgressBar) {
+                    pd.setTitle(context.getText(com.android.internal.R.string.reboot_to_update_title));
+                    pd.setMessage(context.getText(
+                            com.android.internal.R.string.reboot_to_update_prepare));
+                    pd.setMax(100);
+                    pd.setProgressNumberFormat(null);
+                    pd.setProgressStyle(ProgressDialog.STYLE_HORIZONTAL);
+                    pd.setProgress(0);
+                    pd.setIndeterminate(false);
+                } else {
+                    // Factory reset path. Set the dialog message accordingly.
+                    pd.setTitle(context.getText(com.android.internal.R.string.reboot_to_reset_title));
+                    pd.setMessage(context.getText(
+                            com.android.internal.R.string.reboot_to_reset_message));
+                    pd.setIndeterminate(true);
+                }
+            } else {
+                pd.setTitle(context.getText(com.android.internal.R.string.reboot_to_recovery_title));
+                pd.setMessage(context.getText(
+                        com.android.internal.R.string.reboot_to_recovery_message));
+                pd.setIndeterminate(true);
+            }
+        } else if (mReason != null && PowerManager.REBOOT_BOOTLOADER.equals(mReason) && mRebootCustom) {
+            pd.setTitle(context.getText(com.android.internal.R.string.reboot_to_bootloader_title));
             pd.setMessage(context.getText(
-                        com.android.internal.R.string.reboot_to_reset_message));
+                    com.android.internal.R.string.reboot_to_bootloader_message));
+            pd.setIndeterminate(true);
+        } else if (mReason == null && mRebootCustom) {
+            pd.setTitle(context.getText(com.android.internal.R.string.reboot_system_title));
+            pd.setMessage(context.getText(
+                    com.android.internal.R.string.reboot_system_message));
             pd.setIndeterminate(true);
         } else {
             pd.setTitle(context.getText(com.android.internal.R.string.power_off));
