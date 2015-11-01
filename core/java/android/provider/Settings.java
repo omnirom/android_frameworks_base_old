@@ -3518,32 +3518,11 @@ public final class Settings {
         public static final String POWER_PROFILE_PLUGGED = "power_profile_plugged";
 
         /**
-         * Should the alarm icon be show in the statusbar
-         *
-         * @hide
-         */
-        public static final String STATUSBAR_SHOW_ALARM_ICON = "statusbar_show_alarm_icon";
-
-        /**
          * Should the alarm be shown in fullscreen instead of heads-up
          *
          * @hide
          */
         public static final String SHOW_ALARM_FULLSCREEN = "show_alarm_fullscreen";
-
-        /**
-         * Should the storage removed notification be shown
-         *
-         * @hide
-         */
-        public static final String STORAGE_MEDIA_REMOVED_NOTIFICTION = "storage_media_removed_notification";
-
-        /**
-         * Enable ongoing mount notifications for those storage volumes
-         *
-         * @hide
-         */
-        public static final String STORAGE_MOUNT_NOTIFICATION = "storage_mount_notification";
 
         /**
          * Boolean value whether to link ringtone and notification volume
@@ -3858,6 +3837,7 @@ public final class Settings {
             PUBLIC_SETTINGS.add(SOUND_EFFECTS_ENABLED);
             PUBLIC_SETTINGS.add(HAPTIC_FEEDBACK_ENABLED);
             PUBLIC_SETTINGS.add(SHOW_WEB_SUGGESTIONS);
+            PUBLIC_SETTINGS.add(SHOW_ALARM_FULLSCREEN);
         }
 
         /**
