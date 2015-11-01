@@ -1445,4 +1445,14 @@ public class UserManager {
 
         return enableMultiUser && (canAddMoreUsers() || isUserSwitcherEnabled());
     }
+
+    /**
+     * Returns whether the system supports multiple users or single user with guest
+     * @return true if guest mode is enabled and multi user config is enabled
+     * @hide
+     */
+    public static boolean supportsMultipleUsersWithGuest() {
+        return SystemProperties.getBoolean("fw.show_multiuserui",
+                Resources.getSystem().getBoolean(R.bool.config_enableMultiUserUI));
+    }
 }
