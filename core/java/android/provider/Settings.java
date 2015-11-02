@@ -4558,7 +4558,19 @@ public final class Settings {
                 BOOLEAN_VALIDATOR;
 
         /**
+         * Volume key controls ringtone or media sound stream
+         * @hide
+         */
+        public static final String VOLUME_KEYS_CONTROL_RING_TONE =
+                "volume_keys_control_ring_tone";
+
+        /** @hide */
+        private static final Validator VOLUME_KEYS_CONTROL_RING_TONE_VALIDATOR =
+               BOOLEAN_VALIDATOR;
+
+        /**
          * Timeout value for button lights. 0 = disabled
+         * Select various accents to go along with system themes
          * @hide
          */
         public static final String OMNI_BUTTON_BACKLIGHT_TIMEOUT = "button_backlight_timeout";
@@ -4977,6 +4989,7 @@ public final class Settings {
             OMNI_NAVIGATION_BAR_ARROW_KEYS,
             OMNI_VOLUME_BUTTON_MUSIC_CONTROL,
             OMNI_FACE_AUTO_UNLOCK,
+            VOLUME_KEYS_CONTROL_RING_TONE,
         };
 
         /**
@@ -5164,6 +5177,7 @@ public final class Settings {
             PRIVATE_SETTINGS.add(PROXIMITY_AUTO_SPEAKER);
             PRIVATE_SETTINGS.add(PROXIMITY_AUTO_SPEAKER_DELAY);
             PRIVATE_SETTINGS.add(PROXIMITY_AUTO_SPEAKER_INCALL_ONLY);
+            PRIVATE_SETTINGS.add(VOLUME_KEYS_CONTROL_RING_TONE);
         }
 
         /**
@@ -5373,6 +5387,7 @@ public final class Settings {
                     OMNI_VOLUME_BUTTON_MUSIC_CONTROL_VALIDATOR);
             VALIDATORS.put(OMNI_FACE_AUTO_UNLOCK,
                     OMNI_FACE_AUTO_UNLOCK_VALIDATOR);
+            VALIDATORS.put(VOLUME_KEYS_CONTROL_RING_TONE,VOLUME_KEYS_CONTROL_RING_TONE_VALIDATOR);
         }
 
         /**
