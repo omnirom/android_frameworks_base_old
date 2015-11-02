@@ -114,9 +114,14 @@ public class CamcorderProfile
      */
     public static final int QUALITY_WQVGA = 12;
 
+    /** @hide
+     * Quality level corresponding to 4K DCI resolution
+     */
+    public static final int QUALITY_4KDCI = 13;
+
     // Start and end of quality list
     private static final int QUALITY_LIST_START = QUALITY_LOW;
-    private static final int QUALITY_LIST_END = QUALITY_WQVGA;
+    private static final int QUALITY_LIST_END = QUALITY_4KDCI;
 
     /**
      * Time lapse quality level corresponding to the lowest available resolution.
