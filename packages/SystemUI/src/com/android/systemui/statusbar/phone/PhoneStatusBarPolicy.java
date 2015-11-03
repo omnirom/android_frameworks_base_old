@@ -22,7 +22,6 @@ import android.app.AlarmManager.AlarmClockInfo;
 import android.app.IUserSwitchObserver;
 import android.app.StatusBarManager;
 import android.content.BroadcastReceiver;
-import android.content.ContentResolver;
 import android.content.Context;
 import android.content.Intent;
 import android.content.IntentFilter;
@@ -33,7 +32,6 @@ import android.os.IRemoteCallback;
 import android.os.RemoteException;
 import android.os.UserHandle;
 import android.os.UserManager;
-import android.provider.Settings;
 import android.provider.Settings.Global;
 import android.telecom.TelecomManager;
 import android.util.Log;
@@ -223,7 +221,6 @@ public class PhoneStatusBarPolicy implements Callback {
         boolean zenVisible = false;
         int zenIconId = 0;
         String zenDescription = null;
-        boolean zenModeNoInterruptions = false;
 
         boolean volumeVisible = false;
         int volumeIconId = 0;
@@ -236,7 +233,6 @@ public class PhoneStatusBarPolicy implements Callback {
             zenDescription = mContext.getString(R.string.quick_settings_dnd_label);
         } else if (mZen == Global.ZEN_MODE_NO_INTERRUPTIONS) {
             zenVisible = true;
-            zenModeNoInterruptions = true;
             zenIconId = R.drawable.stat_sys_zen_none;
             zenDescription = mContext.getString(R.string.interruption_level_none);
         } else if (mZen == Global.ZEN_MODE_IMPORTANT_INTERRUPTIONS) {
@@ -257,22 +253,12 @@ public class PhoneStatusBarPolicy implements Callback {
             volumeDescription = mContext.getString(R.string.accessibility_ringer_vibrate);
         }
 
-        if (audioManager.getRingerModeInternal() == AudioManager.RINGER_MODE_SILENT) {
-            volumeVisible = true;
-            volumeIconId = R.drawable.stat_sys_ringer_silent;
-            volumeDescription = mContext.getString(R.string.accessibility_ringer_silent);
-        }
-
         if (zenVisible) {
             mService.setIcon(SLOT_ZEN, zenIconId, 0, zenDescription);
         }
         if (zenVisible != mZenVisible) {
             mService.setIconVisibility(SLOT_ZEN, zenVisible);
             mZenVisible = zenVisible;
-        }
-        // overrules volume icon
-        if (zenModeNoInterruptions) {
-            volumeVisible = false;
         }
 
         if (volumeVisible) {
