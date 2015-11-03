@@ -169,9 +169,10 @@ public abstract class KeyguardPinBasedInputView extends KeyguardAbsKeyInputView
             }
         });
 
-        final boolean quickUnlockEnabled = Settings.Secure.getIntForUser(
+        /*final boolean quickUnlockEnabled = Settings.Secure.getIntForUser(
             mContext.getContentResolver(), Settings.Secure.KEYGUARD_QUICK_UNLOCK,
-            0, UserHandle.USER_CURRENT) == 1;
+            0, UserHandle.USER_CURRENT) == 1;*/
+        final boolean quickUnlockEnabled = false;
         if (quickUnlockEnabled) {
             mPasswordEntry.setChangeListener(new PasswordTextView.ChangeListener() {
                 public void onPasswordChanged() {

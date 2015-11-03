@@ -165,14 +165,14 @@ public abstract class KeyguardAbsKeyInputView extends LinearLayout
     protected void quickVerifyPasswordAndUnlock() {
         // Do not call resetPasswordText and do not reportUnlockAttempt
         // as this is called for every entered number.
-        String entry = getPasswordText();
+        /*String entry = getPasswordText();
         try {
             if (mLockPatternUtils.checkPassword(entry, KeyguardUpdateMonitor.getCurrentUser())) {
                 mCallback.reportUnlockAttempt(true, KeyguardUpdateMonitor.getCurrentUser());
                 mCallback.dismiss(true);
             }
         } catch (RequestThrottledException ex) {
-        }
+        }*/
     }
 
     protected abstract void resetPasswordText(boolean animate);
