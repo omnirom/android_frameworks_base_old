@@ -1427,8 +1427,9 @@ public final class PowerManagerService extends SystemService
                 // it can provide feedback to the user.
                 if (dockedOnWirelessCharger) {
                     mNotifier.onWirelessChargingStarted();
+                } else {
+                    mNotifier.onWiredChargingStarted();
                 }
-
             }
 
             if (wasPowered != mIsPowered || oldLevelLow != mBatteryLevelLow) {
