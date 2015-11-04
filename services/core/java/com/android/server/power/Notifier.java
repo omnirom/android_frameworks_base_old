@@ -82,6 +82,7 @@ final class Notifier {
     private static final int MSG_BROADCAST = 2;
     private static final int MSG_WIRELESS_CHARGING_STARTED = 3;
     private static final int MSG_SCREEN_BRIGHTNESS_BOOST_CHANGED = 4;
+    private static final int MSG_WIRED_CHARGING_STARTED = 5;
 
     private final Object mLock = new Object();
 
@@ -559,6 +560,20 @@ final class Notifier {
         mHandler.sendMessage(msg);
     }
 
+    /**
+     * Called when wireless charging has started so as to provide user feedback.
+     */
+    public void onWiredChargingStarted() {
+        if (DEBUG) {
+            Slog.d(TAG, "onWiredChargingStarted");
+        }
+
+        mSuspendBlocker.acquire();
+        Message msg = mHandler.obtainMessage(MSG_WIRED_CHARGING_STARTED);
+        msg.setAsynchronous(true);
+        mHandler.sendMessage(msg);
+    }
+
     private void updatePendingBroadcastLocked() {
         if (!mBroadcastInProgress
                 && mPendingInteractiveState != INTERACTIVE_STATE_UNKNOWN
@@ -691,7 +706,7 @@ final class Notifier {
         }
     };
 
-    private void playWirelessChargingStartedSound() {
+    private void playChargingStartedSound(boolean wireless) {
         final boolean enabled = Settings.Global.getInt(mContext.getContentResolver(),
                 Settings.Global.CHARGING_SOUNDS_ENABLED, 1) != 0;
         final String soundPath = Settings.Global.getString(mContext.getContentResolver(),
@@ -727,8 +742,13 @@ final class Notifier {
                     break;
 
                 case MSG_WIRELESS_CHARGING_STARTED:
-                    playWirelessChargingStartedSound();
+                    playChargingStartedSound(true);
                     break;
+
+                case MSG_WIRED_CHARGING_STARTED:
+                    playChargingStartedSound(false);
+                    break;
+
                 case MSG_SCREEN_BRIGHTNESS_BOOST_CHANGED:
                     sendBrightnessBoostChangedBroadcast();
                     break;
