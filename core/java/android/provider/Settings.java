@@ -10903,6 +10903,12 @@ public final class Settings {
         public static final String USB_PARANOIA_CONNECT = "usb_paranoia_connect";
 
         /**
+         * @hide
+         */
+        public static final String WIRED_CHARGING_STARTED_SOUND =
+                "wired_charging_started_sound";
+
+        /**
          * Flag to enable use of RefactoredBackupManagerService.
          *
          * @hide
