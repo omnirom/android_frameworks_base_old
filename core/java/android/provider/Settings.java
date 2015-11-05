@@ -3595,6 +3595,17 @@ public final class Settings {
          */
 
         /**
+         * @hide
+         */
+        public static final String GLOBAL_ACTIONS_LIST = "global_actions_list";
+
+        /**
+         * Show onscreen keys for hw button devices
+         * @hide
+         */
+        public static final String NAVIGATION_BAR_SHOW = "navigation_bar_show";
+
+        /**
          * Whether to display set of animations when prompting the power menu
          *
          * @hide
@@ -3609,15 +3620,10 @@ public final class Settings {
         public static final String SHOW_ALARM_FULLSCREEN = "show_alarm_fullscreen";
 
         /**
-         * Show onscreen keys for hw button devices
+         * Whether volume button press shuld be treated as wake key
          * @hide
          */
-        public static final String NAVIGATION_BAR_SHOW = "navigation_bar_show";
-
-        /**
-         * @hide
-         */
-        public static final String GLOBAL_ACTIONS_LIST = "global_actions_list";
+        public static final String VOLUME_BUTTON_WAKE = "volume_button_wake";
 
         /**
          * Change volume up and down handlign based on rotation
