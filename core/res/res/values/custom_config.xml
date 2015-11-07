@@ -83,6 +83,25 @@
     -->
     <integer name="config_longPressOnMenuBehavior">0</integer>
 
+    <!-- home -->
+    <integer name="config_longPressOnHomeKeyBehavior">3</integer>
+    <integer name="config_doubleTapOnHomeKeyBehavior">6</integer>
+    <!-- menu -->
+    <integer name="config_longPressOnMenuKeyBehavior">0</integer>
+    <integer name="config_doubleTapOnMenuKeyBehavior">0</integer>
+    <!-- back -->
+    <integer name="config_longPressOnBackKeyBehavior">0</integer>
+    <integer name="config_doubleTapOnBackKeyBehavior">0</integer>
+    <!-- assist -->
+    <integer name="config_longPressOnAssistKeyBehavior">0</integer>
+    <integer name="config_doubleTapOnAssistKeyBehavior">0</integer>
+    <!-- app switch -->
+    <integer name="config_longPressOnAppSwitchKeyBehavior">8</integer>
+    <integer name="config_doubleTapOnAppSwitchKeyBehavior">7</integer>
+    <!-- camera -->
+    <integer name="config_longPressOnCameraKeyBehavior">0</integer>
+    <integer name="config_doubleTapOnCameraKeyBehavior">0</integer>
+
     <!-- Older rotation sensors are not setting event.timestamp correctly. Setting to
          true will use SystemClock.elapsedRealtimeNanos() to set timestamp. -->
     <bool name="config_useSystemClockforRotationSensor">false</bool>

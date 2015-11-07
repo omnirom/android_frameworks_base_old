@@ -129,4 +129,20 @@
   <java-symbol type="string" name="operator_config_url" />
   <java-symbol type="string" name="operator_ping_url" />
   <java-symbol type="bool" name="config_zero_balance_operator"/>
+
+  <!-- Input policy constants  -->
+  <java-symbol type="integer" name="config_deviceHardwareKeys" />
+  <java-symbol type="integer" name="config_doubleTapOnHomeKeyBehavior" />
+  <java-symbol type="integer" name="config_doubleTapOnMenuKeyBehavior" />
+  <java-symbol type="integer" name="config_doubleTapOnBackKeyBehavior" />
+  <java-symbol type="integer" name="config_doubleTapOnAssistKeyBehavior" />
+  <java-symbol type="integer" name="config_doubleTapOnAppSwitchKeyBehavior" />
+  <java-symbol type="integer" name="config_doubleTapOnCameraKeyBehavior" />
+  <java-symbol type="integer" name="config_longPressOnHomeKeyBehavior" />
+  <java-symbol type="integer" name="config_longPressOnMenuKeyBehavior" />
+  <java-symbol type="integer" name="config_longPressOnBackKeyBehavior" />
+  <java-symbol type="integer" name="config_longPressOnAssistKeyBehavior" />
+  <java-symbol type="integer" name="config_longPressOnAppSwitchKeyBehavior" />
+  <java-symbol type="integer" name="config_longPressOnCameraKeyBehavior" />
+
 </resources>
