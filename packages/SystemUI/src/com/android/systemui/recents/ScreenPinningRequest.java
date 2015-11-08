@@ -42,6 +42,8 @@ import android.widget.TextView;
 
 import com.android.systemui.R;
 
+import com.android.internal.util.omni.DeviceUtils;
+
 import java.util.ArrayList;
 
 public class ScreenPinningRequest implements View.OnClickListener {
@@ -215,15 +217,26 @@ public class ScreenPinningRequest implements View.OnClickListener {
                         .setVisibility(View.INVISIBLE);
             }
 
-            final int description = mAccessibilityService.isEnabled()
-                    ? R.string.screen_pinning_description_accessible
-                    : R.string.screen_pinning_description;
+            int description =  R.string.screen_pinning_description;
+            if (!DeviceUtils.deviceSupportNavigationBar(mContext)) {
+                description = R.string.screen_pinning_description_back;
+            } else if (mAccessibilityService.isEnabled()) {
+                description = R.string.screen_pinning_description_accessible;
+            }
+            boolean showBackButton = !DeviceUtils.deviceSupportNavigationBar(mContext) || !mAccessibilityService.isEnabled();
+            boolean showRecentsButton = DeviceUtils.deviceSupportNavigationBar(mContext) && !mAccessibilityService.isEnabled();
+            boolean showSingleButtonMessage = !DeviceUtils.deviceSupportNavigationBar(mContext) || mAccessibilityService.isEnabled();
             ((TextView) mLayout.findViewById(R.id.screen_pinning_description))
                     .setText(description);
             final int backBgVisibility =
-                    mAccessibilityService.isEnabled() ? View.INVISIBLE : View.VISIBLE;
+                    showBackButton ? View.VISIBLE : View.INVISIBLE;
             mLayout.findViewById(R.id.screen_pinning_back_bg).setVisibility(backBgVisibility);
             mLayout.findViewById(R.id.screen_pinning_back_bg_light).setVisibility(backBgVisibility);
+
+            final int recentsBgVisibility =
+                    showRecentsButton ? View.VISIBLE : View.INVISIBLE;
+            mLayout.findViewById(R.id.screen_pinning_recents_bg).setVisibility(recentsBgVisibility);
+            mLayout.findViewById(R.id.screen_pinning_recents_bg_light).setVisibility(recentsBgVisibility);
 
             addView(mLayout, getRequestLayoutParams(isLandscape));
         }
