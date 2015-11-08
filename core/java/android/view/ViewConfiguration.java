@@ -241,8 +241,8 @@ public class ViewConfiguration {
     private final boolean mFadingMarqueeEnabled;
     private final long mGlobalActionsKeyTimeout;
 
-    private boolean sHasPermanentMenuKey;
-    private boolean sHasPermanentMenuKeySet;
+    private boolean mHasPermanentMenuKey;
+    private boolean mUseAutodetectMenuKey;
 
     static final SparseArray<ViewConfiguration> sConfigurations =
             new SparseArray<ViewConfiguration>(2);
@@ -308,33 +308,24 @@ public class ViewConfiguration {
         mOverscrollDistance = (int) (sizeAndDensity * OVERSCROLL_DISTANCE + 0.5f);
         mOverflingDistance = (int) (sizeAndDensity * OVERFLING_DISTANCE + 0.5f);
 
-        if (!sHasPermanentMenuKeySet) {
-            final int configVal = res.getInteger(
-                    com.android.internal.R.integer.config_overrideHasPermanentMenuKey);
+        final int configVal = res.getInteger(
+                com.android.internal.R.integer.config_overrideHasPermanentMenuKey);
 
-            switch (configVal) {
-                default:
-                case HAS_PERMANENT_MENU_KEY_AUTODETECT: {
-                    IWindowManager wm = WindowManagerGlobal.getWindowManagerService();
-                    try {
-                        sHasPermanentMenuKey = !wm.hasNavigationBar();
-                        sHasPermanentMenuKeySet = true;
-                    } catch (RemoteException ex) {
-                        sHasPermanentMenuKey = false;
-                    }
-                }
+        switch (configVal) {
+            default:
+            case HAS_PERMANENT_MENU_KEY_AUTODETECT:
+                mUseAutodetectMenuKey = true;
                 break;
 
-                case HAS_PERMANENT_MENU_KEY_TRUE:
-                    sHasPermanentMenuKey = true;
-                    sHasPermanentMenuKeySet = true;
-                    break;
+            case HAS_PERMANENT_MENU_KEY_TRUE:
+                mUseAutodetectMenuKey = false;
+                mHasPermanentMenuKey = true;
+                break;
 
-                case HAS_PERMANENT_MENU_KEY_FALSE:
-                    sHasPermanentMenuKey = false;
-                    sHasPermanentMenuKeySet = true;
-                    break;
-            }
+            case HAS_PERMANENT_MENU_KEY_FALSE:
+                mUseAutodetectMenuKey = false;
+                mHasPermanentMenuKey = false;
+                break;
         }
 
         mFadingMarqueeEnabled = res.getBoolean(
@@ -756,7 +747,7 @@ public class ViewConfiguration {
      * @return true if a permanent menu key is present, false otherwise.
      */
     public boolean hasPermanentMenuKey() {
-        return sHasPermanentMenuKey;
+        return calcHasMenuButton();
     }
 
     /**
@@ -765,5 +756,17 @@ public class ViewConfiguration {
      */
     public boolean isFadingMarqueeEnabled() {
         return mFadingMarqueeEnabled;
+    }
+
+    private boolean calcHasMenuButton() {
+        if (mUseAutodetectMenuKey) {
+            IWindowManager wm = WindowManagerGlobal.getWindowManagerService();
+            try {
+                return !wm.hasNavigationBar();
+            } catch (RemoteException ex) {
+                return false;
+            }
+        }
+        return mHasPermanentMenuKey;
     }
 }
