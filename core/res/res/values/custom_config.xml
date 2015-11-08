@@ -34,7 +34,7 @@
          config to 7. -->
     <integer name="config_deviceHardwareKeys">0</integer>
 
-    <integer name="config_backKillTimeout">2000</integer>
+    <integer name="config_backKillTimeout">1500</integer>
 
     <string-array translatable="false" name="config_rebootActionsList">
         <item>reboot</item>
@@ -70,8 +70,16 @@
     <!-- Name of that key handler class -->
     <string name="config_deviceKeyHandlerClass" translatable="false"></string>
 
-   <!-- button brightness -->
+    <!-- button brightness -->
     <bool name="config_button_brightness_support">false</bool>
     <integer name="config_button_brightness_default">128</integer>
 
+    <!-- Control the behavior when the user long presses the menu button.
+            0 - Nothing
+            1 - Recent apps view in SystemUI
+            2 - Launch assist intent
+         This needs to match the constants in
+         policy/src/com/android/internal/policy/impl/PhoneWindowManager.java
+    -->
+    <integer name="config_longPressOnMenuBehavior">0</integer>
 </resources>
