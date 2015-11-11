@@ -64,18 +64,21 @@ public abstract class KeyguardPinBasedInputView extends KeyguardAbsKeyInputView
         return mPasswordEntry.requestFocus(direction, previouslyFocusedRect);
     }
 
+    @Override
     protected void resetState() {
-        mPasswordEntry.setEnabled(true);
+        setPasswordEntryEnabled(true);
     }
 
     @Override
     protected void setPasswordEntryEnabled(boolean enabled) {
         mPasswordEntry.setEnabled(enabled);
+        mOkButton.setEnabled(enabled);
     }
 
     @Override
     protected void setPasswordEntryInputEnabled(boolean enabled) {
         mPasswordEntry.setEnabled(enabled);
+        mOkButton.setEnabled(enabled);
     }
 
     @Override
@@ -100,6 +103,8 @@ public abstract class KeyguardPinBasedInputView extends KeyguardAbsKeyInputView
         switch (reason) {
             case PROMPT_REASON_RESTART:
                 return R.string.kg_prompt_reason_restart_pin;
+            case PROMPT_REASON_TIMEOUT:
+                return R.string.kg_prompt_reason_timeout_pin;
             default:
                 return 0;
         }
@@ -220,6 +225,7 @@ public abstract class KeyguardPinBasedInputView extends KeyguardAbsKeyInputView
         mDeleteButton = findViewById(R.id.delete_button);
         mDeleteButton.setVisibility(View.VISIBLE);
         mDeleteButton.setOnClickListener(new OnClickListener() {
+            @Override
             public void onClick(View v) {
                 // check for time-based lockouts
                 if (mPasswordEntry.isEnabled()) {
@@ -229,6 +235,7 @@ public abstract class KeyguardPinBasedInputView extends KeyguardAbsKeyInputView
             }
         });
         mDeleteButton.setOnLongClickListener(new View.OnLongClickListener() {
+            @Override
             public boolean onLongClick(View v) {
                 // check for time-based lockouts
                 if (mPasswordEntry.isEnabled()) {

@@ -11,9 +11,16 @@ $(shell mkdir -p $(OUT)/obj/SHARED_LIBRARIES/libtime_genoff_intermediates/)
 $(shell touch $(OUT)/obj/SHARED_LIBRARIES/libtime_genoff_intermediates/export_includes)
 endif
 
+ifneq ($(ENABLE_CPUSETS),)
+ifneq ($(ENABLE_SCHED_BOOST),)
+LOCAL_CFLAGS += -DUSE_SCHED_BOOST
+endif
+endif
+
 LOCAL_SRC_FILES += \
     $(LOCAL_REL_DIR)/com_android_server_AlarmManagerService.cpp \
     $(LOCAL_REL_DIR)/com_android_server_am_BatteryStatsService.cpp \
+    $(LOCAL_REL_DIR)/com_android_server_am_ActivityManagerService.cpp \
     $(LOCAL_REL_DIR)/com_android_server_AssetAtlasService.cpp \
     $(LOCAL_REL_DIR)/com_android_server_connectivity_Vpn.cpp \
     $(LOCAL_REL_DIR)/com_android_server_ConsumerIrService.cpp \
