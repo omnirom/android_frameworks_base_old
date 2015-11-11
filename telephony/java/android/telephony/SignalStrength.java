@@ -589,7 +589,7 @@ public class SignalStrength implements Parcelable {
 
         if(isGsm()) {
             boolean oldRil = needsOldRilFeature("signalstrength");
-            dBm = getLteDbm();=
+            dBm = getLteDbm();
             if (dBm == INVALID) {
                 if (getTdScdmaLevel() == SIGNAL_STRENGTH_NONE_OR_UNKNOWN || oldRil) {
                     dBm = getGsmDbm();
