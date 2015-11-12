@@ -1004,8 +1004,7 @@ public class NetworkPolicyManagerService extends INetworkPolicyManager.Stub {
         final CharSequence title = res.getText(R.string.data_usage_restricted_title);
         final CharSequence body = res.getString(R.string.data_usage_restricted_body);
 
-        builder.setOnlyAlertOnce(true);
-        builder.setOngoing(true);
+        builder.setOngoing(false);
         builder.setSmallIcon(R.drawable.stat_notify_error);
         builder.setTicker(title);
         builder.setContentTitle(title);
