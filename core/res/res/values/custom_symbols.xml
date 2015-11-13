@@ -56,5 +56,6 @@
   <java-symbol type="layout" name="global_actions_dnd_mode" />
   <!-- global actions -->
   <java-symbol type="style" name="GlobalActionsAnimation" />
-
+  <!-- Vendor image mismatch -->
+  <java-symbol type="string" name="system_error_vendorprint" />
 </resources>
