@@ -133,4 +133,6 @@
     <!-- Notify use that they are in Lock-to-app in accessibility mode -->
     <string name="lock_to_app_toast_back">To unpin this screen, touch and hold Back.</string>
 
+    <!-- Vendor mismatched fingerprint warning [CHAR LIMIT=NONE] -->
+    <string name="system_error_vendorprint">It appears your vendor image may be out of date. Please flash the latest vendor image for your device.</string>
 </resources>
