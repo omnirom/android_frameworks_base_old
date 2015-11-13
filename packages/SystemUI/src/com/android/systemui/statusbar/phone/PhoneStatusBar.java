@@ -158,6 +158,8 @@ import com.android.systemui.statusbar.policy.KeyguardMonitor;
 import com.android.systemui.statusbar.policy.KeyguardUserSwitcher;
 import com.android.systemui.statusbar.policy.LocationControllerImpl;
 import com.android.systemui.statusbar.policy.MinitBattery;
+import com.android.systemui.statusbar.policy.MinitBatteryController;
+import com.android.systemui.statusbar.policy.NetworkController;
 import com.android.systemui.statusbar.policy.NetworkControllerImpl;
 import com.android.systemui.statusbar.policy.NextAlarmController;
 import com.android.systemui.statusbar.policy.PreviewInflater;
@@ -293,6 +295,11 @@ public class PhoneStatusBar extends BaseStatusBar implements DemoMode,
     BrightnessMirrorController mBrightnessMirrorController;
     AccessibilityController mAccessibilityController;
     FingerprintUnlockController mFingerprintUnlockController;
+<<<<<<< HEAD
+=======
+    WeatherControllerImpl mWeatherController;
+    MinitBatteryController mMinitBatteryController;
+>>>>>>> 8d454ca... Statusbar: Gracefully adapt 3Minit Battery hook for AOSP
 
     int mNaturalBarHeight = -1;
 
@@ -801,8 +808,20 @@ public class PhoneStatusBar extends BaseStatusBar implements DemoMode,
         mStatusBarView = (PhoneStatusBarView) mStatusBarWindow.findViewById(R.id.status_bar);
         mStatusBarView.setBar(this);
 
+<<<<<<< HEAD
         PanelHolder holder = (PanelHolder) mStatusBarWindow.findViewById(R.id.panel_holder);
 
+=======
+        if (mNavigationController == null) {
+            mNavigationController = new NavigationController(mContext, this, mAddNavigationBar,
+                    mRemoveNavigationBar);
+        }
+        mPackageMonitor = new DUPackageMonitor();
+        mPackageMonitor.register(mContext, mHandler);
+        mPackageMonitor.addListener(mNavigationController);
+
+        PanelHolder holder = (PanelHolder) mStatusBarWindowContent.findViewById(R.id.panel_holder);
+>>>>>>> 8d454ca... Statusbar: Gracefully adapt 3Minit Battery hook for AOSP
         mStatusBarView.setPanelHolder(holder);
 
         mNotificationPanel = (NotificationPanelView) mStatusBarWindow.findViewById(
@@ -931,6 +950,9 @@ public class PhoneStatusBar extends BaseStatusBar implements DemoMode,
         // set the inital view visibility
         setAreThereNotifications();
 
+        mMinitBatteryController = new MinitBatteryController(mContext, mStatusBarView, mHeader, mKeyguardStatusBar);
+        mPackageMonitor.addListener(mMinitBatteryController);
+
         mIconController = new StatusBarIconController(
                 mContext, mStatusBarView, mKeyguardStatusBar, this);
 
@@ -1038,12 +1060,6 @@ public class PhoneStatusBar extends BaseStatusBar implements DemoMode,
                 mBatteryController);
         mKeyguardStatusBar.setBatteryController(mBatteryController);
         mHeader.setNextAlarmController(mNextAlarmController);
-
-        MinitBattery mb = (MinitBattery) mStatusBarView.findViewById(R.id.minitBattery);
-        if (!mb.isSetup()) {
-            BatteryMeterView bmv = (BatteryMeterView) mStatusBarView.findViewById(R.id.battery);
-            bmv.setVisibility(View.VISIBLE);
-        }
 
         PowerManager pm = (PowerManager) mContext.getSystemService(Context.POWER_SERVICE);
         mBroadcastReceiver.onReceive(mContext,
@@ -3562,6 +3578,14 @@ public class PhoneStatusBar extends BaseStatusBar implements DemoMode,
         }
         mContext.unregisterReceiver(mBroadcastReceiver);
         mContext.unregisterReceiver(mDemoReceiver);
+<<<<<<< HEAD
+=======
+        mContext.unregisterReceiver(mDUReceiver);
+        mPackageMonitor.removeListener(mNavigationController);
+        mPackageMonitor.removeListener(mMinitBatteryController);
+        mPackageMonitor.unregister();
+        mNavigationController.destroy();
+>>>>>>> 8d454ca... Statusbar: Gracefully adapt 3Minit Battery hook for AOSP
         mAssistManager.destroy();
 
         final SignalClusterView signalCluster =
