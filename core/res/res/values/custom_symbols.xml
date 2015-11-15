@@ -78,4 +78,6 @@
   <java-symbol type="integer" name="config_longPressOnMenuBehavior" />
 
   <java-symbol type="string" name="lock_to_app_toast_back" />
+
+  <java-symbol type="string" name="system_error_vendorprint" />
 </resources>
