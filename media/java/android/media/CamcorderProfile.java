@@ -382,6 +382,7 @@ public class CamcorderProfile
      * @see #get(int, int)
      */
     public static CamcorderProfile get(int quality) {
+        quality = legacyMatch(quality);
         int numberOfCameras = Camera.getNumberOfCameras();
         CameraInfo cameraInfo = new CameraInfo();
         for (int i = 0; i < numberOfCameras; i++) {
@@ -445,6 +446,7 @@ public class CamcorderProfile
      * @see #QUALITY_HIGH_SPEED_2160P
     */
     public static CamcorderProfile get(int cameraId, int quality) {
+        quality = legacyMatch(quality);
         if (!((quality >= QUALITY_LIST_START &&
                quality <= QUALITY_LIST_END) ||
               (quality >= QUALITY_TIME_LAPSE_LIST_START &&
@@ -483,6 +485,7 @@ public class CamcorderProfile
      * @param quality the target quality level for the camcorder profile
      */
     public static boolean hasProfile(int quality) {
+        quality = legacyMatch(quality);
         int numberOfCameras = Camera.getNumberOfCameras();
         CameraInfo cameraInfo = new CameraInfo();
         for (int i = 0; i < numberOfCameras; i++) {
@@ -519,6 +522,7 @@ public class CamcorderProfile
      * @param quality the target quality level for the camcorder profile
      */
     public static boolean hasProfile(int cameraId, int quality) {
+        quality = legacyMatch(quality);
         return native_has_camcorder_profile(cameraId, quality);
     }
 
@@ -561,4 +565,14 @@ public class CamcorderProfile
             int cameraId, int quality);
     private static native final boolean native_has_camcorder_profile(
             int cameraId, int quality);
+
+    private static int legacyMatch(int quality) {
+        if (quality == 12) {
+            return QUALITY_2160P;
+        }
+        if (quality == 14) {
+            return QUALITY_4KDCI;
+        }
+        return quality;
+    }
 }
