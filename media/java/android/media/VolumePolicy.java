@@ -23,7 +23,7 @@ import java.util.Objects;
 
 /** @hide */
 public final class VolumePolicy implements Parcelable {
-    public static final VolumePolicy DEFAULT = new VolumePolicy(false, false, true, 400);
+    public static final VolumePolicy DEFAULT = new VolumePolicy(false, false, true, 400, false);
 
     /** Allow volume adjustments lower from vibrate to enter ringer mode = silent */
     public final boolean volumeDownToEnterSilent;
@@ -38,12 +38,16 @@ public final class VolumePolicy implements Parcelable {
         number of milliseconds since an adjustment from normal to vibrate. */
     public final int vibrateToSilentDebounce;
 
+    /** Automatically enter do not disturb when ringer mode = silent and pressing volume down */
+    public final boolean doNotDisturbWhenVolumeDownInSilent;
+
     public VolumePolicy(boolean volumeDownToEnterSilent, boolean volumeUpToExitSilent,
-            boolean doNotDisturbWhenSilent, int vibrateToSilentDebounce) {
+            boolean doNotDisturbWhenSilent, int vibrateToSilentDebounce, boolean doNotDisturbWhenVolumeDownInSilent) {
         this.volumeDownToEnterSilent = volumeDownToEnterSilent;
         this.volumeUpToExitSilent = volumeUpToExitSilent;
         this.doNotDisturbWhenSilent = doNotDisturbWhenSilent;
         this.vibrateToSilentDebounce = vibrateToSilentDebounce;
+        this.doNotDisturbWhenVolumeDownInSilent = doNotDisturbWhenVolumeDownInSilent;
     }
 
     @Override
@@ -51,13 +55,14 @@ public final class VolumePolicy implements Parcelable {
         return "VolumePolicy[volumeDownToEnterSilent=" + volumeDownToEnterSilent
                 + ",volumeUpToExitSilent=" + volumeUpToExitSilent
                 + ",doNotDisturbWhenSilent=" + doNotDisturbWhenSilent
-                + ",vibrateToSilentDebounce=" + vibrateToSilentDebounce + "]";
+                + ",vibrateToSilentDebounce=" + vibrateToSilentDebounce
+                + ",doNotDisturbWhenVolumeDownInSilent=" + doNotDisturbWhenVolumeDownInSilent + "]";
     }
 
     @Override
     public int hashCode() {
         return Objects.hash(volumeDownToEnterSilent, volumeUpToExitSilent, doNotDisturbWhenSilent,
-                vibrateToSilentDebounce);
+                vibrateToSilentDebounce, doNotDisturbWhenVolumeDownInSilent);
     }
 
     @Override
@@ -68,7 +73,8 @@ public final class VolumePolicy implements Parcelable {
         return other.volumeDownToEnterSilent == volumeDownToEnterSilent
                 && other.volumeUpToExitSilent == volumeUpToExitSilent
                 && other.doNotDisturbWhenSilent == doNotDisturbWhenSilent
-                && other.vibrateToSilentDebounce == vibrateToSilentDebounce;
+                && other.vibrateToSilentDebounce == vibrateToSilentDebounce
+                && other.doNotDisturbWhenVolumeDownInSilent == doNotDisturbWhenVolumeDownInSilent;
     }
 
     @Override
@@ -82,6 +88,7 @@ public final class VolumePolicy implements Parcelable {
         dest.writeInt(volumeUpToExitSilent ? 1 : 0);
         dest.writeInt(doNotDisturbWhenSilent ? 1 : 0);
         dest.writeInt(vibrateToSilentDebounce);
+        dest.writeInt(doNotDisturbWhenVolumeDownInSilent ? 1 : 0);
     }
 
     public static final Parcelable.Creator<VolumePolicy> CREATOR
@@ -91,7 +98,8 @@ public final class VolumePolicy implements Parcelable {
             return new VolumePolicy(p.readInt() != 0,
                     p.readInt() != 0,
                     p.readInt() != 0,
-                    p.readInt());
+                    p.readInt(),
+                    p.readInt() != 0);
         }
 
         @Override

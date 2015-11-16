@@ -47,8 +47,9 @@ public class VolumeDialogComponent implements VolumeComponent {
     private final VolumePolicy mVolumePolicy = new VolumePolicy(
             true,  // volumeDownToEnterSilent
             true,  // volumeUpToExitSilent
-            true,  // doNotDisturbWhenSilent
-            400    // vibrateToSilentDebounce
+            false,  // doNotDisturbWhenSilent
+            400,    // vibrateToSilentDebounce
+            true    // doNotDisturbWhenVolumeDownInSilent
     );
 
     public VolumeDialogComponent(SystemUI sysui, Context context, Handler handler,
