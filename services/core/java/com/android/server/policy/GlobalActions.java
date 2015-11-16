@@ -841,6 +841,19 @@ class GlobalActions implements DialogInterface.OnDismissListener, DialogInterfac
         mAirplaneModeOn.updateState(mAirplaneState);
         mAdapter.notifyDataSetChanged();
         mDialog.getWindow().setType(WindowManager.LayoutParams.TYPE_KEYGUARD_DIALOG);
+        /*if (mShowSilentToggle) {
+            IntentFilter filter = new IntentFilter(AudioManager.RINGER_MODE_CHANGED_ACTION);
+            mContext.registerReceiver(mRingerModeReceiver, filter);
+        }*/
+    }
+
+    private void refreshSilentMode() {
+        if (!mHasVibrator) {
+            final boolean silentModeOn =
+                    mAudioManager.getRingerModeInternal() != AudioManager.RINGER_MODE_NORMAL;
+            ((ToggleAction)mSilentModeAction).updateState(
+                    silentModeOn ? ToggleAction.State.On : ToggleAction.State.Off);
+        }
     }
 
     /** {@inheritDoc} */
@@ -1317,20 +1330,7 @@ class GlobalActions implements DialogInterface.OnDismissListener, DialogInterfac
         public void onClick(View v) {
             if (!(v.getTag() instanceof Integer)) return;
             int index = (Integer) v.getTag();
-            if (index == 0 || index == 1) {
-                int zenMode = index == 0
-                            ? Global.ZEN_MODE_NO_INTERRUPTIONS
-                            : Global.ZEN_MODE_IMPORTANT_INTERRUPTIONS;
-                Global.putInt(mContext.getContentResolver(), Global.ZEN_MODE, zenMode);
-            } else {
-                Global.putInt(mContext.getContentResolver(), Global.ZEN_MODE, Global.ZEN_MODE_OFF);
-            }
-            // must be after zen mode!
-            if (index == 2 || index == 3 || index == 4) {
-                int ringerMode = indexToRingerMode(index);
-                mAudioManager.setRingerModeInternal(ringerMode);
-            }
-            mAdapter.notifyDataSetChanged();
+            mAudioManager.setRingerModeInternal(indexToRingerMode(index));
             mHandler.sendEmptyMessageDelayed(MESSAGE_DISMISS, DIALOG_DISMISS_DELAY);
         }
     }

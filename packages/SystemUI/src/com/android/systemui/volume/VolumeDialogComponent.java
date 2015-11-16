@@ -47,7 +47,7 @@ public class VolumeDialogComponent implements VolumeComponent, TunerService.Tuna
 
     public static final boolean DEFAULT_VOLUME_DOWN_TO_ENTER_SILENT = true;
     public static final boolean DEFAULT_VOLUME_UP_TO_EXIT_SILENT = true;
-    public static final boolean DEFAULT_DO_NOT_DISTURB_WHEN_SILENT = true;
+    public static final boolean DEFAULT_DO_NOT_DISTURB_WHEN_SILENT = false;
 
     private final SystemUI mSysui;
     private final Context mContext;
@@ -59,6 +59,7 @@ public class VolumeDialogComponent implements VolumeComponent, TunerService.Tuna
             DEFAULT_VOLUME_UP_TO_EXIT_SILENT,  // volumeUpToExitSilent
             DEFAULT_DO_NOT_DISTURB_WHEN_SILENT,  // doNotDisturbWhenSilent
             400    // vibrateToSilentDebounce
+            true    // doNotDisturbWhenVolumeDownInSilent
     );
 
     public VolumeDialogComponent(SystemUI sysui, Context context, Handler handler,
