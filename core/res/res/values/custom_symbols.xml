@@ -75,4 +75,7 @@
   <java-symbol type="integer" name="config_longPressOnMenuBehavior" />
   <java-symbol type="string" name="lock_to_app_toast_back" />
   <java-symbol type="string" name="system_error_vendorprint" />
+  <java-symbol type="drawable" name="ic_audio_notification_am_alpha" />
+  <java-symbol type="drawable" name="ic_audio_notification_mute_am_alpha" />
+
 </resources>
