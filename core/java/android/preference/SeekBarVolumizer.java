@@ -98,7 +98,7 @@ public class SeekBarVolumizer implements OnSeekBarChangeListener, Handler.Callba
         mCallback = callback;
         mOriginalStreamVolume = mAudioManager.getStreamVolume(mStreamType);
         mLastAudibleStreamVolume = mAudioManager.getLastAudibleStreamVolume(mStreamType);
-        mMuted = mAudioManager.isStreamMute(mStreamType);
+        mMuted = mAudioManager.isStreamMute(mStreamType) || mOriginalStreamVolume == 0;
         if (mCallback != null) {
             mCallback.onMuted(mMuted, isZenMuted());
         }
@@ -140,6 +140,7 @@ public class SeekBarVolumizer implements OnSeekBarChangeListener, Handler.Callba
 
     protected void updateSeekBar() {
         final boolean zenMuted = isZenMuted();
+
         mSeekBar.setEnabled(!zenMuted);
         if (zenMuted) {
             mSeekBar.setProgress(mLastAudibleStreamVolume);
@@ -205,7 +206,7 @@ public class SeekBarVolumizer implements OnSeekBarChangeListener, Handler.Callba
                             .setFlags(AudioAttributes.FLAG_BYPASS_INTERRUPTION_POLICY |
                                     AudioAttributes.FLAG_BYPASS_MUTE)
                             .build());
-                    mRingtone.play();
+                    //mRingtone.play();
                 } catch (Throwable e) {
                     Log.w(TAG, "Error playing ringtone, stream " + mStreamType, e);
                 }
@@ -340,9 +341,11 @@ public class SeekBarVolumizer implements OnSeekBarChangeListener, Handler.Callba
                 if (mSeekBar != null) {
                     mLastProgress = msg.arg1;
                     mLastAudibleStreamVolume = Math.abs(msg.arg2);
-                    final boolean muted = msg.arg2 < 0;
+                    final boolean muted = msg.arg2 <= 0;
                     if (muted != mMuted) {
                         mMuted = muted;
+                        Log.i("maxwen", "handleMessage mMuted=" + mMuted);
+
                         if (mCallback != null) {
                             mCallback.onMuted(mMuted, isZenMuted());
                         }
@@ -362,7 +365,8 @@ public class SeekBarVolumizer implements OnSeekBarChangeListener, Handler.Callba
         if (mSeekBar != null && mAudioManager != null) {
             final int volume = mAudioManager.getStreamVolume(mStreamType);
             final int lastAudibleVolume = mAudioManager.getLastAudibleStreamVolume(mStreamType);
-            final boolean mute = mAudioManager.isStreamMute(mStreamType);
+            final boolean mute = mAudioManager.isStreamMute(mStreamType) || volume == 0;
+            Log.i("maxwen", "updateSlider mute=" + mute);
             mUiHandler.postUpdateSlider(volume, lastAudibleVolume, mute);
         }
     }
@@ -401,17 +405,11 @@ public class SeekBarVolumizer implements OnSeekBarChangeListener, Handler.Callba
             if (AudioManager.VOLUME_CHANGED_ACTION.equals(action)) {
                 int streamType = intent.getIntExtra(AudioManager.EXTRA_VOLUME_STREAM_TYPE, -1);
                 int streamValue = intent.getIntExtra(AudioManager.EXTRA_VOLUME_STREAM_VALUE, -1);
-                final boolean linkEnabled = Settings.System.getInt(context.getContentResolver(),
-                        Settings.System.VOLUME_LINK_NOTIFICATION, 1) == 1;
                 boolean streamMatch = streamType == mStreamType;
-                if (mNotificationOrRing) {
-                    if (linkEnabled) {
-                        streamMatch = isNotificationOrRing(streamType);
-                     }
-                }
                 if (mSeekBar != null && streamMatch && streamValue != -1) {
                     final boolean muted = mAudioManager.isStreamMute(mStreamType)
                             || streamValue == 0;
+                    Log.i("maxwen", "onReceive VOLUME_CHANGED_ACTION muted=" + muted);
                     mUiHandler.postUpdateSlider(streamValue, mLastAudibleStreamVolume, muted);
                 }
             } else if (AudioManager.INTERNAL_RINGER_MODE_CHANGED_ACTION.equals(action)) {
@@ -419,6 +417,7 @@ public class SeekBarVolumizer implements OnSeekBarChangeListener, Handler.Callba
                     mRingerMode = mAudioManager.getRingerModeInternal();
                 }
                 if (mAffectedByRingerMode) {
+                    Log.i("maxwen", "onReceive INTERNAL_RINGER_MODE_CHANGED_ACTION mRingerMode=" + mRingerMode);
                     updateSlider();
                 }
             } else if (NotificationManager.ACTION_INTERRUPTION_FILTER_CHANGED.equals(action)) {
