@@ -36,4 +36,6 @@
   <java-symbol type="string" name="config_deviceKeyHandlerLib" />
   <java-symbol type="string" name="config_deviceKeyHandlerClass" />
   <java-symbol type="bool" name="config_useSystemClockforRotationSensor" />
+  <java-symbol type="drawable" name="ic_audio_notification_new" />
+  <java-symbol type="drawable" name="ic_audio_notification_mute_new" />
 </resources>
