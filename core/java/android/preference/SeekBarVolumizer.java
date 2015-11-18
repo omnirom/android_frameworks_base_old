@@ -140,6 +140,7 @@ public class SeekBarVolumizer implements OnSeekBarChangeListener, Handler.Callba
 
     protected void updateSeekBar() {
         final boolean zenMuted = isZenMuted();
+
         mSeekBar.setEnabled(!zenMuted);
         if (zenMuted) {
             mSeekBar.setProgress(mLastAudibleStreamVolume);
@@ -205,7 +206,7 @@ public class SeekBarVolumizer implements OnSeekBarChangeListener, Handler.Callba
                             .setFlags(AudioAttributes.FLAG_BYPASS_INTERRUPTION_POLICY |
                                     AudioAttributes.FLAG_BYPASS_MUTE)
                             .build());
-                    mRingtone.play();
+                    //mRingtone.play();
                 } catch (Throwable e) {
                     Log.w(TAG, "Error playing ringtone, stream " + mStreamType, e);
                 }
