@@ -43,6 +43,7 @@ import android.os.Handler;
 import android.os.Looper;
 import android.os.Message;
 import android.os.SystemClock;
+import android.provider.Settings;
 import android.provider.Settings.Global;
 import android.transition.AutoTransition;
 import android.transition.Transition;
@@ -255,6 +256,8 @@ public class VolumeDialogImpl implements VolumeDialog, TunerService.Tunable {
             if (!AudioSystem.isSingleVolume(mContext)) {
                 addRow(AudioManager.STREAM_RING,
                         R.drawable.ic_volume_ringer, R.drawable.ic_volume_ringer_mute, true);
+                addRow(AudioManager.STREAM_NOTIFICATION,
+                        R.drawable.ic_volume_notification, R.drawable.ic_volume_notification_mute, true);
                 addRow(AudioManager.STREAM_ALARM,
                         R.drawable.ic_volume_alarm, R.drawable.ic_volume_alarm_mute, false);
                 addRow(AudioManager.STREAM_VOICE_CALL,
@@ -457,6 +460,12 @@ public class VolumeDialogImpl implements VolumeDialog, TunerService.Tunable {
                                 mController.setStreamVolume(stream, 1);
                             }
                         }
+                    } else if (row.stream == AudioManager.STREAM_NOTIFICATION) {
+                        // only ringer icon can change silent or vibrate mode
+                        if (mState.ringerModeInternal == AudioManager.RINGER_MODE_NORMAL) {
+                            final boolean vmute = row.ss.level == 0;
+                            mController.setStreamVolume(stream, vmute ? row.lastAudibleLevel : 0);
+                        }
                     } else {
                         final boolean vmute = row.ss.level == row.ss.levelMin;
                         mController.setStreamVolume(stream,
@@ -619,6 +628,12 @@ public class VolumeDialogImpl implements VolumeDialog, TunerService.Tunable {
     }
 
     private boolean shouldBeVisibleH(VolumeRow row, boolean isActive) {
+        final boolean linkNotificationWithVolume = Settings.System.getInt(mContext.getContentResolver(),
+                Settings.System.VOLUME_LINK_NOTIFICATION, 1) == 1;
+        final boolean isNotificationStream = row.stream == AudioManager.STREAM_NOTIFICATION;
+        if (linkNotificationWithVolume && isNotificationStream) {
+            return false;
+        }
         if (row.stream == AudioSystem.STREAM_ACCESSIBILITY) {
             return mShowA11yStream;
         }
@@ -730,17 +745,21 @@ public class VolumeDialogImpl implements VolumeDialog, TunerService.Tunable {
         }
         final boolean isA11yStream = row.stream == AudioManager.STREAM_ACCESSIBILITY;
         final boolean isRingStream = row.stream == AudioManager.STREAM_RING;
+        final boolean isNotificationStream = row.stream == AudioManager.STREAM_NOTIFICATION;
+        final boolean isRingOrNotificationStream = isRingStream || isNotificationStream;
         final boolean isSystemStream = row.stream == AudioManager.STREAM_SYSTEM;
         final boolean isAlarmStream = row.stream == AudioManager.STREAM_ALARM;
         final boolean isMusicStream = row.stream == AudioManager.STREAM_MUSIC;
-        final boolean isRingVibrate = isRingStream
+        final boolean isRingVibrate = isRingOrNotificationStream
                 && mState.ringerModeInternal == AudioManager.RINGER_MODE_VIBRATE;
         final boolean isRingSilent = isRingStream
                 && mState.ringerModeInternal == AudioManager.RINGER_MODE_SILENT;
+        final boolean isNotificationSilent = isNotificationStream
+                && mState.ringerModeInternal == AudioManager.RINGER_MODE_SILENT;
         final boolean isZenAlarms = mState.zenMode == Global.ZEN_MODE_ALARMS;
         final boolean isZenNone = mState.zenMode == Global.ZEN_MODE_NO_INTERRUPTIONS;
-        final boolean zenMuted = isZenAlarms ? (isRingStream || isSystemStream)
-                : isZenNone ? (isRingStream || isSystemStream || isAlarmStream || isMusicStream)
+        final boolean zenMuted = isZenAlarms ? (isRingOrNotificationStream || isSystemStream)
+                : isZenNone ? (isRingOrNotificationStream || isSystemStream || isAlarmStream || isMusicStream)
                 : false;
 
         // update slider max
@@ -819,9 +838,10 @@ public class VolumeDialogImpl implements VolumeDialog, TunerService.Tunable {
             row.icon.setContentDescription(getStreamLabelH(ss));
         }
 
-        // update slider
-        final boolean enableSlider = !zenMuted;
-        final int vlevel = row.ss.muted && (!isRingStream && !zenMuted) ? 0
+        // notification slider is disabled when vibrate or silent - only ringer slider can be used
+        final boolean enableSlider = isNotificationStream ? (!zenMuted && !isRingVibrate && !isRingSilent && !isNotificationSilent) : !zenMuted;
+        // update slider value - 0 if silent or vibrate
+        final int vlevel = row.ss.muted && (isRingSilent || isNotificationSilent || isRingVibrate && !zenMuted) ? 0
                 : row.ss.level;
         updateVolumeRowSliderH(row, enableSlider, vlevel);
     }
