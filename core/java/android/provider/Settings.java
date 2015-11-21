@@ -5003,6 +5003,12 @@ public final class Settings {
         public static final String KEYGUARD_QUICK_UNLOCK = "keyguard_quick_unlock";
 
         /**
+         * Enable voice lockscreen shortcut
+         * @hide
+         */
+        public static final String LOCKSCREEN_VOICE_SHORTCUT = "lockscreen_voice_shortcut";
+
+        /**
          * Whether lock pattern will vibrate as user enters (0 = false, 1 =
          * true)
          *
