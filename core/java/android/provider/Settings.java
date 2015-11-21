@@ -3714,6 +3714,7 @@ public final class Settings {
         public static final String STATUS_BAR_NETWORK_ACTIVITY = "status_bar_network_activity";
 
         /**
+<<<<<<< HEAD
          * Whether to display recents in full screen
          * @hide
          */
@@ -3724,6 +3725,11 @@ public final class Settings {
          * @hide
          */
         public static final String RECENTS_SHOW_SEARCH_BAR = "recents_show_search_bar";
+
+         * Enable voice lockscreen shortcut
+         * @hide
+         */
+        public static final String LOCKSCREEN_VOICE_SHORTCUT = "lockscreen_voice_shortcut";
 
         /**
          * Settings to backup. This is here so that it's in the same place as the settings
