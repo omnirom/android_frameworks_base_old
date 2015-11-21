@@ -37,6 +37,7 @@ import android.os.Messenger;
 import android.os.RemoteException;
 import android.os.UserHandle;
 import android.provider.MediaStore;
+import android.provider.Settings;
 import android.service.media.CameraPrewarmService;
 import android.telecom.TelecomManager;
 import android.util.AttributeSet;
@@ -310,6 +311,15 @@ public class KeyguardBottomAreaView extends FrameLayout implements View.OnClickL
 
     public boolean isLeftVoiceAssist() {
         return mLeftIsVoiceAssist;
+    }
+
+    private boolean mVoiceShortcutEnabled = Settings.System.getIntForUser(
+                mContext.getContentResolver(), Settings.System.LOCKSCREEN_VOICE_SHORTCUT,
+                0, UserHandle.USER_CURRENT) == 1;
+    if (mVoiceShortcutEnabled) {
+        mLeftIsVoiceAssist = true;
+    } else {
+        mLeftIsVoiceAssist = false;
     }
 
     private boolean isPhoneVisible() {
