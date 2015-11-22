@@ -106,4 +106,6 @@
   <java-symbol type="string" name="lock_to_app_toast_back" />
 
   <java-symbol type="integer" name="config_longPressOnMenuBehavior" />
+
+  <java-symbol type="bool" name="config_useSystemClockforRotationSensor" />
 </resources>
