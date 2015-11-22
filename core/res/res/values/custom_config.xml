@@ -82,4 +82,8 @@
          policy/src/com/android/internal/policy/impl/PhoneWindowManager.java
     -->
     <integer name="config_longPressOnMenuBehavior">0</integer>
+
+    <!-- Older rotation sensors are not setting event.timestamp correctly. Setting to
+         true will use SystemClock.elapsedRealtimeNanos() to set timestamp. -->
+    <bool name="config_useSystemClockforRotationSensor">false</bool>
 </resources>
