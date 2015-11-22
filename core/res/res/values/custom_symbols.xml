@@ -35,4 +35,5 @@
   <java-symbol type="integer" name="config_deviceHardwareKeys" />
   <java-symbol type="string" name="config_deviceKeyHandlerLib" />
   <java-symbol type="string" name="config_deviceKeyHandlerClass" />
+  <java-symbol type="bool" name="config_useSystemClockforRotationSensor" />
 </resources>
