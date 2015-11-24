@@ -32,6 +32,7 @@ import android.os.SystemClock;
 import android.os.UserHandle;
 import android.util.Pair;
 import android.view.KeyEvent;
+import android.view.MotionEvent;
 import android.view.View;
 import android.view.ViewStub;
 import android.widget.Toast;
@@ -242,6 +243,13 @@ public class RecentsActivity extends Activity implements RecentsView.RecentsView
                 mEmptyView = mEmptyViewStub.inflate();
             }
             mEmptyView.setVisibility(View.VISIBLE);
+            mEmptyView.setOnTouchListener(new View.OnTouchListener() {
+                @Override
+                public boolean onTouch(View v, MotionEvent event) {
+                    dismissRecentsToFocusedTaskOrHome(true);
+                    return true;
+                }
+            });
             mRecentsView.setSearchBarVisibility(View.GONE);
             findViewById(R.id.floating_action_button).setVisibility(View.GONE);
         } else {
