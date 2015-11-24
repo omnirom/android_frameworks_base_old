@@ -2579,10 +2579,10 @@ public class PackageManagerService extends IPackageManager.Stub
             File frameworkDir = new File(Environment.getRootDirectory(), "framework");
 
             final VersionInfo ver = mSettings.getInternalVersion();
-            mIsUpgrade = !Build.OMNI_FINGERPRINT.equals(ver.fingerprint);
+            mIsUpgrade = !Build.DATE.equals(ver.fingerprint);
             if (mIsUpgrade) {
                 logCriticalInfo(Log.INFO,
-                        "Upgrading from " + ver.fingerprint + " to " + Build.OMNI_FINGERPRINT);
+                        "Upgrading from " + ver.fingerprint + " to " + Build.DATE);
             }
 
             // when upgrading from pre-M, promote system app permissions from install to runtime
@@ -3181,7 +3181,7 @@ public class PackageManagerService extends IPackageManager.Stub
                                         | Installer.FLAG_CLEAR_CODE_CACHE_ONLY);
                     }
                 }
-                ver.fingerprint = Build.OMNI_FINGERPRINT;
+                ver.fingerprint = Build.DATE;
             }
 
             checkDefaultBrowser();
@@ -22353,7 +22353,7 @@ Slog.v(TAG, ":: stepped forward, applying functor at tag " + parser.getName());
                     Slog.w(TAG, "Failed to scan " + ps.codePath + ": " + e.getMessage());
                 }
 
-                if (!Build.OMNI_FINGERPRINT.equals(ver.fingerprint)) {
+                if (!Build.DATE.equals(ver.fingerprint)) {
                     clearAppDataLIF(ps.pkg, UserHandle.USER_ALL,
                             StorageManager.FLAG_STORAGE_DE | StorageManager.FLAG_STORAGE_CE
                                     | Installer.FLAG_CLEAR_CODE_CACHE_ONLY);
