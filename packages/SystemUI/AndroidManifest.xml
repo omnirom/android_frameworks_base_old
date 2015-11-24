@@ -202,18 +202,34 @@
         </activity>
 
         <activity android:name=".tuner.TunerActivity"
-                  android:enabled="false"
+                  android:enabled="true"
                   android:icon="@drawable/tuner"
                   android:theme="@android:style/Theme.Material.Settings"
                   android:label="@string/system_ui_tuner"
                   android:process=":tuner"
                   android:exported="true">
-            <intent-filter>
+            <!--<intent-filter>
                 <action android:name="com.android.settings.action.EXTRA_SETTINGS" />
                 <category android:name="android.intent.category.DEFAULT" />
             </intent-filter>
             <meta-data android:name="com.android.settings.category"
-                    android:value="com.android.settings.category.system" />
+                    android:value="com.android.settings.category.system" />-->
+        </activity>
+
+        <activity android:name=".tuner.QsTunerActivity"
+                  android:enabled="true"
+                  android:theme="@android:style/Theme.Material.Settings"
+                  android:label="@string/quick_settings"
+                  android:process=":tuner"
+                  android:exported="true">
+        </activity>
+
+        <activity android:name=".tuner.StatusBarActivity"
+                  android:enabled="true"
+                  android:theme="@android:style/Theme.Material.Settings"
+                  android:label="@string/status_bar_icons"
+                  android:process=":tuner"
+                  android:exported="true">
         </activity>
 
         <!-- Alternate Recents -->

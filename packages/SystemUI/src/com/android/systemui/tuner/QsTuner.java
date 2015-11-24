@@ -22,6 +22,7 @@ import android.content.ClipData;
 import android.content.Context;
 import android.content.DialogInterface;
 import android.os.Bundle;
+import android.preference.PreferenceFragment;
 import android.provider.Settings.Secure;
 import android.text.TextUtils;
 import android.util.Log;
@@ -54,7 +55,7 @@ import com.android.systemui.statusbar.policy.SecurityController;
 import java.util.ArrayList;
 import java.util.List;
 
-public class QsTuner extends Fragment implements Callback {
+public class QsTuner extends PreferenceFragment implements Callback {
 
     private static final String TAG = "QsTuner";
 
