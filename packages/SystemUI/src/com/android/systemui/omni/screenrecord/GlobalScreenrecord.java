@@ -245,11 +245,13 @@ class GlobalScreenrecord {
 
             try {
                 copyFileUsingStream(input, output);
-                input.delete();
             } catch (IOException e) {
                 Log.e(TAG, "Unable to copy output file", e);
                 Message msg = Message.obtain(mHandler, MSG_TASK_ERROR);
                 mHandler.sendMessage(msg);
+                return;
+            } finally {
+                input.delete();
             }
 
             // Make it appear in gallery, run MediaScanner
