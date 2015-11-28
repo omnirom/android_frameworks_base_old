@@ -241,6 +241,10 @@ class GlobalScreenrecord {
             File input = new File(TMP_PATH);
             final File output = new File(screenshots, fileName);
 
+            // Delete the tmp file
+            File tmp_file = new File(TMP_PATH);
+            boolean deleted = tmp_file.delete();
+
             Log.d(TAG, "Copying file to " + output.getAbsolutePath());
 
             try {
