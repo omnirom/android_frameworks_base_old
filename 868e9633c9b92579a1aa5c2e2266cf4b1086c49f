@@ -1,0 +1,21 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "b8f5b13e_2dae542e",
+        "filename": "packages/SystemUI/src/com/android/systemui/omni/screenrecord/GlobalScreenrecord.java",
+        "patchSetId": 1
+      },
+      "lineNbr": 252,
+      "author": {
+        "id": 1000026
+      },
+      "writtenOn": "2015-11-28T14:02:44Z",
+      "side": 1,
+      "message": "that should be moved into a finally clause anyway",
+      "revId": "868e9633c9b92579a1aa5c2e2266cf4b1086c49f",
+      "serverId": "56841c99-7c94-43d4-bf0b-cb4707e66d55",
+      "unresolved": false
+    }
+  ]
+}
