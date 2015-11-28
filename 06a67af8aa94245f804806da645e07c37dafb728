@@ -1,0 +1,21 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "b8f5b13e_51e932e3",
+        "filename": "services/core/java/com/android/server/policy/WindowOrientationListener.java",
+        "patchSetId": 2
+      },
+      "lineNbr": 112,
+      "author": {
+        "id": 1000026
+      },
+      "writtenOn": "2015-11-28T20:45:12Z",
+      "side": 1,
+      "message": "not sure if this is intented to be placed here :)\nmaybe therefore the intent is wrong. I would move that outside of this",
+      "revId": "06a67af8aa94245f804806da645e07c37dafb728",
+      "serverId": "56841c99-7c94-43d4-bf0b-cb4707e66d55",
+      "unresolved": false
+    }
+  ]
+}
