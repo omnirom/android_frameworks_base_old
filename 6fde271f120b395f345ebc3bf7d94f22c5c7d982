@@ -1,0 +1,21 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "b8f5b13e_74a2e44a",
+        "filename": "packages/SystemUI/src/com/android/systemui/statusbar/phone/KeyguardBottomAreaView.java",
+        "patchSetId": 13
+      },
+      "lineNbr": 316,
+      "author": {
+        "id": 1000026
+      },
+      "writtenOn": "2015-12-02T15:48:28Z",
+      "side": 1,
+      "message": "you should do this in updateLeftPreview\nand mVoiceShortcutEnabled is an instance variable so it should be placed where all the others are.",
+      "revId": "6fde271f120b395f345ebc3bf7d94f22c5c7d982",
+      "serverId": "56841c99-7c94-43d4-bf0b-cb4707e66d55",
+      "unresolved": false
+    }
+  ]
+}
