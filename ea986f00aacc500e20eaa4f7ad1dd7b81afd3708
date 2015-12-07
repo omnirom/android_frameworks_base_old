@@ -1,0 +1,21 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "b8f5b13e_97b44a7d",
+        "filename": "packages/SystemUI/src/com/android/systemui/statusbar/phone/KeyguardBottomAreaView.java",
+        "patchSetId": 17
+      },
+      "lineNbr": 480,
+      "author": {
+        "id": 1000026
+      },
+      "writtenOn": "2015-12-07T11:02:54Z",
+      "side": 1,
+      "message": "calling that every time is pretty ugly\nalso - didnt we say this is a secure setting?",
+      "revId": "ea986f00aacc500e20eaa4f7ad1dd7b81afd3708",
+      "serverId": "56841c99-7c94-43d4-bf0b-cb4707e66d55",
+      "unresolved": false
+    }
+  ]
+}
