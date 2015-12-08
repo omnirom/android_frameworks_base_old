@@ -839,6 +839,7 @@ final class DisplayPowerController implements AutomaticBrightnessController.Call
         if (mPendingScreenOff && target != Display.STATE_OFF) {
             setScreenState(Display.STATE_OFF);
             mPendingScreenOff = false;
+            mPowerState.dismissColorFadeResources();
         }
 
         if (target == Display.STATE_ON) {
@@ -912,6 +913,7 @@ final class DisplayPowerController implements AutomaticBrightnessController.Call
                 // A black surface is already hiding the contents of the screen.
                 setScreenState(Display.STATE_OFF);
                 mPendingScreenOff = false;
+                mPowerState.dismissColorFadeResources();
             } else if (performScreenOffTransition
                     && mPowerState.prepareColorFade(mContext,
                             mColorFadeFadesConfig ?

@@ -16,6 +16,7 @@
 
 package com.android.systemui.qs;
 
+import android.app.PendingIntent;
 import android.content.Context;
 import android.content.Intent;
 import android.graphics.drawable.Animatable;
@@ -323,7 +324,11 @@ public abstract class QSTile<TState extends State> implements Listenable {
 
     public interface Host {
         void startActivityDismissingKeyguard(Intent intent);
+<<<<<<< HEAD
         void startSettingsActivity(Intent intent);
+=======
+        void startActivityDismissingKeyguard(PendingIntent intent);
+>>>>>>> android-6.0.1_r3
         void warn(String message, Throwable t);
         void collapsePanels();
         Looper getLooper();
