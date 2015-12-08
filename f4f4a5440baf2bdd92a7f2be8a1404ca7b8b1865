@@ -1,0 +1,27 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "b8f5b13e_9a6c6fd0",
+        "filename": "packages/SystemUI/src/com/android/systemui/qs/QSTile.java",
+        "patchSetId": 2
+      },
+      "lineNbr": 328,
+      "author": {
+        "id": 1000174
+      },
+      "writtenOn": "2015-12-08T17:39:02Z",
+      "side": 0,
+      "message": "Max, I think this one can be deleted. It is not on AOSP trees, as well as I have checked commit history and can´t find any commits which is actually using it. It was added during the fix merge commit for 6.0, but not sure why.",
+      "range": {
+        "startLine": 328,
+        "startChar": 8,
+        "endLine": 328,
+        "endChar": 50
+      },
+      "revId": "f4f4a5440baf2bdd92a7f2be8a1404ca7b8b1865",
+      "serverId": "56841c99-7c94-43d4-bf0b-cb4707e66d55",
+      "unresolved": false
+    }
+  ]
+}
