@@ -48,6 +48,8 @@ public class StatusBarHeaderMachine {
         public Drawable getCurrent(final Calendar time);
 
         public String getName();
+
+        public void settingsChanged();
     }
 
     public interface IStatusBarHeaderMachineObserver {
@@ -97,10 +99,38 @@ public class StatusBarHeaderMachine {
                             Settings.System
                                     .getUriFor(Settings.System.STATUS_BAR_CUSTOM_HEADER),
                             false, this, UserHandle.USER_ALL);
+            mContext.getContentResolver()
+                    .registerContentObserver(
+                            Settings.System
+                                    .getUriFor(Settings.System.STATUS_BAR_DAYLIGHT_HEADER_PACK),
+                            false, this, UserHandle.USER_ALL);
         }
 
         @Override
         public void onChange(boolean selfChange) {
+            final boolean customHeader = Settings.System.getIntForUser(mContext.getContentResolver(),
+                    Settings.System.STATUS_BAR_CUSTOM_HEADER, 0,
+                    UserHandle.USER_CURRENT) == 1;
+
+            if (customHeader) {
+                // forward to all observer
+                if (mProviders.size() > 0) {
+                    Iterator<IStatusBarHeaderProvider> nextProvider = mProviders
+                            .iterator();
+                    while (nextProvider.hasNext()) {
+                        IStatusBarHeaderProvider provider = nextProvider.next();
+                        try {
+                            provider.settingsChanged();
+                        } catch (Exception e) {
+                            // just in case
+                        }
+                    }
+                }
+                if (mAttached) {
+                    // we dont want to wait for the alarm
+                    doUpdateStatusHeaderObservers(true);
+                }
+            }
             updateEnablement();
         }
     }
