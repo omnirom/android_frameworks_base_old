@@ -135,13 +135,8 @@ public class QSTileHost implements QSTile.Host, Tunable {
     }
 
     @Override
-<<<<<<< HEAD
-    public void startSettingsActivity(final Intent intent) {
-        mStatusBar.postStartActivityDismissingKeyguard(intent, 0);
-=======
     public void startActivityDismissingKeyguard(PendingIntent intent) {
         mStatusBar.postStartActivityDismissingKeyguard(intent);
->>>>>>> android-6.0.1_r3
     }
 
     @Override

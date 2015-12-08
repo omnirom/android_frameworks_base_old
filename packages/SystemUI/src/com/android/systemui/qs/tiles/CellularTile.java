@@ -92,7 +92,7 @@ public class CellularTile extends QSTile<QSTile.SignalState> {
 
     @Override
     protected void handleLongClick() {
-        mHost.startSettingsActivity(WIRELESS_SETTINGS);
+        mHost.startActivityDismissingKeyguard(WIRELESS_SETTINGS);
     }
 
     @Override

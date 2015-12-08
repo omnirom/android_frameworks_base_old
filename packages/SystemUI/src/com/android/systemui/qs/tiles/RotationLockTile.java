@@ -72,7 +72,7 @@ public class RotationLockTile extends QSTile<QSTile.BooleanState> {
 
     @Override
     protected void handleLongClick() {
-        mHost.startSettingsActivity(DISPLAY_SETTINGS);
+        mHost.startActivityDismissingKeyguard(DISPLAY_SETTINGS);
     }
 
     @Override

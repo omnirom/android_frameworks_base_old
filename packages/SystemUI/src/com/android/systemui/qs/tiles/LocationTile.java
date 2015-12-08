@@ -72,7 +72,7 @@ public class LocationTile extends QSTile<QSTile.BooleanState> {
 
     @Override
     protected void handleLongClick() {
-        mHost.startSettingsActivity(LOCATION_SETTINGS);
+        mHost.startActivityDismissingKeyguard(LOCATION_SETTINGS);
     }
 
     @Override
