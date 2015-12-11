@@ -1,0 +1,21 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "b8f5b13e_857e5464",
+        "filename": "packages/SystemUI/src/com/android/systemui/statusbar/phone/StatusBarWindowView.java",
+        "patchSetId": 3
+      },
+      "lineNbr": 357,
+      "author": {
+        "id": 1000026
+      },
+      "writtenOn": "2015-12-11T17:50:15Z",
+      "side": 1,
+      "message": "its better to reuse the existing OmniSettingsObserver in PhoneStatusBar instead of creating a new one here",
+      "revId": "6c6e1380ebc8d397955cc8ac2e4defc9001860cc",
+      "serverId": "56841c99-7c94-43d4-bf0b-cb4707e66d55",
+      "unresolved": false
+    }
+  ]
+}
