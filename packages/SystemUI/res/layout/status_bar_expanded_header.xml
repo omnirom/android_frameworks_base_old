@@ -99,7 +99,7 @@
             android:layout_gravity="center_vertical"
             android:layout_marginStart="@dimen/header_battery_margin_expanded"
             android:paddingEnd="@dimen/battery_level_padding_end"
-            android:textColor="#ffffff"
+            android:textAppearance="@style/TextAppearance.StatusBar.Expanded.Date.White"
             android:textSize="@dimen/battery_level_text_size"
             android:importantForAccessibility="noHideDescendants"/>
     </LinearLayout>
@@ -167,7 +167,7 @@
         android:paddingStart="6dp"
         android:paddingTop="16dp"
         android:paddingBottom="16dp"
-        android:background="?android:attr/selectableItemBackground"
+        android:background="?android:attr/selectableItemBackgroundBorderless"
         android:visibility="gone"
         />
 
@@ -211,7 +211,7 @@
          android:layout_alignParentBottom="true"
          android:layout_alignParentEnd="true"
          android:layout_marginEnd="10dp"
-         android:layout_marginBottom="@dimen/clock_collapsed_bottom_margin" />
+         android:layout_marginBottom="@dimen/clock_collapsed_bottom_margin"/>
 
     <include layout="@layout/detailed_weather_view"
          android:id="@+id/detailed_weather_view"
