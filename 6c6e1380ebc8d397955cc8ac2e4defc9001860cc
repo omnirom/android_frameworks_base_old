@@ -16,6 +16,24 @@
       "revId": "6c6e1380ebc8d397955cc8ac2e4defc9001860cc",
       "serverId": "56841c99-7c94-43d4-bf0b-cb4707e66d55",
       "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "b8f5b13e_a5db9879",
+        "filename": "packages/SystemUI/src/com/android/systemui/statusbar/phone/StatusBarWindowView.java",
+        "patchSetId": 3
+      },
+      "lineNbr": 357,
+      "author": {
+        "id": 1000026
+      },
+      "writtenOn": "2015-12-11T21:51:28Z",
+      "side": 1,
+      "message": "see e.g. https://github.com/omnirom/android_frameworks_base/blob/android-6.0/packages/SystemUI/src/com/android/systemui/statusbar/phone/PhoneStatusBar.java#L477\n\nget the value there and forward to mStatusBarWindow\nand use that value here\n\nremove SettingsObserver and all references here",
+      "parentUuid": "b8f5b13e_857e5464",
+      "revId": "6c6e1380ebc8d397955cc8ac2e4defc9001860cc",
+      "serverId": "56841c99-7c94-43d4-bf0b-cb4707e66d55",
+      "unresolved": false
     }
   ]
 }
