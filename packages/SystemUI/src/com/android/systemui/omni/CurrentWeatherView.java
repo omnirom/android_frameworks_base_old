@@ -18,6 +18,7 @@
 package com.android.systemui.omni;
 
 import android.content.Context;
+import android.graphics.Color;
 import android.graphics.drawable.Drawable;
 import android.util.ArraySet;
 import android.util.AttributeSet;
@@ -83,5 +84,19 @@ public class CurrentWeatherView extends LinearLayout {
     public void setShowError(Drawable d) {
         mWeatherImage.setImageDrawable(d);
         mWeatherTemp.setText("--");
+    }
+
+    /**
+     * makes text more readable on light backgrounds
+     */
+    public void enableTextShadow() {
+        mWeatherTemp.setShadowLayer(5, 0, 0, Color.BLACK);
+    }
+
+    /**
+     * default
+     */
+    public void disableTextShadow() {
+        mWeatherTemp.setShadowLayer(0, 0, 0, Color.BLACK);
     }
 }
