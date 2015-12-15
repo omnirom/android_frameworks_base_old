@@ -1,0 +1,38 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "b8f5b13e_e013ce59",
+        "filename": "packages/SystemUI/src/com/android/systemui/statusbar/phone/PhoneStatusBar.java",
+        "patchSetId": 4
+      },
+      "lineNbr": 527,
+      "author": {
+        "id": 1000026
+      },
+      "writtenOn": "2015-12-15T22:13:22Z",
+      "side": 1,
+      "message": "you need a different function :)",
+      "revId": "b8625412c9d5ead9b16119b84564b91b64d2e895",
+      "serverId": "56841c99-7c94-43d4-bf0b-cb4707e66d55",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "b8f5b13e_c020ca9d",
+        "filename": "packages/SystemUI/src/com/android/systemui/statusbar/phone/StatusBarWindowView.java",
+        "patchSetId": 4
+      },
+      "lineNbr": 355,
+      "author": {
+        "id": 1000026
+      },
+      "writtenOn": "2015-12-15T22:13:22Z",
+      "side": 1,
+      "message": "you need to move this in a separate function",
+      "revId": "b8625412c9d5ead9b16119b84564b91b64d2e895",
+      "serverId": "56841c99-7c94-43d4-bf0b-cb4707e66d55",
+      "unresolved": false
+    }
+  ]
+}
