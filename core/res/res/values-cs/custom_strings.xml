@@ -95,4 +95,6 @@
   <string name="battery_style_bar">Svislý pruh</string>
   <string name="battery_style_meter_horizontal">Vodorovný pruh</string>
   <string name="battery_style_circle">Kruh</string>
+  <string name="permlab_setKeyguardWallpaper">Nastavit tapetu zámku kláves</string>
+  <string name="permdesc_setKeyguardWallpaper">Povolit aplikaci změnit pozadí zamčené obrazovky.</string>
 </resources>

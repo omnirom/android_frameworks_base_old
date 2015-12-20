@@ -95,4 +95,6 @@
   <string name="battery_style_bar">Vertikaler Balken</string>
   <string name="battery_style_meter_horizontal">Horizontaler Balken</string>
   <string name="battery_style_circle">Kreis</string>
+  <string name="permlab_setKeyguardWallpaper">Hintergrund für Tastensperre setzen</string>
+  <string name="permdesc_setKeyguardWallpaper">Ermöglicht einer App den Hintergrund des Sperrbildschirms zu ändern.</string>
 </resources>

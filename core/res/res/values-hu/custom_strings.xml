@@ -95,4 +95,6 @@
   <string name="battery_style_bar">Függőleges sáv</string>
   <string name="battery_style_meter_horizontal">Vízszintes sáv</string>
   <string name="battery_style_circle">Kör</string>
+  <string name="permlab_setKeyguardWallpaper">billentyűzár háttérképének beállítása</string>
+  <string name="permdesc_setKeyguardWallpaper">Lehetővé teszi az alkalmazás számára a képernyőzár hátterének módosítását.</string>
 </resources>
