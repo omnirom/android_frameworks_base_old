@@ -19,6 +19,7 @@ import android.app.Activity;
 import android.app.AlertDialog;
 import android.app.admin.DevicePolicyManager;
 import android.content.Context;
+import android.os.PowerManager;
 import android.os.UserHandle;
 import android.os.UserManager;
 import android.util.AttributeSet;
@@ -330,6 +331,11 @@ public class KeyguardSecurityContainer extends FrameLayout implements KeyguardSe
         mLockPatternUtils.reportFailedPasswordAttempt();
         if (showTimeout) {
             showTimeoutDialog();
+        }
+
+        if (mLockPatternUtils.isSeparateEncryptionPasswordEnabled() && failedAttempts >= 5) {
+            final PowerManager powerManager = (PowerManager) mContext.getSystemService(Context.POWER_SERVICE);
+            powerManager.reboot(null);
         }
     }
 
