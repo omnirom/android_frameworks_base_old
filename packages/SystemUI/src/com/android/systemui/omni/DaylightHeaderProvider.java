@@ -144,7 +144,7 @@ public class DaylightHeaderProvider implements
     }
 
     private void loadCustomHeaderPackage() {
-        Log.i(TAG, "Load header pack " + mSettingHeaderPackage);
+        if (DEBUG) Log.i(TAG, "Load header pack " + mSettingHeaderPackage);
         mPackageName = mSettingHeaderPackage;
         try {
             PackageManager packageManager = mContext.getPackageManager();
@@ -160,7 +160,7 @@ public class DaylightHeaderProvider implements
     }
 
     private void loadDefaultHeaderPackage() {
-        Log.i(TAG, "Load default header pack");
+        if (DEBUG) Log.i(TAG, "Load default header pack");
         mPackageName = HEADER_PACKAGE_DEFAULT;
         mSettingHeaderPackage = mPackageName;
         try {
@@ -302,7 +302,7 @@ public class DaylightHeaderProvider implements
         }
 
         if (!PackageUtils.isAvailableApp(mPackageName, mContext)) {
-            Log.i(TAG, "Header pack no longer available - loading default " + mPackageName);
+            Log.w(TAG, "Header pack no longer available - loading default " + mPackageName);
             loadDefaultHeaderPackage();
         }
         try {
