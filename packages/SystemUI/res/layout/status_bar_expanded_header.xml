@@ -203,4 +203,11 @@
         android:padding="2dp"
         />
 
+    <ImageView android:id="@+id/weather_image"
+        android:layout_width="64dip"
+        android:layout_height="64dip"
+        android:layout_gravity="bottom|end"
+        android:scaleType="centerCrop"
+        android:visibility="gone" />
+
 </com.android.systemui.statusbar.phone.StatusBarHeaderView>
