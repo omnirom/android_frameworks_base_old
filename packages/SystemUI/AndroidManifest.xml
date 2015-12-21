@@ -141,6 +141,9 @@
     <!-- kill app -->
     <uses-permission android:name="android.permission.FORCE_STOP_PACKAGES" />
 
+    <!-- weather -->
+    <uses-permission android:name="org.omnirom.omnijaws.READ_WEATHER" />
+
     <application
         android:name=".SystemUIApplication"
         android:persistent="true"
