@@ -125,11 +125,6 @@
     <!-- Description of an application permission, listed so the user can choose whether they want to allow the application to do this. -->
     <string name="permdesc_setKeyguardWallpaper">Allows an app to change the lock screen wallpaper.</string>
 
-    <!-- Title of an application permission, listed so the user can choose whether they want to allow the application to do this. -->
-    <string name="permlab_fakePackageSignature">mimic package signature</string>
-    <!-- Description of an application permission, listed so the user can choose whether they want to allow the application to do this. -->
-    <string name="permdesc_fakePackageSignature">Allows the app to use mimic another app\'s package signature.</string>
-
     <!-- Notify use that they are in Lock-to-app in accessibility mode -->
     <string name="lock_to_app_toast_back">To unpin this screen, touch and hold Back.</string>
 
