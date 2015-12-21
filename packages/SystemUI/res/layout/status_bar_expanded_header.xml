@@ -203,4 +203,13 @@
         android:padding="2dp"
         />
 
+    <include layout="@layout/current_weather_view"
+         android:id="@+id/current_weather_view"    
+         android:layout_width="wrap_content"
+         android:layout_height="wrap_content"
+         android:visibility="gone"
+         android:layout_below="@id/multi_user_switch"
+         android:layout_alignParentEnd="true"
+         android:padding="5dp"/>
+
 </com.android.systemui.statusbar.phone.StatusBarHeaderView>
