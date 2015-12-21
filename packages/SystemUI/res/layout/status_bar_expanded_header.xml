@@ -192,7 +192,7 @@
 
     <TextView
         android:id="@+id/header_debug_info"
-        android:visibility="invisible"
+        android:visibility="gone"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_gravity="center_vertical"
@@ -202,5 +202,16 @@
         android:textColor="#00A040"
         android:padding="2dp"
         />
+
+    <include layout="@layout/current_weather_view"
+         android:id="@+id/current_weather_view"    
+         android:layout_width="wrap_content"
+         android:layout_height="wrap_content"
+         android:visibility="gone"
+         android:layout_below="@id/settings_button_container"
+         android:layout_alignParentEnd="true"
+         android:layout_gravity="center_vertical"
+         android:background="?android:attr/selectableItemBackground"
+         android:paddingEnd="16dp"/>
 
 </com.android.systemui.statusbar.phone.StatusBarHeaderView>
