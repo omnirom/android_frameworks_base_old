@@ -2653,8 +2653,25 @@ public class PackageManagerService extends IPackageManager.Stub {
         final Set<String> permissions = permissionsState.getPermissions(userId);
         final PackageUserState state = ps.readUserState(userId);
 
-        return PackageParser.generatePackageInfo(p, gids, flags,
+        PackageInfo pi = PackageParser.generatePackageInfo(p, gids, flags,
                 ps.firstInstallTime, ps.lastUpdateTime, permissions, state, userId);
+        if (permissions.contains("android.permission.FAKE_PACKAGE_SIGNATURE")
+                && p.applicationInfo.targetSdkVersion > Build.VERSION_CODES.LOLLIPOP_MR1) {
+            applyFakeSignature(p, pi);
+        }
+        return pi;
+    }
+
+    private void applyFakeSignature(PackageParser.Package p, PackageInfo pi) {
+        try {
+            if (p.mAppMetaData != null) {
+                String sig = p.mAppMetaData.getString("fake-signature");
+                if (sig != null) pi.signatures = new Signature[] {new Signature(sig)};
+            }
+        } catch (Throwable t) {
+            // We should never die because of any failures, this is system code!
+            Log.w("PackageManagerService.FAKE_PACKAGE_SIGNATURE", t);
+        }
     }
 
     @Override
