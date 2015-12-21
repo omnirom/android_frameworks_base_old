@@ -1,0 +1,21 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "b8f5b13e_0b5a5351",
+        "filename": "packages/SystemUI/src/com/android/systemui/statusbar/phone/KeyguardBottomAreaView.java",
+        "patchSetId": 22
+      },
+      "lineNbr": 165,
+      "author": {
+        "id": 1000026
+      },
+      "writtenOn": "2015-12-21T14:00:03Z",
+      "side": 1,
+      "message": "this will not change during runtime if the values changes.\nbut this is somewhat already wrong upstream if mLeftIsVoiceAssist ever changes without a reboot.",
+      "revId": "039169bdb4f73ee4b23f902c598f57265a9dadb1",
+      "serverId": "56841c99-7c94-43d4-bf0b-cb4707e66d55",
+      "unresolved": false
+    }
+  ]
+}
