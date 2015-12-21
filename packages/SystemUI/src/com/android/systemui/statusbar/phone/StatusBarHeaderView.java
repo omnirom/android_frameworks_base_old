@@ -22,12 +22,14 @@ import android.content.Context;
 import android.content.Intent;
 import android.content.res.Configuration;
 import android.content.res.Resources;
+import android.database.ContentObserver;
 import android.graphics.Outline;
 import android.graphics.Rect;
 import android.graphics.drawable.Animatable;
 import android.graphics.drawable.Drawable;
 import android.graphics.drawable.TransitionDrawable;
 import android.os.UserHandle;
+import android.os.Handler;
 import android.provider.Settings;
 import android.graphics.drawable.RippleDrawable;
 import android.util.AttributeSet;
@@ -49,6 +51,7 @@ import com.android.keyguard.KeyguardStatusView;
 import com.android.systemui.BatteryMeterView;
 import com.android.systemui.FontSizeUtils;
 import com.android.systemui.R;
+import com.android.systemui.omni.OmniJawsClient;
 import com.android.systemui.omni.StatusBarHeaderMachine;
 import com.android.systemui.qs.QSPanel;
 import com.android.systemui.qs.QSTile;
@@ -57,6 +60,7 @@ import com.android.systemui.statusbar.policy.NetworkControllerImpl.EmergencyList
 import com.android.systemui.statusbar.policy.NextAlarmController;
 import com.android.systemui.statusbar.policy.UserInfoController;
 import com.android.systemui.tuner.TunerService;
+
 
 import java.text.NumberFormat;
 
@@ -140,10 +144,26 @@ public class StatusBarHeaderView extends RelativeLayout implements View.OnClickL
     private Drawable mCurrentBackground;
     private float mLastHeight;
     private boolean mDetailTransitioning;
+    private ImageView mWeatherImage;
+    private OmniJawsClient mWeatherClient;
 
+    private final class WeatherContentObserver extends ContentObserver {
+        WeatherContentObserver(Handler handler) {
+            super(handler);
+        }
+        @Override
+        public void onChange(boolean selfChange) {
+            Log.d(TAG, "onChange " + OmniJawsClient.WEATHER_URI);
+            queryAndUpdateWeather();
+        }
+    }
+    
     public StatusBarHeaderView(Context context, AttributeSet attrs) {
         super(context, attrs);
     }
+
+    private Handler mHandler = new Handler();
+    private WeatherContentObserver mContentObserver = new WeatherContentObserver(mHandler);
 
     @Override
     protected void onFinishInflate() {
@@ -174,6 +194,8 @@ public class StatusBarHeaderView extends RelativeLayout implements View.OnClickL
         mSignalCluster = findViewById(R.id.signal_cluster);
         mSystemIcons = (LinearLayout) findViewById(R.id.system_icons);
         mBackgroundImage = (ImageView) findViewById(R.id.background_image);
+        mWeatherImage = (ImageView) findViewById(R.id.weather_image);
+
         loadDimens();
         updateVisibilities();
         updateClockScale();
@@ -205,6 +227,10 @@ public class StatusBarHeaderView extends RelativeLayout implements View.OnClickL
         ((RippleDrawable) getBackground()).setForceSoftware(true);
         ((RippleDrawable) mSettingsButton.getBackground()).setForceSoftware(true);
         ((RippleDrawable) mSystemIconsSuperContainer.getBackground()).setForceSoftware(true);
+
+        mWeatherClient = new OmniJawsClient(mContext);
+        mContext.getContentResolver().registerContentObserver(OmniJawsClient.WEATHER_URI, false, mContentObserver);
+        queryAndUpdateWeather();
     }
 
     @Override
@@ -321,6 +347,7 @@ public class StatusBarHeaderView extends RelativeLayout implements View.OnClickL
         if (changed) {
             updateEverything();
         }
+        mWeatherImage.setVisibility(mExpanded ? View.VISIBLE : View.GONE);
     }
 
     public void updateEverything() {
@@ -900,5 +927,13 @@ public class StatusBarHeaderView extends RelativeLayout implements View.OnClickL
                 mBackgroundImage.setVisibility(View.GONE);
             }
         });
+    }
+
+    public void queryAndUpdateWeather() {
+        mWeatherClient.queryWeather();
+        OmniJawsClient.WeatherInfo data = mWeatherClient.getWeatherInfo();
+        if (data != null) {
+            mWeatherImage.setImageDrawable(mWeatherClient.getWeatherConditionImage(data.conditionCode));
+        }
     }
 }
