@@ -16,18 +16,23 @@
 
 package com.android.systemui.statusbar.phone;
 
+import android.animation.Animator;
+import android.animation.Animator.AnimatorListener;
+import android.animation.AnimatorListenerAdapter;
 import android.app.AlarmManager;
 import android.app.PendingIntent;
 import android.content.Context;
 import android.content.Intent;
 import android.content.res.Configuration;
 import android.content.res.Resources;
+import android.database.ContentObserver;
 import android.graphics.Outline;
 import android.graphics.Rect;
 import android.graphics.drawable.Animatable;
 import android.graphics.drawable.Drawable;
 import android.graphics.drawable.TransitionDrawable;
 import android.os.UserHandle;
+import android.os.Handler;
 import android.provider.Settings;
 import android.graphics.drawable.RippleDrawable;
 import android.util.AttributeSet;
@@ -36,6 +41,7 @@ import android.util.TypedValue;
 import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
+import android.view.ViewAnimationUtils;
 import android.view.ViewGroup;
 import android.view.ViewOutlineProvider;
 import android.widget.ImageView;
@@ -49,6 +55,9 @@ import com.android.keyguard.KeyguardStatusView;
 import com.android.systemui.BatteryMeterView;
 import com.android.systemui.FontSizeUtils;
 import com.android.systemui.R;
+import com.android.systemui.omni.CurrentWeatherView;
+import com.android.systemui.omni.DetailedWeatherView;
+import com.android.systemui.omni.OmniJawsClient;
 import com.android.systemui.omni.StatusBarHeaderMachine;
 import com.android.systemui.qs.QSPanel;
 import com.android.systemui.qs.QSTile;
@@ -56,7 +65,7 @@ import com.android.systemui.statusbar.policy.BatteryController;
 import com.android.systemui.statusbar.policy.NetworkControllerImpl.EmergencyListener;
 import com.android.systemui.statusbar.policy.NextAlarmController;
 import com.android.systemui.statusbar.policy.UserInfoController;
-import com.android.systemui.tuner.TunerService;
+
 
 import java.text.NumberFormat;
 
@@ -140,10 +149,28 @@ public class StatusBarHeaderView extends RelativeLayout implements View.OnClickL
     private Drawable mCurrentBackground;
     private float mLastHeight;
     private boolean mDetailTransitioning;
+    private CurrentWeatherView mWeatherImage;
+    private DetailedWeatherView mWeatherDetailed;
+    private OmniJawsClient mWeatherClient;
+    private OmniJawsClient.WeatherInfo mWeatherData;
+    private boolean mShowWeatherDetailed;
+
+    private final class WeatherContentObserver extends ContentObserver {
+        WeatherContentObserver(Handler handler) {
+            super(handler);
+        }
+        @Override
+        public void onChange(boolean selfChange) {
+            queryAndUpdateWeather();
+        }
+    }
 
     public StatusBarHeaderView(Context context, AttributeSet attrs) {
         super(context, attrs);
     }
+
+    private Handler mHandler = new Handler();
+    private WeatherContentObserver mContentObserver = new WeatherContentObserver(mHandler);
 
     @Override
     protected void onFinishInflate() {
@@ -174,6 +201,9 @@ public class StatusBarHeaderView extends RelativeLayout implements View.OnClickL
         mSignalCluster = findViewById(R.id.signal_cluster);
         mSystemIcons = (LinearLayout) findViewById(R.id.system_icons);
         mBackgroundImage = (ImageView) findViewById(R.id.background_image);
+        mWeatherImage = (CurrentWeatherView) findViewById(R.id.current_weather_view);
+        mWeatherDetailed = (DetailedWeatherView) findViewById(R.id.detailed_weather_view);
+
         loadDimens();
         updateVisibilities();
         updateClockScale();
@@ -205,6 +235,15 @@ public class StatusBarHeaderView extends RelativeLayout implements View.OnClickL
         ((RippleDrawable) getBackground()).setForceSoftware(true);
         ((RippleDrawable) mSettingsButton.getBackground()).setForceSoftware(true);
         ((RippleDrawable) mSystemIconsSuperContainer.getBackground()).setForceSoftware(true);
+
+        mWeatherClient = new OmniJawsClient(mContext);
+        mContext.getContentResolver().registerContentObserver(OmniJawsClient.WEATHER_URI, false, mContentObserver);
+        mWeatherImage.setOnClickListener(this);
+        mWeatherDetailed.setOnClickListener(this);
+        mWeatherDetailed.setVisibility(View.GONE);
+        mShowWeatherDetailed = false;
+
+        queryAndUpdateWeather();
     }
 
     @Override
@@ -288,6 +327,7 @@ public class StatusBarHeaderView extends RelativeLayout implements View.OnClickL
 
     public void setActivityStarter(ActivityStarter activityStarter) {
         mActivityStarter = activityStarter;
+        mWeatherDetailed.setActivityStarter(activityStarter);
     }
 
     public void setBatteryController(BatteryController batteryController) {
@@ -355,8 +395,7 @@ public class StatusBarHeaderView extends RelativeLayout implements View.OnClickL
         }
         mEmergencyCallsOnly.setVisibility(mExpanded && mShowEmergencyCallsOnly ? VISIBLE : GONE);
         mBatteryLevel.setVisibility(mExpanded ? View.VISIBLE : View.GONE);
-        //mSettingsContainer.findViewById(R.id.tuner_icon).setVisibility(
-        //        TunerService.isTunerEnabled(mContext) ? View.VISIBLE : View.INVISIBLE);
+        mWeatherImage.setVisibility((mExpanded && mWeatherData != null)? View.VISIBLE : View.GONE);
     }
 
     private void updateSignalClusterDetachment() {
@@ -439,8 +478,10 @@ public class StatusBarHeaderView extends RelativeLayout implements View.OnClickL
             mAlarmStatus.setText(KeyguardStatusView.formatNextAlarm(getContext(), nextAlarm));
         }
         mAlarmShowing = nextAlarm != null;
-        updateEverything();
-        requestCaptureValues();
+        if (!mShowWeatherDetailed) {
+            updateEverything();
+            requestCaptureValues();
+        }
     }
 
     private void updateClickTargets() {
@@ -449,6 +490,7 @@ public class StatusBarHeaderView extends RelativeLayout implements View.OnClickL
         mSystemIconsSuperContainer.setClickable(mExpanded);
         mSystemIconsSuperContainer.setFocusable(mExpanded);
         mAlarmStatus.setClickable(mNextAlarm != null && mNextAlarm.getShowIntent() != null);
+        mWeatherImage.setClickable(mExpanded && mWeatherData != null);
     }
 
     private void updateClockLp() {
@@ -481,6 +523,8 @@ public class StatusBarHeaderView extends RelativeLayout implements View.OnClickL
     }
 
     public void setExpansion(float t) {
+        hideWeatherDetailed();
+
         if (!mExpanded) {
             t = 0f;
         }
@@ -535,17 +579,6 @@ public class StatusBarHeaderView extends RelativeLayout implements View.OnClickL
     @Override
     public void onClick(View v) {
         if (v == mSettingsButton) {
-            /*if (mSettingsButton.isTunerClick()) {
-                if (TunerService.isTunerEnabled(mContext)) {
-                    TunerService.showResetRequest(mContext, new Runnable() {
-                        @Override
-                        public void run() {
-                            // Relaunch settings so that the tuner disappears.
-                            startSettingsActivity();
-                        }
-                    });
-                }
-            }*/
             startSettingsActivity();
         } else if (v == mSystemIconsSuperContainer) {
             startBatteryActivity();
@@ -554,6 +587,40 @@ public class StatusBarHeaderView extends RelativeLayout implements View.OnClickL
             if (showIntent != null) {
                 mActivityStarter.startPendingIntentDismissingKeyguard(showIntent);
             }
+        } else if (v == mWeatherImage) {
+            try {
+                if (mWeatherData != null) {
+                    mWeatherDetailed.updateWeatherData(mWeatherClient, mWeatherData);
+
+                    // meh!
+                    mAlarmStatus.setVisibility(View.INVISIBLE);
+                    mDateGroup.setVisibility(View.INVISIBLE);
+                    mClock.setVisibility(View.INVISIBLE);
+                    mWeatherImage.setVisibility(View.INVISIBLE);
+
+                    int finalRadius = getWidth();
+                    Animator anim = ViewAnimationUtils.createCircularReveal(mWeatherDetailed,
+                            (int) mWeatherImage.getX(), (int )mWeatherImage.getY(), 0, finalRadius);
+                    mWeatherDetailed.setVisibility(View.VISIBLE);
+                    anim.start();
+                    mShowWeatherDetailed = true;
+                }
+            } catch(Exception e) {
+                Log.e(TAG, "show detailed failed", e);
+            }
+        } else if (v == mWeatherDetailed) {
+            int initRadius = getWidth();
+            Animator anim = ViewAnimationUtils.createCircularReveal(mWeatherDetailed,
+                        (int) mWeatherImage.getX(), (int )mWeatherImage.getY(), initRadius, 0);
+            anim.addListener(new AnimatorListenerAdapter() {
+                @Override
+                public void onAnimationEnd(Animator animation) {
+                    super.onAnimationEnd(animation);
+                    hideWeatherDetailed();
+                    updateEverything();
+                }
+            });
+            anim.start();
         }
     }
 
@@ -624,6 +691,7 @@ public class StatusBarHeaderView extends RelativeLayout implements View.OnClickL
                 : mMultiUserSwitch.getLeft() - mSettingsContainer.getLeft();
         target.signalClusterAlpha = mSignalClusterDetached ? 0f : 1f;
         target.settingsRotation = !mExpanded ? 90f : 0f;
+        target.weatherImageAlpha =  getAlphaForVisibility(mWeatherImage);
     }
 
     private float getAlphaForVisibility(View v) {
@@ -693,6 +761,7 @@ public class StatusBarHeaderView extends RelativeLayout implements View.OnClickL
             mTime.setScaleY(1f);
         }
         updateAmPmTranslation();
+        applyAlpha(mWeatherImage, values.weatherImageAlpha);
     }
 
     /**
@@ -718,6 +787,7 @@ public class StatusBarHeaderView extends RelativeLayout implements View.OnClickL
         float settingsTranslation;
         float signalClusterAlpha;
         float settingsRotation;
+        float weatherImageAlpha;
 
         public void interpoloate(LayoutValues v1, LayoutValues v2, float t) {
             timeScale = v1.timeScale * (1 - t) + v2.timeScale * t;
@@ -744,6 +814,7 @@ public class StatusBarHeaderView extends RelativeLayout implements View.OnClickL
             dateExpandedAlpha = v1.dateExpandedAlpha * (1 - t3) + v2.dateExpandedAlpha * t3;
             dateCollapsedAlpha = v1.dateCollapsedAlpha * (1 - t3) + v2.dateCollapsedAlpha * t3;
             alarmStatusAlpha = v1.alarmStatusAlpha * (1 - t3) + v2.alarmStatusAlpha * t3;
+            weatherImageAlpha = v1.weatherImageAlpha * (1 - t3) + v2.weatherImageAlpha * t3;
         }
     }
 
@@ -800,11 +871,15 @@ public class StatusBarHeaderView extends RelativeLayout implements View.OnClickL
 
         private void handleShowingDetail(final QSTile.DetailAdapter detail) {
             final boolean showingDetail = detail != null;
+
+            hideWeatherDetailed();
+
             transition(mClock, !showingDetail);
             transition(mDateGroup, !showingDetail);
             if (mAlarmShowing) {
                 transition(mAlarmStatus, !showingDetail);
             }
+            transition(mWeatherImage, !showingDetail);
             transition(mQsDetailHeader, showingDetail);
             mShowingDetail = showingDetail;
             if (showingDetail) {
@@ -900,5 +975,44 @@ public class StatusBarHeaderView extends RelativeLayout implements View.OnClickL
                 mBackgroundImage.setVisibility(View.GONE);
             }
         });
+    }
+
+    public void queryAndUpdateWeather() {
+        try {
+            mWeatherClient.queryWeather();
+            mWeatherData = mWeatherClient.getWeatherInfo();
+            if (mWeatherData != null) {
+                mWeatherImage.setConditionImage(mWeatherClient.getWeatherConditionImage(mWeatherData.conditionCode));
+                mWeatherImage.updateWeatherData(mWeatherData);
+            } else {
+                mWeatherImage.setVisibility(View.GONE);
+                hideWeatherDetailed();
+            }
+        } catch(Exception e) {
+            Log.e(TAG, "queryAndUpdateWeather failed", e);
+            mWeatherData = null;
+            mWeatherImage.setVisibility(View.GONE);
+            hideWeatherDetailed();
+        }
+    }
+
+    private void hideWeatherDetailed() {
+        if (mShowWeatherDetailed) {
+            mWeatherDetailed.setVisibility(View.GONE);
+            mShowWeatherDetailed = false;
+
+            // meh!
+            mAlarmStatus.setVisibility(mExpanded && mAlarmShowing ? View.VISIBLE : View.INVISIBLE);
+            mDateGroup.setVisibility(View.VISIBLE);
+            mClock.setVisibility(View.VISIBLE);
+            mWeatherImage.setVisibility((mExpanded && mWeatherData != null)? View.VISIBLE : View.GONE);
+        }
+    }
+
+    public void notifyScreenOn(boolean screenOn) {
+        if (screenOn) {
+            // just check early if an update is due
+            mWeatherClient.updateWeather(false);
+        }
     }
 }
