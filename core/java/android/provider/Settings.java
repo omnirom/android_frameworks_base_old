@@ -3732,7 +3732,14 @@ public final class Settings {
         public static final String RECENTS_SHOW_SEARCH_BAR = "recents_show_search_bar";
 
         /**
-         *  Enable statusbar double tap gesture on to put device to sleep
+         * Whether the camera launch gesture should vibrate
+         *
+         * @hide
+         */
+        public static final String CAMERA_GESTURE_VIBRATE = "camera_gesture_vibrate";
+
+        /**
+         * Enable statusbar double tap gesture on to put device to sleep
          * @hide
          */
         public static final String DOUBLE_TAP_SLEEP_GESTURE = "double_tap_sleep_gesture";
