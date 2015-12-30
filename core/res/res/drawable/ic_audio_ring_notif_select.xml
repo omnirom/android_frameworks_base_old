@@ -20,6 +20,6 @@
         android:drawable="@drawable/ic_audio_ring_notif_white" />
     <item android:state_selected="true"
         android:drawable="@drawable/ic_audio_ring_notif_white" />
-    <item android:drawable="@drawable/ic_audio_ring_notif_black" />
+    <item android:drawable="@drawable/ic_global_audio_ring_notif" />
 </selector>
 
