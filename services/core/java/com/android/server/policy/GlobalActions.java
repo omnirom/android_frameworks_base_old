@@ -234,8 +234,8 @@ class GlobalActions implements DialogInterface.OnDismissListener, DialogInterfac
             mSilentModeAction = new SilentModeTriStateAction(mContext, mAudioManager, mHandler);
         }
         mAirplaneModeOn = new ToggleAction(
-                R.drawable.ic_lock_airplane_mode,
-                R.drawable.ic_lock_airplane_mode_off,
+                R.drawable.ic_global_airplane_mode,
+                R.drawable.ic_global_airplane_mode_off,
                 R.string.global_actions_toggle_airplane_mode,
                 R.string.global_actions_airplane_mode_on_status,
                 R.string.global_actions_airplane_mode_off_status) {
@@ -372,7 +372,7 @@ class GlobalActions implements DialogInterface.OnDismissListener, DialogInterfac
 
     private final class PowerAction extends SinglePressAction implements LongPressAction {
         private PowerAction() {
-            super(com.android.internal.R.drawable.ic_lock_power_off,
+            super(com.android.internal.R.drawable.ic_global_power_off,
                 R.string.global_action_power_off);
         }
 
@@ -415,7 +415,7 @@ class GlobalActions implements DialogInterface.OnDismissListener, DialogInterfac
 
     private final class RebootAction extends SinglePressAction {
         private RebootAction() {
-            super(com.android.internal.R.drawable.ic_lock_power_reboot,
+            super(com.android.internal.R.drawable.ic_global_power_reboot,
                     R.string.global_action_reboot);
             if (mRebootMenu) {
                 mMessageResId = R.string.global_action_reboot_sub;
@@ -468,7 +468,7 @@ class GlobalActions implements DialogInterface.OnDismissListener, DialogInterfac
 
     private final class RebootRecoveryAction extends SinglePressAction {
         private RebootRecoveryAction() {
-            super(com.android.internal.R.drawable.ic_lock_power_rebootrecovery,
+            super(com.android.internal.R.drawable.ic_global_power_rebootrecovery,
                     R.string.global_action_reboot_recovery);
         }
 
@@ -500,7 +500,7 @@ class GlobalActions implements DialogInterface.OnDismissListener, DialogInterfac
 
     private final class RebootBootloaderAction extends SinglePressAction {
         private RebootBootloaderAction() {
-            super(com.android.internal.R.drawable.ic_lock_power_rebootbootloader,
+            super(com.android.internal.R.drawable.ic_global_power_rebootbootloader,
                     R.string.global_action_reboot_bootloader);
         }
 
@@ -1463,10 +1463,7 @@ class GlobalActions implements DialogInterface.OnDismissListener, DialogInterfac
         }
 
         private static int getDialogTheme(Context context) {
-            TypedValue outValue = new TypedValue();
-            context.getTheme().resolveAttribute(com.android.internal.R.attr.alertDialogTheme,
-                    outValue, true);
-            return outValue.resourceId;
+            return com.android.internal.R.style.Theme_Material_DayNight_Dialog_Alert;
         }
 
         @Override
