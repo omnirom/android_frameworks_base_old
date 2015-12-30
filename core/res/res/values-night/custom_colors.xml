@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 <!--
-/* //device/apps/common/assets/res/any/strings.xml
+/* //device/apps/common/assets/res/any/colors.xml
 **
 ** Copyright 2006, The Android Open Source Project
 **
@@ -17,13 +17,7 @@
 ** limitations under the License.
 */
 -->
-<resources xmlns:xliff="urn:oasis:names:tc:xliff:document:1.2">
-    <style name="GlobalActionsAnimation">
-        <item name="windowEnterAnimation">@anim/slide_in_up</item>
-        <item name="windowExitAnimation">@anim/slide_out_down</item>
-    </style>
-    <style name="GlobalActionsAnimationTop">
-        <item name="windowEnterAnimation">@anim/slide_in_down</item>
-        <item name="windowExitAnimation">@anim/slide_out_up</item>
-    </style>
+<resources>
+    <color name="global_actions_text_color">@color/primary_text_default_material_dark</color>
+    <color name="global_actions_icon_color">@color/material_deep_teal_200</color>
 </resources>

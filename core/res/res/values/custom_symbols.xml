@@ -26,9 +26,7 @@
   <java-symbol name="global_action_reboot" type="string" />
   <java-symbol name="global_action_reboot_sub" type="string" />
   <java-symbol name="global_action_reboot_more" type="string" />
-  <java-symbol name="ic_lock_power_rebootrecovery" type="drawable" />
   <java-symbol name="global_action_reboot_recovery" type="string" />
-  <java-symbol name="ic_lock_power_rebootbootloader" type="drawable" />
   <java-symbol name="global_action_reboot_bootloader" type="string" />
   <java-symbol type="array" name="config_rebootActionsList" />
   <java-symbol name="global_action_current_user" type="string" />
@@ -38,6 +36,18 @@
   <java-symbol name="reboot_to_recovery_message" type="string" />
   <java-symbol name="reboot_system_title" type="string" />
   <java-symbol name="reboot_system_message" type="string" />
+  <java-symbol type="drawable" name="ic_global_airplane_mode" />
+  <java-symbol type="drawable" name="ic_global_airplane_mode_off" />
+  <java-symbol type="drawable" name="ic_global_power_off" />
+  <java-symbol name="ic_global_power_rebootbootloader" type="drawable" />
+  <java-symbol name="ic_global_power_rebootrecovery" type="drawable" />
+  <java-symbol name="ic_global_power_reboot" type="drawable" />
+  <java-symbol type="drawable" name="ic_global_audio_ring_notif" />
+  <java-symbol type="drawable" name="ic_global_audio_ring_notif_mute" />
+  <java-symbol type="drawable" name="ic_global_audio_ring_notif_vibrate" />
+  <java-symbol type="drawable" name="ic_global_lock" />
+  <java-symbol type="drawable" name="ic_global_settings" />
+  <java-symbol type="drawable" name="ic_global_voice_search" />
 
   <!-- HW button mapping -->
   <java-symbol type="integer" name="config_deviceHardwareKeys" />
