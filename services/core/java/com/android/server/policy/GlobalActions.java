@@ -222,6 +222,14 @@ class GlobalActions implements DialogInterface.OnDismissListener, DialogInterfac
         }
     }
 
+    private void back() {
+        mRebootMenu = false;
+        mMenuActions = mContext.getResources().getStringArray(
+                com.android.internal.R.array.config_globalActionsList);
+        buildMenuList();
+        mAdapter.notifyDataSetChanged();
+    }
+
     /**
      * Create the global actions dialog.
      * @return A new dialog.
@@ -234,8 +242,8 @@ class GlobalActions implements DialogInterface.OnDismissListener, DialogInterfac
             mSilentModeAction = new SilentModeTriStateAction(mContext, mAudioManager, mHandler);
         }
         mAirplaneModeOn = new ToggleAction(
-                R.drawable.ic_lock_airplane_mode,
-                R.drawable.ic_lock_airplane_mode_off,
+                R.drawable.ic_global_airplane_mode,
+                R.drawable.ic_global_airplane_mode_off,
                 R.string.global_actions_toggle_airplane_mode,
                 R.string.global_actions_airplane_mode_on_status,
                 R.string.global_actions_airplane_mode_off_status) {
@@ -341,27 +349,27 @@ class GlobalActions implements DialogInterface.OnDismissListener, DialogInterfac
                 mItems.add(new RebootBootloaderAction());
             } else if (GLOBAL_ACTION_KEY_AIRPLANE.equals(actionKey)) {
                 mItems.add(mAirplaneModeOn);
-            } else if (GLOBAL_ACTION_KEY_BUGREPORT.equals(actionKey)) {
+            /*} else if (GLOBAL_ACTION_KEY_BUGREPORT.equals(actionKey)) {
                 if (Settings.Global.getInt(mContext.getContentResolver(),
                         Settings.Global.BUGREPORT_IN_POWER_MENU, 0) != 0 && isCurrentUserOwner()) {
                     mItems.add(getBugReportAction());
-                }
+                }*/
             } else if (GLOBAL_ACTION_KEY_SILENT.equals(actionKey)) {
                 if (mShowSilentToggle) {
                     mItems.add(mSilentModeAction);
                 }
-            } else if (GLOBAL_ACTION_KEY_USERS.equals(actionKey)) {
-                if (SystemProperties.getBoolean("fw.power_user_switcher", false)) {
+            /*} else if (GLOBAL_ACTION_KEY_USERS.equals(actionKey)) {
+                if (SystemProperties.getBoolean("fw.power_user_switcher", true)) {
                     addUsersToMenu(mItems);
-                }
+                }*/
             } else if (GLOBAL_ACTION_KEY_SETTINGS.equals(actionKey)) {
                 mItems.add(getSettingsAction());
             } else if (GLOBAL_ACTION_KEY_LOCKDOWN.equals(actionKey)) {
                 mItems.add(getLockdownAction());
             } else if (GLOBAL_ACTION_KEY_VOICEASSIST.equals(actionKey)) {
                 mItems.add(getVoiceAssistAction());
-            } else if (GLOBAL_ACTION_KEY_ASSIST.equals(actionKey)) {
-                mItems.add(getAssistAction());
+            /*} else if (GLOBAL_ACTION_KEY_ASSIST.equals(actionKey)) {
+                mItems.add(getAssistAction());*/
             } else {
                 Log.e(TAG, "Invalid global action key " + actionKey);
             }
@@ -372,7 +380,7 @@ class GlobalActions implements DialogInterface.OnDismissListener, DialogInterfac
 
     private final class PowerAction extends SinglePressAction implements LongPressAction {
         private PowerAction() {
-            super(com.android.internal.R.drawable.ic_lock_power_off,
+            super(com.android.internal.R.drawable.ic_global_power_off,
                 R.string.global_action_power_off);
         }
 
@@ -415,7 +423,7 @@ class GlobalActions implements DialogInterface.OnDismissListener, DialogInterfac
 
     private final class RebootAction extends SinglePressAction {
         private RebootAction() {
-            super(com.android.internal.R.drawable.ic_lock_power_reboot,
+            super(com.android.internal.R.drawable.ic_global_power_reboot,
                     R.string.global_action_reboot);
             if (mRebootMenu) {
                 mMessageResId = R.string.global_action_reboot_sub;
@@ -468,7 +476,7 @@ class GlobalActions implements DialogInterface.OnDismissListener, DialogInterfac
 
     private final class RebootRecoveryAction extends SinglePressAction {
         private RebootRecoveryAction() {
-            super(com.android.internal.R.drawable.ic_lock_power_rebootrecovery,
+            super(com.android.internal.R.drawable.ic_global_power_rebootrecovery,
                     R.string.global_action_reboot_recovery);
         }
 
@@ -500,7 +508,7 @@ class GlobalActions implements DialogInterface.OnDismissListener, DialogInterfac
 
     private final class RebootBootloaderAction extends SinglePressAction {
         private RebootBootloaderAction() {
-            super(com.android.internal.R.drawable.ic_lock_power_rebootbootloader,
+            super(com.android.internal.R.drawable.ic_global_power_rebootbootloader,
                     R.string.global_action_reboot_bootloader);
         }
 
@@ -598,7 +606,7 @@ class GlobalActions implements DialogInterface.OnDismissListener, DialogInterfac
     }
 
     private Action getSettingsAction() {
-        return new SinglePressAction(com.android.internal.R.drawable.ic_settings,
+        return new SinglePressAction(com.android.internal.R.drawable.ic_global_settings,
                 R.string.global_action_settings) {
 
             @Override
@@ -663,7 +671,7 @@ class GlobalActions implements DialogInterface.OnDismissListener, DialogInterfac
     }
 
     private Action getVoiceAssistAction() {
-        return new SinglePressAction(com.android.internal.R.drawable.ic_voice_search,
+        return new SinglePressAction(com.android.internal.R.drawable.ic_global_voice_search,
                 R.string.global_action_voice_assist) {
             @Override
             public void onPress() {
@@ -695,7 +703,7 @@ class GlobalActions implements DialogInterface.OnDismissListener, DialogInterfac
     }
 
     private Action getLockdownAction() {
-        return new SinglePressAction(com.android.internal.R.drawable.ic_lock_lock,
+        return new SinglePressAction(com.android.internal.R.drawable.ic_global_lock,
                 R.string.global_action_lockdown) {
 
             @Override
@@ -1463,10 +1471,7 @@ class GlobalActions implements DialogInterface.OnDismissListener, DialogInterfac
         }
 
         private static int getDialogTheme(Context context) {
-            TypedValue outValue = new TypedValue();
-            context.getTheme().resolveAttribute(com.android.internal.R.attr.alertDialogTheme,
-                    outValue, true);
-            return outValue.resourceId;
+            return com.android.internal.R.style.Theme_Material_DayNight_Dialog_Alert;
         }
 
         @Override

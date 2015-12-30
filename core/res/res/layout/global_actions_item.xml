@@ -27,8 +27,8 @@
     android:background="?android:attr/selectableItemBackground"
     >
     <ImageView android:id="@+id/icon"
-        android:layout_width="56dp"
-        android:layout_height="56dp"
+        android:layout_width="48dp"
+        android:layout_height="48dp"
         android:layout_gravity="center"
         android:layout_marginEnd="8dip"
         android:scaleType="center"
@@ -46,14 +46,15 @@
             android:layout_gravity="top"
 
             android:gravity="center_vertical"
-            android:textAppearance="?android:attr/textAppearanceLarge"
+            android:textColor="@color/global_actions_text_color"
+            android:textAppearance="?android:attr/textAppearanceMedium"
             />
         <TextView android:id="@+id/status"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:layout_gravity="bottom"
             android:minHeight="26dp"
-
+            android:textColor="@color/global_actions_text_color"
             android:textAppearance="?android:attr/textAppearanceSmall"
             />
     </LinearLayout>
