@@ -67,8 +67,8 @@ public class DemoStatusIcons extends LinearLayout implements DemoMode {
             }
             String zen = args.getString("zen");
             if (zen != null) {
-                int iconId = zen.equals("important") ? R.drawable.stat_sys_zen_important
-                        : zen.equals("none") ? R.drawable.stat_sys_zen_none
+                int iconId = zen.equals("important") ? R.drawable.stat_sys_dnd_important
+                        : zen.equals("none") ? R.drawable.stat_sys_dnd_total_silence
                         : 0;
                 updateSlot("zen", null, iconId);
             }
