@@ -27,14 +27,14 @@
         android:id="@+id/option1"
         android:layout_width="wrap_content"
         android:layout_height="match_parent"
-        android:contentDescription="@string/silent_mode_silent"
+        android:contentDescription="@string/dnd_mode_total_silence"
         android:focusable="true"
         >
         <ImageView
             android:layout_width="48dp"
             android:layout_height="48dp"
             android:layout_gravity="center"
-            android:src="@drawable/ic_global_audio_ring_notif_mute"
+            android:src="@drawable/ic_global_dnd_total_silence"
             android:scaleType="center"
             android:duplicateParentState="true"
             android:background="@drawable/global_action_indicator_oval"
@@ -50,14 +50,14 @@
         android:id="@+id/option2"
         android:layout_width="wrap_content"
         android:layout_height="match_parent"
-        android:contentDescription="@string/silent_mode_vibrate"
+        android:contentDescription="@string/dnd_mode_alarms"
         android:focusable="true"
         >
         <ImageView
             android:layout_width="48dp"
             android:layout_height="48dp"
             android:layout_gravity="center"
-            android:src="@drawable/ic_global_audio_ring_notif_vibrate"
+            android:src="@drawable/ic_global_dnd_alarms"
             android:scaleType="center"
             android:duplicateParentState="true"
             android:background="@drawable/global_action_indicator_oval"
@@ -74,17 +74,42 @@
         android:id="@+id/option3"
         android:layout_width="wrap_content"
         android:layout_height="match_parent"
-        android:contentDescription="@string/silent_mode_ring"
+        android:contentDescription="@string/dnd_mode_important"
         android:focusable="true"
         >
         <ImageView
             android:layout_width="48dp"
             android:layout_height="48dp"
             android:layout_gravity="center"
-            android:src="@drawable/ic_global_audio_ring_notif"
+            android:src="@drawable/ic_global_dnd_important"
             android:scaleType="center"
             android:duplicateParentState="true"
             android:background="@drawable/global_action_indicator_oval"
             />
     </LinearLayout>
+
+    <!-- Spacer -->
+    <View android:layout_width="0dp"
+        android:layout_height="match_parent"
+        android:layout_weight="1"
+        android:visibility="invisible"/>
+
+    <LinearLayout
+        android:id="@+id/option4"
+        android:layout_width="wrap_content"
+        android:layout_height="match_parent"
+        android:contentDescription="@string/dnd_mode_off"
+        android:focusable="true"
+        >
+        <ImageView
+            android:layout_width="48dp"
+            android:layout_height="48dp"
+            android:layout_gravity="center"
+            android:src="@drawable/ic_global_dnd_off"
+            android:scaleType="center"
+            android:duplicateParentState="true"
+            android:background="@drawable/global_action_indicator_oval"
+            />
+    </LinearLayout>
+
 </LinearLayout>
