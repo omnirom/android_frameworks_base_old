@@ -21,7 +21,7 @@
     android:layout_height="wrap_content"
     android:minHeight="?android:attr/listPreferredItemHeight"
     android:orientation="horizontal"
-    android:paddingStart="8dip"
+    android:paddingStart="10dip"
     android:paddingTop="6dip"
     android:paddingBottom="6dip"
     android:background="?android:attr/selectableItemBackground"
