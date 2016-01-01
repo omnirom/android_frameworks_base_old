@@ -135,4 +135,10 @@
 
     <!-- Vendor mismatched fingerprint warning [CHAR LIMIT=NONE] -->
     <string name="system_error_vendorprint">It appears your vendor image may be out of date. Please flash the latest vendor image for your device.</string>
+
+    <!-- global actions dnd selector -->
+    <string name="dnd_mode_off">Off</string>
+    <string name="dnd_mode_total_silence">Total silence</string>
+    <string name="dnd_mode_alarms">Alarms only</string>
+    <string name="dnd_mode_important">Priority only</string>
 </resources>
