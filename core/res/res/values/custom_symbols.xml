@@ -48,7 +48,12 @@
   <java-symbol type="drawable" name="ic_global_lock" />
   <java-symbol type="drawable" name="ic_global_settings" />
   <java-symbol type="drawable" name="ic_global_voice_search" />
-
+  <java-symbol type="drawable" name="ic_global_dnd_off" />
+  <java-symbol type="drawable" name="ic_global_dnd_total_silence" />
+  <java-symbol type="drawable" name="ic_global_dnd_alarms" />
+  <java-symbol type="drawable" name="ic_global_dnd_important" />
+  <java-symbol type="id" name="option4" />
+  <java-symbol type="layout" name="global_actions_dnd_mode" />
   <!-- global actions -->
   <java-symbol type="style" name="GlobalActionsAnimation" />
 

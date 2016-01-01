@@ -17,9 +17,9 @@
 
 <selector xmlns:android="http://schemas.android.com/apk/res/android" >
     <item android:state_pressed="true"
-        android:drawable="@drawable/ic_zen_none_white" />
+        android:drawable="@drawable/ic_global_dnd_important_white" />
     <item android:state_selected="true"
-        android:drawable="@drawable/ic_zen_none_white" />
-    <item android:drawable="@drawable/ic_zen_none_black" />
+        android:drawable="@drawable/ic_global_dnd_important_white" />
+    <item android:drawable="@drawable/ic_global_dnd_important_tint" />
 </selector>
 

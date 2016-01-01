@@ -41,5 +41,9 @@
     <!-- advanced reboot system -->
     <string name="reboot_system_title">Reboot system</string>
     <string name="reboot_system_message">Rebooting\u2026</string>
-
+    <!-- global actions dnd selector -->
+    <string name="dnd_mode_off">Off</string>
+    <string name="dnd_mode_total_silence">Total silence</string>
+    <string name="dnd_mode_alarms">Alarms only</string>
+    <string name="dnd_mode_important">Priority only</string>
 </resources>
