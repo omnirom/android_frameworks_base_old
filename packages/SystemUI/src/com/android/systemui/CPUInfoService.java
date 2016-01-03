@@ -46,6 +46,11 @@ public class CPUInfoService extends Service {
     private final String TAG = "CPUInfoService";
     private PowerManager mPowerManager;
     private boolean mPowerProfilesSupported;
+    private int mNumCpus = 1;
+    private String[] mCurrFreq=null;
+    private String[] mCurrGov=null;
+
+    private static final String NUM_OF_CPUS_PATH = "/sys/devices/system/cpu/present";
 
     private class CPUView extends View {
         private Paint mOnlinePaint;
@@ -58,11 +63,10 @@ public class CPUInfoService extends Service {
         private int mNeededWidth;
         private int mNeededHeight;
 
-        private String[] mCurrFreq={"0", "0", "0", "0"};
-        private String[] mCurrGov={"", "", "", ""};
         private boolean mLpMode;
         private String mCPUTemp;
         private String mPowerProfile;
+        private boolean mDataAvail;
 
         private Handler mCurCPUHandler = new Handler() {
             public void handleMessage(Message msg) {
@@ -77,9 +81,6 @@ public class CPUInfoService extends Service {
                         mLpMode = parts[1].equals("1");
 
                         String[] cpuParts=parts[2].split("\\|");
-                        if(cpuParts.length!=4){
-                            return;
-                        }
                         for(int i=0; i<cpuParts.length; i++){
                             String cpuInfo=cpuParts[i];
                             String cpuInfoParts[]=cpuInfo.split(":");
@@ -94,6 +95,7 @@ public class CPUInfoService extends Service {
                         if (mPowerProfilesSupported) {
                             mPowerProfile = parts[3];
                         }
+                        mDataAvail = true;
                         updateDisplay();
                     } catch(ArrayIndexOutOfBoundsException e) {
                         Log.e(TAG, "illegal data " + msgData);
@@ -173,6 +175,10 @@ public class CPUInfoService extends Service {
         @Override
         public void onDraw(Canvas canvas) {
             super.onDraw(canvas);
+            if (!mDataAvail) {
+                return;
+            }
+
             final int W = mNeededWidth;
             final int RIGHT = getWidth()-1;
 
@@ -211,7 +217,10 @@ public class CPUInfoService extends Service {
         }
 
         void updateDisplay() {
-            final int NW = mPowerProfilesSupported ? 5 : 4;
+            if (!mDataAvail) {
+                return;
+            }
+            final int NW = mPowerProfilesSupported ? (mNumCpus + 1) : mNumCpus;
 
             int neededWidth = mPaddingLeft + mPaddingRight + mMaxWidth;
             int neededHeight = mPaddingTop + mPaddingBottom + (mFH*(1+NW));
@@ -245,28 +254,13 @@ public class CPUInfoService extends Service {
         private static final String CPU_TEMP_HTC = "/sys/htc/cpu_temp";
         private static final String CPU_TEMP_OPPO = "/sys/class/thermal/thermal_zone0/temp";
 
-        public CurCPUThread(Handler handler){
+        public CurCPUThread(Handler handler, int numCpus){
             mHandler=handler;
+            mNumCpus = numCpus;
         }
 
         public void interrupt() {
             mInterrupt = true;
-        }
-
-        private String readOneLine(String fname) {
-            BufferedReader br;
-            String line = null;
-            try {
-                br = new BufferedReader(new FileReader(fname), 512);
-                try {
-                    line = br.readLine();
-                } finally {
-                    br.close();
-                }
-            } catch (Exception e) {
-                return null;
-            }
-            return line;
         }
 
         @Override
@@ -275,21 +269,21 @@ public class CPUInfoService extends Service {
                 while (!mInterrupt) {
                     sleep(500);
                     StringBuffer sb=new StringBuffer();
-                    String cpuTemp = readOneLine(CPU_TEMP_HTC);
+                    String cpuTemp = CPUInfoService.readOneLine(CPU_TEMP_HTC);
                     if (cpuTemp == null){
-                        cpuTemp = readOneLine(CPU_TEMP_OPPO);
+                        cpuTemp = CPUInfoService.readOneLine(CPU_TEMP_OPPO);
                     }
                     sb.append(cpuTemp == null?"0":cpuTemp);
                     sb.append(";");
-                    String lpMode = readOneLine(CPU_LP_MODE);
+                    String lpMode = CPUInfoService.readOneLine(CPU_LP_MODE);
                     sb.append(lpMode == null?"0":lpMode);
                     sb.append(";");
 
-                    for(int i=0; i<4; i++){
+                    for(int i=0; i<mNumCpus; i++){
                         final String freqFile=CPU_ROOT+i+CPU_CUR_TAIL;
-                        String currFreq = readOneLine(freqFile);
+                        String currFreq = CPUInfoService.readOneLine(freqFile);
                         final String govFile=CPU_ROOT+i+CPU_GOV_TAIL;
-                        String currGov = readOneLine(govFile);
+                        String currGov = CPUInfoService.readOneLine(govFile);
 
                         if(currFreq==null){
                             currFreq="0";
@@ -314,6 +308,9 @@ public class CPUInfoService extends Service {
     @Override
     public void onCreate() {
         super.onCreate();
+        mNumCpus = getNumOfCpus();
+        mCurrFreq = new String[mNumCpus];
+        mCurrGov = new String[mNumCpus];
 
         mView = new CPUView(this);
         WindowManager.LayoutParams params = new WindowManager.LayoutParams(
@@ -326,7 +323,7 @@ public class CPUInfoService extends Service {
         params.gravity = Gravity.RIGHT | Gravity.TOP;
         params.setTitle("CPU Info");
 
-        mCurCPUThread = new CurCPUThread(mView.getHandler());
+        mCurCPUThread = new CurCPUThread(mView.getHandler(), mNumCpus);
         mCurCPUThread.start();
 
         Log.d(TAG, "started CurCPUThread");
@@ -357,5 +354,41 @@ public class CPUInfoService extends Service {
     @Override
     public IBinder onBind(Intent intent) {
         return null;
+    }
+
+    private static String readOneLine(String fname) {
+        BufferedReader br;
+        String line = null;
+        try {
+            br = new BufferedReader(new FileReader(fname), 512);
+            try {
+                line = br.readLine();
+            } finally {
+                br.close();
+            }
+        } catch (Exception e) {
+            return null;
+        }
+        return line;
+    }
+
+    private static int getNumOfCpus() {
+        int numOfCpu = 1;
+        String numOfCpus = readOneLine(NUM_OF_CPUS_PATH);
+        String[] cpuCount = numOfCpus.split("-");
+        if (cpuCount.length > 1) {
+            try {
+                int cpuStart = Integer.parseInt(cpuCount[0]);
+                int cpuEnd = Integer.parseInt(cpuCount[1]);
+
+                numOfCpu = cpuEnd - cpuStart + 1;
+
+                if (numOfCpu < 0)
+                    numOfCpu = 1;
+            } catch (NumberFormatException ex) {
+                numOfCpu = 1;
+            }
+        }
+        return numOfCpu;
     }
 }
