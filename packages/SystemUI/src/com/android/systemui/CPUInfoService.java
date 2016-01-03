@@ -77,9 +77,6 @@ public class CPUInfoService extends Service {
                         mLpMode = parts[1].equals("1");
 
                         String[] cpuParts=parts[2].split("\\|");
-                        if(cpuParts.length!=4){
-                            return;
-                        }
                         for(int i=0; i<cpuParts.length; i++){
                             String cpuInfo=cpuParts[i];
                             String cpuInfoParts[]=cpuInfo.split(":");
@@ -236,6 +233,7 @@ public class CPUInfoService extends Service {
     protected class CurCPUThread extends Thread {
         private boolean mInterrupt = false;
         private Handler mHandler;
+        private int mNumCpus = 1;
 
         private static final String CURRENT_CPU = "/sys/devices/system/cpu/cpu0/cpufreq/scaling_cur_freq";
         private static final String CPU_ROOT = "/sys/devices/system/cpu/cpu";
@@ -244,9 +242,11 @@ public class CPUInfoService extends Service {
         private static final String CPU_GOV_TAIL = "/cpufreq/scaling_governor";
         private static final String CPU_TEMP_HTC = "/sys/htc/cpu_temp";
         private static final String CPU_TEMP_OPPO = "/sys/class/thermal/thermal_zone0/temp";
+        private static final String NUM_OF_CPUS_PATH = "/sys/devices/system/cpu/present";
 
         public CurCPUThread(Handler handler){
             mHandler=handler;
+            mNumCpus = getNumOfCpus();
         }
 
         public void interrupt() {
@@ -269,6 +269,26 @@ public class CPUInfoService extends Service {
             return line;
         }
 
+        private int getNumOfCpus() {
+            int numOfCpu = 1;
+            String numOfCpus = readOneLine(NUM_OF_CPUS_PATH);
+            String[] cpuCount = numOfCpus.split("-");
+            if (cpuCount.length > 1) {
+                try {
+                    int cpuStart = Integer.parseInt(cpuCount[0]);
+                    int cpuEnd = Integer.parseInt(cpuCount[1]);
+
+                    numOfCpu = cpuEnd - cpuStart + 1;
+
+                    if (numOfCpu < 0)
+                        numOfCpu = 1;
+                } catch (NumberFormatException ex) {
+                    numOfCpu = 1;
+                }
+            }
+            return numOfCpu;
+        }
+
         @Override
         public void run() {
             try {
@@ -285,7 +305,7 @@ public class CPUInfoService extends Service {
                     sb.append(lpMode == null?"0":lpMode);
                     sb.append(";");
 
-                    for(int i=0; i<4; i++){
+                    for(int i=0; i<mNumCpus; i++){
                         final String freqFile=CPU_ROOT+i+CPU_CUR_TAIL;
                         String currFreq = readOneLine(freqFile);
                         final String govFile=CPU_ROOT+i+CPU_GOV_TAIL;
