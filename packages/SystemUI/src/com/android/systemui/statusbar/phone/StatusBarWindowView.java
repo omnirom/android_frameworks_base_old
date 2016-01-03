@@ -16,6 +16,8 @@
 
 package com.android.systemui.statusbar.phone;
 
+import static com.android.systemui.qs.QSPanel.QS_SHOW_BRIGHTNESS_SIDE_BUTTONS;
+
 import android.annotation.ColorInt;
 import android.annotation.DrawableRes;
 import android.annotation.LayoutRes;
@@ -55,21 +57,25 @@ import android.view.Window;
 import android.view.WindowManager;
 import android.view.WindowManagerGlobal;
 import android.widget.FrameLayout;
+import android.widget.ImageView;
 
 import com.android.internal.annotations.VisibleForTesting;
 import com.android.internal.view.FloatingActionMode;
 import com.android.internal.widget.FloatingToolbar;
+import com.android.systemui.Dependency;
 import com.android.systemui.R;
 import com.android.systemui.classifier.FalsingManager;
 import com.android.systemui.statusbar.DragDownHelper;
 import com.android.systemui.statusbar.StatusBarState;
 import com.android.systemui.statusbar.stack.NotificationStackScrollLayout;
+import com.android.systemui.tuner.TunerService;
+import com.android.systemui.tuner.TunerService.Tunable;
 
 import java.io.FileDescriptor;
 import java.io.PrintWriter;
 
 
-public class StatusBarWindowView extends FrameLayout {
+public class StatusBarWindowView extends FrameLayout implements Tunable {
     public static final String TAG = "StatusBarWindowView";
     public static final boolean DEBUG = StatusBar.DEBUG;
 
@@ -103,6 +109,12 @@ public class StatusBarWindowView extends FrameLayout {
      * events manually as it's outside of the regular view bounds.
      */
     private boolean mExpandingBelowNotch;
+
+    private ImageView mMaxBrightness;
+    private ImageView mMinBrightness;
+
+    private boolean mShowAutoBrightnessButton;
+    private boolean mShowBrightnessSideButtons;
 
     public StatusBarWindowView(Context context, AttributeSet attrs) {
         super(context, attrs);
@@ -197,6 +209,8 @@ public class StatusBarWindowView extends FrameLayout {
                 R.id.notification_stack_scroller);
         mNotificationPanel = (NotificationPanelView) findViewById(R.id.notification_panel);
         mBrightnessMirror = findViewById(R.id.brightness_mirror);
+        mMaxBrightness = (ImageView) mBrightnessMirror.findViewById(R.id.brightness_right);
+        mMinBrightness = (ImageView) mBrightnessMirror.findViewById(R.id.brightness_left);
     }
 
     @Override
@@ -204,6 +218,10 @@ public class StatusBarWindowView extends FrameLayout {
         super.onViewAdded(child);
         if (child.getId() == R.id.brightness_mirror) {
             mBrightnessMirror = child;
+            mMaxBrightness = (ImageView) child.findViewById(R.id.brightness_right);
+            mMaxBrightness.setVisibility(!mShowBrightnessSideButtons ? GONE : VISIBLE);
+            mMinBrightness = (ImageView) child.findViewById(R.id.brightness_left);
+            mMinBrightness.setVisibility(!mShowBrightnessSideButtons ? GONE : VISIBLE);
         }
     }
 
@@ -238,6 +256,7 @@ public class StatusBarWindowView extends FrameLayout {
         } else {
             setWillNotDraw(!DEBUG);
         }
+             Dependency.get(TunerService.class).addTunable(this, QS_SHOW_BRIGHTNESS_SIDE_BUTTONS);
     }
 
     @Override
@@ -822,6 +841,17 @@ public class StatusBarWindowView extends FrameLayout {
         }
         if (mDragDownHelper != null) {
             mDragDownHelper.updateDoubleTapToSleep(doubleTapToSleepEnabled);
+        }
+    }
+
+    @Override
+    public void onTuningChanged(String key, String newValue) {
+        if (QS_SHOW_BRIGHTNESS_SIDE_BUTTONS.equals(key)) {
+            if (mMaxBrightness != null || mMinBrightness != null) {
+                mShowBrightnessSideButtons = (newValue == null || Integer.parseInt(newValue) == 0) ? false : true;
+                mMaxBrightness.setVisibility(!mShowBrightnessSideButtons ? GONE : VISIBLE);
+                mMinBrightness.setVisibility(!mShowBrightnessSideButtons ? GONE : VISIBLE);
+            }
         }
     }
 }
