@@ -656,8 +656,8 @@ public class VolumeDialog {
     private void updateFooterH() {
         if (D.BUG) Log.d(TAG, "updateFooterH");
         final boolean wasVisible = mZenFooter.getVisibility() == View.VISIBLE;
-        final boolean visible = mState.zenMode != Global.ZEN_MODE_OFF
-                && mAudioManager.isStreamAffectedByRingerMode(mActiveStream);
+        final boolean visible = mState.zenMode != Global.ZEN_MODE_OFF;
+
         if (wasVisible != visible && !visible) {
             prepareForCollapse();
         }
