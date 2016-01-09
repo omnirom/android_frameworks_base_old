@@ -27,19 +27,21 @@ import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.ImageView;
-import android.widget.LinearLayout;
+import android.widget.FrameLayout;
+import android.widget.ProgressBar;
 import android.widget.TextView;
-
 
 import com.android.systemui.R;
 
-public class CurrentWeatherView extends LinearLayout {
+public class CurrentWeatherView extends FrameLayout {
 
     static final String TAG = "CurrentWeatherView";
     static final boolean DEBUG = true;
 
     private ImageView mWeatherImage;
     private TextView mWeatherTemp;
+    private ProgressBar mProgress;
+    private boolean mRefreshRunning;
 
     public CurrentWeatherView(Context context) {
         this(context, null);
@@ -58,6 +60,9 @@ public class CurrentWeatherView extends LinearLayout {
         super.onFinishInflate();
         mWeatherImage  = (ImageView) findViewById(R.id.condition_image);
         mWeatherTemp  = (TextView) findViewById(R.id.current_weather_temp);
+        mProgress = (ProgressBar) findViewById(R.id.progress_circle);
+        mProgress.setIndeterminate(true);
+        mProgress.setVisibility(View.GONE);
     }
 
     @Override
@@ -98,5 +103,29 @@ public class CurrentWeatherView extends LinearLayout {
      */
     public void disableTextShadow() {
         mWeatherTemp.setShadowLayer(0, 0, 0, Color.BLACK);
+    }
+
+    public void showRefresh() {
+        mProgress.setVisibility(View.VISIBLE);
+        mProgress.setProgress(1);
+        mWeatherTemp.setAlpha(0.5f);
+        mWeatherImage.setAlpha(0.5f);
+        mRefreshRunning = true;
+        // stop it latest after 5s
+        postDelayed(new Runnable() {
+            @Override
+            public void run() {
+                if (mRefreshRunning) {
+                    stopRefresh();
+                }
+            }
+        }, 5000);
+    }
+
+    public void stopRefresh() {
+        mRefreshRunning = false;
+        mWeatherTemp.setAlpha(1f);
+        mWeatherImage.setAlpha(1f);
+        mProgress.setVisibility(View.GONE);
     }
 }
