@@ -1,0 +1,21 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "b8f5b13e_895ae62a",
+        "filename": "packages/SystemUI/src/com/android/systemui/statusbar/phone/PhoneStatusBar.java",
+        "patchSetId": 7
+      },
+      "lineNbr": 535,
+      "author": {
+        "id": 1000026
+      },
+      "writtenOn": "2016-01-12T17:47:39Z",
+      "side": 1,
+      "message": "you must check \u0026\u0026 mShowNavBar here too - to prevent no navbar devices to enter this",
+      "revId": "a7da8d350a88e17f6159497b5d597c8b24ef3753",
+      "serverId": "56841c99-7c94-43d4-bf0b-cb4707e66d55",
+      "unresolved": false
+    }
+  ]
+}
