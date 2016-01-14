@@ -4379,6 +4379,13 @@ public final class Settings {
                 "double_tap_sleep_lockscreen";
 
         /**
+         * whether to enable or disable vibration on succesful fingerprint auth
+         *
+         * @hide
+         */
+        public static final String FINGERPRINT_SUCCESS_VIB = "fingerprint_success_vib";
+
+        /**
          * Force an Ambient notification when a new media track is being played
          * 0 - disabled
          * 1 - show track info within normal Ambient Display notifications
@@ -4801,6 +4808,7 @@ public final class Settings {
             PRIVATE_SETTINGS.add(STATUSBAR_CLOCK_DATE_STYLE);
             PRIVATE_SETTINGS.add(STATUSBAR_CLOCK_DATE_FORMAT);
             PRIVATE_SETTINGS.add(QS_QUICKBAR_COLUMNS);
+            PRIVATE_SETTINGS.add(FINGERPRINT_SUCCESS_VIB);
         }
 
         /**
