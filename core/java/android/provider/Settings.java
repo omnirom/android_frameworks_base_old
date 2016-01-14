@@ -4516,10 +4516,22 @@ public final class Settings {
         /**
          * @hide
          */
+
         public static final String OMNI_SHOW_CPU_OVERLAY = "show_cpu_overlay";
 
         /** @hide */
         private static final Validator OMNI_SHOW_CPU_OVERLAY_VALIDATOR =
+                BOOLEAN_VALIDATOR;
+
+        /**
+         * whether to enable or disable vibration on succesful fingerprint auth
+         *
+         * @hide
+         */
+        public static final String OMNI_FINGERPRINT_SUCCESS_VIB = "fingerprint_success_vib";
+
+        /** @hide */
+        private static final Validator OMNI_FINGERPRINT_SUCCESS_VIB_VALIDATOR =
                 BOOLEAN_VALIDATOR;
 
         /**
@@ -4630,6 +4642,7 @@ public final class Settings {
             OMNI_BUTTON_BACKLIGHT_TIMEOUT,
             OMNI_BUTTON_BACKLIGHT_ON_TOUCH_ONLY,
             OMNI_SHOW_CPU_OVERLAY,
+            OMNI_FINGERPRINT_SUCCESS_VIB,
         };
 
         /**
@@ -4788,6 +4801,7 @@ public final class Settings {
             PRIVATE_SETTINGS.add(OMNI_BUTTON_BACKLIGHT_TIMEOUT);
             PRIVATE_SETTINGS.add(OMNI_BUTTON_BACKLIGHT_ON_TOUCH_ONLY);
             PRIVATE_SETTINGS.add(OMNI_SHOW_CPU_OVERLAY);
+            PRIVATE_SETTINGS.add(OMNI_FINGERPRINT_SUCCESS_VIB);
         }
 
         /**
@@ -4948,6 +4962,8 @@ public final class Settings {
                     OMNI_BUTTON_BACKLIGHT_ON_TOUCH_ONLY_VALIDATOR);
             VALIDATORS.put(OMNI_SHOW_CPU_OVERLAY,
                     OMNI_SHOW_CPU_OVERLAY_VALIDATOR);
+            VALIDATORS.put(OMNI_FINGERPRINT_SUCCESS_VIB,
+                    OMNI_FINGERPRINT_SUCCESS_VIB_VALIDATOR);
         }
 
         /**
