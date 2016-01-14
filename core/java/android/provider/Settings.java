@@ -4894,6 +4894,17 @@ public final class Settings {
                 ANY_INTEGER_VALIDATOR;
 
         /**
+         * whether to enable or disable vibration on succesful fingerprint auth
+         *
+         * @hide
+         */
+        public static final String OMNI_FINGERPRINT_SUCCESS_VIB = "fingerprint_success_vib";
+
+        /** @hide */
+        private static final Validator OMNI_FINGERPRINT_SUCCESS_VIB_VALIDATOR =
+                BOOLEAN_VALIDATOR;
+
+        /**
          * IMPORTANT: If you add a new public settings you also have to add it to
          * PUBLIC_SETTINGS below. If the new setting is hidden you have to add
          * it to PRIVATE_SETTINGS below. Also add a validator that can validate
@@ -5006,6 +5017,7 @@ public final class Settings {
             OMNI_PULSE_BRIGHTNESS,
             OMNI_DOZE_BRIGHTNESS,
             OMNI_STATUS_BAR_QUICK_QS_PULLDOWN,
+            OMNI_FINGERPRINT_SUCCESS_VIB,
         };
 
         /**
@@ -5168,6 +5180,7 @@ public final class Settings {
             PRIVATE_SETTINGS.add(OMNI_PULSE_BRIGHTNESS);
             PRIVATE_SETTINGS.add(OMNI_DOZE_BRIGHTNESS);
             PRIVATE_SETTINGS.add(OMNI_STATUS_BAR_QUICK_QS_PULLDOWN);
+            PRIVATE_SETTINGS.add(OMNI_FINGERPRINT_SUCCESS_VIB);
         }
 
         /**
@@ -5330,6 +5343,8 @@ public final class Settings {
             VALIDATORS.put(OMNI_DOZE_BRIGHTNESS, OMNI_DOZE_BRIGHTNESS_VALIDATOR);
             VALIDATORS.put(OMNI_STATUS_BAR_QUICK_QS_PULLDOWN,
                     OMNI_STATUS_BAR_QUICK_QS_PULLDOWN_VALIDATOR);
+            VALIDATORS.put(OMNI_FINGERPRINT_SUCCESS_VIB,
+                    OMNI_FINGERPRINT_SUCCESS_VIB_VALIDATOR);
         }
 
         /**
