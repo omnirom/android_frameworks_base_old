@@ -54,12 +54,14 @@ public class KeyguardSimPinView extends KeyguardPinBasedInputView {
     private int mRemainingAttempts = -1;
     private AlertDialog mRemainingAttemptsDialog;
     private int mSubId;
+    private int mSlotId;
     private ImageView mSimImageView;
 
     KeyguardUpdateMonitorCallback mUpdateMonitorCallback = new KeyguardUpdateMonitorCallback() {
         @Override
         public void onSimStateChanged(int subId, int slotId, State simState) {
            if (DEBUG) Log.v(TAG, "onSimStateChanged(subId=" + subId + ",state=" + simState + ")");
+           mSlotId = slotId + 1;
            resetState();
        };
     };
@@ -100,8 +102,10 @@ public class KeyguardSimPinView extends KeyguardPinBasedInputView {
         } else if (attemptsRemaining > 0) {
             msgId = isDefault ? R.plurals.kg_password_default_pin_message :
                      R.plurals.kg_password_wrong_pin_code;
-            displayMessage = getContext().getResources()
-                    .getQuantityString(msgId, attemptsRemaining, attemptsRemaining);
+            displayMessage = isDefault ? getContext().getResources()
+                    .getQuantityString(msgId, attemptsRemaining, mSlotId, attemptsRemaining) :
+                     getContext().getResources().getQuantityString(msgId, attemptsRemaining
+                    , attemptsRemaining);
         } else {
             msgId = isDefault ? R.string.kg_sim_pin_instructions : R.string.kg_password_pin_failed;
             displayMessage = getContext().getString(msgId);
