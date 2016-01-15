@@ -88,7 +88,11 @@ public class Clock extends TextView implements DemoMode, Tunable {
                 R.styleable.Clock,
                 0, 0);
         try {
-            mAmPmStyle = a.getInt(R.styleable.Clock_amPmStyle, AM_PM_STYLE_GONE);
+            if(!context.getResources().getBoolean(com.android.internal.R.bool.config_showAmpm)){
+                mAmPmStyle = a.getInt(R.styleable.Clock_amPmStyle, AM_PM_STYLE_GONE);
+            } else {
+                mAmPmStyle = a.getInt(R.styleable.Clock_amPmStyle, AM_PM_STYLE_NORMAL);
+            }
         } finally {
             a.recycle();
         }
