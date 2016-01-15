@@ -1,0 +1,21 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "98faad2e_decc4592",
+        "filename": "core/res/res/values/custom_strings.xml",
+        "patchSetId": 5
+      },
+      "lineNbr": 126,
+      "author": {
+        "id": 1000026
+      },
+      "writtenOn": "2016-01-15T15:07:52Z",
+      "side": 1,
+      "message": "maybe make this text more scary :)\nwhat this means",
+      "revId": "eef650a999d32bf568839a3c5e27bc9c8288fb17",
+      "serverId": "56841c99-7c94-43d4-bf0b-cb4707e66d55",
+      "unresolved": false
+    }
+  ]
+}
