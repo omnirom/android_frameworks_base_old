@@ -118,4 +118,7 @@
     <string name="operator_ping_url" translatable="false"></string>
     <!-- Zero Balance feature enable config -->
     <bool name="config_zero_balance_operator">false</bool>
+
+    <!-- config for showing AM/PM in 12hour format -->
+    <bool name="config_showAmpm">true</bool>
 </resources>
