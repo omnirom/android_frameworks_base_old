@@ -27,6 +27,9 @@ import android.graphics.drawable.RippleDrawable;
 import android.os.Handler;
 import android.os.Looper;
 import android.os.Message;
+import android.os.UserHandle;
+import android.provider.Settings;
+import android.util.Log;
 import android.util.MathUtils;
 import android.util.TypedValue;
 import android.view.Gravity;
@@ -67,6 +70,7 @@ public class QSTileView extends ViewGroup {
     private OnLongClickListener mLongClick;
     private Drawable mTileBackground;
     private RippleDrawable mRipple;
+    private boolean mEqualTiles;
 
     public QSTileView(Context context) {
         super(context);
@@ -98,6 +102,9 @@ public class QSTileView extends ViewGroup {
         setClickable(true);
         updateTopPadding();
         setId(View.generateViewId());
+
+        mEqualTiles = Settings.System.getIntForUser(mContext.getContentResolver(),
+                Settings.System.QS_TILE_EQUAL, 0, UserHandle.USER_CURRENT) == 1;
     }
 
     private void updateTopPadding() {
@@ -142,7 +149,7 @@ public class QSTileView extends ViewGroup {
             mDualLabel.setBackgroundResource(R.drawable.btn_borderless_rect);
             mDualLabel.setFirstLineCaret(mContext.getDrawable(R.drawable.qs_dual_tile_caret));
             mDualLabel.setTextColor(mContext.getColor(R.color.qs_tile_text));
-            mDualLabel.setPadding(0, mDualTileVerticalPaddingPx, 0, mDualTileVerticalPaddingPx);
+            mDualLabel.setPadding(0, mEqualTiles ? 0 : mDualTileVerticalPaddingPx, 0, mEqualTiles ? 0 : mDualTileVerticalPaddingPx);
             mDualLabel.setTypeface(CONDENSED);
             mDualLabel.setTextSize(TypedValue.COMPLEX_UNIT_PX,
                     res.getDimensionPixelSize(R.dimen.qs_tile_text_size));
@@ -160,7 +167,7 @@ public class QSTileView extends ViewGroup {
         } else {
             mLabel = new TextView(mContext);
             mLabel.setTextColor(mContext.getColor(R.color.qs_tile_text));
-            mLabel.setGravity(Gravity.CENTER_HORIZONTAL);
+            mLabel.setGravity(Gravity.CENTER_HORIZONTAL|Gravity.CENTER_VERTICAL);
             mLabel.setMinLines(2);
             mLabel.setPadding(0, 0, 0, 0);
             mLabel.setTypeface(CONDENSED);
@@ -200,7 +207,7 @@ public class QSTileView extends ViewGroup {
         }
         mTopBackgroundView.setFocusable(dual);
         setFocusable(!dual);
-        mDivider.setVisibility(dual ? VISIBLE : GONE);
+        mDivider.setVisibility((dual && !mEqualTiles) ? VISIBLE : GONE);
         postInvalidate();
         return changed;
     }
@@ -361,5 +368,10 @@ public class QSTileView extends ViewGroup {
                 handleStateChanged((State) msg.obj);
             }
         }
+    }
+
+    public void updateSettings() {
+        mEqualTiles = Settings.System.getIntForUser(mContext.getContentResolver(),
+                Settings.System.QS_TILE_EQUAL, 0, UserHandle.USER_CURRENT) == 1;
     }
 }

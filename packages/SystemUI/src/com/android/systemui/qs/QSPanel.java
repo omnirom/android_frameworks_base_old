@@ -25,7 +25,10 @@ import android.content.res.Configuration;
 import android.content.res.Resources;
 import android.os.Handler;
 import android.os.Message;
+import android.os.UserHandle;
+import android.provider.Settings;
 import android.util.AttributeSet;
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -79,6 +82,7 @@ public class QSPanel extends ViewGroup {
 
     private QSFooter mFooter;
     private boolean mGridContentVisible = true;
+    private boolean mEqualTiles;
 
     public QSPanel(Context context) {
         this(context, null);
@@ -105,6 +109,8 @@ public class QSPanel extends ViewGroup {
         addView(mBrightnessView);
         addView(mFooter.getView());
         mClipper = new QSDetailClipper(mDetail);
+        mEqualTiles = Settings.System.getIntForUser(mContext.getContentResolver(),
+                Settings.System.QS_TILE_EQUAL, 0, UserHandle.USER_CURRENT) == 1;
         updateResources();
 
         mBrightnessController = new BrightnessController(getContext(),
@@ -152,8 +158,13 @@ public class QSPanel extends ViewGroup {
         final int columns = Math.max(1, res.getInteger(R.integer.quick_settings_num_columns));
         mCellHeight = res.getDimensionPixelSize(R.dimen.qs_tile_height);
         mCellWidth = (int)(mCellHeight * TILE_ASPECT);
-        mLargeCellHeight = res.getDimensionPixelSize(R.dimen.qs_dual_tile_height);
-        mLargeCellWidth = (int)(mLargeCellHeight * TILE_ASPECT);
+        if (mEqualTiles) {
+            mLargeCellHeight = mCellHeight;
+            mLargeCellWidth = mCellWidth;
+        } else {
+            mLargeCellHeight = res.getDimensionPixelSize(R.dimen.qs_dual_tile_height);
+            mLargeCellWidth = (int)(mLargeCellHeight * TILE_ASPECT);
+        }
         mPanelPaddingBottom = res.getDimensionPixelSize(R.dimen.qs_panel_padding_bottom);
         mDualTileUnderlap = res.getDimensionPixelSize(R.dimen.qs_dual_tile_padding_vertical);
         mBrightnessPaddingTop = res.getDimensionPixelSize(R.dimen.qs_brightness_padding_top);
@@ -466,10 +477,12 @@ public class QSPanel extends ViewGroup {
             if (record.tileView.getVisibility() == GONE) continue;
             // wrap to next column if we've reached the max # of columns
             // also don't allow dual + single tiles on the same row
-            if (r == -1 || c == (mColumns - 1) || rowIsDual != record.tile.supportsDualTargets()) {
+            if (r == -1 || c == (mColumns - 1) || (!mEqualTiles && rowIsDual != record.tile.supportsDualTargets())) {
                 r++;
                 c = 0;
-                rowIsDual = record.tile.supportsDualTargets();
+                if (!mEqualTiles) {
+                    rowIsDual = record.tile.supportsDualTargets();
+                }
             } else {
                 c++;
             }
@@ -646,5 +659,29 @@ public class QSPanel extends ViewGroup {
         void onShowingDetail(QSTile.DetailAdapter detail);
         void onToggleStateChanged(boolean state);
         void onScanStateChanged(boolean state);
+    }
+
+    public void updateSettings() {
+        final boolean equalTiles = Settings.System.getIntForUser(mContext.getContentResolver(),
+                Settings.System.QS_TILE_EQUAL, 0, UserHandle.USER_CURRENT) == 1;
+
+        if (equalTiles != mEqualTiles) {
+            mEqualTiles = equalTiles;
+            final Resources res = mContext.getResources();
+            mCellHeight = res.getDimensionPixelSize(R.dimen.qs_tile_height);
+            mCellWidth = (int)(mCellHeight * TILE_ASPECT);
+            if (mEqualTiles) {
+                mLargeCellHeight = mCellHeight;
+                mLargeCellWidth = mCellWidth;
+            } else {
+                mLargeCellHeight = res.getDimensionPixelSize(R.dimen.qs_dual_tile_height);
+                mLargeCellWidth = (int)(mLargeCellHeight * TILE_ASPECT);
+            }
+            for (TileRecord record : mRecords) {
+                QSTileView tileView = record.tileView;
+                tileView.updateSettings();
+            }
+            postInvalidate();
+        }
     }
 }
