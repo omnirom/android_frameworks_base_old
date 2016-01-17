@@ -75,7 +75,7 @@ public class TunerFragment extends PreferenceFragment {
                 return true;
             }
         });
-        findPreference(KEY_DEMO_MODE).setOnPreferenceClickListener(new OnPreferenceClickListener() {
+        /*findPreference(KEY_DEMO_MODE).setOnPreferenceClickListener(new OnPreferenceClickListener() {
             @Override
             public boolean onPreferenceClick(Preference preference) {
                 FragmentTransaction ft = getFragmentManager().beginTransaction();
@@ -84,7 +84,7 @@ public class TunerFragment extends PreferenceFragment {
                 ft.commit();
                 return true;
             }
-        });
+        });*/
         mBatteryPct = (SwitchPreference) findPreference(KEY_BATTERY_PCT);
         if (Settings.Secure.getInt(getContext().getContentResolver(), SETTING_SEEN_TUNER_WARNING,
                 0) == 0) {
