@@ -21,8 +21,12 @@ import android.app.Fragment;
 import android.content.ClipData;
 import android.content.Context;
 import android.content.DialogInterface;
+import android.database.ContentObserver;
 import android.os.Bundle;
+import android.os.Handler;
+import android.os.UserHandle;
 import android.preference.PreferenceFragment;
+import android.provider.Settings;
 import android.provider.Settings.Secure;
 import android.text.TextUtils;
 import android.util.Log;
@@ -60,6 +64,7 @@ public class QsTuner extends PreferenceFragment implements Callback {
     private static final String TAG = "QsTuner";
 
     private static final int MENU_RESET = Menu.FIRST;
+    private static final int MENU_SETTINGS = Menu.FIRST + 1;
 
     private DraggableQsPanel mQsPanel;
     private CustomHost mTileHost;
@@ -70,25 +75,69 @@ public class QsTuner extends PreferenceFragment implements Callback {
 
     private FrameLayout mAddTarget;
 
+    private class SettingsObserver extends ContentObserver {
+        SettingsObserver(Handler handler) {
+            super(handler);
+        }
+
+        void observe() {
+            getContext().getContentResolver().registerContentObserver(Settings.System.getUriFor(
+                    Settings.System.QS_TILE_EQUAL),
+                    false, this, UserHandle.USER_ALL);
+            getContext().getContentResolver().registerContentObserver(Settings.System.getUriFor(
+                    Settings.System.QS_TILE_COLUMNS),
+                    false, this, UserHandle.USER_ALL);
+        }
+
+        void unobserve() {
+            try {
+                getContext().getContentResolver().unregisterContentObserver(this);
+            } catch(Exception e) {
+            }
+        }
+
+        @Override
+        public void onChange(boolean selfChange) {
+            update();
+        }
+
+        public void update() {
+            if (mQsPanel != null) {
+                mQsPanel.updateSettings();
+            }
+        }
+    }
+    private SettingsObserver mSettingsObserver = new SettingsObserver(new Handler());
+
     @Override
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setHasOptionsMenu(true);
+        mSettingsObserver.observe();
     }
 
     @Override
     public void onCreateOptionsMenu(Menu menu, MenuInflater inflater) {
         menu.add(0, MENU_RESET, 0, com.android.internal.R.string.reset);
+        menu.add(0, MENU_SETTINGS, 0, R.string.qs_settings);
     }
 
+    @Override
     public void onResume() {
         super.onResume();
         MetricsLogger.visibility(getContext(), MetricsLogger.TUNER_QS, true);
     }
 
+    @Override
     public void onPause() {
         super.onPause();
         MetricsLogger.visibility(getContext(), MetricsLogger.TUNER_QS, false);
+    }
+
+    @Override
+    public void onDestroy() {
+        super.onDestroy();
+        mSettingsObserver.unobserve();
     }
 
     @Override
@@ -96,6 +145,12 @@ public class QsTuner extends PreferenceFragment implements Callback {
         switch (item.getItemId()) {
             case MENU_RESET:
                 mTileHost.reset();
+                break;
+            case MENU_SETTINGS:
+                getFragmentManager().beginTransaction()
+                        .replace(android.R.id.content, new QsSettingsFragment(), "QsSettingsFragment")
+                        .addToBackStack(null)
+                        .commit();
                 break;
             case android.R.id.home:
                 getFragmentManager().popBackStack();
@@ -260,11 +315,11 @@ public class QsTuner extends PreferenceFragment implements Callback {
         public void showAddDialog() {
             List<String> tiles = mTileSpecs;
             int numBroadcast = 0;
-            for (int i = 0; i < tiles.size(); i++) {
+            /*for (int i = 0; i < tiles.size(); i++) {
                 if (tiles.get(i).startsWith(IntentTile.PREFIX)) {
                     numBroadcast++;
                 }
-            }
+            }*/
             String[] defaults =
                 getContext().getString(R.string.quick_settings_tiles_default).split(",");
             final String[] available = new String[defaults.length + 1
@@ -284,7 +339,10 @@ public class QsTuner extends PreferenceFragment implements Callback {
                     available[index++] = defaults[i];
                 }
             }
-            available[index++] = getContext().getString(R.string.broadcast_tile);
+            //available[index++] = getContext().getString(R.string.broadcast_tile);
+            if (available.length == 0) {
+                return;
+            }
             new AlertDialog.Builder(getContext())
                     .setTitle(R.string.add_tile)
                     .setItems(available, new DialogInterface.OnClickListener() {
@@ -520,6 +578,7 @@ public class QsTuner extends PreferenceFragment implements Callback {
 
                 for (int i = 0; i < r.tileView.getChildCount(); i++) {
                     r.tileView.getChildAt(i).setClickable(false);
+                    r.tileView.getChildAt(i).setLongClickable(false);
                 }
             }
         }
