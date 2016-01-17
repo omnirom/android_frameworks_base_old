@@ -3772,6 +3772,21 @@ public final class Settings {
         public static final String ENABLE_TABLET_NAVIGATION = "enable_tablet_navigation";
 
         /**
+         * @hide
+         */
+        public static final String QS_TILE_EQUAL = "qs_tile_equal";
+
+        /**
+         * @hide
+         */
+        public static final String QS_TILE_COLUMNS = "qs_tile_columns";
+
+        /**
+         * @hide
+         */
+        public static final String QS_TILE_BG_OPACITY = "qs_tile_bg_opacity";
+
+        /**
          * Settings to backup. This is here so that it's in the same place as the settings
          * keys and easy to update.
          *
