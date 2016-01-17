@@ -283,6 +283,7 @@ public class WifiTile extends QSTile<QSTile.SignalState> {
             mItems.setCallback(this);
             mItems.setEmptyState(R.drawable.ic_qs_wifi_detail_empty,
                     R.string.quick_settings_wifi_detail_empty_text);
+            mItems.setMinHeightInItems(0);
             updateItems();
             setItemsVisible(mState.enabled);
             return mItems;

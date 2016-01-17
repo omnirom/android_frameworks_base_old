@@ -79,7 +79,8 @@ public class HotspotTile extends QSTile<QSTile.BooleanState> {
 
     @Override
     protected void handleLongClick() {
-        if (mState.value) return;  // don't allow usage reset if hotspot is active
+        mHost.startActivityDismissingKeyguard(new Intent("android.settings.TETHER_SETTINGS"));
+        /*if (mState.value) return;  // don't allow usage reset if hotspot is active
         final String title = mContext.getString(R.string.quick_settings_reset_confirmation_title,
                 mState.label);
         mUsageTracker.showResetConfirmation(title, new Runnable() {
@@ -87,12 +88,12 @@ public class HotspotTile extends QSTile<QSTile.BooleanState> {
             public void run() {
                 refreshState();
             }
-        });
+        });*/
     }
 
     @Override
     protected void handleUpdateState(BooleanState state, Object arg) {
-        state.visible = mController.isHotspotSupported() && mUsageTracker.isRecentlyUsed();
+        state.visible = mController.isHotspotSupported() /*&& mUsageTracker.isRecentlyUsed()*/;
         state.label = mContext.getString(R.string.quick_settings_hotspot_label);
 
         if (arg instanceof Boolean) {
