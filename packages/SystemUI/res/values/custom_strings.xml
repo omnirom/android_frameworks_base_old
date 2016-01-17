@@ -49,5 +49,9 @@
     <!-- Screen pinning dialog description when in accessibility mode. -->
     <string name="screen_pinning_description_back">This keeps it in view until you unpin. Touch and hold Back to unpin.</string>
 
+    <!-- tuner -->
     <string name="status_bar_icons">Status bar icons</string>
+    <string name="qs_equal_tile_title">Equal size tiles</string>
+    <string name="qs_equal_tile_summary"></string>
+    <string name="qs_settings">Settings</string>
 </resources>

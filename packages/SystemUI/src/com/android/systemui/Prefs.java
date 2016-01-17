@@ -20,6 +20,7 @@ import android.annotation.StringDef;
 import android.content.Context;
 import android.content.SharedPreferences;
 import android.content.SharedPreferences.OnSharedPreferenceChangeListener;
+import android.preference.PreferenceManager;
 
 import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
@@ -108,6 +109,6 @@ public final class Prefs {
     }
 
     private static SharedPreferences get(Context context) {
-        return context.getSharedPreferences(context.getPackageName(), Context.MODE_PRIVATE);
+        return PreferenceManager.getDefaultSharedPreferences(context);
     }
 }

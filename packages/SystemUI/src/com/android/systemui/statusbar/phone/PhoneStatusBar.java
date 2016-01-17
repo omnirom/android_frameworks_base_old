@@ -493,6 +493,9 @@ public class PhoneStatusBar extends BaseStatusBar implements DemoMode,
             mContext.getContentResolver().registerContentObserver(Settings.System.getUriFor(
                     Settings.System.STATUS_BAR_WEATHER_ICON_PACK),
                     false, this, UserHandle.USER_ALL);
+            mContext.getContentResolver().registerContentObserver(Settings.System.getUriFor(
+                    Settings.System.QS_TILE_EQUAL),
+                    false, this, UserHandle.USER_ALL);
 
             update();
         }
@@ -528,6 +531,10 @@ public class PhoneStatusBar extends BaseStatusBar implements DemoMode,
             }
 
             mHeader.settingsChanged();
+
+            if (mQSPanel != null) {
+                mQSPanel.updateSettings();
+            }
         }
     }
     private OmniSettingsObserver mOmniSettingsObserver = new OmniSettingsObserver(mHandler);
