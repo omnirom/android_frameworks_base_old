@@ -25,7 +25,10 @@ import android.content.res.Configuration;
 import android.content.res.Resources;
 import android.os.Handler;
 import android.os.Message;
+import android.os.UserHandle;
+import android.provider.Settings;
 import android.util.AttributeSet;
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -48,6 +51,7 @@ import java.util.Collection;
 /** View that represents the quick settings tile panel. **/
 public class QSPanel extends ViewGroup {
     private static final float TILE_ASPECT = 1.2f;
+    private static final float TILE_ASPECT_SMALL = 1.0f;
 
     private final Context mContext;
     protected final ArrayList<TileRecord> mRecords = new ArrayList<TileRecord>();
@@ -79,6 +83,9 @@ public class QSPanel extends ViewGroup {
 
     private QSFooter mFooter;
     private boolean mGridContentVisible = true;
+    private boolean mEqualTiles;
+    private int mDefaultColumns;
+    private boolean mSmallTiles;
 
     public QSPanel(Context context) {
         this(context, null);
@@ -105,6 +112,12 @@ public class QSPanel extends ViewGroup {
         addView(mBrightnessView);
         addView(mFooter.getView());
         mClipper = new QSDetailClipper(mDetail);
+        mEqualTiles = Settings.System.getIntForUser(mContext.getContentResolver(),
+                Settings.System.QS_TILE_EQUAL, 0, UserHandle.USER_CURRENT) == 1;
+        mDefaultColumns = Math.max(1, mContext.getResources().getInteger(R.integer.quick_settings_num_columns));
+        mColumns = Settings.System.getIntForUser(mContext.getContentResolver(),
+                Settings.System.QS_TILE_COLUMNS, mDefaultColumns, UserHandle.USER_CURRENT);
+        mSmallTiles = mColumns == 4;
         updateResources();
 
         mBrightnessController = new BrightnessController(getContext(),
@@ -149,18 +162,11 @@ public class QSPanel extends ViewGroup {
 
     public void updateResources() {
         final Resources res = mContext.getResources();
-        final int columns = Math.max(1, res.getInteger(R.integer.quick_settings_num_columns));
-        mCellHeight = res.getDimensionPixelSize(R.dimen.qs_tile_height);
-        mCellWidth = (int)(mCellHeight * TILE_ASPECT);
-        mLargeCellHeight = res.getDimensionPixelSize(R.dimen.qs_dual_tile_height);
-        mLargeCellWidth = (int)(mLargeCellHeight * TILE_ASPECT);
+        updateTileSize();
         mPanelPaddingBottom = res.getDimensionPixelSize(R.dimen.qs_panel_padding_bottom);
         mDualTileUnderlap = res.getDimensionPixelSize(R.dimen.qs_dual_tile_padding_vertical);
         mBrightnessPaddingTop = res.getDimensionPixelSize(R.dimen.qs_brightness_padding_top);
-        if (mColumns != columns) {
-            mColumns = columns;
-            postInvalidate();
-        }
+
         for (TileRecord r : mRecords) {
             r.tile.clearState();
         }
@@ -466,10 +472,12 @@ public class QSPanel extends ViewGroup {
             if (record.tileView.getVisibility() == GONE) continue;
             // wrap to next column if we've reached the max # of columns
             // also don't allow dual + single tiles on the same row
-            if (r == -1 || c == (mColumns - 1) || rowIsDual != record.tile.supportsDualTargets()) {
+            if (r == -1 || c == (mColumns - 1) || (!mEqualTiles && rowIsDual != record.tile.supportsDualTargets())) {
                 r++;
                 c = 0;
-                rowIsDual = record.tile.supportsDualTargets();
+                if (!mEqualTiles) {
+                    rowIsDual = record.tile.supportsDualTargets();
+                }
             } else {
                 c++;
             }
@@ -646,5 +654,44 @@ public class QSPanel extends ViewGroup {
         void onShowingDetail(QSTile.DetailAdapter detail);
         void onToggleStateChanged(boolean state);
         void onScanStateChanged(boolean state);
+    }
+
+    private void updateTileSize() {
+        final Resources res = mContext.getResources();
+        mCellHeight = res.getDimensionPixelSize(R.dimen.qs_tile_height);
+        mCellWidth = (int)(mCellHeight * (mSmallTiles ? TILE_ASPECT_SMALL : TILE_ASPECT));
+        if (mEqualTiles) {
+            mLargeCellHeight = mCellHeight;
+            mLargeCellWidth = mCellWidth;
+        } else {
+            mLargeCellHeight = res.getDimensionPixelSize(R.dimen.qs_dual_tile_height);
+            mLargeCellWidth = (int)(mLargeCellHeight * TILE_ASPECT);
+        }
+    }
+
+    public void updateSettings() {
+        final boolean equalTiles = Settings.System.getIntForUser(mContext.getContentResolver(),
+                Settings.System.QS_TILE_EQUAL, 0, UserHandle.USER_CURRENT) == 1;
+        final int columns = Settings.System.getIntForUser(mContext.getContentResolver(),
+                Settings.System.QS_TILE_COLUMNS, mDefaultColumns, UserHandle.USER_CURRENT);
+
+        boolean refresh = false;
+        if (columns != mColumns) {
+            mColumns = columns;
+            mSmallTiles = mColumns == 4;
+            refresh = true;
+        }
+        if (equalTiles != mEqualTiles) {
+            mEqualTiles = equalTiles;
+            updateTileSize();
+            refresh = true;
+        }
+        if (refresh) {
+            for (TileRecord record : mRecords) {
+                QSTileView tileView = record.tileView;
+                tileView.updateSettings();
+            }
+            postInvalidate();
+        }
     }
 }
