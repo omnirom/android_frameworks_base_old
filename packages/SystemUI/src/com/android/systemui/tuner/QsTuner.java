@@ -21,8 +21,12 @@ import android.app.Fragment;
 import android.content.ClipData;
 import android.content.Context;
 import android.content.DialogInterface;
+import android.database.ContentObserver;
 import android.os.Bundle;
+import android.os.Handler;
+import android.os.UserHandle;
 import android.preference.PreferenceFragment;
+import android.provider.Settings;
 import android.provider.Settings.Secure;
 import android.text.TextUtils;
 import android.util.Log;
@@ -60,35 +64,78 @@ public class QsTuner extends PreferenceFragment implements Callback {
     private static final String TAG = "QsTuner";
 
     private static final int MENU_RESET = Menu.FIRST;
+    private static final int MENU_SETTINGS = Menu.FIRST + 1;
 
     private DraggableQsPanel mQsPanel;
     private CustomHost mTileHost;
-
     private FrameLayout mDropTarget;
-
     private ScrollView mScrollRoot;
-
     private FrameLayout mAddTarget;
+    private QSTileView mAddTileView;
+
+    private class SettingsObserver extends ContentObserver {
+        SettingsObserver(Handler handler) {
+            super(handler);
+        }
+
+        void observe() {
+            getContext().getContentResolver().registerContentObserver(Settings.System.getUriFor(
+                    Settings.System.QS_TILE_EQUAL),
+                    false, this, UserHandle.USER_ALL);
+            getContext().getContentResolver().registerContentObserver(Settings.System.getUriFor(
+                    Settings.System.QS_TILE_COLUMNS),
+                    false, this, UserHandle.USER_ALL);
+        }
+
+        void unobserve() {
+            try {
+                getContext().getContentResolver().unregisterContentObserver(this);
+            } catch(Exception e) {
+            }
+        }
+
+        @Override
+        public void onChange(boolean selfChange) {
+            update();
+        }
+
+        public void update() {
+            if (mQsPanel != null) {
+                mQsPanel.updateSettings();
+            }
+        }
+    }
+    private SettingsObserver mSettingsObserver = new SettingsObserver(new Handler());
 
     @Override
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setHasOptionsMenu(true);
+        mSettingsObserver.observe();
     }
 
     @Override
     public void onCreateOptionsMenu(Menu menu, MenuInflater inflater) {
         menu.add(0, MENU_RESET, 0, com.android.internal.R.string.reset);
+        menu.add(0, MENU_SETTINGS, 0, R.string.qs_settings);
     }
 
+    @Override
     public void onResume() {
         super.onResume();
         MetricsLogger.visibility(getContext(), MetricsLogger.TUNER_QS, true);
     }
 
+    @Override
     public void onPause() {
         super.onPause();
         MetricsLogger.visibility(getContext(), MetricsLogger.TUNER_QS, false);
+    }
+
+    @Override
+    public void onDestroy() {
+        super.onDestroy();
+        mSettingsObserver.unobserve();
     }
 
     @Override
@@ -96,6 +143,12 @@ public class QsTuner extends PreferenceFragment implements Callback {
         switch (item.getItemId()) {
             case MENU_RESET:
                 mTileHost.reset();
+                break;
+            case MENU_SETTINGS:
+                getFragmentManager().beginTransaction()
+                        .replace(android.R.id.content, new QsSettingsFragment(), "QsSettingsFragment")
+                        .addToBackStack(null)
+                        .commit();
                 break;
             case android.R.id.home:
                 getFragmentManager().popBackStack();
@@ -148,20 +201,27 @@ public class QsTuner extends PreferenceFragment implements Callback {
     }
 
     private void setupAddTarget() {
-        QSTileView tileView = new QSTileView(getContext());
-        QSTile.State state = new QSTile.State();
-        state.visible = true;
-        state.icon = ResourceIcon.get(R.drawable.ic_add_circle_qs);
-        state.label = getString(R.string.add_tile);
-        tileView.onStateChanged(state);
-        mAddTarget.addView(tileView);
-        tileView.setClickable(true);
-        tileView.setOnClickListener(new OnClickListener() {
+        mAddTileView = new QSTileView(getContext());
+        mAddTarget.addView(mAddTileView);
+        mAddTarget.setVisibility(View.VISIBLE);
+        mAddTileView.setBackgroundResource(R.drawable.ripple_drawable);
+        mAddTileView.setOnClickListener(new OnClickListener() {
             @Override
             public void onClick(View v) {
                 mTileHost.showAddDialog();
             }
         });
+        // must be after setConClickListener
+        updateAddTargetState(mTileHost.isAddPossible());
+    }
+
+    private void updateAddTargetState(boolean enabled) {
+        QSTile.State state = new QSTile.State();
+        state.visible = true;
+        state.icon = ResourceIcon.get(enabled ? R.drawable.ic_add_circle_qs : R.drawable.ic_add_circle_qs_disabled);
+        state.label = getString(R.string.add_tile);
+        mAddTileView.onStateChanged(state);
+        mAddTileView.setClickable(enabled);
     }
 
     public void onStartDrag() {
@@ -180,6 +240,7 @@ public class QsTuner extends PreferenceFragment implements Callback {
             public void run() {
                 mDropTarget.setVisibility(View.GONE);
                 mAddTarget.setVisibility(View.VISIBLE);
+                updateAddTargetState(mTileHost.isAddPossible());
             }
         });
     }
@@ -187,6 +248,8 @@ public class QsTuner extends PreferenceFragment implements Callback {
     @Override
     public void onTilesChanged() {
         mQsPanel.setTiles(mTileHost.getTiles());
+        mAddTarget.setVisibility(View.VISIBLE);
+        updateAddTargetState(mTileHost.isAddPossible());
     }
 
     private static int getLabelResource(String spec) {
@@ -196,7 +259,7 @@ public class QsTuner extends PreferenceFragment implements Callback {
         else if (spec.equals("cell")) return R.string.quick_settings_cellular_detail_title;
         else if (spec.equals("airplane")) return R.string.airplane_mode;
         else if (spec.equals("dnd")) return R.string.quick_settings_dnd_label;
-        else if (spec.equals("rotation")) return R.string.quick_settings_rotation_locked_label;
+        else if (spec.equals("rotation")) return R.string.quick_settings_rotation_unlocked_label;
         else if (spec.equals("flashlight")) return R.string.quick_settings_flashlight_label;
         else if (spec.equals("location")) return R.string.quick_settings_location_label;
         else if (spec.equals("cast")) return R.string.quick_settings_cast_title;
@@ -257,18 +320,18 @@ public class QsTuner extends PreferenceFragment implements Callback {
                     TextUtils.join(",", tiles), ActivityManager.getCurrentUser());
         }
 
-        public void showAddDialog() {
-            List<String> tiles = mTileSpecs;
-            int numBroadcast = 0;
-            for (int i = 0; i < tiles.size(); i++) {
-                if (tiles.get(i).startsWith(IntentTile.PREFIX)) {
-                    numBroadcast++;
-                }
-            }
+        private boolean isAddPossible() {
             String[] defaults =
                 getContext().getString(R.string.quick_settings_tiles_default).split(",");
-            final String[] available = new String[defaults.length + 1
-                                                  - (tiles.size() - numBroadcast)];
+            return defaults.length - mTileSpecs.size() != 0;
+        }
+
+        public void showAddDialog() {
+            List<String> tiles = mTileSpecs;
+
+            String[] defaults =
+                getContext().getString(R.string.quick_settings_tiles_default).split(",");
+            final String[] available = new String[defaults.length - tiles.size()];
             final String[] availableTiles = new String[available.length];
             int index = 0;
             for (int i = 0; i < defaults.length; i++) {
@@ -284,32 +347,14 @@ public class QsTuner extends PreferenceFragment implements Callback {
                     available[index++] = defaults[i];
                 }
             }
-            available[index++] = getContext().getString(R.string.broadcast_tile);
+            if (available.length == 0) {
+                return;
+            }
             new AlertDialog.Builder(getContext())
                     .setTitle(R.string.add_tile)
                     .setItems(available, new DialogInterface.OnClickListener() {
                         public void onClick(DialogInterface dialog, int which) {
-                            if (which < available.length - 1) {
-                                add(availableTiles[which]);
-                            } else {
-                                showBroadcastTileDialog();
-                            }
-                        }
-                    }).show();
-        }
-
-        public void showBroadcastTileDialog() {
-            final EditText editText = new EditText(getContext());
-            new AlertDialog.Builder(getContext())
-                    .setTitle(R.string.broadcast_tile)
-                    .setView(editText)
-                    .setNegativeButton(android.R.string.cancel, null)
-                    .setPositiveButton(android.R.string.ok, new DialogInterface.OnClickListener() {
-                        public void onClick(DialogInterface dialog, int which) {
-                            String action = editText.getText().toString();
-                            if (isValid(action)) {
-                                add(IntentTile.PREFIX + action + ')');
-                            }
+                            add(availableTiles[which]);
                         }
                     }).show();
         }
@@ -381,7 +426,7 @@ public class QsTuner extends PreferenceFragment implements Callback {
 
         protected DraggableTile(QSTile.Host host, String tileSpec) {
             super(host);
-            Log.d(TAG, "Creating tile " + tileSpec);
+            Log.v(TAG, "Creating tile " + tileSpec);
             mSpec = tileSpec;
         }
 
@@ -435,15 +480,15 @@ public class QsTuner extends PreferenceFragment implements Callback {
         private int getIcon() {
             if (mSpec.equals("wifi")) return R.drawable.ic_qs_wifi_full_3;
             else if (mSpec.equals("bt")) return R.drawable.ic_qs_bluetooth_connected;
-            else if (mSpec.equals("inversion")) return R.drawable.ic_invert_colors_enable;
+            else if (mSpec.equals("inversion")) return R.drawable.ic_invert_colors_disable;
             else if (mSpec.equals("cell")) return R.drawable.ic_qs_signal_full_3;
-            else if (mSpec.equals("airplane")) return R.drawable.ic_signal_airplane_enable;
+            else if (mSpec.equals("airplane")) return R.drawable.ic_signal_airplane_disable;
             else if (mSpec.equals("dnd")) return R.drawable.ic_qs_dnd_on;
             else if (mSpec.equals("rotation")) return R.drawable.ic_portrait_from_auto_rotate;
-            else if (mSpec.equals("flashlight")) return R.drawable.ic_signal_flashlight_enable;
-            else if (mSpec.equals("location")) return R.drawable.ic_signal_location_enable;
+            else if (mSpec.equals("flashlight")) return R.drawable.ic_signal_flashlight_disable;
+            else if (mSpec.equals("location")) return R.drawable.ic_signal_location_disable;
             else if (mSpec.equals("cast")) return R.drawable.ic_qs_cast_on;
-            else if (mSpec.equals("hotspot")) return R.drawable.ic_hotspot_enable;
+            else if (mSpec.equals("hotspot")) return R.drawable.ic_hotspot_disable;
             return R.drawable.android;
         }
 
@@ -464,7 +509,6 @@ public class QsTuner extends PreferenceFragment implements Callback {
         public void onDrop(String sourceText) {
             ((CustomHost) mHost).replace(mSpec, sourceText);
         }
-
     }
 
     private class DragHelper implements OnDragListener {
@@ -520,6 +564,7 @@ public class QsTuner extends PreferenceFragment implements Callback {
 
                 for (int i = 0; i < r.tileView.getChildCount(); i++) {
                     r.tileView.getChildAt(i).setClickable(false);
+                    r.tileView.getChildAt(i).setLongClickable(false);
                 }
             }
         }
