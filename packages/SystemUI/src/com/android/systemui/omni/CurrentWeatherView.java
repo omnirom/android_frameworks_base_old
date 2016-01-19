@@ -83,7 +83,7 @@ public class CurrentWeatherView extends FrameLayout {
         if (mWeatherData == null) {
             return;
         }
-        mWeatherTemp.setText(mWeatherData.temp);
+        mWeatherTemp.setText(mWeatherData.temp + mWeatherData.tempUnits);
     }
 
     public void setShowError(Drawable d) {
