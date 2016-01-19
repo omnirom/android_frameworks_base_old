@@ -25,6 +25,12 @@
   <string name="global_action_reboot_recovery">Recovery</string>
   <string name="global_action_reboot_bootloader">Bootloader</string>
   <string name="global_action_current_user">Courante</string>
+  <string name="reboot_to_bootloader_title">Redémarrer en mode Bootloader</string>
+  <string name="reboot_to_bootloader_message">Redémarrage\u2026</string>
+  <string name="reboot_to_recovery_title">Redémarrer en mode Recovery</string>
+  <string name="reboot_to_recovery_message">Redémarrage\u2026</string>
+  <string name="reboot_system_title">Redémarrer le système</string>
+  <string name="reboot_system_message">Redémarrage\u2026</string>
   <string name="app_killed_message">Application arrêtée</string>
   <string name="hide_lock_to_app_dialog">Toujours démarrer</string>
   <string name="silent_mode_priority">Priorité</string>
