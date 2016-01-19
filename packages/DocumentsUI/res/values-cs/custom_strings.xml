@@ -18,6 +18,21 @@
   <string name="title_standalone">Soubory</string>
   <string name="toast_success_delete">Soubory odstraněny</string>
   <string name="dialog_delete_confirm_title">Smazat soubory?</string>
+  <plurals name="files_copied">
+    <item quantity="one">Soubor byl zkopírován do schránky</item>
+    <item quantity="few">%d soubory byly zkopírovány do schránky</item>
+    <item quantity="other">%d souborů bylo zkopírováno do schránky</item>
+  </plurals>
+  <plurals name="files_pasted">
+    <item quantity="one">Tento soubor byl vložen. Odeslání lze dokončit na pozadí.</item>
+    <item quantity="few">%d soubory byly vloženy. Odeslání lze dokončit na pozadí.</item>
+    <item quantity="other">%d souborů bylo vloženo. Odeslání lze dokončit na pozadí.</item>
+  </plurals>
   <string name="copy_in_progress">Kopírování...</string>
   <string name="delete_in_progress">Odstraňování...</string>
+  <plurals name="dialog_delete_confirm_message">
+    <item quantity="one">Tento soubor bude trvale odstraněn!</item>
+    <item quantity="few">Budou trvale odstraněny %d vybrané soubory!</item>
+    <item quantity="other">Bude trvale odstraněno %d vybraných souborů!</item>
+  </plurals>
 </resources>

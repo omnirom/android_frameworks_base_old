@@ -30,5 +30,4 @@
   <string name="ext_media_mount_action">Munta</string>
   <string name="ext_media_unmounting_notification_title">s\'està muntant\u2026</string>
   <string name="ext_media_mounting_notification_title">s\'està desmuntant\u2026</string>
-  <string name="zen_no_interruptions_but_alarm">Sense interrupcions, excepte alarmes.</string>
 </resources>

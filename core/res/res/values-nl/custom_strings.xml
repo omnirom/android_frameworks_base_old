@@ -25,6 +25,12 @@
   <string name="global_action_reboot_recovery">Recovery</string>
   <string name="global_action_reboot_bootloader">Bootloader</string>
   <string name="global_action_current_user">Huidige</string>
+  <string name="reboot_to_bootloader_title">Herstart bootloader</string>
+  <string name="reboot_to_bootloader_message">Herstarten\u2026</string>
+  <string name="reboot_to_recovery_title">Herstart recovery</string>
+  <string name="reboot_to_recovery_message">Herstarten\u2026</string>
+  <string name="reboot_system_title">Herstart systeem</string>
+  <string name="reboot_system_message">Herstarten\u2026</string>
   <string name="app_killed_message">App beëindigd</string>
   <string name="hide_lock_to_app_dialog">Altijd starten</string>
   <string name="silent_mode_priority">Prioriteit</string>
@@ -90,4 +96,13 @@
   <string name="app_ops_use_vibrate">haptische feedback gebruiken</string>
   <string name="app_ops_use_voice_volume">spraak volume gebruiken</string>
   <string name="app_ops_write_mms_storage">MMS-opslag beschrijven</string>
+  <string name="battery_style_none">Geen</string>
+  <string name="battery_style_default">Standaard</string>
+  <string name="battery_style_bar">Verticale balk</string>
+  <string name="battery_style_meter_horizontal">Horizontale balk</string>
+  <string name="battery_style_circle">Cirkel</string>
+  <string name="permlab_setKeyguardWallpaper">achtergrond van het vergrendelingsscherm instellen</string>
+  <string name="permdesc_setKeyguardWallpaper">Staat een applicatie toe om de achtergrond van het vergrendelscherm aan te passen.</string>
+  <string name="lock_to_app_toast_back">Om dit scherm los te maken, druk en houd terug vast.</string>
+  <string name="system_error_vendorprint">Het lijkt erop dat de software van uw fabrikant verouderd is. Flash de nieuwste software voor uw apparaat.</string>
 </resources>

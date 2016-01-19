@@ -30,7 +30,6 @@
   <string name="ext_media_mount_action">Monter</string>
   <string name="ext_media_unmounting_notification_title">démontage\u2026</string>
   <string name="ext_media_mounting_notification_title">montage\u2026</string>
-  <string name="zen_no_interruptions_but_alarm">Pas d\'interruptions. Sauf pour les alarmes.</string>
   <string name="battery_saver_dismiss_title">Annuler</string>
   <string name="battery_saver_notification_action_text_short">Désactiver</string>
 </resources>
