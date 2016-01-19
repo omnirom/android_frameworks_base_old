@@ -17,6 +17,7 @@
 */
 package com.android.systemui.omni;
 
+import java.text.DecimalFormat;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
@@ -52,7 +53,8 @@ public class OmniJawsClient {
 
     public static final String[] WEATHER_PROJECTION = new String[]{
             "city",
-            "wind",
+            "wind_speed",
+            "wind_direction",
             "condition_code",
             "temperature",
             "humidity",
@@ -66,21 +68,27 @@ public class OmniJawsClient {
     };
 
     final String[] SETTINGS_PROJECTION = new String[] {
-            "enabled"
+            "enabled",
+            "units"
     };
+
+    private static final DecimalFormat sNoDigitsFormat = new DecimalFormat("0");
 
     public static class WeatherInfo {
         public String city;
-        public String wind;
+        public String windSpeed;
+        public String windDirection;
         public int conditionCode;
         public String temp;
         public String humidity;
         public String condition;
         public Long timeStamp;
         public List<DayForecast> forecasts;
+        public String tempUnits;
+        public String windUnits;
 
         public String toString() {
-            return city + ":" + new Date(timeStamp) + ": " + wind + ":" +conditionCode + ":" + temp + ":" + humidity + ":" + condition + ":" + forecasts;
+            return city + ":" + new Date(timeStamp) + ": " + windSpeed + ":" + windDirection + ":" +conditionCode + ":" + temp + ":" + humidity + ":" + condition + ":" + tempUnits + ":" + windUnits + ": " + forecasts;
         }
     }
 
@@ -104,6 +112,7 @@ public class OmniJawsClient {
     private String mPackageName;
     private String mIconPrefix;
     private String mSettingIconPackage;
+    private boolean mMetric;
 
     public OmniJawsClient(Context context) {
         mContext = context;
@@ -145,6 +154,17 @@ public class OmniJawsClient {
         return mCachedInfo;
     }
 
+    private static String getFormattedValue(float value) {
+        if (Float.isNaN(value)) {
+            return "-";
+        }
+        String formatted = sNoDigitsFormat.format(value);
+        if (formatted.equals("-0")) {
+            formatted = "0";
+        }
+        return formatted;
+    }
+
     public void queryWeather() {
         if (!isOmniJawsEnabled()) {
             Log.w(TAG, "queryWeather while disabled");
@@ -165,19 +185,20 @@ public class OmniJawsClient {
                         c.moveToPosition(i);
                         if (i == 0) {
                             mCachedInfo.city = c.getString(0);
-                            mCachedInfo.wind = c.getString(1);
-                            mCachedInfo.conditionCode = c.getInt(2);
-                            mCachedInfo.temp = c.getString(3);
-                            mCachedInfo.humidity = c.getString(4);
-                            mCachedInfo.condition = c.getString(5);
-                            mCachedInfo.timeStamp = Long.valueOf(c.getString(10));
+                            mCachedInfo.windSpeed = getFormattedValue(c.getFloat(1));
+                            mCachedInfo.windDirection = String.valueOf(c.getInt(2)) + "\u00b0";
+                            mCachedInfo.conditionCode = c.getInt(3);
+                            mCachedInfo.temp = getFormattedValue(c.getFloat(4));
+                            mCachedInfo.humidity = c.getString(5);
+                            mCachedInfo.condition = c.getString(6);
+                            mCachedInfo.timeStamp = Long.valueOf(c.getString(11));
                         } else {
                             DayForecast day = new DayForecast();
-                            day.low = c.getString(6);
-                            day.high = c.getString(7);
-                            day.condition = c.getString(8);
-                            day.conditionCode = c.getInt(9);
-                            day.date = c.getString(11);
+                            day.low = getFormattedValue(c.getFloat(7));
+                            day.high = getFormattedValue(c.getFloat(8));
+                            day.condition = c.getString(9);
+                            day.conditionCode = c.getInt(10);
+                            day.date = c.getString(12);
                             forecastList.add(day);
                         }
                     }
@@ -187,6 +208,7 @@ public class OmniJawsClient {
                 c.close();
             }
         }
+        updateUnits();
         if (DEBUG) Log.d(TAG, "queryWeather " + mCachedInfo);
     }
 
@@ -279,6 +301,33 @@ public class OmniJawsClient {
             }
         }
         return true;
+    }
+
+    private void updateUnits() {
+        if (!mEnabled) {
+            return;
+        }
+        final Cursor c = mContext.getContentResolver().query(SETTINGS_URI, SETTINGS_PROJECTION,
+                null, null, null);
+        if (c != null) {
+            int count = c.getCount();
+            if (count == 1) {
+                c.moveToPosition(0);
+                mMetric = c.getInt(1) == 0;
+                if (mCachedInfo != null) {
+                    mCachedInfo.tempUnits = getTemperatureUnit();
+                    mCachedInfo.windUnits = getWindUnit();
+                }
+            }
+        }
+    }
+
+    private String getTemperatureUnit() {
+        return "\u00b0" + (mMetric ? "C" : "F");
+    }
+
+    private String getWindUnit() {
+        return mMetric ? "km/h":"m/h";
     }
 
     public void settingsChanged() {

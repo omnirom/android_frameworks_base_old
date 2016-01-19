@@ -137,14 +137,17 @@ public class DetailedWeatherView extends LinearLayout {
         String format = DateFormat.is24HourFormat(mContext) ? "HH:mm" : "hh:mm a";
         SimpleDateFormat sdf = new SimpleDateFormat(format);
         mWeatherTimestamp.setText(sdf.format(timeStamp));
-        mWeatherData.setText(weatherData.temp + " - " + weatherData.wind + " - " + weatherData.humidity);
+        mWeatherData.setText(weatherData.temp + weatherData.tempUnits + " - " +
+                weatherData.windSpeed + weatherData.windUnits + " " + weatherData.windDirection +" - " +
+                weatherData.humidity);
 
         sdf = new SimpleDateFormat("EE");
         Calendar cal = Calendar.getInstance();
         String dayShort = sdf.format(new Date(cal.getTimeInMillis()));
 
         Drawable d = mWeatherClient.getWeatherConditionImage(weatherData.forecasts.get(0).conditionCode);
-        d = overlay(mContext.getResources(), d, weatherData.forecasts.get(0).low, weatherData.forecasts.get(0).high);
+        d = overlay(mContext.getResources(), d, weatherData.forecasts.get(0).low, weatherData.forecasts.get(0).high,
+                weatherData.tempUnits);
         mForecastImage0.setImageDrawable(d);
         mForecastText0.setText(dayShort);
 
@@ -152,7 +155,8 @@ public class DetailedWeatherView extends LinearLayout {
         dayShort = sdf.format(new Date(cal.getTimeInMillis()));
 
         d = mWeatherClient.getWeatherConditionImage(weatherData.forecasts.get(1).conditionCode);
-        d = overlay(mContext.getResources(), d, weatherData.forecasts.get(1).low, weatherData.forecasts.get(1).high);
+        d = overlay(mContext.getResources(), d, weatherData.forecasts.get(1).low, weatherData.forecasts.get(1).high,
+                weatherData.tempUnits);
         mForecastImage1.setImageDrawable(d);
         mForecastText1.setText(dayShort);
 
@@ -160,7 +164,8 @@ public class DetailedWeatherView extends LinearLayout {
         dayShort = sdf.format(new Date(cal.getTimeInMillis()));
 
         d = mWeatherClient.getWeatherConditionImage(weatherData.forecasts.get(2).conditionCode);
-        d = overlay(mContext.getResources(), d, weatherData.forecasts.get(2).low, weatherData.forecasts.get(2).high);
+        d = overlay(mContext.getResources(), d, weatherData.forecasts.get(2).low, weatherData.forecasts.get(2).high,
+                weatherData.tempUnits);
         mForecastImage2.setImageDrawable(d);
         mForecastText2.setText(dayShort);
 
@@ -168,7 +173,8 @@ public class DetailedWeatherView extends LinearLayout {
         dayShort = sdf.format(new Date(cal.getTimeInMillis()));
 
         d = mWeatherClient.getWeatherConditionImage(weatherData.forecasts.get(3).conditionCode);
-        d = overlay(mContext.getResources(), d, weatherData.forecasts.get(3).low, weatherData.forecasts.get(3).high);
+        d = overlay(mContext.getResources(), d, weatherData.forecasts.get(3).low, weatherData.forecasts.get(3).high,
+                weatherData.tempUnits);
         mForecastImage3.setImageDrawable(d);
         mForecastText3.setText(dayShort);
 
@@ -176,14 +182,15 @@ public class DetailedWeatherView extends LinearLayout {
         dayShort = sdf.format(new Date(cal.getTimeInMillis()));
 
         d = mWeatherClient.getWeatherConditionImage(weatherData.forecasts.get(4).conditionCode);
-        d = overlay(mContext.getResources(), d, weatherData.forecasts.get(4).low, weatherData.forecasts.get(4).high);
+        d = overlay(mContext.getResources(), d, weatherData.forecasts.get(4).low, weatherData.forecasts.get(4).high,
+                weatherData.tempUnits);
         mForecastImage4.setImageDrawable(d);
         mForecastText4.setText(dayShort);
 
         setBackgroundColor(getCurrentHourColor());
     }
 
-    private Drawable overlay(Resources resources, Drawable image, String min, String max) {
+    private Drawable overlay(Resources resources, Drawable image, String min, String max, String tempUnits) {
         final Canvas canvas = new Canvas();
         canvas.setDrawFilter(new PaintFlagsDrawFilter(Paint.ANTI_ALIAS_FLAG,
                 Paint.FILTER_BITMAP_FLAG));
@@ -192,9 +199,8 @@ public class DetailedWeatherView extends LinearLayout {
         final int imageWidth = image.getIntrinsicWidth();
         final int imageHeight = image.getIntrinsicHeight();
         final TextPaint textPaint = new TextPaint(Paint.ANTI_ALIAS_FLAG);
-        //Typeface font = Typeface.create("sans-serif-medium", Typeface.NORMAL);
-        //textPaint.setTypeface(font);
-        textPaint.setColor(Color.WHITE);
+        Typeface font = Typeface.create("sans-serif-condensed", Typeface.NORMAL);
+        textPaint.setColor(mContext.getColor(R.color.qs_tile_text));
         textPaint.setTextAlign(Paint.Align.LEFT);
         final int textSize= (int) TypedValue.applyDimension(TypedValue.COMPLEX_UNIT_SP, 14f, resources.getDisplayMetrics());
         textPaint.setTextSize(textSize);
@@ -205,12 +211,7 @@ public class DetailedWeatherView extends LinearLayout {
         canvas.setBitmap(bmp);
         canvas.drawBitmap(((BitmapDrawable)image).getBitmap(), 0, 0, null);
 
-        String str = null;
-        if (min != null) {
-            str = min +"/"+max;
-        } else {
-            str = max;
-        }
+        String str = min +"/"+max + tempUnits;
         Rect bounds = new Rect();
         textPaint.getTextBounds(str, 0, str.length(), bounds);
         canvas.drawText(str, width / 2 - bounds.width() / 2, height - textSize / 2, textPaint);
