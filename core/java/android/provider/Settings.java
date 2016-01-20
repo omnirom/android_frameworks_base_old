@@ -2649,7 +2649,7 @@ public final class Settings {
         @Deprecated
         public static final String DESK_DOCK_SOUND = Global.DESK_DOCK_SOUND;
 
-        /**
+`        /**
          * @deprecated Use {@link android.provider.Settings.Global#DESK_UNDOCK_SOUND}
          * instead
          * @hide
@@ -3147,6 +3147,12 @@ public final class Settings {
          * @hide
          */
         public static final String STATUS_BAR_NETWORK_ACTIVITY = "status_bar_network_activity";
+
+        /**
+         * Enable to use tablet style navigation bar
+         * @hide
+         */
+        public static final String ENABLE_TABLET_NAVIGATION = "enable_tablet_navigation";
 
         /**
          * Settings to backup. This is here so that it's in the same place as the settings
