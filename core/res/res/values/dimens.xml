@@ -31,13 +31,15 @@
     <integer name="max_action_buttons">2</integer>
     <dimen name="toast_y_offset">64dip</dimen>
     <!-- Height of the status bar -->
-    <dimen name="status_bar_height">25dip</dimen>
+    <dimen name="status_bar_height">24dp</dimen>
     <!-- Height of the bottom navigation / system bar. -->
     <dimen name="navigation_bar_height">48dp</dimen>
     <!-- Height of the bottom navigation bar in portrait; often the same as @dimen/navigation_bar_height -->
     <dimen name="navigation_bar_height_landscape">48dp</dimen>
+    <!-- Height of the bottom navigation bar in portrait -->
+    <dimen name="navigation_bar_height_portrait">48dp</dimen>
     <!-- Width of the navigation bar when it is placed vertically on the screen -->
-    <dimen name="navigation_bar_width">42dp</dimen>
+    <dimen name="navigation_bar_width">48dp</dimen>
     <!-- Height of notification icons in the status bar -->
     <dimen name="status_bar_icon_size">24dip</dimen>
     <!-- Size of the giant number (unread count) in the notifications -->
@@ -304,6 +306,9 @@
     <!-- Touch slop for the global toggle accessibility gesture -->
     <dimen name="accessibility_touch_slop">80dip</dimen>
 
+    <!-- Width of the outline stroke used by the accessibility screen magnification indicator -->
+    <dimen name="accessibility_magnification_indicator_width">4dip</dimen>
+
     <!-- Width of the sliding KeyguardSecurityContainer (includes 2x keyguard_security_view_margin) -->
     <dimen name="keyguard_security_width">320dp</dimen>
 
@@ -353,51 +358,6 @@
     <!-- Outline width for video subtitles. -->
     <dimen name="subtitle_outline_width">2dp</dimen>
 
-    <!-- New TimePicker dimensions. -->
-    <item name="timepicker_circle_radius_multiplier" format="float" type="string">0.82</item>
-    <item name="timepicker_circle_radius_multiplier_24HourMode" format="float" type="string">0.85</item>
-    <item name="timepicker_selection_radius_multiplier" format="float" type="string">0.16</item>
-    <item name="timepicker_ampm_circle_radius_multiplier" format="float" type="string">0.19</item>
-    <item name="timepicker_numbers_radius_multiplier_normal" format="float" type="string">0.81</item>
-    <item name="timepicker_numbers_radius_multiplier_inner" format="float" type="string">0.60</item>
-    <item name="timepicker_numbers_radius_multiplier_outer" format="float" type="string">0.83</item>
-    <item name="timepicker_text_size_multiplier_normal" format="float" type="string">0.17</item>
-    <item name="timepicker_text_size_multiplier_inner" format="float" type="string">0.14</item>
-    <item name="timepicker_text_size_multiplier_outer" format="float" type="string">0.11</item>
-    <item name="timepicker_transition_mid_radius_multiplier" format="float" type="string">0.95</item>
-    <item name="timepicker_transition_end_radius_multiplier" format="float" type="string">1.3</item>
-
-    <dimen name="timepicker_time_label_size">60sp</dimen>
-    <dimen name="timepicker_extra_time_label_margin">-30dp</dimen>
-    <dimen name="timepicker_ampm_label_size">16sp</dimen>
-    <dimen name="timepicker_ampm_horizontal_padding">12dp</dimen>
-    <dimen name="timepicker_ampm_vertical_padding">16dp</dimen>
-    <dimen name="timepicker_pm_top_padding">3dp</dimen>
-    <dimen name="timepicker_separator_padding">4dp</dimen>
-    <dimen name="timepicker_header_height">96dp</dimen>
-    <dimen name="timepicker_minimum_margin_sides">48dp</dimen>
-    <dimen name="timepicker_minimum_margin_top_bottom">24dp</dimen>
-    <dimen name="timepicker_radial_picker_dimen">270dp</dimen>
-
-    <!-- Used by SimpleMonthView -->
-    <dimen name="datepicker_day_number_size">12sp</dimen>
-    <dimen name="datepicker_month_label_size">14sp</dimen>
-    <dimen name="datepicker_month_day_label_text_size">12sp</dimen>
-    <dimen name="datepicker_month_list_item_header_height">48dp</dimen>
-    <dimen name="datepicker_day_number_select_circle_radius">16dp</dimen>
-    <dimen name="datepicker_view_animator_height">226dp</dimen>
-
-    <dimen name="datepicker_year_picker_padding_top">8dp</dimen>
-    <dimen name="datepicker_year_label_height">64dp</dimen>
-    <dimen name="datepicker_year_label_text_size">22dp</dimen>
-    <dimen name="datepicker_component_width">260dp</dimen>
-    <dimen name="datepicker_dialog_width">520dp</dimen>
-    <dimen name="datepicker_selected_date_day_size">88dp</dimen>
-    <dimen name="datepicker_selected_date_month_size">24dp</dimen>
-    <dimen name="datepicker_selected_date_year_size">24dp</dimen>
-    <dimen name="datepicker_header_height">30dp</dimen>
-    <dimen name="datepicker_header_text_size">14dp</dimen>
-
     <!-- Minimum size of the fast scroller thumb's touch target. -->
     <dimen name="fast_scroller_minimum_touch_target">48dp</dimen>
 
@@ -406,25 +366,49 @@
 
     <dimen name="resolver_max_width">480dp</dimen>
 
-     <!-- Size of the offset applied to the position of the circular mask. This is only
-     used on circular displays. In the case where there is no "chin", this will default
-     to 0 -->
-     <dimen name="circular_display_mask_offset">0px</dimen>
+    <!-- Size of the offset applied to the position of the circular mask. This
+         is only used on circular displays. In the case where there is no
+         "chin", this will default to 0 -->
+    <dimen name="circular_display_mask_offset">0px</dimen>
+    <!-- Amount to reduce the size of the circular mask by (to compensate for
+         aliasing effects). This is only used on circular displays. -->
+    <dimen name="circular_display_mask_thickness">1px</dimen>
 
-     <dimen name="lock_pattern_dot_line_width">3dp</dimen>
-     <dimen name="lock_pattern_dot_size">12dp</dimen>
-     <dimen name="lock_pattern_dot_size_activated">28dp</dimen>
+    <dimen name="lock_pattern_dot_line_width">3dp</dimen>
+    <dimen name="lock_pattern_dot_size">12dp</dimen>
+    <dimen name="lock_pattern_dot_size_activated">28dp</dimen>
 
-     <dimen name="text_handle_min_size">40dp</dimen>
+    <dimen name="text_handle_min_size">40dp</dimen>
 
-     <!-- Lighting and shadow properties -->
-     <dimen name="light_y">-200dp</dimen>
-     <dimen name="light_z">800dp</dimen>
-     <dimen name="light_radius">600dp</dimen>
-     <item type="dimen" format="float" name="ambient_shadow_alpha">0.075</item>
-     <item type="dimen" format="float" name="spot_shadow_alpha">0.15</item>
+    <!-- Lighting and shadow properties -->
+    <dimen name="light_y">0dp</dimen>
+    <dimen name="light_z">600dp</dimen>
+    <dimen name="light_radius">800dp</dimen>
+    <item type="dimen" format="float" name="ambient_shadow_alpha">0.039</item>
+    <item type="dimen" format="float" name="spot_shadow_alpha">0.19</item>
 
-     <!-- Largest size an avatar might need to be drawn in the user picker, status bar, or
-         quick settings header -->
-     <dimen name="max_avatar_size">48dp</dimen>
+    <!-- Floating toolbar dimensions -->
+    <dimen name="floating_toolbar_height">48dp</dimen>
+    <dimen name="floating_toolbar_menu_image_button_width">56dp</dimen>
+    <dimen name="floating_toolbar_menu_image_button_vertical_padding">12dp</dimen>
+    <dimen name="floating_toolbar_menu_button_side_padding">16dp</dimen>
+    <dimen name="floating_toolbar_overflow_image_button_width">60dp</dimen>
+    <dimen name="floating_toolbar_overflow_side_padding">18dp</dimen>
+    <dimen name="floating_toolbar_text_size">14sp</dimen>
+    <dimen name="floating_toolbar_menu_button_minimum_width">48dp</dimen>
+    <dimen name="floating_toolbar_preferred_width">328dp</dimen>
+    <dimen name="floating_toolbar_minimum_overflow_height">96dp</dimen>
+    <dimen name="floating_toolbar_maximum_overflow_height">192dp</dimen>
+    <dimen name="floating_toolbar_horizontal_margin">16dp</dimen>
+    <dimen name="floating_toolbar_vertical_margin">8dp</dimen>
+    <dimen name="content_rect_bottom_clip_allowance">20dp</dimen>
+
+    <dimen name="chooser_grid_padding">0dp</dimen>
+
+    <item type="dimen" format="integer" name="time_picker_column_start_material">0</item>
+    <item type="dimen" format="integer" name="time_picker_column_end_material">1</item>
+
+    <!-- Largest size an avatar might need to be drawn in the user picker, status bar, or
+    quick settings header -->
+    <dimen name="max_avatar_size">48dp</dimen>
 </resources>
