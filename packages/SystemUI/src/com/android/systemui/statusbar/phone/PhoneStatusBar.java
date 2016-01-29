@@ -4784,9 +4784,16 @@ public class PhoneStatusBar extends BaseStatusBar implements DemoMode,
                 if (activityManager.isInLockTaskMode()) {
                     handleLongPressBackRecents(v);
                 } else {
-                    // else long press means kill
-                    mHandler.postDelayed(mKillTask, mBackKillTimeout);
-                    mBackKillPending = true;
+                    final boolean backKillEnabled = Settings.System.getIntForUser(mContext.getContentResolver(),
+                            Settings.System.BUTTON_BACK_KILL_ENABLE, 1, mCurrentUserId) == 1;
+                    final int backKillTimeout = Settings.System.getIntForUser(mContext.getContentResolver(),
+                            Settings.System.BUTTON_BACK_KILL_TIMEOUT, mBackKillTimeout, mCurrentUserId);
+
+                    if (backKillEnabled) {
+                        // else long press means kill
+                        mHandler.postDelayed(mKillTask, backKillTimeout);
+                        mBackKillPending = true;
+                    }
                 }
             } catch (RemoteException e) {
                 Log.d(TAG, "Unable to reach activity manager", e);

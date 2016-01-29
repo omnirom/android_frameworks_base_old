@@ -3588,6 +3588,16 @@ public final class Settings {
         public static final String BUTTON_BACKLIGHT_TIMEOUT = "button_backlight_timeout";
 
         /**
+         * @hide
+         */
+        public static final String BUTTON_BACK_KILL_TIMEOUT = "button_back_kill_timeout";
+
+        /**
+         * @hide
+         */
+        public static final String BUTTON_BACK_KILL_ENABLE = "button_back_kill_enable";
+
+        /**
          * Show onscreen keys for hw button devices
          * @hide
          */
