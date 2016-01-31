@@ -380,6 +380,8 @@ public class DocumentsActivity extends BaseActivity {
         @Override
         protected void onPostExecute(RootInfo root) {
             if (isDestroyed()) return;
+            mState.restored = true;
+
             if (root != null) {
                 onRootPicked(root);
             } else {
@@ -493,12 +495,6 @@ public class DocumentsActivity extends BaseActivity {
     @Override
     public void updateActionBar() {
         if (mRootsToolbar != null) {
-            if (mState.action == ACTION_OPEN || mState.action == ACTION_GET_CONTENT
-                    || mState.action == ACTION_OPEN_TREE) {
-                mRootsToolbar.setTitle(R.string.title_open);
-            } else if (mState.action == ACTION_CREATE) {
-                mRootsToolbar.setTitle(R.string.title_save);
-            }
             final String prompt = getIntent().getStringExtra(DocumentsContract.EXTRA_PROMPT);
             if (prompt != null) {
                 mRootsToolbar.setTitle(prompt);
@@ -584,8 +580,7 @@ public class DocumentsActivity extends BaseActivity {
 
         final MenuItem settings = menu.findItem(R.id.menu_settings);
 
-        boolean fileSizeVisible = !(mState.action == ACTION_MANAGE
-                || mState.action == ACTION_BROWSE);
+        boolean fileSizeVisible = mState.action != ACTION_MANAGE;
         if (mState.action == ACTION_CREATE
                 || mState.action == ACTION_OPEN_TREE
                 || mState.action == ACTION_OPEN_COPY_DESTINATION) {
@@ -619,6 +614,11 @@ public class DocumentsActivity extends BaseActivity {
     @Override
     public boolean onOptionsItemSelected(MenuItem item) {
         if (mDrawerToggle != null && mDrawerToggle.onOptionsItemSelected(item)) {
+            return true;
+        }
+        final int id = item.getItemId();
+        if (id == R.id.menu_paste) {
+            onPasteRequested();
             return true;
         }
         return super.onOptionsItemSelected(item);
