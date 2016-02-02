@@ -327,7 +327,7 @@ public class OmniJawsClient {
     }
 
     private String getWindUnit() {
-        return mMetric ? "km/h":"m/h";
+        return mMetric ? "km/h":"mph";
     }
 
     public void settingsChanged() {
