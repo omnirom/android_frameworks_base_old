@@ -2361,7 +2361,7 @@ public final class PowerManagerService extends SystemService
     }
 
     private void shutdownOrRebootInternal(final boolean shutdown, final boolean confirm,
-            final String reason, boolean wait) {
+            final String reason, boolean wait, final boolean custom) {
         if (mHandler == null || !mSystemReady) {
             throw new IllegalStateException("Too early to call shutdown() or reboot()");
         }
@@ -2373,7 +2373,11 @@ public final class PowerManagerService extends SystemService
                     if (shutdown) {
                         ShutdownThread.shutdown(mContext, confirm);
                     } else {
-                        ShutdownThread.reboot(mContext, reason, confirm);
+                        if (custom) {
+                            ShutdownThread.rebootCustom(mContext, reason, confirm);
+                        } else {
+                            ShutdownThread.reboot(mContext, reason, confirm);
+                        }
                     }
                 }
             }
@@ -3397,7 +3401,29 @@ public final class PowerManagerService extends SystemService
 
             final long ident = Binder.clearCallingIdentity();
             try {
-                shutdownOrRebootInternal(false, confirm, reason, wait);
+                shutdownOrRebootInternal(false, confirm, reason, wait, false);
+            } finally {
+                Binder.restoreCallingIdentity(ident);
+            }
+        }
+
+        /**
+         * Reboots the device with custom progress message.
+         *
+         * @param confirm If true, shows a reboot confirmation dialog.
+         * @param reason The reason for the reboot, or null if none.
+         * @param wait If true, this call waits for the reboot to complete and does not return.
+         */
+        @Override // Binder call
+        public void rebootCustom(boolean confirm, String reason, boolean wait) {
+            mContext.enforceCallingOrSelfPermission(android.Manifest.permission.REBOOT, null);
+            if (PowerManager.REBOOT_RECOVERY.equals(reason)) {
+                mContext.enforceCallingOrSelfPermission(android.Manifest.permission.RECOVERY, null);
+            }
+
+            final long ident = Binder.clearCallingIdentity();
+            try {
+                shutdownOrRebootInternal(false, confirm, reason, wait, true);
             } finally {
                 Binder.restoreCallingIdentity(ident);
             }
@@ -3415,7 +3441,7 @@ public final class PowerManagerService extends SystemService
 
             final long ident = Binder.clearCallingIdentity();
             try {
-                shutdownOrRebootInternal(true, confirm, null, wait);
+                shutdownOrRebootInternal(true, confirm, null, wait, false);
             } finally {
                 Binder.restoreCallingIdentity(ident);
             }
