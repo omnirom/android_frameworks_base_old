@@ -863,6 +863,24 @@ public final class PowerManager {
     }
 
     /**
+     * Reboot the device with custom progress meassges.
+     * Will not return if the reboot is successful.
+     * <p>
+     * Requires the {@link android.Manifest.permission#REBOOT} permission.
+     * </p>
+     *
+     * @param reason code to pass to the kernel (e.g., "recovery") to
+     *               request special boot modes, or null.
+     * @hide
+     */
+    public void rebootCustom(String reason) {
+        try {
+            mService.rebootCustom(false, reason, true);
+        } catch (RemoteException e) {
+        }
+    }
+
+    /**
      * Returns true if the device is currently in power save mode.  When in this mode,
      * applications should reduce their functionality in order to conserve battery as
      * much as possible.  You can monitor for changes to this state with

@@ -46,6 +46,7 @@ interface IPowerManager
     boolean isDeviceIdleMode();
 
     void reboot(boolean confirm, String reason, boolean wait);
+    void rebootCustom(boolean confirm, String reason, boolean wait);
     void shutdown(boolean confirm, boolean wait);
     void crash(String message);
 
