@@ -27,7 +27,7 @@
 
     <!-- The default tiles to display in QuickSettings -->
     <string name="quick_settings_tiles_extra" translatable="false">
-        aod,nfc,screenshot
+        aod,nfc,screenshot,caffeine
     </string>
 
     <!-- tiles that should NEVER end up in qs -->
