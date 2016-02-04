@@ -35,4 +35,9 @@
 
      <!-- Screenshot Tile -->
     <string name="screenshot_long_press">Long press for an selected region</string>
+
+    <!-- Caffeine QS tile -->
+    <string name="quick_settings_caffeine_label">Caffeine</string>
+    <string name="accessibility_quick_settings_caffeine_off">Caffeine off.</string>
+    <string name="accessibility_quick_settings_caffeine_on">Caffeine on.</string>
 </resources>
