@@ -36,5 +36,8 @@
     <string name="navbar_tuner_title">Navbar tuner</string>
     <!-- Screen pinning dialog description when in accessibility mode. -->
     <string name="screen_pinning_description_back">This keeps it in view until you unpin. Touch and hold Back to unpin.</string>
-
+    <!-- QUICK SETTINGS TILES -->
+    <string name="quick_settings_caffeine_label">Caffeine</string>
+    <string name="accessibility_quick_settings_caffeine_off">Caffeine off</string>
+    <string name="accessibility_quick_settings_caffeine_on">Caffeine on</string>
 </resources>
