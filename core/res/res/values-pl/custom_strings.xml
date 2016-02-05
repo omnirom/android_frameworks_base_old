@@ -25,6 +25,12 @@
   <string name="global_action_reboot_recovery">Recovery</string>
   <string name="global_action_reboot_bootloader">Bootloader</string>
   <string name="global_action_current_user">Bieżący</string>
+  <string name="reboot_to_bootloader_title">Uruchom ponownie w bootloader</string>
+  <string name="reboot_to_bootloader_message">Uruchamianie ponownie\u2026</string>
+  <string name="reboot_to_recovery_title">Uruchom ponownie w recovery</string>
+  <string name="reboot_to_recovery_message">Uruchamianie ponownie\u2026</string>
+  <string name="reboot_system_title">Uruchom ponownie</string>
+  <string name="reboot_system_message">Uruchamianie ponownie\u2026</string>
   <string name="app_killed_message">Aplikacja zamknięta</string>
   <string name="hide_lock_to_app_dialog">Zawsze uruchamiaj</string>
   <string name="silent_mode_priority">Priorytet</string>
@@ -42,6 +48,7 @@
   <string name="app_ops_delete_mms">usuwanie MMS</string>
   <string name="app_ops_delete_contacts">usuwanie kontaktów</string>
   <string name="app_ops_delete_call_log">usuwanie historii połączeń</string>
+  <string name="app_ops_draw_on_top">rysuj okna na górze</string>
   <string name="app_ops_get_usage_stats">dostęp do statystyk wykorzystania baterii</string>
   <string name="app_ops_keep_device_awake">zapobieganie uśpieniu urządzenia</string>
   <string name="app_ops_modify_calendar">aktualizacje kalendarza</string>
@@ -72,17 +79,21 @@
   <string name="app_ops_record_audio">nagrywanie dźwięku</string>
   <string name="app_ops_send_sms">wysyłanie wiadomości SMS</string>
   <string name="app_ops_send_mms">wysyłanie wiadomości MMS</string>
+  <string name="app_ops_show_toast_window">pokaż okno toast</string>
   <string name="app_ops_start_at_bootup">uruchamianie przy starcie</string>
   <string name="app_ops_toggle_bluetooth">włączanie/wyłączanie Bluetooth</string>
   <string name="app_ops_toggle_nfc">włączanie/wyłączanie NFC</string>
   <string name="app_ops_toggle_wifi">włączanie/wyłączanie WiFi</string>
+  <string name="app_ops_turn_on_mobile_data">włącz przesył danych</string>
   <string name="app_ops_use_alarm_volume">wykorzystanie głośności alarmu</string>
+  <string name="app_ops_use_audio_focus">użyj wyostrzenia dźwięku</string>
   <string name="app_ops_use_bluetooth_volume">wykorzystanie głośności bluetooth</string>
   <string name="app_ops_use_master_volume">wykorzystanie głównej głośności</string>
   <string name="app_ops_use_media_buttons">wykorzystanie przycisków multimediów</string>
   <string name="app_ops_use_media_volume">wykorzystanie głośności multimediów</string>
   <string name="app_ops_use_notification_volume">wykorzystanie głośności powiadomień</string>
   <string name="app_ops_use_ringer_volume">wykorzystanie głośności dzwonka</string>
+  <string name="app_ops_use_vibrate">użyj wibracji</string>
   <string name="app_ops_use_voice_volume">wykorzystanie głośności głosu</string>
   <string name="app_ops_write_mms_storage">zapisywanie do pamięci MMS</string>
   <string name="battery_style_none">Brak</string>
@@ -90,4 +101,12 @@
   <string name="battery_style_bar">Pionowo</string>
   <string name="battery_style_meter_horizontal">Poziomo</string>
   <string name="battery_style_circle">Okrąg</string>
+  <string name="permlab_setKeyguardWallpaper">ustaw tapetę ekranu blokady</string>
+  <string name="permdesc_setKeyguardWallpaper">Zezwala aplikacji na zmianę tapety ekranu blokady.</string>
+  <string name="lock_to_app_toast_back">Aby odpiąć ten ekran, dotknij i przytrzymaj klawisz Wstecz.</string>
+  <string name="system_error_vendorprint">Wygląda na to, że obraz dostawcy może być nieaktualny. Wgraj najnowszy obraz dostawcy dla swojego urządzenia.</string>
+  <string name="dnd_mode_off">Wyłączone</string>
+  <string name="dnd_mode_total_silence">Całkowite wyciszenie</string>
+  <string name="dnd_mode_alarms">Tylko alarmy</string>
+  <string name="dnd_mode_important">Tylko priorytetowe</string>
 </resources>

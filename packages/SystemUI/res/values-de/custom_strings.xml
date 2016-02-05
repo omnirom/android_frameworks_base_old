@@ -30,7 +30,8 @@
   <string name="ext_media_mount_action">Einlegen</string>
   <string name="ext_media_unmounting_notification_title">auswerfen\u2026</string>
   <string name="ext_media_mounting_notification_title">einlegen\u2026</string>
-  <string name="zen_no_interruptions_but_alarm">Keine Unterbrechungen, ausser Alarme.</string>
   <string name="battery_saver_dismiss_title">Schließen</string>
   <string name="battery_saver_notification_action_text_short">Ausschalten</string>
+  <string name="screen_pinning_description_back">Bis zum Lösen sichtbar halten. Zurück-Taste drücken und Halten um zu Lösen.</string>
+  <string name="status_bar_icons">Statusleisten-Symbole</string>
 </resources>

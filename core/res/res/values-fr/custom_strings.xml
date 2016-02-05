@@ -25,6 +25,12 @@
   <string name="global_action_reboot_recovery">Recovery</string>
   <string name="global_action_reboot_bootloader">Bootloader</string>
   <string name="global_action_current_user">Courante</string>
+  <string name="reboot_to_bootloader_title">Redémarrer en mode Bootloader</string>
+  <string name="reboot_to_bootloader_message">Redémarrage\u2026</string>
+  <string name="reboot_to_recovery_title">Redémarrer en mode Recovery</string>
+  <string name="reboot_to_recovery_message">Redémarrage\u2026</string>
+  <string name="reboot_system_title">Redémarrer le système</string>
+  <string name="reboot_system_message">Redémarrage\u2026</string>
   <string name="app_killed_message">Application arrêtée</string>
   <string name="hide_lock_to_app_dialog">Toujours démarrer</string>
   <string name="silent_mode_priority">Priorité</string>
@@ -95,4 +101,14 @@
   <string name="battery_style_bar">Barre verticale</string>
   <string name="battery_style_meter_horizontal">Barre horizontale</string>
   <string name="battery_style_circle">Cercle</string>
+  <string name="permlab_fakePackageSignature">Imiter la signature des paquets</string>
+  <string name="permdesc_fakePackageSignature">Permet à une application de se faire passer pour une autre. Une application malveillante peut utiliser ceci et avoir accès aux données privées des applications. Accordez seulement cette autorisation avec précaution !</string>
+  <string name="permlab_setKeyguardWallpaper">définir le fond d\'écran de verrouillage</string>
+  <string name="permdesc_setKeyguardWallpaper">Permet à une application de modifier le fond d\'écran de déverrouillage.</string>
+  <string name="lock_to_app_toast_back">Pour déverrouiller l\'écran, touchez et maintenez la touche retour.</string>
+  <string name="system_error_vendorprint">Il semble que votre version peut être mise à jour. Veuillez flasher la version la plus récente pour votre appareil.</string>
+  <string name="dnd_mode_off">Désactivé</string>
+  <string name="dnd_mode_total_silence">Silence total</string>
+  <string name="dnd_mode_alarms">Alarmes seulement</string>
+  <string name="dnd_mode_important">Priorité seulement</string>
 </resources>

@@ -30,5 +30,8 @@
   <string name="ext_media_mount_action">Koppelen</string>
   <string name="ext_media_unmounting_notification_title">ontkoppelen\u2026</string>
   <string name="ext_media_mounting_notification_title">koppelen\u2026</string>
-  <string name="zen_no_interruptions_but_alarm">Geen onderbrekingen, behalve alarmen.</string>
+  <string name="battery_saver_dismiss_title">Annuleren</string>
+  <string name="battery_saver_notification_action_text_short">Uitschakelen</string>
+  <string name="screen_pinning_description_back">Dit zorgt ervoor dat het scherm blijft staan tot u hem weer losmaakt. Druk en houd terug in om hem los te maken.</string>
+  <string name="status_bar_icons">Statusbar icoontjes</string>
 </resources>

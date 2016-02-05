@@ -30,7 +30,8 @@
   <string name="ext_media_mount_action">Připojit</string>
   <string name="ext_media_unmounting_notification_title">odpojování\u2026</string>
   <string name="ext_media_mounting_notification_title">připojování\u2026</string>
-  <string name="zen_no_interruptions_but_alarm">Bez přerušení. S výjimkou budíku.</string>
   <string name="battery_saver_dismiss_title">Zrušit</string>
   <string name="battery_saver_notification_action_text_short">Vypnout</string>
+  <string name="screen_pinning_description_back">Toto udržuje obrazovku zobrazenou, dokud ji neodepnete stiskem a podržením tlačítka Zpět.</string>
+  <string name="status_bar_icons">Ikony stavové lišty</string>
 </resources>
