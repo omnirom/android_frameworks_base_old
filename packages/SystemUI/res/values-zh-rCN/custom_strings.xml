@@ -30,5 +30,4 @@
   <string name="ext_media_mount_action">挂载</string>
   <string name="ext_media_unmounting_notification_title">正在卸载\u2026</string>
   <string name="ext_media_mounting_notification_title">正在挂载\u2026</string>
-  <string name="zen_no_interruptions_but_alarm">禁止打扰，除了闹铃。</string>
 </resources>

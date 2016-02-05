@@ -25,6 +25,12 @@
   <string name="global_action_reboot_recovery">Recovery</string>
   <string name="global_action_reboot_bootloader">Bootloader</string>
   <string name="global_action_current_user">Aktuální</string>
+  <string name="reboot_to_bootloader_title">Bootloader</string>
+  <string name="reboot_to_bootloader_message">Restartování\u2026</string>
+  <string name="reboot_to_recovery_title">Recovery</string>
+  <string name="reboot_to_recovery_message">Restartování\u2026</string>
+  <string name="reboot_system_title">Restart</string>
+  <string name="reboot_system_message">Restartování\u2026</string>
   <string name="app_killed_message">Aplikace ukončena</string>
   <string name="hide_lock_to_app_dialog">Vždy spustit</string>
   <string name="silent_mode_priority">Priorita</string>
@@ -95,4 +101,12 @@
   <string name="battery_style_bar">Svislý pruh</string>
   <string name="battery_style_meter_horizontal">Vodorovný pruh</string>
   <string name="battery_style_circle">Kruh</string>
+  <string name="permlab_setKeyguardWallpaper">Nastavit tapetu zámku kláves</string>
+  <string name="permdesc_setKeyguardWallpaper">Povolit aplikaci změnit pozadí zamčené obrazovky.</string>
+  <string name="lock_to_app_toast_back">Chcete-li odebrat tuto obrazovku, stiskněte a držte tlačítko Zpět.</string>
+  <string name="system_error_vendorprint">Zda se, že obraz zařízení je zastaralý. Instalujte si prosím jeho nejnovější verzi.</string>
+  <string name="dnd_mode_off">Vypnuto</string>
+  <string name="dnd_mode_total_silence">Absolutní ticho</string>
+  <string name="dnd_mode_alarms">Pouze budíky</string>
+  <string name="dnd_mode_important">Pouze prioritní</string>
 </resources>

@@ -30,7 +30,6 @@
   <string name="ext_media_mount_action">Монтировать</string>
   <string name="ext_media_unmounting_notification_title">размонтирование\u2026</string>
   <string name="ext_media_mounting_notification_title">монтирование\u2026</string>
-  <string name="zen_no_interruptions_but_alarm">Без перерывов. За исключением будильника.</string>
   <string name="battery_saver_dismiss_title">Отклонить</string>
   <string name="battery_saver_notification_action_text_short">Выключить</string>
 </resources>

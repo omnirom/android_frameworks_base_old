@@ -30,7 +30,8 @@
   <string name="ext_media_mount_action">Csatlakozás</string>
   <string name="ext_media_unmounting_notification_title">leválasztás\u2026</string>
   <string name="ext_media_mounting_notification_title">csatlakoztatás\u2026</string>
-  <string name="zen_no_interruptions_but_alarm">Megszakítás nélkül. Kivéve riasztás.</string>
   <string name="battery_saver_dismiss_title">Elvetés</string>
   <string name="battery_saver_notification_action_text_short">Kikapcsolás</string>
+  <string name="screen_pinning_description_back">Ez a rögzítés feloldásáig a nézetben tartja, Feloldáshoz nyomja meg és tratsa nyomva a Vissza gombot.</string>
+  <string name="status_bar_icons">Állapotsor ikonok</string>
 </resources>
