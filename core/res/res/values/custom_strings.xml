@@ -114,9 +114,8 @@
     <string name="app_ops_use_voice_volume">use voice volume</string>
     <string name="app_ops_write_mms_storage">write MMS storage</string>
 
-    <string name="battery_style_none">None</string>
+    <string name="battery_style_text">Text</string>
     <string name="battery_style_default">Default</string>
-    <string name="battery_style_bar">Vertical bar</string>
     <string name="battery_style_meter_horizontal">Horizontal bar</string>
     <string name="battery_style_circle">Circle</string>
 
