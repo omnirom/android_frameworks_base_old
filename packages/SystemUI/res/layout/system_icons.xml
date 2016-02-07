@@ -35,5 +35,12 @@
     <com.android.systemui.BatteryMeterView android:id="@+id/battery"
         android:layout_height="@dimen/status_bar_battery_icon_height"
         android:layout_width="@dimen/status_bar_battery_icon_width"
-        android:layout_marginBottom="@dimen/battery_margin_bottom"/>
+        android:layout_marginBottom="@dimen/battery_margin_bottom"
+        android:visibility="gone" />
+
+    <LinearLayout
+        android:id="@+id/battery_container"
+        android:layout_width="wrap_content"
+        android:layout_height="match_parent"
+        android:gravity="center_vertical" />
 </LinearLayout>

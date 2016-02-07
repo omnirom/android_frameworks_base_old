@@ -73,7 +73,11 @@ public class CarStatusBar extends PhoneStatusBar implements
     protected PhoneStatusBarView makeStatusBarView() {
         PhoneStatusBarView statusBarView = super.makeStatusBarView();
 
+        View batteryContainer = statusBarView.findViewById(R.id.battery_container);
+        batteryContainer.setVisibility(View.GONE);
+
         mBatteryMeterView = ((BatteryMeterView) statusBarView.findViewById(R.id.battery));
+        mBatteryMeterView.setBatteryController(mCarBatteryController);
 
         // By default, the BatteryMeterView should not be visible. It will be toggled visible
         // when a device has connected by bluetooth.

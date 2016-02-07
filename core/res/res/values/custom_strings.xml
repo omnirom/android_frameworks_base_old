@@ -47,6 +47,13 @@
     <!-- advanced reboot system -->
     <string name="reboot_system_title">Reboot system</string>
     <string name="reboot_system_message">Rebooting\u2026</string>
+
+    <string name="battery_style_text">Text only</string>
+    <string name="battery_style_default">Default</string>
+    <string name="battery_style_meter_horizontal">Horizontal bar</string>
+    <string name="battery_style_circle">Circle</string>
+    <string name="battery_style_droid">Droid</string>
+
     <!-- global actions dnd selector -->
     <string name="dnd_mode_off">Off</string>
     <string name="dnd_mode_total_silence">Total silence</string>
