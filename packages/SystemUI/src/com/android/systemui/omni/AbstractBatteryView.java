@@ -14,8 +14,9 @@
  * limitations under the License.
  */
 
-package com.android.systemui;
+package com.android.systemui.omni;
 
+import android.animation.ArgbEvaluator;
 import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.Intent;
@@ -34,16 +35,14 @@ import android.provider.Settings;
 import android.util.AttributeSet;
 import android.view.View;
 
+import com.android.systemui.R;
 import com.android.systemui.statusbar.policy.BatteryController;
 
-public abstract class AbstractBatteryView extends View implements DemoMode,
-        BatteryController.BatteryStateChangeCallback {
+public abstract class AbstractBatteryView extends View implements BatteryController.BatteryStateChangeCallback {
     public static final String TAG = AbstractBatteryView.class.getSimpleName();
-    public static final String ACTION_LEVEL_TEST = "com.android.systemui.BATTERY_LEVEL_TEST";
 
     protected BatteryController mBatteryController;
     protected boolean mPowerSaveEnabled;
-    protected boolean mDemoMode;
     protected BatteryTracker mDemoTracker = new BatteryTracker();
     protected BatteryTracker mTracker = new BatteryTracker();
     private boolean mAttached;
@@ -52,9 +51,18 @@ public abstract class AbstractBatteryView extends View implements DemoMode,
     protected final int[] mColors;
     protected final int mCriticalLevel;
     protected int mFrameColor;
-    protected int mChargeColor;
+    private int mChargeColor;
     protected final float[] mBoltPoints;
     protected boolean mChargingImage;
+    protected int mDarkModeBackgroundColor;
+    protected int mDarkModeFillColor;
+    protected int mLightModeBackgroundColor;
+    protected int mLightModeFillColor;
+    protected int mIconTint = Color.WHITE;
+    protected final Paint mBoltPaint;
+    protected final Paint mTextPaint;
+    protected int mTextSize;
+    protected boolean mChargeColorEnable = true;
 
     protected class BatteryTracker extends BroadcastReceiver {
         public static final int UNKNOWN_LEVEL = -1;
@@ -69,14 +77,11 @@ public abstract class AbstractBatteryView extends View implements DemoMode,
         String technology;
         int voltage;
         int temperature;
-        boolean testmode = false;
 
         @Override
         public void onReceive(Context context, Intent intent) {
             final String action = intent.getAction();
             if (action.equals(Intent.ACTION_BATTERY_CHANGED)) {
-                if (testmode && ! intent.getBooleanExtra("testmode", false)) return;
-
                 level = (int)(100f
                         * intent.getIntExtra(BatteryManager.EXTRA_LEVEL, 0)
                         / intent.getIntExtra(BatteryManager.EXTRA_SCALE, 100));
@@ -94,37 +99,6 @@ public abstract class AbstractBatteryView extends View implements DemoMode,
                 setContentDescription(
                         context.getString(R.string.accessibility_battery_level, level));
                 postInvalidate();
-            } else if (action.equals(ACTION_LEVEL_TEST)) {
-                testmode = true;
-                post(new Runnable() {
-                    int curLevel = 0;
-                    int incr = 1;
-                    int saveLevel = level;
-                    int savePlugged = plugType;
-                    Intent dummy = new Intent(Intent.ACTION_BATTERY_CHANGED);
-                    @Override
-                    public void run() {
-                        if (curLevel < 0) {
-                            testmode = false;
-                            dummy.putExtra("level", saveLevel);
-                            dummy.putExtra("plugged", savePlugged);
-                            dummy.putExtra("testmode", false);
-                        } else {
-                            dummy.putExtra("level", curLevel);
-                            dummy.putExtra("plugged", incr > 0 ? BatteryManager.BATTERY_PLUGGED_AC : 0);
-                            dummy.putExtra("testmode", true);
-                        }
-                        getContext().sendBroadcast(dummy);
-
-                        if (!testmode) return;
-
-                        curLevel += incr;
-                        if (curLevel == 100) {
-                            incr *= -1;
-                        }
-                        postDelayed(this, 200);
-                    }
-                });
             }
         }
     }
@@ -135,7 +109,6 @@ public abstract class AbstractBatteryView extends View implements DemoMode,
 
         IntentFilter filter = new IntentFilter();
         filter.addAction(Intent.ACTION_BATTERY_CHANGED);
-        filter.addAction(ACTION_LEVEL_TEST);
         final Intent sticky = getContext().registerReceiver(mTracker, filter);
         if (sticky != null) {
             // preload the battery level
@@ -190,6 +163,22 @@ public abstract class AbstractBatteryView extends View implements DemoMode,
                 com.android.internal.R.integer.config_criticalBatteryWarningLevel);
         mChargeColor = getResources().getColor(R.color.batterymeter_charge_color);
         mBoltPoints = loadBoltPoints();
+        mBoltPaint = new Paint(Paint.ANTI_ALIAS_FLAG);
+        mBoltPaint.setColor(getResources().getColor(R.color.batterymeter_bolt_color));
+
+        mDarkModeBackgroundColor =
+                context.getColor(R.color.dark_mode_icon_color_dual_tone_background);
+        mDarkModeFillColor = context.getColor(R.color.dark_mode_icon_color_dual_tone_fill);
+        mLightModeBackgroundColor =
+                context.getColor(R.color.light_mode_icon_color_dual_tone_background);
+        mLightModeFillColor = context.getColor(R.color.light_mode_icon_color_dual_tone_fill);
+
+        mTextPaint = new Paint(Paint.ANTI_ALIAS_FLAG);
+        Typeface font = Typeface.create("sans-serif-condensed", Typeface.BOLD);
+        mTextPaint.setTypeface(font);
+        mTextPaint.setTextAlign(Paint.Align.CENTER);
+        mTextSize = getResources().getDimensionPixelSize(R.dimen.battery_level_text_size);
+        mTextPaint.setTextSize(mTextSize);
     }
 
     public void setBatteryController(BatteryController batteryController) {
@@ -212,28 +201,6 @@ public abstract class AbstractBatteryView extends View implements DemoMode,
         invalidate();
     }
 
-    @Override
-    public void dispatchDemoCommand(String command, Bundle args) {
-        if (!mDemoMode && command.equals(COMMAND_ENTER)) {
-            mDemoMode = true;
-            mDemoTracker.level = mTracker.level;
-            mDemoTracker.plugged = mTracker.plugged;
-        } else if (mDemoMode && command.equals(COMMAND_EXIT)) {
-            mDemoMode = false;
-            postInvalidate();
-        } else if (mDemoMode && command.equals(COMMAND_BATTERY)) {
-           String level = args.getString("level");
-           String plugged = args.getString("plugged");
-           if (level != null) {
-               mDemoTracker.level = Math.min(Math.max(Integer.parseInt(level), 0), 100);
-           }
-           if (plugged != null) {
-               mDemoTracker.plugged = Boolean.parseBoolean(plugged);
-           }
-           postInvalidate();
-        }
-    }
-
     public void setShowPercent(boolean showPercent) {
         mShowPercent = showPercent;
     }
@@ -250,13 +217,24 @@ public abstract class AbstractBatteryView extends View implements DemoMode,
         mChargeColor = chargingColor;
     }
 
+    public void setChargingColorEnable(boolean value) {
+        mChargeColorEnable = value;
+    }
+
     protected boolean isWideDisplay() {
         return mShowPercent && !mPercentInside;
     }
 
     protected boolean showChargingImage() {
-        BatteryTracker tracker = mDemoMode ? mDemoTracker : mTracker;
+        BatteryTracker tracker = mTracker;
         return tracker.plugged && mChargingImage;
+    }
+
+    protected int getChurrentColor(int level) {
+        if (mTracker.plugged && mChargeColorEnable) {
+            return mChargeColor;
+        }
+        return getColorForLevel(level);
     }
 
     protected int getColorForLevel(int percent) {
@@ -268,7 +246,15 @@ public abstract class AbstractBatteryView extends View implements DemoMode,
         for (int i=0; i<mColors.length; i+=2) {
             thresh = mColors[i];
             color = mColors[i+1];
-            if (percent <= thresh) return color;
+            if (percent <= thresh) {
+
+                // Respect tinting for "normal" level
+                if (i == mColors.length-2) {
+                    return mIconTint;
+                } else {
+                    return color;
+                }
+            }
         }
         return color;
     }
@@ -293,6 +279,28 @@ public abstract class AbstractBatteryView extends View implements DemoMode,
         return ptsF;
     }
 
-    protected void applyStyle() {
+    protected abstract void applyStyle();
+
+    protected void setDarkIntensity(float darkIntensity) {
+        int backgroundColor = getBackgroundColor(darkIntensity);
+        int fillColor = getFillColor(darkIntensity);
+        mIconTint = fillColor;
+        mFrameColor = backgroundColor;
+        mBoltPaint.setColor(fillColor);
+        invalidate();
+    }
+
+    protected int getBackgroundColor(float darkIntensity) {
+        return getColorForDarkIntensity(
+                darkIntensity, mLightModeBackgroundColor, mDarkModeBackgroundColor);
+    }
+
+    protected int getFillColor(float darkIntensity) {
+        return getColorForDarkIntensity(
+                darkIntensity, mLightModeFillColor, mDarkModeFillColor);
+    }
+
+    protected int getColorForDarkIntensity(float darkIntensity, int lightColor, int darkColor) {
+        return (int) ArgbEvaluator.getInstance().evaluate(darkIntensity, lightColor, darkColor);
     }
 }

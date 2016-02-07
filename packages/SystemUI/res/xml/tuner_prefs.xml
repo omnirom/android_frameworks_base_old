@@ -66,18 +66,18 @@
 
     </PreferenceScreen>
 
-    <SwitchPreference
+    <!--<SwitchPreference
         android:key="battery_pct"
         android:title="@string/show_battery_percentage"
         android:summary="@string/show_battery_percentage_summary"
-        android:persistent="false" />
+        android:persistent="false" />-->
 
     <!--<Preference
         android:key="demo_mode"
         android:title="@string/demo_mode" />-->
 
-    <Preference
+    <!--<Preference
         android:summary="@string/tuner_persistent_warning"
-        android:selectable="false" />
+        android:selectable="false" />-->
 
 </PreferenceScreen>
