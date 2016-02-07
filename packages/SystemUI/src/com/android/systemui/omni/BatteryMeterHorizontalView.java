@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package com.android.systemui;
+package com.android.systemui.omni;
 
 import android.content.BroadcastReceiver;
 import android.content.Context;
@@ -37,6 +37,8 @@ import android.view.View;
 import android.util.Log;
 import android.util.DisplayMetrics;
 
+import com.android.systemui.R;
+
 import java.text.NumberFormat;
 
 public class BatteryMeterHorizontalView extends AbstractBatteryView {
@@ -48,9 +50,7 @@ public class BatteryMeterHorizontalView extends AbstractBatteryView {
     private float mButtonHeightFraction;
     private float mSubpixelSmoothingLeft;
     private float mSubpixelSmoothingRight;
-    private final Paint mFramePaint, mBatteryPaint, mTextPaint, mBoltPaint;
-    private float mTextHeight;
-    private int mTextSize;
+    private final Paint mFramePaint, mBatteryPaint;
     private int mTextWidth;
     private int mBarWidth;
     private int mBarSpaceWidth;
@@ -91,22 +91,12 @@ public class BatteryMeterHorizontalView extends AbstractBatteryView {
         mFramePaint.setColor(mFrameColor);
         mFramePaint.setDither(true);
         mFramePaint.setStrokeWidth(3);
-        mFramePaint.setStyle(Paint.Style.STROKE);
+        mFramePaint.setStyle(Paint.Style.FILL_AND_STROKE);
 
         mBatteryPaint = new Paint(Paint.ANTI_ALIAS_FLAG);
         mBatteryPaint.setDither(true);
         mBatteryPaint.setStrokeWidth(0);
         mBatteryPaint.setStyle(Paint.Style.FILL_AND_STROKE);
-
-        mTextPaint = new Paint(Paint.ANTI_ALIAS_FLAG);
-        Typeface font = Typeface.create("sans-serif-condensed", Typeface.BOLD);
-        mTextPaint.setTypeface(font);
-        mTextPaint.setTextAlign(Paint.Align.CENTER);
-        mTextSize = getResources().getDimensionPixelSize(R.dimen.battery_level_text_size);
-        mTextPaint.setTextSize(mTextSize);
-
-        mBoltPaint = new Paint(Paint.ANTI_ALIAS_FLAG);
-        mBoltPaint.setColor(getResources().getColor(R.color.batterymeter_bolt_color));
 
         Rect bounds = new Rect();
         final String text = "100%";
@@ -131,9 +121,8 @@ public class BatteryMeterHorizontalView extends AbstractBatteryView {
 
     @Override
     public void draw(Canvas c) {
-        BatteryTracker tracker = mDemoMode ? mDemoTracker : mTracker;
+        BatteryTracker tracker = mTracker;
         final int level = tracker.level;
-
         if (level == BatteryTracker.UNKNOWN_LEVEL) return;
 
         float drawFrac = (float) level / 100f;
@@ -156,12 +145,8 @@ public class BatteryMeterHorizontalView extends AbstractBatteryView {
         mFrame.right -= buttonHeight;
 
         // set the battery charging color
-        int fillColor = tracker.plugged ? mChargeColor : getColorForLevel(level);
-        if (mShowPercent && mPercentInside && !showChargingImage()) {
-            fillColor = Color.argb(0x5f, Color.red(fillColor), Color.green(fillColor), Color.blue(fillColor));
-        }
-        mBatteryPaint.setColor(fillColor);
-        mFramePaint.setColor(tracker.plugged ? mChargeColor : getColorForLevel(level));
+        mBatteryPaint.setColor(getChurrentColor(level));
+        mFramePaint.setColor(mFrameColor);
 
         if (level >= FULL) {
             drawFrac = 1f;
@@ -185,8 +170,6 @@ public class BatteryMeterHorizontalView extends AbstractBatteryView {
         mShapePath.lineTo(mButtonFrame.left, mButtonFrame.top);
 
         if (showChargingImage()) {
-            int boltColor = tracker.plugged ? mChargeColor : getColorForLevel(level);
-            mBoltPaint.setColor(boltColor);
             // define the bolt shape
             final float bl = mFrame.left + mFrame.width() / 2.5f;
             final float bt = mFrame.top + insetTop + 5;
@@ -218,23 +201,16 @@ public class BatteryMeterHorizontalView extends AbstractBatteryView {
             }
         }
 
-        // draw the battery shape background
-        c.drawPath(mShapePath, mFramePaint);
-
-        // draw the battery shape, clipped to charging level
-        mFrame.right = levelTop;
-        mClipPath.reset();
-        mClipPath.addRect(mFrame,  Path.Direction.CCW);
-        mShapePath.op(mClipPath, Path.Op.INTERSECT);
-        c.drawPath(mShapePath, mBatteryPaint);
+        RectF bounds = null;
+        String percentage = null;
+        float textHeight = 0f;
+        float textOffset = 0f;
+        boolean pctOpaque = false;
 
         if (mShowPercent) {
-            mTextPaint.setColor(tracker.plugged ? mChargeColor : getColorForLevel(level));
-
-            float textHeight = 0f;
-            float textOffset = 0f;
-            RectF bounds = null;
-            String percentage = null;
+            if (!mPercentInside) {
+                mTextPaint.setColor(getChurrentColor(level));
+            }
 
             if (mPercentInside) {
                 if (!showChargingImage()) {
@@ -250,6 +226,32 @@ public class BatteryMeterHorizontalView extends AbstractBatteryView {
                 bounds = new RectF(mBarSpaceWidth, 0, mWidth, mHeight);
             }
             if (percentage != null) {
+                if (mPercentInside) {
+                    if (!showChargingImage()) {
+                        pctOpaque = levelTop > bounds.centerX();
+                        if (!pctOpaque) {
+                            mTextPath.reset();
+                            mTextPaint.getTextPath(percentage, 0, percentage.length(), bounds.centerX(),
+                                    bounds.centerY() + textOffset, mTextPath);
+                            mShapePath.op(mTextPath, Path.Op.DIFFERENCE);
+                        }
+                    }
+                }
+            }
+        }
+
+        // draw the battery shape background
+        c.drawPath(mShapePath, mFramePaint);
+
+        // draw the battery shape, clipped to charging level
+        mFrame.right = levelTop;
+        mClipPath.reset();
+        mClipPath.addRect(mFrame,  Path.Direction.CCW);
+        mShapePath.op(mClipPath, Path.Op.INTERSECT);
+        c.drawPath(mShapePath, mBatteryPaint);
+
+        if (mShowPercent && (!mPercentInside || pctOpaque)) {
+            if (percentage != null) {
                 c.drawText(percentage, bounds.centerX(), bounds.centerY() + textOffset, mTextPaint);
             }
         }
@@ -259,16 +261,15 @@ public class BatteryMeterHorizontalView extends AbstractBatteryView {
     protected void applyStyle() {
         if (mPercentInside) {
             DisplayMetrics metrics = mContext.getResources().getDisplayMetrics();
-            mTextSize = (int) (11 * metrics.density + 0.5f);
-            mTextPaint.setShadowLayer(5.0f, 0.0f, 0.0f, Color.BLACK);
+            mTextSize = (int) (10 * metrics.density + 0.5f);
         } else {
             mTextSize = getResources().getDimensionPixelSize(R.dimen.battery_level_text_size);
-            mTextPaint.setShadowLayer(0.0f, 0.0f, 0.0f, Color.BLACK);
         }
         mTextPaint.setTextSize(mTextSize);
         Rect bounds = new Rect();
         final String text = "100%";
         mTextPaint.getTextBounds(text, 0, text.length(), bounds);
         mTextWidth = bounds.width();
+        invalidate();
     }
 }
