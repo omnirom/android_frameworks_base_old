@@ -76,8 +76,8 @@
         android:key="demo_mode"
         android:title="@string/demo_mode" />-->
 
-    <Preference
+    <!--<Preference
         android:summary="@string/tuner_persistent_warning"
-        android:selectable="false" />
+        android:selectable="false" />-->
 
 </PreferenceScreen>

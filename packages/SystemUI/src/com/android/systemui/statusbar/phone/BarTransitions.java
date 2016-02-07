@@ -32,7 +32,7 @@ import android.view.View;
 import android.view.animation.LinearInterpolator;
 
 import com.android.systemui.R;
-import com.android.systemui.AbstractBatteryView;
+import com.android.systemui.omni.AbstractBatteryView;
 
 public class BarTransitions {
     private static final boolean DEBUG = false;
