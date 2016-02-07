@@ -14,7 +14,7 @@
   ~ See the License for the specific language governing permissions and
   ~ limitations under the License
   -->
-<com.android.systemui.BatteryMeterPercentView xmlns:android="http://schemas.android.com/apk/res/android"
+<com.android.systemui.omni.BatteryMeterPercentView xmlns:android="http://schemas.android.com/apk/res/android"
     android:id="@+id/battery"
     android:layout_height="14.5dp"
     android:layout_width="wrap_content"
