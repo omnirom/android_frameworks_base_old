@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package com.android.systemui;
+package com.android.systemui.omni;
 
 import android.content.BroadcastReceiver;
 import android.content.Context;
@@ -37,17 +37,16 @@ import android.view.View;
 import android.util.Log;
 import android.util.DisplayMetrics;
 
+import com.android.systemui.R;
+
 import java.text.NumberFormat;
 
 public class BatteryCirclePercentView extends AbstractBatteryView {
     public static final String TAG = BatteryCirclePercentView.class.getSimpleName();
 
-    private static final float BOLT_LEVEL_THRESHOLD = 0.3f;  // opaque bolt below this fraction
     private static final int FULL = 96;
 
-    private final Paint mFramePaint, mBatteryPaint, mTextPaint, mBoltPaint;
-    private float mTextHeight;
-    private int mTextSize;
+    private final Paint mFramePaint, mBatteryPaint;
     private int mTextWidth;
     private int mCircleWidth;
     private int mHeight;
@@ -90,22 +89,11 @@ public class BatteryCirclePercentView extends AbstractBatteryView {
         mBatteryPaint.setStyle(Paint.Style.STROKE);
         mBatteryPaint.setPathEffect(null);
 
-        mTextPaint = new Paint(Paint.ANTI_ALIAS_FLAG);
-        Typeface font = Typeface.create("sans-serif-condensed", Typeface.BOLD);
-        mTextPaint.setTypeface(font);
-        mTextPaint.setTextAlign(Paint.Align.CENTER);
-        mTextSize = getResources().getDimensionPixelSize(R.dimen.battery_level_text_size);
-        mTextPaint.setTextSize(mTextSize);
-
-        mBoltPaint = new Paint(Paint.ANTI_ALIAS_FLAG);
-        mBoltPaint.setColor(getResources().getColor(R.color.batterymeter_bolt_color));
-
         Rect bounds = new Rect();
         final String text = "100%";
         mTextPaint.getTextBounds(text, 0, text.length(), bounds);
         mTextWidth = bounds.width();
 
-        // bar width is hardcoded  android:layout_width="9.5dp"
         DisplayMetrics metrics = getResources().getDisplayMetrics();
         mCircleWidth = (int) (14.5 * metrics.density + 0.5f);
 
@@ -125,24 +113,15 @@ public class BatteryCirclePercentView extends AbstractBatteryView {
 
     @Override
     public void draw(Canvas c) {
-        BatteryTracker tracker = mDemoMode ? mDemoTracker : mTracker;
+        BatteryTracker tracker = mTracker;
         final int level = tracker.level;
-
         if (level == BatteryTracker.UNKNOWN_LEVEL) return;
 
-        mFrame.set(mStrokeWidth, mStrokeWidth + mPercentOffsetY, mHeight - mStrokeWidth, mHeight - mStrokeWidth + mPercentOffsetY);
+        mFrame.set(mStrokeWidth, mStrokeWidth + mPercentOffsetY, mHeight - mStrokeWidth,
+                mHeight - mStrokeWidth + mPercentOffsetY);
 
-        int fillColor = tracker.plugged ? mChargeColor : getColorForLevel(level);
-        if (mShowPercent && mPercentInside && !showChargingImage()) {
-            fillColor = Color.argb(0xA0, Color.red(fillColor), Color.green(fillColor), Color.blue(fillColor));
-        }
-        mBatteryPaint.setColor(fillColor);
-
-        int frameColor = mFrameColor;
-        if (mShowPercent && mPercentInside && !showChargingImage()) {
-            frameColor = Color.argb(0x5f, Color.red(frameColor), Color.green(frameColor), Color.blue(frameColor));
-        }
-        mFramePaint.setColor(frameColor);
+        mBatteryPaint.setColor(getCurrentColor(level));
+        mFramePaint.setColor(mFrameColor);
 
         // pad circle percentage to 100% once it reaches 97%
         // for one, the circle looks odd with a too small gap,
@@ -161,7 +140,7 @@ public class BatteryCirclePercentView extends AbstractBatteryView {
         c.drawArc(mFrame, 270, 3.6f * padLevel, false, mBatteryPaint);
 
         if (showChargingImage()) {
-            int boltColor = tracker.plugged ? mChargeColor : getColorForLevel(level);
+            int boltColor = getCurrentColor(level);
             mBoltPaint.setColor(boltColor);
             // define the bolt shape
             final float bl = mFrame.left + mFrame.width() / 3f;
@@ -188,7 +167,7 @@ public class BatteryCirclePercentView extends AbstractBatteryView {
         }
 
         if (mShowPercent) {
-            mTextPaint.setColor(tracker.plugged ? mChargeColor : getColorForLevel(level));
+            mTextPaint.setColor(getCurrentColor(level));
 
             float textHeight = 0f;
             float textOffset = 0f;
@@ -218,15 +197,14 @@ public class BatteryCirclePercentView extends AbstractBatteryView {
     protected void applyStyle() {
         if (mPercentInside) {
             mTextSize = (int)(mCircleWidth * 0.6f);
-            mTextPaint.setShadowLayer(5.0f, 0.0f, 0.0f, Color.BLACK);
         } else {
             mTextSize = getResources().getDimensionPixelSize(R.dimen.battery_level_text_size);
-            mTextPaint.setShadowLayer(0.0f, 0.0f, 0.0f, Color.BLACK);
         }
         mTextPaint.setTextSize(mTextSize);
         Rect bounds = new Rect();
         final String text = "100%";
         mTextPaint.getTextBounds(text, 0, text.length(), bounds);
         mTextWidth = bounds.width();
+        invalidate();
     }
 }

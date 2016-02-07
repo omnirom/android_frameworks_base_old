@@ -3548,11 +3548,17 @@ public final class Settings {
         public static final String STATUSBAR_BATTERY_CHARGING_IMAGE = "statusbar_battery_charging_image";
 
         /**
-         * int value of the color to use when charging -1 disabled
+         * int value of the color to use when charging
          *
          * @hide
          */
         public static final String STATUSBAR_BATTERY_CHARGING_COLOR = "statusbar_battery_charging_color";
+        /**
+         * enable color when charging
+         *
+         * @hide
+         */
+        public static final String STATUSBAR_BATTERY_CHARGING_COLOR_ENABLE = "statusbar_battery_charging_color_enable";
 
         /**
          * Custom button brightness value for manual mode
