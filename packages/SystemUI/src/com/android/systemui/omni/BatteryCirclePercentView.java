@@ -108,8 +108,7 @@ public class BatteryCirclePercentView extends AbstractBatteryView {
 
     @Override
     public void draw(Canvas c) {
-        BatteryTracker tracker = mTracker;
-        final int level = tracker.level;
+        final int level = mTracker.level;
         if (level == BatteryTracker.UNKNOWN_LEVEL) return;
 
         mFrame.set(mStrokeWidth, mStrokeWidth, mHeight - mStrokeWidth,
@@ -190,8 +189,9 @@ public class BatteryCirclePercentView extends AbstractBatteryView {
 
     @Override
     protected void applyStyle() {
+        final int level = mTracker.level;
         if (mPercentInside) {
-            mTextSize = (int)(mCircleWidth * 0.6f);
+            mTextSize = (int)(mCircleWidth * (level == 100 ?  0.5f : 0.6f));
             Typeface font = Typeface.create("sans-serif-condensed", Typeface.BOLD);
             mTextPaint.setTypeface(font);
         } else {

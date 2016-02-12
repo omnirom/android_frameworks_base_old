@@ -119,8 +119,7 @@ public class BatteryMeterPercentView extends AbstractBatteryView {
 
     @Override
     public void draw(Canvas c) {
-        BatteryTracker tracker = mTracker;
-        final int level = tracker.level;
+        final int level = mTracker.level;
         if (level == BatteryTracker.UNKNOWN_LEVEL) return;
 
         float drawFrac = (float) level / 100f;
@@ -265,9 +264,10 @@ public class BatteryMeterPercentView extends AbstractBatteryView {
 
     @Override
     protected void applyStyle() {
+        final int level = mTracker.level;
         if (mPercentInside) {
             DisplayMetrics metrics = mContext.getResources().getDisplayMetrics();
-            mTextSize = (int) (9 * metrics.density + 0.5f);
+            mTextSize = (int) ((level == 100 ? 7 : 9) * metrics.density + 0.5f);
             Typeface font = Typeface.create("sans-serif-condensed", Typeface.BOLD);
             mTextPaint.setTypeface(font);
         } else {
