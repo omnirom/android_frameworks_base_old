@@ -31,6 +31,7 @@ import android.app.KeyguardManager;
 import android.app.NotificationManager;
 import android.content.BroadcastReceiver;
 import android.content.Context;
+import android.content.ContentResolver;
 import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.IntentFilter;
@@ -98,13 +99,13 @@ class GlobalActions implements DialogInterface.OnDismissListener, DialogInterfac
      * see config.xml config_globalActionList */
     private static final String GLOBAL_ACTION_KEY_POWER = "power";
     private static final String GLOBAL_ACTION_KEY_AIRPLANE = "airplane";
-    private static final String GLOBAL_ACTION_KEY_BUGREPORT = "bugreport";
+    //private static final String GLOBAL_ACTION_KEY_BUGREPORT = "bugreport";
     private static final String GLOBAL_ACTION_KEY_SILENT = "silent";
     private static final String GLOBAL_ACTION_KEY_USERS = "users";
     private static final String GLOBAL_ACTION_KEY_SETTINGS = "settings";
     private static final String GLOBAL_ACTION_KEY_LOCKDOWN = "lockdown";
     private static final String GLOBAL_ACTION_KEY_VOICEASSIST = "voiceassist";
-    private static final String GLOBAL_ACTION_KEY_ASSIST = "assist";
+    //private static final String GLOBAL_ACTION_KEY_ASSIST = "assist";
     private static final String GLOBAL_ACTION_KEY_REBOOT = "reboot";
     private static final String GLOBAL_ACTION_KEY_REBOOT_RECOVERY = "reboot_recovery";
     private static final String GLOBAL_ACTION_KEY_REBOOT_BOOTLOADER = "reboot_bootloader";
@@ -132,7 +133,10 @@ class GlobalActions implements DialogInterface.OnDismissListener, DialogInterfac
     private boolean mHasTelephony;
     private boolean mHasVibrator;
     private final boolean mShowSilentToggle;
-    private String[] mMenuActions;
+    private String[] mDefaultMenuActions;
+    private String[] mRootMenuActions;
+    private String[] mRebootMenuActions;
+    private String[] mCurrentMenuActions;
     private boolean mRebootMenu;
     private boolean mUserMenu;
 
@@ -170,8 +174,12 @@ class GlobalActions implements DialogInterface.OnDismissListener, DialogInterfac
 
         mShowSilentToggle = SHOW_SILENT_TOGGLE && !mContext.getResources().getBoolean(
                 com.android.internal.R.bool.config_useFixedVolume);
-        mMenuActions = mContext.getResources().getStringArray(
+        mDefaultMenuActions = mContext.getResources().getStringArray(
                 com.android.internal.R.array.config_globalActionsList);
+        mRebootMenuActions = mContext.getResources().getStringArray(
+                    com.android.internal.R.array.config_rebootActionsList);
+
+        settingsChanged();
     }
 
     /**
@@ -181,9 +189,7 @@ class GlobalActions implements DialogInterface.OnDismissListener, DialogInterfac
     public void showDialog(boolean keyguardShowing, boolean isDeviceProvisioned) {
         mRebootMenu = false;
         mUserMenu = false;
-        mMenuActions = mContext.getResources().getStringArray(
-                com.android.internal.R.array.config_globalActionsList);
-
+        mCurrentMenuActions = mRootMenuActions;
         mKeyguardShowing = keyguardShowing;
         mDeviceProvisioned = isDeviceProvisioned;
         if (mDialog != null) {
@@ -193,6 +199,17 @@ class GlobalActions implements DialogInterface.OnDismissListener, DialogInterfac
             mHandler.sendEmptyMessage(MESSAGE_SHOW);
         } else {
             handleShow();
+        }
+    }
+
+    public void settingsChanged() {
+        final String globalAction = Settings.System.getStringForUser(mContext.getContentResolver(),
+                Settings.System.GLOBAL_ACTIONS_LIST, UserHandle.USER_CURRENT);
+
+        if (globalAction != null) {
+            mRootMenuActions = globalAction.split(",");
+        } else {
+            mRootMenuActions = mDefaultMenuActions;
         }
     }
 
@@ -229,8 +246,7 @@ class GlobalActions implements DialogInterface.OnDismissListener, DialogInterfac
 
     private void back() {
         mRebootMenu = false;
-        mMenuActions = mContext.getResources().getStringArray(
-                com.android.internal.R.array.config_globalActionsList);
+        mCurrentMenuActions = mRootMenuActions;
         buildMenuList();
         mAdapter.notifyDataSetChanged();
     }
@@ -338,8 +354,8 @@ class GlobalActions implements DialogInterface.OnDismissListener, DialogInterfac
     private void buildMenuList() {
         mItems = new ArrayList<Action>();
         ArraySet<String> addedKeys = new ArraySet<String>();
-        for (int i = 0; i < mMenuActions.length; i++) {
-            String actionKey = mMenuActions[i];
+        for (int i = 0; i < mCurrentMenuActions.length; i++) {
+            String actionKey = mCurrentMenuActions[i];
             if (addedKeys.contains(actionKey)) {
                 // If we already have added this, don't add it again.
                 continue;
@@ -364,10 +380,11 @@ class GlobalActions implements DialogInterface.OnDismissListener, DialogInterfac
                 if (mShowSilentToggle) {
                     mItems.add(mSilentModeAction);
                 }
-            /*} else if (GLOBAL_ACTION_KEY_USERS.equals(actionKey)) {
-                if (SystemProperties.getBoolean("fw.power_user_switcher", true)) {
+            } else if (GLOBAL_ACTION_KEY_USERS.equals(actionKey)) {
+                UserManager um = (UserManager) mContext.getSystemService(Context.USER_SERVICE);
+                if (um.isUserSwitcherEnabled()) {
                     addUsersToMenu(mItems);
-                }*/
+                }
             } else if (GLOBAL_ACTION_KEY_SETTINGS.equals(actionKey)) {
                 mItems.add(getSettingsAction());
             } else if (GLOBAL_ACTION_KEY_LOCKDOWN.equals(actionKey)) {
@@ -471,8 +488,7 @@ class GlobalActions implements DialogInterface.OnDismissListener, DialogInterfac
         public void onClick(View v) {
             if (!mRebootMenu && advancedRebootEnabled(mContext) && showRebootSubmenu()) {
                 mRebootMenu = true;
-                mMenuActions = mContext.getResources().getStringArray(
-                    com.android.internal.R.array.config_rebootActionsList);
+                mCurrentMenuActions = mRebootMenuActions;
                 buildMenuList();
                 mAdapter.notifyDataSetChanged();
             } else {
