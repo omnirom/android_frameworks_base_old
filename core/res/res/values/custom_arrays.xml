@@ -34,4 +34,17 @@
         <item>3</item>
         <item>4</item>
     </string-array>
+
+    <!-- Defines all possible global actions -->
+    <string-array translatable="false" name="values_globalActionsList">
+        <item>power</item>
+        <item>reboot</item>
+        <item>lockdown</item>
+        <item>settings</item>
+        <item>airplane</item>
+        <item>users</item>
+        <item>voiceassist</item>
+        <item>silent</item>
+        <item>dnd</item>
+    </string-array>
 </resources>
