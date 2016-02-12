@@ -223,10 +223,6 @@
   <java-symbol type="id" name="profile_badge_line2" />
   <java-symbol type="id" name="profile_badge_line3" />
   <java-symbol type="id" name="transitionPosition" />
-  <java-symbol type="id" name="permission_text" />
-  <java-symbol type="id" name="permission_remember_layout" />
-  <java-symbol type="id" name="permission_remember_choice_checkbox" />
-  <java-symbol type="id" name="permission_remember_choice_text" />
 
   <java-symbol type="attr" name="actionModeShareDrawable" />
   <java-symbol type="attr" name="alertDialogCenterButtons" />
@@ -750,8 +746,6 @@
   <java-symbol type="string" name="orgTypeWork" />
   <java-symbol type="string" name="passwordIncorrect" />
   <java-symbol type="string" name="perms_description_app" />
-  <java-symbol type="string" name="permission" />
-  <java-symbol type="string" name="permission_dialog_text" />
   <java-symbol type="string" name="perms_new_perm_prefix" />
   <java-symbol type="string" name="petabyteShort" />
   <java-symbol type="string" name="peerTtyModeFull" />
@@ -1344,7 +1338,6 @@
   <java-symbol type="layout" name="locale_picker_item" />
   <java-symbol type="layout" name="media_controller" />
   <java-symbol type="layout" name="overlay_display_window" />
-  <java-symbol type="layout" name="permission_confirmation_dialog" />
   <java-symbol type="layout" name="preference" />
   <java-symbol type="layout" name="preference_header_item" />
   <java-symbol type="layout" name="preference_list_content" />
