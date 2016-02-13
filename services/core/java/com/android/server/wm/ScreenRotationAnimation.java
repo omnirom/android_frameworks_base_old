@@ -360,7 +360,7 @@ class ScreenRotationAnimation {
         // Compute the transformation matrix that must be applied
         // to the snapshot to make it stay in the same original position
         // with the current screen rotation.
-        int delta = DisplayContent.deltaRotation(rotation, Surface.ROTATION_0);
+        int delta = DisplayContent.deltaRotation(rotation, mSnapshotRotation);
         createRotationMatrix(delta, mWidth, mHeight, mSnapshotInitialMatrix);
 
         if (DEBUG_STATE) Slog.v(TAG, "**** ROTATION: " + delta);
