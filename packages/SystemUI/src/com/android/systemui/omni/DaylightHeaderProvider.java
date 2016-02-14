@@ -54,7 +54,7 @@ public class DaylightHeaderProvider implements
         StatusBarHeaderMachine.IStatusBarHeaderProvider {
 
     public static final String TAG = "DaylightHeaderProvider";
-    private static final boolean DEBUG = false;
+    private static final boolean DEBUG = true;
 
     private class DaylightHeaderInfo {
         public int mType = 0;
@@ -70,8 +70,10 @@ public class DaylightHeaderProvider implements
     private List<DaylightHeaderInfo> mHeadersList;
     private Resources mRes;
     private String mPackageName;
+    private String mHeaderName;
     private String mSettingHeaderPackage;
     private PendingIntent mAlarmHourly;
+    private boolean mIconPackLoaded;
 
     public DaylightHeaderProvider(Context context) {
         mContext = context;
@@ -145,12 +147,21 @@ public class DaylightHeaderProvider implements
 
     private void loadCustomHeaderPackage() {
         if (DEBUG) Log.i(TAG, "Load header pack " + mSettingHeaderPackage);
-        mPackageName = mSettingHeaderPackage;
+        int idx = mSettingHeaderPackage.indexOf("/");
+        if (idx != -1) {
+            String[] parts = mSettingHeaderPackage.split("/");
+            mPackageName = parts[0];
+            mHeaderName = parts[1];
+        } else {
+            mPackageName = mSettingHeaderPackage;
+            mHeaderName = null;
+        }
         try {
             PackageManager packageManager = mContext.getPackageManager();
             mRes = packageManager.getResourcesForApplication(mPackageName);
             loadHeaders();
         } catch (Exception e) {
+            Log.e(TAG, "Failed to load icon pack " + mHeaderName, e);
             mRes = null;
         }
         if (mRes == null) {
@@ -162,6 +173,7 @@ public class DaylightHeaderProvider implements
     private void loadDefaultHeaderPackage() {
         if (DEBUG) Log.i(TAG, "Load default header pack");
         mPackageName = HEADER_PACKAGE_DEFAULT;
+        mHeaderName = null;
         mSettingHeaderPackage = mPackageName;
         try {
             PackageManager packageManager = mContext.getPackageManager();
@@ -175,19 +187,26 @@ public class DaylightHeaderProvider implements
         }
     }
 
-    private void loadHeaders() {
+    private void loadHeaders() throws XmlPullParserException, IOException {
         mHeadersList = new ArrayList<DaylightHeaderInfo>();
         InputStream in = null;
         XmlPullParser parser = null;
 
         try {
-            in = mRes.getAssets().open("daylight_header.xml");
+            if (mHeaderName == null) {
+                if (DEBUG) Log.i(TAG, "Load header pack config daylight_header.xml");
+                in = mRes.getAssets().open("daylight_header.xml");
+            } else {
+                int idx = mHeaderName.lastIndexOf(".");
+                String headerConfigFile = mHeaderName.substring(idx + 1) + ".xml";
+                if (DEBUG) Log.i(TAG, "Load header pack config " + headerConfigFile);
+                in = mRes.getAssets().open(headerConfigFile);
+            }
             XmlPullParserFactory factory = XmlPullParserFactory.newInstance();
             parser = factory.newPullParser();
             parser.setInput(in, "UTF-8");
             loadResourcesFromXmlParser(parser);
-        } catch (XmlPullParserException e) {
-        } catch (IOException e) {
+            mIconPackLoaded = true;
         } finally {
             // Cleanup resources
             if (parser instanceof XmlResourceParser) {
