@@ -1053,7 +1053,10 @@ public class DocumentsActivity extends BaseActivity {
 
                     // If we cut, delete the original file
                     if (!mIsCopy) {
+                        client = DocumentsApplication.acquireUnstableProviderOrThrow(
+                               resolver, doc.derivedUri.getAuthority());
                         DocumentsContract.deleteDocument(client, doc.derivedUri);
+                        ContentProviderClient.releaseQuietly(client);
                     }
 
                     count++;
@@ -1090,5 +1093,29 @@ public class DocumentsActivity extends BaseActivity {
             // Hack to refresh the contents.
             DirectoryFragment.get(getFragmentManager()).onUserSortOrderChanged();
         }
+    }
+
+    /**
+    * @param uri The Uri to check.
+    * @return Whether the Uri authority is ExternalStorageProvider.
+    */
+    public static boolean isExternalStorageDocument(Uri uri) {
+        return "com.android.externalstorage.documents".equals(uri.getAuthority());
+    }
+
+    /**
+    * @param uri The Uri to check.
+    * @return Whether the Uri authority is DownloadsProvider.
+    */
+    public static boolean isDownloadsDocument(Uri uri) {
+        return "com.android.providers.downloads.documents".equals(uri.getAuthority());
+    }
+
+    /**
+    * @param uri The Uri to check.
+    * @return Whether the Uri authority is MediaProvider.
+    */
+    public static boolean isMediaDocument(Uri uri) {
+        return "com.android.providers.media.documents".equals(uri.getAuthority());
     }
 }
