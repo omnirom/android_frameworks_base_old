@@ -314,7 +314,7 @@ public class KeyguardBottomAreaView extends FrameLayout implements View.OnClickL
     }
 
     public boolean isLeftVoiceAssist() {
-        return mLeftIsVoiceAssist;
+        return mLeftIsVoiceAssist && mVoiceShortcutEnabled;
     }
 
     private boolean isPhoneVisible() {
