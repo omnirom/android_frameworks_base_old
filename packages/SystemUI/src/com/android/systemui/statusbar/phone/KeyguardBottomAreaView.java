@@ -131,6 +131,7 @@ public class KeyguardBottomAreaView extends FrameLayout implements View.OnClickL
 
     private boolean mLeftIsVoiceAssist;
     private boolean mVoiceShortcutEnabled;
+    private boolean mShortcutsEnabled = true;
     private AssistManager mAssistManager;
 
     public KeyguardBottomAreaView(Context context) {
@@ -288,18 +289,16 @@ public class KeyguardBottomAreaView extends FrameLayout implements View.OnClickL
         ResolveInfo resolved = resolveCameraIntent();
         boolean visible = !isCameraDisabledByDpm() && resolved != null
                 && getResources().getBoolean(R.bool.config_keyguardShowCameraAffordance)
-                && mUserSetupComplete;
+                && mUserSetupComplete
+                && mShortcutsEnabled;
         mCameraImageView.setVisibility(visible ? View.VISIBLE : View.GONE);
     }
 
     private void updateLeftAffordanceIcon() {
         mLeftIsVoiceAssist = canLaunchVoiceAssist();
-        mVoiceShortcutEnabled = Settings.Secure.getIntForUser(
-                mContext.getContentResolver(), Settings.Secure.LOCKSCREEN_VOICE_SHORTCUT,
-                1, UserHandle.USER_CURRENT) == 1;
         int drawableId;
         int contentDescription;
-        boolean visible = mUserSetupComplete;
+        boolean visible = mUserSetupComplete && mShortcutsEnabled;
         if (mLeftIsVoiceAssist && mVoiceShortcutEnabled) {
             drawableId = R.drawable.ic_mic_26dp;
             contentDescription = R.string.accessibility_voice_assist_button;
@@ -688,5 +687,17 @@ public class KeyguardBottomAreaView extends FrameLayout implements View.OnClickL
     public void updateLeftAffordance() {
         updateLeftAffordanceIcon();
         updateLeftPreview();
+    }
+
+    public void updateSettings() {
+        mShortcutsEnabled = Settings.Secure.getIntForUser(
+                mContext.getContentResolver(), Settings.Secure.LOCK_SHORTCUTS_ENABLE,
+                1, UserHandle.USER_CURRENT) == 1;
+        mVoiceShortcutEnabled = Settings.Secure.getIntForUser(
+                mContext.getContentResolver(), Settings.Secure.LOCKSCREEN_VOICE_SHORTCUT,
+                1, UserHandle.USER_CURRENT) == 1;
+
+        updateCameraVisibility();
+        updateLeftAffordanceIcon();
     }
 }
