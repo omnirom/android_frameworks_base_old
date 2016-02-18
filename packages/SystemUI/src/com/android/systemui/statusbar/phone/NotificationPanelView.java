@@ -30,6 +30,8 @@ import android.graphics.Canvas;
 import android.graphics.Color;
 import android.graphics.Paint;
 import android.graphics.Rect;
+import android.os.UserHandle;
+import android.provider.Settings;
 import android.util.AttributeSet;
 import android.util.MathUtils;
 import android.view.MotionEvent;
@@ -408,7 +410,8 @@ public class NotificationPanelView extends PanelView implements
                     mNotificationStackScroller.getNotGoneChildCount(),
                     getHeight(),
                     mKeyguardStatusView.getHeight(),
-                    mEmptyDragAmount);
+                    mEmptyDragAmount,
+                    mKeyguardStatusView.isTimeVisible());
             mClockPositionAlgorithm.run(mClockPositionResult);
             if (animate || mClockAnimator != null) {
                 startClockAnimation(mClockPositionResult.clockY);
@@ -2452,9 +2455,16 @@ public class NotificationPanelView extends PanelView implements
         return !tasks.isEmpty() && pkgName.equals(tasks.get(0).topActivity.getPackageName());
     }
 
-    public void setQSBackgroundAlpha(int alpha) {
+    private void setQSBackgroundAlpha(int alpha) {
         if (mQsContainer != null) {
             mQsContainer.getBackground().setAlpha(alpha);
         }
+    }
+
+    public void updateSettings() {
+        final int qsAlphaValue = Settings.System.getIntForUser(
+                mContext.getContentResolver(), Settings.System.QS_TILE_BG_OPACITY, 255,
+                UserHandle.USER_CURRENT);
+        setQSBackgroundAlpha(qsAlphaValue);
     }
 }
