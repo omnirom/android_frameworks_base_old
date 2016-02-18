@@ -51,6 +51,7 @@ public class KeyguardClockPositionAlgorithm {
     private int mKeyguardStatusHeight;
     private float mEmptyDragAmount;
     private float mDensity;
+    private boolean mClockEnabled = true;
 
     /**
      * The number (fractional) of notifications the "more" card counts when calculating how many
@@ -86,7 +87,8 @@ public class KeyguardClockPositionAlgorithm {
     }
 
     public void setup(int maxKeyguardNotifications, int maxPanelHeight, float expandedHeight,
-            int notificationCount, int height, int keyguardStatusHeight, float emptyDragAmount) {
+            int notificationCount, int height, int keyguardStatusHeight, float emptyDragAmount,
+            boolean clockEnabled) {
         mMaxKeyguardNotifications = maxKeyguardNotifications;
         mMaxPanelHeight = maxPanelHeight;
         mExpandedHeight = expandedHeight;
@@ -94,6 +96,7 @@ public class KeyguardClockPositionAlgorithm {
         mHeight = height;
         mKeyguardStatusHeight = keyguardStatusHeight;
         mEmptyDragAmount = emptyDragAmount;
+        mClockEnabled = clockEnabled;
     }
 
     public void run(Result result) {
@@ -132,7 +135,7 @@ public class KeyguardClockPositionAlgorithm {
     private float getClockYFraction() {
         float t = getNotificationAmountT();
         t = Math.min(t, 1.0f);
-        return (1 - t) * mClockYFractionMax + t * mClockYFractionMin;
+        return (1 - t) * (mClockEnabled ? mClockYFractionMax : mClockYFractionMin) + t * mClockYFractionMin;
     }
 
     private int getClockY() {
