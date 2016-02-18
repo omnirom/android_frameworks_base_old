@@ -22,7 +22,9 @@ import android.content.ContentResolver;
 import android.content.Context;
 import android.content.res.Configuration;
 import android.content.res.Resources;
+import android.graphics.Typeface;
 import android.os.UserHandle;
+import android.provider.Settings;
 import android.text.TextUtils;
 import android.text.format.DateFormat;
 import android.util.AttributeSet;
@@ -49,6 +51,7 @@ public class KeyguardStatusView extends GridLayout {
     private TextClock mDateView;
     private TextClock mClockView;
     private TextView mOwnerInfo;
+    private boolean mClockEnabled = true;
 
     private KeyguardUpdateMonitorCallback mInfoCallback = new KeyguardUpdateMonitorCallback() {
 
@@ -121,13 +124,14 @@ public class KeyguardStatusView extends GridLayout {
         // Disable elegant text height because our fancy colon makes the ymin value huge for no
         // reason.
         mClockView.setElegantTextHeight(false);
+        updateSettings();
     }
 
     @Override
     protected void onConfigurationChanged(Configuration newConfig) {
         super.onConfigurationChanged(newConfig);
-        mClockView.setTextSize(TypedValue.COMPLEX_UNIT_PX,
-                getResources().getDimensionPixelSize(R.dimen.widget_big_font_size));
+        /*mClockView.setTextSize(TypedValue.COMPLEX_UNIT_PX,
+                getResources().getDimensionPixelSize(R.dimen.widget_big_font_size));*/
         mDateView.setTextSize(TypedValue.COMPLEX_UNIT_PX,
                 getResources().getDimensionPixelSize(R.dimen.widget_label_font_size));
         mOwnerInfo.setTextSize(TypedValue.COMPLEX_UNIT_PX,
@@ -157,7 +161,9 @@ public class KeyguardStatusView extends GridLayout {
             mAlarmStatusView.setText(alarm);
             mAlarmStatusView.setContentDescription(
                     getResources().getString(R.string.keyguard_accessibility_next_alarm, alarm));
-            mAlarmStatusView.setVisibility(View.VISIBLE);
+            if (mClockEnabled) {
+                mAlarmStatusView.setVisibility(View.VISIBLE);
+            }
         } else {
             mAlarmStatusView.setVisibility(View.GONE);
         }
@@ -248,6 +254,46 @@ public class KeyguardStatusView extends GridLayout {
             clockView12 = clockView12.replace(':', '\uee01');
 
             cacheKey = key;
+        }
+    }
+
+    public boolean isClockVisible() {
+        return mClockEnabled;
+    }
+
+    public void updateSettings() {
+        int color = Settings.System.getIntForUser(
+                    mContext.getContentResolver(), Settings.System.LOCK_CLOCK_COLOR, -1, UserHandle.USER_CURRENT);
+        int size = Settings.System.getIntForUser(
+                    mContext.getContentResolver(), Settings.System.LOCK_CLOCK_SIZE, -1, UserHandle.USER_CURRENT);
+        String font = Settings.System.getStringForUser(
+                    mContext.getContentResolver(), Settings.System.LOCK_CLOCK_FONT, UserHandle.USER_CURRENT);
+        mClockEnabled = Settings.System.getIntForUser(
+                    mContext.getContentResolver(), Settings.System.LOCK_CLOCK_ENABLE, 1, UserHandle.USER_CURRENT) == 1;
+
+        if (!mClockEnabled) {
+            mClockView.setVisibility(View.GONE);
+            mAlarmStatusView.setVisibility(View.GONE);
+            mDateView.setVisibility(View.GONE);
+        } else {
+            mClockView.setVisibility(View.VISIBLE);
+            mDateView.setVisibility(View.VISIBLE);
+            refresh();
+        }
+        if (color != -1) {
+            mClockView.setTextColor(color);
+        }
+        if (size != -1) {   
+            mClockView.setTextSize(TypedValue.COMPLEX_UNIT_DIP, size);
+        } else {
+            mClockView.setTextSize(TypedValue.COMPLEX_UNIT_PX,
+                    getResources().getDimensionPixelSize(R.dimen.widget_big_font_size));
+        }
+        if (font != null) {
+            Typeface tface = Typeface.createFromFile(font);
+            if (tface != null) {
+                mClockView.setTypeface(tface);
+            }
         }
     }
 }
