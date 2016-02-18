@@ -111,6 +111,7 @@ import com.android.internal.statusbar.StatusBarIcon;
 import com.android.internal.util.omni.TaskUtils;
 import com.android.internal.util.omni.OmniSwitchConstants;
 import com.android.keyguard.KeyguardHostView.OnDismissAction;
+import com.android.keyguard.KeyguardStatusView;
 import com.android.keyguard.KeyguardUpdateMonitor;
 import com.android.keyguard.KeyguardUpdateMonitorCallback;
 import com.android.keyguard.ViewMediatorCallback;
@@ -326,7 +327,7 @@ public class PhoneStatusBar extends BaseStatusBar implements DemoMode,
     // top bar
     StatusBarHeaderView mHeader;
     KeyguardStatusBarView mKeyguardStatusBar;
-    View mKeyguardStatusView;
+    KeyguardStatusView mKeyguardStatusView;
     KeyguardBottomAreaView mKeyguardBottomArea;
     boolean mLeaveOpenOnKeyguardHide;
     KeyguardIndicationController mKeyguardIndicationController;
@@ -509,6 +510,15 @@ public class PhoneStatusBar extends BaseStatusBar implements DemoMode,
             mContext.getContentResolver().registerContentObserver(Settings.System.getUriFor(
                     Settings.System.QS_TILE_BG_OPACITY),
                     false, this, UserHandle.USER_ALL);
+            mContext.getContentResolver().registerContentObserver(Settings.System.getUriFor(
+                    Settings.System.LOCK_CLOCK_COLOR),
+                    false, this, UserHandle.USER_ALL);
+            mContext.getContentResolver().registerContentObserver(Settings.System.getUriFor(
+                    Settings.System.LOCK_CLOCK_SIZE),
+                    false, this, UserHandle.USER_ALL);
+            mContext.getContentResolver().registerContentObserver(Settings.System.getUriFor(
+                    Settings.System.LOCK_CLOCK_FONT),
+                    false, this, UserHandle.USER_ALL);
 
             update();
         }
@@ -577,6 +587,10 @@ public class PhoneStatusBar extends BaseStatusBar implements DemoMode,
                 final int qsAlphaValue = Settings.System.getIntForUser(
                         mContext.getContentResolver(), Settings.System.QS_TILE_BG_OPACITY, 255, mCurrentUserId);
                 mNotificationPanel.setQSBackgroundAlpha(qsAlphaValue);
+            }
+
+            if (mKeyguardStatusView != null) {
+                mKeyguardStatusView.updateSettings();
             }
         }
     }
@@ -992,7 +1006,7 @@ public class PhoneStatusBar extends BaseStatusBar implements DemoMode,
         mHeader = (StatusBarHeaderView) mStatusBarWindow.findViewById(R.id.header);
         mHeader.setActivityStarter(this);
         mKeyguardStatusBar = (KeyguardStatusBarView) mStatusBarWindow.findViewById(R.id.keyguard_header);
-        mKeyguardStatusView = mStatusBarWindow.findViewById(R.id.keyguard_status_view);
+        mKeyguardStatusView = (KeyguardStatusView) mStatusBarWindow.findViewById(R.id.keyguard_status_view);
         mKeyguardBottomArea =
                 (KeyguardBottomAreaView) mStatusBarWindow.findViewById(R.id.keyguard_bottom_area);
         mKeyguardBottomArea.setActivityStarter(this);

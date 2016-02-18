@@ -3798,6 +3798,21 @@ public final class Settings {
         public static final String GLOBAL_ACTIONS_LIST = "global_actions_list";
 
         /**
+         * @hide
+         */
+        public static final String LOCK_CLOCK_FONT = "lock_clock_font";
+
+        /**
+         * @hide
+         */
+        public static final String LOCK_CLOCK_COLOR = "lock_clock_color";
+
+        /**
+         * @hide
+         */
+        public static final String LOCK_CLOCK_SIZE = "lock_clock_size";
+
+        /**
          * Settings to backup. This is here so that it's in the same place as the settings
          * keys and easy to update.
          *
