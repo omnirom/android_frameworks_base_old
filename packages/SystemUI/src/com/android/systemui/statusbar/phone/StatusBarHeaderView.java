@@ -1099,13 +1099,13 @@ public class StatusBarHeaderView extends RelativeLayout implements View.OnClickL
         }
     }
 
-    public void settingsChanged() {
+    public void updateSettings() {
         final boolean value = Settings.System.getIntForUser(
                 mContext.getContentResolver(), Settings.System.STATUS_BAR_HEADER_WEATHER,
                 0, UserHandle.USER_CURRENT) == 1;
 
         if (mWeatherClient.isOmniJawsEnabled()) {
-            mWeatherClient.settingsChanged();
+            mWeatherClient.updateSettings();
         }
         // show icon pack change
         if (isShowWeatherHeader() && value) {
