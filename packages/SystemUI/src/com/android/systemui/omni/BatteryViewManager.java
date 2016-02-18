@@ -17,8 +17,10 @@
 package com.android.systemui.omni;
 
 import android.database.ContentObserver;
+import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.Intent;
+import android.content.IntentFilter;
 import android.content.res.Resources;
 import android.os.Handler;
 import android.os.UserHandle;
@@ -58,6 +60,16 @@ public class BatteryViewManager {
 
         public boolean isExpandedBatteryView();
     }
+
+    private final BroadcastReceiver mBroadcastReceiver = new BroadcastReceiver() {
+        @Override
+        public void onReceive(Context context, Intent intent) {
+            String action = intent.getAction();
+            if (Intent.ACTION_USER_SWITCHED.equals(action)) {
+                update();
+            }
+        }
+    };
 
     private ContentObserver mSettingsObserver = new ContentObserver(mHandler) {
         @Override
@@ -115,6 +127,10 @@ public class BatteryViewManager {
 
         mExpandedView = observer != null ? observer.isExpandedBatteryView() : false;
         update();
+
+        IntentFilter filter = new IntentFilter();
+        filter.addAction(Intent.ACTION_USER_SWITCHED);
+        mContext.registerReceiver(mBroadcastReceiver, filter);
     }
 
     public void setBatteryController(BatteryController batteryController) {
