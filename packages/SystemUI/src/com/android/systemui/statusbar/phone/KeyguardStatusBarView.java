@@ -19,6 +19,8 @@ package com.android.systemui.statusbar.phone;
 import android.content.Context;
 import android.content.res.Configuration;
 import android.graphics.drawable.Drawable;
+import android.os.UserHandle;
+import android.provider.Settings;
 import android.util.AttributeSet;
 import android.util.TypedValue;
 import android.view.View;
@@ -35,6 +37,7 @@ import com.android.systemui.R;
 import com.android.systemui.omni.AbstractBatteryView;
 import com.android.systemui.omni.BatteryViewManager;
 import com.android.systemui.statusbar.policy.BatteryController;
+import com.android.systemui.statusbar.policy.Clock;
 import com.android.systemui.statusbar.policy.KeyguardUserSwitcher;
 import com.android.systemui.statusbar.policy.UserInfoController;
 import com.android.systemui.statusbar.policy.UserSwitcherController;
@@ -63,6 +66,7 @@ public class KeyguardStatusBarView extends RelativeLayout
     private int mSystemIconsSwitcherHiddenExpandedMargin;
     private Interpolator mFastOutSlowInInterpolator;
     private BatteryViewManager mBatteryViewManager;
+    private Clock mClockView;
 
      public KeyguardStatusBarView(Context context, AttributeSet attrs) {
         super(context, attrs);
@@ -76,6 +80,7 @@ public class KeyguardStatusBarView extends RelativeLayout
         mMultiUserAvatar = (ImageView) findViewById(R.id.multi_user_avatar);
         //mBatteryLevel = (TextView) findViewById(R.id.battery_level);
         mCarrierLabel = (TextView) findViewById(R.id.keyguard_carrier_text);
+        mClockView = (Clock) findViewById(R.id.clock);
         loadDimens();
         mFastOutSlowInInterpolator = AnimationUtils.loadInterpolator(getContext(),
                 android.R.interpolator.fast_out_slow_in);
@@ -251,5 +256,12 @@ public class KeyguardStatusBarView extends RelativeLayout
     @Override
     public boolean hasOverlappingRendering() {
         return false;
+    }
+
+    public void updateSettings() {
+        final boolean lockClockEnabled = Settings.System.getIntForUser(
+                mContext.getContentResolver(), Settings.System.LOCK_CLOCK_ENABLE, 1, UserHandle.USER_CURRENT) == 1;
+
+        mClockView.setVisibility(lockClockEnabled ? View.GONE : View.VISIBLE);
     }
 }
