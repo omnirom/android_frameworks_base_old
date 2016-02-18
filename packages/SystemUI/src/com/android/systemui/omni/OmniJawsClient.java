@@ -119,7 +119,7 @@ public class OmniJawsClient {
         mEnabled = isOmniJawsServiceInstalled();
 
         if (mEnabled) {
-            settingsChanged();
+            updateSettings();
         }
     }
 
@@ -330,7 +330,7 @@ public class OmniJawsClient {
         return mMetric ? "km/h":"mph";
     }
 
-    public void settingsChanged() {
+    public void updateSettings() {
         if (mEnabled) {
             final String iconPack = Settings.System.getStringForUser(
                    mContext.getContentResolver(), Settings.System.STATUS_BAR_WEATHER_ICON_PACK, UserHandle.USER_CURRENT);
