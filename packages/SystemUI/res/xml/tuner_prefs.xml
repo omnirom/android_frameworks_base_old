@@ -45,6 +45,10 @@
             android:title="@string/status_bar_alarm" />
 
         <com.android.systemui.tuner.StatusBarSwitch
+            android:key="volume"
+            android:title="@string/status_bar_silent" />
+
+        <com.android.systemui.tuner.StatusBarSwitch
             android:key="managed_profile"
             android:title="@string/status_bar_work" />
 
