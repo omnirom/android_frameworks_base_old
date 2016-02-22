@@ -212,6 +212,7 @@ public class BatteryMeterPercentView extends AbstractBatteryView {
         float textOffset = 0f;
 
         if (mShowPercent) {
+            updatePercentFontSize();
             if (!mPercentInside) {
                 mTextPaint.setColor(getCurrentColor(level));
             }
@@ -285,5 +286,18 @@ public class BatteryMeterPercentView extends AbstractBatteryView {
         }
         mTextPaint.getTextBounds(text, 0, text.length(), bounds);
         mTextWidth = bounds.width();
+    }
+
+    private void updatePercentFontSize() {
+        if (mPercentInside) {
+            final int level = mTracker.level;
+            DisplayMetrics metrics = mContext.getResources().getDisplayMetrics();
+            mTextSize = (int) ((level == 100 ? 7 : 9) * metrics.density + 0.5f);
+            mTextPaint.setTextSize(mTextSize);
+            Rect bounds = new Rect();
+            String text = "100";
+            mTextPaint.getTextBounds(text, 0, text.length(), bounds);
+            mTextWidth = bounds.width();
+        }
     }
 }

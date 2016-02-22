@@ -161,6 +161,7 @@ public class BatteryCirclePercentView extends AbstractBatteryView {
         }
 
         if (mShowPercent) {
+            updatePercentFontSize();
             mTextPaint.setColor(getCurrentColor(level));
 
             float textHeight = 0f;
@@ -209,5 +210,17 @@ public class BatteryCirclePercentView extends AbstractBatteryView {
         }
         mTextPaint.getTextBounds(text, 0, text.length(), bounds);
         mTextWidth = bounds.width();
+    }
+
+    private void updatePercentFontSize() {
+        if (mPercentInside) {
+            final int level = mTracker.level;
+            mTextSize = (int)(mCircleWidth * (level == 100 ?  0.5f : 0.6f));
+            mTextPaint.setTextSize(mTextSize);
+            Rect bounds = new Rect();
+            String text = "100";
+            mTextPaint.getTextBounds(text, 0, text.length(), bounds);
+            mTextWidth = bounds.width();
+        }
     }
 }
