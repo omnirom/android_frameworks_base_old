@@ -59,6 +59,10 @@
   <java-symbol type="string" name="global_action_users" />
   <java-symbol type="dimen" name="global_actions_avatar_size" />
   <java-symbol type="color" name="global_actions_icon_color" />
+  <java-symbol type="drawable" name="ic_global_screenshot" />
+  <java-symbol type="string" name="global_action_screenshot" />
+  <java-symbol type="drawable" name="ic_global_screenrecord" />
+  <java-symbol type="string" name="global_action_screenrecord" />
 
    <!-- HW button mapping -->
   <java-symbol type="integer" name="config_deviceHardwareKeys" />
