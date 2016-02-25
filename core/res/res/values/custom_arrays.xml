@@ -42,6 +42,8 @@
         <item>lockdown</item>
         <item>settings</item>
         <item>airplane</item>
+        <item>screenshot</item>
+        <item>screencapture</item>
         <item>users</item>
         <item>voiceassist</item>
         <item>silent</item>
