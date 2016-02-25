@@ -6196,13 +6196,14 @@ public class PackageManagerService extends IPackageManager.Stub {
         if (DEBUG_DEXOPT) {
             Log.i(TAG, "Optimizing app " + curr + " of " + total + ": " + pkg.packageName);
         }
-        if (!isFirstBoot()) {
-            try {
-                ActivityManagerNative.getDefault().showBootMessage(
-                        mContext.getResources().getString(R.string.android_upgrading_apk,
-                                curr, total), true);
-            } catch (RemoteException e) {
-            }
+        //if (isFirstBoot()) {}
+        // TODO: add new message here if we want to show something else
+        // other than "Optimizing App ..."
+        try {
+            ActivityManagerNative.getDefault().showBootMessage(
+                    mContext.getResources().getString(R.string.android_upgrading_apk,
+                            curr, total), true);
+        } catch (RemoteException e) {
         }
         PackageParser.Package p = pkg;
         synchronized (mInstallLock) {

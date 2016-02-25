@@ -6506,7 +6506,12 @@ public class PhoneWindowManager implements WindowManagerPolicy {
                     };
                     if (mContext.getPackageManager().isUpgrade()) {
                         mBootMsgDialog.setTitle(R.string.android_upgrading_title);
-                    } else {
+                    } else if (mContext.getPackageManager().isFirstBoot()) {
+                        // TODO: REMOVE IT, already included in next else clause unless
+                        // we want to show something else other than "Android is starting"
+                        mBootMsgDialog.setTitle(R.string.android_start_title);
+                    }
+                    else {
                         mBootMsgDialog.setTitle(R.string.android_start_title);
                     }
                     mBootMsgDialog.setProgressStyle(ProgressDialog.STYLE_SPINNER);
