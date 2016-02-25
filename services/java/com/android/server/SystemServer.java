@@ -157,7 +157,6 @@ public final class SystemServer {
     private ContentResolver mContentResolver;
 
     private boolean mOnlyCore;
-    private boolean mFirstBoot;
 
     private class AdbPortObserver extends ContentObserver {
         public AdbPortObserver() {
@@ -381,7 +380,6 @@ public final class SystemServer {
         Slog.i(TAG, "Package Manager");
         mPackageManagerService = PackageManagerService.main(mSystemContext, installer,
                 mFactoryTestMode != FactoryTest.FACTORY_TEST_OFF, mOnlyCore);
-        mFirstBoot = mPackageManagerService.isFirstBoot();
         mPackageManager = mSystemContext.getPackageManager();
 
         Slog.i(TAG, "User Service");
@@ -515,7 +513,7 @@ public final class SystemServer {
             Slog.i(TAG, "Window Manager");
             wm = WindowManagerService.main(context, inputManager,
                     mFactoryTestMode != FactoryTest.FACTORY_TEST_LOW_LEVEL,
-                    !mFirstBoot, mOnlyCore);
+                    true, mOnlyCore);
             ServiceManager.addService(Context.WINDOW_SERVICE, wm);
             ServiceManager.addService(Context.INPUT_SERVICE, inputManager);
 
