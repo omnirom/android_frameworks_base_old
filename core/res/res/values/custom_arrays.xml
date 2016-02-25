@@ -46,5 +46,7 @@
         <item>voiceassist</item>
         <item>silent</item>
         <item>dnd</item>
+	<item>screenshot</item>
+	<item>screencapture</item>
     </string-array>
 </resources>
