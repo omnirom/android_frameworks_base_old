@@ -38,7 +38,7 @@ import android.widget.TextClock;
 import android.widget.TextView;
 
 import com.android.internal.widget.LockPatternUtils;
-
+import com.android.keyguard.omni.CustomLockClock;
 import java.util.Locale;
 
 public class KeyguardStatusView extends GridLayout {
@@ -50,7 +50,7 @@ public class KeyguardStatusView extends GridLayout {
 
     private TextView mAlarmStatusView;
     private TextClock mDateView;
-    private TextClock mClockView;
+    private CustomLockClock mClockView;
     private TextView mOwnerInfo;
     private boolean mClockEnabled = true;
     private int mClockFontSize;
@@ -115,7 +115,7 @@ public class KeyguardStatusView extends GridLayout {
         super.onFinishInflate();
         mAlarmStatusView = (TextView) findViewById(R.id.alarm_status);
         mDateView = (TextClock) findViewById(R.id.date_view);
-        mClockView = (TextClock) findViewById(R.id.clock_view);
+        mClockView = (CustomLockClock) findViewById(R.id.clock_view);
         mDateView.setShowCurrentUserTime(true);
         mClockView.setShowCurrentUserTime(true);
         mOwnerInfo = (TextView) findViewById(R.id.owner_info);
@@ -125,9 +125,6 @@ public class KeyguardStatusView extends GridLayout {
         refresh();
         updateOwnerInfo();
 
-        // Disable elegant text height because our fancy colon makes the ymin value huge for no
-        // reason.
-        mClockView.setElegantTextHeight(false);
         // we want to store is as dip - cause custom size is also in dip
         mClockFontSize = (int) (getResources().getDimension(com.android.internal.R.dimen.lock_clock_time_font_size)
                 / getResources().getDisplayMetrics().density);
@@ -256,10 +253,6 @@ public class KeyguardStatusView extends GridLayout {
 
             clockView24 = DateFormat.getBestDateTimePattern(locale, clockView24Skel);
 
-            // Use fancy colon.
-            clockView24 = clockView24.replace(':', '\uee01');
-            clockView12 = clockView12.replace(':', '\uee01');
-
             cacheKey = key;
         }
     }
@@ -313,7 +306,7 @@ public class KeyguardStatusView extends GridLayout {
         }
         mClockView.setTypeface(tface);
 
-        mClockView.setShadowLayer(shadow ? 5 : 0, 0, 0, Color.BLACK);
+        mClockView.setTextShadow(shadow);
         mAlarmStatusView.setShadowLayer(shadow ? 5 : 0, 0, 0, Color.BLACK);
         mDateView.setShadowLayer(shadow ? 5 : 0, 0, 0, Color.BLACK);
     }
