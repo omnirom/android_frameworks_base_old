@@ -54,6 +54,7 @@ public class BatteryViewManager {
     private BarTransitions mBarTransitions;
     private BatteryViewManagerObserver mBatteryStyleObserver;
     private boolean mChargingColorEnable = true;
+    private int mBatteryEnable = 1;
 
     public interface BatteryViewManagerObserver {
         public void batteryStyleChanged(AbstractBatteryView batteryStyle);
@@ -124,6 +125,9 @@ public class BatteryViewManager {
         mContext.getContentResolver().registerContentObserver(
                 Settings.System.getUriFor(Settings.System.STATUSBAR_BATTERY_CHARGING_COLOR_ENABLE), false,
                 mSettingsObserver, UserHandle.USER_ALL);
+        mContext.getContentResolver().registerContentObserver(
+                Settings.System.getUriFor(Settings.System.STATUSBAR_BATTERY_ENABLE), false,
+                mSettingsObserver, UserHandle.USER_ALL);
 
         mExpandedView = observer != null ? observer.isExpandedBatteryView() : false;
         update();
@@ -148,7 +152,7 @@ public class BatteryViewManager {
     }
 
     private void switchBatteryStyle(int style, int showPercent, boolean percentInside, boolean chargingImage,
-            int chargingColor, boolean chargingColorEnable) {
+            int chargingColor, boolean chargingColorEnable, int batteryEnable) {
         if (style >= mBatteryStyleList.size()) {
             return;
         }
@@ -159,6 +163,7 @@ public class BatteryViewManager {
         mChargingImage = chargingImage;
         mChargingColor = chargingColor;
         mChargingColorEnable = chargingColorEnable;
+        mBatteryEnable = batteryEnable;
         if (mCurrentBatteryView != null) {
             mContainerView.removeView(mCurrentBatteryView);
         }
@@ -173,6 +178,13 @@ public class BatteryViewManager {
         }
         if (mBarTransitions != null) {
             mBarTransitions.updateBattery(mCurrentBatteryView);
+        }
+        if (mBatteryEnable == 0) {
+            mCurrentBatteryView.setVisibility(View.GONE);
+        } else if (mBatteryEnable == 1) {
+            mCurrentBatteryView.setVisibility(View.VISIBLE);
+        } else if (mBatteryEnable == 2) {
+            mCurrentBatteryView.setVisibility(mExpandedView ? View.VISIBLE : View.GONE);
         }
         notifyObserver();
     }
@@ -211,12 +223,14 @@ public class BatteryViewManager {
                     UserHandle.USER_CURRENT);
         final boolean chargingColorEnable = Settings.System.getIntForUser(mContext.getContentResolver(),
                     Settings.System.STATUSBAR_BATTERY_CHARGING_COLOR_ENABLE, 1, UserHandle.USER_CURRENT) == 1;
+        final int batteryEnable = Settings.System.getIntForUser(mContext.getContentResolver(),
+                    Settings.System.STATUSBAR_BATTERY_ENABLE, 1, UserHandle.USER_CURRENT);
 
         mHandler.post(new Runnable() {
             @Override
             public void run() {
                 switchBatteryStyle(batteryStyle, showPercent, percentInside, chargingImage,
-                        chargingColor, chargingColorEnable);
+                        chargingColor, chargingColorEnable, batteryEnable);
             }
         });
     }

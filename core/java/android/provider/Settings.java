@@ -3561,6 +3561,13 @@ public final class Settings {
         public static final String STATUSBAR_BATTERY_CHARGING_COLOR_ENABLE = "statusbar_battery_charging_color_enable";
 
         /**
+         * when to show battery - values are 0/none 1/always 2/expanded default is 1/always
+         *
+         * @hide
+         */
+        public static final String STATUSBAR_BATTERY_ENABLE = "statusbar_battery_enable";
+
+        /**
          * Custom button brightness value for manual mode
          *
          * @hide
