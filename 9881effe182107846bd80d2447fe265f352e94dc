@@ -101,6 +101,23 @@
       "revId": "9881effe182107846bd80d2447fe265f352e94dc",
       "serverId": "56841c99-7c94-43d4-bf0b-cb4707e66d55",
       "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "98faad2e_ec7989f0",
+        "filename": "services/core/java/com/android/server/policy/GlobalActions.java",
+        "patchSetId": 2
+      },
+      "lineNbr": 1691,
+      "author": {
+        "id": 1000026
+      },
+      "writtenOn": "2016-02-27T16:44:12Z",
+      "side": 1,
+      "message": "also - these are valid also on secure lockscreen AFAIK - so chane to true",
+      "revId": "9881effe182107846bd80d2447fe265f352e94dc",
+      "serverId": "56841c99-7c94-43d4-bf0b-cb4707e66d55",
+      "unresolved": false
     }
   ]
 }
