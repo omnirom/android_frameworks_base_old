@@ -645,6 +645,14 @@ public class SystemServicesProxy {
     }
 
     /**
+     * Returns a user setting.
+     */
+    public int getUserSetting(Context context, String setting, int userId) {
+        ContentResolver cr = context.getContentResolver();
+        return Settings.System.getIntForUser(cr, setting, userId);
+    }
+
+    /**
      * Returns a system property.
      */
     public String getSystemProperty(String key) {

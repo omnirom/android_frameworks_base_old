@@ -41,6 +41,7 @@ import android.view.LayoutInflater;
 import android.view.View;
 
 import com.android.internal.logging.MetricsLogger;
+import com.android.internal.util.omni.TaskUtils;
 import com.android.systemui.Prefs;
 import com.android.systemui.R;
 import com.android.systemui.RecentsComponent;
@@ -411,6 +412,21 @@ public class Recents extends SystemUI
     }
 
     void showRelativeAffiliatedTask(boolean showNextTask) {
+        if (mSystemServicesProxy.getUserSetting(mContext, 
+                  Settings.System.RECENTS_SWIPE_SHOW_NEXT_PREV_TASK, UserHandle.CURRENT) != 0) {
+            if (mConfig.multiStackEnabled) {
+                // Do something for multiStack
+            } else {
+                // this need to add how to determine there is next or prev task
+                // also add some animation to show them
+                TaskUtils.toggleLastApp(mContext, UserHandle.CURRENT); // for test only
+            }
+        } else {
+            showRelativeAffiliatedTaskGroup(showNextTask);
+        }
+    }
+
+    void showRelativeAffiliatedTaskGroup(boolean showNextTask) {
         // Return early if there is no focused stack
         int focusedStackId = mSystemServicesProxy.getFocusedStack();
         TaskStack focusedStack = null;

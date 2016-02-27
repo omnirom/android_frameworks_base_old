@@ -3755,6 +3755,12 @@ public final class Settings {
         public static final String RECENTS_SHOW_SEARCH_BAR = "recents_show_search_bar";
 
         /**
+         * Allow swipe to show next or prev task
+         * @hide
+         */
+        public static final String RECENTS_SWIPE_SHOW_NEXT_PREV_TASK = "recents_swipe_show_next_prev_task";
+
+        /**
          * Whether the camera launch gesture should vibrate
          * @hide
          */
