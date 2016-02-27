@@ -1,0 +1,106 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "98faad2e_caa4704b",
+        "filename": "core/res/res/values/custom_arrays.xml",
+        "patchSetId": 2
+      },
+      "lineNbr": 49,
+      "author": {
+        "id": 1000026
+      },
+      "writtenOn": "2016-02-27T00:09:51Z",
+      "side": 1,
+      "message": "no tabs please - only spaces\nalso - this array defines the order in the menu\nthe dnd and silent entries should always be on the botton",
+      "revId": "9881effe182107846bd80d2447fe265f352e94dc",
+      "serverId": "56841c99-7c94-43d4-bf0b-cb4707e66d55",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "98faad2e_2a7994c2",
+        "filename": "services/core/java/com/android/server/policy/GlobalActions.java",
+        "patchSetId": 2
+      },
+      "lineNbr": 1544,
+      "author": {
+        "id": 1000026
+      },
+      "writtenOn": "2016-02-27T00:09:51Z",
+      "side": 1,
+      "message": "no need to set an instance variable to null - it will always be null automatically",
+      "revId": "9881effe182107846bd80d2447fe265f352e94dc",
+      "serverId": "56841c99-7c94-43d4-bf0b-cb4707e66d55",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "98faad2e_8a6ae8ea",
+        "filename": "services/core/java/com/android/server/policy/GlobalActions.java",
+        "patchSetId": 2
+      },
+      "lineNbr": 1546,
+      "author": {
+        "id": 1000026
+      },
+      "writtenOn": "2016-02-27T00:09:51Z",
+      "side": 1,
+      "message": "whitespaces",
+      "revId": "9881effe182107846bd80d2447fe265f352e94dc",
+      "serverId": "56841c99-7c94-43d4-bf0b-cb4707e66d55",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "98faad2e_6a6f9cfc",
+        "filename": "services/core/java/com/android/server/policy/GlobalActions.java",
+        "patchSetId": 2
+      },
+      "lineNbr": 1551,
+      "author": {
+        "id": 1000026
+      },
+      "writtenOn": "2016-02-27T00:09:51Z",
+      "side": 1,
+      "message": "detto",
+      "revId": "9881effe182107846bd80d2447fe265f352e94dc",
+      "serverId": "56841c99-7c94-43d4-bf0b-cb4707e66d55",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "98faad2e_4a74e0ca",
+        "filename": "services/core/java/com/android/server/policy/GlobalActions.java",
+        "patchSetId": 2
+      },
+      "lineNbr": 1573,
+      "author": {
+        "id": 1000026
+      },
+      "writtenOn": "2016-02-27T00:09:51Z",
+      "side": 1,
+      "message": "s.o.",
+      "revId": "9881effe182107846bd80d2447fe265f352e94dc",
+      "serverId": "56841c99-7c94-43d4-bf0b-cb4707e66d55",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "98faad2e_0a76d8d1",
+        "filename": "services/core/java/com/android/server/policy/GlobalActions.java",
+        "patchSetId": 2
+      },
+      "lineNbr": 1630,
+      "author": {
+        "id": 1000026
+      },
+      "writtenOn": "2016-02-27T00:09:51Z",
+      "side": 1,
+      "message": "I would move that inside of the onPress methods - but thats nearly nitpicking :)",
+      "revId": "9881effe182107846bd80d2447fe265f352e94dc",
+      "serverId": "56841c99-7c94-43d4-bf0b-cb4707e66d55",
+      "unresolved": false
+    }
+  ]
+}
