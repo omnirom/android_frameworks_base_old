@@ -102,4 +102,8 @@
   <!-- lock clock -->
   <java-symbol type="dimen" name="lock_clock_date_font_size" />
   <java-symbol type="dimen" name="lock_clock_time_font_size" />
+
+  <!-- Powermenu Torch -->
+  <java-symbol type="drawable" name="ic_global_torch" />
+  <java-symbol type="string" name="global_action_torch" />
 </resources>
