@@ -2047,6 +2047,7 @@
         <item>bugreport</item>
         <item>screenshot</item>
         <item>screenrecord</item>
+        <item>torch</item>
         <item>users</item>
         <item>dnd</item>
     </string-array>
