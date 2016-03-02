@@ -1,0 +1,169 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!--
+/* Copyright 2015, DIRTY UNICORNS Project
+**
+** Licensed under the Apache License, Version 2.0 (the "License");
+** you may not use this file except in compliance with the License.
+** You may obtain a copy of the License at
+**
+**     http://www.apache.org/licenses/LICENSE-2.0
+**
+** Unless required by applicable law or agreed to in writing, software
+** distributed under the License is distributed on an "AS IS" BASIS,
+** WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+** See the License for the specific language governing permissions and
+** limitations under the License.
+*/
+-->
+<resources>
+
+  <!-- Notification and battery light -->
+  <java-symbol type="bool" name="config_intrusiveNotificationLed" />
+  <java-symbol type="bool" name="config_multiColorNotificationLed" />
+  <java-symbol type="bool" name="config_intrusiveBatteryLed" />
+  <java-symbol type="bool" name="config_multiColorBatteryLed" />
+  <java-symbol type="array" name="notification_light_package_mapping" />
+  <java-symbol type="array" name="config_notificationNoAlertsVibePattern" />
+
+  <!-- Config Power Menu -->
+  <java-symbol type="drawable" name="ic_lock_reboot" />
+  <java-symbol type="string" name="global_action_reboot" />
+  <java-symbol type="string" name="reboot_reboot" />
+  <java-symbol type="array" name="shutdown_reboot_actions" />
+  <java-symbol type="array" name="shutdown_reboot_options" />
+  <java-symbol type="string" name="reboot_system" />
+  <java-symbol type="string" name="reboot_progress" />
+  <java-symbol type="drawable" name="ic_lock_power_screenshot" />
+  <java-symbol type="string" name="powermenu_screenshot" />
+  <java-symbol type="drawable" name="ic_settings_powermenu" />
+  <java-symbol type="drawable" name="ic_lock_power_screenrecord" />
+  <java-symbol type="string" name="powermenu_screenrecord" />
+
+  <!-- Config IME switcher -->
+  <java-symbol type="bool" name="config_show_IMESwitcher" />
+
+  <!-- We don't want to publish private symbols in android.R as part of the
+       SDK.  Instead, put them here. -->
+  <private-symbols package="com.android.internal" />
+
+  <!-- Private symbols that we need to reference from framework code.  See
+       frameworks/base/core/res/MakeJavaSymbols.sed for how to easily generate
+       this.
+  -->
+  <!-- EdgeGesture service -->
+  <java-symbol type="dimen" name="edge_gesture_trigger_distance" />
+  <java-symbol type="dimen" name="edge_gesture_perpendicular_distance" />
+  <java-symbol type="dimen" name="edge_gesture_trigger_thickness" />
+
+  <!-- Theme install failure notification -->
+  <java-symbol type="string" name="theme_install_error_title" />
+  <java-symbol type="string" name="theme_install_error_message" />
+
+  <!-- Theme reset notification -->
+  <java-symbol type="string" name="theme_reset_notification_title" />
+  <java-symbol type="string" name="theme_reset_notification_body" />
+
+  <!-- Non-themeable packages -->
+  <java-symbol type="array" name="non_themeable_packages" />
+
+  <!-- AOKP custom system animations -->
+  <java-symbol type="string" name="action_null"/>
+  <java-symbol type="string" name="animation_fade"/>
+  <java-symbol type="string" name="animation_slide_left"/>
+  <java-symbol type="string" name="animation_slide_right"/>
+  <java-symbol type="string" name="animation_slide_left_no_fade"/>
+  <java-symbol type="string" name="animation_slide_right_no_fade"/>
+  <java-symbol type="string" name="animation_slide_up"/>
+  <java-symbol type="string" name="animation_slide_down"/>
+  <java-symbol type="string" name="animation_default"/>
+  <java-symbol type="string" name="animation_translucent"/>
+  <java-symbol type="string" name="animation_grow_shrink"/>
+  <java-symbol type="string" name="animation_grow_shrink_center"/>
+  <java-symbol type="string" name="animation_grow_shrink_bottom"/>
+  <java-symbol type="string" name="animation_grow_shrink_left"/>
+  <java-symbol type="string" name="animation_grow_shrink_right"/>
+  <java-symbol type="anim" name="shrink_fade_out_ribbon" />
+  <java-symbol type="anim" name="shrink_fade_out_center_ribbon" />
+  <java-symbol type="anim" name="shrink_fade_out_right_ribbon" />
+  <java-symbol type="anim" name="shrink_fade_out_left_ribbon" />
+  <java-symbol type="anim" name="shrink_fade_out_from_bottom_ribbon" />
+  <java-symbol type="anim" name="grow_fade_in_ribbon" />
+  <java-symbol type="anim" name="grow_fade_in_center_ribbon" />
+  <java-symbol type="anim" name="grow_fade_in_left_ribbon" />
+  <java-symbol type="anim" name="grow_fade_in_right_ribbon" />
+  <java-symbol type="anim" name="grow_fade_in_from_bottom_ribbon" />
+  <java-symbol type="anim" name="translucent_enter_ribbon" />
+  <java-symbol type="anim" name="translucent_exit_ribbon" />
+  <java-symbol type="anim" name="slide_in_down" />
+  <java-symbol type="anim" name="slide_out_up" />
+  <java-symbol type="anim" name="slide_in_right_ribbon" />
+  <java-symbol type="anim" name="slide_out_right_ribbon" />
+  <java-symbol type="anim" name="slide_in_left_ribbon" />
+  <java-symbol type="anim" name="slide_out_left_ribbon" />
+  <java-symbol type="anim" name="slow_fade_in" />
+  <java-symbol type="anim" name="slow_fade_out" />
+  <java-symbol type="anim" name="slide_in_up_ribbon" />
+  <java-symbol type="anim" name="slide_out_down_ribbon" />
+  <java-symbol type="anim" name="slide_in_right_no_fade" />
+  <java-symbol type="anim" name="slide_out_left_no_fade" />
+  <java-symbol type="anim" name="slide_in_left_no_fade" />
+  <java-symbol type="anim" name="slide_out_right_no_fade" />
+
+  <!-- Toast Animation -->
+  <java-symbol type="style" name="Animation.Toast.Fade" />
+  <java-symbol type="style" name="Animation.Toast.SlideRight" />
+  <java-symbol type="style" name="Animation.Toast.SlideLeft" />
+  <java-symbol type="style" name="Animation.Toast.Xylon" />
+  <java-symbol type="style" name="Animation.Toast.Toko" />
+  <java-symbol type="style" name="Animation.Toast.Tn" />
+  <java-symbol type="style" name="Animation.Toast.Honami" />
+  <java-symbol type="style" name="Animation.Toast.FastFade" />
+  <java-symbol type="style" name="Animation.Toast.GrowFade" />
+  <java-symbol type="style" name="Animation.Toast.GrowFadeCenter" />
+  <java-symbol type="style" name="Animation.Toast.GrowFadeBottom" />
+  <java-symbol type="style" name="Animation.Toast.Translucent" />
+  <java-symbol type="style" name="Animation.Toast.SlideRightLeft" />
+  <java-symbol type="style" name="Animation.Toast.SlideLeftRight" />
+
+  <!-- Vendor mismatched fingerprint warning [CHAR LIMIT=NONE] -->
+  <java-symbol type="string" name="system_error_vendorprint" />
+
+  <!-- Last app switch animations -->
+  <java-symbol type="anim" name="last_app_in" />
+  <java-symbol type="anim" name="last_app_out" />
+
+  <!-- Screen Recording -->
+  <java-symbol type="bool" name="config_enableScreenrecordChord" />
+
+  <java-symbol type="drawable" name="ic_audio_notification_new" />
+  <java-symbol type="drawable" name="ic_audio_notification_mute_new" />
+  <java-symbol type="drawable" name="ic_audio_notification_mute_alpha" />
+
+  <!-- Power menu Animations  -->
+  <java-symbol type="style" name="PowerMenuBottomAnimation" />
+  <java-symbol type="style" name="PowerMenuTopAnimation" />
+
+  <!-- google webview -->
+  <java-symbol type="string" name="config_alternateWebViewPackageName" />
+
+  <!-- Support Samsung docks -->
+  <java-symbol type="bool" name="config_forceAnalogCarDock" />
+  <java-symbol type="bool" name="config_forceAnalogDeskDock" />
+
+  <!-- Slim recent app screen-->
+  <java-symbol type="integer" name="config_recentDefaultDur" />
+  <java-symbol type="integer" name="config_recentExitDur" />
+  <java-symbol type="style" name="Animation.RecentScreen" />
+  <java-symbol type="style" name="Animation.RecentScreen.Left" />
+  <java-symbol type="anim" name="recent_screen_enter" />
+  <java-symbol type="anim" name="recent_screen_enter_left" />
+  <java-symbol type="anim" name="recent_screen_fade_out" />
+
+  <!-- Hardware key binding -->
+  <java-symbol type="integer" name="config_deviceHardwareKeys" />
+
+  <!-- Powermenu Torch -->
+  <java-symbol type="drawable" name="ic_lock_torch" />
+  <java-symbol type="string" name="global_action_torch" />
+
+</resources>

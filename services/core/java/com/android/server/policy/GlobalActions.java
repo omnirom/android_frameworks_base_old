@@ -49,6 +49,9 @@ import android.graphics.RectF;
 import android.graphics.Shader;
 import android.graphics.drawable.BitmapDrawable;
 import android.graphics.drawable.Drawable;
+import android.hardware.camera2.CameraManager;
+import android.hardware.camera2.CameraCharacteristics;
+import android.hardware.camera2.CameraAccessException;
 import android.media.AudioManager;
 import android.net.ConnectivityManager;
 import android.os.Build;
@@ -112,6 +115,13 @@ class GlobalActions implements DialogInterface.OnDismissListener, DialogInterfac
     /* Valid settings for global actions keys.
      * see config.xml config_globalActionList */
     private static final String GLOBAL_ACTION_KEY_POWER = "power";
+<<<<<<< HEAD
+=======
+    private static final String GLOBAL_ACTION_KEY_REBOOT = "reboot";
+    private static final String GLOBAL_ACTION_KEY_SCREENSHOT = "screenshot";
+    private static final String GLOBAL_ACTION_KEY_SCREENRECORD = "screenrecord";
+    private static final String GLOBAL_ACTION_KEY_TORCH = "torch";
+>>>>>>> 78357b2... Powermenu Torch option [1/2]
     private static final String GLOBAL_ACTION_KEY_AIRPLANE = "airplane";
     //private static final String GLOBAL_ACTION_KEY_BUGREPORT = "bugreport";
     private static final String GLOBAL_ACTION_KEY_SILENT = "silent";
@@ -149,12 +159,16 @@ class GlobalActions implements DialogInterface.OnDismissListener, DialogInterfac
     private boolean mHasTelephony;
     private boolean mHasVibrator;
     private final boolean mShowSilentToggle;
+<<<<<<< HEAD
     private String[] mDefaultMenuActions;
     private String[] mRootMenuActions;
     private String[] mRebootMenuActions;
     private String[] mCurrentMenuActions;
     private boolean mRebootMenu;
     private boolean mUsersMenu;
+=======
+    private static boolean mTorchEnabled = false;
+>>>>>>> 78357b2... Powermenu Torch option [1/2]
 
     /**
      * @param context everything needs a context :(
@@ -374,10 +388,29 @@ class GlobalActions implements DialogInterface.OnDismissListener, DialogInterfac
             } else if (GLOBAL_ACTION_KEY_REBOOT.equals(actionKey)) {
                 // always enable the simple reboot
                 mItems.add(new RebootAction());
+<<<<<<< HEAD
             } else if (advancedRebootEnabled(mContext) && GLOBAL_ACTION_KEY_REBOOT_RECOVERY.equals(actionKey)) {
                 mItems.add(new RebootRecoveryAction());
             } else if (advancedRebootEnabled(mContext) && GLOBAL_ACTION_KEY_REBOOT_BOOTLOADER.equals(actionKey)) {
                 mItems.add(new RebootBootloaderAction());
+=======
+                }
+            } else if (GLOBAL_ACTION_KEY_SCREENSHOT.equals(actionKey)) {
+                if (Settings.System.getInt(mContext.getContentResolver(),
+                        Settings.System.POWERMENU_SCREENSHOT, 1) == 1) {
+                    mItems.add(ScreenshotAction());
+                }
+            } else if (GLOBAL_ACTION_KEY_SCREENRECORD.equals(actionKey)) {
+                if (Settings.System.getInt(mContext.getContentResolver(),
+                        Settings.System.POWERMENU_SCREENRECORD, 0) != 0) {
+                    mItems.add(ScreenrecordAction());
+                }
+            } else if (GLOBAL_ACTION_KEY_TORCH.equals(actionKey)) {
+                if (Settings.System.getInt(mContext.getContentResolver(),
+                        Settings.System.POWERMENU_TORCH, 0) != 0) {
+                mItems.add(getTorchToggleAction());
+                }
+>>>>>>> 78357b2... Powermenu Torch option [1/2]
             } else if (GLOBAL_ACTION_KEY_AIRPLANE.equals(actionKey)) {
                 mItems.add(mAirplaneModeOn);
             /*} else if (GLOBAL_ACTION_KEY_BUGREPORT.equals(actionKey)) {
@@ -617,6 +650,37 @@ class GlobalActions implements DialogInterface.OnDismissListener, DialogInterfac
                 mAdapter.notifyDataSetChanged();
             }
         }
+    }
+
+    private Action getTorchToggleAction() {
+        return new SinglePressAction(com.android.internal.R.drawable.ic_lock_torch,
+                R.string.global_action_torch) {
+
+            public void onPress() {
+                try {
+                    CameraManager cameraManager = (CameraManager)
+                            mContext.getSystemService(Context.CAMERA_SERVICE);
+                    for (final String cameraId : cameraManager.getCameraIdList()) {
+                        CameraCharacteristics characteristics =
+                            cameraManager.getCameraCharacteristics(cameraId);
+                        int orient = characteristics.get(CameraCharacteristics.LENS_FACING);
+                        if (orient == CameraCharacteristics.LENS_FACING_BACK) {
+                            cameraManager.setTorchMode(cameraId, !mTorchEnabled);
+                            mTorchEnabled = !mTorchEnabled;
+                        }
+                    }
+                } catch (CameraAccessException e) {
+                }
+            }
+
+            public boolean showDuringKeyguard() {
+                return true;
+            }
+
+            public boolean showBeforeProvisioning() {
+                return false;
+            }
+        };
     }
 
     private Action getBugReportAction() {

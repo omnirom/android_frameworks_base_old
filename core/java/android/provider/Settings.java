@@ -3624,7 +3624,18 @@ public final class Settings {
         public static final String ENABLE_FORWARD_LOOKUP = "enable_forward_lookup";
 
         /**
+<<<<<<< HEAD
          * Enable looking up of phone numbers of people
+=======
+         * Whether to display the torch option in the power menu
+         *
+         * @hide
+         */
+        public static final String POWERMENU_TORCH = "powermenu_torch";
+
+        /**
+         * Whether to display settings in the power menu
+>>>>>>> 78357b2... Powermenu Torch option [1/2]
          *
          * @hide
          */
