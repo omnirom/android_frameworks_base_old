@@ -49,6 +49,8 @@ import android.view.accessibility.AccessibilityNodeInfo;
 import android.view.animation.AnimationUtils;
 import android.view.animation.Interpolator;
 import android.widget.FrameLayout;
+import android.widget.ImageView;
+import android.widget.LinearLayout;
 import android.widget.TextView;
 
 import com.android.internal.widget.LockPatternUtils;
@@ -58,6 +60,7 @@ import com.android.systemui.EventLogConstants;
 import com.android.systemui.EventLogTags;
 import com.android.systemui.R;
 import com.android.systemui.assist.AssistManager;
+import com.android.systemui.omni.KeyguardShortcuts;
 import com.android.systemui.statusbar.CommandQueue;
 import com.android.systemui.statusbar.KeyguardAffordanceView;
 import com.android.systemui.statusbar.KeyguardIndicationController;
@@ -130,9 +133,18 @@ public class KeyguardBottomAreaView extends FrameLayout implements View.OnClickL
     };
 
     private boolean mLeftIsVoiceAssist;
+    private AssistManager mAssistManager;
+
+    // omni additions
+    private KeyguardShortcuts mKeyguardShortcuts;
+    private LinearLayout mKeyguardShortcutsContainer;
+    private boolean mShowShortcuts = true;
     private boolean mVoiceShortcutEnabled;
     private boolean mShortcutsEnabled = true;
-    private AssistManager mAssistManager;
+    private boolean mShowIndicator = true;
+    private ImageView mKeyguardShortcutTrigger;
+    private boolean mCameraShortcutEnabled = true;
+    private boolean mLeftShortcutEnabled = true;
 
     public KeyguardBottomAreaView(Context context) {
         this(context, null);
@@ -213,6 +225,10 @@ public class KeyguardBottomAreaView extends FrameLayout implements View.OnClickL
         mLockIcon.setOnLongClickListener(this);
         mCameraImageView.setOnClickListener(this);
         mLeftAffordanceView.setOnClickListener(this);
+        mKeyguardShortcuts = (KeyguardShortcuts) findViewById(R.id.shortcuts_container);
+        mKeyguardShortcutsContainer = (LinearLayout) findViewById(R.id.keyguard_shortcuts_container);
+        mKeyguardShortcutTrigger = (ImageView) findViewById(R.id.shortcuts_trigger);
+        mKeyguardShortcutTrigger.setOnClickListener(this);
         initAccessibility();
     }
 
@@ -227,10 +243,10 @@ public class KeyguardBottomAreaView extends FrameLayout implements View.OnClickL
         super.onConfigurationChanged(newConfig);
         int indicationBottomMargin = getResources().getDimensionPixelSize(
                 R.dimen.keyguard_indication_margin_bottom);
-        MarginLayoutParams mlp = (MarginLayoutParams) mIndicationText.getLayoutParams();
+        MarginLayoutParams mlp = (MarginLayoutParams) mKeyguardShortcutsContainer.getLayoutParams();
         if (mlp.bottomMargin != indicationBottomMargin) {
             mlp.bottomMargin = indicationBottomMargin;
-            mIndicationText.setLayoutParams(mlp);
+            mKeyguardShortcutsContainer.setLayoutParams(mlp);
         }
 
         // Respect font size setting.
@@ -290,7 +306,8 @@ public class KeyguardBottomAreaView extends FrameLayout implements View.OnClickL
         boolean visible = !isCameraDisabledByDpm() && resolved != null
                 && getResources().getBoolean(R.bool.config_keyguardShowCameraAffordance)
                 && mUserSetupComplete
-                && mShortcutsEnabled;
+                && mShortcutsEnabled
+                && mCameraShortcutEnabled;
         mCameraImageView.setVisibility(visible ? View.VISIBLE : View.GONE);
     }
 
@@ -298,7 +315,7 @@ public class KeyguardBottomAreaView extends FrameLayout implements View.OnClickL
         mLeftIsVoiceAssist = canLaunchVoiceAssist();
         int drawableId;
         int contentDescription;
-        boolean visible = mUserSetupComplete && mShortcutsEnabled;
+        boolean visible = mUserSetupComplete && mShortcutsEnabled && mLeftShortcutEnabled;
         if (mLeftIsVoiceAssist && mVoiceShortcutEnabled) {
             drawableId = R.drawable.ic_mic_26dp;
             contentDescription = R.string.accessibility_voice_assist_button;
@@ -363,13 +380,15 @@ public class KeyguardBottomAreaView extends FrameLayout implements View.OnClickL
             launchCamera(CAMERA_LAUNCH_SOURCE_AFFORDANCE);
         } else if (v == mLeftAffordanceView) {
             launchLeftAffordance();
-        } if (v == mLockIcon) {
+        } else if (v == mLockIcon) {
             if (!mAccessibilityController.isAccessibilityEnabled()) {
                 handleTrustCircleClick();
             } else {
                 mPhoneStatusBar.animateCollapsePanels(
                         CommandQueue.FLAG_EXCLUDE_NONE, true /* force */);
             }
+        } else if (v == mKeyguardShortcutTrigger) {
+            toggleCustomShortcuts();
         }
     }
 
@@ -554,6 +573,26 @@ public class KeyguardBottomAreaView extends FrameLayout implements View.OnClickL
         return mIndicationText;
     }
 
+    public void showShortcuts() {
+        mKeyguardShortcuts.setAlpha(0f);
+        mKeyguardShortcuts.animate()
+                .alpha(1f)
+                .setInterpolator(PhoneStatusBar.ALPHA_IN)
+                .setDuration(250);
+    }
+
+    public void hideShortcuts() {
+        mKeyguardShortcuts.setAlpha(1f);
+        mKeyguardShortcuts.animate()
+                .alpha(0f)
+                .setInterpolator(PhoneStatusBar.ALPHA_OUT)
+                .setDuration(250);
+    }
+
+    public View getShortcutsContainer() {
+        return mKeyguardShortcutsContainer;
+    }
+
     @Override
     public boolean hasOverlappingRendering() {
         return false;
@@ -601,8 +640,8 @@ public class KeyguardBottomAreaView extends FrameLayout implements View.OnClickL
         if (mCameraImageView.getVisibility() == View.VISIBLE) {
             startFinishDozeAnimationElement(mCameraImageView, delay);
         }
-        mIndicationText.setAlpha(0f);
-        mIndicationText.animate()
+        mKeyguardShortcutsContainer.setAlpha(0f);
+        mKeyguardShortcutsContainer.animate()
                 .alpha(1f)
                 .setInterpolator(mLinearOutSlowInInterpolator)
                 .setDuration(NotificationPanelView.DOZE_ANIMATION_DURATION);
@@ -689,15 +728,42 @@ public class KeyguardBottomAreaView extends FrameLayout implements View.OnClickL
         updateLeftPreview();
     }
 
-    public void updateSettings() {
-        mShortcutsEnabled = Settings.Secure.getIntForUser(
-                mContext.getContentResolver(), Settings.Secure.LOCK_SHORTCUTS_ENABLE,
-                1, UserHandle.USER_CURRENT) == 1;
-        mVoiceShortcutEnabled = Settings.Secure.getIntForUser(
-                mContext.getContentResolver(), Settings.Secure.LOCKSCREEN_VOICE_SHORTCUT,
-                1, UserHandle.USER_CURRENT) == 1;
+    public void setVisible(boolean visible) {
+        Log.d("maxwen", "setVisible=" +visible);
+        mShowIndicator = Settings.System.getIntForUser(mContext.getContentResolver(),
+                Settings.System.LOCK_INDICATOR_DISPLAY, 1, UserHandle.USER_CURRENT) == 1;
+        mShortcutsEnabled = Settings.Secure.getIntForUser(mContext.getContentResolver(),
+                Settings.Secure.LOCK_SHORTCUTS_ENABLE, 1, UserHandle.USER_CURRENT) == 1;
+        mVoiceShortcutEnabled = Settings.Secure.getIntForUser(mContext.getContentResolver(),
+                Settings.Secure.LOCKSCREEN_VOICE_SHORTCUT, 1, UserHandle.USER_CURRENT) == 1;
+        mCameraShortcutEnabled = Settings.Secure.getIntForUser(mContext.getContentResolver(),
+                Settings.Secure.LOCK_CAMERA_SHORTCUT_ENABLE, 1, UserHandle.USER_CURRENT) == 1;
+        mLeftShortcutEnabled = Settings.Secure.getIntForUser(mContext.getContentResolver(),
+                Settings.Secure.LOCK_LEFT_SHORTCUT_ENABLE, 1, UserHandle.USER_CURRENT) == 1;
+
+        mKeyguardShortcuts.setAlpha(1f);
+        if (visible) {
+            mIndicationController.setVisible(mShowIndicator && (!mShortcutsEnabled || !mShowShortcuts));
+            mKeyguardShortcuts.setVisible(mShortcutsEnabled);
+        } else {
+            mIndicationController.setVisible(false);
+            mKeyguardShortcuts.setVisible(false);
+        }
 
         updateCameraVisibility();
         updateLeftAffordanceIcon();
+    }
+
+    public void toggleCustomShortcuts() {
+        if (mShortcutsEnabled) {
+            mShowShortcuts = !mShowShortcuts;
+            if (mShowShortcuts) {
+                mIndicationController.setVisible(false);
+                mKeyguardShortcuts.toggleShortcuts(true);
+            } else {
+                mKeyguardShortcuts.toggleShortcuts(false);
+                mIndicationController.setVisible(mShowIndicator);
+            }
+        }
     }
 }
