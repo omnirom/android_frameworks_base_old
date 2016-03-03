@@ -44,4 +44,6 @@
     <!-- Standard notification width + gravity -->
     <dimen name="notification_panel_width">@dimen/standard_notification_panel_width</dimen>
     <integer name="notification_panel_layout_gravity">@integer/standard_notification_panel_layout_gravity</integer>
+
+    <dimen name="keyguard_indication_margin_bottom">50dp</dimen>
 </resources>
