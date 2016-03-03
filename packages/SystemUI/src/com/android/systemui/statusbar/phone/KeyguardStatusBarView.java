@@ -265,6 +265,7 @@ public class KeyguardStatusBarView extends RelativeLayout
                 mContext.getContentResolver(), Settings.System.LOCK_CLOCK_DISPLAY, Settings.System.LOCK_CLOCK_ALL,
                 UserHandle.USER_CURRENT);
 
-        mClockView.setVisibility((clockEnabled && (clockDisplay & Settings.System.LOCK_CLOCK_TIME) == Settings.System.LOCK_CLOCK_TIME) ? View.GONE : View.VISIBLE);
+        mClockView.setVisibility((clockEnabled && (clockDisplay & Settings.System.LOCK_CLOCK_TIME) ==
+                Settings.System.LOCK_CLOCK_TIME) ? View.GONE : View.VISIBLE);
     }
 }
