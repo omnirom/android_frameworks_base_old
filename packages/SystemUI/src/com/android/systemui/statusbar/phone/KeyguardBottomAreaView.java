@@ -58,6 +58,7 @@ import com.android.systemui.EventLogConstants;
 import com.android.systemui.EventLogTags;
 import com.android.systemui.R;
 import com.android.systemui.assist.AssistManager;
+import com.android.systemui.omni.KeyguardShortcuts;
 import com.android.systemui.statusbar.CommandQueue;
 import com.android.systemui.statusbar.KeyguardAffordanceView;
 import com.android.systemui.statusbar.KeyguardIndicationController;
@@ -133,6 +134,9 @@ public class KeyguardBottomAreaView extends FrameLayout implements View.OnClickL
     private boolean mVoiceShortcutEnabled;
     private boolean mShortcutsEnabled = true;
     private AssistManager mAssistManager;
+
+    // omni additions
+    private KeyguardShortcuts mKeyguardShortcuts;
 
     public KeyguardBottomAreaView(Context context) {
         this(context, null);
@@ -213,6 +217,7 @@ public class KeyguardBottomAreaView extends FrameLayout implements View.OnClickL
         mLockIcon.setOnLongClickListener(this);
         mCameraImageView.setOnClickListener(this);
         mLeftAffordanceView.setOnClickListener(this);
+        mKeyguardShortcuts = (KeyguardShortcuts) findViewById(R.id.shortcut_container);
         initAccessibility();
     }
 
@@ -237,6 +242,14 @@ public class KeyguardBottomAreaView extends FrameLayout implements View.OnClickL
         mIndicationText.setTextSize(TypedValue.COMPLEX_UNIT_PX,
                 getResources().getDimensionPixelSize(
                         com.android.internal.R.dimen.text_size_small_material));
+
+        int shortcursBottomMargin = getResources().getDimensionPixelSize(
+                R.dimen.keyguard_shortcut_bottom_margin);
+        mlp = (MarginLayoutParams) mKeyguardShortcuts.getLayoutParams();
+        if (mlp.bottomMargin != shortcursBottomMargin) {
+            mlp.bottomMargin = shortcursBottomMargin;
+            mKeyguardShortcuts.setLayoutParams(mlp);
+        }
     }
 
     public void setActivityStarter(ActivityStarter activityStarter) {
@@ -554,6 +567,10 @@ public class KeyguardBottomAreaView extends FrameLayout implements View.OnClickL
         return mIndicationText;
     }
 
+    public View getShortcutsView() {
+        return mKeyguardShortcuts;
+    }
+
     @Override
     public boolean hasOverlappingRendering() {
         return false;
@@ -603,6 +620,12 @@ public class KeyguardBottomAreaView extends FrameLayout implements View.OnClickL
         }
         mIndicationText.setAlpha(0f);
         mIndicationText.animate()
+                .alpha(1f)
+                .setInterpolator(mLinearOutSlowInInterpolator)
+                .setDuration(NotificationPanelView.DOZE_ANIMATION_DURATION);
+
+        mKeyguardShortcuts.setAlpha(0f);
+        mKeyguardShortcuts.animate()
                 .alpha(1f)
                 .setInterpolator(mLinearOutSlowInInterpolator)
                 .setDuration(NotificationPanelView.DOZE_ANIMATION_DURATION);

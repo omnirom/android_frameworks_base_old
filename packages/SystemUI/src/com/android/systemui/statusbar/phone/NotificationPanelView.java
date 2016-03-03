@@ -258,6 +258,7 @@ public class NotificationPanelView extends PanelView implements
         mDozeAnimationInterpolator = AnimationUtils.loadInterpolator(getContext(),
                 android.R.interpolator.linear_out_slow_in);
         mKeyguardBottomArea = (KeyguardBottomAreaView) findViewById(R.id.keyguard_bottom_area);
+
         mQsNavbarScrim = findViewById(R.id.qs_navbar_scrim);
         mAfforanceHelper = new KeyguardAffordanceHelper(this, getContext());
         mLastOrientation = getResources().getConfiguration().orientation;

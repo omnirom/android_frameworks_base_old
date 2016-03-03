@@ -126,6 +126,7 @@ import com.android.systemui.doze.DozeHost;
 import com.android.systemui.doze.DozeLog;
 import com.android.systemui.keyguard.KeyguardViewMediator;
 import com.android.systemui.omni.BatteryViewManager;
+import com.android.systemui.omni.KeyguardShortcuts;
 import com.android.systemui.omni.StatusBarHeaderMachine;
 import com.android.systemui.qs.QSPanel;
 import com.android.systemui.recents.ScreenPinningRequest;
@@ -376,6 +377,7 @@ public class PhoneStatusBar extends BaseStatusBar implements DemoMode,
     private boolean mDoubleTabSleep;
     private boolean mEnableTabletNavigation;
     private BatteryViewManager mBatteryViewManager;
+    private KeyguardShortcuts mKeyguardShortcuts;
 
     /**
      * {@link android.provider.Settings.System#SCREEN_AUTO_BRIGHTNESS_ADJ} uses the range [-1, 1].
@@ -537,6 +539,9 @@ public class PhoneStatusBar extends BaseStatusBar implements DemoMode,
             mContext.getContentResolver().registerContentObserver(Settings.Secure.getUriFor(
                     Settings.Secure.LOCKSCREEN_VOICE_SHORTCUT),
                     false, this, UserHandle.USER_ALL);
+            mContext.getContentResolver().registerContentObserver(Settings.Secure.getUriFor(
+                    Settings.Secure.LOCK_SHORTCUTS),
+                    false, this, UserHandle.USER_ALL);
 
             update();
         }
@@ -615,6 +620,10 @@ public class PhoneStatusBar extends BaseStatusBar implements DemoMode,
 
             if (mKeyguardStatusBar != null) {
                 mKeyguardStatusBar.updateSettings();
+            }
+
+            if (mKeyguardShortcuts != null) {
+                mKeyguardShortcuts.updateSettings();
             }
         }
     }
@@ -1189,6 +1198,10 @@ public class PhoneStatusBar extends BaseStatusBar implements DemoMode,
         mStatusBarHeaderMachine = new StatusBarHeaderMachine(mContext);
         mStatusBarHeaderMachine.addObserver(mHeader);
         mStatusBarHeaderMachine.updateEnablement();
+
+        mKeyguardShortcuts =
+                (KeyguardShortcuts) mStatusBarWindow.findViewById(R.id.shortcut_container);
+        mKeyguardShortcuts.setActivityStarter(this);
 
         // disable profiling bars, since they overlap and clutter the output on app windows
         ThreadedRenderer.overrideProperty("disableProfileBars", "true");
@@ -4041,11 +4054,13 @@ public class PhoneStatusBar extends BaseStatusBar implements DemoMode,
     private void updateKeyguardState(boolean goingToFullShade, boolean fromShadeLocked) {
         if (mState == StatusBarState.KEYGUARD) {
             mKeyguardIndicationController.setVisible(true);
+            mKeyguardShortcuts.setVisibility(View.VISIBLE);
             mNotificationPanel.resetViews();
             mKeyguardUserSwitcher.setKeyguard(true, fromShadeLocked);
             mStatusBarView.removePendingHideExpandedRunnables();
         } else {
             mKeyguardIndicationController.setVisible(false);
+            mKeyguardShortcuts.setVisibility(View.GONE);
             mKeyguardUserSwitcher.setKeyguard(false,
                     goingToFullShade || mState == StatusBarState.SHADE_LOCKED || fromShadeLocked);
         }
