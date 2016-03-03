@@ -20,6 +20,7 @@ import android.animation.Animator;
 import android.animation.AnimatorListenerAdapter;
 import android.animation.ValueAnimator;
 import android.content.Context;
+import android.os.Handler;
 import android.view.MotionEvent;
 import android.view.VelocityTracker;
 import android.view.View;
@@ -81,7 +82,16 @@ public class KeyguardAffordanceHelper {
             mCallback.onAnimationToSideEnded();
         }
     };
-
+    private Handler mHandler = new Handler();
+    private boolean mLongClickTargetRight;
+    private boolean mLongClickHandled;
+    private Runnable mLongClickRunnable = new Runnable() {
+        @Override
+        public void run() {
+            mCallback.onIconLongClicked(mLongClickTargetRight);
+            mLongClickHandled = true;
+        }
+    };
     KeyguardAffordanceHelper(Callback callback, Context context) {
         mContext = context;
         mCallback = callback;
@@ -151,8 +161,12 @@ public class KeyguardAffordanceHelper {
                 initVelocityTracker();
                 trackMovement(event);
                 mMotionCancelled = false;
+                mLongClickTargetRight = targetView == mRightIcon;
+                mLongClickHandled = false;
+                mHandler.postDelayed(mLongClickRunnable, ViewConfiguration.getLongPressTimeout());
                 break;
             case MotionEvent.ACTION_POINTER_DOWN:
+                mHandler.removeCallbacks(mLongClickRunnable);
                 mMotionCancelled = true;
                 endMotion(true /* forceSnapBack */, x, y);
                 break;
@@ -163,6 +177,7 @@ public class KeyguardAffordanceHelper {
                 float distance = (float) Math.hypot(xDist, yDist);
                 if (!mTouchSlopExeeded && distance > mTouchSlop) {
                     mTouchSlopExeeded = true;
+                    mHandler.removeCallbacks(mLongClickRunnable);
                 }
                 if (mSwipingInProgress) {
                     if (mTargetedView == mRightIcon) {
@@ -179,11 +194,14 @@ public class KeyguardAffordanceHelper {
             case MotionEvent.ACTION_UP:
                 isUp = true;
             case MotionEvent.ACTION_CANCEL:
-                boolean hintOnTheRight = mTargetedView == mRightIcon;
-                trackMovement(event);
-                endMotion(!isUp, x, y);
-                if (!mTouchSlopExeeded && isUp) {
-                    mCallback.onIconClicked(hintOnTheRight);
+                if (!mLongClickHandled) {
+                    mHandler.removeCallbacks(mLongClickRunnable);
+                    boolean hintOnTheRight = mTargetedView == mRightIcon;
+                    trackMovement(event);
+                    endMotion(!isUp, x, y);
+                    if (!mTouchSlopExeeded && isUp) {
+                        mCallback.onIconClicked(hintOnTheRight);
+                    }
                 }
                 break;
         }
@@ -581,5 +599,7 @@ public class KeyguardAffordanceHelper {
          * @return The factor the minimum swipe amount should be multiplied with.
          */
         float getAffordanceFalsingFactor();
+
+        void onIconLongClicked(boolean rightIcon);
     }
 }
