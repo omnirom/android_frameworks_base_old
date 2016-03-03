@@ -975,6 +975,23 @@ public abstract class PanelView extends FrameLayout {
                     }
                 })
                 .start();
+
+        mKeyguardBottomArea.getShortcutsView().animate()
+                .translationY(-mHintDistance)
+                .setDuration(250)
+                .setInterpolator(mFastOutSlowInInterpolator)
+                .withEndAction(new Runnable() {
+                    @Override
+                    public void run() {
+                        mKeyguardBottomArea.getShortcutsView().animate()
+                                .translationY(0)
+                                .setDuration(450)
+                                .setInterpolator(mBounceInterpolator)
+                                .start();
+                    }
+                })
+                .start();
+
     }
 
     /**

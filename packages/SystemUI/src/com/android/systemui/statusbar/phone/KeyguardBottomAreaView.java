@@ -49,6 +49,7 @@ import android.view.accessibility.AccessibilityNodeInfo;
 import android.view.animation.AnimationUtils;
 import android.view.animation.Interpolator;
 import android.widget.FrameLayout;
+import android.widget.LinearLayout;
 import android.widget.TextView;
 
 import com.android.internal.widget.LockPatternUtils;
@@ -58,6 +59,7 @@ import com.android.systemui.EventLogConstants;
 import com.android.systemui.EventLogTags;
 import com.android.systemui.R;
 import com.android.systemui.assist.AssistManager;
+import com.android.systemui.omni.KeyguardShortcuts;
 import com.android.systemui.statusbar.CommandQueue;
 import com.android.systemui.statusbar.KeyguardAffordanceView;
 import com.android.systemui.statusbar.KeyguardIndicationController;
@@ -133,6 +135,10 @@ public class KeyguardBottomAreaView extends FrameLayout implements View.OnClickL
     private boolean mVoiceShortcutEnabled;
     private boolean mShortcutsEnabled = true;
     private AssistManager mAssistManager;
+
+    // omni additions
+    private KeyguardShortcuts mKeyguardShortcuts;
+    private LinearLayout mBottomContainer;
 
     public KeyguardBottomAreaView(Context context) {
         this(context, null);
@@ -213,6 +219,8 @@ public class KeyguardBottomAreaView extends FrameLayout implements View.OnClickL
         mLockIcon.setOnLongClickListener(this);
         mCameraImageView.setOnClickListener(this);
         mLeftAffordanceView.setOnClickListener(this);
+        mKeyguardShortcuts = (KeyguardShortcuts) findViewById(R.id.shortcut_container);
+        mBottomContainer = (LinearLayout) findViewById(R.id.keyguard_bottom_container);
         initAccessibility();
     }
 
@@ -227,10 +235,10 @@ public class KeyguardBottomAreaView extends FrameLayout implements View.OnClickL
         super.onConfigurationChanged(newConfig);
         int indicationBottomMargin = getResources().getDimensionPixelSize(
                 R.dimen.keyguard_indication_margin_bottom);
-        MarginLayoutParams mlp = (MarginLayoutParams) mIndicationText.getLayoutParams();
+        MarginLayoutParams mlp = (MarginLayoutParams) mBottomContainer.getLayoutParams();
         if (mlp.bottomMargin != indicationBottomMargin) {
             mlp.bottomMargin = indicationBottomMargin;
-            mIndicationText.setLayoutParams(mlp);
+            mBottomContainer.setLayoutParams(mlp);
         }
 
         // Respect font size setting.
@@ -554,6 +562,10 @@ public class KeyguardBottomAreaView extends FrameLayout implements View.OnClickL
         return mIndicationText;
     }
 
+    public View getShortcutsView() {
+        return mKeyguardShortcuts;
+    }
+
     @Override
     public boolean hasOverlappingRendering() {
         return false;
@@ -603,6 +615,12 @@ public class KeyguardBottomAreaView extends FrameLayout implements View.OnClickL
         }
         mIndicationText.setAlpha(0f);
         mIndicationText.animate()
+                .alpha(1f)
+                .setInterpolator(mLinearOutSlowInInterpolator)
+                .setDuration(NotificationPanelView.DOZE_ANIMATION_DURATION);
+
+        mKeyguardShortcuts.setAlpha(0f);
+        mKeyguardShortcuts.animate()
                 .alpha(1f)
                 .setInterpolator(mLinearOutSlowInInterpolator)
                 .setDuration(NotificationPanelView.DOZE_ANIMATION_DURATION);
