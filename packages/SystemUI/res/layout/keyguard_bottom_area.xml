@@ -24,6 +24,11 @@
     android:outlineProvider="none"
     android:elevation="5dp" > <!-- Put it above the status bar header -->
 
+    <include
+        layout="@layout/keyguard_shortcuts"
+        android:layout_marginBottom="@dimen/keyguard_shortcut_bottom_margin"
+        android:visibility="gone" />
+
     <com.android.systemui.statusbar.phone.KeyguardIndicationTextView
         android:id="@+id/keyguard_indication_text"
         android:layout_width="match_parent"

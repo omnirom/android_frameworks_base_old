@@ -53,6 +53,7 @@ import com.android.systemui.DejankUtils;
 import com.android.systemui.EventLogConstants;
 import com.android.systemui.EventLogTags;
 import com.android.systemui.R;
+import com.android.systemui.omni.KeyguardShortcuts;
 import com.android.systemui.qs.QSContainer;
 import com.android.systemui.qs.QSPanel;
 import com.android.systemui.statusbar.ExpandableNotificationRow;
@@ -208,6 +209,9 @@ public class NotificationPanelView extends PanelView implements
     private boolean mLaunchingAffordance;
     private String mLastCameraLaunchSource = KeyguardBottomAreaView.CAMERA_LAUNCH_SOURCE_AFFORDANCE;
 
+    // omni additions
+    private KeyguardShortcuts mKeyguardShortcuts;
+
     private Runnable mHeadsUpExistenceChangedRunnable = new Runnable() {
         @Override
         public void run() {
@@ -258,6 +262,8 @@ public class NotificationPanelView extends PanelView implements
         mDozeAnimationInterpolator = AnimationUtils.loadInterpolator(getContext(),
                 android.R.interpolator.linear_out_slow_in);
         mKeyguardBottomArea = (KeyguardBottomAreaView) findViewById(R.id.keyguard_bottom_area);
+        mKeyguardShortcuts = (KeyguardShortcuts) findViewById(R.id.shortcut_container);
+
         mQsNavbarScrim = findViewById(R.id.qs_navbar_scrim);
         mAfforanceHelper = new KeyguardAffordanceHelper(this, getContext());
         mLastOrientation = getResources().getConfiguration().orientation;
@@ -1019,6 +1025,8 @@ public class NotificationPanelView extends PanelView implements
         }
         if (keyguardShowing) {
             updateDozingVisibilities(false /* animate */);
+        } else {
+            mKeyguardShortcuts.setVisibility(View.GONE);
         }
         resetVerticalPanelPosition();
         updateQsState();
@@ -2180,9 +2188,11 @@ public class NotificationPanelView extends PanelView implements
         if (mDozing) {
             mKeyguardStatusBar.setVisibility(View.INVISIBLE);
             mKeyguardBottomArea.setVisibility(View.INVISIBLE);
+            mKeyguardShortcuts.setVisibility(View.INVISIBLE);
         } else {
             mKeyguardBottomArea.setVisibility(View.VISIBLE);
             mKeyguardStatusBar.setVisibility(View.VISIBLE);
+            mKeyguardShortcuts.setVisibility(View.VISIBLE);
             if (animate) {
                 animateKeyguardStatusBarIn(DOZE_ANIMATION_DURATION);
                 mKeyguardBottomArea.startFinishDozeAnimation();
