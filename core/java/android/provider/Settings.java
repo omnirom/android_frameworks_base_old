@@ -3865,6 +3865,10 @@ public final class Settings {
          */
         public static final String LOCK_CLOCK_DISPLAY = "lockscreen_clock_display";
 
+        /**
+         * @hide
+         */
+        public static final String LOCK_INDICATOR_DISPLAY = "lockscreen_indicator_display";
 
         /**
          * Settings to backup. This is here so that it's in the same place as the settings
@@ -5146,6 +5150,11 @@ public final class Settings {
          * @hide
          */
         public static final String LOCK_SHORTCUTS_ENABLE = "lockscreen_shortcuts_enable";
+
+        /**
+         * @hide
+         */
+        public static final String LOCK_SHORTCUTS = "lockscreen_shortcuts";
 
         /**
          * Whether lock pattern will vibrate as user enters (0 = false, 1 =
