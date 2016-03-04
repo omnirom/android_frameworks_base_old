@@ -189,12 +189,15 @@ public class StatusBarHeaderView extends RelativeLayout implements View.OnClickL
         mSystemIconsSuperContainer.setOnClickListener(this);
         mDateGroup = findViewById(R.id.date_group);
         mClock = findViewById(R.id.clock);
+        mClock.setOnClickListener(this);
         mTime = (TextView) findViewById(R.id.time_view);
         mAmPm = (TextView) findViewById(R.id.am_pm_view);
         mMultiUserSwitch = (MultiUserSwitch) findViewById(R.id.multi_user_switch);
         mMultiUserAvatar = (ImageView) findViewById(R.id.multi_user_avatar);
         mDateCollapsed = (TextView) findViewById(R.id.date_collapsed);
+        mDateCollapsed.setOnClickListener(this);
         mDateExpanded = (TextView) findViewById(R.id.date_expanded);
+        mDateExpanded.setOnClickListener(this);
         mSettingsButton = (SettingsButton) findViewById(R.id.settings_button);
         mSettingsContainer = findViewById(R.id.settings_button_container);
         mSettingsButton.setOnClickListener(this);
@@ -508,6 +511,9 @@ public class StatusBarHeaderView extends RelativeLayout implements View.OnClickL
         mAlarmStatus.setClickable(mNextAlarm != null && mNextAlarm.getShowIntent() != null && !mShowWeatherDetailed);
         mWeatherImage.setClickable(mExpanded && isShowWeatherHeader() && !mShowWeatherDetailed);
         mWeatherDetailed.setClickable(mExpanded && isShowWeatherHeader() && mShowWeatherDetailed);
+        mDateCollapsed.setClickable(mExpanded && !mShowWeatherDetailed);
+        mDateExpanded.setClickable(mExpanded && !mShowWeatherDetailed);
+        mClock.setClickable(mExpanded && !mShowWeatherDetailed);
     }
 
     private void updateClockLp() {
@@ -603,6 +609,10 @@ public class StatusBarHeaderView extends RelativeLayout implements View.OnClickL
             if (showIntent != null) {
                 mActivityStarter.startPendingIntentDismissingKeyguard(showIntent);
             }
+        } else if (v == mClock && mExpanded) {
+            startAlarmsActivity();
+        } else if ((v == mDateCollapsed || v == mDateExpanded) && mExpanded) {
+            startCalendarActivity();
         } else if (v == mWeatherImage) {
             try {
                 if (!mWeatherDataInvalid && mWeatherData != null) {
@@ -672,6 +682,17 @@ public class StatusBarHeaderView extends RelativeLayout implements View.OnClickL
 
     private void startBatteryActivity() {
         mActivityStarter.startActivity(new Intent(Intent.ACTION_POWER_USAGE_SUMMARY),
+                true /* dismissShade */);
+    }
+
+    private void startCalendarActivity() {
+        Intent calIntent = new Intent(Intent.ACTION_MAIN);
+        calIntent.addCategory(Intent.CATEGORY_APP_CALENDAR);
+        mActivityStarter.startActivity(calIntent, true /* dismissShade */);
+    }
+
+    private void startAlarmsActivity() {
+        mActivityStarter.startActivity(new Intent(android.provider.AlarmClock.ACTION_SHOW_ALARMS),
                 true /* dismissShade */);
     }
 
