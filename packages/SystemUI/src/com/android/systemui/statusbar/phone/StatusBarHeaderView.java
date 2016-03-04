@@ -194,6 +194,7 @@ public class StatusBarHeaderView extends RelativeLayout implements View.OnClickL
         mMultiUserSwitch = (MultiUserSwitch) findViewById(R.id.multi_user_switch);
         mMultiUserAvatar = (ImageView) findViewById(R.id.multi_user_avatar);
         mDateCollapsed = (TextView) findViewById(R.id.date_collapsed);
+        mDateCollapsed.setOnClickListener(this);
         mDateExpanded = (TextView) findViewById(R.id.date_expanded);
         mSettingsButton = (SettingsButton) findViewById(R.id.settings_button);
         mSettingsContainer = findViewById(R.id.settings_button_container);
@@ -603,6 +604,10 @@ public class StatusBarHeaderView extends RelativeLayout implements View.OnClickL
             if (showIntent != null) {
                 mActivityStarter.startPendingIntentDismissingKeyguard(showIntent);
             }
+        } else if (v == mDateCollapsed) {
+            Intent calIntent = new Intent(Intent.ACTION_MAIN);
+            calIntent.addCategory(Intent.CATEGORY_APP_CALENDAR);
+            mActivityStarter.startActivity(calIntent, true /* dismissShade */);
         } else if (v == mWeatherImage) {
             try {
                 if (!mWeatherDataInvalid && mWeatherData != null) {
