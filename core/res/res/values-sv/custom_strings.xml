@@ -19,12 +19,25 @@
 */
 -->
 <resources xmlns:xliff="urn:oasis:names:tc:xliff:document:1.2">
+  <!-- Reboot -->
   <string name="global_action_reboot">Starta om</string>
   <string name="global_action_reboot_more">Starta om\u2026</string>
   <string name="global_action_reboot_sub">System</string>
   <string name="global_action_reboot_recovery">Recovery</string>
   <string name="global_action_reboot_bootloader">Bootloader</string>
-  <string name="global_action_current_user">Nuvarande</string>
+  <!-- advanced reboot to bootloader. -->
+  <!-- advanced reboot to recovery. -->
+  <!-- advanced reboot system -->
+  <!-- HW button mapping -->
   <string name="app_killed_message">Tvångsavslutad</string>
   <string name="hide_lock_to_app_dialog">Starta alltid</string>
+  <!-- Title of dialog to confirm rebooting into safe mode. [CHAR LIMIT=50] -->
+  <!-- Reboot Confirmation Dialog.  Message in the confirmation dialog
+         when the user asks to reboot. [CHAR LIMIT=NONE] -->
+  <!-- Title of an application permission, listed so the user can choose whether they want to allow the application to do this. -->
+  <!-- Description of an application permission, listed so the user can choose whether they want to allow the application to do this. -->
+  <!-- Title of an application permission, listed so the user can choose whether they want the application to do this. -->
+  <!-- Description of an application permission, listed so the user can choose whether they want to allow the application to do this. -->
+  <!-- Notify use that they are in Lock-to-app in accessibility mode -->
+  <!-- Vendor mismatched fingerprint warning [CHAR LIMIT=NONE] -->
 </resources>

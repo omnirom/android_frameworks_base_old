@@ -17,12 +17,18 @@
 
 -->
 <resources xmlns:xliff="urn:oasis:names:tc:xliff:document:1.2">
+  <!-- Screenrecord Notification Ticker -->
   <string name="screenrecord_notif_ticker">Іде запис екрану</string>
+  <!-- Screenrecord notification title -->
   <string name="screenrecord_notif_title">Запис екрану</string>
+  <!-- Screenrecord notification action: Stop -->
   <string name="screenrecord_notif_stop">Стоп</string>
+  <!-- Screenrecord notification action: show/hide pointer -->
   <string name="screenrecord_notif_pointer_on">Показати натискання</string>
   <string name="screenrecord_notif_pointer_off">Приховати натискання</string>
+  <!-- Screen record notification error title -->
   <string name="screenrecord_notif_error">Неможливо записати екран</string>
+  <!-- mount notifications -->
   <string name="ext_media_mounted_notification_title">змонтовано</string>
   <string name="ext_media_unmounted_notification_title">розмонтовано</string>
   <string name="ext_media_unmounted_notification_message">Можна безпечно вилучити сховище даних.</string>
@@ -30,6 +36,9 @@
   <string name="ext_media_mount_action">Монтувати</string>
   <string name="ext_media_unmounting_notification_title">розмонтування\u2026</string>
   <string name="ext_media_mounting_notification_title">монтування\u2026</string>
+  <!-- Battery Saver Dimss -->
   <string name="battery_saver_dismiss_title">Відхилити</string>
   <string name="battery_saver_notification_action_text_short">Вимкнути</string>
+  <!-- Screen pinning dialog description when in accessibility mode. -->
+  <!-- tuner -->
 </resources>

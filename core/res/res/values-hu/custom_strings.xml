@@ -19,96 +19,49 @@
 */
 -->
 <resources xmlns:xliff="urn:oasis:names:tc:xliff:document:1.2">
+  <!-- Reboot -->
   <string name="global_action_reboot">Újraindítás</string>
   <string name="global_action_reboot_more">Újraindítás\u2026</string>
   <string name="global_action_reboot_sub">Rendszer</string>
   <string name="global_action_reboot_recovery">Recovery</string>
   <string name="global_action_reboot_bootloader">Bootloader</string>
-  <string name="global_action_current_user">Jelenlegi</string>
+  <string name="global_action_users">Felhasználók\u2026</string>
+  <!-- advanced reboot to bootloader. -->
   <string name="reboot_to_bootloader_title">Újraindítás: bootloader</string>
   <string name="reboot_to_bootloader_message">Újraindítás\u2026</string>
+  <!-- advanced reboot to recovery. -->
   <string name="reboot_to_recovery_title">Újraindítás: recovery</string>
   <string name="reboot_to_recovery_message">Újraindítás\u2026</string>
+  <!-- advanced reboot system -->
   <string name="reboot_system_title">Rendszer újraindítása</string>
   <string name="reboot_system_message">Újraindítás\u2026</string>
-  <string name="app_killed_message">Alkalmazás leállítva</string>
-  <string name="hide_lock_to_app_dialog">Mindig indít</string>
-  <string name="silent_mode_priority">Prioritás</string>
-  <string name="silent_mode_none">Nincs</string>
-  <string name="reboot_title">Újraindítás</string>
-  <string name="reboot_confirm">Szeretné újraindítani?</string>
-  <string name="permission_remember_choice">Megjegyez</string>
-  <string name="permission">Engedély kérelem</string>
-  <string name="permission_dialog_text">%1$s szeretne %2$s</string>
-  <string name="app_ops_access_camera">hozzáférni a kamerához</string>
-  <string name="app_ops_access_location">hozzáférni a helyadataihoz</string>
-  <string name="app_ops_access_notifications">olvasni az értesítéseit</string>
-  <string name="app_ops_activate_vpn">VPN aktiválása</string>
-  <string name="app_ops_delete_sms">SMS törlése</string>
-  <string name="app_ops_delete_mms">MMS törlése</string>
-  <string name="app_ops_delete_contacts">névjegyek törlése</string>
-  <string name="app_ops_delete_call_log">hívásnapló törlése</string>
-  <string name="app_ops_draw_on_top">átfedő ablakot rajzolni</string>
-  <string name="app_ops_get_usage_stats">használati statisztikai adatokat fogadni</string>
-  <string name="app_ops_keep_device_awake">készülékét ébren tartani</string>
-  <string name="app_ops_modify_calendar">naptár adatai frissíteni</string>
-  <string name="app_ops_modify_call_log">hívásnaplót frissíteni</string>
-  <string name="app_ops_modify_clipboard">vágólapot módosítani</string>
-  <string name="app_ops_modify_contacts">névjegyeit módosítani</string>
-  <string name="app_ops_modify_icc_sms">ICC SMS-t írni/módosítani</string>
-  <string name="app_ops_modify_settings">beállításait módosítani</string>
-  <string name="app_ops_modify_sms">SMS-t írni/módosítani</string>
-  <string name="app_ops_mute_mic">mikrofont némítani</string>
-  <string name="app_ops_phone_call">telefonhívást indítani</string>
-  <string name="app_ops_play_audio">hangot lejátszani</string>
-  <string name="app_ops_post_notification">értesítést küldeni</string>
-  <string name="app_ops_project_media">médiát vetíteni</string>
-  <string name="app_ops_read_calendar">naptáradatokat olvasni</string>
-  <string name="app_ops_read_call_log">hívásnaplóját olvasni</string>
-  <string name="app_ops_read_clipboard">vágólapot olvasni</string>
-  <string name="app_ops_read_contacts">névjegyeit olvasni</string>
-  <string name="app_ops_read_icc_sms">ICC SMS üzeneteket olvasni</string>
-  <string name="app_ops_read_mms_storage">MMS tárolót olvasni</string>
-  <string name="app_ops_read_other_accounts">egyéb fiókokat olvasni</string>
-  <string name="app_ops_read_phone_info">telefon információt olvasni</string>
-  <string name="app_ops_read_sms">SMS üzeneteit olvasni</string>
-  <string name="app_ops_receive_emergency_sms"> sűrgősségi SMS</string>
-  <string name="app_ops_receive_mms">MMS üzeneteket fogadni</string>
-  <string name="app_ops_receive_sms">SMS üzeneteket fogadni</string>
-  <string name="app_ops_receive_wap_push">WAP push üzenetet fogadni</string>
-  <string name="app_ops_record_audio">hanganyagot rögzíteni</string>
-  <string name="app_ops_send_sms">egy SMS üzenetet küldeni</string>
-  <string name="app_ops_send_mms">egy MMS üzenetet küldeni</string>
-  <string name="app_ops_show_toast_window">buborékszöveget megjeleníteni</string>
-  <string name="app_ops_start_at_bootup">bootoláskor indulni</string>
-  <string name="app_ops_toggle_bluetooth">Bluetooth-ot ki/be kapcsolni</string>
-  <string name="app_ops_toggle_nfc">NFC-t ki/be kapcsolni</string>
-  <string name="app_ops_toggle_wifi">Wi-Fit ki/be kapcsolni</string>
-  <string name="app_ops_turn_on_mobile_data">mobil adathasználatot bekapcsolni</string>
-  <string name="app_ops_use_alarm_volume">riasztási hangerőt használni</string>
-  <string name="app_ops_use_audio_focus">audio fókuszt használni</string>
-  <string name="app_ops_use_bluetooth_volume">bluetooth hangerőt használni</string>
-  <string name="app_ops_use_master_volume">fő hangerőt használni</string>
-  <string name="app_ops_use_media_buttons">média gombokat használni</string>
-  <string name="app_ops_use_media_volume">média hangerőt használni</string>
-  <string name="app_ops_use_notification_volume">értesítési hangerőt használni</string>
-  <string name="app_ops_use_ringer_volume">csengő hangerőt használni</string>
-  <string name="app_ops_use_vibrate">érintési visszajelzést használni</string>
-  <string name="app_ops_use_voice_volume">hívás hangerőt használni</string>
-  <string name="app_ops_write_mms_storage">MMS tároló írása</string>
-  <string name="battery_style_none">Nincs</string>
-  <string name="battery_style_default">Alapértelmezett</string>
-  <string name="battery_style_bar">Függőleges sáv</string>
-  <string name="battery_style_meter_horizontal">Vízszintes sáv</string>
-  <string name="battery_style_circle">Kör</string>
-  <string name="permlab_fakePackageSignature">Csomag hamisított aláírása</string>
-  <string name="permdesc_fakePackageSignature">Lehetővé teszi az alkalmazás számára, hogy magát másik alkalmazásnak tettese. A rosszindulatú alkalmazások ezt a személyes adatokhoz való hozzáférésre használhatják. Ezt az engedélyt csak óvatosan adja meg!</string>
-  <string name="permlab_setKeyguardWallpaper">billentyűzár háttérképének beállítása</string>
-  <string name="permdesc_setKeyguardWallpaper">Lehetővé teszi az alkalmazás számára a képernyőzár hátterének módosítását.</string>
-  <string name="lock_to_app_toast_back">A képernyő rögzítésének feloldásához, érintse meg és tartsa nyomva a Vissza gombot.</string>
-  <string name="system_error_vendorprint">Úgy tűnik, hogy a szolgáltató Img fájl elavult. Kérjük, flashellje a készülékéhez tartozó legfrissebb képfájlt.</string>
   <string name="dnd_mode_off">Ki</string>
   <string name="dnd_mode_total_silence">Teljes csend</string>
   <string name="dnd_mode_alarms">Csak riasztás</string>
   <string name="dnd_mode_important">Csak prioritásos</string>
+  <!-- HW button mapping -->
+  <string name="app_killed_message">Alkalmazás leállítva</string>
+  <string name="hide_lock_to_app_dialog">Mindig indít</string>
+  <!-- Title of dialog to confirm rebooting into safe mode. [CHAR LIMIT=50] -->
+  <string name="reboot_title">Újraindítás</string>
+  <!-- Reboot Confirmation Dialog.  Message in the confirmation dialog
+         when the user asks to reboot. [CHAR LIMIT=NONE] -->
+  <string name="reboot_confirm">Szeretné újraindítani?</string>
+  <string name="battery_style_text">Csak szöveg</string>
+  <string name="battery_style_default">Alapértelmezett</string>
+  <string name="battery_style_meter_horizontal">Vízszintes sáv</string>
+  <string name="battery_style_circle">Kör</string>
+  <string name="battery_style_droid">Droid</string>
+  <!-- Title of an application permission, listed so the user can choose whether they want to allow the application to do this. -->
+  <string name="permlab_fakePackageSignature">Csomag hamisított aláírása</string>
+  <!-- Description of an application permission, listed so the user can choose whether they want to allow the application to do this. -->
+  <string name="permdesc_fakePackageSignature">Lehetővé teszi az alkalmazás számára, hogy magát másik alkalmazásnak tettese. A rosszindulatú alkalmazások ezt a személyes adatokhoz való hozzáférésre használhatják. Ezt az engedélyt csak óvatosan adja meg!</string>
+  <!-- Title of an application permission, listed so the user can choose whether they want the application to do this. -->
+  <string name="permlab_setKeyguardWallpaper">billentyűzár háttérképének beállítása</string>
+  <!-- Description of an application permission, listed so the user can choose whether they want to allow the application to do this. -->
+  <string name="permdesc_setKeyguardWallpaper">Lehetővé teszi az alkalmazás számára a képernyőzár hátterének módosítását.</string>
+  <!-- Notify use that they are in Lock-to-app in accessibility mode -->
+  <string name="lock_to_app_toast_back">A képernyő rögzítésének feloldásához, érintse meg és tartsa nyomva a Vissza gombot.</string>
+  <!-- Vendor mismatched fingerprint warning [CHAR LIMIT=NONE] -->
+  <string name="system_error_vendorprint">Úgy tűnik, hogy a szolgáltató Img fájl elavult. Kérjük, flashellje a készülékéhez tartozó legfrissebb képfájlt.</string>
 </resources>
