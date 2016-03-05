@@ -17,12 +17,18 @@
 
 -->
 <resources xmlns:xliff="urn:oasis:names:tc:xliff:document:1.2">
+  <!-- Screenrecord Notification Ticker -->
   <string name="screenrecord_notif_ticker">Obrazovka se nahrává</string>
+  <!-- Screenrecord notification title -->
   <string name="screenrecord_notif_title">Nahrávání obrazovky</string>
+  <!-- Screenrecord notification action: Stop -->
   <string name="screenrecord_notif_stop">Zastavit</string>
+  <!-- Screenrecord notification action: show/hide pointer -->
   <string name="screenrecord_notif_pointer_on">Zobrazit ukazatel</string>
   <string name="screenrecord_notif_pointer_off">Skrýt ukazatel</string>
+  <!-- Screen record notification error title -->
   <string name="screenrecord_notif_error">Nelze nahrávat obrazovku</string>
+  <!-- mount notifications -->
   <string name="ext_media_mounted_notification_title">připojeno</string>
   <string name="ext_media_unmounted_notification_title">nepřipojeno</string>
   <string name="ext_media_unmounted_notification_message">Můžete bezpečně odebrat úložiště.</string>
@@ -30,8 +36,18 @@
   <string name="ext_media_mount_action">Připojit</string>
   <string name="ext_media_unmounting_notification_title">odpojování\u2026</string>
   <string name="ext_media_mounting_notification_title">připojování\u2026</string>
+  <!-- Battery Saver Dimss -->
   <string name="battery_saver_dismiss_title">Zrušit</string>
   <string name="battery_saver_notification_action_text_short">Vypnout</string>
+  <!-- Screen pinning dialog description when in accessibility mode. -->
   <string name="screen_pinning_description_back">Toto udržuje obrazovku zobrazenou, dokud ji neodepnete stiskem a podržením tlačítka Zpět.</string>
+  <!-- tuner -->
   <string name="status_bar_icons">Ikony stavové lišty</string>
+  <string name="qs_equal_tile_title">Stejná velikost</string>
+  <string name="qs_equal_tile_summary">Použít stejnou velikost pro všechny dlaždice</string>
+  <string name="qs_settings">Nastavení</string>
+  <string name="qs_tile_columns_title">Sloupce</string>
+  <string name="qs_tile_columns_three">3</string>
+  <string name="qs_tile_columns_four">4</string>
+  <string name="qs_tile_bg_opacity_title">Průhlednost pozadí</string>
 </resources>

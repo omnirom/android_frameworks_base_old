@@ -17,12 +17,18 @@
 
 -->
 <resources xmlns:xliff="urn:oasis:names:tc:xliff:document:1.2">
+  <!-- Screenrecord Notification Ticker -->
   <string name="screenrecord_notif_ticker">Scherm wordt opgenomen</string>
+  <!-- Screenrecord notification title -->
   <string name="screenrecord_notif_title">Scherm opname</string>
+  <!-- Screenrecord notification action: Stop -->
   <string name="screenrecord_notif_stop">Stop</string>
+  <!-- Screenrecord notification action: show/hide pointer -->
   <string name="screenrecord_notif_pointer_on">Aanwijzer weergeven</string>
   <string name="screenrecord_notif_pointer_off">Aanwijzer verbergen</string>
+  <!-- Screen record notification error title -->
   <string name="screenrecord_notif_error">Scherm opname mislukt</string>
+  <!-- mount notifications -->
   <string name="ext_media_mounted_notification_title">gekoppeld</string>
   <string name="ext_media_unmounted_notification_title">ontkoppeld</string>
   <string name="ext_media_unmounted_notification_message">U kunt de opslag veilig verwijderen.</string>
@@ -30,8 +36,11 @@
   <string name="ext_media_mount_action">Koppelen</string>
   <string name="ext_media_unmounting_notification_title">ontkoppelen\u2026</string>
   <string name="ext_media_mounting_notification_title">koppelen\u2026</string>
+  <!-- Battery Saver Dimss -->
   <string name="battery_saver_dismiss_title">Annuleren</string>
   <string name="battery_saver_notification_action_text_short">Uitschakelen</string>
+  <!-- Screen pinning dialog description when in accessibility mode. -->
   <string name="screen_pinning_description_back">Dit zorgt ervoor dat het scherm blijft staan tot u hem weer losmaakt. Druk en houd terug in om hem los te maken.</string>
+  <!-- tuner -->
   <string name="status_bar_icons">Statusbar icoontjes</string>
 </resources>

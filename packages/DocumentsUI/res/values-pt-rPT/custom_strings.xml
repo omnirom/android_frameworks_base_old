@@ -15,15 +15,22 @@
      limitations under the License.
 -->
 <resources xmlns:xliff="urn:oasis:names:tc:xliff:document:1.2">
+  <!-- Action bar title when the app is in standalone (file manager) mode [CHAR LIMIT=32] -->
   <string name="title_standalone">Ficheiros</string>
+  <!-- Toast shown after successfully deleting files -->
   <string name="toast_success_delete">Ficheiros eliminados</string>
+  <!-- Title of the Delete confirmation dialog -->
   <string name="dialog_delete_confirm_title">Eliminar ficheiros?</string>
+  <!-- Text shown in a toast when the user copies files -->
   <plurals name="files_copied">
     <item quantity="one">O ficheiro foi colocado na área de transferência</item>
     <item quantity="other">%d ficheiros foram colocados na área de transferência</item>
   </plurals>
+  <!-- Text shown in a toast when the user pastes files -->
   <plurals name="files_pasted">
     <item quantity="one">O ficheiro foi colado. O upload pode estar a concluir-se em segundo plano.</item>
     <item quantity="other">%d ficheiros foram colados. O upload pode estar a concluir-se em segundo plano.</item>
   </plurals>
+  <!-- Text show in the progress dialog while files are being copied -->
+  <!-- Text show in the progress dialog while files are being deleted -->
 </resources>
