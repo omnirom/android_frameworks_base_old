@@ -480,6 +480,7 @@ public class DozeService extends DreamService implements ProximitySensorManager.
             return;
         }
         final long pulseDuration = mDozeParameters.getPulseDuration(false /*pickup*/);
+        if (DEBUG) Log.d(mTag, "pulseDuration = " + pulseDuration);
         boolean pulseImmediately = System.currentTimeMillis() >= notificationTimeMs;
         if ((notificationTimeMs - mLastScheduleResetTime) >= pulseDuration) {
             mScheduleResetsRemaining--;
