@@ -197,7 +197,7 @@ public class BatteryCirclePercentView extends AbstractBatteryView {
             mTextPaint.setTypeface(font);
         } else {
             mTextSize = getResources().getDimensionPixelSize(R.dimen.battery_level_text_size);
-            Typeface font = Typeface.create("sans-serif", Typeface.NORMAL);
+            Typeface font = Typeface.create("sans-serif-medium", Typeface.NORMAL);
             mTextPaint.setTypeface(font);
         }
         mTextPaint.setTextSize(mTextSize);

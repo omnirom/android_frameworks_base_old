@@ -174,7 +174,7 @@ public abstract class AbstractBatteryView extends View implements BatteryControl
         mLightModeFillColor = context.getColor(R.color.light_mode_icon_color_dual_tone_fill);
 
         mTextPaint = new Paint(Paint.ANTI_ALIAS_FLAG);
-        Typeface font = Typeface.create("sans-serif-condensed", Typeface.BOLD);
+        Typeface font = Typeface.create("sans-serif-medium", Typeface.BOLD);
         mTextPaint.setTypeface(font);
         mTextPaint.setTextAlign(Paint.Align.CENTER);
         mTextSize = getResources().getDimensionPixelSize(R.dimen.battery_level_text_size);
