@@ -60,7 +60,7 @@ public class BatteryPercentView extends AbstractBatteryView {
     public BatteryPercentView(Context context, AttributeSet attrs, int defStyle) {
         super(context, attrs, defStyle);
 
-        Typeface font = Typeface.create("sans-serif", Typeface.NORMAL);
+        Typeface font = Typeface.create("sans-serif-medium", Typeface.NORMAL);
         mTextPaint.setTypeface(font);
         Rect bounds = new Rect();
         String text = "100%";

@@ -172,7 +172,7 @@ public class BatteryDroidView extends AbstractBatteryView {
     protected void applyStyle() {
         mTextSize = getResources().getDimensionPixelSize(R.dimen.battery_level_text_size);
         mTextPaint.setTextSize(mTextSize);
-        Typeface font = Typeface.create("sans-serif", Typeface.NORMAL);
+        Typeface font = Typeface.create("sans-serif-medium", Typeface.NORMAL);
         mTextPaint.setTypeface(font);
         Rect bounds = new Rect();
         final String text = "100%";
