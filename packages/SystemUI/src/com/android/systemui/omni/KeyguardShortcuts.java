@@ -54,7 +54,6 @@ import java.util.List;
 
 public class KeyguardShortcuts extends LinearLayout {
     static final String TAG = "KeyguardShortcuts";
-    static final boolean DEBUG = true;
     private List<String> mShortcuts = new ArrayList<String>();
     private LinearLayout mShortcutItems;
     private HorizontalScrollView mShortcutsView;
@@ -64,6 +63,7 @@ public class KeyguardShortcuts extends LinearLayout {
     private ImageView mKeyguardShortcutTrigger;
     private int mShortcutIconSize;
     private KeyguardBottomAreaView mParent;
+    private boolean mInitDone;
 
     private BroadcastReceiver mBroadcastReceiver = new BroadcastReceiver() {
         @Override
@@ -71,7 +71,14 @@ public class KeyguardShortcuts extends LinearLayout {
             post(new Runnable() {
                 @Override
                 public void run() {
-                    updateSettings();
+                    if (!mInitDone) {
+                        return;
+                    }
+                    // uninstalled apps will just be skipped
+                    buildShortcuts();
+                    if (!hasKeyguardShortcuts()) {
+                        mParent.hideCustomShortcuts();
+                    }
                 }
             });
         }
@@ -93,6 +100,7 @@ public class KeyguardShortcuts extends LinearLayout {
     protected void onAttachedToWindow() {
         super.onAttachedToWindow();
         IntentFilter filter = new IntentFilter(Intent.ACTION_PACKAGE_REMOVED);
+        filter.addAction(Intent.ACTION_PACKAGE_CHANGED);
         filter.addDataScheme("package");
         mContext.registerReceiver(mBroadcastReceiver, filter);
     }
@@ -119,11 +127,14 @@ public class KeyguardShortcuts extends LinearLayout {
         super.onConfigurationChanged(newConfig);
         mAppIconPadding = getResources().getDimensionPixelSize(R.dimen.keyguard_shortcut_item_margin);
         mShortcutIconSize = getResources().getDimensionPixelSize(android.R.dimen.app_icon_size) + mAppIconPadding;
-        calcHorizontalDivider();
+        mInitDone = true;
         updateSettings();
     }
 
     public void updateSettings() {
+        if (!mInitDone) {
+            return;
+        }
         String shortcutStrings = Settings.Secure.getStringForUser(getContext().getContentResolver(),
                 Settings.Secure.LOCK_SHORTCUTS, UserHandle.USER_CURRENT);
         if (shortcutStrings != null && shortcutStrings.length() != 0) {
@@ -134,7 +145,9 @@ public class KeyguardShortcuts extends LinearLayout {
                 mShortcuts.clear();
                 mShortcuts.addAll(newShortcutsList);
                 buildShortcuts();
-                if (wasEmpty) {
+                if (!hasKeyguardShortcuts()) {
+                    mParent.hideCustomShortcuts();
+                } else if (wasEmpty) {
                     mParent.showCustomShortcuts();
                 }
             }
@@ -157,6 +170,8 @@ public class KeyguardShortcuts extends LinearLayout {
     }
 
     private void buildShortcuts() {
+        List<String> newShortcutsList = new ArrayList<String>();
+        calcHorizontalDivider();
         mShortcutItems.removeAllViews();
         Iterator<String> nextShortcut = mShortcuts.iterator();
         while (nextShortcut.hasNext()) {
@@ -176,6 +191,7 @@ public class KeyguardShortcuts extends LinearLayout {
                 app.setTag(intent);
                 app.setImageDrawable(icon);
                 mShortcutItems.addView(app, getKeyguardAppParams());
+                newShortcutsList.add(intentString);
                 app.setOnClickListener(new View.OnClickListener() {
                     public void onClick(View v) {
                        mActivityStarter.startActivity((Intent) app.getTag(), true /* dismissShade */);
@@ -189,6 +205,8 @@ public class KeyguardShortcuts extends LinearLayout {
                 });
             }
         }
+        mShortcuts.clear();
+        mShortcuts.addAll(newShortcutsList);
     }
 
     public void setActivityStarter(ActivityStarter activityStarter) {
