@@ -17,12 +17,18 @@
 
 -->
 <resources xmlns:xliff="urn:oasis:names:tc:xliff:document:1.2">
+  <!-- Screenrecord Notification Ticker -->
   <string name="screenrecord_notif_ticker">Trwa nagrywanie ekranu</string>
+  <!-- Screenrecord notification title -->
   <string name="screenrecord_notif_title">Nagrywanie ekranu</string>
+  <!-- Screenrecord notification action: Stop -->
   <string name="screenrecord_notif_stop">Zatrzymaj</string>
+  <!-- Screenrecord notification action: show/hide pointer -->
   <string name="screenrecord_notif_pointer_on">Pokaż wskaźnik</string>
   <string name="screenrecord_notif_pointer_off">Ukryj wskaźnik</string>
+  <!-- Screen record notification error title -->
   <string name="screenrecord_notif_error">Nie można nagrać ekranu</string>
+  <!-- mount notifications -->
   <string name="ext_media_mounted_notification_title">zamontowano</string>
   <string name="ext_media_unmounted_notification_title">odmontowano</string>
   <string name="ext_media_unmounted_notification_message">Możesz bezpiecznie usunąć nośnik.</string>
@@ -30,8 +36,18 @@
   <string name="ext_media_mount_action">Zamontuj</string>
   <string name="ext_media_unmounting_notification_title">odmontowywanie\u2026</string>
   <string name="ext_media_mounting_notification_title">montowanie\u2026</string>
+  <!-- Battery Saver Dimss -->
   <string name="battery_saver_dismiss_title">Odrzuć</string>
   <string name="battery_saver_notification_action_text_short">Wyłącz</string>
+  <!-- Screen pinning dialog description when in accessibility mode. -->
   <string name="screen_pinning_description_back">Ta funkcja pozwala na trzymanie ich na widoku do momentu aż zostaną odpięte. Dotknij i przytrzymaj Wstecz, aby odpiąć.</string>
+  <!-- tuner -->
   <string name="status_bar_icons">Ikony paska stanu</string>
+  <string name="qs_equal_tile_title">Jednakowej wielkości</string>
+  <string name="qs_equal_tile_summary">Używaj tego samego rozmiaru dla wszystkich kafelków</string>
+  <string name="qs_settings">Ustawienia</string>
+  <string name="qs_tile_columns_title">Kolumny</string>
+  <string name="qs_tile_columns_three">3</string>
+  <string name="qs_tile_columns_four">4</string>
+  <string name="qs_tile_bg_opacity_title">Przezroczystość tła</string>
 </resources>

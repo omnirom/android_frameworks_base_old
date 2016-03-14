@@ -17,9 +17,18 @@
 
 -->
 <resources xmlns:xliff="urn:oasis:names:tc:xliff:document:1.2">
+  <!-- Screenrecord Notification Ticker -->
   <string name="screenrecord_notif_ticker">O ecrã está a ser gravado</string>
+  <!-- Screenrecord notification title -->
   <string name="screenrecord_notif_title">A gravar ecrã</string>
+  <!-- Screenrecord notification action: Stop -->
   <string name="screenrecord_notif_stop">Parar</string>
+  <!-- Screenrecord notification action: show/hide pointer -->
   <string name="screenrecord_notif_pointer_on">Mostrar o ponteiro</string>
   <string name="screenrecord_notif_pointer_off">Ocultar o ponteiro</string>
+  <!-- Screen record notification error title -->
+  <!-- mount notifications -->
+  <!-- Battery Saver Dimss -->
+  <!-- Screen pinning dialog description when in accessibility mode. -->
+  <!-- tuner -->
 </resources>

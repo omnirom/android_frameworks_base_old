@@ -19,96 +19,49 @@
 */
 -->
 <resources xmlns:xliff="urn:oasis:names:tc:xliff:document:1.2">
+  <!-- Reboot -->
   <string name="global_action_reboot">Redémarrer</string>
   <string name="global_action_reboot_more">Redémarrer\u2026</string>
   <string name="global_action_reboot_sub">Système</string>
   <string name="global_action_reboot_recovery">Recovery</string>
   <string name="global_action_reboot_bootloader">Bootloader</string>
-  <string name="global_action_current_user">Courante</string>
+  <string name="global_action_users">Utilisateurs\u2026</string>
+  <!-- advanced reboot to bootloader. -->
   <string name="reboot_to_bootloader_title">Redémarrer en mode Bootloader</string>
   <string name="reboot_to_bootloader_message">Redémarrage\u2026</string>
+  <!-- advanced reboot to recovery. -->
   <string name="reboot_to_recovery_title">Redémarrer en mode Recovery</string>
   <string name="reboot_to_recovery_message">Redémarrage\u2026</string>
+  <!-- advanced reboot system -->
   <string name="reboot_system_title">Redémarrer le système</string>
   <string name="reboot_system_message">Redémarrage\u2026</string>
-  <string name="app_killed_message">Application arrêtée</string>
-  <string name="hide_lock_to_app_dialog">Toujours démarrer</string>
-  <string name="silent_mode_priority">Priorité</string>
-  <string name="silent_mode_none">Aucun</string>
-  <string name="reboot_title">Redémarrer</string>
-  <string name="reboot_confirm">Voulez-vous redémarrer ?</string>
-  <string name="permission_remember_choice">Mémoriser</string>
-  <string name="permission">Demande d\'autorisation</string>
-  <string name="permission_dialog_text">%1$s voudrait pouvoir %2$s</string>
-  <string name="app_ops_access_camera">accéder à l\'appareil photo</string>
-  <string name="app_ops_access_location">accéder à votre position</string>
-  <string name="app_ops_access_notifications">lire vos notifications</string>
-  <string name="app_ops_activate_vpn">activer le VPN</string>
-  <string name="app_ops_delete_sms">supprimer des SMS</string>
-  <string name="app_ops_delete_mms">supprimer des MMS</string>
-  <string name="app_ops_delete_contacts">supprimer des contacts</string>
-  <string name="app_ops_delete_call_log">supprimer le journal d\'appels</string>
-  <string name="app_ops_draw_on_top">afficher des fenêtres au premier plan</string>
-  <string name="app_ops_get_usage_stats">obtenir les statistiques d\'utilisation de la batterie</string>
-  <string name="app_ops_keep_device_awake">garder votre appareil allumé</string>
-  <string name="app_ops_modify_calendar">mettre à jour votre agenda</string>
-  <string name="app_ops_modify_call_log">mettre à jour le journal d\'appels</string>
-  <string name="app_ops_modify_clipboard">modifier le contenu du presse-papier</string>
-  <string name="app_ops_modify_contacts">modifier vos contacts</string>
-  <string name="app_ops_modify_icc_sms">écrire/modifier des messages SMS ICC</string>
-  <string name="app_ops_modify_settings">modifier vos paramètres</string>
-  <string name="app_ops_modify_sms">écrire/modifier des messages SMS</string>
-  <string name="app_ops_mute_mic">couper le micro</string>
-  <string name="app_ops_phone_call">passer un appel</string>
-  <string name="app_ops_play_audio">lire un fichier audio</string>
-  <string name="app_ops_post_notification">afficher une notification</string>
-  <string name="app_ops_project_media">projeter une vidéo</string>
-  <string name="app_ops_read_calendar">lire votre agenda</string>
-  <string name="app_ops_read_call_log">lire le journal d\'appels</string>
-  <string name="app_ops_read_clipboard">lire le contenu du presse-papier</string>
-  <string name="app_ops_read_contacts">lire vos contacts</string>
-  <string name="app_ops_read_icc_sms">lire les messages SMS ICC</string>
-  <string name="app_ops_read_mms_storage">lire les MMS</string>
-  <string name="app_ops_read_other_accounts">lire les autres comptes</string>
-  <string name="app_ops_read_phone_info">lire les informations du téléphone</string>
-  <string name="app_ops_read_sms">lire vos SMS</string>
-  <string name="app_ops_receive_emergency_sms"> recevoir des SMS d\'urgence</string>
-  <string name="app_ops_receive_mms">recevoir des MMS</string>
-  <string name="app_ops_receive_sms">recevoir des SMS</string>
-  <string name="app_ops_receive_wap_push">recevoir des notifications WAP</string>
-  <string name="app_ops_record_audio">enregistrer un fichier audio</string>
-  <string name="app_ops_send_sms">envoyer un SMS</string>
-  <string name="app_ops_send_mms">envoyer un MMS</string>
-  <string name="app_ops_show_toast_window">afficher une notification toast</string>
-  <string name="app_ops_start_at_bootup">se lancer au démarrage</string>
-  <string name="app_ops_toggle_bluetooth">activer/désactiver le Bluetooth</string>
-  <string name="app_ops_toggle_nfc">activer/désactiver le NFC</string>
-  <string name="app_ops_toggle_wifi">activer/désactiver le WiFi</string>
-  <string name="app_ops_turn_on_mobile_data">activer/désactiver les données mobiles</string>
-  <string name="app_ops_use_alarm_volume">modifier le volume de l\'alarme</string>
-  <string name="app_ops_use_audio_focus">utiliser le focus audio</string>
-  <string name="app_ops_use_bluetooth_volume">modifier le volume bluetooth</string>
-  <string name="app_ops_use_master_volume">modifier le volume principal</string>
-  <string name="app_ops_use_media_buttons">utiliser les commandes multimédia</string>
-  <string name="app_ops_use_media_volume">utiliser le volume multimédia</string>
-  <string name="app_ops_use_notification_volume">utiliser le volume des notifications</string>
-  <string name="app_ops_use_ringer_volume">utiliser le volume de la sonnerie</string>
-  <string name="app_ops_use_vibrate">utiliser le retour haptique</string>
-  <string name="app_ops_use_voice_volume">utiliser le volume de la sortie vocale</string>
-  <string name="app_ops_write_mms_storage">écrire des MMS</string>
-  <string name="battery_style_none">Aucun</string>
-  <string name="battery_style_default">Défaut</string>
-  <string name="battery_style_bar">Barre verticale</string>
-  <string name="battery_style_meter_horizontal">Barre horizontale</string>
-  <string name="battery_style_circle">Cercle</string>
-  <string name="permlab_fakePackageSignature">Imiter la signature des paquets</string>
-  <string name="permdesc_fakePackageSignature">Permet à une application de se faire passer pour une autre. Une application malveillante peut utiliser ceci et avoir accès aux données privées des applications. Accordez seulement cette autorisation avec précaution !</string>
-  <string name="permlab_setKeyguardWallpaper">définir le fond d\'écran de verrouillage</string>
-  <string name="permdesc_setKeyguardWallpaper">Permet à une application de modifier le fond d\'écran de déverrouillage.</string>
-  <string name="lock_to_app_toast_back">Pour déverrouiller l\'écran, touchez et maintenez la touche retour.</string>
-  <string name="system_error_vendorprint">Il semble que votre version peut être mise à jour. Veuillez flasher la version la plus récente pour votre appareil.</string>
   <string name="dnd_mode_off">Désactivé</string>
   <string name="dnd_mode_total_silence">Silence total</string>
   <string name="dnd_mode_alarms">Alarmes seulement</string>
   <string name="dnd_mode_important">Priorité seulement</string>
+  <!-- HW button mapping -->
+  <string name="app_killed_message">Application arrêtée</string>
+  <string name="hide_lock_to_app_dialog">Toujours démarrer</string>
+  <!-- Title of dialog to confirm rebooting into safe mode. [CHAR LIMIT=50] -->
+  <string name="reboot_title">Redémarrer</string>
+  <!-- Reboot Confirmation Dialog.  Message in the confirmation dialog
+         when the user asks to reboot. [CHAR LIMIT=NONE] -->
+  <string name="reboot_confirm">Voulez-vous redémarrer ?</string>
+  <string name="battery_style_text">Uniquement du texte </string>
+  <string name="battery_style_default">Défaut</string>
+  <string name="battery_style_meter_horizontal">Barre horizontale</string>
+  <string name="battery_style_circle">Cercle</string>
+  <string name="battery_style_droid">Droid</string>
+  <!-- Title of an application permission, listed so the user can choose whether they want to allow the application to do this. -->
+  <string name="permlab_fakePackageSignature">Imiter la signature des paquets</string>
+  <!-- Description of an application permission, listed so the user can choose whether they want to allow the application to do this. -->
+  <string name="permdesc_fakePackageSignature">Permet à une application de se faire passer pour une autre. Une application malveillante peut utiliser ceci et avoir accès aux données privées des applications. Accordez seulement cette autorisation avec précaution !</string>
+  <!-- Title of an application permission, listed so the user can choose whether they want the application to do this. -->
+  <string name="permlab_setKeyguardWallpaper">définir le fond d\'écran de verrouillage</string>
+  <!-- Description of an application permission, listed so the user can choose whether they want to allow the application to do this. -->
+  <string name="permdesc_setKeyguardWallpaper">Permet à une application de modifier le fond d\'écran de déverrouillage.</string>
+  <!-- Notify use that they are in Lock-to-app in accessibility mode -->
+  <string name="lock_to_app_toast_back">Pour déverrouiller l\'écran, touchez et maintenez la touche retour.</string>
+  <!-- Vendor mismatched fingerprint warning [CHAR LIMIT=NONE] -->
+  <string name="system_error_vendorprint">Il semble que votre version peut être mise à jour. Veuillez flasher la version la plus récente pour votre appareil.</string>
 </resources>

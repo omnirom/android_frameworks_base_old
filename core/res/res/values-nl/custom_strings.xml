@@ -19,96 +19,46 @@
 */
 -->
 <resources xmlns:xliff="urn:oasis:names:tc:xliff:document:1.2">
+  <!-- Reboot -->
   <string name="global_action_reboot">Herstart</string>
   <string name="global_action_reboot_more">Herstart\u2026</string>
   <string name="global_action_reboot_sub">Systeem</string>
   <string name="global_action_reboot_recovery">Recovery</string>
   <string name="global_action_reboot_bootloader">Bootloader</string>
-  <string name="global_action_current_user">Huidige</string>
+  <!-- advanced reboot to bootloader. -->
   <string name="reboot_to_bootloader_title">Herstart bootloader</string>
   <string name="reboot_to_bootloader_message">Herstarten\u2026</string>
+  <!-- advanced reboot to recovery. -->
   <string name="reboot_to_recovery_title">Herstart recovery</string>
   <string name="reboot_to_recovery_message">Herstarten\u2026</string>
+  <!-- advanced reboot system -->
   <string name="reboot_system_title">Herstart systeem</string>
   <string name="reboot_system_message">Herstarten\u2026</string>
-  <string name="app_killed_message">App beëindigd</string>
-  <string name="hide_lock_to_app_dialog">Altijd starten</string>
-  <string name="silent_mode_priority">Prioriteit</string>
-  <string name="silent_mode_none">Geen</string>
-  <string name="reboot_title">Herstarten</string>
-  <string name="reboot_confirm">Wilt u herstarten?</string>
-  <string name="permission_remember_choice">Onthouden</string>
-  <string name="permission">Toestemming gevraagd</string>
-  <string name="permission_dialog_text">%1$s verzoekt %2$s</string>
-  <string name="app_ops_access_camera">toegang tot de camera</string>
-  <string name="app_ops_access_location">toegang tot uw locatie</string>
-  <string name="app_ops_access_notifications">uw meldingen te lezen</string>
-  <string name="app_ops_activate_vpn">Activeer VPN</string>
-  <string name="app_ops_delete_sms">verwijderen van SMS</string>
-  <string name="app_ops_delete_mms">verwijderen van MMS</string>
-  <string name="app_ops_delete_contacts">verwijderen van contactpersonen</string>
-  <string name="app_ops_delete_call_log">verwijderen van bel historie</string>
-  <string name="app_ops_draw_on_top">scherm op voorgrond tonen</string>
-  <string name="app_ops_get_usage_stats">gebruikersstatistieken verkrijgen</string>
-  <string name="app_ops_keep_device_awake">uw apparataat aktief houden</string>
-  <string name="app_ops_modify_calendar">uw agenda bijwerken</string>
-  <string name="app_ops_modify_call_log">bel historie bijwerken</string>
-  <string name="app_ops_modify_clipboard">het klembord wijzigen</string>
-  <string name="app_ops_modify_contacts">uw contacten wijzigen</string>
-  <string name="app_ops_modify_icc_sms">ICC SMS-berichten schrijven/wijzigen</string>
-  <string name="app_ops_modify_settings">uw instellingen wijzigen</string>
-  <string name="app_ops_modify_sms">SMS-berichten schrijven/wijzigen</string>
-  <string name="app_ops_mute_mic">microfoon uitschakelen</string>
-  <string name="app_ops_phone_call">een telefoongesprek te voeren</string>
-  <string name="app_ops_play_audio">audio afspelen</string>
-  <string name="app_ops_post_notification">melding verzenden</string>
-  <string name="app_ops_project_media">projecteer media</string>
-  <string name="app_ops_read_calendar">uw agenda lezen</string>
-  <string name="app_ops_read_call_log">uw bel historie lezen</string>
-  <string name="app_ops_read_clipboard">het klembord lezen</string>
-  <string name="app_ops_read_contacts">uw contacten lezen</string>
-  <string name="app_ops_read_icc_sms">ICC SMS berichten lezen</string>
-  <string name="app_ops_read_mms_storage">MMS-opslag lezen</string>
-  <string name="app_ops_read_other_accounts">andere accounts lezen</string>
-  <string name="app_ops_read_phone_info">telefoon informatie lezen</string>
-  <string name="app_ops_read_sms">uw SMS-berichten lezen</string>
-  <string name="app_ops_receive_emergency_sms"> noodgevallen SMS</string>
-  <string name="app_ops_receive_mms">MMS-berichten ontvangen</string>
-  <string name="app_ops_receive_sms">SMS-berichten ontvangen</string>
-  <string name="app_ops_receive_wap_push">WAP-push ontvangen</string>
-  <string name="app_ops_record_audio">geluid opnemen</string>
-  <string name="app_ops_send_sms">een SMS-bericht versturen</string>
-  <string name="app_ops_send_mms">een MMS-bericht versturen</string>
-  <string name="app_ops_show_toast_window">meldingen van Apps weergeven</string>
-  <string name="app_ops_start_at_bootup">starten bij opstarten</string>
-  <string name="app_ops_toggle_bluetooth">Bluetooth aan-/uitzetten</string>
-  <string name="app_ops_toggle_nfc">NFC aan-/uitzetten</string>
-  <string name="app_ops_toggle_wifi">WiFi aan-/uitzetten</string>
-  <string name="app_ops_turn_on_mobile_data">mobiele data inschakelen</string>
-  <string name="app_ops_use_alarm_volume">alarmvolume gebruiken</string>
-  <string name="app_ops_use_audio_focus">audio focus gebruiken</string>
-  <string name="app_ops_use_bluetooth_volume">bluetooth volume gebruiken</string>
-  <string name="app_ops_use_master_volume">hoofd-volume gebruiken</string>
-  <string name="app_ops_use_media_buttons">mediaknoppen gebruiken</string>
-  <string name="app_ops_use_media_volume">media volume gebruiken</string>
-  <string name="app_ops_use_notification_volume">meldingen volume gebruiken</string>
-  <string name="app_ops_use_ringer_volume">belvolume gebruiken</string>
-  <string name="app_ops_use_vibrate">haptische feedback gebruiken</string>
-  <string name="app_ops_use_voice_volume">spraak volume gebruiken</string>
-  <string name="app_ops_write_mms_storage">MMS-opslag beschrijven</string>
-  <string name="battery_style_none">Geen</string>
-  <string name="battery_style_default">Standaard</string>
-  <string name="battery_style_bar">Verticale balk</string>
-  <string name="battery_style_meter_horizontal">Horizontale balk</string>
-  <string name="battery_style_circle">Cirkel</string>
-  <string name="permlab_fakePackageSignature">Pakket handtekening immiteren</string>
-  <string name="permdesc_fakePackageSignature">Staat de app toe zich voor te doen als een andere app. Kwaadaardige applicaties kunnen dit mogelijk gebruiken voor toegang tot privé applicatie data. Gebruik deze machtiging voorzichtig!</string>
-  <string name="permlab_setKeyguardWallpaper">achtergrond van het vergrendelingsscherm instellen</string>
-  <string name="permdesc_setKeyguardWallpaper">Staat een applicatie toe om de achtergrond van het vergrendelscherm aan te passen.</string>
-  <string name="lock_to_app_toast_back">Om dit scherm los te maken, druk en houd terug vast.</string>
-  <string name="system_error_vendorprint">Het lijkt erop dat de software van uw fabrikant verouderd is. Flash de nieuwste software voor uw apparaat.</string>
   <string name="dnd_mode_off">Uit</string>
   <string name="dnd_mode_total_silence">Totale stilte</string>
   <string name="dnd_mode_alarms">Alleen alarmen</string>
   <string name="dnd_mode_important">Alleen prioriteit</string>
+  <!-- HW button mapping -->
+  <string name="app_killed_message">App beëindigd</string>
+  <string name="hide_lock_to_app_dialog">Altijd starten</string>
+  <!-- Title of dialog to confirm rebooting into safe mode. [CHAR LIMIT=50] -->
+  <string name="reboot_title">Herstarten</string>
+  <!-- Reboot Confirmation Dialog.  Message in the confirmation dialog
+         when the user asks to reboot. [CHAR LIMIT=NONE] -->
+  <string name="reboot_confirm">Wilt u herstarten?</string>
+  <string name="battery_style_default">Standaard</string>
+  <string name="battery_style_meter_horizontal">Horizontale balk</string>
+  <string name="battery_style_circle">Cirkel</string>
+  <!-- Title of an application permission, listed so the user can choose whether they want to allow the application to do this. -->
+  <string name="permlab_fakePackageSignature">Pakket handtekening immiteren</string>
+  <!-- Description of an application permission, listed so the user can choose whether they want to allow the application to do this. -->
+  <string name="permdesc_fakePackageSignature">Staat de app toe zich voor te doen als een andere app. Kwaadaardige applicaties kunnen dit mogelijk gebruiken voor toegang tot privé applicatie data. Gebruik deze machtiging voorzichtig!</string>
+  <!-- Title of an application permission, listed so the user can choose whether they want the application to do this. -->
+  <string name="permlab_setKeyguardWallpaper">achtergrond van het vergrendelingsscherm instellen</string>
+  <!-- Description of an application permission, listed so the user can choose whether they want to allow the application to do this. -->
+  <string name="permdesc_setKeyguardWallpaper">Staat een applicatie toe om de achtergrond van het vergrendelscherm aan te passen.</string>
+  <!-- Notify use that they are in Lock-to-app in accessibility mode -->
+  <string name="lock_to_app_toast_back">Om dit scherm los te maken, druk en houd terug vast.</string>
+  <!-- Vendor mismatched fingerprint warning [CHAR LIMIT=NONE] -->
+  <string name="system_error_vendorprint">Het lijkt erop dat de software van uw fabrikant verouderd is. Flash de nieuwste software voor uw apparaat.</string>
 </resources>

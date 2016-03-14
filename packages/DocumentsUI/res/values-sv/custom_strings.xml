@@ -15,6 +15,13 @@
      limitations under the License.
 -->
 <resources xmlns:xliff="urn:oasis:names:tc:xliff:document:1.2">
+  <!-- Action bar title when the app is in standalone (file manager) mode [CHAR LIMIT=32] -->
   <string name="title_standalone">Filer</string>
+  <!-- Toast shown after successfully deleting files -->
   <string name="toast_success_delete">Filer raderade</string>
+  <!-- Title of the Delete confirmation dialog -->
+  <!-- Text shown in a toast when the user copies files -->
+  <!-- Text shown in a toast when the user pastes files -->
+  <!-- Text show in the progress dialog while files are being copied -->
+  <!-- Text show in the progress dialog while files are being deleted -->
 </resources>

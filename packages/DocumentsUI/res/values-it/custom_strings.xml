@@ -15,18 +15,25 @@
      limitations under the License.
 -->
 <resources xmlns:xliff="urn:oasis:names:tc:xliff:document:1.2">
+  <!-- Action bar title when the app is in standalone (file manager) mode [CHAR LIMIT=32] -->
   <string name="title_standalone">File</string>
+  <!-- Toast shown after successfully deleting files -->
   <string name="toast_success_delete">File eliminati</string>
+  <!-- Title of the Delete confirmation dialog -->
   <string name="dialog_delete_confirm_title">Eliminare i file?</string>
+  <!-- Text shown in a toast when the user copies files -->
   <plurals name="files_copied">
     <item quantity="one">Il file è stato messo nella clipboard</item>
     <item quantity="other">I %d file sono stati messi nella clipboard</item>
   </plurals>
+  <!-- Text shown in a toast when the user pastes files -->
   <plurals name="files_pasted">
     <item quantity="one">Il file è stato incollato. Il caricamento terminerà anche in background.</item>
     <item quantity="other">I %d file sono stati incollati. Il caricamento terminerà anche in background.</item>
   </plurals>
+  <!-- Text show in the progress dialog while files are being copied -->
   <string name="copy_in_progress">Copia in corso\u2026</string>
+  <!-- Text show in the progress dialog while files are being deleted -->
   <string name="delete_in_progress">Cancellazione in corso\u2026</string>
   <plurals name="dialog_delete_confirm_message">
     <item quantity="one">Il file selezionato verrà eliminato in modo permanente!</item>

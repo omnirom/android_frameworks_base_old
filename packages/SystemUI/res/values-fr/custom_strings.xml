@@ -17,12 +17,18 @@
 
 -->
 <resources xmlns:xliff="urn:oasis:names:tc:xliff:document:1.2">
+  <!-- Screenrecord Notification Ticker -->
   <string name="screenrecord_notif_ticker">L\'écran est en cours d\'enregistrement</string>
+  <!-- Screenrecord notification title -->
   <string name="screenrecord_notif_title">Enregistrement de l\'écran</string>
+  <!-- Screenrecord notification action: Stop -->
   <string name="screenrecord_notif_stop">Arrêter</string>
+  <!-- Screenrecord notification action: show/hide pointer -->
   <string name="screenrecord_notif_pointer_on">Afficher le pointeur</string>
   <string name="screenrecord_notif_pointer_off">Masquer le pointeur</string>
+  <!-- Screen record notification error title -->
   <string name="screenrecord_notif_error">Impossible d\'enregistrer l\'écran</string>
+  <!-- mount notifications -->
   <string name="ext_media_mounted_notification_title">monté</string>
   <string name="ext_media_unmounted_notification_title">démonté</string>
   <string name="ext_media_unmounted_notification_message">Vous pouvez retirer le périphérique en toute sécurité.</string>
@@ -30,8 +36,19 @@
   <string name="ext_media_mount_action">Monter</string>
   <string name="ext_media_unmounting_notification_title">démontage\u2026</string>
   <string name="ext_media_mounting_notification_title">montage\u2026</string>
+  <!-- Battery Saver Dimss -->
   <string name="battery_saver_dismiss_title">Annuler</string>
   <string name="battery_saver_notification_action_text_short">Désactiver</string>
+  <!-- Screen pinning dialog description when in accessibility mode. -->
   <string name="screen_pinning_description_back">Cela permet de maintenir en vue jusqu\'à ce que vous l\'enleviez. Touchez et maintenez le bouton Retour pour détacher.</string>
+  <!-- tuner -->
   <string name="status_bar_icons">Icônes de la barre d\'état</string>
+  <string name="qs_equal_tile_title">Taille égale</string>
+  <string name="qs_equal_tile_summary">Utiliser la même taille pour tous les raccourcis</string>
+  <string name="qs_settings">Paramètres</string>
+  <string name="qs_tile_columns_title">Colonnes</string>
+  <string name="qs_tile_columns_three">3</string>
+  <string name="qs_tile_columns_four">4</string>
+  <string name="qs_tile_bg_opacity_title">Opacité de l\'arrière-plan</string>
+  <string name="status_bar_silent">Mode silencieux</string>
 </resources>

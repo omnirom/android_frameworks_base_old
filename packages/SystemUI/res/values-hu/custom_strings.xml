@@ -17,12 +17,18 @@
 
 -->
 <resources xmlns:xliff="urn:oasis:names:tc:xliff:document:1.2">
+  <!-- Screenrecord Notification Ticker -->
   <string name="screenrecord_notif_ticker">Képernyő felvétel folyamatban</string>
+  <!-- Screenrecord notification title -->
   <string name="screenrecord_notif_title">Képernyő felvétel</string>
+  <!-- Screenrecord notification action: Stop -->
   <string name="screenrecord_notif_stop">Leállítás</string>
+  <!-- Screenrecord notification action: show/hide pointer -->
   <string name="screenrecord_notif_pointer_on">Mutató megjelenítése</string>
   <string name="screenrecord_notif_pointer_off">Mutató elrejtése</string>
+  <!-- Screen record notification error title -->
   <string name="screenrecord_notif_error">Képernyő felvétel nem lehetséges</string>
+  <!-- mount notifications -->
   <string name="ext_media_mounted_notification_title">csatlakoztatva</string>
   <string name="ext_media_unmounted_notification_title">leválasztva</string>
   <string name="ext_media_unmounted_notification_message">Biztonságosan eltávolíthatja a tárolót.</string>
@@ -30,8 +36,19 @@
   <string name="ext_media_mount_action">Csatlakozás</string>
   <string name="ext_media_unmounting_notification_title">leválasztás\u2026</string>
   <string name="ext_media_mounting_notification_title">csatlakoztatás\u2026</string>
+  <!-- Battery Saver Dimss -->
   <string name="battery_saver_dismiss_title">Elvetés</string>
   <string name="battery_saver_notification_action_text_short">Kikapcsolás</string>
+  <!-- Screen pinning dialog description when in accessibility mode. -->
   <string name="screen_pinning_description_back">Ez a rögzítés feloldásáig a nézetben tartja, Feloldáshoz nyomja meg és tratsa nyomva a Vissza gombot.</string>
+  <!-- tuner -->
   <string name="status_bar_icons">Állapotsor ikonok</string>
+  <string name="qs_equal_tile_title">Egyenlő nagyságú</string>
+  <string name="qs_equal_tile_summary">Azonos méret az összes csempére</string>
+  <string name="qs_settings">Beállítások</string>
+  <string name="qs_tile_columns_title">Oszlopok</string>
+  <string name="qs_tile_columns_three">3</string>
+  <string name="qs_tile_columns_four">4</string>
+  <string name="qs_tile_bg_opacity_title">Háttér átlátszóság</string>
+  <string name="status_bar_silent">Néma üzemmód</string>
 </resources>

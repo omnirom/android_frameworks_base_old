@@ -19,94 +19,49 @@
 */
 -->
 <resources xmlns:xliff="urn:oasis:names:tc:xliff:document:1.2">
+  <!-- Reboot -->
   <string name="global_action_reboot">Restartovat</string>
   <string name="global_action_reboot_more">Restartovat\u2026</string>
   <string name="global_action_reboot_sub">Systém</string>
   <string name="global_action_reboot_recovery">Recovery</string>
   <string name="global_action_reboot_bootloader">Bootloader</string>
-  <string name="global_action_current_user">Aktuální</string>
+  <string name="global_action_users">Uživatelé\u2026</string>
+  <!-- advanced reboot to bootloader. -->
   <string name="reboot_to_bootloader_title">Bootloader</string>
   <string name="reboot_to_bootloader_message">Restartování\u2026</string>
+  <!-- advanced reboot to recovery. -->
   <string name="reboot_to_recovery_title">Recovery</string>
   <string name="reboot_to_recovery_message">Restartování\u2026</string>
+  <!-- advanced reboot system -->
   <string name="reboot_system_title">Restart</string>
   <string name="reboot_system_message">Restartování\u2026</string>
-  <string name="app_killed_message">Aplikace ukončena</string>
-  <string name="hide_lock_to_app_dialog">Vždy spustit</string>
-  <string name="silent_mode_priority">Priorita</string>
-  <string name="silent_mode_none">Žádný</string>
-  <string name="reboot_title">Restartovat</string>
-  <string name="reboot_confirm">Opravdu chcete restartovat?</string>
-  <string name="permission_remember_choice">Zapamatovat</string>
-  <string name="permission">Požadované oprávnění</string>
-  <string name="permission_dialog_text">Aplikace %1$s by chtěla %2$s</string>
-  <string name="app_ops_access_camera">přístup k fotoaparátu</string>
-  <string name="app_ops_access_location">přístup k vaší poloze</string>
-  <string name="app_ops_access_notifications">číst upozornění</string>
-  <string name="app_ops_activate_vpn">aktivovat VPN</string>
-  <string name="app_ops_delete_sms">smazat SMS</string>
-  <string name="app_ops_delete_mms">smazat MMS</string>
-  <string name="app_ops_delete_contacts">odstranit kontakty</string>
-  <string name="app_ops_delete_call_log">odstranit protokol volání</string>
-  <string name="app_ops_draw_on_top">vykreslovat navrchu</string>
-  <string name="app_ops_get_usage_stats">získat statistiky použití</string>
-  <string name="app_ops_keep_device_awake">zakázat režim spánku</string>
-  <string name="app_ops_modify_calendar">aktualizovat váš kalendář</string>
-  <string name="app_ops_modify_call_log">aktualizovat protokol volání</string>
-  <string name="app_ops_modify_clipboard">upravit schránku</string>
-  <string name="app_ops_modify_contacts">upravit vaše kontakty</string>
-  <string name="app_ops_modify_icc_sms">zapsat/upravit ICC SMS zprávy</string>
-  <string name="app_ops_modify_settings">změnit nastavení</string>
-  <string name="app_ops_modify_sms">napsat/upravit SMS zprávy</string>
-  <string name="app_ops_mute_mic">ztlumit mikrofon</string>
-  <string name="app_ops_phone_call">telefonní hovor</string>
-  <string name="app_ops_play_audio">přehrát zvuk</string>
-  <string name="app_ops_post_notification">odeslat upozornění</string>
-  <string name="app_ops_project_media">zobrazit média</string>
-  <string name="app_ops_read_calendar">číst váš kalendář</string>
-  <string name="app_ops_read_call_log">číst protokol volání</string>
-  <string name="app_ops_read_clipboard">číst schránku</string>
-  <string name="app_ops_read_contacts">číst kontakty</string>
-  <string name="app_ops_read_icc_sms">čtení ICC SMS zpráv</string>
-  <string name="app_ops_read_mms_storage">čtení úložiště MMS</string>
-  <string name="app_ops_read_other_accounts">číst další účty</string>
-  <string name="app_ops_read_phone_info">čtení informací o telefonu</string>
-  <string name="app_ops_read_sms">číst vaše SMS zprávy</string>
-  <string name="app_ops_receive_emergency_sms"> nouzové SMS</string>
-  <string name="app_ops_receive_mms">přijem MMS zpráv</string>
-  <string name="app_ops_receive_sms">přijem SMS zpráv</string>
-  <string name="app_ops_receive_wap_push">příjem WAP push</string>
-  <string name="app_ops_record_audio">nahrát zvuk</string>
-  <string name="app_ops_send_sms">odeslat zprávu SMS</string>
-  <string name="app_ops_send_mms">odeslat zprávu MMS</string>
-  <string name="app_ops_show_toast_window">zobrazit toast animaci</string>
-  <string name="app_ops_start_at_bootup">spustit při startu</string>
-  <string name="app_ops_toggle_bluetooth">zapnutí/vypnutí Bluetooth</string>
-  <string name="app_ops_toggle_nfc">zapnutí/vypnutí NFC</string>
-  <string name="app_ops_toggle_wifi">zapnutí/vypnutí Wi-Fi</string>
-  <string name="app_ops_turn_on_mobile_data">zapnout mobilní data</string>
-  <string name="app_ops_use_alarm_volume">použít hlasitost budíku</string>
-  <string name="app_ops_use_audio_focus">použít zaměření zvukového výstupu</string>
-  <string name="app_ops_use_bluetooth_volume">použít hlasitost bluetooth</string>
-  <string name="app_ops_use_master_volume">použít hlavní hlasitost</string>
-  <string name="app_ops_use_media_buttons">použít mediální tlačítka</string>
-  <string name="app_ops_use_media_volume">použít hlasitost médií</string>
-  <string name="app_ops_use_notification_volume">použít hlasitost upozornění</string>
-  <string name="app_ops_use_ringer_volume">použít hlasitost vyzvánění</string>
-  <string name="app_ops_use_vibrate">použít hmatovou zpětnou vazbu</string>
-  <string name="app_ops_use_voice_volume">použít hlasitost volání</string>
-  <string name="app_ops_write_mms_storage">zápis do úložiště MMS</string>
-  <string name="battery_style_none">Žádný</string>
-  <string name="battery_style_default">Výchozí</string>
-  <string name="battery_style_bar">Svislý pruh</string>
-  <string name="battery_style_meter_horizontal">Vodorovný pruh</string>
-  <string name="battery_style_circle">Kruh</string>
-  <string name="permlab_setKeyguardWallpaper">Nastavit tapetu zámku kláves</string>
-  <string name="permdesc_setKeyguardWallpaper">Povolit aplikaci změnit pozadí zamčené obrazovky.</string>
-  <string name="lock_to_app_toast_back">Chcete-li odebrat tuto obrazovku, stiskněte a držte tlačítko Zpět.</string>
-  <string name="system_error_vendorprint">Zda se, že obraz zařízení je zastaralý. Instalujte si prosím jeho nejnovější verzi.</string>
   <string name="dnd_mode_off">Vypnuto</string>
   <string name="dnd_mode_total_silence">Absolutní ticho</string>
   <string name="dnd_mode_alarms">Pouze budíky</string>
   <string name="dnd_mode_important">Pouze prioritní</string>
+  <!-- HW button mapping -->
+  <string name="app_killed_message">Aplikace ukončena</string>
+  <string name="hide_lock_to_app_dialog">Vždy spustit</string>
+  <!-- Title of dialog to confirm rebooting into safe mode. [CHAR LIMIT=50] -->
+  <string name="reboot_title">Restartovat</string>
+  <!-- Reboot Confirmation Dialog.  Message in the confirmation dialog
+         when the user asks to reboot. [CHAR LIMIT=NONE] -->
+  <string name="reboot_confirm">Opravdu chcete restartovat?</string>
+  <string name="battery_style_text">Pouze text</string>
+  <string name="battery_style_default">Výchozí</string>
+  <string name="battery_style_meter_horizontal">Vodorovný pruh</string>
+  <string name="battery_style_circle">Kruh</string>
+  <string name="battery_style_droid">Droid</string>
+  <!-- Title of an application permission, listed so the user can choose whether they want to allow the application to do this. -->
+  <string name="permlab_fakePackageSignature">Záměna podpisu balíčku</string>
+  <!-- Description of an application permission, listed so the user can choose whether they want to allow the application to do this. -->
+  <string name="permdesc_fakePackageSignature">Umožňuje aplikaci předstírat, že je jiná aplikace. Tyto aplikace mohou být schopen přístupovat k soukromým datům aplikací. S udělením tohoto oprávnění opatrně!</string>
+  <!-- Title of an application permission, listed so the user can choose whether they want the application to do this. -->
+  <string name="permlab_setKeyguardWallpaper">Nastavit tapetu zámku kláves</string>
+  <!-- Description of an application permission, listed so the user can choose whether they want to allow the application to do this. -->
+  <string name="permdesc_setKeyguardWallpaper">Povolit aplikaci změnit pozadí zamčené obrazovky.</string>
+  <!-- Notify use that they are in Lock-to-app in accessibility mode -->
+  <string name="lock_to_app_toast_back">Chcete-li odebrat tuto obrazovku, stiskněte a držte tlačítko Zpět.</string>
+  <!-- Vendor mismatched fingerprint warning [CHAR LIMIT=NONE] -->
+  <string name="system_error_vendorprint">Zda se, že obraz zařízení je zastaralý. Instalujte si prosím jeho nejnovější verzi.</string>
 </resources>

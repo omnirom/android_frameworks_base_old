@@ -17,12 +17,18 @@
 
 -->
 <resources xmlns:xliff="urn:oasis:names:tc:xliff:document:1.2">
+  <!-- Screenrecord Notification Ticker -->
   <string name="screenrecord_notif_ticker">屏幕正在被录制</string>
+  <!-- Screenrecord notification title -->
   <string name="screenrecord_notif_title">正在录制屏幕</string>
+  <!-- Screenrecord notification action: Stop -->
   <string name="screenrecord_notif_stop">停止</string>
+  <!-- Screenrecord notification action: show/hide pointer -->
   <string name="screenrecord_notif_pointer_on">显示指针</string>
   <string name="screenrecord_notif_pointer_off">隐藏指针</string>
+  <!-- Screen record notification error title -->
   <string name="screenrecord_notif_error">无法录制屏幕</string>
+  <!-- mount notifications -->
   <string name="ext_media_mounted_notification_title">已挂载</string>
   <string name="ext_media_unmounted_notification_title">已卸载</string>
   <string name="ext_media_unmounted_notification_message">您可以安全的移除存储。</string>
@@ -30,4 +36,7 @@
   <string name="ext_media_mount_action">挂载</string>
   <string name="ext_media_unmounting_notification_title">正在卸载\u2026</string>
   <string name="ext_media_mounting_notification_title">正在挂载\u2026</string>
+  <!-- Battery Saver Dimss -->
+  <!-- Screen pinning dialog description when in accessibility mode. -->
+  <!-- tuner -->
 </resources>
