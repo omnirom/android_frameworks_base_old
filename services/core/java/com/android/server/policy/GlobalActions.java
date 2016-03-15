@@ -23,6 +23,7 @@ import com.android.internal.telephony.TelephonyProperties;
 import com.android.internal.R;
 import com.android.internal.util.UserIcons;
 import com.android.internal.widget.LockPatternUtils;
+import com.android.internal.util.omni.DeviceUtils;
 
 import android.app.ActivityManager;
 import android.app.ActivityManagerNative;
@@ -49,6 +50,7 @@ import android.graphics.RectF;
 import android.graphics.Shader;
 import android.graphics.drawable.BitmapDrawable;
 import android.graphics.drawable.Drawable;
+import android.hardware.camera2.CameraManager;
 import android.media.AudioManager;
 import android.net.ConnectivityManager;
 import android.os.Build;
@@ -126,6 +128,7 @@ class GlobalActions implements DialogInterface.OnDismissListener, DialogInterfac
     private static final String GLOBAL_ACTION_KEY_DND = "dnd";
     private static final String GLOBAL_ACTION_KEY_SCREENSHOT = "screenshot";
     private static final String GLOBAL_ACTION_KEY_SCREENRECORD = "screenrecord";
+    private static final String GLOBAL_ACTION_KEY_TORCH = "torch";
 
     private final Context mContext;
     private final WindowManagerFuncs mWindowManagerFuncs;
@@ -155,6 +158,9 @@ class GlobalActions implements DialogInterface.OnDismissListener, DialogInterfac
     private String[] mCurrentMenuActions;
     private boolean mRebootMenu;
     private boolean mUsersMenu;
+    private CameraManager mCameraManager;
+    private ToggleAction mTorchModeOn;
+    private ToggleAction.State mTorchState = ToggleAction.State.Off;
 
     /**
      * @param context everything needs a context :(
@@ -195,6 +201,12 @@ class GlobalActions implements DialogInterface.OnDismissListener, DialogInterfac
         mRebootMenuActions = mContext.getResources().getStringArray(
                     com.android.internal.R.array.config_rebootActionsList);
         mItems = new ArrayList<Action>();
+
+        if (DeviceUtils.deviceSupportsCameraFlashlight(mContext)) {
+            mCameraManager = (CameraManager) mContext.getSystemService(Context.CAMERA_SERVICE);
+            mCameraManager.registerTorchCallback(mTorchCallback, new Handler());
+        }
+
         settingsChanged();
     }
 
@@ -327,6 +339,47 @@ class GlobalActions implements DialogInterface.OnDismissListener, DialogInterfac
         };
         onAirplaneModeChanged();
 
+        mTorchModeOn = new ToggleAction(
+                R.drawable.ic_global_torch_on,
+                R.drawable.ic_global_torch_off,
+                R.string.global_actions_toggle_torch_mode,
+                R.string.global_action_torch_on,
+                R.string.global_action_torch_off) {
+
+            void onToggle(boolean on) {
+                Intent torchIntent = new Intent("com.android.systemui.TOGGLE_FLASHLIGHT");
+                torchIntent.addFlags(Intent.FLAG_RECEIVER_FOREGROUND);
+                UserHandle user = new UserHandle(UserHandle.USER_CURRENT);
+                mContext.sendBroadcastAsUser(torchIntent, user);
+            }
+
+            @Override
+            protected void changeStateFromPress(boolean buttonOn) {
+                mState = buttonOn ? State.TurningOn : State.TurningOff;
+                mTorchState = mState;
+            }
+
+            @Override
+            public boolean showDuringKeyguard() {
+                return true;
+            }
+
+            @Override
+            public boolean showDuringRestrictedKeyguard() {
+                return true;
+            }
+
+            @Override
+            public boolean showBeforeProvisioning() {
+                return true;
+            }
+
+            @Override
+            public boolean showForCurrentUser() {
+                return true;
+            }
+        };
+
         buildMenuList();
 
         mAdapter = new MyAdapter();
@@ -408,6 +461,8 @@ class GlobalActions implements DialogInterface.OnDismissListener, DialogInterfac
                 mItems.add(new ScreenShotAction());
             } else if (GLOBAL_ACTION_KEY_SCREENRECORD.equals(actionKey)) {
                 mItems.add(new ScreenRecordAction());
+            } else if (DeviceUtils.deviceSupportsCameraFlashlight(mContext) && GLOBAL_ACTION_KEY_TORCH.equals(actionKey)) {
+                mItems.add(mTorchModeOn);
             } else {
                 Log.e(TAG, "Invalid global action key " + actionKey);
             }
@@ -918,6 +973,7 @@ class GlobalActions implements DialogInterface.OnDismissListener, DialogInterfac
     private void prepareDialog() {
         refreshSilentMode();
         mAirplaneModeOn.updateState(mAirplaneState);
+        mTorchModeOn.updateState(mTorchState);
         mAdapter.notifyDataSetChanged();
         mDialog.getWindow().setType(WindowManager.LayoutParams.TYPE_KEYGUARD_DIALOG);
         /*if (mShowSilentToggle) {
@@ -1046,7 +1102,7 @@ class GlobalActions implements DialogInterface.OnDismissListener, DialogInterfac
         boolean showDuringKeyguard();
 
         /**
-         * @return whether this action should appear in the dialog when a restricted 
+         * @return whether this action should appear in the dialog when a restricted
          * keyguard is showing.
          */
         boolean showDuringRestrictedKeyguard();
@@ -1443,7 +1499,7 @@ class GlobalActions implements DialogInterface.OnDismissListener, DialogInterfac
         ZEN_MODE_IMPORTANT_INTERRUPTIONS = 1;
         ZEN_MODE_NO_INTERRUPTIONS = 2;
         ZEN_MODE_ALARMS = 3;*/
-        
+
         private int dndModeToIndex(int dndMode) {
             switch(dndMode) {
                 case Settings.Global.ZEN_MODE_OFF:
@@ -1767,6 +1823,27 @@ class GlobalActions implements DialogInterface.OnDismissListener, DialogInterfac
         @Override
         public void onChange(boolean selfChange) {
             onAirplaneModeChanged();
+        }
+    };
+
+    private final CameraManager.TorchCallback mTorchCallback =
+            new CameraManager.TorchCallback() {
+
+        @Override
+        public void onTorchModeUnavailable(String cameraId) {
+        }
+
+        @Override
+        public void onTorchModeChanged(String cameraId, boolean enabled) {
+            mTorchState = enabled ? ToggleAction.State.On: ToggleAction.State.Off;
+            mTorchModeOn.updateState(mTorchState);
+            mAdapter.notifyDataSetChanged();
+        }
+
+        private void setCameraAvailable(boolean available) {
+        }
+
+        private void setTorchMode(boolean enabled) {
         }
     };
 
