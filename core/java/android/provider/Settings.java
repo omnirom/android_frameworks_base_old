@@ -3966,6 +3966,16 @@ public final class Settings {
         public static final String DEVICE_PROXI_CHECK_ENABLED = "device_proxi_check_enabled";
 
         /**
+         * @hide
+         */
+        public static final String ACCELEROMETER_ROTATION_ANGLES = "accelerometer_rotation_angles";
+
+        /**
+         * @hide
+         */
+        public static final String LOCKSCREEN_ROTATION = "lockscreen_rotation";
+
+        /**
          * Settings to backup. This is here so that it's in the same place as the settings
          * keys and easy to update.
          *
@@ -4129,7 +4139,11 @@ public final class Settings {
             PRIVATE_SETTINGS.add(BUTTON_LONG_PRESS_RECENTS);
             PRIVATE_SETTINGS.add(SWAP_VOLUME_BUTTONS);
             PRIVATE_SETTINGS.add(BUTTON_LONG_PRESS_HOME);
-        }
+            PRIVATE_SETTINGS.add(BUTTON_EXTRA_KEY_MAPPING);
+            PRIVATE_SETTINGS.add(HARDWARE_KEYS_DISABLE);
+            PRIVATE_SETTINGS.add(DEVICE_PROXI_CHECK_ENABLED);
+            PRIVATE_SETTINGS.add(ACCELEROMETER_ROTATION_ANGLES);
+            PRIVATE_SETTINGS.add(LOCKSCREEN_ROTATION);
 
         /**
          * These are all public system settings
