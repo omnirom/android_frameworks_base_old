@@ -770,6 +770,9 @@ public class StatusBar extends SystemUI implements DemoMode,
             mContext.getContentResolver().registerContentObserver(Settings.System.getUriFor(
                     Settings.System.BUTTON_LONG_PRESS_RECENTS),
                     false, this, UserHandle.USER_ALL);
+            mContext.getContentResolver().registerContentObserver(Settings.System.getUriFor(
+                    Settings.System.LOCKSCREEN_ROTATION),
+                    false, this, UserHandle.USER_ALL);
         }
 
         @Override
@@ -788,6 +791,9 @@ public class StatusBar extends SystemUI implements DemoMode,
             }
             if (mNavigationBar != null) {
                 mNavigationBar.setRecentsOptions(mRecentsStyle, mLongPressOnAppSwitchBehavior);
+            }
+            if (mStatusBarWindowManager != null) {
+                mStatusBarWindowManager.updateKeyguardScreenRotation();
             }
         }
     }
