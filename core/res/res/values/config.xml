@@ -2047,6 +2047,7 @@
         <item>bugreport</item>
         <item>screenshot</item>
         <item>screenrecord</item>
+        <item>torch</item>
         <item>users</item>
         <item>dnd</item>
     </string-array>
@@ -2351,7 +2352,7 @@
 
     <!-- Flag indicating device support for EAP SIM, AKA, AKA' -->
     <bool name="config_eap_sim_based_auth_supported">true</bool>
- 
+
     <!-- How long history of previous vibrations should be kept for the dumpsys. -->
     <integer name="config_previousVibrationsDumpLimit">20</integer>
 
