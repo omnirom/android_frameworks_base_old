@@ -23,6 +23,7 @@ import com.android.internal.telephony.TelephonyProperties;
 import com.android.internal.R;
 import com.android.internal.util.UserIcons;
 import com.android.internal.widget.LockPatternUtils;
+import com.android.internal.util.omni.DeviceUtils;
 
 import android.app.ActivityManager;
 import android.app.ActivityManagerNative;
@@ -49,6 +50,7 @@ import android.graphics.RectF;
 import android.graphics.Shader;
 import android.graphics.drawable.BitmapDrawable;
 import android.graphics.drawable.Drawable;
+import android.hardware.camera2.CameraManager
 import android.media.AudioManager;
 import android.net.ConnectivityManager;
 import android.os.Build;
@@ -126,6 +128,7 @@ class GlobalActions implements DialogInterface.OnDismissListener, DialogInterfac
     private static final String GLOBAL_ACTION_KEY_DND = "dnd";
     private static final String GLOBAL_ACTION_KEY_SCREENSHOT = "screenshot";
     private static final String GLOBAL_ACTION_KEY_SCREENRECORD = "screenrecord";
+    private static final String GLOBAL_ACTION_KEY_TORCH = "torch";
 
     private final Context mContext;
     private final WindowManagerFuncs mWindowManagerFuncs;
@@ -408,6 +411,10 @@ class GlobalActions implements DialogInterface.OnDismissListener, DialogInterfac
                 mItems.add(new ScreenShotAction());
             } else if (GLOBAL_ACTION_KEY_SCREENRECORD.equals(actionKey)) {
                 mItems.add(new ScreenRecordAction());
+            } else if (GLOBAL_ACTION_KEY_TORCH.equals(actionKey)) {
+                if (deviceSupportsCameraFlashlight(mContext) == true) {
+                    mItems.add(new TorchAction());
+                }
             } else {
                 Log.e(TAG, "Invalid global action key " + actionKey);
             }
@@ -1046,7 +1053,7 @@ class GlobalActions implements DialogInterface.OnDismissListener, DialogInterfac
         boolean showDuringKeyguard();
 
         /**
-         * @return whether this action should appear in the dialog when a restricted 
+         * @return whether this action should appear in the dialog when a restricted
          * keyguard is showing.
          */
         boolean showDuringRestrictedKeyguard();
@@ -1443,7 +1450,7 @@ class GlobalActions implements DialogInterface.OnDismissListener, DialogInterfac
         ZEN_MODE_IMPORTANT_INTERRUPTIONS = 1;
         ZEN_MODE_NO_INTERRUPTIONS = 2;
         ZEN_MODE_ALARMS = 3;*/
-        
+
         private int dndModeToIndex(int dndMode) {
             switch(dndMode) {
                 case Settings.Global.ZEN_MODE_OFF:
@@ -1719,6 +1726,43 @@ class GlobalActions implements DialogInterface.OnDismissListener, DialogInterfac
                     mHandler.postDelayed(mScreenrecordTimeout, 31 * 60 * 1000);
                 }
             }
+        }
+    }
+    // Add Torch to Power Menu
+    private final CameraManager.TorchCallback mTorchCallback = new CameraManager.TorchCallback() {
+
+
+    private final class TorchAction extends SinglePressAction {
+        private TorchAction() {
+            super(com.android.internal.R.drawable.ic_global_torch, R.string.global_action_torch);
+        }
+
+        @Override
+        public boolean showDuringKeyguard() {
+            return true;
+        }
+
+        @Override
+        public boolean showDuringRestrictedKeyguard() {
+            return true;
+        }
+
+        @Override
+        public boolean showBeforeProvisioning() {
+            return true;
+        }
+
+        @Override
+        public boolean showForCurrentUser() {
+            return true;
+        }
+
+        @Override
+        public void onPress() {
+            Intent torchIntent = new Intent("com.android.systemui.TOGGLE_FLASHLIGHT");
+            torchIntent.addFlags(Intent.FLAG_RECEIVER_FOREGROUND);
+            UserHandle user = new UserHandle(UserHandle.USER_CURRENT);
+            mContext.sendBroadcastAsUser(torchIntent, user);
         }
     }
 
