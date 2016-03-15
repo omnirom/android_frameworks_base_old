@@ -580,6 +580,9 @@ public class KeyguardBottomAreaView extends FrameLayout implements View.OnClickL
     }
 
     public void showShortcutsContainer() {
+        if (mKeyguardShortcutsContainer.getAlpha() != 0f) {
+            return;
+        }
         mKeyguardShortcutsContainer.setAlpha(0f);
         mKeyguardShortcutsContainer.animate()
                 .alpha(1f)

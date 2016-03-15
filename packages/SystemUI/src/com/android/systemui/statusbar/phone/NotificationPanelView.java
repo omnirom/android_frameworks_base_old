@@ -208,6 +208,7 @@ public class NotificationPanelView extends PanelView implements
     private boolean mHeadsUpAnimatingAway;
     private boolean mLaunchingAffordance;
     private String mLastCameraLaunchSource = KeyguardBottomAreaView.CAMERA_LAUNCH_SOURCE_AFFORDANCE;
+    private float mLastAlpha = -1;
 
     private Runnable mHeadsUpExistenceChangedRunnable = new Runnable() {
         @Override
@@ -1748,6 +1749,15 @@ public class NotificationPanelView extends PanelView implements
 
     private void updateKeyguardBottomAreaAlpha() {
         float alpha = Math.min(getKeyguardContentsAlpha(), 1 - getQsExpansionFraction());
+        if (mLastAlpha == alpha) {
+            return;
+        }
+        mLastAlpha = alpha;
+        if (alpha == 0f) {
+            mKeyguardBottomArea.setVisibility(View.GONE);
+        } else if (mKeyguardBottomArea.getVisibility() == View.GONE) {
+            mKeyguardBottomArea.setVisibility(View.VISIBLE);
+        }
         mKeyguardBottomArea.setAlpha(alpha);
         mKeyguardBottomArea.setImportantForAccessibility(alpha == 0f
                 ? IMPORTANT_FOR_ACCESSIBILITY_NO_HIDE_DESCENDANTS
