@@ -1,0 +1,6 @@
+<!-- drawable/ic_global_torch_on.xml -->
+<selector xmlns:android="http://schemas.android.com/apk/res/android" >
+    <item android:state_pressed="true"
+          android:drawable="@drawable/ic_global_torch_on_white"/>
+    <item android:drawable="@drawable/ic_global_torch_on_tint"/>
+</selector>
