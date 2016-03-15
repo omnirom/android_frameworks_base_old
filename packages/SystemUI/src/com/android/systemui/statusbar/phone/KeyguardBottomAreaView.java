@@ -584,7 +584,13 @@ public class KeyguardBottomAreaView extends FrameLayout implements View.OnClickL
         mKeyguardShortcutsContainer.animate()
                 .alpha(1f)
                 .setInterpolator(PhoneStatusBar.ALPHA_IN)
-                .setDuration(250);
+                .setDuration(250)
+                .withStartAction(new Runnable() {
+                    @Override
+                    public void run() {
+                        mKeyguardShortcutsContainer.setVisibility(View.VISIBLE);
+                    }
+                 });
     }
 
     public void hideShortcutsContainer() {
@@ -592,7 +598,14 @@ public class KeyguardBottomAreaView extends FrameLayout implements View.OnClickL
         mKeyguardShortcutsContainer.animate()
                 .alpha(0f)
                 .setInterpolator(PhoneStatusBar.ALPHA_OUT)
-                .setDuration(250);
+                .setDuration(250)
+                .withEndAction(new Runnable() {
+                    @Override
+                    public void run() {
+                        mKeyguardShortcutsContainer.setVisibility(View.GONE);
+                        mKeyguardShortcutsContainer.setAlpha(1f);
+                    }
+                 });
     }
 
     public View getShortcutsContainer() {
