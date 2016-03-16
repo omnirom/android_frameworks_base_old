@@ -34,7 +34,6 @@ import android.media.Rating;
 import android.os.Bundle;
 import android.os.Handler;
 import android.os.Looper;
-import android.os.UserHandle;
 import android.provider.Settings;
 import android.util.ArrayMap;
 import android.util.Log;
@@ -207,8 +206,8 @@ public class MediaSessionLegacyHelper {
             if (windowService != null) {
                 final int rotation = windowService.getDefaultDisplay().getRotation();
                 final Configuration config = mContext.getResources().getConfiguration();
-                final boolean swapKeys = Settings.System.getIntForUser(mContext.getContentResolver(),
-                        Settings.System.SWAP_VOLUME_BUTTONS, 0, UserHandle.USER_CURRENT) == 1;
+                final boolean swapKeys = Settings.System.getInt(mContext.getContentResolver(),
+                        Settings.System.SWAP_VOLUME_BUTTONS, 0) == 1;
 
                 if (swapKeys
                         && (rotation == Surface.ROTATION_90 || rotation == Surface.ROTATION_180)
