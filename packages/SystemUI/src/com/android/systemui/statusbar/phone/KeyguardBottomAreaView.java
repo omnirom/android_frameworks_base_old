@@ -580,10 +580,7 @@ public class KeyguardBottomAreaView extends FrameLayout implements View.OnClickL
     }
 
     public void showShortcutsContainer() {
-        if (mKeyguardShortcutsContainer.getAlpha() != 0f) {
-            return;
-        }
-        mKeyguardShortcutsContainer.setAlpha(0f);
+        mKeyguardShortcutsContainer.animate().cancel();
         mKeyguardShortcutsContainer.animate()
                 .alpha(1f)
                 .setInterpolator(PhoneStatusBar.ALPHA_IN)
@@ -591,6 +588,7 @@ public class KeyguardBottomAreaView extends FrameLayout implements View.OnClickL
     }
 
     public void hideShortcutsContainer() {
+        mKeyguardShortcutsContainer.animate().cancel();
         mKeyguardShortcutsContainer.setAlpha(1f);
         mKeyguardShortcutsContainer.animate()
                 .alpha(0f)
@@ -649,11 +647,13 @@ public class KeyguardBottomAreaView extends FrameLayout implements View.OnClickL
         if (mCameraImageView.getVisibility() == View.VISIBLE) {
             startFinishDozeAnimationElement(mCameraImageView, delay);
         }
-        mKeyguardShortcutsContainer.setAlpha(0f);
-        mKeyguardShortcutsContainer.animate()
-                .alpha(1f)
-                .setInterpolator(mLinearOutSlowInInterpolator)
-                .setDuration(NotificationPanelView.DOZE_ANIMATION_DURATION);
+        if (mKeyguardShortcutsContainer.getVisibility() == View.VISIBLE) {
+            mKeyguardShortcutsContainer.setAlpha(0f);
+            mKeyguardShortcutsContainer.animate()
+                    .alpha(1f)
+                    .setInterpolator(mLinearOutSlowInInterpolator)
+                    .setDuration(NotificationPanelView.DOZE_ANIMATION_DURATION);
+        }
     }
 
     private void startFinishDozeAnimationElement(View element, long delay) {
