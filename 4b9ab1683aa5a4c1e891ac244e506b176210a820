@@ -36,6 +36,24 @@
     },
     {
       "key": {
+        "uuid": "98faad2e_db13215a",
+        "filename": "libs/androidfw/ResourceTypes.cpp",
+        "patchSetId": 2
+      },
+      "lineNbr": 2916,
+      "author": {
+        "id": 1000008
+      },
+      "writtenOn": "2016-03-17T13:28:07Z",
+      "side": 1,
+      "message": "Actually seems to come from https://github.com/CyanogenMod/android_frameworks_base/commit/4c8a2c4784e44a28fbb5247e92a4ab8ec27485da or a derivative of that - need to do some more reading",
+      "parentUuid": "2b1c0951_267ef813",
+      "revId": "4b9ab1683aa5a4c1e891ac244e506b176210a820",
+      "serverId": "56841c99-7c94-43d4-bf0b-cb4707e66d55",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "2b1c0951_467bf422",
         "filename": "libs/androidfw/ResourceTypes.cpp",
         "patchSetId": 2
@@ -98,6 +116,24 @@
       "writtenOn": "2015-04-20T02:37:36Z",
       "side": 1,
       "message": "This appears unused - need to look at original patch to see if I missed something.",
+      "revId": "4b9ab1683aa5a4c1e891ac244e506b176210a820",
+      "serverId": "56841c99-7c94-43d4-bf0b-cb4707e66d55",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "18e79d95_02348ad8",
+        "filename": "libs/androidfw/ResourceTypes.cpp",
+        "patchSetId": 2
+      },
+      "lineNbr": 6119,
+      "author": {
+        "id": 1000008
+      },
+      "writtenOn": "2016-03-17T13:28:07Z",
+      "side": 1,
+      "message": "Looked at original patch - this is indeed unused",
+      "parentUuid": "2b1c0951_46d694f8",
       "revId": "4b9ab1683aa5a4c1e891ac244e506b176210a820",
       "serverId": "56841c99-7c94-43d4-bf0b-cb4707e66d55",
       "unresolved": false
