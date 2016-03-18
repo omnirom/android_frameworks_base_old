@@ -3927,6 +3927,11 @@ public final class Settings {
         public static final String BUTTON_LONG_PRESS_RECENTS = "button_long_press_recents";
 
         /**
+         * @hide
+         */
+        public static final String VOLUME_BUTTON_MUSIC_CONTROL = "volume_button_music_control";
+
+        /**
          * Change volume up and down handlign based on rotation
          * @hide
          */
