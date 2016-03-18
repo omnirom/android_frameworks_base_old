@@ -5354,6 +5354,13 @@ public final class Settings {
          */
         public static final String OMNI_NOTIFICATION_PULSE = "pulse_ambient_light";
 
+        /**
+         * Control music seeking with volume up/down buttons
+         *
+         * @hide
+         */
+        public static final String OMNI_VOLUME_BUTTON_MUSIC_CONTROL = "volume_button_music_control";
+
          /**
          * Whether to enable Ambient Edge lights
          * @hide
@@ -5570,6 +5577,7 @@ public final class Settings {
             OMNI_CUSTOM_FP_ICON,
             OMNI_DOZE_ON_CHARGE,
             OMNI_NOTIFICATION_PULSE,
+            OMNI_VOLUME_BUTTON_MUSIC_CONTROL,
             OMNI_AOD_NOTIFICATION_PULSE,
             OMNI_AOD_NOTIFICATION_PULSE_CLEAR,
             OMNI_AOD_NOTIFICATION_PULSE_TIMEOUT,
@@ -5629,6 +5637,7 @@ public final class Settings {
             OMNI_SETTINGS_VALIDATORS.put(OMNI_CUSTOM_FP_ICON, 2);
             OMNI_SETTINGS_VALIDATORS.put(OMNI_DOZE_ON_CHARGE, 0);
             OMNI_SETTINGS_VALIDATORS.put(OMNI_NOTIFICATION_PULSE, 0);
+            OMNI_SETTINGS_VALIDATORS.put(OMNI_VOLUME_BUTTON_MUSIC_CONTROL, 0);
             OMNI_SETTINGS_VALIDATORS.put(OMNI_AOD_NOTIFICATION_PULSE, 0);
             OMNI_SETTINGS_VALIDATORS.put(OMNI_AOD_NOTIFICATION_PULSE_CLEAR, 0);
             OMNI_SETTINGS_VALIDATORS.put(OMNI_AOD_NOTIFICATION_PULSE_TIMEOUT, 1);
