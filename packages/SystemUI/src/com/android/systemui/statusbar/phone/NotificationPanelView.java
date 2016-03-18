@@ -1753,10 +1753,14 @@ public class NotificationPanelView extends PanelView implements
             return;
         }
         mLastAlpha = alpha;
-        if (alpha == 0f) {
-            mKeyguardBottomArea.setVisibility(View.GONE);
-        } else if (mKeyguardBottomArea.getVisibility() == View.GONE) {
-            mKeyguardBottomArea.setVisibility(View.VISIBLE);
+
+        if (mStatusBarState == StatusBarState.SHADE_LOCKED
+                || mStatusBarState == StatusBarState.KEYGUARD) {
+            if (alpha == 0f) {
+                mKeyguardBottomArea.setVisibility(View.GONE);
+            } else if (mKeyguardBottomArea.getVisibility() == View.GONE) {
+                mKeyguardBottomArea.setVisibility(View.VISIBLE);
+            }
         }
         mKeyguardBottomArea.setAlpha(alpha);
         mKeyguardBottomArea.setImportantForAccessibility(alpha == 0f
