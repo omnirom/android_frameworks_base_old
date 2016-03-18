@@ -4853,6 +4853,16 @@ public final class Settings {
                 BOOLEAN_VALIDATOR;
 
         /**
+         * Control music seeking with volume up/down buttons
+         *
+         * @hide
+         */
+        public static final String OMNI_VOLUME_BUTTON_MUSIC_CONTROL = "volume_button_music_control";
+
+        private static final Validator OMNI_VOLUME_BUTTON_MUSIC_CONTROL_VALIDATOR =
+                BOOLEAN_VALIDATOR;
+
+        /**
          * IMPORTANT: If you add a new public settings you also have to add it to
          * PUBLIC_SETTINGS below. If the new setting is hidden you have to add
          * it to PRIVATE_SETTINGS below. Also add a validator that can validate
@@ -4961,6 +4971,7 @@ public final class Settings {
             OMNI_DOUBLE_TAP_SLEEP_GESTURE,
             OMNI_DOUBLE_TAP_SLEEP_LOCKSCREEN,
             OMNI_SHOW_CPU_OVERLAY,
+            OMNI_VOLUME_BUTTON_MUSIC_CONTROL,
         };
 
         /**
@@ -5119,6 +5130,7 @@ public final class Settings {
             PRIVATE_SETTINGS.add(OMNI_DOUBLE_TAP_SLEEP_GESTURE);
             PRIVATE_SETTINGS.add(OMNI_DOUBLE_TAP_SLEEP_LOCKSCREEN);
             PRIVATE_SETTINGS.add(OMNI_SHOW_CPU_OVERLAY);
+            PRIVATE_SETTINGS.add(OMNI_VOLUME_BUTTON_MUSIC_CONTROL);
         }
 
         /**
@@ -5275,6 +5287,8 @@ public final class Settings {
                     OMNI_DOUBLE_TAP_SLEEP_LOCKSCREEN_VALIDATOR);
             VALIDATORS.put(OMNI_SHOW_CPU_OVERLAY,
                     OMNI_SHOW_CPU_OVERLAY_VALIDATOR);
+            VALIDATORS.put(OMNI_VOLUME_BUTTON_MUSIC_CONTROL,
+                    OMNI_VOLUME_BUTTON_MUSIC_CONTROL_VALIDATOR);
         }
 
         /**
