@@ -100,8 +100,8 @@ public class BatteryMeterPercentView extends AbstractBatteryView {
         applyStyle();
 
         DisplayMetrics metrics = getResources().getDisplayMetrics();
-        mBarWidth = (int) (9.5f * metrics.density + 0.5f);
-        mBarSpaceWidth = (int) (12 * metrics.density + 0.5f);
+        mBarWidth = (int) (10 * metrics.density + 0.5f);
+        mBarSpaceWidth = (int) (14 * metrics.density + 0.5f);
         mPercentOffsetY = (int) (1 * metrics.density + 0.5f);
     }
 
@@ -258,7 +258,11 @@ public class BatteryMeterPercentView extends AbstractBatteryView {
 
         if (mShowPercent && (!mPercentInside || pctOpaque)) {
             if (percentage != null) {
-                c.drawText(percentage, bounds.centerX(), bounds.centerY() + textOffset, mTextPaint);
+                if (mPercentInside) {
+                    c.drawText(percentage, bounds.centerX(), bounds.centerY() + textOffset, mTextPaint);
+                } else {
+                    c.drawText(percentage, mWidth, bounds.centerY() + textOffset, mTextPaint);
+                }
             }
         }
     }
@@ -267,30 +271,9 @@ public class BatteryMeterPercentView extends AbstractBatteryView {
     protected void applyStyle() {
         final int level = mTracker.level;
         if (mPercentInside) {
-            DisplayMetrics metrics = mContext.getResources().getDisplayMetrics();
-            mTextSize = (int) ((level == 100 ? 7 : 9) * metrics.density + 0.5f);
             Typeface font = Typeface.create("sans-serif-condensed", Typeface.BOLD);
             mTextPaint.setTypeface(font);
-        } else {
-            mTextSize = getResources().getDimensionPixelSize(R.dimen.battery_level_text_size);
-            Typeface font = Typeface.create("sans-serif-medium", Typeface.NORMAL);
-            mTextPaint.setTypeface(font);
-        }
-        mTextPaint.setTextSize(mTextSize);
-        Rect bounds = new Rect();
-        String text = null;
-        if (mPercentInside) {
-            text = "100";
-        } else {
-            text = "100%";
-        }
-        mTextPaint.getTextBounds(text, 0, text.length(), bounds);
-        mTextWidth = bounds.width();
-    }
-
-    private void updatePercentFontSize() {
-        if (mPercentInside) {
-            final int level = mTracker.level;
+            mTextPaint.setTextAlign(Paint.Align.CENTER);
             DisplayMetrics metrics = mContext.getResources().getDisplayMetrics();
             mTextSize = (int) ((level == 100 ? 7 : 9) * metrics.density + 0.5f);
             mTextPaint.setTextSize(mTextSize);
@@ -298,6 +281,29 @@ public class BatteryMeterPercentView extends AbstractBatteryView {
             String text = "100";
             mTextPaint.getTextBounds(text, 0, text.length(), bounds);
             mTextWidth = bounds.width();
+        } else {
+            Typeface font = Typeface.create("sans-serif-medium", Typeface.NORMAL);
+            mTextPaint.setTypeface(font);
+            mTextPaint.setTextAlign(Paint.Align.RIGHT);
+            mTextSize = getResources().getDimensionPixelSize(R.dimen.battery_level_text_size);
+            mTextPaint.setTextSize(mTextSize);
+            Rect bounds = new Rect();
+            String text = text = ".00%";
+            mTextPaint.getTextBounds(text, 0, text.length(), bounds);
+            mTextWidth = bounds.width();
+        }
+    }
+
+    private void updatePercentFontSize() {
+        final int level = mTracker.level;
+        if (mPercentInside) {
+            DisplayMetrics metrics = mContext.getResources().getDisplayMetrics();
+            mTextSize = (int) ((level == 100 ? 7 : 9) * metrics.density + 0.5f);
+            mTextPaint.setTextSize(mTextSize);
+        } else {
+            mTextSize = getResources().getDimensionPixelSize(level == 100 ?
+                    R.dimen.battery_level_text_size_small : R.dimen.battery_level_text_size);
+            mTextPaint.setTextSize(mTextSize);
         }
     }
 }
