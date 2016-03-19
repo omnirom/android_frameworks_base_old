@@ -150,6 +150,7 @@ public class BatteryDroidView extends AbstractBatteryView {
         c.drawArc(mFrame, 270, 3.6f * padLevel, false, mBatteryPaint);
 
         if (mShowPercent) {
+            updatePercentFontSize();
             mTextPaint.setColor(getCurrentColor(level));
 
             float textHeight = 0f;
@@ -163,20 +164,28 @@ public class BatteryDroidView extends AbstractBatteryView {
             bounds = new RectF(mCircleWidth + 3 * mStrokeWidth, mPercentOffsetY, mWidth, mHeight);
 
             if (percentage != null) {
-                c.drawText(percentage, bounds.centerX(), bounds.centerY() + textOffset, mTextPaint);
+                c.drawText(percentage, mWidth, bounds.centerY() + textOffset, mTextPaint);
             }
         }
     }
 
     @Override
     protected void applyStyle() {
-        mTextSize = getResources().getDimensionPixelSize(R.dimen.battery_level_text_size);
-        mTextPaint.setTextSize(mTextSize);
         Typeface font = Typeface.create("sans-serif-medium", Typeface.NORMAL);
         mTextPaint.setTypeface(font);
+        mTextPaint.setTextAlign(Paint.Align.RIGHT);
+        mTextSize = getResources().getDimensionPixelSize(R.dimen.battery_level_text_size);
+        mTextPaint.setTextSize(mTextSize);
         Rect bounds = new Rect();
-        final String text = "100%";
+        String text = text = ".00%";
         mTextPaint.getTextBounds(text, 0, text.length(), bounds);
         mTextWidth = bounds.width();
+    }
+
+    private void updatePercentFontSize() {
+        final int level = mTracker.level;
+        mTextSize = getResources().getDimensionPixelSize(level == 100 ?
+                R.dimen.battery_level_text_size_small : R.dimen.battery_level_text_size);
+        mTextPaint.setTextSize(mTextSize);
     }
 }
