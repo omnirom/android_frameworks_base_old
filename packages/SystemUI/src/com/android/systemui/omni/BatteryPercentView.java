@@ -59,13 +59,6 @@ public class BatteryPercentView extends AbstractBatteryView {
 
     public BatteryPercentView(Context context, AttributeSet attrs, int defStyle) {
         super(context, attrs, defStyle);
-
-        Typeface font = Typeface.create("sans-serif-medium", Typeface.NORMAL);
-        mTextPaint.setTypeface(font);
-        Rect bounds = new Rect();
-        String text = "100%";
-        mTextPaint.getTextBounds(text, 0, text.length(), bounds);
-        mTextWidth = bounds.width();
         DisplayMetrics metrics = getResources().getDisplayMetrics();
         mPercentOffsetY = (int) (1 * metrics.density + 0.5f);
     }
@@ -85,6 +78,7 @@ public class BatteryPercentView extends AbstractBatteryView {
 
         if (level == BatteryTracker.UNKNOWN_LEVEL) return;
 
+        updatePercentFontSize();
         mTextPaint.setColor(getCurrentColor(level));
 
         float textHeight = 0f;
@@ -96,11 +90,27 @@ public class BatteryPercentView extends AbstractBatteryView {
         bounds = new RectF(0, 0, mWidth, mHeight);
 
         if (percentage != null) {
-            c.drawText(percentage, bounds.centerX(), bounds.centerY() + textOffset, mTextPaint);
+            c.drawText(percentage, mWidth, bounds.centerY() + textOffset, mTextPaint);
         }
     }
 
     @Override
     protected void applyStyle() {
+        mTextSize = getResources().getDimensionPixelSize(R.dimen.battery_level_text_size);
+        mTextPaint.setTextSize(mTextSize);
+        Typeface font = Typeface.create("sans-serif-medium", Typeface.NORMAL);
+        mTextPaint.setTypeface(font);
+        mTextPaint.setTextAlign(Paint.Align.RIGHT);
+        Rect bounds = new Rect();
+        String text = ".00%";
+        mTextPaint.getTextBounds(text, 0, text.length(), bounds);
+        mTextWidth = bounds.width();
+    }
+
+    private void updatePercentFontSize() {
+        final int level = mTracker.level;
+        mTextSize = getResources().getDimensionPixelSize(level == 100 ?
+                R.dimen.battery_level_text_size_small : R.dimen.battery_level_text_size);
+        mTextPaint.setTextSize(mTextSize);
     }
 }

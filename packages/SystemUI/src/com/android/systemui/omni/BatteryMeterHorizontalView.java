@@ -207,6 +207,7 @@ public class BatteryMeterHorizontalView extends AbstractBatteryView {
         boolean pctOpaque = false;
 
         if (mShowPercent) {
+            updatePercentFontSize();
             if (!mPercentInside) {
                 mTextPaint.setColor(getCurrentColor(level));
             }
@@ -251,7 +252,11 @@ public class BatteryMeterHorizontalView extends AbstractBatteryView {
 
         if (mShowPercent && (!mPercentInside || !pctOpaque)) {
             if (percentage != null) {
-                c.drawText(percentage, bounds.centerX(), bounds.centerY() + textOffset, mTextPaint);
+                if (mPercentInside) {
+                    c.drawText(percentage, bounds.centerX(), bounds.centerY() + textOffset, mTextPaint);
+                } else {
+                    c.drawText(percentage, mWidth, bounds.centerY() + textOffset, mTextPaint);
+                }
             }
         }
     }
@@ -259,24 +264,35 @@ public class BatteryMeterHorizontalView extends AbstractBatteryView {
     @Override
     protected void applyStyle() {
         if (mPercentInside) {
+            Typeface font = Typeface.create("sans-serif-condensed", Typeface.BOLD);
+            mTextPaint.setTextAlign(Paint.Align.CENTER);
+            mTextPaint.setTypeface(font);
             DisplayMetrics metrics = mContext.getResources().getDisplayMetrics();
             mTextSize = (int) (10 * metrics.density + 0.5f);
-            Typeface font = Typeface.create("sans-serif-condensed", Typeface.BOLD);
-            mTextPaint.setTypeface(font);
+            mTextPaint.setTextSize(mTextSize);
+            Rect bounds = new Rect();
+            String text = "100";
+            mTextPaint.getTextBounds(text, 0, text.length(), bounds);
+            mTextWidth = bounds.width();
         } else {
-            mTextSize = getResources().getDimensionPixelSize(R.dimen.battery_level_text_size);
             Typeface font = Typeface.create("sans-serif-medium", Typeface.NORMAL);
             mTextPaint.setTypeface(font);
+            mTextPaint.setTextAlign(Paint.Align.RIGHT);
+            mTextSize = getResources().getDimensionPixelSize(R.dimen.battery_level_text_size);
+            mTextPaint.setTextSize(mTextSize);
+            Rect bounds = new Rect();
+            String text = text = ".00%";
+            mTextPaint.getTextBounds(text, 0, text.length(), bounds);
+            mTextWidth = bounds.width();
         }
-        mTextPaint.setTextSize(mTextSize);
-        Rect bounds = new Rect();
-        String text = null;
-        if (mPercentInside) {
-            text = "100";
-        } else {
-            text = "100%";
+    }
+
+    private void updatePercentFontSize() {
+        final int level = mTracker.level;
+        if (!mPercentInside) {
+            mTextSize = getResources().getDimensionPixelSize(level == 100 ?
+                    R.dimen.battery_level_text_size_small : R.dimen.battery_level_text_size);
+            mTextPaint.setTextSize(mTextSize);
         }
-        mTextPaint.getTextBounds(text, 0, text.length(), bounds);
-        mTextWidth = bounds.width();
     }
 }
