@@ -1,0 +1,38 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "98faad2e_e6ef60e5",
+        "filename": "services/core/java/com/android/server/policy/GlobalActions.java",
+        "patchSetId": 4
+      },
+      "lineNbr": 415,
+      "author": {
+        "id": 1000026
+      },
+      "writtenOn": "2016-03-22T14:26:01Z",
+      "side": 1,
+      "message": "DeviceUtils.deviceSupportsCameraFlashlight(mContext)\nstatic methofs must be qualified with the class name\nand no need to use \u003d\u003d true - just if(DeviceUtils.deviceSupports...)",
+      "revId": "c25f14fbf1ee6e0aef867ed832531ababd34e1e4",
+      "serverId": "56841c99-7c94-43d4-bf0b-cb4707e66d55",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "98faad2e_c6bc64d9",
+        "filename": "services/core/java/com/android/server/policy/GlobalActions.java",
+        "patchSetId": 4
+      },
+      "lineNbr": 1733,
+      "author": {
+        "id": 1000026
+      },
+      "writtenOn": "2016-03-22T14:26:01Z",
+      "side": 1,
+      "message": "DERGL!!! :P",
+      "revId": "c25f14fbf1ee6e0aef867ed832531ababd34e1e4",
+      "serverId": "56841c99-7c94-43d4-bf0b-cb4707e66d55",
+      "unresolved": false
+    }
+  ]
+}
