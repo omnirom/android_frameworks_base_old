@@ -22,6 +22,7 @@ import android.content.Context;
 import android.content.Intent;
 import android.provider.Settings;
 import android.text.TextUtils;
+import android.view.Gravity;
 import android.view.View;
 import android.view.ViewGroup;
 
@@ -208,6 +209,7 @@ public class BluetoothTile extends QSTile<QSTile.BooleanState>  {
                     R.string.quick_settings_bluetooth_detail_empty_text);
             mItems.setCallback(this);
             mItems.setMinHeightInItems(0);
+            mItems.setGravity(Gravity.CENTER_HORIZONTAL | Gravity.CENTER_VERTICAL);
             updateItems();
             setItemsVisible(mState.value);
             return mItems;

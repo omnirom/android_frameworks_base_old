@@ -21,6 +21,7 @@ import android.content.Intent;
 import android.content.res.Resources;
 import android.provider.Settings;
 import android.util.Log;
+import android.view.Gravity;
 import android.view.View;
 import android.view.ViewGroup;
 
@@ -284,6 +285,7 @@ public class WifiTile extends QSTile<QSTile.SignalState> {
             mItems.setEmptyState(R.drawable.ic_qs_wifi_detail_empty,
                     R.string.quick_settings_wifi_detail_empty_text);
             mItems.setMinHeightInItems(0);
+            mItems.setGravity(Gravity.CENTER_HORIZONTAL | Gravity.CENTER_VERTICAL);
             updateItems();
             setItemsVisible(mState.enabled);
             return mItems;
