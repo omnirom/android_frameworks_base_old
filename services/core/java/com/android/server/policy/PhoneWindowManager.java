@@ -2943,7 +2943,9 @@ public class PhoneWindowManager implements WindowManagerPolicy {
 
             // Remember that home is pressed and handle special actions.
             if (repeatCount == 0) {
-                playSoundEffect(SoundEffectConstants.CLICK);
+                if (!virtualKey) {
+                    playSoundEffect(SoundEffectConstants.CLICK);
+                }
                 mHomePressed = true;
                 if (mHomeDoubleTapPending) {
                     mHomeDoubleTapPending = false;
