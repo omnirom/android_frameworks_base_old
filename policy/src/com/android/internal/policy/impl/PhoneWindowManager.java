@@ -5236,6 +5236,7 @@ public class PhoneWindowManager implements WindowManagerPolicy {
         if (isValidGlobalKey(keyCode)
                 && mGlobalKeyManager.shouldHandleGlobalKey(keyCode, event)) {
             if (isWakeKey) {
+                mWakeKeyTriggered = isCustomWakeKey(keyCode);
                 wakeUp(event.getEventTime(), mAllowTheaterModeWakeFromKey);
             }
             return result;
@@ -5497,6 +5498,7 @@ public class PhoneWindowManager implements WindowManagerPolicy {
         }
 
         if (isWakeKey) {
+            mWakeKeyTriggered = isCustomWakeKey(keyCode);
             wakeUp(event.getEventTime(), mAllowTheaterModeWakeFromKey);
         }
 
