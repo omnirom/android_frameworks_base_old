@@ -69,6 +69,8 @@ public final class ShutdownThread extends Thread {
     private static boolean mReboot;
     private static boolean mRebootSafeMode;
     private static String mRebootReason;
+    private static boolean mConfirmOverride =
+            SystemProperties.getBoolean("ro.config.shutdown.confirm", false);
 
     // Provides shutdown assurance in case the system_server is killed
     public static final String SHUTDOWN_ACTION_PROPERTY = "sys.shutdown.requested";
@@ -134,7 +136,7 @@ public final class ShutdownThread extends Thread {
         }
         Log.d(TAG, "Notifying thread to start shutdown longPressBehavior=" + longPressBehavior);
 
-        if (confirm) {
+        if (confirm || mConfirmOverride) {
             final CloseDialogReceiver closer = new CloseDialogReceiver(context);
             if (sConfirmDialog != null) {
                 sConfirmDialog.dismiss();
