@@ -18,7 +18,7 @@
     <item android:state_pressed="true"
         android:drawable="@drawable/ic_global_dnd_alarms_white"/>
     <item android:state_selected="true"
-        android:drawable="@drawable/ic_global_dnd_alarms_white"/>
+        android:drawable="@drawable/ic_global_dnd_alarms_tint"/>
     <item android:drawable="@drawable/ic_global_dnd_alarms_tint" />
 </selector>
 
