@@ -19,8 +19,8 @@
     android:layout_height="wrap_content"
     android:minHeight="?android:attr/listPreferredItemHeight"
     android:orientation="horizontal"
-    android:paddingStart="10dp"
-    android:paddingEnd="10dp"
+    android:paddingStart="12dp"
+    android:paddingEnd="12dp"
     android:background="?android:attr/actionBarItemBackground" >
 
     <LinearLayout
@@ -37,7 +37,7 @@
             android:src="@drawable/ic_global_dnd_total_silence"
             android:scaleType="center"
             android:duplicateParentState="true"
-            android:background="@drawable/global_action_indicator_oval"
+            android:background="@drawable/global_action_indicator_ring"
             />
     </LinearLayout>
     <!-- Spacer -->
@@ -60,7 +60,7 @@
             android:src="@drawable/ic_global_dnd_alarms"
             android:scaleType="center"
             android:duplicateParentState="true"
-            android:background="@drawable/global_action_indicator_oval"
+            android:background="@drawable/global_action_indicator_ring"
             />
     </LinearLayout>
 
@@ -84,7 +84,7 @@
             android:src="@drawable/ic_global_dnd_important"
             android:scaleType="center"
             android:duplicateParentState="true"
-            android:background="@drawable/global_action_indicator_oval"
+            android:background="@drawable/global_action_indicator_ring"
             />
     </LinearLayout>
 
@@ -108,7 +108,7 @@
             android:src="@drawable/ic_global_dnd_off"
             android:scaleType="center"
             android:duplicateParentState="true"
-            android:background="@drawable/global_action_indicator_oval"
+            android:background="@drawable/global_action_indicator_ring"
             />
     </LinearLayout>
 

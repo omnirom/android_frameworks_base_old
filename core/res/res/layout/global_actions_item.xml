@@ -22,8 +22,6 @@
     android:minHeight="?android:attr/listPreferredItemHeight"
     android:orientation="horizontal"
     android:paddingStart="10dip"
-    android:paddingTop="6dip"
-    android:paddingBottom="6dip"
     android:background="?android:attr/selectableItemBackground"
     >
     <ImageView android:id="@+id/icon"
@@ -44,7 +42,6 @@
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:layout_gravity="top"
-
             android:gravity="center_vertical"
             android:textColor="@color/global_actions_text_color"
             android:textAppearance="?android:attr/textAppearanceMedium"
@@ -53,7 +50,6 @@
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:layout_gravity="bottom"
-            android:minHeight="26dp"
             android:textColor="@color/global_actions_text_color"
             android:textAppearance="?android:attr/textAppearanceSmall"
             />

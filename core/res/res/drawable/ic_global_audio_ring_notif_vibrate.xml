@@ -19,7 +19,7 @@
     <item android:state_pressed="true"
         android:drawable="@drawable/ic_global_audio_ring_notif_vibrate_white" />
     <item android:state_selected="true"
-        android:drawable="@drawable/ic_global_audio_ring_notif_vibrate_white" />
+        android:drawable="@drawable/ic_global_audio_ring_notif_vibrate_tint" />
     <item android:drawable="@drawable/ic_global_audio_ring_notif_vibrate_tint" />
 </selector>
 
