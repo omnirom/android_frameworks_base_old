@@ -57,9 +57,25 @@
                 android:layout_alignTop="@id/clock_view"
                 android:layout_alignBottom="@id/clock_view"
                 android:layout_toEndOf="@id/clock_view"
-                android:visibility="invisible"
+                android:visibility="gone"
                 android:src="@drawable/ic_aod_charging_24dp"
                 android:contentDescription="@string/accessibility_ambient_display_charging"
+            />
+
+            <TextView
+               android:id="@+id/ambient_display_battery_view"
+               android:layout_width="wrap_content"
+               android:layout_height="wrap_content"
+               android:layout_alignTop="@id/clock_view"
+               android:layout_alignBottom="@id/clock_view"
+               android:layout_toEndOf="@id/clock_view"
+               android:layout_weight="1"
+               android:gravity="center"
+               android:drawablePadding="6dp"
+               android:drawableStart="@drawable/ic_battery_full"
+               android:textColor="?attr/wallpaperTextColor"
+               style="@style/widget_label"
+               android:visibility="gone"
             />
 
             <include layout="@layout/keyguard_status_area"
