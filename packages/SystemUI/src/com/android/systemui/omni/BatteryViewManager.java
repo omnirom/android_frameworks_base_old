@@ -65,6 +65,7 @@ public class BatteryViewManager implements TunerService.Tunable {
     public static final int BATTERY_LOCATION_STATUSBAR = 0;
     public static final int BATTERY_LOCATION_KEYGUARD = 1;
     public static final int BATTERY_LOCATION_QSPANEL = 2;
+    public static final int BATTERY_LOCATION_AMBIENT = 3;
 
     private ContentObserver mSettingsObserver = new ContentObserver(mHandler) {
         @Override
@@ -159,7 +160,9 @@ public class BatteryViewManager implements TunerService.Tunable {
         ViewGroup.MarginLayoutParams lp = new ViewGroup.MarginLayoutParams(
                         ViewGroup.LayoutParams.WRAP_CONTENT,
                         ViewGroup.LayoutParams.MATCH_PARENT);
-        if (mCurrentBatteryView.isWithTopMargin() && mLocation != BATTERY_LOCATION_KEYGUARD) {
+        if (mCurrentBatteryView.isWithTopMargin()
+                && mLocation != BATTERY_LOCATION_KEYGUARD
+                && mLocation != BATTERY_LOCATION_AMBIENT) {
             lp.setMargins(0, top, 0, 0);
         }
         mContainerView.addView((View) mCurrentBatteryView, lp);
@@ -172,10 +175,10 @@ public class BatteryViewManager implements TunerService.Tunable {
     }
 
     private void applyStyle() {
-        mCurrentBatteryView.setPercentInside(mPercentInside);
+        mCurrentBatteryView.setPercentInside(mLocation != BATTERY_LOCATION_AMBIENT && mPercentInside);
         mCurrentBatteryView.setChargingImage(mChargingImage);
         mCurrentBatteryView.setChargingColor(mChargingColor);
-        mCurrentBatteryView.setChargingColorEnable(mChargingColorEnable);
+        mCurrentBatteryView.setChargingColorEnable(mLocation != BATTERY_LOCATION_AMBIENT && mChargingColorEnable);
         mCurrentBatteryView.setDottedLine(mDottedLine);
         mCurrentBatteryView.applyStyle();
     }
@@ -240,11 +243,14 @@ public class BatteryViewManager implements TunerService.Tunable {
         if (isShowPercent() || mBatteryStyle == 3) {
             if (!showing) {
                 mBatteryPercentView = loadPercentView();
-                mContainerView.addView(mBatteryPercentView,
-                        0,
-                        new ViewGroup.LayoutParams(
-                                ViewGroup.LayoutParams.WRAP_CONTENT,
-                                ViewGroup.LayoutParams.MATCH_PARENT));
+                ViewGroup.MarginLayoutParams lp = new ViewGroup.MarginLayoutParams(
+                        ViewGroup.LayoutParams.WRAP_CONTENT,
+                        ViewGroup.LayoutParams.MATCH_PARENT);
+                if (mLocation == BATTERY_LOCATION_AMBIENT) {
+                    int margin = mContext.getResources().getDimensionPixelSize(R.dimen.battery_margin_ambient);
+                    lp.setMargins(0, 0, margin, 0);
+                }
+                mContainerView.addView(mBatteryPercentView, 0, lp);
             }
         } else {
             if (showing) {
@@ -257,15 +263,21 @@ public class BatteryViewManager implements TunerService.Tunable {
 
     @Override
     public void onTuningChanged(String key, String newValue) {
-        if (StatusBarIconController.ICON_BLACKLIST.equals(key)) {
+        if (StatusBarIconController.ICON_BLACKLIST.equals(key) && mLocation == BATTERY_LOCATION_STATUSBAR) {
             ArraySet<String> icons = StatusBarIconController.getIconBlacklist(newValue);
             boolean hidden = icons.contains(mSlotBattery);
             Dependency.get(IconLogger.class).onIconVisibility(mSlotBattery, !hidden);
-            mContainerView.setVisibility(hidden ? View.GONE : View.VISIBLE);
+            setBatteryVisibility(!hidden);
         }
     }
 
     private boolean isShowPercent() {
-        return (mForceShowPercent && mLocation != BATTERY_LOCATION_STATUSBAR) || mShowPercent;
+        return (mForceShowPercent && mLocation != BATTERY_LOCATION_STATUSBAR)
+                || mShowPercent
+                || (mLocation == BATTERY_LOCATION_AMBIENT);
+    }
+
+    public void setBatteryVisibility(boolean visible) {
+        mContainerView.setVisibility(!visible ? View.GONE : View.VISIBLE);
     }
 }
