@@ -4658,6 +4658,12 @@ public final class Settings {
                 "long_press_power_torch";
 
         /**
+         * Defines the global heads up notification snooze
+         * @hide
+         */
+        public static final String HEADS_UP_NOTIFICATION_SNOOZE = "heads_up_notification_snooze";
+
+        /**
          * Settings to backup. This is here so that it's in the same place as the settings
          * keys and easy to update.
          *
@@ -5019,6 +5025,7 @@ public final class Settings {
             PRIVATE_SETTINGS.add(ASPECT_RATIO_APPS_LIST);
             PRIVATE_SETTINGS.add(ASPECT_RATIO_APPS_ENABLED);
             PRIVATE_SETTINGS.add(NAVIGATION_BAR_MENU_ARROW_KEYS);
+            PRIVATE_SETTINGS.add(HEADS_UP_NOTIFICATION_SNOOZE);
         }
 
         /**
