@@ -50,15 +50,19 @@ public class KeyguardSimPinView extends KeyguardPinBasedInputView {
 
     private ProgressDialog mSimUnlockProgressDialog = null;
     private CheckSimPin mCheckSimPinThread;
-
+    private boolean mShowDefaultMessage = true;
+    private int mRemainingAttempts = -1;
+    private int mResult = PhoneConstants.PIN_PASSWORD_INCORRECT;
     private AlertDialog mRemainingAttemptsDialog;
     private int mSubId;
+    private int mSlotId;
     private ImageView mSimImageView;
 
     KeyguardUpdateMonitorCallback mUpdateMonitorCallback = new KeyguardUpdateMonitorCallback() {
         @Override
         public void onSimStateChanged(int subId, int slotId, State simState) {
            if (DEBUG) Log.v(TAG, "onSimStateChanged(subId=" + subId + ",state=" + simState + ")");
+           mSlotId = slotId + 1;
            resetState();
        };
     };
@@ -74,25 +78,8 @@ public class KeyguardSimPinView extends KeyguardPinBasedInputView {
     public void resetState() {
         super.resetState();
         if (DEBUG) Log.v(TAG, "Resetting state");
-        KeyguardUpdateMonitor monitor = KeyguardUpdateMonitor.getInstance(mContext);
-        mSubId = monitor.getNextSubIdForState(IccCardConstants.State.PIN_REQUIRED);
-        if (SubscriptionManager.isValidSubscriptionId(mSubId)) {
-            int count = TelephonyManager.getDefault().getSimCount();
-            Resources rez = getResources();
-            final String msg;
-            int color = Color.WHITE;
-            if (count < 2) {
-                msg = rez.getString(R.string.kg_sim_pin_instructions);
-            } else {
-                SubscriptionInfo info = monitor.getSubscriptionInfoForSubId(mSubId);
-                CharSequence displayName = info != null ? info.getDisplayName() : ""; // don't crash
-                msg = rez.getString(R.string.kg_sim_pin_instructions_multi, displayName);
-                if (info != null) {
-                    color = info.getIconTint();
-                }
-            }
-            mSecurityMessageDisplay.setMessage(msg, true);
-            mSimImageView.setImageTintList(ColorStateList.valueOf(color));
+        if (mShowDefaultMessage) {
+            showDefaultMessage();
         }
     }
 
@@ -108,17 +95,21 @@ public class KeyguardSimPinView extends KeyguardPinBasedInputView {
         return 0;
     }
 
-    private String getPinPasswordErrorMessage(int attemptsRemaining) {
+    private String getPinPasswordErrorMessage(int attemptsRemaining, boolean isDefault) {
         String displayMessage;
-
+        int msgId;
         if (attemptsRemaining == 0) {
             displayMessage = getContext().getString(R.string.kg_password_wrong_pin_code_pukked);
         } else if (attemptsRemaining > 0) {
-            displayMessage = getContext().getResources()
-                    .getQuantityString(R.plurals.kg_password_wrong_pin_code, attemptsRemaining,
-                            attemptsRemaining);
+            msgId = isDefault ? R.plurals.kg_password_default_pin_message :
+                     R.plurals.kg_password_wrong_pin_code;
+            displayMessage = isDefault ? getContext().getResources()
+                    .getQuantityString(msgId, attemptsRemaining, mSlotId, attemptsRemaining) :
+                     getContext().getResources().getQuantityString(msgId, attemptsRemaining
+                    , attemptsRemaining);
         } else {
-            displayMessage = getContext().getString(R.string.kg_password_pin_failed);
+            msgId = isDefault ? R.string.kg_sim_pin_instructions : R.string.kg_password_pin_failed;
+            displayMessage = getContext().getString(msgId);
         }
         if (DEBUG) Log.d(LOG_TAG, "getPinPasswordErrorMessage:"
                 + " attemptsRemaining=" + attemptsRemaining + " displayMessage=" + displayMessage);
@@ -150,6 +141,9 @@ public class KeyguardSimPinView extends KeyguardPinBasedInputView {
     @Override
     protected void onAttachedToWindow() {
         super.onAttachedToWindow();
+        if (mShowDefaultMessage) {
+            showDefaultMessage();
+        }
         KeyguardUpdateMonitor.getInstance(mContext).registerCallback(mUpdateMonitorCallback);
     }
 
@@ -228,7 +222,7 @@ public class KeyguardSimPinView extends KeyguardPinBasedInputView {
     }
 
     private Dialog getSimRemainingAttemptsDialog(int remaining) {
-        String msg = getPinPasswordErrorMessage(remaining);
+        String msg = getPinPasswordErrorMessage(remaining, false);
         if (mRemainingAttemptsDialog == null) {
             Builder builder = new AlertDialog.Builder(mContext);
             builder.setMessage(msg);
@@ -262,6 +256,8 @@ public class KeyguardSimPinView extends KeyguardPinBasedInputView {
                 void onSimCheckResponse(final int result, final int attemptsRemaining) {
                     post(new Runnable() {
                         public void run() {
+                            mRemainingAttempts = attemptsRemaining;
+                            mResult = result;
                             if (mSimUnlockProgressDialog != null) {
                                 mSimUnlockProgressDialog.hide();
                             }
@@ -269,8 +265,14 @@ public class KeyguardSimPinView extends KeyguardPinBasedInputView {
                             if (result == PhoneConstants.PIN_RESULT_SUCCESS) {
                                 KeyguardUpdateMonitor.getInstance(getContext())
                                         .reportSimUnlocked(mSubId);
-                                mCallback.dismiss(true);
+                                mResult = PhoneConstants.PIN_PASSWORD_INCORRECT;
+                                mRemainingAttempts = -1;
+                                mShowDefaultMessage = true;
+                                if (mCallback != null) {
+                                    mCallback.dismiss(true);
+                                }
                             } else {
+                                mShowDefaultMessage = false;
                                 if (result == PhoneConstants.PIN_PASSWORD_INCORRECT) {
                                     if (attemptsRemaining <= 2) {
                                         // this is getting critical - show dialog
@@ -278,7 +280,8 @@ public class KeyguardSimPinView extends KeyguardPinBasedInputView {
                                     } else {
                                         // show message
                                         mSecurityMessageDisplay.setMessage(
-                                                getPinPasswordErrorMessage(attemptsRemaining), true);
+                                                getPinPasswordErrorMessage(
+                                                attemptsRemaining, false), true);
                                     }
                                 } else {
                                     // "PIN operation failed!" - no idea what this was and no way to
@@ -308,6 +311,51 @@ public class KeyguardSimPinView extends KeyguardPinBasedInputView {
     @Override
     public boolean startDisappearAnimation(Runnable finishRunnable) {
         return false;
+    }
+
+    private void showDefaultMessage() {
+        KeyguardUpdateMonitor monitor = KeyguardUpdateMonitor.getInstance(mContext);
+        mSubId = monitor.getNextSubIdForState(IccCardConstants.State.PIN_REQUIRED);
+        if (!SubscriptionManager.isValidSubscriptionId(mSubId)) {
+            return;
+        }
+        if (mRemainingAttempts >= 0) {
+            if (mResult != PhoneConstants.PIN_RESULT_SUCCESS)
+                mSecurityMessageDisplay.setMessage(
+                        getPinPasswordErrorMessage(mRemainingAttempts, true),
+                        true);
+            return;
+        }
+
+        int count = TelephonyManager.getDefault().getSimCount();
+        Resources rez = getResources();
+        final String msg;
+        int color = Color.WHITE;
+        if (count < 2) {
+            msg = rez.getString(R.string.kg_sim_pin_instructions);
+        } else {
+            SubscriptionInfo info = monitor.getSubscriptionInfoForSubId(mSubId);
+            CharSequence displayName = info != null ? info.getDisplayName() : ""; // don't crash
+            msg = rez.getString(R.string.kg_sim_pin_instructions_multi, displayName);
+            if (info != null) {
+                color = info.getIconTint();
+            }
+        }
+        mSecurityMessageDisplay.setMessage(msg, true);
+        mSimImageView.setImageTintList(ColorStateList.valueOf(color));
+
+        new CheckSimPin("", mSubId) {
+            void onSimCheckResponse(final int result, final int attemptsRemaining) {
+                Log.d(LOG_TAG, "onSimCheckResponse " + " dummy One result" + result +
+                        " attemptsRemaining=" + attemptsRemaining);
+                if (attemptsRemaining >= 0) {
+                    mRemainingAttempts = attemptsRemaining;
+                    mResult = result;
+                    mSecurityMessageDisplay.setMessage(
+                            getPinPasswordErrorMessage(attemptsRemaining, true), true);
+                }
+            }
+        }.start();
     }
 }
 

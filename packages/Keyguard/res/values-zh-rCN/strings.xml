@@ -119,6 +119,10 @@
     <string name="kg_prompt_reason_switch_profiles_pattern" msgid="3802056699323773969">"切换资料后需要绘制图案。"</string>
     <string name="kg_prompt_reason_switch_profiles_pin" msgid="8108020184731052246">"切换资料后需要输入 PIN 码。"</string>
     <string name="kg_prompt_reason_switch_profiles_password" msgid="6755997057852042672">"切换资料后需要输入密码。"</string>
+    <plurals name="kg_password_default_pin_message">
+      <item quantity="one" msgid="8134313997799638254">"输入 SIM<xliff:g id="subid">%d</xliff:g> PIN，您还有<xliff:g id="NUMBER">%d</xliff:g>次尝试机会。如果仍然失败，则必须联系运营商帮您解锁设备。"</item>
+      <item quantity="other" msgid="2215723361575359486">"输入 SIM<xliff:g id="subid">%d</xliff:g> PIN，您还有<xliff:g id="NUMBER">%d</xliff:g>次尝试机会。"</item>
+    </plurals>
     <plurals name="kg_prompt_reason_time_pattern" formatted="false" msgid="2697444392228541853">
       <item quantity="other">设备已保持锁定状态达 <xliff:g id="NUMBER_1">%d</xliff:g> 小时。请确认解锁图案。</item>
       <item quantity="one">设备已保持锁定状态达 <xliff:g id="NUMBER_0">%d</xliff:g> 小时。请确认解锁图案。</item>

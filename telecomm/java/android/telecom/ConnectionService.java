@@ -103,6 +103,7 @@ public abstract class ConnectionService extends Service {
     private static final int MSG_SWAP_CONFERENCE = 19;
     private static final int MSG_REJECT_WITH_MESSAGE = 20;
     private static final int MSG_SILENCE = 21;
+    private static final int MSG_SET_LOCAL_HOLD = 22;
 
     private static Connection sNullConnection;
 
@@ -211,6 +212,14 @@ public abstract class ConnectionService extends Service {
         @Override
         public void stopDtmfTone(String callId) {
             mHandler.obtainMessage(MSG_STOP_DTMF_TONE, callId).sendToTarget();
+        }
+
+        @Override
+        public void setLocalCallHold(String callId, boolean lchState) {
+            SomeArgs args = SomeArgs.obtain();
+            args.arg1 = callId;
+            args.argi1 = lchState ? 1 : 0;
+            mHandler.obtainMessage(MSG_SET_LOCAL_HOLD, args).sendToTarget();
         }
 
         @Override
@@ -349,6 +358,17 @@ public abstract class ConnectionService extends Service {
                 case MSG_STOP_DTMF_TONE:
                     stopDtmfTone((String) msg.obj);
                     break;
+                case MSG_SET_LOCAL_HOLD: {
+                    SomeArgs args = (SomeArgs) msg.obj;
+                    try {
+                        String callId = (String) args.arg1;
+                        boolean lchStatus = (args.argi1 == 1);
+                        setLocalCallHold(callId, lchStatus);
+                    } finally {
+                        args.recycle();
+                    }
+                    break;
+                }
                 case MSG_CONFERENCE: {
                     SomeArgs args = (SomeArgs) msg.obj;
                     try {
@@ -772,6 +792,11 @@ public abstract class ConnectionService extends Service {
         } else {
             findConferenceForAction(callId, "stopDtmfTone").onStopDtmfTone();
         }
+    }
+
+    private void setLocalCallHold(String callId, boolean lchStatus) {
+        Log.d(this, "setLocalCallHold %s", callId);
+        findConnectionForAction(callId, "setLocalCallHold").setLocalCallHold(lchStatus);
     }
 
     private void conference(String callId1, String callId2) {
