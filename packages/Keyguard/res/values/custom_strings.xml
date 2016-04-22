@@ -22,4 +22,10 @@
     <!-- Description of the Random button in a KeyboardView. [CHAR LIMIT=NONE] -->
     <string name="keyboardview_keycode_random">Reload random buttons</string>
 
+    <!-- Instructions telling the user remaining times when enter SIM PIN view.  -->
+    <plurals name="kg_password_default_pin_message">
+        <item quantity="one">Enter SIM<xliff:g id="subid">%d</xliff:g> PIN, you have <xliff:g id="number">%d</xliff:g> remaining attempt before you must contact your carrier to unlock your device.</item>
+        <item quantity="other">Enter SIM<xliff:g id="subid">%d</xliff:g> PIN, you have <xliff:g id="number">%d</xliff:g> remaining attempts.</item>
+    </plurals>
+
 </resources>
