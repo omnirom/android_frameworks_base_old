@@ -26,6 +26,11 @@
   <string name="global_action_reboot_recovery">Obnovitev</string>
   <string name="global_action_reboot_bootloader">Zagonski nalagalnik</string>
   <string name="global_action_users">Uporabniki \u2026</string>
+  <string name="global_action_screenshot">Zaslonska slika</string>
+  <string name="global_action_screenrecord">Zaslonski posnetek</string>
+  <string name="global_action_torch_on">Svetilka je VKLOPLJENA</string>
+  <string name="global_action_torch_off">Svetilka je IZKLOPLJENA</string>
+  <string name="global_actions_toggle_torch_mode">Svetilka</string>
   <!-- advanced reboot to bootloader. -->
   <string name="reboot_to_bootloader_title">Ponovno zaženi zagonski nalagalnik</string>
   <string name="reboot_to_bootloader_message">Ponovno zaganjanje \u2026</string>

@@ -18,12 +18,39 @@
 -->
 <resources xmlns:xliff="urn:oasis:names:tc:xliff:document:1.2">
   <!-- Screenrecord Notification Ticker -->
+  <string name="screenrecord_notif_ticker">Tela está sendo gravada</string>
   <!-- Screenrecord notification title -->
+  <string name="screenrecord_notif_title">Tela de gravação</string>
   <!-- Screenrecord notification action: Stop -->
+  <string name="screenrecord_notif_stop">Pare</string>
   <!-- Screenrecord notification action: show/hide pointer -->
+  <string name="screenrecord_notif_pointer_on">Mostrar o ponteiro</string>
+  <string name="screenrecord_notif_pointer_off">Ocultar o ponteiro</string>
   <!-- Screen record notification error title -->
+  <string name="screenrecord_notif_error">Não é possível gravar tela</string>
   <!-- mount notifications -->
+  <string name="ext_media_mounted_notification_title">montado</string>
+  <string name="ext_media_unmounted_notification_title">desmontado</string>
+  <string name="ext_media_unmounted_notification_message">Você pode remover com segurança o armazenamento.</string>
+  <string name="ext_media_unmount_action">Desmonte</string>
+  <string name="ext_media_mount_action">Monte</string>
+  <string name="ext_media_unmounting_notification_title">desmontado\u2026</string>
+  <string name="ext_media_mounting_notification_title">montado\u2026</string>
   <!-- Battery Saver Dimss -->
+  <string name="battery_saver_dismiss_title">Descartar</string>
+  <string name="battery_saver_notification_action_text_short">Desativar</string>
   <!-- Screen pinning dialog description when in accessibility mode. -->
+  <string name="screen_pinning_description_back">Isso vai mantém-lo na em vista até que você desassociar. Toque e segure Voltar para desassociar.</string>
   <!-- tuner -->
+  <string name="status_bar_icons">Ícones da barra de status</string>
+  <string name="qs_equal_tile_title">Tamanho igual</string>
+  <string name="qs_equal_tile_summary">Usar o mesmo tamanho para os atalhos</string>
+  <string name="qs_settings">Configurações</string>
+  <string name="qs_tile_columns_title">Colunas</string>
+  <string name="qs_tile_columns_three">3</string>
+  <string name="qs_tile_columns_four">4</string>
+  <string name="qs_tile_bg_opacity_title">Opacidade do fundo</string>
+  <string name="status_bar_silent">Modo silencioso</string>
+  <!-- NFC QS tile -->
+  <string name="quick_settings_nfc_label">NFC</string>
 </resources>

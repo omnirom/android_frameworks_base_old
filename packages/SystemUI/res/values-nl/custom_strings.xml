@@ -43,4 +43,5 @@
   <string name="screen_pinning_description_back">Dit zorgt ervoor dat het scherm blijft staan tot u hem weer losmaakt. Druk en houd terug in om hem los te maken.</string>
   <!-- tuner -->
   <string name="status_bar_icons">Statusbar icoontjes</string>
+  <!-- NFC QS tile -->
 </resources>

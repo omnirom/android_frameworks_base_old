@@ -26,6 +26,11 @@
   <string name="global_action_reboot_recovery">Recovery</string>
   <string name="global_action_reboot_bootloader">Bootloader</string>
   <string name="global_action_users">Felhasználók\u2026</string>
+  <string name="global_action_screenshot">Képernyőmentés</string>
+  <string name="global_action_screenrecord">Képernyő felvétel</string>
+  <string name="global_action_torch_on">Zseblámpa BEKAPCSOLVA</string>
+  <string name="global_action_torch_off">Zseblámpa KIKAPCSOLVA</string>
+  <string name="global_actions_toggle_torch_mode">Zseblámpa</string>
   <!-- advanced reboot to bootloader. -->
   <string name="reboot_to_bootloader_title">Újraindítás: bootloader</string>
   <string name="reboot_to_bootloader_message">Újraindítás\u2026</string>

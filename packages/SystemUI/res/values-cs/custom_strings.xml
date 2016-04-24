@@ -50,4 +50,7 @@
   <string name="qs_tile_columns_three">3</string>
   <string name="qs_tile_columns_four">4</string>
   <string name="qs_tile_bg_opacity_title">Průhlednost pozadí</string>
+  <string name="status_bar_silent">Tichý režim</string>
+  <!-- NFC QS tile -->
+  <string name="quick_settings_nfc_label">NFC</string>
 </resources>
