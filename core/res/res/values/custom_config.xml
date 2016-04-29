@@ -82,4 +82,7 @@
          policy/src/com/android/internal/policy/impl/PhoneWindowManager.java
     -->
     <integer name="config_longPressOnMenuBehavior">0</integer>
+
+    <!-- Boolean to indicate that the device is WiFi only -->
+    <bool name="config_device_wifi_only">false</bool>
 </resources>
