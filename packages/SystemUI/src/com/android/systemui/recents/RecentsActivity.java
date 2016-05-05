@@ -192,7 +192,7 @@ public class RecentsActivity extends Activity implements RecentsView.RecentsView
 
         // Start loading tasks according to the load plan
         if (plan.getTaskStack() == null) {
-            loader.preloadTasks(plan, mConfig.launchedFromHome);
+            loader.preloadTasks(plan, true);
         }
         RecentsTaskLoadPlan.Options loadOpts = new RecentsTaskLoadPlan.Options();
         loadOpts.runningTaskId = mConfig.launchedToTaskId;
