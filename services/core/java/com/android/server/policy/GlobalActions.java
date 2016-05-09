@@ -1618,32 +1618,9 @@ class GlobalActions implements DialogInterface.OnDismissListener, DialogInterfac
             }
         };
 
-        @Override
-        public boolean showDuringKeyguard() {
-            return true;
-        }
-
-        @Override
-        public boolean showDuringRestrictedKeyguard() {
-            return true;
-        }
-
-        @Override
-        public boolean showBeforeProvisioning() {
-            return true;
-        }
-
-        @Override
-        public boolean showForCurrentUser() {
-            return true;
-        }
-
-        @Override
-        public void onPress() {
-            synchronized (mScreenshotLock) {
-                if (mScreenshotConnection != null) {
-                    return;
-                }
+        final Runnable mScreenshotTrigger = new Runnable() {
+            @Override
+            public void run() {
                 ComponentName cn = new ComponentName("com.android.systemui",
                         "com.android.systemui.screenshot.TakeScreenshotService");
                 Intent intent = new Intent();
@@ -1687,6 +1664,36 @@ class GlobalActions implements DialogInterface.OnDismissListener, DialogInterfac
                     mScreenshotConnection = conn;
                     mHandler.postDelayed(mScreenshotTimeout, 10000);
                 }
+            }
+        };
+
+        @Override
+        public boolean showDuringKeyguard() {
+            return true;
+        }
+
+        @Override
+        public boolean showDuringRestrictedKeyguard() {
+            return true;
+        }
+
+        @Override
+        public boolean showBeforeProvisioning() {
+            return true;
+        }
+
+        @Override
+        public boolean showForCurrentUser() {
+            return true;
+        }
+
+        @Override
+        public void onPress() {
+            synchronized (mScreenshotLock) {
+                if (mScreenshotConnection != null) {
+                    return;
+                }
+                mHandler.postDelayed(mScreenshotTrigger, 1000);
             }
         }
     }
