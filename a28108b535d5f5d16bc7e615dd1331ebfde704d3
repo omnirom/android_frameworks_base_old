@@ -1,0 +1,21 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "98faad2e_f8081833",
+        "filename": "services/core/java/com/android/server/policy/GlobalActions.java",
+        "patchSetId": 3
+      },
+      "lineNbr": 1693,
+      "author": {
+        "id": 1000026
+      },
+      "writtenOn": "2016-05-11T11:26:01Z",
+      "side": 1,
+      "message": "need a better way to prevent reentering this",
+      "revId": "a28108b535d5f5d16bc7e615dd1331ebfde704d3",
+      "serverId": "56841c99-7c94-43d4-bf0b-cb4707e66d55",
+      "unresolved": false
+    }
+  ]
+}
