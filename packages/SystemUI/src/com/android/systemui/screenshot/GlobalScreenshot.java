@@ -59,6 +59,7 @@ import android.view.animation.Interpolator;
 import android.widget.ImageView;
 
 import com.android.systemui.R;
+import com.android.systemui.screenshot.ScreenshotEditor;
 
 import java.io.File;
 import java.io.FileOutputStream;
@@ -119,6 +120,8 @@ class SaveImageInBackgroundTask extends AsyncTask<SaveImageInBackgroundData, Voi
     // necessary.
     private static boolean mTickerAddSpace;
 
+    private boolean mIsScreenshotCropShareEnabled;
+
     SaveImageInBackgroundTask(Context context, SaveImageInBackgroundData data,
             NotificationManager nManager, int nId) {
         Resources r = context.getResources();
@@ -131,6 +134,7 @@ class SaveImageInBackgroundTask extends AsyncTask<SaveImageInBackgroundData, Voi
         mScreenshotDir = new File(Environment.getExternalStoragePublicDirectory(
                 Environment.DIRECTORY_PICTURES), SCREENSHOTS_DIR_NAME);
         mImageFilePath = new File(mScreenshotDir, mImageFileName).getAbsolutePath();
+        mIsScreenshotCropShareEnabled = Settings.System.getInt(context.getContentResolver(), Settings.System.SCREENSHOT_CROP_AND_SHARE, 0) != 0;
 
         // Create the large notification icon
         mImageWidth = data.image.getWidth();
@@ -199,7 +203,9 @@ class SaveImageInBackgroundTask extends AsyncTask<SaveImageInBackgroundData, Voi
 
         Notification n = mNotificationBuilder.build();
         n.flags |= Notification.FLAG_NO_CLEAR;
-        mNotificationManager.notify(nId, n);
+
+        if(!mIsScreenshotCropShareEnabled)
+                mNotificationManager.notify(nId, n);
 
         // On the tablet, the large icon makes the notification appear as if it is clickable (and
         // on small devices, the large icon is not shown) so defer showing the large icon until
@@ -255,7 +261,7 @@ class SaveImageInBackgroundTask extends AsyncTask<SaveImageInBackgroundData, Voi
             values.put(MediaStore.Images.ImageColumns.SIZE, new File(mImageFilePath).length());
             Uri uri = resolver.insert(MediaStore.Images.Media.EXTERNAL_CONTENT_URI, values);
 
-            // Create a share intent
+        // Create a share intent
             String subjectDate = DateFormat.getDateTimeInstance().format(new Date(mImageTime));
             String subject = String.format(SCREENSHOT_SHARE_SUBJECT_TEMPLATE, subjectDate);
             Intent sharingIntent = new Intent(Intent.ACTION_SEND);
@@ -318,7 +324,7 @@ class SaveImageInBackgroundTask extends AsyncTask<SaveImageInBackgroundData, Voi
             GlobalScreenshot.notifyScreenshotError(params.context, mNotificationManager);
         } else {
             // Show the final notification to indicate screenshot saved
-            Resources r = params.context.getResources();
+             Resources r = params.context.getResources();
 
             // Create the intent to show the screenshot in gallery
             Intent launchIntent = new Intent(Intent.ACTION_VIEW);
@@ -350,7 +356,15 @@ class SaveImageInBackgroundTask extends AsyncTask<SaveImageInBackgroundData, Voi
 
             Notification n = mNotificationBuilder.build();
             n.flags &= ~Notification.FLAG_NO_CLEAR;
-            mNotificationManager.notify(mNotificationId, n);
+
+            if(!mIsScreenshotCropShareEnabled){
+                   mNotificationManager.notify(mNotificationId, n);
+            } else{
+                    Intent startIntent = new Intent(params.context, com.android.systemui.screenshot.ScreenshotEditor.class);
+                    startIntent.putExtra("screenshotPath", mImageFilePath);
+                    params.context.startService(startIntent);
+            }
+
         }
         params.finisher.run();
         params.clearContext();
