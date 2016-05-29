@@ -15,18 +15,10 @@
   You should have received a copy of the GNU General Public License
   along with this program.  If not, see <http://www.gnu.org/licenses/>.
 -->
-<resources>
-
-    <dimen name="keyguard_shortcut_item_margin">10dp</dimen>
-
-    <dimen name="battery_level_text_size_small">12sp</dimen>
-
-    <dimen name="fab_margin">16dp</dimen>
-
-    <dimen name="text_size_m">24sp</dimen>
-    <dimen name="text_size_s">17sp</dimen>
-    <dimen name="button_height">40dp</dimen>
-
-    <dimen name="crop_buttons">48dp</dimen>
-    <dimen name="crop_color_rect">32dp</dimen>
-</resources>
+<shape xmlns:android="http://schemas.android.com/apk/res/android"
+    android:shape="rectangle" >
+    <solid android:color="@android:color/white" />
+    <stroke
+        android:width="2dp"
+        android:color="#40000000" />
+</shape>
