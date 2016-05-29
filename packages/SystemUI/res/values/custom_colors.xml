@@ -16,14 +16,19 @@
   along with this program.  If not, see <http://www.gnu.org/licenses/>.
 -->
 <resources>
+    <color name="crop_primary">#3F51B5</color>
+    <color name="crop_colorAccent">#FF4081</color>
+    <color name="handle">#E0E0E0</color>
+    <color name="frame">#E0E0E0</color>
+    <color name="guide">#E0E0E0</color>
 
-    <dimen name="keyguard_shortcut_item_margin">10dp</dimen>
+    <color name="draw_color_1">@android:color/white</color>
+    <color name="draw_color_2">@android:color/black</color>
+    <color name="draw_color_3">#9E9E9E</color>
+    <color name="draw_color_4">#F44336</color>
+    <color name="draw_color_5">#4CAF50</color>
+    <color name="draw_color_6">#2196F3</color>
+    <color name="draw_color_7">#FF9800</color>
+    <color name="draw_color_8">#FFEB3B</color>
 
-    <dimen name="battery_level_text_size_small">12sp</dimen>
-
-    <dimen name="fab_margin">16dp</dimen>
-
-    <dimen name="text_size_m">24sp</dimen>
-    <dimen name="text_size_s">17sp</dimen>
-    <dimen name="button_height">40dp</dimen>
 </resources>
