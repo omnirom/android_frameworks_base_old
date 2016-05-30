@@ -124,6 +124,7 @@ public class NumPadKey extends ViewGroup {
                 String klondike = sKlondike[mDigit];
                 final int len = klondike.length();
                 if (len > 0) {
+                    mKlondikeText.setVisibility(View.VISIBLE);
                     mKlondikeText.setText(klondike);
                 } else {
                     mKlondikeText.setVisibility(View.INVISIBLE);
