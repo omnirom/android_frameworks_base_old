@@ -25,4 +25,14 @@
         <item>@string/qs_tile_columns_three</item>
         <item>@string/qs_tile_columns_four</item>
     </string-array>
+
+    <!-- those are dpi values! -->
+    <string-array name="crop_pen_size_entries" translatable="false">
+        <item>1</item>
+        <item>2</item>
+        <item>5</item>
+        <item>10</item>
+        <item>20</item>
+        <item>40</item>
+    </string-array>
 </resources>
