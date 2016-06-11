@@ -48,7 +48,9 @@ import android.widget.FrameLayout;
 import android.widget.TextView;
 
 import com.android.internal.logging.MetricsLogger;
+import com.android.internal.widget.LockPatternUtils;
 import com.android.keyguard.KeyguardStatusView;
+import com.android.keyguard.KeyguardUpdateMonitor;
 import com.android.keyguard.omni.CustomLockClock;
 import com.android.systemui.DejankUtils;
 import com.android.systemui.EventLogConstants;
@@ -210,6 +212,10 @@ public class NotificationPanelView extends PanelView implements
     private String mLastCameraLaunchSource = KeyguardBottomAreaView.CAMERA_LAUNCH_SOURCE_AFFORDANCE;
     private float mLastAlpha = -1;
 
+    // Omni additions
+    private boolean mLockScreenQsDisabled;
+    private LockPatternUtils mLockPatternUtils;
+
     private Runnable mHeadsUpExistenceChangedRunnable = new Runnable() {
         @Override
         public void run() {
@@ -225,6 +231,7 @@ public class NotificationPanelView extends PanelView implements
     public NotificationPanelView(Context context, AttributeSet attrs) {
         super(context, attrs);
         setWillNotDraw(!DEBUG);
+        mLockPatternUtils = new LockPatternUtils(context);
     }
 
     public void setStatusBar(PhoneStatusBar bar) {
@@ -475,7 +482,7 @@ public class NotificationPanelView extends PanelView implements
     }
 
     public void setQsExpansionEnabled(boolean qsExpansionEnabled) {
-        mQsExpansionEnabled = qsExpansionEnabled;
+        mQsExpansionEnabled = qsExpansionEnabled && !isLockScreenQsDisabled();
         mHeader.setClickable(qsExpansionEnabled);
     }
 
@@ -813,7 +820,7 @@ public class NotificationPanelView extends PanelView implements
                 && (event.isButtonPressed(MotionEvent.BUTTON_SECONDARY)
                         || event.isButtonPressed(MotionEvent.BUTTON_TERTIARY));
 
-        return twoFingerDrag || stylusButtonClickDrag || mouseButtonClickDrag;
+        return !isLockScreenQsDisabled() && (twoFingerDrag || stylusButtonClickDrag || mouseButtonClickDrag);
     }
 
     private void handleQsDown(MotionEvent event) {
@@ -2485,10 +2492,21 @@ public class NotificationPanelView extends PanelView implements
         }
     }
 
+    private boolean isLockScreenQsDisabled() {
+        final boolean keyguardOrShadeShowing = mStatusBarState == StatusBarState.KEYGUARD
+                || mStatusBarState == StatusBarState.SHADE_LOCKED;
+        return mLockPatternUtils.isSecure(KeyguardUpdateMonitor.getCurrentUser()) && mLockScreenQsDisabled &&
+                keyguardOrShadeShowing;
+    }
+
     public void updateSettings() {
         final int qsAlphaValue = Settings.System.getIntForUser(
                 mContext.getContentResolver(), Settings.System.QS_TILE_BG_OPACITY, 255,
                 UserHandle.USER_CURRENT);
         setQSBackgroundAlpha(qsAlphaValue);
+
+        mLockScreenQsDisabled = Settings.Secure.getIntForUser(
+                mContext.getContentResolver(), Settings.Secure.LOCK_SCREEN_QS_DISABLED, 0,
+                UserHandle.USER_CURRENT) != 0;
     }
 }
