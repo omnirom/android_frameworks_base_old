@@ -5176,16 +5176,10 @@ public final class Settings {
         public static final String LOCK_NUMPAD_RANDOM = "lock_numpad_random";
 
         /**
-         * Quick unlock for Keyguard
-         * @hide
-         */
-        public static final String KEYGUARD_QUICK_UNLOCK = "keyguard_quick_unlock";
-
-        /**
          * Enable voice lockscreen shortcut
          * @hide
          */
-        public static final String LOCKSCREEN_VOICE_SHORTCUT = "lockscreen_voice_shortcut";
+        public static final String LOCK_VOICE_SHORTCUT = "lockscreen_voice_shortcut";
 
         /**
          * @hide
@@ -5206,6 +5200,13 @@ public final class Settings {
          * @hide
          */
         public static final String LOCK_LEFT_SHORTCUT_ENABLE = "lockscreen_left_shortcut_enable";
+
+        /**
+         * Disable expanding quick settings on secure lock screens
+         *
+         * @hide
+         */
+        public static final String LOCK_QS_DISABLED = "lockscreen_qs_disabled";
 
         /**
          * Whether lock pattern will vibrate as user enters (0 = false, 1 =
