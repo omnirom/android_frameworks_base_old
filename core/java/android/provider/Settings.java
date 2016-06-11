@@ -6460,6 +6460,12 @@ public final class Settings {
                 "camera_double_tap_power_gesture_disabled";
 
         /**
+         *
+         * @hide
+         */
+        public static final String LOCK_SCREEN_QS_DISABLED = "lock_screen_qs_disabled";
+
+        /**
          * This are the settings to be backed up.
          *
          * NOTE: Settings are backed up and restored in the order they appear
