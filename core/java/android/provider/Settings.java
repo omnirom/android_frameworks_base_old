@@ -6460,6 +6460,13 @@ public final class Settings {
                 "camera_double_tap_power_gesture_disabled";
 
         /**
+         * Disable expanding quick settings on secure lock screens
+         *
+         * @hide
+         */
+        public static final String LOCKSCREEN_QS_DISABLED = "lockscreen_qs_disabled";
+
+        /**
          * This are the settings to be backed up.
          *
          * NOTE: Settings are backed up and restored in the order they appear
