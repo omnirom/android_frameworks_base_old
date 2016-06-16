@@ -1017,10 +1017,14 @@ public class StatusBarHeaderView extends RelativeLayout implements View.OnClickL
                 Settings.System.STATUS_BAR_CUSTOM_HEADER_SHADOW, 0,
                 UserHandle.USER_CURRENT);
 
-        if (headerShadow != 0 && mBackgroundImage != null) {
-            ColorDrawable shadow = new ColorDrawable(Color.BLACK);
-            shadow.setAlpha(headerShadow);
-            mBackgroundImage.setForeground(shadow);
+        if (mBackgroundImage != null) {
+            if (headerShadow != 0) {
+                ColorDrawable shadow = new ColorDrawable(Color.BLACK);
+                shadow.setAlpha(headerShadow);
+                mBackgroundImage.setForeground(shadow);
+            } else {
+                mBackgroundImage.setForeground(null);
+            }
         }
     }
 
