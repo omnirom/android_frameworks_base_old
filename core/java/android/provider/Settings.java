@@ -3911,6 +3911,13 @@ public final class Settings {
          */
         public static final String STATUS_BAR_QUICK_QS_PULLDOWN = "status_bar_quick_qs_pulldown";
 
+        /** some devices have a extra hw button e.g. n3 on the back on the 
+         * fingerprint sensor. allow mapping button to key
+         *
+         * @hide
+         */
+        public static final String BUTTON_EXTRA_KEY_MAPPING = "button_extra_mapping";
+
         /**
          * Settings to backup. This is here so that it's in the same place as the settings
          * keys and easy to update.
