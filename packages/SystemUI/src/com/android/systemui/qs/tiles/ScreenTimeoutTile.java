@@ -300,7 +300,7 @@ public class ScreenTimeoutTile extends QSTile<ScreenTimeoutTile.TimeoutState> {
             listView.setChoiceMode(ListView.CHOICE_MODE_SINGLE);
             listView.setDivider(null);
             RadioAdapter adapter = new RadioAdapter(context,
-                    android.R.layout.simple_list_item_single_choice, mEntries);
+                    R.layout.qs_detail_item_single_choice, mEntries);
             int indexOfSelection = Arrays.asList(mValues).indexOf(String.valueOf(getScreenTimeout()));
             mItems.setAdapter(adapter);
             listView.setItemChecked(indexOfSelection, true);
