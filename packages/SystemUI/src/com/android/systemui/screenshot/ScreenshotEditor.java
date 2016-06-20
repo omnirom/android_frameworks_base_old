@@ -97,10 +97,6 @@ public class ScreenshotEditor extends Service implements View.OnClickListener {
     private SharedPreferences preferences;
     private float mDensity;
 
-    public ScreenshotEditor() {
-
-    }
-
     @Override
     public void onCreate() {
         super.onCreate();
