@@ -28,7 +28,8 @@
             android:orientation="horizontal"
             android:layout_alignParentLeft="true"
             android:animateLayoutChanges="true"
-            android:background="@drawable/cropper_bg">
+            android:background="@drawable/cropper_bg"
+            android:padding="2dp">
 
             <ImageButton
                 android:id="@+id/workMode"
@@ -36,7 +37,6 @@
                 android:layout_height="@dimen/crop_buttons"
                 android:layout_gravity="center_vertical"
                 android:background="@drawable/selector_light"
-                android:padding="2dp"
                 android:scaleType="centerInside" />
 
             <LinearLayout
@@ -106,7 +106,8 @@
             android:orientation="horizontal"
             android:layout_alignParentRight="true"
             android:animateLayoutChanges="true"
-            android:background="@drawable/cropper_bg" >
+            android:background="@drawable/cropper_bg"
+            android:padding="2dp">
 
 
             <ImageButton
