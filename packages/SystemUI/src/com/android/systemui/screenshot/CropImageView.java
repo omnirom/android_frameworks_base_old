@@ -19,6 +19,10 @@ import android.graphics.drawable.Drawable;
 import android.net.Uri;
 import android.os.Parcel;
 import android.os.Parcelable;
+import android.renderscript.Allocation;
+import android.renderscript.Element;
+import android.renderscript.RenderScript;
+import android.renderscript.ScriptIntrinsicBlur;
 import android.util.AttributeSet;
 import android.util.DisplayMetrics;
 import android.util.Log;
@@ -110,6 +114,7 @@ public class CropImageView extends ImageView {
     private boolean mShowHandle = true;
     private boolean mIsCropEnabled = true;
     private boolean mIsDrawEnabled = false;
+    private boolean mIsBlurEnabled = false;
     private boolean mIsEnabled = true;
     private PointF mCustomRatio = new PointF(1.0f, 1.0f);
     private float mFrameStrokeWeight = 3.0f;
@@ -127,10 +132,16 @@ public class CropImageView extends ImageView {
     private List<Integer> newLine = new ArrayList<Integer>();
     private int mDrawColor = Color.RED;
     private int mPenSize = 10;
+    private float scaleX = 1;
+    private float scaleY = 1;
 
     private Bitmap mBitmap;
     private Bitmap mBackupBitmap;
     private Bitmap transparentLayer;
+
+    private ArrayList<BlurRect> blurredAreas = new ArrayList<BlurRect>();
+    private float mX = -1;
+    private float mY = -1;
 
     // Constructor /////////////////////////////////////////////////////////////////////////////////
 
@@ -277,7 +288,11 @@ public class CropImageView extends ImageView {
                 canvas.drawBitmap(transparentLayer, 0, 0, null);
                 canvas.drawBitmap(bm, matrix, mPaintBitmap);
 
-                if(mIsDrawEnabled) {
+                if (mX > 0 && mY > 0 && mIsBlurEnabled) {
+                    drawBlur(canvas);
+                }
+
+                if (mIsDrawEnabled) {
                     paths.clear();
                     pathAttr.clear();
                     Point oldPoint = new Point();
@@ -312,7 +327,7 @@ public class CropImageView extends ImageView {
                         }
                     }
                     final Paint paint = getDrawPaint();
-                    for(int j = 0; j < paths.size(); j++){
+                    for (int j = 0; j < paths.size(); j++) {
                         Path currentPath = paths.get(j);
                         Point currentPathAttr = pathAttr.get(j);
                         paint.setColor(currentPathAttr.color);
@@ -322,8 +337,20 @@ public class CropImageView extends ImageView {
                         currentPath.transform(invertMatrix);
                         mCanvas.drawPath(currentPath, paint);
                     }
-
                 }
+
+                if (mIsBlurEnabled && userRect.start != null && userRect.end != null) {
+                    Paint userRectPaint = new Paint();
+                    userRectPaint.setColor(Color.parseColor("#FF4081"));
+                    userRectPaint.setStyle(Paint.Style.STROKE);
+                    userRectPaint.setStrokeWidth(3);
+                    float startX = userRect.start.x > userRect.end.x ? userRect.end.x : userRect.start.x;
+                    float endX = userRect.start.x > userRect.end.x ? userRect.start.x : userRect.end.x;
+                    float startY = userRect.start.y < userRect.end.y ? userRect.start.y : userRect.end.y;
+                    float endY = userRect.start.y < userRect.end.y ? userRect.end.y : userRect.start.y;
+                    canvas.drawRect(startX, startY, endX, endY, userRectPaint);
+                }
+
                 // draw edit frame
                 drawEditFrame(canvas);
             }
@@ -391,6 +418,77 @@ public class CropImageView extends ImageView {
     }
 
     // Drawing method //////////////////////////////////////////////////////////////////////////////
+
+    private void drawBlur(Canvas canvas) {
+
+        for (BlurRect blurRect : blurredAreas) {
+            try {
+                Point rectangleStart = blurRect.start;
+                Point rectangleFinish = blurRect.end;
+
+                int width = (int) (rectangleStart.x - rectangleFinish.x);
+                if (width < 0)
+                    width *= -1;
+                int height = (int) (rectangleStart.y - rectangleFinish.y);
+                if (height < 0)
+                    height *= -1;
+                if (width == 0)
+                    width = 5;
+                if (height == 0)
+                    height = 5;
+                if (rectangleStart.x > rectangleFinish.x) {
+                    rectangleStart.x = rectangleStart.x - width;
+                }
+                if (rectangleStart.y > rectangleFinish.y)
+                    rectangleStart.y = rectangleStart.y - height;
+                if (rectangleStart.x < 0)
+                    rectangleStart.x = 0;
+                if (rectangleStart.y < 0)
+                    rectangleStart.y = 0;
+
+                Matrix invertMatrix = new Matrix(matrix);
+                float[] values = new float[9];
+                invertMatrix.getValues(values);
+                invertMatrix.setScale(scaleX, scaleY);
+
+                final Bitmap blurSource = Bitmap.createBitmap(mBitmap, (int) (rectangleStart.x / scaleX), (int) (rectangleStart.y / scaleY), (int) (width / scaleX), (int) (height / scaleY), invertMatrix, true);
+
+                invertMatrix.setTranslate(rectangleStart.x, rectangleStart.y);
+                Paint blurPaint = new Paint();
+                blurPaint.setFilterBitmap(true);
+                canvas.drawBitmap(blur(getContext(), blurSource), invertMatrix, blurPaint);
+            } catch (Exception e) {
+            }
+        }
+    }
+
+    private static final float BITMAP_SCALE = 1f;
+    private static final float BLUR_RADIUS = 25f;
+
+    public static Bitmap blur(Context context, Bitmap image) {
+        int width = Math.round(image.getWidth() * BITMAP_SCALE);
+        int height = Math.round(image.getHeight() * BITMAP_SCALE);
+
+        Bitmap inputBitmap = Bitmap.createScaledBitmap(image, width, height, false);
+        Bitmap outputBitmap = Bitmap.createBitmap(inputBitmap);
+
+        RenderScript rs = RenderScript.create(context);
+        ScriptIntrinsicBlur theIntrinsic = ScriptIntrinsicBlur.create(rs, Element.U8_4(rs));
+        Allocation tmpIn = Allocation.createFromBitmap(rs, inputBitmap);
+        Allocation tmpOut = Allocation.createFromBitmap(rs, outputBitmap);
+        theIntrinsic.setRadius(BLUR_RADIUS);
+        theIntrinsic.setInput(tmpIn);
+        theIntrinsic.forEach(tmpOut);
+        tmpOut.copyTo(outputBitmap);
+
+        Bitmap outputBitmap2 = Bitmap.createBitmap(outputBitmap, 0, 0, outputBitmap.getWidth(), outputBitmap.getHeight());
+        Allocation tmpIn2 = Allocation.createFromBitmap(rs, inputBitmap);
+        Allocation tmpOut2 = Allocation.createFromBitmap(rs, outputBitmap);
+        theIntrinsic.setInput(tmpIn2);
+        theIntrinsic.forEach(tmpOut2);
+        tmpOut.copyTo(outputBitmap2);
+        return outputBitmap2;
+    }
 
     private void drawEditFrame(Canvas canvas) {
         if (!mIsCropEnabled) return;
@@ -513,10 +611,20 @@ public class CropImageView extends ImageView {
     // Touch Event /////////////////////////////////////////////////////////////////////////////////
     boolean firstTouch = false;
     long cachedTime = 0;
+    Point blurStart = new Point();
+    Point blurFinish = new Point();
+    Point current = new Point();
+    BlurRect userRect = new BlurRect();
 
     @Override
     public boolean onTouchEvent(MotionEvent event) {
         if (!mIsInitialized) return false;
+
+        mX = event.getX();
+        mY = event.getY();
+
+        blurStart = new Point();
+        blurFinish = new Point();
 
         // Catch double tap to show/hide the button bar
         if(event.getAction() == MotionEvent.ACTION_DOWN){
@@ -532,7 +640,7 @@ public class CropImageView extends ImageView {
             }
         }
 
-        if (!mIsCropEnabled && !mIsDrawEnabled) return false;
+        if (!mIsCropEnabled && !mIsDrawEnabled && !mIsBlurEnabled) return false;
         if (!mIsEnabled) return false;
 
         if(mIsDrawEnabled) {
@@ -552,19 +660,46 @@ public class CropImageView extends ImageView {
 
         switch (event.getAction()) {
             case MotionEvent.ACTION_DOWN:
+                if (mIsBlurEnabled && isInsideHorizontal(mX) && isInsideVertical(mY)) {
+                    blurStart.x = mX;
+                    blurStart.y = mY;
+                    userRect.start = blurStart;
+                }
                 onDown(event);
                 return true;
             case MotionEvent.ACTION_MOVE:
                 onMove(event);
+                if (mIsBlurEnabled && isInsideHorizontal(mX) && isInsideVertical(mY)) {
+                    current.x = mX;
+                    current.y = mY;
+                    userRect.end = current;
+                }
                 if (mTouchArea != TouchArea.OUT_OF_BOUNDS) {
                     getParent().requestDisallowInterceptTouchEvent(true);
                 }
                 return true;
             case MotionEvent.ACTION_CANCEL:
                 getParent().requestDisallowInterceptTouchEvent(false);
+                mX = -1;
+                mY = -1;
+                userRect.start = null;
+                userRect.end = null;
+                invalidate();
                 onCancel();
                 return true;
             case MotionEvent.ACTION_UP:
+                if (mIsBlurEnabled) {
+                    BlurRect blurRect = new BlurRect();
+                    if (isInsideHorizontal(mX) && isInsideVertical(mY) && userRect.start != null) {
+                        blurFinish.x = mX;
+                        blurFinish.y = mY;
+                        blurRect.start = userRect.start;
+                        blurRect.end = blurFinish;
+                        blurredAreas.add(blurRect);
+                    }
+                    userRect.start = null;
+                    userRect.end = null;
+                }
                 getParent().requestDisallowInterceptTouchEvent(false);
                 onUp(event);
                 return true;
@@ -1100,6 +1235,7 @@ public class CropImageView extends ImageView {
      * @return src bitmap
      */
     public Bitmap getImageBitmap() {
+        drawBlur(new Canvas(mBitmap));
         return mBitmap;
     }
 
@@ -1136,8 +1272,16 @@ public class CropImageView extends ImageView {
             transparentLayer.recycle();
     }
 
-    public void recoverImage(){
-        this.setImageBitmap(mBackupBitmap);
+     public void recoverImage() {
+        if (mIsBlurEnabled) {
+            if (blurredAreas.size() > 0)
+                blurredAreas.remove(blurredAreas.size() - 1);
+        } else {
+            blurredAreas.clear();
+            this.setImageBitmap(mBackupBitmap);
+            scaleX = 1;
+            scaleY = 1;
+        }
         invalidate();
     }
 
@@ -1241,6 +1385,9 @@ public class CropImageView extends ImageView {
         if (y + h > source.getHeight()) {
             h = source.getHeight() - y;
         }
+
+        scaleX = source.getWidth() * mScale / w;
+        scaleY = source.getHeight() * mScale / h;
 
         Bitmap cropped = Bitmap.createBitmap(source, x, y, w, h, null, false);
         if (mCropMode != CropMode.CIRCLE) return cropped;
@@ -1346,11 +1493,16 @@ public class CropImageView extends ImageView {
         }
     }
 
-    public void setDrawColor(int color){
+    public void mergeBlur() {
+        if (mBitmap != null)
+            drawBlur(new Canvas(mBitmap));
+    }
+
+    public void setDrawColor(int color) {
         mDrawColor = color;
     }
 
-    public void setPenSize(int penSize){
+    public void setPenSize(int penSize) {
         mPenSize = penSize;
     }
 
@@ -1526,6 +1678,10 @@ public class CropImageView extends ImageView {
         invalidate();
     }
 
+   public boolean isCropEnabled() {
+        return mIsCropEnabled;
+    }
+
     public boolean isDrawEnabled() {
         return mIsDrawEnabled;
     }
@@ -1540,8 +1696,14 @@ public class CropImageView extends ImageView {
         invalidate();
     }
 
-    public boolean isCropEnabled() {
-        return mIsCropEnabled;
+    /**
+     * Set whether to blur out some parts of the bitmap.
+     *
+     * @param enabled should show crop frame?
+     */
+    public void setBlurEnabled(boolean enabled) {
+        mIsBlurEnabled = enabled;
+        invalidate();
     }
 
     /**
@@ -1646,6 +1808,11 @@ public class CropImageView extends ImageView {
         public String toString() {
             return x + ", " + y + " " + color + ":" + penSize;
         }
+    }
+
+    class BlurRect {
+        Point start;
+        Point end;
     }
 
     class ColorPath extends Path{
