@@ -987,12 +987,12 @@ public final class Configuration implements Parcelable, Comparable<Configuration
         }
         if (delta.assetSeq != 0 && assetSeq != delta.assetSeq) {
             changed |= ActivityInfo.CONFIG_ASSETS;
+            changed |= ActivityInfo.CONFIG_THEME_FONT;
             assetSeq = delta.assetSeq;
         }
         if (delta.seq != 0) {
             seq = delta.seq;
         }
-        
         return changed;
     }
 
@@ -1104,6 +1104,7 @@ public final class Configuration implements Parcelable, Comparable<Configuration
         }
         if (delta.assetSeq != 0 && assetSeq != delta.assetSeq) {
             changed |= ActivityInfo.CONFIG_ASSETS;
+            changed |= ActivityInfo.CONFIG_THEME_FONT;
         }
 
         return changed;
@@ -1112,17 +1113,18 @@ public final class Configuration implements Parcelable, Comparable<Configuration
     /**
      * Determine if a new resource needs to be loaded from the bit set of
      * configuration changes returned by {@link #updateFrom(Configuration)}.
-     * 
+     *
      * @param configChanges The mask of changes configurations as returned by
      * {@link #updateFrom(Configuration)}.
      * @param interestingChanges The configuration changes that the resource
      * can handled, as given in {@link android.util.TypedValue#changingConfigurations}.
-     * 
+     *
      * @return Return true if the resource needs to be loaded, else false.
      */
     public static boolean needNewResources(int configChanges, int interestingChanges) {
         return (configChanges & (interestingChanges|ActivityInfo.CONFIG_FONT_SCALE|
-                    ActivityInfo.CONFIG_ASSETS)) != 0;
+                    ActivityInfo.CONFIG_ASSETS|
+                    ActivityInfo.CONFIG_THEME_FONT)) != 0;
     }
 
     /**
