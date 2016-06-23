@@ -28,14 +28,6 @@
   <string name="screenrecord_notif_pointer_off">Masquer le pointeur</string>
   <!-- Screen record notification error title -->
   <string name="screenrecord_notif_error">Impossible d\'enregistrer l\'écran</string>
-  <!-- mount notifications -->
-  <string name="ext_media_mounted_notification_title">monté</string>
-  <string name="ext_media_unmounted_notification_title">démonté</string>
-  <string name="ext_media_unmounted_notification_message">Vous pouvez retirer le périphérique en toute sécurité.</string>
-  <string name="ext_media_unmount_action">Démonter</string>
-  <string name="ext_media_mount_action">Monter</string>
-  <string name="ext_media_unmounting_notification_title">démontage\u2026</string>
-  <string name="ext_media_mounting_notification_title">montage\u2026</string>
   <!-- Battery Saver Dimss -->
   <string name="battery_saver_dismiss_title">Annuler</string>
   <string name="battery_saver_notification_action_text_short">Désactiver</string>
@@ -53,4 +45,8 @@
   <string name="status_bar_silent">Mode silencieux</string>
   <!-- NFC QS tile -->
   <string name="quick_settings_nfc_label">NFC</string>
+  <!-- Music QS Tile -->
+  <!-- Screen timeout QS tile -->
+  <!-- Screen off QS tile -->
+  <!-- Screenshot Crop & Share -->
 </resources>

@@ -25,6 +25,12 @@
   <string name="global_action_reboot_sub">System</string>
   <string name="global_action_reboot_recovery">Recovery</string>
   <string name="global_action_reboot_bootloader">Bootloader</string>
+  <string name="global_action_users">Użytkownicy\u2026</string>
+  <string name="global_action_screenshot">Zrzut ekranu</string>
+  <string name="global_action_screenrecord">Nagrywanie ekranu</string>
+  <string name="global_action_torch_on">Latarka włączona</string>
+  <string name="global_action_torch_off">Latarka wyłączona</string>
+  <string name="global_actions_toggle_torch_mode">Latarka</string>
   <!-- advanced reboot to bootloader. -->
   <string name="reboot_to_bootloader_title">Uruchom ponownie w bootloader</string>
   <string name="reboot_to_bootloader_message">Uruchamianie ponownie\u2026</string>
@@ -46,9 +52,11 @@
   <!-- Reboot Confirmation Dialog.  Message in the confirmation dialog
          when the user asks to reboot. [CHAR LIMIT=NONE] -->
   <string name="reboot_confirm">Czy chcesz uruchomić ponownie?</string>
+  <string name="battery_style_text">Tylko tekst</string>
   <string name="battery_style_default">Domyślny</string>
   <string name="battery_style_meter_horizontal">Poziomo</string>
   <string name="battery_style_circle">Okrąg</string>
+  <string name="battery_style_droid">Droid</string>
   <!-- Title of an application permission, listed so the user can choose whether they want to allow the application to do this. -->
   <string name="permlab_fakePackageSignature">Nadpisz podpis pakietu</string>
   <!-- Description of an application permission, listed so the user can choose whether they want to allow the application to do this. -->

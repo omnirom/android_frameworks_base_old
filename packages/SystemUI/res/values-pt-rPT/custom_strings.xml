@@ -27,9 +27,12 @@
   <string name="screenrecord_notif_pointer_on">Mostrar o ponteiro</string>
   <string name="screenrecord_notif_pointer_off">Ocultar o ponteiro</string>
   <!-- Screen record notification error title -->
-  <!-- mount notifications -->
   <!-- Battery Saver Dimss -->
   <!-- Screen pinning dialog description when in accessibility mode. -->
   <!-- tuner -->
   <!-- NFC QS tile -->
+  <!-- Music QS Tile -->
+  <!-- Screen timeout QS tile -->
+  <!-- Screen off QS tile -->
+  <!-- Screenshot Crop & Share -->
 </resources>
