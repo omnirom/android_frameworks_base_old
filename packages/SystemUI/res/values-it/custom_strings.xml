@@ -18,13 +18,35 @@
 -->
 <resources xmlns:xliff="urn:oasis:names:tc:xliff:document:1.2">
   <!-- Screenrecord Notification Ticker -->
+  <string name="screenrecord_notif_ticker">Lo schermo è in registrazione</string>
   <!-- Screenrecord notification title -->
+  <string name="screenrecord_notif_title">Registrando lo schermo</string>
   <!-- Screenrecord notification action: Stop -->
+  <string name="screenrecord_notif_stop">Termina</string>
   <!-- Screenrecord notification action: show/hide pointer -->
+  <string name="screenrecord_notif_pointer_on">Mostra puntatore</string>
+  <string name="screenrecord_notif_pointer_off">Nascondi puntatore</string>
   <!-- Screen record notification error title -->
-  <!-- mount notifications -->
+  <string name="screenrecord_notif_error">Impossibile registrare lo schermo</string>
   <!-- Battery Saver Dimss -->
+  <string name="battery_saver_dismiss_title">Annulla</string>
+  <string name="battery_saver_notification_action_text_short">Spegni</string>
   <!-- Screen pinning dialog description when in accessibility mode. -->
+  <string name="screen_pinning_description_back">Mantieni in vista fino a quando non viene rimosso. Tocca e tieni premuto Indietro per sbloccare.</string>
   <!-- tuner -->
+  <string name="status_bar_icons">Icone della barra di stato</string>
+  <string name="qs_equal_tile_title">Stessa dimensione</string>
+  <string name="qs_equal_tile_summary">Usa la stessa dimensione per tutte i tile</string>
+  <string name="qs_settings">Impostazioni</string>
+  <string name="qs_tile_columns_title">Colonne</string>
+  <string name="qs_tile_columns_three">3</string>
+  <string name="qs_tile_columns_four">4</string>
+  <string name="qs_tile_bg_opacity_title">Opacità sfondo</string>
+  <string name="status_bar_silent">Modalità silenziosa</string>
   <!-- NFC QS tile -->
+  <string name="quick_settings_nfc_label">NFC</string>
+  <!-- Music QS Tile -->
+  <!-- Screen timeout QS tile -->
+  <!-- Screen off QS tile -->
+  <!-- Screenshot Crop & Share -->
 </resources>

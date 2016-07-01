@@ -28,14 +28,6 @@
   <string name="screenrecord_notif_pointer_off">Ocultar o ponteiro</string>
   <!-- Screen record notification error title -->
   <string name="screenrecord_notif_error">Não é possível gravar tela</string>
-  <!-- mount notifications -->
-  <string name="ext_media_mounted_notification_title">montado</string>
-  <string name="ext_media_unmounted_notification_title">desmontado</string>
-  <string name="ext_media_unmounted_notification_message">Você pode remover com segurança o armazenamento.</string>
-  <string name="ext_media_unmount_action">Desmonte</string>
-  <string name="ext_media_mount_action">Monte</string>
-  <string name="ext_media_unmounting_notification_title">desmontado\u2026</string>
-  <string name="ext_media_mounting_notification_title">montado\u2026</string>
   <!-- Battery Saver Dimss -->
   <string name="battery_saver_dismiss_title">Descartar</string>
   <string name="battery_saver_notification_action_text_short">Desativar</string>
@@ -53,4 +45,8 @@
   <string name="status_bar_silent">Modo silencioso</string>
   <!-- NFC QS tile -->
   <string name="quick_settings_nfc_label">NFC</string>
+  <!-- Music QS Tile -->
+  <!-- Screen timeout QS tile -->
+  <!-- Screen off QS tile -->
+  <!-- Screenshot Crop & Share -->
 </resources>

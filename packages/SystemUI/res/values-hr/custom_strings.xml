@@ -22,16 +22,12 @@
   <!-- Screenrecord notification action: Stop -->
   <!-- Screenrecord notification action: show/hide pointer -->
   <!-- Screen record notification error title -->
-  <!-- mount notifications -->
-  <string name="ext_media_mounted_notification_title">pripojeno</string>
-  <string name="ext_media_unmounted_notification_title">otpojeno</string>
-  <string name="ext_media_unmounted_notification_message">Sad možete sigurno otpojiti memoriju.</string>
-  <string name="ext_media_unmount_action">Otpojiti</string>
-  <string name="ext_media_mount_action">Pripojiti</string>
-  <string name="ext_media_unmounting_notification_title">otpajanje\u2026</string>
-  <string name="ext_media_mounting_notification_title">pripajanje\u2026</string>
   <!-- Battery Saver Dimss -->
   <!-- Screen pinning dialog description when in accessibility mode. -->
   <!-- tuner -->
   <!-- NFC QS tile -->
+  <!-- Music QS Tile -->
+  <!-- Screen timeout QS tile -->
+  <!-- Screen off QS tile -->
+  <!-- Screenshot Crop & Share -->
 </resources>

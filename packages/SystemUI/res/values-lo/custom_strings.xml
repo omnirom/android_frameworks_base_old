@@ -22,9 +22,12 @@
   <!-- Screenrecord notification action: Stop -->
   <!-- Screenrecord notification action: show/hide pointer -->
   <!-- Screen record notification error title -->
-  <!-- mount notifications -->
   <!-- Battery Saver Dimss -->
   <!-- Screen pinning dialog description when in accessibility mode. -->
   <!-- tuner -->
   <!-- NFC QS tile -->
+  <!-- Music QS Tile -->
+  <!-- Screen timeout QS tile -->
+  <!-- Screen off QS tile -->
+  <!-- Screenshot Crop & Share -->
 </resources>

@@ -18,13 +18,46 @@
 -->
 <resources xmlns:xliff="urn:oasis:names:tc:xliff:document:1.2">
   <!-- Screenrecord Notification Ticker -->
+  <string name="screenrecord_notif_ticker">Ekran kaydediliyor</string>
   <!-- Screenrecord notification title -->
+  <string name="screenrecord_notif_title">Ekranı kaydetme</string>
   <!-- Screenrecord notification action: Stop -->
+  <string name="screenrecord_notif_stop">Dur</string>
   <!-- Screenrecord notification action: show/hide pointer -->
+  <string name="screenrecord_notif_pointer_on">İşaretçiyi göster</string>
+  <string name="screenrecord_notif_pointer_off">İşaretçiyi gizle</string>
   <!-- Screen record notification error title -->
-  <!-- mount notifications -->
+  <string name="screenrecord_notif_error">Ekran kaydedilemiyor</string>
   <!-- Battery Saver Dimss -->
+  <string name="battery_saver_dismiss_title">Yoksay</string>
+  <string name="battery_saver_notification_action_text_short">Kapat</string>
   <!-- Screen pinning dialog description when in accessibility mode. -->
+  <string name="screen_pinning_description_back">Bu iptal edilene kadar gösterilir. İptal etmek için Geriye dokunun ve basılı tutun.</string>
   <!-- tuner -->
+  <string name="status_bar_icons">Durum çubuğu simgeleri</string>
+  <string name="qs_equal_tile_title">Eşit büyüklükte</string>
+  <string name="qs_equal_tile_summary">Tüm karolar için aynı boyutu kullanın</string>
+  <string name="qs_settings">Ayarlar</string>
+  <string name="qs_tile_columns_title">Sütünlar</string>
+  <string name="qs_tile_columns_three">3</string>
+  <string name="qs_tile_columns_four">4</string>
+  <string name="qs_tile_bg_opacity_title">Arkaplan Saydamlığı</string>
+  <string name="status_bar_silent">Sessiz mod</string>
   <!-- NFC QS tile -->
+  <string name="quick_settings_nfc_label">NFC</string>
+  <!-- Music QS Tile -->
+  <string name="quick_settings_music_label">Müzik</string>
+  <string name="quick_settings_music_play">Oynat</string>
+  <string name="quick_settings_music_pause">Duraklat</string>
+  <!-- Screen timeout QS tile -->
+  <string name="quick_settings_timeout_label">Zaman aşımı</string>
+  <string name="quick_settings_screen_timeout_detail_title">Ekran zaman aşımı</string>
+  <!-- Screen off QS tile -->
+  <string name="quick_settings_screen_off">Ekran kapalı</string>
+  <!-- Screenshot Crop & Share -->
+  <string name="action_delete_success">Silindi</string>
+  <string name="action_delete_fault">Silme başarısız oldu</string>
+  <string name="action_save_success">Kaydedildi</string>
+  <string name="action_save_fault">Kaydetme başarısız oldu</string>
+  <string name="action_edit">Düzenle</string>
 </resources>

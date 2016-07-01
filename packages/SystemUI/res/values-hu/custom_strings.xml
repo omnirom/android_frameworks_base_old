@@ -28,14 +28,6 @@
   <string name="screenrecord_notif_pointer_off">Mutató elrejtése</string>
   <!-- Screen record notification error title -->
   <string name="screenrecord_notif_error">Képernyő felvétel nem lehetséges</string>
-  <!-- mount notifications -->
-  <string name="ext_media_mounted_notification_title">csatlakoztatva</string>
-  <string name="ext_media_unmounted_notification_title">leválasztva</string>
-  <string name="ext_media_unmounted_notification_message">Biztonságosan eltávolíthatja a tárolót.</string>
-  <string name="ext_media_unmount_action">Leválasztás</string>
-  <string name="ext_media_mount_action">Csatlakozás</string>
-  <string name="ext_media_unmounting_notification_title">leválasztás\u2026</string>
-  <string name="ext_media_mounting_notification_title">csatlakoztatás\u2026</string>
   <!-- Battery Saver Dimss -->
   <string name="battery_saver_dismiss_title">Elvetés</string>
   <string name="battery_saver_notification_action_text_short">Kikapcsolás</string>
@@ -53,4 +45,19 @@
   <string name="status_bar_silent">Néma üzemmód</string>
   <!-- NFC QS tile -->
   <string name="quick_settings_nfc_label">NFC</string>
+  <!-- Music QS Tile -->
+  <string name="quick_settings_music_label">Zene</string>
+  <string name="quick_settings_music_play">Lejátszás</string>
+  <string name="quick_settings_music_pause">Szünet</string>
+  <!-- Screen timeout QS tile -->
+  <string name="quick_settings_timeout_label">Időtúllépés</string>
+  <string name="quick_settings_screen_timeout_detail_title">Képernyő időkorlát</string>
+  <!-- Screen off QS tile -->
+  <string name="quick_settings_screen_off">Képernyő ki</string>
+  <!-- Screenshot Crop & Share -->
+  <string name="action_delete_success">Törölve</string>
+  <string name="action_delete_fault">Törlés sikertelen volt</string>
+  <string name="action_save_success">Mentve</string>
+  <string name="action_save_fault">Mentés sikertelen volt</string>
+  <string name="action_edit">Szerkesztés</string>
 </resources>

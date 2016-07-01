@@ -28,16 +28,25 @@
   <string name="screenrecord_notif_pointer_off">隐藏指针</string>
   <!-- Screen record notification error title -->
   <string name="screenrecord_notif_error">无法录制屏幕</string>
-  <!-- mount notifications -->
-  <string name="ext_media_mounted_notification_title">已挂载</string>
-  <string name="ext_media_unmounted_notification_title">已卸载</string>
-  <string name="ext_media_unmounted_notification_message">您可以安全的移除存储。</string>
-  <string name="ext_media_unmount_action">卸载</string>
-  <string name="ext_media_mount_action">挂载</string>
-  <string name="ext_media_unmounting_notification_title">正在卸载\u2026</string>
-  <string name="ext_media_mounting_notification_title">正在挂载\u2026</string>
   <!-- Battery Saver Dimss -->
+  <string name="battery_saver_dismiss_title">忽略</string>
+  <string name="battery_saver_notification_action_text_short">关闭</string>
   <!-- Screen pinning dialog description when in accessibility mode. -->
+  <string name="screen_pinning_description_back">这会将它锁定在视图中。长按返回键解锁。</string>
   <!-- tuner -->
+  <string name="status_bar_icons">状态栏图标</string>
+  <string name="qs_equal_tile_title">相同尺寸</string>
+  <string name="qs_equal_tile_summary">为所有瓷块使用同样的大小</string>
+  <string name="qs_settings">设置</string>
+  <string name="qs_tile_columns_title">列数</string>
+  <string name="qs_tile_columns_three">3</string>
+  <string name="qs_tile_columns_four">4</string>
+  <string name="qs_tile_bg_opacity_title">背景透明度</string>
+  <string name="status_bar_silent">静音模式</string>
   <!-- NFC QS tile -->
+  <string name="quick_settings_nfc_label">NFC</string>
+  <!-- Music QS Tile -->
+  <!-- Screen timeout QS tile -->
+  <!-- Screen off QS tile -->
+  <!-- Screenshot Crop & Share -->
 </resources>

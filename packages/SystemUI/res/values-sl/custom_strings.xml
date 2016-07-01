@@ -28,14 +28,6 @@
   <string name="screenrecord_notif_pointer_off">Skrij kazalec</string>
   <!-- Screen record notification error title -->
   <string name="screenrecord_notif_error">Zaslona ni mogoče posneti</string>
-  <!-- mount notifications -->
-  <string name="ext_media_mounted_notification_title">priklopljena</string>
-  <string name="ext_media_unmounted_notification_title">odklopljena</string>
-  <string name="ext_media_unmounted_notification_message">Pomnilniško napravo lahko varno odstranite.</string>
-  <string name="ext_media_unmount_action">Odklopi</string>
-  <string name="ext_media_mount_action">Priklopi</string>
-  <string name="ext_media_unmounting_notification_title">odklapljanje \u2026</string>
-  <string name="ext_media_mounting_notification_title">priklapljanje \u2026</string>
   <!-- Battery Saver Dimss -->
   <string name="battery_saver_dismiss_title">Opusti</string>
   <string name="battery_saver_notification_action_text_short">Izklopi</string>
@@ -53,4 +45,19 @@
   <string name="status_bar_silent">Tihi način</string>
   <!-- NFC QS tile -->
   <string name="quick_settings_nfc_label">NFC</string>
+  <!-- Music QS Tile -->
+  <string name="quick_settings_music_label">Glasba</string>
+  <string name="quick_settings_music_play">Predvajaj</string>
+  <string name="quick_settings_music_pause">Premor</string>
+  <!-- Screen timeout QS tile -->
+  <string name="quick_settings_timeout_label">Časovna omejitev</string>
+  <string name="quick_settings_screen_timeout_detail_title">Časovna omejitev zaslona</string>
+  <!-- Screen off QS tile -->
+  <string name="quick_settings_screen_off">Izklopi zaslon</string>
+  <!-- Screenshot Crop & Share -->
+  <string name="action_delete_success">Izbrisano</string>
+  <string name="action_delete_fault">Brisanje ni bilo uspešno</string>
+  <string name="action_save_success">Shranjeno</string>
+  <string name="action_save_fault">Shranjevanje ni bilo uspešno</string>
+  <string name="action_edit">Uredi</string>
 </resources>

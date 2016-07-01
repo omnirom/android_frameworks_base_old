@@ -28,14 +28,6 @@
   <string name="screenrecord_notif_pointer_off">Skryť ukazovateľ</string>
   <!-- Screen record notification error title -->
   <string name="screenrecord_notif_error">Nemožno nahrávať obrazovku</string>
-  <!-- mount notifications -->
-  <string name="ext_media_mounted_notification_title">pripojené</string>
-  <string name="ext_media_unmounted_notification_title">odpojené</string>
-  <string name="ext_media_unmounted_notification_message">Môžete bezpečne odstrániť úložisko.</string>
-  <string name="ext_media_unmount_action">Odpojiť</string>
-  <string name="ext_media_mount_action">Pripojiť</string>
-  <string name="ext_media_unmounting_notification_title">odpájanie\u2026</string>
-  <string name="ext_media_mounting_notification_title">pripájanie\u2026</string>
   <!-- Battery Saver Dimss -->
   <string name="battery_saver_dismiss_title">Zrušiť</string>
   <string name="battery_saver_notification_action_text_short">Vypnúť</string>
@@ -53,4 +45,19 @@
   <string name="status_bar_silent">Tichý režim</string>
   <!-- NFC QS tile -->
   <string name="quick_settings_nfc_label">NFC</string>
+  <!-- Music QS Tile -->
+  <string name="quick_settings_music_label">Hudba</string>
+  <string name="quick_settings_music_play">Prehrať</string>
+  <string name="quick_settings_music_pause">Pauza</string>
+  <!-- Screen timeout QS tile -->
+  <string name="quick_settings_timeout_label">Časový limit</string>
+  <string name="quick_settings_screen_timeout_detail_title">Časový limit obrazovky</string>
+  <!-- Screen off QS tile -->
+  <string name="quick_settings_screen_off">Vypnúť obrazovku</string>
+  <!-- Screenshot Crop & Share -->
+  <string name="action_delete_success">Vymazané</string>
+  <string name="action_delete_fault">Vymazanie zlyhalo</string>
+  <string name="action_save_success">Uložené</string>
+  <string name="action_save_fault">Ukladanie zlyhalo</string>
+  <string name="action_edit">Upraviť</string>
 </resources>
