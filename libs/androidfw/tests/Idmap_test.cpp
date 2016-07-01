@@ -69,6 +69,8 @@ TEST_F(IdmapTest, canLoadIdmap) {
 }
 
 TEST_F(IdmapTest, overlayOverridesResourceValue) {
+    const int32_t cookie = 42;
+
     Res_value val;
     ssize_t block = mTargetTable.getResource(base::R::string::test2, &val, false);
     ASSERT_GE(block, 0);
@@ -82,7 +84,7 @@ TEST_F(IdmapTest, overlayOverridesResourceValue) {
     ASSERT_TRUE(targetStr16 != NULL);
     ASSERT_EQ(String16("test2"), String16(targetStr16, strLen));
 
-    ASSERT_EQ(NO_ERROR, mTargetTable.add(overlay_arsc, overlay_arsc_len, mData, mDataSize));
+    ASSERT_EQ(NO_ERROR, mTargetTable.add(overlay_arsc, overlay_arsc_len, mData, mDataSize, cookie));
 
     ssize_t newBlock = mTargetTable.getResource(base::R::string::test2, &val, false);
     ASSERT_GE(newBlock, 0);
@@ -95,6 +97,9 @@ TEST_F(IdmapTest, overlayOverridesResourceValue) {
     targetStr16 = pool->stringAt(val.data, &strLen);
     ASSERT_TRUE(targetStr16 != NULL);
     ASSERT_EQ(String16("test2-overlay"), String16(targetStr16, strLen));
+
+    ASSERT_EQ(NO_ERROR, mTargetTable.remove(cookie));
+    EXPECT_TRUE(IsStringEqual(mTargetTable, base::R::string::test2, "test2"));
 }
 
 TEST_F(IdmapTest, overlaidResourceHasSameName) {

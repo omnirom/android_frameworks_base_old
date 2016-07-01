@@ -56,6 +56,7 @@ import com.android.internal.app.IVoiceInteractor;
 import com.android.internal.os.IResultReceiver;
 
 import java.util.List;
+import java.util.Map;
 
 /**
  * System private API for talking with the activity manager service.  This
@@ -198,6 +199,7 @@ public interface IActivityManager extends IInterface {
 
     public Configuration getConfiguration() throws RemoteException;
     public void updateConfiguration(Configuration values) throws RemoteException;
+    public void updateAssets(int userId, Map<String, String[]> overlays) throws RemoteException;
     public void setRequestedOrientation(IBinder token,
             int requestedOrientation) throws RemoteException;
     public int getRequestedOrientation(IBinder token) throws RemoteException;
@@ -864,4 +866,5 @@ public interface IActivityManager extends IInterface {
             = IBinder.FIRST_CALL_TRANSACTION+299;
     int SHOW_ASSIST_FROM_ACTIVITY_TRANSACTION = IBinder.FIRST_CALL_TRANSACTION+300;
     int IS_ROOT_VOICE_INTERACTION_TRANSACTION = IBinder.FIRST_CALL_TRANSACTION+301;
+    int UPDATE_ASSETS_TRANSACTION = IBinder.FIRST_CALL_TRANSACTION + 302;
 }

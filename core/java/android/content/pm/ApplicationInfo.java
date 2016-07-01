@@ -521,15 +521,6 @@ public class ApplicationInfo extends PackageItemInfo implements Parcelable {
     public String[] splitPublicSourceDirs;
 
     /**
-     * Full paths to the locations of extra resource packages this application
-     * uses. This field is only used if there are extra resource packages,
-     * otherwise it is null.
-     * 
-     * {@hide}
-     */
-    public String[] resourceDirs;
-
-    /**
      * String retrieved from the seinfo tag found in selinux policy. This value
      * is useful in setting an SELinux security context on the process as well
      * as its data directory.
@@ -681,9 +672,6 @@ public class ApplicationInfo extends PackageItemInfo implements Parcelable {
                 && !Arrays.equals(splitSourceDirs, splitPublicSourceDirs)) {
             pw.println(prefix + "splitPublicSourceDirs=" + Arrays.toString(splitPublicSourceDirs));
         }
-        if (resourceDirs != null) {
-            pw.println(prefix + "resourceDirs=" + resourceDirs);
-        }
         if (seinfo != null) {
             pw.println(prefix + "seinfo=" + seinfo);
         }
@@ -770,7 +758,6 @@ public class ApplicationInfo extends PackageItemInfo implements Parcelable {
         nativeLibraryRootRequiresIsa = orig.nativeLibraryRootRequiresIsa;
         primaryCpuAbi = orig.primaryCpuAbi;
         secondaryCpuAbi = orig.secondaryCpuAbi;
-        resourceDirs = orig.resourceDirs;
         seinfo = orig.seinfo;
         sharedLibraryFiles = orig.sharedLibraryFiles;
         dataDir = orig.dataDir;
@@ -823,7 +810,6 @@ public class ApplicationInfo extends PackageItemInfo implements Parcelable {
         dest.writeInt(nativeLibraryRootRequiresIsa ? 1 : 0);
         dest.writeString(primaryCpuAbi);
         dest.writeString(secondaryCpuAbi);
-        dest.writeStringArray(resourceDirs);
         dest.writeString(seinfo);
         dest.writeStringArray(sharedLibraryFiles);
         dest.writeString(dataDir);
@@ -875,7 +861,6 @@ public class ApplicationInfo extends PackageItemInfo implements Parcelable {
         nativeLibraryRootRequiresIsa = source.readInt() != 0;
         primaryCpuAbi = source.readString();
         secondaryCpuAbi = source.readString();
-        resourceDirs = source.readStringArray();
         seinfo = source.readString();
         sharedLibraryFiles = source.readStringArray();
         dataDir = source.readString();

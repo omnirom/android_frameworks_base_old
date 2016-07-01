@@ -449,6 +449,7 @@ public final class ActivityThread {
         boolean persistent;
         Configuration config;
         CompatibilityInfo compatInfo;
+        List<String[]> assetPaths;
 
         /** Initial values for {@link Profiler}. */
         ProfilerInfo initProfilerInfo;
@@ -575,6 +576,8 @@ public final class ActivityThread {
         private static final String DB_INFO_FORMAT = "  %8s %8s %14s %14s  %s";
 
         private int mLastProcessState = -1;
+
+        private ArrayMap<String, Object> mAssetKeys = new ArrayMap<>(2);
 
         private void updatePendingConfiguration(Configuration config) {
             synchronized (mResourcesManager) {
@@ -771,7 +774,7 @@ public final class ActivityThread {
                 IUiAutomationConnection instrumentationUiConnection, int debugMode,
                 boolean enableOpenGlTrace, boolean isRestrictedBackupMode, boolean persistent,
                 Configuration config, CompatibilityInfo compatInfo, Map<String, IBinder> services,
-                Bundle coreSettings) {
+                Bundle coreSettings, List <String[]> assetPaths) {
 
             if (services != null) {
                 // Setup the service cache in the ServiceManager
@@ -831,6 +834,7 @@ public final class ActivityThread {
             data.persistent = persistent;
             data.config = config;
             data.compatInfo = compatInfo;
+            data.assetPaths = assetPaths;
             data.initProfilerInfo = profilerInfo;
             sendMessage(H.BIND_APPLICATION, data);
         }
@@ -846,6 +850,31 @@ public final class ActivityThread {
         public void scheduleConfigurationChanged(Configuration config) {
             updatePendingConfiguration(config);
             sendMessage(H.CONFIGURATION_CHANGED, config);
+        }
+
+        public void scheduleAssetsChanged(String[] assetPaths) {
+            if (assetPaths == null || assetPaths.length == 0) {
+                Slog.w(TAG, "Cannot update assets: array is " +
+                        assetPaths == null ? "null" : "empty");
+                return;
+            }
+            String targetPath = assetPaths[0];
+            if (!mAssetKeys.containsKey(targetPath)) {
+                mAssetKeys.put(targetPath, new Object());
+            }
+            Object key = mAssetKeys.get(targetPath);
+
+            Bundle b = new Bundle(1);
+            b.putStringArray("assetPaths", assetPaths);
+
+            Message m = Message.obtain();
+            m.what = H.ASSETS_CHANGED;
+            m.obj = key;
+            m.setData(b);
+
+            // remove any pending updates to the same asset path before posting this update
+            mH.removeMessages(H.ASSETS_CHANGED, key);
+            mH.sendMessage(m);
         }
 
         public void updateTimeZone() {
@@ -1275,6 +1304,7 @@ public final class ActivityThread {
         public static final int CANCEL_VISIBLE_BEHIND = 147;
         public static final int BACKGROUND_VISIBLE_BEHIND_CHANGED = 148;
         public static final int ENTER_ANIMATION_COMPLETE = 149;
+        public static final int ASSETS_CHANGED = 150;
 
         String codeToString(int code) {
             if (DEBUG_MESSAGES) {
@@ -1328,6 +1358,7 @@ public final class ActivityThread {
                     case CANCEL_VISIBLE_BEHIND: return "CANCEL_VISIBLE_BEHIND";
                     case BACKGROUND_VISIBLE_BEHIND_CHANGED: return "BACKGROUND_VISIBLE_BEHIND_CHANGED";
                     case ENTER_ANIMATION_COMPLETE: return "ENTER_ANIMATION_COMPLETE";
+                    case ASSETS_CHANGED: return "ASSETS_CHANGED";
                 }
             }
             return Integer.toString(code);
@@ -1557,6 +1588,10 @@ public final class ActivityThread {
                 case ENTER_ANIMATION_COMPLETE:
                     handleEnterAnimationComplete((IBinder) msg.obj);
                     break;
+                case ASSETS_CHANGED:
+                    Bundle b = msg.getData();
+                    handleAssetsChanged(b.getStringArray("assetPaths"));
+                    break;
             }
             if (DEBUG_MESSAGES) Slog.v(TAG, "<<< done: " + codeToString(msg.what));
         }
@@ -1695,11 +1730,11 @@ public final class ActivityThread {
     /**
      * Creates the top level resources for the given package.
      */
-    Resources getTopLevelResources(String resDir, String[] splitResDirs, String[] overlayDirs,
-            String[] libDirs, int displayId, Configuration overrideConfiguration,
+    Resources getTopLevelResources(String resDir, String[] splitResDirs, String[] libDirs,
+            int displayId, Configuration overrideConfiguration,
             LoadedApk pkgInfo) {
-        return mResourcesManager.getTopLevelResources(resDir, splitResDirs, overlayDirs, libDirs,
-                displayId, overrideConfiguration, pkgInfo.getCompatibilityInfo());
+        return mResourcesManager.getTopLevelResources(resDir, splitResDirs, libDirs, displayId,
+                overrideConfiguration, pkgInfo.getCompatibilityInfo());
     }
 
     final Handler getHandler() {
@@ -4203,6 +4238,10 @@ public final class ActivityThread {
         return config;
     }
 
+    public final void applyAssetsChangedToResources(String[] assetPaths) {
+        handleAssetsChanged(assetPaths);
+    }
+
     final void handleConfigurationChanged(Configuration config, CompatibilityInfo compat) {
 
         int configDiff = 0;
@@ -4251,6 +4290,16 @@ public final class ActivityThread {
             for (int i=0; i<N; i++) {
                 performConfigurationChanged(callbacks.get(i), config);
             }
+        }
+    }
+
+    final void handleAssetsChanged(String[] assetPaths) {
+        synchronized (mResourcesManager) {
+            mResourcesManager.applyAssetsChangedLocked(assetPaths);
+        }
+
+        for (Map.Entry<IBinder, ActivityClientRecord> entry : mActivities.entrySet()) {
+            requestRelaunchActivity(entry.getKey(), null, null, 0, false, null, null, false);
         }
     }
 
@@ -4494,6 +4543,11 @@ public final class ActivityThread {
         mResourcesManager.applyConfigurationToResourcesLocked(data.config, data.compatInfo);
         mCurDefaultDisplayDpi = data.config.densityDpi;
         applyCompatConfiguration(mCurDefaultDisplayDpi);
+
+        // Prepare the asset manager for any overlay packages to load
+        for (String[] paths : data.assetPaths) {
+            mResourcesManager.applyAssetsChangedLocked(paths);
+        }
 
         data.info = getPackageInfoNoCheck(data.appInfo, data.compatInfo);
 

@@ -13,7 +13,6 @@ SYNOPSIS \n\
       idmap --help \n\
       idmap --fd target overlay fd \n\
       idmap --path target overlay idmap \n\
-      idmap --scan dir-to-scan target-to-look-for target dir-to-hold-idmaps \n\
       idmap --inspect idmap \n\
 \n\
 DESCRIPTION \n\
@@ -47,11 +46,6 @@ OPTIONS \n\
 \n\
       --path: create idmap for target package 'target' (path to apk) and overlay package \n\
               'overlay' (path to apk); write results to 'idmap' (path). \n\
-\n\
-      --scan: non-recursively search directory 'dir-to-scan' (path) for overlay packages with \n\
-              target package 'target-to-look-for' (package name) present at 'target' (path to \n\
-              apk). For each overlay package found, create an idmap file in 'dir-to-hold-idmaps' \n\
-              (path). \n\
 \n\
       --inspect: decode the binary format of 'idmap' (path) and display the contents in a \n\
                  debug-friendly format. \n\
@@ -95,16 +89,6 @@ EXAMPLES \n\
 \n\
 NOTES \n\
       This tool and its expected invocation from installd is modelled on dexopt.";
-
-    bool verify_directory_readable(const char *path)
-    {
-        return access(path, R_OK | X_OK) == 0;
-    }
-
-    bool verify_directory_writable(const char *path)
-    {
-        return access(path, W_OK) == 0;
-    }
 
     bool verify_file_readable(const char *path)
     {
@@ -166,32 +150,6 @@ NOTES \n\
         return idmap_create_path(target_apk_path, overlay_apk_path, idmap_path);
     }
 
-    int maybe_scan(const char *overlay_dir, const char *target_package_name,
-            const char *target_apk_path, const char *idmap_dir)
-    {
-        if (!verify_root_or_system()) {
-            fprintf(stderr, "error: permission denied: not user root or user system\n");
-            return -1;
-        }
-
-        if (!verify_directory_readable(overlay_dir)) {
-            ALOGD("error: no read access to %s: %s\n", overlay_dir, strerror(errno));
-            return -1;
-        }
-
-        if (!verify_file_readable(target_apk_path)) {
-            ALOGD("error: failed to read apk %s: %s\n", target_apk_path, strerror(errno));
-            return -1;
-        }
-
-        if (!verify_directory_writable(idmap_dir)) {
-            ALOGD("error: no write access to %s: %s\n", idmap_dir, strerror(errno));
-            return -1;
-        }
-
-        return idmap_scan(overlay_dir, target_package_name, target_apk_path, idmap_dir);
-    }
-
     int maybe_inspect(const char *idmap_path)
     {
         // anyone (not just root or system) may do --inspect
@@ -228,10 +186,6 @@ int main(int argc, char **argv)
 
     if (argc == 5 && !strcmp(argv[1], "--path")) {
         return maybe_create_path(argv[2], argv[3], argv[4]);
-    }
-
-    if (argc == 6 && !strcmp(argv[1], "--scan")) {
-        return maybe_scan(argv[2], argv[3], argv[4], argv[5]);
     }
 
     if (argc == 3 && !strcmp(argv[1], "--inspect")) {

@@ -3375,6 +3375,16 @@ public abstract class Context {
     public static final String RADIO_SERVICE = "radio";
 
     /**
+     * Use with {@link #getSystemService} to retrieve a {@link
+     * android.content.om.OverlayManager} for managing overlay packages.
+     *
+     * @see #getSystemService
+     * @see android.content.om.OverlayManager
+     * @hide
+     */
+    public static final String OVERLAY_SERVICE = "overlay";
+
+    /**
      * Determine whether the given permission is allowed for a particular
      * process and user ID running in the system.
      *

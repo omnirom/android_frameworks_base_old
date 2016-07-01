@@ -1,6 +1,6 @@
 #include "idmap.h"
 
-#include <UniquePtr.h>
+#include <memory>
 #include <androidfw/AssetManager.h>
 #include <androidfw/ResourceTypes.h>
 #include <androidfw/ZipFileRO.h>
@@ -15,7 +15,7 @@ using namespace android;
 namespace {
     int get_zip_entry_crc(const char *zip_path, const char *entry_name, uint32_t *crc)
     {
-        UniquePtr<ZipFileRO> zip(ZipFileRO::open(zip_path));
+        std::unique_ptr<ZipFileRO> zip(ZipFileRO::open(zip_path));
         if (zip.get() == NULL) {
             return -1;
         }
@@ -41,7 +41,7 @@ namespace {
             ALOGD("error: fchmod %s: %s\n", path, strerror(errno));
             goto fail;
         }
-        if (TEMP_FAILURE_RETRY(flock(fd, LOCK_EX | LOCK_NB)) != 0) {
+        if (TEMP_FAILURE_RETRY(flock(fd, LOCK_EX)) != 0) {
             ALOGD("error: flock %s: %s\n", path, strerror(errno));
             goto fail;
         }
@@ -57,7 +57,7 @@ fail:
 
     int write_idmap(int fd, const uint32_t *data, size_t size)
     {
-        if (lseek(fd, SEEK_SET, 0) < 0) {
+        if (lseek(fd, 0, SEEK_SET) < 0) {
             return -1;
         }
         size_t bytesLeft = size;
@@ -86,7 +86,7 @@ fail:
 
         char buf[N];
         size_t bytesLeft = N;
-        if (lseek(idmap_fd, SEEK_SET, 0) < 0) {
+        if (lseek(idmap_fd, 0, SEEK_SET) < 0) {
             return true;
         }
         for (;;) {
@@ -106,7 +106,7 @@ fail:
 
         uint32_t cached_target_crc, cached_overlay_crc;
         String8 cached_target_path, cached_overlay_path;
-        if (!ResTable::getIdmapInfo(buf, N, NULL, &cached_target_crc, &cached_overlay_crc,
+        if (!ResTable::getIdmapInfo(buf, N, NULL, NULL, &cached_target_crc, &cached_overlay_crc,
                     &cached_target_path, &cached_overlay_path)) {
             return true;
         }

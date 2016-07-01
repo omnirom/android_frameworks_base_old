@@ -43,6 +43,7 @@ import com.android.internal.content.ReferrerIntent;
 
 import java.io.FileDescriptor;
 import java.io.IOException;
+import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -298,9 +299,11 @@ public abstract class ApplicationThreadNative extends Binder
             CompatibilityInfo compatInfo = CompatibilityInfo.CREATOR.createFromParcel(data);
             HashMap<String, IBinder> services = data.readHashMap(null);
             Bundle coreSettings = data.readBundle();
+            ArrayList<String[]> assetPaths = data.readArrayList(null);
             bindApplication(packageName, info, providers, testName, profilerInfo, testArgs,
                     testWatcher, uiAutomationConnection, testMode, openGlTrace,
-                    restrictedBackupMode, persistent, config, compatInfo, services, coreSettings);
+                    restrictedBackupMode, persistent, config, compatInfo, services,
+                    coreSettings, assetPaths);
             return true;
         }
 
@@ -323,6 +326,14 @@ public abstract class ApplicationThreadNative extends Binder
             data.enforceInterface(IApplicationThread.descriptor);
             Configuration config = Configuration.CREATOR.createFromParcel(data);
             scheduleConfigurationChanged(config);
+            return true;
+        }
+
+        case SCHEDULE_ASSETS_CHANGED_TRANSACTION:
+        {
+            data.enforceInterface(IApplicationThread.descriptor);
+            String[] assetPaths = data.readStringArray();
+            scheduleAssetsChanged(assetPaths);
             return true;
         }
 
@@ -993,7 +1004,7 @@ class ApplicationThreadProxy implements IApplicationThread {
             IUiAutomationConnection uiAutomationConnection, int debugMode,
             boolean openGlTrace, boolean restrictedBackupMode, boolean persistent,
             Configuration config, CompatibilityInfo compatInfo, Map<String, IBinder> services,
-            Bundle coreSettings) throws RemoteException {
+            Bundle coreSettings, List<String[]> assetPaths) throws RemoteException {
         Parcel data = Parcel.obtain();
         data.writeInterfaceToken(IApplicationThread.descriptor);
         data.writeString(packageName);
@@ -1022,6 +1033,7 @@ class ApplicationThreadProxy implements IApplicationThread {
         compatInfo.writeToParcel(data, 0);
         data.writeMap(services);
         data.writeBundle(coreSettings);
+        data.writeList(assetPaths);
         mRemote.transact(BIND_APPLICATION_TRANSACTION, data, null,
                 IBinder.FLAG_ONEWAY);
         data.recycle();
@@ -1049,6 +1061,16 @@ class ApplicationThreadProxy implements IApplicationThread {
         data.writeInterfaceToken(IApplicationThread.descriptor);
         config.writeToParcel(data, 0);
         mRemote.transact(SCHEDULE_CONFIGURATION_CHANGED_TRANSACTION, data, null,
+                IBinder.FLAG_ONEWAY);
+        data.recycle();
+    }
+
+    public final void scheduleAssetsChanged(String[] assetPaths)
+            throws RemoteException {
+        Parcel data = Parcel.obtain();
+        data.writeInterfaceToken(IApplicationThread.descriptor);
+        data.writeStringArray(assetPaths);
+        mRemote.transact(SCHEDULE_ASSETS_CHANGED_TRANSACTION, data, null,
                 IBinder.FLAG_ONEWAY);
         data.recycle();
     }

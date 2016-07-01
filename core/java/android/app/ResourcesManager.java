@@ -34,7 +34,9 @@ import android.view.Display;
 import android.view.DisplayAdjustments;
 
 import java.lang.ref.WeakReference;
+import java.util.Arrays;
 import java.util.Locale;
+import java.util.Map;
 
 /** @hide */
 public class ResourcesManager {
@@ -46,6 +48,8 @@ public class ResourcesManager {
             new ArrayMap<>();
     private final ArrayMap<Pair<Integer, DisplayAdjustments>, WeakReference<Display>> mDisplays =
             new ArrayMap<>();
+
+    private final ArrayMap<String, String[]> mAssetPaths = new ArrayMap<>(2);
 
     CompatibilityInfo mResCompatibilityInfo;
 
@@ -149,15 +153,13 @@ public class ResourcesManager {
      *
      * @param resDir the resource directory.
      * @param splitResDirs split resource directories.
-     * @param overlayDirs the resource overlay directories.
      * @param libDirs the shared library resource dirs this app references.
      * @param displayId display Id.
      * @param overrideConfiguration override configurations.
      * @param compatInfo the compatibility info. Must not be null.
      */
-    Resources getTopLevelResources(String resDir, String[] splitResDirs,
-            String[] overlayDirs, String[] libDirs, int displayId,
-            Configuration overrideConfiguration, CompatibilityInfo compatInfo) {
+    Resources getTopLevelResources(String resDir, String[] splitResDirs, String[] libDirs,
+            int displayId, Configuration overrideConfiguration, CompatibilityInfo compatInfo) {
         final float scale = compatInfo.applicationScale;
         Configuration overrideConfigCopy = (overrideConfiguration != null)
                 ? new Configuration(overrideConfiguration) : null;
@@ -201,12 +203,6 @@ public class ResourcesManager {
             }
         }
 
-        if (overlayDirs != null) {
-            for (String idmapPath : overlayDirs) {
-                assets.addOverlayPath(idmapPath);
-            }
-        }
-
         if (libDirs != null) {
             for (String libDir : libDirs) {
                 if (libDir.endsWith(".apk")) {
@@ -242,6 +238,12 @@ public class ResourcesManager {
                 + r.getConfiguration() + " appScale=" + r.getCompatibilityInfo().applicationScale);
 
         synchronized (this) {
+            int N = mAssetPaths.size();
+            for (int i = 0; i < N; i++) {
+                String[] assetPaths = mAssetPaths.valueAt(i);
+                r.updateAssets(assetPaths);
+            }
+
             WeakReference<Resources> wr = mActiveResources.get(key);
             Resources existing = wr != null ? wr.get() : null;
             if (existing != null && existing.getAssets().isUpToDate()) {
@@ -330,4 +332,24 @@ public class ResourcesManager {
         return changes != 0;
     }
 
+    final void applyAssetsChangedLocked(String[] assetPaths) {
+        if (assetPaths.length == 0) {
+            throw new IllegalArgumentException(
+                    "at least the path to the target apk must be specified");
+        }
+        mAssetPaths.put(assetPaths[0], assetPaths);
+
+        Resources.updateSystemAssets(assetPaths);
+        ApplicationPackageManager.configurationChanged();
+
+        for (int i = mActiveResources.size() - 1; i >= 0; i--) {
+            ResourcesKey key = mActiveResources.keyAt(i);
+            Resources r = mActiveResources.valueAt(i).get();
+            if (r != null) {
+                r.updateAssets(assetPaths);
+            } else  {
+                mActiveResources.removeAt(i);
+            }
+        }
+    }
 }

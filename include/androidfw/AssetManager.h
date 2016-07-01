@@ -30,6 +30,11 @@
 #include <utils/threads.h>
 #include <utils/Vector.h>
 
+#include <stdint.h> // INT32_MAX
+#ifndef INT32_MAX
+#define INT32_MAX ((int32_t)(0x7FFFFFFF))
+#endif
+
 /*
  * Native-app access is via the opaque typedef struct AAssetManager in the C namespace.
  */
@@ -115,13 +120,15 @@ public:
      * Each next cookie will be returned there-after, until -1 indicating
      * the end has been reached.
      */
-    int32_t nextAssetPath(const int32_t cookie) const;
+    int32_t nextAssetPath(const int32_t cookie, const String8* targetPath = NULL) const;
 
     /*                                                                       
      * Return an asset path in the manager.  'which' must be between 0 and
      * countAssetPaths().
      */
     String8 getAssetPath(const int32_t cookie) const;
+
+    bool removeAsset(const int32_t cookie);
 
     /*
      * Set the current locale and vendor.  The locale can change during
@@ -236,11 +243,13 @@ public:
 private:
     struct asset_path
     {
-        asset_path() : path(""), type(kFileTypeRegular), idmap(""), isSystemOverlay(false) {}
+        asset_path() :
+            path(""), type(kFileTypeRegular), targetPath(""), idmap(""), cookie(-1) {}
         String8 path;
         FileType type;
+        String8 targetPath;
         String8 idmap;
-        bool isSystemOverlay;
+        int32_t cookie;
     };
 
     Asset* openInPathLocked(const char* fileName, AccessMode mode,
@@ -284,9 +293,6 @@ private:
 
     Asset* openIdmapLocked(const struct asset_path& ap) const;
 
-    void addSystemOverlays(const char* pathOverlaysList, const String8& targetPackagePath,
-            ResTable* sharedRes, size_t offset) const;
-
     class SharedZip : public RefBase {
     public:
         static sp<SharedZip> get(const String8& path, bool createIfNotPresent = true);
@@ -301,9 +307,6 @@ private:
         
         bool isUpToDate();
 
-        void addOverlay(const asset_path& ap);
-        bool getOverlay(size_t idx, asset_path* out) const;
-        
     protected:
         ~SharedZip();
 
@@ -317,8 +320,6 @@ private:
 
         Asset* mResourceTableAsset;
         ResTable* mResourceTable;
-
-        Vector<asset_path> mOverlays;
 
         static Mutex gLock;
         static DefaultKeyedVector<String8, wp<SharedZip> > gOpen;
@@ -352,9 +353,6 @@ private:
         static String8 getPathName(const char* path);
 
         bool isUpToDate();
-
-        void addOverlay(const String8& path, const asset_path& overlay);
-        bool getOverlay(const String8& path, size_t idx, asset_path* out) const;
         
     private:
         void closeZip(int idx);
@@ -364,12 +362,48 @@ private:
         mutable Vector<sp<SharedZip> > mZipFile;
     };
 
+    class AssetPaths {
+        public:
+            enum {
+                // The old index-based implementation used cookie values close to zero.
+                // Switch to a completely different range of expected values to
+                // smoke out any uses of the old implementation.
+                FIRST_VALID_COOKIE = 1234,
+                NO_SUCH_COOKIE = INT32_MAX
+            };
+
+            AssetPaths() : mNextCookie(FIRST_VALID_COOKIE) {}
+
+            inline size_t size() const
+            {
+                return mAssetPaths.size();
+            }
+
+            inline const asset_path& itemAt(size_t index) const
+            {
+                return mAssetPaths.itemAt(index);
+            }
+
+            inline ssize_t removeAt(size_t index)
+            {
+                return mAssetPaths.removeAt(index);
+            }
+
+            ssize_t add(const asset_path& ap, int32_t *cookie);
+            int32_t nextCookie(const int32_t cookie, const String8* targetPath) const;
+            ssize_t cookieToIndex(const int32_t cookie) const;
+
+        private:
+            int32_t mNextCookie;
+            Vector<asset_path> mAssetPaths;
+    };
+
     // Protect all internal state.
     mutable Mutex   mLock;
 
     ZipSet          mZipSet;
 
-    Vector<asset_path> mAssetPaths;
+    AssetPaths      mAssetPaths;
     char*           mLocale;
     char*           mVendor;
 

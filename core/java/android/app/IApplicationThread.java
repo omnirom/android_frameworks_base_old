@@ -97,10 +97,11 @@ public interface IApplicationThread extends IInterface {
             IInstrumentationWatcher testWatcher, IUiAutomationConnection uiAutomationConnection,
             int debugMode, boolean openGlTrace, boolean restrictedBackupMode, boolean persistent,
             Configuration config, CompatibilityInfo compatInfo, Map<String, IBinder> services,
-            Bundle coreSettings) throws RemoteException;
+            Bundle coreSettings, List<String[]> assetPaths) throws RemoteException;
     void scheduleExit() throws RemoteException;
     void scheduleSuicide() throws RemoteException;
     void scheduleConfigurationChanged(Configuration config) throws RemoteException;
+    void scheduleAssetsChanged(String[] assetPaths) throws RemoteException;
     void updateTimeZone() throws RemoteException;
     void clearDnsCache() throws RemoteException;
     void setHttpProxy(String proxy, String port, String exclList,
@@ -206,4 +207,5 @@ public interface IApplicationThread extends IInterface {
     int BACKGROUND_VISIBLE_BEHIND_CHANGED_TRANSACTION = IBinder.FIRST_CALL_TRANSACTION+53;
     int ENTER_ANIMATION_COMPLETE_TRANSACTION = IBinder.FIRST_CALL_TRANSACTION+54;
     int NOTIFY_CLEARTEXT_NETWORK_TRANSACTION = IBinder.FIRST_CALL_TRANSACTION+55;
+    int SCHEDULE_ASSETS_CHANGED_TRANSACTION = IBinder.FIRST_CALL_TRANSACTION+56;
 }

@@ -18,6 +18,8 @@ package android.content.pm;
 
 import android.annotation.NonNull;
 
+import java.util.List;
+
 /**
  * Package manager local system service interface.
  *
@@ -115,4 +117,12 @@ public abstract class PackageManagerInternal {
      */
     public abstract void grantDefaultPermissionsToDefaultSimCallManager(String packageName,
             int userId);
+
+    /**
+     * Get all overlay packages for a user.
+     * @param userId The user for which to get the overlays.
+     * @return A list of overlay packages. An empty list is returned if the
+     *         user has no installed overlay packages.
+     */
+    public abstract List<PackageInfo> getOverlayPackages(int userId);
 }

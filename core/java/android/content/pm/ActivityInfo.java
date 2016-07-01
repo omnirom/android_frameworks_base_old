@@ -552,6 +552,19 @@ public class ActivityInfo extends ComponentInfo
      * constant starts at the high bits.
      */
     public static final int CONFIG_FONT_SCALE = 0x40000000;
+    /**
+     * Bit in {@link #configChanges} used to denote that the current configuration change includes
+     * changes to the set of resource assets, i.e. what overlay packages should be used. Note that
+     * applications cannot handle asset changes themselves. (To support that use-case, @hide must be
+     * removed from this constant and corresponding flags for use in AndroidManifest.xml must be
+     * added).
+     *
+     * This is not a core resource configuration, but a higher-level value, so its constant starts
+     * at the high bits.
+     *
+     * @hide
+     */
+    public static final int CONFIG_ASSETS = 0x80000000;
     
     /** @hide
      * Unfortunately the constants for config changes in native code are
