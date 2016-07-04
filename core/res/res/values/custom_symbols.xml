@@ -113,4 +113,7 @@
   <java-symbol type="string" name="power_key_emergency_number" />
   <java-symbol type="integer" name="power_key_hits_emergency" />
   <java-symbol type="bool" name="config_emergencyCallOnPowerkeyTapGestureEnabled" />
+  <java-symbol type="string" name="operator_config_url" />
+  <java-symbol type="string" name="operator_ping_url" />
+  <java-symbol type="bool" name="config_zero_balance_operator"/>
 </resources>
