@@ -53,4 +53,12 @@ public interface DeviceKeyHandler {
      * @return If the event is a wake event
      */
     public boolean isWakeEvent(KeyEvent event);
+
+    /**
+     * Return false if this event should be ignored
+     *
+     * @param event The key event to be handled
+     * @return If the event should be ignored
+     */
+    public boolean isDisabledKeyEvent(KeyEvent event);
 }
