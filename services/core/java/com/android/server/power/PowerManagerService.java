@@ -469,7 +469,7 @@ public final class PowerManagerService extends SystemService
     private PowerProfileManager mProfileManager;
     private boolean mProfilesSupported;
 
-        // button brightness suppport enablement
+    // button brightness suppport enablement
     private boolean mButtonBrightnessSupport = false;
 
     private int mCurrentButtonBrightness = 0;
@@ -3843,9 +3843,6 @@ public final class PowerManagerService extends SystemService
             currentButtonBrightness = calcButtonLight();
         } else {
             currentButtonBrightness = 0;
-        }
-        if (currentButtonBrightness == mCurrentButtonBrightness) {
-            return;
         }
         mCurrentButtonBrightness = currentButtonBrightness;
 
