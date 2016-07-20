@@ -43,4 +43,6 @@
     <string name="permlab_accessFontManager">access font manager</string>
     <!-- [CHAR LIMIT=NONE] Description of an application permission, listed so the user can choose whether they want to allow the application to do this. -->
     <string name="permdesc_accessFontManager">Allows an application to access the font manager.</string>
+    <!-- Vendor mismatched fingerprint warning [CHAR LIMIT=NONE] -->
+    <string name="system_error_vendorprint">Your vendor image does not match the system. Please flash the <xliff:g id="string">%s</xliff:g> vendor image for your device</string>
 </resources>
