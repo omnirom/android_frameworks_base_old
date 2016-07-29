@@ -86,6 +86,18 @@
     <!-- Older rotation sensors are not setting event.timestamp correctly. Setting to
          true will use SystemClock.elapsedRealtimeNanos() to set timestamp. -->
     <bool name="config_useSystemClockforRotationSensor">false</bool>
+
+    <!-- ######## CAF #########-->
     <!--  operator custom sim icon feature -->
     <bool name="operator_custom_sim_icon">false</bool>
+    <!-- Emergency Number to be invoked when Power key is pressed.
+         Default value is set to 112 as this FR is mainly intended
+         for Indian market-->
+    <string name="power_key_emergency_number">112</string>
+    <!-- Number of power key hits to invoke emergency call -->
+    <integer name="power_key_hits_emergency">3</integer>
+
+    <!-- Allow the gesture to tap the power button N times to start
+         the Emergency Call while the device is non-interactive. -->
+    <bool name="config_emergencyCallOnPowerkeyTapGestureEnabled">false</bool>
 </resources>
