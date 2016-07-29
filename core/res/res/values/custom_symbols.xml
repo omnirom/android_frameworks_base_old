@@ -109,4 +109,8 @@
   <java-symbol type="integer" name="config_longPressOnMenuBehavior" />
 
   <java-symbol type="bool" name="config_useSystemClockforRotationSensor" />
+  <!-- CAF -->
+  <java-symbol type="string" name="power_key_emergency_number" />
+  <java-symbol type="integer" name="power_key_hits_emergency" />
+  <java-symbol type="bool" name="config_emergencyCallOnPowerkeyTapGestureEnabled" />
 </resources>
