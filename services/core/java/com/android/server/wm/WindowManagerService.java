@@ -5899,11 +5899,16 @@ public class WindowManagerService extends IWindowManager.Stub
         LightsManager lm = LocalServices.getService(LightsManager.class);
         Light batteryLight = lm.getLight(LightsManager.LIGHT_ID_BATTERY);
         Light notifLight = lm.getLight(LightsManager.LIGHT_ID_NOTIFICATIONS);
+        Light buttonLight = lm.getLight(LightsManager.LIGHT_ID_BUTTONS);
+
         if (batteryLight != null) {
             batteryLight.turnOff();
         }
         if (notifLight != null) {
             notifLight.turnOff();
+        }
+        if (buttonLight != null) {
+            buttonLight.turnOff();
         }
         // Make sure the last requested orientation has been applied.
         updateRotationUnchecked(false, false);
