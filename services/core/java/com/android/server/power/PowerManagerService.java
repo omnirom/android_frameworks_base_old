@@ -3844,6 +3844,9 @@ public final class PowerManagerService extends SystemService
         } else {
             currentButtonBrightness = 0;
         }
+        if (currentButtonBrightness == mCurrentButtonBrightness) {
+            return;
+        }
         mCurrentButtonBrightness = currentButtonBrightness;
 
         if(DEBUG){
