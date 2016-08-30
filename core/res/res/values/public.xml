@@ -2728,4 +2728,22 @@
     <public type="id" name="icon_frame" id="0x0102003e" />
     <public type="id" name="list_container" id="0x0102003f" />
     <public type="id" name="switch_widget" id="0x01020040" />
+
+  <public type="style" name="Theme.Material.DayNight" />
+  <public type="style" name="Theme.Material.DayNight.DarkActionBar" />
+  <public type="style" name="Theme.Material.DayNight.Dialog" />
+  <public type="style" name="Theme.Material.DayNight.Dialog.Alert" />
+  <public type="style" name="Theme.Material.DayNight.Dialog.MinWidth" />
+  <public type="style" name="Theme.Material.DayNight.Dialog.NoActionBar" />
+  <public type="style" name="Theme.Material.DayNight.Dialog.NoActionBar.MinWidth" />
+  <public type="style" name="Theme.Material.DayNight.Dialog.Presentation" />
+  <public type="style" name="Theme.Material.DayNight.DialogWhenLarge" />
+  <public type="style" name="Theme.Material.DayNight.DialogWhenLarge.NoActionBar" />
+  <public type="style" name="Theme.Material.DayNight.NoActionBar" />
+  <public type="style" name="Theme.Material.DayNight.NoActionBar.Fullscreen" />
+  <public type="style" name="Theme.Material.DayNight.NoActionBar.Overscan" />
+  <public type="style" name="Theme.Material.DayNight.NoActionBar.TranslucentDecor" />
+  <public type="style" name="Theme.Material.DayNight.Panel" />
+  <public type="style" name="Theme.Material.DayNight.DialogWhenLarge.DarkActionBar" />
+
 </resources>
