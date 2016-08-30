@@ -31,7 +31,7 @@
         android:clickable="true"
         android:background="?android:attr/selectableItemBackground"
         android:contentDescription="@*android:string/action_bar_up_description"
-        android:src="?android:attr/homeAsUpIndicator" />
+        android:src="@drawable/ic_ab_back_material_light" />
 
     <TextView
         android:id="@android:id/title"

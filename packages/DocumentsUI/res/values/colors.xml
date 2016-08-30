@@ -26,12 +26,12 @@
     <color name="directory_background">#fff7f7f7</color>
     <color name="menu_search_background">@android:color/transparent</color>
 
-    <color name="primary_dark">@*android:color/primary_dark_material_dark</color>
-    <color name="primary">@*android:color/material_blue_grey_900</color>
+    <color name="primary_dark">#ff00596b</color>
+    <color name="primary">#ffb2dfdb</color>
     <color name="accent">@*android:color/accent_material_light</color>
     <color name="accent_dark">@*android:color/accent_material_dark</color>
     <color name="action_mode">@color/material_grey_400</color>
-    <color name="status_bar_color">@*android:color/material_blue_grey_950</color>
+    <color name="status_bar_color">@color/primary_dark</color>
 
     <color name="band_select_background">#88ffffff</color>
     <color name="band_select_border">#44000000</color>

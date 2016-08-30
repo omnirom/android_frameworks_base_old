@@ -16,18 +16,20 @@
 
 <resources xmlns:android="http://schemas.android.com/apk/res/android">
 
-    <style name="ActionBarTheme" parent="@*android:style/ThemeOverlay.Material.Dark.ActionBar" />
-    <style name="ActionBarPopupTheme" parent="@*android:style/ThemeOverlay.Material.Light" />
+    <style name="ActionBarTheme" parent="@*android:style/Theme.Material.DayNight">
+        <item name="android:background">#ffb2dfdb</item>
+    </style>
+    <style name="ActionBarPopupTheme" parent="@*android:style/Theme.Material.DayNight" />
 
-    <style name="DocumentsTheme" parent="@style/Theme.AppCompat.Light.DarkActionBar">
+    <style name="DocumentsTheme" parent="@style/Theme.AppCompat.DayNight">
         <item name="actionBarWidgetTheme">@null</item>
         <item name="actionBarTheme">@style/ActionBarTheme</item>
         <item name="actionBarPopupTheme">@style/ActionBarPopupTheme</item>
 
         <item name="android:windowBackground">@color/window_background</item>
-        <item name="android:colorPrimaryDark">@color/primary_dark</item>
+        <item name="android:colorPrimaryDark">@*android:color/material_blue_grey_900</item>
         <item name="android:colorPrimary">@color/primary</item>
-        <item name="android:colorAccent">@color/accent</item>
+        <item name="android:colorAccent">@*android:color/material_deep_teal_500</item>
         <item name="colorActionMode">@color/action_mode</item>
         <item name="android:queryBackground">@color/menu_search_background</item>
         <item name="android:statusBarColor">@color/status_bar_color</item>
