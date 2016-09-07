@@ -263,7 +263,6 @@ public class PhoneStatusBarPolicy implements Callback, RotationLockController.Ro
             zenDescription = mContext.getString(R.string.interruption_level_alarms);
         } else if (mZen == Global.ZEN_MODE_NO_INTERRUPTIONS) {
             zenVisible = true;
-            zenModeNoInterruptions = true;
             zenIconId = R.drawable.stat_sys_dnd_total_silence;
             zenDescription = mContext.getString(R.string.interruption_level_none);
         } else if (mZen == Global.ZEN_MODE_IMPORTANT_INTERRUPTIONS) {
