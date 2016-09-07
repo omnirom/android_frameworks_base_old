@@ -281,14 +281,30 @@ public abstract class DialogPreference extends Preference implements
      * Shows the dialog associated with this Preference. This is normally initiated
      * automatically on clicking on the preference. Call this method if you need to
      * show the dialog on some other event.
-     * 
+     *
      * @param state Optional instance state to restore on the dialog
      */
     protected void showDialog(Bundle state) {
+        // Create the dialog
+        final Dialog dialog = mDialog = createDialog();
+        if (state != null) {
+            dialog.onRestoreInstanceState(state);
+        }
+        if (needInputMethod()) {
+            requestInputMethod(dialog);
+        }
+        dialog.setOnDismissListener(this);
+        dialog.show();
+    }
+
+    /**
+     * @hide
+     */
+    protected Dialog createDialog() {
         Context context = getContext();
 
         mWhichButtonClicked = DialogInterface.BUTTON_NEGATIVE;
-        
+
         mBuilder = new AlertDialog.Builder(context)
             .setTitle(mDialogTitle)
             .setIcon(mDialogIcon)
@@ -302,21 +318,12 @@ public abstract class DialogPreference extends Preference implements
         } else {
             mBuilder.setMessage(mDialogMessage);
         }
-        
+
         onPrepareDialogBuilder(mBuilder);
-        
+
         getPreferenceManager().registerOnActivityDestroyListener(this);
-        
-        // Create the dialog
-        final Dialog dialog = mDialog = mBuilder.create();
-        if (state != null) {
-            dialog.onRestoreInstanceState(state);
-        }
-        if (needInputMethod()) {
-            requestInputMethod(dialog);
-        }
-        dialog.setOnDismissListener(this);
-        dialog.show();
+
+        return mBuilder.create();
     }
 
     /**
