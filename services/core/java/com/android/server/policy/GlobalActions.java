@@ -1517,7 +1517,6 @@ class GlobalActions implements DialogInterface.OnDismissListener, DialogInterfac
     private static final int MESSAGE_DISMISS = 0;
     private static final int MESSAGE_REFRESH = 1;
     private static final int MESSAGE_SHOW = 2;
-    private static final int MESSAGE_TOGGLE = 3;
     private static final int DIALOG_DISMISS_DELAY = 300; // ms
 
     private Handler mHandler = new Handler() {
@@ -1535,14 +1534,6 @@ class GlobalActions implements DialogInterface.OnDismissListener, DialogInterfac
                 break;
             case MESSAGE_SHOW:
                 handleShow();
-                break;
-            case MESSAGE_TOGGLE:
-                if (mDialog != null) {
-                    mDialog.dismiss();
-                    mDialog = null;
-                } else {
-                    handleShow();
-                }
                 break;
             }
         }
