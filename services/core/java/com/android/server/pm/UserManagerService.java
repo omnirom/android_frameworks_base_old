@@ -51,6 +51,8 @@ import android.util.SparseBooleanArray;
 import android.util.TimeUtils;
 import android.util.Xml;
 
+import com.google.android.collect.Sets;
+
 import com.android.internal.app.IAppOpsService;
 import com.android.internal.util.ArrayUtils;
 import com.android.internal.util.FastXmlSerializer;
@@ -72,6 +74,7 @@ import java.security.NoSuchAlgorithmException;
 import java.security.SecureRandom;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Set;
 
 public class UserManagerService extends IUserManager.Stub {
 
@@ -134,6 +137,9 @@ public class UserManagerService extends IUserManager.Stub {
     // BACKOFF_INC_INTERVAL times.
     private static final int[] BACKOFF_TIMES = { 0, 30*1000, 60*1000, 5*60*1000, 30*60*1000 };
 
+    // Set of user restrictions, which can only be enforced by the system
+    private static final Set<String> SYSTEM_CONTROLLED_RESTRICTIONS = Sets.newArraySet(
+            UserManager.DISALLOW_RECORD_AUDIO);
 
     private final Context mContext;
     private final PackageManagerService mPm;
@@ -255,6 +261,17 @@ public class UserManagerService extends IUserManager.Stub {
             } catch (RemoteException e) {
                 Log.w(LOG_TAG, "Unable to notify AppOpsService of UserRestrictions");
             }
+        }
+        UserInfo currentGuestUser = null;
+        synchronized (mPackagesLock) {
+            currentGuestUser = findCurrentGuestUserLocked();
+        }
+        if (currentGuestUser != null && !hasUserRestriction(
+                UserManager.DISALLOW_CONFIG_WIFI, currentGuestUser.id)) {
+            // If a guest user currently exists, apply the DISALLOW_CONFIG_WIFI option
+            // to it, in case this guest was created in a previous version where this
+            // user restriction was not a default guest restriction.
+            setUserRestriction(UserManager.DISALLOW_CONFIG_WIFI, true, currentGuestUser.id);
         }
     }
 
@@ -474,6 +491,7 @@ public class UserManagerService extends IUserManager.Stub {
         if (mGuestRestrictions.isEmpty()) {
             mGuestRestrictions.putBoolean(UserManager.DISALLOW_OUTGOING_CALLS, true);
             mGuestRestrictions.putBoolean(UserManager.DISALLOW_SMS, true);
+            mGuestRestrictions.putBoolean(UserManager.DISALLOW_CONFIG_WIFI, true);
         }
     }
 
@@ -510,6 +528,17 @@ public class UserManagerService extends IUserManager.Stub {
         synchronized (mPackagesLock) {
             Bundle restrictions = mUserRestrictions.get(userId);
             return restrictions != null ? new Bundle(restrictions) : new Bundle();
+        }
+    }
+
+    public void setUserRestriction(String key, boolean value, int userId) {
+        checkManageUsersPermission("setUserRestriction");
+        synchronized (mPackagesLock) {
+            if (!SYSTEM_CONTROLLED_RESTRICTIONS.contains(key)) {
+                Bundle restrictions = getUserRestrictions(userId);
+                restrictions.putBoolean(key, value);
+                setUserRestrictions(restrictions, userId);
+            }
         }
     }
 

@@ -388,6 +388,16 @@ public class UserManager {
     public static final String DISALLOW_OUTGOING_BEAM = "no_outgoing_beam";
 
     /**
+    * Specifies if a user is not allowed to record audio. This restriction is always enabled for
+    * background users. The default value is <code>false</code>.
+    *
+    * @see #setUserRestrictions(Bundle)
+    * @see #getUserRestrictions()
+    * @hide
+    */
+    public static final String DISALLOW_RECORD_AUDIO = "no_record_audio";
+
+    /**
      * Application restriction key that is used to indicate the pending arrival
      * of real restrictions for the app.
      *

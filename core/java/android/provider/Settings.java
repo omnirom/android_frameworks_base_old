@@ -2888,6 +2888,12 @@ public final class Settings {
         public static final String KEY_APP_SWITCH_LONG_PRESS_ACTION = "key_app_switch_long_press_action";
 
         /**
+         * Enable/disable haptic feedback for virtual keys
+         * @hide
+         */
+        public static final String VIRTUAL_KEYS_HAPTIC_FEEDBACK = "virtual_keys_haptic_feedback";
+
+        /**
          * @hide
          */
         public static final String POWER_PROFILE_ENABLED = "power_profile_enabled";
@@ -4290,6 +4296,13 @@ public final class Settings {
          */
         public static final String LOCK_SCREEN_ALLOW_PRIVATE_NOTIFICATIONS =
                 "lock_screen_allow_private_notifications";
+
+        /**
+         * Separate password for encryption and the lockscreen.
+         * @hide
+         */
+        public static final String LOCK_SEPARATE_ENCRYPTION_PASSWORD =
+                "lock_separate_encryption_password";
 
         /**
          * Set by the system to track if the user needs to see the call to action for

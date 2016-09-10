@@ -30,14 +30,9 @@ interface IImsRegistrationListener {
     void registrationConnected();
 
     /**
-     * Notifies the application when the device is trying to connect the IMS network.
-     */
-    void registrationProgressing();
-
-    /**
      * Notifies the application when the device is disconnected from the IMS network.
      */
-    void registrationDisconnected(in ImsReasonInfo imsReasonInfo);
+    void registrationDisconnected();
 
     /**
      * Notifies the application when its suspended IMS connection is resumed,

@@ -116,6 +116,7 @@ import android.content.pm.PackageInfoLite;
 import android.content.pm.PackageInstaller;
 import android.content.pm.PackageManager;
 import android.content.pm.PackageManager.LegacyPackageDeleteObserver;
+import android.content.pm.PackageManager.NameNotFoundException;
 import android.content.pm.PackageParser.ActivityIntentInfo;
 import android.content.pm.PackageParser.PackageLite;
 import android.content.pm.PackageParser.PackageParserException;
@@ -8136,8 +8137,31 @@ public class PackageManagerService extends IPackageManager.Stub {
         final File originFile = new File(originPath);
         final OriginInfo origin = OriginInfo.fromUntrustedFile(originFile);
 
+        boolean isSystemApp = false;
+        ApplicationInfo appInfo = null;
+        try {
+            Slog.d(TAG, "installerPackageName=" + installerPackageName);
+            appInfo = mContext.getPackageManager().getApplicationInfo(installerPackageName,
+                    PackageManager.GET_UNINSTALLED_PACKAGES);
+        } catch (NameNotFoundException ignored) {
+            Slog.w(TAG, "Could not find package name " + installerPackageName);
+        }
+        if (appInfo != null) isSystemApp = isSystemApp(appInfo);
+
+        final int userFilteredFlags;
+        Slog.w(TAG, "isSystemApp=" + isSystemApp);
+        if ((getInstallLocation() == PackageHelper.APP_INSTALL_INTERNAL) || isSystemApp) {
+            Slog.w(TAG, "PackageManager.INSTALL_INTERNAL"  );
+            userFilteredFlags = installFlags | PackageManager.INSTALL_INTERNAL;
+        } else if (getInstallLocation() == PackageHelper.APP_INSTALL_EXTERNAL) {
+            Slog.w(TAG, "PackageManager.INSTALL_EXTERNAL"  );
+            userFilteredFlags = installFlags | PackageManager.INSTALL_EXTERNAL;
+        } else{
+            userFilteredFlags = installFlags;
+        }
+
         final Message msg = mHandler.obtainMessage(INIT_COPY);
-        msg.obj = new InstallParams(origin, observer, installFlags,
+        msg.obj = new InstallParams(origin, observer, userFilteredFlags,
                 installerPackageName, verificationParams, user, packageAbiOverride);
         mHandler.sendMessage(msg);
     }

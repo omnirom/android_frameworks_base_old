@@ -1,0 +1,30 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- Copyright (C) 2007 The Android Open Source Project
+
+     Licensed under the Apache License, Version 2.0 (the "License");
+     you may not use this file except in compliance with the License.
+     You may obtain a copy of the License at
+
+          http://www.apache.org/licenses/LICENSE-2.0
+
+     Unless required by applicable law or agreed to in writing, software
+     distributed under the License is distributed on an "AS IS" BASIS,
+     WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+     See the License for the specific language governing permissions and
+     limitations under the License.
+-->
+
+<resources>
+    <!-- Legacy exposed resources for theming -->
+    <color name="exposed_primary_text_light">#de000000</color>
+    <color name="exposed_secondary_text_light">#8a000000</color>
+    <color name="exposed_primary_text_dark">#ffffffff</color>
+    <color name="exposed_notification_big_pic_bg">#CCEEEEEE</color>
+    <color name="exposed_resolver_list_bg">@color/white</color>
+    <color name="exposed_notify_action_text">#8a000000</color>
+    <color name="exposed_navigation_bar">@color/black</color>
+    <color name="exposed_TextAppearance.StatusBar.EventContent">#999999</color>
+    <color name="exposed_TextAppearance.StatusBar.EventContent.Emphasis">#CCCCCC</color>
+    <color name="exposed_TextAppearance.EasyCorrectSuggestion">#88C8C8C8</color>
+    <color name="exposed_Widget.Material.Light.Button_TS">#555555</color>
+</resources>

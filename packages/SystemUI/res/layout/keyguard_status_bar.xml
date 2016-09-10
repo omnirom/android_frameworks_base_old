@@ -63,7 +63,7 @@
         android:gravity="center_vertical"
         android:ellipsize="marquee"
         android:textAppearance="?android:attr/textAppearanceSmall"
-        android:textColor="#ffffff"
+        android:textColor="@color/kg_carrier_text"
         android:singleLine="true" />
 
 </com.android.systemui.statusbar.phone.KeyguardStatusBarView>

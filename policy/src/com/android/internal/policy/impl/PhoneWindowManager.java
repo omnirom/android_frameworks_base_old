@@ -540,6 +540,7 @@ public class PhoneWindowManager implements WindowManagerPolicy {
     boolean mHomeConsumed;
     boolean mAppSwitchLongPressed;
     boolean mHomeDoubleTapPending;
+    boolean mVirtualKeysHapticFeedback = true;
     Intent mHomeIntent;
     Intent mCarDockIntent;
     Intent mDeskDockIntent;
@@ -812,6 +813,9 @@ public class PhoneWindowManager implements WindowManagerPolicy {
                     UserHandle.USER_ALL);
             resolver.registerContentObserver(Settings.System.getUriFor(
                     Settings.System.HARDWARE_KEY_REBINDING), false, this,
+                    UserHandle.USER_ALL);
+            resolver.registerContentObserver(Settings.System.getUriFor(
+                    Settings.System.VIRTUAL_KEYS_HAPTIC_FEEDBACK), false, this,
                     UserHandle.USER_ALL);
             resolver.registerContentObserver(Settings.System.getUriFor(
                     Settings.System.ACCELEROMETER_ROTATION_ANGLES), false, this,
@@ -1935,6 +1939,9 @@ public class PhoneWindowManager implements WindowManagerPolicy {
             mUserRotationAngles = Settings.System.getIntForUser(resolver,
                     Settings.System.ACCELEROMETER_ROTATION_ANGLES, -1,
                     UserHandle.USER_CURRENT);
+
+            mVirtualKeysHapticFeedback = Settings.System.getIntForUser(resolver,
+                    Settings.System.VIRTUAL_KEYS_HAPTIC_FEEDBACK, 1, UserHandle.USER_CURRENT) != 0;
 
             updateKeyAssignments();
 
@@ -3316,7 +3323,7 @@ public class PhoneWindowManager implements WindowManagerPolicy {
 
         // Display task switcher for ALT-TAB.
         if (down && repeatCount == 0 && keyCode == KeyEvent.KEYCODE_TAB) {
-            if (mRecentAppsHeldModifiers == 0 && !keyguardOn) {
+            if (mRecentAppsHeldModifiers == 0 && !keyguardOn && isUserSetupComplete()) {
                 final int shiftlessModifiers = event.getModifiers() & ~KeyEvent.META_SHIFT_MASK;
                 if (KeyEvent.metaStateHasModifiers(shiftlessModifiers, KeyEvent.META_ALT_ON)) {
                     mRecentAppsHeldModifiers = shiftlessModifiers;
@@ -5198,6 +5205,19 @@ public class PhoneWindowManager implements WindowManagerPolicy {
                     + " event.isWakeKey()= " + event.isWakeKey() + " isCustomWakeKey(keyCode)=" + isCustomWakeKey(keyCode));
         }
 
+        if (down && (policyFlags & WindowManagerPolicy.FLAG_VIRTUAL) != 0
+                && event.getRepeatCount() == 0) {
+            if (virtualKey){
+                performHapticFeedbackLw(null, HapticFeedbackConstants.VIRTUAL_KEY, false);
+            } else if(mVirtualKeysHapticFeedback && !mHardwareKeysDisable){
+                performHapticFeedbackLw(null, HapticFeedbackConstants.VIRTUAL_KEY, false);
+            }
+        } else if (down && (keyCode == KeyEvent.KEYCODE_BACK || keyCode == KeyEvent.KEYCODE_MENU)) {
+            if (mVirtualKeysHapticFeedback && !mHardwareKeysDisable) {
+                performHapticFeedbackLw(null, HapticFeedbackConstants.VIRTUAL_KEY, false);
+            }
+        }
+
         // Basic policy based on interactive state.
         int result;
         boolean isWakeKey = (policyFlags & WindowManagerPolicy.FLAG_WAKE) != 0
@@ -6359,7 +6379,7 @@ public class PhoneWindowManager implements WindowManagerPolicy {
                             PackageManager.FEATURE_TELEVISION)) {
                         theme = com.android.internal.R.style.Theme_Leanback_Dialog_Alert;
                     } else {
-                        theme = 0;
+                        theme = com.android.internal.R.style.Theme_Material_Dialog_Alert;
                     }
 
                     mBootMsgDialog = new ProgressDialog(mContext, theme) {
@@ -6720,7 +6740,7 @@ public class PhoneWindowManager implements WindowManagerPolicy {
             return false;
         }
         final boolean hapticsDisabled = Settings.System.getIntForUser(mContext.getContentResolver(),
-                Settings.System.HAPTIC_FEEDBACK_ENABLED, 0, UserHandle.USER_CURRENT) == 0;
+                Settings.System.HAPTIC_FEEDBACK_ENABLED, 1, UserHandle.USER_CURRENT) == 0;
         if (hapticsDisabled && !always) {
             return false;
         }

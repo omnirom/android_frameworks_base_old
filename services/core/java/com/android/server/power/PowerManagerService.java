@@ -60,6 +60,7 @@ import android.os.UserHandle;
 import android.os.WorkSource;
 import android.provider.Settings;
 import android.service.dreams.DreamManagerInternal;
+import android.telephony.TelephonyManager;
 import android.util.EventLog;
 import android.util.Slog;
 import android.util.TimeUtils;
@@ -429,6 +430,8 @@ public final class PowerManagerService extends SystemService
     private final ArrayList<PowerManagerInternal.LowPowerModeListener> mLowPowerModeListeners
             = new ArrayList<PowerManagerInternal.LowPowerModeListener>();
 
+    private TelephonyManager telephonyManager;
+
     // power profile support
     private PowerProfileManager mProfileManager;
     private boolean mProfilesSupported;
@@ -458,6 +461,8 @@ public final class PowerManagerService extends SystemService
     // timeout for button backlight automatic turning off
     private int mButtonTimeout;
 
+    private boolean isPhoneAvailable = false;
+
     private native void nativeInit();
 
     private static native void nativeAcquireSuspendBlocker(String name);
@@ -470,6 +475,7 @@ public final class PowerManagerService extends SystemService
     public PowerManagerService(Context context) {
         super(context);
         mContext = context;
+        telephonyManager = (TelephonyManager) context.getSystemService(Context.TELEPHONY_SERVICE);
         mHandlerThread = new ServiceThread(TAG,
                 Process.THREAD_PRIORITY_DISPLAY, false /*allowIo*/);
         mHandlerThread.start();
@@ -1699,10 +1705,22 @@ public final class PowerManagerService extends SystemService
     private boolean isBeingKeptAwakeLocked() {
         return mStayOn
                 || mProximityPositive
+                || isPhoneCallActive()
                 || (mWakeLockSummary & WAKE_LOCK_STAY_AWAKE) != 0
                 || (mUserActivitySummary & (USER_ACTIVITY_SCREEN_BRIGHT
                         | USER_ACTIVITY_SCREEN_DIM)) != 0
                 || mScreenBrightnessBoostInProgress;
+    }
+
+    /**
+     * Determines whether phone is enabled and a phone call is active.
+     */
+    private boolean isPhoneCallActive() {
+        if (mBootCompleted && telephonyManager != null) {
+            isPhoneAvailable =
+                    telephonyManager.getPhoneType() != TelephonyManager.PHONE_TYPE_NONE;
+        }
+        return isPhoneAvailable ? telephonyManager.isOffhook() : false;
     }
 
     /**
