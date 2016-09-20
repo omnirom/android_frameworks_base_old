@@ -979,6 +979,10 @@ public class SubscriptionManager {
         return subId;
     }
 
+    // MWE Todo CNE hack
+    public static int getDefaultSubId() {
+	return getDefaultSubscriptionId();
+    }
     /**
      * Returns the system's default voice subscription id.
      *
@@ -1000,6 +1004,11 @@ public class SubscriptionManager {
 
         if (VDBG) logd("getDefaultVoiceSubscriptionId, sub id = " + subId);
         return subId;
+    }
+
+    // MWE Todo CNE hack
+    public static int getDefaultVoiceSubId() {
+        return getDefaultVoiceSubscriptionId();
     }
 
     /** @hide */
@@ -1106,6 +1115,11 @@ public class SubscriptionManager {
 
         if (VDBG) logd("getDefaultDataSubscriptionId, sub id = " + subId);
         return subId;
+    }
+
+    // MWE Todo CNE hack
+    public static int getDefaultDataSubId() {
+        return getDefaultDataSubscriptionId();
     }
 
     /** @hide */
