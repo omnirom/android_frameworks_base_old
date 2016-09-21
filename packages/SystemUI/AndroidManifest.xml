@@ -171,6 +171,10 @@
     <!-- shortcut manager -->
     <uses-permission android:name="android.permission.RESET_SHORTCUT_MANAGER_THROTTLING" />
 
+    <!-- Nfc tile -->
+    <uses-permission android:name="android.permission.READ_NFC_SETTINGS" />
+    <uses-permission android:name="android.permission.WRITE_NFC_SETTINGS" />
+
     <application
         android:name=".SystemUIApplication"
         android:persistent="true"
