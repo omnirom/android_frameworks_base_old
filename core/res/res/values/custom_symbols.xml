@@ -57,6 +57,8 @@
   <java-symbol type="layout" name="global_actions_dnd_mode" />
   <!-- global actions -->
   <java-symbol type="style" name="GlobalActionsAnimation" />
+  <java-symbol type="style" name="GlobalActionsAnimationTop" />
+  <java-symbol type="style" name="GlobalActionsAnimationEnter" />
   <java-symbol type="string" name="global_action_users" />
   <java-symbol type="dimen" name="global_actions_avatar_size" />
   <java-symbol type="color" name="global_actions_icon_color" />
@@ -65,7 +67,9 @@
   <!--OmniGears Battery lights -->
   <java-symbol type="bool" name="config_multiColorBatteryLed" />
   <java-symbol type="bool" name="config_intrusiveBatteryLed" />
-
+  <!-- LED pulse -->
+  <java-symbol type="bool" name="config_ledCanPulse" />
+  <!-- ScreenRecord -->
   <java-symbol type="bool" name="config_enableScreenrecordChord" />
   <java-symbol type="drawable" name="ic_global_screenshot" />
   <java-symbol type="string" name="global_action_screenshot" />

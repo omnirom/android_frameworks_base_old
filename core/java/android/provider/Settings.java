@@ -3595,6 +3595,13 @@ public final class Settings {
          */
 
         /**
+         * Whether to display set of animations when prompting the power menu
+         *
+         * @hide
+         */
+        public static final String POWER_MENU_ANIMATIONS = "power_menu_animations";
+
+        /**
          * Should the alarm be shown in fullscreen instead of heads-up
          *
          * @hide
