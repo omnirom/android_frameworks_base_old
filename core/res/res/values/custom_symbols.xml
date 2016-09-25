@@ -70,6 +70,7 @@
   <!-- ScreenRecord -->
   <java-symbol type="bool" name="config_enableScreenrecordChord" />
   <java-symbol type="drawable" name="ic_global_screenshot" />
+  <java-symbol type="drawable" name="ic_global_screenshot_white" />
   <java-symbol type="string" name="global_action_screenshot" />
   <java-symbol type="drawable" name="ic_global_screenrecord" />
   <java-symbol type="string" name="global_action_screenrecord" />
