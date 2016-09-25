@@ -34,4 +34,7 @@
     <string name="screenrecord_notif_error">Unable to record screen</string>
     <!-- Navbar tuner -->
     <string name="navbar_tuner_title">Navbar tuner</string>
+    <!-- Quick settings animation-->
+    <string name="qs_animation_title">Quick settings animation</string>
+    <string name="qs_animation_summary">Enable the android nougat quick settings animation</string>
 </resources>

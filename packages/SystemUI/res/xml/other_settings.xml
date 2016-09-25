@@ -19,6 +19,17 @@
                   android:title="@string/other">
 
     <com.android.systemui.tuner.TunerSwitch
+            android:key="qs_show_brightness"
+            android:title="@string/show_brightness"
+            sysui:defValue="true" />
+
+    <com.android.systemui.tuner.TunerSwitch
+        android:key="qs_fancy_animation"
+        android:title="@string/qs_animation_title"
+        android:summary="@string/qs_animation_summary"
+        android:defaultValue="true" />
+
+    <com.android.systemui.tuner.TunerSwitch
             android:key="overview_nav_bar_gesture"
             android:title="@string/overview_nav_bar_gesture"
             android:summary="@string/overview_nav_bar_gesture_desc" />
