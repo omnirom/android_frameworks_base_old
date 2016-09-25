@@ -51,6 +51,7 @@
     <string name="accessibility_quick_settings_nfc_changed_off">NFC turned off.</string>
     <!-- Announcement made when NFC changes to on (not shown on the screen). [CHAR LIMIT=NONE] -->
     <string name="accessibility_quick_settings_nfc_changed_on">NFC turned on.</string>
+    <string name="quick_settings_screenshot_label">Screenshot</string>
 
     <!-- Screenshot Crop & Share -->
     <string name="action_delete_success">Deleted</string>
