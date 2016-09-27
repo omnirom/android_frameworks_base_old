@@ -3007,9 +3007,9 @@ class AlarmManagerService extends SystemService {
         private void updateTrackingLocked(InFlight inflight) {
             if (inflight != null) {
                 updateStatsLocked(inflight);
+                qcNsrmExt.removeTriggeredUid(inflight.mUid);
             }
             mBroadcastRefCount--;
-            qcNsrmExt.removeTriggeredUid(inflight.mUid);
 
             if (mBroadcastRefCount == 0) {
                 mHandler.obtainMessage(AlarmHandler.REPORT_ALARMS_ACTIVE, 0).sendToTarget();
