@@ -78,4 +78,7 @@
   <java-symbol type="string" name="global_action_torch_on" />
   <java-symbol type="string" name="global_action_torch_off" />
   <java-symbol type="string" name="global_actions_toggle_torch_mode" />
+
+  <java-symbol type="string" name="config_deviceKeyHandlerLib" />
+  <java-symbol type="string" name="config_deviceKeyHandlerClass" />
 </resources>
