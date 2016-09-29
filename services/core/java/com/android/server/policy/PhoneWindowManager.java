@@ -713,6 +713,7 @@ public class PhoneWindowManager implements WindowManagerPolicy {
     // Omni additions
     private DeviceKeyHandler mDeviceKeyHandler;
     private boolean mVolumeWakeSupport;
+    private boolean mHardwareKeysDisable;
 
     private static final int MSG_ENABLE_POINTER_LOCATION = 1;
     private static final int MSG_DISABLE_POINTER_LOCATION = 2;
@@ -856,6 +857,9 @@ public class PhoneWindowManager implements WindowManagerPolicy {
                     UserHandle.USER_ALL);
             resolver.registerContentObserver(Settings.System.getUriFor(
                     Settings.System.VOLUME_BUTTON_WAKE), false, this,
+                    UserHandle.USER_ALL);
+            resolver.registerContentObserver(Settings.System.getUriFor(
+                    Settings.System.HARDWARE_KEYS_DISABLE), false, this,
                     UserHandle.USER_ALL);
             updateSettings();
         }
@@ -2051,7 +2055,10 @@ public class PhoneWindowManager implements WindowManagerPolicy {
                 mGlobalActions.settingsChanged();
             }
             mVolumeWakeSupport = Settings.System.getIntForUser(resolver,
-                    Settings.System.VOLUME_BUTTON_WAKE,0,
+                    Settings.System.VOLUME_BUTTON_WAKE, 0,
+                    UserHandle.USER_CURRENT) != 0;
+            mHardwareKeysDisable = Settings.System.getIntForUser(resolver,
+                    Settings.System.HARDWARE_KEYS_DISABLE, 0,
                     UserHandle.USER_CURRENT) != 0;
         }
         synchronized (mWindowManagerFuncs.getWindowManagerLock()) {
@@ -3070,11 +3077,18 @@ public class PhoneWindowManager implements WindowManagerPolicy {
         final int flags = event.getFlags();
         final boolean down = event.getAction() == KeyEvent.ACTION_DOWN;
         final boolean canceled = event.isCanceled();
+        final boolean virtualKey = event.getDeviceId() == KeyCharacterMap.VIRTUAL_KEYBOARD;
+        final int scanCode = event.getScanCode();
+        // if mHardwareKeysDisable is true we have disabled all button rebindings
+        // so we can be sure that events that are !virtuaKey are only for real buttons
+        final boolean disableKey = !virtualKey && mHardwareKeysDisable;
+        final boolean longPress = (flags & KeyEvent.FLAG_LONG_PRESS) != 0;
 
         if (DEBUG_INPUT) {
             Log.d(TAG, "interceptKeyTi keyCode=" + keyCode + " down=" + down + " repeatCount="
                     + repeatCount + " keyguardOn=" + keyguardOn + " mHomePressed=" + mHomePressed
-                    + " canceled=" + canceled);
+                    + " canceled=" + canceled + " virtualKey=" + virtualKey + " scanCode=" + scanCode
+                    + " longPress=" + longPress);
         }
 
         // If we think we might have a volume down & power key chord on the way
@@ -5643,7 +5657,7 @@ public class PhoneWindowManager implements WindowManagerPolicy {
         final boolean down = event.getAction() == KeyEvent.ACTION_DOWN;
         final boolean canceled = event.isCanceled();
         final int keyCode = event.getKeyCode();
-
+        final boolean virtualKey = event.getDeviceId() == KeyCharacterMap.VIRTUAL_KEYBOARD;
         final boolean isInjected = (policyFlags & WindowManagerPolicy.FLAG_INJECTED) != 0;
 
         // If screen is off then we treat the case where the keyguard is open but hidden
@@ -5654,11 +5668,16 @@ public class PhoneWindowManager implements WindowManagerPolicy {
                                             (interactive ?
                                                 isKeyguardShowingAndNotOccluded() :
                                                 mKeyguardDelegate.isShowing()));
+        // if mHardwareKeysDisable is true we have disabled all button rebindings
+        // so we can be sure that events that are !virtuaKey are only for real buttons
+        boolean disableKey = !virtualKey && mHardwareKeysDisable;
 
         if (DEBUG_INPUT) {
             Log.d(TAG, "interceptKeyTq keycode=" + keyCode
                     + " interactive=" + interactive + " keyguardActive=" + keyguardActive
-                    + " policyFlags=" + Integer.toHexString(policyFlags));
+                    + " policyFlags=" + Integer.toHexString(policyFlags) + " down=" + down
+                    + " event.isWakeKey()= " + event.isWakeKey() + " isCustomWakeKey(keyCode)=" + isCustomWakeKey(keyCode)
+                    + " disableKey=" + disableKey);
         }
 
         // Basic policy based on interactive state.
@@ -5699,7 +5718,8 @@ public class PhoneWindowManager implements WindowManagerPolicy {
 
         boolean useHapticFeedback = down
                 && (policyFlags & WindowManagerPolicy.FLAG_VIRTUAL) != 0
-                && event.getRepeatCount() == 0;
+                && event.getRepeatCount() == 0
+                && !disableKey;
 
         // Specific device key handling
         if (mDeviceKeyHandler != null) {

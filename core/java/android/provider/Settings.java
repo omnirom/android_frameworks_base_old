@@ -3631,6 +3631,24 @@ public final class Settings {
          */
         public static final String SWAP_VOLUME_BUTTONS = "swap_volume_buttons";
 
+        /** some devices have a extra hw button e.g. n3 on the back on the 
+         * fingerprint sensor. allow mapping button to key
+         *
+         * @hide
+         */
+        public static final String BUTTON_EXTRA_KEY_MAPPING = "button_extra_mapping";
+
+        /**
+         * @hide
+         */
+        public static final String BUTTON_SWAP_BACK_RECENTS = "button_swap_back_recents";
+
+        /**
+         * Disable hw buttons - actions, brightness, haptic feedback, overflow menu
+         * @hide
+         */
+        public static final String HARDWARE_KEYS_DISABLE = "hardware_keys_disable";
+
         /**
          * Settings to backup. This is here so that it's in the same place as the settings
          * keys and easy to update.
