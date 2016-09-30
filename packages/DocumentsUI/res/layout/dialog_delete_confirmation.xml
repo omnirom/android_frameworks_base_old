@@ -22,5 +22,5 @@
     android:paddingStart="24dp"
     android:paddingEnd="24dp"
     android:textAppearance="@android:style/TextAppearance.Material.Subhead"
-    android:textColor="@*android:color/primary_text_default_material_light">
+    android:textColor="@color/delete_dialog_text">
 </TextView>
