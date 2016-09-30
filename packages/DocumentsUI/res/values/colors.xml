@@ -38,4 +38,5 @@
     <color name="item_doc_background_disabled">#fff4f4f4</color>
     <color name="item_doc_background_selected">@*android:color/accent_device_default_50</color>
 
+    <color name="delete_dialog_text">@*android:color/primary_text_default_material_light</color>
 </resources>
