@@ -168,6 +168,7 @@ class GlobalActions implements DialogInterface.OnDismissListener, DialogInterfac
     private ToggleAction mTorchModeOn;
     private static boolean mTorchEnabled = false;
     private ToggleAction.State mTorchState = ToggleAction.State.Off;
+    private UserManager mUm;
 
     /**
      * @param context everything needs a context :(
@@ -216,6 +217,7 @@ class GlobalActions implements DialogInterface.OnDismissListener, DialogInterfac
             mCameraManager.registerTorchCallback(mTorchCallback, new Handler());
         }
 
+        mUm = (UserManager) mContext.getSystemService(Context.USER_SERVICE);
         settingsChanged();
     }
 
@@ -475,8 +477,8 @@ class GlobalActions implements DialogInterface.OnDismissListener, DialogInterfac
                     mItems.add(mSilentModeAction);
                 }
             } else if (GLOBAL_ACTION_KEY_USERS.equals(actionKey)) {
-                UserManager um = (UserManager) mContext.getSystemService(Context.USER_SERVICE);
-                if (um.isUserSwitcherEnabled()) {
+                List<UserInfo> users = mUm.getUsers(true);
+                if (mUm.isUserSwitcherEnabled() && users.size() > 1) {
                     mItems.add(new UsersAction());
                 }
             } else if (GLOBAL_ACTION_KEY_SETTINGS.equals(actionKey)) {
@@ -519,8 +521,7 @@ class GlobalActions implements DialogInterface.OnDismissListener, DialogInterfac
 
         @Override
         public boolean onLongPress() {
-            UserManager um = (UserManager) mContext.getSystemService(Context.USER_SERVICE);
-            if (!um.hasUserRestriction(UserManager.DISALLOW_SAFE_BOOT)) {
+            if (!mUm.hasUserRestriction(UserManager.DISALLOW_SAFE_BOOT)) {
                 mWindowManagerFuncs.rebootSafeMode(true);
                 return true;
             }
@@ -963,10 +964,8 @@ class GlobalActions implements DialogInterface.OnDismissListener, DialogInterfac
     }
 
     private void addUsersToMenu(ArrayList<Action> items) {
-        UserManager um = (UserManager) mContext.getSystemService(Context.USER_SERVICE);
-
-        List<UserInfo> users = um.getUsers(true);
-        if (um.isUserSwitcherEnabled() && users.size() > 1) {
+        List<UserInfo> users = mUm.getUsers(true);
+        if (mUm.isUserSwitcherEnabled() && users.size() > 1) {
             final int avatarSize
                     = mContext.getResources().getDimensionPixelSize(com.android.internal.R.dimen.global_actions_avatar_size);
             final int activeColor = mContext.getResources().getColor(R.color.global_actions_icon_color);
@@ -976,7 +975,7 @@ class GlobalActions implements DialogInterface.OnDismissListener, DialogInterfac
                     final boolean isCurrentUser = currentUser == null
                             ? user.id == 0 : (currentUser.id == user.id);
                     Drawable avatar = null;
-                    Bitmap rawAvatar = um.getUserIcon(user.id);
+                    Bitmap rawAvatar = mUm.getUserIcon(user.id);
                     if (rawAvatar != null) {
                         avatar = createCircularClip(rawAvatar, avatarSize, avatarSize);
                     } else {
