@@ -289,7 +289,7 @@ public class BatteryMeterHorizontalView extends AbstractBatteryView implements
             mTextSize = getResources().getDimensionPixelSize(R.dimen.battery_level_text_size);
             mTextPaint.setTextSize(mTextSize);
             Rect bounds = new Rect();
-            String text = text = ".00%";
+            String text = text = "100%";
             mTextPaint.getTextBounds(text, 0, text.length(), bounds);
             mTextWidth = bounds.width();
         }

@@ -108,7 +108,7 @@ public class BatteryPercentView extends AbstractBatteryView implements
         mTextPaint.setTypeface(font);
         mTextPaint.setTextAlign(Paint.Align.RIGHT);
         Rect bounds = new Rect();
-        String text = ".00%";
+        String text = "100%";
         mTextPaint.getTextBounds(text, 0, text.length(), bounds);
         mTextWidth = bounds.width();
     }
