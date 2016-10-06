@@ -3710,6 +3710,12 @@ public final class Settings {
         public static final String NAVIGATION_BAR_SHOW = "navigation_bar_show";
 
         /**
+         * navbar recents style - 0 default AOSP 1 OmniSwitch
+         * @hide
+         */
+        public static final String NAVIGATION_BAR_RECENTS = "navigation_bar_recents";
+
+        /**
          * Whether to display set of animations when prompting the power menu
          *
          * @hide
