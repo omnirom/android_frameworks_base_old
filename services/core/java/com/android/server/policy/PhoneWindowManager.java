@@ -73,6 +73,7 @@ import android.hardware.hdmi.HdmiControlManager;
 import android.hardware.hdmi.HdmiPlaybackClient;
 import android.hardware.hdmi.HdmiPlaybackClient.OneTouchPlayCallback;
 import android.hardware.input.InputManagerInternal;
+import android.hardware.input.InputManager;
 import android.media.AudioAttributes;
 import android.media.AudioManager;
 import android.media.AudioSystem;
@@ -128,6 +129,7 @@ import android.view.KeyCharacterMap;
 import android.view.KeyCharacterMap.FallbackAction;
 import android.view.KeyEvent;
 import android.view.MotionEvent;
+import android.view.SoundEffectConstants;
 import android.view.Surface;
 import android.view.View;
 import android.view.ViewConfiguration;
@@ -140,6 +142,7 @@ import android.view.accessibility.AccessibilityManager;
 import android.view.animation.Animation;
 import android.view.animation.AnimationSet;
 import android.view.animation.AnimationUtils;
+import android.widget.Toast;
 import com.android.internal.R;
 import com.android.internal.logging.MetricsLogger;
 import com.android.internal.os.DeviceKeyHandler;
@@ -148,6 +151,8 @@ import com.android.internal.policy.IShortcutService;
 import com.android.internal.statusbar.IStatusBarService;
 import com.android.internal.util.ScreenShapeHelper;
 import com.android.internal.util.omni.DeviceUtils;
+import com.android.internal.util.omni.TaskUtils;
+import com.android.internal.util.omni.OmniSwitchConstants;
 import com.android.internal.widget.PointerLocationView;
 import com.android.server.GestureLauncherService;
 import com.android.server.LocalServices;
@@ -176,7 +181,7 @@ public class PhoneWindowManager implements WindowManagerPolicy {
     static final String TAG = "WindowManager";
     static final boolean DEBUG = false;
     static final boolean localLOGV = false;
-    static boolean DEBUG_INPUT = false;
+    static boolean DEBUG_INPUT = true;
     static final boolean DEBUG_KEYGUARD = false;
     static final boolean DEBUG_LAYOUT = false;
     static final boolean DEBUG_STARTING_WINDOW = false;
@@ -208,6 +213,7 @@ public class PhoneWindowManager implements WindowManagerPolicy {
 
     // These need to match the documentation/constant in
     // core/res/res/values/config.xml
+    // these are also used for the menu key!
     static final int LONG_PRESS_HOME_NOTHING = 0;
     static final int LONG_PRESS_HOME_RECENT_SYSTEM_UI = 1;
     static final int LONG_PRESS_HOME_ASSIST = 2;
@@ -721,6 +727,15 @@ public class PhoneWindowManager implements WindowManagerPolicy {
     private boolean mVolumeMusicControl;
     private boolean mVolumeWakeActive;
 
+    // What we do when the user long presses on home
+    private int mLongPressOnMenuBehavior;
+    private boolean mOmniSwitchRecents;
+    private boolean mMenuConsumed;
+    private boolean mBackConsumed;
+    private boolean mBackKillPending;
+    private int mBackKillTimeout;
+    private AudioManager mAudioManager;
+
     private static final int MSG_ENABLE_POINTER_LOCATION = 1;
     private static final int MSG_DISABLE_POINTER_LOCATION = 2;
     private static final int MSG_DISPATCH_MEDIA_KEY_WITH_WAKE_LOCK = 3;
@@ -882,6 +897,9 @@ public class PhoneWindowManager implements WindowManagerPolicy {
                     UserHandle.USER_ALL);
             resolver.registerContentObserver(Settings.Secure.getUriFor(
                     Settings.System.NAVIGATION_BAR_SHOW), false, this,
+                    UserHandle.USER_ALL);
+            resolver.registerContentObserver(Settings.System.getUriFor(
+                    Settings.System.NAVIGATION_BAR_RECENTS), false, this,
                     UserHandle.USER_ALL);
 
             updateSettings();
@@ -1538,7 +1556,7 @@ public class PhoneWindowManager implements WindowManagerPolicy {
     private void handleDoubleTapOnHome() {
         if (mDoubleTapOnHomeBehavior == DOUBLE_TAP_HOME_RECENT_SYSTEM_UI) {
             mHomeConsumed = true;
-            toggleRecentApps();
+            doToggleRecentApps();
         }
     }
 
@@ -1717,6 +1735,9 @@ public class PhoneWindowManager implements WindowManagerPolicy {
         boolean debugInputOverride = SystemProperties.getBoolean("debug.inputEvent", false);
         DEBUG_INPUT = DEBUG_INPUT || debugInputOverride;
 
+        mBackKillTimeout = mContext.getResources().getInteger(
+                com.android.internal.R.integer.config_backKillTimeout);
+
         mUseTvRouting = AudioSystem.getPlatformType(mContext) == AudioSystem.PLATFORM_TELEVISION;
 
         readConfigurationDependentBehaviors();
@@ -1869,6 +1890,9 @@ public class PhoneWindowManager implements WindowManagerPolicy {
                         + deviceKeyHandlerLib, e);
             }
         }
+
+        mAudioManager = (AudioManager) context.getSystemService(Context.AUDIO_SERVICE);
+
     }
 
     /**
@@ -1891,6 +1915,13 @@ public class PhoneWindowManager implements WindowManagerPolicy {
         if (mDoubleTapOnHomeBehavior < DOUBLE_TAP_HOME_NOTHING ||
                 mDoubleTapOnHomeBehavior > DOUBLE_TAP_HOME_RECENT_SYSTEM_UI) {
             mDoubleTapOnHomeBehavior = LONG_PRESS_HOME_NOTHING;
+        }
+
+        mLongPressOnMenuBehavior = mContext.getResources().getInteger(
+                com.android.internal.R.integer.config_longPressOnMenuBehavior);
+        if (mLongPressOnMenuBehavior < LONG_PRESS_HOME_NOTHING ||
+                mLongPressOnMenuBehavior > LONG_PRESS_HOME_ASSIST) {
+            mLongPressOnMenuBehavior = LONG_PRESS_HOME_NOTHING;
         }
 
         mShortPressWindowBehavior = SHORT_PRESS_WINDOW_NOTHING;
@@ -2083,6 +2114,9 @@ public class PhoneWindowManager implements WindowManagerPolicy {
                     UserHandle.USER_CURRENT) != 0;
             mVolumeMusicControl = Settings.System.getIntForUser(resolver,
                     Settings.System.VOLUME_BUTTON_MUSIC_CONTROL, 0,
+                    UserHandle.USER_CURRENT) != 0;
+            mOmniSwitchRecents = Settings.System.getIntForUser(resolver,
+                    Settings.System.NAVIGATION_BAR_RECENTS, 0,
                     UserHandle.USER_CURRENT) != 0;
         }
         synchronized (mWindowManagerFuncs.getWindowManagerLock()) {
@@ -3150,6 +3184,13 @@ public class PhoneWindowManager implements WindowManagerPolicy {
             mPendingCapsLockToggle = false;
         }
 
+        // if a kill app is pending and we lift finger
+        // stop the kill action
+        if (mBackKillPending && !down) {
+            mHandler.removeCallbacks(mKillTask);
+            mBackKillPending = false;
+        }
+
         // First we always handle the home key here, so applications
         // can never break it, although if keyguard is on, we do let
         // it handle it, because that gives us the correct 5 second
@@ -3225,7 +3266,7 @@ public class PhoneWindowManager implements WindowManagerPolicy {
                         || mDoubleTapOnHomeBehavior == DOUBLE_TAP_HOME_RECENT_SYSTEM_UI) {
                     preloadRecentApps();
                 }
-            } else if ((event.getFlags() & KeyEvent.FLAG_LONG_PRESS) != 0) {
+            } else if (longPress) {
                 if (!keyguardOn) {
                     handleLongPressOnHome(event.getDeviceId());
                 }
@@ -3235,26 +3276,77 @@ public class PhoneWindowManager implements WindowManagerPolicy {
             // Hijack modified menu keys for debugging features
             final int chordBug = KeyEvent.META_SHIFT_ON;
 
-            if (down && repeatCount == 0) {
-                if (mEnableShiftMenuBugReports && (metaState & chordBug) == chordBug) {
-                    Intent intent = new Intent(Intent.ACTION_BUG_REPORT);
-                    mContext.sendOrderedBroadcastAsUser(intent, UserHandle.CURRENT,
-                            null, null, null, 0, null, null);
-                    return -1;
-                } else if (SHOW_PROCESSES_ON_ALT_MENU &&
-                        (metaState & KeyEvent.META_ALT_ON) == KeyEvent.META_ALT_ON) {
-                    Intent service = new Intent();
-                    service.setClassName(mContext, "com.android.server.LoadAverageService");
-                    ContentResolver res = mContext.getContentResolver();
-                    boolean shown = Settings.Global.getInt(
-                            res, Settings.Global.SHOW_PROCESSES, 0) != 0;
-                    if (!shown) {
-                        mContext.startService(service);
-                    } else {
-                        mContext.stopService(service);
+            if (!virtualKey) {
+                if (down) {
+                    if (repeatCount == 0) {
+                        if (mLongPressOnMenuBehavior == LONG_PRESS_HOME_RECENT_SYSTEM_UI) {
+                            preloadRecentApps();
+                        }
+                        if (mEnableShiftMenuBugReports && (metaState & chordBug) == chordBug) {
+                            Intent intent = new Intent(Intent.ACTION_BUG_REPORT);
+                            mContext.sendOrderedBroadcastAsUser(intent, UserHandle.CURRENT,
+                                    null, null, null, 0, null, null);
+                            return -1;
+                        } else if (SHOW_PROCESSES_ON_ALT_MENU &&
+                                (metaState & KeyEvent.META_ALT_ON) == KeyEvent.META_ALT_ON) {
+                            Intent service = new Intent();
+                            service.setClassName(mContext, "com.android.server.LoadAverageService");
+                            ContentResolver res = mContext.getContentResolver();
+                            boolean shown = Settings.Global.getInt(
+                                    res, Settings.Global.SHOW_PROCESSES, 0) != 0;
+                            if (!shown) {
+                                mContext.startService(service);
+                            } else {
+                                mContext.stopService(service);
+                            }
+                            Settings.Global.putInt(
+                                    res, Settings.Global.SHOW_PROCESSES, shown ? 0 : 1);
+                            return -1;
+                        }
+                    } else if (longPress) {
+                        if (mLongPressOnMenuBehavior != LONG_PRESS_HOME_RECENT_SYSTEM_UI) {
+                            cancelPreloadRecentApps();
+                        }
+                        if (!keyguardOn) {
+                            handleLongPressOnMenu(event.getDeviceId());
+                        }
                     }
-                    Settings.Global.putInt(
-                            res, Settings.Global.SHOW_PROCESSES, shown ? 0 : 1);
+                    return -1;
+                } else {
+                    if (mLongPressOnMenuBehavior == LONG_PRESS_HOME_RECENT_SYSTEM_UI) {
+                        cancelPreloadRecentApps();
+                    }
+                    if (canceled) {
+                        return -1;
+                    }
+                    if (mMenuConsumed) {
+                        mMenuConsumed = false;
+                        return -1;
+                    }
+                    triggerVirtualKeypress(KeyEvent.KEYCODE_MENU);
+                    return -1;
+                }
+            }
+        } else if (keyCode == KeyEvent.KEYCODE_BACK) {
+            if (!virtualKey) {
+                if (down) {
+                    if (repeatCount == 0) {
+                        playSoundEffect(SoundEffectConstants.CLICK);
+                    } else if (longPress) {
+                        if (!keyguardOn) {
+                            handleLongPressOnBack(event.getDeviceId());
+                        }
+                    }
+                    return -1;
+                } else {
+                    if (canceled) {
+                        return -1;
+                    }
+                    if (mBackConsumed) {
+                        mBackConsumed = false;
+                        return -1;
+                    }
+                    triggerVirtualKeypress(KeyEvent.KEYCODE_BACK);
                     return -1;
                 }
             }
@@ -3277,7 +3369,7 @@ public class PhoneWindowManager implements WindowManagerPolicy {
                 if (down && repeatCount == 0) {
                     preloadRecentApps();
                 } else if (!down) {
-                    toggleRecentApps();
+                    doToggleRecentApps();
                 }
             }
             return -1;
@@ -3758,6 +3850,9 @@ public class PhoneWindowManager implements WindowManagerPolicy {
     }
 
     private void preloadRecentApps() {
+        if (mOmniSwitchRecents) {
+            return;
+        }
         mPreloadedRecentApps = true;
         StatusBarManagerInternal statusbar = getStatusBarManagerInternal();
         if (statusbar != null) {
@@ -6058,6 +6153,14 @@ public class PhoneWindowManager implements WindowManagerPolicy {
                 }
                 break;
             }
+            // WTH are those wake keys?
+            case KeyEvent.KEYCODE_MENU: {
+                if (disableKey) {
+                    result &= ~ACTION_PASS_TO_USER;
+                    isWakeKey = false;
+                }
+                break;
+            }
             case KeyEvent.KEYCODE_WINDOW: {
                 if (mShortPressWindowBehavior == SHORT_PRESS_WINDOW_PICTURE_IN_PICTURE) {
                     if (mTvPictureInPictureVisible) {
@@ -8108,5 +8211,89 @@ public class PhoneWindowManager implements WindowManagerPolicy {
         Message msg = mHandler.obtainMessage(MSG_DISPATCH_VOLKEY_WITH_WAKE_LOCK, event);
         msg.setAsynchronous(true);
         mHandler.sendMessageDelayed(msg, ViewConfiguration.getLongPressTimeout());
+    }
+
+
+    private void triggerVirtualKeypress(final int keyCode) {
+        InputManager im = InputManager.getInstance();
+        long now = SystemClock.uptimeMillis();
+
+        final KeyEvent downEvent = new KeyEvent(now, now, KeyEvent.ACTION_DOWN,
+                keyCode, 0, 0, KeyCharacterMap.VIRTUAL_KEYBOARD, 0,
+                KeyEvent.FLAG_FROM_SYSTEM, InputDevice.SOURCE_KEYBOARD);
+        final KeyEvent upEvent = KeyEvent.changeAction(downEvent, KeyEvent.ACTION_UP);
+
+        im.injectInputEvent(downEvent, InputManager.INJECT_INPUT_EVENT_MODE_ASYNC);
+        im.injectInputEvent(upEvent, InputManager.INJECT_INPUT_EVENT_MODE_ASYNC);
+    }
+
+    private void handleLongPressOnMenu(int deviceId) {
+        if (mLongPressOnMenuBehavior != LONG_PRESS_HOME_NOTHING) {
+            mMenuConsumed = true;
+            performHapticFeedbackLw(null, HapticFeedbackConstants.LONG_PRESS, false);
+
+            if (mLongPressOnMenuBehavior == LONG_PRESS_HOME_RECENT_SYSTEM_UI) {
+                doToggleRecentApps();
+            } else if (mLongPressOnMenuBehavior == LONG_PRESS_HOME_ASSIST) {
+                launchAssistAction(null, deviceId);
+            }
+        }
+    }
+
+    private void handleLongPressOnBack(int deviceId) {
+        mBackConsumed = true;
+        performHapticFeedbackLw(null, HapticFeedbackConstants.LONG_PRESS, false);
+
+         // check for locked mode
+        if (!isStopLockTaskMode()) {
+           final boolean backKillEnabled = Settings.System.getIntForUser(mContext.getContentResolver(),
+                    Settings.System.BUTTON_BACK_KILL_ENABLE, 1, UserHandle.USER_CURRENT) == 1;
+            final int backKillTimeout = Settings.System.getIntForUser(mContext.getContentResolver(),
+                    Settings.System.BUTTON_BACK_KILL_TIMEOUT, mBackKillTimeout, UserHandle.USER_CURRENT);
+
+            if (backKillEnabled) {
+                // else kill app
+                mHandler.postDelayed(mKillTask, backKillTimeout);
+                mBackKillPending = true;
+            }
+        }
+    }
+
+    private boolean isStopLockTaskMode() {
+        // in this case there is a different way to stop it
+        if (DeviceUtils.deviceSupportNavigationBar(mContext)) {
+            return false;
+        }
+        try {
+            if (ActivityManagerNative.getDefault().isInLockTaskMode()) {
+                ActivityManagerNative.getDefault().stopSystemLockTaskMode();
+                return true;
+            }
+        } catch (RemoteException e) {
+        }
+        return false;
+    }
+
+    private void doToggleRecentApps() {
+        if (mOmniSwitchRecents) {
+            OmniSwitchConstants.toggleOmniSwitchRecents(mContext, UserHandle.CURRENT);
+        } else {
+            toggleRecentApps();
+        }
+    }
+
+    private Runnable mKillTask = new Runnable() {
+        public void run() {
+            mBackKillPending = false;
+            if (TaskUtils.killActiveTask(mContext, mCurrentUserId)){
+                performHapticFeedbackLw(null, HapticFeedbackConstants.LONG_PRESS, false);
+                Toast.makeText(mContext, R.string.app_killed_message,
+                        Toast.LENGTH_SHORT).show();
+            }
+        }
+    };
+
+    private void playSoundEffect(int soundConstant) {
+        mAudioManager.playSoundEffect(soundConstant, mCurrentUserId);
     }
 }
