@@ -527,8 +527,7 @@ public class StatusBarIconController extends StatusBarIconList implements Tunabl
             v.setImageTintList(ColorStateList.valueOf(getTint(mTintArea, v, mIconTint)));
         }
         mSignalCluster.setIconTint(mIconTint, mDarkIntensity, mTintArea);
-        //mBatteryViewManager.setDarkIntensity(
-        //        isInArea(mTintArea, mBatteryViewManager) ? mDarkIntensity : 0);
+        mBatteryViewManager.setDarkIntensity(mDarkIntensity);
         mClock.setTextColor(getTint(mTintArea, mClock, mIconTint));
     }
 
