@@ -376,6 +376,8 @@ public class PhoneStatusBar extends BaseStatusBar implements DemoMode,
 
     private int mNavigationBarWindowState = WINDOW_STATE_SHOWING;
 
+    private int mStatusBarHeaderHeight;
+
     // the tracker view
     int mTrackingPosition; // the position of the top of the tracking view.
 
@@ -387,6 +389,7 @@ public class PhoneStatusBar extends BaseStatusBar implements DemoMode,
 
     // omni additions
     private BatteryViewManager mBatteryViewManager;
+    private boolean mAutomaticBrightness;
     private boolean mBrightnessControl;
     private boolean mBrightnessChanged;
     private float mScreenWidth;
@@ -397,6 +400,11 @@ public class PhoneStatusBar extends BaseStatusBar implements DemoMode,
     private int mInitialTouchY;
     private boolean mAutomatic;
     private IPowerManager mPower;
+    private boolean mOmniSwitchRecents;
+    private boolean mBackKillPending;
+    private int mBackKillTimeout;
+    private boolean mRecentsConsumed;
+    private boolean mBackConsumed;
     /**
      * {@link android.provider.Settings.System#SCREEN_AUTO_BRIGHTNESS_ADJ} uses the range [-1, 1].
      * Using this factor, it is converted to [0, BRIGHTNESS_ADJ_RESOLUTION] for the SeekBar.
@@ -499,6 +507,12 @@ public class PhoneStatusBar extends BaseStatusBar implements DemoMode,
             mContext.getContentResolver().registerContentObserver(Settings.System.getUriFor(
                     Settings.System.STATUS_BAR_BRIGHTNESS_CONTROL),
                     false, this, UserHandle.USER_ALL);
+            mContext.getContentResolver().registerContentObserver(Settings.System.getUriFor(
+                    Settings.System.SCREEN_BRIGHTNESS_MODE),
+                    false, this, UserHandle.USER_ALL);
+            mContext.getContentResolver().registerContentObserver(Settings.System.getUriFor(
+                    Settings.System.NAVIGATION_BAR_RECENTS),
+                    false, this, UserHandle.USER_ALL);
 
             update();
         }
@@ -518,12 +532,13 @@ public class PhoneStatusBar extends BaseStatusBar implements DemoMode,
                     updateNavigationBar();
                 }
             }
-            mStatusBarWindowManager.updateKeyguardScreenRotation();
-            mAutomatic = Settings.System.getIntForUser(
+            mAutomaticBrightness = Settings.System.getIntForUser(
                     mContext.getContentResolver(), Settings.System.SCREEN_BRIGHTNESS_MODE, 0, mCurrentUserId) !=
                     Settings.System.SCREEN_BRIGHTNESS_MODE_MANUAL;
             mBrightnessControl = Settings.System.getIntForUser(
                     mContext.getContentResolver(), Settings.System.STATUS_BAR_BRIGHTNESS_CONTROL, 0, mCurrentUserId) == 1;
+            mOmniSwitchRecents = Settings.System.getIntForUser(
+                    mContext.getContentResolver(), Settings.System.NAVIGATION_BAR_RECENTS, 0, mCurrentUserId) == 1;
         }
     }
     private NavigationBarObserver mNavigationBarObserver = new NavigationBarObserver(mHandler);
@@ -855,6 +870,9 @@ public class PhoneStatusBar extends BaseStatusBar implements DemoMode,
         }
 
         mAssistManager = new AssistManager(this, context);
+        if (!mShowNavBar) {
+            mAssistManager.onConfigurationChanged();
+        }
 
         // figure out which pixel-format to use for the status bar.
         mPixelFormat = PixelFormat.OPAQUE;
@@ -1331,8 +1349,39 @@ public class PhoneStatusBar extends BaseStatusBar implements DemoMode,
 
     private View.OnClickListener mRecentsClickListener = new View.OnClickListener() {
         public void onClick(View v) {
+            if (mRecentsConsumed) {
+                mRecentsConsumed = false;
+                return;
+            }
             awakenDreams();
-            toggleRecentApps();
+            if (mOmniSwitchRecents) {
+                OmniSwitchConstants.toggleOmniSwitchRecents(mContext, getCurrentUserHandle());
+            } else {
+                toggleRecentApps();
+            }
+        }
+    };
+
+    private View.OnTouchListener mRecentsPreloadOnTouchListener = new View.OnTouchListener() {
+        // additional optimization when we have software system buttons - start loading the recent
+        // tasks on touch down
+        @Override
+        public boolean onTouch(View v, MotionEvent event) {
+            if (mOmniSwitchRecents) {
+                return false;
+            }
+            int action = event.getAction() & MotionEvent.ACTION_MASK;
+            if (action == MotionEvent.ACTION_DOWN) {
+                preloadRecents();
+            } else if (action == MotionEvent.ACTION_CANCEL) {
+                cancelPreloadingRecents();
+            } else if (action == MotionEvent.ACTION_UP) {
+                if (!v.isPressed()) {
+                    cancelPreloadingRecents();
+                }
+
+            }
+            return false;
         }
     };
 
@@ -1427,6 +1476,7 @@ public class PhoneStatusBar extends BaseStatusBar implements DemoMode,
         ButtonDispatcher backButton = mNavigationBarView.getBackButton();
         backButton.setLongClickable(true);
         backButton.setOnLongClickListener(mLongPressBackListener);
+        backButton.mLongPressBackListener(mBackOnTouchListener);
 
         ButtonDispatcher homeButton = mNavigationBarView.getHomeButton();
         homeButton.setOnTouchListener(mHomeActionListener);
@@ -2853,22 +2903,41 @@ public class PhoneStatusBar extends BaseStatusBar implements DemoMode,
                 Math.max(BRIGHTNESS_CONTROL_PADDING, raw));
         float value = (padded - BRIGHTNESS_CONTROL_PADDING) /
                 (1 - (2.0f * BRIGHTNESS_CONTROL_PADDING));
-
-        int newBrightness = mMinBrightness + (int) Math.round(value *
-                (android.os.PowerManager.BRIGHTNESS_ON - mMinBrightness));
-        newBrightness = Math.min(newBrightness, android.os.PowerManager.BRIGHTNESS_ON);
-        newBrightness = Math.max(newBrightness, mMinBrightness);
-
         try {
-            if (mAutomatic) {
-                final float adj = (raw * 100) / (BRIGHTNESS_ADJ_RESOLUTION / 2f) - 1;
-                mPower.setTemporaryScreenAutoBrightnessAdjustmentSettingOverride(adj);
-                Settings.System.putFloatForUser(mContext.getContentResolver(),
-                        Settings.System.SCREEN_AUTO_BRIGHTNESS_ADJ, adj, mCurrentUserId);
-            } else {
-                mPower.setTemporaryScreenBrightnessSettingOverride(newBrightness);
-                Settings.System.putIntForUser(mContext.getContentResolver(),
-                        Settings.System.SCREEN_BRIGHTNESS, newBrightness, mCurrentUserId);
+            IPowerManager power = IPowerManager.Stub.asInterface(
+                    ServiceManager.getService("power"));
+            if (power != null) {
+                if (mAutomaticBrightness) {
+                    float adj = (value * 100) / (BRIGHTNESS_ADJ_RESOLUTION / 2f) - 1;
+                    adj = Math.max(adj, -1);
+                    adj = Math.min(adj, 1);
+                    final float val = adj;
+                    power.setTemporaryScreenAutoBrightnessAdjustmentSettingOverride(val);
+                    AsyncTask.execute(new Runnable() {
+                        public void run() {
+                            Settings.System.putFloatForUser(mContext.getContentResolver(),
+                                    Settings.System.SCREEN_AUTO_BRIGHTNESS_ADJ, val,
+                                    UserHandle.USER_CURRENT);
+                        }
+                    });
+                } else {
+                    int newBrightness = mMinBrightness + (int) Math.round(value *
+                            (android.os.PowerManager.BRIGHTNESS_ON - mMinBrightness));
+                    newBrightness = Math.min(newBrightness, android.os.PowerManager.BRIGHTNESS_ON);
+                    newBrightness = Math.max(newBrightness, mMinBrightness);
+                    final int val = newBrightness;
+                    power.setTemporaryScreenBrightnessSettingOverride(val);
+                    AsyncTask.execute(new Runnable() {
+                        @Override
+                        public void run() {
+                            Settings.System.putIntForUser(mContext.getContentResolver(),
+                                    Settings.System.SCREEN_BRIGHTNESS, val,
+                                    UserHandle.USER_CURRENT);
+                        }
+                    });
+                }
+
+
             }
         } catch (RemoteException e) {
             Log.w(TAG, "Setting Brightness failed: " + e);
@@ -2944,14 +3013,14 @@ public class PhoneStatusBar extends BaseStatusBar implements DemoMode,
 
         if (mBrightnessControl) {
             brightnessControl(event);
-            if ((mDisabled & StatusBarManager.DISABLE_EXPAND) != 0) {
+            if ((mDisabled1 & StatusBarManager.DISABLE_EXPAND) != 0) {
                 return true;
             }
         }
 
         final boolean upOrCancel =
-                    event.getAction() == MotionEvent.ACTION_UP ||
-                    event.getAction() == MotionEvent.ACTION_CANCEL;
+                event.getAction() == MotionEvent.ACTION_UP ||
+                        event.getAction() == MotionEvent.ACTION_CANCEL;
         if (mStatusBarWindowState == WINDOW_STATE_SHOWING) {
             if (upOrCancel && !mExpandedVisible) {
                 setInteracting(StatusBarManager.WINDOW_STATUS_BAR, false);
@@ -2961,8 +3030,19 @@ public class PhoneStatusBar extends BaseStatusBar implements DemoMode,
         }
         if (mBrightnessChanged && upOrCancel) {
             mBrightnessChanged = false;
-            if (mJustPeeked && mExpandedVisible) {
+            if (mJustPeeked) {
+                /**
+                 * if we were just peeking, eat the event and collapse the status bar, otherwise
+                 * the event gets passed down and a full expand might happen.
+                 */
                 mNotificationPanel.fling(10, false);
+                if (mExpandedVisible) {
+                    mExpandedVisible = false;
+                    visibilityChanged(false);
+                    setInteracting(StatusBarManager.WINDOW_STATUS_BAR, false);
+                }
+                disable(mDisabledUnmodified1, mDisabledUnmodified2, true /* animate */);
+                return true;
             }
         }
         return false;
@@ -3706,6 +3786,8 @@ public class PhoneStatusBar extends BaseStatusBar implements DemoMode,
         }
         mMaxAllowedKeyguardNotifications = res.getInteger(
                 R.integer.keyguard_max_notification_count);
+
+        mStatusBarHeaderHeight = res.getDimensionPixelSize(R.dimen.status_bar_header_height);
 
         if (DEBUG) Log.v(TAG, "defineSlots");
     }
@@ -5138,4 +5220,61 @@ public class PhoneStatusBar extends BaseStatusBar implements DemoMode,
             }
         }
     }
+
+    private Runnable mKillTask = new Runnable() {
+        public void run() {
+            mBackKillPending = false;
+            if (TaskUtils.killActiveTask(mContext, mCurrentUserId)){
+                mStatusBarView.performHapticFeedback(HapticFeedbackConstants.LONG_PRESS);
+                Toast.makeText(mContext,
+                        com.android.internal.R.string.app_killed_message, Toast.LENGTH_SHORT).show();
+            }
+        }
+    };
+
+    protected View.OnTouchListener mBackOnTouchListener = new View.OnTouchListener() {
+        @Override
+        public boolean onTouch(View v, MotionEvent event) {
+            int action = event.getAction() & MotionEvent.ACTION_MASK;
+            if (action == MotionEvent.ACTION_CANCEL || action == MotionEvent.ACTION_UP) {
+                // up will stop pending kill
+                if (mBackKillPending) {
+                    mHandler.removeCallbacks(mKillTask);
+                    mBackKillPending = false;
+                }
+                // from long press
+                if (mBackConsumed) {
+                    mBackConsumed = false;
+                    // make sure to stop the ripple
+                    KeyButtonView keyButtonView = (KeyButtonView) v;
+                    keyButtonView.setPressed(false);
+                    // dont send back
+                    return true;
+                }
+            }
+            return false;
+        }
+    };
+
+    private View.OnLongClickListener mLongPressBackListener =
+            new View.OnLongClickListener() {
+        @Override
+        public boolean onLongClick(View v) {
+            mBackConsumed = true;
+            IActivityManager activityManager = ActivityManagerNative.getDefault();
+            try {
+                // in pin app mode this can only be used to stop it
+                if (activityManager.isInLockTaskMode()) {
+                    handleLongPressBackRecents(v);
+                } else {
+                    // else long press means kill
+                    mHandler.postDelayed(mKillTask, mBackKillTimeout);
+                    mBackKillPending = true;
+                }
+            } catch (RemoteException e) {
+                Log.d(TAG, "Unable to reach activity manager", e);
+            }
+            return true;
+        }
+    };
 }

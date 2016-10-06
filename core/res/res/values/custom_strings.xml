@@ -61,4 +61,6 @@
     <string name="dnd_mode_important">Priority only</string>
     <!-- Vendor mismatched fingerprint warning [CHAR LIMIT=NONE] -->
     <string name="system_error_vendorprint">Your vendor image does not match the system. Please flash the <xliff:g id="string">%s</xliff:g> vendor image for your device</string>
+    <!-- HW button mapping -->
+    <string name="app_killed_message">App killed</string>
 </resources>
