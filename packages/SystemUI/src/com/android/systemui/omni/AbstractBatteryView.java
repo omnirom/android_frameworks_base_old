@@ -27,6 +27,7 @@ import android.graphics.Canvas;
 import android.graphics.Color;
 import android.graphics.Paint;
 import android.graphics.Path;
+import android.graphics.Rect;
 import android.graphics.RectF;
 import android.graphics.Typeface;
 import android.os.BatteryManager;
@@ -63,6 +64,7 @@ public abstract class AbstractBatteryView extends View implements BatteryControl
     protected final Paint mTextPaint;
     protected int mTextSize;
     protected boolean mChargeColorEnable = true;
+    protected int mTextWidth;
 
     protected class BatteryTracker extends BroadcastReceiver {
         public static final int UNKNOWN_LEVEL = -1;
@@ -177,7 +179,7 @@ public abstract class AbstractBatteryView extends View implements BatteryControl
         Typeface font = Typeface.create("sans-serif-medium", Typeface.BOLD);
         mTextPaint.setTypeface(font);
         mTextPaint.setTextAlign(Paint.Align.CENTER);
-        mTextSize = getResources().getDimensionPixelSize(R.dimen.battery_level_text_size);
+        mTextSize = getResources().getDimensionPixelSize(R.dimen.omni_battery_level_text_size);
         mTextPaint.setTextSize(mTextSize);
     }
 
@@ -310,5 +312,17 @@ public abstract class AbstractBatteryView extends View implements BatteryControl
             mTextPaint.setShadowLayer(0, 0, 0, Color.BLACK);
         }
         invalidate();
+    }
+
+    protected void updateExtraPercentFontSize() {
+        final int level = mTracker.level;
+        mTextSize = getResources().getDimensionPixelSize(level == 100 ?
+                R.dimen.omni_battery_level_text_size_small : R.dimen.omni_battery_level_text_size);
+        mTextPaint.setTextSize(mTextSize);
+        Rect bounds = new Rect();
+        String text = level == 100 ? "100%" : ".00%";
+        mTextPaint.getTextBounds(text, 0, text.length(), bounds);
+        mTextWidth = bounds.width();
+        requestLayout();
     }
 }

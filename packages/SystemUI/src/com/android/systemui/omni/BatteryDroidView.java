@@ -54,7 +54,6 @@ public class BatteryDroidView extends AbstractBatteryView implements
     private static final int FULL = 96;
 
     private final Paint mFramePaint, mBatteryPaint;
-    private int mTextWidth;
     private int mCircleWidth;
     private int mHeight;
     private int mWidth;
@@ -177,21 +176,20 @@ public class BatteryDroidView extends AbstractBatteryView implements
 
     @Override
     protected void applyStyle() {
+        final int level = mTracker.level;
         Typeface font = Typeface.create("sans-serif-medium", Typeface.NORMAL);
         mTextPaint.setTypeface(font);
         mTextPaint.setTextAlign(Paint.Align.RIGHT);
-        mTextSize = getResources().getDimensionPixelSize(R.dimen.battery_level_text_size);
+        mTextSize = getResources().getDimensionPixelSize(level == 100 ?
+                R.dimen.omni_battery_level_text_size_small : R.dimen.omni_battery_level_text_size);
         mTextPaint.setTextSize(mTextSize);
         Rect bounds = new Rect();
-        String text = text = ".00%";
+        String text = level == 100 ? "100%" : ".00%";
         mTextPaint.getTextBounds(text, 0, text.length(), bounds);
         mTextWidth = bounds.width();
     }
 
     private void updatePercentFontSize() {
-        final int level = mTracker.level;
-        mTextSize = getResources().getDimensionPixelSize(level == 100 ?
-                R.dimen.battery_level_text_size_small : R.dimen.battery_level_text_size);
-        mTextPaint.setTextSize(mTextSize);
+        updateExtraPercentFontSize();
     }
 }
