@@ -60,6 +60,7 @@ public class BatteryMeterHorizontalView extends AbstractBatteryView implements
     private int mHeight;
     private int mWidth;
     private int mPercentOffsetY;
+    private int mBoltWidth;
 
     private final Path mBoltPath = new Path();
 
@@ -108,6 +109,7 @@ public class BatteryMeterHorizontalView extends AbstractBatteryView implements
         mBarSpaceWidth = (int) (22 * metrics.density + 0.5f);
         mBarHeight = (int) (10 * metrics.density + 0.5f);
         mPercentOffsetY = (int) (1 * metrics.density + 0.5f);
+        mBoltWidth = (int) (8 * metrics.density + 0.5f);
     }
 
     @Override
@@ -172,9 +174,9 @@ public class BatteryMeterHorizontalView extends AbstractBatteryView implements
 
         if (showChargingImage()) {
             // define the bolt shape
-            final float bl = mFrame.left + mFrame.width() / 2.5f;
+            final float bl = mFrame.left + mFrame.width() / 2f - mBoltWidth / 2f;
             final float bt = mFrame.top + insetTop + 5;
-            final float br = mFrame.right - mFrame.width() / 4.5f;
+            final float br = mFrame.right - mFrame.width() / 2f + mBoltWidth / 2f;
             final float bb = mFrame.bottom - insetBottom - 2;
             if (mBoltFrame.left != bl || mBoltFrame.top != bt
                     || mBoltFrame.right != br || mBoltFrame.bottom != bb) {
