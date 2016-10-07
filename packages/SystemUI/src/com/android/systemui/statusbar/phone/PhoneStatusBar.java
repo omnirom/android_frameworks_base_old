@@ -508,6 +508,9 @@ public class PhoneStatusBar extends BaseStatusBar implements DemoMode,
             mContext.getContentResolver().registerContentObserver(Settings.System.getUriFor(
                     Settings.System.DOUBLE_TAP_SLEEP_GESTURE),
                     false, this, UserHandle.USER_ALL);
+            mContext.getContentResolver().registerContentObserver(Settings.Secure.getUriFor(
+                    Settings.Secure.LOCK_QS_DISABLED),
+                    false, this, UserHandle.USER_ALL);
 
             update();
         }
@@ -535,6 +538,10 @@ public class PhoneStatusBar extends BaseStatusBar implements DemoMode,
                     mContext.getContentResolver(), Settings.System.STATUS_BAR_BRIGHTNESS_CONTROL, 0, mCurrentUserId) == 1;
             mDoubleTabSleep = Settings.System.getIntForUser(
                     mContext.getContentResolver(), Settings.System.DOUBLE_TAP_SLEEP_GESTURE, 0, mCurrentUserId) == 1;
+
+            if (mNotificationPanel != null) {
+                mNotificationPanel .updateSettings();
+            }
 
             if (mStatusBarWindow != null) {
                 mStatusBarWindow.setDoubleTabSleep(mDoubleTabSleep);
