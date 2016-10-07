@@ -60,7 +60,7 @@ public interface DeviceKeyHandler {
      * @param event The key event to be handled
      * @return If the event should be ignored
      */
-    //public boolean isDisabledKeyEvent(KeyEvent event);
+    public boolean isDisabledKeyEvent(KeyEvent event);
 
     /**
      * Return a "translated" event
