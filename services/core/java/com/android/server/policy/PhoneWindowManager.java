@@ -5732,6 +5732,11 @@ public class PhoneWindowManager implements WindowManagerPolicy {
         // Specific device key handling
         if (mDeviceKeyHandler != null) {
             try {
+                // The device says if we should ignore this event.
+                if (mDeviceKeyHandler.isDisabledKeyEvent(event)) {
+                    result &= ~ACTION_PASS_TO_USER;
+                    return result;
+                }
                 // The device only should consume known keys.
                 if (mDeviceKeyHandler.handleKeyEvent(event)) {
                     result &= ~ACTION_PASS_TO_USER;
