@@ -16,6 +16,23 @@
       "revId": "d3b44e5f05da68c6f1f81615ce3e34b67a9558fe",
       "serverId": "56841c99-7c94-43d4-bf0b-cb4707e66d55",
       "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "d8098520_0c828704",
+        "filename": "packages/SystemUI/src/com/android/systemui/statusbar/phone/PhoneStatusBar.java",
+        "patchSetId": 6
+      },
+      "lineNbr": 527,
+      "author": {
+        "id": 1000026
+      },
+      "writtenOn": "2016-10-08T12:40:40Z",
+      "side": 1,
+      "message": "mAutomatic is undefined at this point",
+      "revId": "d3b44e5f05da68c6f1f81615ce3e34b67a9558fe",
+      "serverId": "56841c99-7c94-43d4-bf0b-cb4707e66d55",
+      "unresolved": false
     }
   ]
 }
