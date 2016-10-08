@@ -32,7 +32,7 @@ import com.android.systemui.Interpolators;
 
 public class SettingsButton extends AlphaOptimizedImageButton {
 
-    private static final long LONG_PRESS_LENGTH = 1000;
+    private static final long LONG_PRESS_LENGTH = 750;
     private static final long ACCEL_LENGTH = 750;
     private static final long FULL_SPEED_LENGTH = 375;
     private static final long RUN_DURATION = 350;
@@ -41,6 +41,7 @@ public class SettingsButton extends AlphaOptimizedImageButton {
     private ObjectAnimator mAnimator;
 
     private float mSlop;
+    private boolean mLongPress;
 
     public SettingsButton(Context context, AttributeSet attrs) {
         super(context, attrs);
@@ -55,14 +56,20 @@ public class SettingsButton extends AlphaOptimizedImageButton {
         return mUpToSpeed;
     }
 
+    public boolean isLongPress() {
+        return mLongPress;
+    }
+
     @Override
     public boolean onTouchEvent(MotionEvent event) {
         switch (event.getActionMasked()) {
             case MotionEvent.ACTION_DOWN:
+                mLongPress = false;
+                mUpToSpeed = false;
                 postDelayed(mLongPressCallback, LONG_PRESS_LENGTH);
                 break;
             case MotionEvent.ACTION_UP:
-                if (mUpToSpeed) {
+                if (mUpToSpeed || mLongPress) {
                     startExitAnimation();
                 } else {
                     cancelLongClick();
@@ -85,7 +92,6 @@ public class SettingsButton extends AlphaOptimizedImageButton {
 
     private void cancelLongClick() {
         cancelAnimation();
-        mUpToSpeed = false;
         removeCallbacks(mLongPressCallback);
     }
 
@@ -168,6 +174,7 @@ public class SettingsButton extends AlphaOptimizedImageButton {
     private final Runnable mLongPressCallback = new Runnable() {
         @Override
         public void run() {
+            mLongPress = true;
             startAccelSpin();
         }
     };
