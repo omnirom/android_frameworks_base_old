@@ -55,7 +55,7 @@ public class SettingsButton extends AlphaOptimizedImageButton {
         return mUpToSpeed;
     }
 
-    @Override
+    /*@Override
     public boolean onTouchEvent(MotionEvent event) {
         switch (event.getActionMasked()) {
             case MotionEvent.ACTION_DOWN:
@@ -81,7 +81,7 @@ public class SettingsButton extends AlphaOptimizedImageButton {
                 break;
         }
         return super.onTouchEvent(event);
-    }
+    }*/
 
     private void cancelLongClick() {
         cancelAnimation();
