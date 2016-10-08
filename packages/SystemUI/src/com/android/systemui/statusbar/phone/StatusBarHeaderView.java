@@ -54,6 +54,7 @@ import com.android.systemui.statusbar.policy.NetworkController.EmergencyListener
 import com.android.systemui.statusbar.policy.NextAlarmController;
 import com.android.systemui.statusbar.policy.UserInfoController;
 import com.android.systemui.tuner.TunerService;
+import com.android.systemui.tuner.TunerActivity;
 
 import java.text.NumberFormat;
 
@@ -132,6 +133,7 @@ public class StatusBarHeaderView extends BaseStatusBarHeader implements View.OnC
     private BatteryViewManager mBatteryViewManager;
 
     private boolean mAllowExpand = true;
+    private View mTunerButton;
 
     public StatusBarHeaderView(Context context, AttributeSet attrs) {
         super(context, attrs);
@@ -154,6 +156,7 @@ public class StatusBarHeaderView extends BaseStatusBarHeader implements View.OnC
         mSettingsButton = (SettingsButton) findViewById(R.id.settings_button);
         mSettingsContainer = findViewById(R.id.settings_button_container);
         mSettingsButton.setOnClickListener(this);
+        mTunerButton.findViewById(R.id.tuner_icon);
         mQsDetailHeader = findViewById(R.id.qs_detail_header);
         mQsDetailHeader.setAlpha(0);
         mQsDetailHeaderTitle = (TextView) mQsDetailHeader.findViewById(android.R.id.title);
@@ -352,8 +355,8 @@ public class StatusBarHeaderView extends BaseStatusBarHeader implements View.OnC
         }
         mEmergencyCallsOnly.setVisibility(mExpanded && mShowEmergencyCallsOnly ? VISIBLE : GONE);
         //mBatteryLevel.setVisibility(mExpanded ? View.VISIBLE : View.GONE);
-        mSettingsContainer.findViewById(R.id.tuner_icon).setVisibility(
-                TunerService.isTunerEnabled(mContext) ? View.VISIBLE : View.INVISIBLE);
+        //mSettingsContainer.findViewById(R.id.tuner_icon).setVisibility(
+        //        TunerService.isTunerEnabled(mContext) ? View.VISIBLE : View.INVISIBLE);
     }
 
     private void updateSignalClusterDetachment() {
@@ -529,15 +532,21 @@ public class StatusBarHeaderView extends BaseStatusBarHeader implements View.OnC
                         @Override
                         public void run() {
                             // Relaunch settings so that the tuner disappears.
-                            startSettingsActivity();
+                            //startSettingsActivity();
                         }
                     });
                 } else {
                     Toast.makeText(getContext(), R.string.tuner_toast, Toast.LENGTH_LONG).show();
                     TunerService.setTunerEnabled(mContext, true);
+                    startTunerActivity();
+                }
+            } else {
+                if (mSettingsButton.isLongPress() && TunerService.isTunerEnabled(mContext)) {
+                    startTunerActivity();
+                } else {
+                    startSettingsActivity();
                 }
             }
-            startSettingsActivity();
         } else if (v == mSystemIconsSuperContainer) {
             startBatteryActivity();
         } else if (v == mAlarmStatus && mNextAlarm != null) {
@@ -555,6 +564,11 @@ public class StatusBarHeaderView extends BaseStatusBarHeader implements View.OnC
 
     private void startBatteryActivity() {
         mActivityStarter.startActivity(new Intent(Intent.ACTION_POWER_USAGE_SUMMARY),
+                true /* dismissShade */);
+    }
+
+    private void startTunerActivity() {
+        mActivityStarter.startActivity(new Intent(getContext(), TunerActivity.class),
                 true /* dismissShade */);
     }
 
@@ -668,6 +682,7 @@ public class StatusBarHeaderView extends BaseStatusBarHeader implements View.OnC
             mSettingsContainer.setTranslationY(mSystemIconsSuperContainer.getTranslationY());
             mSettingsContainer.setTranslationX(values.settingsTranslation);
             mSettingsButton.setRotation(values.settingsRotation);
+            mTunerButton.setRotation(values.settingsRotation);
         }
         applyAlpha(mEmergencyCallsOnly, values.emergencyCallsOnlyAlpha);
         if (!mShowingDetail && !mDetailTransitioning) {
