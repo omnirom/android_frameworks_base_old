@@ -690,6 +690,7 @@ public class ZenModeHelper {
         ZenLog.traceSetZenMode(zen, reason);
         mZenMode = zen;
         updateRingerModeAffectedStreams();
+        readLightsAllowedModeFromSetting();
         setZenModeSetting(mZenMode);
         if (setRingerMode) {
             applyZenToRingerMode();
@@ -744,6 +745,7 @@ public class ZenModeHelper {
         // total silence restrictions
         final boolean muteEverything = mZenMode == Global.ZEN_MODE_NO_INTERRUPTIONS;
 
+        readLightsAllowedModeFromSetting();
         for (int i = USAGE_UNKNOWN; i <= USAGE_VIRTUAL_SOURCE; i++) {
             if (i == USAGE_NOTIFICATION) {
                 applyRestrictions(muteNotifications || muteEverything, i);
