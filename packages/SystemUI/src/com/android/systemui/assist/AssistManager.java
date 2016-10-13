@@ -109,6 +109,9 @@ public class AssistManager {
             return;
         }
 
+        if (mView == null) {
+            onConfigurationChanged();
+        }
         final boolean isService = assistComponent.equals(getVoiceInteractorComponentName());
         if (!isService || !isVoiceSessionRunning()) {
             showOrb(assistComponent, isService);
