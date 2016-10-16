@@ -2208,8 +2208,10 @@ public class InputMethodManagerService extends IInputMethodManager.Stub
             // mImeWindowVis should be updated before calling shouldShowImeSwitcherLocked().
             final boolean needsToShowImeSwitcher = shouldShowImeSwitcherLocked(vis);
             if (mStatusBar != null) {
+                final boolean showIMEButton = Settings.System.getIntForUser(mContext.getContentResolver(),
+                        Settings.System.NAVIGATION_BAR_IME_BUTTON, 1, UserHandle.USER_CURRENT) == 1;
                 mStatusBar.setImeWindowStatus(token, vis, backDisposition,
-                        needsToShowImeSwitcher);
+                        needsToShowImeSwitcher && showIMEButton);
             }
             final InputMethodInfo imi = mMethodMap.get(mCurMethodId);
             if (imi != null && needsToShowImeSwitcher) {
@@ -2224,13 +2226,17 @@ public class InputMethodManagerService extends IInputMethodManager.Stub
                 try {
                     if ((mNotificationManager != null)
                             && !mIWindowManager.hasNavigationBar()) {
-                        if (DEBUG) {
-                            Slog.d(TAG, "--- show notification: label =  " + summary);
+                        final boolean showIMENotification = Settings.System.getIntForUser(mContext.getContentResolver(),
+                                Settings.System.STATUS_BAR_IME_NOTIFICATION, 1, UserHandle.USER_CURRENT) == 1;
+                        if (showIMENotification) {
+                            if (DEBUG) {
+                                Slog.d(TAG, "--- show notification: label =  " + summary);
+                            }
+                            mNotificationManager.notifyAsUser(null,
+                                    SystemMessage.NOTE_SELECT_INPUT_METHOD,
+                                    mImeSwitcherNotification.build(), UserHandle.ALL);
+                            mNotificationShown = true;
                         }
-                        mNotificationManager.notifyAsUser(null,
-                                SystemMessage.NOTE_SELECT_INPUT_METHOD,
-                                mImeSwitcherNotification.build(), UserHandle.ALL);
-                        mNotificationShown = true;
                     }
                 } catch (RemoteException e) {
                 }
