@@ -576,8 +576,6 @@ public class PhoneWindowManager implements WindowManagerPolicy {
     boolean mForcingShowNavBar;
     int mForcingShowNavBarLayer;
 
-    boolean mNavbarVisible = false;
-
     // States of keyguard dismiss.
     private static final int DISMISS_KEYGUARD_NONE = 0; // Keyguard not being dismissed.
     private static final int DISMISS_KEYGUARD_START = 1; // Keyguard needs to be dismissed.
@@ -880,7 +878,7 @@ public class PhoneWindowManager implements WindowManagerPolicy {
             resolver.registerContentObserver(Settings.System.getUriFor(
                     Settings.System.VOLUME_BUTTON_MUSIC_CONTROL), false, this,
                     UserHandle.USER_ALL);
-            resolver.registerContentObserver(Settings.Secure.getUriFor(
+            resolver.registerContentObserver(Settings.System.getUriFor(
                     Settings.System.NAVIGATION_BAR_SHOW), false, this,
                     UserHandle.USER_ALL);
 
@@ -2024,13 +2022,7 @@ public class PhoneWindowManager implements WindowManagerPolicy {
                 updateWakeGestureListenerLp();
             }
 
-            boolean doShowNavbar = Settings.Secure.getIntForUser(resolver,
-                    Settings.System.NAVIGATION_BAR_SHOW,
-                    DeviceUtils.deviceSupportNavigationBar(mContext) ? 1 : 0,
-                    UserHandle.USER_CURRENT) == 1;
-            if (doShowNavbar != mNavbarVisible) {
-                mNavbarVisible = doShowNavbar;
-            }
+            mHasNavigationBar = DeviceUtils.deviceSupportNavigationBar(mContext);
 
             // Configure rotation lock.
             int userRotation = Settings.System.getIntForUser(resolver,
@@ -7833,7 +7825,7 @@ public class PhoneWindowManager implements WindowManagerPolicy {
     // Navigation bar visibility is dynamically configured in settings now
     @Override
     public boolean hasNavigationBar() {
-        return mNavbarVisible;
+        return mHasNavigationBar;
     }
 
     @Override
