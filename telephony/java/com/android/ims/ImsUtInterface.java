@@ -110,6 +110,12 @@ public interface ImsUtInterface {
     public void queryCallBarring(int cbType, Message result);
 
     /**
+     * Retrieves the configuration of the call barring for specified service class.
+     * The return value of ((AsyncResult)result.obj) is an array of {@link ImsSsInfo}.
+     */
+    public void queryCallBarring(int cbType, int serviceClass, Message result);
+
+    /**
      * Retrieves the configuration of the call forward.
      * The return value of ((AsyncResult)result.obj) is an array of {@link ImsCallForwardInfo}.
      */
@@ -151,6 +157,12 @@ public interface ImsUtInterface {
      * Modifies the configuration of the call barring.
      */
     public void updateCallBarring(int cbType, int action,
+            Message result, String[] barrList);
+
+    /**
+     * Modifies the configuration of the call barring for specified service class.
+     */
+    public void updateCallBarring(int cbType, int action, int serviceClass,
             Message result, String[] barrList);
 
     /**
