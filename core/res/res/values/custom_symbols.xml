@@ -48,4 +48,6 @@
   <java-symbol type="bool" name="config_multiColorNotificationLed" />
   <java-symbol type="bool" name="config_fingerprintRemoveClientOnCancel" />
   <java-symbol type="bool" name="config_enableScreenrecordChord" />
+  <java-symbol type="string" name="lock_to_app_toast_back" />
+  <java-symbol type="string" name="app_unpin_message" />
 </resources>
