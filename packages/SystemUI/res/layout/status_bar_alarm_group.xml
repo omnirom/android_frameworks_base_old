@@ -27,7 +27,7 @@
     <LinearLayout
         android:id="@+id/date_time_group"
         android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
+        android:layout_height="19dp"
         android:orientation="horizontal"
         android:focusable="true" >
 
@@ -35,6 +35,19 @@
             android:layout_width="wrap_content"
             android:layout_height="match_parent"
             android:id="@+id/clock" />
+
+        <com.android.systemui.statusbar.policy.DateView
+            android:id="@+id/date"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginStart="6dp"
+            android:drawableStart="@drawable/header_dot"
+            android:drawablePadding="6dp"
+            android:singleLine="true"
+            android:textAppearance="@style/TextAppearance.StatusBar.Expanded.Clock"
+            android:textSize="@dimen/qs_time_collapsed_size"
+            android:gravity="top"
+            systemui:datePattern="@string/abbrev_wday_month_day_no_year_alarm" />
 
         <com.android.systemui.statusbar.AlphaOptimizedImageView
             android:id="@+id/alarm_status_collapsed"
@@ -45,17 +58,6 @@
             android:gravity="center"
             android:visibility="gone" />
     </LinearLayout>
-
-    <com.android.systemui.statusbar.policy.DateView
-        android:id="@+id/date"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:singleLine="true"
-        android:layout_marginTop="-4dp"
-        android:textAppearance="@style/TextAppearance.StatusBar.Expanded.Clock"
-        android:textSize="@dimen/qs_time_collapsed_size"
-        android:gravity="top"
-        systemui:datePattern="@string/abbrev_wday_month_day_no_year_alarm" />
 
     <com.android.systemui.statusbar.AlphaOptimizedButton
         android:id="@+id/alarm_status"
