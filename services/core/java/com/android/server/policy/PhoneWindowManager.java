@@ -117,6 +117,7 @@ import static android.view.WindowManagerPolicy.WindowManagerFuncs.LID_OPEN;
 
 import android.annotation.Nullable;
 import android.app.ActivityManager;
+import android.app.ActivityManagerNative;
 import android.app.ActivityManager.StackId;
 import android.app.ActivityManagerInternal;
 import android.app.ActivityManagerInternal.SleepToken;
@@ -224,6 +225,7 @@ import android.view.animation.AnimationSet;
 import android.view.animation.AnimationUtils;
 import android.view.autofill.AutofillManagerInternal;
 import android.view.inputmethod.InputMethodManagerInternal;
+import android.widget.Toast;
 
 import com.android.internal.R;
 import com.android.internal.logging.MetricsLogger;
@@ -1641,7 +1643,14 @@ public class PhoneWindowManager implements WindowManagerPolicy {
     }
 
     private void backLongPress() {
+        cancelPreloadRecentApps();
         mBackKeyHandled = true;
+
+        if (isStopLockTaskMode(false)) {
+            // no longer possible
+            mHandler.removeCallbacks(mBackLongPress);
+            return;
+        }
 
         switch (mLongPressOnBackBehavior) {
             case LONG_PRESS_BACK_NOTHING:
@@ -1799,6 +1808,18 @@ public class PhoneWindowManager implements WindowManagerPolicy {
         @Override
         public void run() {
             takeScreenrecord();
+        }
+    };
+
+    Runnable mBackLongPress = new Runnable() {
+        public void run() {
+            mLongPressBackConsumed = true;
+
+            if (TaskUtils.killActiveTask(mContext, mCurrentUserId)){
+                performHapticFeedbackLw(null, HapticFeedbackConstants.LONG_PRESS, false);
+                Toast.makeText(mContext, R.string.app_unpin_message,
+                        Toast.LENGTH_SHORT).show();
+            }
         }
     };
 
@@ -3762,6 +3783,15 @@ public class PhoneWindowManager implements WindowManagerPolicy {
                     }
                     // back action is simple to continue and pass further
                 }
+            } else if (isVirtualHardKey && !isStopLockTaskMode(true)) {
+                // back kill called from navbar back button
+                if (down) {
+                    if (repeatCount == 0) {
+                        mHandler.postDelayed(mBackLongPress, 2000);
+                    }
+                } else {
+                    mHandler.removeCallbacks(mBackLongPress);
+                }
             }
         } else if (keyCode == KeyEvent.KEYCODE_N && event.isMetaPressed()) {
             if (down) {
@@ -4154,6 +4184,24 @@ public class PhoneWindowManager implements WindowManagerPolicy {
                 Slog.e(TAG, "Error taking bugreport", e);
             }
         }
+    }
+
+    private boolean isStopLockTaskMode(boolean checkOnly) {
+        // in this case there is a different way to stop it
+        if (DeviceUtils.deviceSupportNavigationBar(mContext)) {
+            return false;
+        }
+        try {
+            if (ActivityManagerNative.getDefault().isInLockTaskMode()) {
+                if (!checkOnly) {
+                    ActivityManagerNative.getDefault().stopSystemLockTaskMode();
+                }
+                return true;
+            }
+        } catch (RemoteException e) {
+            // ignore
+        }
+        return false;
     }
 
     /** {@inheritDoc} */
@@ -9044,6 +9092,10 @@ public class PhoneWindowManager implements WindowManagerPolicy {
             triggerLongPressTimeoutMessage(msg);
         }
         if (keyAction == KEY_ACTION_BACK) {
+            if (isStopLockTaskMode(true)) {
+                mLongPressBackConsumed = false;
+                mHandler.postDelayed(mBackLongPress, 2000);
+            }
             mBackKeyHandled = false;
             Message msg = mHandler.obtainMessage(MSG_BACK_LONG_PRESS);
             triggerLongPressTimeoutMessage(msg);
