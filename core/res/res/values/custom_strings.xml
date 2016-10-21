@@ -68,5 +68,8 @@
     <string name="permdesc_fakePackageSignature">Allows the app to pretend to be a different app. Malicious applications might be able to use this to access private application data. Grant this permission with caution only!</string>
     <!-- back kill -->
     <string name="app_killed_message">App killed</string>
-
+    <!-- Notify use that they are in Lock-to-app in accessibility mode -->
+    <string name="lock_to_app_toast_back">To unpin this screen, touch and hold Back.</string>
+    <!-- Notify use that they are in Lock-to-app in accessibility mode -->
+    <string name="lock_to_app_toast_accessible">To unpin this screen, touch and hold Overview.</string>
 </resources>
