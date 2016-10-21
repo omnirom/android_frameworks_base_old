@@ -117,6 +117,7 @@ import static android.view.WindowManagerPolicy.WindowManagerFuncs.LID_OPEN;
 
 import android.annotation.Nullable;
 import android.app.ActivityManager;
+import android.app.ActivityManagerNative;
 import android.app.ActivityManager.StackId;
 import android.app.ActivityManagerInternal;
 import android.app.ActivityManagerInternal.SleepToken;
@@ -224,6 +225,7 @@ import android.view.animation.AnimationSet;
 import android.view.animation.AnimationUtils;
 import android.view.autofill.AutofillManagerInternal;
 import android.view.inputmethod.InputMethodManagerInternal;
+import android.widget.Toast;
 
 import com.android.internal.R;
 import com.android.internal.logging.MetricsLogger;
@@ -1642,6 +1644,10 @@ public class PhoneWindowManager implements WindowManagerPolicy {
 
     private void backLongPress() {
         mBackKeyHandled = true;
+
+        if (isStopLockTaskMode(false)) {
+            return;
+        }
 
         switch (mLongPressOnBackBehavior) {
             case LONG_PRESS_BACK_NOTHING:
@@ -4154,6 +4160,24 @@ public class PhoneWindowManager implements WindowManagerPolicy {
                 Slog.e(TAG, "Error taking bugreport", e);
             }
         }
+    }
+
+    private boolean isStopLockTaskMode(boolean checkOnly) {
+        // in this case there is a different way to stop it
+        if (DeviceUtils.deviceSupportNavigationBar(mContext)) {
+            return false;
+        }
+        try {
+            if (ActivityManagerNative.getDefault().isInLockTaskMode()) {
+                if (!checkOnly) {
+                    ActivityManagerNative.getDefault().stopSystemLockTaskMode();
+                }
+                return true;
+            }
+        } catch (RemoteException e) {
+            // ignore
+        }
+        return false;
     }
 
     /** {@inheritDoc} */
