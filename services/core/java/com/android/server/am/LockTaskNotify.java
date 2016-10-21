@@ -21,9 +21,12 @@ import android.content.Context;
 import android.os.Handler;
 import android.os.Message;
 import android.view.WindowManager;
+import android.view.accessibility.AccessibilityManager;
 import android.widget.Toast;
 
 import com.android.internal.R;
+import com.android.internal.util.omni.DeviceUtils;
+
 
 /**
  *  Helper to manage showing/hiding a image to notify them that they are entering
@@ -50,7 +53,11 @@ public class LockTaskNotify {
         if (lockTaskModeState == ActivityManager.LOCK_TASK_MODE_LOCKED) {
             text = mContext.getString(R.string.lock_to_app_toast_locked);
         } else if (lockTaskModeState == ActivityManager.LOCK_TASK_MODE_PINNED) {
-            text = mContext.getString(R.string.lock_to_app_toast);
+            int msgId =  R.string.lock_to_app_toast;
+            if (!DeviceUtils.deviceSupportNavigationBar(mContext)) {
+                msgId = R.string.lock_to_app_toast_back;
+            }
+            text = mContext.getString(msgId);
         }
         if (text == null) {
             return;
