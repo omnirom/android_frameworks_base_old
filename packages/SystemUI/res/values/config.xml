@@ -93,7 +93,7 @@
     <integer name="quick_settings_num_columns">3</integer>
 
     <!-- The number of rows in the QuickSettings -->
-    <integer name="quick_settings_num_rows">1</integer>
+    <integer name="quick_settings_num_rows">2</integer>
 
     <!-- The number of columns that the top level tiles span in the QuickSettings -->
     <integer name="quick_settings_user_time_settings_tile_span">1</integer>
@@ -294,7 +294,7 @@
     <!-- Nav bar button default ordering/layout -->
     <string name="config_navBarLayout" translatable="false">space,back;home;recent,menu_ime</string>
 
-    <bool name="quick_settings_show_full_alarm">false</bool>
+    <bool name="quick_settings_show_full_alarm">true</bool>
 
 </resources>
 
