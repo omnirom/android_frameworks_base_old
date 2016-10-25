@@ -104,4 +104,6 @@
   <java-symbol type="string" name="app_killed_message" />
 
   <java-symbol type="string" name="lock_to_app_toast_back" />
+
+  <java-symbol type="integer" name="config_longPressOnMenuBehavior" />
 </resources>
