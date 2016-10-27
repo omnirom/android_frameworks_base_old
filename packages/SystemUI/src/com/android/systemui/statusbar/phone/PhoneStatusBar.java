@@ -952,6 +952,9 @@ public class PhoneStatusBar extends BaseStatusBar implements DemoMode,
                 if (mDozeServiceHost != null) {
                     mDozeServiceHost.firePowerSaveChanged(isPowerSave);
                 }
+                if (mBatteryViewManager != null) {
+                    mBatteryViewManager.update();
+                } 
             }
             @Override
             public void onBatteryLevelChanged(int level, boolean pluggedIn, boolean charging) {
