@@ -258,6 +258,8 @@ public abstract class AbstractBatteryView extends View implements BatteryControl
 
     @Override
     public void onPowerSaveChanged(boolean isPowerSave) {
+        mPowerSaveEnabled = mBatteryController.isPowerSave();
+        postInvalidate();
     }
 
     @Override
