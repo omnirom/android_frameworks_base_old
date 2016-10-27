@@ -269,10 +269,6 @@ public class BatteryMeterPercentView extends AbstractBatteryView implements
     }
 
     @Override
-    public void onPowerSaveChanged(boolean isPowerSave) {
-    }
-
-    @Override
     protected void applyStyle() {
         final int level = mTracker.level;
         if (mPercentInside) {

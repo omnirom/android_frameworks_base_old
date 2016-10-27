@@ -171,10 +171,6 @@ public class BatteryDroidView extends AbstractBatteryView implements
     }
 
     @Override
-    public void onPowerSaveChanged(boolean isPowerSave) {
-    }
-
-    @Override
     protected void applyStyle() {
         final int level = mTracker.level;
         Typeface font = Typeface.create("sans-serif-medium", Typeface.NORMAL);
