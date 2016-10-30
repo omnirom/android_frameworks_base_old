@@ -26,6 +26,7 @@ import android.graphics.drawable.RippleDrawable;
 import android.util.AttributeSet;
 import android.view.View;
 import android.view.View.OnClickListener;
+import android.view.View.OnLongClickListener;
 import android.view.ViewGroup;
 import android.widget.ImageView;
 import android.widget.TextView;
@@ -50,7 +51,7 @@ import com.android.systemui.tuner.TunerService;
 import com.android.systemui.tuner.TunerActivity;
 
 public class QuickStatusBarHeader extends BaseStatusBarHeader implements
-        NextAlarmChangeCallback, OnClickListener, OnUserInfoChangedListener {
+        NextAlarmChangeCallback, OnClickListener, OnUserInfoChangedListener, OnLongClickListener {
 
     private static final String TAG = "QuickStatusBarHeader";
 
@@ -128,6 +129,7 @@ public class QuickStatusBarHeader extends BaseStatusBarHeader implements
         mSettingsButton = (SettingsButton) findViewById(R.id.settings_button);
         mSettingsContainer = findViewById(R.id.settings_button_container);
         mSettingsButton.setOnClickListener(this);
+        mSettingsButton.setOnLongClickListener(this);
 
         mAlarmStatusCollapsed = findViewById(R.id.alarm_status_collapsed);
         mAlarmStatus = (TextView) findViewById(R.id.alarm_status);
@@ -359,18 +361,7 @@ public class QuickStatusBarHeader extends BaseStatusBarHeader implements
         if (v == mSettingsButton) {
             MetricsLogger.action(mContext,
                     MetricsProto.MetricsEvent.ACTION_QS_EXPANDED_SETTINGS_LAUNCH);
-            if (mSettingsButton.isLongPress()) {
-                mHost.startRunnableDismissingKeyguard(() -> post(() -> {
-                    if (!TunerService.isTunerEnabled(mContext)) {
-                        Toast.makeText(getContext(), R.string.tuner_toast,
-                                Toast.LENGTH_LONG).show();
-                        TunerService.setTunerEnabled(mContext, true);
-                    }
-                    startTunerActivity();
-                }));
-            } else {
-                startSettingsActivity();
-            }
+            startSettingsActivity();
         } else if (v == mAlarmStatus && mNextAlarm != null) {
             PendingIntent showIntent = mNextAlarm.getShowIntent();
             if (showIntent != null && showIntent.isActivity()) {
@@ -381,6 +372,22 @@ public class QuickStatusBarHeader extends BaseStatusBarHeader implements
         } else if (v == mDate) {
             startCalendarActivity();
         }
+    }
+
+    @Override
+    public boolean onLongClick(View v) {
+        if (v == mSettingsButton) {
+            mHost.startRunnableDismissingKeyguard(() -> post(() -> {
+                    if (!TunerService.isTunerEnabled(mContext)) {
+                        Toast.makeText(getContext(), R.string.tuner_toast,
+                                Toast.LENGTH_LONG).show();
+                        TunerService.setTunerEnabled(mContext, true);
+                    }
+                    startTunerActivity();
+                }));
+            return true;
+        }
+        return false;
     }
 
     private void startSettingsActivity() {
