@@ -32,6 +32,7 @@ import com.android.systemui.Interpolators;
 
 public class SettingsButton extends AlphaOptimizedImageButton {
 
+    private static final long LONG_PRESS_LENGTH = 1000;
     private static final long ACCEL_LENGTH = 750;
     private static final long FULL_SPEED_LENGTH = 375;
     private static final long RUN_DURATION = 350;
@@ -40,13 +41,10 @@ public class SettingsButton extends AlphaOptimizedImageButton {
     private ObjectAnimator mAnimator;
 
     private float mSlop;
-    private boolean mLongPress;
-    private int mLongPressDelay;
 
     public SettingsButton(Context context, AttributeSet attrs) {
         super(context, attrs);
         mSlop = ViewConfiguration.get(getContext()).getScaledTouchSlop();
-        mLongPressDelay = ViewConfiguration.get(getContext()).getLongPressTimeout();
     }
 
     public boolean isAnimating() {
@@ -57,20 +55,14 @@ public class SettingsButton extends AlphaOptimizedImageButton {
         return mUpToSpeed;
     }
 
-    public boolean isLongPress() {
-        return mLongPress;
-    }
-
-    @Override
+    /*@Override
     public boolean onTouchEvent(MotionEvent event) {
         switch (event.getActionMasked()) {
             case MotionEvent.ACTION_DOWN:
-                mLongPress = false;
-                mUpToSpeed = false;
-                postDelayed(mLongPressCallback, mLongPressDelay);
+                postDelayed(mLongPressCallback, LONG_PRESS_LENGTH);
                 break;
             case MotionEvent.ACTION_UP:
-                if (mUpToSpeed || mLongPress) {
+                if (mUpToSpeed) {
                     startExitAnimation();
                 } else {
                     cancelLongClick();
@@ -89,10 +81,11 @@ public class SettingsButton extends AlphaOptimizedImageButton {
                 break;
         }
         return super.onTouchEvent(event);
-    }
+    }*/
 
     private void cancelLongClick() {
         cancelAnimation();
+        mUpToSpeed = false;
         removeCallbacks(mLongPressCallback);
     }
 
@@ -175,7 +168,6 @@ public class SettingsButton extends AlphaOptimizedImageButton {
     private final Runnable mLongPressCallback = new Runnable() {
         @Override
         public void run() {
-            mLongPress = true;
             startAccelSpin();
         }
     };
