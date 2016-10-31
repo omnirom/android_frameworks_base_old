@@ -2,6 +2,8 @@ package com.android.systemui.qs;
 
 import android.content.Context;
 import android.content.res.Resources;
+import android.os.UserHandle;
+import android.provider.Settings;
 import android.util.AttributeSet;
 import android.view.View;
 import android.view.ViewGroup;
@@ -22,6 +24,7 @@ public class TileLayout extends ViewGroup implements QSTileLayout {
     protected int mCellWidth;
     protected int mCellHeight;
     protected int mCellMargin;
+    protected int mDefaultColumns;
 
     protected final ArrayList<TileRecord> mRecords = new ArrayList<>();
     private int mCellMarginTop;
@@ -74,12 +77,12 @@ public class TileLayout extends ViewGroup implements QSTileLayout {
 
     public boolean updateResources() {
         final Resources res = mContext.getResources();
-        final int columns = Math.max(1, res.getInteger(R.integer.quick_settings_num_columns));
+        mDefaultColumns = Math.max(1, res.getInteger(R.integer.quick_settings_num_columns));
         mCellHeight = mContext.getResources().getDimensionPixelSize(R.dimen.qs_tile_height);
         mCellMargin = res.getDimensionPixelSize(R.dimen.qs_tile_margin);
         mCellMarginTop = res.getDimensionPixelSize(R.dimen.qs_tile_margin_top);
-        if (mColumns != columns) {
-            mColumns = columns;
+        if (mColumns != mDefaultColumns) {
+            mColumns = mDefaultColumns;
             requestLayout();
             return true;
         }
@@ -138,5 +141,16 @@ public class TileLayout extends ViewGroup implements QSTileLayout {
 
     private int getColumnStart(int column) {
         return column * (mCellWidth + mCellMargin) + mCellMargin;
+    }
+
+    @Override
+    public void updateSettings() {
+        int columns = Settings.System.getIntForUser(
+                    mContext.getContentResolver(), Settings.System.QS_LAYOUT_COLUMNS, mDefaultColumns,
+                    UserHandle.USER_CURRENT);
+        if (mColumns != columns) {
+            mColumns = columns;
+            requestLayout();
+        }
     }
 }
