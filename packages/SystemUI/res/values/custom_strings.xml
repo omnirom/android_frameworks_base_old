@@ -51,4 +51,10 @@
     <string name="accessibility_quick_settings_nfc_changed_off">NFC turned off.</string>
     <!-- Announcement made when NFC changes to on (not shown on the screen). [CHAR LIMIT=NONE] -->
     <string name="accessibility_quick_settings_nfc_changed_on">NFC turned on.</string>
+
+    <string name="qs_menu_item_columns">Columns</string>
+    <string name="qs_menu_item_columns_three">3</string>
+    <string name="qs_menu_item_columns_four">4</string>
+    <string name="qs_menu_item_columns_five">5</string>
+    <string name="qs_menu_item_reset">Reset</string>
 </resources>
