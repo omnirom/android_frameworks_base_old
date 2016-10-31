@@ -3988,6 +3988,12 @@ public final class Settings {
         public static final String VOLUME_BUTTON_FORCE_MEDIA = "volume_button_force_media";
 
         /**
+         * Number of qs columns on landscape orientation
+         * @hide
+         */
+        public static final String QS_LAYOUT_COLUMNS_LANDSCAPE = "qs_layout_columns_landscape";
+
+        /**
          * show text headers together with the stream volume images
          * default is true
          * @hide
@@ -4051,6 +4057,11 @@ public final class Settings {
          * @hide
          */
         public static final String FAST_CHARGING_LED_ENABLED = "fast_charging_led_enabled";
+
+        /**
+         * @hide
+         */
+        public static final String QS_LAYOUT_COLUMNS = "qs_layout_columns";
 
         /**
          * Settings to backup. This is here so that it's in the same place as the settings
