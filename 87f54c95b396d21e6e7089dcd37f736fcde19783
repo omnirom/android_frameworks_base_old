@@ -1,0 +1,21 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "d8098520_73e557d9",
+        "filename": "packages/SystemUI/src/com/android/systemui/qs/TileLayout.java",
+        "patchSetId": 2
+      },
+      "lineNbr": 77,
+      "author": {
+        "id": 1000026
+      },
+      "writtenOn": "2016-11-02T08:23:12Z",
+      "side": 0,
+      "message": "default must be set here too else we get a div by zero",
+      "revId": "87f54c95b396d21e6e7089dcd37f736fcde19783",
+      "serverId": "56841c99-7c94-43d4-bf0b-cb4707e66d55",
+      "unresolved": false
+    }
+  ]
+}
