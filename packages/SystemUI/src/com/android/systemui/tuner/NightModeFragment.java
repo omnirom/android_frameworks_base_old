@@ -25,6 +25,7 @@ import android.support.v14.preference.SwitchPreference;
 import android.support.v7.preference.Preference;
 import android.support.v7.preference.Preference.OnPreferenceChangeListener;
 import android.view.LayoutInflater;
+import android.view.MenuItem;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.Switch;
@@ -59,6 +60,13 @@ public class NightModeFragment extends PreferenceFragment implements Tunable,
         super.onCreate(savedInstanceState);
         mNightModeController = new NightModeController(getContext());
         mUiModeManager = getContext().getSystemService(UiModeManager.class);
+        setHasOptionsMenu(true);
+    }
+
+    @Override
+    public void onActivityCreated(Bundle savedInstanceState) {
+        super.onActivityCreated(savedInstanceState);
+        getActivity().getActionBar().setDisplayHomeAsUpEnabled(true);
     }
 
     @Override
@@ -139,6 +147,16 @@ public class NightModeFragment extends PreferenceFragment implements Tunable,
             return false;
         }
         return true;
+    }
+
+    @Override
+    public boolean onOptionsItemSelected(MenuItem item) {
+        switch (item.getItemId()) {
+            case android.R.id.home:
+                getFragmentManager().popBackStack();
+                break;
+        }
+        return super.onOptionsItemSelected(item);
     }
 
     private void postCalculateDisabled() {
