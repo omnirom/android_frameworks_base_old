@@ -1,0 +1,21 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "d8098520_8e07a487",
+        "filename": "packages/SystemUI/src/com/android/systemui/screenshot/ScreenshotEditor.java",
+        "patchSetId": 6
+      },
+      "lineNbr": 460,
+      "author": {
+        "id": 1000026
+      },
+      "writtenOn": "2016-11-07T09:31:25Z",
+      "side": 1,
+      "message": "TODO we should do same error handling as in only save below",
+      "revId": "96bdcf0ac39e6212e877e2a2c420965cb0e4262a",
+      "serverId": "56841c99-7c94-43d4-bf0b-cb4707e66d55",
+      "unresolved": false
+    }
+  ]
+}
