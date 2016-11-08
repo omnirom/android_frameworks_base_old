@@ -4106,6 +4106,13 @@ public final class Settings {
                 BOOLEAN_VALIDATOR;
 
         /**
+         * Enable proxi check for wake keys - must be implemented in a device
+         * KeyHandler
+         * @hide
+         */
+        public static final String OMNI_DEVICE_PROXI_CHECK_ENABLED = "device_proxi_check_enabled";
+
+        /**
          * @hide
          */
         public static final String OMNI_NAVIGATION_BAR_SHOW = "navigation_bar_show";
