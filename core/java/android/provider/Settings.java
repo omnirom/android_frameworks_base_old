@@ -4460,6 +4460,14 @@ public final class Settings {
         /** @hide */
         private static final Validator SHOW_BATTERY_PERCENT_VALIDATOR = BOOLEAN_VALIDATOR;
 
+        // omni adding start
+        /**
+         * @hide
+         */
+        public static final String OMNI_NAVIGATION_BAR_RECENTS = "navigation_bar_recents";
+
+        /** @hide */
+        private static final Validator OMNI_NAVIGATION_BAR_RECENTS_VALIDATOR = BOOLEAN_VALIDATOR;
         /**
          * @hide
          */
@@ -4468,6 +4476,123 @@ public final class Settings {
         /** @hide */
         private static final Validator OMNI_SYSTEM_PROXI_CHECK_ENABLED_VALIDATOR =
                 BOOLEAN_VALIDATOR;
+
+        /**
+         * some devices have a extra hw button e.g. n3 on the back on the
+         * fingerprint sensor. allow mapping button to key
+         *
+         * @hide
+         */
+        public static final String OMNI_BUTTON_EXTRA_KEY_MAPPING = "button_extra_mapping";
+
+        /** @hide */
+        private static final Validator OMNI_BUTTON_EXTRA_KEY_MAPPING_VALIDATOR =
+                ANY_STRING_VALIDATOR;
+
+        /**
+         * Disable hw buttons - actions, brightness, haptic feedback, overflow menu
+         * @hide
+         */
+        public static final String OMNI_HARDWARE_KEYS_DISABLE = "hardware_keys_disable";
+
+        /** @hide */
+        private static final Validator OMNI_HARDWARE_KEYS_DISABLE_VALIDATOR =
+                BOOLEAN_VALIDATOR;
+
+        /**
+         * Enable proxi check for wake keys - must be implemented in a device
+         * KeyHandler
+         * @hide
+         */
+        public static final String OMNI_DEVICE_PROXI_CHECK_ENABLED = "device_proxi_check_enabled";
+
+        /** @hide */
+        private static final Validator OMNI_DEVICE_PROXI_CHECK_ENABLED_VALIDATOR =
+                BOOLEAN_VALIDATOR;
+
+        /**
+         * Enable Gesture Haptic feedback
+         * KeyHandler
+         * @hide
+         */
+        public static final String OMNI_DEVICE_GESTURE_FEEDBACK_ENABLED =
+                "device_gesture_feedback_enabled";
+
+        /** @hide */
+        private static final Validator OMNI_DEVICE_GESTURE_FEEDBACK_ENABLED_VALIDATOR =
+                BOOLEAN_VALIDATOR;
+
+        /**
+         * @hide
+         */
+        public static final String OMNI_DEVICE_FEATURE_SETTINGS = "device_feature_settings";
+
+        /** @hide */
+        private static final Validator OMNI_DEVICE_FEATURE_SETTINGS_VALIDATOR =
+                ANY_STRING_VALIDATOR;
+
+        /**
+         * @hide
+         */
+        public static final String OMNI_NAVIGATION_BAR_SHOW = "navigation_bar_show";
+
+        /** @hide */
+        private static final Validator OMNI_NAVIGATION_BAR_SHOW_VALIDATOR =
+                BOOLEAN_VALIDATOR;
+
+        /**
+         * @hide
+         */
+        public static final String OMNI_ADVANCED_REBOOT = "advanced_reboot";
+
+        /** @hide */
+        private static final Validator OMNI_ADVANCED_REBOOT_VALIDATOR =
+                BOOLEAN_VALIDATOR;
+
+        /**
+         * @hide
+         */
+        public static final String OMNI_USE_BOTTOM_GESTURE_NAVIGATION =
+                "use_bottom_gesture_navigation";
+
+        /** @hide */
+        private static final Validator OMNI_USE_BOTTOM_GESTURE_NAVIGATION_VALIDATOR =
+                BOOLEAN_VALIDATOR;
+
+        /**
+         * Number of qs columns on landscape orientation
+         * @hide
+         */
+        public static final String OMNI_QS_LAYOUT_COLUMNS_LANDSCAPE = "qs_layout_columns_landscape";
+         /** @hide */
+        private static final Validator OMNI_QS_LAYOUT_COLUMNS_LANDSCAPE_VALIDATOR =
+                ANY_INTEGER_VALIDATOR;
+         /**
+         * @hide
+         */
+        public static final String OMNI_QS_LAYOUT_COLUMNS = "qs_layout_columns";
+         /** @hide */
+        private static final Validator OMNI_QS_LAYOUT_COLUMNS_VALIDATOR =
+                ANY_INTEGER_VALIDATOR;
+
+        /**
+         * Whether to display qs tile titles in the qs panel
+         * @hide
+         */
+        public static final String OMNI_QS_TILE_TITLE_VISIBILITY = "qs_tile_title_visibility";
+
+        /** @hide */
+        private static final Validator OMNI_QS_TILE_TITLE_VISIBILITY_VALIDATOR =
+                BOOLEAN_VALIDATOR;
+
+        /**
+         * @hide
+         */
+        public static final String OMNI_QS_LAYOUT_ROWS = "qs_layout_rows";
+
+        /** @hide */
+        private static final Validator OMNI_QS_LAYOUT_ROWS_VALIDATOR =
+                ANY_INTEGER_VALIDATOR;
 
         /**
          * IMPORTANT: If you add a new public settings you also have to add it to
@@ -4541,7 +4666,20 @@ public final class Settings {
             DISPLAY_COLOR_MODE,
             ALARM_ALERT,
             NOTIFICATION_LIGHT_PULSE,
-            OMNI_SYSTEM_PROXI_CHECK_ENABLED
+            OMNI_NAVIGATION_BAR_RECENTS,
+            OMNI_SYSTEM_PROXI_CHECK_ENABLED,
+            OMNI_BUTTON_EXTRA_KEY_MAPPING,
+            OMNI_HARDWARE_KEYS_DISABLE,
+            OMNI_DEVICE_PROXI_CHECK_ENABLED,
+            OMNI_DEVICE_GESTURE_FEEDBACK_ENABLED,
+            OMNI_DEVICE_FEATURE_SETTINGS,
+            OMNI_NAVIGATION_BAR_SHOW,
+            OMNI_ADVANCED_REBOOT,
+            OMNI_USE_BOTTOM_GESTURE_NAVIGATION,
+            OMNI_QS_LAYOUT_COLUMNS_LANDSCAPE,
+            OMNI_QS_LAYOUT_COLUMNS,
+            OMNI_QS_TILE_TITLE_VISIBILITY,
+            OMNI_QS_LAYOUT_ROWS,
         };
 
         /**
@@ -4661,7 +4799,20 @@ public final class Settings {
             PRIVATE_SETTINGS.add(EGG_MODE);
             PRIVATE_SETTINGS.add(SHOW_BATTERY_PERCENT);
             PRIVATE_SETTINGS.add(DISPLAY_COLOR_MODE);
+            PRIVATE_SETTINGS.add(OMNI_NAVIGATION_BAR_RECENTS);
             PRIVATE_SETTINGS.add(OMNI_SYSTEM_PROXI_CHECK_ENABLED);
+            PRIVATE_SETTINGS.add(OMNI_BUTTON_EXTRA_KEY_MAPPING);
+            PRIVATE_SETTINGS.add(OMNI_HARDWARE_KEYS_DISABLE);
+            PRIVATE_SETTINGS.add(OMNI_DEVICE_PROXI_CHECK_ENABLED);
+            PRIVATE_SETTINGS.add(OMNI_DEVICE_GESTURE_FEEDBACK_ENABLED);
+            PRIVATE_SETTINGS.add(OMNI_DEVICE_FEATURE_SETTINGS);
+            PRIVATE_SETTINGS.add(OMNI_NAVIGATION_BAR_SHOW);
+            PRIVATE_SETTINGS.add(OMNI_ADVANCED_REBOOT);
+            PRIVATE_SETTINGS.add(OMNI_USE_BOTTOM_GESTURE_NAVIGATION);
+            PRIVATE_SETTINGS.add(OMNI_QS_LAYOUT_COLUMNS_LANDSCAPE);
+            PRIVATE_SETTINGS.add(OMNI_QS_LAYOUT_COLUMNS);
+            PRIVATE_SETTINGS.add(OMNI_QS_TILE_TITLE_VISIBILITY);
+            PRIVATE_SETTINGS.add(OMNI_QS_LAYOUT_ROWS);
         }
 
         /**
@@ -4755,8 +4906,27 @@ public final class Settings {
             VALIDATORS.put(WIFI_STATIC_DNS2, WIFI_STATIC_DNS2_VALIDATOR);
             VALIDATORS.put(SHOW_BATTERY_PERCENT, SHOW_BATTERY_PERCENT_VALIDATOR);
             VALIDATORS.put(NOTIFICATION_LIGHT_PULSE, BOOLEAN_VALIDATOR);
+            VALIDATORS.put(OMNI_NAVIGATION_BAR_RECENTS, OMNI_NAVIGATION_BAR_RECENTS_VALIDATOR);
             VALIDATORS.put(OMNI_SYSTEM_PROXI_CHECK_ENABLED,
                     OMNI_SYSTEM_PROXI_CHECK_ENABLED_VALIDATOR);
+            VALIDATORS.put(OMNI_BUTTON_EXTRA_KEY_MAPPING,
+                    OMNI_BUTTON_EXTRA_KEY_MAPPING_VALIDATOR);
+            VALIDATORS.put(OMNI_HARDWARE_KEYS_DISABLE, OMNI_HARDWARE_KEYS_DISABLE_VALIDATOR);
+            VALIDATORS.put(OMNI_DEVICE_PROXI_CHECK_ENABLED,
+                    OMNI_DEVICE_PROXI_CHECK_ENABLED_VALIDATOR);
+            VALIDATORS.put(OMNI_DEVICE_GESTURE_FEEDBACK_ENABLED,
+                    OMNI_DEVICE_GESTURE_FEEDBACK_ENABLED_VALIDATOR);
+            VALIDATORS.put(OMNI_DEVICE_FEATURE_SETTINGS,
+                    OMNI_DEVICE_FEATURE_SETTINGS_VALIDATOR);
+            VALIDATORS.put(OMNI_NAVIGATION_BAR_SHOW, OMNI_NAVIGATION_BAR_SHOW_VALIDATOR);
+            VALIDATORS.put(OMNI_ADVANCED_REBOOT, OMNI_ADVANCED_REBOOT_VALIDATOR);
+            VALIDATORS.put(OMNI_USE_BOTTOM_GESTURE_NAVIGATION,
+                    OMNI_USE_BOTTOM_GESTURE_NAVIGATION_VALIDATOR);
+            VALIDATORS.put(OMNI_QS_LAYOUT_COLUMNS_LANDSCAPE,
+                    OMNI_QS_LAYOUT_COLUMNS_LANDSCAPE_VALIDATOR);
+            VALIDATORS.put(OMNI_QS_LAYOUT_COLUMNS, OMNI_QS_LAYOUT_COLUMNS_VALIDATOR);
+            VALIDATORS.put(OMNI_QS_TILE_TITLE_VISIBILITY, OMNI_QS_TILE_TITLE_VISIBILITY_VALIDATOR);
+            VALIDATORS.put(OMNI_QS_LAYOUT_ROWS, OMNI_QS_LAYOUT_ROWS_VALIDATOR);
         }
 
         /**
