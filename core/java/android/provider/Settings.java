@@ -4105,6 +4105,60 @@ public final class Settings {
         private static final Validator OMNI_SYSTEM_PROXI_CHECK_ENABLED_VALIDATOR =
                 BOOLEAN_VALIDATOR;
 
+        /** some devices have a extra hw button e.g. n3 on the back on the
+         * fingerprint sensor. allow mapping button to key
+         *
+         * @hide
+         */
+        public static final String OMNI_BUTTON_EXTRA_KEY_MAPPING = "button_extra_mapping";
+
+        /** @hide */
+        private static final Validator OMNI_BUTTON_EXTRA_KEY_MAPPING_VALIDATOR =
+                BOOLEAN_VALIDATOR;
+
+        /**
+         * Disable hw buttons - actions, brightness, haptic feedback, overflow menu
+         * @hide
+         */
+        public static final String OMNI_HARDWARE_KEYS_DISABLE = "hardware_keys_disable";
+
+        /** @hide */
+        private static final Validator OMNI_HARDWARE_KEYS_DISABLE_VALIDATOR =
+                BOOLEAN_VALIDATOR;
+
+        /**
+         * Enable proxi check for wake keys - must be implemented in a device
+         * KeyHandler
+         * @hide
+         */
+        public static final String OMNI_DEVICE_PROXI_CHECK_ENABLED = "device_proxi_check_enabled";
+
+        /** @hide */
+        private static final Validator OMNI_DEVICE_PROXI_CHECK_ENABLED_VALIDATOR =
+                BOOLEAN_VALIDATOR;
+
+        /**
+         * Enable Off-Screen Gesture Haptic feedback
+         * KeyHandler
+         * @hide
+         */
+        public static final String OMNI_DEVICE_OFF_SCREEN_GESTURE_FEEDBACK_ENABLED = "device_off_screen_gesture_feedback_enabled";
+
+        /** @hide */
+        private static final Validator OMNI_DEVICE_OFF_SCREEN_GESTURE_FEEDBACK_ENABLED_VALIDATOR =
+                BOOLEAN_VALIDATOR;
+
+        /**
+         * Enable Fingerprint Gesture Haptic feedback
+         * KeyHandler
+         * @hide
+         */
+        public static final String OMNI_DEVICE_GESTURE_FEEDBACK_ENABLED = "device_gesture_feedback_enabled";
+
+        /** @hide */
+        private static final Validator OMNI_DEVICE_GESTURE_FEEDBACK_ENABLED_VALIDATOR =
+                BOOLEAN_VALIDATOR;
+
         /**
          * @hide
          */
@@ -4191,6 +4245,11 @@ public final class Settings {
             DISPLAY_COLOR_MODE,
             OMNI_NAVIGATION_BAR_RECENTS,
             OMNI_SYSTEM_PROXI_CHECK_ENABLED,
+            OMNI_BUTTON_EXTRA_KEY_MAPPING,
+            OMNI_HARDWARE_KEYS_DISABLE,
+            OMNI_DEVICE_PROXI_CHECK_ENABLED,
+            OMNI_DEVICE_GESTURE_FEEDBACK_ENABLED,
+            OMNI_DEVICE_OFF_SCREEN_GESTURE_FEEDBACK_ENABLED,
             OMNI_NAVIGATION_BAR_SHOW,
             OMNI_ADVANCED_REBOOT,
         };
@@ -4309,6 +4368,11 @@ public final class Settings {
             PRIVATE_SETTINGS.add(DISPLAY_COLOR_MODE);
             PRIVATE_SETTINGS.add(OMNI_NAVIGATION_BAR_RECENTS);
             PRIVATE_SETTINGS.add(OMNI_SYSTEM_PROXI_CHECK_ENABLED);
+            PRIVATE_SETTINGS.add(OMNI_BUTTON_EXTRA_KEY_MAPPING);
+            PRIVATE_SETTINGS.add(OMNI_HARDWARE_KEYS_DISABLE);
+            PRIVATE_SETTINGS.add(OMNI_DEVICE_PROXI_CHECK_ENABLED);
+            PRIVATE_SETTINGS.add(OMNI_DEVICE_GESTURE_FEEDBACK_ENABLED);
+            PRIVATE_SETTINGS.add(OMNI_DEVICE_OFF_SCREEN_GESTURE_FEEDBACK_ENABLED);
             PRIVATE_SETTINGS.add(OMNI_NAVIGATION_BAR_SHOW);
             PRIVATE_SETTINGS.add(OMNI_ADVANCED_REBOOT);
         }
@@ -4402,6 +4466,15 @@ public final class Settings {
             VALIDATORS.put(OMNI_NAVIGATION_BAR_RECENTS, OMNI_NAVIGATION_BAR_RECENTS_VALIDATOR);
             VALIDATORS.put(OMNI_SYSTEM_PROXI_CHECK_ENABLED,
                     OMNI_SYSTEM_PROXI_CHECK_ENABLED_VALIDATOR);
+            VALIDATORS.put(OMNI_BUTTON_EXTRA_KEY_MAPPING,
+                    OMNI_BUTTON_EXTRA_KEY_MAPPING_VALIDATOR);
+            VALIDATORS.put(OMNI_HARDWARE_KEYS_DISABLE, OMNI_HARDWARE_KEYS_DISABLE_VALIDATOR);
+            VALIDATORS.put(OMNI_DEVICE_PROXI_CHECK_ENABLED,
+                    OMNI_DEVICE_PROXI_CHECK_ENABLED_VALIDATOR);
+            VALIDATORS.put(OMNI_DEVICE_GESTURE_FEEDBACK_ENABLED,
+                    OMNI_DEVICE_GESTURE_FEEDBACK_ENABLED_VALIDATOR);
+            VALIDATORS.put(OMNI_DEVICE_OFF_SCREEN_GESTURE_FEEDBACK_ENABLED,
+                    OMNI_DEVICE_OFF_SCREEN_GESTURE_FEEDBACK_ENABLED_VALIDATOR);
             VALIDATORS.put(OMNI_NAVIGATION_BAR_SHOW, OMNI_NAVIGATION_BAR_SHOW_VALIDATOR);
             VALIDATORS.put(OMNI_ADVANCED_REBOOT, OMNI_ADVANCED_REBOOT_VALIDATOR);
         }
