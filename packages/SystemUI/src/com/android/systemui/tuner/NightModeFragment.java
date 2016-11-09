@@ -97,15 +97,25 @@ public class NightModeFragment extends PreferenceFragment implements Tunable,
         View switchBar = view.findViewById(R.id.switch_bar);
         mSwitch = (Switch) switchBar.findViewById(android.R.id.switch_widget);
         mSwitch.setChecked(mNightModeController.isEnabled());
+        mSwitch.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                toggleState();
+            }
+        });
         switchBar.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                boolean newState = !mNightModeController.isEnabled();
-                MetricsLogger.action(getContext(), MetricsEvent.ACTION_TUNER_NIGHT_MODE, newState);
-                mNightModeController.setNightMode(newState);
-                mSwitch.setChecked(newState);
+                toggleState();
             }
         });
+    }
+
+    private void toggleState() {
+        boolean newState = !mNightModeController.isEnabled();
+        MetricsLogger.action(getContext(), MetricsEvent.ACTION_TUNER_NIGHT_MODE, newState);
+        mNightModeController.setNightMode(newState);
+        mSwitch.setChecked(newState);
     }
 
     @Override
@@ -170,7 +180,7 @@ public class NightModeFragment extends PreferenceFragment implements Tunable,
     }
 
     private void calculateDisabled() {
-        int enabledCount = (mAdjustTint.isChecked() ? 1 : 0)
+        /*int enabledCount = (mAdjustTint.isChecked() ? 1 : 0)
                 + (mAdjustBrightness.isChecked() ? 1 : 0);
         if (enabledCount == 1) {
             if (mAdjustTint.isChecked()) {
@@ -181,7 +191,7 @@ public class NightModeFragment extends PreferenceFragment implements Tunable,
         } else {
             mAdjustTint.setEnabled(true);
             mAdjustBrightness.setEnabled(true);
-        }
+        }*/
     }
 
     @Override
