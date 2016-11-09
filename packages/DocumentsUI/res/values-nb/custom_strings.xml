@@ -16,10 +16,27 @@
 -->
 <resources xmlns:xliff="urn:oasis:names:tc:xliff:document:1.2">
   <!-- Action bar title when the app is in standalone (file manager) mode [CHAR LIMIT=32] -->
+  <string name="title_standalone">Filer</string>
   <!-- Toast shown after successfully deleting files -->
+  <string name="toast_success_delete">Filene ble oppdaget</string>
   <!-- Title of the Delete confirmation dialog -->
+  <string name="dialog_delete_confirm_title">Slette filer?</string>
   <!-- Text shown in a toast when the user copies files -->
+  <plurals name="files_copied">
+    <item quantity="one">Filen har blitt festet til utklippstavlen</item>
+    <item quantity="other">%d filer har blitt festet til utklippstavlen</item>
+  </plurals>
   <!-- Text shown in a toast when the user pastes files -->
+  <plurals name="files_pasted">
+    <item quantity="one">Filen har blitt limt inn. Opplasting kan bli ferdiggjort i bakgrunnen.</item>
+    <item quantity="other">%d filer har blitt limt inn. Opplasting kan bli ferdiggjort i bakgrunnen.</item>
+  </plurals>
   <!-- Text show in the progress dialog while files are being copied -->
+  <string name="copy_in_progress">Kopierer...</string>
   <!-- Text show in the progress dialog while files are being deleted -->
+  <string name="delete_in_progress">Sletter...</string>
+  <plurals name="dialog_delete_confirm_message">
+    <item quantity="one">Denne filen vil bli slettet permanent!</item>
+    <item quantity="other">De %d valgte filene vil bli slettet permanent!</item>
+  </plurals>
 </resources>

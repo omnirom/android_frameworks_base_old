@@ -54,6 +54,12 @@
   <string name="quick_settings_screen_timeout_detail_title">Bildschirm-Timeout</string>
   <!-- Screen off QS tile -->
   <string name="quick_settings_screen_off">Bildschirm aus</string>
+  <!-- Sync QS tile -->
+  <string name="quick_settings_sync_label">Synchronisieren</string>
+  <string name="accessibility_quick_settings_sync_off">Synchronisierung aus</string>
+  <string name="accessibility_quick_settings_sync_on">Synchronisierung an</string>
+  <string name="accessibility_quick_settings_sync_changed_off">Synchronisierung deaktiviert</string>
+  <string name="accessibility_quick_settings_sync_changed_on">Synchronisierung aktiviert</string>
   <!-- Screenshot Crop & Share -->
   <string name="action_delete_success">Gelöscht</string>
   <string name="action_delete_fault">Löschen war nicht erfolgreich</string>

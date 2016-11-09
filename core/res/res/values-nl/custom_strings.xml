@@ -25,6 +25,12 @@
   <string name="global_action_reboot_sub">Systeem</string>
   <string name="global_action_reboot_recovery">Recovery</string>
   <string name="global_action_reboot_bootloader">Bootloader</string>
+  <string name="global_action_users">Gebruikers\u2026</string>
+  <string name="global_action_screenshot">Schermafdruk</string>
+  <string name="global_action_screenrecord">Schermopname</string>
+  <string name="global_action_torch_on">Zaklamp is aan</string>
+  <string name="global_action_torch_off">Zaklamp is uit</string>
+  <string name="global_actions_toggle_torch_mode">Zaklamp</string>
   <!-- advanced reboot to bootloader. -->
   <string name="reboot_to_bootloader_title">Herstart bootloader</string>
   <string name="reboot_to_bootloader_message">Herstarten\u2026</string>
@@ -46,9 +52,11 @@
   <!-- Reboot Confirmation Dialog.  Message in the confirmation dialog
          when the user asks to reboot. [CHAR LIMIT=NONE] -->
   <string name="reboot_confirm">Wilt u herstarten?</string>
+  <string name="battery_style_text">Alleen tekst</string>
   <string name="battery_style_default">Standaard</string>
   <string name="battery_style_meter_horizontal">Horizontale balk</string>
   <string name="battery_style_circle">Cirkel</string>
+  <string name="battery_style_droid">Droid</string>
   <!-- Title of an application permission, listed so the user can choose whether they want to allow the application to do this. -->
   <string name="permlab_fakePackageSignature">Pakket handtekening immiteren</string>
   <!-- Description of an application permission, listed so the user can choose whether they want to allow the application to do this. -->

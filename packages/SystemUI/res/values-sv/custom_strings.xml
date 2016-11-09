@@ -18,16 +18,28 @@
 -->
 <resources xmlns:xliff="urn:oasis:names:tc:xliff:document:1.2">
   <!-- Screenrecord Notification Ticker -->
+  <string name="screenrecord_notif_ticker">Skärmen spelas in</string>
   <!-- Screenrecord notification title -->
+  <string name="screenrecord_notif_title">Spelar in skärmen</string>
   <!-- Screenrecord notification action: Stop -->
+  <string name="screenrecord_notif_stop">Stopp</string>
   <!-- Screenrecord notification action: show/hide pointer -->
+  <string name="screenrecord_notif_pointer_on">Visa pekaren</string>
+  <string name="screenrecord_notif_pointer_off">Dölj pekaren</string>
   <!-- Screen record notification error title -->
   <!-- Battery Saver Dimss -->
+  <string name="battery_saver_notification_action_text_short">Stäng av</string>
   <!-- Screen pinning dialog description when in accessibility mode. -->
   <!-- tuner -->
+  <string name="qs_settings">Inställningar</string>
+  <string name="qs_tile_columns_title">Kolumner</string>
+  <string name="qs_tile_columns_three">3</string>
+  <string name="qs_tile_columns_four">4</string>
   <!-- NFC QS tile -->
+  <string name="quick_settings_nfc_label">NFC</string>
   <!-- Music QS Tile -->
   <!-- Screen timeout QS tile -->
   <!-- Screen off QS tile -->
+  <!-- Sync QS tile -->
   <!-- Screenshot Crop & Share -->
 </resources>

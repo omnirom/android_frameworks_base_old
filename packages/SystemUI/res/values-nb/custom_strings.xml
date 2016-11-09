@@ -18,16 +18,52 @@
 -->
 <resources xmlns:xliff="urn:oasis:names:tc:xliff:document:1.2">
   <!-- Screenrecord Notification Ticker -->
+  <string name="screenrecord_notif_ticker">Skjermen blir tatt opp</string>
   <!-- Screenrecord notification title -->
+  <string name="screenrecord_notif_title">Tar opp skjermen</string>
   <!-- Screenrecord notification action: Stop -->
+  <string name="screenrecord_notif_stop">Stopp</string>
   <!-- Screenrecord notification action: show/hide pointer -->
+  <string name="screenrecord_notif_pointer_on">Vis peker</string>
+  <string name="screenrecord_notif_pointer_off">Skjul peker</string>
   <!-- Screen record notification error title -->
+  <string name="screenrecord_notif_error">Kunne ikke ta opp skjermen</string>
   <!-- Battery Saver Dimss -->
+  <string name="battery_saver_dismiss_title">Avvis</string>
+  <string name="battery_saver_notification_action_text_short">Slå av</string>
   <!-- Screen pinning dialog description when in accessibility mode. -->
+  <string name="screen_pinning_description_back">Dette holder appen oppe helt til du løsner den igjen. Trykk og hold Tilbake-knappen for å løsne.</string>
   <!-- tuner -->
+  <string name="status_bar_icons">Statuslinje ikoner</string>
+  <string name="qs_equal_tile_title">Samme størrelse</string>
+  <string name="qs_equal_tile_summary">Bruk samme størrelse for alle flisene</string>
+  <string name="qs_settings">Innstillinger</string>
+  <string name="qs_tile_columns_title">Kolonner</string>
+  <string name="qs_tile_columns_three">3</string>
+  <string name="qs_tile_columns_four">4</string>
+  <string name="qs_tile_bg_opacity_title">Bakgrunnsgjennomsiktighet</string>
+  <string name="status_bar_silent">Stillemodus</string>
   <!-- NFC QS tile -->
+  <string name="quick_settings_nfc_label">NFC</string>
   <!-- Music QS Tile -->
+  <string name="quick_settings_music_label">Musikk</string>
+  <string name="quick_settings_music_play">Spill</string>
+  <string name="quick_settings_music_pause">Pause</string>
   <!-- Screen timeout QS tile -->
+  <string name="quick_settings_timeout_label">Tidsavbrudd</string>
+  <string name="quick_settings_screen_timeout_detail_title">Skjermtidsavbrudd</string>
   <!-- Screen off QS tile -->
+  <string name="quick_settings_screen_off">Skjerm av</string>
+  <!-- Sync QS tile -->
+  <string name="quick_settings_sync_label">Synkroniser</string>
+  <string name="accessibility_quick_settings_sync_off">Synkronisering av</string>
+  <string name="accessibility_quick_settings_sync_on">Synkronisering på</string>
+  <string name="accessibility_quick_settings_sync_changed_off">Synkronisering er slått av</string>
+  <string name="accessibility_quick_settings_sync_changed_on">Synkronisering er slått på</string>
   <!-- Screenshot Crop & Share -->
+  <string name="action_delete_success">Slettet</string>
+  <string name="action_delete_fault">Slettingen mislyktes</string>
+  <string name="action_save_success">Lagret</string>
+  <string name="action_save_fault">Lagringen mislyktes</string>
+  <string name="action_edit">Rediger</string>
 </resources>

@@ -46,7 +46,24 @@
   <!-- NFC QS tile -->
   <string name="quick_settings_nfc_label">NFC</string>
   <!-- Music QS Tile -->
+  <string name="quick_settings_music_label">音乐</string>
+  <string name="quick_settings_music_play">播放</string>
+  <string name="quick_settings_music_pause">暂停</string>
   <!-- Screen timeout QS tile -->
+  <string name="quick_settings_timeout_label">超时</string>
+  <string name="quick_settings_screen_timeout_detail_title">屏幕超时</string>
   <!-- Screen off QS tile -->
+  <string name="quick_settings_screen_off">关闭屏幕</string>
+  <!-- Sync QS tile -->
+  <string name="quick_settings_sync_label">自动同步</string>
+  <string name="accessibility_quick_settings_sync_off">关闭同步</string>
+  <string name="accessibility_quick_settings_sync_on">打开同步</string>
+  <string name="accessibility_quick_settings_sync_changed_off">同步已关闭</string>
+  <string name="accessibility_quick_settings_sync_changed_on">同步已打开</string>
   <!-- Screenshot Crop & Share -->
+  <string name="action_delete_success">已删除</string>
+  <string name="action_delete_fault">删除失败</string>
+  <string name="action_save_success">已保存</string>
+  <string name="action_save_fault">保存失败</string>
+  <string name="action_edit">编辑</string>
 </resources>

@@ -22,6 +22,11 @@
   <!-- Title of the Delete confirmation dialog -->
   <string name="dialog_delete_confirm_title">Удалить файлы?</string>
   <!-- Text shown in a toast when the user copies files -->
+  <plurals name="files_copied">
+    <item quantity="one">Файл помещён в буфер обмена</item>
+    <item quantity="few">%d файла помещены в буфер обмена</item>
+    <item quantity="other">%d файла помещены в буфер обмена</item>
+  </plurals>
   <!-- Text shown in a toast when the user pastes files -->
   <!-- Text show in the progress dialog while files are being copied -->
   <string name="copy_in_progress">Копирование\u2026</string>

@@ -25,7 +25,7 @@
   <string name="global_action_reboot_sub">Systém</string>
   <string name="global_action_reboot_recovery">Recovery</string>
   <string name="global_action_reboot_bootloader">Bootloader</string>
-  <string name="global_action_users">Užívatelia\u2026</string>
+  <string name="global_action_users">Používatelia\u2026</string>
   <string name="global_action_screenshot">Snímka obrazovky</string>
   <string name="global_action_screenrecord">Záznam obrazovky</string>
   <string name="global_action_torch_on">Baterka je zapnutá</string>
@@ -33,13 +33,13 @@
   <string name="global_actions_toggle_torch_mode">Baterka</string>
   <!-- advanced reboot to bootloader. -->
   <string name="reboot_to_bootloader_title">Reštart do Bootloader</string>
-  <string name="reboot_to_bootloader_message">Reštartovanie/u2026</string>
+  <string name="reboot_to_bootloader_message">Reštartovanie\u2026</string>
   <!-- advanced reboot to recovery. -->
   <string name="reboot_to_recovery_title">Reštart do Recovery</string>
-  <string name="reboot_to_recovery_message">Reštartovanie/u2026</string>
+  <string name="reboot_to_recovery_message">Reštartovanie\u2026</string>
   <!-- advanced reboot system -->
   <string name="reboot_system_title">Reštartovať systém</string>
-  <string name="reboot_system_message">Reštartovanie/u2026</string>
+  <string name="reboot_system_message">Reštartovanie\u2026</string>
   <string name="dnd_mode_off">Vypnuté</string>
   <string name="dnd_mode_total_silence">Úplné ticho</string>
   <string name="dnd_mode_alarms">Len upozornenia</string>

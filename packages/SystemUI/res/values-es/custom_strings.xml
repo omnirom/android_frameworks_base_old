@@ -18,16 +18,52 @@
 -->
 <resources xmlns:xliff="urn:oasis:names:tc:xliff:document:1.2">
   <!-- Screenrecord Notification Ticker -->
+  <string name="screenrecord_notif_ticker">La pantalla está siendo grabada</string>
   <!-- Screenrecord notification title -->
+  <string name="screenrecord_notif_title">Grabando pantalla</string>
   <!-- Screenrecord notification action: Stop -->
+  <string name="screenrecord_notif_stop">Detener</string>
   <!-- Screenrecord notification action: show/hide pointer -->
+  <string name="screenrecord_notif_pointer_on">Mostrar puntero</string>
+  <string name="screenrecord_notif_pointer_off">Ocultar puntero</string>
   <!-- Screen record notification error title -->
+  <string name="screenrecord_notif_error">No se puede grabar la pantalla</string>
   <!-- Battery Saver Dimss -->
+  <string name="battery_saver_dismiss_title">Ignorar</string>
+  <string name="battery_saver_notification_action_text_short">Apagar</string>
   <!-- Screen pinning dialog description when in accessibility mode. -->
+  <string name="screen_pinning_description_back">Esto lo mantiene a la vista hasta que lo libere. Presione y sostenga de nuevo a liberar.</string>
   <!-- tuner -->
+  <string name="status_bar_icons">Iconos de la barra de estado</string>
+  <string name="qs_equal_tile_title">Igual tamaño</string>
+  <string name="qs_equal_tile_summary">Use el mismo tamaño para todas las fichas</string>
+  <string name="qs_settings">Ajustes</string>
+  <string name="qs_tile_columns_title">Columnas</string>
+  <string name="qs_tile_columns_three">3</string>
+  <string name="qs_tile_columns_four">4</string>
+  <string name="qs_tile_bg_opacity_title">Opacidad de Fondo</string>
+  <string name="status_bar_silent">Modo silencioso</string>
   <!-- NFC QS tile -->
+  <string name="quick_settings_nfc_label">NFC</string>
   <!-- Music QS Tile -->
+  <string name="quick_settings_music_label">Música</string>
+  <string name="quick_settings_music_play">Reproducir</string>
+  <string name="quick_settings_music_pause">Pausar</string>
   <!-- Screen timeout QS tile -->
+  <string name="quick_settings_timeout_label">Tiempo terminado</string>
+  <string name="quick_settings_screen_timeout_detail_title">Tiempo de espera de pantalla</string>
   <!-- Screen off QS tile -->
+  <string name="quick_settings_screen_off">Pantalla apagada</string>
+  <!-- Sync QS tile -->
+  <string name="quick_settings_sync_label">Sincronización</string>
+  <string name="accessibility_quick_settings_sync_off">Apagar Sincronización</string>
+  <string name="accessibility_quick_settings_sync_on">Activar sincronización</string>
+  <string name="accessibility_quick_settings_sync_changed_off">Sincronización desactivada</string>
+  <string name="accessibility_quick_settings_sync_changed_on">Sincronización activada</string>
   <!-- Screenshot Crop & Share -->
+  <string name="action_delete_success">Eliminada</string>
+  <string name="action_delete_fault">Eliminación sin éxito</string>
+  <string name="action_save_success">Guardado</string>
+  <string name="action_save_fault">Guardado sin éxito</string>
+  <string name="action_edit">Editar</string>
 </resources>

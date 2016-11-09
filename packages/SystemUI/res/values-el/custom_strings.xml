@@ -18,16 +18,27 @@
 -->
 <resources xmlns:xliff="urn:oasis:names:tc:xliff:document:1.2">
   <!-- Screenrecord Notification Ticker -->
+  <string name="screenrecord_notif_ticker">Γίνεται εγγραφή της οθόνης</string>
   <!-- Screenrecord notification title -->
+  <string name="screenrecord_notif_title">Εγγραφή οθόνης</string>
   <!-- Screenrecord notification action: Stop -->
+  <string name="screenrecord_notif_stop">Διακοπή</string>
   <!-- Screenrecord notification action: show/hide pointer -->
+  <string name="screenrecord_notif_pointer_on">Εμφάνιση δείκτη</string>
+  <string name="screenrecord_notif_pointer_off">Απόκρυψη δείκτη</string>
   <!-- Screen record notification error title -->
+  <string name="screenrecord_notif_error">Αδυναμία εγγραφής οθόνης</string>
   <!-- Battery Saver Dimss -->
+  <string name="battery_saver_dismiss_title">Απόρριψη</string>
+  <string name="battery_saver_notification_action_text_short">Απενεργοποίηση</string>
   <!-- Screen pinning dialog description when in accessibility mode. -->
+  <string name="screen_pinning_description_back">Αυτό εμφανίζεται μέχρι να το ξεκαρφιτσώσετε. Αγγίξτε παρατεταμένα το κουμπί πίσω για να το ξεκαρφιτσώσετε.</string>
   <!-- tuner -->
+  <string name="status_bar_icons">Εικονίδια γραμμής κατάστασης</string>
   <!-- NFC QS tile -->
   <!-- Music QS Tile -->
   <!-- Screen timeout QS tile -->
   <!-- Screen off QS tile -->
+  <!-- Sync QS tile -->
   <!-- Screenshot Crop & Share -->
 </resources>

@@ -16,10 +16,27 @@
 -->
 <resources xmlns:xliff="urn:oasis:names:tc:xliff:document:1.2">
   <!-- Action bar title when the app is in standalone (file manager) mode [CHAR LIMIT=32] -->
+  <string name="title_standalone">Αρχεία</string>
   <!-- Toast shown after successfully deleting files -->
+  <string name="toast_success_delete">Τα αρχεία διαγράφηκαν</string>
   <!-- Title of the Delete confirmation dialog -->
+  <string name="dialog_delete_confirm_title">Διαγραφή αρχείων;</string>
   <!-- Text shown in a toast when the user copies files -->
+  <plurals name="files_copied">
+    <item quantity="one">Το αρχείο τοποθετήθηκε στο πρόχειρο</item>
+    <item quantity="other">%d αρχεία τοποθετήθηκαν στο πρόχειρο</item>
+  </plurals>
   <!-- Text shown in a toast when the user pastes files -->
+  <plurals name="files_pasted">
+    <item quantity="one">Το αρχείο επικολλήθηκε. Η μεταφόρτωση μπορεί να ολοκληρώνεται στο παρασκήνιο.</item>
+    <item quantity="other">%d αρχεία επικολλήθηκαν. Η μεταφόρτωση μπορεί να ολοκληρώνεται στο παρασκήνιο.</item>
+  </plurals>
   <!-- Text show in the progress dialog while files are being copied -->
+  <string name="copy_in_progress">Αντιγραφή...</string>
   <!-- Text show in the progress dialog while files are being deleted -->
+  <string name="delete_in_progress">Διαγραφή...</string>
+  <plurals name="dialog_delete_confirm_message">
+    <item quantity="one">Αυτό το αρχείο θα διαγραφεί οριστικά!</item>
+    <item quantity="other">Αυτό θα διαγράψει οριστικά τα %d επιλεγμένα αρχεία!</item>
+  </plurals>
 </resources>

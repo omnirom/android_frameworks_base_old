@@ -18,16 +18,26 @@
 -->
 <resources xmlns:xliff="urn:oasis:names:tc:xliff:document:1.2">
   <!-- Screenrecord Notification Ticker -->
+  <string name="screenrecord_notif_ticker">正在錄製畫面</string>
   <!-- Screenrecord notification title -->
+  <string name="screenrecord_notif_title">錄製畫面</string>
   <!-- Screenrecord notification action: Stop -->
+  <string name="screenrecord_notif_stop">停止</string>
   <!-- Screenrecord notification action: show/hide pointer -->
+  <string name="screenrecord_notif_pointer_on">顯示指標</string>
+  <string name="screenrecord_notif_pointer_off">隱藏指標</string>
   <!-- Screen record notification error title -->
+  <string name="screenrecord_notif_error">無法錄製螢幕</string>
   <!-- Battery Saver Dimss -->
   <!-- Screen pinning dialog description when in accessibility mode. -->
   <!-- tuner -->
+  <string name="qs_tile_columns_three">三</string>
+  <string name="qs_tile_columns_four">四</string>
+  <string name="qs_tile_bg_opacity_title">背景透明度</string>
   <!-- NFC QS tile -->
   <!-- Music QS Tile -->
   <!-- Screen timeout QS tile -->
   <!-- Screen off QS tile -->
+  <!-- Sync QS tile -->
   <!-- Screenshot Crop & Share -->
 </resources>

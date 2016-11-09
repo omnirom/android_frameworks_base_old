@@ -20,17 +20,53 @@
 -->
 <resources xmlns:xliff="urn:oasis:names:tc:xliff:document:1.2">
   <!-- Reboot -->
+  <string name="global_action_reboot">Reiniciar</string>
+  <string name="global_action_reboot_more">Reiniciar\u2026</string>
+  <string name="global_action_reboot_sub">Sistema</string>
+  <string name="global_action_reboot_recovery">Recovery</string>
+  <string name="global_action_reboot_bootloader">Bootloader</string>
+  <string name="global_action_users">Usuario\u2026</string>
+  <string name="global_action_screenshot">Captura de pantalla</string>
+  <string name="global_action_screenrecord">Grabar pantalla</string>
+  <string name="global_action_torch_on">Linterna encendida</string>
+  <string name="global_action_torch_off">Linterna apagada</string>
+  <string name="global_actions_toggle_torch_mode">Linterna</string>
   <!-- advanced reboot to bootloader. -->
+  <string name="reboot_to_bootloader_title">Reiniciar en bootloader</string>
+  <string name="reboot_to_bootloader_message">Reiniciando\u2026</string>
   <!-- advanced reboot to recovery. -->
+  <string name="reboot_to_recovery_title">Reiniciar recovery</string>
+  <string name="reboot_to_recovery_message">Reiniciando\u2026</string>
   <!-- advanced reboot system -->
+  <string name="reboot_system_title">Reiniciar Sistema</string>
+  <string name="reboot_system_message">Reiniciando\u2026</string>
+  <string name="dnd_mode_off">Apagado</string>
+  <string name="dnd_mode_total_silence">Silencio total</string>
+  <string name="dnd_mode_alarms">Alarmas solamente</string>
+  <string name="dnd_mode_important">Prioridad solamente</string>
   <!-- HW button mapping -->
+  <string name="app_killed_message">Aplicación cerrada</string>
+  <string name="hide_lock_to_app_dialog">Siempre iniciar</string>
   <!-- Title of dialog to confirm rebooting into safe mode. [CHAR LIMIT=50] -->
+  <string name="reboot_title">Reiniciar</string>
   <!-- Reboot Confirmation Dialog.  Message in the confirmation dialog
          when the user asks to reboot. [CHAR LIMIT=NONE] -->
+  <string name="reboot_confirm">¿Desea reiniciar?</string>
+  <string name="battery_style_text">Sólo texto</string>
+  <string name="battery_style_default">Por defecto</string>
+  <string name="battery_style_meter_horizontal">Barra horizontal</string>
+  <string name="battery_style_circle">Círculo</string>
+  <string name="battery_style_droid">Droide</string>
   <!-- Title of an application permission, listed so the user can choose whether they want to allow the application to do this. -->
+  <string name="permlab_fakePackageSignature">Simular firma de paquetes</string>
   <!-- Description of an application permission, listed so the user can choose whether they want to allow the application to do this. -->
+  <string name="permdesc_fakePackageSignature">Permite que la aplicación se haga pasar por otra. Las aplicaciones maliciosas pueden usar esto para acceder a datos privados. ¡Concede este permiso con mucha precaución!</string>
   <!-- Title of an application permission, listed so the user can choose whether they want the application to do this. -->
+  <string name="permlab_setKeyguardWallpaper">establecer fondo de pantalla de bloqueo</string>
   <!-- Description of an application permission, listed so the user can choose whether they want to allow the application to do this. -->
+  <string name="permdesc_setKeyguardWallpaper">Permitir que una aplicación cambie el fondo de la pantalla de bloqueo.</string>
   <!-- Notify use that they are in Lock-to-app in accessibility mode -->
+  <string name="lock_to_app_toast_back">Para desbloquear esta pantalla, pulsa y mantén atrás.</string>
   <!-- Vendor mismatched fingerprint warning [CHAR LIMIT=NONE] -->
+  <string name="system_error_vendorprint">Parece que tu software de fábrica no está actualizado. Por favor, flashea el último software de fábrica para tu dispositivo.</string>
 </resources>

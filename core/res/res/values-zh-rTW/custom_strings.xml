@@ -20,17 +20,53 @@
 -->
 <resources xmlns:xliff="urn:oasis:names:tc:xliff:document:1.2">
   <!-- Reboot -->
+  <string name="global_action_reboot">重新開機</string>
+  <string name="global_action_reboot_more">重新開機\u2026</string>
+  <string name="global_action_reboot_sub">系統</string>
+  <string name="global_action_reboot_recovery">Recovery</string>
+  <string name="global_action_reboot_bootloader">Bootloader</string>
+  <string name="global_action_users">使用者\u2026</string>
+  <string name="global_action_screenshot">螢幕截圖</string>
+  <string name="global_action_screenrecord">畫面錄製</string>
+  <string name="global_action_torch_on">手電筒已開啟</string>
+  <string name="global_action_torch_off">手電筒已關閉</string>
+  <string name="global_actions_toggle_torch_mode">手電筒</string>
   <!-- advanced reboot to bootloader. -->
+  <string name="reboot_to_bootloader_title">重開機至 bootloader</string>
+  <string name="reboot_to_bootloader_message">重新開機中\u2026</string>
   <!-- advanced reboot to recovery. -->
+  <string name="reboot_to_recovery_title">重新開機至 Recovery</string>
+  <string name="reboot_to_recovery_message">重新開機中\u2026</string>
   <!-- advanced reboot system -->
+  <string name="reboot_system_title">重新啟動系統</string>
+  <string name="reboot_system_message">重新開機中\u2026</string>
+  <string name="dnd_mode_off">關閉</string>
+  <string name="dnd_mode_total_silence">完全靜音</string>
+  <string name="dnd_mode_alarms">僅鬧鐘</string>
+  <string name="dnd_mode_important">僅優先打擾</string>
   <!-- HW button mapping -->
+  <string name="app_killed_message">應用程式已終止</string>
+  <string name="hide_lock_to_app_dialog">總是開始</string>
   <!-- Title of dialog to confirm rebooting into safe mode. [CHAR LIMIT=50] -->
+  <string name="reboot_title">重新開機</string>
   <!-- Reboot Confirmation Dialog.  Message in the confirmation dialog
          when the user asks to reboot. [CHAR LIMIT=NONE] -->
+  <string name="reboot_confirm">你想要重新開機嗎?</string>
+  <string name="battery_style_text">純文字</string>
+  <string name="battery_style_default">預設</string>
+  <string name="battery_style_meter_horizontal">橫條</string>
+  <string name="battery_style_circle">環形</string>
+  <string name="battery_style_droid">Droid</string>
   <!-- Title of an application permission, listed so the user can choose whether they want to allow the application to do this. -->
+  <string name="permlab_fakePackageSignature">偽裝安裝包簽名</string>
   <!-- Description of an application permission, listed so the user can choose whether they want to allow the application to do this. -->
+  <string name="permdesc_fakePackageSignature">允許應用程式假裝為另一過一個不同的應用程式。惡意應用程式可能藉此取得應用程式的資料。請小心授予權限!</string>
   <!-- Title of an application permission, listed so the user can choose whether they want the application to do this. -->
+  <string name="permlab_setKeyguardWallpaper">設定鍵盤背景圖</string>
   <!-- Description of an application permission, listed so the user can choose whether they want to allow the application to do this. -->
+  <string name="permdesc_setKeyguardWallpaper">允許應用程式變更鎖定畫面桌布。</string>
   <!-- Notify use that they are in Lock-to-app in accessibility mode -->
+  <string name="lock_to_app_toast_back">按住返回鍵取消螢幕固定</string>
   <!-- Vendor mismatched fingerprint warning [CHAR LIMIT=NONE] -->
+  <string name="system_error_vendorprint">您的韌體似乎不是最新版本，請重新刷寫最新韌體。</string>
 </resources>

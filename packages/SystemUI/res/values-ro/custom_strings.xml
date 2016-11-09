@@ -18,16 +18,49 @@
 -->
 <resources xmlns:xliff="urn:oasis:names:tc:xliff:document:1.2">
   <!-- Screenrecord Notification Ticker -->
+  <string name="screenrecord_notif_ticker">Ecranul este acum înregistrat</string>
   <!-- Screenrecord notification title -->
+  <string name="screenrecord_notif_title">Înregistrare ecran</string>
   <!-- Screenrecord notification action: Stop -->
+  <string name="screenrecord_notif_stop">Oprire</string>
   <!-- Screenrecord notification action: show/hide pointer -->
+  <string name="screenrecord_notif_pointer_on">Arată indicator</string>
+  <string name="screenrecord_notif_pointer_off">Ascunde indicator</string>
   <!-- Screen record notification error title -->
+  <string name="screenrecord_notif_error">Înregistrarea ecranului nu este posibilă</string>
   <!-- Battery Saver Dimss -->
+  <string name="battery_saver_dismiss_title">Șterge</string>
+  <string name="battery_saver_notification_action_text_short">Oprește</string>
   <!-- Screen pinning dialog description when in accessibility mode. -->
+  <string name="screen_pinning_description_back">Acest lucru îl ține la vedere până anulezi fixarea. Ține apăsat Înapoi pentru a anula fixarea.</string>
   <!-- tuner -->
+  <string name="status_bar_icons">Iconuri bară de stare</string>
+  <string name="qs_equal_tile_title">Dimensiuni egale</string>
+  <string name="qs_equal_tile_summary">Utilizare aceeași dimensiune pentru toate panourile</string>
+  <string name="qs_settings">Setări</string>
+  <string name="qs_tile_columns_title">Coloane</string>
+  <string name="qs_tile_columns_three">3</string>
+  <string name="qs_tile_columns_four">4</string>
+  <string name="qs_tile_bg_opacity_title">Opacitate fundal</string>
+  <string name="status_bar_silent">Mod Silenţios</string>
   <!-- NFC QS tile -->
+  <string name="quick_settings_nfc_label">NFC</string>
   <!-- Music QS Tile -->
+  <string name="quick_settings_music_label">Muzică</string>
+  <string name="quick_settings_music_play">Redare</string>
+  <string name="quick_settings_music_pause">Pauză</string>
   <!-- Screen timeout QS tile -->
+  <string name="quick_settings_timeout_label">Timp expirat</string>
   <!-- Screen off QS tile -->
+  <string name="quick_settings_screen_off">Ecran stins</string>
+  <!-- Sync QS tile -->
+  <string name="quick_settings_sync_label">Sincronizare</string>
+  <string name="accessibility_quick_settings_sync_off">Sincronizare opritã</string>
+  <string name="accessibility_quick_settings_sync_on">Sincronizare pornita</string>
   <!-- Screenshot Crop & Share -->
+  <string name="action_delete_success">Şters</string>
+  <string name="action_delete_fault">Ştergerea nu a reușit</string>
+  <string name="action_save_success">Salvat</string>
+  <string name="action_save_fault">Salvarea nu a reușit</string>
+  <string name="action_edit">Editare</string>
 </resources>

@@ -54,6 +54,12 @@
   <string name="quick_settings_screen_timeout_detail_title">Ekran zaman aşımı</string>
   <!-- Screen off QS tile -->
   <string name="quick_settings_screen_off">Ekran kapalı</string>
+  <!-- Sync QS tile -->
+  <string name="quick_settings_sync_label">Eşitleme</string>
+  <string name="accessibility_quick_settings_sync_off">Eşitleme kapalı</string>
+  <string name="accessibility_quick_settings_sync_on">Eşitleme açık</string>
+  <string name="accessibility_quick_settings_sync_changed_off">Eşitleme kapatıldı</string>
+  <string name="accessibility_quick_settings_sync_changed_on">Eşitleme açıldı</string>
   <!-- Screenshot Crop & Share -->
   <string name="action_delete_success">Silindi</string>
   <string name="action_delete_fault">Silme başarısız oldu</string>

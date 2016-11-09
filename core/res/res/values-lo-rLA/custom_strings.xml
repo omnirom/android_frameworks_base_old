@@ -20,39 +20,17 @@
 -->
 <resources xmlns:xliff="urn:oasis:names:tc:xliff:document:1.2">
   <!-- Reboot -->
-  <string name="global_action_reboot">But semula</string>
-  <string name="global_action_reboot_more">But semula\u2026</string>
-  <string name="global_action_reboot_sub">Sistem</string>
-  <string name="global_action_reboot_recovery">Pemulihan</string>
-  <string name="global_action_reboot_bootloader">Pemuat but</string>
   <!-- advanced reboot to bootloader. -->
-  <string name="reboot_to_bootloader_title">But semula pemuat but</string>
-  <string name="reboot_to_bootloader_message">But semula\u2026</string>
   <!-- advanced reboot to recovery. -->
-  <string name="reboot_to_recovery_title">But semula pemulihan</string>
-  <string name="reboot_to_recovery_message">But semula\u2026</string>
   <!-- advanced reboot system -->
-  <string name="reboot_system_title">But semula sistem</string>
-  <string name="reboot_system_message">But semula\u2026</string>
   <!-- HW button mapping -->
-  <string name="app_killed_message">Aplikasi dimatikan</string>
-  <string name="hide_lock_to_app_dialog">Sentiasa memulakan</string>
   <!-- Title of dialog to confirm rebooting into safe mode. [CHAR LIMIT=50] -->
-  <string name="reboot_title">But semula</string>
   <!-- Reboot Confirmation Dialog.  Message in the confirmation dialog
          when the user asks to reboot. [CHAR LIMIT=NONE] -->
-  <string name="reboot_confirm">Adakah anda mahu untuk but semula?</string>
-  <string name="battery_style_default">Asal</string>
-  <string name="battery_style_meter_horizontal">Bar melintang</string>
-  <string name="battery_style_circle">Bulatan</string>
   <!-- Title of an application permission, listed so the user can choose whether they want to allow the application to do this. -->
   <!-- Description of an application permission, listed so the user can choose whether they want to allow the application to do this. -->
   <!-- Title of an application permission, listed so the user can choose whether they want the application to do this. -->
-  <string name="permlab_setKeyguardWallpaper">set wallpaper keyguard</string>
   <!-- Description of an application permission, listed so the user can choose whether they want to allow the application to do this. -->
-  <string name="permdesc_setKeyguardWallpaper">Membenarkan aplikasi untuk menukar kertas dinding skrin kunci.</string>
   <!-- Notify use that they are in Lock-to-app in accessibility mode -->
-  <string name="lock_to_app_toast_back">Untuk menyahsemat skrin ini, sentuh dan tahan Back.</string>
   <!-- Vendor mismatched fingerprint warning [CHAR LIMIT=NONE] -->
-  <string name="system_error_vendorprint">Nampaknya imej vendor anda mungkin sudah lapuk. Sila flash imej vendor terkini untuk peranti anda.</string>
 </resources>

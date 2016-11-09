@@ -18,16 +18,36 @@
 -->
 <resources xmlns:xliff="urn:oasis:names:tc:xliff:document:1.2">
   <!-- Screenrecord Notification Ticker -->
+  <string name="screenrecord_notif_ticker">畫面錄製中</string>
   <!-- Screenrecord notification title -->
+  <string name="screenrecord_notif_title">錄製畫面</string>
   <!-- Screenrecord notification action: Stop -->
+  <string name="screenrecord_notif_stop">停止</string>
   <!-- Screenrecord notification action: show/hide pointer -->
+  <string name="screenrecord_notif_pointer_on">顯示指標</string>
+  <string name="screenrecord_notif_pointer_off">隱藏指標</string>
   <!-- Screen record notification error title -->
+  <string name="screenrecord_notif_error">無法錄製畫面</string>
   <!-- Battery Saver Dimss -->
+  <string name="battery_saver_dismiss_title">忽略</string>
+  <string name="battery_saver_notification_action_text_short">關閉</string>
   <!-- Screen pinning dialog description when in accessibility mode. -->
+  <string name="screen_pinning_description_back">這會將目前畫面應用鎖定。長按返回鍵解鎖。</string>
   <!-- tuner -->
+  <string name="status_bar_icons">狀態欄圖示</string>
+  <string name="qs_equal_tile_title">相同大小</string>
+  <string name="qs_equal_tile_summary">使所有快速鍵大小相同</string>
+  <string name="qs_settings">設定</string>
+  <string name="qs_tile_columns_title">列數</string>
+  <string name="qs_tile_columns_three">3</string>
+  <string name="qs_tile_columns_four">4</string>
+  <string name="qs_tile_bg_opacity_title">背景透明度</string>
+  <string name="status_bar_silent">靜音模式</string>
   <!-- NFC QS tile -->
+  <string name="quick_settings_nfc_label">NFC</string>
   <!-- Music QS Tile -->
   <!-- Screen timeout QS tile -->
   <!-- Screen off QS tile -->
+  <!-- Sync QS tile -->
   <!-- Screenshot Crop & Share -->
 </resources>

@@ -18,16 +18,34 @@
 -->
 <resources xmlns:xliff="urn:oasis:names:tc:xliff:document:1.2">
   <!-- Screenrecord Notification Ticker -->
+  <string name="screenrecord_notif_ticker">画面が録画されています</string>
   <!-- Screenrecord notification title -->
+  <string name="screenrecord_notif_title">録画中</string>
   <!-- Screenrecord notification action: Stop -->
+  <string name="screenrecord_notif_stop">停止</string>
   <!-- Screenrecord notification action: show/hide pointer -->
+  <string name="screenrecord_notif_pointer_on">タッチ操作を表示</string>
+  <string name="screenrecord_notif_pointer_off">タッチ操作を非表示</string>
   <!-- Screen record notification error title -->
+  <string name="screenrecord_notif_error">画面を録画できません</string>
   <!-- Battery Saver Dimss -->
+  <string name="battery_saver_dismiss_title">無視</string>
+  <string name="battery_saver_notification_action_text_short">無効にする</string>
   <!-- Screen pinning dialog description when in accessibility mode. -->
+  <string name="screen_pinning_description_back">解除しない限りその画面に固定されます。解除するには”戻る”を長押しします。</string>
   <!-- tuner -->
+  <string name="status_bar_icons">ステータスバーアイコン</string>
+  <string name="qs_equal_tile_title">等幅</string>
+  <string name="qs_equal_tile_summary">すべてのタイルを同じ大きさにします</string>
+  <string name="qs_settings">設定</string>
+  <string name="qs_tile_columns_title">列数</string>
+  <string name="qs_tile_columns_three">3</string>
+  <string name="qs_tile_columns_four">4</string>
+  <string name="qs_tile_bg_opacity_title">背景の透明度</string>
   <!-- NFC QS tile -->
   <!-- Music QS Tile -->
   <!-- Screen timeout QS tile -->
   <!-- Screen off QS tile -->
+  <!-- Sync QS tile -->
   <!-- Screenshot Crop & Share -->
 </resources>

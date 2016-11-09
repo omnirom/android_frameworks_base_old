@@ -20,17 +20,49 @@
 -->
 <resources xmlns:xliff="urn:oasis:names:tc:xliff:document:1.2">
   <!-- Reboot -->
+  <string name="global_action_reboot">Reboot</string>
+  <string name="global_action_reboot_more">Reboot\u2026</string>
+  <string name="global_action_reboot_sub">Sistem</string>
+  <string name="global_action_reboot_recovery">Pemulihan</string>
+  <string name="global_action_reboot_bootloader">Bootloader</string>
+  <string name="global_action_users">Pengguna\u2026</string>
+  <string name="global_action_screenshot">Tangkapan Layar</string>
+  <string name="global_action_screenrecord">Rekam Layar</string>
+  <string name="global_action_torch_on">Lampu ON</string>
+  <string name="global_action_torch_off">Lampu kilat OFF</string>
   <!-- advanced reboot to bootloader. -->
+  <string name="reboot_to_bootloader_title">Reboot bootloader</string>
+  <string name="reboot_to_bootloader_message">Rebooting\u2026</string>
   <!-- advanced reboot to recovery. -->
+  <string name="reboot_to_recovery_title">Reboot pemulihan</string>
+  <string name="reboot_to_recovery_message">Rebooting\u2026</string>
   <!-- advanced reboot system -->
+  <string name="reboot_system_title">Reboot sistem</string>
+  <string name="reboot_system_message">Rebooting\u2026</string>
+  <string name="dnd_mode_off">Mati</string>
+  <string name="dnd_mode_total_silence">Hening</string>
+  <string name="dnd_mode_alarms">Hanya alarm</string>
+  <string name="dnd_mode_important">Hanya prioritas</string>
   <!-- HW button mapping -->
+  <string name="app_killed_message">Aplikasi dimatikan</string>
+  <string name="hide_lock_to_app_dialog">Selalu memulai</string>
   <!-- Title of dialog to confirm rebooting into safe mode. [CHAR LIMIT=50] -->
+  <string name="reboot_title">Menghidupkan Ulang</string>
   <!-- Reboot Confirmation Dialog.  Message in the confirmation dialog
          when the user asks to reboot. [CHAR LIMIT=NONE] -->
+  <string name="reboot_confirm">Apakah Anda ingin untuk menghidupkan ulang?</string>
+  <string name="battery_style_text">Hanya teks</string>
+  <string name="battery_style_default">Standar</string>
+  <string name="battery_style_meter_horizontal">Bar horisontal</string>
+  <string name="battery_style_circle">Lingkaran</string>
+  <string name="battery_style_droid">Droid</string>
   <!-- Title of an application permission, listed so the user can choose whether they want to allow the application to do this. -->
   <!-- Description of an application permission, listed so the user can choose whether they want to allow the application to do this. -->
   <!-- Title of an application permission, listed so the user can choose whether they want the application to do this. -->
+  <string name="permlab_setKeyguardWallpaper">atur gambar latar kunci</string>
   <!-- Description of an application permission, listed so the user can choose whether they want to allow the application to do this. -->
+  <string name="permdesc_setKeyguardWallpaper">Izinkan aplikasu mengganti gambar latar kunci.</string>
   <!-- Notify use that they are in Lock-to-app in accessibility mode -->
   <!-- Vendor mismatched fingerprint warning [CHAR LIMIT=NONE] -->
+  <string name="system_error_vendorprint">Tampaknya vendor image anda mbelum diperbaharui. Harap install vendor image terbaru untuk perangkat Anda.</string>
 </resources>

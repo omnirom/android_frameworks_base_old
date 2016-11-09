@@ -18,16 +18,36 @@
 -->
 <resources xmlns:xliff="urn:oasis:names:tc:xliff:document:1.2">
   <!-- Screenrecord Notification Ticker -->
+  <string name="screenrecord_notif_ticker">화면이 녹화되고 있습니다</string>
   <!-- Screenrecord notification title -->
+  <string name="screenrecord_notif_title">화면 녹화</string>
   <!-- Screenrecord notification action: Stop -->
+  <string name="screenrecord_notif_stop">중지</string>
   <!-- Screenrecord notification action: show/hide pointer -->
+  <string name="screenrecord_notif_pointer_on">포인터 표시</string>
+  <string name="screenrecord_notif_pointer_off">포인터 숨기기</string>
   <!-- Screen record notification error title -->
+  <string name="screenrecord_notif_error">화면을 녹화할 수 없습니다</string>
   <!-- Battery Saver Dimss -->
+  <string name="battery_saver_dismiss_title">무시</string>
+  <string name="battery_saver_notification_action_text_short">끄기</string>
   <!-- Screen pinning dialog description when in accessibility mode. -->
+  <string name="screen_pinning_description_back">고정 해제할 때까지 이 화면만 보입니다. 해제하려면 뒤로 가기를 길게 누르세요.</string>
   <!-- tuner -->
+  <string name="status_bar_icons">상태 표시줄 아이콘</string>
+  <string name="qs_equal_tile_title">동일한 크기</string>
+  <string name="qs_equal_tile_summary">모든 타일에 동일한 크기 사용</string>
+  <string name="qs_settings">설정</string>
+  <string name="qs_tile_columns_title">열</string>
+  <string name="qs_tile_columns_three">3</string>
+  <string name="qs_tile_columns_four">4</string>
+  <string name="qs_tile_bg_opacity_title">배경 불투명도</string>
+  <string name="status_bar_silent">무음 모드</string>
   <!-- NFC QS tile -->
+  <string name="quick_settings_nfc_label">NFC</string>
   <!-- Music QS Tile -->
   <!-- Screen timeout QS tile -->
   <!-- Screen off QS tile -->
+  <!-- Sync QS tile -->
   <!-- Screenshot Crop & Share -->
 </resources>

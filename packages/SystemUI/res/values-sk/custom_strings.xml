@@ -54,6 +54,12 @@
   <string name="quick_settings_screen_timeout_detail_title">Časový limit obrazovky</string>
   <!-- Screen off QS tile -->
   <string name="quick_settings_screen_off">Vypnúť obrazovku</string>
+  <!-- Sync QS tile -->
+  <string name="quick_settings_sync_label">Synchronizácia</string>
+  <string name="accessibility_quick_settings_sync_off">Synchronizácia vypnutá</string>
+  <string name="accessibility_quick_settings_sync_on">Synch. zap.</string>
+  <string name="accessibility_quick_settings_sync_changed_off">Synchronizácia je vypnutá</string>
+  <string name="accessibility_quick_settings_sync_changed_on">Synchronizácia je zapnutá</string>
   <!-- Screenshot Crop & Share -->
   <string name="action_delete_success">Vymazané</string>
   <string name="action_delete_fault">Vymazanie zlyhalo</string>

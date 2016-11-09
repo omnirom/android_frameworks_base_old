@@ -20,13 +20,28 @@
 -->
 <resources xmlns:xliff="urn:oasis:names:tc:xliff:document:1.2">
   <!-- Reboot -->
+  <string name="global_action_reboot">再起動</string>
+  <string name="global_action_reboot_more">再起動\u2026</string>
+  <string name="global_action_reboot_sub">システム</string>
+  <string name="global_action_reboot_recovery">リカバリモード</string>
+  <string name="global_action_reboot_bootloader">ブートローダー</string>
   <!-- advanced reboot to bootloader. -->
+  <string name="reboot_to_bootloader_title">ブートローダーに再起動</string>
+  <string name="reboot_to_bootloader_message">再起動しています\u2026</string>
   <!-- advanced reboot to recovery. -->
+  <string name="reboot_to_recovery_title">リカバリモードに再起動</string>
+  <string name="reboot_to_recovery_message">再起動しています\u2026</string>
   <!-- advanced reboot system -->
+  <string name="reboot_system_title">再起動</string>
+  <string name="reboot_system_message">再起動しています\u2026</string>
   <!-- HW button mapping -->
+  <string name="app_killed_message">アプリケーションを強制停止しました</string>
+  <string name="hide_lock_to_app_dialog">常に起動</string>
   <!-- Title of dialog to confirm rebooting into safe mode. [CHAR LIMIT=50] -->
+  <string name="reboot_title">再起動</string>
   <!-- Reboot Confirmation Dialog.  Message in the confirmation dialog
          when the user asks to reboot. [CHAR LIMIT=NONE] -->
+  <string name="reboot_confirm">再起動しますか？</string>
   <!-- Title of an application permission, listed so the user can choose whether they want to allow the application to do this. -->
   <!-- Description of an application permission, listed so the user can choose whether they want to allow the application to do this. -->
   <!-- Title of an application permission, listed so the user can choose whether they want the application to do this. -->

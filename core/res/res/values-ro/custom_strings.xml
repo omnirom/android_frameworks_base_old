@@ -20,17 +20,53 @@
 -->
 <resources xmlns:xliff="urn:oasis:names:tc:xliff:document:1.2">
   <!-- Reboot -->
+  <string name="global_action_reboot">Repornire</string>
+  <string name="global_action_reboot_more">Repornire\u2026</string>
+  <string name="global_action_reboot_sub">Sistem</string>
+  <string name="global_action_reboot_recovery">Recuperare</string>
+  <string name="global_action_reboot_bootloader">Bootloader</string>
+  <string name="global_action_users">Utilizatori\u2026</string>
+  <string name="global_action_screenshot">Captură ecran</string>
+  <string name="global_action_screenrecord">Inregistrare ecran</string>
+  <string name="global_action_torch_on">Lanterna este pornita</string>
+  <string name="global_action_torch_off">Lanterna este oprita</string>
+  <string name="global_actions_toggle_torch_mode">Lanterna</string>
   <!-- advanced reboot to bootloader. -->
+  <string name="reboot_to_bootloader_title">Repornire în bootloader</string>
+  <string name="reboot_to_bootloader_message">Repornire\u2026</string>
   <!-- advanced reboot to recovery. -->
+  <string name="reboot_to_recovery_title">Repornire în recovery</string>
+  <string name="reboot_to_recovery_message">Repornire\u2026</string>
   <!-- advanced reboot system -->
+  <string name="reboot_system_title">Repornire sistem</string>
+  <string name="reboot_system_message">Repornire\u2026</string>
+  <string name="dnd_mode_off">Oprit</string>
+  <string name="dnd_mode_total_silence">Liniște totală</string>
+  <string name="dnd_mode_alarms">Numai alarme</string>
+  <string name="dnd_mode_important">Numai priorități</string>
   <!-- HW button mapping -->
+  <string name="app_killed_message">Aplicație oprită</string>
+  <string name="hide_lock_to_app_dialog">Pornește mereu</string>
   <!-- Title of dialog to confirm rebooting into safe mode. [CHAR LIMIT=50] -->
+  <string name="reboot_title">Repornire</string>
   <!-- Reboot Confirmation Dialog.  Message in the confirmation dialog
          when the user asks to reboot. [CHAR LIMIT=NONE] -->
+  <string name="reboot_confirm">Dorești să repornești dispozitivul?</string>
+  <string name="battery_style_text">Doar text</string>
+  <string name="battery_style_default">Prestabilit</string>
+  <string name="battery_style_meter_horizontal">Bară orizontală</string>
+  <string name="battery_style_circle">Cerc</string>
+  <string name="battery_style_droid">Droid</string>
   <!-- Title of an application permission, listed so the user can choose whether they want to allow the application to do this. -->
+  <string name="permlab_fakePackageSignature">Modifice semnătura pachetului</string>
   <!-- Description of an application permission, listed so the user can choose whether they want to allow the application to do this. -->
+  <string name="permdesc_fakePackageSignature">Permite aplicației să pretindă că e altă aplicație. Aplicațiile malițioase pot să folosească această permisiune ca să obțină acces la datele private ale aplicațiilor. Acordă această permisiune cu precauție!</string>
   <!-- Title of an application permission, listed so the user can choose whether they want the application to do this. -->
+  <string name="permlab_setKeyguardWallpaper">stabilească imaginea de fundal a kerguard-ului</string>
   <!-- Description of an application permission, listed so the user can choose whether they want to allow the application to do this. -->
+  <string name="permdesc_setKeyguardWallpaper">Permite aplicației să schimbe imaginea de fundal a ecranului de blocare.</string>
   <!-- Notify use that they are in Lock-to-app in accessibility mode -->
+  <string name="lock_to_app_toast_back">Pentru a anula fixarea acestui ecran, țineți apăsat butonul Înapoi.</string>
   <!-- Vendor mismatched fingerprint warning [CHAR LIMIT=NONE] -->
+  <string name="system_error_vendorprint">Se pare că imaginea furnizorului utilizată de dumneavoastră este învechită. Vă rugăm să instalați ultima versiune pentru dispozitivul dumneavoastră.</string>
 </resources>

@@ -32,5 +32,11 @@
     <item quantity="other">%d ficheiros foram colados. O upload pode estar a concluir-se em segundo plano.</item>
   </plurals>
   <!-- Text show in the progress dialog while files are being copied -->
+  <string name="copy_in_progress">A copiar...</string>
   <!-- Text show in the progress dialog while files are being deleted -->
+  <string name="delete_in_progress">A eliminar...</string>
+  <plurals name="dialog_delete_confirm_message">
+    <item quantity="one">Este ficheiro será permanentemente eliminado!</item>
+    <item quantity="other">Estes ficheiros serão permanentemente eliminados!</item>
+  </plurals>
 </resources>

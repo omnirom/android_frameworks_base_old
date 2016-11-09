@@ -18,16 +18,33 @@
 -->
 <resources xmlns:xliff="urn:oasis:names:tc:xliff:document:1.2">
   <!-- Screenrecord Notification Ticker -->
+  <string name="screenrecord_notif_ticker">Layar sedang direkam</string>
   <!-- Screenrecord notification title -->
+  <string name="screenrecord_notif_title">Merekam layar</string>
   <!-- Screenrecord notification action: Stop -->
+  <string name="screenrecord_notif_stop">Berhenti</string>
   <!-- Screenrecord notification action: show/hide pointer -->
+  <string name="screenrecord_notif_pointer_on">Tampilkan pointer</string>
+  <string name="screenrecord_notif_pointer_off">Sembunyikan pointer</string>
   <!-- Screen record notification error title -->
+  <string name="screenrecord_notif_error">Tidak dapat merekam layar</string>
   <!-- Battery Saver Dimss -->
+  <string name="battery_saver_dismiss_title">Abaikan</string>
+  <string name="battery_saver_notification_action_text_short">Matikan</string>
   <!-- Screen pinning dialog description when in accessibility mode. -->
   <!-- tuner -->
+  <string name="status_bar_icons">Ikon status bar</string>
+  <string name="qs_equal_tile_title">Ukuran yang sama</string>
+  <string name="qs_equal_tile_summary">Gunakan ukuran yang sama untuk semua kotak</string>
+  <string name="qs_settings">Pengaturan</string>
+  <string name="qs_tile_columns_title">Kolom</string>
+  <string name="qs_tile_columns_three">3</string>
+  <string name="qs_tile_columns_four">4</string>
+  <string name="qs_tile_bg_opacity_title">Transparansi Latar Belakang</string>
   <!-- NFC QS tile -->
   <!-- Music QS Tile -->
   <!-- Screen timeout QS tile -->
   <!-- Screen off QS tile -->
+  <!-- Sync QS tile -->
   <!-- Screenshot Crop & Share -->
 </resources>

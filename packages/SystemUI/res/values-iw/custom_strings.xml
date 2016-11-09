@@ -18,16 +18,34 @@
 -->
 <resources xmlns:xliff="urn:oasis:names:tc:xliff:document:1.2">
   <!-- Screenrecord Notification Ticker -->
+  <string name="screenrecord_notif_ticker">המסך מוקלט</string>
   <!-- Screenrecord notification title -->
+  <string name="screenrecord_notif_title">מקליט מסך</string>
   <!-- Screenrecord notification action: Stop -->
+  <string name="screenrecord_notif_stop">עצור</string>
   <!-- Screenrecord notification action: show/hide pointer -->
+  <string name="screenrecord_notif_pointer_on">הצג מצביע</string>
+  <string name="screenrecord_notif_pointer_off">הסתר מצביע</string>
   <!-- Screen record notification error title -->
+  <string name="screenrecord_notif_error">לא ניתן להקליט את המסך</string>
   <!-- Battery Saver Dimss -->
+  <string name="battery_saver_dismiss_title">התעלם</string>
+  <string name="battery_saver_notification_action_text_short">כבה</string>
   <!-- Screen pinning dialog description when in accessibility mode. -->
+  <string name="screen_pinning_description_back">פעולה זו שומרת את זה בתצוגה עד שאתה תבטל הצמדה. לחץ והחזק על מנת לבטל הצמדה.</string>
   <!-- tuner -->
+  <string name="status_bar_icons">סמלי שורת מצב</string>
+  <string name="qs_equal_tile_title">גודל שווה</string>
+  <string name="qs_equal_tile_summary">השתמש באותו גודל עבור כל האריחים</string>
+  <string name="qs_settings">הגדרות</string>
+  <string name="qs_tile_columns_title">טורים</string>
+  <string name="qs_tile_columns_three">3</string>
+  <string name="qs_tile_columns_four">4</string>
+  <string name="qs_tile_bg_opacity_title">אטימות רקע</string>
   <!-- NFC QS tile -->
   <!-- Music QS Tile -->
   <!-- Screen timeout QS tile -->
   <!-- Screen off QS tile -->
+  <!-- Sync QS tile -->
   <!-- Screenshot Crop & Share -->
 </resources>

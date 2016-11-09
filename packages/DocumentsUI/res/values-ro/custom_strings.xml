@@ -16,10 +16,30 @@
 -->
 <resources xmlns:xliff="urn:oasis:names:tc:xliff:document:1.2">
   <!-- Action bar title when the app is in standalone (file manager) mode [CHAR LIMIT=32] -->
+  <string name="title_standalone">Fișiere</string>
   <!-- Toast shown after successfully deleting files -->
+  <string name="toast_success_delete">Fișiere au fost șterse</string>
   <!-- Title of the Delete confirmation dialog -->
+  <string name="dialog_delete_confirm_title">Ești sigur că vrei să ștergi fișierele?</string>
   <!-- Text shown in a toast when the user copies files -->
+  <plurals name="files_copied">
+    <item quantity="one">Acest fișier a fost pus în clipboard</item>
+    <item quantity="few">%d fișiere au fost puse în clipboard</item>
+    <item quantity="other">%d fișiere au fost puse în clipboard</item>
+  </plurals>
   <!-- Text shown in a toast when the user pastes files -->
+  <plurals name="files_pasted">
+    <item quantity="one">Acest fișier a fost lipit. Încărcarea se va realiza pe fundal.</item>
+    <item quantity="few">%d fișiere au fost lipite. Încărcarea se va realiza pe fundal.</item>
+    <item quantity="other">%d fișiere au fost lipite. Încărcarea se va realiza pe fundal.</item>
+  </plurals>
   <!-- Text show in the progress dialog while files are being copied -->
+  <string name="copy_in_progress">Copiere...</string>
   <!-- Text show in the progress dialog while files are being deleted -->
+  <string name="delete_in_progress">Ștergere...</string>
+  <plurals name="dialog_delete_confirm_message">
+    <item quantity="one">Acest fișier va fi șters permanent!</item>
+    <item quantity="few">Acestă acțiune va șterge cele %d fișiere selectate!</item>
+    <item quantity="other">Acestă acțiune va șterge cele %d fișiere selectate!</item>
+  </plurals>
 </resources>

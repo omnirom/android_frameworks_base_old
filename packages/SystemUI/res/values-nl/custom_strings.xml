@@ -35,9 +35,35 @@
   <string name="screen_pinning_description_back">Dit zorgt ervoor dat het scherm blijft staan tot u hem weer losmaakt. Druk en houd terug in om hem los te maken.</string>
   <!-- tuner -->
   <string name="status_bar_icons">Statusbar icoontjes</string>
+  <string name="qs_equal_tile_title">Gelijke grootte</string>
+  <string name="qs_equal_tile_summary">Gebruik dezelfde grootte voor alle tegels</string>
+  <string name="qs_settings">Instellingen</string>
+  <string name="qs_tile_columns_title">Kolommen</string>
+  <string name="qs_tile_columns_three">3</string>
+  <string name="qs_tile_columns_four">4</string>
+  <string name="qs_tile_bg_opacity_title">Achtergronddekking</string>
+  <string name="status_bar_silent">Stille modus</string>
   <!-- NFC QS tile -->
+  <string name="quick_settings_nfc_label">NFC</string>
   <!-- Music QS Tile -->
+  <string name="quick_settings_music_label">Muziek</string>
+  <string name="quick_settings_music_play">Afspelen</string>
+  <string name="quick_settings_music_pause">Pauzeren</string>
   <!-- Screen timeout QS tile -->
+  <string name="quick_settings_timeout_label">Time-out</string>
+  <string name="quick_settings_screen_timeout_detail_title">Scherm time-out</string>
   <!-- Screen off QS tile -->
+  <string name="quick_settings_screen_off">Scherm uit</string>
+  <!-- Sync QS tile -->
+  <string name="quick_settings_sync_label">Synchroniseer</string>
+  <string name="accessibility_quick_settings_sync_off">Sync uit</string>
+  <string name="accessibility_quick_settings_sync_on">Sync aan</string>
+  <string name="accessibility_quick_settings_sync_changed_off">Sync uitgeschakeld</string>
+  <string name="accessibility_quick_settings_sync_changed_on">Sync ingeschakeld</string>
   <!-- Screenshot Crop & Share -->
+  <string name="action_delete_success">Verwijderd</string>
+  <string name="action_delete_fault">Verwijderen is mislukt</string>
+  <string name="action_save_success">Opgeslagen</string>
+  <string name="action_save_fault">Opslaan is mislukt</string>
+  <string name="action_edit">Bewerken</string>
 </resources>

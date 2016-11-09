@@ -20,17 +20,33 @@
 -->
 <resources xmlns:xliff="urn:oasis:names:tc:xliff:document:1.2">
   <!-- Reboot -->
+  <string name="global_action_reboot">重新啟動</string>
+  <string name="global_action_reboot_more">重新啟動\u2026</string>
+  <string name="global_action_reboot_sub">系統</string>
+  <string name="global_action_reboot_recovery">恢復模式</string>
   <!-- advanced reboot to bootloader. -->
+  <string name="reboot_to_bootloader_message">重新啟動中\u2026</string>
   <!-- advanced reboot to recovery. -->
+  <string name="reboot_to_recovery_message">重新啟動中\u2026</string>
   <!-- advanced reboot system -->
+  <string name="dnd_mode_off">關閉</string>
+  <string name="dnd_mode_total_silence">完全靜音</string>
   <!-- HW button mapping -->
+  <string name="app_killed_message">應用程式已終止</string>
   <!-- Title of dialog to confirm rebooting into safe mode. [CHAR LIMIT=50] -->
+  <string name="reboot_title">重新啟動</string>
   <!-- Reboot Confirmation Dialog.  Message in the confirmation dialog
          when the user asks to reboot. [CHAR LIMIT=NONE] -->
+  <string name="reboot_confirm">你想要重新開機嗎?</string>
+  <string name="battery_style_default">預設</string>
   <!-- Title of an application permission, listed so the user can choose whether they want to allow the application to do this. -->
   <!-- Description of an application permission, listed so the user can choose whether they want to allow the application to do this. -->
+  <string name="permdesc_fakePackageSignature">允許應用程式假裝為另一過一個不同的應用程式。惡意應用程式可能藉此取得應用程式的資料。請小心授予此許可權!</string>
   <!-- Title of an application permission, listed so the user can choose whether they want the application to do this. -->
+  <string name="permlab_setKeyguardWallpaper">設定鍵盤鎖牆紙</string>
   <!-- Description of an application permission, listed so the user can choose whether they want to allow the application to do this. -->
+  <string name="permdesc_setKeyguardWallpaper">允許應用程式更改鎖定畫面牆紙。</string>
   <!-- Notify use that they are in Lock-to-app in accessibility mode -->
   <!-- Vendor mismatched fingerprint warning [CHAR LIMIT=NONE] -->
+  <string name="system_error_vendorprint">看來你的供應商圖像可能已過時。請刷入供應商最新的圖像。</string>
 </resources>

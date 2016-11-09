@@ -20,17 +20,53 @@
 -->
 <resources xmlns:xliff="urn:oasis:names:tc:xliff:document:1.2">
   <!-- Reboot -->
+  <string name="global_action_reboot">다시 시작</string>
+  <string name="global_action_reboot_more">다시 시작\u2026</string>
+  <string name="global_action_reboot_sub">시스템</string>
+  <string name="global_action_reboot_recovery">복구 모드</string>
+  <string name="global_action_reboot_bootloader">부트로더</string>
+  <string name="global_action_users">사용자\u2026</string>
+  <string name="global_action_screenshot">스크린샷</string>
+  <string name="global_action_screenrecord">화면녹화</string>
+  <string name="global_action_torch_on">플래시가 켜졌습니다</string>
+  <string name="global_action_torch_off">플래시가 꺼졌습니다</string>
+  <string name="global_actions_toggle_torch_mode">플래쉬라이트</string>
   <!-- advanced reboot to bootloader. -->
+  <string name="reboot_to_bootloader_title">부트로더로 다시 시작</string>
+  <string name="reboot_to_bootloader_message">다시 시작하는 중\u2026</string>
   <!-- advanced reboot to recovery. -->
+  <string name="reboot_to_recovery_title">복구 모드로 다시 시작</string>
+  <string name="reboot_to_recovery_message">다시 시작하는 중\u2026</string>
   <!-- advanced reboot system -->
+  <string name="reboot_system_title">시스템 다시 시작</string>
+  <string name="reboot_system_message">다시 시작하는 중\u2026</string>
+  <string name="dnd_mode_off">꺼짐</string>
+  <string name="dnd_mode_total_silence">모두 음소거</string>
+  <string name="dnd_mode_alarms">알람만</string>
+  <string name="dnd_mode_important">우선 순위만</string>
   <!-- HW button mapping -->
+  <string name="app_killed_message">앱이 종료되었습니다</string>
+  <string name="hide_lock_to_app_dialog">항상 시작</string>
   <!-- Title of dialog to confirm rebooting into safe mode. [CHAR LIMIT=50] -->
+  <string name="reboot_title">다시 시작</string>
   <!-- Reboot Confirmation Dialog.  Message in the confirmation dialog
          when the user asks to reboot. [CHAR LIMIT=NONE] -->
+  <string name="reboot_confirm">다시 시작하겠습니까?</string>
+  <string name="battery_style_text">문자만</string>
+  <string name="battery_style_default">기본값</string>
+  <string name="battery_style_meter_horizontal">가로 막대</string>
+  <string name="battery_style_circle">원형 아이콘</string>
+  <string name="battery_style_droid">드로이드</string>
   <!-- Title of an application permission, listed so the user can choose whether they want to allow the application to do this. -->
+  <string name="permlab_fakePackageSignature">패키지 서명 속이기</string>
   <!-- Description of an application permission, listed so the user can choose whether they want to allow the application to do this. -->
+  <string name="permdesc_fakePackageSignature">응용프로그램이 다른 응용프로그램인 척 하도록 허용합니다. 악의적인 응용 프로그램이 개인 응용 프로그램 데이타에 접근할 수 있습니다.</string>
   <!-- Title of an application permission, listed so the user can choose whether they want the application to do this. -->
+  <string name="permlab_setKeyguardWallpaper">잠금 화면 배경 설정</string>
   <!-- Description of an application permission, listed so the user can choose whether they want to allow the application to do this. -->
+  <string name="permdesc_setKeyguardWallpaper">앱이 잠금 화면 배경을 바꿀 수 있도록 허용합니다.</string>
   <!-- Notify use that they are in Lock-to-app in accessibility mode -->
+  <string name="lock_to_app_toast_back">화면 고정을 해제하려면 \'뒤로\'를 길게 누르십시오.</string>
   <!-- Vendor mismatched fingerprint warning [CHAR LIMIT=NONE] -->
+  <string name="system_error_vendorprint">이 공급 업체의 이미지가 오래되었을 수 있습니다. 최신 공급 업체 이미지를 장치에 플래싱하세요.</string>
 </resources>

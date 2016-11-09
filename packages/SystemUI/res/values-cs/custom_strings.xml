@@ -46,7 +46,24 @@
   <!-- NFC QS tile -->
   <string name="quick_settings_nfc_label">NFC</string>
   <!-- Music QS Tile -->
+  <string name="quick_settings_music_label">Hudba</string>
+  <string name="quick_settings_music_play">Přehrát</string>
+  <string name="quick_settings_music_pause">Pozastavit</string>
   <!-- Screen timeout QS tile -->
+  <string name="quick_settings_timeout_label">Časový limit</string>
+  <string name="quick_settings_screen_timeout_detail_title">Čas do vypnutí obrazovky</string>
   <!-- Screen off QS tile -->
+  <string name="quick_settings_screen_off">Vypnutá obrazovka</string>
+  <!-- Sync QS tile -->
+  <string name="quick_settings_sync_label">Synchronizace</string>
+  <string name="accessibility_quick_settings_sync_off">Synchronizace vyp.</string>
+  <string name="accessibility_quick_settings_sync_on">Synchronizace zap.</string>
+  <string name="accessibility_quick_settings_sync_changed_off">Synchronizace vypnuta</string>
+  <string name="accessibility_quick_settings_sync_changed_on">Synchronizace zapnuta</string>
   <!-- Screenshot Crop & Share -->
+  <string name="action_delete_success">Odstraněno</string>
+  <string name="action_delete_fault">Odstranění neúspěšné</string>
+  <string name="action_save_success">Uloženo</string>
+  <string name="action_save_fault">Ukládání neúspěšné</string>
+  <string name="action_edit">Upravit</string>
 </resources>

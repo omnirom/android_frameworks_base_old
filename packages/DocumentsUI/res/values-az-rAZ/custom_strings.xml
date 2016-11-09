@@ -16,24 +16,10 @@
 -->
 <resources xmlns:xliff="urn:oasis:names:tc:xliff:document:1.2">
   <!-- Action bar title when the app is in standalone (file manager) mode [CHAR LIMIT=32] -->
-  <string name="title_standalone">ファイル</string>
   <!-- Toast shown after successfully deleting files -->
-  <string name="toast_success_delete">ファイルを削除しました</string>
   <!-- Title of the Delete confirmation dialog -->
-  <string name="dialog_delete_confirm_title">ファイルを削除しますか?</string>
   <!-- Text shown in a toast when the user copies files -->
-  <plurals name="files_copied">
-    <item quantity="other">%d個のファイルをクリップボードにコピーしました</item>
-  </plurals>
   <!-- Text shown in a toast when the user pastes files -->
-  <plurals name="files_pasted">
-    <item quantity="other">%d個のファイルを貼り付けています。アップロードはバックグラウンドで終了するかもしれません。</item>
-  </plurals>
   <!-- Text show in the progress dialog while files are being copied -->
-  <string name="copy_in_progress">コピー中...</string>
   <!-- Text show in the progress dialog while files are being deleted -->
-  <string name="delete_in_progress">削除中...</string>
-  <plurals name="dialog_delete_confirm_message">
-    <item quantity="other">選択されている%d個のファイルを完全に削除します!</item>
-  </plurals>
 </resources>

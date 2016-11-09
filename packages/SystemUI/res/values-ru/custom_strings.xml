@@ -33,9 +33,36 @@
   <string name="battery_saver_notification_action_text_short">Выключить</string>
   <!-- Screen pinning dialog description when in accessibility mode. -->
   <!-- tuner -->
+  <string name="status_bar_icons">Значки строки состояния</string>
+  <string name="qs_equal_tile_title">Одинаковый размер</string>
+  <string name="qs_equal_tile_summary">Одинаковый размер для всех плиток</string>
+  <string name="qs_settings">Настройки</string>
+  <string name="qs_tile_columns_title">Количество столбцов</string>
+  <string name="qs_tile_columns_three">3</string>
+  <string name="qs_tile_columns_four">4</string>
+  <string name="qs_tile_bg_opacity_title">Прозрачность фона</string>
+  <string name="status_bar_silent">Без звука</string>
   <!-- NFC QS tile -->
+  <string name="quick_settings_nfc_label">NFC</string>
   <!-- Music QS Tile -->
+  <string name="quick_settings_music_label">Музыка</string>
+  <string name="quick_settings_music_play">Играть</string>
+  <string name="quick_settings_music_pause">Пауза</string>
   <!-- Screen timeout QS tile -->
+  <string name="quick_settings_timeout_label">Тайм-аут</string>
+  <string name="quick_settings_screen_timeout_detail_title">Задержка выкл. экрана</string>
   <!-- Screen off QS tile -->
+  <string name="quick_settings_screen_off">Выключить экран</string>
+  <!-- Sync QS tile -->
+  <string name="quick_settings_sync_label">Синхронизация</string>
+  <string name="accessibility_quick_settings_sync_off">Синхр. выкл</string>
+  <string name="accessibility_quick_settings_sync_on">Синхр. вкл</string>
+  <string name="accessibility_quick_settings_sync_changed_off">Синхронизация была отключена</string>
+  <string name="accessibility_quick_settings_sync_changed_on">Синхронизация была включена</string>
   <!-- Screenshot Crop & Share -->
+  <string name="action_delete_success">Удалено</string>
+  <string name="action_delete_fault">Удаление не произошло</string>
+  <string name="action_save_success">Сохранено</string>
+  <string name="action_save_fault">Не сохранено</string>
+  <string name="action_edit">Редактировать</string>
 </resources>

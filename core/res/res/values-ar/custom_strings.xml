@@ -20,17 +20,48 @@
 -->
 <resources xmlns:xliff="urn:oasis:names:tc:xliff:document:1.2">
   <!-- Reboot -->
+  <string name="global_action_reboot">إعادة التشغيل</string>
+  <string name="global_action_reboot_more">إعادة تشغيل\u2026</string>
+  <string name="global_action_reboot_sub">النظام</string>
+  <string name="global_action_reboot_recovery">استرداد</string>
+  <string name="global_action_reboot_bootloader">محمل الإقلاع</string>
+  <string name="global_action_users">المستخدمون\u2026</string>
   <!-- advanced reboot to bootloader. -->
+  <string name="reboot_to_bootloader_title">محمل الإقلاع</string>
+  <string name="reboot_to_bootloader_message">يتم اعادة التشغيل\u2026</string>
   <!-- advanced reboot to recovery. -->
+  <string name="reboot_to_recovery_title">إعادة التشغيل لوضع الاسترداد</string>
+  <string name="reboot_to_recovery_message">يتم اعادة التشغيل\u2026</string>
   <!-- advanced reboot system -->
+  <string name="reboot_system_title">إعادة التشغيل</string>
+  <string name="reboot_system_message">يتم اعادة التشغيل\u2026</string>
+  <string name="dnd_mode_off">غير مشغّل</string>
+  <string name="dnd_mode_total_silence">صمت تام</string>
+  <string name="dnd_mode_alarms">التنبيهات فقط</string>
+  <string name="dnd_mode_important">الأولوية فقط</string>
   <!-- HW button mapping -->
+  <string name="app_killed_message">تمّ ايقاف التطبيق</string>
+  <string name="hide_lock_to_app_dialog">إبدأ دائماً</string>
   <!-- Title of dialog to confirm rebooting into safe mode. [CHAR LIMIT=50] -->
+  <string name="reboot_title">إعادة التشغيل</string>
   <!-- Reboot Confirmation Dialog.  Message in the confirmation dialog
          when the user asks to reboot. [CHAR LIMIT=NONE] -->
+  <string name="reboot_confirm">هل تريد إعادة التشغيل ؟</string>
+  <string name="battery_style_text">نص فقط</string>
+  <string name="battery_style_default">الافتراضية</string>
+  <string name="battery_style_meter_horizontal">عمود أفقي</string>
+  <string name="battery_style_circle">دائرة</string>
+  <string name="battery_style_droid">الروبوت</string>
   <!-- Title of an application permission, listed so the user can choose whether they want to allow the application to do this. -->
+  <string name="permlab_fakePackageSignature">تزييف توقيع الحزمة</string>
   <!-- Description of an application permission, listed so the user can choose whether they want to allow the application to do this. -->
+  <string name="permdesc_fakePackageSignature">يسمح لتطبيق بالتظاهر بأن يكون تطبيق آخر. التطبيقات الخبيثة والملغمة يمكن أن تستعمل هذه الخاصية للوصول إلى البيانات الخاصة. إمنح هذا الإذن بحذر مطلق!</string>
   <!-- Title of an application permission, listed so the user can choose whether they want the application to do this. -->
+  <string name="permlab_setKeyguardWallpaper">تعيين خلفية الشاشة</string>
   <!-- Description of an application permission, listed so the user can choose whether they want to allow the application to do this. -->
+  <string name="permdesc_setKeyguardWallpaper">السماح لتطبيق بتغيير خلفية شاشة القفل.</string>
   <!-- Notify use that they are in Lock-to-app in accessibility mode -->
+  <string name="lock_to_app_toast_back">لإزالة تثبيت هذه الشاشة، اضغط باستمرار على زر الخلف.</string>
   <!-- Vendor mismatched fingerprint warning [CHAR LIMIT=NONE] -->
+  <string name="system_error_vendorprint">يبدو أن صورة المورد الخاص بك قديمة. يرجى تسطيب آخر صورة مورد لجهازك.</string>
 </resources>

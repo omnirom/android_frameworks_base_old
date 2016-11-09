@@ -54,6 +54,12 @@
   <string name="quick_settings_screen_timeout_detail_title">Časovna omejitev zaslona</string>
   <!-- Screen off QS tile -->
   <string name="quick_settings_screen_off">Izklopi zaslon</string>
+  <!-- Sync QS tile -->
+  <string name="quick_settings_sync_label">Uskladi</string>
+  <string name="accessibility_quick_settings_sync_off">Uskl. izk.</string>
+  <string name="accessibility_quick_settings_sync_on">Uskl. vkl.</string>
+  <string name="accessibility_quick_settings_sync_changed_off">Usklajevanje izklopljeno</string>
+  <string name="accessibility_quick_settings_sync_changed_on">Usklajevanje vklopljeno</string>
   <!-- Screenshot Crop & Share -->
   <string name="action_delete_success">Izbrisano</string>
   <string name="action_delete_fault">Brisanje ni bilo uspešno</string>

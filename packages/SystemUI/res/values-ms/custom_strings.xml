@@ -18,16 +18,27 @@
 -->
 <resources xmlns:xliff="urn:oasis:names:tc:xliff:document:1.2">
   <!-- Screenrecord Notification Ticker -->
+  <string name="screenrecord_notif_ticker">Skrin sedang dirakam</string>
   <!-- Screenrecord notification title -->
+  <string name="screenrecord_notif_title">Merakam skrin</string>
   <!-- Screenrecord notification action: Stop -->
+  <string name="screenrecord_notif_stop">Henti</string>
   <!-- Screenrecord notification action: show/hide pointer -->
+  <string name="screenrecord_notif_pointer_on">Tunjukkan penuding</string>
+  <string name="screenrecord_notif_pointer_off">Sembunyikan penuding</string>
   <!-- Screen record notification error title -->
+  <string name="screenrecord_notif_error">Tidak boleh merakam skrin</string>
   <!-- Battery Saver Dimss -->
+  <string name="battery_saver_dismiss_title">Ketepikan</string>
+  <string name="battery_saver_notification_action_text_short">Tutup</string>
   <!-- Screen pinning dialog description when in accessibility mode. -->
+  <string name="screen_pinning_description_back">Hal ini membuat ia dalam pandangan sehingga anda membuka pin. Sentuh dan tahan Kembali untuk menyahpin.</string>
   <!-- tuner -->
+  <string name="status_bar_icons">Ikon bar status</string>
   <!-- NFC QS tile -->
   <!-- Music QS Tile -->
   <!-- Screen timeout QS tile -->
   <!-- Screen off QS tile -->
+  <!-- Sync QS tile -->
   <!-- Screenshot Crop & Share -->
 </resources>

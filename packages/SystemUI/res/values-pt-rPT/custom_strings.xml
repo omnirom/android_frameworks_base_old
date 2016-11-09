@@ -27,12 +27,27 @@
   <string name="screenrecord_notif_pointer_on">Mostrar o ponteiro</string>
   <string name="screenrecord_notif_pointer_off">Ocultar o ponteiro</string>
   <!-- Screen record notification error title -->
+  <string name="screenrecord_notif_error">Não é possível gravar o ecrã</string>
   <!-- Battery Saver Dimss -->
+  <string name="battery_saver_dismiss_title">Sair</string>
+  <string name="battery_saver_notification_action_text_short">Desligar</string>
   <!-- Screen pinning dialog description when in accessibility mode. -->
+  <string name="screen_pinning_description_back">Isto mantém o item afixado até que o desafixe. Toque mantenha pressionado para desafixar.</string>
   <!-- tuner -->
+  <string name="status_bar_icons">Ícones da barra de estado</string>
+  <string name="qs_equal_tile_title">Tamanho igual</string>
+  <string name="qs_equal_tile_summary">Usar o mesmo tamanho para os mosaicos</string>
+  <string name="qs_settings">Configurações</string>
+  <string name="qs_tile_columns_title">Colunas</string>
+  <string name="qs_tile_columns_three">3</string>
+  <string name="qs_tile_columns_four">4</string>
+  <string name="qs_tile_bg_opacity_title">Opacidade do fundo</string>
+  <string name="status_bar_silent">Modo silencioso</string>
   <!-- NFC QS tile -->
+  <string name="quick_settings_nfc_label">NFC</string>
   <!-- Music QS Tile -->
   <!-- Screen timeout QS tile -->
   <!-- Screen off QS tile -->
+  <!-- Sync QS tile -->
   <!-- Screenshot Crop & Share -->
 </resources>

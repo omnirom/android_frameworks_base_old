@@ -20,17 +20,51 @@
 -->
 <resources xmlns:xliff="urn:oasis:names:tc:xliff:document:1.2">
   <!-- Reboot -->
+  <string name="global_action_reboot">הפעלה מחדש</string>
+  <string name="global_action_reboot_more">הפעלה מחדש\u2026</string>
+  <string name="global_action_reboot_sub">מערכת</string>
+  <string name="global_action_reboot_recovery">שחזור</string>
+  <string name="global_action_reboot_bootloader">Bootloader</string>
+  <string name="global_action_screenshot">צילום מסך</string>
+  <string name="global_action_screenrecord">הקלטת מסך</string>
+  <string name="global_action_torch_on">הפנס דלוק</string>
+  <string name="global_action_torch_off">הפנס כבוי</string>
+  <string name="global_actions_toggle_torch_mode">פנס</string>
   <!-- advanced reboot to bootloader. -->
+  <string name="reboot_to_bootloader_title">הפעלת bootloader מחדש</string>
+  <string name="reboot_to_bootloader_message">מפעיל מחדש\u2026</string>
   <!-- advanced reboot to recovery. -->
+  <string name="reboot_to_recovery_title">הפעל מחדש את השחזור</string>
+  <string name="reboot_to_recovery_message">מפעיל מחדש\u2026</string>
   <!-- advanced reboot system -->
+  <string name="reboot_system_title">הפעלת מערכת מחדש</string>
+  <string name="reboot_system_message">מפעיל מחדש\u2026</string>
+  <string name="dnd_mode_off">כבוי</string>
+  <string name="dnd_mode_total_silence">מושתק לחלוטין</string>
+  <string name="dnd_mode_alarms">שעונים מעוררים בלבד</string>
+  <string name="dnd_mode_important">עדיפות בלבד</string>
   <!-- HW button mapping -->
+  <string name="app_killed_message">היישום נסגר</string>
+  <string name="hide_lock_to_app_dialog">התחל תמיד</string>
   <!-- Title of dialog to confirm rebooting into safe mode. [CHAR LIMIT=50] -->
+  <string name="reboot_title">הפעל מחדש במצב בטוח</string>
   <!-- Reboot Confirmation Dialog.  Message in the confirmation dialog
          when the user asks to reboot. [CHAR LIMIT=NONE] -->
+  <string name="reboot_confirm">האם ברצונך להפעיל מחדש?</string>
+  <string name="battery_style_text">טקסט בלבד</string>
+  <string name="battery_style_default">ברירת מחדל</string>
+  <string name="battery_style_meter_horizontal">שורה מאוזנת</string>
+  <string name="battery_style_circle">עיגול</string>
   <!-- Title of an application permission, listed so the user can choose whether they want to allow the application to do this. -->
+  <string name="permlab_fakePackageSignature">זייף חתימת חבילה</string>
   <!-- Description of an application permission, listed so the user can choose whether they want to allow the application to do this. -->
+  <string name="permdesc_fakePackageSignature">אפשר לאפליקציה להעמיד פנים שהיא אפליקציה אחרת. אפליקציות זדוניות עלולות להשתמש בזה כדי לקבל גישה לנתוני אפליקציה אישיים. אפשר גישה בזהירות בלבד!</string>
   <!-- Title of an application permission, listed so the user can choose whether they want the application to do this. -->
+  <string name="permlab_setKeyguardWallpaper">קבע רקע נעילת מקשים</string>
   <!-- Description of an application permission, listed so the user can choose whether they want to allow the application to do this. -->
+  <string name="permdesc_setKeyguardWallpaper">אפשר ליישום לשנות את רקע מסך הנעילה.</string>
   <!-- Notify use that they are in Lock-to-app in accessibility mode -->
+  <string name="lock_to_app_toast_back">כדי לשחרר את המסך הזה, לחץ והחזק.</string>
   <!-- Vendor mismatched fingerprint warning [CHAR LIMIT=NONE] -->
+  <string name="system_error_vendorprint">נראה כי תמונת היצרן לא מעודכנת. אנא צרוב את תמונת היצרן האחרונה למכשירך.</string>
 </resources>
