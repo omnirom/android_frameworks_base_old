@@ -78,4 +78,8 @@
     <string name="qs_menu_item_columns_four">4</string>
     <string name="qs_menu_item_columns_five">5</string>
     <string name="qs_menu_item_reset">Reset</string>
+
+    <!-- NavBar Tuner -->
+    <string name="menu_ime_always_show">Menu / Keyboard Switcher (always show)</string>
+    <string name="search">Search</string>
 </resources>
