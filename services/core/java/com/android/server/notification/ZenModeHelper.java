@@ -1032,7 +1032,7 @@ public class ZenModeHelper {
                     newZen = Global.ZEN_MODE_ALARMS;
                 }
                 if (newZen != -1) {
-                    setManualZenMode(newZen, null, "onVolumeDownInSilent", false /*setRingerMode*/);
+                    setManualZenMode(newZen, null, "onVolumeDownInSilent", null, false /*setRingerMode*/);
                 }
             }
         }

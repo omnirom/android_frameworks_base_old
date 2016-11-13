@@ -27,7 +27,7 @@
         android:layout_height="wrap_content"
         android:layout_centerHorizontal="true"
         android:textSize="@dimen/qs_tile_text_size"
-        android:textColor="@color/system_accent_color" />
+        android:textColor="?android:attr/colorAccent" />
 
     <ImageView
         android:id="@+id/footer_icon"
