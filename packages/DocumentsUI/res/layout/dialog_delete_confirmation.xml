@@ -20,7 +20,5 @@
     android:layout_height="match_parent"
     android:paddingTop="24dp"
     android:paddingStart="24dp"
-    android:paddingEnd="24dp"
-    android:textAppearance="@android:style/TextAppearance.Material.Subhead"
-    android:textColor="@color/delete_dialog_text">
+    android:paddingEnd="24dp" >
 </TextView>
