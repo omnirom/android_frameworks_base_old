@@ -63,6 +63,7 @@
             android:layout_gravity="start"
             android:orientation="vertical"
             android:elevation="16dp"
+            android:textColor="@color/item_details"
             android:background="@color/drawer_background">
 
             <Toolbar

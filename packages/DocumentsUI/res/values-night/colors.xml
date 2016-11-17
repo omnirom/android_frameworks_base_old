@@ -13,6 +13,7 @@
 
 <resources>
     <color name="directory_background">#ff111111</color>
+    <color name="drawer_background">@color/material_grey_50</color>
     <color name="material_grey_50">@*android:color/material_grey_850</color>
     <color name="material_grey_300">@*android:color/material_grey_800</color>
 
@@ -26,5 +27,9 @@
     <color name="item_doc_background_selected">#ff9e9e9e</color>
     <color name="primary_dark">#ff212121</color>
     <color name="status_bar_color">@color/primary_dark</color>
-    <color name="delete_dialog_text">@*android:color/primary_text_default_material_dark</color>
+
+    <!-- OMNI -->
+    <color name="secondary_text_docs">#80ffffff</color>
+    <color name="item_text">#f1f1f1</color>
+    <color name="item_text_primary">#ffffff</color>
 </resources>
