@@ -217,15 +217,18 @@
     <style name="Animation.StatusBar">
     </style>
 
-    <style name="systemui_theme" parent="@android:style/Theme.DeviceDefault" />
+    <style name="systemui_theme" parent="@android:style/Theme.Material.DayNight" />
 
-    <style name="systemui_theme_remote_input" parent="@android:style/Theme.DeviceDefault.Light">
+    <style name="systemui_theme_remote_input" parent="@android:style/Theme.Material.DayNight">
         <item name="android:colorAccent">@color/remote_input_accent</item>
     </style>
 
-    <style name="Theme.SystemUI.Dialog" parent="@android:style/Theme.DeviceDefault.Light.Dialog" />
+    <style name="Theme.SystemUI.Dialog" parent="@android:style/Theme.Material.DayNight.Dialog">
+        <item name="android:colorPrimary">?attr/colorControlNormal</item>
+        <item name="android:colorControlActivated">?attr/colorAccent</item>
+    </style>
 
-    <style name="Theme.SystemUI.Dialog.Alert" parent="@*android:style/Theme.DeviceDefault.Light.Dialog.Alert" />
+    <style name="Theme.SystemUI.Dialog.Alert" parent="@*android:style/Theme.Material.DayNight.Dialog.Alert" />
 
     <style name="QSBorderlessButton">
         <item name="android:padding">12dp</item>
@@ -250,7 +253,7 @@
         <item name="numColumns">3</item>
     </style>
 
-    <style name="Theme.AlertDialogHost" parent="android:Theme.DeviceDefault">
+    <style name="Theme.AlertDialogHost" parent="android:Theme.Material.DayNight">
         <item name="android:windowIsTranslucent">true</item>
         <item name="android:windowBackground">@android:color/transparent</item>
         <item name="android:windowContentOverlay">@null</item>
@@ -314,12 +317,12 @@
         <item name="android:layout_height">48dp</item>
     </style>
 
-    <style name="TunerSettings" parent="@android:style/Theme.DeviceDefault.Settings">
+    <style name="TunerSettings" parent="@android:style/Theme.Material.Settings">
         <item name="android:windowActionBar">false</item>
         <item name="preferenceTheme">@style/TunerPreferenceTheme</item>
     </style>
 
-    <style name="TunerPreferenceTheme" parent="@android:style/Theme.DeviceDefault.Settings">
+    <style name="TunerPreferenceTheme" parent="@android:style/Theme.Material.Settings">
         <item name="dropdownPreferenceStyle">@style/Preference.DropDown.Material</item>
     </style>
 
