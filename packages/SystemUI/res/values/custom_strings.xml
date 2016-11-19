@@ -90,4 +90,23 @@
     <string name="stream_title_alarm">Alarm</string>
     <string name="stream_title_notification">Notification</string>
     <string name="stream_title_bluetooth">Bluetooth</string>
+
+    <!-- SysUI Tuner: Color and appearance screen title [CHAR LIMIT=50] -->
+    <string name="color_and_appearance">Color and appearance</string>
+    <!-- SysUI Tuner: Name of calibrate display dialog [CHAR LIMIT=30] -->
+    <string name="calibrate_display">Calibrate display</string>
+    <!-- Button to apply settings [CHAR LIMIT=30] -->
+    <string name="color_apply">Apply</string>
+
+    <!-- Title of warning dialog about bad color settings. [CHAR LIMIT=30] -->
+    <string name="color_revert_title">Confirm settings</string>
+
+    <!-- Message warning user about custom color settings [CHAR LIMIT=NONE] -->
+    <string name="color_revert_message">Some color settings can make this
+        device unusable. Click OK to confirm these color settings,
+        otherwise these settings will reset after 10 seconds.</string>
+
+    <string name="color_modification_r" translatable="false">R</string>
+    <string name="color_modification_g" translatable="false">G</string>
+    <string name="color_modification_b" translatable="false">B</string>
 </resources>
