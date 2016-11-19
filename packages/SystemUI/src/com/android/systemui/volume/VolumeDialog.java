@@ -771,6 +771,8 @@ public class VolumeDialog implements TunerService.Tunable {
         final boolean zenMuted = isZenAlarms ? (isRingOrNotificationStream || isSystemStream)
                 : isZenNone ? (isRingOrNotificationStream || isSystemStream || isAlarmStream || isMusicStream)
                 : false;
+        mShowHeaders = Settings.System.getInt(mContext.getContentResolver(),
+                Settings.System.VOLUME_DIALOG_HEADERS, VolumePrefs.DEFAULT_SHOW_HEADERS ? 1 : 0) != 0;
 
         // update slider max
         final int max = ss.levelMax * 100;
@@ -1269,7 +1271,7 @@ public class VolumeDialog implements TunerService.Tunable {
         private int cachedIconRes;
         private ColorStateList cachedSliderTint;
         private int iconState;  // from Events
-        private boolean cachedShowHeaders = VolumePrefs.DEFAULT_SHOW_HEADERS;
+        private boolean cachedShowHeaders;
         private ObjectAnimator anim;  // slider progress animation for non-touch-related updates
         private int animTargetProgress;
         private int lastAudibleLevel = 1;
