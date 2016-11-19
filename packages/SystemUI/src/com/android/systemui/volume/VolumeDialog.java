@@ -129,7 +129,7 @@ public class VolumeDialog implements TunerService.Tunable {
     private boolean mExpanded;
 
     private int mActiveStream;
-    private boolean mShowHeaders = VolumePrefs.DEFAULT_SHOW_HEADERS;
+    private boolean mShowHeaders;
     private boolean mAutomute = VolumePrefs.DEFAULT_ENABLE_AUTOMUTE;
     private boolean mSilentMode = VolumePrefs.DEFAULT_ENABLE_SILENT_MODE;
     private State mState;
@@ -158,7 +158,8 @@ public class VolumeDialog implements TunerService.Tunable {
                 (AccessibilityManager) mContext.getSystemService(Context.ACCESSIBILITY_SERVICE);
         mActiveSliderTint = ColorStateList.valueOf(Utils.getColorAccent(mContext));
         mInactiveSliderTint = loadColorStateList(R.color.volume_slider_inactive);
-
+        mShowHeaders = Settings.System.getInt(context.getContentResolver(),
+                Settings.System.VOLUME_DIALOG_HEADERS, VolumePrefs.DEFAULT_SHOW_HEADERS ? 1 : 0) != 0;
         initDialog();
 
         mAccessibility.init();
@@ -387,7 +388,7 @@ public class VolumeDialog implements TunerService.Tunable {
         row.slider = (SeekBar) row.view.findViewById(R.id.volume_row_slider);
         row.slider.setOnSeekBarChangeListener(new VolumeSeekBarChangeListener(row));
         row.anim = null;
-        row.cachedShowHeaders = VolumePrefs.DEFAULT_SHOW_HEADERS;
+        row.cachedShowHeaders = mShowHeaders;
 
         // forward events above the slider into the slider
         row.view.setOnTouchListener(new OnTouchListener() {
@@ -924,6 +925,8 @@ public class VolumeDialog implements TunerService.Tunable {
     }
 
     private void recheckH(VolumeRow row) {
+        mShowHeaders = Settings.System.getInt(mContext.getContentResolver(),
+                Settings.System.VOLUME_DIALOG_HEADERS, VolumePrefs.DEFAULT_SHOW_HEADERS ? 1 : 0) != 0;
         if (row == null) {
             if (D.BUG) Log.d(TAG, "recheckH ALL");
             trimObsoleteH();
@@ -1269,7 +1272,7 @@ public class VolumeDialog implements TunerService.Tunable {
         private int cachedIconRes;
         private ColorStateList cachedSliderTint;
         private int iconState;  // from Events
-        private boolean cachedShowHeaders = VolumePrefs.DEFAULT_SHOW_HEADERS;
+        private boolean cachedShowHeaders;
         private ObjectAnimator anim;  // slider progress animation for non-touch-related updates
         private int animTargetProgress;
         private int lastAudibleLevel = 1;
