@@ -205,7 +205,6 @@ public class BatteryTile extends QSTile<QSTile.State> implements BatteryControll
             }
             mDrawable.onBatteryLevelChanged(100, false, false);
             mDrawable.onPowerSaveChanged(true);
-            mDrawable.disableShowPercent();
             ((ImageView) mCurrentView.findViewById(android.R.id.icon)).setImageDrawable(mDrawable);
             Checkable checkbox = (Checkable) mCurrentView.findViewById(android.R.id.toggle);
             checkbox.setChecked(mPowerSave);

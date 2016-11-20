@@ -42,7 +42,6 @@ public class BatteryMeterDrawable extends Drawable implements
 
     private static final float ASPECT_RATIO = 9.5f / 14.5f;
     public static final String TAG = BatteryMeterDrawable.class.getSimpleName();
-    public static final String SHOW_PERCENT_SETTING = "status_bar_show_battery_percent";
 
     private static final boolean SINGLE_DIGIT_PERCENT = false;
 
@@ -54,7 +53,6 @@ public class BatteryMeterDrawable extends Drawable implements
     private final int mIntrinsicWidth;
     private final int mIntrinsicHeight;
 
-    private boolean mShowPercent;
     private float mButtonHeightFraction;
     private float mSubpixelSmoothingLeft;
     private float mSubpixelSmoothingRight;
@@ -116,7 +114,6 @@ public class BatteryMeterDrawable extends Drawable implements
         }
         levels.recycle();
         colors.recycle();
-        updateShowPercent();
         mWarningString = context.getString(R.string.battery_meter_very_low_overlay_symbol);
         mCriticalLevel = mContext.getResources().getInteger(
                 com.android.internal.R.integer.config_criticalBatteryWarningLevel);
@@ -181,9 +178,6 @@ public class BatteryMeterDrawable extends Drawable implements
 
     public void startListening() {
         mListening = true;
-        mContext.getContentResolver().registerContentObserver(
-                Settings.System.getUriFor(SHOW_PERCENT_SETTING), false, mSettingObserver);
-        updateShowPercent();
         mBatteryController.addStateChangedCallback(this);
     }
 
@@ -191,11 +185,6 @@ public class BatteryMeterDrawable extends Drawable implements
         mListening = false;
         mContext.getContentResolver().unregisterContentObserver(mSettingObserver);
         mBatteryController.removeStateChangedCallback(this);
-    }
-
-    public void disableShowPercent() {
-        mShowPercent = false;
-        postInvalidate();
     }
 
     private void postInvalidate() {
@@ -263,11 +252,6 @@ public class BatteryMeterDrawable extends Drawable implements
         mWidth = right - left;
         mWarningTextPaint.setTextSize(mHeight * 0.75f);
         mWarningTextHeight = -mWarningTextPaint.getFontMetrics().ascent;
-    }
-
-    private void updateShowPercent() {
-        mShowPercent = 0 != Settings.System.getInt(mContext.getContentResolver(),
-                SHOW_PERCENT_SETTING, 0);
     }
 
     private int getColorForLevel(int percent) {
@@ -450,7 +434,7 @@ public class BatteryMeterDrawable extends Drawable implements
         boolean pctOpaque = false;
         float pctX = 0, pctY = 0;
         String pctText = null;
-        if (!mPluggedIn && !mPowerSaveEnabled && level > mCriticalLevel && mShowPercent) {
+        if (!mPluggedIn && !mPowerSaveEnabled && level > mCriticalLevel) {
             mTextPaint.setColor(getColorForLevel(level));
             mTextPaint.setTextSize(height *
                     (SINGLE_DIGIT_PERCENT ? 0.75f
@@ -513,7 +497,6 @@ public class BatteryMeterDrawable extends Drawable implements
         @Override
         public void onChange(boolean selfChange, Uri uri) {
             super.onChange(selfChange, uri);
-            updateShowPercent();
             postInvalidate();
         }
     }
