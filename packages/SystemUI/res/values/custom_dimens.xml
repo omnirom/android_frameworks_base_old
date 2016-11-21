@@ -30,4 +30,7 @@
 
     <dimen name="crop_buttons">48dp</dimen>
     <dimen name="crop_buttons_inlet">32dp</dimen>
+
+    <dimen name="qs_scroller_margin">12dp</dimen>
+
 </resources>
