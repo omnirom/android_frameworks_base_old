@@ -26,6 +26,7 @@ import android.util.Log;
 import android.view.View;
 import android.view.ViewTreeObserver;
 import android.widget.FrameLayout;
+import android.widget.HorizontalScrollView;
 import com.android.systemui.Interpolators;
 import com.android.systemui.R;
 import com.android.systemui.qs.customize.QSCustomizer;
@@ -64,6 +65,7 @@ public class QSContainer extends FrameLayout {
 
     // omni additions
     private boolean mSecureExpandDisabled;
+    private HorizontalScrollView mQuickQsPanelScroller;
 
     public QSContainer(Context context, AttributeSet attrs) {
         super(context, attrs);
@@ -76,8 +78,9 @@ public class QSContainer extends FrameLayout {
         mQSDetail = (QSDetail) findViewById(R.id.qs_detail);
         mHeader = (BaseStatusBarHeader) findViewById(R.id.header);
         mQSDetail.setQsPanel(mQSPanel, mHeader);
+        mQuickQsPanelScroller = (HorizontalScrollView) mHeader.findViewById(R.id.quick_qs_panel_scroll);
         mQSAnimator = new QSAnimator(this, (QuickQSPanel) mHeader.findViewById(R.id.quick_qs_panel),
-                mQSPanel);
+                mQSPanel, mQuickQsPanelScroller);
         mQSCustomizer = (QSCustomizer) findViewById(R.id.qs_customize);
         mQSCustomizer.setQsContainer(this);
     }
