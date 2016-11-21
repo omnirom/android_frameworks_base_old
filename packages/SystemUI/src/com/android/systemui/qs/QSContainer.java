@@ -21,11 +21,14 @@ import android.animation.AnimatorListenerAdapter;
 import android.content.Context;
 import android.graphics.Point;
 import android.graphics.Rect;
+import android.os.UserHandle;
+import android.provider.Settings;
 import android.util.AttributeSet;
 import android.util.Log;
 import android.view.View;
 import android.view.ViewTreeObserver;
 import android.widget.FrameLayout;
+import android.widget.HorizontalScrollView;
 import com.android.systemui.Interpolators;
 import com.android.systemui.R;
 import com.android.systemui.qs.customize.QSCustomizer;
@@ -64,6 +67,7 @@ public class QSContainer extends FrameLayout {
 
     // omni additions
     private boolean mSecureExpandDisabled;
+    private HorizontalScrollView mQuickQsPanelScroller;
 
     public QSContainer(Context context, AttributeSet attrs) {
         super(context, attrs);
@@ -76,8 +80,9 @@ public class QSContainer extends FrameLayout {
         mQSDetail = (QSDetail) findViewById(R.id.qs_detail);
         mHeader = (BaseStatusBarHeader) findViewById(R.id.header);
         mQSDetail.setQsPanel(mQSPanel, mHeader);
+        mQuickQsPanelScroller = (HorizontalScrollView) mHeader.findViewById(R.id.quick_qs_panel_scroll);
         mQSAnimator = new QSAnimator(this, (QuickQSPanel) mHeader.findViewById(R.id.quick_qs_panel),
-                mQSPanel);
+                mQSPanel, mQuickQsPanelScroller);
         mQSCustomizer = (QSCustomizer) findViewById(R.id.qs_customize);
         mQSCustomizer.setQsContainer(this);
     }
@@ -334,5 +339,12 @@ public class QSContainer extends FrameLayout {
     public void setSecureExpandDisabled(boolean value) {
         if (DEBUG) Log.d(TAG, "setSecureExpandDisabled " + value);
         mSecureExpandDisabled = value;
+    }
+
+    public void updateSettings() {
+        final boolean quickQsScrollEnabled = Settings.System.getIntForUser(getContext().getContentResolver(),
+                Settings.System.QS_QUICKBAR_SCROLL_ENABLED, QuickQSPanel.NUM_QUICK_TILES_DEFAULT,
+                UserHandle.USER_CURRENT) == QuickQSPanel.NUM_QUICK_TILES_ALL;
+        mQSAnimator.setFancyAnimaton(!quickQsScrollEnabled);
     }
 }
