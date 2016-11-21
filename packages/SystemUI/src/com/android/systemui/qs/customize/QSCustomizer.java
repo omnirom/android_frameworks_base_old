@@ -42,6 +42,7 @@ import com.android.internal.logging.MetricsProto;
 import com.android.systemui.R;
 import com.android.systemui.qs.QSContainer;
 import com.android.systemui.qs.QSDetailClipper;
+import com.android.systemui.qs.QuickQSPanel;
 import com.android.systemui.qs.QSTile;
 import com.android.systemui.statusbar.phone.NotificationsQuickSettingsContainer;
 import com.android.systemui.statusbar.phone.PhoneStatusBar;
@@ -99,6 +100,12 @@ public class QSCustomizer extends LinearLayout implements OnMenuItemClickListene
         if (menuItem != null) {
             mColumnsSubMenu = menuItem.getSubMenu();
         }
+        int qsScrollValue = Settings.System.getIntForUser(mContext.getContentResolver(),
+                Settings.System.QS_QUICKBAR_SCROLL_ENABLED, QuickQSPanel.NUM_QUICK_TILES_DEFAULT,
+                UserHandle.USER_CURRENT);
+        MenuItem qsScrollMenuItem = mToolbar.getMenu().findItem(R.id.menu_item_qs_scroll);
+        qsScrollMenuItem.setChecked(qsScrollValue != QuickQSPanel.NUM_QUICK_TILES_DEFAULT);
+
         mToolbar.setTitle(R.string.qs_edit);
         mDefaultColumns = Math.max(1,
                     mContext.getResources().getInteger(R.integer.quick_settings_num_columns));
@@ -192,16 +199,23 @@ public class QSCustomizer extends LinearLayout implements OnMenuItemClickListene
                 reset();
                 break;
             case R.id.menu_item_columns_three:
-                Settings.System.putInt(mContext.getContentResolver(),
-                        Settings.System.QS_LAYOUT_COLUMNS, 3);
+                Settings.System.putIntForUser(mContext.getContentResolver(),
+                        Settings.System.QS_LAYOUT_COLUMNS, 3, UserHandle.USER_CURRENT);
                 break;
             case R.id.menu_item_columns_four:
-                Settings.System.putInt(mContext.getContentResolver(),
-                        Settings.System.QS_LAYOUT_COLUMNS, 4);
+                Settings.System.putIntForUser(mContext.getContentResolver(),
+                        Settings.System.QS_LAYOUT_COLUMNS, 4, UserHandle.USER_CURRENT);
                 break;
             case R.id.menu_item_columns_five:
-                Settings.System.putInt(mContext.getContentResolver(),
-                        Settings.System.QS_LAYOUT_COLUMNS, 5);
+                Settings.System.putIntForUser(mContext.getContentResolver(),
+                        Settings.System.QS_LAYOUT_COLUMNS, 5, UserHandle.USER_CURRENT);
+                break;
+            case R.id.menu_item_qs_scroll:
+                item.setChecked(!item.isChecked());
+                Settings.System.putIntForUser(mContext.getContentResolver(),
+                        Settings.System.QS_QUICKBAR_SCROLL_ENABLED, item.isChecked() ?
+                        QuickQSPanel.NUM_QUICK_TILES_ALL :
+                        QuickQSPanel.NUM_QUICK_TILES_DEFAULT, UserHandle.USER_CURRENT);
                 break;
             }
         return false;
@@ -214,8 +228,9 @@ public class QSCustomizer extends LinearLayout implements OnMenuItemClickListene
             tiles.add(tile);
         }
         mTileAdapter.setTileSpecs(tiles);
-        Settings.System.putInt(mContext.getContentResolver(),
-                Settings.System.QS_LAYOUT_COLUMNS, mDefaultColumns);
+        Settings.System.putIntForUser(mContext.getContentResolver(),
+                Settings.System.QS_LAYOUT_COLUMNS, mDefaultColumns,
+                UserHandle.USER_CURRENT);
     }
 
     private void setTileSpecs() {
