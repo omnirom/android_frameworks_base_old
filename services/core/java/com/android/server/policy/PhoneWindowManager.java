@@ -153,6 +153,7 @@ import com.android.internal.statusbar.IStatusBarService;
 import com.android.internal.util.ScreenShapeHelper;
 import com.android.internal.util.omni.DeviceUtils;
 import com.android.internal.util.omni.TaskUtils;
+import com.android.internal.util.omni.OmniSwitchConstants;
 import com.android.internal.widget.PointerLocationView;
 import com.android.server.GestureLauncherService;
 import com.android.server.LocalServices;
@@ -738,6 +739,7 @@ public class PhoneWindowManager implements WindowManagerPolicy {
     private int mBackKillTimeoutConfig;
     private int mBackKillTimeout;
     private boolean mLongPressBackConsumed;
+    private boolean mOmniSwitchRecents;
 
     private static final int MSG_ENABLE_POINTER_LOCATION = 1;
     private static final int MSG_DISABLE_POINTER_LOCATION = 2;
@@ -1560,7 +1562,7 @@ public class PhoneWindowManager implements WindowManagerPolicy {
             performHapticFeedbackLw(null, HapticFeedbackConstants.LONG_PRESS, false);
 
             if (mLongPressOnMenuBehavior == LONG_PRESS_HOME_RECENT_SYSTEM_UI) {
-                toggleRecentApps();
+                doToggleRecentApps();
             } else if (mLongPressOnMenuBehavior == LONG_PRESS_HOME_ASSIST) {
                 launchAssistAction(null, deviceId);
             }
@@ -1576,7 +1578,7 @@ public class PhoneWindowManager implements WindowManagerPolicy {
 
         switch (mLongPressOnHomeBehavior) {
             case LONG_PRESS_HOME_RECENT_SYSTEM_UI:
-                toggleRecentApps();
+                doToggleRecentApps();
                 break;
             case LONG_PRESS_HOME_ASSIST:
                 launchAssistAction(null, deviceId);
@@ -1590,7 +1592,7 @@ public class PhoneWindowManager implements WindowManagerPolicy {
     private void handleDoubleTapOnHome() {
         if (mDoubleTapOnHomeBehavior == DOUBLE_TAP_HOME_RECENT_SYSTEM_UI) {
             mHomeConsumed = true;
-            toggleRecentApps();
+            doToggleRecentApps();
         }
     }
 
@@ -2151,6 +2153,9 @@ public class PhoneWindowManager implements WindowManagerPolicy {
                     UserHandle.USER_CURRENT);
             mBackKillEnabled = Settings.System.getIntForUser(resolver,
                     Settings.System.BUTTON_BACK_KILL_ENABLE, 0,
+                    UserHandle.USER_CURRENT) != 0;
+            mOmniSwitchRecents = Settings.System.getIntForUser(resolver,
+                    Settings.System.NAVIGATION_BAR_RECENTS, 0,
                     UserHandle.USER_CURRENT) != 0;
 
         }
@@ -3376,7 +3381,7 @@ public class PhoneWindowManager implements WindowManagerPolicy {
                 if (down && repeatCount == 0) {
                     preloadRecentApps();
                 } else if (!down) {
-                    toggleRecentApps();
+                    doToggleRecentApps();
                 }
             }
             return -1;
@@ -3889,6 +3894,9 @@ public class PhoneWindowManager implements WindowManagerPolicy {
     }
 
     private void preloadRecentApps() {
+        if (mOmniSwitchRecents) {
+            return;
+        }
         mPreloadedRecentApps = true;
         StatusBarManagerInternal statusbar = getStatusBarManagerInternal();
         if (statusbar != null) {
@@ -3897,12 +3905,23 @@ public class PhoneWindowManager implements WindowManagerPolicy {
     }
 
     private void cancelPreloadRecentApps() {
+        if (mOmniSwitchRecents) {
+            return;
+        }
         if (mPreloadedRecentApps) {
             mPreloadedRecentApps = false;
             StatusBarManagerInternal statusbar = getStatusBarManagerInternal();
             if (statusbar != null) {
                 statusbar.cancelPreloadRecentApps();
             }
+        }
+    }
+
+    private void doToggleRecentApps() {
+        if (mOmniSwitchRecents) {
+            OmniSwitchConstants.toggleOmniSwitchRecents(mContext, UserHandle.CURRENT);
+        } else {
+            toggleRecentApps();
         }
     }
 

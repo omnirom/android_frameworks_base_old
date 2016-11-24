@@ -3752,6 +3752,12 @@ public final class Settings {
         public static final String DOUBLE_TAP_SLEEP_GESTURE = "double_tap_sleep_gesture";
 
         /**
+         * navbar recents style - 0 default AOSP 1 OmniSwitch
+         * @hide
+         */
+        public static final String NAVIGATION_BAR_RECENTS = "navigation_bar_recents";
+
+        /**
          * Show onscreen keys for hw button devices
          * @hide
          */
