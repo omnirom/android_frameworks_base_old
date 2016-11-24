@@ -202,6 +202,7 @@ import com.android.systemui.statusbar.stack.StackStateAnimator;
 import com.android.systemui.statusbar.stack.StackViewState;
 import com.android.systemui.volume.VolumeComponent;
 import com.android.internal.util.omni.DeviceUtils;
+import com.android.internal.util.omni.OmniSwitchConstants;
 
 import java.io.FileDescriptor;
 import java.io.PrintWriter;
@@ -412,6 +413,7 @@ public class PhoneStatusBar extends BaseStatusBar implements DemoMode,
     private int mInitialTouchY;
     private IPowerManager mPower;
     private boolean mDoubleTabSleep;
+    private boolean mOmniSwitchRecents;
 
     // for disabling the status bar
     int mDisabled1 = 0;
@@ -524,6 +526,9 @@ public class PhoneStatusBar extends BaseStatusBar implements DemoMode,
             mContext.getContentResolver().registerContentObserver(Settings.System.getUriFor(
                     Settings.System.QS_QUICKBAR_SCROLL_ENABLED),
                     false, this, UserHandle.USER_ALL);
+            mContext.getContentResolver().registerContentObserver(Settings.System.getUriFor(
+                    Settings.System.NAVIGATION_BAR_RECENTS),
+                    false, this, UserHandle.USER_ALL);
             update();
         }
 
@@ -549,6 +554,8 @@ public class PhoneStatusBar extends BaseStatusBar implements DemoMode,
                     mContext.getContentResolver(), Settings.System.STATUS_BAR_BRIGHTNESS_CONTROL, 0, mCurrentUserId) == 1;
             mDoubleTabSleep = Settings.System.getIntForUser(
                     mContext.getContentResolver(), Settings.System.DOUBLE_TAP_SLEEP_GESTURE, 0, mCurrentUserId) == 1;
+            mOmniSwitchRecents = Settings.System.getIntForUser(
+                    mContext.getContentResolver(), Settings.System.NAVIGATION_BAR_RECENTS, 0, mCurrentUserId) == 1;
 
             if (mNotificationPanel != null) {
                 mNotificationPanel.updateSettings();
@@ -1402,7 +1409,11 @@ public class PhoneStatusBar extends BaseStatusBar implements DemoMode,
         @Override
         public void onClick(View v) {
             awakenDreams();
+            if (mOmniSwitchRecents) {
+                OmniSwitchConstants.toggleOmniSwitchRecents(mContext, getCurrentUserHandle());
+            } else { 
             toggleRecentApps();
+            }
         }
     };
 
