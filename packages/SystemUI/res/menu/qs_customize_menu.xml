@@ -29,6 +29,9 @@ limitations under the License.
         <item android:id="@+id/menu_item_qs_scroll"
               android:title="@string/qs_menu_item_scroll"
               android:checkable="true" />
+        <item android:id="@+id/menu_item_titles"
+              android:title="@string/qs_menu_item_titles"
+              android:checkable="true" />
         <item android:id="@+id/menu_item_reset"
               android:title="@string/qs_menu_item_reset"/>
 </menu>

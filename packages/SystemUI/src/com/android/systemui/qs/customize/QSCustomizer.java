@@ -106,6 +106,12 @@ public class QSCustomizer extends LinearLayout implements OnMenuItemClickListene
         MenuItem qsScrollMenuItem = mToolbar.getMenu().findItem(R.id.menu_item_qs_scroll);
         qsScrollMenuItem.setChecked(qsScrollValue != QuickQSPanel.NUM_QUICK_TILES_DEFAULT);
 
+        int qsTitlesValue = Settings.System.getIntForUser(mContext.getContentResolver(),
+                Settings.System.QS_TILE_TITLE_VISIBILITY, 1,
+                UserHandle.USER_CURRENT);
+        MenuItem qsTitlesMenuItem = mToolbar.getMenu().findItem(R.id.menu_item_titles);
+        qsTitlesMenuItem.setChecked(qsTitlesValue == 0);
+
         mToolbar.setTitle(R.string.qs_edit);
         mDefaultColumns = Math.max(1,
                     mContext.getResources().getInteger(R.integer.quick_settings_num_columns));
@@ -216,6 +222,12 @@ public class QSCustomizer extends LinearLayout implements OnMenuItemClickListene
                         Settings.System.QS_QUICKBAR_SCROLL_ENABLED, item.isChecked() ?
                         QuickQSPanel.NUM_QUICK_TILES_ALL :
                         QuickQSPanel.NUM_QUICK_TILES_DEFAULT, UserHandle.USER_CURRENT);
+                break;
+            case R.id.menu_item_titles:
+                item.setChecked(!item.isChecked());
+                Settings.System.putIntForUser(mContext.getContentResolver(),
+                        Settings.System.QS_TILE_TITLE_VISIBILITY, item.isChecked() ? 0 : 1,
+                        UserHandle.USER_CURRENT);
                 break;
             }
         return false;

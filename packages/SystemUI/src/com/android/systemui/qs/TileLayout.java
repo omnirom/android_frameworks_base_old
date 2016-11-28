@@ -29,6 +29,7 @@ public class TileLayout extends ViewGroup implements QSTileLayout {
     protected final ArrayList<TileRecord> mRecords = new ArrayList<>();
     private int mCellMarginTop;
     private boolean mListening;
+    private boolean mShowTitles = true;
 
     public TileLayout(Context context) {
         this(context, null);
@@ -145,8 +146,24 @@ public class TileLayout extends ViewGroup implements QSTileLayout {
         int columns = Settings.System.getIntForUser(
                 mContext.getContentResolver(), Settings.System.QS_LAYOUT_COLUMNS, mDefaultColumns,
                 UserHandle.USER_CURRENT);
-        if (mColumns != columns) {
+
+        boolean showTitles = Settings.System.getIntForUser(
+                mContext.getContentResolver(), Settings.System.QS_TILE_TITLE_VISIBILITY, 1,
+                UserHandle.USER_CURRENT) == 1;
+
+        if (showTitles) {
+            mCellHeight = mContext.getResources().getDimensionPixelSize(R.dimen.qs_tile_height);
+        } else {
+            mCellHeight = mContext.getResources().getDimensionPixelSize(R.dimen.qs_tile_height_wo_label);
+        }
+        if (mColumns != columns || mShowTitles != showTitles) {
             mColumns = columns;
+            mShowTitles = showTitles;
+            for (TileRecord record : mRecords) {
+                if (record.tileView instanceof QSTileView) {
+                    ((QSTileView) record.tileView).setLabelVisibility(mShowTitles);
+                }
+            }
             requestLayout();
         }
     }

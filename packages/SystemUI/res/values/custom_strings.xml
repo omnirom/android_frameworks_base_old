@@ -92,4 +92,5 @@
     <string name="stream_title_bluetooth">Bluetooth</string>
 
     <string name="qs_menu_item_scroll">Quickbar scroll</string>
+    <string name="qs_menu_item_titles">Hide labels</string>
 </resources>
