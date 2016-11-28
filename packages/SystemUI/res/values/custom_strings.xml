@@ -77,6 +77,7 @@
     <string name="qs_menu_item_columns_three">3</string>
     <string name="qs_menu_item_columns_four">4</string>
     <string name="qs_menu_item_columns_five">5</string>
+    <string name="qs_menu_item_columns_six">6</string>
     <string name="qs_menu_item_reset">Reset</string>
 
     <!-- NavBar Tuner -->

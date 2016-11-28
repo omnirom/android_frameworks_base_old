@@ -24,6 +24,8 @@ limitations under the License.
                       android:title="@string/qs_menu_item_columns_four" />
                 <item android:id="@+id/menu_item_columns_five"
                       android:title="@string/qs_menu_item_columns_five" />
+                <item android:id="@+id/menu_item_columns_six"
+                      android:title="@string/qs_menu_item_columns_six" />
             </menu>
         </item>
         <item android:id="@+id/menu_item_qs_scroll"

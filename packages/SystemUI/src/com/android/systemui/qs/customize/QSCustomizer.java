@@ -216,6 +216,10 @@ public class QSCustomizer extends LinearLayout implements OnMenuItemClickListene
                 Settings.System.putIntForUser(mContext.getContentResolver(),
                         Settings.System.QS_LAYOUT_COLUMNS, 5, UserHandle.USER_CURRENT);
                 break;
+            case R.id.menu_item_columns_six:
+                Settings.System.putIntForUser(mContext.getContentResolver(),
+                        Settings.System.QS_LAYOUT_COLUMNS, 6, UserHandle.USER_CURRENT);
+                break;
             case R.id.menu_item_qs_scroll:
                 item.setChecked(!item.isChecked());
                 Settings.System.putIntForUser(mContext.getContentResolver(),
