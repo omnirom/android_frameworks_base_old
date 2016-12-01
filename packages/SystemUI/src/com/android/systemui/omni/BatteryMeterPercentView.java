@@ -99,11 +99,7 @@ public class BatteryMeterPercentView extends AbstractBatteryView implements
         mBatteryPaint.setStyle(Paint.Style.FILL_AND_STROKE);
 
         applyStyle();
-
-        DisplayMetrics metrics = getResources().getDisplayMetrics();
-        mBarWidth = (int) (10 * metrics.density + 0.5f);
-        mBarSpaceWidth = (int) (14 * metrics.density + 0.5f);
-        mPercentOffsetY = (int) (1 * metrics.density + 0.5f);
+        loadDimens();
     }
 
     @Override
@@ -305,5 +301,13 @@ public class BatteryMeterPercentView extends AbstractBatteryView implements
         } else {
             super.updateExtraPercentFontSize();
         }
+    }
+
+    @Override
+    protected void loadDimens() {
+        DisplayMetrics metrics = getResources().getDisplayMetrics();
+        mBarWidth = (int) (10 * metrics.density + 0.5f);
+        mBarSpaceWidth = (int) (14 * metrics.density + 0.5f);
+        mPercentOffsetY = (int) (1 * metrics.density + 0.5f);
     }
 }
