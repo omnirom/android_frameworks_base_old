@@ -75,6 +75,7 @@ import android.hardware.hdmi.HdmiControlManager;
 import android.hardware.hdmi.HdmiPlaybackClient;
 import android.hardware.hdmi.HdmiPlaybackClient.OneTouchPlayCallback;
 import android.hardware.input.InputManagerInternal;
+import android.hardware.input.InputManager;
 import android.media.AudioAttributes;
 import android.media.AudioManager;
 import android.media.AudioSystem;
@@ -3327,42 +3328,56 @@ public class PhoneWindowManager implements WindowManagerPolicy {
         } else if (keyCode == KeyEvent.KEYCODE_MENU) {
             // Hijack modified menu keys for debugging features
             final int chordBug = KeyEvent.META_SHIFT_ON;
-
-            if (down) {
-                if (repeatCount == 0) {
-                    if (mLongPressOnMenuBehavior == LONG_PRESS_HOME_RECENT_SYSTEM_UI) {
-                        preloadRecentApps();
-                    }
-                    if (mEnableShiftMenuBugReports && (metaState & chordBug) == chordBug) {
-                        Intent intent = new Intent(Intent.ACTION_BUG_REPORT);
-                        mContext.sendOrderedBroadcastAsUser(intent, UserHandle.CURRENT,
-                                null, null, null, 0, null, null);
-                        return -1;
-                    } else if (SHOW_PROCESSES_ON_ALT_MENU &&
-                            (metaState & KeyEvent.META_ALT_ON) == KeyEvent.META_ALT_ON) {
-                        Intent service = new Intent();
-                        service.setClassName(mContext, "com.android.server.LoadAverageService");
-                        ContentResolver res = mContext.getContentResolver();
-                        boolean shown = Settings.Global.getInt(
-                                res, Settings.Global.SHOW_PROCESSES, 0) != 0;
-                        if (!shown) {
-                            mContext.startService(service);
-                        } else {
-                            mContext.stopService(service);
+            if (!virtualKey) {
+                if (down) {
+                    if (repeatCount == 0) {
+                        if (mLongPressOnMenuBehavior == LONG_PRESS_HOME_RECENT_SYSTEM_UI) {
+                            preloadRecentApps();
                         }
-                        Settings.Global.putInt(
-                                res, Settings.Global.SHOW_PROCESSES, shown ? 0 : 1);
+                        if (mEnableShiftMenuBugReports && (metaState & chordBug) == chordBug) {
+                            Intent intent = new Intent(Intent.ACTION_BUG_REPORT);
+                            mContext.sendOrderedBroadcastAsUser(intent, UserHandle.CURRENT,
+                                    null, null, null, 0, null, null);
+                            return -1;
+                        } else if (SHOW_PROCESSES_ON_ALT_MENU &&
+                                (metaState & KeyEvent.META_ALT_ON) == KeyEvent.META_ALT_ON) {
+                            Intent service = new Intent();
+                            service.setClassName(mContext, "com.android.server.LoadAverageService");
+                            ContentResolver res = mContext.getContentResolver();
+                            boolean shown = Settings.Global.getInt(
+                                    res, Settings.Global.SHOW_PROCESSES, 0) != 0;
+                            if (!shown) {
+                                mContext.startService(service);
+                            } else {
+                                mContext.stopService(service);
+                            }
+                            Settings.Global.putInt(
+                                    res, Settings.Global.SHOW_PROCESSES, shown ? 0 : 1);
+                            return -1;
+                        }
+                    } else if (longPress) {
+                        if (mLongPressOnMenuBehavior != LONG_PRESS_HOME_RECENT_SYSTEM_UI) {
+                            cancelPreloadRecentApps();
+                        }
+                        if (!keyguardOn) {
+                            handleLongPressOnMenu(event.getDeviceId());
+                        }
+                    }
+                    return -1;
+                } else {
+                    if (mLongPressOnMenuBehavior == LONG_PRESS_HOME_RECENT_SYSTEM_UI) {
+                        cancelPreloadRecentApps();
+                    }
+                    if (canceled) {
                         return -1;
                     }
-               } else if (longPress) {
-                   if (mLongPressOnMenuBehavior != LONG_PRESS_HOME_RECENT_SYSTEM_UI) {
-                       cancelPreloadRecentApps();
-                   }
-                   if (!keyguardOn) {
-                       handleLongPressOnMenu(event.getDeviceId());
-                   }
-               }
-               return -1;
+                    if (mMenuConsumed) {
+                        mMenuConsumed = false;
+                        return -1;
+                    }
+                    triggerVirtualKeypress(KeyEvent.KEYCODE_MENU);
+                    return -1;
+                }
             }
         } else if (keyCode == KeyEvent.KEYCODE_SEARCH) {
             if (down) {
@@ -8442,4 +8457,18 @@ public class PhoneWindowManager implements WindowManagerPolicy {
         msg.setAsynchronous(true);
         mHandler.sendMessageDelayed(msg, ViewConfiguration.getLongPressTimeout());
     }
+
+    private void triggerVirtualKeypress(final int keyCode) {
+        InputManager im = InputManager.getInstance();
+        long now = SystemClock.uptimeMillis();
+
+        final KeyEvent downEvent = new KeyEvent(now, now, KeyEvent.ACTION_DOWN,
+                keyCode, 0, 0, KeyCharacterMap.VIRTUAL_KEYBOARD, 0,
+                KeyEvent.FLAG_FROM_SYSTEM, InputDevice.SOURCE_KEYBOARD);
+        final KeyEvent upEvent = KeyEvent.changeAction(downEvent, KeyEvent.ACTION_UP);
+
+        im.injectInputEvent(downEvent, InputManager.INJECT_INPUT_EVENT_MODE_ASYNC);
+        im.injectInputEvent(upEvent, InputManager.INJECT_INPUT_EVENT_MODE_ASYNC);
+    }
+
 }
