@@ -101,14 +101,7 @@ public class BatteryMeterHorizontalView extends AbstractBatteryView implements
         mBatteryPaint.setStyle(Paint.Style.FILL_AND_STROKE);
 
         applyStyle();
-
-        // bar width is hardcoded  android:layout_width="14.5dp"
-        DisplayMetrics metrics = getResources().getDisplayMetrics();
-        mBarWidth = (int) (20 * metrics.density + 0.5f);
-        mBarSpaceWidth = (int) (22 * metrics.density + 0.5f);
-        mBarHeight = (int) (10 * metrics.density + 0.5f);
-        mPercentOffsetY = (int) (1 * metrics.density + 0.5f);
-        mBoltWidth = (int) (8 * metrics.density + 0.5f);
+        loadDimens();
     }
 
     @Override
@@ -296,5 +289,16 @@ public class BatteryMeterHorizontalView extends AbstractBatteryView implements
         if (!mPercentInside) {
             updateExtraPercentFontSize();
         }
+    }
+
+    @Override
+    protected void loadDimens() {
+        // bar width is hardcoded  android:layout_width="14.5dp"
+        DisplayMetrics metrics = getResources().getDisplayMetrics();
+        mBarWidth = (int) (20 * metrics.density + 0.5f);
+        mBarSpaceWidth = (int) (22 * metrics.density + 0.5f);
+        mBarHeight = (int) (10 * metrics.density + 0.5f);
+        mPercentOffsetY = (int) (1 * metrics.density + 0.5f);
+        mBoltWidth = (int) (8 * metrics.density + 0.5f);
     }
 }

@@ -98,13 +98,8 @@ public class BatteryDroidView extends AbstractBatteryView implements
         mBatteryPaint.setPathEffect(null);
 
         applyStyle();
+        loadDimens();
 
-        DisplayMetrics metrics = getResources().getDisplayMetrics();
-        mCircleWidth = (int) (16 * metrics.density + 0.5f);
-        mStrokeWidth = (int) (2 * metrics.density + 0.5f);
-        mBatteryPaint.setStrokeWidth(mStrokeWidth);
-        mFramePaint.setStrokeWidth(mStrokeWidth);
-        mPercentOffsetY = (int) (0.5 * metrics.density + 0.5f);
         mDroid = ((BitmapDrawable) getResources().getDrawable(R.drawable.statusbar_battery_droid)).getBitmap();
     }
 
@@ -187,5 +182,15 @@ public class BatteryDroidView extends AbstractBatteryView implements
 
     private void updatePercentFontSize() {
         updateExtraPercentFontSize();
+    }
+
+    @Override
+    protected void loadDimens() {
+        DisplayMetrics metrics = getResources().getDisplayMetrics();
+        mCircleWidth = (int) (16 * metrics.density + 0.5f);
+        mStrokeWidth = (int) (2 * metrics.density + 0.5f);
+        mBatteryPaint.setStrokeWidth(mStrokeWidth);
+        mFramePaint.setStrokeWidth(mStrokeWidth);
+        mPercentOffsetY = (int) (0.5 * metrics.density + 0.5f);
     }
 }

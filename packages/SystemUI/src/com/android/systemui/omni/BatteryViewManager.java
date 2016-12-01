@@ -24,6 +24,7 @@ import android.os.Handler;
 import android.os.UserHandle;
 import android.provider.Settings;
 import android.util.Log;
+import android.util.TypedValue;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.widget.LinearLayout;
@@ -231,7 +232,8 @@ public class BatteryViewManager {
     }
 
     public void onDensityOrFontScaleChanged() {
+        mCurrentBatteryView.loadDimens();
         mCurrentBatteryView.requestLayout();
-        mCurrentBatteryView.invalidate();
+        mCurrentBatteryView.postInvalidate();
     }
 }
