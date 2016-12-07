@@ -767,19 +767,13 @@ public final class BluetoothAdapter {
     public boolean enableBLE() {
         if (!isBleScanAlwaysAvailable()) return false;
 
-        if (isLeEnabled() == true) {
-            if (DBG) Log.d(TAG, "enableBLE(): BT is already enabled..!");
-            try {
-                mManagerService.updateBleAppCount(mToken, true);
-            } catch (RemoteException e) {
-                Log.e(TAG, "", e);
-            }
-            return true;
-        }
-
         try {
-            if (DBG) Log.d(TAG, "Calling enableBLE");
             mManagerService.updateBleAppCount(mToken, true);
+            if (isLeEnabled()) {
+                if (DBG) Log.d(TAG, "enableBLE(): Bluetooth already enabled");
+                return true;
+            }
+            if (DBG) Log.d(TAG, "enableBLE(): Calling enable");
             return mManagerService.enable();
         } catch (RemoteException e) {
             Log.e(TAG, "", e);
@@ -2016,7 +2010,7 @@ public final class BluetoothAdapter {
     final private IBluetoothManagerCallback mManagerCallback =
         new IBluetoothManagerCallback.Stub() {
             public void onBluetoothServiceUp(IBluetooth bluetoothService) {
-                if (VDBG) Log.d(TAG, "onBluetoothServiceUp: " + bluetoothService);
+                if (DBG) Log.d(TAG, "onBluetoothServiceUp: " + bluetoothService);
 
                 mServiceLock.writeLock().lock();
                 mService = bluetoothService;
@@ -2038,7 +2032,7 @@ public final class BluetoothAdapter {
             }
 
             public void onBluetoothServiceDown() {
-                if (VDBG) Log.d(TAG, "onBluetoothServiceDown: " + mService);
+                if (DBG) Log.d(TAG, "onBluetoothServiceDown: " + mService);
 
                 try {
                     mServiceLock.writeLock().lock();
@@ -2066,7 +2060,7 @@ public final class BluetoothAdapter {
             }
 
             public void onBrEdrDown() {
-                if (VDBG) Log.i(TAG, "on QBrEdrDown: ");
+                if (DBG) Log.i(TAG, "onBrEdrDown:");
             }
     };
 

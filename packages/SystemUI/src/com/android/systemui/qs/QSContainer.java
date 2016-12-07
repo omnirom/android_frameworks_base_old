@@ -347,4 +347,9 @@ public class QSContainer extends FrameLayout {
                 UserHandle.USER_CURRENT) == QuickQSPanel.NUM_QUICK_TILES_ALL;
         mQSAnimator.setFancyAnimaton(!quickQsScrollEnabled);
     }
+
+    public void hideImmediately() {
+        animate().cancel();
+        setY(-mHeader.getHeight());
+    }
 }

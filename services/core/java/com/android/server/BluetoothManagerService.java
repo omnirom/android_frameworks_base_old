@@ -203,7 +203,7 @@ class BluetoothManagerService extends IBluetoothManager.Stub {
                     } finally {
                         mBluetoothLock.readLock().unlock();
                     }
-                    Slog.d(TAG, "state" + st);
+                    Slog.d(TAG, "Airplane Mode change - current state: " + st);
 
                     if (isAirplaneModeOn()) {
                         // Clear registered LE apps to force shut-off
@@ -217,6 +217,7 @@ class BluetoothManagerService extends IBluetoothManager.Stub {
                                 mBluetoothLock.readLock().lock();
                                 if (mBluetooth != null) {
                                     mBluetooth.onBrEdrDown();
+                                    mEnable = false;
                                     mEnableExternal = false;
                                 }
                             } catch (RemoteException e) {
@@ -266,6 +267,7 @@ class BluetoothManagerService extends IBluetoothManager.Stub {
         mContext.registerReceiver(mReceiver, filter);
         loadStoredNameAndAddress();
         if (isBluetoothPersistedStateOn()) {
+            if (DBG) Slog.d(TAG, "Startup: Bluetooth persisted state is ON.");
             mEnableExternal = true;
         }
 
@@ -292,8 +294,10 @@ class BluetoothManagerService extends IBluetoothManager.Stub {
      *  Returns true if the Bluetooth saved state is "on"
      */
     private final boolean isBluetoothPersistedStateOn() {
-        return Settings.Global.getInt(mContentResolver,
-                Settings.Global.BLUETOOTH_ON, 0) != BLUETOOTH_OFF;
+        int state = Settings.Global.getInt(mContentResolver,
+                                           Settings.Global.BLUETOOTH_ON, -1);
+        if (DBG) Slog.d(TAG, "Bluetooth persisted state: " + state);
+        return state != BLUETOOTH_OFF;
     }
 
     /**
@@ -301,7 +305,7 @@ class BluetoothManagerService extends IBluetoothManager.Stub {
      */
     private final boolean isBluetoothPersistedStateOnBluetooth() {
         return Settings.Global.getInt(mContentResolver,
-                Settings.Global.BLUETOOTH_ON, 0) == BLUETOOTH_ON_BLUETOOTH;
+                Settings.Global.BLUETOOTH_ON, BLUETOOTH_ON_BLUETOOTH) == BLUETOOTH_ON_BLUETOOTH;
     }
 
     /**
@@ -309,6 +313,7 @@ class BluetoothManagerService extends IBluetoothManager.Stub {
      *
      */
     private void persistBluetoothSetting(int value) {
+        if (DBG) Slog.d(TAG, "Persisting Bluetooth Setting: " + value);
         Settings.Global.putInt(mContext.getContentResolver(),
                                Settings.Global.BLUETOOTH_ON,
                                value);
@@ -445,14 +450,16 @@ class BluetoothManagerService extends IBluetoothManager.Stub {
 
     class ClientDeathRecipient implements IBinder.DeathRecipient {
         public void binderDied() {
-            if (DBG) Slog.d(TAG, "Binder is dead -  unregister Ble App");
+            if (DBG) Slog.d(TAG, "Binder is dead - unregister Ble App");
             if (mBleAppCount > 0) --mBleAppCount;
 
             if (mBleAppCount == 0) {
                 if (DBG) Slog.d(TAG, "Disabling LE only mode after application crash");
                 try {
                     mBluetoothLock.readLock().lock();
-                    if (mBluetooth != null) {
+                    if (mBluetooth != null &&
+                        mBluetooth.getState() == BluetoothAdapter.STATE_BLE_ON) {
+                        mEnable = false;
                         mBluetooth.onBrEdrDown();
                     }
                 } catch (RemoteException e) {
@@ -469,6 +476,9 @@ class BluetoothManagerService extends IBluetoothManager.Stub {
 
     @Override
     public boolean isBleScanAlwaysAvailable() {
+        if (isAirplaneModeOn() && !mEnable) {
+            return false;
+        }
         try {
             return (Settings.Global.getInt(mContentResolver,
                     Settings.Global.BLE_SCAN_ALWAYS_AVAILABLE)) != 0;
@@ -707,6 +717,7 @@ class BluetoothManagerService extends IBluetoothManager.Stub {
             if (mUnbinding) return;
             mUnbinding = true;
             mHandler.removeMessages(MESSAGE_BLUETOOTH_STATE_CHANGE);
+            mHandler.removeMessages(MESSAGE_BIND_PROFILE_SERVICE);
             if (mBluetooth != null) {
                 //Unregister callback object
                 try {
@@ -1365,7 +1376,7 @@ class BluetoothManagerService extends IBluetoothManager.Stub {
                 {
                     int prevState = msg.arg1;
                     int newState = msg.arg2;
-                    if (DBG) Slog.d(TAG, "MESSAGE_BLUETOOTH_STATE_CHANGE: prevState = " + prevState + ", newState=" + newState);
+                    if (DBG) Slog.d(TAG, "MESSAGE_BLUETOOTH_STATE_CHANGE: prevState = " + prevState + ", newState =" + newState);
                     mState = newState;
                     bluetoothStateChangeHandler(prevState, newState);
                     // handle error state transition case from TURNING_ON to OFF
@@ -1677,6 +1688,7 @@ class BluetoothManagerService extends IBluetoothManager.Stub {
 
     private void bluetoothStateChangeHandler(int prevState, int newState) {
         boolean isStandardBroadcast = true;
+        if (DBG) Slog.d(TAG, "bluetoothStateChangeHandler: " + prevState + " ->  " + newState);
         if (prevState != newState) {
             //Notify all proxy objects first of adapter state change
             if (newState == BluetoothAdapter.STATE_BLE_ON ||
