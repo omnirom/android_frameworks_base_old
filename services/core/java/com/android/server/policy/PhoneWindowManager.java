@@ -190,6 +190,7 @@ public class PhoneWindowManager implements WindowManagerPolicy {
     static final boolean DEBUG_STARTING_WINDOW = false;
     static final boolean DEBUG_WAKEUP = false;
     static final boolean SHOW_STARTING_ANIMATIONS = true;
+    static final boolean SHOW_PROCESSES_ON_ALT_MENU = false;
 
     // Whether to allow dock apps with METADATA_DOCK_HOME to temporarily take over the Home key.
     // No longer recommended for desk docks;
