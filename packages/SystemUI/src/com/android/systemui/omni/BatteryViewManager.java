@@ -46,7 +46,6 @@ public class BatteryViewManager {
     private boolean mPercentInside;
     private boolean mChargingImage = true;
     private int mChargingColor;
-    private boolean mExpandedView;
     private List<AbstractBatteryView> mBatteryStyleList = new ArrayList<AbstractBatteryView>();
     private AbstractBatteryView mCurrentBatteryView;
     private BatteryController mBatteryController;
@@ -57,8 +56,6 @@ public class BatteryViewManager {
 
     public interface BatteryViewManagerObserver {
         public void batteryStyleChanged(AbstractBatteryView batteryStyle);
-
-        public boolean isExpandedBatteryView();
     }
 
     private ContentObserver mSettingsObserver = new ContentObserver(mHandler) {
@@ -118,7 +115,6 @@ public class BatteryViewManager {
                 Settings.System.getUriFor(Settings.System.STATUSBAR_BATTERY_ENABLE), false,
                 mSettingsObserver, UserHandle.USER_ALL);
 
-        mExpandedView = observer != null ? observer.isExpandedBatteryView() : false;
         update();
     }
 
@@ -168,8 +164,6 @@ public class BatteryViewManager {
             mCurrentBatteryView.setVisibility(View.GONE);
         } else if (mBatteryEnable == 1) {
             mCurrentBatteryView.setVisibility(View.VISIBLE);
-        } else if (mBatteryEnable == 2) {
-            mCurrentBatteryView.setVisibility(mExpandedView ? View.VISIBLE : View.GONE);
         }
         notifyObserver();
     }
@@ -186,7 +180,7 @@ public class BatteryViewManager {
 
     private void applyStyle() {
         mCurrentBatteryView.setPercentInside(mPercentInside && mBatteryStyle != 3);
-        boolean showPercentReally = mExpandedView ? mShowPercent != 0 : mShowPercent == 1;
+        boolean showPercentReally = mShowPercent == 1;
         mCurrentBatteryView.setShowPercent(showPercentReally);
         mCurrentBatteryView.setChargingImage(mChargingImage);
         mCurrentBatteryView.setChargingColor(mChargingColor);
@@ -198,7 +192,7 @@ public class BatteryViewManager {
         final int batteryStyle = Settings.System.getIntForUser(mContext.getContentResolver(),
                 Settings.System.STATUSBAR_BATTERY_STYLE, 0, UserHandle.USER_CURRENT);
         final int showPercent = Settings.System.getIntForUser(mContext.getContentResolver(),
-                Settings.System.STATUSBAR_BATTERY_PERCENT, 2, UserHandle.USER_CURRENT);
+                Settings.System.STATUSBAR_BATTERY_PERCENT, 0, UserHandle.USER_CURRENT);
         final boolean percentInside = Settings.System.getIntForUser(mContext.getContentResolver(),
                 Settings.System.STATUSBAR_BATTERY_PERCENT_INSIDE, 0, UserHandle.USER_CURRENT) != 0;
         final boolean chargingImage = Settings.System.getIntForUser(mContext.getContentResolver(),
