@@ -5025,6 +5025,15 @@ public final class Settings {
         public static final String OMNI_DOZE_ON_CHARGE_NOW = "doze_on_charge_now";
 
         /**
+         * media artwork wallpaper blur level on lockscreen
+         * @hide
+         */
+        public static final String OMNI_LOCKSCREEN_MEDIA_BLUR = "lockscreen_media_blur";
+
+        private static final Validator OMNI_LOCKSCREEN_MEDIA_BLUR_VALIDATOR =
+                ANY_INTEGER_VALIDATOR;
+
+        /**
          * IMPORTANT: If you add a new public settings you also have to add it to
          * PUBLIC_SETTINGS below. If the new setting is hidden you have to add
          * it to PRIVATE_SETTINGS below. Also add a validator that can validate
@@ -5149,7 +5158,8 @@ public final class Settings {
             OMNI_VIBRATE_ON_CONNECT,
             OMNI_VIBRATE_ON_CALLWAITING,
             OMNI_VIBRATE_ON_DISCONNECT,
-            OMNI_DOZE_ON_CHARGE
+            OMNI_DOZE_ON_CHARGE,
+            OMNI_LOCKSCREEN_MEDIA_BLUR,
         };
 
         /**
@@ -5325,6 +5335,7 @@ public final class Settings {
             PRIVATE_SETTINGS.add(OMNI_VIBRATE_ON_CALLWAITING);
             PRIVATE_SETTINGS.add(OMNI_VIBRATE_ON_DISCONNECT);
             PRIVATE_SETTINGS.add(OMNI_DOZE_ON_CHARGE);
+            PRIVATE_SETTINGS.add(OMNI_LOCKSCREEN_MEDIA_BLUR);
         }
 
         /**
@@ -5511,6 +5522,7 @@ public final class Settings {
                     OMNI_VIBRATE_ON_DISCONNECT_VALIDATOR);
             VALIDATORS.put(OMNI_DOZE_ON_CHARGE,
                     OMNI_DOZE_ON_CHARGE_VALIDATOR);
+            VALIDATORS.put(OMNI_LOCKSCREEN_MEDIA_BLUR, OMNI_LOCKSCREEN_MEDIA_BLUR_VALIDATOR);
         }
 
         /**
