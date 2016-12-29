@@ -4544,6 +4544,15 @@ public final class Settings {
                 BOOLEAN_VALIDATOR;
 
         /**
+         * hide the media metadata as wallpaper on lockscreen
+         * @hide
+         */
+        public static final String OMNI_LOCKSCREEN_HIDE_MEDIA = "lockscreen_hide_media";
+
+        private static final Validator OMNI_LOCKSCREEN_HIDE_MEDIA_VALIDATOR =
+                BOOLEAN_VALIDATOR;
+
+        /**
          * IMPORTANT: If you add a new public settings you also have to add it to
          * PUBLIC_SETTINGS below. If the new setting is hidden you have to add
          * it to PRIVATE_SETTINGS below. Also add a validator that can validate
@@ -4655,6 +4664,7 @@ public final class Settings {
             OMNI_SHOW_CPU_OVERLAY,
             OMNI_FINGERPRINT_SUCCESS_VIB,
             OMNI_LONG_PRESS_POWER_TORCH,
+            OMNI_LOCKSCREEN_HIDE_MEDIA,
         };
 
         /**
@@ -4815,6 +4825,7 @@ public final class Settings {
             PRIVATE_SETTINGS.add(OMNI_SHOW_CPU_OVERLAY);
             PRIVATE_SETTINGS.add(OMNI_FINGERPRINT_SUCCESS_VIB);
             PRIVATE_SETTINGS.add(OMNI_LONG_PRESS_POWER_TORCH);
+            PRIVATE_SETTINGS.add(OMNI_LOCKSCREEN_HIDE_MEDIA);
         }
 
         /**
@@ -4978,6 +4989,7 @@ public final class Settings {
             VALIDATORS.put(OMNI_FINGERPRINT_SUCCESS_VIB,
                     OMNI_FINGERPRINT_SUCCESS_VIB_VALIDATOR);
             VALIDATORS.put(OMNI_LONG_PRESS_POWER_TORCH, OMNI_LONG_PRESS_POWER_TORCH_VALIDATOR);
+            VALIDATORS.put(OMNI_LOCKSCREEN_HIDE_MEDIA, OMNI_LOCKSCREEN_HIDE_MEDIA_VALIDATOR);
         }
 
         /**
