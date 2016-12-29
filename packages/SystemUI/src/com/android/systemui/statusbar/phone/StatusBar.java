@@ -658,6 +658,9 @@ public class StatusBar extends SystemUI implements DemoMode,
             mContext.getContentResolver().registerContentObserver(Settings.System.getUriFor(
                     Settings.System.OMNI_DOUBLE_TAP_SLEEP_LOCKSCREEN),
                     false, this, UserHandle.USER_ALL);
+            mContext.getContentResolver().registerContentObserver(Settings.System.getUriFor(
+                    Settings.System.OMNI_LOCKSCREEN_HIDE_MEDIA),
+                    false, this, UserHandle.USER_ALL);
         }
 
         @Override
@@ -674,10 +677,14 @@ public class StatusBar extends SystemUI implements DemoMode,
             if (mStatusBarWindow != null) {
                 mStatusBarWindow.updateSettings();
             }
+            mHideLockscreenArtwork = Settings.System.getIntForUser(mContext.getContentResolver(),
+                    Settings.System.OMNI_LOCKSCREEN_HIDE_MEDIA, 0,
+                    UserHandle.USER_CURRENT) != 0;
         }
     }
     private OmniSettingsObserver mOmniSettingsObserver;
     private boolean mShowNavBar;
+    private boolean mHideLockscreenArtwork;
 
     @Override
     public void start() {
@@ -1672,7 +1679,7 @@ public class StatusBar extends SystemUI implements DemoMode,
     @Override
     public void updateMediaMetaData(boolean metaDataChanged, boolean allowEnterAnimation) {
         Trace.beginSection("StatusBar#updateMediaMetaData");
-        if (!SHOW_LOCKSCREEN_MEDIA_ARTWORK) {
+        if (!SHOW_LOCKSCREEN_MEDIA_ARTWORK || mHideLockscreenArtwork) {
             Trace.endSection();
             return;
         }
