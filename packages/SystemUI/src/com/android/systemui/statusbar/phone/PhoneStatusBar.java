@@ -424,6 +424,7 @@ public class PhoneStatusBar extends BaseStatusBar implements DemoMode,
     private IPowerManager mPower;
     private boolean mDoubleTabSleep;
     private boolean mOmniSwitchRecents;
+    private boolean mHideLockscreenArtwork;
 
     // for disabling the status bar
     int mDisabled1 = 0;
@@ -542,6 +543,9 @@ public class PhoneStatusBar extends BaseStatusBar implements DemoMode,
             mContext.getContentResolver().registerContentObserver(Settings.System.getUriFor(
                     Settings.System.QS_TILE_TITLE_VISIBILITY),
                     false, this, UserHandle.USER_ALL);
+            mContext.getContentResolver().registerContentObserver(Settings.System.getUriFor(
+                    Settings.System.LOCKSCREEN_HIDE_MEDIA),
+                    false, this, UserHandle.USER_ALL);
             update();
         }
 
@@ -569,6 +573,8 @@ public class PhoneStatusBar extends BaseStatusBar implements DemoMode,
                     mContext.getContentResolver(), Settings.System.DOUBLE_TAP_SLEEP_GESTURE, 0, mCurrentUserId) == 1;
             mOmniSwitchRecents = Settings.System.getIntForUser(
                     mContext.getContentResolver(), Settings.System.NAVIGATION_BAR_RECENTS, 0, mCurrentUserId) == 1;
+            mHideLockscreenArtwork = Settings.System.getIntForUser(
+                    mContext.getContentResolver(), Settings.System.LOCKSCREEN_HIDE_MEDIA, 0, mCurrentUserId) == 1;
 
             if (mNotificationPanel != null) {
                 mNotificationPanel.updateSettings();
@@ -2321,7 +2327,7 @@ public class PhoneStatusBar extends BaseStatusBar implements DemoMode,
      */
     public void updateMediaMetaData(boolean metaDataChanged, boolean allowEnterAnimation) {
         Trace.beginSection("PhoneStatusBar#updateMediaMetaData");
-        if (!SHOW_LOCKSCREEN_MEDIA_ARTWORK) {
+        if (!SHOW_LOCKSCREEN_MEDIA_ARTWORK || mHideLockscreenArtwork) {
             Trace.endSection();
             return;
         }
