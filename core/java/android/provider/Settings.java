@@ -3896,6 +3896,12 @@ public final class Settings {
         public static final String QS_TILE_TITLE_VISIBILITY = "qs_tile_title_visibility";
 
         /**
+         * hide the media metadata as wallpaper on lockscreen
+         * @hide
+         */
+        public static final String LOCKSCREEN_HIDE_MEDIA = "lockscreen_hide_media";
+
+        /**
          * Settings to backup. This is here so that it's in the same place as the settings
          * keys and easy to update.
          *
