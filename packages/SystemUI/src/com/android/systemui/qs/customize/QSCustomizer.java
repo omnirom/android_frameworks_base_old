@@ -112,6 +112,8 @@ public class QSCustomizer extends LinearLayout implements OnMenuItemClickListene
         MenuItem qsTitlesMenuItem = mToolbar.getMenu().findItem(R.id.menu_item_titles);
         qsTitlesMenuItem.setChecked(qsTitlesValue == 0);
 
+        updateColumnsMenu();
+
         mToolbar.setTitle(R.string.qs_edit);
         mDefaultColumns = Math.max(1,
                     mContext.getResources().getInteger(R.integer.quick_settings_num_columns));
@@ -207,18 +209,22 @@ public class QSCustomizer extends LinearLayout implements OnMenuItemClickListene
             case R.id.menu_item_columns_three:
                 Settings.System.putIntForUser(mContext.getContentResolver(),
                         Settings.System.QS_LAYOUT_COLUMNS, 3, UserHandle.USER_CURRENT);
+                updateColumnsMenu();
                 break;
             case R.id.menu_item_columns_four:
                 Settings.System.putIntForUser(mContext.getContentResolver(),
                         Settings.System.QS_LAYOUT_COLUMNS, 4, UserHandle.USER_CURRENT);
+                updateColumnsMenu();
                 break;
             case R.id.menu_item_columns_five:
                 Settings.System.putIntForUser(mContext.getContentResolver(),
                         Settings.System.QS_LAYOUT_COLUMNS, 5, UserHandle.USER_CURRENT);
+                updateColumnsMenu();
                 break;
             case R.id.menu_item_columns_six:
                 Settings.System.putIntForUser(mContext.getContentResolver(),
                         Settings.System.QS_LAYOUT_COLUMNS, 6, UserHandle.USER_CURRENT);
+                updateColumnsMenu();
                 break;
             case R.id.menu_item_qs_scroll:
                 item.setChecked(!item.isChecked());
@@ -309,5 +315,19 @@ public class QSCustomizer extends LinearLayout implements OnMenuItemClickListene
                 UserHandle.USER_CURRENT);
         mTileAdapter.setColumnCount(columns);
         mLayout.setSpanCount(columns);
+    }
+
+    private void updateColumnsMenu() {
+        int columns = Settings.System.getIntForUser(
+                mContext.getContentResolver(), Settings.System.QS_LAYOUT_COLUMNS, mDefaultColumns,
+                UserHandle.USER_CURRENT);
+        MenuItem menuItemThree = mToolbar.getMenu().findItem(R.id.menu_item_columns_three);
+        menuItemThree.setChecked(columns == 3);
+        MenuItem menuItemFour = mToolbar.getMenu().findItem(R.id.menu_item_columns_four);
+        menuItemFour.setChecked(columns == 4);
+        MenuItem menuItemFive = mToolbar.getMenu().findItem(R.id.menu_item_columns_five);
+        menuItemFive.setChecked(columns == 5);
+        MenuItem menuItemSix = mToolbar.getMenu().findItem(R.id.menu_item_columns_six);
+        menuItemSix.setChecked(columns == 6);
     }
 }

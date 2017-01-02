@@ -19,13 +19,17 @@ limitations under the License.
               android:title="@string/qs_menu_item_columns">
             <menu>
                 <item android:id="@+id/menu_item_columns_three"
-                      android:title="@string/qs_menu_item_columns_three" />
+                      android:title="@string/qs_menu_item_columns_three"
+                      android:checkable="true" />
                 <item android:id="@+id/menu_item_columns_four"
-                      android:title="@string/qs_menu_item_columns_four" />
+                      android:title="@string/qs_menu_item_columns_four"
+                      android:checkable="true" />
                 <item android:id="@+id/menu_item_columns_five"
-                      android:title="@string/qs_menu_item_columns_five" />
+                      android:title="@string/qs_menu_item_columns_five"
+                      android:checkable="true" />
                 <item android:id="@+id/menu_item_columns_six"
-                      android:title="@string/qs_menu_item_columns_six" />
+                      android:title="@string/qs_menu_item_columns_six"
+                      android:checkable="true" />
             </menu>
         </item>
         <item android:id="@+id/menu_item_qs_scroll"
