@@ -28,6 +28,11 @@ import android.widget.LinearLayout.LayoutParams;
 import com.android.internal.statusbar.StatusBarIcon;
 import com.android.systemui.Dependency;
 import com.android.systemui.R;
+import com.android.systemui.SystemUIFactory;
+import com.android.systemui.omni.BatteryViewManager;
+import com.android.systemui.omni.NetworkTraffic;
+import com.android.systemui.statusbar.NotificationData;
+import com.android.systemui.statusbar.SignalClusterView;
 import com.android.systemui.statusbar.StatusBarIconView;
 import com.android.systemui.statusbar.policy.DarkIconDispatcher;
 
@@ -43,11 +48,49 @@ public interface StatusBarIconController {
 
     public static final String ICON_BLACKLIST = "icon_blacklist";
 
+    public static final int DEFAULT_ICON_TINT = Color.WHITE;
+
+    private Context mContext;
+    private PhoneStatusBar mPhoneStatusBar;
+    private DemoStatusIcons mDemoStatusIcons;
+
+    private LinearLayout mSystemIconArea;
+    private LinearLayout mStatusIcons;
+    private SignalClusterView mSignalCluster;
+    private LinearLayout mStatusIconsKeyguard;
+
+    private NotificationIconAreaController mNotificationIconAreaController;
+    private View mNotificationIconAreaInner;
+
+    //private BatteryMeterView mBatteryMeterViewKeyguard;
+    //private BatteryMeterView mBatteryMeterView;
+    private BatteryViewManager mBatteryViewManager;
+    private TextView mClock;
+    private NetworkTraffic mNetworkTraffic;
+
+    private int mIconSize;
+    private int mIconHPadding;
+
+    private int mIconTint = DEFAULT_ICON_TINT;
+    private float mDarkIntensity;
+    private final Rect mTintArea = new Rect();
+    private static final Rect sTmpRect = new Rect();
+    private static final int[] sTmpInt2 = new int[2];
+
+    private boolean mTransitionPending;
+    private boolean mTintChangePending;
+    private float mPendingDarkIntensity;
+    private ValueAnimator mTintAnimator;
+
+    private int mDarkModeIconColorSingleTone;
+    private int mLightModeIconColorSingleTone;
+
     public static ArraySet<String> getIconBlacklist(String blackListStr) {
         ArraySet<String> ret = new ArraySet<>();
         if (blackListStr == null) {
             blackListStr = "rotate,headset";
         }
+
         String[] blacklist = blackListStr.split(",");
         for (String slot : blacklist) {
             if (!TextUtils.isEmpty(slot)) {
@@ -55,6 +98,43 @@ public interface StatusBarIconController {
             }
         }
         return ret;
+
+    };
+
+    public StatusBarIconController(Context context, View statusBar, View keyguardStatusBar,
+            PhoneStatusBar phoneStatusBar) {
+        super(context.getResources().getStringArray(
+                com.android.internal.R.array.config_statusBarIcons));
+        mContext = context;
+        mPhoneStatusBar = phoneStatusBar;
+        mSystemIconArea = (LinearLayout) statusBar.findViewById(R.id.system_icon_area);
+        mStatusIcons = (LinearLayout) statusBar.findViewById(R.id.statusIcons);
+        mSignalCluster = (SignalClusterView) statusBar.findViewById(R.id.signal_cluster);
+
+        mNotificationIconAreaController = SystemUIFactory.getInstance()
+                .createNotificationIconAreaController(context, phoneStatusBar);
+        mNotificationIconAreaInner =
+                mNotificationIconAreaController.getNotificationInnerAreaView();
+
+        ViewGroup notificationIconArea =
+                (ViewGroup) statusBar.findViewById(R.id.notification_icon_area);
+        notificationIconArea.addView(mNotificationIconAreaInner);
+
+        mStatusIconsKeyguard = (LinearLayout) keyguardStatusBar.findViewById(R.id.statusIcons);
+        //mBatteryMeterViewKeyguard = (BatteryMeterView) keyguardStatusBar.findViewById(R.id.battery);
+        //mBatteryMeterView = (BatteryMeterView) statusBar.findViewById(R.id.battery);
+        mBatteryViewManager = phoneStatusBar.getBatteryViewManager();
+        //scaleBatteryMeterViews(context);
+
+        mClock = (TextView) statusBar.findViewById(R.id.clock);
+        mDarkModeIconColorSingleTone = context.getColor(R.color.dark_mode_icon_color_single_tone);
+        mLightModeIconColorSingleTone = context.getColor(R.color.light_mode_icon_color_single_tone);
+        mNetworkTraffic = (NetworkTraffic) statusBar.findViewById(R.id.networkTraffic);
+
+        mHandler = new Handler();
+        loadDimens();
+
+        TunerService.get(mContext).addTunable(this, ICON_BLACKLIST);
     }
 
 
@@ -149,6 +229,12 @@ public interface StatusBarIconController {
             mGroup.removeAllViews();
         }
 
+        mSignalCluster.setIconTint(mIconTint, mDarkIntensity, mTintArea);
+        mBatteryViewManager.setDarkIntensity(mDarkIntensity);
+        mClock.setTextColor(getTint(mTintArea, mClock, mIconTint));
+        mNetworkTraffic.setIconTint(getTint(mTintArea, mNetworkTraffic, mIconTint));
+    }
+
         protected void onIconExternal(int viewIndex, int height) {
             ImageView imageView = (ImageView) mGroup.getChildAt(viewIndex);
             imageView.setScaleType(ImageView.ScaleType.FIT_CENTER);
@@ -177,6 +263,17 @@ public interface StatusBarIconController {
         protected void onRemoveIcon(int viewIndex) {
             mGroup.removeViewAt(viewIndex);
         }
+
+        for (int i = 0; i < mStatusIconsKeyguard.getChildCount(); i++) {
+            View child = mStatusIconsKeyguard.getChildAt(i);
+            LinearLayout.LayoutParams lp = new LinearLayout.LayoutParams(
+                    ViewGroup.LayoutParams.WRAP_CONTENT, mIconSize);
+            child.setLayoutParams(lp);
+        }
+        mBatteryViewManager.onDensityOrFontScaleChanged();
+        mNetworkTraffic.onDensityOrFontScaleChanged();
+        //scaleBatteryMeterViews(mContext);
+    }
 
         public void onSetIcon(int viewIndex, StatusBarIcon icon) {
             StatusBarIconView view = (StatusBarIconView) mGroup.getChildAt(viewIndex);
