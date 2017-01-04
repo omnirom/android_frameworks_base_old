@@ -61,6 +61,12 @@
             android:layout_height="match_parent"
             android:orientation="horizontal"
             >
+            <com.android.systemui.omni.NetworkTraffic
+                android:id="@+id/networkTraffic"
+                android:layout_width="wrap_content"
+                android:layout_height="match_parent"
+                android:singleLine="false"
+                android:gravity="right|center_vertical"/>
 
             <include layout="@layout/system_icons" />
 
