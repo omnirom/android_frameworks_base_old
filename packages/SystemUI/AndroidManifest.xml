@@ -534,5 +534,12 @@
             android:name=".screenshot.ScreenshotEditor"
             android:theme="@style/ScreenshotEditorStyle" />
 
+        <activity android:name=".DaylightHeaderDefault"
+                  android:label="Default" >
+            <intent-filter>
+                <action android:name="org.omnirom.DaylightHeaderPack" />
+                <category android:name="android.intent.category.DEFAULT" />
+            </intent-filter>
+        </activity>
     </application>
 </manifest>
