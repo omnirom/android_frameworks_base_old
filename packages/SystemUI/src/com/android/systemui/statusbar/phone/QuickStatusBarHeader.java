@@ -21,16 +21,24 @@ import android.app.PendingIntent;
 import android.content.Context;
 import android.content.Intent;
 import android.content.res.Configuration;
+import android.graphics.Color;
+import android.graphics.drawable.ColorDrawable;
 import android.graphics.drawable.Drawable;
+import android.graphics.drawable.TransitionDrawable;
 import android.graphics.drawable.RippleDrawable;
+import android.os.UserHandle;
 import android.os.UserManager;
+import android.provider.Settings;
 import android.util.AttributeSet;
+import android.util.Log;
 import android.view.View;
 import android.view.View.OnClickListener;
 import android.view.View.OnLongClickListener;
 import android.view.ViewGroup;
+import android.widget.FrameLayout;
 import android.widget.HorizontalScrollView;
 import android.widget.ImageView;
+import android.widget.RelativeLayout;
 import android.widget.TextView;
 import android.widget.Toast;
 
@@ -39,6 +47,7 @@ import com.android.internal.logging.MetricsProto;
 import com.android.keyguard.KeyguardStatusView;
 import com.android.systemui.FontSizeUtils;
 import com.android.systemui.R;
+import com.android.systemui.omni.StatusBarHeaderMachine;
 import com.android.systemui.qs.QSPanel;
 import com.android.systemui.qs.QSPanel.Callback;
 import com.android.systemui.qs.QuickQSPanel;
@@ -53,7 +62,8 @@ import com.android.systemui.tuner.TunerService;
 import com.android.systemui.tuner.TunerActivity;
 
 public class QuickStatusBarHeader extends BaseStatusBarHeader implements
-        NextAlarmChangeCallback, OnClickListener, OnUserInfoChangedListener, OnLongClickListener {
+        NextAlarmChangeCallback, OnClickListener, OnUserInfoChangedListener, OnLongClickListener,
+        StatusBarHeaderMachine.IStatusBarHeaderMachineObserver {
 
     private static final String TAG = "QuickStatusBarHeader";
 
@@ -96,7 +106,13 @@ public class QuickStatusBarHeader extends BaseStatusBarHeader implements
     private View mEdit;
     private boolean mShowFullAlarm;
     private float mDateTimeTranslation;
+
+    // omni additions
     private HorizontalScrollView mQuickQsPanelScroller;
+    private ImageView mBackgroundImage;
+    private Drawable mCurrentBackground;
+    private int mQsPanelOffsetNormal;
+    private int mQsPanelOffsetHeader;
 
     public QuickStatusBarHeader(Context context, AttributeSet attrs) {
         super(context, attrs);
@@ -149,6 +165,8 @@ public class QuickStatusBarHeader extends BaseStatusBarHeader implements
         ((RippleDrawable) mSettingsButton.getBackground()).setForceSoftware(true);
         ((RippleDrawable) mExpandIndicator.getBackground()).setForceSoftware(true);
 
+        mBackgroundImage = (ImageView) findViewById(R.id.background_image);
+
         updateResources();
     }
 
@@ -177,6 +195,9 @@ public class QuickStatusBarHeader extends BaseStatusBarHeader implements
         mAnimator = builder.build();
 
         updateSettingsAnimator();
+
+        mQsPanelOffsetNormal = getResources().getDimensionPixelSize(R.dimen.qs_panel_top_offset_normal);
+        mQsPanelOffsetHeader = getResources().getDimensionPixelSize(R.dimen.qs_panel_top_offset_header);
     }
 
     protected void updateSettingsAnimator() {
@@ -216,6 +237,15 @@ public class QuickStatusBarHeader extends BaseStatusBarHeader implements
         mExpanded = expanded;
         mHeaderQsPanel.setExpanded(expanded);
         updateEverything();
+
+        // TODO fugly
+        post(new Runnable() {
+            public void run() {
+                RelativeLayout.LayoutParams params = (RelativeLayout.LayoutParams) mBackgroundImage.getLayoutParams(); 
+                params.height = getExpandedHeight();
+                mBackgroundImage.setLayoutParams(params);
+            }
+        });
     }
 
     @Override
@@ -429,14 +459,91 @@ public class QuickStatusBarHeader extends BaseStatusBarHeader implements
     public void updateSettings() {
         if (mQsPanel != null) {
             mQsPanel.updateSettings();
+
+            post(new Runnable() {
+                public void run() {
+                    final boolean customHeader = Settings.System.getIntForUser(mContext.getContentResolver(),
+                            Settings.System.STATUS_BAR_CUSTOM_HEADER, 0,
+                            UserHandle.USER_CURRENT) != 0;
+                    FrameLayout.LayoutParams params = (FrameLayout.LayoutParams) mQsPanel.getLayoutParams();
+                    params.setMargins(0, customHeader ? mQsPanelOffsetHeader : mQsPanelOffsetNormal, 0, 0);
+                    mQsPanel.setLayoutParams(params);
+                }
+            });
         }
         if (mHeaderQsPanel != null) {
             mHeaderQsPanel.updateSettings();
         }
+        applyHeaderBackgroundShadow();
     }
 
     @Override
     public void onClosingFinished() {
         mQuickQsPanelScroller.scrollTo(0, 0);
+    }
+
+    @Override
+    public void updateHeader(final Drawable headerImage, final boolean force) {
+        post(new Runnable() {
+             public void run() {
+                doUpdateStatusBarCustomHeader(headerImage, force);
+            }
+        });
+    }
+
+    @Override
+    public void disableHeader() {
+        post(new Runnable() {
+             public void run() {
+                mCurrentBackground = null;
+                mBackgroundImage.setVisibility(View.GONE);
+            }
+        });
+    }
+
+    private void doUpdateStatusBarCustomHeader(final Drawable next, final boolean force) {
+        if (next != null) {
+            if (next != mCurrentBackground) {
+                Log.i(TAG, "Updating status bar header background");
+                mBackgroundImage.setVisibility(View.VISIBLE);
+                setNotificationPanelHeaderBackground(next, force);
+                mCurrentBackground = next;
+            }
+        } else {
+            mCurrentBackground = null;
+            mBackgroundImage.setVisibility(View.GONE);
+        }
+    }
+
+    private void setNotificationPanelHeaderBackground(final Drawable dw, final boolean force) {
+        if (mBackgroundImage.getDrawable() != null && !force) {
+            Drawable[] arrayDrawable = new Drawable[2];
+            arrayDrawable[0] = mBackgroundImage.getDrawable();
+            arrayDrawable[1] = dw;
+
+            TransitionDrawable transitionDrawable = new TransitionDrawable(arrayDrawable);
+            transitionDrawable.setCrossFadeEnabled(true);
+            mBackgroundImage.setImageDrawable(transitionDrawable);
+            transitionDrawable.startTransition(1000);
+        } else {
+            mBackgroundImage.setImageDrawable(dw);
+        }
+        applyHeaderBackgroundShadow();
+    }
+
+    private void applyHeaderBackgroundShadow() {
+        final int headerShadow = Settings.System.getIntForUser(mContext.getContentResolver(),
+                Settings.System.STATUS_BAR_CUSTOM_HEADER_SHADOW, 80,
+                UserHandle.USER_CURRENT);
+
+        if (mBackgroundImage != null) {
+            if (headerShadow != 0) {
+                ColorDrawable shadow = new ColorDrawable(Color.BLACK);
+                shadow.setAlpha(headerShadow);
+                mBackgroundImage.setForeground(shadow);
+            } else {
+                mBackgroundImage.setForeground(null);
+            }
+        }
     }
 }

@@ -39,4 +39,8 @@
 
     <!-- Network traffic monitor multi-line text size -->
     <dimen name="net_traffic_multi_text_size">7dp</dimen>
+
+    <dimen name="qs_panel_top_offset_normal">80dp</dimen>
+    <dimen name="qs_panel_top_offset_header">110dp</dimen>
+
 </resources>
