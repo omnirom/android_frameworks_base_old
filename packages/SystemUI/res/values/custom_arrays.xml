@@ -31,7 +31,7 @@
         <item>@string/stream_title_call</item> <!-- STREAM_VOICE_CALL -->
         <item>@string/stream_title_system</item> <!-- STREAM_SYSTEM -->
         <item>@string/stream_title_ring</item> <!-- STREAM_RING -->
-        <item>@string/stream_title_music</item> <!-- STREAM_MUSIC -->
+        <item>@string/stream_title_media</item> <!-- STREAM_MUSIC -->
         <item>@string/stream_title_alarm</item> <!-- STREAM_ALARM -->
         <item>@string/stream_title_notification</item> <!-- STREAM_NOTIFICATION -->
         <item>@string/stream_title_bluetooth</item> <!-- STREAM_BLUETOOTH_SCO -->
