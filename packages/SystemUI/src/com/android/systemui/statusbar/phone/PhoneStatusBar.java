@@ -147,6 +147,7 @@ import com.android.systemui.doze.DozeLog;
 import com.android.systemui.keyguard.KeyguardViewMediator;
 import com.android.systemui.qs.QSContainer;
 import com.android.systemui.omni.BatteryViewManager;
+import com.android.systemui.omni.StatusBarHeaderMachine;
 import com.android.systemui.qs.QSPanel;
 import com.android.systemui.recents.ScreenPinningRequest;
 import com.android.systemui.recents.events.EventBus;
@@ -425,6 +426,7 @@ public class PhoneStatusBar extends BaseStatusBar implements DemoMode,
     private boolean mDoubleTabSleep;
     private boolean mOmniSwitchRecents;
     private boolean mHideLockscreenArtwork;
+    private StatusBarHeaderMachine mStatusBarHeaderMachine;
 
     // for disabling the status bar
     int mDisabled1 = 0;
@@ -545,6 +547,9 @@ public class PhoneStatusBar extends BaseStatusBar implements DemoMode,
                     false, this, UserHandle.USER_ALL);
             mContext.getContentResolver().registerContentObserver(Settings.System.getUriFor(
                     Settings.System.LOCKSCREEN_HIDE_MEDIA),
+                    false, this, UserHandle.USER_ALL);
+            mContext.getContentResolver().registerContentObserver(Settings.System.getUriFor(
+                    Settings.System.STATUS_BAR_CUSTOM_HEADER_SHADOW),
                     false, this, UserHandle.USER_ALL);
             update();
         }
@@ -1150,6 +1155,10 @@ public class PhoneStatusBar extends BaseStatusBar implements DemoMode,
 
         // Private API call to make the shadows look better for Recents
         ThreadedRenderer.overrideProperty("ambientRatio", String.valueOf(1.5f));
+
+        mStatusBarHeaderMachine = new StatusBarHeaderMachine(mContext);
+        mStatusBarHeaderMachine.addObserver((QuickStatusBarHeader) mHeader);
+        mStatusBarHeaderMachine.updateEnablement();
 
         return mStatusBarView;
     }
@@ -3909,6 +3918,7 @@ public class PhoneStatusBar extends BaseStatusBar implements DemoMode,
         updateMediaMetaData(true, false);
         mBatteryViewManager.update();
         mOmniSettingsObserver.update();
+        mStatusBarHeaderMachine.updateEnablement();
     }
 
     private void setControllerUsers() {
