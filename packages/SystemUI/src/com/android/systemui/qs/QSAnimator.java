@@ -69,6 +69,7 @@ public class QSAnimator implements Callback, PageListener, Listener, OnLayoutCha
 
     // omni additions
     private HorizontalScrollView mQuickQsPanelScroller;
+    private boolean mNotScrolled = true;
 
     public QSAnimator(QSContainer container, QuickQSPanel quickPanel, QSPanel panel,HorizontalScrollView quickPanelScroller) {
         mQsContainer = container;
@@ -167,7 +168,7 @@ public class QSAnimator implements Callback, PageListener, Listener, OnLayoutCha
             }
             final TextView label = ((QSTileView) tileView).getLabel();
             final View tileIcon = tileView.getIcon().getIconView();
-            if (count < mQuickQsPanel.getNumQuickTiles() && mAllowFancy) {
+            if (count < mQuickQsPanel.getNumQuickTiles() && allowFancy()) {
                 // Quick tiles.
                 QSTileBaseView quickTileView = mQuickQsPanel.getTileView(tile);
                 if (quickTileView == null) {
@@ -196,7 +197,7 @@ public class QSAnimator implements Callback, PageListener, Listener, OnLayoutCha
                 mTopFiveQs.add(tileIcon);
                 mAllViews.add(tileIcon);
                 mAllViews.add(quickTileView);
-            } else if (mFullRows && isIconInAnimatedRow(count)) {
+            } else if (fullRows() && isIconInAnimatedRow(count)) {
                 // TODO: Refactor some of this, it shares a lot with the above block.
                 // Move the last tile position over by the last difference between quick tiles.
                 // This makes the extra icons seems as if they are coming from positions in the
@@ -222,7 +223,7 @@ public class QSAnimator implements Callback, PageListener, Listener, OnLayoutCha
             mAllViews.add(label);
             count++;
         }
-        if (mAllowFancy) {
+        if (allowFancy()) {
             // Make brightness appear static position and alpha in through second half.
             View brightness = mQsPanel.getBrightnessView();
             if (brightness != null) {
@@ -301,7 +302,7 @@ public class QSAnimator implements Callback, PageListener, Listener, OnLayoutCha
             return;
         }
         mLastPosition = position;
-        if (mOnFirstPage && mAllowFancy) {
+        if (mOnFirstPage && allowFancy()) {
             mQuickQsPanel.setAlpha(1);
             mFirstPageAnimator.setPosition(position);
             mFirstPageDelayedAnimator.setPosition(position);
@@ -387,5 +388,21 @@ public class QSAnimator implements Callback, PageListener, Listener, OnLayoutCha
     public void setFancyAnimaton(boolean value) {
         mAllowFancy = value;
         mFullRows = value;
+    }
+
+    private boolean allowFancy() {
+        return mAllowFancy && notScrolled();
+    }
+
+    private boolean fullRows() {
+        return mFullRows && notScrolled();
+    }
+
+    private boolean notScrolled() {
+        if ((mQuickQsPanelScroller.getScrollX() == 0) != mNotScrolled) {
+            mNotScrolled = !mNotScrolled;
+            clearAnimationState();
+        }
+        return mNotScrolled;
     }
 }
