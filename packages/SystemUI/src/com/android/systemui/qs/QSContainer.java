@@ -348,7 +348,6 @@ public class QSContainer extends FrameLayout {
         final boolean quickQsScrollEnabled = Settings.System.getIntForUser(getContext().getContentResolver(),
                 Settings.System.QS_QUICKBAR_SCROLL_ENABLED, QuickQSPanel.NUM_QUICK_TILES_DEFAULT,
                 UserHandle.USER_CURRENT) == QuickQSPanel.NUM_QUICK_TILES_ALL;
-        mQSAnimator.setFancyAnimaton(!quickQsScrollEnabled);
         mQuickQsPanelScrollerContainer.setClipChildren(quickQsScrollEnabled);
         mQuickQsPanelScrollerContainer.setClipToPadding(quickQsScrollEnabled);
     }

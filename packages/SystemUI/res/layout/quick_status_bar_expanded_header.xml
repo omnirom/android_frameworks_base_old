@@ -156,8 +156,9 @@
             android:layout_height="wrap_content"
             android:clipChildren="false"
             android:clipToPadding="false"
-            android:layout_marginStart="@dimen/qs_scroller_margin"
-            android:layout_marginEnd="@dimen/qs_scroller_margin" >
+            android:paddingStart="@dimen/qs_scroller_margin"
+            android:paddingEnd="@dimen/qs_scroller_margin"
+            android:overScrollMode="never" >
 
             <com.android.systemui.qs.QuickQSPanel
                 android:id="@+id/quick_qs_panel"
