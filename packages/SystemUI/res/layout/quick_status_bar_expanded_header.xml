@@ -139,7 +139,7 @@
         android:layout_alignParentStart="true"
         android:layout_alignParentTop="true" />
 
-    <LinearLayout
+    <com.android.systemui.omni.HorizontalClippingLinearLayout
         android:id="@+id/quick_qs_panel_scroll_container"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
@@ -172,7 +172,7 @@
                 android:accessibilityTraversalBefore="@id/expand_indicator" />
 
         </HorizontalScrollView>
-    </LinearLayout>
+    </com.android.systemui.omni.HorizontalClippingLinearLayout>
     <com.android.systemui.statusbar.AlphaOptimizedImageView
         android:id="@+id/qs_detail_header_progress"
         android:src="@drawable/indeterminate_anim"
