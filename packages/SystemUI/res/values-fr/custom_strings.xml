@@ -46,8 +46,24 @@
   <!-- NFC QS tile -->
   <string name="quick_settings_nfc_label">NFC</string>
   <!-- Music QS Tile -->
+  <string name="quick_settings_music_label">Musique</string>
+  <string name="quick_settings_music_play">Lecture</string>
+  <string name="quick_settings_music_pause">Pause</string>
   <!-- Screen timeout QS tile -->
+  <string name="quick_settings_timeout_label">Délai</string>
+  <string name="quick_settings_screen_timeout_detail_title">Mise en veille de l’écran</string>
   <!-- Screen off QS tile -->
+  <string name="quick_settings_screen_off">Éteindre l’écran</string>
   <!-- Sync QS tile -->
+  <string name="quick_settings_sync_label">Synchronisation</string>
+  <string name="accessibility_quick_settings_sync_off">Synchro désactivée</string>
+  <string name="accessibility_quick_settings_sync_on">Synchro activée</string>
+  <string name="accessibility_quick_settings_sync_changed_off">La synchro a été désactivée</string>
+  <string name="accessibility_quick_settings_sync_changed_on">La synchro a été activée</string>
   <!-- Screenshot Crop & Share -->
+  <string name="action_delete_success">Supprimé</string>
+  <string name="action_delete_fault">La suppression a échoué</string>
+  <string name="action_save_success">Enregistré</string>
+  <string name="action_save_fault">L’enregistrement a échoué</string>
+  <string name="action_edit">Modifier</string>
 </resources>

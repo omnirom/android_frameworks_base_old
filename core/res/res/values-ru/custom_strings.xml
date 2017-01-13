@@ -60,7 +60,9 @@
   <!-- Title of an application permission, listed so the user can choose whether they want to allow the application to do this. -->
   <string name="permlab_fakePackageSignature">имитировать подпись пакета</string>
   <!-- Description of an application permission, listed so the user can choose whether they want to allow the application to do this. -->
+  <string name="permdesc_fakePackageSignature">Разрешить приложению маскироваться под другое приложение. Вредоносные приложения могут использовать это для доступа к конфиденциальным данным приложений. Предоставляйте это разрешение с осторожностью!</string>
   <!-- Title of an application permission, listed so the user can choose whether they want the application to do this. -->
+  <string name="permlab_setKeyguardWallpaper">установить обои экрана блокировки</string>
   <!-- Description of an application permission, listed so the user can choose whether they want to allow the application to do this. -->
   <string name="permdesc_setKeyguardWallpaper">Позволить приложению изменять обои экрана блокировки.</string>
   <!-- Notify use that they are in Lock-to-app in accessibility mode -->

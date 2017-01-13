@@ -32,6 +32,7 @@
   <string name="battery_saver_dismiss_title">Отклонить</string>
   <string name="battery_saver_notification_action_text_short">Выключить</string>
   <!-- Screen pinning dialog description when in accessibility mode. -->
+  <string name="screen_pinning_description_back">Находится в поле зрения, пока вы не открепите. Нажмите и удерживайте \"Назад\" чтобы открепить.</string>
   <!-- tuner -->
   <string name="status_bar_icons">Значки строки состояния</string>
   <string name="qs_equal_tile_title">Одинаковый размер</string>
