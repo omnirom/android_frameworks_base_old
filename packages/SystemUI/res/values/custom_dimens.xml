@@ -39,4 +39,7 @@
     <dimen name="status_bar_mobile_signal_width">16dp</dimen>
     <dimen name="status_bar_mobile_type_height">9dp</dimen>
     <dimen name="status_bar_mobile_type_width">12dp</dimen>
+
+    <dimen name="burnin_protection_horizontal_shift">3dp</dimen>
+    <dimen name="burnin_protection_vertical_shift">1dp</dimen>
 </resources>
