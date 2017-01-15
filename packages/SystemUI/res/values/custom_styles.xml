@@ -25,4 +25,18 @@
     <style name="ScreenshotEditorStyle" parent="@android:style/Theme.Material" >
     </style>
 
+    <style name="TextAppearance.StatusBar.Expanded.Clock.Shadow" parent="TextAppearance.StatusBar.Expanded.Clock" >
+        <item name="android:shadowColor">@android:color/black</item>
+        <item name="android:shadowDx">1</item>
+        <item name="android:shadowDy">1</item>
+        <item name="android:shadowRadius">4</item>
+    </style>
+
+    <style name="TextAppearance.StatusBar.Expanded.Date.Shadow" parent="TextAppearance.StatusBar.Expanded.Date" >
+        <item name="android:shadowColor">@android:color/black</item>
+        <item name="android:shadowDx">1</item>
+        <item name="android:shadowDy">1</item>
+        <item name="android:shadowRadius">4</item>
+    </style>
+
 </resources>
