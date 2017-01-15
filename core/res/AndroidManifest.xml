@@ -490,6 +490,9 @@
 
     <protected-broadcast android:name="org.omnirom.omniswitch.ACTION_TOGGLE_OVERLAY" />
 
+    <protected-broadcast android:name="masquerade.substratum.STATUS_CHANGED" />
+
+
     <!-- ====================================================================== -->
     <!--                          RUNTIME PERMISSIONS                           -->
     <!-- ====================================================================== -->
