@@ -1,6 +1,7 @@
 package com.android.systemui.qs;
 
 import android.content.Context;
+import android.content.res.Configuration;
 import android.content.res.Resources;
 import android.os.UserHandle;
 import android.provider.Settings;
@@ -143,10 +144,14 @@ public class TileLayout extends ViewGroup implements QSTileLayout {
     public void updateSettings() {
         final Resources res = mContext.getResources();
         mDefaultColumns = Math.max(1, res.getInteger(R.integer.quick_settings_num_columns));
+        boolean isPortrait = res.getConfiguration().orientation
+                == Configuration.ORIENTATION_PORTRAIT;
         int columns = Settings.System.getIntForUser(
                 mContext.getContentResolver(), Settings.System.QS_LAYOUT_COLUMNS, mDefaultColumns,
                 UserHandle.USER_CURRENT);
-
+        int columnsLandscape = Settings.System.getIntForUser(
+                mContext.getContentResolver(), Settings.System.QS_LAYOUT_COLUMNS_LANDSCAPE, mDefaultColumns,
+                UserHandle.USER_CURRENT);
         boolean showTitles = Settings.System.getIntForUser(
                 mContext.getContentResolver(), Settings.System.QS_TILE_TITLE_VISIBILITY, 1,
                 UserHandle.USER_CURRENT) == 1;
@@ -156,8 +161,8 @@ public class TileLayout extends ViewGroup implements QSTileLayout {
         } else {
             mCellHeight = mContext.getResources().getDimensionPixelSize(R.dimen.qs_tile_height_wo_label);
         }
-        if (mColumns != columns || mShowTitles != showTitles) {
-            mColumns = columns;
+        if (mColumns != (isPortrait ? columns : columnsLandscape) || mShowTitles != showTitles) {
+            mColumns = isPortrait ? columns : columnsLandscape;
             mShowTitles = showTitles;
             for (TileRecord record : mRecords) {
                 if (record.tileView instanceof QSTileView) {
