@@ -16,10 +16,10 @@
 
 <resources xmlns:android="http://schemas.android.com/apk/res/android">
 
-    <style name="ActionBarTheme" parent="@*android:style/ThemeOverlay.Material.Dark.ActionBar" />
-    <style name="ActionBarPopupTheme" parent="@*android:style/Theme.Material.DayNight" />
+    <style name="ActionBarTheme" parent="@android:style/ThemeOverlay.Material.Dark.ActionBar" />
+    <style name="ActionBarPopupTheme" parent="@android:style/Theme.Material.DayNight" />
 
-    <style name="DocumentsTheme" parent="@style/Theme.AppCompat.DayNight">
+    <style name="DocumentsTheme" parent="@android:style/Theme.Material.DayNight.DarkActionBar">
         <item name="actionBarWidgetTheme">@null</item>
         <item name="actionBarTheme">@style/ActionBarTheme</item>
         <item name="actionBarPopupTheme">@style/ActionBarPopupTheme</item>
