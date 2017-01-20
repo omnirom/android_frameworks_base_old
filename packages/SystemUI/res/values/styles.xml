@@ -317,12 +317,12 @@
         <item name="android:layout_height">48dp</item>
     </style>
 
-    <style name="TunerSettings" parent="@android:style/Theme.Material.Settings">
+    <style name="TunerSettings" parent="@android:style/Theme.DeviceDefault.Settings">
         <item name="android:windowActionBar">false</item>
         <item name="preferenceTheme">@style/TunerPreferenceTheme</item>
     </style>
 
-    <style name="TunerPreferenceTheme" parent="@android:style/Theme.Material.Settings">
+    <style name="TunerPreferenceTheme" parent="@android:style/Theme.DeviceDefault.Settings">
         <item name="dropdownPreferenceStyle">@style/Preference.DropDown.Material</item>
     </style>
 
