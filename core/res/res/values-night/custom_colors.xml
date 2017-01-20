@@ -18,6 +18,8 @@
 */
 -->
 <resources>
+    <color name="accent_material_light">@color/material_deep_teal_500</color>
+    <color name="accent_material_dark">@color/material_deep_teal_500</color>
     <color name="global_actions_text_color">@color/primary_text_default_material_dark</color>
-    <color name="global_actions_icon_color">@color/material_deep_teal_200</color>
+    <color name="global_actions_icon_color">@color/accent_material_light</color>
 </resources>
