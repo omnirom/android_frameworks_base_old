@@ -45,6 +45,7 @@ import java.util.Collection;
 public class QuickQSPanel extends QSPanel {
 
     public static final int NUM_QUICK_TILES_DEFAULT = 6;
+    public static final int NUM_QUICK_TILES_LANDSCAPE = 9;
     public static final int NUM_QUICK_TILES_ALL = 666;
 
     private int mMaxTiles = NUM_QUICK_TILES_DEFAULT;
@@ -126,7 +127,7 @@ public class QuickQSPanel extends QSPanel {
         ArrayList<QSTile<?>> quickTiles = new ArrayList<>();
         for (QSTile<?> tile : tiles) {
             quickTiles.add(tile);
-            if (quickTiles.size() == mMaxTiles) {
+            if (quickTiles.size() == getNumQuickTiles()) {
                 break;
             }
         }
@@ -135,12 +136,18 @@ public class QuickQSPanel extends QSPanel {
     }
 
     public int getNumQuickTiles() {
+        boolean isLandscape = mContext.getResources().getConfiguration().orientation
+            == Configuration.ORIENTATION_LANDSCAPE;
+        if (mMaxTiles != NUM_QUICK_TILES_ALL) {
+            return isLandscape ? NUM_QUICK_TILES_LANDSCAPE : NUM_QUICK_TILES_DEFAULT;
+        }
         return mMaxTiles;
     }
 
     @Override
     protected void onConfigurationChanged(Configuration newConfig) {
         super.onConfigurationChanged(newConfig);
+        setMaxTiles(mMaxTiles);
         ((HeaderTileLayout) mTileLayout).updateTileGaps();
     }
 
@@ -266,8 +273,11 @@ public class QuickQSPanel extends QSPanel {
             if (panelWidth == -1) {
                 panelWidth = mScreenWidth;
             }
+            boolean isLandscape = mContext.getResources().getConfiguration().orientation
+                    == Configuration.ORIENTATION_LANDSCAPE;
+            int numShowTiles = isLandscape ? NUM_QUICK_TILES_LANDSCAPE : NUM_QUICK_TILES_DEFAULT;
             panelWidth -= 2 * mStartMargin;
-            int tileGap = (panelWidth - mTileSize * NUM_QUICK_TILES_DEFAULT) / (NUM_QUICK_TILES_DEFAULT - 1);
+            int tileGap = (panelWidth - mTileSize * numShowTiles) / (numShowTiles - 1);
             final int N = getChildCount();
             for (int i = 0; i < N; i++) {
                 if (getChildAt(i) instanceof Space) {
