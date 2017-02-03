@@ -17,6 +17,7 @@
 package com.android.systemui.qs.tiles;
 
 import android.content.BroadcastReceiver;
+import android.content.ComponentName;
 import android.content.Context;
 import android.content.Intent;
 import android.content.IntentFilter;
@@ -27,7 +28,6 @@ import android.provider.Settings.Global;
 import android.text.SpannableStringBuilder;
 import android.text.style.ForegroundColorSpan;
 import android.widget.Switch;
-
 import com.android.internal.logging.MetricsLogger;
 import com.android.internal.logging.MetricsProto.MetricsEvent;
 import com.android.systemui.R;
@@ -37,6 +37,9 @@ import com.android.systemui.statusbar.policy.HotspotController;
 
 /** Quick settings tile: Hotspot **/
 public class HotspotTile extends QSTile<QSTile.AirplaneBooleanState> {
+    static final Intent TETHER_SETTINGS = new Intent().setComponent(new ComponentName(
+             "com.android.settings", "com.android.settings.Settings$TetherProvisioningActivity"));
+
     private final AnimationIcon mEnable =
             new AnimationIcon(R.drawable.ic_hotspot_enable_animation,
                     R.drawable.ic_hotspot_disable);
@@ -94,7 +97,7 @@ public class HotspotTile extends QSTile<QSTile.AirplaneBooleanState> {
 
     @Override
     public Intent getLongClickIntent() {
-        return new Intent(Settings.ACTION_WIRELESS_SETTINGS);
+        return new Intent(TETHER_SETTINGS);
     }
 
     @Override
