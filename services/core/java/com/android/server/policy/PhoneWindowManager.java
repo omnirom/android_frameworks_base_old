@@ -754,6 +754,16 @@ public class PhoneWindowManager implements WindowManagerPolicy {
     private int mBackKillTimeout;
     private boolean mLongPressBackConsumed;
     private boolean mOmniSwitchRecents;
+    private boolean mSwapBackAndRecents;
+
+    private int mPressOnAppSwitchBehavior;
+    private int mPressOnBackBehavior;
+    private boolean mBackDoCustomAction;
+    private boolean mAppSwitchDoCustomAction;
+
+    private static final int KEY_ACTION_NOTHING = 0;
+    private static final int KEY_ACTION_APP_SWITCH = 1;
+    private static final int KEY_ACTION_BACK = 2;
 
     private static final int MSG_ENABLE_POINTER_LOCATION = 1;
     private static final int MSG_DISABLE_POINTER_LOCATION = 2;
@@ -925,6 +935,9 @@ public class PhoneWindowManager implements WindowManagerPolicy {
                     UserHandle.USER_ALL);
             resolver.registerContentObserver(Settings.System.getUriFor(
                     Settings.System.NAVIGATION_BAR_RECENTS), false, this,
+                    UserHandle.USER_ALL);
+            resolver.registerContentObserver(Settings.System.getUriFor(
+                    Settings.System.BUTTON_SWAP_BACK_RECENTS), false, this,
                     UserHandle.USER_ALL);
             updateSettings();
         }
@@ -1231,7 +1244,6 @@ public class PhoneWindowManager implements WindowManagerPolicy {
 
     private void cancelPendingBackKeyAction() {
         if (!mBackKeyHandled) {
-            mBackKeyHandled = true;
             mHandler.removeMessages(MSG_BACK_LONG_PRESS);
         }
     }
@@ -2173,7 +2185,12 @@ public class PhoneWindowManager implements WindowManagerPolicy {
             mOmniSwitchRecents = Settings.System.getIntForUser(resolver,
                     Settings.System.NAVIGATION_BAR_RECENTS, 0,
                     UserHandle.USER_CURRENT) != 0;
+            mSwapBackAndRecents = Settings.System.getIntForUser(resolver,
+                    Settings.System.BUTTON_SWAP_BACK_RECENTS, 0,
+                    UserHandle.USER_CURRENT) != 0;
 
+            mPressOnAppSwitchBehavior = mSwapBackAndRecents ? KEY_ACTION_BACK : KEY_ACTION_APP_SWITCH;
+            mPressOnBackBehavior = mSwapBackAndRecents ? KEY_ACTION_APP_SWITCH : KEY_ACTION_BACK;
         }
         synchronized (mWindowManagerFuncs.getWindowManagerLock()) {
             PolicyControl.reloadFromSetting(mContext);
@@ -3277,14 +3294,6 @@ public class PhoneWindowManager implements WindowManagerPolicy {
             mPendingCapsLockToggle = false;
         }
 
-        if (keyCode == KeyEvent.KEYCODE_BACK && !down) {
-            mHandler.removeCallbacks(mBackLongPress);
-            if (mLongPressBackConsumed) {
-                mLongPressBackConsumed = false;
-                return -1;
-            }
-        }
-
         // First we always handle the home key here, so applications
         // can never break it, although if keyguard is on, we do let
         // it handle it, because that gives us the correct 5 second
@@ -3426,14 +3435,57 @@ public class PhoneWindowManager implements WindowManagerPolicy {
             }
             return 0;
         } else if (keyCode == KeyEvent.KEYCODE_APP_SWITCH) {
-            if (!keyguardOn) {
-                if (down && repeatCount == 0) {
+            if (down) {
+                if (repeatCount == 0) {
+                    if (mPressOnAppSwitchBehavior != KEY_ACTION_APP_SWITCH && !virtualKey) {
+                        if (mPressOnAppSwitchBehavior == KEY_ACTION_BACK) {
+                            triggerLongPressBackKey();
+                        }
+                        mAppSwitchDoCustomAction = true;
+                        return -1;
+                    }
                     preloadRecentApps();
-                } else if (!down) {
-                    doToggleRecentApps();
                 }
+            } else {
+                if (mAppSwitchDoCustomAction) {
+                    mAppSwitchDoCustomAction = false;
+                    if (mPressOnAppSwitchBehavior == KEY_ACTION_BACK) {
+                        if (handleLongPressBackKey()) {
+                            return -1;
+                        }
+                    }
+                    if (!canceled) {
+                        performKeyAction(mPressOnAppSwitchBehavior);
+                    }
+                    return -1;
+                }
+                doToggleRecentApps();
             }
             return -1;
+        } else if (keyCode == KeyEvent.KEYCODE_BACK) {
+            if (down) {
+                if (repeatCount == 0) {
+                    if (mPressOnBackBehavior != KEY_ACTION_BACK && !virtualKey) {
+                        if (mPressOnBackBehavior == KEY_ACTION_APP_SWITCH) {
+                            preloadRecentApps();
+                        }
+                        mBackDoCustomAction = true;
+                        return -1;
+                    }
+                    triggerLongPressBackKey();
+                }
+            } else {
+                if (mBackDoCustomAction) {
+                    mBackDoCustomAction = false;
+                    if (!canceled) {
+                        performKeyAction(mPressOnBackBehavior);
+                    }
+                    return -1;
+                }
+                if (handleLongPressBackKey()) {
+                    return -1;
+                }
+            }
         } else if (keyCode == KeyEvent.KEYCODE_N && event.isMetaPressed()) {
             if (down) {
                 IStatusBarService service = getStatusBarService();
@@ -3589,12 +3641,6 @@ public class PhoneWindowManager implements WindowManagerPolicy {
                 launchAssistAction(Intent.EXTRA_ASSIST_INPUT_HINT_KEYBOARD, event.getDeviceId());
             }
             return -1;
-        } else if (keyCode == KeyEvent.KEYCODE_BACK) {
-            if (isStopLockTaskMode(true) || mBackKillEnabled) {
-                if (down && repeatCount == 0) {
-                    mHandler.postDelayed(mBackLongPress, mBackKillTimeout);
-                }
-            }
         }
 
         // Shortcuts are invoked through Search+key, so intercept those here
@@ -3947,6 +3993,9 @@ public class PhoneWindowManager implements WindowManagerPolicy {
         if (mOmniSwitchRecents) {
             return;
         }
+        if (keyguardOn()) {
+            return;
+        }
         mPreloadedRecentApps = true;
         StatusBarManagerInternal statusbar = getStatusBarManagerInternal();
         if (statusbar != null) {
@@ -3956,6 +4005,9 @@ public class PhoneWindowManager implements WindowManagerPolicy {
 
     private void cancelPreloadRecentApps() {
         if (mOmniSwitchRecents) {
+            return;
+        }
+        if (keyguardOn()) {
             return;
         }
         if (mPreloadedRecentApps) {
@@ -3968,6 +4020,9 @@ public class PhoneWindowManager implements WindowManagerPolicy {
     }
 
     private void doToggleRecentApps() {
+        if (keyguardOn()) {
+            return;
+        }
         if (mOmniSwitchRecents) {
             OmniSwitchConstants.toggleOmniSwitchRecents(mContext, UserHandle.CURRENT);
         } else {
@@ -6086,29 +6141,6 @@ public class PhoneWindowManager implements WindowManagerPolicy {
 
         // Handle special keys.
         switch (keyCode) {
-            case KeyEvent.KEYCODE_BACK: {
-                if (down) {
-                    mBackKeyHandled = false;
-                    if (hasLongPressOnBackBehavior()) {
-                        Message msg = mHandler.obtainMessage(MSG_BACK_LONG_PRESS);
-                        msg.setAsynchronous(true);
-                        mHandler.sendMessageDelayed(msg,
-                                ViewConfiguration.get(mContext).getDeviceGlobalActionKeyTimeout());
-                    }
-                } else {
-                    boolean handled = mBackKeyHandled;
-
-                    // Reset back key state
-                    cancelPendingBackKeyAction();
-
-                    // Don't pass back press to app if we've already handled it
-                    if (handled) {
-                        result &= ~ACTION_PASS_TO_USER;
-                    }
-                }
-                break;
-            }
-
             case KeyEvent.KEYCODE_VOLUME_DOWN:
             case KeyEvent.KEYCODE_VOLUME_UP:
             case KeyEvent.KEYCODE_VOLUME_MUTE: {
@@ -8549,4 +8581,47 @@ public class PhoneWindowManager implements WindowManagerPolicy {
         im.injectInputEvent(upEvent, InputManager.INJECT_INPUT_EVENT_MODE_ASYNC);
     }
 
+    private void performKeyAction(int behavior) {
+        if (DEBUG_INPUT){
+            Slog.d(TAG, "performKeyAction " + behavior);
+        }
+        switch (behavior) {
+            case KEY_ACTION_BACK:
+                triggerVirtualKeypress(KeyEvent.KEYCODE_BACK);
+                break;
+            case KEY_ACTION_APP_SWITCH:
+                doToggleRecentApps();
+                break;
+            default:
+                break;
+        }
+    }
+
+    private void triggerLongPressBackKey() {
+        if (isStopLockTaskMode(true) || mBackKillEnabled) {
+            mLongPressBackConsumed = false;
+            mHandler.postDelayed(mBackLongPress, mBackKillTimeout);
+        }
+        if (hasLongPressOnBackBehavior()) {
+            mBackKeyHandled = false;
+            Message msg = mHandler.obtainMessage(MSG_BACK_LONG_PRESS);
+            msg.setAsynchronous(true);
+            mHandler.sendMessageDelayed(msg,
+                ViewConfiguration.get(mContext).getDeviceGlobalActionKeyTimeout());
+        }
+    }
+
+    private boolean handleLongPressBackKey() {
+        cancelPendingBackKeyAction();
+        mHandler.removeCallbacks(mBackLongPress);
+        if (mBackKeyHandled) {
+            mBackKeyHandled = false;
+            return true;
+        }
+        if (mLongPressBackConsumed) {
+            mLongPressBackConsumed = false;
+            return true;
+        }
+        return false;
+    }
 }
