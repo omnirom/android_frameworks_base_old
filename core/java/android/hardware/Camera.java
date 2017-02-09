@@ -2736,7 +2736,6 @@ public class Camera {
 
         /**
          * Writes the current Parameters to the log.
-         * @hide
          * @deprecated
          */
         @Deprecated
