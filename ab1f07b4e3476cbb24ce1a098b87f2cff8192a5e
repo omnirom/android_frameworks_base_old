@@ -1,0 +1,21 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "78209991_c26b2517",
+        "filename": "packages/Keyguard/res/values/config.xml",
+        "patchSetId": 8
+      },
+      "lineNbr": 36,
+      "author": {
+        "id": 1000026
+      },
+      "writtenOn": "2017-02-15T15:29:51Z",
+      "side": 0,
+      "message": "you still need this - and yes the default must stay true :)",
+      "revId": "ab1f07b4e3476cbb24ce1a098b87f2cff8192a5e",
+      "serverId": "56841c99-7c94-43d4-bf0b-cb4707e66d55",
+      "unresolved": false
+    }
+  ]
+}
