@@ -2,6 +2,23 @@
   "comments": [
     {
       "key": {
+        "uuid": "78209991_22541953",
+        "filename": "packages/Keyguard/src/com/android/keyguard/KeyguardUpdateMonitor.java",
+        "patchSetId": 8
+      },
+      "lineNbr": 1133,
+      "author": {
+        "id": 1000026
+      },
+      "writtenOn": "2017-02-15T15:34:08Z",
+      "side": 1,
+      "message": "well - you would need to add that observer somewhere too :)\nBut as said - this is complete overkill for this\nyou dont need an observer",
+      "revId": "36f02dae2437b4b1a33a9889e6dda90b45da9fa0",
+      "serverId": "56841c99-7c94-43d4-bf0b-cb4707e66d55",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "78209991_e2662150",
         "filename": "packages/Keyguard/src/com/android/keyguard/KeyguardUpdateMonitor.java",
         "patchSetId": 8
@@ -13,6 +30,23 @@
       "writtenOn": "2017-02-15T15:29:51Z",
       "side": 1,
       "message": "you still must use config_fingerprintWakeAndUnlock here as the default value and not 0 - it must be 1 anyway :)",
+      "revId": "36f02dae2437b4b1a33a9889e6dda90b45da9fa0",
+      "serverId": "56841c99-7c94-43d4-bf0b-cb4707e66d55",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "78209991_02511d62",
+        "filename": "packages/Keyguard/src/com/android/keyguard/KeyguardUpdateMonitor.java",
+        "patchSetId": 8
+      },
+      "lineNbr": 1174,
+      "author": {
+        "id": 1000026
+      },
+      "writtenOn": "2017-02-15T15:34:08Z",
+      "side": 1,
+      "message": "Always fetch the actual value here and remove the oberver",
       "revId": "36f02dae2437b4b1a33a9889e6dda90b45da9fa0",
       "serverId": "56841c99-7c94-43d4-bf0b-cb4707e66d55",
       "unresolved": false
