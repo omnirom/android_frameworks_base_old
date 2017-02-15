@@ -36,6 +36,7 @@ import android.app.admin.DevicePolicyManager;
 import android.app.trust.TrustManager;
 import android.content.BroadcastReceiver;
 import android.content.ComponentName;
+import android.content.ContentResolver;
 import android.content.Context;
 import android.content.Intent;
 import android.content.IntentFilter;
@@ -210,6 +211,9 @@ public class KeyguardUpdateMonitor implements TrustManager.TrustListener {
     private TrustManager mTrustManager;
     private UserManager mUserManager;
     private int mFingerprintRunningState = FINGERPRINT_STATE_STOPPED;
+
+    // omni additions
+    private boolean mFingerprintWakeUnlock; // for disabling fingerprint with screen off
 
     private final Handler mHandler = new Handler() {
         @Override
@@ -1126,6 +1130,34 @@ public class KeyguardUpdateMonitor implements TrustManager.TrustListener {
         mUserManager = context.getSystemService(UserManager.class);
     }
 
+    private class OmniSettingsObserver extends ContentObserver {
+        OmniSettingsObserver(Handler handler) {
+            super(handler);
+        }
+
+        void observe() {
+            ContentResolver resolver = mContext.getContentResolver();
+
+            resolver.registerContentObserver(Settings.System.getUriFor(
+                    Settings.System.FINGERPRINT_WAKE_UNLOCK), false, this,
+                    UserHandle.USER_ALL);
+            update();
+        }
+
+        @Override
+        public void onChange(boolean selfChange) {
+            update();
+        }
+
+        public void update() {
+            ContentResolver resolver = mContext.getContentResolver();
+
+            mFingerprintWakeUnlock = Settings.System.getIntForUser(resolver,
+                    Settings.System.FINGERPRINT_WAKE_UNLOCK, 0,
+                    UserHandle.USER_CURRENT) != 0;
+        }
+    }
+
     private void updateFingerprintListeningState() {
         boolean shouldListenForFingerprint = shouldListenForFingerprint();
         if (mFingerprintRunningState == FINGERPRINT_STATE_RUNNING && !shouldListenForFingerprint) {
@@ -1139,8 +1171,7 @@ public class KeyguardUpdateMonitor implements TrustManager.TrustListener {
     private boolean shouldListenForFingerprint() {
         if (!mSwitchingUser && !mFingerprintAlreadyAuthenticated
                 && !isFingerprintDisabled(getCurrentUser())) {
-            if (mContext.getResources().getBoolean(
-                    com.android.keyguard.R.bool.config_fingerprintWakeAndUnlock)) {
+            if (mFingerprintWakeUnlock) {
                 return mKeyguardIsVisible || !mDeviceInteractive || mBouncer || mGoingToSleep;
             } else {
                 return mDeviceInteractive && (mKeyguardIsVisible || mBouncer);
