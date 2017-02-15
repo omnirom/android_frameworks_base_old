@@ -211,6 +211,9 @@ public class KeyguardUpdateMonitor implements TrustManager.TrustListener {
     private UserManager mUserManager;
     private int mFingerprintRunningState = FINGERPRINT_STATE_STOPPED;
 
+    // omni additions
+    private boolean mFingerprintWakeUnlock // for disabling fingerprint scanner wake and unlock
+
     private final Handler mHandler = new Handler() {
         @Override
         public void handleMessage(Message msg) {
@@ -1126,6 +1129,18 @@ public class KeyguardUpdateMonitor implements TrustManager.TrustListener {
         mUserManager = context.getSystemService(UserManager.class);
     }
 
+    private class OmniSettingsObserver extends ContentObserver {
+        OmniSettingsObserver(Handler handler) {
+            super(handler);
+        }
+
+        void observe() {
+            mContext.getContentResolver().registerContentObserver(Settings.System.getUriFor(
+                    Settings.System.FINGERPRINT_WAKE_UNLOCK),
+                    false, this, UserHandle.USER_ALL);
+            update();
+    }
+
     private void updateFingerprintListeningState() {
         boolean shouldListenForFingerprint = shouldListenForFingerprint();
         if (mFingerprintRunningState == FINGERPRINT_STATE_RUNNING && !shouldListenForFingerprint) {
@@ -1139,8 +1154,7 @@ public class KeyguardUpdateMonitor implements TrustManager.TrustListener {
     private boolean shouldListenForFingerprint() {
         if (!mSwitchingUser && !mFingerprintAlreadyAuthenticated
                 && !isFingerprintDisabled(getCurrentUser())) {
-            if (mContext.getResources().getBoolean(
-                    com.android.keyguard.R.bool.config_fingerprintWakeAndUnlock)) {
+            if (mFingerprintWakeUnlock) {
                 return mKeyguardIsVisible || !mDeviceInteractive || mBouncer || mGoingToSleep;
             } else {
                 return mDeviceInteractive && (mKeyguardIsVisible || mBouncer);
