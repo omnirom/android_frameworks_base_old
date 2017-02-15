@@ -3973,6 +3973,11 @@ public final class Settings {
         public static final String BUTTON_SWAP_BACK_RECENTS = "button_swap_back_recents";
 
         /**
+         * @hide
+         */
+        public static final String FINGERPRINT_WAKE_UNLOCK = "fingerprint_wake_unlock";
+
+        /**
          * Settings to backup. This is here so that it's in the same place as the settings
          * keys and easy to update.
          *
