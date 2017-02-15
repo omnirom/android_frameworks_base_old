@@ -1,0 +1,27 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "78209991_427f150f",
+        "filename": "packages/Keyguard/src/com/android/keyguard/KeyguardUpdateMonitor.java",
+        "patchSetId": 6
+      },
+      "lineNbr": 1151,
+      "author": {
+        "id": 1000124
+      },
+      "writtenOn": "2017-02-15T05:54:52Z",
+      "side": 1,
+      "message": "fails: undefined",
+      "range": {
+        "startLine": 1151,
+        "startChar": 95,
+        "endLine": 1151,
+        "endChar": 109
+      },
+      "revId": "40fd708e92933820d8a31b044f8af1cb6bd3bbe5",
+      "serverId": "56841c99-7c94-43d4-bf0b-cb4707e66d55",
+      "unresolved": false
+    }
+  ]
+}
