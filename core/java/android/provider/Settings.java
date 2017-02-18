@@ -7815,6 +7815,12 @@ public final class Settings {
         private static final Validator NOTIFICATION_BADGING_VALIDATOR = BOOLEAN_VALIDATOR;
 
         /**
+         * The TCP/IP port to run ADB on, or -1 for USB
+         * @hide
+         */
+        public static final String ADB_PORT = "adb_port";
+
+        /**
          * Comma separated list of QS tiles that have been auto-added already.
          * @hide
          */
