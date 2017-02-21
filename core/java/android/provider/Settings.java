@@ -5290,6 +5290,27 @@ public final class Settings {
         public static final String LOCK_QS_DISABLED = "lockscreen_qs_disabled";
 
         /**
+         * Enable voice lockscreen shortcut
+         * @hide
+         */
+        public static final String LOCK_VOICE_SHORTCUT = "lockscreen_voice_shortcut";
+
+        /**
+         * @hide
+         */
+        public static final String LOCK_SHORTCUTS_ENABLE = "lockscreen_shortcuts_enable";
+
+        /**
+         * @hide
+         */
+        public static final String LOCK_CAMERA_SHORTCUT_ENABLE = "lockscreen_camera_shortcut_enable";
+
+        /**
+         * @hide
+         */
+        public static final String LOCK_LEFT_SHORTCUT_ENABLE = "lockscreen_left_shortcut_enable";
+
+        /**
          * Whether lock pattern will vibrate as user enters (0 = false, 1 =
          * true)
          *
