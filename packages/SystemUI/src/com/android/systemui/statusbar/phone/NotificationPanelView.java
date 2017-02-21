@@ -1704,6 +1704,7 @@ public class NotificationPanelView extends PanelView implements
         if (mStatusBar.getBarState() == StatusBarState.KEYGUARD
                 || mStatusBar.getBarState() == StatusBarState.SHADE_LOCKED) {
             mAfforanceHelper.animateHideLeftRightIcon();
+            mKeyguardBottomArea.hideShortcutsContainer();
         }
         mNotificationStackScroller.onPanelTrackingStarted();
     }
@@ -1721,6 +1722,7 @@ public class NotificationPanelView extends PanelView implements
                 || mStatusBar.getBarState() == StatusBarState.SHADE_LOCKED)) {
             if (!mHintAnimationRunning) {
                 mAfforanceHelper.reset(true);
+                mKeyguardBottomArea.showShortcutsContainer();
             }
         }
         if (!expand && (mStatusBar.getBarState() == StatusBarState.KEYGUARD

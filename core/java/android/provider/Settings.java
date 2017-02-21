@@ -3988,6 +3988,11 @@ public final class Settings {
         public static final String LOCKSCREEN_ROTATION = "lockscreen_rotation";
 
         /**
+         * @hide
+         */
+        public static final String LOCK_SHORTCUTS_EXPANDED = "lockscreen_shortcuts_expanded";
+
+        /**
          * Settings to backup. This is here so that it's in the same place as the settings
          * keys and easy to update.
          *
@@ -5309,6 +5314,11 @@ public final class Settings {
          * @hide
          */
         public static final String LOCK_LEFT_SHORTCUT_ENABLE = "lockscreen_left_shortcut_enable";
+
+        /**
+         * @hide
+         */
+        public static final String LOCK_SHORTCUTS = "lockscreen_shortcuts";
 
         /**
          * Whether lock pattern will vibrate as user enters (0 = false, 1 =
