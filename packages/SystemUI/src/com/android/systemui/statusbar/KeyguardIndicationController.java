@@ -71,6 +71,7 @@ public class KeyguardIndicationController {
     private String mTransientIndication;
     private int mTransientTextColor;
     private boolean mVisible;
+    private boolean mVisibleOverwrite;
 
     private boolean mPowerPluggedIn;
     private boolean mPowerCharged;
@@ -99,11 +100,20 @@ public class KeyguardIndicationController {
 
     public void setVisible(boolean visible) {
         mVisible = visible;
-        mTextView.setVisibility(visible ? View.VISIBLE : View.GONE);
-        if (visible) {
+        mTextView.setVisibility(isReallyVisible() ? View.VISIBLE : View.GONE);
+        if (isReallyVisible()) {
             hideTransientIndication();
             updateIndication();
         }
+    }
+
+    private boolean isReallyVisible() {
+        return mVisible && mVisibleOverwrite;
+    }
+
+    public void setVisibleOverwrite(boolean value) {
+        mVisibleOverwrite = value;
+        setVisible(mVisible);
     }
 
     /**
@@ -158,7 +168,7 @@ public class KeyguardIndicationController {
     }
 
     private void updateIndication() {
-        if (mVisible) {
+        if (isReallyVisible()) {
             // Walk down a precedence-ordered list of what should indication
             // should be shown based on user or device state
             if (!mUserManager.isUserUnlocked(ActivityManager.getCurrentUser())) {
@@ -323,7 +333,7 @@ public class KeyguardIndicationController {
 
         @Override
         public void onUserUnlocked() {
-            if (mVisible) {
+            if (isReallyVisible()) {
                 updateIndication();
             }
         }
@@ -332,7 +342,7 @@ public class KeyguardIndicationController {
     BroadcastReceiver mTickReceiver = new BroadcastReceiver() {
         @Override
         public void onReceive(Context context, Intent intent) {
-            if (mVisible) {
+            if (isReallyVisible()) {
                 updateIndication();
             }
         }

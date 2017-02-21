@@ -133,6 +133,13 @@ public class KeyguardBottomAreaView extends FrameLayout implements View.OnClickL
     private boolean mLeftIsVoiceAssist;
     private AssistManager mAssistManager;
 
+    // omni additions
+    private boolean mVoiceShortcutEnabled;
+    private boolean mShortcutsEnabled = true;
+    private boolean mShowIndicator = true;
+    private boolean mCameraShortcutEnabled = true;
+    private boolean mLeftShortcutEnabled = true;
+
     public KeyguardBottomAreaView(Context context) {
         this(context, null);
     }
@@ -160,7 +167,7 @@ public class KeyguardBottomAreaView extends FrameLayout implements View.OnClickL
             } else if (host == mCameraImageView) {
                 label = getResources().getString(R.string.camera_label);
             } else if (host == mLeftAffordanceView) {
-                if (mLeftIsVoiceAssist) {
+                if (mLeftIsVoiceAssist && mVoiceShortcutEnabled) {
                     label = getResources().getString(R.string.voice_assist_label);
                 } else {
                     label = getResources().getString(R.string.phone_label);
@@ -309,6 +316,8 @@ public class KeyguardBottomAreaView extends FrameLayout implements View.OnClickL
         boolean visible = !isCameraDisabledByDpm() && resolved != null
                 && getResources().getBoolean(R.bool.config_keyguardShowCameraAffordance)
                 && mUserSetupComplete
+                && mShortcutsEnabled
+                && mCameraShortcutEnabled
                 && !hideShortcuts();
         mCameraImageView.setVisibility(visible ? View.VISIBLE : View.GONE);
     }
@@ -317,8 +326,8 @@ public class KeyguardBottomAreaView extends FrameLayout implements View.OnClickL
         mLeftIsVoiceAssist = canLaunchVoiceAssist();
         int drawableId;
         int contentDescription;
-        boolean visible = mUserSetupComplete && !hideShortcuts();
-        if (mLeftIsVoiceAssist) {
+        boolean visible = mUserSetupComplete && !hideShortcuts() && mShortcutsEnabled && mLeftShortcutEnabled;
+        if (mLeftIsVoiceAssist && mVoiceShortcutEnabled) {
             drawableId = R.drawable.ic_mic_26dp;
             contentDescription = R.string.accessibility_voice_assist_button;
         } else {
@@ -332,7 +341,7 @@ public class KeyguardBottomAreaView extends FrameLayout implements View.OnClickL
     }
 
     public boolean isLeftVoiceAssist() {
-        return mLeftIsVoiceAssist;
+        return mLeftIsVoiceAssist && mVoiceShortcutEnabled;
     }
 
     private boolean isPhoneVisible() {
@@ -510,7 +519,7 @@ public class KeyguardBottomAreaView extends FrameLayout implements View.OnClickL
     }
 
     public void launchLeftAffordance() {
-        if (mLeftIsVoiceAssist) {
+        if (mLeftIsVoiceAssist && mVoiceShortcutEnabled) {
             launchVoiceAssist();
         } else {
             launchPhone();
@@ -618,7 +627,7 @@ public class KeyguardBottomAreaView extends FrameLayout implements View.OnClickL
         if (previewBefore != null) {
             mPreviewContainer.removeView(previewBefore);
         }
-        if (mLeftIsVoiceAssist) {
+        if (mLeftIsVoiceAssist && mVoiceShortcutEnabled) {
             mLeftPreview = mPreviewInflater.inflatePreviewFromService(
                     mAssistManager.getVoiceInteractorComponentName());
         } else {
@@ -740,8 +749,21 @@ public class KeyguardBottomAreaView extends FrameLayout implements View.OnClickL
     }
 
     public void onKeyguardShowingChanged() {
+        mShowIndicator = Settings.Secure.getIntForUser(mContext.getContentResolver(),
+                Settings.Secure.LOCK_INDICATOR_DISPLAY, 1, UserHandle.USER_CURRENT) == 1;
+        mShortcutsEnabled = Settings.Secure.getIntForUser(mContext.getContentResolver(),
+                Settings.Secure.LOCK_SHORTCUTS_ENABLE, 1, UserHandle.USER_CURRENT) == 1;
+        mVoiceShortcutEnabled = Settings.Secure.getIntForUser(mContext.getContentResolver(),
+                Settings.Secure.LOCK_VOICE_SHORTCUT, 1, UserHandle.USER_CURRENT) == 1;
+        mCameraShortcutEnabled = Settings.Secure.getIntForUser(mContext.getContentResolver(),
+                Settings.Secure.LOCK_CAMERA_SHORTCUT_ENABLE, 1, UserHandle.USER_CURRENT) == 1;
+        mLeftShortcutEnabled = Settings.Secure.getIntForUser(mContext.getContentResolver(),
+                Settings.Secure.LOCK_LEFT_SHORTCUT_ENABLE, 1, UserHandle.USER_CURRENT) == 1;
+
         updateLeftAffordance();
         inflateCameraPreview();
+        updateCameraVisibility();
+        mIndicationController.setVisibleOverwrite(mShowIndicator);
     }
 
     private boolean hideShortcuts() {
