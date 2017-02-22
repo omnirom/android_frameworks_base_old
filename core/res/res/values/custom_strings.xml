@@ -34,6 +34,8 @@
     <string name="global_action_torch_on">Flashlight is ON</string>
     <string name="global_action_torch_off">Flashlight is OFF</string>
     <string name="global_actions_toggle_torch_mode">Flashlight</string>
+    <string name="global_action_dismissable_dialog_text">Advanced reboot is disabled.\nDo you want to reboot\u003f</string>
+    <string name="global_action_dnaa">Do not show again</string>
 
     <!-- Silent Mode -->
     <string name="silent_mode_priority">Priority</string>

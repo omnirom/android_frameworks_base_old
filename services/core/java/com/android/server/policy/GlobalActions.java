@@ -30,6 +30,7 @@ import com.android.internal.util.omni.DeviceUtils;
 
 import android.app.ActivityManager;
 import android.app.ActivityManagerNative;
+import android.app.AlertDialog;
 import android.app.Dialog;
 import android.app.KeyguardManager;
 import android.app.NotificationManager;
@@ -87,6 +88,7 @@ import android.view.KeyEvent;
 import android.view.LayoutInflater;
 import android.view.MotionEvent;
 import android.view.View;
+import android.view.View.OnClickListener;
 import android.view.ViewConfiguration;
 import android.view.ViewGroup;
 import android.view.WindowManager;
@@ -96,6 +98,7 @@ import android.view.WindowManagerPolicy.WindowState;
 import android.view.accessibility.AccessibilityEvent;
 import android.widget.AdapterView;
 import android.widget.BaseAdapter;
+import android.widget.CheckBox;
 import android.widget.ImageView;
 import android.widget.ImageView.ScaleType;
 import android.widget.LinearLayout;
@@ -170,6 +173,7 @@ class GlobalActions implements DialogInterface.OnDismissListener, DialogInterfac
     private ToggleAction.State mTorchState = ToggleAction.State.Off;
     private UserManager mUm;
     private final EmergencyAffordanceManager mEmergencyAffordanceManager;
+
 
     /**
      * @param context everything needs a context :(
@@ -302,8 +306,8 @@ class GlobalActions implements DialogInterface.OnDismissListener, DialogInterfac
     }
 
     private int getPowermenuAnimations() {
-        return Settings.System.getInt(mContext.getContentResolver(),
-                Settings.System.POWER_MENU_ANIMATIONS, 0);
+        return Settings.System.getIntForUser(mContext.getContentResolver(),
+                Settings.System.POWER_MENU_ANIMATIONS, 0, UserHandle.USER_CURRENT);
     }
 
     /**
@@ -497,9 +501,9 @@ class GlobalActions implements DialogInterface.OnDismissListener, DialogInterfac
             } else if (GLOBAL_ACTION_KEY_REBOOT.equals(actionKey)) {
                 // always enable the simple reboot
                 mItems.add(new RebootAction());
-            } else if (GLOBAL_ACTION_KEY_REBOOT_RECOVERY.equals(actionKey)) {
+            } else if (advancedRebootEnabled(mContext) && GLOBAL_ACTION_KEY_REBOOT_RECOVERY.equals(actionKey)) {
                 mItems.add(new RebootRecoveryAction());
-            } else if (GLOBAL_ACTION_KEY_REBOOT_BOOTLOADER.equals(actionKey)) {
+            } else if (advancedRebootEnabled(mContext) && GLOBAL_ACTION_KEY_REBOOT_BOOTLOADER.equals(actionKey)) {
                 mItems.add(new RebootBootloaderAction());
             /*} else if (GLOBAL_ACTION_KEY_ASSIST.equals(actionKey)) {
                 mItems.add(getAssistAction());*/
@@ -566,11 +570,17 @@ class GlobalActions implements DialogInterface.OnDismissListener, DialogInterfac
         private RebootAction() {
             super(com.android.internal.R.drawable.ic_global_power_reboot,
                     R.string.global_action_reboot);
-//            if (mRebootMenu) {
-//                mMessageResId = R.string.global_action_reboot_sub;
-//            } else if (showRebootSubmenu()) {
-//                mMessageResId = R.string.global_action_reboot_more;
-//            }
+            if (mRebootMenu) {
+                mMessageResId = R.string.global_action_reboot_sub;
+            } else if (showRebootSubmenu() && advancedRebootEnabled(mContext)) {
+                mMessageResId = R.string.global_action_reboot_more;
+            }
+        }
+
+        private boolean dismissDialogEnabled() {
+            boolean dismissDialogEnabled = Settings.Secure.getIntForUser(mContext.getContentResolver(),
+                    Settings.Secure.GLOBAL_ACTION_DNAA, 0, UserHandle.USER_CURRENT) == 1;
+            return dismissDialogEnabled;
         }
 
         @Override
@@ -609,8 +619,47 @@ class GlobalActions implements DialogInterface.OnDismissListener, DialogInterfac
                 mAdapter.notifyDataSetChanged();
             } else {
                 mHandler.sendEmptyMessage(MESSAGE_DISMISS);
-                mWindowManagerFuncs.rebootCustom(null, false);
+                if (!dismissDialogEnabled()) {
+                    doShowAlert();
+                } else {
+                    doReboot();
+                }
             }
+        }
+
+        private void doShowAlert() {
+            AlertDialog.Builder b = new  AlertDialog.Builder(mContext,
+                    com.android.internal.R.style.Theme_Material_DayNight_Dialog_Alert);
+            View content = LayoutInflater.from(mContext).inflate(
+                    R.layout.global_action_dismissable_dialog, null);
+            final CheckBox dontShowAgain = (CheckBox) content.findViewById(R.id.global_action_skip);
+
+            b.setTitle(R.string.global_action_reboot);
+            b.setView(content);
+            b.setMessage(R.string.global_action_dismissable_dialog_text);
+            b.setPositiveButton(R.string.dlg_ok, new DialogInterface.OnClickListener() {
+                @Override
+                public void onClick(DialogInterface dialog, int which) {
+                    Settings.Secure.putIntForUser(mContext.getContentResolver(),
+                            Settings.Secure.GLOBAL_ACTION_DNAA, dontShowAgain.isChecked() ? 1 : 0,
+                            UserHandle.USER_CURRENT);
+                    dialog.dismiss();
+                    doReboot();
+                }
+            });
+            b.setNegativeButton(R.string.cancel, new DialogInterface.OnClickListener() {
+                @Override
+                public void onClick(DialogInterface dialog, int which) {
+                    dialog.dismiss();
+                }
+            });
+            AlertDialog d = b.create();
+            d.getWindow().setType(WindowManager.LayoutParams.TYPE_KEYGUARD_DIALOG);
+            d.show();
+        }
+
+        private void doReboot() {
+            mWindowManagerFuncs.rebootCustom(null, false);
         }
     }
 
@@ -1993,12 +2042,11 @@ class GlobalActions implements DialogInterface.OnDismissListener, DialogInterfac
         }
     }
 
-//    private boolean advancedRebootEnabled(Context context) {
-//        boolean devOptionsEnabled = Settings.Secure.getInt(context.getContentResolver(),
-//                Settings.Secure.DEVELOPER_OPTIONS_ENABLED, 0) == 1;
-//        return Settings.Secure.getInt(context.getContentResolver(),
-//                Settings.Secure.ADVANCED_REBOOT, devOptionsEnabled ? 1 : 0) == 1;
-//    }
+    private boolean advancedRebootEnabled(Context context) {
+        boolean advancedRebootEnabled = Settings.Secure.getIntForUser(context.getContentResolver(),
+                Settings.Secure.ADVANCED_REBOOT, 0, UserHandle.USER_CURRENT) == 1;
+        return advancedRebootEnabled;
+    }
 
     private boolean isActionVisible(Action action) {
         if (mKeyguardShowing) {
@@ -2028,12 +2076,12 @@ class GlobalActions implements DialogInterface.OnDismissListener, DialogInterfac
                     com.android.internal.R.array.config_rebootActionsList);
         for (int i = 0; i < rebootMenuActions.length; i++) {
             String actionKey = rebootMenuActions[i];
-            if (GLOBAL_ACTION_KEY_REBOOT_RECOVERY.equals(actionKey)) {
+            if (advancedRebootEnabled(mContext) && GLOBAL_ACTION_KEY_REBOOT_RECOVERY.equals(actionKey)) {
                 RebootRecoveryAction a = new RebootRecoveryAction();
                 if (isActionVisible(a)) {
                     items.add(a);
                 }
-            } else if (GLOBAL_ACTION_KEY_REBOOT_BOOTLOADER.equals(actionKey)) {
+            } else if (advancedRebootEnabled(mContext) && GLOBAL_ACTION_KEY_REBOOT_BOOTLOADER.equals(actionKey)) {
                 RebootBootloaderAction a = new RebootBootloaderAction();
                 if (isActionVisible(a)) {
                     items.add(a);

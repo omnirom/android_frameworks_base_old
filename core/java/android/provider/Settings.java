@@ -3743,6 +3743,7 @@ public final class Settings {
          */
 
         /**
+         * Omni additions start
          * @hide
          */
         public static final String BUTTON_BACK_KILL_TIMEOUT = "button_back_kill_timeout";
@@ -5288,44 +5289,6 @@ public final class Settings {
         public static final String LOCK_PATTERN_VISIBLE = "lock_pattern_visible_pattern";
 
         /**
-         * Disable expanding quick settings on secure lock screens
-         *
-         * @hide
-         */
-        public static final String LOCK_QS_DISABLED = "lockscreen_qs_disabled";
-
-        /**
-         * Enable voice lockscreen shortcut
-         * @hide
-         */
-        public static final String LOCK_VOICE_SHORTCUT = "lockscreen_voice_shortcut";
-
-        /**
-         * @hide
-         */
-        public static final String LOCK_SHORTCUTS_ENABLE = "lockscreen_shortcuts_enable";
-
-        /**
-         * @hide
-         */
-        public static final String LOCK_CAMERA_SHORTCUT_ENABLE = "lockscreen_camera_shortcut_enable";
-
-        /**
-         * @hide
-         */
-        public static final String LOCK_LEFT_SHORTCUT_ENABLE = "lockscreen_left_shortcut_enable";
-
-        /**
-         * @hide
-         */
-        public static final String LOCK_HIDE_INDICATOR_DISPLAY = "lockscreen_hide_indicator_display";
-
-        /**
-         * @hide
-         */
-        public static final String LOCK_HIDE_STATUS_BAR = "lockscreen_hide_status_bar";
-
-        /**
          * Whether lock pattern will vibrate as user enters (0 = false, 1 =
          * true)
          *
@@ -6822,6 +6785,56 @@ public final class Settings {
          * @hide
          */
         public static final String WEB_ACTION_ENABLED = "web_action_enabled";
+
+        /**
+         * Omni additions start
+         *
+         * @hide
+         */
+        public static final String GLOBAL_ACTION_DNAA = "global_action_dnaa";
+
+        /**
+         * @hide
+         */
+        public static final String ADVANCED_REBOOT = "advanced_reboot";
+
+        /**
+         * Disable expanding quick settings on secure lock screens
+         *
+         * @hide
+         */
+        public static final String LOCK_QS_DISABLED = "lockscreen_qs_disabled";
+
+        /**
+         * Enable voice lockscreen shortcut
+         * @hide
+         */
+        public static final String LOCK_VOICE_SHORTCUT = "lockscreen_voice_shortcut";
+
+        /**
+         * @hide
+         */
+        public static final String LOCK_SHORTCUTS_ENABLE = "lockscreen_shortcuts_enable";
+
+        /**
+         * @hide
+         */
+        public static final String LOCK_CAMERA_SHORTCUT_ENABLE = "lockscreen_camera_shortcut_enable";
+
+        /**
+         * @hide
+         */
+        public static final String LOCK_LEFT_SHORTCUT_ENABLE = "lockscreen_left_shortcut_enable";
+
+        /**
+         * @hide
+         */
+        public static final String LOCK_HIDE_INDICATOR_DISPLAY = "lockscreen_hide_indicator_display";
+
+        /**
+         * @hide
+         */
+        public static final String LOCK_HIDE_STATUS_BAR = "lockscreen_hide_status_bar";
 
         /**
          * This are the settings to be backed up.

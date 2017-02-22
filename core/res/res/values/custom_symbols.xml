@@ -54,6 +54,9 @@
   <java-symbol type="drawable" name="ic_global_dnd_important" />
   <java-symbol type="drawable" name="ic_global_users" />
   <java-symbol type="id" name="option4" />
+  <java-symbol type="id" name="global_action_skip" />
+  <java-symbol type="layout" name="global_action_dismissable_dialog" />
+  <java-symbol type="string" name="global_action_dismissable_dialog_text" />
   <java-symbol type="layout" name="global_actions_dnd_mode" />
   <!-- global actions -->
   <java-symbol type="style" name="GlobalActionsAnimation" />
