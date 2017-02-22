@@ -3758,6 +3758,11 @@ public final class Settings {
         public static final String GLOBAL_ACTIONS_LIST = "global_actions_list";
 
         /**
+         * @hide
+         */
+        public static final String ADVANCED_REBOOT = "advanced_reboot";
+
+        /**
          *  Enable statusbar double tap gesture on to put device to sleep
          * @hide
          */
