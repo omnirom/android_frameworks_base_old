@@ -30,6 +30,7 @@ import com.android.internal.util.omni.DeviceUtils;
 
 import android.app.ActivityManager;
 import android.app.ActivityManagerNative;
+import android.app.AlertDialog;
 import android.app.Dialog;
 import android.app.KeyguardManager;
 import android.app.NotificationManager;
@@ -41,6 +42,7 @@ import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.IntentFilter;
 import android.content.ServiceConnection;
+import android.content.SharedPreferences;
 import android.content.pm.UserInfo;
 import android.database.ContentObserver;
 import android.graphics.Bitmap;
@@ -87,6 +89,7 @@ import android.view.KeyEvent;
 import android.view.LayoutInflater;
 import android.view.MotionEvent;
 import android.view.View;
+import android.view.View.OnClickListener;
 import android.view.ViewConfiguration;
 import android.view.ViewGroup;
 import android.view.WindowManager;
@@ -96,6 +99,7 @@ import android.view.WindowManagerPolicy.WindowState;
 import android.view.accessibility.AccessibilityEvent;
 import android.widget.AdapterView;
 import android.widget.BaseAdapter;
+import android.widget.CheckBox;
 import android.widget.ImageView;
 import android.widget.ImageView.ScaleType;
 import android.widget.LinearLayout;
@@ -135,6 +139,9 @@ class GlobalActions implements DialogInterface.OnDismissListener, DialogInterfac
     private static final String GLOBAL_ACTION_KEY_SCREENSHOT = "screenshot";
     private static final String GLOBAL_ACTION_KEY_SCREENRECORD = "screenrecord";
     private static final String GLOBAL_ACTION_KEY_TORCH = "torch";
+    private static final String GLOBAL_ACTION_DNAA = "dnaa";
+
+    private CheckBox dontShowAgain;
 
     private final Context mContext;
     private final WindowManagerFuncs mWindowManagerFuncs;
@@ -170,6 +177,7 @@ class GlobalActions implements DialogInterface.OnDismissListener, DialogInterfac
     private ToggleAction.State mTorchState = ToggleAction.State.Off;
     private UserManager mUm;
     private final EmergencyAffordanceManager mEmergencyAffordanceManager;
+
 
     /**
      * @param context everything needs a context :(
@@ -573,6 +581,12 @@ class GlobalActions implements DialogInterface.OnDismissListener, DialogInterfac
             }
         }
 
+        private boolean dismissDialogEnabled() {
+            boolean dismissDialogEnabled = Settings.System.getInt(mContext.getContentResolver(),
+                    Settings.System.GLOBAL_ACTION_DNAA, 0) == 1;
+            return dismissDialogEnabled;
+        }
+
         @Override
         public boolean showDuringKeyguard() {
             return true;
@@ -609,8 +623,49 @@ class GlobalActions implements DialogInterface.OnDismissListener, DialogInterfac
                 mAdapter.notifyDataSetChanged();
             } else {
                 mHandler.sendEmptyMessage(MESSAGE_DISMISS);
-                mWindowManagerFuncs.rebootCustom(null, false);
+                if (!dismissDialogEnabled()) {
+                    doShowAlert();
+                } else {
+                    doReboot();
+                }
             }
+        }
+
+        private void doShowAlert() {
+            AlertDialog.Builder b = new  AlertDialog.Builder(mContext);
+            LayoutInflater inflater = LayoutInflater.from(mContext);
+            View content = inflater.inflate(
+                                R.layout.global_action_dissmissable_dialog, null);
+            dontShowAgain = (CheckBox) content.findViewById(R.id.global_action_skip);
+
+            b.setTitle(R.string.dialog_alert_title);
+            b.setView(content);
+            b.setMessage(R.string.reboot_confirm);
+            b.setPositiveButton(R.string.dlg_ok,
+                    new DialogInterface.OnClickListener() {
+                        public void onClick(DialogInterface dialog, int which) {
+                            boolean checkBoxResult = false;
+                            if (dontShowAgain.isChecked()) {
+                                checkBoxResult = true;
+                            }
+                            Settings.System.putInt(mContext.getContentResolver(),
+                                Settings.System.GLOBAL_ACTION_DNAA, checkBoxResult ? 0 : 1);
+                            dialog.dismiss();
+                            doReboot();
+                        }
+                   });
+            b.setNegativeButton(R.string.cancel,
+                    new DialogInterface.OnClickListener() {
+                        public void onClick(DialogInterface dialog, int which) {
+                            dialog.dismiss();
+                            mHandler.sendEmptyMessage(MESSAGE_DISMISS);
+                        }
+                    });
+            b.create().show();
+        }
+
+        private void doReboot() {
+            mWindowManagerFuncs.rebootCustom(null, false);
         }
     }
 

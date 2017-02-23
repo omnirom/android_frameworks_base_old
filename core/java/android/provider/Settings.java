@@ -3760,6 +3760,11 @@ public final class Settings {
         /**
          * @hide
          */
+        public static final String GLOBAL_ACTION_DNAA = "global_action_dnaa";
+
+        /**
+         * @hide
+         */
         public static final String ADVANCED_REBOOT = "advanced_reboot";
 
         /**
