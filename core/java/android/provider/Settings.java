@@ -6305,6 +6305,11 @@ public final class Settings {
                 "lock_screen_allow_remote_input";
 
         /**
+         * @hide
+         */
+        public static final String LOCK_HIDE_STATUS_BAR = "lockscreen_hide_status_bar";
+
+        /**
          * Set by the system to track if the user needs to see the call to action for
          * the lockscreen notification policy.
          * @hide
