@@ -4350,6 +4350,11 @@ public final class Settings {
         /**
          * @hide
          */
+        public static final String LOCK_HIDE_STATUS_BAR = "lockscreen_hide_status_bar";
+
+        /**
+         * @hide
+         */
         public static final String DEVICE_FEATURE_SETTINGS = "device_feature_settings";
 
         /**
