@@ -5316,6 +5316,11 @@ public final class Settings {
         public static final String LOCK_INDICATOR_DISPLAY = "lockscreen_indicator_display";
 
         /**
+         * @hide
+         */
+        public static final String LOCK_HIDE_STATUS_BAR = "lockscreen_hide_status_bar";
+
+        /**
          * Whether lock pattern will vibrate as user enters (0 = false, 1 =
          * true)
          *
