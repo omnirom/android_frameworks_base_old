@@ -5318,7 +5318,7 @@ public final class Settings {
         /**
          * @hide
          */
-        public static final String LOCK_INDICATOR_DISPLAY = "lockscreen_indicator_display";
+        public static final String LOCK_HIDE_INDICATOR_DISPLAY = "lockscreen_hide_indicator_display";
 
         /**
          * @hide
