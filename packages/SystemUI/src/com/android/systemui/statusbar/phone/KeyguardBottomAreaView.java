@@ -750,7 +750,7 @@ public class KeyguardBottomAreaView extends FrameLayout implements View.OnClickL
 
     public void onKeyguardShowingChanged() {
         mShowIndicator = Settings.Secure.getIntForUser(mContext.getContentResolver(),
-                Settings.Secure.LOCK_INDICATOR_DISPLAY, 1, UserHandle.USER_CURRENT) == 1;
+                Settings.Secure.LOCK_INDICATOR_DISPLAY, 0, UserHandle.USER_CURRENT) == 0;
         mShortcutsEnabled = Settings.Secure.getIntForUser(mContext.getContentResolver(),
                 Settings.Secure.LOCK_SHORTCUTS_ENABLE, 1, UserHandle.USER_CURRENT) == 1;
         mVoiceShortcutEnabled = Settings.Secure.getIntForUser(mContext.getContentResolver(),
