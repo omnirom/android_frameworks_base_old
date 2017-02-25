@@ -6840,6 +6840,13 @@ public final class Settings {
          * @hide
          */
         public static final String LOCK_HIDE_STATUS_BAR = "lockscreen_hide_status_bar";
+		
+		/**
+         * Force authorize Substratum (or equivalent) frontend calling packages by Masquerade
+         * @hide
+         */
+        public static final String FORCE_AUTHORIZE_SUBSTRATUM_PACKAGES = "force_authorize_substratum_packages";
+
 
         /**
          * This are the settings to be backed up.
