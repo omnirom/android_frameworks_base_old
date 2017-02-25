@@ -1,0 +1,72 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "78209991_31f3459b",
+        "filename": "core/res/res/values/custom_strings.xml",
+        "patchSetId": 10
+      },
+      "lineNbr": 37,
+      "author": {
+        "id": 1000026
+      },
+      "writtenOn": "2017-02-25T17:41:58Z",
+      "side": 1,
+      "message": "you can also use unicode 003F",
+      "revId": "6eef9914411d4f2d8a90d920abaf6fcb11b7db23",
+      "serverId": "56841c99-7c94-43d4-bf0b-cb4707e66d55",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "78209991_f1ecadbb",
+        "filename": "core/res/res/values/custom_symbols.xml",
+        "patchSetId": 10
+      },
+      "lineNbr": 27,
+      "author": {
+        "id": 1000026
+      },
+      "writtenOn": "2017-02-25T17:41:58Z",
+      "side": 1,
+      "message": "where is this used?",
+      "revId": "6eef9914411d4f2d8a90d920abaf6fcb11b7db23",
+      "serverId": "56841c99-7c94-43d4-bf0b-cb4707e66d55",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "78209991_d12d31fe",
+        "filename": "core/res/res/values/custom_symbols.xml",
+        "patchSetId": 10
+      },
+      "lineNbr": 60,
+      "author": {
+        "id": 1000026
+      },
+      "writtenOn": "2017-02-25T17:41:58Z",
+      "side": 1,
+      "message": "and this?",
+      "revId": "6eef9914411d4f2d8a90d920abaf6fcb11b7db23",
+      "serverId": "56841c99-7c94-43d4-bf0b-cb4707e66d55",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "78209991_11f0498a",
+        "filename": "services/core/java/com/android/server/policy/GlobalActions.java",
+        "patchSetId": 10
+      },
+      "lineNbr": 45,
+      "author": {
+        "id": 1000026
+      },
+      "writtenOn": "2017-02-25T17:41:58Z",
+      "side": 1,
+      "message": "should not bee neded needed",
+      "revId": "6eef9914411d4f2d8a90d920abaf6fcb11b7db23",
+      "serverId": "56841c99-7c94-43d4-bf0b-cb4707e66d55",
+      "unresolved": false
+    }
+  ]
+}
