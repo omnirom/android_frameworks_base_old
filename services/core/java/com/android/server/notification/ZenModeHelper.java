@@ -460,7 +460,12 @@ public class ZenModeHelper {
     }
 
     public void setManualZenMode(int zenMode, Uri conditionId, String caller, String reason) {
-        setManualZenMode(zenMode, conditionId, reason, caller, true /*setRingerMode*/);
+        boolean setRingerMode = true;
+        if (zenMode == Global.ZEN_MODE_OFF_ONLY) {
+            setRingerMode = false;
+            zenMode = Global.ZEN_MODE_OFF;
+        }
+        setManualZenMode(zenMode, conditionId, reason, caller, setRingerMode);
     }
 
     private void setManualZenMode(int zenMode, Uri conditionId, String reason, String caller,
