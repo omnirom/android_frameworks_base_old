@@ -681,6 +681,7 @@ public class PhoneWindowManager implements WindowManagerPolicy {
     private int mLongPressOnHomeBehavior;
     private int mLongPressOnMenuBehavior;
     private boolean mMenuConsumed;
+    private boolean mAppSwitchConsumed;
 
     // What we do when the user double-taps on home
     private int mDoubleTapOnHomeBehavior;
@@ -795,6 +796,7 @@ public class PhoneWindowManager implements WindowManagerPolicy {
     private static final int MSG_REQUEST_TRANSIENT_BARS_ARG_NAVIGATION = 1;
 
     private static final int MSG_DISPATCH_VOLKEY_WITH_WAKE_LOCK = 20;
+    private static final int MSG_APP_SWITCH_LONG_PRESS = 21;
 
     private class PolicyHandler extends Handler {
         @Override
@@ -858,6 +860,9 @@ public class PhoneWindowManager implements WindowManagerPolicy {
                     break;
                 case MSG_BACK_LONG_PRESS:
                     backLongPress();
+                    break;
+                case MSG_APP_SWITCH_LONG_PRESS:
+                    appSwitchLongPress();
                     break;
                 case MSG_DISPOSE_INPUT_CONSUMER:
                     disposeInputConsumer((InputConsumer) msg.obj);
@@ -1367,6 +1372,7 @@ public class PhoneWindowManager implements WindowManagerPolicy {
     }
 
     private void backLongPress() {
+        cancelPreloadRecentApps();
         mBackKeyHandled = true;
 
         switch (mLongPressOnBackBehavior) {
@@ -3460,6 +3466,7 @@ public class PhoneWindowManager implements WindowManagerPolicy {
                         return -1;
                     }
                     preloadRecentApps();
+                    triggerLongPressAppSwitchKey();
                 }
             } else {
                 if (mAppSwitchDoCustomAction) {
@@ -3474,7 +3481,10 @@ public class PhoneWindowManager implements WindowManagerPolicy {
                     }
                     return -1;
                 }
-                doToggleRecentApps();
+                if (handleLongPressAppSwitchKey()) {
+                    return -1;
+                }
+                if (!mAppSwitchConsumed) doToggleRecentApps();
             }
             return -1;
         } else if (keyCode == KeyEvent.KEYCODE_BACK) {
@@ -3483,6 +3493,7 @@ public class PhoneWindowManager implements WindowManagerPolicy {
                     if (mPressOnBackBehavior != KEY_ACTION_BACK && !virtualKey) {
                         if (mPressOnBackBehavior == KEY_ACTION_APP_SWITCH) {
                             preloadRecentApps();
+                            triggerLongPressAppSwitchKey();
                         }
                         mBackDoCustomAction = true;
                         return -1;
@@ -3492,6 +3503,11 @@ public class PhoneWindowManager implements WindowManagerPolicy {
             } else {
                 if (mBackDoCustomAction) {
                     mBackDoCustomAction = false;
+                    if (mPressOnBackBehavior == KEY_ACTION_APP_SWITCH) {
+                        if (handleLongPressAppSwitchKey()) {
+                            return -1;
+                        }
+                    }
                     if (!canceled) {
                         performKeyAction(mPressOnBackBehavior);
                     }
@@ -8650,7 +8666,7 @@ public class PhoneWindowManager implements WindowManagerPolicy {
             Message msg = mHandler.obtainMessage(MSG_BACK_LONG_PRESS);
             msg.setAsynchronous(true);
             mHandler.sendMessageDelayed(msg,
-                ViewConfiguration.get(mContext).getDeviceGlobalActionKeyTimeout());
+                ViewConfiguration.get(mContext).getLongPressTimeout());
         }
     }
 
@@ -8667,4 +8683,42 @@ public class PhoneWindowManager implements WindowManagerPolicy {
         }
         return false;
     }
+
+    private void triggerLongPressAppSwitchKey() {
+        mAppSwitchConsumed = false;
+        Message msg = mHandler.obtainMessage(MSG_APP_SWITCH_LONG_PRESS);
+        msg.setAsynchronous(true);
+        mHandler.sendMessageDelayed(msg,
+            ViewConfiguration.get(mContext).getLongPressTimeout());
+    }
+
+    private void cancelPendingAppSwitchAction() {
+        if (!mAppSwitchConsumed) {
+            mHandler.removeMessages(MSG_APP_SWITCH_LONG_PRESS);
+        }
+    }
+
+    private boolean handleLongPressAppSwitchKey() {
+        cancelPendingAppSwitchAction();
+        if (mAppSwitchConsumed) {
+            mAppSwitchConsumed = false;
+            return true;
+        }
+        return false;
+    }
+
+    private void appSwitchLongPress() {
+        cancelPreloadRecentApps();
+        mAppSwitchConsumed = true;
+        boolean dockStatus = TaskUtils.isTaskDocked();
+        if (dockStatus) {
+            TaskUtils.undockTask();
+        } else {
+            TaskUtils.dockTopTask(mContext);
+            // if OmniSwitch is disabled this will trigger AOSP recent same as from soft keys
+            // with OmniSwitch it will run restoreHomeStack
+            showRecentApps(false, true);
+        }
+    }
 }
+
