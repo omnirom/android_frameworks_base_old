@@ -645,6 +645,7 @@ public class PhoneWindowManager implements WindowManagerPolicy {
     boolean mSearchKeyShortcutPending;
     boolean mConsumeSearchKeyUp;
     boolean mAssistKeyLongPressed;
+    boolean mAppSwitchLongPressed;
     boolean mPendingMetaAction;
     boolean mPendingCapsLockToggle;
     int mMetaState;
@@ -681,6 +682,7 @@ public class PhoneWindowManager implements WindowManagerPolicy {
     private int mLongPressOnHomeBehavior;
     private int mLongPressOnMenuBehavior;
     private boolean mMenuConsumed;
+    private boolean mOverviewConsumed;
 
     // What we do when the user double-taps on home
     private int mDoubleTapOnHomeBehavior;
@@ -3460,23 +3462,34 @@ public class PhoneWindowManager implements WindowManagerPolicy {
                         return -1;
                     }
                     preloadRecentApps();
+                    mAppSwitchLongPressed = false;
+                } else if (longPress) {
+                    mAppSwitchLongPressed = true;
+                    triggerLongPressOverviewKey();
                 }
-            } else {
-                if (mAppSwitchDoCustomAction) {
-                    mAppSwitchDoCustomAction = false;
-                    if (mPressOnAppSwitchBehavior == KEY_ACTION_BACK) {
-                        if (handleLongPressBackKey()) {
-                            return -1;
-                        }
+                return -1;
+            } else if (mAppSwitchLongPressed) {
+                mAppSwitchLongPressed = false;
+                    if (canceled) {
+                        return -1;
                     }
-                    if (!canceled) {
-                        performKeyAction(mPressOnAppSwitchBehavior);
+                    if (mOverviewConsumed) {
+                        mOverviewConsumed = false;
+                        return -1;
                     }
-                    return -1;
-                }
-                doToggleRecentApps();
-            }
-            return -1;
+             } else if (mAppSwitchDoCustomAction) {
+                 mAppSwitchDoCustomAction = false;
+                 if (mPressOnAppSwitchBehavior == KEY_ACTION_BACK) {
+                     if (handleLongPressBackKey()) {
+                         return -1;
+                     }
+                 }
+                 if (!canceled) {
+                     performKeyAction(mPressOnAppSwitchBehavior);
+                 }
+                 return -1;
+             }
+             if (!mOverviewConsumed) doToggleRecentApps();
         } else if (keyCode == KeyEvent.KEYCODE_BACK) {
             if (down) {
                 if (repeatCount == 0) {
@@ -8666,5 +8679,23 @@ public class PhoneWindowManager implements WindowManagerPolicy {
             return true;
         }
         return false;
+    }
+
+    private void triggerLongPressOverviewKey() {
+        Slog.v("darkobas", "loooooongpressss" );
+        handleLongPressOverviewKey();
+    }
+
+    private void handleLongPressOverviewKey() {
+        mOverviewConsumed = true;
+        boolean dockStatus = TaskUtils.isTaskDocked();
+        if (dockStatus) {
+            TaskUtils.undockTask();
+        } else {
+            TaskUtils.dockTopTask(mContext);
+            // if OmniSwitch is disabled this will trigger AOSP recent same as from soft keys
+            // with OmniSwitch it will run restoreHomeStack
+            showRecentApps(true, false);
+        }
     }
 }
