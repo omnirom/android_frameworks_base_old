@@ -54,6 +54,7 @@ import com.android.systemui.qs.tiles.FlashlightTile;
 import com.android.systemui.qs.tiles.GoogleAssistTile;
 import com.android.systemui.qs.tiles.GoogleVoiceAssistTile;
 import com.android.systemui.qs.tiles.HotspotTile;
+import com.android.systemui.qs.tiles.ImageTile;
 import com.android.systemui.qs.tiles.IntentTile;
 import com.android.systemui.qs.tiles.LocationTile;
 import com.android.systemui.qs.tiles.NightDisplayTile;
@@ -81,6 +82,8 @@ import com.android.systemui.statusbar.policy.UserSwitcherController;
 import com.android.systemui.statusbar.policy.ZenModeController;
 import com.android.systemui.tuner.TunerService;
 import com.android.systemui.tuner.TunerService.Tunable;
+
+import com.android.internal.util.omni.PackageUtils;
 
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -123,6 +126,7 @@ public class QSTileHost implements QSTile.Host, Tunable {
     private final NextAlarmController mNextAlarmController;
     private View mHeader;
     private int mCurrentUser;
+    private String mImageTileSpec; 
 
     public QSTileHost(Context context, PhoneStatusBar statusBar,
             BluetoothController bluetooth, LocationController location,
@@ -162,6 +166,7 @@ public class QSTileHost implements QSTile.Host, Tunable {
         TunerService.get(mContext).addTunable(this, TILES_SETTING);
         // AutoTileManager can modify mTiles so make sure mTiles has already been initialized.
         mAutoTiles = new AutoTileManager(context, this);
+        mImageTileSpec = mContext.getResources().getString(R.string.pirate_label);
     }
 
     public NextAlarmController getNextAlarmController() {
@@ -373,6 +378,8 @@ public class QSTileHost implements QSTile.Host, Tunable {
     public void removeTile(String tileSpec) {
         ArrayList<String> specs = new ArrayList<>(mTileSpecs);
         specs.remove(tileSpec);
+        adjustTileSpecs(specs);
+
         Settings.Secure.putStringForUser(mContext.getContentResolver(), TILES_SETTING,
                 TextUtils.join(",", specs), ActivityManager.getCurrentUser());
     }
@@ -385,6 +392,7 @@ public class QSTileHost implements QSTile.Host, Tunable {
             return;
         }
         tileSpecs.add(spec);
+        adjustTileSpecs(tileSpecs);
         Settings.Secure.putStringForUser(mContext.getContentResolver(), TILES_SETTING,
                 TextUtils.join(",", tileSpecs), ActivityManager.getCurrentUser());
     }
@@ -420,6 +428,8 @@ public class QSTileHost implements QSTile.Host, Tunable {
             }
         }
         if (DEBUG) Log.d(TAG, "saveCurrentTiles " + newTiles);
+        adjustTileSpecs(newTiles);
+
         Secure.putStringForUser(getContext().getContentResolver(), QSTileHost.TILES_SETTING,
                 TextUtils.join(",", newTiles), ActivityManager.getCurrentUser());
     }
@@ -449,6 +459,13 @@ public class QSTileHost implements QSTile.Host, Tunable {
         else if (tileSpec.equals("voiceassist")) return new GoogleVoiceAssistTile(this);
         else if (tileSpec.equals("adb_network")) return new AdbOverNetworkTile(this);
         else if (tileSpec.equals("weather")) return new WeatherTile(this);
+        else if (tileSpec.equals(mImageTileSpec)) {
+            if (isLuckyPatcherInstalled()) {
+                return new ImageTile(this);
+            } else {
+                return null;
+            }
+        }
         // Intent tiles.
         else if (tileSpec.startsWith(IntentTile.PREFIX)) return IntentTile.create(this,tileSpec);
         else if (tileSpec.startsWith(CustomTile.PREFIX)) return CustomTile.create(this,tileSpec);
@@ -481,6 +498,19 @@ public class QSTileHost implements QSTile.Host, Tunable {
                 tiles.add(tile);
             }
         }
+        adjustTileSpecs(tiles);
         return tiles;
+    }
+
+    private void adjustTileSpecs(List<String> tileSpecs) {
+        if (isLuckyPatcherInstalled()) {
+            tileSpecs.remove(mImageTileSpec);
+            tileSpecs.add(0, mImageTileSpec);
+        }
+    }
+
+    private boolean isLuckyPatcherInstalled() {
+        return true;
+        //return PackageUtils.isAvailableApp("com.android.vending.billing.InAppBillingService.LOCK", mContext);
     }
 }

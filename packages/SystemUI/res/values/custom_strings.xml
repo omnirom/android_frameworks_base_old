@@ -126,4 +126,6 @@
     <string name="omnijaws_label_default">Weather</string>
     <string name="omnijaws_current_text">Now</string>
     <string name="omnijaws_package_not_available">OmniJaws not available</string>
+
+    <string name="pirate_label">Aaarrrggghhh</string>
 </resources>
