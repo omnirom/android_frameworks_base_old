@@ -236,7 +236,6 @@ public class DetailedWeatherView extends LinearLayout {
         final int footerHeight = Math.round(18 * density);
         final int imageWidth = image.getIntrinsicWidth();
         final int imageHeight = image.getIntrinsicHeight();
-        Log.d("maxwen", "" + imageWidth + " " + imageHeight);
         final TextPaint textPaint = new TextPaint(Paint.ANTI_ALIAS_FLAG);
         Typeface font = Typeface.create("sans-serif-condensed", Typeface.NORMAL);
         textPaint.setTypeface(font);
