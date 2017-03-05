@@ -21,10 +21,12 @@ package com.android.internal.util.omni;
 import android.app.Activity;
 import android.app.ActivityOptions;
 import android.app.ActivityManager;
+import static android.app.ActivityManager.StackId.DOCKED_STACK_ID;
 import android.app.ActivityManager.RunningAppProcessInfo;
 import android.app.ActivityManagerNative;
 import android.content.ActivityNotFoundException;
 import android.content.Context;
+import android.content.ComponentName;
 import android.content.Intent;
 import android.content.pm.ActivityInfo;
 import android.content.pm.PackageManager;
@@ -33,6 +35,8 @@ import android.os.Process;
 import android.os.RemoteException;
 import android.os.UserHandle;
 import android.util.Log;
+import android.view.WindowManagerGlobal;
+import android.view.WindowManager;
 
 import java.util.List;
 
@@ -76,44 +80,6 @@ public class TaskUtils {
         return false;
     }
 
-/*    public static void toggleLastApp(Context context, int userId) {
-        String defaultHomePackage = resolveCurrentLauncherPackageForUser(
-                context, userId);
-        final ActivityManager am = (ActivityManager) context
-                .getSystemService(Activity.ACTIVITY_SERVICE);
-        final List<ActivityManager.RecentTaskInfo> tasks = am
-                .getRecentTasksForUser(5,
-                        ActivityManager.RECENT_IGNORE_UNAVAILABLE, userId);
-        // lets get enough tasks to find something to switch to
-        // Note, we'll only get as many as the system currently has - up to 5
-        int lastAppId = 0;
-        Intent lastAppIntent = null;
-        for (int i = 1; i < tasks.size() && lastAppIntent == null; i++) {
-            final String packageName = tasks.get(i).baseIntent.getComponent()
-                    .getPackageName();
-            if (!packageName.equals(defaultHomePackage)
-                    && !packageName.equals(SYSTEMUI_PACKAGE)) {
-                final ActivityManager.RecentTaskInfo info = tasks.get(i);
-                lastAppId = info.id;
-                lastAppIntent = info.baseIntent;
-            }
-        }
-        if (lastAppId > 0) {
-            final ActivityOptions opts = ActivityOptions.makeCustomAnimation(
-                    context, com.android.internal.R.anim.last_app_in,
-                    com.android.internal.R.anim.last_app_out);
-            am.moveTaskToFront(lastAppId,
-                    ActivityManager.MOVE_TASK_NO_USER_ACTION, opts.toBundle());
-        } else if (lastAppIntent != null) {
-            // last task is dead, restart it.
-            lastAppIntent.addFlags(Intent.FLAG_ACTIVITY_LAUNCHED_FROM_HISTORY);
-            try {
-                context.startActivityAsUser(lastAppIntent, UserHandle.CURRENT);
-            } catch (ActivityNotFoundException e) {
-            }
-        }
-    }*/
-
     private static String resolveCurrentLauncherPackageForUser(Context context,
             int userId) {
         final Intent launcherIntent = new Intent(Intent.ACTION_MAIN)
@@ -128,27 +94,62 @@ public class TaskUtils {
         return LAUNCHER_PACKAGE;
     }
 
-    public static int getPackagePersistentId(String packageName, Context context) {
+    private static int getRunningTask(Context context) {
         final ActivityManager am = (ActivityManager) context
                 .getSystemService(Context.ACTIVITY_SERVICE);
 
-        List<ActivityManager.RecentTaskInfo> mTasks = am.getRecentTasks(
-                Integer.MAX_VALUE, ActivityManager.RECENT_IGNORE_UNAVAILABLE);
-
-        for (int i = 0; i < mTasks.size(); i++) {
-            String name = mTasks.get(i).baseIntent.getComponent()
-                    .getPackageName();
-            if (name.equals(packageName)) {
-                return mTasks.get(i).persistentId;
-            }
+        List<ActivityManager.RunningTaskInfo> tasks = am.getRunningTasks(1);
+        if (tasks != null && !tasks.isEmpty()) {
+            return tasks.get(0).id;
         }
         return -1;
     }
 
-    public static void movePackageToFront(int mId, Context context) {
-        final ActivityManager am = (ActivityManager) context
-                .getSystemService(Context.ACTIVITY_SERVICE);
-        am.moveTaskToFront(mId, ActivityManager.MOVE_TASK_WITH_HOME);
+    public static boolean isMultiStackEnabled() {
+        return ActivityManager.supportsMultiWindow();
+    }
+
+    public static boolean isTaskDocked() {
+        if (isMultiStackEnabled()) {
+            try {
+                return WindowManagerGlobal.getWindowManagerService().getDockedStackSide() != WindowManager.DOCKED_INVALID;
+            } catch (RemoteException e) {
+            }
+        }
+        return false;
+    }
+
+    public static void undockTask() {
+        if (isTaskDocked()) {
+            try {
+                ActivityManagerNative.getDefault().moveTasksToFullscreenStack(
+                        DOCKED_STACK_ID, true /* onTop */);
+            } catch (RemoteException e) {
+            }
+        }
+    }
+
+    /**
+     * after calling this
+     * PhoneWindowManager.showRecentApps(true, false); must be called
+     * this will take care of the rest depending if OmniSwitch
+     * recents is enabled or not
+     */
+    public static void dockTopTask(Context context) {
+        if (isMultiStackEnabled() && !isTaskDocked()) {
+            try {
+                int taskId = getRunningTask(context);
+                if (taskId != -1) {
+                    int createMode = ActivityManager.DOCKED_STACK_CREATE_MODE_TOP_OR_LEFT;
+                    ActivityOptions options = ActivityOptions.makeBasic();
+                    options.setDockCreateMode(createMode);
+                    options.setLaunchStackId(DOCKED_STACK_ID);
+                    ActivityManagerNative.getDefault().startActivityFromRecents(
+                            taskId,  options.toBundle());
+                }
+            } catch (RemoteException e) {
+            }
+        }
     }
 }
 
