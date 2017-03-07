@@ -18,10 +18,14 @@ package com.android.keyguard;
 
 import android.app.ActivityManager;
 import android.app.AlarmManager;
+import android.content.ContentResolver;
 import android.content.Context;
 import android.content.res.Configuration;
 import android.content.res.Resources;
+import android.graphics.Color;
+import android.graphics.Typeface;
 import android.os.UserHandle;
+import android.provider.Settings;
 import android.text.TextUtils;
 import android.text.format.DateFormat;
 import android.util.AttributeSet;
@@ -34,7 +38,7 @@ import android.widget.TextClock;
 import android.widget.TextView;
 
 import com.android.internal.widget.LockPatternUtils;
-
+import com.android.keyguard.omni.CustomLockClock;
 import java.util.Locale;
 
 public class KeyguardStatusView extends GridLayout {
@@ -46,12 +50,16 @@ public class KeyguardStatusView extends GridLayout {
 
     private TextView mAlarmStatusView;
     private TextClock mDateView;
-    private TextClock mClockView;
+    private CustomLockClock mClockView;
     private TextView mOwnerInfo;
     //On the first boot, keygard will start to receiver TIME_TICK intent.
     //And onScreenTurnedOff will not get called if power off when keyguard is not started.
     //Set initial value to false to skip the above case.
     private boolean mEnableRefresh = false;
+    private boolean mClockEnabled = true;
+    private int mClockFontSize;
+    private int mClockDisplay = Settings.System.LOCK_CLOCK_ALL;
+    private boolean mAlarmVisible = true;
 
     private KeyguardUpdateMonitorCallback mInfoCallback = new KeyguardUpdateMonitorCallback() {
 
@@ -116,7 +124,7 @@ public class KeyguardStatusView extends GridLayout {
         super.onFinishInflate();
         mAlarmStatusView = (TextView) findViewById(R.id.alarm_status);
         mDateView = (TextClock) findViewById(R.id.date_view);
-        mClockView = (TextClock) findViewById(R.id.clock_view);
+        mClockView = (CustomLockClock) findViewById(R.id.clock_view);
         mDateView.setShowCurrentUserTime(true);
         mClockView.setShowCurrentUserTime(true);
         mOwnerInfo = (TextView) findViewById(R.id.owner_info);
@@ -126,16 +134,21 @@ public class KeyguardStatusView extends GridLayout {
         refresh();
         updateOwnerInfo();
 
-        // Disable elegant text height because our fancy colon makes the ymin value huge for no
-        // reason.
-        mClockView.setElegantTextHeight(false);
+        // we want to store is as dip - cause custom size is also in dip
+        mClockFontSize = (int) (getResources().getDimension(R.dimen.widget_big_font_size)
+                / getResources().getDisplayMetrics().density);
+        Settings.System.putIntForUser(mContext.getContentResolver(), Settings.System.LOCK_CLOCK_DEFAULT_SIZE,
+                mClockFontSize, UserHandle.USER_CURRENT);
+        updateSettings();
     }
 
     @Override
     protected void onConfigurationChanged(Configuration newConfig) {
         super.onConfigurationChanged(newConfig);
-        mClockView.setTextSize(TypedValue.COMPLEX_UNIT_PX,
-                getResources().getDimensionPixelSize(R.dimen.widget_big_font_size));
+        mClockFontSize = (int) (getResources().getDimension(R.dimen.widget_big_font_size)
+                / getResources().getDisplayMetrics().density);
+        Settings.System.putIntForUser(mContext.getContentResolver(), Settings.System.LOCK_CLOCK_DEFAULT_SIZE,
+                mClockFontSize, UserHandle.USER_CURRENT);
         // Some layouts like burmese have a different margin for the clock
         MarginLayoutParams layoutParams = (MarginLayoutParams) mClockView.getLayoutParams();
         layoutParams.bottomMargin = getResources().getDimensionPixelSize(
@@ -158,7 +171,7 @@ public class KeyguardStatusView extends GridLayout {
     private void refresh() {
         AlarmManager.AlarmClockInfo nextAlarm =
                 mAlarmManager.getNextAlarmClock(UserHandle.USER_CURRENT);
-        Patterns.update(mContext, nextAlarm != null);
+        Patterns.update(mContext, nextAlarm != null && mAlarmVisible);
 
         refreshTime();
         refreshAlarmStatus(nextAlarm);
@@ -170,7 +183,9 @@ public class KeyguardStatusView extends GridLayout {
             mAlarmStatusView.setText(alarm);
             mAlarmStatusView.setContentDescription(
                     getResources().getString(R.string.keyguard_accessibility_next_alarm, alarm));
-            mAlarmStatusView.setVisibility(View.VISIBLE);
+            if (mAlarmVisible) {
+                mAlarmStatusView.setVisibility(View.VISIBLE);
+            }
         } else {
             mAlarmStatusView.setVisibility(View.GONE);
         }
@@ -268,5 +283,57 @@ public class KeyguardStatusView extends GridLayout {
 
             cacheKey = key;
         }
+    }
+
+    public boolean isTimeVisible() {
+        return mClockEnabled && (mClockDisplay & Settings.System.LOCK_CLOCK_TIME) == Settings.System.LOCK_CLOCK_TIME;
+    }
+
+    public void updateSettings() {
+        int color = Settings.System.getIntForUser(
+                    mContext.getContentResolver(), Settings.System.LOCK_CLOCK_COLOR, Color.WHITE, UserHandle.USER_CURRENT);
+        int size = Settings.System.getIntForUser(
+                    mContext.getContentResolver(), Settings.System.LOCK_CLOCK_SIZE, mClockFontSize, UserHandle.USER_CURRENT);
+        String font = Settings.System.getStringForUser(
+                    mContext.getContentResolver(), Settings.System.LOCK_CLOCK_FONT, UserHandle.USER_CURRENT);
+        mClockEnabled = Settings.System.getIntForUser(
+                    mContext.getContentResolver(), Settings.System.LOCK_CLOCK_ENABLE, 1,
+                    UserHandle.USER_CURRENT) != 0;
+        mClockDisplay = Settings.System.getIntForUser(
+                    mContext.getContentResolver(), Settings.System.LOCK_CLOCK_DISPLAY, Settings.System.LOCK_CLOCK_ALL,
+                    UserHandle.USER_CURRENT);
+        boolean shadow = (mClockDisplay & Settings.System.LOCK_CLOCK_SHADOW) == Settings.System.LOCK_CLOCK_SHADOW;
+
+        mAlarmVisible = mClockEnabled && (mClockDisplay & Settings.System.LOCK_CLOCK_ALARM) == Settings.System.LOCK_CLOCK_ALARM;
+
+        if (!mClockEnabled) {
+            mClockView.setVisibility(View.GONE);
+            mAlarmStatusView.setVisibility(View.GONE);
+            mDateView.setVisibility(View.GONE);
+        } else {
+            mClockView.setVisibility(((mClockDisplay & Settings.System.LOCK_CLOCK_TIME) == Settings.System.LOCK_CLOCK_TIME)
+                    ? View.VISIBLE : View.GONE);
+            mAlarmStatusView.setVisibility(((mClockDisplay & Settings.System.LOCK_CLOCK_ALARM) == Settings.System.LOCK_CLOCK_ALARM)
+                    ? View.VISIBLE : View.GONE);
+            mDateView.setVisibility(((mClockDisplay & Settings.System.LOCK_CLOCK_DATE) == Settings.System.LOCK_CLOCK_DATE)
+                    ? View.VISIBLE : View.GONE);
+        }
+        refresh();
+
+        mClockView.setTextColor(color);
+        mAlarmStatusView.setTextColor(color);
+        mDateView.setTextColor(color);
+
+        mClockView.setTextSize(TypedValue.COMPLEX_UNIT_DIP, size);
+
+        Typeface tface = Typeface.create("sans-serif-light", Typeface.NORMAL);
+        if (font != null) {
+            tface = Typeface.createFromFile(font);
+        }
+        mClockView.setTypeface(tface);
+
+        mClockView.setTextShadow(shadow);
+        mAlarmStatusView.setShadowLayer(shadow ? 5 : 0, 0, 0, Color.BLACK);
+        mDateView.setShadowLayer(shadow ? 5 : 0, 0, 0, Color.BLACK);
     }
 }
