@@ -43,6 +43,7 @@ import com.android.systemui.qs.QSPanel;
 import com.android.systemui.omni.AbstractBatteryView;
 import com.android.systemui.omni.BatteryViewManager;
 import com.android.systemui.statusbar.policy.BatteryController;
+import com.android.systemui.statusbar.policy.Clock;
 import com.android.systemui.statusbar.policy.KeyguardUserSwitcher;
 import com.android.systemui.statusbar.policy.UserInfoController;
 import com.android.systemui.statusbar.policy.UserSwitcherController;
@@ -74,6 +75,7 @@ public class KeyguardStatusBarView extends RelativeLayout
     private BatteryViewManager mBatteryViewManager;
     private boolean mHideContents;
     private boolean mTouchStarted;
+    private Clock mClockView;
 
     public KeyguardStatusBarView(Context context, AttributeSet attrs) {
         super(context, attrs);
@@ -87,6 +89,7 @@ public class KeyguardStatusBarView extends RelativeLayout
         mMultiUserSwitch = (MultiUserSwitch) findViewById(R.id.multi_user_switch);
         mMultiUserAvatar = (ImageView) findViewById(R.id.multi_user_avatar);
         mCarrierLabel = (TextView) findViewById(R.id.keyguard_carrier_text);
+        mClockView = (Clock) findViewById(R.id.clock);
         loadDimens();
         updateUserSwitcher();
         LinearLayout batteryContainer = (LinearLayout) findViewById(R.id.battery_container);
@@ -416,5 +419,16 @@ public class KeyguardStatusBarView extends RelativeLayout
             }
             set.start();
         }
+    }
+
+    public void updateSettings() {
+        final boolean clockEnabled = Settings.System.getIntForUser(
+                mContext.getContentResolver(), Settings.System.LOCK_CLOCK_ENABLE, 1, UserHandle.USER_CURRENT) != 0;
+        final int clockDisplay = Settings.System.getIntForUser(
+                mContext.getContentResolver(), Settings.System.LOCK_CLOCK_DISPLAY, Settings.System.LOCK_CLOCK_ALL,
+                UserHandle.USER_CURRENT);
+
+        mClockView.setVisibility((clockEnabled && (clockDisplay & Settings.System.LOCK_CLOCK_TIME) ==
+                Settings.System.LOCK_CLOCK_TIME) ? View.GONE : View.VISIBLE);
     }
 }
