@@ -45,6 +45,7 @@ import android.widget.TextView;
 import com.android.internal.logging.MetricsLogger;
 import com.android.internal.widget.LockPatternUtils;
 import com.android.keyguard.KeyguardStatusView;
+import com.android.keyguard.omni.CustomLockClock;
 import com.android.systemui.AutoReinflateContainer;
 import com.android.systemui.AutoReinflateContainer.InflateListener;
 import com.android.keyguard.KeyguardUpdateMonitor;
@@ -99,7 +100,7 @@ public class NotificationPanelView extends PanelView implements
     protected QSContainer mQsContainer;
     private AutoReinflateContainer mQsAutoReinflateContainer;
     private KeyguardStatusView mKeyguardStatusView;
-    private TextView mClockView;
+    private CustomLockClock mClockView;
     private View mReserveNotificationSpace;
     private View mQsNavbarScrim;
     protected NotificationsQuickSettingsContainer mNotificationContainerParent;
@@ -230,7 +231,7 @@ public class NotificationPanelView extends PanelView implements
         super.onFinishInflate();
         mKeyguardStatusBar = (KeyguardStatusBarView) findViewById(R.id.keyguard_header);
         mKeyguardStatusView = (KeyguardStatusView) findViewById(R.id.keyguard_status_view);
-        mClockView = (TextView) findViewById(R.id.clock_view);
+        mClockView = (CustomLockClock) findViewById(R.id.clock_view);
 
         mNotificationContainerParent = (NotificationsQuickSettingsContainer)
                 findViewById(R.id.notification_container_parent);
