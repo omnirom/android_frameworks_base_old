@@ -3999,6 +3999,65 @@ public final class Settings {
         public static final String OMNIJAWS_WEATHER_ICON_PACK = "omnijaws_weather_icon_pack";
 
         /**
+         * @hide
+         */
+        public static final String LOCK_CLOCK_FONT = "lock_clock_font";
+
+        /**
+         * @hide
+         */
+        public static final String LOCK_CLOCK_COLOR = "lock_clock_color";
+
+         /**
+         * @hide
+         */
+        public static final String LOCK_CLOCK_SHADOW = "lockscreen_clock_shadow";
+
+        /**
+         * @hide
+         */
+        public static final String LOCK_CLOCK_SIZE = "lock_clock_size";
+
+        /**
+         * @hide
+         */
+        public static final String LOCK_CLOCK_DEFAULT_SIZE = "lock_clock_default_size";
+
+         /**
+         * @hide
+         */
+        public static final String LOCK_CLOCK_ENABLE = "lockscreen_clock_enable";
+
+        /**
+         * bitfield for show time/date/alarm
+         * 0 hide completely
+         *
+         * @hide
+         */
+        public static final int LOCK_CLOCK_TIME =  1;
+        /**
+         * @hide
+         */
+        public static final int LOCK_CLOCK_DATE =  2;
+        /**
+         * @hide
+         */
+        public static final int LOCK_CLOCK_ALARM = 4;
+        /**
+         * @hide
+         */
+        public static final int LOCK_CLOCK_NONE = 0;
+        /**
+         * @hide
+         */
+        public static final int LOCK_CLOCK_ALL = LOCK_CLOCK_TIME | LOCK_CLOCK_DATE | LOCK_CLOCK_ALARM;
+
+        /**
+         * @hide
+         */
+        public static final String LOCK_CLOCK_DISPLAY = "lockscreen_clock_display";
+
+        /**
          * Settings to backup. This is here so that it's in the same place as the settings
          * keys and easy to update.
          *
