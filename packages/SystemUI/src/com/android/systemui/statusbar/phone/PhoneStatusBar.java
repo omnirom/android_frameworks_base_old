@@ -127,6 +127,7 @@ import com.android.internal.logging.MetricsProto.MetricsEvent;
 import com.android.internal.statusbar.NotificationVisibility;
 import com.android.internal.statusbar.StatusBarIcon;
 import com.android.keyguard.KeyguardHostView.OnDismissAction;
+import com.android.keyguard.KeyguardStatusView;
 import com.android.keyguard.KeyguardUpdateMonitor;
 import com.android.keyguard.KeyguardUpdateMonitorCallback;
 import com.android.keyguard.ViewMediatorCallback;
@@ -377,7 +378,7 @@ public class PhoneStatusBar extends BaseStatusBar implements DemoMode,
     // top bar
     BaseStatusBarHeader mHeader;
     protected KeyguardStatusBarView mKeyguardStatusBar;
-    View mKeyguardStatusView;
+    KeyguardStatusView mKeyguardStatusView;
     KeyguardBottomAreaView mKeyguardBottomArea;
     boolean mLeaveOpenOnKeyguardHide;
     KeyguardIndicationController mKeyguardIndicationController;
@@ -561,6 +562,21 @@ public class PhoneStatusBar extends BaseStatusBar implements DemoMode,
             mContext.getContentResolver().registerContentObserver(Settings.System.getUriFor(
                     Settings.System.LOCKSCREEN_ROTATION),
                     false, this, UserHandle.USER_ALL);
+            mContext.getContentResolver().registerContentObserver(Settings.System.getUriFor(
+                    Settings.System.LOCK_CLOCK_COLOR),
+                    false, this, UserHandle.USER_ALL);
+            mContext.getContentResolver().registerContentObserver(Settings.System.getUriFor(
+                    Settings.System.LOCK_CLOCK_SIZE),
+                    false, this, UserHandle.USER_ALL);
+            mContext.getContentResolver().registerContentObserver(Settings.System.getUriFor(
+                    Settings.System.LOCK_CLOCK_FONT),
+                    false, this, UserHandle.USER_ALL);
+            mContext.getContentResolver().registerContentObserver(Settings.System.getUriFor(
+                    Settings.System.LOCK_CLOCK_ENABLE),
+                    false, this, UserHandle.USER_ALL);
+            mContext.getContentResolver().registerContentObserver(Settings.System.getUriFor(
+                    Settings.System.LOCK_CLOCK_DISPLAY),
+                    false, this, UserHandle.USER_ALL);
             update();
         }
 
@@ -603,6 +619,14 @@ public class PhoneStatusBar extends BaseStatusBar implements DemoMode,
                 mHeader.updateSettings();
             }
             mStatusBarWindowManager.updateKeyguardScreenRotation();
+
+            if (mKeyguardStatusView != null) {
+                mKeyguardStatusView.updateSettings();
+            }
+
+            if (mKeyguardStatusBar != null) {
+                mKeyguardStatusBar.updateSettings();
+            }
         }
     }
     private OmniSettingsObserver mOmniSettingsObserver = new OmniSettingsObserver(mHandler);
@@ -991,7 +1015,7 @@ public class PhoneStatusBar extends BaseStatusBar implements DemoMode,
         mDozeScrimController = new DozeScrimController(mScrimController, context);
 
         mKeyguardStatusBar = (KeyguardStatusBarView) mStatusBarWindow.findViewById(R.id.keyguard_header);
-        mKeyguardStatusView = mStatusBarWindow.findViewById(R.id.keyguard_status_view);
+        mKeyguardStatusView = (KeyguardStatusView) mStatusBarWindow.findViewById(R.id.keyguard_status_view);
         mKeyguardBottomArea =
                 (KeyguardBottomAreaView) mStatusBarWindow.findViewById(R.id.keyguard_bottom_area);
         mKeyguardBottomArea.setActivityStarter(this);
