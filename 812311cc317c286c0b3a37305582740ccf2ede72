@@ -1,0 +1,21 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "9828ed82_ae481763",
+        "filename": "services/core/java/com/android/server/policy/PhoneWindowManager.java",
+        "patchSetId": 6
+      },
+      "lineNbr": 3487,
+      "author": {
+        "id": 1000026
+      },
+      "writtenOn": "2017-03-08T15:28:39Z",
+      "side": 1,
+      "message": "but this is already checked in handleLongPressAppSwitchKey below. So it will not reach this point if mAppSwitchConsumed \u003d\u003d true",
+      "revId": "812311cc317c286c0b3a37305582740ccf2ede72",
+      "serverId": "56841c99-7c94-43d4-bf0b-cb4707e66d55",
+      "unresolved": false
+    }
+  ]
+}
