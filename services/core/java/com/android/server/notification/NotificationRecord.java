@@ -144,8 +144,10 @@ public final class NotificationRecord {
 
         boolean isNoisy = (n.defaults & Notification.DEFAULT_SOUND) != 0
                 || (n.defaults & Notification.DEFAULT_VIBRATE) != 0
+                || (n.defaults & Notification.DEFAULT_LIGHTS) != 0
                 || n.sound != null
-                || n.vibrate != null;
+                || n.vibrate != null
+                || (n.flags & Notification.FLAG_SHOW_LIGHTS) != 0;
         stats.isNoisy = isNoisy;
 
         if (!isNoisy && importance > IMPORTANCE_LOW) {
