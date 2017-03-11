@@ -1,0 +1,21 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "9828ed82_1174eec9",
+        "filename": "services/core/java/com/android/server/display/AutomaticBrightnessController.java",
+        "patchSetId": 1
+      },
+      "lineNbr": 410,
+      "author": {
+        "id": 1000026
+      },
+      "writtenOn": "2017-03-11T18:10:03Z",
+      "side": 1,
+      "message": "can you make sure that if the config is not set at all that the default code will be used?",
+      "revId": "1abd89ea4efbd50e0cb6f7ac97496708670c3e8d",
+      "serverId": "56841c99-7c94-43d4-bf0b-cb4707e66d55",
+      "unresolved": false
+    }
+  ]
+}
