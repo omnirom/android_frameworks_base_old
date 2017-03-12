@@ -4057,6 +4057,13 @@ public final class Settings {
         public static final String LOCK_CLOCK_DISPLAY = "lockscreen_clock_display";
 
         /**
+         * @hide One of HEADS_UP_OFF, HEADS_UP_ON
+         * user specific value for HEADS_UP_NOTIFICATIONS_ENABLED
+         * global one will overrule this
+         */
+        public static final String HEADS_UP_NOTIFICATIONS_USER_ENABLED = "heads_up_notifications_user_enabled";
+
+        /**
          * Settings to backup. This is here so that it's in the same place as the settings
          * keys and easy to update.
          *
