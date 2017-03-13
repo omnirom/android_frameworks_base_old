@@ -1060,7 +1060,7 @@ public class PhoneStatusBar extends BaseStatusBar implements DemoMode,
 
         // must be before StatusBarIconController
         LinearLayout batteryContainer = (LinearLayout) mStatusBarView.findViewById(R.id.battery_container);
-        mBatteryViewManager = new BatteryViewManager(mContext, batteryContainer, mStatusBarView.getBarTransitions(), null);
+        mBatteryViewManager = new BatteryViewManager(mContext, batteryContainer);
 
         createIconController();
 
