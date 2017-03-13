@@ -52,6 +52,11 @@
     <!-- Announcement made when NFC changes to on (not shown on the screen). [CHAR LIMIT=NONE] -->
     <string name="accessibility_quick_settings_nfc_changed_on">NFC turned on.</string>
     <string name="quick_settings_screenshot_label">Screenshot</string>
+    <string name="quick_settings_heads_up_label">Heads up</string>
+    <string name="quick_settings_heads_up_on">Heads up On</string>
+    <string name="quick_settings_heads_up_off">Heads up Off</string>
+    <string name="quick_settings_heads_up_changed_off">Heads up notifications disabled</string>
+    <string name="quick_settings_heads_up_changed_on">Heads up notifications enabled</string>
 
     <!-- Screenshot Crop & Share -->
     <string name="action_delete_success">Deleted</string>
