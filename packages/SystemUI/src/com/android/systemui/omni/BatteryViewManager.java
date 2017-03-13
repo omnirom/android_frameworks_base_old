@@ -31,7 +31,6 @@ import android.widget.LinearLayout;
 
 import com.android.systemui.R;
 import com.android.systemui.statusbar.policy.BatteryController;
-import com.android.systemui.statusbar.phone.BarTransitions;
 
 import java.util.List;
 import java.util.ArrayList;
@@ -46,17 +45,11 @@ public class BatteryViewManager {
     private boolean mPercentInside;
     private boolean mChargingImage = true;
     private int mChargingColor;
-    private List<AbstractBatteryView> mBatteryStyleList = new ArrayList<AbstractBatteryView>();
-    private AbstractBatteryView mCurrentBatteryView;
+    private List<IBatteryView> mBatteryStyleList = new ArrayList<IBatteryView>();
+    private IBatteryView mCurrentBatteryView;
     private BatteryController mBatteryController;
-    private BarTransitions mBarTransitions;
-    private BatteryViewManagerObserver mBatteryStyleObserver;
     private boolean mChargingColorEnable = true;
     private int mBatteryEnable = 1;
-
-    public interface BatteryViewManagerObserver {
-        public void batteryStyleChanged(AbstractBatteryView batteryStyle);
-    }
 
     private ContentObserver mSettingsObserver = new ContentObserver(mHandler) {
         @Override
@@ -65,32 +58,33 @@ public class BatteryViewManager {
         }
     };
 
-    public BatteryViewManager(Context context, LinearLayout mContainer, BarTransitions barTransitions,
-        BatteryViewManagerObserver observer) {
+    public BatteryViewManager(Context context, LinearLayout mContainer) {
         mContext = context;
         mContainerView = mContainer;
-        mBarTransitions = barTransitions;
-        mBatteryStyleObserver = observer;
         mHandler = new Handler();
 
-        AbstractBatteryView view = (AbstractBatteryView) LayoutInflater.from(mContext).inflate(
+        IBatteryView view = (IBatteryView) LayoutInflater.from(mContext).inflate(
                 R.layout.battery_meter_percent_view, mContainerView, false);
         mBatteryStyleList.add(view);
 
-        view = (AbstractBatteryView) LayoutInflater.from(mContext).inflate(
+        view = (IBatteryView) LayoutInflater.from(mContext).inflate(
                 R.layout.battery_meter_horizontal_view, mContainerView, false);
         mBatteryStyleList.add(view);
 
-        view = (AbstractBatteryView) LayoutInflater.from(mContext).inflate(
+        view = (IBatteryView) LayoutInflater.from(mContext).inflate(
                 R.layout.battery_circle_percent_view, mContainerView, false);
         mBatteryStyleList.add(view);
 
-        view = (AbstractBatteryView) LayoutInflater.from(mContext).inflate(
+        view = (IBatteryView) LayoutInflater.from(mContext).inflate(
                 R.layout.battery_percent_view, mContainerView, false);
         mBatteryStyleList.add(view);
 
-        view = (AbstractBatteryView) LayoutInflater.from(mContext).inflate(
+        view = (IBatteryView) LayoutInflater.from(mContext).inflate(
                 R.layout.battery_droid_view, mContainerView, false);
+        mBatteryStyleList.add(view);
+
+        view = (IBatteryView) LayoutInflater.from(mContext).inflate(
+                R.layout.battery_theme_view, mContainerView, false);
         mBatteryStyleList.add(view);
 
         mContext.getContentResolver().registerContentObserver(
@@ -124,12 +118,8 @@ public class BatteryViewManager {
         if (mCurrentBatteryView != null) {
             mCurrentBatteryView.setBatteryController(mBatteryController);
             applyStyle();
-            mContainerView.addView(mCurrentBatteryView);
-            if (mBarTransitions != null) {
-                mBarTransitions.updateBattery(mCurrentBatteryView);
-            }
+            mContainerView.addView((View) mCurrentBatteryView);
         }
-        notifyObserver();
     }
 
     private void switchBatteryStyle(int style, int showPercent, boolean percentInside, boolean chargingImage,
@@ -146,7 +136,7 @@ public class BatteryViewManager {
         mChargingColorEnable = chargingColorEnable;
         mBatteryEnable = batteryEnable;
         if (mCurrentBatteryView != null) {
-            mContainerView.removeView(mCurrentBatteryView);
+            mContainerView.removeView((View) mCurrentBatteryView);
         }
         mCurrentBatteryView = null;
 
@@ -155,26 +145,16 @@ public class BatteryViewManager {
             mCurrentBatteryView = mBatteryStyleList.get(batteryIndex);
             mCurrentBatteryView.setBatteryController(mBatteryController);
             applyStyle();
-            mContainerView.addView(mCurrentBatteryView);
-        }
-        if (mBarTransitions != null) {
-            mBarTransitions.updateBattery(mCurrentBatteryView);
+            mContainerView.addView((View) mCurrentBatteryView);
         }
         if (mBatteryEnable == 0) {
-            mCurrentBatteryView.setVisibility(View.GONE);
+            ((View) mCurrentBatteryView).setVisibility(View.GONE);
         } else if (mBatteryEnable == 1) {
-            mCurrentBatteryView.setVisibility(View.VISIBLE);
-        }
-        notifyObserver();
-    }
-
-    private void notifyObserver() {
-        if (mBatteryStyleObserver != null) {
-            mBatteryStyleObserver.batteryStyleChanged(mCurrentBatteryView);
+            ((View) mCurrentBatteryView).setVisibility(View.VISIBLE);
         }
     }
 
-    public AbstractBatteryView getCurrentBatteryView() {
+    public IBatteryView getCurrentBatteryView() {
         return mCurrentBatteryView;
     }
 
@@ -219,15 +199,9 @@ public class BatteryViewManager {
         }
     }
 
-    public void setTextShadow(boolean enabled) {
-        if (mCurrentBatteryView != null) {
-            mCurrentBatteryView.setTextShadow(enabled);
-        }
-    }
-
     public void onDensityOrFontScaleChanged() {
         mCurrentBatteryView.loadDimens();
-        mCurrentBatteryView.requestLayout();
-        mCurrentBatteryView.postInvalidate();
+        ((View) mCurrentBatteryView).requestLayout();
+        ((View) mCurrentBatteryView).postInvalidate();
     }
 }

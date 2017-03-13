@@ -40,7 +40,6 @@ import com.android.systemui.BatteryMeterView;
 import com.android.systemui.Interpolators;
 import com.android.systemui.R;
 import com.android.systemui.qs.QSPanel;
-import com.android.systemui.omni.AbstractBatteryView;
 import com.android.systemui.omni.BatteryViewManager;
 import com.android.systemui.statusbar.policy.BatteryController;
 import com.android.systemui.statusbar.policy.Clock;
@@ -94,7 +93,7 @@ public class KeyguardStatusBarView extends RelativeLayout
         loadDimens();
         updateUserSwitcher();
         LinearLayout batteryContainer = (LinearLayout) findViewById(R.id.battery_container);
-        mBatteryViewManager = new BatteryViewManager(mContext, batteryContainer, null, null);
+        mBatteryViewManager = new BatteryViewManager(mContext, batteryContainer);
         setOnTouchListener(new View.OnTouchListener() {
             @Override
             public boolean onTouch(View v, MotionEvent event) {
