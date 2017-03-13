@@ -37,4 +37,13 @@
 
     <!-- OmniJaws detailed view temperature text -->
     <color name="omni_jaws_detailed_temperature_color">@android:color/white</color>
+
+    <!-- custom clock resource we DONT want to be themed -->
+    <color name="dark_mode_icon_color_dual_tone_background_copy">#3d000000</color>
+    <color name="dark_mode_icon_color_dual_tone_fill_copy">#7a000000</color>
+    <color name="light_mode_icon_color_dual_tone_background_copy">#4dffffff</color>
+    <color name="light_mode_icon_color_dual_tone_fill_copy">#ffffff</color>
+    <color name="batterymeter_frame_color_copy">#4DFFFFFF</color><!-- 30% white -->
+    <color name="batterymeter_charge_color_copy">#FFFFFFFF</color>
+    <color name="batterymeter_bolt_color_copy">#FFFFFFFF</color>
 </resources>

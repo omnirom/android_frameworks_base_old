@@ -48,6 +48,7 @@
         <item>@string/battery_style_circle</item>
         <item>@string/battery_style_text</item>
         <item>@string/battery_style_droid</item>
+        <item>@string/battery_style_theme</item>
     </string-array>
 
     <string-array name="values_battery_styles" translatable="false">
@@ -56,5 +57,6 @@
         <item>2</item>
         <item>3</item>
         <item>4</item>
+        <item>5</item>
     </string-array>
 </resources>
