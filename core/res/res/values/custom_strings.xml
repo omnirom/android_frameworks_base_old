@@ -55,6 +55,7 @@
     <string name="battery_style_meter_horizontal">Horizontal bar</string>
     <string name="battery_style_circle">Circle</string>
     <string name="battery_style_droid">Droid</string>
+    <string name="battery_style_theme">Theme</string>
 
     <!-- global actions dnd selector -->
     <string name="dnd_mode_off">Off</string>
