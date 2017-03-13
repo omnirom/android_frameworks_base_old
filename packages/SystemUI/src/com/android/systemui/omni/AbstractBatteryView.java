@@ -39,12 +39,11 @@ import android.view.View;
 import com.android.systemui.R;
 import com.android.systemui.statusbar.policy.BatteryController;
 
-public abstract class AbstractBatteryView extends View implements BatteryController.BatteryStateChangeCallback {
+public class AbstractBatteryView extends View implements IBatteryView, BatteryController.BatteryStateChangeCallback {
     public static final String TAG = AbstractBatteryView.class.getSimpleName();
 
     protected BatteryController mBatteryController;
     protected boolean mPowerSaveEnabled;
-    protected BatteryTracker mDemoTracker = new BatteryTracker();
     protected BatteryTracker mTracker = new BatteryTracker();
     private boolean mAttached;
     protected boolean mShowPercent;
@@ -52,7 +51,7 @@ public abstract class AbstractBatteryView extends View implements BatteryControl
     protected final int[] mColors;
     protected final int mCriticalLevel;
     protected int mFrameColor;
-    private int mChargeColor;
+    protected int mChargeColor;
     protected final float[] mBoltPoints;
     protected boolean mChargingImage;
     protected int mDarkModeBackgroundColor;
@@ -198,22 +197,27 @@ public abstract class AbstractBatteryView extends View implements BatteryControl
         postInvalidate();
     }
 
+    @Override
     public void setShowPercent(boolean showPercent) {
         mShowPercent = showPercent;
     }
 
+    @Override
     public void setPercentInside(boolean percentInside) {
         mPercentInside = percentInside;
     }
 
+    @Override
     public void setChargingImage(boolean chargingImage) {
         mChargingImage = chargingImage;
     }
 
+    @Override
     public void setChargingColor(int chargingColor) {
         mChargeColor = chargingColor;
     }
 
+    @Override
     public void setChargingColorEnable(boolean value) {
         mChargeColorEnable = value;
     }
@@ -282,9 +286,12 @@ public abstract class AbstractBatteryView extends View implements BatteryControl
         return ptsF;
     }
 
-    protected abstract void applyStyle();
+    @Override
+    public void applyStyle() {
+    }
 
-    protected void setDarkIntensity(float darkIntensity) {
+    @Override
+    public void setDarkIntensity(float darkIntensity) {
         int backgroundColor = getBackgroundColor(darkIntensity);
         int fillColor = getFillColor(darkIntensity);
         mIconTint = fillColor;
@@ -307,15 +314,6 @@ public abstract class AbstractBatteryView extends View implements BatteryControl
         return (int) ArgbEvaluator.getInstance().evaluate(darkIntensity, lightColor, darkColor);
     }
 
-    public void setTextShadow(boolean enabled) {
-        if (enabled) {
-            mTextPaint.setShadowLayer(5, 0, 0, Color.BLACK);
-        } else {
-            mTextPaint.setShadowLayer(0, 0, 0, Color.BLACK);
-        }
-        invalidate();
-    }
-
     protected void updateExtraPercentFontSize() {
         final int level = mTracker.level;
         mTextSize = getResources().getDimensionPixelSize(level == 100 ?
@@ -328,6 +326,7 @@ public abstract class AbstractBatteryView extends View implements BatteryControl
         requestLayout();
     }
 
-    protected void loadDimens() {
+    @Override
+    public void loadDimens() {
     }
 }

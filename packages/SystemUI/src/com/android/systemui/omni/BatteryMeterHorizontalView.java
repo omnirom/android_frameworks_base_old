@@ -42,8 +42,7 @@ import com.android.systemui.statusbar.policy.BatteryController;
 
 import java.text.NumberFormat;
 
-public class BatteryMeterHorizontalView extends AbstractBatteryView implements
-        BatteryController.BatteryStateChangeCallback {
+public class BatteryMeterHorizontalView extends AbstractBatteryView {
     public static final String TAG = BatteryMeterHorizontalView.class.getSimpleName();
 
     private static final float BOLT_LEVEL_THRESHOLD = 0.3f;  // opaque bolt below this fraction
@@ -258,7 +257,7 @@ public class BatteryMeterHorizontalView extends AbstractBatteryView implements
     }
 
     @Override
-    protected void applyStyle() {
+    public void applyStyle() {
         final int level = mTracker.level;
         if (mPercentInside) {
             Typeface font = Typeface.create("sans-serif-condensed", Typeface.BOLD);
@@ -292,7 +291,7 @@ public class BatteryMeterHorizontalView extends AbstractBatteryView implements
     }
 
     @Override
-    protected void loadDimens() {
+    public void loadDimens() {
         // bar width is hardcoded  android:layout_width="14.5dp"
         DisplayMetrics metrics = getResources().getDisplayMetrics();
         mBarWidth = (int) (20 * metrics.density + 0.5f);
