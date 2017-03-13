@@ -42,8 +42,7 @@ import com.android.systemui.statusbar.policy.BatteryController;
 
 import java.text.NumberFormat;
 
-public class BatteryPercentView extends AbstractBatteryView implements
-        BatteryController.BatteryStateChangeCallback {
+public class BatteryPercentView extends AbstractBatteryView {
     public static final String TAG = BatteryPercentView.class.getSimpleName();
 
     private int mPercentOffsetY;
@@ -95,7 +94,7 @@ public class BatteryPercentView extends AbstractBatteryView implements
     }
 
     @Override
-    protected void applyStyle() {
+    public void applyStyle() {
         final int level = mTracker.level;
         mTextSize = getResources().getDimensionPixelSize(level == 100 ?
                 R.dimen.omni_battery_level_text_size_small : R.dimen.omni_battery_level_text_size);
@@ -114,7 +113,7 @@ public class BatteryPercentView extends AbstractBatteryView implements
     }
 
     @Override
-    protected void loadDimens() {
+    public void loadDimens() {
         DisplayMetrics metrics = getResources().getDisplayMetrics();
         mPercentOffsetY = (int) (1 * metrics.density + 0.5f);
     }
