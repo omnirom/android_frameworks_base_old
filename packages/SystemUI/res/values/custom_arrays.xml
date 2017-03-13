@@ -46,4 +46,10 @@
         <item>@string/quick_settings_location_gps_only_label</item>
         <item>@string/quick_settings_location_high_accuracy_label</item>
     </string-array>
+
+    <!-- custom clock resource we DONT want to be themed -->
+    <array name="batterymeter_color_values_copy">
+        <item>@*android:color/battery_saver_mode_color</item>
+        <item>#FFFFFFFF</item>
+    </array>
 </resources>

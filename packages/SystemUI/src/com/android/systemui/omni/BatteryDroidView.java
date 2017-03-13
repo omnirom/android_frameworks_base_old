@@ -47,8 +47,7 @@ import com.android.systemui.statusbar.policy.BatteryController;
 
 import java.text.NumberFormat;
 
-public class BatteryDroidView extends AbstractBatteryView implements
-        BatteryController.BatteryStateChangeCallback {
+public class BatteryDroidView extends AbstractBatteryView {
     public static final String TAG = BatteryDroidView.class.getSimpleName();
 
     private static final int FULL = 96;
@@ -166,7 +165,7 @@ public class BatteryDroidView extends AbstractBatteryView implements
     }
 
     @Override
-    protected void applyStyle() {
+    public void applyStyle() {
         final int level = mTracker.level;
         Typeface font = Typeface.create("sans-serif-medium", Typeface.NORMAL);
         mTextPaint.setTypeface(font);
@@ -185,7 +184,7 @@ public class BatteryDroidView extends AbstractBatteryView implements
     }
 
     @Override
-    protected void loadDimens() {
+    public void loadDimens() {
         DisplayMetrics metrics = getResources().getDisplayMetrics();
         mCircleWidth = (int) (16 * metrics.density + 0.5f);
         mStrokeWidth = (int) (2 * metrics.density + 0.5f);

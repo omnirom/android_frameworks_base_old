@@ -50,4 +50,16 @@
         <item name="android:textStyle">normal</item>
         <item name="android:textColor">#ffffff</item>
     </style>
+
+    <!-- Base battery metter drawable style -->
+    <style name="BatteryMeterViewDrawable">
+        <!-- Gravity used for positioning text within the battery meter -->
+        <item name="android:gravity">center</item>
+        <item name="blendMode">clear</item>
+    </style>
+
+    <!-- Battery meter drawable styles -->
+    <style name="BatteryMeterViewDrawable.Portrait">
+        <item name="blendMode">overlay</item>
+    </style>
 </resources>

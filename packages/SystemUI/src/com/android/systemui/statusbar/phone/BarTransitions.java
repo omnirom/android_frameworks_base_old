@@ -35,7 +35,6 @@ import android.view.View;
 
 import com.android.systemui.Interpolators;
 import com.android.systemui.R;
-import com.android.systemui.omni.AbstractBatteryView;
 
 public class BarTransitions {
     private static final boolean DEBUG = false;
@@ -69,9 +68,6 @@ public class BarTransitions {
         if (HIGH_END) {
             mView.setBackground(mBarBackground);
         }
-    }
-
-    public void updateBattery(AbstractBatteryView battery) {
     }
 
     public int getMode() {
