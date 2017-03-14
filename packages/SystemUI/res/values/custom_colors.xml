@@ -34,4 +34,7 @@
     <color name="ripple_material_dark">#40ffffff</color>
 
     <color name="alarm_status_color">#E0E0E0</color>
+
+    <!-- OmniJaws detailed view temperature text -->
+    <color name="omni_jaws_detailed_temperature_color">@android:color/white</color>
 </resources>
