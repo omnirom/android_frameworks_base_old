@@ -90,6 +90,7 @@ public class KeyguardStatusBarView extends RelativeLayout
         mMultiUserAvatar = (ImageView) findViewById(R.id.multi_user_avatar);
         mCarrierLabel = (TextView) findViewById(R.id.keyguard_carrier_text);
         mClockView = (Clock) findViewById(R.id.clock);
+        mClockView.setBlacklistSupport(false);
         loadDimens();
         updateUserSwitcher();
         LinearLayout batteryContainer = (LinearLayout) findViewById(R.id.battery_container);
