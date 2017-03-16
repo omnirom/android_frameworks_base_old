@@ -65,6 +65,7 @@
   <java-symbol type="string" name="global_action_users" />
   <java-symbol type="dimen" name="global_actions_avatar_size" />
   <java-symbol type="color" name="global_actions_icon_color" />
+  <java-symbol type="color" name="global_actions_text_color_dark" />
   <!-- Vendor image mismatch -->
   <java-symbol type="string" name="system_error_vendorprint" />
   <!--OmniGears Battery lights -->
