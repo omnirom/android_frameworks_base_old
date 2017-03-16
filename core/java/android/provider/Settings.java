@@ -4606,6 +4606,16 @@ public final class Settings {
                 ANY_INTEGER_VALIDATOR;
 
         /**
+         * Disable expanding quick settings on secure lock screens
+         *
+         * @hide
+         */
+        public static final String OMNI_LOCK_QS_DISABLED = "lockscreen_qs_disabled";
+
+        private static final Validator OMNI_LOCK_QS_DISABLED_VALIDATOR =
+                BOOLEAN_VALIDATOR;
+
+        /**
          * IMPORTANT: If you add a new public settings you also have to add it to
          * PUBLIC_SETTINGS below. If the new setting is hidden you have to add
          * it to PRIVATE_SETTINGS below. Also add a validator that can validate
@@ -4722,7 +4732,8 @@ public final class Settings {
             OMNI_NETWORK_TRAFFIC_STATE,
             OMNI_NETWORK_TRAFFIC_AUTOHIDE,
             OMNI_NETWORK_TRAFFIC_AUTOHIDE_THRESHOLD,
-            OMNI_STATUS_BAR_QUICK_QS_PULLDOWN
+            OMNI_STATUS_BAR_QUICK_QS_PULLDOWN,
+            OMNI_LOCK_QS_DISABLED
         };
 
         /**
@@ -4889,6 +4900,7 @@ public final class Settings {
             PRIVATE_SETTINGS.add(OMNI_NETWORK_TRAFFIC_AUTOHIDE);
             PRIVATE_SETTINGS.add(OMNI_NETWORK_TRAFFIC_AUTOHIDE_THRESHOLD);
             PRIVATE_SETTINGS.add(OMNI_STATUS_BAR_QUICK_QS_PULLDOWN);
+            PRIVATE_SETTINGS.add(OMNI_LOCK_QS_DISABLED);
         }
 
         /**
@@ -5063,6 +5075,7 @@ public final class Settings {
                     OMNI_NETWORK_TRAFFIC_AUTOHIDE_THRESHOLD_VALIDATOR);
             VALIDATORS.put(OMNI_STATUS_BAR_QUICK_QS_PULLDOWN,
                     OMNI_STATUS_BAR_QUICK_QS_PULLDOWN_VALIDATOR);
+            VALIDATORS.put(OMNI_LOCK_QS_DISABLED, OMNI_LOCK_QS_DISABLED_VALIDATOR);
         }
 
         /**
