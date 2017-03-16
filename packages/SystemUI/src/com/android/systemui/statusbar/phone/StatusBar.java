@@ -871,6 +871,9 @@ public class StatusBar extends SystemUI implements DemoMode,
             mContext.getContentResolver().registerContentObserver(Settings.System.getUriFor(
                     Settings.System.FORCE_AMBIENT_FOR_MEDIA),
                     false, this, UserHandle.USER_ALL);
+            mContext.getContentResolver().registerContentObserver(Settings.Secure.getUriFor(
+                    Settings.Secure.LOCK_QS_DISABLED),
+                    false, this, UserHandle.USER_ALL);
         }
 
         @Override
@@ -917,6 +920,9 @@ public class StatusBar extends SystemUI implements DemoMode,
             }
             mLockscreenMediaMetadata = Settings.System.getIntForUser(mContext.getContentResolver(),
                     Settings.System.LOCKSCREEN_HIDE_MEDIA_METADATA, 0, mCurrentUserId) == 0;
+            if (mNotificationPanel != null) {
+                mNotificationPanel.updateSettings();
+            }
         }
     }
     private OmniSettingsObserver mOmniSettingsObserver;
