@@ -16,5 +16,9 @@
 -->
 
 <selector xmlns:android="http://schemas.android.com/apk/res/android">
-    <item android:drawable="@drawable/ic_audio_ring_notif_vibrate" />
+    <item android:state_pressed="true"
+          android:drawable="@drawable/ic_audio_ring_notif_vibrate_white"/>
+    <item android:state_selected="true"
+          android:drawable="@drawable/ic_audio_ring_notif_vibrate_white"/>
+    <item android:drawable="@drawable/ic_audio_ring_notif_vibrate_tint"/>
 </selector>
