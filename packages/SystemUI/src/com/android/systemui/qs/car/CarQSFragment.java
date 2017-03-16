@@ -127,6 +127,10 @@ public class CarQSFragment extends Fragment implements QS {
     }
 
     @Override
+    public void setSecureExpandDisabled(boolean value) {
+    }
+
+    @Override
     public void setExpanded(boolean qsExpanded) {
         // No quick settings to expand
     }
