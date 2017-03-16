@@ -10,8 +10,7 @@
         android:id="@+id/global_action_skip"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:textColor="@color/global_actions_text_color"
-        android:buttonTint="@color/global_actions_text_color"
+        android:buttonTint="@color/global_actions_icon_color"
         android:textAppearance="?android:attr/textAppearanceSmall"
         android:text="@string/global_action_dnaa" >
     </CheckBox>

@@ -46,7 +46,6 @@
             android:layout_height="wrap_content"
             android:layout_gravity="top"
             android:gravity="center_vertical"
-            android:textColor="@color/global_actions_text_color"
             android:textAppearance="?android:attr/textAppearanceMedium"
             />
         <TextView android:id="@+id/status"
@@ -54,7 +53,6 @@
             android:layout_height="wrap_content"
             android:layout_gravity="bottom|start"
             android:minHeight="26dp"
-            android:textColor="@color/global_actions_text_color"
             android:textAppearance="?android:attr/textAppearanceSmall"
             />
     </LinearLayout>
