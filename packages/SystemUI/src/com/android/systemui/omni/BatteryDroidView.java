@@ -261,7 +261,7 @@ public class BatteryDroidView extends AbstractBatteryView {
     @Override
     public void loadDimens() {
         DisplayMetrics metrics = getResources().getDisplayMetrics();
-        mCircleWidth = (int) (17 * metrics.density + 0.5f);
+        mCircleWidth = (int) (16 * metrics.density + 0.5f);
         mStrokeWidth = (int) (mCircleWidth / 6.5f);
         mBatteryPaint.setStrokeWidth(mStrokeWidth);
         mFramePaint.setStrokeWidth(mStrokeWidth);
