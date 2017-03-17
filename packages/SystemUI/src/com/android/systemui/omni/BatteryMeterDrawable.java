@@ -612,4 +612,8 @@ public class BatteryMeterDrawable extends Drawable {
     public void setChargingColorEnable(boolean value) {
         mChargeColorEnable = value;
     }
+
+    public void resetSize() {
+        mInitialized = false;
+    }
 }

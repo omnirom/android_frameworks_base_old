@@ -51,6 +51,8 @@ public class BatteryMeterDrawableView extends ImageView implements IBatteryView,
     protected BatteryController mBatteryController;
     protected BatteryTracker mTracker = new BatteryTracker();
     private boolean mAttached;
+    private int mHeight;
+    private int mWidth;
 
     protected class BatteryTracker extends BroadcastReceiver {
         public static final int UNKNOWN_LEVEL = -1;
@@ -106,6 +108,7 @@ public class BatteryMeterDrawableView extends ImageView implements IBatteryView,
         // The BatteryMeterDrawable wants to use the clear xfermode,
         // so use a separate layer to not make it clear the background with it.
         setLayerType(View.LAYER_TYPE_HARDWARE, null);
+        loadDimens();
     }
 
     @Override
@@ -173,7 +176,11 @@ public class BatteryMeterDrawableView extends ImageView implements IBatteryView,
 
     @Override
     public void loadDimens() {
-        requestLayout();
+        mWidth = getContext().getResources().getDimensionPixelSize(
+                R.dimen.status_bar_battery_icon_width);
+        mHeight = getContext().getResources().getDimensionPixelSize(
+                R.dimen.status_bar_battery_icon_height);
+        mDrawable.resetSize();
     }
 
     @Override
@@ -199,5 +206,11 @@ public class BatteryMeterDrawableView extends ImageView implements IBatteryView,
     @Override
     public void setChargingColorEnable(boolean value) {
         mDrawable.setChargingColorEnable(value);
+    }
+
+    @Override
+    protected void onMeasure(int widthMeasureSpec, int heightMeasureSpec) {
+        super.onMeasure(widthMeasureSpec, heightMeasureSpec);
+        setMeasuredDimension(mWidth, mHeight);
     }
 }

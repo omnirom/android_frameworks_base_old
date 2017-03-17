@@ -53,6 +53,7 @@ public class BatteryMeterPercentView extends AbstractBatteryView {
     private float mSubpixelSmoothingRight;
     private final Paint mFramePaint, mBatteryPaint;
     private int mBarWidth;
+    private int mBarHeight;
     private int mBarSpaceWidth;
     private int mHeight;
     private int mWidth;
@@ -105,7 +106,7 @@ public class BatteryMeterPercentView extends AbstractBatteryView {
     protected void onMeasure(int widthMeasureSpec, int heightMeasureSpec) {
         super.onMeasure(widthMeasureSpec, heightMeasureSpec);
         mWidth = (isWideDisplay() ? mTextWidth : 0) + mBarSpaceWidth;
-        mHeight = getMeasuredHeight();
+        mHeight = mBarHeight;
         setMeasuredDimension(mWidth, mHeight);
     }
 
@@ -305,6 +306,7 @@ public class BatteryMeterPercentView extends AbstractBatteryView {
     @Override
     public void loadDimens() {
         DisplayMetrics metrics = getResources().getDisplayMetrics();
+        mBarHeight = (int) (15 * metrics.density + 0.5f);
         mBarWidth = (int) (10 * metrics.density + 0.5f);
         mBarSpaceWidth = (int) (14 * metrics.density + 0.5f);
         mPercentOffsetY = (int) (1 * metrics.density + 0.5f);
