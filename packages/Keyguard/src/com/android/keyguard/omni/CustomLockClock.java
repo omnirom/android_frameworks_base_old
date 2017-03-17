@@ -157,6 +157,8 @@ public class CustomLockClock extends ImageView {
     private boolean mTextShadow;
     private Typeface mTypeface;
     private float mTextSpacing = -1;
+    private int mWidth;
+    private int mHeight;
 
     private final ContentObserver mFormatChangeObserver = new ContentObserver(new Handler()) {
         @Override
@@ -636,9 +638,17 @@ public class CustomLockClock extends ImageView {
         int textHeight = (int)(textPaint.descent() - textPaint.ascent());
         int textOffset = (int)((textHeight / 2) - textPaint.descent());
         Bitmap myBitmap = Bitmap.createBitmap((int) textPaint.measureText(text), (int) mTextSize, Bitmap.Config.ARGB_8888);
+        mHeight = (int) mTextSize;
+        mWidth = (int) textPaint.measureText(text);
         Canvas myCanvas = new Canvas(myBitmap);
         myCanvas.drawText(text, myBitmap.getWidth() / 2, myBitmap.getHeight() / 2 + textOffset, textPaint);
         return myBitmap;
+    }
+
+    @Override
+    protected void onMeasure(int widthMeasureSpec, int heightMeasureSpec) {
+        super.onMeasure(widthMeasureSpec, heightMeasureSpec);
+        setMeasuredDimension(mWidth, mHeight);
     }
 
     public void setTextSize(int unit, float size) {
@@ -651,6 +661,9 @@ public class CustomLockClock extends ImageView {
             r = c.getResources();
 
         mTextSize = (int) TypedValue.applyDimension(unit, size, r.getDisplayMetrics());
+        onTimeChanged();
+        requestLayout();
+        invalidate();
     }
 
     public int getTextSize() {
