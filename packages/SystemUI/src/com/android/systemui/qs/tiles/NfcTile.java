@@ -63,17 +63,8 @@ public class NfcTile extends QSTile<QSTile.BooleanState> {
     }
 
     @Override
-    protected void handleLongClick() {
-        Intent intent = new Intent("android.settings.NFC_SETTINGS");
-        intent.addCategory(Intent.CATEGORY_DEFAULT);
-        mHost.startActivityDismissingKeyguard(intent);
-    }
-
-    @Override
     protected void handleSecondaryClick() {
-        Intent intent = new Intent("android.settings.NFC_SETTINGS");
-        intent.addCategory(Intent.CATEGORY_DEFAULT);
-        mHost.startActivityDismissingKeyguard(intent);
+        handleClick();
     }
 
     protected void toggleState() {
@@ -109,7 +100,9 @@ public class NfcTile extends QSTile<QSTile.BooleanState> {
 
     @Override
     public Intent getLongClickIntent() {
-        return null;
+        Intent intent = new Intent("android.settings.NFC_SETTINGS");
+        intent.addCategory(Intent.CATEGORY_DEFAULT);
+        return intent;
     }
 
     @Override
