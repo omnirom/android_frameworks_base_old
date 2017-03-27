@@ -75,6 +75,13 @@ public final class PhoneAccount implements Parcelable {
             "codeaurora.org.extra.ALWAYS_USE_VOIP_AUDIO_MODE";
 
     /**
+     * Indicating sort order for phone accounts
+     * @hide
+     */
+    public static final String EXTRA_SORT_ORDER =
+            "android.telecom.extra.SORT_ORDER";
+
+    /**
      * Flag indicating that this {@code PhoneAccount} can act as a connection manager for
      * other connections. The {@link ConnectionService} associated with this {@code PhoneAccount}
      * will be allowed to manage phone calls including using its own proprietary phone-call
