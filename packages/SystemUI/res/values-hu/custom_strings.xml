@@ -31,19 +31,34 @@
   <!-- Screen pinning dialog description when in accessibility mode. -->
   <string name="screen_pinning_description_back">Ez a rögzítés feloldásáig a nézetben tartja, Feloldáshoz nyomja meg és tratsa nyomva a Vissza gombot.</string>
   <!-- QUICK SETTINGS TILES -->
+  <string name="quick_settings_caffeine_label">Caffeine</string>
+  <string name="accessibility_quick_settings_caffeine_off">Caffeine ki</string>
+  <string name="accessibility_quick_settings_caffeine_on">Caffeine be</string>
   <string name="quick_settings_music_label">Zene</string>
   <string name="quick_settings_music_play">Lejátszás</string>
   <string name="quick_settings_music_pause">Szünet</string>
   <string name="quick_settings_nfc_label">NFC</string>
   <!-- Content description of the NFC tile in quick settings when off (not shown on the screen). [CHAR LIMIT=NONE] -->
+  <string name="accessibility_quick_settings_nfc_off">NFC ki.</string>
   <!-- Content description of the NFC tile in quick settings when on (not shown on the screen). [CHAR LIMIT=NONE] -->
+  <string name="accessibility_quick_settings_nfc_on">NFC be.</string>
   <!-- Announcement made when NFC changes to off (not shown on the screen). [CHAR LIMIT=NONE] -->
+  <string name="accessibility_quick_settings_nfc_changed_off">NFC kikapcsolva.</string>
   <!-- Announcement made when NFC changes to on (not shown on the screen). [CHAR LIMIT=NONE] -->
+  <string name="accessibility_quick_settings_nfc_changed_on">NFC bekapcsolva.</string>
+  <string name="quick_settings_screenshot_label">Képernyőkép</string>
   <!-- Screenshot Crop & Share -->
   <string name="action_delete_success">Törölve</string>
   <string name="action_delete_fault">Törlés sikertelen volt</string>
   <string name="action_save_success">Mentve</string>
   <string name="action_save_fault">Mentés sikertelen volt</string>
+  <string name="pref_action_color_title">Akciógombok színe</string>
+  <string name="pref_action_color_summary">Válassza ki a kedvenc színét az akciógombokhoz</string>
+  <string name="pref_category_main">Fő beállítások</string>
+  <string name="pref_category_user">Felhasználói beállítások</string>
+  <string name="pref_crop_behavior_title">Vágási viselkedés</string>
+  <string name="pref_crop_behavior_summary">A körülvágott kép használata, még akkor is, ha az eredeti nem került körbevágásra a vágás művelettel</string>
+  <string name="action_ok">OK</string>
   <!-- Screenshot Crop & Share -->
   <string name="action_delete_success">Törölve</string>
   <string name="action_delete_fault">Törlés sikertelen volt</string>
@@ -51,5 +66,44 @@
   <string name="action_save_fault">Mentés sikertelen volt</string>
   <string name="action_edit">Szerkesztés</string>
   <!-- qs edit mode menu -->
+  <string name="qs_menu_item_columns">Oszlopok</string>
+  <string name="qs_menu_item_columns_landscape">Oszlopok (fekvő)</string>
+  <string name="qs_menu_item_columns_three">3</string>
+  <string name="qs_menu_item_columns_four">4</string>
+  <string name="qs_menu_item_columns_five">5</string>
+  <string name="qs_menu_item_columns_six">6</string>
+  <string name="qs_menu_item_columns_seven">7</string>
+  <string name="qs_menu_item_columns_eight">8</string>
+  <string name="qs_menu_item_columns_nine">9</string>
+  <string name="qs_menu_item_reset">Visszaállítás</string>
   <!-- NavBar Tuner -->
+  <string name="menu_ime_always_show">Menü / Billentyűzet váltó (mindig mutat)</string>
+  <string name="search">Keresés</string>
+  <string name="stream_title_call">Hívás</string>
+  <string name="stream_title_system">Rendszer</string>
+  <string name="stream_title_ring">Csörgés</string>
+  <string name="stream_title_media">Média</string>
+  <string name="stream_title_alarm">Ébresztő</string>
+  <string name="stream_title_notification">Értesítés</string>
+  <string name="stream_title_bluetooth">Bluetooth</string>
+  <string name="qs_menu_item_scroll">Gyorsbeállítások sáv görgetése</string>
+  <string name="qs_menu_item_titles">Címkék elrejtése</string>
+  <!-- Advance location quick setting tile -->
+  <string name="accessibility_quick_settings_location_battery_saving">Helyzetmeghatározás: energiatakarékos mód.</string>
+  <string name="accessibility_quick_settings_location_gps_only">Helyzetmeghatározás: csak GPS mód.</string>
+  <string name="accessibility_quick_settings_location_high_accuracy">Helyzetmeghatározás: nagy pontosságú mód.</string>
+  <string name="accessibility_quick_settings_location_changed_battery_saving">Helyzetmeghatározás megváltozott: enegiatakarékos mód.</string>
+  <string name="accessibility_quick_settings_location_changed_gps_only">Helyzetmeghatározás megváltozott: csak GPS mód.</string>
+  <string name="accessibility_quick_settings_location_changed_high_accuracy">Helyzetmeghatározá megváltozott: nagy pontosságú mód.</string>
+  <string name="quick_settings_location_detail_title">Helyzetmeghatározási mód</string>
+  <string name="quick_settings_location_battery_saving_label">Energiatakarékos</string>
+  <string name="quick_settings_location_gps_only_label">Csak GPS</string>
+  <string name="quick_settings_location_high_accuracy_label">Nagy pontosság</string>
+  <string name="quick_settings_location_off_label">Hely ki</string>
+  <string name="quick_settings_google_assist_label">Segéd</string>
+  <string name="quick_settings_google_voice_assist_label">Hangsegéd</string>
+  <string name="quick_settings_network_adb_enabled_label">Engedélyezve</string>
+  <string name="quick_settings_network_adb_disabled_label">Letiltva</string>
+  <string name="quick_settings_network_adb_label">ADB hálózaton keresztül</string>
+  <!-- Path data for portrait battery -->
 </resources>

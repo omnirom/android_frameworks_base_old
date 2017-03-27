@@ -18,18 +18,68 @@
 -->
 <resources xmlns:xliff="urn:oasis:names:tc:xliff:document:1.2">
   <!-- Screenrecord Notification Ticker -->
+  <string name="screenrecord_notif_ticker">მიმდინარეობს ეკრანის ჩაწერა</string>
   <!-- Screenrecord notification title -->
+  <string name="screenrecord_notif_title">მიმდინარეობს ეკრანის ჩაწერა</string>
   <!-- Screenrecord notification action: Stop -->
+  <string name="screenrecord_notif_stop">გაჩერება</string>
   <!-- Screenrecord notification action: show/hide pointer -->
+  <string name="screenrecord_notif_pointer_on">მაჩვენებლის ჩვენება</string>
+  <string name="screenrecord_notif_pointer_off">მაჩვენებლის დამალვა</string>
   <!-- Screen record notification error title -->
+  <string name="screenrecord_notif_error">ეკრანის ჩაწერა ვერ მოხერხდა</string>
   <!-- Screen pinning dialog description when in accessibility mode. -->
+  <string name="screen_pinning_description_back">ეს ინახავს მას ხედვაში, სანამ არ მოხსნით. დააჭირეთ და გეჭიროთ \"უკან\" მოსახსნელად.</string>
   <!-- QUICK SETTINGS TILES -->
+  <string name="quick_settings_caffeine_label">Caffeine</string>
+  <string name="accessibility_quick_settings_caffeine_off">Caffeine გამორთულია</string>
+  <string name="accessibility_quick_settings_caffeine_on">Caffeine ჩართულია</string>
+  <string name="quick_settings_music_label">მუსიკა</string>
+  <string name="quick_settings_music_play">დაკვრა</string>
+  <string name="quick_settings_music_pause">შეჩერება</string>
+  <string name="quick_settings_nfc_label">NFC</string>
   <!-- Content description of the NFC tile in quick settings when off (not shown on the screen). [CHAR LIMIT=NONE] -->
+  <string name="accessibility_quick_settings_nfc_off">NFC გამორთულია.</string>
   <!-- Content description of the NFC tile in quick settings when on (not shown on the screen). [CHAR LIMIT=NONE] -->
+  <string name="accessibility_quick_settings_nfc_on">NFC ჩართულია.</string>
   <!-- Announcement made when NFC changes to off (not shown on the screen). [CHAR LIMIT=NONE] -->
+  <string name="accessibility_quick_settings_nfc_changed_off">NFC გამორთულია.</string>
   <!-- Announcement made when NFC changes to on (not shown on the screen). [CHAR LIMIT=NONE] -->
+  <string name="accessibility_quick_settings_nfc_changed_on">NFC ჩართულია.</string>
+  <string name="quick_settings_screenshot_label">ეკრანის სურათი</string>
   <!-- Screenshot Crop & Share -->
+  <string name="action_delete_success">წაშლა</string>
+  <string name="action_delete_fault">წაშლა ვერ მოხერხდა</string>
+  <string name="action_save_success">შენახვა</string>
+  <string name="action_save_fault">შენახვა ვერ მოხერხდა</string>
+  <string name="pref_action_color_title">ქმედებების ღილაკების ფერი</string>
+  <string name="pref_action_color_summary">აირჩიეთ თქვენი საყვარელი ფერი ქმედებების ღილაკებისთვის</string>
+  <string name="pref_category_main">ძირითადი პარამეტრები</string>
+  <string name="pref_category_user">მომხმარებლის პარამეტრები</string>
+  <string name="pref_crop_behavior_title">მოჭრის ქცევა</string>
+  <string name="pref_crop_behavior_summary">მოჭრილი სურათის გამოყენება, მაშინაც, როდესაც ორიგინალი არ იყო მოჭრილი მოჭრის ქმედებით</string>
+  <string name="action_ok">OK</string>
   <!-- Screenshot Crop & Share -->
+  <string name="action_edit">რედაქტირება</string>
   <!-- qs edit mode menu -->
+  <string name="qs_menu_item_columns">სვეტები</string>
+  <string name="qs_menu_item_columns_three">3</string>
+  <string name="qs_menu_item_columns_four">4</string>
+  <string name="qs_menu_item_columns_five">5</string>
+  <string name="qs_menu_item_columns_six">6</string>
+  <string name="qs_menu_item_reset">ჩამოგდება</string>
   <!-- NavBar Tuner -->
+  <string name="menu_ime_always_show">მენიუ / კლავიატურის გადამრთველი (ყოველთვის გამოჩენა)</string>
+  <string name="search">ძიება</string>
+  <string name="stream_title_call">ზარი</string>
+  <string name="stream_title_system">სისტემა</string>
+  <string name="stream_title_ring">რეკვა</string>
+  <string name="stream_title_media">მედია</string>
+  <string name="stream_title_alarm">მაღვიძარა</string>
+  <string name="stream_title_notification">შეტყობინება</string>
+  <string name="stream_title_bluetooth">Bluetooth</string>
+  <string name="qs_menu_item_scroll">სწრაფი პანელის სკროლი</string>
+  <string name="qs_menu_item_titles">ეტიკეტების დამალვა</string>
+  <!-- Advance location quick setting tile -->
+  <!-- Path data for portrait battery -->
 </resources>

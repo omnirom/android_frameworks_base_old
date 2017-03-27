@@ -31,25 +31,86 @@
   <!-- Screen pinning dialog description when in accessibility mode. -->
   <string name="screen_pinning_description_back">Cela permet de maintenir en vue jusqu\'à ce que vous l\'enleviez. Touchez et maintenez le bouton Retour pour détacher.</string>
   <!-- QUICK SETTINGS TILES -->
+  <string name="quick_settings_caffeine_label">Caffeine</string>
+  <string name="accessibility_quick_settings_caffeine_off">Caffeine désactivée</string>
+  <string name="accessibility_quick_settings_caffeine_on">Caffeine activée</string>
   <string name="quick_settings_music_label">Musique</string>
   <string name="quick_settings_music_play">Lecture</string>
   <string name="quick_settings_music_pause">Pause</string>
   <string name="quick_settings_nfc_label">NFC</string>
   <!-- Content description of the NFC tile in quick settings when off (not shown on the screen). [CHAR LIMIT=NONE] -->
+  <string name="accessibility_quick_settings_nfc_off">NFC désactivé.</string>
   <!-- Content description of the NFC tile in quick settings when on (not shown on the screen). [CHAR LIMIT=NONE] -->
+  <string name="accessibility_quick_settings_nfc_on">NFC activé.</string>
   <!-- Announcement made when NFC changes to off (not shown on the screen). [CHAR LIMIT=NONE] -->
+  <string name="accessibility_quick_settings_nfc_changed_off">NFC a été désactivé.</string>
   <!-- Announcement made when NFC changes to on (not shown on the screen). [CHAR LIMIT=NONE] -->
+  <string name="accessibility_quick_settings_nfc_changed_on">NFC a été activé.</string>
+  <string name="quick_settings_screenshot_label">Capture d’écran</string>
   <!-- Screenshot Crop & Share -->
   <string name="action_delete_success">Supprimé</string>
   <string name="action_delete_fault">La suppression a échoué</string>
-  <string name="action_save_success">Enregistré</string>
+  <string name="action_save_success">Sauvegardé</string>
   <string name="action_save_fault">L’enregistrement a échoué</string>
+  <string name="pref_action_color_title">Couleur des boutons d’action</string>
+  <string name="pref_action_color_summary">Choisissez votre couleur préférée pour les boutons d’action</string>
+  <string name="pref_category_main">Paramètres principaux</string>
+  <string name="pref_category_user">Paramètres utilisateur</string>
+  <string name="pref_crop_behavior_title">Comportement du recadrage</string>
+  <string name="pref_crop_behavior_summary">Utiliser l’image recadrée, même si l’originale ne l’a pas été avec l’action de recadrage</string>
+  <string name="action_ok">OK</string>
   <!-- Screenshot Crop & Share -->
   <string name="action_delete_success">Supprimé</string>
   <string name="action_delete_fault">La suppression a échoué</string>
-  <string name="action_save_success">Enregistré</string>
+  <string name="action_save_success">Sauvegardé</string>
   <string name="action_save_fault">L’enregistrement a échoué</string>
   <string name="action_edit">Modifier</string>
   <!-- qs edit mode menu -->
+  <string name="qs_menu_item_columns">Colonnes</string>
+  <string name="qs_menu_item_columns_landscape">Colonnes «Mode Paysage »</string>
+  <string name="qs_menu_item_columns_three">3</string>
+  <string name="qs_menu_item_columns_four">4</string>
+  <string name="qs_menu_item_columns_five">5</string>
+  <string name="qs_menu_item_columns_six">6</string>
+  <string name="qs_menu_item_columns_seven">7</string>
+  <string name="qs_menu_item_columns_eight">8</string>
+  <string name="qs_menu_item_columns_nine">9</string>
+  <string name="qs_menu_item_reset">Réinitialiser</string>
   <!-- NavBar Tuner -->
+  <string name="menu_ime_always_show">Menu / Commutateur de clavier (toujours afficher)</string>
+  <string name="search">Rechercher</string>
+  <string name="stream_title_call">Appel</string>
+  <string name="stream_title_system">Système</string>
+  <string name="stream_title_ring">Sonnerie</string>
+  <string name="stream_title_media">Média</string>
+  <string name="stream_title_alarm">Alarme</string>
+  <string name="stream_title_notification">Notification</string>
+  <string name="stream_title_bluetooth">Bluetooth</string>
+  <string name="qs_menu_item_scroll">Défilement de la barre de raccourcis</string>
+  <string name="qs_menu_item_titles">Masquer les libellés</string>
+  <!-- Advance location quick setting tile -->
+  <string name="accessibility_quick_settings_location_battery_saving">Suivi de Localisation: Mode d\'économie d\'énergie.</string>
+  <string name="accessibility_quick_settings_location_gps_only">Suivi de Localisation: Mode appareil uniquement.</string>
+  <string name="accessibility_quick_settings_location_high_accuracy">Suivi de Localisation: mode haute précision.</string>
+  <string name="accessibility_quick_settings_location_changed_battery_saving">Suivi de Localisation définie sur «Économie d\'énergie».</string>
+  <string name="accessibility_quick_settings_location_changed_gps_only">Suivi de Localisation définie sur «Appareil uniquement».</string>
+  <string name="accessibility_quick_settings_location_changed_high_accuracy">Suivi de Localisation définie sur «Haute précision».</string>
+  <string name="quick_settings_location_detail_title">Mode de localisation</string>
+  <string name="quick_settings_location_battery_saving_label">Économie d\'énergie</string>
+  <string name="quick_settings_location_gps_only_label">Appareil uniquement</string>
+  <string name="quick_settings_location_high_accuracy_label">Haute précision</string>
+  <string name="quick_settings_location_off_label">Localisation désactivée</string>
+  <string name="quick_settings_google_assist_label">Assistance</string>
+  <string name="quick_settings_google_voice_assist_label">Assistance vocale</string>
+  <string name="quick_settings_network_adb_enabled_label">Activé</string>
+  <string name="quick_settings_network_adb_disabled_label">Désactivé</string>
+  <string name="quick_settings_network_adb_label">ADB sur TCP/IP</string>
+  <string name="omnijaws_service_error">Erreur</string>
+  <string name="omnijaws_service_unkown">Aucune donnée météo disponible</string>
+  <string name="omnijaws_detail_header">Météo</string>
+  <string name="omnijaws_label_default">Météo</string>
+  <string name="omnijaws_current_text">Actuellement</string>
+  <string name="omnijaws_package_not_available">OmniJaws indisponible</string>
+  <!-- Path data for portrait battery -->
+  <string name="pirate_label">Aaarrrggghhh</string>
 </resources>

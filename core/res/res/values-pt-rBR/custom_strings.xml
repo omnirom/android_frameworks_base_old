@@ -36,6 +36,8 @@
   <string name="global_action_torch_off">A lanterna está desligada</string>
   <string name="global_actions_toggle_torch_mode">Lanterna</string>
   <!-- Silent Mode -->
+  <string name="silent_mode_priority">Prioridade</string>
+  <string name="silent_mode_none">Nenhum</string>
   <!-- advanced reboot to bootloader. -->
   <string name="reboot_to_bootloader_title">Reinicie para bootloader</string>
   <string name="reboot_to_bootloader_message">Reiniciando</string>
@@ -56,6 +58,7 @@
   <string name="dnd_mode_alarms">Somente alarmes</string>
   <string name="dnd_mode_important">Prioridade apenas</string>
   <!-- Vendor mismatched fingerprint warning [CHAR LIMIT=NONE] -->
+  <string name="system_error_vendorprint">Sua imagem de fornecedor não coincide com o sistema. Por favor atualize a <xliff:g id="string">%s</xliff:g> da imagem de fornecedor do seu dispositivo</string>
   <!-- Title of an application permission, listed so the user can choose whether they want to allow the application to do this. -->
   <string name="permlab_fakePackageSignature">Assinatura de pacote spoof</string>
   <!-- Description of an application permission, listed so the user can choose whether they want to allow the application to do this. -->

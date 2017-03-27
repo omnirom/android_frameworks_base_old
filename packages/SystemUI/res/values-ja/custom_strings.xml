@@ -35,8 +35,13 @@
   <!-- Content description of the NFC tile in quick settings when on (not shown on the screen). [CHAR LIMIT=NONE] -->
   <!-- Announcement made when NFC changes to off (not shown on the screen). [CHAR LIMIT=NONE] -->
   <!-- Announcement made when NFC changes to on (not shown on the screen). [CHAR LIMIT=NONE] -->
+  <string name="quick_settings_screenshot_label">スクリーンショット</string>
   <!-- Screenshot Crop & Share -->
+  <string name="pref_action_color_title">アクションボタンの色</string>
+  <string name="pref_category_user">ユーザー設定</string>
   <!-- Screenshot Crop & Share -->
   <!-- qs edit mode menu -->
   <!-- NavBar Tuner -->
+  <!-- Advance location quick setting tile -->
+  <!-- Path data for portrait battery -->
 </resources>

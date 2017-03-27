@@ -31,19 +31,34 @@
   <!-- Screen pinning dialog description when in accessibility mode. -->
   <string name="screen_pinning_description_back">Bu iptal edilene kadar gösterilir. İptal etmek için Geriye dokunun ve basılı tutun.</string>
   <!-- QUICK SETTINGS TILES -->
+  <string name="quick_settings_caffeine_label">Kafein</string>
+  <string name="accessibility_quick_settings_caffeine_off">Kafein kapalı</string>
+  <string name="accessibility_quick_settings_caffeine_on">Kafein açık</string>
   <string name="quick_settings_music_label">Müzik</string>
   <string name="quick_settings_music_play">Oynat</string>
   <string name="quick_settings_music_pause">Duraklat</string>
   <string name="quick_settings_nfc_label">NFC</string>
   <!-- Content description of the NFC tile in quick settings when off (not shown on the screen). [CHAR LIMIT=NONE] -->
+  <string name="accessibility_quick_settings_nfc_off">NFC kapalı.</string>
   <!-- Content description of the NFC tile in quick settings when on (not shown on the screen). [CHAR LIMIT=NONE] -->
+  <string name="accessibility_quick_settings_nfc_on">NFC açık.</string>
   <!-- Announcement made when NFC changes to off (not shown on the screen). [CHAR LIMIT=NONE] -->
+  <string name="accessibility_quick_settings_nfc_changed_off">NFC devre dışı.</string>
   <!-- Announcement made when NFC changes to on (not shown on the screen). [CHAR LIMIT=NONE] -->
+  <string name="accessibility_quick_settings_nfc_changed_on">NFC etkinleştirildi.</string>
+  <string name="quick_settings_screenshot_label">Ekran görüntüsü</string>
   <!-- Screenshot Crop & Share -->
   <string name="action_delete_success">Silindi</string>
   <string name="action_delete_fault">Silme başarısız oldu</string>
   <string name="action_save_success">Kaydedildi</string>
   <string name="action_save_fault">Kaydetme başarısız oldu</string>
+  <string name="pref_action_color_title">Eylem düğmeleri rengi</string>
+  <string name="pref_action_color_summary">Eylem düğmeleri için en sevdiğiniz rengi seçin</string>
+  <string name="pref_category_main">Ana Ayarlar</string>
+  <string name="pref_category_user">Kullanıcı Ayarları</string>
+  <string name="pref_crop_behavior_title">Kırpma davranışı</string>
+  <string name="pref_crop_behavior_summary">Asıl resim kırpma eylemi ile kırpılmamış olsa bile kırpılmış resmi kullan</string>
+  <string name="action_ok">Tamam</string>
   <!-- Screenshot Crop & Share -->
   <string name="action_delete_success">Silindi</string>
   <string name="action_delete_fault">Silme başarısız oldu</string>
@@ -51,5 +66,42 @@
   <string name="action_save_fault">Kaydetme başarısız oldu</string>
   <string name="action_edit">Düzenle</string>
   <!-- qs edit mode menu -->
+  <string name="qs_menu_item_columns">Sütunlar</string>
+  <string name="qs_menu_item_columns_three">3</string>
+  <string name="qs_menu_item_columns_four">4</string>
+  <string name="qs_menu_item_columns_five">5</string>
+  <string name="qs_menu_item_columns_six">6</string>
+  <string name="qs_menu_item_columns_seven">7</string>
+  <string name="qs_menu_item_columns_eight">8</string>
+  <string name="qs_menu_item_columns_nine">9</string>
+  <string name="qs_menu_item_reset">Sıfırla</string>
   <!-- NavBar Tuner -->
+  <string name="menu_ime_always_show">Menü / Klavye Değiştirici (daima göster)</string>
+  <string name="search">Ara</string>
+  <string name="stream_title_call">Arama</string>
+  <string name="stream_title_system">Sistem</string>
+  <string name="stream_title_ring">Zil sesi</string>
+  <string name="stream_title_media">Ortam</string>
+  <string name="stream_title_alarm">Alarm</string>
+  <string name="stream_title_notification">Bildirim</string>
+  <string name="stream_title_bluetooth">Bluetooth</string>
+  <string name="qs_menu_item_scroll">Hızlı ayarlar kaydırma</string>
+  <string name="qs_menu_item_titles">Etiketleri gizle</string>
+  <!-- Advance location quick setting tile -->
+  <string name="accessibility_quick_settings_location_battery_saving">Konum bildirimi: pil tasarruf modu.</string>
+  <string name="accessibility_quick_settings_location_gps_only">Konum bildirimi: sadece sensörler modu.</string>
+  <string name="accessibility_quick_settings_location_high_accuracy">Konum bildirimi: yüksek hassasiyet modu.</string>
+  <string name="accessibility_quick_settings_location_changed_battery_saving">Konum bildirimi pil tasarruf moduna geçti.</string>
+  <string name="accessibility_quick_settings_location_changed_gps_only">Konum bildirimi sadece sensörler moduna geçti.</string>
+  <string name="accessibility_quick_settings_location_changed_high_accuracy">Konum bildirimi yüksek hassasiyet moduna geçti.</string>
+  <string name="quick_settings_location_detail_title">Konum modu</string>
+  <string name="quick_settings_location_battery_saving_label">Pil tasarrufu</string>
+  <string name="quick_settings_location_gps_only_label">Sadece cihaz</string>
+  <string name="quick_settings_location_high_accuracy_label">Yüksek doğruluk</string>
+  <string name="quick_settings_location_off_label">Konum kapalı</string>
+  <string name="quick_settings_google_assist_label">Asist</string>
+  <string name="quick_settings_network_adb_enabled_label">Etkin</string>
+  <string name="quick_settings_network_adb_disabled_label">Devre dışı</string>
+  <string name="quick_settings_network_adb_label">Ağ üzerinden ADB</string>
+  <!-- Path data for portrait battery -->
 </resources>

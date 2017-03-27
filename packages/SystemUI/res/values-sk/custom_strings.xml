@@ -31,25 +31,55 @@
   <!-- Screen pinning dialog description when in accessibility mode. -->
   <string name="screen_pinning_description_back">Toto udržuje obrazovku v pripnutú popredí, pokým ju neodopnete stlačením a podržaním tlačídla Späť.</string>
   <!-- QUICK SETTINGS TILES -->
+  <string name="quick_settings_caffeine_label">Caffeine</string>
+  <string name="accessibility_quick_settings_caffeine_off">Caffeine vyp</string>
+  <string name="accessibility_quick_settings_caffeine_on">Caffeine zap</string>
   <string name="quick_settings_music_label">Hudba</string>
   <string name="quick_settings_music_play">Prehrať</string>
   <string name="quick_settings_music_pause">Pauza</string>
   <string name="quick_settings_nfc_label">NFC</string>
   <!-- Content description of the NFC tile in quick settings when off (not shown on the screen). [CHAR LIMIT=NONE] -->
+  <string name="accessibility_quick_settings_nfc_off">NFC vyp.</string>
   <!-- Content description of the NFC tile in quick settings when on (not shown on the screen). [CHAR LIMIT=NONE] -->
+  <string name="accessibility_quick_settings_nfc_on">NFC zap.</string>
   <!-- Announcement made when NFC changes to off (not shown on the screen). [CHAR LIMIT=NONE] -->
+  <string name="accessibility_quick_settings_nfc_changed_off">NFC je vypnuté.</string>
   <!-- Announcement made when NFC changes to on (not shown on the screen). [CHAR LIMIT=NONE] -->
+  <string name="accessibility_quick_settings_nfc_changed_on">NFC je zapnuté.</string>
+  <string name="quick_settings_screenshot_label">Snímka obrazovky</string>
   <!-- Screenshot Crop & Share -->
   <string name="action_delete_success">Vymazané</string>
   <string name="action_delete_fault">Vymazanie zlyhalo</string>
   <string name="action_save_success">Uložené</string>
   <string name="action_save_fault">Ukladanie zlyhalo</string>
+  <string name="pref_action_color_title">Farba tlačidiel akcie</string>
+  <string name="pref_action_color_summary">Vyberte si obľubenú farbu pre tlačidlá akcie</string>
+  <string name="pref_category_main">Hlavné nastavenia</string>
+  <string name="pref_category_user">Používateľské nastavenia</string>
+  <string name="pref_crop_behavior_title">Voľby orezania</string>
+  <string name="pref_crop_behavior_summary">Použiť orezaný obrázok aj v prípade, že pôvodný obrázok v skutočnosti nebo upravený touto funkciou</string>
+  <string name="action_ok">OK</string>
   <!-- Screenshot Crop & Share -->
-  <string name="action_delete_success">Vymazané</string>
-  <string name="action_delete_fault">Vymazanie zlyhalo</string>
-  <string name="action_save_success">Uložené</string>
-  <string name="action_save_fault">Ukladanie zlyhalo</string>
   <string name="action_edit">Upraviť</string>
   <!-- qs edit mode menu -->
+  <string name="qs_menu_item_columns">Stĺpce</string>
+  <string name="qs_menu_item_columns_three">3</string>
+  <string name="qs_menu_item_columns_four">4</string>
+  <string name="qs_menu_item_columns_five">5</string>
+  <string name="qs_menu_item_columns_six">6</string>
+  <string name="qs_menu_item_reset">Obnoviť</string>
   <!-- NavBar Tuner -->
+  <string name="menu_ime_always_show">Menu / Prepínač klávesnice (vždy zobrazovať)</string>
+  <string name="search">Hľadať</string>
+  <string name="stream_title_call">Zavolať</string>
+  <string name="stream_title_system">Systém</string>
+  <string name="stream_title_ring">Zvonenie</string>
+  <string name="stream_title_media">Médiá</string>
+  <string name="stream_title_alarm">Budík</string>
+  <string name="stream_title_notification">Oznámenie</string>
+  <string name="stream_title_bluetooth">Bluetooth</string>
+  <string name="qs_menu_item_scroll">Posuvník rýchleho menu</string>
+  <string name="qs_menu_item_titles">Skryť štítky</string>
+  <!-- Advance location quick setting tile -->
+  <!-- Path data for portrait battery -->
 </resources>

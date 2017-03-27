@@ -26,16 +26,18 @@
   <!-- Reboot -->
   <string name="global_action_reboot">Перезагрузить</string>
   <string name="global_action_reboot_more">Перезагрузка\u2026</string>
-  <string name="global_action_reboot_sub">Системные</string>
+  <string name="global_action_reboot_sub">Система</string>
   <string name="global_action_reboot_recovery">Рекавери</string>
   <string name="global_action_reboot_bootloader">Загрузчик</string>
   <string name="global_action_users">Пользователи\u2026</string>
   <string name="global_action_screenshot">Снимок экрана</string>
-  <string name="global_action_screenrecord">Запись экрана</string>
-  <string name="global_action_torch_on">Фонарик включен</string>
+  <string name="global_action_screenrecord">Запись с экрана</string>
+  <string name="global_action_torch_on">Фонарик включается</string>
   <string name="global_action_torch_off">Фонарик выключен</string>
   <string name="global_actions_toggle_torch_mode">Фонарик</string>
   <!-- Silent Mode -->
+  <string name="silent_mode_priority">Приоритет</string>
+  <string name="silent_mode_none">Без эффекта</string>
   <!-- advanced reboot to bootloader. -->
   <string name="reboot_to_bootloader_title">В загрузчик</string>
   <string name="reboot_to_bootloader_message">Перезагрузка\u2026</string>
@@ -56,6 +58,7 @@
   <string name="dnd_mode_alarms">Только будильники</string>
   <string name="dnd_mode_important">Только важные</string>
   <!-- Vendor mismatched fingerprint warning [CHAR LIMIT=NONE] -->
+  <string name="system_error_vendorprint">Ваше изображение производителя не соответствует системе. Пожалуйста прошейте <xliff:g id="string">%s</xliff:g> изображение производителя для вашего устройства</string>
   <!-- Title of an application permission, listed so the user can choose whether they want to allow the application to do this. -->
   <string name="permlab_fakePackageSignature">имитировать подпись пакета</string>
   <!-- Description of an application permission, listed so the user can choose whether they want to allow the application to do this. -->

@@ -45,11 +45,9 @@
   <string name="action_save_success">Opgeslagen</string>
   <string name="action_save_fault">Opslaan is mislukt</string>
   <!-- Screenshot Crop & Share -->
-  <string name="action_delete_success">Verwijderd</string>
-  <string name="action_delete_fault">Verwijderen is mislukt</string>
-  <string name="action_save_success">Opgeslagen</string>
-  <string name="action_save_fault">Opslaan is mislukt</string>
   <string name="action_edit">Bewerken</string>
   <!-- qs edit mode menu -->
   <!-- NavBar Tuner -->
+  <!-- Advance location quick setting tile -->
+  <!-- Path data for portrait battery -->
 </resources>

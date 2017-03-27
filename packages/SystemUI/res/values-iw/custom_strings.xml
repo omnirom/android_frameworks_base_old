@@ -31,12 +31,42 @@
   <!-- Screen pinning dialog description when in accessibility mode. -->
   <string name="screen_pinning_description_back">פעולה זו שומרת את זה בתצוגה עד שאתה תבטל הצמדה. לחץ והחזק על מנת לבטל הצמדה.</string>
   <!-- QUICK SETTINGS TILES -->
+  <string name="quick_settings_caffeine_label">קפאין</string>
+  <string name="accessibility_quick_settings_caffeine_off">קפאין כבוי</string>
+  <string name="accessibility_quick_settings_caffeine_on">קפאין דלוק</string>
+  <string name="quick_settings_music_label">מוזיקה</string>
+  <string name="quick_settings_music_play">נגן</string>
+  <string name="quick_settings_music_pause">השהה</string>
+  <string name="quick_settings_nfc_label">NFC</string>
   <!-- Content description of the NFC tile in quick settings when off (not shown on the screen). [CHAR LIMIT=NONE] -->
+  <string name="accessibility_quick_settings_nfc_off">NFC כבוי.</string>
   <!-- Content description of the NFC tile in quick settings when on (not shown on the screen). [CHAR LIMIT=NONE] -->
+  <string name="accessibility_quick_settings_nfc_on">NFC מופעל.</string>
   <!-- Announcement made when NFC changes to off (not shown on the screen). [CHAR LIMIT=NONE] -->
+  <string name="accessibility_quick_settings_nfc_changed_off">NFC כובה.</string>
   <!-- Announcement made when NFC changes to on (not shown on the screen). [CHAR LIMIT=NONE] -->
+  <string name="accessibility_quick_settings_nfc_changed_on">NFC הופעל.</string>
+  <string name="quick_settings_screenshot_label">צילום מסך</string>
   <!-- Screenshot Crop & Share -->
+  <string name="action_delete_success">נמחק</string>
+  <string name="action_delete_fault">מחיקה בוצעה ללא הצלחה</string>
+  <string name="action_save_success">נשמר</string>
+  <string name="action_save_fault">שמירה בוצעה ללא הצלחה</string>
+  <string name="pref_category_main">הגדרות ראשיות</string>
+  <string name="pref_category_user">הגדרות משתמש</string>
+  <string name="action_ok">אוקיי</string>
   <!-- Screenshot Crop & Share -->
+  <string name="action_edit">עריכה</string>
   <!-- qs edit mode menu -->
+  <string name="qs_menu_item_columns">טורים</string>
+  <string name="qs_menu_item_columns_three">3</string>
+  <string name="qs_menu_item_columns_four">4</string>
+  <string name="qs_menu_item_columns_five">5</string>
+  <string name="qs_menu_item_columns_six">6</string>
+  <string name="qs_menu_item_reset">אתחל</string>
   <!-- NavBar Tuner -->
+  <string name="stream_title_notification">התראה</string>
+  <string name="stream_title_bluetooth">בלוטות\'</string>
+  <!-- Advance location quick setting tile -->
+  <!-- Path data for portrait battery -->
 </resources>

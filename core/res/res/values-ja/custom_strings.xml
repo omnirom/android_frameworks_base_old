@@ -29,6 +29,9 @@
   <string name="global_action_reboot_sub">システム</string>
   <string name="global_action_reboot_recovery">リカバリモード</string>
   <string name="global_action_reboot_bootloader">ブートローダー</string>
+  <string name="global_action_users">ユーザー\u2026</string>
+  <string name="global_action_screenshot">スクリーンショット</string>
+  <string name="global_action_screenrecord">画面の録画</string>
   <!-- Silent Mode -->
   <!-- advanced reboot to bootloader. -->
   <string name="reboot_to_bootloader_title">ブートローダーに再起動</string>
@@ -39,6 +42,8 @@
   <!-- advanced reboot system -->
   <string name="reboot_system_title">再起動</string>
   <string name="reboot_system_message">再起動しています\u2026</string>
+  <string name="battery_style_text">テキストのみ</string>
+  <string name="battery_style_circle">サークル</string>
   <!-- global actions dnd selector -->
   <!-- Vendor mismatched fingerprint warning [CHAR LIMIT=NONE] -->
   <!-- Title of an application permission, listed so the user can choose whether they want to allow the application to do this. -->

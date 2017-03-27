@@ -36,6 +36,8 @@
   <string name="global_action_torch_off">Linterna apagada</string>
   <string name="global_actions_toggle_torch_mode">Linterna</string>
   <!-- Silent Mode -->
+  <string name="silent_mode_priority">Prioridad</string>
+  <string name="silent_mode_none">Ninguno</string>
   <!-- advanced reboot to bootloader. -->
   <string name="reboot_to_bootloader_title">Reiniciar en bootloader</string>
   <string name="reboot_to_bootloader_message">Reiniciando\u2026</string>
@@ -56,12 +58,13 @@
   <string name="dnd_mode_alarms">Alarmas solamente</string>
   <string name="dnd_mode_important">Prioridad solamente</string>
   <!-- Vendor mismatched fingerprint warning [CHAR LIMIT=NONE] -->
+  <string name="system_error_vendorprint">Su imagen de proveedor no coincide con el sistema. Por favor, instale la imagen del proveedor <xliff:g id="string">%s </xliff:g> para su dispositivo</string>
   <!-- Title of an application permission, listed so the user can choose whether they want to allow the application to do this. -->
   <string name="permlab_fakePackageSignature">Simular firma de paquetes</string>
   <!-- Description of an application permission, listed so the user can choose whether they want to allow the application to do this. -->
   <string name="permdesc_fakePackageSignature">Permite que la aplicación se haga pasar por otra. Las aplicaciones maliciosas pueden usar esto para acceder a datos privados. ¡Concede este permiso con mucha precaución!</string>
   <!-- back kill -->
-  <string name="app_killed_message">Aplicación cerrada</string>
+  <string name="app_killed_message">App Terminada</string>
   <!-- Notify use that they are in Lock-to-app in accessibility mode -->
   <string name="lock_to_app_toast_back">Para desbloquear esta pantalla, pulsa y mantén atrás.</string>
 </resources>

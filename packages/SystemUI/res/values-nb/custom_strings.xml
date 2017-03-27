@@ -45,11 +45,9 @@
   <string name="action_save_success">Lagret</string>
   <string name="action_save_fault">Lagringen mislyktes</string>
   <!-- Screenshot Crop & Share -->
-  <string name="action_delete_success">Slettet</string>
-  <string name="action_delete_fault">Slettingen mislyktes</string>
-  <string name="action_save_success">Lagret</string>
-  <string name="action_save_fault">Lagringen mislyktes</string>
   <string name="action_edit">Rediger</string>
   <!-- qs edit mode menu -->
   <!-- NavBar Tuner -->
+  <!-- Advance location quick setting tile -->
+  <!-- Path data for portrait battery -->
 </resources>

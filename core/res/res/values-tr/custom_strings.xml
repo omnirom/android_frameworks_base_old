@@ -36,6 +36,8 @@
   <string name="global_action_torch_off">El feneri kapalı</string>
   <string name="global_actions_toggle_torch_mode">El feneri</string>
   <!-- Silent Mode -->
+  <string name="silent_mode_priority">Öncelik</string>
+  <string name="silent_mode_none">Hiçbiri</string>
   <!-- advanced reboot to bootloader. -->
   <string name="reboot_to_bootloader_title">Önyükleyiciyi yeniden başlat</string>
   <string name="reboot_to_bootloader_message">Yeniden başlatılıyor\u2026</string>
@@ -56,6 +58,7 @@
   <string name="dnd_mode_alarms">Sadece alarmlar</string>
   <string name="dnd_mode_important">Sadece öncelik</string>
   <!-- Vendor mismatched fingerprint warning [CHAR LIMIT=NONE] -->
+  <string name="system_error_vendorprint">Vendor imajı sisteminiz ile eşleşmiyor. Cihazınız için lütfen <xliff:g id="string">%s</xliff:g> vendor imajını yükleyin</string>
   <!-- Title of an application permission, listed so the user can choose whether they want to allow the application to do this. -->
   <string name="permlab_fakePackageSignature">Paket imzasını taklit et</string>
   <!-- Description of an application permission, listed so the user can choose whether they want to allow the application to do this. -->

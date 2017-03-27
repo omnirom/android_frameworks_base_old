@@ -45,11 +45,9 @@
   <string name="action_save_success">Salvat</string>
   <string name="action_save_fault">Salvarea nu a reușit</string>
   <!-- Screenshot Crop & Share -->
-  <string name="action_delete_success">Şters</string>
-  <string name="action_delete_fault">Ştergerea nu a reușit</string>
-  <string name="action_save_success">Salvat</string>
-  <string name="action_save_fault">Salvarea nu a reușit</string>
   <string name="action_edit">Editare</string>
   <!-- qs edit mode menu -->
   <!-- NavBar Tuner -->
+  <!-- Advance location quick setting tile -->
+  <!-- Path data for portrait battery -->
 </resources>

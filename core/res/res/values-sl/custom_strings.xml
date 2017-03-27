@@ -36,6 +36,8 @@
   <string name="global_action_torch_off">Svetilka je IZKLOPLJENA</string>
   <string name="global_actions_toggle_torch_mode">Svetilka</string>
   <!-- Silent Mode -->
+  <string name="silent_mode_priority">Prednost</string>
+  <string name="silent_mode_none">Brez</string>
   <!-- advanced reboot to bootloader. -->
   <string name="reboot_to_bootloader_title">Ponovno zaženi zagonski nalagalnik</string>
   <string name="reboot_to_bootloader_message">Ponovno zaganjanje \u2026</string>
@@ -56,6 +58,7 @@
   <string name="dnd_mode_alarms">Samo budilke</string>
   <string name="dnd_mode_important">Samo prednostno</string>
   <!-- Vendor mismatched fingerprint warning [CHAR LIMIT=NONE] -->
+  <string name="system_error_vendorprint">Odtis prodajalca se ne ujema s sistemom.  Namestite odtis prodajalca <xliff:g id="string">%s</xliff:g> za vašo napravo</string>
   <!-- Title of an application permission, listed so the user can choose whether they want to allow the application to do this. -->
   <string name="permlab_fakePackageSignature">Zaobidenje podpisa paketa</string>
   <!-- Description of an application permission, listed so the user can choose whether they want to allow the application to do this. -->

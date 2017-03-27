@@ -45,11 +45,9 @@
   <string name="action_save_success">Zapisano</string>
   <string name="action_save_fault">Zapis nieudany</string>
   <!-- Screenshot Crop & Share -->
-  <string name="action_delete_success">Usunięto</string>
-  <string name="action_delete_fault">Usuwanie nie powiodło się</string>
-  <string name="action_save_success">Zapisano</string>
-  <string name="action_save_fault">Zapis nieudany</string>
   <string name="action_edit">Edytuj</string>
   <!-- qs edit mode menu -->
   <!-- NavBar Tuner -->
+  <!-- Advance location quick setting tile -->
+  <!-- Path data for portrait battery -->
 </resources>

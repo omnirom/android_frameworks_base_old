@@ -31,19 +31,34 @@
   <!-- Screen pinning dialog description when in accessibility mode. -->
   <string name="screen_pinning_description_back">Bis zum Lösen sichtbar halten. Zurück-Taste drücken und Halten um zu Lösen.</string>
   <!-- QUICK SETTINGS TILES -->
+  <string name="quick_settings_caffeine_label">Koffein</string>
+  <string name="accessibility_quick_settings_caffeine_off">Koffein aus</string>
+  <string name="accessibility_quick_settings_caffeine_on">Koffein an</string>
   <string name="quick_settings_music_label">Musik</string>
   <string name="quick_settings_music_play">Wiedergabe</string>
   <string name="quick_settings_music_pause">Pause</string>
   <string name="quick_settings_nfc_label">NFC</string>
   <!-- Content description of the NFC tile in quick settings when off (not shown on the screen). [CHAR LIMIT=NONE] -->
+  <string name="accessibility_quick_settings_nfc_off">NFC aus.</string>
   <!-- Content description of the NFC tile in quick settings when on (not shown on the screen). [CHAR LIMIT=NONE] -->
+  <string name="accessibility_quick_settings_nfc_on">NFC an.</string>
   <!-- Announcement made when NFC changes to off (not shown on the screen). [CHAR LIMIT=NONE] -->
+  <string name="accessibility_quick_settings_nfc_changed_off">NFC deaktiviert.</string>
   <!-- Announcement made when NFC changes to on (not shown on the screen). [CHAR LIMIT=NONE] -->
+  <string name="accessibility_quick_settings_nfc_changed_on">NFC aktiviert.</string>
+  <string name="quick_settings_screenshot_label">Bildschirmfoto</string>
   <!-- Screenshot Crop & Share -->
   <string name="action_delete_success">Gelöscht</string>
   <string name="action_delete_fault">Löschen war nicht erfolgreich</string>
   <string name="action_save_success">Gespeichert</string>
   <string name="action_save_fault">Speichern war nicht erfolgreich</string>
+  <string name="pref_action_color_title">Farbe der Aktionsbuttons</string>
+  <string name="pref_action_color_summary">Wähle deine Lieblingsfarbe für die Actionsbuttons</string>
+  <string name="pref_category_main">Haupteinstellungen</string>
+  <string name="pref_category_user">Benutzereinstellungen</string>
+  <string name="pref_crop_behavior_title">Zuschnittsverhalten</string>
+  <string name="pref_crop_behavior_summary">Benutze das zugeschnittene Bild auch wenn das Original nicht mit Zuschnittoption zugeschnitten wurde</string>
+  <string name="action_ok">OK</string>
   <!-- Screenshot Crop & Share -->
   <string name="action_delete_success">Gelöscht</string>
   <string name="action_delete_fault">Löschen war nicht erfolgreich</string>
@@ -51,5 +66,52 @@
   <string name="action_save_fault">Speichern war nicht erfolgreich</string>
   <string name="action_edit">Bearbeiten</string>
   <!-- qs edit mode menu -->
+  <string name="qs_menu_item_columns">Spalten</string>
+  <string name="qs_menu_item_columns_landscape">Querformat-Spalten</string>
+  <string name="qs_menu_item_columns_three">3</string>
+  <string name="qs_menu_item_columns_four">4</string>
+  <string name="qs_menu_item_columns_five">5</string>
+  <string name="qs_menu_item_columns_six">6</string>
+  <string name="qs_menu_item_columns_seven">7</string>
+  <string name="qs_menu_item_columns_eight">8</string>
+  <string name="qs_menu_item_columns_nine">9</string>
+  <string name="qs_menu_item_reset">Zurücksetzen</string>
   <!-- NavBar Tuner -->
+  <string name="menu_ime_always_show">Menü / Tastatur-Umschalter (immer einblenden)</string>
+  <string name="search">Suche</string>
+  <string name="stream_title_call">Anruf</string>
+  <string name="stream_title_system">System</string>
+  <string name="stream_title_ring">Klingeln</string>
+  <string name="stream_title_media">Medien</string>
+  <string name="stream_title_alarm">Alarm</string>
+  <string name="stream_title_notification">Benachrichtigung</string>
+  <string name="stream_title_bluetooth">Bluetooth</string>
+  <string name="qs_menu_item_scroll">Schnelles Scrollen</string>
+  <string name="qs_menu_item_titles">Beschriftungen ausblenden</string>
+  <!-- Advance location quick setting tile -->
+  <string name="accessibility_quick_settings_location_battery_saving">Standortmodus: Energiesparmodus.</string>
+  <string name="accessibility_quick_settings_location_gps_only">Standortmodus: Nur Gerät.</string>
+  <string name="accessibility_quick_settings_location_high_accuracy">Standortmodus: Hohe Genauigkeit.</string>
+  <string name="accessibility_quick_settings_location_changed_battery_saving">Standortmodus geändert zu \"Energiesparmodus\".</string>
+  <string name="accessibility_quick_settings_location_changed_gps_only">Standortmodus geändert zu \"Nur Gerät\".</string>
+  <string name="accessibility_quick_settings_location_changed_high_accuracy">Standortmodus geändert zu \"Hohe Genauigkeit\".</string>
+  <string name="quick_settings_location_detail_title">Standortmodus</string>
+  <string name="quick_settings_location_battery_saving_label">Energiesparend</string>
+  <string name="quick_settings_location_gps_only_label">Nur Gerät</string>
+  <string name="quick_settings_location_high_accuracy_label">Hohe Genauigkeit</string>
+  <string name="quick_settings_location_off_label">Standort aus</string>
+  <string name="quick_settings_google_assist_label">Assistent</string>
+  <string name="quick_settings_google_voice_assist_label">Sprachassistent</string>
+  <string name="quick_settings_network_adb_enabled_label">Aktiviert</string>
+  <string name="quick_settings_network_adb_disabled_label">Deaktiviert</string>
+  <string name="quick_settings_network_adb_label">ADB über Netzwerk</string>
+  <string name="omnijaws_service_error">Fehler</string>
+  <string name="omnijaws_service_unkown">Keine Wetterdaten</string>
+  <string name="omnijaws_detail_header">Wetter</string>
+  <string name="omnijaws_label_default">Wetter</string>
+  <string name="omnijaws_current_text">Jetzt</string>
+  <string name="omnijaws_package_not_available">OmniJaws ist nicht verfügbar</string>
+  <!-- Path data for portrait battery -->
+  <string name="pirate_label">Aaarrrggghhh</string>
+  <string name="pirate_spec">Pirat</string>
 </resources>

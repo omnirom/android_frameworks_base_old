@@ -31,25 +31,55 @@
   <!-- Screen pinning dialog description when in accessibility mode. -->
   <string name="screen_pinning_description_back">Isso vai mantém-lo na em vista até que você desassociar. Toque e segure Voltar para desassociar.</string>
   <!-- QUICK SETTINGS TILES -->
+  <string name="quick_settings_caffeine_label">Cafeína</string>
+  <string name="accessibility_quick_settings_caffeine_off">Cafeína desligada</string>
+  <string name="accessibility_quick_settings_caffeine_on">Cafeína ligada</string>
   <string name="quick_settings_music_label">Música</string>
   <string name="quick_settings_music_play">Reproduzir</string>
   <string name="quick_settings_music_pause">Pausar</string>
   <string name="quick_settings_nfc_label">NFC</string>
   <!-- Content description of the NFC tile in quick settings when off (not shown on the screen). [CHAR LIMIT=NONE] -->
+  <string name="accessibility_quick_settings_nfc_off">NFC desligado.</string>
   <!-- Content description of the NFC tile in quick settings when on (not shown on the screen). [CHAR LIMIT=NONE] -->
+  <string name="accessibility_quick_settings_nfc_on">NFC ligado.</string>
   <!-- Announcement made when NFC changes to off (not shown on the screen). [CHAR LIMIT=NONE] -->
+  <string name="accessibility_quick_settings_nfc_changed_off">NFC foi desligado.</string>
   <!-- Announcement made when NFC changes to on (not shown on the screen). [CHAR LIMIT=NONE] -->
+  <string name="accessibility_quick_settings_nfc_changed_on">NFC foi ligado.</string>
+  <string name="quick_settings_screenshot_label">Captura de tela</string>
   <!-- Screenshot Crop & Share -->
   <string name="action_delete_success">Excluído</string>
   <string name="action_delete_fault">A exclusão foi malsucedida</string>
   <string name="action_save_success">Salvo</string>
   <string name="action_save_fault">Economia foi malsucedida</string>
+  <string name="pref_action_color_title">Cor de botões de ação</string>
+  <string name="pref_action_color_summary">Escolha sua cor favorita para os botões de ação</string>
+  <string name="pref_category_main">Menu de Configurações</string>
+  <string name="pref_category_user">Configurações de usuário</string>
+  <string name="pref_crop_behavior_title">Comportamento das culturas</string>
+  <string name="pref_crop_behavior_summary">Usar a imagem recortada, mesmo que o original na verdade ainda não foi cortada</string>
+  <string name="action_ok">OK</string>
   <!-- Screenshot Crop & Share -->
-  <string name="action_delete_success">Excluído</string>
-  <string name="action_delete_fault">A exclusão foi malsucedida</string>
-  <string name="action_save_success">Salvo</string>
-  <string name="action_save_fault">Economia foi malsucedida</string>
   <string name="action_edit">Editar</string>
   <!-- qs edit mode menu -->
+  <string name="qs_menu_item_columns">Colunas</string>
+  <string name="qs_menu_item_columns_three">3</string>
+  <string name="qs_menu_item_columns_four">4</string>
+  <string name="qs_menu_item_columns_five">5</string>
+  <string name="qs_menu_item_columns_six">6</string>
+  <string name="qs_menu_item_reset">Redefinir</string>
   <!-- NavBar Tuner -->
+  <string name="menu_ime_always_show">Alternador Menu / teclado (Mostrar sempre)</string>
+  <string name="search">Pesquisa</string>
+  <string name="stream_title_call">Chamar</string>
+  <string name="stream_title_system">Sistema</string>
+  <string name="stream_title_ring">Toque</string>
+  <string name="stream_title_media">Multimídia</string>
+  <string name="stream_title_alarm">Alarme</string>
+  <string name="stream_title_notification">Notificação</string>
+  <string name="stream_title_bluetooth">Bluetooth</string>
+  <string name="qs_menu_item_scroll">Rolagem da barra de acesso rápido</string>
+  <string name="qs_menu_item_titles">Esconder os rótulos</string>
+  <!-- Advance location quick setting tile -->
+  <!-- Path data for portrait battery -->
 </resources>

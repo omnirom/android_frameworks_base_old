@@ -31,19 +31,34 @@
   <!-- Screen pinning dialog description when in accessibility mode. -->
   <string name="screen_pinning_description_back">To ga ohrani v pogledu, dokler ga ne odpnete.  Dotaknite se in pridržite Nazaj za odpenjanje.</string>
   <!-- QUICK SETTINGS TILES -->
+  <string name="quick_settings_caffeine_label">Kofein</string>
+  <string name="accessibility_quick_settings_caffeine_off">Kofein izk.</string>
+  <string name="accessibility_quick_settings_caffeine_on">Kofein vkl.</string>
   <string name="quick_settings_music_label">Glasba</string>
   <string name="quick_settings_music_play">Predvajaj</string>
   <string name="quick_settings_music_pause">Premor</string>
   <string name="quick_settings_nfc_label">NFC</string>
   <!-- Content description of the NFC tile in quick settings when off (not shown on the screen). [CHAR LIMIT=NONE] -->
+  <string name="accessibility_quick_settings_nfc_off">NFC izk.</string>
   <!-- Content description of the NFC tile in quick settings when on (not shown on the screen). [CHAR LIMIT=NONE] -->
+  <string name="accessibility_quick_settings_nfc_on">NFC vkl.</string>
   <!-- Announcement made when NFC changes to off (not shown on the screen). [CHAR LIMIT=NONE] -->
+  <string name="accessibility_quick_settings_nfc_changed_off">NFC izklopljen.</string>
   <!-- Announcement made when NFC changes to on (not shown on the screen). [CHAR LIMIT=NONE] -->
+  <string name="accessibility_quick_settings_nfc_changed_on">NFC vklopljen.</string>
+  <string name="quick_settings_screenshot_label">Zaslonska slika</string>
   <!-- Screenshot Crop & Share -->
   <string name="action_delete_success">Izbrisano</string>
   <string name="action_delete_fault">Brisanje ni bilo uspešno</string>
   <string name="action_save_success">Shranjeno</string>
   <string name="action_save_fault">Shranjevanje ni bilo uspešno</string>
+  <string name="pref_action_color_title">Barva gumbov dejanj</string>
+  <string name="pref_action_color_summary">Izberite priljubljeno barvo gumbov dejanj</string>
+  <string name="pref_category_main">Glavne nastavitve</string>
+  <string name="pref_category_user">Uporabniške nastavitve</string>
+  <string name="pref_crop_behavior_title">Vedenje obrezovanja</string>
+  <string name="pref_crop_behavior_summary">Uporabi obrezano sliko, tudi če izvirna slika ni bila dejansko obrezana z dejanjem obrezovanja</string>
+  <string name="action_ok">V redu</string>
   <!-- Screenshot Crop & Share -->
   <string name="action_delete_success">Izbrisano</string>
   <string name="action_delete_fault">Brisanje ni bilo uspešno</string>
@@ -51,5 +66,44 @@
   <string name="action_save_fault">Shranjevanje ni bilo uspešno</string>
   <string name="action_edit">Uredi</string>
   <!-- qs edit mode menu -->
+  <string name="qs_menu_item_columns">Stolpci</string>
+  <string name="qs_menu_item_columns_landscape">Stolpci ležeče</string>
+  <string name="qs_menu_item_columns_three">3</string>
+  <string name="qs_menu_item_columns_four">4</string>
+  <string name="qs_menu_item_columns_five">5</string>
+  <string name="qs_menu_item_columns_six">6</string>
+  <string name="qs_menu_item_columns_seven">7</string>
+  <string name="qs_menu_item_columns_eight">8</string>
+  <string name="qs_menu_item_columns_nine">9</string>
+  <string name="qs_menu_item_reset">Ponastavi</string>
   <!-- NavBar Tuner -->
+  <string name="menu_ime_always_show">Meni/Preklopnik tipkovnice (vedno prikaži)</string>
+  <string name="search">Poišči</string>
+  <string name="stream_title_call">Kliči</string>
+  <string name="stream_title_system">Sistem</string>
+  <string name="stream_title_ring">Pozvoni</string>
+  <string name="stream_title_media">Predstavnost</string>
+  <string name="stream_title_alarm">Budilka</string>
+  <string name="stream_title_notification">Obvestilo</string>
+  <string name="stream_title_bluetooth">Bluetooth</string>
+  <string name="qs_menu_item_scroll">Drsenje hitre vrstice</string>
+  <string name="qs_menu_item_titles">Skrij oznake</string>
+  <!-- Advance location quick setting tile -->
+  <string name="accessibility_quick_settings_location_battery_saving">Poročanje o lokaciji: način varčevanja energije.</string>
+  <string name="accessibility_quick_settings_location_gps_only">Poročanje o lokaciji: način \'samo tipala\'.</string>
+  <string name="accessibility_quick_settings_location_high_accuracy">Poročanje o lokaciji: način visoke natančnosti.</string>
+  <string name="accessibility_quick_settings_location_changed_battery_saving">Poročanje o lokaciji spremenjeno na način varčevanja energije.</string>
+  <string name="accessibility_quick_settings_location_changed_gps_only">Poročanje o lokaciji spremenjeno na način \'samo tipala\'.</string>
+  <string name="accessibility_quick_settings_location_changed_high_accuracy">Poročanje o lokaciji spremenjeno na način visoke natančnosti.</string>
+  <string name="quick_settings_location_detail_title">Način lokacije</string>
+  <string name="quick_settings_location_battery_saving_label">Varčevanje energije</string>
+  <string name="quick_settings_location_gps_only_label">Samo naprava</string>
+  <string name="quick_settings_location_high_accuracy_label">Visoka natančnost</string>
+  <string name="quick_settings_location_off_label">Izklopi lokacijo</string>
+  <string name="quick_settings_google_assist_label">Pomoč</string>
+  <string name="quick_settings_google_voice_assist_label">Glasovna pomoč</string>
+  <string name="quick_settings_network_adb_enabled_label">Omogočen</string>
+  <string name="quick_settings_network_adb_disabled_label">Onemogočen</string>
+  <string name="quick_settings_network_adb_label">ADB preko omrežja</string>
+  <!-- Path data for portrait battery -->
 </resources>

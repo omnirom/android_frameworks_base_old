@@ -36,6 +36,8 @@
   <string name="global_action_torch_off">Zaklamp is uit</string>
   <string name="global_actions_toggle_torch_mode">Zaklamp</string>
   <!-- Silent Mode -->
+  <string name="silent_mode_priority">Prioriteit</string>
+  <string name="silent_mode_none">Geen</string>
   <!-- advanced reboot to bootloader. -->
   <string name="reboot_to_bootloader_title">Herstart bootloader</string>
   <string name="reboot_to_bootloader_message">Herstarten\u2026</string>
@@ -56,6 +58,7 @@
   <string name="dnd_mode_alarms">Alleen alarmen</string>
   <string name="dnd_mode_important">Alleen prioriteit</string>
   <!-- Vendor mismatched fingerprint warning [CHAR LIMIT=NONE] -->
+  <string name="system_error_vendorprint">Je fabrieksversie komt niet overeen met het systeem. Gelieve de <xliff:g id="string">%s</xliff:g> fabrieksversie voor jouw apparaat te installeren</string>
   <!-- Title of an application permission, listed so the user can choose whether they want to allow the application to do this. -->
   <string name="permlab_fakePackageSignature">Pakket handtekening immiteren</string>
   <!-- Description of an application permission, listed so the user can choose whether they want to allow the application to do this. -->

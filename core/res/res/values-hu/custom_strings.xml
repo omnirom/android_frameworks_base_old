@@ -36,6 +36,8 @@
   <string name="global_action_torch_off">Zseblámpa KIKAPCSOLVA</string>
   <string name="global_actions_toggle_torch_mode">Zseblámpa</string>
   <!-- Silent Mode -->
+  <string name="silent_mode_priority">Prioritás</string>
+  <string name="silent_mode_none">Nincs</string>
   <!-- advanced reboot to bootloader. -->
   <string name="reboot_to_bootloader_title">Újraindítás: bootloader</string>
   <string name="reboot_to_bootloader_message">Újraindítás\u2026</string>
@@ -56,6 +58,7 @@
   <string name="dnd_mode_alarms">Csak riasztás</string>
   <string name="dnd_mode_important">Csak prioritásos</string>
   <!-- Vendor mismatched fingerprint warning [CHAR LIMIT=NONE] -->
+  <string name="system_error_vendorprint">Úgy tűnik a gyártói képe elavult. Kérjük, frissítse a <xliff:g id="string">%s</xliff:g> gyártói képre a készülékét</string>
   <!-- Title of an application permission, listed so the user can choose whether they want to allow the application to do this. -->
   <string name="permlab_fakePackageSignature">Csomag hamisított aláírása</string>
   <!-- Description of an application permission, listed so the user can choose whether they want to allow the application to do this. -->

@@ -35,7 +35,11 @@
   <string name="global_action_torch_on">Taschenlampe ist AN</string>
   <string name="global_action_torch_off">Taschenlampe ist AUS</string>
   <string name="global_actions_toggle_torch_mode">Taschenlampe</string>
+  <string name="global_action_dismissable_dialog_text">Erweiterter Neustart ist deaktiviert.\nMöchten Sie neustarten\u003f</string>
+  <string name="global_action_dnaa">Nicht erneut anzeigen</string>
   <!-- Silent Mode -->
+  <string name="silent_mode_priority">Priorität</string>
+  <string name="silent_mode_none">Keine</string>
   <!-- advanced reboot to bootloader. -->
   <string name="reboot_to_bootloader_title">Bootloader neu starten</string>
   <string name="reboot_to_bootloader_message">Starte neu\u2026</string>
@@ -50,12 +54,14 @@
   <string name="battery_style_meter_horizontal">Horizontaler Balken</string>
   <string name="battery_style_circle">Kreis</string>
   <string name="battery_style_droid">Droid</string>
+  <string name="battery_style_theme">Erscheinungsbild</string>
   <!-- global actions dnd selector -->
   <string name="dnd_mode_off">Aus</string>
   <string name="dnd_mode_total_silence">Vollständig Still</string>
   <string name="dnd_mode_alarms">Nur Alarme</string>
   <string name="dnd_mode_important">Nur Wichtige</string>
   <!-- Vendor mismatched fingerprint warning [CHAR LIMIT=NONE] -->
+  <string name="system_error_vendorprint">Ihr Vendor-Image entspricht nicht dem System. Bitte flashen sie das <xliff:g id="string">%s</xliff:g> Vendor-Image für ihr Gerät.</string>
   <!-- Title of an application permission, listed so the user can choose whether they want to allow the application to do this. -->
   <string name="permlab_fakePackageSignature">Paket Signatur vortäuschen</string>
   <!-- Description of an application permission, listed so the user can choose whether they want to allow the application to do this. -->

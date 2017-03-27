@@ -31,13 +31,49 @@
   <!-- Screen pinning dialog description when in accessibility mode. -->
   <string name="screen_pinning_description_back">고정 해제할 때까지 이 화면만 보입니다. 해제하려면 뒤로 가기를 길게 누르세요.</string>
   <!-- QUICK SETTINGS TILES -->
+  <string name="quick_settings_caffeine_label">카페인</string>
+  <string name="accessibility_quick_settings_caffeine_off">카페인 끄기</string>
+  <string name="accessibility_quick_settings_caffeine_on">카페인 켜기</string>
+  <string name="quick_settings_music_label">음악</string>
+  <string name="quick_settings_music_play">재생</string>
+  <string name="quick_settings_music_pause">일시정지</string>
   <string name="quick_settings_nfc_label">NFC</string>
   <!-- Content description of the NFC tile in quick settings when off (not shown on the screen). [CHAR LIMIT=NONE] -->
+  <string name="accessibility_quick_settings_nfc_off">NFC 꺼짐.</string>
   <!-- Content description of the NFC tile in quick settings when on (not shown on the screen). [CHAR LIMIT=NONE] -->
+  <string name="accessibility_quick_settings_nfc_on">NFC 켜짐.</string>
   <!-- Announcement made when NFC changes to off (not shown on the screen). [CHAR LIMIT=NONE] -->
+  <string name="accessibility_quick_settings_nfc_changed_off">NFC가 꺼졌습니다.</string>
   <!-- Announcement made when NFC changes to on (not shown on the screen). [CHAR LIMIT=NONE] -->
+  <string name="accessibility_quick_settings_nfc_changed_on">NFC가 켜졌습니다.</string>
+  <string name="quick_settings_screenshot_label">스크린샷</string>
   <!-- Screenshot Crop & Share -->
+  <string name="action_delete_success">삭제됨</string>
+  <string name="action_delete_fault">삭제되지 않았습니다.</string>
+  <string name="action_save_success">저장됨</string>
+  <string name="action_save_fault">저장되지 않았습니다.</string>
+  <string name="pref_category_main">기본 설정</string>
+  <string name="pref_category_user">사용자 설정</string>
+  <string name="action_ok">확인</string>
   <!-- Screenshot Crop & Share -->
+  <string name="action_edit">수정</string>
   <!-- qs edit mode menu -->
+  <string name="qs_menu_item_columns">열</string>
+  <string name="qs_menu_item_columns_three">3</string>
+  <string name="qs_menu_item_columns_four">4</string>
+  <string name="qs_menu_item_columns_five">5</string>
+  <string name="qs_menu_item_columns_six">6</string>
+  <string name="qs_menu_item_reset">초기화</string>
   <!-- NavBar Tuner -->
+  <string name="search">검색</string>
+  <string name="stream_title_call">통화</string>
+  <string name="stream_title_system">시스템</string>
+  <string name="stream_title_ring">벨소리</string>
+  <string name="stream_title_media">미디어</string>
+  <string name="stream_title_alarm">알람</string>
+  <string name="stream_title_notification">알림</string>
+  <string name="stream_title_bluetooth">블루투스</string>
+  <string name="qs_menu_item_titles">레이블 숨기기</string>
+  <!-- Advance location quick setting tile -->
+  <!-- Path data for portrait battery -->
 </resources>

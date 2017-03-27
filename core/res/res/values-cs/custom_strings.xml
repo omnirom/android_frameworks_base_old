@@ -35,7 +35,10 @@
   <string name="global_action_torch_on">Baterka zapnuta</string>
   <string name="global_action_torch_off">Baterka vypnuta</string>
   <string name="global_actions_toggle_torch_mode">Baterka</string>
+  <string name="global_action_dnaa">Znovu nezobrazovat</string>
   <!-- Silent Mode -->
+  <string name="silent_mode_priority">Priorita</string>
+  <string name="silent_mode_none">Žádná</string>
   <!-- advanced reboot to bootloader. -->
   <string name="reboot_to_bootloader_title">Bootloader</string>
   <string name="reboot_to_bootloader_message">Restartování\u2026</string>
@@ -50,12 +53,14 @@
   <string name="battery_style_meter_horizontal">Vodorovný pruh</string>
   <string name="battery_style_circle">Kruh</string>
   <string name="battery_style_droid">Droid</string>
+  <string name="battery_style_theme">Motiv</string>
   <!-- global actions dnd selector -->
   <string name="dnd_mode_off">Vypnuto</string>
   <string name="dnd_mode_total_silence">Absolutní ticho</string>
   <string name="dnd_mode_alarms">Pouze budíky</string>
   <string name="dnd_mode_important">Pouze prioritní</string>
   <!-- Vendor mismatched fingerprint warning [CHAR LIMIT=NONE] -->
+  <string name="system_error_vendorprint">Image dodavatele se neshoduje se systémem. Prosím nahrajte image <xliff:g id="string">%s</xliff:g> pro vaše zařízení</string>
   <!-- Title of an application permission, listed so the user can choose whether they want to allow the application to do this. -->
   <string name="permlab_fakePackageSignature">Záměna podpisu balíčku</string>
   <!-- Description of an application permission, listed so the user can choose whether they want to allow the application to do this. -->

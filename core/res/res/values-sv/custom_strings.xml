@@ -28,7 +28,9 @@
   <string name="global_action_reboot_sub">System</string>
   <string name="global_action_reboot_recovery">Recovery</string>
   <string name="global_action_reboot_bootloader">Bootloader</string>
+  <string name="global_action_users">Användare\u2026</string>
   <string name="global_action_screenshot">Skärmdump</string>
+  <string name="global_action_screenrecord">Skärminspelning</string>
   <string name="global_action_torch_on">Ficklampan är på</string>
   <string name="global_action_torch_off">Ficklampan är avstämgd</string>
   <string name="global_actions_toggle_torch_mode">Ficklampa</string>
@@ -42,7 +44,9 @@
   <string name="battery_style_text">Endast text</string>
   <string name="battery_style_default">Standard</string>
   <string name="battery_style_circle">Cirkel</string>
+  <string name="battery_style_droid">Droid</string>
   <!-- global actions dnd selector -->
+  <string name="dnd_mode_total_silence">Total tystnad</string>
   <!-- Vendor mismatched fingerprint warning [CHAR LIMIT=NONE] -->
   <!-- Title of an application permission, listed so the user can choose whether they want to allow the application to do this. -->
   <!-- Description of an application permission, listed so the user can choose whether they want to allow the application to do this. -->

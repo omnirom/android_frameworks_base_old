@@ -36,6 +36,8 @@
   <string name="global_action_torch_off">플래시가 꺼졌습니다</string>
   <string name="global_actions_toggle_torch_mode">플래쉬라이트</string>
   <!-- Silent Mode -->
+  <string name="silent_mode_priority">우선순위</string>
+  <string name="silent_mode_none">표시 안 함</string>
   <!-- advanced reboot to bootloader. -->
   <string name="reboot_to_bootloader_title">부트로더로 다시 시작</string>
   <string name="reboot_to_bootloader_message">다시 시작하는 중\u2026</string>
@@ -56,6 +58,7 @@
   <string name="dnd_mode_alarms">알람만</string>
   <string name="dnd_mode_important">우선 순위만</string>
   <!-- Vendor mismatched fingerprint warning [CHAR LIMIT=NONE] -->
+  <string name="system_error_vendorprint">벤더 이미지가 시스템과 일치하지 않습니다. <xliff:g id="string">%s</xliff:g> 벤더 이미지를 기기에 플래시 해 주세요.</string>
   <!-- Title of an application permission, listed so the user can choose whether they want to allow the application to do this. -->
   <string name="permlab_fakePackageSignature">패키지 서명 속이기</string>
   <!-- Description of an application permission, listed so the user can choose whether they want to allow the application to do this. -->

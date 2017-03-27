@@ -31,19 +31,37 @@
   <!-- Screen pinning dialog description when in accessibility mode. -->
   <string name="screen_pinning_description_back">Toto udržuje obrazovku zobrazenou, dokud ji neodepnete stiskem a podržením tlačítka Zpět.</string>
   <!-- QUICK SETTINGS TILES -->
+  <string name="quick_settings_caffeine_label">Caffeine</string>
+  <string name="accessibility_quick_settings_caffeine_off">Caffeine vypnuto</string>
+  <string name="accessibility_quick_settings_caffeine_on">Caffeine zapnuto</string>
   <string name="quick_settings_music_label">Hudba</string>
   <string name="quick_settings_music_play">Přehrát</string>
   <string name="quick_settings_music_pause">Pozastavit</string>
   <string name="quick_settings_nfc_label">NFC</string>
   <!-- Content description of the NFC tile in quick settings when off (not shown on the screen). [CHAR LIMIT=NONE] -->
+  <string name="accessibility_quick_settings_nfc_off">NFC vyp.</string>
   <!-- Content description of the NFC tile in quick settings when on (not shown on the screen). [CHAR LIMIT=NONE] -->
+  <string name="accessibility_quick_settings_nfc_on">NFC zap.</string>
   <!-- Announcement made when NFC changes to off (not shown on the screen). [CHAR LIMIT=NONE] -->
+  <string name="accessibility_quick_settings_nfc_changed_off">NFC vypnuto.</string>
   <!-- Announcement made when NFC changes to on (not shown on the screen). [CHAR LIMIT=NONE] -->
+  <string name="accessibility_quick_settings_nfc_changed_on">NFC zapnuto.</string>
+  <string name="quick_settings_screenshot_label">Snímek obrazovky</string>
+  <string name="quick_settings_heads_up_on">Prohlížení oznámení povoleno</string>
+  <string name="quick_settings_heads_up_off">Prohlížení oznámení zakázáno</string>
+  <string name="quick_settings_heads_up">Prohlížení oznámení</string>
   <!-- Screenshot Crop & Share -->
   <string name="action_delete_success">Odstraněno</string>
   <string name="action_delete_fault">Odstranění neúspěšné</string>
   <string name="action_save_success">Uloženo</string>
   <string name="action_save_fault">Ukládání neúspěšné</string>
+  <string name="pref_action_color_title">Barva tlačítek akce</string>
+  <string name="pref_action_color_summary">Vyberte si svou oblíbenou barvu pro tlačítka akcí</string>
+  <string name="pref_category_main">Hlavní nastavení</string>
+  <string name="pref_category_user">Uživatelská nastavení</string>
+  <string name="pref_crop_behavior_title">Možnosti oříznutí</string>
+  <string name="pref_crop_behavior_summary">Použít oříznutý obrázek i v případě, že původní obrázek byl dříve upravený touto funkcí</string>
+  <string name="action_ok">OK</string>
   <!-- Screenshot Crop & Share -->
   <string name="action_delete_success">Odstraněno</string>
   <string name="action_delete_fault">Odstranění neúspěšné</string>
@@ -51,5 +69,52 @@
   <string name="action_save_fault">Ukládání neúspěšné</string>
   <string name="action_edit">Upravit</string>
   <!-- qs edit mode menu -->
+  <string name="qs_menu_item_columns">Sloupce</string>
+  <string name="qs_menu_item_columns_landscape">Sloupce na šířku</string>
+  <string name="qs_menu_item_columns_three">3</string>
+  <string name="qs_menu_item_columns_four">4</string>
+  <string name="qs_menu_item_columns_five">5</string>
+  <string name="qs_menu_item_columns_six">6</string>
+  <string name="qs_menu_item_columns_seven">7</string>
+  <string name="qs_menu_item_columns_eight">8</string>
+  <string name="qs_menu_item_columns_nine">9</string>
+  <string name="qs_menu_item_reset">Obnovit</string>
   <!-- NavBar Tuner -->
+  <string name="menu_ime_always_show">Menu / Přepínač klávesnice (vždy zobrazovat)</string>
+  <string name="search">Hledat</string>
+  <string name="stream_title_call">Volání</string>
+  <string name="stream_title_system">Systém</string>
+  <string name="stream_title_ring">Vyzvánění</string>
+  <string name="stream_title_media">Média</string>
+  <string name="stream_title_alarm">Budík</string>
+  <string name="stream_title_notification">Oznámení</string>
+  <string name="stream_title_bluetooth">Bluetooth</string>
+  <string name="qs_menu_item_scroll">Posuvník rychlé nabídky</string>
+  <string name="qs_menu_item_titles">Skrýt štítky</string>
+  <!-- Advance location quick setting tile -->
+  <string name="accessibility_quick_settings_location_battery_saving">Hlášení polohy: úspora baterie.</string>
+  <string name="accessibility_quick_settings_location_gps_only">Hlášení polohy: pouze zařízení.</string>
+  <string name="accessibility_quick_settings_location_high_accuracy">Hlášení polohy: vysoká přesnost.</string>
+  <string name="accessibility_quick_settings_location_changed_battery_saving">Hlášení polohy změněno na režim \"Úspora baterie\".</string>
+  <string name="accessibility_quick_settings_location_changed_gps_only">Hlášení polohy změněno na režim \"Pouze zařízení\".</string>
+  <string name="accessibility_quick_settings_location_changed_high_accuracy">Hlášení polohy změněno na režim \"Vysoká přesnost\".</string>
+  <string name="quick_settings_location_detail_title">Režim určování polohy</string>
+  <string name="quick_settings_location_battery_saving_label">Úspora baterie</string>
+  <string name="quick_settings_location_gps_only_label">Pouze zařízení</string>
+  <string name="quick_settings_location_high_accuracy_label">Vysoká přesnost</string>
+  <string name="quick_settings_location_off_label">Poloha vypnuta</string>
+  <string name="quick_settings_google_assist_label">Asistence</string>
+  <string name="quick_settings_google_voice_assist_label">Hlasový asistent</string>
+  <string name="quick_settings_network_adb_enabled_label">Povoleno</string>
+  <string name="quick_settings_network_adb_disabled_label">Zakázáno</string>
+  <string name="quick_settings_network_adb_label">ADB přes síť</string>
+  <string name="omnijaws_service_error">Chyba</string>
+  <string name="omnijaws_service_unkown">Žádné údaje o počasí</string>
+  <string name="omnijaws_detail_header">Počasí</string>
+  <string name="omnijaws_label_default">Počasí</string>
+  <string name="omnijaws_current_text">Nyní</string>
+  <string name="omnijaws_package_not_available">OmniJaws není k dispozici</string>
+  <!-- Path data for portrait battery -->
+  <string name="pirate_label">Aaarrrggghhh</string>
+  <string name="pirate_spec">pirát</string>
 </resources>

@@ -36,6 +36,7 @@
   <string name="global_action_torch_off">Torcia spenta</string>
   <string name="global_actions_toggle_torch_mode">Torcia</string>
   <!-- Silent Mode -->
+  <string name="silent_mode_priority">Priorità</string>
   <!-- advanced reboot to bootloader. -->
   <string name="reboot_to_bootloader_title">Riavvia in bootloader</string>
   <string name="reboot_to_bootloader_message">Riavvio in corso\u2026</string>

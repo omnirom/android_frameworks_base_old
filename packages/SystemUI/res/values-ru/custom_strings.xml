@@ -31,25 +31,55 @@
   <!-- Screen pinning dialog description when in accessibility mode. -->
   <string name="screen_pinning_description_back">Находится в поле зрения, пока вы не открепите. Нажмите и удерживайте \"Назад\" чтобы открепить.</string>
   <!-- QUICK SETTINGS TILES -->
+  <string name="quick_settings_caffeine_label">Запрет сна</string>
+  <string name="accessibility_quick_settings_caffeine_off">Запрет сна выкл</string>
+  <string name="accessibility_quick_settings_caffeine_on">Запрет сна вкл</string>
   <string name="quick_settings_music_label">Музыка</string>
   <string name="quick_settings_music_play">Играть</string>
   <string name="quick_settings_music_pause">Пауза</string>
   <string name="quick_settings_nfc_label">NFC</string>
   <!-- Content description of the NFC tile in quick settings when off (not shown on the screen). [CHAR LIMIT=NONE] -->
+  <string name="accessibility_quick_settings_nfc_off">NFC выкл.</string>
   <!-- Content description of the NFC tile in quick settings when on (not shown on the screen). [CHAR LIMIT=NONE] -->
+  <string name="accessibility_quick_settings_nfc_on">NFC вкл.</string>
   <!-- Announcement made when NFC changes to off (not shown on the screen). [CHAR LIMIT=NONE] -->
+  <string name="accessibility_quick_settings_nfc_changed_off">NFC выключен.</string>
   <!-- Announcement made when NFC changes to on (not shown on the screen). [CHAR LIMIT=NONE] -->
+  <string name="accessibility_quick_settings_nfc_changed_on">NFC включён.</string>
+  <string name="quick_settings_screenshot_label">Снимок экрана</string>
   <!-- Screenshot Crop & Share -->
   <string name="action_delete_success">Удалено</string>
   <string name="action_delete_fault">Удаление не произошло</string>
   <string name="action_save_success">Сохранено</string>
   <string name="action_save_fault">Не сохранено</string>
+  <string name="action_ok">ОК</string>
   <!-- Screenshot Crop & Share -->
   <string name="action_delete_success">Удалено</string>
-  <string name="action_delete_fault">Удаление не произошло</string>
   <string name="action_save_success">Сохранено</string>
-  <string name="action_save_fault">Не сохранено</string>
   <string name="action_edit">Редактировать</string>
   <!-- qs edit mode menu -->
+  <string name="qs_menu_item_columns">Столбцы</string>
+  <string name="qs_menu_item_columns_six">6</string>
+  <string name="qs_menu_item_columns_seven">7</string>
+  <string name="qs_menu_item_columns_eight">8</string>
+  <string name="qs_menu_item_columns_nine">9</string>
+  <string name="qs_menu_item_reset">Сбросить</string>
   <!-- NavBar Tuner -->
+  <string name="search">Поиск</string>
+  <string name="stream_title_call">Вызов</string>
+  <string name="stream_title_system">Система</string>
+  <string name="stream_title_ring">Рингтон</string>
+  <string name="stream_title_media">Мультимедиа</string>
+  <string name="stream_title_alarm">Будильник</string>
+  <string name="stream_title_notification">Уведомление</string>
+  <string name="stream_title_bluetooth">Bluetooth</string>
+  <string name="qs_menu_item_titles">Скрыть значения</string>
+  <!-- Advance location quick setting tile -->
+  <string name="quick_settings_location_detail_title">Режим местоположения</string>
+  <string name="quick_settings_google_assist_label">Ассистент</string>
+  <string name="quick_settings_google_voice_assist_label">Голосовой ассистент</string>
+  <string name="quick_settings_network_adb_enabled_label">Включено</string>
+  <string name="quick_settings_network_adb_disabled_label">Выключено</string>
+  <string name="quick_settings_network_adb_label">Отладка по сети</string>
+  <!-- Path data for portrait battery -->
 </resources>

@@ -36,6 +36,8 @@
   <string name="global_action_torch_off">Baterka je vypnutá</string>
   <string name="global_actions_toggle_torch_mode">Baterka</string>
   <!-- Silent Mode -->
+  <string name="silent_mode_priority">Priorita</string>
+  <string name="silent_mode_none">Žiadny</string>
   <!-- advanced reboot to bootloader. -->
   <string name="reboot_to_bootloader_title">Reštart do Bootloader</string>
   <string name="reboot_to_bootloader_message">Reštartovanie\u2026</string>
@@ -56,6 +58,7 @@
   <string name="dnd_mode_alarms">Len upozornenia</string>
   <string name="dnd_mode_important">Len prioritné</string>
   <!-- Vendor mismatched fingerprint warning [CHAR LIMIT=NONE] -->
+  <string name="system_error_vendorprint">Obraz nie je vhodný pre tento systém. Prosím nainštalujte obraz <xliff:g id="string">%s</xliff:g> pre vaše zariadenie</string>
   <!-- Title of an application permission, listed so the user can choose whether they want to allow the application to do this. -->
   <string name="permlab_fakePackageSignature">Sfalšovanie podpisu balíka</string>
   <!-- Description of an application permission, listed so the user can choose whether they want to allow the application to do this. -->

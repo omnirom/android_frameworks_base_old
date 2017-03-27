@@ -29,13 +29,33 @@
   <!-- Screen record notification error title -->
   <!-- Screen pinning dialog description when in accessibility mode. -->
   <!-- QUICK SETTINGS TILES -->
+  <string name="quick_settings_music_label">Musik</string>
   <string name="quick_settings_nfc_label">NFC</string>
   <!-- Content description of the NFC tile in quick settings when off (not shown on the screen). [CHAR LIMIT=NONE] -->
+  <string name="accessibility_quick_settings_nfc_off">NFC av.</string>
   <!-- Content description of the NFC tile in quick settings when on (not shown on the screen). [CHAR LIMIT=NONE] -->
+  <string name="accessibility_quick_settings_nfc_on">NFC på.</string>
   <!-- Announcement made when NFC changes to off (not shown on the screen). [CHAR LIMIT=NONE] -->
   <!-- Announcement made when NFC changes to on (not shown on the screen). [CHAR LIMIT=NONE] -->
+  <string name="quick_settings_screenshot_label">Skärmdump</string>
   <!-- Screenshot Crop & Share -->
+  <string name="pref_category_main">Huvudinställningar</string>
+  <string name="pref_category_user">Användarinställningar</string>
   <!-- Screenshot Crop & Share -->
+  <string name="action_edit">Redigera</string>
   <!-- qs edit mode menu -->
+  <string name="qs_menu_item_columns">Kolumner</string>
+  <string name="qs_menu_item_columns_three">3</string>
+  <string name="qs_menu_item_columns_four">4</string>
+  <string name="qs_menu_item_columns_five">5</string>
+  <string name="qs_menu_item_columns_six">6</string>
   <!-- NavBar Tuner -->
+  <string name="search">Sök</string>
+  <string name="stream_title_system">System</string>
+  <string name="stream_title_media">Media</string>
+  <string name="stream_title_alarm">Alarm</string>
+  <string name="stream_title_bluetooth">Bluetooth</string>
+  <string name="qs_menu_item_titles">Dölj etiketter</string>
+  <!-- Advance location quick setting tile -->
+  <!-- Path data for portrait battery -->
 </resources>

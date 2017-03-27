@@ -34,7 +34,9 @@
   <string name="global_action_screenrecord">Rekam Layar</string>
   <string name="global_action_torch_on">Lampu ON</string>
   <string name="global_action_torch_off">Lampu kilat OFF</string>
+  <string name="global_actions_toggle_torch_mode">Senter</string>
   <!-- Silent Mode -->
+  <string name="silent_mode_priority">Prioritas</string>
   <!-- advanced reboot to bootloader. -->
   <string name="reboot_to_bootloader_title">Reboot bootloader</string>
   <string name="reboot_to_bootloader_message">Rebooting\u2026</string>

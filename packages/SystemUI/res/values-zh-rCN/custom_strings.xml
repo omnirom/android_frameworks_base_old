@@ -31,19 +31,34 @@
   <!-- Screen pinning dialog description when in accessibility mode. -->
   <string name="screen_pinning_description_back">这会将它锁定在视图中。长按返回键解锁。</string>
   <!-- QUICK SETTINGS TILES -->
+  <string name="quick_settings_caffeine_label">兴奋模式</string>
+  <string name="accessibility_quick_settings_caffeine_off">兴奋模式关闭.</string>
+  <string name="accessibility_quick_settings_caffeine_on">兴奋模式打开.</string>
   <string name="quick_settings_music_label">音乐</string>
   <string name="quick_settings_music_play">播放</string>
   <string name="quick_settings_music_pause">暂停</string>
   <string name="quick_settings_nfc_label">NFC</string>
   <!-- Content description of the NFC tile in quick settings when off (not shown on the screen). [CHAR LIMIT=NONE] -->
+  <string name="accessibility_quick_settings_nfc_off">NFC 关闭</string>
   <!-- Content description of the NFC tile in quick settings when on (not shown on the screen). [CHAR LIMIT=NONE] -->
+  <string name="accessibility_quick_settings_nfc_on">NFC 开启</string>
   <!-- Announcement made when NFC changes to off (not shown on the screen). [CHAR LIMIT=NONE] -->
+  <string name="accessibility_quick_settings_nfc_changed_off">NFC 已关闭</string>
   <!-- Announcement made when NFC changes to on (not shown on the screen). [CHAR LIMIT=NONE] -->
+  <string name="accessibility_quick_settings_nfc_changed_on">NFC 已打开</string>
+  <string name="quick_settings_screenshot_label">屏幕截图</string>
   <!-- Screenshot Crop & Share -->
   <string name="action_delete_success">已删除</string>
   <string name="action_delete_fault">删除失败</string>
   <string name="action_save_success">已保存</string>
   <string name="action_save_fault">保存失败</string>
+  <string name="pref_action_color_title">动作栏颜色</string>
+  <string name="pref_action_color_summary">为动作栏设置你喜爱的颜色</string>
+  <string name="pref_category_main">快速设置</string>
+  <string name="pref_category_user">用户设置</string>
+  <string name="pref_crop_behavior_title">裁剪行为</string>
+  <string name="pref_crop_behavior_summary">使用裁剪的图像，即使图像并未进行裁剪处理</string>
+  <string name="action_ok">确定</string>
   <!-- Screenshot Crop & Share -->
   <string name="action_delete_success">已删除</string>
   <string name="action_delete_fault">删除失败</string>
@@ -51,5 +66,44 @@
   <string name="action_save_fault">保存失败</string>
   <string name="action_edit">编辑</string>
   <!-- qs edit mode menu -->
+  <string name="qs_menu_item_columns">列数</string>
+  <string name="qs_menu_item_columns_landscape">行数</string>
+  <string name="qs_menu_item_columns_three">3</string>
+  <string name="qs_menu_item_columns_four">4</string>
+  <string name="qs_menu_item_columns_five">5</string>
+  <string name="qs_menu_item_columns_six">6</string>
+  <string name="qs_menu_item_columns_seven">7</string>
+  <string name="qs_menu_item_columns_eight">8</string>
+  <string name="qs_menu_item_columns_nine">9</string>
+  <string name="qs_menu_item_reset">重置​​​</string>
   <!-- NavBar Tuner -->
+  <string name="menu_ime_always_show">菜单 / 键盘切换器 （总是显示）</string>
+  <string name="search">搜索</string>
+  <string name="stream_title_call">呼叫</string>
+  <string name="stream_title_system">系统</string>
+  <string name="stream_title_ring">铃声</string>
+  <string name="stream_title_media">媒体</string>
+  <string name="stream_title_alarm">闹钟</string>
+  <string name="stream_title_notification">通知</string>
+  <string name="stream_title_bluetooth">蓝牙</string>
+  <string name="qs_menu_item_scroll">快速滚动快捷设置栏</string>
+  <string name="qs_menu_item_titles">隐藏文字说明</string>
+  <!-- Advance location quick setting tile -->
+  <string name="accessibility_quick_settings_location_battery_saving">位置信息：低耗电量。</string>
+  <string name="accessibility_quick_settings_location_gps_only">位置信息：仅限设备。</string>
+  <string name="accessibility_quick_settings_location_high_accuracy">位置信息：高精确度。</string>
+  <string name="accessibility_quick_settings_location_changed_battery_saving">位置信息模式已改为低耗电量。</string>
+  <string name="accessibility_quick_settings_location_changed_gps_only">位置信息模式已改为仅限设备。</string>
+  <string name="accessibility_quick_settings_location_changed_high_accuracy">位置信息模式已改为高精确度。</string>
+  <string name="quick_settings_location_detail_title">位置信息</string>
+  <string name="quick_settings_location_battery_saving_label">低耗电量</string>
+  <string name="quick_settings_location_gps_only_label">仅限设备</string>
+  <string name="quick_settings_location_high_accuracy_label">高精确度</string>
+  <string name="quick_settings_location_off_label">位置信息关闭</string>
+  <string name="quick_settings_google_assist_label">助手</string>
+  <string name="quick_settings_google_voice_assist_label">语音助手</string>
+  <string name="quick_settings_network_adb_enabled_label">已启用</string>
+  <string name="quick_settings_network_adb_disabled_label">已禁用</string>
+  <string name="quick_settings_network_adb_label">网络 ADB 调试</string>
+  <!-- Path data for portrait battery -->
 </resources>

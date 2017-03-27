@@ -31,25 +31,38 @@
   <!-- Screen pinning dialog description when in accessibility mode. -->
   <string name="screen_pinning_description_back">Mantieni in vista fino a quando non viene rimosso. Tocca e tieni premuto Indietro per sbloccare.</string>
   <!-- QUICK SETTINGS TILES -->
+  <string name="quick_settings_caffeine_label">Caffeina</string>
+  <string name="accessibility_quick_settings_caffeine_off">Caffeina off</string>
+  <string name="accessibility_quick_settings_caffeine_on">Caffeina on</string>
   <string name="quick_settings_music_label">Musica</string>
   <string name="quick_settings_music_play">Riproduci</string>
   <string name="quick_settings_music_pause">Pausa</string>
   <string name="quick_settings_nfc_label">NFC</string>
   <!-- Content description of the NFC tile in quick settings when off (not shown on the screen). [CHAR LIMIT=NONE] -->
+  <string name="accessibility_quick_settings_nfc_off">NFC non attivo.</string>
   <!-- Content description of the NFC tile in quick settings when on (not shown on the screen). [CHAR LIMIT=NONE] -->
+  <string name="accessibility_quick_settings_nfc_on">NFC attivo.</string>
   <!-- Announcement made when NFC changes to off (not shown on the screen). [CHAR LIMIT=NONE] -->
   <!-- Announcement made when NFC changes to on (not shown on the screen). [CHAR LIMIT=NONE] -->
+  <string name="accessibility_quick_settings_nfc_changed_on">NFC attivato.</string>
   <!-- Screenshot Crop & Share -->
   <string name="action_delete_success">Eliminato</string>
   <string name="action_delete_fault">Eliminazione fallita</string>
   <string name="action_save_success">Salvato</string>
   <string name="action_save_fault">Salvataggio fallito</string>
+  <string name="pref_category_main">Impostazioni principali</string>
+  <string name="pref_category_user">Impostazioni utente</string>
+  <string name="pref_crop_behavior_title">Azione ritaglio</string>
   <!-- Screenshot Crop & Share -->
-  <string name="action_delete_success">Eliminato</string>
-  <string name="action_delete_fault">Eliminazione fallita</string>
-  <string name="action_save_success">Salvato</string>
-  <string name="action_save_fault">Salvataggio fallito</string>
   <string name="action_edit">Modifica</string>
   <!-- qs edit mode menu -->
+  <string name="qs_menu_item_columns">Colonne</string>
   <!-- NavBar Tuner -->
+  <string name="search">Cerca</string>
+  <string name="stream_title_call">Chiamate</string>
+  <string name="stream_title_system">Sistema</string>
+  <string name="stream_title_alarm">Sveglia</string>
+  <string name="stream_title_notification">Notifica</string>
+  <!-- Advance location quick setting tile -->
+  <!-- Path data for portrait battery -->
 </resources>

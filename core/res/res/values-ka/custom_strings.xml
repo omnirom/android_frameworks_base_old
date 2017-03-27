@@ -21,15 +21,50 @@
 <resources xmlns:xliff="urn:oasis:names:tc:xliff:document:1.2">
   <!-- Reboot Confirmation Dialog.  Message in the confirmation dialog
          when the user asks to reboot. [CHAR LIMIT=NONE] -->
+  <string name="reboot_confirm">გსურთ გადატივრთვა?</string>
+  <string name="reboot_title">გადატვირთვა</string>
   <!-- Reboot -->
+  <string name="global_action_reboot">გადატვირთვა</string>
+  <string name="global_action_reboot_more">გადატვირთვა\u2026</string>
+  <string name="global_action_reboot_sub">სისტემა</string>
+  <string name="global_action_reboot_recovery">აღდგენა</string>
+  <string name="global_action_reboot_bootloader">ცამტვირთი</string>
+  <string name="global_action_users">მომხმარებლები\u2026</string>
+  <string name="global_action_screenshot">ეკრანის სურათი</string>
+  <string name="global_action_screenrecord">ეკრანის ჩაწერა</string>
+  <string name="global_action_torch_on">ფანარი ჩართულია</string>
+  <string name="global_action_torch_off">ფანარი გამორთული</string>
+  <string name="global_actions_toggle_torch_mode">ფანარი</string>
   <!-- Silent Mode -->
+  <string name="silent_mode_priority">რიორიტეტი</string>
+  <string name="silent_mode_none">არცერთი</string>
   <!-- advanced reboot to bootloader. -->
+  <string name="reboot_to_bootloader_title">ჩამტვირთვის გადატვირთვა</string>
+  <string name="reboot_to_bootloader_message">მიმდინარეობს გადატვირთვა\u2026</string>
   <!-- advanced reboot to recovery. -->
+  <string name="reboot_to_recovery_title">აღდგენის რეჟიმში გადატვირთვა</string>
+  <string name="reboot_to_recovery_message">მიმდინარეობს გადატვირთვა\u2026</string>
   <!-- advanced reboot system -->
+  <string name="reboot_system_title">სისტემის გადატვირთვა</string>
+  <string name="reboot_system_message">მიმდინარეობს გადატვირთვა\u2026</string>
+  <string name="battery_style_text">მხოლოდ ტექსტი</string>
+  <string name="battery_style_default">გაჩიმებით</string>
+  <string name="battery_style_meter_horizontal">ჰორიზონტალური ხაზი</string>
+  <string name="battery_style_circle">წრე</string>
+  <string name="battery_style_droid">დროიდი</string>
   <!-- global actions dnd selector -->
+  <string name="dnd_mode_off">გამორთულია</string>
+  <string name="dnd_mode_total_silence">ტოტალური სიჩუმე</string>
+  <string name="dnd_mode_alarms">მხოლოდ მაღვიძარა</string>
+  <string name="dnd_mode_important">მხოლოდ პრიორიტეტული</string>
   <!-- Vendor mismatched fingerprint warning [CHAR LIMIT=NONE] -->
+  <string name="system_error_vendorprint">თქვენი მომწოდებლის იმიჯი არ ემთხვევა სისტემას. გთხოვთ, ჩაწეროთ <xliff:g id="string">%s</xliff:g> მომწოდებლის იმიჯი თქვენი მოწყობილობისთვის</string>
   <!-- Title of an application permission, listed so the user can choose whether they want to allow the application to do this. -->
+  <string name="permlab_fakePackageSignature">სპუფინგის პაკეტის ხელმოწერა</string>
   <!-- Description of an application permission, listed so the user can choose whether they want to allow the application to do this. -->
+  <string name="permdesc_fakePackageSignature">აძლევს აპს საშუალება მოიქცეს, როგორც სხვა აპი. მავნე პროგრამებს შეუძლიათ გამოიყენონ ეს პირადი აპლიკაციის მონაცემებზე წვდომის მისაღებად. დართედ უფლება ყურადღებით!</string>
   <!-- back kill -->
+  <string name="app_killed_message">აპი მოკლულია</string>
   <!-- Notify use that they are in Lock-to-app in accessibility mode -->
+  <string name="lock_to_app_toast_back">ამ ეკრანის მოსახსნელად, დააჭირეთ და გეჭიროთ \"უკან\".</string>
 </resources>
