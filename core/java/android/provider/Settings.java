@@ -4188,6 +4188,8 @@ public final class Settings {
             PUBLIC_SETTINGS.add(HAPTIC_FEEDBACK_ENABLED);
             PUBLIC_SETTINGS.add(SHOW_WEB_SUGGESTIONS);
             PUBLIC_SETTINGS.add(VIBRATE_WHEN_RINGING);
+            PUBLIC_SETTINGS.add(LOCK_SOUND);
+            PUBLIC_SETTINGS.add(UNLOCK_SOUND);
         }
 
         /**
@@ -4224,8 +4226,6 @@ public final class Settings {
             PRIVATE_SETTINGS.add(DESK_UNDOCK_SOUND);
             PRIVATE_SETTINGS.add(CAR_DOCK_SOUND);
             PRIVATE_SETTINGS.add(CAR_UNDOCK_SOUND);
-            PRIVATE_SETTINGS.add(LOCK_SOUND);
-            PRIVATE_SETTINGS.add(UNLOCK_SOUND);
             PRIVATE_SETTINGS.add(SIP_RECEIVE_CALLS);
             PRIVATE_SETTINGS.add(SIP_CALL_OPTIONS);
             PRIVATE_SETTINGS.add(SIP_ALWAYS);
