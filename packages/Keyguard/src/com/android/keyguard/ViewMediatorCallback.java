@@ -92,4 +92,9 @@ public interface ViewMediatorCallback {
      *         {@link KeyguardSecurityView#PROMPT_REASON_TIMEOUT}.
      */
     int getBouncerPromptReason();
+
+    /**
+     * reload all settings based information like e.g. lock and unlock sounds
+     */
+    void updateSettings();
 }
