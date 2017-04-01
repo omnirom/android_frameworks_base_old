@@ -619,6 +619,11 @@ public class KeyguardViewMediator extends SystemUI {
             }
             return KeyguardSecurityView.PROMPT_REASON_NONE;
         }
+
+        @Override
+        public void updateSettings() {
+            KeyguardViewMediator.this.updateSettings();
+        }
     };
 
     public void userActivity() {
@@ -660,36 +665,9 @@ public class KeyguardViewMediator extends SystemUI {
         mStatusBarKeyguardViewManager =
                 SystemUIFactory.getInstance().createStatusBarKeyguardViewManager(mContext,
                         mViewMediatorCallback, mLockPatternUtils);
-        final ContentResolver cr = mContext.getContentResolver();
-
         mDeviceInteractive = mPM.isInteractive();
 
-        mLockSounds = new SoundPool(1, AudioManager.STREAM_SYSTEM, 0);
-        String soundPath = Settings.Global.getString(cr, Settings.Global.LOCK_SOUND);
-        if (soundPath != null) {
-            mLockSoundId = mLockSounds.load(soundPath, 1);
-        }
-        if (soundPath == null || mLockSoundId == 0) {
-            Log.w(TAG, "failed to load lock sound from " + soundPath);
-        }
-        soundPath = Settings.Global.getString(cr, Settings.Global.UNLOCK_SOUND);
-        if (soundPath != null) {
-            mUnlockSoundId = mLockSounds.load(soundPath, 1);
-        }
-        if (soundPath == null || mUnlockSoundId == 0) {
-            Log.w(TAG, "failed to load unlock sound from " + soundPath);
-        }
-        soundPath = Settings.Global.getString(cr, Settings.Global.TRUSTED_SOUND);
-        if (soundPath != null) {
-            mTrustedSoundId = mLockSounds.load(soundPath, 1);
-        }
-        if (soundPath == null || mTrustedSoundId == 0) {
-            Log.w(TAG, "failed to load trusted sound from " + soundPath);
-        }
-
-        int lockSoundDefaultAttenuation = mContext.getResources().getInteger(
-                com.android.internal.R.integer.config_lockSoundVolumeDb);
-        mLockSoundVolume = (float)Math.pow(10, (float)lockSoundDefaultAttenuation/20);
+        updateSettings();
 
         mHideAnimation = AnimationUtils.loadAnimation(mContext,
                 com.android.internal.R.anim.lock_screen_behind_enter);
@@ -2048,5 +2026,35 @@ public class KeyguardViewMediator extends SystemUI {
                 Slog.w(TAG, "Failed to call to IKeyguardStateCallback", e);
             }
         }
+    }
+
+    private void updateSettings() {
+        final ContentResolver cr = mContext.getContentResolver();
+        mLockSounds = new SoundPool(1, AudioManager.STREAM_SYSTEM, 0);
+        String soundPath = Settings.Global.getString(cr, Settings.Global.LOCK_SOUND);
+        if (soundPath != null) {
+            mLockSoundId = mLockSounds.load(soundPath, 1);
+        }
+        if (soundPath == null || mLockSoundId == 0) {
+            Log.w(TAG, "failed to load lock sound from " + soundPath);
+        }
+        soundPath = Settings.Global.getString(cr, Settings.Global.UNLOCK_SOUND);
+        if (soundPath != null) {
+            mUnlockSoundId = mLockSounds.load(soundPath, 1);
+        }
+        if (soundPath == null || mUnlockSoundId == 0) {
+            Log.w(TAG, "failed to load unlock sound from " + soundPath);
+        }
+        soundPath = Settings.Global.getString(cr, Settings.Global.TRUSTED_SOUND);
+        if (soundPath != null) {
+            mTrustedSoundId = mLockSounds.load(soundPath, 1);
+        }
+        if (soundPath == null || mTrustedSoundId == 0) {
+            Log.w(TAG, "failed to load trusted sound from " + soundPath);
+        }
+
+        int lockSoundDefaultAttenuation = mContext.getResources().getInteger(
+                com.android.internal.R.integer.config_lockSoundVolumeDb);
+        mLockSoundVolume = (float)Math.pow(10, (float)lockSoundDefaultAttenuation/20);
     }
 }
