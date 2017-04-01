@@ -584,6 +584,12 @@ public class PhoneStatusBar extends BaseStatusBar implements DemoMode,
             mContext.getContentResolver().registerContentObserver(Settings.System.getUriFor(
                     Settings.System.LOCK_CLOCK_DISPLAY),
                     false, this, UserHandle.USER_ALL);
+            mContext.getContentResolver().registerContentObserver(Settings.Global.getUriFor(
+                    Settings.Global.LOCK_SOUND),
+                    false, this, UserHandle.USER_ALL);
+            mContext.getContentResolver().registerContentObserver(Settings.Global.getUriFor(
+                    Settings.Global.UNLOCK_SOUND),
+                    false, this, UserHandle.USER_ALL);
             update();
         }
 
@@ -633,6 +639,10 @@ public class PhoneStatusBar extends BaseStatusBar implements DemoMode,
 
             if (mKeyguardStatusBar != null) {
                 mKeyguardStatusBar.updateSettings();
+            }
+
+            if (mKeyguardViewMediatorCallback != null) {
+                mKeyguardViewMediatorCallback.updateSettings();
             }
         }
     }
