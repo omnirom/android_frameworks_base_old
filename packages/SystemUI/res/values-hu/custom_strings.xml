@@ -47,6 +47,9 @@
   <!-- Announcement made when NFC changes to on (not shown on the screen). [CHAR LIMIT=NONE] -->
   <string name="accessibility_quick_settings_nfc_changed_on">NFC bekapcsolva.</string>
   <string name="quick_settings_screenshot_label">Képernyőkép</string>
+  <string name="quick_settings_heads_up_on">Felugró értesítések engedélyezve</string>
+  <string name="quick_settings_heads_up_off">Felugró értesítések letiltva</string>
+  <string name="quick_settings_heads_up">Felugró értesítések</string>
   <!-- Screenshot Crop & Share -->
   <string name="action_delete_success">Törölve</string>
   <string name="action_delete_fault">Törlés sikertelen volt</string>
@@ -105,5 +108,13 @@
   <string name="quick_settings_network_adb_enabled_label">Engedélyezve</string>
   <string name="quick_settings_network_adb_disabled_label">Letiltva</string>
   <string name="quick_settings_network_adb_label">ADB hálózaton keresztül</string>
+  <string name="omnijaws_service_error">Hiba</string>
+  <string name="omnijaws_service_unkown">Nincs időjárási adat</string>
+  <string name="omnijaws_detail_header">Időjárás</string>
+  <string name="omnijaws_label_default">Időjárás</string>
+  <string name="omnijaws_current_text">Most</string>
+  <string name="omnijaws_package_not_available">OmniJaws nem elérhető</string>
   <!-- Path data for portrait battery -->
+  <string name="pirate_label">Aaarrrggghhh</string>
+  <string name="pirate_spec">kalóz</string>
 </resources>

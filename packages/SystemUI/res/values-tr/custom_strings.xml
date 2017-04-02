@@ -47,6 +47,9 @@
   <!-- Announcement made when NFC changes to on (not shown on the screen). [CHAR LIMIT=NONE] -->
   <string name="accessibility_quick_settings_nfc_changed_on">NFC etkinleştirildi.</string>
   <string name="quick_settings_screenshot_label">Ekran görüntüsü</string>
+  <string name="quick_settings_heads_up_on">Açılır pencere bildirimlerine izin verildi</string>
+  <string name="quick_settings_heads_up_off">Açılır pencere bildirimleri devre dışı</string>
+  <string name="quick_settings_heads_up">Gözatma bildirimleri</string>
   <!-- Screenshot Crop & Share -->
   <string name="action_delete_success">Silindi</string>
   <string name="action_delete_fault">Silme başarısız oldu</string>
@@ -67,6 +70,7 @@
   <string name="action_edit">Düzenle</string>
   <!-- qs edit mode menu -->
   <string name="qs_menu_item_columns">Sütunlar</string>
+  <string name="qs_menu_item_columns_landscape">Sütunlar yatay</string>
   <string name="qs_menu_item_columns_three">3</string>
   <string name="qs_menu_item_columns_four">4</string>
   <string name="qs_menu_item_columns_five">5</string>
@@ -100,8 +104,17 @@
   <string name="quick_settings_location_high_accuracy_label">Yüksek doğruluk</string>
   <string name="quick_settings_location_off_label">Konum kapalı</string>
   <string name="quick_settings_google_assist_label">Asist</string>
+  <string name="quick_settings_google_voice_assist_label">Sesli yardım</string>
   <string name="quick_settings_network_adb_enabled_label">Etkin</string>
   <string name="quick_settings_network_adb_disabled_label">Devre dışı</string>
   <string name="quick_settings_network_adb_label">Ağ üzerinden ADB</string>
+  <string name="omnijaws_service_error">Hata</string>
+  <string name="omnijaws_service_unkown">Hava durumu verisi yok</string>
+  <string name="omnijaws_detail_header">Hava Durumu</string>
+  <string name="omnijaws_label_default">Hava Durumu</string>
+  <string name="omnijaws_current_text">Şuan</string>
+  <string name="omnijaws_package_not_available">OmniJaws mevcut değil</string>
   <!-- Path data for portrait battery -->
+  <string name="pirate_label">Aaarrrggghhh</string>
+  <string name="pirate_spec">korsan</string>
 </resources>

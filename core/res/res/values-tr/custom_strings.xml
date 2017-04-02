@@ -35,6 +35,8 @@
   <string name="global_action_torch_on">El feneri açık</string>
   <string name="global_action_torch_off">El feneri kapalı</string>
   <string name="global_actions_toggle_torch_mode">El feneri</string>
+  <string name="global_action_dismissable_dialog_text">Gelişmiş yeniden başlatma devre dışı.\nYeniden başlatmak istiyor musunuz\u003f</string>
+  <string name="global_action_dnaa">Bir daha gösterme</string>
   <!-- Silent Mode -->
   <string name="silent_mode_priority">Öncelik</string>
   <string name="silent_mode_none">Hiçbiri</string>
@@ -52,6 +54,7 @@
   <string name="battery_style_meter_horizontal">Yatay çubuk</string>
   <string name="battery_style_circle">Çember</string>
   <string name="battery_style_droid">Droid</string>
+  <string name="battery_style_theme">Tema</string>
   <!-- global actions dnd selector -->
   <string name="dnd_mode_off">Kapalı</string>
   <string name="dnd_mode_total_silence">Tam sessizlik</string>
