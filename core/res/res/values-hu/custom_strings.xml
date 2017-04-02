@@ -35,6 +35,8 @@
   <string name="global_action_torch_on">Zseblámpa BEKAPCSOLVA</string>
   <string name="global_action_torch_off">Zseblámpa KIKAPCSOLVA</string>
   <string name="global_actions_toggle_torch_mode">Zseblámpa</string>
+  <string name="global_action_dismissable_dialog_text">Speciális újraindítás letiltva.\nSzeretné újraindítani\u003f</string>
+  <string name="global_action_dnaa">Ne jelenjen meg újra</string>
   <!-- Silent Mode -->
   <string name="silent_mode_priority">Prioritás</string>
   <string name="silent_mode_none">Nincs</string>
@@ -52,6 +54,7 @@
   <string name="battery_style_meter_horizontal">Vízszintes sáv</string>
   <string name="battery_style_circle">Kör</string>
   <string name="battery_style_droid">Droid</string>
+  <string name="battery_style_theme">Téma</string>
   <!-- global actions dnd selector -->
   <string name="dnd_mode_off">Ki</string>
   <string name="dnd_mode_total_silence">Teljes csend</string>

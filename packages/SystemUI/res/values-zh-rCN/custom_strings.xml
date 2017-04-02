@@ -47,6 +47,9 @@
   <!-- Announcement made when NFC changes to on (not shown on the screen). [CHAR LIMIT=NONE] -->
   <string name="accessibility_quick_settings_nfc_changed_on">NFC 已打开</string>
   <string name="quick_settings_screenshot_label">屏幕截图</string>
+  <string name="quick_settings_heads_up_on">启用顶部通知</string>
+  <string name="quick_settings_heads_up_off">禁用顶部通知</string>
+  <string name="quick_settings_heads_up">顶部通知</string>
   <!-- Screenshot Crop & Share -->
   <string name="action_delete_success">已删除</string>
   <string name="action_delete_fault">删除失败</string>
@@ -105,5 +108,13 @@
   <string name="quick_settings_network_adb_enabled_label">已启用</string>
   <string name="quick_settings_network_adb_disabled_label">已禁用</string>
   <string name="quick_settings_network_adb_label">网络 ADB 调试</string>
+  <string name="omnijaws_service_error">错误</string>
+  <string name="omnijaws_service_unkown">没有天气数据</string>
+  <string name="omnijaws_detail_header">天气</string>
+  <string name="omnijaws_label_default">天气</string>
+  <string name="omnijaws_current_text">现在</string>
+  <string name="omnijaws_package_not_available">OmniJaws无法使用</string>
   <!-- Path data for portrait battery -->
+  <string name="pirate_label">Aaarrrggghhh</string>
+  <string name="pirate_spec">海盗</string>
 </resources>

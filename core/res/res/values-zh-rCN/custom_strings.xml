@@ -35,6 +35,8 @@
   <string name="global_action_torch_on">手电筒已打开</string>
   <string name="global_action_torch_off">手电筒已关闭</string>
   <string name="global_actions_toggle_torch_mode">手电筒</string>
+  <string name="global_action_dismissable_dialog_text">未开启高级重启功能。\n确定重新启动？</string>
+  <string name="global_action_dnaa">不再提示</string>
   <!-- Silent Mode -->
   <string name="silent_mode_priority">优先级</string>
   <string name="silent_mode_none">无</string>
@@ -52,6 +54,7 @@
   <string name="battery_style_meter_horizontal">横条</string>
   <string name="battery_style_circle">环状</string>
   <string name="battery_style_droid">机器人</string>
+  <string name="battery_style_theme">主题</string>
   <!-- global actions dnd selector -->
   <string name="dnd_mode_off">关闭</string>
   <string name="dnd_mode_total_silence">完全静音</string>
