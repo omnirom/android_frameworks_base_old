@@ -87,6 +87,10 @@
          true will use SystemClock.elapsedRealtimeNanos() to set timestamp. -->
     <bool name="config_useSystemClockforRotationSensor">false</bool>
 
+    <!-- call removeCient in cancelAuthentification after stop to
+        avoid 3s delay for certain fpc HALs -->
+    <bool name="config_fingerprintRemoveClientOnCancel">false</bool>
+
     <!-- ######## CAF #########-->
     <!--  operator custom sim icon feature -->
     <bool name="operator_custom_sim_icon">false</bool>
