@@ -63,4 +63,8 @@
         0 - Nothing
         1 - Recent apps view in SystemUI -->
     <integer name="config_longPressOnMenuBehavior">0</integer>
+
+    <!-- call removeCient in cancelAuthentification after stop to
+        avoid 3s delay for certain fpc HALs -->
+    <bool name="config_fingerprintRemoveClientOnCancel">false</bool>
 </resources>
