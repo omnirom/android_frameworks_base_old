@@ -584,7 +584,7 @@ class BluetoothManagerService extends IBluetoothManager.Stub {
         if (DBG) Slog.d(TAG,"BluetoothGatt Service is Up");
         try {
             mBluetoothLock.readLock().lock();
-            if (isBleAppPresent() == false && mBluetooth != null
+            if (/*isBleAppPresent() == false &&*/ mBluetooth != null
                   && mBluetooth.getState() == BluetoothAdapter.STATE_BLE_ON) {
                 mBluetooth.onLeServiceUp();
 
