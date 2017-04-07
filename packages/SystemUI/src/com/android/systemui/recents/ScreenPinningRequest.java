@@ -239,10 +239,12 @@ public class ScreenPinningRequest implements View.OnClickListener {
             boolean showRecentsButton = DeviceUtils.deviceSupportNavigationBar(mContext) && !mAccessibilityService.isEnabled();
             boolean showSingleButtonMessage = !DeviceUtils.deviceSupportNavigationBar(mContext) || mAccessibilityService.isEnabled();
 
+            boolean touchExplorationEnabled = mAccessibilityService.isTouchExplorationEnabled();
             ((TextView) mLayout.findViewById(R.id.screen_pinning_description))
-                    .setText(R.string.screen_pinning_description);
-            final int backBgVisibility =
-                    showBackButton ? View.VISIBLE : View.INVISIBLE;
+                    .setText(touchExplorationEnabled
+                            ? R.string.screen_pinning_description_accessible
+                            : R.string.screen_pinning_description);
+            final int backBgVisibility = touchExplorationEnabled ? View.INVISIBLE : View.VISIBLE;
             mLayout.findViewById(R.id.screen_pinning_back_bg).setVisibility(backBgVisibility);
             mLayout.findViewById(R.id.screen_pinning_back_bg_light).setVisibility(backBgVisibility);
 

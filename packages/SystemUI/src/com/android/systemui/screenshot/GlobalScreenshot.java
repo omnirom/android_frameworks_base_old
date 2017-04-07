@@ -61,6 +61,7 @@ import android.view.WindowManager;
 import android.view.animation.Interpolator;
 import android.widget.ImageView;
 
+import com.android.internal.messages.SystemMessageProto.SystemMessage;
 import com.android.systemui.R;
 import com.android.systemui.SystemUI;
 import com.android.systemui.screenshot.ScreenshotEditor;
@@ -209,7 +210,8 @@ class SaveImageInBackgroundTask extends AsyncTask<Void, Void, Void> {
             mNotificationBuilder.setFlag(Notification.FLAG_NO_CLEAR, true);
             SystemUI.overrideNotificationAppName(context, mNotificationBuilder);
 
-            mNotificationManager.notify(R.id.notification_screenshot, mNotificationBuilder.build());
+            mNotificationManager.notify(SystemMessage.NOTE_GLOBAL_SCREENSHOT,
+                    mNotificationBuilder.build());
 
             /**
              * NOTE: The following code prepares the notification builder for updating the notification
@@ -368,7 +370,8 @@ class SaveImageInBackgroundTask extends AsyncTask<Void, Void, Void> {
                     .setPublicVersion(mPublicNotificationBuilder.build())
                     .setFlag(Notification.FLAG_NO_CLEAR, false);
 
-                mNotificationManager.notify(R.id.notification_screenshot, mNotificationBuilder.build());
+                mNotificationManager.notify(SystemMessage.NOTE_GLOBAL_SCREENSHOT,
+                        mNotificationBuilder.build());
             } else{
                 Intent startIntent = new Intent(mParams.context, com.android.systemui.screenshot.ScreenshotEditor.class);
                 startIntent.putExtra(GlobalScreenshot.SCREENSHOT_FILE_PATH, mImageFilePath);
@@ -389,7 +392,7 @@ class SaveImageInBackgroundTask extends AsyncTask<Void, Void, Void> {
         mParams.clearContext();
 
         // Cancel the posted notification
-        mNotificationManager.cancel(R.id.notification_screenshot);
+        mNotificationManager.cancel(SystemMessage.NOTE_GLOBAL_SCREENSHOT);
     }
 }
 
@@ -901,7 +904,7 @@ class GlobalScreenshot {
         Notification n = new Notification.BigTextStyle(b)
                 .bigText(errorMsg)
                 .build();
-        nManager.notify(R.id.notification_screenshot, n);
+        nManager.notify(SystemMessage.NOTE_GLOBAL_SCREENSHOT, n);
     }
 
     /**
@@ -913,7 +916,7 @@ class GlobalScreenshot {
             // Clear the notification
             final NotificationManager nm =
                     (NotificationManager) context.getSystemService(Context.NOTIFICATION_SERVICE);
-            nm.cancel(R.id.notification_screenshot);
+            nm.cancel(SystemMessage.NOTE_GLOBAL_SCREENSHOT);
         }
     }
 
@@ -931,7 +934,7 @@ class GlobalScreenshot {
             final NotificationManager nm =
                     (NotificationManager) context.getSystemService(Context.NOTIFICATION_SERVICE);
             final Uri uri = Uri.parse(intent.getStringExtra(SCREENSHOT_URI_ID));
-            nm.cancel(R.id.notification_screenshot);
+            nm.cancel(SystemMessage.NOTE_GLOBAL_SCREENSHOT);
 
             // And delete the image from the media store
             new DeleteImageInBackgroundTask(context).execute(uri);
@@ -952,7 +955,7 @@ class GlobalScreenshot {
             final NotificationManager nm =
                     (NotificationManager) getSystemService(Context.NOTIFICATION_SERVICE);
             final String imageFilePath = intent.getStringExtra(SCREENSHOT_FILE_PATH);
-            nm.cancel(R.id.notification_screenshot);
+            nm.cancel(SystemMessage.NOTE_GLOBAL_SCREENSHOT);
 
             Intent startIntent = new Intent(this, com.android.systemui.screenshot.ScreenshotEditor.class);
             startIntent.putExtra(SCREENSHOT_FILE_PATH, imageFilePath);
