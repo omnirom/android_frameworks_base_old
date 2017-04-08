@@ -4073,6 +4073,12 @@ public final class Settings {
         public static final String HEADS_UP_NOTIFICATIONS_USER_ENABLED = "heads_up_notifications_user_enabled";
 
         /**
+         * show the headset plugged notification in TtyManager
+         * @hide
+         */
+         public static final String HEADSET_PLUGGED_NOTIFICATION = "headset_plugged_notification";
+
+        /**
          * Settings to backup. This is here so that it's in the same place as the settings
          * keys and easy to update.
          *
