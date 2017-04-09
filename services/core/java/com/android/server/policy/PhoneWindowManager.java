@@ -2324,7 +2324,7 @@ public class PhoneWindowManager implements WindowManagerPolicy {
                     UserHandle.USER_CURRENT) != 0;
             mOmniSwitchRecents = Settings.System.getIntForUser(resolver,
                     Settings.System.NAVIGATION_BAR_RECENTS, 0,
-                    UserHandle.USER_CURRENT) != 0;
+                    UserHandle.USER_CURRENT) == 1;
             mSwapBackAndRecents = Settings.System.getIntForUser(resolver,
                     Settings.System.BUTTON_SWAP_BACK_RECENTS, 0,
                     UserHandle.USER_CURRENT) != 0;
