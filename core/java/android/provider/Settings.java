@@ -3774,7 +3774,7 @@ public final class Settings {
         public static final String DOUBLE_TAP_SLEEP_GESTURE = "double_tap_sleep_gesture";
 
         /**
-         * navbar recents style - 0 default AOSP 1 OmniSwitch
+         * navbar recents style - 0 default AOSP (card) 1 OmniSwitch 2 default AOSP (grid)
          * @hide
          */
         public static final String NAVIGATION_BAR_RECENTS = "navigation_bar_recents";
