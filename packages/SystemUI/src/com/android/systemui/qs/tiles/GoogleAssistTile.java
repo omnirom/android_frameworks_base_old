@@ -55,7 +55,9 @@ public class GoogleAssistTile extends QSTile<QSTile.BooleanState>  {
 
     @Override
     protected void handleClick() {
-        mHost.startActivityDismissingKeyguard(getAssistIntent());
+        if (isAsistInstalled()) {
+            mHost.startActivityDismissingKeyguard(getAssistIntent());
+        }
     }
 
     @Override
@@ -72,7 +74,10 @@ public class GoogleAssistTile extends QSTile<QSTile.BooleanState>  {
 
     @Override
     public Intent getLongClickIntent() {
-        return getAssistIntent();
+        if (isAsistInstalled()) {
+            return getAssistIntent();
+        }
+        return null;
     }
 
     @Override
