@@ -227,73 +227,74 @@ public class DisconnectCause {
     public static final int DATA_LIMIT_REACHED = 55;
 
     /**
+     * The emergency call was terminated because it was dialed on the wrong SIM slot.
+     * The call needs to be redialed the other slot.
+     * {@hide}
+     */
+    public static final int DIALED_ON_WRONG_SLOT = 56;
+
+    /**
      * The call being placed was detected as a call forwarding number and was being dialed while
      * roaming on a carrier that does not allow this.
      * @hide
      */
     public static final int DIALED_CALL_FORWARDING_WHILE_ROAMING = 57;
 
-    /**
-     * The emergency call was terminated because it was dialed on the wrong SIM slot.
-     * The call needs to be redialed the other slot.
-     * {@hide}
-     */
-    public static final int DIALED_ON_WRONG_SLOT = 58;
-    public static final int NO_CIRCUIT_AVAIL = 59;
-    public static final int NO_ROUTE_TO_DESTINAON = 60;
-    public static final int OPERATOR_DETERMINED_BARRING = 61;
-    public static final int CALL_FAIL_NO_USER_RESPONDING = 62;
-    public static final int CALL_FAIL_NO_ANSWER_FROM_USER = 63;
-    public static final int CALL_FAIL_DESTINATION_OUT_OF_ORDER = 64;
-    public static final int BEARER_CAPABILITY_NOT_AUTHORIZED = 65;
-    public static final int CHANNEL_UNACCEPTABLE = 66;
-    public static final int CALL_REJECTED = 67;
-    public static final int NUMBER_CHANGED = 68;
-    public static final int PREEMPTION = 69;
-    public static final int FACILITY_REJECTED = 70;
-    public static final int RESP_TO_STATUS_ENQUIRY = 71;
-    public static final int NORMAL_UNSPECIFIED = 72;
-    public static final int NETWORK_OUT_OF_ORDER = 73;
-    public static final int TEMPORARY_FAILURE = 74;
-    public static final int SWITCHING_EQUIPMENT_CONGESTION = 75;
-    public static final int ACCESS_INFORMATION_DISCARDED = 76;
-    public static final int REQUESTED_CIRCUIT_OR_CHANNEL_NOT_AVAILABLE = 77;
-    public static final int RESOURCES_UNAVAILABLE_OR_UNSPECIFIED = 78;
-    public static final int QOS_UNAVAILABLE = 79;
-    public static final int REQUESTED_FACILITY_NOT_SUBSCRIBED = 80;
-    public static final int INCOMING_CALLS_BARRED_WITHIN_CUG = 81;
-    public static final int BEARER_CAPABILITY_UNAVAILABLE = 82;
-    public static final int SERVICE_OPTION_NOT_AVAILABLE = 83;
-    public static final int BEARER_SERVICE_NOT_IMPLEMENTED = 84;
-    public static final int REQUESTED_FACILITY_NOT_IMPLEMENTED = 85;
-    public static final int ONLY_DIGITAL_INFORMATION_BEARER_AVAILABLE = 86;
-    public static final int SERVICE_OR_OPTION_NOT_IMPLEMENTED = 87;
-    public static final int INVALID_TRANSACTION_IDENTIFIER = 88;
-    public static final int USER_NOT_MEMBER_OF_CUG = 89;
-    public static final int INCOMPATIBLE_DESTINATION = 90;
-    public static final int INVALID_TRANSIT_NW_SELECTION = 91;
-    public static final int SEMANTICALLY_INCORRECT_MESSAGE = 92;
-    public static final int INVALID_MANDATORY_INFORMATION = 93;
-    public static final int MESSAGE_TYPE_NON_IMPLEMENTED = 94;
-    public static final int MESSAGE_TYPE_NOT_COMPATIBLE_WITH_PROTOCOL_STATE = 95;
-    public static final int INFORMATION_ELEMENT_NON_EXISTENT = 96;
-    public static final int CONDITIONAL_IE_ERROR = 97;
-    public static final int MESSAGE_NOT_COMPATIBLE_WITH_PROTOCOL_STATE = 98;
-    public static final int RECOVERY_ON_TIMER_EXPIRED = 99;
-    public static final int PROTOCOL_ERROR_UNSPECIFIED = 100;
-    public static final int INTERWORKING_UNSPECIFIED = 101;
-    public static final int LOCAL_LOW_BATTERY = 102;
-    public static final int LOW_BATTERY = 103;
+    public static final int NO_CIRCUIT_AVAIL = 58;
+    public static final int NO_ROUTE_TO_DESTINAON = 59;
+    public static final int OPERATOR_DETERMINED_BARRING = 60;
+    public static final int CALL_FAIL_NO_USER_RESPONDING = 61;
+    public static final int CALL_FAIL_NO_ANSWER_FROM_USER = 62;
+    public static final int CALL_FAIL_DESTINATION_OUT_OF_ORDER = 63;
+    public static final int BEARER_CAPABILITY_NOT_AUTHORIZED = 64;
+    public static final int CHANNEL_UNACCEPTABLE = 65;
+    public static final int CALL_REJECTED = 66;
+    public static final int NUMBER_CHANGED = 67;
+    public static final int PREEMPTION = 68;
+    public static final int FACILITY_REJECTED = 69;
+    public static final int RESP_TO_STATUS_ENQUIRY = 70;
+    public static final int NORMAL_UNSPECIFIED = 71;
+    public static final int NETWORK_OUT_OF_ORDER = 72;
+    public static final int TEMPORARY_FAILURE = 73;
+    public static final int SWITCHING_EQUIPMENT_CONGESTION = 74;
+    public static final int ACCESS_INFORMATION_DISCARDED = 75;
+    public static final int REQUESTED_CIRCUIT_OR_CHANNEL_NOT_AVAILABLE = 76;
+    public static final int RESOURCES_UNAVAILABLE_OR_UNSPECIFIED = 77;
+    public static final int QOS_UNAVAILABLE = 78;
+    public static final int REQUESTED_FACILITY_NOT_SUBSCRIBED = 79;
+    public static final int INCOMING_CALLS_BARRED_WITHIN_CUG = 80;
+    public static final int BEARER_CAPABILITY_UNAVAILABLE = 81;
+    public static final int SERVICE_OPTION_NOT_AVAILABLE = 82;
+    public static final int BEARER_SERVICE_NOT_IMPLEMENTED = 83;
+    public static final int REQUESTED_FACILITY_NOT_IMPLEMENTED = 84;
+    public static final int ONLY_DIGITAL_INFORMATION_BEARER_AVAILABLE = 85;
+    public static final int SERVICE_OR_OPTION_NOT_IMPLEMENTED = 86;
+    public static final int INVALID_TRANSACTION_IDENTIFIER = 87;
+    public static final int USER_NOT_MEMBER_OF_CUG = 88;
+    public static final int INCOMPATIBLE_DESTINATION = 89;
+    public static final int INVALID_TRANSIT_NW_SELECTION = 90;
+    public static final int SEMANTICALLY_INCORRECT_MESSAGE = 91;
+    public static final int INVALID_MANDATORY_INFORMATION = 92;
+    public static final int MESSAGE_TYPE_NON_IMPLEMENTED = 93;
+    public static final int MESSAGE_TYPE_NOT_COMPATIBLE_WITH_PROTOCOL_STATE = 94;
+    public static final int INFORMATION_ELEMENT_NON_EXISTENT = 95;
+    public static final int CONDITIONAL_IE_ERROR = 96;
+    public static final int MESSAGE_NOT_COMPATIBLE_WITH_PROTOCOL_STATE = 97;
+    public static final int RECOVERY_ON_TIMER_EXPIRED = 98;
+    public static final int PROTOCOL_ERROR_UNSPECIFIED = 99;
+    public static final int INTERWORKING_UNSPECIFIED = 100;
+    public static final int LOCAL_LOW_BATTERY = 101;
+    public static final int LOW_BATTERY = 102;
 
     /** EMERGENCY call failed with temporary fail cause */
-    public static final int EMERGENCY_TEMP_FAILURE         = 104;
+    public static final int EMERGENCY_TEMP_FAILURE         = 103;
     /** EMERGENCY call failed with permanent fail cause */
-    public static final int EMERGENCY_PERM_FAILURE         = 105;
+    public static final int EMERGENCY_PERM_FAILURE         = 104;
 
     /** call failed due to LTE to 3G/2G handover not feasible */
-    public static final int HO_NOT_FEASIBLE = 106;
+    public static final int HO_NOT_FEASIBLE = 105;
 
-    public static final int NON_SELECTED_USER_CLEARING = 107;
+    public static final int NON_SELECTED_USER_CLEARING = 106;
 
     //*********************************************************************************************
     // When adding a disconnect type:
@@ -303,7 +304,7 @@ public class DisconnectCause {
     // 4) Update toString() with the newly added disconnect type.
     // 5) Update android.telecom.DisconnectCauseUtil with any mappings to a telecom.DisconnectCause.
     //
-    // NextId: 108
+    // NextId: 107
     //*********************************************************************************************
 
     /** Smallest valid value for call disconnect codes. */
