@@ -105,12 +105,20 @@ public class TileAdapter extends RecyclerView.Adapter<Holder> implements TileSta
         return mDecoration;
     }
 
+    private void saveSpecsOnMove(QSTileHost host) {
+        saveSpecsInternal(host, false);
+    }
+
     public void saveSpecs(QSTileHost host) {
+        saveSpecsInternal(host, true);
+    }
+
+    private void saveSpecsInternal(QSTileHost host, boolean check) {
         List<String> newSpecs = new ArrayList<>();
         for (int i = 0; i < mTiles.size() && mTiles.get(i) != null; i++) {
             newSpecs.add(mTiles.get(i).spec);
         }
-        host.changeTiles(mCurrentSpecs, newSpecs);
+        host.changeTiles(mCurrentSpecs, newSpecs, check);
         mCurrentSpecs = newSpecs;
     }
 
@@ -373,7 +381,7 @@ public class TileAdapter extends RecyclerView.Adapter<Holder> implements TileSta
                     fromLabel, (to + 1));
         }
         v.announceForAccessibility(announcement);
-        saveSpecs(mHost);
+        saveSpecsOnMove(mHost);
         return true;
     }
 
