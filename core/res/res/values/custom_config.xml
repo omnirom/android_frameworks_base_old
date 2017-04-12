@@ -92,8 +92,17 @@
     <bool name="config_fingerprintRemoveClientOnCancel">false</bool>
 
     <!-- ######## CAF #########-->
+    <!-- Configuartion to support SIM contact batch operation.-->
+    <bool name="config_sim_phonebook_batch_operation">true</bool>
+    <bool name="config_volte_preferred">false</bool>
+
     <!--  operator custom sim icon feature -->
     <bool name="operator_custom_sim_icon">false</bool>
+
+    <!-- Configuration to send sms on 1x when UE is attached to eHRPD and there is an active
+         1xRTT voice call, irrespective of IMS registration state  -->
+    <bool name="config_send_sms1x_on_voice_call">true</bool>
+
     <!-- Emergency Number to be invoked when Power key is pressed.
          Default value is set to 112 as this FR is mainly intended
          for Indian market-->
