@@ -1,0 +1,38 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "9828ed82_8ebaf069",
+        "filename": "core/res/res/values/custom_config.xml",
+        "patchSetId": 3
+      },
+      "lineNbr": 106,
+      "author": {
+        "id": 1000026
+      },
+      "writtenOn": "2017-04-12T15:38:30Z",
+      "side": 1,
+      "message": "those are only 3",
+      "revId": "2835252f78bbce5170f711a2dfe53cafbaf668b3",
+      "serverId": "56841c99-7c94-43d4-bf0b-cb4707e66d55",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "9828ed82_ae8dacdb",
+        "filename": "core/res/res/values/custom_symbols.xml",
+        "patchSetId": 3
+      },
+      "lineNbr": 122,
+      "author": {
+        "id": 1000026
+      },
+      "writtenOn": "2017-04-12T15:38:30Z",
+      "side": 1,
+      "message": "those are 4",
+      "revId": "2835252f78bbce5170f711a2dfe53cafbaf668b3",
+      "serverId": "56841c99-7c94-43d4-bf0b-cb4707e66d55",
+      "unresolved": false
+    }
+  ]
+}
