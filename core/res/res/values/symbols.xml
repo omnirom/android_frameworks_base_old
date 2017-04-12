@@ -356,7 +356,6 @@
   <java-symbol type="integer" name="config_wifi_framework_network_switch_tx_packet_threshold" />
   <java-symbol type="integer" name="config_wifi_framework_network_switch_rx_packet_threshold" />
   <java-symbol type="integer" name="config_wifi_framework_current_network_boost" />
-  <java-symbol type="bool" name="config_send_sms1x_on_voice_call" />
   <java-symbol type="integer" name="config_bluetooth_max_advertisers" />
   <java-symbol type="integer" name="config_bluetooth_max_scan_filters" />
   <java-symbol type="integer" name="config_burnInProtectionMinHorizontalOffset" />
@@ -2750,9 +2749,4 @@
   <java-symbol type="bool" name="use_lock_pattern_drawable" />
   <java-symbol type="drawable" name="lockscreen_notselected" />
   <java-symbol type="drawable" name="lockscreen_selected" />
-
-  <!-- SIM contact batch operation -->
-  <java-symbol type="bool" name="config_sim_phonebook_batch_operation" />
-  <java-symbol type="bool" name="config_volte_preferred" />
-  <java-symbol type="bool" name="operator_custom_sim_icon" />
 </resources>
