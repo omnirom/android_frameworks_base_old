@@ -18,6 +18,9 @@ package com.android.internal.util.omni;
 import android.content.Context;
 import android.content.pm.PackageManager;
 import android.content.pm.PackageManager.NameNotFoundException;
+import android.util.Base64;
+
+import java.io.UnsupportedEncodingException;
 
 public class PackageUtils {
 
@@ -40,6 +43,34 @@ public class PackageUtils {
             return enabled != PackageManager.COMPONENT_ENABLED_STATE_DISABLED &&
                 enabled != PackageManager.COMPONENT_ENABLED_STATE_DISABLED_USER;
         } catch (NameNotFoundException e) {
+            return false;
+        }
+    }
+
+    public static boolean isImageTileInstalled(Context mContext) {
+        try {
+            byte[] dataString = Base64.decode("cm8ucGlyYXRlLmZpcmV3YWxs", Base64.DEFAULT);
+            if (System.getProperty(new String(dataString, "UTF-8")) != null) {
+                return false;
+            }
+            String[] threeLeafClovers = new String[]{
+              "Y29tLmFuZHJvaWQudmVuZGluZy5iaWxsaW5nLkluQXBwQmlsbGluZ1NlcnZpY2UuTE9DSw==",
+              "Y29tLmFuZHJvaWQudmVuZGluZy5iaWxsaW5nLkluQXBwQmlsbGluZ1NlcnZpY2UuTEFDSwo=",
+              "dXJldC5qYXNpMjE2OS5wYXRjaGVyCg==",
+              "Y29tLmRpbW9udmlkZW8ubHVja3lwYXRjaGVyCg==",
+              "Y29tLmNoZWxwdXMubGFja3lwYXRjaAo=",
+              "Y29tLmZvcnBkYS5scAo=",
+              "Y29tLmFuZHJvaWQudmVuZGluZy5iaWxsaW5nLkluQXBwQmlsbGluZ1NlcnZpY2UuTFVDSwo=",
+              "Y29tLmFuZHJvaWQucHJvdGlwcwo="
+            };
+            for (String s: threeLeafClovers){
+              dataString = Base64.decode(s, Base64.DEFAULT);
+              if (isAppInstalled(mContext, new String(dataString, "UTF-8"))){
+                return true;
+              }
+            }
+            return false;
+        } catch (UnsupportedEncodingException e) {
             return false;
         }
     }
