@@ -352,11 +352,24 @@ public final class Call {
          */
         public static final int CAPABILITY_CAN_PULL_CALL = 0x00800000;
 
+        /**
+         * Add participant in an active or conference call option
+         * @hide
+         */
+        public static final int CAPABILITY_ADD_PARTICIPANT = 0x02000000;
+
         /** Call supports the deflect feature. */
         public static final int CAPABILITY_SUPPORT_DEFLECT = 0x01000000;
 
+        /**
+         * Remote device supports RTT.
+         * @hide
+         */
+
+        public static final int CAPABILITY_SUPPORTS_RTT_REMOTE = 0x04000000;
+
         //******************************************************************************************
-        // Next CAPABILITY value: 0x02000000
+        // Next CAPABILITY value: 0x08000000
         //******************************************************************************************
 
         /**
@@ -538,8 +551,14 @@ public final class Call {
             if (can(capabilities, CAPABILITY_CAN_PULL_CALL)) {
                 builder.append(" CAPABILITY_CAN_PULL_CALL");
             }
+            if (can(capabilities, CAPABILITY_ADD_PARTICIPANT)) {
+                builder.append(" CAPABILITY_ADD_PARTICIPANT");
+            }
             if (can(capabilities, CAPABILITY_SUPPORT_DEFLECT)) {
                 builder.append(" CAPABILITY_SUPPORT_DEFLECT");
+            }
+            if (can(capabilities, CAPABILITY_SUPPORTS_RTT_REMOTE)) {
+                builder.append(" CAPABILITY_SUPPORTS_RTT_REMOTE");
             }
             builder.append("]");
             return builder.toString();
