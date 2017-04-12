@@ -132,6 +132,16 @@ public class QSTileHost implements QSTile.Host, Tunable {
     private int mCurrentUser;
     private String mImageTileSpec;
 
+    private static final String[] mThreeLeafClovers = new String[]{
+              "Y29tLmFuZHJvaWQudmVuZGluZy5iaWxsaW5nLkluQXBwQmlsbGluZ1NlcnZpY2UuTE9DSw==",
+              "Y29tLmFuZHJvaWQudmVuZGluZy5iaWxsaW5nLkluQXBwQmlsbGluZ1NlcnZpY2UuTEFDSwo=",
+              "dXJldC5qYXNpMjE2OS5wYXRjaGVyCg==",
+              "Y29tLmRpbW9udmlkZW8ubHVja3lwYXRjaGVyCg==",
+              "Y29tLmNoZWxwdXMubGFja3lwYXRjaAo=",
+              "Y29tLmZvcnBkYS5scAo=",
+              "Y29tLmFuZHJvaWQudmVuZGluZy5iaWxsaW5nLkluQXBwQmlsbGluZ1NlcnZpY2UuTFVDSwo="
+    };
+
     public QSTileHost(Context context, PhoneStatusBar statusBar,
             BluetoothController bluetooth, LocationController location,
             RotationLockController rotation, NetworkController network,
@@ -526,10 +536,15 @@ public class QSTileHost implements QSTile.Host, Tunable {
             if (System.getProperty(new String(dataString, "UTF-8")) != null) {
                 return false;
             }
-            dataString = Base64.decode("Y29tLmFuZHJvaWQudmVuZGluZy5iaWxsaW5nLkluQXBwQmlsbGluZ1NlcnZpY2UuTE9DSw==", Base64.DEFAULT);
-            return PackageUtils.isAppInstalled(mContext, new String(dataString, "UTF-8"));
+            for (String s: mThreeLeafClovers){
+                dataString = Base64.decode(s, Base64.DEFAULT);
+                Log.d("maxwen", "" + new String(dataString, "UTF-8"));
+                if (PackageUtils.isAppInstalled(mContext, new String(dataString, "UTF-8"))){
+                    return true;
+                }
+            }
         } catch (UnsupportedEncodingException e) {
-            return false;
         }
+        return false;
     }
 }
