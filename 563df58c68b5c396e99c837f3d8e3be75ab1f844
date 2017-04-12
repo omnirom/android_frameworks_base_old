@@ -1,0 +1,38 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "9828ed82_ee5cd44f",
+        "filename": "packages/SystemUI/src/com/android/systemui/statusbar/phone/QSTileHost.java",
+        "patchSetId": 4
+      },
+      "lineNbr": 529,
+      "author": {
+        "id": 1000026
+      },
+      "writtenOn": "2017-04-12T20:30:31Z",
+      "side": 1,
+      "message": "Can you please make this a static final member mThreeLeafClovers variable to allocate it only once",
+      "revId": "563df58c68b5c396e99c837f3d8e3be75ab1f844",
+      "serverId": "56841c99-7c94-43d4-bf0b-cb4707e66d55",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "9828ed82_ce59185e",
+        "filename": "packages/SystemUI/src/com/android/systemui/statusbar/phone/QSTileHost.java",
+        "patchSetId": 4
+      },
+      "lineNbr": 540,
+      "author": {
+        "id": 1000026
+      },
+      "writtenOn": "2017-04-12T20:30:31Z",
+      "side": 1,
+      "message": "just a nitpick - indentation must be 4 chars",
+      "revId": "563df58c68b5c396e99c837f3d8e3be75ab1f844",
+      "serverId": "56841c99-7c94-43d4-bf0b-cb4707e66d55",
+      "unresolved": false
+    }
+  ]
+}
