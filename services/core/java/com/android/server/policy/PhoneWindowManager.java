@@ -6299,6 +6299,20 @@ public class PhoneWindowManager implements WindowManagerPolicy {
 
         // Handle special keys.
         switch (keyCode) {
+            case KeyEvent.KEYCODE_BACK: {
+                if (down) {
+                    interceptBackKeyDown();
+                } else {
+                    boolean handled = interceptBackKeyUp(event);
+
+                    // Don't pass back press to app if we've already handled it via long press
+                    if (handled) {
+                        result &= ~ACTION_PASS_TO_USER;
+                    }
+                }
+                break;
+            }
+
             case KeyEvent.KEYCODE_VOLUME_DOWN:
             case KeyEvent.KEYCODE_VOLUME_UP:
             case KeyEvent.KEYCODE_VOLUME_MUTE: {
