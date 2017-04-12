@@ -112,9 +112,17 @@
   <java-symbol type="integer" name="config_longPressOnMenuBehavior" />
 
   <java-symbol type="bool" name="config_useSystemClockforRotationSensor" />
+
   <java-symbol type="bool" name="config_fingerprintRemoveClientOnCancel" />
 
   <!-- CAF -->
+  <!-- SIM contact batch operation -->
+  <java-symbol type="bool" name="config_sim_phonebook_batch_operation" />
+  <java-symbol type="bool" name="config_volte_preferred" />
+  <java-symbol type="bool" name="operator_custom_sim_icon" />
+
+  <java-symbol type="bool" name="config_send_sms1x_on_voice_call" />
+
   <java-symbol type="string" name="power_key_emergency_number" />
   <java-symbol type="integer" name="power_key_hits_emergency" />
   <java-symbol type="bool" name="config_emergencyCallOnPowerkeyTapGestureEnabled" />
