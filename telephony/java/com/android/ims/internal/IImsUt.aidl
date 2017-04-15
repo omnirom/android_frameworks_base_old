@@ -122,4 +122,9 @@ interface IImsUt {
      */
     int updateCallBarringForServiceClass(int cbType, int action, int serviceClass,
             in String[] barrList);
+
+    /**
+      * Retrieves the configuration of the call forward for specified service class.
+      */
+    int queryCFForServiceClass(int condition, String number, int serviceClass);
 }
