@@ -1,0 +1,21 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "9828ed82_a4894b26",
+        "filename": "services/core/java/com/android/server/power/QCNsrmPowerExtension.java",
+        "patchSetId": 1
+      },
+      "lineNbr": 48,
+      "author": {
+        "id": 1000026
+      },
+      "writtenOn": "2017-04-16T14:01:34Z",
+      "side": 0,
+      "message": "WTF!!!",
+      "revId": "05fe5aa3f2b66f83cc2b2fe821eb708419b9cf89",
+      "serverId": "56841c99-7c94-43d4-bf0b-cb4707e66d55",
+      "unresolved": false
+    }
+  ]
+}
