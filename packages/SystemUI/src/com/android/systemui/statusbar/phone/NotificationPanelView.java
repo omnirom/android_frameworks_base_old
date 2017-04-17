@@ -29,10 +29,12 @@ import android.graphics.Canvas;
 import android.graphics.Color;
 import android.graphics.Paint;
 import android.graphics.Rect;
+import android.os.PowerManager;
 import android.os.UserHandle;
 import android.provider.Settings;
 import android.util.AttributeSet;
 import android.util.MathUtils;
+import android.view.GestureDetector;
 import android.view.MotionEvent;
 import android.view.VelocityTracker;
 import android.view.View;
@@ -206,6 +208,10 @@ public class NotificationPanelView extends PanelView implements
     // Omni additions
     private boolean mQsSecureExpandDisabled;
     private LockPatternUtils mLockPatternUtils;
+    private boolean mDoubleTapToSleepEnabled;
+    private int mStatusBarHeaderHeight;
+    private GestureDetector mStatusBarGesture;
+    private boolean mHideStatusBarContents;
 
     private Runnable mHeadsUpExistenceChangedRunnable = new Runnable() {
         @Override
@@ -221,6 +227,27 @@ public class NotificationPanelView extends PanelView implements
         setWillNotDraw(!DEBUG);
         mLockPatternUtils = new LockPatternUtils(context);
         mFalsingManager = FalsingManager.getInstance(context);
+
+        mStatusBarGesture = new GestureDetector(mContext, new GestureDetector.SimpleOnGestureListener() {
+            @Override
+            public boolean onDoubleTap(MotionEvent e) {
+                if (mDoubleTapToSleepEnabled) {
+                    PowerManager pm = (PowerManager) mContext.getSystemService(Context.POWER_SERVICE);
+                    if(pm != null) {
+                        pm.goToSleep(e.getEventTime());
+                    }
+                }
+                return true;
+            }
+            @Override
+            public boolean onSingleTapConfirmed(MotionEvent e) {
+                if (mHideStatusBarContents) {
+                    // hide/show statusbar contents
+                    mKeyguardStatusBar.toggleContents();
+                }
+                return true;
+            }
+        });
     }
 
     public void setStatusBar(PhoneStatusBar bar) {
@@ -293,6 +320,7 @@ public class NotificationPanelView extends PanelView implements
                 R.dimen.notification_panel_min_side_margin);
         mMaxFadeoutHeight = getResources().getDimensionPixelSize(
                 R.dimen.max_notification_fadeout_height);
+        mStatusBarHeaderHeight = getResources().getDimensionPixelSize(R.dimen.status_bar_header_height);
     }
 
     public void updateResources() {
@@ -745,6 +773,11 @@ public class NotificationPanelView extends PanelView implements
         if (mBlockTouches || mQsContainer.isCustomizing()) {
             return false;
         }
+        if ((mDoubleTapToSleepEnabled || mHideStatusBarContents)
+                && mStatusBarState == StatusBarState.KEYGUARD
+                && event.getY() < mStatusBarHeaderHeight) {
+            mStatusBarGesture.onTouchEvent(event);
+        }
         initDownStates(event);
         if (mListenForHeadsUp && !mHeadsUpTouchHelper.isTrackingHeadsUp()
                 && mHeadsUpTouchHelper.onInterceptTouchEvent(event)) {
@@ -1028,7 +1061,7 @@ public class NotificationPanelView extends PanelView implements
             mKeyguardStatusBar.setAlpha(1f);
             mKeyguardStatusBar.setVisibility(keyguardShowing ? View.VISIBLE : View.INVISIBLE);
             if (keyguardShowing) {
-                mKeyguardStatusBar.toggleContents(true);
+                mKeyguardStatusBar.hideContents();
             }
             if (keyguardShowing && oldState != mStatusBarState) {
                 mKeyguardBottomArea.onKeyguardShowingChanged();
@@ -2379,5 +2412,11 @@ public class NotificationPanelView extends PanelView implements
                 mContext.getContentResolver(), Settings.Secure.LOCK_QS_DISABLED, 0,
                 UserHandle.USER_CURRENT) != 0;
         mQsContainer.updateSettings();
+        mDoubleTapToSleepEnabled = Settings.System.getIntForUser(
+                mContext.getContentResolver(), Settings.System.DOUBLE_TAP_SLEEP_GESTURE, 0,
+                UserHandle.USER_CURRENT) == 1;
+        mHideStatusBarContents = Settings.Secure.getIntForUser(
+                getContext().getContentResolver(), Settings.Secure.LOCK_HIDE_STATUS_BAR, 0,
+                UserHandle.USER_CURRENT) == 1;
     }
 }
