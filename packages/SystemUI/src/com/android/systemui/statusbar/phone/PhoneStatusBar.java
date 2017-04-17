@@ -540,6 +540,9 @@ public class PhoneStatusBar extends BaseStatusBar implements DemoMode,
                     Settings.System.DOUBLE_TAP_SLEEP_GESTURE),
                     false, this, UserHandle.USER_ALL);
             mContext.getContentResolver().registerContentObserver(Settings.Secure.getUriFor(
+                    Settings.Secure.LOCK_HIDE_STATUS_BAR),
+                    false, this, UserHandle.USER_ALL);
+            mContext.getContentResolver().registerContentObserver(Settings.Secure.getUriFor(
                     Settings.Secure.LOCK_QS_DISABLED),
                     false, this, UserHandle.USER_ALL);
             mContext.getContentResolver().registerContentObserver(Settings.System.getUriFor(
@@ -618,7 +621,8 @@ public class PhoneStatusBar extends BaseStatusBar implements DemoMode,
             mOmniSwitchRecents = Settings.System.getIntForUser(
                     mContext.getContentResolver(), Settings.System.NAVIGATION_BAR_RECENTS, 0, mCurrentUserId) == 1;
             mHideLockscreenArtwork = Settings.System.getIntForUser(
-                    mContext.getContentResolver(), Settings.System.LOCKSCREEN_HIDE_MEDIA, 0, mCurrentUserId) == 1;
+                    mContext.getContentResolver(), Settings.System.LOCKSCREEN_HIDE_MEDIA, 0,
+                    mCurrentUserId) == 1;
 
             if (mNotificationPanel != null) {
                 mNotificationPanel.updateSettings();
