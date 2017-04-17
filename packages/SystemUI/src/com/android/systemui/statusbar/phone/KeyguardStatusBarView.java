@@ -73,7 +73,6 @@ public class KeyguardStatusBarView extends RelativeLayout
     private View mSystemIconsContainer;
     private BatteryViewManager mBatteryViewManager;
     private boolean mHideContents;
-    private boolean mTouchStarted;
     private Clock mClockView;
 
     public KeyguardStatusBarView(Context context, AttributeSet attrs) {
@@ -94,23 +93,6 @@ public class KeyguardStatusBarView extends RelativeLayout
         updateUserSwitcher();
         LinearLayout batteryContainer = (LinearLayout) findViewById(R.id.battery_container);
         mBatteryViewManager = new BatteryViewManager(mContext, batteryContainer);
-        setOnTouchListener(new View.OnTouchListener() {
-            @Override
-            public boolean onTouch(View v, MotionEvent event) {
-                final int action = event.getAction();
-                if (action == MotionEvent.ACTION_DOWN) {
-                    mTouchStarted = true;
-                } else if (action == MotionEvent.ACTION_UP) {
-                    if (mTouchStarted) {
-                        toggleContents(!mHideContents);
-                    }
-                    mTouchStarted = false;
-                } else if (action == MotionEvent.ACTION_CANCEL) {
-                    mTouchStarted = false;
-                }
-                return true;
-            }
-        });
     }
 
     @Override
@@ -341,7 +323,15 @@ public class KeyguardStatusBarView extends RelativeLayout
         return false;
     }
 
-    public void toggleContents(boolean hideContents) {
+    public void hideContents() {
+        toggleContentsInternal(true);
+    }
+
+    public void toggleContents() {
+        toggleContentsInternal(!mHideContents);
+    }
+
+    private void toggleContentsInternal(boolean hideContents) {
         boolean shouldHideContents = Settings.Secure.getIntForUser(
                 getContext().getContentResolver(), Settings.Secure.LOCK_HIDE_STATUS_BAR, 0,
                 UserHandle.USER_CURRENT) == 1;
