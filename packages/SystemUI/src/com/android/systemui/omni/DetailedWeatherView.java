@@ -153,9 +153,9 @@ public class DetailedWeatherView extends LinearLayout {
 
     public void updateWeatherData(OmniJawsClient.WeatherInfo weatherData) {
         if (weatherData == null) {
-            mConditionLine.setVisibility(View.GONE);
-            mWeatherCity.setVisibility(View.GONE);
-            mWeatherTimestamp.setVisibility(View.GONE);
+            //mConditionLine.setVisibility(View.GONE);
+            //mWeatherCity.setVisibility(View.GONE);
+            //mWeatherTimestamp.setVisibility(View.GONE);
             mWeatherData.setVisibility(View.GONE);
             mNoWeatherNotice.setVisibility(View.VISIBLE);
             mNoWeatherNotice.setText(getResources().getString(R.string.omnijaws_service_unkown));
@@ -285,9 +285,9 @@ public class DetailedWeatherView extends LinearLayout {
     }
 
     public void weatherError() {
-        mConditionLine.setVisibility(View.GONE);
-        mWeatherCity.setVisibility(View.GONE);
-        mWeatherTimestamp.setVisibility(View.GONE);
+        //mConditionLine.setVisibility(View.GONE);
+        //mWeatherCity.setVisibility(View.GONE);
+        //mWeatherTimestamp.setVisibility(View.GONE);
         mWeatherData.setVisibility(View.GONE);
         mNoWeatherNotice.setVisibility(View.VISIBLE);
         mNoWeatherNotice.setText(getResources().getString(R.string.omnijaws_service_error_long));
