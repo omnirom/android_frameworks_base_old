@@ -107,6 +107,11 @@ public class WeatherTile extends QSTile<QSTile.BooleanState> implements OmniJaws
     }
 
     @Override
+    public void weatherError() {
+        if (DEBUG) Log.d(TAG, "weatherError");
+    }
+
+    @Override
     protected void handleDestroy() {
         // make sure we dont left one
         mWeatherClient.removeObserver(this);
