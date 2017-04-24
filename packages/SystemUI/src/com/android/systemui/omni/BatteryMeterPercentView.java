@@ -309,6 +309,6 @@ public class BatteryMeterPercentView extends AbstractBatteryView {
         mBarHeight = (int) (15 * metrics.density + 0.5f);
         mBarWidth = (int) (10 * metrics.density + 0.5f);
         mBarSpaceWidth = (int) (14 * metrics.density + 0.5f);
-        mPercentOffsetY = (int) (1 * metrics.density + 0.5f);
+        mPercentOffsetY = (int) (0.8 * metrics.density + 0.5f);
     }
 }
