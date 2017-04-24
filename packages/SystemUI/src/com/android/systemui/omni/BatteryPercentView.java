@@ -115,6 +115,6 @@ public class BatteryPercentView extends AbstractBatteryView {
     @Override
     public void loadDimens() {
         DisplayMetrics metrics = getResources().getDisplayMetrics();
-        mPercentOffsetY = (int) (1 * metrics.density + 0.5f);
+        mPercentOffsetY = (int) (0.5 * metrics.density + 0.5f);
     }
 }
