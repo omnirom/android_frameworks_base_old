@@ -47,11 +47,20 @@
   <!-- Announcement made when NFC changes to on (not shown on the screen). [CHAR LIMIT=NONE] -->
   <string name="accessibility_quick_settings_nfc_changed_on">NFC включён.</string>
   <string name="quick_settings_screenshot_label">Снимок экрана</string>
+    <string name="quick_settings_heads_up_on">Всплывающие уведомления включены</string>
+    <string name="quick_settings_heads_up_off">Всплывающие уведомления отключены</string>
+    <string name="quick_settings_heads_up">Всплывающие уведомления</string>
   <!-- Screenshot Crop & Share -->
   <string name="action_delete_success">Удалено</string>
   <string name="action_delete_fault">Удаление не произошло</string>
   <string name="action_save_success">Сохранено</string>
   <string name="action_save_fault">Не сохранено</string>
+    <string name="pref_action_color_title">Цвет кнопок</string>
+    <string name="pref_action_color_summary">Выберите любимый цвет для кнопок</string>
+    <string name="pref_category_main">Основные настройки</string>
+    <string name="pref_category_user">Пользовательские настройки</string>
+    <string name="pref_crop_behavior_title">Кидрирование</string>
+    <string name="pref_crop_behavior_summary">Использовать кадрированное изображение даже если оригинальное не было обрезано с помощью редактора</string>
   <string name="action_ok">ОК</string>
   <!-- Screenshot Crop & Share -->
   <string name="action_delete_success">Удалено</string>
@@ -59,12 +68,17 @@
   <string name="action_edit">Редактировать</string>
   <!-- qs edit mode menu -->
   <string name="qs_menu_item_columns">Столбцы</string>
+    <string name="qs_menu_item_columns_landscape">Столбцы в альбомной ориентации</string>
+    <string name="qs_menu_item_columns_three">3</string>
+    <string name="qs_menu_item_columns_four">4</string>
+    <string name="qs_menu_item_columns_five">5</string>
   <string name="qs_menu_item_columns_six">6</string>
   <string name="qs_menu_item_columns_seven">7</string>
   <string name="qs_menu_item_columns_eight">8</string>
   <string name="qs_menu_item_columns_nine">9</string>
   <string name="qs_menu_item_reset">Сбросить</string>
   <!-- NavBar Tuner -->
+    <string name="menu_ime_always_show">Переключатель Меню / Клавиатуры  (всегда показывать)</string>
   <string name="search">Поиск</string>
   <string name="stream_title_call">Вызов</string>
   <string name="stream_title_system">Система</string>
@@ -73,13 +87,33 @@
   <string name="stream_title_alarm">Будильник</string>
   <string name="stream_title_notification">Уведомление</string>
   <string name="stream_title_bluetooth">Bluetooth</string>
-  <string name="qs_menu_item_titles">Скрыть значения</string>
+    <string name="qs_menu_item_scroll">Прокрутка плиток</string>
+  <string name="qs_menu_item_titles">Скрыть подписи</string>
   <!-- Advance location quick setting tile -->
-  <string name="quick_settings_location_detail_title">Режим местоположения</string>
+    <string name="accessibility_quick_settings_location_battery_saving">Передача геоданных: по координатам сети.</string>
+    <string name="accessibility_quick_settings_location_gps_only">Передача геоданных: по спутникам GPS.</string>
+    <string name="accessibility_quick_settings_location_high_accuracy">Передача геоданных: по всем источникам.</string>
+    <string name="accessibility_quick_settings_location_changed_battery_saving">Передача геоданных изменена на поиск по координатам сети.</string>
+    <string name="accessibility_quick_settings_location_changed_gps_only">Передача геоданных изменена на поиск по спутникам GPS.</string>
+    <string name="accessibility_quick_settings_location_changed_high_accuracy">Передача геоданных изменена на поиск по всем источникам.</string>
+    <string name="quick_settings_location_detail_title">Режим местоположения</string>
+    <string name="quick_settings_location_battery_saving_label">По координатам сети</string>
+    <string name="quick_settings_location_gps_only_label">По спутникам GPS</string>
+    <string name="quick_settings_location_high_accuracy_label">По всем источникам</string>
+    <string name="quick_settings_location_off_label">Местоположение выкл.</string>
   <string name="quick_settings_google_assist_label">Ассистент</string>
   <string name="quick_settings_google_voice_assist_label">Голосовой ассистент</string>
   <string name="quick_settings_network_adb_enabled_label">Включено</string>
   <string name="quick_settings_network_adb_disabled_label">Выключено</string>
   <string name="quick_settings_network_adb_label">Отладка по сети</string>
+    <string name="omnijaws_service_error">Ошибка</string>
+    <string name="omnijaws_service_unkown">Нет данных о погоде</string>
+    <string name="omnijaws_service_error_long">Ошибка загрузки данных о погоде</string>
+    <string name="omnijaws_detail_header">Погода</string>
+    <string name="omnijaws_label_default">Погода</string>
+    <string name="omnijaws_current_text">Сейчас</string>
+    <string name="omnijaws_package_not_available">OmniJaws недоступен</string>
   <!-- Path data for portrait battery -->
+    <string name="pirate_label">Карамба!</string>
+    <string name="pirate_spec">пират</string>
 </resources>
