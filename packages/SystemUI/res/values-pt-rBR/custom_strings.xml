@@ -47,6 +47,9 @@
   <!-- Announcement made when NFC changes to on (not shown on the screen). [CHAR LIMIT=NONE] -->
   <string name="accessibility_quick_settings_nfc_changed_on">NFC foi ligado.</string>
   <string name="quick_settings_screenshot_label">Captura de tela</string>
+  <string name="quick_settings_heads_up_on">Notificações flutuantes ativadas</string>
+  <string name="quick_settings_heads_up_off">Notificações flutuantes desativadas</string>
+  <string name="quick_settings_heads_up">Notificações flutuante</string>
   <!-- Screenshot Crop & Share -->
   <string name="action_delete_success">Excluído</string>
   <string name="action_delete_fault">A exclusão foi malsucedida</string>
@@ -60,13 +63,21 @@
   <string name="pref_crop_behavior_summary">Usar a imagem recortada, mesmo que o original na verdade ainda não foi cortada</string>
   <string name="action_ok">OK</string>
   <!-- Screenshot Crop & Share -->
+  <string name="action_delete_success">Excluído</string>
+  <string name="action_delete_fault">A exclusão não teve êxito</string>
+  <string name="action_save_success">Salvo</string>
+  <string name="action_save_fault">Registro falhou</string>
   <string name="action_edit">Editar</string>
   <!-- qs edit mode menu -->
   <string name="qs_menu_item_columns">Colunas</string>
+  <string name="qs_menu_item_columns_landscape">Colunas em modo paisagem</string>
   <string name="qs_menu_item_columns_three">3</string>
   <string name="qs_menu_item_columns_four">4</string>
   <string name="qs_menu_item_columns_five">5</string>
   <string name="qs_menu_item_columns_six">6</string>
+  <string name="qs_menu_item_columns_seven">7</string>
+  <string name="qs_menu_item_columns_eight">8</string>
+  <string name="qs_menu_item_columns_nine">9</string>
   <string name="qs_menu_item_reset">Redefinir</string>
   <!-- NavBar Tuner -->
   <string name="menu_ime_always_show">Alternador Menu / teclado (Mostrar sempre)</string>
@@ -81,5 +92,29 @@
   <string name="qs_menu_item_scroll">Rolagem da barra de acesso rápido</string>
   <string name="qs_menu_item_titles">Esconder os rótulos</string>
   <!-- Advance location quick setting tile -->
+  <string name="accessibility_quick_settings_location_battery_saving">Modo de Localização: Economia de bateria.</string>
+  <string name="accessibility_quick_settings_location_gps_only">Modo de localização: Somente no dispositivo.</string>
+  <string name="accessibility_quick_settings_location_high_accuracy">Modo de localização: Alta precisão.</string>
+  <string name="accessibility_quick_settings_location_changed_battery_saving">Modo de localização mudou para Economia de bateria.</string>
+  <string name="accessibility_quick_settings_location_changed_gps_only">Modo de localização mudou para Somente dispositivo.</string>
+  <string name="accessibility_quick_settings_location_changed_high_accuracy">Modo de localização mudou para Alta precisão.</string>
+  <string name="quick_settings_location_detail_title">Modo de localização</string>
+  <string name="quick_settings_location_battery_saving_label">Economia de bateria</string>
+  <string name="quick_settings_location_gps_only_label">Somente no dispositivo</string>
+  <string name="quick_settings_location_high_accuracy_label">Alta precisão</string>
+  <string name="quick_settings_location_off_label">Localização desligada</string>
+  <string name="quick_settings_google_assist_label">Google Assist</string>
+  <string name="quick_settings_google_voice_assist_label">Assistência de voz</string>
+  <string name="quick_settings_network_adb_enabled_label">Habilitado</string>
+  <string name="quick_settings_network_adb_disabled_label">Desabilitado</string>
+  <string name="quick_settings_network_adb_label">ADB através da rede</string>
+  <string name="omnijaws_service_error">Erro</string>
+  <string name="omnijaws_service_unkown">Sem dados meteorológicos</string>
+  <string name="omnijaws_detail_header">Tempo</string>
+  <string name="omnijaws_label_default">Tempo</string>
+  <string name="omnijaws_current_text">Agora</string>
+  <string name="omnijaws_package_not_available">OmniJaws não disponível</string>
   <!-- Path data for portrait battery -->
+  <string name="pirate_label">Aaarrrggghhh</string>
+  <string name="pirate_spec">pirata</string>
 </resources>

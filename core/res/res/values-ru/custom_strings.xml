@@ -31,15 +31,17 @@
   <string name="global_action_reboot_bootloader">Загрузчик</string>
   <string name="global_action_users">Пользователи\u2026</string>
   <string name="global_action_screenshot">Снимок экрана</string>
-  <string name="global_action_screenrecord">Запись с экрана</string>
-  <string name="global_action_torch_on">Фонарик включается</string>
+  <string name="global_action_screenrecord">Запись экрана</string>
+  <string name="global_action_torch_on">Фонарик включен</string>
   <string name="global_action_torch_off">Фонарик выключен</string>
   <string name="global_actions_toggle_torch_mode">Фонарик</string>
+  <string name="global_action_dismissable_dialog_text">Расширенная перезагрузка откючена. \nПерезагрузить\u003f</string>
+  <string name="global_action_dnaa">Больше не показывать</string>
   <!-- Silent Mode -->
   <string name="silent_mode_priority">Приоритет</string>
   <string name="silent_mode_none">Без эффекта</string>
   <!-- advanced reboot to bootloader. -->
-  <string name="reboot_to_bootloader_title">В загрузчик</string>
+  <string name="reboot_to_bootloader_title">Перезапуск в загрузчик</string>
   <string name="reboot_to_bootloader_message">Перезагрузка\u2026</string>
   <!-- advanced reboot to recovery. -->
   <string name="reboot_to_recovery_title">Перезагрузка в рекавери</string>
@@ -52,13 +54,14 @@
   <string name="battery_style_meter_horizontal">Горизонтальная полоса</string>
   <string name="battery_style_circle">Круг</string>
   <string name="battery_style_droid">Droid</string>
+  <string name="battery_style_theme">Тема</string>
   <!-- global actions dnd selector -->
   <string name="dnd_mode_off">Выкл</string>
   <string name="dnd_mode_total_silence">Полная тишина</string>
   <string name="dnd_mode_alarms">Только будильники</string>
   <string name="dnd_mode_important">Только важные</string>
   <!-- Vendor mismatched fingerprint warning [CHAR LIMIT=NONE] -->
-  <string name="system_error_vendorprint">Ваше изображение производителя не соответствует системе. Пожалуйста прошейте <xliff:g id="string">%s</xliff:g> изображение производителя для вашего устройства</string>
+  <string name="system_error_vendorprint">Ваш образ производителя не соответствует системе. Пожалуйста, прошейте <xliff:g id="string">%s</xliff:g> образ производителя для вашего устройства</string>
   <!-- Title of an application permission, listed so the user can choose whether they want to allow the application to do this. -->
   <string name="permlab_fakePackageSignature">имитировать подпись пакета</string>
   <!-- Description of an application permission, listed so the user can choose whether they want to allow the application to do this. -->
@@ -66,5 +69,5 @@
   <!-- back kill -->
   <string name="app_killed_message">Приложение закрыто</string>
   <!-- Notify use that they are in Lock-to-app in accessibility mode -->
-  <string name="lock_to_app_toast_back">Что-бы открепить этот экран нажмите и удерживайте кнопку \"Назад\".</string>
+  <string name="lock_to_app_toast_back">Для открепления экрана нажмите и удерживайте кнопку \"Назад\".</string>
 </resources>

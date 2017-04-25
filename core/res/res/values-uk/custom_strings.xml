@@ -35,7 +35,9 @@
   <string name="global_action_torch_on">Ліхтарик УВІМК</string>
   <string name="global_action_torch_off">Ліхтарик ВИМК</string>
   <string name="global_actions_toggle_torch_mode">Ліхтарик</string>
+  <string name="global_action_dnaa">Більше не показувати</string>
   <!-- Silent Mode -->
+  <string name="silent_mode_priority">Пріоритет</string>
   <!-- advanced reboot to bootloader. -->
   <string name="reboot_to_bootloader_title">В завантажувач</string>
   <string name="reboot_to_bootloader_message">Перезавантаження\u2026</string>
@@ -50,6 +52,7 @@
   <string name="battery_style_meter_horizontal">Горизонтальна панель</string>
   <string name="battery_style_circle">Коло</string>
   <string name="battery_style_droid">Droid</string>
+  <string name="battery_style_theme">Тема</string>
   <!-- global actions dnd selector -->
   <string name="dnd_mode_off">Вимк</string>
   <string name="dnd_mode_total_silence">Тотальна тиша</string>

@@ -47,6 +47,9 @@
   <!-- Announcement made when NFC changes to on (not shown on the screen). [CHAR LIMIT=NONE] -->
   <string name="accessibility_quick_settings_nfc_changed_on">NFC aktiviert.</string>
   <string name="quick_settings_screenshot_label">Bildschirmfoto</string>
+  <string name="quick_settings_heads_up_on">Kurzes Einblenden erlaubt</string>
+  <string name="quick_settings_heads_up_off">Kurzes Einblenden ist deaktiviert</string>
+  <string name="quick_settings_heads_up">Kurzes Einblenden</string>
   <!-- Screenshot Crop & Share -->
   <string name="action_delete_success">Gelöscht</string>
   <string name="action_delete_fault">Löschen war nicht erfolgreich</string>

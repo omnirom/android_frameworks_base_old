@@ -47,9 +47,9 @@
   <!-- Announcement made when NFC changes to on (not shown on the screen). [CHAR LIMIT=NONE] -->
   <string name="accessibility_quick_settings_nfc_changed_on">NFC etkinleştirildi.</string>
   <string name="quick_settings_screenshot_label">Ekran görüntüsü</string>
-  <string name="quick_settings_heads_up_on">Açılır pencere bildirimlerine izin verildi</string>
-  <string name="quick_settings_heads_up_off">Açılır pencere bildirimleri devre dışı</string>
-  <string name="quick_settings_heads_up">Gözatma bildirimleri</string>
+  <string name="quick_settings_heads_up_on">Ekran üstü bildirimlerine izin verildi</string>
+  <string name="quick_settings_heads_up_off">Ekran üstü bildirimleri devre dışı bırakıldı</string>
+  <string name="quick_settings_heads_up">Ekran üstü bildirimleri</string>
   <!-- Screenshot Crop & Share -->
   <string name="action_delete_success">Silindi</string>
   <string name="action_delete_fault">Silme başarısız oldu</string>
@@ -70,7 +70,7 @@
   <string name="action_edit">Düzenle</string>
   <!-- qs edit mode menu -->
   <string name="qs_menu_item_columns">Sütunlar</string>
-  <string name="qs_menu_item_columns_landscape">Sütunlar yatay</string>
+  <string name="qs_menu_item_columns_landscape">Yatay sütunlar</string>
   <string name="qs_menu_item_columns_three">3</string>
   <string name="qs_menu_item_columns_four">4</string>
   <string name="qs_menu_item_columns_five">5</string>
@@ -92,27 +92,27 @@
   <string name="qs_menu_item_scroll">Hızlı ayarlar kaydırma</string>
   <string name="qs_menu_item_titles">Etiketleri gizle</string>
   <!-- Advance location quick setting tile -->
-  <string name="accessibility_quick_settings_location_battery_saving">Konum bildirimi: pil tasarruf modu.</string>
+  <string name="accessibility_quick_settings_location_battery_saving">Konum bildirimi: pil tasarrufu modu.</string>
   <string name="accessibility_quick_settings_location_gps_only">Konum bildirimi: sadece sensörler modu.</string>
   <string name="accessibility_quick_settings_location_high_accuracy">Konum bildirimi: yüksek hassasiyet modu.</string>
-  <string name="accessibility_quick_settings_location_changed_battery_saving">Konum bildirimi pil tasarruf moduna geçti.</string>
-  <string name="accessibility_quick_settings_location_changed_gps_only">Konum bildirimi sadece sensörler moduna geçti.</string>
-  <string name="accessibility_quick_settings_location_changed_high_accuracy">Konum bildirimi yüksek hassasiyet moduna geçti.</string>
+  <string name="accessibility_quick_settings_location_changed_battery_saving">Konum bildirimi pil tasarrufu modu olarak değiştirildi.</string>
+  <string name="accessibility_quick_settings_location_changed_gps_only">Konum bildirimi sadece sensörler modu olarak değiştirildi.</string>
+  <string name="accessibility_quick_settings_location_changed_high_accuracy">Konum bildirimi yüksek hassasiyet modu olarak değiştirildi.</string>
   <string name="quick_settings_location_detail_title">Konum modu</string>
   <string name="quick_settings_location_battery_saving_label">Pil tasarrufu</string>
   <string name="quick_settings_location_gps_only_label">Sadece cihaz</string>
-  <string name="quick_settings_location_high_accuracy_label">Yüksek doğruluk</string>
+  <string name="quick_settings_location_high_accuracy_label">Yüksek hassasiyet</string>
   <string name="quick_settings_location_off_label">Konum kapalı</string>
-  <string name="quick_settings_google_assist_label">Asist</string>
+  <string name="quick_settings_google_assist_label">Asistan</string>
   <string name="quick_settings_google_voice_assist_label">Sesli yardım</string>
-  <string name="quick_settings_network_adb_enabled_label">Etkin</string>
-  <string name="quick_settings_network_adb_disabled_label">Devre dışı</string>
+  <string name="quick_settings_network_adb_enabled_label">Etkinleştirildi</string>
+  <string name="quick_settings_network_adb_disabled_label">Devre dışı bırakıldı</string>
   <string name="quick_settings_network_adb_label">Ağ üzerinden ADB</string>
   <string name="omnijaws_service_error">Hata</string>
   <string name="omnijaws_service_unkown">Hava durumu verisi yok</string>
   <string name="omnijaws_detail_header">Hava Durumu</string>
   <string name="omnijaws_label_default">Hava Durumu</string>
-  <string name="omnijaws_current_text">Şuan</string>
+  <string name="omnijaws_current_text">Şu an</string>
   <string name="omnijaws_package_not_available">OmniJaws mevcut değil</string>
   <!-- Path data for portrait battery -->
   <string name="pirate_label">Aaarrrggghhh</string>

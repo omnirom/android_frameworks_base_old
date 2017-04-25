@@ -43,26 +43,78 @@
   <!-- Content description of the NFC tile in quick settings when on (not shown on the screen). [CHAR LIMIT=NONE] -->
   <string name="accessibility_quick_settings_nfc_on">NFC attivo.</string>
   <!-- Announcement made when NFC changes to off (not shown on the screen). [CHAR LIMIT=NONE] -->
+  <string name="accessibility_quick_settings_nfc_changed_off">NFC disattivato.</string>
   <!-- Announcement made when NFC changes to on (not shown on the screen). [CHAR LIMIT=NONE] -->
   <string name="accessibility_quick_settings_nfc_changed_on">NFC attivato.</string>
+  <string name="quick_settings_screenshot_label">Screenshot</string>
+  <string name="quick_settings_heads_up_on">Notifiche peek permesse</string>
+  <string name="quick_settings_heads_up_off">Le notifiche peek sono disattivate</string>
+  <string name="quick_settings_heads_up">Notifiche peek</string>
   <!-- Screenshot Crop & Share -->
   <string name="action_delete_success">Eliminato</string>
   <string name="action_delete_fault">Eliminazione fallita</string>
   <string name="action_save_success">Salvato</string>
   <string name="action_save_fault">Salvataggio fallito</string>
+  <string name="pref_action_color_title">Colore pulsanti di azione</string>
+  <string name="pref_action_color_summary">Scegli il tuo colore preferito per i pulsanti di azione</string>
   <string name="pref_category_main">Impostazioni principali</string>
   <string name="pref_category_user">Impostazioni utente</string>
   <string name="pref_crop_behavior_title">Azione ritaglio</string>
+  <string name="pref_crop_behavior_summary">Usa l\'immagine ritagliata anche se attualmente quella originale non è stata ritagliata con l\'azione di ritaglio</string>
+  <string name="action_ok">OK</string>
   <!-- Screenshot Crop & Share -->
+  <string name="action_delete_success">Eliminato</string>
+  <string name="action_delete_fault">Errore durante l\'eliminazione</string>
+  <string name="action_save_success">Salvato</string>
+  <string name="action_save_fault">Errore durante il salvataggio</string>
   <string name="action_edit">Modifica</string>
   <!-- qs edit mode menu -->
   <string name="qs_menu_item_columns">Colonne</string>
+  <string name="qs_menu_item_columns_landscape">Colonne in modalità landscape</string>
+  <string name="qs_menu_item_columns_three">3</string>
+  <string name="qs_menu_item_columns_four">4</string>
+  <string name="qs_menu_item_columns_five">5</string>
+  <string name="qs_menu_item_columns_six">6</string>
+  <string name="qs_menu_item_columns_seven">7</string>
+  <string name="qs_menu_item_columns_eight">8</string>
+  <string name="qs_menu_item_columns_nine">9</string>
+  <string name="qs_menu_item_reset">Azzera</string>
   <!-- NavBar Tuner -->
+  <string name="menu_ime_always_show">Menu / selettore tastiera (mostra sempre)</string>
   <string name="search">Cerca</string>
   <string name="stream_title_call">Chiamate</string>
   <string name="stream_title_system">Sistema</string>
+  <string name="stream_title_ring">Squilla</string>
+  <string name="stream_title_media">File multimediali</string>
   <string name="stream_title_alarm">Sveglia</string>
   <string name="stream_title_notification">Notifica</string>
+  <string name="stream_title_bluetooth">Bluetooth</string>
+  <string name="qs_menu_item_scroll">Scorrimento barra di scelta rapida</string>
+  <string name="qs_menu_item_titles">Nascondi etichette</string>
   <!-- Advance location quick setting tile -->
+  <string name="accessibility_quick_settings_location_battery_saving">Geolocalizzazione: modalità risparmio energetico.</string>
+  <string name="accessibility_quick_settings_location_gps_only">Geolocalizzazione: modalità solo Gps.</string>
+  <string name="accessibility_quick_settings_location_high_accuracy">Geolocalizzazione: modalità alta precisione.</string>
+  <string name="accessibility_quick_settings_location_changed_battery_saving">Geolocalizzazione in modalità risparmio energetico.</string>
+  <string name="accessibility_quick_settings_location_changed_gps_only">Geolocalizzazione in modalità solo gps.</string>
+  <string name="accessibility_quick_settings_location_changed_high_accuracy">Geolocalizzazione in modalità alta precisione.</string>
+  <string name="quick_settings_location_detail_title">Geolocalizzazione</string>
+  <string name="quick_settings_location_battery_saving_label">Risparmio energetico</string>
+  <string name="quick_settings_location_gps_only_label">Solo dispositivo</string>
+  <string name="quick_settings_location_high_accuracy_label">Alta precisione</string>
+  <string name="quick_settings_location_off_label">Geolocalizzazione disattivata</string>
+  <string name="quick_settings_google_assist_label">Assist</string>
+  <string name="quick_settings_google_voice_assist_label">Assistente di voce</string>
+  <string name="quick_settings_network_adb_enabled_label">Abilitiato</string>
+  <string name="quick_settings_network_adb_disabled_label">Disabilitato</string>
+  <string name="quick_settings_network_adb_label">ADB attraverso la rete</string>
+  <string name="omnijaws_service_error">Errore</string>
+  <string name="omnijaws_service_unkown">Nessun dato meteo</string>
+  <string name="omnijaws_detail_header">Meteo</string>
+  <string name="omnijaws_label_default">Meteo</string>
+  <string name="omnijaws_current_text">Adesso</string>
+  <string name="omnijaws_package_not_available">OmniJaws non disponibile</string>
   <!-- Path data for portrait battery -->
+  <string name="pirate_label">Aaarrrggghhh</string>
+  <string name="pirate_spec">pirata</string>
 </resources>

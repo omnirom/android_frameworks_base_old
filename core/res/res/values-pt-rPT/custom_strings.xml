@@ -35,7 +35,11 @@
   <string name="global_action_torch_on">A lanterna está ligada</string>
   <string name="global_action_torch_off">A lanterna está desligada</string>
   <string name="global_actions_toggle_torch_mode">Lanterna</string>
+  <string name="global_action_dismissable_dialog_text">A reinicialização avançada está desativada.\nDeseja reinicializar?\u003f</string>
+  <string name="global_action_dnaa">Não mostrar novamente</string>
   <!-- Silent Mode -->
+  <string name="silent_mode_priority">Prioridade</string>
+  <string name="silent_mode_none">Nenhum</string>
   <!-- advanced reboot to bootloader. -->
   <string name="reboot_to_bootloader_title">Reinciar bootloader</string>
   <string name="reboot_to_bootloader_message">A reiniciar\u2026</string>
@@ -50,12 +54,14 @@
   <string name="battery_style_meter_horizontal">Barra horizontal</string>
   <string name="battery_style_circle">Círculo</string>
   <string name="battery_style_droid">Droid</string>
+  <string name="battery_style_theme">Tema</string>
   <!-- global actions dnd selector -->
   <string name="dnd_mode_off">Desigado</string>
   <string name="dnd_mode_total_silence">Silêncio total</string>
   <string name="dnd_mode_alarms">Só alarmes</string>
   <string name="dnd_mode_important">Apenas prioridade</string>
   <!-- Vendor mismatched fingerprint warning [CHAR LIMIT=NONE] -->
+  <string name="system_error_vendorprint">A sua imagem do fabricante não coincide com a do sistema. Por favor atualize a <xliff:g id="string">%s</xliff:g> da imagem do fabricante para o seu dispositivo</string>
   <!-- Title of an application permission, listed so the user can choose whether they want to allow the application to do this. -->
   <string name="permlab_fakePackageSignature">Imitar a assinatura dos pacotes</string>
   <!-- Description of an application permission, listed so the user can choose whether they want to allow the application to do this. -->

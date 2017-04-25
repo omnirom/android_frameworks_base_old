@@ -31,15 +31,34 @@
   <!-- Screen pinning dialog description when in accessibility mode. -->
   <string name="screen_pinning_description_back">Доки він закріплений, він буде на виду. Щоб відкріпити натисніть та утримуйте Назад.</string>
   <!-- QUICK SETTINGS TILES -->
+  <string name="quick_settings_caffeine_label">Заборона сну</string>
+  <string name="accessibility_quick_settings_caffeine_off">Заборона сну вимк.</string>
+  <string name="accessibility_quick_settings_caffeine_on">Заборона сну увімк.</string>
+  <string name="quick_settings_music_label">Музика</string>
+  <string name="quick_settings_music_play">Грати</string>
+  <string name="quick_settings_music_pause">Пауза</string>
   <string name="quick_settings_nfc_label">NFC</string>
   <!-- Content description of the NFC tile in quick settings when off (not shown on the screen). [CHAR LIMIT=NONE] -->
+  <string name="accessibility_quick_settings_nfc_off">NFC вимк.</string>
   <!-- Content description of the NFC tile in quick settings when on (not shown on the screen). [CHAR LIMIT=NONE] -->
+  <string name="accessibility_quick_settings_nfc_on">NFC увімк.</string>
   <!-- Announcement made when NFC changes to off (not shown on the screen). [CHAR LIMIT=NONE] -->
+  <string name="accessibility_quick_settings_nfc_changed_off">NFC вимкнено.</string>
   <!-- Announcement made when NFC changes to on (not shown on the screen). [CHAR LIMIT=NONE] -->
+  <string name="accessibility_quick_settings_nfc_changed_on">NFC увімкнуто.</string>
+  <string name="quick_settings_screenshot_label">Скріншот</string>
   <!-- Screenshot Crop & Share -->
+  <string name="pref_category_user">Користувацькі налаштування</string>
   <!-- Screenshot Crop & Share -->
   <!-- qs edit mode menu -->
+  <string name="qs_menu_item_columns_five">5</string>
+  <string name="qs_menu_item_columns_six">6</string>
+  <string name="qs_menu_item_columns_seven">7</string>
+  <string name="qs_menu_item_columns_eight">8</string>
+  <string name="qs_menu_item_columns_nine">9</string>
+  <string name="qs_menu_item_reset">Очистити</string>
   <!-- NavBar Tuner -->
+  <string name="search">Пошук</string>
   <!-- Advance location quick setting tile -->
   <!-- Path data for portrait battery -->
 </resources>

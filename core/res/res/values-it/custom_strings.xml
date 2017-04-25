@@ -35,8 +35,11 @@
   <string name="global_action_torch_on">Torcia accesa</string>
   <string name="global_action_torch_off">Torcia spenta</string>
   <string name="global_actions_toggle_torch_mode">Torcia</string>
+  <string name="global_action_dismissable_dialog_text">Il riavvio avanzato è disabilitato.\nVuoi riavviare\u003f</string>
+  <string name="global_action_dnaa">Non mostrare più</string>
   <!-- Silent Mode -->
   <string name="silent_mode_priority">Priorità</string>
+  <string name="silent_mode_none">Nessuno</string>
   <!-- advanced reboot to bootloader. -->
   <string name="reboot_to_bootloader_title">Riavvia in bootloader</string>
   <string name="reboot_to_bootloader_message">Riavvio in corso\u2026</string>
@@ -51,12 +54,14 @@
   <string name="battery_style_meter_horizontal">Barra orizzontale</string>
   <string name="battery_style_circle">Cerchio</string>
   <string name="battery_style_droid">Droid</string>
+  <string name="battery_style_theme">Tema</string>
   <!-- global actions dnd selector -->
   <string name="dnd_mode_off">Non attivo</string>
   <string name="dnd_mode_total_silence">Silenzio totale</string>
   <string name="dnd_mode_alarms">Solo sveglie</string>
   <string name="dnd_mode_important">Solo con priorità</string>
   <!-- Vendor mismatched fingerprint warning [CHAR LIMIT=NONE] -->
+  <string name="system_error_vendorprint">L\'immagine del fornitore non corrisponde al sistema. Per favore esegui il flash dell\'immagine del fornitore di <xliff:g id="string">%s </xliff:g> per il dispositivo</string>
   <!-- Title of an application permission, listed so the user can choose whether they want to allow the application to do this. -->
   <string name="permlab_fakePackageSignature">Spoof firma pacchetto</string>
   <!-- Description of an application permission, listed so the user can choose whether they want to allow the application to do this. -->
