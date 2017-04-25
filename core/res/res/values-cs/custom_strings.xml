@@ -35,6 +35,7 @@
   <string name="global_action_torch_on">Baterka zapnuta</string>
   <string name="global_action_torch_off">Baterka vypnuta</string>
   <string name="global_actions_toggle_torch_mode">Baterka</string>
+  <string name="global_action_dismissable_dialog_text">Rozšířené restartování je zakázáno.\nChcete restartovat\u003f</string>
   <string name="global_action_dnaa">Znovu nezobrazovat</string>
   <!-- Silent Mode -->
   <string name="silent_mode_priority">Priorita</string>

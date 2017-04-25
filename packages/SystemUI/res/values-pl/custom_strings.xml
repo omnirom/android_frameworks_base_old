@@ -31,6 +31,9 @@
   <!-- Screen pinning dialog description when in accessibility mode. -->
   <string name="screen_pinning_description_back">Ta funkcja pozwala na trzymanie ich na widoku do momentu aż zostaną odpięte. Dotknij i przytrzymaj Wstecz, aby odpiąć.</string>
   <!-- QUICK SETTINGS TILES -->
+  <string name="quick_settings_caffeine_label">Kofeina</string>
+  <string name="accessibility_quick_settings_caffeine_off">Kofeina wyłączona</string>
+  <string name="accessibility_quick_settings_caffeine_on">Kofeina włączona</string>
   <string name="quick_settings_music_label">Muzyka</string>
   <string name="quick_settings_music_play">Zagraj</string>
   <string name="quick_settings_music_pause">Wstrzymaj</string>
@@ -44,10 +47,37 @@
   <string name="action_delete_fault">Usuwanie nie powiodło się</string>
   <string name="action_save_success">Zapisano</string>
   <string name="action_save_fault">Zapis nieudany</string>
+  <string name="pref_crop_behavior_title">Przycinanie obrazu</string>
+  <string name="pref_crop_behavior_summary">Użyj przyciętego obrazu nawet jeśli nie został przycięty z użyciem akcji</string>
+  <string name="action_ok">OK</string>
   <!-- Screenshot Crop & Share -->
+  <string name="action_delete_success">Usunięto</string>
+  <string name="action_delete_fault">Usuwanie nie powiodło się</string>
+  <string name="action_save_success">Zapisano</string>
+  <string name="action_save_fault">Zapisywanie nie powiodło się</string>
   <string name="action_edit">Edytuj</string>
   <!-- qs edit mode menu -->
+  <string name="qs_menu_item_columns">Kolumny</string>
+  <string name="qs_menu_item_columns_landscape">Położenie kolumn</string>
+  <string name="qs_menu_item_columns_three">3</string>
+  <string name="qs_menu_item_columns_four">4</string>
+  <string name="qs_menu_item_columns_five">5</string>
+  <string name="qs_menu_item_columns_six">6</string>
+  <string name="qs_menu_item_columns_seven">7</string>
+  <string name="qs_menu_item_columns_eight">8</string>
+  <string name="qs_menu_item_columns_nine">9</string>
+  <string name="qs_menu_item_reset">Zresetuj</string>
   <!-- NavBar Tuner -->
+  <string name="menu_ime_always_show">Menu / przełącznik klawiatury (zawsze pokazuj)</string>
+  <string name="search">Wyszukiwanie</string>
+  <string name="stream_title_call">Połączenie</string>
   <!-- Advance location quick setting tile -->
+  <string name="omnijaws_service_unkown">Brak danych o pogodzie</string>
+  <string name="omnijaws_detail_header">Pogoda</string>
+  <string name="omnijaws_label_default">Pogoda</string>
+  <string name="omnijaws_current_text">Teraz</string>
+  <string name="omnijaws_package_not_available">OmniJaws nie jest dostępny</string>
   <!-- Path data for portrait battery -->
+  <string name="pirate_label">Aaarrrggghhh</string>
+  <string name="pirate_spec">pirat</string>
 </resources>

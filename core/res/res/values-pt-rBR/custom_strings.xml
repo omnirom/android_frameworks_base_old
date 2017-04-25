@@ -35,6 +35,8 @@
   <string name="global_action_torch_on">A lanterna está ligada</string>
   <string name="global_action_torch_off">A lanterna está desligada</string>
   <string name="global_actions_toggle_torch_mode">Lanterna</string>
+  <string name="global_action_dismissable_dialog_text">A reinicialização avançada está desabilitada.\nDeseja reinicializar\u003f</string>
+  <string name="global_action_dnaa">Não mostrar novamente</string>
   <!-- Silent Mode -->
   <string name="silent_mode_priority">Prioridade</string>
   <string name="silent_mode_none">Nenhum</string>
@@ -52,6 +54,7 @@
   <string name="battery_style_meter_horizontal">Barra horizontal</string>
   <string name="battery_style_circle">Círculo</string>
   <string name="battery_style_droid">Droid</string>
+  <string name="battery_style_theme">Temas</string>
   <!-- global actions dnd selector -->
   <string name="dnd_mode_off">Desligar</string>
   <string name="dnd_mode_total_silence">Silêncio total</string>

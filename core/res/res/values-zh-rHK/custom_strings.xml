@@ -28,16 +28,38 @@
   <string name="global_action_reboot_more">重新啟動\u2026</string>
   <string name="global_action_reboot_sub">系統</string>
   <string name="global_action_reboot_recovery">恢復模式</string>
+  <string name="global_action_reboot_bootloader">引導模式</string>
+  <string name="global_action_users">使用者\u2026</string>
+  <string name="global_action_screenshot">螢幕截圖</string>
+  <string name="global_action_screenrecord">畫面錄製</string>
+  <string name="global_action_torch_on">手電筒已開啟</string>
+  <string name="global_action_torch_off">手電筒已關閉</string>
+  <string name="global_actions_toggle_torch_mode">手電筒</string>
+  <string name="global_action_dismissable_dialog_text">高級重啟已被禁用\n你想要重啟嗎\u003f</string>
+  <string name="global_action_dnaa">不要再顯示</string>
   <!-- Silent Mode -->
+  <string name="silent_mode_priority">優先</string>
+  <string name="silent_mode_none">無</string>
   <!-- advanced reboot to bootloader. -->
+  <string name="reboot_to_bootloader_title">重開機至 bootloader</string>
   <string name="reboot_to_bootloader_message">重新啟動中\u2026</string>
   <!-- advanced reboot to recovery. -->
+  <string name="reboot_to_recovery_title">重新開機至 Recovery</string>
   <string name="reboot_to_recovery_message">重新啟動中\u2026</string>
   <!-- advanced reboot system -->
+  <string name="reboot_system_title">重開機</string>
+  <string name="reboot_system_message">重新啟動中\u2026</string>
+  <string name="battery_style_text">只有文字</string>
   <string name="battery_style_default">預設</string>
+  <string name="battery_style_meter_horizontal">橫條</string>
+  <string name="battery_style_circle">環形</string>
+  <string name="battery_style_droid">機器人</string>
+  <string name="battery_style_theme">主題</string>
   <!-- global actions dnd selector -->
   <string name="dnd_mode_off">關閉</string>
   <string name="dnd_mode_total_silence">完全靜音</string>
+  <string name="dnd_mode_alarms">僅鬧鐘</string>
+  <string name="dnd_mode_important">僅優先打擾</string>
   <!-- Vendor mismatched fingerprint warning [CHAR LIMIT=NONE] -->
   <!-- Title of an application permission, listed so the user can choose whether they want to allow the application to do this. -->
   <!-- Description of an application permission, listed so the user can choose whether they want to allow the application to do this. -->

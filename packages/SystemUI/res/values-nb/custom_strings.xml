@@ -36,18 +36,66 @@
   <string name="quick_settings_music_pause">Pause</string>
   <string name="quick_settings_nfc_label">NFC</string>
   <!-- Content description of the NFC tile in quick settings when off (not shown on the screen). [CHAR LIMIT=NONE] -->
+  <string name="accessibility_quick_settings_nfc_off">NFC av.</string>
   <!-- Content description of the NFC tile in quick settings when on (not shown on the screen). [CHAR LIMIT=NONE] -->
+  <string name="accessibility_quick_settings_nfc_on">NFC på.</string>
   <!-- Announcement made when NFC changes to off (not shown on the screen). [CHAR LIMIT=NONE] -->
+  <string name="accessibility_quick_settings_nfc_changed_off">NFC deaktivert.</string>
   <!-- Announcement made when NFC changes to on (not shown on the screen). [CHAR LIMIT=NONE] -->
+  <string name="accessibility_quick_settings_nfc_changed_on">NFC aktivert.</string>
+  <string name="quick_settings_screenshot_label">Skjermdump</string>
   <!-- Screenshot Crop & Share -->
   <string name="action_delete_success">Slettet</string>
   <string name="action_delete_fault">Slettingen mislyktes</string>
   <string name="action_save_success">Lagret</string>
   <string name="action_save_fault">Lagringen mislyktes</string>
+  <string name="pref_category_main">Hovedinnstillingene</string>
+  <string name="pref_category_user">Brukerinnstillinger</string>
+  <string name="action_ok">OK</string>
   <!-- Screenshot Crop & Share -->
+  <string name="action_delete_success">Slettet</string>
+  <string name="action_delete_fault">Slettingen mislyktes</string>
+  <string name="action_save_success">Lagret</string>
+  <string name="action_save_fault">Lagringen mislyktes</string>
   <string name="action_edit">Rediger</string>
   <!-- qs edit mode menu -->
+  <string name="qs_menu_item_columns">Kolonner</string>
+  <string name="qs_menu_item_columns_landscape">Kolonneutforming</string>
+  <string name="qs_menu_item_columns_three">3</string>
+  <string name="qs_menu_item_columns_four">4</string>
+  <string name="qs_menu_item_columns_five">5</string>
+  <string name="qs_menu_item_columns_six">6</string>
+  <string name="qs_menu_item_columns_seven">7</string>
+  <string name="qs_menu_item_columns_eight">8</string>
+  <string name="qs_menu_item_columns_nine">9</string>
+  <string name="qs_menu_item_reset">Tilbakestill</string>
   <!-- NavBar Tuner -->
+  <string name="search">Søk</string>
+  <string name="stream_title_call">Ring</string>
+  <string name="stream_title_system">System</string>
+  <string name="stream_title_media">Media</string>
+  <string name="stream_title_alarm">Alarm</string>
+  <string name="stream_title_notification">Varsel</string>
   <!-- Advance location quick setting tile -->
+  <string name="accessibility_quick_settings_location_battery_saving">Posisjoneringsrapportering: Batterisparing.</string>
+  <string name="accessibility_quick_settings_location_gps_only">Posisjoneringsrapportering: Bare sensoren.</string>
+  <string name="accessibility_quick_settings_location_high_accuracy">Posisjoneringsrapportering: Stor nøyaktighet.</string>
+  <string name="accessibility_quick_settings_location_changed_battery_saving">Posisjoneringsrapportering endret til batterisparing.</string>
+  <string name="accessibility_quick_settings_location_changed_gps_only">Posisjoneringsrapportering endret til bare sensoren.</string>
+  <string name="accessibility_quick_settings_location_changed_high_accuracy">Posisjoneringsrapportering endret til stor nøyaktighet.</string>
+  <string name="quick_settings_location_detail_title">Posisjoneringsmodus</string>
+  <string name="quick_settings_location_battery_saving_label">Batterisparing</string>
+  <string name="quick_settings_location_gps_only_label">Bare sensoren</string>
+  <string name="quick_settings_location_high_accuracy_label">Stor nøyaktighet</string>
+  <string name="quick_settings_location_off_label">Posisjonering av</string>
+  <string name="quick_settings_google_assist_label">Google assistent</string>
+  <string name="quick_settings_google_voice_assist_label">Stemme assistent</string>
+  <string name="quick_settings_network_adb_enabled_label">Aktivert</string>
+  <string name="quick_settings_network_adb_disabled_label">Deaktivert</string>
+  <string name="omnijaws_service_error">Feil</string>
+  <string name="omnijaws_service_unkown">Ingen værdata</string>
+  <string name="omnijaws_detail_header">Vær</string>
+  <string name="omnijaws_label_default">Vær</string>
+  <string name="omnijaws_current_text">Nå</string>
   <!-- Path data for portrait battery -->
 </resources>

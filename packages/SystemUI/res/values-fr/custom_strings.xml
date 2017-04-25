@@ -47,6 +47,9 @@
   <!-- Announcement made when NFC changes to on (not shown on the screen). [CHAR LIMIT=NONE] -->
   <string name="accessibility_quick_settings_nfc_changed_on">NFC a été activé.</string>
   <string name="quick_settings_screenshot_label">Capture d’écran</string>
+  <string name="quick_settings_heads_up_on">Notifications flottantes activées</string>
+  <string name="quick_settings_heads_up_off">Notifications flottantes désactivées</string>
+  <string name="quick_settings_heads_up">Notifications flottantes</string>
   <!-- Screenshot Crop & Share -->
   <string name="action_delete_success">Supprimé</string>
   <string name="action_delete_fault">La suppression a échoué</string>
@@ -113,4 +116,5 @@
   <string name="omnijaws_package_not_available">OmniJaws indisponible</string>
   <!-- Path data for portrait battery -->
   <string name="pirate_label">Aaarrrggghhh</string>
+  <string name="pirate_spec">pirate</string>
 </resources>

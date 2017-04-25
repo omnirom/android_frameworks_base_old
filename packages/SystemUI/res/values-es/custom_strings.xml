@@ -47,6 +47,9 @@
   <!-- Announcement made when NFC changes to on (not shown on the screen). [CHAR LIMIT=NONE] -->
   <string name="accessibility_quick_settings_nfc_changed_on">Se ha activado el NFC.</string>
   <string name="quick_settings_screenshot_label">Captura de pantalla</string>
+  <string name="quick_settings_heads_up_on">Notificaciones flotantes habilitadas</string>
+  <string name="quick_settings_heads_up_off">Notificaciones flotantes deshabilitadas</string>
+  <string name="quick_settings_heads_up">Notificaciones flotantes</string>
   <!-- Screenshot Crop & Share -->
   <string name="action_delete_success">Eliminada</string>
   <string name="action_delete_fault">Eliminación sin éxito</string>
@@ -60,14 +63,24 @@
   <string name="pref_crop_behavior_summary">Utilizar la imagen recortada aunque el original no ha sido recortada con la acción de recorte</string>
   <string name="action_ok">OK</string>
   <!-- Screenshot Crop & Share -->
+  <string name="action_delete_success">Eliminada</string>
+  <string name="action_delete_fault">Eliminación sin éxito</string>
+  <string name="action_save_success">Guardada</string>
+  <string name="action_save_fault">Guardado sin éxito</string>
   <string name="action_edit">Editar</string>
   <!-- qs edit mode menu -->
   <string name="qs_menu_item_columns">Columnas</string>
+  <string name="qs_menu_item_columns_landscape">Columnas en modo apaisado</string>
   <string name="qs_menu_item_columns_three">3</string>
   <string name="qs_menu_item_columns_four">4</string>
   <string name="qs_menu_item_columns_five">5</string>
   <string name="qs_menu_item_columns_six">6</string>
+  <string name="qs_menu_item_columns_seven">7</string>
+  <string name="qs_menu_item_columns_eight">8</string>
+  <string name="qs_menu_item_columns_nine">9</string>
+  <string name="qs_menu_item_reset">Reiniciar</string>
   <!-- NavBar Tuner -->
+  <string name="menu_ime_always_show">Menú / Selector de Teclado (mostrar siempre)</string>
   <string name="search">Buscar</string>
   <string name="stream_title_call">Llamada</string>
   <string name="stream_title_system">Sistema</string>
@@ -76,8 +89,32 @@
   <string name="stream_title_alarm">Alarma</string>
   <string name="stream_title_notification">Notificación</string>
   <string name="stream_title_bluetooth">Bluetooth</string>
+  <string name="qs_menu_item_scroll">Barra de desplazamiento</string>
   <string name="qs_menu_item_titles">Ocultar etiquetas</string>
   <!-- Advance location quick setting tile -->
+  <string name="accessibility_quick_settings_location_battery_saving">Informe de ubicación: Modo de ahorro de batería.</string>
+  <string name="accessibility_quick_settings_location_gps_only">Informe de ubicación: modo solo dispositivo.</string>
+  <string name="accessibility_quick_settings_location_high_accuracy">Informe de ubicación: modo de alta precisión.</string>
+  <string name="accessibility_quick_settings_location_changed_battery_saving">Informe de ubicación cambiado a modo de ahorro de batería.</string>
+  <string name="accessibility_quick_settings_location_changed_gps_only">Informes de ubicación cambiados a modo solo dispositivo.</string>
+  <string name="accessibility_quick_settings_location_changed_high_accuracy">Informes de ubicación cambiados a modo alta precisión.</string>
+  <string name="quick_settings_location_detail_title">Modo de ubicación</string>
   <string name="quick_settings_location_battery_saving_label">Ahorro de batería</string>
+  <string name="quick_settings_location_gps_only_label">Solo dispositivo</string>
+  <string name="quick_settings_location_high_accuracy_label">Alta precisión</string>
+  <string name="quick_settings_location_off_label">Ubicación apagada</string>
+  <string name="quick_settings_google_assist_label">Asistente</string>
+  <string name="quick_settings_google_voice_assist_label">Ayuda de voz</string>
+  <string name="quick_settings_network_adb_enabled_label">Habilitado</string>
+  <string name="quick_settings_network_adb_disabled_label">Deshabilitado</string>
+  <string name="quick_settings_network_adb_label">ADB sobre red</string>
+  <string name="omnijaws_service_error">Error</string>
+  <string name="omnijaws_service_unkown">Sin datos metereológicos</string>
+  <string name="omnijaws_detail_header">Clima</string>
+  <string name="omnijaws_label_default">Clima</string>
+  <string name="omnijaws_current_text">Ahora</string>
+  <string name="omnijaws_package_not_available">OmniJaws no disponible</string>
   <!-- Path data for portrait battery -->
+  <string name="pirate_label">Aaarrrggghhh</string>
+  <string name="pirate_spec">pirata</string>
 </resources>
