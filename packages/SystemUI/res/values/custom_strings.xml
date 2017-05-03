@@ -127,6 +127,7 @@
     <string name="omnijaws_service_unkown">No weather data</string>
     <string name="omnijaws_service_error_long">Error loading weather data</string>
     <string name="omnijaws_service_disabled">Service disabled</string>
+    <string name="omnijaws_service_error_marker" translatable="false"> * </string>
     <string name="omnijaws_detail_header">Weather</string>
     <string name="omnijaws_label_default">Weather</string>
     <string name="omnijaws_current_text">Now</string>
