@@ -939,8 +939,8 @@ public final class SmsManager {
             Log.d(TAG, "getSubscriptionId isSmsSimPickActivityNeeded is true");
             // ask the user for a default SMS SIM.
             Intent intent = new Intent();
-            intent.setClassName("com.android.settings",
-                    "com.android.settings.sim.SimDialogActivity");
+            intent.setClassName("com.qualcomm.qti.simsettings",
+                    "com.qualcomm.qti.simsettings.SimDialogActivity");
             intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
             intent.putExtra(DIALOG_TYPE_KEY, SMS_PICK);
             try {
