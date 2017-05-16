@@ -31,9 +31,9 @@
   <!-- Screen pinning dialog description when in accessibility mode. -->
   <string name="screen_pinning_description_back">Bu iptal edilene kadar gösterilir. İptal etmek için Geriye dokunun ve basılı tutun.</string>
   <!-- QUICK SETTINGS TILES -->
-  <string name="quick_settings_caffeine_label">Kafein</string>
-  <string name="accessibility_quick_settings_caffeine_off">Kafein kapalı</string>
-  <string name="accessibility_quick_settings_caffeine_on">Kafein açık</string>
+  <string name="quick_settings_caffeine_label">Caffeine</string>
+  <string name="accessibility_quick_settings_caffeine_off">Caffeine kapalı</string>
+  <string name="accessibility_quick_settings_caffeine_on">Caffeine açık</string>
   <string name="quick_settings_music_label">Müzik</string>
   <string name="quick_settings_music_play">Oynat</string>
   <string name="quick_settings_music_pause">Duraklat</string>
@@ -110,6 +110,8 @@
   <string name="quick_settings_network_adb_label">Ağ üzerinden ADB</string>
   <string name="omnijaws_service_error">Hata</string>
   <string name="omnijaws_service_unkown">Hava durumu verisi yok</string>
+  <string name="omnijaws_service_error_long">Hava durumu bilgisi yüklenemedi</string>
+  <string name="omnijaws_service_disabled">Hizmet devre dışı bırakıldı</string>
   <string name="omnijaws_detail_header">Hava Durumu</string>
   <string name="omnijaws_label_default">Hava Durumu</string>
   <string name="omnijaws_current_text">Şu an</string>

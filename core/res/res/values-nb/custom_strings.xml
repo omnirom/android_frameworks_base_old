@@ -61,6 +61,7 @@
   <string name="dnd_mode_alarms">Bare alarmer</string>
   <string name="dnd_mode_important">Bare prioritert</string>
   <!-- Vendor mismatched fingerprint warning [CHAR LIMIT=NONE] -->
+  <string name="system_error_vendorprint">Den nåværende vendor.img filen er ikke kompatibel med enheten. Vennligst innstaller <xliff:g id="string">%s</xliff:g> versjon for enheten din</string>
   <!-- Title of an application permission, listed so the user can choose whether they want to allow the application to do this. -->
   <string name="permlab_fakePackageSignature">Forfalske pakke signatur</string>
   <!-- Description of an application permission, listed so the user can choose whether they want to allow the application to do this. -->

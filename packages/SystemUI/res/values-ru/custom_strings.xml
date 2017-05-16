@@ -89,6 +89,7 @@
   <string name="stream_title_alarm">Будильник</string>
   <string name="stream_title_notification">Уведомление</string>
   <string name="stream_title_bluetooth">Bluetooth</string>
+  <string name="qs_menu_item_scroll">Прокрутка плиток</string>
   <string name="qs_menu_item_titles">Скрыть значения</string>
   <!-- Advance location quick setting tile -->
   <string name="accessibility_quick_settings_location_battery_saving">Отображение местоположения: энергосберегающий режим.</string>
@@ -109,6 +110,8 @@
   <string name="quick_settings_network_adb_label">Отладка по сети</string>
   <string name="omnijaws_service_error">Ошибка</string>
   <string name="omnijaws_service_unkown">Нет данных погоды</string>
+  <string name="omnijaws_service_error_long">Ошибка загрузки данных о погоде</string>
+  <string name="omnijaws_service_disabled">Служба отключена</string>
   <string name="omnijaws_detail_header">Погода</string>
   <string name="omnijaws_label_default">Погода</string>
   <string name="omnijaws_current_text">Сейчас</string>
