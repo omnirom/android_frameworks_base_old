@@ -110,6 +110,8 @@
   <string name="quick_settings_network_adb_label">ADB přes síť</string>
   <string name="omnijaws_service_error">Chyba</string>
   <string name="omnijaws_service_unkown">Žádné údaje o počasí</string>
+  <string name="omnijaws_service_error_long">Chyba při načítání údajů o počasí</string>
+  <string name="omnijaws_service_disabled">Služba je zakázána</string>
   <string name="omnijaws_detail_header">Počasí</string>
   <string name="omnijaws_label_default">Počasí</string>
   <string name="omnijaws_current_text">Nyní</string>

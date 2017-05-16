@@ -18,20 +18,105 @@
 -->
 <resources xmlns:xliff="urn:oasis:names:tc:xliff:document:1.2">
   <!-- Screenrecord Notification Ticker -->
+  <string name="screenrecord_notif_ticker">Ekran çəkilir</string>
   <!-- Screenrecord notification title -->
+  <string name="screenrecord_notif_title">Ekran yazılır</string>
   <!-- Screenrecord notification action: Stop -->
+  <string name="screenrecord_notif_stop">Dayandır</string>
   <!-- Screenrecord notification action: show/hide pointer -->
+  <string name="screenrecord_notif_pointer_on">Əqrəbi göstər</string>
+  <string name="screenrecord_notif_pointer_off">Əqrəbi gizlət</string>
   <!-- Screen record notification error title -->
+  <string name="screenrecord_notif_error">Ekran yazmaq olmur</string>
   <!-- Screen pinning dialog description when in accessibility mode. -->
+  <string name="screen_pinning_description_back">Bu ləğv olunana qədər göstərilir. Ləğv etmək üçün Geriyə toxun və saxla.</string>
   <!-- QUICK SETTINGS TILES -->
+  <string name="quick_settings_caffeine_label">Kofein</string>
+  <string name="accessibility_quick_settings_caffeine_off">Kofein qapalıdır</string>
+  <string name="accessibility_quick_settings_caffeine_on">Kofein açıqdır</string>
+  <string name="quick_settings_music_label">Musiqi</string>
+  <string name="quick_settings_music_play">Oynat</string>
+  <string name="quick_settings_music_pause">Dayandır</string>
+  <string name="quick_settings_nfc_label">NFC</string>
   <!-- Content description of the NFC tile in quick settings when off (not shown on the screen). [CHAR LIMIT=NONE] -->
+  <string name="accessibility_quick_settings_nfc_off">NFC qapalıdır.</string>
   <!-- Content description of the NFC tile in quick settings when on (not shown on the screen). [CHAR LIMIT=NONE] -->
+  <string name="accessibility_quick_settings_nfc_on">NFC açıqdır.</string>
   <!-- Announcement made when NFC changes to off (not shown on the screen). [CHAR LIMIT=NONE] -->
+  <string name="accessibility_quick_settings_nfc_changed_off">NFC deaktiv edildi.</string>
   <!-- Announcement made when NFC changes to on (not shown on the screen). [CHAR LIMIT=NONE] -->
+  <string name="accessibility_quick_settings_nfc_changed_on">NFC aktivləşdi.</string>
+  <string name="quick_settings_screenshot_label">Ekran görüntüsü</string>
+  <string name="quick_settings_heads_up_on">Üst bildirişlərə icazə verildi</string>
+  <string name="quick_settings_heads_up_off">Üst bildirişlər qapadıldı</string>
+  <string name="quick_settings_heads_up">Üst bildirişlər</string>
   <!-- Screenshot Crop & Share -->
+  <string name="action_delete_success">Silindi</string>
+  <string name="action_delete_fault">Silmə prosesi alınmadı</string>
+  <string name="action_save_success">Saxlanıldı</string>
+  <string name="action_save_fault">Saxlama prosesi alınmadı</string>
+  <string name="pref_action_color_title">Əməl düymələrinin rəngi</string>
+  <string name="pref_action_color_summary">Əməl düymələri üçün sevimli rəngini seç</string>
+  <string name="pref_category_main">Əsas parametrlər</string>
+  <string name="pref_category_user">İstifadəçi Paramtrləri</string>
+  <string name="pref_crop_behavior_title">Qırpma hərəkəti</string>
+  <string name="pref_crop_behavior_summary">Əsas şəkil qırpma ilə qırpılmasa da şəkili istifadə et</string>
+  <string name="action_ok">Oldu</string>
   <!-- Screenshot Crop & Share -->
+  <string name="action_delete_success">Silindi</string>
+  <string name="action_delete_fault">Silmə prosesi alınmadı</string>
+  <string name="action_save_success">Saxlanıldı</string>
+  <string name="action_save_fault">Saxlama prosesi alınmadı</string>
+  <string name="action_edit">Düzəliş</string>
   <!-- qs edit mode menu -->
+  <string name="qs_menu_item_columns">Sütunlar</string>
+  <string name="qs_menu_item_columns_landscape">Üfüqi Sütunlar</string>
+  <string name="qs_menu_item_columns_three">3</string>
+  <string name="qs_menu_item_columns_four">4</string>
+  <string name="qs_menu_item_columns_five">5</string>
+  <string name="qs_menu_item_columns_six">6</string>
+  <string name="qs_menu_item_columns_seven">7</string>
+  <string name="qs_menu_item_columns_eight">8</string>
+  <string name="qs_menu_item_columns_nine">9</string>
+  <string name="qs_menu_item_reset">Sıfırla</string>
   <!-- NavBar Tuner -->
+  <string name="menu_ime_always_show">Menyu / Klaviatura Seçici (həmişə göstər)</string>
+  <string name="search">Axtar</string>
+  <string name="stream_title_call">Zəng Et</string>
+  <string name="stream_title_system">Sistem</string>
+  <string name="stream_title_ring">Zəng Səsi</string>
+  <string name="stream_title_media">Medya</string>
+  <string name="stream_title_alarm">Alarm</string>
+  <string name="stream_title_notification">Bildiriş</string>
+  <string name="stream_title_bluetooth">Bluetooth</string>
+  <string name="qs_menu_item_scroll">Sürətli tənzimləmə sürüşdürmə</string>
+  <string name="qs_menu_item_titles">Yarlıqları gizlət</string>
   <!-- Advance location quick setting tile -->
+  <string name="accessibility_quick_settings_location_battery_saving">Yer bildirişi: enerji qənaəti modu.</string>
+  <string name="accessibility_quick_settings_location_gps_only">Yer bildirişi: yalnız sensorlar modu.</string>
+  <string name="accessibility_quick_settings_location_high_accuracy">Yer bildirişi: yüksək həssaslıq modu.</string>
+  <string name="accessibility_quick_settings_location_changed_battery_saving">Yer bildirişi enerji qənaəti moduna dəyişdirildi.</string>
+  <string name="accessibility_quick_settings_location_changed_gps_only">Yer bildirişi yalnız sensorlar moduna dəyişdirildi.</string>
+  <string name="accessibility_quick_settings_location_changed_high_accuracy">Yer bildirişi yüksək həssaslıq moduna dəyişdirildi.</string>
+  <string name="quick_settings_location_detail_title">Məkan modu</string>
+  <string name="quick_settings_location_battery_saving_label">Enerji qənaəti</string>
+  <string name="quick_settings_location_gps_only_label">Yalnız cihaz</string>
+  <string name="quick_settings_location_high_accuracy_label">Yüksək həssaslıq</string>
+  <string name="quick_settings_location_off_label">Məkan bağlıdır</string>
+  <string name="quick_settings_google_assist_label">Köməkçi</string>
+  <string name="quick_settings_google_voice_assist_label">Səsli kömək</string>
+  <string name="quick_settings_network_adb_enabled_label">Aktivdir</string>
+  <string name="quick_settings_network_adb_disabled_label">Deaktivdir</string>
+  <string name="quick_settings_network_adb_label">Şəbəkə üzərindən ADB</string>
+  <string name="omnijaws_service_error">Xəta</string>
+  <string name="omnijaws_service_unkown">Hava məlumatı yoxdur</string>
+  <string name="omnijaws_service_error_long">Hava məlumatı yüklənərkən problem yarandı</string>
+  <string name="omnijaws_service_disabled">Servis bağlıdır</string>
+  <string name="omnijaws_detail_header">Hava</string>
+  <string name="omnijaws_label_default">Hava</string>
+  <string name="omnijaws_current_text">İndi</string>
+  <string name="omnijaws_package_not_available">Omnijaws mövcüd deyil</string>
   <!-- Path data for portrait battery -->
+  <string name="pirate_label">Aaarrrggghhh</string>
+  <string name="pirate_spec">pirat</string>
 </resources>

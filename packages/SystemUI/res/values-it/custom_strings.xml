@@ -110,6 +110,8 @@
   <string name="quick_settings_network_adb_label">ADB attraverso la rete</string>
   <string name="omnijaws_service_error">Errore</string>
   <string name="omnijaws_service_unkown">Nessun dato meteo</string>
+  <string name="omnijaws_service_error_long">Errore durante il caricamento dei dati meteo</string>
+  <string name="omnijaws_service_disabled">Servizio disabilitato</string>
   <string name="omnijaws_detail_header">Meteo</string>
   <string name="omnijaws_label_default">Meteo</string>
   <string name="omnijaws_current_text">Adesso</string>
