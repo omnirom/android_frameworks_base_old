@@ -751,6 +751,21 @@ public class StatusBar extends SystemUI implements DemoMode,
     private NavigationBarFragment mNavigationBar;
     private View mNavigationBarView;
 
+    // omni additions start
+    private class OmniSettingsObserver extends ContentObserver {
+        OmniSettingsObserver(Handler handler) {
+            super(handler);
+        }
+
+        void observe() {
+        }
+
+        @Override
+        public void onChange(boolean selfChange) {
+        }
+    }
+    private OmniSettingsObserver mOmniSettingsObserver = new OmniSettingsObserver(mHandler);
+
     @Override
     public void start() {
         mNetworkController = Dependency.get(NetworkController.class);
@@ -807,6 +822,8 @@ public class StatusBar extends SystemUI implements DemoMode,
                 true,
                 mLockscreenSettingsObserver,
                 UserHandle.USER_ALL);
+
+        mOmniSettingsObserver.observe();
 
         mBarService = IStatusBarService.Stub.asInterface(
                 ServiceManager.getService(Context.STATUS_BAR_SERVICE));

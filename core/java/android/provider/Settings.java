@@ -3891,6 +3891,12 @@ public final class Settings {
          * the setting value. See an example above.
          */
 
+        // Omni additions start
+        /**
+         * @hide
+         */
+        public static final String STATUS_BAR_LOGO = "status_bar_logo";
+
         /**
          * Settings to backup. This is here so that it's in the same place as the settings
          * keys and easy to update.
@@ -4048,6 +4054,7 @@ public final class Settings {
             PRIVATE_SETTINGS.add(LOCK_TO_APP_ENABLED);
             PRIVATE_SETTINGS.add(EGG_MODE);
             PRIVATE_SETTINGS.add(SHOW_BATTERY_PERCENT);
+            PRIVATE_SETTINGS.add(STATUS_BAR_LOGO);
         }
 
         /**
