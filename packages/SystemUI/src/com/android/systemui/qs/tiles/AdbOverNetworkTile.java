@@ -75,6 +75,7 @@ public class AdbOverNetworkTile extends QSTile<QSTile.BooleanState> {
     protected void handleUpdateState(BooleanState state, Object arg) {
         mActive = isAdbEnabled();
         if (!mActive) {
+            state.icon = ResourceIcon.get(R.drawable.ic_qs_network_adb_off);
             return;
         }
         mActive = isAdbNetworkEnabled();
