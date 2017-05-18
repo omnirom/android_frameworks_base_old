@@ -75,6 +75,7 @@ public class AdbOverNetworkTile extends QSTile<QSTile.BooleanState> {
     protected void handleUpdateState(BooleanState state, Object arg) {
         mActive = isAdbEnabled();
         if (!mActive) {
+            state.icon = ResourceIcon.get(R.drawable.ic_qs_network_adb_off);
             return;
         }
         mActive = isAdbNetworkEnabled();
@@ -106,8 +107,8 @@ public class AdbOverNetworkTile extends QSTile<QSTile.BooleanState> {
     }
 
     private boolean isAdbEnabled() {
-        return Settings.Global.getInt(mContext.getContentResolver(),
-                Settings.Global.ADB_ENABLED, 0) > 0;
+        return Settings.Secure.getInt(mContext.getContentResolver(),
+                Settings.Secure.ADB_ENABLED, 0) > 0;
     }
 
     private boolean isAdbNetworkEnabled() {
@@ -135,7 +136,7 @@ public class AdbOverNetworkTile extends QSTile<QSTile.BooleanState> {
                         Settings.Secure.getUriFor(Settings.Secure.ADB_PORT),
                         false, mObserver);
                 mContext.getContentResolver().registerContentObserver(
-                        Settings.Global.getUriFor(Settings.Global.ADB_ENABLED),
+                        Settings.Global.getUriFor(Settings.Secure.ADB_ENABLED),
                         false, mObserver);
             } else {
                 mContext.getContentResolver().unregisterContentObserver(mObserver);
