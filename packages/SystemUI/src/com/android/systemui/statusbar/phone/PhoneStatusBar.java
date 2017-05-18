@@ -570,6 +570,9 @@ public class PhoneStatusBar extends BaseStatusBar implements DemoMode,
                     Settings.System.STATUS_BAR_CUSTOM_HEADER),
                     false, this, UserHandle.USER_ALL);
             mContext.getContentResolver().registerContentObserver(Settings.System.getUriFor(
+                    Settings.System.STATUS_BAR_LOGO),
+                    false, this, UserHandle.USER_ALL);
+            mContext.getContentResolver().registerContentObserver(Settings.System.getUriFor(
                     Settings.System.LOCKSCREEN_ROTATION),
                     false, this, UserHandle.USER_ALL);
             mContext.getContentResolver().registerContentObserver(Settings.System.getUriFor(
@@ -637,6 +640,10 @@ public class PhoneStatusBar extends BaseStatusBar implements DemoMode,
 
             if (mKeyguardStatusBar != null) {
                 mKeyguardStatusBar.updateSettings();
+            }
+
+            if (mIconController != null) {
+                mIconController.updateSettings(true);
             }
         }
     }
