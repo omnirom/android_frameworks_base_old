@@ -25,6 +25,7 @@ import android.net.wifi.WifiInfo;
 import android.net.wifi.WifiManager;
 import android.os.UserHandle;
 import android.provider.Settings;
+import android.widget.Toast;
 
 import com.android.systemui.R;
 import com.android.systemui.qs.QSTile;
@@ -52,6 +53,9 @@ public class AdbOverNetworkTile extends QSTile<QSTile.BooleanState> {
         Settings.Secure.putIntForUser(mContext.getContentResolver(),
                 Settings.Secure.ADB_PORT, isAdbNetworkEnabled() ? -1 : 5555,
                 UserHandle.USER_CURRENT);
+        if (!isAdbEnabled()) {
+           Toast.makeText(mContext, mContext.getString(R.string.quick_settings_network_adb_toast), Toast.LENGTH_LONG).show();
+        }
         refreshState();
     }
 
@@ -75,6 +79,8 @@ public class AdbOverNetworkTile extends QSTile<QSTile.BooleanState> {
     protected void handleUpdateState(BooleanState state, Object arg) {
         mActive = isAdbEnabled();
         if (!mActive) {
+            state.icon = ResourceIcon.get(R.drawable.ic_qs_network_adb_off);
+            state.label = mContext.getString(R.string.quick_settings_network_adb_label);
             return;
         }
         mActive = isAdbNetworkEnabled();
