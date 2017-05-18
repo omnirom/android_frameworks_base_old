@@ -28,6 +28,7 @@ import android.os.Bundle;
 import android.os.Handler;
 import android.os.SystemClock;
 import android.os.UserHandle;
+import android.provider.Settings;
 import android.text.TextUtils;
 import android.util.ArraySet;
 import android.util.TypedValue;
@@ -82,6 +83,8 @@ public class StatusBarIconController extends StatusBarIconList implements Tunabl
     private BatteryViewManager mBatteryViewManager;
     private TextView mClock;
     private NetworkTraffic mNetworkTraffic;
+    private View mOmniLogo;
+    private boolean mShowLogo;
 
     private int mIconSize;
     private int mIconHPadding;
@@ -143,11 +146,13 @@ public class StatusBarIconController extends StatusBarIconList implements Tunabl
         mDarkModeIconColorSingleTone = context.getColor(R.color.dark_mode_icon_color_single_tone);
         mLightModeIconColorSingleTone = context.getColor(R.color.light_mode_icon_color_single_tone);
         mNetworkTraffic = (NetworkTraffic) statusBar.findViewById(R.id.networkTraffic);
+        mOmniLogo = statusBar.findViewById(R.id.status_bar_logo);
 
         mHandler = new Handler();
         loadDimens();
 
         TunerService.get(mContext).addTunable(this, ICON_BLACKLIST);
+        updateSettings(false);
     }
 
     public void setSignalCluster(SignalClusterView signalCluster) {
@@ -319,7 +324,7 @@ public class StatusBarIconController extends StatusBarIconList implements Tunabl
     }
 
     public void hideSystemIconArea(boolean animate) {
-        animateHide(mSystemIconArea, animate);
+        animateHide(mSystemIconArea, animate, true);
     }
 
     public void showSystemIconArea(boolean animate) {
@@ -327,11 +332,17 @@ public class StatusBarIconController extends StatusBarIconList implements Tunabl
     }
 
     public void hideNotificationIconArea(boolean animate) {
-        animateHide(mNotificationIconAreaInner, animate);
+        animateHide(mNotificationIconAreaInner, animate, true);
+        if (mShowLogo) {
+            animateHide(mOmniLogo, animate, true);
+        }
     }
 
     public void showNotificationIconArea(boolean animate) {
         animateShow(mNotificationIconAreaInner, animate);
+        if (mShowLogo) {
+            animateShow(mOmniLogo, animate);
+        }
     }
 
     public void setClockVisibility(boolean visible) {
@@ -358,7 +369,7 @@ public class StatusBarIconController extends StatusBarIconList implements Tunabl
     /**
      * Hides a view.
      */
-    private void animateHide(final View v, boolean animate) {
+    private void animateHide(final View v, boolean animate, final boolean invisible) {
         v.animate().cancel();
         if (!animate) {
             v.setAlpha(0f);
@@ -373,7 +384,7 @@ public class StatusBarIconController extends StatusBarIconList implements Tunabl
                 .withEndAction(new Runnable() {
                     @Override
                     public void run() {
-                        v.setVisibility(View.INVISIBLE);
+                        v.setVisibility(invisible ? View.INVISIBLE : View.GONE);
                     }
                 });
     }
@@ -612,5 +623,17 @@ public class StatusBarIconController extends StatusBarIconList implements Tunabl
                 mContext.getResources().getDimensionPixelSize(
                         R.dimen.status_bar_clock_end_padding),
                 0);
+    }
+
+    public void updateSettings(boolean animate) {
+        mShowLogo = Settings.System.getIntForUser(
+                mContext.getContentResolver(), Settings.System.STATUS_BAR_LOGO, 0,
+                UserHandle.USER_CURRENT) == 1;
+        if (mShowLogo) {
+            animateShow(mOmniLogo, animate);
+        } else {
+            animateHide(mOmniLogo, animate, false);
+        }
+        //mOmniLogo.setVisibility(mShowLogo ? View.VISIBLE : View.GONE);
     }
 }
