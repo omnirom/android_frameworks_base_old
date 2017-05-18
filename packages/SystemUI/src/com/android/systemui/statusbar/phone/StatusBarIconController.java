@@ -82,6 +82,7 @@ public class StatusBarIconController extends StatusBarIconList implements Tunabl
     private BatteryViewManager mBatteryViewManager;
     private TextView mClock;
     private NetworkTraffic mNetworkTraffic;
+    private View mOmniLogo;
 
     private int mIconSize;
     private int mIconHPadding;
@@ -143,6 +144,7 @@ public class StatusBarIconController extends StatusBarIconList implements Tunabl
         mDarkModeIconColorSingleTone = context.getColor(R.color.dark_mode_icon_color_single_tone);
         mLightModeIconColorSingleTone = context.getColor(R.color.light_mode_icon_color_single_tone);
         mNetworkTraffic = (NetworkTraffic) statusBar.findViewById(R.id.networkTraffic);
+        mOmniLogo = statusBar.findViewById(R.id.omnirom_logo_status_bar);
 
         mHandler = new Handler();
         loadDimens();
@@ -328,10 +330,12 @@ public class StatusBarIconController extends StatusBarIconList implements Tunabl
 
     public void hideNotificationIconArea(boolean animate) {
         animateHide(mNotificationIconAreaInner, animate);
+        animateHide(mOmniLogo, animate);
     }
 
     public void showNotificationIconArea(boolean animate) {
         animateShow(mNotificationIconAreaInner, animate);
+        animateShow(mOmniLogo, animate);
     }
 
     public void setClockVisibility(boolean visible) {
