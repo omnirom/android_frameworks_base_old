@@ -1,0 +1,21 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "234edd41_146b8f6d",
+        "filename": "packages/SystemUI/src/com/android/systemui/qs/tiles/AdbOverNetworkTile.java",
+        "patchSetId": 1
+      },
+      "lineNbr": 78,
+      "author": {
+        "id": 1000026
+      },
+      "writtenOn": "2017-05-18T13:40:53Z",
+      "side": 1,
+      "message": "as said - why make it so complicated? use one check and use the else path for both",
+      "revId": "255b8dbe3530a7e6015d27bbaf78b978bb9d2bbe",
+      "serverId": "56841c99-7c94-43d4-bf0b-cb4707e66d55",
+      "unresolved": false
+    }
+  ]
+}
