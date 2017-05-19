@@ -1,0 +1,21 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "80b0f2de_26d2653e",
+        "filename": "packages/SystemUI/src/com/android/systemui/qs/tiles/AdbOverNetworkTile.java",
+        "patchSetId": 9
+      },
+      "lineNbr": 56,
+      "author": {
+        "id": 1000026
+      },
+      "writtenOn": "2017-05-19T14:22:01Z",
+      "side": 1,
+      "message": "shouldnt we skip setting the prefs value if USB debugging is disabled anyway?",
+      "revId": "180fbea6d817e22afcb10890282e2f57d3bc376b",
+      "serverId": "56841c99-7c94-43d4-bf0b-cb4707e66d55",
+      "unresolved": false
+    }
+  ]
+}
