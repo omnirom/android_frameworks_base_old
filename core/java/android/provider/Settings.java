@@ -3497,6 +3497,13 @@ public final class Settings {
         public static final String BATTERY_LIGHT_PULSE = "battery_light_pulse";
 
         /**
+         * Whether the battery light should only be enabled on fully charged battery.
+         * The value is boolean (1 or 0).
+         * @hide
+         */
+        public static final String BATTERY_LIGHT_ONLY_FULLY_CHARGED = "battery_light_only_fully_charged";
+
+        /**
          * What color to use for the battery LED while charging - low
          * @hide
          */
