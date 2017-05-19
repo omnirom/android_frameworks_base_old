@@ -147,6 +147,7 @@ public final class BatteryService extends SystemService {
     private Led mLed;
     private boolean mLightEnabled;
     private boolean mLedPulseEnabled;
+    private boolean mLightOnlyFullyCharged;
     private int mBatteryLowARGB;
     private int mBatteryMediumARGB;
     private int mBatteryFullARGB;
@@ -840,6 +841,9 @@ public final class BatteryService extends SystemService {
                 if (status == BatteryManager.BATTERY_STATUS_CHARGING) {
                     // Solid red when battery is charging
                     mBatteryLight.setColor(mBatteryLowARGB);
+                    if (mLightOnlyFullyCharged) {
+                        mBatteryLight.turnOff();
+                    }
                 } else if (mLedPulseEnabled) {
                     // Flash red when battery is low and not charging
                     mBatteryLight.setFlashing(mBatteryLowARGB, Light.LIGHT_FLASH_TIMED,
@@ -857,10 +861,16 @@ public final class BatteryService extends SystemService {
                     } else {
                         // Battery is full or charging and nearly full
                         mBatteryLight.setColor(mBatteryFullARGB);
+                        if (mLightOnlyFullyCharged) {
+                            mBatteryLight.turnOff();
+                        }
                     }
                 } else {
                     // Battery is charging and halfway full
                     mBatteryLight.setColor(mBatteryMediumARGB);
+                    if (mLightOnlyFullyCharged) {
+                        mBatteryLight.turnOff();
+                    }
                 }
             } else {
                 // No lights if not charging and not low
@@ -953,6 +963,10 @@ public final class BatteryService extends SystemService {
             resolver.registerContentObserver(Settings.System.getUriFor(
                     Settings.System.BATTERY_LIGHT_PULSE), false, this);
 
+            // Only light if fully charged
+            resolver.registerContentObserver(Settings.System.getUriFor(
+                    Settings.System.BATTERY_LIGHT_ONLY_FULLY_CHARGED), false, this);
+
             // Light colors
             if (mMultiColorLed) {
                 // Register observer if we have a multi color led
@@ -984,6 +998,9 @@ public final class BatteryService extends SystemService {
             // Low battery pulse
             mLedPulseEnabled = Settings.System.getInt(resolver,
                     Settings.System.BATTERY_LIGHT_PULSE, mLightEnabled ? 1 : 0) != 0;
+
+            mLightOnlyFullyCharged = Settings.System.getInt(resolver,
+                    Settings.System.BATTERY_LIGHT_ONLY_FULLY_CHARGED, 0) != 0;
 
             // Light colors
             mBatteryLowARGB = Settings.System.getInt(resolver,
