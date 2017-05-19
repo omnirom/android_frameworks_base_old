@@ -33,7 +33,6 @@
         android:paddingTop="16dp"
         android:paddingBottom="16dp"
         android:paddingStart="16dp"
-        android:textAppearance="?android:attr/textAppearanceSmall"
-        android:textColor="?android:attr/colorAccent" />
+        android:textAppearance="?android:attr/textAppearanceSmall"/>
 
 </LinearLayout>
