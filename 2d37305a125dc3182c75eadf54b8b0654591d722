@@ -1,0 +1,21 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "3797ae7b_c939a659",
+        "filename": "services/core/java/com/android/server/BatteryService.java",
+        "patchSetId": 2
+      },
+      "lineNbr": 1002,
+      "author": {
+        "id": 1000026
+      },
+      "writtenOn": "2017-05-20T13:20:14Z",
+      "side": 1,
+      "message": "hm - actually interessting why we dont need to use getIntForUser here - this is a service so it is shared between users. Could be that we did all here wrong since ages :) need to test with different users",
+      "revId": "2d37305a125dc3182c75eadf54b8b0654591d722",
+      "serverId": "56841c99-7c94-43d4-bf0b-cb4707e66d55",
+      "unresolved": false
+    }
+  ]
+}
