@@ -570,10 +570,12 @@ public class BatteryMeterDrawable extends Drawable {
         if (mPluggedIn && mChargeColorEnable) {
             return mChargeColor;
         } else {
-            // If we are in power save mode, always use the normal color.
-            if (mPowerSaveEnabled) {
-                return mColors[mColors.length - 1];
+            //now statusbar battery levels color
+            if (mPowerSaveEnabled || mPluggedIn) {
+                return !isChargeLevel ? mColors[mColors.length - 1]//mColors[3] (white)
+                        : mIconTint; //darkintensity color
             }
+
             int thresh = 0;
             int color = 0;
             for (int i = 0; i < mColors.length; i += 2) {
