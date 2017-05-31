@@ -31,23 +31,92 @@
   <!-- Screen pinning dialog description when in accessibility mode. -->
   <string name="screen_pinning_description_back">Dit zorgt ervoor dat het scherm blijft staan tot u hem weer losmaakt. Druk en houd terug in om hem los te maken.</string>
   <!-- QUICK SETTINGS TILES -->
+  <string name="quick_settings_caffeine_label">Cafeïne</string>
+  <string name="accessibility_quick_settings_caffeine_off">Cafeïne uitgeschakeld</string>
+  <string name="accessibility_quick_settings_caffeine_on">Cafeïne ingeschakeld</string>
   <string name="quick_settings_music_label">Muziek</string>
   <string name="quick_settings_music_play">Afspelen</string>
   <string name="quick_settings_music_pause">Pauzeren</string>
   <string name="quick_settings_nfc_label">NFC</string>
   <!-- Content description of the NFC tile in quick settings when off (not shown on the screen). [CHAR LIMIT=NONE] -->
+  <string name="accessibility_quick_settings_nfc_off">NFC uit.</string>
   <!-- Content description of the NFC tile in quick settings when on (not shown on the screen). [CHAR LIMIT=NONE] -->
+  <string name="accessibility_quick_settings_nfc_on">NFC aan.</string>
   <!-- Announcement made when NFC changes to off (not shown on the screen). [CHAR LIMIT=NONE] -->
+  <string name="accessibility_quick_settings_nfc_changed_off">NFC uitgeschakeld.</string>
   <!-- Announcement made when NFC changes to on (not shown on the screen). [CHAR LIMIT=NONE] -->
+  <string name="accessibility_quick_settings_nfc_changed_on">NFC ingeschakeld.</string>
+  <string name="quick_settings_screenshot_label">Schermafdruk</string>
+  <string name="quick_settings_heads_up_on">Meldingen inzien toegestaan</string>
+  <string name="quick_settings_heads_up_off">Meldingen inzien uitgeschakeld</string>
+  <string name="quick_settings_heads_up">Meldingen inzien</string>
   <!-- Screenshot Crop & Share -->
   <string name="action_delete_success">Verwijderd</string>
   <string name="action_delete_fault">Verwijderen is mislukt</string>
   <string name="action_save_success">Opgeslagen</string>
   <string name="action_save_fault">Opslaan is mislukt</string>
+  <string name="pref_action_color_title">Kleur actieknoppen</string>
+  <string name="pref_action_color_summary">Kies uw favoriete kleur voor de actieknoppen</string>
+  <string name="pref_category_main">Hoofdinstellingen</string>
+  <string name="pref_category_user">Gebruikersinstellingen</string>
+  <string name="pref_crop_behavior_title">Bijsnijd gedrag</string>
+  <string name="pref_crop_behavior_summary">De bijgesneden afbeelding gebruiken, zelfs als originele eigenlijk nog niet is bijgesneden</string>
+  <string name="action_ok">OK</string>
   <!-- Screenshot Crop & Share -->
+  <string name="action_delete_success">Verwijderd</string>
+  <string name="action_delete_fault">Verwijderen is mislukt</string>
+  <string name="action_save_success">Opgeslagen</string>
+  <string name="action_save_fault">Opslaan is mislukt</string>
   <string name="action_edit">Bewerken</string>
   <!-- qs edit mode menu -->
+  <string name="qs_menu_item_columns">Kolommen</string>
+  <string name="qs_menu_item_columns_landscape">Kolommen landscape</string>
+  <string name="qs_menu_item_columns_three">3</string>
+  <string name="qs_menu_item_columns_four">4</string>
+  <string name="qs_menu_item_columns_five">5</string>
+  <string name="qs_menu_item_columns_six">6</string>
+  <string name="qs_menu_item_columns_seven">7</string>
+  <string name="qs_menu_item_columns_eight">8</string>
+  <string name="qs_menu_item_columns_nine">9</string>
+  <string name="qs_menu_item_reset">Opnieuw instellen</string>
   <!-- NavBar Tuner -->
+  <string name="menu_ime_always_show">Menu / toetsenbord Switcher (altijd weergeven)</string>
+  <string name="search">Zoeken</string>
+  <string name="stream_title_call">Bellen</string>
+  <string name="stream_title_system">Systeem</string>
+  <string name="stream_title_ring">Ring</string>
+  <string name="stream_title_media">Media</string>
+  <string name="stream_title_alarm">Alarm</string>
+  <string name="stream_title_notification">Notificatie</string>
+  <string name="stream_title_bluetooth">Bluetooth</string>
+  <string name="qs_menu_item_scroll">Scroll snelkoppelingen</string>
+  <string name="qs_menu_item_titles">Labels verbergen</string>
   <!-- Advance location quick setting tile -->
+  <string name="accessibility_quick_settings_location_battery_saving">Locatie rapportage: Accubesparing.</string>
+  <string name="accessibility_quick_settings_location_gps_only">Locatie rapportage: Alleen apparaat.</string>
+  <string name="accessibility_quick_settings_location_high_accuracy">Locatie rapportage: Grote nauwkeurigheid.</string>
+  <string name="accessibility_quick_settings_location_changed_battery_saving">Locatie rapportage gewijzigd in accubesparingsmodus.</string>
+  <string name="accessibility_quick_settings_location_changed_gps_only">Locatie rapportage gewijzigd in alleen-sensorsmodus.</string>
+  <string name="accessibility_quick_settings_location_changed_high_accuracy">Locatie rapportage gewijzigd in hoge nauwkeurigheidsmodus.</string>
+  <string name="quick_settings_location_detail_title">Locatie modus</string>
+  <string name="quick_settings_location_battery_saving_label">Accubesparing</string>
+  <string name="quick_settings_location_gps_only_label">Alleen apparaat</string>
+  <string name="quick_settings_location_high_accuracy_label">Grote nauwkeurigheid</string>
+  <string name="quick_settings_location_off_label">Locatie uitgeschakeld</string>
+  <string name="quick_settings_google_assist_label">Assist</string>
+  <string name="quick_settings_google_voice_assist_label">Stem assistent</string>
+  <string name="quick_settings_network_adb_enabled_label">Ingeschakeld</string>
+  <string name="quick_settings_network_adb_disabled_label">Uitgeschakeld</string>
+  <string name="quick_settings_network_adb_label">ADB over netwerk</string>
+  <string name="omnijaws_service_error">Fout</string>
+  <string name="omnijaws_service_unkown">Geen weer gegevens</string>
+  <string name="omnijaws_service_error_long">Fout bij het laden van weergegevens</string>
+  <string name="omnijaws_service_disabled">Service uitgeschakeld</string>
+  <string name="omnijaws_detail_header">Weer</string>
+  <string name="omnijaws_label_default">Weer</string>
+  <string name="omnijaws_current_text">Nu</string>
+  <string name="omnijaws_package_not_available">OmniJaws niet beschikbaar</string>
   <!-- Path data for portrait battery -->
+  <string name="pirate_label">Aaarrrggghhh</string>
+  <string name="pirate_spec">piraat</string>
 </resources>

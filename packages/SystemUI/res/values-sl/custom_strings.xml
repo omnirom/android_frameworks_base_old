@@ -47,6 +47,9 @@
   <!-- Announcement made when NFC changes to on (not shown on the screen). [CHAR LIMIT=NONE] -->
   <string name="accessibility_quick_settings_nfc_changed_on">NFC vklopljen.</string>
   <string name="quick_settings_screenshot_label">Zaslonska slika</string>
+  <string name="quick_settings_heads_up_on">Prikazovanje obvestil omogočeno</string>
+  <string name="quick_settings_heads_up_off">Prikazovanje obvestil onemogočeno</string>
+  <string name="quick_settings_heads_up">Prikazovanje obvestil</string>
   <!-- Screenshot Crop & Share -->
   <string name="action_delete_success">Izbrisano</string>
   <string name="action_delete_fault">Brisanje ni bilo uspešno</string>
@@ -105,5 +108,14 @@
   <string name="quick_settings_network_adb_enabled_label">Omogočen</string>
   <string name="quick_settings_network_adb_disabled_label">Onemogočen</string>
   <string name="quick_settings_network_adb_label">ADB preko omrežja</string>
+  <string name="omnijaws_service_error">Napaka</string>
+  <string name="omnijaws_service_unkown">Ni podatkov o vremenu</string>
+  <string name="omnijaws_service_error_long">Napaka pri nalaganju podatkov o vremenu</string>
+  <string name="omnijaws_service_disabled">Storitev onemogočena</string>
+  <string name="omnijaws_detail_header">Vreme</string>
+  <string name="omnijaws_label_default">Vreme</string>
+  <string name="omnijaws_current_text">Zdaj</string>
+  <string name="omnijaws_package_not_available">OmniJaws ni nameščen</string>
   <!-- Path data for portrait battery -->
+  <string name="pirate_spec">pirat</string>
 </resources>

@@ -59,6 +59,8 @@
   <string name="pref_action_color_summary">Velg din favorittfarge for handlingsknappene</string>
   <string name="pref_category_main">Hovedinnstillingene</string>
   <string name="pref_category_user">Brukerinnstillinger</string>
+  <string name="pref_crop_behavior_title">Beskjæringskontroll</string>
+  <string name="pref_crop_behavior_summary">Bruk det beskårede bildet selv om orginalen ikke vært beskåret med beskjærings-reglen</string>
   <string name="action_ok">OK</string>
   <!-- Screenshot Crop & Share -->
   <string name="action_delete_success">Slettet</string>
@@ -87,6 +89,7 @@
   <string name="stream_title_alarm">Alarm</string>
   <string name="stream_title_notification">Varsel</string>
   <string name="stream_title_bluetooth">Bluetooth</string>
+  <string name="qs_menu_item_scroll">Hurtigvalgrull</string>
   <string name="qs_menu_item_titles">Skjul etiketter</string>
   <!-- Advance location quick setting tile -->
   <string name="accessibility_quick_settings_location_battery_saving">Posisjoneringsrapportering: Batterisparing.</string>
@@ -115,4 +118,5 @@
   <string name="omnijaws_package_not_available">OmniJaws ikke tilgjengelig</string>
   <!-- Path data for portrait battery -->
   <string name="pirate_label">Aaarrrggghhh</string>
+  <string name="pirate_spec">pirat</string>
 </resources>

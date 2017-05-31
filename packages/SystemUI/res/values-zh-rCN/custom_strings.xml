@@ -47,8 +47,8 @@
   <!-- Announcement made when NFC changes to on (not shown on the screen). [CHAR LIMIT=NONE] -->
   <string name="accessibility_quick_settings_nfc_changed_on">NFC 已打开</string>
   <string name="quick_settings_screenshot_label">屏幕截图</string>
-  <string name="quick_settings_heads_up_on">启用顶部通知</string>
-  <string name="quick_settings_heads_up_off">禁用顶部通知</string>
+  <string name="quick_settings_heads_up_on">顶部通知已启用</string>
+  <string name="quick_settings_heads_up_off">顶部通知已禁用</string>
   <string name="quick_settings_heads_up">顶部通知</string>
   <!-- Screenshot Crop & Share -->
   <string name="action_delete_success">已删除</string>
@@ -89,7 +89,7 @@
   <string name="stream_title_alarm">闹钟</string>
   <string name="stream_title_notification">通知</string>
   <string name="stream_title_bluetooth">蓝牙</string>
-  <string name="qs_menu_item_scroll">快速滚动快捷设置栏</string>
+  <string name="qs_menu_item_scroll">滚动快捷工具栏</string>
   <string name="qs_menu_item_titles">隐藏文字说明</string>
   <!-- Advance location quick setting tile -->
   <string name="accessibility_quick_settings_location_battery_saving">位置信息：低耗电量。</string>
