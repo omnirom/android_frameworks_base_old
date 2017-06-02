@@ -430,7 +430,6 @@ public class PhoneStatusBar extends BaseStatusBar implements DemoMode,
     private int mInitialTouchY;
     private IPowerManager mPower;
     private boolean mDoubleTabSleep;
-    private boolean mOmniSwitchRecents;
     private boolean mHideLockscreenArtwork;
     private StatusBarHeaderMachine mStatusBarHeaderMachine;
 

@@ -92,6 +92,7 @@ import com.android.internal.messages.SystemMessageProto.SystemMessage;
 import com.android.internal.statusbar.IStatusBarService;
 import com.android.internal.statusbar.StatusBarIcon;
 import com.android.internal.widget.LockPatternUtils;
+import com.android.internal.util.omni.OmniSwitchConstants;
 import com.android.keyguard.KeyguardHostView.OnDismissAction;
 import com.android.keyguard.KeyguardUpdateMonitor;
 import com.android.systemui.DejankUtils;
@@ -277,6 +278,9 @@ public abstract class BaseStatusBar extends SystemUI implements
     protected boolean mVrMode;
 
     private Set<String> mNonBlockablePkgs;
+
+    // Omni additions
+    protected boolean mOmniSwitchRecents;
 
     @Override  // NotificationData.Environment
     public boolean isDeviceProvisioned() {
@@ -1340,12 +1344,20 @@ public abstract class BaseStatusBar extends SystemUI implements
         public boolean onTouch(View v, MotionEvent event) {
             int action = event.getAction() & MotionEvent.ACTION_MASK;
             if (action == MotionEvent.ACTION_DOWN) {
-                preloadRecents();
+                if (mOmniSwitchRecents) {
+                    OmniSwitchConstants.preloadOmniSwitchRecents(mContext, UserHandle.CURRENT);
+                } else {
+                    preloadRecents();
+                }
             } else if (action == MotionEvent.ACTION_CANCEL) {
-                cancelPreloadingRecents();
+                if (!mOmniSwitchRecents) {
+                    cancelPreloadingRecents();
+                }
             } else if (action == MotionEvent.ACTION_UP) {
                 if (!v.isPressed()) {
-                    cancelPreloadingRecents();
+                    if (!mOmniSwitchRecents) {
+                        cancelPreloadingRecents();
+                    }
                 }
 
             }
