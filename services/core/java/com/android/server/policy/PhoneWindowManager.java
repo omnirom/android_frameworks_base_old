@@ -4140,10 +4140,11 @@ public class PhoneWindowManager implements WindowManagerPolicy {
     }
 
     private void preloadRecentApps() {
-        if (mOmniSwitchRecents) {
+        if (keyguardOn()) {
             return;
         }
-        if (keyguardOn()) {
+        if (mOmniSwitchRecents) {
+            OmniSwitchConstants.preloadOmniSwitchRecents(mContext, UserHandle.CURRENT);
             return;
         }
         mPreloadedRecentApps = true;
@@ -4154,10 +4155,10 @@ public class PhoneWindowManager implements WindowManagerPolicy {
     }
 
     private void cancelPreloadRecentApps() {
-        if (mOmniSwitchRecents) {
+        if (keyguardOn()) {
             return;
         }
-        if (keyguardOn()) {
+        if (mOmniSwitchRecents) {
             return;
         }
         if (mPreloadedRecentApps) {

@@ -33,7 +33,12 @@ public class OmniSwitchConstants {
     /**
      * Intent broadcast action for toogle the omniswitch overlay
      */
-    private static final String ACTION_TOGGLE_OVERLAY = APP_PACKAGE_NAME + ".ACTION_TOGGLE_OVERLAY";
+    private static final String ACTION_TOGGLE_OVERLAY2 = APP_PACKAGE_NAME + ".ACTION_TOGGLE_OVERLAY2";
+
+    /**
+     * Intent broadcast action for telling omniswitch to preload tasks
+     */
+    private static final String ACTION_PRELOAD_TASKS = APP_PACKAGE_NAME + ".ACTION_PRELOAD_TASKS";
 
     private static final String ACTION_RESTORE_HOME_STACK = APP_PACKAGE_NAME + ".ACTION_RESTORE_HOME_STACK";
 
@@ -61,12 +66,23 @@ public class OmniSwitchConstants {
      * @hide
      */
     public static void toggleOmniSwitchRecents(Context context, UserHandle user) {
-        final Intent showIntent = new Intent(OmniSwitchConstants.ACTION_TOGGLE_OVERLAY);
+        final Intent showIntent = new Intent(OmniSwitchConstants.ACTION_TOGGLE_OVERLAY2);
         context.sendBroadcastAsUser(showIntent, user);
     }
 
-    public static void restoreHomeStack(Context context, UserHandle user) {
+    /**
+     * @hide
+     */
+     public static void restoreHomeStack(Context context, UserHandle user) {
         final Intent showIntent = new Intent(OmniSwitchConstants.ACTION_RESTORE_HOME_STACK);
+        context.sendBroadcastAsUser(showIntent, user);
+    }
+
+    /**
+     * @hide
+     */
+     public static void preloadOmniSwitchRecents(Context context, UserHandle user) {
+        final Intent showIntent = new Intent(OmniSwitchConstants.ACTION_PRELOAD_TASKS);
         context.sendBroadcastAsUser(showIntent, user);
     }
 }
