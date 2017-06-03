@@ -434,10 +434,12 @@ public class FingerprintService extends SystemService implements IHwBinder.Death
         if (client != null && client.onAuthenticated(fingerId, groupId)) {
             removeClient(client);
         }
-        if (fingerId != 0) {
-            mPerformanceStats.accept++;
-        } else {
-            mPerformanceStats.reject++;
+        if (mPerformanceStats != null) {
+            if (fingerId != 0) {
+                mPerformanceStats.accept++;
+            } else {
+                mPerformanceStats.reject++;
+            }
         }
     }
 
@@ -819,9 +821,9 @@ public class FingerprintService extends SystemService implements IHwBinder.Death
                 mFailedAttempts++;
                 mTimedLockoutCleared = false;
                 final int lockoutMode = getLockoutMode();
-                if (lockoutMode == AuthenticationClient.LOCKOUT_PERMANENT) {
+                if (mPerformanceStats != null && lockoutMode == AuthenticationClient.LOCKOUT_PERMANENT) {
                     mPerformanceStats.permanentLockout++;
-                } else if (lockoutMode == AuthenticationClient.LOCKOUT_TIMED) {
+                } else if (mPerformanceStats != null && lockoutMode == AuthenticationClient.LOCKOUT_TIMED) {
                     mPerformanceStats.lockout++;
                 }
 
