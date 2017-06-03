@@ -292,10 +292,12 @@ public class FingerprintService extends SystemService implements IBinder.DeathRe
         if (client != null && client.onAuthenticated(fingerId, groupId)) {
             removeClient(client);
         }
-        if (fingerId != 0) {
-            mPerformanceStats.accept++;
-        } else {
-            mPerformanceStats.reject++;
+        if (mPerformanceStats != null) {
+            if (fingerId != 0) {
+                mPerformanceStats.accept++;
+            } else {
+                mPerformanceStats.reject++;
+            }
         }
     }
 
