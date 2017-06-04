@@ -25,6 +25,7 @@ import android.content.pm.PackageManager;
 import android.os.Environment;
 import android.os.Process;
 import android.os.storage.StorageManager;
+import android.os.SystemProperties;
 import android.util.ArrayMap;
 import android.util.ArraySet;
 import android.util.Slog;
@@ -392,6 +393,17 @@ public class SystemConfig {
                         Slog.w(TAG, "<unavailable-feature> without name in " + permFile + " at "
                                 + parser.getPositionDescription());
                     } else {
+                        String fprop = parser.getAttributeValue(null, "prop");
+                        if (fprop != null) {
+                            boolean propEnable = SystemProperties.get(fprop, false);
+                            if (!propEnable) {
+                                mUnavailableFeatures.add(fname);
+                            }
+                            else {
+                                XmlUtils.skipCurrentTag(parser);
+                                continue;
+                            }
+                        }
                         mUnavailableFeatures.add(fname);
                     }
                     XmlUtils.skipCurrentTag(parser);
