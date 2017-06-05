@@ -257,9 +257,9 @@ public class QSAnimator implements Callback, PageListener, Listener, OnLayoutCha
             mTranslationXAnimator = translationXBuilder.build();
             mTranslationYAnimator = translationYBuilder.build();
         } else {
-            mFirstPageAnimator = new TouchAnimator.Builder()
+            mFirstPageAnimator = firstPageBuilder
                 .addFloat(mQuickQsPanel, "alpha", 1, 0)
-                .setListener(mNonFirstPageListener)
+                .setListener(this)
                 .setEndDelay(.5f)
                 .build();
         }
@@ -301,7 +301,7 @@ public class QSAnimator implements Callback, PageListener, Listener, OnLayoutCha
             return;
         }
         mLastPosition = position;
-        if (mOnFirstPage && mAllowFancy) {
+        if (mOnFirstPage) {
             mQuickQsPanel.setAlpha(1);
             mFirstPageAnimator.setPosition(position);
             mFirstPageDelayedAnimator.setPosition(position);
