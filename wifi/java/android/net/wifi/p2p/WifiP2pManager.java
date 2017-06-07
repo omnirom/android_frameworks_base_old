@@ -578,6 +578,14 @@ public class WifiP2pManager {
     /** @hide */
     public static final int RESPONSE_DEVICE_INFO                    = BASE + 98;
 
+    /** @hide */
+    public static final int SET_WFDR2_INFO                          = BASE + 99;
+    /** @hide */
+    public static final int SET_WFDR2_INFO_FAILED                   = BASE + 100;
+    /** @hide */
+    public static final int SET_WFDR2_INFO_SUCCEEDED                = BASE + 101;
+
+
     /**
      * Create a new WifiP2pManager instance. Applications use
      * {@link android.content.Context#getSystemService Context.getSystemService()} to retrieve
@@ -928,6 +936,7 @@ public class WifiP2pManager {
                     case SET_DEVICE_NAME_FAILED:
                     case DELETE_PERSISTENT_GROUP_FAILED:
                     case SET_WFD_INFO_FAILED:
+                    case SET_WFDR2_INFO_FAILED:
                     case START_WPS_FAILED:
                     case START_LISTEN_FAILED:
                     case STOP_LISTEN_FAILED:
@@ -956,6 +965,7 @@ public class WifiP2pManager {
                     case SET_DEVICE_NAME_SUCCEEDED:
                     case DELETE_PERSISTENT_GROUP_SUCCEEDED:
                     case SET_WFD_INFO_SUCCEEDED:
+                    case SET_WFDR2_INFO_SUCCEEDED:
                     case START_WPS_SUCCEEDED:
                     case START_LISTEN_SUCCEEDED:
                     case STOP_LISTEN_SUCCEEDED:
@@ -1636,7 +1646,18 @@ public class WifiP2pManager {
         c.mAsyncChannel.sendMessage(SET_WFD_INFO, 0, c.putListener(listener), wfdInfo);
     }
 
-
+    /** @hide */
+    public void setWFDR2Info(
+            Channel c, WifiP2pWfdInfo wfdInfo,
+            ActionListener listener) {
+        checkChannel(c);
+        try {
+            mService.checkConfigureWifiDisplayPermission();
+        } catch (RemoteException e) {
+            e.rethrowFromSystemServer();
+        }
+        c.mAsyncChannel.sendMessage(SET_WFDR2_INFO, 0, c.putListener(listener), wfdInfo);
+    }
     /**
      * Delete a stored persistent group from the system settings.
      *
