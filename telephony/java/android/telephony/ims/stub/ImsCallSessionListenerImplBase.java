@@ -206,11 +206,11 @@ public class ImsCallSessionListenerImplBase extends IImsCallSessionListener.Stub
      *                      constants defined in {@link android.telephony.ServiceState}.  For
      *                      example {@link android.telephony.ServiceState#RIL_RADIO_TECHNOLOGY_LTE}.
      */
-    @Override
+    /*@Override
     public void callSessionMayHandover(IImsCallSession session, int srcAccessTech,
             int targetAccessTech) {
         // no-op
-    }
+    }*/
 
     /**
      * Notifies of handover information for this call
@@ -226,6 +226,12 @@ public class ImsCallSessionListenerImplBase extends IImsCallSessionListener.Stub
     public void callSessionHandoverFailed(IImsCallSession session, int srcAccessTech,
             int targetAccessTech,
             ImsReasonInfo reasonInfo) {
+        // no-op
+    }
+
+    @Override
+    public void callSessionMayHandover(IImsCallSession session, int srcAccessTech,
+            int targetAccessTech) {
         // no-op
     }
 
