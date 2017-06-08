@@ -373,6 +373,20 @@ public class ImsCallSession {
         }
 
         /**
+         * Called when session access technology may change to LTE soon but mobile data being off
+         * may block this handover.
+         *
+         * @param session IMS session object
+         * @param srcAccessTech original access technology, e.g. WiFi
+         * @param targetAccessTech new access technology, e.g. LTE
+         */
+        public void callSessionMayHandover(ImsCallSession session,
+                                        int srcAccessTech, int targetAccessTech) {
+            // no-op
+        }
+
+
+        /**
          * Called when TTY mode of remote party changed
          *
          * @param session IMS session object
@@ -1230,6 +1244,20 @@ public class ImsCallSession {
             if (mListener != null) {
                 mListener.callSessionHandoverFailed(ImsCallSession.this, srcAccessTech,
                         targetAccessTech, reasonInfo);
+            }
+        }
+
+
+        /**
+         * Called when session access technology may change to LTE soon but mobile data being off
+         * may block this handover.
+         */
+        @Override
+        public void callSessionMayHandover(IImsCallSession session,
+                                              int srcAccessTech, int targetAccessTech) {
+            if (mListener != null) {
+                mListener.callSessionMayHandover(ImsCallSession.this, srcAccessTech,
+                        targetAccessTech);
             }
         }
 

@@ -212,6 +212,12 @@ public class ImsCallSessionListenerImplBase extends IImsCallSessionListener.Stub
         // no-op
     }
 
+    @Override
+    public void callSessionMayHandover(IImsCallSession session, int srcAccessTech,
+            int targetAccessTech) {
+        // no-op
+    }
+
     /**
      * Notifies the TTY mode change by remote party.
      *
