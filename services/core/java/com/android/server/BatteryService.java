@@ -834,16 +834,14 @@ public final class BatteryService extends SystemService {
         public void updateLightsLocked() {
             final int level = mBatteryProps.batteryLevel;
             final int status = mBatteryProps.batteryStatus;
-            if (!mLightEnabled) {
+            if (!mLightEnabled || (mLightOnlyFullyCharged &&
+                    status == BatteryManager.BATTERY_STATUS_CHARGING)) {
                 // No lights if explicitly disabled
                 mBatteryLight.turnOff();
             } else if (level < mLowBatteryWarningLevel) {
                 if (status == BatteryManager.BATTERY_STATUS_CHARGING) {
                     // Solid red when battery is charging
                     mBatteryLight.setColor(mBatteryLowARGB);
-                    if (mLightOnlyFullyCharged) {
-                        mBatteryLight.turnOff();
-                    }
                 } else if (mLedPulseEnabled) {
                     // Flash red when battery is low and not charging
                     mBatteryLight.setFlashing(mBatteryLowARGB, Light.LIGHT_FLASH_TIMED,
@@ -861,16 +859,10 @@ public final class BatteryService extends SystemService {
                     } else {
                         // Battery is full or charging and nearly full
                         mBatteryLight.setColor(mBatteryFullARGB);
-                        if (mLightOnlyFullyCharged) {
-                            mBatteryLight.turnOff();
-                        }
                     }
                 } else {
                     // Battery is charging and halfway full
                     mBatteryLight.setColor(mBatteryMediumARGB);
-                    if (mLightOnlyFullyCharged) {
-                        mBatteryLight.turnOff();
-                    }
                 }
             } else {
                 // No lights if not charging and not low
