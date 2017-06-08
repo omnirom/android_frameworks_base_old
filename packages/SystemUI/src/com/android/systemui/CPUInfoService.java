@@ -20,6 +20,7 @@ import android.app.Service;
 import android.content.Context;
 import android.content.Intent;
 import android.graphics.Canvas;
+import android.graphics.Color;
 import android.graphics.Paint;
 import android.graphics.PixelFormat;
 import android.graphics.Rect;
@@ -99,44 +100,37 @@ public class CPUInfoService extends Service {
 
         CPUView(Context c) {
             super(c);
-
-            setPadding(4, 4, 4, 4);
-            //setBackgroundResource(com.android.internal.R.drawable.load_average_background);
-
-            // Need to scale text size by density...  but we won't do it
-            // linearly, because with higher dps it is nice to squeeze the
-            // text a bit to fit more of it.  And with lower dps, trying to
-            // go much smaller will result in unreadable text.
-            int textSize = 10;
             float density = c.getResources().getDisplayMetrics().density;
-            if (density < 1) {
-                textSize = 9;
-            } else {
-                textSize = (int)(12*density);
-                if (textSize < 10) {
-                    textSize = 10;
-                }
-            }
+            int paddingPx = Math.round(5 * density);
+            setPadding(paddingPx, paddingPx, paddingPx, paddingPx);
+            setBackgroundColor(Color.argb(0x40, 0, 0, 0));
+
+            final int textSize = Math.round(14 * density);
+
             mOnlinePaint = new Paint();
             mOnlinePaint.setAntiAlias(true);
             mOnlinePaint.setTextSize(textSize);
-            mOnlinePaint.setARGB(255, 255, 255, 255);
+            mOnlinePaint.setColor(Color.WHITE);
+            mOnlinePaint.setShadowLayer(5.0f, 0.0f, 0.0f, Color.BLACK);
+
 
             mOfflinePaint = new Paint();
             mOfflinePaint.setAntiAlias(true);
             mOfflinePaint.setTextSize(textSize);
-            mOfflinePaint.setARGB(255, 255, 0, 0);
+            mOfflinePaint.setColor(Color.RED);
+            mOfflinePaint.setShadowLayer(5.0f, 0.0f, 0.0f, Color.BLACK);
 
             mLpPaint = new Paint();
             mLpPaint.setAntiAlias(true);
             mLpPaint.setTextSize(textSize);
-            mLpPaint.setARGB(255, 0, 255, 0);
+            mLpPaint.setColor(Color.GREEN);
+            mLpPaint.setShadowLayer(5.0f, 0.0f, 0.0f, Color.BLACK);
 
             mAscent = mOnlinePaint.ascent();
             float descent = mOnlinePaint.descent();
             mFH = (int)(descent - mAscent + .5f);
 
-            final String maxWidthStr="cpuX xxxxxxxxxxxxxx 1700000";
+            final String maxWidthStr="cpuX interactive 0000000";
             mMaxWidth = (int)mOnlinePaint.measureText(maxWidthStr);
 
             updateDisplay();
@@ -213,7 +207,7 @@ public class CPUInfoService extends Service {
             final int NW = mNumCpus;
 
             int neededWidth = mPaddingLeft + mPaddingRight + mMaxWidth;
-            int neededHeight = mPaddingTop + mPaddingBottom + (mFH*(1+NW));
+            int neededHeight = mPaddingTop + mPaddingBottom + mFH * NW;
             if (neededWidth != mNeededWidth || neededHeight != mNeededHeight) {
                 mNeededWidth = neededWidth;
                 mNeededHeight = neededHeight;
@@ -300,7 +294,7 @@ public class CPUInfoService extends Service {
 
         mView = new CPUView(this);
         WindowManager.LayoutParams params = new WindowManager.LayoutParams(
-            WindowManager.LayoutParams.MATCH_PARENT,
+            WindowManager.LayoutParams.WRAP_CONTENT,
             WindowManager.LayoutParams.WRAP_CONTENT,
             WindowManager.LayoutParams.TYPE_SECURE_SYSTEM_OVERLAY,
             WindowManager.LayoutParams.FLAG_NOT_FOCUSABLE|
