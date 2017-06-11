@@ -1,0 +1,21 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "a3c45537_6206b82f",
+        "filename": "telephony/java/android/telephony/ServiceState.java",
+        "patchSetId": 2
+      },
+      "lineNbr": 163,
+      "author": {
+        "id": 1000026
+      },
+      "writtenOn": "2017-06-11T14:05:55Z",
+      "side": 1,
+      "message": "whity!",
+      "revId": "b735c62066ac428acd4ea6509bf7bb55277ff2f0",
+      "serverId": "56841c99-7c94-43d4-bf0b-cb4707e66d55",
+      "unresolved": false
+    }
+  ]
+}
