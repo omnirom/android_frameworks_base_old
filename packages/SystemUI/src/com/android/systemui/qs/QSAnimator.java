@@ -262,6 +262,10 @@ public class QSAnimator implements Callback, PageListener, Listener, OnLayoutCha
                 .setListener(this)
                 .setEndDelay(.5f)
                 .build();
+            View brightness = mQsPanel.getBrightnessView();
+            if (brightness != null) {
+                mAllViews.add(brightness);
+            }
         }
         mNonfirstPageAnimator = new TouchAnimator.Builder()
                 .addFloat(mQuickQsPanel, "alpha", 1, 0)
