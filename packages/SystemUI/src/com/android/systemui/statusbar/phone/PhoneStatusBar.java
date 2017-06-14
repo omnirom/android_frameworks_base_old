@@ -433,6 +433,7 @@ public class PhoneStatusBar extends BaseStatusBar implements DemoMode,
     private boolean mDoubleTabSleep;
     private boolean mHideLockscreenArtwork;
     private StatusBarHeaderMachine mStatusBarHeaderMachine;
+    private int mLongPressOnAppSwitchBehavior;
 
     // for disabling the status bar
     int mDisabled1 = 0;
@@ -590,6 +591,10 @@ public class PhoneStatusBar extends BaseStatusBar implements DemoMode,
             mContext.getContentResolver().registerContentObserver(Settings.System.getUriFor(
                     Settings.System.LOCK_CLOCK_DISPLAY),
                     false, this, UserHandle.USER_ALL);
+            mContext.getContentResolver().registerContentObserver(Settings.System.getUriFor(
+                    Settings.System.BUTTON_LONG_PRESS_RECENTS),
+                    false, this, UserHandle.USER_ALL);
+
             update();
         }
 
@@ -618,8 +623,9 @@ public class PhoneStatusBar extends BaseStatusBar implements DemoMode,
             mOmniSwitchRecents = Settings.System.getIntForUser(
                     mContext.getContentResolver(), Settings.System.NAVIGATION_BAR_RECENTS, 0, mCurrentUserId) == 1;
             mHideLockscreenArtwork = Settings.System.getIntForUser(
-                    mContext.getContentResolver(), Settings.System.LOCKSCREEN_HIDE_MEDIA, 0,
-                    mCurrentUserId) == 1;
+                    mContext.getContentResolver(), Settings.System.LOCKSCREEN_HIDE_MEDIA, 0, mCurrentUserId) == 1;
+            mLongPressOnAppSwitchBehavior = Settings.System.getIntForUser(
+                    mContext.getContentResolver(), Settings.System.BUTTON_LONG_PRESS_RECENTS, 0, mCurrentUserId);
 
             if (mNotificationPanel != null) {
                 mNotificationPanel.updateSettings();
@@ -5274,6 +5280,11 @@ public class PhoneStatusBar extends BaseStatusBar implements DemoMode,
     }
 
     private boolean handleLongPressRecents() {
+        if (mLongPressOnAppSwitchBehavior != 0 || !ActivityManager.supportsMultiWindow()) {
+            TaskUtils.toggleLastApp(mContext, mCurrentUserId);
+            return true;
+        }
+
         if (mRecents == null || !ActivityManager.supportsMultiWindow()
                 || !getComponent(Divider.class).getView().getSnapAlgorithm()
                 .isSplitScreenFeasible()) {
