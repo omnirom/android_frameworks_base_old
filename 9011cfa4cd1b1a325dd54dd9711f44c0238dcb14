@@ -1,0 +1,27 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "6cf81759_b1f2fb52",
+        "filename": "packages/SystemUI/res/values/config.xml",
+        "patchSetId": 3
+      },
+      "lineNbr": 42,
+      "author": {
+        "id": 1001823
+      },
+      "writtenOn": "2017-06-14T16:43:50Z",
+      "side": 1,
+      "message": "always enable like this? or leave it to false and override in a device specific overlay?",
+      "range": {
+        "startLine": 42,
+        "startChar": 4,
+        "endLine": 42,
+        "endChar": 61
+      },
+      "revId": "9011cfa4cd1b1a325dd54dd9711f44c0238dcb14",
+      "serverId": "56841c99-7c94-43d4-bf0b-cb4707e66d55",
+      "unresolved": false
+    }
+  ]
+}
