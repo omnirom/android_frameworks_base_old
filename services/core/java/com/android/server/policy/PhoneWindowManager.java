@@ -377,9 +377,6 @@ public class PhoneWindowManager implements WindowManagerPolicy {
     // Vibrator pattern for haptic feedback of a context click.
     long[] mContextClickVibePattern;
 
-    /** If true, hitting shift & menu will broadcast Intent.ACTION_BUG_REPORT */
-    boolean mEnableShiftMenuBugReports = false;
-
     boolean mSafeMode;
     WindowState mStatusBar = null;
     int mStatusBarHeight;
@@ -767,15 +764,18 @@ public class PhoneWindowManager implements WindowManagerPolicy {
     private boolean mLongPressBackConsumed;
     private boolean mOmniSwitchRecents;
     private boolean mSwapBackAndRecents;
+    private boolean mSwapMenuAndRecents;
 
     private int mPressOnAppSwitchBehavior;
     private int mPressOnBackBehavior;
-    private boolean mBackDoCustomAction;
-    private boolean mAppSwitchDoCustomAction;
+    private int mPressOnMenuBehavior;
+    private boolean mDoCustomAction;
 
     private static final int KEY_ACTION_NOTHING = 0;
     private static final int KEY_ACTION_APP_SWITCH = 1;
     private static final int KEY_ACTION_BACK = 2;
+    private static final int KEY_ACTION_MENU = 3;
+
     int mUserRotationAngles = -1;
 
     // constants for rotation bits
@@ -809,6 +809,7 @@ public class PhoneWindowManager implements WindowManagerPolicy {
 
     private static final int MSG_DISPATCH_VOLKEY_WITH_WAKE_LOCK = 21;
     private static final int MSG_APP_SWITCH_LONG_PRESS = 22;
+    private static final int MSG_MENU_LONG_PRESS = 23;
 
     private class PolicyHandler extends Handler {
         @Override
@@ -876,6 +877,9 @@ public class PhoneWindowManager implements WindowManagerPolicy {
                     break;
                 case MSG_APP_SWITCH_LONG_PRESS:
                     appSwitchLongPress();
+                    break;
+                case MSG_MENU_LONG_PRESS:
+                    handleLongPressOnMenu();
                     break;
                 case MSG_DISPOSE_INPUT_CONSUMER:
                     disposeInputConsumer((InputConsumer) msg.obj);
@@ -974,7 +978,9 @@ public class PhoneWindowManager implements WindowManagerPolicy {
             resolver.registerContentObserver(Settings.System.getUriFor(
                     Settings.System.ACCELEROMETER_ROTATION_ANGLES), false, this,
                     UserHandle.USER_ALL);
-
+            resolver.registerContentObserver(Settings.System.getUriFor(
+                    Settings.System.BUTTON_SWAP_MENU_RECENTS), false, this,
+                    UserHandle.USER_ALL);
             updateSettings();
         }
 
@@ -1356,6 +1362,18 @@ public class PhoneWindowManager implements WindowManagerPolicy {
         }
     }
 
+    private void cancelPendingAppSwitchAction() {
+        if (!mAppSwitchConsumed) {
+            mHandler.removeMessages(MSG_APP_SWITCH_LONG_PRESS);
+        }
+    }
+
+    private void cancelPendingMenuAction() {
+        if (!mMenuConsumed) {
+            mHandler.removeMessages(MSG_MENU_LONG_PRESS);
+        }
+    }
+
     private void backMultiPressAction(long eventTime, int count) {
         if (count >= PANIC_PRESS_BACK_COUNT) {
             switch (mPanicPressOnBackBehavior) {
@@ -1727,6 +1745,17 @@ public class PhoneWindowManager implements WindowManagerPolicy {
         }
     }
 
+    private void handleLongPressOnMenu() {
+        if (mLongPressOnMenuBehavior != LONG_PRESS_HOME_NOTHING) {
+            mMenuConsumed = true;
+            performHapticFeedbackLw(null, HapticFeedbackConstants.LONG_PRESS, false);
+
+            if (mLongPressOnMenuBehavior == LONG_PRESS_HOME_RECENT_SYSTEM_UI) {
+                doToggleRecentApps();
+            }
+        }
+    }
+
     private void handleLongPressOnHome(int deviceId) {
         if (mLongPressOnHomeBehavior == LONG_PRESS_HOME_NOTHING) {
             return;
@@ -1864,7 +1893,6 @@ public class PhoneWindowManager implements WindowManagerPolicy {
                 "PhoneWindowManager.mBroadcastWakeLock");
         mPowerKeyWakeLock = mPowerManager.newWakeLock(PowerManager.PARTIAL_WAKE_LOCK,
                 "PhoneWindowManager.mPowerKeyWakeLock");
-        mEnableShiftMenuBugReports = "1".equals(SystemProperties.get("ro.debuggable"));
         mSupportAutoRotation = mContext.getResources().getBoolean(
                 com.android.internal.R.bool.config_supportAutoRotation);
         mLidOpenRotation = readRotation(
@@ -2328,9 +2356,13 @@ public class PhoneWindowManager implements WindowManagerPolicy {
             mSwapBackAndRecents = Settings.System.getIntForUser(resolver,
                     Settings.System.BUTTON_SWAP_BACK_RECENTS, 0,
                     UserHandle.USER_CURRENT) != 0;
+            mSwapMenuAndRecents = Settings.System.getIntForUser(resolver,
+                    Settings.System.BUTTON_SWAP_MENU_RECENTS, 0,
+                    UserHandle.USER_CURRENT) != 0;
 
             mPressOnAppSwitchBehavior = mSwapBackAndRecents ? KEY_ACTION_BACK : KEY_ACTION_APP_SWITCH;
             mPressOnBackBehavior = mSwapBackAndRecents ? KEY_ACTION_APP_SWITCH : KEY_ACTION_BACK;
+            mPressOnMenuBehavior = mSwapMenuAndRecents ? (mSwapBackAndRecents ? KEY_ACTION_BACK : KEY_ACTION_APP_SWITCH) : KEY_ACTION_MENU;
         }
         synchronized (mWindowManagerFuncs.getWindowManagerLock()) {
             PolicyControl.reloadFromSetting(mContext);
@@ -3507,58 +3539,22 @@ public class PhoneWindowManager implements WindowManagerPolicy {
             }
             return -1;
         } else if (keyCode == KeyEvent.KEYCODE_MENU) {
-            // Hijack modified menu keys for debugging features
-            final int chordBug = KeyEvent.META_SHIFT_ON;
             if (!virtualKey) {
                 if (down) {
                     if (repeatCount == 0) {
-                        if (mLongPressOnMenuBehavior == LONG_PRESS_HOME_RECENT_SYSTEM_UI) {
-                            preloadRecentApps();
-                        }
-                        if (mEnableShiftMenuBugReports && (metaState & chordBug) == chordBug) {
-                            Intent intent = new Intent(Intent.ACTION_BUG_REPORT);
-                            mContext.sendOrderedBroadcastAsUser(intent, UserHandle.CURRENT,
-                                    null, null, null, 0, null, null);
-                            return -1;
-                        } else if (SHOW_PROCESSES_ON_ALT_MENU &&
-                                (metaState & KeyEvent.META_ALT_ON) == KeyEvent.META_ALT_ON) {
-                            Intent service = new Intent();
-                            service.setClassName(mContext, "com.android.server.LoadAverageService");
-                            ContentResolver res = mContext.getContentResolver();
-                            boolean shown = Settings.Global.getInt(
-                                    res, Settings.Global.SHOW_PROCESSES, 0) != 0;
-                            if (!shown) {
-                                mContext.startService(service);
-                            } else {
-                                mContext.stopService(service);
-                            }
-                            Settings.Global.putInt(
-                                    res, Settings.Global.SHOW_PROCESSES, shown ? 0 : 1);
+                        if (isCustomKeyAction(keyCode)) {
+                            doDownKeyAction(getCustomKeyAction(keyCode));
+                            mDoCustomAction = true;
                             return -1;
                         }
-                    } else if (longPress) {
-                        if (mLongPressOnMenuBehavior != LONG_PRESS_HOME_RECENT_SYSTEM_UI) {
-                            cancelPreloadRecentApps();
-                        }
-                        if (!keyguardOn) {
-                            handleLongPressOnMenu(event.getDeviceId());
-                        }
+                        doDownKeyAction(KEY_ACTION_MENU);
                     }
-                    return -1;
                 } else {
-                    if (mLongPressOnMenuBehavior == LONG_PRESS_HOME_RECENT_SYSTEM_UI) {
-                        cancelPreloadRecentApps();
-                    }
-                    if (canceled) {
+                    if (doUpKeyAction(keyCode, canceled) == -1) {
                         return -1;
                     }
-                    if (mMenuConsumed) {
-                        mMenuConsumed = false;
-                        return -1;
-                    }
-                    triggerVirtualKeypress(KeyEvent.KEYCODE_MENU);
-                    return -1;
                 }
+                return -1;
             }
         } else if (keyCode == KeyEvent.KEYCODE_SEARCH) {
             if (down) {
@@ -3575,65 +3571,39 @@ public class PhoneWindowManager implements WindowManagerPolicy {
             }
             return 0;
         } else if (keyCode == KeyEvent.KEYCODE_APP_SWITCH) {
-            if (down) {
-                if (repeatCount == 0) {
-                    if (mPressOnAppSwitchBehavior != KEY_ACTION_APP_SWITCH && !virtualKey) {
-                        if (mPressOnAppSwitchBehavior == KEY_ACTION_BACK) {
-                            triggerLongPressBackKey();
-                        }
-                        mAppSwitchDoCustomAction = true;
-                        return -1;
-                    }
-                    preloadRecentApps();
-                    triggerLongPressAppSwitchKey();
-                }
-            } else {
-                if (mAppSwitchDoCustomAction) {
-                    mAppSwitchDoCustomAction = false;
-                    if (mPressOnAppSwitchBehavior == KEY_ACTION_BACK) {
-                        if (handleLongPressBackKey()) {
+            if (!virtualKey) {
+                if (down) {
+                    if (repeatCount == 0) {
+                        if (isCustomKeyAction(keyCode)) {
+                            doDownKeyAction(getCustomKeyAction(keyCode));
+                            mDoCustomAction = true;
                             return -1;
                         }
+                        doDownKeyAction(KEY_ACTION_APP_SWITCH);
                     }
-                    if (!canceled) {
-                        performKeyAction(mPressOnAppSwitchBehavior);
+                } else {
+                    if (doUpKeyAction(keyCode, canceled) == -1) {
+                        return -1;
                     }
-                    return -1;
                 }
-                if (handleLongPressAppSwitchKey()) {
-                    return -1;
-                }
-                doToggleRecentApps();
             }
             return -1;
         } else if (keyCode == KeyEvent.KEYCODE_BACK) {
-            if (down) {
-                if (repeatCount == 0) {
-                    if (mPressOnBackBehavior != KEY_ACTION_BACK && !virtualKey) {
-                        if (mPressOnBackBehavior == KEY_ACTION_APP_SWITCH) {
-                            preloadRecentApps();
-                            triggerLongPressAppSwitchKey();
-                        }
-                        mBackDoCustomAction = true;
-                        return -1;
-                    }
-                    triggerLongPressBackKey();
-                }
-            } else {
-                if (mBackDoCustomAction) {
-                    mBackDoCustomAction = false;
-                    if (mPressOnBackBehavior == KEY_ACTION_APP_SWITCH) {
-                        if (handleLongPressAppSwitchKey()) {
+            if (!virtualKey) {
+                if (down) {
+                    if (repeatCount == 0) {
+                        if (isCustomKeyAction(keyCode)) {
+                            doDownKeyAction(getCustomKeyAction(keyCode));
+                            mDoCustomAction = true;
                             return -1;
                         }
+                        doDownKeyAction(KEY_ACTION_BACK);
                     }
-                    if (!canceled) {
-                        performKeyAction(mPressOnBackBehavior);
+                } else {
+                    if (doUpKeyAction(keyCode, canceled) == -1) {
+                        return -1;
                     }
-                    return -1;
-                }
-                if (handleLongPressBackKey()) {
-                    return -1;
+                    // back action is simple to continue and pass further
                 }
             }
         } else if (keyCode == KeyEvent.KEYCODE_N && event.isMetaPressed()) {
@@ -8782,65 +8752,18 @@ public class PhoneWindowManager implements WindowManagerPolicy {
             case KEY_ACTION_APP_SWITCH:
                 doToggleRecentApps();
                 break;
+            case KEY_ACTION_MENU:
+                triggerVirtualKeypress(KeyEvent.KEYCODE_MENU);
+                break;
             default:
                 break;
         }
     }
 
-    private void triggerLongPressBackKey() {
-        if (isStopLockTaskMode(true) || mBackKillEnabled) {
-            mLongPressBackConsumed = false;
-            mHandler.postDelayed(mBackLongPress, mBackKillTimeout);
-        }
-        if (hasLongPressOnBackBehavior()) {
-            mBackKeyHandled = false;
-            Message msg = mHandler.obtainMessage(MSG_BACK_LONG_PRESS);
-            msg.setAsynchronous(true);
-            mHandler.sendMessageDelayed(msg,
-                ViewConfiguration.get(mContext).getLongPressTimeout());
-        }
-    }
-
-    private boolean handleLongPressBackKey() {
-        cancelPendingBackKeyAction();
-        mHandler.removeCallbacks(mBackLongPress);
-        if (mBackKeyHandled) {
-            mBackKeyHandled = false;
-            return true;
-        }
-        if (mLongPressBackConsumed) {
-            mLongPressBackConsumed = false;
-            return true;
-        }
-        return false;
-    }
-
-    private void triggerLongPressAppSwitchKey() {
-        mAppSwitchConsumed = false;
-        Message msg = mHandler.obtainMessage(MSG_APP_SWITCH_LONG_PRESS);
-        msg.setAsynchronous(true);
-        mHandler.sendMessageDelayed(msg,
-            ViewConfiguration.get(mContext).getLongPressTimeout());
-    }
-
-    private void cancelPendingAppSwitchAction() {
-        if (!mAppSwitchConsumed) {
-            mHandler.removeMessages(MSG_APP_SWITCH_LONG_PRESS);
-        }
-    }
-
-    private boolean handleLongPressAppSwitchKey() {
-        cancelPendingAppSwitchAction();
-        if (mAppSwitchConsumed) {
-            mAppSwitchConsumed = false;
-            return true;
-        }
-        return false;
-    }
-
     private void appSwitchLongPress() {
         cancelPreloadRecentApps();
         mAppSwitchConsumed = true;
+        performHapticFeedbackLw(null, HapticFeedbackConstants.LONG_PRESS, false);
         boolean dockStatus = TaskUtils.isTaskDocked();
         if (dockStatus) {
             TaskUtils.undockTask();
@@ -8850,6 +8773,162 @@ public class PhoneWindowManager implements WindowManagerPolicy {
             // with OmniSwitch it will run restoreHomeStack
             showRecentApps(false, true);
         }
+    }
+
+    private void doDownKeyAction(int keyAction) {
+        if (keyAction == KEY_ACTION_APP_SWITCH) {
+            preloadRecentApps();
+            doStartLongPressKeyAction(keyAction);
+        }
+        if (keyAction == KEY_ACTION_BACK) {
+            doStartLongPressKeyAction(keyAction);
+        }
+        if (keyAction == KEY_ACTION_MENU) {
+            if (mLongPressOnMenuBehavior == LONG_PRESS_HOME_RECENT_SYSTEM_UI) {
+                preloadRecentApps();
+            }
+            doStartLongPressKeyAction(keyAction);
+        }
+    }
+
+    private void doStartLongPressKeyAction(int keyAction) {
+        if (keyAction == KEY_ACTION_APP_SWITCH) {
+            mAppSwitchConsumed = false;
+            Message msg = mHandler.obtainMessage(MSG_APP_SWITCH_LONG_PRESS);
+            triggerLongPressTimeoutMessage(msg);
+        }
+        if (keyAction == KEY_ACTION_BACK) {
+            if (isStopLockTaskMode(true) || mBackKillEnabled) {
+                mLongPressBackConsumed = false;
+                mHandler.postDelayed(mBackLongPress, mBackKillTimeout);
+            }
+            if (hasLongPressOnBackBehavior()) {
+                mBackKeyHandled = false;
+                Message msg = mHandler.obtainMessage(MSG_BACK_LONG_PRESS);
+                triggerLongPressTimeoutMessage(msg);
+            }
+        }
+        if (keyAction == KEY_ACTION_MENU) {
+            mMenuConsumed = false;
+            Message msg = mHandler.obtainMessage(MSG_MENU_LONG_PRESS);
+            triggerLongPressTimeoutMessage(msg);
+        }
+    }
+
+    private void triggerLongPressTimeoutMessage(Message msg) {
+        msg.setAsynchronous(true);
+        mHandler.sendMessageDelayed(msg,
+                ViewConfiguration.get(mContext).getLongPressTimeout());
+    }
+
+    private boolean doLongPressKeyAction(int keyAction) {
+        if (keyAction == KEY_ACTION_APP_SWITCH) {
+            cancelPendingAppSwitchAction();
+            if (mAppSwitchConsumed) {
+                mAppSwitchConsumed = false;
+                return true;
+            }
+            cancelPreloadRecentApps();
+        }
+        if (keyAction == KEY_ACTION_BACK) {
+            cancelPendingBackKeyAction();
+            mHandler.removeCallbacks(mBackLongPress);
+            if (mBackKeyHandled) {
+                mBackKeyHandled = false;
+                return true;
+            }
+            if (mLongPressBackConsumed) {
+                mLongPressBackConsumed = false;
+                return true;
+            }
+        }
+        if (keyAction == KEY_ACTION_MENU) {
+            cancelPendingMenuAction();
+            if (mMenuConsumed) {
+                mMenuConsumed = false;
+                return true;
+            }
+            cancelPreloadRecentApps();
+        }
+        return false;
+    }
+
+    private int doUpKeyAction(int keyCode, boolean canceled) {
+        if (keyCode == KeyEvent.KEYCODE_BACK) {
+            if (mDoCustomAction) {
+                mDoCustomAction = false;
+                if (doLongPressKeyAction(mPressOnBackBehavior)) {
+                    return -1;
+                }
+                if (!canceled) {
+                    performKeyAction(mPressOnBackBehavior);
+                }
+                return -1;
+            }
+            if (doLongPressKeyAction(KEY_ACTION_BACK)) {
+                return -1;
+            }
+            // normal back handling is just to pass down
+        }
+        if (keyCode == KeyEvent.KEYCODE_APP_SWITCH) {
+            if (mDoCustomAction) {
+                mDoCustomAction = false;
+                if (doLongPressKeyAction(mPressOnAppSwitchBehavior)) {
+                    return -1;
+                }
+                if (!canceled) {
+                    performKeyAction(mPressOnAppSwitchBehavior);
+                }
+                return -1;
+            }
+            if (doLongPressKeyAction(KEY_ACTION_APP_SWITCH)) {
+                return -1;
+            }
+            performKeyAction(KEY_ACTION_APP_SWITCH);
+        }
+        if (keyCode == KeyEvent.KEYCODE_MENU) {
+            if (mDoCustomAction) {
+                mDoCustomAction = false;
+                if (doLongPressKeyAction(mPressOnMenuBehavior)) {
+                    return -1;
+                }
+                if (!canceled) {
+                    performKeyAction(mPressOnMenuBehavior);
+                }
+                return -1;
+            }
+            if (doLongPressKeyAction(KEY_ACTION_MENU)) {
+                return -1;
+            }
+            performKeyAction(KEY_ACTION_MENU);
+        }
+        return 0;
+    }
+
+    private boolean isCustomKeyAction(int keyCode) {
+        if (keyCode == KeyEvent.KEYCODE_BACK) {
+            return mPressOnBackBehavior != KEY_ACTION_BACK;
+        }
+        if (keyCode == KeyEvent.KEYCODE_APP_SWITCH) {
+            return mPressOnAppSwitchBehavior != KEY_ACTION_APP_SWITCH;
+        }
+        if (keyCode == KeyEvent.KEYCODE_MENU) {
+            return mPressOnMenuBehavior != KEY_ACTION_MENU;
+        }
+        return false;
+    }
+
+    private int getCustomKeyAction(int keyCode) {
+        if (keyCode == KeyEvent.KEYCODE_BACK) {
+            return mPressOnBackBehavior;
+        }
+        if (keyCode == KeyEvent.KEYCODE_APP_SWITCH) {
+            return mPressOnAppSwitchBehavior;
+        }
+        if (keyCode == KeyEvent.KEYCODE_MENU) {
+            return mPressOnMenuBehavior;
+        }
+        return -1;
     }
 }
 
