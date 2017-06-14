@@ -4091,6 +4091,11 @@ public final class Settings {
         public static final String STATUS_BAR_LOGO = "status_bar_logo";
 
         /**
+         * @hide
+         */
+        public static final String BUTTON_SWAP_MENU_RECENTS = "button_swap_menu_recents";
+
+        /**
          * Settings to backup. This is here so that it's in the same place as the settings
          * keys and easy to update.
          *
