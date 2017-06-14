@@ -80,6 +80,44 @@ public class TaskUtils {
         return false;
     }
 
+    public static void toggleLastApp(Context context, int userId) {
+        String defaultHomePackage = resolveCurrentLauncherPackageForUser(
+                context, userId);
+        final ActivityManager am = (ActivityManager) context
+                .getSystemService(Activity.ACTIVITY_SERVICE);
+        final List<ActivityManager.RecentTaskInfo> tasks = am
+                .getRecentTasksForUser(5,
+                        ActivityManager.RECENT_IGNORE_UNAVAILABLE, userId);
+        // lets get enough tasks to find something to switch to
+        // Note, we'll only get as many as the system currently has - up to 5
+        int lastAppId = 0;
+        Intent lastAppIntent = null;
+        for (int i = 1; i < tasks.size() && lastAppIntent == null; i++) {
+            final String packageName = tasks.get(i).baseIntent.getComponent()
+                    .getPackageName();
+            if (!packageName.equals(defaultHomePackage)
+                    && !packageName.equals(SYSTEMUI_PACKAGE)) {
+                final ActivityManager.RecentTaskInfo info = tasks.get(i);
+                lastAppId = info.id;
+                lastAppIntent = info.baseIntent;
+            }
+        }
+        if (lastAppId > 0) {
+            final ActivityOptions opts = ActivityOptions.makeCustomAnimation(
+                    context, com.android.internal.R.anim.last_app_in,
+                    com.android.internal.R.anim.last_app_out);
+            am.moveTaskToFront(lastAppId,
+                    ActivityManager.MOVE_TASK_NO_USER_ACTION, opts.toBundle());
+        } else if (lastAppIntent != null) {
+            // last task is dead, restart it.
+            lastAppIntent.addFlags(Intent.FLAG_ACTIVITY_LAUNCHED_FROM_HISTORY);
+            try {
+                context.startActivityAsUser(lastAppIntent, UserHandle.CURRENT);
+            } catch (ActivityNotFoundException e) {
+            }
+        }
+    }
+
     private static String resolveCurrentLauncherPackageForUser(Context context,
             int userId) {
         final Intent launcherIntent = new Intent(Intent.ACTION_MAIN)
@@ -105,12 +143,8 @@ public class TaskUtils {
         return -1;
     }
 
-    public static boolean isMultiStackEnabled() {
-        return ActivityManager.supportsMultiWindow();
-    }
-
     public static boolean isTaskDocked() {
-        if (isMultiStackEnabled()) {
+        if (ActivityManager.supportsMultiWindow()) {
             try {
                 return WindowManagerGlobal.getWindowManagerService().getDockedStackSide() != WindowManager.DOCKED_INVALID;
             } catch (RemoteException e) {
@@ -136,7 +170,7 @@ public class TaskUtils {
      * recents is enabled or not
      */
     public static void dockTopTask(Context context) {
-        if (isMultiStackEnabled() && !isTaskDocked()) {
+        if (ActivityManager.supportsMultiWindow() && !isTaskDocked()) {
             try {
                 int taskId = getRunningTask(context);
                 if (taskId != -1) {
