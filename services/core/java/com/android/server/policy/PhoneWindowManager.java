@@ -767,6 +767,7 @@ public class PhoneWindowManager implements WindowManagerPolicy {
     private boolean mSwapMenuAndRecents;
 
     private int mPressOnAppSwitchBehavior;
+    private int mLongPressOnAppSwitchBehavior;
     private int mPressOnBackBehavior;
     private int mPressOnMenuBehavior;
     private boolean mDoCustomAction;
@@ -775,6 +776,8 @@ public class PhoneWindowManager implements WindowManagerPolicy {
     private static final int KEY_ACTION_APP_SWITCH = 1;
     private static final int KEY_ACTION_BACK = 2;
     private static final int KEY_ACTION_MENU = 3;
+    private static final int KEY_ACTION_SPLIT = 4;
+    private static final int KEY_ACTION_LAST_APP = 5;
 
     int mUserRotationAngles = -1;
 
@@ -981,6 +984,10 @@ public class PhoneWindowManager implements WindowManagerPolicy {
             resolver.registerContentObserver(Settings.System.getUriFor(
                     Settings.System.BUTTON_SWAP_MENU_RECENTS), false, this,
                     UserHandle.USER_ALL);
+            resolver.registerContentObserver(Settings.System.getUriFor(
+                    Settings.System.BUTTON_LONG_PRESS_RECENTS), false, this,
+                    UserHandle.USER_ALL);
+
             updateSettings();
         }
 
@@ -2359,8 +2366,12 @@ public class PhoneWindowManager implements WindowManagerPolicy {
             mSwapMenuAndRecents = Settings.System.getIntForUser(resolver,
                     Settings.System.BUTTON_SWAP_MENU_RECENTS, 0,
                     UserHandle.USER_CURRENT) != 0;
+            mLongPressOnAppSwitchBehavior = Settings.System.getIntForUser(resolver,
+                    Settings.System.BUTTON_LONG_PRESS_RECENTS, 0,
+                    UserHandle.USER_CURRENT);
 
             mPressOnAppSwitchBehavior = mSwapBackAndRecents ? KEY_ACTION_BACK : KEY_ACTION_APP_SWITCH;
+            mLongPressOnAppSwitchBehavior = !TaskUtils.isMultiStackEnabled() ? KEY_ACTION_LAST_APP : mLongPressOnAppSwitchBehavior;
             mPressOnBackBehavior = mSwapBackAndRecents ? KEY_ACTION_APP_SWITCH : KEY_ACTION_BACK;
             mPressOnMenuBehavior = mSwapMenuAndRecents ? (mSwapBackAndRecents ? KEY_ACTION_BACK : KEY_ACTION_APP_SWITCH) : KEY_ACTION_MENU;
         }
@@ -8754,6 +8765,20 @@ public class PhoneWindowManager implements WindowManagerPolicy {
             case KEY_ACTION_MENU:
                 triggerVirtualKeypress(KeyEvent.KEYCODE_MENU);
                 break;
+            case KEY_ACTION_SPLIT:
+                boolean dockStatus = TaskUtils.isTaskDocked();
+                if (dockStatus) {
+                    TaskUtils.undockTask();
+                } else {
+                    TaskUtils.dockTopTask(mContext);
+                    // if OmniSwitch is disabled this will trigger AOSP recent same as from soft keys
+                    // with OmniSwitch it will run restoreHomeStack
+                    showRecentApps(false, true);
+                }
+                break;
+            case KEY_ACTION_LAST_APP:
+                TaskUtils.toggleLastApp(mContext, mCurrentUserId);
+                break;
             default:
                 break;
         }
@@ -8763,15 +8788,7 @@ public class PhoneWindowManager implements WindowManagerPolicy {
         cancelPreloadRecentApps();
         mAppSwitchConsumed = true;
         performHapticFeedbackLw(null, HapticFeedbackConstants.LONG_PRESS, false);
-        boolean dockStatus = TaskUtils.isTaskDocked();
-        if (dockStatus) {
-            TaskUtils.undockTask();
-        } else {
-            TaskUtils.dockTopTask(mContext);
-            // if OmniSwitch is disabled this will trigger AOSP recent same as from soft keys
-            // with OmniSwitch it will run restoreHomeStack
-            showRecentApps(false, true);
-        }
+        performKeyAction(mLongPressOnAppSwitchBehavior);
     }
 
     private void doDownKeyAction(int keyAction) {
