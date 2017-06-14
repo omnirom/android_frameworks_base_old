@@ -1,0 +1,55 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "5304a56c_ec1f7d5b",
+        "filename": "packages/SystemUI/res/drawable/ic_qs_signal_hp.xml",
+        "patchSetId": 2
+      },
+      "lineNbr": 3,
+      "author": {
+        "id": 1000026
+      },
+      "writtenOn": "2017-06-14T00:54:10Z",
+      "side": 1,
+      "message": "same as for the other vector",
+      "revId": "8687a4853e36687f84b7de26aa734e5d84b21b04",
+      "serverId": "56841c99-7c94-43d4-bf0b-cb4707e66d55",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "7e7b012f_f64ce0f6",
+        "filename": "packages/SystemUI/res/drawable/stat_sys_data_fully_connected_hp.xml",
+        "patchSetId": 2
+      },
+      "lineNbr": 3,
+      "author": {
+        "id": 1000026
+      },
+      "writtenOn": "2017-06-14T00:54:10Z",
+      "side": 1,
+      "message": "have you changed it? - only if yes you can add our copyright",
+      "revId": "8687a4853e36687f84b7de26aa734e5d84b21b04",
+      "serverId": "56841c99-7c94-43d4-bf0b-cb4707e66d55",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "438f6720_b7f0a0e2",
+        "filename": "packages/SystemUI/res/values/strings.xml",
+        "patchSetId": 2
+      },
+      "lineNbr": 342,
+      "author": {
+        "id": 1000026
+      },
+      "writtenOn": "2017-06-14T00:54:10Z",
+      "side": 1,
+      "message": "should be in custom_strings.xml - all changes to AOSP in resources should be separated so that we can always see what we added",
+      "revId": "8687a4853e36687f84b7de26aa734e5d84b21b04",
+      "serverId": "56841c99-7c94-43d4-bf0b-cb4707e66d55",
+      "unresolved": false
+    }
+  ]
+}
