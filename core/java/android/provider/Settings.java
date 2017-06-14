@@ -4101,6 +4101,13 @@ public final class Settings {
         public static final String BUTTON_SWAP_MENU_RECENTS = "button_swap_menu_recents";
 
         /**
+         * 0 for split screen
+         * 1 for switch to last app
+         * @hide
+         */
+        public static final String BUTTON_LONG_PRESS_RECENTS = "button_long_press_recents";
+
+        /**
          * Settings to backup. This is here so that it's in the same place as the settings
          * keys and easy to update.
          *

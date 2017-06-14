@@ -115,6 +115,9 @@
 
   <java-symbol type="bool" name="config_fingerprintRemoveClientOnCancel" />
 
+  <java-symbol type="anim" name="last_app_in" />
+  <java-symbol type="anim" name="last_app_out" />
+
   <!-- CAF -->
   <!-- SIM contact batch operation -->
   <java-symbol type="bool" name="config_sim_phonebook_batch_operation" />
