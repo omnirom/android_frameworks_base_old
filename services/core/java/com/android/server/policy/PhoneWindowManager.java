@@ -461,9 +461,6 @@ public class PhoneWindowManager implements WindowManagerPolicy {
     // Vibrator pattern for haptic feedback of a context click.
     long[] mContextClickVibePattern;
 
-    /** If true, hitting shift & menu will broadcast Intent.ACTION_BUG_REPORT */
-    boolean mEnableShiftMenuBugReports = false;
-
     /** Controller that supports enabling an AccessibilityService by holding down the volume keys */
     private AccessibilityShortcutController mAccessibilityShortcutController;
 
@@ -832,11 +829,13 @@ public class PhoneWindowManager implements WindowManagerPolicy {
     private boolean mVolumeMusicControl;
     private boolean mVolumeWakeActive;
     private boolean mSwapBackAndRecents;
+    private boolean mSwapMenuAndRecents;
     private int mPressOnAppSwitchBehavior;
     private int mPressOnBackBehavior;
+    private int mPressOnMenuBehavior;
     private boolean mDoCustomAction;
     private boolean mLongPressBackConsumed;
-    // Omni additions end
+    private boolean mMenuConsumed;
 
     // constants for rotation bits
     private static final int ROTATION_0_MODE = 1;
@@ -852,6 +851,7 @@ public class PhoneWindowManager implements WindowManagerPolicy {
     private static final int KEY_ACTION_LAST_APP = 5;
     private static final int KEY_ACTION_SLEEP = 6;
     private static final int KEY_ACTION_APP_SWITCH = 7;
+    // Omni additions end
 
     // Fallback actions by key code.
     private final SparseArray<KeyCharacterMap.FallbackAction> mFallbackActions =
@@ -886,12 +886,11 @@ public class PhoneWindowManager implements WindowManagerPolicy {
     private static final int MSG_ACCESSIBILITY_TV = 23;
     private static final int MSG_DISPATCH_BACK_KEY_TO_AUTOFILL = 24;
     private static final int MSG_DISPATCH_VOLKEY_WITH_WAKE_LOCK = 25;
-
     private static final int MSG_APP_SWITCH_LONG_PRESS = 26;
+    private static final int MSG_MENU_LONG_PRESS = 27;
 
     private static final int MSG_REQUEST_TRANSIENT_BARS_ARG_STATUS = 0;
     private static final int MSG_REQUEST_TRANSIENT_BARS_ARG_NAVIGATION = 1;
-
 
     private class PolicyHandler extends Handler {
         @Override
@@ -959,6 +958,9 @@ public class PhoneWindowManager implements WindowManagerPolicy {
                     break;
                 case MSG_APP_SWITCH_LONG_PRESS:
                     appSwitchLongPress();
+                    break;
+                case MSG_MENU_LONG_PRESS:
+                    handleLongPressOnMenu();
                     break;
                 case MSG_DISPOSE_INPUT_CONSUMER:
                     disposeInputConsumer((InputConsumer) msg.obj);
@@ -1070,6 +1072,9 @@ public class PhoneWindowManager implements WindowManagerPolicy {
                     UserHandle.USER_ALL);
             resolver.registerContentObserver(Settings.System.getUriFor(
                     Settings.System.BUTTON_SWAP_BACK_RECENTS), false, this,
+                    UserHandle.USER_ALL);
+            resolver.registerContentObserver(Settings.System.getUriFor(
+                    Settings.System.BUTTON_SWAP_MENU_RECENTS), false, this,
                     UserHandle.USER_ALL);
             updateSettings();
         }
@@ -1486,6 +1491,12 @@ public class PhoneWindowManager implements WindowManagerPolicy {
     private void cancelPendingAppSwitchAction() {
         if (!mAppSwitchConsumed) {
             mHandler.removeMessages(MSG_APP_SWITCH_LONG_PRESS);
+        }
+    }
+
+    private void cancelPendingMenuAction() {
+        if (!mMenuConsumed) {
+            mHandler.removeMessages(MSG_MENU_LONG_PRESS);
         }
     }
 
@@ -2042,7 +2053,6 @@ public class PhoneWindowManager implements WindowManagerPolicy {
                 "PhoneWindowManager.mBroadcastWakeLock");
         mPowerKeyWakeLock = mPowerManager.newWakeLock(PowerManager.PARTIAL_WAKE_LOCK,
                 "PhoneWindowManager.mPowerKeyWakeLock");
-        mEnableShiftMenuBugReports = "1".equals(SystemProperties.get("ro.debuggable"));
         mSupportAutoRotation = mContext.getResources().getBoolean(
                 com.android.internal.R.bool.config_supportAutoRotation);
         mLidOpenRotation = readRotation(
@@ -2532,9 +2542,13 @@ public class PhoneWindowManager implements WindowManagerPolicy {
             mSwapBackAndRecents = Settings.System.getIntForUser(resolver,
                     Settings.System.BUTTON_SWAP_BACK_RECENTS, 0,
                     UserHandle.USER_CURRENT) != 0;
+            mSwapMenuAndRecents = Settings.System.getIntForUser(resolver,
+                    Settings.System.BUTTON_SWAP_MENU_RECENTS, 0,
+                    UserHandle.USER_CURRENT) != 0;
 
             mPressOnAppSwitchBehavior = mSwapBackAndRecents ? KEY_ACTION_BACK : KEY_ACTION_APP_SWITCH;
             mPressOnBackBehavior = mSwapBackAndRecents ? KEY_ACTION_APP_SWITCH : KEY_ACTION_BACK;
+            mPressOnMenuBehavior = mSwapMenuAndRecents ? (mSwapBackAndRecents ? KEY_ACTION_BACK : KEY_ACTION_APP_SWITCH) : KEY_ACTION_MENU;
         }
         synchronized (mWindowManagerFuncs.getWindowManagerLock()) {
             PolicyControl.reloadFromSetting(mContext);
@@ -3685,14 +3699,16 @@ public class PhoneWindowManager implements WindowManagerPolicy {
             if (!virtualKey) {
                 if (down) {
                     if (repeatCount == 0) {
-                        mAppSwitchConsumed = false;
-                        preloadRecentApps();
-                    } else if ((event.getFlags() & KeyEvent.FLAG_LONG_PRESS) != 0) {
-                        handleLongPressOnMenu();
+                        if (isCustomKeyAction(keyCode)) {
+                            doDownKeyAction(getCustomKeyAction(keyCode));
+                            mDoCustomAction = true;
+                            return -1;
+                        }
+                        doDownKeyAction(KEY_ACTION_MENU);
                     }
                 } else {
-                    if (!mAppSwitchConsumed) {
-                        performKeyAction(KEY_ACTION_MENU);
+                    if (doUpKeyAction(keyCode, canceled) == -1) {
+                        return -1;
                     }
                 }
                 return -1;
@@ -9013,6 +9029,12 @@ public class PhoneWindowManager implements WindowManagerPolicy {
         if (keyAction == KEY_ACTION_BACK) {
             doStartLongPressKeyAction(keyAction);
         }
+        if (keyAction == KEY_ACTION_MENU) {
+            if (mLongPressOnMenuBehavior == 1) {
+                preloadRecentApps();
+            }
+            doStartLongPressKeyAction(keyAction);
+        }
     }
 
     private void doStartLongPressKeyAction(int keyAction) {
@@ -9024,6 +9046,11 @@ public class PhoneWindowManager implements WindowManagerPolicy {
         if (keyAction == KEY_ACTION_BACK) {
             mBackKeyHandled = false;
             Message msg = mHandler.obtainMessage(MSG_BACK_LONG_PRESS);
+            triggerLongPressTimeoutMessage(msg);
+        }
+        if (keyAction == KEY_ACTION_MENU) {
+            mMenuConsumed = false;
+            Message msg = mHandler.obtainMessage(MSG_MENU_LONG_PRESS);
             triggerLongPressTimeoutMessage(msg);
         }
     }
@@ -9053,6 +9080,14 @@ public class PhoneWindowManager implements WindowManagerPolicy {
                 mLongPressBackConsumed = false;
                 return true;
             }
+        }
+        if (keyAction == KEY_ACTION_MENU) {
+            cancelPendingMenuAction();
+            if (mMenuConsumed) {
+                mMenuConsumed = false;
+                return true;
+            }
+            cancelPreloadRecentApps();
         }
         return false;
     }
@@ -9090,6 +9125,22 @@ public class PhoneWindowManager implements WindowManagerPolicy {
             }
             performKeyAction(KEY_ACTION_APP_SWITCH);
         }
+        if (keyCode == KeyEvent.KEYCODE_MENU) {
+            if (mDoCustomAction) {
+                mDoCustomAction = false;
+                if (doLongPressKeyAction(mPressOnMenuBehavior)) {
+                    return -1;
+                }
+                if (!canceled) {
+                    performKeyAction(mPressOnMenuBehavior);
+                }
+                return -1;
+            }
+            if (doLongPressKeyAction(KEY_ACTION_MENU)) {
+                return -1;
+            }
+            performKeyAction(KEY_ACTION_MENU);
+        }
         return 0;
     }
 
@@ -9100,6 +9151,9 @@ public class PhoneWindowManager implements WindowManagerPolicy {
         if (keyCode == KeyEvent.KEYCODE_APP_SWITCH) {
             return mPressOnAppSwitchBehavior != KEY_ACTION_APP_SWITCH;
         }
+        if (keyCode == KeyEvent.KEYCODE_MENU) {
+            return mPressOnMenuBehavior != KEY_ACTION_MENU;
+        }
         return false;
     }
 
@@ -9109,6 +9163,9 @@ public class PhoneWindowManager implements WindowManagerPolicy {
         }
         if (keyCode == KeyEvent.KEYCODE_APP_SWITCH) {
             return mPressOnAppSwitchBehavior;
+        }
+        if (keyCode == KeyEvent.KEYCODE_MENU) {
+            return mPressOnMenuBehavior;
         }
         return -1;
     }

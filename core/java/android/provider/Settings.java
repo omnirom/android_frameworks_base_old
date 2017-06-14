@@ -4152,6 +4152,11 @@ public final class Settings {
         public static final String BUTTON_SWAP_BACK_RECENTS = "button_swap_back_recents";
 
         /**
+         * @hide
+         */
+        public static final String BUTTON_SWAP_MENU_RECENTS = "button_swap_menu_recents";
+
+        /**
          * Settings to backup. This is here so that it's in the same place as the settings
          * keys and easy to update.
          *
@@ -4348,6 +4353,7 @@ public final class Settings {
             PRIVATE_SETTINGS.add(NAVIGATION_BAR_IME_BUTTON);
             PRIVATE_SETTINGS.add(SHOW_BATTERY_IMAGE);
             PRIVATE_SETTINGS.add(BUTTON_SWAP_BACK_RECENTS);
+            PRIVATE_SETTINGS.add(BUTTON_SWAP_MENU_RECENTS);
         }
 
         /**
