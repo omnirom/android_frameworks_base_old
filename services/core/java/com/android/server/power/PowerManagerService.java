@@ -199,6 +199,10 @@ public final class PowerManagerService extends SystemService
     private DreamManagerInternal mDreamManager;
     private Light mAttentionLight;
 
+    //button on touch
+    private int mEvent;
+    private boolean  buttonPressed;
+
     private final Object mLock = new Object();
 
     // A bitfield that indicates what parts of the power state have
@@ -245,6 +249,7 @@ public final class PowerManagerService extends SystemService
     private long mLastSleepTime;
 
     // Timestamp of the last call to user activity.
+    private long mLastButtonActivityTime;
     private long mLastUserActivityTime;
     private long mLastUserActivityTimeNoChangeLights;
 
@@ -534,6 +539,9 @@ public final class PowerManagerService extends SystemService
 
     // overrule and disable brightness for buttons
     private boolean mHardwareKeysDisable = false;
+
+    // button on touch
+    private boolean mButtonBacklightOnTouchOnly = false;
 
     // timeout for button backlight automatic turning off
     private int mButtonTimeout;
@@ -1220,6 +1228,7 @@ public final class PowerManagerService extends SystemService
 
         Trace.traceBegin(Trace.TRACE_TAG_POWER, "userActivity");
         try {
+            mEvent = event;
             if (eventTime > mLastInteractivePowerHintTime) {
                 powerHintInternal(POWER_HINT_INTERACTION, 0);
                 mLastInteractivePowerHintTime = eventTime;
@@ -1236,6 +1245,10 @@ public final class PowerManagerService extends SystemService
                     || mWakefulness == WAKEFULNESS_DOZING
                     || (flags & PowerManager.USER_ACTIVITY_FLAG_INDIRECT) != 0) {
                 return false;
+            }
+
+            if ((event & PowerManager.USER_ACTIVITY_EVENT_BUTTON) != 0) {
+                    mLastButtonActivityTime = eventTime;
             }
 
             if ((flags & PowerManager.USER_ACTIVITY_FLAG_NO_CHANGE_LIGHTS) != 0) {
@@ -4099,6 +4112,9 @@ public final class PowerManagerService extends SystemService
             mHardwareKeysDisable = Settings.System.getIntForUser(
                     mContext.getContentResolver(), Settings.System.HARDWARE_KEYS_DISABLE,
                     0, UserHandle.USER_CURRENT) != 0;
+            mButtonBacklightOnTouchOnly = Settings.System.getIntForUser(
+                    mContext.getContentResolver(), Settings.System.BUTTON_BACKLIGHT_ON_TOUCH_ONLY,
+                    0, UserHandle.USER_CURRENT) != 0;
             mButtonTimeout = Settings.System.getIntForUser(resolver,
                     Settings.System.BUTTON_BACKLIGHT_TIMEOUT,
                     0, UserHandle.USER_CURRENT) * 1000;
@@ -4110,13 +4126,22 @@ public final class PowerManagerService extends SystemService
             return;
         }
 
+        buttonPressed = mEvent == PowerManager.USER_ACTIVITY_EVENT_BUTTON;
         boolean buttonlight_on =  mDisplayPowerRequest.policy == DisplayPowerRequest.POLICY_BRIGHT;
         int currentButtonBrightness = 0;
 
-        if (buttonlight_on){
-            currentButtonBrightness = calcButtonLight();
+        if (!mButtonBacklightOnTouchOnly) {
+            if (buttonlight_on) {
+                currentButtonBrightness = calcButtonLight();
+            } else {
+                currentButtonBrightness = 0;
+            }
         } else {
-            currentButtonBrightness = 0;
+            if (buttonPressed && buttonlight_on) {
+                currentButtonBrightness = calcButtonLight();
+            } else {
+                currentButtonBrightness = 0;
+            }
         }
         mCurrentButtonBrightness = currentButtonBrightness;
 
