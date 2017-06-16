@@ -3882,6 +3882,11 @@ public final class Settings {
         public static final String BUTTON_BACKLIGHT_TIMEOUT = "button_backlight_timeout";
 
         /**
+         * @hide
+         */
+        public static final String BUTTON_BACKLIGHT_ON_TOUCH_ONLY = "button_backlight_on_touch_only";
+
+        /**
          * never show ime switcher notification
          * by default its shown in the navbar on devices that supports it
          * @hide
