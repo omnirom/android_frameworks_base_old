@@ -1744,6 +1744,8 @@ public class ConnectivityService extends IConnectivityManager.Stub
                 mInitialBroadcast = null;
             }
         }
+        setCustomHostname();
+
         // load the global proxy at startup
         mHandler.sendMessage(mHandler.obtainMessage(EVENT_APPLY_GLOBAL_HTTP_PROXY));
 
@@ -5578,5 +5580,13 @@ public class ConnectivityService extends IConnectivityManager.Stub
 
     private void logNetworkEvent(NetworkAgentInfo nai, int evtype) {
         mMetricsLog.log(new NetworkEvent(nai.network.netId, evtype));
+    }
+
+    private void setCustomHostname() {
+        String hostname = Settings.Secure.getString(context.getContentResolver(),
+                Settings.Secure.DEVICE_HOSTNAME);
+        if (!TextUtils.isEmpty(hostname)) {
+            SystemProperties.set("net.hostname", hostname);
+        }
     }
 }
