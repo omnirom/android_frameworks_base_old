@@ -284,7 +284,7 @@ public class QuickQSPanel extends QSPanel {
             }
             panelWidth -= 2 * mStartMargin;
             int maxNumTiles = panelWidth / (mTileSize + 2 * mMinTileGap);
-            int layoutNumTiles = Math.min(maxNumTiles, numTiles);
+            int layoutNumTiles = Math.max(Math.min(maxNumTiles, numTiles), 2);
             int tileGap = (panelWidth - mTileSize * layoutNumTiles) / (layoutNumTiles - 1);
             final int N = getChildCount();
             for (int i = 0; i < N; i++) {
