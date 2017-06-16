@@ -3142,21 +3142,19 @@ public class PackageManagerService extends IPackageManager.Stub
     }
 
     private @Nullable String getOptionalVerifierLPr() {
-        final Intent intent = new Intent(Intent.ACTION_PACKAGE_NEEDS_VERIFICATION);
+        final Intent intent = new Intent("android.intent.action.PACKAGE_NEEDS_OPTIONAL_VERIFICATION");
 
         final List<ResolveInfo> matches = queryIntentReceiversInternal(intent, PACKAGE_MIME_TYPE,
                 MATCH_SYSTEM_ONLY | MATCH_DIRECT_BOOT_AWARE | MATCH_DIRECT_BOOT_UNAWARE,
                 UserHandle.USER_SYSTEM);
-        if (matches.size() == 1) {
-            //if there's one verifier it will be used as the required verifier
-            return null;
-        } else if (matches.size() > 1) {
+        if (matches.size() >= 1) {
             String optionalVerifierName = mContext.getResources().getString(R.string.config_optionalPackageVerifierName);
             if (TextUtils.isEmpty(optionalVerifierName))
                 return null;
             for (int i = 0; i < matches.size(); i++) {
-                if (matches.get(i).getComponentInfo().packageName.contains(optionalVerifierName))
+                if (matches.get(i).getComponentInfo().packageName.contains(optionalVerifierName)) {
                     return matches.get(i).getComponentInfo().packageName;
+                }
             }
         }
         return null;
@@ -15973,8 +15971,11 @@ public class PackageManagerService extends IPackageManager.Stub
 
                     if (mOptionalVerifierPackage != null) {
                         final Intent optionalIntent = new Intent(verification);
+                        optionalIntent.setAction("android.intent.action.PACKAGE_NEEDS_OPTIONAL_VERIFICATION");
+                        final List<ResolveInfo> optional_receivers = queryIntentReceiversInternal(optionalIntent,
+                            PACKAGE_MIME_TYPE, 0, verifierUser.getIdentifier());
                         final ComponentName optionalVerifierComponent = matchComponentForVerifier(
-                            mOptionalVerifierPackage, receivers);
+                            mOptionalVerifierPackage, optional_receivers);
                         optionalIntent.setComponent(optionalVerifierComponent);
                         verificationState.addOptionalVerifier(optionalUid);
                         mContext.sendBroadcastAsUser(optionalIntent, verifierUser, android.Manifest.permission.PACKAGE_VERIFICATION_AGENT);
