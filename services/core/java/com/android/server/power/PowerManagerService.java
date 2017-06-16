@@ -199,6 +199,9 @@ public final class PowerManagerService extends SystemService
     private DreamManagerInternal mDreamManager;
     private Light mAttentionLight;
 
+    //button on touch
+    private int mEvent;
+
     private final Object mLock = new Object();
 
     // A bitfield that indicates what parts of the power state have
@@ -535,6 +538,9 @@ public final class PowerManagerService extends SystemService
     // overrule and disable brightness for buttons
     private boolean mHardwareKeysDisable = false;
 
+    // button on touch
+    private boolean mButtonBacklightOnTouchOnly;
+
     // timeout for button backlight automatic turning off
     private int mButtonTimeout;
 
@@ -732,6 +738,9 @@ public final class PowerManagerService extends SystemService
                         false, mSettingsObserver, UserHandle.USER_ALL);
                 resolver.registerContentObserver(Settings.System.getUriFor(
                         Settings.System.BUTTON_BACKLIGHT_TIMEOUT),
+                        false, mSettingsObserver, UserHandle.USER_ALL);
+                resolver.registerContentObserver(
+                        Settings.System.getUriFor(Settings.System.BUTTON_BACKLIGHT_ON_TOUCH_ONLY),
                         false, mSettingsObserver, UserHandle.USER_ALL);
             }
 
@@ -1220,6 +1229,7 @@ public final class PowerManagerService extends SystemService
 
         Trace.traceBegin(Trace.TRACE_TAG_POWER, "userActivity");
         try {
+            mEvent = event;
             if (eventTime > mLastInteractivePowerHintTime) {
                 powerHintInternal(POWER_HINT_INTERACTION, 0);
                 mLastInteractivePowerHintTime = eventTime;
@@ -4099,6 +4109,9 @@ public final class PowerManagerService extends SystemService
             mHardwareKeysDisable = Settings.System.getIntForUser(
                     mContext.getContentResolver(), Settings.System.HARDWARE_KEYS_DISABLE,
                     0, UserHandle.USER_CURRENT) != 0;
+            mButtonBacklightOnTouchOnly = Settings.System.getIntForUser(
+                    mContext.getContentResolver(), Settings.System.BUTTON_BACKLIGHT_ON_TOUCH_ONLY,
+                    0, UserHandle.USER_CURRENT) != 0;
             mButtonTimeout = Settings.System.getIntForUser(resolver,
                     Settings.System.BUTTON_BACKLIGHT_TIMEOUT,
                     0, UserHandle.USER_CURRENT) * 1000;
@@ -4106,15 +4119,39 @@ public final class PowerManagerService extends SystemService
     }
 
     private void updateButtonLight() {
+        if (mEvent != PowerManager.USER_ACTIVITY_EVENT_TOUCH &&
+                mEvent != PowerManager.USER_ACTIVITY_EVENT_BUTTON) {
+            return;
+        }
+
         if (mDisplayPowerRequest == null || !mButtonBrightnessSupport){
             return;
         }
 
+        if (mButtonDisableBrightness || mHardwareKeysDisable){
+            mCurrentButtonBrightness = 0;
+            mLightsManager.getLight(LightsManager.LIGHT_ID_BUTTONS).setBrightness(mCurrentButtonBrightness);
+            return;
+        }
+
+        final boolean buttonPressed = mEvent == PowerManager.USER_ACTIVITY_EVENT_BUTTON;
         boolean buttonlight_on =  mDisplayPowerRequest.policy == DisplayPowerRequest.POLICY_BRIGHT;
         int currentButtonBrightness = 0;
 
         if (buttonlight_on){
-            currentButtonBrightness = calcButtonLight();
+            if (mButtonBacklightOnTouchOnly) {
+                if (buttonPressed) {
+                    currentButtonBrightness = calcButtonLight();
+                } else {
+                    if (mButtonDisabledByTimeout) {
+                        currentButtonBrightness = 0;
+                    } else {
+                        currentButtonBrightness = mCurrentButtonBrightness;
+                    }
+                }
+            } else {
+                currentButtonBrightness = calcButtonLight();
+            }
         } else {
             currentButtonBrightness = 0;
         }
@@ -4130,7 +4167,7 @@ public final class PowerManagerService extends SystemService
     private int calcButtonLight() {
         int buttonBrightness = 0;
 
-        if (mButtonDisableBrightness || mButtonDisabledByTimeout || mHardwareKeysDisable){
+        if (mButtonDisabledByTimeout){
             buttonBrightness = 0;
         } else {
             if (mCustomButtonBrightness == -1 || mButtonUseScreenBrightness){
