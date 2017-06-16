@@ -268,6 +268,9 @@ public class QuickQSPanel extends QSPanel {
         }
 
         public int calcNumTiles() {
+            if (mTileSize == 0) {
+                return mTileSize;
+            }
             int panelWidth = mContext.getResources().getDimensionPixelSize(R.dimen.notification_panel_width);
             if (panelWidth == -1) {
                 panelWidth = mScreenWidth;
@@ -278,6 +281,9 @@ public class QuickQSPanel extends QSPanel {
         }
 
         public void updateTileGaps(int numTiles) {
+            if (numTiles == 0) {
+                return;
+            }
             int panelWidth = mContext.getResources().getDimensionPixelSize(R.dimen.notification_panel_width);
             if (panelWidth == -1) {
                 panelWidth = mScreenWidth;
@@ -285,7 +291,7 @@ public class QuickQSPanel extends QSPanel {
             panelWidth -= 2 * mStartMargin;
             int maxNumTiles = panelWidth / (mTileSize + 2 * mMinTileGap);
             int layoutNumTiles = Math.min(maxNumTiles, numTiles);
-            int tileGap = (panelWidth - mTileSize * layoutNumTiles) / (layoutNumTiles - 1);
+            int tileGap = (panelWidth - mTileSize * layoutNumTiles) / (layoutNumTiles > 1 ? layoutNumTiles - 1 : 2);
             final int N = getChildCount();
             for (int i = 0; i < N; i++) {
                 if (getChildAt(i) instanceof Space) {
