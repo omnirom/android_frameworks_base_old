@@ -1,0 +1,38 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "931cc34f_abe6348d",
+        "filename": "services/core/java/com/android/server/power/PowerManagerService.java",
+        "patchSetId": 2
+      },
+      "lineNbr": 544,
+      "author": {
+        "id": 1000026
+      },
+      "writtenOn": "2017-06-16T23:59:44Z",
+      "side": 1,
+      "message": "dont follow wrong AOSP code - boolean values dont need to be initialized with false",
+      "revId": "06ad5c97440cc0659ef7ca841b63f75b43bffe97",
+      "serverId": "56841c99-7c94-43d4-bf0b-cb4707e66d55",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "3311dbc9_74db4f1a",
+        "filename": "services/core/java/com/android/server/power/PowerManagerService.java",
+        "patchSetId": 2
+      },
+      "lineNbr": 4134,
+      "author": {
+        "id": 1000026
+      },
+      "writtenOn": "2017-06-16T23:59:44Z",
+      "side": 1,
+      "message": "if (mButtonBacklightOnTouchOnly \u0026\u0026 !buttonPressed)\n    buttonlight_on \u003d false\nand keep all the code below original",
+      "revId": "06ad5c97440cc0659ef7ca841b63f75b43bffe97",
+      "serverId": "56841c99-7c94-43d4-bf0b-cb4707e66d55",
+      "unresolved": false
+    }
+  ]
+}
