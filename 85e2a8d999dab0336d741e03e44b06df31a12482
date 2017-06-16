@@ -1,0 +1,21 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "c92b2e3e_9d2487e5",
+        "filename": "services/core/java/com/android/server/power/PowerManagerService.java",
+        "patchSetId": 1
+      },
+      "lineNbr": 1251,
+      "author": {
+        "id": 1000026
+      },
+      "writtenOn": "2017-06-16T23:51:34Z",
+      "side": 1,
+      "message": "whats that mLastButtonActivityTime good for - is not used anywhere useful?",
+      "revId": "85e2a8d999dab0336d741e03e44b06df31a12482",
+      "serverId": "56841c99-7c94-43d4-bf0b-cb4707e66d55",
+      "unresolved": false
+    }
+  ]
+}
