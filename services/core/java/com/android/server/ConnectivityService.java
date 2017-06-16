@@ -722,17 +722,12 @@ public class ConnectivityService extends IConnectivityManager.Stub
 
         // setup our unique device name
         // either to (in order): current net.hostname
-        //                       DEVICE_HOSTNAME
         //                       android-ANDROID_ID
         //                       android-r-RANDOM_NUMBER
         if (TextUtils.isEmpty(SystemProperties.get("net.hostname"))) {
-            String hostname = Settings.Secure.getString(context.getContentResolver(),
-                    Settings.Secure.DEVICE_HOSTNAME);
             String id = Settings.Secure.getString(context.getContentResolver(),
                     Settings.Secure.ANDROID_ID);
-            if (!TextUtils.isEmpty(hostname)) {
-                SystemProperties.set("net.hostname", hostname);
-            } else if (!TextUtils.isEmpty(id)) {
+            if (!TextUtils.isEmpty(id)) {
                 String name = new String("android-").concat(id);
                 SystemProperties.set("net.hostname", name);
             } else {
@@ -1744,6 +1739,8 @@ public class ConnectivityService extends IConnectivityManager.Stub
                 mInitialBroadcast = null;
             }
         }
+        setCustomHostname();
+
         // load the global proxy at startup
         mHandler.sendMessage(mHandler.obtainMessage(EVENT_APPLY_GLOBAL_HTTP_PROXY));
 
@@ -5578,5 +5575,13 @@ public class ConnectivityService extends IConnectivityManager.Stub
 
     private void logNetworkEvent(NetworkAgentInfo nai, int evtype) {
         mMetricsLog.log(new NetworkEvent(nai.network.netId, evtype));
+    }
+
+    private void setCustomHostname() {
+        String hostname = Settings.Secure.getString(mContext.getContentResolver(),
+                Settings.Secure.DEVICE_HOSTNAME);
+        if (!TextUtils.isEmpty(hostname)) {
+            SystemProperties.set("net.hostname", hostname);
+        }
     }
 }
