@@ -1,0 +1,38 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "d9b20617_628d0eb2",
+        "filename": "services/core/java/com/android/server/power/PowerManagerService.java",
+        "patchSetId": 3
+      },
+      "lineNbr": 204,
+      "author": {
+        "id": 1000026
+      },
+      "writtenOn": "2017-06-17T00:09:40Z",
+      "side": 1,
+      "message": "not needed remove",
+      "revId": "43b94192c4291201ba057cd94ebc19a03588301d",
+      "serverId": "56841c99-7c94-43d4-bf0b-cb4707e66d55",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "039a3903_595571f4",
+        "filename": "services/core/java/com/android/server/power/PowerManagerService.java",
+        "patchSetId": 3
+      },
+      "lineNbr": 4127,
+      "author": {
+        "id": 1000026
+      },
+      "writtenOn": "2017-06-17T00:09:40Z",
+      "side": 1,
+      "message": "use final boolean here",
+      "revId": "43b94192c4291201ba057cd94ebc19a03588301d",
+      "serverId": "56841c99-7c94-43d4-bf0b-cb4707e66d55",
+      "unresolved": false
+    }
+  ]
+}
