@@ -4791,6 +4791,17 @@ public final class Settings {
                 BOOLEAN_VALIDATOR;
 
         /**
+         * Disable power menu on secure lock screens
+         *
+         * @hide
+         */
+        public static final String OMNI_LOCK_POWER_MENU_DISABLED = "lockscreen_power_menu_disabled";
+
+        /** @hide */
+        private static final Validator OMNI_LOCK_POWER_MENU_DISABLED_VALIDATOR =
+                BOOLEAN_VALIDATOR;
+
+        /**
          * IMPORTANT: If you add a new public settings you also have to add it to
          * PUBLIC_SETTINGS below. If the new setting is hidden you have to add
          * it to PRIVATE_SETTINGS below. Also add a validator that can validate
@@ -4892,6 +4903,7 @@ public final class Settings {
             OMNI_LOCKSCREEN_WEATHER_ENABLED,
             OMNI_ASPECT_RATIO_APPS_ENABLED,
             OMNI_ASPECT_RATIO_APPS_LIST,
+            OMNI_LOCK_POWER_MENU_DISABLED,
         };
 
         /**
@@ -5043,6 +5055,7 @@ public final class Settings {
             PRIVATE_SETTINGS.add(OMNI_LOCKSCREEN_WEATHER_ENABLED);
             PRIVATE_SETTINGS.add(OMNI_ASPECT_RATIO_APPS_ENABLED);
             PRIVATE_SETTINGS.add(OMNI_ASPECT_RATIO_APPS_LIST);
+            PRIVATE_SETTINGS.add(OMNI_LOCK_POWER_MENU_DISABLED);
         }
 
         /**
@@ -5187,6 +5200,8 @@ public final class Settings {
                     OMNI_ASPECT_RATIO_APPS_ENABLED_VALIDATOR);
             VALIDATORS.put(OMNI_ASPECT_RATIO_APPS_LIST,
                     OMNI_ASPECT_RATIO_APPS_LIST_VALIDATOR);
+            VALIDATORS.put(OMNI_LOCK_POWER_MENU_DISABLED,
+                    OMNI_LOCK_POWER_MENU_DISABLED_VALIDATOR);
         }
 
         /**
