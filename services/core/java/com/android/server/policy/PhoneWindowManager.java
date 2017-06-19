@@ -809,6 +809,7 @@ public class PhoneWindowManager implements WindowManagerPolicy {
     private boolean mOmniSwitchRecents;
     private boolean mAppSwitchConsumed;
     private int mLongPressOnAppSwitchBehavior;
+    private boolean mGlobalActionsOnLockDisable;
 
     private static final int KEY_ACTION_NOTHING = 0;
     private static final int KEY_ACTION_APP_SWITCH = 1;
@@ -997,6 +998,10 @@ public class PhoneWindowManager implements WindowManagerPolicy {
             resolver.registerContentObserver(Settings.System.getUriFor(
                     Settings.System.BUTTON_LONG_PRESS_RECENTS), false, this,
                     UserHandle.USER_ALL);
+            resolver.registerContentObserver(Settings.Secure.getUriFor(
+                    Settings.Secure.LOCK_POWER_MENU_DISABLED), false, this,
+                    UserHandle.USER_ALL);
+
             updateSettings();
         }
 
@@ -1691,6 +1696,9 @@ public class PhoneWindowManager implements WindowManagerPolicy {
     }
 
     void showGlobalActionsInternal() {
+        if (isKeyguardSecure() && isKeyguardShowingAndNotOccluded() && mGlobalActionsOnLockDisable) {
+            return;
+        }
         sendCloseSystemWindows(SYSTEM_DIALOG_REASON_GLOBAL_ACTIONS);
         if (mGlobalActions == null) {
             mGlobalActions = new GlobalActions(mContext, mWindowManagerFuncs);
@@ -2370,6 +2378,10 @@ public class PhoneWindowManager implements WindowManagerPolicy {
                     Settings.System.BUTTON_LONG_PRESS_RECENTS, 0,
                     UserHandle.USER_CURRENT);
             mLongPressOnAppSwitchBehavior = !ActivityManager.supportsMultiWindow(mContext) ? KEY_ACTION_LAST_APP : (mLongPressOnAppSwitchBehavior == 0 ? KEY_ACTION_SPLIT : KEY_ACTION_LAST_APP);
+
+            mGlobalActionsOnLockDisable = Settings.Secure.getIntForUser(resolver,
+                    Settings.Secure.LOCK_POWER_MENU_DISABLED, 0,
+                    UserHandle.USER_CURRENT) != 0;
         }
         synchronized (mWindowManagerFuncs.getWindowManagerLock()) {
             PolicyControl.reloadFromSetting(mContext);
