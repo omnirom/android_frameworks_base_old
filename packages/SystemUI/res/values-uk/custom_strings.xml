@@ -47,6 +47,8 @@
   <!-- Announcement made when NFC changes to on (not shown on the screen). [CHAR LIMIT=NONE] -->
   <string name="accessibility_quick_settings_nfc_changed_on">NFC увімкнуто.</string>
   <string name="quick_settings_screenshot_label">Скріншот</string>
+  <string name="quick_settings_heads_up_on">Перегляд сповіщень увімкнено</string>
+  <string name="quick_settings_heads_up_off">Перегляд сповіщень вимкнено</string>
   <!-- Screenshot Crop & Share -->
   <string name="pref_category_user">Користувацькі налаштування</string>
   <!-- Screenshot Crop & Share -->

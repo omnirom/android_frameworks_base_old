@@ -108,6 +108,7 @@
   <string name="quick_settings_network_adb_enabled_label">Povoleno</string>
   <string name="quick_settings_network_adb_disabled_label">Zakázáno</string>
   <string name="quick_settings_network_adb_label">ADB přes síť</string>
+  <string name="quick_settings_network_adb_toast">USB ladění není povoleno</string>
   <string name="omnijaws_service_error">Chyba</string>
   <string name="omnijaws_service_unkown">Žádné údaje o počasí</string>
   <string name="omnijaws_service_error_long">Chyba při načítání údajů o počasí</string>

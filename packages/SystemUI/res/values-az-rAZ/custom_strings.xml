@@ -108,6 +108,7 @@
   <string name="quick_settings_network_adb_enabled_label">Aktivdir</string>
   <string name="quick_settings_network_adb_disabled_label">Deaktivdir</string>
   <string name="quick_settings_network_adb_label">Şəbəkə üzərindən ADB</string>
+  <string name="quick_settings_network_adb_toast">USB xəta ayırıcı aktivləşdirilməyib</string>
   <string name="omnijaws_service_error">Xəta</string>
   <string name="omnijaws_service_unkown">Hava məlumatı yoxdur</string>
   <string name="omnijaws_service_error_long">Hava məlumatı yüklənərkən problem yarandı</string>

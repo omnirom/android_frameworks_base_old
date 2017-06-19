@@ -108,6 +108,7 @@
   <string name="quick_settings_network_adb_enabled_label">Aktivert</string>
   <string name="quick_settings_network_adb_disabled_label">Deaktivert</string>
   <string name="quick_settings_network_adb_label">ADB over nettverk</string>
+  <string name="quick_settings_network_adb_toast">USB-feilsøking er ikke aktivert</string>
   <string name="omnijaws_service_error">Feil</string>
   <string name="omnijaws_service_unkown">Ingen værdata</string>
   <string name="omnijaws_service_error_long">Feil ved lasting av værdata</string>
