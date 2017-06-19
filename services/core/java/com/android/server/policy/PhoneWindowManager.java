@@ -895,7 +895,7 @@ public class PhoneWindowManager implements WindowManagerPolicy {
                     showRecentApps(false);
                     break;
                 case MSG_DISPATCH_SHOW_GLOBAL_ACTIONS:
-                    showGlobalActionsInternal();
+                    showGlobalActionsInternal(false);
                     break;
                 case MSG_KEYGUARD_DRAWN_COMPLETE:
                     if (DEBUG_WAKEUP) Slog.w(TAG, "Setting mKeyguardDrawComplete");
@@ -1054,6 +1054,10 @@ public class PhoneWindowManager implements WindowManagerPolicy {
             resolver.registerContentObserver(Settings.System.getUriFor(
                     Settings.System.OMNI_USE_BOTTOM_GESTURE_NAVIGATION), false, this,
                     UserHandle.USER_ALL);
+            resolver.registerContentObserver(Settings.System.getUriFor(
+                    Settings.System.OMNI_LOCK_POWER_MENU_DISABLED), false, this,
+                    UserHandle.USER_ALL);
+
             updateSettings();
         }
 
@@ -1645,8 +1649,7 @@ public class PhoneWindowManager implements WindowManagerPolicy {
             break;
         case LONG_PRESS_POWER_GLOBAL_ACTIONS:
             mPowerKeyHandled = true;
-            performHapticFeedbackLw(null, HapticFeedbackConstants.LONG_PRESS, false);
-            showGlobalActionsInternal();
+            showGlobalActionsInternal(true);
             break;
         case LONG_PRESS_POWER_SHUT_OFF:
         case LONG_PRESS_POWER_SHUT_OFF_NO_CONFIRM:
@@ -1679,8 +1682,7 @@ public class PhoneWindowManager implements WindowManagerPolicy {
             break;
         case VERY_LONG_PRESS_POWER_GLOBAL_ACTIONS:
             mPowerKeyHandled = true;
-            performHapticFeedbackLw(null, HapticFeedbackConstants.LONG_PRESS, false);
-            showGlobalActionsInternal();
+            showGlobalActionsInternal(true);
             break;
         }
     }
@@ -1834,8 +1836,7 @@ public class PhoneWindowManager implements WindowManagerPolicy {
         @Override
         public void run() {
             mEndCallKeyHandled = true;
-            performHapticFeedbackLw(null, HapticFeedbackConstants.LONG_PRESS, false);
-            showGlobalActionsInternal();
+            showGlobalActionsInternal(true);
         }
     };
 
@@ -1862,7 +1863,13 @@ public class PhoneWindowManager implements WindowManagerPolicy {
         mHandler.sendEmptyMessage(MSG_DISPATCH_SHOW_GLOBAL_ACTIONS);
     }
 
-    void showGlobalActionsInternal() {
+    void showGlobalActionsInternal(boolean hapticFeedback) {
+        if (!isGlobalActionEnabled()) {
+            return;
+        }
+        if (hapticFeedback) {
+            performHapticFeedbackLw(null, HapticFeedbackConstants.LONG_PRESS, false);
+        }
         if (mGlobalActions == null) {
             mGlobalActions = new GlobalActions(mContext, mWindowManagerFuncs);
         }
@@ -2602,6 +2609,9 @@ public class PhoneWindowManager implements WindowManagerPolicy {
             mHasNavigationBar = DeviceUtils.deviceSupportNavigationBar(mContext);
             mUseGestureButton = Settings.System.getIntForUser(resolver,
                     Settings.System.OMNI_USE_BOTTOM_GESTURE_NAVIGATION, 0,
+                    UserHandle.USER_CURRENT) != 0;
+            mGlobalActionsOnLockDisable = Settings.System.getIntForUser(resolver,
+                    Settings.System.OMNI_LOCK_POWER_MENU_DISABLED, 0,
                     UserHandle.USER_CURRENT) != 0;
         }
         synchronized (mWindowManagerFuncs.getWindowManagerLock()) {
@@ -9205,5 +9215,12 @@ public class PhoneWindowManager implements WindowManagerPolicy {
     @Override
     public boolean isGestureButtonEnabled() {
         return mUseGestureButton;
+    }
+
+    private boolean isGlobalActionEnabled() {
+        if (isKeyguardSecure(mCurrentUserId) && mGlobalActionsOnLockDisable) {
+            return false;
+        }
+        return true;
     }
 }
