@@ -108,6 +108,7 @@
   <string name="quick_settings_network_adb_enabled_label">Engedélyezve</string>
   <string name="quick_settings_network_adb_disabled_label">Letiltva</string>
   <string name="quick_settings_network_adb_label">ADB hálózaton keresztül</string>
+  <string name="quick_settings_network_adb_toast">USB hibakeresés nincs engedélyezve</string>
   <string name="omnijaws_service_error">Hiba</string>
   <string name="omnijaws_service_unkown">Nincs időjárási adat</string>
   <string name="omnijaws_service_error_long">Hiba az időjárási adatok betöltésekor</string>

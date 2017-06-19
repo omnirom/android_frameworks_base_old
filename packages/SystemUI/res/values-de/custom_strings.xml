@@ -55,8 +55,8 @@
   <string name="action_delete_fault">Löschen war nicht erfolgreich</string>
   <string name="action_save_success">Gespeichert</string>
   <string name="action_save_fault">Speichern war nicht erfolgreich</string>
-  <string name="pref_action_color_title">Farbe der Aktionstaste</string>
-  <string name="pref_action_color_summary">Wähle deine Lieblingsfarbe für die Aktionstaste</string>
+  <string name="pref_action_color_title">Farbe der Aktionstasten</string>
+  <string name="pref_action_color_summary">Wähle deine bevorzugte Farbe für die Aktionstasten</string>
   <string name="pref_category_main">Haupteinstellungen</string>
   <string name="pref_category_user">Benutzereinstellungen</string>
   <string name="pref_crop_behavior_title">Zuschnittsverhalten</string>
@@ -99,7 +99,7 @@
   <string name="accessibility_quick_settings_location_changed_gps_only">Standortmodus geändert zu \"Nur Gerät\".</string>
   <string name="accessibility_quick_settings_location_changed_high_accuracy">Standortmodus geändert zu \"Hohe Genauigkeit\".</string>
   <string name="quick_settings_location_detail_title">Standortmodus</string>
-  <string name="quick_settings_location_battery_saving_label">Energiesparend</string>
+  <string name="quick_settings_location_battery_saving_label">Energie sparen</string>
   <string name="quick_settings_location_gps_only_label">Nur Gerät</string>
   <string name="quick_settings_location_high_accuracy_label">Hohe Genauigkeit</string>
   <string name="quick_settings_location_off_label">Standort aus</string>
@@ -108,6 +108,7 @@
   <string name="quick_settings_network_adb_enabled_label">Aktiviert</string>
   <string name="quick_settings_network_adb_disabled_label">Deaktiviert</string>
   <string name="quick_settings_network_adb_label">ADB über Netzwerk</string>
+  <string name="quick_settings_network_adb_toast">USB Debugging ist nicht aktiv</string>
   <string name="omnijaws_service_error">Fehler</string>
   <string name="omnijaws_service_unkown">Keine Wetterdaten</string>
   <string name="omnijaws_service_error_long">Fehler beim Laden der Wetterdaten</string>

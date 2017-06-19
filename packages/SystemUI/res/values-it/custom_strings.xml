@@ -108,6 +108,7 @@
   <string name="quick_settings_network_adb_enabled_label">Abilitiato</string>
   <string name="quick_settings_network_adb_disabled_label">Disabilitato</string>
   <string name="quick_settings_network_adb_label">ADB attraverso la rete</string>
+  <string name="quick_settings_network_adb_toast">Il debug USB non è attivato</string>
   <string name="omnijaws_service_error">Errore</string>
   <string name="omnijaws_service_unkown">Nessun dato meteo</string>
   <string name="omnijaws_service_error_long">Errore durante il caricamento dei dati meteo</string>

@@ -108,6 +108,7 @@
   <string name="quick_settings_network_adb_enabled_label">已启用</string>
   <string name="quick_settings_network_adb_disabled_label">已禁用</string>
   <string name="quick_settings_network_adb_label">网络 ADB 调试</string>
+  <string name="quick_settings_network_adb_toast">未启用 USB 调试</string>
   <string name="omnijaws_service_error">错误</string>
   <string name="omnijaws_service_unkown">没有天气数据</string>
   <string name="omnijaws_service_error_long">读取天气数据错误</string>
