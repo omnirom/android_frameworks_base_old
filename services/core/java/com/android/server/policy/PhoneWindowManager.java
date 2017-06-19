@@ -765,7 +765,7 @@ public class PhoneWindowManager implements WindowManagerPolicy {
     private boolean mOmniSwitchRecents;
     private boolean mSwapBackAndRecents;
     private boolean mSwapMenuAndRecents;
-
+    private boolean mPowerButtonOnLock;
     private int mPressOnAppSwitchBehavior;
     private int mPressOnBackBehavior;
     private int mPressOnMenuBehavior;
@@ -776,7 +776,7 @@ public class PhoneWindowManager implements WindowManagerPolicy {
     private static final int KEY_ACTION_BACK = 2;
     private static final int KEY_ACTION_MENU = 3;
 
-    int mUserRotationAngles = -1;
+    private int mUserRotationAngles = -1;
 
     // constants for rotation bits
     private static final int ROTATION_0_MODE = 1;
@@ -981,6 +981,10 @@ public class PhoneWindowManager implements WindowManagerPolicy {
             resolver.registerContentObserver(Settings.System.getUriFor(
                     Settings.System.BUTTON_SWAP_MENU_RECENTS), false, this,
                     UserHandle.USER_ALL);
+            resolver.registerContentObserver(Settings.Secure.getUriFor(
+                    Settings.Secure.LOCK_POWER_MENU_DISABLED), false, this,
+                    UserHandle.USER_ALL);
+
             updateSettings();
         }
 
@@ -1478,6 +1482,9 @@ public class PhoneWindowManager implements WindowManagerPolicy {
             break;
         case LONG_PRESS_POWER_GLOBAL_ACTIONS:
             mPowerKeyHandled = true;
+            if (mKeyguardSecureIncludingHidden && !mPowerButtonOnLock) {
+                break;
+            }
             if (!performHapticFeedbackLw(null, HapticFeedbackConstants.LONG_PRESS, false)) {
                 performAuditoryFeedbackForAccessibilityIfNeed();
             }
@@ -2359,6 +2366,9 @@ public class PhoneWindowManager implements WindowManagerPolicy {
             mSwapMenuAndRecents = Settings.System.getIntForUser(resolver,
                     Settings.System.BUTTON_SWAP_MENU_RECENTS, 0,
                     UserHandle.USER_CURRENT) != 0;
+            mPowerButtonOnLock = Settings.Secure.getIntForUser(resolver,
+                    Settings.Secure.LOCK_POWER_MENU_DISABLED, 0,
+                    UserHandle.USER_CURRENT) == 0;
 
             mPressOnAppSwitchBehavior = mSwapBackAndRecents ? KEY_ACTION_BACK : KEY_ACTION_APP_SWITCH;
             mPressOnBackBehavior = mSwapBackAndRecents ? KEY_ACTION_APP_SWITCH : KEY_ACTION_BACK;

@@ -6959,6 +6959,13 @@ public final class Settings {
         public static final String LOCK_QS_DISABLED = "lockscreen_qs_disabled";
 
         /**
+         * Disable power menu on secure lock screens
+         *
+         * @hide
+         */
+        public static final String LOCK_POWER_MENU_DISABLED = "lockscreen_power_menu_disabled";
+
+        /**
          * Enable voice lockscreen shortcut
          * @hide
          */
