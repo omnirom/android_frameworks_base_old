@@ -4101,6 +4101,11 @@ public final class Settings {
         public static final String BUTTON_SWAP_MENU_RECENTS = "button_swap_menu_recents";
 
         /**
+         * @hide
+         */
+        public static final String DEVICE_GESTURE_MAPPING = "device_gesture_mapping";
+
+        /**
          * Settings to backup. This is here so that it's in the same place as the settings
          * keys and easy to update.
          *
