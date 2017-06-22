@@ -502,6 +502,8 @@
 
     <protected-broadcast android:name="projekt.substratum.APP_CRASHED" />
 
+    <protected-broadcast android:name="com.android.systemui.ACTION_DISMISS_KEYGUARD" />
+
     <!-- ====================================================================== -->
     <!--                          RUNTIME PERMISSIONS                           -->
     <!-- ====================================================================== -->
