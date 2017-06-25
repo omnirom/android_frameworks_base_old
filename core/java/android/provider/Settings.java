@@ -4088,7 +4088,7 @@ public final class Settings {
          * show the headset plugged notification in TtyManager
          * @hide
          */
-         public static final String HEADSET_PLUGGED_NOTIFICATION = "headset_plugged_notification";
+        public static final String HEADSET_PLUGGED_NOTIFICATION = "headset_plugged_notification";
 
         /**
          * @hide
@@ -4099,6 +4099,11 @@ public final class Settings {
          * @hide
          */
         public static final String BUTTON_SWAP_MENU_RECENTS = "button_swap_menu_recents";
+
+        /**
+         * @hide
+         */
+        public static final String CALL_DND_ENABLED = "call_dnd_enabled";
 
         /**
          * Settings to backup. This is here so that it's in the same place as the settings
