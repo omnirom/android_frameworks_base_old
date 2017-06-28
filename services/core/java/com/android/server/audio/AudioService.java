@@ -2707,10 +2707,12 @@ public class AudioService extends IAudioService.Stub {
     public void setBluetoothScoOnInt(boolean on) {
         if (on) {
             mForcedUseForComm = AudioSystem.FORCE_BT_SCO;
-            if ((mBluetoothHeadset != null) &&
-                (mBluetoothHeadset.getAudioState(mBluetoothHeadsetDevice)
-                             != BluetoothHeadset.STATE_AUDIO_CONNECTED)) {
-                return;
+            synchronized(mScoClients) {
+                if ((mBluetoothHeadset != null) &&
+                    (mBluetoothHeadset.getAudioState(mBluetoothHeadsetDevice)
+                                 != BluetoothHeadset.STATE_AUDIO_CONNECTED)) {
+                    return;
+                }
             }
         } else if (mForcedUseForComm == AudioSystem.FORCE_BT_SCO) {
             mForcedUseForComm = AudioSystem.FORCE_NONE;
