@@ -43,6 +43,7 @@ import android.os.PowerManagerInternal;
 import android.os.Process;
 import android.os.RemoteException;
 import android.os.SystemClock;
+import android.os.SystemProperties;
 import android.os.UserHandle;
 import android.os.WorkSource;
 import android.provider.Settings;
@@ -741,12 +742,19 @@ final class Notifier {
 
                 case MSG_WIRELESS_CHARGING_STARTED:
                 case MSG_WIRED_CHARGING_STARTED:
-                    playWirelessChargingStartedSound();
+                    if (!isDataEncrypted()) {
+                        playWirelessChargingStartedSound();
+                    }
                     break;
                 case MSG_SCREEN_BRIGHTNESS_BOOST_CHANGED:
                     sendBrightnessBoostChangedBroadcast();
                     break;
             }
         }
+    }
+
+    private boolean isDataEncrypted() {
+        String voldState = SystemProperties.get("vold.decrypt");
+        return "1".equals(voldState) || "trigger_restart_min_framework".equals(voldState);
     }
 }
