@@ -62,7 +62,6 @@ import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.PrintWriter;
 
-
 /**
  * <p>BatteryService monitors the charging status, and charge level of the device
  * battery.  When these values change this service broadcasts the new values
@@ -159,9 +158,12 @@ public final class BatteryService extends SystemService {
     private int mBatteryMediumARGB;
     private int mBatteryFullARGB;
     private int mBatteryReallyFullARGB;
+    private int mFastBatteryARGB;
     private boolean mMultiColorLed;
-
+    private boolean mFastChargingLedSupported;
     private boolean mSentLowBatteryBroadcast = false;
+    private int mMaxChargingWattage;
+    private boolean mFastBatteryLightEnabled;
 
     private ActivityManagerInternal mActivityManagerInternal;
 
@@ -184,6 +186,9 @@ public final class BatteryService extends SystemService {
                 com.android.internal.R.integer.config_shutdownBatteryTemperature);
         mLightEnabled = mContext.getResources().getBoolean(
                 com.android.internal.R.bool.config_intrusiveBatteryLed);
+        //Fast charging led support
+        mFastChargingLedSupported = context.getResources().getBoolean(
+                com.android.internal.R.bool.config_FastChargingLedSupported);
 
         // watch for invalid charger messages if the invalid_charger switch exists
         if (new File("/sys/devices/virtual/switch/invalid_charger/state").exists()) {
@@ -543,6 +548,11 @@ public final class BatteryService extends SystemService {
             mLastChargeCounter = mBatteryProps.batteryChargeCounter;
             mLastBatteryLevelCritical = mBatteryLevelCritical;
             mLastInvalidCharger = mInvalidCharger;
+            mMaxChargingWattage = mLastMaxChargingCurrent * 5;
+            if (mFastChargingLedSupported) {
+                // Update the Fast battery LED
+                mLed.fastCharge(mMaxChargingWattage);
+            }
         }
     }
 
@@ -900,6 +910,13 @@ public final class BatteryService extends SystemService {
         private final Light mBatteryLight;
         private final int mBatteryLedOn;
         private final int mBatteryLedOff;
+        private final int mFastThreshold = 7500000;
+        private boolean mIsFastCharging;
+
+        protected void fastCharge(int mWatt) {
+            mIsFastCharging = mWatt > mFastThreshold;
+            updateLightsLocked();
+        }
 
         public Led(Context context, LightsManager lights) {
             mBatteryLight = lights.getLight(LightsManager.LIGHT_ID_BATTERY);
@@ -919,6 +936,7 @@ public final class BatteryService extends SystemService {
             final int level = mBatteryProps.batteryLevel;
             final int status = mBatteryProps.batteryStatus;
             boolean lightEnabled = mLightEnabled;
+            boolean fastlightenabled = mFastBatteryLightEnabled & mIsFastCharging;
             int lightColor = mBatteryLowARGB;
             boolean pulseColor = false;
 
@@ -926,7 +944,11 @@ public final class BatteryService extends SystemService {
                 // No lights if explicitly disabled
                 lightEnabled = false;
             } else if (level < mLowBatteryWarningLevel) {
-                if (status == BatteryManager.BATTERY_STATUS_CHARGING) {
+                if (fastlightenabled) {
+                    //Solid color when battery is fast charging
+                    lightColor = mFastBatteryARGB;
+                    lightEnabled = !mLightOnlyFullyCharged;
+                } else if (status == BatteryManager.BATTERY_STATUS_CHARGING) {
                     // Solid red when battery is charging
                     lightEnabled = !mLightOnlyFullyCharged;
                     lightColor = mBatteryLowARGB;
@@ -952,9 +974,15 @@ public final class BatteryService extends SystemService {
                         lightColor = mBatteryFullARGB;
                     }
                 } else {
-                    // Battery is charging and halfway full
-                    lightEnabled = !mLightOnlyFullyCharged;
-                    lightColor = mBatteryMediumARGB;
+                    if (fastlightenabled) {
+                        //Solid color when battery is fast charging
+                        lightColor = mFastBatteryARGB;
+                        lightEnabled = !mLightOnlyFullyCharged;
+                    } else {
+                        // Battery is charging and halfway full
+                        lightEnabled = !mLightOnlyFullyCharged;
+                        lightColor = mBatteryMediumARGB;
+                    }
                 }
             } else {
                 // No lights if not charging and not low
@@ -1077,7 +1105,20 @@ public final class BatteryService extends SystemService {
                 resolver.registerContentObserver(Settings.System.getUriFor(
                         Settings.System.BATTERY_LIGHT_REALLY_FULL_COLOR), false, this,
                         UserHandle.USER_ALL);
-            }
+
+                // Light colors
+                if (mFastChargingLedSupported) {
+                    //Fast Charging LED
+                    resolver.registerContentObserver(Settings.System.getUriFor(
+                            Settings.System.FAST_CHARGING_LED_ENABLED), false, this,
+                            UserHandle.USER_ALL);
+
+                    // Register observer if we have a device that supports fast charging
+                    resolver.registerContentObserver(Settings.System.getUriFor(
+                            Settings.System.FAST_BATTERY_LIGHT_COLOR), false, this,
+                            UserHandle.USER_ALL);
+                }
+             }
 
             update();
         }
@@ -1093,6 +1134,10 @@ public final class BatteryService extends SystemService {
             // Battery light enabled
             mLightEnabled = Settings.System.getIntForUser(resolver,
                     Settings.System.BATTERY_LIGHT_ENABLED, mLightEnabled ? 1 : 0, UserHandle.USER_CURRENT) != 0;
+
+            //Fast charging LED enabled
+            mFastBatteryLightEnabled = Settings.System.getIntForUser(resolver,
+                    Settings.System.FAST_CHARGING_LED_ENABLED, 0, UserHandle.USER_CURRENT) != 0;
 
             // Low battery pulse
             mLedPulseEnabled = Settings.System.getIntForUser(resolver,
@@ -1114,6 +1159,11 @@ public final class BatteryService extends SystemService {
                     res.getInteger(com.android.internal.R.integer.config_notificationsBatteryFullARGB), UserHandle.USER_CURRENT);
             mBatteryReallyFullARGB = Settings.System.getIntForUser(resolver,
                     Settings.System.BATTERY_LIGHT_REALLY_FULL_COLOR, mBatteryFullARGB, UserHandle.USER_CURRENT);
+
+            // Fast Light colors
+            mFastBatteryARGB = Settings.System.getIntForUser(resolver,
+                    Settings.System.FAST_BATTERY_LIGHT_COLOR,
+                    res.getInteger(com.android.internal.R.integer.config_notificationsFastBatteryARGB), UserHandle.USER_CURRENT);
 
             updateLedPulse();
         }
