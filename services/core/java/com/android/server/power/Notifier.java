@@ -22,6 +22,7 @@ import android.app.RetailDemoModeServiceInternal;
 
 import com.android.internal.app.IAppOpsService;
 import com.android.internal.app.IBatteryStats;
+import com.android.internal.util.omni.DeviceUtils;
 import com.android.server.EventLogTags;
 import com.android.server.LocalServices;
 
@@ -741,7 +742,9 @@ final class Notifier {
 
                 case MSG_WIRELESS_CHARGING_STARTED:
                 case MSG_WIRED_CHARGING_STARTED:
-                    playWirelessChargingStartedSound();
+                    if (!DeviceUtils.isDataEncrypted()) {
+                        playWirelessChargingStartedSound();
+                    }
                     break;
                 case MSG_SCREEN_BRIGHTNESS_BOOST_CHANGED:
                     sendBrightnessBoostChangedBroadcast();
