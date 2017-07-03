@@ -43,6 +43,15 @@
     <!-- Does the battery LED support multiple colors? Used to decide if the user can change the colors -->
     <bool name="config_multiColorBatteryLed">false</bool>
 
+    <!-- Does the device supports fast charging -->
+    <bool name="config_FastChargingLed">false</bool>
+
+    <!--Are the fast charging LED enabled ? -->
+    <bool name="config_FastChargingLedEnabled">false</bool>
+
+    <!-- Default value for led color when battery is low on charge -->
+    <integer name="config_notificationsFastBatteryARGB">0xF0FFF0</integer>
+
     <!-- If this is true, key chords can be used to take a screen record on the device. -->
     <bool name="config_enableScreenrecordChord">true</bool>
 
