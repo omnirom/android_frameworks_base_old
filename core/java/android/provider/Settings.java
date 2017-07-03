@@ -4040,6 +4040,19 @@ public final class Settings {
         public static final String BATTERY_LIGHT_REALLY_FULL_COLOR = "battery_light_really_full_color";
 
         /**
+         * What color to use for the battery LED while charging - low
+         * @hide
+         */
+        public static final String FAST_BATTERY_LIGHT_COLOR = "fast_battery_light_color";
+
+        /**
+         * Whether the fast charging battery light is enabled
+         * The value is boolean (1 or 0).
+         * @hide
+         */
+        public static final String FAST_CHARGING_LED_ENABLED = "fast_charging_led_enabled";
+
+        /**
          * Settings to backup. This is here so that it's in the same place as the settings
          * keys and easy to update.
          *
@@ -4218,6 +4231,8 @@ public final class Settings {
             PRIVATE_SETTINGS.add(BATTERY_LIGHT_LOW_COLOR);
             PRIVATE_SETTINGS.add(BATTERY_LIGHT_MEDIUM_COLOR);
             PRIVATE_SETTINGS.add(BATTERY_LIGHT_REALLY_FULL_COLOR);
+            PRIVATE_SETTINGS.add(FAST_BATTERY_LIGHT_COLOR);
+            PRIVATE_SETTINGS.add(FAST_CHARGING_LED_ENABLED);
         }
 
         /**
