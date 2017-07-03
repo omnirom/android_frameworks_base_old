@@ -189,4 +189,9 @@ public class DeviceUtils {
         }
         return false;
     }
+
+    public static boolean isDataEncrypted() {
+        String voldState = SystemProperties.get("vold.decrypt");
+        return "1".equals(voldState) || "trigger_restart_min_framework".equals(voldState);
+    }
 }
