@@ -3488,6 +3488,14 @@ public final class Settings {
          * @hide
          */
         public static final String BATTERY_LIGHT_ENABLED = "battery_light_enabled";
+        
+        /**
+         * Whether the fast charging battery light should be enabled (if hardware supports it)
+         * The value is boolean (1 or 0).
+         * @hide
+         */
+        public static final String FAST_CHARGING_LED_ENABLED = "fast_charging_led_enabled";
+        
 
         /**
          * Whether the battery LED should repeatedly flash when the battery is low
@@ -3526,6 +3534,13 @@ public final class Settings {
          * @hide
          */
         public static final String BATTERY_LIGHT_REALLY_FULL_COLOR = "battery_light_really_full_color";
+        
+        
+         /**
+         * What color to use for the battery LED while charging - low
+         * @hide
+         */
+        public static final String FAST_BATTERY_LIGHT_COLOR = "fast_battery_light_color";
 
         /**
          * Show pointer location on screen?
