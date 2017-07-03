@@ -71,6 +71,11 @@
   <!--OmniGears Battery lights -->
   <java-symbol type="bool" name="config_multiColorBatteryLed" />
   <java-symbol type="bool" name="config_intrusiveBatteryLed" />
+  <java-symbol type="bool" name="config_FastchargingLedEnabled" />
+  <java-symbol type="bool" name="config_FastchargingLed" />
+  <java-symbol type="integer" name="config_notificationsFastBatteryFullARGB" />
+  <java-symbol type="integer" name="config_notificationsFastBatteryLowARGB" />
+  <java-symbol type="integer" name="config_notificationsFastBatteryMediumARGB" />
   <!-- ScreenRecord -->
   <java-symbol type="bool" name="config_enableScreenrecordChord" />
   <java-symbol type="drawable" name="ic_global_screenshot" />
