@@ -109,6 +109,7 @@ public final class PowerManagerService extends SystemService
     private static final int MSG_SCREEN_BRIGHTNESS_BOOST_TIMEOUT = 3;
     // Message: Polling to look for long held wake locks.
     private static final int MSG_CHECK_FOR_LONG_WAKELOCKS = 4;
+    private static final int MSG_BUTTON_TIMEOUT = 5;
 
     // Dirty bit: mWakeLocks changed
     protected static final int DIRTY_WAKE_LOCKS = 1 << 0;
@@ -516,6 +517,7 @@ public final class PowerManagerService extends SystemService
     // True if we are currently in VR Mode.
     private boolean mIsVrModeEnabled;
 
+    // Omni additions
     // button brightness suppport enablement
     private boolean mButtonBrightnessSupport = false;
 
@@ -532,17 +534,12 @@ public final class PowerManagerService extends SystemService
     // overrule and disable brightness for buttons
     private boolean mButtonDisableBrightness = false;
 
-    // overrule and disable based on timout
-    private boolean mButtonDisabledByTimeout = false;
-
-    // overrule and disable brightness for buttons
-    private boolean mHardwareKeysDisable = false;
-
     // button on touch
     private boolean mButtonBacklightOnTouchOnly;
 
     // timeout for button backlight automatic turning off
     private int mButtonTimeout;
+    private boolean mButtonTimeoutEnabled;
 
     private native void nativeInit();
 
@@ -1792,6 +1789,14 @@ public final class PowerManagerService extends SystemService
                 | DIRTY_WAKEFULNESS | DIRTY_SETTINGS)) != 0) {
             mHandler.removeMessages(MSG_USER_ACTIVITY_TIMEOUT);
 
+            boolean wakeLocksValue = (dirty & DIRTY_WAKE_LOCKS) != 0;
+            boolean userActivityValue = (dirty & DIRTY_USER_ACTIVITY) != 0;
+            boolean wakefullnessValue = (dirty & DIRTY_WAKEFULNESS) != 0;
+            boolean settingsValue = (dirty & DIRTY_SETTINGS) != 0;
+
+            if (DEBUG) {
+                Slog.d(TAG, "DIRTY_WAKE_LOCKS=" + wakeLocksValue + " DIRTY_USER_ACTIVITY=" + userActivityValue + " DIRTY_WAKEFULNESS=" + wakefullnessValue + " DIRTY_SETTINGS=" + settingsValue);
+            }
             long nextTimeout = 0;
             if (mWakefulness == WAKEFULNESS_AWAKE
                     || mWakefulness == WAKEFULNESS_DREAMING
@@ -1806,12 +1811,14 @@ public final class PowerManagerService extends SystemService
                     nextTimeout = mLastUserActivityTime
                             + screenOffTimeout - screenDimDuration;
                     if (now < nextTimeout) {
-                        if (mButtonTimeout != 0){
-                            if (now > mLastUserActivityTime + mButtonTimeout) {
-                                mButtonDisabledByTimeout = true;
+                        if (mButtonTimeoutEnabled && (userActivityValue || settingsValue)){
+                            final boolean buttonPressed = mEvent == PowerManager.USER_ACTIVITY_EVENT_BUTTON;
+                            if (mButtonBacklightOnTouchOnly) {
+                                if (buttonPressed) {
+                                    triggerButtonTimeoutEvent(now);
+                                }
                             } else {
-                                mButtonDisabledByTimeout = false;
-                                nextTimeout = now + mButtonTimeout;
+                                triggerButtonTimeoutEvent(now);
                             }
                         }
                         mUserActivitySummary = USER_ACTIVITY_SCREEN_BRIGHT;
@@ -2241,8 +2248,10 @@ public final class PowerManagerService extends SystemService
                 mDisplayPowerRequest.dozeScreenBrightness = PowerManager.BRIGHTNESS_DEFAULT;
             }
 
-            if ((dirty & ( DIRTY_USER_ACTIVITY | DIRTY_SETTINGS)) != 0) {
-                updateButtonLight();
+            if (mButtonBrightnessSupport) {
+                if ((dirty & ( DIRTY_USER_ACTIVITY | DIRTY_SETTINGS)) != 0) {
+                    updateButtonLight(false);
+                }
             }
 
             mDisplayReady = mDisplayManagerInternal.requestPowerState(mDisplayPowerRequest,
@@ -2402,8 +2411,8 @@ public final class PowerManagerService extends SystemService
         @Override
         public void onBrightnessChanged(int value) {
             mScreenBrightnessAuto = value;
-            if (mButtonUseScreenBrightness) {
-                updateButtonLight();
+            if (mButtonBrightnessSupport && mButtonUseScreenBrightness) {
+                updateButtonLight(false);
             }
         }
 
@@ -3251,6 +3260,12 @@ public final class PowerManagerService extends SystemService
                     break;
                 case MSG_CHECK_FOR_LONG_WAKELOCKS:
                     checkForLongWakeLocks();
+                    break;
+                case MSG_BUTTON_TIMEOUT:
+                    if (DEBUG) {
+                        Slog.d(TAG, "button timeout triggered");
+                    }
+                    updateButtonLight(true);
                     break;
             }
         }
@@ -4110,24 +4125,40 @@ public final class PowerManagerService extends SystemService
             mButtonDisableBrightness = Settings.System.getIntForUser(
                     mContext.getContentResolver(), Settings.System.CUSTOM_BUTTON_DISABLE_BRIGHTNESS,
                     0, UserHandle.USER_CURRENT) != 0;
-            mHardwareKeysDisable = Settings.System.getIntForUser(
+            boolean hardwareKeysDisable = Settings.System.getIntForUser(
                     mContext.getContentResolver(), Settings.System.HARDWARE_KEYS_DISABLE,
                     0, UserHandle.USER_CURRENT) != 0;
+            mButtonDisableBrightness = mButtonDisableBrightness || hardwareKeysDisable;
             mButtonBacklightOnTouchOnly = Settings.System.getIntForUser(
                     mContext.getContentResolver(), Settings.System.BUTTON_BACKLIGHT_ON_TOUCH_ONLY,
                     0, UserHandle.USER_CURRENT) != 0;
             mButtonTimeout = Settings.System.getIntForUser(resolver,
                     Settings.System.BUTTON_BACKLIGHT_TIMEOUT,
                     0, UserHandle.USER_CURRENT) * 1000;
+
+            mButtonTimeoutEnabled = mButtonTimeout != 0 && !mButtonDisableBrightness;
+            // prevent remaining timout to be triggered
+            mHandler.removeMessages(MSG_BUTTON_TIMEOUT);
+            // force it off - it will come back if needed later
+            updateButtonLight(true);
         }
     }
 
-    private void updateButtonLight() {
-        if (mDisplayPowerRequest == null || !mButtonBrightnessSupport){
+    private void updateButtonLight(boolean timeoutEvent) {
+        if (mDisplayPowerRequest == null){
             return;
         }
 
-        if (mButtonDisableBrightness || mHardwareKeysDisable){
+        if (mButtonDisableBrightness){
+            mCurrentButtonBrightness = 0;
+            mLightsManager.getLight(LightsManager.LIGHT_ID_BUTTONS).setBrightness(mCurrentButtonBrightness);
+            return;
+        }
+
+        if (timeoutEvent) {
+            if (DEBUG) {
+                Slog.d(TAG, "button timeout handled");
+            }
             mCurrentButtonBrightness = 0;
             mLightsManager.getLight(LightsManager.LIGHT_ID_BUTTONS).setBrightness(mCurrentButtonBrightness);
             return;
@@ -4138,15 +4169,11 @@ public final class PowerManagerService extends SystemService
         int currentButtonBrightness = 0;
 
         if (buttonlight_on){
-            if (mButtonBacklightOnTouchOnly) {
+            if (mButtonBacklightOnTouchOnly && mButtonTimeoutEnabled) {
                 if (buttonPressed) {
                     currentButtonBrightness = calcButtonLight();
                 } else {
-                    if (mButtonDisabledByTimeout) {
-                        currentButtonBrightness = 0;
-                    } else {
-                        currentButtonBrightness = mCurrentButtonBrightness;
-                    }
+                    currentButtonBrightness = mCurrentButtonBrightness;
                 }
             } else {
                 currentButtonBrightness = calcButtonLight();
@@ -4156,7 +4183,7 @@ public final class PowerManagerService extends SystemService
         }
         mCurrentButtonBrightness = currentButtonBrightness;
 
-        if(DEBUG){
+        if (DEBUG) {
             Slog.d(TAG, "mCurrentButtonBrightness="+mCurrentButtonBrightness);
         }
 
@@ -4166,22 +4193,28 @@ public final class PowerManagerService extends SystemService
     private int calcButtonLight() {
         int buttonBrightness = 0;
 
-        if (mButtonDisabledByTimeout){
-            buttonBrightness = 0;
-        } else {
-            if (mCustomButtonBrightness == -1 || mButtonUseScreenBrightness){
-                // use same value as screen
-                boolean autoBrightness = (mScreenBrightnessModeSetting ==
-                        Settings.System.SCREEN_BRIGHTNESS_MODE_AUTOMATIC);
-                if (autoBrightness) {
-                    buttonBrightness = mScreenBrightnessAuto == -1 ? mScreenBrightnessSetting : mScreenBrightnessAuto;
-                } else {
-                    buttonBrightness = mScreenBrightnessSetting;
-                }
+        if (mCustomButtonBrightness == -1 || mButtonUseScreenBrightness){
+            // use same value as screen
+            boolean autoBrightness = (mScreenBrightnessModeSetting ==
+                    Settings.System.SCREEN_BRIGHTNESS_MODE_AUTOMATIC);
+            if (autoBrightness) {
+                buttonBrightness = mScreenBrightnessAuto == -1 ? mScreenBrightnessSetting : mScreenBrightnessAuto;
             } else {
-                buttonBrightness = mCustomButtonBrightness;
+                buttonBrightness = mScreenBrightnessSetting;
             }
+        } else {
+            buttonBrightness = mCustomButtonBrightness;
         }
         return buttonBrightness;
+    }
+
+    private void triggerButtonTimeoutEvent(long now) {
+        mHandler.removeMessages(MSG_BUTTON_TIMEOUT);
+        if (DEBUG) {
+            Slog.d(TAG, "button timeout set to " + (now + mButtonTimeout));
+        }
+        Message msg = mHandler.obtainMessage(MSG_BUTTON_TIMEOUT);
+        msg.setAsynchronous(true);
+        mHandler.sendMessageAtTime(msg, now + mButtonTimeout);
     }
 }
