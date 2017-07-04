@@ -813,6 +813,7 @@ public abstract class Connection extends Conferenceable {
         public void onRttInitiationFailure(Connection c, int reason) {}
         public void onRttSessionRemotelyTerminated(Connection c) {}
         public void onRemoteRttRequest(Connection c) {}
+        public void onCdmaConnectionTimeReset(Connection c) {}
     }
 
     /**
@@ -2290,6 +2291,16 @@ public abstract class Connection extends Conferenceable {
             }
         }
         fireOnConferenceableConnectionsChanged();
+    }
+
+    /**
+       *@hide
+       * Resets the cdma connection time.
+       */
+    public final void resetCdmaConnectionTime() {
+        for (Listener l : mListeners) {
+            l.onCdmaConnectionTimeReset(this);
+        }
     }
 
     /**

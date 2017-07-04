@@ -581,6 +581,10 @@ final class ConnectionServiceAdapterServant {
                 throws RemoteException {
             mHandler.obtainMessage(MSG_ON_RTT_UPGRADE_REQUEST, connectionId).sendToTarget();
         }
+
+        @Override
+        public void resetCdmaConnectionTime(String callId, Session.Info sessionInfo) {
+        }
     };
 
     public ConnectionServiceAdapterServant(IConnectionServiceAdapter delegate) {
