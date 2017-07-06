@@ -258,6 +258,14 @@ public class SubscriptionManager {
      * @hide
      */
     public static final String SIM_PROVISIONING_STATUS = "sim_provisioning_status";
+    
+    /**
+     * The user configured Network mode of SIM/sub.
+     * <P>Type: INTEGER (int)</P>
+     * {@hide}
+     */
+    public static final String USER_NETWORK_MODE = "user_network_mode";
+
 
     /**
      *  TelephonyProvider column name for extreme threat in CB settings
