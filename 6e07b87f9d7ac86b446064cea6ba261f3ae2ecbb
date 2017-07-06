@@ -1,0 +1,208 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "a02d1630_09beb7de",
+        "filename": "services/core/java/com/android/server/BatteryService.java",
+        "patchSetId": 15
+      },
+      "lineNbr": 180,
+      "author": {
+        "id": 1000026
+      },
+      "writtenOn": "2017-07-06T09:59:48Z",
+      "side": 1,
+      "message": "indentation wrong",
+      "revId": "6e07b87f9d7ac86b446064cea6ba261f3ae2ecbb",
+      "serverId": "56841c99-7c94-43d4-bf0b-cb4707e66d55",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "b1ac091a_55c4b308",
+        "filename": "services/core/java/com/android/server/BatteryService.java",
+        "patchSetId": 15
+      },
+      "lineNbr": 530,
+      "author": {
+        "id": 1000026
+      },
+      "writtenOn": "2017-07-06T09:59:48Z",
+      "side": 1,
+      "message": "missing space before and after *",
+      "revId": "6e07b87f9d7ac86b446064cea6ba261f3ae2ecbb",
+      "serverId": "56841c99-7c94-43d4-bf0b-cb4707e66d55",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "a6c2f8be_04340264",
+        "filename": "services/core/java/com/android/server/BatteryService.java",
+        "patchSetId": 15
+      },
+      "lineNbr": 531,
+      "author": {
+        "id": 1000026
+      },
+      "writtenOn": "2017-07-06T09:59:48Z",
+      "side": 1,
+      "message": "indentation wrong",
+      "revId": "6e07b87f9d7ac86b446064cea6ba261f3ae2ecbb",
+      "serverId": "56841c99-7c94-43d4-bf0b-cb4707e66d55",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "4d345015_90a24a2f",
+        "filename": "services/core/java/com/android/server/BatteryService.java",
+        "patchSetId": 15
+      },
+      "lineNbr": 832,
+      "author": {
+        "id": 1000026
+      },
+      "writtenOn": "2017-07-06T09:59:48Z",
+      "side": 1,
+      "message": "missing space before {",
+      "revId": "6e07b87f9d7ac86b446064cea6ba261f3ae2ecbb",
+      "serverId": "56841c99-7c94-43d4-bf0b-cb4707e66d55",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "d31ab641_12acc622",
+        "filename": "services/core/java/com/android/server/BatteryService.java",
+        "patchSetId": 15
+      },
+      "lineNbr": 835,
+      "author": {
+        "id": 1000026
+      },
+      "writtenOn": "2017-07-06T09:59:48Z",
+      "side": 1,
+      "message": "indentation wrong",
+      "revId": "6e07b87f9d7ac86b446064cea6ba261f3ae2ecbb",
+      "serverId": "56841c99-7c94-43d4-bf0b-cb4707e66d55",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "52e6e8a6_3951a947",
+        "filename": "services/core/java/com/android/server/BatteryService.java",
+        "patchSetId": 15
+      },
+      "lineNbr": 838,
+      "author": {
+        "id": 1000026
+      },
+      "writtenOn": "2017-07-06T09:59:48Z",
+      "side": 1,
+      "message": "indentation wrong",
+      "revId": "6e07b87f9d7ac86b446064cea6ba261f3ae2ecbb",
+      "serverId": "56841c99-7c94-43d4-bf0b-cb4707e66d55",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "0f29c083_83988c39",
+        "filename": "services/core/java/com/android/server/BatteryService.java",
+        "patchSetId": 15
+      },
+      "lineNbr": 839,
+      "author": {
+        "id": 1000026
+      },
+      "writtenOn": "2017-07-06T09:59:48Z",
+      "side": 1,
+      "message": "could also be written simple as\nisFastCharging \u003d mWatt \u003e mFastThreshold \u0026 mFastChargingLedEnabled;\nupdateLightsLocked();",
+      "revId": "6e07b87f9d7ac86b446064cea6ba261f3ae2ecbb",
+      "serverId": "56841c99-7c94-43d4-bf0b-cb4707e66d55",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "4025f936_0d774b6b",
+        "filename": "services/core/java/com/android/server/BatteryService.java",
+        "patchSetId": 15
+      },
+      "lineNbr": 868,
+      "author": {
+        "id": 1000026
+      },
+      "writtenOn": "2017-07-06T09:59:48Z",
+      "side": 1,
+      "message": "missing space before else and before {",
+      "revId": "6e07b87f9d7ac86b446064cea6ba261f3ae2ecbb",
+      "serverId": "56841c99-7c94-43d4-bf0b-cb4707e66d55",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "93d24e05_ef798b78",
+        "filename": "services/core/java/com/android/server/BatteryService.java",
+        "patchSetId": 15
+      },
+      "lineNbr": 873,
+      "author": {
+        "id": 1000026
+      },
+      "writtenOn": "2017-07-06T09:59:48Z",
+      "side": 1,
+      "message": "spaces",
+      "revId": "6e07b87f9d7ac86b446064cea6ba261f3ae2ecbb",
+      "serverId": "56841c99-7c94-43d4-bf0b-cb4707e66d55",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "02b7ed37_95f34f8b",
+        "filename": "services/core/java/com/android/server/BatteryService.java",
+        "patchSetId": 15
+      },
+      "lineNbr": 903,
+      "author": {
+        "id": 1000026
+      },
+      "writtenOn": "2017-07-06T09:59:48Z",
+      "side": 1,
+      "message": "spaces",
+      "revId": "6e07b87f9d7ac86b446064cea6ba261f3ae2ecbb",
+      "serverId": "56841c99-7c94-43d4-bf0b-cb4707e66d55",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "6e3ccf10_e4e9ee17",
+        "filename": "services/core/java/com/android/server/BatteryService.java",
+        "patchSetId": 15
+      },
+      "lineNbr": 908,
+      "author": {
+        "id": 1000026
+      },
+      "writtenOn": "2017-07-06T09:59:48Z",
+      "side": 1,
+      "message": "indentation",
+      "revId": "6e07b87f9d7ac86b446064cea6ba261f3ae2ecbb",
+      "serverId": "56841c99-7c94-43d4-bf0b-cb4707e66d55",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "dbf6dae3_542c5707",
+        "filename": "services/core/java/com/android/server/BatteryService.java",
+        "patchSetId": 15
+      },
+      "lineNbr": 1045,
+      "author": {
+        "id": 1000026
+      },
+      "writtenOn": "2017-07-06T09:59:48Z",
+      "side": 1,
+      "message": "indentation",
+      "revId": "6e07b87f9d7ac86b446064cea6ba261f3ae2ecbb",
+      "serverId": "56841c99-7c94-43d4-bf0b-cb4707e66d55",
+      "unresolved": false
+    }
+  ]
+}
