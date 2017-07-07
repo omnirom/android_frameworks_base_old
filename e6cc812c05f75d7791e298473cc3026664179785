@@ -1,0 +1,72 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "c3b3cc90_492e9eac",
+        "filename": "services/core/java/com/android/server/BatteryService.java",
+        "patchSetId": 16
+      },
+      "lineNbr": 829,
+      "author": {
+        "id": 1000026
+      },
+      "writtenOn": "2017-07-07T10:57:27Z",
+      "side": 1,
+      "message": "member variables must start with lowercase m",
+      "revId": "e6cc812c05f75d7791e298473cc3026664179785",
+      "serverId": "56841c99-7c94-43d4-bf0b-cb4707e66d55",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "f6e60fd1_e7b5f704",
+        "filename": "services/core/java/com/android/server/BatteryService.java",
+        "patchSetId": 16
+      },
+      "lineNbr": 831,
+      "author": {
+        "id": 1000026
+      },
+      "writtenOn": "2017-07-07T10:57:27Z",
+      "side": 1,
+      "message": "methods (function) must start with a lowercase char",
+      "revId": "e6cc812c05f75d7791e298473cc3026664179785",
+      "serverId": "56841c99-7c94-43d4-bf0b-cb4707e66d55",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "e9ab72d5_70bd61cf",
+        "filename": "services/core/java/com/android/server/BatteryService.java",
+        "patchSetId": 16
+      },
+      "lineNbr": 832,
+      "author": {
+        "id": 1000026
+      },
+      "writtenOn": "2017-07-07T10:57:27Z",
+      "side": 1,
+      "message": "using tabs will kill sweet little kittens",
+      "revId": "e6cc812c05f75d7791e298473cc3026664179785",
+      "serverId": "56841c99-7c94-43d4-bf0b-cb4707e66d55",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "ddbcce2b_b8021f7f",
+        "filename": "services/core/java/com/android/server/BatteryService.java",
+        "patchSetId": 16
+      },
+      "lineNbr": 846,
+      "author": {
+        "id": 1000026
+      },
+      "writtenOn": "2017-07-07T10:57:27Z",
+      "side": 1,
+      "message": "this should be in the outer class",
+      "revId": "e6cc812c05f75d7791e298473cc3026664179785",
+      "serverId": "56841c99-7c94-43d4-bf0b-cb4707e66d55",
+      "unresolved": false
+    }
+  ]
+}
