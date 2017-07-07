@@ -2,6 +2,40 @@
   "comments": [
     {
       "key": {
+        "uuid": "c0724336_57008251",
+        "filename": "core/res/res/values/custom_config.xml",
+        "patchSetId": 16
+      },
+      "lineNbr": 50,
+      "author": {
+        "id": 1000026
+      },
+      "writtenOn": "2017-07-07T11:00:10Z",
+      "side": 1,
+      "message": "why we need two of them? IMHO we only need one global for supported or not",
+      "revId": "e6cc812c05f75d7791e298473cc3026664179785",
+      "serverId": "56841c99-7c94-43d4-bf0b-cb4707e66d55",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "005344d7_a055d99f",
+        "filename": "services/core/java/com/android/server/BatteryService.java",
+        "patchSetId": 16
+      },
+      "lineNbr": 183,
+      "author": {
+        "id": 1000026
+      },
+      "writtenOn": "2017-07-07T11:00:10Z",
+      "side": 1,
+      "message": "here you should add the init of mFastChargingLed",
+      "revId": "e6cc812c05f75d7791e298473cc3026664179785",
+      "serverId": "56841c99-7c94-43d4-bf0b-cb4707e66d55",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "c3b3cc90_492e9eac",
         "filename": "services/core/java/com/android/server/BatteryService.java",
         "patchSetId": 16
