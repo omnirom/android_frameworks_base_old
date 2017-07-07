@@ -203,6 +203,21 @@ public class CallLog {
          * device other than the current one.
          */
         public static final int ANSWERED_EXTERNALLY_TYPE = 7;
+        /**
+         * Call log type for incoming IMS calls.
+         * @hide
+         */
+        public static final int INCOMING_IMS_TYPE = 1000;
+        /**
+         * Call log type for outgoing IMS calls.
+         * @hide
+         */
+        public static final int OUTGOING_IMS_TYPE = 1001;
+        /**
+         * Call log type for missed IMS calls.
+         * @hide
+         */
+        public static final int MISSED_IMS_TYPE = 1002;
 
         /**
          * Bit-mask describing features of the call (e.g. video).
@@ -675,7 +690,7 @@ public class CallLog {
             values.put(NEW, Integer.valueOf(1));
             values.put(ADD_FOR_ALL_USERS, addForAllUsers ? 1 : 0);
 
-            if (callType == MISSED_TYPE) {
+            if (callType == MISSED_TYPE || callType == MISSED_IMS_TYPE) {
                 values.put(IS_READ, Integer.valueOf(is_read ? 1 : 0));
             }
 
@@ -713,7 +728,8 @@ public class CallLog {
                             final String dataId = cursor.getString(0);
                             updateDataUsageStatForData(resolver, dataId);
                             if (duration >= MIN_DURATION_FOR_NORMALIZED_NUMBER_UPDATE_MS
-                                    && callType == Calls.OUTGOING_TYPE
+                                    && (callType == Calls.OUTGOING_TYPE ||
+                                    callType == OUTGOING_IMS_TYPE)
                                     && TextUtils.isEmpty(ci.normalizedNumber)) {
                                 updateNormalizedNumber(context, resolver, dataId, number);
                             }
@@ -835,7 +851,7 @@ public class CallLog {
                 c = resolver.query(
                     CONTENT_URI,
                     new String[] {NUMBER},
-                    TYPE + " = " + OUTGOING_TYPE,
+                    TYPE + " = " + OUTGOING_TYPE + " OR " + TYPE + " = " + OUTGOING_IMS_TYPE,
                     null,
                     DEFAULT_SORT_ORDER + " LIMIT 1");
                 if (c == null || !c.moveToFirst()) {
