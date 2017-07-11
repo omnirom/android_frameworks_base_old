@@ -1,0 +1,27 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "a2d0dc2f_bfcf94b1",
+        "filename": "services/core/java/com/android/server/BatteryService.java",
+        "patchSetId": 18
+      },
+      "lineNbr": 856,
+      "author": {
+        "id": 1001994
+      },
+      "writtenOn": "2017-07-11T16:42:00Z",
+      "side": 1,
+      "message": "whitespaces",
+      "range": {
+        "startLine": 856,
+        "startChar": 0,
+        "endLine": 856,
+        "endChar": 12
+      },
+      "revId": "a4fdf247a8298cae9acf08984cd614550bfaf874",
+      "serverId": "56841c99-7c94-43d4-bf0b-cb4707e66d55",
+      "unresolved": false
+    }
+  ]
+}
