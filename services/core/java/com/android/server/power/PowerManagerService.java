@@ -2249,7 +2249,7 @@ public final class PowerManagerService extends SystemService
             }
 
             if (mButtonBrightnessSupport) {
-                if ((dirty & ( DIRTY_USER_ACTIVITY | DIRTY_SETTINGS)) != 0) {
+                if ((dirty & ( DIRTY_USER_ACTIVITY | DIRTY_SETTINGS | DIRTY_ACTUAL_DISPLAY_POWER_STATE_UPDATED)) != 0) {
                     updateButtonLight(false);
                 }
             }
