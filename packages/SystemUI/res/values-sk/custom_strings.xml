@@ -60,13 +60,21 @@
   <string name="pref_crop_behavior_summary">Použiť orezaný obrázok aj v prípade, že pôvodný obrázok v skutočnosti nebo upravený touto funkciou</string>
   <string name="action_ok">OK</string>
   <!-- Screenshot Crop & Share -->
+  <string name="action_delete_success">Odstránené</string>
+  <string name="action_delete_fault">Odstránenie nebolo úspešné</string>
+  <string name="action_save_success">Uložené</string>
+  <string name="action_save_fault">Ukladanie nebolo úspešné</string>
   <string name="action_edit">Upraviť</string>
   <!-- qs edit mode menu -->
   <string name="qs_menu_item_columns">Stĺpce</string>
+  <string name="qs_menu_item_columns_landscape">Vodorovné stĺpce</string>
   <string name="qs_menu_item_columns_three">3</string>
   <string name="qs_menu_item_columns_four">4</string>
   <string name="qs_menu_item_columns_five">5</string>
   <string name="qs_menu_item_columns_six">6</string>
+  <string name="qs_menu_item_columns_seven">7</string>
+  <string name="qs_menu_item_columns_eight">8</string>
+  <string name="qs_menu_item_columns_nine">9</string>
   <string name="qs_menu_item_reset">Obnoviť</string>
   <!-- NavBar Tuner -->
   <string name="menu_ime_always_show">Menu / Prepínač klávesnice (vždy zobrazovať)</string>
@@ -81,5 +89,34 @@
   <string name="qs_menu_item_scroll">Posuvník rýchleho menu</string>
   <string name="qs_menu_item_titles">Skryť štítky</string>
   <!-- Advance location quick setting tile -->
+  <string name="accessibility_quick_settings_location_battery_saving">Hlásenie umiestnenia: režim úspory batérie.</string>
+  <string name="accessibility_quick_settings_location_gps_only">Hlásenie umiestnenia: režim senzorov zariadenia.</string>
+  <string name="accessibility_quick_settings_location_high_accuracy">Hlásenie umiestnenie: režim vysokej presnosti.</string>
+  <string name="accessibility_quick_settings_location_changed_battery_saving">Hlásenie umiestnenia zmenené na režim úspory batérie.</string>
+  <string name="accessibility_quick_settings_location_changed_gps_only">Hlásenie umiestnenia zmenené na režim senzorov zariadenia.</string>
+  <string name="accessibility_quick_settings_location_changed_high_accuracy">Hlásenie umiestnenia zmenené na režim vysokej presnosti.</string>
+  <string name="quick_settings_location_detail_title">Režim umiestnenia</string>
+  <string name="quick_settings_location_battery_saving_label">Úspora batérie</string>
+  <string name="quick_settings_location_gps_only_label">Iba senzory zariadenia</string>
+  <string name="quick_settings_location_high_accuracy_label">Vysoká presnoť</string>
+  <string name="quick_settings_location_off_label">Umiestnenie vypnuté</string>
+  <string name="quick_settings_google_assist_label">Asistencia</string>
+  <string name="quick_settings_google_voice_assist_label">Hlasový asistent</string>
+  <string name="quick_settings_network_adb_enabled_label">Povolené</string>
+  <string name="quick_settings_network_adb_disabled_label">Zakázané</string>
+  <string name="quick_settings_network_adb_label">ADB cez sieť</string>
+  <string name="quick_settings_network_adb_toast">USB ladenie nie je povolené</string>
+  <string name="omnijaws_service_error">Chyba</string>
+  <string name="omnijaws_service_unkown">Žiadne údaje o počasí</string>
+  <string name="omnijaws_service_error_long">Chyba pri načítavaní údajov o počasí</string>
+  <string name="omnijaws_service_disabled">Služba zakázaná</string>
+  <string name="omnijaws_detail_header">Počasie</string>
+  <string name="omnijaws_label_default">Počasie</string>
+  <string name="omnijaws_current_text">Teraz</string>
+  <string name="omnijaws_package_not_available">OmniJaws nie je dostupný</string>
   <!-- Path data for portrait battery -->
+  <!-- Content description of the data connection type HSPA+ for accessibility (not shown on the screen). [CHAR LIMIT=NONE] -->
+  <string name="accessibility_data_connection_hspap">HSPA+</string>
+  <string name="pirate_label">Aaarrrggghhh</string>
+  <string name="pirate_spec">pirát</string>
 </resources>

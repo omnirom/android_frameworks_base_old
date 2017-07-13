@@ -108,6 +108,7 @@
   <string name="quick_settings_network_adb_enabled_label">Ligado</string>
   <string name="quick_settings_network_adb_disabled_label">Desligado</string>
   <string name="quick_settings_network_adb_label">ADB através da rede</string>
+  <string name="quick_settings_network_adb_toast">A depuração USB não está ligada</string>
   <string name="omnijaws_service_error">Erro</string>
   <string name="omnijaws_service_unkown">Sem informação meteorológica</string>
   <string name="omnijaws_service_error_long">Erro ao carregar dados meteorológicos</string>
@@ -117,6 +118,8 @@
   <string name="omnijaws_current_text">Agora</string>
   <string name="omnijaws_package_not_available">O Omnijaws está indisponível</string>
   <!-- Path data for portrait battery -->
+  <!-- Content description of the data connection type HSPA+ for accessibility (not shown on the screen). [CHAR LIMIT=NONE] -->
+  <string name="accessibility_data_connection_hspap">HSPA +</string>
   <string name="pirate_label">Aaarrrggghhh</string>
   <string name="pirate_spec">pirata</string>
 </resources>

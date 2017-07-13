@@ -108,6 +108,7 @@
   <string name="quick_settings_network_adb_enabled_label">Aktywne</string>
   <string name="quick_settings_network_adb_disabled_label">Nieaktywne</string>
   <string name="quick_settings_network_adb_label">ADB przez sieć</string>
+  <string name="quick_settings_network_adb_toast">Debugowanie USB jest wyłączone</string>
   <string name="omnijaws_service_error">Błąd</string>
   <string name="omnijaws_service_unkown">Brak danych o pogodzie</string>
   <string name="omnijaws_service_error_long">Błąd ładowania danych pogody</string>
@@ -117,6 +118,8 @@
   <string name="omnijaws_current_text">Teraz</string>
   <string name="omnijaws_package_not_available">OmniJaws nie jest dostępny</string>
   <!-- Path data for portrait battery -->
+  <!-- Content description of the data connection type HSPA+ for accessibility (not shown on the screen). [CHAR LIMIT=NONE] -->
+  <string name="accessibility_data_connection_hspap">HSPA+</string>
   <string name="pirate_label">Aaarrrggghhh</string>
   <string name="pirate_spec">pirat</string>
 </resources>

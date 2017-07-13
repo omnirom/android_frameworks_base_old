@@ -35,6 +35,8 @@
   <string name="global_action_torch_on">Baterka je zapnutá</string>
   <string name="global_action_torch_off">Baterka je vypnutá</string>
   <string name="global_actions_toggle_torch_mode">Baterka</string>
+  <string name="global_action_dismissable_dialog_text">Pokročilé reštartovanie je zakázané.\nChcete vykonať reštart\u003f</string>
+  <string name="global_action_dnaa">Nezobrazovať znovu</string>
   <!-- Silent Mode -->
   <string name="silent_mode_priority">Priorita</string>
   <string name="silent_mode_none">Žiadny</string>
@@ -52,13 +54,14 @@
   <string name="battery_style_meter_horizontal">Vodorovná čiara</string>
   <string name="battery_style_circle">Kruh</string>
   <string name="battery_style_droid">Droid</string>
+  <string name="battery_style_theme">Téma</string>
   <!-- global actions dnd selector -->
   <string name="dnd_mode_off">Vypnuté</string>
   <string name="dnd_mode_total_silence">Úplné ticho</string>
   <string name="dnd_mode_alarms">Len upozornenia</string>
   <string name="dnd_mode_important">Len prioritné</string>
   <!-- Vendor mismatched fingerprint warning [CHAR LIMIT=NONE] -->
-  <string name="system_error_vendorprint">Obraz nie je vhodný pre tento systém. Prosím nainštalujte obraz <xliff:g id="string">%s</xliff:g> pre vaše zariadenie</string>
+  <string name="system_error_vendorprint">Obraz výrobcu nie je vhodný pre tento systém. Prosím, nainštalujte obraz výrobcu <xliff:g id="string">%s</xliff:g> pre vaše zariadenie</string>
   <!-- Title of an application permission, listed so the user can choose whether they want to allow the application to do this. -->
   <string name="permlab_fakePackageSignature">Sfalšovanie podpisu balíka</string>
   <!-- Description of an application permission, listed so the user can choose whether they want to allow the application to do this. -->

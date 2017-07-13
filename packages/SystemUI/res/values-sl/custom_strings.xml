@@ -117,5 +117,6 @@
   <string name="omnijaws_current_text">Zdaj</string>
   <string name="omnijaws_package_not_available">OmniJaws ni nameščen</string>
   <!-- Path data for portrait battery -->
+  <!-- Content description of the data connection type HSPA+ for accessibility (not shown on the screen). [CHAR LIMIT=NONE] -->
   <string name="pirate_spec">pirat</string>
 </resources>

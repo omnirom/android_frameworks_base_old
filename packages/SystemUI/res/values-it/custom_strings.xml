@@ -118,6 +118,8 @@
   <string name="omnijaws_current_text">Adesso</string>
   <string name="omnijaws_package_not_available">OmniJaws non disponibile</string>
   <!-- Path data for portrait battery -->
+  <!-- Content description of the data connection type HSPA+ for accessibility (not shown on the screen). [CHAR LIMIT=NONE] -->
+  <string name="accessibility_data_connection_hspap">HSPA+</string>
   <string name="pirate_label">Aaarrrggghhh</string>
   <string name="pirate_spec">pirata</string>
 </resources>
