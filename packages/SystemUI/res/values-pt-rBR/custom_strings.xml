@@ -52,21 +52,21 @@
   <string name="quick_settings_heads_up">Notificações flutuante</string>
   <!-- Screenshot Crop & Share -->
   <string name="action_delete_success">Excluído</string>
-  <string name="action_delete_fault">A exclusão foi malsucedida</string>
+  <string name="action_delete_fault">A exclusão não teve êxito</string>
   <string name="action_save_success">Salvo</string>
-  <string name="action_save_fault">Economia foi malsucedida</string>
+  <string name="action_save_fault">Salvando não teve êxito</string>
   <string name="pref_action_color_title">Cor de botões de ação</string>
   <string name="pref_action_color_summary">Escolha sua cor favorita para os botões de ação</string>
   <string name="pref_category_main">Menu de Configurações</string>
   <string name="pref_category_user">Configurações de usuário</string>
-  <string name="pref_crop_behavior_title">Comportamento das culturas</string>
+  <string name="pref_crop_behavior_title">Comportamento da opção cortar</string>
   <string name="pref_crop_behavior_summary">Usar a imagem recortada, mesmo que o original na verdade ainda não foi cortada</string>
   <string name="action_ok">OK</string>
   <!-- Screenshot Crop & Share -->
   <string name="action_delete_success">Excluído</string>
   <string name="action_delete_fault">A exclusão não teve êxito</string>
   <string name="action_save_success">Salvo</string>
-  <string name="action_save_fault">Registro falhou</string>
+  <string name="action_save_fault">A salvação não teve êxito</string>
   <string name="action_edit">Editar</string>
   <!-- qs edit mode menu -->
   <string name="qs_menu_item_columns">Colunas</string>
@@ -118,6 +118,8 @@
   <string name="omnijaws_current_text">Agora</string>
   <string name="omnijaws_package_not_available">OmniJaws não disponível</string>
   <!-- Path data for portrait battery -->
+  <!-- Content description of the data connection type HSPA+ for accessibility (not shown on the screen). [CHAR LIMIT=NONE] -->
+  <string name="accessibility_data_connection_hspap">HSPA+</string>
   <string name="pirate_label">Aaarrrggghhh</string>
   <string name="pirate_spec">pirata</string>
 </resources>

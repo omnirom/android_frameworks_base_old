@@ -107,4 +107,5 @@
   <string name="omnijaws_current_text">현재</string>
   <string name="omnijaws_package_not_available">OmniJaws가 설치되어 있지 않음</string>
   <!-- Path data for portrait battery -->
+  <!-- Content description of the data connection type HSPA+ for accessibility (not shown on the screen). [CHAR LIMIT=NONE] -->
 </resources>

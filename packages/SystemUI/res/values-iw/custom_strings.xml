@@ -69,4 +69,5 @@
   <string name="stream_title_bluetooth">בלוטות\'</string>
   <!-- Advance location quick setting tile -->
   <!-- Path data for portrait battery -->
+  <!-- Content description of the data connection type HSPA+ for accessibility (not shown on the screen). [CHAR LIMIT=NONE] -->
 </resources>

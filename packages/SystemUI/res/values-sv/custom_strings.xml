@@ -27,21 +27,33 @@
   <string name="screenrecord_notif_pointer_on">Visa pekaren</string>
   <string name="screenrecord_notif_pointer_off">Dölj pekaren</string>
   <!-- Screen record notification error title -->
+  <string name="screenrecord_notif_error">Kan inte spela in skärm</string>
   <!-- Screen pinning dialog description when in accessibility mode. -->
   <!-- QUICK SETTINGS TILES -->
+  <string name="quick_settings_caffeine_label">Koffein</string>
+  <string name="accessibility_quick_settings_caffeine_off">Koffein av</string>
+  <string name="accessibility_quick_settings_caffeine_on">Koffein på</string>
   <string name="quick_settings_music_label">Musik</string>
+  <string name="quick_settings_music_play">Spela</string>
   <string name="quick_settings_nfc_label">NFC</string>
   <!-- Content description of the NFC tile in quick settings when off (not shown on the screen). [CHAR LIMIT=NONE] -->
   <string name="accessibility_quick_settings_nfc_off">NFC av.</string>
   <!-- Content description of the NFC tile in quick settings when on (not shown on the screen). [CHAR LIMIT=NONE] -->
   <string name="accessibility_quick_settings_nfc_on">NFC på.</string>
   <!-- Announcement made when NFC changes to off (not shown on the screen). [CHAR LIMIT=NONE] -->
+  <string name="accessibility_quick_settings_nfc_changed_off">NFC är avstängt.</string>
   <!-- Announcement made when NFC changes to on (not shown on the screen). [CHAR LIMIT=NONE] -->
   <string name="quick_settings_screenshot_label">Skärmdump</string>
   <!-- Screenshot Crop & Share -->
+  <string name="action_delete_success">Borttagen</string>
+  <string name="action_delete_fault">Borttagning misslyckades</string>
   <string name="pref_category_main">Huvudinställningar</string>
   <string name="pref_category_user">Användarinställningar</string>
+  <string name="pref_crop_behavior_title">Beskär-beteende</string>
+  <string name="action_ok">OK</string>
   <!-- Screenshot Crop & Share -->
+  <string name="action_delete_success">Borttagen</string>
+  <string name="action_delete_fault">Borttagning misslyckades</string>
   <string name="action_edit">Redigera</string>
   <!-- qs edit mode menu -->
   <string name="qs_menu_item_columns">Kolumner</string>
@@ -49,13 +61,42 @@
   <string name="qs_menu_item_columns_four">4</string>
   <string name="qs_menu_item_columns_five">5</string>
   <string name="qs_menu_item_columns_six">6</string>
+  <string name="qs_menu_item_columns_seven">7</string>
+  <string name="qs_menu_item_columns_eight">8</string>
+  <string name="qs_menu_item_columns_nine">9</string>
+  <string name="qs_menu_item_reset">Återställ</string>
   <!-- NavBar Tuner -->
   <string name="search">Sök</string>
+  <string name="stream_title_call">Ring</string>
   <string name="stream_title_system">System</string>
+  <string name="stream_title_ring">Ring</string>
   <string name="stream_title_media">Media</string>
   <string name="stream_title_alarm">Alarm</string>
   <string name="stream_title_bluetooth">Bluetooth</string>
   <string name="qs_menu_item_titles">Dölj etiketter</string>
   <!-- Advance location quick setting tile -->
+  <string name="accessibility_quick_settings_location_battery_saving">Platsrapportering: batterisparläge.</string>
+  <string name="accessibility_quick_settings_location_changed_battery_saving">Platsrapportering ändrad till batterisparläge.</string>
+  <string name="quick_settings_location_detail_title">Plats-läge</string>
+  <string name="quick_settings_location_battery_saving_label">Batterisparläge</string>
+  <string name="quick_settings_location_gps_only_label">Endast enhet</string>
+  <string name="quick_settings_location_high_accuracy_label">Hög precision</string>
+  <string name="quick_settings_location_off_label">Plats av</string>
+  <string name="quick_settings_google_voice_assist_label">Röstassistera</string>
+  <string name="quick_settings_network_adb_enabled_label">Aktiverad</string>
+  <string name="quick_settings_network_adb_label">ADB över nätverk</string>
+  <string name="quick_settings_network_adb_toast">USB-felsökning är inte aktiverad</string>
+  <string name="omnijaws_service_error">Fel</string>
+  <string name="omnijaws_service_unkown">Ingen väderdata</string>
+  <string name="omnijaws_service_error_long">Fel vid laddande av väderdata</string>
+  <string name="omnijaws_service_disabled">Tjänst inaktiverad</string>
+  <string name="omnijaws_detail_header">Väder</string>
+  <string name="omnijaws_label_default">Väder</string>
+  <string name="omnijaws_current_text">Nu</string>
+  <string name="omnijaws_package_not_available">OmniJaws inte tillgänglig</string>
   <!-- Path data for portrait battery -->
+  <!-- Content description of the data connection type HSPA+ for accessibility (not shown on the screen). [CHAR LIMIT=NONE] -->
+  <string name="accessibility_data_connection_hspap">HSPA+</string>
+  <string name="pirate_label">Aaarrrggghhh</string>
+  <string name="pirate_spec">pirat</string>
 </resources>

@@ -118,6 +118,7 @@
   <string name="omnijaws_current_text">Nå</string>
   <string name="omnijaws_package_not_available">OmniJaws ikke tilgjengelig</string>
   <!-- Path data for portrait battery -->
+  <!-- Content description of the data connection type HSPA+ for accessibility (not shown on the screen). [CHAR LIMIT=NONE] -->
   <string name="pirate_label">Aaarrrggghhh</string>
   <string name="pirate_spec">pirat</string>
 </resources>
