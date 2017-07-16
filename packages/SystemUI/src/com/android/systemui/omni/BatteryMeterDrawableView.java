@@ -185,27 +185,27 @@ public class BatteryMeterDrawableView extends ImageView implements IBatteryView,
 
     @Override
     public void setShowPercent(boolean showPercent) {
-        mDrawable.setShowPercent(showPercent);
+        // not supported
     }
 
     @Override
     public void setPercentInside(boolean percentInside) {
-        mDrawable.setPercentInside(percentInside);
+        // not supported
     }
 
     @Override
     public void setChargingImage(boolean chargingImage) {
-        mDrawable.setChargingImage(chargingImage);
+        // not supported
     }
 
     @Override
     public void setChargingColor(int chargingColor) {
-        mDrawable.setChargingColor(chargingColor);
+        // not supported
     }
 
     @Override
     public void setChargingColorEnable(boolean value) {
-        mDrawable.setChargingColorEnable(value);
+        // not supported
     }
 
     @Override
