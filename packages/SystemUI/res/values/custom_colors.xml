@@ -38,7 +38,18 @@
     <!-- OmniJaws detailed view temperature text -->
     <color name="omni_jaws_detailed_temperature_color">@android:color/white</color>
 
-    <!-- custom clock resource we DONT want to be themed -->
+    <!-- Battery colors -->
+    <color name="batterymeter_frame_color_darkintensity">@color/dark_mode_icon_color_dual_tone_background</color> <!-- statusbar battery frame color on white statusbar  -->
+    <color name="batterymeter_frame_color_tile">@color/light_mode_icon_color_dual_tone_background</color> <!-- tile battery frame color -->
+    <color name="batterymeter_tile_bolt_plus_color">@color/batterymeter_bolt_color</color> <!-- bolt and plus color for tile on non circle battery styles - the qs panel background color -->
+    <color name="battery_charge_level_on_light_statusbar">@color/dark_mode_icon_color_dual_tone_fill</color> <!-- level color on white statusbar -->
+    <color name="battery_charge_level_on_normal_statusbar">@color/light_mode_icon_color_dual_tone_fill</color> <!-- level color on normal statusbar -->
+    <color name="battery_charge_level_low_level">#FFE53935</color> <!-- level color when <15 for statusbar battery -->
+    <color name="battery_normal_charge_level_tile">#ffffff</color> <!-- level color when >15 for the tile battery -->
+    <color name="battery_low_charge_level_tile">@color/battery_charge_level_low_level</color> <!-- level color when >15 for the tile battery -->
+    <color name="status_bar_battery_level_text_color">#ffffff</color> <!-- percentage text outside battery icon -->
+
+    <!-- custom resource we DONT want to be themed -->
     <color name="dark_mode_icon_color_dual_tone_background_copy">#3d000000</color>
     <color name="dark_mode_icon_color_dual_tone_fill_copy">#7a000000</color>
     <color name="light_mode_icon_color_dual_tone_background_copy">#4dffffff</color>
