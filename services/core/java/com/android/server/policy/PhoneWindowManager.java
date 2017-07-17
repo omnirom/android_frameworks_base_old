@@ -772,6 +772,7 @@ public class PhoneWindowManager implements WindowManagerPolicy {
     private int mPressOnBackBehavior;
     private int mPressOnMenuBehavior;
     private boolean mDoCustomAction;
+    private int mLongPressOnHomeBehaviorCustom;
 
     private static final int KEY_ACTION_NOTHING = 0;
     private static final int KEY_ACTION_APP_SWITCH = 1;
@@ -779,6 +780,7 @@ public class PhoneWindowManager implements WindowManagerPolicy {
     private static final int KEY_ACTION_MENU = 3;
     private static final int KEY_ACTION_SPLIT = 4;
     private static final int KEY_ACTION_LAST_APP = 5;
+    private static final int KEY_ACTION_SLEEP = 6;
 
     private int mUserRotationAngles = -1;
 
@@ -991,7 +993,9 @@ public class PhoneWindowManager implements WindowManagerPolicy {
             resolver.registerContentObserver(Settings.System.getUriFor(
                     Settings.System.BUTTON_LONG_PRESS_RECENTS), false, this,
                     UserHandle.USER_ALL);
-
+            resolver.registerContentObserver(Settings.System.getUriFor(
+                    Settings.System.BUTTON_LONG_PRESS_HOME), false, this,
+                    UserHandle.USER_ALL);
             updateSettings();
         }
 
@@ -1771,13 +1775,13 @@ public class PhoneWindowManager implements WindowManagerPolicy {
     }
 
     private void handleLongPressOnHome(int deviceId) {
-        if (mLongPressOnHomeBehavior == LONG_PRESS_HOME_NOTHING) {
+        if (mLongPressOnHomeBehaviorCustom == LONG_PRESS_HOME_NOTHING) {
             return;
         }
         mHomeConsumed = true;
         performHapticFeedbackLw(null, HapticFeedbackConstants.LONG_PRESS, false);
 
-        switch (mLongPressOnHomeBehavior) {
+        switch (mLongPressOnHomeBehaviorCustom) {
             case LONG_PRESS_HOME_RECENT_SYSTEM_UI:
                 doToggleRecentApps();
                 break;
@@ -1785,7 +1789,7 @@ public class PhoneWindowManager implements WindowManagerPolicy {
                 launchAssistAction(null, deviceId);
                 break;
             default:
-                Log.w(TAG, "Undefined home long press behavior: " + mLongPressOnHomeBehavior);
+                performKeyAction(mLongPressOnHomeBehaviorCustom);
                 break;
         }
     }
@@ -2378,6 +2382,9 @@ public class PhoneWindowManager implements WindowManagerPolicy {
                     UserHandle.USER_CURRENT) != 0;
             mLongPressOnAppSwitchBehavior = Settings.System.getIntForUser(resolver,
                     Settings.System.BUTTON_LONG_PRESS_RECENTS, 0,
+                    UserHandle.USER_CURRENT);
+            mLongPressOnHomeBehaviorCustom = Settings.System.getIntForUser(resolver,
+                    Settings.System.BUTTON_LONG_PRESS_HOME, mLongPressOnHomeBehavior,
                     UserHandle.USER_CURRENT);
 
             mPressOnAppSwitchBehavior = mSwapBackAndRecents ? KEY_ACTION_BACK : KEY_ACTION_APP_SWITCH;
@@ -3549,7 +3556,7 @@ public class PhoneWindowManager implements WindowManagerPolicy {
                     mHomeDoubleTapPending = false;
                     mHandler.removeCallbacks(mHomeDoubleTapTimeoutRunnable);
                     handleDoubleTapOnHome();
-                } else if (mLongPressOnHomeBehavior == LONG_PRESS_HOME_RECENT_SYSTEM_UI
+                } else if (mLongPressOnHomeBehaviorCustom == LONG_PRESS_HOME_RECENT_SYSTEM_UI
                         || mDoubleTapOnHomeBehavior == DOUBLE_TAP_HOME_RECENT_SYSTEM_UI) {
                     preloadRecentApps();
                 }
@@ -8798,6 +8805,9 @@ public class PhoneWindowManager implements WindowManagerPolicy {
                 break;
             case KEY_ACTION_LAST_APP:
                 TaskUtils.toggleLastApp(mContext, mCurrentUserId);
+                break;
+            case KEY_ACTION_SLEEP:
+                mPowerManager.goToSleep(SystemClock.uptimeMillis(), PowerManager.GO_TO_SLEEP_REASON_POWER_BUTTON, 0);
                 break;
             default:
                 break;
