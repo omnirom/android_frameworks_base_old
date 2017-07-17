@@ -4121,6 +4121,18 @@ public final class Settings {
         public static final String BUTTON_LONG_PRESS_RECENTS = "button_long_press_recents";
 
         /**
+         * 0 for nothing
+         * 1 recents
+         * 2 start assist
+         * 3 show menu
+         * 4 toggle split screen
+         * 5 switch to last app
+         * 6 turn off
+         * @hide
+         */
+        public static final String BUTTON_LONG_PRESS_HOME = "button_long_press_home";
+
+        /**
          * Settings to backup. This is here so that it's in the same place as the settings
          * keys and easy to update.
          *
