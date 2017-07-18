@@ -633,7 +633,9 @@ public class StatusBarIconController extends StatusBarIconList implements Tunabl
                 mContext.getContentResolver(), Settings.System.STATUS_BAR_LOGO, 0,
                 UserHandle.USER_CURRENT) == 1;
         if (mShowLogo) {
-            animateShow(mOmniLogo, animate);
+            if (mNotificationIconAreaInner.getVisibility() == View.VISIBLE) {
+                animateShow(mOmniLogo, animate);
+            }
         } else {
             animateHide(mOmniLogo, animate, false);
         }
