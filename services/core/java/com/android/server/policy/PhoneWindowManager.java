@@ -3535,6 +3535,10 @@ public class PhoneWindowManager implements WindowManagerPolicy {
                     return -1;
                 }
 
+                if (mOmniSwitchRecents) {
+                    OmniSwitchConstants.hideOmniSwitchRecents(mContext, UserHandle.CURRENT);
+                }
+
                 handleShortPressOnHome();
                 return -1;
             }
