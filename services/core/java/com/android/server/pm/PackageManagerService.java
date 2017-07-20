@@ -15978,7 +15978,20 @@ public class PackageManagerService extends IPackageManager.Stub
                             mOptionalVerifierPackage, optional_receivers);
                         optionalIntent.setComponent(optionalVerifierComponent);
                         verificationState.addOptionalVerifier(optionalUid);
-                        mContext.sendBroadcastAsUser(optionalIntent, verifierUser, android.Manifest.permission.PACKAGE_VERIFICATION_AGENT);
+                        if (mRequiredVerifierPackage != null) {
+                            mContext.sendBroadcastAsUser(optionalIntent, verifierUser, android.Manifest.permission.PACKAGE_VERIFICATION_AGENT);
+                        } else {
+                            mContext.sendOrderedBroadcastAsUser(optionalIntent, verifierUser, android.Manifest.permission.PACKAGE_VERIFICATION_AGENT,
+                            new BroadcastReceiver() {
+                                @Override
+                                public void onReceive(Context context, Intent intent) {
+                                    final Message msg = mHandler.obtainMessage(CHECK_PENDING_VERIFICATION);
+                                    msg.arg1 = verificationId;
+                                    mHandler.sendMessageDelayed(msg, getVerificationTimeout());
+                                }
+                            }, null, 0, null, null);
+                            mArgs = null;
+                        }
                     }
 
                     final ComponentName requiredVerifierComponent = matchComponentForVerifier(
