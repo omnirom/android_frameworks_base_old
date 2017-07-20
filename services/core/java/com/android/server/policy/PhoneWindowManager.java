@@ -1516,6 +1516,12 @@ public class PhoneWindowManager implements WindowManagerPolicy {
         cancelPreloadRecentApps();
         mBackKeyHandled = true;
 
+        if (isStopLockTaskMode(false)) {
+            // no longer possible
+            mHandler.removeCallbacks(mBackLongPress);
+            return;
+        }
+
         switch (mLongPressOnBackBehavior) {
             case LONG_PRESS_BACK_NOTHING:
                 break;
@@ -1661,9 +1667,7 @@ public class PhoneWindowManager implements WindowManagerPolicy {
     Runnable mBackLongPress = new Runnable() {
         public void run() {
             mLongPressBackConsumed = true;
-            if (isStopLockTaskMode(false)) {
-                return;
-            }
+
             if (TaskUtils.killActiveTask(mContext, mCurrentUserId)){
                 performHapticFeedbackLw(null, HapticFeedbackConstants.LONG_PRESS, false);
                 Toast.makeText(mContext, R.string.app_killed_message,
@@ -1748,19 +1752,6 @@ public class PhoneWindowManager implements WindowManagerPolicy {
                     }
                 }
             });
-        }
-    }
-
-    private void handleLongPressOnMenu(int deviceId) {
-        if (mLongPressOnMenuBehavior != LONG_PRESS_HOME_NOTHING) {
-            mMenuConsumed = true;
-            performHapticFeedbackLw(null, HapticFeedbackConstants.LONG_PRESS, false);
-
-            if (mLongPressOnMenuBehavior == LONG_PRESS_HOME_RECENT_SYSTEM_UI) {
-                doToggleRecentApps();
-            } else if (mLongPressOnMenuBehavior == LONG_PRESS_HOME_ASSIST) {
-                launchAssistAction(null, deviceId);
-            }
         }
     }
 
@@ -3445,12 +3436,13 @@ public class PhoneWindowManager implements WindowManagerPolicy {
         // so we can be sure that events that are !virtuaKey are only for real buttons
         final boolean disableKey = !virtualKey && mHardwareKeysDisable;
         final boolean longPress = (flags & KeyEvent.FLAG_LONG_PRESS) != 0;
+        final boolean isVirtualHardKey = (flags & KeyEvent.FLAG_VIRTUAL_HARD_KEY) != 0;
 
         if (DEBUG_INPUT) {
             Log.d(TAG, "interceptKeyTi keyCode=" + keyCode + " down=" + down + " repeatCount="
                     + repeatCount + " keyguardOn=" + keyguardOn + " mHomePressed=" + mHomePressed
                     + " canceled=" + canceled + " virtualKey=" + virtualKey + " scanCode=" + scanCode
-                    + " longPress=" + longPress);
+                    + " longPress=" + longPress + " isVirtualHardKey=" + isVirtualHardKey);
         }
 
         // If we think we might have a volume down & power key chord on the way
@@ -3645,6 +3637,15 @@ public class PhoneWindowManager implements WindowManagerPolicy {
                         return -1;
                     }
                     // back action is simple to continue and pass further
+                }
+            } else if (isVirtualHardKey && mBackKillEnabled && !isStopLockTaskMode(true)) {
+                // back kill called from navbar back button
+                if (down) {
+                    if (repeatCount == 0) {
+                        mHandler.postDelayed(mBackLongPress, mBackKillTimeout);
+                    }
+                } else {
+                    mHandler.removeCallbacks(mBackLongPress);
                 }
             }
         } else if (keyCode == KeyEvent.KEYCODE_N && event.isMetaPressed()) {
@@ -3966,10 +3967,6 @@ public class PhoneWindowManager implements WindowManagerPolicy {
     }
 
     private boolean isStopLockTaskMode(boolean checkOnly) {
-        // in this case there is a different way to stop it
-        if (DeviceUtils.deviceSupportNavigationBar(mContext)) {
-            return false;
-        }
         try {
             if (ActivityManagerNative.getDefault().isInLockTaskMode()) {
                 if (!checkOnly) {
@@ -8857,15 +8854,13 @@ public class PhoneWindowManager implements WindowManagerPolicy {
             triggerLongPressTimeoutMessage(msg);
         }
         if (keyAction == KEY_ACTION_BACK) {
-            if (isStopLockTaskMode(true) || mBackKillEnabled) {
+            if (mBackKillEnabled) {
                 mLongPressBackConsumed = false;
                 mHandler.postDelayed(mBackLongPress, mBackKillTimeout);
             }
-            if (hasLongPressOnBackBehavior()) {
-                mBackKeyHandled = false;
-                Message msg = mHandler.obtainMessage(MSG_BACK_LONG_PRESS);
-                triggerLongPressTimeoutMessage(msg);
-            }
+            mBackKeyHandled = false;
+            Message msg = mHandler.obtainMessage(MSG_BACK_LONG_PRESS);
+            triggerLongPressTimeoutMessage(msg);
         }
         if (keyAction == KEY_ACTION_MENU) {
             mMenuConsumed = false;
