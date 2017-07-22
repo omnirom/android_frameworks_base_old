@@ -63,6 +63,13 @@ public class TaskUtils {
                     for (String pkg : appInfo.pkgList) {
                         if (!pkg.equals(SYSTEMUI_PACKAGE)
                                 && !pkg.equals(defaultHomePackage)) {
+                            // Restore home screen stack before killing the app
+                            Intent home = new Intent(Intent.ACTION_MAIN, null);
+                            home.addCategory(Intent.CATEGORY_HOME);
+                            home.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK
+                                    | Intent.FLAG_ACTIVITY_RESET_TASK_IF_NEEDED);
+                            context.startActivity(home);
+                            // Kill the app
                             am.forceStopPackageAsUser(pkg, userId);
                             targetKilled = true;
                             break;
