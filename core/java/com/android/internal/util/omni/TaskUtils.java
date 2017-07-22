@@ -64,6 +64,21 @@ public class TaskUtils {
                         if (!pkg.equals(SYSTEMUI_PACKAGE)
                                 && !pkg.equals(defaultHomePackage)) {
                             am.forceStopPackageAsUser(pkg, userId);
+                        final List<ActivityManager.RecentTaskInfo> recentTasks =
+                                am.getRecentTasksForUser(ActivityManager.getMaxRecentTasksStatic(),
+                                ActivityManager.RECENT_IGNORE_HOME_STACK_TASKS
+                                        | ActivityManager.RECENT_INGORE_PINNED_STACK_TASKS
+                                        | ActivityManager.RECENT_IGNORE_UNAVAILABLE
+                                        | ActivityManager.RECENT_INCLUDE_PROFILES,
+                                        UserHandle.CURRENT.getIdentifier());
+                        final int size = recentTasks.size();
+                        for (int i = 0; i < size; i++) {
+                            ActivityManager.RecentTaskInfo recentInfo = recentTasks.get(i);
+                            if (recentInfo.baseIntent.getComponent().getPackageName().equals(pkg)) {
+                                int taskid = recentInfo.persistentId;
+                                am.removeTask(taskid);
+                            }
+                        }
                             targetKilled = true;
                             break;
                         }
