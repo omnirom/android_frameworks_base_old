@@ -4669,6 +4669,13 @@ public final class Settings {
          */
         public static final String HEADS_UP_TIMEOUT = "heads_up_timeout";
 
+         /**
+         * Whether ADB over network should be disabled when the device gets disconnected from network
+         * The value is boolean (1 or 0).
+         * @hide
+         */
+        public static final String DISABLE_ADB_NETWORK_ON_DISCONNECT = "disable_adb_network_on_disconnect";
+
         /**
          * Settings to backup. This is here so that it's in the same place as the settings
          * keys and easy to update.
