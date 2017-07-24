@@ -8818,6 +8818,11 @@ public class PhoneWindowManager implements WindowManagerPolicy {
                 break;
             case KEY_ACTION_SLEEP:
                 mPowerManager.goToSleep(SystemClock.uptimeMillis(), PowerManager.GO_TO_SLEEP_REASON_POWER_BUTTON, 0);
+                // in the goto sleep case we wont get a up event that will reset this to the correct state
+                if (mHomePressed) {
+                    mHomeConsumed = false;
+                    mHomePressed = false;
+                }
                 break;
             default:
                 break;
