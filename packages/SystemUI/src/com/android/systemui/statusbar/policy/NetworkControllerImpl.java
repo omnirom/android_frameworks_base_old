@@ -22,13 +22,16 @@ import android.content.Intent;
 import android.content.IntentFilter;
 import android.content.res.Configuration;
 import android.content.res.Resources;
+import android.database.ContentObserver;
 import android.net.ConnectivityManager;
 import android.net.NetworkCapabilities;
+import android.net.NetworkInfo;
 import android.net.wifi.WifiManager;
 import android.os.AsyncTask;
 import android.os.Bundle;
 import android.os.Handler;
 import android.os.Looper;
+import android.os.UserHandle;
 import android.provider.Settings;
 import android.telephony.ServiceState;
 import android.telephony.SignalStrength;
@@ -140,6 +143,9 @@ public class NetworkControllerImpl extends BroadcastReceiver
     private boolean mUserSetup;
     private boolean mSimDetected;
 
+    private boolean mDisableAdbNetworkOnDisconnect = false;
+    private NetworkInfo mNetworkInfo;
+
     /**
      * Construct this controller object and register for updates.
      */
@@ -216,6 +222,17 @@ public class NetworkControllerImpl extends BroadcastReceiver
                         deviceProvisionedController.getCurrentUser()));
             }
         });
+
+        mContext.getContentResolver().registerContentObserver(Settings.System.getUriFor(
+                Settings.System.DISABLE_ADB_NETWORK_ON_DISCONNECT), false,
+                new ContentObserver(new Handler()) {
+                    @Override
+                    public void onChange(boolean selfChange) {
+                        updateAdbNetworkSettings();
+                    }
+                });
+
+        updateAdbNetworkSettings();
     }
 
     public DataSaverController getDataSaverController() {
@@ -432,6 +449,15 @@ public class NetworkControllerImpl extends BroadcastReceiver
                 // If none of the subscriptions are active, we might need to recalculate
                 // emergency state.
                 recalculateEmergency();
+            }
+        } else if (action.equals(WifiManager.NETWORK_STATE_CHANGED_ACTION)) {
+            // We need to update signal bars also here.
+            mWifiSignalController.handleBroadcast(intent);
+            mNetworkInfo = (NetworkInfo) intent.getParcelableExtra(WifiManager.EXTRA_NETWORK_INFO);
+            NetworkInfo.State state = mNetworkInfo.getState();
+            if (state == NetworkInfo.State.DISCONNECTED) {
+                // Disable wireless adb on network disconnect.
+                handleAdbNetworkOnDisconnect();
             }
         } else {
             int subId = intent.getIntExtra(PhoneConstants.SUBSCRIPTION_KEY,
@@ -988,5 +1014,31 @@ public class NetworkControllerImpl extends BroadcastReceiver
             config.inflateSignalStrengths = res.getBoolean(R.bool.config_inflateSignalStrength);
             return config;
         }
+    }
+
+    // Wireless adb disconnect helper methods
+    private boolean isAdbEnabled() {
+        return Settings.Global.getInt(mContext.getContentResolver(),
+                Settings.Global.ADB_ENABLED, 0) > 0;
+    }
+
+    private boolean isAdbNetworkEnabled() {
+        return Settings.Secure.getIntForUser(mContext.getContentResolver(),
+                Settings.Secure.ADB_PORT, 0, UserHandle.USER_CURRENT) > 0;
+    }
+
+    private void handleAdbNetworkOnDisconnect() {
+        if (mDisableAdbNetworkOnDisconnect) {
+            if (isAdbEnabled() && isAdbNetworkEnabled()) {
+                Settings.Secure.putIntForUser(mContext.getContentResolver(),
+                        Settings.Secure.ADB_PORT, -1,
+                        UserHandle.USER_CURRENT);
+            }
+        }
+    }
+
+    private void updateAdbNetworkSettings() {
+        mDisableAdbNetworkOnDisconnect = Settings.System.getIntForUser(mContext.getContentResolver(),
+                Settings.System.DISABLE_ADB_NETWORK_ON_DISCONNECT, 1, UserHandle.USER_CURRENT) != 0;
     }
 }
