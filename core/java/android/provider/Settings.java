@@ -8071,6 +8071,13 @@ public final class Settings {
          */
         public static final String ADB_PORT = "adb_port";
 
+         /**
+         * Whether ADB over network should be disabled when the device gets disconnected from network
+         * The value is boolean (1 or 0).
+         * @hide
+         */
+        public static final String DISABLE_ADB_NETWORK_ON_DISCONNECT = "disable_adb_network_on_disconnect";
+
         /**
          * Comma separated list of QS tiles that have been auto-added already.
          * @hide
