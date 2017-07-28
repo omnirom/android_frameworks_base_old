@@ -33,6 +33,7 @@ import android.os.PowerManager;
 import android.os.UserHandle;
 import android.provider.Settings;
 import android.util.AttributeSet;
+import android.util.EventLog;
 import android.util.MathUtils;
 import android.view.GestureDetector;
 import android.view.MotionEvent;
@@ -2377,6 +2378,10 @@ public class NotificationPanelView extends PanelView implements
      * @param keyguardIsShowing whether keyguard is being shown
      */
     public boolean canCameraGestureBeLaunched(boolean keyguardIsShowing) {
+        if (!mStatusBar.isCameraAllowedByAdmin()) {
+            EventLog.writeEvent(0x534e4554, "63787722", -1, "");
+            return false;
+        }
         ResolveInfo resolveInfo = mKeyguardBottomArea.resolveCameraIntent();
         String packageToLaunch = (resolveInfo == null || resolveInfo.activityInfo == null)
                 ? null : resolveInfo.activityInfo.packageName;
