@@ -144,7 +144,7 @@ class PackageVerificationState {
      * @return {@code true} when verification is considered complete
      */
     public boolean isVerificationComplete() {
-        if (!mRequiredVerificationComplete) {
+        if (mRequiredVerifierUid != -1 && !mRequiredVerificationComplete) {
             return false;
         }
 
@@ -166,7 +166,7 @@ class PackageVerificationState {
      * @return {@code true} if installation should be allowed
      */
     public boolean isInstallAllowed() {
-        if (!mRequiredVerificationPassed) {
+        if (mRequiredVerifierUid != -1 && !mRequiredVerificationPassed) {
             return false;
         }
 
