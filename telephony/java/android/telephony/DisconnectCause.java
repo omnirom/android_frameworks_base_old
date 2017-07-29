@@ -313,8 +313,35 @@ public class DisconnectCause {
     public static final int HO_NOT_FEASIBLE = 107;
 
     public static final int NON_SELECTED_USER_CLEARING = 108;
+    /**
+     * Stk Call Control modified DIAL request to video DIAL request.
+     * {@hide}
+     */
+    public static final int DIAL_MODIFIED_TO_DIAL_VIDEO = 109;
 
+    /**
+     * Stk Call Control modified Video DIAL request to SS request.
+     * {@hide}
+     */
+    public static final int DIAL_VIDEO_MODIFIED_TO_SS = 110;
 
+    /**
+     * Stk Call Control modified Video DIAL request to USSD request.
+     * {@hide}
+     */
+    public static final int DIAL_VIDEO_MODIFIED_TO_USSD = 111;
+
+    /**
+     * Stk Call Control modified Video DIAL request to DIAL request.
+     * {@hide}
+     */
+    public static final int DIAL_VIDEO_MODIFIED_TO_DIAL = 112;
+
+    /**
+     * Stk Call Control modified Video DIAL request to Video DIAL request.
+     * {@hide}
+     */
+    public static final int DIAL_VIDEO_MODIFIED_TO_DIAL_VIDEO = 113;
 
     //*********************************************************************************************
     // When adding a disconnect type:
@@ -324,14 +351,14 @@ public class DisconnectCause {
     // 4) Update toString() with the newly added disconnect type.
     // 5) Update android.telecom.DisconnectCauseUtil with any mappings to a telecom.DisconnectCause.
     //
-    // NextId: 109
+    // NextId: 114
     //*********************************************************************************************
 
     /** Smallest valid value for call disconnect codes. */
     public static final int MINIMUM_VALID_VALUE = NOT_DISCONNECTED;
 
     /** Largest valid value for call disconnect codes. */
-    public static final int MAXIMUM_VALID_VALUE = NON_SELECTED_USER_CLEARING;
+    public static final int MAXIMUM_VALID_VALUE = DIAL_VIDEO_MODIFIED_TO_DIAL_VIDEO;
 
     /** Private constructor to avoid class instantiation. */
     private DisconnectCause() {
@@ -429,6 +456,16 @@ public class DisconnectCause {
             return "DIAL_MODIFIED_TO_SS";
         case DIAL_MODIFIED_TO_DIAL:
             return "DIAL_MODIFIED_TO_DIAL";
+        case DIAL_MODIFIED_TO_DIAL_VIDEO:
+            return "DIAL_MODIFIED_TO_DIAL_VIDEO";
+        case DIAL_VIDEO_MODIFIED_TO_SS:
+            return "DIAL_VIDEO_MODIFIED_TO_SS";
+        case DIAL_VIDEO_MODIFIED_TO_USSD:
+            return "DIAL_VIDEO_MODIFIED_TO_USSD";
+        case DIAL_VIDEO_MODIFIED_TO_DIAL:
+            return "DIAL_VIDEO_MODIFIED_TO_DIAL";
+        case DIAL_VIDEO_MODIFIED_TO_DIAL_VIDEO:
+            return "DIAL_VIDEO_MODIFIED_TO_DIAL_VIDEO";
         case ERROR_UNSPECIFIED:
             return "ERROR_UNSPECIFIED";
         case OUTGOING_FAILURE:

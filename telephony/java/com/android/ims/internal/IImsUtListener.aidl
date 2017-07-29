@@ -19,6 +19,7 @@ package com.android.ims.internal;
 import android.os.Bundle;
 
 import com.android.ims.ImsCallForwardInfo;
+import com.android.ims.ImsSsData;
 import com.android.ims.ImsSsInfo;
 import com.android.ims.internal.IImsUt;
 import com.android.ims.ImsReasonInfo;
@@ -56,4 +57,11 @@ interface IImsUtListener {
      */
     void utConfigurationCallWaitingQueried(in IImsUt ut,
             int id, in ImsSsInfo[] cwInfo);
+
+    /**
+     * Notifies client when STK CC Supplementary Service indication is received
+     *
+     * @param ssData Details of STK CC SS request and response information
+     */
+    void onSupplementaryServiceIndication(in ImsSsData ssData);
 }
