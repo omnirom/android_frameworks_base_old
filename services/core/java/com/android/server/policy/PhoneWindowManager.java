@@ -3604,20 +3604,18 @@ public class PhoneWindowManager implements WindowManagerPolicy {
             }
             return 0;
         } else if (keyCode == KeyEvent.KEYCODE_APP_SWITCH) {
-            if (!virtualKey) {
-                if (down) {
-                    if (repeatCount == 0) {
-                        if (isCustomKeyAction(keyCode)) {
-                            doDownKeyAction(getCustomKeyAction(keyCode));
-                            mDoCustomAction = true;
-                            return -1;
-                        }
-                        doDownKeyAction(KEY_ACTION_APP_SWITCH);
-                    }
-                } else {
-                    if (doUpKeyAction(keyCode, canceled) == -1) {
+            if (down) {
+                if (repeatCount == 0) {
+                    if (isCustomKeyAction(keyCode)) {
+                        doDownKeyAction(getCustomKeyAction(keyCode));
+                        mDoCustomAction = true;
                         return -1;
                     }
+                    doDownKeyAction(KEY_ACTION_APP_SWITCH);
+                }
+            } else {
+                if (doUpKeyAction(keyCode, canceled) == -1) {
+                    return -1;
                 }
             }
             return -1;
