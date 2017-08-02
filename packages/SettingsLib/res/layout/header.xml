@@ -24,9 +24,9 @@
             android:layout_height="wrap_content"
             android:layout_gravity="center_vertical"
             android:text="@string/drawer_header_title"
-            android:textColor="?android:attr/colorControlNormal"
             android:paddingStart="10dp"
-            android:textAppearance="?android:attr/textAppearanceMedium" />
+            android:textSize="18sp"
+            android:textAppearance="@android:style/TextAppearance.Material.Subhead" />
     </LinearLayout>
 
     <View
