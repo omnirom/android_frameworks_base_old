@@ -23,20 +23,16 @@
         <item name="actionBarWidgetTheme">@null</item>
         <item name="actionBarTheme">@style/ActionBarTheme</item>
         <item name="actionBarPopupTheme">@style/ActionBarPopupTheme</item>
-
         <item name="android:windowBackground">@color/window_background</item>
         <item name="android:colorPrimaryDark">@color/primary_dark</item>
         <item name="android:colorPrimary">@color/primary</item>
         <item name="android:colorAccent">@color/accent</item>
         <item name="android:colorControlActivated">?android:attr/colorAccent</item>
         <item name="android:queryBackground">@color/menu_search_background</item>
-
         <item name="android:listDivider">@*android:drawable/list_divider_material</item>
-
         <item name="android:windowActionBar">false</item>
         <item name="android:windowActionModeOverlay">true</item>
         <item name="android:windowNoTitle">true</item>
-
         <item name="android:windowSoftInputMode">stateUnspecified|adjustUnspecified</item>
     </style>
 
