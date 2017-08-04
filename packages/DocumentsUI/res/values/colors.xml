@@ -31,15 +31,12 @@
     <color name="band_select_background">#88ffffff</color>
     <color name="band_select_border">#44000000</color>
 
-    <color name="root_activated_color">@*android:color/accent_device_default_700</color>
-
     <!-- TODO: Would be nice to move this to a color-set, but not sure how to support animation -->
     <color name="item_doc_background">#fffafafa</color>
     <color name="item_doc_background_disabled">#fff4f4f4</color>
     <color name="item_doc_background_selected">@*android:color/accent_device_default_50</color>
 
     <!-- OMNI -->
-    <color name="secondary_text_docs">#80000000</color>
     <color name="item_text">#323232</color>
     <color name="item_text_primary">#000000</color>
 </resources>
