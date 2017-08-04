@@ -3142,7 +3142,7 @@ public class PackageManagerService extends IPackageManager.Stub
     }
 
     private @Nullable String getOptionalVerifierLPr() {
-        final Intent intent = new Intent("android.intent.action.PACKAGE_NEEDS_OPTIONAL_VERIFICATION");
+        final Intent intent = new Intent("com.qualcomm.qti.intent.action.PACKAGE_NEEDS_OPTIONAL_VERIFICATION");
 
         final List<ResolveInfo> matches = queryIntentReceiversInternal(intent, PACKAGE_MIME_TYPE,
                 MATCH_SYSTEM_ONLY | MATCH_DIRECT_BOOT_AWARE | MATCH_DIRECT_BOOT_UNAWARE,
@@ -15881,8 +15881,11 @@ public class PackageManagerService extends IPackageManager.Stub
                         : getPackageUid(mOptionalVerifierPackage, MATCH_DEBUG_TRIAGED_MISSING,
                                 verifierUser.getIdentifier());
 
+                final int installerUid =
+                        verificationInfo == null ? -1 : verificationInfo.installerUid;
                 if (!origin.existing && (requiredUid != -1 || optionalUid != -1)
-                        && isVerificationEnabled(verifierUser.getIdentifier(), installFlags)) {
+                        && isVerificationEnabled(
+                                verifierUser.getIdentifier(), installFlags, installerUid)) {
                     final Intent verification = new Intent(
                             Intent.ACTION_PACKAGE_NEEDS_VERIFICATION);
                     verification.addFlags(Intent.FLAG_RECEIVER_FOREGROUND);
@@ -15971,7 +15974,7 @@ public class PackageManagerService extends IPackageManager.Stub
 
                     if (mOptionalVerifierPackage != null) {
                         final Intent optionalIntent = new Intent(verification);
-                        optionalIntent.setAction("android.intent.action.PACKAGE_NEEDS_OPTIONAL_VERIFICATION");
+                        optionalIntent.setAction("com.qualcomm.qti.intent.action.PACKAGE_NEEDS_OPTIONAL_VERIFICATION");
                         final List<ResolveInfo> optional_receivers = queryIntentReceiversInternal(optionalIntent,
                             PACKAGE_MIME_TYPE, 0, verifierUser.getIdentifier());
                         final ComponentName optionalVerifierComponent = matchComponentForVerifier(
