@@ -2578,8 +2578,8 @@ public class AccountManager {
         @Override
         public void doWork() throws RemoteException {
             android.util.SeempLog.record(31);
-            getAccountsByTypeAndFeatures(mAccountType, mFeatures,
-                    new AccountManagerCallback<Account[]>() {
+            getAccountByTypeAndFeatures(mAccountType, mFeatures,
+                    new AccountManagerCallback<Bundle>() {
                         @Override
                         public void run(AccountManagerFuture<Bundle> future) {
                             String accountName = null;
