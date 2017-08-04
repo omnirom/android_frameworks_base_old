@@ -16,14 +16,7 @@
 
 <resources xmlns:android="http://schemas.android.com/apk/res/android">
 
-    <style name="ActionBarTheme" parent="@*android:style/ThemeOverlay.Material.Dark.ActionBar" />
-    <style name="ActionBarPopupTheme" parent="@*android:style/Theme.Material.DayNight" />
-
-    <style name="DocumentsTheme" parent="@style/Theme.AppCompat.DayNight">
-        <item name="actionBarWidgetTheme">@null</item>
-        <item name="actionBarTheme">@style/ActionBarTheme</item>
-        <item name="actionBarPopupTheme">@style/ActionBarPopupTheme</item>
-
+    <style name="DocumentsTheme" parent="Theme.AppCompat.DayNight.DarkActionBar">
         <item name="android:windowBackground">@color/window_background</item>
         <item name="android:colorPrimaryDark">@color/primary_dark</item>
         <item name="android:colorPrimary">@color/primary</item>
