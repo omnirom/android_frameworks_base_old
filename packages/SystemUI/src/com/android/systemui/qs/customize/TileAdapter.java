@@ -24,9 +24,11 @@ import android.os.UserHandle;
 import android.provider.Settings;
 import android.util.Log;
 import android.view.LayoutInflater;
+import android.view.MotionEvent;
 import android.view.View;
 import android.view.View.OnClickListener;
 import android.view.View.OnLayoutChangeListener;
+import android.view.View.OnTouchListener;
 import android.view.ViewGroup;
 import android.widget.FrameLayout;
 import android.widget.TextView;
@@ -352,6 +354,7 @@ public class TileAdapter extends RecyclerView.Adapter<Holder> implements TileSta
         holder.mTileView.setHideLabel(!mShowLabels);
         holder.mTileView.setImportantForAccessibility(View.IMPORTANT_FOR_ACCESSIBILITY_YES);
         holder.mTileView.setClickable(true);
+        holder.mTileView.setOnClickListener(null);
         holder.mTileView.setFocusable(true);
         holder.mTileView.setFocusableInTouchMode(true);
 
@@ -378,6 +381,22 @@ public class TileAdapter extends RecyclerView.Adapter<Holder> implements TileSta
         if (position == mFocusIndex) {
             focusOnHolder(holder);
         }
+        holder.mTileView.setOnTouchListener(new OnTouchListener() {
+            @Override
+            public boolean onTouch(View v, MotionEvent ev) {
+                if (ev.getAction() == MotionEvent.ACTION_UP) {
+                    int position = holder.getLayoutPosition();
+                    if (position < mEditIndex) {
+                        if (canRemoveTiles()) {
+                           move(position, mEditIndex, true);
+                        }
+                    } else {
+                       move(position, mEditIndex, true);
+                    }
+                }
+                return false;
+            }
+        });
     }
 
     private void focusOnHolder(Holder holder) {
