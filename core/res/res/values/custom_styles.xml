@@ -18,13 +18,16 @@
 */
 -->
 <resources xmlns:xliff="urn:oasis:names:tc:xliff:document:1.2">
-  <!-- Power menu reboot -->
-  <java-symbol name="reboot_to_bootloader_title" type="string" />
-  <java-symbol name="reboot_to_bootloader_message" type="string" />
-  <java-symbol name="reboot_to_recovery_title" type="string" />
-  <java-symbol name="reboot_to_recovery_message" type="string" />
-  <java-symbol name="reboot_system_title" type="string" />
-  <java-symbol name="reboot_system_message" type="string" />
-  <java-symbol type="array" name="config_rebootActionsList" />
-  <java-symbol type="array" name="values_globalActionsList" />
+    <style name="GlobalActionsAnimation">
+        <item name="windowEnterAnimation">@anim/slide_in_up</item>
+        <item name="windowExitAnimation">@anim/slide_out_down</item>
+    </style>
+    <style name="GlobalActionsAnimationTop">
+        <item name="windowEnterAnimation">@anim/slide_in_down</item>
+        <item name="windowExitAnimation">@anim/slide_out_up</item>
+    </style>
+    <style name="GlobalActionsAnimationEnter">
+        <item name="windowEnterAnimation">@anim/dialog_enter</item>
+        <item name="windowExitAnimation">@anim/dialog_exit</item>
+    </style>
 </resources>
