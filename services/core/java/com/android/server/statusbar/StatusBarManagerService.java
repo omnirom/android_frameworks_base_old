@@ -1208,7 +1208,7 @@ public class StatusBarManagerService extends IStatusBarService.Stub implements D
      * Allows the status bar to reboot the device.
      */
     @Override
-    public void reboot(boolean safeMode) {
+    public void reboot(boolean safeMode, String reason) {
         enforceStatusBarService();
         long identity = Binder.clearCallingIdentity();
         try {
@@ -1218,8 +1218,7 @@ public class StatusBarManagerService extends IStatusBarService.Stub implements D
                 if (safeMode) {
                     ShutdownThread.rebootSafeMode(getUiContext(), true);
                 } else {
-                    ShutdownThread.reboot(getUiContext(),
-                            PowerManager.SHUTDOWN_USER_REQUESTED, false);
+                    ShutdownThread.rebootCustom(getUiContext(), reason, false);
                 }
             });
         } finally {
