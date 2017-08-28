@@ -1,0 +1,62 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!--
+/* //device/apps/common/assets/res/any/strings.xml
+**
+** Copyright 2006, The Android Open Source Project
+**
+** Licensed under the Apache License, Version 2.0 (the "License");
+** you may not use this file except in compliance with the License.
+** You may obtain a copy of the License at
+**
+**     http://www.apache.org/licenses/LICENSE-2.0
+**
+** Unless required by applicable law or agreed to in writing, software
+** distributed under the License is distributed on an "AS IS" BASIS,
+** WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+** See the License for the specific language governing permissions and
+** limitations under the License.
+*/
+-->
+<resources xmlns:xliff="urn:oasis:names:tc:xliff:document:1.2">
+    <string name="drag_or_touch_to_rearrange_tiles">Touch to remove or drag to rearrange tiles</string>
+    <string name="drag_or_touch_to_add_tiles">Touch or drag to add tiles</string>
+    <string name="customize_settings_info_text"><b>Note:</b> columns will be limited automatically for available space.</string>
+    <string name="customize_show_labels">Labels</string>
+    <string name="customize_quickbar_sync">Sync</string>
+    <string name="customize_quickbar_label">Quickbar</string>
+    <string name="customize_columns_land_label">Landscape</string>
+    <string name="customize_columns_port_label">Portrait</string>
+    <string name="omnijaws_service_error">Error</string>
+    <string name="omnijaws_service_unkown">No weather data</string>
+    <string name="omnijaws_service_error_long">Error loading weather data</string>
+    <string name="omnijaws_service_disabled">Service is disabled</string>
+    <string name="omnijaws_detail_header">Weather</string>
+    <string name="omnijaws_label_default">Weather</string>
+    <string name="omnijaws_current_text">Now</string>
+    <string name="omnijaws_package_not_available">OmniJaws not available</string>
+    <string name="omnijaws_service_last_update">Last update:</string>
+
+    <!-- Power Tile -->
+    <string name="qs_power_button_title">Power button</string>
+        
+    <!-- Heads Up QS Tile -->
+    <string name="quick_settings_heads_up_label">Heads-up notifications</string>
+    <string name="accessibility_quick_settings_heads_up_off">Heads-up notifications disabled.</string>
+    <string name="accessibility_quick_settings_heads_up_on">Heads-up notifications allowed.</string>
+    <string name="accessibility_quick_settings_heads_up_changed_off">Heads-up notifications turned off.</string>
+    <string name="accessibility_quick_settings_heads_up_changed_on">Heads-up notifications turned on.</string>
+
+     <!-- Screenshot Tile -->
+    <string name="screenshot_error_title">Screenshot invalid</string>
+
+    <!-- AOD QS tile -->
+    <string name="quick_settings_aod_label">AOD</string>
+
+    <!-- Power menu reboot -->
+    <string name="global_action_reboot">Restart</string>
+    <string name="global_action_reboot_more">Restart\u2026</string>
+    <string name="global_action_reboot_sub">System</string>
+    <string name="global_action_reboot_recovery">Recovery</string>
+    <string name="global_action_reboot_bootloader">Bootloader</string>
+    <string name="global_action_reboot_fastboot">Fastboot</string>
+</resources>
