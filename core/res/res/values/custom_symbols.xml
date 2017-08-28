@@ -3,4 +3,17 @@
     <java-symbol type="bool" name="config_proxiSensorWakupCheck" />
     <java-symbol type="string" name="config_deviceKeyHandlerLib" />
     <java-symbol type="string" name="config_deviceKeyHandlerClass" />
+
+    <!-- Power menu reboot -->
+    <java-symbol type="string" name="reboot_title" />
+    <java-symbol type="string" name="reboot_confirm" />
+    <java-symbol name="reboot_to_bootloader_title" type="string" />
+    <java-symbol name="reboot_to_bootloader_message" type="string" />
+    <java-symbol name="reboot_to_fastboot_title" type="string" />
+    <java-symbol name="reboot_to_fastboot_message" type="string" />
+    <java-symbol name="reboot_to_recovery_title" type="string" />
+    <java-symbol name="reboot_to_recovery_message" type="string" />
+    <java-symbol name="reboot_system_title" type="string" />
+    <java-symbol name="reboot_system_message" type="string" />
+    <java-symbol type="array" name="config_rebootActionsList" />
 </resources>
