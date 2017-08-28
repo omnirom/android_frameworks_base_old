@@ -3891,11 +3891,21 @@ public final class Settings {
          * the setting value. See an example above.
          */
 
-        // Omni additions start
+        // Omni additions start system
         /**
          * @hide
          */
         public static final String STATUS_BAR_LOGO = "status_bar_logo";
+
+        /**
+         * @hide
+         */
+        public static final String GLOBAL_ACTIONS_LIST = "global_actions_list";
+
+        /**
+         * @hide
+         */
+         public static final String POWER_MENU_ANIMATIONS = "power_menu_animations";
 
         /**
          * Settings to backup. This is here so that it's in the same place as the settings
@@ -4055,6 +4065,7 @@ public final class Settings {
             PRIVATE_SETTINGS.add(EGG_MODE);
             PRIVATE_SETTINGS.add(SHOW_BATTERY_PERCENT);
             PRIVATE_SETTINGS.add(STATUS_BAR_LOGO);
+            PRIVATE_SETTINGS.add(POWER_MENU_ANIMATIONS);
         }
 
         /**
@@ -6968,6 +6979,19 @@ public final class Settings {
          * @hide
          */
         public static final String NOTIFICATION_BADGING = "notification_badging";
+
+        // Omni additions start secure
+
+        /**
+         *
+         * @hide
+         */
+        public static final String GLOBAL_ACTION_DNAA = "global_action_dnaa";
+
+        /**
+         * @hide
+         */
+        public static final String ADVANCED_REBOOT = "advanced_reboot";
 
         /**
          * This are the settings to be backed up.
