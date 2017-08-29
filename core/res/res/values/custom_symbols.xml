@@ -30,4 +30,6 @@
   <java-symbol type="style" name="GlobalActionsAnimation" />
   <java-symbol type="style" name="GlobalActionsAnimationTop" />
   <java-symbol type="style" name="GlobalActionsAnimationEnter" />
+  <java-symbol type="anim" name="last_app_in" />
+  <java-symbol type="anim" name="last_app_out" />
 </resources>
