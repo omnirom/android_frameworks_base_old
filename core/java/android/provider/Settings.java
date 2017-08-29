@@ -4439,6 +4439,16 @@ public final class Settings {
                 BOOLEAN_VALIDATOR;
 
         /**
+         *  Enable statusbar double tap gesture on to put device to sleep
+         * @hide
+         */
+        public static final String OMNI_DOUBLE_TAP_SLEEP_GESTURE = "double_tap_sleep_gesture";
+
+        /** @hide */
+        private static final Validator OMNI_DOUBLE_TAP_SLEEP_GESTURE_VALIDATOR =
+                BOOLEAN_VALIDATOR;
+
+        /**
          * IMPORTANT: If you add a new public settings you also have to add it to
          * PUBLIC_SETTINGS below. If the new setting is hidden you have to add
          * it to PRIVATE_SETTINGS below. Also add a validator that can validate
@@ -4538,6 +4548,7 @@ public final class Settings {
             OMNI_LOCKSCREEN_WEATHER_ENABLED,
             OMNI_SCREENSHOT_SHUTTER_SOUND,
             OMNI_LOCK_POWER_MENU_DISABLED,
+            OMNI_DOUBLE_TAP_SLEEP_GESTURE,
         };
 
         /**
@@ -4688,6 +4699,7 @@ public final class Settings {
             PRIVATE_SETTINGS.add(OMNI_LOCKSCREEN_WEATHER_ENABLED);
             PRIVATE_SETTINGS.add(OMNI_SCREENSHOT_SHUTTER_SOUND);
             PRIVATE_SETTINGS.add(OMNI_LOCK_POWER_MENU_DISABLED);
+            PRIVATE_SETTINGS.add(OMNI_DOUBLE_TAP_SLEEP_GESTURE);
         }
 
         /**
@@ -4832,6 +4844,8 @@ public final class Settings {
                     OMNI_SCREENSHOT_SHUTTER_SOUND_VALIDATOR);
             VALIDATORS.put(OMNI_LOCK_POWER_MENU_DISABLED,
                     OMNI_LOCK_POWER_MENU_DISABLED_VALIDATOR);
+            VALIDATORS.put(OMNI_DOUBLE_TAP_SLEEP_GESTURE,
+                    OMNI_DOUBLE_TAP_SLEEP_GESTURE_VALIDATOR);
         }
 
         /**
