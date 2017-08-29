@@ -80,8 +80,7 @@ public class AmbientDisplayConfiguration {
     }
 
     public boolean alwaysOnAvailable() {
-        // Does not work properly yet.
-        return false;
+        return true;
     }
 
     public String ambientDisplayComponent() {
