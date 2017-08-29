@@ -645,6 +645,9 @@ public class StatusBar extends SystemUI implements DemoMode,
             mContext.getContentResolver().registerContentObserver(Settings.System.getUriFor(
                     Settings.System.OMNI_USE_OLD_MOBILETYPE),
                     false, this, UserHandle.USER_ALL);
+            mContext.getContentResolver().registerContentObserver(Settings.System.getUriFor(
+                    Settings.System.OMNI_DOUBLE_TAP_SLEEP_GESTURE),
+                    false, this, UserHandle.USER_ALL);
         }
 
         @Override
@@ -658,6 +661,9 @@ public class StatusBar extends SystemUI implements DemoMode,
                     Settings.System.OMNI_USE_OLD_MOBILETYPE, 0,
                     UserHandle.USER_CURRENT) != 0;
             TelephonyIcons.updateIcons(USE_OLD_MOBILETYPE);
+            if (mStatusBarWindow != null) {
+                mStatusBarWindow.updateSettings();
+            }
         }
     }
     private OmniSettingsObserver mOmniSettingsObserver;
