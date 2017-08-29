@@ -3905,7 +3905,13 @@ public final class Settings {
         /**
          * @hide
          */
-         public static final String POWER_MENU_ANIMATIONS = "power_menu_animations";
+        public static final String POWER_MENU_ANIMATIONS = "power_menu_animations";
+
+        /**
+         *  Enable statusbar double tap gesture on to put device to sleep
+         * @hide
+         */
+        public static final String DOUBLE_TAP_SLEEP_GESTURE = "double_tap_sleep_gesture";
 
         /**
          * Settings to backup. This is here so that it's in the same place as the settings
@@ -4066,6 +4072,7 @@ public final class Settings {
             PRIVATE_SETTINGS.add(SHOW_BATTERY_PERCENT);
             PRIVATE_SETTINGS.add(STATUS_BAR_LOGO);
             PRIVATE_SETTINGS.add(POWER_MENU_ANIMATIONS);
+            PRIVATE_SETTINGS.add(DOUBLE_TAP_SLEEP_GESTURE);
         }
 
         /**

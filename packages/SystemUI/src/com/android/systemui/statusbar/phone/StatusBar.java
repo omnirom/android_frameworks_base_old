@@ -758,10 +758,20 @@ public class StatusBar extends SystemUI implements DemoMode,
         }
 
         void observe() {
+            mContext.getContentResolver().registerContentObserver(Settings.System.getUriFor(
+                    Settings.System.DOUBLE_TAP_SLEEP_GESTURE),
+                    false, this, UserHandle.USER_ALL);
         }
 
         @Override
         public void onChange(boolean selfChange) {
+            update();
+        }
+
+        public void update() {
+            if (mStatusBarWindow != null) {
+                mStatusBarWindow.updateSettings();
+            }
         }
     }
     private OmniSettingsObserver mOmniSettingsObserver = new OmniSettingsObserver(mHandler);
@@ -822,8 +832,6 @@ public class StatusBar extends SystemUI implements DemoMode,
                 true,
                 mLockscreenSettingsObserver,
                 UserHandle.USER_ALL);
-
-        mOmniSettingsObserver.observe();
 
         mBarService = IStatusBarService.Stub.asInterface(
                 ServiceManager.getService(Context.STATUS_BAR_SERVICE));
@@ -974,6 +982,9 @@ public class StatusBar extends SystemUI implements DemoMode,
             }
         };
         Dependency.get(ConfigurationController.class).addCallback(mConfigurationListener);
+
+        mOmniSettingsObserver.observe();
+        mOmniSettingsObserver.update();
     }
 
     protected void createIconController() {
