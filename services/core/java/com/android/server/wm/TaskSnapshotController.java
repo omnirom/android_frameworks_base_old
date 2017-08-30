@@ -29,6 +29,7 @@ import android.graphics.Rect;
 import android.os.Environment;
 import android.os.Handler;
 import android.util.ArraySet;
+import android.util.Log;
 import android.view.DisplayListCanvas;
 import android.view.RenderNode;
 import android.view.ThreadedRenderer;
@@ -152,6 +153,8 @@ class TaskSnapshotController {
                 if (task.getController() != null) {
                     task.getController().reportSnapshotChanged(snapshot);
                 }
+            } else {
+                Log.d("maxwen", "snapshotTasks failed for taskId = " + task.mTaskId);
             }
         }
     }
