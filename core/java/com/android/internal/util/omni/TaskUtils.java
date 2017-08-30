@@ -42,7 +42,7 @@ import java.util.List;
 
 public class TaskUtils {
 
-    private static final String LAUNCHER_PACKAGE = "com.android.launcher";
+    private static final String LAUNCHER_PACKAGE = "com.android.launcher3";
     private static final String SYSTEMUI_PACKAGE = "com.android.systemui";
 
     public static boolean killActiveTask(Context context, int userId) {
@@ -61,8 +61,7 @@ public class TaskUtils {
                     && appInfo.importance == RunningAppProcessInfo.IMPORTANCE_FOREGROUND) {
                 if (appInfo.pkgList != null && (appInfo.pkgList.length > 0)) {
                     for (String pkg : appInfo.pkgList) {
-                        if (!pkg.equals(SYSTEMUI_PACKAGE)
-                                && !pkg.equals(defaultHomePackage)) {
+                        if (!pkg.equals(SYSTEMUI_PACKAGE) && !pkg.equals(defaultHomePackage)) {
                             am.forceStopPackageAsUser(pkg, userId);
                             targetKilled = true;
                             break;
@@ -81,13 +80,11 @@ public class TaskUtils {
     }
 
     public static void toggleLastApp(Context context, int userId) {
-        String defaultHomePackage = resolveCurrentLauncherPackageForUser(
-                context, userId);
+        String defaultHomePackage = resolveCurrentLauncherPackageForUser(context, userId);
         final ActivityManager am = (ActivityManager) context
                 .getSystemService(Activity.ACTIVITY_SERVICE);
-        final List<ActivityManager.RecentTaskInfo> tasks = am
-                .getRecentTasksForUser(5,
-                        ActivityManager.RECENT_IGNORE_UNAVAILABLE, userId);
+        final List<ActivityManager.RecentTaskInfo> tasks = am.getRecentTasksForUser(5,
+                ActivityManager.RECENT_IGNORE_UNAVAILABLE, userId);
         // lets get enough tasks to find something to switch to
         // Note, we'll only get as many as the system currently has - up to 5
         int lastAppId = 0;
@@ -120,14 +117,16 @@ public class TaskUtils {
 
     private static String resolveCurrentLauncherPackageForUser(Context context,
             int userId) {
-        final Intent launcherIntent = new Intent(Intent.ACTION_MAIN)
-        .addCategory(Intent.CATEGORY_HOME);
+        final Intent launcherIntent = new Intent(Intent.ACTION_MAIN);
+        launcherIntent.addCategory(Intent.CATEGORY_HOME);
         final PackageManager pm = context.getPackageManager();
         final ResolveInfo launcherInfo = pm.resolveActivityAsUser(
                 launcherIntent, 0, userId);
-        if (launcherInfo.activityInfo != null
-                && !launcherInfo.activityInfo.packageName.equals("android")) {
-            return launcherInfo.activityInfo.packageName;
+        if (launcherInfo != null) {
+            if (launcherInfo.activityInfo != null
+                    && !launcherInfo.activityInfo.packageName.equals("android")) {
+                return launcherInfo.activityInfo.packageName;
+            }
         }
         return LAUNCHER_PACKAGE;
     }
@@ -164,10 +163,7 @@ public class TaskUtils {
     }
 
     /**
-     * after calling this
-     * PhoneWindowManager.showRecentApps(true, false); must be called
-     * this will take care of the rest depending if OmniSwitch
-     * recents is enabled or not
+     *
      */
     public static void dockTopTask(Context context) {
         if (ActivityManager.supportsMultiWindow(context) && !isTaskDocked(context)) {

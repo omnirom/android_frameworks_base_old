@@ -4073,6 +4073,8 @@ public final class Settings {
             PRIVATE_SETTINGS.add(STATUS_BAR_LOGO);
             PRIVATE_SETTINGS.add(POWER_MENU_ANIMATIONS);
             PRIVATE_SETTINGS.add(DOUBLE_TAP_SLEEP_GESTURE);
+            PRIVATE_SETTINGS.add(NAVIGATION_BAR_RECENTS);
+            PRIVATE_SETTINGS.add(BUTTON_LONG_PRESS_RECENTS);
         }
 
         /**
