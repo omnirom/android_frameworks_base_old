@@ -143,6 +143,8 @@ import com.android.internal.statusbar.IStatusBarService;
 import com.android.internal.statusbar.NotificationVisibility;
 import com.android.internal.statusbar.StatusBarIcon;
 import com.android.internal.util.NotificationMessagingUtil;
+import com.android.internal.util.omni.OmniSwitchConstants;
+import com.android.internal.util.omni.TaskUtils;
 import com.android.internal.widget.LockPatternUtils;
 import com.android.keyguard.KeyguardHostView.OnDismissAction;
 import com.android.keyguard.KeyguardStatusView;
@@ -763,6 +765,12 @@ public class StatusBar extends SystemUI implements DemoMode,
             mContext.getContentResolver().registerContentObserver(Settings.System.getUriFor(
                     Settings.System.DOUBLE_TAP_SLEEP_GESTURE),
                     false, this, UserHandle.USER_ALL);
+            mContext.getContentResolver().registerContentObserver(Settings.System.getUriFor(
+                    Settings.System.NAVIGATION_BAR_RECENTS),
+                    false, this, UserHandle.USER_ALL);
+            mContext.getContentResolver().registerContentObserver(Settings.System.getUriFor(
+                    Settings.System.BUTTON_LONG_PRESS_RECENTS),
+                    false, this, UserHandle.USER_ALL);
         }
 
         @Override
@@ -771,12 +779,23 @@ public class StatusBar extends SystemUI implements DemoMode,
         }
 
         public void update() {
+            mRecentsStyle = Settings.System.getIntForUser(
+                    mContext.getContentResolver(), Settings.System.NAVIGATION_BAR_RECENTS, 0, mCurrentUserId);
+            mOmniSwitchRecents = mRecentsStyle == 1;
+            mLongPressOnAppSwitchBehavior = Settings.System.getIntForUser(
+                    mContext.getContentResolver(), Settings.System.BUTTON_LONG_PRESS_RECENTS, 0, mCurrentUserId);
             if (mStatusBarWindow != null) {
                 mStatusBarWindow.updateSettings();
+            }
+            if (mNavigationBar != null) {
+                mNavigationBar.setRecentsOptions(mRecentsStyle, mLongPressOnAppSwitchBehavior);
             }
         }
     }
     private OmniSettingsObserver mOmniSettingsObserver = new OmniSettingsObserver(mHandler);
+    private boolean mOmniSwitchRecents;
+    private int mRecentsStyle;
+    private int mLongPressOnAppSwitchBehavior;
     private StatusBarHeaderMachine mStatusBarHeaderMachine;
 
     @Override
@@ -1263,6 +1282,7 @@ public class StatusBar extends SystemUI implements DemoMode,
                 mNavigationBar.setLightBarController(mLightBarController);
             }
             mNavigationBar.setCurrentSysuiVisibility(mSystemUiVisibility);
+            mNavigationBar.setRecentsOptions(mRecentsStyle, mLongPressOnAppSwitchBehavior);
         });
     }
 
@@ -1572,8 +1592,12 @@ public class StatusBar extends SystemUI implements DemoMode,
         }
         int dockSide = WindowManagerProxy.getInstance().getDockSide();
         if (dockSide == WindowManager.DOCKED_INVALID) {
-            return mRecents.dockTopTask(NavigationBarGestureHelper.DRAG_MODE_NONE,
-                    ActivityManager.DOCKED_STACK_CREATE_MODE_TOP_OR_LEFT, null, metricsDockAction);
+            if (!mOmniSwitchRecents) {
+                mRecents.dockTopTask(NavigationBarGestureHelper.DRAG_MODE_NONE,
+                        ActivityManager.DOCKED_STACK_CREATE_MODE_TOP_OR_LEFT, null, metricsDockAction);
+            } else {
+                TaskUtils.dockTopTask(mContext);
+            }
         } else {
             Divider divider = getComponent(Divider.class);
             if (divider != null && divider.isMinimized() && !divider.isHomeStackResizable()) {

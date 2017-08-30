@@ -232,6 +232,8 @@ import com.android.internal.policy.IShortcutService;
 import com.android.internal.policy.PhoneWindow;
 import com.android.internal.statusbar.IStatusBarService;
 import com.android.internal.util.ScreenShapeHelper;
+import com.android.internal.util.omni.OmniSwitchConstants;
+import com.android.internal.util.omni.TaskUtils;
 import com.android.internal.widget.PointerLocationView;
 import com.android.server.GestureLauncherService;
 import com.android.server.LocalServices;
@@ -260,7 +262,7 @@ public class PhoneWindowManager implements WindowManagerPolicy {
     static final String TAG = "WindowManager";
     static final boolean DEBUG = false;
     static final boolean localLOGV = false;
-    static final boolean DEBUG_INPUT = false;
+    static boolean DEBUG_INPUT = false;
     static final boolean DEBUG_KEYGUARD = false;
     static final boolean DEBUG_LAYOUT = false;
     static final boolean DEBUG_SPLASH_SCREEN = false;
@@ -803,6 +805,19 @@ public class PhoneWindowManager implements WindowManagerPolicy {
     // Maps global key codes to the components that will handle them.
     private GlobalKeyManager mGlobalKeyManager;
 
+    // omni additions start
+    private boolean mOmniSwitchRecents;
+    private boolean mAppSwitchConsumed;
+    private int mLongPressOnAppSwitchBehavior;
+
+    private static final int KEY_ACTION_NOTHING = 0;
+    private static final int KEY_ACTION_APP_SWITCH = 1;
+    private static final int KEY_ACTION_BACK = 2;
+    private static final int KEY_ACTION_MENU = 3;
+    private static final int KEY_ACTION_SPLIT = 4;
+    private static final int KEY_ACTION_LAST_APP = 5;
+    private static final int KEY_ACTION_SLEEP = 6;
+
     // Fallback actions by key code.
     private final SparseArray<KeyCharacterMap.FallbackAction> mFallbackActions =
             new SparseArray<KeyCharacterMap.FallbackAction>();
@@ -975,6 +990,12 @@ public class PhoneWindowManager implements WindowManagerPolicy {
                     UserHandle.USER_ALL);
             resolver.registerContentObserver(Settings.Global.getUriFor(
                     Settings.Global.POLICY_CONTROL), false, this,
+                    UserHandle.USER_ALL);
+            resolver.registerContentObserver(Settings.System.getUriFor(
+                    Settings.System.NAVIGATION_BAR_RECENTS), false, this,
+                    UserHandle.USER_ALL);
+            resolver.registerContentObserver(Settings.System.getUriFor(
+                    Settings.System.BUTTON_LONG_PRESS_RECENTS), false, this,
                     UserHandle.USER_ALL);
             updateSettings();
         }
@@ -1980,6 +2001,9 @@ public class PhoneWindowManager implements WindowManagerPolicy {
         mHandleVolumeKeysInWM = mContext.getResources().getBoolean(
                 com.android.internal.R.bool.config_handleVolumeKeysInWindowManager);
 
+        boolean debugInputOverride = SystemProperties.getBoolean("debug.inputEvent", false);
+        DEBUG_INPUT = DEBUG_INPUT || debugInputOverride;
+
         readConfigurationDependentBehaviors();
 
         mAccessibilityManager = (AccessibilityManager) context.getSystemService(
@@ -2339,6 +2363,13 @@ public class PhoneWindowManager implements WindowManagerPolicy {
             if (mImmersiveModeConfirmation != null) {
                 mImmersiveModeConfirmation.loadSetting(mCurrentUserId);
             }
+            mOmniSwitchRecents = Settings.System.getIntForUser(resolver,
+                    Settings.System.NAVIGATION_BAR_RECENTS, 0,
+                    UserHandle.USER_CURRENT) == 1;
+            mLongPressOnAppSwitchBehavior = Settings.System.getIntForUser(resolver,
+                    Settings.System.BUTTON_LONG_PRESS_RECENTS, 0,
+                    UserHandle.USER_CURRENT);
+            mLongPressOnAppSwitchBehavior = !ActivityManager.supportsMultiWindow(mContext) ? KEY_ACTION_LAST_APP : (mLongPressOnAppSwitchBehavior == 0 ? KEY_ACTION_SPLIT : KEY_ACTION_LAST_APP);
         }
         synchronized (mWindowManagerFuncs.getWindowManagerLock()) {
             PolicyControl.reloadFromSetting(mContext);
@@ -3434,6 +3465,9 @@ public class PhoneWindowManager implements WindowManagerPolicy {
             // Remember that home is pressed and handle special actions.
             if (repeatCount == 0) {
                 mHomePressed = true;
+                if (mOmniSwitchRecents) {
+                    OmniSwitchConstants.hideOmniSwitchRecents(mContext, UserHandle.CURRENT);
+                }
                 if (mHomeDoubleTapPending) {
                     mHomeDoubleTapPending = false;
                     mHandler.removeCallbacks(mHomeDoubleTapTimeoutRunnable);
@@ -3482,10 +3516,17 @@ public class PhoneWindowManager implements WindowManagerPolicy {
             return 0;
         } else if (keyCode == KeyEvent.KEYCODE_APP_SWITCH) {
             if (!keyguardOn) {
-                if (down && repeatCount == 0) {
-                    preloadRecentApps();
-                } else if (!down) {
-                    toggleRecentApps();
+                if (down) {
+                    if (repeatCount == 0) {
+                        mAppSwitchConsumed = false;
+                        preloadRecentApps();
+                    } else if ((event.getFlags() & KeyEvent.FLAG_LONG_PRESS) != 0) {
+                        appSwitchLongPress();
+                    }
+                } else {
+                    if (!mAppSwitchConsumed) {
+                        toggleRecentApps();
+                    }
                 }
             }
             return -1;
@@ -4061,6 +4102,10 @@ public class PhoneWindowManager implements WindowManagerPolicy {
     }
 
     private void preloadRecentApps() {
+        if (mOmniSwitchRecents) {
+            OmniSwitchConstants.preloadOmniSwitchRecents(mContext, UserHandle.CURRENT);
+            return;
+        }
         mPreloadedRecentApps = true;
         StatusBarManagerInternal statusbar = getStatusBarManagerInternal();
         if (statusbar != null) {
@@ -4069,6 +4114,9 @@ public class PhoneWindowManager implements WindowManagerPolicy {
     }
 
     private void cancelPreloadRecentApps() {
+        if (mOmniSwitchRecents) {
+            return;
+        }
         if (mPreloadedRecentApps) {
             mPreloadedRecentApps = false;
             StatusBarManagerInternal statusbar = getStatusBarManagerInternal();
@@ -4079,10 +4127,14 @@ public class PhoneWindowManager implements WindowManagerPolicy {
     }
 
     private void toggleRecentApps() {
-        mPreloadedRecentApps = false; // preloading no longer needs to be canceled
-        StatusBarManagerInternal statusbar = getStatusBarManagerInternal();
-        if (statusbar != null) {
-            statusbar.toggleRecentApps();
+        if (mOmniSwitchRecents) {
+            OmniSwitchConstants.toggleOmniSwitchRecents(mContext, UserHandle.CURRENT);
+        } else {
+            mPreloadedRecentApps = false; // preloading no longer needs to be canceled
+            StatusBarManagerInternal statusbar = getStatusBarManagerInternal();
+            if (statusbar != null) {
+                statusbar.toggleRecentApps();
+            }
         }
     }
 
@@ -4093,10 +4145,18 @@ public class PhoneWindowManager implements WindowManagerPolicy {
     }
 
     private void showRecentApps(boolean triggeredFromAltTab, boolean fromHome) {
-        mPreloadedRecentApps = false; // preloading no longer needs to be canceled
-        StatusBarManagerInternal statusbar = getStatusBarManagerInternal();
-        if (statusbar != null) {
-            statusbar.showRecentApps(triggeredFromAltTab, fromHome);
+        if (mOmniSwitchRecents) {
+            if (!fromHome) {
+                OmniSwitchConstants.restoreHomeStack(mContext, UserHandle.CURRENT);
+            } else {
+                OmniSwitchConstants.toggleOmniSwitchRecents(mContext, UserHandle.CURRENT);
+            }
+        } else {
+            mPreloadedRecentApps = false; // preloading no longer needs to be canceled
+            StatusBarManagerInternal statusbar = getStatusBarManagerInternal();
+            if (statusbar != null) {
+                statusbar.showRecentApps(triggeredFromAltTab, fromHome);
+            }
         }
     }
 
@@ -8397,5 +8457,36 @@ public class PhoneWindowManager implements WindowManagerPolicy {
         if (mKeyguardDelegate != null) {
             mKeyguardDelegate.dump(prefix, pw);
         }
+    }
+
+    private void performKeyAction(int behavior) {
+        if (DEBUG_INPUT){
+            Slog.d(TAG, "performKeyAction " + behavior);
+        }
+        switch (behavior) {
+            case KEY_ACTION_SPLIT:
+                boolean dockStatus = TaskUtils.isTaskDocked(mContext);
+                if (dockStatus) {
+                    TaskUtils.undockTask(mContext);
+                } else {
+                    TaskUtils.dockTopTask(mContext);
+                    // if OmniSwitch is disabled this will trigger AOSP recent same as from soft keys
+                    // with OmniSwitch it will run restoreHomeStack
+                    showRecentApps(false, true);
+                }
+                break;
+            case KEY_ACTION_LAST_APP:
+                TaskUtils.toggleLastApp(mContext, mCurrentUserId);
+                break;
+            default:
+                break;
+        }
+    }
+
+    private void appSwitchLongPress() {
+        mAppSwitchConsumed = true;
+        cancelPreloadRecentApps();
+        performHapticFeedbackLw(null, HapticFeedbackConstants.LONG_PRESS, false);
+        performKeyAction(mLongPressOnAppSwitchBehavior);
     }
 }
