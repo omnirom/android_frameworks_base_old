@@ -29,6 +29,19 @@
         android:background="@drawable/qs_background_primary"
         android:elevation="4dp" />
 
+    <LinearLayout
+        android:layout_width="@dimen/notification_panel_width"
+        android:layout_height="128dp"
+        android:layout_gravity="center" >
+        
+        <ImageView
+            android:id="@+id/background_image"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:scaleType="centerCrop"
+            android:visibility="gone" />
+    </LinearLayout>
+
     <com.android.systemui.qs.QSPanel
         android:id="@+id/quick_settings_panel"
         android:layout_marginTop="28dp"
