@@ -3914,6 +3914,19 @@ public final class Settings {
         public static final String DOUBLE_TAP_SLEEP_GESTURE = "double_tap_sleep_gesture";
 
         /**
+         * navbar recents style - 0 default AOSP (card) 1 OmniSwitch 2 default AOSP (grid)
+         * @hide
+         */
+        public static final String NAVIGATION_BAR_RECENTS = "navigation_bar_recents";
+
+        /**
+         * 0 for split screen
+         * 1 for switch to last app
+         * @hide
+         */
+        public static final String BUTTON_LONG_PRESS_RECENTS = "button_long_press_recents";
+
+        /**
          * Settings to backup. This is here so that it's in the same place as the settings
          * keys and easy to update.
          *
@@ -4073,6 +4086,8 @@ public final class Settings {
             PRIVATE_SETTINGS.add(STATUS_BAR_LOGO);
             PRIVATE_SETTINGS.add(POWER_MENU_ANIMATIONS);
             PRIVATE_SETTINGS.add(DOUBLE_TAP_SLEEP_GESTURE);
+            PRIVATE_SETTINGS.add(NAVIGATION_BAR_RECENTS);
+            PRIVATE_SETTINGS.add(BUTTON_LONG_PRESS_RECENTS);
         }
 
         /**
