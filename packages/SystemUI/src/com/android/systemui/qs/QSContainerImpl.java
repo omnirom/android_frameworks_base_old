@@ -117,6 +117,8 @@ public class QSContainerImpl extends FrameLayout {
         // Pin QS Footer to the bottom of the panel.
         mQSFooter.setTranslationY(height - mQSFooter.getHeight());
 
+        // maxwen: not really needed cause have set the elevation of the
+        // notification scroller also to 4dp
         float elevation = mQsExpansion * mFullElevation;
         mQSDetail.setElevation(elevation);
         mBackground.setElevation(elevation);
