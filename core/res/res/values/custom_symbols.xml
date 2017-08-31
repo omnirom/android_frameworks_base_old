@@ -32,4 +32,5 @@
   <java-symbol type="style" name="GlobalActionsAnimationEnter" />
   <java-symbol type="anim" name="last_app_in" />
   <java-symbol type="anim" name="last_app_out" />
+  <java-symbol type="integer" name="config_deviceHardwareKeys" />
 </resources>
