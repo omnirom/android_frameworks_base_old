@@ -4813,6 +4813,17 @@ public final class Settings {
                 BOOLEAN_VALIDATOR;
 
         /**
+         * Double tap on lockscreen to sleep
+         * @hide
+         */
+        public static final String OMNI_DOUBLE_TAP_SLEEP_LOCKSCREEN =
+                "double_tap_sleep_lockscreen";
+
+        /** @hide */
+        private static final Validator OMNI_DOUBLE_TAP_SLEEP_LOCKSCREEN_VALIDATOR =
+                BOOLEAN_VALIDATOR;
+
+        /**
          * IMPORTANT: If you add a new public settings you also have to add it to
          * PUBLIC_SETTINGS below. If the new setting is hidden you have to add
          * it to PRIVATE_SETTINGS below. Also add a validator that can validate
@@ -4917,6 +4928,7 @@ public final class Settings {
             OMNI_LOCK_POWER_MENU_DISABLED,
             OMNI_BACK_GESTURE_HEIGHT,
             OMNI_DOUBLE_TAP_SLEEP_GESTURE,
+            OMNI_DOUBLE_TAP_SLEEP_LOCKSCREEN,
         };
 
         /**
@@ -5071,6 +5083,7 @@ public final class Settings {
             PRIVATE_SETTINGS.add(OMNI_LOCK_POWER_MENU_DISABLED);
             PRIVATE_SETTINGS.add(OMNI_BACK_GESTURE_HEIGHT);
             PRIVATE_SETTINGS.add(OMNI_DOUBLE_TAP_SLEEP_GESTURE);
+            PRIVATE_SETTINGS.add(OMNI_DOUBLE_TAP_SLEEP_LOCKSCREEN);
         }
 
         /**
@@ -5220,6 +5233,8 @@ public final class Settings {
             VALIDATORS.put(OMNI_BACK_GESTURE_HEIGHT, OMNI_BACK_GESTURE_HEIGHT_VALIDATOR);
             VALIDATORS.put(OMNI_DOUBLE_TAP_SLEEP_GESTURE,
                     OMNI_DOUBLE_TAP_SLEEP_GESTURE_VALIDATOR);
+            VALIDATORS.put(OMNI_DOUBLE_TAP_SLEEP_LOCKSCREEN,
+                    OMNI_DOUBLE_TAP_SLEEP_LOCKSCREEN_VALIDATOR);
         }
 
         /**
