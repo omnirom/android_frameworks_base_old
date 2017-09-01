@@ -884,8 +884,12 @@ public class StatusBarWindowView extends FrameLayout {
         boolean doubleTapToSleepEnabled = Settings.System.getIntForUser(
                 mContext.getContentResolver(), Settings.System.OMNI_DOUBLE_TAP_SLEEP_GESTURE, 0,
                 UserHandle.USER_CURRENT) == 1;
+        boolean isDoubleTapEnabled = Settings.System.getIntForUser(
+                mContext.getContentResolver(), Settings.System.OMNI_DOUBLE_TAP_SLEEP_LOCKSCREEN, 0,
+                UserHandle.USER_CURRENT) == 1;
         if (mNotificationPanel != null) {
             mNotificationPanel.updateDoubleTapToSleep(doubleTapToSleepEnabled);
+            mNotificationPanel.setLockscreenDoubleTapToSleep(isDoubleTapEnabled);
         }
         if (mDragDownHelper != null) {
             mDragDownHelper.updateDoubleTapToSleep(doubleTapToSleepEnabled);
