@@ -19,6 +19,12 @@
 */
 -->
 <resources>
+    <!-- Path to the library that contains a device specific key handler -->
+    <string name="config_deviceKeyHandlerLib" translatable="false"></string>
+
+    <!-- Name of that key handler class -->
+    <string name="config_deviceKeyHandlerClass" translatable="false"></string>
+
     <!-- Hardware 'face' keys present on the device, stored as a bit field.
          This integer should equal the sum of the corresponding value for each
          of the following keys present:
