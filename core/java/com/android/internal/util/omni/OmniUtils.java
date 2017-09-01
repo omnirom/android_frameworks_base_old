@@ -23,6 +23,7 @@ import android.os.UserHandle;
 import android.hardware.input.InputManager;
 import android.os.Handler;
 import android.os.Looper;
+import android.os.PowerManager;
 import android.os.RemoteException;
 import android.os.SystemClock;
 import android.view.InputDevice;
@@ -103,6 +104,13 @@ public class OmniUtils {
             wm.screenRecordAction(mode);
         } catch (RemoteException e) {
             e.printStackTrace();
+        }
+    }
+
+    public static void goToSleep(Context context) {
+        PowerManager pm = (PowerManager) context.getSystemService(Context.POWER_SERVICE);
+        if(pm != null) {
+            pm.goToSleep(SystemClock.uptimeMillis());
         }
     }
 }
