@@ -324,6 +324,7 @@ oneway interface IStatusBar
     /** Unregisters a nearby media devices provider. */
     void unregisterNearbyMediaDevicesProvider(in INearbyMediaDevicesProvider provider);
 
+<<<<<<< HEAD
     /** Dump protos from SystemUI. The proto definition is defined there */
     void dumpProto(in String[] args, in ParcelFileDescriptor pfd);
 
@@ -346,4 +347,10 @@ oneway interface IStatusBar
      * @param packageName of the session for which the output switcher is shown.
      */
     void showMediaOutputSwitcher(String packageName);
+
+    /**
+     *Omni
+     */
+    void toggleCameraFlash();
+    void toggleCameraFlashState(boolean enable);
 }
