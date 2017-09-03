@@ -284,4 +284,11 @@ oneway interface IStatusBar
      * Triggers a GC in the system and status bar.
      */
     void runGcForTest();
+
+    /**
+     *Omni
+     */
+    void toggleCameraFlash();
+    void toggleCameraFlashState(boolean enable);
+
 }
