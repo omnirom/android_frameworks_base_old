@@ -346,4 +346,10 @@ oneway interface IStatusBar
      * @param packageName of the session for which the output switcher is shown.
      */
     void showMediaOutputSwitcher(String packageName);
+
+    /**
+     *Omni
+     */
+    void toggleCameraFlash();
+    void toggleCameraFlashState(boolean enable);
 }

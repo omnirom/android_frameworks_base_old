@@ -230,4 +230,10 @@ interface IStatusBarService
 
     /** Shows rear display educational dialog */
     void showRearDisplayDialog(int currentBaseState);
+
+    /**
+     * Omni
+     */
+    void toggleCameraFlash();
+    void toggleCameraFlashState(boolean enable);
 }

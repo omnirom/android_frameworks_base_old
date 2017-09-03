@@ -169,6 +169,8 @@ public class CommandQueue extends IStatusBar.Stub implements
     private static final int MSG_ENTER_STAGE_SPLIT_FROM_RUNNING_APP = 71 << MSG_SHIFT;
     private static final int MSG_SHOW_MEDIA_OUTPUT_SWITCHER = 72 << MSG_SHIFT;
     private static final int MSG_TOGGLE_TASKBAR = 73 << MSG_SHIFT;
+    private static final int MSG_TOGGLE_CAMERA_FLASH               = 74 << MSG_SHIFT;
+    private static final int MSG_TOGGLE_CAMERA_FLASH_STATE         = 75 << MSG_SHIFT;
 
     public static final int FLAG_EXCLUDE_NONE = 0;
     public static final int FLAG_EXCLUDE_SEARCH_PANEL = 1 << 0;
@@ -482,6 +484,7 @@ public class CommandQueue extends IStatusBar.Stub implements
                 @NonNull INearbyMediaDevicesProvider provider) {}
 
         /**
+<<<<<<< HEAD
          * @see IStatusBar#showRearDisplayDialog
          */
         default void showRearDisplayDialog(int currentBaseState) {}
@@ -500,6 +503,12 @@ public class CommandQueue extends IStatusBar.Stub implements
          * @see IStatusBar#showMediaOutputSwitcher
          */
         default void showMediaOutputSwitcher(String packageName) {}
+=======
+         * Omni
+         */
+        default void toggleCameraFlash() { }
+        default void toggleCameraFlashState(boolean enable) { }
+>>>>>>> 6af266f9b034 (Add api to toggle flashlight and check if device has flashlight)
     }
 
     @VisibleForTesting
@@ -1351,8 +1360,24 @@ public class CommandQueue extends IStatusBar.Stub implements
     }
 
     @Override
+<<<<<<< HEAD
     public void goToFullscreenFromSplit() {
         mHandler.obtainMessage(MSG_GO_TO_FULLSCREEN_FROM_SPLIT).sendToTarget();
+=======
+    public void toggleCameraFlash() {
+        synchronized (mLock) {
+            mHandler.removeMessages(MSG_TOGGLE_CAMERA_FLASH);
+            mHandler.sendEmptyMessage(MSG_TOGGLE_CAMERA_FLASH);
+        }
+    }
+
+    @Override
+    public void toggleCameraFlashState(boolean enable) {
+        synchronized (mLock) {
+            mHandler.removeMessages(MSG_TOGGLE_CAMERA_FLASH_STATE);
+            mHandler.obtainMessage(MSG_TOGGLE_CAMERA_FLASH_STATE,enable ? 1 : 0, 0, null).sendToTarget();
+        }
+>>>>>>> 6af266f9b034 (Add api to toggle flashlight and check if device has flashlight)
     }
 
     private final class H extends Handler {
@@ -1798,6 +1823,7 @@ public class CommandQueue extends IStatusBar.Stub implements
                         mCallbacks.get(i).requestTileServiceListeningState(component);
                     }
                     break;
+<<<<<<< HEAD
                 case MSG_SHOW_REAR_DISPLAY_DIALOG:
                     for (int i = 0; i < mCallbacks.size(); i++) {
                         mCallbacks.get(i).showRearDisplayDialog((Integer) msg.obj);
@@ -1818,6 +1844,16 @@ public class CommandQueue extends IStatusBar.Stub implements
                     String clientPackageName = (String) args.arg1;
                     for (int i = 0; i < mCallbacks.size(); i++) {
                         mCallbacks.get(i).showMediaOutputSwitcher(clientPackageName);
+=======
+                case MSG_TOGGLE_CAMERA_FLASH:
+                    for (int i = 0; i < mCallbacks.size(); i++) {
+                        mCallbacks.get(i).toggleCameraFlash();
+                    }
+                    break;
+                case MSG_TOGGLE_CAMERA_FLASH_STATE:
+                    for (int i = 0; i < mCallbacks.size(); i++) {
+                        mCallbacks.get(i).toggleCameraFlashState(msg.arg1 != 0);
+>>>>>>> 6af266f9b034 (Add api to toggle flashlight and check if device has flashlight)
                     }
                     break;
             }
