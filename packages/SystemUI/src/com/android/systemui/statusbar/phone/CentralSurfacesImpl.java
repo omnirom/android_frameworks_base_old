@@ -437,6 +437,17 @@ public class CentralSurfacesImpl extends CoreStartable implements
     public void togglePanel() {
         mCommandQueueCallbacks.togglePanel();
     }
+
+    /** */
+    public void toggleCameraFlash() {
+        mCommandQueueCallbacks.toggleCameraFlash();
+    }
+
+    /** */
+    public void toggleCameraFlashState(boolean enable) {
+        mCommandQueueCallbacks.toggleCameraFlashState(enable);
+    }
+
     /**
      * The {@link StatusBarState} of the status bar.
      */
