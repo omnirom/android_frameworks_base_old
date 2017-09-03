@@ -44,6 +44,7 @@ import com.android.internal.logging.nano.MetricsProto.MetricsEvent;
 import com.android.internal.statusbar.LetterboxDetails;
 import com.android.internal.view.AppearanceRegion;
 import com.android.keyguard.KeyguardUpdateMonitor;
+import com.android.systemui.Dependency;
 import com.android.systemui.R;
 import com.android.systemui.assist.AssistManager;
 import com.android.systemui.camera.CameraIntents;
@@ -64,6 +65,7 @@ import com.android.systemui.statusbar.disableflags.DisableFlagsLogger;
 import com.android.systemui.statusbar.notification.stack.NotificationStackScrollLayoutController;
 import com.android.systemui.statusbar.phone.dagger.CentralSurfacesComponent;
 import com.android.systemui.statusbar.policy.DeviceProvisionedController;
+import com.android.systemui.statusbar.policy.FlashlightController;
 import com.android.systemui.statusbar.policy.HeadsUpManager;
 import com.android.systemui.statusbar.policy.KeyguardStateController;
 import com.android.systemui.statusbar.policy.RemoteInputQuickSettingsDisabler;
@@ -110,6 +112,9 @@ public class CentralSurfacesCommandQueueCallbacks implements CommandQueue.Callba
 
     private static final VibrationAttributes HARDWARE_FEEDBACK_VIBRATION_ATTRIBUTES =
             VibrationAttributes.createForUsage(VibrationAttributes.USAGE_HARDWARE_FEEDBACK);
+
+    /*omni add-on*/
+    private FlashlightController mFlashlightController;
 
     @Inject
     CentralSurfacesCommandQueueCallbacks(
@@ -174,6 +179,9 @@ public class CentralSurfacesCommandQueueCallbacks implements CommandQueue.Callba
                 mVibratorOptional, resources);
         mSystemBarAttributesListener = systemBarAttributesListener;
         mActivityStarter = activityStarter;
+
+        // omni
+        mFlashlightController = Dependency.get(FlashlightController.class);
     }
 
     @Override
@@ -604,5 +612,25 @@ public class CentralSurfacesCommandQueueCallbacks implements CommandQueue.Callba
             timings[i] = pattern[i];
         }
         return VibrationEffect.createWaveform(timings, /* repeat= */ -1);
+    }
+
+    @Override
+    public void toggleCameraFlash() {
+        if (mFlashlightController != null) {
+            mFlashlightController.initFlashLight();
+            if (mFlashlightController.hasFlashlight() && mFlashlightController.isAvailable()) {
+                mFlashlightController.setFlashlight(!mFlashlightController.isEnabled());
+            }
+        }
+    }
+
+    @Override
+    public void toggleCameraFlashState(boolean enable) {
+        if (mFlashlightController != null) {
+            mFlashlightController.initFlashLight();
+            if (mFlashlightController.hasFlashlight() && mFlashlightController.isAvailable()) {
+                mFlashlightController.setFlashlight(enable);
+            }
+        }
     }
 }
