@@ -26,4 +26,5 @@
     <string name="global_action_dismissable_dialog_text">Advanced restart is disabled.\nDo you want to restart\u003f</string>
     <string name="global_action_dnaa">Do not show again</string>
     <string name="global_action_settings">Settings</string>
+    <string name="summary_empty" translatable="false"></string>
 </resources>
