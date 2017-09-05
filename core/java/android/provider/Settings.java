@@ -5792,6 +5792,25 @@ public final class Settings {
         public static final String OMNI_STATUS_BAR_BT_BATTERY = "status_bar_bt_battery";
 
         /**
+         * @hide
+         * Whether the phone vibrates on call connect
+         * @hide
+         */
+        public static final String OMNI_VIBRATE_ON_CONNECT = "vibrate_on_connect";
+
+         /**
+         * Whether the phone vibrates on call waiting
+         * @hide
+         */
+        public static final String OMNI_VIBRATE_ON_CALLWAITING = "vibrate_on_callwaiting";
+
+         /**
+         * Whether the phone vibrates on disconnect
+         * @hide
+         */
+        public static final String OMNI_VIBRATE_ON_DISCONNECT = "vibrate_on_disconnect";
+
+        /**
          * SettingsBackupAgent will combine its list with this so we dont need
          * to add new things into SettingsProvider SystemSettings
          * @hide
@@ -5818,6 +5837,9 @@ public final class Settings {
             OMNI_BATTERY_LIGHT_REALLY_FULL_COLOR,
             OMNI_BATTERY_LIGHT_ONLY_FULLY_CHARGED,
             OMNI_STATUS_BAR_BT_BATTERY,
+            OMNI_VIBRATE_ON_CONNECT,
+            OMNI_VIBRATE_ON_CALLWAITING,
+            OMNI_VIBRATE_ON_DISCONNECT,
         };
 
         /**
@@ -5854,6 +5876,9 @@ public final class Settings {
             OMNI_SETTINGS_VALIDATORS.put(OMNI_FAST_CHARGING_LED_ENABLED, 0);
             OMNI_SETTINGS_VALIDATORS.put(OMNI_BATTERY_LIGHT_ONLY_FULLY_CHARGED, 0);
             OMNI_SETTINGS_VALIDATORS.put(OMNI_STATUS_BAR_BT_BATTERY, 0);
+            OMNI_SETTINGS_VALIDATORS.put(OMNI_VIBRATE_ON_CONNECT, 0);
+            OMNI_SETTINGS_VALIDATORS.put(OMNI_VIBRATE_ON_CALLWAITING, 0);
+            OMNI_SETTINGS_VALIDATORS.put(OMNI_VIBRATE_ON_DISCONNECT, 0);
         }
     }
 
