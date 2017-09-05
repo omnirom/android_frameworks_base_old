@@ -4636,6 +4636,33 @@ public final class Settings {
                 BOOLEAN_VALIDATOR;
 
         /**
+         * Whether the phone vibrates on call connect
+         * @hide
+         */
+        public static final String OMNI_VIBRATE_ON_CONNECT = "vibrate_on_connect";
+
+        private static final Validator OMNI_VIBRATE_ON_CONNECT_VALIDATOR =
+                BOOLEAN_VALIDATOR;
+
+         /**
+         * Whether the phone vibrates on call waiting
+         * @hide
+         */
+        public static final String OMNI_VIBRATE_ON_CALLWAITING = "vibrate_on_callwaiting";
+
+        private static final Validator OMNI_VIBRATE_ON_CALLWAITING_VALIDATOR =
+                BOOLEAN_VALIDATOR;
+
+         /**
+         * Whether the phone vibrates on disconnect
+         * @hide
+         */
+        public static final String OMNI_VIBRATE_ON_DISCONNECT = "vibrate_on_disconnect";
+
+        private static final Validator OMNI_VIBRATE_ON_DISCONNECT_VALIDATOR =
+                BOOLEAN_VALIDATOR;
+
+        /**
          * IMPORTANT: If you add a new public settings you also have to add it to
          * PUBLIC_SETTINGS below. If the new setting is hidden you have to add
          * it to PRIVATE_SETTINGS below. Also add a validator that can validate
@@ -4755,7 +4782,10 @@ public final class Settings {
             OMNI_NETWORK_TRAFFIC_AUTOHIDE,
             OMNI_NETWORK_TRAFFIC_AUTOHIDE_THRESHOLD,
             OMNI_STATUS_BAR_QUICK_QS_PULLDOWN,
-            OMNI_LOCK_QS_DISABLED
+            OMNI_LOCK_QS_DISABLED,
+            OMNI_VIBRATE_ON_CONNECT,
+            OMNI_VIBRATE_ON_CALLWAITING,
+            OMNI_VIBRATE_ON_DISCONNECT
         };
 
         /**
@@ -4925,6 +4955,9 @@ public final class Settings {
             PRIVATE_SETTINGS.add(OMNI_NETWORK_TRAFFIC_AUTOHIDE_THRESHOLD);
             PRIVATE_SETTINGS.add(OMNI_STATUS_BAR_QUICK_QS_PULLDOWN);
             PRIVATE_SETTINGS.add(OMNI_LOCK_QS_DISABLED);
+            PRIVATE_SETTINGS.add(OMNI_VIBRATE_ON_CONNECT);
+            PRIVATE_SETTINGS.add(OMNI_VIBRATE_ON_CALLWAITING);
+            PRIVATE_SETTINGS.add(OMNI_VIBRATE_ON_DISCONNECT);
         }
 
         /**
@@ -5104,6 +5137,12 @@ public final class Settings {
             VALIDATORS.put(OMNI_STATUS_BAR_QUICK_QS_PULLDOWN,
                     OMNI_STATUS_BAR_QUICK_QS_PULLDOWN_VALIDATOR);
             VALIDATORS.put(OMNI_LOCK_QS_DISABLED, OMNI_LOCK_QS_DISABLED_VALIDATOR);
+            VALIDATORS.put(OMNI_VIBRATE_ON_CONNECT,
+                    OMNI_VIBRATE_ON_CONNECT_VALIDATOR);
+            VALIDATORS.put(OMNI_VIBRATE_ON_CALLWAITING,
+                    OMNI_VIBRATE_ON_CALLWAITING_VALIDATOR);
+            VALIDATORS.put(OMNI_VIBRATE_ON_DISCONNECT,
+                    OMNI_VIBRATE_ON_DISCONNECT_VALIDATOR);
         }
 
         /**
