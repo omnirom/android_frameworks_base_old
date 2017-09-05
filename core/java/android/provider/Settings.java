@@ -4511,6 +4511,14 @@ public final class Settings {
 
         /** @hide */
         private static final Validator OMNI_BUTTON_BACKLIGHT_ON_TOUCH_ONLY_VALIDATOR =
+
+        /**
+         * @hide
+         */
+        public static final String OMNI_SHOW_CPU_OVERLAY = "show_cpu_overlay";
+
+        /** @hide */
+        private static final Validator OMNI_SHOW_CPU_OVERLAY_VALIDATOR =
                 BOOLEAN_VALIDATOR;
 
         /**
@@ -4620,6 +4628,7 @@ public final class Settings {
             OMNI_BUTTON_BACKLIGHT_ENABLE,
             OMNI_BUTTON_BACKLIGHT_TIMEOUT,
             OMNI_BUTTON_BACKLIGHT_ON_TOUCH_ONLY
+            OMNI_SHOW_CPU_OVERLAY,
         };
 
         /**
@@ -4777,6 +4786,7 @@ public final class Settings {
             PRIVATE_SETTINGS.add(OMNI_BUTTON_BACKLIGHT_ENABLE);
             PRIVATE_SETTINGS.add(OMNI_BUTTON_BACKLIGHT_TIMEOUT);
             PRIVATE_SETTINGS.add(OMNI_BUTTON_BACKLIGHT_ON_TOUCH_ONLY);
+            PRIVATE_SETTINGS.add(OMNI_SHOW_CPU_OVERLAY);
         }
 
         /**
@@ -4935,6 +4945,8 @@ public final class Settings {
                     OMNI_BUTTON_BACKLIGHT_TIMEOUT_VALIDATOR);
             VALIDATORS.put(OMNI_BUTTON_BACKLIGHT_ON_TOUCH_ONLY,
                     OMNI_BUTTON_BACKLIGHT_ON_TOUCH_ONLY_VALIDATOR);
+            VALIDATORS.put(OMNI_SHOW_CPU_OVERLAY,
+                    OMNI_SHOW_CPU_OVERLAY_VALIDATOR);
         }
 
         /**
