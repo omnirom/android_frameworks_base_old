@@ -5380,6 +5380,24 @@ public final class Settings {
         public static final String OMNI_BACK_GESTURE_HEIGHT = "back_gesture_height";
 
         /**
+         * Whether the phone vibrates on call connect
+         * @hide
+         */
+        public static final String OMNI_VIBRATE_ON_CONNECT = "vibrate_on_connect";
+
+         /**
+         * Whether the phone vibrates on call waiting
+         * @hide
+         */
+        public static final String OMNI_VIBRATE_ON_CALLWAITING = "vibrate_on_callwaiting";
+
+         /**
+         * Whether the phone vibrates on disconnect
+         * @hide
+         */
+        public static final String OMNI_VIBRATE_ON_DISCONNECT = "vibrate_on_disconnect";
+
+        /**
          * SettingsBackupAgent will combine its list with this so we dont need
          * to add new things into SettingsProvider SystemSettings
          * @hide
@@ -5408,6 +5426,9 @@ public final class Settings {
             OMNI_NOTIFICATION_PULSE_COLOR_AUTOMATIC,
             OMNI_NAVIGATION_BAR_RECENTS,
             OMNI_BACK_GESTURE_HEIGHT,
+            OMNI_VIBRATE_ON_CONNECT,
+            OMNI_VIBRATE_ON_CALLWAITING,
+            OMNI_VIBRATE_ON_DISCONNECT
         };
 
         /**
@@ -5415,8 +5436,8 @@ public final class Settings {
          * to add new things into SettingsProvider SystemSettingsValidators
          * we cant use Validators interface so use a simple integer mapping
          * BOOLEAN_VALIDATOR == 0
-         * ANY_INTEGER_VALIDATOR == 1         
-         * ANY_STRING_VALIDATOR == 2         
+         * ANY_INTEGER_VALIDATOR == 1
+         * ANY_STRING_VALIDATOR == 2
          * @hide
          */
         public static final Map<String, Integer> OMNI_SETTINGS_VALIDATORS = new ArrayMap<>();
@@ -5445,6 +5466,9 @@ public final class Settings {
             OMNI_SETTINGS_VALIDATORS.put(OMNI_NOTIFICATION_PULSE_COLOR_AUTOMATIC, 1);
             OMNI_SETTINGS_VALIDATORS.put(OMNI_NAVIGATION_BAR_RECENTS, 0);
             OMNI_SETTINGS_VALIDATORS.put(OMNI_BACK_GESTURE_HEIGHT, 1);
+            OMNI_SETTINGS_VALIDATORS.put(OMNI_VIBRATE_ON_CONNECT, 1);
+            OMNI_SETTINGS_VALIDATORS.put(OMNI_VIBRATE_ON_CALLWAITING, 1);
+            OMNI_SETTINGS_VALIDATORS.put(OMNI_VIBRATE_ON_DISCONNECT, 1);
         }
     }
 
