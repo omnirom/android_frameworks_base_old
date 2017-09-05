@@ -4514,6 +4514,15 @@ public final class Settings {
                 BOOLEAN_VALIDATOR;
 
         /**
+         * @hide
+         */
+        public static final String OMNI_SHOW_CPU_OVERLAY = "show_cpu_overlay";
+
+        /** @hide */
+        private static final Validator OMNI_SHOW_CPU_OVERLAY_VALIDATOR =
+                BOOLEAN_VALIDATOR;
+
+        /**
          * IMPORTANT: If you add a new public settings you also have to add it to
          * PUBLIC_SETTINGS below. If the new setting is hidden you have to add
          * it to PRIVATE_SETTINGS below. Also add a validator that can validate
@@ -4619,7 +4628,8 @@ public final class Settings {
             OMNI_CUSTOM_BUTTON_USE_SCREEN_BRIGHTNESS,
             OMNI_BUTTON_BACKLIGHT_ENABLE,
             OMNI_BUTTON_BACKLIGHT_TIMEOUT,
-            OMNI_BUTTON_BACKLIGHT_ON_TOUCH_ONLY
+            OMNI_BUTTON_BACKLIGHT_ON_TOUCH_ONLY,
+            OMNI_SHOW_CPU_OVERLAY,
         };
 
         /**
@@ -4777,6 +4787,7 @@ public final class Settings {
             PRIVATE_SETTINGS.add(OMNI_BUTTON_BACKLIGHT_ENABLE);
             PRIVATE_SETTINGS.add(OMNI_BUTTON_BACKLIGHT_TIMEOUT);
             PRIVATE_SETTINGS.add(OMNI_BUTTON_BACKLIGHT_ON_TOUCH_ONLY);
+            PRIVATE_SETTINGS.add(OMNI_SHOW_CPU_OVERLAY);
         }
 
         /**
@@ -4935,6 +4946,8 @@ public final class Settings {
                     OMNI_BUTTON_BACKLIGHT_TIMEOUT_VALIDATOR);
             VALIDATORS.put(OMNI_BUTTON_BACKLIGHT_ON_TOUCH_ONLY,
                     OMNI_BUTTON_BACKLIGHT_ON_TOUCH_ONLY_VALIDATOR);
+            VALIDATORS.put(OMNI_SHOW_CPU_OVERLAY,
+                    OMNI_SHOW_CPU_OVERLAY_VALIDATOR);
         }
 
         /**
