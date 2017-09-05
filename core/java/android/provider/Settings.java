@@ -4636,6 +4636,7 @@ public final class Settings {
                 BOOLEAN_VALIDATOR;
 
         /**
+<<<<<<< HEAD
          * Whether to use the custom status bar header or not
          * @hide
          */
@@ -4693,6 +4694,33 @@ public final class Settings {
 
         private static final Validator OMNI_STATUS_BAR_FILE_HEADER_IMAGE_VALIDATOR =
                 ANY_STRING_VALIDATOR;
+
+        /**
+         * Whether the phone vibrates on call connect
+         * @hide
+         */
+        public static final String OMNI_VIBRATE_ON_CONNECT = "vibrate_on_connect";
+
+        private static final Validator OMNI_VIBRATE_ON_CONNECT_VALIDATOR =
+                BOOLEAN_VALIDATOR;
+
+         /**
+         * Whether the phone vibrates on call waiting
+         * @hide
+         */
+        public static final String OMNI_VIBRATE_ON_CALLWAITING = "vibrate_on_callwaiting";
+
+        private static final Validator OMNI_VIBRATE_ON_CALLWAITING_VALIDATOR =
+                BOOLEAN_VALIDATOR;
+
+         /**
+         * Whether the phone vibrates on disconnect
+         * @hide
+         */
+        public static final String OMNI_VIBRATE_ON_DISCONNECT = "vibrate_on_disconnect";
+
+        private static final Validator OMNI_VIBRATE_ON_DISCONNECT_VALIDATOR =
+                BOOLEAN_VALIDATOR;
 
         /**
          * IMPORTANT: If you add a new public settings you also have to add it to
@@ -4820,7 +4848,10 @@ public final class Settings {
             OMNI_STATUS_BAR_DAYLIGHT_HEADER_PACK,
             OMNI_STATUS_BAR_CUSTOM_HEADER_PROVIDER,
             OMNI_STATUS_BAR_CUSTOM_HEADER_IMAGE,
-            OMNI_STATUS_BAR_FILE_HEADER_IMAGE
+            OMNI_STATUS_BAR_FILE_HEADER_IMAGE,
+            OMNI_VIBRATE_ON_CONNECT,
+            OMNI_VIBRATE_ON_CALLWAITING,
+            OMNI_VIBRATE_ON_DISCONNECT
         };
 
         /**
@@ -4996,6 +5027,9 @@ public final class Settings {
             PRIVATE_SETTINGS.add(OMNI_STATUS_BAR_CUSTOM_HEADER_PROVIDER);
             PRIVATE_SETTINGS.add(OMNI_STATUS_BAR_CUSTOM_HEADER_IMAGE);
             PRIVATE_SETTINGS.add(OMNI_STATUS_BAR_FILE_HEADER_IMAGE);
+            PRIVATE_SETTINGS.add(OMNI_VIBRATE_ON_CONNECT);
+            PRIVATE_SETTINGS.add(OMNI_VIBRATE_ON_CALLWAITING);
+            PRIVATE_SETTINGS.add(OMNI_VIBRATE_ON_DISCONNECT);
         }
 
         /**
@@ -5187,6 +5221,12 @@ public final class Settings {
                     OMNI_STATUS_BAR_CUSTOM_HEADER_IMAGE_VALIDATOR);
             VALIDATORS.put(OMNI_STATUS_BAR_FILE_HEADER_IMAGE,
                     OMNI_STATUS_BAR_FILE_HEADER_IMAGE_VALIDATOR);
+            VALIDATORS.put(OMNI_VIBRATE_ON_CONNECT,
+                    OMNI_VIBRATE_ON_CONNECT_VALIDATOR);
+            VALIDATORS.put(OMNI_VIBRATE_ON_CALLWAITING,
+                    OMNI_VIBRATE_ON_CALLWAITING_VALIDATOR);
+            VALIDATORS.put(OMNI_VIBRATE_ON_DISCONNECT,
+                    OMNI_VIBRATE_ON_DISCONNECT_VALIDATOR);
         }
 
         /**
