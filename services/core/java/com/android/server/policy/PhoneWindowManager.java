@@ -118,6 +118,7 @@ import static android.view.WindowManagerPolicy.WindowManagerFuncs.LID_ABSENT;
 import static android.view.WindowManagerPolicy.WindowManagerFuncs.LID_CLOSED;
 import static android.view.WindowManagerPolicy.WindowManagerFuncs.LID_OPEN;
 
+import android.Manifest;
 import android.annotation.Nullable;
 import android.app.ActivityManager;
 import android.app.ActivityManagerNative;
@@ -8770,6 +8771,26 @@ public class PhoneWindowManager implements WindowManagerPolicy {
     @Override
     public boolean hasNavigationBar() {
         return mHasNavigationBar;
+    }
+
+    @Override
+    public void sendCustomAction(Intent intent) {
+        String action = intent.getAction();
+        if (action != null) {
+            if (OmniUtils.INTENT_SCREENSHOT.equals(action)) {
+                mContext.enforceCallingOrSelfPermission(Manifest.permission.ACCESS_SURFACE_FLINGER,
+                        TAG + "sendCustomAction permission denied");
+                mHandler.removeCallbacks(mScreenshotRunnable);
+                mScreenshotRunnable.setScreenshotType(TAKE_SCREENSHOT_FULLSCREEN);
+                mHandler.post(mScreenshotRunnable);
+            } else if (OmniUtils.INTENT_REGION_SCREENSHOT.equals(action)) {
+                mContext.enforceCallingOrSelfPermission(Manifest.permission.ACCESS_SURFACE_FLINGER,
+                        TAG + "sendCustomAction permission denied");
+                mHandler.removeCallbacks(mScreenshotRunnable);
+                mScreenshotRunnable.setScreenshotType(TAKE_SCREENSHOT_SELECTED_REGION);
+                mHandler.post(mScreenshotRunnable);
+            }
+        }
     }
 
     @Override
