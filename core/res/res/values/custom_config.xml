@@ -47,6 +47,8 @@
     <!-- Does the battery LED support multiple colors? Used to decide if the user can change the colors -->
     <bool name="config_multiColorBatteryLed">false</bool>
 
+    <bool name="config_multiColorNotificationLed">false</bool>
+    
     <!-- Does the device supports fast charging -->
     <bool name="config_FastChargingLedSupported">false</bool>
 
