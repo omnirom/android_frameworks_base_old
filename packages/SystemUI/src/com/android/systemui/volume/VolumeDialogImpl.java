@@ -134,6 +134,7 @@ public class VolumeDialogImpl implements VolumeDialog, TunerService.Tunable {
     private boolean mShowA11yStream;
 
     private int mActiveStream;
+    private boolean mShowHeaders = VolumePrefs.DEFAULT_SHOW_HEADERS;
     private boolean mAutomute = VolumePrefs.DEFAULT_ENABLE_AUTOMUTE;
     private boolean mSilentMode = VolumePrefs.DEFAULT_ENABLE_SILENT_MODE;
     private State mState;
@@ -309,6 +310,12 @@ public class VolumeDialogImpl implements VolumeDialog, TunerService.Tunable {
         mHandler.obtainMessage(H.SET_STREAM_IMPORTANT, stream, important ? 1 : 0).sendToTarget();
     }
 
+    public void setShowHeaders(boolean showHeaders) {
+        if (showHeaders == mShowHeaders) return;
+        mShowHeaders = showHeaders;
+        mHandler.sendEmptyMessage(H.RECHECK_ALL);
+    }
+
     public void setAutomute(boolean automute) {
         if (mAutomute == automute) return;
         mAutomute = automute;
@@ -380,6 +387,7 @@ public class VolumeDialogImpl implements VolumeDialog, TunerService.Tunable {
         writer.println(mExpandButtonAnimationRunning);
         writer.print("  mActiveStream: "); writer.println(mActiveStream);
         writer.print("  mDynamic: "); writer.println(mDynamic);
+        writer.print("  mShowHeaders: "); writer.println(mShowHeaders);
         writer.print("  mAutomute: "); writer.println(mAutomute);
         writer.print("  mSilentMode: "); writer.println(mSilentMode);
         writer.print("  mCollapseTime: "); writer.println(mCollapseTime);
@@ -410,6 +418,7 @@ public class VolumeDialogImpl implements VolumeDialog, TunerService.Tunable {
         row.slider = (SeekBar) row.view.findViewById(R.id.volume_row_slider);
         row.slider.setOnSeekBarChangeListener(new VolumeSeekBarChangeListener(row));
         row.anim = null;
+        row.cachedShowHeaders = VolumePrefs.DEFAULT_SHOW_HEADERS;
 
         // forward events above the slider into the slider
         row.view.setOnTouchListener(new OnTouchListener() {
@@ -654,6 +663,7 @@ public class VolumeDialogImpl implements VolumeDialog, TunerService.Tunable {
             Util.setVisOrGone(row.view, shouldBeVisible);
             Util.setVisOrGone(row.header, shouldBeVisible);
             if (row.view.isShown()) {
+                updateVolumeRowHeaderVisibleH(row);
                 updateVolumeRowSliderTintH(row, isActive);
             }
         }
@@ -761,12 +771,17 @@ public class VolumeDialogImpl implements VolumeDialog, TunerService.Tunable {
         final boolean zenMuted = isZenAlarms ? (isRingOrNotificationStream || isSystemStream)
                 : isZenNone ? (isRingOrNotificationStream || isSystemStream || isAlarmStream || isMusicStream)
                 : false;
+        mShowHeaders = Settings.System.getInt(mContext.getContentResolver(),
+                Settings.System.VOLUME_DIALOG_HEADERS, VolumePrefs.DEFAULT_SHOW_HEADERS ? 1 : 0) != 0;
 
         // update slider max
         final int max = ss.levelMax * 100;
         if (max != row.slider.getMax()) {
             row.slider.setMax(max);
         }
+
+        // update header visible
+        updateVolumeRowHeaderVisibleH(row);
 
         // update header text
         Util.setText(row.header, getStreamLabelH(ss));
@@ -844,6 +859,14 @@ public class VolumeDialogImpl implements VolumeDialog, TunerService.Tunable {
         final int vlevel = row.ss.muted && (isRingSilent || isNotificationSilent || isRingVibrate && !zenMuted) ? 0
                 : row.ss.level;
         updateVolumeRowSliderH(row, enableSlider, vlevel);
+    }
+
+    private void updateVolumeRowHeaderVisibleH(VolumeRow row) {
+        final boolean showHeaders = mExpanded && mShowHeaders;
+        if (row.cachedShowHeaders != showHeaders) {
+            row.cachedShowHeaders = showHeaders;
+            Util.setVisOrGone(row.header, showHeaders);
+        }
     }
 
     private void updateVolumeRowSliderTintH(VolumeRow row, boolean isActive) {
@@ -1308,6 +1331,7 @@ public class VolumeDialogImpl implements VolumeDialog, TunerService.Tunable {
         private int cachedIconRes;
         private ColorStateList cachedSliderTint;
         private int iconState;  // from Events
+        private boolean cachedShowHeaders;
         private ObjectAnimator anim;  // slider progress animation for non-touch-related updates
         private int animTargetProgress;
         private int lastAudibleLevel = 1;
