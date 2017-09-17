@@ -165,4 +165,7 @@ interface INotificationManager
     void applyRestore(in byte[] payload, int user);
 
     ParceledListSlice getAppActiveNotifications(String callingPkg, int userId);
+
+    void forceShowLedLight(int color);
+    void forcePulseLedLight(int color, int onTime, int offTime);
 }
