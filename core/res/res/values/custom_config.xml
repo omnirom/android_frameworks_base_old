@@ -15,4 +15,14 @@
          platform signatures, specifically for use on devices with a vendor partition. -->
     <string-array name="config_vendorPlatformSignatures">
     </string-array>
+
+    <!-- Is the battery LED intrusive? Used to decide if there should be a disable option -->
+    <bool name="config_intrusiveBatteryLed">false</bool>
+    <!-- Does the battery LED support multiple colors?
+         Used to decide if the user can change the colors -->
+    <bool name="config_multiColorBatteryLed">false</bool>
+    <!-- Does the device supports fast charging -->
+    <bool name="config_FastChargingLedSupported">false</bool>
+    <!-- Default value for led color when fast charging is active -->
+    <integer name="config_notificationsFastBatteryARGB">0x0000FF</integer>
 </resources>
