@@ -221,4 +221,8 @@ interface INotificationManager
     boolean getPrivateNotificationsAllowed();
 
     long pullStats(long startNs, int report, boolean doAgg, out List<ParcelFileDescriptor> stats);
+
+    //Omni
+    void forceShowLedLight(int color);
+    void forcePulseLedLight(int color, int onTime, int offTime);
 }
