@@ -45,7 +45,6 @@
     </LinearLayout>
 
     <LinearLayout
-        android:id="@+id/volume_dialog_content"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:orientation="vertical"
@@ -53,6 +52,7 @@
         android:layout_alignParentTop="true"
         android:layout_marginEnd="@dimen/volume_expander_margin_end" >
         <TextView
+            android:id="@+id/volume_row_header_dummy"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:ellipsize="end"

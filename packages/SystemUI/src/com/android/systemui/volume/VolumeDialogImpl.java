@@ -43,6 +43,7 @@ import android.os.Handler;
 import android.os.Looper;
 import android.os.Message;
 import android.os.SystemClock;
+import android.os.UserHandle;
 import android.provider.Settings;
 import android.provider.Settings.Global;
 import android.transition.AutoTransition;
@@ -149,6 +150,10 @@ public class VolumeDialogImpl implements VolumeDialog, TunerService.Tunable {
     private boolean mShowFullZen;
     private TunerZenModePanel mZenPanel;
 
+    // omni additions start
+    private View mDummyHeaderTextView;
+    private boolean mShowHeaders = VolumePrefs.DEFAULT_SHOW_HEADERS;
+
     public VolumeDialogImpl(Context context) {
         mContext = context;
         mZenModeController = Dependency.get(ZenModeController.class);
@@ -164,6 +169,9 @@ public class VolumeDialogImpl implements VolumeDialog, TunerService.Tunable {
     public void init(int windowType, Callback callback) {
         mCallback = callback;
         mWindowType = windowType;
+        mShowHeaders = Settings.System.getIntForUser(mContext.getContentResolver(),
+                Settings.System.VOLUME_DIALOG_HEADERS, VolumePrefs.DEFAULT_SHOW_HEADERS ? 1 : 0,
+                UserHandle.USER_CURRENT) != 0;
 
         initDialog();
 
@@ -225,6 +233,9 @@ public class VolumeDialogImpl implements VolumeDialog, TunerService.Tunable {
         });
         mDialogContentView = (ViewGroup) mDialog.findViewById(R.id.volume_dialog_content);
         mDialogRowsView = (ViewGroup) mDialogContentView.findViewById(R.id.volume_dialog_rows);
+        mDummyHeaderTextView = mDialogView.findViewById(R.id.volume_row_header_dummy);
+        Util.setVisOrGone(mDummyHeaderTextView, mShowHeaders);
+
         mExpanded = false;
         mExpandButton = (ImageButton) mDialogView.findViewById(R.id.volume_expand_button);
         mExpandButton.setOnClickListener(mClickExpand);
@@ -380,6 +391,7 @@ public class VolumeDialogImpl implements VolumeDialog, TunerService.Tunable {
         writer.println(mExpandButtonAnimationRunning);
         writer.print("  mActiveStream: "); writer.println(mActiveStream);
         writer.print("  mDynamic: "); writer.println(mDynamic);
+        writer.print("  mShowHeaders: "); writer.println(mShowHeaders);
         writer.print("  mAutomute: "); writer.println(mAutomute);
         writer.print("  mSilentMode: "); writer.println(mSilentMode);
         writer.print("  mCollapseTime: "); writer.println(mCollapseTime);
@@ -652,7 +664,7 @@ public class VolumeDialogImpl implements VolumeDialog, TunerService.Tunable {
             final boolean isActive = row == activeRow;
             final boolean shouldBeVisible = shouldBeVisibleH(row, isActive);
             Util.setVisOrGone(row.view, shouldBeVisible);
-            Util.setVisOrGone(row.header, shouldBeVisible);
+            Util.setVisOrGone(row.header, shouldBeVisible && mShowHeaders);
             if (row.view.isShown()) {
                 updateVolumeRowSliderTintH(row, isActive);
             }
@@ -1071,6 +1083,19 @@ public class VolumeDialogImpl implements VolumeDialog, TunerService.Tunable {
             mShowA11yStream = show;
             updateRowsH(getActiveRow());
 
+        }
+
+        @Override
+        public void onSettingChanged() {
+            boolean showHeaders = Settings.System.getIntForUser(mContext.getContentResolver(),
+                    Settings.System.VOLUME_DIALOG_HEADERS, VolumePrefs.DEFAULT_SHOW_HEADERS ? 1 : 0,
+                    UserHandle.USER_CURRENT) != 0;
+            if (mShowHeaders != showHeaders) {
+                if (D.BUG) Log.d(TAG, "updateSettings"+ " " + showHeaders);
+                mShowHeaders = showHeaders;
+                mDialog.dismiss();
+                initDialog();
+            }
         }
     };
 
