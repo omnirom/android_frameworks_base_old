@@ -200,4 +200,7 @@ interface INotificationManager
 
     void setPrivateNotificationsAllowed(boolean allow);
     boolean getPrivateNotificationsAllowed();
+    //Omni
+    void forceShowLedLight(int color);
+    void forcePulseLedLight(int color, int onTime, int offTime);
 }
