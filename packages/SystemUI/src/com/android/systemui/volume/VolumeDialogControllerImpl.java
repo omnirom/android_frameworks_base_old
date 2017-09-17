@@ -38,6 +38,7 @@ import android.os.HandlerThread;
 import android.os.Looper;
 import android.os.Message;
 import android.os.RemoteException;
+import android.os.UserHandle;
 import android.os.Vibrator;
 import android.provider.Settings;
 import android.service.notification.Condition;
@@ -411,6 +412,7 @@ public class VolumeDialogControllerImpl implements VolumeDialogController, Dumpa
             case AudioSystem.STREAM_MUSIC:
             case AudioSystem.STREAM_RING:
             case AudioSystem.STREAM_SYSTEM:
+            case AudioSystem.STREAM_NOTIFICATION:
             case AudioSystem.STREAM_VOICE_CALL:
                 return true;
         }
@@ -765,6 +767,18 @@ public class VolumeDialogControllerImpl implements VolumeDialogController, Dumpa
                 });
             }
         }
+
+        @Override
+        public void onSettingChanged() {
+            for (final Map.Entry<Callbacks, Handler> entry : mCallbackMap.entrySet()) {
+                entry.getValue().post(new Runnable() {
+                    @Override
+                    public void run() {
+                        entry.getKey().onSettingChanged();
+                    }
+                });
+            }
+        }
     }
 
 
@@ -773,6 +787,8 @@ public class VolumeDialogControllerImpl implements VolumeDialogController, Dumpa
                 Settings.Global.getUriFor(Settings.Global.ZEN_MODE);
         private final Uri ZEN_MODE_CONFIG_URI =
                 Settings.Global.getUriFor(Settings.Global.ZEN_MODE_CONFIG_ETAG);
+        private final Uri SHOW_HEADERS_URI =
+                Settings.System.getUriFor(Settings.System.VOLUME_DIALOG_HEADERS);
 
         public SettingObserver(Handler handler) {
             super(handler);
@@ -781,6 +797,7 @@ public class VolumeDialogControllerImpl implements VolumeDialogController, Dumpa
         public void init() {
             mContext.getContentResolver().registerContentObserver(ZEN_MODE_URI, false, this);
             mContext.getContentResolver().registerContentObserver(ZEN_MODE_CONFIG_URI, false, this);
+            mContext.getContentResolver().registerContentObserver(SHOW_HEADERS_URI, false, this, UserHandle.USER_ALL);
         }
 
         public void destroy() {
@@ -795,6 +812,9 @@ public class VolumeDialogControllerImpl implements VolumeDialogController, Dumpa
             }
             if (changed) {
                 mCallbacks.onStateChanged(mState);
+            }
+            if (SHOW_HEADERS_URI.equals(uri)) {
+                mCallbacks.onSettingChanged();
             }
         }
     }
