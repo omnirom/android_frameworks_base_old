@@ -48,4 +48,13 @@
     <!-- Device uses Fingerprint On Display -->
     <bool name="config_usesFOD">false</bool>
 
+    <!-- Is the battery LED intrusive? Used to decide if there should be a disable option -->
+    <bool name="config_intrusiveBatteryLed">true</bool>
+      <!-- Does the battery LED support multiple colors?
+         Used to decide if the user can change the colors -->
+    <bool name="config_multiColorBatteryLed">true</bool>
+    <!-- Does the device supports fast charging -->
+    <bool name="config_FastChargingLedSupported">false</bool>
+    <!-- Default value for led color when fast charging is active -->
+    <integer name="config_notificationsFastBatteryARGB">0x0000FF</integer>
 </resources>

@@ -1000,6 +1000,10 @@ public class KeyguardUpdateMonitor implements TrustManager.TrustListener {
                 } else {
                     maxChargingMicroWatt = -1;
                 }
+                if (DEBUG) Log.d(TAG, "maxChargingMicroAmp = " + maxChargingMicroAmp +
+                        " maxChargingMicroVolt = " + maxChargingMicroVolt + " maxChargingMicroWatt = " +
+                        maxChargingMicroWatt);
+
                 final Message msg = mHandler.obtainMessage(
                         MSG_BATTERY_UPDATE, new BatteryStatus(status, level, plugged, health,
                                 maxChargingMicroWatt));
