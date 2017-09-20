@@ -157,4 +157,9 @@ public class TileLayout extends ViewGroup implements QSTileLayout {
             requestLayout();
         }
     }
+
+    @Override
+    public int getNumColumns() {
+        return mColumns;
+    }
 }
