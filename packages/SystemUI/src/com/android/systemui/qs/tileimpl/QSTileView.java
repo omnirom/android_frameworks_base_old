@@ -46,6 +46,8 @@ public class QSTileView extends QSTileBaseView {
     private ViewGroup mLabelContainer;
     private View mExpandIndicator;
     private View mExpandSpace;
+    private boolean mHideEpxand;
+    private boolean mDualTarget;
 
     public QSTileView(Context context, QSIconView icon) {
         this(context, icon, false);
@@ -126,14 +128,15 @@ public class QSTileView extends QSTileBaseView {
                     : View.VISIBLE);
         }
         boolean dualTarget = DUAL_TARGET_ALLOWED && state.dualTarget;
+        mDualTarget = state.dualTarget;
         mExpandIndicator.setVisibility(View.GONE);
         mExpandSpace.setVisibility(View.GONE);
-        mLabelContainer.setContentDescription(dualTarget ? state.dualLabelContentDescription
+        mLabelContainer.setContentDescription(mDualTarget ? state.dualLabelContentDescription
                 : null);
-        if (dualTarget != mLabelContainer.isClickable()) {
-            mLabelContainer.setClickable(dualTarget);
-            mLabelContainer.setLongClickable(dualTarget);
-            mLabelContainer.setBackground(dualTarget ? newTileBackground() : null);
+        if (mDualTarget != mLabelContainer.isClickable()) {
+            mLabelContainer.setClickable(mDualTarget);
+            mLabelContainer.setLongClickable(mDualTarget);
+            mLabelContainer.setBackground(mDualTarget ? newTileBackground() : null);
         }
         mLabel.setEnabled(!state.disabledByPolicy);
         mPadLock.setVisibility(state.disabledByPolicy ? View.VISIBLE : View.GONE);
@@ -147,5 +150,11 @@ public class QSTileView extends QSTileBaseView {
         mLabelContainer.setOnLongClickListener(longClick);
         mLabelContainer.setClickable(false);
         mLabelContainer.setLongClickable(false);
+    }
+
+    public void setHideExpand(boolean value) {
+        mHideEpxand = value;
+        mExpandIndicator.setVisibility((mDualTarget && !mHideEpxand) ? View.VISIBLE : View.GONE);
+        mExpandSpace.setVisibility((mDualTarget && !mHideEpxand) ? View.VISIBLE : View.GONE);
     }
 }
