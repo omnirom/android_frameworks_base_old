@@ -93,6 +93,11 @@ public abstract class QSTileImpl<TState extends State> implements QSTile {
 
     abstract protected void handleUpdateState(TState state, Object arg);
 
+    @Override
+    public boolean isDualTarget() {
+        return false;
+    }
+
     /**
      * Declare the category of this tile.
      *
@@ -260,8 +265,10 @@ public abstract class QSTileImpl<TState extends State> implements QSTile {
     }
 
     protected void handleLongClick() {
-        Dependency.get(ActivityStarter.class).postStartActivityDismissingKeyguard(
-                getLongClickIntent(), 0);
+        if (getLongClickIntent() != null) {
+            Dependency.get(ActivityStarter.class).postStartActivityDismissingKeyguard(
+                    getLongClickIntent(), 0);
+        }
     }
 
     public abstract Intent getLongClickIntent();
