@@ -29,6 +29,7 @@ import android.os.Handler;
 import android.os.Message;
 import android.service.quicksettings.Tile;
 import android.util.AttributeSet;
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.widget.LinearLayout;
@@ -105,6 +106,7 @@ public class QSPanel extends LinearLayout implements Tunable, Callback, Brightne
                 R.layout.qs_paged_tile_layout, this, false);
         mTileLayout.setListening(mListening);
         addView((View) mTileLayout);
+        updateSettings();
 
         mPanelPageIndicator = (PageIndicator) LayoutInflater.from(context).inflate(
                 R.layout.qs_page_indicator, this, false);
@@ -113,7 +115,6 @@ public class QSPanel extends LinearLayout implements Tunable, Callback, Brightne
         ((PagedTileLayout) mTileLayout).setPageIndicator(mPanelPageIndicator);
         mQsTileRevealController = new QSTileRevealController(mContext, this,
                 (PagedTileLayout) mTileLayout);
-        updateSettings();
 
         addDivider();
 
@@ -468,6 +469,7 @@ public class QSPanel extends LinearLayout implements Tunable, Callback, Brightne
         r.callback = callback;
         r.tileView.init(r.tile);
         r.tile.refreshState();
+        r.tileView.setHideExpand(mTileLayout.getNumColumns() > 4);
         mRecords.add(r);
 
         if (mTileLayout != null) {
@@ -664,6 +666,7 @@ public class QSPanel extends LinearLayout implements Tunable, Callback, Brightne
 
         boolean updateResources();
         void updateSettings();
+        int getNumColumns();
 
         void setListening(boolean listening);
 
@@ -673,6 +676,11 @@ public class QSPanel extends LinearLayout implements Tunable, Callback, Brightne
     public void updateSettings() {
         if (mTileLayout != null) {
             mTileLayout.updateSettings();
+
+            for (TileRecord r : mRecords) {
+                QSTileView v = r.tileView;
+                v.setHideExpand(mTileLayout.getNumColumns() > 4);
+            }
         }
     }
 }
