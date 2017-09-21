@@ -3988,12 +3988,6 @@ public final class Settings {
         public static final String VOLUME_BUTTON_FORCE_MEDIA = "volume_button_force_media";
 
         /**
-         * Number of qs columns on landscape orientation
-         * @hide
-         */
-        public static final String QS_LAYOUT_COLUMNS_LANDSCAPE = "qs_layout_columns_landscape";
-
-        /**
          * show text headers together with the stream volume images
          * default is true
          * @hide
@@ -4062,6 +4056,18 @@ public final class Settings {
          * @hide
          */
         public static final String QS_LAYOUT_COLUMNS = "qs_layout_columns";
+
+        /**
+         * Number of qs columns on landscape orientation
+         * @hide
+         */
+        public static final String QS_LAYOUT_COLUMNS_LANDSCAPE = "qs_layout_columns_landscape";
+
+        /**
+         * Whether to display qs tile titles in the qs panel
+         * @hide
+         */
+        public static final String QS_TILE_TITLE_VISIBILITY = "qs_tile_title_visibility";
 
         /**
          * Settings to backup. This is here so that it's in the same place as the settings
@@ -4244,6 +4250,9 @@ public final class Settings {
             PRIVATE_SETTINGS.add(BATTERY_LIGHT_REALLY_FULL_COLOR);
             PRIVATE_SETTINGS.add(FAST_BATTERY_LIGHT_COLOR);
             PRIVATE_SETTINGS.add(FAST_CHARGING_LED_ENABLED);
+            PRIVATE_SETTINGS.add(QS_LAYOUT_COLUMNS);
+            PRIVATE_SETTINGS.add(QS_LAYOUT_COLUMNS_LANDSCAPE);
+            PRIVATE_SETTINGS.add(QS_TILE_TITLE_VISIBILITY);
         }
 
         /**

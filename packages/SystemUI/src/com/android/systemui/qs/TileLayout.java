@@ -26,6 +26,7 @@ public class TileLayout extends ViewGroup implements QSTileLayout {
     protected int mCellHeight;
     protected int mCellMargin;
     protected int mDefaultColumns;
+    protected boolean mShowTitles = true;
 
     protected final ArrayList<TileRecord> mRecords = new ArrayList<>();
     private int mCellMarginTop;
@@ -152,8 +153,18 @@ public class TileLayout extends ViewGroup implements QSTileLayout {
         int columnsLandscape = Settings.System.getIntForUser(
                 mContext.getContentResolver(), Settings.System.QS_LAYOUT_COLUMNS_LANDSCAPE, mDefaultColumns,
                 UserHandle.USER_CURRENT);
-        if (mColumns != (isPortrait ? columns : columnsLandscape)) {
+        boolean showTitles = Settings.System.getIntForUser(
+                mContext.getContentResolver(), Settings.System.QS_TILE_TITLE_VISIBILITY, 1,
+                UserHandle.USER_CURRENT) == 1;
+
+        if (showTitles) {
+            mCellHeight = mContext.getResources().getDimensionPixelSize(R.dimen.qs_tile_height);
+        } else {
+            mCellHeight = mContext.getResources().getDimensionPixelSize(R.dimen.qs_tile_height_wo_label);
+        }
+        if (mColumns != (isPortrait ? columns : columnsLandscape) || mShowTitles != showTitles) {
             mColumns = isPortrait ? columns : columnsLandscape;
+            mShowTitles = showTitles;
             requestLayout();
         }
     }
@@ -161,5 +172,10 @@ public class TileLayout extends ViewGroup implements QSTileLayout {
     @Override
     public int getNumColumns() {
         return mColumns;
+    }
+
+    @Override
+    public boolean isShowTitles() {
+        return mShowTitles;
     }
 }
