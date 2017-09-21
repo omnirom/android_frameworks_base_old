@@ -112,7 +112,7 @@ public class DeviceUtils {
         return sm.getDefaultSensor(TYPE_LIGHT) != null;
     }
 
-    /*public static boolean deviceSupportNavigationBar(Context context) {
+    public static boolean deviceSupportNavigationBar(Context context) {
         return deviceSupportNavigationBarForUser(context, UserHandle.USER_CURRENT);
     }
 
@@ -136,7 +136,7 @@ public class DeviceUtils {
         } else {
             return hasNavigationBar == 1;
         }
-    }*/
+    }
 
     private static int getScreenType(Context con) {
         WindowManager wm = (WindowManager)con.getSystemService(Context.WINDOW_SERVICE);
