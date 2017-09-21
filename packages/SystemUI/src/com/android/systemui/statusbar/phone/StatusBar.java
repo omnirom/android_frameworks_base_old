@@ -7092,6 +7092,7 @@ public class StatusBar extends SystemUI implements DemoMode,
     }
     // End Extra BaseStatusBarMethods.
 
+    // omni additions start
     private void updateNavigationBar() {
         mShowNavBar = DeviceUtils.deviceSupportNavigationBarForUser(mContext, mCurrentUserId);
         if (DEBUG) Log.v(TAG, "updateNavigationBar=" + mShowNavBar);

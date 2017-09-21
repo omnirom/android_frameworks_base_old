@@ -557,6 +557,12 @@ public final class PowerManagerService extends SystemService
     // True if we are currently in VR Mode.
     private boolean mIsVrModeEnabled;
 
+    // Omni additions
+    // button brightness suppport enablement
+    private boolean mButtonBrightnessSupport = false;
+    private int mCurrentButtonBrightness = 0;
+    private boolean mButtonDisableBrightness;
+
     /**
      * All times are in milliseconds. These constants are kept synchronized with the system
      * global Settings. Any access to this class or its fields should be done while
@@ -832,6 +838,12 @@ public final class PowerManagerService extends SystemService
         filter = new IntentFilter();
         filter.addAction(Intent.ACTION_DOCK_EVENT);
         mContext.registerReceiver(new DockReceiver(), filter, null, mHandler);
+
+        if (mButtonBrightnessSupport){
+            resolver.registerContentObserver(
+                    Settings.System.getUriFor(Settings.System.HARDWARE_KEYS_DISABLE),
+                    false, mSettingsObserver, UserHandle.USER_ALL);
+        }
     }
 
     private void readConfigurationLocked() {
@@ -873,6 +885,8 @@ public final class PowerManagerService extends SystemService
                 com.android.internal.R.fraction.config_maximumScreenDimRatio, 1, 1);
         mSupportsDoubleTapWakeConfig = resources.getBoolean(
                 com.android.internal.R.bool.config_supportDoubleTapWake);
+        mButtonBrightnessSupport = resources.getBoolean(
+                com.android.internal.R.bool.config_button_brightness_support);
     }
 
     private void updateSettingsLocked() {
@@ -950,6 +964,7 @@ public final class PowerManagerService extends SystemService
             updateLowPowerModeLocked();
         }
 
+        updateButtonLightSettings();
         mDirty |= DIRTY_SETTINGS;
     }
 
@@ -2357,6 +2372,12 @@ public final class PowerManagerService extends SystemService
             } else {
                 mDisplayPowerRequest.dozeScreenState = Display.STATE_UNKNOWN;
                 mDisplayPowerRequest.dozeScreenBrightness = PowerManager.BRIGHTNESS_DEFAULT;
+            }
+
+            if (mButtonBrightnessSupport) {
+                if ((dirty & ( DIRTY_USER_ACTIVITY | DIRTY_SETTINGS | DIRTY_ACTUAL_DISPLAY_POWER_STATE_UPDATED)) != 0) {
+                    updateButtonLight();
+                }
             }
 
             mDisplayReady = mDisplayManagerInternal.requestPowerState(mDisplayPowerRequest,
@@ -4771,5 +4792,48 @@ public final class PowerManagerService extends SystemService
         public void powerHint(int hintId, int data) {
             powerHintInternal(hintId, data);
         }
+    }
+
+    // omni additions start
+    private void updateButtonLightSettings() {
+        if (mButtonBrightnessSupport){
+            final ContentResolver resolver = mContext.getContentResolver();
+            boolean hardwareKeysDisable = Settings.System.getIntForUser(
+                    mContext.getContentResolver(), Settings.System.HARDWARE_KEYS_DISABLE,
+                    0, UserHandle.USER_CURRENT) != 0;
+            mButtonDisableBrightness = hardwareKeysDisable;
+            updateButtonLight();
+        }
+    }
+
+    private void updateButtonLight() {
+        if (mDisplayPowerRequest == null){
+            return;
+        }
+
+        if (mButtonDisableBrightness){
+            mCurrentButtonBrightness = 0;
+            if (DEBUG) {
+                Slog.d(TAG, "mButtonDisableBrightness="+mCurrentButtonBrightness);
+            }
+            mLightsManager.getLight(LightsManager.LIGHT_ID_BUTTONS).setBrightness(mCurrentButtonBrightness);
+            return;
+        }
+
+        boolean buttonlight_on =  mDisplayPowerRequest.policy == DisplayPowerRequest.POLICY_BRIGHT;
+        int currentButtonBrightness = 0;
+
+        if (buttonlight_on){
+            currentButtonBrightness = mDisplayPowerRequest.screenBrightness;
+        } else {
+            currentButtonBrightness = 0;
+        }
+        mCurrentButtonBrightness = currentButtonBrightness;
+
+        if (DEBUG) {
+            Slog.d(TAG, "mCurrentButtonBrightness="+mCurrentButtonBrightness);
+        }
+
+        mLightsManager.getLight(LightsManager.LIGHT_ID_BUTTONS).setBrightness(mCurrentButtonBrightness);
     }
 }
