@@ -30,6 +30,12 @@ limitations under the License.
                 <item android:id="@+id/menu_item_columns_six"
                       android:title="@string/qs_menu_item_columns_six"
                       android:checkable="true" />
+                <item android:id="@+id/menu_item_columns_seven"
+                      android:title="@string/qs_menu_item_columns_seven"
+                      android:checkable="true" />
+                <item android:id="@+id/menu_item_columns_eight"
+                      android:title="@string/qs_menu_item_columns_eight"
+                      android:checkable="true" />
             </menu>
         </item>
         <item android:id="@+id/menu_item_columns_landscape"
@@ -52,6 +58,40 @@ limitations under the License.
                       android:checkable="true" />
                 <item android:id="@+id/menu_item_columns_landscape_eight"
                       android:title="@string/qs_menu_item_columns_eight"
+                      android:checkable="true" />
+            </menu>
+        </item>
+        <item android:id="@+id/menu_item_rows"
+              android:title="@string/qs_menu_item_rows">
+            <menu>
+                <item android:id="@+id/menu_item_rows_one"
+                      android:title="@string/qs_menu_item_rows_one"
+                      android:checkable="true" />
+                <item android:id="@+id/menu_item_rows_two"
+                      android:title="@string/qs_menu_item_rows_two"
+                      android:checkable="true" />
+                <item android:id="@+id/menu_item_rows_three"
+                      android:title="@string/qs_menu_item_rows_three"
+                      android:checkable="true" />
+                <item android:id="@+id/menu_item_rows_four"
+                      android:title="@string/qs_menu_item_rows_four"
+                      android:checkable="true" />
+            </menu>
+        </item>
+        <item android:id="@+id/menu_item_rows_landscape"
+              android:title="@string/qs_menu_item_rows_landscape">
+            <menu>
+                <item android:id="@+id/menu_item_rows_landscape_one"
+                      android:title="@string/qs_menu_item_rows_one"
+                      android:checkable="true" />
+                <item android:id="@+id/menu_item_rows_landscape_two"
+                      android:title="@string/qs_menu_item_rows_two"
+                      android:checkable="true" />
+                <item android:id="@+id/menu_item_rows_landscape_three"
+                      android:title="@string/qs_menu_item_rows_three"
+                      android:checkable="true" />
+                <item android:id="@+id/menu_item_rows_landscape_four"
+                      android:title="@string/qs_menu_item_rows_four"
                       android:checkable="true" />
             </menu>
         </item>

@@ -29,5 +29,7 @@
     <!-- Color of the FOD view -->
     <color name="config_fodColor">#00ff00</color>
 
+    <integer name="quick_settings_num_rows">3</integer>
+
 </resources>
 

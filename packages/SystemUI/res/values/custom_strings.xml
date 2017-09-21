@@ -46,9 +46,14 @@
     <string name="qs_menu_item_columns_six">6</string>
     <string name="qs_menu_item_columns_seven">7</string>
     <string name="qs_menu_item_columns_eight">8</string>
-    <string name="qs_menu_item_columns_nine">9</string>
     <string name="qs_menu_item_reset">Reset</string>
     <string name="qs_menu_item_titles">Show labels</string>
+    <string name="qs_menu_item_rows">Rows</string>
+    <string name="qs_menu_item_rows_landscape">Rows landscape</string>
+    <string name="qs_menu_item_rows_one">1</string>
+    <string name="qs_menu_item_rows_two">2</string>
+    <string name="qs_menu_item_rows_three">3</string>
+    <string name="qs_menu_item_rows_four">4</string>
 
     <string name="tuner_quick_settings">Quick settings</string>
     <string name="tuner_show_brightness_new">Show brightness slider</string>
