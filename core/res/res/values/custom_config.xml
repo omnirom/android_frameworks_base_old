@@ -52,4 +52,7 @@
 
     <!-- Default value for led color when battery is low on charge -->
     <integer name="config_notificationsFastBatteryARGB">0x0000FF</integer>
+
+    <!-- Boolean indicating whether we want button brightness support -->
+    <bool name="config_button_brightness_support">false</bool>
 </resources>
