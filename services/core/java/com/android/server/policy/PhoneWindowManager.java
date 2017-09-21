@@ -8618,6 +8618,7 @@ public class PhoneWindowManager implements WindowManagerPolicy {
         }
     }
 
+    // omni additions start
     private void triggerVirtualKeypress(final int keyCode) {
         InputManager im = InputManager.getInstance();
         long now = SystemClock.uptimeMillis();
