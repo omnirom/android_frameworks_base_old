@@ -4140,14 +4140,14 @@ public final class Settings {
         public static final String OMNI_QS_LAYOUT_COLUMNS_LANDSCAPE = "qs_layout_columns_landscape";
          /** @hide */
         private static final Validator OMNI_QS_LAYOUT_COLUMNS_LANDSCAPE_VALIDATOR =
-                ANY_STRING_VALIDATOR;
+                ANY_INTEGER_VALIDATOR;
          /**
          * @hide
          */
         public static final String OMNI_QS_LAYOUT_COLUMNS = "qs_layout_columns";
          /** @hide */
         private static final Validator OMNI_QS_LAYOUT_COLUMNS_VALIDATOR =
-                ANY_STRING_VALIDATOR;
+                ANY_INTEGER_VALIDATOR;
 
         /**
          * Whether to display qs tile titles in the qs panel
@@ -4158,6 +4158,15 @@ public final class Settings {
         /** @hide */
         private static final Validator OMNI_QS_TILE_TITLE_VISIBILITY_VALIDATOR =
                 BOOLEAN_VALIDATOR;
+
+        /**
+         * @hide
+         */
+        public static final String OMNI_QS_LAYOUT_ROWS = "qs_layout_rows";
+
+        /** @hide */
+        private static final Validator OMNI_QS_LAYOUT_ROWS_VALIDATOR =
+                ANY_INTEGER_VALIDATOR;
 
         /**
          * IMPORTANT: If you add a new public settings you also have to add it to
@@ -4233,6 +4242,7 @@ public final class Settings {
             OMNI_QS_LAYOUT_COLUMNS_LANDSCAPE,
             OMNI_QS_LAYOUT_COLUMNS,
             OMNI_QS_TILE_TITLE_VISIBILITY,
+            OMNI_QS_LAYOUT_ROWS,
         };
 
         /**
@@ -4355,6 +4365,7 @@ public final class Settings {
             PRIVATE_SETTINGS.add(OMNI_QS_LAYOUT_COLUMNS_LANDSCAPE);
             PRIVATE_SETTINGS.add(OMNI_QS_LAYOUT_COLUMNS);
             PRIVATE_SETTINGS.add(OMNI_QS_TILE_TITLE_VISIBILITY);
+            PRIVATE_SETTINGS.add(OMNI_QS_LAYOUT_ROWS);
         }
 
         /**
@@ -4454,6 +4465,7 @@ public final class Settings {
                     OMNI_QS_LAYOUT_COLUMNS_LANDSCAPE_VALIDATOR);
             VALIDATORS.put(OMNI_QS_LAYOUT_COLUMNS, OMNI_QS_LAYOUT_COLUMNS_VALIDATOR);
             VALIDATORS.put(OMNI_QS_TILE_TITLE_VISIBILITY, OMNI_QS_TILE_TITLE_VISIBILITY_VALIDATOR);
+            VALIDATORS.put(OMNI_QS_LAYOUT_ROWS, OMNI_QS_LAYOUT_ROWS_VALIDATOR);
         }
 
         /**
