@@ -19,6 +19,7 @@ import android.content.res.Configuration;
 import android.service.quicksettings.Tile;
 import android.text.SpannableStringBuilder;
 import android.text.style.ForegroundColorSpan;
+import android.util.Log;
 import android.view.Gravity;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -133,5 +134,9 @@ public class QSTileView extends QSTileBaseView {
         mHideEpxand = value;
         mExpandIndicator.setVisibility((mDualTarget && !mHideEpxand) ? View.VISIBLE : View.GONE);
         mExpandSpace.setVisibility((mDualTarget && !mHideEpxand) ? View.VISIBLE : View.GONE);
+    }
+
+    public void setHideLabel(boolean value) {
+        mLabelContainer.setVisibility(value ? View.GONE : View.VISIBLE);
     }
 }
