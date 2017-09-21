@@ -398,6 +398,7 @@ public class QSPanel extends LinearLayout implements Tunable, Callback {
         r.tileView.init(r.tile);
         r.tile.refreshState();
         r.tileView.setHideExpand(mTileLayout.getNumColumns() > 4);
+        r.tileView.setHideLabel(!mTileLayout.isShowTitles());
         mRecords.add(r);
 
         if (mTileLayout != null) {
@@ -584,6 +585,7 @@ public class QSPanel extends LinearLayout implements Tunable, Callback {
         boolean updateResources();
         void updateSettings();
         int getNumColumns();
+        boolean isShowTitles();
 
         void setListening(boolean listening);
     }
@@ -595,6 +597,20 @@ public class QSPanel extends LinearLayout implements Tunable, Callback {
             for (TileRecord r : mRecords) {
                 QSTileView v = r.tileView;
                 v.setHideExpand(mTileLayout.getNumColumns() > 4);
+                v.setHideLabel(!mTileLayout.isShowTitles());
+                if (r.tile.isDualTarget()) {
+                    if (!mTileLayout.isShowTitles()) {
+                        v.setOnLongClickListener(view -> {
+                            r.tile.secondaryClick();
+                            return true;
+                        });
+                    } else {
+                        v.setOnLongClickListener(view -> {
+                            r.tile.longClick();
+                            return true;
+                        });
+                    }
+                }
             }
         }
     }
