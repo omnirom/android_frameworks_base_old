@@ -43,6 +43,7 @@ public class ShortcutPicker extends PreferenceFragment implements Tunable {
     private String mKey;
     private SelectablePreference mNonePreference;
     private TunerService mTunerService;
+    private HiddenPreference mHiddenPreference;
 
     @Override
     public void onCreatePreferences(Bundle savedInstanceState, String rootKey) {
@@ -52,10 +53,15 @@ public class ShortcutPicker extends PreferenceFragment implements Tunable {
         PreferenceCategory otherApps = new PreferenceCategory(context);
         otherApps.setTitle(R.string.tuner_other_apps);
 
+        mHiddenPreference = new HiddenPreference(context);
+        mSelectablePreferences.add(mHiddenPreference);
+        mHiddenPreference.setTitle(R.string.lockscreen_hidden);
+        mHiddenPreference.setIcon(R.drawable.ic_remove_circle);
+        screen.addPreference(mHiddenPreference);
+
         mNonePreference = new SelectablePreference(context);
         mSelectablePreferences.add(mNonePreference);
-        mNonePreference.setTitle(R.string.lockscreen_none);
-        mNonePreference.setIcon(R.drawable.ic_remove_circle);
+        mNonePreference.setTitle(R.string.lockscreen_default);
         screen.addPreference(mNonePreference);
 
         LauncherApps apps = getContext().getSystemService(LauncherApps.class);
@@ -195,6 +201,18 @@ public class ShortcutPicker extends PreferenceFragment implements Tunable {
         @Override
         public String toString() {
             return mShortcut.toString();
+        }
+    }
+
+    private static class HiddenPreference extends SelectablePreference {
+
+        public HiddenPreference(Context context) {
+            super(context);
+        }
+
+        @Override
+        public String toString() {
+            return "none";
         }
     }
 }
