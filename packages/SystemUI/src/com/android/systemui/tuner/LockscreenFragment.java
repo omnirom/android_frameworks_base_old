@@ -96,7 +96,7 @@ public class LockscreenFragment extends PreferenceFragment {
         Preference shortcut = findPreference(buttonSetting);
         SwitchPreference unlock = (SwitchPreference) findPreference(unlockKey);
         addTunable((k, v) -> {
-            boolean visible = !TextUtils.isEmpty(v);
+            boolean visible = !TextUtils.isEmpty(v) && !v.equals("none");
             unlock.setVisible(visible);
             setSummary(shortcut, v);
         }, buttonSetting);
@@ -119,7 +119,7 @@ public class LockscreenFragment extends PreferenceFragment {
 
     private void setSummary(Preference shortcut, String value) {
         if (value == null) {
-            shortcut.setSummary(R.string.lockscreen_none);
+            shortcut.setSummary(R.string.lockscreen_default);
             return;
         }
         if (value.contains("::")) {
@@ -129,8 +129,10 @@ public class LockscreenFragment extends PreferenceFragment {
             ActivityInfo info = getActivityinfo(getContext(), value);
             shortcut.setSummary(info != null ? info.loadLabel(getContext().getPackageManager())
                     : null);
-        } else {
+        } else if (value.equals("none")) {
             shortcut.setSummary(R.string.lockscreen_none);
+        } else {
+            shortcut.setSummary(R.string.lockscreen_default);
         }
     }
 
@@ -344,6 +346,8 @@ public class LockscreenFragment extends PreferenceFragment {
                     if (info != null) {
                         return new ActivityButton(mContext, info);
                     }
+                } else if (buttonStr.equals("none")) {
+                    return new HiddenButton();
                 }
             }
             return null;
@@ -403,6 +407,25 @@ public class LockscreenFragment extends PreferenceFragment {
         @Override
         public Intent getIntent() {
             return mIntent;
+        }
+    }
+
+    private static class HiddenButton implements IntentButton {
+        private final IconState mIconState;
+
+        public HiddenButton() {
+            mIconState = new IconState();
+            mIconState.isVisible = false;
+        }
+
+        @Override
+        public IconState getIcon() {
+            return mIconState;
+        }
+
+        @Override
+        public Intent getIntent() {
+            return null;
         }
     }
 }
