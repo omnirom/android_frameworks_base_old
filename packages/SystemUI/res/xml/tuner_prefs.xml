@@ -27,17 +27,17 @@
         android:key="status_bar"
         android:title="@string/status_bar" >
 
-        <com.android.systemui.tuner.StatusBarSwitch
+        <!--<com.android.systemui.tuner.StatusBarSwitch
             android:key="rotate"
-            android:title="@string/status_bar_settings_auto_rotation" />
+        android:title="@string/status_bar_settings_auto_rotation" />-->
 
         <com.android.systemui.tuner.StatusBarSwitch
             android:key="headset"
             android:title="@string/headset" />
 
-        <com.android.systemui.tuner.StatusBarSwitch
+        <!--<com.android.systemui.tuner.StatusBarSwitch
             android:key="managed_profile"
-            android:title="@string/status_bar_work" />
+        android:title="@string/status_bar_work" />-->
 
         <!-- ime -->
         <!-- sync_failing -->
@@ -73,9 +73,9 @@
             android:key="wifi"
             android:title="@string/quick_settings_wifi_label" />
 
-        <com.android.systemui.tuner.StatusBarSwitch
+        <!--<com.android.systemui.tuner.StatusBarSwitch
             android:key="ethernet"
-            android:title="@string/status_bar_ethernet" />
+        android:title="@string/status_bar_ethernet" />-->
 
         <com.android.systemui.tuner.StatusBarSwitch
             android:key="mobile"
@@ -111,10 +111,10 @@
 
         <!-- Action for this is
              MetricsConstants.ACTION_TUNER_DO_NOT_DISTURB_VOLUME_PANEL -->
-        <com.android.systemui.tuner.TunerSwitch
+        <!--<com.android.systemui.tuner.TunerSwitch
             android:key="sysui_show_full_zen"
             android:title="@string/tuner_full_zen_title"
-            sysui:metricsAction="314" />
+            sysui:metricsAction="314" />-->
 
         <!-- Action for this is
              MetricsConstants.ACTION_TUNER_DO_NOT_DISTURB_VOLUME_SHORTCUT -->
