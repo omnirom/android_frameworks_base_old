@@ -27,4 +27,7 @@
     <!-- AOD QS tile -->
     <string name="quick_settings_aod_label">AOD</string>
 
+    <string name="lockscreen_default">Default</string>
+    <string name="lockscreen_hidden">None</string>
+
 </resources>
