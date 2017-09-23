@@ -56,4 +56,9 @@
     <!-- Boolean indicating whether we want button brightness support -->
     <bool name="config_button_brightness_support">false</bool>
     <integer name="config_button_brightness_default">128</integer>
+
+    <!-- Control the behavior when the user long presses the menu button.
+        0 - Nothing
+        1 - Recent apps view in SystemUI -->
+    <integer name="config_longPressOnMenuBehavior">0</integer>
 </resources>
