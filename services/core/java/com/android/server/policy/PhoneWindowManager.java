@@ -821,6 +821,7 @@ public class PhoneWindowManager implements WindowManagerPolicy {
     private boolean mHardwareKeysDisable;
     private int mUserRotationAngles = -1;
     private boolean mVolumeWakeSupport;
+    private int mLongPressOnMenuBehavior;
 
     // constants for rotation bits
     private static final int ROTATION_0_MODE = 1;
@@ -2249,6 +2250,13 @@ public class PhoneWindowManager implements WindowManagerPolicy {
 
         mNavBarOpacityMode = res.getInteger(
                 com.android.internal.R.integer.config_navBarOpacityMode);
+
+        mLongPressOnMenuBehavior = mContext.getResources().getInteger(
+                com.android.internal.R.integer.config_longPressOnMenuBehavior);
+        if (mLongPressOnMenuBehavior < LONG_PRESS_HOME_NOTHING ||
+                mLongPressOnMenuBehavior > LONG_PRESS_HOME_ASSIST) {
+            mLongPressOnMenuBehavior = LONG_PRESS_HOME_NOTHING;
+        }
     }
 
     @Override
@@ -3574,12 +3582,19 @@ public class PhoneWindowManager implements WindowManagerPolicy {
             // Hijack modified menu keys for debugging features
             final int chordBug = KeyEvent.META_SHIFT_ON;
 
-            if (down && repeatCount == 0) {
-                if (mEnableShiftMenuBugReports && (metaState & chordBug) == chordBug) {
-                    Intent intent = new Intent(Intent.ACTION_BUG_REPORT);
-                    mContext.sendOrderedBroadcastAsUser(intent, UserHandle.CURRENT,
-                            null, null, null, 0, null, null);
-                    return -1;
+            if (!keyguardOn) {
+                if (down) {
+                    if (repeatCount == 0) {
+                        if (mEnableShiftMenuBugReports && (metaState & chordBug) == chordBug) {
+                            Intent intent = new Intent(Intent.ACTION_BUG_REPORT);
+                            mContext.sendOrderedBroadcastAsUser(intent, UserHandle.CURRENT,
+                                    null, null, null, 0, null, null);
+                            return -1;
+                        }
+                    } else if ((event.getFlags() & KeyEvent.FLAG_LONG_PRESS) != 0) {
+                        handleLongPressOnMenu();
+                        return -1;
+                    }
                 }
             }
         } else if (keyCode == KeyEvent.KEYCODE_SEARCH) {
@@ -8702,5 +8717,14 @@ public class PhoneWindowManager implements WindowManagerPolicy {
                 return mVolumeWakeSupport;
         }
         return false;
+    }
+
+    private void handleLongPressOnMenu() {
+        if (mLongPressOnMenuBehavior == 1) {
+            mAppSwitchConsumed = true;
+            cancelPreloadRecentApps();
+            performHapticFeedbackLw(null, HapticFeedbackConstants.LONG_PRESS, false);
+            toggleRecentApps();
+        }
     }
 }
