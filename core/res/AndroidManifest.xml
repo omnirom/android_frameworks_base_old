@@ -553,6 +553,10 @@
     <protected-broadcast android:name="android.media.tv.action.CHANNEL_BROWSABLE_REQUESTED" />
     <protected-broadcast android:name="com.android.server.InputMethodManagerService.SHOW_INPUT_METHOD_PICKER" />
 
+    <!-- Added in O : DPM  -->
+    <protected-broadcast android:name="com.qti.dpmframework.DPM_INTERNET_CONNECTED" />
+    <protected-broadcast android:name="com.qti.dpmframework.DPM_PREFERENCE_CHANGED" />
+
     <!-- omni additions start -->
     <protected-broadcast android:name="org.omnirom.omniswitch.ACTION_TOGGLE_OVERLAY2" />
     <protected-broadcast android:name="org.omnirom.omniswitch.ACTION_RESTORE_HOME_STACK" />
