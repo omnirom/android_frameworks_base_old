@@ -395,7 +395,10 @@ public class LockscreenFragment extends PreferenceFragment {
             if (!mInitDone) {
                 init();
             }
-            return mShortcut.intent;
+            if (mShortcut != null) {
+                return mShortcut.intent;
+            }
+            return null;
         }
     }
 
