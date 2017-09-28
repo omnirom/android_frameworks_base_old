@@ -87,6 +87,7 @@
     <string name="qs_menu_item_rows_two">2</string>
     <string name="qs_menu_item_rows_three">3</string>
     <string name="qs_menu_item_rows_four">4</string>
+    <string name="qs_menu_item_scroll">Quickbar scroll</string>
 
     <string name="tuner_quick_settings">Quick settings</string>
     <string name="tuner_show_brightness_new">Show brightness slider</string>
@@ -101,4 +102,5 @@
     <string name="omnijaws_current_text">Now</string>
     <string name="omnijaws_package_not_available">OmniJaws not available</string>
     <string name="omnijaws_service_last_update">Last update:</string>
+
 </resources>

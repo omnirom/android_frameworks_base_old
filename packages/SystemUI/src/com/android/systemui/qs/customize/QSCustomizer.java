@@ -50,6 +50,7 @@ import com.android.systemui.plugins.qs.QS;
 import com.android.systemui.plugins.qs.QSTile;
 import com.android.systemui.qs.QSDetailClipper;
 import com.android.systemui.qs.QSTileHost;
+
 import com.android.systemui.statusbar.phone.LightBarController;
 import com.android.systemui.statusbar.phone.NotificationsQuickSettingsContainer;
 import com.android.systemui.statusbar.policy.KeyguardMonitor;
@@ -132,10 +133,17 @@ public class QSCustomizer extends LinearLayout implements OnMenuItemClickListene
         MenuItem qsTitlesMenuItem = mToolbar.getMenu().findItem(R.id.menu_item_titles);
         qsTitlesMenuItem.setChecked(qsTitlesValue == 1);
 
+        int qsScrollValue = Settings.System.getIntForUser(mContext.getContentResolver(),
+                Settings.System.OMNI_QS_QUICKBAR_SCROLL_ENABLED, 0,
+                UserHandle.USER_CURRENT);
+        MenuItem qsScrollMenuItem = mToolbar.getMenu().findItem(R.id.menu_item_qs_scroll);
+        qsScrollMenuItem.setChecked(qsScrollValue != 0);
+
         int accentColor = Utils.getColorAttr(context, android.R.attr.colorAccent);
         mToolbar.setTitleTextColor(accentColor);
         mToolbar.getNavigationIcon().setTint(accentColor);
         mToolbar.getOverflowIcon().setTint(accentColor);
+
         mToolbar.setTitle(R.string.qs_edit);
         int defaultColumns = Math.max(1,
                     mContext.getResources().getInteger(R.integer.quick_settings_num_columns));
@@ -353,6 +361,12 @@ public class QSCustomizer extends LinearLayout implements OnMenuItemClickListene
             case R.id.menu_item_rows_landscape_four:
                 Settings.System.putIntForUser(mContext.getContentResolver(),
                         Settings.System.OMNI_QS_LAYOUT_ROWS_LANDSCAPE, 4, UserHandle.USER_CURRENT);
+                break;
+            case R.id.menu_item_qs_scroll:
+                item.setChecked(!item.isChecked());
+                Settings.System.putIntForUser(mContext.getContentResolver(),
+                        Settings.System.OMNI_QS_QUICKBAR_SCROLL_ENABLED, item.isChecked() ?
+                        1 : 0, UserHandle.USER_CURRENT);
                 break;
         }
         updateSettings();

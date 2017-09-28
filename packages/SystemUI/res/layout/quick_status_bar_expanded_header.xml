@@ -40,8 +40,7 @@
     <!-- Layout containing tooltips, alarm text, etc. -->
     <include layout="@layout/quick_settings_header_info" />
 
-    <com.android.systemui.qs.QuickQSPanel
-        android:id="@+id/quick_qs_panel"
+    <LinearLayout
         android:layout_width="match_parent"
         android:layout_height="48dp"
         android:layout_below="@id/quick_qs_status_icons"
@@ -52,7 +51,34 @@
         android:clipChildren="false"
         android:clipToPadding="false"
         android:focusable="true"
-        android:importantForAccessibility="yes" />
+        android:importantForAccessibility="yes" >
+
+        <HorizontalScrollView
+            android:id="@+id/quick_qs_panel_scroll"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:clipChildren="false"
+            android:clipToPadding="false"
+            android:paddingStart="@dimen/qs_scroller_margin"
+            android:paddingEnd="@dimen/qs_scroller_margin"
+            android:overScrollMode="never"
+            android:scrollbars="none">
+
+            <com.android.systemui.qs.QuickQSPanel
+                android:id="@+id/quick_qs_panel"
+                android:layout_width="match_parent"
+                android:layout_height="48dp"
+                android:layout_alignParentEnd="true"
+                android:layout_alignParentTop="true"
+                android:accessibilityTraversalAfter="@+id/date_time_group"
+                android:accessibilityTraversalBefore="@id/expand_indicator"
+                android:clipChildren="false"
+                android:clipToPadding="false"
+                android:focusable="true"
+                android:importantForAccessibility="yes" />
+
+        </HorizontalScrollView>
+    </LinearLayout>
 
     <com.android.systemui.statusbar.AlphaOptimizedImageView
         android:id="@+id/qs_detail_header_progress"
