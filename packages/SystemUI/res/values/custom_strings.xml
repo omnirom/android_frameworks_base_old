@@ -45,4 +45,5 @@
     <string name="qs_menu_item_rows_four">4</string>
     <string name="lockscreen_default">Default</string>
     <string name="lockscreen_hidden">None</string>
+    <string name="qs_menu_item_scroll">Quickbar scroll</string>
 </resources>
