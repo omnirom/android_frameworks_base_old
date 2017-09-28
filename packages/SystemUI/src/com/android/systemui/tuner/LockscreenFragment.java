@@ -38,7 +38,6 @@ import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
 import android.support.v7.widget.RecyclerView.ViewHolder;
 import android.text.TextUtils;
-import android.util.Log;
 import android.util.TypedValue;
 import android.view.Gravity;
 import android.view.LayoutInflater;
@@ -334,7 +333,6 @@ public class LockscreenFragment extends PreferenceFragment {
 
         @Override
         public IntentButton create(Map<String, String> settings) {
-        Log.d("maxwen", "create " + mKey + " " + settings);
             String buttonStr = settings.get(mKey);
             if (!TextUtils.isEmpty(buttonStr)) {
                 if (buttonStr.contains("::")) {
@@ -395,7 +393,10 @@ public class LockscreenFragment extends PreferenceFragment {
             if (!mInitDone) {
                 init();
             }
-            return mShortcut.intent;
+            if (mShortcut != null) {
+                return mShortcut.intent;
+            }
+            return null;
         }
     }
 
