@@ -17,6 +17,10 @@
 package com.android.systemui.qs;
 
 import android.content.Context;
+import android.content.ContentResolver;
+import android.content.res.Configuration;
+import android.os.UserHandle;
+import android.provider.Settings;
 import android.util.AttributeSet;
 import android.view.Gravity;
 import android.view.View;
@@ -42,8 +46,10 @@ import java.util.Collection;
 public class QuickQSPanel extends QSPanel {
 
     public static final String NUM_QUICK_TILES = "sysui_qqs_count";
+    public static int NUM_QUICK_TILES_DEFAULT = 6;
+    public static final int NUM_QUICK_TILES_ALL = 666;
 
-    private int mMaxTiles;
+    private int mMaxTiles = NUM_QUICK_TILES_DEFAULT;
     protected QSPanel mFullPanel;
 
     public QuickQSPanel(Context context, AttributeSet attrs) {
@@ -138,23 +144,50 @@ public class QuickQSPanel extends QSPanel {
             }
         }
         super.setTiles(quickTiles, true);
+        ((HeaderTileLayout) mTileLayout).updateTileGaps();
     }
 
     private final Tunable mNumTiles = new Tunable() {
         @Override
         public void onTuningChanged(String key, String newValue) {
-            setMaxTiles(getNumQuickTiles(mContext));
+            NUM_QUICK_TILES_DEFAULT = getNumQuickTiles(mContext);
+            ((HeaderTileLayout) mTileLayout).updateTileGaps();
+            updateSettings();
         }
     };
 
     public static int getNumQuickTiles(Context context) {
-        return Dependency.get(TunerService.class).getValue(NUM_QUICK_TILES, 6);
+        return Dependency.get(TunerService.class)
+                .getValue(NUM_QUICK_TILES, NUM_QUICK_TILES_DEFAULT);
+    }
+
+    public int getNumQuickTiles() {
+        return mMaxTiles;
+    }
+
+    public int getNumVisibleQuickTiles() {
+        return NUM_QUICK_TILES_DEFAULT;
+    }
+
+    @Override
+    protected void onConfigurationChanged(Configuration newConfig) {
+        super.onConfigurationChanged(newConfig);
+        ((HeaderTileLayout) mTileLayout).updateTileGaps();
+    }
+
+    public void updateSettings() {
+        setMaxTiles(Settings.System.getIntForUser(mContext.getContentResolver(),
+                Settings.System.QS_QUICKBAR_SCROLL_ENABLED, 0, UserHandle.USER_CURRENT) == 0 ?
+                NUM_QUICK_TILES_DEFAULT : NUM_QUICK_TILES_ALL);
     }
 
     private static class HeaderTileLayout extends LinearLayout implements QSTileLayout {
 
         protected final ArrayList<TileRecord> mRecords = new ArrayList<>();
         private boolean mListening;
+        private int mTileSize;
+        private int mScreenWidth;
+        private int mStartMargin;
 
         public HeaderTileLayout(Context context) {
             super(context);
@@ -162,6 +195,10 @@ public class QuickQSPanel extends QSPanel {
             setClipToPadding(false);
             setGravity(Gravity.CENTER_VERTICAL);
             setLayoutParams(new LayoutParams(LayoutParams.MATCH_PARENT, LayoutParams.MATCH_PARENT));
+            mTileSize = mContext.getResources().getDimensionPixelSize(R.dimen.qs_quick_tile_size);
+            mStartMargin = mContext.getResources()
+                    .getDimensionPixelSize(R.dimen.qs_scroller_margin);
+            mScreenWidth = mContext.getResources().getDisplayMetrics().widthPixels;
         }
 
         @Override
@@ -185,16 +222,18 @@ public class QuickQSPanel extends QSPanel {
         }
 
         private LayoutParams generateSpaceParams() {
-            int size = mContext.getResources().getDimensionPixelSize(R.dimen.qs_quick_tile_size);
-            LayoutParams lp = new LayoutParams(0, size);
-            lp.weight = 1;
+            //int size = mContext.getResources().getDimensionPixelSize(R.dimen.qs_quick_tile_size);
+            //LayoutParams lp = new LayoutParams(0, size);
+            //lp.weight = 1;
+            LayoutParams lp = new LayoutParams(mTileSize, mTileSize);
             lp.gravity = Gravity.CENTER;
             return lp;
         }
 
         private LayoutParams generateLayoutParams() {
-            int size = mContext.getResources().getDimensionPixelSize(R.dimen.qs_quick_tile_size);
-            LayoutParams lp = new LayoutParams(size, size);
+            //int size = mContext.getResources().getDimensionPixelSize(R.dimen.qs_quick_tile_size);
+            //LayoutParams lp = new LayoutParams(size, size);
+            LayoutParams lp = new LayoutParams(mTileSize, mTileSize);
             lp.gravity = Gravity.CENTER;
             return lp;
         }
@@ -253,6 +292,7 @@ public class QuickQSPanel extends QSPanel {
                         R.id.expand_indicator);
             }
         }
+
         @Override
         public void updateSettings() {
         }
@@ -265,6 +305,25 @@ public class QuickQSPanel extends QSPanel {
         @Override
         public boolean isShowTitles() {
             return false;
+        }
+
+        public void updateTileGaps() {
+            int panelWidth = mContext.getResources()
+                    .getDimensionPixelSize(R.dimen.notification_panel_width);
+            if (panelWidth == -1) {
+                panelWidth = mScreenWidth;
+            }
+            panelWidth -= 2 * mStartMargin;
+            int tileGap = (panelWidth - mTileSize * NUM_QUICK_TILES_DEFAULT) /
+                    (NUM_QUICK_TILES_DEFAULT - 1);
+            final int N = getChildCount();
+            for (int i = 0; i < N; i++) {
+                if (getChildAt(i) instanceof Space) {
+                    Space s = (Space) getChildAt(i);
+                    LayoutParams params = (LayoutParams) s.getLayoutParams();
+                    params.width = tileGap;
+                }
+            }
         }
     }
 }

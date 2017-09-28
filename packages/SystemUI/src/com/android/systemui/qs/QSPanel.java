@@ -140,7 +140,6 @@ public class QSPanel extends LinearLayout implements Tunable, Callback {
                 R.layout.qs_paged_tile_layout, this, false);
         mTileLayout.setListening(mListening);
         addView((View) mTileLayout);
-        updateSettings();
     }
 
     public boolean isShowingCustomize() {
