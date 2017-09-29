@@ -19,9 +19,11 @@ package com.android.systemui.qs;
 import android.content.Context;
 import android.content.ContentResolver;
 import android.content.res.Configuration;
+import android.content.res.Resources;
 import android.os.UserHandle;
 import android.provider.Settings;
 import android.util.AttributeSet;
+import android.util.Log;
 import android.view.Gravity;
 import android.view.View;
 import android.widget.HorizontalScrollView;
@@ -46,12 +48,12 @@ import java.util.Collection;
  */
 public class QuickQSPanel extends QSPanel {
 
-    public static final String NUM_QUICK_TILES = "sysui_qqs_count";
     public static int NUM_QUICK_TILES_DEFAULT = 6;
     public static final int NUM_QUICK_TILES_ALL = 666;
 
-    private int mMaxTiles = NUM_QUICK_TILES_DEFAULT;
+    private static int mMaxTiles = NUM_QUICK_TILES_DEFAULT;
     protected QSPanel mFullPanel;
+    private boolean mIsScrolling;
 
     public QuickQSPanel(Context context, AttributeSet attrs) {
         super(context, attrs);
@@ -82,13 +84,11 @@ public class QuickQSPanel extends QSPanel {
     @Override
     protected void onAttachedToWindow() {
         super.onAttachedToWindow();
-        Dependency.get(TunerService.class).addTunable(mNumTiles, NUM_QUICK_TILES);
     }
 
     @Override
     protected void onDetachedFromWindow() {
         super.onDetachedFromWindow();
-        Dependency.get(TunerService.class).removeTunable(mNumTiles);
     }
 
     public void setQSPanelAndHeader(QSPanel fullPanel, View header) {
@@ -120,7 +120,7 @@ public class QuickQSPanel extends QSPanel {
     }
 
     public void setMaxTiles(int maxTiles) {
-        mMaxTiles = maxTiles;
+        mMaxTiles = Math.max(maxTiles, NUM_QUICK_TILES_DEFAULT);
         if (mHost != null) {
             setTiles(mHost.getTiles());
         }
@@ -140,46 +140,47 @@ public class QuickQSPanel extends QSPanel {
         ArrayList<QSTile> quickTiles = new ArrayList<>();
         for (QSTile tile : tiles) {
             quickTiles.add(tile);
-            if (quickTiles.size() == mMaxTiles) {
+            if (!mIsScrolling && quickTiles.size() == mMaxTiles) {
                 break;
             }
         }
         super.setTiles(quickTiles, true);
-        ((HeaderTileLayout) mTileLayout).updateTileGaps();
+        ((HeaderTileLayout) mTileLayout).updateTileGaps(mMaxTiles);
     }
 
-    private final Tunable mNumTiles = new Tunable() {
-        @Override
-        public void onTuningChanged(String key, String newValue) {
-            NUM_QUICK_TILES_DEFAULT = getNumQuickTiles(mContext);
-            ((HeaderTileLayout) mTileLayout).updateTileGaps();
-            updateSettings();
-        }
-    };
-
-    public static int getNumQuickTiles(Context context) {
-        return Dependency.get(TunerService.class)
-                .getValue(NUM_QUICK_TILES, NUM_QUICK_TILES_DEFAULT);
-    }
-
-    public int getNumQuickTiles() {
+    public static int getNumQuickTiles() {
         return mMaxTiles;
     }
 
     public int getNumVisibleQuickTiles() {
-        return NUM_QUICK_TILES_DEFAULT;
+        return mMaxTiles;
     }
 
     @Override
     protected void onConfigurationChanged(Configuration newConfig) {
         super.onConfigurationChanged(newConfig);
-        ((HeaderTileLayout) mTileLayout).updateTileGaps();
+        ((HeaderTileLayout) mTileLayout).updateResources();
+        updateColumns();
     }
 
     public void updateSettings() {
-        setMaxTiles(Settings.System.getIntForUser(mContext.getContentResolver(),
-                Settings.System.QS_QUICKBAR_SCROLL_ENABLED, 0, UserHandle.USER_CURRENT) == 0 ?
-                NUM_QUICK_TILES_DEFAULT : NUM_QUICK_TILES_ALL);
+        mIsScrolling = Settings.System.getIntForUser(mContext.getContentResolver(),
+                Settings.System.QS_QUICKBAR_SCROLL_ENABLED, 0, UserHandle.USER_CURRENT) == 1;
+        updateColumns();
+    }
+
+    private void updateColumns() {
+        final Resources res = mContext.getResources();
+        boolean isPortrait = res.getConfiguration().orientation == Configuration.ORIENTATION_PORTRAIT;
+        int columns = Settings.System.getIntForUser(
+                mContext.getContentResolver(), Settings.System.QS_LAYOUT_COLUMNS, NUM_QUICK_TILES_DEFAULT,
+                UserHandle.USER_CURRENT);
+        int columnsLandscape = Settings.System.getIntForUser(
+                mContext.getContentResolver(), Settings.System.QS_LAYOUT_COLUMNS_LANDSCAPE, NUM_QUICK_TILES_DEFAULT,
+                UserHandle.USER_CURRENT);
+
+        setMaxTiles(isPortrait ? columns : columnsLandscape);
+        ((HeaderTileLayout) mTileLayout).updateTileGaps(mMaxTiles);
     }
 
     @Override
@@ -210,10 +211,8 @@ public class QuickQSPanel extends QSPanel {
             setClipToPadding(false);
             setGravity(Gravity.CENTER_VERTICAL);
             setLayoutParams(new LayoutParams(LayoutParams.MATCH_PARENT, LayoutParams.MATCH_PARENT));
-            mTileSize = mContext.getResources().getDimensionPixelSize(R.dimen.qs_quick_tile_size);
-            mStartMargin = mContext.getResources()
-                    .getDimensionPixelSize(R.dimen.qs_scroller_margin);
             mScreenWidth = mContext.getResources().getDisplayMetrics().widthPixels;
+            updateResources();
         }
 
         @Override
@@ -283,7 +282,9 @@ public class QuickQSPanel extends QSPanel {
 
         @Override
         public boolean updateResources() {
-            // No resources here.
+            mTileSize = mContext.getResources().getDimensionPixelSize(R.dimen.qs_quick_tile_size);
+            mStartMargin = mContext.getResources()
+                    .getDimensionPixelSize(R.dimen.qs_scroller_margin);
             return false;
         }
 
@@ -314,7 +315,7 @@ public class QuickQSPanel extends QSPanel {
 
         @Override
         public int getNumColumns() {
-            return getNumQuickTiles(mContext);
+            return getNumQuickTiles();
         }
 
         @Override
@@ -322,15 +323,14 @@ public class QuickQSPanel extends QSPanel {
             return false;
         }
 
-        public void updateTileGaps() {
+        public void updateTileGaps(int numTiles) {
             int panelWidth = mContext.getResources()
                     .getDimensionPixelSize(R.dimen.notification_panel_width);
             if (panelWidth == -1) {
                 panelWidth = mScreenWidth;
             }
             panelWidth -= 2 * mStartMargin;
-            int tileGap = (panelWidth - mTileSize * NUM_QUICK_TILES_DEFAULT) /
-                    (NUM_QUICK_TILES_DEFAULT - 1);
+            int tileGap = (panelWidth - mTileSize * numTiles) / (numTiles - 1);
             final int N = getChildCount();
             for (int i = 0; i < N; i++) {
                 if (getChildAt(i) instanceof Space) {
