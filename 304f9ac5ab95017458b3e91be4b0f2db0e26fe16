@@ -1,0 +1,27 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "3a89b369_e1eb2bd0",
+        "filename": "core/java/android/app/NotificationChannel.java",
+        "patchSetId": 10
+      },
+      "lineNbr": 122,
+      "author": {
+        "id": 1001049
+      },
+      "writtenOn": "2017-09-29T07:56:42Z",
+      "side": 1,
+      "message": "Needs to be set to 0x00ffffff like in NotificationRecord code and the settings part to work as expected on clean flash. I didn\u0027t set 0 as default to avoid black as default light and colorpicker color when the app doesn\u0027t set a channel color but still wants to enabled default system led color.\nIn any case, btw, this  DEFAUL_LIGHT_COLOR must be the same set in other classes of the two commits.",
+      "range": {
+        "startLine": 122,
+        "startChar": 11,
+        "endLine": 122,
+        "endChar": 12
+      },
+      "revId": "304f9ac5ab95017458b3e91be4b0f2db0e26fe16",
+      "serverId": "56841c99-7c94-43d4-bf0b-cb4707e66d55",
+      "unresolved": false
+    }
+  ]
+}
