@@ -1,0 +1,27 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "e8de5f84_ba616811",
+        "filename": "services/core/java/com/android/server/notification/NotificationRecord.java",
+        "patchSetId": 2
+      },
+      "lineNbr": 219,
+      "author": {
+        "id": 1001049
+      },
+      "writtenOn": "2017-09-30T08:14:15Z",
+      "side": 0,
+      "message": "In the Settings part, when channel color is 0, we take as default this:\ncom.android.internal.R.color.config_defaultNotificationColor\n\nBut there are apps like whatsapp that don\u0027t support channel but still set a custom default color (notification.ledARGB) different from that system boolean. \nExample: \n- user sets whatsapp led to purple in whatsapp options;\n- channel color will be still 0 because whatsapp doesn\u0027t support channels\n- if the user goes into system settings, then whatsapp notification settings, the color picker will take com.android.internal.R.color.config_defaultNotificationColor as default color, instead of purple that user set\n- the user opens the picker, default color will be the bool instead of purple.\n\nSo i think it\u0027s better to keep this 0x00ffffff till we find a way to get notification.ledARGB also in the Settings part for the default color if channel is not supported.",
+      "range": {
+        "startLine": 219,
+        "startChar": 88,
+        "endLine": 219,
+        "endChar": 100
+      },
+      "revId": "14eb38d77d7e39bcedbd5008c96347a7278098f1",
+      "serverId": "56841c99-7c94-43d4-bf0b-cb4707e66d55",
+      "unresolved": false
+    }
+  ]
+}
