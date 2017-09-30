@@ -1295,6 +1295,7 @@ public class InputMethodManagerService extends IInputMethodManager.Stub
                         .setColor(com.android.internal.R.color.system_notification_accent_color);
 
         Intent intent = new Intent(Settings.ACTION_SHOW_INPUT_METHOD_PICKER);
+        intent.addFlags(Intent.FLAG_RECEIVER_INCLUDE_BACKGROUND);
         mImeSwitchPendingIntent = PendingIntent.getBroadcast(mContext, 0, intent, 0);
 
         mShowOngoingImeSwitcherForPhones = false;

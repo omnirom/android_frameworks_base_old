@@ -547,6 +547,7 @@
     <protected-broadcast android:name="org.omnirom.omniswitch.ACTION_PRELOAD_TASKS" />
     <protected-broadcast android:name="org.omnirom.omniswitch.ACTION_HIDE_OVERLAY" />
     <protected-broadcast android:name="com.android.systemui.ACTION_DISMISS_KEYGUARD" />
+    <protected-broadcast android:name="android.settings.SHOW_INPUT_METHOD_PICKER" />
 
     <!-- ====================================================================== -->
     <!--                          RUNTIME PERMISSIONS                           -->
