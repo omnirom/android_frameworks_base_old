@@ -113,10 +113,14 @@ public class QSPanel extends LinearLayout implements Tunable, Callback {
         mFooter = new QSSecurityFooter(this, context);
         addView(mFooter.getView());
 
+        // enable the brightness icon
+        ImageView brightnessIcon = (ImageView) mBrightnessView.findViewById(R.id.brightness_icon);
+        brightnessIcon.setVisibility(View.VISIBLE);
+
         updateResources();
 
         mBrightnessController = new BrightnessController(getContext(),
-                findViewById(R.id.brightness_icon),
+                brightnessIcon,
                 findViewById(R.id.brightness_slider));
     }
 
