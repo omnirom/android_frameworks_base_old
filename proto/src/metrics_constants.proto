@@ -3972,6 +3972,9 @@ message MetricsEvent {
     // OS: O
     FIELD_NOTIFICATION_GROUP_SUMMARY = 947;
 
+    // ACTION: Custom Omni metrics
+    OMNI_SETTINGS = 1000;
+
     // ---- End O Constants, all O constants go above this line ----
 
     // Add new aosp constants above this line.
