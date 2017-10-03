@@ -4144,6 +4144,11 @@ public final class Settings {
         /**
          * @hide
          */
+        public static final String SHOW_BATTERY_IMAGE = "status_bar_show_battery_image";
+
+        /**
+         * @hide
+         */
         public static final String BUTTON_SWAP_BACK_RECENTS = "button_swap_back_recents";
 
         /**
@@ -4339,6 +4344,10 @@ public final class Settings {
             PRIVATE_SETTINGS.add(BUTTON_BACKLIGHT_ON_TOUCH_ONLY);
             PRIVATE_SETTINGS.add(VOLUME_BUTTON_WAKE);
             PRIVATE_SETTINGS.add(QS_QUICKBAR_SCROLL_ENABLED);
+            PRIVATE_SETTINGS.add(STATUS_BAR_IME_NOTIFICATION);
+            PRIVATE_SETTINGS.add(NAVIGATION_BAR_IME_BUTTON);
+            PRIVATE_SETTINGS.add(SHOW_BATTERY_IMAGE);
+            PRIVATE_SETTINGS.add(BUTTON_SWAP_BACK_RECENTS);
         }
 
         /**
