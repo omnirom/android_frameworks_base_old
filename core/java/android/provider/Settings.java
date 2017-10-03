@@ -4142,6 +4142,11 @@ public final class Settings {
         public static final String NAVIGATION_BAR_IME_BUTTON = "navigation_bar_ime_button";
 
         /**
+         * @hide
+         */
+        public static final String SHOW_BATTERY_IMAGE = "status_bar_show_battery_image";
+
+        /**
          * Settings to backup. This is here so that it's in the same place as the settings
          * keys and easy to update.
          *
