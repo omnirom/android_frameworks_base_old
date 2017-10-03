@@ -19,4 +19,5 @@
 -->
 <resources xmlns:xliff="urn:oasis:names:tc:xliff:document:1.2">
     <dimen name="qs_tile_height_wo_label">48dp</dimen>
+    <dimen name="status_bar_battery_icon_layout_width">11.5dp</dimen>
 </resources>
