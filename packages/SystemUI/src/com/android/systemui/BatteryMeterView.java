@@ -16,6 +16,7 @@
 package com.android.systemui;
 
 import static android.provider.Settings.System.SHOW_BATTERY_PERCENT;
+import static android.provider.Settings.System.SHOW_BATTERY_IMAGE;
 
 import android.animation.ArgbEvaluator;
 import android.content.Context;
@@ -57,7 +58,7 @@ public class BatteryMeterView extends LinearLayout implements
 
     private final BatteryMeterDrawableBase mDrawable;
     private final String mSlotBattery;
-    private final ImageView mBatteryIconView;
+    private ImageView mBatteryIconView;
     private TextView mBatteryPercentView;
 
     private BatteryController mBatteryController;
@@ -97,16 +98,9 @@ public class BatteryMeterView extends LinearLayout implements
 
         mSlotBattery = context.getString(
                 com.android.internal.R.string.status_bar_battery);
-        mBatteryIconView = new ImageView(context);
-        mBatteryIconView.setImageDrawable(mDrawable);
-        final MarginLayoutParams mlp = new MarginLayoutParams(
-                getResources().getDimensionPixelSize(R.dimen.status_bar_battery_icon_width),
-                getResources().getDimensionPixelSize(R.dimen.status_bar_battery_icon_height));
-        mlp.setMargins(0, 0, 0,
-                getResources().getDimensionPixelOffset(R.dimen.battery_margin_bottom));
-        addView(mBatteryIconView, mlp);
 
         updateShowPercent();
+        updateShowImage();
 
         Context dualToneDarkTheme = new ContextThemeWrapper(context,
                 Utils.getThemeAttr(context, R.attr.darkIconTheme));
@@ -146,7 +140,10 @@ public class BatteryMeterView extends LinearLayout implements
         mBatteryController.addCallback(this);
         getContext().getContentResolver().registerContentObserver(
                 Settings.System.getUriFor(SHOW_BATTERY_PERCENT), false, mSettingObserver);
+        getContext().getContentResolver().registerContentObserver(
+                Settings.System.getUriFor(SHOW_BATTERY_IMAGE), false, mSettingObserver);
         updateShowPercent();
+        updateShowImage();
         Dependency.get(TunerService.class).addTunable(this, StatusBarIconController.ICON_BLACKLIST);
         Dependency.get(ConfigurationController.class).addCallback(this);
     }
@@ -210,6 +207,32 @@ public class BatteryMeterView extends LinearLayout implements
         }
     }
 
+    private void loadImageView() {
+        mBatteryIconView = new ImageView(getContext());
+        mBatteryIconView.setImageDrawable(mDrawable);
+        final MarginLayoutParams mlp = new MarginLayoutParams(
+                getResources().getDimensionPixelSize(R.dimen.status_bar_battery_icon_width),
+                getResources().getDimensionPixelSize(R.dimen.status_bar_battery_icon_height));
+        mlp.setMargins(0, 0, 0,
+                getResources().getDimensionPixelOffset(R.dimen.battery_margin_bottom));
+        addView(mBatteryIconView, mlp);
+    }
+
+    private void updateShowImage() {
+        final boolean showing = mBatteryIconView != null;
+        if (0 != Settings.System.getInt(getContext().getContentResolver(),
+                SHOW_BATTERY_IMAGE, 1)) {
+            if (!showing) {
+                loadImageView();
+            }
+        } else {
+            if (showing) {
+                removeView(mBatteryIconView);
+                mBatteryIconView = null;
+            }
+        }
+    }
+
     @Override
     public void onDensityOrFontScaleChanged() {
         scaleBatteryMeterViews();
@@ -233,8 +256,12 @@ public class BatteryMeterView extends LinearLayout implements
                 (int) (batteryWidth * iconScaleFactor), (int) (batteryHeight * iconScaleFactor));
         scaledLayoutParams.setMargins(0, 0, 0, marginBottom);
 
-        mBatteryIconView.setLayoutParams(scaledLayoutParams);
-        FontSizeUtils.updateFontSize(mBatteryPercentView, R.dimen.qs_time_expanded_size);
+        if (mBatteryIconView != null) {
+            mBatteryIconView.setLayoutParams(scaledLayoutParams);
+        }
+        if (mBatteryPercentView != null) {
+            FontSizeUtils.updateFontSize(mBatteryPercentView, R.dimen.qs_time_expanded_size);
+        }
     }
 
     @Override
@@ -268,6 +295,7 @@ public class BatteryMeterView extends LinearLayout implements
         public void onChange(boolean selfChange, Uri uri) {
             super.onChange(selfChange, uri);
             updateShowPercent();
+            updateShowImage();
         }
     }
 }
