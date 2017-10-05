@@ -26,4 +26,9 @@
         <item name="android:textStyle">normal</item>
         <item name="android:textColor">?android:attr/textColorPrimary</item>
     </style>
+
+    <style name="TextAppearance.QS.NetworkTraffic">
+        <item name="android:textSize">@dimen/net_traffic_text_size</item>
+        <item name="android:fontFamily">sans-serif-condensed</item>
+    </style>
 </resources>
