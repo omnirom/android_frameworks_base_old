@@ -3756,7 +3756,7 @@ public class NotificationManagerService extends SystemService {
         // light
         // release the light
         boolean wasShowLights = mLights.remove(key);
-        if (record.getLight() != null && aboveThreshold
+        if (record.getLight() != null
                 && ((record.getSuppressedVisualEffects()
                 & NotificationListenerService.SUPPRESSED_EFFECT_SCREEN_OFF) == 0)
                 && (!record.isIntercepted() || (record.isIntercepted() && record.shouldLightOnZen()))) {
