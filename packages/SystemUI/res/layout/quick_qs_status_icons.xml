@@ -32,11 +32,22 @@
         android:id="@+id/date"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:layout_gravity="start"
+        android:layout_gravity="start|center_vertical"
         android:gravity="center_vertical"
         android:singleLine="true"
         android:textAppearance="@style/TextAppearance.QS.TileLabel"
         systemui:datePattern="@string/abbrev_wday_month_day_no_year_alarm" />
+
+    <com.android.systemui.omni.NetworkTraffic
+        android:id="@+id/networkTraffic"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:gravity="center_vertical"
+        android:layout_gravity="center_vertical"
+        android:layout_marginStart="8dp"
+        android:layout_marginEnd="4dp"
+        android:textAppearance="@style/TextAppearance.QS.NetworkTraffic"
+        android:singleLine="true" />
 
     <com.android.systemui.statusbar.phone.StatusIconContainer
         android:id="@+id/statusIcons"
