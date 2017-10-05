@@ -4535,6 +4535,50 @@ public final class Settings {
                 BOOLEAN_VALIDATOR;
 
         /**
+         * @hide
+         */
+        public static final String OMNI_NETWORK_TRAFFIC_ENABLE = "network_traffic_enable";
+
+        /** @hide */
+        private static final Validator OMNI_NETWORK_TRAFFIC_ENABLE_VALIDATOR =
+                BOOLEAN_VALIDATOR;
+
+        /**
+         * Network traffic indicator, goes from least to greatest significant bitwise
+         * 0 = Display up-stream traffic if set
+         * 1 = Display down-stream traffic if set
+         * 2 = Show as Byte/s if set
+         * 16-31 = Refresh interval(ms) min: 250 max: 32750 default: 1000
+         * @hide
+         */
+        public static final String OMNI_NETWORK_TRAFFIC_STATE = "network_traffic_state";
+
+        /** @hide */
+        private static final Validator OMNI_NETWORK_TRAFFIC_STATE_VALIDATOR =
+                ANY_INTEGER_VALIDATOR;
+
+        /**
+         * Whether or not to hide the network traffic indicator when there is no activity
+         * @hide
+         */
+        public static final String OMNI_NETWORK_TRAFFIC_AUTOHIDE = "network_traffic_autohide";
+
+        /** @hide */
+        private static final Validator OMNI_NETWORK_TRAFFIC_AUTOHIDE_VALIDATOR =
+                BOOLEAN_VALIDATOR;
+
+        /**
+         * Network traffic inactivity threshold (default is 10 kBs)
+         * @hide
+         */
+        public static final String OMNI_NETWORK_TRAFFIC_AUTOHIDE_THRESHOLD =
+                "network_traffic_autohide_threshold";
+
+        /** @hide */
+        private static final Validator OMNI_NETWORK_TRAFFIC_AUTOHIDE_THRESHOLD_VALIDATOR =
+                ANY_INTEGER_VALIDATOR;
+
+        /**
          * IMPORTANT: If you add a new public settings you also have to add it to
          * PUBLIC_SETTINGS below. If the new setting is hidden you have to add
          * it to PRIVATE_SETTINGS below. Also add a validator that can validate
@@ -4645,6 +4689,10 @@ public final class Settings {
             OMNI_BUTTON_BACKLIGHT_ON_TOUCH_ONLY,
             OMNI_SHOW_CPU_OVERLAY,
             OMNI_FINGERPRINT_SUCCESS_VIB,
+            OMNI_NETWORK_TRAFFIC_ENABLE,
+            OMNI_NETWORK_TRAFFIC_STATE,
+            OMNI_NETWORK_TRAFFIC_AUTOHIDE,
+            OMNI_NETWORK_TRAFFIC_AUTOHIDE_THRESHOLD
         };
 
         /**
@@ -4804,6 +4852,10 @@ public final class Settings {
             PRIVATE_SETTINGS.add(OMNI_BUTTON_BACKLIGHT_ON_TOUCH_ONLY);
             PRIVATE_SETTINGS.add(OMNI_SHOW_CPU_OVERLAY);
             PRIVATE_SETTINGS.add(OMNI_FINGERPRINT_SUCCESS_VIB);
+            PRIVATE_SETTINGS.add(OMNI_NETWORK_TRAFFIC_ENABLE);
+            PRIVATE_SETTINGS.add(OMNI_NETWORK_TRAFFIC_STATE);
+            PRIVATE_SETTINGS.add(OMNI_NETWORK_TRAFFIC_AUTOHIDE);
+            PRIVATE_SETTINGS.add(OMNI_NETWORK_TRAFFIC_AUTOHIDE_THRESHOLD);
         }
 
         /**
@@ -4966,6 +5018,14 @@ public final class Settings {
                     OMNI_SHOW_CPU_OVERLAY_VALIDATOR);
             VALIDATORS.put(OMNI_FINGERPRINT_SUCCESS_VIB,
                     OMNI_FINGERPRINT_SUCCESS_VIB_VALIDATOR);
+            VALIDATORS.put(OMNI_NETWORK_TRAFFIC_ENABLE,
+                    OMNI_NETWORK_TRAFFIC_ENABLE_VALIDATOR);
+            VALIDATORS.put(OMNI_NETWORK_TRAFFIC_STATE,
+                    OMNI_NETWORK_TRAFFIC_STATE_VALIDATOR);
+            VALIDATORS.put(OMNI_NETWORK_TRAFFIC_AUTOHIDE,
+                    OMNI_NETWORK_TRAFFIC_AUTOHIDE_VALIDATOR);
+            VALIDATORS.put(OMNI_NETWORK_TRAFFIC_AUTOHIDE_THRESHOLD,
+                    OMNI_NETWORK_TRAFFIC_AUTOHIDE_THRESHOLD_VALIDATOR);
         }
 
         /**
