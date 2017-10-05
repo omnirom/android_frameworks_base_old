@@ -7113,8 +7113,11 @@ public class StatusBar extends SystemUI implements DemoMode,
             }
         } else {
             if (mNavigationBarView != null){
+                FragmentHostManager fm = FragmentHostManager.get(mNavigationBarView);
                 mWindowManager.removeViewImmediate(mNavigationBarView);
                 mNavigationBarView = null;
+                fm.getFragmentManager().beginTransaction().remove(mNavigationBar).commit();
+                mNavigationBar = null;
             }
         }
     }
