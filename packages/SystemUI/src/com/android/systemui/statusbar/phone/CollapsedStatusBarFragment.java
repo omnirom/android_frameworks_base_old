@@ -42,6 +42,7 @@ import com.android.systemui.statusbar.policy.EncryptionHelper;
 import com.android.systemui.statusbar.policy.KeyguardMonitor;
 import com.android.systemui.statusbar.policy.NetworkController;
 import com.android.systemui.statusbar.policy.NetworkController.SignalCallback;
+import com.android.systemui.omni.NetworkTraffic;
 
 /**
  * Contains the collapsed status bar and handles hiding/showing based on disable flags
@@ -65,7 +66,9 @@ public class CollapsedStatusBarFragment extends Fragment implements CommandQueue
     // omni additions start
     private View mOmniLogo;
     private boolean mShowLogo;
+    private boolean mShowNetworkTraffic;
     private final Handler mHandler = new Handler();
+    private NetworkTraffic mNetworkTraffic;
 
     private class OmniSettingsObserver extends ContentObserver {
         OmniSettingsObserver(Handler handler) {
@@ -120,6 +123,7 @@ public class CollapsedStatusBarFragment extends Fragment implements CommandQueue
         mSignalClusterView = mStatusBar.findViewById(R.id.signal_cluster);
         Dependency.get(DarkIconDispatcher.class).addDarkReceiver(mSignalClusterView);
         mOmniLogo = mStatusBar.findViewById(R.id.status_bar_logo);
+        mNetworkTraffic = (NetworkTraffic) mStatusBar.findViewById(R.id.networkTraffic);
         updateSettings(false);
         // Default to showing until we know otherwise.
         showSystemIconArea(false);
@@ -224,6 +228,10 @@ public class CollapsedStatusBarFragment extends Fragment implements CommandQueue
         animateHide(mNotificationIconAreaInner, animate, true);
         if (mShowLogo) {
             animateHide(mOmniLogo, animate, true);
+        }
+
+        if (mShowNetworkTraffic) {
+            animateHide(mNetworkTraffic, animate, true);
         }
     }
 
