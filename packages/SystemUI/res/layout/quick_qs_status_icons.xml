@@ -38,6 +38,16 @@
         android:textAppearance="@style/TextAppearance.QS.TileLabel"
         systemui:datePattern="@string/abbrev_wday_month_day_no_year_alarm" />
 
+    <com.android.systemui.omni.NetworkTraffic
+        android:id="@+id/networkTraffic"
+        android:layout_width="wrap_content"
+        android:layout_height="match_parent"
+        android:maxLines="2"
+        android:fontFamily="sans-serif-condensed"
+        android:gravity="end|center_vertical"
+        android:layout_marginStart="2dp"
+        android:layout_marginEnd="2dp" />
+
     <com.android.systemui.statusbar.phone.StatusIconContainer
         android:id="@+id/statusIcons"
         android:layout_width="0dp"
