@@ -130,7 +130,9 @@ public class QuickQSPanel extends QSPanel {
     public void onTuningChanged(String key, String newValue) {
         // No tunings for you.
         if (key.equals(QS_SHOW_BRIGHTNESS)) {
-            // No Brightness for you.
+            super.onTuningChanged(key, "0");
+        }
+        if (key.equals(QS_SHOW_BRIGHTNESS_MODE)) {
             super.onTuningChanged(key, "0");
         }
     }
