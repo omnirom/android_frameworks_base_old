@@ -1130,9 +1130,9 @@ public class FingerprintService extends SystemService implements IHwBinder.Death
                         if (client instanceof AuthenticationClient) {
                             if (client.getToken() == token) {
                                 if (DEBUG) Slog.v(TAG, "stop client " + client.getOwnerString());
-                                client.stop(client.getToken() == token);
-                                if (mRemoveClientOnCancel) {
-                                    removeClient(client);
+                                final int stopResult = client.stop(client.getToken() == token);
+                                if (mRemoveClientOnCancel && (stopResult == 0)) {
+                                    handleError(mHalDeviceId, FingerprintManager.FINGERPRINT_ERROR_CANCELED, 0 /*vendorCode */);
                                 }
                             } else {
                                 if (DEBUG) Slog.v(TAG, "can't stop client "
