@@ -8943,32 +8943,19 @@ public class PhoneWindowManager implements WindowManagerPolicy {
     }
 
     // omni additions start
-    private void triggerVirtualKeypress(final int keyCode) {
-        InputManager im = InputManager.getInstance();
-        long now = SystemClock.uptimeMillis();
-
-        final KeyEvent downEvent = new KeyEvent(now, now, KeyEvent.ACTION_DOWN,
-                keyCode, 0, 0, KeyCharacterMap.VIRTUAL_KEYBOARD, 0,
-                KeyEvent.FLAG_FROM_SYSTEM, InputDevice.SOURCE_KEYBOARD);
-        final KeyEvent upEvent = KeyEvent.changeAction(downEvent, KeyEvent.ACTION_UP);
-
-        im.injectInputEvent(downEvent, InputManager.INJECT_INPUT_EVENT_MODE_ASYNC);
-        im.injectInputEvent(upEvent, InputManager.INJECT_INPUT_EVENT_MODE_ASYNC);
-    }
-
     private void performKeyAction(int behavior) {
         if (DEBUG_INPUT){
             Slog.d(TAG, "performKeyAction " + behavior);
         }
         switch (behavior) {
             case KEY_ACTION_BACK:
-                triggerVirtualKeypress(KeyEvent.KEYCODE_BACK);
+                OmniUtils.sendKeycode(KeyEvent.KEYCODE_BACK);
                 break;
             case KEY_ACTION_APP_SWITCH:
                 toggleRecentApps();
                 break;
             case KEY_ACTION_MENU:
-                triggerVirtualKeypress(KeyEvent.KEYCODE_MENU);
+                OmniUtils.sendKeycode(KeyEvent.KEYCODE_MENU);
                 break;
             case KEY_ACTION_SPLIT:
                 boolean dockStatus = TaskUtils.isTaskDocked(mContext);
