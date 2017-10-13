@@ -15,17 +15,21 @@
 
 package com.android.systemui.qs.tiles;
 
+import android.content.pm.ActivityInfo;
 import android.content.ComponentName;
 import android.content.Context;
 import android.content.Intent;
 import android.service.quicksettings.Tile;
+import android.widget.Toast;
 
 import com.android.internal.util.omni.OmniUtils;
+import com.android.internal.util.omni.TaskUtils;
 import com.android.internal.logging.nano.MetricsProto.MetricsEvent;
 import com.android.systemui.qs.QSHost;
 import com.android.systemui.plugins.qs.QSTile.BooleanState;
 import com.android.systemui.qs.tileimpl.QSTileImpl;
 import com.android.systemui.R;
+import android.view.KeyEvent;
 
 /** Quick settings tile: PictureInPictureTile **/
 public class PictureInPictureTile extends QSTileImpl<BooleanState> {
@@ -50,7 +54,13 @@ public class PictureInPictureTile extends QSTileImpl<BooleanState> {
     @Override
     public void handleClick() {
         mHost.collapsePanels();
-        OmniUtils.sendKeycode(171);
+        ActivityInfo ai = TaskUtils.getRunningActivityInfo(mContext);
+        if (ai != null && !ai.supportsPictureInPicture()) {
+            Toast.makeText(mContext, mContext.getString(
+                    R.string.quick_settings_pip_tile_app_na), Toast.LENGTH_LONG).show();
+            return;
+        }
+        OmniUtils.sendKeycode(KeyEvent.KEYCODE_WINDOW);
     }
 
     @Override

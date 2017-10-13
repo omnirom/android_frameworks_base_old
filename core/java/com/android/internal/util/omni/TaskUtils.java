@@ -142,6 +142,22 @@ public class TaskUtils {
         return -1;
     }
 
+    public static ActivityInfo getRunningActivityInfo(Context context) {
+        final ActivityManager am = (ActivityManager) context
+                .getSystemService(Context.ACTIVITY_SERVICE);
+        final PackageManager pm = context.getPackageManager();
+
+        List<ActivityManager.RunningTaskInfo> tasks = am.getRunningTasks(1);
+        if (tasks != null && !tasks.isEmpty()) {
+            ActivityManager.RunningTaskInfo top = tasks.get(0);
+            try {
+                return pm.getActivityInfo(top.topActivity, 0);
+            } catch (PackageManager.NameNotFoundException e) {
+            }
+        }
+        return null;
+    }
+
     public static boolean isTaskDocked(Context context) {
         if (ActivityManager.supportsMultiWindow(context)) {
             try {
