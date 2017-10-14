@@ -1523,12 +1523,12 @@ final class ActivityRecord extends ConfigurationContainer implements AppWindowCo
     final Bitmap screenshotActivityLocked() {
         if (DEBUG_SCREENSHOTS) Slog.d(TAG_SCREENSHOTS, "screenshotActivityLocked: " + this);
 
-        if (ENABLE_TASK_SNAPSHOTS) {
+        /*if (ENABLE_TASK_SNAPSHOTS) {
             // No need to screenshot if snapshots are enabled.
             if (DEBUG_SCREENSHOTS) Slog.d(TAG_SCREENSHOTS,
                     "\tSnapshots are enabled, abort taking screenshot");
             return null;
-        }
+        }*/
 
         if (noDisplay) {
             if (DEBUG_SCREENSHOTS) Slog.d(TAG_SCREENSHOTS, "\tNo display");
