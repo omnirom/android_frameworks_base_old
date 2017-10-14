@@ -12578,6 +12578,10 @@ public final class Settings {
          */
         public static final String OMNI_RECENT_TASKS_VISIBLE_DISABLE =
                 "recents_tasks_visible_disable";
+       /**
+         * @hide
+         */
+        public static final String OMNI_DEVICE_IDLE_CONSTANTS_USER = "device_idle_constants_user";
 
         /**
          * Settings to backup. This is here so that it's in the same place as the settings

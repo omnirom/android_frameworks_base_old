@@ -791,6 +791,9 @@ public class DeviceIdleController extends SystemService
             mResolver.registerContentObserver(
                     Settings.Global.getUriFor(Settings.Global.DEVICE_IDLE_CONSTANTS),
                     false, this);
+            mResolver.registerContentObserver(Settings.Global.getUriFor(
+                    Settings.Global.OMNI_DEVICE_IDLE_CONSTANTS_USER),
+                    false, this);
             updateConstants();
         }
 
@@ -802,8 +805,14 @@ public class DeviceIdleController extends SystemService
         private void updateConstants() {
             synchronized (DeviceIdleController.this) {
                 try {
-                    mParser.setString(Settings.Global.getString(mResolver,
-                            Settings.Global.DEVICE_IDLE_CONSTANTS));
+                    String userValues = Settings.Global.getString(mResolver,
+                            Settings.Global.OMNI_DEVICE_IDLE_CONSTANTS_USER);
+                    if (userValues == null) {
+                        mParser.setString(Settings.Global.getString(mResolver,
+                                Settings.Global.DEVICE_IDLE_CONSTANTS));
+                    } else {
+                        mParser.setString(userValues);
+                    }
                 } catch (IllegalArgumentException e) {
                     // Failed to parse the settings string, log this and move on
                     // with defaults.
