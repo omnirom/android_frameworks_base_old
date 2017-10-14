@@ -260,6 +260,9 @@ public class QSPanel extends LinearLayout implements Tunable, Callback {
             // Reload the mirror in case it got reinflated but we didn't.
             setBrightnessMirror(mBrightnessMirrorController);
         }
+        if (mTileLayout instanceof PagedTileLayout) {
+            ((PagedTileLayout) mTileLayout).postDistributeTiles();
+        }
     }
 
     public void onCollapse() {
