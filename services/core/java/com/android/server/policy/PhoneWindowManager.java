@@ -6267,6 +6267,7 @@ public class PhoneWindowManager implements WindowManagerPolicy {
         final int keyCode = event.getKeyCode();
         final boolean virtualKey = event.getDeviceId() == KeyCharacterMap.VIRTUAL_KEYBOARD;
         final boolean isInjected = (policyFlags & WindowManagerPolicy.FLAG_INJECTED) != 0;
+        final boolean isVirtualHardKey = (policyFlags & KeyEvent.FLAG_VIRTUAL_HARD_KEY) != 0;
 
         // If screen is off then we treat the case where the keyguard is open but hidden
         // the same as if it were open and in front.
@@ -6343,6 +6344,10 @@ public class PhoneWindowManager implements WindowManagerPolicy {
                 && (policyFlags & WindowManagerPolicy.FLAG_VIRTUAL) != 0
                 && event.getRepeatCount() == 0
                 && !disableKey;
+
+        if (virtualKey && !isVirtualHardKey) {
+            useHapticFeedback = false;
+        }
 
         // Specific device key handling
         if (mDeviceKeyHandler != null) {
