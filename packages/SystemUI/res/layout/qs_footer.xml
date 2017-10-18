@@ -122,9 +122,4 @@
             android:padding="10dp" />
     </LinearLayout>
 
-    <include layout="@layout/qs_divider"
-        android:layout_width="match_parent"
-        android:layout_height="1dp"
-        android:layout_gravity="bottom" />
-
 </com.android.systemui.qs.QSFooter>
