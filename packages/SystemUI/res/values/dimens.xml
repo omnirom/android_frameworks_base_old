@@ -775,6 +775,6 @@
 
     <dimen name="signal_icon_size">17dp</dimen>
 
-    <dimen name="qs_gutter_height">6dp</dimen>
+    <dimen name="qs_gutter_height">0dp</dimen>
 
 </resources>
