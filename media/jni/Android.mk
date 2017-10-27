@@ -68,6 +68,10 @@ LOCAL_C_INCLUDES += \
     $(PV_INCLUDES) \
     $(JNI_H_INCLUDE)
 
+ifeq ($(BOARD_USES_QCOM_HARDWARE),true)
+    LOCAL_CFLAGS += -DQCOM_HARDWARE
+endif
+
 LOCAL_CFLAGS += -Wall -Werror -Wno-error=deprecated-declarations -Wunused -Wunreachable-code
 
 LOCAL_MODULE:= libmedia_jni
