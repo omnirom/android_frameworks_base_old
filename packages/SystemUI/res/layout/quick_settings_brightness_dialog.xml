@@ -18,21 +18,17 @@
     android:layout_height="wrap_content"
     android:layout_width="match_parent"
     android:layout_gravity="center_vertical"
-    android:paddingLeft="16dp"
-    android:paddingRight="16dp"
+    android:paddingLeft="22dp"
+    android:paddingRight="22dp"
     style="@style/BrightnessDialogContainer">
 
     <ImageView
-        android:id="@+id/brightness_icon"
-        android:layout_width="48dp"
-        android:layout_height="48dp"
+        android:id="@+id/brightness_left"
+        android:layout_width="21.0dip"
+        android:layout_height="21.0dip"
         android:layout_gravity="center_vertical"
-        android:src="@drawable/ic_qs_brightness_auto_off_new"
-        android:contentDescription="@null"
-        android:visibility="gone"
-        android:scaleType="center"
-        android:layout_marginStart="8dp"
-        android:background="?android:attr/selectableItemBackgroundBorderless" />
+        android:src="@drawable/ic_brightness_left"
+        android:contentDescription="@null" />
 
     <com.android.systemui.settings.ToggleSliderView
         android:id="@+id/brightness_slider"
@@ -43,5 +39,23 @@
         android:contentDescription="@string/accessibility_brightness"
         android:importantForAccessibility="no"
         systemui:text="@string/status_bar_settings_auto_brightness_label" />
+
+    <ImageView
+        android:id="@+id/brightness_right"
+        android:layout_width="21.0dip"
+        android:layout_height="21.0dip"
+        android:layout_gravity="center_vertical"
+        android:src="@drawable/ic_brightness_right"
+        android:contentDescription="@null" />
+
+    <ImageButton
+        android:id="@+id/brightness_icon"
+        android:layout_width="21.0dip"
+        android:layout_height="21.0dip"
+        android:layout_gravity="center_vertical"
+        android:background="?android:attr/selectableItemBackgroundBorderless"
+        android:src="@drawable/ic_qs_brightness_auto_off_new"
+        android:contentDescription="@null"
+        android:layout_marginStart="30.0dip" />
 
 </LinearLayout>
