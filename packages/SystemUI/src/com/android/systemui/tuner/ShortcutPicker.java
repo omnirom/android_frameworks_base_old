@@ -134,6 +134,7 @@ public class ShortcutPicker extends PreferenceFragment implements Tunable {
     public void onDestroy() {
         super.onDestroy();
         mTunerService.removeTunable(this);
+        getActivity().setTitle(R.string.tuner_lock_screen);
     }
 
     @Override
