@@ -250,10 +250,15 @@ public final class SystemServer {
         }
         @Override
         public void onChange(boolean selfChange) {
-            int adbPort = Settings.Secure.getInt(mContentResolver,
-                Settings.Secure.ADB_PORT, 0);
-            // setting this will control whether ADB runs on TCP/IP or USB
-            SystemProperties.set("service.adb.tcp.port", Integer.toString(adbPort));
+            try {
+                int adbPort = Settings.Secure.getInt(mContentResolver,
+                    Settings.Secure.ADB_PORT, 0);
+                // setting this will control whether ADB runs on TCP/IP or USB
+                SystemProperties.set("service.adb.tcp.port", Integer.toString(adbPort));
+            } catch (Exception e) {
+                // never ever crash here
+                Slog.e(TAG, "AdbPortObserver", e);
+            }
         }
     }
 
