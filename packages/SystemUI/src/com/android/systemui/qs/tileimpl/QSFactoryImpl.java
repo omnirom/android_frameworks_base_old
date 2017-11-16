@@ -27,6 +27,7 @@ import com.android.systemui.qs.tiles.AirplaneModeTile;
 import com.android.systemui.qs.tiles.AODTile;
 import com.android.systemui.qs.tiles.BatterySaverTile;
 import com.android.systemui.qs.tiles.BluetoothTile;
+import com.android.systemui.qs.tiles.CaffeineTile;
 import com.android.systemui.qs.tiles.CastTile;
 import com.android.systemui.qs.tiles.CellularTile;
 import com.android.systemui.qs.tiles.ColorInversionTile;
@@ -102,6 +103,8 @@ public class QSFactoryImpl implements QSFactory {
             // Omni tiles
             case "aod":
                 return new AODTile(mHost);
+            case "caffeine":
+                return new CaffeineTile(mHost);
         }
 
         // Intent tiles.
