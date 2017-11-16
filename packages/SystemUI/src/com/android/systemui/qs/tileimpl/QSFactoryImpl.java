@@ -24,6 +24,7 @@ import com.android.systemui.qs.tiles.AdbOverNetworkTile;
 import com.android.systemui.qs.tiles.AirplaneModeTile;
 import com.android.systemui.qs.tiles.BatterySaverTile;
 import com.android.systemui.qs.tiles.BluetoothTile;
+import com.android.systemui.qs.tiles.CaffeineTile;
 import com.android.systemui.qs.tiles.CastTile;
 import com.android.systemui.qs.tiles.CellularTile;
 import com.android.systemui.qs.tiles.ColorInversionTile;
@@ -75,6 +76,7 @@ public class QSFactoryImpl implements QSFactory {
         else if (tileSpec.equals("weather")) return new WeatherTile(mHost);
         else if (tileSpec.equals("pip")) return new PictureInPictureTile(mHost);
         else if (tileSpec.equals("screenshot")) return new ScreenshotTile(mHost);
+        else if (tileSpec.equals("caffeine")) return new CaffeineTile(mHost);
         // Intent tiles.
         else if (tileSpec.startsWith(IntentTile.PREFIX)) return IntentTile.create(mHost, tileSpec);
         else if (tileSpec.startsWith(CustomTile.PREFIX)) return CustomTile.create(mHost, tileSpec);
