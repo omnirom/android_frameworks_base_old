@@ -19,14 +19,18 @@
 -->
 <resources xmlns:xliff="urn:oasis:names:tc:xliff:document:1.2">
 
+    <!-- Caffeine tile -->
+    <string name="quick_settings_caffeine_label">Caffeine</string>
+    <string name="accessibility_quick_settings_caffeine_off">Caffeine off</string>
+    <string name="accessibility_quick_settings_caffeine_on">Caffeine on</string>
+
     <!-- ADB over network tile -->
     <string name="quick_settings_network_adb_enabled_label">Enabled</string>
     <string name="quick_settings_network_adb_disabled_label">Disabled</string>
     <string name="quick_settings_network_adb_label">ADB over network</string>
     <string name="quick_settings_network_adb_toast">USB debugging is not enabled</string>
 
-   
     <!-- AOD QS tile -->
     <string name="quick_settings_aod_label">AOD</string>
 
-   </resources>
+</resources>
