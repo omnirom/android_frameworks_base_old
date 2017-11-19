@@ -440,7 +440,10 @@ public final class SmsManager {
                 true /* persistMessage*/, priority, isExpectMore, validityPeriod);
     }
 
-    public void sendTextMessageInternal(
+    /**
+     * @hide
+     */
+     public void sendTextMessageInternal(
             String destinationAddress, String scAddress, String text,
             PendingIntent sentIntent, PendingIntent deliveryIntent, boolean persistMessage,
             int priority, boolean isExpectMore, int validityPeriod) {
@@ -708,6 +711,9 @@ public final class SmsManager {
                 deliveryIntents, true /* persistMessage*/);
     }
 
+    /**
+     * @hide
+     */
     public void sendMultipartTextMessageInternal(
             String destinationAddress, String scAddress, List<String> parts,
             List<PendingIntent> sentIntents, List<PendingIntent> deliveryIntents,
