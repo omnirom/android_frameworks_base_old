@@ -40,7 +40,7 @@ public class PictureInPictureTile extends QSTileImpl<BooleanState> {
 
     @Override
     public int getMetricsCategory() {
-        return MetricsEvent.OMNI_SETTINGS;
+        return MetricsEvent.CUSTOM_QUICK_TILES;
     }
 
     @Override
