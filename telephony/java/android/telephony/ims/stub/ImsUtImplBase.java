@@ -53,10 +53,28 @@ public class ImsUtImplBase extends IImsUt.Stub {
     }
 
     /**
+     * Retrieves the configuration of the call barring for specified service class.
+     */
+    @Override
+    public int queryCallBarringForServiceClass(int cbType, int serviceClass)
+            throws RemoteException {
+        return -1;
+    }
+
+    /**
      * Retrieves the configuration of the call forward.
      */
     @Override
     public int queryCallForward(int condition, String number) throws RemoteException {
+        return -1;
+    }
+
+    /**
+     * Retrieves the configuration of the call forward for specified service class.
+     */
+    @Override
+    public int queryCFForServiceClass(int condition, String number,
+            int serviceClass) throws RemoteException {
         return -1;
     }
 
@@ -113,6 +131,15 @@ public class ImsUtImplBase extends IImsUt.Stub {
      */
     @Override
     public int updateCallBarring(int cbType, int action, String[] barrList) throws RemoteException {
+        return -1;
+    }
+
+    /**
+     * Updates the configuration of the call barring for specified service class.
+     */
+    @Override
+    public int updateCallBarringForServiceClass(int cbType, int action, int serviceClass,
+            String[] barrList) throws RemoteException {
         return -1;
     }
 

@@ -67,6 +67,20 @@ public final class PhoneAccount implements Parcelable {
     public static final String EXTRA_CALL_SUBJECT_CHARACTER_ENCODING =
             "android.telecom.extra.CALL_SUBJECT_CHARACTER_ENCODING";
 
+     /**
+     * Indicating flag for phone account whether to use voip audio mode for voip calls
+     * @hide
+     */
+    public static final String EXTRA_ALWAYS_USE_VOIP_AUDIO_MODE =
+            "codeaurora.org.extra.ALWAYS_USE_VOIP_AUDIO_MODE";
+
+    /**
+     * Indicating sort order for phone accounts
+     * @hide
+     */
+    public static final String EXTRA_SORT_ORDER =
+            "android.telecom.extra.SORT_ORDER";
+
     /**
      * Flag indicating that this {@code PhoneAccount} can act as a connection manager for
      * other connections. The {@link ConnectionService} associated with this {@code PhoneAccount}

@@ -16,6 +16,7 @@
 
 package com.android.ims;
 
+import android.os.Handler;
 import android.os.Message;
 
 /**
@@ -109,11 +110,23 @@ public interface ImsUtInterface {
     public void queryCallBarring(int cbType, Message result);
 
     /**
+     * Retrieves the configuration of the call barring for specified service class.
+     * The return value of ((AsyncResult)result.obj) is an array of {@link ImsSsInfo}.
+     */
+    public void queryCallBarring(int cbType, int serviceClass, Message result);
+
+    /**
      * Retrieves the configuration of the call forward.
      * The return value of ((AsyncResult)result.obj) is an array of {@link ImsCallForwardInfo}.
      */
     public void queryCallForward(int condition, String number, Message result);
 
+    /**
+     * Retrieves the configuration of the call forward for the specified service class.
+     * The return value of ((AsyncResult)result.obj) is an array of {@link ImsCallForwardInfo}.
+     */
+    public void queryCallForward(int condition, String number,
+            int serviceClass, Message result);
     /**
      * Retrieves the configuration of the call waiting.
      * The return value of ((AsyncResult)result.obj) is an array of {@link ImsSsInfo}.
@@ -147,6 +160,12 @@ public interface ImsUtInterface {
             Message result, String[] barrList);
 
     /**
+     * Modifies the configuration of the call barring for specified service class.
+     */
+    public void updateCallBarring(int cbType, int action, int serviceClass,
+            Message result, String[] barrList);
+
+    /**
      * Modifies the configuration of the call forward.
      */
     public void updateCallForward(int action, int condition, String number,
@@ -176,4 +195,14 @@ public interface ImsUtInterface {
      * Updates the configuration of the COLP supplementary service.
      */
     public void updateCOLP(boolean enable, Message result);
+
+    /**
+     * Register for UNSOL_ON_SS indications.
+     */
+    public void setSuppServiceIndication(Handler handle, int event, Object object);
+
+    /**
+     * Deregister for UNSOL_ON_SS indications.
+     */
+    public void unSetSuppServiceIndication(Handler handler);
 }

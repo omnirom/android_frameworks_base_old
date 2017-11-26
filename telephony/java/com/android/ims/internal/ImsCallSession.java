@@ -373,6 +373,20 @@ public class ImsCallSession {
         }
 
         /**
+         * Called when session access technology may change to LTE soon but mobile data being off
+         * may block this handover.
+         *
+         * @param session IMS session object
+         * @param srcAccessTech original access technology, e.g. WiFi
+         * @param targetAccessTech new access technology, e.g. LTE
+         */
+        public void callSessionMayHandover(ImsCallSession session,
+                                        int srcAccessTech, int targetAccessTech) {
+            // no-op
+        }
+
+
+        /**
          * Called when TTY mode of remote party changed
          *
          * @param session IMS session object
@@ -402,6 +416,28 @@ public class ImsCallSession {
          */
         public void callSessionSuppServiceReceived(ImsCallSession session,
                 ImsSuppServiceNotification suppServiceInfo) {
+        }
+
+        /**
+         * Received RTT modify request from Remote Party
+         */
+        public void callSessionRttModifyRequestReceived(ImsCallSession session,
+            ImsCallProfile callProfile) {
+            // no-op
+        }
+
+        /**
+         * Received response for RTT modify request
+         */
+        public void callSessionRttModifyResponseReceived(int status) {
+            // no -op
+        }
+
+        /**
+         * Device received RTT message from Remote UE
+         */
+        public void callSessionRttMessageReceived(String rttMessage) {
+            // no-op
         }
     }
 
@@ -944,6 +980,57 @@ public class ImsCallSession {
     }
 
     /**
+     * Sends Rtt Message
+     *
+     * @param rttMessage rtt text to be sent
+     * @throws ImsException if call is absent
+     */
+    public void sendRttMessage(String rttMessage) {
+        if (mClosed) {
+            return;
+        }
+
+        try {
+            miSession.sendRttMessage(rttMessage);
+        } catch (RemoteException e) {
+        }
+    }
+
+    /**
+     * Sends RTT Upgrade request
+     *
+     * @param to   : expected profile
+     * @throws CallStateException
+     */
+    public void sendRttModifyRequest(ImsCallProfile to) {
+        if (mClosed) {
+            return;
+        }
+
+        try {
+            miSession.sendRttModifyRequest(to);
+        } catch (RemoteException e) {
+        }
+    }
+
+    /**
+     * Sends RTT Upgrade response
+     *
+     * @param response : response for upgrade
+     * @throws CallStateException
+     */
+    public void sendRttModifyResponse(boolean response) {
+        if (mClosed) {
+            return;
+        }
+
+        try {
+            miSession.sendRttModifyResponse(response);
+        } catch (RemoteException e) {
+        }
+    }
+
+    /**
      * A listener type for receiving notification on IMS call session events.
      * When an event is generated for an {@link IImsCallSession},
      * the application is notified by having one of the methods called on
@@ -1233,6 +1320,20 @@ public class ImsCallSession {
             }
         }
 
+
+        /**
+         * Called when session access technology may change to LTE soon but mobile data being off
+         * may block this handover.
+         */
+        @Override
+        public void callSessionMayHandover(IImsCallSession session,
+                                              int srcAccessTech, int targetAccessTech) {
+            if (mListener != null) {
+                mListener.callSessionMayHandover(ImsCallSession.this, srcAccessTech,
+                        targetAccessTech);
+            }
+        }
+
         /**
          * Notifies the TTY mode received from remote party.
          */
@@ -1267,6 +1368,36 @@ public class ImsCallSession {
             }
         }
 
+        /**
+         * Received RTT modify request from remote party
+         */
+        @Override
+        public void callSessionRttModifyRequestReceived(IImsCallSession session,
+                ImsCallProfile callProfile) {
+            if (mListener != null) {
+                mListener.callSessionRttModifyRequestReceived(ImsCallSession.this, callProfile);
+            }
+        }
+
+        /**
+         * Received response for RTT modify request
+         */
+        @Override
+        public void callSessionRttModifyResponseReceived(int status) {
+            if (mListener != null) {
+                mListener.callSessionRttModifyResponseReceived(status);
+            }
+        }
+
+        /**
+         * RTT Message received
+         */
+        @Override
+        public void callSessionRttMessageReceived(String rttMessage) {
+            if (mListener != null) {
+                mListener.callSessionRttMessageReceived(rttMessage);
+            }
+        }
     }
 
     /**

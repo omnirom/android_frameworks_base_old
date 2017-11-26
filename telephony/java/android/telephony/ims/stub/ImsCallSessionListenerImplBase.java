@@ -212,6 +212,12 @@ public class ImsCallSessionListenerImplBase extends IImsCallSessionListener.Stub
         // no-op
     }
 
+    @Override
+    public void callSessionMayHandover(IImsCallSession session, int srcAccessTech,
+            int targetAccessTech) {
+        // no-op
+    }
+
     /**
      * Notifies the TTY mode change by remote party.
      *
@@ -245,6 +251,36 @@ public class ImsCallSessionListenerImplBase extends IImsCallSessionListener.Stub
     @Override
     public void callSessionSuppServiceReceived(IImsCallSession session,
             ImsSuppServiceNotification suppSrvNotification) {
+        // no-op
+    }
+
+    /**
+     * Received RTT modify request from Remote Party
+     * @param session The call session.
+     * @param callProfile ImsCallProfile with updated attribute
+     */
+    @Override
+    public void callSessionRttModifyRequestReceived(IImsCallSession session,
+            ImsCallProfile callProfile) {
+        // no-op
+    }
+
+    /**
+     * Received response for RTT modify request
+     * @param status true : Accepted the request
+     *               false : Declined the request
+     */
+    @Override
+    public void callSessionRttModifyResponseReceived(int status) {
+        // no -op
+    }
+
+    /**
+     * Device received RTT message from Remote UE
+     * @param rttMessage RTT message received
+     */
+    @Override
+    public void callSessionRttMessageReceived(String rttMessage) {
         // no-op
     }
 }

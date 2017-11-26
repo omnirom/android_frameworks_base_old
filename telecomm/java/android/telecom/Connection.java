@@ -328,8 +328,16 @@ public abstract class Connection extends Conferenceable {
      */
     public static final int CAPABILITY_CAN_PULL_CALL = 0x01000000;
 
+    /**
+     * Add participant in an active or conference call option
+     *
+     * @hide
+     */
+    public static final int CAPABILITY_ADD_PARTICIPANT = 0x02000000;
+
+
     //**********************************************************************************************
-    // Next CAPABILITY value: 0x02000000
+    // Next CAPABILITY value: 0x04000000
     //**********************************************************************************************
 
     /**
@@ -805,6 +813,7 @@ public abstract class Connection extends Conferenceable {
         public void onRttInitiationFailure(Connection c, int reason) {}
         public void onRttSessionRemotelyTerminated(Connection c) {}
         public void onRemoteRttRequest(Connection c) {}
+        public void onCdmaConnectionTimeReset(Connection c) {}
     }
 
     /**
@@ -2282,6 +2291,16 @@ public abstract class Connection extends Conferenceable {
             }
         }
         fireOnConferenceableConnectionsChanged();
+    }
+
+    /**
+       *@hide
+       * Resets the cdma connection time.
+       */
+    public final void resetCdmaConnectionTime() {
+        for (Listener l : mListeners) {
+            l.onCdmaConnectionTimeReset(this);
+        }
     }
 
     /**
