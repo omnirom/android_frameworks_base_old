@@ -164,6 +164,7 @@
     <!-- Warning, this goes last. -->
     <Preference
         android:summary="@string/tuner_persistent_warning"
-        android:selectable="false" />
+        android:selectable="false"
+        android:icon="@drawable/ic_info_outline_24dp" />
 
 </PreferenceScreen>
