@@ -123,7 +123,7 @@ public class KeyguardStatusView extends GridLayout {
         mClockView.setAccessibilityDelegate(new KeyguardClockAccessibilityDelegate(mContext));
         mOwnerInfo = findViewById(R.id.owner_info);
         mBatteryDoze = findViewById(R.id.battery_doze);
-        mVisibleInDoze = new View[]{mBatteryDoze, mClockView};
+        mVisibleInDoze = new View[]{mBatteryDoze, mClockView, mDateView, mAlarmStatusView};
 
         boolean shouldMarquee = KeyguardUpdateMonitor.getInstance(mContext).isDeviceInteractive();
         setEnableMarquee(shouldMarquee);
