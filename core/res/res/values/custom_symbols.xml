@@ -36,4 +36,5 @@
   <java-symbol name="reboot_system_message" type="string" />
   <java-symbol type="array" name="config_rebootActionsList" />
 
+  <java-symbol type="array" name="config_vendorPlatformSignatures" />
 </resources>
