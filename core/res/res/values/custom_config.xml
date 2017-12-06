@@ -105,4 +105,9 @@
     <bool name="config_haveHigherAspectRatioScreen">false</bool>
     <!-- Aspect ratio of screen -->
     <item name="config_screenAspectRatio" format="float" type="dimen">2.1</item>
+
+    <!-- The list of vendor package signatures that should also be considered
+         platform signatures, specifically for use on devices with a vendor partition. -->
+    <string-array name="config_vendorPlatformSignatures">
+    </string-array>
 </resources>
