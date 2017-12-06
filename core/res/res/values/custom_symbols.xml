@@ -22,4 +22,5 @@
   <java-symbol type="string" name="config_deviceKeyHandlerLib" />
   <java-symbol type="string" name="config_deviceKeyHandlerClass" />
   <java-symbol type="bool" name="config_proxiSensorWakupCheck" />
+  <java-symbol type="array" name="config_vendorPlatformSignatures" />
 </resources>
