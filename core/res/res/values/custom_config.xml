@@ -40,4 +40,9 @@
     <!-- make sure you enable this only if your device supports deep slepp
     with active proximity sensor event listener -->
     <bool name="config_proxiSensorWakupCheck">false</bool>
+
+    <!-- The list of vendor package signatures that should also be considered
+         platform signatures, specifically for use on devices with a vendor partition. -->
+    <string-array name="config_vendorPlatformSignatures">
+    </string-array>
 </resources>
