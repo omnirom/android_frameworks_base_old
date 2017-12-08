@@ -53,7 +53,6 @@ import android.util.DisplayMetrics;
 import android.util.Log;
 import android.util.Slog;
 import android.util.SparseBooleanArray;
-import android.view.ContextThemeWrapper;
 import android.view.Gravity;
 import android.view.MotionEvent;
 import android.view.View;
@@ -1159,7 +1158,6 @@ public class VolumeDialogImpl implements VolumeDialog, TunerService.Tunable {
     private final class CustomDialog extends Dialog {
         public CustomDialog(Context context) {
             super(context);
-            //super(new ContextThemeWrapper(context, R.style.systemui_theme));
         }
 
         @Override
